@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL ReleaseDebugStatic DLL (Plugin)"
+	InheritedPropertySheets=".\nel_vs90_rds.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="_USRDLL"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_rds.dll"
+	/>
+</VisualStudioPropertySheet>

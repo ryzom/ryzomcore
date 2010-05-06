@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL DebugFast EXE (Windows)"
+	InheritedPropertySheets=".\nel_vs90_df.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="_WINDOWS"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		SubSystem="2"
+	/>
+</VisualStudioPropertySheet>

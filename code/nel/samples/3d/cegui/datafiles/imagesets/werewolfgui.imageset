@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<Imageset Name="WerewolfGuiImagery" Imagefile="./datafiles/imagesets/werewolfgui.tga" NativeHorzRes="256" NativeVertRes="512" AutoScaled="true">
+	<Image Name="WerewolfLogo" XPos="52" YPos="5" Width="168" Height="120" />
+	<Image Name="CeguiLogo" XPos="42" YPos="281" Width="180" Height="92" />
+	<Image Name="NeLLogo" XPos="15" YPos="128" Width="240" Height="128" />
+</Imageset>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Title" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Themas" Type="Type" Filename="filename.typ" FilenameExt="*.encyclo_thema" Array="true"/>
+  <ELEMENT Name="RewardBrick" Type="Type" Filename="filename.typ" FilenameExt="*.sbrick"/>
+  <ELEMENT Name="AlbumNumber" Type="Type" Filename="int.typ"/>
+  <LOG>Mon Nov 15 17:24:57 2004 (besson) Dfn Structure = 
+Tue Nov 16 10:49:35 2004 (besson) Dfn Structure = 
+Tue Nov 16 10:50:57 2004 (besson) Dfn Structure = 
+Tue Nov 16 10:51:30 2004 (besson) Dfn Structure = </LOG>
+</DFN>

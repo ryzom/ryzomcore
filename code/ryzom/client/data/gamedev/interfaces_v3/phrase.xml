@@ -1,0 +1,833 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- ************** -->
+<!-- * PHRASE MAIN * -->
+<!-- ************** -->
+
+<!-- search "DEPENDS on %phrase_max_restrict_combat" if you have to change this value" -->
+<define	id="phrase_max_restrict_combat" value="15"/>
+<!-- Definition of all combat Skill (ie weapons) we want to see in weapon restriction. 
+	Code deduce the icons (fake sbrick) to draw, by filling UI:PHRASE:BUILD:RESTRICT_COMBAT:*:SHEET 
+	the number of skill must be == %phrase_max_restrict_combat (nlassert)
+-->
+<define	id="phrase_def_skill_restrict_combat" value="SFM1SSM SFM1SAM SFM1BMM SFM1BSM SFM1PSM SFM2SSM SFM2SAM SFM2BMM SFM2PPM SFMCADM SFMCAHM SFR1APM SFR2AAM SFR2ALM SFR2ARM"/>
+
+
+<variable entry="UI:SAVE:PHRASE:BOOK_AS_LIST_TEXT"  type="sint32" value="1" />
+<variable entry="UI:SAVE:PHRASE:BOOK_AUTOFOLD"  type="sint32" value="1" />
+<variable entry="UI:PHRASE:BUILD:TOTAL_COST"  type="sint32" value="0" />
+<variable entry="UI:PHRASE:BUILD:TOTAL_CREDIT"  type="sint32" value="0" />
+<variable entry="UI:PHRASE:BUILD:ROOT_EFFECT_VALID"  type="sint32" value="0" />
+<variable entry="UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED"  type="sint32" value="0"/>
+<variable entry="UI:PHRASE:BUILD:RESTRICT_COMBAT:$i:SHEET"  type="sint32" value="0" size="%phrase_max_restrict_combat" />
+<variable entry="UI:PHRASE:BUILD:RESTRICT_COMBAT:$i:LOCKED"  type="sint32" value="0" size="%phrase_max_restrict_combat" />
+<variable entry="UI:VARIABLES:LINKS_INFOS"  type="sint32" value="0" />
+
+
+<proc id="phrase_book_opened">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:ACTIONS|value=1"/>
+	<!--<action handler="context_help_html" params="action_drag_drop"/>-->
+</proc>
+
+
+<!-- Spell_Book Frame def-->
+<define id="phrase_book_main_w" value="610" />
+<define id="phrase_book_filter_w" value="382" />
+<define id="phrase_book_list_w" value="216" />
+<define id="phrase_book_line_maxw" value="176" />
+
+
+<!-- * SKILL template skill * -->
+<template name="tips_skill" keep="true" posparent="parent" posref="TL TL" h="30" id="" skillid="" >
+
+	<group id="#id" w="160" h="#h" posparent="#posparent" posref="#posref" >
+	
+		<instance template="frame_widget" id="frame" posref="TL TL" sizeref="wh" w="0" h="0" x="0" />
+		<view type="bitmap" id="back" scale="true" posref="TL TL" x="1" y="-1" sizeref="hw" h="-2" w="-2" texture="blank.tga" color="28 28 28 255" global_color="false"/>
+		
+		<!-- do not change id (used for setting right skill name) -->
+		<group id="group_name" x="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+			<view type="text" id="name" fontsize="10" x="1" y="-3" posref="TM TM" shadow="true" global_color="false" line_maxw="156" 
+				over_extend_view_text="true" over_extend_parent_rect="true" />
+		</group>
+
+		<!-- Show Value of the skill and the Cap_Skill. Do not change the ids. -->
+		<view type="text"		 id="max" posref="BR BR" x="-4"  y="0" fontsize="10" shadow="true" global_color="false" />
+		<view type="text"		 id="sep" posparent="max" posref="BL BR" x="-2" y="0" fontsize="10" shadow="true" hardtext="/" global_color="false" />
+		<view type="text"		 id="bas" posparent="sep" posref="BL BR" x="-2" y="0" fontsize="10" shadow="true" global_color="false" />
+		<view type="text_number" id="lvl" posparent="bas" posref="BL BR" x="-2" y="0" fontsize="10" shadow="true" value="%player_skills:#skillid:%skill" positive="true" global_color="false" />
+		<view type="bar" id="progress" posref="BL BL" x="4" y="4" mini="true" value="%player_skills:#skillid:%skill_progress" range="255" />
+
+		
+		<!-- Buf Debuf. -->
+		<link expr="ifthenelse(lt(@%player_skills:#skillid:%skill, @%player_skills:#skillid:%skill_base), '%skill_neg_buf', 
+					ifthenelse(gt(@%player_skills:#skillid:%skill, @%player_skills:#skillid:%skill_base), '%skill_pos_buf', '255 255 255 255' ) )"
+								target="lvl:color" />
+		<link expr="getSkillBaseText(@%player_skills:#skillid:%skill, @%player_skills:#skillid:%skill_base)"
+								target="bas:hardtext" />
+								
+		<!-- Change Skill Background Color -->						
+		<link expr="ifthenelse(eq(@%player_skills:#skillid:%skill_base, 0), '60 90 90 64',
+						 ifthenelse(not(isSkillAtMax(#skillid,@UI:VARIABLES:TRACK_SKILL_CHANGE)), '175 100 10 192', '145 155 20 192'))" target="back:color" />
+		
+				
+		<!-- Skill not At Max or not 0: show progress & change name Y-->
+		<link expr="and(ne(@%player_skills:#skillid:%skill_base, 0),not(isSkillAtMax(#skillid,@UI:VARIABLES:TRACK_SKILL_CHANGE)))" target="progress:active,max:active,sep:active,bas:active,lvl:active" />
+		<link expr="ifthenelse(and(ne(@%player_skills:#skillid:%skill_base, 0),not(isSkillAtMax(#skillid,@UI:VARIABLES:TRACK_SKILL_CHANGE))), '-3' ,'-11')" target="group_name:name:y" />
+
+	</group>
+
+</template>
+
+
+<!-- * template for Phrase Section display -->
+<template name="template_phrase_progression_section" keep="true" posparent="parent" id="" >
+	<group id="#id" posref="TL TL" x="0" y="0" h="26" child_resize_w="true" >
+		<view type="text" id="name" posref="ML ML" x="0" y="-8" shadow="true" global_color="false" color="255 255 255 255" fontsize="10"/>
+	</group>
+</template>
+
+
+<!-- * template for Phrase as Icon List -->
+<template name="template_phrase_action_icon_list" id="" dbentry="" >
+	<group type="list_sheet_icon_phrase" nature="sphrase" id="#id" value="#dbentry" array="false" 
+		posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" 
+		wspace="4" hspace="4" dragable="true" rowmax="32" lmargin="10" tmargin="2" bmargin="0" 
+		onclick_r="open_help_auto" oncandrag="phrase_can_drag_castable"  auto_grayed="true" >
+		
+		<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="26" />
+
+	</group>
+	<view type="bitmap" id="sep1" posparent="#id" posref="BL TL" scale="true" sizeref="w" h="2" y="0" texture="W_line_hor.tga" />
+	<link expr="eq(@UI:SAVE:PHRASE:BOOK_AS_LIST_TEXT,0)" target="#id:active,sep1:active" />
+</template>
+
+
+<!-- * template for Phrase as Text List -->
+<template name="template_phrase_action_text_list" id="" dbentry="" >
+	<group type="list_sheet_text_phrase" nature="sphrase" id="#id" value="#dbentry" array="false" 
+		child_resize_h="false"
+		posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" 
+		hspace="4" selection="false" 
+		onclick_r="open_help_auto" oncandrag="phrase_can_drag_castable" 
+		xitem="2" yitem="-2" xtext="30" ytext="-2"
+		dragable="true" auto_grayed="true" gray_text_with_ctrl="true" 
+		over_color="%bot_chat_sheet_selection_normal"
+		over_col_pushed="%bot_chat_sheet_selection_pushed"
+		over_col_over="%bot_chat_sheet_selection_over"
+		color="255 255 255 255" fontsize="8" shadow="true"
+		multi_line="true" multi_line_space="0" >				
+		<!-- the scroll -->
+		<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="30" />
+				
+		<!-- the group to scroll -->				
+		<group id="list" max_sizeref="h" max_sizeparent="parent" max_h="0" sizeref="w" posref="TL TL" x="8" y="0" w="-16" />
+	</group>
+	<view type="bitmap" id="sep2" posparent="#id" posref="BL TL" scale="true" sizeref="w" h="2" y="0" texture="W_line_hor.tga" />
+	<link expr="eq(@UI:SAVE:PHRASE:BOOK_AS_LIST_TEXT,1)" target="#id:active,sep2:active" />
+</template>
+
+
+
+<!-- **** Main container SKILLS PROGRESSION & ACTIONS -->
+<group type="container" id="phrase_book" title="uiPhraseBookTitle" global_color="false" opened="true" openable="false"
+	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:INV"
+	on_active="proc"	on_active_params="phrase_book_opened"
+	on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ACTIONS|value=0"
+	help_page="interf_action_book.html"
+	resizer="true"  w="610" h="400" pop_min_w="420" pop_min_h="300" pop_max_w="1024" pop_max_h="768"
+>
+
+
+	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"  
+		 group_onclick_r="active_menu"
+		 group_params_r="menu=ui:interface:base_menu_with_color" >
+		 
+		 <group id="death_malus" posref="MR MR" w="80" h="10" x="-32" y="0" >
+			 <view type="bar" id="xp_malus" posref="MR MR" mini="true" color="255 255 255 255" value="SERVER:USER:DEATH_XP_MALUS" range="255" />
+			 <ctrl type="tooltip" id="tt_malus" tooltip="uittPhraseXPMalus" tooltip_parent="win" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="10" />
+			 
+			 <view type="bitmap" id="death" posref="TL TL" texture="w_death.tga" global_color="false" />
+		</group>
+		<link expr="ne(@SERVER:USER:DEATH_XP_MALUS,255)" target="death_malus:active" />			 
+	</group>
+
+
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+	
+		<!-- SKILLS -->
+		<group type="skills_displayer" id="content" posref="TL TL" x="0" y="-6" sizeref="w6h" w="0" h="-24" template_skill="tips_skill" 
+			node_handler="phrase_book_skill_filter" >
+
+			<group id="sbtree" posref="TL TL" sizeref="wh" w="0" x="0" y="0" h="0" >
+				<group id="black" posref="TL TL" sizeref="wh" x="10" w="-10" h="0" inherit_gc_alpha="true"/>
+				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+			
+				<group id="tree_list" type="tree" posref="TL TL" x="14" y="-2"
+						col_over="255 255 255 150" col_select="255 255 255 255" fontsize="10"
+						max_sizeparent="parent" max_sizeref="wh" max_w="-16" max_h="-8"
+						arbo_open_first="skill_arbo_open_first.tga"
+						arbo_close_just_one="skill_arbo_close_just_one.tga"
+						arbo_son_without_son="skill_arbo_son_without_son.tga"
+						arbo_son_last="skill_arbo_son_last.tga"
+						arbo_son="skill_arbo_son.tga"
+						arbo_level="skill_arbo_level.tga"
+						arbo_x_extend="skill_arbo_x_extend.tga"
+						select_ancestor_on_close="true" 
+						navigate_one_branch="true"
+						rectangle_outline="true"
+						rectangle_w="160"
+						rectangle_h="30"
+						rectangle_x="0"
+						rectangle_y="0"
+						rectangle_drl="1"
+						>
+				</group>
+	
+				<ctrl style="skin_scroll" id="scroll_bar" posref="TL TL" target="tree_list" target_stepy="32" />
+
+			</group>
+		</group>
+		
+		
+		<!-- ACTION TYPE SELECTION -->
+		<group id="tab_group" posref="TR TR" x="-4" y="-8" sizeref="w4" w="-4" h="24" >
+			<group type="tab" id="action_select" posref="TL TL" x="0" y="0" child_resize_w="true" h="24" >
+				<ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL"	group="content:progress_actions"	hardtext="uitabPhraseActions"	onclick_l="" params_l="" tooltip="uittPhraseActions" tooltip_parent="win" />
+				<ctrl style="tab_button_new" id="tab1" posparent="tab0"		group="content:progress_upgrades"	hardtext="uitabPhraseUpgrades"	onclick_l="" params_l="" tooltip="uittPhraseUpgrades" tooltip_parent="win" />
+			</group>
+			<view type="bitmap" id="septab" posparent="action_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+		</group>
+
+
+		<!-- PROGRESSION ACTIONS -->
+		<group id="progress_actions" posref="TR TR" x="-4" y="-36" sizeref="w4h" w="-4" h="-60" >
+			<!-- Raw List of Phrase -->
+			<instance template="template_phrase_action_icon_list" id="list_icon" dbentry="UI:PHRASE:PROGRESS_ACTIONS" />
+			<!-- Text List of Phrase -->
+			<instance template="template_phrase_action_text_list" id="list_text" dbentry="UI:PHRASE:PROGRESS_ACTIONS" />
+		</group>
+
+
+		<!-- PROGRESSION UPGRADES -->
+		<group id="progress_upgrades" posref="TR TR" x="-4" y="-36" sizeref="w4h" w="-4" h="-60" >
+			<!-- Raw List of Phrase -->
+			<instance template="template_phrase_action_icon_list" id="list_icon" dbentry="UI:PHRASE:PROGRESS_UPGRADES" />
+			<!-- Text List of Phrase -->
+			<instance template="template_phrase_action_text_list" id="list_text" dbentry="UI:PHRASE:PROGRESS_UPGRADES" />
+		</group>
+
+
+		<!-- TOGGLE List / Details -->
+		<instance template="check_box" id="details" posref="BR BR" hardtext="uiPhraseDisplayTextList" dblink="UI:SAVE:PHRASE:BOOK_AS_LIST_TEXT" />
+		
+		<!-- TOGGLE AutoFold / Not -->
+		<instance template="check_box" id="autofold" posref="BL BL" hardtext="uiPhraseAutoFold" dblink="UI:SAVE:PHRASE:BOOK_AUTOFOLD" />
+		<link expr="@UI:SAVE:PHRASE:BOOK_AUTOFOLD" target="content:sbtree:tree_list:navigate_one_branch" />
+		
+		
+	</group>
+</group>
+
+
+<!-- ******************************************** -->
+<!-- * PHRASE BRICK SELECTION					* -->
+<!-- ******************************************** -->
+
+
+<!-- Define varaibles for the list sheet of the root brick selection modal-->
+<define id="phrase_brick_selection_max" value_from_code="getPhraseBrickSelectionMax()" />
+<variable entry="UI:PHRASE:SELECT:$i:SHEET" type="sint32" value="0" size="%phrase_brick_selection_max" />
+
+<!-- The modal for Brick selection -->
+<!--<group type="modal" id="build_phrase_select_brick" x="0" y="0" w="184" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" 
+	exit_click_l="true" >
+	<group type="list_sheet" nature="sbrick" brick_over="true" id="list" posref="TL TL" value="UI:PHRASE:SELECT" wspace="4" hspace="4" array="false" x="4" y="-4" w="176"
+		onclick_l="phrase_validate_brick" params_l="src=ctrl_launch_modal" onclick_r="open_sbrick_help" >
+	</group>
+</group>
+-->
+
+<!-- The modal for Brick selection. NB: don't exit on lclick cause of scrollbar -->
+<group type="modal" id="build_phrase_select_brick" x="0" y="0" w="280" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" options="skin_modal" >
+		<!-- This group is here only to ensure that the modal is not too small -->
+		<group id="fake_minh" posref="TL TL" sizeref="w" w="0" h="30" />
+
+		<!-- The Selection group -->
+		<group type="list_sheet_compo_brick" id="list" sizeref="w" w="-12" child_resize_h="true" child_resize_hmargin="0" 
+			 posref="TL TL"
+			 x="4"
+			 y="-4"
+			 xitem="2" yitem="-2"
+			 xtext="32" ytext="-2"
+			 xcost="230" ycost="-8"
+			 hspace="4"
+			 array="false"
+			 value="UI:PHRASE:SELECT"
+			 selection="false"
+
+			 dragable="false"
+			 nature="sbrick"
+			 brick_over="true"
+			 onclick_l="phrase_validate_brick" params_l="src=ctrl_launch_modal"
+		     onclick_r="open_sbrick_help"			  
+
+			 over_color="%bot_chat_sheet_selection_normal"
+			 over_col_pushed="%bot_chat_sheet_selection_pushed"
+			 over_col_over="%bot_chat_sheet_selection_over"
+
+			 color="255 255 255 255"
+			 fontsize="8"
+			 shadow="true"
+			 multi_line="true"
+			 multi_line_space="0"
+			 line_maxw="180" 
+			>				
+			<!-- the scroll -->
+			<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" y="-2" />			
+					
+			<!-- the group to scroll -->				
+			<group id="list" sizeref="w" posref="TL TL" max_h="300" x="8" y="0" w="-8" h="0" />
+		</group>
+</group>
+
+
+<!-- ******************************** -->
+<!-- * PHRASE COMPOSITION ELEMENTS  * -->
+<!-- ******************************** -->
+
+
+<!-- Max Slots for phrase composition -->
+<define	id="phrase_max_brick" value="64" />
+
+
+<!-- Ctrls for a Parameter -->
+<template name="ctrl_phrase_param" id="" index="" paramindex="" posparent="" x="4" y="0" >
+	<view type="bitmap" id="param_back#index_#paramindex" posref="TR TL" posparent="#posparent" x="#x" y="#y" texture="W_slot_brick.tga" color="255 255 255 192" />
+	<ctrl type="sheet" id="param_brick#index_#paramindex" nature="sbrick" value="UI:PHRASE:BUILD:PARAM:#index:#paramindex" posref="TL TL" posparent="param_back#index_#paramindex" x="0" y="0" 
+		onclick_l="phrase_select_param_brick" params_l="index=#index|param_index=#paramindex" onclick_r="open_sbrick_help" />
+</template>
+
+
+<!-- This define the special maxw of the root text info -->
+<define	id="phrase_build_root_info_maxw" value="200" />
+
+<!-- Ctrls for a Root/Mandatory/Optional Brick and its parameters instanciation -->
+<template name="ctrl_phrase_main" posref="" posparent="parent" x="0" y="-2" index="" id="" >
+	<!-- The Main Suffix Brick -->
+	<view type="bitmap" id="main_back#index" posref="#posref" posparent="#posparent" x="#x" y="#y" texture="W_slot_brick.tga" color="255 255 255 192" />
+	<ctrl type="sheet" id="main_brick#index" nature="sbrick" value="UI:PHRASE:BUILD:MAIN:#index" posref="TL TL" posparent="main_back#index" x="0" y="0" 
+		onclick_l="phrase_select_main_brick" params_l="index=#index" onclick_r="open_sbrick_help" tooltip="uittSelectBrick" />
+	<view type="text" id="main_cost#index" posparent="main_brick#index" posref="MR ML" x="128" y="-2" color="255 210 11 255" shadow="true" fontsize="10" />
+	<view type="text" id="main_credit#index" posparent="main_brick#index" posref="MR ML" x="172" y="-2" color="80 217 11 255" shadow="true" fontsize="10" />
+	<view type="text" id="main_info#index" posparent="main_brick#index" posref="MR ML" x="8" y="-1" color="255 255 255 255" shadow="true" fontsize="10" 
+		multi_line="true" line_maxw="116" multi_line_space="0" />
+	<!-- The 4 Params Brick (hardcoded). Relative to Suffix then each other -->
+	<instance template="ctrl_phrase_param" id="param_back#index_0" index="#index" paramindex="0" posparent="main_back#index" x="8" />
+	<instance template="ctrl_phrase_param" id="param_back#index_1" index="#index" paramindex="1" posparent="param_back#index_0" />
+	<instance template="ctrl_phrase_param" id="param_back#index_2" index="#index" paramindex="2" posparent="param_back#index_1" />
+	<instance template="ctrl_phrase_param" id="param_back#index_3" index="#index" paramindex="3" posparent="param_back#index_2" />
+</template>
+
+
+<!-- ****************************** -->
+<!-- * PHRASE COMPOSITION MAIN    * -->
+<!-- ****************************** -->
+
+<template name="box_widget_color" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" color="" keep="true">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" color="#color" sizeref="#sizeref" >
+		<group id="bg" sizeref="hw" h="0" w="0" />
+		<view type="bitmap" id="back" scale="true" posparent="bg" posref="MM MM" sizeref="hw" h="-8" w="-8" texture="W_box_blank.tga" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="tlb" texture="W_box_top_left.tga"  posref="TL TL" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="trb" texture="W_box_top_right.tga"  posref="TR TR" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="brb" texture="W_box_bot_right.tga"  posref="BR BR" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="blb" texture="W_box_bot_left.tga" posref="BL BL" color="#color" global_color="false" inherit_gc_alpha="true"/>			
+		<view type="bitmap" id="tb" texture="W_box_top.tga" posref="TM TM" scale="true" sizeref="w" w="-8" h="4" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="bb" texture="W_box_bot.tga" posref="BM BM" scale="true" sizeref="w" w="-8" h="4" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="lb" texture="W_box_left.tga" posref="ML ML"  scale="true" sizeref="h" h="-8" w="4" color="#color" global_color="false" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="rb" texture="W_box_right.tga" posref="MR MR" scale="true" sizeref="h" h="-8" w="4" color="#color" global_color="false" inherit_gc_alpha="true"/>
+	</group>
+</template>
+
+<!-- brick to show weapon restriction -->
+<template name="ctrl_combat_restrict" posparent="parent" posref="" x="0" y="0" index="" id="" >
+	<ctrl type="sheet" id="#id" nature="sbrick" value="UI:PHRASE:BUILD:RESTRICT_COMBAT:#index" posparent="#posparent" posref="#posref"  
+		x="#x" y="#y" auto_grayed="true" on_tooltip="phrase_combat_restrict_tooltip" />
+</template>
+
+<!-- Composition Modal container-->
+<group style="container_modal" id="phrase_composition" w="272" h="440" title="uiPhraseCreate" 
+	modal_parent="phrase_book"   header_color="UI:SAVE:WIN:COLORS:INV" pop_max_h="700"
+	on_enter="phrase_validate_on_enter" 
+	on_active="set"	on_active_params="dblink=UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE|value=1"
+	on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:PHRASE_COMPOSITION:ACTIVE|value=0"
+	>
+
+	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL" >
+	</group>
+	
+	<group type="build_phrase" id="header_opened" x="0" y="0" w="0" h="0" posref="TL TL" >
+	
+		<!-- RESTRICT -->
+		<group id="restrict" posref="TM TM" w="256" h="66" x="0" y="-59">
+			<view type="text" id="restrict_text" posref="TL BL" x="0" y="-15" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseRESTRICTION" />
+			<!-- Organize in 2 rows. DEPENDS on %phrase_max_restrict_combat  -->
+			<vector template="ctrl_combat_restrict" _firstindex="0" _size="9" id="combat_brick$i" index="$i" _firstpos="TL TL  " _xfirst="4" _yfirst="-13" _nextpos="TR TL" />
+			<vector template="ctrl_combat_restrict" _firstindex="9" _size="6" id="combat_brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-39" _nextpos="TR TL" />
+		</group>
+		<link expr="@UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED" target="restrict:active" />
+
+		<!-- BACK -->
+		<group id="back" posref="TM TM" w="256" h="0" x="0" y="-74">
+			<instance template="box_widget" id="back_root" posref="TL TL" w="256" h="0" x="0" y="0" />
+				<view type="bitmap" id="col1" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-51" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+				<view type="bitmap" id="col2" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-7" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col1:active" />
+			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col2:active" />
+		</group>
+		<link expr="ifthenelse(ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0), 316, 66)" target="back:h" />
+		<link expr="ifthenelse(ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0), 316, 66)" target="back:back_root:h" />
+		<link expr="ifthenelse(ne(@UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED,0), -142, -74)" target="back:y" />
+		
+
+		<!-- NEW OP BUTTON. -->
+		<group id="new_buttons" posparent="back" posref="TM TM" x="0" y="-8" child_resize_w="true" child_resize_h="true" >
+		
+			<ctrl style="new_element_content" id="new_optional_button" posref="TL TL" y="0" wmargin="8" hardtext="uittPhraseEditNewOptional"
+				 onclick_l="phrase_select_new_brick" params_l="type=optional"/>
+			
+			<ctrl style="new_element_content" id="new_credit_button" posref="TR TL" posparent="new_optional_button" x="4" y="0" 
+				wmargin="8" hardtext="uittPhraseEditNewCredit" onclick_l="phrase_select_new_brick" params_l="type=credit"/>
+			 
+		</group>
+		<!-- display only if root and effects are valid -->
+		<link expr="@UI:PHRASE:BUILD:ROOT_EFFECT_VALID" target="new_buttons:active" />
+
+
+		<!-- SPELL ICON -->
+		<ctrl type="sheet" id="spell_view" nature="sphraseid" posref="TL BL" x="4" y="-56" value="UI:PHRASE:BUILD:EDITION_PHRASE" tooltip="uittActionIcon" />
+		<view type="text" id="spell_view_name" posparent="spell_view" posref="TL BL" x="0" y="-3" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseEditIcon" />
+		<!-- Hide only the Icon if no composition starter (game design request) -->
+		<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="spell_view:active" />
+		
+
+		<!-- NAME OF SPELL -->
+		<instance template="edit_box_widget"  id="eb_spell_name" posref="TR BR" x="4" w="216" y="-54" h="20" child_resize="false"
+				text_x="0" text_y="-2" text_ref="ML ML"
+				fontsize="12" multi_line="false" max_num_chars="20" 
+				enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" onchange="phrase_change_name" />
+		<view type="text" id="text_spell_name" posparent="eb_spell_name" posref="TL BL" x="0" y="-2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseEditName" />
+
+		<!-- INFOS -->
+		<group id="infos" w="256" h="80" posparent="back" posref="BL TL" x="0" y="-4" >
+		
+			<!-- Sabrina Cost -->
+			<view type="text" id="totaltext" posref="TL TL" fontsize="12" global_color="true" shadow="true" color="255 255 255 255" hardtext="uiPhraseTotal" />
+			<view type="text_number" id="cost" posref="TL TM" fontsize="12" x="186" global_color="false" shadow="true" color="255 210 11 255" value="UI:PHRASE:BUILD:TOTAL_COST" />
+			<view type="text_number" id="credit" posref="TL TM" fontsize="12" x="230" global_color="false" shadow="true" color="80 217 11 255" value="UI:PHRASE:BUILD:TOTAL_CREDIT" />
+					
+			<!-- Phrase DESC -->
+			<view type="text" id="phrase_desc" posref="TL TL" x="0" y="-17" color="255 255 255 255" shadow="true" fontsize="10" 
+				multi_line="true" multi_line_space="0" />
+
+		</group>
+		<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="infos:active" />
+		
+		<!-- BALANCE -->
+		<view type="bitmap" id="balance" posref="BM BM" x="0" y="34" texture="action_balance_equal.tga" global_color="false"/>
+		<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="balance:active" />
+		<link expr="ifthenelse(eq(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'action_balance_equal.tga',
+							ifthenelse(gt(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'action_balance_cost.tga',
+									'action_balance_cred.tga'))"
+		target="balance:texture" />
+		<view type="text" id="balancetext" posparent="balance" posref="BM TM" fontsize="10" global_color="false" shadow="true" color="255 255 255 255" hardtext="uiBalanceEqual" />
+		<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="balancetext:active" />
+		<link expr="ifthenelse(eq(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'uiBalanceEqual',
+							ifthenelse(gt(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'uiBalanceCost',
+									'uiBalanceCred'))"
+		target="balancetext:hardtext" />
+		<link expr="ifthenelse(eq(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'255 255 255 255',
+							ifthenelse(gt(@UI:PHRASE:BUILD:TOTAL_COST,@UI:PHRASE:BUILD:TOTAL_CREDIT),'255 210 11 255',
+									'80 217 11 255'))"
+		target="balancetext:color" />
+		
+		
+		
+		<view type="text" id="compo" posref="TL BL" posparent="back" x="0" y="0" fontsize="10" shadow="true" global_color="true" color="255 255 255 255" hardtext="uiPhraseCOMPOSITION" />
+		
+
+		<!-- The scroll group -->
+		<group id="bricks" posparent="back" posref="TL TL" x="12" y="-32" w="244" child_resize_h="true" child_resize_hmargin="4" max_h="280" >
+			<!-- List of Bricks -->
+			<vector template="ctrl_phrase_main" id="main_back$i" _size="%phrase_max_brick" _firstpos="TL TL" _xfirst="4" _yfirst="-2" _nextpos="BL TL" index="$i" />
+		</group>
+		<ctrl style="skin_scroll" id="scroll_row" posparent="back" posref="TL TL" x="4" y="-34" target="bricks" target_stepy="28" />
+
+
+
+		<!-- VALIDATION -->
+		<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" onclick_ok="phrase_validate" ok_text="uittPhraseEditValidate" 
+					onclick_cancel="set" onclick_cancel_param="target_property=ui:interface:phrase_composition:active|value=0" cancel_text="uittCancel" />
+
+	</group>
+	<link expr="ifthenelse( eq(@UI:PHRASE:BUILD:MAIN:0:SHEET,0), 190,
+							ifthenelse(ne(@UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED,0), 608, 540) )" 
+					target="header_opened:h" />
+	
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+	</group>
+
+</group>
+
+
+<!-- ****************************** -->
+<!-- * PHRASE FABER EXECUTION	  * -->
+<!-- ****************************** -->
+
+<!-- constants -->
+<define id="phrase_faber_selection_max" value_from_code="getPhraseMPSelectionMax()" />
+<define	id="phrase_faber_max_item_req" value="10" />	<!-- Max 5 item part, and 5 formula MPs -->
+<define	id="phrase_faber_max_mp_slot" value="36" />
+
+<!-- Define varaibles for the list sheet of the mp selection modal-->
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:SHEET" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<variable entry="UI:PHRASE:FABER:MP_SELECT:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_selection_max" />
+<!-- Define varaibles for the mp selected array-->
+<template name="phrase_faber_def_build_mps" index="" id="" >
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:SHEET" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUALITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:QUANTITY" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:USER_COLOR" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+	<variable entry="UI:PHRASE:FABER:MP_BUILD:#index:$i:WEIGHT" type="sint32" value="0" size="%phrase_faber_max_mp_slot" />
+</template>
+<vector template="phrase_faber_def_build_mps" id="yoyo_pipo_faber$i" index="$i" _size="%phrase_faber_max_item_req" _firstpos="TL TL" _xfirst="0" _nextpos="TR TL" _yfirst="0" />
+<!-- Define varaibles for the plan selection -->
+<variable entry="UI:PHRASE:FABER:FABER_PLAN:SHEET" type="sint32" value="0" />
+<!-- Define varaibles for the Mp Quantity setup -->
+<variable entry="UI:PHRASE:FABER:MP_QUANTITY:$i:SELECTED" type="sint32" value="0" size="%phrase_faber_max_item_req" />
+<variable entry="UI:PHRASE:FABER:MP_QUANTITY:$i:REQUIRED" type="sint32" value="0" size="%phrase_faber_max_item_req" />
+<!-- declare the dummy mp stack selection slot -->
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:SHEET" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:QUALITY" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:QUANTITY" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:WEIGHT" type="sint32" value="0" />
+<!-- declare the dummy mp stack selection value -->
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:CUR_QUANTITY" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:STACK_SELECT:MAX_QUANTITY" type="sint32" value="0" />
+<!-- Define varaibles for the Result Item -->
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:SHEET" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUALITY" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:QUANTITY" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:USER_COLOR" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:LOCKED" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:WEIGHT" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:NAMEID" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:INFO_VERSION" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:ENCHANT" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:RM_CLASS_TYPE" type="sint32" value="0" />
+<variable entry="UI:PHRASE:FABER:RESULT_ITEM:RM_FABER_STAT_TYPE" type="sint32" value="0" />
+
+
+<!-- The modal for Mp selection. NB: x/y so the mouse is ready to click on first mp -->
+<group type="modal" id="phrase_faber_mp_selection" posref="BL TL" x="-24" y="24" w="290" 
+	child_resize_h="true" child_resize_hmargin="4" exit_click_out="true" options="skin_modal" >
+
+	<group type="list_sheet" nature="item" id="list" posref="TL TL" value="UI:PHRASE:FABER:MP_SELECT" 
+		wspace="4" hspace="4" array="false" x="4" y="-4" w="290" child_resize_h="true"
+		rowmax="6" column_max="6" lmargin="10"
+		onclick_l="phrase_faber_validate_mp" params_l="src=ctrl_launch_modal" onclick_r="open_item_help" >
+	
+		<!-- the scroll -->
+		<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" />
+	</group>
+</group>
+
+
+<!-- the modal For Mp Quantity Selection. NB: x/y so the mouse is ready to click "REMOVE" -->
+<proc id="phrase_faber_remove_mp" >
+	<!-- set the quantity to  -->
+	<action handler="set" params="dblink=UI:PHRASE:FABER:STACK_SELECT:CUR_QUANTITY|value=0" />
+	<!-- then select the quantity -->
+	<action handler="phrase_faber_select_mp_quantity" />
+</proc>
+<group type="modal" id="phrase_faber_mp_quantity" exit_click_out="true" 
+ posref="TL TL" w="185" h="100" x="-35" y="85"
+ on_enter="phrase_faber_select_mp_quantity" options="skin_modal"
+>
+	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="SELECT QUANTITY" />
+	<ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="UI:PHRASE:FABER:STACK_SELECT" posref="MM MM" x="-26" y="0" use_quantity="false" />
+	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
+	<instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12" 
+			posparent="sheet" posref="MR ML" x="16" y="0" text_x="-2" w="32" 
+			prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="3"
+			onchange="editbox_number" onchange_params="value=UI:PHRASE:FABER:STACK_SELECT:CUR_QUANTITY|update_text=false|value=UI:PHRASE:FABER:STACK_SELECT:MAX_QUANTITY" 
+			onenter="phrase_faber_select_mp_quantity" max_historic="0" />
+	
+	<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" 
+				onclick_ok="phrase_faber_select_mp_quantity" 
+				onclick_ok_param="" 
+				onclick_cancel="leave_modal"
+				onclick_cancel_param="" />
+
+	<!-- the button to remove it (smae as set 0), on the left -->
+	<ctrl style="button_ok" id="button_remove" posref="BL BL" x="4" y="4" 
+		onclick_l="proc" params_l="phrase_faber_remove_mp" hardtext="uiFaberMpRemove" />
+
+</group>
+
+
+
+<!-- Template for a required item line -->
+<template name="faber_item_req" posref="" posparent="parent" x="0" y="0" item_req="" id="" >
+	<group id="#id" x="#x" y="#y" posref="#posref" posparent="#posparent" w="350" child_resize_h="true" >
+		<!-- The item part info Icon. Hidden if a formula MP and not an item part -->
+		<view type="bitmap" id="icon" posref="TL TL" scale="true" x="0" y="0" w="24" h="24" global_color="false" />
+
+		<!-- The item part/formula MP info text -->
+		<view type="text" id="text" posref="TL TL" x="26" y="-8"
+			color="255 255 255 255" global_color="true" fontsize="10" shadow="true" />
+
+		<!-- The Quantity of item required info text -->
+		<view type="text_quantity" id="text_quantity" posref="TR TR" x="0" y="-8"
+			color="255 255 255 255" global_color="true" fontsize="10" shadow="true" 
+			value="UI:PHRASE:FABER:MP_QUANTITY:#item_req:SELECTED" 
+			valuemax="UI:PHRASE:FABER:MP_QUANTITY:#item_req:REQUIRED" />
+
+		<!-- The list of item -->
+		<group type="list_sheet" nature="item" id="list" 
+			posref="TL TL" x="8" y="-24" w="350" child_resize_h="true"
+			wspace="8" hspace="8" 
+			value="UI:PHRASE:FABER:MP_BUILD:#item_req" array="false" 
+			auto_grayed="false"
+			onclick_l="phrase_faber_select_mp" params_l="item_req=#item_req" onclick_r="open_item_help" tooltip="uittSelectMp" />
+	</group>
+</template>
+
+
+<!-- Template for a MPStat in Faber -->
+<template name="template_mp_faber_stat" id="" x="0" y="-2" posparent="item_result" posref="" >
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="350" h="16" active="false" >
+		<view type="text" id="text" line_maxw="170" posref="ML ML" over_extend_view_text="true" /> 
+		<view type="bar" id="bar" posref="MR MR" x="-50" value="0" range="100" /> 
+		<view type="text" id="textstat" posref="MR MR" /> 
+		<ctrl type="tooltip" id="tt" sizeref="wh" w="0" h="0" tooltip="" />
+	</group>
+</template>
+
+
+<!-- To know if Faber phrase is opened or not -->
+<variable entry="UI:VARIABLES:ISACTIVE:PHRASE_FABER" type="sint32" value="0" />
+<proc id="proc_phrase_faber_opened" >
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:PHRASE_FABER|value=1"/>
+</proc>
+<proc id="proc_phrase_faber_closed">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:PHRASE_FABER|value=0"/>
+	<action handler="phrase_faber_on_close" />
+</proc>
+
+
+<!-- container modal on hand -->
+<!--	on_enter="phrase_faber_validate_on_enter" -->
+<group style="container_modal" id="phrase_faber_execution" w="780" h="516" title="uiPhraseFaberExecute" 
+	modal_parent="gestionsets|bot_chat_missions"   header_color="UI:SAVE:WIN:COLORS:INV" pop_max_h="716"
+	on_active="proc" on_active_params="proc_phrase_faber_opened"
+	on_deactive="proc" on_deactive_params="proc_phrase_faber_closed"
+	>
+
+	<group id="header_closed" x="0" y="0" w="0" h="16" posref="TL TL" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="0" h="496" posref="TL TL" >
+		<!-- BACK -->
+		<group id="back" posref="TL TL" w="772" h="424" x="0" y="-44">
+			<instance template="box_widget" id="back_root" posref="TL TL" w="772" h="424" x="0" y="0" />
+		</group>
+
+		<!-- Help info -->
+		<view type="text" id="select_info" posref="TL TL" x="8" y="-26" color="255 255 255 255" shadow="true" fontsize="12" 
+			multi_line="true" line_maxw="380" multi_line_space="0" hardtext="uiTextHelpSelectMp" />
+		<link expr="ifthenelse(eq(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0), 'uiTextHelpSelectFaberPlan', 'uiTextHelpSelectMp')" target="select_info:hardtext" />
+		
+		<!-- The FaberPlan Brick -->
+		<ctrl type="sheet" id="faber_plan" nature="sbrick" value="UI:PHRASE:FABER:FABER_PLAN" posref="TL TL" posparent="back" x="8" y="-6" 
+			onclick_l="phrase_faber_select_plan" onclick_r="open_sbrick_help" tooltip="uittSelectPlan" />
+		<view type="text" id="faber_plan_info" posparent="faber_plan" posref="MR ML" x="8" y="-1" color="255 255 255 255" shadow="true" fontsize="10" 
+			multi_line="true" line_maxw="250" multi_line_space="0" hardtext="uiTextHelpSelectFaberPlanSlot" />
+		<link expr="eq(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="faber_plan_info:active" />
+
+		<!-- The Success Rate info. Must be multiline for Formating -->
+		<view type="text" id="success_text" posparent="back" posref="TL TL" x="8" y="-36" color="255 255 255 255" shadow="true" fontsize="12" 
+			multi_line="true" line_maxw="350" multi_line_space="0" hardtext="" />
+		<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="success_text:active" />
+
+
+		<!-- The 10 item_req (itemParts and specific Formula items) -->
+		<group id="back_slots" x="16" y="-56" posparent="back" posref="TL TL" w="368" h="312" >
+			<instance template="inner_thin_border" inherit_gc_alpha="true" />
+		</group>
+		<group id="item_reqs" x="16" y="-60" posparent="back" posref="TL TL" child_resize_w="true" child_resize_h="true" max_h="304" >
+			<vector template="faber_item_req" _size="%phrase_faber_max_item_req" id="item_req_$i" item_req="$i" _firstpos="TL TL" _nextpos="BL TL" x="0" y="0" />
+		</group>
+		<ctrl style="skin_scroll" id="sv" posparent="back" posref="TL TL" x="4" y="-60" target="item_reqs" />
+
+		<!-- RESULT ITEM -->
+		<group id="item_result" posparent="back" posref="TR TR" x="-20" y="-4" w="360" child_resize_h="true" max_h="368" >
+			<instance template="inner_thin_border" inherit_gc_alpha="true" />
+			
+			<!-- Text Header -->
+			<view type="text" id="header" posref="TL TL" y="0" hardtext="uiFaberItemResultHeader"/> <!-- for item, pacts, .. -->					
+
+			<!-- item result -->
+			<ctrl type="sheet" id="item_result" nature="item" value="UI:PHRASE:FABER:RESULT_ITEM" posparent="header" posref="BL TL" x="0" y="-2" tooltip="uittFaberItemResult" />
+			
+			<!-- Stat Preview -->
+			<vector template="template_mp_faber_stat" id="stat$i" _size="%MAX_STAT_MP_CRAFT" _firstpos="BL TL" _xfirst="0" _yfirst="-2" _nextpos="BL TL" />
+		</group>
+		<ctrl style="skin_scroll" id="sv_ir" posparent="back" posref="TR TR" x="-8" y="-44" target="item_result" />
+
+		<!-- VALIDATION -->
+		<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" onclick_ok="phrase_faber_validate" ok_text="uittPhraseFaberBuild" 
+					onclick_cancel="set" onclick_cancel_param="target_property=ui:interface:phrase_faber_execution:active|value=0" cancel_text="uittCancel" />
+	</group>
+
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+	</group>
+
+</group>
+
+<!--************************-->
+<!--		LINKS			-->
+<!--************************-->
+
+<!-- TEMPLATE DE LINK -->
+<template name="active_link" keep="true" posparent="parent" posref="TL TL" h="32" id="" x="0" y="0" index="" >
+	<group id="#id" w="306" h="#h" posparent="#posparent" posref="#posref" x="#x" y="#y" >
+		<group id="cadre" posref="ML ML" w="306" h="30" >
+			<!-- CADRE -->
+			<view type="bitmap" id="cadre1" posref="TL TL" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="-1" />
+			<view type="bitmap" id="cadre2" posref="TR TR" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="1" />
+			<view type="bitmap" id="cadre3" posref="TL TL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="1" />
+			<view type="bitmap" id="cadre4" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
+		</group>
+		<link expr="ifthenelse(eq(@UI:VARIABLES:LINKS_INFOS, 0), 306, 200)" target="cadre:w" />
+		
+		<!-- SLOT. don't change the id for info -->
+		<ctrl type="sheet" id="ctrl_phrase" nature="sphraseid" posref="ML ML" x="2" dragable="false" 
+			value="SERVER:EXECUTE_PHRASE:LINK:#index" onclick_r="open_phraseid_help" /> 
+	
+		<group id="name_cost" w="120" h="26" posparent="ctrl_phrase" posref="TR TL" x="2" y="-1" >
+			<!-- NAME. Get the Name spell -->
+			<view type="text" id="spell_name" posref="TL TL" y="-1" w="120" h="10" shadow="true" fontsize="10"
+				global_color="false" />
+			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
+			
+			<!-- COSTS (HP, SAP, STA) -->
+			<!--
+			<view type="text" id="costs" posparent="spell" posref="BR BL" x="2" y="0" shadow="true" fontsize="8" hardtext="uiLinksCosts" />
+			-->
+			<instance template="box_widget" id="box_cost" posref="BL BL" w="81" h="13" />
+			
+			<view type="text_number" id="hp_cost" posparent="box_cost" posref="ML MM" x="14" y="-2" fontsize="8" shadow="true" value="SERVER:EXECUTE_PHRASE:LINK:#index:HP_COST" color="%hp_color" global_color="false" />
+			<view type="text" id="sep1" posparent="box_cost" posref="ML MM" x="27" y="-1" shadow="true" fontsize="10" hardtext="/" color="255 255 255 255" />
+			<view type="text_number" id="sap_cost" posparent="box_cost" posref="MM MM" x="0" y="-2" fontsize="8" shadow="true" value="SERVER:EXECUTE_PHRASE:LINK:#index:SAP_COST" color="%sap_color" global_color="false" />
+			<view type="text" id="sep2" posparent="box_cost" posref="ML MM" x="54" y="-1" shadow="true" fontsize="10" hardtext="/" color="255 255 255 255" />
+			<view type="text_number" id="sta_cost" posparent="box_cost" posref="MR MM" x="-14" y="-2" fontsize="8" shadow="true" value="SERVER:EXECUTE_PHRASE:LINK:#index:STA_COST" color="%sta_color" global_color="false" />
+		</group>
+		<link expr="eq(@UI:VARIABLES:LINKS_INFOS, 0)" target="name_cost:active" />	
+		
+		<!-- SEP SPELL/TARGET -->
+		<view type="bitmap" id="sep" posref="ML ML" x="150" scale="true" w="2" h="26" color="255 255 255 160" texture="W_line_ver.tga" />
+		<link expr="eq(@UI:VARIABLES:LINKS_INFOS, 0)" target="sep:active" />	
+		
+		<!-- TARGET -->
+		<group id="target" posref="ML ML" x="154" w="150" h="26" >
+			<!-- TARGET Name -->
+			<view type="text_id" id="name" posref="TL TL" x="0" y="-1" h="10" shadow="true" fontsize="10" textid="SERVER:EXECUTE_PHRASE:LINK:#index:TARGET_NAME" />
+			<!-- Jauges Target -->
+			<view type="bar3" id="jauges" posref="BL BL" mini="true" y="1"
+								color1="%sta_color" 	value1="SERVER:EXECUTE_PHRASE:LINK:#index:TARGET_STA"  	range1="UI:CONST:127" 
+								color2="%sap_color"   value2="SERVER:EXECUTE_PHRASE:LINK:#index:TARGET_SAP"	range2="UI:CONST:127"
+								color3="%hp_color"   value3="SERVER:EXECUTE_PHRASE:LINK:#index:TARGET_HP" 	range3="UI:CONST:127" />
+		</group>
+		<link expr="ifthenelse(eq(@UI:VARIABLES:LINKS_INFOS, 0), 154, 40)" target="target:x" />
+		
+		<!-- BUTTON TO STOP THE LINK -->
+		<ctrl type="button" id="stop_button" button_type="push_button" posref="MM MM" sizeref="wh" w="-2" h="-4" scale="true" 
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 32"
+			onclick_l="phrase_link_stop" params_l="#index" tooltip="uiStopLinkSpell" 
+			onclick_r="phrase_link_ctrl_rclick" />
+		
+		<!-- HIDE THIS GROUP IF NO LINK -->
+		<link expr="ne(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE, 0)" target="active" />
+
+	</group>
+</template>
+
+
+<!-- LE CONTAINER DE LINKS -->
+<group type="container" id="links" w="314" title="uiLinksTitle" global_color="false" opened="true" resizer="false" openable="false"
+	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:INV"
+	on_active="set"	on_active_params="dblink=UI:VARIABLES:ISACTIVE:LINKS|value=1"
+	on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:LINKS|value=0"
+>
+
+	<group id="header_closed" x="0" y="0" w="314" h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="314" h="20" posref="TL TL"  
+		 group_onclick_r="active_menu"
+		 group_params_r="menu=ui:interface:base_menu_with_color" >
+		 
+		 <view type="text" id="text_show_preview" posref="MR MR" x="-16" y="0" color="255 255 255 255" fontsize="10" global_color="false" shadow="true" hardtext="uiLinkInfo" />		
+		 <ctrl type="button" id="show_info" button_type="toggle_button" posparent="text_show_preview" posref="ML MR" x="-2" y="2" pushed="false"
+		 		tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga"
+				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0"
+				global_color_normal="true" global_color_over="true" global_color_pushed="true"
+				onclick_l="set" params_l="dblink=UI:VARIABLES:LINKS_INFOS|value=not(@UI:VARIABLES:LINKS_INFOS)" />
+
+	</group>
+
+	<group id="content" x="0" y="0" w="310" child_resize_h="true" posref="TL TL" >
+		<!-- Yoyo: must leave 0 to the Y, if we want the system "hide=>H==0" to work -->
+		<instance template="active_link" id="al0" index="0" posref="TL TL" 				   />
+		<instance template="active_link" id="al1" index="1" posparent="al0" posref="BL TL" />
+		<instance template="active_link" id="al2" index="2" posparent="al1" posref="BL TL" />
+		<instance template="active_link" id="al3" index="3" posparent="al2" posref="BL TL" />
+		<instance template="active_link" id="al4" index="4" posparent="al3" posref="BL TL" />
+		<instance template="active_link" id="al5" index="5" posparent="al4" posref="BL TL" />
+		<instance template="active_link" id="al6" index="6" posparent="al5" posref="BL TL" />
+		<instance template="active_link" id="al7" index="7" posparent="al6" posref="BL TL" />
+		<instance template="active_link" id="al8" index="8" posparent="al7" posref="BL TL" />
+		<instance template="active_link" id="al9" index="9" posparent="al8" posref="BL TL" />
+	</group>
+</group>
+<link expr="ifthenelse(eq(@UI:VARIABLES:LINKS_INFOS, 0), 314, 208)" target="ui:interface:links:w" />
+
+
+
+
+<!--************************-->
+<!--		LINKS			-->
+<!--************************-->
+
+
+
+
+<tree node="phrase_book"/>
+<tree node="phrase_composition"/>
+<tree node="phrase_faber_execution"/>
+<tree node="links"/>
+
+
+</interface_config>

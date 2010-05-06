@@ -1,0 +1,14 @@
+FILE(GLOB SRC *.cpp *.h ../zone_lib/*.cpp ../zone_lib/*.h)
+
+ADD_EXECUTABLE(zone_dependencies ${SRC})
+
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(zone_dependencies ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nel3d nelgeorges)
+IF(WIN32)
+  SET_TARGET_PROPERTIES(zone_dependencies PROPERTIES 
+    LINK_FLAGS "/NODEFAULTLIB:libcmt"
+    PROJECT_LABEL "Tools, 3D: zone_dependencies")
+ENDIF(WIN32)
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
+INSTALL(TARGETS zone_dependencies RUNTIME DESTINATION bin COMPONENT tools3d)

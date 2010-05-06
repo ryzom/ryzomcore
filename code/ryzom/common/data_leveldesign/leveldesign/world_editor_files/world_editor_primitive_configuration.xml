@@ -1,0 +1,472 @@
+<?xml version="1.0"?>
+<NEL_LIGO_PRIMITIVE_CLASS>
+
+	<!-- **** FOR CL **** -->
+
+	<CONFIGURATION NAME="faune dynamic" R="255" G="255" B="25">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="faune dynamic"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="faune static" R="255" G="145" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="faune static"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="faune scripted" R="255" G="25" B="25">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="faune scripted"/>
+		</MATCH_GROUP>
+        </CONFIGURATION>
+
+	<CONFIGURATION NAME="bot dynamic" R="150" G="170" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="bot dynamic"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	
+	<CONFIGURATION NAME="bot static" R="0" G="50" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="bot static"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="bot scripted" R="0" G="25" B="125">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="bot scripted"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="task" R="255" G="0" B="225">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="task"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="craft" R="0" G="255" B="100">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="craft"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="campement" R="255" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="campement"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="bot objet" R="0" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="infos"/>
+			<MATCH NAME="type" VALUE="bot objet"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="fauna zone" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="npc zone" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="road" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_road"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+
+	<CONFIGURATION NAME="outpost" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="activity_outpost" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="outpost attack" R="255" G="255" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="activity_outpost_attack" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="outpost defense" R="255" G="0" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="activity_outpost_def" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+
+	<CONFIGURATION NAME="plant" R="127" G="127" B="127">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			
+			<MATCH NAME="properties" VALUE="activity_plant"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="carnivores food" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_food_carn"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="carnivores rest" R="255" G="127" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_rest_carn"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>	
+
+	<CONFIGURATION NAME="herbivores food" R="0" G="0" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_food_herb"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="herbivores rest" R="0" G="127" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_rest_herb"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="kittin food" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_food_kitin"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="kittin rest" R="255" G="127" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_rest_kitin"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>	
+
+	<CONFIGURATION NAME="degen food" R="255" G="0" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_food_degen"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="degen rest" R="255" G="127" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_rest_degen"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>	
+
+	<CONFIGURATION NAME="fauna spawn" R="255" G="255" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_fauna_zone"/>
+			<MATCH NAME="properties" VALUE="activity_spawn"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+
+	<CONFIGURATION NAME="spawn npc" R="255" G="127" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="properties" VALUE="activity_spawn"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="rest npc" R="255" G="0" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="properties" VALUE="activity_rest"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<CONFIGURATION NAME="harvest npc" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="properties" VALUE="activity_harvest"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+	<!--
+	<CONFIGURATION NAME="unaffected npc zone" R="0" G="127" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="dyn_npc_zone"/>
+			<MATCH NAME="activity_harvest" VALUE="false"/>
+			<MATCH NAME="activity_rest" VALUE="false"/>
+			<MATCH NAME="activity_spawn" VALUE="false"/>
+			<MATCH NAME="activity_outpost" VALUE="false"/>
+			<MATCH NAME="activity_outpost_attack" VALUE="false"/>
+			<MATCH NAME="activity_outpost_def" VALUE="false"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	-->
+
+	<!--
+		totof.
+	-->
+	<!--
+	<CONFIGURATION NAME="plant ju_s3_bamboo" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_bamboo"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s1_arbragrelot" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s1_arbragrelot"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s1_giant_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s1_giant_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s1_giant_trunk" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s1_giant_trunk"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_arbragrelot" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_arbragrelot"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_bigroot_A" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_bigroot_A"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_bigroot_B" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_bigroot_B"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_bigroot_C" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_bigroot_C"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_big_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_big_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_birch" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_birch"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s2_spiketree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s2_spiketree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s3_birch" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s3_birch"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s3_buissonaepine" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s3_buissonaepine"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s3_champignou_A" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s3_champignou_A"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s3_champignou_B" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s3_champignou_B"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant fo_s3_fougere" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="fo_s3_fougere"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s1_bamboo" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s1_bamboo"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s1_canopy_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s1_canopy_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s2_big_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s2_big_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s2_young_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s2_young_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_bamboo" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_bamboo"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_Banana_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_Banana_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_Bush_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_Bush_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_dead_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_dead_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_fantree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_fantree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_plante" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_plante"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_plantegrasse" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_plantegrasse"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="plant ju_s3_tree" R="0" G="255" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="prim"/>
+			<MATCH NAME="form" VALUE="ju_s3_tree"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	-->
+
+	<!-- Deposit zones -->
+	<CONFIGURATION NAME="deposit auto_spawn" R="32" G="255" B="32">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>			
+			<MATCH NAME="auto_spawn_sources" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit disabled" R="255" G="32" B="32">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="enabled" VALUE="false"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit spring" R="128" G="256" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_season_spring" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit summer" R="256" G="256" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_season_summer" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit automn" R="256" G="128" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_season_automn" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit winter" R="128" G="128" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_season_winter" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit day" R="256" G="256" B="0">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_its_day" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit night" R="0" G="0" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_its_night" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit weather_best" R="64" G="64" B="255">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_weather_0_best" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit good" R="64" G="64" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_weather_1_good" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit bad" R="128" G="64" B="128">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_weather_2_bad" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+	<CONFIGURATION NAME="deposit worst" R="64" G="0" B="64">
+		<MATCH_GROUP>
+			<MATCH NAME="class" VALUE="depositzone"/>
+			<MATCH NAME="while_weather_3_worst" VALUE="true"/>
+		</MATCH_GROUP>
+	</CONFIGURATION>
+
+</NEL_LIGO_PRIMITIVE_CLASS>

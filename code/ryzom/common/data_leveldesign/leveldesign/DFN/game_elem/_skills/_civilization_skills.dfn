@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Dragon" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Fyros" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Goo" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Tryker" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrykerMystery" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Zorai" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="ZoraiMystery" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

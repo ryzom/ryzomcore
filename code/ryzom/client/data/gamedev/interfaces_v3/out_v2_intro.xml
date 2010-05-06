@@ -1,0 +1,249 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+<variable entry="UI:TEMP:INTROCLICKSTEP"	type="sint64" value="-1"/>
+
+<!-- ***************** -->
+<!-- *   PROCEDURES  * -->
+<!-- ***************** -->
+
+<proc id="proc_next_screen_when_intro_logo_finished">
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+<proc id="proc_active_intro_logo_noskip">
+	<action handler="set" params="dblink=UI:TEMP:INTROCLICKSTEP|value=0" />
+	<action handler="set" params="target_property=ui:outgame:logo_intro:back:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:logo_intro:back_txt:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:logo_intro:tryton_text:texture|value='tryton1.tga'" />
+	<action handler="anim_start" params="anim=anim_intro_logo" />
+	<action handler="anim_start" params="anim=anim_tryton_fadein_start" />
+</proc>
+
+<!-- check if we have to skip the intro -->
+<proc id="proc_active_intro_logo">
+	<action handler="proc" cond="eq(@UI:TEMP:SKIP_INTRO,0)" params="proc_active_intro_logo_noskip" />	
+	<action handler="set" params="target_property=ui:outgame:global_background:active|value=1" />
+	<action handler="proc" cond="ne(@UI:TEMP:SKIP_INTRO,0)" params="proc_intro_skip" />	
+</proc>
+
+<proc id="proc_intro_next_step">
+	<action handler="play_sound" params="name=intro_click" />
+	<action handler="set" params="dblink=UI:TEMP:INTROCLICKSTEP|value=add(@@UI:TEMP:INTROCLICKSTEP,1)" />
+	<action handler="anim_start" params="anim=anim_tryton_fadeout" />
+</proc>
+
+<proc id="proc_intro_back_step">
+	<action handler="play_sound" params="name=intro_click" />
+	<action handler="set" params="dblink=UI:TEMP:INTROCLICKSTEP|value=sub(@@UI:TEMP:INTROCLICKSTEP,1)" />
+	<action handler="anim_start" params="anim=anim_tryton_fadeout" />
+</proc>
+
+<proc id="proc_tryton_fadeout_finished">
+	<action handler="set" cond="ne(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back:active|value=1" />
+	<action handler="set" cond="ne(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back_txt:active|value=1" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back:active|value=0" />
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:back_txt:active|value=0" />
+	<action handler="proc" params="proc_tryton_fadeout_finished2" />
+</proc>
+
+<proc id="proc_tryton_fadeout_finished2">
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,0)" params="target_property=ui:outgame:logo_intro:tryton_text:texture|value='tryton1.tga'" />
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,1)" params="target_property=ui:outgame:logo_intro:tryton_text:texture|value='tryton2.tga'" />
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,2)" params="target_property=ui:outgame:logo_intro:tryton_text:texture|value='tryton3.tga'" />
+	<action handler="set" cond="eq(@UI:TEMP:INTROCLICKSTEP,3)" params="target_property=ui:outgame:logo_intro:tryton_text:texture|value='tryton4.tga'" />
+	<action handler="proc" cond="eq(@UI:TEMP:INTROCLICKSTEP,4)" params="proc_intro_skip" />
+	<action handler="anim_start" cond="ne(@UI:TEMP:INTROCLICKSTEP,4)" params="anim=anim_tryton_fadein" />
+</proc>
+
+
+<proc id="proc_intro_skip">
+	<action handler="play_sound" params="name=intro_click" />
+	<action handler="anim_stop" params="anim=anim_intro_logo" />
+	<action handler="set" params="target_property=ui:outgame:global_background:back3d:cam:posx|value=-3.18" />
+	<action handler="set" params="target_property=ui:outgame:global_background:back3d:cam:posy|value=-13.0" />
+	<action handler="set" params="target_property=ui:outgame:global_background:back3d:cam:tgtx|value=-3.23" />
+	<action handler="set" params="target_property=ui:outgame:global_background:back3d:cam:tgtz|value=0.0" />
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+<proc id="proc_when_atys_turn_finished">
+	<action handler="anim_start" params="anim=anim_atys_turn" />
+</proc>
+
+
+
+
+
+<!-- *********************** -->
+<!-- *  GLOBAL BACKGROUND  * -->
+<!-- *********************** -->
+<!-- for all screens -->
+
+
+<!-- ***************** -->
+<!-- * INTRODUCTION  * -->
+<!-- ***************** -->
+ 
+<group id="logo_intro" sizeref="wh" w="0" h="0" on_active="" on_active_params="" >
+
+	<!-- BLACK BACK -->
+	<view type="bitmap" id="bg" posref="MM MM" x="0" y="0" render_layer="0" texture="blank.tga" color="0 0 0 255" scale="true" global_color="false" />
+
+	
+	
+	<!--
+	<view type="bitmap" id="nevrax" render_layer="1" txtoffsetx="0" txtoffsety="0" txtwidth="352" txtheight="48"
+	global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
+
+	<view type="bitmap" id="presents" render_layer="1" txtoffsetx="0" txtoffsety="176" txtwidth="128" txtheight="32"
+	global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
+	
+	<view type="bitmap" id="ryzom" render_layer="1" txtoffsetx="0" txtoffsety="48" txtwidth="400" txtheight="128"
+		global_color="false" color="255 255 255 0" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
+	-->
+
+	<!-- EXIT BUTTON -->
+	<!--
+	<ctrl type="button" id="skip" button_type="push_button" posref="TR TR" x="-8" y="-16"
+			tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" color="255 128 0 255"
+			onclick_l="proc" params_l="proc_intro_skip"  tooltip="uiSkipIntro" />
+			
+	<view type="text" id="skip_txt" posparent="skip" posref="MR MR" x="-36" y="-1" hardtext="uiSkipTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
+	
+	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16"
+			tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" color="255 255 255 255"
+			onclick_l="proc" params_l="proc_intro_next_step"  tooltip="uiNextStep" />
+			
+	<view type="text" id="next_txt" posparent="next" posref="MR MR" x="-36" y="-1" hardtext="uiNextTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
+	
+	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
+			tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" color="255 255 255 0"
+			onclick_l="proc" params_l="proc_intro_back_step"  tooltip="uiPrevStep" />
+			
+	<view type="text" id="back_txt" posparent="back" posref="ML ML" x="36" y="-1" hardtext="uiBackTryton" shadow="true" fontsize="16" color="255 255 255 255" render_layer="2" />		
+	-->
+	
+		
+	<!-- TRYTON's TEXT -->
+	<!--
+	<group type="scroll_text" id="tryton_text" sizeref="w" w="-200" child_resize_h="true" child_resize_wmargin="16" child_resize_hmargin="16" posref="MM MM" x="0" y="0" min_height="64" max_height="500" active="true" >
+		<group id="black" posref="TL TL" sizeref="hw" w="0" h="0" />
+		<group type="list" id="text_list" hardtext="uiTryton1" shadow="true" fontsize="36" justification="justified" color="255 255 255 255" space="3" 
+											posref="TL TL" posparent="black" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+	</group>	
+	-->
+	<!--
+	<view type="bitmap" id="tryton_text" render_layer="1" global_color="false" color="255 255 255 255"
+		posref="MM MM" x="0" y="0" texture="tryton1.tga" txtoffsetx="128" txtoffsety="120" txtwidth="760" txtheight="272" />
+	-->
+</group>
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_intro)" target="logo_intro:active" />
+
+
+<!-- ***************** -->
+<!-- *  ANIMATIONS   * -->
+<!-- ***************** -->
+
+<!-- Intro -->
+
+<!--
+<anim id="anim_intro_logo" duration="60.0" disable_buttons="false" >
+							
+	<track type="linear" target="global_background:back3d:cam:posx">
+		<key time="0.0" value="-5.0" />
+		<key time="60.0" value="-3.18"/>
+	</track>
+	
+	<track type="linear" target="global_background:back3d:cam:tgtx">
+		<key time="0.0" value="-25.0" />
+		<key time="60.0" value="-3.23"/>
+	</track>
+	
+	<track type="linear" target="global_background:back3d:cam:tgtz">
+		<key time="0.0" value="20.0" />
+		<key time="60.0" value="0"/>
+	</track>
+
+	<track type="linear" target="global_background:back3d:cam:posy">
+		<key time="0.0" value="-45.0" />
+		<key time="60.0" value="-13.0"/>
+	</track>
+	
+</anim>
+
+
+<anim id="anim_tryton_fadein" duration="1.0" disable_buttons="true" >
+	<track type="linear" target="logo_intro:tryton_text:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:back:alpha,logo_intro:back_txt:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255"/>
+	</track>
+</anim>
+
+
+
+<anim id="anim_tryton_fadein_start" duration="4.0" disable_buttons="true" >
+
+	<track type="linear" target="global_background:stars:alpha">
+		<key time="0.0" value="0.0" />
+		<key time="1.0" value="0.0" />
+		<key time="3.0" value="255"/>
+	</track>
+
+	<track type="linear" target="logo_intro:tryton_text:alpha">
+		<key time="0.0" value="0" />
+		<key time="3.0" value="0"/>
+		<key time="4.0" value="255"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:skip:alpha,logo_intro:skip_txt:alpha">
+		<key time="0.0" value="0" />
+		<key time="3.0" value="0"/>
+		<key time="4.0" value="255"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
+		<key time="0.0" value="0" />
+		<key time="3.0" value="0"/>
+		<key time="4.0" value="255"/>
+	</track>
+	
+</anim>
+
+
+<anim id="anim_tryton_fadeout" duration="1.0" disable_buttons="true" on_finish="proc" on_finish_params="proc_tryton_fadeout_finished" >
+	<track type="linear" target="logo_intro:tryton_text:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:next:alpha,logo_intro:next_txt:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0"/>
+	</track>
+	
+	<track type="linear" target="logo_intro:back:alpha,logo_intro:back_txt:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0"/>
+	</track>
+</anim>
+-->
+
+
+
+
+</interface_config>
+

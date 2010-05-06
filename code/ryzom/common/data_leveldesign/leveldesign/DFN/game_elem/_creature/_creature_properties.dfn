@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.10 $" State="modified">
+  <ELEMENT Name="Selectable" Type="Type" Filename="iboolean.typ" Default="true"/>
+  <ELEMENT Name="Talkable" Type="Type" Filename="iboolean.typ" Default="false"/>
+  <ELEMENT Name="Attackable" Type="Type" Filename="iboolean.typ" Default="true"/>
+  <ELEMENT Name="Curativable" Type="Type" Filename="iboolean.typ" Default="true"/>
+  <ELEMENT Name="Givable" Type="Type" Filename="iboolean.typ" Default="false"/>
+  <ELEMENT Name="LootHarvestState" Type="Type" Filename="_creature_loot_harvest_state.typ"/>
+  <ELEMENT Name="Mountable" Type="Type" Filename="iboolean.typ" Default="false"/>
+  <ELEMENT Name="XPGainCoef" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="Turn" Type="Type" Filename="iboolean.typ" Default="true"/>
+  <ELEMENT Name="SelectableBySpace" Type="Type" Filename="iboolean.typ" Default="true"/>
+  <LOG>Wed Jun 26 19:48:38 2002 (puzin) Dfn Parents = 
+Wed Jun 26 19:48:38 2002 (puzin) Dfn Structure = 
+Wed Jun 26 19:54:18 2002 (puzin) Dfn Structure = 
+Wed Jun 26 20:36:22 2002 (puzin) Dfn Structure = 
+Wed Aug 28 16:27:15 2002 (fleury) Dfn Structure = 
+Fri Aug 30 11:52:56 2002 (fleury) Dfn Structure = 
+Tue Nov 19 14:22:46 2002 (saffray) Dfn Structure = 
+Thu Feb 12 11:14:31 2004 (ledorze) Dfn Structure = 
+Thu Jun 03 11:37:03 2004 (fleury) Dfn Structure = 
+Thu Jun 03 11:38:53 2004 (fleury) Dfn Structure = 
+Thu Jun 03 12:12:23 2004 (fleury) Dfn Structure = 
+Thu Nov 25 18:11:13 2004 (guignot) Dfn Structure = </LOG>
+</DFN>

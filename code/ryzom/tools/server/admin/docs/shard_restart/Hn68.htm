@@ -1,0 +1,170 @@
+<html>
+<head>
+<LINK REL="stylesheet" TYPE="text/css" HREF="H38.css">
+<script src="Hu37.js"></script>
+<script>
+<!--
+if (g_theApp.isNav)
+	{
+	window.captureEvents(Event.RESIZE);
+	window.onresize=handleResize;
+	}
+
+function NavBarOnLoad()
+	{
+	if( IsFrame("frmNavBar" ) )
+		{
+		LoadDiv('NavBar', UpdateNavBar, InitNavBar);
+		parent.g_NavBarLoaded = true;
+
+		g_theApp.PageUpdateFunc = UpdateNavBar;
+/*
+		if ( ZoomAvailable() )
+			{
+			if ( null != (div = new CDiv('divZoom', document)) )
+				div.Show();
+
+			document.zoomForm.zoomFactor.onchange();
+			}
+*/
+		GoToPage(0);
+		}
+		
+	return;
+	}
+
+function NavBarOnUnload ()
+	{
+	g_theApp.PageUpdateFunc = null;
+	}
+
+function LoadDiv(divId, initProc, loadProc)
+	{
+	if ( g_theApp.isIE )
+		{
+		document.ondragstart=CancelDrag;
+		document.onselectstart=CancelDrag;
+		}
+	
+	if ( !g_theApp.isNav )
+		{
+		document.body.style.margin = 2
+		document.body.style.top = 0;
+		}
+	
+	if ( initProc != null )
+		initProc();
+		
+	if ( loadProc != null)
+		loadProc();
+	
+	if ( null != (div = new CDiv(divId, document)) )
+		div.Show();
+	}
+
+function InitNavBar()
+	{
+/*
+	if ( g_theApp.isIE )
+		{
+		div = new CImage('btnPrev');
+		div.put_Title(jsLoadString(IDS_TITLE_PREVPAGE));
+			
+		div = new CImage('btnNext');
+		div.put_Title(jsLoadString(IDS_TITLE_NEXTPAGE));
+		}
+*/
+	}
+
+function UpdateNavBar()
+	{
+	var entry;
+	
+	ix = 0;
+	entry = g_theApp.FileList[g_theApp.CurrentPageIX];
+
+	if ( null != entry )
+		ix = g_theApp.CurrentPageIX;
+
+	if ( null != (theForm = GetPageForm()) )
+		{
+		if (theForm.pageSelect != null)
+			{
+			theForm.pageSelect.selectedIndex = ix;
+			}
+		}
+	}
+
+function SelectPage()
+	{
+	theForm = GetPageForm();
+
+	var selectedIndex = theForm.pageSelect.selectedIndex;
+	GoToPage(parseInt(theForm.pageSelect[selectedIndex].value));
+	}
+
+function GetPageForm()
+	{
+	return FindForm('pageForm', document);
+	}
+
+//-->
+</script>
+
+
+</head>
+<body class="oldNavBar" onload="NavBarOnLoad()" onunload="NavBarOnUnload()" bgcolor="#000000" link="#000000" vlink="#000000" alink="#000000" topmargin=0>
+
+<div id="NavBar" name="NavBar" align="center" style="position:absolute;top:0;width:100%;">
+
+<table width="100&#37;" cellpadding="0" cellspacing="0">
+<tr>
+
+<td valign="top" nowrap align="center">
+<form id="pageForm" name="pageForm">
+<script>
+<!--
+if ( document.images )
+	{
+	m_ltOut  = new Image(); m_ltOut.src = "lt_off.gif";
+	m_ltOver = new Image(); m_ltOver.src = "lt_over.gif";
+	m_ltDown = new Image(); m_ltDown.src = "lt_click.gif";
+	m_rtOut  = new Image(); m_rtOut.src = "rt_off.gif";
+	m_rtOver = new Image(); m_rtOver.src = "rt_over.gif";
+	m_rtDown = new Image(); m_rtDown.src = "rt_click.gif";
+	}
+
+function imgOver(id) { if ( document.images ) document.images[id].src = eval("m_" + id + "Over.src"); }
+function imgOut(id)  { if ( document.images ) document.images[id].src = eval("m_" + id + "Out.src"); }
+//-->
+</script>
+<a href="javascript:GoToPrevPage()" onMouseOver="javascript:imgOver('lt');" onMouseOut="javascript:imgOut('lt');">
+<img src="lt_off.gif" name="lt" id="lt" border="0" WIDTH="26" HEIGHT="18">
+</a>
+<select id="pageSelect" name="pageSelect" onchange="javascript:SelectPage();">
+<script>
+<!--
+for ( var i in g_theApp.FileList )
+	{
+	document.write('<option value="' + i + '"');
+
+	if ( i == 0 )
+		document.write(' selected');
+
+	document.write('>' + html_escape(g_theApp.FileList[i].PageName) + '</option>');
+	}
+//-->
+</script>
+</select>
+<a href="javascript:GoToNextPage()" onMouseOver="javascript:imgOver('rt');" onMouseOut="javascript:imgOut('rt');">
+<img src="rt_off.gif" id="rt" name="rt" border="0" WIDTH="26" HEIGHT="18">
+</a>
+</form>
+</td>
+
+</tr></table>
+
+</div>
+
+</body>
+</html>

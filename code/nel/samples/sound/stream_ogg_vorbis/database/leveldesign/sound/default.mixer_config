@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ARRAY Name="SampleBanks">
+      <ATOM Value="base_samples"/>
+    </ARRAY>
+    <ARRAY Name="BackgroundFlags">
+      <STRUCT>
+        <ATOM Name="Name" Value="day"/>
+        <ATOM Name="ShortName" Value="d"/>
+        <ATOM Name="FadeIn" Value="10*1000"/>
+        <ATOM Name="FadeOut" Value="10*1000"/>
+        <ATOM Name="InitialState" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="night"/>
+        <ATOM Name="ShortName" Value="n"/>
+        <ATOM Name="FadeIn" Value="10*1000"/>
+        <ATOM Name="FadeOut" Value="10*1000"/>
+        <ATOM Name="InitialState" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="fair"/>
+        <ATOM Name="ShortName" Value="f"/>
+        <ATOM Name="FadeIn" Value="10*1000"/>
+        <ATOM Name="FadeOut" Value="10*1000"/>
+        <ATOM Name="InitialState" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="rain"/>
+        <ATOM Name="ShortName" Value="r"/>
+        <ATOM Name="FadeIn" Value="10*1000"/>
+        <ATOM Name="FadeOut" Value="10*1000"/>
+        <ATOM Name="InitialState" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="quick_mute"/>
+        <ATOM Name="ShortName" Value="q"/>
+        <ATOM Name="FadeIn" Value="10*1000"/>
+        <ATOM Name="FadeOut" Value="100"/>
+        <ATOM Name="InitialState" Value="false"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Mar 10 09:40:33 2009 (Kaetemi) formName Resized = 1</LOG>
+</FORM>

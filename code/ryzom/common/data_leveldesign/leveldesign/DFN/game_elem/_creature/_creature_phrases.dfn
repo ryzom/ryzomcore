@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Version="0.2" State="modified">
+  <ELEMENT Name="Melee" Type="Dfn" Filename="_creature_phrases_melee.dfn"/>
+  <ELEMENT Name="Shooter" Type="Dfn" Filename="_creature_phrases_shooter.dfn"/>
+  <ELEMENT Name="Mage" Type="Dfn" Filename="_creature_phrases_mage.dfn"/>
+  <ELEMENT Name="Healer" Type="Dfn" Filename="_creature_phrases_healer.dfn"/>
+  <ELEMENT Name="Buffer" Type="Dfn" Filename="_creature_phrases_buffer.dfn"/>
+  <LOG>Tue Jul 23 20:59:27 2002 (miller) Dfn Structure = 
+Tue Jul 23 21:00:24 2002 (miller) Dfn Structure = </LOG>
+</DFN>

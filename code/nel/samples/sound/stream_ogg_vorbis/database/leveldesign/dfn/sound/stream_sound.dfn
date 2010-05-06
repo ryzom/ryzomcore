@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="MinDistance" Type="Type" Filename="distance.typ" Default="1.0"/>
+  <ELEMENT Name="MaxDistance" Type="Type" Filename="distance.typ" Default="15.0"/>
+  <ELEMENT Name="Alpha" Type="Type" Filename="alpha.typ" Default="1.0"/>
+  <LOG></LOG>
+</DFN>

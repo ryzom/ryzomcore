@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="BombFX" Type="Dfn" Filename="animation_fx_set_by_lvl.dfn"/>
+  <ELEMENT Name="ChainFX" Type="Dfn" Filename="animation_fx_set_by_lvl.dfn"/>
+  <ELEMENT Name="SprayFX" Type="Dfn" Filename="animation_fx_set_by_lvl.dfn"/>
+  <LOG>Wed Oct 15 14:42:05 2003 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

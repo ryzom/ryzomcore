@@ -1,0 +1,106 @@
+******************************************************************
+* NeL plug-ins for 3DSMAX 4.2 + MSVC.NET (VC7) compilation notes *
+******************************************************************
+
+
+** DISTRIBUTION NOTES **
+
+Given that Max plug-ins are linked to the 3DSMax SDK (which is not Gnu GPL) 
+and to NeL (which is Gnu GPL), anyone distributing plug-ins in binary form will be in 
+breach of the Gnu GPL.
+ 
+In English than means that you shouldn't distribute the plug-ins as binaries.
+You are, of course, free to distribute the source code.
+
+THIS PLUGIN HAVE BEEN TESTED ON 3DSMAX3.1 WITH CHARACTER STUDIO 3.
+
+
+1. Max/MaxSDK setup
+   ----------------
+
+You must install the MaxSDK on your machine. Let's say that <Maxpath> is the
+installation path of your 3DSMax software. You must add the following C++
+paths from the global settings of VC7 (Tools/Options/Projects/VC++ Directories):
+
+  Library files : <Maxpath>\Lib
+  Include files : <MaxPath>\Include
+                  <MaxPath>\Include\Maxscrpt
+
+Due to a conflict between a NT's include file and a Maxscript one (<parser.h>),
+you must insert the Max include files BEFORE any reference to the PlatformSDK
+includes.
+
+Upon compilation, the plugins and needed DLLs will all be output in the
+'code/nel/lib7/' folder. Update your <Maxpath>/plugin.ini file to add a this
+plugin path. Example :
+
+  [Directories]
+  Standard MAX plug-ins=C:\3dsmax42\StdPlugs
+  Additional MAX plug-ins=C:\3dsmax42\plugins
+  NeL plug-ins=C:\nel_cvs\code\nel\lib7
+
+Finally, you'll have to install some startup scripts. They reside in the
+'code/nel/tools/3d/plugin_max/script/startup/' folder, and they have to be
+copied in '<Maxpath>/scripts/startup'.
+
+Note (2002/08/07) :
+  nel_material.ms and nel_multi_set.ms do not run well under Max4.2 for
+  now, you should currently ignore them (don't copy them).
+
+
+
+2. Compilation
+   -----------
+
+Open 'code/nel/tools/3d/plugin_max/plugin_max_public.sln'. It will build
+several targets, along some NeL dependencies. You should see the following
+files in 'code/nel/lib7/' :
+
+(Shared components :)
+  nel_3dsmax_shared<suffix>.dll
+  object_viewer.dll
+(Max plugins :)
+  nelexport.dlu
+  neltileutility.dlu
+  nelconvertpatch.dlm
+
+The <suffix> part depends on your build profile ('rd' for ReleaseDebug, 'df' for
+'DebugFast', etc).
+
+
+
+3. Runtime
+   -------
+
+In order that all DLL can be found at load time, update your PATH environment variable
+to add the full name (ie. including the drive letter) of your 'code/nel/lib7/' path.
+
+  NT/2K/XP users : Config Panel/System/'Advanced' tab/'Environment variables' button.
+  PATH should be defined in the global variables. You don't have to reboot, but you must
+  restart the current running applications in order they notice this change.
+
+  Win95/98/Me users : edit your PATH in C:\AUTOEXEC.BAT, then reboot (no alternative).
+
+Last step : the object viewer needs a config file at runtime, use the one provided with
+the distribution. Copy 'code/nel/tools/3d/object_viewer/object_viewer.cfg' into your
+'code/nel/lib7/' path (side by side with the Max plugins). You may edit it as fit.
+
+
+
+4. Simple test
+   -----------
+
+Launch 3DSMax. It should load the nel_* startup scripts and maybe generate some errors
+due to Maxscript differences between 3.x and 4.x. You can 'safely' ignore them (for now).
+
+Create a simple primitive, like a 'teapot' : select 'teapot' from the primitive tab
+on the right, then click on the viewport to place it and size it.
+
+Select the 'tool tab' (little hammer, rightmost), click the 'More' button. The dialog
+should show a list of plugins, 'NeL Export' and 'NeL Tile Bank' being among them. Select
+'NeL Export'.
+
+Now click on the 'View scene' button in the bottom right panel. You should see the
+object viewer popup with a gray teapot. Max navigations shortcuts are available
+(Ctrl/Alt + middle mouse button, etc).
+

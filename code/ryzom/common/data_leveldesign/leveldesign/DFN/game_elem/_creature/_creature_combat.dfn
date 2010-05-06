@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.9 $" State="modified">
+  <ELEMENT Name="BonusAggroHungry" Type="Type" Filename="float.typ" Default="60.0"/>
+  <ELEMENT Name="BonusAggroVeryHungry" Type="Type" Filename="float.typ" Default="80.0"/>
+  <ELEMENT Name="AggroRadiusNotHungry" Type="Type" Filename="float.typ" Default="5.0"/>
+  <ELEMENT Name="AggroRadiusHungry" Type="Type" Filename="float.typ" Default="10.0"/>
+  <ELEMENT Name="AggroRadiusHunting" Type="Type" Filename="float.typ" Default="30.0"/>
+  <ELEMENT Name="DistModulator" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="TargetModulator" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="ScoreModulator" Type="Type" Filename="float.typ" Default="0.01"/>
+  <ELEMENT Name="FearModulator" Type="Type" Filename="float.typ" Default="0.01"/>
+  <ELEMENT Name="LifeLevelModulator" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="CourageModulator" Type="Type" Filename="float.typ" Default="2.0"/>
+  <ELEMENT Name="GroupCohesionModulator" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="AssistDist" Type="Type" Filename="float.typ" Default="20"/>
+  <ELEMENT Name="AggroRadiusD1" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroRadiusD2" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroReturnDistCheck" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroPrimaryGroupDist" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroPrimaryGroupCoef" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroSecondaryGroupDist" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroSecondaryGroupCoef" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <ELEMENT Name="AggroPropagationRadius" Type="Type" Filename="float.typ" Default="-1.0"/>
+  <LOG>Thu Jan 30 14:32:17 2003 (Administrateur) Dfn Structure = 
+Wed Feb 12 11:41:22 2003 (Administrateur) Dfn Structure = 
+Wed Mar 19 02:31:02 2003 (miller) Dfn Structure = 
+Tue May 27 11:10:34 2003 (portier) Dfn Structure = 
+Tue May 27 11:36:09 2003 (portier) Dfn Structure = 
+Wed May 28 17:57:05 2003 (portier) Dfn Structure = 
+Mon Aug 25 15:43:24 2003 (ledorze) Dfn Structure = 
+Mon Aug 25 17:33:45 2003 (ledorze) Dfn Structure = 
+Mon Aug 25 17:34:44 2003 (ledorze) Dfn Structure = 
+Wed Jan 28 15:44:34 2004 (ledorze) Dfn Structure = 
+Wed Mar 23 17:05:09 2005 (vuarand) Dfn Structure = 
+Tue Mar 29 18:47:22 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

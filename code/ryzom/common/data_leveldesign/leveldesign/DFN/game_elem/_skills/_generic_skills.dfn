@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Caravan" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Desert" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="FirstAid" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Forest" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="HandToHand" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Jungle" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Lake" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="LightArmourWear" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MakeShiftRepair" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Matis" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MatisMystery" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="PrimaryRoots" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="RockTabou" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Running" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Swimming" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

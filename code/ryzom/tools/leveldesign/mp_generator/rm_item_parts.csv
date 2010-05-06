@@ -1,0 +1,33 @@
+;E:\Sheets\Raw Materials\rm_item_parts.csv;;;;Ne pas changer colonnes des caracs ci-contre (accédé par index);Laisser vide la colonne ci-dessous (sauf légende Positive… Peak);Durability;Weight;SapLoad;DMG;Speed;Range;DodgeModifier;ParryModifier;AdversaryDodgeModifier;AdversaryParryModifier;ProtectionFactor;MaxSlashingProtectionFactor;MaxBluntProtection;MaxPiercingProtection;ElementalCastingTimeFactor;ElementalPowerFactor;OffensiveAfflictionCastingTimeFactor;OffensiveAfflictionPowerFactor;HealCastingTimeFactor;HealPowerFactor;DefensiveAfflictionCastingTimeFactor;DefensiveAfflictionPowerFactor;;
+A;MpL : les Lames;;;;;;C;D;D;D;C;;D;C;D;C;;;;;;;;;;;;;;
+B;MpH : les marteaux (Hammer);;;;;;C;D;D;D;C;;D;C;D;C;;;;;;;;;;;;;;
+C;MpP : les Pointes (lances, pikes et flèches/munitions (jackets));;;;;;C;D;D;D;C;;D;C;D;C;;;;;;;;;;;;;;
+D;MpM : les manches (poignée,crosse,manche de harpon& hampe de flèches);;;;;;C;D;D;D;C;;D;C;D;C;;;;;;;;;;;;;;
+E;MpG : les grips (revêtement autour d'une poignée, cf. comme sur une raquette de tennis);;;;;;C;D;D;;C;;D;C;D;C;;;;;;;;;;;;;;
+F;MpC : les Contrepoids;;;;;;C;D;D;;C;;D;C;D;C;;;;;;;;;;;;;;
+G;MpGa : les gachettes(ou système de declenchement en general);;;;;;C;D;D;;C;;D;C;D;C;;;;;;;;;;;;;;
+H;MpPe : le percuteur (ou système de mise à feu et de projection en general);;;;;;C;D;D;D;C;C;D;C;D;C;;;;;;;;;;;;;;
+I;MpCa : le canon (tout ce qui dirige le projectile);;;;;;C;D;D;D;C;C;D;C;D;C;;;;;;;;;;;;;;
+J;MpE : l’explosif (partie qui explose au contact), utilisée aussi pour la charge de propulsion.;;;;;;C;D;;D;C;C;;;;;;;;;;;;;;;;;;
+K;MpEn : les enveloppes(support du projectile, influe sur l’aerodynamisme);;;;;;C;D;;;C;C;;;;;;;;;;;;;;;;;;
+L;MpPr : le projectile (partie frappant l’adversaire, source du degât);;;;;;C;D;;D;C;C;;;;;;;;;;;;;;;;;;
+M;MpCr : la carapace exterieure;;;;;;C;D;;;;;D;C;;;C;C;D;D;;;;;;;;;;
+N;MpRi : le revêtement interieur;;;;;;C;D;;;;;D;C;;;C;C;D;D;;;;;;;;;;
+O;MpRe : le rembourrage;;;;;;C;D;;;;;D;C;;;C;C;D;D;;;;;;;;;;
+P;MpAt : les attaches (& permet combattant de tenir son bouclier);;;;;;C;D;;;;;D;C;;;C;C;D;D;;;;;;;;
+Q;MpSu : le support (partie principale du bijou);;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+R;MpED : les elements decoratifs;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+S;MpBT : le blacksmith tool;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+T;MpPes : le pestle;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+U;MpSh : le sharpener;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+V;MpTK : le tunnelingknife;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+W;MpJH : le Jewelry hammer;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+X;MpCf : le Campfire;;;;;;C;D;;;;;;;;;;;;;;;;;;;;
+Y;MpVe : les vêtements (Clothes);;;;;;C;D;;;;;D;C;;;C;C;D;D;;;;;;;;
+Z;MpMF : Magic Focus;;;;;;C;D;D;;;;;;;;;;;;D;C;D;C;D;C;D;C
+;;;;;;Positive;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1
+;;;;;;Min;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+;;;;;;Max;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80;80
+;;;;;;Peak;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100
+
+;;;;;;;0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21

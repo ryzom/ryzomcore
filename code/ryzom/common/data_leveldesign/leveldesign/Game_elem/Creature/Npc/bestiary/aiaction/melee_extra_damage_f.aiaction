@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.13 $" State="modified">
+  <STRUCT>
+    <ATOM Name="type" Value="Melee"/>
+    <ATOM Name="SpeedFactor" Value="0"/>
+    <ATOM Name="DamageFactor" Value="1"/>
+    <ATOM Name="DamageAdd" Value="0"/>
+    <ATOM Name="CombatDamageType" Value="BLUNT"/>
+    <ATOM Name="Critic" Value="0.1"/>
+    <ATOM Name="AimingType" Value="Random"/>
+    <ATOM Name="Behaviour" Value="UNKNOWN_BEHAVIOUR "/>
+    <ATOM Name="DurationType" Value="Normal"/>
+    <ATOM Name="EffectType" Value="normal"/>
+    <ATOM Name="EffectDurationType" Value="Normal"/>
+    <ATOM Name="DamageType" Value="BLUNT"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

@@ -1,0 +1,31 @@
+<generator header_tag="RE_MODULE_ITF_H">
+
+	<include file="nel/misc/entity_id.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="GUS_SCM">
+
+		<module_interface name="CRepositoryEmitter" module_class='"RepositoryEmitter"'>
+
+			<method name="requestFile" msg="RE_REQUEST">
+				<doc line=""/>
+
+				<param type="std::string"	name="fileName"		byref="true"/>
+			</method>
+
+			<method name="fileDataAck" msg="RE_DATA_ACK">
+				<doc line=""/>
+
+				<param type="std::string"	name="fileName"		byref="true"/>
+				<param type="bool"			name="status"		/>
+			</method>
+
+			<method name="duplicateModuleError" msg="RE_ERR_DUPMOD">
+				<doc line=""/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+
+</generator>

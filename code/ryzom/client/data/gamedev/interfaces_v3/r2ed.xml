@@ -1,0 +1,3180 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+
+<proc id="proc_reset_r2ed_interface">
+	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
+	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
+</proc>
+
+
+<style style="valid_txt_button" type="text_button" button_type="push_button"
+		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="80" wmargin="40"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="255 255 255 255" col_over="255 255 255 0" col_pushed="255 255 255 255"
+		text_y="-1" fontsize="13" shadow="true"
+		text_color_normal="222 201 182 255" 
+	    text_color_pushed="222 201 182 255" 
+	    text_color_over="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255" 
+	    text_shadow_color_pushed="0 0 0 255" 
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="false" />
+
+
+<!-- **************************************** -->
+<!-- *         TEMPLATES                    * -->
+<!-- **************************************** -->
+<template name="r2ed_bad_pos_icon" id="bad_pos" keep="true" posref="BL BM" posparent="parent">		
+	<group type="in_scene" id="#id" child_resize_w="true" child_resize_h="true" posref="#posref" posparent="#posparent"
+	 in_scene_offset_x="0"
+	 in_scene_offset_y="0"
+	>	
+		<view type="bitmap" id="stop" w="32" h="32" posref="TL TL" texture="r2ed_icon_stop.tga"/>		
+	</group>
+</template>
+
+<!-- debug button (todo : put in widget.xml) -->
+<template name="r2ed_command_button" id="command_button" caption="go" ah="lua" ah_params="debugInfo('no ah params defined')" keep="true">
+	<group child_resize_h="true" id="#id" child_resize_w="true" posref="TL TL" active="true">
+		<ctrl style="text_button_16" id="command" active="true" posref="TL TL" onclick_l="#ah" params_l="#ah_params" hardtext="#caption"/>
+	</group>
+</template>
+
+<style style="r2_main_menu_button_style" type="text_button" button_type="push_button"
+		tx_normal="r2_main_menu_normal" tx_pushed="r2_main_menu_pushed" tx_over="r2_main_menu_over"
+		wmargin="8"
+		text_x="28"
+		text_posref="ML ML"
+		global_color="false"
+		force_text_over="true"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		text_y="-2" fontsize="14" shadow="true" case_mode="%case_upper"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
+
+<!-- entry in file list widget -->
+<template name="r2ed_filelist_entry" text="unknown" id="" keep="true" params_l="">
+	<group id="#id" child_resize_h="true" sizeref="w" posref="TL TL">
+		<view type="text" id="t" posref="ML ML" global_color="true" fontsize="15" shadow="true" hardtext="#text"/>			
+		<ctrl type="button" id="button" button_type="toggle_button" sizeref="wh" posref="TL TL"
+				 scale="true"
+				 tx_normal="blank.tga" 
+				 tx_pushed="blank.tga" 
+				 tx_over="blank.tga"				 
+				 color="0 0 0 0"
+				 col_over="255 255 255 127"
+				 col_pushed="255 255 255 192"				 				 
+				 over_when_pushed = "false"
+				 onclick_l="lua"
+				 params_l="#params_l"				 
+				/>
+	</group>
+</template>
+
+<group type="menu" id="r2ed_base_menu_look"
+ options="context_menu_back" 
+ text_y="-2"
+ color="255 255 255 255"
+ fontsize="16"
+ shadow="true"
+ shadow_color="0 0 0 255"
+ shadow_color_over="0 0 0 255"
+ color_over="0 0 0 255"
+ color_grayed="255 255 255 128"
+ shadow_color_grayed="0 0 0 255"
+ highlight_over="255 255 255 128"		  
+>
+</group>
+
+
+
+<!-- ******************************************************************************************************************* -->
+<!-- *                                                      R2ED INTERFACE                                             * -->
+<!-- ******************************************************************************************************************* -->
+
+
+<template name="r2ed_tool" id="" x="0" y="0" active="true" posref="BL BM" posparent="parent" icon="" icon_over="" icon_pushed="" w="44" h="39" tooltip=""
+ on_tooltip=""
+ on_tooltip_params=""
+ offset_x = "0"
+ offset_y = "0"
+ onclick_l=""
+ params_l=""
+ keep="true"
+ icon_disabled="blank.tga"
+ border_select_tex="r2ed_tool_border_select.tga"
+ corner_select_tex="r2ed_tool_corner_select.tga"
+ tooltip_parent=""
+ tooltip_posref="auto"
+>	
+	<group id="#id" active="#active" x="#x" y="#y" posref="#posref" posparent="#posparent"
+	 child_resize_w="true" child_resize_h="true"
+	 child_resize_wmargin="#offset_x" child_resize_hmargin="#offset_y"
+	 onclick_l=""
+	 params_l=""
+	>			
+		<group id="unselected" active="true" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" global_color="false" w="8" h="8" posref="BL BL" texture="r2ed_tool_corner.tga" rot="3"/>
+			<view type="bitmap" id="bg" w="#w" h="#h" scale="true" posparent="bl" posref="TR BL" texture="r2ed_tool_bg.tga" rot="3"/>						
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon" 
+				 tx_pushed="#icon_pushed" 
+				 tx_over="#icon_over" 				 
+				 tooltip="#tooltip"
+				 tooltip_parent="#tooltip_parent"
+				 tooltip_posref="#tooltip_posref"
+				 on_tooltip="#on_tooltip"
+				 on_tooltip_params="#on_tooltip_params"
+				 global_color="false"
+				 global_color_normal="false"
+				 global_color_over="false"
+				 global_color_pushed="false"
+				 onclick_l="#onclick_l"
+				 params_l="#params_l"
+				 over_when_pushed = "false"
+				/>				
+			<view type="bitmap" global_color="false" id="bottom" scale="true" posparent="button" posref="BL TL" sizeref="w" w="0" h="8" texture="r2ed_tool_border.tga" rot="2"/>			
+			<view type="bitmap" global_color="false" id="top" scale="true" posparent="button" posref="TL BL" sizeref="w" w="0" h="8" texture="r2ed_tool_border.tga" rot="0"/>			
+			<view type="bitmap" global_color="false" id="left" scale="true" posparent="button" posref="BL BR" sizeref="h" w="8" h="0" texture="r2ed_tool_border.tga" rot="3"/>
+			<view type="bitmap" global_color="false" id="right" scale="true" posparent="button" posref="BR BL" sizeref="h" w="8" h="0" texture="r2ed_tool_border.tga" rot="1"/>			
+			<view type="bitmap" global_color="false" id="tl" w="8" h="8" posref="TL BR" texture="r2ed_tool_corner.tga" posparent="button" rot="0"/>
+			<view type="bitmap" global_color="false" id="tr" w="8" h="8" posref="TR BL" texture="r2ed_tool_corner.tga" posparent="button" rot="1"/>
+			<view type="bitmap" global_color="false" id="br" w="8" h="8" posref="BR TL" texture="r2ed_tool_corner.tga" posparent="button" rot="2"/>
+		</group>		
+		<group id="selected" active="false" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" global_color="false" w="8" h="8" posref="BL BL" texture="#corner_select_tex" rot="3"/>
+			<view type="bitmap" id="bg" w="#w" h="#h" scale="true" posparent="bl" posref="TR BL" texture="r2ed_tool_bg.tga" rot="3"/>						
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon" 
+				 tx_pushed="#icon_pushed" 
+				 tx_over="#icon_over"				 
+				 tooltip="#tooltip"
+				 on_tooltip="#on_tooltip"
+				 on_tooltip_params="#on_tooltip_params"
+				 tooltip_parent="#tooltip_parent"
+				 tooltip_posref="#tooltip_posref"
+				 global_color="false"
+				 global_color_normal="false"
+				 global_color_over="false"
+				 global_color_pushed="false"
+				 onclick_l="#onclick_l"
+				 params_l="#params_l"
+				 over_when_pushed = "false"
+				/>
+			<view type="bitmap" global_color="false" id="bottom" scale="true" posparent="button" posref="BL TL" sizeref="w" h="8" w="0" texture="#border_select_tex" rot="2"/>
+			<view type="bitmap" global_color="false" id="top" scale="true" posparent="button" posref="TL BL" sizeref="w" h="8" w="0" texture="#border_select_tex" rot="0"/>
+			<view type="bitmap" global_color="false" id="left" scale="true" posparent="button" posref="BL BR" sizeref="h" w="8" h="0" texture="#border_select_tex" rot="3"/>
+			<view type="bitmap" global_color="false" id="right" scale="true" posparent="button" posref="BR BL" sizeref="h" w="8" h="0" texture="#border_select_tex" rot="1"/>
+			<view type="bitmap" global_color="false" id="tl" w="8" h="8" posref="TL BR" texture="#corner_select_tex" posparent="button" rot="0"/>
+			<view type="bitmap" global_color="false" id="tr" w="8" h="8" posref="TR BL" texture="#corner_select_tex" posparent="button" rot="1"/>
+			<view type="bitmap" global_color="false" id="br" w="8" h="8" posref="BR TL" texture="#corner_select_tex" posparent="button" rot="2"/>								
+		</group>				
+		<group id="disabled" active="false" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" global_color="false" w="8" h="8" posref="BL BL" texture="r2ed_tool_corner.tga" rot="3"/>
+			<view type="bitmap" id="bg" w="#w" h="#h" scale="true" posparent="bl" posref="TR BL" texture="r2ed_tool_bg.tga" rot="3"/>						
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon_disabled" 
+				 tx_pushed="#icon_disabled" 
+				 tx_over="#icon_disabled"				 
+				 tooltip="#tooltip"
+				 on_tooltip="#on_tooltip"
+				 on_tooltip_params="#on_tooltip_params"
+				 tooltip_parent="#tooltip_parent"
+				 tooltip_posref="#tooltip_posref"
+				 global_color="false"
+				 global_color_normal="false"
+				 global_color_over="false"
+				 global_color_pushed="false"				 
+				 over_when_pushed = "false"
+				 onclick_l="#onclick_l"
+				 params_l="#params_l"
+				 frozen="true"
+				 frozen_half_tone="false"
+				/>		
+			<view type="bitmap" global_color="false" id="bottom" scale="true" posparent="button" posref="BL TL" sizeref="w" h="8" w="0" texture="r2ed_tool_border.tga" rot="2"/>
+			<view type="bitmap" global_color="false" id="top" scale="true" posparent="button" posref="TL BL" sizeref="w" h="8" w="0" texture="r2ed_tool_border.tga" rot="0"/>
+			<view type="bitmap" global_color="false" id="left" scale="true" posparent="button" posref="BL BR" sizeref="h" w="8" h="0" texture="r2ed_tool_border.tga" rot="3"/>
+			<view type="bitmap" global_color="false" id="right" scale="true" posparent="button" posref="BR BL" sizeref="h" w="8" h="0" texture="r2ed_tool_border.tga" rot="1"/>
+			<view type="bitmap" global_color="false" id="tl" w="8" h="8" posref="TL BR" texture="r2ed_tool_corner.tga" posparent="button" rot="0"/>
+			<view type="bitmap" global_color="false" id="tr" w="8" h="8" posref="TR BL" texture="r2ed_tool_corner.tga" posparent="button" rot="1"/>
+			<view type="bitmap" global_color="false" id="br" w="8" h="8" posref="BR TL" texture="r2ed_tool_corner.tga" posparent="button" rot="2"/>
+		</group>
+	</group>
+	<!--
+	<tree node="#id">
+	</tree>
+	-->
+</template>
+
+<template name="named_r2ed_tool" id="" x="0" y="0" active="true" posref="BL BL" posparent="" icon="" icon_over="" icon_pushed="" w="44" h="39" tooltip=""
+ onclick_l=""
+ params_l=""
+ text_color="255 255 255 255"
+ fontsize="15"
+ text=""
+>
+	<group id="#id" active="true" x="#x" y="#y" posref="#posref" posparent="#posparent"
+	 child_resize_w="true" child_resize_h="true"
+	 onclick_l=""
+	 params_l=""
+	>
+		<instance template="r2ed_tool" id="tool" posparent="parent" tooltip="#tooltip" onclick_l="#onclick_l" params_l="#params_l" icon="#icon" icon_over="#icon_over" icon_pushed="#icon_pushed" posref="ML ML"/>
+		<view type="text" id="t" posref="MR ML" posparent="tool" x="4" color="#text_color" global_color="true" fontsize="#fontsize" shadow="true" hardtext="#text"/>
+	</group>
+</template>
+
+
+<!-- ************************************************** -->
+<!-- *                    BBOX EDIT                   * -->
+<!-- ************************************************** -->
+
+
+<template name = "bbox_slider" id="bbox_slider">
+		<group id="#id" posref="TL TL" h="12" sizeref="w">
+			<view type="bitmap" id="bk" posref="BL BL" scale="true" y="6" sizeref="w" h="2" texture="W_line_hor2.tga" />
+			<ctrl type="scroll" id="slider" posparent="bk" posref="MM MM" x="0" y="-1" sizeref="w" h="8"
+								vertical="false" align="L" tracksize="8" 
+								tx_topright="w_scroll_R.tga" tx_middle="w_scroll_M.tga" tx_bottomleft="w_scroll_L.tga"
+								onscroll="lua" params="r2.CustomBBox:updateFromUI()"
+			min="0"
+			max="10000"/>
+		</group>
+</template>
+
+<group type="container" id="r2ed_bbox_edit" title="uiR2EDBBoxEdit" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_EDIT_BBOX"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="600"	
+	h="220"
+	w="220"
+	active="false"
+	on_active="lua"
+	on_active_params="if r2 and r2.Mode == 'Edit' then r2.CustomBBox:updateUI() end"
+	on_close_button="lua"
+	on_close_button_params="runCommand('hideR2EntityBoxes')"
+	savable="true"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="800" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<group id="enclosing" sizeref="wh" w="0" h="0" posref="TL TL">
+			<view type="text" id="no_selected_bbox" posref="MM MM" global_color="true" fontsize="16" shadow="true" hardtext="uiR2DNoSelectedInstance"/>
+			<view type="text" id="no_custom_bbox" posref="MM MM" global_color="true" fontsize="16" shadow="true" hardtext="uiR2DNoCustomBBox"/>
+			<group id="custom_bbox" posref="TL TL" sizeref="w" active="false" child_resize_h="true" child_resize_hmargin="4">
+				<group id="custom_bbox_checkbox" posref="TL TL" child_resize_h="true" y="-4" sizeref="w" child_resize_hmargin="4" child_resize_wmargin="4"> 
+					<ctrl type="button" id="custom_bbox_enabled" button_type="toggle_button" posref="ML ML" x="2" y="0"
+					tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+					color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
+					onclick_l="lua"
+					params_l="r2.CustomBBox:updateFromUI()"
+					/>
+					<view type="text" id="text_custom" posparent="custom_bbox_enabled" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDCustomSelectBBox" auto_clamp="true"/>	
+				</group> 
+				<group type="table" id="bbox" posref="BL TL" posparent="custom_bbox_checkbox" sizeref="w" width="100%" border="0" bgcolor="0 0 0 127" y="-4"
+				 cellspacing="0"
+				 cellpadding="0"
+				 continuous_update="true"
+				> 
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="x_min_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxXMin" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">						
+							<instance template="bbox_slider" id="x_min"/>
+						</TD>
+					</TR>
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="x_max_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxXMax" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">						
+							<instance template="bbox_slider" id="x_max"/>
+						</TD>
+					</TR>
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="y_min_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxYMin" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">						
+							<instance template="bbox_slider" id="y_min"/>
+						</TD>
+					</TR>
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="y_max_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxYMax" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">						
+							<instance template="bbox_slider" id="y_max"/>
+						</TD>
+					</TR>
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="z_min_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxZMin" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">						
+							<instance template="bbox_slider" id="z_min"/>
+						</TD>
+					</TR>
+					<TR>
+						<TD width="25%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<view type="text" id="z_max_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDBBoxZMax" auto_clamp="true"/>
+						</TD>
+						<TD height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+							<instance template="bbox_slider" id="z_max"/>
+						</TD>
+					</TR>
+				</group>
+				<!-- save button -->
+				<ctrl style="text_button_16" id="save" posparent="bbox" posref="BL TL" x="0"  y="-4" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.CustomBBox:save()" hardtext="uiR2EDSave"/>
+			</group>					
+		</group>
+
+	</group>
+</group>
+
+<tree node="r2ed_bbox_edit">
+</tree>
+
+
+<!-- ************************************************** -->
+<!-- *                    TOOLS                       * -->
+<!-- ************************************************** -->
+
+<!-- Main toolbar -->
+<group id="r2ed_toolbar" 
+  active="true" x="5" y="-5" posref="TL TL"
+  child_resize_w="true"
+  child_resize_h="true"
+>
+	<instance template="r2ed_tool" id="r2ed_tool_select" tooltip="uimR2EDTooltipSelectMove" onclick_l="r2ed_select_move" posparent="parent" posref="TL TL" x="0" y="0" icon="r2ed_tool_select.tga" icon_over="r2ed_tool_select_over.tga" icon_pushed="r2ed_tool_select_pushed.tga" 
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>	
+	<instance template="r2ed_tool" id="r2ed_tool_rotate" tooltip="uimR2EDTooltipSelectRotate" onclick_l="r2ed_select_rotate" posparent="r2ed_tool_select"  posref="TR TL" x="4" y="0" icon="r2ed_tool_can_rotate.tga" icon_over="r2ed_tool_can_rotate_over.tga" icon_pushed="r2ed_tool_can_rotate_pushed.tga"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+	<instance template="r2ed_tool" active="false" id="r2ed_tool_undo" tooltip="uimR2EDTooltipUndo" y="0" icon="r2ed_tool_undo.tga" icon_over="r2ed_tool_undo_over.tga" icon_pushed="r2ed_tool_undo_pushed.tga"
+	 icon_disabled="r2ed_tool_undo_disabled.tga"
+	 posparent="r2ed_tool_rotate" posref="TR TL" x="4"
+	 onclick_l="r2ed_undo"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>			
+	<instance template="r2ed_tool" active="false" id="r2ed_tool_redo" tooltip="uimR2EDTooltipRedo" icon="r2ed_tool_redo.tga" icon_over="r2ed_tool_redo_over.tga" icon_pushed="r2ed_tool_redo_pushed.tga"	 
+	 icon_disabled="r2ed_tool_redo_disabled.tga"
+	 posparent="r2ed_tool_undo" posref="TR TL" x="4"
+	 onclick_l="r2ed_redo"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>				
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_copy" tooltip="uimR2EDTooltipCopy" posparent="r2ed_tool_redo" posref="TR TL" x="4" y="0" icon="r2ed_tool_copy.tga" icon_over="r2ed_tool_copy_over.tga" icon_pushed="r2ed_tool_copy_pushed.tga"
+	 onclick_l="edit_copy"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_paste" tooltip="uimR2EDTooltipPaste" posparent="r2ed_tool_copy" posref="TR TL" x="4" y="0" icon="r2ed_tool_paste.tga" icon_over="r2ed_tool_paste_over.tga" icon_pushed="r2ed_tool_paste_pushed.tga"
+	 onclick_l="edit_paste"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+	
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_display_mode" tooltip="uiR2EdPropertyToolTip_WorldObject_DisplayMode" posparent="r2ed_tool_paste" posref="TR TL" x="4" y="0" icon="r2ed_tool_prim_display_mode.tga" icon_over="r2ed_tool_prim_display_mode_over.tga" icon_pushed="r2ed_tool_prim_display_mode_pushed.tga"	 
+	 onclick_l="lua"
+	 params_l="r2:popDisplayModeMenu()"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_freeze_bot_objects" tooltip="uiR2EDFreezeBotObjects" posparent="r2ed_tool_display_mode" posref="TR TL" x="4" y="0" icon="r2ed_tool_unfreeze_object.tga" icon_over="r2ed_tool_unfreeze_object_over.tga" icon_pushed="r2ed_tool_unfreeze_object_pushed.tga"	 
+	 onclick_l="r2ed_freeze_unfreeze_botobjects"
+	 params_l=""
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_unfreeze_bot_objects" tooltip="uiR2EDUnfreezeBotObjects" posparent="r2ed_freeze_bot_objects" posref="TR TL" x="0" y="0" icon="r2ed_tool_freeze_object.tga" icon_over="r2ed_tool_freeze_object_over.tga" icon_pushed="r2ed_tool_freeze_object_pushed.tga"	 
+	 onclick_l="r2ed_freeze_unfreeze_botobjects"
+	 params_l=""
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>	
+
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_teleport" tooltip="uimR2EDTooltipTeleport" posparent="r2ed_unfreeze_bot_objects" posref="TR TL" x="4" y="0" icon="r2ed_tool_teleport.tga" icon_over="r2ed_tool_teleport_over.tga" icon_pushed="r2ed_tool_teleport_pushed.tga"
+	 onclick_l="r2ed_teleport"	 
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>	
+
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_start" tooltip="uimR2EDTooltipGoTest" posparent="r2ed_tool_teleport" posref="TR TL" x="4" y="0" icon="r2ed_tool_start.tga" icon_over="r2ed_tool_start_over.tga" icon_pushed="r2ed_tool_start_pushed.tga"
+	 onclick_l="r2ed_try_go_test"	 
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_stop" tooltip="uimR2EDTooltipGoEdition" posparent="r2ed_tool_start" posref="TR TL" x="4" y="0" icon="r2ed_tool_stop.tga" icon_over="r2ed_tool_stop_over.tga" icon_pushed="r2ed_tool_stop_pushed.tga"
+	 onclick_l="r2ed_stop_test"	 
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>	
+
+	<instance template="r2ed_tool" active="true" id="r2ed_stop_live" tooltip="uimR2EDStopLive" posparent="r2ed_tool_stop" posref="TR TL" x="4" y="0" icon="r2_stop_live.tga" icon_over="r2_stop_live_over.tga" icon_pushed="r2_stop_live_pushed.tga"
+	 onclick_l="r2_stop_live"
+	 params_l="confirmStopLive=0"
+	 on_tooltip="lua"	 
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	/>
+
+	<instance template="r2ed_tool" active="true" id="r2ed_live" tooltip="uimR2EDMakeCurrentLive" icon="r2_live.tga" icon_over="r2_live_over.tga" icon_pushed="r2_live_pushed.tga"
+	 onclick_l="open_scenario_control"
+	 params_l=""
+	 x="8"	 
+	 posref="TR TL"
+	 posparent="r2ed_stop_live"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+
+</group>
+
+<tree node="r2ed_toolbar">
+</tree>
+
+
+<!-- windows toolbar -->
+<group id="r2ed_windows_dm_bar" 
+ active="true" x="-5" y="-5" posref="TR TR"
+ child_resize_w="true"
+ child_resize_h="true"
+>
+	<instance template="r2ed_tool" active="true" id="r2ed_live" tooltip="uimR2EDUpdateFiltersCharacters" icon="r2_scenario_admin.tga" icon_over="r2_scenario_admin_over.tga" icon_pushed="r2_scenario_admin_pushed.tga"
+	 onclick_l="open_scenario_control"
+	 params_l="showHide=1"	 
+	 posref="BL BL"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+	<instance template="r2ed_tool" active="true" id="player_control" tooltip="uimR2EDPlayerControl" posparent="r2ed_live" posref="TR TL" x="4" y="0" icon="r2_player_admin.tga" icon_over="r2_player_admin_over.tga" icon_pushed="r2_player_admin_pushed.tga"
+	 onclick_l="show_hide"
+	 params_l="ring_chars_tracking"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+
+</group>
+
+<tree node="r2ed_windows_dm_bar">
+</tree>
+
+
+<!-- because of ui customisation keep r2 buttons in a window for the 'player' modes : owner player & tester player -->
+ 
+<group type="container" id="r2ed_toolbar_window" title="" global_color="false" line_at_bottom="false"
+	group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"
+	movable="true" opened="true" resizer="false" header_color="UI:SAVE:WIN:COLORS:OPT"	
+	pop_min_w="220" pop_min_h="104" pop_max_w="220" pop_max_h="104"	
+	h="104"
+	w="220"
+	active="false"
+	on_active=""
+	on_active_params=""
+	on_close_button=""
+	on_close_button_params=""
+	savable="true"
+	openable="false" header_active="false" right_button="false"	
+>	
+
+	<group id="header_opened" x="0" y="0" sizeref="w" child_resize_h="true" posref="TL TL" active="true">
+		<group id="offseter" 
+		  posref="TL TL"
+		  child_resize_w="true"		  
+		  child_resize_h="true"
+		  child_resize_hmargin="0"
+		  y="0"
+		>
+			<group id="enclosing" 
+			  posref="TL TL"
+			  child_resize_w="true"		  
+			  child_resize_h="true"		  
+			>
+				<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_dm_mode" tooltip="uiR2EDAnimDMMode" posparent="parent" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" hardtext="DM mode" icon="r2_icon_dm_mode.tga" icon_over="r2_icon_dm_mode_over.tga" icon_pushed="r2_icon_dm_mode_pushed.tga"
+				 onclick_l="r2ed_anim_dm_mode"			 
+				 on_tooltip="lua"
+				 tooltip_parent="win"
+				 on_tooltip_params="r2.ToolUI:updateTooltip()"
+				/>			
+				<instance template="r2ed_tool" active="true" id="r2ed_stop_live" tooltip="uimR2EDStopLive" posparent="r2ed_anim_dm_mode" posref="TR TL" x="0" y="0" icon="r2_stop_live.tga" icon_over="r2_stop_live_over.tga" icon_pushed="r2_stop_live_pushed.tga"
+				 onclick_l="r2_stop_live"
+				 params_l="confirmStopLive=0"
+				 on_tooltip="lua"
+				 tooltip_parent="win"
+				 on_tooltip_params="r2.ToolUI:updateTooltip()"
+				/>
+				<instance template="r2ed_tool" active="true" id="r2ed_live" tooltip="uimR2EDUpdateFiltersCharacters" posparent="r2ed_stop_live" icon="r2_live.tga" icon_over="r2_live_over.tga" icon_pushed="r2_live_pushed.tga"
+				 onclick_l="open_scenario_control"
+				 params_l="showHide=1"	 
+				 posref="TR TL" x="4" y="0"
+				 border_select_tex="r2ed_tool_border_select_g.tga"
+				 corner_select_tex="r2ed_tool_corner_select_g.tga"
+				/>
+				<instance template="r2ed_tool" active="true" id="player_control" tooltip="uimR2EDPlayerControl" posparent="r2ed_live" posref="TR TL" x="4" y="0" icon="r2_player_admin.tga" icon_over="r2_player_admin_over.tga" icon_pushed="r2_player_admin_pushed.tga"				 
+				 onclick_l="show_hide"
+				 params_l="ring_chars_tracking"
+				 on_tooltip="lua"
+				 tooltip_parent="win"
+				 on_tooltip_params="r2.ToolUI:updateTooltip()"
+				/>
+			</group>
+		</group>
+	</group>
+</group>
+
+
+<tree node="r2ed_toolbar_window">
+</tree>
+
+
+<!-- display mode menu -->
+<!--
+<group type="menu" id="r2ed_display_mode_menu" extends="r2ed_base_menu_look" mouse_pos="false" posref="TL TL">	
+	<action id="reset"	name="uiR2EDResetDisplayMode" handler="lua" params="r2:resetDisplayModeForAllObjects()"/>
+	<separator/>
+	<action id="show"	name="uiR2EDShow">
+		<action id="show_all"	name="uiR2EDShowAll" handler="lua" params="r2:setDisplayMode('all', 0, 1)"/>
+		<action id="hide_all"	name="uiR2EDHideAll" handler="lua" params="r2:setDisplayMode('all', 1)"/>
+		<separator/>
+		<action id="show_all_roads_regions"	name="uiR2EDShowAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 0, 1)"/>
+		<action id="hide_all_roads_regions"	name="uiR2EDHideAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 1)"/>
+		<separator/>
+		<action id="show_all_scenery_objects"	name="uiR2EDShowAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 0, 1)"/>
+		<action id="hide_all_scenery_objects"	name="uiR2EDHideAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 1)"/>
+	</action>	
+	<action id="lock"	name="uiR2EDLock">
+		<action id="lock_all"	name="uiR2EDLockAll" handler="lua" params="r2:setDisplayMode('all', 3)"/>
+		<action id="unlock_all"	name="uiR2EDUnlockAll" handler="lua" params="r2:setDisplayMode('all', 0, 3)"/>
+		<separator/>
+		<action id="lock_all_roads_regions"	name="uiR2EDLockAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 3)"/>
+		<action id="unlock_all_roads_regions"	name="uiR2EDUnlockAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 0, 3)"/>
+		<separator/>
+		<action id="lock_all_scenery_objects"	name="uiR2EDLockAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 3)"/>
+		<action id="unlock_all_scenery_objects"	name="uiR2EDUnlockAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 0, 3)"/>
+	</action>	
+	<action id="freeze"	name="uiR2EDFreeze">
+		<action id="freeze_all"	name="uiR2EDFreezeAll" handler="lua" params="r2:setDisplayMode('all', 2)"/>
+		<action id="unfreeze_all"	name="uiR2EDUnfreezeAll" handler="lua" params="r2:setDisplayMode('all', 0, 2)"/>
+		<separator/>
+		<action id="freeze_all_roads_regions"	name="uiR2EDFreezeAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 2)"/>
+		<action id="unfreeze_all_roads_regions"	name="uiR2EDUnfreezeAllRoadRegions" handler="lua" params="r2:setDisplayMode('places', 0, 2)"/>
+		<separator/>
+		<action id="freeze_all_scenery_objects"	name="uiR2EDFreezeAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 2)"/>
+		<action id="unfreeze_all_scenery_objects"	name="uiR2EDUnfreezeAllSceneryObjects" handler="lua" params="r2:setDisplayMode('bot_objects', 0, 2)"/>
+	</action>	
+</group>
+-->
+
+<!-- primitive display mode -->
+<group type="menu" id="r2ed_primitive_display" extends="r2ed_base_menu_look" mouse_pos="false" posref="TL TL">	
+	<action id="freeze_all"		checkable="true" name="uiR2EDFreezeAll"   handler="lua" params="r2:primDisplayFreezeAll()"/>
+	<action id="unfreeze_all"	checkable="true" name="uiR2EDUnfreezeAll" handler="lua" params="r2:primDisplayUnfreezeAll()"/>
+	<separator/>	
+	<action id="hide_all"			checkable="true" name="uiR2EDHideAll" handler="lua" params="r2:primDisplayHideAll()"/>
+	<action id="show_contextual"	checkable="true" name="uiR2EDShowContextual"        handler="lua" params="r2:primDisplayShowContextual()"/>
+	<action id="show_all"			checkable="true" name="uiR2EDShowAll" handler="lua" params="r2:primDisplayShowAll()"/>
+</group>
+
+	
+
+
+<!-- windows toolbar -->
+<group id="r2ed_windows_bar" 
+ active="false" x="-5" y="-5" posref="TR TR"
+ child_resize_w="true"
+ child_resize_h="true"
+>
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_palette_window" tooltip="uimR2EDTooltipPaletteWindow" icon="r2ed_tool_palette_window.tga" icon_over="r2ed_tool_palette_window_over.tga" icon_pushed="r2ed_tool_palette_window_pushed.tga"
+	 onclick_l="show_hide"
+	 params_l="r2ed_palette"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	 posref="BL BL"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_scenario_window" tooltip="uimR2EDTooltipScenarioWindow" posparent="r2ed_tool_palette_window" posref="TR TL" x="4" y="0" icon="r2ed_tool_scenario_window.tga" icon_over="r2ed_tool_scenario_window_over.tga" icon_pushed="r2ed_tool_scenario_window_pushed.tga"
+	 onclick_l="show_hide"
+	 params_l="r2ed_scenario"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+	<instance template="r2ed_tool" active="true" id="r2ed_tool_map_window" tooltip="uimR2EDTooltipMapWindow" posparent="r2ed_tool_scenario_window" posref="TR TL" x="4" y="0" icon="r2ed_tool_map_window.tga" icon_over="r2ed_tool_map_window_over.tga" icon_pushed="r2ed_tool_map_window_pushed.tga"
+	 onclick_l="show_hide"	 
+	 params_l="map"
+	 on_tooltip="lua"
+	 on_tooltip_params="r2.ToolUI:updateTooltip()"
+	 border_select_tex="r2ed_tool_border_select_g.tga"
+	 corner_select_tex="r2ed_tool_corner_select_g.tga"
+	/>
+</group>
+
+<tree node="r2ed_windows_bar">
+</tree>
+
+
+<group id="r2ed_tool_context_help" posref="BL TL" y="-8" posparent="r2ed_toolbar"
+ child_resize_h="true" w="0" active="true" savable="false">
+	<view type="text" id="t" posref="ML ML" global_color="false" fontsize="15" shadow="true" hardtext="toto" active="true"/>
+</group>
+
+<tree node="r2ed_tool_context_help">	
+</tree>
+
+
+<group id="r2ed_max_visible_entity_count_exceeded" posref="BL TL" y="-8" posparent="r2ed_tool_context_help"
+ child_resize_h="true" w="0" active="false" savable="false">
+	<view type="text" id="t" posref="ML ML" global_color="false" fontsize="15" color="255 0 0 255" shadow="true" hardtext="uiR2EDMaxVisibleEntityCountExceeded" active="true"/>
+</group>
+
+<tree node="r2ed_max_visible_entity_count_exceeded">	
+</tree>
+
+
+
+
+<!-- bottom left decoration -->
+<group id="r2ed_main_bl" 
+  active="true" x="-4" y="-2" posref="BL BL"  
+  child_resize_w="true"
+  child_resize_h="true"
+>	
+	<view type="bitmap" id="bg" posref="BL BL" w="40" h="33" texture="r2_main_bl.tga" color="255 255 255 255" global_color="false"/>	
+</group>
+
+<tree node="r2ed_main_bl">
+</tree>
+
+
+
+<!-- A the choose your scenario for starting animation-->
+<group id="r2ed_animation_loading" 
+  active="true" x="-4" y="-2" posref="BL BL"  
+  sizeref="wh"	
+  child_resize_w="true"
+  child_resize_h="true"
+  overlappable = "false"
+>	
+	<view type="bitmap" id="bg" posref="BL BL" w="0" h="0" texture="r2_main_bl.tga" color="255 255 255 255" global_color="false" sizeref="wh" scale="true"/>	
+</group>
+
+<tree node="r2ed_animation_loading">
+</tree>
+
+
+
+
+<!-- A the wait for the animator to start the scenario-->
+<group id="r2ed_animation_waiting" 
+  active="true" x="-4" y="-2" posref="BL BL"  
+  sizeref="wh"	
+  child_resize_w="true"
+  child_resize_h="true"
+  overlappable = "false"
+>	
+	<view type="bitmap" id="bg" posref="BL BL" w="0" h="0" texture="r2_icon_test_mode.tga" color="255 255 255 255" global_color="false" sizeref="wh" scale="true"/>	
+</group>
+
+<tree node="r2ed_animation_waiting">
+</tree>
+
+
+
+
+<!-- Contextual toolbar -->
+<!--
+<group id="r2ed_contextual_toolbar" 
+  active="false" x="16" y="16" posref="BL BL"
+  child_resize_w="true"
+  child_resize_h="true"
+>
+	<group type="list" id="buttons" addelt="R" align="T" child_resize_h="true" child_resize_w="true">
+	-->
+		<!-- filled by code -->
+<!--
+	</group>	
+</group>
+
+<tree node="r2ed_contextual_toolbar">
+</tree>
+-->
+
+
+<!-- windows on / off + tmp debug stuffs -->
+<!--
+<group id="r2ed_windowbar" 
+  active="true" x="0" y="0" posref="TL TL"  
+  child_resize_w="true"
+  child_resize_h="true"
+>	
+	<ctrl style="text_button_16" id="palette" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:switchPaletteWindow()" hardtext="uiR2EDPaletteWindow"/>	
+	<ctrl style="text_button_16" id="scenario" posref="TR TL" x="4" posparent="palette" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:switchScenarioWindow()" hardtext="uiR2EDScenarioWindow"/>
+	<ctrl style="text_button_16" id="properties" posref="TR TL" x="4" posparent="scenario" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:switchPropertiesWindow()" hardtext="uiR2EDPropertiesWindow"/>
+	<view type="bitmap" id="bl" x="4" w="1" h="16" posref="TR TL" posparent="properties" texture="blank.tga" scale="true"/>
+	<ctrl style="text_button_16" id="debug_console" posref="TR TL" x="4" posparent="bl" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:switchDebugWindow()" hardtext="uiR2EDDebugConsoleWindow"/>
+	<view type="bitmap" id="bl2" x="4" w="1" h="16" posref="TR TL" posparent="debug_console" texture="blank.tga" scale="true"/>
+	<ctrl style="text_button_16" id="show_hide_prims" posref="TR TL" x="4" posparent="bl2" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.Config.PrimDisplayEnabled = not r2.Config.PrimDisplayEnabled" hardtext="uiR2EDShowHidePrims"/>
+	<ctrl style="text_button_16" id="cust_bbox" posparent="show_hide_prims" posref="TR TL" x="4" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:switchCustomBBoxWindow()" hardtext="uiR2EDCustomBBox"/>
+	
+
+</group>
+
+<tree node="r2ed_windowbar">
+</tree>
+-->
+
+<!-- tmp : for debug -->
+<group id="r2ed_testbar" 
+  active="true" x="4" y="4" posref="BL BL"  
+  child_resize_w="true"
+  child_resize_wmargin="8"
+  child_resize_h="true"
+>	
+	<!-- toggle dm mode / test mode -->	
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_test_mode" tooltip="uiR2EDAnimTestMode" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" hardtext="test mode" icon="r2_icon_test_mode.tga" icon_over="r2_icon_test_mode_over.tga" icon_pushed="r2_icon_test_mode_pushed.tga"
+	 onclick_l="lua" 
+	 params_l="runAH(nil, 'r2ed_anim_test_mode', '')"
+	/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_dm_mode" tooltip="uiR2EDAnimDMMode" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" hardtext="DM mode" icon="r2_icon_dm_mode.tga" icon_over="r2_icon_dm_mode_over.tga" icon_pushed="r2_icon_dm_mode_pushed.tga"
+	 onclick_l="lua" 
+	 params_l="runAH(nil, 'r2ed_anim_dm_mode', '')"
+	/>
+
+	<!-- Acts -->	
+	
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_acts" tooltip="uiR2EDAnimActs" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.AnimActs:popMenu()" hardtext="act2" icon="r2_icon_acts.tga" icon_over="r2_icon_acts_over.tga" icon_pushed="r2_icon_acts_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_triggers" tooltip="uiR2EDAnimTriggers" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.AnimUserTriggers:popMenu()" hardtext="act2" icon="r2_icon_animation_triggers.tga" icon_over="r2_icon_animation_triggers_over.tga" icon_pushed="r2_icon_animation_triggers_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_speak_as" tooltip="uiR2EDAnimSpeakAs" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('TALK_AS')" hardtext="speak as" icon="r2_icon_speak_as.tga" icon_over="r2_icon_speak_as_over.tga" icon_pushed="r2_icon_speak_as_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_stop_speak" tooltip="uiR2EDAnimStopSpeak" posref="TL TL" x="0"  wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('STOP_TALK')"  hardtext="stop speak" icon="r2_icon_stop_speak.tga" icon_over="r2_icon_stop_speak_over.tga" icon_pushed="r2_icon_stop_speak_pushed.tga"/>
+	<!-- entities control -->
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_control" tooltip="uiR2EDAnimControl" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('CONTROL')"  hardtext="control as" icon="r2_icon_possess.tga" icon_over="r2_icon_possess_over.tga" icon_pushed="r2_icon_possess_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_stop_control" tooltip="uiR2EDAnimStopControl" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('STOP_CONTROL')"  hardtext="stop control" icon="r2_icon_stop_possess.tga" icon_over="r2_icon_stop_possess_over.tga" icon_pushed="r2_icon_stop_possess_pushed.tga"/>
+	
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_add_hp"	tooltip="uiR2EDAnimAddHP" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('ADD_HP')" hardtext="add hp" icon="r2_icon_add_hp.tga" icon_over="r2_icon_add_hp_over.tga" icon_pushed="r2_icon_add_hp_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_grp_heal"	tooltip="uiR2EDAnimGrpHeal" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('GRP_HEAL')" hardtext="heal group" icon="r2_icon_add_hp.tga" icon_over="r2_icon_add_hp_over.tga" icon_pushed="r2_icon_add_hp_pushed.tga"/>
+
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_kill"	tooltip="uiR2EDAnimKill" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua"  params_l="r2:dssTarget('KILL_NPC')" hardtext="kill" icon="r2_toolbar_kill.tga" icon_over="r2_toolbar_kill_over.tga" icon_pushed="r2_toolbar_kill_pushed.tga"/>
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_grp_kill"	tooltip="uiR2EDAnimGrpKill" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua"  params_l="r2:dssTarget('GRP_KILL')" hardtext="kill group" icon="r2_toolbar_kill.tga" icon_over="r2_toolbar_kill_over.tga" icon_pushed="r2_toolbar_kill_pushed.tga"/>
+
+
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_despawn"	tooltip="uiR2EDAnimDespawn" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:dssTarget('DESPAWN_NPC')" hardtext="despawn" icon="r2_icon_despawn.tga" icon_over="r2_icon_despawn_over.tga" icon_pushed="r2_icon_despawn_pushed.tga"/>
+
+	<!-- weather control -->	
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_weather" tooltip="uiR2EDChangeWeather" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:changeWeatherDialog()" hardtext="weather" icon="r2_icon_weather.tga" icon_over="r2_icon_weather_over.tga" icon_pushed="r2_icon_weather_pushed.tga"/>
+
+	<!-- dm gift -->	
+	<instance template="r2ed_tool" w="32" h="32" id="r2ed_anim_dm_gift" tooltip="uiR2EDDMGift" posref="TL TL" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.DMGift:begin()" hardtext="weather" icon="r2_icon_animation_give.tga" icon_over="r2_icon_animation_give_over.tga" icon_pushed="r2_icon_animation_give_pushed.tga"/>
+	
+</group>
+
+<tree node="r2ed_testbar">
+</tree>
+
+
+<!-- Template : a single controlled entity, with the button to stop controlling it -->
+<template name="controlled_entity" posref="BL BL" posparent="parent">
+	<group id="#id" child_resize_h="true" child_resize_w="true" posref="#posref" posparent="#posparent">
+		<ctrl type="button" id="b" button_type="push_button" posref="ML ML"
+		 tx_normal="r2_icon_possess_small.tga" 
+		 tx_pushed="r2_icon_possess_small_pushed.tga" 
+		 tx_over="r2_icon_possess_small_over.tga"				 
+		 tooltip=""		 
+		 tooltip_parent="win"
+		 global_color="false"
+		 global_color_normal="false"
+		 global_color_over="false"
+		 global_color_pushed="false"
+		 onclick_l="lua"
+		 params_l="debugInfo('implement me')"
+		 over_when_pushed = "false"
+		/>			
+		<view type="text_id" id="t" x="2" y="0" posref="MR ML" posparent="b" fontsize="10" textid="#db_entry" />	
+		<!--
+		<view type="text" id="t" x="2" y="0" posref="MR ML" posparent="b" fontsize="10" hardtext="test test test" />	
+		-->
+	</group>
+</template>
+
+<!-- List of entities that are being possessed / talking -->
+<group id="dm_controlled_entities" x="8" y="54" child_resize_w="true" child_resize_wmargin="8" child_resize_h="true" child_resize_hmargin="8" active="false">	
+	<instance template="box_widget" id="box" posref="TL TL" sizeref="wh" w="0" h="0" />	
+	<group id="inside" child_resize_w="true" child_resize_h="true" x="4" y="4">
+		<vector template="controlled_entity" _size="%r2_max_num_dm_controlled_entities" _firstpos="BL BL" _nextpos="TL BL" id="b$i" db_entry="UI:VARIABLES:R2_DM_CONTROLLED:$i:TEXT_ID"/>
+	</group>	
+</group>
+
+<tree node="dm_controlled_entities">
+</tree>
+
+
+
+<!-- menu for the acts list at animation time -->
+<group type="menu" id="r2ed_anim_acts_menu" extends="r2ed_base_menu_look" mouse_pos="false" case_mode="0">
+	<!-- filled by code -->	
+</group>
+
+<!-- menu for the triggers list at animation time -->
+<group type="menu" id="r2ed_anim_triggers_menu" extends="r2ed_base_menu_look" mouse_pos="false" case_mode="0">
+	<!-- filled by code -->	
+</group>
+
+
+<group id="r2ed_current_session" 
+  active="false" x="140" y="-4" posref="TL TL"  
+  child_resize_w="true"
+  child_resize_h="true"
+>	
+	<view type="text" id="current_session" global_color="false" fontsize="20" shadow="true"/>		
+</group>
+
+
+<tree node="r2ed_current_session">
+</tree>
+
+
+
+
+
+<group id="r2ed_uploading_bar" 
+  active="false" y="200" x="0" posref="MM MM"  
+  child_resize_w="true"
+  child_resize_h="true"
+>	
+	<view type="text" id="uploading_bar" global_color="false" hardtext=""  fontsize="20" shadow="true"/>		
+</group>
+
+
+<tree node="r2ed_uploading_bar">
+</tree>
+
+
+<!-- Admin toolbar -->
+<group id="r2ed_toolbar_admin" 
+  active="false" x="-8" y="8" posref="BR BR"
+  child_resize_w="true"
+  child_resize_h="true"
+>
+<!--
+	<instance template="r2ed_tool" id="r2ed_tool_go_test" tooltip="uimR2EDTooltipGoTest" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
+	posref="TL TL" x="0" y="0" 
+	icon="r2ed_go_test.tga" icon_over="r2ed_go_test_over.tga" icon_pushed="r2ed_go_test_pushed.tga"/>-->
+	<instance template="r2ed_tool" id="r2ed_tool_go_edition" tooltip="uimR2EDTooltipGoEdition" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
+	posref="TL TL" x="0" y="0" 
+	icon="r2ed_go_edition.tga" icon_over="r2ed_go_edition_over.tga" icon_pushed="r2ed_go_edition_pushed.tga"/>
+</group>
+
+<tree node="r2ed_toolbar_admin">
+</tree>
+
+
+
+
+
+<!-- ************************************************** -->
+<!-- *                     PALETTE                    * -->
+<!-- ************************************************** -->
+
+
+<style style="tab_button_palette" type="tab_button" button_type="radio_button"
+		x="0" posref="TR TL"		
+		text_x="28"
+		text_posref="ML ML"
+		tx_normal="r2_tab_wide_normal" tx_pushed="r2_tab_wide_pushed" tx_over="r2_tab_wide_over"
+		global_color_normal="true" global_color_over="true" global_color_pushed="true"
+		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+		text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="true"
+		/>
+
+
+<group type="container" id="r2ed_palette" title="uiR2EDPalette" global_color="false" line_at_bottom="false"
+	movable="true" active="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_PALETTE"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="600"
+	w="240"	
+	savable="true"
+	on_active="lua" on_active_params="if (r2 and r2.Mode == 'Edit') then r2.ToolUI:updateToggleWindowButtons() end"
+	on_deactive="lua" on_deactive_params="if (r2 and r2.Mode == 'Edit') then r2.ToolUI:updateToggleWindowButtons() end"
+>
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+
+
+
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >				
+		<group type="tab" id="palette_tabs" child_resize_w="true" h="24" posref="TL TL" x="0" y="-4" >			
+			
+			<ctrl style="tab_button_palette" id="tab0" x="0" posref="TL TL"	group="sbtree_entities"		hardtext="uiR2EDTabEntities" tooltip=""		onclick_r=""	 params_r=""			onclick_l="" params_l=""/>
+			<view type="bitmap" global_color="false" texture="r2_palette_entities.tga" id="tab0_bm" posparent="tab0" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />
+			
+			<ctrl style="tab_button_palette" id="tab2" posparent="tab0"	group="sbtree_objects"		hardtext=""	tooltip=""	onclick_r=""	 params_r=""			onclick_l="" params_l=""/>
+			<view type="bitmap" global_color="false" texture="r2_palette_objets.tga" scale="true" id="tab2_bm" posparent="tab2" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />
+
+			<ctrl style="tab_button_palette" id="tab1" posparent="tab2"		group="feature_tree_panel"	hardtext="uiR2EDTabFeatures" tooltip=""	onclick_r="" params_r=""	onclick_l="" params_l=""/>		
+			<view type="bitmap" global_color="false" texture="r2_palette_components.tga" id="tab1_bm" posparent="tab1" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />
+						
+			<ctrl style="tab_button_palette" id="tab3" posparent="tab1"		group="sbtree_geo"	hardtext="uiR2EDTabGeo"	tooltip="" onclick_r="" params_r=""	onclick_l="" params_l=""/>	
+			<view type="bitmap" global_color="false" texture="r2_palette_zones.tga" id="tab3_bm" posparent="tab3" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />			
+			
+			<ctrl style="tab_button_palette" id="tab4" posparent="tab3"		group="debug_panel"	hardtext="uiR2EDTabDebug" tooltip=""	onclick_r="" params_r=""	onclick_l="" params_l=""/>		
+			<view type="bitmap" global_color="false" texture="ICO_Magic.tga" id="tab4_bm" posparent="tab4" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />			
+		</group>
+		<view type="bitmap" id="sep" posparent="palette_tabs" posref="BL TL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+		
+		<!-- group of entity instances	-->		
+		<group id="sbtree_entities" posref="TL TL" sizeref="wh" x="0" w="-14" y="-32" h="-32" >
+			<group type="table" id="entity_selection" posref="TL TL" sizeref="w" width="100%" y="-4"
+			 cellspacing="0"
+			 cellpadding="0"
+			 continuous_update="true"
+			> 
+				<TR>
+					<TD width="50%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+						<view type="text" id="ecosystem_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDEcosystem" auto_clamp="true"/>
+					</TD>
+					<TD width="50%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+						<view type="text" id="level_text" global_color="true" fontsize="14" shadow="true" hardtext="uiR2EDLevel" auto_clamp="true"/>
+					</TD>
+				</TR>
+				<TR>
+					<TD width="50%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+						<group type="combo_box" id="ecosystem" sizeref="w" w="-4" x="0" y="-2" child_resize_h="true" child_resize_hmargin="10" linked_to_db="false" posref="BL BL"
+						 on_change="lua" on_change_params="r2:setupPaletteAccessibleContent()">
+							<instance template="combo_box_def1" />
+							<!--
+							<combo_text name="uiR2EDEcosystemAll"/>
+							-->
+							<combo_text name="uiR2EDEcosystemDesert"/>
+							<combo_text name="uiR2EDEcosystemForest"/>
+							<combo_text name="uiR2EDEcosystemJungle"/>
+							<combo_text name="uiR2EDEcosystemLacustre"/>
+							<combo_text name="uiR2EDEcosystemPrimeRoots"/>
+							<combo_text name="uiR2EDEcosystemGoo"/>
+						</group>
+					</TD>
+					<TD width="50%" height="0" align="left" valign="middle" ignore_max_width="true" ignore_min_width="true">
+						<group type="combo_box" id="level" sizeref="w" w="-4" x="0" y="-2" child_resize_h="true" child_resize_hmargin="10" linked_to_db="false" posref="BL BL"
+						 on_change="lua" on_change_params="r2:setupPaletteAccessibleContent()">
+							<instance template="combo_box_def1" />
+							<!--
+							<combo_text name="uiR2EDLevelsAll"/>
+							-->
+							<combo_text name="1-50"/>
+							<combo_text name="51-100"/>
+							<combo_text name="101-150"/>
+							<combo_text name="151-200"/>
+							<combo_text name="201-250"/>
+						</group>
+					</TD>
+				</TR>
+			</group>			
+			<group id="entity_enclosing" sizeref="wh" posref="TL TL" y="0" h="0">
+				<group id="tree_list" type="tree" posref="TL TL" x="14" y="0" col_over="255 255 255 48" col_select="255 255 255 80"
+					max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="0">
+				</group>						
+				<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
+			</group>						
+		</group>
+
+		<!-- ********************************************************************** -->
+		<!-- ********************************************************************** -->
+		<group id="feature_tree_panel" posref="TL TL" sizeref="wh" x="0" w="-14" y="-32" h="-32" >
+			<group id="user_component_buttons" active="false" posref="BL BL" x="0" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+				<ctrl style="text_button_16" frozen="false" id="load" posref="TL TL" x="1" y="-3" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2_core.UserComponentManager:loadUserComponentFile()" hardtext="uiR2EDExportLoad"/>
+				<ctrl style="text_button_16" frozen="false" id="unload" posref="TR TL" x="2" y="0" posparent="load" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2_core.UserComponentManager:unloadUserComponent()" hardtext="uiR2EDExportUnload"/>
+
+			</group>			
+			<group id="feature_enclosing" sizeref="wh" w="0" h="-6" x="0" y="-6" posref="TL TL">
+				<group id="tree_list" type="tree" posref="TL TL" x="14" y="0" col_over="255 255 255 48" col_select="255 255 255 80"
+					max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="0">				
+				</group>						
+				<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
+			</group>						
+		</group>
+
+		<!-- ********************************************************************** -->
+		<!-- ********************************************************************** -->
+		<group id="sbtree_objects" posref="TL TL" sizeref="wh" x="0" w="-14" y="-32" h="-32" >			
+			
+
+			<group id="bot_enclosing" sizeref="wh" posref="TL TL" y="0" h="0">
+				<group id="tree_list_objects" type="tree" posref="TL TL" x="14" y="0" col_over="255 255 255 48" col_select="255 255 255 80"
+					max_sizeparent="parent" max_sizeref="wh" max_w="-20" max_h="-22">
+				</group>						
+				<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list_objects" y="22"/>
+			</group>	
+			
+			<ctrl type="button" id="draw_array" button_type="toggle_button" posref="BL BL" x="-1" y="2"				
+				tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
+				onclick_l="r2ed_toggle_draw_array"
+				tooltip="uiR2EDDrawArrayTooltip"
+			/>
+
+			<view type="text" id="draw_array_text" posref="MR ML" x="4" y="-2" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDDrawArray" posparent="draw_array"/>
+
+			 <group id="separator" posref="TL BL" posparent="draw_array" sizeparent="parent" sizeref="w" w="0" h="8" x="0" y="-2" >
+				<view type="bitmap" id="sep_lef" posref="TL TL" texture="Skin_Sep_L.tga" inherit_gc_alpha="false" />
+				<view type="bitmap" id="sep_mid" posref="MM MM" scale="true" sizeref="w" w="-16" h="4" texture="Skin_Sep_M.tga" inherit_gc_alpha="false" />
+				<view type="bitmap" id="sep_rig" posref="TR TR" texture="Skin_Sep_R.tga" inherit_gc_alpha="false" />
+			 </group>
+		</group>
+						
+		<!-- ********************************************************************** -->
+		<!-- ********************************************************************** -->		
+		<group id="sbtree_geo" posref="TL TL" sizeref="wh" x="0" w="0" y="-8" h="0" >
+			<!-- list of geo features	-->						
+			<group id="geo_features" sizeref="wh" w="-16" h="-35" posref="TL TL" y="-24" x="0">						
+				<!--
+				<group id="black" posref="TL TL" y="-24" sizeref="hw" x="12" w="-12" h="-4" inherit_gc_alpha="true"/>
+				-->
+				<!--
+				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>				
+				-->				
+				<group id="tb_enclosing" sizeref="wh" w="-16" h="0" x="16" y="0" posref="TL TL">
+					<instance template="inner_thin_border" inherit_gc_alpha="true"/>				
+				</group>
+				<group id="enclosing" sizeref="wh" w="-10" h="-10" x="5" y="-5" posref="TL TL">
+					<group id="geo_feature_list" 
+					  active="true" x="16" y="0" posref="TL TL"				  
+					  sizeref="w"
+					  child_resize_h="true"
+					  max_sizeref="h"
+					  max_h="0"
+					>				
+						<instance template="named_r2ed_tool" id="r2ed_tool_draw_road" tooltip="uiR2EDtooltipDrawRoad" 
+						 onclick_l="lua" posparent="parent" posref="TL TL" x="0" y="0" icon="r2ed_tool_draw_road.tga" icon_over="r2ed_tool_draw_road_over.tga" icon_pushed="r2ed_tool_draw_road_pushed.tga" text="uiR2EDtooltipDrawRoad"
+						 params_l="r2:createRoad()"
+						/>	
+						<instance template="named_r2ed_tool" id="r2ed_tool_draw_region" tooltip="uiR2EDtooltipDrawRegion" 
+						 onclick_l="lua" posparent="r2ed_tool_draw_road" posref="BL TL" x="0" y="-4" icon="r2ed_tool_draw_region.tga" icon_over="r2ed_tool_draw_region_over.tga" icon_pushed="r2ed_tool_draw_region_pushed.tga" text="uiR2EDtooltipDrawRegion"
+						 params_l="r2:createRegion()"
+						/>	
+						<!--
+						<instance template="named_r2ed_tool" id="r2ed_tool_rotate" tooltip="uimR2EDTooltipSelectRotate" onclick_l="r2ed_select_rotate" posparent="r2ed_tool_select"  posref="BL TL" x="0" y="-8" icon="r2ed_tool_can_rotate.tga" icon_over="r2ed_tool_can_rotate_over.tga" icon_pushed="r2ed_tool_can_rotate_pushed.tga" text="uiR2EDtooltipDrawRoad"/>	
+						<instance template="named_r2ed_tool" id="r2ed_tool_undo" tooltip="uimR2EDTooltipUndo" posparent="r2ed_tool_rotate" posref="BL TL" x="0" y="-8" icon="r2ed_tool_undo.tga" icon_over="r2ed_tool_undo_over.tga" icon_pushed="r2ed_tool_undo_pushed.tga" text="uiR2EDtooltipDrawRoad"/>
+						<instance template="named_r2ed_tool" id="r2ed_tool_redo" tooltip="uimR2EDTooltipRedo" posparent="r2ed_tool_undo" posref="BL TL" x="0" y="-8" icon="r2ed_tool_redo.tga" icon_over="r2ed_tool_redo_over.tga" icon_pushed="r2ed_tool_redo_over.tga" text="uiR2EDtooltipDrawRoad"/>
+						-->
+					</group>
+					<ctrl style="skin_scroll" id="scroll_bar" align="B" target="geo_feature_list" />
+				</group>
+			</group>									
+		</group>		
+
+		<group id="sbtree_features" posref="TL TL" sizeref="wh" x="0" w="-14" y="-8" h="-4" active="false">
+			<!-- list of features	-->						
+			<group id="features" sizeref="wh" w="-16" h="-35" posref="TL TL" y="-24" x="0">						
+				<!--
+				<group id="black" posref="TL TL" y="-24" sizeref="hw" x="12" w="-12" h="-4" inherit_gc_alpha="true"/>
+				-->
+				<!--
+				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>				
+				-->				
+				<group id="tb_enclosing" sizeref="wh" w="-16" h="0" x="16" y="0" posref="TL TL">
+					<instance template="inner_thin_border" inherit_gc_alpha="true"/>				
+				</group>
+				<group id="enclosing" sizeref="wh" w="-10" h="-10" x="5" y="-5" posref="TL TL">
+					<group id="feature_list" 
+					  active="true" x="16" y="0" posref="TL TL"				  
+					  sizeref="w"
+					  child_resize_h="true"
+					  max_sizeref="h"
+					  max_h="0"
+					>		
+						
+						<instance template="named_r2ed_tool" id="r2ed_create_dialog" tooltip="uiR2EDCreateDialog" 
+							onclick_l="lua" posparent="parent" posref="TL TL" x="0" y="0" 
+							icon="r2ed_create_dialog.tga" icon_over="r2ed_create_dialog_over.tga" icon_pushed="r2ed_create_dialog_pushed.tga"
+							text="uiR2EDDialog"
+							params_l="r2.Features['ActivitySequence'].Components.ChatSequence:createProtected()"
+						/>
+						<!--<instance template="named_r2ed_tool" id="r2ed_create_feature_man_hunt" tooltip="uiR2EdTooltipCreateFeatureManHunt" 
+						 onclick_l="lua" posparent="r2ed_create_dialog" posref="BL TL" x="0" y="-4" icon="r2ed_feature_timer.tga" icon_over="r2ed_feature_timer_over.tga" icon_pushed="r2ed_feature_timer_pushed.tga" text="uiR2EdCreateFeatureManHunt"
+						 params_l="r2.Features['ManHuntFeature'].Components.ManHunt:createProtected()"
+						 />
+						 <instance template="named_r2ed_tool" id="r2ed_create_feature_ambush" tooltip="uiR2EdTooltipCreateFeatureAmbush" 
+						 onclick_l="lua" posparent="r2ed_create_feature_man_hunt" posref="BL TL" x="0" y="-4" icon="r2ed_feature_timer.tga" icon_over="r2ed_feature_timer_over.tga" icon_pushed="r2ed_feature_timer_pushed.tga" text="uiR2EdCreateFeatureAmbush"
+						 params_l="r2.Features['Ambush'].Components.Ambush:createProtected()"
+						 />
+						 <instance template="named_r2ed_tool" id="r2ed_create_feature_timed_spawner" tooltip="uiR2EdTooltipCreateFeatureTimedSpawner" 
+						 onclick_l="lua" posparent="r2ed_create_feature_ambush" posref="BL TL" x="0" y="-4" icon="r2ed_feature_timer.tga" icon_over="r2ed_feature_timer_over.tga" icon_pushed="r2ed_feature_timer_pushed.tga" text="uiR2EdCreateFeatureTimedSpawner"
+						 params_l="r2.Features['TimedSpawner'].Components.TimedSpawner:createProtected()"
+						 />-->
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_timer" tooltip="uiR2EdTooltipCreateFeatureTimer" 
+						 onclick_l="lua" posparent="r2ed_create_dialog" posref="BL TL" x="0" y="-4" icon="r2ed_feature_timer.tga" icon_over="r2ed_feature_timer_over.tga" icon_pushed="r2ed_feature_timer_pushed.tga" text="uiR2EdTooltipCreateFeatureTimer"
+						 params_l="r2.Features['TimerFeature'].Components.Timer:createProtected()"
+						 />
+ 						<instance template="named_r2ed_tool" id="r2ed_create_feature_zone_trigger" tooltip="uiR2EdTooltipCreateFeatureZoneTrigger" 
+							onclick_l="lua" posparent="r2ed_create_feature_timer" posref="BL TL" x="0" y="-4" 
+							icon="r2ed_tool_draw_region.tga" icon_over="r2ed_tool_draw_region_over.tga" icon_pushed="r2ed_tool_draw_region_pushed.tga"
+							text="uiR2EdZoneTrigger"
+							params_l="r2.Features['ZoneTrigger'].Components.ZoneTrigger:createProtected()"
+						 />
+						 <instance template="named_r2ed_tool" id="r2ed_create_user_trigger" tooltip="uiR2EdUserTrigger" 
+							onclick_l="lua" posparent="r2ed_create_feature_zone_trigger" posref="BL TL" x="0" y="-4" 
+							icon="r2ed_create_dialog.tga" icon_over="r2ed_create_dialog_over.tga" icon_pushed="r2ed_create_dialog_pushed.tga"
+							text="uiR2EdUserTrigger"
+							params_l="r2.Features.UserTriggerFeature.Components.UserTrigger:createProtected()"
+						/>
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_request_item" tooltip="uiR2EDtooltipCreateRequestItem" 
+						 onclick_l="lua" posparent="r2ed_create_user_trigger" posref="BL TL" x="0" y="-4" icon="r2ed_feature_fauna.tga" icon_over="r2ed_feature_fauna_over.tga" icon_pushed="r2ed_feature_fauna_pushed.tga" text="uiR2EdRequestItem"
+						 params_l="r2.Features['RequestItemFeature'].Components.RequestItem.create()"
+						 />
+ 						<instance template="named_r2ed_tool" id="r2ed_create_feature_give_item" tooltip="uiR2EDtooltipCreateGiveItem" 
+						 onclick_l="lua" posparent="r2ed_create_feature_request_item" posref="BL TL" x="0" y="-4" icon="r2ed_feature_fauna.tga" icon_over="r2ed_feature_fauna_over.tga" icon_pushed="r2ed_feature_fauna_pushed.tga" text="uiR2EdGiveItem"
+						 params_l="r2.Features['GiveItemFeature'].Components.GiveItem.create()"
+						 />
+ 						<instance template="named_r2ed_tool" id="r2ed_create_feature_talk_to" tooltip="uiR2EDtooltipCreateTalkTo" 
+						 onclick_l="lua" posparent="r2ed_create_feature_give_item" posref="BL TL" x="0" y="-4" icon="r2ed_feature_fauna.tga" icon_over="r2ed_feature_fauna_over.tga" icon_pushed="r2ed_feature_fauna_pushed.tga" text="uiR2EdTalkTo"
+						 params_l="r2.Features['TalkToFeature'].Components.TalkTo.create()"
+						/>	
+						<instance template="named_r2ed_tool" id="r2ed_create_easter" tooltip="uiR2EdEasterEgg" 
+							onclick_l="lua" posparent="r2ed_create_feature_talk_to" posref="BL TL" x="0" y="-4" 
+							icon="r2ed_create_dialog.tga" icon_over="r2ed_create_dialog_over.tga" icon_pushed="r2ed_create_dialog_pushed.tga"
+							text="uiR2EdEasterEgg"
+							params_l="r2.Features.EasterEggFeature.Components.EasterEgg:createProtected()"
+						 />
+						 <instance template="named_r2ed_tool" id="r2ed_create_feature_boss_spawner" tooltip="uiR2EDtooltipCreateFeatureBossSpawner" 
+						 onclick_l="lua" posparent="r2ed_create_easter" posref="BL TL" x="0" y="-4" icon="r2ed_feature_fauna.tga" icon_over="r2ed_feature_fauna_over.tga" icon_pushed="r2ed_feature_fauna_pushed.tga" text="uiR2EDtooltipCreateFeatureBossSpawner"
+						 params_l="r2.Features['BossSpawnerFeature'].Components.BossSpawner:createProtected()"
+						/>
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_loot_spawner" tooltip="uiR2EdTooltipCreateFeatureLootSpawner" 
+						 onclick_l="lua" posparent="r2ed_create_feature_boss_spawner" posref="BL TL" x="0" y="-4" icon="r2ed_feature_loot_spawner.tga" icon_over="r2ed_feature_loot_spawner_over.tga" icon_pushed="r2ed_feature_loot_spawner_pushed.tga" text="uiR2EdTooltipCreateFeatureLootSpawner"
+						 params_l="r2.Features['LootSpawnerFeature'].Components.LootSpawner:createProtected()"
+						 />
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_bandit_camp" tooltip="uiR2EDtooltipCreateFeatureBanditCamp" 
+						 onclick_l="lua" posparent="r2ed_create_feature_loot_spawner" posref="BL TL" x="0" y="-4" icon="r2ed_feature_bandit_camp.tga" icon_over="r2ed_feature_bandit_camp_over.tga" icon_pushed="r2ed_feature_bandit_camp_pushed.tga" text="uiR2EDtooltipCreateFeatureBanditCamp"
+						 params_l="r2.Features['BanditCampFeature'].Components.BanditCamp:createProtected()"
+						 />
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_fauna" tooltip="uiR2EDtooltipCreateFeatureFauna" 
+						 onclick_l="lua" posparent="r2ed_create_feature_bandit_camp" posref="BL TL" x="0" y="-4" icon="r2ed_feature_fauna.tga" icon_over="r2ed_feature_fauna_over.tga" icon_pushed="r2ed_feature_fauna_pushed.tga" text="uiR2EDtooltipCreateFeatureFauna"
+						 params_l="r2.Features['FaunaFeature'].Components.Fauna:createProtected()"
+						/>
+						<!--
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_time_trigger" tooltip="uiR2EdTooltipCreateFeatureTimeTrigger" 
+									 onclick_l="lua" posparent="r2ed_create_feature_timer" posref="BL TL" x="0" y="-4" icon="r2ed_feature_bandit_camp.tga" icon_over="r2ed_feature_bandit_camp_over.tga" icon_pushed="r2ed_feature_bandit_camp_pushed.tga" text="uiR2EdTooltipCreateFeatureTimeTrigger"
+									 params_l="r2.Features['TimeTriggerFeature'].create()"
+									 />
+									 -->
+									 
+
+
+
+ 						<!--<instance template="named_r2ed_tool" id="r2ed_create_feature_time_trigger" tooltip="uiR2EdTooltipCreateFeatureTimeTrigger" 
+						 onclick_l="lua" posparent="r2ed_create_feature_timer" posref="BL TL" x="0" y="-4" icon="r2ed_feature_bandit_camp.tga" icon_over="r2ed_feature_bandit_camp_over.tga" icon_pushed="r2ed_feature_bandit_camp_pushed.tga" text="uiR2EdTooltipCreateFeatureTimeTrigger"
+						 params_l="r2.Features['TimeTriggerFeature'].create()"
+						 />
+						<instance template="named_r2ed_tool" id="r2ed_create_feature_kitins_lair" tooltip="uiR2EDtooltipCreateFeatureKitinsLair" 
+						 onclick_l="lua" posparent="r2ed_create_feature_fauna" posref="BL TL" x="0" y="-4" icon="r2ed_feature_kitins_lair.tga" icon_over="r2ed_feature_kitins_lair_over.tga" icon_pushed="r2ed_feature_kitins_lair_pushed.tga" text="uiR2EDtooltipCreateFeatureKitinsLair"
+						 params_l="debugInfo('kitins lair')"
+						 /> -->
+				 
+						
+					</group>
+					<ctrl style="skin_scroll" id="scroll_bar" align="B" target="feature_list" />
+				</group>
+			</group>
+		</group>
+		
+		<group id="debug_panel" posref="TL TL" sizeref="wh" x="0" w="-14" y="-32" h="-32" active="false">
+			<group id="button_enclosing" 
+			 active="true" x="16" y="0" posref="TL TL"				  
+		     sizeref="w"
+			 child_resize_h="true"
+			 max_sizeref="h"
+			 max_h="0"
+			>
+				<instance template="label_toggle_button" id="nevrax_scenario" posparent="parent" 
+					x="3" y="-5" posref="TL TL" w="200" hardtext="uiR2EDNevraxScenario" fontsize="12" y_text="-5" params_l="r2.ScenarioWindow:nevraxScenario()"  tooltip="uiR2EDNevraxScenarioTooltip"/>	
+				<instance template="label_toggle_button" id="trial_allowed_scenario" posparent="nevrax_scenario" 
+					posref="BL TL" y="-4"  w="200" hardtext="uiR2EDTrialAllowedScenario" fontsize="12" y_text="-5" params_l="r2.ScenarioWindow:trialAllowed()"  tooltip="uiR2EDTrialAllowedScenarioTooltip" />	
+
+				<group id="mission_tag" x="0" y="-5" w="200" sizeref="w" h="20" posref="BL TL" posparent="trial_allowed_scenario"  tooltip="uiR2EDScenarioMissionTagTooltip">
+
+					<group id="mission_tag_label" h="20" w="120" x="0"  y="0" posref="TL TL" posparent="parent" >	
+						<view type="text" id="type_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioMissionTag" />
+					</group>
+					<instance template="edit_box_widget" id="mission_tag_eb" posref="MR ML" x="0" posparent="mission_tag_label" w="200"
+					 onenter="lua" 
+					 negative_filter = '"{}[]'
+					 fontsize="12"
+					 params="r2.ScenarioWindow:onScenarioMissionTagChanged()"
+					 on_focus_lost="lua"
+					 on_focus_lost_params="r2.ScenarioWindow:onScenarioMissionTagChanged()"
+					 reset_focus_on_hide="true"
+					 max_num_chars="32"
+					/>					
+				</group>
+
+
+				<ctrl style="text_button_16" id="reset_ed" posparent="mission_tag" posref="BL TL" y="-4"  wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="if r2 and r2.acts then r2.acts.deleteOldScenario=true end runCommand('resetEditor')" hardtext="reset editor"/>
+				<ctrl style="text_button_16" id="reset_ed_and_reload_ui" posparent="reset_ed" posref="BL TL" y="-4" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="if r2 and r2.acts then r2.acts.deleteOldScenario=true end runCommand('resetEditorAndReloadUI')" hardtext="reset editor and reload ui"/>
+				<ctrl style="text_button_16" id="reload_core" posparent="reset_ed_and_reload_ui" posref="BL TL" y="-4" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.doFile('r2_core.lua')" hardtext="reload r2_core.lua"/>
+				<ctrl style="text_button_16" id="reset_display" posparent="reload_core" posref="BL TL" y="-4" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.resetDisplayInfo()" hardtext="reset display infos"/>					
+				<ctrl style="text_button_16" id="inspect_r2" posparent="reset_display" posref="BL TL" y="-4" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="inspect(r2)" hardtext="inspect r2"/>													
+			</group>				
+			<ctrl style="skin_scroll" id="scroll_bar" align="B" target="button_enclosing" />
+		</group>
+
+	</group>
+</group>
+
+
+
+
+
+
+
+<!-- ************************************************ -->
+<!-- *                 CONNECTION MSGS              * -->
+<!-- ************************************************ -->
+<group type="container" id="r2ed_connect" w="300" title="uiR2EDConnexion" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_CONNECT"	
+	pop_min_w="300" pop_min_h="150" pop_max_w="300" pop_max_h="150"		
+	header_active="false"
+>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<view type="text" id="connexionMsg" posref="MM MM" global_color="true" fontsize="20" shadow="true"/>
+	</group>
+</group>
+
+<!-- ************************************************ -->
+<!-- *          PROPERTY WINDOW WHEN UNSELECTED     * -->
+<!-- ************************************************ -->
+<group type="container" id="r2ed_property_sheet_no_selection" w="150" title="uiR2EDProperties" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_PROP_WINDOW"	
+	pop_min_w="150" pop_min_h="32" pop_max_w="800" pop_max_h="600"		
+	active = "false"
+	on_alpha_settings_changed="lua"
+	on_alpha_settings_changed_params="if r2 and r2.onPropertySheetAlphaSettingsChanged then r2:onPropertySheetAlphaSettingsChanged() end"
+	on_active="lua"
+	on_active_params="if r2 then r2:restoreContAlphaSettings('R2_PROP_SHEET') end"
+	on_deactive="lua" on_deactive_params="if r2 and r2.Mode == 'Edit' then r2.PropertyWindowVisible = false end"
+	escapable="true"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<view type="text" id="t" posref="MM MM" global_color="true" fontsize="16" shadow="true" hardtext="uiR2DNoSelectedInstance"/>
+	</group>
+</group>
+
+<!-- ************************************************************************** -->
+<!-- *         'NO PROPERTIES' WINDOW WHEN OBJECT HAS NO EDITABLE PORPERTIES  * -->
+<!-- ************************************************************************** -->
+<group type="container" id="r2ed_property_sheet_no_properties" w="150" title="uiR2EDProperties" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_PROP_WINDOW"	
+	pop_min_w="150" pop_min_h="32" pop_max_w="800" pop_max_h="600"		
+	active = "false"
+	on_alpha_settings_changed="lua"
+	on_alpha_settings_changed_params="if r2 and r2.onPropertySheetAlphaSettingsChanged then r2:onPropertySheetAlphaSettingsChanged() end"	
+	on_active="lua"
+	on_active_params="if r2 then r2:restoreContAlphaSettings('R2_PROP_SHEET') end"
+	on_deactive="lua" on_deactive_params="if r2 and r2.Mode == 'Edit' then r2.PropertyWindowVisible = false end"
+	escapable="true"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<view type="text" id="t" posref="MM MM" global_color="true" fontsize="16" shadow="true" hardtext="uiR2DNoProperties"/>
+	</group>
+</group>
+
+
+<!-- ********************************** -->
+<!-- *  TMP : table test              * -->
+<!-- ********************************** -->
+<group type="container" id="r2ed_table_test" w="150" title="uiR2EDTableTest" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:OPT"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="600"	
+	active="false"
+>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<group id="enclosing" sizeref="wh" w="-16" h="0" posref="TL TL">
+			<group type="table" id="my_table" posref="TL TL" sizeref="w" width="100%" border="2" bgcolor="0 255 0 255" y="-4"
+			 cellspacing="1"
+			 cellpadding="0"
+			 continuous_update="true"
+			> 
+				<!-- test 1 -->							
+				<TR>
+					<TD width="30%" bgcolor="0 0 0 127" height="30" align="center" valign="middle">
+						<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 1 cell 1 cell 1 cell 1"
+						 multi_line="true"
+						/>					
+					</TD>
+					<TD bgcolor="255 0 0 127" height="30" align="center" valign="middle">
+						<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 2"/>
+					</TD>
+				</TR>
+				<TR>
+					<TD width="30%" bgcolor="0 0 0 192" height="30" align="center" valign="middle">
+						<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 3"/>
+					</TD>
+					<TD bgcolor="0 0 255 192" height="30" align="center" valign="middle">
+						<view type="text" id="mon_text" global_color="true" fontsize="20" shadow="true" hardtext="cell 4"/>
+					</TD>
+				</TR>			
+				<!--			
+				<TR>				
+					<TD width="100%" bgcolor="255 0 0 127" height="30">
+						<view type="text" posref="TL TL" global_color="true" fontsize="20" shadow="true" hardtext="cell 2"/>
+					</TD>
+				</TR>			
+				-->
+			</group>		
+		</group>
+	</group>
+</group>
+
+<tree node="r2ed_table_test">
+</tree>
+
+<!-- ********************************** -->
+<!-- *  TMP : edit box test           * -->
+<!-- ********************************** -->
+<group type="container" id="r2ed_editbox_test" w="150" title="uiR2EDTableTest" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:OPT"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="600"	
+	active="false"
+>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<group id="enclosing" sizeref="wh" w="-16" h="0" posref="TL TL">
+			<instance template="edit_box_widget" text_y="-1" posref="TL TL" sizeref="w" w="-8" fontsize="14" x="0" reset_focus_on_hide="true"
+			 negative_filter = '"{}[]'
+			 child_resize_hmargin="4"
+			 max_historic="0"
+			 y="-2"
+			 onchange="" 
+			 onchange_params="" 
+			 prompt="" enter_loose_focus="true" 
+			 color="255 255 255 255"
+			 onenter="proc" 
+			 params=""
+			 id = "eb"
+			 text_ref = "TL TL"
+			 entry_type = "text"
+			 multi_line = "true"
+			 max_num_chars = "1024"
+			/>
+		</group>
+	</group>
+</group>
+
+<tree node="r2ed_editbox_test">
+</tree>
+
+<!-- ********************************** -->
+<!-- *  TMP : inspect window          * -->
+<!-- ********************************** -->
+
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+<group type="container" id="lua_inspector" title="uiLuaInspector" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_LUA_INSPECTOR"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="2000"
+	active="false"
+	w="300"
+	h="300"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
+		<group id="inspector_options" sizeref="w" child_resize_h="true" posref="TL TL" x="0" y="-6">			
+			<ctrl style="text_button_16" id="refresh" posref="ML ML" x="0" y="0" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="refreshLuaInspector()" hardtext="uiR2EDRefresh"/>			
+			<ctrl type="button" id="auto_refresh_button" button_type="toggle_button" posparent="refresh" posref="MR ML" x="4" y="0"
+					tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+					color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
+					onclick_l=""
+					params_l=""
+					/>	
+			<view type="text" id="auto_refresh_text" posparent="auto_refresh_button" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDAutoRefresh"/>		
+		</group>
+		<group id="sbtree" posref="TL TL" sizeref="wh" x="0" w="-14" y="-30" h="-20" >
+			<!-- group of entity instances	-->			
+			<group id="tree_list" type="tree" posref="TL TL" x="14" y="0" col_over="255 255 255 48" col_select="255 255 255 80"
+				max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="0">
+
+			</group>						
+			<ctrl style='skin_scroll' id='scroll_bar' align='T' target='tree_list' />							
+		</group>		
+	</group>
+</group>
+
+<tree node="lua_inspector">
+</tree>
+
+
+
+<!-- ************************************************ -->
+<!-- *                     MENUS                    * -->
+<!-- ************************************************ -->
+
+<!-- entity menus -->
+
+<!--
+on_active="" on_active_params=""
+	options="context_menu_back"	
+	text_y="-2"
+	color="255 255 255 255"
+	fontsize="12"
+	shadow="false"
+	shadow_color="0 0 0 0"
+	shadow_color_over="0 0 0 0"
+	color_over="0 0 0 255"
+	color_grayed="255 255 255 128"
+	shadow_color_grayed="0 0 0 0"
+	highlight_over="255 255 255 128"	
+-->
+
+<!--
+text_y="-2"
+ color="255 255 255 255"
+ fontsize="20"
+ shadow="false"
+ shadow_color="0 0 0 0"
+ shadow_color_over="0 0 0 0"
+ color_over="0 0 0 255"
+ color_grayed="255 255 255 128"
+ shadow_color_grayed="0 0 0 0"
+ highlight_over="255 255 255 128"		
+ -->
+
+<!-- icon inside a menu -->
+<template name="r2_menu_button" id="but" bitmap="brick_default.tga" keep="true" size="24">
+	<group id="#id" posref="TL TL" child_resize_h="true" child_resize_w="true">
+		<view type="bitmap" id="bm" scale="true" w="#size" h="#size" texture="#bitmap" global_color="false"/>
+	</group>
+</template>
+
+
+<!-- name of key for a menu entry -->
+<template name="r2_keyname"  keep="true" id="" hardtext="">
+	<group id="#id" posref="TL TL" child_resize_h="true" child_resize_w="true">
+		<view type="text" id="t" posref="TL TL" global_color="false" fontsize="12" shadow="true" hardtext="#hardtext"/>
+	</group>
+</template>
+
+
+
+
+
+<group type="menu" id="r2ed_main_menu" extends="r2ed_base_menu_look" mouse_pos="false">
+	<action id="debug_console"		name="uiR2EDDebugConsoleWindow"	handler="lua"   params="r2:switchDebugWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=ICO_Magic.tga" usergroup_r="r2_keyname" usergroup_params_r="id=debug_console_key"/>	
+	<action id="cust_bbox"	name="uiR2EDCustomBBox"	handler="lua"   params="r2:switchCustomBBoxWindow()" usergroup_r="r2_keyname" usergroup_params_r="cust_bbox_key" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=ICO_Magic.tga" />
+	<action id="go_test"		name="uimR2EDTooltipGoTest"		handler="lua" params="r2:tryGoTest()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_go_test_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=go_test_key"/>
+	<separator/>
+	<action id="new_scenario"		name="uiR2EDNewScenario"	handler="lua"   params="r2.acts:openScenarioActEditor(true)" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_new_scenario_small.tga"/>
+	<action id="load_scenario"		name="uiR2EDLoadScenario"	handler="lua"   params="UnitTest.testLoadScenarioUi()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_load_small.tga"/>
+	<action id="save_scenario"		name="uiR2EDSaveScenario"	handler="lua"   params="UnitTest.testSaveScenarioUi()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_save_small.tga"/>		
+	<separator/>
+<!--
+	<action id="import_user_component"		name="uiR2EDImportUserComponent"	handler="lua"   params="r2.UserComponentsManager:importUserComponentUi()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_load_small.tga"/>	
+	<action id="create_user_component"		name="uiR2EDCreateUserComponent"	handler="lua"   params="r2.UserComponentsManager:createUserComponentUi()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_save_small.tga"/>		
+	<separator/>
+-->
+	<action id="map"			name="uiR2EDMap"				handler="lua"   params="r2:switchMapWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_map_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=map_key"/>			
+	<action id="palette"		name="uiR2EDPaletteWindow"		handler="lua"   params="r2:switchPaletteWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_palette_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=palette_key"/>
+	<action id="scenario"		name="uiR2EDScenarioWindow"		handler="lua"   params="r2:switchScenarioWindow()"  usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_scenario_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=scenario_key"/>
+	<action id="properties"		name="uiR2EDPropertiesWindow"	handler="lua"   params="r2:switchPropertiesWindow()"  usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_properties_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=properties_key"/>	
+	<separator/>
+	<action id="chat_window"		name="uiR2EDChatWindow"		handler="lua"   params="r2:switchChatWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_chat_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=chat_window_key"/>
+	<action id="mail_box"			name="uiR2EDMailBox"		handler="lua"   params="r2:switchMailBoxWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_mail_box_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=mail_box_key"/>
+	<action id="guild_forum"		name="uiR2EDGuildForum"		cond="ne(@SERVER:GUILD:NAME,0)" handler="lua"   params="r2:switchGuildForumWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_Forum_ring.tga" usergroup_r="r2_keyname" usergroup_params_r="id=guild_forum_key"/>
+	<separator/>
+	<action id="toggle_fixed_lighting" name="uiR2EDTurnLightOn" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
+	<separator/>
+	<action id="reset windows"		name="uiR2EDResetWindows"	handler="lua"   params="r2:resetDesktop(getDesktopIndex())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_resetwindows.tga"/>
+	<action id="keys"		name="uiR2EDKeys"	 handler="show_hide"   params="keys" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_keys_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=keys_key"/>
+	<action id="preferences"		name="uiR2EDPreferences"	handler="show_hide"   params="game_config" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_preferences.tga" usergroup_r="r2_keyname" usergroup_params_r="id=preferences_key"/>
+	<action id="support"			name="uiR2EDSupport"			handler="show_hide"   params="cs_browser" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_support.tga"/>	
+	<separator/>
+	<!--
+	<action id="show_hide_prims"	name="uiR2EDShowHidePrims"	handler="lua"   params="r2.Config.PrimDisplayEnabled = not r2.Config.PrimDisplayEnabled" usergroup_r="r2_keyname" usergroup_params_r="id=show_hide_prims_key"/>
+	-->
+	<action id="quit"		name="uimR2EDQuit"		handler="enter_modal" params="group=ui:interface:quit_dialog" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_quit.tga" usergroup_r="r2_keyname" usergroup_params_r="id=quit_key"/>
+</group>
+
+<group type="menu" id="r2ed_main_menu_animation" extends="r2ed_base_menu_look" mouse_pos="false">	
+	
+	<action id="debug_console"		name="uiR2EDDebugConsoleWindow"	handler="lua"   params="r2:switchDebugWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=ICO_Magic.tga" usergroup_r="r2_keyname" usergroup_params_r="id=debug_console_key"/>
+	<action id="live"				name="uiR2EDLive"	handler="open_scenario_control"   params="showHide=1" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_r2_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=r2_live_key"/>	
+	<separator/>
+	
+	<action id="stop_test"		name="uimR2EDStopTest"		handler="r2ed_stop_test" params="" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_stop_test_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=stop_test_key"/>
+	<action id="stop_live"			name="uiR2EDStopLive"	handler="r2_stop_live"   params="" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_stop_live_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=r2_stop_live_key"/>
+	<separator/>
+
+	<action id="map"			name="uiR2EDMap"				handler="lua"   params="r2:switchMapWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_map_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=map_key"/>			
+	<separator/>
+		
+	<action id="chat_window"		name="uiR2EDChatWindow"	handler="lua"   params="r2:switchChatWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_chat_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=chat_window_key"/>	
+	<action id="mail_box"				name="uiR2EDMailBox"		handler="lua"   params="r2:switchMailBoxWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_mail_box_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=mail_box_key"/>
+
+	<action id="guild_forum"		name="uiR2EDGuildForum"		cond="ne(@SERVER:GUILD:NAME,0)" handler="lua"   params="r2:switchGuildForumWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_Forum_ring.tga" usergroup_r="r2_keyname" usergroup_params_r="id=guild_forum_key"/>
+	
+	<action id="player_admin"		name="uiR2EDPlayerAdmin"	handler="lua"   params="r2:switchPlayerAdminWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_player_admin_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=r2_player_admin_key"/>
+	
+	<separator/>
+
+	<action id="toggle_fixed_lighting" name="uiR2EDDivineLight" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
+	<separator/>
+
+	<action id="reset windows"		name="uiR2EDResetWindows"	handler="lua"   params="r2:resetDesktop(getDesktopIndex())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_resetwindows.tga"/>
+	<action id="keys"		name="uiR2EDKeys"	 handler="show_hide"   params="keys" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_keys_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=keys_key"/>
+	<action id="preferences"		name="uiR2EDPreferences"	handler="show_hide"   params="game_config" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_preferences.tga" usergroup_r="r2_keyname" usergroup_params_r="id=preferences_key"/>
+	<action id="support"			name="uiR2EDSupport"			handler="show_hide"   params="cs_browser" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_support.tga"/>
+	<separator/>
+
+	<action id="quit"		name="uimR2EDQuit"		handler="enter_modal"   params="group=ui:interface:quit_dialog" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_quit.tga" usergroup_r="r2_keyname" usergroup_params_r="id=quit_key"/>
+</group>
+
+
+<group type="menu" id="r2ed_base_menu" extends="r2ed_base_menu_look">
+	<action id="cut"		name="uimR2EDCut"		handler="lua"   params="r2:cut(r2:getSelectedInstance())" />
+	<action id="paste"		name="uimR2EDPaste"		handler="lua"   params="r2:paste()" />
+	<separator id="dynamic_content_start"/>
+	<!-- Dynamic content is inserted here by lua code -->
+	<!-- When 'onSetupMenu' is called -->		
+	<separator id="dynamic_content_end"/>
+	<!--
+	<action id="selectParent1"		name=""		handler="lua"   params="r2:selectParent(1)" />
+	<action id="selectParent2"		name=""		handler="lua"   params="r2:selectParent(2)" />
+	<action id="selectParent3"		name=""		handler="lua"   params="r2:selectParent(3)" />
+	<action id="selectParent4"		name=""		handler="lua"   params="r2:selectParent(4)" />
+	<action id="selectParent5"		name=""		handler="lua"   params="r2:selectParent(5)" />
+	<action id="selectParent6"		name=""		handler="lua"   params="r2:selectParent(6)" />
+	<action id="selectParent7"		name=""		handler="lua"   params="r2:selectParent(7)" />
+	<action id="selectParent8"		name=""		handler="lua"   params="r2:selectParent(8)" />		
+	-->
+	<!-- TMP for debug -->
+	<separator id="sepParent"/>
+	<action id="dump_lua_table"		name="uimR2EDMenuDumpLuaTable"		handler="r2ed_dump_lua_table"   params="depth=30" />	
+	<action id="dump_dialogs_as_text"	name="uimR2EDMenuSaveDialogsAsText"	handler="lua"   params="r2:dumpDialogsAsText()" />	
+	<action id="update_dialogs_from_text"	name="uimR2EDMenuUpdateDialogsFromText"	handler="lua"   params="r2:updateDialogsFromText()" />	
+	<action id="inspect_lua_table"	name="uimR2EDMenuInspectLuaTable"	handler="lua"   params="r2:inspectCurrInstance()" />	
+	<action id="translateFeatures"		name="translate features"	handler="lua"   params="r2.requestTranslateFeatures()" />
+	<separator/>
+	<!--
+	<action id="properties"		name="uimR2EDMenuProperties"	handler="lua"   params="r2:showProperties(r2:getSelectedInstance())" />
+	-->
+</group>
+
+<group type="menu" id="r2ed_palette_menu" extends="r2ed_base_menu">
+	<!-- TMP for debug -->		
+	<action id="dump_lua_table"		name="uimR2EDDumpLuaTable"		handler="lua"  params="r2:onShowPaletteLuaTable(30)" />
+</group>
+
+
+<group type="menu" id="r2ed_entity_menu" extends="r2ed_base_menu">	
+	<!-- perhaps the following option would fit better in a base menu -->	
+	<action id="move"				name="uimR2EDMenuMove"			handler="r2ed_move"				params="" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2ed_icon_move.tga"/>
+	<action id="rotate"				name="uimR2EDMenuRotate"		handler="r2ed_rotate"			params="" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2ed_icon_rotate.tga"/>
+	<action id="teleport"				name="uimR2EDMenuTeleport" handler="lua"  params="r2:teleportToTarget()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2ed_tool_teleport.tga"/>
+
+	<separator/>
+	<action id="activities"	name="uimR2EDNewActivity" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2ed_icon_newactivity.tga">
+		<!--<action id="currentBehavior" name=""/>
+		<separator/>
+		<action id="pickZone" name="uimR2EDMenuPickZone" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_wander_zone_small.tga" handler="r2ed_picker_lua"		params="TestFunc=r2:testCanPickZoneForNPC|PickFunc=r2:affectZoneToNPC"/>
+
+		<action id="followRoute" name="uimR2EDMenuFollowRoute" handler="r2ed_picker_lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_follow_road_small.tga" params="TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorFollowRouteToNPC"/>
+		<action id="patrolRoute" name="uimR2EDMenuPatrolRoute" handler="r2ed_picker_lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_patrol_road_small.tga" params="TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorPatrolRouteToNPC"/>
+		<action id="turnAround" name="uimR2EDMenuRepeatRoute" handler="r2ed_picker_lua"	usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_repeat_road_small.tga"	params="TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorRepeatRoadToNPC"/>
+		<action id="standInPlace" name="uimR2EDMenuStandInPlace" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_stand_still_small.tga" params="r2:setNPCStandInPlace(r2:getSelectedInstance())"/>
+		-->
+		<!--
+		<action id="pickZone" name="uimR2EDMenuPickZone" handler="r2ed_picker_lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_wander_zone_small.tga" params="CursCanPickPos=curs_create.tga|CursCannotPickPos=curs_stop.tga|TestFunc=r2:testCanPickZoneForNPC|PickFunc=r2:affectZoneToSelectedNPC|PickPosFunc=r2:createZoneAndAffectZoneToNPC"/>
+		<action id="followRoute" name="uimR2EDMenuFollowRoute" handler="r2ed_picker_lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_follow_road_small.tga" params="CursCanPickPos=curs_create.tga|CursCannotPickPos=curs_stop.tga|TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorFollowRouteToNPC|PickPosFunc=r2:createRouteAndSetBehaviorFollowRouteToNPC"/>
+		<action id="patrolRoute" name="uimR2EDMenuPatrolRoute" handler="r2ed_picker_lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_patrol_road_small.tga" params="CursCanPickPos=curs_create.tga|CursCannotPickPos=curs_stop.tga|TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorPatrolRouteToNPC|PickPosFunc=r2:createRouteAndSetBehaviorPatrolRouteToNPC"/>
+		<action id="turnAround" name="uimR2EDMenuRepeatRoute" handler="r2ed_picker_lua"	usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_repeat_road_small.tga"	params="CursCanPickPos=curs_create.tga|CursCannotPickPos=curs_stop.tga|TestFunc=r2:testCanPickRoadForNPC|PickFunc=r2:setBehaviorRepeatRoadToNPC|PickPosFunc=r2:createRoadAndSetBehaviorRepeatRoadToNPC"/>
+		<action id="standInPlace" name="uimR2EDMenuStandInPlace" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_stand_still_small.tga" params="r2:setNPCStandInPlace(r2:getSelectedInstance())"/>
+		-->
+		<!--
+		<action id="pickZone" name="uimR2EDMenuPickZone" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_wander_zone_small.tga" params="r2:getSelectedInstance():onPickWanderZone()"/>
+		<action id="followRoute" name="uimR2EDMenuFollowRoute" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_follow_road_small.tga" params="r2:getSelectedInstance():onPickFollowRoute()"/>
+		<action id="patrolRoute" name="uimR2EDMenuPatrolRoute" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_patrol_road_small.tga" params="r2:getSelectedInstance():onPickPatrolRoute()"/>
+		<action id="turnAround" name="uimR2EDMenuRepeatRoute" handler="lua"	usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_repeat_road_small.tga"	params="r2:getSelectedInstance():onPickRepeatRoute()"/>
+		<action id="standInPlace" name="uimR2EDMenuStandInPlace" handler="lua" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_toolbar_stand_still_small.tga" params="r2:getSelectedInstance():onStandStill()"/>
+		-->
+		
+	</action>	
+</group>
+
+<group type="menu" id="r2ed_npc_group_menu" extends="r2ed_base_menu">		
+	<!--
+	<action id="delete"				name="uimR2EDMenuDelete"		handler="lua"			params="r2:getSelectedInstance():onDelete()" />
+	<separator/>	
+	-->
+</group>
+
+<group type="menu" id="r2ed_feature_menu" extends="r2ed_base_menu">	
+	<!--
+	<action id="delete"				name="uimR2EDMenuDelete"		handler="lua"			params="r2:getSelectedInstance():onDelete()" />
+	<separator/>
+	-->
+</group>
+
+<group type="menu" id="r2ed_road_menu" extends="r2ed_base_menu">	
+	<!--
+	<action id="delete"				name="uimR2EDMenuDelete"		handler="lua"			params="r2:getSelectedInstance():onDelete()" />
+	<separator/>
+	-->
+</group>
+
+
+
+
+<tree node="r2ed_palette">
+</tree>
+
+
+
+<tree node="r2ed_connect">
+</tree>
+
+<tree node="r2ed_property_sheet_no_selection">
+</tree>
+
+<tree node="r2ed_property_sheet_no_properties">
+</tree>
+
+
+<!-- ************************************************ -->
+<!-- *                     RESET                    * -->
+<!-- ************************************************ -->
+
+<!--
+<proc id="proc_reset_r2ed">	
+	<action handler="set_virtual_desktop" params="vdesk=0" />
+
+	<action handler="set" params="target='ui:interface:r2ed_toolbar:active'|value=1" />
+	<action handler="set" params="target='ui:interface:r2ed_windowbar:active'|value=1" />
+	
+	<action handler="set" params="target='ui:interface:system_info:active'|value=0" />	
+	<action handler="set" params="target='ui:interface:target:active'|value=0" />
+
+	<action handler="set" params="target='ui:interface:main_chat:active'|value=0" />	
+	<action handler="set" params="target='ui:interface:main_chat:x'|value=0" />	
+	<action handler="set" params="target='ui:interface:main_chat:y'|value=0" />
+
+	<action handler="set" params="target='ui:interface:r2ed_connect:active'|value=0" />	
+	<action handler="set" params="target='ui:interface:help_browser:active'|value=0" />	
+	<action handler="set" params="target='ui:interface:milko_pad:active'|value=0" />	
+		
+	<action handler="set" params="target='ui:interface:debug_info:active'|value=0"/>
+	<action handler="set" params="target='ui:interface:debug_info:w'|value=350" />
+	<action handler="set" params="target='ui:interface:debug_info:h'|value=300" />
+	<action handler="set" params="target='ui:interface:debug_info:x'|value=10000" />
+	<action handler="set" params="target='ui:interface:debug_info:y'|value=370" />	
+
+</proc>
+-->
+
+
+<!-- ************************************************** -->
+<!-- *                  NPC CREATION                  * -->
+<!-- ************************************************** -->
+
+<!-- button tab style -->
+<style style="tab_button_npc" type="tab_button" button_type="radio_button"
+		x="0" posref="TR TL"		
+		text_x="4"
+		text_posref="ML ML"
+		tx_normal="r2_tab_wide_normal" tx_pushed="r2_tab_wide_pushed" tx_over="r2_tab_wide_over"
+		global_color_normal="true" global_color_over="true" global_color_pushed="true"
+		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+		text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="true"
+		/>
+
+<!-- label/slider template -->
+<template name="label_slider" id="" active="true" posparent="" w="95" y="-5" h="" tooltip="" hardtext="" 
+ params="" end_params="" cancel_params="" max="">	
+
+	<group id="#id" active="true" y="#y" posref="BL TL" posparent="#posparent" child_resize_w="true" child_resize_h="true">	
+			
+		<!-- label -->		
+		<group id="slider_text_place" w="#w" h="20" x="0" y="0" posref="TL TL">
+			<view type="text" id="slider_text" posref="TL TL" 
+			 x="0" y="0" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+				
+		<!-- line -->		
+		<view type="bitmap" id="line_slider" posparent="slider_text_place" posref="TR TL" scale="true" 
+		 x="0" y="-5" w="90" h="4" texture="W_line_hor2.tga" />
+
+		<ctrl type="scroll" id="slider" posparent="line_slider" posref="MM MM" 
+		 x="0" y="0" w="90" h="16" vertical="false" align="L" min="0" max="#max" tracksize="12" cancelable="true" 
+		 tx_topright="w_scroll_R.tga" 	tx_middle="w_scroll_l123_m.tga" 	tx_bottomleft="w_scroll_L.tga"  
+		 onscrollend="lua" end_params="#end_params" onscrollcancel="lua" cancel_params="#cancel_params" 
+		 onscroll="lua" params="#params" />
+
+	</group>
+
+</template>
+
+
+<!-- random and add list buttons template -->
+<template name="button_random_add_list" id="" posparent="" onclick_random="" onclick_random_param="" 
+ onclick_add_list="" onclick_add_list_param=""  keep="true" tooltip_ok="" posref="BL TL" x="0" y="-10"> 
+
+	<group id="#id" posparent="#posparent" posref="#posref" w="200" child_resize_h="true" 
+	 x="#x" y="#y">
+		
+		<ctrl style="button_ok" id="random" posref="TL TL" text_y="-2" onclick_l="#onclick_random" 
+		 params_l="#onclick_random_param" hardtext="uiR2EdRandom" tooltip="#tooltip_ok" />
+		<ctrl style="button_ok" x="13" posparent="random" text_y="-2" posref ="TR TL" onclick_l="#onclick_add_list" 
+		 params_l="#onclick_add_list_param" hardtext="uiR2EdManageSetsShort" />
+	</group>
+	
+</template>
+
+
+<!-- label/edit box template -->
+<template name="label_edit_box" active="true" id="" x="0" y="0" posparent="" posref="" w="" hardtext="" 
+ fontsize="10" onenter="lua" params="" onchange="lua" onchange_params="" 
+ on_focus_lost="" on_focus_lost_params="" max_num_chars="6" entry_type="text" >	
+
+	<group id="#id" x="#x" y="#y" w="#w" h="34" posparent="#posparent" posref="#posref" >
+		
+		<!-- label -->
+		<group id="label" sizeref="w" w="0" h="12" x="0" y="0" posref="TL TL" posparent="parent" >		
+			<view type="text" id="name_text" posref="TL TL" x="2" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- edit box -->
+		<group type="edit_box" id="edit_box_group" sizeref="w" posparent="label" posref="BL TL" x="0" y="-2" 
+		 onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params"
+		 on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" 
+		 negative_filter = '"{}[]'
+		 max_num_chars="#max_num_chars" prompt="" enter_loose_focus="true" entry_type="#entry_type"  reset_focus_on_hide="true" menu_r="" >
+									
+			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
+			<view type="text" id="edit_text" x="4" y="-5" posref="TL TL" multi_line="false" 
+			 fontsize="10" shadow="true" hardtext="" global_color="false"/>
+		</group>
+	</group>
+</template>
+
+<!-- label/combo box template -->
+<template name="label_combo_box" active="true" id="" x="0" y="0" posparent="" posref="" w="" fontsize="10" 
+ hardtext="" on_change_params="" combo_box_y="-2" >	
+
+	<group id="#id" active="#active" x="#x" y="#y" w="#w" h="34" posparent="#posparent" posref="#posref" >
+		
+		<!-- label -->
+		<group id="label" sizeref="w" w="0" h="12" x="0" y="0" posref="TL TL" >
+			<view type="text" id="name_text" posref="TL TL" x="2" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- combo box -->
+		<group type="combo_box" id="combo_box" w="#w" h="20" x="0" y="#combo_box_y" posref="BL TL" posparent="label" 
+		 linked_to_db="false" on_change="lua" on_change_params="#on_change_params" >
+			<instance template="r2ed_combo_box" />
+		</group>
+
+	</group>
+
+</template>
+
+
+<!-- horizontal label/ two combo box template -->
+<template name="label_two_combo_box" keep="true" active="true" id="" x="0" y="0" posparent="" posref="" hardtext="">	
+
+	<group id="#id" x="#x" y="#y" w="265" h="20" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label" w="75" h="20" x="0" y="0" posref="TL TL" posparent="parent" >
+			<view type="text" id="name_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- first combo box -->
+		<group type="combo_box" id="first_combo_box" w="85" h="20" x="10" y="0" posref="TR TL" posparent="label" 
+		 linked_to_db="false">
+			<instance template="r2ed_combo_box" />
+		</group>
+
+		<!-- second combo box -->
+		<group type="combo_box" id="second_combo_box" w="85" h="20" x="10" y="0" posref="TR TL" posparent="first_combo_box" 
+		 linked_to_db="false">
+			<instance template="r2ed_combo_box" />
+		</group>
+	</group>
+</template>
+
+<!-- horizontal label / two combo box / edit box template -->
+<template name="label_two_combo_edit_box" active="true" id="" x="0" y="0" posparent="" posref="" hardtext="" >	
+
+	<group id="#id" x="#x" y="#y" w="305" h="20" posparent="#posparent" posref="#posref" >
+	
+		<!-- label / two combo box -->
+		<instance template="label_two_combo_box" id="label_two_combo_box" posparent="parent" posref="TL TL" hardtext="#hardtext" />
+
+		<!-- edit box -->
+		<group type="edit_box" id="edit_box_group" h="20" w="30" posparent="label_two_combo_box" posref="TR TL" x="10" y="0" 
+		 onenter="" params="" max_num_chars="3" prompt="" enter_loose_focus="true" 
+		 entry_type="text"  reset_focus_on_hide="true" menu_r="" >
+									
+			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
+			<view type="text" id="edit_text" x="5" y="-5" posref="TL TL" multi_line="false" 
+			 fontsize="10" shadow="true" hardtext="" global_color="false"/>
+		</group>
+	</group>
+</template>
+
+<!-- horizontal label / two combo box / edit box /slider template -->
+<template name="label_two_combo_edit_box_slider" active="true" id="" x="0" y="0" posparent="" posref="" 
+ hardtext="" params="" end_params="" cancel_params="" >	
+
+	<group id="#id" x="#x" y="#y" w="400" h="20" posparent="#posparent" posref="#posref" >
+		
+		<!-- label / two combo box /edit box -->
+		<instance template="label_two_combo_edit_box" id="label_two_combo_edit_box" posparent="parent" posref="TL TL" hardtext="#hardtext" />
+
+		<!-- slider -->
+		<view type="bitmap" id="line_slider" posparent="label_two_combo_edit_box" posref="TR TL" scale="true" 
+		 x="10" y="-10" w="85" h="4" texture="W_line_hor2.tga" />
+
+		<ctrl type="scroll" id="slider" posparent="line_slider" posref="MM MM" 
+		 x="0" y="0" w="85" h="16" vertical="false" align="L" min="0" max="255" tracksize="12" 
+		 tx_topright="w_scroll_R.tga" tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_L.tga" cancelable="true" 
+		 onscrollend="lua" end_params="#end_params" onscrollcancel="lua" cancel_params="#cancel_params" 
+		 onscroll="lua" params="#params"/>
+	</group>
+</template>
+
+
+<!-- horizontal label / combo box / slider template -->
+<template name="label_combo_box_slider" active="true" id="" x="0" y="0" posparent="" posref="" 
+ hardtext="" on_change_params="" params="" end_params="" cancel_params="" >	
+
+	<group id="#id" x="#x" y="#y" w="430" h="20" posparent="#posparent" posref="#posref" >
+		
+		<!-- label / combo box -->
+		<instance template="h_label_combo_box" id="label_combo_box" w="270" w_label="110" w_combo="160" 
+		 posparent="parent" posref="TL TL" hardtext="#hardtext" on_change_params="#on_change_params"/>
+
+		<!-- slider -->
+		<view type="bitmap" id="line_slider" posparent="label_combo_box" posref="TR TL" scale="true" 
+		 x="30" y="-10" w="100" h="4" texture="W_line_hor2.tga" />
+
+		<ctrl type="scroll" id="slider" posparent="line_slider" posref="MM MM" 
+		 x="0" y="0" w="100" h="16" vertical="false" align="L" min="0" max="5" cancelable="true" 
+		 tracksize="12" tx_topright="w_scroll_R.tga" tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_L.tga"
+		 onscrollend="lua" end_params="#end_params" onscrollcancel="lua" cancel_params="#cancel_params" 
+		 onscroll="lua" params="#params"/>
+		 	
+	</group>
+</template>
+
+
+
+<proc id="character_active">
+	<action handler="set" params="target_property=ui:interface:r2ed_npc:content:npc_view:char3d:char:anim|value=0" />
+</proc>
+
+
+<!-- ************************************************************************************************** -->
+<!-- **************************************** NPC GUI ************************************************* -->
+<!-- ************************************************************************************************** -->	
+
+<group type="container" id="r2ed_npc" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_CUSTOM_LOOK"	
+	pop_min_w="753" pop_min_h="505" pop_max_w="753" pop_max_h="505"	active="false"
+	on_active="proc" on_active_params="character_active"
+	on_deactive="lua" on_deactive_params="if r2 and r2.Mode == 'Edit' then r2:updateNotes(); r2:updateName() end"
+	escapable = "true"
+>
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+
+		<!-- NPC VIEW -->
+		<group id="npc_view" x="0" y="-3" w="300" h="472" posref="TL TL" >
+			
+			<scene3d id="char3d" sizeref="wh" w="-2" h="-2" posref="TL TL" x="1" y="-1" curcam="cam"
+			 ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" 
+			 user_interaction="true" rotz_factor="0.017"
+			 roty_factor="0.005" roty_limit_min="-20" roty_limit_max="15"
+			 dist_factor="0.005" dist_limit_min="9.0" dist_limit_max="16.0">
+
+				<character3d id="char" dblink="target" pos="0.0 0.0 -1.8" rot="0.0 0.0 0.0" copy_anim="true" />
+				<camera id="cam" fov="5" pos="0.0 -14.0 0.0" target="0.0 0.0 -0.85" roll="0" />
+ 
+				<light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
+				<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />
+
+			</scene3d>
+
+			<ctrl style="button_ok" id="change_view" x="-10" y="10" posparent="char3d" posref="BR BR" 
+			 text_y="-2" onclick_l="lua" params_l="r2:changeView()" hardtext="uiR2EDChangeView" tooltip="" />
+		
+		</group>	
+
+		<view type="bitmap" id="v_sep" posparent="npc_view" y="-25" posref="TR TL" w="2" h="515" 
+		 scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<!-- MENU -->
+		<group id="menu" x="0" y="0" w="470" h="445" posparent="npc_view" posref="TR TL" >		
+			
+			<group type="tab" id="npc_tabs" child_resize_w="true" h="24" posref="TL TL" x="0" y="-4" >
+			
+				<ctrl style="tab_button_npc" id="tab0" x="0" posref="TL TL"	group="profile"		
+				 hardtext="uiR2EdProfile"		onclick_r=""	 params_r=""			onclick_l="" params_l=""/>
+				<view type="bitmap" id="tab0_bm" posparent="tab0" posref="TL TL" w="24" h="24" x="4" y="-2 " 
+				 color="255 255 255 255" />
+
+				<ctrl style="tab_button_npc" id="tab1" posparent="tab0"		group="equipment"	
+				 hardtext="uiR2EdEquipment"	onclick_r="" params_r=""	onclick_l="" params_l=""/>	
+				<view type="bitmap" id="tab1_bm" posparent="tab1" posref="TL TL" w="24" h="24" x="4" y="-2 " 
+				 color="255 255 255 255" />
+
+				<ctrl style="tab_button_npc" id="tab2" posparent="tab1"		group="body"	
+				 hardtext="uiR2EdBody"	onclick_r="" params_r=""	onclick_l="" params_l=""/>		
+				<view type="bitmap" id="tab2_bm" posparent="tab2" posref="TL TL" w="24" h="24" x="4" y="-2 " 
+				 color="255 255 255 255" />
+<!--
+				<ctrl style="tab_button_npc" id="tab3" posparent="tab2"		group="group"	
+				 hardtext="uiR2EdGroup"	onclick_r="" params_r=""	onclick_l="" params_l=""/>		
+				<view type="bitmap" id="tab3_bm" posparent="tab3" posref="TL TL" w="24" h="24" x="4" y="-2 " 
+				 color="255 255 255 255" />
+-->
+			</group>
+
+			<view type="bitmap" id="sep" posparent="npc_tabs" posref="BL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+			 scale="true" texture="blank.tga" color="120 120 120 255" />
+				
+
+			<!-- ************************************************************************************************** -->
+			<!-- ************************************   PROFILE  ************************************************** -->
+			<!-- ************************************************************************************************** -->	
+			<group id="profile" posref="TL TL" sizeref="wh" x="0" w="-14" y="-15" h="-12" 
+			 on_deactive="lua" on_deactive_params="if r2 and r2.Mode == 'Edit' then r2:updateNotes(); r2:updateName() end" >
+				<group id="profile_content" posref="TL TL" sizeref="wh" x="0" w="0" y="-25" h="0" >
+					
+					<!-- *************** -->
+					<!-- NPC DESCRIPTION -->
+					<group id="npc_description" w="420" h="257" x="10" y="0" posref="TL TL">
+						
+						<group id="back_description" sizeref="wh" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<!-- name -->
+						<instance template="label_edit_box" id="name" posparent="parent" posref="TL TL" w="264" 
+						 x="10" y="-15" hardtext="uiR2EdName" fontsize="12" max_num_chars="25" 
+						 onenter="lua" params="r2:updateName()" on_focus_lost="" on_focus_lost_params="r2:updateName()" 
+						/>
+
+						<!-- fonction 
+						<instance template="label_combo_box" id="fonction" posparent="name" posref="BL TL" 
+						 w="264" y="-13" hardtext="uiR2EdFunction" fontsize="12" on_change_params="r2:updateFunction()"/>
+						-->
+						<!-- Race, Sex, Level -->
+						<group id="race_sex_level" w="420" h="35" x="0" y="-13" posref="BL TL" posparent="name">
+				
+							<!-- Race -->
+							<instance template="label_combo_box" id="race" posparent="parent" posref="TL TL" 
+							 w="127" hardtext="uiR2EdRace" fontsize="12" on_change_params="r2:updateRace()" />
+
+							<!-- Sex -->
+							<instance template="label_combo_box" id="sex" posparent="race" posref="TR TL" 
+							 x="10" w="127" hardtext="uiR2EdSex" fontsize="12" on_change_params="r2:updateSex()" />
+
+							<!-- Level 
+							<instance template="label_combo_box" id="level" posparent="sex" posref="TR TL" 
+							 x="10" w="127" fontsize="12" hardtext="uiR2EdLevel" on_change_params="r2:updateLevel()"/>
+							-->							
+						</group>
+
+						<!-- Notes -->
+						<group id="notes" y="-13" w="420" h="165" posparent="race_sex_level" posref="BL TL">
+
+							<!-- label -->
+							<group id="label_notes" w="400" h="15" x="0" y="0" posref="TL TL" posparent="parent" >
+								<view type="text" id="level_design_info_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdNotes" />
+							</group>
+
+							<!-- Edit text for NPC description -->
+							<group id="back_small_description" sizeref="w" posparent="label_notes" posref="BL TL" y="0" h="120" w="0">
+								<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+							</group>
+
+							<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12"/>
+
+							<group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
+							 child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
+							 max_h="-4" max_w="310" want_return="true" 
+							 onenter="lua" params="getUICaller():getEnclosingContainer():find('small_description_scroll').trackPos = 0"
+							 on_focus_lost="lua" on_focus_lost_params="" >
+												
+								<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 
+								 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+							</group>
+
+							<ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" 
+							 posparent="crop_desc" posref="TR TL" x="-12" y="0" />
+
+						 </group>
+
+					</group>
+
+					
+
+					<!-- *************** -->
+					<!-- CHAT PARAMETERS 
+					<group id="chat_parameters" sizeref="w" h="134" x="0" y="-9" posparent="npc_behaviour" posref="BL TL">
+						
+						<group id="back_chat" sizeref="wh" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<instance template="label_combo_box" id="parameters" posparent="parent" posref="TL TL" 
+						 x="10" y="-10" w="400" hardtext="uiR2EdChatParameters" />
+
+						<group id="options_list" posparent="parameters" sizeref="w" w="0" h="60" posref="BL TL" x="0" y="-2">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+							<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-4" h="-4" />
+
+							<group id="options" posparent="crop" posref="TL TL" x="0" y="-4" sizeref="w" child_resize_h="true" 
+							 child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+						
+								<group type="scroll_text" id="options_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="16" 
+									child_resize_hmargin="16" posref="TL TL" x="0" y="0" min_height="160" max_height="160" >
+
+									<group type="list" id="text_list" hardtext="uiCongifExplanation" shadow="true" fontsize="10" 
+									 justification="justified" color="255 255 255 160" space="3" 
+									 global_color="true" posref="TL TL" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+								</group>
+							</group>
+
+							<ctrl style="skin_scroll" id="scroll_options" align="T" target="options" posparent="crop" posref="TR TR" 
+							 x="2" y="-4" />
+						</group>
+
+						<ctrl style="button_ok" id="create_new" x="0" y="-2" posparent="options_list" posref="BR TR" 
+						 text_y="-2" onclick_l="" params_l="" hardtext="uiR2EdCreateNew" tooltip="" />
+					</group>
+					-->
+				</group>
+			</group>
+
+
+
+			<!-- ************************************************************************************************** -->
+			<!-- **********************************   EQUIPMENT  ************************************************** -->
+			<!-- ************************************************************************************************** -->			
+			<group id="equipment" posref="TL TL" sizeref="wh" x="0" w="0" y="-5" h="0" >
+				<group id="equipment_content" posref="TL TL" sizeref="wh" x="10" w="0" y="-25" h="0" >
+
+					<!-- ****** -->
+					<!-- ARMOUR -->
+					<group id="armour" w="420" h="260" x="0" y="-10" posparent="parent" posref="TL TL">
+						
+						<group id="back_armour" sizeref="wh" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+		
+						<!-- first line of labels -->
+						<group id="labels_line" w="400" h="22" x="10" y="-5" posref="TL TL" posparent="parent" >
+
+							<group id="piece" w="85" h="12" x="112" y="-10" posref="TL TL" >
+								<view type="text" id="faction_test" posref="TL TL" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdPiece" />
+							</group>
+
+							<group id="color" w="56" h="12" x="103" y="0" posref="TR TL" posparent="piece" >
+								<view type="text" id="drop_text" posref="TL TL" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdColor" />
+							</group>
+
+							<instance template="label_toggle_button" id="color_link" posparent="color" 
+							 y="1" posref="BR BL" w="70" hardtext="uiR2EdLink" fontsize="12" y_text="-5" params_l="r2:linkColor()"/>	
+						</group>
+
+						<!-- helmet -->
+						<instance template="label_combo_box_slider" id="helmet" posparent="labels_line" 
+						 posref="BL TL" hardtext="uiR2EdHelmet" y="-7" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')"/>
+
+						<!-- chest plate-->
+						<instance template="label_combo_box_slider" id="chest_plate" posparent="helmet" 
+						 posref="BL TL" y="-5" hardtext="uiR2EdChestPlate" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')" />
+
+						<!-- legs -->
+						<instance template="label_combo_box_slider" id="legs" posparent="chest_plate" 
+						 posref="BL TL" y="-5" hardtext="uiR2EdLegs" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')"/>
+
+						<!-- boots -->
+						<instance template="label_combo_box_slider" id="boots" posparent="legs" 
+						 posref="BL TL" y="-5" hardtext="uiR2EdBoots" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')" />
+
+						<!-- gloves -->
+						<instance template="label_combo_box_slider" id="gloves" posparent="boots" 
+						 posref="BL TL" y="-5" hardtext="uiR2EdGloves" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')" />
+
+						<!-- arms guard -->
+						<instance template="label_combo_box_slider" id="arms_guard" posparent="gloves" 
+						 posref="BL TL" y="-5" hardtext="uiR2EdArmsGuard" on_change_params="r2:updatePieceEquipment()"
+						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
+						 cancel_params="r2:updatePieceEquipmentColor('cancel')" />
+
+						<!-- equipment random button -->
+						<ctrl style="button_ok" id="equ_random" x="110" y="-20" posparent="arms_guard" posref="BL TL" 
+						 text_y="-2" onclick_l="lua" params_l="r2:randomEquipment()" hardtext="uiR2EdRandomEquipment" />
+
+						<!-- color random button -->
+						<ctrl style="button_ok" id="color_random" x="30" y="0" posparent="equ_random" posref="TR TL" 
+						 text_y="-2" onclick_l="lua" params_l="r2:randomColor()" hardtext="uiR2EdRandomColor" />
+
+						<!-- sets -->
+						<instance template="h_label_combo_box" id="equipment_sets"  
+						 posref="BL BL" w="270" w_label="110" w_combo="160" x="10" y="10" hardtext="uiR2EdSets" 
+						 on_change_params="r2:selectEquipmentSets()" />
+
+						<!-- save set button -->
+						<ctrl style="button_ok" id="save_set" x="29" y="0" posparent="equipment_sets" posref="BR BL" 
+						 text_y="-2" hardtext="uiR2EdManageSets" onclick_l="proc" params_l="add_equipment_active" />
+
+					</group>
+
+					
+					<!-- COMBAT MODE button 
+					<group id="combat_mode" sizeref="w" w="0" h="16" x="0" y="-15" posparent="armour" posref="BL TL">
+						<ctrl style="button_ok" id="combat_mode_button" x="10" posparent="parent" posref="TL TL" 
+						 text_y="-2" onclick_l="proc" params_l="combat_mode_active" hardtext="uiR2EdCombatMode" tooltip="" />
+					</group>-->
+
+					<!-- ****** -->
+					<!-- LEFT / RIGHT HAND -->
+					<group id="hands_gr" sizeref="w" w="0" h="40" x="0" y="-15" posparent="armour" posref="BL TL">
+						
+						<group id="back_hands" sizeref="wh" w="0" h="0" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<instance template="h_label_combo_box" id="hands" posparent="parent" x="10" y="-10" posref="TL TL" 
+						 w="400" w_label="110" w_combo="290" hardtext="uiR2EdSpecialization" on_change_params="r2:updateWeapons()"/>
+
+					</group>
+
+					<!-- ******* -->
+					<!-- OBJECTS 
+					<group id="objets" sizeref="w" w="0" h="141" x="0" y="-9" posparent="hands_gr" posref="BL TL">
+						
+						<group id="back_objets" sizeref="h" w="420" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<instance template="label_edit_box" id="existing_objects" posparent="parent" posref="TL TL" 
+						 x="10" y="-10" w="180" hardtext="uiR2EdExistingLootableObjects" fontsize="12"/>
+
+						<group id="objects_list" posparent="existing_objects" sizeref="w" w="0" h="60" posref="BL TL" x="0" y="-2">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+							<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-4" h="-4" />
+
+							<group id="list" posparent="crop" posref="TL TL" x="0" y="-4" sizeref="w" child_resize_h="true" 
+							 child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+						
+								<group type="scroll_text" id="list_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="16" 
+								 child_resize_hmargin="16" posref="TL TL" x="0" y="0" min_height="160" max_height="160" >
+
+									<group type="list" id="text_list" hardtext="uiCongifExplanation" shadow="true" fontsize="10" 
+									 justification="justified" color="255 255 255 160" space="3" 
+									 global_color="true" posref="TL TL" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+								</group>
+							</group>
+
+							<ctrl style="skin_scroll" id="scroll_objects" align="T" target="list" posparent="crop" posref="TR TR" 
+							 x="2" y="-4" />
+						</group>
+
+						<ctrl type="button" id="add" button_type="push_button" posparent="objects_list" x="12" y="-4" posref="TR TL" 
+						 tx_normal="W_arrow_right_0.tga" tx_pushed="W_arrow_right_0.tga" tx_over="W_button_12_over.tga" 
+						 onclick_l="" params_l="" onclick_r="" params_r="" />
+						<ctrl type="button" id="remove" button_type="push_button" x="0" y="-6" posparent="add" posref="BL TL" 
+						 tx_normal="W_arrow_left_0.tga" tx_pushed="W_arrow_left_0.tga" tx_over="W_button_12_over.tga" 
+						 onclick_l="" params_l="" onclick_r="" params_r="" />
+						
+						<group id="objects_bag" w="180" h="12" x="40" y="0" posref="TR TL" posparent="existing_objects" >
+							<view type="text" id="bag_text" posref="TL TL" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdInBag" />
+						</group>
+
+						<group id="objects_in_bag" posparent="objects_bag" sizeref="w" w="0" h="82" posref="BL TL" x="0" y="-2">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+							<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-4" h="-4" />
+
+							<group id="list" posparent="crop" posref="TL TL" x="0" y="-4" sizeref="w" child_resize_h="true" 
+							 child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+						
+								<group type="scroll_text" id="list_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="16" 
+								 child_resize_hmargin="16" posref="TL TL" x="0" y="0" min_height="160" max_height="160" >
+
+									<group type="list" id="text_list" hardtext="uiCongifExplanation" shadow="true" fontsize="10" 
+									 justification="justified" color="255 255 255 160" space="3" 
+									 global_color="true" posref="TL TL" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+								</group>
+							</group>
+
+							<ctrl style="skin_scroll" id="scroll_objects_bag" align="T" target="list" posparent="crop" posref="TR TR" 
+							 x="2" y="-4" />
+						</group>
+
+						<instance template="h_label_edit_box" id="all" y="-5" x="0" posparent="objects_in_bag" posref="BL TL" 
+						 hardtext="All" w_label="15"/>
+						<instance template="h_label_edit_box" id="each" y="0" x="8" posparent="all" posref="TR TL" 
+						 hardtext="Each" w_label="30"/>
+
+					</group>
+					-->
+				</group>	
+			</group>		
+
+			<!-- ************************************************************************************************** -->
+			<!-- **********************************   BODY  ******************************************************* -->
+			<!-- ************************************************************************************************** -->
+			<group id="body" posref="TL TL" sizeref="wh" x="0" w="-14" y="-5" h="-4" >					
+				<group id="body_content" posref="TL TL" sizeref="wh" x="0" w="0" y="-25" h="0" >
+					
+					<!-- ********* -->
+					<!-- BODY SETS -->
+					<group id="top_left_body_features" w="205" h="204" x="10" y="-10" posref="TL TL">
+										
+						<group id="back_top_left" sizeref="h" w="205" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="wh" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<group id="body_sets_scroll_target" posparent="parent" posref="TL TL" x="10" y="-10" 
+						 sizeref="wh" w="-20" h="-20" >
+						
+							<!-- Body sets combo box -->
+							<instance template="h_label_combo_box" id="body_sets" posparent="parent" posref="TL TL" 
+							 x="0" y="0" hardtext="uiR2EdBodySets" posref_combo="TR TL" on_change_params="r2:selectBodySets()"/>
+
+							<!-- Height slider -->
+							<instance template="label_slider" id="slider_height" y="-18" posparent="body_sets" hardtext="uiR2EdHeight" 
+							 params="r2:changeBodyAttribute('GabaritHeight', 'local')" 
+							 end_params="r2:changeBodyAttribute('GabaritHeight', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('GabaritHeight', 'cancel')" max="14"/>
+							
+							<!-- Torso slider -->
+							<instance template="label_slider" id="slider_torso" posparent="slider_height" hardtext="uiR2EdTorso" 
+							 params="r2:changeBodyAttribute('GabaritTorsoWidth', 'local')" 
+							 end_params="r2:changeBodyAttribute('GabaritTorsoWidth', 'commit')"
+							 cancel_params="r2:changeBodyAttribute('GabaritTorsoWidth', 'cancel')" max="14"/>
+
+							<!-- Arms slider -->
+							<instance template="label_slider" id="slider_arms" posparent="slider_torso" hardtext="uiR2EdArms" 
+							 params="r2:changeBodyAttribute('GabaritArmsWidth', 'local')" 
+							 end_params="r2:changeBodyAttribute('GabaritArmsWidth', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('GabaritArmsWidth', 'cancel')" max="14"/>
+							
+							<!-- Legs slider -->
+							<instance template="label_slider" id="slider_legs" posparent="slider_arms" hardtext="uiR2EdLegs" 
+							 params="r2:changeBodyAttribute('GabaritLegsWidth', 'local')" 
+							 end_params="r2:changeBodyAttribute('GabaritLegsWidth', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('GabaritLegsWidth', 'cancel')" max="14"/>
+							
+							<!-- Breast slider -->
+							<instance template="label_slider" id="slider_breast" posparent="slider_legs" hardtext="uiR2EdBreast" 
+							 params="r2:changeBodyAttribute('GabaritBreastSize', 'local')" 
+							 end_params="r2:changeBodyAttribute('GabaritBreastSize', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('GabaritBreastSize', 'cancel')" max="14"/>
+							
+							<!-- Random and Add list buttons -->
+							<instance template="button_random_add_list" id="body_sets_buttons" posparent="body_sets_scroll_target" 
+							 posref="BL BL" x="0" y="0"
+							 onclick_random="lua" onclick_random_param="r2:randomBody()" 
+							 onclick_add_list="proc" onclick_add_list_param="add_body_sets_active" />
+						</group>
+					</group>
+
+					<!-- ********* -->
+					<!-- FACE SETS -->
+					<group id="bottom_left_body_features" sizeref="w" w="0" h="179" x="0" y="-10" 
+					 posparent="top_left_body_features" posref="BL TL">
+						
+						<group id="back_bottom_left" sizeref="h" w="205" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="wh" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<group id="face_sets_scroll_target" posparent="parent" posref="TL TL" x="10" y="-10" 
+						 sizeref="wh"  w="-20" h="-20">
+						
+							<!-- Face sets combo box -->
+							<instance template="h_label_combo_box" id="face_sets" posparent="parent" posref="TL TL" 
+							 x="0" y="0" hardtext="uiR2EdFaceSets" on_change_params="r2:selectFaceSets()" />
+
+							<!-- Eye color slider -->
+							<instance template="label_slider" id="slider_eye_color" y="-18" posparent="face_sets" hardtext="uiR2EdEyeColor" 
+							 params="r2:changeBodyAttribute('EyesColor', 'local')" 
+							 end_params="r2:changeBodyAttribute('EyesColor', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('EyesColor', 'cancel')" max="7" />
+
+							<!-- Tattoos slider -->
+							<instance template="label_slider" id="slider_tattoos" posparent="slider_eye_color" hardtext="uiR2EdTattoos" 
+							 params="r2:changeBodyAttribute('Tattoo', 'local')" 
+							 end_params="r2:changeBodyAttribute('Tattoo', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('Tattoo', 'cancel')" max="31" />														
+							
+							<!-- Haircut slider -->
+							<instance template="label_slider" id="slider_haircut" posparent="slider_tattoos" hardtext="uiR2EdHaircut" 
+							 params="r2:changeBodyAttribute('HairType', 'local')" 
+							 end_params="r2:changeBodyAttribute('HairType', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('HairType', 'cancel')" max="6" />
+
+							<!-- Hair color slider -->
+							<instance template="label_slider" id="slider_hair_color" posparent="slider_haircut" hardtext="uiR2EdHairColor" 
+							 params="r2:changeBodyAttribute('HairColor', 'local')" 
+							 end_params="r2:changeBodyAttribute('HairColor', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('HairColor', 'cancel')" max="5" />
+						
+							<!-- Random and Add list buttons -->
+							<instance template="button_random_add_list" id="face_sets_buttons" posparent="bottom_left_body_features"
+							 posref="BL BL" x="0" y="0"
+							 onclick_random="lua" onclick_random_param="r2:randomFace()" 
+							 onclick_add_list="proc" onclick_add_list_param="add_face_sets_active" />
+						</group>
+					</group>
+
+					<!-- ********** -->
+					<!-- FACE MORPH -->
+					<group id="right_body_features" sizeref="w" w="0" h="393" x="10" y="0" posparent="top_left_body_features" 
+					 posref="TR TL">
+
+						<group id="back_right" sizeref="wh" posref="TL TL">
+							<view type="bitmap" id="back" scale="true" sizeref="wh" h="0" w="0" texture="W_box_blank.tga" 
+							 inherit_gc_alpha="true"/>
+						</group>
+
+						<group id="face_morph_scroll_target" posparent="parent" posref="TL TL" x="10" y="-10" sizeref="wh"  w="-20" h="-20">
+						
+							<!-- Face morph combo box -->
+							<instance template="h_label_combo_box" id="face_morph" posparent="parent" posref="TL TL" 
+							 x="0" y="0" hardtext="uiR2EdFaceMorph" on_change_params="r2:selectMorphSets()" />
+							
+							<!-- Morph1 slider -->
+							<instance template="label_slider" y="-18" id="slider_morph_target1" posparent="face_morph" 
+							 params="r2:changeBodyAttribute('MorphTarget1', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget1', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget1', 'cancel')" max="7" />
+
+							<!-- Morph2 slider -->
+							<instance template="label_slider" id="slider_morph_target2" posparent="slider_morph_target1" 
+							 params="r2:changeBodyAttribute('MorphTarget2', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget2', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget2', 'cancel')" max="7" />
+							
+							<!-- Morph3 slider -->
+							<instance template="label_slider" id="slider_morph_target3" posparent="slider_morph_target2" 
+							 params="r2:changeBodyAttribute('MorphTarget3', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget3', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget3', 'cancel')" max="7" />
+
+							<!-- Morph4 slider -->
+							<instance template="label_slider" id="slider_morph_target4" posparent="slider_morph_target3" 
+							 params="r2:changeBodyAttribute('MorphTarget4', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget4', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget4', 'cancel')" max="7" />
+							
+							<!-- Morph5 slider -->
+							<instance template="label_slider" id="slider_morph_target5" posparent="slider_morph_target4" 
+							 params="r2:changeBodyAttribute('MorphTarget5', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget5', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget5', 'cancel')" max="7" />
+							
+							<!-- Morph6 slider -->
+							<instance template="label_slider" id="slider_morph_target6" posparent="slider_morph_target5" 
+							 params="r2:changeBodyAttribute('MorphTarget6', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget6', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget6', 'cancel')" max="7" />		
+	
+							<!-- Morph7 slider -->
+							<instance template="label_slider" id="slider_morph_target7" posparent="slider_morph_target6" 
+							 params="r2:changeBodyAttribute('MorphTarget7', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget7', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget7', 'cancel')" max="7" />
+							
+							<!-- Morph8 -->
+							<instance template="label_slider" id="slider_morph_target8" posparent="slider_morph_target7" 
+							 params="r2:changeBodyAttribute('MorphTarget8', 'local')" 
+							 end_params="r2:changeBodyAttribute('MorphTarget8', 'commit')" 
+							 cancel_params="r2:changeBodyAttribute('MorphTarget8', 'cancel')" max="7" />
+							
+							<!-- Random and Add list buttons -->
+							<instance template="button_random_add_list" id="face_morph_buttons" posparent="right_body_features"
+							 posref="BL BL" x="0" y="0"
+							 onclick_random="lua" onclick_random_param="r2:randomFaceMorph()" 
+							 onclick_add_list="proc" onclick_add_list_param="add_face_morph_active" />
+						</group>
+			
+					</group>
+				</group>	
+			</group>
+		</group>
+
+		<ctrl style="button_ok" id="preview" x="11" y="0" posparent="menu" posref="BL TL" 
+		 text_y="-2" onclick_l="lua" params_l="r2:preview()" hardtext="uiR2EdPreview" />
+
+	</group>
+</group>
+
+<tree node="r2ed_npc">
+</tree>
+
+
+<!-- ****************** -->
+<!-- combat mode widget -->
+<!-- ****************** -->
+<proc id="combat_mode_active">
+	<action handler="enter_modal" params="group=ui:interface:r2ed_combat_mode" />
+</proc>
+
+<group type="modal" id="r2ed_combat_mode" exit_click_out="true" posref="ML ML" x="-70" w="440" h="255" options="skin_modal" >
+
+	<group id="combat_mode_group" x="10" y="-10" w="420" h="209" posref="TL TL">
+
+		<group id="back_combat_mode" sizeref="wh" posref="TL TL">
+			<view type="bitmap" id="back" scale="true" sizeref="wh" h="0" w="0" texture="W_box_blank.tga" 
+			 inherit_gc_alpha="true"/>
+		</group>
+
+		<!-- Filters -->
+		<group id="filter" sizeref="w" h="20" x="10" y="-7" posparent="parent" posref="TL TL">
+				
+			<!-- Melee -->
+			<instance template="label_toggle_button" id="melee" posparent="parent" 
+			 posref="TL TL" x="0" y="0" w="119" hardtext="uiR2EdMelee"/>
+
+			<!-- Range -->
+			<instance template="label_toggle_button" id="range" posparent="melee" 
+			 posref="TR TL" x="0" w="119" hardtext="uiR2EdRange"/>
+			 
+			<!-- Nuke -->
+			<instance template="label_toggle_button" id="nuke" posparent="range" 
+			 posref="TR TL" x="0" w="119" hardtext="uiR2EdNuke"/>
+			 
+			<!-- Heal -->
+			<instance template="label_toggle_button" id="heal" posparent="nuke" 
+			 posref="TR TL" x="0" w="119" hardtext="uiR2EdHeal"/>			
+		</group>
+
+		<!-- Action sets combo box -->
+		<instance template="label_combo_box" id="action_sets" posparent="filter" posref="BL TL" 
+		 y="-8" w="180" hardtext="uiR2EdActionSets" />
+
+		
+		<!-- ACTIONS -->
+		<group id="actions" w="400" h="200" x="0" y="-10" posparent="action_sets" posref="BL TL">
+			
+			<!-- Action label -->
+			<instance template="label_edit_box" id="action_label" posparent="parent" posref="TL TL" 
+			 x="0" y="0" w="180" hardtext="uiR2EdActions" fontsize="10"/>
+
+			<!-- Existing actions list -->
+			<group id="actions_list" posparent="action_label" sizeref="w" w="0" h="82" posref="BL TL" x="0" y="-2">
+				<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+				<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-4" h="-4" />
+
+				<group id="list" posparent="crop" posref="TL TL" x="0" y="-4" sizeref="w" child_resize_h="true" 
+				 child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+			
+					<group type="scroll_text" id="list_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="16" 
+					 child_resize_hmargin="16" posref="TL TL" x="0" y="0" min_height="160" max_height="160" >
+
+						<group type="list" id="text_list" hardtext="uiCongifExplanation" shadow="true" fontsize="10" 
+						 justification="justified" color="255 255 255 160" space="3" 
+						 global_color="true" posref="TL TL" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+					</group>
+				</group>
+
+				<ctrl style="skin_scroll" id="scroll_actions" align="T" target="list" posparent="crop" posref="TR TR" 
+				 x="2" y="-4" />
+			</group>
+
+			<!-- Add/remove buttons -->
+			<ctrl type="button" id="add" button_type="push_button" posparent="actions_list" x="12" y="-12" posref="TR TL" 
+			 tx_normal="W_arrow_right_0.tga" tx_pushed="W_arrow_right_0.tga" tx_over="W_button_12_over.tga" 
+			 onclick_l="" params_l="" onclick_r="" params_r="" />
+			<ctrl type="button" id="remove" button_type="push_button" x="0" y="-6" posparent="add" posref="BL TL" 
+			 tx_normal="W_arrow_left_0.tga" tx_pushed="W_arrow_left_0.tga" tx_over="W_button_12_over.tga" 
+			 onclick_l="" params_l="" onclick_r="" params_r="" />
+
+			<!-- Actions of NPC -->
+			<group id="npc_actions" posparent="actions_list" w="180" h="82" posref="TR TL" x="40" y="22">
+				<!-- TMP -->
+				
+				<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+
+				<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-4" h="-4" />
+
+				<group id="list" posparent="crop" posref="TL TL" x="0" y="-4" sizeref="w" child_resize_h="true" 
+				 child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4" >
+			
+					<group type="scroll_text" id="list_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="16" 
+					 child_resize_hmargin="16" posref="TL TL" x="0" y="0" min_height="160" max_height="160" >
+
+						<group type="list" id="text_list" hardtext="uiCongifExplanation" shadow="true" fontsize="10" 
+						 justification="justified" color="255 255 255 160" space="3" 
+						 global_color="true" posref="TL TL" x="8" y="-8" sizeref="hw" w="-16" h="-16" />
+						 
+					</group>
+				</group>
+
+				<ctrl style="skin_scroll" id="scroll_npc_actions" align="T" target="list" posparent="crop" posref="TR TR" 
+				 x="2" y="-4" />
+				 
+			</group>
+
+			<!-- Weight -->
+			<instance template="h_label_edit_box" id="weight" y="-2" x="0" posparent="npc_actions" posref="BL TL" 
+			 hardtext="uiR2EdWeight" w="100" w_label="40" w_box="60" fontsize="10"/>
+
+			<!-- Add list button -->
+			<ctrl style="button_ok" id="add_list" x="18" y="0" posparent="weight" posref="BR BL" 
+			 text_y="-2" onclick_l="" params_l="" hardtext="uiR2EdAddList" tooltip="" />
+			
+		</group>
+	</group>
+
+	<!-- Ok / Cancel / Update buttons -->
+	<group id="ok_cancel_update" w="400" h="20" x="10" y="-10" posparent="combat_mode_group" posref="BL TL">
+		
+		<!-- Ok -->
+		<ctrl style="button_ok" id="ok" x="0" y="0" posparent="parent" posref="TL TL" 
+		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext="      OK      " tooltip="" />
+
+		<!-- Cancel -->
+		<ctrl style="button_ok" id="cancel" x="110" y="0" posparent="ok" posref="TR TL" 
+		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext=" CANCEL " tooltip="" />
+		 
+		<!-- Update -->
+		<ctrl style="button_ok" id="update" x="110" y="0" posparent="cancel" posref="TR TL" 
+		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext=" UPDATE " tooltip="" />	
+	</group>
+
+</group>
+
+
+<!-- *********************** -->
+<!--  BODY / EQUIPMENT  SET  -->
+<!-- *********************** -->
+<template name="add_sets" edit_text="" combo_text="" hardtext="" add_params="" update_params="" 
+ remove_params="" params_l="" random_params="" >	
+
+	<group id="group_add_sets" sizeref="wh" x="0" y="-2" posref="TL TL" >
+
+		<view type="text" id="title" posref="TL TL" x="70" y="-6" hardtext="#hardtext" shadow="true" color="255 255 255 255" fontsize="12"/>
+		
+		<!-- Close button -->	
+		<ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-4"
+		 tx_normal="w_win_close.tga" tx_pushed="w_win_close.tga" tx_over="W_button_14_over.tga"
+		 onclick_l="lua" params_l="#params_l" />
+	
+		<group id="sets" x="10" y="-23" w="205" h="181" posref="TL TL">
+
+			<group id="back_add_sets" sizeref="wh" posref="TL TL">
+				<view type="bitmap" id="back" scale="true" sizeref="wh" h="0" w="0" texture="W_box_blank.tga" 
+				 inherit_gc_alpha="true"/>
+			</group>
+
+			<!-- New sets -->
+			<instance template="label_edit_box" id="new_sets" posparent="parent" posref="TL TL" 
+			 x="10" y="-10" w="186" hardtext="#edit_text" fontsize="12" max_num_chars="20" />
+
+			<!-- Add -->
+			<ctrl style="button_ok" id="add" x="0" y="-2" posparent="new_sets" posref="BL TL" 
+			 text_y="-2" onclick_l="lua" params_l="#add_params" hardtext="uiR2EdAdd" />
+
+			<!-- Random sets -->
+			<ctrl style="button_ok" id="random_sets" x="40" y="-20" posparent="add" posref="BL TL" 
+			 text_y="-2" onclick_l="lua" params_l="#random_params" hardtext="uiR2EdRandomSet" />
+
+			<!-- Update sets -->
+			<instance template="label_combo_box" id="update_sets" posparent="random_sets" posref="BL TL" 
+			 x="-40" y="-20" w="186" hardtext="#combo_text" fontsize="12" />
+
+			<!-- Update -->
+			<ctrl style="button_ok" id="update" x="0" y="-2" posparent="update_sets" posref="BL TL" 
+			 text_y="-2" onclick_l="lua" params_l="#update_params" hardtext="uiR2EdUpdate" />
+
+			<!-- Remove button -->
+			<ctrl style="button_ok" id="remove" x="28" y="0" posparent="update" posref="TR TL" 
+			 text_y="-2" onclick_l="lua" params_l="#remove_params" hardtext="uiR2EdRemove" tooltip="" />
+
+		</group>
+			 
+	</group>
+</template>
+
+<proc id="add_body_sets_active">
+	<action handler="enter_modal" params="group=ui:interface:r2ed_add_body_sets" />
+</proc>
+
+<group type="modal" id="r2ed_add_body_sets" exit_click_out="true" posref="ML ML" x="-70" w="225" h="218" 
+ options="skin_modal" >
+	<instance template="add_sets" edit_text="New body sets" combo_text="Body sets list" hardtext="uiR2EdBodySets"
+	 add_params="r2:addBodySets()" update_params="r2:updateBodySets()" remove_params="r2:removeBodySets()" 
+	 params_l="r2:closeModalBodySets()" random_params="r2:randomSets('body_sets')"/>
+</group>
+
+
+<!-- ****************** -->
+<!--       FACE SET     -->
+<!-- ****************** -->
+<proc id="add_face_sets_active">
+	<action handler="enter_modal" params="group=ui:interface:r2ed_add_face_sets" />
+</proc>
+
+<group type="modal" id="r2ed_add_face_sets" exit_click_out="true" posref="ML ML" x="-70" w="225" h="218" 
+ options="skin_modal" >
+	<instance template="add_sets" edit_text="New face sets" combo_text="Face sets list" hardtext="uiR2EdFaceSets"
+	 add_params="r2:addFaceSets()" update_params="r2:updateFaceSets()" remove_params="r2:removeFaceSets()" 
+	 params_l="r2:closeModalFaceSets()" random_params="r2:randomSets('face_sets')" />
+</group>
+
+
+<!-- ****************** -->
+<!--       FACE MORPH   -->
+<!-- ****************** -->
+<proc id="add_face_morph_active">
+	<action handler="enter_modal" params="group=ui:interface:r2ed_add_face_morph" />
+</proc>
+
+<group type="modal" id="r2ed_add_face_morph" exit_click_out="true" posref="ML ML" x="-300" w="225" h="218" 
+ options="skin_modal" onclick_out="lua" onclick_out_params="r2:closeModalFaceMorph()">
+	<instance template="add_sets" edit_text="New face morph" combo_text="Face morph list" hardtext="uiR2EdFaceMorph"
+	 add_params="r2:addFaceMorph()" update_params="r2:updateFaceMorph()" remove_params="r2:removeFaceMorph()" 
+	 params_l="r2:closeModalFaceMorph()" random_params="r2:randomSets('face_morph')" />
+</group>
+
+
+<!-- ****************** -->
+<!--       EQUIPMENT    -->
+<!-- ****************** -->
+<proc id="add_equipment_active">
+	<action handler="enter_modal" params="group=ui:interface:r2ed_add_equipment_set" />
+</proc>
+
+<group type="modal" id="r2ed_add_equipment_set" exit_click_out="true" posref="ML ML" x="-300" w="225" h="218" 
+ options="skin_modal" onclick_out="lua" onclick_out_params="r2:closeModalEquipment()">
+	<instance template="add_sets" edit_text="New equipment" combo_text="Equipment list" hardtext="uiR2EdEquipment"
+	 add_params="r2:addEquipmentSet()" update_params="r2:updateEquipmentSet()" remove_params="r2:removeEquipment()" 
+	 params_l="r2:closeModalEquipment()" random_params="r2:randomSets('equipment_sets')" />
+</group>
+
+
+<!-- ****************** -->
+<!--    ADMIN WINDOW    -->
+<!-- ****************** -->
+
+<!-- MOVED TO help.xml 
+<group type="container" id="r2ed_web_admin" w="410" h="400" title="uiR2EDWebAdminWindow" global_color="false"
+ resizer="true" pop_min_w="100" pop_min_h="96" pop_max_w="2000" pop_max_h="1600"
+ title_bar_open="false" open_button="false" force_open_out="true"
+ lockable="true" openable="false" opened="true" movable="true" active="false">
+
+-->
+	<!--
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
+	
+			<ctrl style="text_button_header" button_type="push_button" id="browse_redo" posref="MR MR" x="-16" y="0"
+				hardtext="uiR2EDRefreshButton" tooltip="uiR2EDRefreshButton" onclick_l="lua" 
+				params_l="getUICaller().parent.parent:refresh()" frozen="true" />			
+			<ctrl style="text_button_header" button_type="push_button" id="browse_redo" posref="MR MR" x="-16" y="0"
+				hardtext="uiBrowseRedoButton" tooltip="uittBrowseRedo" onclick_l="browse_redo" 
+				params_l="name=ui:interface:r2ed_web_admin:admin_web_page" frozen="true" />
+			<ctrl style="text_button_header" button_type="push_button" id="browse_undo" posparent="browse_redo" posref="ML MR" x="-4" y="0"
+				hardtext="uiBrowseUndoButton" tooltip="uittBrowseUndo" onclick_l="browse_undo" 
+				params_l="name=ui:interface:r2ed_web_admin:admin_web_page" frozen="true" />				
+	</group>
+	-->
+	
+<!--
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">			
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL">			
+			<ctrl style="text_button_header" button_type="push_button" id="browse_refresh" posref="MR MR" x="-16" y="0"
+				hardtext="uiR2EDRefreshButton" tooltip="uiR2EDRefreshButton" onclick_l="browse_refresh" 
+				params_l="name=ui:interface:r2ed_web_admin:content:admin_web_page" frozen="false" /> -->
+<!--			<ctrl style="text_button_header" button_type="push_button" id="browse_redo" posref="MR MR" x="-16" y="0"
+				hardtext="uiBrowseRedoButton" tooltip="uittBrowseRedo" onclick_l="browse_redo" 
+				params_l="name=ui:interface:r2ed_web_admin:admin_web_page" frozen="true" />
+			<ctrl style="text_button_header" button_type="push_button" id="browse_undo" posparent="browse_redo" posref="ML MR" x="-4" y="0"
+				hardtext="uiBrowseUndoButton" tooltip="uittBrowseUndo" onclick_l="browse_undo" 
+				params_l="name=ui:interface:r2ed_web_admin:admin_web_page" frozen="true" />
+-->
+<!--	</group>
+
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+
+		<group type="html" id="admin_web_page" posref="TL TL" posparent="parent" url="home" title_prefix="uiR2EDWebAdminWindow"
+			sizeref="wh" x="6" y="0" w="-12" h="0"
+			background_color="0 0 0 0"
+			error_color="255 240 48 255"
+			link_color="240 155 100 255"
+			text_color="210 210 210 255"
+			h1_color="255 255 255 255"
+			h2_color="255 255 255 255"
+			h3_color="255 255 255 255"
+			h4_color="255 255 255 255"
+			h5_color="255 255 255 255"
+			h6_color="255 255 255 255"
+			text_font_size="10"
+			h1_font_size="20"
+			h2_font_size="18"
+			h3_font_size="16"
+			h4_font_size="14"
+			h5_font_size="12"
+			h6_font_size="12"
+			
+			paragraph_begin_space="1"
+			multi_line_space_factor="0.25"
+			td_begin_space="16"
+			li_begin_space="4"
+			ul_begin_space="12"
+			li_indent="0"
+			ul_indent="30"
+			
+			checkbox_bitmap_normal="w_slot_on.tga"
+			checkbox_bitmap_pushed="w_opacity_on.tga"
+			checkbox_bitmap_over=""
+			background_bitmap_view="black2"
+			home=""
+			browse_next_time="false"
+			timeout="0"
+			form_text_area_group="edit_box_widget_multiline"
+			browse_tree=""
+			browse_undo=""
+			browse_redo=""
+			browse_refresh="ui:interface:r2ed_web_admin:header_opened:browse_refresh"
+			>
+			<group id="black" posref="BR BR" sizeref="hw" w="-12" h="-12" inherit_gc_alpha="true"/>
+			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+			<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+
+			<ctrl style="skin_scroll" id="scroll_bar" />
+
+		</group>		
+	</group>
+</group> -->
+<!--			browse_undo="ui:interface:help_browser:header_opened:browse_undo"
+			browse_redo="ui:interface:help_browser:header_opened:browse_redo"
+-->
+<!-- <tree node="r2ed_web_admin">
+</tree> -->
+
+
+<!-- ****************** -->
+<!--    SELECT BAR      -->
+<!-- ****************** -->
+
+<style style="r2_select_bar_button_style" type="text_button" button_type="push_button"
+		tx_normal="r2_select_bar_start_normal" tx_pushed="r2_select_bar_start_normal" tx_over="r2_select_bar_start_over"
+		wmargin="12"
+		text_x="12"
+		text_posref="ML ML"
+		global_color="false"
+		force_text_over="true"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		text_y="-2" fontsize="14" shadow="true"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 128" text_color_over="255 255 255 255" />
+
+<style style="r2_select_menu_button_style" type="text_button" button_type="push_button"
+		tx_normal="r2_select_menu" tx_pushed="r2_select_menu_pushed" tx_over="r2_select_menu_over"
+		wmargin="10"
+		text_x="16"
+		text_posref="ML ML"
+		global_color="false"
+		force_text_over="true"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		text_y="-2" fontsize="14" shadow="true"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
+
+
+
+<template name="r2ed_select_bar_button" id="" onclick_l="" params_l="" onclick_r="" params_r="" keep="true">
+	<group id="#id" child_resize_w="true" child_resize_h="true">		
+		<ctrl style="r2_select_bar_button_style" over_when_pushed="false" id="b" x="0" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" hardtext="select" onclick_l="#onclick_l" params_l="#params_l" onclick_r="#onclick_r" params_r="#params_r"/>
+		<!-- optionnal icon over the button -->
+		<view type="bitmap" id="icon" active="false" w="14" h="14" posref="ML ML" x="12" y="1" scale="true" texture="blank.tga" global_color="false"/>
+	</group>
+</template>
+
+<!-- max number of buttons in the select bar -->
+<define id="r2ed_max_num_select_bar_button" value="4"/>
+
+<group id="r2ed_select_bar" posref="BL BL" x="28" y="-2" child_resize_w="true" child_resize_h="true">
+	<group id="buttons" type="list" addelt="R" align="B"
+	  active="true" x="0" y="0" posref="BL BL"  
+	  child_resize_w="true"
+	  h="32"  
+	  space="-9">
+		<!-- filled by code -->
+	</group>
+	<ctrl style="r2_select_menu_button_style" active="false" over_when_pushed="false" id="sequences" x="16" posparent="buttons" posref="TR TL" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" hardtext="uiR2EDSequences" onclick_l="lua" params_l="r2.SelectBar:browseSequences()"/>
+</group>
+
+<tree node="r2ed_select_bar">
+</tree>
+
+<group type="menu" id="r2ed_select_bar_menu" onpostclick_out="lua" onpostclick_out_params="r2.SelectBar:onMenuPostClickOut()" extends="r2ed_base_menu_look" mouse_pos="false" case_mode="0">
+	<!-- filled by code -->	
+</group>
+
+
+<!-- mini toolbar -->
+<!-- max number of buttons in the contextual toobar -->
+<define id="r2ed_max_num_mini_buttons" value="8"/>
+
+
+<template name="r2ed_mini_tool" id="" onclick_l="" params_l="" onclick_r="" params_r="" keep="true" posref="BL BL" posparent="parent" size="20">
+	<group id="#id" child_resize_w="true" child_resize_wmargin="2" child_resize_h="true" posref="#posref" posparent="#posparent">
+		<ctrl type="button" w="#size" h="#size" over_when_pushed="false" id="b" x="0" 
+		 button_type="push_button"
+		 color="255 255 255 255" 
+		 col_over="255 255 255 255" 
+		 col_pushed="255 255 255 255" 
+		 hardtext="select" 
+		 onclick_l="#onclick_l" 
+		 params_l="#params_l" 
+		 onclick_r="#onclick_r" 
+		 params_r="#params_r"
+		 global_color="false"
+		 global_color_normal="false"
+		 global_color_over="false"
+		 global_color_pushed="false"
+		/>
+	</group>
+</template>
+
+
+<!--
+
+-->
+
+<!--
+<tree node="r2ed_mini_toolbar">
+</tree>
+-->
+
+<!-- main menu button (also include the mini-bar -->
+<group id="r2ed_main_menu_button" 
+  active="true" x="0" y="0" posref="BR BR"  
+  child_resize_w="true"
+  child_resize_h="true"
+>	
+	<view type="bitmap" id="bg" w="256" h="28" scale="true" posref="BR BR" texture="r2_gradient.tga" color="255 255 255 127"/>
+	<ctrl style="r2_main_menu_button_style" over_when_pushed="false" id="b" posref="BR BR" x="0" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:popMainMenu()" hardtext="uiR2EDMainMenu"/>
+	<group id="mini_toolbar" 
+	  active="true" x="0" y="-8" 
+	  child_resize_w="true"
+	  child_resize_h="true"
+	  posparent="b"  posref="TL TR"
+	>
+		<group id="buttons" align="T" child_resize_h="true" child_resize_w="true" >
+			<vector template="r2ed_mini_tool" _size="%r2ed_max_num_mini_buttons" _firstpos="BL BL" _nextpos="BR BL" id="b$i" texture="r2_icon_dialog_mini.tga" w="20" h="20"/>		
+		</group>	
+	</group>
+</group>
+
+<tree node="r2ed_main_menu_button">
+</tree>
+
+
+
+<!-- *********************** -->
+<!--    CONTEXTUAL TOOLBAR   -->
+<!-- *********************** -->
+
+<!-- max number of buttons in the contextual toobar -->
+<define id="r2ed_max_num_contextual_buttons" value="20"/>
+
+<group id="r2ed_contextual_toolbar_new" 
+  active="true" x="0" y="3" posparent="r2ed_select_bar"  posref="TL BL"
+  child_resize_w="true"
+  child_resize_h="true"
+>
+	<group id="buttons" align="T" child_resize_h="true" child_resize_w="true">			
+		<vector template="r2ed_tool" _size="%r2ed_max_num_contextual_buttons" _firstpos="BL BL" _nextpos="BR BL" id="b$i" active="false" onclick_l="lua" params_l="r2.ContextualCommands:runCommand($i)" w="32" h="32"
+		 on_tooltip="lua"
+		 on_tooltip_params="r2:updateContextualCommandTooltip($i)"
+		/>		
+	</group>	
+</group>
+
+<tree node="r2ed_contextual_toolbar_new">
+</tree>
+
+<!-- *********************** -->
+<!--    FEATURES INFO	     -->
+<!-- *********************** -->
+
+<proc id="help_close">
+	<action handler="lua"   params="r2.setFeatureDisplayHelp()"/>
+	<action handler="set" 	params="target='ui:interface:feature_help:active'|value=0"/>	
+</proc>
+
+<group type="container" id="feature_help" w="370" pop_min_w="370" pop_max_w="370" h="550" pop_min_h="550" pop_max_h="550"
+ title="" global_color="false" header_color="UI:SAVE:WIN:COLORS:R2_FEATURE_HELP" uc_title=""
+ title_bar_open="false" open_button="false" force_open_out="true" right_button="false"
+ lockable="true" openable="false" opened="true" movable="true" active="false" savable="true" >	
+
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="12" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="370" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0" sizeref="w"> 
+		
+		
+		<!--<group id="tb_enclosing" sizeref="wh" w="-16" h="0" x="16" y="0" posref="TL TL">
+			<instance template="inner_thin_border" inherit_gc_alpha="true"/>				
+		</group> -->
+		<group id="tb_enclosing" sizeref="w" w="-16" h="460" x="16" y="0" posref="TL TL" >
+				<instance template="inner_thin_border" inherit_gc_alpha="true"/>				
+		</group>
+		<group id="enclosing" sizeref="w" w="-16" h="450" x="5" y="-5" posref="TL TL">
+			<group id="help_text_enclosed" 
+			  active="true" x="16" y="0" posref="TL TL"				  
+			  sizeref="w"
+			  child_resize_h="true"
+			  max_sizeref="h"
+			  max_h="0"
+			>
+				<view type="text" id="help_text" posref="TL TL" posparent="parent" x="0" y="-14" color="255 255 255 255" fontsize="12" shadow="true"
+					global_color="true" hardtext="" multi_line="true" multi_line_space="0" />
+			</group>
+			<ctrl style="skin_scroll" id="scroll_bar" align="T" target="help_text_enclosed" />										
+		</group>
+		
+		
+		
+
+		<!--<view type="text" id="help_text" posref="TL TL" posparent="parent" x="0" y="-14" color="255 255 255 255" fontsize="12" shadow="true"
+			global_color="true" hardtext="" multi_line="true" multi_line_space="0" />
+		-->
+		<ctrl type="button" id="custom_bbox_enabled" button_type="toggle_button" posref="BL BL" posparent="tb_enclosing" x="0" y="-14"
+				tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" pushed="true"
+				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
+				onclick_l="lua" 
+				params_l="r2.CustomBBox:updateFromUI()"
+		/>
+		<view type="text" id="text_custom" posparent="custom_bbox_enabled" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
+
+		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="-2"
+			onclick_l="proc" params_l="help_close" hardtext="uittOK" /> 
+	</group>
+	
+</group>
+
+
+<tree node="feature_help">
+</tree>
+
+
+<!-- context menu with edition look -->
+<group type="menu" id="game_context_menu_edition" extends="r2ed_base_menu_look" on_active="" on_active_params="">
+
+	<!-- Put First NPC interaction, sorted by usage frequency-->
+	<!-- trade -->
+	<action id="trade_item"				name="uimGcmTrade"				handler="context_trade_item"			params="" />
+	<action id="trade_pact"				name="uimGcmTradePact"			handler="context_trade_pact"			params="" />
+	<action id="trade_phrase"			name="uimGcmTradePhase"			handler="context_trade_phrase"			params="" />
+	<action id="trade_teleport"         name="uimGcmTeleport"			handler="context_trade_teleport"		params="" />
+	<action id="trade_faction"			name="uimGcmFaction"			handler="context_trade_faction"			params="" />
+	<action id="trade_cosmetic"         name="uimGcmCosmetic"			handler="context_trade_cosmetic"		params="" />
+
+	<action id="trade_guild_options"	name="uimGcmGuildOptions"		handler="context_trade_guild_options"	params="" />
+	<action id="trade_outpost_building" name="uimGcmOutpostBuilding"	handler="context_trade_outpost_building" params="" />
+	<action id="trade_guild_role_master" name="uimGcmGuildRoleMaster"	handler="context_trade_guild_role_master" params="" />
+	<!-- choose mission -->
+	<action id="choose_mission"			name="uimGcmMissions"           handler="context_choose_mission"        params=""/>
+	<!-- access to the web page -->
+	<action id="web_page"				name=""							handler="context_web_page"				params=""/>
+	<!-- create guild -->
+	<action id="create_guild"			name="uimGcmCreateGuild"        handler="context_create_guild"          params="" />
+	<!-- mission options -->
+	<action id="mo0"					name=""							handler="mission_option"				params="id=0" />
+	<action id="mo1"					name=""							handler="mission_option"				params="id=1" />
+	<action id="mo2"					name=""							handler="mission_option"				params="id=2" />
+	<action id="mo3"					name=""							handler="mission_option"				params="id=3" />
+	<action id="mo4"					name=""							handler="mission_option"				params="id=4" />
+	<action id="mo5"					name=""							handler="mission_option"				params="id=5" />
+	<action id="mo6"					name=""							handler="mission_option"				params="id=6" />
+	<action id="mo7"					name=""							handler="mission_option"				params="id=7" />
+	<!-- mission ring -->
+	<action id="mr0"					name=""							handler="mission_ring"					params="id=0" />
+	<action id="mr1"					name=""							handler="mission_ring"					params="id=1" />
+	<action id="mr2"					name=""							handler="mission_ring"					params="id=2" />
+	<action id="mr3"					name=""							handler="mission_ring"					params="id=3" />
+	<!-- Loot/Forage/Quartering -->
+	<action id="loot_action"			name="uimGcmLoot"				handler="context_loot"					params="" />
+	<action id="quartering"				name="uimGcmQuartering"			handler="context_quartering"			params="" />
+	<!-- New BotChat By Yoyo -->
+	<action id="choose_zc_charge"		name="uimGcmZoneCharge"         handler="context_choose_zc_charge"      params=""/>
+	<action id="cancel_zc_charge"		name="uimGcmCancelZoneCharge"	handler="context_cancel_zc_charge"		params=""/>
+	<action id="choose_building"		name="uimGcmChooseBuilding"		handler="context_choose_building"		params=""/>
+	<action id="destroy_building"		name="uimGcmDestroyBuilding"	handler="context_destroy_building"		params=""/>
+	<action id="outpost_state"			name="uimGcmDeclareWar"			handler="lua:game:outpostBCOpenStateWindow()"	params=""/>
+	<action id="buy_rm"					name="uimGcmBuyRM"				handler="context_buy_rm"				params=""/>
+	<action id="upgrade_rm"				name="uimGcmUpgradeRM"			handler="context_upgrade_rm"			params=""/>
+	<action id="outpost_bannish_player"	name="uimGcmOutpostBanishPlayer"	handler="outpost_ban_player"		params=""/>
+	<action id="outpost_bannish_guild"	name="uimGcmOutpostBanishGuild"	handler="outpost_ban_guild"			params=""/>
+
+	<!-- talk : engage conversation with player or ask news to a npc -->
+	<action id="talk"					name="uimGcmTalk"				handler="context_talk"					params="" />
+	<action id="news"					name="uimGcmNews"				handler="context_talk"					params="" />
+
+
+	<!-- Action misc with selection -->
+	<separator/>
+	<!-- ennemy -->
+	<action id="attack"					name="uimGcmAttack"				handler="context_attack"				params="" />
+	<action id="duel"					name="uimGcmDuel"				handler="context_duel"					params="" />
+	<action id="unduel"					name="uimGcmUnDuel"				handler="context_unduel"				params="" />
+	<action id="pvp_challenge"			name="uimGcmPvpChallenge"		handler="context_pvp_challenge"			params="" />
+	<action id="unpvp_challenge"		name="uimGcmUnPvpChanllenge"	handler="context_unpvp_challenge"		params="" />
+	<action id="disengage"				name="uimGcmDisengage"			handler="context_disengage"				params="" />
+	<!-- friendly -->
+	<action id="assist"					name="uimAssist"				handler="assist_target"					params="" />
+	<action id="exchange"				name="uimGcmExchange"			handler="context_exchange"				params="" />
+	<action id="invit"					name="uimGcmInvit"				handler="context_invit"					params="" />
+	<action id="guild_invit"			name="uimGcmGuildInvit"			handler="context_guild_invit"			params="" />
+	<action id="add_to_friend_list"		name="uimGcmAddToFriendList"	handler="context_add_to_friend_list"	params="" />
+	<!-- misc -->
+	<action id="mount"					name="uimGcmMount"				handler="beast_order"	params="order=mount|beast_index=@UI:GCM_BEAST_SELECTED" />
+	<action id="pa_follow"				name="uimFollowMe"				handler="beast_order"	params="order=follow|beast_index=@UI:GCM_BEAST_SELECTED"/>
+	<action id="pa_stop"				name="uimGcmStop"				handler="beast_order"	params="order=stop|beast_index=@UI:GCM_BEAST_SELECTED"/>
+	<action id="pa_free"				name="uimGcmFree"				handler="beast_order"	params="order=free|beast_index=@UI:GCM_BEAST_SELECTED"/>
+	<action id="pa_enter_stable"		name="uimGcmEnterStable"		handler="beast_order"	params="order=enter_stable|beast_index=@UI:GCM_BEAST_SELECTED"/>
+	<action id="extract_rm"				name="uimGcmExtractRM"			handler="context_extract_rm"			params="" />
+	<action id="follow"					name="uimFollow"				handler="command"						params="follow" />
+	<action id="quit_team"				name="uimGcmQuitTeam"			handler="context_quit_team"				params="" />
+	<action id="info"					name="uimGcmInfo"				handler="open_title_help"				params="from=target" />
+	<action id="build_totem"			name="uimGcmChooseBuilding"		handler="build_totem"					params="" />
+
+	<!-- Action with no selection -->
+	<separator/>
+	<action id="free_look"				name="uiMouseHead"				handler="context_free_look"				params="" />
+	<action id="move"					name="uimGcmMove"				handler="context_move"					params="" />
+	<action id="stop"					name="uimGcmStopMove"			handler="context_stop"					params="" />
+	<action id="unseat"					name="uimUnmount"				handler="beast_order"	params="order=unmount|beast_index=0" />
+</group>
+
+
+
+
+</interface_config>
+
+

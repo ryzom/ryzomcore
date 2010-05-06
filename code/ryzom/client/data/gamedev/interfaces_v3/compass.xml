@@ -1,0 +1,1055 @@
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <variable entry="UI:SAVE:RADARZOOM"
+            type="sint64"
+            value="1" />
+  <variable entry="UI:TEMP:VOLUME"
+            type="sint64"
+            value="255" />
+  <!--******************-->
+  <!--*   MP3 PLAYER   *-->
+  <!--******************-->
+  <proc id="mp3_player_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:MP3PLAYER|value=1" />
+  </proc>
+  <proc id="mp3_player_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:MP3PLAYER|value=0" />
+  </proc>
+  <group type="menu"
+         id="mp3_player_menu"
+         extends="base_menu_with_color"></group>
+  <group type="modal"
+         id="playlist"
+         posparent="mp3_player"
+         posref="BM TM"
+         w="234"
+         h="256"
+         options="layer0"
+         mouse_pos="false"
+         escapable="false"
+         exit_click_out="false"
+         on_active=""
+         on_active_params="">
+    <view type="text"
+          id="title"
+          posref="TL TL"
+          x="4"
+          y="-4"
+          hardtext="uiPlaylistTitle"
+          shadow="true"
+          color="255 255 255 255"
+          fontsize="12" />
+    <ctrl type="button"
+          id="close"
+          button_type="push_button"
+          posref="TR TR"
+          x="-4"
+          y="-4"
+          tx_normal="w_win_close.tga"
+          tx_pushed="w_win_close.tga"
+          tx_over="W_button_14_over.tga"
+          onclick_l="leave_modal"
+          params_l="" />
+  </group>
+  <link expr="@UI:TEMP:VOLUME"
+        action="music_player"
+        params="volume=@UI:TEMP:VOLUME" />
+  <group id="mp3_player"
+         type="container_windows"
+         w="206"
+         h="40"
+         header_active="false"
+         resizer="false"
+         right_button="true"
+         movable="true"
+         locked="true"
+         openable="false"
+         win_priority="%win_priority_lowest"
+         savable="true"
+         group_onclick_r="active_menu"
+         group_params_r="menu=ui:interface:mp3_player_menu"
+         on_deactive="proc"
+         on_deactive_params="mp3_player_deactive"
+         on_active="proc"
+         on_active_params="mp3_player_active">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           w="206"
+           h="40"
+           posref="TL TL" />
+    <!-- CONTROLS -->
+    <group id="controls"
+           posref="TL TL"
+           w="206"
+           h="20"
+           y="-6">
+      <!-- Slots of Prev/Play/Pause/Next buttons -->
+      <view id="slot1"
+            type="bitmap"
+            posref="ML ML"
+            x="8"
+            y="-1"
+            texture="mp3_button_slot.tga" />
+      <view id="slot2"
+            type="bitmap"
+            posref="TR TL"
+            posparent="slot1"
+            x="2"
+            y="0"
+            texture="mp3_button_slot.tga" />
+      <view id="slot3"
+            type="bitmap"
+            posref="TR TL"
+            posparent="slot2"
+            x="2"
+            y="0"
+            texture="mp3_button_slot.tga" />
+      <view id="slot4"
+            type="bitmap"
+            posref="TR TL"
+            posparent="slot3"
+            x="2"
+            y="0"
+            texture="mp3_button_slot.tga" />
+      <!-- Prev/Play/Pause/Next Buttons -->
+      <ctrl type="button"
+            id="but_prev"
+            button_type="push_button"
+            posref="MM MM"
+            posparent="slot1"
+            tx_normal="mp3_button_previous.tga"
+            tx_pushed="mp3_button_previous.tga"
+            tx_over="mp3_button_over.tga"
+            onclick_l="music_player"
+            params_l="previous"
+            tooltip="uiMP3Prev" />
+      <ctrl type="button"
+            id="but_play"
+            button_type="push_button"
+            posref="MM MM"
+            posparent="slot2"
+            tx_normal="mp3_button_play.tga"
+            tx_pushed="mp3_button_play.tga"
+            tx_over="mp3_button_over.tga"
+            onclick_l="music_player"
+            params_l="play"
+            tooltip="uiMP3Play" />
+      <ctrl type="button"
+            id="but_pause"
+            button_type="push_button"
+            posref="MM MM"
+            posparent="slot3"
+            tx_normal="mp3_button_pause.tga"
+            tx_pushed="mp3_button_pause.tga"
+            tx_over="mp3_button_over.tga"
+            onclick_l="music_player"
+            params_l="pause"
+            tooltip="uiMP3Pause" />
+      <ctrl type="button"
+            id="but_next"
+            button_type="push_button"
+            posref="MM MM"
+            posparent="slot4"
+            tx_normal="mp3_button_next.tga"
+            tx_pushed="mp3_button_next.tga"
+            tx_over="mp3_button_over.tga"
+            onclick_l="music_player"
+            params_l="next"
+            tooltip="uiMP3Next" />
+      <!-- Volume -->
+      <view type="bitmap"
+            id="vol_jauge"
+            posparent="slot4"
+            posref="TR TL"
+            x="2"
+            texture="mp3_vol_jauge.tga" />
+      <group id="volume_control"
+             posparent="slot4"
+             posref="MR ML"
+             x="4"
+             y="-3"
+             w="48"
+             h="20">
+        <view type="bitmap"
+              id="bk"
+              posref="ML ML"
+              scale="true"
+              y="-1"
+              w="48"
+              h="2"
+              texture="W_line_hor2.tga" />
+        <ctrl type="scroll"
+              id="c"
+              posparent="bk"
+              posref="MM MM"
+              x="0"
+              y="-1"
+              w="48"
+              h="8"
+              vertical="false"
+              align="L"
+              min="0"
+              max="255"
+              tracksize="8"
+              value="UI:TEMP:VOLUME"
+              tx_topright="w_scroll_R.tga"
+              tx_middle="w_scroll_l123_m.tga"
+              tx_bottomleft="w_scroll_L.tga"
+              onscroll=""
+              params="" />
+      </group>
+      <!-- Slots of Open/Playlist buttons -->
+      <view id="slot5"
+            type="bitmap"
+            posref="MR ML"
+            posparent="volume_control"
+            x="4"
+            y="3"
+            texture="mp3_button_slot.tga" />
+      <!--
+    <view id="slot6" type="bitmap" posref="TR TL" posparent="slot5" x="2" y="0" texture="mp3_button_slot.tga" />
+                -->
+      <!-- Open/Playlist buttons -->
+      <ctrl type="button"
+            id="but_open"
+            button_type="push_button"
+            posref="MM MM"
+            posparent="slot5"
+            tx_normal="mp3_button_open.tga"
+            tx_pushed="mp3_button_open.tga"
+            tx_over="mp3_button_over.tga"
+            onclick_l="music_player"
+            params_l="play_songs"
+            tooltip="uiMP3Open" />
+      <!--
+                <ctrl type="button" id="but_list" button_type="push_button" posref="MM MM" posparent="slot6"
+      tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga"
+                        onclick_l="enter_modal" params_l="group=ui:interface:playlist" tooltip="uiMP3Playlist" />
+                -->
+      <!-- TOOLTIPS -->
+      <ctrl type="tooltip"
+            id="volumett"
+            tooltip="uiMP3Volume"
+            posparent="volume_control"
+            posref="TL TL"
+            w="48"
+            h="20" />
+    </group>
+    <!-- SCREEN -->
+    <group id="screen"
+           posref="BM BM"
+           w="190"
+           h="20"
+           y="8">
+      <instance template="box_widget"
+                id="box"
+                posref="TL TL"
+                sizeref="wh"
+                w="0"
+                h="0" />
+      <view type="text"
+            id="text"
+            posref="ML ML"
+            x="2"
+            y="-2"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="10"
+            line_maxw="182"
+            shadow="true"
+            hardtext="No File..." />
+    </group>
+  </group>
+  <tree node="mp3_player" />
+  <!--***************-->
+  <!--*   COMPASS   *-->
+  <!--***************-->
+  <variable type="float"
+            entry="UI:VARIABLES:DIRECTION" />
+  <proc id="compass_proc_active">
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:posx|value=0.0" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:posy|value=-0.01" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:posz|value=2.5" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:tgtx|value=0.0" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:tgty|value=0.0" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:tgtz|value=0.0" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:arrow3d:cam:fov|value=30.0" />
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:COMPAS|value=1" />
+    <!--<action handler="set" params="target_property=ui:interface:compass:arrow3d:arrow:diffuse|value=135.0" />-->
+  </proc>
+  <proc id="compas_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:COMPAS|value=0" />
+  </proc>
+  <proc id="radar_proc_zoom_in">
+    <action handler="set"
+            cond="ne(@UI:SAVE:RADARZOOM,0)"
+            params="dblink=UI:SAVE:RADARZOOM|value=sub(@UI:SAVE:RADARZOOM,1)" />
+  </proc>
+  <proc id="radar_proc_zoom_out">
+    <action handler="set"
+            cond="ne(@UI:SAVE:RADARZOOM,3)"
+            params="dblink=UI:SAVE:RADARZOOM|value=add(@UI:SAVE:RADARZOOM,1)" />
+  </proc>
+  <proc id="radar_proc_zoom">
+    <action handler="set"
+            params="target_property=ui:interface:compass:visuel:range:hardtext|
+                                                                value=switch(@0, 'uiRadarZoom0', 'uiRadarZoom1', 'uiRadarZoom2', 'uiRadarZoom3')" />
+    <action handler="set"
+            params="target_property=ui:interface:compass:visuel:radar:world_size|
+                                                                value=switch(@0, 50.0, 100.0, 250.0, 500.0)" />
+  </proc>
+  <group id="compass_menu"
+         type="menu_compas"
+         extends="base_menu_with_color"
+         posref="TL TL"
+         x="0"
+         y="0"
+         mouse_pos="true"
+         exit_click_b="true"
+         force_inside_screen="true"
+         compass="ui:interface:compass">
+    <!-- SubMenus. Add dummy entries first -->
+    <action id="mission"
+            name="uimCompassMissions">
+      <action id="dummy1"
+              name="DUMMY-ERROR" />
+    </action>
+    <action id="land_mark"
+            name="uimCompassLandMarks">
+      <action id="land_mark_misc"
+              name="uiLMMiscColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_tribe"
+              name="uiLMTribeColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_bandit"
+              name="uiLMBanditColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_citizen"
+              name="uiLMCitizenColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_fauna"
+              name="uiLMFaunaColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_faunaexcel"
+              name="uiLMFaunaExcelColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_faunasup"
+              name="uiLMFaunaSupColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_forage"
+              name="uiLMForageColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_forageexcel"
+              name="uiLMForageExcelColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_foragesup"
+              name="uiLMForageSupColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_sap"
+              name="uiLMSapColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_amber"
+              name="uiLMAmberColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_node"
+              name="uiLMNodeColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_fiber"
+              name="uiLMFiberColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_bark"
+              name="uiLMBarkColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_seed"
+              name="uiLMSeedColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_shell"
+              name="uiLMShellColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_resin"
+              name="uiLMResinColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_wood"
+              name="uiLMWoodColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_oil"
+              name="uiLMOilColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_mission"
+              name="uiLMMissionColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_food"
+              name="uiLMFoodColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_construction"
+              name="uiLMConstructionColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_goo"
+              name="uiLMGooColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_insect"
+              name="uiLMInsectColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_kitin"
+              name="uiLMKitinColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_nocive"
+              name="uiLMNociveColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_preservative"
+              name="uiLMPreservativeColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_passage"
+              name="uiLMPassageColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+      <action id="land_mark_teleporter"
+              name="uiLMTeleporterColor">
+        <action id="dummy1"
+                name="DUMMY-ERROR" />
+      </action>
+    </action>
+    <action id="team"
+            name="uimCompassTeam">
+      <action id="dummy1"
+              name="DUMMY-ERROR" />
+    </action>
+    <action id="animal"
+            name="uimCompassAnimal">
+      <action id="dummy1"
+              name="DUMMY-ERROR" />
+    </action>
+    <action id="dialogs"
+            name="uimCompassDialogs">
+      <action id="dummy1"
+              name="DUMMY-ERROR" />
+    </action>
+    <!-- Common Container menu actions -->
+    <separator />
+    <action id="zi"
+            name="uimZoomIn"
+            handler="proc"
+            params="radar_proc_zoom_in" />
+    <action id="zo"
+            name="uimZoomOut"
+            handler="proc"
+            params="radar_proc_zoom_out" />
+    <separator />
+    <!--
+        <action id="lock_unlock" name="uimLockUnlock" handler="lock_unlock" cond="eq(@UI:VARIABLES:GC_POPUP, 1)"/>      
+        <action id="help" name="uimHelp" handler="ic_help" cond="eq(@UI:VARIABLES:GC_HAS_HELP, 1)"/>
+        -->
+  </group>
+  <group id="compass"
+         type="compas"
+         movable="true"
+         w="182"
+         h="150"
+         openable="false"
+         resizer="false"
+         header_active="false"
+         right_button="false"
+         group_onclick_r="active_menu"
+         opened="false"
+         options="compass"
+         on_active="proc"
+         on_active_params="compass_proc_active"
+         on_deactive="proc"
+         on_deactive_params="compas_proc_deactive"
+         group_params_r="menu=ui:interface:compass_menu"
+         north_color="255 255 255 255"
+         selection_color="0 0 255 255"
+         respawn_color="66 66 77 255"
+         home_color="255 0 255 255"
+         continent_landmark_color="0 255 0 255"
+         mission_landmark_color="255 0 255 255"
+         user_landmark_color="255 255 0 255"
+         new_target_selected_color="255 0 0 255"
+         help_page="interf_compass.html">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           w="166"
+           h="156"
+           posref="TL TL">
+      <view id="back_L"
+            type="bitmap"
+            posref="BL BL"
+            texture="Compas_L.tga" />
+      <view id="back_M"
+            type="bitmap"
+            posref="BM BM"
+            scale="true"
+            sizeref="w"
+            w="-8"
+            h="16"
+            texture="Compas_M.tga" />
+      <view id="back_R"
+            type="bitmap"
+            posref="BR BR"
+            texture="Compas_R.tga" />
+    </group>
+    <!-- new mail message notifier -->
+    <group id="mail"
+           posref="TR TR"
+           w="32"
+           h="24"
+           x="-4"
+           y="-4">
+      <view id="envelop"
+            type="bitmap"
+            texture="mail.tga"
+            global_color="false" />
+      <view type="text"
+            id="mail_nb"
+            posref="BR BR"
+            x="0"
+            y="0"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="false"
+            fontsize="10"
+            hardtext="" />
+<!--      <view type="text" id="mail_nb2" posparent="mail_nb" posref="BL BR" x="-2" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="x" /> -->
+    </group>
+    <link expr="@UI:VARIABLES:MAIL_WAITING"
+          target="mail:active" />
+    <!-- new guild forum message notifier -->
+    <group id="forum"
+           posref="TR TR"
+           w="32"
+           h="24"
+           x="-36"
+           y="-4">
+      <view id="envelop"
+            type="bitmap"
+            w="24"
+            scale="true"
+            texture="r2ed_create_dialog.tga"
+            global_color="false" />
+      <view type="text"
+            id="forum_nb"
+            posref="BR BR"
+            x="0"
+            y="0"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="false"
+            fontsize="10"
+            hardtext="" />
+    </group>
+    <link expr="@UI:VARIABLES:FORUM_UPDATED"
+          target="forum:active" />
+    <view type="text"
+          id="dist"
+          posref="BM BM"
+          x="0"
+          y="0"
+          hardtext="uiRadarZoom0"
+          shadow="true"
+          color="255 255 255 255"
+          global_color="false"
+          fontsize="12"
+          line_maxw="164"
+          over_extend_view_text="true" />
+    <scene3d id="arrow3d"
+             x="0"
+             y="0"
+             w="142"
+             h="142"
+             posref="TM TM"
+             curcam="cam"
+             ambient="0 0 0"
+             sun_ambient="20 20 20"
+             sun_diffuse="0 0 0"
+             sun_specular="0 0 0"
+             sun_direction="2.0 1.0 -1.0">
+      <camera id="cam"
+              fov="60"
+              pos="0 0 1"
+              target="0 0 0"
+              roll="0" />
+      <light id="l1"
+             pos="-20.0 -30.0 100.0"
+             color="255 255 255"
+             near="1000.0"
+             far="1500.0" />
+      <shape id="arrow"
+             name="arrow.shape"
+             pos="0 0 0"
+             rot="0.0 0.0 0.0" />
+    </scene3d>
+    <group id="visuel"
+           posparent="arrow3d"
+           posref="MM MM"
+           w="128"
+           h="128"
+           y="-8">
+      <!-- Background -->
+      <view id="back"
+            type="bitmap"
+            texture="w_radar.tga" />
+      <view type="text"
+            id="range"
+            posref="BM MM"
+            x="0"
+            y="16"
+            hardtext="uiRadarZoom0"
+            shadow="true"
+            color="255 255 255 255"
+            fontsize="10" />
+      <!-- ZOOM -->
+      <!--
+                <ctrl type="button" id="zoom_in" button_type="push_button" posref="BR BR" x="-8" y="8" 
+                        tx_normal="w_button_radar_plus.tga" tx_pushed="w_button_radar_plus.tga" tx_over="W_button_16_over.tga"
+                        color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 255"
+                        onclick_l="proc" params_l="radar_proc_zoom_in" render_layer="4" />
+                <ctrl type="button" id="zoom_out" button_type="push_button" posref="BL BL" x="9" y="9" 
+                        tx_normal="w_button_radar_moins.tga" tx_pushed="w_button_radar_moins.tga" tx_over="W_button_14_over.tga"
+                        color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 255"
+                        onclick_l="proc" params_l="radar_proc_zoom_out" render_layer="4"  />
+                -->
+      <view id="radar"
+            type="radar"
+            texture_std="w_radar_point.tga"
+            texture_missionlist="radar_mission_16.tga"
+            texture_missionauto="radar_mission3_16.tga"
+            texture_missionstep="radar_mission2_16.tga"
+            mini_texture_missionlist="radar_mission_mini_16.tga"
+            mini_texture_missionauto="radar_mission3_mini_16.tga"
+            mini_texture_missionstep="radar_mission2_mini_16.tga"
+            world_size="50.0"
+            posparent="back"
+            posref="MM MM"
+            w="108"
+            h="108"
+            y="8"
+            global_color="false" />
+      <!--    
+                <link expr="ne(@UI:SAVE:RADARZOOM,0)" target="zoom_in:active" />
+                <link expr="ne(@UI:SAVE:RADARZOOM,3)" target="zoom_out:active" />
+                -->
+    </group>
+    <ctrl type="tooltip"
+          id="tt"
+          tooltip="uittCompassDistance"
+          tooltip_parent="win"
+          posref="BL BL"
+          x="0"
+          y="0"
+          sizeref="w"
+          w="0"
+          h="16" />
+    <ctrl type="tooltip"
+          id="tt2"
+          tooltip="uittCompassRange"
+          tooltip_parent="win"
+          posref="BM BM"
+          x="0"
+          y="26"
+          w="44"
+          h="18" />
+  </group>
+  <tree node="compass" />
+  <link expr="switch(@UI:SAVE:RADARZOOM, 'uiRadarZoom0', 'uiRadarZoom1', 'uiRadarZoom2', 'uiRadarZoom3')"
+        target="ui:interface:compass:visuel:range:hardtext" />
+  <link expr="switch(@UI:SAVE:RADARZOOM, 50.0, 100.0, 250.0, 500.0)"
+        target="ui:interface:compass:visuel:radar:world_size" />
+  <!--******************-->
+  <!--*   CONNECTION   *-->
+  <!--******************-->
+  <proc id="proc_connection_close">
+    <action handler="set"
+            params="target_property=ui:interface:connection:w|value=64" />
+    <action handler="set"
+            params="target_property=ui:interface:connection:header_closed:w|value=64" />
+  </proc>
+  <group id="connection"
+         type="container"
+         title="uiConnectionTitle_short"
+         title_opened="uiConnectionTitle"
+         w="192"
+         global_color="false"
+         movable="true"
+         active="false"
+         openable="true"
+         opened="true"
+         resizer="false"
+         header_color="UI:SAVE:WIN:COLORS:OPT"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:CONNECTION|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CONNECTION|value=0"
+         on_open="set"
+         on_open_params="target_property=ui:interface:connection:w|value=192"
+         on_close="set"
+         on_close_params="target_property=ui:interface:connection:w|value=64">
+
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="74"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <!--
+                <group id="server_state" posref="TM TM" w="28" h="16" x="0" >
+                        <view type="text" id="server0" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState0" />
+                        <view type="text" id="server1" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState1" />
+                        <view type="text" id="server2" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState2" />
+                        <view type="text" id="server3" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState3" />
+                        <view type="text" id="server4" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState4" />
+                        <view type="text" id="server5" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState5" />
+                        <view type="text" id="server6" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState6" />
+                        <view type="text" id="server7" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState7" />
+                        <view type="text" id="server8" posref="ML ML" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext="uiServerState8" />
+                        <view type="text" id="server9" posref="TR TR" x="0" y="-68" color="255 255 255 255" fontsize="11" shadow="true" global_color="false" hardtext="uiServerState9" />
+                </group>
+                -->
+      <view type="text_number"
+            id="upload"
+            posref="TL TL"
+            x="0"
+            y="-20"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="10"
+            value="UI:VARIABLES:UPLOAD"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="download"
+            posref="BL TL"
+            posparent="upload"
+            x="0"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="10"
+            value="UI:VARIABLES:DOWNLOAD"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="ping"
+            posref="BL TL"
+            posparent="download"
+            x="0"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="10"
+            value="UI:VARIABLES:PING"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="packet"
+            posref="BL TL"
+            posparent="ping"
+            x="0"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="10"
+            value="UI:VARIABLES:PACKETLOST"
+            global_color="false"
+            positive="true" />
+    </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="content"
+           posref="TR TR"
+           h="82">
+      <view type="text"
+            id="up_title"
+            posref="TL TL"
+            x="0"
+            y="-4"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            hardtext="uiUpload" />
+      <view type="text"
+            id="down_title"
+            posref="TL TL"
+            x="0"
+            y="-20"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            hardtext="uiDownload" />
+      <view type="text"
+            id="ping_title"
+            posref="TL TL"
+            x="0"
+            y="-36"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            hardtext="uiPing" />
+      <view type="text"
+            id="packet_title"
+            posref="TL TL"
+            x="0"
+            y="-52"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            hardtext="uiPacketLost" />
+      <view type="text"
+            id="server_title"
+            posref="TL TL"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            hardtext="uiServerState" />
+      <view type="text_number"
+            id="upload"
+            posref="TR TR"
+            x="0"
+            y="-4"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="11"
+            value="UI:VARIABLES:UPLOAD"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="download"
+            posref="TR TR"
+            x="0"
+            y="-20"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="11"
+            value="UI:VARIABLES:DOWNLOAD"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="ping"
+            posref="TR TR"
+            x="0"
+            y="-36"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="11"
+            value="UI:VARIABLES:PING"
+            global_color="false"
+            positive="true" />
+      <view type="text_number"
+            id="packet"
+            posref="TR TR"
+            x="0"
+            y="-52"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="11"
+            value="UI:VARIABLES:PACKETLOST"
+            global_color="false"
+            positive="true" />
+      <view type="text"
+            id="server0"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState0" />
+      <view type="text"
+            id="server1"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState1" />
+      <view type="text"
+            id="server2"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState2" />
+      <view type="text"
+            id="server3"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState3" />
+      <view type="text"
+            id="server4"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState4" />
+      <view type="text"
+            id="server5"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState5" />
+      <view type="text"
+            id="server6"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState6" />
+      <view type="text"
+            id="server7"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState7" />
+      <view type="text"
+            id="server8"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState8" />
+      <view type="text"
+            id="server9"
+            posref="TR TR"
+            x="0"
+            y="-68"
+            color="255 255 255 255"
+            fontsize="11"
+            shadow="true"
+            global_color="false"
+            hardtext="uiServerState9" />
+    </group>
+  </group>
+  <tree node="connection" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,0)"
+        target="connection:content:server0:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,1)"
+        target="connection:content:server1:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,2)"
+        target="connection:content:server2:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,3)"
+        target="connection:content:server3:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,4)"
+        target="connection:content:server4:active" />
+  <link expr="and(ne(@UI:VARIABLES:CONNECTION_QUALITY,0),eq(@UI:VARIABLES:SERVERSTATE,5))"
+        target="connection:content:server5:active" />
+  <link expr="and(eq(@UI:VARIABLES:CONNECTION_QUALITY,0),eq(@UI:VARIABLES:SERVERSTATE,5))"
+        target="connection:content:server9:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,6)"
+        target="connection:content:server6:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,7)"
+        target="connection:content:server7:active" />
+  <link expr="eq(@UI:VARIABLES:SERVERSTATE,8)"
+        target="connection:content:server8:active" />
+</interface_config>

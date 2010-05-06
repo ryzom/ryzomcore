@@ -1,0 +1,293 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_LOG_ANALYSER_DIALOG DIALOGEX 0, 0, 493, 277
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "NeL Log Analyser"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT1,5,25,481,45,ES_MULTILINE | WS_VSCROLL
+    PUSHBUTTON      "Add View...",IDC_AddView,5,5,55,14
+    PUSHBUTTON      "Add Trace View...",IDC_ADDTRACEVIEW,65,5,55,14
+    PUSHBUTTON      "Compute Traces",IDC_ComputeTraces,125,5,55,14
+    SCROLLBAR       IDC_SCROLLBAR1,476,85,10,185,SBS_VERT | NOT WS_VISIBLE
+    PUSHBUTTON      "Reset",IDC_Reset,185,5,40,14
+    CONTROL         "Browse Log Sessions",IDC_CheckSessions,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,319,5,77,10
+    PUSHBUTTON      "Help",IDC_HelpBtn,275,5,40,14
+    CONTROL         "Browse All File Series",IDC_CheckAllFileSeries,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,319,15,75,10
+    CONTROL         "Display line headers",IDC_DispLineHeaders,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,403,5,83,9
+    PUSHBUTTON      "Plug-ins...",IDC_Analyse,230,5,40,14
+    CONTROL         "Detect corrupted lines",IDC_DetectCorruptedLines,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,403,15,81,10
+END
+
+IDD_View DIALOG DISCARDABLE  0, 0, 492, 282
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         " ",IDC_Service,"Static",SS_SIMPLE | WS_GROUP,67,5,418,8
+    PUSHBUTTON      "Filter...",IDC_BUTTON1,5,5,30,10,NOT WS_VISIBLE
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | 
+                    LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,5,20,480,255
+    PUSHBUTTON      "Find...",IDC_BUTTON2,35,5,30,10,NOT WS_VISIBLE
+    GROUPBOX        "",IDC_DragBar,1,7,8,268,NOT WS_VISIBLE
+END
+
+IDD_FILTERDIALOG DIALOG DISCARDABLE  0, 0, 269, 104
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Filtering preferences"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,217,3,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,217,20,50,14
+    LTEXT           " ",IDC_PosFilterCap,5,5,205,8
+    LTEXT           "Negative filters (lines containing one of these substrings will be discarded)",
+                    IDC_NegFilterCap,5,35,235,8
+    EDITTEXT        IDC_PosFilter,5,15,205,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_NegFilter,5,45,205,14,ES_AUTOHSCROLL
+    LTEXT           "List separator",IDC_SepCap,5,65,45,8
+    EDITTEXT        IDC_Sep,5,75,25,14,ES_AUTOHSCROLL
+END
+
+IDD_LOGSESSIONS DIALOG DISCARDABLE  0, 0, 264, 140
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Available log sessions"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,210,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,210,22,50,14
+    LISTBOX         IDC_LIST1,5,15,200,115,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Select the log session to use, or none (for all sessions)",
+                    IDC_STATIC,5,5,200,8
+END
+
+IDD_PLUGINSELECTOR_DIALOG DIALOG DISCARDABLE  0, 0, 349, 149
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,295,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,295,25,50,14
+    LISTBOX         IDC_LIST1,10,20,280,70,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Select the plug-in to call:",IDC_STATIC,10,5,280,8
+    LTEXT           " ",IDC_PLUGIN_INFO,10,110,330,30
+    LTEXT           "To register new plug-ins, just drag-n-drop their DLL onto the Log Analyser window",
+                    IDC_STATIC,295,45,50,50
+    GROUPBOX        " ",IDC_GROUP_INFO,5,95,340,50
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,5,0,1
+ PRODUCTVERSION 1,5,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "Nevrax\0"
+            VALUE "FileDescription", "NeL Log Analyser\0"
+            VALUE "FileVersion", "1, 5, 0, 1\0"
+            VALUE "InternalName", "log_analyser\0"
+            VALUE "LegalCopyright", "Copyright (C) 2002-2003 Nevrax\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "NeL Log Analyser\0"
+            VALUE "ProductVersion", "1, 5, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_LOG_ANALYSER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 486
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 270
+    END
+
+    IDD_View, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 485
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 275
+    END
+
+    IDD_FILTERDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 262
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 97
+    END
+
+    IDD_LOGSESSIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 257
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 133
+    END
+
+    IDD_PLUGINSELECTOR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 342
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 142
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\log_analyser.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\log_analyser.ico"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\log_analyser.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

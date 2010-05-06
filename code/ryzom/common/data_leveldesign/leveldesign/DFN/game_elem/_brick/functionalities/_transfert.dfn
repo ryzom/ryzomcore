@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="Affected Score" Type="Type" Filename="_scores.typ"/>
+  <ELEMENT Name="Affect Regen" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ResistTest" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Output" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Modifier" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="ModifierOnResist" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Duration" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DurationOnResist" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Effect Type" Type="Type" Filename="_effect_type.typ"/>
+  <ELEMENT Name="Apply Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <LOG>Mon Jan 27 16:03:53 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:04:44 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:04:50 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:27:47 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:32:36 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:32:54 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:33:52 2003 (fleury) Dfn Structure = 
+Mon Jan 27 16:34:02 2003 (fleury) Dfn Structure = 
+Tue Jan 28 16:00:54 2003 (fleury) Dfn Structure = 
+Tue Feb 04 16:18:05 2003 (fleury) Dfn Structure = 
+Tue Feb 04 17:26:32 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

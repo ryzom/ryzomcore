@@ -1,0 +1,19 @@
+
+October 25 2002
+===============
+
+* Added the new clouds system
+
+
+October 22 2002
+===============
+
+* Added the new login system with nel_launcher
+
+
+October 10 2002
+===============
+
+* Snowballs server now use Layer5 instead of Layer4 that is deprecated
+
+* Snowballs client can run without server with Local=1; in the client.cfg

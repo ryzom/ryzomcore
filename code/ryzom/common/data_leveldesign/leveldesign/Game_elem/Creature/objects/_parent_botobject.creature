@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.6 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <STRUCT Name="MovementSpeeds">
+        <ATOM Name="WalkSpeed" Value="0"/>
+        <ATOM Name="RunSpeed" Value="0"/>
+      </STRUCT>
+      <ATOM Name="Fame" Value="none"/>
+    </STRUCT>
+    <STRUCT Name="3d data">
+      <ATOM Name="DisplayOSD" Value="false"/>
+      <ATOM Name="DisplayInRadar" Value="false"/>
+      <ATOM Name="DisplayName" Value="false"/>
+      <ATOM Name="DisplayBars" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="Collision">
+      <ATOM Name="NotTraversable" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="Properties">
+      <ATOM Name="Selectable" Value="false"/>
+      <ATOM Name="Attackable" Value="false"/>
+      <ATOM Name="Curativable" Value="false"/>
+      <ATOM Name="Turn" Value="false"/>
+    </STRUCT>
+    <ATOM Name="attack_list0" Value="magic_cur_homin.attack_list"/>
+    <ATOM Name="attack_list1" Value="magic_off_homin.attack_list"/>
+    <ATOM Name="attack_list2" Value="melee.attack_list"/>
+    <ATOM Name="attack_list3" Value="range.attack_list"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Sep 25 12:22:57 2002 (receveur) .Basics.Race = karavan
+Wed Sep 25 12:23:20 2002 (receveur) .Basics.MeleeFightingCompetences.HandToHand = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:23:33 2002 (receveur) .Basics.RangeFightingCompetences.Pistol = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:23:36 2002 (receveur) .Basics.RangeFightingCompetences.Rifle = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:31 2002 (receveur) .Basics.MeleeFightingCompetences.Kick = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.HeavyArmourWear = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.LightArmourWear = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.MediumArmourWear = &quot;Basics.Level&quot;*10
+Tue Oct 29 10:30:52 2002 (receveur) formName Pasted = 
+Tue Oct 29 10:41:56 2002 (receveur) formName Resized = 
+Tue Oct 29 15:12:56 2002 (receveur) .Basics.First Name = karavan
+Wed Feb 05 18:18:27 2003 (receveur) .Basics.Species = karavan
+Fri Sep 19 11:54:01 2003 (mauduit) .3d data.Automaton = 
+Fri Sep 19 11:54:01 2003 (mauduit) .3d data.Skel = Ma_roadsign_1_skel.skel
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Equipment.Body.Item = Ma_roadsign_poteau_1.shape
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Race = 
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Species = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.DamageLocalisationTable = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.Gender = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.Size = 
+Fri Sep 19 11:54:43 2003 (mauduit) Form Parents = 
+Fri Sep 19 12:16:12 2003 (mauduit) .3d data.AnimSetBaseName = roadsign_1_default_.animation_set
+Thu Sep 25 14:44:56 2003 (mauduit) .3d data.AnimSetBaseName = roadsign_1
+Wed Mar 17 14:28:37 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_Altar_Kamik.shape
+Wed Mar 17 14:29:50 2004 (camerlo) .3d data.AnimSetBaseName = 
+Wed Mar 17 14:29:50 2004 (camerlo) .3d data.Skel = 
+Wed Mar 17 14:33:50 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_Altar_Karavan.shape
+Wed May 26 14:09:11 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_1_Caisse.shape
+Wed May 26 14:09:29 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_3_Caisse.shape
+Wed May 26 14:10:00 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_1_Tonneau.shape
+Tue Jun 22 16:20:46 2004 (ly) .Basics.Equipment.Body.Item = GEN_Mission_1_Tonneau.shape
+Tue Jun 22 17:25:22 2004 (ly) .Basics.Equipment.Body.Item = GE_Mission_1_Tonneau.shape
+Tue Jul 06 14:31:21 2004 (camerlo) .Collision.CollisionRadius = 0.7
+Thu Jul 08 18:34:47 2004 (camerlo) .Collision.CollisionRadius = 0.6
+Thu Jul 15 14:11:43 2004 (camerlo) .3d data.DisplayOSD = false
+Thu Jul 15 14:12:35 2004 (camerlo) .3d data.DisplayOSD = 
+Thu Jul 15 14:12:47 2004 (camerlo) .Basics.Equipment.Body.Item = 
+Thu Jul 15 14:13:30 2004 (camerlo) .Collision.CollisionRadius = 
+Thu Jul 15 14:13:34 2004 (camerlo) .3d data.DisplayOSD = false
+Wed Jul 28 19:04:36 2004 (camerlo) .3d data.DisplayBars = false
+Wed Jul 28 19:04:36 2004 (camerlo) .3d data.DisplayInRadar = false
+Wed Jul 28 19:04:36 2004 (camerlo) .3d data.DisplayName = false
+Wed Jul 28 19:04:41 2004 (camerlo) .Collision.NotTraversable = true
+Wed Jul 28 19:05:09 2004 (camerlo) .Properties.Attackable = false
+Wed Jul 28 19:05:09 2004 (camerlo) .Properties.Curativable = false
+Wed Jul 28 19:05:09 2004 (camerlo) .Properties.Selectable = false
+Thu Nov 25 18:16:30 2004 (guignot) .Properties.Turn = false
+Thu Feb 10 17:29:20 2005 (monnerot) .attack_list0 = magic_cur_homin.attack_list
+Thu Feb 10 17:29:20 2005 (monnerot) .attack_list1 = magic_off_homin.attack_list
+Thu Feb 10 17:29:20 2005 (monnerot) .attack_list2 = melee.attack_list
+Thu Feb 10 17:29:20 2005 (monnerot) .attack_list3 = range.attack_list
+Thu Feb 10 17:29:20 2005 (monnerot) .attack_list4 = 
+Thu Feb 10 17:29:20 2005 (monnerot) .item_r_stat = 
+Thu Apr 14 18:08:13 2005 (monnerot) .Basics.Fame = none
+Mon Nov 21 14:28:27 2005 (monnerot) .Basics.MovementSpeeds.RunSpeed = 0
+Mon Nov 21 14:28:27 2005 (monnerot) .Basics.MovementSpeeds.WalkSpeed = 0</LOG>
+</FORM>

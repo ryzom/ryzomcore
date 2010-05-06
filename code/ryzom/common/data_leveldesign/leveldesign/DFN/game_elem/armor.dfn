@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="head" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <ELEMENT Name="arm" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <ELEMENT Name="leg" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <ELEMENT Name="chest" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <ELEMENT Name="feet" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <ELEMENT Name="hand" Type="Type" Filename="filename.typ" FilenameExt="*.armorpiece"/>
+  <LOG>Mon Oct 13 11:42:14 2003 (ledorze) Dfn Structure = 
+Mon Oct 13 11:43:24 2003 (ledorze) Dfn Structure = </LOG>
+</DFN>

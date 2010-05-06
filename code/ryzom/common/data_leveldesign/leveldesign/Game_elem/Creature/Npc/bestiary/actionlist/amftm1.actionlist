@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="actions">
+      <ATOM Value="melee_normal_damage_f.aiaction"/>
+      <ATOM Value="melee_extra_damage_f.aiaction"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

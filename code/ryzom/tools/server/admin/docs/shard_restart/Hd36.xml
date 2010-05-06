@@ -1,0 +1,819 @@
+<VisioDocument xmlns="urn:schemas-microsoft-com:office:visio">
+	<DocumentProperties>
+		<Title>Drawing1</Title>
+		<HyperlinkBase href=""></HyperlinkBase>
+	</DocumentProperties>
+	<Pages>
+		<Page ID="0" Name="Login" NameU="Login">
+			<Shapes>
+				<Shape ID="1" UniqueID="{91046659-FA77-48AA-838A-13606C3334E1}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>1. Login to the Ryzom Admin tool.</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">11.318897637795276</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{9694EB16-4F3E-45C6-AC40-A3F7C0563AD0}" Name="Sheet.5" NameU="Sheet.5">
+					<Text>Click the 'Main' button at the top right of the screen to get a view something like this:</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">10.925196850393698</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{E278AF4A-0A5C-4BCC-AC75-A8E6FE8361C4}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">3.444881889763779</PinX>
+						<PinY Unit="MM">8.471653543307085</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="4" Name="Select Shard" NameU="Select Shard">
+			<Shapes>
+				<Shape ID="1" UniqueID="{53468736-A9AF-404C-B1A9-A223BFC10EAC}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>2. Select the shard that you want to restart</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">11.318897637795274</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{93800CE6-47A4-46E4-B900-E5039B76B569}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">8.865354330708659</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{94487BB2-17A4-422E-927B-D2A6374093C2}" Name="Sheet.3" NameU="Sheet.3">
+					<XForm>
+						<PinX Unit="MM">0.590551181102362</PinX>
+						<PinY Unit="MM">9.566929133858269</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{5F962DD6-F08A-4685-A6CE-A59A6BA485CB}" Name="Sheet.4" NameU="Sheet.4">
+					<XForm>
+						<PinX Unit="MM">3.809004357293814</PinX>
+						<PinY Unit="MM">9.571398391822701</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="5" Name="Lock The Shard" NameU="Open Restart Interface">
+			<Shapes>
+				<Shape ID="1" UniqueID="{56F4C05F-E3AD-4A95-8828-B2469697E908}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>3. Click the 'lock shard' button to take control of the shard that you've selected 
+
+</Text>
+					<XForm>
+						<PinX Unit="MM">4.227356009930337</PinX>
+						<PinY Unit="MM">11.111767279090113</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{704902DF-2483-46CA-AA4B-CFABE2A95C3C}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">8.865354330708659</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{FEFABA33-0ACE-46A3-BD3A-53ECF294A55F}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>The pink 'restart sequence' button will appear</Text>
+					<XForm>
+						<PinX Unit="MM">3.354717958339129</PinX>
+						<PinY Unit="MM">6.200787401574803</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{5052404E-0A6A-4304-BEDB-F52DB69B727B}" Name="Sheet.4" NameU="Sheet.4">
+					<XForm>
+						<PinX Unit="MM">3.349803149606298</PinX>
+						<PinY Unit="MM">3.747244094488188</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{D98A873E-5773-4FAF-A1FC-F149BB8B6FB1}" Name="Sheet.5" NameU="Sheet.5">
+					<XForm>
+						<PinX Unit="MM">1.722440944881890</PinX>
+						<PinY Unit="MM">9.999999999999998</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{0F99CEFB-BDAE-4F11-B4BE-B1CF3D1BB89B}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">4.330657900600900</PinX>
+						<PinY Unit="MM">10.004469257964431</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{222F2967-F340-4C22-A612-7C9907901A2C}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">2.283464566929134</PinX>
+						<PinY Unit="MM">4.881889763779529</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{5653314C-D54A-4E36-8771-5A38412A59DF}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">4.645618530522161</PinX>
+						<PinY Unit="MM">4.886359021743961</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="6" Name="Open Restart Interface" NameU="Page-5">
+			<Shapes>
+				<Shape ID="1" UniqueID="{BDE767EC-13C0-4B5B-8C25-BFE8C758C9E0}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>4. Click on the 'restart sequence' button</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913385</PinX>
+						<PinY Unit="MM">11.515748031496063</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{B328EC33-C001-400E-9D6A-16A5D8BC44FC}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">9.055118110236219</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{44C39972-0D7F-49E8-BD60-D350E169D9A1}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>You will be prompted to continue:</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">6.387357830271215</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{06DF5344-0785-4B93-BEFD-F16C5E1EAAF2}" Name="Sheet.4" NameU="Sheet.4">
+					<XForm>
+						<PinX Unit="MM">2.449803149606299</PinX>
+						<PinY Unit="MM">5.487795275590552</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{3FF55A02-8ABE-444F-8A0B-FBBA7BBB7DEC}" Name="Sheet.5" NameU="Sheet.5">
+					<Text>The restart sequence interface will appear below the shard services. It should have the following appearance:</Text>
+					<XForm>
+						<PinX Unit="MM">5.216535433070866</PinX>
+						<PinY Unit="MM">4.429133858267717</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{ACEAE92A-DDAE-4B1F-959B-3282BA71E40C}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">3.349803149606297</PinX>
+						<PinY Unit="MM">1.961417322834646</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{EB575663-AC91-4B5A-B31A-331DE34E463B}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">2.283464566929134</PinX>
+						<PinY Unit="MM">10.196850393700787</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{67BF0A86-B828-477F-B836-334E7513C9F9}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">4.645618530522159</PinX>
+						<PinY Unit="MM">10.201319651665219</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="9" UniqueID="{1F3DAC6E-25BA-4538-9976-2ACCADA7AE0D}" Name="Sheet.9" NameU="Sheet.9">
+					<XForm>
+						<PinX Unit="MM">3.661417322834646</PinX>
+						<PinY Unit="MM">0.866141732283465</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="10" UniqueID="{74395526-F3F7-4925-811A-D7D049F7DF35}" Name="Sheet.10" NameU="Sheet.10">
+					<XForm>
+						<PinX Unit="MM">6.545224829734759</PinX>
+						<PinY Unit="MM">0.791870832767583</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="7" Name="Stop The Shard" NameU="Stop The Shard">
+			<Shapes>
+				<Shape ID="1" UniqueID="{31E77A8F-693D-4B1F-BE50-117E8FE519D8}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>5. Click on the 'Stop the Shard' button
+</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913385</PinX>
+						<PinY Unit="MM">11.391951006124234</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{DA027A63-AE68-4DDC-9B3E-61AB026CCA38}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">9.055118110236219</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{E7E9498A-7BC7-4857-8981-722B704A3B55}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>You will be prompted to continue</Text>
+					<XForm>
+						<PinX Unit="MM">3.344887613645888</PinX>
+						<PinY Unit="MM">6.397637795275591</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{92D07E73-83DC-492B-B007-4DD0DB5F08ED}" Name="Sheet.4" NameU="Sheet.4">
+					<XForm>
+						<PinX Unit="MM">1.950590551181103</PinX>
+						<PinY Unit="MM">5.487795275590552</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{CB7D0DE0-1727-4ECF-8117-0F65CAAF1623}" Name="Sheet.5" NameU="Sheet.5">
+					<Text>WARNING: Pressing this button has a direct effect on the game. Don't press this button unless you are sure of what you're doing.</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913385</PinX>
+						<PinY Unit="MM">4.330708661417323</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{12203F01-74D5-4FB9-9748-2E500C409BBD}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">3.011811023622047</PinX>
+						<PinY Unit="MM">8.759842519685039</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{A962D7F8-DF38-4EDC-9DF1-EF4B55CE7319}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">5.492075223435546</PinX>
+						<PinY Unit="MM">8.764311777649471</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="9" UniqueID="{9894559C-FA13-48E4-ADDE-7527A933B3A3}" Name="Sheet.9" NameU="Sheet.9">
+					<Text>Pressing OK here will broadcast a message to all players who are logged in telling them that shard will be shut down and will prevent new players from logging in.</Text>
+					<XForm>
+						<PinX Unit="MM">3.838582677165354</PinX>
+						<PinY Unit="MM">3.740157480314961</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="12" UniqueID="{44AFCC79-A261-4B30-AFAE-C8CE2F0C4007}" Name="Sheet.12" NameU="Sheet.12">
+					<XForm>
+						<PinX Unit="MM">6.215551181102361</PinX>
+						<PinY Unit="MM">8.671259842519685</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="13" UniqueID="{0BAA1F29-B8A5-471D-9E4B-C883C52D6361}" Name="Sheet.13" NameU="Sheet.13">
+					<XForm>
+						<PinX Unit="MM">6.539640283161631</PinX>
+						<PinY Unit="MM">8.517154135620743</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="14" UniqueID="{E4E0E8D6-0149-494F-9AD4-9D0A60B32CDD}" Name="Sheet.14" NameU="Sheet.14">
+					<Text>Clicking the ‘Cancel’ Button will close the ‘Restart Interface’ without any effect on the shard</Text>
+					<XForm>
+						<PinX Unit="MM">8.169291338582674</PinX>
+						<PinY Unit="MM">8.169291338582676</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="8" Name="Wait For Shard To Stop" NameU="Wait While Shard Stops">
+			<Shapes>
+				<Shape ID="1" UniqueID="{C7B5CE63-9315-41B7-93F9-29F1E51232D2}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>During this time messages are broadcast to the players warning them that the game shard is going to be stopped and that they should log out</Text>
+					<XForm>
+						<PinX Unit="MM">6.200787401574803</PinX>
+						<PinY Unit="MM">11.122047244094491</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{B3693731-3147-4AFE-AE09-462FF2A7E4E3}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>This sequence starts automatically when the 'Step 1' timer reaches zero.
+During this time persistent data is saved and the game services shut down cleanly</Text>
+					<XForm>
+						<PinX Unit="MM">5.413385826771653</PinX>
+						<PinY Unit="MM">7.677165354330715</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{F7564B18-B62A-4608-B3EF-39F0A0701BF6}" Name="Sheet.5" NameU="Sheet.5">
+					<Text>When the 'Step 2' timer reaches zero, the 'Running State' column should read 'stopped' for all services.</Text>
+					<XForm>
+						<PinX Unit="MM">4.291338582677165</PinX>
+						<PinY Unit="MM">4.232283464566931</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{9ACC6263-A071-41F5-9849-FEB5EDDC5931}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.346456692913385</PinX>
+						<PinY Unit="MM">8.654330708661423</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{558E6563-9759-445F-B371-B20920CFEFDD}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">3.021653543307086</PinX>
+						<PinY Unit="MM">9.874803149606306</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="14" UniqueID="{79DD6E3E-E59C-495C-B49A-07C9FEA2C9CB}" Name="Sheet.14" NameU="Sheet.14">
+					<XForm>
+						<PinX Unit="MM">3.444881889763779</PinX>
+						<PinY Unit="MM">5.121456692913391</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="15" UniqueID="{3DD6FC05-D7B8-4288-B28F-16BE9C4375C0}" Name="Sheet.15" NameU="Sheet.15">
+					<XForm>
+						<PinX Unit="MM">3.441535433070867</PinX>
+						<PinY Unit="MM">1.835236220472441</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="16" UniqueID="{3C313C95-E3AD-4898-9C7B-074F25E9ADA4}" Name="Sheet.16" NameU="Sheet.16">
+					<Text>6. Wait for the shutdown sequence to begin</Text>
+					<XForm>
+						<PinX Unit="MM">4.133858267716535</PinX>
+						<PinY Unit="MM">11.515748031496065</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="17" UniqueID="{F2FCE633-315B-404D-A488-59B6CA352B5D}" Name="Sheet.17" NameU="Sheet.17">
+					<Text>7. Wait for the shutdown sequence to go through.</Text>
+					<XForm>
+						<PinX Unit="MM">6.003937007874015</PinX>
+						<PinY Unit="MM">8.169291338582683</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="22" UniqueID="{F79C068C-AE31-4E35-9A2B-70A1FB8D03CE}" Name="Sheet.22" NameU="Sheet.22">
+					<Text>If this is not the case then the developers should be contacted and you should click the ‘Give Up, Shard cannot be started’ button.</Text>
+					<XForm>
+						<PinX Unit="MM">5.452755905511811</PinX>
+						<PinY Unit="MM">-0.688976377952756</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="23" UniqueID="{AD8AA1FB-658F-41BE-82AF-94AFB6547B71}" Name="Sheet.23" NameU="Sheet.23">
+					<XForm>
+						<PinX Unit="MM">3.349803149606298</PinX>
+						<PinY Unit="MM">-2.319291338582677</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="20" UniqueID="{A72A4857-0D9D-47B1-8950-7817FF995CEF}" Name="Sheet.20" NameU="Sheet.20">
+					<XForm>
+						<PinX Unit="MM">5.841535433070866</PinX>
+						<PinY Unit="MM">-2.834645669291338</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="21" UniqueID="{716965B1-2BE1-4F9C-BC30-A97A0FE77C28}" Name="Sheet.21" NameU="Sheet.21">
+					<XForm>
+						<PinX Unit="MM">6.559988609262317</PinX>
+						<PinY Unit="MM">-2.830176411326904</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="13" UniqueID="{F15AB4DE-5320-4E74-B095-3B163AC8B72A}" Name="Sheet.13" NameU="Sheet.13">
+					<XForm>
+						<PinX Unit="MM">6.235236220472441</PinX>
+						<PinY Unit="MM">9.881889763779526</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="18" UniqueID="{CB1A76CA-3E0C-4CC2-880D-CA80A0578FEA}" Name="Sheet.18" NameU="Sheet.18">
+					<XForm>
+						<PinX Unit="MM">6.539640283161631</PinX>
+						<PinY Unit="MM">9.716890432038076</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{B206D675-FF7D-40A9-BEE2-B0C6C000256A}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">5.511760262805623</PinX>
+						<PinY Unit="MM">9.879272407570738</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="19" UniqueID="{5B2C41F6-96A7-4FFB-8E63-CEB046B7E636}" Name="Sheet.19" NameU="Sheet.19">
+					<Text>Clicking the ‘Cancel’ Button will abort the shutdown sequence and allow players to login to the shard</Text>
+					<XForm>
+						<PinX Unit="MM">8.169291338582676</PinX>
+						<PinY Unit="MM">9.350393700787400</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="9" Name="Restart 1/4" NameU="Restart 1/4">
+			<Shapes>
+				<Shape ID="1" UniqueID="{257D7146-9FCF-4EFB-8425-900F469A375A}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>8. Start the start sequence by pressing the '1/4 - Start Low Level' button.</Text>
+					<XForm>
+						<PinX Unit="MM">4.232283464566929</PinX>
+						<PinY Unit="MM">11.278433945756781</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{94A82F74-C565-4116-9301-590BB88C33B6}" Name="Sheet.2" NameU="Sheet.2">
+					<Text>The services will start launching</Text>
+					<XForm>
+						<PinX Unit="MM">4.232283464566929</PinX>
+						<PinY Unit="MM">7.972440944881889</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{F2FE4233-25DF-4BE8-98F5-4EAA471D3075}" Name="Sheet.3" NameU="Sheet.3">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">9.688582677165352</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{ED749B20-77FE-49E1-A210-5B63FC35F4A5}" Name="Sheet.4" NameU="Sheet.4">
+					<Text>9. Click on the shard name every few seconds or so to update the view until the 'ts', 'ms' and 'rns' services are all running.</Text>
+					<XForm>
+						<PinX Unit="MM">7.244094488188976</PinX>
+						<PinY Unit="MM">2.854330708661416</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{F8A20637-DBD7-4590-9F73-DCBA7230246A}" Name="Sheet.5" NameU="Sheet.5">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">5.518897637795275</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{35599E83-EC04-4D59-94AE-3A0F15DD9D0A}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">2.175196850393701</PinX>
+						<PinY Unit="MM">9.389763779527558</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{4A6902B5-E486-4C19-85C3-C755CCF74F85}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">4.684988609262318</PinX>
+						<PinY Unit="MM">9.394233037491990</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{5B926AFF-7FA9-429F-BC35-528E4DA2B296}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">1.279527559055118</PinX>
+						<PinY Unit="MM">4.694881889763780</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="9" UniqueID="{687A6544-E301-4E0E-97FC-178DC4387FE4}" Name="Sheet.9" NameU="Sheet.9">
+					<XForm>
+						<PinX Unit="MM">4.104279947844995</PinX>
+						<PinY Unit="MM">4.886359021743958</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="10" UniqueID="{D39AA23A-1D8B-444F-A7CD-EC7C32F4F557}" Name="Sheet.10" NameU="Sheet.10">
+					<XForm>
+						<PinX Unit="MM">1.269685039370079</PinX>
+						<PinY Unit="MM">3.799212598425196</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="11" UniqueID="{0E162B7C-00AB-435B-8073-8D60578C0E07}" Name="Sheet.11" NameU="Sheet.11">
+					<XForm>
+						<PinX Unit="MM">4.104279947844995</PinX>
+						<PinY Unit="MM">3.803681856389628</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="12" UniqueID="{FEA9BAB7-28A1-469A-A8CE-D982D57F1DAD}" Name="Sheet.12" NameU="Sheet.12">
+					<XForm>
+						<PinX Unit="MM">1.269685039370079</PinX>
+						<PinY Unit="MM">4.330708661417321</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="13" UniqueID="{E4DFF36B-07DB-4355-B9EA-CF012A76D02B}" Name="Sheet.13" NameU="Sheet.13">
+					<XForm>
+						<PinX Unit="MM">4.104279947844995</PinX>
+						<PinY Unit="MM">4.335177919381754</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="14" UniqueID="{D55F9F74-DEB2-492D-AD85-648575ED5702}" Name="Sheet.14" NameU="Sheet.14">
+					<Text>The 'running state' and 'state' columns for these services should both read 'online' and the 'Report' column should read '01s'
+This step should only take a few seconds</Text>
+					<XForm>
+						<PinX Unit="MM">6.240157480314960</PinX>
+						<PinY Unit="MM">2.362204724409448</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="15" UniqueID="{51711FC0-116D-4ACF-8A4A-84FBCCBAD2D1}" Name="Sheet.15" NameU="Sheet.15">
+					<Text>If the states don't update correctly then the developers should be contacted and you should click the ‘Give Up, Shard cannot be started’ button.</Text>
+					<XForm>
+						<PinX Unit="MM">6.240157480314960</PinX>
+						<PinY Unit="MM">1.870078740157480</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="17" UniqueID="{3EF00317-FD9D-44CE-BC58-6DFB7C441A46}" Name="Sheet.17" NameU="Sheet.17">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">0.239763779527558</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="18" UniqueID="{FFD0135C-E7F2-40DA-92E6-3CA4ABADA802}" Name="Sheet.18" NameU="Sheet.18">
+					<XForm>
+						<PinX Unit="MM">5.841535433070867</PinX>
+						<PinY Unit="MM">-0.275590551181102</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="19" UniqueID="{8C263C36-B033-4921-BB78-247E64CFFF31}" Name="Sheet.19" NameU="Sheet.19">
+					<XForm>
+						<PinX Unit="MM">6.559988609262317</PinX>
+						<PinY Unit="MM">-0.271121293216669</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="10" Name="Restart 2/4" NameU="Restart 2/4">
+			<Shapes>
+				<Shape ID="1" UniqueID="{85ED2C5D-1C7F-46F5-870D-F2D3DDF0AB21}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>10. Click on the '2/4 - Start Mid Level' button to continue the start sequence</Text>
+					<XForm>
+						<PinX Unit="MM">4.133858267716535</PinX>
+						<PinY Unit="MM">11.278433945756781</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{0218F1DB-9A95-4880-A45F-18B28D0A2D9B}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">9.688582677165353</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{1A376A9E-242A-4750-BE5B-F7B3487D433D}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>The main game services will be started... they will take a minute or two to initialise so patience is required.</Text>
+					<XForm>
+						<PinX Unit="MM">5.708661417322834</PinX>
+						<PinY Unit="MM">8.169291338582678</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{C9D5EFB4-71DB-4694-BA18-E7F7246C8B11}" Name="Sheet.5" NameU="Sheet.5">
+					<Text>11. Click on the shard name every few seconds or so to update the view until the 'egs', 'ios' and 'gpms' services are all running.</Text>
+					<XForm>
+						<PinX Unit="MM">7.677165354330708</PinX>
+						<PinY Unit="MM">7.578740157480314</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{11E32F08-8437-419C-B657-A83A6394B6C5}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">2.155511811023622</PinX>
+						<PinY Unit="MM">9.251968503937007</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{6FE2B0F7-62D3-4139-AF16-008A3F59B8E8}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">4.675146089577279</PinX>
+						<PinY Unit="MM">9.256437761901440</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="28" UniqueID="{ABB078BF-224D-4767-9A45-B0A5D67126A3}" Name="Sheet.28" NameU="Sheet.28">
+					<Text>The 'running state' and 'state' columns for these services should both read 'online' and the 'Report' column should read '01s'
+This step will generally take one or two minutes but may be a little longer. It should not exceed 5 minutes.</Text>
+					<XForm>
+						<PinX Unit="MM">7.775590551181102</PinX>
+						<PinY Unit="MM">7.086614173228346</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="29" UniqueID="{4C8CAEF9-005B-4F3A-AC9F-D9C10B86A720}" Name="Sheet.29" NameU="Sheet.29">
+					<XForm>
+						<PinX Unit="MM">3.444881889763779</PinX>
+						<PinY Unit="MM">4.520472440944881</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="30" UniqueID="{F712D519-205B-44B5-BE5C-A4F468E04235}" Name="Sheet.30" NameU="Sheet.30">
+					<Text>If the states don't update correctly then the developers should be contacted and you should click the ‘Give Up, Shard cannot be started’ button.</Text>
+					<XForm>
+						<PinX Unit="MM">6.240157480314961</PinX>
+						<PinY Unit="MM">2.066929133858268</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="34" UniqueID="{15580980-71BB-471E-B8BD-9464640A6CE6}" Name="Sheet.34" NameU="Sheet.34">
+					<XForm>
+						<PinX Unit="MM">3.448228346456693</PinX>
+						<PinY Unit="MM">0.436614173228346</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="11" Name="Restart 3/4" NameU="Restart 3/4">
+			<Shapes>
+				<Shape ID="1" UniqueID="{C0392C49-02D5-484D-976B-0CD87E1C4D89}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>12. Click on the '3/4 - Start High Level' button to continue the start sequence</Text>
+					<XForm>
+						<PinX Unit="MM">4.822834645669291</PinX>
+						<PinY Unit="MM">11.318897637795274</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{E5B99E4F-FC7E-4CD9-8EDF-CFE91F4B0F2A}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">9.688582677165353</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{90403A77-D05E-4759-B78C-70B23EB378FD}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>The AI services will be started... they will take a minute or so to initialise</Text>
+					<XForm>
+						<PinX Unit="MM">4.960629921259843</PinX>
+						<PinY Unit="MM">7.972440944881889</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{0F371B65-D209-4F1A-BD97-91D1F0C7484B}" Name="Sheet.4" NameU="Sheet.4">
+					<Text>13. Click on the shard name every few seconds or so to update the view until the 'ais' services are all running.</Text>
+					<XForm>
+						<PinX Unit="MM">6.062992125984252</PinX>
+						<PinY Unit="MM">2.854330708661417</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{775ACF8D-1674-453D-A9E6-19B3BC449543}" Name="Sheet.5" NameU="Sheet.5">
+					<XForm>
+						<PinX Unit="MM">3.343110236220472</PinX>
+						<PinY Unit="MM">5.518897637795275</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{F44A8A30-F5AF-49DB-B507-6FDCD226FD77}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">2.155511811023622</PinX>
+						<PinY Unit="MM">9.114173228346456</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{49352680-CBFA-40FD-9FB3-143D20AC1838}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">4.675146089577279</PinX>
+						<PinY Unit="MM">9.118642486310888</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{C944A512-488B-4C7A-A015-7833E2D1775A}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">1.427165354330709</PinX>
+						<PinY Unit="MM">6.131889763779526</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="9" UniqueID="{5517BBA3-2F01-4061-BD00-18C0A1015DA7}" Name="Sheet.9" NameU="Sheet.9">
+					<XForm>
+						<PinX Unit="MM">4.281158906272716</PinX>
+						<PinY Unit="MM">6.110971265772092</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="10" UniqueID="{A3A03F60-E8E8-47EB-9678-42AD7434467C}" Name="Sheet.10" NameU="Sheet.10">
+					<Text>The 'running state' and 'state' columns for these services should both read 'online' and the 'Report' column should read '01s'
+This step should take roughly one minute.</Text>
+					<XForm>
+						<PinX Unit="MM">6.496062992125983</PinX>
+						<PinY Unit="MM">2.362204724409448</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="11" UniqueID="{7D7ECFF5-FB60-4F47-B80E-86B59E004422}" Name="Sheet.11" NameU="Sheet.11">
+					<Text>If the states don't update correctly then the developers should be contacted and you should click the ‘Give Up, Shard cannot be started’ button.</Text>
+					<XForm>
+						<PinX Unit="MM">6.240157480314960</PinX>
+						<PinY Unit="MM">1.870078740157481</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="12" UniqueID="{DDCEC7BB-40E9-487F-A556-5E8AFA3378B7}" Name="Sheet.12" NameU="Sheet.12">
+					<XForm>
+						<PinX Unit="MM">3.448228346456692</PinX>
+						<PinY Unit="MM">0.239763779527558</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="12" Name="Restart 4/4" NameU="Restart 4/4">
+			<Shapes>
+				<Shape ID="1" UniqueID="{E9E9F9AE-15E5-4D41-A9D4-0ACC4A949AF0}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>14. Click on the '4/4 - Start Top Level' button to continue the start sequence</Text>
+					<XForm>
+						<PinX Unit="MM">5.669291338582677</PinX>
+						<PinY Unit="MM">11.318897637795276</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{6396E82F-CC31-469C-9B8A-DE0F6276536F}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">9.688582677165353</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{65C4EB35-7385-4CBC-B0A6-EE84B1E08F15}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>The Front end communication services will be started</Text>
+					<XForm>
+						<PinX Unit="MM">4.232283464566929</PinX>
+						<PinY Unit="MM">7.972440944881889</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{0D7D1297-D358-4699-84DA-FB7D80FD1F7B}" Name="Sheet.4" NameU="Sheet.4">
+					<Text>15. Click on the shard name every few seconds or so to update the view until ALL services are running.</Text>
+					<XForm>
+						<PinX Unit="MM">6.099628492123085</PinX>
+						<PinY Unit="MM">7.381889763779527</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{264B34C5-2D81-40FD-94FB-BCBF210D60B7}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">2.145669291338582</PinX>
+						<PinY Unit="MM">8.956692913385828</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{1A698E0F-72A8-4E80-9357-6F9F94447243}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">4.675146089577279</PinX>
+						<PinY Unit="MM">8.961162171350260</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="12" UniqueID="{B8D5671C-1E1F-4932-8E95-8500346C233D}" Name="Sheet.12" NameU="Sheet.12">
+					<Text>The 'running state' and 'state' columns for ALL services should both read 'online' and the 'Report' column should read '01s'
+NOTE: The RWS service state will read ‘open’ when the other services read ‘online’.
+This step should only take a few seconds.</Text>
+					<XForm>
+						<PinX Unit="MM">5.416119539372975</PinX>
+						<PinY Unit="MM">6.786526684164478</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="14" UniqueID="{FB1DF6B6-0C39-4D54-9B49-415935ABA98C}" Name="Sheet.14" NameU="Sheet.14">
+					<Text>If the states don't update correctly then the developers should be contacted and you should click the ‘Give Up, Shard cannot be started’ button.</Text>
+					<XForm>
+						<PinX Unit="MM">6.240157480314961</PinX>
+						<PinY Unit="MM">1.476377952755906</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="15" UniqueID="{93CDC813-41D3-4D73-B2FB-DA534449AE2B}" Name="Sheet.15" NameU="Sheet.15">
+					<XForm>
+						<PinX Unit="MM">3.448228346456693</PinX>
+						<PinY Unit="MM">-0.153937007874017</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="21" UniqueID="{2BAFD75E-F18C-4298-9D8D-1DD5BCBE7E90}" Name="Sheet.21" NameU="Sheet.21">
+					<XForm>
+						<PinX Unit="MM">3.444881889763779</PinX>
+						<PinY Unit="MM">4.047047244094488</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="13" Name="Hand Over To Customer Support" NameU="Hand Over To Customer Support">
+			<Shapes>
+				<Shape ID="1" UniqueID="{42C447C9-9AD0-4C18-AD6D-A29B7C10556F}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>16. Click on the 'Hand Over to Customer Support' button to finish the start sequence</Text>
+					<XForm>
+						<PinX Unit="MM">4.566929133858268</PinX>
+						<PinY Unit="MM">11.318897637795276</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{D5C588D5-6461-461E-8A83-5E2E5449DAB6}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.343110236220473</PinX>
+						<PinY Unit="MM">9.688582677165353</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{3B45D0ED-78FF-4450-BB23-788CBEDDF4CC}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>The shard is now open in restricted mode - the customer support team can log in and check that everything is ok before the shard opens
+The customer support volunteers can now open the shard to the players when they are ready</Text>
+					<XForm>
+						<PinX Unit="MM">4.035433070866141</PinX>
+						<PinY Unit="MM">7.785870516185478</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{EA816466-9F16-48B6-9775-FAE624D2205C}" Name="Sheet.4" NameU="Sheet.4">
+					<Text>17. Click on the 'Done' button to exit the 'restart sequence' interface</Text>
+					<XForm>
+						<PinX Unit="MM">4.232283464566930</PinX>
+						<PinY Unit="MM">6.988188976377953</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{F14AE284-B99B-4797-A050-EEEDFE9D8190}" Name="Sheet.5" NameU="Sheet.5">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">4.591141732283464</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{CB130AE9-8699-4502-A3F4-8ACC6A2B0FB0}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">2.942913385826772</PinX>
+						<PinY Unit="MM">8.818897637795274</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="7" UniqueID="{EBCAFF62-237E-438D-8721-3015E0ABF8DC}" Name="Sheet.7" NameU="Sheet.7">
+					<XForm>
+						<PinX Unit="MM">5.472390184065468</PinX>
+						<PinY Unit="MM">8.823366895759707</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="8" UniqueID="{00336F69-60AA-409F-A8BB-BD12F93E6155}" Name="Sheet.8" NameU="Sheet.8">
+					<XForm>
+						<PinX Unit="MM">6.240157480314961</PinX>
+						<PinY Unit="MM">3.011811023622048</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="9" UniqueID="{C31975B7-2A4A-439A-875D-D6CC02B9969C}" Name="Sheet.9" NameU="Sheet.9">
+					<XForm>
+						<PinX Unit="MM">6.564909869104838</PinX>
+						<PinY Unit="MM">3.016280281586480</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+		<Page ID="14" Name="Unlock Shard" NameU="Unlock Shard">
+			<Shapes>
+				<Shape ID="1" UniqueID="{F782C94F-C0B9-46FF-BE0D-EA77C795405B}" Name="Sheet.1" NameU="Sheet.1">
+					<Text>18. Click on the 'Unlock Shard' button to finish</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">11.278433945756781</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="2" UniqueID="{0608B00D-9D95-49E4-A9FA-406420B65696}" Name="Sheet.2" NameU="Sheet.2">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">8.921850393700787</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="3" UniqueID="{6F7A8B9A-2058-4DD5-8007-3FF3B03B6423}" Name="Sheet.3" NameU="Sheet.3">
+					<Text>You should be back to a view that looks something like this:</Text>
+					<XForm>
+						<PinX Unit="MM">3.346456692913386</PinX>
+						<PinY Unit="MM">6.397637795275590</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="4" UniqueID="{15BA5C88-518E-44AB-B7CE-CB3BC34524D1}" Name="Sheet.4" NameU="Sheet.4">
+					<XForm>
+						<PinX Unit="MM">3.349803149606299</PinX>
+						<PinY Unit="MM">4.000590551181102</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="5" UniqueID="{EFFD49D9-5552-44FE-9DD4-B82C89B1615C}" Name="Sheet.5" NameU="Sheet.5">
+					<XForm>
+						<PinX Unit="MM">1.771653543307087</PinX>
+						<PinY Unit="MM">10.019685039370080</PinY>
+					</XForm>
+				</Shape>
+				<Shape ID="6" UniqueID="{AC6B9CC9-5D5E-4A40-9358-021097808101}" Name="Sheet.6" NameU="Sheet.6">
+					<XForm>
+						<PinX Unit="MM">4.379870499026097</PinX>
+						<PinY Unit="MM">10.004469257964434</PinY>
+					</XForm>
+				</Shape>
+			</Shapes>
+		</Page>
+	</Pages>
+</VisioDocument>

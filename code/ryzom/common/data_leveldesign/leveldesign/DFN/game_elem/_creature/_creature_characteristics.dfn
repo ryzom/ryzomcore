@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" State="modified">
+  <ELEMENT Name="Constitution" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Metabolism" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Intelligence" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Wisdom" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Strength" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="WellBalanced" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Dexterity" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="Will" Type="Type" Filename="int.typ" Default="35"/>
+  <ELEMENT Name="DynamicEnergyValue" Type="Type" Filename="float.typ" Default="0.01"/>
+  <ELEMENT Name="DynGroupCountMultiplier" Type="Type" Filename="int.typ" Default="1"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:13 2002 (corvazier) File converted from old format
+Thu Sep 04 15:31:34 2003 (boucher) Dfn Structure = 
+Wed Oct 15 11:26:33 2003 (fleury) Dfn Structure = 
+Wed Sep 29 17:29:18 2004 (boucher) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Visual Property Value" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Tue Nov 16 18:08:25 2004 (nouveau) Dfn Structure = 
+Tue Nov 16 18:12:37 2004 (nouveau) Dfn Structure = 
+Wed Nov 17 14:28:58 2004 (nouveau) Dfn Structure = </LOG>
+</DFN>

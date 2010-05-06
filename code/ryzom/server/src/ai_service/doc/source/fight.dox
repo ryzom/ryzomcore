@@ -1,0 +1,206 @@
+/** @file
+	@brief La gestion du combat dans l'AIS
+	
+	(C) 2005 - Doub
+	- 2005/01/12 - Doub - Created
+*/
+/**
+@page fight La gestion du combat dans l'AIS
+
+@section definitions Définitions
+- @e joueur: le personnage d'un joueur tel qu'il est vu par l'AIS
+- @e bot : un agent (créature, npc) controlé par l'AIS
+- @e entité : une entité physique dans le monde ; bots et joueurs sont tous des entités
+- @e aggro : quantification de l'aggressivité des bots envers les entités
+
+@section variables Les variables
+Chaque entité spawnée a dans le mirroir divers champs pouvant influencer le combat&nbsp;:
+- Mode
+- Target
+- CombatState
+- CurrentHitPoints
+- MaxHitPoints
+- Stunned
+- WhoSeesMe
+- ActionFlags et TargetList
+- ainsi que 100 champs de fame (Fame_0 à Fame_99).
+
+Chaque bot a une fiche associée décrivant ses propriétés. Cette fiche de bot contient les champs suivants&nbsp;:
+- Level
+- Radius
+- BoundingRadius
+- BonusAggroHungry
+- BonusAggroVeryHungry
+- AssistDist
+- AggroRadiusNotHungry
+- AggroRadiusHungry
+- AggroRadiusHunting
+- FaunaType
+- DistModulator
+- TargetModulator
+- ScoreModulator
+- FearModulator
+- LifeLevelModulator
+- CourageModulator
+- GroupCohesionModulator
+- XPLevel
+- NbPlayers
+- MinFightDist
+- FactionIndex
+- GroupIndexStr : le groupe auquel appartient le bot
+- AssistGroupIndexStr : une liste des groupes que le bot assiste
+- AttackGroupIndexStr : une liste des groupes que le bot attaque
+
+@section fight_aggro L'aggro
+
+L'aggro envers une entité est représenté par un couple entité/valeur. Chaque bot a une liste de ces couples, qui représente l'ensemble des entités que le bot considère comme ses ennemis. De même chaque groupe a une liste de couples d'aggro. Les valeurs d'aggro s'échelonnent de 0 à 1. L'ensemble des valeurs d'aggro s'amenuise au cours du temps, au rythme de 1 unité toutes les 2 minutes (ainsi une valeur d'aggro à 0,5 atteindra 0 au bout d'une minute). Un couple est retiré de la liste quand la valeur atteint 0. Quand l'AIS change l'aggro elle utilise 3 méthodes (e est l'entité cible) :
+- setBotAggroMinimum(e, v) : fixe le minimum d'aggro, càd si la valeur d'aggro actuelle est supérieure à v on la consereve, sinon on la fixe à v
+- addBotAggro(e, v) : augmente l'aggro de (1-a)*v où a est la valeur actuelle
+- forgetAggro(e) : supprime l'aggro
+
+@section targeting Le ciblage
+
+Chaque entité peut cibler une autre entité, selon un de ces trois types : combat, visuel et inaccessible. Chaque entité peut être ciblée un nombre illimité de fois selon chacun des trois types, et peux accéder à l'ensemble des entités la ciblant. Une cible de type combat est l'entité que l'on combat, une cible de type visuel est l'entité que l'on regarde, une cible de type inaccessible est une entité que l'on ne peux pas atteindre et que l'on fuit (anti-exploit notamment).
+
+Chaque entité ne peux avoir qu'une cible à la fois, et l'entité ciblée est référencée dans le champ Target du mirroir. Toutes les entités (bots et joueurs) qui ont pour cible un joueur (quel que soit le type de ciblage) apparaitront avec une icone d'oeil sur le client du joueur en question.
+
+@section behaviours Les comportements
+
+Les comportements sont présents dans l'AIS sous plusieurs formes. Les bots sont classés en deux catégories : npc et créature (flore/faune). Les bots sont assignés à des groupes. Les groupes sont assignés à des managers. Les managers sont associés à des AIInstances. Les AIInstances sont en général responsable d'un continent chacune.
+
+Il existe des comportements de groupe, des comportements de bot, des profils de groupe et des profils de bot. Les profils sont des comportements temporairement associés à un bot ou un groupe. Les comportements et profils de groupe sont updatés toutes les quelques secondes, en fonction de la proximité des joueurs et de l'état des créatures (en combat ou non par exemple).
+
+@subsection behaviourGroupFauna Groupes de créatures
+Les groupes de créatures ont une activité qui suit un cycle prédéfini (spawning, grazing, resting) qui est repété en boucle, et dont la période est prédéfinie.
+
+À chaque mise à jour des groupes un leader de groupe est designé au besoin. Puis les bots sont réorganisés (cf @ref fightReorganize). Chaque bot est ensuite mis à jour.
+
+@subsection behaviourBotFauna Créature
+Le comportement général des créatures est influencé par une activité de groupe parmi wandering, grazing et resting pour la faune et valant plant idle pour la flore et une activité de profil (cf @ref profileBotFauna).
+
+À chaque mise à jour si la créature n'est pas en combat, elle choisit une cible toutes les 1,5 secondes. Elle récupère la liste des entités qu'elle voit, et pour chacune d'entre elles :
+- Si la différence d'altitude est de plus de 10m elle l'ignore
+- Si l'entité est un joueur
+  - Si la fiche de la créature indique qu'elle attaque les joueurs elle fixe le minimum d'aggro pour ce joueur à 0,4.
+  - Sinon
+    - Si la créature n'est pas une plante, qu'elle peut bouger, que l'entité n'est pas en mode combat, et que ça position est accessible on calcule un score de curiosité pour l'entité.
+    - Si l'entité a le meilleur score et que la créature n'a pas de cible elle prend l'entité pour cible visuelle.
+- Si l'entité est un NPC
+  - Si la créature est un herbivore
+    - Si la créature n'a pas de cible et que l'entité est assez proche elle peut (alétoirement) la prendre pour cible visuelle.
+  - Si la créature est un prédateur
+    - Si l'entité a un profil de groupe "escorté" la créature fixe le minimum d'aggro pour ce NPC à 0,8.
+- Si l'entité est une créature ou un animal de bat (Mektoub packer)
+  - Si l'entité est dans le rayon d'assist, si elle a été frappée dans les 2 dernières secondes et si soit elle fait partie du groupe de la créature ou la fiche de la créature indique qu'elle doit l'assiter
+    - Si la cible de l'entité est un joueur on fixe le minimum d'aggro pour ce joueur à 0,2.
+    - On fixe le minimum d'aggro à 0,2 pour toutes les entités ciblant l'entitée assistée.
+  - Si la fiche de la créature indique qu'elle doit attaquer l'entité
+    - Si la créature peut bouger et a faim
+      - Si l'entité est vivante, si la créature courre plus vite que l'entité et si la créature a plus de 75% de ses points de vie, elle fixe le minimum d'aggro pour l'entité à 0,4 ou moins selon sa distance.
+      - Si l'entité est morte, si son cadavre a encore de la viande sur lui et si la créature n'a pas d'autre profile elle se crée un profil de manducation de cadavre (CEatCorpseFaunaProfile).
+  - Si la fiche de l'entité indique qu'elle doit attaquer la créature
+    - Si la créature peut bouger et courre moins vite que l'entité elle se crée un profil de fuite (CBotProfileGoAwaySpawn).
+  - Si la créature n'a pas de cible et que l'entité est assez proche elle peut (alétoirement) la prendre pour cible visuelle.
+
+Si elle est curieuse de voir un joueur elle se crée un profil de curiosité (CCuriosityFaunaProfile). Si l'activité de groupe a changé elle se crée un profil correspondant (StaticRestFaunaProfile, StaticGrazeFaunaProfile, StaticWanderFaunaProfile ou StaticPlanteIdleFaunaProfile). Si la créature n'est pas assomée elle met à jour sont profil. Finalement si elle n'est pas en combat elle met à jour sa liste d'aggro (atténuation des valeurs d'aggro).
+
+@subsection profileNpc Profils de NPC (bots et groupes)
+Les profils de NPC sont répartis selon une hiérarchie selon le graphe suivant. Les flèches représentent un héritage (pointant le parent), les profils en pointillés sont des classes intermédiaires (non instanciés en tant que tels), les profils en gras sont des profils de groupe (les autres sont les profils de bot).
+@dot
+digraph profileBotNpcHierarchy {
+	[rankdir=LR]
+	node [shape=box fontname="Arial" fontsize=9 height=0 width=0];
+	edge [dir=back arrowtail=onormal];
+	CAIBaseSpawnProfile [style=dashed];
+	CBotProfileMoveToSpawn;
+	CBotProfileFollowPosSpawn;
+	CBotProfileWanderBaseSpawn [style=dashed];
+	CBotProfileStandAtPosSpawn;
+	CBotProfileForageSpawn;
+	CActivitySpawnProfile [style=dashed];
+	CGrpProfileNormalSpawn [style=dashed];
+	CSlaveSpawnProfile [style=dashed];
+	CMoveSpawnProfile [style=dashed];
+	CFightSpawnProfile;
+	CGrpProfileGoToPointSpawn [style=bold];
+	CGrpProfileFollowRouteSpawn [style=bold];
+	CGrpProfileStandOnVerticesSpawn [style=bold];
+	CGrpProfileWanderSpawn [style=bold];
+	CGrpProfileBanditSpawn [style=bold];
+	CGrpProfileEscortedSpawn [style=bold];
+	CGrpProfileGuardSpawn [style=bold];
+	CGrpProfileGuardEscortedSpawn [style=bold];
+	CGrpProfileFaction [style=bold];
+	
+	CAIBaseSpawnProfile -> CBotProfileMoveToSpawn;
+	CAIBaseSpawnProfile -> CBotProfileFollowPosSpawn;
+	CAIBaseSpawnProfile -> CBotProfileWanderBaseSpawn;
+	CBotProfileWanderBaseSpawn -> CBotProfileStandAtPosSpawn;
+	CBotProfileWanderBaseSpawn -> CBotProfileForageSpawn;
+	CAIBaseSpawnProfile -> CActivitySpawnProfile;
+	CActivitySpawnProfile -> CGrpProfileNormalSpawn;
+	CAIBaseSpawnProfile -> CSlaveSpawnProfile;
+	CSlaveSpawnProfile -> CMoveSpawnProfile;
+	CSlaveSpawnProfile -> CFightSpawnProfile;
+	CMoveSpawnProfile -> CGrpProfileGoToPointSpawn;
+	CMoveSpawnProfile -> CGrpProfileFollowRouteSpawn;
+	CMoveSpawnProfile -> CGrpProfileStandOnVerticesSpawn;
+	CMoveSpawnProfile -> CGrpProfileWanderSpawn;
+	CGrpProfileNormalSpawn -> CGrpProfileBanditSpawn;
+	CGrpProfileNormalSpawn -> CGrpProfileEscortedSpawn;
+	CGrpProfileNormalSpawn -> CGrpProfileGuardSpawn;
+	CGrpProfileNormalSpawn -> CGrpProfileGuardEscortedSpawn;
+	CGrpProfileNormalSpawn -> CGrpProfileFaction;
+}
+@enddot
+
+@section fightReorganize Réorganisation du combat
+La réorganisation se fait sur un ensemble de bots. Pour chaque bot la séquence suivante est appliquée.
+- Si le bot est effrayé il calcule un vecteur l'éloignant des entités le regardant et se crée un profil de fuite (CBotProfileFleeSpawn) selon ce vecteur.
+- Si le bot est en combat @e et en train de taper il ne fait rien (la séquence s'arrête ici).
+- Le bot construit une liste des entités pour lesquelles il a de l'aggro.
+- Il y rajoute les entités pour lesquelles son groupe a de l'aggro.
+- Pour chaque entité de cette liste le bot calcule un score, et sélectionne comme ennemi à combattre l'entité avec le plus haut score
+- Si le bot a un ennemi à combattre et que ce n'est pas sa cible il se crée un profil de combat (CBotProfileFightSpawnFauna pour les créatures, CBotProfileFightSpawnNpc pour les NPCs) et prend l'ennemi à combattre comme cible de combat.
+- Sinon si le bot a une cible innaccessible il se crée un profil de fuite (CBotProfileFleeSpawn) s'éloignant de cet ennemi et prend l'ennemi à fuir comme cible innaccessible.
+
+*/
+
+@section behaviours
+@subsection behaviourGroupNpc Groupes de NPCs
+...
+
+@subsection behaviourBotNpc NPC
+...
+
+@subsection profileGroup Profils de groupe
+...
+
+@subsection profileBotFauna Profils de créature
+...
+
+@section behaviours
+@subsection profileNpc
+@subsubsection CAIBaseSpawnProfile
+@subsubsection CBotProfileMoveToSpawn
+@subsubsection CBotProfileFollowPosSpawn
+@subsubsection CBotProfileWanderBaseSpawn
+@subsubsection CBotProfileStandAtPosSpawn
+@subsubsection CBotProfileForageSpawn
+@subsubsection CActivitySpawnProfile
+@subsubsection CGrpProfileNormalSpawn
+@subsubsection CSlaveSpawnProfile
+@subsubsection CMoveSpawnProfile
+@subsubsection CFightSpawnProfile
+@subsubsection CGrpProfileGoToPointSpawn
+@subsubsection CGrpProfileFollowRouteSpawn
+@subsubsection CGrpProfileStandOnVerticesSpawn
+@subsubsection CGrpProfileWanderSpawn
+@subsubsection CGrpProfileBanditSpawn
+@subsubsection CGrpProfileEscortedSpawn
+@subsubsection CGrpProfileGuardSpawn
+@subsubsection CGrpProfileGuardEscortedSpawn
+@subsubsection CGrpProfileFaction
+
+...
+

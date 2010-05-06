@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="unknow"/>
+      <Body Name="BODY">
+        <VECTOR size="9">
+          <POLYPTR id="19614872" class="CFormBodyEltAtom">
+            <Atom Name="Include_patats" Value="list&lt; patat_name.typ &gt;"/>
+          </POLYPTR>
+          <POLYPTR id="19614960" class="CFormBodyEltAtom">
+            <Atom Name="Exclude_patats" Value="list&lt; patat_name.typ &gt;"/>
+          </POLYPTR>
+          <POLYPTR id="19615048" class="CFormBodyEltAtom">
+            <Atom Name="Plants" Value="list&lt; plant_instance.dfn &gt;"/>
+          </POLYPTR>
+          <POLYPTR id="19615136" class="CFormBodyEltAtom">
+            <Atom Name="Jitter_Pos" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="19615224" class="CFormBodyEltAtom">
+            <Atom Name="Scale_Min" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="19615312" class="CFormBodyEltAtom">
+            <Atom Name="Scale_Max" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="19650376" class="CFormBodyEltAtom">
+            <Atom Name="Put_On_Water" Value="boolean.typ"/>
+          </POLYPTR>
+          <POLYPTR id="19650464" class="CFormBodyEltAtom">
+            <Atom Name="Water_Height" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="19650552" class="CFormBodyEltAtom">
+            <Atom Name="Random_Seed" Value="uint32.typ"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="3D">
+      <ATOM Name="Bounding Radius"/>
+      <ATOM Name="LOD 0 min"/>
+      <ATOM Name="LOD 0 max" Value="100.0"/>
+      <ATOM Name="LOD 1 min" Value="110.0"/>
+      <ATOM Name="LOD 1 max" Value="200.0"/>
+      <STRUCT Name="SpringFX">
+        <ATOM Name="FXName" Value="brazierB.ps"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:17 2002 (corvazier) File converted from old format
+Tue Jan 27 10:28:17 2004 (vizerie) .3D.SpringFX.FXName = brazierB.ps</LOG>
+</FORM>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="lvl_dmg" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="speed" Type="Type" Filename="int.typ" Default="1"/>
+  <LOG>Mon Oct 13 11:48:44 2003 (ledorze) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_c_ar.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="refugee black sleeves"/>
+      <ATOM Name="ItemType" Value="Light Sleeves"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Arms"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="CraftPlan" Value="bcraea26.sbrick"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="TR_HOM_refugee_armpad.shape"/>
+      <ATOM Name="shape_female" Value="tr_HOF_underwear_armpad.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon" Value="AR_armpad.tga"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+      <ATOM Name="color" Value="Black"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="ArmorTool"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Aug 07 10:55:14 2002 (mauduit) Form Parents = 
+Fri Sep 27 14:21:31 2002 (favre) .basics.name = zorai light sleeves
+Wed Oct 02 17:58:05 2002 (favre) .basics.hit points = low
+Wed Oct 02 17:58:05 2002 (favre) .basics.weight = light
+Thu Sep 18 10:36:52 2003 (coutelas) .AsBrick.Client.Icon = AR_armpad.tga
+Thu Sep 18 10:36:52 2003 (coutelas) .basics.ItemType = Light Sleeves
+Thu Sep 18 10:36:52 2003 (coutelas) .faber.Skill = zorai light sleeves craft
+Tue Sep 23 16:46:48 2003 (coutelas) .basics.name = zorai refugee sleeves
+Wed Sep 24 11:45:36 2003 (coutelas) .basics.name = refugee sleeves
+Wed Sep 24 11:45:36 2003 (coutelas) .basics.origin = refugee
+Wed Sep 24 11:45:57 2003 (coutelas) .3d.color = 
+Wed Sep 24 11:53:21 2003 (coutelas) .3d.color = Red
+Wed Sep 24 11:53:21 2003 (coutelas) .basics.name = refugee red sleeves
+Wed Sep 24 12:19:58 2003 (coutelas) .basics.origin = 
+Fri Sep 26 17:36:51 2003 (saffray) .basics.EquipmentInfo.EquipmentSlots[0] = Arms
+Fri Sep 26 17:36:51 2003 (saffray) formName Resized = 1</LOG>
+</FORM>

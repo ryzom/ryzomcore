@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <ELEMENT Name="New Valid Types" Type="Dfn" Filename="_brick_valid_targets.dfn"/>
+  <LOG>Tue Nov 26 14:30:04 2002 (fleury) Dfn Structure = 
+Thu Jan 30 19:48:04 2003 (fleury) Dfn Structure = 
+Mon Feb 03 16:13:17 2003 (fleury) Dfn Structure = 
+Wed Feb 05 14:48:13 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,7 @@
+; georges_edit_dll.def : Declares the module parameters for the DLL.
+
+LIBRARY      "georges_dll"
+DESCRIPTION  'georges_dll Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here

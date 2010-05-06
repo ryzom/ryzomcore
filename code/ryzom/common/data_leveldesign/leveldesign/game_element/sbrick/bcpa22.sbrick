@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.11 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCPA"/>
+      <ATOM Name="IndexInFamily" Value="22"/>
+      <ATOM Name="Property 0" Value="FPLAN: BCZAEA BCZAEB BCZAEC BCZAED BCCAEA BCCAEB BCCAEC BCCAED BCRAEA"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SC 0"/>
+      <ATOM Name="Action Nature" Value="CRAFT"/>
+      <ATOM Name="Skill" Value="SCA"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="FP_Armor.tga"/>
+      <ATOM Name="IconBack" Value="BK_zorai_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_Over.tga"/>
+    </STRUCT>
+    <STRUCT Name="Optional">
+      <ATOM Name="f0" Value="BCOA"/>
+      <ATOM Name="f1" Value="BCOB"/>
+      <ATOM Name="f2" Value="BCOC"/>
+      <ATOM Name="f3" Value="BCOD"/>
+    </STRUCT>
+    <STRUCT Name="Parameter">
+      <ATOM Name="f0" Value="BCZACA"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="ArmorTool"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Mar 18 17:24:09 2009 (kervala) .Basics.Property 0 = FPLAN: BCZAEA BCZAEB BCZAEC BCZAED BCCAEA BCCAEB BCCAEC BCCAED BCRAEA</LOG>
+</FORM>

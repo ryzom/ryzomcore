@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL Debug"
+	InheritedPropertySheets=".\nel_vs90.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		Optimization="0"
+		PreprocessorDefinitions="_DEBUG"
+		BasicRuntimeChecks="3"
+		RuntimeLibrary="3"
+		EnableFunctionLevelLinking="true"
+		DebugInformationFormat="4"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace)_d.lib"
+		IgnoreDefaultLibraryNames="libcmt;libcmtd;msvcrt"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_d.exe"
+		IgnoreDefaultLibraryNames="libcmt;libcmtd;msvcrt"
+		GenerateDebugInformation="true"
+		ImportLibrary="$(RootNamespace)_d.lib"
+	/>
+</VisualStudioPropertySheet>

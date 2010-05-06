@@ -1,0 +1,1464 @@
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <lua file="player.lua" />
+  <lua file="taskbar.lua" />
+  <!-- ********** -->
+  <!-- * PLAYER * -->
+  <!-- ********** -->
+  <variable entry="UI:TEMP:ACTIONVAL"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:VARIABLES:DISPLAYBARSTOTAL"
+            type="sint64"
+            value="3" />
+  <variable entry="UI:TEMP:PVP_FACTION:TAG_PVP"
+            type="bool"
+            value="0" />
+  <variable entry="UI:TEMP:PVP_FACTION:DSP_MODE"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:TEMP:PVP_FACTION:DSP_PUSHED"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:TEMP:PVP_FACTION:DSP_TIMER"
+            type="sint32"
+            value="0" />
+  <define id="user_name_id"
+          value="SERVER:Entities:E0:P6" />
+  <!-- jauges with tooltips -->
+  <template name="jauges_player"
+            x="0"
+            y="0"
+            posref="TR TR">
+    <view type="bar3"
+          id="jauges"
+          posref="#posref"
+          x="#x"
+          y="#y"
+          color1="%focus_color"
+          value1="%player_focus_percent"
+          range1="%player_percent_max"
+          color2="%sap_color"
+          value2="%player_sap_percent"
+          range2="%player_percent_max"
+          color3="%sta_color"
+          value3="%player_sta_percent"
+          range3="%player_percent_max" />
+    <ctrl type="tooltip"
+          id="tt1"
+          on_tooltip="player_tt_stamina"
+          color="%sta_color"
+          posparent="jauges"
+          posref="TL TL"
+          x="0"
+          y="-1"
+          sizeref="wh3"
+          w="0"
+          h="0" />
+    <ctrl type="tooltip"
+          id="tt2"
+          on_tooltip="player_tt_sap"
+          color="%sap_color"
+          posparent="tt1"
+          posref="BL TL"
+          x="0"
+          y="0"
+          sizeref="wh"
+          w="0"
+          h="0" />
+    <ctrl type="tooltip"
+          id="tt3"
+          on_tooltip="player_tt_focus"
+          color="%focus_color"
+          posparent="tt2"
+          posref="BL TL"
+          x="0"
+          y="0"
+          sizeref="wh"
+          w="0"
+          h="0" />
+  </template>
+  <!-- the Main Group -->
+  <proc id="player_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:PLAYER|value=1" />
+    <!--  
+      <action handler="set" params="target_property=ui:interface:player:char3d:char:anim|value=0" />
+      <action handler="set" params="target_property=ui:interface:player:char3d:cam:posz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
+      <action handler="set" params="target_property=ui:interface:player:char3d:cam:tgtz|value=add(0.15,getprop('ui:interface:player:char3d:char:headz'))" />
+      <action handler="anim_start" params="anim=anim_refresh_player" />
+    -->
+  </proc>
+  <proc id="player_cam_position">
+    <action handler="set"
+            params="target_property=ui:interface:player:char3d:cam:posz|value=add(0.12,getprop('ui:interface:player:char3d:char:headz'))" />
+    <action handler="set"
+            params="target_property=ui:interface:player:char3d:cam:tgtz|value=add(0.12,getprop('ui:interface:player:char3d:char:headz'))" />
+  </proc>
+  <anim id="anim_refresh_player"
+        duration="0.1"
+        disable_buttons="false"
+        on_finish="proc"
+        on_finish_params="player_cam_position"></anim>
+  <template name="jauge_score"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            w="156"
+            color=""
+            color_gray=""
+            text=""
+            val=""
+            maxval=""
+            val_bar=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y">
+      <group id="jauge_bar"
+             posref="TL TL"
+             w="#w"
+             h="16">
+        <view type="bitmap"
+              id="jauge_graph"
+              posref="TL TL"
+              texture="jauge.tga"
+              color="#color"
+              global_color="false" />
+      </group>
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            x="16"
+            y="-3"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="10"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text_number"
+            id="max"
+            posref="MR MR"
+            x="-12"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="false"
+            fontsize="10"
+            value="#maxval"
+            positive="true" />
+      <view type="text"
+            id="sep"
+            posparent="max"
+            posref="TL TR"
+            x="-1"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="false"
+            fontsize="10"
+            hardtext="/" />
+      <view type="text_number"
+            id="val"
+            posparent="max"
+            posref="TL TR"
+            x="-10"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="false"
+            fontsize="10"
+            value="#val"
+            positive="true" />
+      <link expr="div(mul(abs(@#val_bar), #w), %player_percent_max)"
+            target="jauge_bar:w" />
+      <link expr="ifthenelse(le(@#val_bar,0), '#color_gray', '#color')"
+            target="jauge_bar:jauge_graph:color" />
+    </group>
+    <instance template="text_tt"
+              posparent="#id"
+              tooltip="#tooltip"
+              tooltip_parent="win" />
+  </template>
+  <!-- ******************** -->
+  <!-- AFFICHAGE DES BARRES -->
+  <!-- ******************** -->
+  <group type="menu"
+         id="player_jauge_menu"
+         extends="base_menu_with_color">
+    <action id="sap_bardisplay"
+            name="uiSapBarDisplay"
+            handler="set"
+            params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=not(@UI:SAVE:PLAYER:DISP_SAP)" />
+    <action id="sta_bardisplay"
+            name="uiStaBarDisplay"
+            handler="set"
+            params="dblink=UI:SAVE:PLAYER:DISP_STA|value=not(@UI:SAVE:PLAYER:DISP_STA)" />
+    <action id="foc_bardisplay"
+            name="uiFocBarDisplay"
+            handler="set"
+            params="dblink=UI:SAVE:PLAYER:DISP_FOC|value=not(@UI:SAVE:PLAYER:DISP_FOC)" />
+  </group>
+  <link expr="depends(@UI:SAVE:PLAYER:DISP_SAP, @UI:SAVE:PLAYER:DISP_STA, @UI:SAVE:PLAYER:DISP_FOC)"
+        action="lua"
+        params="game:updatePlayerBars()" />
+  <link expr="depends(@SERVER:CHARACTER_INFO:PVP_FACTION_TAG)"
+        action="lua"
+        params="game:updatePvpTag()" />
+  <!-- ************** -->
+  <!-- CURRENT ACTION -->
+  <!-- ************** -->
+  <!-- Must pass through an other DB, to allow multiple isntances of the action bar template -->
+  <variable entry="UI:PHRASE:ACT_BAR_LEN"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:PHRASE:EXECUTE_NEXT:PHRASE"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:PHRASE:EXECUTE_NEXT:ISCYCLIC"
+            type="sint32"
+            value="0" />
+  <link expr="depends(@UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK)"
+        action="set"
+        cond="and(ne(@SERVER:USER:ACT_TEND,0),ne(sub(@%player_act_end,@%player_act_start),0))"
+        params="dblink=UI:PHRASE:ACT_BAR_LEN|value=div(mul(sub(@UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK,@%player_act_start), 92), sub(@%player_act_end,@%player_act_start))" />
+  <link expr="eq(@SERVER:USER:ACT_TEND,0)"
+        action="set"
+        params="dblink=UI:PHRASE:ACT_BAR_LEN|value=0" />
+  <!-- The template (instanciated 2 times) -->
+  <template name="t_current_action_bar"
+            id=""
+            x=""
+            y=""
+            posref="TL TL"
+            tooltip_parent=""
+            tooltip_special_parent=""
+            active="true">
+    <group id="#id"
+           x="#x"
+           y="#y"
+           posref="#posref"
+           w="166"
+           h="32"
+           active="#active">
+      <!-- Backs -->
+      <view type="bitmap"
+            id="slot_action1"
+            posref="TL TL"
+            y="-3"
+            texture="slot_brick.tga"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="slot_action2"
+            posref="TR TR"
+            y="-3"
+            texture="slot_brick.tga"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="progression"
+            posref="TM TM"
+            y="-7"
+            texture="slot_jauge_action.tga"
+            inherit_gc_alpha="false" />
+      <instance template="text_tt"
+                tooltip="uittGaugesActionBar"
+                posparent="progression"
+                tooltip_parent="#tooltip_parent"
+                tooltip_special_parent="#tooltip_special_parent" />
+      <!-- Next Action + Cycle bmp -->
+      <ctrl type="sheet"
+            id="execute_phrase_next"
+            nature="sphraseid"
+            value="UI:PHRASE:EXECUTE_NEXT"
+            posparent="slot_action2"
+            posref="TL TL"
+            x="1"
+            y="-1"
+            tooltip="uittNextExecutingPhrase"
+            tooltip_parent="#tooltip_parent"
+            tooltip_special_parent="#tooltip_special_parent" />
+      <view type="bitmap"
+            id="view_cycle_action"
+            texture="action_cycle.tga"
+            global_color="false"
+            active="false"
+            posparent="execute_phrase_next"
+            posref="TL TL"
+            x="0"
+            y="0"
+            render_layer="3" />
+      <link expr="@UI:PHRASE:EXECUTE_NEXT:ISCYCLIC"
+            target="view_cycle_action:active" />
+      <!-- Action in progress -->
+      <ctrl type="sheet"
+            id="execute_phrase"
+            nature="sphraseid"
+            value="SERVER:EXECUTE_PHRASE"
+            posparent="slot_action1"
+            posref="TL TL"
+            x="1"
+            y="-1"
+            tooltip_parent="#tooltip_parent"
+            tooltip_special_parent="#tooltip_special_parent"
+            onclick_l="phrase_cancel_cast"
+            on_tooltip="lua:game:getMilkoTooltipWithKey('', 'uittExecutingPhrase', 'uittExecutingPhrase', 'phrase_cancel_cast', '')" />
+      <ctrl type="sheet"
+            id="execute_special_action"
+            nature="sbrick"
+            value="SERVER:EXECUTE_PHRASE"
+            posparent="execute_phrase"
+            posref="BL BL"
+            x="0"
+            y="0"
+            tooltip_parent="#tooltip_parent"
+            tooltip_special_parent="#tooltip_special_parent"
+            onclick_l="phrase_cancel_cast"
+            on_tooltip="lua:game:getMilkoTooltipWithKey('', 'uittExecutingPhrase', 'uittExecutingPhrase', 'phrase_cancel_cast', '')" />
+      <link expr="@SERVER:EXECUTE_PHRASE:SHEET"
+            target="execute_special_action:active" />
+      <!-- Action Bar -->
+      <group id="action_bar"
+             posref="TL TL"
+             posparent="progression"
+             w="0"
+             h="20">
+        <view type="bitmap"
+              id="jauge_graph"
+              posref="TL TL"
+              texture="jauge_action.tga"
+              color="255 255 255 255"
+              global_color="false" />
+      </group>
+      <link expr="@UI:PHRASE:ACT_BAR_LEN"
+            target="action_bar:w" />
+    </group>
+  </template>
+  <!-- The Current Action bar Window -->
+  <group type="container"
+         id="current_action"
+         w="182"
+         h="40"
+         title=""
+         global_color="false"
+         global_color_over="true"
+         resizer="false"
+         header_active="false"
+         right_button="false"
+         movable="false"
+         active="false"
+         opened="true"
+         openable="false"
+         options="compass"
+         locked="false"
+         savable="false">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="0"
+           posref="TL TL" />
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="182"
+           h="40"
+           posref="TL TL">
+      <instance template="t_current_action_bar"
+                id="current_action"
+                x="0"
+                y="0"
+                posref="MM MM"
+                tooltip_parent="special"
+                tooltip_special_parent="ui:interface:milko_pad" />
+    </group>
+  </group>
+  <tree node="current_action" />
+  <!-- Display the current action bar if wanted and usefull. update its position under memory bar. Usefull if: 
+                - some special action casted
+                - some phrase casted
+                - some phrase casted next
+                - some action bar setuped
+                - if the player is in combat mode
+-->
+  <link expr="and(eq(@UI:SAVE:ACT_BAR_OUT,1), eq(@UI:VARIABLES:ISACTIVE:SETS,1), or(
+                        ne(@SERVER:EXECUTE_PHRASE:SHEET,0), 
+                        ne(@SERVER:EXECUTE_PHRASE:PHRASE,0),
+                        ne(@UI:PHRASE:EXECUTE_NEXT:PHRASE,0),
+                        ne(@SERVER:USER:ACT_TEND,0),
+                        eq(@SERVER:Entities:E0:P8,3)) )"
+        target="current_action:active"
+        action="lua:game:updateCurrentActionPosition()" />
+  <!-- ************* -->
+  <!-- JAUGES PLAYER -->
+  <!-- ************* -->
+  <!-- Tag Button -->
+  <template name="t_pvp_tag_button"
+            id=""
+            tx=""
+            mode="">
+    <ctrl type="button"
+          id="#id"
+          button_type="toggle_button"
+          posref="TR TR"
+          x="0"
+          y="0"
+          active="false"
+          tx_normal="#tx"
+          tx_pushed="#tx"
+          tx_over="W_button_24_over.tga"
+          w="24"
+          h="24"
+          scale="true"
+          global_color_normal="false"
+          global_color_over="false"
+          global_color_pushed="false"
+          over_when_pushed="false"
+          onclick_l="lua:game:pvpTag()"
+          on_tooltip="lua:game:playerTTPvp()"
+          tooltip_parent="win" />
+    <link expr="eq(@UI:TEMP:PVP_FACTION:DSP_MODE, #mode)"
+          target="#id:active" />
+    <link expr="@UI:TEMP:PVP_FACTION:DSP_PUSHED"
+          target="#id:pushed" />
+  </template>
+  <!-- Player container -->
+  <group type="container"
+         id="player"
+         w="182"
+         h="512"
+         title=""
+         global_color="false"
+         global_color_over="true"
+         resizer="false"
+         header_active="false"
+         right_button="false"
+         movable="true"
+         active="false"
+         opened="true"
+         openable="false"
+         on_active="proc"
+         on_active_params="player_active"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:PLAYER|value=0"
+         on_open="set"
+         on_open_params="dblink=%inventory_touched|value=1"
+         on_close="set"
+         on_close_params="dblink=%inventory_touched|value=1"
+         help_page="interf_my_gauges.html"
+         title_delta_max_w="-42"
+         title_over_extend_view_text="true"
+         group_onclick_l="self_target"
+         on_begin_move="self_target">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="34"
+           posref="TL TL"
+           group_onclick_l="self_target"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="32"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:player_jauge_menu"
+           group_onclick_l="self_target">
+      <!-- The Player Name -->
+      <view type="text"
+            id="player_title"
+            posref="BL BL"
+            x="0"
+            y="0"
+            color="255 255 255 255"
+            global_color="true"
+            fontsize="11"
+            shadow="true"
+            hardtext="Refugee"
+            line_maxw="140"
+            over_extend_view_text="true" />
+      <!-- PVP Tag Button -->
+      <instance template="t_pvp_tag_button"
+                id="pvp_tag_button_0"
+                tx="pvp_green.tga"
+                mode="0" />
+      <instance template="t_pvp_tag_button"
+                id="pvp_tag_button_1"
+                tx="pvp_orange.tga"
+                mode="1" />
+      <instance template="t_pvp_tag_button"
+                id="pvp_tag_button_2"
+                tx="pvp_red.tga"
+                mode="2" />
+      <!-- PVP Tag special overed pushed icon. pushed == over rotated !!. (NB: Ugly to save icon space) -->
+      <view type="bitmap"
+            id="pvp_tag_pushed"
+            posref="TR TR"
+            x="0"
+            y="0"
+            w="24"
+            h="24"
+            scale="true"
+            rot="2"
+            texture="W_button_24_over.tga"
+            color="255 255 255 255"
+            active="false"
+            global_color="false" />
+      <link expr="@UI:TEMP:PVP_FACTION:DSP_PUSHED"
+            target="pvp_tag_pushed:active" />
+      <!-- PVP Tag timer -->
+      <view type="bitmap"
+            id="pvp_timer_bg"
+            posref="TR TL"
+            x="-24"
+            y="-25"
+            w="24"
+            h="4"
+            scale="true"
+            texture="blank.tga"
+            color="8 60 8 255"
+            active="false" />
+      <view type="bitmap"
+            id="pvp_timer"
+            posref="TR TL"
+            x="-24"
+            y="-26"
+            w="24"
+            h="2"
+            scale="true"
+            texture="blank.tga"
+            color="32 220 32 255"
+            active="false" />
+      <link expr="@UI:TEMP:PVP_FACTION:DSP_TIMER"
+            target="pvp_timer_bg:active, pvp_timer:active" />
+    </group>
+    <group id="content"
+           x="0"
+           y="-2"
+           w="166"
+           child_resize_h="true"
+           posref="TL TL"
+           group_onclick_l="self_target">
+      <!-- new Jauges -->
+      <view type="bitmap"
+            id="b_lif"
+            posref="TL TL"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="b_sap"
+            posref="TL TL"
+            y="-20"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="b_sta"
+            posref="TL TL"
+            y="-35"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="b_foc"
+            posref="TL TL"
+            y="-50"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <instance template="jauge_score"
+                id="jlife"
+                posparent="b_lif"
+                posref="TL TL"
+                color="214 56 7 255"
+                color_gray="160 42 5 255"
+                text="uiHP"
+                val="%player_hp"
+                maxval="%player_hp_max"
+                val_bar="%player_hp_percent"
+                tooltip="uittGaugesHP" />
+      <instance template="jauge_score"
+                id="jsap"
+                posparent="b_sap"
+                posref="TL TL"
+                color="133 189 5 255"
+                color_gray="100 141 3 255"
+                text="uiSap"
+                val="%player_sap"
+                maxval="%player_sap_max"
+                val_bar="%player_sap_percent"
+                tooltip="uittGaugesSap" />
+      <instance template="jauge_score"
+                id="jsta"
+                posparent="b_sta"
+                posref="TL TL"
+                color="202 67 152 255"
+                color_gray="151 50 114 255"
+                text="uiStamina"
+                val="%player_sta"
+                maxval="%player_sta_max"
+                val_bar="%player_sta_percent"
+                tooltip="uittGaugesSta" />
+      <instance template="jauge_score"
+                id="jfoc"
+                posparent="b_foc"
+                posref="TL TL"
+                color="31 155 197 255"
+                color_gray="23 116 147 255"
+                text="uiFocus"
+                val="%player_focus"
+                maxval="%player_focus_max"
+                val_bar="%player_focus_percent"
+                tooltip="uittGaugesFoc" />
+      <!-- Action Progression (display only if user wants to). Important to set active by default, to have correct reset.xml behaviour -->
+      <instance template="t_current_action_bar"
+                id="current_action"
+                x="0"
+                y="-65"
+                tooltip_parent="win"
+                active="false" />
+      <link expr="eq(@UI:SAVE:ACT_BAR_OUT,0)"
+            target="current_action:active" />
+    </group>
+  </group>
+  <tree node="player" />
+  <!-- ************************* -->
+  <!-- *  BONUS MALUS  * -->
+  <!-- ************************* -->
+  <!-- constants -->
+  <define id="num_server_bonus_malus"
+          value="12" />
+  <define id="num_local_bonus_malus"
+          value="16" />
+  <!-- server + DeathPenalty/XPCat/RingXPCat/PVP Outpost -->
+  <!-- Temp DB that may contains other static bonus (XPcatalyzer, RingXPcatalyzer, PVP Outpost) -->
+  <variable entry="UI:VARIABLES:BONUS:$i:SHEET"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:BONUS:$i:DISABLED"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:BONUS:$i:SPECIAL_TOOLTIP"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:MALUS:$i:SHEET"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:MALUS:$i:DISABLED"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:MALUS:$i:SPECIAL_TOOLTIP"
+            type="sint32"
+            value="0"
+            size="%num_local_bonus_malus" />
+  <variable entry="UI:VARIABLES:SHOW_BONUS"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:SHOW_MALUS"
+            type="sint32"
+            value="0" />
+  <!-- Link that copy server DB to local DB -->
+  <link expr="depends(@SERVER:USER:DEATH_XP_MALUS, @SERVER:CHARACTER_INFO:XP_CATALYSER, @SERVER:CHARACTER_INFO:RING_XP_CATALYSER, @SERVER:CHARACTER_INFO:PVP_OUTPOST, @%malus, @%bonus)"
+        action="lua:game:updatePlayerBonusMalus()" />
+  <template name="t_text_bonus"
+            id=""
+            x=""
+            y="">
+    <group id="#id"
+           child_resize_w="true"
+           child_resize_h="true"
+           child_resize_wmargin="1"
+           child_resize_hmargin="1"
+           posref="TL TM"
+           x="#x"
+           y="#y"
+           avoid_resize_parent="true"
+           active="false">
+      <!-- seconds shadow for better readibility (fake bold) -->
+      <view type="text"
+            id="shade0"
+            x="0"
+            y="1"
+            color="0 0 0 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+      <view type="text"
+            id="shade1"
+            x="2"
+            y="1"
+            color="0 0 0 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+      <view type="text"
+            id="shade2"
+            x="1"
+            y="2"
+            color="0 0 0 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+      <view type="text"
+            id="shade3"
+            x="1"
+            y="0"
+            color="0 0 0 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+      <!-- standard text. 2 for more readibility -->
+      <view type="text"
+            id="text"
+            x="1"
+            y="1"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+      <view type="text"
+            id="text2"
+            x="1"
+            y="1"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="9"
+            shadow="false"
+            hardtext=""
+            multi_line="true"
+            multi_line_space="0"
+            multi_line_maxw_only="true" />
+    </group>
+  </template>
+  <!-- The Bonus Malus Window -->
+  <group type="container"
+         id="bonus_malus"
+         w="116"
+         h="80"
+         title=""
+         global_color="false"
+         global_color_over="true"
+         resizer="false"
+         header_active="false"
+         right_button="false"
+         movable="true"
+         active="true"
+         opened="true"
+         openable="false"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:BONUS_MALUS|value=0"
+         group_onclick_r="active_menu"
+         group_params_r="menu=ui:interface:base_menu_with_color"
+         options="compass">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="0"
+           posref="TL TL" />
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="116"
+           child_resize_h="true"
+           child_resize_hmargin="7"
+           posref="TL TL">
+      <!-- WINDOW TOOLTIP -->
+      <!-- display the tooltip only when the window is empty (so players understand what it is) -->
+      <ctrl type="tooltip"
+            id="tt_empty"
+            instant_help="true"
+            posref="TM TM"
+            x="0"
+            y="-3"
+            sizeref="w"
+            w="-6"
+            h="22"
+            tooltip="uittBonusMalusWindow"
+            tooltip_parent="win" />
+      <link expr="and(not(@UI:VARIABLES:SHOW_BONUS), not(@UI:VARIABLES:SHOW_MALUS))"
+            target="tt_empty:active" />
+      <!-- BONUS -->
+      <group id="bonus"
+             x="2"
+             y="-4"
+             sizeref="w"
+             w="0"
+             child_resize_h="true"
+             posref="TL TL">
+        <!-- Special list_sheet that display some disable bitmap if needed according to DB -->
+        <group type="list_sheet_bonus_malus"
+               id="bonuses"
+               sizeref="w"
+               w="0"
+               value="UI:VARIABLES:BONUS"
+               posref="TL TL"
+               y="0"
+               wspace="2"
+               hspace="12"
+               maxitem="%num_local_bonus_malus"
+               rowmin="1"
+               rowmax="4"
+               nature="sbrick"
+               array="false"
+               lmargin="0"
+               rmargin="0"
+               tmargin="0"
+               bmargin="1"
+               column_max="4"
+               column_center="false"
+               disable_texture="MG_suppression.tga"
+               onclick_r="open_sbrick_help"
+               params_r="test_aura_disabled=1"
+               onclick_l="lua:game:onLeftClickBonus()"
+               on_tooltip="aura_modifier_tooltip"
+               child_resize_h="true"
+               tooltip_parent="win"></group>
+        <!-- small texts under icons. For now do only the first 4th bonus. Do it later for other if needed -->
+        <instance template="t_text_bonus"
+                  id="text0"
+                  x="13"
+                  y="-26" />
+        <instance template="t_text_bonus"
+                  id="text1"
+                  x="41"
+                  y="-26" />
+        <instance template="t_text_bonus"
+                  id="text2"
+                  x="69"
+                  y="-26" />
+        <instance template="t_text_bonus"
+                  id="text3"
+                  x="97"
+                  y="-26" />
+        <!-- Always display at least a line here, for better readability of malus (always under) -->
+        <!--<link expr="@UI:VARIABLES:SHOW_BONUS" target="active" />-->
+      </group>
+      <!-- sep -->
+      <view type="bitmap"
+            id="sep"
+            sizeparent="parent"
+            sizeref="w"
+            w="0"
+            h="2"
+            posparent="bonus"
+            posref="BL TL"
+            scale="true"
+            texture="W_line_hor.tga" />
+      <link expr="and(@UI:VARIABLES:SHOW_BONUS, @UI:VARIABLES:SHOW_MALUS)"
+            target="sep:active" />
+      <group id="dummy_pos"
+             posparent="sep"
+             posref="TL TL"
+             sizeref="w"
+             h="2" />
+      <!-- MALUS -->
+      <group id="malus"
+             y="-2"
+             sizeparent="parent"
+             sizeref="w"
+             w="0"
+             child_resize_h="true"
+             posparent="dummy_pos"
+             posref="BL TL">
+        <!-- Special list_sheet that display some disable bitmap if needed according to DB -->
+        <group type="list_sheet_bonus_malus"
+               id="maluses"
+               sizeref="w"
+               w="0"
+               value="UI:VARIABLES:MALUS"
+               posref="TL TL"
+               y="0"
+               wspace="2"
+               hspace="12"
+               maxitem="%num_local_bonus_malus"
+               rowmin="1"
+               rowmax="4"
+               nature="sbrick"
+               array="false"
+               lmargin="0"
+               rmargin="0"
+               tmargin="0"
+               bmargin="0"
+               column_max="4"
+               column_center="false"
+               disable_texture="MG_suppression.tga"
+               onclick_r="open_sbrick_help"
+               params_r="test_aura_disabled=1"
+               onclick_l="lua:game:onLeftClickMalus()"
+               on_tooltip="aura_modifier_tooltip"
+               child_resize_h="true"
+               tooltip_parent="win"></group>
+        <link expr="@UI:VARIABLES:SHOW_MALUS"
+              target="active" />
+      </group>
+    </group>
+  </group>
+  <tree node="bonus_malus" />
+  <!-- ************************* -->
+  <!-- *  ANIMALS GLOBAL  * -->
+  <!-- ************************* -->
+  <!-- Animals MENU -->
+  <!-- Each Option is enabled/disabled at open according to the animal selected -->
+  <group type="menu"
+         id="animal_menu_all"
+         extends="base_menu_with_color"
+         on_active="animal_menu_option">
+    <action id="follow"
+            name="uimFollowMe"
+            handler="beast_order"
+            params="order=follow|beast_index=@UI:BEAST_SELECTED" />
+    <action id="stop"
+            name="uimStop"
+            handler="beast_order"
+            params="order=stop|beast_index=@UI:BEAST_SELECTED" />
+    <action id="free"
+            name="uimFree"
+            handler="beast_order"
+            params="order=free|beast_index=@UI:BEAST_SELECTED" />
+    <action id="enter_stable"
+            name="uimEnterStable"
+            handler="beast_order"
+            params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" />
+    <action id="leave_stable"
+            name="uimLeaveStable"
+            handler="beast_order"
+            params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" />
+    <separator />
+  </group>
+  <!-- Each Option is enabled/disabled at open according to the animal selected -->
+  <group type="menu"
+         id="animal_menu"
+         extends="base_menu"
+         on_active="animal_menu_option">
+    <action id="follow"
+            name="uimFollowMe"
+            handler="beast_order"
+            params="order=follow|beast_index=@UI:BEAST_SELECTED" />
+    <action id="stop"
+            name="uimStop"
+            handler="beast_order"
+            params="order=stop|beast_index=@UI:BEAST_SELECTED" />
+    <action id="free"
+            name="uimFree"
+            handler="beast_order"
+            params="order=free|beast_index=@UI:BEAST_SELECTED" />
+    <action id="enter_stable"
+            name="uimEnterStable"
+            handler="beast_order"
+            params="order=enter_stable|beast_index=@UI:BEAST_SELECTED" />
+    <action id="leave_stable"
+            name="uimLeaveStable"
+            handler="beast_order"
+            params="order=leave_stable|beast_index=@UI:BEAST_SELECTED" />
+    <action id="mount"
+            name="uimMount"
+            handler="beast_order"
+            params="order=mount|beast_index=@UI:BEAST_SELECTED" />
+    <action id="unseat"
+            name="uimUnmount"
+            handler="beast_order"
+            params="order=unmount|beast_index=@UI:BEAST_SELECTED" />
+  </group>
+  <!-- temp variable to store the animal selected 
+        0: All animals
+        1 to 5: Pack animals
+-->
+  <variable entry="UI:BEAST_SELECTED"
+            type="sint64"
+            value="0" />
+  <group type="container"
+         id="animal_global"
+         w="236"
+         h="96"
+         title="uiAnimalsTitle"
+         opened="true"
+         openable="false"
+         resizer="false"
+         movable="true"
+         active="false"
+         pop_min_h="62"
+         pop_max_h="512"
+         min_w="236"
+         max_w="236"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=0"
+         global_color="false"
+         global_color_over="true"
+         header_color="UI:SAVE:WIN:COLORS:ANI"
+         help_page="interf_animals.html">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="proc"
+           group_params_r="right_click_on_animal_proc|0"></group>
+    <group id="content"
+           h="0"
+           posref="TR TR"
+           child_resize_h="true">
+      <group id="no_available_animals"
+             x="0"
+             y="0"
+             sizeref="w"
+             w="0"
+             h="70"
+             posref="TL TL"
+             active="false">
+        <group id="main"
+               sizeref="w"
+               w="-16"
+               posref="MM MM"
+               child_resize_h="true"
+               y="-8">
+          <view type="text"
+                id="text"
+                global_color="true"
+                fontsize="14"
+                shadow="true"
+                hardtext="uiNoAvailableAnimals"
+                multi_line="true"
+                continuous_update="true" />
+        </group>
+      </group>
+    </group>
+  </group>
+  <!-- proc : right click on a animal -->
+  <proc id="right_click_on_animal_proc">
+    <!-- set index of current animal -->
+    <action handler="set"
+            params="dblink=UI:BEAST_SELECTED|value=@0" />
+    <!-- If ALL MENU, display the menu. Only if some animal present -->
+    <!-- MAX_INVENTORY_ANIMAL -->
+    <action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), 
+                                                                        isAnimalStatusPresent(@%pa_beast1:STATUS), 
+                                                                        isAnimalStatusPresent(@%pa_beast2:STATUS), 
+                                                                        isAnimalStatusPresent(@%pa_beast3:STATUS) ) )"
+            handler="active_menu"
+            params="menu=ui:interface:animal_menu_all" />
+    <!-- If SINGLE MENU, display the menu -->
+    <action cond="ne(@0,0)"
+            handler="active_menu"
+            params="menu=ui:interface:animal_menu" />
+  </proc>
+  <!-- ****************** -->
+  <!-- *  PA TEMPLATE   * -->
+  <!-- ****************** -->
+  <template name="pa_template"
+            index=""
+            beast_db_entry=""
+            bars_entry=""
+            startitem=""
+            bag_path="">
+    <group type="container"
+           id="userpa#index"
+           w="220"
+           title="uiPATitleMount#index"
+           resizer="false"
+           opened="true"
+           openable="false"
+           active_savable="false"
+           global_color="false"
+           global_color_over="true"
+           header_color="UI:SAVE:WIN:COLORS:ANI"
+           title_delta_max_w="-150"
+           title_over_extend_view_text="true">
+      <group id="header_closed"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             h="14"
+             posref="TL TL"
+             group_onclick_r="proc"
+             group_params_r="right_click_on_animal_proc|#index">
+        <view type="bar3"
+              id="jauges"
+              posref="MR MR"
+              mini="true"
+              x="-16"
+              color1="%bulk_color"
+              range1="#beast_db_entry:BULK_MAX"
+              color2="255 255 255 255"
+              value2="#beast_db_entry:HUNGER"
+              range2="31"
+              color3="%hp_color"
+              value3="#bars_entry:HP"
+              range3="127" />
+        <ctrl type="tooltip"
+              id="tt"
+              instant_help="true"
+              posparent="jauges"
+              posref="TL TL"
+              x="0"
+              y="0"
+              sizeref="wh"
+              tooltip="uittAnimalBar"
+              tooltip_parent="win" />
+        <!-- if animal is dead, display despawn timer bar instead of jauges -->
+        <view type="bar"
+              id="death_timer"
+              posref="MR MR"
+              mini="true"
+              x="-16"
+              color="255 255 255 255"
+              value="#beast_db_entry:DESPAWN"
+              range="71" />
+        <ctrl type="tooltip"
+              id="tt_death_timer"
+              instant_help="true"
+              posparent="death_timer"
+              posref="TL TL"
+              x="0"
+              y="0"
+              sizeref="wh"
+              tooltip="uittDeathTimer"
+              tooltip_parent="win" />
+        <link expr="isAnimalStatusDead(@#beast_db_entry:STATUS)"
+              target="death_timer:active,tt_death_timer:active" />
+        <!-- animal status icon -->
+        <view type="bitmap"
+              id="animal_alive_landscape"
+              posref="MR MR"
+              x="-124"
+              w="14"
+              h="14"
+              scale="true"
+              texture="mektoub_map.tga" />
+        <instance template="text_tt"
+                  tooltip="uittAliveLandscape"
+                  posparent="animal_alive_landscape"
+                  tooltip_parent="win" />
+        <link expr="and(isAnimalStatusAlive(@#beast_db_entry:STATUS),not(isAnimalStatusInStable(@#beast_db_entry:STATUS)))"
+              target="animal_alive_landscape:active,tt_animal_alive_landscape:active" />
+        <view type="bitmap"
+              id="animal_stable"
+              posref="MR MR"
+              x="-124"
+              w="14"
+              h="14"
+              scale="true"
+              texture="building_state2.tga" />
+        <instance template="text_tt"
+                  tooltip="uittStable"
+                  posparent="animal_stable"
+                  tooltip_parent="win" />
+        <link expr="isAnimalStatusInStable(@#beast_db_entry:STATUS)"
+              target="animal_stable:active,tt_animal_stable:active" />
+        <view type="bitmap"
+              id="animal_dead"
+              posref="MR MR"
+              x="-124"
+              w="14"
+              h="14"
+              scale="true"
+              texture="MP_skull.tga" />
+        <instance template="text_tt"
+                  tooltip="uittDead"
+                  posparent="animal_dead"
+                  tooltip_parent="win" />
+        <link expr="isAnimalStatusDead(@#beast_db_entry:STATUS)"
+              target="animal_dead:active,tt_animal_dead:active" />
+        <view type="bitmap"
+              id="weight"
+              posref="MR MR"
+              x="-84"
+              texture="W_weight.tga" />
+        <ctrl type="tooltip"
+              id="tt_weight"
+              posparent="weight"
+              posref="MR MR"
+              x="0"
+              y="0"
+              sizeref="wh"
+              w="28"
+              h="14"
+              tooltip="uittAnimalWeight"
+              tooltip_parent="win" />
+        <view type="text"
+              id="weight_txt"
+              posparent="weight"
+              posref="TL TR"
+              x="-2"
+              y="-2"
+              color="255 255 255 255"
+              shadow="true"
+              fontsize="8" />
+        <!-- set the weight -->
+        <link expr="identity(getItemsWeight('#bag_path', 0, %max_animal_invslot), @#bag_path)"
+              target="weight_txt:hardtext" />
+        <!-- set the bulk bar -->
+        <link expr="identity(getItemsBulk('#bag_path', 0, %max_animal_invslot), @#bag_path)"
+              target="jauges:value1" />
+        <!-- if animal is dead we don't display the jauges and weight -->
+        <link expr="not(isAnimalStatusDead(@#beast_db_entry:STATUS))"
+              target="jauges:active,weight:active,weight_txt:active" />
+        <!-- Open Inventory button -->
+        <ctrl type="button"
+              id="open_inv"
+              button_type="push_button"
+              posref="MR MR"
+              x="-1"
+              w="14"
+              h="14"
+              scale="true"
+              tx_normal="animal_inventory.tga"
+              tx_pushed="animal_inventory.tga"
+              tx_over="W_button_14_over.tga"
+              global_color_normal="false"
+              global_color_over="true"
+              global_color_pushed="false"
+              onclick_l="animal_open_inventory"
+              params_l="#index"
+              tooltip="uittAnimalInv"
+              tooltip_parent="win" />
+        <!-- BIG TRANSPARENT BUTTON TO TARGET THE PACK_ANIMAL. w="-16" to let the "inventory" button work -->
+        <ctrl type="button"
+              id="select_button"
+              button_type="push_button"
+              posref="ML ML"
+              sizeref="wh"
+              w="-16"
+              h="0"
+              scale="true"
+              tx_normal="blank.tga"
+              tx_pushed="blank.tga"
+              tx_over="blank.tga"
+              color="0 0 0 0"
+              col_pushed="0 0 0 0"
+              col_over="255 255 255 32"
+              onclick_l="animal_target"
+              params_l="#index" />
+      </group>
+      <!-- links to change the name color if it is the target -->
+      <link expr="ifthenelse(eq(@#beast_db_entry:UID,@UI:VARIABLES:TARGET:UID),
+                                                        '255 0 0 255',
+                                                        '255 255 255 255')"
+            target="title_color" />
+    </group>
+    <link expr="isAnimalStatusPresent(@#beast_db_entry:STATUS)"
+          target="userpa#index:active" />
+    <link expr="switch(@#beast_db_entry:TYPE, 'uiPATitleMount#index', 'uiPATitleMount#index', 'uiPATitlePacker#index', 'uiPATitleDemon#index')"
+          target="userpa#index:title" />
+  </template>
+  <!-- MAX_INVENTORY_ANIMAL -->
+  <instance template="pa_template"
+            index="1"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:0"
+            beast_db_entry="%pa_beast0"
+            bag_path="%pa_bag0" />
+  <instance template="pa_template"
+            index="2"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:1"
+            beast_db_entry="%pa_beast1"
+            bag_path="%pa_bag1" />
+  <instance template="pa_template"
+            index="3"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:2"
+            beast_db_entry="%pa_beast2"
+            bag_path="%pa_bag2" />
+  <instance template="pa_template"
+            index="4"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:3"
+            beast_db_entry="%pa_beast3"
+            bag_path="%pa_bag3" />
+  <!-- ***************************** -->
+  <!-- *   ANIMAL(S) DEAD WINDOW   * -->
+  <!-- ***************************** -->
+  <group type="container"
+         id="animal_dead_popup"
+         w="80"
+         h="60"
+         min_w="60"
+         max_w="120"
+         min_h="45"
+         max_h="180"
+         resizer="false"
+         global_color="false"
+         global_color_over="true"
+         movable="true"
+         active="false"
+         opened="true"
+         openable="false"
+         right_button="false"
+         header_active="false">
+    <group id="content"
+           x="0"
+           y="0"
+           w="80"
+           h="60"
+           posref="MM MM">
+      <view type="bitmap"
+            id="dead_animal_bp"
+            x="0"
+            y="8"
+            posref="MM MM"
+            texture="MP_skull.tga" />
+      <ctrl type="tooltip"
+            id="dead_animal_tooltip"
+            tooltip=""
+            on_tooltip="animal_dead_popup_tooltip"
+            color="0 0 0 255"
+            posparent="dead_animal_bp"
+            posref="TL TL"
+            x="0"
+            y="0"
+            sizeref="wh" />
+    </group>
+  </group>
+  <tree node="animal_dead_popup" />
+  <link expr="or( ne(@SERVER:PACK_ANIMAL:BEAST0:DESPAWN,0),
+                                ne(@SERVER:PACK_ANIMAL:BEAST1:DESPAWN,0),
+                                ne(@SERVER:PACK_ANIMAL:BEAST2:DESPAWN,0),
+                                ne(@SERVER:PACK_ANIMAL:BEAST3:DESPAWN,0)))"
+        target="ui:interface:animal_dead_popup:active" />
+  <!-- *************************** -->
+  <!-- *   ANIMALS INVENTORIES   * -->
+  <!-- *************************** -->
+  <!-- The Template Animal Inventory -->
+  <template name="animal_inventory_template"
+            id=""
+            title=""
+            info_entry=""
+            bag_entry=""
+            icon_db="">
+    <group style="inv_container"
+           id="#id"
+           title="uiPABagTitleMount#title"
+           header_color="UI:SAVE:WIN:COLORS:ANI"
+           on_active="set"
+           on_active_params="dblink=UI:VARIABLES:ISACTIVE:#icon_db|value=1"
+           on_deactive="set"
+           on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:#icon_db|value=0">
+
+      <group id="header_closed"
+             h="12"
+             posref="TL TL"></group>
+      <!-- Animal Header Info -->
+      <group id="header_opened"
+             x="0"
+             y="0"
+             h="16"
+             posref="TL TL"
+             group_onclick_r="active_menu"
+             group_params_r="menu=ui:interface:base_menu_with_color">
+             
+        <instance template="tinv_nbslots_bulk_weight"
+                  id="ibw"
+                  x="-16"
+                  inv_branch_nb="%max_animal_invslot"
+                  inv_branch="#bag_entry"
+                  inv_bulk_max="#info_entry:BULK_MAX" />
+      </group>
+      <group id="content"
+             posref="TL TL"
+             h="218">
+        <instance template="tinv_item_list"
+                  id="iil"
+                  y="-8"
+                  sizeref="wh"
+                  h="-8"
+                  inv_branch_nb="%max_animal_invslot"
+                  inv_branch="#bag_entry"
+                  inv_type="#icon_db"
+                  animal_status="#info_entry:STATUS" />
+        <!-- Text To say why the inventory is disabled or not. Middle to be visible -->
+        <view type="text"
+              id="disable_txt"
+              posref="BL BL"
+              x="2"
+              y="2"
+              color="255 255 255 255"
+              shadow="true"
+              fontsize="10" />
+        <!-- According to the beast state, display text -->
+        <link expr="getAnimalInventoryStateText(@#info_entry:STATUS)"
+              target="disable_txt:hardtext" />
+      </group>
+      <!-- Hide The window if the STATUS become "Not Present" -->
+      <link expr="@#info_entry:STATUS"
+            action="hide"
+            cond="not(isAnimalStatusPresent(@#info_entry:STATUS))"
+            params="#id" />
+    </group>
+    <!-- Title name depends on the type of the animal -->
+    <link expr="switch(@#info_entry:TYPE, 'uiPABagTitleMount#title', 'uiPABagTitleMount#title', 'uiPABagTitlePacker#title', 'uiPABagTitleDemon#title')"
+          target="#id:title" />
+    <!-- Create the node here -->
+    <tree node="#id" />
+  </template>
+  <!-- Pack Animals (packer, mount, demon) Instanciation -->
+  <!-- MAX_INVENTORY_ANIMAL -->
+  <instance template="animal_inventory_template"
+            id="inv_pa0"
+            title="0"
+            info_entry="%pa_beast0"
+            bag_entry="%pa_bag0"
+            icon_db="INV_PA0" />
+  <instance template="animal_inventory_template"
+            id="inv_pa1"
+            title="1"
+            info_entry="%pa_beast1"
+            bag_entry="%pa_bag1"
+            icon_db="INV_PA1" />
+  <instance template="animal_inventory_template"
+            id="inv_pa2"
+            title="2"
+            info_entry="%pa_beast2"
+            bag_entry="%pa_bag2"
+            icon_db="INV_PA2" />
+  <instance template="animal_inventory_template"
+            id="inv_pa3"
+            title="3"
+            info_entry="%pa_beast3"
+            bag_entry="%pa_bag3"
+            icon_db="INV_PA3" />
+  <tree node="animal_global">
+    <!-- MAX_INVENTORY_ANIMAL -->
+    <tree node="userpa1" />
+    <tree node="userpa2" />
+    <tree node="userpa3" />
+    <tree node="userpa4" />
+  </tree>
+</interface_config>

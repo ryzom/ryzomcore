@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="zorai"/>
+      <ATOM Name="family" Value="armor"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Hands"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="TR_HOM_underwear_hand.shape"/>
+      <ATOM Name="shape_female" Value="TR_HOF_underwear_hand.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="color" Value="None"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:16:10 2002 (mauduit) .3d.shape = TR_HOM_underwear_hand.shape
+Tue Jul 09 14:06:14 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_hand.shape
+Tue Jul 09 14:06:14 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Hands
+Tue Jul 09 14:06:14 2002 (mauduit) formName Resized = 1
+Tue Jul 09 14:06:27 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:06:27 2002 (mauduit) .basics.origin = tryker
+Mon Jul 15 14:10:26 2002 (mauduit) .3d.color = UserColor
+Wed Jul 31 10:18:57 2002 (mauduit) .3d.map_variant = Low Quality
+Wed Aug 07 09:23:57 2002 (mauduit) .3d.shape = ZO_HOM_underwear_hand.shape
+Wed Aug 07 09:23:57 2002 (mauduit) .3d.shape_female = ZO_HOF_underwear_hand.shape
+Mon Aug 26 17:14:49 2002 (receveur) .basics.origin = zorai
+Mon Sep 09 15:56:45 2002 (mauduit) .3d.shape = TR_HOM_underwear_hand.shape
+Mon Sep 09 15:56:45 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_hand.shape
+Fri Oct 04 17:02:10 2002 (mauduit) .3d.color = None
+Mon Feb 23 19:59:57 2004 (puzin) .basics.Saleable = false</LOG>
+</FORM>

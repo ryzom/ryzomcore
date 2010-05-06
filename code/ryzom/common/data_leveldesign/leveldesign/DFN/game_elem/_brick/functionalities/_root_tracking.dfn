@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Range" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Information repeat rate" Type="Type" Filename="float.typ" Default="3"/>
+  <LOG>Thu Dec 19 17:39:51 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

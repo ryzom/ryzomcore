@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="TrainingAgility" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingCharisme" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingConstitution" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingEmpathie" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingIntelligence" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingPerception" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingStrength" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingWellBalanced" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TrainingWill" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<NEL_WORLD_EDITOR_PROJECT>
+  <VERSION>2</VERSION>
+  <DATA_DIRECTORY VALUE="..\continents\newbieland"/>
+  <CONTEXT VALUE=""/>
+  <DATABASE_ELEMENT FILENAME="..\continents\newbieland\newbieland.land" TYPE="landscape">
+    <PRIMITIVES VERSION="1">
+      <ROOT_PRIMITIVE TYPE="CPrimNode">
+        <ALIAS LAST_GENERATED="0"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>landscape</STRING>
+        </PROPERTY>
+      </ROOT_PRIMITIVE>
+    </PRIMITIVES>
+  </DATABASE_ELEMENT>
+</NEL_WORLD_EDITOR_PROJECT>

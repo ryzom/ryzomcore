@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Matis - The verdant heights" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Zorai - The sicklands" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Fyros - The burning desert" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Tryker - Aeden aqueous" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Nov 26 15:02:42 2002 (fleury) Dfn Structure = 
+Thu Apr 24 16:19:33 2003 (fleury) Dfn Structure = 
+Thu Apr 24 16:42:17 2003 (fleury) Dfn Structure = 
+Thu Apr 24 16:43:02 2003 (fleury) Dfn Structure = 
+Thu Apr 24 16:43:22 2003 (fleury) Dfn Structure = 
+Fri Apr 25 11:25:57 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

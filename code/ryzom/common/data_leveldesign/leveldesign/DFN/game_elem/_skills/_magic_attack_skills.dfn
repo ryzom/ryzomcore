@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="AttackKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="BadLuck" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Bleeding" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="CerebralFever" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="CreatureHatred" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="DesertKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="ForestKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="HearWithering" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="JungleKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="LakeKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Madness" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorMandragore" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorMandragoreAutomn" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorMandragoreSpring" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorMandragoreSummer" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorMandragoreWinter" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Mandragore" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MandragoreAutomn" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MandragoreSpring" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MandragoreSummer" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MandragoreWinter" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MuscularFever" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="NervousFever" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Nunb" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Paralysis" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="PlantHatred" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SlowingBreath" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SlowingLife" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TactileWithering" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Terror" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="VisualWithering" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

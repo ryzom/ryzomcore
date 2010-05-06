@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Version="0.1" State="modified">
+  <ELEMENT Name="Score" Type="Type" Filename="_scores.typ"/>
+  <ELEMENT Name="Efficiency" Type="Type" Filename="float.typ"/>
+</DFN>

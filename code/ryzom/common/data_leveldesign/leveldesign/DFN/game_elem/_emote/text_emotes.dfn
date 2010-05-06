@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Array" Type="Dfn" Filename="_text_emote.dfn" Array="true"/>
+  <LOG>Tue Apr 27 10:40:44 2004 (nouveau) Dfn Structure = 
+Tue Apr 27 10:52:27 2004 (nouveau) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,941 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Polish resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PLK)
+#ifdef _WIN32
+LANGUAGE LANG_POLISH, SUBLANG_DEFAULT
+#pragma code_page(1250)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\ide2.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_SUBMENU_BUILD MENU DISCARDABLE 
+BEGIN
+    POPUP "&Build"
+    BEGIN
+        MENUITEM "Compile\tCtrl+F7",            ID_BUILD_COMPILE
+        MENUITEM "&Build\tF7",                  ID_BUILD_BUILD
+        MENUITEM "&Rebuild All",                ID_BUILD_REBUILDALL
+        MENUITEM "&Clean",                      ID_BUILD_CLEAN
+        MENUITEM SEPARATOR
+        MENUITEM "&Go\tF5",                     ID_BUILD_GO
+        MENUITEM "&Step Into\tF11",             ID_BUILD_STEPINTO
+        MENUITEM "Run To &Cursor\tCtrl+F10",    ID_BUILD_RUNTOCURSOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Execute\tCtrl+F5",           ID_BUILD_EXECUTE
+    END
+END
+
+IDR_SUBMENU_DEBUG MENU DISCARDABLE 
+BEGIN
+    POPUP "&Debug"
+    BEGIN
+        MENUITEM "&Go\tF5",                     ID_DEBUG_GO
+        MENUITEM "&Restart\tCtrl+Shift+F5",     ID_DEBUG_RESTART
+        MENUITEM "Stop Debugging\tShift+F5",    ID_DEBUG_STOPDEBUGGING
+        MENUITEM "&Break",                      ID_DEBUG_BREAK
+        MENUITEM SEPARATOR
+        MENUITEM "Step &Into\tF11",             ID_DEBUG_STEPINTO
+        MENUITEM "Step &Over\tF10",             ID_DEBUG_STEPOVER
+        MENUITEM "Step O&ut\tShift+F11",        ID_DEBUG_STEPOUT
+        MENUITEM "Run To &Cursor\tCtrl+F10",    ID_DEBUG_RUNTOCURSOR
+    END
+END
+
+IDR_PROJECT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&Project"
+    BEGIN
+        MENUITEM "Add &files to project",       ID_PROJECT_ADD_FILES
+        MENUITEM SEPARATOR
+        MENUITEM "&Settings\tAlt+F7",           ID_PROJECT_PROPERTIES
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROJECT_PROPERTIES DIALOG DISCARDABLE  0, 0, 231, 129
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,174,108,50,14
+    LTEXT           "Output files:",IDC_STATIC,7,37,38,8
+    LTEXT           "Output file prefix:",IDC_STATIC,7,68,54,8
+    EDITTEXT        IDC_OUTPUT_DIR,7,46,147,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_OUTPUT_PREFIX,7,77,105,12,ES_AUTOHSCROLL
+    CONTROL         "Generate listing file",IDC_GENERATE_LISTING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,98,75,10
+    LTEXT           "Intermediate files:",IDC_STATIC,8,7,56,8
+    EDITTEXT        IDC_INTERMEDIATE_DIR,7,16,147,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Cancel",IDCANCEL,119,108,50,14
+END
+
+IDD_NEW_PROJECT DIALOG DISCARDABLE  0, 0, 283, 130
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New Project"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,229,109,47,14
+    PUSHBUTTON      "Cancel",IDCANCEL,174,109,47,14
+    CONTROL         "List1",IDC_PROJECT_TYPES,"SysListView32",LVS_LIST | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,8,160,115
+    LTEXT           "Project name:",IDC_STATIC,173,8,44,8
+    EDITTEXT        IDC_PROJECT_NAME,173,17,88,12,ES_AUTOHSCROLL
+    LTEXT           "Location:",IDC_STATIC,174,33,30,8
+    EDITTEXT        IDC_PROJECT_LOCATION,173,43,88,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_PROJECT_SELLOC,262,43,14,12
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PROJECT_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 224
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 122
+    END
+
+    IDD_NEW_PROJECT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 123
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROJECT_ADD_FILES    "Inserts existing file(s) into project"
+    ID_PROJECT_PROPERTIES   "Edits the project build and debug settings"
+    ID_BUILD_COMPILE        "Compiles the file"
+    ID_BUILD_BUILD          "Builds the project"
+    ID_BUILD_REBUILDALL     "Rebuilds the current project"
+    ID_BUILD_CLEAN          "Deletes intermediate and output files (cleans the project)"
+    ID_BUILD_GO             "Starts or continues the program"
+    ID_BUILD_STEPINTO       "Steps into the next statement"
+    ID_BUILD_RUNTOCURSOR    "Runs the program to the line containing the cursor"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_BUILD_EXECUTE        "Executes the program"
+    ID_DEBUG_RESTART        "Restarts the program"
+    ID_DEBUG_STOPDEBUGGING  "Stops debugging the program"
+    ID_DEBUG_BREAK          "Stops program execution; breaks into the debugger"
+    ID_DEBUG_STEPOVER       "Steps over the next statement"
+    ID_DEBUG_STEPOUT        "Steps out of the current function"
+    ID_DEBUG_STEPINTO       "Steps into the next statement"
+    ID_DEBUG_RUNTOCURSOR    "Runs the program to the line containing the cursor"
+END
+
+#endif    // Polish resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "N&ew Project",                ID_FILE_NEWPROJECT
+        MENUITEM "Open &Project...",            ID_FILE_OPENPROJECT
+        MENUITEM "&Save Project",               ID_FILE_SAVEPROJECT
+        MENUITEM "Save Project As...",          ID_FILE_SAVEPROJECTAS
+        MENUITEM "C&lose Project",              ID_FILE_CLOSEPROJECT
+        MENUITEM SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Workspace",                  ID_VIEW_WORKSPACE
+        MENUITEM "&Output",                     ID_VIEW_OUTPUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Call Stack",                 ID_VIEW_CALLSTACK
+        MENUITEM "&Local Variables",            ID_VIEW_LOCALS
+        MENUITEM "W&atches",                    ID_VIEW_WATCHES
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Lua Help (pdf)",             ID_HELP_LUAHELPPDF
+        MENUITEM "Lua &Homepage",               ID_HELP_LUAHOMEPAGE
+        MENUITEM SEPARATOR
+        MENUITEM "&LuaIDE Homepage",            ID_HELP_VISITHOMEPAGE
+        MENUITEM "&Contact Author",             ID_HELP_CONTACTAUTHOR
+        MENUITEM SEPARATOR
+        MENUITEM "&About LuaIDE...",            ID_APP_ABOUT
+    END
+END
+
+IDR_IDE2TYPE MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close\tCtrl+F4",             ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "N&ew Project",                ID_FILE_NEWPROJECT
+        MENUITEM "Open &Project...",            ID_FILE_OPENPROJECT
+        MENUITEM "&Save Project",               ID_FILE_SAVEPROJECT
+        MENUITEM "Save Project As...",          ID_FILE_SAVEPROJECTAS
+        MENUITEM "C&lose Project",              ID_FILE_CLOSEPROJECT
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Delete\t     Del",           ID_EDIT_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "Select A&ll",                 ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle &Breakpoint\tF9",      ID_TOGGLE_BREAKPOINT
+        MENUITEM "Breakpoints\tCtrl+B",         ID_BREAKPOINTS
+        MENUITEM SEPARATOR
+        MENUITEM "&Go to ...\tCtrl+G",          IDM_GOTO_LINE
+        MENUITEM "&Find text ...\tCtrl+F",      IDM_FIND_TEXT
+        MENUITEM "Find next\tF3",               IDM_FIND_NEXT
+        MENUITEM "Find previous\tShift+F3",     IDM_FIND_PREVIOUS
+        MENUITEM SEPARATOR
+        MENUITEM "Check &syntax\tCtrl+Q",       IDM_CHECK_SYNTAX
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Workspace",                  ID_VIEW_WORKSPACE
+        MENUITEM "&Output",                     ID_VIEW_OUTPUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Call Stack",                 ID_VIEW_CALLSTACK
+        MENUITEM "&Local Variables",            ID_VIEW_LOCALS
+        MENUITEM "W&atches",                    ID_VIEW_WATCHES
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Lua Help (pdf)",             ID_HELP_LUAHELPPDF
+        MENUITEM "Lua &Homepage",               ID_HELP_LUAHOMEPAGE
+        MENUITEM SEPARATOR
+        MENUITEM "&LuaIDE Homepage",            ID_HELP_VISITHOMEPAGE
+        MENUITEM "&Contact Author",             ID_HELP_CONTACTAUTHOR
+        MENUITEM SEPARATOR
+        MENUITEM "&About LuaIDE...",            ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About ide2"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "LuaIDE Version 1.0 Beta",IDC_STATIC,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright (C) Sparrow Hawk Labs 2002",IDC_STATIC,40,25,
+                    141,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ide2.ico"
+IDR_IDE2TYPE            ICON    DISCARDABLE     "res\\LuaDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+IDB_IL_TAB              BITMAP  DISCARDABLE     "res\\il_tab.bmp"
+IDB_IL_FILE             BITMAP  DISCARDABLE     "res\\il_file.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCEL_BUILD ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "F",            IDM_FIND_TEXT,          VIRTKEY, CONTROL, NOINVERT
+    "G",            IDM_GOTO_LINE,          VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_CONTROL,     ID_CONTROL_DOWN,        VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "Q",            IDM_CHECK_SYNTAX,       VIRTKEY, CONTROL, NOINVERT
+    VK_F10,         ID_BUILD_RUNTOCURSOR,   VIRTKEY, CONTROL, NOINVERT
+    VK_F11,         ID_BUILD_STEPINTO,      VIRTKEY, NOINVERT
+    VK_F3,          ID_PREV_DOC,            VIRTKEY, NOINVERT
+    VK_F3,          ID_SELECT_FIND_NEXT,    VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          IDM_FIND_PREVIOUS,      VIRTKEY, SHIFT, NOINVERT
+    VK_F3,          ID_SELECT_FIND_PREVIOUS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_BUILD_GO,            VIRTKEY, NOINVERT
+    VK_F5,          ID_BUILD_EXECUTE,       VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_F7,          ID_BUILD_BUILD,         VIRTKEY, NOINVERT
+    VK_F7,          ID_BUILD_COMPILE,       VIRTKEY, CONTROL, NOINVERT
+    VK_F7,          ID_PROJECT_PROPERTIES,  VIRTKEY, ALT, NOINVERT
+    "B",            ID_BREAKPOINTS,         VIRTKEY, CONTROL, NOINVERT
+    VK_F9,          ID_TOGGLE_BREAKPOINT,   VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_TAB,         ID_NEXT_DOC,            VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_PREV_DOC,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ACCEL_DEBUG ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "G",            IDM_GOTO_LINE,          VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_PREV_DOC,            VIRTKEY, NOINVERT
+    VK_F3,          IDM_FIND_PREVIOUS,      VIRTKEY, SHIFT, NOINVERT
+    VK_F3,          ID_SELECT_FIND_NEXT,    VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SELECT_FIND_PREVIOUS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "F",            IDM_FIND_TEXT,          VIRTKEY, CONTROL, NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "Q",            IDM_CHECK_SYNTAX,       VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_DEBUG_STOPDEBUGGING, VIRTKEY, SHIFT, NOINVERT
+    VK_F5,          ID_DEBUG_RESTART,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_F7,          ID_PROJECT_PROPERTIES,  VIRTKEY, ALT, NOINVERT
+    "B",            ID_BREAKPOINTS,         VIRTKEY, CONTROL, NOINVERT
+    VK_F9,          ID_TOGGLE_BREAKPOINT,   VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_NEXT_DOC,            VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_PREV_DOC,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_CONTROL,     ID_CONTROL_DOWN,        VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ACCEL_DEBUG_BREAK ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "G",            IDM_GOTO_LINE,          VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_PREV_DOC,            VIRTKEY, NOINVERT
+    VK_F3,          IDM_FIND_PREVIOUS,      VIRTKEY, SHIFT, NOINVERT
+    VK_F3,          ID_SELECT_FIND_NEXT,    VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SELECT_FIND_PREVIOUS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "F",            IDM_FIND_TEXT,          VIRTKEY, CONTROL, NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "Q",            IDM_CHECK_SYNTAX,       VIRTKEY, CONTROL, NOINVERT
+    VK_F10,         ID_DEBUG_STEPOVER,      VIRTKEY, NOINVERT
+    VK_F10,         ID_DEBUG_RUNTOCURSOR,   VIRTKEY, CONTROL, NOINVERT
+    VK_F11,         ID_DEBUG_STEPINTO,      VIRTKEY, NOINVERT
+    VK_F11,         ID_DEBUG_STEPOUT,       VIRTKEY, SHIFT, NOINVERT
+    VK_F5,          ID_DEBUG_GO,            VIRTKEY, NOINVERT
+    VK_F5,          ID_DEBUG_STOPDEBUGGING, VIRTKEY, SHIFT, NOINVERT
+    VK_F5,          ID_DEBUG_RESTART,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_F7,          ID_PROJECT_PROPERTIES,  VIRTKEY, ALT, NOINVERT
+    "B",            ID_BREAKPOINTS,         VIRTKEY, CONTROL, NOINVERT
+    VK_F9,          ID_TOGGLE_BREAKPOINT,   VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_NEXT_DOC,            VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_PREV_DOC,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_CONTROL,     ID_CONTROL_DOWN,        VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ACCEL_NO_PROJECT ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "G",            IDM_GOTO_LINE,          VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_PREV_DOC,            VIRTKEY, NOINVERT
+    VK_F3,          IDM_FIND_PREVIOUS,      VIRTKEY, SHIFT, NOINVERT
+    VK_F3,          ID_SELECT_FIND_NEXT,    VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SELECT_FIND_PREVIOUS, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "F",            IDM_FIND_TEXT,          VIRTKEY, CONTROL, NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "Q",            IDM_CHECK_SYNTAX,       VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_NEXT_DOC,            VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_PREV_DOC,            VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_CONTROL,     ID_CONTROL_DOWN,        VIRTKEY, CONTROL, NOINVERT
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "ide2 MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "ide2\0"
+            VALUE "LegalCopyright", "Copyright (C) 2002\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "ide2.EXE\0"
+            VALUE "ProductName", "ide2 Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "LuaIDE v1.0 Beta"
+    IDR_IDE2TYPE            "LuaIDE\nLua\nLua\nLua (*.lua)\n.lua\nLuaIDE.Document\nLuaIDE Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "LuaIDE"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+    IDS_EXTERNALLY_MODIFIED_FILE 
+                            " has been modified by an external application, reload ?"
+    IDS_CHECK_OK            "Syntax check was successful"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROJECT_ADD_FILES    "Inserts existing file(s) into project"
+    ID_FILE_OPENPROJECT     "Opens an existing project"
+    ID_FILE_SAVEPROJECT     "Saves the project"
+    ID_FILE_SAVEPROJECTAS   "Saves the project under new name"
+    ID_PROJECT_PROPERTIES   "Edits the project build and debug settings"
+    ID_BUILD_COMPILE        "Compiles the file"
+    ID_BUILD_BUILD          "Builds the project"
+    ID_BUILD_REBUILDALL     "Rebuilds the current project"
+    ID_BUILD_CLEAN          "Deletes intermediate and output files (cleans the project)"
+    ID_BUILD_GO             "Starts or continues the program"
+    ID_BUILD_STEPINTO       "Steps into the next statement"
+    ID_BUILD_RUNTOCURSOR    "Runs the program to the line containing the cursor"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_WORKSPACE       "Show or hide the workspace\nToggle Workspace"
+    ID_VIEW_OUTPUT          "Show or hide the output\nToggle Output"
+    ID_VIEW_CALLSTACK       "Show or hide the call stack\nToggle Call Stack"
+    ID_VIEW_LOCALS          "Show or hide local variables\nToggle Local Variables"
+    ID_VIEW_WATCHES         "Show or hide watch\nToggle Watch"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_BUILD_EXECUTE        "Executes the program"
+    ID_DEBUG_RESTART        "Restarts the program"
+    ID_DEBUG_STOPDEBUGGING  "Stops debugging the program"
+    ID_DEBUG_BREAK          "Stops program execution; breaks into the debugger"
+    ID_DEBUG_STEPOVER       "Steps over the next statement"
+    ID_DEBUG_STEPOUT        "Steps out of the current function"
+    ID_TOGGLE_BREAKPOINT    "Turns Breakpoint On/Off"
+    ID_FILE_NEWPROJECT      "Opens a new project"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_CLOSEPROJECT    "Close current project\nClose Project"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_GOTOLINE DIALOG DISCARDABLE  0, 0, 161, 42
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Go to line"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Go to",IDOK,109,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,109,24,50,14
+    EDITTEXT        IDC_LINE,7,7,97,15,ES_AUTOHSCROLL
+END
+
+IDD_FINDTEXT DIALOG DISCARDABLE  0, 0, 186, 66
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Find"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Fi&nd next",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+    EDITTEXT        IDC_TEXT_TO_FIND,7,7,116,15,ES_AUTOHSCROLL
+    CONTROL         "Match &whole word",IDC_MATCH_WHOLE_WORD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,27,90,8
+    CONTROL         "Match &case",IDC_MATCH_CASE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,8,38,90,8
+    CONTROL         "Regular &expression",IDC_REGULAR_EXPRESSION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,49,90,8
+END
+
+IDD_BREAKPOINTS DIALOG DISCARDABLE  0, 0, 258, 135
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Breakpoints"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,201,114,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,146,114,50,14
+    LISTBOX         IDC_BP_LIST,7,7,244,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Condition...",IDC_CONDITION,7,79,61,12
+    PUSHBUTTON      "Delete al&l",IDC_DELETEALL,129,78,61,13
+    PUSHBUTTON      "&Remove",IDC_REMOVE,70,78,58,13
+END
+
+IDD_BREAKPOINT_CONDITION DIALOG DISCARDABLE  0, 0, 395, 47
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Condition"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,338,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,338,24,50,14
+    EDITTEXT        IDC_CONDITION,7,7,323,14,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_GOTOLINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 154
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 35
+    END
+
+    IDD_FINDTEXT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+
+    IDD_BREAKPOINTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 251
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    IDD_BREAKPOINT_CONDITION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 388
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 40
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\ide2.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="Buy Price" Type="Type" Filename="int.typ"/>
+  <LOG>Wed Mar 30 16:43:39 2005 (cado) Dfn Structure = 
+Tue Sep 27 10:48:46 2005 (guignot) Dfn Structure = </LOG>
+</DFN>

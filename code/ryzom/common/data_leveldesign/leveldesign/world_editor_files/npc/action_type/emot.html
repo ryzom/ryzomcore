@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+	<HEAD>
+		<META http-equiv=Content-Type content="text/html; charset=unicode">
+		<META content="MSHTML 6.00.2716.2200" name=GENERATOR>
+	</HEAD>
+	<BODY>
+		<P><FONT color=green size=5>emot</FONT></P>
+		<P>Start an emot for one or more bot.</p>
+		<P>
+		Emot list is available in a george file here 
+		<a href="../../../Game_elem/emot/list.emot">list.emot</a><BR>
+		As events and actions are group wide, you could specifie 
+		the name of one or more bots (for named bot) or the number of one or more
+		bots (in a group of non named bots) that will play the emot.<BR>
+		If no name or number filter are found, then all the bots in the group will
+		play the same emot. This is not an issue for groups with only one bot.
+		<P>
+		If the action is triggered from a <B>'player_follow_npc'</B> or
+		<B>'player_target_npc'</B> event, then the followed or targeted bot will be
+		automaticaly selected to play the emot. In this case, bot_name and bot_number 
+		are simply ignored.
+
+
+		</P>
+		<P><STRONG>Parameters :</STRONG><BR>
+		<FONT color=gray>&lt;emot_name&gt;<BR>
+		[&lt;bot_name&gt;|&lt;bot_number&gt;]<BR>
+		[...]
+		</FONT>
+		</P>
+	</BODY>
+</HTML>

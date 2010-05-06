@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_c_al.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="generic light armor armor"/>
+      <ATOM Name="origin" Value="common"/>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Feb 11 15:36:06 2005 (besson) Form Parents = 
+Tue Feb 03 11:15:59 2009 (kervala) .3d.icon background = BK_generic.tga
+Tue Feb 03 11:15:59 2009 (kervala) .basics.Saleable = false</LOG>
+</FORM>

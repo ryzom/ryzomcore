@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_c_al.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="tryker light armor"/>
+      <ATOM Name="origin" Value="tryker"/>
+    </STRUCT>
+    <STRUCT Name="armor">
+      <ATOM Name="Skill" Value="SDALTAE"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="map_variant" Value="Low Quality"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 06 12:08:42 2002 (mauduit) .3d.map_variant = Low Quality
+Tue Aug 06 16:36:03 2002 (mauduit) Form Parents = 
+Thu Feb 27 15:29:01 2003 (receveur) .faber.Create.MP 1 = lake_fiber.item
+Thu Jun 05 17:11:01 2003 (receveur) Form Parents = 
+Thu Sep 18 10:03:17 2003 (coutelas) .armor.Skill = light armor wear tryker
+Thu Sep 18 10:03:17 2003 (coutelas) .basics.origin = tryker
+Thu Sep 18 10:03:17 2003 (coutelas) .faber.Create.MP 1 Family = Shell
+Thu Sep 18 10:03:17 2003 (coutelas) .faber.Skill = tryker light armor craft
+Thu Sep 18 10:12:20 2003 (coutelas) .faber.Create.MP 3 Property = Cushion
+Fri Sep 19 14:06:35 2003 (coutelas) .AsBrick.Client.IconBack = BK_tryker_brick.tga
+Tue Sep 23 12:12:34 2003 (coutelas) .basics.name = tryker light armor
+Thu Oct 02 15:00:40 2003 (coutelas) .faber.Create.MP 1 = Raw Material for Armor shell
+Thu Oct 02 15:02:13 2003 (coutelas) .faber.Create.MP 1 = 
+Tue Feb 10 15:18:42 2004 (fleury) .armor.Skill = SDALTAE</LOG>
+</FORM>

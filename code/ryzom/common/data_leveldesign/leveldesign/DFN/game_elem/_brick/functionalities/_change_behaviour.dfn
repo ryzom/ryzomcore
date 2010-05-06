@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="ExecutionBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="SuccessBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FailureBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FumbleBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FinalBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="StopBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="CriticalSuccessBehaviour" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ApplyOnTarget" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Nov 26 11:37:53 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:38:51 2002 (fleury) Dfn Structure = 
+Wed Nov 27 19:12:27 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

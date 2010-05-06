@@ -1,0 +1,43 @@
+INTRODUCTION:
+-------------
+
+Ligoscape is a landscape generation method based on the NeL landscape technology.
+
+PROJECT STRUCTURE:
+------------------
+
+The project is composed of :
+
+* Static Library *
+  This lib contains the shared code used by the plugin, the WorldEditor and the exporter.
+  It contains the main export code from 3dsmax to ligo and ligo to NeL.
+  
+* 3dsmax Plugin * 
+  This plugin is used to check, debug and export ligo data from max to WorldEditor
+
+* WorldEditor * 
+  This tools is used to paint the landscape with base zone
+  The tool is in 2 part a DLL and a EXE because it is used in stand-alone mode and in 
+  integrated mode (inside the Master Tool). It can be used to export (ligo to NeL).
+
+* Exporter *
+  This is just a little program in command line to export data from Ligo to Nel.
+  It is used in the build_game_data process.
+
+PROJECT DEPENDENCIES:
+---------------------
+
+// "ProjectA <- ProjectB" is for "ProjectA needs ProjectB"
+
+ligoscape_lib <- nel_3d
+ligoscape_lib <- nel_misc
+
+ligoscape_plugin_max <- ligoscape_lib
+ligoscape_plugin_max <- nel_patch_lib
+
+WorldEditor <- ligoscape_lib
+WorldEditor <- nel_3d
+WorldEditor <- nel_misc
+WorldEditor <- nel_driver_opengl
+
+WorldEditor_Exe <- WorldEditor

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="ID" Type="Type" Filename="int.typ" Default="default"/>
+  <ELEMENT Name="String" Type="Type" Filename="string.typ"/>
+  <LOG>Thu Oct 23 13:58:24 2003 (puzin) Dfn Structure = 
+Tue Dec 09 19:19:26 2003 (vizerie) Dfn Structure = 
+Wed Dec 10 15:02:48 2003 (vizerie) Dfn Structure = 
+Wed Dec 10 15:04:30 2003 (vizerie) Dfn Structure = </LOG>
+</DFN>

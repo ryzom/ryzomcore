@@ -1,0 +1,40 @@
+#CMS down
+EGS_COMBAT_CMS_DOWN	"&RG&(Server Debug) The combat move service is down, cannot engage melee combat..."
+
+# when an entity attacks another entity
+BS_YOU_ATTACK_E		"&BC&You attack $0e."
+BS_ATTACKS_YOU_E	"&RG&$0e attacks you."
+BS_ATTACKS_EE		"&BC&$0e attacks $1e."
+
+# when an entity leaves combat
+BS_YOU_END_ATTACK_E	"&BC&You stop attacking $0e."
+BS_END_ATTACKS_YOU_E	"&RG&$0e leaves combat."
+BS_END_ATTACKS_EE	"&BC&$0e stops attacking $1e."
+
+# when damage is done to/by an entity
+BS_HIT_EEI 		"&BC&$0e hits $1e for $2i damage."
+BS_YOU_HIT_EI 		"&BC&You inflict $1i points of damage on $0e."
+BS_HITS_YOU_EI 		"&RG&$0e hits you for $1i damage."
+BS_HIT_NULL_EE 		"&BC&$0e hits $1e but does no damage."
+BS_YOU_HIT_NULL_E	"&BC&You hit $0e but do no damage."
+BS_HITS_YOU_NULL_E 	"&RG&$0e hits you but does no damage."
+
+# when an entity misses his/her enemy in combat
+BS_YOU_MISS_E		"&BC&You miss $0e."
+BS_MISSES_YOU_E 	"&RG&$0e misses you."
+BS_MISSES_EE 		"&BC&$0e misses $1e."
+
+# critical hit
+EGS_YOU_CRITICAL_HIT_E	"&BC&You perform a critical strike on $0e."
+EGS_CRITICAL_HIT_YOU_E	"&RG&$0e performs a critical strike on you."
+EGS_CRITICAL_HIT_EE	"&BC&$0e performs a critical strike on $1e."
+
+# Fumble
+EGS_YOU_FUMBLE		"&RG&You fumble."
+EGS_ENEMY_FUMBLE_E	"&BC&$0e fumbles."
+EGS_FUMBLE_E		"&BC&$0e fumbles."
+
+EGS_START_DEFAULT_ATTACK "&BL& you return to basic fighting style."
+BS_SUFFER_PENALTY_NO_STAMINA	"&RG&You are low on stamina and suffer a penalty on your combat skills."
+
+EGS_RANGE_CLOSE_COMBAT_LEAVE	"You cannot use a range weapon against an opponent engaged in close combat with you."

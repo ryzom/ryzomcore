@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="EquipmentSlots" Type="Type" Filename="item_slot_type.typ" Array="true"/>
+  <ELEMENT Name="WearEquipmentMalus" Type="Type" Filename="float.typ" Default="0.0"/>
+  <LOG>Fri Jun 28 20:54:38 2002 (saffray) Dfn Structure = 
+Tue Jan 13 11:31:01 2004 (saffray) Dfn Structure = </LOG>
+</DFN>

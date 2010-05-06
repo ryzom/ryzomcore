@@ -1,0 +1,1504 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+<variable entry="UI:TEMP:APPEARCLICKSEX" type="sint64" value="-1"/>
+<variable entry="UI:TEMP:APPEARCLICKBFC" type="sint64" value="-1"/> <!-- 0-body 1-face 2-clothes -->
+<variable entry="UI:TEMP:APPEARCLICKTMPBFC" type="sint64" value="-1"/>
+<variable entry="UI:TEMP:APPEARCHOICE" type="sint64" value="-1"/>
+
+
+
+
+
+<variable entry="UI:TEMP:HAIRCUT" type="sint64" value="1" />
+
+<!-- appear init -->
+
+<proc id="proc_appear_big_buttons_on" >
+	<action handler="set" params="target_property=ui:outgame:appear:female2:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:active|value=1" />
+</proc>
+
+
+
+<proc id="import_fyros">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D|dbsrc=UI:TEMP:CHAR3DFYROS" />
+</proc>
+
+<proc id="import_matis">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D|dbsrc=UI:TEMP:CHAR3DMATIS" />
+</proc>
+
+<proc id="import_tryker">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D|dbsrc=UI:TEMP:CHAR3DTRYKER" />
+</proc>
+
+<proc id="import_zorai">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D|dbsrc=UI:TEMP:CHAR3DZORAI" />
+</proc>
+
+<proc id="export_fyros">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DFYROS|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set"  params="dblink=UI:TEMP:CHAR3DFYROS:PEOPLE|value=0" />
+</proc>
+
+<proc id="export_matis">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DMATIS|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set"  params="dblink=UI:TEMP:CHAR3DFYROS:PEOPLE|value=1" />
+</proc>
+
+<proc id="export_tryker">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DTRYKER|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set"  params="dblink=UI:TEMP:CHAR3DFYROS:PEOPLE|value=2" />
+</proc>
+
+<proc id="export_zorai">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3DZORAI|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set"  params="dblink=UI:TEMP:CHAR3DFYROS:PEOPLE|value=3" />
+</proc>
+
+
+
+
+
+<proc id="proc_appear_start">
+
+
+	<action handler="set" params="dblink=UI:TEMP:CHAR3DFYROS:CAREER|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3DMATIS:CAREER|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3DTRYKER:CAREER|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3DZORAI:CAREER|value=0" />
+
+
+	<action handler="set" params="target_property=ui:outgame:appear:female2:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:active|value=0" />
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="import_fyros" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="import_matis" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="import_tryker" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="import_zorai" />
+
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear" />
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:options" />
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l1" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l2" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l3" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l4" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l5" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_clothes:l6" /> 
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_face:eyes" />
+	<action handler="reset_pushed" params="dblink=ui:outgame:appear:advopt_face:haircolor" />
+	
+	
+	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:cam" />
+	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:camface" />
+	
+	<!-- ****** -->
+	<!-- Colors -->
+	<!-- ****** -->
+	
+	<!-- Hairs -->
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,0)" params="target_property=ui:outgame:appear:advopt_face:eyes:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,1)" params="target_property=ui:outgame:appear:advopt_face:eyes:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,2)" params="target_property=ui:outgame:appear:advopt_face:eyes:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,3)" params="target_property=ui:outgame:appear:advopt_face:eyes:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,4)" params="target_property=ui:outgame:appear:advopt_face:eyes:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:HATCOLOR,5)" params="target_property=ui:outgame:appear:advopt_face:eyes:c6:pushed|value=1" />
+		
+	<!-- Eyes -->
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,0)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,1)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,2)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,3)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,4)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,5)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPC:EYESCOLOR,6)" params="target_property=ui:outgame:appear:advopt_face:haircolor:c7:pushed|value=1" />
+	
+	
+	<!-- Clothes -->
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,0)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,1)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,2)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,3)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,4)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,5)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,6)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c7:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR,7)" params="target_property=ui:outgame:appear:advopt_clothes:l1:c8:pushed|value=1" />
+	    
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,0)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,1)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,2)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,3)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,4)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,5)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,6)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c7:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:ARMCOLOR,7)" params="target_property=ui:outgame:appear:advopt_clothes:l2:c8:pushed|value=1" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,0)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,1)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,2)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,3)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,4)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,5)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,6)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c7:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR,7)" params="target_property=ui:outgame:appear:advopt_clothes:l3:c8:pushed|value=1" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,0)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,1)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,2)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,3)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,4)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,5)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,6)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c7:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR,7)" params="target_property=ui:outgame:appear:advopt_clothes:l4:c8:pushed|value=1" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,0)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c1:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,1)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c2:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,2)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c3:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,3)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c4:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,4)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c5:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,5)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c6:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,6)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c7:pushed|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:VPB:FEETCOLOR,7)" params="target_property=ui:outgame:appear:advopt_clothes:l5:c8:pushed|value=1" />
+		
+	
+	<!-- No Zorai Eyes Color -->
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:active|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:eyes:active|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes_custom:active|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:eyes_custom:active|value=0" />
+
+
+	<!-- Set EYES & HAIR COLOR from specie -->
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="eyes_hair_color_fy" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="eyes_hair_color_ma" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="eyes_hair_color_tr" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="eyes_hair_color_zo" />
+	
+
+	<!-- Set light from specie -->
+	
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:back:posx|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:back:posy|value=28.5" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:back:posz|value=2.4" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:colr|value=255" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:colg|value=128" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:colb|value=0" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:colr|value=192" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:colg|value=255" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:colb|value=64" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:colr|value=64" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:colg|value=255" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:colb|value=255" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:colr|value=255" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:colg|value=128" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:colb|value=0" />
+
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:near|value=1.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:far|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:back:posz|value=2.2" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:near|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:far|value=3.5" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:back:posz|value=2.0" />
+		
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:near|value=3.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:far|value=4.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:back:posz|value=2.4" />
+
+		
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_m:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_m:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_m:colb|value=255" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_f:colr|value=255" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_f:colg|value=255" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:lgt_f:colb|value=255" />
+	
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKSEX|value=-2" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKSEX|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKBFC|value=-2" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKBFC|value=-1" />
+
+
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face1:hardtext|value='uiFace1Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face2:hardtext|value='uiFace2Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face3:hardtext|value='uiFace3Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face4:hardtext|value='uiFace4Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face5:hardtext|value='uiFace5Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face6:hardtext|value='uiFace6Fy'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:advopt_face:face7:hardtext|value='uiFace7Fy'" />
+
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face1:hardtext|value='uiFace1Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face2:hardtext|value='uiFace2Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face3:hardtext|value='uiFace3Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face4:hardtext|value='uiFace4Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face5:hardtext|value='uiFace5Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face6:hardtext|value='uiFace6Ma'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:advopt_face:face7:hardtext|value='uiFace7Ma'" />
+
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face1:hardtext|value='uiFace1Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face2:hardtext|value='uiFace2Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face3:hardtext|value='uiFace3Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face4:hardtext|value='uiFace4Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face5:hardtext|value='uiFace5Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face6:hardtext|value='uiFace6Tr'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:advopt_face:face7:hardtext|value='uiFace7Tr'" />
+
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face1:hardtext|value='uiFace1Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face2:hardtext|value='uiFace2Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face3:hardtext|value='uiFace3Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face4:hardtext|value='uiFace4Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face5:hardtext|value='uiFace5Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face6:hardtext|value='uiFace6Zo'" />
+	<action handler="set"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:advopt_face:face7:hardtext|value='uiFace7Zo'" />
+
+	
+	<action handler="proc" params="proc_appear_clothes_off" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charmal:anim|value=0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charfem:anim|value=0" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:env:name|value='outgame_fyros.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:env:name|value='outgame_matis.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:env:name|value='outgame_tryker.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:env:name|value='outgame_zorai.ig'" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:env:posz|value=-1.03" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:env:posz|value=0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:env:posz|value=0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:env:posz|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:posx|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:posy|value=24.0" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:tgtx|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:tgty|value=26.5" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:rotx|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:roty|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:cam:rotz|value=0.0" />
+	
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:cam:posz|value=2.1" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:cam:posz|value=2.2" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:cam:posz|value=2.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:cam:posz|value=2.3" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:cam:tgtz|value=1.7" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:cam:tgtz|value=1.8" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:cam:tgtz|value=1.6" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:cam:tgtz|value=1.9" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:appear:char3d:cam:fov|value=70.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:appear:char3d:cam:fov|value=75.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:appear:char3d:cam:fov|value=65.0" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:appear:char3d:cam:fov|value=85.0" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:camface:posz|value=2.2" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:camface:tgtz|value=2.2" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charmal:posx|value=0.8" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charfem:posx|value=-0.8" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charmal:posz|value=0.0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charfem:posz|value=0.04" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charmal:anim|value=0" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:charfem:anim|value=0" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:w|value=800" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:active|value=0" />
+
+	<action handler="set" params="target_property=ui:outgame:appear:char3dface:x|value=400" />
+	<action handler="set" params="target_property=ui:outgame:appear:blackbox2:x|value=400" />
+
+	<action handler="anim_start" params="anim=anim_appear_intro" />
+</proc>
+
+
+
+<proc id="eyes_hair_color_fy">
+	
+	<!-- EYES -->
+	
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c1_back:color|value='143 38 15'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c2_back:color|value='177 142 25'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c3_back:color|value='82 131 25'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c4_back:color|value='64 103 139'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c5_back:color|value='115 73 140'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c6_back:color|value='136 36 75'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c7_back:color|value='141 135 129'" />
+	
+	<!-- HAIR -->
+
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c1_back:color|value='206 198 181'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c2_back:color|value='157 151 149'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c3_back:color|value='94 95 95'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c4_back:color|value='83 56 43'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c5_back:color|value='136 47 28'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c6_back:color|value='181 135 42'" />
+	
+	
+</proc>
+
+<proc id="eyes_hair_color_ma">
+	
+	<!-- EYES -->
+	
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c1_back:color|value='166 63 38'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c2_back:color|value='199 147 33'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c3_back:color|value='116 192 50'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c4_back:color|value='54 111 176'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c5_back:color|value='95 48 153'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c6_back:color|value='167 54 103'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c7_back:color|value='171 169 170'" />
+	
+	<!-- HAIR -->
+
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c1_back:color|value='169 150 110'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c2_back:color|value='118 105 86'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c3_back:color|value='98 97 86'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c4_back:color|value='88 60 37'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c5_back:color|value='151 58 28'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c6_back:color|value='177 135 45'" />
+
+	
+</proc>
+
+<proc id="eyes_hair_color_tr">
+	
+	<!-- EYES -->
+	
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c1_back:color|value='128 57 49'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c2_back:color|value='159 113 29'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c3_back:color|value='84 107 46'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c4_back:color|value='64 98 120'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c5_back:color|value='71 59 121'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c6_back:color|value='125 62 96'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:eyes:eyes_c7_back:color|value='101 94 91'" />
+	
+	<!-- HAIR -->
+
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c1_back:color|value='78 93 70'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c2_back:color|value='97 76 97'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c3_back:color|value='115 68 39'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c4_back:color|value='159 117 71'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c5_back:color|value='147 78 54'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c6_back:color|value='180 140 51'" />
+
+</proc>
+
+<proc id="eyes_hair_color_zo">
+	
+	<!-- HAIR -->
+
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c1_back:color|value='78 93 70'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c2_back:color|value='97 76 97'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c3_back:color|value='115 68 39'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c4_back:color|value='159 117 71'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c5_back:color|value='147 78 54'" />
+	<action handler="set" params="target_property=ui:outgame:appear:advopt_face:haircolor:hair_c6_back:color|value='180 140 51'" />
+
+
+</proc>
+
+
+
+<proc id="proc_appear_start2">
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:active|value=1" />
+	<action handler="anim_start" params="anim=anim_appear_intro2" />
+</proc>
+
+<!-- appear uninit -->
+
+<proc id="proc_appear_finish">
+
+	<action handler="set" params="target_property=ui:outgame:appear:female2:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:active|value=0" />
+	
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="export_fyros" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="export_matis" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="export_tryker" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="export_zorai" />
+		
+	<action handler="proc" params="proc_appear_close_help2" />
+	<action handler="anim_start" cond="ne(@UI:TEMP:APPEARCLICKSEX,-1)" params="anim=anim_appear_undisplay_infos" />
+	<action handler="anim_start" params="anim=anim_appear_outro" />
+</proc>
+
+<proc id="proc_appear_finish2">
+	<action handler="proc" params="proc_appear_clothes_off" />
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:active|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKSEX|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKBFC|value=-1" />
+	<action handler="anim_start" params="anim=anim_appear_outro2" />
+</proc>
+
+<proc id="proc_appear_finish3">
+	<action handler="copy" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
+</proc>
+
+<proc id="proc_appear_open_help">
+	<action handler="play_sound" params="name=generic_help_click" />
+	<action handler="set" params="target_property=ui:outgame:appear:help_box:active|value=1" />
+</proc>
+
+<proc id="proc_appear_close_help">
+	<action handler="play_sound" params="name=generic_help_close_click" />
+	<action handler="set" params="target_property=ui:outgame:appear:help_box:active|value=0" />
+</proc>
+
+<proc id="proc_appear_close_help2">
+	<action handler="set" params="target_property=ui:outgame:appear:help_box:active|value=0" />
+</proc>
+
+<!-- click -->
+
+<proc id="proc_appear_choice_sex">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:SEX|@0" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:female2:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:active|value=0" />
+	
+	<action handler="play_sound" params="name=appear_but_click" />
+		
+	<action handler="reset_pushed" cond="eq(@UI:TEMP:APPEARCLICKSEX,-1)" params="dblink=ui:outgame:appear:options" />
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKSEX,-1)" params="target_property=ui:outgame:appear:options:body:pushed|value=1" />
+	<action handler="proc" cond="eq(@UI:TEMP:APPEARCLICKSEX,-1)" params="proc_appear_choice_bfc|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:appear:char3d:camface:posz|value=getprop('ui:outgame:appear:char3d:charmal:headz')" />
+	<action handler="anim_start" cond="eq(@UI:TEMP:APPEARCLICKSEX,-1)" params="anim=anim_appear_display_infos" />
+	<action handler="anim_start" cond="and(eq(@UI:TEMP:APPEARCLICKSEX,-1),eq(@UI:TEMP:CHAR3D:VPA:SEX,0))" params="anim=anim_appear_cam_mf_m" />
+	<action handler="anim_start" cond="and(eq(@UI:TEMP:APPEARCLICKSEX,-1),eq(@UI:TEMP:CHAR3D:VPA:SEX,1))" params="anim=anim_appear_cam_mf_f" />
+	<action handler="anim_start" cond="and(eq(@UI:TEMP:APPEARCLICKSEX,0),eq(@UI:TEMP:CHAR3D:VPA:SEX,1))" params="anim=anim_appear_cam_m_f" />
+	<action handler="anim_start" cond="and(eq(@UI:TEMP:APPEARCLICKSEX,1),eq(@UI:TEMP:CHAR3D:VPA:SEX,0))" params="anim=anim_appear_cam_f_m" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKSEX|@0" />
+</proc>
+
+<proc id="proc_appear_home_screen">
+	<action handler="play_sound" params="name=generic_home_click" />
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_select" />
+	<action handler="proc" params="proc_appear_finish" />
+</proc>
+
+<proc id="proc_appear_back_screen">
+	<action handler="play_sound" params="name=generic_prev_click" />
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_specie" />
+	<action handler="proc" params="proc_appear_finish" />
+</proc>
+
+<proc id="proc_appear_next_screen">
+	<action handler="play_sound" params="name=generic_next_click" />
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_summary" />
+	<action handler="proc" params="proc_appear_finish" />
+</proc>
+
+<proc id="proc_appear_choice_bfc">
+	<action handler="play_sound" params="name=generic_bb_click" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCHOICE|@0" />
+	
+ 	<action handler="proc" cond="eq(@UI:TEMP:APPEARCHOICE,2)" params="proc_appear_clothes_on" />
+	<action handler="proc" cond="ne(@UI:TEMP:APPEARCHOICE,2)" params="proc_appear_clothes_off" />
+	
+	<action handler="anim_start" cond="eq(@UI:TEMP:APPEARCLICKBFC,-1)" params="anim=anim_appear_bfc2" />
+	<action handler="anim_start" cond="ne(@UI:TEMP:APPEARCLICKBFC,-1)" params="anim=anim_appear_bfc" />
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKBFC,-1)" params="dblink=UI:TEMP:APPEARCLICKBFC|@0" />
+	<action handler="set" params="dblink=UI:TEMP:APPEARCLICKTMPBFC|@0" />
+</proc>
+
+<proc id="proc_appear_choice_bfc2">
+	<action handler="copy" params="dbdst=UI:TEMP:APPEARCLICKBFC|dbsrc=UI:TEMP:APPEARCLICKTMPBFC" />
+	<action handler="anim_start" params="anim=anim_appear_bfc2" />
+</proc>
+
+<proc id="proc_appear_propagate2">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D_MALE|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D_MALE:VPA:SEX|value=0" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D_FEMALE|dbsrc=UI:TEMP:CHAR3D" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D_FEMALE:VPA:SEX|value=1" />
+</proc>
+
+<proc id="proc_appear_propagate">
+	<action handler="proc" params="proc_appear_propagate2" cond="eq(@UI:CURRENT_SCREEN, %screen_appear)" />
+</proc>
+
+<proc id="proc_appear_clothes_on">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:VPA:JACKETMODEL|dbsrc=UI:TEMP:CHAR3D_CLOTHES:VPA:JACKETMODEL" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:VPA:ARMMODEL|dbsrc=UI:TEMP:CHAR3D_CLOTHES:VPA:ARMMODEL" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:VPB:HANDSMODEL|dbsrc=UI:TEMP:CHAR3D_CLOTHES:VPB:HANDSMODEL" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:VPA:TROUSERMODEL|dbsrc=UI:TEMP:CHAR3D_CLOTHES:VPA:TROUSERMODEL" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:VPB:FEETMODEL|dbsrc=UI:TEMP:CHAR3D_CLOTHES:VPB:FEETMODEL" />
+	
+	<action handler="proc" params="proc_appear_propagate" />
+</proc>
+
+<proc id="proc_appear_clothes_off">
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:JACKETMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:ARMMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:HANDSMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPA:TROUSERMODEL|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:CHAR3D:VPB:FEETMODEL|value=0" />
+	
+	<action handler="proc" params="proc_appear_propagate" />
+</proc>
+
+<proc id="proc_height_camface">
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKSEX,0)" params="target_property=ui:outgame:appear:char3d:camface:posz|value=add(0.1,getprop('ui:outgame:appear:char3d:charmal:headz'))" />
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKSEX,0)" params="target_property=ui:outgame:appear:char3d:camface:tgtz|value=add(0.1,getprop('ui:outgame:appear:char3d:charmal:headz'))" />
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKSEX,1)" params="target_property=ui:outgame:appear:char3d:camface:posz|value=add(0.1,getprop('ui:outgame:appear:char3d:charfem:headz'))" />
+	<action handler="set" cond="eq(@UI:TEMP:APPEARCLICKSEX,1)" params="target_property=ui:outgame:appear:char3d:camface:tgtz|value=add(0.1,getprop('ui:outgame:appear:char3d:charfem:headz'))" />
+</proc>
+
+<!-- Change hair cut -->
+<proc id="proc_appear_change_haircut">
+	<action handler="proc" params="proc_appear_change_haircut_fy" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" />
+	<action handler="proc" params="proc_appear_change_haircut_ma" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" />
+	<action handler="proc" params="proc_appear_change_haircut_tr" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" />
+	<action handler="proc" params="proc_appear_change_haircut_zo" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" />
+</proc>
+
+<proc id="proc_appear_change_haircut_fy">
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,0)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,1)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,2)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,3)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,4)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,5)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_medium03.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,6)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('fy_cheveux_long01.sitem','HEAD')" />
+</proc>
+
+<proc id="proc_appear_change_haircut_ma">
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,0)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,1)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,2)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,3)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,4)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,5)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_long01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,6)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('ma_cheveux_long02.sitem','HEAD')" />
+</proc>
+
+<proc id="proc_appear_change_haircut_tr">
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,0)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,1)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,2)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,3)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_short03.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,4)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,5)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,6)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('tr_cheveux_long01.sitem','HEAD')" />
+</proc>
+
+<proc id="proc_appear_change_haircut_zo">
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,0)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_shave01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,1)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_short01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,2)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,3)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium02.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,4)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_medium03.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,5)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_long01.sitem','HEAD')" />
+	<action handler="set" cond="eq(@UI:TEMP:HAIRCUT,6)" params="dblink=UI:TEMP:CHAR3D:VPA:HATMODEL|value=getVSIndex('zo_cheveux_long02.sitem','HEAD')" />
+</proc>
+
+<!-- ************* -->
+<!-- * TEMPLATES * -->
+<!-- ************* -->
+
+<!-- Appear morph target template slider -->
+
+<template name="slider" posref="TL TL" x="0" y="0" w="136" h="8"  id="" posparent="parent" sizeref="" keep="true">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+		<view type="bitmap" id="left" posref="TL TL" texture="slider_l.tga"/>
+		<view type="bitmap" id="right" posref="TR TR" texture="slider_r.tga"/>
+		<view type="bitmap" id="middle" posref="MM MM" scale="true" sizeref="hw" h="0" w="-8" texture="slider_m.tga"/>
+	</group>
+</template>
+
+ 
+<template name="appearmttslider" nb="" id="" posref="TL TL" x="28" y="16" >
+
+	<instance template="slider" id="bk#nb" posref="#posref" x="#x" y="#y" />
+	<!--
+	<view type="text" id="title#nb" posparent="bk#nb" posref="ML MR" x="-4" y="0" hardtext="#nb" color="255 255 255 255" fontsize="12"/>
+	-->
+	<ctrl type="scroll" id="scroll#nb" posparent="bk#nb" posref="MM MM" x="0" y="0" w="124" h="12"
+						vertical="false" align="L" min="0" max="7" value="UI:TEMP:CHAR3D:VPC:MORPHTARGET#nb" tracksize="12" 
+						onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+						tx_bottomleft="slide_l.tga"/>
+</template>
+
+
+<template name="colthes_color" id="" title="" dblink="" posref="TL TL" posparent="parent" x="0" y="32" >
+
+	<group id="#id" posref="#posref" posparent="#posparent" x="#x" y="#y" w="280" h="20" >
+
+		<view type="text" id="title" posref="ML ML" x="0" y="0" hardtext="#title" color="255 255 255 255" fontsize="12"/>
+		
+		<view type="bitmap" id="c1_back" x="90" y="0" posref="ML ML" texture="but_fake.tga" 				color="125 32 30" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c2_back" posparent="c1_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="171 122 52" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c3_back" posparent="c2_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="70 88 39" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c4_back" posparent="c3_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="46 82 68" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c5_back" posparent="c4_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="45 70 103" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c6_back" posparent="c5_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="57 48 82" 	scale="true" w="18" h="18" />
+		<view type="bitmap" id="c7_back" posparent="c6_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="130 130 129" scale="true" w="18" h="18" />
+		<view type="bitmap" id="c8_back" posparent="c7_back" posref="TR TL" x="6" texture="but_fake.tga" 	color="47 47 45 " 	scale="true" w="18" h="18" />
+		
+		<ctrl type="button" button_type="radio_button" id="c1" posparent="c1_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="125 32 30" 
+								onclick_l="set" params_l="dblink=#dblink|value=0" />
+
+		<ctrl type="button" button_type="radio_button" id="c2" posparent="c2_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="171 122 52" 
+								onclick_l="set" params_l="dblink=#dblink|value=1" />
+
+		<ctrl type="button" button_type="radio_button" id="c3" posparent="c3_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="70 88 39" 
+								onclick_l="set" params_l="dblink=#dblink|value=2" />
+
+		<ctrl type="button" button_type="radio_button" id="c4" posparent="c4_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="46 82 68" 
+								onclick_l="set" params_l="dblink=#dblink|value=3" />
+
+		<ctrl type="button" button_type="radio_button" id="c5" posparent="c5_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="45 70 103"
+								onclick_l="set" params_l="dblink=#dblink|value=4" />
+
+		<ctrl type="button" button_type="radio_button" id="c6" posparent="c6_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="57 48 82" 
+								onclick_l="set" params_l="dblink=#dblink|value=5" />
+
+		<ctrl type="button" button_type="radio_button" id="c7" posparent="c7_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="130 130 129" 
+								onclick_l="set" params_l="dblink=#dblink|value=6" />
+
+		<ctrl type="button" button_type="radio_button" id="c8" posparent="c8_back" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="47 47 45"
+								onclick_l="set" params_l="dblink=#dblink|value=7" />
+	</group>
+
+</template>
+
+
+
+<proc id="proc_big_female">
+	<action handler="set" params="target_property=ui:outgame:appear:female:pushed|value=1" />
+	<action handler="proc" params="proc_appear_choice_sex|value=1" />
+</proc>
+
+<proc id="proc_big_male">
+	<action handler="set" params="target_property=ui:outgame:appear:male:pushed|value=1" />
+	<action handler="proc" params="proc_appear_choice_sex|value=0" />
+</proc>
+
+<proc id="proc_female_over">
+	<action handler="play_sound" params="name=specie_but_over" />
+	<action handler="set" params="target_property=ui:outgame:appear:female2:col_normal|value='0 0 0 0'" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:col_normal|value='0 0 0 196'" />
+</proc>
+
+<proc id="proc_male_over">
+	<action handler="play_sound" params="name=specie_but_over" />
+	<action handler="set" params="target_property=ui:outgame:appear:male2:col_normal|value='0 0 0 0'" />
+	<action handler="set" params="target_property=ui:outgame:appear:female2:col_normal|value='0 0 0 196'" />
+</proc>
+
+<!-- *************** -->
+<!-- * MAIN WINDOW * -->
+<!-- *************** -->
+
+<group id="appear" w="800" h="600" posref="MM MM"
+						on_active="proc" on_active_params="proc_appear_start">
+
+
+	<!-- BLACK BACK -->
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="-32" render_layer="-4" texture="blank.tga" color="0 0 0 255" scale="true" w="800" h="488" global_color="false" />
+
+
+	<!-- Title -->
+	<view type="text" id="title" posref="TL TL" x="8" y="-6" hardtext="uiAppearTitle" fontsize="20"/>
+
+
+	<!-- TIMELINE -->
+	<group id="timeline" w="784" h="32" posref="BL BL" x="8" y="16" >
+		<view type="bitmap" id="b4" posref="MM MR" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="b5" posref="MM ML" x="0" y="0" texture="time_button.tga" global_color="false" />
+		<view type="bitmap" id="back_bg" posref="TL TL" x="0" y="0" texture="time_back.tga" global_color="false" />
+		<view type="bitmap" id="next_bg" posref="TR TR" x="0" y="0" texture="time_next.tga" global_color="false" />
+		<view type="bitmap" id="line" posparent="back_bg" posref="MR ML" x="0" y="0" texture="time_line.tga" scale="true" w="272" h="4" global_color="false" />
+		<view type="bitmap" id="line" posparent="next_bg" posref="ML MR" x="0" y="0" texture="time_line.tga" scale="true" w="272" h="4" global_color="false" />
+	</group>
+
+
+	<!-- Buttons SEX -->
+	<ctrl type="button" button_type="radio_button" id="female" posref="BL MM" x="372" y="32"
+									tx_normal="logo_female.tga" tx_over="button_blank_over.tga" tx_pushed="logo_female_pushed.tga"
+									onover="play_sound" params_over="name=appear_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_appear_choice_sex|value=1" tooltip="uiFemale"/>
+
+	<ctrl type="button" button_type="radio_button" id="male" posref="BL MM" x="428" y="32"
+									tx_normal="logo_male.tga" tx_over="button_blank_over.tga" tx_pushed="logo_male_pushed.tga"
+									onover="play_sound" params_over="name=appear_but_over"
+									over_when_pushed="false" onclick_l="proc" params_l="proc_appear_choice_sex|value=0" tooltip="uiMale"/>
+
+
+
+
+
+	<!-- Home & Help -->
+	<!-- Removed for Beta 1
+	<ctrl type="button" id="help" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_help.tga" tx_pushed="button_help.tga" tx_over="button_help_over.tga" 
+		onover="play_sound" params_over="name=generic_help_over"
+		onclick_l="launch_help" params_l="url=help_outgame.html" tooltip="uiHelp" />
+	-->
+		
+	<ctrl type="button" id="home" button_type="push_button" posref="TR MM" x="-24" y="-16"
+		tx_normal="button_home.tga" tx_pushed="button_home.tga" tx_over="button_home_over.tga" 
+		onover="play_sound" params_over="name=generic_home_over"
+		onclick_l="proc" params_l="proc_appear_home_screen" tooltip="uiReturnCharSel" />
+
+
+	<!-- Buttons timeline -->
+	<ctrl type="button" id="back" button_type="push_button" posref="BL BL" x="8" y="16"
+		tx_normal="button_back.tga" tx_pushed="button_back_over.tga" tx_over="button_back_over.tga" 
+		onover="play_sound" params_over="name=generic_prev_over"
+		onclick_l="proc" params_l="proc_appear_back_screen" tooltip="uiPrevStep"/>
+
+	<ctrl type="button" id="next" button_type="push_button" posref="BR BR" x="-8" y="16"
+		tx_normal="button_next.tga" tx_pushed="button_next_over.tga" tx_over="button_next_over.tga" 
+		onover="play_sound" params_over="name=generic_next_over"
+		onclick_l="proc" params_l="proc_appear_next_screen" tooltip="uiNextStep"/>
+	<link expr="ne(@UI:TEMP:APPEARCLICKSEX,-1)" target="next:active" />
+
+
+		
+
+
+	<!-- vue 3D du perso -->
+	<scene3d id="char3d" x="0" y="-32" w="800" h="488" posref="TL TL" curcam="cam" render_layer="-2"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="2.0" dist_limit_max="3.0"	
+						ambient="0 0 0" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+
+		<character3d id="charmal" dblink="UI:TEMP:CHAR3D_MALE" pos="0.8 26.5 0.0" rot="0.0 0.0 0.0" />
+		<character3d id="charfem" dblink="UI:TEMP:CHAR3D_FEMALE" pos="-0.8 26.5 0.0" rot="0.0 0.0 0.0" />
+
+		<camera id="cam" fov="80" pos="0.0 24.0 2.2" target="0.0 26.5 2.2" roll="0" />
+		<camera id="camface" fov="28" pos="0.0 25.3 2.2" target="0.0 26.5 2.2" roll="0" />
+
+		<light id="back" pos="0.0 28.5 2.4" color="255 128 0" near="2.5" far="4.0" />
+		<light id="lgt_m" pos="1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+		<light id="lgt_f" pos="-1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+
+		<ig id="env" name="outgame_fyros.ig" pos="0 0 0" active="false" />
+		
+		<shape id="shadow_male" name="shadow.shape" pos="0.8 26.5 0.85" rot="0.0 0.0 0.0" />
+		<shape id="shadow_female" name="shadow.shape" pos="-0.8 26.5 0.85" rot="0.0 0.0 0.0" />
+
+		<auto_anim name="waterfall01_maserre.anim"/>
+		<auto_anim name="waterfall02_maserre.anim"/>
+	</scene3d>
+
+
+
+	<scene3d id="char3dface" x="400" y="-32" w="400" h="244" posref="TR TR" reference="char3d" curcam="camface" render_layer="-2"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-10" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="0.9" dist_limit_max="1.5" >
+	</scene3d>
+	<link expr="ne(@UI:TEMP:APPEARCLICKSEX,-1)" target="char3dface:active" />
+
+
+
+
+	<!-- BIG BUTTONS col_over="40 73 34 128"-->
+	
+	<ctrl type="button" id="female2" button_type="push_button" posref="TL TL" x="0" y="-32" sizeref="w2h" w="0" h="-112" scale="true" 
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 128" col_pushed="0 0 0 0" col_over="255 255 255 0"
+			onover="proc" params_over="proc_female_over"
+			onclick_l="proc" params_l="proc_big_female" />
+
+	<ctrl type="button" id="male2" button_type="push_button" posparent="female2" posref="TR TL" x="0" y="0" sizeref="wh" w="0" h="0" scale="true" 
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 128" col_pushed="0 0 0 0" col_over="255 255 255 0"
+			onover="proc" params_over="proc_male_over"
+			onclick_l="proc" params_l="proc_big_male" />
+
+
+
+	<!-- ADVANCED OPTIONS : body -->	
+	<group id="advopt_body" posref="TR TR" x="400" y="-276" w="400" h="244" active="false" >
+		<!-- Height -->
+		<instance template="slider" id="bk1" posref="BM BM" x="4" y="166" w="136" h="8" />
+
+		<view type="text" id="title1" posparent="bk1" posref="TL BL" x="-8" y="4" hardtext="uiHeight" color="255 255 255 255" fontsize="10"/>
+
+		<ctrl type="scroll" id="scroll1" posparent="bk1" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:CHARACTERHEIGHT" tracksize="12" 
+							onscrollend="proc" params="proc_height_camface" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga"/>
+		<!-- Torso -->
+		<instance template="slider" id="bk2" posref="BM BM" x="4" y="134" w="136" h="8" />
+		
+		<view type="text" id="title2" posparent="bk2" posref="TL BL" x="-8" y="4" hardtext="uiTorso" color="255 255 255 255" fontsize="10"/>
+
+		<ctrl type="scroll" id="scroll2" posparent="bk2" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:TORSOWIDTH" tracksize="12" 
+							onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga"/>
+		<!-- Arms -->
+		<instance template="slider" id="bk3" posref="BM BM" x="4" y="102" w="136" h="8" />
+		
+		<view type="text" id="title3" posparent="bk3" posref="TL BL" x="-8" y="4" hardtext="uiArms" color="255 255 255 255" fontsize="10"/>
+
+		<ctrl type="scroll" id="scroll3" posparent="bk3" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:ARMSWIDTH" tracksize="12" 
+							onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga"/>
+		<!-- Legs -->
+		<instance template="slider" id="bk4" posref="BM BM" x="4" y="70" w="136" h="8" />
+		
+		<view type="text" id="title4" posparent="bk4" posref="TL BL" x="-8" y="4" hardtext="uiLegs" color="255 255 255 255" fontsize="10"/>
+
+		<ctrl type="scroll" id="scroll4" posparent="bk4" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:LEGSWIDTH" tracksize="12" 
+							onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga"/>
+
+	</group>
+	<link expr="eq(@UI:TEMP:APPEARCLICKBFC,0)" target="advopt_body:active" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:CHARACTERHEIGHT)" action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:TORSOWIDTH)" action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:ARMSWIDTH)" action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:LEGSWIDTH)" action="proc" params="proc_appear_propagate" />
+
+	<!-- ADVANCED OPTIONS : face -->	
+	<group id="advopt_face" posref="TR TR" x="400" y="-276" w="400" h="244" active="false" >
+		
+		<view type="text" id="face_custom" posref="TL TL" x="16" y="-8" hardtext="uiShape" color="255 255 255 255" fontsize="14"/>
+		
+		<view type="text" id="hair_custom" posref="TL TL" x="200" y="-8" hardtext="uiHair" color="255 255 255 255" fontsize="14"/>
+		<view type="text" id="haircut_custom" posref="TL BL" x="204" y="-36" hardtext="uiHaircut" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="hair_color_custom" posref="TL BL" x="204" y="-64" hardtext="uiColor" color="192 192 192 255" fontsize="10"/>
+		
+		<view type="text" id="tatoo_custom" posref="TL TL" x="200" y="-124" hardtext="uiTatoos" color="255 255 255 255" fontsize="14"/>
+		
+		<view type="text" id="eyes_custom" posref="TL TL" x="200" y="-168" hardtext="uiEyes" color="255 255 255 255" fontsize="14"/>
+		
+		
+		<instance template="appearmttslider" nb="1" y="-40" />
+		<instance template="appearmttslider" nb="2" y="-68" />
+		<instance template="appearmttslider" nb="3" y="-96" />
+		<instance template="appearmttslider" nb="4" y="-124" />
+		<instance template="appearmttslider" nb="5" y="-152" />
+		<instance template="appearmttslider" nb="6" y="-180" />
+		<instance template="appearmttslider" nb="7" y="-208" />
+
+		<view type="text" id="face1" posref="TL BL" x="20" y="-36" hardtext="uiFace1Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face2" posref="BL BL" x="0" y="-28" posparent="face1" hardtext="uiFace2Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face3" posref="BL BL" x="0" y="-28" posparent="face2" hardtext="uiFace3Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face4" posref="BL BL" x="0" y="-28" posparent="face3" hardtext="uiFace4Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face5" posref="BL BL" x="0" y="-28" posparent="face4" hardtext="uiFace5Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face6" posref="BL BL" x="0" y="-28" posparent="face5" hardtext="uiFace6Fy" color="192 192 192 255" fontsize="10"/>
+		<view type="text" id="face7" posref="BL BL" x="0" y="-28" posparent="face6" hardtext="uiFace7Fy" color="192 192 192 255" fontsize="10"/>
+
+
+		<group id="eyes" posparent="eyes_custom" posref="BL TL" x="8" y="-8" w="168" h="20" >
+		
+			<view type="bitmap" id="eyes_c1_back" posref="ML ML" x="2" y="0" texture="but_fake.tga" color="172 62 7" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c2_back" posparent="eyes_c1_back" posref="TR TL" x="6" texture="but_fake.tga" color="232 204 48" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c3_back" posparent="eyes_c2_back" posref="TR TL" x="6" texture="but_fake.tga" color="69 186 17" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c4_back" posparent="eyes_c3_back" posref="TR TL" x="6" texture="but_fake.tga" color="17 112 186" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c5_back" posparent="eyes_c4_back" posref="TR TL" x="6" texture="but_fake.tga" color="136 17 186" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c6_back" posparent="eyes_c5_back" posref="TR TL" x="6" texture="but_fake.tga" color="186 17 140" scale="true" w="18" h="18" />
+			<view type="bitmap" id="eyes_c7_back" posparent="eyes_c6_back" posref="TR TL" x="6" texture="but_fake.tga" color="172 172 172" scale="true" w="18" h="18" />
+			
+			<ctrl type="button" button_type="radio_button" id="c1" posparent="eyes_c1_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c1_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=0" />
+								
+			<ctrl type="button" button_type="radio_button" id="c2" posparent="eyes_c2_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c2_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=1" />
+			
+			<ctrl type="button" button_type="radio_button" id="c3" posparent="eyes_c3_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c3_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=2" />
+			
+			<ctrl type="button" button_type="radio_button" id="c4" posparent="eyes_c4_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c4_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=3" />
+			
+			<ctrl type="button" button_type="radio_button" id="c5" posparent="eyes_c5_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c5_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=4" />
+								
+			<ctrl type="button" button_type="radio_button" id="c6" posparent="eyes_c6_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c6_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=5" />
+								
+			<ctrl type="button" button_type="radio_button" id="c7" posparent="eyes_c7_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:eyes:eyes_c7_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPC:EYESCOLOR|value=6" />
+		</group>
+
+
+
+
+
+		<group id="haircut" posparent="haircut_custom" posref="BL TL" x="8" y="-2" w="168" h="12" >
+		
+						
+			<instance template="slider" id="bkh" posref="ML ML" w="136" h="8" />
+			
+			<ctrl type="scroll" id="scrollh" posparent="bkh" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="6" value="UI:TEMP:HAIRCUT" tracksize="12" 
+							onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga" />
+		</group>
+
+		<link expr="depends(@UI:TEMP:HAIRCUT)" action="proc" params="proc_appear_change_haircut" />
+
+
+
+		<group id="haircolor" posparent="hair_color_custom" posref="BL TL" x="8" y="-8" w="168" h="20" >
+		
+			<view type="bitmap" id="hair_c1_back" posref="ML ML" x="2" y="0" texture="but_fake.tga" color="214 214 214" scale="true" w="18" h="18" />
+			<view type="bitmap" id="hair_c2_back" posparent="hair_c1_back" posref="TR TL" x="6" texture="but_fake.tga" color="121 121 121" scale="true" w="18" h="18" />
+			<view type="bitmap" id="hair_c3_back" posparent="hair_c2_back" posref="TR TL" x="6" texture="but_fake.tga" color="50 50 50" scale="true" w="18" h="18" />
+			<view type="bitmap" id="hair_c4_back" posparent="hair_c3_back" posref="TR TL" x="6" texture="but_fake.tga" color="117 92 35" scale="true" w="18" h="18" />
+			<view type="bitmap" id="hair_c5_back" posparent="hair_c4_back" posref="TR TL" x="6" texture="but_fake.tga" color="189 95 3" scale="true" w="18" h="18" />
+			<view type="bitmap" id="hair_c6_back" posparent="hair_c5_back" posref="TR TL" x="6" texture="but_fake.tga" color="175 153 17" scale="true" w="18" h="18" />
+			
+			
+			
+			<ctrl type="button" button_type="radio_button" id="c1" posparent="hair_c1_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c1_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=0" />
+			
+			<ctrl type="button" button_type="radio_button" id="c2" posparent="hair_c2_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c2_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=1" />
+			
+			<ctrl type="button" button_type="radio_button" id="c3" posparent="hair_c3_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c3_back:color')" 
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=2" />
+			
+			<ctrl type="button" button_type="radio_button" id="c4" posparent="hair_c4_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c4_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=3" />
+			
+			<ctrl type="button" button_type="radio_button" id="c5" posparent="hair_c5_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c5_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=4" />
+			
+			<ctrl type="button" button_type="radio_button" id="c6" posparent="hair_c6_back" pushed="true" posref="TL TL" x="-1" y="1"
+								tx_normal="but_color.tga" tx_over="but_color_over.tga" tx_pushed="but_color_selected.tga"
+								color="getprop('ui:outgame:appear:haircolor:hair_c6_back:color')"
+								onclick_l="set" params_l="dblink=UI:TEMP:CHAR3D:VPA:HATCOLOR|value=5" />
+		</group>
+
+
+		<instance template="slider" id="bkt" posparent="tatoo_custom" posref="BL TL" x="12" y="-8" w="136" h="8" />
+		<ctrl type="scroll" id="scrollt" posparent="bkt" posref="MM MM" x="0" y="0" w="124" h="12"
+							vertical="false" align="L" min="0" max="31" value="UI:TEMP:CHAR3D:VPC:TATTOO" tracksize="12" 
+							onscroll="" params="" tx_topright="slide_r.tga" tx_middle="slide_m.tga"
+							tx_bottomleft="slide_l.tga"/>
+
+	</group>
+	<link expr="eq(@UI:TEMP:APPEARCLICKBFC,1)" target="advopt_face:active" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET1)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET2)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET3)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET4)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET5)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET6)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:MORPHTARGET7)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:EYESCOLOR)"		action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPA:HATMODEL)"		action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPA:HATCOLOR)"		action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPC:TATTOO)"		action="proc" params="proc_appear_propagate" />
+
+	<!-- ADVANCED OPTIONS : clothes-->	
+	<group id="advopt_clothes" posref="TR TR" x="0" y="-276" w="400" h="244" active="false" >
+
+		<instance template="colthes_color" id="l1" title="uiTorso"   dblink="UI:TEMP:CHAR3D:VPA:JACKETCOLOR"  posref="TL TL" x="60" y="-40" />
+		<instance template="colthes_color" id="l2" title="uiArmpad"  dblink="UI:TEMP:CHAR3D:VPA:ARMCOLOR"	  posparent="l1" posref="BL TL" x="0" y="-8" />
+		<instance template="colthes_color" id="l3" title="uiGloves"  dblink="UI:TEMP:CHAR3D:VPB:HANDSCOLOR"	  posparent="l2" posref="BL TL" x="0" y="-8" />
+		<instance template="colthes_color" id="l4" title="uiTrouser" dblink="UI:TEMP:CHAR3D:VPA:TROUSERCOLOR" posparent="l3" posref="BL TL" x="0" y="-8" />
+		<instance template="colthes_color" id="l5" title="uiFeet"	 dblink="UI:TEMP:CHAR3D:VPB:FEETCOLOR"	  posparent="l4" posref="BL TL" x="0" y="-8" />
+
+	</group>
+	<link expr="eq(@UI:TEMP:APPEARCLICKBFC,2)" target="advopt_clothes:active" />
+	<!-- not with ...vpa:hatcolor already done for advopt_face -->
+	<link expr="depends(@UI:TEMP:CHAR3D:VPA:JACKETCOLOR)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPA:ARMCOLOR)"		action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPB:HANDSCOLOR)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPA:TROUSERCOLOR)"	action="proc" params="proc_appear_propagate" />
+	<link expr="depends(@UI:TEMP:CHAR3D:VPB:FEETCOLOR)"		action="proc" params="proc_appear_propagate" />
+
+	<!-- BLACK BOX (sert a faire les transition...) -->
+	<view type="bitmap" id="blackbox" posref="TL TL" x="0" y="-32" render_layer="0" texture="blank.tga" color="0 0 0 0" scale="true" w="800" h="488" global_color="false" />
+	<view type="bitmap" id="blackbox2" posref="TR TR" x="400" y="-276" render_layer="1" texture="blank.tga" color="0 0 0 255" scale="true" w="400" h="244" global_color="false" />
+	<link expr="ne(@UI:TEMP:APPEARCLICKSEX,-1)" target="blackbox2:active" />
+
+	<view type="bitmap" id="blackboxface" posref="TR TR" x="400" y="-32" w="400" h="488" render_layer="1" texture="blank.tga" color="0 0 0 255" scale="true" global_color="false" />
+
+	<!-- BORDERS -->
+	<view type="bitmap" id="top_line" posref="TL TL" posparent="blackbox" x="0" y="1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="bot_line" posref="BL BL" posparent="blackbox" x="0" y="-1" texture="border_hor.tga" scale="true" w="800" h="1" global_color="false" />
+	<view type="bitmap" id="vertical_line" posparent="char3d" posref="MR MR" x="0" y="0"  texture="border_ver.tga" scale="true" w="1" h="488" render_layer="2" global_color="false" />
+	<view type="bitmap" id="mid_line" posref="BL TL" posparent="char3dface" x="0" y="0" texture="border_hor.tga" scale="true" w="400" h="1" render_layer="2" global_color="false" />
+	<link expr="ne(@UI:TEMP:APPEARCLICKSEX,-1)" target="vertical_line:active" />
+	<link expr="ne(@UI:TEMP:APPEARCLICKSEX,-1)" target="mid_line:active" />
+
+
+
+
+	<!-- OPTIONS : body face clothes -->	
+	<group id="options" posref="BL TL" x="800" y="96" w="800" h="40" >
+	
+		<ctrl type="button" id="body" button_type="radio_button" posref="TL TL" x="224" render_layer="2" 
+			tx_normal="big_button.tga" tx_pushed="big_button_over.tga" tx_over="big_button_over.tga" col_over="255 255 255 128"
+			onover="play_sound" params_over="name=generic_bb_over"
+			over_when_pushed="false" onclick_l="proc" params_l="proc_appear_choice_bfc|value=0" />
+
+		<ctrl type="button" id="face" button_type="radio_button" posref="TL TL" x="448" render_layer="2" 
+			tx_normal="big_button.tga" tx_pushed="big_button_over.tga" tx_over="big_button_over.tga" col_over="255 255 255 128"
+			onover="play_sound" params_over="name=generic_bb_over"
+			over_when_pushed="false" onclick_l="proc" params_l="proc_appear_choice_bfc|value=1" />
+<!--
+		<ctrl type="button" id="clothes" button_type="radio_button" posref="TL TL" x="560" render_layer="2" 
+			tx_normal="big_button.tga" tx_pushed="big_button_over.tga" tx_over="big_button_over.tga" col_over="255 255 255 128"
+			onover="play_sound" params_over="name=generic_bb_over"
+			over_when_pushed="false" onclick_l="proc" params_l="proc_appear_choice_bfc|value=2" />
+-->		
+		<view type="text" id="title1" posparent="body" posref="MM MM" x="-4" y="4" hardtext="uiBody" color="255 255 255 255" fontsize="12" render_layer="2" />
+		<view type="text" id="title2" posparent="face" posref="MM MM" x="-4" y="4" hardtext="uiFace" color="255 255 255 255" fontsize="12" render_layer="2" />
+<!--
+		<view type="text" id="title3" posparent="clothes" posref="MM MM" x="-4" y="4" hardtext="uiClothes" color="255 255 255 255" fontsize="12" render_layer="2" />
+-->		
+	</group>
+
+	<!-- HELP -->
+	<group id="help_box" w="320" h="240" posref="MM MM" active="false" group_onclick_l="proc" group_params_l="proc_nothing" >
+		<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="0 0 0 192" global_color="false" />
+		<instance template="window_border" id="bord" posref="MM MM" />
+		<view type="text" id="title_help" posref="TL TL" x="8" y="-8" hardtext="uiHelpTitle" fontsize="12" />
+		<ctrl type="button" id="close_help" button_type="push_button" posref="TR TR" x="-8" y="-8"
+			onover="play_sound" params_over="name=generic_help_close_over"
+			tx_normal="W_close.tga" tx_pushed="W_close.tga" tx_over="W_button_12_over.tga" 
+			onclick_l="proc" params_l="proc_appear_close_help" tooltip="uiClose" />
+	</group>
+
+
+</group>
+
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_appear)" target="appear:active" />
+
+
+
+<!-- ANIMATION -->
+
+<!-- Intro -->
+<anim id="anim_appear_intro" duration="1.0" on_finish="proc" on_finish_params="proc_appear_start2" >
+	
+	<track type="linear" target="appear:bg:h,appear:blackbox:h">
+		<key time="0.1" value="0" />
+		<key time="0.35" value="488" />
+	</track>
+
+	<track type="linear" target="appear:bg:y,appear:blackbox:y">
+		<key time="0.1" value="-276" />
+		<key time="0.35" value="-32" />
+	</track>
+
+	<track type="linear" target="appear:title:y">
+		<key time="0.0" value="20" />
+		<key time="1.0" value="-6" />
+	</track>
+	
+	<track type="linear" target="appear:timeline:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="appear:blackbox:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="appear:back:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="appear:male:alpha,appear:female:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+	
+</anim>
+
+<anim id="anim_appear_intro2" duration="1.0" on_finish="proc" on_finish_params="proc_appear_big_buttons_on" >
+	
+	<track type="linear" target="appear:blackbox:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+</anim>
+
+<!-- outro -->
+<anim id="anim_appear_outro" duration="1.0" on_finish="proc" on_finish_params="proc_appear_finish2" >
+
+	<track type="linear" target="appear:blackbox:alpha,appear:blackbox2:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+
+	<track type="linear" target="appear:timeline:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="appear:back:alpha,appear:male:alpha,appear:female:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="appear:title:y">
+		<key time="0.0" value="-6" />
+		<key time="1.0" value="20" />
+	</track>
+
+</anim>
+
+<anim id="anim_appear_outro2" duration="1.0" on_finish="proc" on_finish_params="proc_appear_finish3" >
+
+	<track type="linear" target="appear:bg:h,appear:blackbox:h">
+		<key time="0.1" value="488" />
+		<key time="0.35" value="0" />
+	</track>
+
+	<track type="linear" target="appear:bg:y,appear:blackbox:y">
+		<key time="0.1" value="-32" />
+		<key time="0.35" value="-276" />
+	</track>
+
+</anim>
+
+<!-- display undisplay body face clothes -->
+<anim id="anim_appear_display_infos" duration="1.0" >
+
+	<track type="linear" target="appear:options:x">
+		<key time="0.0" value="800" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:advopt_body:x,appear:advopt_face:x,appear:advopt_clothes:x">
+		<key time="0.0" value="400" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:next:alpha">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+
+</anim>
+
+<anim id="anim_appear_undisplay_infos" duration="1.0" >
+
+	<track type="linear" target="appear:options:x">
+		<key time="0.0" value="0" />
+		<key time="1.0" value="-800" />
+	</track>
+<!--
+	<track type="linear" target="appear:advopt_body:x,appear:advopt_face:x,appear:advopt_clothes:x">
+		<key time="0.0" value="400" />
+		<key time="1.0" value="0" />
+	</track>
+-->
+	<track type="linear" target="appear:next:alpha">
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+
+</anim>
+
+<anim id="anim_appear_bfc" duration="0.5" on_finish="proc" on_finish_params="proc_appear_choice_bfc2" >
+
+	<track type="linear" target="appear:blackbox2:alpha">
+		<key time="0.0" value="0" />
+		<key time="0.5" value="255" />
+	</track>
+
+</anim>
+
+<anim id="anim_appear_bfc2" duration="0.5" >
+
+	<track type="linear" target="appear:blackbox2:alpha">
+		<key time="0.0" value="255" />
+		<key time="0.5" value="0" />
+	</track>
+
+</anim>
+
+<!-- 2 persos vers male -->
+<anim id="anim_appear_cam_mf_m" duration="1.5" >
+	
+	<track type="linear" target="appear:char3d:back:posx" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="1.0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_f:colr,appear:char3d:lgt_f:colg,appear:char3d:lgt_f:colb" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+		
+	<track type="linear" target="appear:char3d:cam:posx,appear:char3d:cam:tgtx,appear:char3d:camface:posx,appear:char3d:camface:tgtx">
+		<key time="0.0" value="0.0" />
+		<key time="1.0" value="0.8" />
+	</track>
+<!--
+	<track type="linear" target="appear:char3d:cam:posy">
+		<key time="0.0" value="21.0" />
+		<key time="1.0" value="23.5" />
+	</track>
+
+	<track type="linear" target="appear:char3d:cam:posz">
+		<key time="0.0" value="2.5" />
+		<key time="1.0" value="2.4" />
+	</track>
+-->
+	<track type="linear" target="appear:char3d:camface:posz,appear:char3d:camface:tgtz" dynamic="true" >
+		<key time="0.0" value="2.2" />
+		<key time="1.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charmal:headz'))" />
+	</track>
+<!--
+	<track type="linear" target="appear:char3d:charfem:posx">
+		<key time="0.0" value="-0.8" />
+		<key time="1.0" value="-1.2" />
+	</track>
+-->
+	<track type="linear" target="appear:char3d:w">
+		<key time="0.0" value="800" />
+		<key time="1.0" value="400" />
+	</track>
+
+	<track type="linear" target="appear:char3dface:x,appear:blackbox2:x,appear:blackboxface:x">
+		<key time="0.0" value="400" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:blackboxface:alpha" >
+		<key time="1.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:cam:fov" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:appear:char3d:cam:fov')" />
+		<key time="1.0" value="sub(getprop('ui:outgame:appear:char3d:cam:fov'),30)" />
+	</track>
+
+</anim>
+
+<!-- 2 persos vers female -->
+<anim id="anim_appear_cam_mf_f" duration="1.5" >
+	
+	<track type="linear" target="appear:char3d:back:posx" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="-1.0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_m:colr,appear:char3d:lgt_m:colg,appear:char3d:lgt_m:colb" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:cam:posx,appear:char3d:cam:tgtx,appear:char3d:camface:posx,appear:char3d:camface:tgtx">
+		<key time="0.0" value="0.0" />
+		<key time="1.0" value="-0.8" />
+	</track>
+<!--
+	<track type="linear" target="appear:char3d:cam:posy">
+		<key time="0.0" value="21.0" />
+		<key time="1.0" value="23.5" />
+	</track>
+
+	<track type="linear" target="appear:char3d:cam:posz">
+		<key time="0.0" value="2.5" />
+		<key time="1.0" value="2.4" />
+	</track>
+-->
+	<track type="linear" target="appear:char3d:camface:posz,appear:char3d:camface:tgtz" dynamic="true" >
+		<key time="0.0" value="2.2" />
+		<key time="1.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charfem:headz'))" />
+	</track>
+	
+	<track type="linear" target="appear:blackboxface:alpha" >
+		<key time="1.0" value="255" />
+		<key time="1.5" value="0" />
+	</track>
+	
+<!--
+	<track type="linear" target="appear:char3d:charmal:posx">
+		<key time="0.0" value="0.8" />
+		<key time="1.0" value="1.2" />
+	</track>
+-->
+	<track type="linear" target="appear:char3d:w">
+		<key time="0.0" value="800" />
+		<key time="1.0" value="400" />
+	</track>
+
+	<track type="linear" target="appear:char3dface:x,appear:blackbox2:x,appear:blackboxface:x">
+		<key time="0.0" value="400" />
+		<key time="1.0" value="0" />
+	</track>
+
+	<track type="linear" target="appear:char3d:cam:fov" dynamic="true" >
+		<key time="0.0" value="getprop('ui:outgame:appear:char3d:cam:fov')" />
+		<key time="1.0" value="sub(getprop('ui:outgame:appear:char3d:cam:fov'),30)" />
+	</track>
+
+</anim>
+
+<!-- male vers female -->
+<anim id="anim_appear_cam_m_f" duration="1.0" >
+	
+	<track type="linear" target="appear:char3d:back:posx" >
+		<key time="0.0" value="1.0" />
+		<key time="1.0" value="-1.0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_m:colr,appear:char3d:lgt_m:colg,appear:char3d:lgt_m:colb" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_f:colr,appear:char3d:lgt_f:colg,appear:char3d:lgt_f:colb" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:cam:posx,appear:char3d:cam:tgtx,appear:char3d:camface:posx,appear:char3d:camface:tgtx">
+		<key time="0.0" value="0.8" />
+		<key time="1.0" value="-0.8" />
+	</track>
+
+	<track type="linear" target="appear:char3d:camface:posz,appear:char3d:camface:tgtz" dynamic="true" >
+		<key time="0.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charmal:headz'))" />
+		<key time="1.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charfem:headz'))" />
+	</track>
+<!--
+	<track type="linear" target="appear:char3d:cam:posy">
+		<key time="0.0" value="23.5" />
+		<key time="0.5" value="21.0" />
+		<key time="1.0" value="23.5" />
+	</track>
+
+	<track type="linear" target="appear:char3d:cam:posz">
+		<key time="0.0" value="2.4" />
+		<key time="0.5" value="2.5" />
+		<key time="1.0" value="2.4" />
+	</track>
+
+	<track type="linear" target="appear:char3d:charmal:posx">
+		<key time="0.0" value="0.8" />
+		<key time="1.0" value="1.2" />
+	</track>
+
+	<track type="linear" target="appear:char3d:charfem:posx">
+		<key time="0.0" value="-1.2" />
+		<key time="1.0" value="-0.8" />
+	</track>
+-->
+</anim>
+
+
+<!-- female vers male -->
+<anim id="anim_appear_cam_f_m" duration="1.0" >
+	
+	<track type="linear" target="appear:char3d:back:posx" >
+		<key time="0.0" value="-1.0" />
+		<key time="1.0" value="1.0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_m:colr,appear:char3d:lgt_m:colg,appear:char3d:lgt_m:colb" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:lgt_f:colr,appear:char3d:lgt_f:colg,appear:char3d:lgt_f:colb" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+	
+	<track type="linear" target="appear:char3d:cam:posx,appear:char3d:cam:tgtx,appear:char3d:camface:posx,appear:char3d:camface:tgtx">
+		<key time="0.0" value="-0.8" />
+		<key time="1.0" value="0.8" />
+	</track>
+
+	<track type="linear" target="appear:char3d:camface:posz,appear:char3d:camface:tgtz" dynamic="true" >
+		<key time="0.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charfem:headz'))" />
+		<key time="1.0" value="add(0.1,getprop('ui:outgame:appear:char3d:charmal:headz'))" />
+	</track>
+<!--
+	<track type="linear" target="appear:char3d:cam:posy">
+		<key time="0.0" value="23.5" />
+		<key time="0.5" value="21.0" />
+		<key time="1.0" value="23.5" />
+	</track>
+
+	<track type="linear" target="appear:char3d:cam:posz">
+		<key time="0.0" value="2.4" />
+		<key time="0.5" value="2.5" />
+		<key time="1.0" value="2.4" />
+	</track>
+
+	<track type="linear" target="appear:char3d:charmal:posx">
+		<key time="0.0" value="1.2" />
+		<key time="1.0" value="0.8" />
+	</track>
+
+	<track type="linear" target="appear:char3d:charfem:posx">
+		<key time="0.0" value="-0.8" />
+		<key time="1.0" value="-1.2" />
+	</track>
+-->
+</anim>
+
+
+</interface_config>

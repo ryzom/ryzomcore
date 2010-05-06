@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Modifier Min" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Modifier Max" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Multiplier Min" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Multiplier Max" Type="Type" Filename="float.typ"/>
+  <LOG>Wed Feb 05 11:20:36 2003 (brigand) Dfn Structure = </LOG>
+</DFN>

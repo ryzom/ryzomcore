@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Armor Type" Type="Type" Filename="item_category.typ"/>
+  <LOG>Tue Nov 26 11:49:21 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

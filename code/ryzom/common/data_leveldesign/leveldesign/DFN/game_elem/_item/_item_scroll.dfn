@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Texture" Type="Type" Filename="string.typ" FilenameExt="*.tga"/>
+  <LOG>Thu Jul 21 18:40:06 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

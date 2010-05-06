@@ -1,0 +1,469 @@
+<generator header_tag="LOGGER_SERVICE_ITF">
+	<include file="nel/misc/entity_id.h"/>
+	<include file="nel/misc/sheet_id.h"/>
+	<include file="inventories.h"/>
+	<sys-include file="vector"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="LGS">
+
+		<!-- ============================================================== -->
+		<enum name="TSupportedParamType">
+			<item name="spt_uint32"/>
+			<item name="spt_uint64"/>
+			<item name="spt_sint32"/>
+			<item name="spt_float"/>
+			<item name="spt_string"/>
+			<item name="spt_entityId"/>
+			<item name="spt_sheetId"/>
+			<item name="spt_itemId"/>
+		</enum>
+
+		<verbatim_header>
+<![CDATA[
+
+//	template <class T>	LGS::TSupportedParamType getParamType();
+//	template <class T>	LGS::TSupportedParamType getParamType<uint32>() { return LGS::TSupportedParamType::spt_uint32;}
+//	template <class T>	LGS::TSupportedParamType getParamType<uint64>() { return LGS::TSupportedParamType::spt_uint64;}
+//	template <class T>	LGS::TSupportedParamType getParamType<sint32>() { return LGS::TSupportedParamType::spt_sint32;}
+//	template <class T>	LGS::TSupportedParamType getParamType<float>() { return LGS::TSupportedParamType::spt_float;}
+//	template <class T>	LGS::TSupportedParamType getParamType<std::string>() { return LGS::TSupportedParamType::spt_string;}
+//	template <class T>	LGS::TSupportedParamType getParamType<NLMISC::CEntityId>() { return LGS::TSupportedParamType::spt_entityId;}
+//	template <class T>	LGS::TSupportedParamType getParamType<NLMISC::CSheetId>() { return LGS::TSupportedParamType::spt_sheetId;}
+//	template <class T>	LGS::TSupportedParamType getParamType<INVENTORIES::TItemId>() { return LGS::TSupportedParamType::spt_itemId;}
+
+	struct TParamValue
+	{
+		TParamValue()
+			:	_Type(TSupportedParamType::invalid_val)
+		{}
+
+		TParamValue(uint32 value)
+		{
+			_Type = TSupportedParamType::spt_uint32;
+			_UInt32Val = value;
+		}
+
+		TParamValue(uint64 value)
+		{
+			_Type = TSupportedParamType::spt_uint64;
+			_UInt64Val = value;
+		}
+
+		TParamValue(bool value)
+		{
+			_Type = TSupportedParamType::spt_uint32;
+			_UInt32Val = value ? 1 : 0;
+		}
+
+		TParamValue(sint32 value)
+		{
+			_Type = TSupportedParamType::spt_sint32;
+			_SInt32Val = value;
+		}
+
+		TParamValue(float value)
+		{
+			_Type = TSupportedParamType::spt_float;
+			_FloatVal = value;
+		}
+
+		TParamValue(const std::string &value)
+		{
+			_Type = TSupportedParamType::spt_string;
+			_StringVal = value;
+		}
+
+		TParamValue(const NLMISC::CEntityId &value)
+		{
+			_Type = TSupportedParamType::spt_entityId;
+			_EntityId = value;
+		}
+
+		TParamValue(const NLMISC::CSheetId &value)
+		{
+			_Type = TSupportedParamType::spt_sheetId;
+			_SheetId = value;
+		}
+
+		TParamValue(INVENTORIES::TItemId itemId)
+		{
+			_Type = TSupportedParamType::spt_itemId;
+			_ItemId = itemId;
+		}
+
+		TParamValue &operator = (const TParamValue &other)
+		{
+			_Type = other._Type;
+
+			switch (_Type.getValue())
+			{
+			case TSupportedParamType::spt_uint32:
+				_UInt32Val = other._UInt32Val;
+				break;
+			case TSupportedParamType::spt_uint64:
+				_UInt64Val = other._UInt64Val;
+				break;
+			case TSupportedParamType::spt_sint32:
+				_SInt32Val = other._SInt32Val;
+				break;
+			case TSupportedParamType::spt_float:
+				_FloatVal = other._FloatVal;
+				break;
+			case TSupportedParamType::spt_string:
+				_StringVal = other._StringVal;
+				break;
+			case TSupportedParamType::spt_entityId:
+				_EntityId = other._EntityId;
+				break;
+			case TSupportedParamType::spt_sheetId:
+				_SheetId = other._SheetId;
+				break;
+			case TSupportedParamType::spt_itemId:
+				_ItemId = other._ItemId;
+				break;
+			default:
+				nlstop;
+			};
+
+			return *this;
+		}
+
+		void serial(NLMISC::IStream &s)
+		{
+			// read the type 
+			s.serial(_Type);
+
+			// serial the value
+			switch (_Type.getValue())
+			{
+			case TSupportedParamType::spt_uint32:
+				s.serial(_UInt32Val);
+				break;
+			case TSupportedParamType::spt_uint64:
+				s.serial(_UInt64Val);
+				break;
+			case TSupportedParamType::spt_sint32:
+				s.serial(_SInt32Val);
+				break;
+			case TSupportedParamType::spt_float:
+				s.serial(_FloatVal);
+				break;
+			case TSupportedParamType::spt_string:
+				s.serial(_StringVal);
+				break;
+			case TSupportedParamType::spt_entityId:
+				s.serial(_EntityId);
+				break;
+			case TSupportedParamType::spt_sheetId:
+				s.serial(_SheetId);
+				break;
+			case TSupportedParamType::spt_itemId:
+				s.serial(_ItemId);
+				break;
+			default:
+				nlstop;
+			};
+		}
+
+		std::string toString() const
+		{
+			switch (_Type.getValue())
+			{
+			case TSupportedParamType::spt_uint32:
+				return NLMISC::toString(_UInt32Val);
+				break;
+			case TSupportedParamType::spt_uint64:
+				return NLMISC::toString(_UInt64Val);
+				break;
+			case TSupportedParamType::spt_sint32:
+				return NLMISC::toString(_SInt32Val);
+				break;
+			case TSupportedParamType::spt_float:
+				return NLMISC::toString(_FloatVal);
+				break;
+			case TSupportedParamType::spt_string:
+				return _StringVal;
+				break;
+			case TSupportedParamType::spt_entityId:
+				return _EntityId.toString();
+				break;
+			case TSupportedParamType::spt_sheetId:
+				return _SheetId.toString();
+				break;
+			case TSupportedParamType::spt_itemId:
+				return NLMISC::toString(_ItemId);
+				break;
+			default:
+				nlstop;
+
+				return "";
+			};
+		}
+
+		TSupportedParamType getType() const
+		{
+			return _Type;
+		}
+
+		uint32 get_uint32() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_uint32);
+			return _UInt32Val;
+		}
+		uint64 get_uint64() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_uint64);
+			return _UInt64Val;
+		}
+		sint32 get_sint32() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_sint32);
+			return _SInt32Val;
+		}
+		float get_float() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_float);
+			return _FloatVal;
+		}
+		const std::string &get_string() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_string);
+			return _StringVal;
+		}
+		const NLMISC::CEntityId &get_entityId() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_entityId);
+			return _EntityId;
+		}
+		const NLMISC::CSheetId &get_sheetId() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_sheetId);
+			return _SheetId;
+		}
+		const INVENTORIES::TItemId &get_itemId() const
+		{
+			nlassert(_Type == TSupportedParamType::spt_itemId);
+			return _ItemId;
+		}
+
+
+		const uint32 &get(const uint32 *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_uint32);
+			return _UInt32Val;
+		}
+
+		const uint64 &get(const uint64 *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_uint64);
+			return _UInt64Val;
+		}
+
+		const sint32 &get(const sint32 *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_sint32);
+			return _SInt32Val;
+		}
+
+		const float &get(const float *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_float);
+			return _FloatVal;
+		}
+
+		const std::string &get(const std::string *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_string);
+			return _StringVal;
+		}
+
+		const NLMISC::CEntityId &get(const NLMISC::CEntityId *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_entityId);
+			return _EntityId;
+		}
+
+		const NLMISC::CSheetId &get(const NLMISC::CSheetId *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_sheetId);
+			return _SheetId;
+		}
+
+		const INVENTORIES::TItemId &get(const INVENTORIES::TItemId *typeTag) const
+		{
+			nlassert(_Type == TSupportedParamType::spt_itemId);
+			return _ItemId;
+		}
+
+		bool operator == (const TParamValue &other) const
+		{
+			if (_Type != other._Type)
+				return false;
+
+			switch (_Type.getValue())
+			{
+			case TSupportedParamType::spt_uint32:
+				return _UInt32Val == other._UInt32Val;
+				break;
+			case TSupportedParamType::spt_uint64:
+				return _UInt64Val == other._UInt64Val;
+				break;
+			case TSupportedParamType::spt_sint32:
+				return _SInt32Val == other._SInt32Val;
+				break;
+			case TSupportedParamType::spt_float:
+				return _FloatVal == other._FloatVal;
+				break;
+			case TSupportedParamType::spt_string:
+				return _StringVal == other._StringVal;
+				break;
+			case TSupportedParamType::spt_entityId:
+				return _EntityId == other._EntityId;
+				break;
+			case TSupportedParamType::spt_sheetId:
+				return _SheetId == other._SheetId;
+				break;
+			case TSupportedParamType::spt_itemId:
+				return _ItemId == other._ItemId;
+				break;
+			default:
+				return false;;
+			};
+		}
+
+		bool operator < (const TParamValue &other) const
+		{
+			if (_Type != other._Type)
+				return false;
+
+			switch (_Type.getValue())
+			{
+			case TSupportedParamType::spt_uint32:
+				return _UInt32Val < other._UInt32Val;
+				break;
+			case TSupportedParamType::spt_uint64:
+				return _UInt64Val < other._UInt64Val;
+				break;
+			case TSupportedParamType::spt_sint32:
+				return _SInt32Val < other._SInt32Val;
+				break;
+			case TSupportedParamType::spt_float:
+				return _FloatVal < other._FloatVal;
+				break;
+			case TSupportedParamType::spt_string:
+				return _StringVal < other._StringVal;
+				break;
+			case TSupportedParamType::spt_entityId:
+				return _EntityId < other._EntityId;
+				break;
+			case TSupportedParamType::spt_sheetId:
+				return _SheetId < other._SheetId;
+				break;
+			case TSupportedParamType::spt_itemId:
+				return _ItemId < other._ItemId;
+				break;
+			default:
+				return false;;
+			};
+		}
+
+	private:
+		TSupportedParamType	_Type;
+
+		union
+		{
+			uint32		_UInt32Val;
+			uint64		_UInt64Val;
+			sint32		_SInt32Val;
+			float		_FloatVal;
+		};
+		std::string				_StringVal;
+		NLMISC::CEntityId		_EntityId;
+		NLMISC::CSheetId		_SheetId;
+		INVENTORIES::TItemId	_ItemId;
+	};
+]]>
+
+		</verbatim_header>
+
+		<!-- ============================================================== -->
+		<class name="TParamDesc">
+			<doc line="Describe a param for a log entry"/>
+
+			<serial/>
+
+			<property type="std::string"		name="Name"	byref="true" doc="Name of the parameter"/>
+			<property type="TSupportedParamType" name="Type"	enum="smart" doc="Type of the parameter"/>
+			<property type="bool"				name="List"	default="false" doc="Flag indicating that this parameter is a list"/>
+		</class>
+
+		<!-- ============================================================== -->
+		<class name="TListParamValues">
+			<doc line="A vector of parameter value"/>
+
+			<serial/>
+
+			<property type="std::list &lt; TParamValue &gt;"		name="Params"	byref="true" serial="Cont"/>
+		</class>
+
+
+		<!-- ============================================================== -->
+		<class name="TLogDefinition">
+			<doc line="Definition of a log entry"/>
+
+			<serial/>
+
+			<property type="std::string"	name="LogName"	
+				doc="The name of the log, used to identify the log"/>
+			<property type="bool"			name="Context"	default="false" 
+				doc="This log is a context log"/>
+			<property type="std::string"	name="LogText"	
+				doc="The textual content of the log, contains '__CLOSE_CONTEXT__' to close a log context"/>
+
+			<property type="std::vector &lt; TParamDesc &gt;"	name="Params" byref="true" serial="Cont"/>
+			<property type="std::vector &lt; TParamDesc &gt;"	name="ListParams" byref="true" serial="Cont"/>
+
+		</class>
+
+		<!-- ============================================================== -->
+		<class name="TLogInfo">
+			<doc line="A log entry data. This contains the parameter of a log "/>
+			<doc line="entry to be stored in the log archive"/>
+
+			<serial/>
+
+			<property type="std::string" name="LogName"/>
+			<property type="uint32"		name="TimeStamp"/>
+
+			<property type="std::vector &lt; TParamValue &gt;"		name="Params"		byref="true" serial="Cont"/>
+			<property type="std::vector &lt; TListParamValues &gt;"	name="ListParams"	byref="true" serial="Cont"/>
+
+		</class>
+
+		<!-- ============================================================== -->
+		<!-- ============================================================== -->
+		<!-- ============================================================== -->
+		<module_interface name="CLoggerService" module_class='"LoggerService"'>
+
+			<!-- ========================================================== -->
+			<method name="registerClient" msg="RC">
+				<doc line="A logger client register itself wy providing it's definition of "/>
+				<doc line="the log content. It is mandatory that ALL client share"/>
+				<doc line="Exactly the same definition of log."/>
+
+				<param type="uint32" name="shardId"/>
+				<param type="std::vector &lt; TLogDefinition &gt;"		name="logDef" byref="true" serial="Cont"/>
+			</method>
+			
+			<!-- ========================================================== -->
+			<method name="reportLog" msg="LG">
+				<doc line="A client send a log"/>
+
+				<param type="std::vector &lt; TLogInfo &gt;" name="logInfos" byref="true" serial="Cont"/>
+			</method>
+		</module_interface>
+
+	</namespace>
+</generator>
+

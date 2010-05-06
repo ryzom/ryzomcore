@@ -1,0 +1,467 @@
+
+**>>> READ THIS FIRST <<<***
+
+The doc is separated in two parts :
+ - The first part document the global XML structure used for defining
+module interfaces as well as the necessary support class (like serialisable
+class and 'smart' enum).
+ - The second part add the documentation for the generation of SQL database mapping
+to generated C++ classes.
+
+***************************************************************
+* General usage elements (for interface and database mapping) *
+***************************************************************
+
+Root XML element :
+<generator>
+
+	Attributes :
+	-----------
+	header_tag="XXXX"		:	Generate a #ifndef XXXX #define XXX #endif idioms around the generated header file
+								to avoid mutiple inclusion problems
+
+	Allowed sub elements :
+	----------------------
+	<include>
+	<cpp-include>
+	<namespace>
+
+<include>
+	Used to generate file inclusion in the generated header file.
+	Attributes :
+	------------
+	file="XXXX"		: Output #include "XXXX" in the generated header
+
+<cpp-include>
+	Used to generate file inclusion in the generated cpp file.
+	Attributes :
+	------------
+	file="XXXX"		: Output #include "XXXX" in the generated cpp
+
+<namespace>
+	This is generate a namespace enclosing all subsequent declaration.
+	Attributes :
+	------------
+	name="XXXX"		: Generate namespace XXXX {}
+
+	Allowed sub elements:
+	---------------------
+	<enum>
+	<class>
+	<module_interface>
+	<callback_interface>
+
+<enum>
+	This generate a 'smart' enum type in C++. Smart enums are structs having
+	an embeded enumerated type as well as methods to convert to/from string value.
+	This enums are very efficient when exchanging data with a non enum aware
+	language (like PHP) or when storing them in persistent system (file or
+	database) because one can store the stringified version of the enum, making
+	storage more strong against enum modification.
+	Smart enum automaticaly have a last value named 'invalid'.
+
+	Attributes :
+	------------
+	name="XXXX"		: Generate enum XXXX{};
+	bitset="true|false" : Optionnal, if true, generate the smart enum class '[name]Enum'
+							and a typedef 'name' based on the class NLMISC::CEnumBitset
+							specialized with the enum class.
+							You are responsible to provide enumerated value that are
+							power of two (1, 2, 4, 8, 16...) and you are limited
+							to 32 value.
+							You could also specify enumerated value that are
+							a mixe a any number of base value (eg.
+							<item name="four" value="4"/>
+							<item name="eight" value="8"/>
+							<item name="four_and_height" value="12"/>)
+
+	Sub Elements:
+	-------------
+	<doc>	: see below
+	<item>	: This is an enumerated value entry. One or more inside an enum
+		Attributes :
+		------------
+		name="YYYY"		: Generate an entry in the enum naned YYYY,
+		value="ZZZZ"	: Optionnal, set a numerical value to the enum entry, generate =ZZZZ,
+
+	<header_code>	: Allow inclusion of user code in the declaration of the
+						generated enum. This will just copy the content of the
+						element in the scope of the generated smart enum class.
+						One can use this element to insert custom conversion function
+						for the enum (convert to or from).
+						It is important to know that the enumerated value is
+						stored in a variable called _Value.
+		e.g : <header_code> public: void fromMyOtherEnum(TOtherEnum other)
+									{
+										switch (other)
+										{
+										case other_1:	_Value = this_enum_1;
+										etc...
+										}
+									}
+				</header_code>
+
+
+<class>
+	This generate a class that have a list of property with get/set on each and optionnaly
+	can generate serialisation code and/or SQL database mapping code.
+	This classes have two usages :
+		- specifie complex type to use as interface method parameters
+		- generate mapping for an SQL table (see second part of doc for mapping specific elements)
+
+	Attributes :
+	------------
+	name="XXXX"		: Generate class XXXX{};
+
+	Sub Elements:
+	-------------
+	<doc>			: see below
+	<serial/>		: If present, just act as a flag to generate serialisation method.
+						Class used as method parameter MUST have this element.
+
+	<property>		: Declare a property in the class. One or more.
+						Each property is generated has a private member of the
+						class and appropriate accessor are generated.
+						They are named set<name> and get<name>.
+		Attributes :
+		------------
+		type="TTT"		: the type of the property (can be any C++ valid type, even template container)
+		name="NNN"		: the name of the property. Must be a valid C++ name.
+		enum="smart"	: optionnal. If the type is a smart enum, you must add this property to generate appropriate code
+		enum="true"		: optionnal. Same as enum="smart"
+		byref="true"	: optionnal. If present, generate a 'const &' parameter passing where needed. You should always
+							specify it when using stl string, container or classes where the cost of
+							copying is heavy.
+		serial="SSS"	: optional. If presend, the parameter value is appened to the serial
+							command for the attribute. You must use it for stl container
+							for example (serial="Cont" generate 'serialCont(...)'
+		doc="DDDDD"		: optionnal. You can provide a documentation line for the property.
+							This will generate a one line documentation just above the
+							property definition in the generated header file.
+
+<module_interface>
+	This is the declaration of a nel layer 6 module interface.
+	Each interface will generate two C++ classes :
+		- the skeleton class to be inherited from the servant module.
+			It define all the methods of the interface as virtual pure methods
+			that your servant module must implement.
+			The skeleton class contains all the tedious code related to
+			message dispatching and deserialising.
+			For now, you must call 'dispatchMessage' on your skeleton from your
+			processModuleMessage methods in order to let the skeleton handle the message.
+		- the proxy class to be use by client module (also called 'client stub' in
+			CORBA dialect).
+			It define a very simple object (in the sense that it have very little
+			or no data member) that support all the methods declared in the interface.
+			At run time, you instantiate proxy with existing generic module proxy
+			reference before invoking the methods of the interface.
+			Proxy contains all the tedious code to serialise the message and send it
+			to the proxyfied module.
+
+	Optionnaly, a method can be tagged 'broadcast' or 'two way'.
+
+	Attributes :
+	------------
+	name="XXXX"			: Generate class XXXX_Skel{}; and class XXXX_Proxy{};
+	module_class="YYYY"	: Optionnal. If present, the generator add an assert in the
+							proxy that fordid binding a module proxy having a module
+							class other than the specified one.
+
+	Sub Elements:
+	-------------
+	<method>
+
+		Attributes :
+		------------
+		name="nnnn"		: The name of the method. Must be a valid C++ method name.
+		msg="mmm"		: The name of the NeL message. This must be unique in the scope
+							of the servant module. It is specified in addition to the
+							method name in order to reduce network overhead.
+							So, you can name a method 'mySuperFooMethodOfTheDeathVeryReadable' and
+							use a message name of 'MVR'.
+		broadcast="true" : Optionnal. Tag this method as 'broadcastable'. This mean that in addition
+							to the normal method, a second one is generate, prefixed with
+							'broadcast_' and taking as argument two iterators over a stl container of
+							proxy pointer followed by the normal method parameters.
+							You can use any forward iterator that return a proxy reference.
+
+		Sub Elements:
+		-------------
+		<doc>		: Optionnal. See below
+		<param>		: Zero or more. Specify parameters of the method. The syntax is almost
+						the same as the <property> element in class defintion.
+			Attributes :
+			------------
+			type="TTT"	: The type of the parameter, must be a valid serialisable C++ type.
+			name="NNN"	: The name of the parameter, must be a valid C++ identifier.
+			serial="SSS" : Optionnal. Specify a serialisation variante. Generate 'serialSSS(...)'
+			byref="true" : Optionnal. Generate 'const &' parameter passing when necessary. You should
+							always specify it for classes or STL container to avoid costly copy.
+			enum="smart"
+			enum="true" : Specify that the parameter is an enum, generate the appropriate code.
+		<return>	: Optionnal. Return value of the method. If you specify a return value,
+						then your method use a two way invokation. This is usefull for
+						building synchronous code but have some constraints. You must call
+						a two way method only in a task coroutine context because, as the
+						call is blocking, we need the main coroutine to continue to run
+						for updating the Layer 5 network.
+			Attributes :
+			------------
+			type="TTT"	: The type of the return value, must be a valid serialisable C++ type.
+			serial="SSS" : Optionnal. Specify a serialisation variante. Generate 'serialSSS(...)'
+
+<callback_interface>
+	This element declare a Layer 3 callback interface.
+	This interfaces are primilary use to build communication with external language like
+	PHP or python. But it can also be used to build C++ to C++ comm easily without
+	the tedious work of serialisation , callback registration and handling.
+	For now, the generator is able to generate client and server side C++ code as well as
+	client side PHP code. The python client interface are automaticaly handled by a
+	python lib called 'pynel'.
+	The server have is own socket socket server that listen for client connection.
+	The server class declare a set of virtual pure methods that you mnust implement in
+	a derived class to handle method invokation.
+	The client class is just a stub supporting all the methods with the necessary code to
+	forward the call to the server.
+
+	Attributes :
+	------------
+	name="NNN"	: This is the name of the interface, generate the classes NNNItf for the server
+					side and NNNClientItf for the client side.
+	caller="php" : Is present, activate the generation of the php code for this interface.
+
+	Sub Elements:
+	-------------
+	<doc>	: See below
+	<return>
+		This define a return message, i.e. a message that is send by the server and received
+		by the client.
+
+		Sub Elements:
+		-------------
+		<doc>	: See below
+		<param>	: define a parameter.
+			Attributes :
+			------------
+			type="TTT"	: The type of the parameter, must be a valid serialisable C++ type.
+			name="NNN"	: The name of the parameter, must be a valid C++ identifier.
+			php_serial = "SSS" : optionnal. Specify a serialisation variante for the php code.
+								The most usual usage is php_serial="String".
+			serial="SSS" : Optionnal. Specify a serialisation variante. Generate 'serialSSS(...)'
+			byref="true" : Optionnal. Generate 'const &' parameter passing when necessary. You should
+							always specify it for classes or STL container to avoid costly copy.
+			enum="smart"
+			enum="true" : Specify that the parameter is an enum, generate the appropriate code.
+
+	<invoke>
+		This define a method invokation from client to server.
+
+		Sub Elements:
+		-------------
+		<doc>	: See below
+		<param>	: define a parameter.
+			Attributes :
+			------------
+			type="TTT"	: The type of the parameter, must be a valid serialisable C++ type.
+			name="NNN"	: The name of the parameter, must be a valid C++ identifier.
+			php_serial = "SSS" : optionnal. Specify a serialisation variante for the php code.
+								The most usual usage is php_serial="String".
+			serial="SSS" : Optionnal. Specify a serialisation variante. Generate 'serialSSS(...)'
+			byref="true" : Optionnal. Generate 'const &' parameter passing when necessary. You should
+							always specify it for classes or STL container to avoid costly copy.
+			enum="smart"
+			enum="true" : Specify that the parameter is an enum, generate the appropriate code.
+
+<doc>
+	Used to document an enum item, a class, a module interface, a method.
+	In addition to docummenting the interface description, it generate single
+	line documentation in the header file.
+	For class, module interface and methods, you can have multiple doc element for
+	longeur documentation.
+
+************************************************
+* Database mapping only elements and attributes *
+************************************************
+
+NB :	This part only list and document additionnal
+		elements or attibute not already documented above
+
+The database maping allow to associate a class type with a database table.
+Each row in the table can be mapped to an instance of the class.
+The system allow to specify relationship between different class. This
+relation are handled by the object model (not by the database system).
+Relation include one to one and one to many with selectable deletion
+strategy : update or cascade.
+The 'update' strategy will clean to parent reference in all children when the
+parent is deleted.
+The 'cascade' strategy will delete all children when the parent is deleted.
+
+A particular class can map all or only some of the database field.
+As well, a class mapped can have property that are not mapped in the table.
+
+One to many relation between classes can be implemented using either
+a vector or a map in the run time class. Note that the vector relation
+has no order guaranty as children are store in the order database returned them.
+On the other hand, vector offer a simple random access on all children.
+For map relation, the children are sorted using theire unique id. Depending
+on the nature of the unique id, this may or may not be usefull.
+
+<class>
+	<database>		: Activate SQL database mapping code if present.
+		Attributes :
+		------------
+		table="TTTT"	: This is the name of the SQL table that this class map into
+
+	<parent>
+		This element define a relation with a parent class.
+
+		Attributes :
+		------------
+		class="CCC"			: The class type of the parent.
+		child_name="NNN"	: The property name that store the children in the parent class.
+		relation="one-to-many | one-to-one" : the cardinality of the relation.
+		db_col="DDD"		: the database column of this class that contains the parent unique id.
+		cont="vector | map"	: The type of STL container used in the parent to store the children.
+								Only use it with one-to-many relation.
+
+		NB : the child_name, relation and cont attribute MUST match exactly with the one define
+			in the parent class <child_class> attribute.
+
+	<child_class>
+		This element define a relation with a child class.
+
+		Attributes :
+		------------
+		type="TTT"			: The class type of the child class.
+		name="NNN"			: The property name that store the children.
+		relation="one-to-many | one-to-one" : the cardinality of the relation.
+		cont="vector | map"	: The type of STL container used in the parent to store the children.
+								Only use it with one-to-many relation.
+		on-delete="cascade | update": optionnal, specify the strategy to use when a parent object is
+										deleted.
+		NB : the child_name, relation and cont attribute MUST match exactly with the one define
+			in the child class <parent> attribute.
+
+	<property>
+		This have the same attibute as the class property descibed above with the additionnal
+		following attributes:
+
+		Attributes :
+		------------
+		db_col="CCC"	: optionnal. Specify the colum name in the database table that map this property
+		unique_id="true" : optionnal. Specify that this property map the unique id of the class instance in the database.
+							If you use database mapping, it is a requirement that one and only one property have
+							this attribute set. It is forbiden to set this property after the object have been
+							stored (or created) in the database. If the id is not autogen (see below), you must
+							set a correct unique value before storing the object.
+		autogen="true"	: optionnal. Use only with unique_id="true". Specify that the unique id is automaticaly
+							generated by the database engine, so it is fordiden to set it and to access it before
+							the object have been created in the database.
+
+=============================
+Some note about the SQL mapping.
+
+The SQL to object mapping have some design goal :
+
+ * The main goal is simplifying database mapping. You can do most of your work
+	without writing a single SQL statement. All the tedious work is done for you.
+ * All objects in memory are smart pointed, allowing easy memory management.
+ * The system guaranty that the same same object obtained from different mean will
+	be the same object in memory.
+ * There is a cache mechanisme that allow minimal requesting to database. If a
+	request need to retreive an object already in memory, it just return the
+	available object.
+ * The system is designed to map one SQL table with one class. Nevertheless, it is
+	possible to map sub part of a table onto two diffrent object. In the case however,
+	the system can not guaranty coherency of shared properties.
+
+The SQL to object mqpping have some limitation :
+
+ * unique id can only be unigned 32 bits. You CANNOT use string for example.
+ * There can be only one application writing in the database. This is a consequence of
+	a performance choice.
+ * You are not allowed to build cyclic relation between classes. This is a consequence of
+	the use of smart pointer to maintain object in memory. If you do circular reference, you
+	end up with group on unreleasable object.
+ * For now, the system did not implement an 'autocomit' mechanisme, althoug, it will be
+	easy to implement. So you have to manually call 'update' on you modified objcet
+	before you clear you last reference on the object.
+
+
+Usage notes :
+
+Due to the usage of an object cache, object stay in memory for some time after they are
+released by the user code. Furthermore, when object are chained in a parent/child relation,
+the child are not considered 'released' until there parent are deleted from the cache.
+This introduce an additionnal delay for object eviction from memory.
+In consequence, when you have to manuialy change data in the database and you whant to see your
+change in the mapped classe, you must make sure that :
+	- all reference of object that map the modufied SQL data are released,
+	- the clache is clean.
+You one of this condition is not filled, one can and up using an memory object that
+does not contains the modified SQL data.
+To speed up cache cleaning, there is a NeL command on the cache system that allow to force the
+eviction of all object. As well, there is command to query the status of the cache (number of
+object of each kind in memory and released).
+
+Object life cycle :
+A mapped object have a strict life cycle that you must well know to avoid trouble.
+
+* no object
+		This is the initial state, the object did not exist.
+
+	- createTransient() -> TRANSIENT
+		This create a new transient instance of the class.
+	- load() -> CLEAN (and the load variante with children)
+		This load an instance of the class from the SQL table.
+
+* TRANSIENT
+		This is the status of a newly created object. This object is not bound to the
+		SQL table and is considered 'transient'. This is the first step in creating
+		new object in the persistent storage.
+		If the unique id is not autogenerated, it is the only state where you can assign
+		the unique id.
+		If the unique id is autogenerated, trying to read the unique id will assert.
+
+	- create() -> CLEAN
+		This create a new entry in the SQL table for the transient object.
+		The unique id must be valid if not auto generated, or it will be
+		initialised with a generated one.
+	- delete reference -> no object
+		Deleting all reference on a transient object destroy it immediately.
+
+* CLEAN
+		This is a state of a SQL mqpped object in memory.
+		Being clean mean that all property reflect the value in the SQL tqble
+		at time of loading/storing.
+
+	- change a property -> DIRTY
+		If you change a property, the object become dirty. Note that the
+		set methods are smart to not change the state if you set the same value.
+	- delete reference -> RELEASED
+		Deleting all reference on a clan object make it 'released'. The time
+		of release is stored in the object base information and the object
+		cache become responsible for the object.
+	- delteObject() -> REMOVED
+		This delete the SQL entry for this object and mark it as removed.
+
+* DIRTY
+		This is the state of a modified SQL mapped object.
+
+	- update() -> CLEAN
+		Update will write back to the SQL table the new object property values.
+
+	- delete reference -> ASSERT
+		Deleteing all reference on a dirty object is a fault. This generate assert error.
+
+* RELEASED
+	This is the state of an object in the cache. After some time, the object will be
+	deleted if no more reference are taken on it.
+
+	- cache time out -> delete
+		If the cache time out expire, then the object is deleted from memory.
+
+	- load() -> CLEAN (or any child load variante)
+		If the user code try to load this object, then the object is removed from
+		the cache and become clean.
+

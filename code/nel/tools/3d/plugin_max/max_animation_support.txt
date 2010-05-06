@@ -1,0 +1,63 @@
+
+>> 3dsmax animation features supported by the NeL export <<
+
+
+-> Only those values are animated in the NeL engine:
+
+ INODE:
+ ------
+
+ * Position
+ * Rotation
+ * Scale (in local basis only)
+
+ MATERIAL:
+ ---------
+
+ * Ambiant color
+ * Diffuse color
+ * Specular color
+ * Self illumination color (not with the factor but with the color)
+ * Opacity
+
+-> Animated scale is supported but only when it is done in the LOCAL BASIS OF THE MODEL.
+
+-> Only those controlers are fully supported:
+
+ * Linear float 
+ * Linear point3
+ * Linear rotation
+ * Linear scale
+ * Bezier float
+ * Bezier position
+ * Bezier rotation
+ * Bezier point3
+ * Bezier scale
+ * TCB float
+ * TCB position
+ * TCB rotation
+ * TCB point3
+ * TCB scale
+
+Watch out: the Bezier color controler is not supported! Use a point3 interpolation instead.
+
+-> Biped controlers are oversampled at export. They are compressed by a post process in build_gamedata
+
+-> All the bezier tang mode are supported:
+
+ * Smooth
+ * Linear
+ * Step
+ * Fast
+ * Slow
+ * User
+
+-> The bezier "Constant Velocity" option is not supported.
+
+-> The loop modes supported in Bezier, TCB and linear are:
+
+ * Constant
+ * Cycle
+ * Loop
+
+This loop mode must be the same before and after the range. (Same mode for IN and OUT).

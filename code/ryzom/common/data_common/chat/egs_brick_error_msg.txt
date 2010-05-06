@@ -1,0 +1,76 @@
+ # error code for sentence validation
+# BS_TARGET_TOO_FAR	"&RG&Your target is too far away."
+# BS_TARGET_TOO_FAR_OR	"&RG&Your target is too far away or you are not facing it."
+BS_TOO_EXPENSIVE	"&RG&You cannot afford this formula or action phrase."
+EGS_TOO_EXPENSIVE_SAP		"&RG&You do not have enough sap for this action."
+# EGS_TOO_EXPENSIVE_STAMINA	"&RG&You do not have enough stamina for this action."
+# EGS_TOO_EXPENSIVE_HP		"&RG&You do not have enough hp to pay this action cost."
+
+# BS_INVALID_TARGET	"&RG&Invalid Target."
+# BS_ITEM_INCOMPATIBLE	"&RG&This formula or action phrase is incompatible with the item in your hand."
+BS_NEED_WEAPON		"&RG&This strategy needs a weapon."
+# BS_NO_AMMO		"&RG&This weapon needs ammo."
+BS_AMMO_INCOMPATIBLE	"&RG&The selected weapon is incompatible with the selected ammo."
+BS_ITEM_INCOMPATIBLE_FOR_2_HANDS "&RG&You must carry a sword in your right hand and a dagger in the left to perform this action"
+# EGS_NOT_ENOUGH_AMMO	"&RG&This strategy needs more ammunition."
+EGS_COMBAT_NO_VALID_SLOT "&RG&Cannot enter combat as there is no available weapon or empty sheath for hand to hand combat."
+
+EGS_CANNOT_ENGAGE_COMBAT_YET	"&RG&You cannot engage combat yet."
+
+BS_LACK_STAMINA		"&RG&You need to regain stamina to do this. Rest first."
+# BS_TARGET_NOT_ATTACKABLE "&RG&You cannot use offensive action against your current target."
+
+# 
+BS_INVALID		"&RG&Invalid sentence."
+BS_UNCOMPLETE		"&RG&Uncomplete formula, mandatory bricks are missing."
+
+# player need a full armor set
+EGS_NEED_FULL_LIGHT_ARMOR_SET		"&RG&You need a full light armor set to use this strategy."
+EGS_NEED_FULL_MEDIUM_ARMOR_SET		"&RG&You need a full medium armor set to use this strategy."
+EGS_NEED_FULL_HEAVY_ARMOR_SET		"&RG&You need a full heavy armor set to use this strategy."
+EGS_NEED_FULL_ARMOR_SET			"&RG&You need a full armor set to use this strategy."
+
+# invalid target action state
+EGS_CANNOT_TARGET_ENTITY_RANGE_COMBAT	"&RG&You cannot target an entity engaged in range combat."
+EGS_CANNOT_TARGET_ENTITY_MELEE_COMBAT	"&RG&You cannot target an entity engaged in melee combat."
+EGS_CANNOT_TARGET_ENTITY_CASTING	"&RG&You cannot target an entity which is casting a spell."
+EGS_CANNOT_TARGET_ENTITY_DOING_FABER	"&RG&You cannot target an entity which is crafting."
+EGS_CANNOT_TARGET_ENTITY_HARVESTING	"&RG&You cannot target an entity which is harvesting."
+EGS_CANNOT_TARGET_ENTITY_TRACKING	"&RG&You cannot target an entity which is tracking."
+EGS_CANNOT_TARGET_ENTITY_WALKING	"&RG&You cannot target a walking entity."
+EGS_CANNOT_TARGET_ENTITY_RUNNING	"&RG&You cannot target a running entity."
+EGS_CANNOT_TARGET_ENTITY_IDLE		"&RG&You cannot target an idle entity."
+EGS_CANNOT_MUST_TARGET_ENTITY_IDLE	"&RG&You must target an idle entity."
+
+#invalid target nature
+EGS_CANNOT_TARGET_KAMI_COMBAT_S		"&RG&The strategy $0s cannot be used against a Kami."
+EGS_CANNOT_TARGET_HOMIN_COMBAT_S	"&RG&The strategy $0s cannot be used against a homin."
+EGS_CANNOT_TARGET_CREATURE_COMBAT_S	"&RG&The strategy $0s cannot be used against a creature."
+EGS_CANNOT_TARGET_KAMI_MAGIC_S		"&RG&The spell $0s cannot be cast on a Kami."
+EGS_CANNOT_TARGET_HOMIN_MAGIC_S		"&RG&The spell $0s cannot be cast on a homin."
+EGS_CANNOT_TARGET_CREATURE_MAGIC_S	"&RG&The spell $0s cannot be cast on a creature."
+
+EGS_CANNOT_TARGET_ENEMY_MAGIC		"&RG&This spell cannot be cast on a enemy."
+
+#insuficient level
+EGS_CANNOT_TARGET_HIGHER_LVL		"&RG&You cannot use this formula on an higher level entity."
+
+
+# feature under construction
+EGS_FEATURE_UNDER_CONSTRUCTION		"&RG&This feature is under construction."
+
+# more accurate comments
+EGS_NEED_WEAPON_S			"&RG&This strategy needs a weapon using skill $0s."
+
+#PVP
+# EGS_PVP_NOT_ALLOWED			"&RG&You cannot enter combat with or use offensive actions against another player in this area."
+
+# cannot use a skill with a score of 0
+EGS_CANNOT_USE_NULL_SKILL_S		"&RG&You cannot do this action as you don't have the necessary skill $0s."
+
+# cannot act while on mektoub (debug)
+EGS_CANNOT_USE_ACTION_ON_MEKTOUB	"&RG&You cannot carry out actions while riding a mektoub."
+
+# need opening
+EGS_OPENING_DODGE_FAILED		"&RG&You can only use this action after you successfully dodge your opponent."
+EGS_OPENING_PARRY_FAILED		"&RG&You can only use this action after you successfully parry your opponent."

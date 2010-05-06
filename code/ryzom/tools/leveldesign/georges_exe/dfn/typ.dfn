@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="Temporary out of date"/>
+      <Body Name="BODY">
+        <VECTOR size="7">
+          <POLYPTR id="10288960" class="CFormBodyEltAtom">
+            <Atom Name="Type" Value="_Type.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10289744" class="CFormBodyEltAtom">
+            <Atom Name="Enum" Value="boolean.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10289848" class="CFormBodyEltAtom">
+            <Atom Name="Formula" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10289952" class="CFormBodyEltAtom">
+            <Atom Name="Lowlimit" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10290056" class="CFormBodyEltAtom">
+            <Atom Name="Highlimit" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10290160" class="CFormBodyEltAtom">
+            <Atom Name="DefaultValue" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="10290264" class="CFormBodyEltAtom">
+            <Atom Name="Predef" Value="list&lt; _typ.dfn &gt;"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

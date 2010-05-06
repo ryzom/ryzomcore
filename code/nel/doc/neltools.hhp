@@ -1,0 +1,14 @@
+[OPTIONS]
+Auto Index=Yes
+Compatibility=1.1 or later
+Compiled file=neltools.chm
+Default topic=html\tool\index.html
+Display compile progress=Yes
+Language=0x809 Anglais (Royaume-Uni)
+
+
+[FILES]
+html\tool\index.html
+
+[INFOTYPES]
+

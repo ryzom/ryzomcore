@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="skill" Type="Type" Filename="_harvest_skills.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:21 2002 (corvazier) File converted from old format
+Tue Aug 27 11:13:33 2002 (fleury) Dfn Structure = 
+Tue Aug 27 11:25:09 2002 (fleury) Dfn Structure = 
+Tue Aug 27 11:25:37 2002 (fleury) Dfn Structure = 
+Tue Aug 27 11:41:41 2002 (fleury) Dfn Structure = 
+Tue Aug 27 11:50:51 2002 (fleury) Dfn Structure = 
+Wed Apr 02 18:00:44 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

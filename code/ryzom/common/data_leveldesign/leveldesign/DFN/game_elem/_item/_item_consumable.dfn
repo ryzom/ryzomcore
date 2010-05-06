@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <ELEMENT Name="EffectPhrase" Type="Type" Filename="filename.typ" FilenameExt="*.sphrase"/>
+  <ELEMENT Name="EffectEmote" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Family" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="LoopTimer" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="MaxNbLoops" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="OverdoseTimer" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="ConsumptionTime" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="BreakWhenHit" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Sit" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="StandUp" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Swim" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Mektoub" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Property 0" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Property 1" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Property 2" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Property 3" Type="Type" Filename="string.typ"/>
+  <LOG>Wed Apr 27 16:56:42 2005 (fleury) Dfn Structure = 
+Thu Apr 28 17:51:13 2005 (fleury) Dfn Structure = 
+Tue Jul 05 11:12:03 2005 (vuarand) Dfn Structure = 
+Tue Jul 05 11:12:30 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

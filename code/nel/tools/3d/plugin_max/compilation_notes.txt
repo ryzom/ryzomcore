@@ -1,0 +1,88 @@
+************************************************
+* NeL plug-ins for 3DSMAX 3.1 compilation notes
+************************************************
+
+* $Id: compilation_notes.txt,v 1.6 2001/10/05 14:56:45 corvazier Exp $
+
+** DISTRIBUTION NOTES **
+
+Given that Max plug-ins are linked to the 3DSMax SDK (which is not Gnu GPL) 
+and to NeL (which is Gnu GPL), anyone distributing plug-ins in binary form will be in 
+breach of the Gnu GPL.
+ 
+In English than means that you shouldn't distribute the plug-ins as binaries.
+You are, of course, free to distribute the source code.
+
+THIS PLUGIN HAVE BEEN TESTED ON 3DSMAX3.1 WITH CHARACTER STUDIO 3.
+
+** VISUAL CONFIGURATION **
+
+This projects have been compiled with MS Visual c++ 6.
+
+You must have the 3dsmax 3.1 SDK installed (by default, it is not).
+You must have the Character Studio 3 SDK installed.
+
+You must configure your compiler and add the following pathes:
+
+/MAXSDK/lib			to the lib search path
+/MAXSDK/include			to the include search path
+/MAXSDK/include/maxscrpt	to the include search path
+/CHARACTER_STUDIO_SDK		to the include search path
+
+The maxsdk is "c:\3dsmax3_1\maxsdk" on a standard installation.
+
+Put the 3dsmax sdk include directories before the Visual studio ones
+because there is some conflicts between them.
+
+** PROJECTS **
+
+There is three plug-ins in this package:
+
+1) nel_export : an export / view utility plug-in for NeL.
+2) nel_patch_converted : a patch converter to translate max patches in NeL patches.
+3) tile_utility : an utility plug-in to load tile banks in 3dsmax.
+
+** DEPENDENCIES **
+
+Thoses plug-ins need some sub projects to work with:
+
+1) NeL 3d library
+2) NeL misc library
+3) NeL openGL driver
+4) nel_mesh_lib : library of functions to convert max Meshes and animation data in NeL format.
+5) nel_patch_lib : library of functions to convert max patches in NeL format.
+6) object_viewer : the common NeL tool to watch nel objects and animations.
+7) nel_3dsmax_shared : shared dll for NeL plug-ins
+
+** INSTALL **
+
+Once all those projects are compiled you should have:
+
+* nelexport.dlu
+* neltileutility.dlu
+* nelconvertpatch.dlm. 
+
+Thoses dll must go in a plugins directory of 3dsmax. (ex: c:/3dsmax3_1/plugins)
+
+* nel_3dsmax_shared.dll
+* object_viewer.dll
+* object_viewer.cfg
+* nel_drv_opengl_win.dll
+
+Thoses dll must go in the 3dsmax root directory. (ex: c:/3dsmax3_1)
+
+* nel_light.ms
+* nel_material.ms
+* nel_swt.ms
+* nel_flare.ms
+* nel_ps.ms
+
+Thoses scripts must go in the startup script dirctory. (ex: c:/3dsmax3_1/scripts/startup)
+
+** FUTURE WORKS **
+
+* We will add a macro define to remove the need of character studio to complile the plugins
+* Support for 3dsmax 4. If you compile succefully the plugin under the 4 version, write
+  to us.
+
+** HAVE SOME FUN **

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="Temporary out of date"/>
+      <Body Name="BODY">
+        <VECTOR size="4">
+          <POLYPTR id="9589728" class="CFormBodyEltAtom">
+            <Atom Name="Name" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="9589896" class="CFormBodyEltAtom">
+            <Atom Name="Border" Value="_ai_patate.dfn"/>
+          </POLYPTR>
+          <POLYPTR id="9590080" class="CFormBodyEltAtom">
+            <Atom Name="Creation" Value="list&lt; _ai_creature_elem.dfn &gt;"/>
+          </POLYPTR>
+          <POLYPTR id="9569976" class="CFormBodyEltAtom">
+            <Atom Name="Child" Value="list&lt;  &gt;"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Version="0.5" State="modified">
+  <ELEMENT Name="Race" Type="Type" Filename="People.typ"/>
+  <ELEMENT Name="Role" Type="Type" Filename="role.typ"/>
+  <ELEMENT Name="PreMemorizedSentences1" Type="Dfn" Filename="_sentence.dfn" Array="true"/>
+  <ELEMENT Name="StartEquipment1" Type="Dfn" Filename="_creature_equipment.dfn"/>
+  <ELEMENT Name="PreMemorizedSentences2" Type="Dfn" Filename="_sentence.dfn" Array="true"/>
+  <ELEMENT Name="StartEquipment2" Type="Dfn" Filename="_creature_equipment.dfn"/>
+  <ELEMENT Name="PreMemorizedSentences3" Type="Dfn" Filename="_sentence.dfn" Array="true"/>
+  <ELEMENT Name="StartEquipment3" Type="Dfn" Filename="_creature_equipment.dfn"/>
+  <LOG></LOG>
+</DFN>

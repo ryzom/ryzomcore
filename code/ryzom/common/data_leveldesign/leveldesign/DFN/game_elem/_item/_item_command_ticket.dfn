@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Command" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Priviledge" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="NbRun" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG></LOG>
+</DFN>

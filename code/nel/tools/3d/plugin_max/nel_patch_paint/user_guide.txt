@@ -1,0 +1,74 @@
+*** Painter user guide.
+
+Function keys:
+--------------
+
+F1: TILE MODE
+	Go in tile mode.
+
+F2: COLOR MODE
+	Go in vertex color mode
+
+F3: DISPLACE MODE
+	Go in displace mode (not operational)
+
+SPACE:	CHANGE MATERIAL
+	In tile mode, select a tileset in the list.
+	In color mode, select a color in the list.
+	In dispace moden select a displace map in the list.
+
+CTRL+Z:	UNDO
+
+CTRL+E:	REDO
+
+A:	Toggle lighting on / off
+
+P:	PICK
+	In tile mode, pick a tileset on the landscape.
+	In color mode, pick a color on the landscape.
+	In dispace moden pick a displace map on the landscape.
+
+F5:	FILL
+	In tile mode, fill the patch you click on with the current tileset with rotation = 0.
+	In color mode, fill the patch you click on with the current color.
+	In displace mode, fill the patch you click on with the current displace map.
+	
+F6:	FILL
+	In tile mode, fill the patch you click on with the current tileset with rotation = 1.
+
+F7:	FILL
+	In tile mode, fill the patch you click on with the current tileset with rotation = 2.
+
+F8:	FILL
+	In tile mode, fill the patch you click on with the current tileset with rotation = 3.
+
+W:
+	Toggle texture 256 / texture 128
+
+X:
+	Toggle vertex colors
+
+INSERT / SUPPR:
+	Select the brush size (small, medium large)
+
+F / V:
+	Select your tile group you want to paint with (All, 0, 1, 2, 3, 4, 5, 6, 7).
+
+B:
+	Select your background color.
+
+C:
+	Show/hide orientation arrows.
+
+C:
+	Show/hide orientation arrows.
+
+HOME / END:
+	Select the opacity of the brush (for vertex color)
+
+PAGEUP / PAGEDOWN:
+	Select the hardness of the brush (for vertex color)
+	
+F11:
+	Trick mode: donesn't try to propagate border. Use ONLY when you can't do anything else.
+

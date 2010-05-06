@@ -1,0 +1,19 @@
+
+>> 3dsmax skinning features supported by the NeL export <<
+
+
+-> Export the skinning only from the Physique and the com_skin2 plugin (new skin version)
+
+ * >>> The skin must be attached to the root node of the scene.
+ * >>> The root bone of the skeleton must be attached to the root node of the scene.
+ * >>> Bones must not have the same name than another node in 3dsmax.
+ * Support for 4 matrices by vertices max.
+
+-> No support for standard Skin plugin
+
+-> Skeletons supported
+
+ * Bones
+ * Objects (like boxes)
+ * Biped
+ * Try other objects !

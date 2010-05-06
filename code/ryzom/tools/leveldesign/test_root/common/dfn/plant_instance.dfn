@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="unknow"/>
+      <Body Name="BODY">
+        <VECTOR size="3">
+          <POLYPTR id="21852512" class="CFormBodyEltAtom">
+            <Atom Name="File name" Value="plant_name.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21852616" class="CFormBodyEltAtom">
+            <Atom Name="Density" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21852720" class="CFormBodyEltAtom">
+            <Atom Name="Falloff" Value="float.typ"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

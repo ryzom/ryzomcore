@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Version="0.3" State="modified">
+  <ELEMENT Name="bag" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <LOG></LOG>
+</DFN>

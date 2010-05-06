@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL Release EXE (Console)"
+	InheritedPropertySheets=".\nel_vs90_r.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="_CONSOLE"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		SubSystem="1"
+		AdditionalDependencies="libcmt.lib"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="GroundID" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="FXName" Type="Type" Filename="string.typ"/>
+  <LOG>Tue Aug 12 11:31:28 2003 (Nicolas Vizerie) Dfn Structure = 
+Tue Aug 12 12:12:44 2003 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

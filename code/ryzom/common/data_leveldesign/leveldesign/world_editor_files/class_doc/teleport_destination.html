@@ -1,0 +1,402 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="teleport_destination_files/filelist.xml">
+<title>npc_group</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Boris Boucher</o:Author>
+  <o:LastAuthor>nouveau</o:LastAuthor>
+  <o:Revision>6</o:Revision>
+  <o:TotalTime>141</o:TotalTime>
+  <o:Created>2004-03-04T14:20:00Z</o:Created>
+  <o:LastSaved>2004-03-04T14:42:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>271</o:Words>
+  <o:Characters>1551</o:Characters>
+  <o:Company>nevrax</o:Company>
+  <o:Lines>12</o:Lines>
+  <o:Paragraphs>3</o:Paragraphs>
+  <o:CharactersWithSpaces>1819</o:CharactersWithSpaces>
+  <o:Version>10.2625</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-alt:"\FF2D\FF33 \660E\671D";
+	mso-font-charset:128;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:fixed;
+	mso-font-signature:1 134676480 16 0 131072 0;}
+@font-face
+	{font-family:"\@MS Mincho";
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";
+	mso-ansi-language:FR;}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;
+	mso-ansi-language:FR;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	mso-ansi-language:FR;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"MS Mincho";
+	mso-ansi-language:FR;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 65.95pt 1.0in 65.95pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:32586569;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1341821240 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1
+	{mso-list-id:363487553;
+	mso-list-template-ids:-2018989852;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l2
+	{mso-list-id:803696492;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1018820242 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.75in;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:-.25in;
+	font-family:Symbol;
+	color:windowtext;}
+@list l2:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1><span style='color:#FF6600;mso-ansi-language:EN-US'>Teleport_destination<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'>Represents a teleport destination,
+accessed to teleport triggers<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'>For room <span
+style='mso-spacerun:yes'> </span>instanciation problems, here is a rule of
+thumb : “there must be one destination per room in a building, but the system
+automatically declines them by player and by guild”<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span style='color:#999999;mso-ansi-language:EN-US'>Properties&nbsp;:<o:p></o:p></span></h2>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'><o:p><span style='text-decoration:none'>&nbsp;</span></o:p></span></u></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>name </span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: name of the destination. 2 destination CANNOT SHARE THE SAME
+NAME. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>type </span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: <span style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-indent:.5in'><span style='mso-ansi-language:
+EN-US'>* Uninstanciated : this is a standard teleportation : the destination is
+unique and not shared<span style='mso-spacerun:yes'>  </span>between instances<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-indent:.5in'><span style='mso-ansi-language:
+EN-US'>* CommonRoom : the destination is a room that is not linked to a player
+or a guild but is shared by buildings ( exemple : a city hall interior )<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-indent:.5in'><span style='mso-ansi-language:
+EN-US'>* PlayerRoom : Destination is a room belonging to a player. (not
+implemented yet)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-indent:.5in'><span style='mso-ansi-language:
+EN-US'>* GuildMain : Main Room of a guild ( entry room )<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-indent:.5in'><span style='mso-ansi-language:
+EN-US'>* GuildAnnex : annex room of a guild<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'>bots : </span></b><span
+style='color:black;mso-ansi-language:EN-US'>name of the bots to spawn in a
+newly created instance of the destination ( does not work with </span><span
+style='mso-ansi-language:EN-US'>Uninstanciated ).<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'>exit : </span></b><span
+style='color:black;mso-ansi-language:EN-US'>name of a teleport destination.
+Used to force theplayer to get out of a building ( needed for all types except </span><span
+style='mso-ansi-language:EN-US'>Uninstanciated<span style='color:black'>, does
+not work with </span>Uninstanciated )<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'>teleport_pets</span></b><span
+style='color:black;mso-ansi-language:EN-US'> : if checked, player pets will be
+teleported<b style='mso-bidi-font-weight:normal'> (</b> works only with </span><span
+style='mso-ansi-language:EN-US'>Uninstanciated )<span style='color:black'><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span style='color:black;mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>place_name</span></b><span style='mso-ansi-language:
+EN-US'> : name of the destination in the list<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='color:black;mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>icon</span></b><span style='mso-ansi-language:
+EN-US'> : icon to display in the destination list. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>teleport_zone : </span></b><span
+style='mso-ansi-language:EN-US'>name of a teleport_zone structures, used to know
+the physical cords of the destination<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'>restriction : if a player does not
+match the restrictions, he cannot teleport to the destination. <o:p></o:p></span></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'>Supported values are :<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><b
+style='mso-bidi-font-weight:normal'><span style='color:black;mso-ansi-language:
+EN-US'><span style='mso-tab-count:1'>            </span>*</span></b><span
+style='mso-fareast-font-family:"Times New Roman";color:#A000A0;mso-ansi-language:
+EN-US'>Rm_Fight</span><span style='mso-fareast-font-family:"Times New Roman";
+color:black;mso-ansi-language:EN-US'><span style='mso-tab-count:1'>       </span>
+<span style='mso-spacerun:yes'> </span>the guild in which the user is must have
+a fight rolemaster<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:
+EN-US'><span style='mso-tab-count:1'>            </span>*</span><span
+style='mso-fareast-font-family:"Times New Roman";color:#A000A0;mso-ansi-language:
+EN-US'>Rm_Magic</span><span style='mso-fareast-font-family:"Times New Roman";
+color:black;mso-ansi-language:EN-US'><span style='mso-tab-count:1'>     </span><span
+style='mso-spacerun:yes'>  </span>the guild in which the user is must have a magic
+rolemaster<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:
+EN-US'><span style='mso-tab-count:1'>            </span>*</span><span
+style='mso-fareast-font-family:"Times New Roman";color:#A000A0;mso-ansi-language:
+EN-US'>Rm_Harvest</span><span style='mso-fareast-font-family:"Times New Roman";
+color:black;mso-ansi-language:EN-US'><span style='mso-spacerun:yes'>    </span><span
+style='mso-spacerun:yes'> </span>the guild in which the user is must have a
+harvest rolemaster<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:
+EN-US'><span style='mso-tab-count:1'>            </span>*</span><span
+style='mso-fareast-font-family:"Times New Roman";color:#A000A0;mso-ansi-language:
+EN-US'>Rm_Craft</span><span style='mso-fareast-font-family:"Times New Roman";
+color:black;mso-ansi-language:EN-US'><span style='mso-spacerun:yes'>        
+</span>the guild in which the user is must have a craft rolemaster<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:black;mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'><o:p><span style='text-decoration:none'>&nbsp;</span></o:p></span></u></b></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

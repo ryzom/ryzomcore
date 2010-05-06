@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="RelativeLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MajorBrick" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MediumBrick" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MinorBrick" Type="Type" Filename="int.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:11 2002 (corvazier) File converted from old format</LOG>
+</DFN>

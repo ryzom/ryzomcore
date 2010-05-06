@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="fyros"/>
+      <ATOM Name="family" Value="armor"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Chest"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="tr_HOM_underwear_gilet.shape"/>
+      <ATOM Name="shape_female" Value="fy_HOF_underwear_gilet.shape"/>
+      <ATOM Name="color" Value="UserColor"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:16:01 2002 (mauduit) .3d.shape = TR_HOM_underwear_gilet.shape
+Tue Jul 09 14:07:43 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Chest
+Tue Jul 09 14:07:43 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:07:43 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:07:43 2002 (mauduit) formName Resized = 1
+Tue Jul 09 14:07:54 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_gilet.shape
+Mon Jul 15 14:10:32 2002 (mauduit) .3d.color = UserColor
+Thu Jul 25 17:02:54 2002 (mauduit) .3d.shape = fy_HOM_underwear_gilet.shape
+Thu Jul 25 17:02:54 2002 (mauduit) .3d.shape_female = fy_HOF_underwear_gilet.shape
+Thu Jul 25 17:02:54 2002 (mauduit) .basics.origin = fyros
+Tue Aug 27 12:04:58 2002 (wuibout) .3d.icon = AR_gilet.tga
+Tue Aug 27 12:04:58 2002 (wuibout) .3d.icon background = BK_fyros.tga
+Tue Aug 27 12:19:09 2002 (wuibout) .3d.icon = 
+Tue Aug 27 12:19:09 2002 (wuibout) .3d.icon background = 
+Wed Jul 09 09:58:10 2003 (mauduit) .3d.shape = tr_HOM_underwear_gilet.shape
+Mon Feb 23 20:06:03 2004 (puzin) .basics.Saleable = false</LOG>
+</FORM>

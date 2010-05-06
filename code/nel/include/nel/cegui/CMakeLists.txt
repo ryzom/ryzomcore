@@ -1,0 +1,3 @@
+FILE(GLOB HEADERS *.h)
+
+INSTALL(FILES ${HEADERS} DESTINATION include/nel/cegui COMPONENT headers)

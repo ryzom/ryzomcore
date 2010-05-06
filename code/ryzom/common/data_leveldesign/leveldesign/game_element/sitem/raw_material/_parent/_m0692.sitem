@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FORM Version="0.0" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="Drop or Sell" Value="true"/>
+      <ATOM Name="Bulk" Value="0.5"/>
+    </STRUCT>
+    <STRUCT Name="mp">
+      <ATOM Name="Family" Value="Yubo Tooth"/>
+      <ATOM Name="Group" Value="Creature"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="MP_Tooth.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

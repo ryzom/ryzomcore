@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Version="0.2" State="modified">
+  <ELEMENT Name="LocationType" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Boundary" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Exclusions" Type="Type" Filename="string.typ" Array="true"/>
+  <LOG>Tue Jul 02 11:38:59 2002 (Administrateur) Dfn Structure = 
+Thu Jul 04 18:34:33 2002 (Administrateur) Dfn Structure = </LOG>
+</DFN>

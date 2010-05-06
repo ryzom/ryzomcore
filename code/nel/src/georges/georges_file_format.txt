@@ -1,0 +1,15 @@
+Nel Georges File Format
+
+There is 3 kind of files,
+
+Type files (*.typ), define a basic element type (string, color, number with default values, limit, enums and graphic user interface).
+Dfn files (*.dfn), define a structure composed of basic elements, array of basic element, sub structures, array of sub structures and virtual sub structures.
+Form files (*.dfn_name), implement a Dfn file (the name of the Dfn based file is dfn_name.dfn).
+
+Type =
+
+Dfn =
+
+Form =
+
+

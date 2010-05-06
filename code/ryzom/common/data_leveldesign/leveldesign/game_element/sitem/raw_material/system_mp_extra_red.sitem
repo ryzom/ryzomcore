@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="system_mp_extra.sitem"/>
+  <STRUCT>
+    <STRUCT Name="mp">
+      <ATOM Name="MpColor" Value="Red"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="MP_generic_colorize.tga"/>
+      <ATOM Name="IconBackColor" Value="0,0,0"/>
+      <ATOM Name="IconColor" Value="255,34,34"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Apr 13 02:36:59 2010 (ulukyn) .3d.IconBackColor = 0,0,0
+Tue Apr 13 02:36:59 2010 (ulukyn) .3d.IconColor = 255,34,34
+Tue Apr 13 02:36:59 2010 (ulukyn) .3d.icon = MP_generic_colorize.tga</LOG>
+</FORM>

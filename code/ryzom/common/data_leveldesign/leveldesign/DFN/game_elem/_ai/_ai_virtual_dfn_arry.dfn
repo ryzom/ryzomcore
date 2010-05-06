@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Version="0.8" State="modified">
+  <ELEMENT Name="IsA" Type="DfnPointer"/>
+  <LOG>Thu Sep 12 14:44:44 2002 (chafik) Dfn Structure = </LOG>
+</DFN>

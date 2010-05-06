@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<DFN Version="0.6" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="CreatureLimit" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Boundary" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Exclusions" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Spawn" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Population" Type="Dfn" Filename="_ai_population.dfn" Array="true"/>
+  <ELEMENT Name="Location" Type="Dfn" Filename="_ai_location.dfn" Array="true"/>
+  <ELEMENT Name="Children" Type="Dfn" Filename="_ai_manager.dfn" Array="true"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:23 2002 (corvazier) File converted from old format
+Tue Jul 02 18:36:54 2002 (Administrateur) Dfn Structure = 
+Tue Jul 02 18:41:30 2002 (Administrateur) Dfn Structure = 
+Tue Jul 02 18:51:24 2002 (Administrateur) Dfn Structure = 
+Tue Jul 02 18:51:27 2002 (Administrateur) Dfn Structure = 
+Tue Jul 02 19:02:30 2002 (Administrateur) Dfn Structure = 
+Tue Jul 02 19:02:51 2002 (Administrateur) Dfn Structure = </LOG>
+</DFN>

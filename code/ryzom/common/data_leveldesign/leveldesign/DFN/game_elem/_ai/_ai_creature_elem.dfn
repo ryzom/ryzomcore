@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Version="0.8" State="modified">
+  <ELEMENT Name="ClassName" Type="Type" Filename="_ai_creature_type.typ"/>
+  <ELEMENT Name="Quantity" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Sheet" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Class" Type="Type" Filename="_ai_creature_type.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:23 2002 (corvazier) File converted from old format</LOG>
+</DFN>

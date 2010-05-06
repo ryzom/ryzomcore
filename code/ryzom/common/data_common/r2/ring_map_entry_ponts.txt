@@ -1,0 +1,1068 @@
+a1 uiR2_Lakes01 uiR2EntryPoint01 31346 -1310 N
+a1 uiR2_Lakes01 uiR2EntryPoint02 31269 -1238 E
+a1 uiR2_Lakes01 uiR2EntryPoint03 31456 -1379 N
+
+a1 uiR2_Lakes07 uiR2EntryPoint01 36264 -1103 S
+a1 uiR2_Lakes07 uiR2EntryPoint02 36208 -1353 N
+a1 uiR2_Lakes07 uiR2EntryPoint03 36478 -1269 W
+a1 uiR2_Lakes07 uiR2EntryPoint04 36478 -1105 SW
+
+a1 uiR2_Lakes22 uiR2EntryPoint01 32250 -2800 W
+a1 uiR2_Lakes22 uiR2EntryPoint02 31920 -3160 N
+a1 uiR2_Lakes22 uiR2EntryPoint03 32080 -3090 N
+a1 uiR2_Lakes22 uiR2EntryPoint04 32250 -3065 NE
+
+l1 uiR2_Lakes15 uiR2EntryPoint01 34634 -1872 SW
+l1 uiR2_Lakes15 uiR2EntryPoint02 34258 -1991 W
+l1 uiR2_Lakes15 uiR2EntryPoint03 34321 -1860 S
+l1 uiR2_Lakes15 uiR2EntryPoint04 34510 -2060 W
+
+l1 uiR2_Lakes17 uiR2EntryPoint01 36150 -2310 NE
+l1 uiR2_Lakes17 uiR2EntryPoint02 35936 -2243 S
+l1 uiR2_Lakes17 uiR2EntryPoint03 35920 -1844 W
+l1 uiR2_Lakes17 uiR2EntryPoint04 36103 -1923 SW
+l1 uiR2_Lakes17 uiR2EntryPoint05 35895 -1935 S
+
+l1 uiR2_Lakes18 uiR2EntryPoint01 36725 -1993 E
+l1 uiR2_Lakes18 uiR2EntryPoint02 36688 -2159 N
+l1 uiR2_Lakes18 uiR2EntryPoint03 36879 -2217 N
+l1 uiR2_Lakes18 uiR2EntryPoint04 36941 -1970 SW
+
+l1 uiR2_Lakes26 uiR2EntryPoint01 34460 -3120 E
+l1 uiR2_Lakes26 uiR2EntryPoint02 34689 -2756 SW
+l1 uiR2_Lakes26 uiR2EntryPoint03 34681 -3111 N
+l1 uiR2_Lakes26 uiR2EntryPoint04 34671 -2931 N
+
+l1 uiR2_Lakes27 uiR2EntryPoint01 35605 -3080 NW
+l1 uiR2_Lakes27 uiR2EntryPoint02 35520 -2780 S
+l1 uiR2_Lakes27 uiR2EntryPoint03 35133 -2663 SE
+l1 uiR2_Lakes27 uiR2EntryPoint04 35283 -3051 N
+
+l1 uiR2_Lakes38 uiR2EntryPoint01 36720 -3740 S
+l1 uiR2_Lakes38 uiR2EntryPoint02 36751 -4024 NW
+l1 uiR2_Lakes38 uiR2EntryPoint03 36230 -3767 E
+l1 uiR2_Lakes38 uiR2EntryPoint04 36481 -3564 S
+
+l1 uiR2_Lakes39 uiR2EntryPoint01 37510 -3900 N
+l1 uiR2_Lakes39 uiR2EntryPoint02 37299 -3575 SE
+l1 uiR2_Lakes39 uiR2EntryPoint03 37861 -3719 W
+
+l2 uiR2_Lakes03 uiR2EntryPoint01 32961 -1388 N
+l2 uiR2_Lakes03 uiR2EntryPoint02 32784 -1507 NE
+l2 uiR2_Lakes03 uiR2EntryPoint03 33390 -1517 NW
+l2 uiR2_Lakes03 uiR2EntryPoint04 33365 -916 SW
+l2 uiR2_Lakes03 uiR2EntryPoint05 33033 -991 S
+
+l2 uiR2_Lakes08 uiR2EntryPoint01 36991 -1311 E
+l2 uiR2_Lakes08 uiR2EntryPoint02 37197 -1547 NW
+l2 uiR2_Lakes08 uiR2EntryPoint03 37230 -1035 S
+l2 uiR2_Lakes08 uiR2EntryPoint04 37111 -1264 SE
+l2 uiR2_Lakes08 uiR2EntryPoint05 37393 -1285 W
+
+l2 uiR2_Lakes16 uiR2EntryPoint01 35330 -2120 W
+l2 uiR2_Lakes16 uiR2EntryPoint02 35180 -2010 S
+l2 uiR2_Lakes16 uiR2EntryPoint03 35145 -2135 NE
+
+l2 uiR2_Lakes19 uiR2EntryPoint01 37681 -2167 N
+l2 uiR2_Lakes19 uiR2EntryPoint02 37367 -2341 NW
+l2 uiR2_Lakes19 uiR2EntryPoint03 37331 -2070 NE
+l2 uiR2_Lakes19 uiR2EntryPoint04 37521 -1929 S
+l2 uiR2_Lakes19 uiR2EntryPoint05 37773 -2008 W
+
+l2 uiR2_Lakes23 uiR2EntryPoint01 32727 -3120 W
+l2 uiR2_Lakes23 uiR2EntryPoint02 32694 -2802 W
+l2 uiR2_Lakes23 uiR2EntryPoint03 32523 -2995 E
+
+l2 uiR2_Lakes10 uiR2EntryPoint01 38531 -1379 NE
+l2 uiR2_Lakes10 uiR2EntryPoint02 38962 -1092 S
+l2 uiR2_Lakes10 uiR2EntryPoint03 38677 -1146 SE
+l2 uiR2_Lakes10 uiR2EntryPoint04 38953 -1444 NW
+
+l2 uiR2_Lakes11 uiR2EntryPoint01 31531 -2280 NW
+l2 uiR2_Lakes11 uiR2EntryPoint02 31517 -1946 SW
+l2 uiR2_Lakes11 uiR2EntryPoint03 31107 -2130 NE
+l2 uiR2_Lakes11 uiR2EntryPoint04 31203 -1938 SE
+l2 uiR2_Lakes11 uiR2EntryPoint05 31358 -2065 NW
+
+l3 uiR2_Lakes14 uiR2EntryPoint01 33438 -2169 E
+l3 uiR2_Lakes14 uiR2EntryPoint02 33562 -2128 SW
+l3 uiR2_Lakes14 uiR2EntryPoint03 33590 -2230 NW 
+
+l3 uiR2_Lakes21 uiR2EntryPoint01 31247 -2790 E
+l3 uiR2_Lakes21 uiR2EntryPoint02 31128 -3031 N
+l3 uiR2_Lakes21 uiR2EntryPoint03 31536 -2778 W
+l3 uiR2_Lakes21 uiR2EntryPoint04 31413 -3101 NE
+l3 uiR2_Lakes21 uiR2EntryPoint05 31306 -3168 NW
+
+l3 uiR2_Lakes31 uiR2EntryPoint01 31295 -4080 N
+l3 uiR2_Lakes31 uiR2EntryPoint02 31425 -3724 SW
+l3 uiR2_Lakes31 uiR2EntryPoint03 31258 -3747 SE
+
+l3 uiR2_Lakes04 uiR2EntryPoint01 33740 -1068 E
+l3 uiR2_Lakes04 uiR2EntryPoint02 34268 -1202 W
+l3 uiR2_Lakes04 uiR2EntryPoint03 34145 -1045 SW
+l3 uiR2_Lakes04 uiR2EntryPoint04 33996 -1283 N
+l3 uiR2_Lakes04 uiR2EntryPoint05 33691 -1206 E
+
+l3 uiR2_Lakes06 uiR2EntryPoint01 35468 -1272 N
+l3 uiR2_Lakes06 uiR2EntryPoint02 35954 -1080 SW
+l3 uiR2_Lakes06 uiR2EntryPoint03 35764 -1026 E
+l3 uiR2_Lakes06 uiR2EntryPoint04 35438 -890 SE
+l3 uiR2_Lakes06 uiR2EntryPoint05 35634 -1288 N
+
+l3 uiR2_Lakes09 uiR2EntryPoint01 37916 -1124 S
+l3 uiR2_Lakes09 uiR2EntryPoint02 37709 -1451 NE
+l3 uiR2_Lakes09 uiR2EntryPoint03 38149 -1051 SW
+l3 uiR2_Lakes09 uiR2EntryPoint04 38073 -1412 NW
+
+l3 uiR2_Lakes20 uiR2EntryPoint01 38155 -2000 E
+l3 uiR2_Lakes20 uiR2EntryPoint02 38290 -1813 E
+l3 uiR2_Lakes20 uiR2EntryPoint03 38488 -1996 W
+l3 uiR2_Lakes20 uiR2EntryPoint04 38289 -2183 S
+
+l4 uiR2_Lakes33 uiR2EntryPoint01 32370 -3880 N
+l4 uiR2_Lakes33 uiR2EntryPoint02 32447 -3577 SE
+l4 uiR2_Lakes33 uiR2EntryPoint03 32561 -3774 SW
+l4 uiR2_Lakes33 uiR2EntryPoint04 32716 -3591 S
+l4 uiR2_Lakes33 uiR2EntryPoint05 32721 -3914 N
+
+l4 uiR2_Lakes02 uiR2EntryPoint01 32059 -1392 N
+l4 uiR2_Lakes02 uiR2EntryPoint02 32267 -1181 W
+l4 uiR2_Lakes02 uiR2EntryPoint03 32053 -1159 SE
+
+l4 uiR2_Lakes05 uiR2EntryPoint01 34650 -1133 NE
+l4 uiR2_Lakes05 uiR2EntryPoint02 35018 -1280 SW
+l4 uiR2_Lakes05 uiR2EntryPoint03 34984 -889 SW
+l4 uiR2_Lakes05 uiR2EntryPoint04 34769 -1166 NE
+
+l4 uiR2_Lakes12 uiR2EntryPoint01 32040 -2368 N
+l4 uiR2_Lakes12 uiR2EntryPoint02 32401 -2210 SW
+l4 uiR2_Lakes12 uiR2EntryPoint03 32019 -1939 S
+l4 uiR2_Lakes12 uiR2EntryPoint04 31891 -2241 E
+
+l4 uiR2_Lakes24 uiR2EntryPoint01 33350 -3120 N
+l4 uiR2_Lakes24 uiR2EntryPoint02 33200 -2865 N
+l4 uiR2_Lakes24 uiR2EntryPoint03 33450 -2950 W
+
+l4 uiR2_Lakes34 uiR2EntryPoint01 33520 -3910 N
+l4 uiR2_Lakes34 uiR2EntryPoint02 33206 -3990 W
+l4 uiR2_Lakes34 uiR2EntryPoint03 33276 -3784 N
+l4 uiR2_Lakes34 uiR2EntryPoint04 33619 -3638 NW
+l4 uiR2_Lakes34 uiR2EntryPoint05 33335 -3829 NE
+
+o1 uiR2_Lakes25 uiR2EntryPoint01 33980 -3110 N
+o1 uiR2_Lakes25 uiR2EntryPoint02 33900 -2990 NE
+o1 uiR2_Lakes25 uiR2EntryPoint03 34105 -2760 SW
+
+o1 uiR2_Lakes28 uiR2EntryPoint01 36480 -3100 N
+o1 uiR2_Lakes28 uiR2EntryPoint02 36146 -2679 SE
+o1 uiR2_Lakes28 uiR2EntryPoint03 36324 -2871 S
+
+o1 uiR2_Lakes29 uiR2EntryPoint01 37500 -3110 N
+o1 uiR2_Lakes29 uiR2EntryPoint02 37078 -2937 SW
+o1 uiR2_Lakes29 uiR2EntryPoint03 37389 -2802 S
+
+o1 uiR2_Lakes30 uiR2EntryPoint01 38100 -2850 E
+o1 uiR2_Lakes30 uiR2EntryPoint02 38414 -2715 S
+o1 uiR2_Lakes30 uiR2EntryPoint03 38489 -3116 NW
+
+o1 uiR2_Lakes32 uiR2EntryPoint01 31900 -3600 E
+o1 uiR2_Lakes32 uiR2EntryPoint02 32108 -3832 N
+o1 uiR2_Lakes32 uiR2EntryPoint03 32112 -3672 W
+
+o1 uiR2_Lakes35 uiR2EntryPoint01 34200 -4080 E
+o1 uiR2_Lakes35 uiR2EntryPoint02 34145 -3645 SE
+o1 uiR2_Lakes35 uiR2EntryPoint03 34387 -3988 S
+
+o1 uiR2_Lakes36 uiR2EntryPoint01 34960 -3770 N
+o1 uiR2_Lakes36 uiR2EntryPoint02 35149 -3703 SW
+o1 uiR2_Lakes36 uiR2EntryPoint03 34957 -3586 S
+
+o1 uiR2_Lakes37 uiR2EntryPoint01 35760 -3750 N
+o1 uiR2_Lakes37 uiR2EntryPoint02 35577 -3640 SE
+o1 uiR2_Lakes37 uiR2EntryPoint03 35912 -3874 N
+o1 uiR2_Lakes37 uiR2EntryPoint04 35902 -3589 SE
+
+o1 uiR2_Lakes40 uiR2EntryPoint01 38180 -3470 SE
+o1 uiR2_Lakes40 uiR2EntryPoint01 38416 -3819 NE
+o1 uiR2_Lakes40 uiR2EntryPoint01 38151 -3740 N
+
+
+//z1 uiR2_Lakes13 uiR2EntryPoint01 32479 -2298 E
+//z1 uiR2_Lakes13 uiR2EntryPoint02 32880 -2080 S
+//z1 uiR2_Lakes13 uiR2EntryPoint03 33050 -2265 NW
+
+// Desert
+
+
+a1 uiR2_Deserts03 uiR2EntryPoint01 22791 -1289 N
+a1 uiR2_Deserts03 uiR2EntryPoint02 23041 -1284 NW
+a1 uiR2_Deserts03 uiR2EntryPoint03 22873 -1110 SE
+
+a1 uiR2_Deserts21 uiR2EntryPoint01 25980 -2015 E
+a1 uiR2_Deserts21 uiR2EntryPoint02 26452 -1963 W
+a1 uiR2_Deserts21 uiR2EntryPoint03 26353 -1872 SW
+a1 uiR2_Deserts21 uiR2EntryPoint04 26214 -1961 S
+
+a1 uiR2_Deserts32 uiR2EntryPoint01 28070 -2340 E
+a1 uiR2_Deserts32 uiR2EntryPoint02 28240 -2719 N
+a1 uiR2_Deserts32 uiR2EntryPoint03 28318 -2643 W
+a1 uiR2_Deserts32 uiR2EntryPoint04 28293 -2445 W
+
+d1 uiR2_Deserts02 uiR2EntryPoint01 22383 -1512 N
+d1 uiR2_Deserts02 uiR2EntryPoint02 22454 -1186 SW
+d1 uiR2_Deserts02 uiR2EntryPoint03 22062 -1050 S
+d1 uiR2_Deserts02 uiR2EntryPoint04 22072 -1289 NE
+
+d1 uiR2_Deserts10 uiR2EntryPoint01 28923 -1434 N
+d1 uiR2_Deserts10 uiR2EntryPoint02 29217 -1371 E
+d1 uiR2_Deserts10 uiR2EntryPoint03 28901 -1115 SW
+
+d1 uiR2_Deserts22 uiR2EntryPoint01 26950 -2015 N
+d1 uiR2_Deserts22 uiR2EntryPoint02 26937 -1864 S
+d1 uiR2_Deserts22 uiR2EntryPoint03 27089 -2042 NW
+
+d1 uiR2_Deserts23 uiR2EntryPoint01 27600 -1924 S
+d1 uiR2_Deserts23 uiR2EntryPoint02 27575 -2351 NW
+d1 uiR2_Deserts23 uiR2EntryPoint03 27545 -2211 N
+d1 uiR2_Deserts23 uiR2EntryPoint04 27442 -1866 S
+
+d1 uiR2_Deserts28 uiR2EntryPoint01 25050 -2650 S
+d1 uiR2_Deserts28 uiR2EntryPoint02 24910 -2819 E
+d1 uiR2_Deserts28 uiR2EntryPoint03 24881 -2720 N
+d1 uiR2_Deserts28 uiR2EntryPoint04 24915 -2511 SW
+
+d1 uiR2_Deserts29 uiR2EntryPoint01 25880 -2630 E
+d1 uiR2_Deserts29 uiR2EntryPoint02 26022 -2374 SW
+d1 uiR2_Deserts29 uiR2EntryPoint03 26156 -2560 N
+d1 uiR2_Deserts29 uiR2EntryPoint04 26163 -2402 S
+
+d1 uiR2_Deserts31 uiR2EntryPoint01 27760 -2700 N
+d1 uiR2_Deserts31 uiR2EntryPoint02 27404 -2588 S
+d1 uiR2_Deserts31 uiR2EntryPoint03 27538 -2606 S
+d1 uiR2_Deserts31 uiR2EntryPoint04 27413 -2744 NE
+
+d1 uiR2_Deserts05 uiR2EntryPoint01 24257 -1520 NE
+d1 uiR2_Deserts05 uiR2EntryPoint02 24593 -1447 N
+d1 uiR2_Deserts05 uiR2EntryPoint03 24341 -1184 NE
+d1 uiR2_Deserts05 uiR2EntryPoint04 24535 -1054 S
+
+d1 uiR2_Deserts13 uiR2EntryPoint01 28942 -1919 S
+d1 uiR2_Deserts13 uiR2EntryPoint02 28538 -2241 E
+d1 uiR2_Deserts13 uiR2EntryPoint03 28814 -2251 NW
+d1 uiR2_Deserts13 uiR2EntryPoint04 28956 -2079 W
+d1 uiR2_Deserts13 uiR2EntryPoint05 28794 -1912 S
+
+d1 uiR2_Deserts17 uiR2EntryPoint01 23250 -1840 W
+d1 uiR2_Deserts17 uiR2EntryPoint02 23096 -1943 NE
+d1 uiR2_Deserts17 uiR2EntryPoint03 23034 -1839 E
+d1 uiR2_Deserts17 uiR2EntryPoint04 23096 -1713 S
+
+d1 uiR2_Deserts24 uiR2EntryPoint01 27915 -1875 S
+d1 uiR2_Deserts24 uiR2EntryPoint02 28136 -1960 S
+d1 uiR2_Deserts24 uiR2EntryPoint03 28233 -1746 S
+d1 uiR2_Deserts24 uiR2EntryPoint04 28324 -1841 W
+
+d3 uiR2_Deserts27 uiR2EntryPoint01 23305 -2454 E
+d3 uiR2_Deserts27 uiR2EntryPoint02 23313 -2682 N
+d3 uiR2_Deserts27 uiR2EntryPoint03 23464 -2611 N
+d3 uiR2_Deserts27 uiR2EntryPoint04 23496 -2442 SW
+
+d3 uiR2_Deserts04 uiR2EntryPoint01 23452 -1050 SE
+d3 uiR2_Deserts04 uiR2EntryPoint02 23846 -1435 W
+d3 uiR2_Deserts04 uiR2EntryPoint03 23599 -1418 N
+d3 uiR2_Deserts04 uiR2EntryPoint04 23927 -1163 W
+
+d3 uiR2_Deserts11 uiR2EntryPoint01 29554 -1468 N
+d3 uiR2_Deserts11 uiR2EntryPoint02 29922 -1222 W
+d3 uiR2_Deserts11 uiR2EntryPoint03 29622 -1048 S
+d3 uiR2_Deserts11 uiR2EntryPoint04 29615 -1306 SE
+d3 uiR2_Deserts11 uiR2EntryPoint05 29755 -1447 NW
+
+d3 uiR2_Deserts16 uiR2EntryPoint01 22304 -1856 E
+d3 uiR2_Deserts16 uiR2EntryPoint02 22513 -1995 E
+d3 uiR2_Deserts16 uiR2EntryPoint03 22687 -1891 N
+d3 uiR2_Deserts16 uiR2EntryPoint04 22537 -1877 N
+
+d4 uiR2_Deserts18 uiR2EntryPoint01 23730 -2280 N
+d4 uiR2_Deserts18 uiR2EntryPoint02 23666 -2154 NE
+d4 uiR2_Deserts18 uiR2EntryPoint03 23871 -1977 SE
+d4 uiR2_Deserts18 uiR2EntryPoint04 23570 -2056 NE
+d4 uiR2_Deserts18 uiR2EntryPoint05 23834 -1997 W
+
+d4 uiR2_Deserts19 uiR2EntryPoint01 24560 -2015 N
+d4 uiR2_Deserts19 uiR2EntryPoint02 24267 -1998 E
+d4 uiR2_Deserts19 uiR2EntryPoint03 24841 -2002 W
+d4 uiR2_Deserts19 uiR2EntryPoint04 24562 -1914 S
+
+d4 uiR2_Deserts09 uiR2EntryPoint01 27814 -1375 N
+d4 uiR2_Deserts09 uiR2EntryPoint02 27471 -1503 E
+d4 uiR2_Deserts09 uiR2EntryPoint03 27609 -1197 E
+d4 uiR2_Deserts09 uiR2EntryPoint04 27730 -1088 S
+d4 uiR2_Deserts09 uiR2EntryPoint05 27529 -1014 SE
+
+d4 uiR2_Deserts14 uiR2EntryPoint01 30629 -2300 N
+// d4 uiR2_Deserts14 uiR2EntryPoint04 30747 -2023 SW
+d4 uiR2_Deserts14 uiR2EntryPoint02 30577 -1836 S
+d4 uiR2_Deserts14 uiR2EntryPoint03 30347 -2140 SE
+// d4 uiR2_Deserts14 uiR2EntryPoint05 30407 -1835 SE
+
+d5 uiR2_Deserts15 uiR2EntryPoint01 21500 -1830 E
+d5 uiR2_Deserts15 uiR2EntryPoint02 21933 -1833 W
+d5 uiR2_Deserts15 uiR2EntryPoint03 21763 -1839 E
+d5 uiR2_Deserts15 uiR2EntryPoint04 21515 -1913 N
+
+d5 uiR2_Deserts30 uiR2EntryPoint01 26650 -2650 E
+d5 uiR2_Deserts30 uiR2EntryPoint02 27036 -2638 W
+d5 uiR2_Deserts30 uiR2EntryPoint03 26922 -2433 SE
+d5 uiR2_Deserts30 uiR2EntryPoint04 26779 -2504 S
+
+d5 uiR2_Deserts33 uiR2EntryPoint01 29510 -2040 S
+d5 uiR2_Deserts33 uiR2EntryPoint02 29517 -2239 N
+d5 uiR2_Deserts33 uiR2EntryPoint03 29712 -2523 NW
+d5 uiR2_Deserts33 uiR2EntryPoint04 29920 -2157 W
+d5 uiR2_Deserts33 uiR2EntryPoint05 29758 -2318 W
+
+d5 uiR2_Deserts08 uiR2EntryPoint01 26694 -1485 N
+d5 uiR2_Deserts08 uiR2EntryPoint02 26949 -1512 NW
+d5 uiR2_Deserts08 uiR2EntryPoint03 26482 -1366 E
+d5 uiR2_Deserts08 uiR2EntryPoint04 26875 -1010 S
+d5 uiR2_Deserts08 uiR2EntryPoint05 26460 -1205 NE
+
+d6 uiR2_Deserts06 uiR2EntryPoint01 25523 -1500 NW
+d6 uiR2_Deserts06 uiR2EntryPoint02 25419 -1142 SW
+d6 uiR2_Deserts06 uiR2EntryPoint03 25220 -1416 W
+d6 uiR2_Deserts06 uiR2EntryPoint04 25168 -1168 SW
+
+d6 uiR2_Deserts20 uiR2EntryPoint01 25206 -2118 N
+d6 uiR2_Deserts20 uiR2EntryPoint02 25435 -1997 W
+d6 uiR2_Deserts20 uiR2EntryPoint03 25410 -2177 N
+d6 uiR2_Deserts20 uiR2EntryPoint04 25532 -1942 N
+d6 uiR2_Deserts20 uiR2EntryPoint05 25724 -2192 W
+
+d6 uiR2_Deserts25 uiR2EntryPoint01 21845 -2475 S
+d6 uiR2_Deserts25 uiR2EntryPoint02 21891 -2836 W
+d6 uiR2_Deserts25 uiR2EntryPoint03 21442 -2799 NW
+d6 uiR2_Deserts25 uiR2EntryPoint04 21460 -2447 S
+d6 uiR2_Deserts25 uiR2EntryPoint05 21765 -2480 W
+
+d6 uiR2_Deserts26 uiR2EntryPoint01 22627 -2480 W
+d6 uiR2_Deserts26 uiR2EntryPoint02 22352 -2474 E
+d6 uiR2_Deserts26 uiR2EntryPoint03 22925 -2483 W
+d6 uiR2_Deserts26 uiR2EntryPoint04 22790 -2627 N
+
+
+
+o1 uiR2_Deserts07 uiR2EntryPoint01 26051 -1405 N
+o1 uiR2_Deserts07 uiR2EntryPoint02 26153 -1044 S
+o1 uiR2_Deserts07 uiR2EntryPoint03 25855 -1233 E
+o1 uiR2_Deserts07 uiR2EntryPoint04 25818 -1027 SE
+
+o1 uiR2_Deserts12 uiR2EntryPoint01 30818 -1487 NW
+o1 uiR2_Deserts12 uiR2EntryPoint02 30726 -1023 S
+o1 uiR2_Deserts12 uiR2EntryPoint03 30369 -1083 SE
+o1 uiR2_Deserts12 uiR2EntryPoint04 30389 -1307 E
+o1 uiR2_Deserts12 uiR2EntryPoint05 30539 -1440 NW
+
+
+
+//z1 uiR2_Deserts01 uiR2EntryPoint01 21570 -1363 N
+//z1 uiR2_Deserts01 uiR2EntryPoint02 21340 -1066 SE
+//z1 uiR2_Deserts01 uiR2EntryPoint03 21678 -1129 SW
+//z1 uiR2_Deserts01 uiR2EntryPoint04 21503 -1296 N
+
+
+
+
+// Forest
+
+
+a1 uiR2_Forest04 uiR2EntryPoint01 24213 -11157 W
+a1 uiR2_Forest04 uiR2EntryPoint02 23975 -11225 E
+a1 uiR2_Forest04 uiR2EntryPoint03 23827 -11373 NE
+a1 uiR2_Forest04 uiR2EntryPoint04 24180 -11383 NW
+a1 uiR2_Forest04 uiR2EntryPoint05 23871 -11059 SE
+a1 uiR2_Forest04 uiR2EntryPoint06 24189 -10982 SW
+
+a1 uiR2_Forest05 uiR2EntryPoint01 24752 -11360 N
+a1 uiR2_Forest05 uiR2EntryPoint02 24602 -11060 SE
+a1 uiR2_Forest05 uiR2EntryPoint03 24865 -11100 SW
+a1 uiR2_Forest05 uiR2EntryPoint04 25046 -11197 W
+a1 uiR2_Forest05 uiR2EntryPoint05 24640 -11453 N
+a1 uiR2_Forest05 uiR2EntryPoint06 24537 -11201 E
+
+a1 uiR2_Forest14 uiR2EntryPoint01 21282 -12196 N
+a1 uiR2_Forest14 uiR2EntryPoint02 21276 -11986 S
+a1 uiR2_Forest14 uiR2EntryPoint03 21276 -11766 S
+
+a1 uiR2_Forest27 uiR2EntryPoint01 21173 -12644 W
+a1 uiR2_Forest27 uiR2EntryPoint02 21068 -12561 S
+a1 uiR2_Forest27 uiR2EntryPoint03 21113 -12714 N
+a1 uiR2_Forest27 uiR2EntryPoint04 21119 -12639 S
+
+a1 uiR2_Forest32 uiR2EntryPoint01 24680 -12600 SE
+a1 uiR2_Forest32 uiR2EntryPoint02 24538 -13025 N
+a1 uiR2_Forest32 uiR2EntryPoint03 24822 -13039 N
+a1 uiR2_Forest32 uiR2EntryPoint04 24718 -12889 N
+a1 uiR2_Forest32 uiR2EntryPoint05 24830 -12554 SW
+a1 uiR2_Forest32 uiR2EntryPoint06 24659 -12750 E
+
+f1 uiR2_Forest03 uiR2EntryPoint01 23010 -11209 E
+f1 uiR2_Forest03 uiR2EntryPoint02 23080 -11152 E
+f1 uiR2_Forest03 uiR2EntryPoint03 23400 -11400 NW
+f1 uiR2_Forest03 uiR2EntryPoint04 23400 -11000 SW
+f1 uiR2_Forest03 uiR2EntryPoint05 23000 -11000 SE
+
+f1 uiR2_Forest19 uiR2EntryPoint01 24944 -12220 N
+f1 uiR2_Forest19 uiR2EntryPoint02 25357 -12233 N
+f1 uiR2_Forest19 uiR2EntryPoint03 25265 -12240 W
+f1 uiR2_Forest19 uiR2EntryPoint04 24971 -11947 S
+f1 uiR2_Forest19 uiR2EntryPoint05 25155 -12081 SE
+
+f1 uiR2_Forest23 uiR2EntryPoint01 28465 -12056 W
+f1 uiR2_Forest23 uiR2EntryPoint02 28011 -12082 E
+f1 uiR2_Forest23 uiR2EntryPoint03 28496 -12248 N
+f1 uiR2_Forest23 uiR2EntryPoint04 28375 -11911 SE
+f1 uiR2_Forest23 uiR2EntryPoint05 28194 -12118 E
+f1 uiR2_Forest23 uiR2EntryPoint06 27926 -11988 SE
+
+f1 uiR2_Forest39 uiR2EntryPoint01 30520 -12600 S
+f1 uiR2_Forest39 uiR2EntryPoint02 30143 -12958 E
+f1 uiR2_Forest39 uiR2EntryPoint03 30195 -12559 SE
+f1 uiR2_Forest39 uiR2EntryPoint04 30621 -12958 NW
+f1 uiR2_Forest39 uiR2EntryPoint05 30298 -12694 SE
+f1 uiR2_Forest39 uiR2EntryPoint06 30524 -12799 W
+f1 uiR2_Forest39 uiR2EntryPoint07 30291 -12910 NE
+
+f1 uiR2_Forest41 uiR2EntryPoint01 22140 -13150 SE
+f1 uiR2_Forest41 uiR2EntryPoint02 22401 -13440 NW
+f1 uiR2_Forest41 uiR2EntryPoint03 22263 -13269 S
+f1 uiR2_Forest41 uiR2EntryPoint04 22338 -13133 SW
+f1 uiR2_Forest41 uiR2EntryPoint05 22173 -13476 NE
+
+f1 uiR2_Forest20 uiR2EntryPoint01 26110 -11936 SW
+f1 uiR2_Forest20 uiR2EntryPoint02 25734 -11920 SE
+f1 uiR2_Forest20 uiR2EntryPoint03 25691 -12200 SW
+f1 uiR2_Forest20 uiR2EntryPoint04 26113 -12164 NW
+f1 uiR2_Forest20 uiR2EntryPoint05 25950 -12097 N
+
+f1 uiR2_Forest31 uiR2EntryPoint01 23470 -12600 SE
+f1 uiR2_Forest31 uiR2EntryPoint02 23681 -12712 S
+f1 uiR2_Forest31 uiR2EntryPoint03 23510 -13001 NE
+f1 uiR2_Forest31 uiR2EntryPoint04 23948 -13020 W
+f1 uiR2_Forest31 uiR2EntryPoint05 23598 -12850 SW
+f1 uiR2_Forest31 uiR2EntryPoint06 23995 -12787 W
+f1 uiR2_Forest31 uiR2EntryPoint07 23879 -12573 W
+
+f2 uiR2_Forest34 uiR2EntryPoint01 26220 -12600 SE
+f2 uiR2_Forest34 uiR2EntryPoint02 26613 -12753 NW
+f2 uiR2_Forest34 uiR2EntryPoint03 26413 -12556 S
+f2 uiR2_Forest34 uiR2EntryPoint04 26238 -12888 N
+f2 uiR2_Forest34 uiR2EntryPoint05 26661 -12640 W
+
+f2 uiR2_Forest35 uiR2EntryPoint01 27100 -12600 S
+f2 uiR2_Forest35 uiR2EntryPoint02 27043 -12938 N
+f2 uiR2_Forest35 uiR2EntryPoint03 27222 -12726 W
+
+f2 uiR2_Forest45 uiR2EntryPoint01 26000 -13600 SW
+f2 uiR2_Forest45 uiR2EntryPoint02 25983 -13976 NW
+f2 uiR2_Forest45 uiR2EntryPoint03 25684 -13611 SE
+f2 uiR2_Forest45 uiR2EntryPoint04 25835 -13674 SE
+f2 uiR2_Forest45 uiR2EntryPoint05 26004 -13834 NW
+f2 uiR2_Forest45 uiR2EntryPoint06 25786 -13883 N
+
+f2 uiR2_Forest08 uiR2EntryPoint01 26957 -11364 NE
+f2 uiR2_Forest08 uiR2EntryPoint02 27200 -11178 S
+f2 uiR2_Forest08 uiR2EntryPoint03 27360 -11040 SW
+f2 uiR2_Forest08 uiR2EntryPoint04 27002 -10967 SE
+f2 uiR2_Forest08 uiR2EntryPoint05 27406 -11414 NW
+
+f2 uiR2_Forest12 uiR2EntryPoint01 29919 -11062 N
+f2 uiR2_Forest12 uiR2EntryPoint02 29855 -11111 NE
+f2 uiR2_Forest12 uiR2EntryPoint03 29986 -10996 SW
+
+f2 uiR2_Forest33 uiR2EntryPoint01 25300 -12600 S
+f2 uiR2_Forest33 uiR2EntryPoint02 25598 -13023 N
+f2 uiR2_Forest33 uiR2EntryPoint03 25598 -12632 W
+f2 uiR2_Forest33 uiR2EntryPoint04 25299 -12957 N
+
+f3 uiR2_Forest38 uiR2EntryPoint01 29630 -12600 SW
+f3 uiR2_Forest38 uiR2EntryPoint02 29735 -12939 NW
+f3 uiR2_Forest38 uiR2EntryPoint03 29350 -12779 E
+f3 uiR2_Forest38 uiR2EntryPoint04 29525 -12714 SE
+f3 uiR2_Forest38 uiR2EntryPoint05 29391 -12585 SE
+f3 uiR2_Forest38 uiR2EntryPoint06 29465 -13029 NE
+
+f3 uiR2_Forest46 uiR2EntryPoint01 27000 -13600 S
+f3 uiR2_Forest46 uiR2EntryPoint02 28057 -14465 N
+f3 uiR2_Forest46 uiR2EntryPoint03 26890 -14013 NE
+f3 uiR2_Forest46 uiR2EntryPoint04 27254 -13872 S
+
+f3 uiR2_Forest02 uiR2EntryPoint01 22236 -11281 NE
+f3 uiR2_Forest02 uiR2EntryPoint02 22468 -11198 W
+f3 uiR2_Forest02 uiR2EntryPoint03 22222 -11426 NE
+f3 uiR2_Forest02 uiR2EntryPoint04 22353 -11000 S
+f3 uiR2_Forest02 uiR2EntryPoint05 22446 -11374 NW
+f3 uiR2_Forest02 uiR2EntryPoint06 22137 -11199 E
+f3 uiR2_Forest02 uiR2EntryPoint07 22158 -10990 E
+f3 uiR2_Forest02 uiR2EntryPoint08 22259 -11108 E
+
+f3 uiR2_Forest07 uiR2EntryPoint01 26322 -11348 N
+f3 uiR2_Forest07 uiR2EntryPoint02 26310 -11200 E
+f3 uiR2_Forest07 uiR2EntryPoint03 26545 -11157 W
+f3 uiR2_Forest07 uiR2EntryPoint04 26185 -10967 E
+f3 uiR2_Forest07 uiR2EntryPoint05 26171 -11200 E
+f3 uiR2_Forest07 uiR2EntryPoint06 26446 -11021 SW
+f3 uiR2_Forest07 uiR2EntryPoint07 26222 -11401 NE
+f3 uiR2_Forest07 uiR2EntryPoint08 26498 -11359 W
+
+f3 uiR2_Forest16 uiR2EntryPoint01 23114 -11953 W
+f3 uiR2_Forest16 uiR2EntryPoint02 22883 -11999 E
+f3 uiR2_Forest16 uiR2EntryPoint03 22743 -12136 N
+f3 uiR2_Forest16 uiR2EntryPoint04 22735 -11817 SE
+f3 uiR2_Forest16 uiR2EntryPoint05 23038 -12182 NW
+
+f3 uiR2_Forest18 uiR2EntryPoint01 24326 -11878 SE
+f3 uiR2_Forest18 uiR2EntryPoint02 24390 -12095 N
+f3 uiR2_Forest18 uiR2EntryPoint03 24525 -12090 E
+f3 uiR2_Forest18 uiR2EntryPoint04 24225 -11836 E
+
+f4 uiR2_Forest25 uiR2EntryPoint01 29903 -11886 SO
+f4 uiR2_Forest25 uiR2EntryPoint02 29714 -12046 NE
+f4 uiR2_Forest25 uiR2EntryPoint03 29730 -11826 SE
+f4 uiR2_Forest25 uiR2EntryPoint04 29959 -11791 SW
+
+f4 uiR2_Forest01 uiR2EntryPoint01 21581 -11056 S
+f4 uiR2_Forest01 uiR2EntryPoint02 21733 -11412 NW
+f4 uiR2_Forest01 uiR2EntryPoint03 21648 -11248 S
+f4 uiR2_Forest01 uiR2EntryPoint04 21510 -11443 NE
+f4 uiR2_Forest01 uiR2EntryPoint05 21400 -11247 E
+f4 uiR2_Forest01 uiR2EntryPoint06 21762 -10995 S
+f4 uiR2_Forest01 uiR2EntryPoint07 21855 -11231 W
+f4 uiR2_Forest01 uiR2EntryPoint08 21355 -11040 E
+f4 uiR2_Forest01 uiR2EntryPoint09 21596 -10946 S
+
+f4 uiR2_Forest10 uiR2EntryPoint01 28673 -11191 N
+f4 uiR2_Forest10 uiR2EntryPoint02 28645 -11007 S
+f4 uiR2_Forest10 uiR2EntryPoint03 28566 -11110 E
+
+f4 uiR2_Forest24 uiR2EntryPoint01 29365 -11968 W
+f4 uiR2_Forest24 uiR2EntryPoint02 28963 -11969 E
+f4 uiR2_Forest24 uiR2EntryPoint03 29146 -11817 S
+f4 uiR2_Forest24 uiR2EntryPoint04 29117 -12186 N
+f4 uiR2_Forest24 uiR2EntryPoint05 29139 -12001 N
+
+f4 uiR2_Forest30 uiR2EntryPoint01 22865 -12920 N
+f4 uiR2_Forest30 uiR2EntryPoint02 23068 -12632 W
+f4 uiR2_Forest30 uiR2EntryPoint03 22773 -12782 E
+f4 uiR2_Forest30 uiR2EntryPoint04 22901 -12688 S
+
+f4 uiR2_Forest40 uiR2EntryPoint01 21150 -13350 N
+f4 uiR2_Forest40 uiR2EntryPoint02 21536 -13506 N
+f4 uiR2_Forest40 uiR2EntryPoint03 21359 -13195 S
+f4 uiR2_Forest40 uiR2EntryPoint04 21162 -13553 NE
+f4 uiR2_Forest40 uiR2EntryPoint05 21267 -13280 W
+f4 uiR2_Forest40 uiR2EntryPoint06 21118 -13278 SE
+
+
+
+o1 uiR2_Forest09 uiR2EntryPoint01 28210 -10964 SW
+o1 uiR2_Forest09 uiR2EntryPoint02 28058 -11137 S
+o1 uiR2_Forest09 uiR2EntryPoint03 27855 -11099 E
+
+o1 uiR2_Forest13 uiR2EntryPoint01 30783 -11199 W
+o1 uiR2_Forest13 uiR2EntryPoint02 30569 -10957 S
+o1 uiR2_Forest13 uiR2EntryPoint03 30355 -11071 E
+
+o1 uiR2_Forest21 uiR2EntryPoint01 26547 -12021 E
+o1 uiR2_Forest21 uiR2EntryPoint02 26748 -11980 SW
+o1 uiR2_Forest21 uiR2EntryPoint03 26636 -12215 N
+o1 uiR2_Forest21 uiR2EntryPoint04 26560 -11775 S
+
+o1 uiR2_Forest26 uiR2EntryPoint01 30827 -11803 W
+o1 uiR2_Forest26 uiR2EntryPoint02 30559 -11816 E
+o1 uiR2_Forest26 uiR2EntryPoint03 30347 -11839 E 
+
+o1 uiR2_Forest28 uiR2EntryPoint01 21720 -12717 N
+o1 uiR2_Forest28 uiR2EntryPoint02 21559 -12569 S
+o1 uiR2_Forest28 uiR2EntryPoint03 21581 -12739 NE
+o1 uiR2_Forest28 uiR2EntryPoint04 21831 -12579 SW
+o1 uiR2_Forest28 uiR2EntryPoint05 21676 -12643 E
+
+
+
+//z1 uiR2_Forest06 uiR2EntryPoint01 25424 -11251 E
+//z1 uiR2_Forest06 uiR2EntryPoint02 25768 -11068 SW
+//z1 uiR2_Forest06 uiR2EntryPoint03 25616 -11254 NW
+
+//z1 uiR2_Forest11 uiR2EntryPoint01 29400 -11408 NW
+//z1 uiR2_Forest11 uiR2EntryPoint02 29273 -11198 S
+//z1 uiR2_Forest11 uiR2EntryPoint03 29112 -11028 SE
+
+//z1 uiR2_Forest15 uiR2EntryPoint01 22136 -11787 S
+//z1 uiR2_Forest15 uiR2EntryPoint02 21908 -12109 NE
+//z1 uiR2_Forest15 uiR2EntryPoint03 21903 -11855 SE
+//z1 uiR2_Forest15 uiR2EntryPoint04 22206 -12161 NW
+//z1 uiR2_Forest15 uiR2EntryPoint05 22066 -11993 N
+
+//z1 uiR2_Forest17 uiR2EntryPoint01 23533 -11761 SE
+//z1 uiR2_Forest17 uiR2EntryPoint02 23689 -12007 N
+//z1 uiR2_Forest17 uiR2EntryPoint03 23688 -12223 N
+//z1 uiR2_Forest17 uiR2EntryPoint04 23850 -11791 SW
+//z1 uiR2_Forest17 uiR2EntryPoint05 23464 -12000 E
+//z1 uiR2_Forest17 uiR2EntryPoint06 23862 -12143 NW
+
+//z1 uiR2_Forest22 uiR2EntryPoint01 27153 -12009 E
+//z1 uiR2_Forest22 uiR2EntryPoint02 27581 -11992 SW
+//z1 uiR2_Forest22 uiR2EntryPoint03 27374 -12176 N
+//z1 uiR2_Forest22 uiR2EntryPoint04 27381 -11938 S
+//z1 uiR2_Forest22 uiR2EntryPoint05 27260 -12085 E
+//z1 uiR2_Forest22 uiR2EntryPoint06 27444 -12071 W
+
+//z1 uiR2_Forest29 uiR2EntryPoint01 22306 -12674 W
+//z1 uiR2_Forest29 uiR2EntryPoint02 22404 -12746 N
+//z1 uiR2_Forest29 uiR2EntryPoint03 22152 -12719 NE
+
+//z1 uiR2_Forest36 uiR2EntryPoint01 27800 -12770 E
+//z1 uiR2_Forest36 uiR2EntryPoint02 28127 -12573 SW
+//z1 uiR2_Forest36 uiR2EntryPoint03 28218 -13020 NW
+//z1 uiR2_Forest36 uiR2EntryPoint04 27909 -12736 SW
+//z1 uiR2_Forest36 uiR2EntryPoint05 27805 -12614 S
+//z1 uiR2_Forest36 uiR2EntryPoint06 27896 -12855 E
+//z1 uiR2_Forest36 uiR2EntryPoint07 27794 -13005 NW
+//z1 uiR2_Forest36 uiR2EntryPoint08 28058 -12493 SE
+
+//z1 uiR2_Forest37 uiR2EntryPoint01 28980 -12920 W
+//z1 uiR2_Forest37 uiR2EntryPoint02 28880 -12886 SE
+//z1 uiR2_Forest37 uiR2EntryPoint03 28879 -13020 NE
+//z1 uiR2_Forest37 uiR2EntryPoint04 28522 -12562 E
+//z1 uiR2_Forest37 uiR2EntryPoint05 28712 -12686 s
+//z1 uiR2_Forest37 uiR2EntryPoint06 28747 -12911 N
+
+//z1 uiR2_Forest42 uiR2EntryPoint01 22830 -13600 NE
+//z1 uiR2_Forest42 uiR2EntryPoint02 23342 -13475 W
+//z1 uiR2_Forest42 uiR2EntryPoint03 22853 -13394 SE
+//z1 uiR2_Forest42 uiR2EntryPoint04 23099 -13430 S
+
+//z1 uiR2_Forest43 uiR2EntryPoint01 24000 -13600 N
+//z1 uiR2_Forest43 uiR2EntryPoint02 24076 -13838 W
+//z1 uiR2_Forest43 uiR2EntryPoint03 23825 -13411 SE
+//z1 uiR2_Forest43 uiR2EntryPoint04 24208 -13583 W
+//z1 uiR2_Forest43 uiR2EntryPoint05 24000 -13364 S
+//z1 uiR2_Forest43 uiR2EntryPoint06 24039 -13492 W
+
+//z1 uiR2_Forest44 uiR2EntryPoint01 24670 -13600 S
+//z1 uiR2_Forest44 uiR2EntryPoint02 24877 -14823 N
+//z1 uiR2_Forest44 uiR2EntryPoint03 24959 -14224 W
+//z1 uiR2_Forest44 uiR2EntryPoint04 24653 -14092 N
+//z1 uiR2_Forest44 uiR2EntryPoint05 24565 -13357 S
+//z1 uiR2_Forest44 uiR2EntryPoint06 24642 -14325 E
+
+
+
+
+// Jungle
+
+a1 uiR2_Jungle14 uiR2EntryPoint01 40700 -11200 E
+a1 uiR2_Jungle14 uiR2EntryPoint02 40876 -11370 W
+a1 uiR2_Jungle14 uiR2EntryPoint03 40681 -11376 W
+a1 uiR2_Jungle14 uiR2EntryPoint04 40841 -10966 W
+
+a1 uiR2_Jungle23 uiR2EntryPoint01 38200 -12000 N
+a1 uiR2_Jungle23 uiR2EntryPoint02 38163 -11917 W
+a1 uiR2_Jungle23 uiR2EntryPoint03 37956 -12037 E
+a1 uiR2_Jungle23 uiR2EntryPoint04 38356 -11999 NW
+a1 uiR2_Jungle23 uiR2EntryPoint05 38489 -11936 NW
+a1 uiR2_Jungle23 uiR2EntryPoint06 38196 -11782 S
+
+a1 uiR2_Jungle27 uiR2EntryPoint01 31200 -12700 N
+a1 uiR2_Jungle27 uiR2EntryPoint02 31207 -12533 S
+a1 uiR2_Jungle27 uiR2EntryPoint03 31299 -12813 NW
+
+j1 uiR2_Jungle06 uiR2EntryPoint01 34426 -11339 NE
+j1 uiR2_Jungle06 uiR2EntryPoint02 34698 -11060 W
+j1 uiR2_Jungle06 uiR2EntryPoint03 34836 -11243 W
+j1 uiR2_Jungle06 uiR2EntryPoint04 34651 -11405 S
+j1 uiR2_Jungle06 uiR2EntryPoint05 34372 -11029 E
+
+j1 uiR2_Jungle07 uiR2EntryPoint01 35300 -11200 SE
+j1 uiR2_Jungle07 uiR2EntryPoint02 35534 -11057 SW
+j1 uiR2_Jungle07 uiR2EntryPoint03 35424 -11378 N
+j1 uiR2_Jungle07 uiR2EntryPoint04 35100 -11026 SE
+
+j1 uiR2_Jungle15 uiR2EntryPoint01 31300 -12000 N
+j1 uiR2_Jungle15 uiR2EntryPoint02 31181 -11823 SE
+j1 uiR2_Jungle15 uiR2EntryPoint03 31185 -12211 NE
+j1 uiR2_Jungle15 uiR2EntryPoint04 31549 -12148 NW
+j1 uiR2_Jungle15 uiR2EntryPoint05 31549 -11920 W
+
+j1 uiR2_Jungle18 uiR2EntryPoint01 34000 -12000 S
+j1 uiR2_Jungle18 uiR2EntryPoint02 34234 -12243 N
+j1 uiR2_Jungle18 uiR2EntryPoint03 34161 -11953 E
+j1 uiR2_Jungle18 uiR2EntryPoint04 34191 -11792 S
+j1 uiR2_Jungle18 uiR2EntryPoint05 33799 -11882 SE
+j1 uiR2_Jungle18 uiR2EntryPoint06 33832 -12256 N
+
+j1 uiR2_Jungle36 uiR2EntryPoint01 37074 -12782 N
+j1 uiR2_Jungle36 uiR2EntryPoint02 37071 -12878 SW
+j1 uiR2_Jungle36 uiR2EntryPoint03 36896 -12875 E
+j1 uiR2_Jungle36 uiR2EntryPoint04 36934 -12737 S
+j1 uiR2_Jungle36 uiR2EntryPoint05 36978 -13070 N
+j1 uiR2_Jungle36 uiR2EntryPoint06 36800 -13062 NE
+
+j1 uiR2_Jungle41 uiR2EntryPoint01 40648 -12573 N
+j1 uiR2_Jungle41 uiR2EntryPoint02 40696 -12807 E
+j1 uiR2_Jungle41 uiR2EntryPoint03 40771 -13042 N
+
+j1 uiR2_Jungle53 uiR2EntryPoint01 39683 -13678 W
+j1 uiR2_Jungle53 uiR2EntryPoint02 39413 -13784 NE
+j1 uiR2_Jungle53 uiR2EntryPoint03 39514 -13435 SE
+j1 uiR2_Jungle53 uiR2EntryPoint04 39718 -13338 S
+
+j2 uiR2_Jungle01 uiR2EntryPoint01 31300 -11100 S
+j2 uiR2_Jungle01 uiR2EntryPoint02 31257 -10932 E
+j2 uiR2_Jungle01 uiR2EntryPoint03 31594 -11118 N
+j2 uiR2_Jungle01 uiR2EntryPoint04 31080 -11296 NE
+
+j2 uiR2_Jungle28 uiR2EntryPoint01 31600 -12550 N
+j2 uiR2_Jungle28 uiR2EntryPoint02 31788 -12534 S
+
+j2 uiR2_Jungle32 uiR2EntryPoint01 33720 -12700 SW
+j2 uiR2_Jungle32 uiR2EntryPoint02 33855 -12620 W
+j2 uiR2_Jungle32 uiR2EntryPoint03 33646 -12853 SE
+j2 uiR2_Jungle32 uiR2EntryPoint04 33757 -12969 NW
+
+j2 uiR2_Jungle34 uiR2EntryPoint01 35220 -12610 N
+j2 uiR2_Jungle34 uiR2EntryPoint02 35030 -12535 SW
+j2 uiR2_Jungle34 uiR2EntryPoint03 35028 -12728 SE
+j2 uiR2_Jungle34 uiR2EntryPoint04 35304 -12781 W
+j2 uiR2_Jungle34 uiR2EntryPoint05 35419 -12726 S
+
+j2 uiR2_Jungle51 uiR2EntryPoint01 38204 -13916 N
+j2 uiR2_Jungle51 uiR2EntryPoint02 38135 -13696 NW
+j2 uiR2_Jungle51 uiR2EntryPoint03 38032 -13508 E
+
+j2 uiR2_Jungle02 uiR2EntryPoint01 32203 -11283 NW
+j2 uiR2_Jungle02 uiR2EntryPoint02 32062 -10944 E
+j2 uiR2_Jungle02 uiR2EntryPoint03 32396 -11409 N
+j2 uiR2_Jungle02 uiR2EntryPoint04 32557 -11107 S
+j2 uiR2_Jungle02 uiR2EntryPoint05 32533 -10964 W
+
+j2 uiR2_Jungle05 uiR2EntryPoint01 33768 -11278 N
+j2 uiR2_Jungle05 uiR2EntryPoint02 33981 -11292 W
+
+j3 uiR2_Jungle38 uiR2EntryPoint01 38290 -12740 E
+j3 uiR2_Jungle38 uiR2EntryPoint02 38288 -12905 E
+j3 uiR2_Jungle38 uiR2EntryPoint03 38446 -13070 E
+j3 uiR2_Jungle38 uiR2EntryPoint04 38665 -12895 NW
+j3 uiR2_Jungle38 uiR2EntryPoint05 38475 -12755 S
+
+j3 uiR2_Jungle49 uiR2EntryPoint01 36953 -13596 N
+j3 uiR2_Jungle49 uiR2EntryPoint02 36931 -13379 SW
+j3 uiR2_Jungle49 uiR2EntryPoint03 36564 -13630 NE
+j3 uiR2_Jungle49 uiR2EntryPoint04 36901 -13803 N
+
+j3 uiR2_Jungle52 uiR2EntryPoint01 39145 -13665 W
+j3 uiR2_Jungle52 uiR2EntryPoint02 39053 -13517 E
+j3 uiR2_Jungle52 uiR2EntryPoint03 38963 -13387 N
+j3 uiR2_Jungle52 uiR2EntryPoint04 38710 -13477 S
+j3 uiR2_Jungle52 uiR2EntryPoint05 38931 -13723 W
+j3 uiR2_Jungle52 uiR2EntryPoint06 38915 -13580 N
+
+j3 uiR2_Jungle03 uiR2EntryPoint01 33100 -11200 NE
+j3 uiR2_Jungle03 uiR2EntryPoint02 32837 -11458 E
+j3 uiR2_Jungle03 uiR2EntryPoint03 33230 -11343 N
+j3 uiR2_Jungle03 uiR2EntryPoint04 33304 -11015 SW
+
+j3 uiR2_Jungle24 uiR2EntryPoint01 39000 -12000 W
+j3 uiR2_Jungle24 uiR2EntryPoint02 39297 -11888 S
+j3 uiR2_Jungle24 uiR2EntryPoint03 38832 -11886 SE
+j3 uiR2_Jungle24 uiR2EntryPoint04 38847 -12265 NE
+j3 uiR2_Jungle24 uiR2EntryPoint05 39289 -12258 NE
+
+j3 uiR2_Jungle25 uiR2EntryPoint01 39621 -12083 NW
+j3 uiR2_Jungle25 uiR2EntryPoint02 39938 -12037 S
+j3 uiR2_Jungle25 uiR2EntryPoint03 39916 -12213 SE
+j3 uiR2_Jungle25 uiR2EntryPoint04 40114 -11884 W
+j3 uiR2_Jungle25 uiR2EntryPoint05 39955 -11803 W
+j3 uiR2_Jungle25 uiR2EntryPoint06 39786 -11886 W
+
+j3 uiR2_Jungle29 uiR2EntryPoint01 31753 -12934 N
+j3 uiR2_Jungle29 uiR2EntryPoint02 31766 -13034 W
+j3 uiR2_Jungle29 uiR2EntryPoint03 31948 -12894 NW
+j3 uiR2_Jungle29 uiR2EntryPoint04 31574 -12918 N
+
+j4 uiR2_Jungle50 uiR2EntryPoint01 37426 -13620 N
+j4 uiR2_Jungle50 uiR2EntryPoint02 37482 -13875 E
+j4 uiR2_Jungle50 uiR2EntryPoint03 37596 -13682 E
+j4 uiR2_Jungle50 uiR2EntryPoint04 37700 -13544 NE
+j4 uiR2_Jungle50 uiR2EntryPoint05 37685 -13388 NW
+
+j4 uiR2_Jungle08 uiR2EntryPoint01 36200 -11200 SE
+j4 uiR2_Jungle08 uiR2EntryPoint02 36390 -11360 W
+j4 uiR2_Jungle08 uiR2EntryPoint03 36076 -11069 W
+
+j4 uiR2_Jungle12 uiR2EntryPoint01 39235 -11288 N
+j4 uiR2_Jungle12 uiR2EntryPoint02 39448 -10932 W
+j4 uiR2_Jungle12 uiR2EntryPoint03 38946 -11120 E
+j4 uiR2_Jungle12 uiR2EntryPoint04 39153 -11467 N
+j4 uiR2_Jungle12 uiR2EntryPoint05 39130 -11005 NE
+j4 uiR2_Jungle12 uiR2EntryPoint06 39426 -11406 S
+
+j4 uiR2_Jungle16 uiR2EntryPoint01 32200 -12000 E
+j4 uiR2_Jungle16 uiR2EntryPoint02 32017 -11813 S
+j4 uiR2_Jungle16 uiR2EntryPoint03 32332 -12242 N
+j4 uiR2_Jungle16 uiR2EntryPoint04 32459 -11865 W
+j4 uiR2_Jungle16 uiR2EntryPoint05 32047 -12201 N
+
+j4 uiR2_Jungle22 uiR2EntryPoint01 37400 -12000 N
+j4 uiR2_Jungle22 uiR2EntryPoint02 37515 -11789 N
+j4 uiR2_Jungle22 uiR2EntryPoint03 37631 -12105 N
+j4 uiR2_Jungle22 uiR2EntryPoint04 37530 -12275 NE
+j4 uiR2_Jungle22 uiR2EntryPoint05 37339 -12275 NW
+j4 uiR2_Jungle22 uiR2EntryPoint06 37167 -11731 S
+
+j4 uiR2_Jungle42 uiR2EntryPoint01 31103 -13282 E
+j4 uiR2_Jungle42 uiR2EntryPoint02 31352 -13419 W
+j4 uiR2_Jungle42 uiR2EntryPoint03 31285 -13573 S
+j4 uiR2_Jungle42 uiR2EntryPoint04 31307 -13712 N
+j4 uiR2_Jungle42 uiR2EntryPoint05 31420 -13639 SW
+j4 uiR2_Jungle42 uiR2EntryPoint06 31083 -13691 NE
+
+
+o1 uiR2_Jungle11 uiR2EntryPoint01 38400 -11200 N
+o1 uiR2_Jungle11 uiR2EntryPoint02 38565 -11080 W
+o1 uiR2_Jungle11 uiR2EntryPoint03 38389 -11029 E
+
+o1 uiR2_Jungle19 uiR2EntryPoint01 35000 -12000 N
+o1 uiR2_Jungle19 uiR2EntryPoint02 34752 -12146 NE
+o1 uiR2_Jungle19 uiR2EntryPoint03 34749 -11909 SE
+o1 uiR2_Jungle19 uiR2EntryPoint04 35292 -12042 S
+o1 uiR2_Jungle19 uiR2EntryPoint05 35320 -12203 S
+
+o1 uiR2_Jungle21 uiR2EntryPoint01 36600 -12000 N
+o1 uiR2_Jungle21 uiR2EntryPoint02 36833 -11757 SW
+o1 uiR2_Jungle21 uiR2EntryPoint03 36443 -12055 E
+o1 uiR2_Jungle21 uiR2EntryPoint04 36504 -12275 NW
+o1 uiR2_Jungle21 uiR2EntryPoint05 36657 -12265 NW
+
+o1 uiR2_Jungle26 uiR2EntryPoint01 40600 -12000 W
+o1 uiR2_Jungle26 uiR2EntryPoint02 40903 -11996 W
+o1 uiR2_Jungle26 uiR2EntryPoint03 40429 -12233 NE
+
+o1 uiR2_Jungle30 uiR2EntryPoint01 32318 -12599 N
+o1 uiR2_Jungle30 uiR2EntryPoint02 32444 -12765 N
+o1 uiR2_Jungle30 uiR2EntryPoint03 32497 -12629 W
+
+o1 uiR2_Jungle33 uiR2EntryPoint01 34230 -12745 N
+o1 uiR2_Jungle33 uiR2EntryPoint02 34311 -12806 SE
+o1 uiR2_Jungle33 uiR2EntryPoint03 34399 -12967 W
+o1 uiR2_Jungle33 uiR2EntryPoint04 34221 -12959 E
+
+o1 uiR2_Jungle35 uiR2EntryPoint01 35800 -13010 N
+o1 uiR2_Jungle35 uiR2EntryPoint02 36057 -12912 W
+o1 uiR2_Jungle35 uiR2EntryPoint03 35755 -12619 E
+o1 uiR2_Jungle35 uiR2EntryPoint04 36228 -12618 W
+o1 uiR2_Jungle35 uiR2EntryPoint05 35934 -12714 E
+
+o1 uiR2_Jungle44 uiR2EntryPoint01 32799 -13439 N
+o1 uiR2_Jungle44 uiR2EntryPoint02 32628 -13363 SE
+o1 uiR2_Jungle44 uiR2EntryPoint03 32928 -13375 SW
+o1 uiR2_Jungle44 uiR2EntryPoint04 32828 -13484 SE
+o1 uiR2_Jungle44 uiR2EntryPoint05 32954 -13703 N
+
+o1 uiR2_Jungle45 uiR2EntryPoint01 33599 -13741 N
+o1 uiR2_Jungle45 uiR2EntryPoint02 33422 -13656 NE
+o1 uiR2_Jungle45 uiR2EntryPoint03 33762 -13543 NW
+o1 uiR2_Jungle45 uiR2EntryPoint04 33521 -13372 SE
+
+o1 uiR2_Jungle46 uiR2EntryPoint01 34218 -13905 N
+o1 uiR2_Jungle46 uiR2EntryPoint02 34374 -13798 NE
+o1 uiR2_Jungle46 uiR2EntryPoint03 34517 -13771 S
+o1 uiR2_Jungle46 uiR2EntryPoint04 34582 -13541 SE
+o1 uiR2_Jungle46 uiR2EntryPoint05 34311 -13491 N
+o1 uiR2_Jungle46 uiR2EntryPoint06 34194 -13371 NW
+
+o1 uiR2_Jungle47 uiR2EntryPoint01 35624 -13369 N
+o1 uiR2_Jungle47 uiR2EntryPoint02 35613 -13526 W
+o1 uiR2_Jungle47 uiR2EntryPoint03 35446 -13684 E
+o1 uiR2_Jungle47 uiR2EntryPoint04 35162 -13683 W
+o1 uiR2_Jungle47 uiR2EntryPoint05 35118 -13442 E
+o1 uiR2_Jungle47 uiR2EntryPoint06 35379 -13426 SE
+
+o1 uiR2_Jungle48 uiR2EntryPoint01 35989 -13425 N
+o1 uiR2_Jungle48 uiR2EntryPoint02 36122 -13469 SW
+o1 uiR2_Jungle48 uiR2EntryPoint03 36107 -13750 N
+
+
+
+//z1 uiR2_Jungle04 uiR2EntryPoint01 33840 -11000 N
+
+//z1 uiR2_Jungle09 uiR2EntryPoint01 36694 -11144 E
+//z1 uiR2_Jungle09 uiR2EntryPoint02 36947 -11190 N
+//z1 uiR2_Jungle09 uiR2EntryPoint03 36698 -10954 S
+//z1 uiR2_Jungle09 uiR2EntryPoint04 36679 -11467 N
+//z1 uiR2_Jungle09 uiR2EntryPoint05 36880 -11041 S
+//z1 uiR2_Jungle09 uiR2EntryPoint06 36870 -11253 E
+//z1 uiR2_Jungle09 uiR2EntryPoint07 37203 -11179 N
+
+//z1 uiR2_Jungle10 uiR2EntryPoint01 37790 -11080 E
+//z1 uiR2_Jungle10 uiR2EntryPoint02 37909 -11413 N
+//z1 uiR2_Jungle10 uiR2EntryPoint03 37530 -11208 NE
+//z1 uiR2_Jungle10 uiR2EntryPoint04 37588 -11375 N
+
+//z1 uiR2_Jungle13 uiR2EntryPoint01 40000 -11200 W
+//z1 uiR2_Jungle13 uiR2EntryPoint02 40187 -11030 S
+//z1 uiR2_Jungle13 uiR2EntryPoint03 39771 -10957 E
+//z1 uiR2_Jungle13 uiR2EntryPoint04 39793 -11177 E
+//z1 uiR2_Jungle13 uiR2EntryPoint05 40057 -11356 E
+
+//z1 uiR2_Jungle17 uiR2EntryPoint01 33000 -12000 N
+//z1 uiR2_Jungle17 uiR2EntryPoint02 33158 -12149 N
+//z1 uiR2_Jungle17 uiR2EntryPoint03 33211 -11895 N
+//z1 uiR2_Jungle17 uiR2EntryPoint04 33199 -12007 W
+//z1 uiR2_Jungle17 uiR2EntryPoint05 32971 -11754 S
+//z1 uiR2_Jungle17 uiR2EntryPoint06 33038 -11926 E
+
+//z1 uiR2_Jungle20 uiR2EntryPoint01 35650 -12140 N
+
+//z1 uiR2_Jungle31 uiR2EntryPoint01 33149 -12874 N
+//z1 uiR2_Jungle31 uiR2EntryPoint02 33066 -13037 S
+//z1 uiR2_Jungle31 uiR2EntryPoint03 33043 -12726 NW
+
+//z1 uiR2_Jungle37 uiR2EntryPoint01 37929 -12925 N
+
+//z1 uiR2_Jungle39 uiR2EntryPoint01 38971 -12788 N
+//z1 uiR2_Jungle39 uiR2EntryPoint02 39024 -13072 NE
+//z1 uiR2_Jungle39 uiR2EntryPoint03 39159 -12877 E
+//z1 uiR2_Jungle39 uiR2EntryPoint04 39432 -13045 N
+//z1 uiR2_Jungle39 uiR2EntryPoint05 39280 -12841 N
+//z1 uiR2_Jungle39 uiR2EntryPoint06 39255 -12682 N
+//z1 uiR2_Jungle39 uiR2EntryPoint07 39433 -12707 E
+
+//z1 uiR2_Jungle40 uiR2EntryPoint01 40132 -12610 N
+
+//z1 uiR2_Jungle43 uiR2EntryPoint01 31767 -13391 N
+
+
+// Prime Roots
+
+p1 uiR2_Primes04 uiR2EntryPoint01 33300 -21200 S
+p1 uiR2_Primes04 uiR2EntryPoint02 33454 -21456 NW
+p1 uiR2_Primes04 uiR2EntryPoint03 33029 -21522 E
+
+p1 uiR2_Primes06 uiR2EntryPoint01 34700 -21070 SE
+p1 uiR2_Primes06 uiR2EntryPoint02 34905 -21093 SW
+p1 uiR2_Primes06 uiR2EntryPoint03 34733 -21359 N
+
+p1 uiR2_Primes22 uiR2EntryPoint01 37500 -21960 S
+p1 uiR2_Primes22 uiR2EntryPoint02 37524 -22163 N
+p1 uiR2_Primes22 uiR2EntryPoint03 37394 -22286 NE
+
+p1 uiR2_Primes09 uiR2EntryPoint01 36950 -21200 E
+p1 uiR2_Primes09 uiR2EntryPoint02 37532 -21366 W
+p1 uiR2_Primes09 uiR2EntryPoint03 37208 -21170 S
+
+p3 uiR2_Primes29 uiR2EntryPoint01 33140 -22910 W
+p3 uiR2_Primes29 uiR2EntryPoint02 33016 -22602 S
+p3 uiR2_Primes29 uiR2EntryPoint03 32776 -23057 NE
+
+p3 uiR2_Primes01 uiR2EntryPoint01 31110 -21520 E
+p3 uiR2_Primes01 uiR2EntryPoint02 31198 -21061 S
+p3 uiR2_Primes01 uiR2EntryPoint03 31132 -21312 E
+
+p3 uiR2_Primes05 uiR2EntryPoint01 34250 -21300 W
+p3 uiR2_Primes05 uiR2EntryPoint02 33891 -21271 E
+p3 uiR2_Primes05 uiR2EntryPoint03 34151 -21558 N
+
+p5 uiR2_Primes16 uiR2EntryPoint01 32970 -22100 NW
+p5 uiR2_Primes16 uiR2EntryPoint02 32763 -21871 SE
+p5 uiR2_Primes16 uiR2EntryPoint03 32890 -21990 S
+
+p5 uiR2_Primes18 uiR2EntryPoint01 34600 -22075 W
+p5 uiR2_Primes18 uiR2EntryPoint02 34205 -22078 E
+p5 uiR2_Primes18 uiR2EntryPoint03 34651 -21825 S
+
+p5 uiR2_Primes25 uiR2EntryPoint01 39910 -22320 E
+p5 uiR2_Primes25 uiR2EntryPoint02 39757 -22077 E
+p5 uiR2_Primes25 uiR2EntryPoint03 39979 -22132 NW
+
+p6 uiR2_Primes03 uiR2EntryPoint01 32300 -21100 SE
+p6 uiR2_Primes03 uiR2EntryPoint02 32288 -21484 N
+p6 uiR2_Primes03 uiR2EntryPoint03 32691 -21085 SW
+
+p6 uiR2_Primes07 uiR2EntryPoint01 35350 -21300 NE
+p6 uiR2_Primes07 uiR2EntryPoint02 35519 -21067 S
+p6 uiR2_Primes07 uiR2EntryPoint03 35601 -21405 N
+
+p6 uiR2_Primes13 uiR2EntryPoint01 40330 -21600 N
+p6 uiR2_Primes13 uiR2EntryPoint02 40127 -21438 E
+p6 uiR2_Primes13 uiR2EntryPoint03 40537 -21438 W
+
+p7 uiR2_Primes19 uiR2EntryPoint01 35000 -22300 N
+p7 uiR2_Primes19 uiR2EntryPoint02 35456 -22007 W
+p7 uiR2_Primes19 uiR2EntryPoint03 35022 -21891 SE
+
+p7 uiR2_Primes26 uiR2EntryPoint01 40500 -22100 N
+p7 uiR2_Primes26 uiR2EntryPoint02 40694 -22284 NW
+p7 uiR2_Primes26 uiR2EntryPoint03 40426 -22298 NE
+
+p7 uiR2_Primes08 uiR2EntryPoint01 36200 -21100 E
+p7 uiR2_Primes08 uiR2EntryPoint02 36393 -21558 N
+p7 uiR2_Primes08 uiR2EntryPoint03 36077 -21345 S
+
+p8 uiR2_Primes10 uiR2EntryPoint01 38002 -21293 N
+p8 uiR2_Primes10 uiR2EntryPoint02 38006 -21532 N
+p8 uiR2_Primes10 uiR2EntryPoint03 38094 -21040 S
+
+p8 uiR2_Primes11 uiR2EntryPoint01 38970 -21520 W
+p8 uiR2_Primes11 uiR2EntryPoint02 38721 -21047 S
+p8 uiR2_Primes11 uiR2EntryPoint03 38577 -21350 NW
+
+p8 uiR2_Primes15 uiR2EntryPoint01 31980 -21880 SE
+p8 uiR2_Primes15 uiR2EntryPoint02 32365 -22121 NW
+p8 uiR2_Primes15 uiR2EntryPoint03 32159 -22032 N
+
+p11 uiR2_Primes30 uiR2EntryPoint01 33730 -22860 N
+p11 uiR2_Primes30 uiR2EntryPoint02 33656 -22604 E
+p11 uiR2_Primes30 uiR2EntryPoint03 33843 -22997 E
+
+p11 uiR2_Primes12 uiR2EntryPoint01 39500 -21280 NE
+p11 uiR2_Primes12 uiR2EntryPoint02 39240 -21197 E
+p11 uiR2_Primes12 uiR2EntryPoint03 39800 -21352 W
+
+p11 uiR2_Primes14 uiR2EntryPoint01 31350 -21960 S
+p11 uiR2_Primes14 uiR2EntryPoint02 31373 -22074 S
+p11 uiR2_Primes14 uiR2EntryPoint03 31166 -22272 NE
+
+p12 uiR2_Primes17 uiR2EntryPoint01 33660 -22000 SW
+p12 uiR2_Primes17 uiR2EntryPoint02 33397 -21879 SE
+p12 uiR2_Primes17 uiR2EntryPoint03 33347 -22331 N
+
+p12 uiR2_Primes21 uiR2EntryPoint01 37000 -22150 W
+p12 uiR2_Primes21 uiR2EntryPoint02 36645 -21864 SE
+p12 uiR2_Primes21 uiR2EntryPoint03 36964 -21813 SE
+
+p12 uiR2_Primes27 uiR2EntryPoint01 31530 -22700 SW
+p12 uiR2_Primes27 uiR2EntryPoint02 31533 -23080 NW
+p12 uiR2_Primes27 uiR2EntryPoint03 31078 -22800 N
+
+
+
+o1 uiR2_Primes02 uiR2EntryPoint01 31640 -21140 SE
+o1 uiR2_Primes02 uiR2EntryPoint02 31593 -21374 N
+o1 uiR2_Primes02 uiR2EntryPoint03 31818 -21204 W
+
+o1 uiR2_Primes28 uiR2EntryPoint01 32270 -23000 N
+o1 uiR2_Primes28 uiR2EntryPoint02 32316 -22662 S
+o1 uiR2_Primes28 uiR2EntryPoint03 31933 -22734 SE
+
+
+
+//z1 uiR2_Primes20 uiR2EntryPoint01 35790 -22100 N
+
+//z1 uiR2_Primes23 uiR2EntryPoint01 38360 -21970 N
+
+//z1 uiR2_Primes24 uiR2EntryPoint02 38906 -21891 SE
+
+//z1 uiR2_Primes24 uiR2EntryPoint03 39086 -22287 NW

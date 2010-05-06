@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="SH" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHF" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFD" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFDA" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFDAE" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFDAEM" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFF" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFFA" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFFAE" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFFAEM" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFJ" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFJA" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFJAE" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFJAEM" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFL" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFLA" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFLAE" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFLAEM" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFP" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFPA" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFPAE" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SHFPAEM" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

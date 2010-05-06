@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="FX" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FXSafe" Type="Type" Filename="filename.typ" Default="&quot;FX&quot;"/>
+  <ELEMENT Name="Knowledge" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Icons" Type="Type" Filename="filename.typ" Array="true"/>
+  <LOG>Thu Dec 18 11:43:31 2003 (cado) Dfn Structure = 
+Thu Dec 18 11:48:24 2003 (cado) Dfn Structure = 
+Thu Dec 18 14:41:33 2003 (cado) Dfn Structure = 
+Thu Dec 18 16:25:27 2003 (cado) Dfn Structure = 
+Tue Dec 23 11:31:58 2003 (cado) Dfn Structure = 
+Wed Oct 26 10:54:35 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

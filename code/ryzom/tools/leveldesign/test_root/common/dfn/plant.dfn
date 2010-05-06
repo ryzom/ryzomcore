@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="unknow"/>
+      <Body Name="BODY">
+        <VECTOR size="5">
+          <POLYPTR id="21853664" class="CFormBodyEltAtom">
+            <Atom Name="Name" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21853768" class="CFormBodyEltAtom">
+            <Atom Name="Shape" Value="filename.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21853872" class="CFormBodyEltAtom">
+            <Atom Name="Shadow" Value="filename.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21853976" class="CFormBodyEltAtom">
+            <Atom Name="Collision_radius" Value="float.typ"/>
+          </POLYPTR>
+          <POLYPTR id="21854080" class="CFormBodyEltAtom">
+            <Atom Name="Bunding_radius" Value="float.typ"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

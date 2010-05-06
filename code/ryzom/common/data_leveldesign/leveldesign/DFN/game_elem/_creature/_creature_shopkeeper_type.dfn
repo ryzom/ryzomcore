@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="ObjectType1" Type="Type" Filename="item_family.typ"/>
+  <ELEMENT Name="ObjectType2" Type="Type" Filename="item_family.typ"/>
+  <ELEMENT Name="ObjectType3" Type="Type" Filename="item_family.typ"/>
+  <ELEMENT Name="ObjectType4" Type="Type" Filename="item_family.typ"/>
+  <ELEMENT Name="Exotic" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="HarvestSkill1" Type="Type" Filename="_harvest_skills.typ"/>
+  <ELEMENT Name="HarvestSkill2" Type="Type" Filename="_harvest_skills.typ"/>
+  <ELEMENT Name="HarvestSkill3" Type="Type" Filename="_harvest_skills.typ"/>
+  <ELEMENT Name="HarvestSkill4" Type="Type" Filename="_harvest_skills.typ"/>
+  <ELEMENT Name="Special Items" Type="Type" Filename="filename.typ" FilenameExt="*.item" Array="true"/>
+  <ELEMENT Name="Special Mp" Type="Type" Filename="filename.typ" FilenameExt="*.item" Array="true"/>
+  <ELEMENT Name="TeleportType" Type="Type" Filename="teleport_type.typ"/>
+  <LOG>Wed Sep 18 15:37:59 2002 (saffray) Dfn Structure = 
+Wed Sep 18 15:50:28 2002 (saffray) Dfn Structure = 
+Mon Oct 07 17:19:52 2002 (brigand) Dfn Structure = </LOG>
+</DFN>

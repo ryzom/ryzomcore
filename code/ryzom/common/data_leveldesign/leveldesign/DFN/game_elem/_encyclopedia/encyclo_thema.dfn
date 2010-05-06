@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Title" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="RewardText" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="RewardSheet" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Tasks" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Rite" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ThemaNumber" Type="Type" Filename="int.typ"/>
+  <LOG>Mon Nov 15 17:27:40 2004 (besson) Dfn Structure = 
+Tue Nov 16 10:49:34 2004 (besson) Dfn Structure = 
+Tue Nov 16 10:51:19 2004 (besson) Dfn Structure = 
+Tue Nov 16 11:36:00 2004 (besson) Dfn Structure = 
+Mon Dec 06 11:38:26 2004 (besson) Dfn Structure = </LOG>
+</DFN>

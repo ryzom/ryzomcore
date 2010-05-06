@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<DFN Version="0.5" State="modified">
+  <ELEMENT Name="Eat" Type="Dfn" Filename="_ai_comportement_eat.dfn"/>
+  <ELEMENT Name="Fight" Type="Dfn" Filename="_ai_comportement_fight.dfn"/>
+  <ELEMENT Name="Talk" Type="Dfn" Filename="_ai_comportement_tolk.dfn"/>
+  <ELEMENT Name="Sleep" Type="Dfn" Filename="_ai_comportement_sleep.dfn"/>
+  <ELEMENT Name="Chase" Type="Dfn" Filename="_ai_comportement_chase.dfn"/>
+  <ELEMENT Name="Explore" Type="Dfn" Filename="_ai_comportement_explore.dfn"/>
+  <ELEMENT Name="Walk" Type="Dfn" Filename="_ai_comportement_walk.dfn"/>
+  <ELEMENT Name="Comment" Type="Type" Filename="edit.typ"/>
+  <LOG>Thu Aug 29 15:52:29 2002 (chafik) Dfn Structure = 
+Thu Aug 29 16:59:28 2002 (chafik) Dfn Structure = 
+Fri Aug 30 13:59:16 2002 (chafik) Dfn Structure = 
+Fri Sep 06 14:15:31 2002 (robert) Dfn Structure = 
+Thu Oct 03 10:55:38 2002 (chafik) Dfn Structure = </LOG>
+</DFN>

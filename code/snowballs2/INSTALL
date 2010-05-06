@@ -1,0 +1,84 @@
+
+If you find any bugs or have any suggestions use the OpenNeL Issue Tracker:
+   <URL:http://www.opennel.org/jira/secure/Dashboard.jspa>
+
+If you need any help contact us on the OpenNeL Forums:
+   <URL:http://www.opennel.org/jforum/forums/list.page>
+
+
+Requirements
+============
+
+   Snowballs need the folowing libraries :
+
+      - NeL                   <URL:http://www.opennel.org/>
+            Default install plus NeL Sound.
+            You need to launch the configure script with the '--enable-sound'
+            option.
+      - NeLNS                 <URL:http://www.opennel.org/>
+            This is mandatory to run the Snowballs server but it isn't for
+            the Snowballs client.
+
+   And the lastest Snowballs data pack available :
+
+                              <URL:http://www.opennel.org/>
+
+
+Compilation
+===========
+
+   1. Windows compilation
+   ----------------------
+
+      Visit the following urls for the most recent information:
+      
+         http://www.opennel.org/confluence/display/NEL/NeLRequiredLibrariesWindows
+         http://www.opennel.org/confluence/display/NEL/CompilingNelWindows
+         http://www.opennel.org/confluence/display/NEL/NeLSetupQuickStart
+
+
+   2. GNU/Linux compilation
+   ------------------------
+
+      In the case (ex: after a cvs checkout) that you need to rebuild the
+      "configure" script and/or the "Makefile.in" files, execute the
+      "bootstrap" script in the swnoballs directory :
+ 
+         % ./bootstrap
+
+      In the snowballs directory do :
+
+         % ./configure --with-stlport=<Path_to_the_stlport_install_directory>
+
+         % make
+
+      The "configure" script must be call with the "--with-stlport" option.
+      This option permit to override the default STL headers.
+
+      To disable the client or the server compilation and install, use
+      '--disable-client' and '--disable-server' options.
+
+      To pass additional arguments to the C++ compiler, use the command line :
+
+         % CXXFLAGS=-pipe ./configure --with-stlport=<STLPort_headers_path>
+
+      To get the complete list of arguments of the "configure" script use the
+      following command :
+
+         % ./configure --help
+
+
+Installation
+============
+
+   1. Windows installation
+   -----------------------
+
+      Not done yet.
+
+
+   2. GNU/Linux installation
+   --------------------------
+
+      % make install
+

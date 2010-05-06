@@ -1,0 +1,1161 @@
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <variable entry="UI:TEMP:GUILD_SHEET:ICON"
+            type="sint64"
+            value="1" />
+  <variable entry="UI:TEMP:GUILD_SHEET:NAME"
+            type="sint64"
+            value="1" />
+  <!-- Variable to store the guild symbol and name for each entity in game -->
+  <variable entry="UI:ENTITY:GUILD:$i:ICON"
+            type="sint64"
+            value="0"
+            size="256" />
+  <variable entry="UI:ENTITY:GUILD:$i:NAME"
+            type="sint64"
+            value="0"
+            size="256" />
+  <proc id="guild_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:GUILD|value=1" />
+    <action handler="guild_sheet_open"
+            params="update_members=1" />
+    <action handler="set"
+            cond="not(%is_guild_present)"
+            params="target='ui:interface:guild:active'|value=0" />
+  </proc>
+  <proc id="guild_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:GUILD|value=0" />
+  </proc>
+  <!-- ******************* -->
+  <!-- * TEMPLATE MEMBER * -->
+  <!-- ******************* -->
+  <group type="menu"
+         id="menu_member"
+         extends="base_menu"
+         on_active="guild_member_menu_open">
+    <action id="lead"
+            name="uimGuildLeader"
+            handler="guild_member_chg_to_leader" />
+    <action id="hiof"
+            name="uimGuildHighOfficer"
+            handler="guild_member_chg_to_high_officer" />
+    <action id="offi"
+            name="uimGuildOfficer"
+            handler="guild_member_chg_to_officer" />
+    <action id="memb"
+            name="uimGuildMember"
+            handler="guild_member_chg_to_member" />
+    <action id="kick"
+            name="uimGuildKick"
+            handler="guild_member_kick" />
+  </group>
+  <!--
+        <action id="recr" name="uimGuildRecruiter"              handler="guild_member_chg_to_recruiter" />
+        <action id="bear" name="uimGuildBearer"                 handler="guild_member_chg_to_bearer" />
+-->
+  <template name="member_template"
+            keep="true"
+            posparent="parent"
+            posref="TL TL"
+            h="16"
+            id="">
+    <group id="#id"
+           w="294"
+           h="#h"
+           posparent="#posparent"
+           posref="#posref"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:menu_member">
+      <view type="text"
+            id="name"
+            x="4"
+            y="0"
+            fontsize="12"
+            shadow="true"
+            case_mode="%case_first_word_letter_up" />
+      <view type="text"
+            id="grade"
+            x="158"
+            y="0"
+            fontsize="10"
+            shadow="true" />
+      <view type="bitmap"
+            id="online"
+            x="-10"
+            y="0"
+            posref="MR MR"
+            texture="w_online.tga"
+            global_color="false" />
+      <ctrl type="tooltip"
+            id="tt_online"
+            posparent="online"
+            posref="MR MR"
+            x="0"
+            y="0"
+            sizeref="wh"
+            w="0"
+            h="0"
+            tooltip="uittFriendsOnline"
+            tooltip_parent="win" />
+    </group>
+  </template>
+  <!-- **************** -->
+  <!-- *  GUILD MAIN  * -->
+  <!-- **************** -->
+  <group type="container"
+         id="guild"
+         title="uiGuildTitle"
+         w="330"
+         h="350"
+         pop_max_h="700"
+         resizer="false"
+         global_color="false"
+         header_color="UI:SAVE:WIN:COLORS:MEM"
+         openable="false"
+         opened="true"
+         movable="true"
+         active="false"
+         savable="false"
+         on_active="proc"
+         on_active_params="guild_proc_active"
+         on_deactive="proc"
+         on_deactive_params="guild_proc_deactive">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="100"
+           h="48"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <group type="tab"
+             id="guild_select"
+             child_resize_w="true"
+             h="24"
+             posref="TL TL"
+             x="0"
+             y="-24">
+        <ctrl style="tab_button_new"
+              id="tab0"
+              x="0"
+              posref="TL TL"
+              group="content:tab_guild"
+              hardtext="uiGuildTabGuild"
+              onclick_r=""
+              params_r=""
+              onclick_l="set"
+              params_l="target='ui:interface:guild:w'|value=330" />
+        <ctrl style="tab_button_new"
+              id="tab1"
+              posparent="tab0"
+              group="content:tab_outpost"
+              hardtext="uiGuildTabOutpost"
+              onclick_r=""
+              params_r=""
+              onclick_l="set"
+              params_l="target='ui:interface:guild:w'|value=450" />
+      </group>
+      <view type="bitmap"
+            id="sep"
+            posparent="guild_select"
+            posref="BR BL"
+            sizeparent="parent"
+            sizeref="w"
+            w="0"
+            h="1"
+            scale="true"
+            texture="blank.tga"
+            color="166 166 166 255" />
+    </group>
+    <group id="content"
+           posref="TL TL"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           child_resize_h="true"
+           child_resize_hmargin="4">
+      <group id="tab_guild"
+             posref="TL TL"
+             x="0"
+             y="0"
+             h="0"
+             sizeref="w"
+             w="0"
+             child_resize_h="true"
+             child_resize_hmargin="8">
+        <!-- LOGO & NAME -->
+        <ctrl type="sheet"
+              id="blason"
+              posref="TL TL"
+              x="2"
+              y="-8"
+              nature="guild_flag"
+              slot="false"
+              value="SERVER:GUILD"
+              dragable="false"
+              color="255 255 255 255" />
+        <view type="text_id"
+              id="name"
+              posparent="blason"
+              posref="TR TL"
+              x="8"
+              w="200"
+              y="-2"
+              h="20"
+              shadow="true"
+              global_color="false"
+              fontsize="16"
+              textid="SERVER:GUILD:NAME"
+              dynamic_string="false" />
+        <!-- Age / Effectif -->
+        <view type="text_number"
+              id="age"
+              posparent="blason"
+              posref="BR BL"
+              x="8"
+              y="0"
+              fontsize="10"
+              shadow="true"
+              value="SERVER:GUILD:CREATION_DATE"
+              positive="true" />
+        <view type="text"
+              id="days"
+              posparent="age"
+              posref="MR ML"
+              x="2"
+              y="0"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiGuildInfoAge" />
+        <view type="text"
+              id="sep"
+              posparent="days"
+              posref="MR ML"
+              x="2"
+              y="0"
+              fontsize="10"
+              shadow="true"
+              hardtext="/" />
+        <view type="text"
+              id="member_count"
+              posparent="sep"
+              posref="MR ML"
+              x="2"
+              y="0"
+              fontsize="10"
+              shadow="true"
+              value=""
+              positive="true" />
+        <view type="text"
+              id="members"
+              posparent="member_count"
+              posref="MR ML"
+              x="2"
+              y="0"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiGuildInfoEff" />
+        <!-- DESCRIPTION -->
+        <view type="text"
+              id="desc_title"
+              posparent="blason"
+              shadow="true"
+              posref="BL TL"
+              x="0"
+              y="-6"
+              fontsize="12"
+              hardtext="uiGuildInfoDes"
+              global_color="false"
+              case_mode="%case_upper" />
+        <view type="text_id"
+              id="desc"
+              posparent="desc_title"
+              posref="BL TL"
+              x="0"
+              y="-2"
+              shadow="true"
+              fontsize="10"
+              multi_line="true"
+              multi_line_space="0"
+              textid="SERVER:GUILD:DESCRIPTION"
+              dynamic_string="false" />
+        <!-- HEADQUARTERS -->
+        <view type="text"
+              id="head_title"
+              posparent="desc"
+              shadow="true"
+              posref="BL TL"
+              x="0"
+              y="-4"
+              fontsize="12"
+              hardtext="uiGuildInfoHead"
+              global_color="false"
+              case_mode="%case_upper" />
+        <view type="text_id"
+              id="head"
+              posparent="head_title"
+              posref="MR ML"
+              x="0"
+              y="-1"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiGuildInfoHead2"
+              textid="SERVER:GUILD:VILLAGE"
+              dynamic_string="true" />
+        <!--
+                <view type="text" id="fame_title" posparent="head_title" shadow="true" posref="BL TL" x="0" y="-2" fontsize="12" hardtext="uiGuildInfoFame" global_color="false" case_mode="%case_upper" />
+                <view type="text_number" id="fame" posparent="fame_title" posref="MR ML" x="0" y="-1" fontsize="10" shadow="true" value="SERVER:GUILD:FAME" positive="false" />
+-->
+        <!-- XP Score -->
+        <view type="text"
+              id="XP_title"
+              posparent="head_title"
+              shadow="true"
+              posref="BL TL"
+              x="0"
+              y="-2"
+              fontsize="12"
+              hardtext="uiGuildInfoScore"
+              global_color="false"
+              case_mode="%case_upper" />
+        <view type="text_number"
+              id="xp"
+              posparent="XP_title"
+              posref="MR ML"
+              x="0"
+              y="-1"
+              fontsize="10"
+              shadow="true"
+              value="SERVER:GUILD:XP"
+              positive="true" />
+        <!-- Money -->
+        <instance template="argent"
+                  id="money"
+                  tooltip="uittGuildMoney"
+                  posparent="XP_title"
+                  posref="BL TL"
+                  x="0"
+                  y="-4"
+                  w="130"
+                  h="16"
+                  value="SERVER:GUILD:INVENTORY:MONEY" />
+        <!-- MEMBERS LIST -->
+        <group id="list_member"
+               posparent="money"
+               posref="BL TL"
+               x="0"
+               y="-8"
+               sizeparent="parent"
+               sizeref="w"
+               w="-8"
+               h="208">
+          <view type="text"
+                id="title"
+                posref="TL TL"
+                x="0"
+                y="-5"
+                fontsize="12"
+                shadow="true"
+                global_color="false"
+                hardtext="uiGuildMembers" />
+          <view type="text"
+                id="rank"
+                posref="TL TL"
+                x="170"
+                y="-8"
+                fontsize="10"
+                shadow="true"
+                global_color="false"
+                hardtext="uiGuildMemberRank" />
+          <view type="text"
+                id="online"
+                posref="TR TR"
+                x="-10"
+                y="-8"
+                fontsize="10"
+                shadow="true"
+                global_color="false"
+                hardtext="uiGuildMemberOnline" />
+          <group type="list"
+                 id="guild_members"
+                 posref="TL TL"
+                 x="12"
+                 y="-24"
+                 sizeref="h"
+                 h="-30"
+                 w="310"
+                 over="true"
+                 child_resize_hmargin="2"></group>
+          <ctrl style="skin_scroll"
+                id="scroll_bar_guild"
+                posref="TL TL"
+                x="0"
+                y="-24"
+                target="guild_members"
+                target_stepy="16" />
+          <group id="black"
+                 posref="TL TL"
+                 sizeparent="guild_members"
+                 x="0"
+                 y="2"
+                 sizeref="w"
+                 w="0"
+                 h="180"
+                 posparent="guild_members"
+                 inherit_gc_alpha="true" />
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <!-- QUIT GUILD BUTTON -->
+        <ctrl style="text_button_16"
+              id="quit_guild"
+              posparent="list_member"
+              posref="BR TR"
+              x="0"
+              y="-6"
+              hardtext="uiQuitGuild"
+              color="255 255 255 255"
+              col_over="255 255 255 255"
+              col_pushed="255 255 255 255"
+              global_color_normal="true"
+              global_color_over="true"
+              global_color_pushed="true"
+              onclick_l="context_quit_guild"
+              params_l="" />
+      </group>
+      <group id="tab_outpost"
+             posref="TL TL"
+             x="0"
+             y="0"
+             h="0"
+             sizeref="w"
+             w="0"
+             child_resize_h="true"
+             child_resize_hmargin="0">
+        <instance template="t_outpost_manager"
+                  id="outpost_manager" />
+      </group>
+    </group>
+  </group>
+  <tree node="guild" />
+  <!-- ***************** -->
+  <!-- *  GUILD FORUM  * -->
+  <!-- ***************** -->
+  <proc id="guild_forum_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:GUILD_FORUM|value=1" />
+    <action handler="set"
+            cond="not(%is_guild_present)"
+            params="target='ui:interface:guild_forum:active'|value=0" />
+    <action handler="browse"
+            params="name=ui:interface:guild_forum:content:html|url=home|show=0" />
+  </proc>
+  <proc id="guild_forum_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:GUILD_FORUM|value=0" />
+  </proc>
+  <group type="menu"
+         id="guild_forum_menu"
+         extends="base_menu_with_color">
+    <action id="home"
+            name="uiHOME"
+            handler="browse"
+            params="name=ui:interface:guild_forum:content:html|url=home" />
+  </group>
+  <group type="container"
+         id="guild_forum"
+         w="480"
+         h="400"
+         title=""
+         global_color="false"
+         open_button="false"
+         force_open_out="true"
+         header_color="UI:SAVE:WIN:COLORS:MEM"
+         resizer="true"
+         pop_min_w="220"
+         pop_min_h="96"
+         pop_max_w="2000"
+         pop_max_h="1600"
+         title_bar_open="false"
+         lockable="true"
+         openable="false"
+         opened="true"
+         movable="true"
+         active="true"
+         on_active="proc"
+         on_active_params="guild_forum_proc_active"
+         on_deactive="proc"
+         on_deactive_params="guild_forum_proc_deactive">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="480"
+           h="13"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:guild_forum_menu">
+           </group>
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL">
+      <group type="forum_html"
+             id="html"
+             posref="TL TL"
+             url="home"
+             title_prefix="uiGuildForumTitle"
+             sizeref="wh"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="255 255 255 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="12"
+             paragraph_begin_space="12"
+             multi_line_space_factor="0.25"
+             td_begin_space="0"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="-10"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             browse_next_time="false"
+             form_text_area_group="edit_box_widget_multiline">
+        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-10"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+      </group>
+    </group>
+  </group>
+  <tree node="guild_forum" />
+  <!-- **************** -->
+  <!-- *  GUILD CHAT  * -->
+  <!-- **************** -->
+  <proc id="guild_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:GUILD_CHAT|value=0" />
+  </proc>
+  <!-- container is c++ generated (people_interraction.cpp) -->
+  <!-- ********************* -->
+  <!-- *  GUILD INVENTORY  * -->
+  <!-- ********************* -->
+  <proc id="guild_inv_activated">
+    <!--    <action handler="proc" params="memorize_inventory_state"/>-->
+    <action handler="context_help_html"
+            params="inventory" />
+  </proc>
+  <proc id="guild_get_money">
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:title:hardtext|value='uiMoneyFromGuild'" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box1:active|value=0" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box2:active|value=1" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:ok1:active|value=0" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:ok2:active|value=1" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box2:eb:input_string|value=100" />
+    <action handler="set"
+            params="dblink=UI:VARIABLES:CHOOSE_MONEY|value=100" />
+    <action handler="set_keyboard_focus"
+            params="select_all=true|target=ui:interface:guild_inv_money:box2:eb" />
+    <action handler="enter_modal"
+            params="group=ui:interface:guild_inv_money" />
+  </proc>
+  <proc id="guild_put_money">
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:title:hardtext|value='uiMoneyToGuild'" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box1:active|value=1" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box2:active|value=0" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:ok1:active|value=1" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:ok2:active|value=0" />
+    <action handler="set"
+            params="target_property=ui:interface:guild_inv_money:box1:eb:input_string|value=100" />
+    <action handler="set"
+            params="dblink=UI:VARIABLES:CHOOSE_MONEY|value=100" />
+    <action handler="set_keyboard_focus"
+            params="select_all=true|target=ui:interface:guild_inv_money:box1:eb" />
+    <action handler="enter_modal"
+            params="group=ui:interface:guild_inv_money" />
+  </proc>
+  <!-- see what to do with that 
+ on_active="proc" on_active_params="guild_inv_activated" 
+ on_deactive="" on_deactive_params="" -->
+  <group style="inv_container_guild"
+         id="inv_guild"
+         header_color="UI:SAVE:WIN:COLORS:TRADE"
+         title="uitabInvGuild"
+         on_close_button="set"
+         on_close_button_params="dblink=UI:SAVE:INVENTORY_GUILD_WANT_POPUP|value=0">
+
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <instance template="tinv_nbslots_bulk_weight"
+                id="ibw"
+                x="-16"
+                inv_branch="%guild_inv_dbentry"
+                inv_bulk_max="%guild_inv_bulk_max" />
+    </group>
+    <group id="content"
+           h="214"
+           posref="TR TR">
+      <instance template="tinv_item_list"
+                id="iil"
+                y="-8"
+                sizeref="wh"
+                h="-8"
+                inv_branch="%guild_inv_dbentry"
+                inv_branch_nb="%max_guild_invslot"
+                inv_type="INV_GUILD" />
+      <instance template="argent"
+                id="money"
+                posref="BL BL"
+                x="4"
+                y="1"
+                value="%guild_inv_money" />
+      <ctrl style="new_element_header"
+            id="getmoney_but"
+            posref="MR ML"
+            posparent="money"
+            x="4"
+            wmargin="8"
+            hardtext="uittGetMoney"
+            onclick_l="proc"
+            params_l="guild_get_money" />
+      <ctrl style="new_element_header"
+            id="putmoney_but"
+            posref="MR ML"
+            posparent="getmoney_but"
+            x="4"
+            wmargin="8"
+            hardtext="uittPutMoney"
+            onclick_l="proc"
+            params_l="guild_put_money" />
+    </group>
+  </group>
+  <link expr="and(%is_guild_present, @UI:SAVE:INVENTORY_GUILD_WANT_POPUP, @UI:TEMP:INVENTORY_GUILD_OPENED)"
+        target="inv_guild:active" />
+  <tree node="inv_guild" />
+  <!-- QUANTITY OF MONEY MODAL BOX -->
+  <group type="modal"
+         id="guild_inv_money"
+         exit_click_out="true"
+         posref="MM BL"
+         w="170"
+         h="64"
+         options="skin_modal">
+    <!-- info text -->
+    <view type="text"
+          id="title"
+          posref="TL TL"
+          x="4"
+          y="-4"
+          color="255 255 255 255"
+          fontsize="12"
+          shadow="true"
+          hardtext="uiSelMoney2Give"
+          global_color="false" />
+    <!-- bitmap for the seeds -->
+    <view type="bitmap"
+          id="money"
+          posref="BL TL"
+          posparent="title"
+          x="20"
+          y="-4"
+          texture="money_seve.tga"
+          global_color="false" />
+    <!-- edit box for the seeds -->
+    <instance template="edit_box_widget"
+              id="box1"
+              posparent="money"
+              text_ref="TR TR"
+              text_y="-1"
+              posref="MR ML"
+              w="92"
+              h="16"
+              fontsize="10"
+              x="2"
+              y="0"
+              reset_focus_on_hide="true"
+              max_historic="0"
+              onenter="guild_inv_put_money"
+              onchange="editbox_number"
+              onchange_params="value=UI:VARIABLES:CHOOSE_MONEY|max_value=@%money|update_text=false"
+              prompt=""
+              enter_loose_focus="false"
+              multi_line="false"
+              max_num_chars="12"
+              color="135 243 28 255" />
+    <instance template="edit_box_widget"
+              id="box2"
+              posparent="money"
+              text_ref="TR TR"
+              text_y="-1"
+              posref="MR ML"
+              w="92"
+              h="16"
+              fontsize="10"
+              x="2"
+              y="0"
+              reset_focus_on_hide="true"
+              max_historic="0"
+              onenter="guild_inv_get_money"
+              params="confirm_money_quantity"
+              onchange="editbox_number"
+              onchange_params="value=UI:VARIABLES:CHOOSE_MONEY|max_value=@%guild_inv_money|update_text=false"
+              prompt=""
+              enter_loose_focus="false"
+              multi_line="false"
+              max_num_chars="12"
+              color="135 243 28 255" />
+    <!-- ok / cancel -->
+    <instance template="button_ok_cancel"
+              id="ok1"
+              posref="BR BR"
+              x="-4"
+              y="4"
+              onclick_ok="guild_inv_put_money"
+              onclick_ok_param=""
+              onclick_cancel="leave_modal"
+              onclick_cancel_param="" />
+    <instance template="button_ok_cancel"
+              id="ok2"
+              posref="BR BR"
+              x="-4"
+              y="4"
+              onclick_ok="guild_inv_get_money"
+              onclick_ok_param=""
+              onclick_cancel="leave_modal"
+              onclick_cancel_param="" />
+  </group>
+  <!-- ************** -->
+  <!-- *  MAIL BOX  * -->
+  <!-- ************** -->
+  <proc id="mailbox_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:MAILBOX|value=1" />
+    <action handler="browse"
+            params="name=ui:interface:mailbox:content:html|url=home|show=0" />
+  </proc>
+  <proc id="mailbox_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:MAILBOX|value=0" />
+  </proc>
+  <group type="menu"
+         id="mailbox_menu"
+         extends="base_menu_with_color">
+    <action id="home"
+            name="uiHOME"
+            handler="browse"
+            params="name=ui:interface:mailbox:content:html|url=home" />
+  </group>
+  <group type="container"
+         id="mailbox"
+         w="480"
+         h="400"
+         title=""
+         global_color="false"
+         open_button="false"
+         force_open_out="true"
+         header_color="UI:SAVE:WIN:COLORS:COM"
+         resizer="true"
+         pop_min_w="220"
+         pop_min_h="96"
+         pop_max_w="2000"
+         pop_max_h="1600"
+         title_bar_open="false"
+         lockable="true"
+         openable="false"
+         opened="true"
+         movable="true"
+         active="true"
+         on_active="proc"
+         on_active_params="mailbox_proc_active"
+         on_deactive="proc"
+         on_deactive_params="mailbox_proc_deactive">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="480"
+           h="13"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:mailbox_menu"></group>
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL">
+      <group type="mail_html"
+             id="html"
+             posref="TL TL"
+             url="home"
+             title_prefix="uiMailboxTitle"
+             sizeref="wh"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="255 255 255 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="12"
+             paragraph_begin_space="12"
+             multi_line_space_factor="0.25"
+             td_begin_space="0"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="-10"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             browse_next_time="false"
+             form_text_area_group="edit_box_widget_multiline">
+        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-10"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+      </group>
+    </group>
+  </group>
+  <tree node="mailbox" />
+  <!-- ************** -->
+  <!-- *  WEB IG  * -->
+  <!-- ************** -->
+  <proc id="webig_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:WEBIG|value=1" />
+    <action handler="browse"
+            params="name=ui:interface:webig:content:html|url=home" />
+  </proc>
+  <proc id="webig_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:WEBIG|value=0" />
+  </proc>
+  <group type="menu"
+         id="webig_menu"
+         extends="base_menu_with_color">
+    <action id="home"
+            name="uiHOME"
+            handler="browse"
+            params="name=ui:interface:webig:content:html|url=home" />
+  </group>
+  <group type="container"
+         id="webig"
+         w="480"
+         h="400"
+         title=""
+         global_color="false"
+         open_button="false"
+         force_open_out="true"
+         header_color="UI:SAVE:WIN:COLORS:COM"
+         resizer="true"
+         pop_min_w="220"
+         pop_min_h="96"
+         pop_max_w="2000"
+         pop_max_h="1600"
+         title_bar_open="false"
+         lockable="true"
+         openable="true"
+         opened="true"
+         movable="true"
+         active="true"
+         on_active="proc"
+         on_active_params="webig_proc_active"
+         on_deactive="proc"
+         on_deactive_params="webig_proc_deactive">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:webig_menu"
+           on_active="lua" on_active_params="game:closeWebIGBrowserHeader()"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="480"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:webig_menu"
+           on_active="lua" on_active_params="game:openWebIGBrowserHeader()">
+      <!-- must be frozen by default cause no undo/redo at start -->
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_redo"
+            posref="MR MR"
+            x="-16"
+            y="0"
+            hardtext="uiBrowseRedoButton"
+            tooltip="uittBrowseRedo"
+            onclick_l="browse_redo"
+            params_l="name=ui:interface:webig:content:html"
+            frozen="true" />
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_undo"
+            posparent="browse_redo"
+            posref="ML MR"
+            x="-4"
+            y="0"
+            hardtext="uiBrowseUndoButton"
+            tooltip="uittBrowseUndo"
+            onclick_l="browse_undo"
+            params_l="name=ui:interface:webig:content:html"
+            frozen="true" />
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_refresh"
+            posparent="browse_undo"
+            posref="ML MR"
+            x="-4"
+            y="0"
+            hardtext="uiBrowseRefresh"
+            tooltip="uittBrowseRefresh"
+            onclick_l="browse_refresh"
+            params_l="name=ui:interface:webig:content:html" />
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_home"
+            posparent="browse_refresh"
+            posref="ML MR"
+            x="-4"
+            y="0"
+            hardtext="uiBrowseHome"
+            tooltip="uittBrowseHome"
+            onclick_l="browse_home"
+            params_l="name=ui:interface:webig:content:html" />
+    </group>
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL">
+      <group type="webig_html"
+             id="html"
+             posref="TL TL"
+             url="home"
+             sizeref="wh"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="255 255 255 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="12"
+             paragraph_begin_space="12"
+             multi_line_space_factor="0.25"
+             td_begin_space="0"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="-10"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             browse_next_time="false"
+             form_text_area_group="edit_box_widget_multiline"
+             browse_refresh="ui:interface:webig:header_opened:browse_refresh"
+             browse_undo="ui:interface:webig:header_opened:browse_undo"
+             browse_redo="ui:interface:webig:header_opened:browse_redo">
+             
+        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-10"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+      </group>
+    </group>
+  </group>
+  <tree node="webig" />
+</interface_config>

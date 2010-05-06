@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Skill Modifier" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Fri Jan 10 15:04:31 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

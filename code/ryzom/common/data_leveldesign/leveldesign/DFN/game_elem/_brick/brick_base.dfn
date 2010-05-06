@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="FamilyId" Type="Type" Filename="_brick_family.typ"/>
+  <ELEMENT Name="IndexInFamily" Type="Type" Filename="_position_in_family.typ"/>
+  <ELEMENT Name="EnergyType" Type="Type" Filename="_brick_energy_type.typ"/>
+  <ELEMENT Name="MandatoryFamilies" Type="Type" Filename="_brick_family.typ" Array="true"/>
+  <ELEMENT Name="OptionalFamilies" Type="Type" Filename="_brick_family.typ" Array="true"/>
+  <ELEMENT Name="MPs" Type="Dfn" Filename="_brick_mp.dfn" Array="true"/>
+  <ELEMENT Name="Cost" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Difficulty" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="CostWeight" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="DifficultyWeight" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Latency" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="ExecutionLength" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="MinSkill" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MinCharac" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MinSpecialization" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Skill" Type="Type" Filename="_skills.typ"/>
+  <ELEMENT Name="Charac" Type="Type" Filename="_characteristic.typ"/>
+  <ELEMENT Name="Specialization" Type="Type" Filename="_specialized_skills.typ"/>
+  <ELEMENT Name="Syllable" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Root" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Functionalities" Type="Dfn" Filename="_functionality.dfn" Array="true"/>
+  <ELEMENT Name="ValidTargetTypes" Type="Type" Filename="_entity_types.typ" Array="true"/>
+  <ELEMENT Name="BrickName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="InGameDescription" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Level" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Type" Type="Type" Filename="_brick_type.typ"/>
+  <ELEMENT Name="Repeat" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Attributes" Type="Dfn" Filename="_functionality_attribute.dfn" Array="true"/>
+  <ELEMENT Name="Nature" Type="Type" Filename="_action_nature.typ"/>
+  <ELEMENT Name="Power" Type="Type" Filename="_brick_power.typ"/>
+  <ELEMENT Name="TargetNeeded" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Icon" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DisplayIndex" Type="Type" Filename="boolean.typ" Default="false"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:07 2002 (corvazier) File converted from old format
+Mon Jun 24 21:42:12 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:48:52 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:49:21 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:49:35 2002 (fleury) Dfn Structure = 
+Mon Jul 01 11:15:43 2002 (fleury) Dfn Structure = 
+Tue Jul 23 11:24:43 2002 (besson) Dfn Structure = 
+Thu Jul 25 11:28:31 2002 (brigand) Dfn Structure = 
+Thu Jul 25 11:29:31 2002 (brigand) Dfn Structure = 
+Tue Jul 30 15:30:46 2002 (fleury) Dfn Structure = 
+Thu Aug 22 16:53:29 2002 (fleury) Dfn Structure = 
+Mon Sep 16 10:49:23 2002 (fleury) Dfn Structure = 
+Tue Oct 08 11:07:44 2002 (fleury) Dfn Structure = 
+Tue Oct 08 11:09:36 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

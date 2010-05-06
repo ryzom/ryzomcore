@@ -1,0 +1,88 @@
+
+// scripts for guild systems
+file "entities_game_service/guild_member_pd"
+{
+	include "guild_manager/guild_manager_interface.h"
+	derived class CGuildMemberPD key(Id)
+	{
+		TCharacterId					Id;
+		TGuildGrade						Grade
+		{
+			onChange()
+			@[
+				// callback the manager 
+				IGuildManager::getInstance().guildMemberChanged(this);
+			]@
+		}
+
+		uint32							EnterTime;
+		parent CGuildPD:Members			Guild;
+	}
+}
+
+//file "entities_game_service/guild_rolemaster_pd"
+//{
+//	class CGuildRolemasterPD
+//	{
+//		bool							Valid;
+//	}
+//}
+
+file "entities_game_service/guild_pd"
+{
+	include "mission_manager/ai_alias_translator.h"
+//	dimension TMaxChargeApplied 1;
+
+	derived class CGuildPD key(Id)
+	{
+		TGuildId							Id;
+		uint64								Money;
+//		uint16								Village;
+		uint32								CreationDate;
+//		uint32								XP;
+//		uint32								Bulk;
+//		uint32								MaxBulk;
+//		uint32								ChargesPoints;
+		TPeople								Race;
+		uint64								Icon;
+		uint32								Building;
+		uint32								Version;
+
+			
+		CGuildMemberPD:Guild<>				Members		
+		{
+			onChange()
+			@[
+				// callback the manager 
+				IGuildManager::getInstance().guildMemberListChanged(this);
+			]@
+		}
+
+
+		//CGuildRolemasterPD[TSPType]			Rolemasters;
+
+		CGuildFameContainerPD:Parent		FameContainer;
+
+
+
+		//CEntityId[TMaxChargeApplied]		ChargesAppliedId;
+		//CEntityId							ChargeOwnedId;
+		
+		//CGuildMissionName:Guild<>			SuccessfulMissions;
+		//CGuildChargeName:Guild<>			SuccessfulCharges;
+		
+		parent CGuildContainerPD:Guilds		Parent;
+	}
+}
+
+file "entities_game_service/guild_container_pd"
+{
+	mapped class CGuildContainerPD key(Dummy)
+	{
+		// id of the GM guild
+		TGuildId			GMGuild;
+		CGuildPD:Parent<>	Guilds;
+		// dummy key needed by PDS. This class is a singleton
+		uint8				Dummy;
+	}
+}

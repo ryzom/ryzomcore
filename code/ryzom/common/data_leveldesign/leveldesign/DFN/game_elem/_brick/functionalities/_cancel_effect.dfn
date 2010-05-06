@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Affected Role" Type="Type" Filename="_career.typ"/>
+  <ELEMENT Name="Affect Basic Career Only" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Success Chances" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Transfert" Type="Type" Filename="float.typ" Default="0"/>
+  <LOG>Tue Jan 28 10:48:23 2003 (brigand) Dfn Structure = 
+Tue Jan 28 12:38:46 2003 (brigand) Dfn Structure = 
+Thu Jan 30 18:27:20 2003 (brigand) Dfn Structure = </LOG>
+</DFN>

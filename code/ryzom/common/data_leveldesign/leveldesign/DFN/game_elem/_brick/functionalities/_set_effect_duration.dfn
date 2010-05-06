@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="DurationParam" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DurationOnResistParam" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Operation" Type="Type" Filename="_sentence_modifier_operator.typ" Default="SET"/>
+  <ELEMENT Name="DurationInCycles" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Nov 26 15:02:42 2002 (fleury) Dfn Structure = 
+Fri Jan 03 13:31:08 2003 (fleury) Dfn Structure = 
+Fri Jan 03 13:53:25 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

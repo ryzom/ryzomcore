@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.12 $" State="modified">
+  <PARENT Filename="_homin_attack.creature"/>
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="Race" Value="fyros"/>
+      <ATOM Name="Gender" Value="Female"/>
+      <STRUCT Name="MovementSpeeds">
+        <ATOM Name="WalkSpeed" Value="1.66"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d data">
+      <ATOM Name="Skel" Value="FY_HOF_skel.skel"/>
+      <ATOM Name="AnimSetBaseName" Value="fy_hof"/>
+      <ATOM Name="LodCharacterName" Value="FY_HOF_LOD"/>
+      <ATOM Name="LodCharacterDistance" Value="40.0"/>
+      <STRUCT Name="Shadow">
+        <ATOM Name="Shadow Bone 0" Value="Bip01"/>
+        <ATOM Name="Shadow Size 0" Value="1.5"/>
+      </STRUCT>
+      <ATOM Name="Skin" Value="fyros"/>
+      <ARRAY Name="HairItem">
+        <STRUCT Name="long">
+          <ATOM Name="Item" Value="fy_cheveux_long01.item"/>
+        </STRUCT>
+        <STRUCT Name="medium">
+          <ATOM Name="Item" Value="fy_cheveux_medium01.item"/>
+        </STRUCT>
+        <STRUCT Name="shave">
+          <ATOM Name="Item" Value="fy_cheveux_shave01.item"/>
+        </STRUCT>
+        <STRUCT Name="short">
+          <ATOM Name="Item" Value="fy_cheveux_short01.item"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="Properties">
+      <ATOM Name="Talkable" Value="true"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Jul 03 14:25:50 2002 (mauduit) .3d data.AnimSetNormal = fy_hom_normal.animation_set
+Wed Jul 03 14:25:50 2002 (mauduit) .3d data.Skel = FY_HOF_skel.skel
+Wed Jul 03 14:27:13 2002 (mauduit) Form Parents = 
+Thu Jul 11 16:22:07 2002 (mauduit) formName Pasted = 
+Thu Jul 18 18:37:45 2002 (mauduit) .3d data.Skin = fyros
+Thu Jul 25 17:39:06 2002 (mauduit) .3d data.AnimSetBaseName = fy_hom
+Tue Jul 30 20:11:07 2002 (receveur) Form Parents = 
+Tue Aug 06 09:36:43 2002 (mauduit) .3d data.AnimSetBaseName = fy_hof
+Fri Sep 06 12:08:27 2002 (mauduit) .3d data.LodCharacterDistance = 40.0
+Fri Sep 06 12:08:27 2002 (mauduit) .3d data.LodCharacterName = FY_HOF_LOD
+Tue Sep 10 10:20:00 2002 (mauduit) .Basics.Gender = Female
+Tue Sep 10 10:21:21 2002 (mauduit) .Basics.Race = fyros
+Tue Mar 18 13:55:51 2003 (mauduit) .Properties.Talkable = true
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[0] Renamed = long
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[0].Item = fy_cheveux_long01.item
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[1] Renamed = medium
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[1].Item = fy_cheveux_medium01.item
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[2] Renamed = shave
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[2].Item = fy_cheveux_shave01.item
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[3] Renamed = short
+Thu Mar 20 17:03:49 2003 (puzin) .3d data.HairItem[3].Item = fy_cheveux_short01.item
+Thu Mar 20 17:03:49 2003 (puzin) formName Resized = 4
+Tue Aug 19 15:11:28 2003 (mory) .Basics.MovementSpeeds.WalkSpeed = 1.66
+Thu Mar 18 19:51:00 2004 (nouveau) Form Parents = </LOG>
+</FORM>

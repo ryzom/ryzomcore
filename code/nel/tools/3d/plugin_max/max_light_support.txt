@@ -1,0 +1,23 @@
+
+>> 3dsmax light features supported by the NeL export <<
+
+
+
+-> Export those kind of lights
+
+ * Global ambiant light
+ * Omni
+ * Spot (free or target)
+ * Direct (free or target)
+
+-> Export those values from the light
+
+ * Color
+ * Use diffuse
+ * Use specular
+ * Ambiant only
+ * Multiplier (pseudo)
+ * Spot Hotspot (pseudo) (directionnal hotspot is not used)
+ * Spot Fallof (pseudo) (directionnal fallof is not used)
+ * Far attenuation begin (if the begin attenuation is not 0.f, the far attenuation will be very bad)
+ * Far attenuation end (pseudo)

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.9 $" State="modified">
+  <PARENT Filename="_fighter.starting_role"/>
+  <PARENT Filename="_matis.starting_role"/>
+  <PARENT Filename="_parent.starting_role"/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Feb 23 15:10:31 2004 (puzin)
+Mon Feb 23 17:47:57 2004 (puzin) .StartEquipment1.HandR.Item = icmm1pd.sitem
+Mon Feb 23 17:48:01 2004 (puzin) .StartEquipment2.HandR.Item = icmm1pd.sitem
+Mon Feb 23 17:48:06 2004 (puzin) .StartEquipment3.HandR.Item = icmm1pd.sitem</LOG>
+</FORM>

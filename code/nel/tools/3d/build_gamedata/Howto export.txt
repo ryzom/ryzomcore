@@ -1,0 +1,615 @@
+<<< HOWTO export data for the client >>>
+
+-----------------------------------------------------------------------------------------------------
+
+SUMMARY
+
+INSTALL
+
+DIRECTORIES
+
+EXPORT USER GUIDE
+
+* EXPORT DATA FOR THE LOCAL CLIENT
+* EXPORT DATA IN THE GAMEDATA DIRECTORY
+* EXPORT DSS FILES FROM PHOTOSHOP
+* EXPORT A MESH
+* EXPORT A PARTICLE SYSTEM
+* EXPORT A SKELETON
+* EXPORT A SKELETON TEMPLATE WEIGHT
+* EXPORT AN ANIMATION
+* EXPORT AN INSTANCE GROUP
+* EXPORT A ZONE
+* EXPORT A SMALLBANK
+* EXPORT A FARBANK
+* EXPORT MESH TEXTURES
+* EXPORT LANDSCAPE TEXTURES
+
+TECHNICAL NOTES ABOUT AUTOMATIC DATA PROCESS
+
+* DATA PROCESS
+
+-----------------------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------------------------------
+
+INSTALL
+
+To export and build the gamedata, you will need to install the project build_gamedata.
+You will need cygwin installed. The path must be configurated with cygwin path
+before any other directory, include winnt root pathes.
+
+-----------------------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------------------------------
+
+DIRECTORIES
+
+There is 4 main directories:
+
+database/ is the root directory of the 3d database
+gamedata/ is the root directory of the current gamadata folder
+client/ is the root directory of the client
+build_gamedata/ is the root directory of the build data system
+
+-----------------------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------------------------------
+
+**** EXPORT USER GUIDE ****
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT DATA FOR THE LOCAL CLIENT
+
+The data for your local client are stored in the client/data directory.
+You can manually export here your data to test it with your client.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT DATA IN THE GAMEDATA DIRECTORY
+
+You musn't export directly your data for the gamedata folder.
+An automatic process will update your modification directly from the graphic database (w:\) 
+and add them to the new gamedata folder.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT DSS FILES FROM PHOTOSHOP
+
+Install the photoshop DDS plugin. (\\Server\code\tools\plugins photoshop)
+Load your TGA file. Save as *.DDS. Then come a big dialog box with a lot of options.
+In the left part of the dialog box select the format you want (DXT1 or DXT5).
+Select "Generate MIP maps".
+Select NO OTHER OPTION.
+Save.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT MESH TEXTURES
+
+Manual process:
+---------------
+
+Load your TGA texture in photoshop. 
+If your texture has no alpha channel, only rgb, export a DXT1 DDS file.
+If your texture has an alpha channel, export a DXT5 DDS file.
+The maps directory for the client is client/data/maps.
+The name of the dds texture file is the same than the tga texture with the .dss extension.
+
+See * EXPORT DSS FILES FROM PHOTOSHOP
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete 
+build_gamedata/processes/map/dds/*.*
+build_gamedata/processes/map/tga/*.*
+
+Export: 
+The export process will copy each tga texture placed in the folders 
+database/Stuff/<race>/Agents/Actors/<sexe/bot>/animation/skeletons/
+database/Stuff/<race>/Decors/_textures
+The textures are copied in build_gamedata/processes/map/tga/.
+If, in the database, a dds texture is placed side by side a tga texture with the same name, the dds
+texture will be copied too in build_gamedata/processes/map/tga/.
+
+Build:
+The build process take each exported tga texture and convert them in dds.
+If they have alpha channel, they will be converted in DXT5, else in DXTC1.
+If a dds texture is available for a tga, the converter will use the file format in the dds file
+to create the builded dds texture.
+Builded dds are storder in build_gamedata/processes/map/dds/.
+
+Install:
+The install process will copy build_gamedata/processes/map/dds/*.dds in client/data/maps
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT LANDSCAPE TEXTURES
+
+Manual process:
+---------------
+
+Textures on the landscape are 24 bits TGA files.
+They can be 128x128 or 256x256.
+In the client, you have to export the texture for diffuse, additive and transition in DXT5 format 
+using the photoshop plugin. 
+The displacement textures (noise textures) must be exported in TGA.
+The interface textures (GUI) must be exported in TGA.
+The landscape texture are stored in the directories client/data/tiles.
+
+See * EXPORT DSS FILES FROM PHOTOSHOP
+
+
+Automatic process:
+------------------
+
+Clean:
+Clean will delete files in 
+build_gamedata/processes/tiles/maps_final
+build_gamedata/processes/tiles/maps_tga
+build_gamedata/processes/displace/tga
+build_gamedata/processes/interface/tga
+
+Export:
+Export will copy all the TGA files stored in the directory database/landscape/_texture_Tiles and in its sub directories
+into build_gamedata/processes/tiles/maps_tga
+It copies tga texture from database/landscape/_texture_Tiles/displace in build_gamedata/processes/displace/tga
+It copies tga texture from database/interface in build_gamedata/processes/interface/tga
+
+Build:
+The build process will convert the tga texture in build_gamedata/processes/tiles/maps_tga in DXT5 dds file.
+DDS textures will be stored in the directory build_gamedata/processes/tiles/maps_dds.
+
+Install:
+The install process will copy the dds texture from build_gamedata/processes/tiles/maps_dds into client/data/tiles.
+The install process will copy the tga texture from build_gamedata/processes/displace/tga into client/data/tiles.
+The install process will copy the tga texture from build_gamedata/processes/interface/tga into client/data/tiles.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A MESH
+
+Manual process:
+---------------
+
+-If your mesh as NO coarse lod (croisillons) and NO lightmap :
+
+	In max, load your mesh project. Select the mesh you want to export.
+	Export it with the "NeL export" utility plugin, button "export model".
+	The file extension must be a "*.shape".
+	The name of the .shape file is the name of the max mesh.
+	Save directly this .shape file in the client directory (client/data/shapes).
+
+-If your mesh as a coarse lod : 
+
+	In max, load your mesh project. Select the main mesh you want to export. Don't select the lods.
+	Export it with the "NeL export" utility plugin, button "export model".
+	The file extension must be a "*.shape".
+	The name of the .shape file is the name of the max mesh.
+	Save this .shape file in the build data shape directory for coase meshes (build_gamedata/processes/shape/shape_with_coarse_mesh).
+	Be sure to have all the other meshes with coarse lod in the directory build_gamedata/processes/shape/shape_with_coarse_mesh.
+	(You can get it on the build_data computer).
+	Execute the coarse mesh build command (build_gamedata/processes/shape/3_build.bat).
+	Run the mesh install build_gamedata/processes/shape/4_install.bat. (Copy the shape and the texture in the client data).
+
+-If your mesh as lightmaps : 
+
+	In max, load your mesh project. Use the city_export.ms script to export manualy mesh with lightmaps.
+	The file extension must be a "*.shape".
+	The name of the .shape file is the name of the max mesh.
+	Be sure to export your meshes in the build_gamedata/processes/shape/shape directory.
+	Be sure the lightmaps are exported in the directory build_gamedata/processes/shape/lightmap.
+	Execute the lightmap build command (build_gamedata/processes/shape/3_build.bat).
+	Run the mesh install build_gamedata/processes/shape/4_install.bat. (Copy the shape and the lightmaps in the client data).
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete 
+	build_gamedata/processes/shape/shape/*.*,
+	build_gamedata/processes/shape/shape_with_coarse_mesh/*.*,
+	build_gamedata/processes/shape/shape_with_coarse_mesh_builded/*.*,
+	build_gamedata/processes/shape/lightmap/*.*,
+	build_gamedata/processes/shape/lightmap_16_bits/*.* files
+
+Export: 
+The export process will open each max projects placed in the folders
+	stuff/<race>/agents/actors/<sexe/bot/vehicules/monsters>
+	stuff/<race>/agents/accessories
+	stuff/<race>/decors/vegetations
+	stuff/<race>/decors/constructions
+	landscape/eau
+It will select each ROOT object (not children) that are geometry, not named "Bip01", not particule system, not flaged "Don't export" and not 
+Accelerator (not portal / not cluster). The extension of the file is "*.shape". The name of the file is the name of the mesh in max.
+If the object have coarse meshes, it will be exported in the folder build_gamedata/processes/shape/shape_with_coarse_mesh/.
+else it will be exported in the folder build_gamedata/processes/shape/shape/.
+If the object have lightmaps, lightmaps will be exported in the folder build_gamedata/processes/shape/lightmap/.
+The name of the lightmap is the name of the object followed by a number of one digit.
+The extension of the lightmap is .tga.
+
+Build:
+The build process will first convert the lightmaps in 16 bits tga files.
+Those computed lightmaps will be builded in folder build_gamedata/processes/shape/lightmap_16_bits.
+Then, the build process will compute the coarses mesh and there big texture.
+The final coarses meshes are builded in folder build_gamedata/processes/shape/shape_with_coarse_mesh_builded.
+The final coarses meshes name is the same than the exported name.
+The coarses meshes texture is builded in folder build_gamedata/processes/shape/shape_with_coarse_mesh_builded/nel_coarse_texture.dds.
+
+Install:
+The install process will copy 
+build_gamedata/processes/shape/shape/*.* in client/data/shapes
+build_gamedata/processes/shape/shape_with_coarse_mesh_builded/*.shape in client/data/shapes
+build_gamedata/processes/shape/shape_with_coarse_mesh_builded/nel_coarse_texture.dds in client/data/maps
+build_gamedata/processes/shape/lightmap_16_bits/*.* in client/data/lightmaps
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A PARTICLE SYSTEM
+
+Manual process:
+---------------
+
+Directly copy your ps file in the client directory client/data/ps.
+
+Automatic process:
+------------------
+
+Clean:
+Clean will delete build_gamedata/processes/ps/ps/*.* file.
+
+Export:
+Copy the file from database/sfx in build_gamedata/processes/ps/ps.
+
+Build:
+Does nothing.
+
+Install:
+Copy the file from build_gamedata/processes/ps/ps in client/data/ps.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A SKELETON
+
+Manual process:
+---------------
+
+In max, load your skeleton project with a skeleton in figure mode. Select the root of the skeleton.
+Export it with the "NeL export" utility plugin, button "export skeleton".
+The file extension must be a "*.skel".
+The skeleton directory for the client is client/data/animations/skeletons.
+The name of the skel file is the name of the max project.
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete build_gamedata/processes/skel/skel/*.*
+
+Export: 
+The export process will open each max projects placed in the folder database/Stuff/<race>/Agents/Actors/<sexe/bot>/animation/skeletons/.
+It will select "Bip01" in the project an export the skel. The root of the skeleton must have been named "Bip01".
+The skel files are exported in the build folder build_gamedata/processes/skel/skel/.
+The name of the skel files are the name of the max projects.
+
+Build:
+Does nothing
+
+Install:
+The install process will copy build_gamedata/processes/skel/skel/*.* in client/data/animations/skeletons
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A SKELETON TEMPLATE WEIGHT
+
+Manual process:
+---------------
+
+In max, load your skeleton template weight project. Select ALL the bones of the skeleton.
+Export it with the "NelL export" utility plugin, button "export skeleton weights
+The skeleton directory for the client is client/data/animations/skeletons.
+The name of the swt file is the name of the max project.
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete build_gamedata/processes/swt/swt/*.*
+
+Export: 
+The export process will open each max projects placed in the folder database/Stuff/<race>/Agents/Actors/<sexe/bot>/animation/swt/.
+It will select all the objects in the project an export the swt. The swt files are exported in the build folder build_gamedata/processes/swt/swt/.
+The name of the swt files are the name of the max projects.
+
+Build:
+Does nothing
+
+Install:
+The install process will copy build_gamedata/processes/swt/swt/*.* in client/data/animations/skeletons
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT AN ANIMATION
+
+Manual process:
+---------------
+
+In max, load your animation project. 
+Select the animated objects. For the skeletons select only the root.
+Export it with the "NeL export" utility plugin, button "export model animation".
+The file extension must be a "*.anim".
+The animation directory for the client is client/data/animations/anim.
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete build_gamedata/processes/anim/anim/*.*
+
+Export:
+The export process will open each max projects placed in the folder database/Stuff/<race>/Agents/Actors/<sexe/bot>/animation/anims/.
+It will select the "Bip01" object in the project an export the animation. The anim files are exported in the build folder build_gamedata/processes/anim/anim/.
+The name of the anim files are the name of the max projects.
+
+Build:
+Does nothing
+
+Install:
+The install process will copy build_gamedata/processes/anim/anim/*.* in client/data/animations/anim.
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT AN INSTANCE GROUP
+
+Manual process:
+---------------
+
+Open your instance group project. For each instance gourps in your project, select all objects in the same instance group 
+and export it with the "NeL utility" plugin, button "Export Instance Group". You can use a script like city_export.max 
+if the export is too boring.
+
+Automatic process:
+------------------
+
+Clean:
+Delete files in build_gamedata/processes/ig/ig.
+
+Export:
+For each max file in the database directories 
+database/stuff/<race>/decors/constructions
+database/landscape/zones
+the process will open the max file and look for instance group name flaged on objets.
+
+If there is some objects with instance group name flagged (city or interior)
+	For each instance group name, it select the max object and export the ig in build_gamedata/processes/ig/ig.
+
+If there is no objects with instance group name flagged (zone file with vegetation)
+	The process will select all object in the project that are reference on a shape export the ig in build_gamedata/processes/ig/ig.
+
+Build:
+Does nothing
+
+Install:
+Copy the file stored in build_gamedata/processes/ig/ig in the client directory client/data/ig
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A ZONE
+
+Zone building configuration file is build_gamedata/cfg/properties.cfg
+
+Manual process:
+---------------
+
+To export manually zones, open your zone projects in max, select the zones. Export it with the 
+"NeL export" utility plugin, button "export model".
+Save the .zone files in the build_gamedata directory build_gamedata/processes/zone/zone_exported/.
+Then execute the build command (build_gamedata/processes/zone/3_build.bat).
+After the build, install the zone in the client with the command 4_install (build_gamedata/processes/zone/4_install.bat).
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete 
+build_gamedata/processes/zone/zone_exported/*.*
+build_gamedata/processes/zone/zone_lighted/*.*
+build_gamedata/processes/zone/zone_welded/*.*
+build_gamedata/processes/zone/zone_depend/*.*
+
+Export:
+The automatic export will export zone object from max database max files in the directory database/landscape/zones.
+The .zone files are stored in build_gamedata/processes/zone/zone_exported/. The name of the zone is the name
+of the max object.
+
+Build:
+The build process will first build the zone dependencies (*.depend files in build_gamedata/processes/zone/zone_dependencies/).
+Then it will generate welded zone (*.zonew files in build_gamedata/processes/zone/zone_welded/).
+Then it will generate lighted zone (*.zonel files in build_gamedata/processes/zone/zone_lighted/).
+
+Install:
+The install process will copy build_gamedata/processes/zone/zone_lighted/*.* in client/data/zone
+	
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A SMALLBANK
+
+Manual process:
+---------------
+
+Copy your .bank in the directory build_gamedata/processes/smallbank/bank/.
+Execute the build command (build_gamedata/processes/smallbank/3_build.bat).
+Execute the install command (build_gamedata/processes/smallbank/3_install.bat).
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete 
+build_gamedata/processes/smallbank/bank/*.*
+build_gamedata/processes/smallbank/smallbank/*.*
+
+Export:
+Copy the bank stored in database/landscape/_texture_Tiles/bank in build_gamedata/processes/smallbank/bank/.
+
+Build:
+Convert the build_gamedata/processes/smallbank/bank/*.bank files in build_gamedata/processes/smallbank/smallbank/*.smallbank files.
+
+Install
+Copy the build_gamedata/processes/smallbank/smallbank/*.smallbank files in the client/data/bank
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A FARBANK
+
+Manual process:
+---------------
+
+Copy your .bank in the directory build_gamedata/processes/smallbank/bank/.
+Execute the build command (build_gamedata/processes/farbank/3_build.bat).
+Execute the install command (build_gamedata/processes/farbank/3_install.bat).
+
+Automatic process:
+------------------
+
+Clean:
+The clean process will delete build_gamedata/processes/farbank/bank/*.*
+
+Export:
+Does nothing.
+
+Build:
+Convert the build_gamedata/processes/smallbank/bank/*.bank files in build_gamedata/processes/farbank/farbank/*.farbank files.
+
+Install
+Copy the build_gamedata/processes/farbank/farbank/*.farbank files in the client/data/bank
+
+-----------------------------------------------------------------------------------------------------
+
+* EXPORT A VEGETABLE SET
+
+Manual process:
+---------------
+
+Directly copy your vegetset file in the client directory client/data/vegetables.
+
+Automatic process:
+------------------
+
+Clean:
+Clean will delete build_gamedata/processes/vegetset/vegetset/*.* file.
+
+Export:
+Copy the file from database/landscape/vegetables in build_gamedata/processes/vegetset/vegetset.
+
+Build:
+Does nothing.
+
+Install:
+Copy the file from build_gamedata/processes/vegetset/vegetset in client/data/vegetables.
+
+-----------------------------------------------------------------------------------------------------
+
+
+
+
+-----------------------------------------------------------------------------------------------------
+
+**** TECHNICAL NOTES ABOUT AUTOMATIC DATA PROCESS ****
+
+-----------------------------------------------------------------------------------------------------
+
+* DATA PROCESS
+
+The automatic data process are divided in several automatic data processes.
+
+Each automatic data process must be located in a separated directory based in "build_gamedata/processes/".
+Each automatic data process is executed in its root directory "build_gamedata/processes/my_process".
+Each automatic must be sure to not stop the process with a messagebox or a pause.
+Each automatic data process must have the following batch command files:
+
+	- build_gamedata/processes/my_process/0_setup.bat: This command must create missing local directories and update binary tools 
+	(and all others setup stuff).
+
+
+	- build_gamedata/processes/my_process/1_clear.bat: This command must delete all the temporary exported / builded files. Don't delete
+	the installed client files.
+
+
+	- build_gamedata/processes/my_process/2_export.bat: This command must export the data from the database into a local directory.
+
+		* After the export process the log file "build_gamedata/processes/my_process/log.log" must exist.
+
+		* The log file must begin by the following lines:
+-------
+--- Export my_process
+-------
+
+		* A file must be exported only if the target file (previous temporary exported file) is not existing or it is not up to date. 
+
+		* If the file is not exported because it is up to date, the export process should log in the log file an entry prefixed by "SKIPPED "
+		and followed by the name of the skipped target: "SKIPPED build_gamedata/processes/my_process/tmp_exported/skippedfile.ext".
+
+		* All errors during export should be, if possible, loged in the log file prefixed by the word "ERROR ".
+
+		* All sucessful export should be log in the log file prefixed bt the word "OK ".
+
+		* All others warning and error informations are welcome in the log file.
+
+		* The export process must use "build_gamedata/the config.cfg" file to get the database or 3dsmax directories.
+
+
+	- build_gamedata/processes/my_process/3_build.bat: This command is executed after the export process. It must perform some build stuff on the
+		temporary exported data.
+
+		* After the build process the log file "build_gamedata/processes/my_process/log.log" must exist.
+
+		* The log file must begin by the following lines:
+-------
+--- Build my_process
+-------
+
+		* A file must be builded only if the target file (previous temporary builded file) is not existing or it is not up to date.
+
+		* If the file is not builded because it is up to date, the build process should log in the log file an entry prefixed by "SKIPPED "
+		and followed by the name of the skipped target: "SKIPPED build_gamedata/processes/my_process/tmp_builded/skippedfile.ext".
+
+		* All errors during build should be, if possible, loged in the log file prefixed by the word "ERROR ".
+
+		* All sucessful build should be log in the log file prefixed bt the word "OK "
+
+		* All others warning and error informations are welcome in the log file.
+
+
+	- build_gamedata/processes/my_process/4_install.bat: This command will install exported / builded files in the client directory.
+
+		* This command assume that the client data directory tree is builded.
+
+		* After the install process the log file "build_gamedata/processes/my_process/log.log" must exist.
+
+		* The log file must begin by the following lines:
+-------
+--- Install my_process
+-------
+
+		* A file must be install only if the target file (previous installed file) is not existing or it is not up to date.
+
+		* If the file is not installed because it is up to date, the install process should log in the log file an entry prefixed by "SKIPPED "
+		and followed by the name of the skipped target: "SKIPPED client/data/.../skippedfile.ext".
+
+		* All errors during install should be, if possible, loged in the log file prefixed by the word "ERROR ".
+
+		* All sucessful install should be log in the log file prefixed bt the word "OK "
+
+		* All others warning and error informations are welcome in the log file.
+
+-----------------------------------------------------------------------------------------------------

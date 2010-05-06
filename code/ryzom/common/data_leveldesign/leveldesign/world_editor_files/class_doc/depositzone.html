@@ -1,0 +1,177 @@
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+<body bgcolor="#FFFFFF" text="#000000">
+<p align="center"><b>Properties for : Deposit zone</b></p>
+<p><b>Contraintes</b><br>
+  <br>
+  Les primitives &quot;ecotypezone&quot; d&eacute;terminent o&ugrave; se trouvent 
+  les terrains correspondant aux &eacute;cosyst&egrave;mes. Par exemple, au nord-ouest 
+  du territoire Matis on a un ecotype Desert, et non Forest.<br>
+  - Un deposit est inclus dans une seule ecotypezone.<br>
+  - Un deposit ne doit pas se trouver en dehors d'une ecotypezone. <br>
+  <br>
+</p>
+<p><b>Propri&eacute;t&eacute;s principales</b><br>
+  <br>
+  Dans les primitives depositzone il est possible de sp&eacute;cifier directement 
+  des code de MP (sans le .sitem), dans le tableau &quot;exact_mp_item&quot;. 
+  Ainsi, pour les missions, vous pouvez cr&eacute;er des deposits qui contiennent 
+  les MP sp&eacute;cifiques dont vous avez besoin.<br>
+  Voici comment se fait la s&eacute;lection des MP d'un d&eacute;posit :<br>
+  our chaque fiche de MP m*.sitem existante :</p>
+<p><br>
+  1. Si le nom est trouv&eacute; dans la tableau &quot;exact_mp_item&quot;, s&eacute;lection<br>
+  <br>
+  2. Sinon :<br>
+  . si l'&eacute;cosyst&egrave;me de la MP correspond &agrave; l'ecotype* dans 
+  lequel se trouve le deposit, ou si c'est Common,<br>
+  . si la moyenne des stats de la MP est comprise entre stat_quality_min et stat_quality_max 
+  inclus<br>
+  =&gt; alors on regarde si la famille de la MP est trouv&eacute;e dans le<br>
+  tableau &quot;mps&quot; : si oui, s&eacute;lection ; sinon, on regarde si elle<br>
+  peut servir &agrave; fabriquer un des item parts indiqu&eacute;s dans<br>
+  &quot;item_parts&quot;. Elle sera s&eacute;lectionn&eacute;e si la civilisation 
+  du plan<br>
+  de craft correspondant est trouv&eacute;e dans &quot;craft_civ&quot; ou s'il 
+  n'y<br>
+  a pas de civilisation sp&eacute;cifi&eacute;e.<i><br>
+  </i><br>
+</p>
+<p><b>Autres propri&eacute;t&eacute;s</b><br>
+</p>
+<p>- <b>auto_spawn_average_period_s</b> : dur&eacute;e moyenne, en secondes, entre 
+  deux spawns de source dans le deposit. Qqsoit ce r&eacute;glage, la dur&eacute;e 
+  r&eacute;elle sera un multiple de la p&eacute;riode d'update des deposits dans 
+  l'EGS (r&eacute;glable avec la variable DepositUpdateFrequency, qui vaut par 
+  d&eacute;faut 30 secondes).<br>
+  Valeur par d&eacute;faut : 60 s (1 min)<br>
+  - <b>auto_spawn_extraction_time_s</b> : dur&eacute;e de vie restante d'une source 
+  auto-spawn&eacute;e &agrave; partir du d&eacute;but de la premi&egrave;re extraction<br>
+  Valeur par d&eacute;faut : 25 s<br>
+  - <b>auto_spawn_lifetime_s</b> : dur&eacute;e avant disparition d'une source 
+  auto-spawn&eacute;e non extraite<br>
+  Valeur par d&eacute;faut : 600 s (10 min)<br>
+  - <b>auto_spawn_min_source</b> : Le syst&egrave;me force la zone de d&eacute;posit &agrave; avoir 
+  au moins ce nombre de sources auto-spawn&eacute;es en permanence<br>
+  Valeur par d&eacute;faut : 0 <br>
+  Valeur MAXIMUM accept&eacute;e par le syst&egrave;me : 100 <br>
+  Il est reccomand&eacute; de faire plutot 5 d&eacute;posits de 20 source mini, que 1 deposit de 100 sources mini<br>
+  - <b>auto_spawn_sources</b> : si &agrave; false, seule des prospections permettront 
+  de trouver des MP<br>
+  - <b>can_have_depletion_risk</b> : si &agrave; false, les joueurs ne pourront pas invalider la zone en faisant des actions trop dures.<br>
+Si a true (defaut), et qu'un joueur utilise une action d'extraction qui fait baisser trop vite la vie de la source, il se peut qu'une zone de 9 metre de rayon environ pop et invalidee tout forage autour de la source<br>
+  - <b>can_prospect</b> : si &agrave; false, des prospections ne trouveront rien 
+  (&agrave; utiliser en conjonction avec auto_spawn_sources) <br>
+  - <b>craft_civ</b> : cf. plus haut<br>
+  - <b>deposit_max_quality_250</b> : qualit&eacute; maximale que pourra atteindre 
+  un extracteur m&ecirc;me si celui-ci dispose de stanzas de qualit&eacute; d'extraction 
+  plus &eacute;lev&eacute;es. Valeur par d&eacute;faut : -1 (pas de maximum commun 
+  au gisement, dans ce cas ce sera la valeur MaxQuality indiqu&eacute;e dans chaque 
+  fiche de MP qui sera utilis&eacute;e).<br>
+  - <b>deposit_min_quality_250</b> : qualit&eacute; minimale, i.e. il est n&eacute;cessaire 
+  d'utiliser une stanza de qualit&eacute; d'extraction suffisante (au moins &eacute;gale 
+  au chiffre indiqu&eacute;). Ainsi il peut exister des gisements de haut niveau. 
+  Valeur par d&eacute;faut : -1 (pas de minimum)<br>
+  - <b>deposit_quantity_limit</b> : Les gisements peuvent avoir une quantit&eacute; 
+  limit&eacute;e. Lorsque tout le stock est consomm&eacute;, le gisement reste 
+  vide pendant un temps donn&eacute;. Ainsi il peut exister des mati&egrave;res 
+  premi&egrave;res particuli&egrave;rement rares. Valeur par d&eacute;faut : -1 
+  (pas de limite)<br>
+  - <b>deposit_quantity_respawn_time_ryzomdays</b> : en conjonction avec deposit_quantity_limit, 
+  indique combien de temps le gisement reste vide apr&egrave;s que toute la quantit&eacute; 
+  contenue ait &eacute;t&eacute; consomm&eacute;e.<br>
+  - <b>deposit_statquality_max</b> : cf. tableau, la &quot;stat_quality&quot; 
+  d&eacute;termine en fait les classes de MP (Basic, Fine, Choice, Excellent, 
+  Supreme, etc.) qui seront pr&eacute;sentes<i>.</i> <i>deposit_statquality_max 
+  et deposit_statquality_min peuvent etre egaux.</i><br>
+  - <b>deposit_statquality_min</b> : cf.tableau, la &quot;stat_quality&quot; d&eacute;termine 
+  en fait les classes de MP (Basic, Fine, Choice, Excellent, Supreme, etc.) qui 
+  seront pr&eacute;sentes. <i>deposit_statquality_max et deposit_statquality_min 
+  peuvent etre egaux.</i><br>
+  - <b>enabled</b> : si &agrave; false, on ne trouvera rien dans ce gisement quelles 
+  que soient ses propri&eacute;t&eacute;s<br>
+  - <b>exact_mp_item</b> : Nom exact de la fiche de mp<br>
+  - <b>initial_kami_anger</b> : Si -1, pas de col&egrave;re kamique dans ce deposit. 
+  Valeur par d&eacute;faut : 0. Les maxs qui d&eacute;clenchent des repr&eacute;sailles 
+  aux r&eacute;colteurs est global et est contr&ocirc;l&eacute; par une variable 
+  de l'EGS.<br>
+  -<b> item_parts</b> : peut servir &agrave; fabriquer un des item parts indiqu&eacute;s<br>
+  - <b>mps</b> : type de Mps a s&eacute;l&eacute;ctionner dans une liste<br>
+  - <b>source_fx</b> : permet de choisir le FX qui sera affich&eacute; pour repr&eacute;senter 
+  les sources de ce gisement. Ce num&eacute;ro est un index d&eacute;signant un 
+  fichier _fx0.forage_source dans leveldesign\game_element\forage_source.<br>
+  - <b>while_season_..., while_weather..., while_its_... :</b> pr&eacute;sence 
+  en fonction des conditions de saison / m&eacute;t&eacute;o / heure de la journ&eacute;e.<br>
+  <br>
+</p>
+<table width="75%" border="1" cellspacing="0" cellpadding="0" align="center">
+  <tr bgcolor="#999999" bordercolor="#000000"> 
+    <td colspan="2" height="20"> 
+      <div align="center">Tableau des &quot;statquality&quot;</div>
+    </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+    <td width="51%"> 
+      <div align="center">20</div>
+    </td>
+    <td width="49%"> 
+      <div align="center">Basic, Plain, Average </div>
+    </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+    <td width="51%"> 
+      <div align="center">35</div>
+    </td>
+    <td width="49%"> 
+      <div align="center">Fine, Prime </div>
+    </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+    <td width="51%"> 
+      <div align="center">50</div>
+    </td>
+    <td width="49%"> 
+      <div align="center">Choice, Select</div>
+    </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+    <td width="51%"> 
+      <div align="center">65</div>
+    </td>
+    <td width="49%"> 
+      <div align="center">Excellent, Superb</div>
+    </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+    <td height="29" width="51%"> 
+      <div align="center">80</div>
+    </td>
+    <td height="29" width="49%"> 
+      <div align="center">Supreme, Magnificient</div>
+    </td>
+  </tr>
+</table>
+<p><br>
+  Ainsi, on peut par exemple diff&eacute;rencier les deposits &quot;pour forageurs 
+  d&eacute;butants&quot; (avec les valeurs ci-dessus) des deposits de kitini&egrave;res 
+  ou autres qui spawneraient des sources diff&eacute;remment.<br>
+  <br>
+</p>
+<p><b>Visualisation dans le WordEditor</b><br>
+  <br>
+  Toutes les propri&eacute;t&eacute;s de type bool&eacute;en des deposits peuvent 
+  &ecirc;tre visualis&eacute;s en couleurs &agrave; l'aide de la commande 'Windows 
+  &gt; Primitive configuration' du WorldEditor (par exemple, en cochant 'auto_spawn' 
+  et 'disabled', vous verrez les deposits concern&eacute;s respectivement en vert 
+  et en rouge, les autres restants dans la couleur habituelle ; de la m&ecirc;me 
+  fa&ccedil;on, vous pouvez afficher tous ceux qui sont activ&eacute;s quand il 
+  fait nuit, etc.). </p>
+<p>&nbsp;</p>
+<p><b>Questions :</b></p>
+<p><a href="mailto:cado@nevrax.com?subject=Question%20a%20propos%20de%20W.Editor%20=%20%3E%20deposit%20zone">Olivier 
+  Cado</a> = &gt; Equipe Gamecode</p>
+</body>
+</html>

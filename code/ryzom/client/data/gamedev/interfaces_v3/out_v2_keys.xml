@@ -1,0 +1,42 @@
+<!-- **************************** -->
+<!-- Outgame keyboard assignation -->
+<!-- **************************** -->
+
+<interface_config>
+
+<!-- Movie recorder -->
+<key name="KeyF3" ctrl="1" action="toggle_movie_recorder"/>
+<key name="KeyF4" ctrl="1" action="replay_movie"/>
+<key name="KeyF5" ctrl="1" action="save_movie"/>
+
+<!-- Debug Action -->
+<key name="KeyF6" ctrl="1" action="memory_report" /> 
+
+<!-- Text edit -->
+<key name="KeyLEFT" action="edit_previous_char" context="edit"/>
+<key name="KeyLEFT" shift="1" action="edit_select_previous_char" context="edit"/>
+<key name="KeyLEFT" ctrl="1" action="edit_previous_word" context="edit"/>
+<key name="KeyLEFT" ctrl="1" shift="1" action="edit_select_previous_word" context="edit"/>
+<key name="KeyRIGHT" action="edit_next_char" context="edit"/>
+<key name="KeyRIGHT" shift="1" action="edit_select_next_char" context="edit"/>
+<key name="KeyRIGHT" ctrl="1" action="edit_next_word" context="edit"/>
+<key name="KeyRIGHT" ctrl="1" shift="1" action="edit_select_next_word" context="edit"/>
+<key name="KeyHOME" action="edit_goto_line_begin" context="edit"/>
+<key name="KeyHOME" shift="1" action="edit_select_to_line_begin" context="edit"/>
+<key name="KeyHOME" ctrl="1" action="edit_goto_block_begin" context="edit"/>
+<key name="KeyHOME" ctrl="1" shift="1" action="edit_select_to_block_begin" context="edit"/>
+<key name="KeyEND" action="edit_goto_line_end" context="edit"/>
+<key name="KeyEND" shift="1" action="edit_select_to_line_end" context="edit"/>
+<key name="KeyEND" ctrl="1" action="edit_goto_block_end" context="edit"/>
+<key name="KeyEND" ctrl="1" shift="1" action="edit_select_to_block_end" context="edit"/>
+<key name="KeyUP" action="edit_previous_line" context="edit"/>
+<key name="KeyDOWN" action="edit_next_line" context="edit"/>
+<key name="KeyDELETE" action="edit_delete_char" context="edit"/>
+<key name="KeyC" ctrl="1" action="edit_copy" context="edit"/>
+<key name="KeyV" ctrl="1" action="edit_paste" context="edit"/>
+<key name="KeyX" ctrl="1" action="edit_cut" context="edit"/>
+<key name="KeyA" ctrl="1" action="edit_select_all" context="edit"/>
+<key name="KeyTAB" action="edit_expand" context="edit"/>
+<key name="KeyBACK" action="edit_back" context="edit"/>
+
+</interface_config>

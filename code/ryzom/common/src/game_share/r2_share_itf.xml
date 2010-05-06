@@ -1,0 +1,559 @@
+<generator header_tag="R2_SHARE_ITF">
+
+	<cpp-include file="stdpch.h"/>
+	<include file="game_share/object.h"/>
+	<include file="nel/misc/md5.h"/>
+	<include file="game_share/r2_types.h"/>
+
+	<namespace name="R2">
+
+		<!-- Moved to r2_types.h
+		<enum name="TUserRole">
+			<item name="ur_player"/>
+			<item name="ur_editor"/>
+			<item name="ur_animator"/>
+			<item name="ur_outland_owner"/>
+		</enum>
+		-->
+
+		<enum name="TSessionLevel" base = "1">
+			<item name="sl_a"/>
+			<item name="sl_b"/>
+			<item name="sl_c"/>
+			<item name="sl_d"/>
+			<item name="sl_e"/>
+			<item name="sl_f"/>
+			<header_code>
+	public:
+		void fromCharacterLevel(uint32 level)
+		{
+			if (level &lt; 21)
+				_Value = sl_a;	// 0..20
+			else if (level &lt; 51)
+				_Value = sl_b;	// 21..50
+			else if (level &lt; 101)
+				_Value = sl_c;	// 51..100
+			else if (level &lt; 151)
+				_Value = sl_d;	// 101..150
+			else if (level &lt; 201)
+				_Value = sl_e;	// 151..200
+			else
+				_Value = sl_f;	// 201..oo
+		}
+
+		void fromSkillName(const std::string &amp;skillName)
+		{
+			// we considere the lenght of the skill name to be proportional to the level
+			if (skillName.size() &lt; 2)
+			{
+				// skill name too short
+				_Value = invalid_val;
+			}
+			uint32 size = skillName.size()-1;
+			if (size &lt; end_of_enum)
+				_Value = TValues(size);
+			else
+				// max the level
+				_Value = sl_f;
+		}
+
+		// return a value corresponding to the top of the game level range for the given value
+		uint32 asLevel()
+		{
+			switch (_Value)
+			{
+				case sl_a: return  20;
+				case sl_b: return  50;
+				case sl_c: return 100;
+				case sl_d: return 150;
+				case sl_e: return 200;
+				case sl_f: return 250;
+				default: BOMB("Invalid value being converted to level - returning 1",return 1);
+			}
+		}
+			</header_code>
+		</enum>
+
+		<class name="TRunningScenarioInfo">
+			<serial/>
+
+			<property type="NLMISC::CHashKeyMD5"	name="ScenarioKey"		byref="true"/>
+			<property type="std::string"			name="ScenarioTitle"	byref="true"/>
+			<property type="std::string"			name="ScenarioDesc"		byref="true"/>
+			<property type="TSessionLevel"			name="SessionLevel"						enum="smart"/>
+			<property type="std::string"			name="ScenarioAuthorName" byref="true" />
+			<property type="uint32"					name="SessionAnimatorCharId"	/>
+			<property type="bool"					name="DMLess"	/>
+			<property type="std::string"			name="MissionTag" byref="true" />
+		</class>
+
+
+		<enum name="TPioneerRight">
+			<item name="Tester" value="0"/>
+			<item name="DM"/>
+		</enum>
+
+		<!--  ServerAnimationModule -->
+		<module_interface name="CShareServerAnimationItf" module_class='"ServerAnimationModule"'>
+
+
+
+			<method name="connectAnimationModePlay" msg="RCAMP">
+				<doc line="request the connection to play mode in an animation session"/>
+			</method>
+
+
+			<method name="askMissionItemsDescription" msg="SAID">
+				<doc line="A client Message to register mission item of a scenario"/>
+			</method>
+
+			<method name="askActPositionDescriptions" msg="SAAPD">
+				<doc line="A client Message to update client Act Position Description"/>
+			</method>
+
+			<method name="askUserTriggerDescriptions" msg="SAUTD">
+				<doc line="A client Message to update client User Trigger Description"/>
+			</method>
+
+			<method name="onUserTriggerTriggered" msg="SOUTT">
+				<doc line="client wants to trigger an user trigger"/>
+				<param type="uint32"						name="actId"/>
+				<param type="uint32"						name="triggerId"/>
+			</method>
+
+			<method name="onDssTarget" msg="SODT">
+				<doc line="client wants to execute a dm action on its target"/>
+				<param type="std::vector&lt;std::string&gt;" name="args" serial="Cont" byref="true"/>
+			</method>
+
+
+
+
+
+		</module_interface>
+
+
+
+		<!--  ServerEditionModule -->
+		<module_interface name="CShareServerEditionItf" module_class='"ServerEditionModule"'>
+
+			<method name="startingScenario" msg="RSS1">
+			</method>
+
+			<method name="startScenario" msg="RSS2">
+				<doc line="Request the start of a test scenario"/>
+				<param type="bool"		name="ok"/>
+				<param type="TScenarioHeaderSerializer" name="header" byref="true"/>
+				<param type="CObjectSerializerServer"		name="data" byref="true"/>
+				<param type="uint32"	name="startingAct"/>
+			</method>
+
+			<method name="advConnACK" msg="ADC_ACK">
+				<doc line="Client has received the ADV_CONN message"/>
+			</method>
+
+			<method name="onUserComponentRegistered" msg="SUCR">
+				<doc line="The client announce to the server that he has registered a component."/>
+				<param type="NLMISC::CHashKeyMD5"		name="md5" byref="true"/>
+			</method>
+
+			<method name="onUserComponentDownloading" msg="SUCD">
+				<doc line="The client announce to the server that he need a componennt so the server must uploading it."/>
+				<param type="NLMISC::CHashKeyMD5"		name="md5" byref="true"/>
+			</method>
+
+			<method name="onScenarioUploadAsked" msg="SSUA">
+				<doc line="Upload the high level scenario."/>
+				<param type="uint32"		name="msgId"/>
+				<param type="CObjectSerializerServer"		name="hlScenario" byref="true"/>
+				<param type="bool"		name="mustBrodcast"/>
+			</method>
+
+			<method name="onNodeSetAsked" msg="SNSA">
+				<doc line="The client request to set a node on a hl scenario."/>
+				<param type="uint32"		name="msgId"/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="R2::CObjectSerializerServer"	name="value" byref="true"/>
+			</method>
+
+			<method name="onNodeInsertAsked" msg="SNIA">
+				<doc line="The client request to insert a node on a hl scenario."/>
+				<param type="uint32"		name="msgId"/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="sint32" name="position"/>
+				<param type="std::string" name="key" byref="true"/>
+				<param type="R2::CObjectSerializerServer"	name="value" byref="true"/>
+			</method>
+
+			<method name="onNodeEraseAsked" msg="SNEA">
+				<doc line="The client request to erase a node on a hl scenario."/>
+				<param type="uint32"		name="msgId"/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="sint32" name="position"/>
+			</method>
+
+			<method name="onNodeMoveAsked" msg="SNMA">
+				<doc line="The client request to move a node on a hl scenario."/>
+				<param type="uint32"		name="msgId"/>
+				<param type="std::string" name="instanceId1" byref="true"/>
+				<param type="std::string" name="attrName1" byref="true"/>
+				<param type="sint32" name="position1"/>
+				<param type="std::string" name="instanceId2" byref="true"/>
+				<param type="std::string" name="attrName2" byref="true"/>
+				<param type="sint32" name="position2"/>
+			</method>
+
+			<method name="onMapConnectionAsked" msg="SMCA">
+				<doc line="Call by the client in order to download its current scenario (and tp)."/>
+				<param type="TSessionId" name="scenarioId" />
+				<param type="bool" name="updateHighLevel" />
+				<param type="bool" name="mustTp" />
+				<param type="R2::TUserRole" name="role"/>
+			</method>
+
+			<method name="onCharModeUpdateAsked" msg="SCMUA">
+				<doc line="Call by the client when he change its mode (Dm, Tester, Player)"/>
+				<param type="R2::TCharMode" name="mode" />
+			</method>
+
+
+			<method name="onTpPositionAsked" msg="STPA">
+				<doc line="client wants to tp at a specific position (clicking in map)"/>
+				<param type="float" name="x" />
+				<param type="float" name="y" />
+				<param type="float" name="z" />
+			</method>
+
+			<method name="tpToEntryPoint" msg="TPEP">
+				<doc line="Update the mode of the pioneer (DM/TEST)."/>
+				<param type="uint32"						name="actIndex"/>
+			</method>
+
+			<method name="setStartingAct" msg="STA">
+				<doc line="Set the starting act of the scenario"/>
+				<param type="uint32"						name="actIndex"/>
+			</method>
+
+
+			<method name="onScenarioRingAccessUpdated" msg="SRAU">
+				<doc line="Update the the ring access of a scenario."/>
+				<param type="bool" name="ok" />
+				<param type="std::string" name="ringAccess" byref="true" />
+				<param type="std::string" name="errMsg" byref="true" />
+			</method>
+
+			<method name="saveScenarioFile" msg="SSSFA">
+				<doc line="a message to validate a file waiting to be saved"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="R2::TScenarioHeaderSerializer" name="header" byref="true"/>
+			</method>
+
+			<method name="loadScenarioFile" msg="SLSFA">
+				<doc line="a message to validate a file waiting to be loaded"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="std::string" name="signature" byref="true"/>
+			</method>
+
+			<method name="saveUserComponentFile" msg="SUCF">
+				<doc line="a message to validate a user component file waiting to be saved"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="R2::TScenarioHeaderSerializer" name="header" byref="true"/>
+			</method>
+
+			<method name="loadUserComponentFile" msg="LUCF">
+				<doc line="a message to validate a user component file waiting to be loaded"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="std::string" name="signature" byref="true"/>
+			</method>
+
+			<method name="teleportOneCharacterToAnother" msg="STOCTA">
+				<doc line="a message to ask the dss to teleport a character to another character"/>
+				<param type="TSessionId" name="sessionId"  />
+				<param type="uint32" name="sourceId"  />
+				<param type="uint32" name="destId"  />
+			</method>
+
+			<method name="teleportWhileUploadingScenario" msg="STWUS">
+				<doc line="teleport the player while uploading the scenario"/>
+				<param type="std::string" name="island" byref="true"/>
+				<param type="std::string" name="entryPoint" byref="true"/>
+				<param type="std::string" name="season" byref="true"/>
+			</method>
+
+
+			<method name="multiPartMsgHead" msg="DSS_HEAD" >
+				<doc line="send the header of a multi-part message"/>
+				<param type="uint32" name="charId" />
+				<param type="std::string" name="msgName" byref="true"/>
+				<param type="uint32" name="nbPacket" />
+				<param type="uint32" name="size" />
+			</method>
+
+			<method name="multiPartMsgBody" msg="DSS_MSG" >
+				<doc line="send a part of a multi-part message"/>
+				<param type="uint32" name="charId" />
+				<param type="uint32" name="partId" />
+				<param type="std::vector&lt;uint8&gt;" name="data" byref="true" serial="Cont"/>
+			</method>
+
+			<method name="multiPartMsgFoot" msg="DSS_FOOT" >
+				<doc line="send the footer of a multi-part message"/>
+				<param type="uint32" name="charId" />
+			</method>
+
+			<method name="forwardToDss" msg="DSS_FW" >
+				<doc line="simulate the forward of a message (to dss)"/>
+				<param type="uint32" name="charId" />
+				<param type="NLNET::CMessage" name="msg" serial="Message" byref="true" />
+			</method>
+
+		</module_interface>
+
+
+
+		<!--  ClientEditionModule -->
+		<module_interface name="CShareClientEditionItf" module_class='"ClientEditionModule"'>
+
+			<method name="startingScenario" msg="RSS1" broadcast="true">
+				<doc line="The start of a test has been requested"/>
+				<param type="uint32"	name="charId" /> <!-- the id of of the character that has requested de start -->
+			</method>
+
+			<method name="startScenario" msg="RSS2" broadcast="true">
+				<doc line="A Scenario has started"/>
+				<param type="bool"		name="ok"/> <!-- ok?setMode(DM):setMode(Edition) -->
+				<param type="uint32"	name="startingAct" />
+				<param type="std::string"	name="errorMsg" byref="true" />
+			</method>
+
+
+			<method name="onUserComponentRegistered" msg="CUCR" broadcast="true">
+				<doc line="A User component has been registered"/>
+				<param type="NLMISC::CHashKeyMD5" name="md5" byref="true"/>
+			</method>
+
+			<method name="onUserComponentUploading" msg="CUCU">
+				<doc line="Request the upload of a component"/>
+				<param type="NLMISC::CHashKeyMD5" name="md5" byref="true"/>
+			</method>
+
+
+			<method name="onScenarioUploaded" msg="CSUA" broadcast="true">
+				<doc line="The client request to upload an hl ata."/>
+				<param type="R2::CObjectSerializerClient"		name="hlScenario" byref="true"/>
+			</method>
+
+
+			<method name="onNodeSet" msg="CNSA" broadcast="true">
+				<doc line="The client request to set a node on a hl scenario."/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="R2::CObjectSerializerClient"	name="value" byref="true"/>
+			</method>
+
+			<method name="onNodeInserted" msg="CNIA" broadcast="true">
+				<doc line="The ServerEditionMode inserts a node on a hl scenario."/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="sint32" name="position"/>
+				<param type="std::string" name="key" byref="true"/>
+				<param type="R2::CObjectSerializerClient"	name="value" byref="true"/>
+			</method>
+
+			<method name="onNodeErased" msg="CNEA" broadcast="true">
+				<doc line="The ServerEditionMode erases a node on a hl scenario."/>
+				<param type="std::string" name="instanceId" byref="true"/>
+				<param type="std::string" name="attrName" byref="true"/>
+				<param type="sint32" name="position"/>
+			</method>
+
+			<method name="onNodeMoved" msg="CNMA" broadcast="true">
+				<doc line="The ServerEditionMode a move node on a hl scenario."/>
+				<param type="std::string" name="instanceId1" byref="true"/>
+				<param type="std::string" name="attrName1" byref="true"/>
+				<param type="sint32" name="position1"/>
+				<param type="std::string" name="instanceId2" byref="true"/>
+				<param type="std::string" name="attrName2" byref="true"/>
+				<param type="sint32" name="position2"/>
+			</method>
+
+			<method name="onQuotaUpdated" msg="CQU">
+				<doc line="Updates the client quota" />
+				<param type="uint32" name="maxNpcs"/>
+				<param type="uint32" name="maxStaticObjects"/>
+			</method>
+
+			<method name="onCharModeUpdated" msg="CCMU">
+				<doc line="Updates the client Mode (tester, dm, editor, player) be the speed" />
+				<param type="R2::TCharMode" name="mode"/>
+			</method>
+
+			<method name="onTestModeDisconnected" msg="CTMD" broadcast="true">
+				<doc line="Indicates to the client that an animation has stop (animation, play, test)" />
+				<param type="TSessionId" name="sessionId"/>
+				<param type="uint32" name="lastActIndex"/>
+				<param type="R2::TScenarioSessionType" name="animationType" serial="Enum" />
+			</method>
+
+			<method name="onTpPositionSimulated" msg="CTPPS">
+				<doc line="A DSS Message to make a local client tp (because egs can not do it)/" />
+				<param type="TSessionId" name="sessionId" />
+				<param type="uint64" name="characterId64" />
+				<param type="sint32" name="x" />
+				<param type="sint32" name="y" />
+				<param type="sint32" name="z" />
+				<param type="uint8" name="scenarioSeason" />
+			</method>
+
+			<method name="onKicked" msg="COK">
+				<doc line="A DSS Message to indicates that the client will be disconnect in secondes./" />
+				<param type="uint32" name="timeBeforeDisconnection" />
+				<param type="bool" name="mustKick" />
+			</method>
+
+			<method name="onDisconnected" msg="COD">
+				<doc line="A DSS Message to make to disconnect the client./" />
+			</method>
+
+			<method name="scheduleStartAct" msg="SSA1" broadcast="true">
+				<doc line="Tell to the client that an act begin in nbSeconds"/>
+				<param type="uint32"	name="errorId" /> <!-- 0 if ok -->
+				<param type="uint32"	name="actId" /> <!-- the id of of the act that the user has requested de start -->
+				<param type="uint32"	name="nbSeconds" /> <!-- The delay between the request and the start of act -->
+			</method>
+
+			<method name="onAnimationModePlayConnected" msg="OAMC" broadcast="true">
+				<doc line="Tell to the client that he is connected in play mode in an animation session"/>
+			</method>
+
+			<method name="updateScenarioHeader" msg="CUSH">
+				<doc line="A DSS Message to update the scenario Header"/>
+				<param type="R2::TScenarioHeaderSerializer" name="scenarioHeader" byref="true"/>
+			</method>
+
+			<method name="updateMissionItemsDescription" msg="CUIT">
+				<doc line="A DSS Message to update discription mission item of a scenario"/>
+				<param type="TSessionId"						name="sessionId"/>
+				<param type="std::vector&lt;R2::TMissionItem&gt;" name="missionItem" byref="true" serial="Cont"/>
+			</method>
+
+			<method name="updateActPositionDescriptions" msg="CUAPD">
+				<doc line="A DSS Message to update the discription of acts (name and positions)" />
+				<param type="R2::TActPositionDescriptions" name="actPositionDescriptions" byref="true" serial="Cont"/>
+			</method>
+
+			<method name="updateUserTriggerDescriptions" msg="CUUTD">
+				<doc line="A DSS Message to update the discription of acts (name and positions)" />
+				<param type="R2::TUserTriggerDescriptions" name="userTriggerDescriptions" byref="true" serial="Cont"/>
+			</method>
+			<method name="onCurrentActIndexUpdated" msg="CUAIU">
+				<doc line="A DSS Message to update the discription of acts (name and positions)" />
+				<param type="uint32" name="actIndex" />
+			</method>
+
+			<method name="updateTalkingAsList" msg="CUTAL">
+				<doc line="Update the Talking as list."/>
+				<param type="std::vector&lt;uint32&gt;" name="botsId"  byref="true" serial="Cont"/>
+			</method>
+
+			<method name="updateIncarningList" msg="CUIL">
+				<doc line="Update the Incarning list."/>
+				<param type="std::vector&lt;uint32&gt;" name="botsId"  byref="true" serial="Cont"/>
+			</method>
+
+			<method name="systemMsg" msg="CSM" broadcast="true">
+				<doc line="A message that will be printed an client"/>
+				<param type="std::string" name="msgType"  byref="true"/>
+				<param type="std::string" name="who"  byref="true"/>
+				<param type="std::string" name="msg"  byref="true"/>
+			</method>
+
+			<method name="onRingAccessUpdated" msg="CRAU">
+				<doc line="Update the ring access of the client"/>
+				<param type="std::string" name="ringAccess"  byref="true"/>
+			</method>
+
+			<method name="saveScenarioFileAccepted" msg="CSSFA">
+				<doc line="a message to validate a file waiting to be saved"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="std::string" name="signature" byref="true"/>
+				<param type="bool" name="isAccepted"/>
+			</method>
+
+
+			<method name="loadScenarioFileAccepted" msg="CLSFA">
+				<doc line="a message to validate a file waiting to be loaded"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="bool" name="ok" />
+			</method>
+
+			<method name="saveUserComponentFileAccepted" msg="SUCFA">
+				<doc line="a message to validate a user component file waiting to be saved"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="std::string" name="signature" byref="true"/>
+				<param type="bool" name="isAccepted"/>
+			</method>
+
+
+			<method name="loadUserComponentFileAccepted" msg="LUCFA">
+				<doc line="a message to validate a user component file waiting to be loaded"/>
+				<param type="std::string" name="md5" byref="true"/>
+				<param type="bool" name="ok" />
+			</method>
+
+			<method name="multiPartMsgHead" msg="DSS_HEAD" >
+				<doc line="send the header of a multi-part message"/>
+				<param type="std::string" name="msgName" byref="true"/>
+				<param type="uint32" name="nbPacket" />
+				<param type="uint32" name="size" />
+			</method>
+
+			<method name="multiPartMsgBody" msg="DSS_MSG" >
+				<doc line="send a part of a multi-part message"/>
+				<param type="uint32" name="partId" />
+				<param type="uint32" name="packetSize"/>
+			</method>
+
+			<method name="multiPartMsgFoot" msg="DSS_FOOT" >
+				<doc line="send the footer of a multi-part message"/>
+			</method>
+
+			<method name="ackMsg" msg="CACKMSG" >
+				<doc line="send an ack messag to the client"/>
+				<param type="uint32" name="msgId"/>
+				<param type="bool" name="ok"/>
+			</method>
+
+		</module_interface>
+
+
+		<class name="TCharMappedInfo">
+			<doc line="Describe an user item in a ring session"/>
+			<serial/>
+
+			<property type="NLMISC::CSheetId"	name="ItemSheet"	byref="true"/>
+			<property type="ucstring"		name="Name"			byref="true"/>
+
+		</class>
+
+
+		<!-- ############################################################## -->
+		<module_interface name="CIOSRingItf">
+			<doc line="Implemented by IOS, support the reception of commands from the DSS"/>
+
+			<!-- ========================================================== -->
+			<method name="storeItemNamesForAIInstance" msg="SINFAI">
+				<doc line="DSS send a list of ring names user item with a AI instance"/>
+
+				<param type="uint32"		name="aiInstance"/>
+				<param type="std::vector &lt; TCharMappedInfo &gt;"		name="itemInfos"	byref="true" serial="Cont"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+</generator>
+

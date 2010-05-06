@@ -1,0 +1,17 @@
+// Spécifier les champs à extraire
+// NOTE: les champs _LocSlot & _PhraseId & _SheetId & _Recommended sont automatiquement ajoutés
+
+_CraftParameters.Durability
+_CraftParameters.Weight
+_CraftParameters.SapLoad
+_CraftParameters.StatEnergy
+_CraftParameters.DodgeModifier
+_CraftParameters.ParryModifier
+_CraftParameters.ProtectionFactor
+_CraftParameters.MaxSlashingProtection
+_CraftParameters.MaxBluntProtection
+_CraftParameters.MaxPiercingProtection
+_CraftParameters.Color
+_CraftParameters.HpBuff
+_CraftParameters.StaBuff
+_CraftParameters.Protection

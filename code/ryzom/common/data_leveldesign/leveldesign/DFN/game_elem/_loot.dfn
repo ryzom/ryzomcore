@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Version="0.1" State="modified">
+  <ELEMENT Name="item" Type="Type" Filename="filename.typ" FilenameExt="*.item"/>
+  <ELEMENT Name="min" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="max" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="chance" Type="Type" Filename="int.typ"/>
+  <LOG>Tue Jul 23 19:51:38 2002 (miller) Dfn Structure = </LOG>
+</DFN>

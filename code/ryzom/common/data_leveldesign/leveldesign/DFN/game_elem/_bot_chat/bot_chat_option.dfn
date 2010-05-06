@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.7 $" State="modified">
+  <ELEMENT Name="Action" Type="Type" Filename="bot_chat_action.typ"/>
+  <ELEMENT Name="NextPage" Type="Type" Filename="bot_chat_page.typ"/>
+  <ELEMENT Name="DBPath" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Refusable" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Thu Dec 05 19:15:32 2002 (Nicolas Vizerie) Dfn Structure = 
+Mon Jan 27 16:00:18 2003 (Nicolas Vizerie) Dfn Structure = 
+Tue Jan 28 14:26:34 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Jan 29 12:03:25 2003 (Nicolas Vizerie) Dfn Structure = 
+Tue Mar 11 12:21:42 2003 (Nicolas Vizerie) Dfn Structure = 
+Tue Mar 11 14:08:40 2003 (Nicolas Vizerie) Dfn Structure = 
+Tue Mar 11 18:41:58 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Mar 12 15:11:50 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Mar 26 11:52:40 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Apr 02 12:16:50 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Apr 02 14:29:40 2003 (Nicolas Vizerie) Dfn Structure = 
+Mon Jun 16 17:17:41 2003 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

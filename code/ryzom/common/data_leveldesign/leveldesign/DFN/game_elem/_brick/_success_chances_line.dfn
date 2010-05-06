@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="RelativeLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="SuccessChances" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="PartialSuccessMaxDraw" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="XpGain" Type="Type" Filename="float.typ" Default="1.0"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:12 2002 (corvazier) File converted from old format
+Tue Sep 07 18:08:41 2004 (fleury) Dfn Structure = 
+Tue Sep 07 18:12:34 2004 (fleury) Dfn Structure = 
+Tue Sep 07 19:19:47 2004 (fleury) Dfn Structure = 
+Tue Sep 07 20:53:21 2004 (fleury) Dfn Structure = </LOG>
+</DFN>

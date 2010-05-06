@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.5 $" State="modified">
+  <STRUCT>
+    <ATOM Name="brick 0" Value="bfpa01.sbrick"/>
+    <ATOM Name="brick 1"/>
+    <ATOM Name="brick 2"/>
+    <ATOM Name="brick 3"/>
+    <ATOM Name="brick 4"/>
+    <ATOM Name="brick 5"/>
+    <ATOM Name="brick 6"/>
+    <ATOM Name="brick 7"/>
+    <ATOM Name="brick 11"/>
+    <ATOM Name="brick 13"/>
+    <ATOM Name="brick 15"/>
+    <ATOM Name="brick 17"/>
+    <ATOM Name="usable_by_player" Value="true"/>
+    <ATOM Name="castable" Value="true"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

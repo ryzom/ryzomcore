@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="ParamId" Value="Gain controler"/>
+    <ARRAY Name="Sounds">
+      <ATOM Value="tuut.sound"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Jun 02 21:31:32 2009 (Kaetemi) .ParamId = Gain controler
+Tue Jun 02 21:31:59 2009 (Kaetemi) .Sounds[0] = tuut.sound
+Tue Jun 02 21:31:59 2009 (Kaetemi) formName Resized = 1</LOG>
+</FORM>

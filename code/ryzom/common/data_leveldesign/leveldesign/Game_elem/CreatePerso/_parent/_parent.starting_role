@@ -1,0 +1,271 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="StartEquipment1">
+      <STRUCT Name="Body">
+        <ATOM Name="Item" Value="icrave.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+      <STRUCT Name="Legs">
+        <ATOM Name="Item" Value="icrape.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+      <STRUCT Name="Arms">
+        <ATOM Name="Item" Value="icrase.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+      <STRUCT Name="Hands">
+        <ATOM Name="Item" Value="icrage.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+      <STRUCT Name="Feet">
+        <ATOM Name="Item" Value="icrabe.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+      <STRUCT Name="Head">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Face">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Headdress">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Neck">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="StartEquipment2">
+      <STRUCT Name="Body">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Legs">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Arms">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Hands">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Feet">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Head">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Face">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Headdress">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Neck">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="StartEquipment3">
+      <STRUCT Name="Body">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Legs">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Arms">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Hands">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Feet">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Head">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Face">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Headdress">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="EarR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Neck">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="WristR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="FingerR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="AnkleR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandL">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="HandR">
+        <ATOM Name="Quality" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Feb 23 15:10:31 2004 (puzin)
+Mon Feb 23 16:06:01 2004 (puzin) .StartEquipment1.Feet.Item = icrabe.sitem
+Mon Feb 23 16:06:39 2004 (puzin) .StartEquipment1.Hands.Item = icrage.sitem
+Mon Feb 23 16:07:09 2004 (puzin) .StartEquipment1.Legs.Item = icrape.sitem
+Mon Feb 23 16:07:31 2004 (puzin) .StartEquipment1.Arms.Item = icrase.sitem
+Mon Feb 23 16:07:42 2004 (puzin) .StartEquipment1.Body.Item = icrave.sitem
+Mon Feb 23 16:10:01 2004 (puzin) formName Pasted = 
+Mon Feb 23 20:08:52 2004 (puzin) .StartEquipment1.Body.Quality = 1
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Arms.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Arms.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Body.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Body.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Feet.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Feet.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Hands.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Hands.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Legs.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment2.Legs.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Arms.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Arms.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Body.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Body.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Feet.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Feet.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Hands.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Hands.Quality = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Legs.Item = 
+Fri Aug 13 19:23:21 2004 (puzin) .StartEquipment3.Legs.Quality = 
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.AnkleL.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.AnkleR.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.EarL.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.EarR.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.Face.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.FingerL.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.FingerR.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.HandL.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.HandR.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.Head.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.Headdress.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.Neck.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.WristL.Quality = 0
+Mon Aug 16 15:21:59 2004 (puzin) .StartEquipment1.WristR.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.AnkleL.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.AnkleR.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Arms.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Body.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.EarL.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.EarR.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Face.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Feet.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.FingerL.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.FingerR.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.HandL.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.HandR.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Hands.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Head.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Headdress.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Legs.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.Neck.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.WristL.Quality = 0
+Mon Aug 16 15:22:48 2004 (puzin) .StartEquipment2.WristR.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.AnkleL.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.AnkleR.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Arms.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Body.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.EarL.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.EarR.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Face.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Feet.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.FingerL.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.FingerR.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.HandL.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.HandR.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Hands.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Head.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Headdress.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Legs.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.Neck.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.WristL.Quality = 0
+Mon Aug 16 15:23:41 2004 (puzin) .StartEquipment3.WristR.Quality = 0</LOG>
+</FORM>

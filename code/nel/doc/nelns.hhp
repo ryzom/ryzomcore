@@ -1,0 +1,14 @@
+[OPTIONS]
+Auto Index=Yes
+Compatibility=1.1 or later
+Compiled file=nelns.chm
+Default topic=html\nelns\index.html
+Display compile progress=Yes
+Language=0x809 Anglais (Royaume-Uni)
+
+
+[FILES]
+html\nelns\index.html
+
+[INFOTYPES]
+

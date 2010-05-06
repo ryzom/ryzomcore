@@ -1,0 +1,245 @@
+<!-- ****************************************** -->
+<!-- *             RESET INTERFACE            * -->
+<!-- ****************************************** -->
+<!-- A container is ALWAYS defined in BL TL hotspot when poped (layer0) else (layer > 0) it is a TL TL -->
+<!-- Take care that if the container is not active a getProp of w or h will return 0 -->
+
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+<variable entry="UI:TEMP:ACTIVE" type="sint64" value="0" />
+
+<proc id="pri_top_center" >
+	<action handler="set" params="dblink=UI:TEMP:ACTIVE|value=getprop('@0:active')" />
+	<action handler="set" params="target='@0:active'|value=1" />
+	<!--<action handler="set" params="target='@0:x'|value=div(sub(getprop('ui:interface:w'),getprop('@0:w')),2)" />-->
+	<action handler="set" params="target='@0:y'|value=sub(getprop('ui:interface:h'),48)" />
+	<action handler="set" params="target='@0:active'|value=@UI:TEMP:ACTIVE" />
+</proc>
+
+
+<proc id="base_desktop" >
+
+	<action handler="reset_interface" params="" />
+	<action handler="unlock_all_container" params="" />
+	
+	<!-- Player -->
+	<action handler="set" params="target='ui:interface:player:active'|value=1" />
+	<action handler="set" params="target='ui:interface:player:x'|value=4" />
+	<action handler="set" params="target='ui:interface:player:y'|value=sub(getprop('ui:interface:h'),4)" />
+	<action handler="set_transparent" params="ui:interface:player" />
+
+	<!-- BonusMalus -->
+	<action handler="set" params="target='ui:interface:bonus_malus:active'|value=1" />
+	<action handler="set" params="target='ui:interface:bonus_malus:x'|value=188" />
+	<action handler="set" params="target='ui:interface:bonus_malus:y'|value=sub(getprop('ui:interface:h'),4)" />
+	
+	<!-- Target -->
+	<action handler="set" params="target='ui:interface:target:active'|value=1" />
+	<action handler="set" params="target='ui:interface:target:x'|value=4" />
+	<action handler="set" params="target='ui:interface:target:y'|value=sub(sub(getprop('ui:interface:h'),getprop('ui:interface:player:h')),8)" />
+	<action handler="set_transparent" params="ui:interface:target" />
+	
+	<!-- Team -->
+	<action handler="set" params="target='ui:interface:team_list:x'|value=4" />
+	<action handler="set" params="target='ui:interface:team_list:y'|value=sub(sub(sub(getprop('ui:interface:h'),getprop('ui:interface:player:h')),getprop('ui:interface:target:h')),12)" />
+	
+	<!-- Compass -->
+	<action handler="set" params="target='ui:interface:compass:active'|value=1" />
+	<action handler="set" params="target='ui:interface:compass:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:compass:w')),4)" />
+	<action handler="set" params="target='ui:interface:compass:y'|value=sub(getprop('ui:interface:h'),4)" />
+	<action handler="set_transparent" params="ui:interface:compass" />
+	
+	<!-- Main Chat -->
+	<action handler="set" params="target='ui:interface:main_chat:active'|value=1" />
+	<action handler="set_alpha" params="target=ui:interface:main_chat|alpha=100" />
+	
+	<!-- Actions -->
+	<action handler="set" params="target='ui:interface:gestionsets:active'|value=0" />
+	
+	<!-- Info Player Journal -->
+	<action handler="set" params="target='ui:interface:info_player_journal:x'|value=4" />
+	<action handler="set" params="target='ui:interface:info_player_journal:y'|value=sub(getprop('ui:interface:h'),113)" />
+	<action handler="set_alpha" params="target=ui:interface:info_player_journal|alpha=100" />
+	
+	<!-- Milko -->
+	<action handler="set" params="target='ui:interface:milko_pad:active'|value=1" />
+	<action handler="set" params="target='ui:interface:milko_pad:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:milko_pad:w')),4)" />
+	<action handler="set" params="target='ui:interface:milko_pad:y'|value=add(getprop('ui:interface:milko_pad:h'),4)" />
+	<action handler="set_alpha" params="target=ui:interface:milko_pad|alpha=200" />
+	
+	<!-- Map -->
+	<action handler="set" params="target='ui:interface:map:active'|value=1" />
+	<action handler="set" params="target='ui:interface:map:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:map:w')),4)" />
+	<action handler="set" params="target='ui:interface:map:y'|value=sub(sub(getprop('ui:interface:h'), getprop('ui:interface:compass:h')), 8)" />
+	<action handler="set" params="target='ui:interface:map:active'|value=0" />
+	
+	<!-- Contacts -->
+	<action handler="set" params="target='ui:interface:contact_list:active'|value=1" />
+	<action handler="set" params="target='ui:interface:contact_list:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:contact_list:w')),4)" />
+	<action handler="set" params="target='ui:interface:contact_list:y'|value=sub(sub(getprop('ui:interface:h'), getprop('ui:interface:compass:h')), 12)" />
+	<action handler="set" params="target='ui:interface:contact_list:active'|value=0" />
+	
+	<!-- Mailbox -->
+	<action handler="set" params="target='ui:interface:mailbox:w'|value=480" />
+	<action handler="set" params="target='ui:interface:mailbox:h'|value=360" />
+	
+	<!-- Gestion Windows (the popup in middle of the screen) -->
+	<action handler="set" params="dblink=UI:TEMP:ACTIVE|value=getprop('ui:interface:gestion_windows:active')" />
+	<action handler="set" params="target='ui:interface:gestion_windows:active'|value=1" />
+	<action handler="set" params="target='ui:interface:gestion_windows:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:gestion_windows:w')),2)" />
+	<action handler="set" params="target='ui:interface:gestion_windows:y'|value=add(getprop('ui:interface:gestion_windows:h'),div(sub(getprop('ui:interface:h'),getprop('ui:interface:gestion_windows:h')),2))" />
+	<action handler="set" params="target='ui:interface:gestion_windows:active'|value=@UI:TEMP:ACTIVE" />
+	
+</proc>
+
+<proc id="proc_reset_interface">
+		
+	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />	
+	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
+	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
+	
+	<action handler="reset_virtual_desktop" params="vdesk=0" />
+	<action handler="reset_virtual_desktop" params="vdesk=1" />
+	<action handler="reset_virtual_desktop" params="vdesk=2" />
+	<action handler="reset_virtual_desktop" params="vdesk=3" />
+
+	<!-- ********* -->
+	<!-- DESKTOP 1 -->
+	<!-- ********* -->
+	<action handler="set_virtual_desktop" params="vdesk=0" />
+	<action handler="proc" params="base_desktop" />
+	
+		<!-- Actions -->
+		<action handler="set" params="target='ui:interface:gestionsets:active'|value=1" />
+		<action handler="set" params="target='ui:interface:gestionsets:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:gestionsets:w')),2)" />
+		<action handler="set" params="target='ui:interface:gestionsets:y'|value=sub(getprop('ui:interface:h'),4)" />
+		
+		<!-- Main Chat -->
+		<action handler="set" params="target='ui:interface:main_chat:w'|value=383" />
+		<action handler="set" params="target='ui:interface:main_chat:h'|value=237" />
+		<action handler="set" params="target='ui:interface:main_chat:x'|value=4" />
+		<action handler="set" params="target='ui:interface:main_chat:y'|value=add(getprop('ui:interface:main_chat:h'),4)" />
+		
+		<!-- Mission Journal -->
+		<action handler="set" params="target='ui:interface:info_player_journal:active'|value=1" />
+		<action handler="set" params="target='ui:interface:info_player_journal:locked'|value=0" />
+		<action handler="set" params="target='ui:interface:info_player_journal:h'|value=182" />
+		<action handler="set" params="target='ui:interface:info_player_journal:w'|value=280" />
+		<action handler="set" params="target='ui:interface:info_player_journal:x'|value=4" />
+		<action handler="set" params="target='ui:interface:info_player_journal:y'|value=add(add(getprop('ui:interface:main_chat:h'),getprop('ui:interface:info_player_journal:h')),8)" />
+		
+	<!-- ********* -->
+	<!-- DESKTOP 2 -->
+	<!-- ********* -->
+	<action handler="set_virtual_desktop" params="vdesk=1" />
+	<action handler="proc" params="base_desktop" />
+	
+		<!-- Compass -->
+		<action handler="set" params="target='ui:interface:compass:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:compass:w')),4)" />
+		<action handler="set" params="target='ui:interface:compass:y'|value=sub(getprop('ui:interface:h'),4)" />
+		
+		<!-- Player -->
+		<action handler="set" params="target='ui:interface:player:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:player:w')),4)" />
+		<action handler="set" params="target='ui:interface:player:y'|value=sub(sub(getprop('ui:interface:h'),getprop('ui:interface:compass:h')),8)" />
+
+		<!-- Target -->
+		<action handler="set" params="target='ui:interface:target:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:target:w')),4)" />
+		<action handler="set" params="target='ui:interface:target:y'|value=sub(sub(sub(getprop('ui:interface:h'),getprop('ui:interface:player:h')), getprop('ui:interface:compass:h')), 12)" />
+
+		<!-- BonusMalus -->
+		<action handler="set" params="target='ui:interface:bonus_malus:x'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:bonus_malus:w')),4)" />
+		<action handler="set" params="target='ui:interface:bonus_malus:y'|value=sub(sub(sub(sub(getprop('ui:interface:h'), getprop('ui:interface:target:h')), getprop('ui:interface:compass:h')), getprop('ui:interface:player:h')), 16)" />
+
+		<!-- Mission Journal -->
+		<action handler="set" params="target='ui:interface:info_player_journal:active'|value=0" />
+		
+		<!-- Actions -->
+		<action handler="set" params="target='ui:interface:gestionsets:active'|value=0" />
+		
+		<!-- Main Chat -->
+		<action handler="set" params="target='ui:interface:main_chat:w'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:compass:w')),8)" />
+		<action handler="set" params="target='ui:interface:main_chat:h'|value=132" />
+		<action handler="set" params="target='ui:interface:main_chat:x'|value=4" />
+		<action handler="set" params="target='ui:interface:main_chat:y'|value=add(getprop('ui:interface:main_chat:h'),4)" />
+		
+		<!-- Map -->
+		<action handler="set" params="target='ui:interface:map:w'|value=sub(sub(getprop('ui:interface:w'),getprop('ui:interface:compass:w')),8)" />
+		<action handler="set" params="target='ui:interface:map:h'|value=sub(sub(getprop('ui:interface:h'),getprop('ui:interface:main_chat:h')),8)" />
+		<action handler="set" params="target='ui:interface:map:x'|value=4" />
+		<action handler="set" params="target='ui:interface:map:y'|value=sub(sub(getprop('ui:interface:h'),getprop('ui:interface:map:h')),4)" />
+		<action handler="set" params="target='ui:interface:map:locked'|value=0" />
+		<action handler="set" params="target='ui:interface:map:active'|value=1" />
+	
+	<!-- ********* -->
+	<!-- DESKTOP 3 -->
+	<!-- ********* -->
+	<action handler="set_virtual_desktop" params="vdesk=2" />
+	<action handler="reset_interface" params="" />
+	
+	
+	<!-- ********* -->
+	<!-- DESKTOP 4 -->
+	<!-- ********* -->
+	<action handler="set_virtual_desktop" params="vdesk=3" />
+	<action handler="proc" params="base_desktop" />
+	
+		<!-- Actions -->
+		<action handler="set" params="target='ui:interface:gestionsets:active'|value=1" />
+		<action handler="set" params="target='ui:interface:gestionsets:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:gestionsets:w')),2)" />
+		<action handler="set" params="target='ui:interface:gestionsets:y'|value=sub(getprop('ui:interface:h'),4)" />
+		
+		<!-- Main Chat -->
+		<action handler="set" params="target='ui:interface:main_chat:w'|value=383" />
+		<action handler="set" params="target='ui:interface:main_chat:h'|value=237" />
+		<action handler="set" params="target='ui:interface:main_chat:x'|value=4" />
+		<action handler="set" params="target='ui:interface:main_chat:y'|value=add(getprop('ui:interface:main_chat:h'),4)" />
+		
+		<!-- Mission Journal -->
+		<action handler="set" params="target='ui:interface:info_player_journal:active'|value=1" />
+		<action handler="set" params="target='ui:interface:info_player_journal:locked'|value=0" />
+		<action handler="set" params="target='ui:interface:info_player_journal:h'|value=182" />
+		<action handler="set" params="target='ui:interface:info_player_journal:w'|value=280" />
+		<action handler="set" params="target='ui:interface:info_player_journal:x'|value=4" />
+		<action handler="set" params="target='ui:interface:info_player_journal:y'|value=add(add(getprop('ui:interface:main_chat:h'),getprop('ui:interface:info_player_journal:h')),8)" />
+	
+	<!-- SAUVEGARDE DU DESKTOP 4 ET RETOUR AU DESKTOP 0 -->
+	<action handler="set_virtual_desktop" params="vdesk=0" />
+	
+	
+	<!-- ************ -->
+	<!-- INFO WINDOWS -->
+	<!-- ************ -->
+
+	<action handler="help_reset_pos" params="y=-100" />
+
+	<action handler="lua" params="local tbw = getUI('ui:interface:r2ed_toolbar_window', false) if tbw then tbw.active = (r2~=nil and r2.Mode~=nil and r2.Mode=='Test') end" />
+	
+	<!-- ************ -->
+	<!--     MISC     -->
+	<!-- ************ -->
+	<action handler="lua" params="getUI('ui:interface:keys').uc_title = i18n.get('uiKeysTitle')"/>	
+	<action handler="lua" params="local w = getUI('ui:interface:r2ed_toolbar_window', false) if w then w.active = (r2~=nil and r2.Mode~=nil and r2.Mode=='Test') end"/>	
+	<!-- reenable missions, possibly hidden after a ring session -->
+	<action handler="lua:game:updateMissionJournalMode()"/>
+	<action handler="lua" params="local animals = getUI('ui:interface:animal_global');
+		if animals then 
+			animals.content.no_available_animals.active = false; 			
+			animals.header_opened.active = true; 
+			animals.header_closed.active = false; 
+			if animals.list then 
+				animals.list.active = true; 
+			end;
+		end"/>
+
+	<action handler="lua" params="if r2 and r2.initDMToolbarWindowPos then r2:initDMToolbarWindowPos() end" />
+
+</proc>
+
+
+<proc id="proc_reset_r2ed_interface">
+
+</proc>
+
+</interface_config>

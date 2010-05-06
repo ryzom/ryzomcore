@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <ATOM Name="CycleLenght" Value="3"/>
+    <ATOM Name="MinThunderPeriod" Value="5.0"/>
+    <ATOM Name="ThunderLenght" Value="0.4"/>
+    <ATOM Name="CloudWindSpeedFactor" Value="5"/>
+    <ATOM Name="CloudMinSpeed" Value="0.5"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Nov 15 15:44:46 2002 (Nicolas Vizerie) .MinThunderPeriod = 5.0
+Fri Nov 15 15:44:46 2002 (Nicolas Vizerie) .ThunderLenght = 0.2
+Fri Nov 15 16:12:04 2002 (Nicolas Vizerie) .ThunderLenght = 0.4
+Thu Mar 20 12:17:28 2003 (gatto) .CloudMinSpeed = 0.5
+Thu Mar 20 12:17:28 2003 (gatto) .CloudWindSpeedFactor = 5
+Wed May 19 15:53:11 2004 (vizerie) .CycleLenght = 3</LOG>
+</FORM>

@@ -1,0 +1,224 @@
+<HTML>
+<HEAD>
+<TITLE>
+Georges Editor Help
+</TITLE>
+</HEAD>
+<BODY>
+<A href="#Config file">Config file</A><BR>
+<A href="#User privilege">User privilege</A><BR>
+<A href="#Custom icon">Custom icon</A><BR>
+<A href="#Georges expression syntax">Georges expression syntax</A><BR>
+<A href="#Georges file formats">Georges file formats</A>
+<A name="Config file"></A>
+<H1>
+Config file
+</H1>
+Your "georges.cfg" config file MUST have the following entries:
+<ul>
+<li>root_search_directory = "l:\"; // (Root search path for georges files)</li>
+<li>typ_dfn_sub_folder    = "dfn"; // (Sub directory for types and dfn files)</li>
+<li>remember_list_size    = 11; // (Size of remember list in combobox)</li>
+<li>max_undo              = 20; // (Size of the undo buffer)</li>
+<li>default_type          = "default.typ"; // (Default type used when insert a new element in a DFN)</li>
+<li>default_dfn           = "default.dfn"; // (Default dfn used when insert a new element in a DFN)</li>
+<li>plugins               = {  }; // (List of plugins to load with georges)</li>
+<li>superuser             = 1; // (User mode. 0 for normal user, 1 for super user)</li>
+<li>user_type             = {  }; // (List of form type editable by a normal user. Superuser edit all kind of form)</li>
+</ul>
+<A name="Custom icon"></A>
+<H1>
+Custom icons
+</H1>
+<P>
+To have a custom icon for a form type (for exemple ".item"), place an icon file named "item.ico" in the Georges "DFN & TYPES" directory.
+then your file will shown with your custom icon in file explorer and in the georges file browser. <P>You can customise georges icons too.
+If can do the same thing to customise a special DFN or TYPE value in the left view of your document.
+<P>You can customise internal icons too. To do this, create one of the following icons:
+<ul>
+<li>header.ico (Header of the document)</li>
+<li>type.ico (Type document)</li>
+<li>dfn.ico (Dfn document)</li>
+<li>root.ico (first node of the document)</li>
+<li>array.ico (Array node of the document)</li>
+<li>typedoc.ico (Type node of the document)</li>
+<li>struct.ico (Struct node of the document)</li>
+<li>vstruct.ico (Virtual struct node of the document)</li>
+<li>hold.ico (Hold buffers)</li>
+</ul>
+<A name="User privilege"></A>
+<H1>
+User privilege
+</H1>
+<P>There is two privilege levels, user and superuser. To be a superuser, set to 1 the value superuser in georges.cfg.
+The user can't edit / open DFN and Type files, can't open the properties window. The user can create / modify only
+a subset of the forms. This subset is defined in the georges.cfg file by the parameter "user_type".
+<P>For exemple, if the user must only edit the files "*.animation" and "*.skeleton", set the config file like this:<BR> user_type = { "animation", "skeleton" };
+<A name="Georges expression syntax"></A>
+<H1>
+Georges expression syntax
+</H1>
+<P>
+Georges expression syntax depends the type of value you edit. Non-numerical or numerical.<BR>
+Numerical types are value of type UnsignedInt, SignedInt, Double. <BR>
+Non-numerical are value of type Color, String, Filename.<BR>
+</P>
+<H3>
+Non-numerical expression syntax
+</H3>
+<H4>
+Exemples
+</H4>
+<P>
+Some exemples of Georges non-numerical expressions:
+</P>
+<P>
+foo // Simple string<BR>
+".Entities[0].Position.X" // Reference on a form string<BR>
+{sqrt (24 * 2)} // Numerical expression converted in text<BR>
+myname{".Level"*2}.creature // Strings and expressions concatenation<BR>
+</P>
+<H4>
+Grammar
+</H4>
+<P>
+non_num_expression:	non_num_expression non_num_expression<BR>
+			| string<BR>
+			| value_reference<BR>
+			| numerical_expression<BR>
+			| constants<BR>
+<BR>
+value_reference:	"value_form_name"<BR>
+<BR>
+numerical_expression:	{numerical_expression_options num_expression (see above)}<BR>
+<BR>
+numerical_expression_options: | $zN // Pad left the number with zeros until the size of the number reach N<BR>
+<BR>
+constants:	"$filename" : form filename<BR>
+<BR>
+</P>
+<H3>
+Numerical expression syntax
+</H3>
+<H4>
+Exemples
+</H4>
+<P>
+Some exemples of Georges numerical expressions:
+</P>
+<P>
+1 // Simple number<BR>
+1+1 // Basic operator<BR>
+(1+2)*3 // Parentesis<BR>
+sin (pi) // Math functions<BR>
+2+$filename*4 // Operation with the number in the form filename<BR>
+2+".Entities[0].Position.X"*4 // Operation with a form value<BR>
+</P>
+<H4>
+Grammar
+</H4>
+<P>
+num_expression:	'-' num_expression<BR>
+			| '!' num_expression		// Returns true if a equal false, else false (logical not)<BR>
+			| '~' num_expression		// Returns ~ round(a) (bitwise not)<BR>
+			| '(' num_expression ')'<BR>
+			| num_expression operator num_expression<BR>
+			| function1 '(' num_expression ')'<BR>
+			| function2 '(' num_expression ',' num_expression ')'<BR>
+			| number<BR>
+			| constant<BR>
+			| value_reference<BR>
+			| value_existance<BR>
+<BR>
+operator:	'*'		// Calculates (a * b)<BR>
+			| '/'		// Calculates (a / b)<BR>
+			| '%'		// Calculates the remainder of (a / b)<BR>
+			| '+'		// Calculates (a + b)<BR>
+			| '-'		// Calculates (a - b)<BR>
+			| '<<'		// Returns round(a) left 32 bits unsigned shift by round(b)<BR>
+			| '>>'		// Returns round(a) right 32 bits unsigned shift by round(b)<BR>
+			| '<-'		// Returns round(a) left 32 bits signed shift by round(b)<BR>
+			| '->'		// Returns round(a) right 32 bits signed shift by round(b)<BR>
+			| '<'		// Returns true if a is strictly smaller than b<BR>
+			| '<='		// Returns true if a is smaller or equal than b<BR>
+			| '>'		// Returns true if a is strictly bigger than b<BR>
+			| '>='		// Returns true if a is bigger or equal than b<BR>
+			| '=='		// Returns true if a equal b, else returns false (warning, performs a floating point comparison)<BR>
+			| '!='		// Returns false if a equal b, else returns true (warning, performs a floating point comparison)<BR>
+			| '&'		// Returns round(a) & round(b) over 32 bits<BR>
+			| '|'		// Returns round(a) | round(b) over 32 bits<BR>
+			| '^'		// Returns round(a) ^ round(b) over 32 bits<BR>
+			| '&&'		// Returns true if a equal true and b equal true else returns false<BR>
+			| '||'		// Returns true if a equal true or b equal true else returns false<BR>
+			| '^^'		// Returns true if a equal true and b equal false, or, a equal false and b equal 1.0, else returns false<BR>
+<BR>
+function1:	abs			// Calculates the absolute value<BR>
+			| acos		// Calculates the arccosine<BR>
+			| asin		// Calculates the arcsine<BR>
+			| atan		// Calculates the arctangent<BR>
+			| ceil		// Calculates the ceiling of a value ( ceil(-1.1) = -1, ceil(1.1) = 2 )<BR>
+			| cos		// Calculates the cosine<BR>
+			| cosh		// Calculates the hyperbolic cosine<BR>
+			| exp		// Calculates the exponential<BR>
+			| exponent	// Calculates the exponent of a floating point value<BR>
+			| floor		// Calculates the floor of a value ( floor(-1.1) = -2, floor(1.1) = 1 )<BR>
+			| int		// Calculates the C style integer value ( int(-1.6) = -1, int(1.6) = 1 )<BR>
+			| log		// Calculates logarithms<BR>
+			| log10		// Calculates base-10 logarithms<BR>
+			| mantissa	// Calculates the mantissa of a floating point value<BR>
+			| round		// Calculates the nearest integer value ( round(-1.6) = -2, round(1.1) = 1 )<BR>
+			| sin		// Calculate sines<BR>
+			| sinh		// Calculate hyperbolic sines <BR>
+			| sq		// Calculates the square<BR>
+			| sqrt		// Calculates the square root<BR>
+			| tan		// Calculates the tangent <BR>
+			| tanh		// Calculates the hyperbolic tangent <BR>
+<BR>
+function2:	max			// Returns the larger of two values<BR>
+			| min		// Returns the smaller of two values<BR>
+			| atan2		// Calculates the arctangent of arg0/arg1<BR>
+			| pow		// Calculates a raised at the power of b<BR>
+			| rand		// Calculates a pseudo random value (arg0 <= randomValue < arg1)<BR>
+<BR>
+number:		[0-9]+								// Unsigned decimal integer<BR>
+			| "0x"[0-9a-fA-F]+					// Unsigned hexadecimal integer<BR>
+			| "0"[0-7]+							// Unsigned octal integer<BR>
+			| [0-9]*.[0-9]+						// Unsigned floating point value<BR>
+			| [0-9]*.[0-9]+[eE]-?[0-9]*.[0-9]+	// Unsigned floating point value with signed exponent<BR>
+<BR>
+constant:	e			// 2.7182818284590452353602874713527<BR>
+			| pi		// 3.1415926535897932384626433832795<BR>
+			| $filename	// Returns the number found at the end of the form filename<BR>
+<BR>
+value_reference:	\"value_form_name\" // Return the value string. Must be a litteral expression. Return error if the value doesn't exist.<BR>
+<BR>
+value_existance:	\"#value_form_name\" // Return 1 if the form value is filled else 0. Return error if the value doesn't exist.<BR>
+<BR>
+</P>
+<H4>
+Operator precedence
+</H4>
+<P>
+ 0 - unary operator (-, ~, !)<BR>
+ 1 - *, /, %<BR>
+ 2 - +, -, <BR>
+ 3 - <<, >>, <-, -><BR>
+ 4 - <, <=, >, >=<BR>
+ 5 - ==, !=<BR>
+ 6 - &<BR>
+ 7 - |<BR>
+ 8 - ^<BR>
+ 9 - &&<BR>
+10 - ||<BR>
+11 - ^^<BR>
+</P>
+<A name="Georges file formats"></A>
+<H1>
+Georges file formats
+</H1>
+There is 3 kind of files:<BR><BR>
+Type files (*.typ), define a basic element type (string, color, number with default values, limit, enums and graphic user interface).<BR>
+Dfn files (*.dfn), define a structure composed of basic elements, array of basic element, sub structures, array of sub structures and virtual sub structures.<BR>
+Form files (*.dfn_name), implement a Dfn file (the name of the Dfn based file is dfn_name.dfn).<BR>
+</BODY>
+</HTML>

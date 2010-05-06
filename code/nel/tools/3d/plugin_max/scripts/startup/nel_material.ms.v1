@@ -1,0 +1,178 @@
+-- Nel Material properties
+-- based on  Real Time material by Fred Ruff www.ruff-stuff.com
+
+plugin material NelMaterial
+    name:"NeL Material"
+    classID:#(0x64c75fec, 0x222b9eb9)
+    extends:standard replaceUI:false version:1.0
+(
+	local params, 
+
+		ThreeValueArray = #("None","average","a lot"),
+		CollisionTypeArray = #("floor","door","stairs","elevator","ladder"),
+		FrictionTypeArray = ThreeValueArray,
+		SlowMotionTypeArray = ThreeValueArray,
+		SinkTypeArray = ThreeValueArray,
+		BounceTypeArray = ThreeValueArray,
+		DammageTypeArray = ThreeValueArray,
+		TriggerTypeArray = #("type1 ?","type2 ?","type3 ?"),
+		SoundTypeArray = #("type1 ?","type2 ?","type3 ?"),
+		FXTypeArray = #("type1 ?","type2 ?","type3 ?"),
+		TracksPersistanceTypeArray = ThreeValueArray,
+		PresetsArray = #("--"),
+
+		presetfile = ((getdir #scripts) + "\\RTmatpresets.ini")
+
+
+    parameters main rollout:NelParams
+    (
+		-- 3d part of the material
+
+		bLightMap type:#boolean default:false ui:cbLightMap
+
+		-- Pacs part of the material
+
+		BaseColor type:#color default:(color 100 100 100) --ui:Base
+
+		CollisionType	 		type:#integer default:1 --ui:CollisionTypeList
+		FrictionType 			type:#integer default:1 --ui:FrictionType		
+		SlowMotionType	 		type:#integer default:1 --ui:SlowMotionType
+		SinkType		 		type:#integer default:1 --ui:SinkType		
+		BounceType		 		type:#integer default:1 --ui:BounceType		
+		DammageType		 		type:#integer default:1 --ui:DammageType		
+		TriggerType		 		type:#integer default:1 --ui:TriggerType		
+		SoundType		 		type:#integer default:1 --ui:SoundType		
+		FXType					type:#integer default:1 --ui:FXType			
+		TracksPersistanceType 	type:#integer default:1 --ui:TracksPersistanceType   
+
+	)
+
+
+    rollout NelParams "Nel Material"
+    (
+
+------------------------------------------------
+	group "3d"
+		(
+		CheckBox cbLightMap "LightMap"
+		)
+	group "Pacs"
+		(
+		colorpicker Base "Base Color: "  
+		DropDownList PresetList "Presets :" 						width:145 items:PresetsArray align:#left across:2
+		Label labeltext01 "Presets  works only 'one way'"
+		DropDownList CollisionTypeList "Collision Type :" 			width:145 items:CollisionTypeArray 		 align:#left across:2
+		DropDownList FrictionTypeList "No Friction Type (ice) :" 	width:145 items:FrictionTypeArray 		 align:#left across:2
+		DropDownList SlowMotionTypeList "Slow Motion Type :" 		width:145 items:SlowMotionTypeArray 	 align:#left across:2
+		DropDownList SinkTypeList "Sink Type :" 					width:145 items:SinkTypeArray 			 align:#left across:2
+		DropDownList BounceTypeList "Bounce Type :"					width:145 items:BounceTypeArray 		 align:#left across:2
+		DropDownList DammageTypeList "Dammage Type :" 				width:145 items:DammageTypeArray 		 align:#left across:2
+		DropDownList TriggerTypeList "Trigger Type :" 				width:145 items:TriggerTypeArray 		 align:#left across:2
+		DropDownList SoundTypeList "Sound Type :" 					width:145 items:SoundTypeArray 			 align:#left across:2
+		DropDownList FXTypeList "FX Type :" 						width:145 items:FXTypeArray 			 align:#left across:2
+		DropDownList TracksPersistanceTypeList "Tracks Type :" 		width:145 items:TracksPersistanceTypeArray align:#left 
+		)
+	------------------------------------------------
+
+		on CollisionTypeList			selected val do CollisionType 			= val
+		on FrictionTypeList				selected val do FrictionType 			= val
+		on SlowMotionTypeList			selected val do SlowMotionType			= val
+		on SinkTypeList					selected val do SinkType				= val
+		on BounceTypeList				selected val do BounceType				= val
+		on DammageTypeList				selected val do DammageType				= val
+		on TriggerTypeList				selected val do TriggerType				= val
+		on SoundTypeList				selected val do SoundType			 	= val
+		on FXTypeList					selected val do FXType			 		= val
+		on TracksPersistanceTypeList 	selected val do TracksPersistanceType 	= val
+
+		on Base changed col do 
+			(
+			basecolor = col 
+			try (delegate.diffuse = col) catch () 
+			try (this.standard.diffuse=col) catch ()
+			)
+
+		
+		Fn presetread =
+			(
+			matnum = GetINISetting presetfile "materials" "matnumber" 
+			for i = 1 to (matnum as integer) do (PresetsArray[i]=GetINISetting presetfile "materials" ("matname" + i as string))
+			PresetList.items = PresetsArray
+			)
+
+		Fn UsePreset selectedpreset=
+			(
+			local tempcolor = (color 0 0 0)
+			presetparams = GetINISetting presetfile "materials" ("matparam" + selectedpreset as string)
+			presetparamsarray = (filterString  presetparams "-,")
+
+			CollisionType 			= presetparamsarray[1] as float
+			FrictionType 			= presetparamsarray[2] as integer
+			SlowMotionType			= presetparamsarray[3] as integer
+			SinkType				= presetparamsarray[4] as integer
+			BounceType				= presetparamsarray[5] as integer
+			DammageType				= presetparamsarray[6] as integer
+			TriggerType				= presetparamsarray[7] as integer
+			SoundType				= presetparamsarray[8] as integer
+			FXType					= presetparamsarray[9] as integer
+			TracksPersistanceType 	= presetparamsarray[10] as integer
+			tempcolor.r				= presetparamsarray[11] as integer
+			tempcolor.g				= presetparamsarray[12] as integer
+			tempcolor.b				= presetparamsarray[13] as integer
+		
+			basecolor = tempcolor
+			Base.color = basecolor
+			try (delegate.diffuse = basecolor) catch ()
+			try (this.standard.diffuse=basecolor) catch ()
+
+			)
+
+
+		Fn updateparams =
+			(
+			print "updating params"
+			CollisionTypeList.selection	= CollisionType
+			FrictionTypeList.selection	= FrictionType 		
+			SlowMotionTypeList.selection= SlowMotionType		
+			SinkTypeList.selection		= SinkType		
+			BounceTypeList.selection	= BounceType		
+			DammageTypeList.selection	= DammageType		
+			TriggerTypeList.selection	= TriggerType				        
+			SoundTypeList.selection		= SoundType		
+			FXTypeList.selection		= FXType			
+			TracksPersistanceTypeList.selection   = TracksPersistanceType 
+			Base.color = BaseColor 
+			)
+
+		on PresetList selected val do 
+			(
+			UsePreset val
+			updateparams()
+			)
+
+		on params reload do (print "reload" ; updateparams())
+		on params open do 
+			(
+			print "open"
+			presetread()
+			updateparams() 
+			)
+	)
+
+    on create do 
+    (   
+		print "create"
+		delegate.ambient = [0,0,0]
+		delegate.diffuse = [255,255,255]
+		delegate.diffuse = BaseColor
+		delegate.specular = [255,255,255]
+		delegate.specularlevel = 0
+		delegate.glossiness = 0
+		delegate.diffuseMap = bitmapTexture()
+		delegate.selfillumMap = bitmapTexture()
+--		delegate.name = "toto"
+	)
+
+)
+
+

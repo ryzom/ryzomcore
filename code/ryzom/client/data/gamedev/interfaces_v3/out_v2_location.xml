@@ -1,0 +1,973 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+<!-- ******************* -->
+<!-- * SELECT LOCATION * -->
+<!-- ******************* -->
+
+<!-- we arrive in location from 0-charsel 1-appear -->
+<variable entry="UI:TEMP:FROM" type="sint64" value="0"/>
+
+<variable entry="UI:TEMP:LOCCLICKINFO"		type="sint64" value="-1"/>
+<variable entry="UI:TEMP:LOCCLICKDEST"		type="sint64" value="-1"/>
+<variable entry="UI:TEMP:CHAR3D:LOC" 		type="sint64" value="-1"/>
+<variable entry="UI:TEMP:LOCATIONBACKHOME"	type="sint64" value="-1"/>
+<variable entry="UI:TEMP:PLAYNOWLATER"		type="sint64" value="-1"/>
+
+<variable entry="UI:TEMP:CHAR3D:DEST" type="sint64" value="-1"/>
+
+<!-- Init -->
+<proc id="proc_location_start">
+	<action handler="reset_pushed" params="dblink=ui:outgame:location" />
+	
+	<action handler="proc" params="location_enable_buttons" />
+
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=0" />
+	
+	<action handler="set" params="target_property=ui:outgame:location:finish_but:active|value=1" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=0" />
+	
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=-2" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=-1" />
+
+	<action handler="proc" params="proc_choice_location|0"/>
+
+
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:location:loc3d:land:name|value='nb_fyros.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:location:3d_menu_1:land:name|value='nb_fyros.ig'" />
+
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:location:loc3d:land:name|value='nb_matis.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:location:3d_menu_1:land:name|value='nb_matis.ig'" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:location:loc3d:land:name|value='nb_tryker.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:location:3d_menu_1:land:name|value='nb_tryker.ig'" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:location:loc3d:land:name|value='nb_zorai.ig'" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:location:3d_menu_1:land:name|value='nb_zorai.ig'" />
+
+
+	<action handler="proc" params="init_main_nb"/>
+
+
+
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="init_menu_nbfyros"/>
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="init_menu_nbmatis"/>
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="init_menu_nbtryker"/>
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="init_menu_nbzorai"/>
+
+	<action handler="proc" params="proc_random_location" />
+
+	<action handler="anim_start" params="anim=anim_location_intro" />
+	<action handler="anim_start" params="anim=anim_loc_clouds" />
+	<action handler="anim_start" params="anim=anim_loc_select_fx" />
+	
+</proc>
+
+
+
+<proc id="location_disable_buttons">
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:active|value=0"/>
+	<!--
+	<action handler="set" params="target_property=ui:outgame:location:infos_but:active|value=0"/>
+	-->
+	<action handler="set" params="target_property=ui:outgame:location:finish_but:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:location:abort_but:active|value=0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:location:quit_but:active|value=0"/>
+</proc>
+
+
+<proc id="location_enable_buttons">
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:active|value=1"/>
+	<!--
+	<action handler="set" params="target_property=ui:outgame:location:infos_but:active|value=1"/>
+	-->
+	<action handler="set" params="target_property=ui:outgame:location:finish_but:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:location:abort_but:active|value=1"/>
+	
+	<action handler="set" params="target_property=ui:outgame:location:quit_but:active|value=1"/>
+</proc>
+
+
+
+<proc id="proc_random_location" >
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=rand(0,4)" />
+	<action handler="proc" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="proc_choice_location|0" />
+	<action handler="proc" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="proc_choice_location|1" />
+	<action handler="proc" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="proc_choice_location|2" />
+	<action handler="proc" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="proc_choice_location|3" />
+	<action handler="proc" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="proc_choice_location|4" />
+</proc>
+
+
+<proc id="init_main_nb">
+	<!-- Cam -->
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:fov|value=70"/>
+	
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:started|value=1" />
+	<action handler="set" params="target_property=ui:outgame:location:3d_select:select_fx:started|value=1" />
+	
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:posy|value=-1.5"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:posz|value=2.0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:tgtx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:tgty|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:cam:tgtz|value=-0.7"/>
+	
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:land:posz|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:clouds:posz|value=0.0"/>
+
+</proc>
+
+
+<proc id="init_menu_nbfyros">
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.99"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.45"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:land:posz|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:clouds:posz|value=0.0"/>
+
+	<!-- Villages Names -->
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:hardtext|value='uiLocDest1Fyros'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:hardtext|value='uiLocDest2Fyros'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:hardtext|value='uiLocDest3Fyros'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:hardtext|value='uiLocDest4Fyros'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:hardtext|value='uiLocDest5Fyros'"/>
+	
+	<!-- Aegus -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posx|value=-0.33"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posy|value=0.39"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtx|value=-0.81"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgty|value=0.50"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtz|value=-0.02"/>
+	
+	<!-- Kaemon -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posx|value=-0.34"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posy|value=-0.01"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtx|value=0.07"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgty|value=-0.21"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtz|value=0.0"/>
+	
+	<!-- Sekovix -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posx|value=0.87"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posy|value=0.62"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posz|value=-0.01"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtx|value=0.62"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgty|value=0.52"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtz|value=-0.01"/>
+
+	<!-- Phyxon -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posx|value=-0.54"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posy|value=-0.33"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtx|value=-0.43"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgty|value=-0.69"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtz|value=-0.01"/>
+	
+	<!-- Galemus -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posx|value=0.53"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posy|value=-0.76"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtx|value=0.98"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgty|value=-0.73"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtz|value=0.0"/>
+</proc>
+
+
+<proc id="init_menu_nbmatis">
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.76"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.36"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=0.0"/>
+
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:land:posz|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:clouds:posz|value=0.0"/>
+
+	<!-- Villages Names -->
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:hardtext|value='uiLocDest1Matis'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:hardtext|value='uiLocDest2Matis'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:hardtext|value='uiLocDest3Matis'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:hardtext|value='uiLocDest4Matis'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:hardtext|value='uiLocDest5Matis'"/>
+
+	<!-- Stalli -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posx|value=-0.39"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posy|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posz|value=0.31"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtx|value=-0.72"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgty|value=0.53"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtz|value=0.11"/>
+	
+	<!-- Borea -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posx|value=0.76"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posy|value=-0.33"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posz|value=0.42"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtx|value=0.15"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgty|value=0.1"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtz|value=0.08"/>
+	
+	<!-- Nistia -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posx|value=1.67"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posy|value=0.17"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posz|value=0.22"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtx|value=1.05"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgty|value=-0.07"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtz|value=0.04"/>
+
+	<!-- Rosilio -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posx|value=-0.13"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posy|value=-0.88"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posz|value=0.37"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtx|value=-0.44"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgty|value=-0.34"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtz|value=0.08"/>
+	
+	<!-- Miani -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:fov|value=30"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posx|value=-0.26"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posy|value=-0.7"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posz|value=0.32"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtx|value=0.5"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgty|value=-0.79"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtz|value=0.03"/>
+</proc>
+
+
+<proc id="init_menu_nbtryker">
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.99"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:land:posz|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:clouds:posz|value=0.0"/>
+
+	<!-- Villages Names -->
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:hardtext|value='uiLocDest1Tryker'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:hardtext|value='uiLocDest2Tryker'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:hardtext|value='uiLocDest3Tryker'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:hardtext|value='uiLocDest4Tryker'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:hardtext|value='uiLocDest5Tryker'"/>
+
+	<!-- Aubermouth -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posx|value=-0.51"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posy|value=0.17"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posz|value=0.05"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtx|value=-1.06"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgty|value=-0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtz|value=-0.02"/>
+	
+	<!-- Barkdell -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posx|value=-0.22"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posy|value=-0.15"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtx|value=0.38"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgty|value=0.06"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtz|value=-0.02"/>
+	
+	<!-- Hobwelly -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posx|value=0.91"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posy|value=0.13"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posz|value=0.02"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtx|value=1.23"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgty|value=0.49"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtz|value=-0.02"/>
+
+	<!-- Waverton -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posx|value=-0.5"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posy|value=-0.74"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posz|value=0.01"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtx|value=-0.89"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgty|value=-1.12"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtz|value=-0.02"/>
+	
+	<!-- Dingleton -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:fov|value=30"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posx|value=0.97"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posy|value=-0.71"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posz|value=0.04"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtx|value=1.08"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgty|value=-1.2"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtz|value=-0.02"/>
+</proc>
+
+
+
+<proc id="init_menu_nbzorai">
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.99"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.45"/>
+	<action handler="set" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:land:posz|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:clouds:posz|value=0.0"/>
+
+	<!-- Villages Names -->
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but0:hardtext|value='uiLocDest1Zorai'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but1:hardtext|value='uiLocDest2Zorai'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but2:hardtext|value='uiLocDest3Zorai'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but3:hardtext|value='uiLocDest4Zorai'"/>
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but4:hardtext|value='uiLocDest5Zorai'"/>
+	
+	<!-- Qai-lo -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posx|value=-0.64"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posy|value=0.34"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:posz|value=0.01"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtx|value=-0.97"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgty|value=0.54"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu1:tgtz|value=-0.05"/>
+	
+	<!-- Sheng-wo -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posx|value=0.18"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posy|value=-0.4"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:posz|value=0.11"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtx|value=-0.14"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgty|value=-0.31"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu2:tgtz|value=-0.08"/>
+	
+	<!-- men-xing -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posx|value=0.55"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posy|value=-0.07"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:posz|value=0.15"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtx|value=0.7"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgty|value=0.32"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu3:tgtz|value=-0.08"/>
+
+	<!-- Koi-zun -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posx|value=-0.4"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posy|value=-0.78"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:posz|value=0.07"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtx|value=-0.75"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgty|value=-0.98"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu4:tgtz|value=-0.08"/>
+	
+	<!-- Yin-piang -->
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:fov|value=40"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posx|value=0.34"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posy|value=-0.52"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:posz|value=0.13"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtx|value=0.72"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgty|value=-0.74"/>
+	<action handler="set" params="target_property=ui:outgame:location:3d_menu_1:cam_menu5:tgtz|value=-0.08"/>
+</proc>
+
+
+
+<proc id="restart_loc_clouds">
+	<action handler="anim_start" params="anim=anim_loc_clouds" />
+</proc>
+
+<proc id="restart_loc_select_fx">
+	<action handler="anim_start" params="anim=anim_loc_select_fx" />
+</proc>
+
+
+<proc id="location_when_back_finished">
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="proc" params="proc_big_buttons_deactive" />
+	<action handler="anim_start"  params="anim=anim_location_back2" />
+</proc>
+
+
+<proc id="proc_choice_location">
+	<action handler="set" params="target_property=ui:outgame:location:leftbuts:but@0:pushed|value=1" />
+	<action handler="play_sound" params="name=career_but_click" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=@0" />
+
+	<action handler="set" params="target_property=ui:outgame:location:select_menu:y |
+								value=switch(@0, 2, -151, -304, -457, -610)" />
+	<action handler="set" params="target_property=ui:outgame:location:3d_select:y |
+								value=switch(@0, 0, -153, -306, -459, -612)" />							
+								
+
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="loc_selection_nbfyros" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="loc_selection_nbmatis" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="loc_selection_nbtryker" />						
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="loc_selection_nbzorai" />
+	
+
+	<action handler="proc" params="proc_location_infos2" />
+</proc>
+
+
+<proc id="loc_selection_nbfyros" >
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.85"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.42"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.05"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.18"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.21"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.05"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.48"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.51"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.04"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.3"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.65"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.04"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.88"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.75"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.04"/>
+</proc>
+
+<proc id="loc_selection_nbmatis" >
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.76"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.36"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=0.0"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.31"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.06"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=0.07"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=1.06"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.02"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=0.0"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.5"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.39"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.01"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.62"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.62"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+</proc>
+
+<proc id="loc_selection_nbtryker" >
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.99"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.02"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.42"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.1"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=1.3"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.45"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.9"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-1.08"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=1.05"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-1.08"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+</proc>
+
+<proc id="loc_selection_nbzorai" >
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.99"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.45"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,0)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.06"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.15"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.24"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,1)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.08"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.63"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=0.31"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,2)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.1"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=-0.74"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.88"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,3)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.08"/>
+
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posx|value=0.72"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posy|value=-0.66"/>
+	<action handler="set" cond="eq(@UI:TEMP:LOCCLICKDEST,4)" params="target_property=ui:outgame:location:loc3d:loc_fx:posz|value=-0.1"/>
+</proc>
+
+
+<!-- ABORT -->
+
+
+<group type="modal" id="location_abort" posref="MM MM" w="300" h="190" 
+					mouse_pos="false" escapable="false" exit_click_out="false" 
+					display="false"
+>
+					
+	
+	<instance template="outgame_popup" id="back" posref="TL TL" />
+	
+	
+	<view type="text" id="text" posref="TM TM" x="0" y="-60" color="255 255 255 255" global_color="false" line_maxw="284"
+		fontsize="17" shadow="true" hardtext="uiCP_Location_Back" multi_line="true" multi_line_space="0"/>
+
+	<ctrl style="valid_txt_button" id="submit" posref="BR BR" x="-8" y="8" hardtext="uiCP_Abort_yes"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_location_abort_continue" />
+
+	<ctrl style="valid_txt_button" id="cancel" posref="TR BR" posparent="submit" x="0" y="4" hardtext="uiCP_Abort_no"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_location_abort_cancel" />
+
+</group>
+
+
+
+<proc id="proc_play_later">
+	<action handler="play_sound" params="name=generic_next_click" />
+	<action handler="anim_start" params="anim=anim_CP_location_abort" />
+</proc>
+
+<proc id="proc_play_later2">
+	<action handler="enter_modal" params="group=ui:outgame:location_abort" />
+</proc>
+
+<proc id="proc_play_later3">
+	<action handler="proc" params="location_disable_buttons" />
+	<action handler="set" params="dblink=UI:TEMP:PLAYNOWLATER|value=1" />
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:DEST|dbsrc=UI:TEMP:LOCCLICKDEST" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<!--
+	<action handler="set" params="target_property=ui:outgame:location:abort_but:active|value=0" />
+	-->
+	<action handler="ask_create_char" params="name=ui:outgame:appear_name:eb|caracs=UI:TEMP:JOB_|charsum=UI:TEMP:CHAR3D|loc=UI:TEMP:CHAR3D:DEST|slot=@UI:TEMP:CHARSELSLOT" />
+<!--	
+	<action handler="set" params="dblink=UI:NEXT_SCREEN|value=%screen_select" />
+	<action handler="copy" params="dbdst=UI:CURRENT_SCREEN|dbsrc=UI:NEXT_SCREEN" />
+-->
+</proc>
+
+
+
+<proc id="proc_location_abort_continue">
+	<action handler="leave_modal" />
+	<action handler="anim_start" params="anim=anim_CP_location_abort_ok" />
+</proc>
+
+<proc id="proc_location_abort_cancel">
+	<action handler="leave_modal" />
+	<action handler="anim_start" params="anim=anim_CP_location_abort_cancel" />
+</proc>
+
+
+<!-- ABORT -->
+<proc id="proc_location_abort">
+	<action handler="play_sound" params="name=generic_prev_click" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=0" />
+
+	<action handler="anim_start" params="anim=anim_location_outro_abort" />
+</proc>
+
+<proc id="proc_location_abort2">
+	<action handler="proc" params="location_disable_buttons" />
+	<action handler="set"  cond="eq(@UI:TEMP:LOCATIONBACKHOME,0)" params="dblink=UI:CURRENT_SCREEN|value=%screen_appear" />
+	<action handler="set"  cond="eq(@UI:TEMP:LOCATIONBACKHOME,1)" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+</proc>
+
+<!-- HOME -->
+<!--
+<proc id="proc_choice_home_screen_location">
+	<action handler="play_sound" params="name=generic_home_click" />
+
+	<action handler="anim_start" params="anim=anim_location_back" />
+	<action handler="set" params="dblink=UI:TEMP:LOCATIONBACKHOME|value=1" />
+</proc>
+-->
+<!-- FINISH -->
+<proc id="proc_location_finish">
+	<action handler="play_sound" params="name=generic_next_click" />
+
+	<action handler="anim_start" params="anim=anim_location_outro_finish" />
+	<action handler="set" params="dblink=UI:TEMP:PLAYNOWLATER|value=0" />
+
+	<!-- Continue or Restart Default Outgame Music
+		MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
+	-->
+	<action handler="play_music_outgame"  params="async=0" />
+</proc>
+
+<proc id="proc_location_finish2">
+	<action handler="copy" params="dbdst=UI:TEMP:CHAR3D:DEST|dbsrc=UI:TEMP:LOCCLICKDEST" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKINFO|value=0" />
+	<action handler="set" params="dblink=UI:TEMP:LOCCLICKDEST|value=-1" />
+	<action handler="set" params="target_property=ui:outgame:location:finish_but:active|value=0" />
+	<action handler="ask_create_char" params="name=ui:outgame:appear_name:eb|caracs=UI:TEMP:JOB_|charsum=UI:TEMP:CHAR3D|loc=UI:TEMP:CHAR3D:DEST|slot=@UI:TEMP:CHARSELSLOT" />
+</proc>
+
+<proc id="proc_location_finish3">
+	<action handler="proc" params="location_disable_buttons" />
+	<action handler="anim_start" cond="eq(@UI:TEMP:PLAYNOWLATER,0)" params="anim=anim_location_finish3to4" />
+
+	<action handler="set" cond="eq(@UI:TEMP:PLAYNOWLATER,1)" params="dblink=UI:CURRENT_SCREEN|value=%screen_select" />
+
+</proc>
+
+<proc id="proc_location_finish4">
+	<action handler="launch_game" params="slot=@UI:TEMP:CHARSELSLOT" />
+</proc>
+
+
+<!-- ********* -->
+<!-- * INFOS * -->
+<!-- ********* -->
+
+<proc id="proc_location_infos">
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=not(@UI:TEMP:INFOS)" />
+	<action handler="leave_modal" params="" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:INFOS, 1)" params="target_property=ui:outgame:location:quit_but:active|value=0" />
+	
+	<action handler="enter_modal" cond="eq(@UI:TEMP:INFOS, 1)" params="group=ui:outgame:location_infos" /> 
+</proc>
+
+<proc id="proc_location_infos2">
+	<action handler="enter_modal" cond="eq(@UI:TEMP:INFOS, 1)" params="group=ui:outgame:location_infos" /> 
+</proc>
+
+<group type="modal" id="location_infos" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+					mouse_pos="false" escapable="false" exit_click_out="true" 
+					display="false"
+>
+					
+	
+	<view type="text" id="text" posref="TM TM" x="0" y="0" color="255 255 255 255" global_color="false" line_maxw="780"
+		fontsize="17" shadow="true" hardtext="uiLocation_Infos" multi_line="true" multi_line_space="0"/>
+
+
+	<ctrl style="valid_txt_button" id="quit_but" posref="BM BM" y="0" hardtext="uiInfos_Close"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_infos"/>
+
+</group>
+
+
+
+<!-- SERVER CREATE THE CHARACTER -->
+
+<proc id="proc_loc_server_test">
+	<action handler="proc" params="proc_location_finish3" 
+		cond="and(eq(@UI:CURRENT_SCREEN,%screen_location),eq(@UI:SERVER_RECEIVED_CHARS,1))" />
+</proc>
+
+<link expr="depends(@UI:CURRENT_SCREEN, @UI:SERVER_RECEIVED_CHARS)"
+	action="proc" params="proc_loc_server_test" />
+
+
+<!-- ***************** -->
+<!-- *  MAIN WINDOW  * -->
+<!-- ***************** -->
+
+<group id="location" w="1024" h="768" posref="MM MM"
+				on_active="proc" on_active_params="proc_location_start">
+
+	<!-- TEMP BACK -->
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="0" render_layer="-3" scale="true" w="1024" h="768" texture="blank.tga"
+		color="0 0 0 255" global_color="false" />
+		
+		
+	<!-- 3D Scene -->
+	<scene3d id="loc3d" x="-3" y="-3" w="815" h="762" posref="TR TR" curcam="cam" curcs="env" render_layer="-2"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-20" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="2.5" dist_limit_max="3.5"
+						ambient="0 0 0" sun_ambient="0 0 0" sun_diffuse="0 0 0" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						<!--
+						ambient="20 20 20" sun_ambient="0 0 0" sun_diffuse="160 128 0" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						-->
+	
+		<camera id="cam" fov="70" pos="0.0 -2.5 3.6" target="0.0 0.0 0.0" roll="0" />
+		
+		<!--
+		<light id="back" pos="-0.90 1.53 0.9" color="170 150 0" near="5" far="10" />
+		<light id="lgt" pos="0.65 -1.12 2.65" color="255 255 255" near="10" far="20" />
+		-->
+
+		<ig id="land" name="nb_fyros.ig" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" />
+		<shape id="clouds" name="nb_matis_clouds.shape" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" />
+		
+		<fx id="loc_fx" pos="-0.76 0.36 0" name="Outgame_location.ps" rot="0.0 0.0 0.0" />
+	
+		<auto_anim name="Helice00.anim"/>
+		<auto_anim name="Helice01.anim"/>
+		<auto_anim name="Helice02.anim"/>
+		<auto_anim name="Helice03.anim"/>
+		<auto_anim name="Helice04.anim"/>
+				
+	</scene3d>
+	
+	
+	
+	<!-- Menu 3d -->
+	<scene3d id="3d_menu_1" w="200" h="150" posref="TL TL" curcam="cam_menu1" curcs="env" render_layer="-2"
+						user_interaction="false" 
+						ambient="64 64 64" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+	
+		<camera id="cam_menu1" fov="20" pos="0.0 -2.5 2.0" target="0.0 0.0 0.0" roll="0" />
+		<camera id="cam_menu2" fov="20" pos="0.0 -2.5 2.0" target="0.0 0.0 0.0" roll="0" />
+		<camera id="cam_menu3" fov="20" pos="0.0 -2.5 2.0" target="0.0 0.0 0.0" roll="0" />
+		<camera id="cam_menu4" fov="20" pos="0.0 -2.5 2.0" target="0.0 0.0 0.0" roll="0" />
+		<camera id="cam_menu5" fov="20" pos="0.0 -2.5 2.0" target="0.0 0.0 0.0" roll="0" />
+		
+		<!--
+		<light id="back" pos="-0.90 1.53 1.24" color="170 150 120" near="10" far="20" />
+		<light id="lgt" pos="0.65 -1.12 2.65" color="255 255 255" near="10" far="20" />
+		-->
+		
+		<ig id="land" name="nb_fyros.ig" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" />
+		<shape id="clouds" name="nb_matis_clouds.shape" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" />
+				
+		<auto_anim name="Helice00.anim"/>
+		<auto_anim name="Helice01.anim"/>
+		<auto_anim name="Helice02.anim"/>
+		<auto_anim name="Helice03.anim"/>
+		<auto_anim name="Helice04.anim"/>
+		
+	</scene3d>
+
+	
+	<scene3d id="3d_menu_2" posparent="3d_menu_1" w="200" h="150" y="-3" posref="BL TL" curcam="cam_menu2"
+		curcs="env" render_layer="-2" reference="3d_menu_1"	user_interaction="false"
+		ambient="64 64 64" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	</scene3d>
+	
+	<scene3d id="3d_menu_3" posparent="3d_menu_2" w="200" h="150" y="-3" posref="BL TL" curcam="cam_menu3"
+		curcs="env" render_layer="-2" reference="3d_menu_1"	user_interaction="false"
+		ambient="64 64 64" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	</scene3d>
+
+	<scene3d id="3d_menu_4" posparent="3d_menu_3" w="200" h="150" y="-3" posref="BL TL" curcam="cam_menu4"
+		curcs="env" render_layer="-2" reference="3d_menu_1"	user_interaction="false"
+		ambient="64 64 64" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	</scene3d>
+	
+	<scene3d id="3d_menu_5" posparent="3d_menu_4" w="200" h="150" y="-3" posref="BL TL" curcam="cam_menu5"
+		curcs="env" render_layer="-2" reference="3d_menu_1"	user_interaction="false"
+		ambient="64 64 64" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	</scene3d>
+	
+	
+	
+	<!-- Buttons on left -->
+	<group id="leftbuts" sizeref="wh" w="0" h="0">
+
+		<ctrl style="menu_button" id="but0" posref="TL TL" x="3" y="-3" hardtext="uiLocDest1Matis"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_choice_location|0" />
+
+		<ctrl style="menu_button" id="but1" posref="BL TL" posparent="but0" y="-3" hardtext="uiLocDest2Matis"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_choice_location|1" />
+
+		<ctrl style="menu_button" id="but2" posref="BL TL" posparent="but1" y="-3" hardtext="uiLocDest3Matis"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_choice_location|2" />
+
+		<ctrl style="menu_button" id="but3" posref="BL TL" posparent="but2" y="-3" hardtext="uiLocDest4Matis"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_choice_location|3" />
+
+		<ctrl style="menu_button" id="but4" posref="BL TL" posparent="but3" y="-3" hardtext="uiLocDest5Matis"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_choice_location|4" />
+
+	</group>
+
+
+
+	<!--*************-->
+	<!-- SKIN BANNER -->
+	<!--*************-->
+	
+	<view type="bitmap" id="skin_banner" posref="BL BL" x="0" y="0" render_layer="-1" texture="outgame_skin_banner.tga"
+		color="255 255 255 255" global_color="false" />
+
+
+	<!-- MODAL BLACK SCREEN -->
+	<view type="bitmap" id="infos_screen" x="-3" y="-3" w="815" h="762" posref="TR TR" render_layer="1" texture="blank.tga" color="0 0 0 160"
+		scale="true" global_color="false" />
+	<link expr="eq(@UI:TEMP:INFOS, 1)" target="infos_screen:active" />
+	
+	
+	<!-- Bottom buttons -->
+	<!--
+	<ctrl style="valid_txt_button" id="infos_but" posref="BL BL" x="248" y="48" hardtext="uiCP_Infos"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_location_infos"/>
+	-->
+	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="36" hardtext="uiLocation_Play"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_location_finish"/>
+
+	<ctrl style="valid_txt_button" id="abort_but" posparent="finish_but" posref="TM BM" y="4" hardtext="uiLocation_Back"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_play_later"/>
+
+
+
+	<!-- SKIN -->
+	
+	<view type="bitmap" id="skin" posref="TL TL" x="0" y="0" render_layer="2" texture="outgame_skin.tga"
+		color="255 255 255 255" global_color="false" />
+
+	<!-- TITLE -->
+	
+	<group id="title" w="292" h="46" y="-6" x="-272" posref="TR TR">
+		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="-4" hardtext="uiCP_title2"/>
+		<view type="text" id="title2" posref="BM BM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_selection"/>
+	</group>
+	
+
+	<!-- SKIN MENU SELECTION 1 -->
+	<view type="bitmap" id="select_menu" posref="TL TL" x="0" y="2" render_layer="4" scale="true" texture="blank.tga"
+		color="0 0 0 0" w="212" h="160" />
+
+
+	<!-- Select 3d -->
+	<scene3d id="3d_select" w="206" h="156" posref="TL TL" curcam="cam" curcs="env" render_layer="4"
+						user_interaction="false" 
+						ambient="0 0 0" sun_ambient="0 0 0" sun_diffuse="0 0 0" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	
+		<camera id="cam" fov="70" pos="0 -3 0" target="0.0 0.0 0.0" roll="0" />
+		<fx id="select_fx" pos="2.0 0.0 1.5" name="sfx_interface_selectioncadre.ps" rot="0.0 0.0 0.0" />
+	
+		
+	</scene3d>
+
+		
+	<!-- KAMI MENU SELECT -->
+	<view type="bitmap" id="select_kami" posparent="select_menu" posref="MR ML" x="-30" y="-3" render_layer="3" texture="kami_select.tga"
+		color="255 255 255 255" global_color="false" />	
+		
+	<!-- QUIT BUTTON -->
+	<ctrl type="button" id="quit_but" button_type="push_button" posref="TR TR" x="0" y="0"  
+				tx_normal="quit.tga" tx_pushed="quit.tga" tx_over="quit.tga"
+				color="255 255 255 255" col_pushed="255 255 255 255" col_over="0 0 0 0"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_quit"/>
+
+	<!-- BLACK SCREEN FADE -->
+	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
+		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />
+
+
+</group>
+
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_location)" target="location:active" />
+
+<!-- ***************** -->
+<!-- *  ANIMATIONS   * -->
+<!-- ***************** -->
+
+<anim id="anim_location_intro" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+<anim id="anim_location_outro_finish" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_location_finish2" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_location_finish3to4" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_location_finish4" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+
+
+<anim id="anim_location_outro_abort" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_location_abort2" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+
+
+<anim id="anim_loc_clouds" duration="60.0"  disable_buttons="false" on_finish="proc" on_finish_params="restart_loc_clouds" >
+	<track type="linear" target="location:loc3d:clouds:rotz" >
+		<key time="0.0" value="0" />
+		<key time="60.0" value="360" />
+	</track>
+
+</anim>
+
+
+
+<anim id="anim_loc_select_fx" duration="2.0"  disable_buttons="false" on_finish="proc" on_finish_params="restart_loc_select_fx" >
+
+	<track type="linear" target="location:3d_select:select_fx:posx" >
+		<key time="0.0" 	value="2" />
+		<key time="0.5" 	value="-2" />
+		<key time="1.0" 	value="-2" />
+		<key time="1.5" 	value="2" />
+		<key time="2.0" 	value="2" />
+	</track>
+	
+	<track type="linear" target="location:3d_select:select_fx:posz" >
+		<key time="0.0" 	value="1.5" />
+		<key time="0.5" 	value="1.5" />
+		<key time="1.0" 	value="-1.5" />
+		<key time="1.5" 	value="-1.5" />
+		<key time="2.0" 	value="1.5" />
+	</track>
+	
+</anim>
+
+<anim id="anim_CP_location_abort" duration="0.5"  disable_buttons="true" on_finish="proc" on_finish_params="proc_play_later2" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="0.5" value="128" />
+	</track>
+</anim>
+
+<anim id="anim_CP_location_abort_ok" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_play_later3" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="128" />
+		<key time="1.5" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_CP_location_abort_cancel" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="" >
+	<track type="linear" target="location:black_screen:alpha" >
+		<key time="0.0" value="128" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+</interface_config>

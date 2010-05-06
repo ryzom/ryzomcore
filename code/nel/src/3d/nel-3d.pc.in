@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: nel-3d
+Version: @VERSION@
+Description: NeL @VERSION@
+Reqiures:
+Libs: -L${libdir}
+Libs.private: @LIBS@ @FREETYPE_LIBS@ -lc
+Cflags: -I${includedir} @FREETYPE_CFLAGS@

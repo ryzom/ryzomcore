@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<FORM Version="0.0" State="modified">
+  <STRUCT>
+    <ATOM Name="TestVal1" Value="1"/>
+    <ATOM Name="TestVal2" Value="2"/>
+    <ATOM Name="WriteVal" Value="4"/>
+    <ARRAY Name="TestArray">
+      <ATOM Value="Array Val 1"/>
+      <ATOM Value="Array Val 2"/>
+    </ARRAY>
+    <ARRAY Name="CoolFilesInfo">
+      <STRUCT>
+        <ATOM Name="Name" Value="Tiger Eats Man In One Bite"/>
+        <ATOM Name="ShortName" Value="Tiger Attack"/>
+        <ATOM Name="Ranking" Value="55"/>
+        <ATOM Name="TopTenRanking" Value="9"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="Tiny Car Jumps Bridge Over River"/>
+        <ATOM Name="ShortName" Value="Crazy Car Jump"/>
+        <ATOM Name="Ranking" Value="40"/>
+        <ATOM Name="TopTenRanking" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="Nevrax Presents Cool Open Source Contributors Awards"/>
+        <ATOM Name="ShortName" Value="Nevrax Gives Awards"/>
+        <ATOM Name="Ranking" Value="1"/>
+        <ATOM Name="TopTenRanking" Value="1"/>
+      </STRUCT>
+    </ARRAY>
+    <ARRAY Name="TestByBracket">
+      <ATOM Value="true"/>
+      <ATOM Value="false"/>
+    </ARRAY>
+    <STRUCT Name="PositionData">
+      <ATOM Name="x" Value="1"/>
+      <ATOM Name="y" Value="1"/>
+      <ATOM Name="z" Value="2"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

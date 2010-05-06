@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<FORM Version="0.0" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="family" Value="raw material (mp)"/>
+      <ATOM Name="stackable" Value="99"/>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="mp">
+      <ATOM Name="Ecosystem" Value="Forest"/>
+      <ATOM Name="Category" Value="Faber"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon background" Value="BK_matis.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Taming Tool Type" Type="Type" Filename="item_taming_tool_type.typ"/>
+  <LOG>Thu Dec 19 17:39:51 2002 (fleury) Dfn Structure = 
+Fri Mar 14 21:50:50 2003 (fleury) Dfn Structure = 
+Thu May 22 16:40:08 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

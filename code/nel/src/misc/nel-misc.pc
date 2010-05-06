@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: nel-misc
+Version: 0.5.0
+Description: NeL 0.5.0
+Reqiures:
+Libs: -L${libdir}
+Libs.private: -ldl -lpthread  -lxml2 -lc -lpthread -lrt -ldl
+Cflags: -I${includedir} -lc -lpthread -lrt -ldl

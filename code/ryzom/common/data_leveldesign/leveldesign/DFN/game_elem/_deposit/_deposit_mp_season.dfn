@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <ELEMENT Name="MinQuantity" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MaxQuantity" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="RegenRate" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="AngryLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="FuryLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="BlackKamiLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Comment" Type="Type" Filename="edit.typ" Default="Regen rate is in units per hours"/>
+  <LOG>Tue Sep 16 16:29:15 2003 (saffray) Dfn Structure = 
+Tue Sep 16 16:38:55 2003 (saffray) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Bone" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="OffsetX" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="OffsetY" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="OffsetZ" Type="Type" Filename="float.typ" Default="0"/>
+  <LOG>Wed Sep 08 14:52:37 2004 (vizerie) Dfn Structure = 
+Fri Sep 10 11:19:56 2004 (vizerie) Dfn Structure = </LOG>
+</DFN>

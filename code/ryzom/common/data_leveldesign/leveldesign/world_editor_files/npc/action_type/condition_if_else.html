@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+	<HEAD>
+		<META http-equiv=Content-Type content="text/html; charset=unicode">
+		<META content="MSHTML 6.00.2716.2200" name=GENERATOR>
+	</HEAD>
+	<BODY>
+		<P><FONT color=green size=5>condition_if_else</FONT></P>
+		<P>This action should take 2 sub actions</P>
+		<P>If the condition&nbsp;is matched then the first sub action is executed. 
+		otherwise the second sub action is executed.<BR>
+		The conditions expression must match the folowing pattern :<BR>
+		&lt;local_variable&gt; &lt;operator&gt; &lt;local_variable|foreign_variable|constant_value&gt;<br>
+		operator can be one of '<B>&lt;</B>', '<B>&gt;</B>', '<B>=</B>', '<B>!=</B>', '<B>&lt;=</B>', '<B>&gt;=</B>'<br>
+		<P>
+		Each group come with a set of 4 variables with id 0 to 3.<BR>
+		</P>
+		<P>
+		Locals variables are the variables of the current group, they are expressed with a 'v' followed by
+		the variable id (0-3). eg : v0. <br>
+		NB: foreign varaibles are accessible only if the group name is unique in the world.
+		</P>
+		<P>Foreigns variables are variables that come from another group. They are expressed with the group name
+		followed by a colon ':' then followed by a local variable identifier (v<id>). eg : group_1:v2.<br>
+		</P>
+		<P>
+		Constant value are floating point numerical expression in base 10.
+		<P>Note that the 'weight' values in the sub actions are used as follows: If the 
+		weights are different then the action with the lower weight will be the one 
+		executed if the condition is matched</P>
+		<P><STRONG>Patrameters:</STRONG></P>
+		<P>&lt;condition expression&gt;</P>
+	</BODY>
+</HTML>

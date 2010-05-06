@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Effect 1" Type="Dfn" Filename="_item_special_effect.dfn"/>
+  <ELEMENT Name="Effect 2" Type="Dfn" Filename="_item_special_effect.dfn"/>
+  <ELEMENT Name="Effect 3" Type="Dfn" Filename="_item_special_effect.dfn"/>
+  <ELEMENT Name="Effect 4" Type="Dfn" Filename="_item_special_effect.dfn"/>
+  <ELEMENT Name="Effect 5" Type="Dfn" Filename="_item_special_effect.dfn"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:19 2002 (corvazier) File converted from old format
+Wed Jul 24 18:40:17 2002 (miller) Dfn Structure = 
+Wed Jul 24 18:41:53 2002 (miller) Dfn Structure = 
+Wed Jul 24 18:48:51 2002 (miller) Dfn Structure = 
+Tue Aug 27 17:07:38 2002 (miller) Dfn Structure = 
+Mon Mar 03 15:07:57 2003 (fleury) Dfn Structure = 
+Wed Apr 02 17:53:20 2003 (fleury) Dfn Structure = 
+Wed Apr 02 17:54:01 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

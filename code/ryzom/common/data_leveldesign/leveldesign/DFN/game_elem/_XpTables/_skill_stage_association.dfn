@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Version="0.2" State="modified">
+  <ELEMENT Name="Skill" Type="Type" Filename="_skills_and_specialized_skills.typ"/>
+  <ELEMENT Name="Type of Stage" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="TrainingGainCoef" Type="Type" Filename="float.typ" Default="1.0"/>
+  <LOG>Tue Jun 18 13:48:40 2002 (saffray) Dfn Structure = 
+Wed Jun 26 12:04:13 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

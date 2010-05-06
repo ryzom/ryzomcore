@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" Version="0.2" State="modified">
+  <ELEMENT Name="Plant Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Comment" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="3D" Type="Dfn" Filename="_plant_3d_info.dfn"/>
+  <ELEMENT Name="AI" Type="DfnPointer"/>
+  <ELEMENT Name="Games Params" Type="Dfn" Filename="_plant_game_param.dfn"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:09 2002 (corvazier) File converted from old format
+Fri Sep 06 17:25:13 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

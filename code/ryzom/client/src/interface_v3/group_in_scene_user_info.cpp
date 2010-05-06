@@ -1,0 +1,1117 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+#include "stdpch.h"
+#include "interface_manager.h"
+#include "view_bitmap.h"
+#include "group_in_scene_user_info.h"
+#include "action_handler.h"
+#include "../entities.h"
+#include "../user_entity.h"
+#include "../forage_source_cl.h"
+#include "guild_manager.h"
+#include "dbctrl_sheet.h"
+#include "bar_manager.h"
+#include "../client_cfg.h"
+#include "../npc_icon.h"
+//
+#include "../r2/editor.h"
+
+using namespace std;
+using namespace NLMISC;
+
+extern CEntityManager EntitiesMngr;
+
+uint CGroupInSceneUserInfo::_BatLength = 0;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_Value = NULL;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueBegin = NULL;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueEnd = NULL;
+
+// ***************************************************************************
+NLMISC_REGISTER_OBJECT(CViewBase, CGroupInSceneUserInfo, std::string, "in_scene_user_info");
+REGISTER_UI_CLASS(CGroupInSceneUserInfo)
+
+
+
+CGroupInSceneUserInfo::CGroupInSceneUserInfo(const TCtorParam &param)
+:	CGroupInScene(param)
+{
+	_Name = NULL;
+	_Title = NULL;
+	_GuildName = NULL;
+	_TribeName = NULL;
+	_EventFaction = NULL;
+	_PermanentContent = NULL;
+	_Target = NULL;
+	_MissionTarget = NULL;
+	uint i;
+	for (i=0; i<NumBars; i++)
+		_Bars[i] = NULL;
+	_Entity = NULL;
+	_NeedGuildNameId= false;
+	_NeedGuildSymbolId= false;
+	_IsLeftGroupActive= false;
+}
+
+// ***************************************************************************
+
+CGroupInSceneUserInfo::~CGroupInSceneUserInfo()
+{
+}
+
+// ***************************************************************************
+
+// Static bars data
+
+// ***************************************************************************
+
+CRGBA CGroupInSceneUserInfo::BarColor[NumBars]=
+{
+	CRGBA(255, 64, 0),
+	CRGBA(72, 255, 0),
+	CRGBA(255, 0, 255),
+	CRGBA(0, 128, 255),
+	CRGBA(255, 255, 255),
+};
+
+CRGBA CGroupInSceneUserInfo::BarColorHPNegative = CRGBA(127, 32, 0);
+
+// ***************************************************************************
+
+#define nlfsinfo if ( isForageSource ) nlinfo
+#define nlfsinfo2 if ( _Entity->isForageSource() ) nlinfo
+
+
+CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
+{
+	// Get the interface manager
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	nlassert (pIM);
+
+	// Character type
+	bool user = entity->isUser ();
+	bool _friend = entity->isViewedAsFriend ();
+	bool isForageSource = entity->isForageSource ();
+	// Special display for roleMaster etc...
+	// NB: fauna can be friend too (kami!!!)
+	bool npcFriendAndNeutral = (entity->canHaveMissionIcon() || entity->isFauna()) && entity->isFriend ();
+	// if the npc is an ally (outpost squad for instance) still display its bar
+	if(npcFriendAndNeutral)
+		npcFriendAndNeutral= npcFriendAndNeutral && !entity->isAlly();
+
+	// Window id
+	string id = "in_scene_entity_info_"+toString (entity->slot());
+
+	bool bars[NumBars];
+	bool name;
+	bool symbol;
+	bool title;
+	bool guildName;
+	bool tribeName = false;
+	bool eventFaction = false;
+	bool needGuildNameId= false;
+	bool needGuildSymbolId= false;
+	bool forageSourceBarDisplayed= false;
+	bool needPvPLogo= false;
+	bool permanentContent = false;
+	bool displayMissionIcons = pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
+
+	// Names
+	const char *templateName;
+	ucstring theTribeName;
+	ucstring entityName = entity->getDisplayName();
+	ucstring entityTitle = entity->getTitle();
+	string entityPermanentContent = entity->getPermanentStatutIcon();
+
+	// Active fields and bars
+	if ( isForageSource )
+	{
+		string dbEntry = "UI:SAVE:INSCENE:SOURCE:";
+		CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(entity);
+
+		name = !entityName.empty() /*&& pIM->getDbProp(dbEntry+"NAME")->getValueBool()*/;
+		symbol = (forageSource->getKnowledge() != 0);
+		title = false;
+		guildName = false;
+		// Display the forage soruce bars only if I am the entity selected
+		forageSourceBarDisplayed = (entity->slot() == UserEntity->selection());
+		bars[Time] = forageSourceBarDisplayed;
+		bars[Amount] = forageSourceBarDisplayed;
+		//bool displayExtractingParams = true; //forageSource->isExtractionInProgress() /*&& pIM->getDbProp(dbEntry+"HP")*/;
+		bars[Life] = forageSourceBarDisplayed;//displayExtractingParams;
+		bars[Danger] = forageSourceBarDisplayed;//displayExtractingParams;
+		bars[Spawn] = forageSourceBarDisplayed;//displayExtractingParams;
+		templateName = "forage_source";
+	}
+	else if(npcFriendAndNeutral)
+	{
+		// For RoleMasters, merchants etc... must display name and function, and nothing else
+		for(uint i=0;i<NumBars;i++)
+			bars[i]= false;
+		name= !entityName.empty();
+		symbol= false;
+		title= true;
+		guildName= false;
+		templateName = "in_scene_user_info";
+	}
+	else
+	{
+		// Base entry in database
+		string dbEntry;
+		getBarSettings( pIM, user, entity->isPlayer(), _friend, dbEntry, bars );
+		name = !entityName.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool();
+		title = !entityTitle.empty() && pIM->getDbProp(dbEntry+"TITLE")->getValueBool();
+		// if name is empty but not title, title is displayed as name
+		if (!title && entityName.empty() && !entityTitle.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool())
+			title = true;
+		templateName = "in_scene_user_info";
+		// special guild
+		if(pIM->getDbProp(dbEntry+"GUILD_SYMBOL")->getValueBool())
+		{
+			// if symbol not still available, wait for one when VP received
+			symbol = (entity->getGuildSymbol() != 0);
+			needGuildSymbolId = true;
+		}
+		else
+		{
+			symbol= false;
+			needGuildSymbolId = false;
+		}
+		if(pIM->getDbProp(dbEntry+"GUILD_NAME")->getValueBool())
+		{
+			// if guild name not still available, wait for one when VP received
+			guildName = (entity->getGuildNameID() != 0);
+			needGuildNameId = true;
+		}
+		else
+		{
+			guildName= false;
+			needGuildNameId= false;
+		}
+		needPvPLogo = pIM->getDbProp(dbEntry+"PVP_LOGO")->getValueBool();
+
+		eventFaction = (entity->getEventFactionID() != 0);
+	}
+
+	permanentContent = !entityPermanentContent.empty();
+
+
+
+	// according to entity setup, may disable some fields
+	if(!entity->getDisplayOSDName())
+	{
+		// force no name (still symbol if setuped, is that true?)
+		name= false;
+		title= false;
+		guildName= false;
+		needGuildNameId = false;
+	}
+	if(!entity->getDisplayOSDBars())
+	{
+		// force no bar
+		for(uint i=0;i<NumBars;i++)
+			bars[i]= false;
+	}
+
+	// get faction name
+	{
+		CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
+		if (pChar != NULL)
+		{
+			const CCharacterSheet *pSheet = pChar->getSheet();
+			if (pSheet != NULL)
+			{
+				string sFame = pSheet->getFame();
+				if (strnicmp(sFame.c_str(),"tribe_",6)==0)
+				{
+					tribeName = true;
+					// always display title for tribe
+					title = true;
+					theTribeName = STRING_MANAGER::CStringManagerClient::getFactionLocalizedName(sFame);
+					// tribeName stuff disable any guild name
+					guildName= false;
+					needGuildNameId= false;
+				}
+			}
+		}
+	}
+
+
+	// Create the template
+	CGroupInSceneUserInfo *info = newGroupInScene(templateName, id);
+	if (info)
+	{
+		// copy guild info
+		info->_NeedGuildNameId= needGuildNameId;
+		info->_NeedGuildSymbolId= needGuildSymbolId;
+
+		// Get the left group
+		CInterfaceGroup *leftGroup = info->getGroup ("right");
+		info->_IsLeftGroupActive = true;
+
+		if (info && leftGroup)
+		{
+			// *** Build it
+			info->_Entity = entity;
+
+			// Some constants
+			sint barHeight, barSpace, textH;
+			fromString(pIM->getDefine("in_scene_user_info_bar_h"), barHeight);
+			fromString(pIM->getDefine("in_scene_user_info_bar_space"), barSpace);
+			fromString(pIM->getDefine("in_scene_user_info_text_h"), textH);
+			fromString(pIM->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
+
+			// Build the bars
+			uint barCount = 0;
+			uint i;
+			for (i=0; i<NumBars; i++)
+			{
+				info->_Bars[i] = NULL;
+				if (bars[i])
+				{
+					// Get the bar
+					CViewBase *bar = leftGroup->getView ("bar" + toString(barCount));
+					if (bar)
+					{
+						// Bitmap view
+						CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(bar);
+						if (bitmap)
+						{
+							if ( ! isForageSource ) // forage source: use color from widgets.xml
+							{
+								// Set the color
+								bitmap->setColorRGBA (BarColor[i]);
+							}
+							info->_Bars[i] = bitmap;
+						}
+					}
+
+					barCount++;
+				}
+			}
+
+			// Remove others
+			for (i=barCount; i<NumBars; i++)
+			{
+				CViewBase *bar = leftGroup->getView ("bar" + toString(i));
+				if (bar)
+					leftGroup->delView (bar);
+				CViewBase *icon = leftGroup->getView ("icon" + toString(i));
+				if (icon)
+					leftGroup->delView (icon);
+				CCtrlBase *toolTip = leftGroup->getCtrl ("tt" + toString(i));
+				if ( toolTip )
+					leftGroup->delCtrl (toolTip);
+				CCtrlBase *toolTip2 = leftGroup->getCtrl ("ttb" + toString(i));
+				if ( toolTip2 )
+					leftGroup->delCtrl (toolTip2);
+			}
+
+			// Adjust win_jauge_mid
+			sint spaceBar = (NumBars-barCount) * (barSpace+barHeight);
+			CViewBase *win_jauge_mid = leftGroup->getView ("win_jauge_mid");
+			if (win_jauge_mid)
+			{
+				win_jauge_mid->setH (win_jauge_mid->getH() - spaceBar);
+			}
+
+			// No bar ?
+			if (!barCount)
+			{
+				// Delete
+				if (win_jauge_mid)
+					win_jauge_mid->setActive(false);
+					// leftGroup->delView (win_jauge_mid);
+				CViewBase *view = leftGroup->getView ("win_jauge_top");
+				if (view)
+					view->setActive(false);
+					//leftGroup->delView (view);
+				view = leftGroup->getView ("win_jauge_bot");
+				if (view)
+					view->setActive(false);
+					//leftGroup->delView (view);
+			}
+
+			// Strings
+			sint stringSpace = 0;
+			sint stringCount = 0;
+			if (name)
+			{
+				CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
+				if (text)
+					info->_Name = dynamic_cast<CViewText*>(text);
+				stringCount++;
+			}
+			else
+				stringSpace += textH;
+			if (title)
+			{
+				CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
+				if (text)
+					info->_Title = dynamic_cast<CViewText*>(text);
+				stringCount++;
+			}
+			else
+				stringSpace += textH;
+
+
+			// Get the permanent content bitmap
+			if(permanentContent)
+			{
+				CViewBase *permanent = leftGroup->getView ("permanent_content");
+				if (permanent)
+				{
+					CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(permanent);
+					if (bitmap)
+					{
+						info->_PermanentContent = bitmap;
+						info->_PermanentContent->setTexture(entityPermanentContent);
+					}
+				}
+			}
+
+
+			// NB : guild, event faction and tribe use the same text entry
+			if (guildName || eventFaction || tribeName)
+			{
+				if (eventFaction)
+				{
+					CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
+					if (text)
+						info->_EventFaction = dynamic_cast<CViewText*>(text);
+					stringCount++;
+				}
+				else if (guildName)
+				{
+					nlassert(!tribeName);
+					CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
+					if (text)
+						info->_GuildName = dynamic_cast<CViewText*>(text);
+					stringCount++;
+				}
+				else if (tribeName)
+				{
+					nlassert(!guildName);
+					CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
+					if (text)
+						info->_TribeName = dynamic_cast<CViewText*>(text);
+					stringCount++;
+				}
+			}
+			else
+				stringSpace += textH;
+
+			// Hide guild symbol / raw material source icon?
+			if ( isForageSource )
+			{
+				CViewBase *logo = info->getView( "guild_logo" );
+				if (!symbol)
+				{
+					info->delView(logo);
+					leftGroup->setX(0);
+				}
+				else
+				{
+					CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(logo);
+					if (bitmap)
+					{
+						// Set the raw material knowledge icon
+						CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(entity);
+						const string *iconFilename = forageSource->getKnowledgeIcon();
+						if ( iconFilename )
+							bitmap->setTexture (*iconFilename);
+					}
+					leftGroup->setW( leftGroup->getW() + 42 );
+					leftGroup->invalidateCoords();
+				}
+
+				// Increase vertical size to let bars be seen
+				//leftGroup->setH( leftGroup->getH() + 42 ); // hide last bar, currently
+
+				// Set ZBias of forage interface
+				info->setZBias(ClientCfg.ForageInterfaceZBias);
+
+				// use cursor only if source bar displayed
+				info->setUseCursor(forageSourceBarDisplayed);
+			}
+			else if (npcFriendAndNeutral)
+			{
+				// Don't display any guild logo
+				CCtrlBase *guildLogo = info->getCtrl ("guild_logo");
+				info->delCtrl(guildLogo);
+
+				CViewBase *logo = info->getView( "npc_mission_logo" );
+				CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(logo);
+				CViewBase *logoOver = info->getView( "npc_mission_logo_over" );
+				CViewBitmap *bitmapOver = dynamic_cast<CViewBitmap*>(logoOver);
+				if (bitmap && bitmapOver)
+				{
+					// Set the NPC icon
+					const CNPCIconCache::CNPCIconDesc& iconDesc = CNPCIconCache::getInstance().getNPCIcon(entity, true);
+					if ((!iconDesc.getTextureMain().empty()) && displayMissionIcons)
+					{
+						bitmap->setTexture(iconDesc.getTextureMain());
+						bitmap->setActive(true);
+						if (!iconDesc.getTextureOver().empty())
+						{
+							bitmapOver->setTexture(iconDesc.getTextureOver());
+							bitmapOver->setActive(true);
+						}
+						else
+						{
+							info->delView(logoOver);
+						}
+						leftGroup->setW( leftGroup->getW() + 42 );
+						leftGroup->invalidateCoords();
+					}
+					else
+					{
+						info->delView(logo);
+						info->delView(logoOver);
+						leftGroup->setX(0);
+					}
+				}
+			}
+			else
+			{
+				CCtrlBase *logo = info->getCtrl ("guild_logo");
+				if (logo)
+				{
+					if (!symbol)
+					{
+						info->delCtrl(logo);
+						leftGroup->setX(0);
+					}
+					else
+					{
+						CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(logo);
+						if (sheet)
+						{
+							// Set the guild symbol
+							string dbLeaf = "UI:ENTITY:GUILD:"+toString (entity->slot());
+							sheet->setSheet(dbLeaf);
+
+							pIM->getDbProp(dbLeaf+":ICON")->setValue64(entity->getGuildSymbol());
+						}
+					}
+				}
+			}
+
+			if (!isForageSource)
+			{
+				// Get the target bitmap
+				CViewBase *target = leftGroup->getView ("target");
+				if (target)
+				{
+					CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(target);
+					if (bitmap)
+						info->_Target = bitmap;
+				}
+
+				// Get the mission target bitmap
+				CViewBase *missionTarget = leftGroup->getView ("mission_target");
+				if (missionTarget)
+				{
+					CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(missionTarget);
+					if (bitmap)
+						info->_MissionTarget = bitmap;
+				}
+
+				// set or inactive pvp logos
+				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
+				if (pPlayer != NULL && needPvPLogo)
+				{
+					CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+					if (pvpFactionLogo)
+					{
+						if( pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
+						{
+							CViewBitmap * pvpFactionLogoBmp = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
+							if( pvpFactionLogoBmp )
+								pvpFactionLogoBmp->setTexture( pIM->getDefine(PVP_CLAN::toIconDefineString(pPlayer->getPvpClan())) );
+						}
+						else
+						{
+							pvpFactionLogo->setActive(false);
+						}
+					}
+
+					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+					if (pvpOutpostLogo)
+					{
+						if( pPlayer->getOutpostId() == 0 )
+						{
+							pvpOutpostLogo->setActive(false);
+						}
+					}
+
+					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
+					if (pvpDuelLogo)
+					{
+						if( !(pPlayer->getPvpMode()&PVP_MODE::PvpDuel) )
+						{
+							pvpDuelLogo->setActive(false);
+						}
+					}
+				}
+				else
+				{
+					// unactive pvp logos
+					CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+					if (pvpFactionLogo)
+						pvpFactionLogo->setActive(false);
+
+					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+					if (pvpOutpostLogo)
+						pvpOutpostLogo->setActive(false);
+
+					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
+					if (pvpDuelLogo)
+					pvpDuelLogo->setActive(false);
+				}
+			}
+
+			// No bar and no string ?
+			if (((stringCount == 1) && !barCount) || (stringCount == 0))
+			{
+				// Delete
+				CViewBase *bitmap = leftGroup->getView ("win_top");
+				if (bitmap)
+					//leftGroup->delView (bitmap);
+					bitmap->setAlpha(0);
+				bitmap = leftGroup->getView ("win_mid");
+				if (bitmap)
+					//leftGroup->delView (bitmap);
+					bitmap->setAlpha(0);
+				bitmap = leftGroup->getView ("win_bot");
+				if (bitmap)
+					//leftGroup->delView (bitmap);
+					bitmap->setAlpha(0);
+
+				// Anti-Bug, xmargin is not take into evaluate W
+				/*if (info->_Name)
+					info->_Name->setX(0);*/
+
+			}
+
+			// Delete remaining strings
+			for (i=std::max(1,stringCount); i<3; i++)
+			{
+				CViewBase *text = leftGroup->getView ("info"+toString(i));
+				if (text)
+					leftGroup->delView(text);
+			}
+
+			// Adjust win_mid
+			CViewBase *win_mid = leftGroup->getView ("win_mid");
+			if (win_mid)
+			{
+				win_mid->setH (win_mid->getH() - spaceBar/2 - stringSpace);
+			}
+
+			// Total height
+			sint totalHeight = info->getH ();
+			totalHeight -= spaceBar + stringSpace;
+			info->setH (totalHeight);
+			totalHeight = leftGroup->getH ();
+			totalHeight -= spaceBar + stringSpace;
+			leftGroup->setH (totalHeight);
+
+			// Set player name
+			if (info->_Name)
+			{
+				info->_Name->setText(entityName);
+				info->_Name->setModulateGlobalColor(false);
+			}
+
+			// Set player title
+			if (info->_Title)
+				info->_Title->setText(entityTitle);
+
+			// Set tribe name
+			if (info->_TribeName)
+			{
+				nlassert(info->_GuildName == NULL);
+				info->_TribeName->setText(theTribeName);
+			}
+
+			// Init user leaf nodes
+			if (entity->isUser())
+			{
+				_Value = pIM->getDbProp ("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
+				_ValueBegin = pIM->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_START");
+				_ValueEnd = pIM->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_END");
+			}
+
+			// Update data
+			info->updateDynamicData ();
+
+			// Activate it
+			info->setActive(true);
+
+			// Link to the interface
+			pIM->addWindowToMasterGroup("ui:interface", info);
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+			info->setParent(pRoot);
+			if (pRoot)
+				pRoot->addGroup (info);
+
+		}
+	}
+
+	return info;
+}
+
+// ***************************************************************************
+
+class CHandlerResetCharacterInScene : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		bool	pvpOnly= nlstricmp(sParams,"pvponly")==0;
+		// Reset all entities
+		uint i;
+		uint numEntity = EntitiesMngr.entities().size();
+		for (i=0; i<numEntity; i++)
+		{
+			CEntityCL *entity = EntitiesMngr.entity(i);
+			if (entity)
+			{
+				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
+				if (character)
+				{
+					// filter if needed
+					bool	rebuild= true;
+					if(pvpOnly)
+					{
+						if( character->getPvpMode()==0 &&
+							character->getOutpostId()==0 )
+							rebuild= false;
+					}
+
+					// rebuild if needed
+					if(rebuild)
+						character->buildInSceneInterface ();
+				}
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerResetCharacterInScene, "reset_character_in_scene");
+
+
+// ***************************************************************************
+void CGroupInSceneUserInfo::getBarSettings( CInterfaceManager* pIM, bool isUser, bool isPlayer, bool isFriend, std::string& dbEntry, bool *bars )
+{
+	dbEntry = isUser?"UI:SAVE:INSCENE:USER:":isFriend?"UI:SAVE:INSCENE:FRIEND:":"UI:SAVE:INSCENE:ENEMY:";
+	// if currently is edition mode, then bars are not displayed
+	if (ClientCfg.R2EDEnabled && R2::isEditionCurrent())
+	{
+		bars[HP]     = false;
+		bars[SAP]    = false;
+		bars[STA]    = false;
+		bars[Focus]  = false;
+		bars[Action] = false;
+	}
+	else
+	{
+		bars[HP] = pIM->getDbProp(dbEntry+"HP")->getValueBool();
+		bars[SAP] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"SAP")->getValueBool();
+		bars[STA] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"STA")->getValueBool();
+		bars[Focus] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"FOCUS")->getValueBool();
+		bars[Action] = (isUser) && pIM->getDbProp(dbEntry+"ACTION")->getValueBool();
+	}
+}
+
+
+// ***************************************************************************
+void CGroupInSceneUserInfo::setLeftGroupActive( bool active )
+{
+	_IsLeftGroupActive = active;
+
+	// The user and forage source cases are handled externally
+	if ( _Entity->isUser() || _Entity->isForageSource() )
+		return;
+
+	string dbEntry;
+	bool barSettings [NumBars];
+	getBarSettings( CInterfaceManager::getInstance(), _Entity->isUser(), _Entity->isPlayer(), _Entity->isViewedAsFriend(), dbEntry, barSettings );
+
+	// Show/hide bars
+	bool atLeastOneBar = false;
+	for ( uint i=0; i!=NumBars; ++i )
+	{
+		if ( barSettings[i] && _Bars[i] )
+		{
+			_Bars[i]->setActive(active);
+			atLeastOneBar = true;
+		}
+	}
+
+	if ( atLeastOneBar )
+	{
+		// Show/hide jauge
+		CInterfaceGroup *leftGroup = getGroup ("right");
+		if ( leftGroup )
+		{
+			CViewBase *view = leftGroup->getView ("win_jauge_mid");
+			if (view)
+				view->setActive(active);
+			view = leftGroup->getView ("win_jauge_top");
+			if (view)
+				view->setActive(active);
+			view = leftGroup->getView ("win_jauge_bot");
+			if (view)
+				view->setActive(active);
+		}
+	}
+}
+
+
+// Helper for updateDynamicData()
+inline double getManhattanDistance( const CVectorD& vec )
+{
+	return (fabs(vec.x) + fabs(vec.y));
+}
+
+
+// ***************************************************************************
+void CGroupInSceneUserInfo::updateDynamicData ()
+{
+	CRGBA	entityColor= _Entity->getColor();
+	bool	isPvpColor= (_Entity->getPvpMode()!=PVP_MODE::None);
+
+	// Set state fx
+	CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(_Entity);
+	if (pPlayer != NULL)
+		if (pPlayer->isAFK())
+			pPlayer->setStateFx("sp_medit.ps");
+		else if (pPlayer->getStateFx() == "sp_medit.ps")
+			pPlayer->removeStateFx();
+	
+	if (_Entity->isDead())
+			_Entity->setStateFx("misc_dead.ps");
+
+	// Set entity data
+	if (_Name)
+	{
+		_Name->setColor(entityColor);
+		_Name->setModulateGlobalColor(false);
+		ucstring entityName = _Entity->getDisplayName();
+		if (pPlayer != NULL)
+			if (pPlayer->isAFK())
+				entityName += CI18N::get("uiAFK");				
+		_Name->setText(entityName);
+
+		// Title color get the PVP color
+		if (_Title)
+		{
+			if (isPvpColor)
+				_Title->setColor(entityColor);
+			else
+				_Title->setColor(NLMISC::CRGBA(118, 153, 195, 255));
+			_Title->setModulateGlobalColor(false);
+		}
+	}
+	else
+	{
+		// Always set the title color as the entity color
+		if (_Title)
+		{
+			_Title->setColor(entityColor);
+			_Title->setModulateGlobalColor(false);
+		}
+	}
+
+	// Set the guild name
+	if (_GuildName)
+	{
+		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+		ucstring ucsTmp;
+		if (pSMC->getString (_Entity->getGuildNameID(), ucsTmp))
+			_GuildName->setText(ucsTmp);
+
+		// guildname color is the pvp color
+		_GuildName->setColor(entityColor);
+		_GuildName->setModulateGlobalColor(!isPvpColor);
+	}
+
+	// Set the guild symbol
+	if (_Entity->getGuildSymbol() != 0)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		string dbLeaf = "UI:ENTITY:GUILD:"+toString (_Entity->slot())+":ICON";
+		pIM->getDbProp(dbLeaf)->setValue64(_Entity->getGuildSymbol());
+	}
+
+	// Set the event faction
+	if (_EventFaction)
+	{
+		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+		ucstring ucsTmp;
+		if (pSMC->getString (_Entity->getEventFactionID(), ucsTmp))
+			_EventFaction->setText(ucsTmp);
+
+		// guildname color depends of PVP faction or not
+		_EventFaction->setColor(entityColor);
+		_EventFaction->setModulateGlobalColor(!isPvpColor);
+	}
+
+	double manhattanDistance = getManhattanDistance( UserEntity->pos()-_Entity->pos() );
+	// Does this entity target the user
+	if (_Target)
+	{
+		bool active = _Entity->getTargetSlotNoLag() == 0; // slot 0 is the player
+		if (manhattanDistance > CLFECOMMON::THRESHOLD_TARGET_ID_CLIENT_M)
+			active = false;
+		if (active != _Target->getActive())
+			_Target->setActive(active);
+	}
+
+	// Is the mission target
+	if (_MissionTarget)
+	{
+		bool active = _Entity->isMissionTarget ();
+		if (active != _MissionTarget->getActive())
+			_MissionTarget->setActive(active);
+	}
+
+	// If the entity is too far, hide the bars because their value is not updated by the server
+	if ( manhattanDistance < CLFECOMMON::THRESHOLD_BARS_CLIENT_M )
+	{
+		if ( ! isLeftGroupActive() )
+			setLeftGroupActive( true );
+
+		// retrieve the bar info from the Bar Manager
+		CBarManager::CBarInfo	barInfo;
+		if(!_Entity->isForageSource())
+		{
+			barInfo= CBarManager::getInstance()->getBarsByEntityId(_Entity->slot());
+		}
+		// or directly from the forage source
+		else
+		{
+			// NB: forage don't use CBarManager for 2 reasons: unusefull (forage bars exist only through VP),
+			// and complicated since updated at each frame on client (because of smooth transition code)
+			CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
+			barInfo.Score[SCORES::hit_points]=	forageSource->getTimeBar();		// Map TimeBar to HP
+			barInfo.Score[SCORES::sap]= forageSource->getQuantityBar();			// Map QuantityBar to SAP
+			barInfo.Score[SCORES::stamina]= forageSource->getDBar();			// Map D Bar to Sta
+			barInfo.Score[SCORES::focus]= forageSource->getEBar();				// Map E Bar to Focus
+		}
+
+		// Set the bar
+		if (_Bars[HP])
+		{
+			sint value = (sint)_BatLength * barInfo.Score[SCORES::hit_points] / RZ_BARS_LENGTH;
+			if ( ! _Entity->isForageSource() )
+			{
+				if (value < 0)
+				{
+					value = -value;
+					_Bars[HP]->setColorRGBA(BarColorHPNegative);
+				}
+				else
+				{
+					_Bars[HP]->setColorRGBA(BarColor[HP]);
+				}
+				// if dead creature, force the hp to 0
+				if( _Entity->mode() == MBEHAV::DEATH && !_Entity->isPlayer() && !_Entity->isUser())
+				{
+					if( value > 0 )
+					{
+						value = 0;
+					}
+				}
+			}
+			else
+			{
+				// Forage source time bar: display in different colours if in extra time
+				CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
+				if ( forageSource->isInExtraTime() )
+				{
+					_Bars[HP]->setColorRGBA(
+						forageSource->isInProspectionExtraTime() ?
+						CRGBA( 255, 0, 0 ) : // red
+						CRGBA( 235, 144, 0 ) ); // orange
+				}
+			}
+			clamp (value, 0, (sint)_BatLength);
+			if(_Bars[HP]->getW() != value)
+				_Bars[HP]->setWAndInvalidateCoords (value);
+		}
+		if (_Bars[SAP])
+		{
+			int value = _BatLength * barInfo.Score[SCORES::sap] / RZ_BARS_LENGTH;
+			clamp (value, 0, (int)_BatLength);
+			if(_Bars[SAP]->getW() != value)
+				_Bars[SAP]->setWAndInvalidateCoords (value);
+
+			// Forage source quantity bar: update contents value in tooltip
+			if ( _Entity->isForageSource() )
+			{
+				CInterfaceGroup *group = getGroup ("right");
+				CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
+				ucstring txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
+				CCtrlBase *toolTip = group->getCtrl ("tt1");
+				if ( toolTip )
+					toolTip->setDefaultContextHelp( txt );
+				CCtrlBase *toolTip2 = group->getCtrl ("ttb1");
+				if ( toolTip2 )
+					toolTip2->setDefaultContextHelp( txt );
+			}
+		}
+		if (_Bars[STA])
+		{
+			int value = _BatLength * barInfo.Score[SCORES::stamina] / RZ_BARS_LENGTH;
+			clamp (value, 0, (int)_BatLength);
+			if(_Bars[STA]->getW() != value)
+			{
+				// Forage source life bar: update danger colour
+				if ( _Entity->isForageSource() )
+				{
+					CRGBA color = _Bars[STA]->getColorRGBA();
+					color.blendFromuiRGBOnly( CRGBA( 255, 127, 127 ), CRGBA( 255, 0, 0 ), (RZ_BARS_LENGTH - barInfo.Score[SCORES::stamina]) * (256/RZ_BARS_LENGTH) );
+					_Bars[STA]->setColorRGBA( color );
+				}
+				_Bars[STA]->setWAndInvalidateCoords (value);
+			}
+		}
+		if (_Bars[Focus])
+		{
+			int value = _BatLength * barInfo.Score[SCORES::focus] / RZ_BARS_LENGTH;
+			clamp (value, 0, (int)_BatLength);
+			if(_Bars[Focus]->getW() != value)
+			{
+				// Forage source life bar: update danger colour
+				if ( _Entity->isForageSource() )
+				{
+					CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
+					if ( forageSource->isSafe() )
+					{
+						_Bars[Focus]->setColorRGBA( CForageSourceCL::SafeSourceColor );
+					}
+					else
+					{
+						CRGBA color = _Bars[Focus]->getColorRGBA();
+						color.blendFromuiRGBOnly( CRGBA( 255, 175, 0 ), CRGBA( 255, 0, 0 ), (RZ_BARS_LENGTH - barInfo.Score[SCORES::focus]) * (256/RZ_BARS_LENGTH) );
+						_Bars[Focus]->setColorRGBA( color );
+					}
+				}
+				_Bars[Focus]->setWAndInvalidateCoords (value);
+			}
+		}
+
+		if (_Entity->isUser() && _Bars[Action])
+		{
+			sint64 value = 0;
+			sint64 begin = 0;
+			sint64 end = 1;
+			if (_Value)
+				value = _Value->getValue64();
+			if (_ValueBegin)
+				begin = _ValueBegin->getValue64();
+			if (_ValueEnd)
+				end = _ValueEnd->getValue64();
+			end = max(begin, end);
+			clamp (value, begin, end);
+			if (end!=begin)
+			{
+				value = (sint32)_BatLength * (sint32)(value-begin) / (sint32)(end-begin);
+				clamp (value, 0, (int)_BatLength);
+			}
+			else
+			{
+				value= 0;
+			}
+
+			if(_Bars[Action]->getW() != value)
+				_Bars[Action]->setWAndInvalidateCoords ((sint32)value);
+		}
+		else if ( _Entity->isForageSource() && _Bars[Action] )
+		{
+			CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
+			sint32 value = (sint32)_BatLength * (sint32)forageSource->getKamiAngerBar() / RZ_BARS_LENGTH;
+			if(_Bars[Action]->getW() != value)
+				_Bars[Action]->setWAndInvalidateCoords(value);
+		}
+	}
+	else
+	{
+		// The entity is too far => hide the bars
+		if ( isLeftGroupActive() )
+			setLeftGroupActive( false );
+	}
+
+	// For Entities, set some ZBias if the entity is selected or under cursor
+	if(_Entity && !_Entity->isForageSource())
+	{
+		if( _Entity->slot()==SlotUnderCursor || _Entity->slot()==UserEntity->selection())
+			setZBias(-2.f);
+		else
+			setZBias(0.f);
+	}
+}
+
+// ***************************************************************************
+CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string &templateName, const std::string &id)
+{
+	CInterfaceGroup *groupInfo = NULL;
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	static volatile bool bypass = false;
+	if (R2::getEditor().getMode() == R2::CEditor::EditionMode && !bypass)
+	{
+		// NB : only use the fast version during edition because duplication of CCDBCtrlSheet not implemented now, but we don't
+		// use it for the edition !!!!
+		CInterfaceElement *prototype = im->getElementFromId("ui:interface:" + templateName + "_proto");
+		if (prototype && dynamic_cast<CInterfaceGroup *>(prototype))
+		{
+			extern bool NoOpForCCtrlSheetInfo_Serial; // CCDBCtrlSheet::serial not implemented, but prevent an assert in its serial because
+													  // we don't use it in this special case (R2, Edition)
+			NoOpForCCtrlSheetInfo_Serial = true;
+			groupInfo = dynamic_cast<CInterfaceGroup *>(prototype->clone());
+			NoOpForCCtrlSheetInfo_Serial = false;
+			if (groupInfo)
+			{
+				groupInfo->setIdRecurse(id);
+			}
+		}
+	}
+
+	if (!groupInfo)
+	{
+		std::vector<std::pair<std::string,std::string> > templateParams;
+		templateParams.push_back (std::pair<std::string,std::string>("id", id));
+		groupInfo = CInterfaceManager::getInstance()->createGroupInstance ( templateName,
+			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+	}
+
+	CGroupInSceneUserInfo *info = dynamic_cast<CGroupInSceneUserInfo*>(groupInfo);
+	if (!info)
+	{
+		delete groupInfo;
+	}
+	return info;
+}
+
+void CGroupInSceneUserInfo::serial(NLMISC::IStream &f)
+{
+	CGroupInScene::serial(f);
+}
+
+

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.6 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BFPA"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SF 0"/>
+      <ATOM Name="Action Nature" Value="FIGHT"/>
+      <ATOM Name="Skill" Value="SF"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="ICO_Multi_Fight.tga"/>
+      <ATOM Name="IconBack" Value="BK_generic_brick.tga"/>
+    </STRUCT>
+    <STRUCT Name="Optional">
+      <ATOM Name="f0" Value="BFOA"/>
+      <ATOM Name="f1" Value="BFOB"/>
+      <ATOM Name="f2" Value="BFOC"/>
+      <ATOM Name="f3" Value="BFOD"/>
+      <ATOM Name="f4" Value="BFOE"/>
+      <ATOM Name="f5" Value="BFOF"/>
+    </STRUCT>
+    <STRUCT Name="Credit">
+      <ATOM Name="f0" Value="BFCA"/>
+      <ATOM Name="f1" Value="BFCB"/>
+      <ATOM Name="f2" Value="BFCC"/>
+      <ATOM Name="f3" Value="BFCD"/>
+      <ATOM Name="f4" Value="BFCE"/>
+      <ATOM Name="f5" Value="BFCF"/>
+      <ATOM Name="f6" Value="BFCG"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Nov 27 14:01:47 2003 (saffray) .Basics.Action Nature = FIGHT
+Thu May 06 16:26:51 2004 (fleury) .Credit.f5 = BFCF
+Thu May 06 16:26:51 2004 (fleury) .Credit.f6 = BFCG</LOG>
+</FORM>

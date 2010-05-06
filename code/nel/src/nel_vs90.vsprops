@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL"
+	OutputDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+	IntermediateDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="LIBXML_STATIC;WIN32"
+		StringPooling="true"
+		ExceptionHandling="2"
+		EnableEnhancedInstructionSet="0"
+		DisableLanguageExtensions="false"
+		WarningLevel="3"
+		SuppressStartupBanner="true"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace).lib"
+		SuppressStartupBanner="true"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="Winmm.lib Odbc32.lib Odbccp32.lib Ws2_32.lib"
+		OutputFile="$(RootNamespace).exe"
+		SuppressStartupBanner="true"
+		IgnoreDefaultLibraryNames="LIBC.lib"
+		ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
+		ImportLibrary="$(RootNamespace).lib"
+		TargetMachine="1"
+	/>
+	<UserMacro
+		Name="LibraryALUT"
+		Value="alut.lib"
+	/>
+	<UserMacro
+		Name="LibraryDirect3D9"
+		Value="d3dx9.lib d3d9.lib"
+	/>
+	<UserMacro
+		Name="LibraryDirectInput8"
+		Value="dinput8.lib dxguid.lib"
+	/>
+	<UserMacro
+		Name="LibraryDirectSound"
+		Value="dsound.lib dxguid.lib"
+	/>
+	<UserMacro
+		Name="LibraryEAX"
+		Value="eax.lib eaxguid.lib"
+	/>
+	<UserMacro
+		Name="LibraryFMOD"
+		Value="fmodvc.lib"
+	/>
+	<UserMacro
+		Name="LibraryFreeType"
+		Value="freetype236.lib"
+	/>
+	<UserMacro
+		Name="LibraryLIBcURL"
+		Value="libcurl.lib"
+	/>
+	<UserMacro
+		Name="LibraryLIBJPEG"
+		Value="libjpeg.lib"
+	/>
+	<UserMacro
+		Name="LibraryLibxml2"
+		Value="libxml2_a.lib"
+	/>
+	<UserMacro
+		Name="LibraryLUA"
+		Value="lua5.1.lib"
+	/>
+	<UserMacro
+		Name="LibraryMysqlClient"
+		Value="mysqlclient.lib"
+	/>
+	<UserMacro
+		Name="LibraryOpenAL"
+		Value="OpenAL32.lib"
+	/>
+	<UserMacro
+		Name="LibraryOpenGL"
+		Value="OpenGL32.lib"
+	/>
+	<UserMacro
+		Name="LibraryS3TC"
+		Value="s3tc.lib"
+	/>
+	<UserMacro
+		Name="LibraryZLIB"
+		Value="zlib.lib"
+	/>
+	<UserMacro
+		Name="LibraryX3DAudio"
+		Value="x3daudio.lib"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,82 @@
+#!/bin/sh -
+
+RYZOM_PATH="$HOME/code/ryzom"
+
+. $RYZOM_PATH/tools/scripts/linux/utilities
+
+init
+
+##############################################################################
+#### BUILD NEL
+##############################################################################
+
+CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" $RYZOM_PATH/tools/scripts/linux/build init nel --disable-3d --disable-samples --disable-tools >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD INIT NEL
+
+#$RYZOM_PATH/tools/scripts/linux/build nel clean
+#verify $? BUILD NEL CLEAN
+
+$RYZOM_PATH/tools/scripts/linux/build nel >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD NEL
+
+$RYZOM_PATH/tools/scripts/linux/build nel install >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD NEL INSTALL
+
+##############################################################################
+#### BUILD NELNS
+##############################################################################
+
+CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" $RYZOM_PATH/tools/scripts/linux/build init nelns >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD INIT NELNS
+
+#$RYZOM_PATH/tools/scripts/linux/build nelns clean
+#verify $? BUILD NEL CLEAN
+
+$RYZOM_PATH/tools/scripts/linux/build nelns >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD NELNS
+
+$RYZOM_PATH/tools/scripts/linux/build nelns install >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD NELNS INSTALL
+
+
+##############################################################################
+##### CLEAR packed_sheet (rebuilt in Ryzom build)
+##############################################################################
+
+rm $RYZOM_PATH/server/src/*/*.packed_sheets
+
+##############################################################################
+#### BUILD RYZOM COMMON
+##############################################################################
+
+cd $RYZOM_PATH/common
+
+#make clean >>$LOG_INFO 2>>$LOG_ERROR
+#verify $? CLEAN RYZOM COMMON
+
+make update >>$LOG_INFO 2>>$LOG_ERROR
+verify $? UPDATE RYZOM MAKEFILE COMMON
+
+CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" make night >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD RYZOM COMMON
+
+##############################################################################
+#### BUILD RYZOM
+##############################################################################
+
+cd $RYZOM_PATH/server
+
+#make clean >>$LOG_INFO 2>>$LOG_ERROR
+#verify $? CLEAN RYZOM
+
+make update >>$LOG_INFO 2>>$LOG_ERROR
+verify $? UPDATE RYZOM MAKEFILE
+
+CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" make night >>$LOG_INFO 2>>$LOG_ERROR
+verify $? BUILD RYZOM
+
+##############################################################################
+##### copy translation file from tools/translation
+##############################################################################
+
+#cp -a $RYZOM_PATH/tools/translation/translated/*.txt $RYZOM_PATH/server/data_shard/language/

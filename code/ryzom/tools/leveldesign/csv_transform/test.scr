@@ -1,0 +1,35 @@
+#include test1.scr
+#include test2.scr
+
+
+#output test.out
+
+#tbl,chap,chep,npc,mission_id
+bob,a,b,bob,m0
+bob,"b","c",bob,m0
+fred,c,d,fred,m0
+fred,d,e,fred,m1
+#
+
+#tbl;"chop;";chap
+#output test1.out
+bob;";a";b
+bob;"b;";c
+#output test2.out
+fred;c;d
+fred;d;e
+#
+
+#para tabbed
+Column 1 = $col1$, column 2 = $col2$, column 3 = $col3$
+#
+
+#output test3.out
+#text
+Begin tab delimited reading:
+#tabtbl tabbed
+col1	col2	col3
+a1	b1	c1
+a2	b2	c2
+#text
+End tab delimited reading.

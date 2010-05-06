@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Version="0.9" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Prim" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Child" Type="Dfn" Filename="_ai_manager.dfn" Array="true"/>
+  <LOG>Tue Jul 02 11:13:15 2002 (Administrateur) Dfn Structure = </LOG>
+</DFN>

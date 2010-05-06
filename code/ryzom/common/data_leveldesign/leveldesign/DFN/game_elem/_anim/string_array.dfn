@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="array" Type="Type" Filename="string.typ" Array="true" Default="default"/>
+  <LOG>Thu Oct 23 13:58:24 2003 (puzin) Dfn Structure = </LOG>
+</DFN>

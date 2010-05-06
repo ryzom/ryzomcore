@@ -1,0 +1,236 @@
+<interface_config>
+  <root id="outgame"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <!-- **************************************** -->
+  <!-- * CONFIGURATION FOR OUTGAME INTERFACES * -->
+  <!-- **************************************** -->
+  <options name="text_selection">
+    <param name="back_select_color"
+           value="255 255 255 255" />
+    <param name="text_select_color"
+           value="0 0 0 255" />
+  </options>
+  <options name="system">
+    <param name="ctrl_sheet_gray_color"
+           value="255 255 255 128" />
+    <param name="ctrl_sheet_redify_color"
+           value="255 100 100 128" />
+    <param name="ctrl_text_redify_color"
+           value="255 32 32 160" />
+    <!--    <param name="font"
+           value="outgame.ttf" /> -->
+    <param name="font"
+           value="ryzom.ttf" />
+    <param name="add_coef_font"
+           value="3" />
+    <param name="mul_coef_anim"
+           value="0.8" />
+    <param name="bubbles_timeout"
+           value="10" />
+    <param name="messages_timeout"
+           value="10" />
+    <param name="context_timeout"
+           value="5" />
+    <param name="context_html_timeout"
+           value="15" />
+  </options>
+  <!-- anim 0 is the default animation -->
+  <options type="animation_set"
+           name="character_animations">
+    <param name="m0"
+           value="FY_HOM_idle" />
+    <param name="m1"
+           value="FY_HOM_Co_AB_engarde" />
+    <param name="m2"
+           value="FY_HOM_Co_fu_engarde" />
+    <param name="m3"
+           value="FY_HOM_Co_A1m_engarde" />
+    <param name="m4"
+           value="FY_HOM_Co_A1mD_engarde" />
+    <param name="m5"
+           value="FY_HOM_Pioche_loop" />
+    <param name="m6"
+           value="FY_HOM_AD_idle" />
+    <param name="m7"
+           value="FY_HOM_Co_L2m_engarde" />
+    <param name="m8"
+           value="FY_HOM_Co_p_engarde" />
+    <param name="m9"
+           value="FY_HOM_Host_Loop" />
+    <param name="m10"
+           value="FY_HOM_Bienveillant_Loop" />
+    <param name="m11"
+           value="FY_HOM_Neutre_loop" />
+    <param name="m12"
+           value="FY_HOM_Co_A2m_engarde" />
+    <param name="m13"
+           value="FY_HOM_Co_A2m_engarde" />
+    <param name="f0"
+           value="FY_HOF_A_idle" />
+    <param name="f1"
+           value="FY_HOF_Co_AB_engarde" />
+    <param name="f2"
+           value="FY_HOF_Co_fu_engarde" />
+    <param name="f3"
+           value="FY_HOF_Co_A1m_engarde" />
+    <param name="f4"
+           value="FY_HOF_Co_A1mD_engarde" />
+    <param name="f5"
+           value="FY_HOF_Pioche_loop" />
+    <param name="f6"
+           value="FY_HOF_AD_idle" />
+    <param name="f7"
+           value="FY_HOF_Co_L2m_engarde" />
+    <param name="f8"
+           value="FY_HOF_Co_p_engarde" />
+    <param name="f9"
+           value="FY_HOF_Host_Loop" />
+    <param name="f10"
+           value="FY_HOF_Bienveillant_Loop" />
+    <param name="f11"
+           value="FY_HOF_Neutre_loop" />
+    <param name="f12"
+           value="FY_HOF_Co_A2m_coup1" />
+    <param name="f13"
+           value="FY_HOF_Co_A2m_engarde" />
+  </options>
+  <!-- *********** -->
+  <!-- *  MOUSE  * -->
+  <!-- * POINTER * -->
+  <!-- *********** -->
+  <view type="pointer"
+        id="cursor"
+        x="8"
+        y="-4"
+        w="56"
+        h="56"
+        tx_default="curs_default.tga"
+        tx_move_window="curs_move_window.tga"
+        tx_resize_BR_TL="curs_resize_BR_TL.tga"
+        tx_resize_BL_TR="curs_resize_BL_TR.tga"
+        tx_resize_TB="curs_resize_TB.tga"
+        tx_resize_LR="curs_resize_LR.tga"
+        tx_rotate="curs_rotate.tga"
+        tx_scale="curs_scale.tga"
+        posref="BL MM" />
+  <!-- ************* -->
+  <!-- * CONSTANTES * -->
+  <!-- ************* -->
+  <variable entry="UI:CONST:127"
+            type="sint32"
+            value="127" />
+  <!-- ************* -->
+  <!-- *  DEFINES  * -->
+  <!-- ************* -->
+  <define id="screen_connecting"
+          value="0" />
+  <define id="screen_intro"
+          value="1" />
+  <define id="screen_select"
+          value="2" />
+  <define id="screen_specie"
+          value="3" />
+  <define id="screen_career"
+          value="4" />
+  <define id="screen_career"
+          value="5" />
+  <define id="screen_appear"
+          value="6" />
+  <define id="screen_summary"
+          value="7" />
+  <define id="screen_crashing"
+          value="8" />
+  <define id="screen_location"
+          value="9" />
+  <variable entry="UI:TEMP:SKIP_INTRO"
+            type="bool"
+            value="0" />
+  <variable entry="UI:SERVER_RECEIVED_CHARS"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:SERVER_RECEIVED_VALID"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:CURRENT_SCREEN"
+            type="sint64"
+            value="%screen_connecting" />
+  <variable entry="UI:NEXT_SCREEN"
+            type="sint64"
+            value="-1" />
+  <variable entry="UI:SELECTED_SLOT"
+            type="sint64"
+            value="-1" />
+  <variable entry="UI:NEW_SELECTED_SLOT"
+            type="sint64"
+            value="-1" />
+  <variable entry="UI:TEMP:CARACS:STR"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:CON"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:AGI"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:WIL"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:WEL"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:INT"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:CHA"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:EMP"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:TEMP:CARACS:PER"
+            type="sint64"
+            value="0" />
+  <!-- ****************************** -->
+  <!-- *             MISC           * -->
+  <!-- ****************************** -->
+  <variable entry="UI:VARIABLES:CURRENT_TIME"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:VARIABLES:CURRENT_SERVER_TICK"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK"
+            type="sint64"
+            value="0" />
+  <variable entry="UI:SAVE:COLOR:R"
+            type="sint32"
+            value="255" />
+  <variable entry="UI:SAVE:COLOR:G"
+            type="sint32"
+            value="255" />
+  <variable entry="UI:SAVE:COLOR:B"
+            type="sint32"
+            value="255" />
+  <variable entry="UI:SAVE:COLOR:A"
+            type="sint32"
+            value="255" />
+  <!-- ***************************** -->
+  <!-- *  COMMON DEFINE COLORS     * -->
+  <!-- ***************************** -->
+  <define id="hp_color"
+          value="255 64 0 255" />
+  <define id="hp_color_neg"
+          value="127 32 0 255" />
+  <define id="sta_color"
+          value="255 0 255 255" />
+  <define id="sap_color"
+          value="72 255 0 255" />
+  <define id="focus_color"
+          value="0 128 255 255" />
+  <define id="bulk_color"
+          value="215 185 75 255" />
+</interface_config>

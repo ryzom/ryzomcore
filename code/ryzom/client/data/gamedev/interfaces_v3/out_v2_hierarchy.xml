@@ -1,0 +1,27 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+<!-- ************************ -->
+<!-- * ui:outgame Hierarchy * -->
+<!-- ************************ -->
+
+<tree node="connecting"/> 
+
+<!--
+<tree node="global_background"/>
+<tree node="specie"/>
+<tree node="career"/>
+<tree node="summary"/>
+<tree node="logo_intro"/>
+-->
+
+
+<tree node="charsel"/> 
+
+<tree node="appear"/>
+<tree node="location"/>
+
+<tree node="crashing"/> 
+
+</interface_config>

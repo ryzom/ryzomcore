@@ -1,0 +1,9 @@
+LIBRARY nelpaintpatch.dlm
+EXPORTS
+	LibDescription			@1
+	LibNumberClasses		@2
+	LibClassDesc			@3
+	LibVersion				@4
+	CanAutoDefer			@5
+SECTIONS
+	.data READ WRITE

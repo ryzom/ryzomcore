@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_gfa_l.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="fyros light boots"/>
+      <ATOM Name="family" Value="armor"/>
+      <ATOM Name="ItemType" Value="Light boots"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Feet"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="CraftPlan" Value="bcfaea07.sbrick"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="fy_HOM_civil01_bottes.shape"/>
+      <ATOM Name="shape_female" Value="fy_HOF_civil01_bottes.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon" Value="AR_botte.tga"/>
+      <ATOM Name="icon background" Value="BK_fyros.tga"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="ArmorTool"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 06 18:41:49 2002 (mauduit) Form Parents = 
+Fri Sep 27 10:52:37 2002 (favre) .basics.name = fyros light boots
+Wed Oct 02 17:05:31 2002 (favre) .basics.hit points = very low
+Wed Oct 02 17:05:31 2002 (favre) .basics.weight = middle
+Wed Sep 17 16:33:59 2003 (coutelas) .faber.Skill = fyros light boots craft
+Thu Sep 18 19:14:39 2003 (coutelas) .basics.family = armor
+Fri Sep 19 11:49:21 2003 (coutelas) .AsBrick.Client.Icon = AR_botte.tga
+Fri Sep 19 11:49:21 2003 (coutelas) .AsBrick.Client.IconBack = BK_fyros_brick.tga
+Tue Sep 23 12:18:06 2003 (coutelas) .basics.ItemType = Light boots</LOG>
+</FORM>

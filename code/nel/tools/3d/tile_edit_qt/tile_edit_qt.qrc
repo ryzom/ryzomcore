@@ -1,0 +1,27 @@
+<RCC>
+  <qresource prefix="newPrefix" >
+    <file>left.png</file>
+    <file>right.png</file>
+    <file>reset.png</file>
+    <file>up.png</file>
+    <file>down.png</file>
+  </qresource>
+  <qresource prefix="newPrefix" >
+    <file>rotation270.png</file>
+    <file>rotation0.png</file>
+    <file>rotation90.png</file>
+    <file>rotation180.png</file>
+  </qresource>
+  <qresource prefix="newPrefix" >
+    <file>empty_image.png</file>
+  </qresource>
+  <qresource prefix="newPrefix" >
+    <file>replace_image.png</file>
+    <file>add_tile.png</file>
+    <file>delete_image.png</file>
+    <file>delete_tile.png</file>
+  </qresource>
+  <qresource prefix="newPrefix" >
+    <file>nel.png</file>
+  </qresource>
+</RCC>

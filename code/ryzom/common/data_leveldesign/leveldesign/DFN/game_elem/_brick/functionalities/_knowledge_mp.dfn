@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="MpLevelMin" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="MpLevelMax" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Wed Feb 12 12:20:10 2003 (berenguier) Dfn Structure = </LOG>
+</DFN>

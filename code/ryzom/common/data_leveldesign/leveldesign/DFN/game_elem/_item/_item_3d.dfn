@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.14 $" State="modified">
+  <ELEMENT Name="shape" Type="Type" Filename="filename.typ" FilenameExt="*.shape"/>
+  <ELEMENT Name="shape_female" Type="Type" Filename="filename.typ" FilenameExt="*.shape"/>
+  <ELEMENT Name="map_variant" Type="Type" Filename="item_map.typ"/>
+  <ELEMENT Name="icon" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon background" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon overlay" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon overlay2" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="IconBackColor" Type="Type" Filename="color.typ" Default="255,255,255"/>
+  <ELEMENT Name="IconColor" Type="Type" Filename="color.typ" Default="255,255,255"/>
+  <ELEMENT Name="IconOverColor" Type="Type" Filename="color.typ" Default="255,255,255"/>
+  <ELEMENT Name="IconOver2Color" Type="Type" Filename="color.typ" Default="255,255,255"/>
+  <ELEMENT Name="text overlay" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="anim_set" Type="Type" Filename="item_animset.typ"/>
+  <ELEMENT Name="color" Type="Type" Filename="item_color.typ"/>
+  <ELEMENT Name="fx" Type="Dfn" Filename="_item_3d_fx.dfn"/>
+  <ELEMENT Name="has_fx" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="never hide when equiped" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Jun 18 17:20:13 2002 (besson) Dfn Structure = 
+Tue Jun 25 16:14:15 2002 (puzin) Dfn Structure = 
+Tue Jun 25 16:28:18 2002 (puzin) Dfn Structure = 
+Wed Jul 03 22:09:57 2002 (puzin) Dfn Structure = 
+Fri Jul 05 13:51:00 2002 (puzin) Dfn Structure = 
+Fri Jul 05 14:56:36 2002 (puzin) Dfn Structure = 
+Fri Jul 12 18:36:26 2002 (puzin) Dfn Structure = 
+Mon Aug 05 10:50:53 2002 (puzin) Dfn Structure = 
+Tue Aug 06 20:13:39 2002 (puzin) Dfn Structure = 
+Thu Aug 08 16:42:09 2002 (puzin) Dfn Structure = 
+Tue Aug 27 11:20:33 2002 (miller) Dfn Structure = 
+Mon Sep 23 18:40:27 2002 (puzin) Dfn Structure = 
+Mon Sep 23 18:52:15 2002 (puzin) Dfn Structure = 
+Mon Sep 23 18:53:25 2002 (puzin) Dfn Structure = 
+Tue Apr 27 17:12:34 2004 (coutelas) Dfn Structure = 
+Thu Sep 23 16:12:27 2004 (coutelas) Dfn Structure = 
+Thu Sep 23 16:13:09 2004 (coutelas) Dfn Structure = </LOG>
+</DFN>

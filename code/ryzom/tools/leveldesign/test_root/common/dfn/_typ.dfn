@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<File_of_forms>
+  <CHECK>1179603533</CHECK>
+  <VERSION>0</VERSION>
+  <CONTAINER size="1">
+    <ELM>
+      <Head User_name="Anonymous" Version_number="0.0" Date="Temporary out of date"/>
+      <Body Name="BODY">
+        <VECTOR size="2">
+          <POLYPTR id="3932016" class="CFormBodyEltAtom">
+            <Atom Name="Designation" Value="string.typ"/>
+          </POLYPTR>
+          <POLYPTR id="3930536" class="CFormBodyEltAtom">
+            <Atom Name="Substitute" Value="string.typ"/>
+          </POLYPTR>
+        </VECTOR>
+      </Body>
+    </ELM>
+  </CONTAINER>
+</File_of_forms>

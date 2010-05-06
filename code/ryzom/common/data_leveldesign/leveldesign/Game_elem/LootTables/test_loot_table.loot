@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<FORM Version="0.6" State="modified">
+  <STRUCT>
+    <ARRAY Name="LootTable">
+      <STRUCT>
+        <ATOM Name="Item" Value="shield_of_kelpeucalya_lvl_08.item"/>
+        <ATOM Name="Probability" Value="25"/>
+        <ATOM Name="MinLevel" Value="6"/>
+        <ATOM Name="MaxLevel" Value="10"/>
+        <ATOM Name="RangeLevel" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Item" Value="matis_pistol_lvl_12.item"/>
+        <ATOM Name="Probability" Value="25"/>
+        <ATOM Name="MinLevel" Value="10"/>
+        <ATOM Name="MaxLevel" Value="13"/>
+        <ATOM Name="RangeLevel" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Item" Value="matis_sword_lvl_11.item"/>
+        <ATOM Name="Probability" Value="25"/>
+        <ATOM Name="MinLevel" Value="10"/>
+        <ATOM Name="MaxLevel" Value="13"/>
+        <ATOM Name="RangeLevel" Value="1"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Aug 26 16:00:49 2002 (saffray) .LootTable[0].Item = shield_of_kelpeucalya_lvl_08.item
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[0].MaxLevel = 40
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[0].MinLevel = 1
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[0].Probability = 25
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[0].RangeLevel = 5
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[1].Item = matis_pistol_lvl_12.item
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[1].MaxLevel = 40
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[1].MinLevel = 1
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[1].Probability = 25
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[1].RangeLevel = 5
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[2].Item = matis_sword_lvl_11.item
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[2].MaxLevel = 40
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[2].MinLevel = 1
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[2].Probability = 25
+Mon Aug 26 16:00:49 2002 (saffray) .LootTable[2].RangeLevel = 5
+Mon Aug 26 16:00:49 2002 (saffray) formName Resized = 3
+Mon Aug 26 16:47:20 2002 (saffray) .LootTable[0].MaxLevel = 10
+Mon Aug 26 16:47:20 2002 (saffray) .LootTable[0].MinLevel = 6
+Mon Aug 26 16:47:50 2002 (saffray) .LootTable[1].MaxLevel = 13
+Mon Aug 26 16:47:50 2002 (saffray) .LootTable[1].MinLevel = 10
+Mon Aug 26 16:47:50 2002 (saffray) formName Resized = 4
+Mon Aug 26 16:48:31 2002 (saffray) .LootTable[2].MaxLevel = 13
+Mon Aug 26 16:48:31 2002 (saffray) .LootTable[2].MinLevel = 10
+Mon Aug 26 16:48:31 2002 (saffray) .LootTable[2].RangeLevel = 1
+Mon Aug 26 16:49:38 2002 (saffray) .LootTable[0].RangeLevel = 1
+Mon Aug 26 16:49:38 2002 (saffray) .LootTable[1].RangeLevel = 1
+Mon Aug 26 16:49:38 2002 (saffray) .LootTable[3].RangeLevel = 1
+Mon Aug 26 17:04:48 2002 (saffray) formName Resized = 3</LOG>
+</FORM>

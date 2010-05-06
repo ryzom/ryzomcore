@@ -1,0 +1,224 @@
+
+body        {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background-color: #FFFFFF;
+}
+
+td          {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+table       {
+	margin: 0px;
+	padding: 0px;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+th          {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background-color: #999999;
+}
+
+input       {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+input.small	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	width: 45px;
+}
+
+textarea    {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	width:98%;
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+}
+
+textarea.command {
+	font-family: Terminal, Courier;
+	font-size: 10pt;
+}
+
+a:link { color: #000088; text-decoration: none; }
+a:visited { color: #000088; text-decoration: none; }
+a:active { color: #000033; text-decoration: none; }
+a:hover { color: #8800CC; text-decoration: underline; }
+
+td.boxed {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+	background-color: #eeeeee;
+	padding-left: 5px;
+	padding-right: 5px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+td.line_left   { border-left: 1px solid #000000;   }
+td.line_right  { border-right: 1px solid #000000;  }
+td.line_top    { border-top: 1px solid #000000;    }
+td.line_bottom { border-bottom: 1px solid #000000; }
+
+
+table.viewlist { height:100%; }
+table.view {
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+}
+
+td.offline { background-color: #FF0000; }
+td.unknown { background-color: #FFAA00; }
+
+tr.row0 			{ background-color: #CCCCCC; }
+tr.row1 			{ background-color: #DDDDDD; }
+
+tr.row0_static		{ background-color: #CCCCCC; }
+tr.row1_static		{ background-color: #DDDDDD; }
+
+tr.row_red			{ background-color: #C83C3C; }
+tr.row_orange_dark	{ background-color: #E4916F; }
+tr.row_orange_light	{ background-color: #F2D079; }
+
+tr.row_stopped		{ background-color: #AAAAAA; }
+tr.row_starting		{ background-color: #75D5A8; }
+
+tr.row0:hover, tr.row1:hover, tr.row_stopped:hover, tr.row_starting:hover, tr.row_red:hover, tr.row_orange_dark:hover, tr.row_orange_light:hover {
+	background-color: #99BBDD;
+}
+
+tr.row_restart_active {
+	background-color: #CC8899;
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+}
+
+td.cell_inactive1	{ color: #666666; }
+td.cell_inactive2	{ color: #666666; font-style: italic; }
+
+td.heads {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background-color: #999999;
+	font-weight: bold;
+}
+
+input {
+	border-left: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+}
+
+input.check {
+	border-left: 0px solid #000000;
+	border-right: 0px solid #000000;
+	border-top: 0px solid #000000;
+	border-bottom: 0px solid #000000;
+}
+
+input.refresh_counter {
+	border-left: 0px solid #000000;
+	border-right: 0px solid #000000;
+	border-top: 0px solid #000000;
+	border-bottom: 0px solid #000000;
+	background-color: #cccccc;
+	text-align: center;
+	width: 100%;
+}
+
+input.restart {
+	background-color: #CC8899;
+}
+
+span.alert {
+	color: #FF0000;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+span.basicbold {
+	color: #000000;
+	font-weight: bold;
+}
+
+span.running {
+	color: #38A167;
+	font-weight: bold;
+}
+
+span.autostart_on {
+	color: #38A167;
+	font-weight: bold;
+}
+
+span.autostart_off {
+	color: #C83C3C;
+	font-weight: bold;
+}
+
+span.stopped {
+	color: #C83C3C;
+	font-weight: bold;
+}
+
+
+td.domainlist:hover {
+	background-color: #7799BB;
+}
+
+td.domainlistselected {
+	background-color: #99BBDD;
+	font-weight: bold;
+}
+
+td.shardlist:hover {
+	background-color: #7799BB;
+}
+
+td.shardlistselected {
+	background-color: #99BBDD;
+	font-weight: bold;
+}
+
+tr.varlist:hover {
+	background-color: #7799BB;
+}
+
+tr.varlistselected {
+	background-color: #99BBDD;
+}
+
+.ws_close {
+	background-color: #888888;
+}
+
+.ws_dev {
+	background-color: #DD8888;
+}
+
+.ws_restricted {
+	background-color: #DDDD88;
+}
+
+.ws_open {
+	background-color: #88DD88;
+}
+

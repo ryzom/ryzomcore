@@ -1,0 +1,95 @@
+
+
+<input_config>
+	<!-- List Of Combo Events that are used to Text Edition -->
+	<!-- mod means: 'c' or 's' or 'a' or a combination of them.
+		'c' The combo is valid if the Control is pressed
+		's' The combo is valid if the Shift is pressed
+		'a' The combo is valid if the Alt is pressed
+		For convenience, 'C', 'S', and 'A' are also possible BUT there means is different:
+		'C' The combo is valid wether or not the Control Key is pressed
+		'S' The combo is valid wether or not the Shift Key is pressed
+		'A' The combo is valid wether or not the Alt Key is pressed
+	-->
+	<combo_key_chat>
+
+		<!-- All Standard typing Keys. Valid also if Shift is pressed -->
+		<key id="Key0" mod="CSA" />
+		<key id="Key1" mod="CSA" />
+		<key id="Key2" mod="CSA" />
+		<key id="Key3" mod="CSA" />
+		<key id="Key4" mod="CSA" />
+		<key id="Key5" mod="CSA" />
+		<key id="Key6" mod="CSA" />
+		<key id="Key7" mod="CSA" />
+		<key id="Key8" mod="CSA" />
+		<key id="Key9" mod="CSA" />
+		<key id="KeyA" mod="S" />
+		<key id="KeyB" mod="S" />
+		<key id="KeyC" mod="S" />
+		<key id="KeyD" mod="S" />
+		<key id="KeyE" mod="CSA" />	<!-- euro -->
+		<key id="KeyF" mod="S" />
+		<key id="KeyG" mod="S" />
+		<key id="KeyH" mod="S" />
+		<key id="KeyI" mod="S" />
+		<key id="KeyJ" mod="S" />
+		<key id="KeyK" mod="S" />
+		<key id="KeyL" mod="S" />
+		<key id="KeyM" mod="S" />
+		<key id="KeyN" mod="S" />
+		<key id="KeyO" mod="S" />
+		<key id="KeyP" mod="S" />
+		<key id="KeyQ" mod="S" />
+		<key id="KeyR" mod="S" />
+		<key id="KeyS" mod="S" />
+		<key id="KeyT" mod="S" />
+		<key id="KeyU" mod="S" />
+		<key id="KeyV" mod="S" />
+		<key id="KeyW" mod="S" />
+		<key id="KeyX" mod="S" />
+		<key id="KeyY" mod="S" />
+		<key id="KeyZ" mod="S" />
+
+		<!-- Formating -->
+		<key id="KeyRETURN"		mod="" />
+		<key id="KeyCAPITAL"	mod="" />
+		<key id="KeyESCAPE"		mod="" />
+		<key id="KeySPACE"		mod="" />
+
+		<!-- KeyPad -->
+		<key id="KeyNUMPAD0"	mod="" />
+		<key id="KeyNUMPAD1"	mod="" />
+		<key id="KeyNUMPAD2"	mod="" />
+		<key id="KeyNUMPAD3"	mod="" />
+		<key id="KeyNUMPAD4"	mod="" />
+		<key id="KeyNUMPAD5"	mod="" />
+		<key id="KeyNUMPAD6"	mod="" />
+		<key id="KeyNUMPAD7"	mod="" />
+		<key id="KeyNUMPAD8"	mod="" />
+		<key id="KeyNUMPAD9"	mod="" />
+		<key id="KeyMULTIPLY"	mod="" />
+		<key id="KeyADD"		mod="" />
+		<key id="KeySEPARATOR"	mod="" />
+		<key id="KeySUBTRACT"	mod="" />
+		<key id="KeyDECIMAL"	mod="" />
+		<key id="KeyDIVIDE"		mod="" />
+		<key id="KeyNUMLOCK"	mod="" />
+
+		<!-- France. Extra Keys (comma etc...) -->
+		<key id="0xBA"			mod="CSA" />
+		<key id="0xBB"			mod="CSA" />
+		<key id="0xBC"			mod="CSA" />
+		<key id="0xBE"			mod="CSA" />
+		<key id="0xBF"			mod="CSA" />
+		<key id="0xC0"			mod="CSA" />
+		<key id="0xDB"			mod="CSA" />
+		<key id="0xDC"			mod="CSA" />
+		<key id="0xDD"			mod="CSA" />
+		<key id="0xDE"			mod="CSA" />
+		<key id="0xDF"			mod="CSA" />
+		<key id="0xE2"			mod="CSA" />
+
+	</combo_key_chat>
+</input_config>
+

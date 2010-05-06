@@ -1,0 +1,491 @@
+<!-- ********************** -->
+<!-- Game action definition -->
+<!-- ********************** -->
+
+<!-- Take care to update macros.xml with a good t_all_keys if you add / remove a category -->
+
+<interface_config>
+
+<define id="action_param_hidden"		value="0" />
+<define id="action_param_constant"		value="1" />
+<define id="action_param_user"			value="2" />
+<define id="action_param_user_name"		value="3" />
+
+<template name="openable_window_list">
+
+	<value value="connection"	hardtext="uiConnection"/>
+
+</template>
+
+<template name="container_window_list">
+
+	<value value="player"				hardtext="uiPlayer" contexts="game, r2ed_anim_test"/>
+	<value value="bonus_malus"			hardtext="uiBonusMalus" contexts="game"/>
+	<value value="info_player_skills"	hardtext="uiStatus" contexts="game"/>
+	<value value="info_player_journal"	hardtext="uiJournal" contexts="game"/>
+	<value value="encyclopedia"			hardtext="uiEncyclopedia" contexts="game"/>
+	<value value="fame"					hardtext="uiFameTitle" contexts="game"/>
+
+	<value value="gestionsets"			hardtext="uiHands" contexts="game, r2ed_anim_test"/>
+	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
+	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
+	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	<value value="webig"				hardtext="uiWebIG" contexts="game"/>
+
+	<value value="animal_global"		hardtext="uiAnimals" contexts="game"/>
+
+	<value value="compass"				hardtext="uiCompas" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	
+	<value value="map"					hardtext="uiMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	
+	<value value="gestion_windows"		hardtext="uiTaskbar" contexts="game"/>
+
+	<value value="guild"				hardtext="uiGuild" contexts="game"/>
+	<value value="guild_forum"			hardtext="uiGuildForum" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	<value value="guild_chat"			hardtext="uiGuildChat" contexts="game"/>
+	<value value="team_list"			hardtext="uiTeamList" contexts="game"/>
+	<value value="team_chat"			hardtext="uiTeamChat" contexts="game"/>
+
+	<value value="target"				hardtext="uiTarget" contexts="game, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="contact_list"			hardtext="uiContactList" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
+	<value value="main_chat"			hardtext="uiMainChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="tell"					hardtext="uiTellWinAct" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	
+	<value value="keys"					hardtext="uiKeys" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="macros"				hardtext="uiMacros" contexts="game"/>
+	<value value="game_config"			hardtext="uiGlobalSettings" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="connection"			hardtext="uiConnection" contexts="game"/>
+	<value value="mp3_player"			hardtext="uimwMP3Player" contexts="game"/>
+	<value value="bg_downloader"		hardtext="uimwBGDownloader" contexts="game"/>
+	<value value="links"				hardtext="uiLinks" contexts="game"/>
+	<value value="debug_info"			hardtext="uiDebug" contexts="game"/>
+
+	<!-- r2ed specifics -->
+	<value value="r2ed_palette"			hardtext="uiR2EDPalette" contexts="r2ed"/>
+	<value value="r2ed_scenario"		hardtext="uiR2EDScenario" contexts="r2ed"/>
+	<value value="r2ed_ring_window"		hardtext="uiR2EDRingWindow" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="r2ed_scenario_scores"	hardtext="uiR2EDScoresWindow" contexts="game, r2ed_anim_dm"/>
+
+</template>
+
+
+<template name="popable_window_list">
+
+
+</template>
+
+
+<action_category name="player" hardtext="uiPlayer" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<action name="toggle_light"         hardtext="uiLightOnOff"/>
+	<action name="toggle_dodge_parry"   hardtext="uiToggleDodgeParry"/>
+</action_category>
+
+<action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<action name="toggle_sit_stand"	hardtext="uiMoveToggleSitStand" contexts="game, r2ed_anim_test"/>
+	<action name="forward"			hardtext="uiMoveForward" macroisable="false" />
+	<action name="backward"			hardtext="uiMoveBackward" macroisable="false" />
+	<action name="turn_left"		hardtext="uiMoveTurnLeft" macroisable="false" />
+	<action name="turn_right"		hardtext="uiMoveTurnRight" macroisable="false" />
+	<action name="strafe_left"		hardtext="uiMoveStrafeLeft" macroisable="false" />
+	<action name="strafe_right"		hardtext="uiMoveStrafeRight" macroisable="false" />
+	<action name="look_up"			hardtext="uiMoveLookUp" macroisable="false" />
+	<action name="look_down"		hardtext="uiMoveLookDown" macroisable="false" />
+	<action name="toggle_auto_walk"	hardtext="uiMoveToggleAutoWalk" macroisable="false" />
+	<action name="toggle_run_walk"	hardtext="uiMoveRunWalk" contexts="game, r2ed_anim_test, r2ed_anim_dm"/>
+	<action name="mount_unmount"	hardtext="uiMountUnmount" contexts="game"/>
+	<action name="camera_turn_left"		hardtext="uiCameraTurnLeft" macroisable="false" />
+	<action name="camera_turn_right"	hardtext="uiCameraTurnRight" macroisable="false" />
+	<action name="camera_turn_center"	hardtext="uiCameraTurnCenter" />
+</action_category>
+
+<action_category name="actions" hardtext="uiActions" contexts="game, r2ed_anim_test">
+	<action name="command" hardtext="uiDebugCommand" macroisable="false" >
+		<parameter hardtext="uiShortcutNumber">
+			<value value="a execMemorizedPhrase 0 0" hardtext="uiKey0"/>
+			<value value="a execMemorizedPhrase 1 0" hardtext="uiKey1"/>
+			<value value="a execMemorizedPhrase 2 0" hardtext="uiKey2"/>
+			<value value="a execMemorizedPhrase 3 0" hardtext="uiKey3"/>
+			<value value="a execMemorizedPhrase 4 0" hardtext="uiKey4"/>
+			<value value="a execMemorizedPhrase 5 0" hardtext="uiKey5"/>
+			<value value="a execMemorizedPhrase 6 0" hardtext="uiKey6"/>
+			<value value="a execMemorizedPhrase 7 0" hardtext="uiKey7"/>
+			<value value="a execMemorizedPhrase 8 0" hardtext="uiKey8"/>
+			<value value="a execMemorizedPhrase 9 0" hardtext="uiKey9"/>
+		</parameter>
+	</action>
+	<action name="no_target"			hardtext="uiNoTarget" />
+	<action name="target"				hardtext="uiTargetCmd" >
+		<parameter hardtext="uiTargetCmdEntity" type="%action_param_user_name" name="entity"/>
+	</action>
+	<action name="target_teammate_shortcut" hardtext="uiTargetTeammateCmd" contexts="game">
+		<parameter hardtext="uiTargetTeammateCmdI" type="%action_param_constant" name="indexInTeam" value="1">
+			<value value="1" hardtext="uiKey1"/>
+			<value value="2" hardtext="uiKey2"/>
+			<value value="3" hardtext="uiKey3"/>
+			<value value="4" hardtext="uiKey4"/>
+			<value value="5" hardtext="uiKey5"/>
+			<value value="6" hardtext="uiKey6"/>
+			<value value="7" hardtext="uiKey7"/>
+			<value value="8" hardtext="uiKey8"/>
+		</parameter>
+	</action>
+	<action name="assist"				hardtext="uiAssistCmd" contexts="game">
+		<parameter hardtext="uiAssistCmdEntity" type="%action_param_user_name" name="entity"/>
+	</action>
+	<action name="assist_target"		hardtext="uiAssistTargetCmd" contexts="game, r2ed_anim_test"/>
+	<action name="self_target"			hardtext="uiSelfTarget" contexts="game, r2ed_anim_test"/>
+	<action name="toggle_combat"		hardtext="uiToggleCombat" contexts="game, r2ed_anim_test"/>
+	<action name="front_selection"	hardtext="uiFrontSelection" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiFrontSelectionType">
+			<value value="friend" hardtext="uiFrontSelectionFriend"/>
+			<value value="ennemy" hardtext="uiFrontSelectionEnnemy"/>
+		</parameter>
+	</action>
+	<action name="run_shortcut"				hardtext="uiRunShortcut" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiShortcutNumber">
+			<value value="00" hardtext="uiNumber01"/>
+			<value value="01" hardtext="uiNumber02"/>
+			<value value="02" hardtext="uiNumber03"/>
+			<value value="03" hardtext="uiNumber04"/>
+			<value value="04" hardtext="uiNumber05"/>
+			<value value="05" hardtext="uiNumber06"/>
+			<value value="06" hardtext="uiNumber07"/>
+			<value value="07" hardtext="uiNumber08"/>
+			<value value="08" hardtext="uiNumber09"/>
+			<value value="09" hardtext="uiNumber10"/>
+			<value value="10" hardtext="uiNumber11"/>
+			<value value="11" hardtext="uiNumber12"/>
+			<value value="12" hardtext="uiNumber13"/>
+			<value value="13" hardtext="uiNumber14"/>
+			<value value="14" hardtext="uiNumber15"/>
+			<value value="15" hardtext="uiNumber16"/>
+			<value value="16" hardtext="uiNumber17"/>
+			<value value="17" hardtext="uiNumber18"/>
+			<value value="18" hardtext="uiNumber19"/>
+			<value value="19" hardtext="uiNumber20"/>
+		</parameter>
+	</action>
+	<action name="select_shortcut_bar"		hardtext="uiSelectShortcutBar" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiShortcutBarNumber">
+			<value value="1" hardtext="uiNumber01"/>
+			<value value="2" hardtext="uiNumber02"/>
+			<value value="3" hardtext="uiNumber03"/>
+			<value value="4" hardtext="uiNumber04"/>
+			<value value="5" hardtext="uiNumber05"/>
+			<value value="6" hardtext="uiNumber06"/>
+			<value value="7" hardtext="uiNumber07"/>
+			<value value="8" hardtext="uiNumber08"/>
+			<value value="9" hardtext="uiNumber09"/>
+			<value value="10" hardtext="uiNumber10"/>
+		</parameter>
+	</action>
+	<action name="phrase_cancel_cast"		hardtext="uiCancelCast" contexts="game, r2ed_anim_test"/>
+</action_category>
+
+<action_category name="chat" hardtext="uiChat" contexts="game, r2ed, r2ed_anim_test"> <!-- not available in r2ed for now -->
+	<action name="talk_untalk"			hardtext="uiTalkLeave"/>
+	<action name="reply_teller"			hardtext="uiReplyTeller"/>
+	<action name="reply_teller_once"	hardtext="uiReplyTellerOnce"/>
+	<action name="cycle_tell"			hardtext="uiCycleTell"/>
+	<action name="enter_tell"				hardtext="uiEnterTellCmd">
+		<parameter hardtext="uiTellCmdDest" type="%action_param_user_name" name="player"/>
+	</action>
+	<action name="tell"					hardtext="uiTellCmd">
+		<parameter hardtext="uiTellCmdDest" type="%action_param_user_name" name="player"/>
+		<parameter hardtext="uiTellCmdMsg"	type="%action_param_user" name="text"/>
+	</action>
+	<action name="enter_talk"					hardtext="uiEnterTalkCmd">
+		<parameter hardtext="uiTalkCmdMode" type="%action_param_constant" name="mode" value="0">
+			<value value="0" hardtext="uiTalkCmdModeSay"/>
+			<value value="1" hardtext="uiTalkCmdModeShout"/>
+			<value value="2" hardtext="uiTalkCmdModeTeam"/>
+			<value value="3" hardtext="uiTalkCmdModeGuild"/>
+			<!--<value value="4" hardtext="uiTalkCmdModeCivilisation"/>
+			<value value="5" hardtext="uiTalkCmdModeTerritory"/>
+			<value value="6" hardtext="uiTalkCmdModeUniverse"/>-->
+			<!--		7	tell
+						8	player
+						9	arround
+						10	system -->
+			<value value="11" hardtext="uiTalkCmdModeRegion"/>
+
+		</parameter>
+	</action>
+	<action name="talk"					hardtext="uiTalkCmd">
+		<parameter hardtext="uiTalkCmdMode" type="%action_param_constant" name="mode" value="0">
+			<value value="0" hardtext="uiTalkCmdModeSay"/>
+			<value value="1" hardtext="uiTalkCmdModeShout"/>
+			<value value="2" hardtext="uiTalkCmdModeTeam"/>
+			<value value="3" hardtext="uiTalkCmdModeGuild"/>
+			<!--<value value="4" hardtext="uiTalkCmdModeCivilisation"/>
+			<value value="5" hardtext="uiTalkCmdModeTerritory"/>
+			<value value="6" hardtext="uiTalkCmdModeUniverse"/>-->
+			<!--		7	tell
+						8	player
+						9	arround
+						10	system -->
+			<value value="11" hardtext="uiTalkCmdModeRegion"/>
+		</parameter>
+		<parameter hardtext="uiTalkCmdMsg" type="%action_param_user" name="text"/>
+	</action>
+
+	<action name="talk_message"				hardtext="uiTalkMem">
+		<parameter hardtext="uiTalkMemMsg" type="%action_param_constant" value="0">
+			<value value="00" hardtext="uiTalkMemMsg00"/>
+			<value value="01" hardtext="uiTalkMemMsg01"/>
+			<value value="02" hardtext="uiTalkMemMsg02"/>
+			<value value="03" hardtext="uiTalkMemMsg03"/>
+			<value value="04" hardtext="uiTalkMemMsg04"/>
+			<value value="05" hardtext="uiTalkMemMsg05"/>
+			<value value="06" hardtext="uiTalkMemMsg06"/>
+			<value value="07" hardtext="uiTalkMemMsg07"/>
+			<value value="08" hardtext="uiTalkMemMsg08"/>
+			<value value="09" hardtext="uiTalkMemMsg09"/>
+			<value value="10" hardtext="uiTalkMemMsg10"/>
+			<value value="11" hardtext="uiTalkMemMsg11"/>
+			<value value="12" hardtext="uiTalkMemMsg12"/>
+			<value value="13" hardtext="uiTalkMemMsg13"/>
+			<value value="14" hardtext="uiTalkMemMsg14"/>
+			<value value="15" hardtext="uiTalkMemMsg15"/>
+			<value value="16" hardtext="uiTalkMemMsg16"/>
+			<value value="17" hardtext="uiTalkMemMsg17"/>
+			<value value="18" hardtext="uiTalkMemMsg18"/>
+			<value value="19" hardtext="uiTalkMemMsg19"/>
+		</parameter>
+	</action>
+</action_category>
+
+<action_category name="view" hardtext="uiView" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<!-- <action name="toggle_names"			hardtext="uiToggleNames" repeat="1" keyup="1" /> -->
+	<action name="toggle_camera"		hardtext="uiToggleCamera"/>
+	<action name="rear_view"			hardtext="uiRearView" keyup="1" macroisable="false" />
+	<action name="toggle_chat"			hardtext="uiDebugToggleChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<action name="camera_up"			hardtext="uiCameraUp" />
+	<action name="camera_down"			hardtext="uiCameraDown" />
+</action_category>
+
+<action_category name="windows" hardtext="uiWindows" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<action name="open" hardtext="uiOpenWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="openable_window_list"/>
+		</parameter>
+	</action>
+	<action name="close" hardtext="uiCloseWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="openable_window_list"/>
+		</parameter>
+	</action>
+	<action name="open_close" hardtext="uiToggleOpenCloseWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="openable_window_list"/>
+		</parameter>
+	</action>
+	<action name="popup" hardtext="uiPopupWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="popable_window_list"/>
+		</parameter>
+	</action>
+	<action name="popin" hardtext="uiPopinWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="popable_window_list"/>
+		</parameter>
+	</action>
+	<action name="popup_popin" hardtext="uiTogglePopupPopinWindow">
+		<parameter hardtext="uiWindowName">
+			<instance template="popable_window_list"/>
+		</parameter>
+	</action>	
+	<action name="show" hardtext="uiShow" repeat="1" keyup="1">
+		<parameter hardtext="uiWindowName">
+			<instance template="container_window_list"/>
+		</parameter>
+	</action>
+	<action name="hide" hardtext="uiHide" repeat="1" keyup="1">
+		<parameter hardtext="uiWindowName">
+			<instance template="container_window_list"/>
+		</parameter>
+	</action>
+	<action name="show_hide" hardtext="uiShowHide">
+		<parameter hardtext="uiWindowName">
+			<instance template="container_window_list"/>
+		</parameter>
+	</action>
+	<action name="dock_undock_chat" hardtext="uiDockUndockChat">
+		<parameter hardtext="uiWindowName">
+			<value value="SYSTEM_INFO"			hardtext="uiSystemInfo" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+			<value value="AROUND_ME"			hardtext="uiAroundMe" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+			<value value="TEAM_CHAT"			hardtext="uiTeamChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+			<value value="GUILD_CHAT"			hardtext="uiGuildChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+			<value value="REGION_CHAT"			hardtext="uiREGION" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+			<value value="UNIVERSE_CHAT"		hardtext="uiUNIVERSE" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
+		</parameter>
+	</action>	
+	<action name="show_on_press" hardtext="uiShowOnPress" repeat="1" keyup="1" macroisable="false">
+		<parameter hardtext="uiWindowName">
+			<instance template="container_window_list"/>
+		</parameter>
+	</action>	
+	<!-- in r2 virtual desktop are used for the different mode (edition, dm, test) -->
+	<action name="set_desktop"			hardtext="uiSetDesktop" repeat="1" keyup="1" contexts="game">
+		<parameter hardtext="uiDesktopNumber">
+			<value value="0" hardtext="uiKey0"/>
+			<value value="1" hardtext="uiKey1"/>
+			<value value="2" hardtext="uiKey2"/>
+			<value value="3" hardtext="uiKey3"/>
+		</parameter>
+	</action>
+	<action name="copy_to_desktop"			hardtext="uiCopyToDesktop" repeat="1" keyup="1" contexts="game">
+		<parameter hardtext="uiDesktopNumber">
+			<value value="0" hardtext="uiKey0"/>
+			<value value="1" hardtext="uiKey1"/>
+			<value value="2" hardtext="uiKey2"/>
+			<value value="3" hardtext="uiKey3"/>
+		</parameter>
+	</action>
+</action_category>
+  
+<action_category name="system" hardtext="uiSystem" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<action name="quit_game"						hardtext="uiQuitGameWithoutWarning" contexts="game, r2ed_scenario_creation"/>
+	<action name="quit_ryzom"						hardtext="uiQuitRyzomWithoutWarning" contexts="game, r2ed_scenario_creation"/>	
+	<action name="quit_ryzom_now"					hardtext="uiQuitRyzomWithoutWarning" contexts="r2ed, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>	
+
+	<action name="enter_modal" hardtext="uiQuit">
+		<parameter value="ui:interface:quit_dialog" name="group" type="%action_param_hidden" />
+	</action>
+
+	<action name="free_mouse"		hardtext="uiFreeMouse" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
+	<action name="close_help"				hardtext="uiCloseHelp" contexts="game"/>
+	<action name="screen_shot"				hardtext="uiScreenShot" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<action name="screen_shot_jpg"			hardtext="uiScreenShotJPG" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<action name="screen_shot_png"			hardtext="uiScreenShotPNG" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+</action_category>
+
+<action_category name="edit" hardtext="uiEdit" macroisable="false" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, waiting_network, r2ed_scenario_creation">
+	<action name="edit_previous_char"			hardtext="uiEditPreviousChar"		repeat="1"/>
+	<action name="edit_select_previous_char"	hardtext="uiEditSelectPreviousChar" repeat="1"/>
+	<action name="edit_previous_word"			hardtext="uiEditPreviousWord"		repeat="1"/>
+	<action name="edit_select_previous_word"	hardtext="uiEditSelectPreviousWord" repeat="1"/>
+	<action name="edit_next_char"				hardtext="uiEditNextChar"			repeat="1"/>
+	<action name="edit_select_next_char"		hardtext="uiEditSelectNextChar"		repeat="1"/>
+	<action name="edit_next_word"				hardtext="uiEditNextWord"			repeat="1"/>
+	<action name="edit_select_next_word"		hardtext="uiEditSelectNextWord"		repeat="1"/>
+	<action name="edit_goto_line_begin"			hardtext="uiEditGotoLineBegin"/>
+	<action name="edit_select_to_line_begin"	hardtext="uiEditSelectToLineBegin"/>
+	<action name="edit_goto_block_begin"		hardtext="uiEditGotoBlockBegin"/>
+	<action name="edit_select_to_block_begin"	hardtext="uiEditSelectToBlockBegin"/>
+	<action name="edit_goto_line_end"			hardtext="uiEditGotoLineEnd"/>
+	<action name="edit_select_to_line_end"		hardtext="uiEditSelectToLineEnd"/>
+	<action name="edit_goto_block_end"			hardtext="uiEditGotoBlockEnd"/>
+	<action name="edit_select_to_block_end"		hardtext="uiEditSelectToBlockEnd"/>
+	<action name="edit_previous_line"			hardtext="uiEditPreviousLine"		repeat="1"/>
+	<action name="edit_next_line"				hardtext="uiEditNextLine"			repeat="1"/>
+	<action name="edit_delete_char"				hardtext="uiEditDeleteChar"			repeat="1"/>
+	<action name="edit_copy"					hardtext="uiEditCopy"/>
+	<action name="edit_paste"					hardtext="uiEditPaste"				repeat="1"/>
+	<action name="edit_cut"						hardtext="uiEditCut"/>
+	<action name="edit_select_all"				hardtext="uiEditSelectAll"/>
+	<action name="edit_expand"					hardtext="uiEditExpand" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, waiting_network"/>
+	<action name="edit_expand_or_cycle_tell"    hardtext="uiEditExpandOrCycleTell" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, waiting_network"/>
+	<action name="edit_back"					hardtext="uiEditBack"				repeat="1"/>
+</action_category>
+
+<action_category name="debug" hardtext="uiDebug" macroisable="false" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm">
+	<action name="toggle_help"				hardtext="uiDebugToggleHelp"/>
+	<action name="display_infos"			hardtext="uiDebugDisplayInfos" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
+	<action name="render_mode"				hardtext="uiDebugRenderMode" />
+	<action name="toggle_render"			hardtext="uiDebugToggleRender" />
+	<action name="switch_console_display"	hardtext="uiDebugSwitchConsoleDisplay" />	
+	<action name="toggle_fly"				hardtext="uiDebugToggleFly" />
+	<action name="test"						hardtext="uiDebugTest" />
+	<action name="set_pos"					hardtext="uiDebugSetPos" />
+	<action name="pacs_borders"				hardtext="uiDebugPacsBorders" />
+	<action name="debug_clusters"			hardtext="uiDebugClusters" />
+	<action name="reload_landscape_ig"		hardtext="uiDebugReloadLandscapeIG" />
+	<action name="profile"					hardtext="uiDebugProfile" />
+	<action name="profile_vblock"			hardtext="uiDebugProfileVbLock" />
+	<action name="profile_texture"			hardtext="uiDebugProfileTexture" />
+	<action name="profile_fillrate"			hardtext="uiDebugProfileFillRate" />
+	<action name="memory_report"			hardtext="uiDebugMemoryReport" />
+	<action name="toggle_primitive"			hardtext="uiDebugTogglePrimitive" />
+	<action name="primitive_up"				hardtext="uiDebugPrimitiveUp" />
+	<action name="primitive_down"			hardtext="uiDebugPrimitiveDown" />
+
+	<action name="toggle_3d_filter"			hardtext="uiDebugToggle3dFilter">
+		<parameter hardtext="uiFilterNumber">
+			<value value="0" hardtext="uiKey0"/>
+			<value value="1" hardtext="uiKey1"/>
+			<value value="2" hardtext="uiKey2"/>
+			<value value="3" hardtext="uiKey3"/>
+			<value value="4" hardtext="uiKey4"/>
+			<value value="5" hardtext="uiKey5"/>
+			<value value="6" hardtext="uiKey6"/>
+			<value value="7" hardtext="uiKey7"/>
+			<value value="8" hardtext="uiKey8"/>
+		</parameter>
+	</action>
+
+	<action name="draw_sound"				hardtext="uiDebugDrawSound" />
+	<action name="inc_camera_height"		hardtext="uiDebugIncCameraHeight" />
+	<action name="dec_camera_height"		hardtext="uiDebugDecCameraHeight" />
+
+	<!-- Weather debug -->
+	<action name="inc_time"					hardtext="uiDebugWeatherIncTime" />
+	<action name="dec_time"					hardtext="uiDebugWeatherDecTime" />
+	<action name="toggle_season"			hardtext="uiDebugWeatherTogSeason" />
+	<action name="reload_season"			hardtext="uiDebugWeatherReloadSeason" />
+	<action name="wind_test"				hardtext="uiDebugWeatherWindTest" />
+	<action name="reel_weather"				hardtext="uiDebugWeatherReelWeather" />
+	<action name="update_clouds"			hardtext="uiDebugWeatherUpdateClouds" />
+	<action name="toggle_weather_function"	hardtext="uiDebugWeatherTogFunction" />
+	<action name="inc_hour"					hardtext="uiDebugWeatherIncHour" />
+	<action name="dec_hour"					hardtext="uiDebugWeatherDecHour" />	
+	<action name="weather_stats"			hardtext="uiDebugWeatherStats" />
+	<action name="dec_display_factor"		hardtext="uiDebugWeatherDecDispFactor" />
+	<action name="inc_display_factor"		hardtext="uiDebugWeatherIncDispFactor" />
+	<action name="test"						hardtext="uiTest" />
+
+	<!-- timed fxs -->
+	<action name="show_timed_fx"			hardtext="uiDebugShowTimedFXs" />
+
+	<!-- Movie recorder -->
+	<action name="toggle_movie_recorder"	hardtext="uiToggleMovieRecorder" />
+	<action name="replay_movie"				hardtext="uiReplayMovie" />
+	<action name="save_movie"				hardtext="uiSaveMovie" />
+</action_category>
+
+<action_category name="r2ed" hardtext="uiR2EDActionCategory" macroisable="false" contexts="r2ed">
+	<!-- edition specific (in keys_r2ed.xml) -->
+	<action name="r2ed_context_command"		hardtext="uimR2EDContextualCommand">
+		<!-- contextual commands -->		
+		<parameter hardtext="uimR2EDCommandName" name="commandId">
+				<value value="delete"				hardtext="uimR2EDMenuDelete"/>
+				<value value="properties"			hardtext="uimR2EDMenuProperties"/>
+				<value value="group"				hardtext="uimR2EDMenuGroup"/>
+				<value value="ungroup"				hardtext="uimR2EDMenuUngroup"/>
+				<value value="set_as_leader"		hardtext="uimR2EDMenuSetAsGroupLeader"/>
+				<value value="wander_route"			hardtext="uimR2EDMenuPickZone"/>
+				<value value="follow_route"			hardtext="uimR2EDMenuFollowRoute"/>
+				<value value="patrol_route"			hardtext="uimR2EDMenuPatrolRoute"/>
+				<value value="repeat_route"			hardtext="uimR2EDMenuRepeatRoute"/>
+				<value value="stand_still"			hardtext="uimR2EDMenuStandInPlace"/>
+				<value value="customize_look"		hardtext="uiR2EDCustomizeLook"/>				
+		</parameter>
+	</action>
+	<action name="r2ed_cancel_tool"		hardtext="uimR2EDCancelTool" contexts="r2ed, r2ed_anim_dm"/>
+	<action name="r2ed_try_go_test"		hardtext="uimR2EDTooltipGoTest"/>
+	<action name="r2ed_select_move"		hardtext="uimR2EDTooltipSelectMove"/>
+	<action name="r2ed_select_rotate"	hardtext="uimR2EDTooltipSelectRotate"/>
+	<action name="r2ed_teleport"		hardtext="uimR2EDTooltipTeleport" contexts="r2ed, r2ed_anim_dm"/>
+	<action name="r2ed_undo"			hardtext="uimR2EDTooltipUndo" contexts="r2ed"/>
+	<action name="r2ed_redo"				hardtext="uimR2EDTooltipRedo" contexts="r2ed"/>
+	<action name="r2ed_freeze_unfreeze_botobjects"	hardtext="uimR2EDFreezeBotObjects" contexts="r2ed"/>
+
+	<!-- animation specific (in keys.xml instead) -->
+	<action name="r2ed_stop_test"		hardtext="uimR2EDTooltipGoEdition" contexts="r2ed_anim_test, r2ed_anim_dm"/>
+
+</action_category>
+
+
+
+
+</interface_config>

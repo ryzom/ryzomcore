@@ -1,0 +1,198 @@
+<!-- ****************************************** -->
+<!-- *                  WIDGETS               * -->
+<!-- ****************************************** -->
+
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="true" />
+
+<!-- BUTTONS STYLE -->
+
+<!-- Big button on the left part of the screen -->
+
+<style style="menu_button" type="text_button" button_type="radio_button"
+		tx_normal="Menu_off" tx_pushed="Menu_on" tx_over="Menu_off" wmin="200" wmargin="0"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 255 255 255"
+		text_y="54" fontsize="15" shadow="true"
+		text_color_normal="255 255 0 128" 
+	    text_color_pushed="255 255 255 255" 
+	    text_color_over="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255" 
+	    text_shadow_color_pushed="0 0 0 255" 
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="false" 
+	    text_global_color_pushed="false"
+	    text_global_color_over="false" />
+	    
+<style style="job_fight" type="button" button_type="radio_button"
+		tx_normal="job_fight_off.tga" tx_pushed="job_fight_on.tga" tx_over="job_fight_over.tga" 
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="225 210 155 128" col_over="255 255 255 255" col_pushed="255 255 255 255" />
+		
+<style style="job_magic" type="button" button_type="radio_button"
+		tx_normal="job_magic_off.tga" tx_pushed="job_magic_on.tga" tx_over="job_magic_over.tga" 
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="225 210 155 128" col_over="255 255 255 255" col_pushed="255 255 255 255" />
+		
+<style style="job_forage" type="button" button_type="radio_button"
+		tx_normal="job_forage_off.tga" tx_pushed="job_forage_on.tga" tx_over="job_forage_over.tga" 
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="225 210 155 128" col_over="255 255 255 255" col_pushed="255 255 255 255" />
+		
+<style style="job_craft" type="button" button_type="radio_button"
+		tx_normal="job_craft_off.tga" tx_pushed="job_craft_on.tga" tx_over="job_craft_over.tga" 
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="225 210 155 128" col_over="255 255 255 255" col_pushed="255 255 255 255" />		
+
+
+
+<style style="opt_button" type="text_button" button_type="radio_button" 
+		tx_normal="opt_off" tx_pushed="opt_off" tx_over="opt_off" wmargin="80"
+		global_color_normal="true" global_color_over="true" global_color_pushed="false" 
+		color="255 255 255 255" col_over="255 255 255 0" col_pushed="255 255 255 255"
+		text_y="12" fontsize="15" shadow="true"
+		text_color_normal="108 158 16 255" 
+	    text_color_pushed="255 255 255 255"
+	    text_color_over="138 188 46 255" 
+	    text_shadow_color_normal="0 0 0 255" 
+	    text_shadow_color_pushed="0 0 0 255"
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="false" />
+
+
+<style style="txt_button" type="text_button" button_type="radio_button" 
+		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmargin="24"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="255 255 255 255" col_over="255 255 255 0" col_pushed="255 255 255 255"
+		text_y="-1" fontsize="13" shadow="true"
+		text_color_normal="222 201 182 255" 
+		text_color_pushed="222 201 182 255" 
+	    text_color_over="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255" 
+	    text_shadow_color_pushed="0 0 0 255" 
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="false" />
+	    
+	    
+<style style="valid_txt_button" type="text_button" button_type="push_button"
+		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="80" wmargin="40"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="255 255 255 255" col_over="255 255 255 0" col_pushed="255 255 255 255"
+		text_y="-1" fontsize="13" shadow="true"
+		text_color_normal="222 201 182 255" 
+	    text_color_pushed="222 201 182 255" 
+	    text_color_over="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255" 
+	    text_shadow_color_pushed="0 0 0 255" 
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="true" 
+	    text_global_color_pushed="false" 
+	    text_global_color_over="false" />
+	    
+
+<template name="outgame_popup" posparent="parent" sizeref="wh" >
+	<view type="bitmap" id="top" texture="pop_t.tga" posref="TL TL" posparent="#posparent" scale="true" sizeref="w" h="64" />
+	<view type="bitmap" id="bg"  texture="pop_blank.tga" scale="true" posparent="#posparent" posref="TM TM" sizeref="hw" w="-32" h="-80" y="-64" avoid_resize_parent="true" />
+	<view type="bitmap" id="brb" texture="pop_br.tga" posref="BR BR" posparent="#posparent" avoid_resize_parent="true" />
+	<view type="bitmap" id="blb" texture="pop_bl.tga" posref="BL BL" posparent="#posparent" avoid_resize_parent="true" />		
+	<view type="bitmap" id="bb" texture="pop_b.tga" posref="BM BM" posparent="#posparent" scale="true" sizeref="w" w="-32" h="16" avoid_resize_parent="true" />
+	<view type="bitmap" id="lb" texture="pop_l.tga" posref="TL TL" posparent="#posparent" scale="true" sizeref="h" h="-80" w="16" y="-64" avoid_resize_parent="true" />
+	<view type="bitmap" id="rb" texture="pop_r.tga" posref="TR TR" posparent="#posparent" scale="true" sizeref="h" h="-80" w="16" y="-64" avoid_resize_parent="true" />			
+</template>
+
+<template name="outgame_black_back" posparent="parent" sizeref="wh" color="0 0 0 128" x="x" y="y" >
+
+		<view type="bitmap" id="bg" texture="sub_menu_blank.tga" scale="true" color="#color" posref="MM MM" sizeref="hw" w="-32" h="-32"/>
+		<view type="bitmap" id="tlb" texture="sub_menu_tl.tga" posref="TL TL" color="#color" />
+		<view type="bitmap" id="trb" texture="sub_menu_tr.tga" posref="TR TR" color="#color" />
+		<view type="bitmap" id="brb" texture="sub_menu_br.tga" posref="BR BR" color="#color" />
+		<view type="bitmap" id="blb" texture="sub_menu_bl.tga" posref="BL BL" color="#color" />		
+		<view type="bitmap" id="tb" texture="sub_menu_blank.tga" posref="TM TM" color="#color" scale="true" sizeref="w" w="-32" h="16"/>
+		<view type="bitmap" id="bb" texture="sub_menu_blank.tga" posref="BM BM" color="#color" scale="true" sizeref="w" w="-32" h="16"/>
+		<view type="bitmap" id="lb" texture="sub_menu_blank.tga" posref="ML ML" color="#color" scale="true" sizeref="h" h="-32" w="16"/>
+		<view type="bitmap" id="rb" texture="sub_menu_blank.tga" posref="MR MR" color="#color" scale="true" sizeref="h" h="-32" w="16"/>
+
+</template>
+
+<!-- Over Text used for SingleLine TextView that are clamped (group_tree, keys interface....) -->
+<group id="over_extend_view_text" child_resize_w="true" child_resize_h="true" child_resize_wmargin="4" child_resize_hmargin="4" posref="BL BL" >
+	<!-- System, don'change the ids, nor the posref -->
+	<!-- color and modulate_color are replaced according to the view text to over -->
+	<view type="bitmap" id="midoutline" sizeref="wh" posref="MM MM" w="0" h="0"   scale="true" color="255 255 255 255" texture="blank.tga" />
+	<view type="bitmap" id="midback" sizeref="wh" posref="MM MM" h="-2" w="-2" scale="true" color="64 64 64 255" texture="blank.tga" />
+	<!-- fontsize, shadow, text, color, modulate_color.... are replaced according to the view text to over -->
+	<view type="text" id="text" posref="BL BL" x="2" y="1" color="255 255 255 255" fontsize="12" shadow="true" multi_line="false" />
+</group>
+
+
+<define id="over_border_color" value="240 200 40 255" />
+
+<group id="context_help" posref="BL BL" 
+	child_resize_w="true" child_resize_wmargin="12" 
+	child_resize_h="true" child_resize_hmargin="9" >
+	<!--Decoration-->
+	<view type="bitmap" id="midcolor" sizeref="wh" posref="MM MM" h="-4" w="-4" scale="true" color="120 100 20 255" global_color="false" texture="blank.tga" />
+	<view type="bitmap" id="t" sizeref="w" posref="TM TM" w="-16" h="8"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_t.tga" />
+	<view type="bitmap" id="b" sizeref="w" posref="BM BM" w="-16" h="8"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_b.tga" />
+	<view type="bitmap" id="l" sizeref="h" posref="ML ML" w="8" h="-16"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_l.tga" />
+	<view type="bitmap" id="r" sizeref="h" posref="MR MR" w="8" h="-16"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_r.tga" />
+	<view type="bitmap" id="tl" avoid_resize_parent="true" posref="TL TL" w="8" h="8"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_tl.tga" />
+	<view type="bitmap" id="bl" avoid_resize_parent="true" posref="BL BL" w="8" h="8"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_bl.tga" />
+	<view type="bitmap" id="tr" avoid_resize_parent="true" posref="TR TR" w="8" h="8"   scale="true" color="%over_border_color" global_color="false" texture="W_hl_tr.tga" />
+	<view type="bitmap" id="br" avoid_resize_parent="true" posref="BR BR" w="8" h="8"	scale="true" color="%over_border_color" global_color="false" texture="W_hl_br.tga" />
+	<!--System, don'change the ids -->
+	<view type="text" id="text" posref="TM TM" y="-6" color="255 255 255 255" global_color="false" 
+		fontsize="12" shadow="true" multi_line="true" multi_line_space="1" 
+		line_maxw="300" multi_line_maxw_only="true" />
+</group>
+
+<template name="box_widget" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" keep="true" render_layer="0">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+		<group id="bg" sizeref="hw" h="0" w="0" />
+		<view type="bitmap" render_layer="#render_layer" id="back" 	scale="true" posparent="bg" posref="MM MM" sizeref="hw" h="-8" w="-8" texture="W_box_blank.tga" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="bgb" 	scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="tlb" 	texture="W_box_top_left.tga"  posref="TL TL" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="trb" 	texture="W_box_top_right.tga"  posref="TR TR" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="brb" 	texture="W_box_bot_right.tga"  posref="BR BR" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="blb" 	texture="W_box_bot_left.tga" posref="BL BL" inherit_gc_alpha="true"/>			
+		<view type="bitmap" render_layer="#render_layer" id="tb" 	texture="W_box_top.tga" posref="TM TM" scale="true" sizeref="w" w="-8" h="4" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="bb" 	texture="W_box_bot.tga" posref="BM BM" scale="true" sizeref="w" w="-8" h="4" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="lb" 	texture="W_box_left.tga" posref="ML ML"  scale="true" sizeref="h" h="-8" w="4" inherit_gc_alpha="true"/>
+		<view type="bitmap" render_layer="#render_layer" id="rb" 	texture="W_box_right.tga" posref="MR MR" scale="true" sizeref="h" h="-8" w="4" inherit_gc_alpha="true"/>
+	</group>
+</template>
+
+
+<template name="combo_box_def1" keep="true" render_layer="0">
+	<!-- DECORATION -->
+	<instance template="box_widget" render_layer="#render_layer" id="back" sizeref="wh" w="0" h="0" />
+	<view type="bitmap" render_layer="#render_layer" id="arrow" posref="MR MR" x="-4" texture="W_arrow_down_2.tga" />
+
+	<!-- SYSTEM -->
+	<view type="text" id="text" render_layer="#render_layer" posref="ML ML" x="2" />
+	<ctrl type="button" render_layer="#render_layer" button_type="push_button" id="select" sizeref="wh" w="0" h="0" col_over="255 255 255 90" tx_over="blank.tga" scale="true" />
+</template>
+
+<!-- the modal Menu opened on a combo box 's click -->
+<group type="menu" id="combo_box_select_menu" posref="BL TL" x="0" y="0"
+	mouse_pos="false"
+	space="2"
+	shadow="false"
+	color="255 255 255 128"  
+	shadow_color="0 0 0 255"
+	color_over="255 255 255 255"
+	shadow_color_over="0 0 0 255"
+	color_grayed="0 0 0 255"
+	shadow_color_grayed="155 155 155 255"
+	fontsize="12"
+	highlight_over="255 255 255 128"
+	force_inside_screen="true"
+	>
+</group>
+
+</interface_config>

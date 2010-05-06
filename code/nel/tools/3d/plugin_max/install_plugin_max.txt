@@ -1,0 +1,19 @@
+
+If you have installed 3dsmax9 by default, the root path is:
+
+<3DSMAX> = C:\Program Files\Autodesk\3ds Max 9
+
+- Copy following files inside <3DSMAX>/plugins
+
+nel_export\ReleaseDebug\nel_export.dlu
+tile_utility\ReleaseDebug\neltileutility.dlu
+nel_patch_converter\ReleaseDebug\nelconvertpatch.dlm
+
+- Copy following files inside <3DSMAX>/
+
+nel_3dsmax_shared\ReleaseDebug\nel_3dsmax_shared.dll
+nel\lib\object_viewer_rd.dll
+nel\lib\nel_drv_opengl_win_rd.dll
+nel\tools\3d\object_viewer\object_viewer.cfg
+
+- Copy plugin_max\scripts\* dans <3DSMAX>/Scripts

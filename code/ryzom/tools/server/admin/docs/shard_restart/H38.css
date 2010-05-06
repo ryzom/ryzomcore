@@ -1,0 +1,106 @@
+BODY {background:#FFFFFF}
+
+.menuItem {
+	font-family:sans-serif; font-size:small;
+	width:220;padding-left:20;
+	background-color:menu;
+	color:black   
+}
+
+.highlightItem {
+	font-family:sans-serif; font-size:small;
+	width:220; padding-left:20;
+	background-Color:highlight; color:white;
+}
+
+.navBar {
+	background-Color:buttonface;
+}
+
+.oldNavBar {
+	background-Color:black;
+}
+
+.pageView {
+	background-Color:white;
+}
+
+.propViewer {
+	background-Color:white;
+	color: black;
+	font-family: Verdana;
+	font-style: italic;
+	font-weight: bold;
+	font-size: medium;
+	text-align: center;
+}
+
+.propViewerTABLE {
+	background-Color: black;
+	font-weight: medium;
+	border-width: 1pt;
+	border-color: black;
+}
+
+.propViewerTHEAD {
+	background-Color: rgb(230,230,230); 
+	color: black;
+	font-family: Verdana;
+	font-style: italic;
+	font-weight: medium;
+	font-size: small;
+}
+
+.propViewerHeaderSep {
+	background-Color: black;
+	height: 0pt;
+}
+
+.propViewerLines {
+	background-Color: black;
+	height: 2pt;
+}
+
+.propViewerTD {
+	font-family: Verdana;
+	color: black;
+	font-size: x-small;
+	font-style: normal;
+	align: center;
+}
+
+.propViewerEvenRow {
+	background-Color: rgb(253,254,238);
+}
+
+.propViewerOddRow {
+	background-Color: rgb(254,254,247); 
+}
+
+.clTab {
+	cursor:hand;
+	background:buttonface;
+	font: 0.7em Arial;
+	padding-left:3px;
+	padding-right:3px;
+	text-align:center;
+}
+
+.clBorder {
+	background:windowframe;
+	font:1pt;
+}
+
+.clScroll {
+	font:8pt Courier New;
+	color:threeddarkshadow;
+	cursor:default;
+	line-height:10pt;
+}
+
+.clScroll2 {
+	font:10pt Arial;
+	color:threeddarkshadow;
+	cursor:default;
+	line-height:11pt;
+}

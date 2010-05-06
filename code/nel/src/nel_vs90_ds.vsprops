@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL DebugStatic"
+	InheritedPropertySheets=".\nel_vs90_d.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="NL_STATIC"
+		RuntimeLibrary="1"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace)_ds.lib"
+		IgnoreDefaultLibraryNames="libcmt;msvcrt;msvcrtd;$(NOINHERIT)"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_ds.exe"
+		IgnoreDefaultLibraryNames="libcmt;msvcrt;msvcrtd;$(NOINHERIT)"
+		ImportLibrary="$(RootNamespace)_ds.lib"
+	/>
+</VisualStudioPropertySheet>

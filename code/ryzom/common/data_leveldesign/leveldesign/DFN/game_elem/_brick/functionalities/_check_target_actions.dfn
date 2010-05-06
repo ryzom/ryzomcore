@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="MeleeCombat" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="RangeCombat" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Casting" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="DoingFaber" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Tracking" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Harvesting" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Walking" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Running" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Idle" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Mon Jan 13 16:20:03 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

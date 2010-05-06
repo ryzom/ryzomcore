@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_c_m2ms.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="magician gloves"/>
+      <ATOM Name="origin" Value="refugee"/>
+      <ATOM Name="Drop or Sell" Value="false"/>
+      <ATOM Name="CraftPlan" Value="bcrmea15.sbrick"/>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="GE_HOM_Acc_Gauntlet_gen.shape"/>
+      <ATOM Name="shape_female" Value="GE_HOF_Acc_Gauntlet_gen.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 08 09:25:43 2002 (mauduit) .3d.map_variant = Low Quality
+Fri Sep 27 15:19:00 2002 (favre) .basics.name = zorai staff
+Thu Sep 18 11:42:54 2003 (coutelas) .basics.ItemType = Staff
+Thu Sep 18 11:42:54 2003 (coutelas) .basics.origin = zorai
+Thu Sep 18 11:42:54 2003 (coutelas) .faber.Skill = zorai staff craft
+Thu Sep 18 11:42:54 2003 (coutelas) .melee weapon.skill = staff zorai
+Thu Sep 18 11:46:10 2003 (coutelas) .faber.Skill = zorai staff craft
+Thu Sep 18 11:46:35 2003 (coutelas) .faber.Skill = electrical staff craft
+Fri Sep 19 14:29:01 2003 (coutelas) .AsBrick.Client.IconBack = BK_zorai_brick.tga
+Mon Dec 22 11:08:26 2003 (gatto) .3d.fx.Trail = Zo_Wea_Baton_trail_00.shape
+Mon Mar 15 16:18:57 2004 (tran) .3d.shape = GE_Wea_Baton.shape
+Mon Mar 15 16:18:57 2004 (tran) .3d.shape_female = GE_Wea_Baton.shape
+Mon Mar 15 16:22:09 2004 (tran) .3d.fx.Trail = GE_Wea_Baton_trail_00.shape
+Mon Aug 30 17:33:29 2004 (coutelas) .3d.shape = 
+Mon Aug 30 17:33:29 2004 (coutelas) .3d.shape_female = 
+Wed Sep 01 10:37:27 2004 (coutelas) .3d.fx.Trail = 
+Tue Sep 07 16:29:25 2004 (coutelas) .basics.origin = refugee
+Tue Sep 07 16:29:43 2004 (coutelas) .basics.CraftPlan = bcrmea15.sbrick
+Tue Sep 07 16:29:43 2004 (coutelas) .basics.Drop or Sell = false
+Tue Sep 07 16:29:43 2004 (coutelas) .basics.Saleable = false
+Tue Sep 07 16:30:03 2004 (coutelas) .3d.icon background = BK_refugee.tga
+Wed Sep 08 16:02:00 2004 (coutelas) .3d.shape = GE_HOM_Acc_Gauntlet_gen.shape
+Wed Sep 08 16:02:00 2004 (coutelas) .3d.shape_female = GE_HOF_Acc_Gauntlet_gen.shape</LOG>
+</FORM>

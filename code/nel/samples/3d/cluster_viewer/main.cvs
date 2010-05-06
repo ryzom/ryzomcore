@@ -1,0 +1,35 @@
+
+// Cluster Viewer Script 
+
+// This sample shows all functionnality of the script to create a scene
+// a basic sample could be :
+// 
+// city.ig
+// + street1.ig
+// ++ house0.ig
+// + street2.ig
+// ++ house1.ig
+// ++ house2.ig
+//
+// This means that the city.ig is father of street1 and street2 and house0
+// is child of street1. The + indicates the level of depth in hierarchy.
+// We can put initial position and rotation. We can avoid initial rotation 
+// or both of them.
+// For instance if we want a house at a specific position and rotation
+// We have to write something like:
+// city.ig		1.0		1.0		1.0				0.0		0.0		3.14
+
+// The special keyword CAMERA_START that indicates where to start the camera
+
+
+CAMERA_START	20.0	20.0	5.0
+street.ig
+
+
+//+ apart.ig
+//+ taverne.ig
+//+ forge.ig
+//+ mairie.ig
+//+ warschool.ig
+//+ fx_flammes.ig
+//+ objects.ig

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.26 $" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="LightLandscapeDay" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightLandscapeNight" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightLandscapeDusk" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightEntityDay" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightEntityDusk" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightEntityNight" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightRootDay" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightRootDusk" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LightRootNight" Type="Dfn" Filename="_light.dfn"/>
+  <ELEMENT Name="LandscapePointLightMaterial" Type="Dfn" Filename="_rgba.dfn"/>
+  <ELEMENT Name="PacsRBank" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="PacsGR" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Ecosystem" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="LandscapeIG" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SkyDay" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SkyNight" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SkyIg" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Villages" Type="Dfn" Filename="village.dfn" Array="true"/>
+  <ELEMENT Name="ZCs" Type="Dfn" Filename="zc.dfn" Array="true"/>
+  <ELEMENT Name="FogDayMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FogDuskMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FogNightMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FogDistMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FogDepthMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="NoRainMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="ZoneMin" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ZoneMax" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FogStart" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="FogEnd" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="EntitySunPower" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="EntitySunMaxThreshold" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="RootFogStart" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="RootFogEnd" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="SpringWeatherFunction" Type="Dfn" Filename="weather_function.dfn"/>
+  <ELEMENT Name="SummerWeatherFunction" Type="Dfn" Filename="weather_function.dfn"/>
+  <ELEMENT Name="AutumnWeatherFunction" Type="Dfn" Filename="weather_function.dfn"/>
+  <ELEMENT Name="WinterWeatherFunction" Type="Dfn" Filename="weather_function.dfn"/>
+  <ELEMENT Name="SkyFogPart" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SpringCanopyIG" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SummerCanopyIG" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="AutumnCanopyIG" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="WinterCanopyIG" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Indoor" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="WorldMap" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="LandMarks" Type="Dfn" Filename="landmark.dfn" Array="true"/>
+  <ELEMENT Name="LocalizedName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="MicroLifePrimitives" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="SpringTileColorMono" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="SummerTileColorMono" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="AutumnTileColorMono" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="WinterTileColorMono" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="SpringTileColorFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="SummerTileColorFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="AutumnTileColorFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="WinterTileColorFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="SpringStaticLightingFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="SummerStaticLightingFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="AutumnStaticLightingFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="WinterStaticLightingFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="SkySheetSpring" Type="Type" Filename="filename.typ" FilenameExt="*.sky"/>
+  <ELEMENT Name="SkySheetSummer" Type="Type" Filename="filename.typ" FilenameExt="*.sky"/>
+  <ELEMENT Name="SkySheetAutumn" Type="Type" Filename="filename.typ" FilenameExt="*.sky"/>
+  <ELEMENT Name="SkySheetWinter" Type="Type" Filename="filename.typ" FilenameExt="*.sky"/>
+  <ELEMENT Name="DisplayedSeasonForSpring" Type="Type" Filename="season.typ" Default="Spring"/>
+  <ELEMENT Name="DisplayedSeasonForSummer" Type="Type" Filename="season.typ" Default="Summer"/>
+  <ELEMENT Name="DisplayedSeasonForAutumn" Type="Type" Filename="season.typ" Default="Autumn"/>
+  <ELEMENT Name="DisplayedSeasonForWinter" Type="Type" Filename="season.typ" Default="Winter"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:03 2002 (corvazier) File converted from old format
+Tue Jun 25 11:00:07 2002 (corvazier) Dfn Structure = 
+Fri Oct 18 11:22:08 2002 (corvazier) Dfn Structure = 
+Fri Oct 18 11:23:25 2002 (corvazier) Dfn Structure =
+Fri Oct 18 11:07:31 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed Oct 30 11:28:02 2002 (corvazier) Dfn Structure = 
+Wed Nov 06 19:57:10 2002 (Nicolas Vizerie) Dfn Structure = 
+Tue Nov 12 18:26:07 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed Nov 13 17:16:24 2002 (Nicolas Vizerie) Dfn Structure = 
+Mon Nov 18 11:51:13 2002 (Nicolas Vizerie) Dfn Structure = 
+Tue Feb 04 14:47:31 2003 (corvazier) Dfn Structure = 
+Wed May 21 14:22:18 2003 (nevrax) Dfn Structure = 
+Wed May 21 14:22:32 2003 (nevrax) Dfn Structure = 
+Wed May 21 14:22:44 2003 (nevrax) Dfn Structure = 
+Wed May 21 14:22:47 2003 (nevrax) Dfn Structure = 
+Wed May 21 17:05:30 2003 (nevrax) Dfn Structure = 
+Thu Sep 11 19:23:01 2003 (Nicolas Vizerie) Dfn Structure = 
+Fri Sep 12 18:34:31 2003 (Nicolas Vizerie) Dfn Structure = 
+Wed Nov 12 15:11:11 2003 (corvazier) Dfn Structure = 
+Mon Jan 19 15:05:14 2004 (vizerie) Dfn Structure = 
+Wed Feb 04 16:30:32 2004 (besson) Dfn Structure = 
+Wed Feb 04 16:35:42 2004 (besson) Dfn Structure = 
+Thu Feb 05 10:24:56 2004 (besson) Dfn Structure = 
+Fri Feb 06 14:02:10 2004 (besson) Dfn Structure = 
+Fri Feb 06 14:38:32 2004 (besson) Dfn Structure = 
+Tue Apr 13 15:13:59 2004 (vizerie) Dfn Structure = 
+Tue Jun 06 14:32:34 2006 (berenguier) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<DFN Version="0.2" State="modified">
+  <ELEMENT Name="Shadow Bone 0"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 0"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 1"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 1"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 2"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 2"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 3"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 3"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 4"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 4"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 5"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 5"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 6"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 6"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 7"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 7"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 8"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 8"			Type="Type" Filename="float.typ"/>
+
+  <ELEMENT Name="Shadow Bone 9"			Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Shadow Size 9"			Type="Type" Filename="float.typ"/>
+ <LOG>Mon Jun 17 20:42:38 2002 (puzin) Dfn Structure = 
+Mon Jun 17 20:45:42 2002 (puzin) Dfn Structure = 
+Wed Jul 10 22:35:27 2002 (puzin) Dfn Structure = </LOG>
+</DFN>

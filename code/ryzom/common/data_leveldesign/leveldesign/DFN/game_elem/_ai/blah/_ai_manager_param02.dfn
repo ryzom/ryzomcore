@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Border" Type="Dfn" Filename="_ai_patate.dfn"/>
+  <ELEMENT Name="Creation" Type="Dfn" Filename="_ai_creature_elem.dfn" Array="true"/>
+  <ELEMENT Name="Child" Type="Dfn" Filename="_ai_manager_param03.dfn" Array="true"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:26 2002 (corvazier) File converted from old format</LOG>
+</DFN>

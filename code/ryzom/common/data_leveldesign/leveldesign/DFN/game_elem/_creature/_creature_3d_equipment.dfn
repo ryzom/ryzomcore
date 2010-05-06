@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Version="0.11" State="modified">
+  <ELEMENT Name="Shape" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Texture" Type="Type" Filename="_creature_texture_equipment.typ" Default="-1"/>
+  <ELEMENT Name="Color" Type="Type" Filename="_creature_color_equipment.typ" Default="-1"/>
+  <LOG>Tue Jun 18 11:17:44 2002 (puzin) Dfn Structure = 
+Tue Jun 18 11:18:10 2002 (puzin) Dfn Structure = 
+Tue Jun 18 11:23:21 2002 (puzin) Dfn Structure = 
+Tue Jun 18 11:23:26 2002 (puzin) Dfn Structure = 
+Tue Jun 18 16:25:22 2002 (puzin) Dfn Structure = </LOG>
+</DFN>

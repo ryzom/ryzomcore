@@ -1,0 +1,503 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "3d"=..\..\..\..\code\nel\src\3d.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "driver_opengl"=..\..\..\..\code\nel\src\3d\driver\opengl\driver_opengl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "export"=.\export\export.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "game_share"=..\..\..\..\code\ryzom\src_v2\game_share.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "georges"=..\..\..\..\code\nel\src\georges.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "georges_edit_dll"=.\georges_dll\georges_edit_dll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "georges_exe"=.\georges_exe\georges_exe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name georges_dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges_edit_dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "land_export_lib"=..\3d\ligo\land_export_lib\land_export_lib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ligo"=..\..\..\..\code\nel\src\ligo.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "logic"=..\..\..\..\code\nel\src\logic.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "logic_editor_dll"=.\logic_editor_dll\logic_editor_dll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name logic
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name net
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "logic_editor_exe"=.\logic_editor_exe\logic_editor_exe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name logic_editor_dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "master"=.\master\master.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name georges_exe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name logic_editor_exe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name zviewer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name export
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name driver_opengl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges_edit_dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "memory"=..\..\..\..\code\nel\src\memory.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "misc"=..\..\..\..\code\nel\src\misc.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mission_compiler_fe"=.\mission_compiler_fe\mission_compiler_fe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name mission_compiler_lib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name memory
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mission_compiler_lib"=.\mission_compiler_lib\mission_compiler_lib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "net"=..\..\..\..\code\nel\src\net.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "pacs"=..\..\..\..\code\nel\src\pacs.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "sound"=..\..\..\..\code\nel\src\sound.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "world_editor"=..\3d\ligo\world_editor\world_editor.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name pacs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name memory
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "world_editor_fauna_graph_plugin"=..\3d\ligo\world_editor_fauna_graph_plugin\world_editor_fauna_graph_plugin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "world_editor_graph_plugin"=..\3d\ligo\world_editor_graph_plugin\world_editor_graph_plugin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mission_compiler_lib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "world_editor_primitive_plugin"=..\3d\ligo\world_editor_primitive_plugin\world_editor_primitive_plugin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "world_editor_service"=..\3d\ligo\world_editor_service\world_editor_service.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "world_editor_shard_monitor_plugin"=..\3d\ligo\world_editor_shard_monitor_plugin\world_editor_shard_monitor_plugin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name net
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name game_share
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "worldeditor_sound_plugin"=..\3d\ligo\worldeditor_sound_plugin\worldeditor_sound_plugin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name game_share
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name georges
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sound
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ligo
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "zviewer"=..\..\..\..\code\tool\zviewer\zviewer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name misc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

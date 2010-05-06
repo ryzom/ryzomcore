@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Time before next engage" Type="Type" Filename="float.typ" Default="0.0"/>
+  <LOG>Fri Dec 13 16:03:09 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

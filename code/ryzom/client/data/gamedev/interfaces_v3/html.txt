@@ -1,0 +1,92 @@
+// HTML support in CGroupHTML
+
+<LUA>luascript</LUA>					// execute the enclosed lua script immediately. NB : this is NOT like javascript, you can't affect the page content or detect button event.
+
+<FONT color="#a0b1c2">					// Change the current font color for normal text
+
+<A>										// Anchor, works with text and images
+	href = "http://www.nevrax.com"		// Absolute URI. Can run one or more action handlers use this syntax:
+											"ah:action1&params11=value11&params12=value12&&action2&params21=value21&params22=value22"
+
+	z_action_shortcut = "action"		// Insert a description of the keyboard shortcut used by the action handler passed in parameter
+	z_action_params = "parameter"		// Action handler parameters
+	z_action_category = ""				// Category of the action ("", "debug", "edit" etc.. see actions.xml)
+
+<BODY>
+	bgcolor	= "#003366"					// Page background color, if not specified, use the default CGroupHTML background color 
+
+<FORM>
+	action = "http://www.nevrax.com/form.php"	// Absolute or relative URI. Action to perform to post the FORM (always post method). 
+	<INPUT>
+		name = "value0"						// The name of the form input
+		type = "text"						// Type of form input. Can be button, text, image, hidden or checkbox.
+		src = "button.gif"					// If type==image, The image filename, see <IMG>for restrictions
+		size = "100"						// If type==text, The edit box width in pixels
+		checked = "anything"				// If type==checkbox, the checkbox will be checked
+		value = "value"						// Use for hidden
+		alt = "uiGo"						// Tooltip text (not localized, CI18N string id) used for buttons (type == image or type == checkbox)
+		global_color						// global color flag. If set, the button bitmap will be modulated by the interface global color.
+		z_btn_tmpl="template_name"			// (deprecated, use z_input_tmpl instead) if type==button, used to specify the ryzom interface template to use for the button, this allow to customize each button (NB : the template must exist in the client xml files)
+		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files)
+		z_input_width="template_name"		// if type==button|text|checkbox, used to specify the minimal witdh of the widget (cool to line up widget)
+
+	<TEXTAREA>
+		name = "value0"						// The name of the form input
+		cols = "10"							// Number of text columns
+		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files)
+		z_input_width="template_name"		// if type==button|text|checkbox, used to specify the minimal witdh of the widget (cool to line up widget)
+
+	<SELECT name="selectName">				// a combo box that return selected value in 'selecteName' var
+		<OPTION	value = "valueName" [selected="selected"]>content</OPTION> // one or more option element with optionnaly one haveing the 'selected' attribute
+	</SELECT>
+		
+<H1> ~ <H6>								// Heading, size and color are specified in the CGroupHTML
+
+<IMG>									// Image, image must in the client data in tga / dds format.
+	src = "button.gif"					// The image name can have any file extensions. It will be remplaced in the client by "TGA".
+	alt = "uiGo"						// Tooltip text (not localized, CI18N string id) used for button (image into an anchor)
+	global_color						// global color flag. If set, the bitmap will be modulated by the interface global color.
+
+<P>										// Paragraph
+
+<UL>									// Unsorted list
+	<LI>								// Unsorted list separator
+
+<PRE>									// Preformated text
+
+<TABLE>									// Table
+	width = "100"						// Fixed width
+	width = "50%"						// Variable width
+	height = "15"						// Fixed height
+	border = "1"						// Border width (can't be colored, always transparent)
+	cellspacing = "1"					// Cell spacing width (can't be colored, always transparent)
+	cellpadding = "1"					// Cell padding width (can't be colored, always transparent)
+	bgcolor	= "#RRGGBB[AA]"				// Cell background color and optional alpha
+	align = "left"						// Cell horizontal alignment (left, center or right)
+	valign = "top"						// Cell vertical alignment (top, middle or bottom)
+	nowrap								// Don't wrap he text
+	<TR>
+		bgcolor	= "#RRGGBB[AA]"				// Cell background color and optional alpha
+		align = "left"						// Cell horizontal alignment (left, center or right)
+		valign = "top"						// Cell vertical alignment (top, middle or bottom)
+		nowrap								// Don't wrap he text
+		<TD>
+			width = "100"						// Fixed width
+			width = "50%"						// Variable width
+			height = "15"						// Fixed height
+			bgcolor	= "#RRGGBB[AA]"				// Cell background color and optional alpha
+			align = "left"						// Cell horizontal alignment (left, center or right)
+			valign = "top"						// Cell vertical alignment (top, middle or bottom)
+			nowrap								// Don't wrap he text
+
+
+<TITLE>									// Page title
+
+// For quick help ONLY
+
+<P>
+	quick_help_events="event1 event2"		// Event that trig to the next step
+	quick_help_condition="always"			// Condition that skip the step and jump to the next one
+	quick_help_link="ah:browse&url=http://www.w3.org"	// Browse this URL when paragraph is highlighted. See <A href>
+
+You can use the action handler "run_quick_help" to run a quick_help. The parameter is the name of the radio button of the selected quick help.

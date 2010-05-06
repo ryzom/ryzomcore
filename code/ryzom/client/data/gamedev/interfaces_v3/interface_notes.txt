@@ -1,0 +1,76 @@
+<!-- *************************** -->
+<!-- *************************** -->
+<!-- ** ADVANCED SCRIPT NOTES ** -->
+<!-- *************************** -->
+<!-- *************************** -->
+
+
+<!-- ********** -->
+<!-- SCROLL BAR -->
+<!-- ********** -->
+
+
+<!-- 
+Simple sample : the doc is fixed size and view region (maxw,maxh) is fixed size 
+The only trickiest thing is that the doc/view group (here its 'sbtest') has size bigger than those displayed
+So we cannot link scrollbar pos to it. ScrollBars has the same size than the target (in w for a horizontal scrollbar and
+in h for a vertical scrollbar).
+Note the automatic detection of mouse wheel in the group
+
+To activate the sample put it in a .xml that is loaded (see client_default.cfg for that)
+If you have access to the console command just type : /ah show trap
+else you have to activate it by hand in a reset proc or something
+-->
+
+<group type="container" id="trap" w="200" title="TRAPTEST" multi_resize="false" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:HELP"
+ title_bar_open="false" min_w="208" min_h="64" max_w="2000"
+ max_h="1600" pop_max_w="2000" pop_max_h="1600" lockable="true" openable="false" opened="true" movable="true" resizer="false" active="true">
+	
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"
+		 group_onclick_r="active_menu"
+	 	group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="170" h="13" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" 	
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
+	</group>
+
+	<!-- w of content is set by the parent so here its 208 - (bitmap left + bitmap right) = 200 -->
+	<group id="content" posref="TL TL" child_resize_h="true" >
+
+		<!-- Group of fixed size because content is resized from children and we cannot predict exactly the size -->
+		<group id="all" x="0" y="0" w="200" h="200" posref="TL TL" >
+			
+			<!-- Simple sample : the doc is fixed size and view region (maxw,maxh) is fixed size -->
+			<view type="bitmap" id="back" posref="TL TL" x="32" y="-32" w="64" h="64" scale="true" texture="w_box_blank.tga" color="128 128 128 128" />
+
+			<!-- the ref pos of the group indicates where to put the view region TL, TR, BL, BR -->
+			<!-- The following comments shows the influence of ref pos over the starting configuration -->
+			<!--<group id="sbtest" posref="TL TL" x="32" y="-32" w="128" h="128" max_w="64" max_h="64" >-->
+			<!--<group id="sbtest" posref="BL BL" x="32" y="104" w="128" h="128" max_w="64" max_h="64" >-->
+			<!--<group id="sbtest" posref="BR BR" x="-104" y="104" w="128" h="128" max_w="64" max_h="64" >-->
+			<group id="sbtest" posref="TR TR" x="-104" y="-32" w="128" h="128" max_w="64" max_h="64" >
+				<view type="bitmap" id="b1" posref="BL BL"					texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b2" posref="BL BL" y="56"			texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b3" posref="BL BL" y="112"			texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b4" posref="BL BL" x="56"			texture="w_answer_16_valid.tga" />
+				<view type="bitmap" id="b5" posref="BL BL" x="56" y="56"	texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b6" posref="BL BL" x="56" y="112"	texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b7" posref="BL BL" x="112"			texture="w_answer_16_cancel.tga" />
+				<view type="bitmap" id="b8" posref="BL BL" x="112" y="56"	texture="w_answer_16_valid.tga" />
+				<view type="bitmap" id="b9" posref="BL BL" x="112" y="112"	texture="w_answer_16_valid.tga" />
+			</group>
+			<!-- The scroll bar cannot have sbtest as parent ref for their pos because the size is 128 and not 64 (what is viewed) -->
+			<ctrl type="scroll" id="sv" posref="TL TL" x="22" y="-32" w="8" tx_topright="w_scroll_l123_t.tga" 
+				tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_l123_b.tga" target="sbtest" />
+
+			<ctrl type="scroll" id="sh" posref="TL TL" x="32" y="-98" h="8" vertical="false" tx_topright="w_scroll_R.tga" 
+				tx_middle="w_scroll_M.tga" tx_bottomleft="w_scroll_L.tga"		target="sbtest" />
+
+		</group>
+
+	</group>
+
+</group>	
+<tree node="trap"/>
+

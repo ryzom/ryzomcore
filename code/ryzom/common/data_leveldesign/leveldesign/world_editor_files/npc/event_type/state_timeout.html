@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv=Content-Type content="text/html; charset=unicode">
+<META content="MSHTML 6.00.2716.2200" name=GENERATOR></HEAD>
+<BODY>
+<P><FONT color=purple size=5>state_timeout</FONT></P>
+<P>This event is triggered when a special reserved timer called the 'state timeout' timer is 
+triggered.</P>
+<P>This timer should be used to time idle states as it may 
+be interrogated by ai_profile code and its value taken into account&nbsp;for decision 
+making.</P>
+<P>The state timeout timer is reset to a 'dissabled' each 
+time the state changes, before the 'start_of_state' event is 
+triggered</P>
+<P>The timeout timer may be suspended during punctual 
+states if the action 'suspend_state_timeout' is triggered on start of the punctual 
+state.</P></BODY></HTML>

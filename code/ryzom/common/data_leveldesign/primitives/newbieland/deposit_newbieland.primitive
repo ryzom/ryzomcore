@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="1">
+  <ROOT_PRIMITIVE TYPE="CPrimNode">
+    <ALIAS LAST_GENERATED="112"/>
+    <PROPERTY TYPE="string">
+      <NAME>name</NAME>
+      <STRING></STRING>
+    </PROPERTY>
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>depositzone_list</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>starting_city</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimZone">
+        <PT X="10302.409180" Y="-11703.411133" Z="0.000000"/>
+        <PT X="10305.859375" Y="-11703.967773" Z="0.000000"/>
+        <PT X="10312.425781" Y="-11692.726563" Z="0.000000"/>
+        <PT X="10298.958984" Y="-11691.613281" Z="0.000000"/>
+        <PT X="10287.718750" Y="-11697.845703" Z="0.000000"/>
+        <PT X="10283.043945" Y="-11708.530273" Z="0.000000"/>
+        <PT X="10285.826172" Y="-11723.332031" Z="0.000000"/>
+        <PT X="10292.949219" Y="-11731.568359" Z="0.000000"/>
+        <PT X="10304.079102" Y="-11734.461914" Z="0.000000"/>
+        <PT X="10315.430664" Y="-11732.347656" Z="0.000000"/>
+        <PT X="10323.444336" Y="-11723.444336" Z="0.000000"/>
+        <PT X="10325.001953" Y="-11712.871094" Z="0.000000"/>
+        <PT X="10322.665039" Y="-11701.073242" Z="0.000000" SELECTED="true"/>
+        <PT X="10313.539063" Y="-11693.505859" Z="0.000000"/>
+        <PT X="10307.417969" Y="-11704.968750" Z="0.000000"/>
+        <PT X="10311.090820" Y="-11709.754883" Z="0.000000"/>
+        <PT X="10310.311523" Y="-11716.321289" Z="0.000000"/>
+        <PT X="10305.970703" Y="-11719.882813" Z="0.000000"/>
+        <PT X="10299.515625" Y="-11720.327148" Z="0.000000"/>
+        <PT X="10295.731445" Y="-11716.321289" Z="0.000000"/>
+        <PT X="10294.173828" Y="-11711.201172" Z="0.000000"/>
+        <PT X="10297.178711" Y="-11705.859375" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>auto_spawn_sources</NAME>
+          <STRING>true</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>can_have_depletion_risk</NAME>
+          <STRING>false</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>depositzone</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>deposit_max_quality_250</NAME>
+          <STRING>10</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>deposit_statquality_max</NAME>
+          <STRING>20</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string_array">
+          <NAME>exact_mp_item</NAME>
+          <STRING>m0001dxacb01</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>depositzone_1</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="91"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>

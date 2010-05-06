@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<DFN Version="0.4" State="modified">
+  <ELEMENT Name="Harvester" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Healer" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Caster buffer" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Caster Attack" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Melee fighter" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Range fighter" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Trader" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <ELEMENT Name="Faber" Type="Dfn" Filename="actions_groupe.dfn"/>
+  <LOG>Wed Oct 02 14:35:45 2002 (Administrateur) Dfn Parents = 
+Wed Oct 02 14:35:45 2002 (Administrateur) Dfn Structure = 
+Wed Oct 02 14:51:54 2002 (Administrateur) Dfn Structure = 
+Wed Oct 02 16:17:51 2002 (Administrateur) Dfn Structure = 
+Wed Oct 02 16:55:01 2002 (Administrateur) Dfn Structure = </LOG>
+</DFN>

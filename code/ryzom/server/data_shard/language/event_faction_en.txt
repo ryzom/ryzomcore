@@ -1,0 +1,2 @@
+event_faction_1	Sample faction 1
+event_faction_2	Sample faction 2

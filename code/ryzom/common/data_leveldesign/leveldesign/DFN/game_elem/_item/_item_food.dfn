@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="GoodForPet" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Calories" Type="Type" Filename="float.typ" Default="20"/>
+  <LOG>Thu Jan 15 15:14:35 2004 (saffray) Dfn Structure = </LOG>
+</DFN>

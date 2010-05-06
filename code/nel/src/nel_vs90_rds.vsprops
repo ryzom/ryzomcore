@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL ReleaseDebugStatic"
+	InheritedPropertySheets=".\nel_vs90_rd.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="NL_STATIC"
+		RuntimeLibrary="0"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace)_rds.lib"
+		IgnoreDefaultLibraryNames="libcmtd;msvcrt;msvcrtd;$(NOINHERIT)"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_rds.exe"
+		IgnoreDefaultLibraryNames="libcmtd;msvcrt;msvcrtd;$(NOINHERIT)"
+		ImportLibrary="$(RootNamespace)_rds.lib"
+	/>
+</VisualStudioPropertySheet>

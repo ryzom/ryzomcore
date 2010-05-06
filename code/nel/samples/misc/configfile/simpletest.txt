@@ -1,0 +1,27 @@
+// one line comment
+/*
+ big comment
+ on more than one line
+*/
+
+	var1 = 123;			// var1 type:int,    value:123
+	var2 = "456.25";		// var2 type:string, value:"456.25"
+	var3 = 123.123;			// var3 type:real,   value:123.123
+
+	// the resulting type is type of the first left value
+	var4 = 123.123 + 2;		// var4 type:real,   value:125.123
+	var5 = 123 + 2.1;		// var5 type:int,    value:125
+
+	var6 = (-112+1) * 3 - 14;	// var6 type:int, value:-347
+
+	var7 = var1 + 1;		// var7 type:int, value:124
+
+	var8 = var2 + 10;		// var8 type:string, value:456.2510 (convert 10 into a string and concat it)
+	var9 = 10.15 + var2;		// var9 type:real, value:466.40 (convert var2 into a real and add it)
+
+	var10 = { 10.0, 51.1 };		// var10 type:realarray, values:{10.0,51.1}
+	var11 = { "str1", "str2", "str3" }; // var11 type:stringarray, values:{"str1", "str2", "str3"}
+
+	var12 = { 133, -1 };	// var12 type:intarray, values:{133,-1}
+
+	var13 = { 1, 0.5, -1 };

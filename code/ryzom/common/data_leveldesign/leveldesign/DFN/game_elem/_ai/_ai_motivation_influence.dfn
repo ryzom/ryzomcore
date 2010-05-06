@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Version="0.1" State="modified">
+  <ELEMENT Name="Motivation" Type="Type" Filename="_ai_motivation.typ"/>
+  <ELEMENT Name="Force" Type="Type" Filename="float.typ"/>
+  <COMMENTS>Force must be between -100 (max inhibition) and +100 (max excitation)
+</COMMENTS>
+  <LOG>Fri Aug 02 11:23:28 2002 (robert) Dfn Structure = 
+Fri Aug 02 11:23:28 2002 (robert) Header Comments = Force must be between -100 (max inhibition) and +100 (max excitation)
+</LOG>
+</DFN>

@@ -1,0 +1,98 @@
+ligoscript.txt
+---------------
+
+Ligoscape maxscript new functions:
+
+
+**********************************************
+
+NeLLigoExportMaterial node "Filename.ligomat" only_check error_in_dialog
+
+Export a ligo material file from a max NeL patch mesh.
+
+node is a MaxNode. It must be a max NeL patch mesh.
+Filename is the file name to export the material
+only_check is true to export the file, false to only check it
+error_in_dialog is true to display the errors message in a dialog, false in the listener
+
+**********************************************
+
+NeLLigoExportTransition node_array "Filename.ligotrans" firstMaterial secondMaterial only_check error_in_dialog
+
+Export a ligo transition file from 9 max NeL patch mesh and two ligo material files
+
+node_array is an array of 9 nodes. Cell can be undefined to check some transitions.
+Filename is the file name to export the material
+firstMaterial is the file name of the first material used in this transition
+secondMaterial is the file name of the second material used in this transition
+only_check is true to export the file, false to only check it
+error_in_dialog is true to display the errors message in a dialog, false in the listener
+
+**********************************************
+
+NeLLigoExportMaterial node "Filename.ligomt" only_check error_in_dialog
+
+Export a ligo material file from a max NeL patch mesh.
+
+node is a MaxNode. It must be a max NeL patch mesh.
+Filename is the file name to export the material
+only_check is true to export the file, false to only check it
+error_in_dialog is true to display the errors message in a dialog, false in the listener
+
+**********************************************
+
+NeLLigoGetErrorZoneTemplate code_array vertex_id_array message_array error_index
+
+Get the export errors after a call to NeLLigoExportZoneTemplate.
+
+code_array is an integer array with the error code. (2 for OpenedEdge, 4 for InvalidVertexList, 5 for NotInserted)
+vertex_id_array is an integer array with the id of the vertex where an error occured.
+message_array is a string array with the error message for the vertices
+error_index is the id of the error buffer (1 ~ 9)
+
+All thoses arraies have the same size.
+
+The function return a global error code undex a string. (0 for noerror, 1 for NoBoundaryVertices, 2 for opened edge, 3 for MulitpleEdge, 4 for InvalidVertexList)
+
+**********************************************
+
+NeLLigoGetSnap 
+
+Return the snap defined in the config file, else return undefined
+
+**********************************************
+
+NeLLigoGetCellSize
+
+Return the cell size defined in the config file, else return undefined
+
+**********************************************
+
+NeLLigoCheckZoneWithTemplate node templateFileName error_in_dialog
+
+Check a ligo zone with a ligo zone template.
+
+node is a MaxNode to check. It must be a max NeL patch mesh.
+Filename is the file name to import the template used to test the ligo zone.
+error_in_dialog is true to display the errors message in a dialog, false in the listener
+
+**********************************************
+
+NeLLigoSetDirectory path_name
+
+Set the current directory
+
+path_name is the new directory
+
+Return true if success, false else.
+
+**********************************************
+
+NeLLigoGetErrorString error_code
+
+Return an error message with an error code
+
+error_code is the error code
+
+Return an error message (string)
+

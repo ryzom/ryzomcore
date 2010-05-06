@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL ReleaseDebug"
+	InheritedPropertySheets=".\nel_vs90_r_dev.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		PreprocessorDefinitions="NL_RELEASE_DEBUG;ASSERT_THROW_EXCEPTION"
+		BufferSecurityCheck="true"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace)_rd.lib"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_rd.exe"
+		ImportLibrary="$(RootNamespace)_rd.lib"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,445 @@
+
+<%// ========================================================================%>
+<%// Template code for logger service logs									 %>
+<%// ========================================================================%>
+
+<%for-each log-class%>
+
+<%// ------------------------------------------------------------------------%>
+<%// --header output---------------------------------------------------------%>
+<%// ------------------------------------------------------------------------%>
+<%output concat($__inputPath, 'log_', lower-case(@name), '_gen.h')%>
+
+
+<%// check that all param with the same name have the same type %>
+<%for-each log-context/param%>
+	<%$name @name%>
+	<%$type @type%>
+
+	<%for-each ../../log-context/param[not(@type = $type)]%>
+		<%error concat('Parameter error, param name ', @name, ' also exist with type ', @type)%>
+	<%end-for%>
+<%end-for%>
+
+<%// Build the list of context variables%>
+<%for-each log-context/param%>
+	<%$name @name%>
+	<%$type @type%>
+	<%$byref @byref%>
+	<%// check if this context var is not already prepared%>
+	<%if not(../../context-param[@name = $name])%>
+		<%for-each parent::node()/parent::node()%>
+			<%add-elem 'context-param' $name%>
+			<%for-each context-param[@name = $name]%>
+				<%add-attr 'type' $type%>
+				<%add-attr 'byref' $byref%>
+			<%end-for%>
+		<%end-for%>
+	<%end-if%>
+<%end-for%>
+
+
+#ifndef _LOG_GEN_<%= upper-case(@name)%>_H
+#define _LOG_GEN_<%= upper-case(@name)%>_H
+
+#include "nel/misc/types_nl.h"
+#include "nel/misc/entity_id.h"
+#include "nel/misc/sheet_id.h"
+#include "inventories.h"
+
+<%// Include specific header %>
+<%for-each include%>
+#include "<%= @file%>"
+<%end-for%>
+
+<%// declare log context class %>
+<%for-each log-context%>
+struct TLogContext_<%= ../@name%>_<%= @name%>
+{
+	/// The constructor push a log context in the logger system
+	TLogContext_<%= ../@name%>_<%= @name%>(<%call makeParamList%>);
+
+	/// The desstructor pop a context in the logger system
+	~TLogContext_<%= ../@name%>_<%= @name%>();
+
+private:
+	/// The name of the context
+	static const std::string _ContextName;
+
+
+};
+<%end-for%>
+
+/// No context context. Use this to disable any contextual log underneath
+struct TLogNoContext_<%= @name%>
+{
+	TLogNoContext_<%= @name%>();
+	~TLogNoContext_<%= @name%>();
+};
+
+
+<%// generate log functions %>
+<%for-each log%>
+void _log_<%= ../@name%>_<%= @name%>(<%call makeParamListPlusComma%>const char *_filename_, uint _lineNo_);
+#define log_<%= ../@name%>_<%= @name%>(<%call makeParamListForMacro%>) \
+	_log_<%= ../@name%>_<%= @name%>(<%call makeParamListForMacroPlusComma%>__FILE__, __LINE__)
+<%end-for%>
+
+#endif
+
+<%// ------------------------------------------------------------------------%>
+<%// --CPP output------------------------------------------------------------%>
+<%// ------------------------------------------------------------------------%>
+<%output concat($__inputPath, 'log_', lower-case(@name), '_gen.cpp')%>
+#include "stdpch.h"
+#include "utils.h"
+#include "log_<%= lower-case(@name)%>_gen.h"
+
+
+#include "logger_service_itf.h"
+#include "logger_service_client.h"
+
+// A function fo force linking of this code module
+void forceLink_<%= @name%>(){}
+
+
+
+<%// generate the auto registered descriptor class %>
+<%$className concat('C', @name, 'Desc')%>
+class <%= $className%>
+{
+	friend class CLoggerClient;
+
+	/// The list of log definition for this log class
+	std::vector<LGS::TLogDefinition>	_LogDefs;
+
+	/// Stack of context variable
+	<%for-each context-param%>
+	std::vector<<%^= @type%>>	_<%^= @name%>;
+	<%end-for%>
+
+	/// Counter of 'no context' object stacked.
+	uint32	_NoContextCount;
+
+public:
+	/// constructor
+	<%= $className%>()
+		:	_NoContextCount(0)
+	{
+		_LogDefs.resize(<%= count(log-context)+count(log)%>);
+		<%$i 0%>
+		<%for-each log-context%>
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[<%= $i%>];
+
+			logDef.setLogName("<%^= ../@name%>_<%^= @name%>");
+			<%/* logDef.getParams().resize(<%= count(param)%>); */%>
+			logDef.setContext(true);
+
+			<%$i $i+1%>
+		}
+		<%end-for%>
+		<%for-each log%>
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[<%= $i%>];
+
+			<%$param param[not(@list='true')]%>
+			<%$listParam param[@list='true']%>
+
+			logDef.setLogName("<%^= ../@name%>_<%^= @name%>");
+			logDef.setLogText("<%^= @text%>");
+
+			logDef.getParams().resize(<%= count($param) + count(context-param)%>);
+			logDef.getListParams().resize(<%= count($listParam)%>);
+
+			<%$j 0%>
+			<%for-each context-param%>
+				<%$name @name%>
+			logDef.getParams()[<%= $j%>].setName("<%^= ../context-param[@name = $name]/@name%>");
+			logDef.getParams()[<%= $j%>].setType(<%= deduceType(../../context-param[@name = $name]/@type, ../../context-param[@name = $name]/@enum)%>);
+				<%$j $j+1%>
+			<%end-for%>
+
+			<%for-each $param%>
+			logDef.getParams()[<%= $j%>].setName("<%^= @name%>");
+			logDef.getParams()[<%= $j%>].setType(<%= deduceType(@type, @enum)%>);
+			logDef.getParams()[<%= $j%>].setList(false);
+				<%$j $j+1%>
+			<%end-for%>
+			<%$j 0%>
+			<%for-each $listParam%>
+			logDef.getListParams()[<%= $j%>].setName("<%^= @name%>");
+			logDef.getListParams()[<%= $j%>].setType(<%= deduceType(@type, @enum)%>);
+			logDef.getListParams()[<%= $j%>].setList(true);
+				<%$j $j+1%>
+			<%end-for%>
+
+			<%$i $i+1%>
+		}
+		<%end-for%>
+
+		// Register the log definitions
+		LGS::ILoggerServiceClient::addLogDefinitions(_LogDefs);
+	}
+
+	// Context var stack accessor
+	<%for-each context-param%>
+	bool getContextVar_<%^= @name%> (<%^= @type%> &value)
+	{
+		if (_<%^= @name%>.empty())
+			return false;
+
+		value = _<%= @name%>.back();
+		return true;
+	}
+
+	void pushContextVar_<%= @name%> (<%if @byref='true'%>const <%end-if%><%= @type%> <%if @byref='true'%>&<%end-if%>value)
+	{
+		_<%= @name%>.push_back(value);
+	}
+	void popContextVar_<%= @name%> ()
+	{
+		_<%= @name%>.pop_back();
+	}
+	<%end-for%>
+
+	void pushNoContext()
+	{
+		++_NoContextCount;
+	}
+	void popNoContext()
+	{
+		nlassert(_NoContextCount > 0);
+		--_NoContextCount;
+	}
+
+	uint32 getNoContextCount()
+	{
+		return _NoContextCount;
+	}
+
+};
+// Instantiate the descriptor class
+C<%= @name%>Desc	<%= @name%>Desc;
+
+
+<%// implement log context class %>
+<%for-each log-context%>
+const std::string TLogContext_<%= ../@name%>_<%= @name%>::_ContextName("<%= concat(../@name, '_', @name)%>");
+/// The constructor push a log context in the logger system
+TLogContext_<%= ../@name%>_<%= @name%>::TLogContext_<%= ../@name%>_<%= @name%>(<%call makeParamList%>)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	<%for-each param%>
+	<%= ../../@name%>Desc.pushContextVar_<%= @name%>(<%= @name%>);
+	<%end-for%>
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_<%= ../@name%>_<%= @name%>::~TLogContext_<%= ../@name%>_<%= @name%>()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	<%for-each param%>
+	<%= ../../@name%>Desc.popContextVar_<%= @name%>();
+	<%end-for%>
+}
+<%end-for%>
+
+/// No context context. Use this to disable any contextual log underneath
+TLogNoContext_<%= @name%>::TLogNoContext_<%= @name%>()
+{
+	<%= @name%>Desc.pushNoContext();
+}
+
+TLogNoContext_<%= @name%>::~TLogNoContext_<%= @name%>()
+{
+	<%= @name%>Desc.popNoContext();
+}
+
+
+<%// generate log functions %>
+<%for-each log%>
+void _log_<%= ../@name%>_<%= @name%>(<%call makeParamListPlusComma%>const char *_filename_, uint _lineNo_)
+{
+	static LGS::TLogInfo logInfo;
+	static bool init = false;
+	if (!init)
+	{
+		logInfo.setLogName("<%= ../@name%>_<%= @name%>");
+		logInfo.getParams().resize(<%= count(param[not(@list='true')]) + count(context-param) %>);
+		logInfo.getListParams().resize(<%= count(param[@list='true']) %>);
+	}
+
+	<%$i 0%>
+	<%for-each context-param%>
+		<%// <=%>
+
+		<%$name @name%>
+	// Context parameter
+		<%// generate the log context param %>
+		<%for-each ../../context-param[@name = $name]%>
+			<%// <=%>
+
+	<%^= @type%>	<%^= @name%>;
+	if (!<%^= ../@name%>Desc.getContextVar_<%= @name%>(<%= @name%>))
+	{
+		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		STOP_IF(<%^= ../@name%>Desc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log '<%= ../@name%>'");
+		return;
+	}
+
+			<%if @enum='true'%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= getNamespace(@type)%>::toString(<%= @name%>));
+			<%else-if @enum='smart'%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= @name%>.toString());
+			<%else%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= @name%>);
+			<%end-if%>
+			<%// =>%>
+		<%end-for%>
+
+		<%$i $i+1%>
+		<%// =>%>
+	<%end-for%>
+
+	<%for-each param[not(@list='true')]%>
+		<%if @enum='true'%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= getNamespace(@type)%>::toString(<%= @name%>));
+		<%else-if @enum='smart'%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= @name%>.toString());
+		<%else%>
+	logInfo.getParams()[<%= $i%>] = LGS::TParamValue(<%= @name%>);
+		<%end-if%>
+
+		<%$i $i+1%>
+	<%end-for%>
+
+	<%// Restart the loop fo the vector parameters%>
+	<%$i 0%>
+
+	<%for-each param[@list='true']%>
+	LGS::TListParamValues &<%= @name%>_list = logInfo.getListParams()[<%= $i%>];
+	<%= @name%>_list.getParams().clear();
+	std::list<<%= @type%>>::const_iterator first(<%= @name%>.begin()), last(<%= @name%>.end());
+	for (; first != last; ++first)
+	{
+			<%if @enum='true'%>
+		<%= @name%>_list.getParams().push_back(LGS::TParamValue(<%= getNamespace(@type)%>::toString(*first));
+			<%else-if @enum='smart'%>
+		<%= @name%>_list.getParams().push_back(LGS::TParamValue(first->toString()));
+			<%else%>
+		<%= @name%>_list.getParams().push_back(LGS::TParamValue(*first));
+			<%end-if%>
+	}
+
+		<%$i $i+1%>
+	<%end-for%>
+
+	logInfo.setTimeStamp(NLMISC::CTime::getSecondsSince1970());
+
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->sendLog(logInfo);
+}
+<%end-for%>
+
+
+<%end-for%>
+
+
+
+
+
+<%def deduceType(type, enum)%>
+	<%if $type = 'bool' or $type = 'char' or $type = 'uint8' or $type = 'uint16' or $type = 'uint32'%>
+		<%return 'LGS::TSupportedParamType::spt_uint32'%>
+	<%else-if $type = 'uint64'%>
+		<%return 'LGS::TSupportedParamType::spt_uint64'%>
+	<%else-if $type = 'sint8' or $type = 'sint16' or $type = 'sint32'%>
+		<%return 'LGS::TSupportedParamType::spt_sint32'%>
+	<%else-if $type = 'float'%>
+		<%return 'LGS::TSupportedParamType::spt_float'%>
+	<%else-if $type = 'char*' or $type = 'std::string' or $enum='true' or $enum='smart'%>
+		<%return 'LGS::TSupportedParamType::spt_string'%>
+	<%else-if $type = 'NLMISC::CEntityId'%>
+		<%return 'LGS::TSupportedParamType::spt_entityId'%>
+	<%else-if $type = 'NLMISC::CSheetId'%>
+		<%return 'LGS::TSupportedParamType::spt_sheetId'%>
+	<%else-if $type = 'INVENTORIES::TItemId'%>
+		<%return 'LGS::TSupportedParamType::spt_itemId'%>
+	<%else%>
+		<%error concat('Unsupported parameter format "', string($type), '"')%>
+		<%return 'LGS::TSupportedParamType::invalid_value'%>
+	<%end-if%>
+<%end-def%>
+
+
+<%def makeParamList%>
+	<%for-each param%>
+		<%if @list = 'true'%>
+			<%if @byref='true'%>const std::list< <%= @type%> > &<%= @name%>
+			<%else%>std::list< <%= @type%> > <%= @name%>
+			<%end-if%>
+		<%else%>
+			<%if @byref='true'%>const <%= @type%> &<%= @name%>
+			<%else%>
+				<%= @type%> <%= @name%>
+			<%end-if%>
+		<%end-if%>
+		<%if position()!=last()%>, <%end-if%>
+	<%end-for%>
+<%end-def%>
+
+<%def makeParamListPlusComma%>
+	<%call makeParamList%><%if count((param)) > 0%>, <%end-if%>
+<%end-def%>
+
+<%def makeParamListForMacro%>
+	<%for-each param%>
+		<%= @name%>
+		<%if position()!=last()%>, <%end-if%>
+	<%end-for%>
+<%end-def%>
+
+<%def makeParamListForMacroPlusComma%>
+	<%call makeParamListForMacro%><%if count((param)) > 0%>, <%end-if%>
+<%end-def%>
+
+
+<%def getNamespace(type)%>
+
+	<%return substring-before($type, '::')%>
+<%end-def%>
+
+<%// ------------------------------------------------------------------------%>
+<%// -- Master CPP file, force link of all log definition -------------------%>
+<%// ------------------------------------------------------------------------%>
+<%output concat($__inputPath, 'log_gather_all_gen.cpp')%>
+#include "stdpch.h"
+#include "utils.h"
+
+
+<%for-each log-class%>
+extern void forceLink_<%= @name%>();
+<%end-for%>
+
+void forceLinkOfAllLogs()
+{
+	<%for-each log-class%>
+	forceLink_<%= @name%>();
+	<%end-for%>
+};
+
+
+
+<%// ========================================================================%>
+<%// Output the tag file													 %>
+<%// ========================================================================%>
+
+<%output concat($__inputName, '.tag')%>
+Log regenerated on <%= $__currentDateTime%>

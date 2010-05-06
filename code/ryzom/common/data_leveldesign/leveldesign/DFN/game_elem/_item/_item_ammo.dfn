@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.14 $" State="modified">
+  <ELEMENT Name="weapon type" Type="Type" Filename="_range_skills.typ"/>
+  <ELEMENT Name="specialization" Type="Type" Filename="_range_specialized_skills.typ"/>
+  <ELEMENT Name="damage type" Type="Type" Filename="item_damage_type.typ"/>
+  <ELEMENT Name="long range limit" Type="Type" Filename="item_firing_range.typ" Default="medium"/>
+  <ELEMENT Name="medium range limit" Type="Type" Filename="int.typ" Default="0.5*&quot;ammo.long range limit&quot;"/>
+  <ELEMENT Name="short range limit" Type="Type" Filename="int.typ" Default="0.3*&quot;ammo.long range limit&quot;"/>
+  <ELEMENT Name="rate of fire" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="latency" Type="Type" Filename="float.typ" Default="4"/>
+  <ELEMENT Name="damage factor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="magazine" Type="Type" Filename="item_magazine_size.typ"/>
+  <ELEMENT Name="type" Type="Type" Filename="item_ammo_type.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:19 2002 (corvazier) File converted from old format
+Wed Jul 24 18:39:46 2002 (miller) Dfn Structure = 
+Wed Jul 24 18:41:49 2002 (miller) Dfn Structure = 
+Wed Jul 24 18:48:50 2002 (miller) Dfn Structure = 
+Fri Aug 23 14:31:16 2002 (fleury) Dfn Structure = 
+Tue Aug 27 17:08:02 2002 (miller) Dfn Structure = 
+Mon Oct 21 16:07:53 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:04:57 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:06:19 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:06:52 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:08:15 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:10:30 2002 (fleury) Dfn Structure = 
+Tue Nov 12 18:15:42 2002 (fleury) Dfn Structure = 
+Wed Nov 27 15:32:01 2002 (fleury) Dfn Structure = 
+Wed Nov 27 15:34:31 2002 (fleury) Dfn Structure = 
+Mon Mar 03 15:08:35 2003 (fleury) Dfn Structure = 
+Wed Apr 02 18:05:48 2003 (fleury) Dfn Structure = 
+Mon Jun 02 19:16:39 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

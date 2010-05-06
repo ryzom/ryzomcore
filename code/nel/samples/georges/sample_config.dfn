@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN>
+	<ELEMENT Name="TestVal1" Type="Type" Filename="int.typ" Default="0"/>
+	<ELEMENT Name="TestVal2" Type="Type" Filename="int.typ" Default="0"/>
+	<ELEMENT Name="WriteVal" Type="Type" Filename="int.typ" Default="0" />
+	<ELEMENT Name="TestArray" Type="Type" Filename="string.typ" Array="true"/>
+	<ELEMENT Name="CoolFilesInfo" Type="Dfn" Filename="coolfilesinfo.dfn" Array="true"/>
+	<ELEMENT Name="TestByBracket" Type="Type" Filename="boolean.typ" Array="true"/>
+	<ELEMENT Name="PositionData" Type="Dfn" Filename="positiondata.dfn" Array="false" />
+</DFN>

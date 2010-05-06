@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.35 $" State="modified">
+  <ELEMENT Name="name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="origin" Type="Type" Filename="item_origine.typ"/>
+  <ELEMENT Name="family" Type="Type" Filename="item_family.typ"/>
+  <ELEMENT Name="ItemType" Type="Type" Filename="item_type.typ"/>
+  <ELEMENT Name="sack_type" Type="Type" Filename="filename.typ" Default="bag.item"/>
+  <ELEMENT Name="stackable" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="quality" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ShardExchangeable" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Drop or Sell" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="EquipmentInfo" Type="Dfn" Filename="_item_equipment_info.dfn"/>
+  <ELEMENT Name="CraftPlan" Type="Type" Filename="filename.typ" FilenameExt="*.sbrick"/>
+  <ELEMENT Name="Bulk" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Weight" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Saleable" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="No Rent" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Price" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Time to Equip In Ticks" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Consumable" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="RequiredSkill" Type="Type" Filename="_Skills.typ" Default="none"/>
+  <ELEMENT Name="MinRequiredSkillLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="RequiredSkillQualityFactor" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="RequiredSkillQualityOffset" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="RequiredSkill2" Type="Type" Filename="_Skills.typ" Default="none"/>
+  <ELEMENT Name="MinRequiredSkillLevel2" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="RequiredSkillQualityFactor2" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="RequiredSkillQualityOffset2" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="RequiredCharac" Type="Type" Filename="_characteristic.typ" Default="Unknown"/>
+  <ELEMENT Name="MinRequiredCharacLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="RequiredCharacQualityFactor" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="RequiredCharacQualityOffset" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Type 1" Type="Type" Filename="_classification_types.typ" Default="Unknown"/>
+  <ELEMENT Name="VS Type skill modifier 1" Type="Type" Filename="int.typ" Default="0"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:19 2002 (corvazier) File converted from old format
+Thu Aug 28 17:50:51 2003 (saffray) Dfn Structure = 
+Wed Jan 28 14:19:28 2004 (nouveau) Dfn Structure = 
+Thu Feb 05 15:55:37 2004 (nouveau) Dfn Structure = 
+Thu Sep 02 10:52:00 2004 (fleury) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,14 @@
+[OPTIONS]
+Auto Index=Yes
+Compatibility=1.1 or later
+Compiled file=nel.chm
+Default topic=html\nel\index.html
+Display compile progress=Yes
+Language=0x809 Anglais (Royaume-Uni)
+
+
+[FILES]
+html\nel\index.html
+
+[INFOTYPES]
+

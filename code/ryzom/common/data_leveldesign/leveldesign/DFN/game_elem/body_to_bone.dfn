@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Head" Type="Type" Filename="string.typ" Default="Bip01 Head"/>
+  <ELEMENT Name="Chest" Type="Type" Filename="string.typ" Default="Bip01 Spine2"/>
+  <ELEMENT Name="LeftArm" Type="Type" Filename="string.typ" Default="Bip01 L UpperArm"/>
+  <ELEMENT Name="RightArm" Type="Type" Filename="string.typ" Default="Bip01 R UpperArm"/>
+  <ELEMENT Name="LeftHand" Type="Type" Filename="string.typ" Default="Bip01 L Hand"/>
+  <ELEMENT Name="RightHand" Type="Type" Filename="string.typ" Default="Bip01 R Hand"/>
+  <ELEMENT Name="LeftLeg" Type="Type" Filename="string.typ" Default="Bip01 L Calf"/>
+  <ELEMENT Name="RightLeg" Type="Type" Filename="string.typ" Default="Bip01 R Calf"/>
+  <ELEMENT Name="LeftFoot" Type="Type" Filename="string.typ" Default="Bip01 L Foot"/>
+  <ELEMENT Name="RightFoot" Type="Type" Filename="string.typ" Default="Bip01 R Foot"/>
+  <LOG>Tue Dec 16 17:42:39 2003 (vizerie) Dfn Structure = 
+Tue Dec 16 17:45:34 2003 (vizerie) Dfn Structure = 
+Tue Dec 16 17:47:53 2003 (vizerie) Dfn Structure = 
+Tue Dec 16 19:04:48 2003 (vizerie) Dfn Structure = </LOG>
+</DFN>

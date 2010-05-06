@@ -1,0 +1,10 @@
+PRB: 3dsmax3.1 crash into nel_material.ms
+----
+
+1) Verify your maxscript.dll and paramblk2.dll version number is "3.1.0.1". If it is "3.1.0.0", get an update.
+2) Try to delete the content of /matlibs and restart 3dsmax.
+
+PRB: Trouble using Physique modifier in Character Studio >= 3 under 3dsmax >= 4
+----
+
+Check the line USE_2.2_RIGID_DEFORMATIONS=Yes is present in the file maxdir/plugcfg/physique.ini (Case sensitive!)

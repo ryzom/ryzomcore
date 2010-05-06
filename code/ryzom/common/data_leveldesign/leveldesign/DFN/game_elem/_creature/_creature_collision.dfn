@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.5 $" State="modified">
+  <ELEMENT Name="CollisionRadius" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="BoundingRadius" Type="Type" Filename="float.typ" Default="&quot;Collision.CollisionRadius&quot;"/>
+  <ELEMENT Name="Length" Type="Type" Filename="float.typ" Default="&quot;Collision.CollisionRadius&quot;*2"/>
+  <ELEMENT Name="Width" Type="Type" Filename="float.typ" Default="&quot;Collision.CollisionRadius&quot;*2"/>
+  <ELEMENT Name="Height" Type="Type" Filename="float.typ" Default="2.0"/>
+  <ELEMENT Name="Dist Bip01 to head" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="Dist Bip01 to front" Type="Type" Filename="float.typ" Default="&quot;Collision.Length&quot;/2"/>
+  <ELEMENT Name="Dist Bip01 to mid" Type="Type" Filename="float.typ" Default="&quot;Collision.Dist Bip01 to front&quot;-&quot;Collision.Length&quot;/2"/>
+  <ELEMENT Name="Dist Bip01 to back" Type="Type" Filename="float.typ" Default="-&quot;Collision.Length&quot;+&quot;Collision.Dist Bip01 to front&quot;"/>
+  <ELEMENT Name="NotTraversable" Type="Type" Filename="iboolean.typ" Default="false"/>
+  <ELEMENT Name="ClipRadius" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="ClipHeight" Type="Type" Filename="float.typ" Default="0.0"/>
+  <LOG>Wed Jun 26 16:58:04 2002 (legros) Dfn Structure = 
+Wed Jun 26 17:05:59 2002 (legros) Dfn Structure = 
+Tue Jul 02 11:35:12 2002 (legros) Dfn Structure = 
+Tue Jul 02 11:38:40 2002 (legros) Dfn Structure = 
+Tue Aug 27 15:43:37 2002 (tran) Dfn Structure = 
+Tue Aug 27 15:48:25 2002 (tran) Dfn Structure = 
+Mon Jul 26 11:49:13 2004 (boucher) Dfn Structure = 
+Mon Jul 26 11:55:07 2004 (boucher) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,35 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by georges_plugin_sound.rc
+//
+#define HIDC_FILTER_00                  0x8402040f    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_01                  0x84020411    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_02                  0x84020413    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_03                  0x84020415    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_04                  0x84020417    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_05                  0x84020419    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_06                  0x8402041a    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_07                  0x8402041b    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_08                  0x8402041c    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_09                  0x8402041d    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_10                  0x8402041e    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_11                  0x8402041f    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_12                  0x84020420    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_13                  0x84020421    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_14                  0x84020422    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_15                  0x84020423    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_16                  0x84020410    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_17                  0x84020412    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_18                  0x84020414    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_19                  0x84020416    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_20                  0x84020418    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_21                  0x84020436    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_22                  0x84020438    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_23                  0x8402043d    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_24                  0x84020457    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_25                  0x84020458    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_26                  0x84020459    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_27                  0x8402045a    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_28                  0x8402045b    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_29                  0x8402045c    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_30                  0x8402045d    // IDD_PAGE_BG_FLAGS
+#define HIDC_FILTER_31                  0x8402045e    // IDD_PAGE_BG_FLAGS

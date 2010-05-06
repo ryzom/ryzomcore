@@ -1,0 +1,56 @@
+<html>
+<head>
+<LINK REL="stylesheet" TYPE="text/css" HREF="H38.css">
+<script src="Hu37.js"></script>
+<script>
+<!--
+g_theApp.ZoomResetFunc = ResetZoom;
+
+function ResetZoom()
+{
+	var formZoom = FindForm('zoomForm', document);
+	formZoom.zoomFactor.selectedIndex = 0;
+}
+//-->
+</script>
+<style>
+body { position:absolute;top:-5px; }
+#NavBar { position:absolute;top:0px;left:0px }
+</style>
+</head>
+<body class="navBar">
+
+<div id="NavBar" name="NavBar">
+
+<table width="100&#37;" cellpadding="0" cellspacing="0">
+<tr>
+
+<td valign="top" nowrap align="center">
+
+<td nowrap align="right">
+<span id="divZoom" name="divZoom" style="position:relative;top:0px;">
+<form id="zoomForm" name="zoomForm">
+<select id="zoomFactor" name="zoomFactor"
+onchange="javascript:zoom_onchange(zoomFactor[zoomFactor.selectedIndex].value)">
+<option value="-1" selected>Fit In Window
+<option value="1200">1200&#37;
+<option value="800">800&#37;
+<option value="600">600&#37;
+<option value="400">400&#37;
+<option value="200">200&#37;
+<option value="150">150&#37;
+<option value="100">100&#37;
+<option value="75">75&#37;
+<option value="50">50&#37;
+<option value="25">25&#37;
+</select>
+</form>
+</span>
+</td>
+
+</tr></table>
+
+</div>
+</body>
+</html>
+

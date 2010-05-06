@@ -1,0 +1,551 @@
+%{
+
+/* Includes */
+
+#ifdef NL_OS_WINDOWS
+#pragma warning (disable : 4786)
+#endif // NL_OS_WINDOWS
+#include "nel/misc/config_file.h"
+#include "nel/misc/common.h"
+#include "nel/misc/debug.h"
+
+#include <stdio.h>
+#include <vector>
+#include <string>
+
+using namespace std;
+using namespace NLMISC;
+
+/* Constantes */
+
+#define YYPARSE_PARAM pvararray
+
+// WARNING!!!! DEBUG_PRINTF are commented using // so IT MUST HAVE NO INSTRUCTION AFTER A DEBUG_PRINTF OR THEY LL BE COMMENTED
+/*
+#define DEBUG_PRINTF	InfoLog->displayRaw
+#define DEBUG_PRINT(a)	InfoLog->displayRaw(a)
+*/
+
+#define DEBUG_PRINT(a)
+#ifdef __GNUC__
+#define DEBUG_PRINTF(format, args...)
+#else // __GNUC__
+#define DEBUG_PRINTF	// InfoLog->displayRaw
+#endif // __GNUC__
+
+
+/* Types */
+
+enum cf_operation { OP_PLUS, OP_MINUS, OP_MULT, OP_DIVIDE, OP_NEG };
+
+struct cf_value
+{
+	NLMISC::CConfigFile::CVar::TVarType	Type;
+	int						Int;
+	double					Real;
+	char					String[1024];
+};
+
+/* Externals */
+
+extern bool cf_Ignore;
+
+extern bool LoadRoot;
+
+extern FILE *yyin;
+
+/* Variables */
+
+NLMISC::CConfigFile::CVar		cf_CurrentVar;
+
+int		cf_CurrentLine;
+char	*cf_CurrentFile;
+
+bool	cf_OverwriteExistingVariable;	// setup in the config_file.cpp reparse()
+
+
+
+/* Prototypes */
+
+int yylex (void);
+
+cf_value cf_op (cf_value a, cf_value b, cf_operation op);
+
+void cf_print (cf_value Val);
+
+void cf_setVar (NLMISC::CConfigFile::CVar &Var, cf_value Val);
+
+int yyerror (const char *);
+
+%}
+
+%start ROOT
+
+%union	{
+			cf_value Val;
+		}
+
+%token <Val> ADD_ASSIGN ASSIGN VARIABLE STRING SEMICOLON
+%token <Val> PLUS MINUS MULT DIVIDE
+%token <Val> RPAREN LPAREN RBRACE LBRACE
+%token <Val> COMMA INTEGER REAL FILELINE
+
+%type <Val> inst
+%type <Val> expression
+%type <Val> expr2
+%type <Val> expr3
+%type <Val> expr4
+%type <Val> exprbrace
+%type <Val> variable
+
+%%
+
+ROOT:		instlist | { }
+			;
+
+instlist:	instlist inst { }
+		|	inst { }
+		;
+
+inst	:	FILELINE STRING INTEGER
+			{
+				DEBUG_PRINTF("Forcing current file %s and line %u\n", $2.String, $3.Int-1);
+
+				if (cf_CurrentFile != NULL)
+					free(cf_CurrentFile);
+				// store the filename
+				cf_CurrentFile = strdup($2.String);
+				// store the current line minus 1 because the #fileline count for a line
+				cf_CurrentLine = $3.Int-1;
+			}
+
+inst:		VARIABLE ASSIGN expression SEMICOLON
+			{
+				DEBUG_PRINTF("                                   (TYPE %d VARIABLE=", $1.Type);
+				cf_print ($1);
+				DEBUG_PRINTF("), (TYPE %d VALUE=", $3.Type);
+				cf_print ($3);
+				DEBUG_PRINT(")\n");
+				int i;
+				// on recherche l'existence de la variable
+				for(i = 0; i < (int)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).size()); i++)
+				{
+					if ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Name == $1.String)
+					{
+						if (cf_OverwriteExistingVariable || (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Root || !strcmp($1.String,"RootConfigFilename"))
+						{
+							DEBUG_PRINTF("Variable '%s' existe deja, ecrasement\n", $1.String);
+						}
+						break;
+					}
+				}
+				NLMISC::CConfigFile::CVar Var;
+				Var.Comp = false;
+				Var.Callback = NULL;
+				if (cf_CurrentVar.Comp)
+				{
+					DEBUG_PRINTF ("yacc: new assign complex variable '%s'\n", $1.String);
+					Var = cf_CurrentVar;
+				}
+				else
+				{
+					DEBUG_PRINTF ("yacc: new assign normal variable '%s'\n", $1.String);
+					cf_setVar (Var, $3);
+				}
+				Var.Name = $1.String;
+				if (i == (int)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).size ()))
+				{
+					// nouvelle variable
+					DEBUG_PRINTF ("yacc: new assign var '%s'\n", $1.String);
+					(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).push_back (Var);
+				}
+				else if (cf_OverwriteExistingVariable || (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Root || !strcmp($1.String,"RootConfigFilename"))
+				{
+					// reaffectation d'une variable
+					Var.Callback = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Callback;
+					DEBUG_PRINTF ("yacc: reassign var name '%s' type %d\n", Var.Name.c_str(), Var.Type);
+					if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != NULL)
+						(Var.Callback)(Var);
+					(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] = Var;
+				}
+				else
+				{
+					DEBUG_PRINTF ("yacc: don't reassign var '%s' because the variable already exists\n", $1.String);
+				}
+
+				cf_CurrentVar.IntValues.clear ();
+				cf_CurrentVar.RealValues.clear ();
+				cf_CurrentVar.StrValues.clear ();
+				cf_CurrentVar.Comp = false;
+				cf_CurrentVar.Type = NLMISC::CConfigFile::CVar::T_UNKNOWN;
+			}
+			;
+
+inst:		VARIABLE ADD_ASSIGN expression SEMICOLON
+			{
+				DEBUG_PRINT("                                   (VARIABLE+=");
+				cf_print ($1);
+				DEBUG_PRINT("), (VALUE=");
+				cf_print ($3);
+				DEBUG_PRINT(")\n");
+				int i;
+				// on recherche l'existence de la variable
+				for(i = 0; i < (int)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).size()); i++)
+				{
+					if ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Name == $1.String)
+					{
+						DEBUG_PRINTF("Variable '%s' existe deja, ajout\n", $1.String);
+						break;
+					}
+				}
+				NLMISC::CConfigFile::CVar Var;
+				Var.Comp = false;
+				Var.Callback = NULL;
+				if (cf_CurrentVar.Comp) Var = cf_CurrentVar;
+				else cf_setVar (Var, $3);
+				Var.Name = $1.String;
+				if (i == (int)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).size ()))
+				{
+					// nouvelle variable
+					DEBUG_PRINTF ("yacc: new add assign var '%s'\n", $1.String);
+					(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).push_back (Var);
+				}
+				else
+				{
+					// reaffectation d'une variable
+					Var.Callback = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Callback;
+					DEBUG_PRINTF ("yacc: add assign var '%s'\n", $1.String);
+					if ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].FromLocalFile)
+					{
+						// this var was created in the current cfg, append the new value at the end
+						(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].add(Var);
+
+						if (Var.size() > 0 && Var.Callback != NULL)
+							(Var.Callback)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i]);
+					}
+					else
+					{
+						// this var has been created in a parent Cfg, append at the begining of the array
+						Var.add ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i]);
+						if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != NULL)
+							(Var.Callback)(Var);
+						(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] = Var;
+					}
+				}
+
+				cf_CurrentVar.IntValues.clear ();
+				cf_CurrentVar.RealValues.clear ();
+				cf_CurrentVar.StrValues.clear ();
+				cf_CurrentVar.Comp = false;
+				cf_CurrentVar.Type = NLMISC::CConfigFile::CVar::T_UNKNOWN;
+			}
+			;
+
+expression:	expr2 { $$ = $1; cf_CurrentVar.Comp = false; DEBUG_PRINT("false\n"); }
+			| LBRACE exprbrace RBRACE { $$ = $2; cf_CurrentVar.Comp = true; DEBUG_PRINT("true\n"); }
+			| LBRACE exprbrace COMMA RBRACE { $$ = $2; cf_CurrentVar.Comp = true; DEBUG_PRINT("true\n"); }
+			| LBRACE RBRACE { $$ = $2; cf_CurrentVar.Comp = true; DEBUG_PRINT("true\n"); }
+			;
+
+exprbrace:	expr2					{ $$ = $1; /*cf_CurrentVar.Type = $1.Type;*/ cf_setVar (cf_CurrentVar, $1); }
+			| exprbrace COMMA expr2 { $$ = $3; /*cf_CurrentVar.Type = $3.Type;*/ cf_setVar (cf_CurrentVar, $3); }
+			;
+
+expr2:		expr3 { $$ = $1; }
+			| expr2 PLUS expr3 { $$ = cf_op($1, $3, OP_PLUS); }
+			| expr2 MINUS expr3 { $$ = cf_op($1, $3, OP_MINUS); }
+			;
+
+expr3:		expr4 { $$ = $1; }
+			| expr3 MULT expr4 { $$ = cf_op($1, $3, OP_MULT); }
+			| expr3 DIVIDE expr4 { $$ = cf_op ($1, $3, OP_DIVIDE); }
+			;
+
+expr4:		PLUS expr4 { $$ = $2; }
+			| MINUS expr4 { cf_value v; v.Type=NLMISC::CConfigFile::CVar::T_INT; /* just to avoid a warning, I affect 'v' with a dummy value */ $$ = cf_op($2,v,OP_NEG); }
+			| LPAREN expression RPAREN { $$ = $2; }
+			| INTEGER { $$ = yylval.Val; }
+			| REAL { $$ = yylval.Val; }
+			| STRING { $$ = yylval.Val; }
+			| variable { $$ = $1; }
+			;
+
+variable:	VARIABLE
+			{
+				DEBUG_PRINT("yacc: cont\n");
+				bool ok=false;
+				int i;
+				for(i = 0; i < (int)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM))).size()); i++)
+				{
+					if ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Name == $1.String)
+					{
+						ok = true;
+						break;
+					}
+				}
+				if (ok)
+				{
+					cf_value Var;
+					Var.Type = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Type;
+					DEBUG_PRINTF("vart %d\n", Var.Type);
+					switch (Var.Type)
+					{
+					case NLMISC::CConfigFile::CVar::T_INT: Var.Int = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].IntValues[0]; break;
+					case NLMISC::CConfigFile::CVar::T_REAL: Var.Real = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].RealValues[0]; break;
+					case NLMISC::CConfigFile::CVar::T_STRING: strcpy (Var.String, (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].StrValues[0].c_str()); break;
+					default: DEBUG_PRINT("*** CAN T DO THAT!!!\n"); break;
+					}
+					$$ = Var;
+				}
+				else
+				{
+					DEBUG_PRINT("var existe pas\n");
+				}
+			}
+			;
+%%
+
+/* compute the good operation with a, b and op */
+cf_value cf_op (cf_value a, cf_value b, cf_operation op)
+{
+	DEBUG_PRINTF("[OP:%d; ", op);
+	cf_print(a);
+	DEBUG_PRINT("; ");
+	cf_print(b);
+	DEBUG_PRINT("; ");
+
+	switch (op)
+	{
+	case OP_MULT:																//  *********************
+		switch (a.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		a.Int *= b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Int *= (int)b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: int*str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_REAL:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		a.Real *= (double)b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Real *= b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: real*str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_STRING:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		DEBUG_PRINT("ERROR: str*int\n");  break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	DEBUG_PRINT("ERROR: str*real\n");  break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: str*str\n");  break;
+			default: break;
+			}
+			break;
+		default: break;
+		}
+		break;
+	case OP_DIVIDE:																//  //////////////////////
+		switch (a.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		a.Int /= b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Int /= (int)b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: int/str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_REAL:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		a.Real /= (double)b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Real /= b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: real/str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_STRING:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		DEBUG_PRINT("ERROR: str/int\n"); break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	DEBUG_PRINT("ERROR: str/real\n"); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: str/str\n"); break;
+			 default: break;
+			}
+			break;
+		default: break;
+		}
+		break;
+	case OP_PLUS:																//  ++++++++++++++++++++++++
+		switch (a.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	a.Int += b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Int += (int)b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	a.Int += atoi(b.String); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_REAL:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	a.Real += (double)b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Real += b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	a.Real += atof (b.String); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_STRING:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%d", b.Int); strcat(a.String, str2); break; }
+			case NLMISC::CConfigFile::CVar::T_REAL:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%f", b.Real); strcat(a.String, str2); break; }
+			case NLMISC::CConfigFile::CVar::T_STRING:	strcat (a.String, b.String); break;
+			default: break;
+			}
+			break;
+		default: break;
+		}
+		break;
+	case OP_MINUS:																//  -------------------------
+		switch (a.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	a.Int -= b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Int -= (int)b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: int-str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_REAL:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	a.Real -= (double)b.Int; break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	a.Real -= b.Real; break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: real-str\n"); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_STRING:
+			switch (b.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	DEBUG_PRINT("ERROR: str-int\n"); break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	DEBUG_PRINT("ERROR: str-real\n"); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	DEBUG_PRINT("ERROR: str-str\n"); break;
+			default: break;
+			}
+			break;
+		default: break;
+		}
+		break;
+	case OP_NEG:																// neg
+		switch (a.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:		a.Int = -a.Int; break;
+		case NLMISC::CConfigFile::CVar::T_REAL:		a.Real = -a.Real; break;
+		case NLMISC::CConfigFile::CVar::T_STRING:		DEBUG_PRINT("ERROR: -str\n"); break;
+		default: break;
+		}
+		break;
+	}
+	cf_print(a);
+	DEBUG_PRINT("]\n");
+	return a;
+}
+
+/* print a value, it's only for debug purpose */
+void cf_print (cf_value Val)
+{
+	switch (Val.Type)
+	{
+	case NLMISC::CConfigFile::CVar::T_INT:
+		DEBUG_PRINTF("'%d'", Val.Int);
+		break;
+	case NLMISC::CConfigFile::CVar::T_REAL:
+		DEBUG_PRINTF("`%f`", Val.Real);
+		break;
+	case NLMISC::CConfigFile::CVar::T_STRING:
+		DEBUG_PRINTF("\"%s\"", Val.String);
+		break;
+	default: break;
+	}
+}
+
+/* put a value into a var */
+void cf_setVar (NLMISC::CConfigFile::CVar &Var, cf_value Val)
+{
+	DEBUG_PRINTF("Set var (type %d var name '%s') with new var type %d with value : ", Var.Type, Var.Name.c_str(), Val.Type);
+	cf_print(Val);
+	DEBUG_PRINTF("\n");
+	Var.Root = LoadRoot;
+	if (Var.Type == NLMISC::CConfigFile::CVar::T_UNKNOWN || Var.Type == Val.Type)
+	{
+		if (Var.Type == NLMISC::CConfigFile::CVar::T_UNKNOWN)
+		{
+			DEBUG_PRINTF("var type is unknown, set to the val type\n");
+		}
+		else
+		{
+			DEBUG_PRINTF("val type is same var type, just add\n");
+		}
+
+		Var.Type = Val.Type;
+		switch (Val.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT: Var.IntValues.push_back (Val.Int); break;
+		case NLMISC::CConfigFile::CVar::T_REAL: Var.RealValues.push_back (Val.Real); break;
+		case NLMISC::CConfigFile::CVar::T_STRING: Var.StrValues.push_back(Val.String); break;
+		default: break;
+		}
+	}
+	else
+	{
+		// need to convert the type
+		switch (Var.Type)
+		{
+		case NLMISC::CConfigFile::CVar::T_INT:
+			switch (Val.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_REAL:		Var.IntValues.push_back ((int)Val.Real); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	Var.IntValues.push_back (atoi(Val.String)); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_REAL:
+			switch (Val.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:		Var.RealValues.push_back ((double)Val.Int); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	Var.RealValues.push_back (atof(Val.String)); break;
+			default: break;
+			}
+			break;
+		case NLMISC::CConfigFile::CVar::T_STRING:
+			switch (Val.Type)
+			{
+			case NLMISC::CConfigFile::CVar::T_INT:	Var.StrValues.push_back(toString(Val.Int)); break;
+			case NLMISC::CConfigFile::CVar::T_REAL:	Var.StrValues.push_back(toString(Val.Real)); break;
+			default: break;
+			}
+			break;
+		default: break;
+		}
+	}
+}
+
+int yyerror (const char *s)
+{
+	DEBUG_PRINTF("%s\n",s);
+	return 1;
+}
+
+

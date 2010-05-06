@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.5 $" State="modified">
+  <ELEMENT Name="move"                          Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="rotation"                      Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="attack"                        Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="slide"                         Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="default next"                  Type="Type" Filename="string.typ"   Default="idle" />
+  <ELEMENT Name="next automaton"                Type="Type" Filename="string.typ"   Default="&quot;mode&quot;"/>
+  <ELEMENT Name="max duration"                  Type="Type" Filename="float.typ"    Default="-1.0"/>
+  <ELEMENT Name="max loop"                      Type="Type" Filename="int.typ"      Default="0"/>
+
+  <ELEMENT Name="brk at destination"            Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="on move forward"               Type="Type" Filename="string.typ"   Default=""/> <!--&quot;idle.on move forward&quot;" /> -->
+  <ELEMENT Name="on move backward"              Type="Type" Filename="string.typ"   Default=""/> <!--&quot;idle.on move backward&quot;"/> -->
+  <ELEMENT Name="on move left"                  Type="Type" Filename="string.typ"   Default=""/> <!--&quot;idle.on move left&quot;"    /> -->
+  <ELEMENT Name="on move right"                 Type="Type" Filename="string.typ"   Default=""/> <!--&quot;idle.on move right&quot;"   /> -->
+  <ELEMENT Name="on rotation left"              Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on rotation right"             Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on big bend left"              Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on big bend right"             Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on min speed"                  Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on max speed"                  Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on bad heading forward"        Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on bad heading backward"       Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on bad heading left"           Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="on bad heading right"          Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="bad heading min"               Type="Type" Filename="float.typ"    Default="0.0"/>
+  <ELEMENT Name="bad heading max"               Type="Type" Filename="float.typ"    Default="0.0"/>
+  <ELEMENT Name="adjust orientation"            Type="Type" Filename="boolean.typ"  Default="false"/>
+
+  <ELEMENT Name="dir factor"                    Type="Type" Filename="float.typ"    Default="0.0"/>
+  <ELEMENT Name="rot factor"                    Type="Type" Filename="float.typ"    Default="1.0"/>
+  <ELEMENT Name="on atk"                        Type="Type" Filename="string.typ"   />
+  <ELEMENT Name="breakable on impact"           Type="Type" Filename="boolean.typ"  Default="false"/>
+  <ELEMENT Name="x factor"                      Type="Type" Filename="float.typ"    Default="0.0"/>
+  <ELEMENT Name="y factor"                      Type="Type" Filename="float.typ"    Default="1.0"/>
+  <ELEMENT Name="z factor"                      Type="Type" Filename="float.typ"    Default="0.0"/>
+  <!-- Modes -->
+  <ELEMENT Name=        "alert mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=       "combat mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name= "combat_float mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=        "death mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=       "normal mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=          "eat mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=       "hungry mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name= "mount_normal mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=         "rest mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=          "sit mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=         "swim mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <ELEMENT Name=   "swim_death mode transition" Type="Type" Filename="string.typ"   Default=""/>
+  <COMMENTS></COMMENTS>
+  <LOG>Sun Mar 16 02:02:00 2003 (puzin)</LOG>
+</DFN>

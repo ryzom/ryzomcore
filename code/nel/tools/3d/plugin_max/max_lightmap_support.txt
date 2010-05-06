@@ -1,0 +1,28 @@
+
+>> NeL lightmap features <<
+
+-> Support of lights
+ * Omni and spot light only
+ * Attenuation far
+ * Exclude mesh from light
+ * Cast Shadow on light and cast/receive in object properties
+ * Spot texture projector
+ * Ambient only
+ * Multiply factor
+ * Double sided
+ * Opacity in texture
+ * Stained glass in texture through NeL material
+
+-> Additionnal features
+ * Vertex color
+ * Auto Animated light groups (Color channel with a Point3 controller)
+ * Lumel size defined
+ * Oversampling
+ * Multiple lightmap animatable for one mesh (up to 8)
+ * Colored lightmap intensity variation
+
+-> Not supported light options
+ * Directionnal light
+ * Attenuation near
+ * Scalable attenuation size
+ * Projector rectangle

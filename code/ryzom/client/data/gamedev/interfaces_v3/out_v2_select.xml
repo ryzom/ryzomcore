@@ -1,0 +1,936 @@
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
+<lua file="out_v2_select.lua" />
+<lua file="bg_downloader.lua" />
+
+<!-- *********************** -->
+<!-- * CHARACTER SELECTION * -->
+<!-- *********************** -->
+
+<!-- *************** -->
+<!-- *  VARIABLES  * -->
+<!-- *************** -->
+
+<variable entry="UI:TEMP:CHARSELSLOT" 		type="sint64" value="-1"/>
+<variable entry="UI:TEMP:EDIT_SCENARIO" 	type="sint64" value="0"/>
+<!-- are we in del char mode ? -->
+<variable entry="UI:TEMP:CHARSELDELCHAR" 	type="sint64" value="0"/>
+
+<variable entry="UI:TEMP:CHAR3D:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHARSLOT0:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHARSLOT1:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHARSLOT2:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHARSLOT3:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHARSLOT4:PEOPLE" 	type="sint64" value="0" />
+
+<variable entry="UI:TEMP:CHARSELOPT1" 		type="sint64" value="0"/>
+<variable entry="UI:TEMP:CHARSELOPT2" 		type="sint64" value="0"/>
+
+<variable entry="UI:TEMP:HAIRCUT" 				type="sint64" value="1" />
+<variable entry="UI:TEMP:RAND" 					type="sint64" value="1" />
+<variable entry="UI:TEMP:CHAR3DFYROS:PEOPLE" 	type="sint64" value="0" />
+<variable entry="UI:TEMP:CHAR3DMATIS:PEOPLE" 	type="sint64" value="1" />
+<variable entry="UI:TEMP:CHAR3DTRYKER:PEOPLE" 	type="sint64" value="2" />
+<variable entry="UI:TEMP:CHAR3DZORAI:PEOPLE" 	type="sint64" value="3" />
+
+<variable entry="UI:TEMP:INFOS"					type="sint64" value="-1"/>
+<variable entry="UI:TEMP:HAS_EDITSESSION" type="sint64" value="0" />
+
+
+<!-- ***************** -->
+<!-- *   PROCEDURES  * -->
+<!-- ***************** -->
+
+<!-- When we reach the charsel page -->
+<proc id="proc_charsel_active">
+	<action handler="proc" params="proc_charsel_initslot|0" />
+	<action handler="proc" params="proc_charsel_initslot|1" />
+	<action handler="proc" params="proc_charsel_initslot|2" />
+	<action handler="proc" params="proc_charsel_initslot|3" />
+	<action handler="proc" params="proc_charsel_initslot|4" />
+
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=0" />
+
+	<action handler="anim_start" params="anim=anim_charsel_intro" />
+
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:posx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:posy|value=23.0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:posz|value=2.8"/>
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:tgtx|value=0.0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:tgty|value=26.5"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:tgtz|value=2.0"/>
+
+	<action handler="lua:game:procCharselClickSlot()" />
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:3d_select:select_fx:started|value=1" />
+	<action handler="anim_start" params="anim=anim_sel_select_fx" />
+	
+	<action handler="anim_start" params="anim=anim_empty" />
+	
+	<action handler="proc" params="charsel_enable_buttons" />
+	
+	<!-- Continue or Restart Default Outgame Music
+		MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
+	-->
+	<action handler="play_music_outgame"  params="async=0" />
+
+</proc>
+
+
+<proc id="charsel_disable_buttons">
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot0:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot1:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot2:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot3:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot4:active|value=0"/>
+	<!--
+	<action handler="set" params="target_property=ui:outgame:charsel:infos_but:active|value=0"/>
+	-->
+	<action handler="set" params="target_property=ui:outgame:charsel:play_but:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:edit_session_but:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=0"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=0"/>
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=0"/>
+</proc>
+
+
+<proc id="charsel_enable_buttons">
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot0:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot1:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot2:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot3:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot4:active|value=1"/>
+	<!--
+	<action handler="set" params="target_property=ui:outgame:charsel:infos_but:active|value=1"/>
+	-->
+	<action handler="set" params="target_property=ui:outgame:charsel:play_but:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:edit_session_but:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=1"/>
+	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=1"/>
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=1"/>
+</proc>
+
+
+<proc id="restart_sel_select_fx">
+	<action handler="anim_start" params="anim=anim_sel_select_fx" />
+</proc>
+
+
+<!-- Init Slots -->
+<proc id="proc_charsel_initslot">
+	<action handler="proc" cond="not(isCharSelSlotEmpty(@0))" params="proc_charsel_initslot_full|@0" />
+	<action handler="proc" cond="isCharSelSlotEmpty(@0)" params="proc_charsel_initslot_empty|@0" />
+</proc>
+
+<proc id="proc_charsel_initslot_full">
+	<action handler="set_db_from_slot" params="dblink=UI:TEMP:CHARSLOT@0|slot=@0" />
+
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:charsel:empty_slot@0:active|value=0" />
+
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:char:anim|value=3" />
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:env:name |
+			value=switch(@UI:TEMP:CHARSLOT@0:PEOPLE, 'outgame_fyros.ig', 'outgame_matis.ig', 'outgame_tryker.ig', 'outgame_zorai.ig')" />
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:fov |
+			value=switch(@UI:TEMP:CHARSLOT@0:PEOPLE, 21, 22, 20, 23)" />
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:posz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:tgtz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
+
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:uc_hardtext|slot=@0" />
+</proc>
+
+<proc id="proc_charsel_initslot_empty">
+	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:active|value=0" />
+	<action handler="set" params="target_property=ui:outgame:charsel:empty_slot@0:active|value=1" />
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot@0:hardtext|value='uiCharSel_EmptySlot'" />
+</proc>
+
+
+<proc id="select_specie_anim">
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:char:anim|value=5" />
+	<!--
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="target_property=ui:outgame:charsel:char3d:char:anim|value=11" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="target_property=ui:outgame:charsel:char3d:char:anim|value=12" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="target_property=ui:outgame:charsel:char3d:char:anim|value=13" />
+	<action handler="set" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="target_property=ui:outgame:charsel:char3d:char:anim|value=14" />
+	-->
+</proc>
+
+
+<!-- When we click on a slot -->
+<proc id="proc_charsel_clickslot">
+	<action handler="set" params="dblink=UI:TEMP:CHARSELSLOT|value=-1" />
+	<action handler="set" params="dblink=UI:TEMP:CHARSELSLOT|value=@0" />
+	<action handler="set_db_from_slot" params="dblink=UI:TEMP:CHAR3D|slot=@0" />
+	
+	<action handler="set" cond="ne(@UI:TEMP:CHAR3D:VPA:WEAPONRIGHTHAND, 0)" params="target_property=ui:outgame:charsel:char3d:char:anim|value=10" />
+	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:VPA:WEAPONRIGHTHAND, 0)" params="select_specie_anim" />
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:active|value=not(isCharSelSlotEmpty(@0))" />
+	<action handler="set" params="target_property=ui:outgame:charsel:empty3d:active|value=isCharSelSlotEmpty(@0)" />
+	<action handler="set" params="target_property=ui:outgame:charsel:select_menu:y |
+									value=switch(@0, 2, -151, -304, -457, -610)" />
+	<action handler="set" params="target_property=ui:outgame:charsel:but_slot@0:pushed|value=1" />
+	
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:env:name |
+			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 'outgame_fyros.ig', 'outgame_matis.ig', 'outgame_tryker.ig', 'outgame_zorai.ig')" />
+	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:fov |
+			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 60, 60, 60, 60)" />
+	<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y |
+								value=switch(@0, 0, -153, -306, -459, -612)" />	
+								
+	<action handler="proc" params="proc_charsel_infos2" />
+</proc>
+
+<proc id="proc_charsel_play">
+	<action handler="set" params="dblink=UI:TEMP:EDIT_SCENARIO|value=0" />
+	<action handler="anim_start" params="anim=anim_charsel_outro_play" />
+</proc>
+
+<proc id="proc_charsel_edit_menu">	
+	<action handler="set" params="dblink=UI:TEMP:HAS_EDITSESSION|value=isCharSelSlotHasEditSession(@UI:TEMP:CHARSELSLOT)" />
+	<action handler="lua:game:openEditorMenu()" />
+</proc>
+
+
+<proc id="proc_charsel_edit_scenario">
+	<action handler="set" params="dblink=UI:TEMP:EDIT_SCENARIO|value=1" />
+	<action handler="anim_start" params="anim=anim_charsel_outro_play" />
+</proc>
+
+<proc id="proc_charsel_new_scenario">
+	<action handler="set" params="dblink=UI:TEMP:EDIT_SCENARIO|value=2" />
+	<action handler="anim_start" params="anim=anim_charsel_outro_play" />
+</proc>
+
+<proc id="proc_charsel_new_scenario_warning">
+	<action handler="enter_modal" params="group=ui:outgame:r2ed_editor_new_sceneario_warning" /> 
+	<!--	<action handler="lua:game:openEditorMenuWarningNewScenario()" /> -->
+</proc>
+
+<proc id="proc_charsel_new_scenario_warning_cancel">
+	<action handler="play_sound" params="name=charsel_delno_click" /> 
+	<action handler="leave_modal" params="" /> 
+	<action handler="anim_start" params="anim=anim_charsel_delout" />
+</proc>
+
+
+
+
+<proc id="proc_charsel_play2">
+	<action handler="proc" params="charsel_disable_buttons" />
+	<action handler="launch_game" params="slot=@UI:TEMP:CHARSELSLOT|edit_mode=@UI:TEMP:EDIT_SCENARIO" />
+</proc>
+
+<proc id="proc_charsel_create_new">
+	<action handler="anim_start" params="anim=anim_charsel_outro_new" />
+</proc>
+<proc id="proc_charsel_create_new2">
+	<action handler="proc" params="charsel_disable_buttons" />
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_appear" /> 
+</proc>
+
+<proc id="proc_charsel_create_ran">
+	<action handler="anim_start" params="anim=anim_charsel_outro_ran" />
+</proc>
+<proc id="proc_charsel_create_ran2">
+	<action handler="proc" params="charsel_disable_buttons" />
+	<action handler="set" params="dblink=UI:CURRENT_SCREEN|value=%screen_appear" /> 
+</proc>
+
+
+
+<!-- When we click on the exit button -->
+<proc id="proc_quit" >
+	<action handler="play_sound" params="name=charsel_quit_click" />
+	<action handler="quit_ryzom" />
+</proc>
+
+
+<!-- Relance la rotation du sigle empty -->
+<proc id="restart_empty_anim">
+	<action handler="anim_start" params="anim=anim_empty" />
+</proc>
+
+
+<!-- ***************** -->
+<!-- *   TEMPLATES   * -->
+<!-- ***************** -->
+
+<template name="char_slot_view" posparent="parent" posref="TL TL" id="" dblink="" x="0" y="-3" >
+
+	<scene3d id="#id" posparent="#posparent" w="200" h="150" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env" render_layer="-2" user_interaction="false" 
+						ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+		<character3d id="char" dblink="#dblink" pos="0.0 26.5 0.85" rot="0.0 0.0 10.0" />
+
+		<camera id="cam" fov="20" pos="0.0 24.0 2.2" target="0.0 26.5 2.0" roll="0" />
+	
+		<light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+		<ig id="env" name="outgame_matis.ig" pos="0 0 0" />
+
+		<shape id="shadow" name="shadow.shape" pos="0.0 26.5 0.85" rot="0.0 0.0 0.0" />
+
+		<auto_anim name="brazero-inter1.anim"/>
+		<auto_anim name="brazero-inter2.anim"/>
+		<auto_anim name="lanterne-int1.anim"/>
+		<auto_anim name="lanterne-int2.anim"/>
+		
+	</scene3d>
+
+</template>
+
+
+<template name="empty_slot_view" posparent="parent" posref="TL TL" id="" dblink="" x="0" y="-3" >
+
+	<scene3d id="#id" posparent="#posparent" w="200" h="150" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env" render_layer="-2" user_interaction="false" 
+						ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+
+		<camera id="cam" fov="80" pos="0.0 24.0 2.6" target="0.0 26.5 2.2" roll="0" />
+	
+		<light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+		
+		<shape id="empty" name="empty.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
+
+	</scene3d>
+
+</template>
+
+
+
+<!-- ******************** -->
+<!-- * DELETE CHARACTER * -->
+<!-- ******************** -->
+
+<group type="modal" id="charsel_delchar_confirm" posref="MM MM" w="300" h="180" 
+					mouse_pos="false" escapable="false" exit_click_out="false" display="false">
+					
+	
+	<instance template="outgame_popup" id="back" posref="TL TL" />
+	
+	
+	<view type="text" id="text" posref="TM TM" x="0" y="-60" color="255 255 255 255" global_color="false" line_maxw="284"
+		fontsize="17" shadow="true" hardtext="uiCharSel_DelChar" multi_line="true" multi_line_space="0"/>
+
+	<ctrl style="valid_txt_button" id="submit" posref="BR BR" x="-8" y="8" hardtext="uiCP_Delete_yes"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_delchar_confirm_ok" />
+
+	<ctrl style="valid_txt_button" id="cancel" posref="TR BR" posparent="submit" x="0" y="4" hardtext="uiCP_Delete_no"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_delchar_confirm_cancel" />
+
+</group>
+
+
+
+<!-- ********* -->
+<!-- * INFOS * -->
+<!-- ********* -->
+
+<proc id="proc_charsel_infos">
+	<action handler="set" params="dblink=UI:TEMP:INFOS|value=not(@UI:TEMP:INFOS)" />
+	<action handler="leave_modal" params="" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:INFOS, 1)" params="target_property=ui:outgame:charsel:quit_but:active|value=0" />
+	
+	<action handler="set" cond="eq(@UI:TEMP:INFOS, 0)" params="target_property=ui:outgame:charsel:quit_but:active|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:INFOS, 0)" params="target_property=ui:outgame:appear:quit_but:active|value=1" />
+	<action handler="set" cond="eq(@UI:TEMP:INFOS, 0)" params="target_property=ui:outgame:location:quit_but:active|value=1" />
+	
+	<action handler="enter_modal" cond="and(eq(@UI:TEMP:INFOS, 1),not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)))" params="group=ui:outgame:charsel_infos1" />
+	<action handler="enter_modal" cond="and(eq(@UI:TEMP:INFOS, 1),isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT))" 		params="group=ui:outgame:charsel_infos2" />
+	
+</proc>
+
+<proc id="proc_charsel_infos2">
+	<action handler="enter_modal" cond="and(eq(@UI:TEMP:INFOS, 1),not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)))"  params="group=ui:outgame:charsel_infos1" />
+	<action handler="enter_modal" cond="and(eq(@UI:TEMP:INFOS, 1),isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT))" 		params="group=ui:outgame:charsel_infos2" />
+</proc>
+
+<group type="modal" id="charsel_infos1" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+					mouse_pos="false" escapable="false" exit_click_out="true" display="false">
+	
+	<view type="text" id="text" posref="TM TM" x="0" y="0" color="255 255 255 255" global_color="false" line_maxw="780"
+		fontsize="17" shadow="true" hardtext="uiCharSel_Infos1" multi_line="true" multi_line_space="0"/>
+
+
+	<ctrl style="valid_txt_button" id="quit_but" posref="BM BM" y="0" hardtext="uiInfos_Close"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_infos"/>
+
+</group>
+
+<group type="modal" id="charsel_infos2" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+					mouse_pos="false" escapable="false" exit_click_out="true" display="false">
+	
+	<view type="text" id="text" posref="TM TM" x="0" y="0" color="255 255 255 255" global_color="false" line_maxw="780"
+		fontsize="17" shadow="true" hardtext="uiCharSel_Infos2" multi_line="true" multi_line_space="0"/>
+
+
+	<ctrl style="valid_txt_button" id="quit_but" posref="BM BM" y="0" hardtext="uiInfos_Close"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_infos"/>
+
+</group>
+
+<proc id="proc_charsel_del">
+	<action handler="anim_start" params="anim=anim_charsel_delin" />
+	<action handler="set" params="dblink=UI:TEMP:CHARSELDELCHAR|value=1" /> 
+	<action handler="enter_modal" params="group=ui:outgame:charsel_delchar_confirm" /> 
+</proc>
+
+<proc id="proc_charsel_delchar_confirm_ok">
+	<action handler="anim_start" params="anim=anim_charsel_delin2" />
+	<action handler="play_sound" params="name=charsel_delok_click" /> 
+	<action handler="leave_modal" params="" /> 
+	<action handler="ask_delete_char" params="slot=@UI:TEMP:CHARSELSLOT" /> 
+</proc>
+
+<proc id="proc_charsel_delchar_confirm_ok2">
+	<action handler="set" params="dblink=UI:TEMP:CHARSELDELCHAR|value=0" /> 
+	<action handler="anim_start" params="anim=anim_char_sel_delete" /> 
+	<action handler="proc" params="proc_charsel_active" />
+</proc>
+
+<proc id="proc_charsel_test">
+	<action handler="proc" params="proc_charsel_delchar_confirm_ok2" 
+	cond="and(eq(@UI:TEMP:CHARSELDELCHAR,1),eq(@UI:CURRENT_SCREEN, %screen_select),eq(@UI:SERVER_RECEIVED_CHARS,1))" /> 
+</proc>
+
+<!-- When we got the answer from server terminate delchar --> 
+<link expr="depends(@UI:CURRENT_SCREEN,@UI:SERVER_RECEIVED_CHARS)" action="proc" params="proc_charsel_test" /> 
+
+<proc id="proc_charsel_delchar_confirm_cancel">
+	<action handler="play_sound" params="name=charsel_delno_click" /> 
+	<action handler="leave_modal" params="" /> 
+	<action handler="anim_start" params="anim=anim_charsel_delout" />
+</proc>
+
+
+<proc id="charsel_init_buttons">
+	<action handler="add_link" params="id=play_edit_session_del_init|expr=and(not(isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)), not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT))))|target=ui:outgame:charsel:play_but:active,ui:outgame:charsel:edit_session_but:active,ui:outgame:charsel:del_but:active" />
+	<action handler="add_link" params="id=create_new_but_init|expr=isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:create_new_but:active" />
+	<action handler="add_link" params="id=resume_session_but_init|expr=isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:resume_session_but:active,ui:outgame:charsel:in_ring_session:active" />
+	
+	<action handler="remove_link" params="id=play_edit_session_del_init" />
+	<action handler="remove_link" params="id=create_new_but_init" />
+	<action handler="remove_link" params="id=resume_session_but_init" />
+</proc>
+
+
+<!-- ***************** -->
+<!-- *  MAIN WINDOW  * -->
+<!-- ***************** -->
+
+<group id="charsel" w="1024" h="768" posref="MM MM"
+								on_active="proc" on_active_params="proc_charsel_active" >
+
+	<!-- TEMP BACK -->
+	<view type="bitmap" id="bg" posref="TL TL" x="0" y="0" render_layer="-3" scale="true" w="1024" h="768" texture="blank.tga"
+		color="0 0 0 255" global_color="false" />
+
+	
+	<!--***************-->
+	<!-- MAIN 3D SCENE -->
+	<!--***************-->
+	
+	
+	<!-- Vue Globale -->
+	<scene3d id="char3d" x="-3" y="-3" w="815" h="762" posref="TR TR" curcam="cam" curcs="env" render_layer="-2"
+						user_interaction="true" rotz_factor="0.017"
+						roty_factor="0.005" roty_limit_min="-20" roty_limit_max="15"
+						dist_factor="0.005" dist_limit_min="3.0" dist_limit_max="3.8"	
+						ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" 	 
+	>
+						
+	
+		<character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0 26.5 1.0" rot="0.0 0.0 0.0" />
+		
+		<camera id="cam" fov="80" pos="0.0 24.0 2.6" target="0.0 26.5 2.2" roll="0" />
+		<camera id="camface" fov="20" pos="0.0 25.0 2.2" target="0.0 26.5 2.2" roll="0" />
+	
+		<light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+			
+		<ig id="env" name="outgame_matis.ig" pos="0 0 0.15" />
+		
+		<shape id="shadow" name="shadow.shape" pos="0.0 26.5 1.0" rot="0.0 0.0 0.0" />
+		
+		<auto_anim name="brazero-inter1.anim"/>
+		<auto_anim name="brazero-inter2.anim"/>
+		<auto_anim name="lanterne-int1.anim"/>
+		<auto_anim name="lanterne-int2.anim"/>
+	</scene3d>	
+
+	<view type="text" id="in_ring_session" multi_line="true" w="650" line_maxw="650" posref="TL TL" global_color="false" render_layer="2" fontsize="17" shadow="true" y="-80" x="260" hardtext_format="uiCP_InRingSession"/>
+
+	
+	<!-- Empty Scene -->
+	<scene3d id="empty3d" x="-3" y="-3" w="815" h="762" posref="TR TR" curcam="cam" curcs="env" render_layer="-2"
+						user_interaction="false"	
+						ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+						
+	
+		<camera id="cam" fov="80" pos="0.0 24.0 2.6" target="0.0 26.5 2.2" roll="0" />
+			
+		<light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="2.5" far="4.0" />
+		<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+		
+				
+		<shape id="empty" name="empty.shape" pos="0.0 26.5 2.5" rot="0.0 0.0 0.0" />
+	</scene3d>
+	
+	
+	<!--***********-->
+	<!-- MAIN MENU -->
+	<!--***********-->
+	
+	<!-- View of each slot TODO : convert relative pos by absolute !!! -->
+
+	<instance template="char_slot_view" id="slot0" dblink="UI:TEMP:CHARSLOT0" posref="TL TL" x="3" />
+	<instance template="char_slot_view" id="slot1" dblink="UI:TEMP:CHARSLOT1" posref="TL TL" y="-153" />
+	<instance template="char_slot_view" id="slot2" dblink="UI:TEMP:CHARSLOT2" posref="TL TL" y="-306" />
+	<instance template="char_slot_view" id="slot3" dblink="UI:TEMP:CHARSLOT3" posref="TL TL" y="-459" />
+	<instance template="char_slot_view" id="slot4" dblink="UI:TEMP:CHARSLOT4" posref="TL TL" y="-612" />
+	
+	<instance template="empty_slot_view" id="empty_slot0" posref="TL TL" x="3" y="-3" />
+	<instance template="empty_slot_view" id="empty_slot1" posref="TL TL" x="3" y="-156" />
+	<instance template="empty_slot_view" id="empty_slot2" posref="TL TL" x="3" y="-309" />
+	<instance template="empty_slot_view" id="empty_slot3" posref="TL TL" x="3" y="-462" />
+	<instance template="empty_slot_view" id="empty_slot4" posref="TL TL" x="3" y="-615" />
+	
+
+	<!-- Button of each slot (always present even if empty slot) -->
+
+	<ctrl style="menu_button" id="but_slot0" posref="TL TL" x="3" y="-3"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_charsel_clickslot|0" />
+
+	<ctrl style="menu_button" id="but_slot1" posref="BL TL" posparent="but_slot0" y="-3"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_charsel_clickslot|1" />
+
+	<ctrl style="menu_button" id="but_slot2" posref="BL TL" posparent="but_slot1" y="-3"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_charsel_clickslot|2" />
+
+	<ctrl style="menu_button" id="but_slot3" posref="BL TL" posparent="but_slot2" y="-3"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_charsel_clickslot|3" />
+
+	<ctrl style="menu_button" id="but_slot4" posref="BL TL" posparent="but_slot3" y="-3"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_charsel_clickslot|4" />
+
+
+	<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">		
+		<instance template="outgame_black_back" id="border"/>		
+		<view type="text" id="text"	active="true" y="-10" posref="TM TM"	hardtext="" fontsize="13" color="255 255 255 255"/>
+		<view type="bitmap" id="bm" active="false" y="1" x="-1" texture="W_answer_16_valid.tga" posparent="text" posref="ML MR"/>
+		<view type="text" id="ellipsis"	active="true" y="0" posref="BR BL"	posparent="text" hardtext="" fontsize="13" color="255 255 255 255"/>
+		<view type="bar" id="progress" active="true" posparent="text" x="-8" posref="BM TM" y="-4"/>
+
+		<group type="combo_box" id="prio" sizeref="w" w="64" x="0" y="-8" child_resize_h="true" child_resize_hmargin="6" linked_to_db="false" 
+		 posparent="progress"
+		 posref="BM TM"		 
+		 on_change="lua:bgdownloader:onChangePriority()" on_change_params=""
+		 tooltip="uiBGD_PriorityTooltip"
+		 global_color="false"
+		>		
+			<instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>						
+			<combo_text name="uiBGD_Paused" />
+			<combo_text name="uiBGD_LowPriority" />
+			<combo_text name="uiBGD_NormalPriority" />			
+		</group>
+	</group>
+
+
+	<!--***************-->
+	<!-- BOTTOM BUTTON -->
+	<!--***************-->
+
+<!--
+	<ctrl type="button" id="display_infos" button_type="toggle_button" posref="BL BL" x="248" y="48"  
+				tx_normal="infos.tga" tx_pushed="infos.tga" tx_over="infos.tga"
+				color="255 255 255 255" col_pushed="255 255 255 255" col_over="0 0 0 0"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_charsel_infos"/>
+-->
+	<!--
+	<ctrl style="valid_txt_button" id="infos_but" posref="BL BL" x="248" y="48" hardtext="uiCP_Infos"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_infos"/>
+	-->
+
+	<!--
+	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="76" hardtext="uiCharSel_Play"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_play"/>
+	-->
+
+	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="76" hardtext="uiCharSel_Play"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="lua" params_l="outgame:launchGame()"/>
+
+	<ctrl style="valid_txt_button" id="edit_session_but" posref="BR BM" x="-112" y="36" hardtext="uiLaunchEditor"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_edit_menu"/>
+
+	<ctrl style="valid_txt_button" id="del_but" posref="BR BL" x="-794" y="56" hardtext="uiCharSel_Del"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_del"/>
+
+	<link expr="and(not(isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)), not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)))" target="play_but:active,edit_session_but:active,del_but:active" />
+
+
+	<ctrl style="valid_txt_button" id="create_new_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_CreateNew"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_create_new"/>
+
+	<!-- TEMP: For R2 alpha, don't allow more than one character per user -->
+	<link expr="isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)" target="create_new_but:active" />
+
+	<ctrl style="valid_txt_button" id="resume_session_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_ResumeSession"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_play"/>
+
+	<!-- TEMP: For R2 alpha, don't allow more than one character per user -->
+	<link expr="isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)" target="resume_session_but:active,in_ring_session:active" />
+
+
+	<!--*************-->
+	<!-- SKIN BANNER -->
+	<!--*************-->
+	
+	<view type="bitmap" id="skin_banner" posref="BL BL" x="0" y="0" render_layer="-1" texture="outgame_skin_banner.tga"
+		color="255 255 255 255" global_color="false" />
+
+
+	<!-- MODAL BLACK SCREEN -->
+	<view type="bitmap" id="infos_screen" x="-3" y="-3" w="815" h="762" posref="TR TR" render_layer="1" texture="blank.tga" color="0 0 0 160"
+		scale="true" global_color="false" />
+	<link expr="eq(@UI:TEMP:INFOS, 1)" target="infos_screen:active" />
+
+
+	<!-- SKIN -->
+	
+	<view type="bitmap" id="skin" posref="TL TL" x="0" y="0" render_layer="2" texture="outgame_skin.tga"
+		color="255 255 255 255" global_color="false" />
+	
+	<!-- TITLE -->
+	
+	<group id="title" w="292" h="46" y="-6" x="-272" posref="TR TR">
+		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="-4" hardtext="uiCP_title1"/>
+		<view type="text" id="title2" posref="BM BM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_selection"/>
+	</group>
+	
+	
+	<!-- SKIN MENU SELECTION 1 -->
+	<view type="bitmap" id="select_menu" posref="TL TL" x="0" y="2" render_layer="4" scale="true" texture="blank.tga"
+		color="0 0 0 0" w="212" h="160" />
+
+	<!-- Select 3d -->
+	<scene3d id="3d_select" w="206" h="156" posref="TL TL" curcam="cam" curcs="env" render_layer="4"
+						user_interaction="false" 
+						ambient="0 0 0" sun_ambient="0 0 0" sun_diffuse="0 0 0" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+	
+		<camera id="cam" fov="70" pos="0 -3 0" target="0.0 0.0 0.0" roll="0" />
+		<fx id="select_fx" pos="2.0 0.0 1.5" name="sfx_interface_selectioncadre.ps" rot="0.0 0.0 0.0" />
+	
+		
+	</scene3d>
+		
+	<!-- KAMI MENU SELECT -->
+	<view type="bitmap" id="select_kami" posparent="select_menu" posref="MR ML" x="-30" y="-3" render_layer="3" texture="kami_select.tga"
+		color="255 255 255 255" global_color="false" />	
+
+
+	<!-- QUIT BUTTON
+	<ctrl style="valid_txt_button" id="quit_but" posref="TR TR" x="-4" y="-4" hardtext="uiCharSel_Quit"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_quit"/>
+-->
+	<ctrl type="button" id="quit_but" button_type="push_button" posref="TR TR" x="0" y="0"  
+				tx_normal="quit.tga" tx_pushed="quit.tga" tx_over="quit.tga"
+				color="255 255 255 255" col_pushed="255 255 255 255" col_over="0 0 0 0"
+				onover="play_sound" params_over="name=specie_but_over"
+				onclick_l="proc" params_l="proc_quit"/>
+		
+	
+	<!-- BLACK SCREEN FADE -->
+	<view type="bitmap" id="black_screen" posref="TL TL" x="0" y="0" render_layer="4" texture="blank.tga"
+		color="0 0 0 255" sizeref="wh" scale="true" global_color="false" />
+
+	<!-- Simple Message Box with just a OK button -->
+	<group type="modal" id="message_box" exit_click_out="true" posparent="char3d" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="100" 
+	 on_enter="leave_modal" mouse_pos="false" escapable="false" 
+	 display="false"
+	>
+		<instance template="outgame_popup" id="back" posref="TL TL" />
+
+		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+		<ctrl style="valid_txt_button" id="ok" posref="BM BM" x="0" y="8" hardtext="uittOK" 
+						avoid_resize_parent="true" 
+						onover="play_sound" params_over="name=specie_but_over" 
+						onclick_l="leave_modal" />
+	</group>
+	
+
+
+	
+
+
+	<!-- Web box
+	<group id="webstart" posref="BR BR" w="200" h="200" active="true" >
+		<group id="content" x="0" y="0" w="200" h="200" posref="TL TL" >
+			<group type="html" id="webstart_html" posref="TL TL" 
+				url="" 
+				title_prefix="uiQuickhelpTitle"
+				sizeref="wh" x="0" y="0" w="-40" h="-40" 
+				background_color="0 0 0 0"
+				error_color="255 240 48 255"
+				link_color="240 155 100 255"
+				text_color="210 210 210 255"
+				h1_color="255 255 255 255"
+				h2_color="255 255 255 255"
+				h3_color="255 255 255 255"
+				h4_color="255 255 255 255"
+				h5_color="255 255 255 255"
+				h6_color="255 255 255 255"
+				text_font_size="10"
+				h1_font_size="16"
+				h2_font_size="14"
+				h3_font_size="13"
+				h4_font_size="12"
+				h5_font_size="11"
+				h6_font_size="11"
+				paragraph_begin_space="12"
+				multi_line_space_factor="0.25"
+				td_begin_space="0"
+				li_begin_space="4"
+				ul_begin_space="12"
+				li_indent="-10"
+				ul_indent="30"
+				checkbox_bitmap_normal="patch_off.tga"
+				checkbox_bitmap_pushed="patch_on.tga"
+				checkbox_bitmap_over=""
+				background_bitmap_view=""
+				home=""
+				browse_next_time="false"
+				timeout="0"
+				form_text_area_group="edit_box_widget_multiline" >
+
+				<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
+				<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+				<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+				<ctrl style="skin_scroll" id="scroll_bar" />
+			</group>
+		</group>
+	</group>
+	-->
+
+</group>
+
+<!--
+<template name="r2ed_editor_menu_button" id="but" bitmap="brick_default.tga" keep="true" size="24">
+	<group id="#id" posref="TL TL" child_resize_h="true" child_resize_w="true">
+		<view type="bitmap" id="bm" scale="true" w="#size" h="#size" texture="#bitmap" global_color="false"/>
+	</group>
+</template>
+-->
+<group type="modal" id="r2ed_editor_new_sceneario_warning" w="300" h="200" 
+ posref="MM MM" render_layer="1"
+ mouse_pos="false" escapable="false" exit_click_out="true" 
+ display="false"
+>
+
+	<instance template="outgame_popup" id="back" posref="TL TL" />
+
+	<view type="text" id="text" posref="TM TM" x="0" y="-60" color="255 255 255 255" global_color="false" line_maxw="284"
+		fontsize="17" shadow="true" hardtext="uiR2EDNewScenarioWarning" multi_line="true" multi_line_space="0"/>
+
+	
+	<ctrl style="valid_txt_button" id="submit" posref="BM BM" x="0" y="8" hardtext="uittOK"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_new_scenario" />
+
+	<ctrl style="valid_txt_button" id="cancel" posref="TM BM" posparent="submit" x="0" y="4" hardtext="uiCP_Delete_no"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_new_scenario_warning_cancel" />
+
+</group>
+
+
+<options name="menu_back">
+
+	<param name="tx_tl"			value="CM_TL.tga" />
+	<param name="tx_t"			value="CM_T.tga" />
+	<param name="tx_tr"			value="CM_TR.tga" />
+	<param name="tx_l"			value="CM_L.tga" />
+	<param name="tx_r"			value="CM_R.tga" />
+	<param name="tx_blank"		value="CM_M.tga" />
+	<param name="tx_bl"			value="CM_BL.tga" />
+	<param name="tx_b"			value="CM_B.tga" />
+	<param name="tx_br"			value="CM_BR.tga" />
+
+</options>
+
+
+<group type="menu" id="r2ed_editor_menu"
+	options="menu_back"  
+	text_y="-2"
+	color="255 255 255 255"
+	fontsize="16"
+	shadow="true"
+	shadow_color="0 0 0 255"
+	shadow_color_over="0 0 0 255"
+	color_over="0 0 0 255"
+	color_grayed="255 255 255 128"
+	shadow_color_grayed="0 0 0 255"
+	highlight_over="255 255 255 128"
+	mouse_pos="false">
+
+	<action id="new_scenario" name="uiR2EDNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
+	<action id="new_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>
+
+</group>
+
+
+<!-- This link is used to display the right screen among the outgame screens -->
+<link expr="eq(@UI:CURRENT_SCREEN, %screen_select)" target="charsel:active" />
+
+<!-- ***************** -->
+<!-- *  ANIMATIONS   * -->
+<!-- ***************** -->
+
+<anim id="anim_charsel_intro" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="255" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_outro_play" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_charsel_play2" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_outro_new" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_charsel_create_new2" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_outro_ran" duration="1.0"  disable_buttons="true" on_finish="proc" on_finish_params="proc_charsel_create_ran2" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_delin" duration="0.5"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="0" />
+		<key time="0.5" value="128" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_delin2" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="128" />
+		<key time="1.0" value="255" />
+	</track>
+</anim>
+
+<anim id="anim_charsel_delout" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
+	<track type="linear" target="charsel:black_screen:alpha" >
+		<key time="0.0" value="128" />
+		<key time="1.0" value="0" />
+	</track>
+</anim>
+
+<anim id="anim_empty" duration="5.0"  disable_buttons="false" on_finish="proc" on_finish_params="restart_empty_anim" >
+	<track type="linear" target="charsel:empty3d:empty:rotz" >
+		<key time="0.0" value="0" />
+		<key time="5.0" value="360" />
+	</track>
+</anim>
+
+<anim id="anim_sel_select_fx" duration="2.0"  disable_buttons="false" on_finish="proc" on_finish_params="restart_sel_select_fx" >
+
+	<track type="linear" target="charsel:3d_select:select_fx:posx" >
+		<key time="0.0" 	value="2" />
+		<key time="0.5" 	value="-2" />
+		<key time="1.0" 	value="-2" />
+		<key time="1.5" 	value="2" />
+		<key time="2.0" 	value="2" />
+	</track>
+	
+	<track type="linear" target="charsel:3d_select:select_fx:posz" >
+		<key time="0.0" 	value="1.5" />
+		<key time="0.5" 	value="1.5" />
+		<key time="1.0" 	value="-1.5" />
+		<key time="1.5" 	value="-1.5" />
+		<key time="2.0" 	value="1.5" />
+	</track>
+	
+</anim>
+
+
+<proc id="proc_browse_faq" >
+	<!--
+	NB : do not leave the window here, this way the user can refer to the message in the help message box
+	<action handler="leave_modal" />
+	-->
+	<action handler="browse_faq" params=""/>				
+</proc>	
+
+
+
+<proc id="proc_message_box_with_help_ok" >
+	<action handler="leave_modal" />	    <!-- must leave modal first if another modal is to be displayed after this one -->
+	<action handler="" params=""/>				
+</proc>
+
+
+<group type="modal" id="message_box_with_help" exit_click_out="false" posparent="charsel:char3d" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="100" 
+ on_enter="proc" on_enter_params="proc_message_box_with_help_ok" 
+ on_deactive = "proc" on_deactive_params="proc_message_box_with_help_ok"
+ escapable="true" 
+ mouse_pos="false"
+ display="false"
+>
+	<instance template="outgame_popup" id="back" posref="TL TL" />
+
+	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+	<ctrl style="valid_txt_button" id="ok" posref="BM BL" x="0" y="8" hardtext="uittOK" 
+					avoid_resize_parent="true" 
+					onover="play_sound" params_over="name=specie_but_over" 
+					onclick_l="proc" params_l="proc_message_box_with_help_ok"
+					/>
+	<ctrl style="valid_txt_button" id="browse_faq" posref="BM BR" x="0" y="8" hardtext="uittBrowseFaq" 
+					avoid_resize_parent="true" 
+					onover="play_sound" params_over="name=specie_but_over" 
+					onclick_l="proc" params_l="proc_browse_faq"/>
+</group>
+
+
+
+
+</interface_config>
+

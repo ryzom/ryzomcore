@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Version="0.3" State="modified">
+  <PARENT Name="_ai_object.dfn"/>
+  <ELEMENT Name="Marche" Type="Dfn" Filename="_ai_vitesse.dfn"/>
+  <ELEMENT Name="Course" Type="Dfn" Filename="_ai_vitesse.dfn"/>
+</DFN>

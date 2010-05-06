@@ -1,0 +1,16 @@
+Module name:		Stats Scan
+Short name:			STATS
+Associated modules:	None
+Requires:			Nothing
+
+Description
+-----------
+
+Todo
+----
+- path for generated files (from cfg + override) => managed incrementally with directory numbering
+- add incremental update systems
+	- add tables with a column per day ()
+	- add tables with a column per week (limited number of weeks)
+	- add tables with a column per month (limited number of months)
+- add 2d and 3d plots (eg top skill vs money or given skill vs money, etc)

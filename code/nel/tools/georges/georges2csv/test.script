@@ -1,0 +1,39 @@
+// dummy script file
+DFNPATH	r:\code\ryzom\data_leveldesign\leveldesign\dfn
+PATH	r:\code\ryzom\data_leveldesign
+
+//OUTPUT	creatures.csv
+//FIELD	Basics.Scores.HitPoints
+//FIELD	Basics.Scores.Sap
+//SCANFILES +*.creature
+
+OUTPUT	skeletons.csv
+//FIELD	Basics.Equipment.Body.Item
+//FIELD	Basics.Equipment.Legs.Item
+//FIELD	Basics.Equipment.Arms.Item
+//FIELD	Basics.Equipment.Hands.Item
+//FIELD	Basics.Equipment.Feet.Item
+//FIELD	Basics.Equipment.Head.Item
+//FIELD	Basics.Equipment.Face.Item
+FIELD	3d data.Skel
+FIELD	3d data.AnimSetBaseName
+SCANFILES +_*.creature
+
+OUTPUT	anims.csv
+FIELD	idle.animations[0].filename
+FIELD	walk.animations[0].filename
+FIELD	run.animations[0].filename
+FIELD	turn_left.animations[0].filename
+FIELD	turn_right.animations[0].filename
+FIELD	about_face_left.animations[0].filename
+FIELD	about_face_right.animations[0].filename
+FIELD	attack1.animations[0].filename
+FIELD	attack2.animations[0].filename
+SCANFILES +*.animation_set
+
+//OUTPUT items.csv
+//SOURCE	Basics.Scores.HitPoints
+//SOURCE	Basics.Scores.Sap
+//SCANFILES +*.item
+
+

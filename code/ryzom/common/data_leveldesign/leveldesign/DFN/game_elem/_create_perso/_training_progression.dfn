@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="TrainingScore1" Type="Type" Filename="float.typ" Default="1.24"/>
+  <ELEMENT Name="TrainingScore2" Type="Type" Filename="float.typ" Default="1.2"/>
+  <ELEMENT Name="TrainingScore3" Type="Type" Filename="float.typ" Default="1.16"/>
+  <ELEMENT Name="TrainingScore4" Type="Type" Filename="float.typ" Default="1.12"/>
+  <ELEMENT Name="TrainingRegen1" Type="Type" Filename="float.typ" Default="1.24"/>
+  <ELEMENT Name="TrainingRegen2" Type="Type" Filename="float.typ" Default="1.2"/>
+  <ELEMENT Name="TrainingRegen3" Type="Type" Filename="float.typ" Default="1.16"/>
+  <ELEMENT Name="TrainingRegen4" Type="Type" Filename="float.typ" Default="1.12"/>
+  <LOG>Fri Dec 13 19:38:02 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.9 $" State="modified">
+  <PARENT Filename="_parent_botobject.creature"/>
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <STRUCT Name="Equipment">
+        <STRUCT Name="Body">
+          <ATOM Name="Item" Value="GE_Mission_Tourgarde.shape"/>
+        </STRUCT>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d data">
+      <ARRAY Name="ProjectileCastRay">
+        <STRUCT>
+          <STRUCT Name="Origin">
+            <ATOM Name="Z" Value="8.5"/>
+          </STRUCT>
+          <STRUCT Name="Pos">
+            <ATOM Name="Z" Value="8.5"/>
+          </STRUCT>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="Collision">
+      <ATOM Name="CollisionRadius" Value="7.8"/>
+      <ATOM Name="Length" Value="0"/>
+      <ATOM Name="Width" Value="0"/>
+      <ATOM Name="Height" Value="15"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Sep 25 12:22:57 2002 (receveur) .Basics.Race = karavan
+Wed Sep 25 12:23:20 2002 (receveur) .Basics.MeleeFightingCompetences.HandToHand = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:23:33 2002 (receveur) .Basics.RangeFightingCompetences.Pistol = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:23:36 2002 (receveur) .Basics.RangeFightingCompetences.Rifle = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:31 2002 (receveur) .Basics.MeleeFightingCompetences.Kick = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.HeavyArmourWear = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.LightArmourWear = &quot;Basics.Level&quot;*10
+Wed Sep 25 12:28:45 2002 (receveur) .Basics.MeleeFightingCompetences.MediumArmourWear = &quot;Basics.Level&quot;*10
+Tue Oct 29 10:30:52 2002 (receveur) formName Pasted = 
+Tue Oct 29 10:41:56 2002 (receveur) formName Resized = 
+Tue Oct 29 15:12:56 2002 (receveur) .Basics.First Name = karavan
+Wed Feb 05 18:18:27 2003 (receveur) .Basics.Species = karavan
+Fri Sep 19 11:54:01 2003 (mauduit) .3d data.Automaton = 
+Fri Sep 19 11:54:01 2003 (mauduit) .3d data.Skel = Ma_roadsign_1_skel.skel
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Equipment.Body.Item = Ma_roadsign_poteau_1.shape
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Race = 
+Fri Sep 19 11:54:01 2003 (mauduit) .Basics.Species = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.DamageLocalisationTable = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.Gender = 
+Fri Sep 19 11:54:24 2003 (mauduit) .Basics.Size = 
+Fri Sep 19 11:54:43 2003 (mauduit) Form Parents = 
+Fri Sep 19 12:16:12 2003 (mauduit) .3d data.AnimSetBaseName = roadsign_1_default_.animation_set
+Thu Sep 25 14:44:56 2003 (mauduit) .3d data.AnimSetBaseName = roadsign_1
+Wed Mar 17 14:28:37 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_Altar_Kamik.shape
+Wed Mar 17 14:29:50 2004 (camerlo) .3d data.AnimSetBaseName = 
+Wed Mar 17 14:29:50 2004 (camerlo) .3d data.Skel = 
+Wed Mar 17 14:33:50 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_Altar_Karavan.shape
+Wed May 26 14:09:11 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_1_Caisse.shape
+Wed May 26 14:09:29 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_3_Caisse.shape
+Wed May 26 14:10:00 2004 (camerlo) .Basics.Equipment.Body.Item = GE_Mission_1_Tonneau.shape
+Tue Jun 15 17:46:36 2004 (ly) .Basics.Equipment.Body.Item = Gen_Mission_Tonneau_broke
+Tue Jun 15 17:47:25 2004 (ly) .Basics.Equipment.Body.Item = GE_Mission_Tourgarde
+Tue Jul 06 14:44:53 2004 (camerlo) .Collision.CollisionRadius = 8
+Thu Jul 08 18:48:31 2004 (camerlo) .Collision.CollisionRadius = 7.8
+Thu Jul 15 14:43:29 2004 (camerlo) Form Parents = 
+Tue Jul 20 16:17:27 2004 (camerlo) .Collision.Height = 15
+Tue Jul 20 16:17:27 2004 (camerlo) .Collision.Length = 0
+Tue Jul 20 16:17:27 2004 (camerlo) .Collision.Width = 0
+Thu Feb 17 11:18:15 2005 (tran) .3d data.ProjectileCastOffsetZ = 8.5
+Mon May 02 14:23:43 2005 (tran) .3d data.ProjectileCastRay[0].Origin.Z = 8.5
+Mon May 02 14:23:43 2005 (tran) formName Resized = 1
+Tue May 03 17:42:15 2005 (tran) .3d data.ProjectileCastRay[0].Pos.Z = 8.5</LOG>
+</FORM>

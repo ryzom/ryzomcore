@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="arma" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="balduse" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="bul" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="capryni" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="chonari" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="clapclap" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="cococlaw" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="cute" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="dag" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="diranak" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="estrasson" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="filin" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="frahar" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="gibbai" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="hachtaha" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="jungler" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kakty" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kalab" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kami" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kazoar" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitifly" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitihank" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitiharak" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitikil" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitimandib" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitin" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitinagan" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitinega" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="kitinokto" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="lightbird" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="mektoub " Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="mektoub_packer" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="mektoub_mount" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="pucetron" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="regus" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ryzerb" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ryzoholo" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ryzoholok" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="vampignon" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="varinx" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="yber" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="zerx" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Wed Jun 11 11:01:00 2003 (fleury) Dfn Structure = 
+Wed Jun 11 11:37:18 2003 (fleury) Dfn Structure = 
+Wed Jun 11 11:37:21 2003 (fleury) Dfn Structure = 
+Wed Jun 11 11:37:24 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

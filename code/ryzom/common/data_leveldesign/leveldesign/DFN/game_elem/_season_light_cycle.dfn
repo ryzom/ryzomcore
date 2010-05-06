@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="DayHour" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DayToDuskHour" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DuskToNightHour" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="NightHour" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="NightToDayHour" Type="Type" Filename="float.typ" Default="0"/>
+  <LOG>Tue Oct 22 16:27:22 2002 (Nicolas Vizerie) Dfn Structure = 
+Fri Oct 25 15:18:23 2002 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

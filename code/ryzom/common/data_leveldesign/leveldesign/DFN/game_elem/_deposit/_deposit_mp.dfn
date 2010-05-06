@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="MaxAmount" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="MaterialId" Type="Type" Filename="string.typ"/>
+  <LOG>Tue Sep 16 16:06:29 2003 (saffray) Dfn Structure = 
+Tue Sep 16 16:28:30 2003 (saffray) Dfn Structure = 
+Fri Nov 14 15:25:38 2003 (cado) Dfn Structure = 
+Fri Nov 14 15:25:44 2003 (cado) Dfn Structure = </LOG>
+</DFN>

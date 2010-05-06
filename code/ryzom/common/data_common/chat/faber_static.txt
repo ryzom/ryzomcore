@@ -1,0 +1,53 @@
+BS_FABER_INVALID_MODE			"&RG&You cannot use Faber while in combat."
+BS_FABER_MP_QUALITY_TOO_LOW		"&RG&You must use raw materials with a greater quality than that of the crafted item minimum quality."
+BS_FABER_RM_QUALITY_TOO_LOW_S		"&RG&The $0s is of insufficient quality for this object."
+BS_FABER_LACK_RM_QTY_S			"&RG&You don't have enough $0s to craft this object."
+BS_FABER_LACK_RM_TYPE_S			"&RG&You need $0s to craft this object."
+BS_FABER_TOOL_QUALITY_TOO_LOW		"&RG&The tool you are using is of insufficient quality to work on this object."
+BS_FABER_NEED_TOOL			"&RG&Your don't have the right tool to craft this object."
+BS_FABER_NEED_WORKSHOP			"&RG&You must be in a workshop in order to work on this object."
+BS_FABER_BEGIN_S			"&BL&You begin to craft the $0s."
+EGS_FABER_FAILED_LOW_QUALITY_SI		"&RG&You barely managed to craft the item $0s with its minimal quality $1i."
+EGS_FABER_FAILED_LOW_QUALITY_ISI	"&RG&You barely managed to craft $0i objects $1s with their minimal quality $2i."
+BS_FABER_END_ITEM_SI			"&BC&You have crafted the object $0s with a quality of $1i."
+BS_FABER_STACK_END_ITEM_ISI		"&BC&You have crafted $0i objects $1s with a quality of $2i."
+BS_FABER_PLAYER_LEVEL_TOO_LOW		"&RG&Your skill must improve before you can craft this object."
+
+BS_FABER_CANCEL				"&RG&You stopped before you finished crafting the object."
+
+
+BS_REPAIR_INVALID_MODE			"&RG&You cannot repair an object while in combat."
+BS_REPAIR_PERFECT_CONDITION		"&RG&This object is in perfect condition, there is no need to repair it."
+BS_REPAIR_BEGIN_S			"&BL&You begin repairing the object $0s."
+BS_REPAIR_SUCCESS_IS			"&BC&You have restored $0i life points to the object $1s."
+BS_REPAIR_SUCCESS_ISI			"&JA&You have restored $0i life points to the object $1s and increased it's quality by $2i."
+BS_REPAIR_STACK_SUCCESS_IIS		"&BC&You have restored $0i life points to the $1i objects $2s."
+BS_REPAIR_STACK_SUCCESS_IISI		"&JA&You have restored $0i life points to your $1i $2s and increased their qualities by $3i."
+
+BS_REPAIR_FAILED_S			"&RG&You failed to repair the object $0s."
+BS_REPAIR_CANCEL			"&RG&You stopped before you finished repairing the object."
+BS_REPAIR_NEED_TOOL			"&RG&You do not have the right tool to repair this object."
+
+
+
+EGS_REFINE_RM_QUALITY_TOO_LOW		"&RG&You must use raw material of a quality at least equal to the quality of the item to upgrade."
+BS_REFINE_INVALID_MODE			"&RG&You cannot refine an item while in combat."
+BS_REFINE_BEGIN_S			"&BL&You begin to upgrade the object $0s."
+EGS_REFINE_OBJECT_DAMAGED		"&RG&This object is used or damaged and cannot be upgraded. Repair it first."
+EGS_REFINE_INVALID_MANUFACTURER		"&RG&You cannot upgrade this object. It was created by another."
+EGS_REFINE_INVALID_MANUFACTURER_IGNORE	"&RG&(you can continue upgrade action though...this test is ignored for testing purposes..)"
+EGS_REFINE_MAX_QUALITY			"&RG&This object is of maximum quality and cannot be upgraded."
+BS_REFINE_FAILED			"&RG&Your upgrade has failed."
+BS_REFINE_PLAYER_LEVEL_TOO_LOW		"&RG&Your skill must improve before you can upgrade this object."
+BS_REFINE_SUCCESS_SI			"&BC&You have upgraded the object $0s with $1i additional life points."
+BS_REFINE_SUCCESS_SII			"&JA&You have upgraded the object $0s with $1i additional life points and increased it's quality by $2i."
+BS_REFINE_STACK_SUCCESS_IIS		"&BC&You have upgraded your $1i objects $2s with $0i additional life points."
+BS_REFINE_STACK_SUCCESS_IISI		"&JA&You have upgraded your $1i objects $2s with $0i additional life points and increased it's quality by $3i."
+
+BS_REFINE_NEED_TOOL			"&RG&You do not have the right tool to upgrade this object."
+EGS_REFINE_NEED_MP			"&RG&You need a raw material compatible with upgrade to upgrade your item."
+EGS_REFINE_BAD_MP			"&RG&The raw material you have selected is incompatible with upgrading."
+BS_REFINE_CANCEL			"&RG&You stopped before you finished upgrading the object."
+
+EGS_FABER_NOT_ENOUGH_ROOM		"&RG&You need to have enough empty slots in your bags to store the built items."
+OPS_FABER_INVENTORY_LOCKED		"&RG&You cannot manipulate your inventories while the Faber interface is opened."

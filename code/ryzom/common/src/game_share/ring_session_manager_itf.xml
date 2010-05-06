@@ -1,0 +1,1179 @@
+<generator header_tag="RING_SESSION_MANAGER_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<include file="r2_share/r2_basic_types.h"/>
+	<include file="r2_share/r2_share_itf.h"/>
+	<include file="nel/net/login_cookie.h"/>
+	<include file="../../nelns/welcome_service/welcome_service_itf.h"/>
+	<include file="game_share/character_sync_itf.h"/>
+	<include file="game_share/security_check.h"/>
+	<cpp-include file="stdpch.h"/>
+	<php-include file="welcome_service_itf.php"/>
+
+	<namespace name="RSMGR">
+
+		<!-- ############################################################## -->
+
+		<enum name="TSessionPartStatus">
+			<item name="sps_play_subscribed" value="1"/>
+			<item name="sps_play_invited"/>
+			<item name="sps_edit_invited"/>
+			<item name="sps_anim_invited"/>
+			<item name="sps_playing"/>
+			<item name="sps_editing"/>
+			<item name="sps_animating"/>
+		</enum>
+
+		<enum name="TSessionType">
+			<item name="st_edit"/>
+			<item name="st_anim"/>
+			<item name="st_outland"/>
+			<item name="st_mainland"/>
+		</enum>
+
+		<enum name="TSessionOrientation">
+			<item name="so_newbie_training" value="1"/>
+			<item name="so_story_telling"/>
+			<item name="so_mistery"/>
+			<item name="so_hack_slash"/>
+			<item name="so_guild_training"/>
+			<item name="so_other"/>
+		</enum>
+
+		<enum name="TSessionState">
+			<item name="ss_planned" value="1"/>
+			<item name="ss_open"/>
+			<item name="ss_locked"/>
+			<item name="ss_closed"/>
+		</enum>
+
+		<enum name="TAnimMode">
+			<item name="am_dm" value="1"/>
+			<item name="am_autonomous"/>
+		</enum>
+
+		<enum name="TAccessType">
+			<item name="at_public" value="1"/>
+			<item name="at_private"/>
+		</enum>
+
+		<enum name="TRuleType">
+			<item name="rt_strict" value="1"/>
+			<item name="rt_liberal"/>
+		</enum>
+
+		<enum name="TLevelFilter" bitset="true">
+			<item name="lf_a" value="1"/>
+			<item name="lf_b" value="2"/>
+			<item name="lf_c" value="4"/>
+			<item name="lf_d" value="8"/>
+			<item name="lf_e" value="16"/>
+			<item name="lf_f" value="32"/>
+		</enum>
+
+		<enum name="TEstimatedDuration">
+			<item name="et_short" value="1"/>
+			<item name="et_medium"/>
+			<item name="et_long"/>
+		</enum>
+
+		<enum name="TRaceFilter" bitset="true">
+			<item name="rf_fyros" value="1"/>
+			<item name="rf_matis" value="2"/>
+			<item name="rf_tryker" value = "4"/>
+			<item name="rf_zorai" value = "8"/>
+		</enum>
+
+		<enum name="TReligionFilter" bitset="true">
+			<item name="rf_kami" value="1"/>
+			<item name="rf_karavan" value="2"/>
+			<item name="rf_neutral" value = "4"/>
+		</enum>
+
+		<enum name="TGuildFilter">
+			<item name="gf_only_my_guild"/>
+			<item name="gf_any_player"/>
+		</enum>
+
+		<enum name="TShardFilter" bitset="true">
+			<item name="sf_shard00" value= "1&lt;&lt;0"/>
+			<item name="sf_shard01" value= "1&lt;&lt;1"/>
+			<item name="sf_shard02" value= "1&lt;&lt;2"/>
+			<item name="sf_shard03" value= "1&lt;&lt;3"/>
+			<item name="sf_shard04" value= "1&lt;&lt;4"/>
+			<item name="sf_shard05" value= "1&lt;&lt;5"/>
+			<item name="sf_shard06" value= "1&lt;&lt;6"/>
+			<item name="sf_shard07" value= "1&lt;&lt;7"/>
+			<item name="sf_shard08" value= "1&lt;&lt;8"/>
+			<item name="sf_shard09" value= "1&lt;&lt;9"/>
+			<item name="sf_shard10" value= "1&lt;&lt;10"/>
+			<item name="sf_shard11" value= "1&lt;&lt;11"/>
+			<item name="sf_shard12" value= "1&lt;&lt;12"/>
+			<item name="sf_shard13" value= "1&lt;&lt;13"/>
+			<item name="sf_shard14" value= "1&lt;&lt;14"/>
+			<item name="sf_shard15" value= "1&lt;&lt;15"/>
+			<item name="sf_shard16" value= "1&lt;&lt;16"/>
+			<item name="sf_shard17" value= "1&lt;&lt;17"/>
+			<item name="sf_shard18" value= "1&lt;&lt;18"/>
+			<item name="sf_shard19" value= "1&lt;&lt;19"/>
+			<item name="sf_shard20" value= "1&lt;&lt;20"/>
+			<item name="sf_shard21" value= "1&lt;&lt;21"/>
+			<item name="sf_shard22" value= "1&lt;&lt;22"/>
+			<item name="sf_shard23" value= "1&lt;&lt;23"/>
+			<item name="sf_shard24" value= "1&lt;&lt;24"/>
+			<item name="sf_shard25" value= "1&lt;&lt;25"/>
+			<item name="sf_shard26" value= "1&lt;&lt;26"/>
+			<item name="sf_shard27" value= "1&lt;&lt;27"/>
+			<item name="sf_shard28" value= "1&lt;&lt;28"/>
+			<item name="sf_shard29" value= "1&lt;&lt;29"/>
+			<item name="sf_shard30" value= "1&lt;&lt;30"/>
+			<item name="sf_shard31" value= "1&lt;&lt;31"/>
+		</enum>
+
+
+
+		<!-- ############################################################## -->
+		<class name="TRunningSessionInfo">
+			<doc line="Info about a running session in a DSS"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="TSessionId"		name="SessionId"					doc="The session Id"/>
+			<property type="TSessionType"	name="SessionType"	enum="smart"	doc="The type of the session"/>
+			<property type="uint32"			name="InstanceId"					doc="Instance ID that host this session"/>
+			<property type="uint32"			name="NbPlayingChars"				doc="Number of characters currently playing in the session (player and pioneer)"/>
+
+		</class>
+
+
+		<!-- ############################################################## -->
+		<enum name="TSessionEvent">
+			<doc line="A character enter the session"/>
+			<item name="se_char_enter"/>
+
+			<doc line="A character leave the session"/>
+			<item name="se_char_leave"/>
+
+			<doc line="The session is almost closed"/>
+			<item name="se_session_closing"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<module_interface name="CRingSessionManager" module_class='"RingSessionManager"'>
+
+			<!-- __________________________________________________________ -->
+			<method name="registerDSS" msg="RDSS">
+				<doc line="A edition or animation server module register in the session manager"/>
+				<doc line="It send the list of session hosted in the server"/>
+
+				<param type="uint32"						name="shardId"/>
+				<param type="std::vector &lt; TRunningSessionInfo &gt;"	name="runningSessions" serial="Cont" byref="true"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="sessionCreated" msg="SSC">
+				<doc line="The session server report a session creation."/>
+
+				<param type="RSMGR::TRunningSessionInfo"	name="sessionInfo"	byref="true"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="reportSessionEvent" msg="RSE">
+				<doc line="The session report an event."/>
+				<doc line="charId is used only when the event is about a character."/>
+
+				<param type="RSMGR::TSessionEvent"	name="event"/>
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="uint32"				name="charId"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="scenarioStarted" msg="SCS">
+				<doc line="The DSS report that an animation scenario has just started"/>
+				<doc line="this allow SU to create the session log and scenario info record if needed."/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="R2::TRunningScenarioInfo"	name="scenarioInfo"	byref="true"/>
+			</method>
+
+
+			<!-- __________________________________________________________ -->
+			<method name="reportCharacterKicked" msg="RCK">
+				<doc line="The session report that a DM has kicked a character from a session."/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="uint32"				name="charId"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="scenarioEnded" msg="SCE">
+				<doc line="The DSS report the end of an animation session and"/>
+				<doc line="provides a bunch of data about the session life."/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="R2::TRunningScenarioInfo"	name="scenarioInfo"	byref="true"/>
+				<param type="uint32"				name="rrpScored"/>
+				<param type="uint32"				name="scenarioPointScored"/>
+				<param type="uint32"				name="timeTaken"/>
+				<param type="std::vector &lt; uint32 &gt;" name="participants" byref="true" serial="Cont"/>
+			</method>
+
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CRingSessionManagerClient">
+			<doc line="Session manager client are the ring editor servers for example"/>
+
+			<!-- __________________________________________________________ -->
+			<method name="createSession" msg="CSS">
+				<doc line="Ask the client to create a new session modules"/>
+
+				<param type="uint32"				name="ownerCharId"/>
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="RSMGR::TSessionType"	name="type" enum="smart"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="addCharacterInSession" msg="AHC">
+				<doc line="Ask the client to allow a character in the session"/>
+
+				<param type="TSessionId"		name="sessionId"/>
+				<param type="uint32"			name="charId"/>
+				<param type="WS::TUserRole"		name="enterAs"		enum="smart"/>
+				<param type="std::string"		name="ringAccess"	byref="true"/>
+				<param type="bool"				name="newcomer"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="closeSession" msg="CLSDSS">
+				<doc line="Ask the client to close a running session"/>
+
+				<param type="TSessionId"			name="sessionId"/>
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="stopHibernation" msg="SH">
+				<doc line="Ask the client stop hibernation for the"/>
+				<doc line="specified session. This mean to remove any"/>
+				<doc line="hibernated scenario file from the backup."/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="uint32"			name="ownerId"/>
+
+			</method>
+
+			<!-- __________________________________________________________ -->
+			<method name="characterKicked" msg="CK">
+				<doc line="Session mananger report that a character has been kicked by the web"/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="uint32"				name="charId"/>
+			</method>
+
+			<method name="characterUnkicked" msg="CUK">
+				<doc line="Session mananger report that a character has been unkicked by the web"/>
+
+				<param type="TSessionId"			name="sessionId"/>
+				<param type="uint32"				name="charId"/>
+			</method>
+
+			<method name="teleportOneCharacterToAnother" msg="STOCTA">
+				<doc line="Ask to teleport on character to another (the 2 characters must be in the same season)"/>
+				<doc line="The character must arrived in the season"/>
+				<param type="TSessionId"					name="sessionId"/>
+				<param type="uint32"						name="sourceCharId"/>
+				<param type="uint32"						name="destCharId"/>
+			</method>
+
+			<method name="hibernateSession" msg="SHSA">
+				<doc line="Ask to hibernate a session"/>
+				<param type="TSessionId"					name="sessionId"/>
+			</method>
+
+			<method name="setSessionStartParams" msg="SSSP">
+				<doc line="Set the start position of a session (eg while your are uploading an animation session)"/>
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::string"	name="initialIslandLocation" byref="true"/>
+				<param type="std::string"	name="initialEntryPointLocation" byref="true"/>
+				<param type="std::string"	name="initialSeason" byref="true"/>
+			</method>
+
+
+
+
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<callback_interface name="CRingSessionManagerWeb" caller="php">
+			<doc line="Callback interface used by web server during 'outgame' operation"/>
+
+
+			<!-- __________________________________________________________ -->
+			<!-- Generic reponse -->
+			<!-- __________________________________________________________ -->
+			<return name="invokeResult" msg="RET">
+				<doc line="Generic response to invoke."/>
+				<doc line="result contains 0 if no error, more than 0 in case of error"/>
+
+				<param type="uint32"		name="userId"/>
+				<param type="uint32"		name="resultCode"/>
+				<param type="std::string"	name="resultString" php_serial="String" byref="true"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- session related -->
+			<!-- __________________________________________________________ -->
+			<invoke name="scheduleSession" msg="SSS">
+				<doc line="Create or schedule a new session (edit or anim)"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionType"	name="sessionType"	enum="smart"/>
+				<param type="std::string"	name="sessionTitle"	php_serial="String" byref="true"/>
+<!--				<param type="uint32"		name="plannedDate"	/>-->
+				<param type="std::string"	name="sessionDesc"	php_serial="String" byref="true"/>
+				<param type="R2::TSessionLevel"	name="sessionLevel"	enum="smart"/>
+<!--				<param type="TAccessType"	name="accessType"	enum="smart"/>-->
+				<param type="TRuleType"		name="ruleType"		enum="smart"/>
+				<param type="TEstimatedDuration"	name="estimatedDuration"	enum="smart"/>
+				<param type="uint32"		name="subscriptionSlot"	/>
+				<param type="TAnimMode"		name="animMode"		enum="smart"/>
+				<param type="TRaceFilter"	name="raceFilter"	enum="smart"/>
+				<param type="TReligionFilter"	name="religionFilter"	enum="smart"/>
+				<param type="TGuildFilter"	name="guildFilter"	enum="smart"/>
+				<param type="TShardFilter"	name="shardFilter"	enum="smart"/>
+				<param type="TLevelFilter"	name="levelFilter"	enum="smart"/>
+				<param type="std::string"	name="language"		php_serial="String" byref="true"/>
+				<param type="TSessionOrientation" name="orientation"	enum="smart"/>
+				<param type="bool"			name="subscriptionClosed"	/>
+				<param type="bool"			name="autoInvite"	/>
+			</invoke>
+
+			<invoke name="setSessionStartParams" msg="SSSP">
+				<doc line="Set the start position of a session (eg while your are uploading an animation session)"/>
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::string"	name="initialIslandLocation" byref="true"/>
+				<param type="std::string"	name="initialEntryPointLocation" byref="true"/>
+				<param type="std::string"	name="initialSeason" byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+				<return name="scheduleSessionResult" msg="SSSR">
+					<doc line="result is : 0 : session have been created fine"/>
+					<doc line="            1 : invalid session type"/>
+					<doc line="            2 : invalid level"/>
+					<doc line="            3 : unknown character"/>
+					<doc line="            4 : not used"/>
+					<doc line="            5 : invalid access type"/>
+					<doc line="            6 : invalid rule type"/>
+					<doc line="            7 : invalid duration"/>
+					<doc line="            8 : invalid user"/>
+					<doc line="            9 : free trial account can't create anim session"/>
+					<doc line="            10 : user is ban from ring anim session"/>
+
+					<param type="uint32"		name="charId"/>
+					<param type="TSessionId"	name="sessionId"/>
+					<param type="uint8"			name="result"	php_serial="UInt8"/>
+					<param type="std::string"	name="resultString"	php_serial="String" byref="true"/>
+				</return>
+
+
+			<!-- __________________________________________________________ -->
+			<!-- get session info -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getSessionInfo" msg="GSI">
+				<doc line="get session info (anim)"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+
+			<!-- __________________________________________________________ -->
+				<return name="sessionInfoResult" msg="SIR">
+					<doc line="session info result (anim)"/>
+
+					<param type="uint32"		name="charId"/>
+					<param type="TSessionId"	name="sessionId"/>
+					<param type="TRaceFilter"	name="raceFilter"	enum="smart"/>
+					<param type="TReligionFilter"	name="religionFilter"	enum="smart"/>
+					<param type="TGuildFilter"	name="guildFilter"	enum="smart"/>
+					<param type="TShardFilter"	name="shardFilter"	enum="smart"/>
+					<param type="TLevelFilter"	name="levelFilter"	enum="smart"/>
+					<param type="bool"		name="subscriptionClosed"/>
+					<param type="bool"		name="autoInvite"/>
+					<param type="std::string"	name="language"		php_serial="String" byref="true"/>
+					<param type="TSessionOrientation" name="orientation"	enum="smart"/>
+					<param type="std::string"	name="description"	php_serial="String" byref="true"/>
+				</return>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="updateSessionInfo" msg="USS">
+				<doc line="Update the informations of a planned or running session"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session updated"/>
+				<doc line="                        1 : unknown character"/>
+				<doc line="                        2 : unknown session"/>
+				<doc line="                        3 : char don't own the session"/>
+				<doc line="                        4 : session is closed, no update allowed"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::string"	name="sessionTitle"	php_serial="String" byref="true"/>
+				<param type="uint32"		name="plannedDate"	/>
+				<param type="std::string"	name="sessionDesc"	php_serial="String" byref="true"/>
+				<param type="R2::TSessionLevel"	name="sessionLevel"	enum="smart"/>
+<!--				<param type="TAccessType"	name="accessType"	enum="smart"/>-->
+				<param type="TEstimatedDuration"	name="estimatedDuration"	enum="smart"/>
+				<param type="uint32"		name="subscriptionSlot"	/>
+				<param type="TRaceFilter"	name="raceFilter"	enum="smart"/>
+				<param type="TReligionFilter"	name="religionFilter"	enum="smart"/>
+				<param type="TGuildFilter"	name="guildFilter"	enum="smart"/>
+				<param type="TShardFilter"	name="shardFilter"	enum="smart"/>
+				<param type="TLevelFilter"	name="levelFilter"	enum="smart"/>
+				<param type="bool"			name="subscriptionClosed"	/>
+				<param type="bool"			name="autoInvite"	/>
+				<param type="std::string"	name="language"		php_serial="String" byref="true"/>
+				<param type="TSessionOrientation" name="orientation"	enum="smart"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="cancelSession" msg="CANSS">
+				<doc line="Cancel a plannified session"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session canceled"/>
+				<doc line="                        1 : unknown char"/>
+				<doc line="                        2 : unknown session"/>
+				<doc line="                        3 : char don't own the session"/>
+				<doc line="                        4 : session not in planned state"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="startSession" msg="STSS">
+				<doc line="start a planned session"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session started"/>
+				<doc line="                        1 : char not found"/>
+				<doc line="                        2 : session not found"/>
+				<doc line="                        3 : session not own by user"/>
+				<doc line="                        4 : user is already have a running session of this type"/>
+				<doc line="                        5 : session server failure"/>
+				<doc line="                        6 : Action fordidden for free trial"/>
+				<doc line="                        7 : User not found"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="closeSession" msg="CLSS">
+				<doc line="Close a running session"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session closed (or about to close)"/>
+				<doc line="                        1 : session not found"/>
+				<doc line="                        2 : char don't own the session"/>
+				<doc line="                        3 : session not open"/>
+				<doc line="                        4 : failed to close the session, internal error"/>
+
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="closeEditSession" msg="CLESS">
+				<doc line="Close the current edit session of the character"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session closed (or about to close)"/>
+				<doc line="                        1 : char not found"/>
+				<doc line="                        2 : failed to close the session, internal error"/>
+				<doc line="                        3 : no session server to close the session"/>
+				<doc line="                        4 : no edit session found"/>
+				<doc line="                        5 : internal error"/>
+
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- known_users managment -->
+			<!-- __________________________________________________________ -->
+			<invoke name="addFriendCharacter" msg="AFC">
+				<doc line="Add a character in a user friend list"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : friend char not found"/>
+				<doc line="                        3 : char already friend"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="friendCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="removeFriendCharacter" msg="RFC">
+				<doc line="Repove a character from a user friend list"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : friend char not found"/>
+				<doc line="                        3 : char not friend"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="friendCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="addBannedCharacter" msg="ABC">
+				<doc line="Add a character to a user ban list. This ban the user that own the character"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : banned char not found"/>
+				<doc line="                        3 : char already banned by user"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="bannedCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="removeBannedCharacter" msg="RBC">
+				<doc line="Remove a character from a user ban list."/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : banned char not found"/>
+				<doc line="                        3 : char not banned by user"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="bannedCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="addFriendDMCharacter" msg="AFDC">
+				<doc line="Add a character in a DM user friend list"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : friend char not found"/>
+				<doc line="                        3 : char already DM friend"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="friendDMCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="removeFriendDMCharacter" msg="RFDC">
+				<doc line="Remove a character from a DM user friend list"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : friend char not found"/>
+				<doc line="                        3 : char not friend"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="uint32" name="friendDMCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="setKnownCharacterComments" msg="SKCC">
+				<doc line="Set the comment associated to a known character entry"/>
+				<doc line="Return 'invokeResult' : 0 : ok"/>
+				<doc line="                        1 : user not found"/>
+				<doc line="                        2 : known character entry not found"/>
+				<doc line="                        3 : character relation don't match the set comments relation"/>
+				<doc line="                        4 : internal error"/>
+
+				<param type="uint32"		name="userId"/>
+				<param type="uint32"		name="charId"/>
+				<param type="std::string"	name="relation"	byref="true" php_serial="String"/>
+				<param type="std::string"	name="comments"	byref="true" php_serial="String"/>
+			</invoke>
+
+
+			<!-- __________________________________________________________ -->
+			<!-- character management -->
+			<!-- __________________________________________________________ -->
+			<invoke name="inviteCharacter" msg="IC">
+				<doc line="A user invite a character to help or play in his session"/>
+				<doc line="charRole is from enum TSessionPartStatus"/>
+				<doc line="invokeReturn : 0 : ok, character invited"/>
+				<doc line="               1 : char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : invited char not found"/>
+				<doc line="               4 : char not own the session"/>
+				<doc line="               5 : char already invited"/>
+				<doc line="               6 : char role and session type don't match (edit/editor, anim/animator)"/>
+				<doc line="               7 : charRole is invalid (must be sps_play_invited, sps_edit_invited or sps_anim_invited)"/>
+				<doc line="               8 : database failure"/>
+				<doc line="              11 : owner char is not animator in the session"/>
+				<doc line="              12 : newcomer flag missmatch"/>
+				<doc line="              13 : scenario not started, can't validate invitation now"/>
+				<doc line="              14 : free trial character are not allowed in user scenario"/>
+
+				<param type="uint32"		name="ownerCharId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="invitedCharId"/>
+				<param type="TSessionPartStatus" name="charRole" enum="smart"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="removeInvitedCharacter" msg="RIC">
+				<doc line="A user remove an invitation in a session"/>
+				<doc line="invokeReturn : 0 : ok, character invited"/>
+				<doc line="               1 : removed char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : character already entered in session"/>
+				<doc line="               4 : invitation not found"/>
+				<doc line="               5 : owner char don't own the session"/>
+
+				<param type="uint32"		name="ownerCharId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="removedCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="subscribeSession" msg="SBS">
+				<doc line="A character subscribe to a public animation session"/>
+				<doc line="invokeReturn : 0 : ok, subscription accepted"/>
+				<doc line="               1 : char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : character already subscribed to or invited in the session"/>
+				<doc line="               4 : session not public"/>
+				<doc line="               5 : character banned"/>
+				<doc line="               6 : no place left, session is full"/>
+				<doc line="               7 : session owner not found"/>
+				<doc line="               8 : internal error"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="unsubscribeSession" msg="USBS">
+				<doc line="A character unsubscribe to a public animation session"/>
+				<doc line="The character must not join the session in order to unsubscribe"/>
+				<doc line="invokeReturn : 0 : ok, unsubscription accepted"/>
+				<doc line="               1 : char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : character has not subscribed in the session"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="joinSession" msg="JSS">
+				<doc line="A character asks to join (or enter) a running session."/>
+				<doc line="It must have been subscribed or invited to the session to be allowed"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::string"	name="clientApplication" php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+				<return name="joinSessionResult" msg="JSSR">
+					<doc line="Return the result of the session joining attempt"/>
+					<doc line="If join is ok, the shardAddr contain &lt;ip:port&gt; of the"/>
+					<doc line="Front end that waits for the player to come in and the."/>
+					<doc line="participation mode for the character (editor, animator or player)."/>
+					<doc line="If ok, the web must return a page with a lua script."/>
+					<doc line="that trigger the action handler 'on_connect_to_shard' :"/>
+					<doc line='&lt;lua&gt;runAH(nul, "on_connect_to_shard", "cookie=cookieValue|fsAddr=shardAddr|mode=participantStatus");&lt;lua&gt;'/>
+					<doc line="result : 0 : ok the client can join the session"/>
+					<doc line="         1 : char not found"/>
+					<doc line="         2 : session not found"/>
+					<doc line="         3 : no session participant for this character (not used for a mainland shard)"/>
+					<doc line="         4 : can't find session server (not used for a mainland shard)"/>
+					<doc line="         5 : shard hosting session is not reachable"/>
+					<doc line="         6 : nel user info not found"/>
+					<doc line="         7 : ring user not found"/>
+					<doc line="         8 : welcome service rejected connection request"/>
+					<doc line="         9 : session service shutdown (not used for a mainland shard)"/>
+					<doc line="        10 : no mainland shard found (joinMainland only)"/>
+					<doc line="        11 : internal error"/>
+					<doc line="        12 : failed to request for access permission"/>
+					<doc line="        13 : can't find access permission for user and domain"/>
+					<doc line="        14 : Welcome service is closed for you"/>
+					<doc line="        15 : Session is not open"/>
+					<doc line="        16 : User banned from ring"/>
+					<doc line="        17 : Newcomer flag missmatch"/>
+					<doc line="        18 : Can't find session log to validate session access"/>
+					<doc line="        19 : Can't find scenario info to validate session access"/>
+					<doc line="        20 : Scenario is not allowed to free trial players"/>
+
+					<param type="uint32"		name="userId"/>
+					<param type="TSessionId"	name="sessionId"/>
+					<param type="uint32"		name="result"/>
+					<param type="std::string"	name="shardAddr" php_serial="String" byref="true"/>
+					<param type="TSessionPartStatus"	name="participantStatus" byref="true" enum="smart"/>
+				</return>
+
+			<!-- __________________________________________________________ -->
+				<return name="joinSessionResultExt" msg="JSSRE">
+					<doc line="See joinSessionResult."/>
+					<doc line="Adds a security code."/>
+					<param type="uint32"		name="userId"/>
+					<param type="TSessionId"	name="sessionId"/>
+					<param type="uint32"		name="result"/>
+					<param type="std::string"	name="shardAddr" php_serial="String" byref="true"/>
+					<param type="TSessionPartStatus"	name="participantStatus" byref="true" enum="smart"/>
+					<param type="CSecurityCode"	name="securityCheckForFastDisconnection" byref="true"/>
+				</return>
+
+
+			<!-- __________________________________________________________ -->
+			<invoke name="joinMainland" msg="JML">
+				<doc line="A character asks to join a shard."/>
+				<doc line="charId: userId &lt;&lt; 4 &amp; charSlot"/>
+				<doc line="If ingame, charSlot in [0..14], otherwise 15 if outgame"/>
+				<doc line="The actual shard will be chosen according to current load."/>
+				<doc line="Will return a joinSessionResult."/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::string"	name="clientApplication" php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="joinEditSession" msg="JES">
+				<doc line="Ask to join the edit session for the specified character."/>
+				<doc line="If the edit session do not exist, then the SU"/>
+				<doc line="create it before internally calling the join session request"/>
+				<doc line="the SU."/>
+				<doc line="Return joinSessionResult."/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::string"	name="clientApplication" php_serial="String" byref="true"/>
+			</invoke>
+
+
+			<!-- __________________________________________________________ -->
+			<invoke name="hibernateEditSession" msg="HES">
+				<doc line="hibernate an editing session"/>
+				<doc line="Return 'invokeResult' : 0 : ok, session hibernating(or no session)"/>
+				<doc line="                        1 : undefined error"/>
+
+				<param type="uint32"		name="charId"/>
+
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="getShards" msg="GSH">
+				<doc line="Request to have the list of accessible shards with their attributes."/>
+				<doc line="This is a dev feature only."/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+				<return name="getShardsResult" msg="GSHR">
+					<doc line="Return the list of online shards on which the user is allowed to connect,"/>
+					<doc line="and their current dynamic attributes. Other attributes (e.g. names)"/>
+					<doc line="can be queried from the database. Offline shards are the ones in the database"/>
+					<doc line="of the same domain but not listed in the result."/>
+					<doc line="Then the client will have to call joinShard to connect on an online shard."/>
+
+					<param type="uint32"		name="userId"/>
+					<param type="std::string"	name="result" php_serial="String" byref="true"/>
+				</return>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="kickCharacter" msg="KC">
+				<doc line="Kick a character from a session"/>
+				<doc line="charId must be the owner of a DM in the session"/>
+				<doc line="invokeReturn : 0 : ok, character kicked"/>
+				<doc line="               1 : char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : kicked character has no participation in the session"/>
+				<doc line="               4 : internal error"/>
+				<doc line="               5 : owner char don't own the session"/>
+
+				<param type="uint32"		name="ownerCharId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="kickedCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="unkickCharacter" msg="UKC">
+				<doc line="Unkick a character from a session"/>
+				<doc line="charId must be the owner of a DM in the session"/>
+				<doc line="invokeReturn : 0 : ok, character kicked"/>
+				<doc line="               1 : char not found"/>
+				<doc line="               2 : session not found"/>
+				<doc line="               3 : kicked character has no participation in the session"/>
+				<doc line="               4 : internal error"/>
+				<doc line="               5 : owner char don't own the session"/>
+
+				<param type="uint32"		name="ownerCharId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="unkickedCharId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- guild invite -->
+			<!-- __________________________________________________________ -->
+			<invoke name="inviteGuild" msg="IG">
+				<doc line="A user invite a guild to play in a session"/>
+				<doc line="invokeReturn : 0 : ok, guild invited"/>
+				<doc line="               1 : guild not found"/>
+				<doc line="               2 : char not found"/>
+				<doc line="               3 : session not found"/>
+				<doc line="               4 : guild already invited"/>
+				<doc line="               5 : char don't own the session"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="guildId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<invoke name="removeInvitedGuild" msg="RIG">
+				<doc line="Remove a guild invitation in a session"/>
+				<doc line="invokeReturn : 0 : ok, guild invited"/>
+				<doc line="               1 : guild not found"/>
+				<doc line="               2 : char not found"/>
+				<doc line="               3 : session not found"/>
+				<doc line="               4 : guild not invited"/>
+				<doc line="               5 : char don't own the session"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="guildId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Scenario desc related -->
+			<!-- __________________________________________________________ -->
+			<invoke name="setScenarioInfo" msg="SSCI">
+				<doc line="Set the additionnal scenario info"/>
+				<doc line="playType is the enumerated type TPlayType"/>
+				<doc line="invokeReturn : 0 : ok, info setted"/>
+				<doc line="               1 : scenario not found"/>
+				<doc line="               2 : char not owner of session"/>
+				<doc line="               3 : char not found"/>
+
+				<param type="uint32"			name="charId"/>
+				<param type="TSessionId"		name="sessionId"/>
+				<param type="std::string"		name="title"		php_serial="String" byref="true"/>
+<!--				<param type="std::string"	name="journal"		php_serial="String" byref="true"/>-->
+<!--				<param type="std::string"	name="credits"		php_serial="String" byref="true"/>-->
+				<param type="uint32"			name="numPlayer"/>
+				<param type="std::string"		name="playType"		php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- journal entry -->
+			<!-- __________________________________________________________ -->
+			<invoke name="addJournalEntry" msg="AJE">
+				<doc line="Add an entry in the session journal"/>
+				<doc line="invokeReturn : 0 : ok, entry added"/>
+				<doc line="               1 : scenario not found"/>
+				<doc line="               2 : user can't post in this journal"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::string"	name="entryType" php_serial="String" byref="true"/>
+				<param type="std::string"	name="text"		php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Player rating -->
+			<!-- __________________________________________________________ -->
+			<invoke name="setPlayerRating" msg="SPR">
+				<doc line="Set the rating for a scenario"/>
+				<doc line="invokeReturn : 0 : ok, rating set"/>
+				<doc line="               1 : scenario not found"/>
+				<doc line="               2 : char is not found"/>
+				<doc line="               3 : char is not a participant of session"/>
+				<doc line="               4 : no session log for the session"/>
+				<doc line="               5 : char is banned from session"/>
+				<doc line="               6 : session not found"/>
+				<doc line="               7 : scenario not found"/>
+				<doc line="               8 : internal error"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="uint32"		name="rateFun"/>
+				<param type="uint32"		name="rateDifficulty"/>
+				<param type="uint32"		name="rateAccessibility"/>
+				<param type="uint32"		name="rateOriginality"/>
+				<param type="uint32"		name="rateDirection"/>
+			</invoke>
+
+
+		</callback_interface>
+
+
+		<class name="TSessionDesc">
+			<serial/>
+
+			<property type="TSessionId"		name="SessionId" />
+			<property type="bool"			name="RequesterCharInvited" />
+			<property type="bool"			name="RequesterCharKicked" />
+			<property type="std::string"	name="OwnerName"	byref="true"/>
+			<property type="std::string"	name="Title"		byref="true"/>
+			<property type="std::string"	name="Description"	byref="true"/>
+			<property type="TAnimMode"		name="AnimMode"		enum="smart"/>
+			<property type="R2::TSessionLevel"	name="SessionLevel" enum="smart"/>
+			<property type="bool"			name="AllowFreeTrial"/>
+
+			<property type="uint32"			name="LaunchDate" />
+			<property type="uint32"			name="NbConnectedPlayer" />
+
+			<property type="std::string"	name="Language"	byref="true"/>
+			<property type="TSessionOrientation" name="Orientation"/>
+			<property type="uint32"			name="NbRating"/>
+			<property type="uint32"			name="RateFun"/>
+			<property type="uint32"			name="RateDifficulty"/>
+			<property type="uint32"			name="RateAccessibility"/>
+			<property type="uint32"			name="RateOriginality"/>
+			<property type="uint32"			name="RateDirection"/>
+			<property type="uint32"			name="ScenarioRRPTotal"/>
+
+		</class>
+
+
+		<class name="TCharDesc">
+			<serial/>
+
+			<property type="uint32"			name="CharId" />
+			<property type="bool"			name="Connected" />
+			<property type="bool"			name="Kicked" />
+			<property type="std::string"	name="CharName"		byref="true"/>
+			<property type="std::string"	name="GuildName"	byref="true"/>
+			<property type="uint32"			name="ShardId"	/>
+			<property type="R2::TSessionLevel"				name="Level"		enum="smart"/>
+			<property type="CHARSYNC::TRace"			name="Race"			enum="smart"/>
+			<property type="CHARSYNC::TCivilisation"	name="Civilisation"	enum="smart"/>
+			<property type="CHARSYNC::TCult"			name="Cult"			enum="smart"/>
+			<property type="TSessionPartStatus"	name="PartStatus"	enum="smart"/>
+
+
+<!--			<property type="TRaceFilterEnum"	name="Race"			enum="smart"/>
+			<property type="TReligionFilterEnum"	name="Religion"		enum="smart"/>
+			<property type="TShardFilterEnum"	name="Shard" enum="smart"/>
+			<property type="TLevelFilterEnum"	name="Level" enum="smart"/>
+-->
+		</class>
+
+		<!-- ############################################################## -->
+		<callback_interface name="CSessionBrowserServerWeb" extend="CRingSessionManagerWeb" caller="php">
+			<doc line="Callback interface used by client to request session info"/>
+
+			<!-- __________________________________________________________ -->
+			<!-- Authenticate the client-->
+			<!-- __________________________________________________________ -->
+			<invoke name="authenticate" msg="AUTH">
+				<doc line="The client send it's cookie information to"/>
+				<doc line="authenticate himself."/>
+				<doc line="The cookie value is checked against the value stored."/>
+				<doc line="in the database."/>
+				<doc line="Furthermore, the server will check"/>
+				<doc line="evenly the database to see if the user is still"/>
+				<doc line="online and still have the same cookie"/>
+
+				<param type="uint32"				name="userId"/>
+				<param type="NLNET::CLoginCookie"	name="cookie"	byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- getSessionList -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getSessionList" msg="GSL">
+				<doc line="Ask for the list of session that are available"/>
+				<doc line="for the requesting character."/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return session list -->
+			<!-- __________________________________________________________ -->
+			<return name="sessionList" msg="SL">
+				<doc line="Return the list of available session"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::vector &lt; TSessionDesc &gt;"	name="sessions" byref="true" serial="Cont"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- getPlayerList -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getCharList" msg="GCL">
+				<doc line="Ask for the list of player characters that are available"/>
+				<doc line="for the requesting session."/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return player list -->
+			<!-- __________________________________________________________ -->
+			<return name="charList" msg="CL">
+				<doc line="Return the list of player characters in the session"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="TSessionId"	name="sessionId"/>
+				<param type="std::vector &lt; TCharDesc &gt;"	name="characters" byref="true" serial="Cont"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- inviteCharacterByName-->
+			<!-- __________________________________________________________ -->
+			<invoke name="inviteCharacterByName" msg="ICBN">
+				<doc line="Invite a player in a session given it's name"/>
+				<doc line="This method make a certain number of asumption :"/>
+				<doc line="The sessionId is deducted from the current session id of"/>
+				<doc line="the requester character."/>
+				<doc line="The invited char id is deducted from the name by using."/>
+				<doc line="the full name rules for shard resolution."/>
+				<doc line="Return invoke_result with the following error codes :"/>
+				<doc line="		0   :	no error"/>
+				<doc line="		100 :	unknown onwer char"/>
+				<doc line="		101 :	player already invited"/>
+				<doc line="		102 :	no current session"/>
+				<doc line="		103 :	internal error"/>
+				<doc line="		104 :	invited char not found"/>
+				<doc line="		plus all the error code from inviteCharacter in the ring session manager interface"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::string"	name="invitedCharName"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- getMyScenarioRatings -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getMyRatings" msg="GMSR">
+				<doc line="Ask for character existing rating for the current session scenario"/>
+				<doc line="return playerRatings."/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="uint32"		name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return my player ratings -->
+			<!-- __________________________________________________________ -->
+			<return name="playerRatings" msg="PR">
+				<doc line="Return current player rating of the current session scenario"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="bool"			name="scenarioRated"/>
+				<param type="uint32"		name="rateFun"/>
+				<param type="uint32"		name="rateDifficulty"/>
+				<param type="uint32"		name="rateAccessibility"/>
+				<param type="uint32"		name="rateOriginality"/>
+				<param type="uint32"		name="rateDirection"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- getSessionAverageScores -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getSessionAverageScores" msg="GSAS">
+				<doc line="Ask for average scores of a session"/>
+				<doc line="return scessionAverageScores."/>
+
+				<param type="uint32"		name="sessionId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- getScenarioAverageScores -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getScenarioAverageScores" msg="GSCAS">
+				<doc line="Ask for average scores of a scenario"/>
+				<doc line="return scenarioAverageScores."/>
+
+				<param type="std::string"		name="md5"	byref="true"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return average scores of a scenario -->
+			<!-- __________________________________________________________ -->
+			<return name="sessionAverageScores" msg="SAS">
+				<doc line="Return average scores of a session"/>
+
+				<param type="bool"			name="scenarioRated"/>
+				<param type="uint32"		name="rateFun"/>
+				<param type="uint32"		name="rateDifficulty"/>
+				<param type="uint32"		name="rateAccessibility"/>
+				<param type="uint32"		name="rateOriginality"/>
+				<param type="uint32"		name="rateDirection"/>
+				<param type="uint32"		name="rrpTotal"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return average scores of a scenario -->
+			<!-- __________________________________________________________ -->
+			<return name="scenarioAverageScores" msg="SCAS">
+				<doc line="Return average scores of a scenario"/>
+
+				<param type="bool"			name="scenarioRated"/>
+				<param type="uint32"		name="rateFun"/>
+				<param type="uint32"		name="rateDifficulty"/>
+				<param type="uint32"		name="rateAccessibility"/>
+				<param type="uint32"		name="rateOriginality"/>
+				<param type="uint32"		name="rateDirection"/>
+				<param type="uint32"		name="rrpTotal"/>
+			</return>
+
+
+			<!-- __________________________________________________________ -->
+			<!-- getRingRatings -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getRingRatings" msg="GRR">
+				<doc line="Ask for the author rating, the AM rating and the Masterless rating"/>
+				<doc line="for the requesting character."/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return ring ratings -->
+			<!-- __________________________________________________________ -->
+			<return name="ringRatings" msg="RR">
+				<doc line="Return the author rating, the AM rating and the Masterless rating"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="uint32"		name="authorRating"/>
+				<param type="uint32"		name="AMRating"/>
+				<param type="uint32"		name="masterlessRating"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
+			<!-- getRingPoints -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getRingPoints" msg="GRP">
+				<doc line="Ask for ring points of the character"/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return ring points -->
+			<!-- __________________________________________________________ -->
+			<return name="ringPoints" msg="RP">
+				<doc line="Return the ring points of the character"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::string"	name="ringPoints" byref="true"/>
+				<param type="std::string"	name="maxRingPoints" byref="true"/>
+			</return>
+
+
+			<invoke  name="forwardToDss" msg="DSS_FW" >
+				<doc line="simulate the forward of a message (to dss)"/>
+				<param type="uint32" name="charId" />
+				<param type="NLNET::CMessage" name="msg" serial="Message" byref="true" />
+			</invoke>
+
+
+		</callback_interface>
+
+<!-- invoke template to copy/past
+			<invoke name="" msg="">
+				<doc line=""/>
+
+				<param type="" name="" php_serial="String" byref="true"/>
+			</invoke>
+-->
+
+	</namespace>
+</generator>
+

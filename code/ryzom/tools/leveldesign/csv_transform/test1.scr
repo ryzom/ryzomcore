@@ -1,0 +1,21 @@
+#file_header
+<xml>
+#file_footer
+</xml>
+
+#header npc
+<bot>
+#
+
+#footer npc
+</bot>
+#
+
+#header mission_id
+<mission>
+#
+
+#footer mission_id
+</mission>
+#
+

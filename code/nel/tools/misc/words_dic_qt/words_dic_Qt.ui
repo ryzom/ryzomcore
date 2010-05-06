@@ -1,0 +1,84 @@
+<ui version="4.0" >
+ <class>Form</class>
+ <widget class="QWidget" name="Form" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>529</width>
+    <height>262</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Words Dic</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="words_dic_Qt.qrc" >
+    <normaloff>:/nel.png</normaloff>:/nel.png</iconset>
+  </property>
+  <property name="autoFillBackground" >
+   <bool>false</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <widget class="QLineEdit" name="lookUpEdit" />
+     </item>
+     <item>
+      <widget class="QPushButton" name="findButton" >
+       <property name="text" >
+        <string>Find</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearButton" >
+       <property name="text" >
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showAllCheckBox" >
+       <property name="text" >
+        <string>Show old-style "lvl" sheets</string>
+       </property>
+       <property name="checked" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="fileListButton" >
+       <property name="text" >
+        <string>File List</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QListWidget" name="resultsListWidget" >
+     <property name="editTriggers" >
+      <set>QAbstractItemView::CurrentChanged</set>
+     </property>
+     <property name="sortingEnabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="statusLabel" >
+     <property name="text" >
+      <string/>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="words_dic_Qt.qrc" />
+ </resources>
+ <connections/>
+</ui>

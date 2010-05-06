@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="3d data">
+      <ARRAY Name="GroundFX">
+      <STRUCT>
+        <ATOM Name="GroundID" Value="0"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="1"/>
+        <ATOM Name="FXName" Value="StepRunHomWet.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="2"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="3"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="4"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="5"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="6"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="7"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="8"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="9"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="10"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="11"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="12"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="13"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="14"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="15"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="16"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="17"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="18"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="19"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="20"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="21"/>
+        <ATOM Name="FXName" Value="StepRunHomBoue.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="22"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="23"/>
+        <ATOM Name="FXName" Value="StepRunHomVeget.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="24"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="25"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="26"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="27"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="GroundID" Value="28"/>
+        <ATOM Name="FXName" Value="StepRunHomDust.ps"/>
+      </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <ATOM Name="attack_list0" Value="magic_cur_homin.attack_list"/>
+    <ATOM Name="attack_list1" Value="magic_off_homin.attack_list"/>
+    <ATOM Name="attack_list2" Value="melee.attack_list"/>
+    <ATOM Name="attack_list3" Value="range.attack_list"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Mar 18 19:49:03 2004 (nouveau) .attack_list0 = magic_cur_homin.attack_list
+Thu Mar 18 19:49:03 2004 (nouveau) .attack_list1 = magic_off_homin.attack_list
+Thu Mar 18 19:49:03 2004 (nouveau) .attack_list2 = melee.attack_list
+Thu Mar 18 19:49:03 2004 (nouveau) .attack_list3 = range.attack_list
+Thu May 27 19:23:10 2004 (tran) formName Resized = 1</LOG>
+</FORM>

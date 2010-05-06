@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="A MpL (Blade)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="B MpH (Hammer)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="C MpP (Point)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="D MpM (Shaft)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="E MpG (Grip)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="F MpC (Counterweight)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="G MpGA (Trigger)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="H MpPE (Firing pin)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="I MpCA (Barrel)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="J MpE (Explosive)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="K MpEN (Ammo jacket)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="L MpPR (Ammo bullet)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="M MpCR (Armor shell)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="N MpRI (Armor interior coating)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="O MpRE (Armor interieur stuffing)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="P MpAT (Armor clip)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="Q MpSU (Jewel stone support)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="R MpED (Jewel stone)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="S MpBT (Blacksmith tool)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="T MpPES (Pestle tool)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="U MpSH (Sharpener tool)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="V MpTK (Tunneling Knife)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="W MpJH (Jewelry hammer)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="X MpCF (Campfire)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="Y MpVE (Clothes)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <ELEMENT Name="Z MpMF (Magic Focus)" Type="Dfn" Filename="_item_faber_mp_parameters.dfn"/>
+  <LOG></LOG>
+</DFN>

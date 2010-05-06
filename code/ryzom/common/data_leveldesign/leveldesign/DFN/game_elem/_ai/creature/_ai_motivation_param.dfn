@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Version="0.4" State="modified">
+  <PARENT Name="_ai_motivation.dfn"/>
+  <ELEMENT Name="Faim" Type="Type" Filename="float.typ" Default="300"/>
+  <ELEMENT Name="Tres faim" Type="Type" Filename="float.typ" Default="600"/>
+  <ELEMENT Name="Affame" Type="Type" Filename="float.typ" Default="900"/>
+  <LOG>Thu Aug 29 14:57:53 2002 (chafik) Dfn Structure = 
+Thu Aug 29 16:08:48 2002 (chafik) Dfn Parents = 
+Thu Aug 29 16:08:48 2002 (chafik) Dfn Structure = 
+Thu Aug 29 17:13:09 2002 (chafik) Dfn Structure = 
+Thu Aug 29 17:13:49 2002 (chafik) Dfn Structure = </LOG>
+</DFN>

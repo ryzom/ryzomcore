@@ -1,0 +1,50 @@
+#error deprecated
+<generator header_tag="RR_MODULE_ITF_H">
+
+	<include file="nel/misc/md5.h"/>
+	<include file="repository.h"/>
+
+	<namespace name="PATCHMAN">
+
+		<class name="TFileRecord">
+			<!-- activate serial generation -->
+			<serial/>	
+
+			<property type="std::string"			name="FileName"		byref="true"/>
+			<property type="NLMISC::CHashKeyMD5"	name="Checksum"		byref="true"/>
+
+		</class>
+
+		<module_interface name="CRepositoryReceiver">
+
+			<method name="fileList" msg="RR_LIST">
+				<doc line=""/>
+
+				<param type="uint32"		name="version"		/>
+				<param type="TFileInfoVector"	name="files" byref="true" serial="Cont"/>
+			</method>
+
+			<method name="beginFile" msg="RR_FILE_BEGIN">
+				<doc line=""/>
+
+				<param type="std::string"	name="fileName"		byref="true"/>
+				<param type="uint32"		name="fileSize"		/>
+			</method>
+
+			<method name="fileData" msg="RR_FILE_DATA">
+				<doc line=""/>
+
+				<param type="std::string"	name="fileName"		byref="true"/>
+				<param type="std::string"	name="data"			byref="true"/>
+			</method>
+
+			<method name="fileEnd" msg="RR_FILE_END">
+				<doc line=""/>
+
+				<param type="std::string"	name="fileName"		byref="true"/>
+			</method>
+		</module_interface>
+
+	</namespace>
+
+</generator>

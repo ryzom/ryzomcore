@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.17 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCZPEA"/>
+      <ATOM Name="SPCost" Value="40"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SC 20"/>
+      <ATOM Name="Action Nature" Value="CRAFT"/>
+      <ATOM Name="Skill" Value="SCR1PEM"/>
+      <ATOM Name="LearnRequiresBricks" Value="bcpa21.sbrick"/>
+      <ATOM Name="CivRestriction" Value="zorai"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="RW_pistol.tga"/>
+      <ATOM Name="IconBack" Value="BK_zorai_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_over.tga"/>
+      <ATOM Name="IconOver2" Value="W_AM_logo.tga"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="AmmoTool"/>
+      <STRUCT Name="Create">
+        <ATOM Name="Crafted Item" Value="iczp1pp.sitem"/>
+        <ATOM Name="Nb built items" Value="40"/>
+        <ATOM Name="MP 1" Value="Raw Material for Ammo jacket"/>
+        <ATOM Name="Quantity 1" Value="2"/>
+        <ATOM Name="MP 2" Value="Raw Material for Ammo bullet"/>
+        <ATOM Name="Quantity 2" Value="1"/>
+        <ATOM Name="MP 3" Value="Raw Material for Explosive"/>
+        <ATOM Name="Quantity 3" Value="1"/>
+        <ATOM Name="MP 4"/>
+        <ATOM Name="Quantity 4" Value="0"/>
+        <ATOM Name="MP 5"/>
+        <ATOM Name="Quantity 5" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Sep 09 10:38:34 2004 (peloille) .faber.Create.Nb built items = 40
+Thu Sep 09 10:38:34 2004 (peloille) .faber.Create.Quantity 1 = 2
+Thu Sep 09 10:38:34 2004 (peloille) .faber.Create.Quantity 2 = 1
+Thu Sep 09 10:38:34 2004 (peloille) .faber.Create.Quantity 3 = 1</LOG>
+</FORM>

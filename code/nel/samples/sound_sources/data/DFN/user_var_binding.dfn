@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ParamId" Type="Type" Filename="parameter_id.typ"/>
+  <ELEMENT Name="Sounds" Type="Type" Filename="filename.typ" FilenameExt="*.sound" Array="true"/>
+  <LOG>Mon Feb 10 17:32:55 2003 (boucher) Dfn Structure = 
+Mon Feb 10 17:34:17 2003 (boucher) Dfn Structure = 
+Tue Feb 11 09:49:09 2003 (boucher) Dfn Structure = </LOG>
+</DFN>

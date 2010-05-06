@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL DebugFast"
+	InheritedPropertySheets=".\nel_vs90_d.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		Optimization="4"
+		InlineFunctionExpansion="1"
+		PreprocessorDefinitions="NL_DEBUG_FAST"
+		DebugInformationFormat="3"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		OutputFile="$(RootNamespace)_df.lib"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(RootNamespace)_df.exe"
+		ImportLibrary="$(RootNamespace)_df.lib"
+	/>
+</VisualStudioPropertySheet>

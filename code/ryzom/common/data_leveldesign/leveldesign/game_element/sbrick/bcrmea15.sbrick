@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.3 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCRMEA"/>
+      <ATOM Name="IndexInFamily" Value="14"/>
+      <ATOM Name="SPCost" Value="30"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SC 0"/>
+      <ATOM Name="Action Nature" Value="CRAFT"/>
+      <ATOM Name="Skill" Value="SCMCAEM"/>
+      <ATOM Name="LearnRequiresBricks" Value="bcpa25.sbrick"/>
+      <ATOM Name="CivRestriction" Value="common"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="MG_Glove.tga"/>
+      <ATOM Name="IconBack" Value="BK_generic_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_over.tga"/>
+      <ATOM Name="IconOver2"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="MeleeWeaponTool"/>
+      <ATOM Name="Item Max Level" Value="100"/>
+      <STRUCT Name="Create">
+        <ATOM Name="Crafted Item" Value="icrm2ms.sitem"/>
+        <ATOM Name="Nb built items" Value="1"/>
+        <ATOM Name="MP 1" Value="Raw Material for Shaft"/>
+        <ATOM Name="Quantity 1" Value="8"/>
+        <ATOM Name="MP 2" Value="Raw Material for Grip"/>
+        <ATOM Name="Quantity 2" Value="2"/>
+        <ATOM Name="MP 3" Value="Raw Material for Magic Focus"/>
+        <ATOM Name="Quantity 3" Value="10"/>
+        <ATOM Name="MP 4"/>
+        <ATOM Name="Quantity 4" Value="0"/>
+        <ATOM Name="MP 5"/>
+        <ATOM Name="Quantity 5" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jun 18 11:24:51 2004 (coutelas) .faber.Create.MP 3 = Raw Material for Magic Focus
+Fri Jun 18 11:24:51 2004 (coutelas) .faber.Create.Quantity 3 = 2
+Wed Jun 30 17:21:22 2004 (coutelas) .Basics.Skill = SCM2
+Tue Aug 17 18:54:21 2004 (puzin) .faber.Create.Quantity 2 = 2
+Tue Aug 17 18:54:21 2004 (puzin) .faber.Create.Quantity 3 = 10
+Tue Sep 07 16:32:43 2004 (coutelas) .Basics.IndexInFamily = 60
+Tue Sep 07 16:33:07 2004 (coutelas) .faber.Create.Crafted Item = icrm2ms.sitem</LOG>
+</FORM>

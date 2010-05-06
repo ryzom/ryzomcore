@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Ressource 0 RM file" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Ressource 0 PS file" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Ressource 1 RM file" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="Ressource 1 PS file" Type="Type" Filename="filename.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:18 2002 (corvazier) File converted from old format</LOG>
+</DFN>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Version="2.4" State="modified">
+  <ELEMENT Name="Operator" Type="Type" Filename="_ai_operator.typ"/>
+  <ELEMENT Name="Params" Type="Dfn" Filename="_ai_behaviour_param.dfn" Array="true"/>
+  <ELEMENT Name="MotivationInfluences" Type="Dfn" Filename="_ai_motivation_influence.dfn" Array="true"/>
+  <COMMENTS>This DFN describes an operator and its parameters, to be included in a creature.</COMMENTS>
+  <LOG>Fri Aug 02 11:24:55 2002 (robert) Dfn Structure = </LOG>
+</DFN>

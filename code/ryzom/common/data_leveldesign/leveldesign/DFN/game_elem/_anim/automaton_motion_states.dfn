@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="idle_to_walk"           Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="walk"                   Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="walk_to_run"            Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="run_to_walk"            Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="run"                    Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="idle_to_backward"       Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="backward"               Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="strafe_left"            Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="strafe_right"           Type="Dfn" Filename="automaton_state.dfn"/>
+
+  <ELEMENT Name="turn_left"              Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="turn_right"             Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="turn_left_to_walk"      Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="turn_right_to_walk"     Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="turn_left_to_backward"  Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="turn_right_to_backward" Type="Dfn" Filename="automaton_state.dfn"/>
+  <LOG>Fri May 30 16:30:00 2003 (puzin)</LOG>
+</DFN>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_meat_loot_lvl.loot"/>
+  <STRUCT>
+    <ARRAY Name="LootTable">
+      <STRUCT Name="meat_loot_lvl_11_15">
+        <ATOM Name="Item" Value="meat_loot_lvl_11_15.item"/>
+        <ATOM Name="MinLevel" Value="11.0"/>
+        <ATOM Name="MaxLevel" Value="15.0"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Sep 30 17:12:48 2002 (favre) .LootTable[0].Item = meat_loot_lvl_11.item
+Mon Sep 30 17:12:48 2002 (favre) .LootTable[0].MaxLevel = 15.0
+Mon Sep 30 17:12:48 2002 (favre) .LootTable[0].MinLevel = 11.0
+Mon Sep 30 17:12:48 2002 (favre) .LootTable[0].Probability = 100
+Mon Sep 30 17:15:46 2002 (favre) .LootTable[0] Renamed = meat_loot_lvl_11_15
+Mon Sep 30 17:23:49 2002 (favre) .LootTable[0].Probability = 
+Tue Oct 08 17:05:08 2002 (favre) Form Parents = 
+Mon Nov 18 17:28:59 2002 (mauduit) .LootTable[0].Item = meat_loot_lvl_11_15.item</LOG>
+</FORM>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.6 $" State="modified">
+  <PARENT Filename="_magician.starting_role"/>
+  <PARENT Filename="_matis.starting_role"/>
+  <PARENT Filename="_parent.starting_role"/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Feb 23 15:10:31 2004 (puzin) .PreMemorizedSentences1[0].Sabrina Phrase = abf01.sphrase
+Mon Feb 23 15:10:31 2004 (puzin) formName Resized = 1
+Mon Feb 23 15:11:06 2004 (puzin) .PreMemorizedSentences1[0] Renamed = default atk
+Mon Feb 23 15:11:58 2004 (puzin) .PreMemorizedSentences1[1] Renamed = power
+Mon Feb 23 15:11:58 2004 (puzin) .PreMemorizedSentences1[1].Sabrina Phrase = abe_use_item_power.sphrase
+Mon Feb 23 15:11:58 2004 (puzin) formName Resized = 2
+Mon Feb 23 16:45:25 2004 (puzin) Form Parents = </LOG>
+</FORM>

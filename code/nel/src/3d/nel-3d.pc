@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: nel-3d
+Version: 0.5.0
+Description: NeL 0.5.0
+Reqiures:
+Libs: -L${libdir}
+Libs.private: -ldl -lpthread  -lxml2 -lfreetype -lz -lc
+Cflags: -I${includedir} -I/usr/include/freetype2

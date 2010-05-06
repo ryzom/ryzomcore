@@ -1,0 +1,8 @@
+REGEDIT4
+
+[HKEY_CLASSES_ROOT\Directory\shell\branch_patcher]
+@="&Patch diff to another folder..."
+
+[HKEY_CLASSES_ROOT\Directory\shell\branch_patcher\command]
+@="\"\\\\Server\\code\\bin\\branch_patcher.exe\" %1"
+

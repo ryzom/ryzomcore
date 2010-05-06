@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="list" Type="Type" Filename="filename.typ" FilenameExt="*.animset_mode" Array="true"/>
+  <LOG>Wed Dec 11 12:13:32 2002 (puzin)
+Tue Jul 08 19:35:15 2003 (puzin) Dfn Structure = </LOG>
+</DFN>

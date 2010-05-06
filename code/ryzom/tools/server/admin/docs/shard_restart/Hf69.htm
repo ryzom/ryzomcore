@@ -1,0 +1,250 @@
+<html>
+<head>
+<title>
+Restarting Ryzom Game Shards
+</title>
+<script src="Hu37.js"></script>
+<script>
+<!--
+var g_NavBarLoaded = g_TitleBarLoaded = false; 
+
+function FileEntry (pageID, pageName, priImage, secImage) 
+{
+	this.PageID	  = pageID;
+	this.PageName = pageName;
+	this.PriImage = priImage;
+	this.SecImage = secImage;
+}
+
+g_FileList = new  Array(
+ new FileEntry (0, "Login", "Hg39_1.htm", ""),
+ new FileEntry (4, "Select Shard", "Hg41_2.htm", ""),
+ new FileEntry (5, "Lock The Shard", "Hg43_3.htm", ""),
+ new FileEntry (6, "Open Restart Interface", "Hg45_4.htm", ""),
+ new FileEntry (7, "Stop The Shard", "Hg47_5.htm", ""),
+ new FileEntry (8, "Wait For Shard To Stop", "Hg49_6.htm", ""),
+ new FileEntry (9, "Restart 1/4", "Hg51_7.htm", ""),
+ new FileEntry (10, "Restart 2/4", "Hg53_8.htm", ""),
+ new FileEntry (11, "Restart 3/4", "Hg55_9.htm", ""),
+ new FileEntry (12, "Restart 4/4", "Hg57_10.htm", ""),
+ new FileEntry (13, "Hand Over To Customer Support", "Hg59_11.htm", ""),
+ new FileEntry (14, "Unlock Shard", "Hg61_12.htm", "")
+
+);
+
+var g_SupportingFileList = new Array (
+	"Hd36.xml",
+	"",
+	"",
+	"Hn68.htm",
+	"Hz63.htm"
+);
+
+var FileIndex_XML	= 0;
+var FileIndex_CP	= 1;
+var FileIndex_Nav	= 2;
+var FileIndex_Nav2	= 3;
+var FileIndex_Zoom	= 4;
+
+var FrameCP			= '<frame name="frmCustProp" src="' + g_SupportingFileList[FileIndex_CP] + '" frameborder="yes" scrolling="auto">';
+var FramePageView	= '<frame name="frmPageView" src="javascript:parent.BlankPage(' + "'white'" + ')" frameborder="no" scrolling="auto">';
+var FrameNavBar		= '<frame name="frmNavBar" src="javascript:parent.BlankPage(' + "'white'" + ')" frameborder="no" scrolling="no">';
+var FrameZoom		= '<frame name="frmZoomBox" src="' + g_SupportingFileList[FileIndex_Zoom] + '" frameborder="yes" scrolling="no">';
+var FramePlaceHolder= '<frame name="frmPlaceHolder" src="javascript:parent.BlankPage(' + "'white'" + ')" frameborder="no" scrolling="no" noresize>';
+
+function HTMLExport() { } 
+g_theApp = new HTMLExport();
+
+g_theApp.ActiveViewMgr = null;
+g_theApp.PageUpdateFunc = null;
+g_theApp.ZoomResetFunc = null;
+g_theApp.CPResetFunc = null;
+g_theApp.custPropEntryPoint = null;
+g_theApp.VisDocName = "Restarting Ryzom Game Shards.vsd";
+g_theApp.VisDocPath = "C:\\Documents and Settings\\Miller\\Bureau\\";
+g_theApp.FileList = g_FileList;
+g_theApp.CurrentPageIX = -1;
+g_theApp.DocHasBaseHL = false;
+g_theApp.objParser = null;
+g_theApp.appVer = navigator.appVersion;
+g_theApp.isNav = (navigator.appName == "Netscape")
+g_theApp.verNav = 0;
+
+g_theApp.PriFormatMinIE			= 3.00;
+g_theApp.PriFormatMinNav		= 3.00;
+g_theApp.PriFormatSupportsZoom	= 0;
+g_theApp.SecFormatMinIE			= 0.00;
+g_theApp.SecFormatMinNav		= 0.00;
+g_theApp.SecFormatSupportsZoom	= 0;
+
+var msie = g_theApp.appVer.indexOf( "MSIE " );
+
+g_theApp.isIE = (msie >= 0);
+g_theApp.verIE = 0;
+
+if (g_theApp.isIE)
+{
+	g_theApp.verIE = parseFloat(g_theApp.appVer.substring(msie + 5, g_theApp.appVer.indexOf(";", msie)));
+
+	if (g_theApp.verIE >= 5.0)
+	{
+		g_theApp.objParser = new ActiveXObject("Microsoft.XMLDOM");
+	
+		// Instruct the parser to use synchronous data transfer
+		g_theApp.objParser.async = false;
+	
+		// Call the load method of the XML parser object, passing in the path to
+		// the file containing the XML data
+		g_theApp.objParser.load(g_SupportingFileList[FileIndex_XML]);
+		if (g_theApp.objParser.parseError.errorCode != 0)
+		{
+			g_theApp.objParser = null;
+		}
+
+		if (g_theApp.objParser != null)
+		{
+			var baseHyperlink = g_theApp.objParser.selectSingleNode("VisioDocument/DocumentProperties/HyperlinkBase");
+			if (baseHyperlink != null && baseHyperlink.attributes != null)
+			{
+				var basehref = baseHyperlink.attributes.getNamedItem ("href");
+				g_theApp.DocHasBaseHL = (basehref != null && basehref.text.length > 0)
+			}
+		}
+	}
+}
+else
+{
+	g_theApp.verNav = parseInt(g_theApp.appVer);
+}
+
+// Create the HTML frameset. 
+CreateDocument ();
+
+function BlankPage(color) 
+{
+	if ( (null != color) && ("" == color) )
+		color = "black"; 
+
+	return "<html><body bgcolor='" + color + "'></body></html>";
+}
+
+function LoadFrames()
+{
+	if (g_theApp.isIE && g_theApp.verIE >= 5.0)
+	{ 
+		if (this.frmNavBar != null)
+		{
+			// Load the newer version of the nav bar if it was created, otherwise, 
+			// load the older one. 
+			var strNavBarFile = g_SupportingFileList[FileIndex_Nav];
+			if (strNavBarFile.length <= 0)
+			{
+				strNavBarFile = g_SupportingFileList[FileIndex_Nav2];
+			}
+
+			this.frmNavBar.location.replace (strNavBarFile);
+		}
+	}
+	else 
+	{
+		if (this.frmNavBar != null)
+		{
+			this.frmNavBar.location.replace (g_SupportingFileList[FileIndex_Nav2]);
+		}
+	}
+
+	// Load the first page. 
+	GoToPage (0);
+}
+
+function CreateFrameset (frame1, frame2, framesetAttrs, defaultFramesetAttrs)
+{
+	if (frame1 != null && frame1.length > 0 && 
+		frame2 != null && frame2.length > 0)
+	{
+		var strFrameset;
+
+		strFrameset = "<frameset " + framesetAttrs + ">";
+		strFrameset += frame1;
+		strFrameset += frame2;
+		strFrameset += "</frameset>";
+
+		return strFrameset;
+	}
+	else if (frame1 != null && frame1.length > 0)
+	{
+		if (defaultFramesetAttrs != null && defaultFramesetAttrs.length > 0)
+		{
+			return CreateFrameset (frame1, " ", defaultFramesetAttrs, "");
+		}
+		return frame1;
+	}
+	else if (frame2 != null && frame2.length > 0)
+	{
+		if (defaultFramesetAttrs != null && defaultFramesetAttrs.length > 0)
+		{
+			return CreateFrameset (" ", frame2, defaultFramesetAttrs, "");
+		}
+		return frame2;
+	}
+
+	return "";
+}
+
+function CreateDocument ()
+{
+	var frameCPText = "";
+	var frameNavBarText = "";
+	var frameZoomText = "";
+
+	// Does the current output format support zooming? 
+	if (ZoomAvailable ())
+	{
+		frameZoomText = FrameZoom;
+	}
+
+	// Do we want a nav bar?
+	if (g_FileList.length > 1 &&
+		(g_SupportingFileList[FileIndex_Nav].length > 0 || 
+		 g_SupportingFileList[FileIndex_Nav2].length > 0))
+	{
+		frameNavBarText = FrameNavBar;
+	}
+
+	// Do we have a prop viewer file, and does this browser support XML? 
+	if (g_SupportingFileList[FileIndex_CP].length > 0 &&
+		g_SupportingFileList[FileIndex_XML].length > 0 &&
+		SupportsXML () &&
+		g_theApp.objParser != null)
+	{
+		frameCPText = FrameCP;
+	}
+
+	// Create a frameset with the nav bar/zoom
+	var frmsetNavZoom = CreateFrameset (frameNavBarText, frameZoomText, 'name="frmsetNavBar" cols="*,120"', "");
+
+	// Now put that frameset inside another frameset. This one will contain the actual
+	// output pages. 
+	var frmsetOutput = CreateFrameset (FramePageView, 
+									   frmsetNavZoom, 
+									   'rows="*,30" framespacing=0 onload="LoadFrames()"',
+									   '');//'rows="*" framespacing=0 onload="LoadFrames()"');
+
+	// Now put this frameset inside another one. This one will contain the 
+	// custom property viewer as well. 
+	var frmsetTotal = CreateFrameset (frameCPText, frmsetOutput, 'cols="25%,75%" onload="LoadFrames()"', "");
+
+	// One last check to make sure that we actually have a frameset to load. 
+	if (frmsetTotal == FramePageView)
+	{
+		frmsetTotal = CreateFrameset (FramePageView, FramePlaceHolder, 'rows="100%,0" onload="LoadFrames()"', "");
+	}
+
+	document.write (frmsetTotal);
+}
+
+//-->
+</script>
+</head>
+
+</html>

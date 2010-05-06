@@ -1,0 +1,139 @@
+
+1. What's this document about?
+   ---------------------------
+
+This document contains useful information about SNOWBALLS, NeL, Nevrax,
+technical requirements, and caveats about compilation and installation.
+It also includes a short "user manual" for the programs provided. It is
+highly recommended reading.
+
+
+2. What are NeL and Nevrax
+   -----------------------
+
+NeL is a free software framework developped by Nevrax Ltd, for the purpose of 
+building internet multiuser entertainment.
+
+Nevrax is a company dedicated to Free Software, which is why their tools are 
+covered by the GPL. See the attached license file. They built NeL to create 
+their massively multiplayer online role playing game called The Saga of Ryzom.
+
+You should visit our website at http://www.opennel.org/ for more information.
+
+
+3. What's in the package?
+   ----------------------
+
+The package contains:
+
+   - The latest source code for the NeL client and server frameworks
+   - The source code and data for a sample NeL game called 'SNOWBALLS'
+
+If you have a source distribution, you need to compile the source to
+produce the various executables. If you have a binary distribution,
+you have a pre-built exe client for Snowballs, but no source.
+
+The source code is provided as is, and reflects the state of the NeL
+framework at the release date. We have done our best to insure that the
+snapshot you are using now compiles and works correctly. However, we
+only test on a limited range of configurations, and the vagaries of
+OS and hardware means we cannot guarantee it compiles and executes
+correctly on your system at the time.
+
+If you are using SVN, you can keep in synch with the NeL Development Team 
+as we have included the required SVN information. An update will give you 
+current source. We do not guarantee that the source in SVN will compile 
+and work correctly at all time as it includes the latest work in progress.
+
+
+4. Caveat
+   ------
+
+The sample client, server and data files provided do not accurately reflect
+our game currently in production. We do intend penguins and gnus to appear
+in the final game, but most of the gameplay you will see does not reflect
+what we will implement later.
+
+
+5. Compiling NeL and SNOWBALLS
+   ---------------------------
+
+TODO: update text.
+You will need a C++ compiler to properly compile and execute the NeL
+framework. The program compiles reasonably under a Unix/GCC environment,
+but it has been chiefly tested under a Linux environment.
+
+TODO: update text.
+The server has been compiled and executed on a Windows machine, but it
+is highly recommended that you run it on a separate GNU/Linux machine. The
+client has been compiled and executed on a GNU/Linux machine, but will
+probably not work on other unix compatible systems (yet).
+
+The client and server require an operating TCP/IP stack to communicate.
+
+The data files for the client and server should be in the ./data child 
+directories of the directory in which the executables are located.
+
+See the INSTALL file for the requirements and installation instructions.
+
+
+6. Running SNOWBALLS client
+   ------------------------
+
+It is highly recommended that you run the client on a PC with plenty of 
+main memory (128Megs+) and a 3D card that supports T&L in hardware and 
+has 32Mb of memory. Lesser configurations will probably give you very 
+poor framerates.
+
+TODO: rewrite completely, incorrect.
+You just have to execute nel_launcher.exe (and never snowballs.exe directly).
+The application will prompt you a login and password. If you enter
+a user name that has never been used before on the server that you are
+connected to then a new account will be created with the password that
+you enter at the 'PASSWORD' prompt. You'll need to remeber this password
+as you'll need each time you login in the future. Use only alphanumeric
+value for login and password, don't use space and other strange characters.
+WARNING: Password are not crypted so you should use 'dummy' password.
+
+TODO: rewrite completely, incorrect.
+After you have to select a shard if available, just click on the shard name.
+It patch if necessary and automatically launch snowballs game, just wait.
+
+TODO: rewrite completely, incorrect and extremely boring.
+You're now a penguin on an artic snowfield. You have snowballs which you
+can throw at other people. When you throw a snowball, you have a few
+seconds during which you gather more snow before you can throw the next
+one. If you hit someone, your score increases, and the snowed opponent 
+becomes immune to further snowing (he flashes on the screen) for 5s. He
+cannot retaliate while invulnerable.
+
+Good luck.
+
+
+7. The controls in SNOWBALLS
+   -------------------------
+
+Use the mouse to look around.
+Use arrow keys to move forward, backward, strafe left and strafe right.
+
+F3: switch on/off the wireframe mode
+F4: clear the chat window
+F5: switch on/off the chat text
+F6: switch on/off the radar
+F7: zoom out the radar
+F8: zoom in the radar
+F9: capture or uncapture the mouse
+F10: switch betweeon online and offline
+F11: reset player position
+F12: take a screenshot
+SHIFT-ESC: quit
+Left Mouse Button: throw a snowball
+Type text followed by ENTER to broadcast messages
+
+
+8. Contacting us
+   -------------
+
+For comments and problems relating to SNOWBALLS or NeL 
+you can go to the forums at http://www.opennel.org/jforum/forums/list.page
+or use the issue tracker at http://www.opennel.org/jira/secure/Dashboard.jspa

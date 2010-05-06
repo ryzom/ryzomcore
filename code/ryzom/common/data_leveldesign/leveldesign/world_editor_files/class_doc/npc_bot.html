@@ -1,0 +1,781 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="npc_bot_files/filelist.xml">
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Boris Boucher</o:Author>
+  <o:LastAuthor>Guillaume PUZIN</o:LastAuthor>
+  <o:Revision>15</o:Revision>
+  <o:TotalTime>1351</o:TotalTime>
+  <o:Created>2003-07-18T07:59:00Z</o:Created>
+  <o:LastSaved>2007-06-14T08:13:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>600</o:Words>
+  <o:Characters>3426</o:Characters>
+  <o:Company>nevrax</o:Company>
+  <o:Lines>28</o:Lines>
+  <o:Paragraphs>8</o:Paragraphs>
+  <o:CharactersWithSpaces>4018</o:CharactersWithSpaces>
+  <o:Version>10.2625</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>117</w:Zoom>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:ApplyBreakingRules/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:UseFELayout/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-format:other;
+	mso-font-pitch:fixed;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-alt:"\FF2D\FF33 \660E\671D";
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:\5B8B\4F53;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0mm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";
+	mso-bidi-font-family:"Times New Roman";
+	mso-ansi-language:FR;}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0mm;
+	margin-bottom:3.0pt;
+	margin-left:0mm;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;
+	mso-ansi-language:FR;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0mm;
+	margin-bottom:3.0pt;
+	margin-left:0mm;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	mso-ansi-language:FR;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+@page Section1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:32586569;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1341821240 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1
+	{mso-list-id:199629970;
+	mso-list-type:hybrid;
+	mso-list-template-ids:671153828 964230964 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l1:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:-;
+	mso-level-tab-stop:90.0pt;
+	mso-level-number-position:left;
+	margin-left:90.0pt;
+	text-indent:-18.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";}
+@list l1:level2
+	{mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2
+	{mso-list-id:670957983;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1013193272 964230964 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l2:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:-;
+	mso-level-tab-stop:90.0pt;
+	mso-level-number-position:left;
+	margin-left:90.0pt;
+	text-indent:-18.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";}
+@list l2:level2
+	{mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3
+	{mso-list-id:803696492;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1018820242 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:54.0pt;
+	mso-level-number-position:left;
+	margin-left:54.0pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;
+	color:windowtext;}
+@list l3:level2
+	{mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l3:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l4
+	{mso-list-id:952395746;
+	mso-list-template-ids:249171826;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+ol
+	{margin-bottom:0mm;}
+ul
+	{margin-bottom:0mm;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0mm 5.4pt 0mm 5.4pt;
+	mso-para-margin:0mm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:36.0pt'>
+
+<div class=Section1>
+
+<h1><span style='color:#FF6600;mso-ansi-language:EN-US'>npc_bot<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span style='color:#999999;mso-ansi-language:EN-US'>Properties&nbsp;:<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>chat_parameters</span></u></b><span
+style='mso-ansi-language:EN-US'>&nbsp;: Describe the reference chat for the
+bot. Chat is specified with a series of keywords followed by a colon then by
+parameter(s).<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<ul style='margin-top:0mm' type=disc>
+ <li class=MsoNormal style='color:black;mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>shop</span></b><span
+     style='mso-ansi-language:EN-US'> : a space separated list of shop category
+     or alias as defined in the file <a
+     href="../../../data_shard/shop_category.cfg">shop_category.cfg</a>.<o:p></o:p></span></li>
+ <li class=MsoNormal style='color:black;mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>-shop</span></b><span
+     style='mso-ansi-language:EN-US'> : a space separated list of shop category
+     or alias that are not offered in shop by default.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>item</span></b><span
+     style='mso-ansi-language:EN-US'>&nbsp;: a space separated list of shop
+     item. Items are sheet name without the trailing ‘.item’.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>-item</span></b><span
+     style='mso-ansi-language:EN-US'>&nbsp;: a space separated list of shop
+     item that are not offered in shop by default.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>nitem
+     </span></b><span style='mso-ansi-language:EN-US'>: a space separated list
+     of named item. &lt;name&gt; &lt;price&gt; &lt;faction_type : </span><span
+     lang=FR>kami | karavan | fyros | zorai | tryker | matis</span><span
+     style='mso-ansi-language:EN-US'>&gt; &lt;price in faction_points&gt;<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='color:black;mso-ansi-language:
+     EN-US'>-mission</span></b><span style='color:black;mso-ansi-language:EN-US'>
+     : a space separated list of mission name that are not offered by default. </span><span
+     style='mso-ansi-language:EN-US'><o:p></o:p></span></li>
+ <li class=MsoNormal style='color:black;mso-list:l0 level1 lfo3;tab-stops:list 36.0pt'><b
+     style='mso-bidi-font-weight:normal'><span style='mso-ansi-language:EN-US'>op
+     </span></b><span style='color:windowtext;mso-ansi-language:EN-US'>:
+     (Optional Parameters) a ‘free’ strings that will be parsed by EGS.</span><span
+     style='mso-ansi-language:EN-US'><o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='text-indent:36.0pt'><span style='mso-ansi-language:
+EN-US'>Actually, the available optional parameters are:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:90.0pt;text-indent:-18.0pt;mso-list:l1 level1 lfo5;
+tab-stops:list 90.0pt'><![if !supportLists]><span style='mso-fareast-font-family:
+"Times New Roman";mso-ansi-language:EN-US'><span style='mso-list:Ignore'>-<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Courier;mso-ansi-language:EN-US'>op : guild_caretaker :
+&lt;teleport_destination&gt;</span></b><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'> <o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:72.0pt;text-indent:36.0pt'><span
+style='mso-ansi-language:EN-US'>The bot is a guild caretaker, linked to the
+building associated to the specified destination. This bot will sell guild
+building, rolemasters, etc.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:90.0pt;text-indent:-18.0pt;mso-list:l1 level1 lfo5;
+tab-stops:list 90.0pt'><![if !supportLists]><span style='mso-fareast-font-family:
+"Times New Roman";mso-ansi-language:EN-US'><span style='mso-list:Ignore'>-<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Courier;mso-ansi-language:EN-US'>op : player_caretaker :
+&lt;teleport_destination&gt;</span></b><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'> <o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:72.0pt;text-indent:36.0pt'><span
+style='mso-ansi-language:EN-US'>The bot is a player caretaker, linked to the
+building associated to the specified destination. This bot will sell player
+building, rolemasters, etc.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:90.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo7;
+tab-stops:list 90.0pt'><![if !supportLists]><span style='mso-fareast-font-family:
+"Times New Roman";mso-ansi-language:EN-US'><span style='mso-list:Ignore'>-<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Courier;mso-ansi-language:EN-US'>op : guild_rolemaster :
+&lt; craft | harvest | fight<span style='mso-spacerun:yes'>  </span>| magic
+&gt;<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:108.0pt'><span style='mso-ansi-language:
+EN-US'>The bot is a guild role master specialized in the specified skill
+branch.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:90.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo7;
+tab-stops:list 90.0pt'><![if !supportLists]><span style='mso-fareast-font-family:
+"Times New Roman";mso-ansi-language:EN-US'><span style='mso-list:Ignore'>-<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Courier;mso-ansi-language:EN-US'>op : charge : &lt;charge
+name&gt;<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:108.0pt'><span style='mso-ansi-language:
+EN-US'>The bot proposes guild charges to player<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:108.0pt'><span style='mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span style='color:black;
+mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span style='color:black;
+mso-ansi-language:EN-US'>NB: the negated keyword (-shop, -item and –mission)
+are more used in <a href="npc_state_chat.html">npc_state_chat</a> nodes to
+dynamically change the content of the shop/chat.</span><span style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>equipment</span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: Describe the equipment for the bot. Equipment is specified with
+a series of keywords followed by a color then by parameter(s). Keywords are
+case insensitive and must be placed one by line.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>RI</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: define weapon in right hand. The only one parameter is the
+weapon sheet name (including filename extension) or write “<b>none</b>” to
+remove the item in hand. <o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>LI</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: define weapon in left hand. The only one parameter is the weapon
+sheet name (including filename extension) or write “<b>none</b>” to remove the
+item in hand.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>HAT</span></b><span style='mso-ansi-language:
+EN-US'> or <b style='mso-bidi-font-weight:normal'>IH</b>&nbsp;: flag the
+presence of a hat. No parameter.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'>New detailed coloration:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CHEAD</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the head color (used either for hair or for hat). Parameter
+is a list of randomly chosen color index space separated (e.g. 1 2 3 4). <o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CARMS</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the arms color. Parameter is a list of randomly chosen color
+index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CHANDS</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the hands color. Parameter is a list of randomly chosen
+color index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CBODY</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the body color. Parameter is a list of randomly chosen color
+index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CLEGS</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the legs color. Parameter is a list of randomly chosen color
+index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>CFEETS</span></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: set the foots color. Parameter is a list of randomly chosen
+color index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'>Old commands (keep for
+compatibility and usefulness)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>UPPER</span></b><span style='mso-ansi-language:
+EN-US'> or <b style='mso-bidi-font-weight:normal'>CU</b>&nbsp;: set the head,
+arms, hands and body color at once. Parameter is a list of randomly chosen
+color index space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>LOWER</span></b><span style='mso-ansi-language:
+EN-US'> or <b style='mso-bidi-font-weight:normal'>CL</b>&nbsp;: set the legs
+and foots color at once. Parameter is a list of randomly chosen color index
+space separated.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-top:0mm;margin-right:0mm;margin-bottom:12.0pt;
+margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>HAIR</span></b><span style='mso-ansi-language:
+EN-US'> or <b style='mso-bidi-font-weight:normal'>CH</b>&nbsp;: set the hair
+(aka head) color. Parameter is a list of randomly chosen color index space
+separated.<o:p></o:p></span></p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0 width="75%"
+ style='width:75.0%;mso-cellspacing:0mm;border:outset black 1.0pt;mso-border-alt:
+ outset black .75pt;mso-padding-alt:0mm 0mm 0mm 0mm'>
+ <tr style='mso-yfti-irow:0'>
+  <td width="15%" style='width:15.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#999999;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:black;mso-ansi-language:EN-US'>Chiffre</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="35%" style='width:35.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#999999;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:black;mso-ansi-language:EN-US'>Couleur</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#999999;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:black;mso-ansi-language:EN-US'>Chiffre</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#999999;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:black;mso-ansi-language:EN-US'>Couleur</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="15%" style='width:15.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>0<o:p></o:p></span></p>
+  </td>
+  <td width="35%" style='width:35.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:red;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Rouge<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>4<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#0000CC;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:white;mso-ansi-language:EN-US'>Bleu</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="15%" style='width:15.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>1<o:p></o:p></span></p>
+  </td>
+  <td width="35%" style='width:35.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#FFFFCC;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Beige<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>5<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#9900FF;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Violet<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width="15%" style='width:15.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>2<o:p></o:p></span></p>
+  </td>
+  <td width="35%" style='width:35.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#33FF00;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Vert<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>6<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:white;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Blanc<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes'>
+  <td width="15%" style='width:15.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>3<o:p></o:p></span></p>
+  </td>
+  <td width="35%" style='width:35.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:#66FFFF;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>Cyan<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'>7<o:p></o:p></span></p>
+  </td>
+  <td width="25%" style='width:25.0%;border:inset black 1.0pt;mso-border-alt:
+  inset black .75pt;background:black;padding:0mm 0mm 0mm 0mm'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='mso-fareast-font-family:SimSun;color:white;mso-ansi-language:EN-US'>Noir</span><span
+  style='mso-fareast-font-family:SimSun;mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l3 level1 lfo9;
+tab-stops:list 36.0pt 54.0pt'><![if !supportLists]><span style='font-family:
+Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>is_stuck</span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: Flag to force the bot to spawn at the specified world location, even
+if the location is in a collision zone. This is used for placing merchant and
+other useful bot into closed shop for example.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>keywords</span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: This is a set of <a href="keywords.html">keywords</a> for the
+bot.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>level</span></u></b><span style='mso-ansi-language:
+EN-US'>&nbsp;: This is the level of bot. The level is appended to the end of
+the <b style='mso-bidi-font-weight:normal'>sheet_server</b> to obtain the
+server sheet name.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>sheet_client</span></u></b><span
+style='mso-ansi-language:EN-US'>&nbsp;: This is the ‘visual’ sheet for the bot.
+All visual information are extracted from this sheet (e.g. sex, race,
+clothes…).<b style='mso-bidi-font-weight:normal'><u><o:p></o:p></u></b></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

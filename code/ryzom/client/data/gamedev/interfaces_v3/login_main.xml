@@ -1,0 +1,843 @@
+<interface_config>
+
+<root id="login" x="0" y="0" w="800" h="600" active="true" />
+
+<!-- UI:VARIABLES:SCREEN = -1 not on any window or checking password
+0 on checkpass window
+1 on sharddisp window
+-->
+<variable entry="UI:VARIABLES:SCREEN" type="sint32" value="-1" />
+
+<variable entry="UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS" type="sint32" value="-1" />
+
+
+<proc id="top_center">
+  <action handler="set" params="target='@0:x'|value=div(sub(getprop('ui:login:w'),getprop('@0:w')),2)" />
+  <action handler="set" params="target='@0:y'|value=getprop('ui:login:h')" />
+</proc>
+
+
+
+<!-- **************************** -->
+<!-- * CHECK LOGIN AND PASSWORD * -->
+<!-- **************************** -->
+
+
+
+<group id="checkpass" posref="MM MM" w="1024" h="768" active="false" 
+  on_active="init_res_lod" on_deactive="uninit_res_lod" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    
+    <!--
+    <view type="bitmap" id="jena" posparent="window" posref="MR MR" x="-64" texture="log_jena.tga" global_color="false" render_layer="-1" />
+    -->
+    
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    
+    
+    <!-- Login Edit_Boxes -->
+    <view type="text" id="txt_log" x="115" posref="TL TL" posparent="window" hardtext="uiLogin" fontsize="10" y="-48"  color="255 255 255 255" />
+    <view type="text" id="txt_pas" posparent="txt_log" posref="TL TL" hardtext="uiPassword" fontsize="10" x="246" color="255 255 255 255" />
+    
+    <instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BL TL" w="240" h="24" fontsize="12" x="0" y="-4"
+    text_ref="BM BM" text_y="-2"
+    reset_focus_on_hide="false"  max_historic="0"
+    onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+    
+    <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BL TL" w="240" h="24" fontsize="14" x="0" y="-4"
+    text_ref="BM BM" text_y="-2"
+    reset_focus_on_hide="false"  max_historic="0" entry_type="password"
+    onenter="on_login" params=""
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+    
+    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TR TL" x="6" onclick_l="on_login" hardtext="uiOnConnect" />
+    
+    
+    <!-- Boxes Web Shortcuts -->
+    <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" />
+    
+    <!-- Create Account -->
+    <ctrl style="log_spe_but" id="but_create_account" posparent="web_win" posref="TL TL" x="8" y="-8"
+    onclick_l="on_create_account" hardtext="uiCreateAccount" />
+
+	<!-- Upgrade Account -->
+    <ctrl style="log_spe_but" id="but_upgrade_account" posparent="but_create_account" posref="BL TL" y="-8"
+    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" />
+
+	<!-- Forget Password -->
+    <ctrl style="log_spe_but" id="but_forget_pwd" posparent="but_upgrade_account" posref="BL TL" y="-8"
+    onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />
+
+	<!-- Game Configuration -->
+    <ctrl style="log_spe_but" id="but_game_configuration" posparent="but_forget_pwd" posref="BL TL" y="-8"
+    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" />
+    
+    <!-- Edit Account -->
+    <ctrl style="log_spe_but" id="but_edit_account" posparent="but_game_configuration" posref="BL TL" y="-8"
+    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
+    
+    
+    <!-- Free Trial 
+    <ctrl style="log_spe_but" id="but_free_trial" posparent="but_forget_pwd" posref="BL TL" y="-8"
+    onclick_l="open_url" params_l="cfg_FreeTrialURL" hardtext="uiFreeTrial" />
+	-->
+    
+    <!-- Login Support -->
+    <ctrl style="log_spe_but" id="but_login_support" posparent="but_edit_account" posref="BL TL" y="-8"
+    onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
+    
+    <!-- Scan Data -->
+<!--
+    <ctrl style="log_spe_but" id="but_scan_data" posparent="but_login_support" posref="BL TL" y="-8"
+    onclick_l="on_scan_data_start" hardtext="uiScanData" />
+
+    <link expr="@UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS" target=" but_game_configuration:active, 
+																but_create_account:active,
+																but_edit_account:active,
+																but_forget_pwd:active,
+																but_free_trial:active,
+																but_login_support:active,
+																but_scan_data:active" />
+-->
+
+    <link expr="@UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS" target=" but_create_account:active,
+																but_upgrade_account:active,
+																but_forget_pwd:active,
+																but_game_configuration:active, 
+																but_edit_account:active,
+																but_login_support:active" />
+																
+    <!-- RESOLUTION ET LEVEL OF DETAILS -->
+    <instance template="server_box" id="res_win" posparent="web_win" posref="BL TL" w="276" h="24" y="-24" />
+    <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
+
+    <!-- Textes -->
+    <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
+    <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
+
+    <view type="text" id="res_value" posparent="res_win" posref="MM MM" y="-2" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiResValue" />
+    <view type="text" id="lod_value" posparent="lod_win" posref="MM MM" y="-2" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiLodValue" />
+
+
+    <!-- Boutons Res -->  
+    <ctrl type="button" button_type="push_button" id="less_res_but" posparent="res_win" posref="ML ML" x="8" y="0"
+		tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		onclick_l="less_res" params_l="" />
+
+	<ctrl type="button" button_type="push_button" id="more_res_but" posparent="res_win" posref="MR MR" x="-8" y="0"
+		tx_normal="but_right.tga" tx_pushed="but_right.tga" tx_over="but_right.tga"
+		color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		onclick_l="more_res" params_l="" />
+
+    <!-- Boutons LoD --> 
+    <ctrl type="button" button_type="push_button" id="less_lod_but" posparent="lod_win" posref="ML ML" x="8" y="0"
+		tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		onclick_l="less_lod" params_l="" />
+
+    <ctrl type="button" button_type="push_button" id="more_lod_but" posparent="lod_win" posref="MR MR" x="-8" y="0"
+		tx_normal="but_right.tga" tx_pushed="but_right.tga" tx_over="but_right.tga"
+		color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		onclick_l="more_lod" params_l="" />
+
+
+  </group>
+</group>
+
+
+
+
+<!-- ****************** -->
+<!-- * DISPLAY SHARDS * -->
+<!-- ****************** -->
+
+<proc id="shard_click_rn">
+	<action handler="enter_modal" params="group=ui:login:release_note_modal" />
+	<action handler="set_release_note" params="@0|@1" />
+</proc>
+
+<template name="t_shard" id="" posref="TL TL" posparent="parent" keep="true" >
+	<group id="#id" sizeparent="parent" sizeref="w" w="0" h="22" x="0" y="0" posref="#posref" posparent="#posparent" >
+
+		<view type="text" id="name" x="0" posref="BL BL" fontsize="12" y="1" color="135 243 28 255" shadow="true" />
+
+		<view type="text" id="online" x="372" posref="BL BM" fontsize="10" y="1" hardtext="uiOnline" color="135 243 28 255" shadow="true" />
+		<view type="text" id="offline" x="372" posref="BL BM" fontsize="10" y="1" hardtext="uiOffline" color="135 243 28 255" shadow="true" />
+
+		<view type="text" id="version" x="452" posref="BL BM" fontsize="10" y="1" color="135 243 28 255" shadow="true" />
+
+		<ctrl style="server_note" id="note" posref="ML MM" x="540" onclick_l="proc" params_l="shard_click_rn|shard=#id|group=ui:login:release_note_modal:html" hardtext="uiReleaseNote" />
+
+		<ctrl type="button" button_type="toggle_button" id="but" sizeref="h" h="0" w="492" scale="true" posref="TL TL"
+			texture="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_pushed="75 144 29 192" col_over="96 117 24 128"
+			onclick_l="shard_select" params_l="" />
+	</group>
+</template>
+
+
+<group id="sharddisp" posref="MM MM" w="1024" h="768" active="false" on_enter="login_connect">
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+  
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    <view type="bitmap" id="kami" posparent="window" posref="TR TR" x="-50" y="-24" texture="log_kami.tga" global_color="false" render_layer="-1" />
+    
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    
+    <!-- SERVER SELECTION -->
+    <instance template="server_box" id="server_win" posparent="window" posref="ML ML" w="612" h="338" x="8" y="0" />
+    
+    <group id="shard_list" posparent="server_win" posref="TM TM" y="-4" w="604" child_resize_h="true" max_sizeparent="parent" max_sizeref="w" max_w="-18" max_h="330" >
+    </group>
+    
+    <!-- scroll bar -->
+    <instance template="bk_scroll" id="back_scrollbar" posparent="server_win" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+    <ctrl style="skin_scroll" id="scroll_bar" align="T" target="shard_list" posparent="server_win" posref="TR TL" target_stepy="22" x="8" y="0" />
+    
+    <!-- Connect Button -->
+    <ctrl style="log_std_but" id="but_log" posparent="server_win" posref="BM TM" y="-8" onclick_l="login_connect" hardtext="uiOnConnect" />
+    
+    
+    <!-- Table Infos -->
+    <instance template="log_box_frame" id="infos_win" posparent="server_win" posref="TL BL" w="612" h="22" y="4" />
+    <view type="text" id="status_txt" posref="BL BM" x="376" y="1" posparent="infos_win" fontsize="10" color="255 255 255 255" hardtext="uiOnStatus" shadow="true" />
+    <view type="text" id="version_txt" posref="BL BM" x="456" y="1" posparent="infos_win" fontsize="10" color="255 255 255 255" hardtext="uiOnVersion" shadow="true" />
+    <view type="text" id="release_txt" posref="BL BM" x="544" y="1" posparent="infos_win" fontsize="10" color="255 255 255 255" hardtext="uiOnRelease" shadow="true" />
+    
+  </group>
+
+</group>
+
+
+<!-- ********************** -->
+<!-- * RELEASE NOTE MODAL * -->
+<!-- ********************** -->
+
+<group type="modal" id="release_note_modal" exit_click_out="true" posref="MM MM" w="640" h="396"
+on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="true" x="-72" y="-11"
+>
+
+  <!-- Window -->
+  <instance template="log_box_frame" id="bk" posref="MM MM" sizeref="wh" w="0" h="0" />
+  
+  <instance template="bk_scroll" id="back_scrollbar" posref="TR TR" x="-8" y="-8" w="24" h="342" />
+  
+  
+  <!-- Html -->
+  
+	<group type="html" id="html" posref="TM TM" url="home" title_prefix=""
+		x="0" y="-8" w="624" h="342"
+		background_color="0 0 0 0"
+		error_color="255 240 48 255"
+		link_color="240 155 100 255"
+		text_color="210 210 210 255"
+		h1_color="255 255 255 255"
+		h2_color="255 255 255 255"
+		h3_color="255 255 255 255"
+		h4_color="255 255 255 255"
+		h5_color="255 255 255 255"
+		h6_color="255 255 255 255"
+		text_font_size="10"
+		h1_font_size="16"
+		h2_font_size="14"
+		h3_font_size="13"
+		h4_font_size="12"
+		h5_font_size="11"
+		h6_font_size="11"
+		paragraph_begin_space="12"
+		multi_line_space_factor="0.25"
+		td_begin_space="0"
+		li_begin_space="4"
+		ul_begin_space="12"
+		li_indent="-10"
+		ul_indent="30"
+		checkbox_bitmap_normal=""
+		checkbox_bitmap_pushed=""
+		checkbox_bitmap_over=""
+		background_bitmap_view=""
+		home="release.html"
+		browse_next_time="true"
+		form_text_area_group="edit_box_widget_multiline"
+	>
+		<group id="black" posref="BL BL" sizeref="hw" w="0" h="0" inherit_gc_alpha="true"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="0" y="0" space="0" sizeref="wh" w="-28" h="0" maxelements="2000"/>
+		<ctrl style="skin_scroll" id="scroll_bar" posref="TR TR" target_stepy="16" x="-4" />
+	</group>
+  
+  <ctrl style="log_std_but" id="but_close" posparent="html" posref="BM TM" y="-8" onclick_l="leave_modal" hardtext="uiNoteClose"/>
+
+</group>
+
+
+
+<!-- ******************** -->
+<!-- * CHECKING PROGESS * -->
+<!-- ******************** -->
+
+
+
+
+<group id="checking" posref="MM MM" w="1024" h="768" active="false" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+  
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    
+    
+    <!-- Window -->
+    <instance template="server_box" id="check_win" posparent="window" posref="MM MM" w="600" h="128" x="0" y="0" />
+    
+    <!-- Textes -->
+    
+    <view type="text" id="title" posparent="check_win" posref="TM BM" y="8" color="255 255 255 255"
+    fontsize="12" shadow="true" hardtext="uiOnChecking" />
+    
+    <view type="text" id="state" posparent="check_win" posref="TL TL" w="584" x="8" y="-8" line_maxw="584" color="135 243 28 255"
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    <view type="text" id="progress" posref="BL TL" posparent="state" fontsize="12" y="-8" color="135 243 28 255" line_maxw="584"
+    shadow="true" multi_line="true" multi_line_space="0" />
+  
+  </group>
+
+</group>
+
+
+<!-- **************************** -->
+<!-- * DISPLAY PATCH CATEGORIES * -->
+<!-- **************************** -->
+
+<template name="t_cat" id="" posref="TL TL" posparent="parent" keep="true" >
+  <group id="#id" w="382" h="22" x="0" y="0" posref="#posref" posparent="#posparent" >
+  
+    <view type="text" id="name" posref="BL BL" fontsize="12" x="26" y="1" color="135 243 28 255" shadow="true" />
+    
+    <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="1" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
+    
+    <ctrl type="button" button_type="toggle_button" id="on_off" sizeref="hw" h="-2" w="0" x="0" posref="ML ML" scale="true" pushed="true"
+    texture="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_pushed="75 144 29 80" col_over="96 117 24 32"
+    onclick_l="set" params_l="dblink=UI:VARIABLES:CAT:#id|value=not(@UI:VARIABLES:CAT:#id)" />
+    
+    <view type="bitmap" id="state" posref="ML ML" x="2" texture="patch_on.tga" />
+    
+    <link expr="ifthenelse( eq(@UI:VARIABLES:CAT:#id,0),
+							'patch_on.tga',
+							'patch_off.tga' )"				target="state:texture" />
+  </group>
+</template>
+
+
+
+<group id="catdisp" posref="MM MM" w="1024" h="768" active="false" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+
+    <!-- Window -->
+    <instance template="server_box" id="global_win" posparent="bl" posref="TM TM" w="400" h="22" x="-14" y="-240" />
+    <instance template="server_box" id="nonopt_win" posparent="global_win" posref="BM TM" w="400" h="22" y="-8" />
+    <instance template="server_box" id="opt_win"	posparent="nonopt_win" posref="BM TM" w="400" h="206" y="-30" />
+    
+    <!-- Textes -->
+    <view type="text" id="title" posparent="global_win" posref="TM BM" y="24" color="255 255 255 255"
+    fontsize="12" shadow="true" hardtext="uiOnPatchDetail" />
+    
+    <view type="text" id="opt_txt" posparent="opt_win" posref="TL BL" y="1" color="255 255 255 255"
+    fontsize="10" shadow="true" hardtext="uiOnPatchOpt" />
+    
+    <group id="global_patch" w="382" h="22" posparent="global_win" posref="MM MM" >
+      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="TOTAL PATCH" />
+      <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
+    </group>
+      <group id="nonopt_patch" w="382" h="22" posparent="nonopt_win" posref="MM MM" >
+      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="NON OPTIONAL FILES" />
+      <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
+    </group>
+
+    <!-- Categories -->
+    <group id="cat_list" posparent="opt_win" posref="TM TM" y="-4" child_resize_h="true" w="382" max_h="330" >
+    </group>
+
+    <!-- scroll bar -->
+    <instance template="bk_scroll" id="back_scrollbar" posparent="opt_win" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+    <ctrl style="skin_scroll" id="scroll_bar" align="T" target="cat_list" posparent="cat_win" posref="TR TL" target_stepy="22" x="8" y="0" />
+
+    <!-- Patch Button -->
+    <ctrl style="log_std_but" id="but_log" posparent="opt_win" posref="BM TM" y="-8" onclick_l="login_patch" hardtext="uiOnPatch" />
+
+  </group>
+
+</group>
+
+
+
+<!-- ******************** -->
+<!-- * PATCHING PROGESS * -->
+<!-- ******************** -->
+
+
+
+
+<group id="patching" posref="MM MM" w="1024" h="768" active="false" 
+	on_active="set_release_note" on_active_params="shard=selected|group=ui:login:patching:content:release_txt" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+  
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    
+    
+    <!-- patch -->
+    <instance template="server_box" id="global_win" posparent="bl" posref="TM TM" w="600" h="22" x="-14" y="-180" />
+    <instance template="server_box" id="patch_win"	posparent="global_win" posref="BM TM" w="600" h="48" y="-8" />
+    <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="global_win:active,patch_win:active"/>
+    
+    <group id="global_patch" w="582" h="22" posparent="global_win" posref="MM MM" >
+    	<view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="TOTAL PATCH" />
+    	<view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext=".../...Kbs" />
+    </group>
+    <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="global_patch:active"/>
+    
+    <view type="text" id="progress" posref="TL TL" posparent="patch_win" fontsize="12" x="8" y="-8" color="135 243 28 255" shadow="true"/>
+    <view type="text" id="state" posparent="progress" posref="TR TL" w="520" x="4" y="0" line_maxw="520" color="135 243 28 255"
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="progress:active,state:active"/>
+    
+    <!-- Reboot -->
+    <instance template="server_box" id="reboot_win" posparent="bl" posref="TM TM" w="600" h="78" x="-14" y="-180" />
+    
+    <group id="global_warn" w="582" h="54" posparent="reboot_win" posref="MM MM" >
+      <view type="text" id="warn" posref="TM TM" fontsize="12" x="0" y="-3" color="135 243 28 255" shadow="true" hardtext="uiRebootConfirm" />
+      <ctrl style="log_std_but" id="rebootbut" posparent="warn" posref="BM TM" y="-8" onclick_l="reboot" hardtext="uiRebootBut" />
+    </group>
+    
+    <link expr="eq(@UI:VARIABLES:SCREEN,5)" target="reboot_win:active,global_warn:active"/>
+    
+    
+    <!-- Release Note -->
+    <instance template="server_box" id="release_win"	posparent="bl" posref="TM TM" w="600" h="324" x="-14" y="-282" />
+    
+    <view type="text" id="release_title" posref="TM BM" posparent="release_win" fontsize="10" y="-2" color="255 255 255 255" 
+    hardtext="uiOnRelease" shadow="true"/>
+    
+<!--
+    <group id="release_txt" posparent="release_win" posref="TL TL" x="8" y="-8" w="584" child_resize_h="true" h="0" max_h="308" >
+      <view type="text" id="content" posref="TL TL" w="584" line_maxw="584" color="135 243 28 255"
+      fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="uiEulaContent" />
+    </group>
+-->
+
+    <group type="html" id="release_txt" posparent="release_win" posref="TL TL" url="home" title_prefix=""
+		x="8" y="-8" w="620" h="308"
+		background_color="0 0 0 0"
+		error_color="255 240 48 255"
+		link_color="240 155 100 255"
+		text_color="210 210 210 255"
+		h1_color="255 255 255 255"
+		h2_color="255 255 255 255"
+		h3_color="255 255 255 255"
+		h4_color="255 255 255 255"
+		h5_color="255 255 255 255"
+		h6_color="255 255 255 255"
+		text_font_size="10"
+		h1_font_size="16"
+		h2_font_size="14"
+		h3_font_size="13"
+		h4_font_size="12"
+		h5_font_size="11"
+		h6_font_size="11"
+		paragraph_begin_space="12"
+		multi_line_space_factor="0.25"
+		td_begin_space="0"
+		li_begin_space="4"
+		ul_begin_space="12"
+		li_indent="-10"
+		ul_indent="30"
+		checkbox_bitmap_normal=""
+		checkbox_bitmap_pushed=""
+		checkbox_bitmap_over=""
+		background_bitmap_view=""
+		home="release.html"
+		browse_next_time="true"
+		form_text_area_group="edit_box_widget_multiline"
+	>
+		<group id="black" posref="BL BL" sizeref="hw" w="0" h="0" inherit_gc_alpha="true"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="0" y="0" space="0" sizeref="wh" w="-28" h="0" maxelements="2000"/>
+	    <ctrl style="skin_scroll" id="scroll_bar" posref="TR TR" target_stepy="16" x="-4" />
+	</group>
+    
+    <!-- scroll bar -->
+    <instance template="bk_scroll" id="back_scrollbar" posparent="release_win" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+    <ctrl style="skin_scroll" id="scroll_bar" align="T" target="release_txt" posparent="release_win" posref="TR TL" target_stepy="22" x="8" y="-8" />
+    
+	<!-- close button-->
+<!--	<ctrl style="log_std_but" id="but_close" posparent="release_txt" posref="BM TM" x="0" y="-8" fontsize="12" onclick_l="close_patch" params_l="" hardtext="uiClosePatch" active="false"/>-->
+    
+    
+  </group>
+
+</group>
+
+
+
+<!-- ******** -->
+<!-- * EULA * -->
+<!-- ******** -->
+
+
+<group id="eula" w="1024" h="768" posref="MM MM" active="false" >
+
+  <!-- BACKGROUND -->
+  <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+  <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+  
+  <!-- EXIT BUTTON -->
+  <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+  
+  <!-- WINDOW -->
+  <instance template="server_box" id="eula_win" posparent="window" posref="MM MM" w="612" h="338" x="-24" y="0" />
+  
+  <!-- EULA TEXT -->
+  <group id="eula_txt" posparent="eula_win" posref="TL TL" x="8" y="-8" w="596" child_resize_h="true" h="0" max_h="322" >
+    <view type="text" id="content" posref="TL TL" w="596" line_maxw="596" color="135 243 28 255"
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="uiEulaContent" />
+  </group>
+  
+  <!-- SCROLL BAR -->
+  <instance template="bk_scroll" id="back_scrollbar" posparent="eula_win" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+  <ctrl style="skin_scroll" id="scroll_bar" align="T" target="eula_txt" posparent="eula_win" posref="TR TL" target_stepy="22" x="8" y="-8" />
+  
+  
+  <!-- TITLE -->
+  <view type="text" id="title" posparent="eula_win" posref="TM BM" y="8" color="255 255 255 255"
+  fontsize="20" shadow="true" hardtext="uiEula" />
+  
+  <!-- ACCEPT & DECLINE BUTTONS -->
+  <ctrl style="log_std_but" id="but_accept" posparent="eula_win" posref="BM TR" x="-4" y="-8" fontsize="12" onclick_l="accept_eula" params_l="" hardtext="uiEulaAccept" />
+  <ctrl style="log_std_but" id="but_decline" posparent="eula_win" posref="BM TL" x="4" y="-8" fontsize="12" onclick_l="login_quit" params_l="" hardtext="uiEulaDecline" />
+
+</group>
+
+
+
+<!-- ******************** -->
+<!-- * DATASCAN PROGESS * -->
+<!-- ******************** -->
+
+<!-- 1 The scan is running, 0 The scan has ended -->
+<variable entry="UI:VARIABLES:DATASCAN_RUNNING" type="sint32" value="0" />
+
+<!-- Page that show the result of data scanning -->
+<group id="datascan" posref="MM MM" w="1024" h="768" active="false" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+  
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    
+    <!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    
+    
+    <!-- Window -->
+	<group id="placeholder" posparent="window" posref="MM MM" w="600" h="340" x="0" y="0" />
+    
+    <!-- title -->
+    <view type="text" id="title" posparent="placeholder" posref="TM BM" y="22" color="255 255 255 255"
+    fontsize="12" shadow="true" hardtext="uiOnDataScanning" />
+    <view type="text" id="explain" posparent="placeholder" posref="TM BM" y="4" color="255 255 255 255"
+    fontsize="8" shadow="true" hardtext="uiOnDataScanningHelp" />
+
+    
+	<!-- check state -->
+    <instance template="server_box" id="check_win" posparent="placeholder" posref="TM TM" sizeref="w" h="88" x="0" y="0" />
+    <view type="text" id="state" posparent="check_win" posref="TL TL" w="584" x="8" y="-8" line_maxw="584" color="135 243 28 255"
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    <view type="text" id="progress" posref="BL TL" posparent="state" fontsize="12" y="-8" color="135 243 28 255" line_maxw="584"
+    shadow="true" multi_line="true" multi_line_space="0" />
+
+	<!-- Log Window with scroll -->
+    <instance template="server_box" id="log_win" posparent="placeholder" posref="BM BM" sizeref="w" h="244" x="0" y="0" />
+	<group id="log_txt" posparent="log_win" posref="TL TL" x="8" y="-8" sizeref="w" child_resize_h="true"
+		max_sizeparent="log_win" max_sizeref="h" max_h="-16">
+		<view type="text" id="log" posref="TL TL" fontsize="10" color="243 243 28 255" line_maxw="584"
+			shadow="true" multi_line="true" multi_line_space="0" />
+	</group>
+    <instance template="bk_scroll" id="back_scrollbar" posparent="log_win" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+    <ctrl style="skin_scroll" id="scroll_bar" align="T" target="log_txt" posparent="log_win" posref="TR TL" target_stepy="15" x="8" y="-8" />
+
+
+    <!-- Close Button -->
+    <ctrl style="log_std_but" id="but_close" posparent="placeholder" posref="BM TM" y="-8" onclick_l="on_scan_data_close" hardtext="uiCancelScanData" />
+	<link expr="ifthenelse(eq(@UI:VARIABLES:DATASCAN_RUNNING,1),'uiCancelScanData','uiCloseScanData')" target="but_close:hardtext" />
+
+  </group>
+
+</group>
+
+
+<!-- ******************** -->
+<!-- *  CREATE ACCOUNT  * -->
+<!-- ******************** -->
+
+<style style="log_url" type="text_button" button_type="toggle_button" 
+		tx_normal="but" tx_pushed="but" tx_over="but_over" wmargin="16" 
+		color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 0"
+		text_y="-6" text_underlined="true" fontsize="10" shadow="true"
+		text_color_normal="255 255 255 255" text_color_over="100 255 100 255" text_color_pushed="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255"
+	    text_shadow_color_pushed="0 0 0 255"
+	    text_shadow_color_over="0 0 0 255" 
+/>
+
+<template name="log_box_blank" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" 
+ keep="true" color="200 255 230 50" >
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+		<group id="bg" sizeref="hw" h="0" w="0" />		
+		<view type="bitmap" id="bk"	scale="true" posparent="bg" posref="MM MM" sizeref="hw" h="-32" w="-32" texture="blank.tga" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="tl"	texture="LogBoxBlank_TL.tga"  posref="TL TL" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="tr"	texture="LogBoxBlank_TR.tga"  posref="TR TR" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="br"	texture="LogBoxBlank_BR.tga"  posref="BR BR" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="bl"	texture="LogBoxBlank_BL.tga"  posref="BL BL" color="#color" render_layer="-1"/>			
+		<view type="bitmap" id="t" 	texture="blank.tga" posref="TM TM" scale="true" sizeref="w" w="-32" h="16" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="b" 	texture="blank.tga" posref="BM BM" scale="true" sizeref="w" w="-32" h="16" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="l" 	texture="blank.tga" posref="ML ML" scale="true" sizeref="h" h="-32" w="16" color="#color" render_layer="-1"/>
+		<view type="bitmap" id="r" 	texture="blank.tga" posref="MR MR" scale="true" sizeref="h" h="-32" w="16" color="#color" render_layer="-1"/>
+	</group>
+</template>
+
+<!-- Page that show the result of data scanning -->
+<group id="create_account" posref="MM MM" w="1024" h="768" active="false" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+  
+    <!-- BACKGROUND -->
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    
+    <!-- Window -->
+	<group id="placeholder" posparent="window" posref="MM MM" w="600" h="360" x="0" y="0" />
+    
+    <!-- title -->
+    <view type="text" id="title" posparent="placeholder" posref="TM BM" y="0" color="255 255 255 255"
+    fontsize="16" shadow="true" hardtext="uiCreateAccount" />
+    
+	<group id="submit_gr" x="30" y="-20" posparent="window" sizeref="wh" w="-30" h="-15" posref="TL TL" >
+  
+		<!-- login -->
+		<view type="text" id="txt_log" posref="TL TL" hardtext="uiUsername" fontsize="12" x="0" y="-60"  color="255 255 255 255" />
+
+		<instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BL BL" w="260" h="24" fontsize="12" x="190" y="0"
+		text_ref="BM BM" text_y="-2"
+		on_focus="create_account_rules" on_focus_params="rules_login" reset_focus_on_hide="false"  max_historic="0"
+		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_password:eb|select_all=false"
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
+    
+		<!-- password -->
+		<view type="text" id="txt_pas" posparent="txt_log" posref="BL TL" hardtext="uiPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
+    
+		<instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BL BL" w="260" h="24" fontsize="16" x="190" y="0"
+		text_ref="BM BM" text_y="-2"
+		on_focus="create_account_rules" on_focus_params="rules_password" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
+		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_confirm_password:eb|select_all=false"
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="8" color="135 243 28 255" />
+
+		<!-- confirm password -->
+		<view type="text" id="txt_confirm_pas" posparent="txt_pas" posref="BL TL" hardtext="uiConfirmPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
+    
+		<instance template="edit_box_log" id="eb_confirm_password" posparent="txt_confirm_pas" posref="BL BL" w="260" h="24" fontsize="16" x="190" y="0"
+		text_ref="BM BM" text_y="-2"
+		on_focus="create_account_rules" on_focus_params="rules_password_conf" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
+		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_email:eb|select_all=false"
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="8" color="135 243 28 255" />
+    
+		<!-- email -->
+		<view type="text" id="txt_email" posparent="txt_confirm_pas" posref="BL TL" hardtext="uiEmail" fontsize="12" x="0" y="-30" color="255 255 255 255" />
+    
+		<instance template="edit_box_log" id="eb_email" posparent="txt_email" posref="BL BL" w="260" h="24" fontsize="12" x="190" y="0"
+		text_ref="BM BM" text_y="-2"
+		on_focus="create_account_rules" on_focus_params="rules_email" reset_focus_on_hide="false"  max_historic="0"
+		onenter="" params=""
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="255" color="135 243 28 255" />
+
+		<!-- accept conditions -->
+		<ctrl type="button" id="accept_cond" button_type="toggle_button" pushed="true"	
+		 posref="BL TL" posparent="txt_email" x="0" y="-30" tx_normal="w_opacity_on.tga" 
+		 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+		 col_over="255 255 255 0" onclick_l="create_account_rules" params_l="" tooltip=""
+		/>
+
+		<view type="text" id="txt_accept_cond" posref="BR BL" posparent="accept_cond" hardtext="uiAcceptTermsOfUse1" fontsize="10" x="20" y="-2"  color="255 255 255 255" />
+		
+		<ctrl type="text_button" id="terms_launch_url" style="log_url" posref="BR BL" posparent="txt_accept_cond" x="2" y="0" hardtext="uiAcceptTermsOfUse2" 
+		 onclick_l="open_url" params_l="cfg_ConditionsTermsURL"/>
+
+		<!-- ********************** -->
+		<!-- *** WELCOME/ERRORS *** -->
+		<!-- ********************** -->
+		
+		<instance template="log_box_blank" id="welcome_errors_gr" posparent="eb_login" posref="TR TL" h="165" w="260" x="20" y="0" 
+		 blackColor="0 0 0 255" whiteColor="255 255 255 255" />
+	
+		<group id="erros_txt" posparent="welcome_errors_gr" posref="TL TL" x="8" y="-8" sizeref="w" child_resize_h="true"
+			max_sizeparent="welcome_errors_gr" max_sizeref="h" max_h="-16">
+			<view type="text" id="errors_list" posref="TL TL" x="15" y="-15" fontsize="12" color="255 255 255 255" line_maxw="584"
+				shadow="true" multi_line="true" multi_line_space="20" multi_max_line="100" hardtext="uiCreateAccountWelcome" />
+		</group>
+	
+		<instance template="bk_scroll" id="err_back_scrollbar" active="true" posparent="welcome_errors_gr" posref="TR TL" x="4" w="24" sizeref="h" h="0" />
+		<ctrl style="skin_scroll" id="err_scroll_bar" active="true" align="T" target="erros_txt" posparent="welcome_errors_gr" posref="TR TL" target_stepy="15" x="8" y="-8" />
+
+
+		<!-- ********************** -->
+		<!-- ******* RULES ******** -->
+		<!-- ********************** -->
+		<instance template="server_box" id="rules_gr" posref="BL BL" w="740" h="80" y="70" />
+
+		<!-- login rules -->
+		<view type="text" id="rules_login" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="login rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />
+
+		<!-- password rules -->
+		<view type="text" id="rules_password" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="password rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />
+
+		<!-- password confirmation rules -->
+		<view type="text" id="rules_password_conf" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="password confirmation rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />
+
+		<!-- email rules -->
+		<view type="text" id="rules_email" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="email rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />
+
+		<!-- conditions rules -->
+		<view type="text" id="rules_conditions" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="conditions rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />
+
+		<!-- Close Button -->
+		<ctrl style="log_std_but" id="but_close" posparent="placeholder" posref="BM BR" x="-10" y="25" onclick_l="on_create_account_close" hardtext="uiCancelCreateAccount" />
+
+		<!-- Submit Button -->
+		<ctrl style="log_std_but" id="but_submit" posparent="placeholder" posref="BM BL" x="10" y="25" onclick_l="on_create_account_submit" hardtext="uiSubmitNewAccount" />
+
+	</group>
+
+	<group id="login_gr" x="30" y="-40" posparent="window" sizeref="wh" w="-60" h="-45" posref="TL TL" >
+  	
+		<view type="text" id="success" multi_line="true" line_maxw="600" posref="TL TL" hardtext="uiSubmitSucces1" fontsize="14" x="90" y="-50"  color="255 255 255 255" />
+		<view type="text" id="email_adress" multi_line="false" line_maxw="600" posparent="success" posref="BL TL" hardtext="ADRESSE\n" fontsize="14" x="80" y="-10"  color="150 255 150 255" />
+		<view type="text" id="successEnd" multi_line="true" line_maxw="600" posparent="email_adress" posref="BL TL" hardtext="uiSubmitSucces2" fontsize="14" x="-80" y="-10"  color="255 255 255 255" />
+
+		<!-- Close Button -->
+		<ctrl style="log_std_but" id="but_close" posparent="placeholder" posref="BM BR" x="-10" y="15" onclick_l="on_create_account_close" hardtext="uiCancelCreateAccount" />
+	
+		<!-- Submit Button -->
+		<ctrl style="log_std_but" id="but_login" posparent="placeholder" posref="BM BL" x="10" y="15" onclick_l="create_account_login" hardtext="uiOnConnect" />
+
+	</group>
+
+
+  </group>
+
+</group>
+
+
+<!-- *********************** -->
+<!-- * Web start interface * -->
+<!-- *********************** -->
+
+<!-- Page that show the result of data scanning -->
+<!--<group id="webstart" posref="MM MM" w="1024" h="768" active="false" >
+
+  <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
+-->
+    <!-- BACKGROUND -->
+<!--
+    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+
+	<instance template="html_text_button" id="back_to_login" text="BACK TO LOGIN" posparent="parent" posref="TL TL" y="-15" 
+		onclick="on_back_to_login" onclick_param="" active="true"/>
+
+	<instance template="html_text_button" id="reload_test_page" text="RELOAD START PAGE" posparent="parent" posref="TL TL" y="-45" 
+		onclick="on_reload_test_page" onclick_param="" active="false"/>
+-->
+    
+    <!-- EXIT BUTTON -->
+<!--    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+   -->
+    
+    <!-- Window -->
+<!--	<group id="placeholder" posparent="window" posref="MM MM" w="600" h="340" x="0" y="0" />
+    -->
+    <!-- title -->
+<!--    <view type="text" id="title" posparent="placeholder" posref="TM BM" y="22" color="255 255 255 255"
+    fontsize="12" shadow="true" hardtext="uiOnDataScanning" />
+    <view type="text" id="explain" posparent="placeholder" posref="TM BM" y="4" color="255 255 255 255"
+    fontsize="8" shadow="true" hardtext="uiOnDataScanningHelp" />
+-->
+    
+<!--
+		<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
+		<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+
+		<ctrl style="skin_scroll" id="scroll_bar" />
+	</group>
+-->
+
+    <!-- Close Button -->
+<!--<ctrl style="log_std_but" id="but_close" posparent="placeholder" posref="BM TM" y="-8" onclick_l="on_scan_data_close" hardtext="uiCancelScanData" />
+	<link expr="ifthenelse(eq(@UI:VARIABLES:DATASCAN_RUNNING,1),'uiCancelScanData','uiCloseScanData')" target="but_close:hardtext" />
+-->
+<!--  </group>
+
+</group> -->
+
+
+
+<link expr="eq(@UI:VARIABLES:SCREEN,0)" target="checkpass:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,1)" target="sharddisp:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,2)" target="checking:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,3)" target="catdisp:active"/>
+<link expr="or(eq(@UI:VARIABLES:SCREEN,4),eq(@UI:VARIABLES:SCREEN,5))" target="patching:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,6)" target="eula:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,7)" target="datascan:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,8)" target="webstart:active"/>
+<link expr="eq(@UI:VARIABLES:SCREEN,9)" target="create_account:active"/>
+
+
+<tree node="checkpass"/>
+<tree node="sharddisp"/>
+<tree node="checking"/>
+<tree node="patching"/>
+<tree node="catdisp"/>
+<tree node="eula"/>
+<tree node="datascan"/>
+<tree node="webstart"/>
+<tree node="create_account"/>
+
+
+</interface_config>

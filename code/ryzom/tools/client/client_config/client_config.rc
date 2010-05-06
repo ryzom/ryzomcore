@@ -1,0 +1,547 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\client_config.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiConfigAboutRyzomConfiguration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "uiConfigRyzomConfigurationVersion",IDC_STATIC,40,10,119,
+                    8,SS_NOPREFIX
+    LTEXT           "uiConfigCopyright",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "uiConfigOK",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_CLIENT_CONFIG_DIALOG DIALOGEX 0, 0, 555, 343
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "uiConfigTitle"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "uiConfigOK",IDOK,274,322,50,14
+    PUSHBUTTON      "uiConfigCancel",IDCANCEL,329,322,50,14
+    PUSHBUTTON      "uiConfigApply",ID_APPLY,383,322,50,14,WS_DISABLED
+    PUSHBUTTON      "uiConfigDefault",ID_DEFAULT,437,322,50,14
+    PUSHBUTTON      "uiConfigLaunch",ID_LAUNCH,492,322,50,14
+END
+
+IDD_GENERAL DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "uiConfigSaveConfig",IDC_SAVE_CONFIG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,41,181,10
+    CONTROL         "uiConfigSlowDown",IDC_SLEEP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,20,245,224,10
+    GROUPBOX        "uiConfigAdvanced",IDC_STATIC,5,230,270,30
+    COMBOBOX        IDC_LANGUAGE,7,17,95,110,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "uiConfigLanguage",IDC_DISPLAY_FS_TEXT0,7,7,68,10
+END
+
+IDD_DISPLAY DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "uiConfigAuto",IDC_DRV3D_AUTO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,20,34,90,10
+    CONTROL         "uiConfigOpenGL",IDC_OPENGL,"Button",BS_AUTORADIOBUTTON,
+                    20,46,90,10
+    CONTROL         "uiConfigDirect3D",IDC_DIRECT3D,"Button",
+                    BS_AUTORADIOBUTTON,20,58,115,10
+    CONTROL         "uiConfigFullscreen",IDC_FULLSCREEN,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,20,105,90,10
+    CONTROL         "uiConfigWindowed",IDC_WINDOW,"Button",
+                    BS_AUTORADIOBUTTON,20,150,70,10
+    COMBOBOX        IDC_MODE,40,130,95,110,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_WIDTH,85,165,50,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HEIGHT,85,185,50,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_POSITION_X,85,205,50,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_POSITION_Y,85,225,50,12,ES_AUTOHSCROLL
+    LTEXT           "uiConfigWindowedOrFullscreen",IDC_STATIC,20,90,235,10
+    LTEXT           "uiConfigVideoMode",IDC_DISPLAY_FS_TEXT0,40,120,145,10
+    LTEXT           "uiConfigOpenGLOrD3D",IDC_STATIC,20,20,245,10
+    GROUPBOX        "uiConfigDriver",IDC_STATIC,5,5,270,65
+    GROUPBOX        "uiConfigParameters",IDC_STATIC,5,75,270,185
+    LTEXT           "uiConfigWidth",IDC_DISPLAY_WND_TEXT0,40,165,25,12,
+                    SS_CENTERIMAGE
+    LTEXT           "uiConfigHeight",IDC_DISPLAY_WND_TEXT1,40,185,25,12,
+                    SS_CENTERIMAGE
+    LTEXT           "uiConfigPositionX",IDC_DISPLAY_WND_TEXT2,40,205,35,12,
+                    SS_CENTERIMAGE
+    LTEXT           "uiConfigPositionY",IDC_DISPLAY_WND_TEXT3,40,225,35,12,
+                    SS_CENTERIMAGE
+END
+
+IDD_SOUND DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "uiConfigActivateSound",IDC_SOUND_ON,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,5,181,10
+    CONTROL         "",IDC_EAX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,70,25,
+                    181,10
+    LTEXT           "uiConfigSoundBuffer",IDC_SOUND_TEXT_SB,5,65,55,12,
+                    SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SOUND_QUALITY,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,65,60,105,26
+    LTEXT           "uiConfigEnableEAX",IDC_SOUND_TEXT_EAX,5,25,55,15
+    LTEXT           "",IDC_SOUND_QUALITY_VALUE,175,80,100,20,SS_CENTERIMAGE
+    CONTROL         "",IDC_FMOD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,70,90,
+                    181,10
+    LTEXT           "uiConfigEnableFMod",IDC_SOUND_TEXT_FMOD,5,90,55,15
+    CONTROL         "",IDC_FORCESOUNDSOFT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,70,45,181,10
+    LTEXT           "uiConfigSoundForceSoftware",IDC_SOUND_TEXT_FORCESOFT,5,
+                    45,55,15
+END
+
+IDD_DISPLAY_DETAILS DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Slider1",IDC_LANDSCAPE_QUALITY,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,10,30,105,24
+    LTEXT           "uiConfigLOD",IDC_STATIC,15,15,60,15,SS_CENTERIMAGE
+    LTEXT           "",IDC_LANDSCAPE_QUALITY_VALUE,125,30,140,20,
+                    SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_CHARACTER_QUALITY,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,10,91,105,26
+    LTEXT           "uiConfigLOD",IDC_STATIC,15,75,60,15,SS_CENTERIMAGE
+    LTEXT           "",IDC_CHARACTER_QUALITY_VALUE,125,91,140,20,
+                    SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_FX_QUALITY,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,10,154,105,26
+    LTEXT           "uiConfigLOD",IDC_STATIC,15,140,60,15,SS_CENTERIMAGE
+    LTEXT           "",IDC_FX_QUALITY_VALUE,125,154,140,20,SS_CENTERIMAGE
+    GROUPBOX        "uiConfigFX",IDC_STATIC,5,130,270,55
+    GROUPBOX        "uiConfigCharacters",IDC_STATIC,5,65,270,60
+    GROUPBOX        "uiConfigLandscape",IDC_STATIC,5,5,270,55
+    GROUPBOX        "uiConfigTexture",IDC_STATIC,5,190,270,55
+    LTEXT           "",IDC_TEXTURE_QUALITY_VALUE,125,215,140,20,
+                    SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_TEXTURE_QUALITY,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,10,214,105,26
+    LTEXT           "uiConfigLOD",IDC_STATIC,15,200,60,15,SS_CENTERIMAGE
+END
+
+IDD_DISPLAY_ADVANCED DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "uiConfigDisableDXTC",IDC_FORCE_DXTC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,25,160,10
+    CONTROL         "uiConfigDisableVP",IDC_DISABLE_VERTEX_PROGRAM,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,40,160,10
+    CONTROL         "uiConfigDisableAGP",IDC_DISABLE_AGP_VERTICES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,55,160,10
+    CONTROL         "uiConfigDisableTextureShader",
+                    IDC_DISABLE_TEXTURE_SHADERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,5,70,160,10
+    LTEXT           "uiConfigAdvancedComment",IDC_STATIC,5,5,255,15
+END
+
+IDD_DISPLAY_INFO DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "uiConfigOpenGL",IDC_STATIC,5,5,270,255
+    LTEXT           "uiConfigVendor",IDC_STATIC,15,20,55,10
+    LTEXT           "",IDC_GL_VENDOR,80,20,185,10
+    LTEXT           "uiConfigRenderer",IDC_STATIC,15,35,55,10
+    LTEXT           "",IDC_GL_RENDERER,80,35,190,10
+    LTEXT           "uiConfigVersion",IDC_STATIC,15,50,55,10
+    LTEXT           "",IDC_GL_VERSION,80,50,185,10
+    LISTBOX         IDC_EXTENSION,15,80,170,170,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "uiConfigExtensions",IDC_STATIC,15,70,40,10
+END
+
+IDD_PRESET DIALOG DISCARDABLE  0, 0, 284, 161
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ryzom Auto Configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "System memory :",IDC_STATIC,20,50,105,12,SS_CENTERIMAGE
+    LTEXT           "",IDC_SYSTEM_MEMORY,135,50,135,12,SS_CENTERIMAGE
+    LTEXT           "CPU frequency :",IDC_STATIC,20,65,115,12,SS_CENTERIMAGE
+    LTEXT           "",IDC_CPU_FREQUENCY,135,65,135,12,SS_CENTERIMAGE
+    LTEXT           "Video card :",IDC_STATIC,20,80,115,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_VIDEO_CARD,135,80,130,215,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Video memory :",IDC_STATIC,20,95,115,12,SS_CENTERIMAGE
+    DEFPUSHBUTTON   "&OK",IDOK,175,140,50,14
+    LTEXT           "",IDC_VIDEO_MEMORY,135,95,135,12,SS_CENTERIMAGE
+    LTEXT           "Hardware sound buffer :",IDC_STATIC,20,110,115,12,
+                    SS_CENTERIMAGE
+    LTEXT           "",IDC_HARDWARE_SOUND_BUFFER,135,110,135,12,
+                    SS_CENTERIMAGE
+    GROUPBOX        "Computer information",IDC_STATIC,5,35,274,100
+    PUSHBUTTON      "&Cancel",IDCANCEL,230,140,50,14
+    LTEXT           "It's time to configure Ryzom for your computer. Check the information below is correct and press OK. The program will adjust Ryzom configuration files to get optimal performance on your computer.",
+                    IDC_STATIC,5,5,275,25
+END
+
+IDD_DISPLAY_D3D DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "uiConfigDirect3D",IDC_STATIC,5,5,270,255
+    LTEXT           "uiConfigDescription",IDC_STATIC,15,20,55,10
+    LTEXT           "",IDC_D3D_DESCRIPTION,80,20,185,10
+    LTEXT           "uiConfigDriverDesc",IDC_STATIC,15,35,55,10
+    LTEXT           "",IDC_D3D_DRIVER,80,35,190,10
+    LTEXT           "uiConfigDriverVersion",IDC_STATIC,15,50,54,10
+    LTEXT           "",IDC_D3D_DRIVER_VERSION,80,50,185,10
+END
+
+IDD_SYSTEM_INFO DIALOG DISCARDABLE  0, 0, 283, 268
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "uiConfigDisplaySysInfo",IDC_STATIC,5,5,270,255
+    LTEXT           "uiConfigSystemInfoPhyMem",IDC_STATIC,15,80,60,10
+    LTEXT           "",IDC_SYS_INFO_PHY_MEM,100,80,165,10
+    LTEXT           "uiConfigSystemInfoOS",IDC_STATIC,15,20,60,20
+    LTEXT           "",IDC_SYS_INFO_OS,100,20,170,25
+    LTEXT           "uiConfigSystemInfoCPU",IDC_STATIC,15,50,54,10
+    LTEXT           "",IDC_SYS_INFO_CPU,100,50,165,25
+    LTEXT           "uiConfigSystemInfoVideo",IDC_STATIC,15,95,54,10
+    LTEXT           "",IDC_SYS_INFO_VIDEO,100,95,165,10
+    LTEXT           "uiConfigSystemInfoVideoDriver",IDC_STATIC,15,110,85,10
+    LTEXT           "",IDC_SYS_INFO_VIDEO_DRIVER,100,110,165,10
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "client_config MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "client_config\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "client_config.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "client_config Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_CLIENT_CONFIG_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 548
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 336
+    END
+
+    IDD_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_DISPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_SOUND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_DISPLAY_DETAILS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_DISPLAY_ADVANCED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_DISPLAY_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_PRESET, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 277
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 154
+    END
+
+    IDD_DISPLAY_D3D, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+
+    IDD_SYSTEM_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 261
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_LEFT_0              BITMAP  DISCARDABLE     "res\\left_bitmap_0.bmp"
+IDB_TOP_RIGHT           BITMAP  DISCARDABLE     "res\\top_right.bmp"
+IDB_DISPLAY             BITMAP  DISCARDABLE     "res\\display_icon.bmp"
+IDB_CARD                BITMAP  DISCARDABLE     "res\\card_icon.bmp"
+IDB_DISPLAY_ADVANCED    BITMAP  DISCARDABLE     "res\\display_config_icon.bmp"
+IDB_DISPLAY_DETAILS     BITMAP  DISCARDABLE     "res\\display_properties_icon.bmp"
+IDB_GENERAL             BITMAP  DISCARDABLE     "res\\general_icon.bmp"
+IDB_NETWORK             BITMAP  DISCARDABLE     "res\\network_icon.bmp"
+IDB_SOUND               BITMAP  DISCARDABLE     "res\\sound_icon.bmp"
+IDB_UPDATE              BITMAP  DISCARDABLE     "res\\update_icon.bmp"
+IDB_WELCOME             BITMAP  DISCARDABLE     "res\\welcome_icon.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\client_config.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_GENERAL DLGINIT
+BEGIN
+    IDC_LANGUAGE, 0x403, 8, 0
+0x6e45, 0x6c67, 0x7369, 0x0068, 
+    IDC_LANGUAGE, 0x403, 9, 0
+0x7246, 0x6e61, 0x61e7, 0x7369, "\000" 
+    IDC_LANGUAGE, 0x403, 7, 0
+0x6544, 0x7475, 0x6863, "\000" 
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SLASH_SCREEN DIALOGEX 0, 0, 333, 231
+STYLE WS_POPUP
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         155,IDC_STATIC,"Static",SS_BITMAP,0,0,333,231
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_SLASH_SCREEN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 326
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 224
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SLASH_SCREEN        BITMAP  DISCARDABLE     "res\\splash_screen.bmp"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\client_config.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

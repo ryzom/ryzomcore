@@ -1,0 +1,1305 @@
+<interface_config>
+
+<!-- ************************************ -->
+<!-- ************************************ -->
+<!-- *       TASKBAR DEFINITION         * -->
+<!-- ************************************ -->
+<!-- ************************************ -->
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+<lua file="taskbar.lua" />
+
+
+<!-- *************************** -->
+<!-- * TASKBAR DESKTOP BUTTONS * -->
+<!-- *************************** -->
+
+<proc id="tb_setdesktop" >
+	<action handler="set" cond="ne(@UI:SAVE:CURRENT_DESKTOP,@0)" params="target_property=ui:interface:gestion_windows:active|value=0" />
+	<action handler="leave_modal" />
+	<action handler="set_virtual_desktop" params="vdesk=@0" />
+	<action handler="set" params="dblink=UI:SAVE:CURRENT_DESKTOP|value=getVirtualDesktop()" />
+</proc>
+
+<proc id="tb_open_gestion_windows" >
+	<!--
+	<action handler="set" params="target_property=ui:interface:gestion_windows:close:active|value=1" />
+	<action handler="set" params="target_property=ui:interface:gestion_windows:active|value=1" />
+	-->
+	<action handler="set" params="target_property=ui:interface:gestion_windows:close:active|value=1" />
+	<action handler="show_hide" params="gestion_windows" />
+	<action handler="set_top_window" params="win=ui:interface:gestion_windows" />
+</proc>
+
+<template name="modes" id="" posparent="parent" posref="TL TL" x="0" y="0" w="42" h="28" texture=""
+	desk_value="" >
+		<!-- the big button is used to restore the current specific mode -->
+		<ctrl type="button" id="#id" button_type="radio_button" posparent="#posparent" x="#x" y="#y" posref="#posref" 
+										tx_normal="#texture" tx_pushed="#texture" tx_over="W_button_28_over.tga" 
+										color="255 255 255 128" col_pushed="255 255 255 255" click_when_pushed="true"
+										onclick_l="proc" params_l="tb_setdesktop|#desk_value" global_color_pushed="false"
+										onlongclick_l="proc" params_longclick_l="tb_open_gestion_windows" />
+		
+		
+					
+		<!-- the arrow button open a modal to select the new specific mode -->
+		<!--<ctrl type="button" id="arrow_up#id" button_type="push_button" posparent="#id" posref="TR TL" y="0" 
+										tx_normal="W_mode_choice.tga" tx_pushed="W_mode_choice.tga" tx_over="W_button_mode_over.tga"
+										color="255 255 255 128" col_pushed="255 255 255 255"
+										onclick_l="enter_modal" params_l="group=#onlist_modal" />-->
+
+		<!-- the big button is pushed if one of our mode -->
+		<link expr="eq(@UI:SAVE:CURRENT_DESKTOP,#desk_value)" target="#id:pushed"/>
+
+</template>
+
+
+<!-- ************** -->
+<!-- * QUIT MODAL * -->
+<!-- ************** -->
+
+<proc id="quit_dialog_game" >
+	<action handler="quit_game" />
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_ryzom" >
+	<action handler="paying_account" />
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_ryzom_now" >
+	<action handler="quit_ryzom_now" />
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_cancel" >
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_mainland" >
+	<action handler="return_to_mainland" />
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_reselect_char" >
+	<action handler="reselect_character" />
+	<action handler="leave_modal" />
+</proc>
+
+<proc id="quit_dialog_launch_editor" >
+	<action handler="leave_modal" /> <!-- must leave modal first because 'launch game' may pop a message box in some cases if patching was uncomplete -->
+	<action handler="launch_game" params="slot=ingame_auto|edit_mode=1" />	
+</proc>
+
+
+<!-- the modal (formerly: h="60") -->
+<define id="quit_button_delta_y" value="-4" />
+<group type="modal" id="quit_dialog" exit_click_out="false" mouse_pos="false" posref="MM MM" child_resize_w="true" child_resize_wmargin="16" child_resize_h="true" child_resize_hmargin="16" win_priority="%win_priority_highest"
+ on_enter="proc" options="skin_modal" y="20"
+ on_enter_params="quit_dialog_ryzom"
+ on_active="configure_quit_dialog_box"
+ on_active_params=""
+>
+	<view type="text" id="text" posref="TM TM" color="233 197 42 255" x="10" y="-8" fontsize="14" global_color="false" shadow="true" hardtext="uiQestionQuit" />
+	<view type="bitmap" id="warning" posparent="text" posref="ML MR" y="4" x="-4" global_color="false" texture="w_warning.tga" />
+			
+	<group id="indent_middle" child_resize_w="true" child_resize_h="true" child_resize_hmargin="4" child_resize_wmargin="16" posref="TM TM" x="8" y="-32" >
+	
+		<!-- NORMAL	-->
+		
+		<ctrl style="quit_button" id="cancel" posref="TL TL" hardtext="uittQuitCancel" onclick_l="proc" params_l="quit_dialog_cancel"
+			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
+		<ctrl style="quit_button" id="return_mainland" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland"
+			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
+		<ctrl style="quit_button" id="launch_editor" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittLaunchEditor" onclick_l="proc" params_l="quit_dialog_launch_editor"
+			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
+
+		<ctrl style="quit_button" id="reselect_char" posparent="launch_editor" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
+			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
+		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
+			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />-->
+		<ctrl style="quit_button" id="ryzom" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitRyzom" onclick_l="proc" params_l="quit_dialog_ryzom"
+			color="240 125 110 255" col_over="240 125 110 255" col_pushed="240 125 110 255" text_color_normal="240 125 110 160" />
+		<ctrl style="quit_button" id="ryzom_now" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitRyzom" onclick_l="proc" params_l="quit_dialog_ryzom_now"
+			color="240 125 110 255" col_over="240 125 110 255" col_pushed="240 125 110 255" text_color_normal="240 125 110 160" />
+
+	</group>
+</group>
+
+<!-- ****************** -->
+<!-- * SERVER STALLED * -->
+<!-- ****************** -->
+
+<group type="modal" id="server_stalled" exit_click_out="false" mouse_pos="false" 
+	posref="MM MM" x="0" y="-50" child_resize_w="true" child_resize_wmargin="10" h="60" 
+	win_priority="%win_priority_highest" options="skin_modal"
+>
+	<view type="text" id="text" posref="TM TM" color="233 197 42 255" x="0" y="-8" fontsize="14" global_color="false" shadow="true" hardtext="uiServerStalled" />
+	<view type="bitmap" id="icon" posparent="text" posref="BM TM" y="-2" x="0" texture="disconnect.tga" global_color="false" />
+			
+</group>
+
+<link expr="eq(@UI:VARIABLES:CONNECTION_QUALITY,0)" target="ui:interface:server_stalled:active" />
+
+
+<!-- ************************* -->
+<!-- * GAME QUIT PROGRESSION * -->
+<!-- ************************* -->
+
+<!-- Quit Progression is 0 if current action is not quit -->
+<variable entry="UI:VARIABLES:QUIT_PROGRESS" type="sint32" value="0" />
+<link expr="depends(@UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK, @SERVER:EXECUTE_PHRASE:SHEET)" 
+	action="set" cond="isQuitBrick(@SERVER:EXECUTE_PHRASE:SHEET)" params="dblink=UI:VARIABLES:QUIT_PROGRESS|value=@UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK"/>
+<link expr="depends(@SERVER:EXECUTE_PHRASE:SHEET)" 
+	action="set" cond="not(isQuitBrick(@SERVER:EXECUTE_PHRASE:SHEET))" params="dblink=UI:VARIABLES:QUIT_PROGRESS|value=0"/>
+
+<group type="modal" id="game_quitting" exit_click_out="false" mouse_pos="false" 
+	posref="MM MM" x="0" y="45" child_resize_w="true" child_resize_wmargin="10" h="110" 
+	win_priority="%win_priority_highest" options="skin_modal"
+>
+	<view type="text" id="text" posref="TM TM" color="233 197 42 255" x="0" y="-8" fontsize="14" global_color="false" shadow="true" hardtext="uiQuitingRyzom" />
+	<view type="bar" id="progress" posref="TM TM" x="0" y="-28" color="255 255 255" value="UI:VARIABLES:QUIT_PROGRESS" range="%player_act_end" reference="%player_act_start" />
+	<view type="text" id="text_mean" posref="TM TM" color="233 197 42 255" x="0" y="-50" fontsize="10" global_color="false" shadow="true" hardtext="uiQuitingRules" 
+		multi_line="true" multi_line_space="0" multi_line_maxw_only="true" line_maxw="600" />
+
+	<group id="indent_middle" child_resize_w="true" child_resize_wmargin="16" h="24" posref="BM BM" x="8" y="8" >
+		<ctrl style="quit_button" id="cancel" posref="TL TL" hardtext="uittQuitCancel" onclick_l="quit_ryzom_abort"
+			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
+		<ctrl style="quit_button" id="ryzom" posparent="cancel" posref="TR TL" x="4" hardtext="uiQuitNow" onclick_l="quit_ryzom_now"
+			color="240 125 110 255" col_over="240 125 110 255" col_pushed="240 125 110 255" text_color_normal="240 125 110 160" />
+	</group>
+</group>
+
+<proc id="proc_free_trial_game_quitting">
+	<action handler="open_url"	params="cfg_EditAccountURL" />
+	<action handler="close_free_trial_game_quitting"	params="" />
+</proc>
+
+<!-- Popup for free trial players -->
+<group type="modal" id="free_trial_game_quitting" exit_click_out="false" mouse_pos="false" 
+	posref="MM MM" x="0" y="45" child_resize_w="true" child_resize_wmargin="30" h="130" 
+	win_priority="%win_priority_highest" options="skin_modal"
+>
+
+	<view type="text" id="title_paying_account" color="233 197 42 255" posref="TL TL" x="30" y="-10" fontsize="14" global_color="false" shadow="true" hardtext="uiTitlePayingAccount" />
+
+	<view type="text" id="text_paying_account" color="233 197 42 255" posparent="title_paying_account" posref="BL TL" x="0" y="-15" fontsize="14" global_color="false" shadow="true" hardtext="uiPayingAccount" 
+		multi_line="true" multi_line_space="0" multi_line_maxw_only="true" />
+
+	<group id="indent_middle" child_resize_w="true" child_resize_wmargin="16" h="24" posref="BM BM" x="8" y="15" >
+		<ctrl style="quit_button" id="cancel" posref="TL TL" hardtext="uiNotYet" onclick_l="close_free_trial_game_quitting" 
+		 color="240 125 110 255" col_over="240 125 110 255" col_pushed="240 125 110 255" text_color_normal="240 125 110 160" wmin="100" />
+		<ctrl style="quit_button" id="validate" posparent="cancel" posref="TR TL" x="4" hardtext="uiUpgradeNow" onclick_l="proc" params_l="proc_free_trial_game_quitting"
+		 color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" wmin="100" />
+	</group>
+</group>
+
+
+
+<!--*************-->
+<!--* milko_pad *-->
+<!--*************-->
+
+<!-- Variables -->
+<variable entry="UI:VARIABLES:MK_MOVE"		type="sint32" value="0" />
+<variable entry="UI:VARIABLES:MK_MOVE_TMP"	type="sint32" value="0" />
+<variable entry="UI:VARIABLES:MK_ATTACK"	type="sint32" value="0" />
+<variable entry="UI:VARIABLES:MK_KICK"		type="sint32" value="0" />
+<variable entry="UI:SAVE:MK_MODE"			type="sint32" value="1" />
+
+<!-- Defines -->
+<define id="color_red" value="230 50 50 255" />
+<define id="color_blue" value="120 168 188 255" />
+<define id="color_green" value="138 168 98 255" />
+<define id="color_yellow" value="253 236 88 255" />
+<define id="color_turquoise" value="126 214 205 255" />
+<define id="color_purple" value="171 108 166 255" />
+<define id="color_orange" value="249 162 49 255" />
+<define id="color_beige" value="175 160 110 255" />
+
+<!-- Procedures -->
+<proc id="mk_move">
+	<action handler="set" params="dblink=UI:VARIABLES:MK_MOVE_TMP|value=@UI:VARIABLES:MK_MOVE" />
+	<action handler="context_move" cond="eq(@UI:VARIABLES:MK_MOVE_TMP,0)" />
+	<action handler="context_stop" cond="eq(@UI:VARIABLES:MK_MOVE_TMP,1)" />
+</proc>
+
+<proc id="mk_attack">
+	<action handler="context_attack"	cond="eq(@UI:VARIABLES:MK_ATTACK,0)" />
+	<action handler="context_disengage"	cond="eq(@UI:VARIABLES:MK_ATTACK,1)" />
+</proc>
+
+<proc id="mk_kick">
+	<action handler="context_invit"	cond="eq(@UI:VARIABLES:MK_KICK,0)" />
+	<action handler="milko_kick"	cond="eq(@UI:VARIABLES:MK_KICK,1)" />
+</proc>
+
+<!-- milko_pad -->
+<!--group type="container" id="milko_pad" header_active="false" right_button="false"
+	global_color="false" opened="true" openable="false" resizer="false" locked="false"
+	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:HELP" savable="true"
+	group_onclick_r="active_menu" group_params_r="menu=ui:interface:milko_menu"
+	w="134" h="200" pop_max_h="400"
+	on_active="proc" on_active_params="mk_proc_mode" -->
+
+<!-- Milko pad element : icon and text buttons -->
+<template name="mk_icon_text" id="" posparent="parent" posref="TL TL" x="0" y="0" w="128" h="24" hardtext="" hardtext_pushed="" button_type="push_button" db=""
+	onclick_l="" params_l="" tx_normal="" tx_pushed="" c="255 255 255 255" tooltip="" tooltip_pushed="" alpha_pushed="192" >
+	<group id="#id" w="#w" h="24" x="#x" y="#y" posref="#posref" posparent="#posparent" >
+	
+		<ctrl type="button" id="icon" button_type="#button_type" posref="TL TL" x="0" y="0"
+			tx_over="TB_over.tga" tx_normal="#tx_normal" tx_pushed="#tx_pushed" 
+			color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 #alpha_pushed"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false" />
+		
+		<ctrl type="text_button" id="button" hardtext="#hardtext" fontsize="10" onclick_l="" params_l=""
+			posparent="icon" posref="MR ML" x="3" y="0" wmargin="0" wmin="98" shadow="true"
+			button_type="push_button" tx_normal="w_text_button_pushed" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over" 
+			global_color_normal="false" global_color_pushed="false" global_color_over="false" 
+			color="#c" text_global_color_normal="false"/>
+			
+		<ctrl type="button" id="over" sizeref="wh" onclick_l="#onclick_l" params_l="#params_l"
+			button_type="push_button" scale="true" render_layer="1"
+			tx_over="blank.tga" tx_normal="blank.tga" tx_pushed="blank.tga" 
+			color="0 0 0 0" col_over="0 0 0 48" col_pushed="0 0 0 96"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			on_tooltip="lua:game:getMilkoTooltipWithKey('#db', '#tooltip', '#tooltip_pushed', '#onclick_l', '#params_l')" />
+			
+	</group>
+</template>
+
+<!-- Milko pad element : icon and text buttons (toggle) -->
+<template name="mk_icon_text_toggle" id="" posparent="parent" posref="TL TL" x="" y="" w="128" h="24" hardtext="" hardtext_pushed="" db=""
+	onclick_l="" params_l="" tx_normal="" tx_pushed="" button_type="toggle_button" c="" tooltip="" tooltip_pushed="" >
+	
+	<instance template="mk_icon_text" id="#id" hardtext="#hardtext" hardtext_pushed="#hardtext_pushed" 
+		posref="#posref" w="#w" h="#h" x="#x" y="#y" db="#db" c="#c" tooltip="#tooltip" tooltip_pushed="#tooltip_pushed"
+		posparent="#posparent" button_type="#button_type"
+		onclick_l="#onclick_l" params_l="#params_l"
+		tx_normal="#tx_normal" tx_pushed="#tx_pushed" alpha_pushed="255" />
+		
+	<link expr="ifthenelse(eq(@#db,0), '#tx_normal', '#tx_pushed')" 		target="#id:icon:texture, #id:icon:texture_pushed" />
+	<link expr="ifthenelse(eq(@#db,0), '#hardtext', '#hardtext_pushed')" 	target="#id:button:hardtext" />
+	
+</template>
+
+<!-- Milko pad element : icon button -->
+<template name="mk_icon" id="" posparent="parent" posref="TL TL" x="0" y="0" w="24" h="24" tooltip="" tooltip_pushed=""
+	onclick_l="" params_l="" tx_normal="" tx_pushed="" button_type="push_button" db="" alpha_pushed="192">
+	<group id="#id" w="#w" h="#h" x="#x" y="#y" posref="#posref" posparent="#posparent" >
+	
+	<ctrl type="button" id="icon" button_type="#button_type" posref="TL TL" x="0" y="0"
+		onclick_l="#onclick_l" params_l="#params_l" tooltip_parent="ctrl"
+		tx_over="TB_over.tga" tx_normal="#tx_normal" tx_pushed="#tx_pushed" 
+		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 #alpha_pushed"
+		global_color_normal="false" global_color_pushed="false" global_color_over="false"
+		on_tooltip="lua:game:getMilkoTooltipWithKey('#db', '#tooltip', '#tooltip_pushed', '#onclick_l', '#params_l')" />
+	
+	</group>
+</template>
+
+<!-- Milko pad element : icon button (toggle) -->
+<template name="mk_icon_toggle" id="" posparent="parent" posref="TL TL" x="0" y="0" w="24" h="24" tooltip="" tooltip_pushed=""
+	onclick_l="" params_l="" tx_normal="" tx_pushed="" button_type="toggle_button" db="" >
+	
+	<instance template="mk_icon" id="#id" tooltip="#tooltip" tooltip_pushed="#tooltip_pushed" 
+		posref="#posref" w="#w" h="#h" x="#x" y="#y" db="#db"
+		posparent="#posparent" button_type="#button_type"
+		onclick_l="#onclick_l" params_l="#params_l"
+		tx_normal="#tx_normal" tx_pushed="#tx_pushed" alpha_pushed="255" />
+	
+	<link expr="ifthenelse(eq(@#db,0), '#tx_normal', '#tx_pushed')" target="#id:icon:texture, #id:icon:texture_pushed" />
+	
+</template>
+
+<proc id="mk_proc_mode">
+	<action handler="set" params="target='ui:interface:milko_pad:content:mode1:active'|value=0"/>
+	<action handler="set" params="target='ui:interface:milko_pad:content:mode2:active'|value=0"/>
+	<action handler="set" params="target='ui:interface:milko_pad:content:mode3:active'|value=0"/>
+	<action handler="set" params="target='ui:interface:milko_pad:content:mode4:active'|value=0"/>
+	<action handler="set" params="target='ui:interface:milko_pad:content:mode5:active'|value=0"/>
+	
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,1)" params="target='ui:interface:milko_pad:content:mode1:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,1)" params="target='ui:interface:milko_pad:w'|value=142"/>
+	
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,2)" params="target='ui:interface:milko_pad:content:mode2:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,2)" params="target='ui:interface:milko_pad:content:mode3:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,2)" params="target='ui:interface:milko_pad:w'|value=66"/>
+	
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,3)" params="target='ui:interface:milko_pad:content:mode3:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,3)" params="target='ui:interface:milko_pad:w'|value=40"/>
+
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,4)" params="target='ui:interface:milko_pad:content:mode4:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,4)" params="target='ui:interface:milko_pad:content:mode5:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,4)" params="target='ui:interface:milko_pad:w'|value=248"/>
+	
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,5)" params="target='ui:interface:milko_pad:content:mode5:active'|value=1"/>
+	<action handler="set" cond="eq(@UI:SAVE:MK_MODE,5)" params="target='ui:interface:milko_pad:w'|value=248"/>
+</proc>
+
+<group type="menu" id="milko_menu" extends="base_menu_with_color">
+	<action id="quick_help" name="uiQuickhelpTitle" handler="proc" params="quick_help_taskbar"/>
+	<!--
+	<action id="reset_ui" name="uiTaskbarResetUI" handler="proc" params="proc_reset_interface"/>
+	-->
+	<action id="reset_ui" name="uiTaskbarResetUI" handler="milko_menu_reset_interface" params=""/>
+</group>
+
+<template name="t_mode_button" id="" x="0" y="0" >
+	<ctrl type="button" id="#id" button_type="push_button" posref="TL TL" x="#x" y="#y" scale="true" w="12" h="12"
+		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+		global_color_normal="false" global_color_pushed="false" global_color_over="false"
+		onclick_l="mk_inc_mode" params_l="" tx_over="w_button_12_over.tga" tx_normal="tb_mode.tga" tx_pushed="tb_mode.tga"
+		over_when_pushed="false" tooltip="uiMk_mode" />
+</template>
+
+<!-- milko_pad -->
+<group type="container" id="milko_pad" header_active="false" right_button="false" options="layer0_pad" 
+	global_color="false" opened="true" openable="false" resizer="false" locked="false"
+	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:HELP" savable="true"
+	group_onclick_r="active_menu" group_params_r="menu=ui:interface:milko_menu"
+	w="142" h="200" pop_max_h="400"
+	on_active="proc" on_active_params="mk_proc_mode" >
+
+		<group id="header_closed" x="0" y="0" h="0" posref="TL TL" >
+		</group>
+
+		<group id="header_opened" x="0" y="0" sizeref="w" w="0" h="16" posref="TL TL" >
+			
+			<!-- button in header for vertical mode -->
+			<instance template="t_mode_button" id="mode_button" x="6" y="0" />
+			<link expr="le(@UI:SAVE:MK_MODE,3)" target="mode_button:active" />
+			<link expr="ifthenelse(le(@UI:SAVE:MK_MODE,3), 16, 0)" target="h" />
+				
+		</group>
+		
+		<group id="content" x="0" y="0" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
+			
+			<!-- button in content for horizontal mode -->
+			<instance template="t_mode_button" id="mode_button" x="2" y="-12" />
+			<link expr="gt(@UI:SAVE:MK_MODE,3)" target="mode_button:active" />
+			<link expr="ifthenelse(eq(@UI:SAVE:MK_MODE,4), -38, -12)" target="mode_button:y" />
+
+			<!-- **** MODE 1 : text + button in two tabs : actions & windows-->
+			<group id="mode1" x="0" y="0" posref="TL TL" active="true" w="128" h="0" child_resize_h="true" child_resize_hmargin="0">
+			
+				<group id="tab_group" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="24" >
+					<group type="tab" id="milko_select" posref="TL TL" x="0" y="0" child_resize_w="true" h="24" >
+						<ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL"	group="mode1_content:milko_windows"	hardtext="uiMk_tab1" />
+						<ctrl style="tab_button_new" id="tab1" posparent="tab0"		group="mode1_content:milko_actions"	hardtext="uiMk_tab2" />
+					</group>
+				<view type="bitmap" id="septab" posparent="milko_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+				</group>
+				
+				<group id="mode1_content" x="0" y="-24" posref="TL TL" w="128" h="0" child_resize_h="true" child_resize_hmargin="0">
+				
+					<group id="milko_windows" x="0" y="0" h="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
+					
+						<!-- Identity -->
+						<instance template="mk_icon_text" id="window1" hardtext="uiMk_window1" posparent="parent" c="%color_green"
+							tooltip="uiMk_window1" onclick_l="show_hide" params_l="info_player_skills" tx_normal="tb_identity.tga" tx_pushed="tb_identity.tga"/>
+						
+						<!-- Inventory -->
+						<instance template="mk_icon_text" id="window2" hardtext="uiMk_window2" posparent="window1" posref="BL TL" c="%color_blue"
+							tooltip="uiMk_window2" onclick_l="show_hide" params_l="inventory" tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
+						
+						<!-- Actions -->
+						<instance template="mk_icon_text" id="window3" hardtext="uiMk_window3" posparent="window2" posref="BL TL" c="%color_blue"
+							tooltip="uiMk_window3" onclick_l="show_hide" params_l="phrase_book" tx_normal="tb_spellbook.tga" tx_pushed="tb_spellbook.tga"/>
+						
+						<!-- Tasks -->
+						<instance template="mk_icon_text" id="window4" hardtext="uiMk_window4" posparent="window3" posref="BL TL" c="%color_turquoise"
+							tooltip="uiMk_window4" onclick_l="show_hide" params_l="info_player_journal" tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
+							
+						<!-- Map -->
+						<instance template="mk_icon_text" id="window5" hardtext="uiMk_window5" posparent="window4" posref="BL TL" c="%color_orange"
+							tooltip="uiMk_window5" onclick_l="show_hide" params_l="map" tx_normal="tb_map.tga" tx_pushed="tb_map.tga"/>
+						
+						<!-- Interaction -->
+						<instance template="mk_icon_text" id="window6" hardtext="uiMk_window6" posparent="window5" posref="BL TL" c="%color_yellow"
+							tooltip="uiMk_window6" onclick_l="enter_modal" params_l="group=ui:interface:milko_interaction" tx_normal="tb_interaction.tga" tx_pushed="tb_interaction.tga"/>
+							
+						<!-- Help/CS -->
+						<instance template="mk_icon_text" id="window7" hardtext="uiMk_window10" posparent="window6" posref="BL TL" c="%color_purple" 
+							tooltip="uiMk_window10" onclick_l="enter_modal" params_l="group=ui:interface:milko_help" tx_normal="tb_help.tga" tx_pushed="tb_help.tga" />
+
+						<!-- System -->
+						<instance template="mk_icon_text" id="window8" hardtext="uiMk_window9" posparent="window7" posref="BL TL" c="%color_red"
+							tooltip="uiMk_window9" onclick_l="enter_modal" params_l="group=ui:interface:milko_system" tx_normal="tb_system.tga" tx_pushed="tb_system.tga"/>
+							
+						<!-- Quit -->
+						<instance template="mk_icon_text" id="window9" hardtext="uiMk_system7" posparent="window8" posref="BL TL" c="%color_red" 
+							tooltip="uiMk_system7" onclick_l="enter_modal" params_l="group=ui:interface:quit_dialog" tx_normal="tb_quit.tga" tx_pushed="tb_quit.tga" />
+
+					</group>
+					
+					<group id="milko_actions" x="0" y="0" h="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
+					
+						<!-- Sit/Stand -->
+						<instance template="mk_icon_text_toggle" id="action1" posparent="parent" posref="TL TL" c="%color_green"
+							hardtext="uiMk_action2_0" hardtext_pushed="uiMk_action2_1" tooltip="uiMk_action2_0_tt" tooltip_pushed="uiMk_action2_1_tt"
+							onclick_l="toggle_sit_stand" params_l="" db="UI:VARIABLES:PLAYER_STAND"
+							tx_normal="tb_action_sit.tga" tx_pushed="tb_action_stand.tga"/>
+						
+						<!-- Run/Walk -->
+						<instance template="mk_icon_text_toggle" id="action2" posparent="action1" posref="BL TL" c="%color_green"
+							hardtext="uiMk_action3_0" hardtext_pushed="uiMk_action3_1" tooltip="uiMk_action3_0_tt" tooltip_pushed="uiMk_action3_1_tt"
+							onclick_l="toggle_run_walk" params_l="" db="UI:VARIABLES:PLAYER_RUNNING"
+							tx_normal="tb_action_walk.tga" tx_pushed="tb_action_run.tga"/>
+						
+						<!-- Dodge/Parry -->
+						<instance template="mk_icon_text_toggle" id="action3" posparent="action2" posref="BL TL" c="%color_green"
+							hardtext="uiMk_action4_0" hardtext_pushed="uiMk_action4_1" tooltip="uiMk_action4_0_tt" tooltip_pushed="uiMk_action4_1_tt"
+							onclick_l="toggle_dodge_parry" params_l="" db="SERVER:DEFENSE:DEFENSE_MODE"
+							tx_normal="tb_mode_dodge.tga" tx_pushed="tb_mode_parry.tga"/>
+						<link expr="@SERVER:DEFENSE:DEFENSE_MODE" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode1:mode1_content:milko_actions:action3:over')" />
+						
+						<!-- Move/Stop -->
+						<instance template="mk_icon_text_toggle" id="action4" posparent="action3" posref="BL TL" c="%color_blue"
+							hardtext="uiMk_action1_0" hardtext_pushed="uiMk_action1_1" tooltip="uiMk_action1_0_tt" tooltip_pushed="uiMk_action1_1_tt"
+							onclick_l="proc" params_l="mk_move" db="UI:VARIABLES:MK_MOVE"
+							tx_normal="tb_action_move.tga" tx_pushed="tb_action_stop.tga"/>
+							
+						<!-- Attack/Disengage -->
+						<instance template="mk_icon_text_toggle" id="action5" posparent="action4" posref="BL TL" c="%color_blue"
+							hardtext="uiMk_action5_0" hardtext_pushed="uiMk_action5_1" tooltip="uiMk_action5_0_tt" tooltip_pushed="uiMk_action5_1_tt"
+							onclick_l="toggle_combat" params_l="" db="UI:VARIABLES:MK_ATTACK"
+							tx_normal="tb_action_attack.tga" tx_pushed="tb_action_disengage.tga"/>
+						<link expr="@UI:VARIABLES:MK_ATTACK" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode1:mode1_content:milko_actions:action5:over')" />
+						
+						<!-- Extract -->
+						<instance template="mk_icon_text" id="action6" hardtext="uiMk_action6" posparent="action5" posref="BL TL"
+							onclick_l="context_extract_rm" params_l="" c="%color_blue" tooltip="uiMk_action6_tt"
+							tx_normal="tb_action_extract.tga" tx_pushed="tb_action_extract.tga"/>
+						
+						<!-- Invite -->
+						<instance template="mk_icon_text" id="action7" hardtext="uiMk_action7" posparent="action6" posref="BL TL"
+							onclick_l="proc" params_l="mk_kick" c="%color_blue" tooltip="uiMk_action7_tt"
+							tx_normal="tb_action_invite.tga" tx_pushed="tb_action_invite.tga"/>
+						
+						<!-- Disband -->
+						<instance template="mk_icon_text" id="action8" hardtext="uiMk_action8" posparent="action7" posref="BL TL"
+							onclick_l="context_quit_team" params_l="" c="%color_blue" tooltip="uiMk_action8_tt"
+							tx_normal="tb_action_disband.tga" tx_pushed="tb_action_disband.tga"/>
+						
+						<!-- Talk -->
+						<instance template="mk_icon_text" id="action9" hardtext="uiMk_action9" posparent="action8" posref="BL TL"
+							onclick_l="context_talk" params_l="" c="%color_blue" tooltip="uiMk_action9_tt"
+							tx_normal="tb_action_talk.tga" tx_pushed="tb_action_talk.tga"/>
+							
+					</group>
+				</group>
+				
+			</group>
+			
+			<!-- **** MODE 2 : buttons in two columns : actions & windows-->
+			<group id="mode2" x="26" y="0" posref="TL TL" active="false" w="24" h="0" child_resize_h="true" child_resize_hmargin="0" >
+			
+				<!-- Sit/Stand -->
+				<instance template="mk_icon_toggle" id="action1" posparent="parent" posref="TL TL"
+					tooltip="uiMk_action2_0_tt" tooltip_pushed="uiMk_action2_1_tt"
+					onclick_l="toggle_sit_stand" params_l="" db="UI:VARIABLES:PLAYER_STAND"
+					tx_normal="tb_action_sit.tga" tx_pushed="tb_action_stand.tga"/>
+				
+				<!-- Run/Walk -->
+				<instance template="mk_icon_toggle" id="action2" posparent="action1" posref="BL TL"
+					tooltip="uiMk_action3_0_tt" tooltip_pushed="uiMk_action3_1_tt"
+					onclick_l="toggle_run_walk" params_l="" db="UI:VARIABLES:PLAYER_RUNNING"
+					tx_normal="tb_action_walk.tga" tx_pushed="tb_action_run.tga"/>
+				
+				<!-- Dodge/Parry -->
+				<instance template="mk_icon_toggle" id="action3" posparent="action2" posref="BL TL"
+					tooltip="uiMk_action4_0_tt" tooltip_pushed="uiMk_action4_1_tt"
+					onclick_l="toggle_dodge_parry" params_l="" db="SERVER:DEFENSE:DEFENSE_MODE"
+					tx_normal="tb_mode_dodge.tga" tx_pushed="tb_mode_parry.tga"/>
+				<link expr="@SERVER:DEFENSE:DEFENSE_MODE" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode2:action3:icon')" />
+				
+				<!-- Move/Stop -->
+				<instance template="mk_icon_toggle" id="action4" posparent="action3" posref="BL TL"
+					tooltip="uiMk_action1_0_tt" tooltip_pushed="uiMk_action1_1_tt"
+					onclick_l="proc" params_l="mk_move" db="UI:VARIABLES:MK_MOVE"
+					tx_normal="tb_action_move.tga" tx_pushed="tb_action_stop.tga"/>
+
+				<!-- Attack/Disengage -->
+				<instance template="mk_icon_toggle" id="action5" posparent="action4" posref="BL TL"
+					tooltip="uiMk_action5_0_tt" tooltip_pushed="uiMk_action5_1_tt"
+					onclick_l="toggle_combat" params_l="" db="UI:VARIABLES:MK_ATTACK"
+					tx_normal="tb_action_attack.tga" tx_pushed="tb_action_disengage.tga"/>
+				<link expr="@UI:VARIABLES:MK_ATTACK" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode2:action5:icon')" />
+				
+				<!-- Extract -->
+				<instance template="mk_icon" id="action6" tooltip="uiMk_action6_tt" posparent="action5" posref="BL TL"
+					onclick_l="context_extract_rm" params_l=""
+					tx_normal="tb_action_extract.tga" tx_pushed="tb_action_extract.tga"/>
+				
+				<!-- Invite -->
+				<instance template="mk_icon" id="action7" tooltip="uiMk_action7_tt" posparent="action6" posref="BL TL"
+					onclick_l="proc" params_l="mk_kick"
+					tx_normal="tb_action_invite.tga" tx_pushed="tb_action_invite.tga"/>
+				
+				<!-- Disband -->
+				<instance template="mk_icon" id="action8" tooltip="uiMk_action8_tt" posparent="action7" posref="BL TL"
+					onclick_l="context_quit_team" params_l=""
+					tx_normal="tb_action_disband.tga" tx_pushed="tb_action_disband.tga"/>
+				
+				<!-- Talk -->
+				<instance template="mk_icon" id="action9" tooltip="uiMk_action9_tt" posparent="action8" posref="BL TL"
+					onclick_l="context_talk" params_l=""
+					tx_normal="tb_action_talk.tga" tx_pushed="tb_action_talk.tga"/>
+			</group>
+			
+			<!-- **** MODE 3 : buttons in one columns : windows-->
+			<group id="mode3" x="0" y="0" posref="TL TL" active="false" w="24" h="0" child_resize_h="true" child_resize_hmargin="0" >
+				
+				<!-- Identity -->
+				<instance template="mk_icon" id="window1" tooltip="uiMk_window1" posparent="parent"
+					onclick_l="show_hide" params_l="info_player_skills"
+					tx_normal="tb_identity.tga" tx_pushed="tb_identity.tga"/>
+				
+				<!-- Inventory -->
+				<instance template="mk_icon" id="window2" tooltip="uiMk_window2" posparent="window1" posref="BL TL"
+					onclick_l="show_hide" params_l="inventory"
+					tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
+				
+				<!-- Actions -->
+				<instance template="mk_icon" id="window3" tooltip="uiMk_window3" posparent="window2" posref="BL TL"
+					onclick_l="show_hide" params_l="phrase_book"
+					tx_normal="tb_spellbook.tga" tx_pushed="tb_spellbook.tga"/>
+				
+				<!-- Tasks -->
+				<instance template="mk_icon" id="window4" tooltip="uiMk_window4" posparent="window3" posref="BL TL"
+					onclick_l="show_hide" params_l="info_player_journal"
+					tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
+					
+				<!-- Map -->
+				<instance template="mk_icon" id="window5" tooltip="uiMk_window5" posparent="window4" posref="BL TL"
+					onclick_l="show_hide" params_l="map"
+					tx_normal="tb_map.tga" tx_pushed="tb_map.tga"/>
+				
+				<!-- Interaction -->
+				<instance template="mk_icon" id="window6" tooltip="uiMk_window6" posparent="window5" posref="BL TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_interaction"
+					tx_normal="tb_interaction.tga" tx_pushed="tb_interaction.tga"/>
+					
+				<!-- Help/CS -->
+				<instance template="mk_icon" id="window7" tooltip="uiMk_window10" posparent="window6" posref="BL TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_help"
+					tx_normal="tb_help.tga" tx_pushed="tb_help.tga"/>
+					
+				<!-- System -->
+				<instance template="mk_icon" id="window8" tooltip="uiMk_window9" posparent="window7" posref="BL TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_system"
+					tx_normal="tb_system.tga" tx_pushed="tb_system.tga"/>
+				
+				<!-- Quit -->
+				<instance template="mk_icon" id="window9" tooltip="uiMk_system7" posparent="window8" posref="BL TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:quit_dialog" 
+					tx_normal="tb_quit.tga" tx_pushed="tb_quit.tga" />
+
+			</group>
+			
+			<!-- **** MODE 4 : buttons in two rows : actions & windows-->
+			<group id="mode4" x="16" y="-26" posref="TL TL" active="false" w="0" h="24" child_resize_w="true" child_resize_wmargin="0" >
+			
+				<!-- Sit/Stand -->
+				<instance template="mk_icon_toggle" id="action1" posparent="parent" posref="TL TL"
+					tooltip="uiMk_action2_0_tt" tooltip_pushed="uiMk_action2_1_tt"
+					onclick_l="toggle_sit_stand" params_l="" db="UI:VARIABLES:PLAYER_STAND"
+					tx_normal="tb_action_sit.tga" tx_pushed="tb_action_stand.tga"/>
+				
+				<!-- Run/Walk -->
+				<instance template="mk_icon_toggle" id="action2" posparent="action1" posref="TR TL"
+					tooltip="uiMk_action3_0_tt" tooltip_pushed="uiMk_action3_1_tt"
+					onclick_l="toggle_run_walk" params_l="" db="UI:VARIABLES:PLAYER_RUNNING"
+					tx_normal="tb_action_walk.tga" tx_pushed="tb_action_run.tga"/>
+				
+				<!-- Dodge/Parry -->
+				<instance template="mk_icon_toggle" id="action3" posparent="action2" posref="TR TL"
+					tooltip="uiMk_action4_0_tt" tooltip_pushed="uiMk_action4_1_tt"
+					onclick_l="toggle_dodge_parry" params_l="" db="SERVER:DEFENSE:DEFENSE_MODE"
+					tx_normal="tb_mode_dodge.tga" tx_pushed="tb_mode_parry.tga"/>
+				<link expr="@SERVER:DEFENSE:DEFENSE_MODE" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode4:action3:icon')" />
+				
+				<!-- Move/Stop -->
+				<instance template="mk_icon_toggle" id="action4" posparent="action3" posref="TR TL"
+					tooltip="uiMk_action1_0_tt" tooltip_pushed="uiMk_action1_1_tt"
+					onclick_l="proc" params_l="mk_move" db="UI:VARIABLES:MK_MOVE"
+					tx_normal="tb_action_move.tga" tx_pushed="tb_action_stop.tga"/>
+
+				<!-- Attack/Disengage -->
+				<instance template="mk_icon_toggle" id="action5" posparent="action4" posref="TR TL"
+					tooltip="uiMk_action5_0_tt" tooltip_pushed="uiMk_action5_1_tt"
+					onclick_l="toggle_combat" params_l="" db="UI:VARIABLES:MK_ATTACK"
+					tx_normal="tb_action_attack.tga" tx_pushed="tb_action_disengage.tga"/>
+				<link expr="@UI:VARIABLES:MK_ATTACK" action="lua:game:taskbarDisableTooltip('ui:interface:milko_pad:content:mode4:action5:icon')" />
+				
+				<!-- Extract -->
+				<instance template="mk_icon" id="action6" tooltip="uiMk_action6_tt" posparent="action5" posref="TR TL"
+					onclick_l="context_extract_rm" params_l=""
+					tx_normal="tb_action_extract.tga" tx_pushed="tb_action_extract.tga"/>
+				
+				<!-- Invite -->
+				<instance template="mk_icon" id="action7" tooltip="uiMk_action7_tt" posparent="action6" posref="TR TL"
+					onclick_l="proc" params_l="mk_kick"
+					tx_normal="tb_action_invite.tga" tx_pushed="tb_action_invite.tga"/>
+				
+				<!-- Disband -->
+				<instance template="mk_icon" id="action8" tooltip="uiMk_action8_tt" posparent="action7" posref="TR TL"
+					onclick_l="context_quit_team" params_l=""
+					tx_normal="tb_action_disband.tga" tx_pushed="tb_action_disband.tga"/>
+				
+				<!-- Talk -->
+				<instance template="mk_icon" id="action9" tooltip="uiMk_action9_tt" posparent="action8" posref="TR TL"
+					onclick_l="context_talk" params_l=""
+					tx_normal="tb_action_talk.tga" tx_pushed="tb_action_talk.tga"/>
+			</group>
+			
+			<!-- **** MODE 5 : buttons in one row : windows-->
+			<group id="mode5" x="16" y="0" posref="TL TL" active="false" w="0" h="24" child_resize_w="true" child_resize_wmargin="0" >
+				
+				<!-- Identity -->
+				<instance template="mk_icon" id="window1" tooltip="uiMk_window1" posparent="parent"
+					onclick_l="show_hide" params_l="info_player_skills"
+					tx_normal="tb_identity.tga" tx_pushed="tb_identity.tga"/>
+				
+				<!-- Inventory -->
+				<instance template="mk_icon" id="window2" tooltip="uiMk_window2" posparent="window1" posref="TR TL"
+					onclick_l="show_hide" params_l="inventory"
+					tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
+				
+				<!-- Actions -->
+				<instance template="mk_icon" id="window3" tooltip="uiMk_window3" posparent="window2" posref="TR TL"
+					onclick_l="show_hide" params_l="phrase_book"
+					tx_normal="tb_spellbook.tga" tx_pushed="tb_spellbook.tga"/>
+				
+				<!-- Tasks -->
+				<instance template="mk_icon" id="window4" tooltip="uiMk_window4" posparent="window3" posref="TR TL"
+					onclick_l="show_hide" params_l="info_player_journal"
+					tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
+					
+				<!-- Map -->
+				<instance template="mk_icon" id="window5" tooltip="uiMk_window5" posparent="window4" posref="TR TL"
+					onclick_l="show_hide" params_l="map"
+					tx_normal="tb_map.tga" tx_pushed="tb_map.tga"/>
+				
+				<!-- Interaction -->
+				<instance template="mk_icon" id="window6" tooltip="uiMk_window6" posparent="window5" posref="TR TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_interaction"
+					tx_normal="tb_interaction.tga" tx_pushed="tb_interaction.tga"/>
+					
+				<!-- Help/CS -->
+				<instance template="mk_icon" id="window7" tooltip="uiMk_window10" posparent="window6" posref="TR TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_help"
+					tx_normal="tb_help.tga" tx_pushed="tb_help.tga"/>
+					
+				<!-- System -->
+				<instance template="mk_icon" id="window8" tooltip="uiMk_window9" posparent="window7" posref="TR TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:milko_system"
+					tx_normal="tb_system.tga" tx_pushed="tb_system.tga"/>
+				
+				<!-- Quit -->
+				<instance template="mk_icon" id="window9" tooltip="uiMk_system7" posparent="window8" posref="TR TL"
+					onclick_l="enter_modal" params_l="group=ui:interface:quit_dialog" 
+					tx_normal="tb_quit.tga" tx_pushed="tb_quit.tga" />
+
+			</group>
+
+			<!-- Change mode -->
+			<link expr="depends(@UI:SAVE:MK_MODE)" action="proc" params="mk_proc_mode" />
+			
+		</group>
+		
+</group>
+
+<style style="mk_sub_menu" type="modal" button_type="push_button" w="133" pop_max_h="400"
+	movable="true" resizer="false" global_color="true" openable="false" opened="true" active="false" escapable="true" right_button="false"
+	savable="false" header_color="UI:SAVE:WIN:COLORS:MEM"
+	exit_click_out="true" exit_click_l="true" force_inside_screen="true" posref="TL BR" />
+
+<group style="mk_sub_menu" id="milko_interaction" modal_parent="milko_pad" child_resize_h="true" child_resize_hmargin="8" >
+
+	<!-- Contacts -->
+	<instance template="mk_icon_text" id="sys1" hardtext="uiMk_interaction1" posparent="parent" posref="TL TL" x="4" y="-4"
+		onclick_l="show_hide" params_l="contact_list" tooltip="uiMk_interaction1"
+		tx_normal="tb_contacts.tga" tx_pushed="tb_contacts.tga" c="%color_yellow" />
+	
+	<!-- Guild -->
+	<instance template="mk_icon_text" id="sys2" hardtext="uiMk_interaction2" posparent="sys1" posref="BL TL"
+		onclick_l="show_hide" params_l="guild" tooltip="uiMk_interaction2"
+		tx_normal="tb_guild.tga" tx_pushed="tb_guild.tga" c="%color_yellow" />
+	<link expr="not(%is_guild_present)" target="sys2:icon:frozen" />
+	<link expr="not(%is_guild_present)" target="sys2:button:frozen" />
+	
+	<!-- Guild's forum -->
+	<instance template="mk_icon_text" id="sys3" hardtext="uiMk_interaction3" posparent="sys2" posref="BL TL"
+		onclick_l="show_hide" params_l="guild_forum" tooltip="uiMk_interaction3"
+		tx_normal="tb_forum.tga" tx_pushed="tb_forum.tga" c="%color_yellow" />
+	<link expr="not(%is_guild_present)" target="sys3:button:frozen" />
+	<link expr="not(%is_guild_present)" target="sys3:icon:frozen" />
+	
+	<!-- Fame -->
+	<instance template="mk_icon_text" id="sys4" hardtext="uiMk_interaction4" posparent="sys3" posref="BL TL"
+		onclick_l="show_hide" params_l="fame" tooltip="uiMk_interaction4"
+		tx_normal="tb_faction.tga" tx_pushed="tb_faction.tga" c="%color_yellow" />
+	
+	<!-- Mailbox -->
+	<instance template="mk_icon_text" id="sys5" hardtext="uiMk_interaction5" posparent="sys4" posref="BL TL"
+		onclick_l="show_hide" params_l="mailbox" tooltip="uiMk_interaction5"
+		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
+
+	<!-- WebIG -->
+	<instance template="mk_icon_text" id="sys5b" hardtext="uiMk_interaction5b" posparent="sys5" posref="BL TL"
+		onclick_l="show_hide" params_l="webig" tooltip="uiMk_interaction5b"
+		tx_normal="tb_mail.tga" tx_pushed="tb_mail.tga" c="%color_yellow" />
+	
+	<!-- Team -->
+	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_interaction6" posparent="sys5b" posref="BL TL"
+		onclick_l="show_hide" params_l="team_list" tooltip="uiMk_interaction6"
+		tx_normal="tb_team.tga" tx_pushed="tb_team.tga" c="%color_yellow" />
+	<link expr="not(%is_team_present)" target="sys6:button:frozen" />
+	<link expr="not(%is_team_present)" target="sys6:icon:frozen" />
+	
+	<!-- Animals -->
+	<instance template="mk_icon_text" id="sys7" hardtext="uiMk_interaction7" posparent="sys6" posref="BL TL"
+		onclick_l="show_hide" params_l="animal_global" tooltip="uiMk_interaction7"
+		tx_normal="tb_animals.tga" tx_pushed="tb_animals.tga" c="%color_yellow" />
+		
+	<!-- Ring -->
+	<!--
+	<instance template="mk_icon_text" id="sys8" hardtext="uiMk_interaction8" posparent="sys7" posref="BL TL"
+		onclick_l="show_hide" params_l="r2ed_ring_window" tooltip="uiMk_interaction8" 
+		tx_normal="tb_ring_window.tga" tx_pushed="tb_ring_window.tga" c="%color_yellow"/>
+		-->
+
+</group>
+
+<group style="mk_sub_menu" id="milko_system" modal_parent="milko_pad" child_resize_h="true" child_resize_hmargin="8" >
+
+	<!-- Configuration -->
+	<instance template="mk_icon_text" id="sys1" hardtext="uiMk_system1" posparent="parent" posref="TL TL" x="4" y="-4"
+		onclick_l="show_hide" params_l="game_config" tooltip="uiMk_system1"
+		tx_normal="tb_action_config.tga" tx_pushed="tb_action_config.tga" c="%color_beige" />
+	
+	<!-- Keys -->
+	<instance template="mk_icon_text" id="sys2" hardtext="uiMk_system2" posparent="sys1" posref="BL TL"
+		onclick_l="show_hide" params_l="keys" tooltip="uiMk_system2"
+		tx_normal="tb_keys.tga" tx_pushed="tb_keys.tga" c="%color_beige" />
+	
+	<!-- Windows -->
+	<instance template="mk_icon_text" id="sys3" hardtext="uiMk_system3" posparent="sys2" posref="BL TL"
+		onclick_l="proc" params_l="tb_open_gestion_windows" tooltip="uiMk_system3"
+		tx_normal="tb_windows.tga" tx_pushed="tb_windows.tga" c="%color_beige" />
+	
+	<!-- Macros -->
+	<instance template="mk_icon_text" id="sys4" hardtext="uiMk_system4" posparent="sys3" posref="BL TL"
+		onclick_l="show_hide" params_l="macros" tooltip="uiMk_system4"
+		tx_normal="tb_macros.tga" tx_pushed="tb_macros.tga" c="%color_beige" />
+	
+	<!-- Connection -->
+	<instance template="mk_icon_text" id="sys5" hardtext="uiMk_system5" posparent="sys4" posref="BL TL"
+		onclick_l="show_hide" params_l="connection" tooltip="uiMk_system5"
+		tx_normal="tb_connection.tga" tx_pushed="tb_connection.tga" c="%color_beige" />
+	
+	<!-- Mp3 player -->
+	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_system6" posparent="sys5" posref="BL TL"
+		onclick_l="show_hide" params_l="mp3_player" tooltip="uiMk_system6"
+		tx_normal="mp3.tga" tx_pushed="mp3.tga" c="%color_beige" />
+
+	<!-- Background downloader -->
+	<instance template="mk_icon_text" id="sys7" hardtext="uiMk_system8" posparent="sys6" posref="BL TL"
+		onclick_l="show_hide" params_l="bg_downloader" tooltip="uiMk_system8"
+		tx_normal="bg_downloader.tga" tx_pushed="bg_downloader.tga" c="%color_beige" />
+	
+</group>
+
+
+<group style="mk_sub_menu" id="milko_help" modal_parent="milko_pad" child_resize_h="true" child_resize_hmargin="8" >
+
+	<!-- Help -->
+	<instance template="mk_icon_text" id="help1" hardtext="uiMk_window7" posparent="parent" posref="TL TL" x="4" y="-4"
+		tooltip="uiMk_window7" onclick_l="show_hide" params_l="help_browser" 
+		tx_normal="tb_help.tga" tx_pushed="tb_help.tga" c="%color_purple" />
+		
+	<!-- Support -->
+	<instance template="mk_icon_text" id="help2" hardtext="uiMk_window8" posparent="help1" posref="BL TL"
+		tooltip="uiMk_window8" onclick_l="show_hide" params_l="cs_browser" 
+		tx_normal="tb_support.tga" tx_pushed="tb_support.tga" c="%color_purple" />
+
+</group>
+
+
+<!-- ********************* -->
+<!-- * WINDOWS LIST MENU * -->
+<!-- ********************* -->
+
+
+<!-- HELP MENU -->
+
+<variable entry="UI:TEMP:HELP_ACTIVE" type="sint32" value="0" />
+
+<proc id="proc_launch_help" >
+	<action handler="set" params="dblink=UI:TEMP:HELP_ACTIVE|value=getprop('ui:interface:help_browser:active')" />
+	<action handler="launch_help" params="url=intro.html" cond="eq(@UI:TEMP:HELP_ACTIVE,0)" />
+	<action handler="set" params="target='ui:interface:help_browser:active'|value=0" cond="eq(@UI:TEMP:HELP_ACTIVE,1)" />
+</proc>
+
+
+<!-- *************************** -->
+<!-- * WINDOWS MENUS TEMPLATES * -->
+<!-- *************************** -->
+
+<template name="win_menus" id="" posparent="parent" posref="TL TL" x="0" y="0" w="50" h="18" nb="" >
+
+		<view type="bitmap" id="#id" posparent="#posparent" x="#x" y="#y" posref="#posref" texture="w_slot_win_menu.tga" />
+		<view type="bitmap" id="back#id" posparent="#id" x="1" y="0" posref="ML ML" texture="M_back.tga" global_color="false" />
+	<!--
+		<ctrl type="button" id="icon#id" button_type="toggle_button" posparent="#id" x="1" y="0" posref="ML ML" 
+										tx_normal="none.tga" tx_pushed="none.tga" tx_over="W_button_32_over.tga" 
+									 	color="255 255 255 128" col_pushed="255 255 255 255" col_over="255 255 255 255"
+										global_color_normal="false" global_color_over="true" global_color_pushed="false"
+										click_when_pushed="true" onclick_l="proc" params_l="wlm_active#nb" />
+	-->		
+		<ctrl type="button" id="arrow#id" button_type="push_button" posparent="back#id" posref="MM MM"
+										tx_normal="#tx" tx_pushed="#tx" tx_over="W_button_24_over.tga"
+										color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 255"
+										global_color_normal="false" global_color_over="true" global_color_pushed="false"
+										onclick_l="enter_modal" params_l="group=ui:interface:wlm_menu#nb" tooltip="#tooltip"/>
+</template>
+
+
+
+<!-- ******************* -->
+<!-- * GESTION_WINDOWS * -->
+<!-- ******************* -->
+
+
+<template name="special_border" posparent="parent">
+
+		<view type="bitmap" id="back" texture="W_special_blank.tga" posref="MM MM" posparent="#posparent" scale="true" color="#color" sizeref="wh" w="-16" h="-16" global_color="false" />
+	
+		<view type="bitmap" id="tr" texture="W_special_TR.tga" posref="TR TR" posparent="#posparent" color="#color" global_color="false"/>
+		<view type="bitmap" id="br" texture="W_special_BR.tga" posref="BR BR" posparent="#posparent" color="#color" global_color="false"/>
+		<view type="bitmap" id="bl" texture="W_special_BL.tga" posref="BL BL" posparent="#posparent" color="#color" global_color="false"/>
+		
+		<view type="bitmap" id="t" texture="W_special_T.tga" posref="TR TR" posparent="#posparent" scale="true" color="#color" sizeref="w" w="-34" h="8" x="-8" global_color="false"/>
+		<view type="bitmap" id="l" texture="W_special_L.tga" posref="BL BL" posparent="#posparent" scale="true" color="#color" sizeref="h" w="8" h="-34" y="8" global_color="false"/>
+		
+		<view type="bitmap" id="b" texture="W_special_B.tga" posref="BM BM" posparent="#posparent" scale="true" color="#color" sizeref="w" w="-16" h="8" global_color="false"/>
+		<view type="bitmap" id="r" texture="W_special_R.tga" posref="MR MR" posparent="#posparent" scale="true" color="#color" sizeref="h" w="8" h="-16" global_color="false"/>
+		
+		
+		
+		<link expr="intToColor(@#color)" target="back:color_rgba,
+												 tr:color_rgba,
+												 br:color_rgba,
+												 bl:color_rgba,
+												 t:color_rgba,
+												 l:color_rgba,
+												 b:color_rgba,
+												 r:color_rgba" />
+		
+</template>
+
+
+<template name="win_button" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14" pushflag="" win_name="" >
+		
+	<group id="#id" sizeref="w" w="0" h="14" x="#x" y="#y" posref="#posref" posparent="#posparent">
+		<ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML"
+										tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga"
+									 	color="#color" col_pushed="#color" col_over="#color"
+										global_color_normal="false" global_color_over="false" global_color_pushed="false"
+										click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
+
+		<view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" hardtext="#text" />
+		<view type="text" id="key" posref="MR MR" x="-8" y="-4" fontsize="8" global_color="false" color="#color" shadow="true" hardtext="uiNotAssigned" />
+
+
+		<link expr="@#pushflag" target="but:pushed" />
+		<link expr="ifthenelse(eq(@#pushflag,1), makeRGB(255,255,255), intToColor(@#color))" target="text:color_rgba,key:color_rgba" />
+		<link expr="intToColor(@#color)" target="but:col_normal_rgba,but:col_over_rgba,but:col_pushed_rgba" />
+	</group>
+</template>
+
+
+<template name="win_button_grayed" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14" 
+	pushflag="" win_name="" test_grayed="" color="" color_grayed="" >
+		
+	<group id="#id" sizeref="w" w="0" h="14" x="#x" y="#y" posref="#posref" posparent="#posparent">
+		<view type="bitmap" id="back" x="8" texture="W_slot_on.tga" color="#color_grayed" posref="ML ML" global_color="false"/>
+		<ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML" active="false"
+										tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga"
+									 	color="#color" col_pushed="#color" col_over="#color"
+										global_color_normal="false" global_color_over="false" global_color_pushed="false"
+										click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
+				
+		<view type="text" id="text" posparent="back" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color_grayed" shadow="true" hardtext="#text" />
+		<view type="text" id="key" posref="MR MR" x="-8" y="0" fontsize="8" global_color="false" color="#color_grayed" shadow="true" hardtext="CTRL+SHIFT+ALT+NUMPADD" />
+	
+		
+		<link expr="@#pushflag" target="but:pushed" />
+		<link expr="not(#test_grayed)" target="but:active" />
+		<link expr="intToColor(@#color_grayed)" target="back:color_rgba" />
+		<link expr="intToColor(@#color)" target="but:col_normal_rgba,but:col_over_rgba,but:col_pushed_rgba" />
+
+		<link expr="ifthenelse(#test_grayed, intToColor(@#color_grayed),
+						ifthenelse(eq(@#pushflag,1),makeRGB(255,255,255),intToColor(@#color)))" target="text:color_rgba,key:color_rgba" />
+
+	</group>
+</template>
+
+
+<group id="gestion_windows" type="container" w="588" h="620" openable="false" header_active="false" right_button="false" resizer="false"
+	movable="true" active="false" opened="true" win_priority="%win_priority_high" min_w="588" max_w="588" max_h="620" pop_max_h="620"
+	on_active="gestion_windows_update_key_binding"
+	group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color"
+>
+
+	<group id="header_closed" x="0" y="0" w="600" h="546" posref="TL TL" />
+	<group id="header_opened" x="0" y="0" w="600" h="546" posref="TL TL" />
+	<group id="content" x="0" y="0" w="600" h="0" posref="TL TL" />
+<!--
+	<view type="text" id="title" posref="TM TM" x="0" y="-8" fontsize="16" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiWinDisplay" />
+-->
+	<ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-6" tx_normal="W_close_0.tga" tx_pushed="W_close_0.tga" tx_over="W_button_16_over.tga" 
+				onclick_l="set" params_l="target_property=ui:interface:gestion_windows:active|value=0" tooltip="uittClose" />
+
+<!-- * PLAYER * -->
+
+	<group id="status" w="256" child_resize_h="true" posref="TL TL" x="34" y="-34" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:PLA" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiStatusTitle" />
+
+		<instance template="win_button" id="caracs"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwProgression" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:CAREERS"	win_name="info_player_skills" />
+
+		<instance template="win_button" id="journal"	color="UI:SAVE:WIN:COLORS:PLA" text="uimwMissions" posparent="caracs" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MISSIONS"	win_name="info_player_journal" />
+
+		<instance template="win_button" id="target"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwTarget" posparent="journal" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" />
+
+		<instance template="win_button" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player" />
+			
+		<instance template="win_button" id="bonus_malus"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBonusMalus" posparent="jauge" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:BONUS_MALUS"	win_name="bonus_malus" />
+
+		<instance template="win_button" id="ency"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwEncyclopedia" posparent="bonus_malus" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA"	win_name="encyclopedia" />
+
+	</group>
+	<view type="bitmap" id="pla_ico_back" posparent="status" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="pla_ico" posparent="pla_ico_back" posref="MM MM" x="0" y="-1" texture="spe_status.tga" global_color="false" />
+	
+
+<!-- * INVENTORY * -->	
+	
+	<group id="inventory" w="256" child_resize_h="true" posparent="status" posref="TR TL" x="30" y="0" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:INV" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiWorkshop" />
+
+		<instance template="win_button" id="hands" color="UI:SAVE:WIN:COLORS:INV" text="uimwHands" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:SETS" win_name="gestionsets" />
+
+		<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hands" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
+
+		<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiPhraseBookTitle" posparent="invent" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:ACTIONS" win_name="phrase_book" />
+		
+		<instance template="win_button" id="links" color="UI:SAVE:WIN:COLORS:INV" text="uiLinksTitle" posparent="action_book" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:LINKS" win_name="links" />
+		
+		<!--	
+		<instance template="win_button" id="defense" color="UI:SAVE:WIN:COLORS:INV" text="uiDefenseTitle" posparent="links" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:DEFENSE" win_name="defense" />
+		-->
+	</group>
+	<view type="bitmap" id="inv_ico_back" posparent="inventory" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="inv_ico" posparent="inv_ico_back" posref="MM MM" x="1" y="-1" texture="spe_inventory.tga" global_color="false" />
+
+
+
+<!-- * GUILD & TEAM * -->
+	
+	<group id="memory" w="256" child_resize_h="true" posparent="status" posref="BR TR" x="0" y="-26" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:MEM" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiGuildTeam" />
+	
+		<instance template="win_button_grayed" id="guild" color="UI:SAVE:WIN:COLORS:MEM" text="uimwGuild" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:GUILD"			win_name="guild"		color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_guild_present)" />
+
+		<!--
+		<instance template="win_button_grayed" id="guild_chat" color="UI:SAVE:WIN:COLORS:MEM" text="uimwGuildChat" posparent="guild" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:GUILD_CHAT"		win_name="guild_chat"	color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_guild_present)" />
+		-->
+		
+		<instance template="win_button_grayed" id="guild_forum" color="UI:SAVE:WIN:COLORS:MEM" text="uimwGuildForum" posparent="guild" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:GUILD_FORUM"	win_name="guild_forum"	color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_guild_present)" />
+					
+		<instance template="win_button_grayed" id="team_list" color="UI:SAVE:WIN:COLORS:MEM" text="uimwTeamList" posparent="guild_forum" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:TEAM_LIST" 		win_name="team_list"	color_grayed="UI:SAVE:WIN:COLORS:MEM_GRAYED" test_grayed="not(%is_team_present)" />
+		
+		<!--	
+		<instance template="win_button" id="team_chat" color="UI:SAVE:WIN:COLORS:MEM" text="uimwTeamChat" posparent="team_list" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:TEAM_CHAT" 		win_name="team_chat" />
+		-->
+		
+	</group>
+	<view type="bitmap" id="mem_ico_back" posparent="memory" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="mem_ico" posparent="mem_ico_back" posref="MM MM" x="1" y="-1" texture="spe_memory.tga" global_color="false" />
+
+
+<!-- * COMMUNICATION * -->
+	
+	<group id="communication" w="256" child_resize_h="true" posparent="inventory" posref="BL TL" x="0" y="-26" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:COM" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiCommunication" />
+
+		<instance template="win_button" id="main_chat" color="UI:SAVE:WIN:COLORS:COM" 	text="uimwMainChat" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:CHAT_GROUP" 	win_name="main_chat" />
+
+		<instance template="win_button" id="contact_list" color="UI:SAVE:WIN:COLORS:COM" text="uimwContactList" posparent="main_chat" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:CONTACT_LIST" 	win_name="contact_list" />
+		
+		<instance template="win_button" id="mailbox" color="UI:SAVE:WIN:COLORS:COM" text="uimwMailbox" posparent="contact_list" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MAILBOX" win_name="mailbox" />
+
+		<instance template="win_button" id="fame"	color="UI:SAVE:WIN:COLORS:COM" text="uimwFame" posparent="mailbox" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:FAME"		win_name="fame" />
+
+		<instance template="win_button" id="webig"	color="UI:SAVE:WIN:COLORS:COM" text="uimwWebIG" posparent="fame" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:WEBIG"		win_name="webig" />
+		
+	</group>
+	<view type="bitmap" id="com_ico_back" posparent="communication" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="com_ico" posparent="com_ico_back" posref="MM MM" x="2" y="-2" texture="spe_com.tga" global_color="false" />
+
+
+<!-- * ORIENTATION * -->	
+	
+	<group id="laboratory" w="256" child_resize_h="true" posref="BL TL" x="0" y="-26" posparent="memory" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:LAB" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiOrientation" />
+
+		<instance template="win_button"	id="compass" color="UI:SAVE:WIN:COLORS:LAB" text="uimwCompas" posref="TL TL" x="0" y="-30" 
+			pushflag="UI:VARIABLES:ISACTIVE:COMPAS" win_name="compass" />
+
+		<instance template="win_button" id="map"   color="UI:SAVE:WIN:COLORS:LAB" text="uimwMap" posparent="compass" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MAP" win_name="map" />
+
+
+	</group>
+	<view type="bitmap" id="lab_ico_back" posparent="laboratory" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="lab_ico" posparent="lab_ico_back" posref="MM MM" x="2" y="-1" texture="spe_labs.tga" global_color="false" />
+
+
+
+<!-- * ANIMALS * -->
+	
+	<group id="beast" w="256" child_resize_h="true" posparent="communication" posref="BR TR" x="0" y="-26" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:ANI" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiBeast" />
+
+		<instance template="win_button" id="pa" color="UI:SAVE:WIN:COLORS:ANI" text="uimwPA" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL"	win_name="animal_global" />
+
+	</group>
+	<view type="bitmap" id="ani_ico_back" posparent="beast" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="ani_ico" posparent="ani_ico_back" posref="MM MM" x="4" y="-1" texture="spe_beast.tga" global_color="false" />
+
+
+
+
+<!-- * OPTIONS * -->
+	
+	<group id="options" w="256" child_resize_h="true" posref="BM BM" x="-13" y="10" >
+		<instance template="special_border" color="UI:SAVE:WIN:COLORS:OPT" />
+
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" fontsize="14" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiOptTitle" />
+
+		<instance template="win_button" id="game_config" color="UI:SAVE:WIN:COLORS:OPT" text="uimwColors" posref="TL TL" x="0" y="-30"
+			pushflag="UI:VARIABLES:ISACTIVE:GAME_CONFIG" win_name="game_config" />
+
+		<instance template="win_button" id="keys" color="UI:SAVE:WIN:COLORS:OPT" text="uimwKeys" posparent="game_config" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:KEYS" win_name="keys" />
+
+		<instance template="win_button" id="macros" color="UI:SAVE:WIN:COLORS:OPT" text="uimwMacros" posparent="keys" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MACROS" win_name="macros" />
+		
+		<instance template="win_button" id="connection" color="UI:SAVE:WIN:COLORS:OPT" text="uimwConnection" posparent="macros" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:CONNECTION" win_name="connection" />
+		
+		<instance template="win_button" id="mp3" color="UI:SAVE:WIN:COLORS:OPT" text="uimwMP3Player" posparent="connection" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MP3PLAYER" win_name="mp3_player" />
+
+		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" />
+		
+    <!--<instance template="win_button" id="cosm" color="UI:SAVE:WIN:COLORS:OPT" text="uimwCosmetics" posparent="mp3" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:COSMETICS" win_name="cosmetics" />-->
+
+	
+	</group>
+	<view type="bitmap" id="opt_ico_back" posparent="options" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
+	<view type="bitmap" id="opt_ico" posparent="opt_ico_back" posref="MM MM" x="2" y="-1" texture="spe_options.tga" global_color="false" />
+
+
+
+
+
+<!-- SEPARATEURS -->
+<!--
+	<view type="bitmap" id="sep0" posparent="status" 	posref="BM TM" x="0" y="-4" scale="true" w="4" 	h="52" texture="blank.tga" color="0 0 0 128" global_color="true" />
+	<view type="bitmap" id="sep1" posparent="inventory" posref="ML MR" x="-4" y="0" scale="true" w="28" h="4"  texture="blank.tga" color="0 0 0 128" global_color="true" />
+	<view type="bitmap" id="sep2" posparent="inventory" posref="BM TM" x="0" y="-4" scale="true" w="4" 	h="24" texture="blank.tga" color="0 0 0 128" global_color="true" />
+	<view type="bitmap" id="sep4" posparent="memory" 	posref="BM TM" x="0" y="-4" scale="true" w="4" 	h="24" texture="blank.tga" color="0 0 0 128" global_color="true" />
+-->
+
+<!--
+	<group id="bar" child_resize_w="true" child_resize_wmargin="8" w="0" h="20" x="-14" y="8" posref="BR BR">
+		<ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML"
+										tx_normal="W_slot_on.tga" tx_pushed="W_opacity_on.tga"
+									 	color="255" col_pushed="255" col_over="255"
+										global_color_normal="true" global_color_over="true" global_color_pushed="true"
+										click_when_pushed="true" onclick_l="show_hide" params_l="windows" />
+
+		<view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-2" fontsize="12" global_color="false" color="255 255 255 255" shadow="true" hardtext="uimwWindowsBar" />
+		<link expr="@UI:VARIABLES:ISACTIVE:WINDOWSBAR" target="but:pushed" />
+	</group>
+-->
+</group>
+<tree node="gestion_windows"/>
+
+<!-- Keys binding works with action handler : gestion_windows_update_key_binding
+	(take care when editing no space tabs, etc.. allowed) -->
+
+<options type="list" name="gestion_windows_key_binding" >
+
+	<param value="status:caracs|info_player_skills" />
+	<param value="status:journal|info_player_journal" />
+	<param value="status:target|target" />
+	<param value="status:jauge|player" />
+	<param value="status:bonus_malus|bonus_malus" />
+	<param value="status:ency|encyclopedia" />
+
+	<param value="inventory:hands|gestionsets" />
+	<param value="inventory:invent|inventory" />
+	<param value="inventory:action_book|phrase_book" />
+	<param value="inventory:links|links" />
+
+	<param value="beast:pa|animal_global" />
+
+	<param value="laboratory:compass|compass" />
+	<param value="laboratory:map|map" />
+
+	<param value="memory:guild|guild" />
+	<param value="memory:guild_forum|guild_forum" />
+	<param value="memory:team_list|team_list" />
+
+	<param value="communication:main_chat|main_chat" />
+	<param value="communication:contact_list|contact_list" />
+	<param value="communication:mailbox|mailbox" />
+	<param value="communication:fame|fame" />
+	
+	<param value="options:game_config|game_config" />
+	<param value="options:keys|keys" />
+	<param value="options:macros|macros" />
+	<param value="options:connection|connection" />
+	<param value="options:mp3|mp3_player" />
+
+</options>
+
+
+<!-- Color association -->
+
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:INV)" target="gestion_windows:inv_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:ANI)" target="gestion_windows:ani_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:LAB)" target="gestion_windows:lab_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:COM)" target="gestion_windows:com_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:PLA)" target="gestion_windows:pla_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:MEM)" target="gestion_windows:mem_ico_back:color_rgba" />
+<link expr="intToColor(@UI:SAVE:WIN:COLORS:OPT)" target="gestion_windows:opt_ico_back:color_rgba" />
+
+
+<!-- **************************** -->
+<!-- **************************** -->
+<!-- WEB STUFF WHEN QUITING RYZOM -->
+<!-- **************************** -->
+<!-- **************************** -->
+
+<group type="container" id="web_on_quit" w="630" h="400" title="uiWebOnQuit" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:HELP"
+ resizer="true" pop_min_w="400" pop_min_h="296" pop_max_w="2000" pop_max_h="1600"
+ title_bar_open="false" min_w="216" min_h="64" max_w="2000" right_button="true" savable="false"
+ max_h="1600" lockable="true" openable="false" opened="true" movable="true" active="true">
+	
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"
+		 group_onclick_r="active_menu"
+	 	group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="0" h="13" posref="TL TL" 
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
+	</group>
+
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+
+		<group type="qcm_html" id="html" posref="TL TL" posparent="parent" url="home" title_prefix="uiHelpTitle"
+			sizeref="wh" x="0" y="0" w="0" h="0"
+			background_color="0 0 0 255"
+			error_color="255 240 48 255" 
+			link_color="240 155 100 255" 
+			text_color="210 210 210 255" 
+			h1_color="255 255 255 255" 
+			h2_color="255 255 255 255" 
+			h3_color="255 255 255 255" 
+			h4_color="255 255 255 255"  
+			h5_color="255 255 255 255" 
+			h6_color="255 255 255 255"
+			text_font_size="10" 
+			h1_font_size="20" 
+			h2_font_size="18" 
+			h3_font_size="16"  
+			h4_font_size="14" 
+			h5_font_size="12" 
+			h6_font_size="12"
+			paragraph_begin_space="12" 
+			multi_line_space_factor="0.25" 
+			td_begin_space="0" 
+			li_begin_space="4" 
+			ul_begin_space="12" 
+			li_indent="-10" 
+			ul_indent="30" 
+			checkbox_bitmap_normal="w_slot_on.tga"
+			checkbox_bitmap_pushed="w_opacity_on.tga"
+			checkbox_bitmap_over=""
+			background_bitmap_view="black2"
+			browse_next_time="true"
+			form_text_area_group="edit_box_widget_multiline"
+			>
+			<group id="black" posref="BR BR" sizeref="hw" w="-12" h="-12" inherit_gc_alpha="true"/>
+			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+			<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+			
+			<ctrl style="skin_scroll" id="scroll_bar" />
+
+		</group>
+
+	</group>
+
+</group>
+
+<tree node="web_on_quit"/>
+
+
+
+
+</interface_config>

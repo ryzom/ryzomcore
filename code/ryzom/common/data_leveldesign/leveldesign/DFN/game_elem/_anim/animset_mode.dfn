@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <ELEMENT Name="alert" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="combat" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="death" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="default" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="eat" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="hungry" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="mount_default" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="mount_swim" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="rest" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="sit" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="swim" Type="Dfn" Filename="animset_type.dfn"/>
+  <ELEMENT Name="swim_death" Type="Dfn" Filename="animset_type.dfn"/>
+  <LOG>Wed Dec 11 11:29:57 2002 (puzin)
+Thu Dec 09 14:18:23 2004 (fleury) Dfn Structure = </LOG>
+</DFN>

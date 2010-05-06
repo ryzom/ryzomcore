@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Version="0.1" State="modified">
+  <ELEMENT Name="SkillStageTable" Type="Dfn" Filename="_skill_stage_association.dfn" Array="true"/>
+  <LOG>Tue Jun 18 13:51:26 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

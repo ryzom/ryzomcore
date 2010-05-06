@@ -1,0 +1,28 @@
+>> How to create nel water in Max <<
+
+NeL support a form of water that can be edited in 3DS Max.
+
+- Create a convex polygon (with z = 0 in object space) for each area of water
+- Apply a NeL material to this shape
+- Select water material
+
+For now, full water display is only supported on GeForce 3 (though, it will run with older cards, but will look a lot less nice :( )
+
+The following max map are used to create the water (their name may be misleading, but not all the water maps have an equivalent in max)
+
+- Texture 1 : an environment map that is reflected by water. Basically, 
+  it is obtained by rendering the top hemisphere of the skydome.
+- Texture 2 : May be used to set an alternate texture for the env map. 
+- Texture 3 : the same than Texture 1, but for underwater
+- Texture 4 : the same than Texture 2, but for underwater
+- Texture 5 : here, you select a heightmap that is used to deform the envmap of the water. (the bumpmap is build from the heightmap)
+- Texture 6 : The same as the Texture 5, but it is used to deform the previous bumpmap (water animation)
+- Texture 7 : its alpha and colors are used to modulate the final color and alpha of the water
+  It is then possible to blend between these 2 map for night / day transition (with the night / day dialog in the object viewer)
+
+
+Texture coordinates apply only to the diffuse map. This texture may have any orientation provided this orientation is the same over the whole polygon
+
+For the bump map, you can't specify orientation but only speed and scale (in the NeL material)
+
+IMPORTANT : vertices between various water area should be EXACTLY welded, otherwise (big..) holes may result during the rendering.

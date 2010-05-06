@@ -1,0 +1,50 @@
+﻿LanguageName [English]
+
+// Window
+WindowTitle [NeL Qt]
+
+// DebugBar
+DebugBarTitle [NeL Qt]
+
+// Widgets
+WidgetGraphicsConfig [Graphics Configuration]
+WidgetCommandLog [Console]
+
+// Menus
+MenuFile [&File]
+MenuEdit [&Edit]
+MenuViewport [&Viewport]
+MenuWidgets [&Widgets]
+MenuHelp [&Help]
+
+// Actions
+ActionQuit [&Exit]
+ActionQuitStatusTip [Close the NeL Qt application.]
+ActionSaveScreenshot [Save &Screenshot]
+ActionSaveScreenshotStatusTip [Make a screenshot of the current viewport and save it to the default screenshot directory.]
+ActionAbout [&About]
+ActionAboutStatusTip [Show the about box.]
+ActionUndo [&Undo]
+ActionUndoStatusTip [Undo the last action.]
+ActionRedo [&Redo]
+ActionRedoStatusTip [Redo the last undone action.]
+
+// Status
+StatusReady [Ready]
+
+// GraphicsConfig
+GraphicsConfigDriverGroup [Driver Settings]
+GraphicsConfigEnabled [Enabled]
+GraphicsConfigDriver [Driver: ]
+GraphicsConfigFontName [Font: ]
+GraphicsConfigApply [Apply]
+GraphicsConfigRenderGroup [Render Settings]
+GraphicsConfigBackgroundColor [Background Color]
+GraphicsConfigFontShadow [Font Shadow]
+GraphicsConfigScreenshotGroup [Screenshot Settings]
+
+// About
+AboutTitle [About NeL Qt]
+AboutText [It is vaporware, indeed.]
+
+// end of file

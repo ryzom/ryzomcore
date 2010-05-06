@@ -1,0 +1,488 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="1">
+  <ROOT_PRIMITIVE TYPE="CPrimNode">
+    <ALIAS LAST_GENERATED="66"/>
+    <CHILD TYPE="CPrimZone">
+      <PT X="8059.277344" Y="-9645.528320" Z="0.000000" SELECTED="true"/>
+      <PT X="7615.869141" Y="-11547.617188" Z="0.000000"/>
+      <PT X="10650.712891" Y="-12533.696289" Z="0.000000"/>
+      <PT X="11253.334961" Y="-10638.268555" Z="0.000000"/>
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>continent</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>id</NAME>
+        <STRING>newbieland</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>newbieland</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>sheet</NAME>
+        <STRING>newbieland</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimNode">
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>start_villages</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>start_villages</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>start_village</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>starting_city</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>start_point</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>mission</NAME>
+              <STRING>NEWBIELAND_START</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>starting_city_start_point</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>spawn_zone</NAME>
+              <STRING>newbie_start_point</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>welcomer</NAME>
+              <STRING>chiang_the_strong</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="3"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>safe_zones</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>safe_zones_10</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="8788.535156" Y="-11199.533203" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>safe_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>safe_zone_kami_shining_lake</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>radius</NAME>
+            <STRING>30</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="13"/>
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="9482.628906" Y="-10898.919922" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>safe_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>safe_zone_karavan_shattered_ruins</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>radius</NAME>
+            <STRING>20</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="14"/>
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="10241.403320" Y="-10807.729492" Z="0.000000"/>
+        <PT X="9840.371094" Y="-10559.319336" Z="0.000000"/>
+        <PT X="9459.409180" Y="-10595.527344" Z="0.000000"/>
+        <PT X="9327.344727" Y="-10988.653320" Z="0.000000"/>
+        <PT X="9779.528320" Y="-11285.471680" Z="0.000000"/>
+        <PT X="10122.082031" Y="-11429.381836" Z="0.000000"/>
+        <PT X="10215.847656" Y="-11279.558594" Z="0.000000"/>
+        <PT X="10209.596680" Y="-11246.453125" Z="0.000000"/>
+        <PT X="10180.560547" Y="-11229.932617" Z="0.000000"/>
+        <PT X="10209.596680" Y="-11168.856445" Z="0.000000"/>
+        <PT X="10236.370117" Y="-11181.430664" Z="0.000000"/>
+        <PT X="10253.519531" Y="-11155.867188" Z="0.000000"/>
+        <PT X="10251.465820" Y="-11113.444336" Z="0.000000"/>
+        <PT X="10263.472656" Y="-11047.518555" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>place</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>main place</NAME>
+          <STRING>false</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>region_newbieland_the_shattered_ruins</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="21"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="9482.238281" Y="-10898.705078" Z="0.000000"/>
+          <ANGLE VALUE="2.326742"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>teleport_spawn_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>karavan_respawn_shattered_ruins</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>type</NAME>
+            <STRING>karavan</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="10244.935547" Y="-11732.002930" Z="0.000000"/>
+        <PT X="10244.971680" Y="-11834.202148" Z="0.000000"/>
+        <PT X="10257.416016" Y="-11852.695313" Z="0.000000"/>
+        <PT X="10369.399414" Y="-11871.703125" Z="0.000000"/>
+        <PT X="10398.591797" Y="-11842.709961" Z="0.000000"/>
+        <PT X="10422.166016" Y="-11827.415039" Z="0.000000"/>
+        <PT X="10433.723633" Y="-11790.457031" Z="0.000000"/>
+        <PT X="10450.075195" Y="-11760.011719" Z="0.000000"/>
+        <PT X="10456.939453" Y="-11726.783203" Z="0.000000"/>
+        <PT X="10449.589844" Y="-11716.355469" Z="0.000000"/>
+        <PT X="10444.310547" Y="-11719.396484" Z="0.000000"/>
+        <PT X="10387.153320" Y="-11661.750977" Z="0.000000"/>
+        <PT X="10380.433594" Y="-11651.652344" Z="0.000000"/>
+        <PT X="10362.558594" Y="-11645.263672" Z="0.000000"/>
+        <PT X="10347.433594" Y="-11648.907227" Z="0.000000"/>
+        <PT X="10323.522461" Y="-11668.516602" Z="0.000000"/>
+        <PT X="10306.427734" Y="-11666.303711" Z="0.000000"/>
+        <PT X="10287.212891" Y="-11670.840820" Z="0.000000"/>
+        <PT X="10257.783203" Y="-11693.852539" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>place</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>place_starting_zone_starting_city</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>place_type</NAME>
+          <STRING>Capital</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="19"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="10430.746094" Y="-11666.378906" Z="0.000000"/>
+          <ANGLE VALUE="-2.316925"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>teleport_spawn_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>kami_respawn_starting_city</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>radius</NAME>
+            <STRING>6.687500</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>type</NAME>
+            <STRING>kami</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="10409.519531" Y="-11869.596680" Z="0.000000"/>
+          <ANGLE VALUE="2.022400"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>teleport_spawn_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>karavan_respawn_starting_city</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>radius</NAME>
+            <STRING>6.937500</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>type</NAME>
+            <STRING>karavan</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="10304.768555" Y="-11725.426758" Z="0.000000"/>
+          <ANGLE VALUE="-4.574944"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>teleport_spawn_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>newbie_start_point</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>radius</NAME>
+            <STRING>5</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>type</NAME>
+            <STRING>normal</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="10138.448242" Y="-11663.740234" Z="0.000000" SELECTED="true"/>
+        <PT X="10180.987305" Y="-11665.181641" Z="0.000000"/>
+        <PT X="10192.086914" Y="-11654.680664" Z="0.000000"/>
+        <PT X="10202.118164" Y="-11645.036133" Z="0.000000"/>
+        <PT X="10211.319336" Y="-11620.019531" Z="0.000000"/>
+        <PT X="10209.719727" Y="-11601.597656" Z="0.000000"/>
+        <PT X="10205.825195" Y="-11590.130859" Z="0.000000"/>
+        <PT X="10206.642578" Y="-11556.529297" Z="0.000000"/>
+        <PT X="10192.994141" Y="-11544.289063" Z="0.000000"/>
+        <PT X="10186.783203" Y="-11533.187500" Z="0.000000"/>
+        <PT X="10139.982422" Y="-11532.889648" Z="0.000000"/>
+        <PT X="10131.348633" Y="-11548.566406" Z="0.000000"/>
+        <PT X="10119.880859" Y="-11559.163086" Z="0.000000"/>
+        <PT X="10109.932617" Y="-11583.423828" Z="0.000000"/>
+        <PT X="10111.592773" Y="-11599.693359" Z="0.000000"/>
+        <PT X="10116.065430" Y="-11615.560547" Z="0.000000"/>
+        <PT X="10119.583984" Y="-11637.976563" Z="0.000000"/>
+        <PT X="10127.929688" Y="-11648.382813" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>place</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>place_starting_zone_arena</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="17"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="10138.290039" Y="-11664.036133" Z="0.000000" SELECTED="true"/>
+        <PT X="10181.068359" Y="-11665.244141" Z="0.000000"/>
+        <PT X="10202.479492" Y="-11645.036133" Z="0.000000"/>
+        <PT X="10211.269531" Y="-11620.489258" Z="0.000000"/>
+        <PT X="10209.357422" Y="-11601.597656" Z="0.000000"/>
+        <PT X="10206.280273" Y="-11590.375977" Z="0.000000"/>
+        <PT X="10205.918945" Y="-11555.987305" Z="0.000000"/>
+        <PT X="10192.911133" Y="-11543.814453" Z="0.000000"/>
+        <PT X="10186.671875" Y="-11533.213867" Z="0.000000"/>
+        <PT X="10140.037109" Y="-11533.000977" Z="0.000000"/>
+        <PT X="10131.296875" Y="-11548.749023" Z="0.000000"/>
+        <PT X="10120.185547" Y="-11558.920898" Z="0.000000"/>
+        <PT X="10109.629883" Y="-11584.041016" Z="0.000000"/>
+        <PT X="10111.077148" Y="-11600.331055" Z="0.000000"/>
+        <PT X="10115.479492" Y="-11614.660156" Z="0.000000"/>
+        <PT X="10119.776367" Y="-11637.940430" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>pvp_zone</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>newbieland_pvp_arena</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="18"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="9433.255859" Y="-10671.476563" Z="0.000000"/>
+        <PT X="9377.871094" Y="-10424.999023" Z="0.000000"/>
+        <PT X="8921.063477" Y="-10404.898438" Z="0.000000"/>
+        <PT X="8839.250000" Y="-10441.666992" Z="0.000000"/>
+        <PT X="8767.634766" Y="-10519.075195" Z="0.000000"/>
+        <PT X="8654.169922" Y="-10682.314453" Z="0.000000"/>
+        <PT X="8654.190430" Y="-11238.159180" Z="0.000000"/>
+        <PT X="8723.933594" Y="-11288.939453" Z="0.000000"/>
+        <PT X="8829.777344" Y="-11297.364258" Z="0.000000"/>
+        <PT X="9166.230469" Y="-11149.216797" Z="0.000000"/>
+        <PT X="9170.800781" Y="-11131.319336" Z="0.000000"/>
+        <PT X="9327.209961" Y="-10987.626953" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>place</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>main place</NAME>
+          <STRING>false</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>region_newbieland_shining_lake</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="24"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="8788.576172" Y="-11199.042969" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>teleport_spawn_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>kami_respawn_shining_lake</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>type</NAME>
+            <STRING>kami</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimZone">
+        <PT X="8179.341309" Y="-10260.317383" Z="0.000000"/>
+        <PT X="8179.341309" Y="-11022.994141" Z="0.000000"/>
+        <PT X="8661.032227" Y="-11045.931641" Z="0.000000"/>
+        <PT X="8643.828125" Y="-12106.797852" Z="0.000000"/>
+        <PT X="11195.641602" Y="-12129.735352" Z="0.000000"/>
+        <PT X="11212.844727" Y="-10266.051758" Z="0.000000" SELECTED="true"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>region</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>region_newbieland</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>newbie_region</NAME>
+          <STRING>true</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="66"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPath">
+          <PT X="9405.142578" Y="-11257.110352" Z="0.000000"/>
+          <PT X="9402.992188" Y="-11342.409180" Z="0.000000"/>
+          <PT X="9472.522461" Y="-11410.505859" Z="0.000000"/>
+          <PT X="9483.297852" Y="-11564.946289" Z="0.000000" SELECTED="true"/>
+          <PT X="9478.256836" Y="-11413.373047" Z="0.000000"/>
+          <PT X="9615.882813" Y="-11403.337891" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>goo_border</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>goo_border_newbieland</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="28"/>
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="outpost_number" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Zone" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ForceLoadDist" Type="Type" Filename="float.typ" Default="200"/>
+  <ELEMENT Name="LoadDist" Type="Type" Filename="float.typ" Default="300"/>
+  <ELEMENT Name="UnloadDist" Type="Type" Filename="float.typ" Default="500"/>
+  <ELEMENT Name="EnableRuins" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Thu Oct 16 15:25:41 2003 (nevrax) Dfn Structure = </LOG>
+</DFN>

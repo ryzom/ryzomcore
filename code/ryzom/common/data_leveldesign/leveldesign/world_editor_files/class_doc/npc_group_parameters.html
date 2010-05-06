@@ -1,0 +1,393 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="npc_group_parameters_files/filelist.xml">
+<title>npc_group</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Boris Boucher</o:Author>
+  <o:LastAuthor>boucher</o:LastAuthor>
+  <o:Revision>21</o:Revision>
+  <o:TotalTime>117</o:TotalTime>
+  <o:Created>2003-07-17T15:23:00Z</o:Created>
+  <o:LastSaved>2004-08-16T17:50:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>304</o:Words>
+  <o:Characters>1733</o:Characters>
+  <o:Company>nevrax</o:Company>
+  <o:Lines>14</o:Lines>
+  <o:Paragraphs>4</o:Paragraphs>
+  <o:CharactersWithSpaces>2033</o:CharactersWithSpaces>
+  <o:Version>10.2625</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:UseFELayout/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-alt:"\FF2D\FF33 \660E\671D";
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:\5B8B\4F53;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";
+	mso-ansi-language:FR;}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;
+	mso-ansi-language:FR;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	mso-ansi-language:FR;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{mso-style-link:"Plain Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"MS Mincho";
+	mso-ansi-language:FR;}
+span.PlainTextChar
+	{mso-style-name:"Plain Text Char";
+	mso-style-link:"Plain Text";
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-fareast-font-family:"MS Mincho";
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";
+	mso-ansi-language:FR;
+	mso-fareast-language:ZH-CN;
+	mso-bidi-language:AR-SA;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 65.95pt 1.0in 65.95pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:803696492;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1018820242 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.75in;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:-.25in;
+	font-family:Symbol;
+	color:windowtext;}
+@list l0:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1><span style='color:#FF6600;mso-ansi-language:EN-US'>npc_group<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<h2><span style='color:#999999;mso-ansi-language:EN-US'>Properties&nbsp;:<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'>grp_parameters</span></u></b><span
+style='mso-ansi-language:EN-US'>&nbsp;: This is a set of parameters for the
+group. This is a list of «&nbsp;keywords&nbsp;: parameters&nbsp;» entry.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
+style='color:#999999;mso-ansi-language:EN-US'>(deprecated) </span></b><span
+class=PlainTextChar><b style='mso-bidi-font-weight:normal'><span
+style='mso-ansi-language:EN-US'>attackable</span></b></span><span
+style='color:black;mso-ansi-language:EN-US'> : same as </span><span
+class=PlainTextChar><b><span lang=FR>player_attackable</span></b></span><span
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'>player_attackable</span></b></span><span
+style='color:black;mso-ansi-language:EN-US'> : Indicate that the player can
+attack the npcs of the goups, bots also suffer area effect of player weapon. No
+parameters.</span><span style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span lang=FR>bot_attackable</span></b></span><b
+style='mso-bidi-font-weight:normal'><span lang=FR style='mso-ansi-language:
+EN-US'> </span></b><span style='color:black;mso-ansi-language:EN-US'>: Indicate
+that any bot (npc or fauna) can attack the pcs of the group. The npc will also
+suffer damage from bot area effect. . No parameters.</span><span
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'>bad guy&nbsp;: &lt;dist&gt;</span></b></span><span
+style='color:black;mso-ansi-language:EN-US'> : Indicate that this bots will
+aggro any player. Parameter is the aggro dist (in meters).</span><span
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'>escort range&nbsp;: &lt;dist&gt; </span></b></span><span
+style='mso-ansi-language:EN-US'><span style='mso-spacerun:yes'> </span>:
+Specify the <b style='mso-bidi-font-weight:normal'>escort range</b>. Parameter
+is the escort range (in meters). For more info, see the <a
+href="../npc/ai_activity/escorted.html">the escorted activity</a>. The default
+value is 30 m.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'>respawn time&nbsp;: &lt;nb_ticks&gt;</span></b></span><span
+style='mso-ansi-language:EN-US'> : Specify the <b style='mso-bidi-font-weight:
+normal'>respawn time</b> in TICKS <a href="#note1">[1]</a>. Default is 5 mn
+(300 ticks). When setting <b style='mso-bidi-font-weight:normal'>respawn time</b>,
+the <b style='mso-bidi-font-weight:normal'>despawn time</b> is automaticaly set
+to ¼ of <b style='mso-bidi-font-weight:normal'>despawn time</b>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'>despawn time&nbsp;: &lt;nb_ticks&gt; </span></b></span><span
+style='mso-ansi-language:EN-US'>&nbsp;: Specify the <b style='mso-bidi-font-weight:
+normal'>despawn time</b> in TICKS <a href="#note1">[1]</a>. Default is ¼ of 5
+mn. You MUST place <b style='mso-bidi-font-weight:normal'>despawn time</b>
+AFTER <b style='mso-bidi-font-weight:normal'>respawn time</b> or the value will
+be overwrite.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><span class=PlainTextChar><b><span
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></b></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><span style='color:#999999;
+mso-ansi-language:EN-US'>(Deprecated)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><span style='color:#999999;
+mso-ansi-language:EN-US'>Dynamic system keywords:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span lang=FR
+style='color:#999999'>camp contact</span></b></span><b style='mso-bidi-font-weight:
+normal'><span style='color:#999999;mso-ansi-language:EN-US'>&nbsp;: </span></b><span
+style='color:#999999;mso-ansi-language:EN-US'>Specify that the contact group is
+working inside the tribe camp <a href="#note2"><span style='color:#999999'>[2]</span></a>.
+No parameter.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span lang=FR
+style='color:#999999'>city contact</span></b></span><b style='mso-bidi-font-weight:
+normal'><span style='color:#999999;mso-ansi-language:EN-US'>&nbsp;: </span></b><span
+style='color:#999999;mso-ansi-language:EN-US'>Specify that the contact group is
+working in a city <a href="#note2"><span style='color:#999999'>[2]</span></a>.
+No parameter.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span lang=FR
+style='color:#999999'>outpost contact</span></b></span><b style='mso-bidi-font-weight:
+normal'><span style='color:#999999;mso-ansi-language:EN-US'>&nbsp;: </span></b><span
+style='color:#999999;mso-ansi-language:EN-US'>Specify that the contact group is
+working in an outpost <a href="#note2"><span style='color:#999999'>[2]</span></a>.
+No parameter.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in .75in'><![if !supportLists]><span style='font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=PlainTextChar><b><span
+style='color:#999999;mso-ansi-language:EN-US'>aggro range </span></b></span><b
+style='mso-bidi-font-weight:normal'><span style='color:#999999;mso-ansi-language:
+EN-US'>: <span style='mso-spacerun:yes'> </span></span></b><span
+class=PlainTextChar><b><span style='color:#999999;mso-ansi-language:EN-US'>&lt;dist&gt;</span></b></span><b
+style='mso-bidi-font-weight:normal'><span style='color:#999999;mso-ansi-language:
+EN-US'> </span></b><span style='color:#999999;mso-ansi-language:EN-US'>Specify
+the aggro distance. Parameter is the agro distance (in meter).<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><span style='mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><span style='mso-ansi-language:
+EN-US'>Notes&nbsp;:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><a name=note1></a><span
+style='mso-ansi-language:EN-US'>[1] Re-spawn time is the delay after the death
+of a bot to his rebirth. De-spawn time is the time between the death of a bot
+and the de-spawn of the cadaver. Cadaver de-spawn can be faster if a player
+loot all the material on the cadaver.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:.25in'><a name=note2></a><span
+style='mso-ansi-language:EN-US'>[2] If no contact flags are set, the group is
+available for all the places.<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><u><span
+style='mso-ansi-language:EN-US'><o:p><span style='text-decoration:none'>&nbsp;</span></o:p></span></u></b></p>
+
+</div>
+
+</body>
+
+</html>

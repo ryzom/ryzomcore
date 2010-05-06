@@ -1,0 +1,131 @@
+-------------------------------------------------
+
+>> 3dsmax material features supported by the NeL export <<
+
+-------------------------------------------------
+
+SUMMARY
+
+-> Export those informations from stdmat
+-> How to use lightmaps
+-> How to use "color vertex"
+-> How to use "alpha vertex"
+-> How to use multitexture
+-> How to manage multiple textures set for a single material
+
+-------------------------------------------------
+
+-> Export those informations from stdmat
+
+ * Ambiant color
+ * Diffuse color
+ * Specular color
+ * Self illumation value (pseudo)
+ * Self illumation color (pseudo)
+ * Opacity
+ * Shininess (pseudo)
+ * Glosness (pseudo)
+ * Diffuse texture 
+ * Opacity texture. If opacity texture and diffuse texture are used, NeL try to use the alpha channel of the diffuse texture as opacity map.
+ * Double sided
+ * You can use crop if you don't repeat the texture.
+ * You can use crop and repeat the texture on U if the U crop is full (0 -> 1).
+ * You can use crop and repeat the texture on V if the V crop is full (0 -> 1).
+ * Extended parameters transparency type (filter or additive)
+ * Specular is used throught cube environnement mapping (use composite to give the 6 faces a unique texture)
+
+-------------------------------------------------
+
+-> How to use lightmaps
+
+Use a NeL material.
+Check the box "lightmap".
+You material MUST have a texture.
+The object must be mapped.
+You can map your object twice using the second mapping channel for the lightmap. (Use CopyMap)
+
+YOU CAN
+-------
+Lightmap can be used with vertex color
+Lightmap can be used with alpha test
+The material diffuse color is used
+The material ambiante color is used
+
+YOU CAN'T
+---------
+Lightmap can't be used with alpha vertex
+Lightmap can't be used with multitexture
+Lightmap can't be used with specular map
+The material specular color is not used
+The material opacity is not used
+The material can't be used with extended parameters transparency type (filter or additive)
+
+-------------------------------------------------
+
+-> How to use "color vertex"
+
+See the sample "color vertex.max"
+Use a NeL material.
+Check the box "color vertex".
+You can edit your vertex color with vertex paint or edit mesh.
+
+-------------------------------------------------
+
+-> How to use "alpha vertex"
+
+See the sample "alpha vertex.max"
+Use a NeL material.
+Check the box "alpha vertex".
+Choose the channel to use as alpha. You can edit your vertex color with "vertex paint" or "edit mesh".
+Then copy it with "CopyMap" in the selected channel for alpha vertex.
+The source of the copy must be 0, the destination is the channel you have choosed in the NeL material.
+
+-------------------------------------------------
+
+-> How to use multitexture
+
+-------------------------------------------------
+
+-> How to use specular texture
+
+See the sample "specular.max"
+
+-------------------------------------------------
+-> How to manage multiple textures set for a single material
+
+When selecting a map, you can choose bitmap as a map type, but you can also select Nel Multi Bitmap.
+With a NeL multi bitmap, you can have 4 sets of maps for a single material.
+The 'bitmap' slot of the map isn't used anymore, it is just useful to select the currently displayed map.
+The 4 slots are in the 'Aditionnals bitmap' rollout.
+If the file name is left blank, that means that there's no map assigned for that slot.
+The 'Get' button allows you to choose the bitmap, and a 'View' button allows to display it
+
+You can convert all maps in an object to 'Nel Multi Bitmap' maps by using macro script called 'ConvertMaxBitmapToNelBitmapMacroScript'
+It operates on the selection, and can convert materials that are either StdMat, NelMaterial, or MultiMaterial.
+
+Once you start using Nel MultiBitmaps, you can toggle which bitmap is displayed in the viewport by using the macro scripts
+called SelectNelBitmapSet1..4. Sometimes you may need to refresh the display to get it work..
+If a slot hasn't been defined, the first slot is taken as a default.
+
+Note : you can also change the displayed set of texture in the object viewer, in the 'View' menu.
+
+----------------------------------------------------------
+-> How to use Per-Pixel-Lighting ?
+Per pixel lighting i available on GeForce 3 (and above) only for now. On other boards, gouraud shading is used instead. It is based on the blinn model.
+No bump is applied. Only the nearest light is rendered using p.p.l. Others are rendered using gouraud shading.
+(to keep single pass rendering). For now, only per instance attenuation is done.
+
+REQUIRED : You model must have one, and only one stage of texture used (but is can use several textures) 
+A continous mapping is needed to applied per pixel lighting techniques.
+
+YOU CAN'T 
+- You can't use a mesh vertex program when this shader is used. 
+- You can't mix shader that use a vertex program in a single model.
+
+
+HOW-TO
+- Create a NeL Material
+- Select the per pixel lighting shader (with or without specular)
+- Apply it to your model. 
+- Apply a mapping and a texture to your model
+

@@ -1,0 +1,105 @@
+Module name:		Remote Shard Saves Module
+Short name:			RS
+Associated modules:	SAVES
+Requires:			Nothing
+Syntax:				ModulesAdd remote_saves <shard name> <type>
+					- where <shard name> is the name of the shard that the saves are for
+					- where <type> is 'shard' for character saves, guild saves, etc
+					- where <type> is 'www' for mail and forum saves
+					- where <type> is 'bak' for backups
+
+
+TODO
+----
+h- CRemoteSavesConnection
+	void processMsgRegister(uint32 sender,CMsgSavesRegister& msgBody);
+	void processMsgInit(uint32 sender,CMsgRSInit& msgBody);
+	void processMsgUpdate(uint32 sender,CMsgRSUpdate& msgBody);
+	void processMsgDownload(uint32 sender,CMsgRSDownload& msgBody);
+	void processMsgGenericReply(uint32 sender,CMsgRSGenericReply& msgBody);
+
+h- CRemoteSavesManager	
+
+- CShardSavesInterface
+	? getOfflineCommandsFileList();
+- CBackupSavesInterface
+
+- treat moduleUp and moduleDown correctly (for connecting to SAVES modules)
+- manage pending job queue in CRemoteSavesConnectionModule (include management of servide up and service down...)
+
+- Add CRemoteSavesInterface specialisation for incremental backups
+- test the delete file code
+- If more than one interface requests the same file only one request should be sent out to the remote module (if possible)
+
+
+Description
+-----------
+This is a module to be run on a local machine in order to access shard saves handled
+by a SAVES module (most likely on another machine)
+
+
+Remote Saves Interface API Classes
+----------------------------------
+CRemoteSavesInterface:
+	CRemoteSavesInterface(shard name,type,subscribe);		// ctor - sets subscription destination and mode
+	isReady();								// flag to say whether the interface is connected or not
+
+	getShardName();							// get shard name as declared at module instantiation
+	getType();								// get shard type as declared at module instantiation
+
+	addCallbackObject(ISavesCallbackPtr);	// setup a callback object to receive request replies
+	removeCallbackObject(TSavesCallbackPtr);
+
+	requestFile();							// download a file from the server
+	uploadFile();							// upload a file to the server
+	deleteFile();							// delete a file on the server
+
+	getFileList();							// get the FDC container for the file list as it currently stands
+
+CShardSavesInterface (specialisation of CRemoteSavesInterface):
+	getAccountNamesFile();			// get handle to account_names.txt
+	getCharacterNamesFile();		// get handle to character_names.txt
+	getGameCycleFile();				// get handle to game_cycle.ticks file
+	getGMPendingTPFile();			// get handle to gm_pending_tp.bin file
+	getCharacterFileList();			// get the list of character save files
+	getGuildFileList();				// get the list of guild save files
+	getSaleStoreFileList();			// get the list of files for items for sale in the sale store
+	getOfflineCommandsFileList();	// get the list of files for items for sale in the sale store
+
+CMailSavesInterface (specialisation of CRemoteSavesInterface):
+	getEntityFileList(entity_name);					// get the set of files for a given entity
+	moveEntityFiles(old_name,new_name,overwrite);	// move the files for an entity from one folder to another
+
+CBackupSavesInterface (specialisation of CRemoteSavesInterface):
+	getCharacterFileList(charcater_name);	// get the set of backup files for a given character
+	getGuildFileList(guild_name);			// get the list of backup files for a given guild
+
+
+Implementation
+--------------
+	class CRemoteSavesConnection;	// an object that represents the connection to a remote CSaves modules
+	class CRemoteSavesManager;		// singleton manager class for all of the local CRemoteSavesConnection objects
+
+CRemoteSavesManager
+	Responsible for instantiating CRemoteSavesConnection modules as required and for preventing more than one
+	such module from being instantiated for any one given target
+	CRemoteSavesConnection objects are instantiated or removed in function of the CRemoteSavesInterface objects that
+	are created or removed
+
+	getInstance()
+	registerSavesInterface(CRemoteSavesInterface*)
+	unregisterSavesInterface(CRemoteSavesInterface*)
+	getConnection(shardName,type)
+
+CRemoteSavesConnection
+	Responsible for limitting network throttling by GUSes
+	Only allows n save requests to be sent to connected shard saves module at a time (handles a queue for the rest)
+
+
+REMOTE_SAVES Module Messages
+----------------------------
+	CMsgRSInit			(fileList)
+	CMsgRSUpdate		(newFiles,changedFiles,deletedFiles)
+	CMsgRSDownload		(requestId,fileName,fileBody)
+	CMsgRSGenericReply	(requestId,successFlag,msg)
+

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="StickMode" Type="Type" Filename="stick_mode.typ" Default="Follow"/>
+  <ELEMENT Name="UserBone" Type="Type" Filename="string.typ"/>
+  <LOG>Thu Nov 13 18:03:15 2003 (vizerie) Dfn Structure = 
+Wed Nov 19 14:27:08 2003 (vizerie) Dfn Structure = </LOG>
+</DFN>

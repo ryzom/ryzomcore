@@ -1,0 +1,8 @@
+<nel:packed_xml>
+	<nel:xml_file name="file1_in_sub_1.xml">
+<myxml><withSomethink name="foo"/></myxml>
+	</nel:xml_file>
+	<nel:xml_file name="file2_in_sub_1.xml">
+<anotherxml><withSomethink name="bar"/></anotherxml>
+	</nel:xml_file>
+</nel:packed_xml>

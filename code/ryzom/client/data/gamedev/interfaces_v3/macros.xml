@@ -1,0 +1,663 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+<link expr="depends(@SERVER:USER:ACT_NUMBER)" action="macro_receive_action_end" />
+
+<!-- ************************************ -->
+<!-- *     EDITION DES COMMANDES		* -->
+<!-- ************************************ -->
+
+<!-- ASSIGN KEY TO COMMAND MODAL BOX -->
+<proc id="modal_get_key_ok">
+	<action handler="reset_keyboard_focus" />
+	<action handler="ah_assign_key" />
+</proc>
+
+<proc id="modal_get_key_cancel">
+	<action handler="reset_keyboard_focus" />
+	<action handler="leave_modal" />
+</proc>
+
+<group type="modal_get_key" id="assign_key" exit_click_out="true" posref="MR MM" w="224" child_resize_h="true" child_resize_hmargin="8" >
+	<view type="text" id="text" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiAssignKey" />
+
+	<instance template="box_widget" id="back_key" posref="TM TM" w="176" h="20" x="0" y="-20" />
+	<view type="text" id="keytext" posparent="back_key" posref="MM MM" x="0" y="-1" color="255 255 255 255" global_color="false" fontsize="10" shadow="true"  />
+	<view type="text" id="inuse" posref="TM TM" x="0" y="-44" color="255 255 255 128" fontsize="10" shadow="true" multi_line="true" multi_line_space="0" line_maxw="216" />
+
+	<instance template="button_ok_cancel" posref="TR TR" x="-4" y="-70" 
+				onclick_ok="proc" 
+				onclick_ok_param="modal_get_key_ok" 
+				onclick_cancel="proc"
+				onclick_cancel_param="modal_get_key_cancel" />
+
+</group>
+
+
+<!-- EDIT COMMAND MAIN CONTAINER -->
+<!-- Choose Category, Action, Params and Key association -->
+<template name="teditcmd" id="" keep="true" db_sel_cat="" db_sel_act="" db_sel_1p="" db_sel_2p="" db_disp_1p="" db_disp_2p="" >
+	<group style="container_modal" id="#id" w="338" h="256" title="uiEditCmd"
+							on_active="editcmd_open" on_active_params="#id"
+							header_color="UI:SAVE:WIN:COLORS:OPT" >
+							
+		<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+		</group>
+		
+		<group id="header_opened" x="0" y="0"  h="16" posref="TL TL" >
+		</group>
+		
+		<group id="content" x="0" y="0" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
+
+			<!-- Background : now used to define the comboSzone -->
+			<group id="back" posref="TL TL" w="320" h="216" x="0" y="0"/>
+					
+			<!-- Category combo -->
+			<group type="combo_box" id="combo_cat" w="320" h="20" value="#db_sel_cat" posref="TL TL" x="0" y="-20" >
+				<instance template="combo_box_def1" />
+			</group>
+			<view type="text" id="combo_cat_name" posparent="combo_cat" posref="TL BL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiCategory" />
+
+			<!-- Action combo -->
+			<group type="combo_box" id="combo_action" w="320" h="20" value="#db_sel_act" posref="TL TL" x="0" y="-60" >
+				<instance template="combo_box_def1" />
+			</group>
+			<view type="text" id="combo_action_name" posparent="combo_action" posref="TL BL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiAction" />
+
+			<!-- Param 1 : params diplayed depends on type of params -->
+			<group type="combo_box" id="first_param_list" value="#db_sel_1p" w="320" h="20" posref="TL TL" x="0" y="-100" >
+				<instance template="combo_box_def1" />
+			</group>
+
+			<instance template="edit_box_widget" id="first_param_editbox" w="320" h="20" posref="TL TL" x="0" y="-100" reset_focus_on_hide="true" 
+				max_historic="10" prompt="" enter_loose_focus="true" multi_line="false" line_maxw="312" 
+				onenter="editcmd_change_first_param" params="#id" 
+				onchange="editcmd_change_first_param" onchange_params="#id" />
+				
+			<link expr="eq(@#db_disp_1p,0)" target="first_param_list:active" />
+			<link expr="eq(@#db_disp_1p,1)" target="first_param_editbox:active" />
+
+			<view type="text" id="first_param_name" posparent="first_param_list" posref="TL BL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="" />
+
+			<!-- Param 2 -->
+			<group type="combo_box" id="second_param_list" value="#db_sel_2p" w="320" h="20" posref="TL TL" x="0" y="-140" >
+				<instance template="combo_box_def1" />
+			</group>
+
+			<instance template="edit_box_widget" id="second_param_editbox" w="320" h="20" posref="TL TL" x="0" y="-140" reset_focus_on_hide="true" 
+				max_historic="10" prompt="" enter_loose_focus="true" multi_line="false" line_maxw="312" 
+				onenter="editcmd_change_second_param" params="#id" 
+				onchange="editcmd_change_first_param" onchange_params="#id" />
+
+			<link expr="eq(@#db_disp_2p,0)" target="second_param_list:active" />
+			<link expr="eq(@#db_disp_2p,1)" target="second_param_editbox:active" />
+
+			<view type="text" id="second_param_name" posparent="second_param_list" posref="TL BL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="" />
+
+			<!-- Action to do when category, action, 1st or 2nd params change -->
+			<link expr="@#db_sel_cat"	action="editcmd_change_category"		params="#id" />
+			<link expr="@#db_sel_act"	action="editcmd_change_action"			params="#id" />
+			<link expr="@#db_sel_1p"	action="editcmd_change_first_param"		params="#id"/>
+			<link expr="@#db_sel_2p"	action="editcmd_change_second_param"	params="#id"/>
+				
+			<!-- Button key to directly define a key for this action (not displayed in macro mode) -->
+			<group id="keygrp" sizeref="w" h="42" posref="BM BM" y="4" posparent="back" >
+				<instance template="box_widget" id="back_key" posref="BM BM" w="176" h="20"/>
+				<view type="text" id="key_name" posparent="back_key" posref="TL BL" x="0" y="0" color="255 255 255 128" fontsize="8" shadow="true" hardtext="uiCmdKey" />
+				<view type="bitmap" id="sep" posref="BM BM" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="40" />		
+			
+				<ctrl type="button" id="butkey" button_type="push_button" posref="BM BM" w="176" h="20" scale="true"
+								texture="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga" 
+								color="255 255 255 0" col_pushed="255 255 255 0" col_over="255 255 255 90"
+								global_color_normal="true" global_color_pushed="true" global_color_over="true" 
+								onclick_l="editcmd_cmd_def_key" params_l="#id" />
+				<view type="text" id="txtkey" posparent="back_key" posref="MM MM" x="0" y="-1" color="255 255 255 255" fontsize="8" shadow="true" hardtext="uiEditCmdNone" />
+			</group>
+
+			<instance template="button_ok_cancel" posparent="back" posref="BR TR" x="0" y="-4" 
+						onclick_ok="editcmd_ok" 
+						onclick_ok_param="#id"
+						onclick_cancel="set"
+						onclick_cancel_param="target_property=ui:interface:#id:active|value=0" />
+
+		</group>
+	</group>
+</template>
+
+<!-- ************************************ -->
+<!-- *     DEFINTION DES TOUCHES		* -->
+<!-- ************************************ -->
+
+<!-- Menu for key edition -->
+<variable entry="UI:VARIABLES:KEYS:MENU_LINE_EDITED" type="sint32" value="-1" />
+<group type="menu" id="menu_key" extends="base_menu">
+	<action name="uimAssignKey" handler="keys_assign"/>
+	<action name="uimEditKey" handler="keys_edit"  cond="canEditKey(@UI:VARIABLES:KEYS:MENU_LINE_EDITED)" />
+	<action name="uimDeleteKey" handler="keys_delete"  cond="canDeleteKey(@UI:VARIABLES:KEYS:MENU_LINE_EDITED)" />
+</group>
+
+<!-- Called when keys container opend -->
+<proc id="proc_keys_open">
+	<action handler="keys_open" params="" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:KEYS|value=1" />
+</proc>
+<!-- Called when keys container closed -->
+<proc id="proc_keys_close">
+	<action handler="set" params="target_property=ui:interface:editcmd:active|value=0" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:KEYS|value=0" />
+</proc>
+<!-- Called when right-click on a key line -->
+<proc id="proc_keys_menu">
+	<action handler="set" params="dblink=UI:VARIABLES:KEYS:MENU_LINE_EDITED|value=@0"  />
+	<action handler="active_menu" params="menu=ui:interface:menu_key"  />
+</proc>
+
+<!-- TEMPLATE FOR ONE KEY -->
+<template name="tk_line" keep="true" posparent="parent" posref="TL TL" h="14" id="" lineid="">
+	<group id="#id" w="388" h="#h" posparent="#posparent" posref="#posref" 
+		group_onclick_r="proc" group_params_r="proc_keys_menu|#lineid" 
+		group_onclick_l="keys_assign">
+		<!-- if change name.x, change command.line_maxw please -->
+		<view type="text" id="name" x="248" y="0" fontsize="10" shadow="true" />
+		<view type="text" id="command" line_maxw="238" x="0" y="0" fontsize="10" shadow="true" 
+			over_extend_view_text="true" over_extend_parent_rect="true" />
+	</group>
+</template>
+
+<!-- KEYS MAIN CONTAINER -->
+<group type="container" id="keys" w="420" h="16" resizer="false" openable="false" title="uiKeysTitle"
+	global_color="false" opened="true" pop_min_h="64"
+	movable="true" active="false" header_color="UI:SAVE:WIN:COLORS:OPT"
+	on_active="proc" on_active_params="proc_keys_open" 
+	on_deactive="proc" on_deactive_params="proc_keys_close"
+>
+
+
+	<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0"  h="16" posref="TL TL"
+		 group_onclick_r="active_menu"
+		 group_params_r="menu=ui:interface:base_menu_with_color" >
+
+					
+		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewKeyShortcut"
+				 onclick_l="keys_new" />
+
+	</group>
+		
+	<group id="content" x="0" y="0" w="0" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" >
+	</group>
+
+</group>
+
+<!-- KEYS CONTAINER FOR ALL KEYS-->
+<!-- Needed for scroll bar of the main container -->
+<template name="t_all_keys" keep="false" id="" title="" >
+	<group type="container" id="#id" title="#title" w="320" h="128" openable="false" global_color="false" opened="true" resizer="false" savable="false" >
+		<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+		</group>
+		<group id="header_opened" x="0" y="0"  h="20" posref="TL TL" >
+		</group>
+		<group id="content" type="list" x="0" y="0" over="true" posref="TL TL" >
+		</group>
+	</group>
+</template>
+
+<!-- the id must be keys_### where ### is the name of the category -->
+<!-- dont remember if you add / remove a category to update hierarchy.xml -->
+<instance template="t_all_keys" id="keys_player"	title="uiKeysPlayerTitle" />
+<instance template="t_all_keys" id="keys_movement"	title="uiKeysMovementTitle" />
+<instance template="t_all_keys" id="keys_actions"	title="uiKeysActionsTitle" />
+<instance template="t_all_keys" id="keys_chat"		title="uiKeysChatTitle" />
+<instance template="t_all_keys" id="keys_view"		title="uiKeysViewTitle" />
+<instance template="t_all_keys" id="keys_windows"	title="uiKeysWindowsTitle" />
+<instance template="t_all_keys" id="keys_system"	title="uiKeysSystemTitle" />
+<instance template="t_all_keys" id="keys_edit"		title="uiKeysEditTitle" />
+<instance template="t_all_keys" id="keys_debug"		title="uiKeysDebugTitle" />
+<instance template="t_all_keys" id="keys_r2ed"		title="uiR2EDActionCategory" />
+
+
+<!-- ************************************************************************************************************************************************ -->
+<!-- ************************************************************************************************************************************************ -->
+<!-- ************************************************************************************************************************************************ -->
+
+<!-- ************************************ -->
+<!-- *     DEFINTION DES MACROS			* -->
+<!-- ************************************ -->
+
+<!-- ++++++++++++++++ -->
+<!-- MACROS CONTAINER -->
+<!-- ++++++++++++++++ -->
+
+<group type="menu" id="options_macro" exit_click_b="true" extends="base_menu" >
+	<action name="uimMacroExec" handler="macros_exec" />
+	<action name="uimMacroEdit" handler="macros_edit" />
+	<action name="uimMacroDel"	handler="macros_del" />
+</group>
+
+<!-- Template defining one macro in the macros container -->
+<template name="element_macro" keep="true" posparent="parent" posref="TL TL" w="392" h="30" id="" >
+	<group id="#id" w="#w" h="#h" posparent="#posparent" posref="#posref" group_onclick_r="active_menu" group_params_r="menu=ui:interface:options_macro" >
+		<view type="bitmap" id="sep1" posref="TL TL" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="-1" />
+		<view type="bitmap" id="sep2" posref="TR TR" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="1" />
+		
+		<view type="bitmap" id="sep3" posref="TL TL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="1" />
+		<view type="bitmap" id="sep4" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
+		
+		
+		<ctrl type="sheet" id="icon" nature="macro" posref="ML ML" x="4" y="0" dragable="true" /> 
+<!--
+		<view type="bitmap" id="fakebutton"  texture="W_slot_brick.tga" />
+		<view type="bitmap" id="back_icon" posparent="fakebutton" posref="TL TL" x="1" y="-1" texture="US_back_0.tga" global_color="false" />
+		<view type="bitmap" id="icon_icon" posparent="back_icon" posref="TL TL" texture="US_ico_0.tga" global_color="false"/>
+		<view type="bitmap" id="over_icon" posparent="icon_icon" posref="TL TL" texture="US_over_2.tga" global_color="false"/>
+
+		<ctrl type="button" id="icon_button" button_type="push_button" posref="ML ML" x="5" render_layer="2"
+							tx_normal="W_button_24_over.tga" tx_over="W_button_24_over.tga" tx_pushed="W_button_24_over.tga"
+							color="255 255 255 0" col_over="255 255 255 128" col_pushed="255 255 255 0" global_color_over="false"
+							onclick_l="" params_l="" />
+-->
+							
+		<view type="text" id="macro_name" posparent="icon" posref="MR ML" x="8" fontsize="12" y="-1" shadow="true" />
+		<!--
+		<instance template="box_widget" id="back_key" posref="MR MR" w="128" h="20" x="-4" y="0"/>
+		-->
+		<view type="text" id="macro_key" posref="MR MR" x="-4" y="-1" fontsize="10" shadow="true" hardtext="" color="255 255 255 128" />
+	</group>
+</template>
+
+<!-- Called when macro container opened -->
+<proc id="proc_macros_open">
+	<action handler="macros_open" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MACROS|value=1" />
+</proc>
+<!-- Called when macro container closed -->
+<proc id="proc_macros_close">
+	<action handler="set" params="target_property=ui:interface:editcmd:active|value=0" />
+	<action handler="set" params="target_property=ui:interface:new_macro:active|value=0" />
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MACROS|value=0" />
+</proc>
+
+<!-- MACROS MAIN CONTAINER -->
+<!-- This container holds in its content 'element_macro' instances of the macros -->
+<group type="container" id="macros" w="420" h="512" title="uiMacrosTitle" resizer="false" openable="false" 
+	global_color="false" opened="true" header_color="UI:SAVE:WIN:COLORS:OPT"
+	movable="true" active="false"
+	on_active="proc" on_active_params="proc_macros_open"
+	on_deactive="proc" on_deactive_params="proc_macros_close"
+>
+
+
+	<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0"  h="18" posref="TL TL"
+		 group_onclick_r="active_menu"
+		 group_params_r="menu=ui:interface:base_menu_with_color" >
+		 
+		 
+		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewMacro"
+				 onclick_l="macros_new_macro" />					
+	</group>
+
+	<group id="content" x="0" y="0" over="true" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
+		<group id="macros" x="10" y="-4" sizeref="w" posref="TL TL" child_resize_h="true" max_h="300" >
+			<group id="list" type="list" x="0" y="0" posref="TL TL" />
+		</group>
+		<ctrl style="skin_scroll" id="sv" posref="TL TL" y="-4" target="macros" />
+	</group>
+<!--
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+	</group>
+-->
+</group>
+<tree node="macros" />
+
+
+<!-- +++++++++++++ -->
+<!-- MACRO EDITION -->
+<!-- +++++++++++++ -->
+
+<group type="menu" id="options_macro_command" exit_click_b="true" extends="base_menu" >
+	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up" />
+	<action name="uimMCMoveDown"	handler="new_macro_cmd_move_down" />
+	<action name="uimMCEdit"		handler="new_macro_cmd_edit" />
+	<action name="uimMCDel"			handler="new_macro_cmd_delete" />
+</group>
+
+<!-- Definition d'une commande dans une macro -->
+<template name="macro_command" keep="true" posparent="parent" posref="TL TL" w="412" h="20" id="" >
+	<group id="#id" w="#w" h="#h" posparent="#posparent" posref="#posref" group_onclick_r="active_menu" group_params_r="menu=ui:interface:options_macro_command" >
+		<view type="bitmap" id="sep1" posref="TL TL" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="-1" />
+		<view type="bitmap" id="sep2" posref="TR TR" scale="true" sizeref="h" h="0" w="2" texture="W_line_ver.tga" x="1" />
+		
+		<view type="bitmap" id="sep3" posref="TL TL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="1" />
+		<view type="bitmap" id="sep4" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
+		
+		<view type="bitmap" id="sep5" posref="BL BL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-1" />
+		
+		<view type="bitmap" id="fakebutton" posref="ML ML" x="4" y="0" texture="W_button_10_choice.tga" />
+		<view type="text" id="macro_name" posparent="fakebutton" posref="MR ML" x="4" fontsize="10" shadow="true" />
+		<view type="text" id="cmd_key" posref="MR MR" x="-4" fontsize="8" shadow="true" color="255 255 255 128" hardtext="" />
+	</group>
+</template>
+
+<!-- MACRO EDITION MAIN CONTAINER -->
+<group style="container_modal" id="new_macro" w="420" h="512" title="uiNewMacro" 
+						on_active="new_macro_open" modal_parent="macros"
+						header_color="UI:SAVE:WIN:COLORS:OPT" >
+						
+	<group id="header_closed" x="0" y="0"  h="16" posref="TL TL" >
+	</group>
+	
+	<group id="header_opened" x="0" y="0"  h="20" posref="TL TL" >
+	</group>
+	
+	<group id="content" x="0" y="0" w="0" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
+	
+		<ctrl type="sheet" id="icon" nature="macro" posref="TL TL" x="2" y="-10" tooltip="uittMacroUserDefIcon" onclick_l="enter_modal" params_l="group=ui:interface:macro_icon_creation" dragable="false" /> 
+		<!--
+		<view type="bitmap" id="fakebutton" posref="TL TL" x="0" y="-10" texture="W_slot_brick.tga" />
+		<view type="bitmap" id="back_icon" posparent="fakebutton" posref="TL TL" x="1" y="-1" texture="US_back_0.tga" global_color="false"/>
+		<view type="bitmap" id="icon_icon" posparent="back_icon" posref="TL TL" texture="US_ico_0.tga" global_color="false"/>
+		<view type="bitmap" id="over_icon" posparent="icon_icon" posref="TL TL" texture="US_over_2.tga" global_color="false"/>
+		-->
+		
+	
+		<group type="edit_box" id="edit_name" posparent="icon" posref="MR ML" x="4" y="0"  w="198" h="20" child_resize_h="true" 
+									onenter="new_macro_enter_name" params="" max_num_chars="19" prompt="" enter_loose_focus="true"
+									entry_type="text"  reset_focus_on_hide="true" menu_r="" >
+									
+			<instance template="box_widget" id="back_name" posref="TL TL" sizeref="w" w="0" h="20" />
+			<view type="text" id="edit_text" x="4" y="-1" posref="ML ML" multi_line="false" 
+			fontsize="10" shadow="true" hardtext="" global_color="false"/>
+			
+		</group>
+		 
+		
+		<instance template="box_widget" id="back_key" posparent="edit_name" posref="MR ML" w="176" h="20" x="4" y="0"/>
+		<view type="text" id="macro_key" posparent="back_key" posref="MM MM" fontsize="8" y="-1" shadow="true" />
+	
+		<!--<ctrl type="button" id="icon_button" button_type="push_button" posref="TL TL" y="-11" x="1"  render_layer="2"
+							tx_normal="W_button_24_over.tga" tx_over="W_button_24_over.tga" tx_pushed="W_button_24_over.tga"
+							color="255 255 255 0" col_over="255 255 255 128" col_pushed="255 255 255 0" global_color_over="false"
+							onclick_l="" params_l="" />
+			-->				
+		<ctrl type="button" id="key_button" button_type="push_button" posparent="back_key" posref="TL TL" render_layer="2"
+							w="176" h="20" scale="true"
+							tx_normal="blank.tga" tx_over="blank.tga" tx_pushed="blank.tga"
+							color="255 255 255 0" col_pushed="255 255 255 0" col_over="255 255 255 90"
+							global_color_normal="true" global_color_pushed="true" global_color_over="true"
+							onclick_l="editcmd_cmd_def_key" params_l="editcmd" />
+	
+		<view type="text" id="txticon" 	posparent="icon" 		posref="TL BL" 		fontsize="8"	 shadow="true" 		hardtext="uiMacroIcon" 	x="2" y="-3" />
+		<view type="text" id="name" 	posparent="edit_name" 	posref="TL BL" 		fontsize="8"	 shadow="true" 		hardtext="uiMacroName" 	x="2" y="0" />
+		<view type="text" id="key" 		posparent="back_key" 	posref="TL BL" 		fontsize="8" 	 shadow="true" 		hardtext="uiMacroKey" 	x="2" y="0" />
+		
+		<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor2.tga" color="255 255 255 128" y="-40" />
+			
+		<view type="text" id="commands" posparent="sep" posref="BL TL" fontsize="10" shadow="true" hardtext="uiMacroCom" y="-6" />
+		
+		
+		<ctrl style="new_element_header" id="add_button" posparent="sep" posref="BR TR" x="0" y="-4" wmargin="8" hardtext="uiMacroAddCom"
+				 onclick_l="new_macro_new_cmd" />
+		
+		
+		<group id="cmds" type="list" posref="BR TR" posparent="sep" x="0" y="-22" over="true" >
+<!--
+			<instance template="macro_command" id="cmd1" posref="TL TL" />
+			<instance template="macro_command" id="cmd2" posparent="cmd1" posref="BL TL" />
+-->
+		</group>
+		
+		<instance template="button_ok_cancel" posparent="cmds" posref="BR TR" x="0" y="-4" 
+					onclick_ok="new_macro_ok" 
+					onclick_ok_param="" 
+					onclick_cancel="set"
+					onclick_cancel_param="target_property=ui:interface:new_macro:active|value=0" />
+			
+	</group>
+	
+</group>
+<tree node="new_macro" />
+
+
+
+<!-- +++++++++++++ -->
+<!-- ICON CREATION -->
+<!-- +++++++++++++ -->
+
+<!-- Template that define slots -->
+<template name="icon_sheet" id="" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="26" > 
+	<group id="#id" x="#x" y="#y" posparent="#posparent" posref="#posref" sizeref="w" h="#h" >
+		<view type="bitmap" id="sht1" posref="TL TL" x="0" y="0" texture="W_slot_brick.tga" />
+		<view type="bitmap" id="sht2" posparent="sht1" posref="TR TL" x="4" y="0" texture="W_slot_brick.tga" />
+		<view type="bitmap" id="sht3" posparent="sht2" posref="TR TL" x="4" y="0" texture="W_slot_brick.tga" />
+		<view type="bitmap" id="sht4" posparent="sht3" posref="TR TL" x="4" y="0" texture="W_slot_brick.tga" />
+		<view type="bitmap" id="sht5" posparent="sht4" posref="TR TL" x="4" y="0" texture="W_slot_brick.tga" />
+	</group>
+</template>
+
+<!-- ICON CREATION PROCEDURES -->
+
+<!-- BACKGROUND -->
+<proc id="change_icon_bg">
+	<action handler="set_macro_back" params="target=ui:interface:macro_icon_creation:icon|value=@0" />
+</proc>
+
+<!-- FOREGROUND -->
+<proc id="change_icon_fg">
+	<action handler="set_macro_icon" params="target=ui:interface:macro_icon_creation:icon|value=@0" />
+</proc>
+
+<!-- PATTERN -->
+<proc id="change_icon_pa">
+	<action handler="set_macro_over" params="target=ui:interface:macro_icon_creation:icon|value=@0" />
+</proc>
+
+<!-- ICON CREATION MAIN MODAL WINDOW -->
+<group type="modal" id="macro_icon_creation" exit_click_out="true" posref="TL TR" w="162" h="336"  on_enter="" on_enter_params=""
+	on_active="macro_icon_creation_open" on_active_params="new_macro" options="skin_modal">
+
+	<view type="text" id="title" posref="TL TL" x="6" y="-4" color="255 255 255 255" fontsize="14" shadow="true" global_color="false" hardtext="uiIconCreation" />
+	
+	
+	<ctrl type="sheet" id="icon" nature="macro" posref="TM TM" x="0" y="-24" dragable="false" /> 
+	<view type="bitmap" id="sep" posref="TL TL" scale="true" sizeref="w" h="2" w="0" texture="W_line_hor.tga" y="-54" />
+	
+	
+	<!-- Background -->
+	<group id="IconBackground" posref="TL TL" w="146" h="72" x="8" y="-64" >
+		<view type="text" id="Ico_back" posref="TL TL" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiIconBack" />
+		<instance template="icon_sheet" id="sheet1" posref="TL TL" y="-14" />
+		<instance template="icon_sheet" id="sheet2" posparent="sheet1" posref="BL TL" y="-4" />
+	
+	
+		<view type="bitmap" id="bg1" posparent="sheet1" posref="TL TL" x="1" y="-1" texture="US_back_0.tga" global_color="false"/>
+		<view type="bitmap" id="bg2" posparent="bg1" posref="TR TL" x="6" y="0" texture="US_back_1.tga" global_color="false"/>
+		<view type="bitmap" id="bg3" posparent="bg2" posref="TR TL" x="6" y="0" texture="US_back_2.tga" global_color="false"/>
+		<view type="bitmap" id="bg4" posparent="bg3" posref="TR TL" x="6" y="0" texture="US_back_3.tga" global_color="false"/>
+		<view type="bitmap" id="bg5" posparent="bg4" posref="TR TL" x="6" y="0" texture="US_back_4.tga" global_color="false"/>
+		
+		
+		<view type="bitmap" id="bg6" posparent="sheet2" posref="TL TL" x="1" y="-1" texture="US_back_5.tga" global_color="false"/>
+		<view type="bitmap" id="bg7" posparent="bg6" posref="TR TL" x="6" y="0" texture="US_back_6.tga" global_color="false"/>
+		<view type="bitmap" id="bg8" posparent="bg7" posref="TR TL" x="6" y="0" texture="US_back_7.tga" global_color="false"/>
+		<view type="bitmap" id="bg9" posparent="bg8" posref="TR TL" x="6" y="0" texture="US_back_8.tga" global_color="false"/>
+		<view type="bitmap" id="bg10" posparent="bg9" posref="TR TL" x="6" y="0" texture="US_back_9.tga" global_color="false"/>
+		
+		<ctrl type="button" button_type="radio_button" id="but1" posparent="sheet1" posref="TL TL"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|0" />
+		<ctrl type="button" button_type="radio_button" id="but2" posparent="but1" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|1" />
+		<ctrl type="button" button_type="radio_button" id="but3" posparent="but2" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|2" />
+		<ctrl type="button" button_type="radio_button" id="but4" posparent="but3" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|3" />
+		<ctrl type="button" button_type="radio_button" id="but5" posparent="but4" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|4" />
+		<ctrl type="button" button_type="radio_button" id="but6" posparent="sheet2" posref="TL TL"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|5" />
+		<ctrl type="button" button_type="radio_button" id="but7" posparent="but6" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|6" />
+		<ctrl type="button" button_type="radio_button" id="but8" posparent="but7" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|7" />
+		<ctrl type="button" button_type="radio_button" id="but9" posparent="but8" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|8" />
+		<ctrl type="button" button_type="radio_button" id="but10" posparent="but9" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_bg|9" />
+	</group>
+	
+	
+	<!-- Foreground -->
+	<group id="IconForeground" posparent="IconBackground" posref="BL TL" w="146" h="72" x="0" y="-8" >
+		<view type="text" id="Ico_back" posref="TL TL" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiIconFore" />
+		<instance template="icon_sheet" id="sheet1" posref="TL TL" y="-14" />
+		<instance template="icon_sheet" id="sheet2" posparent="sheet1" posref="BL TL" y="-4" />
+	
+	
+		<view type="bitmap" id="bg1" posparent="sheet1" posref="TL TL" x="1" y="-1" texture="US_ico_0.tga" global_color="false" />
+		<view type="bitmap" id="bg2" posparent="bg1" posref="TR TL" x="6" y="0" texture="US_ico_1.tga" global_color="false" />
+		<view type="bitmap" id="bg3" posparent="bg2" posref="TR TL" x="6" y="0" texture="US_ico_2.tga" global_color="false" />
+		<view type="bitmap" id="bg4" posparent="bg3" posref="TR TL" x="6" y="0" texture="US_ico_3.tga" global_color="false" />
+		<view type="bitmap" id="bg5" posparent="bg4" posref="TR TL" x="6" y="0" texture="US_ico_4.tga" global_color="false" />
+		
+		
+		<view type="bitmap" id="bg6" posparent="sheet2" posref="TL TL" x="1" y="-1" texture="US_ico_5.tga" global_color="false"/>
+		<view type="bitmap" id="bg7" posparent="bg6" posref="TR TL" x="6" y="0" texture="US_ico_6.tga" global_color="false" />
+		<view type="bitmap" id="bg8" posparent="bg7" posref="TR TL" x="6" y="0" texture="US_ico_7.tga" global_color="false" />
+		<view type="bitmap" id="bg9" posparent="bg8" posref="TR TL" x="6" y="0" texture="US_ico_8.tga" global_color="false" />
+		<view type="bitmap" id="bg10" posparent="bg9" posref="TR TL" x="6" y="0" texture="US_ico_9.tga" global_color="false" />
+		
+		<ctrl type="button" button_type="radio_button" id="but1" posparent="sheet1" posref="TL TL"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|0" />
+		<ctrl type="button" button_type="radio_button" id="but2" posparent="but1" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|1" />
+		<ctrl type="button" button_type="radio_button" id="but3" posparent="but2" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|2" />
+		<ctrl type="button" button_type="radio_button" id="but4" posparent="but3" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|3" />
+		<ctrl type="button" button_type="radio_button" id="but5" posparent="but4" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|4" />
+		<ctrl type="button" button_type="radio_button" id="but6" posparent="sheet2" posref="TL TL"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|5" />
+		<ctrl type="button" button_type="radio_button" id="but7" posparent="but6" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|6" />
+		<ctrl type="button" button_type="radio_button" id="but8" posparent="but7" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|7" />
+		<ctrl type="button" button_type="radio_button" id="but9" posparent="but8" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|8" />
+		<ctrl type="button" button_type="radio_button" id="but10" posparent="but9" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_fg|9" />
+	</group>
+
+	<!-- Pattern -->
+	<group id="IconPattern" posparent="IconForeground" posref="BL TL" w="146" h="42" x="0" y="-8" >
+		<view type="text" id="Ico_Pat" posref="TL TL" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiIconPat" />
+		<instance template="icon_sheet" id="sheet1" posref="TL TL" y="-14" />
+			
+	
+		<view type="bitmap" id="bg1" posparent="sheet1" posref="TL TL" x="1" y="-1" texture="US_over_0.tga" global_color="false"/>
+		<view type="bitmap" id="bg2" posparent="bg1" posref="TR TL" x="6" y="0" texture="US_over_1.tga" global_color="false"/>
+		<view type="bitmap" id="bg3" posparent="bg2" posref="TR TL" x="6" y="0" texture="US_over_2.tga" global_color="false"/>
+		<view type="bitmap" id="bg4" posparent="bg3" posref="TR TL" x="6" y="0" texture="US_over_3.tga" global_color="false"/>
+		<view type="bitmap" id="bg5" posparent="bg4" posref="TR TL" x="6" y="0" texture="US_over_4.tga" global_color="false"/>
+		
+		<ctrl type="button" button_type="radio_button" id="but1" posparent="sheet1" posref="TL TL"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_pa|0" />
+		<ctrl type="button" button_type="radio_button" id="but2" posparent="but1" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_pa|1" />
+		<ctrl type="button" button_type="radio_button" id="but3" posparent="but2" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_pa|2" />
+		<ctrl type="button" button_type="radio_button" id="but4" posparent="but3" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_pa|3" />
+		<ctrl type="button" button_type="radio_button" id="but5" posparent="but4" posref="TR TL" x="4"
+								tx_normal="W_slot_brick_selected.tga" tx_over="W_slot_brick_selected.tga" tx_pushed="W_slot_brick_selected.tga"
+								color="255 255 255 0" col_over="255 255 255 0" col_pushed="255 255 255 255" global_color_over="false"
+								onclick_l="proc" params_l="change_icon_pa|4" />
+	</group>
+	
+	
+	<view type="text" id="Ico_txt" posparent="IconPattern" posref="BL TL" y="-8" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiIconTxt" />
+	<group type="edit_box" id="edit_name" posparent="Ico_txt" posref="TL TL" x="0" y="-14"  w="146" h="20" child_resize_h="true" 
+									onenter="" params="" max_num_chars="17" prompt="" enter_loose_focus="true"
+									onchange="eb_update_macro_text" onchange_params="ui:interface:macro_icon_creation:icon"
+									entry_type="alpha_num"  reset_focus_on_hide="true" menu_r="" >
+									
+			<instance template="box_widget" id="back_name" posref="TL TL" sizeref="w" w="0" h="20" />
+			<view type="text" id="edit_text" x="4" y="1" posref="ML ML" multi_line="false" 
+					fontsize="12" shadow="true" hardtext="" global_color="false"/>
+	</group>
+	
+	<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" 
+				onclick_ok="macro_icon_creation_ok" 
+				onclick_ok_param="" 
+				onclick_cancel="leave_modal"
+				onclick_cancel_param="" />
+
+</group>
+
+<tree node="keys" >
+	<tree node="keys_player"/>
+	<tree node="keys_movement"/>
+	<tree node="keys_actions"/>
+	<tree node="keys_chat"/>
+	<tree node="keys_view"/>
+	<tree node="keys_windows"/>
+	<tree node="keys_system"/>
+	<tree node="keys_edit"/>
+	<tree node="keys_debug"/>
+	<tree node="keys_r2ed"/>
+</tree>
+
+</interface_config>

@@ -1,0 +1,170 @@
+// scripts for missions systems
+file "entities_game_service/mission_pd"
+{
+	include "mission_manager/mission_base_behaviour.h"
+
+	class CActiveStepStatePD key ( Index )
+	{
+		uint32								Index;
+		uint32								State;
+		hidden parent CActiveStepPD:States	Step;
+	}
+
+	class CActiveStepPD key(IndexInTemplate)
+	{
+		uint32								IndexInTemplate;
+		CActiveStepStatePD:Step<>			States;
+		hidden parent CMissionPD:Steps		Mission;
+	}
+
+	class CDoneStepPD key (Index)
+	{
+		uint32								Index;
+		hidden parent CMissionPD:StepsDone	Mission;
+	}
+
+
+	class CMissionCompassPD key(Index)
+	{
+		onInit
+		@[
+			NameStringId = 0;
+			NameString.clear();
+		]@
+
+		@[
+
+			// User code appended in mission.pds
+			uint32							NameStringId;
+			std::string						NameString;
+
+		]@
+
+		uint32								Index;
+		uint32								Place;
+		uint32								BotId;
+		hidden parent CMissionPD:Compass	Mission;
+	}
+
+	class CMissionTeleportPD key(Index)
+	{
+		uint32								Index;
+		hidden parent CMissionPD:Teleports	Mission;
+	}
+
+	class CMissionInsidePlacePD key(Alias)
+	{
+		uint32									Alias;
+		uint32									Delay;
+		hidden parent CMissionPD:InsidePlaces	Mission;
+	}
+	class CMissionOutsidePlacePD key(Alias)
+	{
+		uint32									Alias;
+		uint32									Delay;
+		hidden parent CMissionPD:OutsidePlaces	Mission;
+	}
+
+	class CHandledAIGroupPD key (GroupAlias)
+	{
+		uint32										GroupAlias;
+		uint32										DespawnTime;
+		hidden parent CMissionPD:HandledAIGroups	Mission;
+	}
+
+	derived class CMissionPD key(TemplateId) implements CMissionBaseBehaviour
+	{
+		onInit
+		@[
+			_Mission = this;
+		]@
+		// template id
+		uint32					TemplateId;
+		// main mission template id (in case of chain mission)
+		uint32					MainMissionTemplateId;
+		// mission giver alias
+		uint32					Giver;
+		// the minimum hour of the day to advance in the mission
+		float					HourLowerBound;
+		// the maximum hour of the day to advance in the mission
+		float					HourUpperBound;
+		// the season to advance in the mission
+		TSeason					Season;
+		/// mono end date of the mission ( in tick )
+		uint32					MonoEndDate;
+		// end date of the mission ( in tick )
+		uint32					EndDate;
+		// fail date of the current critical part of the mission ( in tick )
+		uint32					CriticalPartEndDate;
+		/// begin date
+		uint32					BeginDate;
+		/// index fof the current failure ( the one that will be triggered if the mission fails )
+		uint32					FailureIndex;
+		/// index fof the current crash handler ( the one that will be triggered if an AI or EGS crash )
+		uint32					CrashHandlerIndex = @[0xFFFFFFFF]@;
+		/// index fof the current 'player reconnect' handler
+		uint32					PlayerReconnectHandlerIndex = @[0xFFFFFFFF]@;
+		/// true if the mission is finished
+		bool					Finished;
+		/// if the mission is finished indicates if it is a success or a failure
+		bool					MissionSuccess = @[true]@;
+		/// index of the current mission overloaded description
+		uint32					DescIndex;
+
+		/// if mission is currently in a waiting queue, indicate it's ID here (can only be in one queue at once)
+		uint32					WaitingQueueId;
+
+		// steps of the mission
+		CActiveStepPD:Mission<>			Steps;
+		// compass directions
+		CMissionCompassPD:Mission<>		Compass;
+		// done steps
+		CDoneStepPD:Mission<>			StepsDone;
+		/// activated mission teleports
+		CMissionTeleportPD:Mission<>	Teleports;
+		/// activated inside places
+		CMissionInsidePlacePD:Mission<>			InsidePlaces;
+		/// activated outside places
+		CMissionOutsidePlacePD:Mission<>		OutsidePlaces;
+
+		CHandledAIGroupPD:Mission<>		HandledAIGroups;
+
+		parent CMissionContainerPD:Missions Container;
+	}
+
+	derived class CMissionGuildPD : CMissionPD
+	{
+	}
+
+	derived class CMissionTeamPD : CMissionPD
+	{
+	}
+
+
+	derived class CMissionSoloPD : CMissionPD
+	{
+	}
+
+	mapped class CMissionContainerPD key(CharId)
+	{
+		CEntityId				CharId;
+		CMissionPD:Container<>	Missions;
+	}
+}
+	
+	
+	/*
+	
+	/// description text ( if empty, use default text )
+	std::string									_DescText;
+	/// description text additionnal params
+	std::vector< STRING_MANAGER::TParam >		_DescParam;
+	/// the mission teleports
+	std::vector< CMissionActionSetTeleport* >	_Teleports;
+
+
+	
+*/
+
+		
+	

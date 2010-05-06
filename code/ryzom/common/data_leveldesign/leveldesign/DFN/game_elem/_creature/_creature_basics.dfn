@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.49 $" State="modified">
+  <ELEMENT Name="Race" Type="Type" Filename="_creature_race.typ"/>
+  <ELEMENT Name="Gender" Type="Type" Filename="gender.typ"/>
+  <ELEMENT Name="DamageLocalisationTable" Type="Type" Filename="characterdamagelocalisationtable.typ"/>
+  <ELEMENT Name="Size" Type="Type" Filename="_creature_size.typ"/>
+  <ELEMENT Name="Profile" Type="Type" Filename="_career.typ"/>
+  <ELEMENT Name="ChatProfile" Type="Type" Filename="_creature_chat_profile.typ"/>
+  <ELEMENT Name="Level" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="PlayerSkillLevel" Type="Type" Filename="int.typ" Default="&quot;Basics.Level&quot;"/>
+  <ELEMENT Name="NbPlayers" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="PlayerHpLevel" Type="Type" Filename="int.typ" Default="&quot;Basics.Level&quot;"/>
+  <ELEMENT Name="NbHitToKillPlayer" Type="Type" Filename="float.typ" Default="5"/>
+  <ELEMENT Name="Ecosystem" Type="Type" Filename="_creature_ecosystem.typ"/>
+  <ELEMENT Name="Characteristics" Type="Dfn" Filename="_creature_characteristics.dfn"/>
+  <ELEMENT Name="Scores" Type="Dfn" Filename="_creature_derivated_scores.dfn"/>
+  <ELEMENT Name="Equipment" Type="Dfn" Filename="_creature_equipment.dfn"/>
+  <ELEMENT Name="CivilizationKnowledge" Type="Dfn" Filename="_civilization_skills.dfn"/>
+  <ELEMENT Name="FaberCompetences" Type="Dfn" Filename="_crafting_skills.dfn"/>
+  <ELEMENT Name="GenericCompetences" Type="Dfn" Filename="_generic_skills.dfn"/>
+  <ELEMENT Name="HarvestCompetences" Type="Dfn" Filename="_harvest_skills.dfn"/>
+  <ELEMENT Name="MagicAlterationCompetences" Type="Dfn" Filename="_magic_alteration_skills.dfn"/>
+  <ELEMENT Name="MagicAttackCompetences" Type="Dfn" Filename="_magic_attack_skills.dfn"/>
+  <ELEMENT Name="MagicHealingCompetences" Type="Dfn" Filename="_magic_healer_skills.dfn"/>
+  <ELEMENT Name="MagicGenericCompetences" Type="Dfn" Filename="_magic_skills.dfn"/>
+  <ELEMENT Name="MeleeFightingCompetences" Type="Dfn" Filename="_melee_skills.dfn"/>
+  <ELEMENT Name="RangeFightingCompetences" Type="Dfn" Filename="_range_skills.dfn"/>
+  <ELEMENT Name="TradingCompetences" Type="Dfn" Filename="_trading_skills.dfn"/>
+  <ELEMENT Name="Training Characteristics" Type="Dfn" Filename="_training_characteristic_skills.dfn"/>
+  <ELEMENT Name="Training Scores" Type="Dfn" Filename="_training_score_skills.dfn"/>
+  <ELEMENT Name="MoveCompetences" Type="Dfn" Filename="_move_competences.dfn"/>
+  <ELEMENT Name="MovementSpeeds" Type="Dfn" Filename="_creature_movespeed.dfn"/>
+  <ELEMENT Name="Alternative Clothes" Type="Type" Filename="filename.typ" FilenameExt="*.creature" Array="true"/>
+  <ELEMENT Name="type" Type="Type" Filename="_creature_basics_type.typ"/>
+  <ELEMENT Name="Fame" Type="Type" Filename="string.typ" Default="none"/>
+  <ELEMENT Name="FameByKill" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FameForGuardAttack" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="life" Type="Type" Filename="uint32.typ" Default="1"/>
+  <ELEMENT Name="AttackSpeed" Type="Type" Filename="float.typ" Default="3"/>
+  <ELEMENT Name="LifeRegen" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="AttackLevel" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="DefenseLevel" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="XPLevel" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="TauntLevel" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="MeleeReachValue" Type="Type" Filename="int.typ" Default="5"/>
+  <ELEMENT Name="XPGainOnCreature" Type="Type" Filename="int.typ" Default="10*&quot;Properties.XPGainCoef&quot;"/>
+  <ELEMENT Name="RegionForce" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="ForceLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="LocalCode" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="DodgeAsDefense" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="BotName" Type="Type" Filename="string.typ"/>
+  <LOG>Wed Jun 26 11:50:43 2002 (fleury) Dfn Structure = 
+Tue Jul 09 11:44:36 2002 (puzin) Dfn Structure = 
+Fri Jul 19 17:27:09 2002 (nevrax) Dfn Structure = 
+Fri Jul 19 17:38:46 2002 (nevrax) Dfn Structure = 
+Fri Jul 19 17:58:50 2002 (nevrax) Dfn Structure = 
+Tue Aug 13 12:07:41 2002 (miller) Dfn Structure = 
+Tue Sep 03 11:59:14 2002 (saffray) Dfn Structure = 
+Mon Feb 03 16:51:55 2003 (fleury) Dfn Structure = 
+Wed Feb 26 16:46:28 2003 (puzin) Dfn Structure = 
+Wed Feb 26 16:54:26 2003 (puzin) Dfn Structure = 
+Wed Feb 26 17:23:43 2003 (puzin) Dfn Structure = 
+Mon Mar 17 14:24:10 2003 (saffray) Dfn Structure = 
+Fri Jun 06 12:04:42 2003 (mauduit) Dfn Structure = 
+Thu Oct 16 15:24:43 2003 (boucher) Dfn Structure = 
+Fri Oct 17 10:53:19 2003 (boucher) Dfn Structure = 
+Fri Nov 21 15:12:07 2003 (ledorze) Dfn Structure = 
+Tue Dec 02 12:08:53 2003 (ledorze) Dfn Structure = 
+Wed Jan 21 16:59:28 2004 (ledorze) Dfn Structure = 
+Wed Mar 17 12:13:15 2004 (ledorze) Dfn Structure = 
+Tue Mar 23 10:34:10 2004 (ledorze) Dfn Structure = 
+Mon May 10 17:44:16 2004 (fleury) Dfn Structure = 
+Mon May 10 17:50:14 2004 (fleury) Dfn Structure = 
+Tue Jul 13 17:22:54 2004 (fleury) Dfn Structure = 
+Tue Jul 13 17:23:39 2004 (fleury) Dfn Structure = 
+Tue Jul 13 17:24:13 2004 (fleury) Dfn Structure = 
+Tue Jul 13 17:24:45 2004 (fleury) Dfn Structure = 
+Thu Aug 26 15:15:29 2004 (ledorze) Dfn Structure = 
+Tue Oct 05 13:50:58 2004 (besson) Dfn Structure = 
+Wed Jan 05 12:27:40 2005 (fleury) Dfn Structure = 
+Mon May 09 17:51:35 2005 (vuarand) Dfn Structure = 
+Tue Aug 02 11:37:03 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,417 @@
+<generator header_tag="ADMIN_MODULES_ITF">
+	
+	<include file="nel/misc/time_nl.h"/>
+
+	<namespace name="ADMIN">
+
+		<!-- PHP interface of the admin service module-->
+		<!-- ############################################################## -->
+		<callback_interface name="CAdminServiceWeb" caller="php">
+			<doc line="This is the interface used by PHP to call methods"/>
+			<doc line="on the Admin service module"/>
+			
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- globalCmd -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="globalCmd" msg="GCMD">
+				<doc line="Send a command to the AS."/>
+				<doc line="This is used to issue global commands like 'as.allStart' or 'as.allStop'."/>
+				<doc line="The result is returned by the return message"/>
+				<doc line="serviceCmdResult."/>
+
+				<param type="std::string"	name="command"		php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- controlCmd -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="controlCmd" msg="CCMD">
+				<doc line="Send a service related command to the executor "/>
+				<doc line="(not to the controled service)"/>
+				<doc line="The result is returned by the return message"/>
+				<doc line="controlCmdResult."/>
+
+
+				<param type="std::string"	name="serviceAlias"	php_serial="String" byref="true"/>
+				<param type="std::string"	name="command"		php_serial="String" byref="true"/>
+			</invoke>
+			
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- serviceCmd -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="serviceCmd" msg="SCMD">
+				<doc line="Send a command to a service."/>
+				<doc line="The result is returned by the return message"/>
+				<doc line="serviceCmdResult."/>
+
+				<param type="std::string"	name="serviceAlias"	php_serial="String" byref="true"/>
+				<param type="std::string"	name="command"		php_serial="String" byref="true"/>
+			</invoke>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- commandResult -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+				<return name="commandResult" msg="CMDR">
+					<param type="std::string"	name="serviceAlias"	php_serial="String" byref="true"/>
+					<param type="std::string"	name="result" php_serial="String" byref="true"/>
+				</return>
+			
+			
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- getShardOrders -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="getShardOrders" msg="GSO">
+				<doc line="Get the orders of each known shard."/>
+				<doc line="The return value is a vector of string, one entry by shard"/>
+
+				<return type="std::string"	php_serial="String" array="true"/>
+
+			</invoke>
+			
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- getStates -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="getStates" msg="GS">
+				<doc line="Get the last known state of all services."/>
+				<doc line="The return value is a vector of string, one entry by service"/>
+
+				<return type="std::string"	php_serial="String" array="true"/>
+
+			</invoke>
+			
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- getHighRezGraphInfo -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="getHighRezGraphInfo" msg="GHRGI">
+				<doc line="Get information about a high rez graph."/>
+				<doc line="The return is a string array containing"/>
+				<doc line="the name of the var, the available sample"/>
+				<doc line="period as two unix date (start dans end)"/>
+				<doc line="and the number of samples available"/>
+				<doc line="If the var is not found, an empty array is returned"/>
+
+
+				<return type="std::string" php_serial="String"	array="true"/>
+
+				<param type="std::string"	name="varAddr" php_serial="String" byref="true"/>
+
+			</invoke>
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- getHighRezGraph -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<invoke name="getHighRezGraph" msg="GHRG">
+				<doc line="Get the data for a high resolution graph."/>
+				<doc line="The return is a string array, each"/>
+				<doc line="string containing 'time:milliOffset:value"/>
+				<doc line="Set endDate to 0 to specify a start date relative"/>
+				<doc line="to the last sample date. In this case, start date"/>
+				<doc line="is interpreted as the number of second before"/>
+				<doc line="the last sample."/>
+
+				<return type="std::string" php_serial="String"	array="true"/>
+
+				<param type="std::string"	name="varAddr" php_serial="String" byref="true"/>
+				<param type="uint32"		name="startDate" />
+				<param type="uint32"		name="endDate" />
+				<param type="uint32"		name="milliStep" />
+
+			</invoke>
+			
+		</callback_interface>
+
+		<!-- ############################################################## -->
+		<!-- Item data for graph -->
+		<!-- ############################################################## -->
+		<class name="TGraphData">
+			<serial/>
+
+			<property	type="std::string"	name="ServiceAlias"	byref="true"/>
+			<property	type="std::string"	name="VarName"		byref="true"/>
+			<property	type="uint32"		name="SamplePeriod"/>
+			<property	type="double"		name="Value"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<!-- Group of data for graph -->
+		<!-- ############################################################## -->
+		<class name="TGraphDatas">
+			<serial/>
+
+			<property	type="uint32"	name="CurrentTime"/>
+			<property	type="std::vector &lt; TGraphData &gt;"	name="Datas" byref="true" serial="Cont"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<!-- Item data for high rez graph -->
+		<!-- ############################################################## -->
+		<class name="THighRezData">
+			<serial/>
+
+			<property	type="NLMISC::TTime"	name="SampleTick"/>
+			<property	type="double"			name="Value"/>
+		</class>
+		<!-- ############################################################## -->
+		<!-- Group of data for high rez graph -->
+		<!-- ############################################################## -->
+		<class name="THighRezDatas">
+			<serial/>
+
+			<property	type="std::string"	name="ServiceAlias"	byref="true"/>
+			<property	type="std::string"	name="VarName"		byref="true"/>
+			<property	type="uint32"		name="CurrentTime"/>
+
+			<property	type="std::vector &lt; THighRezData &gt;"	name="Datas" byref="true" serial="Cont"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<!-- Shard orders enum -->
+		<!-- ############################################################## -->
+		<enum name="TShardOrders">
+			<item name="so_autostart_on"/>
+			<item name="so_autostart_off"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<!-- Service orders enum -->
+		<!-- ############################################################## -->
+		<enum name="TRunningOrders">
+			<item name="ro_deactivated"/>
+			<item name="ro_activated"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<!-- Service running state enum-->
+		<!-- ############################################################## -->
+		<enum name="TRunningState">
+			<item name="rs_stopped"/>
+			<item name="rs_running"/>
+			<item name="rs_online"/>
+<!--			<item name="rs_stopped"/>
+			<item name="rs_starting"/>
+-->
+<!--			<item name="rs_connected"/>-->
+<!--			<item name="rs_online"/>
+			<item name="rs_stopping"/>
+-->		</enum>
+
+		<!-- ############################################################## -->
+		<!-- Service running tag -->
+		<!-- ############################################################## -->
+		<enum name="TRunningTag">
+			<item name="rt_chain_crashing"/>
+			<item name="rt_locally_started"/>
+			<item name="rt_locally_stopped"/>
+			<item name="rt_globally_stopped"/>
+			<item name="rt_stopped_for_patch"/>
+			<item name="rt_externaly_started"/>
+			<item name="rt_slow_to_stop"/>
+			<item name="rt_slow_to_start"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<!-- Service status -->
+		<!-- ############################################################## -->
+		<class name="TServiceStatus">
+			<serial/>
+
+			<property	type="std::string"	name="ShardName"		byref="true"/>
+			<property	type="std::string"	name="ServiceLongName"	byref="true"/>
+			<property	type="std::string"	name="ServiceShortName"	byref="true"/>
+			<property	type="std::string"	name="ServiceAliasName"	byref="true"/>
+			<property	type="TRunningState"	name="RunningState"	enum="smart"/>
+			<property	type="TRunningOrders"	name="RunningOrders"	enum="smart"/>
+			<property	type="std::set &lt; TRunningTag &gt;"	name="RunningTags"	serial="Cont" enum="smart" byref="true"/>
+			<property	type="std::string"	name="Status"			byref="true"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<!-- Module interface of the admin service module-->
+		<!-- ############################################################## -->
+		<module_interface name="CAdminService">
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- up service update -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="upServiceUpdate" msg="USU">
+				<doc line="An AES send an update of the list of service up"/>
+
+				<param type="std::vector &lt; TServiceStatus &gt;"	name="serviceStatus"	byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- graphUpdate -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="graphUpdate" msg="GU">
+				<doc line="An AES send graph data update"/>
+
+				<param type="TGraphDatas"			name="graphDatas"	byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- HR graphUpdate -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="highRezGraphUpdate" msg="HRGU">
+				<doc line="An AES send high rez graph data update"/>
+
+				<param type="THighRezDatas"			name="graphDatas"	byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- updateAESStates -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--			<method name="updateAESStates" msg="UAS">
+				<doc line="An AES send it's updated state strings"/>
+
+				<param type="std::vector &lt; std::string &gt;"	name="states"	byref="true" serial="Cont"/>
+			</method>
+-->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- aes return command result -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="commandResult" msg="CR">
+				<doc line="AES send back the result of execution of a command"/>
+
+				<param type="uint32"		name="commandId" />
+				<param type="std::string"	name="serviceAlias"		byref="true"/>
+				<param type="std::string"	name="result"			byref="true"/>
+			</method>
+		</module_interface>
+
+
+		<!-- ############################################################## -->
+		<!-- Module interface of the admin executor service module-->
+		<!-- ############################################################## -->
+		<module_interface name="CAdminExecutorService">
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- global state from AS -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--			<method name="setGlobalOrders" msg="SGO" broadcast="true">
+				<doc line="AS send it's global running orders"/>
+
+				<param type="TRunningOrders"	name="globalOrders" enum="smart"/>
+			</method>
+-->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- shard state from AS -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="setShardOrders" msg="SCO" broadcast="true">
+				<doc line="AS send orders for a shard"/>
+
+				<param type="std::string"		name="shardName"		byref="true"/>
+				<param type="TShardOrders"	name="shardOrders" enum="smart"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- shutdown shard from AS -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="shutdownShard" msg="SDS" broadcast="true">
+				<doc line="AS send a command to shutdown a shard with a delay"/>
+
+				<param type="std::string"		name="shardName"		byref="true"/>
+				<param type="uint32"			name="delay"/>
+			</method>
+
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- controlCmd -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="controlCmd" msg="CC" broadcast="true">
+				<doc line="AS send a control command to this AES"/>
+
+				<param type="uint32"		name="commandId" />
+				<param type="std::string"	name="serviceAlias"	byref="true"/>
+				<param type="std::string"	name="command"		byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- service command -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="serviceCmd" msg="SCMD">
+				<doc line="Send a command to a service."/>
+
+				<param type="uint32"		name="commandId" />
+				<param type="std::string"	name="serviceAlias"	php_serial="String" byref="true"/>
+				<param type="std::string"	name="command"		php_serial="String" byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- aes client return command result -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="commandResult" msg="CR">
+				<doc line="AES client send back the result of execution of a command"/>
+
+				<param type="uint32"		name="commandId" />
+				<param type="std::string"	name="serviceAlias"		byref="true"/>
+				<param type="std::string"	name="result"			byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- graphUpdate -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="graphUpdate" msg="GU">
+				<doc line="A service send graph data update"/>
+
+				<param type="TGraphDatas"			name="graphDatas"	byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- HR graphUpdate -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="highRezGraphUpdate" msg="HRGU">
+				<doc line="A service high rez graph data update"/>
+
+				<param type="THighRezDatas"			name="graphDatas"	byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- serviceConnected-->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!--			<method name="serviceConnected" msg="SR">
+				<doc line="A service inform the AES that it is connected"/>
+
+				<param type="std::string"	name="longName"		byref="true"/>
+				<param type="std::string"	name="shortName"	byref="true"/>
+				<param type="std::string"	name="aliasName"	byref="true"/>
+				<param type="uint32"		name="pid"/>
+			</method>
+-->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- service status update -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="serviceStatusUpdate" msg="SSU">
+				<doc line="A service send an update of of it's status string"/>
+
+				<param type="std::string"	name="status"	byref="true"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<!-- Module interface of the admin executor service client module-->
+		<!-- ############################################################## -->
+		<module_interface name="CAdminExecutorServiceClient">
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- service command -->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="serviceCmd" msg="SCMD">
+				<doc line="execute a command and return the result."/>
+
+				<param type="uint32"		name="commandId" />
+				<param type="std::string"	name="command"		byref="true"/>
+			</method>
+
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<!-- service command (one way)-->
+			<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+			<method name="serviceCmdNoReturn" msg="SCMDNR">
+				<doc line="Send a command to a service without waiting for the return value."/>
+
+				<param type="std::string"	name="command"		byref="true"/>
+			</method>
+
+
+		</module_interface>
+	</namespace>
+</generator>

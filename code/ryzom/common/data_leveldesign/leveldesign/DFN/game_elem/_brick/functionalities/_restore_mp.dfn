@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="MP Category" Type="Type" Filename="item_mp_category.typ"/>
+  <ELEMENT Name="Min added MP base quantity" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Max added MP base quantity" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Added Quantity Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Max added total quantity" Type="Type" Filename="int.typ" Default="100"/>
+  <LOG>Thu Jan 02 19:07:12 2003 (fleury) Dfn Structure = 
+Thu Jan 02 19:15:52 2003 (fleury) Dfn Structure = 
+Thu Jan 02 19:18:28 2003 (fleury) Dfn Structure = 
+Thu Jan 02 19:20:48 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

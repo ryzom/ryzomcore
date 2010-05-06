@@ -1,0 +1,7 @@
+; logic_editor.def : Declares the module parameters for the DLL.
+
+LIBRARY      "logic_editor_df"
+DESCRIPTION  'logic_editor Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="ContinentName" Type="Type" Filename="continents.typ"/>
+  <ELEMENT Name="TownName" Type="Type" Filename="town_list.typ"/>
+  <LOG>Wed Feb 12 14:17:52 2003 (berenguier) Dfn Structure = 
+Tue Feb 18 16:12:18 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

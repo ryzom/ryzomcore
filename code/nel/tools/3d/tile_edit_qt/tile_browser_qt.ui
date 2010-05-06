@@ -1,0 +1,519 @@
+<ui version="4.0" >
+ <class>TileBrowserDialog</class>
+ <widget class="QDialog" name="TileBrowserDialog" >
+  <property name="windowModality" >
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>949</width>
+    <height>878</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Edit Tile Set</string>
+  </property>
+  <widget class="QFrame" name="buttonFrame" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>131</width>
+     <height>871</height>
+    </rect>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>131</width>
+     <height>871</height>
+    </size>
+   </property>
+   <property name="maximumSize" >
+    <size>
+     <width>200</width>
+     <height>990</height>
+    </size>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Plain</enum>
+   </property>
+   <widget class="QDialogButtonBox" name="buttonBox" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>800</y>
+      <width>131</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Vertical</enum>
+    </property>
+    <property name="standardButtons" >
+     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>520</y>
+      <width>131</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Editor Options</string>
+    </property>
+    <widget class="QPushButton" name="refreshPushButton" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>111</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Refresh View</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="tileLabelGroupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>31</y>
+       <width>111</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Tile Label</string>
+     </property>
+     <widget class="QRadioButton" name="indexRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Index</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="fileNameRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Filename</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="tileZoomGroupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>111</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Zoom</string>
+     </property>
+     <widget class="QRadioButton" name="smallRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Small</string>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="normalRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="bigRadioButton" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Big</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>131</width>
+      <height>351</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Tile Set Textures</string>
+    </property>
+    <widget class="QGroupBox" name="tileTextureGroupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>111</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Edit Channel</string>
+     </property>
+     <widget class="QRadioButton" name="diffuseRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Diffuse</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="additiveRadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Additive</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="alphaRadioButton" >
+      <property name="enabled" >
+       <bool>false</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Alpha</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="tileTypeGroupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>111</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Edit Type</string>
+     </property>
+     <property name="checkable" >
+      <bool>false</bool>
+     </property>
+     <widget class="QRadioButton" name="_128x128RadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>128 x 128</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="_256x256RadioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>256 x 256</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="transitionRadioButton" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Transitions</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="displaceRadioButton" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>84</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Displace</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="batchLoadPushButton" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>240</y>
+       <width>111</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Batch Load</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="exportBorderPushButton" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>280</y>
+       <width>111</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Export Border</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="importBorderPushButton" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>310</y>
+       <width>111</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Import Border</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QListView" name="tileBrowserListView" >
+   <property name="geometry" >
+    <rect>
+     <x>150</x>
+     <y>8</y>
+     <width>791</width>
+     <height>861</height>
+    </rect>
+   </property>
+   <property name="contextMenuPolicy" >
+    <enum>Qt::ActionsContextMenu</enum>
+   </property>
+   <property name="autoFillBackground" >
+    <bool>false</bool>
+   </property>
+   <property name="editTriggers" >
+    <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+   </property>
+   <property name="selectionMode" >
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="movement" >
+    <enum>QListView::Snap</enum>
+   </property>
+   <property name="flow" >
+    <enum>QListView::LeftToRight</enum>
+   </property>
+   <property name="isWrapping" stdset="0" >
+    <bool>true</bool>
+   </property>
+   <property name="resizeMode" >
+    <enum>QListView::Adjust</enum>
+   </property>
+   <property name="viewMode" >
+    <enum>QListView::IconMode</enum>
+   </property>
+  </widget>
+  <action name="actionAddTile" >
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/add_tile.png</normaloff>:/newPrefix/add_tile.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Add Tile ...</string>
+   </property>
+  </action>
+  <action name="actionDeleteTile" >
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/delete_tile.png</normaloff>:/newPrefix/delete_tile.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Delete Tile</string>
+   </property>
+  </action>
+  <action name="actionReplaceImage" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/replace_image.png</normaloff>:/newPrefix/replace_image.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Replace Image ...</string>
+   </property>
+  </action>
+  <action name="actionDeleteImage" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/delete_image.png</normaloff>:/newPrefix/delete_image.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Delete Image</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="tile_edit_qt.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>TileBrowserDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>TileBrowserDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

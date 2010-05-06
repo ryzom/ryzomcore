@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Version="0.5" State="modified">
+  <ELEMENT Name="Skill" Type="Type" Filename="_specialized_skills.typ"/>
+  <ELEMENT Name="Associated Characteristics" Type="Type" Filename="_characteristic.typ" Array="true"/>
+  <ELEMENT Name="Skill type for role" Type="Type" Filename="_skill_role_category.typ"/>
+  <ELEMENT Name="Level minimum" Type="Type" Filename="int.typ"/>
+</DFN>

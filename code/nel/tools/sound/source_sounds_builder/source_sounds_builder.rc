@@ -1,0 +1,271 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SOURCE_SOUNDS_BUILDER_DIALOG DIALOGEX 0, 0, 464, 354
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "NeL Source Sounds Builder"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Tree1",IDC_TREE1,"SysTreeView32",TVS_HASLINES | 
+                    TVS_EDITLABELS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
+                    WS_BORDER | WS_TABSTOP,5,25,235,325
+    PUSHBUTTON      "Add a Sound",IDC_AddSound,135,5,60,14
+    PUSHBUTTON      "Save File...",IDC_Save,410,5,50,14
+    PUSHBUTTON      "Load File...",IDC_Load,355,5,50,14
+    PUSHBUTTON      "Up",IDC_MoveUp,305,240,25,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Down",IDC_MoveDown,335,240,25,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Import Names...",IDC_Import,5,5,60,14
+    LTEXT           "Directions\n\n1) Import sound names or wav files\n2) Set their properties, listen them and apply them\n3) Save them in a file",
+                    IDC_Home1,245,45,205,45
+    LTEXT           "Later, to change or add sounds :\n\n1) Load your file back\n2) Import the sound names again if they have been updated\n3) Set their properties and apply them\n4) Save them again",
+                    IDC_Home2,245,95,205,50
+    LTEXT           "You can also add sounds (button), rename them (long click or 'F2' key), and remove them (button or 'Del' key). Importing an existing name or wav file does not change the existing sound.",
+                    IDC_Home3,245,155,205,35
+    PUSHBUTTON      "Import wav Files...",IDC_ImpDir,70,5,60,14
+    LTEXT           "Welcome to NeL Sounds Builder v1.4.2.",IDC_STATIC,245,
+                    30,205,10
+    PUSHBUTTON      "Sort View",IDC_Sort,200,5,40,14
+END
+
+IDD_SoundPage DIALOG DISCARDABLE  243, 20, 222, 292
+STYLE DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        " Sound Properties ",IDC_SoundGroup,5,0,210,285
+    LTEXT           "Filename",IDC_Filename,10,33,29,8
+    EDITTEXT        IDC_EditFilename,75,30,110,12,ES_AUTOHSCROLL | WS_GROUP
+    PUSHBUTTON      "...",IDC_ChooseFile,190,30,15,12,WS_GROUP
+    LTEXT           "Gain",IDC_Gain,10,62,15,8
+    EDITTEXT        IDC_EditGain,75,60,40,12,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "Ext. 3D Properties",IDC_Pos3D,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_GROUP | WS_TABSTOP,10,125,72,10
+    GROUPBOX        " 3D Properties ",IDC_Pos3DGroup,10,140,200,115,WS_GROUP
+    PUSHBUTTON      "Undo",IDC_Cancel,15,265,50,14,WS_GROUP
+    LTEXT           "Min dist.",IDC_MinDist,15,155,60,8
+    LTEXT           "Max dist.",IDC_MaxDist,15,170,60,8
+    EDITTEXT        IDC_EditMaxDist,75,170,40,12,ES_AUTOHSCROLL
+    LTEXT           "Cone Inner Angle",IDC_ConeInnerAngle,15,185,55,8
+    EDITTEXT        IDC_EditInnerAngle,75,185,40,12,ES_AUTOHSCROLL
+    LTEXT           "Cone Outer Angle",IDC_ConeOuterAngle,15,200,60,8
+    EDITTEXT        IDC_EditOuterAngle,75,200,40,12,ES_AUTOHSCROLL
+    LTEXT           "Cone Outer Gain",IDC_ConeOuterGain,15,215,60,8
+    EDITTEXT        IDC_EditOuterGain,75,215,40,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EditMinDist,75,155,40,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Remove",IDC_Remove,70,265,50,14
+    PUSHBUTTON      "Play",IDC_PlaySound,155,105,50,14
+    CONTROL         "Play Looped",IDC_Looped,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,155,121,50,15
+    CTEXT           "",IDC_Stereo,75,46,40,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "",IDC_BadCone,145,175,60,8
+    CONTROL         "Slider1",IDC_SliderInnerAngle,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,115,185,30,12
+    CONTROL         "Slider1",IDC_SliderOuterAngle,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,115,200,30,12
+    CONTROL         "Slider1",IDC_SliderOuterGain,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,115,215,30,12
+    CONTROL         "Slider1",IDC_SliderMinDist,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,115,155,30,12
+    CONTROL         "Slider1",IDC_SliderMaxDist,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,115,170,30,12
+    PUSHBUTTON      "Read Me !",IDC_ButtonHelp,15,236,50,14
+    CONTROL         "Slider1",IDC_SliderGain,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,115,60,30,12
+    PUSHBUTTON      "Play Outside",IDC_ButtonTestOuterGain,155,235,50,14
+    LTEXT           "Pitch",IDC_Pitch,10,77,16,8
+    EDITTEXT        IDC_EditPitch,75,75,40,12,ES_AUTOHSCROLL
+    CONTROL         "Slider1",IDC_SliderPitch,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,115,75,30,15
+    CONTROL         "Looping",IDC_Looping,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,110,72,10
+    PUSHBUTTON      "Home",IDC_Home,155,265,50,14,WS_GROUP
+    CONTROL         "",IDC_SoundName,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    75,17,135,8
+    LTEXT           "Name",IDC_STATIC,10,18,20,8
+    LTEXT           "Type",IDC_STATIC,10,47,17,8
+    LTEXT           "Priority",IDC_Prio,10,94,40,10
+    COMBOBOX        IDC_CbPriority,75,92,40,133,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "source_sounds_builder MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "source_sounds_builder\0"
+            VALUE "LegalCopyright", "Copyright (C) 2001\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "source_sounds_builder.EXE\0"
+            VALUE "ProductName", "source_sounds_builder Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_SOURCE_SOUNDS_BUILDER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 457
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 347
+    END
+
+    IDD_SoundPage, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 215
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 285
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\source_sounds_builder.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\source_sounds_builder.ico"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\source_sounds_builder.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

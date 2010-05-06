@@ -1,0 +1,625 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\logic_editor.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\logic_editor.ico"
+IDR_LOGIC_TYPE          ICON    DISCARDABLE     "res\\logic_editorDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About logic_editor...",      ID_APP_ABOUT
+    END
+END
+
+IDR_LOGIC_TYPE MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About logic_editor...",      ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About logic_editor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "logic_editor Version 1.0",IDC_STATIC,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright (C) 2001",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_FORM_DLG DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_PAGE_VARIABLES DIALOG DISCARDABLE  0, 0, 319, 233
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Variables"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_LIST_VARIABLES,7,7,100,219,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_VARIABLE_NAME,125,36,170,15,ES_AUTOHSCROLL
+    LTEXT           "Variable name :",IDC_STATIC,125,23,50,8
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD,174,65,72,14
+    PUSHBUTTON      "Delete",IDC_BUTTON_VAR_DELETE,174,89,71,14
+    PUSHBUTTON      "Apply Change",IDC_BUTTON_VAR_APPLY,174,113,72,14
+END
+
+IDD_PAGE_COUNTERS DIALOG DISCARDABLE  0, 0, 362, 207
+STYLE WS_POPUP | WS_CAPTION
+CAPTION "Counters"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Name :",IDC_STATIC,155,28,24,8
+    LTEXT           "Mode :",IDC_STATIC,153,57,23,8
+    LTEXT           "Inc / Dec :",IDC_STATIC,153,89,36,8
+    LTEXT           "Lower Limit :",IDC_STATIC,155,117,40,8
+    LTEXT           "Upper Limit :",IDC_STATIC,153,142,40,8
+    EDITTEXT        IDC_COUNTER_NAME,196,25,159,14,ES_AUTOHSCROLL
+    LISTBOX         IDC_LIST_COUNTERS,7,7,136,193,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_COUNTER_MODE,201,54,92,54,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_COUNTER_INCDEC,201,85,92,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_COUNTER_LOWER_LIMIT,201,113,65,14,
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COUNTER_UPPER_LIMIT,201,140,66,14,
+                    ES_AUTOHSCROLL
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD_COUNTER,159,177,50,14
+    PUSHBUTTON      "Delete",IDC_BUTTON_COUNTER_REMOVE,229,177,50,14
+    PUSHBUTTON      "Apply Changes",IDC_BUTTON_COUNTER_APPLY,295,177,50,14
+END
+
+IDD_PAGE_STATES DIALOG DISCARDABLE  0, 0, 310, 298
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "States"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "State Name :",IDC_STATIC,25,21,42,8
+    GROUPBOX        "Event",IDC_STATIC,7,67,285,224
+    EDITTEXT        IDC_EDIT_STATE_NAME,73,18,122,14,ES_AUTOHSCROLL
+    LTEXT           "Condition name :",IDC_STATIC,19,84,54,8
+    COMBOBOX        IDC_COMBO_STATE_COND_NAMES,77,82,97,49,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Event Action :",IDC_STATIC,21,114,46,8
+    CONTROL         "Event Message",IDC_RADIO_STATE_EVENT_MSG,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,68,129,65,10
+    CONTROL         "State Change",IDC_RADIO_STATE_CHANGE,"Button",
+                    BS_AUTORADIOBUTTON,189,129,59,10
+    LTEXT           "Message Destination :",IDC_STATIC_STATE_MSG1,21,152,71,
+                    8,WS_DISABLED
+    EDITTEXT        IDC_EDIT_STATE_MSG_DEST,99,150,180,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "Message ID :",IDC_STATIC_STATE_MSG2,21,175,43,8,
+                    WS_DISABLED
+    COMBOBOX        IDC_COMBO_STATE_MSG_ID,99,173,181,41,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Argument :",IDC_STATIC_STATE_MSG3,21,197,35,8,
+                    WS_DISABLED
+    EDITTEXT        IDC_EDIT_STATE_ARGUMENT,99,197,181,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "State Change :",IDC_STATIC_STATE_CHANGE,21,226,48,8,
+                    WS_DISABLED
+    COMBOBOX        IDC_COMBO_STATE_CHANGE,99,224,182,54,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add State",IDC_BUTTON_ADD_STATE,32,47,50,14
+    PUSHBUTTON      "Delete State",IDC_BUTTON_STATE_REMOVE,133,47,50,14
+    PUSHBUTTON      "Apply Change",IDC_BUTTON_STATE_APPLY,235,47,50,14
+    PUSHBUTTON      "Add Event",IDC_BUTTON_ADD_EVENT,35,256,50,14
+    PUSHBUTTON      "Apply Changes",IDC_BUTTON_EVENT_APPLY,223,256,50,14
+    PUSHBUTTON      "Delete Event",IDC_BUTTON_EVENT_REMOVE,130,256,50,14
+END
+
+IDD_PAGE_CONDITIONS DIALOG DISCARDABLE  0, 0, 371, 311
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Conditions"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Condition Name :",IDC_STATIC,21,20,55,8
+    EDITTEXT        IDC_EDIT_CONDITION_NAME,82,18,193,14,ES_AUTOHSCROLL
+    GROUPBOX        "Node edition",IDC_STATIC,7,71,357,226
+    LTEXT           "Type :",IDC_STATIC,25,92,21,8
+    COMBOBOX        IDC_COMBO_NODE_TYPE,53,89,136,69,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Comparison ",IDC_STATIC_COMPARISON,25,113,320,107
+    LTEXT           "Variable Name : ",IDC_STATIC_VAR_NAME,37,130,53,8
+    COMBOBOX        IDC_COMBO_NODE_COND_NAME,121,246,203,56,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Comparison Operator :",IDC_STATIC_OPERATOR,37,154,71,8
+    COMBOBOX        IDC_COMBO_NODE_OPERATOR,121,152,203,70,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Comparand :",IDC_STATIC_COMPARAND,38,176,41,8
+    EDITTEXT        IDC_EDIT_NODE_COMPARAND,121,175,86,14,ES_AUTOHSCROLL
+    GROUPBOX        "Sub-condition ",IDC_STATIC_SUB_COND,25,230,320,38
+    LTEXT           "Condition Name :",IDC_STATIC_COND_NAME,36,248,55,8
+    COMBOBOX        IDC_COMBO_NODE_VAR_NAME,121,128,203,66,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add Node",IDC_BUTTON_ADD_NODE,34,277,58,14
+    PUSHBUTTON      "Delete Node",IDC_BUTTON_DELETE_NODE,147,277,58,14
+    PUSHBUTTON      "Apply Changes",IDC_BUTTON_NODE_APPLY,261,276,58,14
+    PUSHBUTTON      "Add Condition",IDC_BUTTON_ADD_CONDITION,44,44,50,14
+    PUSHBUTTON      "Apply Change",IDC_BUTTON_COND_APPLY,259,44,58,14
+    PUSHBUTTON      "Delete",IDC_BUTTON_DELETE_CONDITION,146,44,58,14
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "logic_editor MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "logic_editor\0"
+            VALUE "LegalCopyright", "Copyright (C) 2001\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "logic_editor.EXE\0"
+            VALUE "ProductName", "logic_editor Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_FORM_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_PAGE_VARIABLES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
+    END
+
+    IDD_PAGE_COUNTERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 355
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
+    END
+
+    IDD_PAGE_STATES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 291
+    END
+
+    IDD_PAGE_CONDITIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 364
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 304
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PAGE_COUNTERS DLGINIT
+BEGIN
+    IDC_COMBO_COUNTER_MODE, 0x403, 5, 0
+0x6f4c, 0x706f, "\000" 
+    IDC_COMBO_COUNTER_MODE, 0x403, 8, 0
+0x6853, 0x7475, 0x6c74, 0x0065, 
+    IDC_COMBO_COUNTER_MODE, 0x403, 16, 0
+0x7453, 0x706f, 0x6f20, 0x206e, 0x7261, 0x6972, 0x6176, 0x006c, 
+    IDC_COMBO_COUNTER_INCDEC, 0x403, 10, 0
+0x6e49, 0x7263, 0x6d65, 0x6e65, 0x0074, 
+    IDC_COMBO_COUNTER_INCDEC, 0x403, 10, 0
+0x6544, 0x7263, 0x6d65, 0x6e65, 0x0074, 
+    0
+END
+
+IDD_PAGE_CONDITIONS DLGINIT
+BEGIN
+    IDC_COMBO_NODE_TYPE, 0x403, 11, 0
+0x6554, 0x6d72, 0x6e69, 0x7461, 0x726f, "\000" 
+    IDC_COMBO_NODE_TYPE, 0x403, 4, 0
+0x4f4e, 0x0054, 
+    IDC_COMBO_NODE_TYPE, 0x403, 14, 0
+0x7553, 0x2d62, 0x6f63, 0x646e, 0x7469, 0x6f69, 0x006e, 
+    IDC_COMBO_NODE_TYPE, 0x403, 11, 0
+0x6f43, 0x706d, 0x7261, 0x7369, 0x6e6f, "\000" 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 2, 0
+0x003c, 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 2, 0
+0x003e, 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 3, 0
+0x3d3c, "\000" 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 3, 0
+0x3d3e, "\000" 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 2, 0
+0x003d, 
+    IDC_COMBO_NODE_OPERATOR, 0x403, 3, 0
+0x3d21, "\000" 
+    0
+END
+
+IDD_PAGE_STATES DLGINIT
+BEGIN
+    IDC_COMBO_STATE_MSG_ID, 0x403, 10, 0
+0x4f54, 0x4420, 0x4645, 0x4e49, 0x0045, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "logic_editor"
+    IDR_LOGIC_TYPE          "\nLogic_\nLogic_\nLogic_ Files (*.logic)\n.logic\nLogiceditor.Document\nLogic_ Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "logic_editor"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\logic_editor.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

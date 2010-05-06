@@ -1,0 +1,430 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\master.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\master.ico"
+IDR_MASTERTYPE          ICON    DISCARDABLE     "res\\masterDoc.ico"
+IDI_FOLDER              ICON    DISCARDABLE     "res\\folder.ico"
+IDI_FILE                ICON    DISCARDABLE     "res\\file.ico"
+IDI_CONTINENTS          ICON    DISCARDABLE     "res\\continents.ico"
+IDI_BACKUP              ICON    DISCARDABLE     "res\\backup.ico"
+IDI_TRASH               ICON    DISCARDABLE     "res\\trash.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&Continent"
+    BEGIN
+        MENUITEM "&Save All",                   ID_CONTINENT_SAVE
+        MENUITEM "Export To Client",            ID_CONTINENT_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Lock Tree",                  ID_OPTIONS_TREELOCK
+        MENUITEM "Set &Continents Path",        ID_OPTIONS_SETCONTINENTSDIR
+        MENUITEM "Set &Backup Path",            ID_OPTIONS_SETBACKUPDIR
+        MENUITEM "Set &Trash Path",             ID_OPTIONS_SETTRASHDIR
+        MENUITEM "Set Default &DFN Path",       ID_OPTIONS_SETDEFAULTDFNDIR
+        MENUITEM "Set Default &GameElem Path",  ID_OPTIONS_SETDEFAULTGAMEELEMDIR
+
+    END
+    POPUP "&Windows"
+    BEGIN
+        MENUITEM "&WorldEditor",                ID_WINDOWS_WORLDEDITOR
+        MENUITEM "&Georges",                    ID_WINDOWS_GEORGES
+        MENUITEM "&LogicEditor",                ID_WINDOWS_LOGICEDITOR
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset",                      ID_WINDOWS_RESET
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About master...",            ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About master"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Master Tools",IDC_STATIC,89,23,54,8,SS_NOPREFIX
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK2,178,34,50,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK3,7,34,50,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK4,7,7,50,14,WS_GROUP
+END
+
+IDD_MASTERTREE DIALOG DISCARDABLE  0, 0, 186, 94
+STYLE WS_POPUP | WS_THICKFRAME
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_CHOOSETAG DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Choose Tag"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,74,50,14
+    LISTBOX         IDC_LIST,7,7,116,81,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_CHOOSEDIR DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Choose the directory"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,74,50,14
+    LISTBOX         IDC_LIST,7,7,115,81,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_EXPORTOPT DIALOG DISCARDABLE  0, 0, 154, 45
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Export To Client"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,99,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,99,24,50,14
+    COMBOBOX        IDC_CONTINENTLIST,7,17,88,88,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Continent to Export",IDC_STATIC,7,7,61,8
+END
+
+IDD_EXPORTCB DIALOG DISCARDABLE  0, 0, 250, 133
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Export Callback"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,7,112,236,14
+    LTEXT           "Export Pass",IDC_PASS,7,7,236,8
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,
+                    7,19,236,14
+    EDITTEXT        IDC_EDIT1,7,38,236,69,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | WS_VSCROLL
+END
+
+IDD_CONTINENT_PROPERTIES DIALOG DISCARDABLE  0, 0, 186, 302
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Continent Properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+    EDITTEXT        IDC_EDIT_CONTINENT_NAME,7,18,110,14,ES_AUTOHSCROLL
+    LTEXT           "Continent Name",IDC_STATIC,7,7,52,8
+    EDITTEXT        IDC_EDIT_LANDFILE,7,47,146,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_LANDFILE,159,46,20,14
+    LTEXT           "Land File",IDC_STATIC,7,38,30,8
+    LTEXT           "Land Directory zoneLigos, zoneBitmaps, zones",
+                    IDC_STATIC,7,65,148,8
+    EDITTEXT        IDC_EDIT_LANDDIR,7,76,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_LANDDIR,159,71,20,14
+    LTEXT           "Georges DFN Directory",IDC_STATIC,7,239,74,8
+    EDITTEXT        IDC_EDIT_DFNDIR,7,250,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_DFNDIR,160,250,20,14
+    LTEXT           "Georges GameElem Directory",IDC_STATIC,7,268,94,8
+    EDITTEXT        IDC_EDIT_GAMEELEMDIR,7,279,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_GAMEELEMDIR,159,278,20,14
+    EDITTEXT        IDC_OUT_LANDSCAPE_DIR,7,105,148,14,ES_AUTOHSCROLL
+    LTEXT           "Landscape ZoneW Directory",IDC_STATIC,7,96,148,8
+    PUSHBUTTON      "...",IDC_EXPLORE_LANDSCAPE,159,105,20,14
+    EDITTEXT        IDC_OUT_VEGETABLE_DIR,7,134,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_EXPLORE_VEGETABLE,159,134,20,14
+    LTEXT           "Output Vegetable Directory",IDC_STATIC,7,126,148,8
+    EDITTEXT        IDC_LAND_BANK_FILE,7,163,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_EXPLORE_LAND_BANK_FILE,159,163,20,14
+    LTEXT           "Landscape Small Bank File",IDC_STATIC,7,154,148,8
+    EDITTEXT        IDC_LAND_FAR_BANK_FILE,7,192,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_EXPLORE_LAND_FAR_BANK_FILE,159,194,20,14
+    LTEXT           "Landscape Far Bank File",IDC_STATIC,7,182,148,8
+    LTEXT           "Landscape Tile Noise Directory",IDC_STATIC,7,211,148,8
+    EDITTEXT        IDC_LAND_TILE_NOISE_DIR,7,221,148,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_EXPLORE_LAND_TILE_NOISE_DIR,159,220,20,14
+END
+
+IDD_NAME_EDIT DIALOG DISCARDABLE  0, 0, 186, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Name Edit"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT_NAME,7,19,113,14,ES_AUTOHSCROLL | NOT 
+                    WS_TABSTOP
+    LTEXT           "Comment",IDC_COMMENT,7,9,112,8
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "master MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "master\0"
+            VALUE "LegalCopyright", "Copyright (C) 2001\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "master.EXE\0"
+            VALUE "ProductName", "master Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_NAME_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 39
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "master\n\nMaster\n\n\nMaster.Document\nMaster Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "master"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\master.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

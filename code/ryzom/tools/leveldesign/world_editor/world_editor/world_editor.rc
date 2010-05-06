@@ -1,0 +1,1269 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\world_editor.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#include ""afxdb.rc""          // Database resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\world_editor.ico"
+IDR_WORLDETYPE          ICON    DISCARDABLE     "res\\world_editor_doc.ico"
+IDI_FOLDER_CLOSED       ICON    DISCARDABLE     "res\\folder_closed.ico"
+IDI_POINT_OPENED        ICON    DISCARDABLE     "res\\point_opened.ico"
+IDI_LINE_OPENED         ICON    DISCARDABLE     "res\\line_opened.ico"
+IDI_ZONE_OPENED         ICON    DISCARDABLE     "res\\zone_opened.ico"
+IDI_FOLDER_OPENED       ICON    DISCARDABLE     "res\\folder_opened.ico"
+IDI_PROPERTY_CLOSED     ICON    DISCARDABLE     "res\\property_closed.ico"
+IDI_ROOT_CLOSED         ICON    DISCARDABLE     "res\\root_closed.ico"
+IDI_PROPERTY_OPENED     ICON    DISCARDABLE     "res\\property_opened.ico"
+IDI_LINE_CLOSED         ICON    DISCARDABLE     "res\\line_closed.ico"
+IDI_POINT_CLOSED        ICON    DISCARDABLE     "res\\point_closed.ico"
+IDI_ZONE_CLOSED         ICON    DISCARDABLE     "res\\zone_closed.ico"
+IDI_ROOT_OPENED         ICON    DISCARDABLE     "res\\root_opened.ico"
+IDI_FOLDER_HIDDEN       ICON    DISCARDABLE     "res\\folder_hidden.ico"
+IDI_LINE_HIDDEN         ICON    DISCARDABLE     "res\\line_hidden.ico"
+IDI_POINT_HIDDEN        ICON    DISCARDABLE     "res\\point_hidden.ico"
+IDI_PROPERTY_HIDDEN     ICON    DISCARDABLE     "res\\property_hidden.ico"
+IDI_ROOT_HIDDEN         ICON    DISCARDABLE     "res\\root_hidden.ico"
+IDI_ZONE_HIDDEN         ICON    DISCARDABLE     "res\\zone_hidden.ico"
+IDI_ERROR_STRUCTURE     ICON    DISCARDABLE     "res\\erro.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_EDIT_UNDO
+    BUTTON      ID_EDIT_REDO
+    SEPARATOR
+    BUTTON      ID_EDIT_ZONE
+    BUTTON      ID_EDIT_TRANSITION
+    BUTTON      ID_EDIT_LOGIC
+    SEPARATOR
+    BUTTON      ID_EDIT_LOCK
+    SEPARATOR
+    BUTTON      ID_EDIT_SELECT
+    BUTTON      ID_EDIT_TRANSLATE
+    BUTTON      ID_EDIT_ROTATE
+    BUTTON      ID_EDIT_TURN
+    BUTTON      ID_EDIT_SCALE
+    BUTTON      ID_EDIT_RADIUS
+    BUTTON      ID_EDIT_ADD_POINT
+    SEPARATOR
+    BUTTON      ID_VIEW_SHOW
+    BUTTON      ID_VIEW_HIDE
+    SEPARATOR
+    BUTTON      ID_VIEW_LANDSCAPE
+    BUTTON      ID_VIEW_LAYERS
+    BUTTON      ID_VIEW_PRIMITIVES
+    BUTTON      ID_EDIT_DETAILS
+    BUTTON      ID_VIEW_COLLISIONS
+    BUTTON      ID_VIEW_PACS
+    BUTTON      ID_VIEW_GRID
+    BUTTON      ID_VIEW_POINTS
+    SEPARATOR
+    BUTTON      ID_EDIT_SELECT_BY_LOCATION
+    BUTTON      ID_FIND
+    BUTTON      ID_VIEW_LOCATESELECTEDPRIMITIVES
+    BUTTON      ID_VIEW_LOCATESELECTEDPRIMITIVES_TREE
+    SEPARATOR
+    BUTTON      ID_EDIT_SELECT_CHILDREN
+    SEPARATOR
+    BUTTON      ID_EDIT_EXPAND
+    BUTTON      ID_EDIT_COLLAPSE
+    SEPARATOR
+    BUTTON      ID_PROJECT_SETTINGS
+    SEPARATOR
+    BUTTON      ID_HELP_FINDER
+    BUTTON      ID_MISSION_COMPILER
+    BUTTON      ID_NAME_DLG
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "&Export Snapshot...",         ID_EXPORT_SNAPSHOT
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+F4",               ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Delete\tDel",                ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "&Find...\tCTRL+F",            ID_FIND
+        MENUITEM SEPARATOR
+        MENUITEM "&Goto position...\tCTRL+G",   ID_GOTO
+        MENUITEM "Save Current P&osition\tALT+P", ID_SAVPOS
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All\tCtrl+A",         ID_EDIT_SELECT_ALL
+        MENUITEM "Select &Children\tC",         ID_EDIT_SELECT_CHILDREN
+        MENUITEM "Select By Location\tCtrl+L",  ID_EDIT_SELECT_BY_LOCATION
+        MENUITEM SEPARATOR
+        MENUITEM "&Expand\tE",                  ID_EDIT_EXPAND
+        MENUITEM "&Collapse\tR",                ID_EDIT_COLLAPSE
+        MENUITEM SEPARATOR
+        MENUITEM "Toggle Lock\tSpace",          ID_EDIT_LOCK
+        MENUITEM SEPARATOR
+        MENUITEM "Pr&operties...\tAlt+Enter",   ID_EDIT_PROPERTIES
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Zone\tF2",                   ID_EDIT_ZONE, CHECKED
+        MENUITEM "&Transition\tF3",             ID_EDIT_TRANSITION
+        MENUITEM "&Primitive\tF4",              ID_EDIT_LOGIC
+        MENUITEM SEPARATOR
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
+        MENUITEM SEPARATOR
+        MENUITEM "&Select\tF5",                 ID_EDIT_SELECT
+        MENUITEM "&Move\tF6",                   ID_EDIT_TRANSLATE
+        MENUITEM "&Rotate\tF7",                 ID_EDIT_ROTATE
+        MENUITEM "T&urn\tF8",                   ID_EDIT_TURN
+        MENUITEM "Sca&le\tF9",                  ID_EDIT_SCALE
+        MENUITEM "&Radius\tF10",                ID_EDIT_RADIUS
+        MENUITEM "&Add points\tF11",            ID_EDIT_ADD_POINT
+        MENUITEM SEPARATOR
+        MENUITEM "&Show\tS",                    ID_VIEW_SHOW
+        MENUITEM "&Hide\tH",                    ID_VIEW_HIDE
+        MENUITEM SEPARATOR
+        MENUITEM "Show / Hide &Landscape\tL",   ID_VIEW_LANDSCAPE
+        MENUITEM "Show / Hide &Layers\tY",      ID_VIEW_LAYERS
+        MENUITEM "Show / Hide &Grid\tG",        ID_VIEW_GRID
+        MENUITEM "Show / Hide &Grid points\tCTRL+G", ID_VIEW_POINTS
+        MENUITEM "Show / Hide &Primitives\tP",  ID_VIEW_PRIMITIVES
+        MENUITEM "Show / Hide &Details\tD",     ID_EDIT_DETAILS
+        MENUITEM "Show / Hide C&ollisions\tO",  ID_VIEW_COLLISIONS
+        MENUITEM "Show / Hide &PACS\tCTRL+P",   ID_VIEW_PACS
+        MENUITEM SEPARATOR
+        MENUITEM "Locate selected primitives\tALT+L", 
+                                                ID_VIEW_LOCATESELECTEDPRIMITIVES
+
+        MENUITEM "Locate selected primitives in tree\tALT+T", 
+                                                ID_VIEW_LOCATESELECTEDPRIMITIVES_TREE
+
+    END
+    POPUP "&Project"
+    BEGIN
+        MENUITEM "A&dd Landscape",              ID_PROJECT_ADDLANDSCAPE
+        MENUITEM "N&ew Landscape",              ID_PROJECT_NEWLANDSCAPE
+        MENUITEM SEPARATOR
+        MENUITEM "&Add Primitive",              ID_PROJECT_ADDPRIMITIVE
+        MENUITEM "&New Primitive",              ID_PROJECT_NEWPRIMITIVE
+        MENUITEM "&Import .prim",               ID_PROJECT_IMPORT_PRIM
+        MENUITEM SEPARATOR
+        MENUITEM "Settings...\tAlt+F7",         ID_PROJECT_SETTINGS
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset unique ID",            ID_PROJECT_RESETUNIQUEID
+        MENUITEM "&Generate missing ID",        ID_PROJECT_GENERATENULLID
+        MENUITEM "&Force ID uniqueness",        ID_PROJECT_CORRECT_ID
+        MENUITEM "&Reset primitive configuration", 
+                                                ID_PROJECT_RESET_PRIMITIVE_CONFIGURATION
+
+    END
+    POPUP "Windows"
+    BEGIN
+        MENUITEM "Primitive configuration",     ID_WINDOWS_PRIMITIVECONFIGURATION
+
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Topics\tF1",            ID_HELP_FINDER
+        MENUITEM "Histor&y",                    ID_HELP_HISTORY
+        MENUITEM SEPARATOR
+        MENUITEM "&About NeL World Editor...",  ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_DIALOG ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "F",            ID_FIND,                VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_GOTO,                VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_EDIT_SELECT_BY_LOCATION, VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_VIEW_LOCATESELECTEDPRIMITIVES, VIRTKEY, ALT, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_VIEW_PACS,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_VIEW_LOCATESELECTEDPRIMITIVES_TREE, VIRTKEY, ALT, 
+                                                    NOINVERT
+    VK_F1,          ID_HELP_FINDER,         VIRTKEY, NOINVERT
+    VK_F10,         ID_EDIT_RADIUS,         VIRTKEY, NOINVERT
+    VK_F11,         ID_EDIT_ADD_POINT,      VIRTKEY, NOINVERT
+    VK_F2,          ID_EDIT_ZONE,           VIRTKEY, NOINVERT
+    VK_F3,          ID_EDIT_TRANSITION,     VIRTKEY, NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, ALT, NOINVERT
+    VK_F5,          ID_EDIT_SELECT,         VIRTKEY, NOINVERT
+    VK_F6,          ID_EDIT_TRANSLATE,      VIRTKEY, NOINVERT
+    VK_F7,          ID_EDIT_ROTATE,         VIRTKEY, NOINVERT
+    VK_F7,          ID_PROJECT_SETTINGS,    VIRTKEY, ALT, NOINVERT
+    VK_F8,          ID_EDIT_TURN,           VIRTKEY, NOINVERT
+    VK_F9,          ID_EDIT_SCALE,          VIRTKEY, NOINVERT
+    VK_RETURN,      ID_EDIT_PROPERTIES,     VIRTKEY, ALT, NOINVERT
+END
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_SELECT_CHILDREN, VIRTKEY, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_EDIT_DETAILS,        VIRTKEY, NOINVERT
+    "E",            ID_EDIT_EXPAND,         VIRTKEY, NOINVERT
+    "F",            ID_FIND,                VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_VIEW_GRID,           VIRTKEY, NOINVERT
+    "G",            ID_GOTO,                VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_VIEW_POINTS,         VIRTKEY, ALT, NOINVERT
+    "H",            ID_VIEW_HIDE,           VIRTKEY, NOINVERT
+    "L",            ID_VIEW_LANDSCAPE,      VIRTKEY, NOINVERT
+    "L",            ID_EDIT_SELECT_BY_LOCATION, VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_VIEW_LOCATESELECTEDPRIMITIVES, VIRTKEY, ALT, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_VIEW_COLLISIONS,     VIRTKEY, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_VIEW_PRIMITIVES,     VIRTKEY, NOINVERT
+    "P",            ID_VIEW_PACS,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_SAVPOS,              VIRTKEY, ALT, NOINVERT
+    "R",            ID_EDIT_COLLAPSE,       VIRTKEY, NOINVERT
+    "S",            ID_VIEW_SHOW,           VIRTKEY, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_VIEW_LOCATESELECTEDPRIMITIVES_TREE, VIRTKEY, ALT, 
+                                                    NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_DELETE,         VIRTKEY, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_HELP_FINDER,         VIRTKEY, NOINVERT
+    VK_F10,         ID_EDIT_RADIUS,         VIRTKEY, NOINVERT
+    VK_F11,         ID_EDIT_ADD_POINT,      VIRTKEY, NOINVERT
+    VK_F2,          ID_EDIT_ZONE,           VIRTKEY, NOINVERT
+    VK_F3,          ID_EDIT_TRANSITION,     VIRTKEY, NOINVERT
+    VK_F4,          ID_EDIT_LOGIC,          VIRTKEY, NOINVERT
+    VK_F4,          ID_FILE_CLOSE,          VIRTKEY, ALT, NOINVERT
+    VK_F5,          ID_EDIT_SELECT,         VIRTKEY, NOINVERT
+    VK_F6,          ID_EDIT_TRANSLATE,      VIRTKEY, NOINVERT
+    VK_F7,          ID_EDIT_ROTATE,         VIRTKEY, NOINVERT
+    VK_F7,          ID_PROJECT_SETTINGS,    VIRTKEY, ALT, NOINVERT
+    VK_F8,          ID_EDIT_TURN,           VIRTKEY, NOINVERT
+    VK_F9,          ID_EDIT_SCALE,          VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_RETURN,      ID_EDIT_PROPERTIES,     VIRTKEY, ALT, NOINVERT
+    VK_SPACE,       ID_EDIT_LOCK,           VIRTKEY, NOINVERT
+    VK_TAB,         ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_TAB,         ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Y",            ID_VIEW_LAYERS,         VIRTKEY, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 73
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About NeL World Editor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "NeL World Editor Version 0.47",IDC_TITLE_VERSION,40,10,
+                    96,8,SS_NOPREFIX
+    LTEXT           "Copyright Nevrax (C) 2005",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,8,50,14,WS_GROUP
+    LTEXT           "Allocated Video Mem :",IDC_STATIC,15,43,73,16
+    LTEXT           "Static",IDC_STATIC_VIDEO_MEM,97,43,87,16
+END
+
+IDD_CREATE_ELEMENT DIALOG DISCARDABLE  0, 0, 247, 47
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create Element"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,190,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,190,24,50,14
+    EDITTEXT        IDC_EDIT_NAME,32,7,148,14,ES_AUTOHSCROLL
+    LTEXT           "Name",IDC_STATIC,7,7,20,8
+    LTEXT           "Type",IDC_STATIC,7,25,20,8
+    COMBOBOX        IDC_COMBOTYPE,32,25,148,106,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_TOOLS_ZONE DIALOG DISCARDABLE  0, 0, 246, 278
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_CATTYPE1,7,7,83,65,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATVALUE1,94,7,83,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATTYPE2,7,26,83,65,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATVALUE2,94,26,83,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATTYPE3,7,46,83,65,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATVALUE3,94,46,83,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATTYPE4,7,66,83,65,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATVALUE4,94,66,83,66,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "AND",IDC_AND2,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    183,28,31,10
+    CONTROL         "OR",IDC_OR2,"Button",BS_AUTORADIOBUTTON,213,28,29,10
+    CONTROL         "AND",IDC_AND3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    183,47,31,10
+    CONTROL         "OR",IDC_OR3,"Button",BS_AUTORADIOBUTTON,213,47,29,10
+    CONTROL         "AND",IDC_AND4,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    183,66,31,10
+    CONTROL         "OR",IDC_OR4,"Button",BS_AUTORADIOBUTTON,213,66,29,10
+    GROUPBOX        "",IDC_STATIC,180,22,59,18,WS_GROUP
+    GROUPBOX        "",IDC_STATIC,180,41,59,18,WS_GROUP
+    GROUPBOX        "",IDC_STATIC,180,60,59,18,WS_GROUP
+    CONTROL         "0°",IDC_ROT0,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,
+                    83,23,10
+    CONTROL         "90°",IDC_ROT90,"Button",BS_AUTORADIOBUTTON,31,83,27,10
+    CONTROL         "180°",IDC_ROT180,"Button",BS_AUTORADIOBUTTON,59,83,31,
+                    10
+    CONTROL         "270°",IDC_ROT270,"Button",BS_AUTORADIOBUTTON,91,83,31,
+                    10
+    CONTROL         "Ran",IDC_ROTRANDOM,"Button",BS_AUTORADIOBUTTON,123,83,
+                    29,10
+    CONTROL         "Full Cycle",IDC_ROTCYCLE,"Button",BS_AUTORADIOBUTTON,
+                    152,83,46,10
+    CONTROL         "NoFlip",IDC_FLIPNO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,7,94,36,10
+    CONTROL         "Flip",IDC_FLIPYES,"Button",BS_AUTORADIOBUTTON,45,94,27,
+                    10
+    CONTROL         "Ran",IDC_FLIPRANDOM,"Button",BS_AUTORADIOBUTTON,74,94,
+                    29,10
+    CONTROL         "Full Cycle",IDC_FLIPCYCLE,"Button",BS_AUTORADIOBUTTON,
+                    103,94,46,10
+    CONTROL         "Random",IDC_RANDOM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,189,7,43,10
+    CONTROL         "Not Propagate",IDC_NOT_PROPAGATE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,177,95,62,10
+    CONTROL         "Full Cycle",IDC_FULL_CYCLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,189,16,46,10
+    CONTROL         "Force",IDC_FORCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    205,84,34,10
+END
+
+IDD_SELECTZONE DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Zone"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,74,50,14
+    LISTBOX         IDC_LISTZONE,7,7,118,81,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_GENERATE DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Generate"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,84,74,45,14
+    PUSHBUTTON      "Cancel",IDCANCEL,137,74,42,14
+    LTEXT           "MinX",IDC_STATIC,7,17,17,8
+    EDITTEXT        IDC_EDITMINX,33,13,40,14,ES_AUTOHSCROLL
+    LTEXT           "MinY",IDC_STATIC,7,35,17,8
+    EDITTEXT        IDC_EDITMINY,33,31,40,14,ES_AUTOHSCROLL
+    LTEXT           "MaxX",IDC_STATIC,7,53,19,8
+    EDITTEXT        IDC_EDITMAXX,33,49,40,14,ES_AUTOHSCROLL
+    LTEXT           "MaxY",IDC_STATIC,7,71,19,8
+    EDITTEXT        IDC_EDITMAXY,33,67,40,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBOMATERIAL,87,7,92,58,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Zone Base X",IDC_STATIC,94,33,42,8
+    EDITTEXT        IDC_EDITZONEBASEX,139,31,40,14,ES_AUTOHSCROLL
+    LTEXT           "Zone Base Y",IDC_STATIC,93,52,42,8
+    EDITTEXT        IDC_EDITZONEBASEY,139,50,40,14,ES_AUTOHSCROLL
+END
+
+IDD_MOVE DIALOG DISCARDABLE  0, 0, 186, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Move In Cell"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+    LTEXT           "X Offset",IDC_STATIC,7,7,26,8
+    LTEXT           "Y Offset",IDC_STATIC,7,24,26,8
+    EDITTEXT        IDC_EDITXOFFSET,50,7,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDITYOFFSET,49,23,40,14,ES_AUTOHSCROLL
+END
+
+IDD_EXPORT DIALOG DISCARDABLE  0, 0, 375, 316
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Export To Client"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,317,280,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,317,296,50,14
+    EDITTEXT        IDC_EDIT_REFZONEDIR,7,16,153,14,ES_AUTOHSCROLL
+    LTEXT           "Reference Zones Directory",IDC_STATIC,7,7,86,8
+    PUSHBUTTON      "...",IDC_BUTTON_REFZONEDIR,166,16,13,14
+    GROUPBOX        "Lighting",IDC_STATIC,195,280,118,30
+    CONTROL         "Noise",IDC_RADIOLIGHTNOISE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,203,292,34,10
+    CONTROL         "Patch",IDC_RADIOLIGHTPATCH,"Button",BS_AUTORADIOBUTTON,
+                    241,292,35,10
+    CONTROL         "No",IDC_RADIOLIGHTNO,"Button",BS_AUTORADIOBUTTON,279,
+                    292,25,10
+    LTEXT           "Output Zones Directory",IDC_STATIC,7,33,74,8
+    EDITTEXT        IDC_EDIT_OUTZONEDIR,7,42,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_OUTZONEDIR,166,42,13,14
+    LTEXT           "Tile Bank File",IDC_STATIC,7,129,44,8
+    EDITTEXT        IDC_EDIT_TILEBANKFILE,7,139,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_TILEBANKFILE,166,139,13,14
+    LTEXT           "Height Map File",IDC_STATIC,7,157,50,8
+    EDITTEXT        IDC_EDIT_HEIGHTMAPFILE,7,167,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_HEIGHTMAPFILE,166,167,13,14
+    EDITTEXT        IDC_EDIT_ZFACTOR,119,182,40,14,ES_AUTOHSCROLL
+    LTEXT           "Height Factor",IDC_STATIC,63,184,44,8
+    LTEXT           "Height Map File 2",IDC_STATIC,9,199,56,8
+    EDITTEXT        IDC_EDIT_HEIGHTMAPFILE2,7,209,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_HEIGHTMAPFILE2,166,209,13,14
+    EDITTEXT        IDC_EDIT_ZFACTOR2,119,225,40,14,ES_AUTOHSCROLL
+    LTEXT           "Height Factor 2",IDC_STATIC,63,228,50,8
+    LTEXT           "ZoneMin",IDC_STATIC,203,258,29,8
+    EDITTEXT        IDC_EDIT_ZONEMIN,238,255,40,14,ES_AUTOHSCROLL
+    LTEXT           "ZoneMax",IDC_STATIC,287,258,31,8
+    EDITTEXT        IDC_EDIT_ZONEMAX,321,255,40,14,ES_AUTOHSCROLL
+    GROUPBOX        "Export Limiter",IDC_STATIC,195,245,172,27
+    EDITTEXT        IDC_EDIT_REFIGDIR,7,80,153,14,ES_AUTOHSCROLL
+    LTEXT           "Reference Instance Group Directory",IDC_STATIC,7,70,115,
+                    8
+    PUSHBUTTON      "...",IDC_BUTTON_REFIGDIR,166,80,13,14
+    LTEXT           "Output Instance Group Directory",IDC_STATIC,7,97,103,8
+    EDITTEXT        IDC_EDIT_OUTIGDIR,7,105,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_OUTIGDIR,166,105,13,14
+    GROUPBOX        "",IDC_STATIC,1,0,182,63
+    GROUPBOX        "",IDC_STATIC,2,62,181,61
+    EDITTEXT        IDC_EDIT_REFCMBDIR,197,17,153,14,ES_AUTOHSCROLL
+    LTEXT           "Reference Collisions Directory",IDC_STATIC,197,7,95,8
+    PUSHBUTTON      "...",IDC_BUTTON_REFCMBDIR,355,17,13,14
+    LTEXT           "Output Collisions Directory",IDC_STATIC,197,34,83,8
+    EDITTEXT        IDC_EDIT_OUTCMBDIR,197,42,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_OUTCMBDIR,355,42,13,14
+    GROUPBOX        "",IDC_STATIC,191,1,182,61
+    EDITTEXT        IDC_EDIT_REFADDITIONNALIGDIR,198,80,153,14,
+                    ES_AUTOHSCROLL
+    LTEXT           "Reference Instance Group Directory",IDC_STATIC,198,70,
+                    115,8
+    PUSHBUTTON      "...",IDC_BUTTON_REFADDITIONNALIGDIR,356,80,13,14
+    LTEXT           "Output Instance Group Directory",IDC_STATIC,198,97,103,
+                    8
+    EDITTEXT        IDC_EDIT_OUTADDITIONNALIGDIR,198,105,153,14,
+                    ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_OUTADDITIONNALIGDIR,356,105,13,14
+    GROUPBOX        "",IDC_STATIC,192,62,181,61
+    CONTROL         "Export collisions",IDC_EXPORT_COLLISIONS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,201,215,81,11
+    EDITTEXT        IDC_EDIT_DFNDIR,197,138,153,14,ES_AUTOHSCROLL
+    LTEXT           "Dfn base directory",IDC_STATIC,197,128,58,8
+    PUSHBUTTON      "...",IDC_BUTTON_DFNDIR,355,138,13,14
+    EDITTEXT        IDC_EDIT_CONTINENTFILE,197,190,153,14,ES_AUTOHSCROLL
+    LTEXT           ".continent file",IDC_STATIC,197,180,43,8
+    PUSHBUTTON      "...",IDC_BUTTON_CONTINENTFILE,355,190,13,14
+    CONTROL         "Export additionnal igs",IDC_EXPORT_ADDITIONNAL_IGS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,201,230,81,11
+    EDITTEXT        IDC_EDIT_CONTINENTSDIR,197,165,153,14,ES_AUTOHSCROLL
+    LTEXT           "Continents base directory",IDC_STATIC,197,155,80,8
+    PUSHBUTTON      "...",IDC_BUTTON_CONTINENTSDIR,355,165,13,14
+    LTEXT           "Color Map File",IDC_STATIC,7,245,46,8
+    EDITTEXT        IDC_EDIT_COLORMAPFILE,5,255,153,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_COLORMAPFILE,164,255,13,14
+END
+
+IDD_TYPEMANAGER DIALOG DISCARDABLE  0, 0, 186, 156
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Type Manager"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,135,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,135,50,14
+    LISTBOX         IDC_LISTTYPE,7,26,172,102,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add Type",IDC_ADDTYPE,7,7,50,14
+    PUSHBUTTON      "Remove Type",IDC_REMOVETYPE,68,7,50,14
+    PUSHBUTTON      "Edit Type",IDC_EDITTYPE,129,7,50,14
+END
+
+IDD_TYPE DIALOG DISCARDABLE  0, 0, 186, 46
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Type"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+    LTEXT           "Name",IDC_STATIC,7,7,20,8
+    LTEXT           "Color",IDC_STATIC,7,29,17,8
+    EDITTEXT        IDC_EDITNAME,36,7,82,14,ES_AUTOHSCROLL
+    CONTROL         "Color",IDC_BUTTONCOLOR,"Button",BS_OWNERDRAW | 
+                    WS_TABSTOP,36,24,50,14
+END
+
+IDD_TYPESEL DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Type"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,74,50,14
+    LISTBOX         IDC_LIST,7,7,117,81,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_EXPORTCB DIALOG DISCARDABLE  0, 0, 310, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Export Callback"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,7,117,296,14
+    LTEXT           "Export Pass",IDC_PASSTEXT,7,7,296,8
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
+                    18,296,14
+    EDITTEXT        IDC_EDIT_INFO,7,39,296,73,ES_MULTILINE | ES_AUTOHSCROLL | 
+                    WS_VSCROLL
+END
+
+IDD_TOOLS_LOGIC DIALOG DISCARDABLE  0, 0, 178, 278
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_EDIT_STRING DIALOG DISCARDABLE  0, 0, 247, 47
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit name"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,190,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,190,24,50,14
+    EDITTEXT        IDC_EDIT_NAME,32,17,148,14,ES_AUTOHSCROLL
+    LTEXT           "Name",-1,7,17,20,8
+END
+
+IDD_LOADING DIALOGEX 0, 0, 281, 47
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "NeL World Editor"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Please Wait While Loading...",IDC_STATIC_TEXT_LOADING,
+                    "Static",SS_LEFTNOWORDWRAP | WS_GROUP,5,5,269,8
+    ICON            IDR_MAINFRAME,IDC_STATIC,5,20,20,20,SS_CENTERIMAGE | 
+                    SS_RIGHTJUST | SS_REALSIZEIMAGE
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,
+                    30,20,245,20
+END
+
+IDD_CUSTOM_SNAPSHOT DIALOG DISCARDABLE  0, 0, 147, 130
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Snapshot"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,5,110,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,90,110,50,14
+    EDITTEXT        IDC_WIDTH,90,30,51,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HEIGHT,90,45,51,12,ES_AUTOHSCROLL
+    LTEXT           "Width:",IDC_STATIC,15,30,70,13,SS_CENTERIMAGE
+    LTEXT           "Height:",IDC_STATIC,15,45,70,12,SS_CENTERIMAGE
+    CONTROL         "Keep bitmap ratio",IDC_KEEPRATIO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,60,75,10
+    CONTROL         "RGB",IDC_RGBA,"Button",BS_AUTORADIOBUTTON | WS_GROUP,5,
+                    80,60,10
+    CONTROL         "Grayscale",IDC_GRAY_SCALE,"Button",BS_AUTORADIOBUTTON,5,
+                    90,60,10
+    CONTROL         "Fixed size",IDC_FIXED_SIZE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,5,5,60,10
+    CONTROL         "Custom size",IDC_GRAY_SCALE2,"Button",
+                    BS_AUTORADIOBUTTON,5,15,60,10
+END
+
+IDD_PROJECT_SETTINGS DIALOG DISCARDABLE  0, 0, 254, 153
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project Settings"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,5,135,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,60,135,50,14
+    EDITTEXT        IDC_DATA_DIRECTORY,5,15,190,12,ES_AUTOHSCROLL
+    LTEXT           "Data directory:",IDC_STATIC,5,5,50,10
+    PUSHBUTTON      "Browse",IDC_BROWSE,200,15,50,14
+    COMBOBOX        IDC_CONTEXT,5,45,105,85,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Context:",IDC_STATIC,5,35,50,10
+END
+
+IDD_PROPERTIES DIALOGEX 0, 0, 298, 121
+STYLE WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,5,105,50,15
+    PUSHBUTTON      "&Cancel",IDCANCEL,124,105,50,15
+    PUSHBUTTON      "&Update",IDUPDATE,240,105,50,15
+    SCROLLBAR       IDC_SCROLLBAR_PROP,283,15,12,76,SBS_VERT
+    CONTROL         "",IDC_PROPERTY_FRAME,"Static",SS_BLACKFRAME,0,0,297,103,
+                    WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_FIRST_PROP,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,6,6,273,19
+END
+
+IDD_SELECT_PRIMITIVE_BY_LOCATION DIALOG DISCARDABLE  0, 0, 172, 85
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select a primitive by its location"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_X,75,5,90,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_Y,75,25,90,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_THRESHOLD,75,45,90,15,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Select",IDOK,5,65,50,14
+    PUSHBUTTON      "Select more",IDMORE,60,65,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,115,65,50,14
+    LTEXT           "X :",IDC_STATIC,10,5,40,15,SS_CENTERIMAGE
+    LTEXT           "Y :",IDC_STATIC,10,25,40,15,SS_CENTERIMAGE
+    LTEXT           "Threshold :",IDC_STATIC,10,45,40,15,SS_CENTERIMAGE
+END
+
+IDD_FIND_PRIMITIVE DIALOG DISCARDABLE  0, 0, 349, 145
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Find a primitive..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_PROPERTY,56,8,286,12,ES_AUTOHSCROLL
+    LTEXT           "Property :",IDC_STATIC,7,8,48,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_VALUE,56,26,286,12,ES_AUTOHSCROLL
+    LTEXT           "Value :",IDC_STATIC,7,26,48,12,SS_CENTERIMAGE
+    LTEXT           "",IDC_PRIMITIVE_NAME,7,104,335,34,SS_SUNKEN
+    DEFPUSHBUTTON   "&Find Next",ID_FIND_NEXT,102,83,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,7,83,50,14
+    CONTROL         "selection only",IDC_SELECTION,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,57,65,59,10
+    LTEXT           "Replace With :",IDC_STATIC,7,48,48,8
+    EDITTEXT        IDC_REPLACE_TEXT,56,42,286,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Replace",ID_REPLACE,197,83,50,14
+    PUSHBUTTON      "&ReplaceAll",ID_REPLACE_ALL,292,83,50,14
+END
+
+IDD_GOTO_POS DIALOG DISCARDABLE  0, 0, 142, 58
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Goto position"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&Goto",IDOK,85,5,50,14
+    PUSHBUTTON      "Ca&ncel",IDCANCEL,85,25,50,14
+    LTEXT           "X",IDC_STATIC,5,5,10,10
+    EDITTEXT        IDC_GOTO_POS_X,20,5,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,5,25,10,8
+    EDITTEXT        IDC_GOTO_POS_Y,20,25,50,12,ES_AUTOHSCROLL
+    CONTROL         "&zoom at position",IDC_CHECK_POS_ZOMM,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,45,70,10
+END
+
+IDD_NAME DIALOG DISCARDABLE  0, 0, 483, 354
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Name attribution"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,282,333,50,14
+    DEFPUSHBUTTON   "&Reset",ID_NAME_RESET,216,333,50,14
+    DEFPUSHBUTTON   "OK",IDOK,150,333,50,14
+    EDITTEXT        IDC_NAME_EBOX_GN,162,15,151,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_NAME_EBOX_IG,162,34,151,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "&Assign",ID_NAME_ASSIGN,217,52,50,14,WS_DISABLED
+    EDITTEXT        IDC_NAME_FILTER,180,92,125,12,ES_AUTOHSCROLL
+    LISTBOX         IDC_NAME_SEARCH,29,110,426,84,LBS_SORT | LBS_USETABSTOPS | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_NAME_ID,29,220,426,78,LBS_SORT | LBS_USETABSTOPS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Assign name",IDC_STATIC,107,7,270,67
+    LTEXT           "Generic name:",IDC_STATIC,111,17,47,8
+    LTEXT           "In game name:",IDC_STATIC,111,36,48,8
+    LTEXT           "Search for in game name:",IDC_STATIC,93,95,82,8
+    LTEXT           "...",IDC_NAME_DIR,28,311,235,13
+    LTEXT           "",IDC_NAME_NEWGN,319,16,29,10
+    GROUPBOX        "Selected bots:",IDC_STATIC,19,210,445,96
+    GROUPBOX        "Name database:",IDC_STATIC,20,83,445,122
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "Nevrax\0"
+            VALUE "FileDescription", "NeL World Editor\0"
+            VALUE "FileVersion", "0, 0, 0, 1\0"
+            VALUE "InternalName", "world_editor\0"
+            VALUE "LegalCopyright", "Nevrax Copyright (C) 2002\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "world_editor.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "NeL World Editor\0"
+            VALUE "ProductVersion", "0, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 66
+    END
+
+    IDD_CUSTOM_SNAPSHOT, DIALOG
+    BEGIN
+        RIGHTMARGIN, 91
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_PROJECT_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 247
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 146
+    END
+
+    IDD_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 282
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 21
+    END
+
+    IDD_SELECT_PRIMITIVE_BY_LOCATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 78
+    END
+
+    IDD_FIND_PRIMITIVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 342
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+    END
+
+    IDD_GOTO_POS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 135
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 51
+    END
+
+    IDD_NAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 476
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 347
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_MOVE                CURSOR  DISCARDABLE     "res\\move.cur"
+IDC_ROTATE              CURSOR  DISCARDABLE     "res\\rotate.cur"
+IDC_TURN                CURSOR  DISCARDABLE     "res\\turn.cur"
+IDC_SCALE               CURSOR  DISCARDABLE     "res\\scale.cur"
+IDC_ADD_POINT           CURSOR  DISCARDABLE     "res\\add_point.cur"
+IDC_COPY                CURSOR  DISCARDABLE     "res\\copy.cur"
+IDC_SELECT              CURSOR  DISCARDABLE     "res\\select.cur"
+IDC_SELECT_COPY         CURSOR  DISCARDABLE     "res\\select_copy.cur"
+IDC_INSERT_POINT        CURSOR  DISCARDABLE     "res\\insert_point.cur"
+IDC_HAND                CURSOR  DISCARDABLE     "res\\hand.cur"
+IDC_ZOOM                CURSOR  DISCARDABLE     "res\\zoom.cur"
+IDC_RADIUS              CURSOR  DISCARDABLE     "res\\radius.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "NeL World Editor\n\nNeLWorldEditor\nNeL World Editor Files (*.worldedit)\n.worldedit\nWorldeditor.Document\nNeL World Editor Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "NeL World Editor"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_ZONENAMENEL "                                   "
+    ID_INDICATOR_ZONENAMEREF 
+                            "                                                                                                        "
+    ID_INDICATOR_COORDINATES "(0,0)                                    "
+    ID_INDICATOR_ZONEROT    "Rot(0)"
+    ID_INDICATOR_ZONEFLIP   "Flip(0)"
+    ID_INDICATOR_INFO       "                                                                                                                                                                  "
+    ID_INDICATOR_SELECTION  "9999 selected primitives"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen (CTRL+O)"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave (Ctrl+S)"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+    ID_HELP_FINDER          "List Help topics\nHelp Topics (F1)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy (Ctrl+C)"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut (Ctrl+X)"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste (Ctrl+V)"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo (Ctrl+Z)"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo (Ctrl+Y)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+    ID_WINDOWS_PLUGINS      "Menu to select betwen the different plugins \n Plugins"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_GRID            "Show / hide grid\nShow / Hide grid (G)"
+    ID_MODE_LOGIC           "Logic Edition"
+    ID_MODE_ZONE            "Zone edition"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_PACS            "Show / hide PACS lines\nPACS (CTRL+P)"
+    ID_VIEW_PACS            "Show / hide PACS lines\nPACS (CTRL+P)"
+    ID_VIEW_POINTS          "Show / hide grid points\nShow / Hide grid points (CTRL+G)"
+    ID_PROJECT_GENERATENULLID 
+                            "Check all ID and regenerate any 0 or empty ID in all the loaded primitves"
+    ID_PROJECT_CORRECT_ID   "Check and correct any ID that is not unique in the set of loaded primitives"
+    ID_SAVPOS               "Save Current Coordinates to file position.txt\nSave Current &Position\tALT+P"
+    ID_MISSION_COMPILER     "Mission compiler\nMission compiler"
+    ID_NAME_DLG             "Name generator\nName generator"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_TURN            "Turn selection\nTurn (F8)"
+    ID_EDIT_SCALE           "Scale selection\nScale (F9)"
+    ID_EDIT_RADIUS          "Change selection radius\nRadius (F10)"
+    ID_EDIT_ADD_POINT       "Add points in selection\nAdd points (F11)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROJECT_SETTINGS     "Project properties\nProperties (Alt+F7)"
+    ID_EDIT_LOCK            "Edit current selection points\nEdit points (Space)"
+    ID_EDIT_ZONE            "Toggle in zone mode\nZone mode (F2)"
+    ID_EDIT_TRANSITION      "Toggle in transition mode\nTransition mode (F3)"
+    ID_EDIT_LOGIC           "Toggle in primitive mode\nPrimitive mode (F4)"
+    ID_EDIT_SELECT          "Selection mode\nSelect (F5)"
+    ID_EDIT_TRANSLATE       "Move selection\nMove (F6)"
+    ID_EDIT_ROTATE          "Rotate selection\nRotate (F7)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_DETAILS         "Show / hide details\nDetails (D)"
+    ID_VIEW_SHOW            "Show selected primitives\nShow (S)"
+    ID_VIEW_HIDE            "Hide selected primitives\nHide (H)"
+    ID_EDIT_SELECT_CHILDREN "Select selected node children \tC\nSelect children (C)"
+    ID_EDIT_EXPAND          "Expand selected nodes\nExpand (E)"
+    ID_EDIT_COLLAPSE        "Collapse selected nodes\nCollapse (R)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_LANDSCAPE       "Show / hide landscapes\nShow / Hide landscapes (L)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_PRIMITIVES      "Show / hide primitives\nShow / Hide primitives (P)"
+    ID_VIEW_LAYERS          "Show / hide layers\nShow / Hide layers (Y)"
+    ID_VIEW_GRIS            "Show / hide grid\nShow / Hide gris (G)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_SELECT_BY_LOCATION 
+                            "Select primitives by location CTRL+L\nSelect primitives by location (CTRL+L)"
+    ID_BUTTON33457          "Locate selected primitives"
+    ID_VIEW_LOCATESELECTEDPRIMITIVES 
+                            "Locate selected primitives \tALT+L\nLocate selected primitives (ALT+L)"
+    ID_VIEW_LOCATESELECTEDPRIMITIVES_TREE 
+                            "Locate selected primitives in the tree\tALT+T\nLocate selected primitives in the tree (ALT+T)"
+    ID_PROJECT_RESETUNIQUEID "Reset unique ID\nReset unique ID"
+    ID_FIND                 "Find a primitive\tCTRL+F/nFind a primitive (CTRL+F)"
+    ID_VIEW_COLLISIONS      "Show / hide Collisions\nCollisions (O)"
+    ID_RENAME_SELECTED      "Force auto-rename on selected elements"
+    ID_REPAIR_SELECTED      "Repair selected elements by adding missing fields"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU DISCARDABLE 
+BEGIN
+    POPUP "Primitive Configuration"
+    BEGIN
+        MENUITEM "&Select",                     ID_PRIMITIVECONFIGURATION_SELECT
+
+        MENUITEM "&Show",                       ID_PRIMITIVECONFIGURATION_SHOW
+
+        MENUITEM "&Hide",                       ID_PRIMITIVECONFIGURATION_HIDE
+
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PRIMITIVE_CONFIGURATION DIALOGEX 0, 0, 238, 87
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Primitive configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",IDC_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,7,7,224,73
+END
+
+IDD_SPLASHSCREEN DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE WS_POPUP | WS_CAPTION
+CAPTION "World Edit Load"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Static",IDC_LOAD_WORLD_EDIT,7,5,172,85,SS_SUNKEN
+END
+
+IDD_DIRECTORY_SELECTOR DIALOG DISCARDABLE  0, 0, 282, 26
+STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif"
+BEGIN
+    COMBOBOX        IDC_DIRLIST,54,7,216,234,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Previous dir:",IDC_STATIC,6,7,45,12,SS_CENTERIMAGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PRIMITIVE_CONFIGURATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 231
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 80
+    END
+
+    IDD_SPLASHSCREEN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_DIRECTORY_SELECTOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 275
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 19
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\world_editor.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#include "afxdb.rc"          // Database resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

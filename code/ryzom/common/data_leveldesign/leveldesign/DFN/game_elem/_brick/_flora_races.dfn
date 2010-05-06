@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+	<ELEMENT Name="cephaloplant" Type="Type" Filename="boolean.typ" Default="false"/>
+	<ELEMENT Name="electroalgs" Type="Type" Filename="boolean.typ" Default="false"/>
+	<ELEMENT Name="phytopsy" Type="Type" Filename="boolean.typ" Default="false"/>
+	<ELEMENT Name="sap_enslaver" Type="Type" Filename="boolean.typ" Default="false"/>
+	<ELEMENT Name="spitting_weeds" Type="Type" Filename="boolean.typ" Default="false"/>
+	<ELEMENT Name="swarmplants" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Wed Jun 11 11:24:39 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

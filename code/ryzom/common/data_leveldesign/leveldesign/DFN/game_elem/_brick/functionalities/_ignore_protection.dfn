@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Ignore Protection Skill" Type="Type" Filename="_skills.typ"/>
+  <ELEMENT Name="Ignore Protection Specialization" Type="Type" Filename="_specialized_skills.typ"/>
+  <LOG>Tue Nov 26 14:30:04 2002 (fleury) Dfn Structure = 
+Tue Nov 26 14:40:52 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

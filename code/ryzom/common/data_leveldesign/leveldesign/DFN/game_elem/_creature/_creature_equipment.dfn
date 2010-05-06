@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<DFN Version="0.3" State="modified">
+  <ELEMENT Name="Body" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Legs" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Arms" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Hands" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Feet" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Head" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Face" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Headdress" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="EarL" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="EarR" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="Neck" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="WristL" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="WristR" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="FingerL" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="FingerR" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="AnkleL" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="AnkleR" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="HandL" Type="Dfn" Filename="_creature_items.dfn"/>
+  <ELEMENT Name="HandR" Type="Dfn" Filename="_creature_items.dfn"/>
+  <LOG></LOG>
+</DFN>

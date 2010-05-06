@@ -1,0 +1,105 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- TRAP : Previous version. Now all is unified through the temp_inventory -->
+
+<!--*************-->
+<!--*   LOOT    *-->
+<!--*************-->
+<!--
+<proc id="end_loot_proc">
+	<action handler="end_harvest" params="loot"/>
+	<action handler="set" params="dblink=pickup_inventory:0:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:1:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:2:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:3:SHEET|value=0"/>
+	<action handler="set" params="target_property=ui:interface:loot:active|value=0"/>
+</proc>
+
+
+<group id="loot" exit_click_out="false" posref="MM MM" w="196" h="90" mouse_pos="false" active="false"
+ on_active="proc"
+ on_active_params="memorize_inventory_state" 
+ on_deactive="proc"
+ on_deactive_params="restore_inventory_state"
+>
+
+	<instance template="modal_border" posparent="parent"/>	
+	<view type="bitmap" id="back" posref="MM MM" scale="true" sizeref="wh" w="-8" h="-8" texture="w_modal_blank.tga" />	
+
+	<view type="text" id="text" posref="TL TL" x="7" y="-4" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiLoot" global_color="false"/>
+	<ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-5" tx_normal="W_close_1.tga" tx_pushed="W_close_1.tga" tx_over="W_button_12_over.tga" 
+			onclick_l="proc" params_l="end_loot_proc" tooltip="uittClose" />
+					
+	<! - can swap item only to an empty slot => setup 'buy_selection' to make it work with slot_can_drop - >
+	<group type="list_sheet" id="lootcontent" value="%pickup_inventory" w="180" posref="TM TM" y="-20" wspace="4" hspace="4"
+		  	maxitem="4" startitem="0" rowmin="1" rowmax="1" dragable="true" 
+			selection_group="buy_selection"
+	>	
+	</group>	
+	<view type="text" id="drag_to_inventory" posref="BM TM" posparent="lootcontent" y="-4" color="255 255 255 255" fontsize="14" shadow="true" hardtext="uiDragToInventory"/>
+</group>
+
+
+<! - put an observer to display the window if any item has been harvested. The window is removed when there's no more item - >
+<link expr="or(ne(@%pickup_inventory:0:SHEET, 0),
+               ne(@%pickup_inventory:1:SHEET, 0),
+			   ne(@%pickup_inventory:2:SHEET, 0),
+			   ne(@%pickup_inventory:3:SHEET, 0))"
+	  target="loot:active"/>
+
+-->
+<!--****************-->
+<!--*   HARVEST    *-->
+<!--****************-->
+
+<!--
+<proc id="end_harvest_proc">
+	<action handler="end_harvest" params="harvest"/>
+	<action handler="set" params="dblink=pickup_inventory:0:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:1:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:2:SHEET|value=0"/>
+	<action handler="set" params="dblink=pickup_inventory:3:SHEET|value=0"/>
+	<action handler="set" params="target_property=ui:interface:harvest:active|value=0"/>
+</proc>
+
+
+<group id="harvest" exit_click_out="false" posref="MM MM" w="196" h="95" y="-95" mouse_pos="false" active="false"
+ on_active="proc"
+ on_active_params="memorize_inventory_state" 
+ on_deactive="proc"
+ on_deactive_params="restore_inventory_state"
+>
+	<instance template="modal_border" posparent="parent"/>	
+	<view type="bitmap" id="back" posref="MM MM" scale="true" sizeref="wh" w="-8" h="-8" texture="w_modal_blank.tga" />
+	
+	<view type="text" id="text" posref="TL TL" x="7" y="-4" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiHarvest" global_color="false"/>
+	<ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-5" tx_normal="W_close_1.tga" tx_pushed="W_close_1.tga" tx_over="W_button_12_over.tga" 
+			onclick_l="proc" params_l="end_harvest_proc" tooltip="uittClose"/>
+
+	<! - Don't display the quality because unknown - >
+	<group type="list_sheet" id="lootcontent" value="%harvest_inventory" w="180" posref="TM TM" y="-20" wspace="4" hspace="4"
+		  	maxitem="4" startitem="0" rowmin="1" rowmax="1" onclick_l="harvest_item" use_quality="false">
+	</group>
+	<view type="text" id="drag_to_inventory" posref="BM TM" posparent="lootcontent" y="-4" color="255 255 255 255" fontsize="14" shadow="true" hardtext="uiDragToInventory"/>		
+</group>
+
+<! - put an observer to display the window if any item has been harvested. The window is removed when there's no more item - >
+<link expr="or(ne(@%harvest_inventory:0:SHEET, 0),
+               ne(@%harvest_inventory:1:SHEET, 0),
+			   ne(@%harvest_inventory:2:SHEET, 0),
+			   ne(@%harvest_inventory:3:SHEET, 0))"
+	  target="harvest:active"/>
+
+
+
+<tree node="loot">
+</tree>
+
+<tree node="harvest">
+</tree>
+
+-->
+</interface_config>

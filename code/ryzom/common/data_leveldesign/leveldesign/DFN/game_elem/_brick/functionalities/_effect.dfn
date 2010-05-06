@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.20 $" State="modified">
+  <ELEMENT Name="Duration in Cycles?" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Duration" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="DurationOnFailure" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DurationRange" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="DurationRangeOnFailure" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Repeat Interval" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="Nb Repeat" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Affected Value" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Modifier" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="ModifierOnFailure" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Secondary Modifier" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Mode" Type="Type" Filename="_modifier_mode.typ"/>
+  <ELEMENT Name="Effect Type" Type="Type" Filename="_effect_type.typ"/>
+  <ELEMENT Name="Life Points" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="Killer Effects" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Prevented Effects" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="No Resist Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="No Resist Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="No Resist Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Resist Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Resist Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Resist Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Private Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Spectators Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="End Creator Msg Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply Effect Function" Type="Type" Filename="_effect_functions.typ"/>
+  <ELEMENT Name="End Effect Function" Type="Type" Filename="_effect_functions.typ"/>
+  <ELEMENT Name="ResistValue" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ResistThreshold" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Resistance Modifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Resistance Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="AdditionalParam" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Apply on execute?" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ApplyOnTarget" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="DynamicModifier" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DynamicModifierOnResist" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="TestTargetLevel" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="AdmissibleDeltaLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="DurationInActions" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="DurationInActionsType" Type="Type" Filename="_duration_in_action_type.typ"/>
+  <ELEMENT Name="AdditionalModifiers" Type="Dfn" Filename="_modifier.dfn" Array="true"/>
+  <ELEMENT Name="IsStatic" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Nov 26 11:56:29 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:57:55 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:58:10 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:58:23 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:00:15 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:00:48 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:12 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:26 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:49 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:34:08 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:34:18 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:37:38 2002 (fleury) Dfn Structure = 
+Thu Nov 28 12:12:45 2002 (fleury) Dfn Structure = 
+Thu Nov 28 12:14:14 2002 (fleury) Dfn Structure = 
+Fri Nov 29 17:23:15 2002 (brigand) Dfn Structure = 
+Tue Dec 03 10:47:08 2002 (brigand) Dfn Structure = 
+Tue Dec 03 11:24:59 2002 (brigand) Dfn Structure = 
+Tue Dec 03 18:44:45 2002 (fleury) Dfn Structure = 
+Wed Dec 04 19:43:44 2002 (brigand) Dfn Structure = 
+Thu Dec 05 15:59:55 2002 (brigand) Dfn Structure = 
+Fri Dec 06 14:19:16 2002 (fleury) Dfn Structure = 
+Fri Dec 06 14:19:32 2002 (fleury) Dfn Structure = 
+Tue Dec 10 15:39:32 2002 (brigand) Dfn Structure = 
+Mon Dec 16 15:21:54 2002 (fleury) Dfn Structure = 
+Mon Dec 16 15:30:45 2002 (fleury) Dfn Structure = 
+Mon Dec 16 16:28:09 2002 (fleury) Dfn Structure = 
+Mon Dec 16 16:28:24 2002 (fleury) Dfn Structure =
+Tue Dec 10 15:39:32 2002 (brigand) Dfn Structure = 
+Tue Dec 17 18:41:31 2002 (brigand) Dfn Structure = 
+Tue Jan 14 12:08:22 2003 (brigand) Dfn Structure = 
+Tue Jan 14 14:45:29 2003 (brigand) Dfn Structure = 
+Tue Jan 14 14:48:38 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:16:59 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:17:10 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:21:34 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:23:50 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:24:32 2003 (brigand) Dfn Structure = 
+Tue Jan 14 15:25:56 2003 (brigand) Dfn Structure = 
+Tue Dec 17 18:41:31 2002 (brigand) Dfn Structure = 
+Wed Jan 15 14:03:03 2003 (fleury) Dfn Structure = 
+Wed Jan 15 14:13:27 2003 (fleury) Dfn Structure = 
+
+Mon Feb 10 15:13:14 2003 (fleury) Dfn Structure = 
+Mon Feb 10 15:14:01 2003 (fleury) Dfn Structure = 
+Mon Mar 24 19:10:20 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

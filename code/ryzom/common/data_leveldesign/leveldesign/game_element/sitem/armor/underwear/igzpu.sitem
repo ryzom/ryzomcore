@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="zorai"/>
+      <ATOM Name="family" Value="armor"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Legs"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="ZO_HOM_underwear_pantabottes.shape"/>
+      <ATOM Name="shape_female" Value="ZO_HOF_underwear_pantabottes.shape"/>
+      <ATOM Name="color" Value="UserColor"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:50 2002 (mauduit) .3d.shape = TR_HOM_underwear_bottes.shape
+Tue Jul 09 14:07:14 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Feet
+Tue Jul 09 14:07:14 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:07:14 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:07:14 2002 (mauduit) formName Resized = 1
+Tue Jul 09 14:07:24 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_bottes.shape
+Tue Jul 09 17:20:28 2002 (mauduit) .3d.shape = TR_HOF_underwear_pantabottes.shape
+Tue Jul 09 17:20:28 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_pantabottes.shape
+Tue Jul 09 17:20:28 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Legs
+Tue Jul 09 17:48:46 2002 (mauduit) .3d.shape = TR_HOM_underwear_pantabottes.shape
+Mon Jul 15 14:10:21 2002 (mauduit) .3d.color = UserColor
+Wed Aug 07 09:23:47 2002 (mauduit) .3d.shape = ZO_HOM_underwear_pantabottes.shape
+Wed Aug 07 09:23:47 2002 (mauduit) .3d.shape_female = ZO_HOF_underwear_pantabottes.shape
+Mon Aug 26 17:14:43 2002 (receveur) .basics.origin = zorai
+Wed Sep 18 10:58:03 2002 (mauduit) .3d.shape = TR_HOM_underwear_pantabottes.shape
+Wed Sep 18 10:58:03 2002 (mauduit) .3d.shape_female = TR_HOF_underwear_pantabottes.shape
+Wed Sep 18 11:22:59 2002 (mauduit) .3d.shape = ZO_HOM_underwear_pantabottes.shape
+Wed Sep 18 11:22:59 2002 (mauduit) .3d.shape_female = ZO_HOF_underwear_pantabottes.shape
+Mon Feb 23 19:59:50 2004 (puzin) .basics.Saleable = false</LOG>
+</FORM>

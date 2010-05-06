@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="Short Range Limit" Type="Type" Filename="item_firing_range.typ" Default="0"/>
+  <ELEMENT Name="Medium Range Limit" Type="Type" Filename="item_firing_range.typ" Default="0"/>
+  <ELEMENT Name="Long Range Limit" Type="Type" Filename="item_firing_range.typ" Default="0"/>
+  <ELEMENT Name="Short Range Modifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Medium Range Modifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Long Range Modifier" Type="Type" Filename="int.typ" Default="-10"/>
+  <LOG>Tue Nov 26 12:18:08 2002 (fleury) Dfn Structure = 
+Mon Dec 16 15:08:57 2002 (fleury) Dfn Structure = 
+Tue Jan 07 14:19:03 2003 (fleury) Dfn Structure = 
+Tue Jan 07 15:03:17 2003 (fleury) Dfn Structure = 
+Tue Apr 22 14:57:14 2003 (fleury) Dfn Structure = 
+Tue Apr 22 14:58:27 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.21 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCFAEA"/>
+      <ATOM Name="IndexInFamily" Value="1"/>
+      <ATOM Name="SPCost" Value="30"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="SC 0"/>
+      <ATOM Name="Action Nature" Value="CRAFT"/>
+      <ATOM Name="Skill" Value="SCALBEM"/>
+      <ATOM Name="LearnRequiresBricks" Value="bcpa04.sbrick"/>
+      <ATOM Name="CivRestriction" Value="fyros"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="AR_botte.tga"/>
+      <ATOM Name="IconBack" Value="BK_fyros_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_over.tga"/>
+      <ATOM Name="IconOver2"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="ArmorTool"/>
+      <ATOM Name="Item Max Level" Value="100"/>
+      <STRUCT Name="Create">
+        <ATOM Name="Crafted Item" Value="icfalb.sitem"/>
+        <ATOM Name="Nb built items" Value="1"/>
+        <ATOM Name="MP 1" Value="Raw Material for Clothes"/>
+        <ATOM Name="Quantity 1" Value="2"/>
+        <ATOM Name="MP 2" Value="Raw Material for Armor interior coating"/>
+        <ATOM Name="Quantity 2" Value="2"/>
+        <ATOM Name="MP 3" Value="Raw Material for Armor interior stuffing"/>
+        <ATOM Name="Quantity 3" Value="1"/>
+        <ATOM Name="MP 4" Value="Raw Material for Armor clip"/>
+        <ATOM Name="Quantity 4" Value="1"/>
+        <ATOM Name="MP 5"/>
+        <ATOM Name="Quantity 5" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Oct 13 14:43:05 2003 (coutelas) .faber.Tool type = Needle
+Wed May 12 15:55:25 2004 (coutelas) .faber.Create.MP 1 = Raw Material for Clothes</LOG>
+</FORM>

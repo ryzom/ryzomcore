@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="List" Type="Dfn" Filename="spell_id.dfn" Array="true"/>
+  <LOG>Wed Oct 15 18:13:32 2003 (Nicolas Vizerie) Dfn Structure = 
+Fri Nov 07 10:30:04 2003 (vizerie) Dfn Structure = </LOG>
+</DFN>

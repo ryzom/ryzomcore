@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="NeL Release (DEV)"
+	InheritedPropertySheets=".\nel_vs90.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		Optimization="2"
+		InlineFunctionExpansion="2"
+		EnableIntrinsicFunctions="true"
+		FavorSizeOrSpeed="1"
+		OmitFramePointers="true"
+		EnableFiberSafeOptimizations="true"
+		WholeProgramOptimization="true"
+		PreprocessorDefinitions="NDEBUG;ASSERT_THROW_EXCEPTION"
+		RuntimeLibrary="2"
+		BufferSecurityCheck="false"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		IgnoreDefaultLibraryNames="libcmt;libcmtd;msvcrtd"
+		LinkTimeCodeGeneration="true"
+		OutputFile="$(RootNamespace)_r.lib"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		IgnoreDefaultLibraryNames="libcmt;libcmtd;msvcrtd"
+		OptimizeReferences="2"
+		EnableCOMDATFolding="2"
+		LinkTimeCodeGeneration="1"
+		OutputFile="$(RootNamespace).exe"
+		ImportLibrary="$(RootNamespace)_r.lib"
+	/>
+</VisualStudioPropertySheet>

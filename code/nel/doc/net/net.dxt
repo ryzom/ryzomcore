@@ -1,0 +1,222 @@
+/**
+\page network Network engine (until May 1, 2001)
+
+\author Olivier Cado
+
+Warning: this document describes the network engine as it was available in the NeL CVS tree until May 1, 2001. The updated documentation is available at http://www.nevrax.org/docs/nelnet.php3
+
+\section networkintro Introduction
+
+Conceptually, the network subsystem is divided into layers :
+-# Layer 1 is the socket layer : it allows to send/receive any data synchronously using a network, either reliably or not.
+-# Layer 2 is the message transfer layer : it allows to send/receive messages synchronously.
+-# Layer 3 is the message handling layer : it allows to listen for messages and to call event-driven callback functions.
+-# The recipient of a connection need not be an Internet address. It can be pointed to as a specific service using a Naming Service.
+-# Any object can be serialized to/from a message.
+-# Server software are called services and have a common interface.
+
+Here is the implementation point of view :
+-# Layer 1 is implemented by NLNET::CBaseSocket.
+-# Layer 2 is implemented by NLNET::CSocket.
+-# Layer 3 is implemented by NLNET::CMsgSocket.
+-# The class NLNET::CNamingClient allows using the Naming Service. It is used by NLNET::CMsgSocket for service lookup. The addresses are implemented by NLNET::CInetAddress. 
+-# The class NLNET::CMessage inherits from NLMISC::IStream.
+-# All services inherit from NLNET::IService. It provides the basic functionnalities such as registration to the Naming Service, server start-up and shutdown (see \ref new_service_howto).
+
+To use the layer 3, you need to #include "nel/net/msg_socket.h".
+
+\section networkusing Using the network engine
+
+Example : I want to ask the "family service" (let's call it "FMLS") the age of Toto. Let's say the family service
+understands a message of type "AGEREQ" and answers back a message of type "AGE" :
+
+- How to send a synchronous request to a host, using CSocket (layer 2) ?
+
+\code
+  #include "nel/net/socket.h"
+  #include "nel/net/naming_client.h"
+  (...)
+
+  uint16 validitytime;
+  CSocket client;
+  // Connect to the family service
+  if ( CNamingClient::lookupAndConnect( "FMLS", client, validitytime ) )
+  {
+	// Send request
+	CMessage msgout( "AGEREQ" );
+	msgout.serial( Toto.name() );
+	client.send( msgout );
+
+	// Receive answer
+	uint16 age;
+	CMessage msgin( "", true );
+	client.receive( msgin );
+	msgin.serial( age );
+	Toto.setAge( age );
+  }
+
+\endcode
+
+- How to send an asynchronous request to a host, using CMsgSocket, the message handling system (layer 3) ?
+
+\code
+  #include "nel/net/msg_socket.h"
+  (...)
+
+  // Callback to process the answer
+  void cbProcessAge( CMessage& msgin, TSenderId idfrom )
+  {
+    uint16 age;
+    msgin.serial( age );
+    Toto.setAge( age );
+  }
+
+  // Callback array
+  TCallbackItem ClientCallbacks [] =
+  {
+    { "AGE", cbProcessAge }
+  };
+
+  void main()
+  {
+    // Connect to the family service
+    CMsgSocket client ( ClientCallbacks, sizeof(ClientCallbacks)/sizeof(TCallbackItem), "FMLS" );
+
+    // Send request
+    CMessage msgout ( "AGEREQ" ); // The server should have a callback associated to "AGEREQ"
+    msgout.serial( Toto.name() );
+    client.send( msgout );
+
+    while ( true )
+    {
+      client.update(); // tests if a message has been received, and if the associated callback is called back
+      // Same as CMsgSocket::update()
+    }
+  }
+\endcode
+
+- How to send a container or an object ?
+
+Symply serialize your container or your object in a message.
+
+Example :
+\code
+  vector<CMyClass> myvector;
+  CMessage msgout ( false );
+  msgout.serialCont( myvector );
+  client.send( msgout );
+\endcode
+This code serializes all objects contained in \e myvector. For this to work, you need to provide a method serial()
+in your class CMyClass. This is explained in NLMISC::IStream. For a map or a multimap, use serialMap() instead of serialCont().
+
+\section netenginev1 Features and implementation
+
+\subsection msgtypebinding Message type binding
+
+Let's study a communication between two machines, A and B, where A sends several messages, of the same type, to B. In the following, we explain the 4 steps. Steps (1) and (4) correspond to the sending of the messages from A to B.
+
+- Step 1: The first time a type of message is sent by A, its header contains its "message name" (or message type as string).
+- Step 2: The remote machine B, when it receives it, sends back a binding message with the index of its associated callback, i.e. the binded "message number" (or message type as number). 
+- Step 3: A processes the binding message by remembering the binding "message name" -> "message number" for this connection.
+- Step 4: Next time A sents this type of message, the header contains the message number.
+
+The data structures need to implement this protocol are listed below.
+
+\subsection netlayers Network layers
+
+-# Socket Layer:
+- CBaseSocket
+- Allows to send/receive any data (uint8*) synchronously over the network, either reliably or not (TCP streams or UDP datagrams)
+
+-# Message Transfer Layer:
+- CSocket
+- Allows to send/receive messages (CMessage objects, in which you can serialize data) synchronously. TCP/UDP (not fully tested with UDP)
+- Implements the encoding/decoding of message headers
+- Implementation:
+	- Contains a set (_MsgsToBind : CMsgBindSet) that knows which messages have not been binded on the other side yet (when this set is empty, it means all bind messages have been set to the remote host (see step 2))
+	- Contains a map (_BindMapForSends : CMsgMap) that saves the message type bindings understood by the remote connection (see step 3),
+
+-# Message Handling Layer:
+- CMsgSocket
+- Allows to listen for messages and to call event-driven callback functions.
+- Initializing:
+	- A CMsgSocket object can be a server object or a client object. There is at most one server object by process, but there can be several client objects.
+	- When creating a server object, a passive listening socket is created, waiting for incoming connection requests.
+	- A client object connects to a server which is specified either by its address or by its service name. In the latter the Naming Service is asked for the service address.
+	- Anyone who creates a CMsgSocket object is required to define some callbacks and a callback array of the following form (its contents is only a sample):
+\code
+TCallbackItem MyCallbackArray [] =
+{
+	{ "CHAT", cbDisplayChatMsg },
+	{ "PING", cbPing },
+	{ "PONG", cbPong },
+	{ "D", cbHandleDisconnection }
+};
+\endcode
+	- A method (addCallbackArray()) is provided for appending another callback array to the one specified at the beginning. Consequently you can provide callbacks in different modules of your program.
+
+- Receiving messages and handling connections:
+	- When a message is received, the callback corresponding to its message name (if any) is called. Sample:
+\code
+void cbDisplayChatMsg( CMessage& inputmsg, TSenderId connectionid )
+{
+	string line;
+	inputmsg.serial( line );
+	ChatOutput.addLine( line );
+}
+\endcode
+	- Two special message names are reserved : "C" and "D". C is called when a new connection is accepted by a server CMsgSocket object, and D is called when a connection is closed (either gracefully closed or broken). In both cases, an input message containing the address (CInetAddress) of the concerned remote host is passed to the callback (use serial() to get the address).
+	- The user can deliberately close a connection by calling close().
+	- Each connection is handled by a CSocket object. The list of connections is static, so that only one select() is performed for all connections, in the static method CMsgSocket::update(). This method receives only one message per socket at most.
+
+- Sending messages:
+	- To send a message to a particular host, call clientsocket->send( outputmsg ) if you are a client of the remote host (i.e. you have created a client object) or call CMsgSocket::send( outputmsg, connectionid ).
+	- To send a message to all connected hosts, call sendToAll( outputmsg ) or sendToAllExceptHost( outputmsg, excludedhostid ) or even sendToAllExceptHosts( outputmsg, excludedhostidset ) if you want to exclude one host or more from the destination list.
+
+- Controlling access:
+	- The class provides basic features for allowing/disallowing a specified host to access to the callbacks. In the "C" callback (called when a connection is accepted), you can call authorizeOnly( authcallback, hostid ) so that the specified host cannot call any callback but authcallback. If this host tries to call another callback (i.e. it sends a message with a wrong message type), it will be disconnected. In authcallback you can then allow the client to access the other callbacks, calling authorizeAll( hostid ).
+
+- Gathering statistics:
+	- There are several methods used to gather statistic about the network traffic. The static ones (bytesSent(), bytesReceived(), newBytesSent(), newBytesReceived()) give the total amount of input/output transferred data. The others (the same, with the suffix -FromHost()) are relative to one particular host.
+
+- Misc:
+	- To know about the other methods, read the Doxygen documentation of CMsgSocket or the header file.
+
+- Implementation:
+	- Contains a static set (_SearchSet: CSearchSet) and one set (_ClientSearchSet) per client object, allowing a fast search in the callback array. This set is optimized by not storing the message names but the pointers to the items in the callback array, even sorting by comparing the names.
+
+\subsection theservices Services
+
+You can use the class CMsgSocket directly, as in the Snowballs client, but a framework is provided for building server applications (see the class IService and the Doxygen related page "How to create a new service").
+
+\subsection dtcs Distributed Components Toolkit System (DTC System)
+
+A set of services are available:
+- The Naming Service (NS) locates a service by name/service identifier. It can also allocate port numbers. In NeL, the class CNamingClient allows the programmer to use the NS without writing network operations.
+- The Log Service (LOGS) is a centralized logger for all services (client class: CNetDisplayer used by CLog, and CNetLog that logs to the Network Viewer tool)
+- The Time Service (TS) is a centralized time reference manager (client class: CUniTime).
+- The Login Service (LS) is a centralized user account manager for all shards. It is the only service that does not connect to the NS because it is not part of a shard.
+- The Admin Executor Service (AES) collects stats about a physical machine.
+- The Agent Service (AS) routes messages for inter-agent communication over several machines.
+
+In CVS:/code/server you will find another service, the Moves Service (DRServer) which is the main server for Snowballs.
+
+\subsection deadreck Dead Reckoning
+
+NLNET contains a framework to handle networked virtual environments containing moving entities physically controlled on different computers. In the future, this framework may be removed from NeL and put somewhere else.
+
+Here are the involved classes:
+- IMovingEntity:
+	- CLocalEntity: a locally-controlled entity
+	- CReplica: an entity not controlled directly:
+		- CRemoteEntity: an remote-controlled replica, with convergency
+
+- IEntityInterpolator: base class for convergency:
+	- LinearEntityInterpolator
+	- CubicEntityInterpolator: Bézier interpolation
+
+- CLocalArea: a local entity and a list of remote entities. Call update() to update the position of the entities using dead reckoning.
+
+A good example of usage can be found in the Snowballs source code (client.cpp and move_listener.cpp).
+
+*/

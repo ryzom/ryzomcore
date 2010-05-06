@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<FORM Version="0.0" State="modified">
+  <STRUCT>
+    <ATOM Name="Name" Value="Jungle"/>
+    <ATOM Name="MicroVeget" Value="microveget_jungle.tga"/>
+    <ATOM Name="SmallBank" Value="jungle.smallbank"/>
+    <ATOM Name="FarBank" Value="jungle.farbank"/>
+    <ATOM Name="CoarseMeshMap" Value="nel_coarse_mesh_jungle.tga"/>
+  </STRUCT>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:23:59 2002 (corvazier) File converted from old format</LOG>
+</FORM>

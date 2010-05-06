@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="properties" Type="Dfn" Filename="_data_elem.dfn" Array="true"/>
+  <ELEMENT Name="max number of rows or entities" Type="Type" Filename="sint32.typ"/>
+  <ELEMENT Name="entity types" Type="Type" Filename="string.typ" Array="true"/>
+  <LOG>Mon Sep 23 12:11:21 2002 (cado) Dfn Structure = </LOG>
+</DFN>

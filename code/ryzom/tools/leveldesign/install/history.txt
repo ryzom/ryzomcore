@@ -1,0 +1,257 @@
+NeL World Editor History
+
+v0.47 : new age
+
+Fixed: crash when deleting primitive
+Fixed: crash in MOS
+Fixed: infinite loop at the startup
+
+v0.46
+
+CHANGED : Better looking for 'search and replace' dialog box
+
+v0.45
+
+FIXED : collapse tree don't work.
+
+v0.44
+
+FIXED : ramdom crash and weird behavior of property editro dialof after a move of primitive in 
+		the tree fdollowed by an edition of properties with ALT+enter
+
+v0.43
+
+CHANGED : edition node properties (hidden, selected and expanded) are all stored as XML comment
+			int the primitive files. This allow more efficient comparison of real content in
+			primitive files.
+
+v0.42
+
+FIXED : when reloading a primitive, the tree view is correctly updated.
+FIXED : since new stable alias system, WE crash when relading an externaly modified primitive.
+
+v0.41
+
+ADDED : In property dialog, if closing or changing primitive selection without commiting the
+		changed property, the application will warn the user and propose to save
+		or discard it's modification.
+
+ADDED : Keyboard control of the tree view while editing in property dialog.
+		Just press ALT and arrows keys to change the selection in the tree view.
+
+v0.40
+
+CHANGED : reworked 'properties' dialog, now support keyboard shurtcuts to update/cancel 
+		  or validate the dialog.
+		  The dialog also support 'tab' to move between controls
+
+ADDED : plugin interface to replace the standard primitive drawing code. Each plugin
+		can claim to be called to draw a liste of primitive types.
+
+v0.39
+
+FIXED : Multiple primitive file open dialog work with more than a few primitives selected.
+
+v0.38
+
+FIXED : load, save edit unicode primitives.
+
+v0.37
+
+FIXED : multiple assert when error detected in the tree structure
+
+v0.36
+
+ADDED : copy / paste in new combo boxes
+
+v0.35
+
+FIXED : Const string keybord selection work fine now
+
+v0.34
+
+FIXED : Select by category is no more case sensitive
+FIXED : Can't move root tree nodes anymore. "nouveau projet, ajouter au moins deux landscapes, essayer de changer leur ordre en faisant ctrl + flèche, kaboum rq : pas la peine de spécifier les settings, suffit qu'il y ait deux lands, ça marche aussi avec des primitves, visiblement avec tous les trucs root."
+FIXED : Log are flooded using "primitive configurations"
+FIXED : "lorsque l'on copie-colle une instance, la première ainsi collée porte le même nom que l'original alors que toutes les autres après ont un numéro bien incrémenté."
+FIXED : Copy works when several primitives are selected
+ADDED : Button to show / hide collision
+ADDED : Meter point grid
+FIXED : Properties window get larger when JC's scrollbar is used
+ADDED : JC's scrollbar track message handled
+ADDED : JC's scrollbar works with the mouse wheel
+
+v0.33
+
+ADDED : Display PACS surfaces, just copy PACS .lr, .rbank and .gr in your "data directory"/pacs.
+
+v0.32
+
+CHANGED : Can read binary and xml .land files
+
+v0.31
+
+FIXED : error and continue when loading prb
+
+v0.30
+
+FIXED : Renommer le fichier après la sauvegarde
+FIXED : charge tout de meme le continent, meme si une transition utilise des matériels inconnus.
+
+v0.29
+
+FIXED : Values in const_string_array was always by default.
+FIXED : Default values in const_string_array work now.
+CHANGED : Autoname for string_array and const_string_array copy all the content of the array and not only the first line.
+
+v0.28
+
+ADDED : ALT + LEFT click to drag the view
+FIXED : Si selectionne une primitive dans l'arbre (zone, point ou path), tu fait 'locate' et zoom arriere et paf, ca plante.
+FIXED : Peut pas charger 2 .land
+FIXED : Lorsque l'on efface des zones dans un .land, la boite englobante du continent est recalculée.
+FIXED : Salut on crash le world editor des que l'on zoom peux tu voir ca please merci !
+FIXED : Le bouton View à droite des boites const_string_array crashe. Maintenant il fonctionne.
+FIXED : On ne peut pas ajouter autant d'éléments qu'on veut dans un const_string_array car la boite n'a pas d'ascenseur. On peut ajouter des lignes avec "INSERT".
+KNOWN BUG : Crash when paint several continent at a time : ask Trap
+
+v0.27
+
+ADDED : Primitive configuration check strings in array too
+ADDED : Const string array (new property type, TYPE="const_string_array")
+ADDED : Zoom on cursor
+ADDED : Option to not add number when copy
+FIXED : Copy / paste of generated primitives allowed (for ex: .prim children of a .flora_zone)
+FIXED : A right click when draging an object followed by a left click lead to an assert. Now a right click cancel the action.
+FIXED : Zoom with left click + shift
+FIXED : Crash when UNDO/REDO a copy of a primitive with unique ID parameters
+
+v0.26
+
+FIXED : some bug fixed in configurations selection
+ADDED : configurations popup menu with SHOW / HIDE / SELECT options
+
+v0.25
+
+ADDED : primitive configurations
+
+v0.24
+
+ADDED : create a new landscape
+FIXED : crash when paint a larger landscape
+ADDED : export continent snapshot
+
+v0.23
+
+ADDED : shard monitor plugin for the world editor
+
+v0.22
+
+FIXED : autorename rework with the new default value system
+REMARK : auto rename is not working for the moment. You can replace it by set an empty name string in the primitive you want to rename
+
+v0.21
+
+FIXED : multi properties edition fixed
+
+v0.20
+
+CHANGED : edit string array with a multi line text window
+
+v0.19
+
+FIXED : error structure fixed (the node with the error is now marked with the error icon too)
+CHANGED : some shortcuts are available in the properties dialog (help, new, open etc..)
+CHANGED : ligo use a class primitive xml to get the default value in the application reading primitive files
+CHANGED : set node that doesn't exist or are empty to default
+FIXED : checkbox default value fixed
+ADDED : add a history file
+ADDED : show collisions in world editor
+
+v0.18
+
+CHANGED : 3 states choeck box for default value
+CHANGED : empty string stand for default value
+
+v0.17
+
+FIXED : Edit string array
+ADDED : Search the primitives matching a property value (CTRL+F)
+
+v0.16
+
+ADDED : Dialog non modale
+ADDED : Find items in the tree
+FIXED : Debug plant on path
+ADDED : Reset unique id function
+FIXED : Copy / paste -> unique id updated
+
+v0.15
+
+FIXED : select update tree bug
+FIXED : expand / collapse update tree bug
+FIXED : bigger primitive name
+FIXED : "new_" removed
+
+v0.14
+
+FIXED : Bug ctrl + flèches dans l'arbre
+ADDED : Initialise default value for hidden values
+ADDED : Draw arrow in path
+FIXED : Modify the document when initialise default values
+FIXED : Ligozone name not cropped anymore
+
+v0.13
+
+CHANGED : The dialog property is always dispayed, even if it is too large.
+CHANGED : Empty unique ID properties are initialised when a primitive file is loaded. A message box warn you when properties has been
+initialised.
+
+For the moment, i initialise default values ONLY for properties with unique id. I'm afraid to loose information if i initialise all
+the empty properties with their default values.
+
+v0.12
+
+FIXED :  Delete primitives and the root lead to a crash
+FIXED :  Delete a sub primitive and undo -> refresh prb
+NOTABUG :  Select by position bug
+FIXED :  Click-select and drag bug
+ADDED : Default parameter value can be a unique number
+
+Pour initialiser une propriété d'une primitive avec un identifiant "unique", ajoutez la ligne
+<DEFAULT_VALUE GEN_ID="true"/> dans le noeud XML de la propriété en question.
+
+v0.11
+
+ADDED : Select primitive by location
+ADDED : Locate selected primitives
+FIXED : Refresh bug when rename a primitive
+FIXED : Crash when try to delete a non deletable primitve then delete all the primitive
+FIXED : Crash when delete multiple vertices in sub object
+
+v0.10
+
+FIXED : Select foire un peu..
+FIXED : AddPrimitive crash
+
+v0.7
+
+FIXED : Vegetation
+FIXED : Combo parameters can be a list of filename get per extension in a directory context dependent
+FIXED : Generate function over a zone or a path primitive
+FIXED : Load zones overlapped by generator primitives
+FIXED : Test collision with others primitives of class .plant and their radius
+FIXED : Radius
+FIXED : Mini documentation
+FIXED : Relative pathes in .worldeditor
+
+v0.3
+
+CHANGED : Script updaté
+CHANGED : Link des points d'un group_fauna
+CHANGED : Copier / couper / coller de primitive
+CHANGED : Menu click droit plus intelligent
+CHANGED : Icone du programme
+CHANGED : On ne peut plus effacer les primitives "crées en dure"
+CHANGED : Pleins de bugs en moins
+CHANGED : Y'avait d'autre truc mais je ne me rappel pas de tout.. :)

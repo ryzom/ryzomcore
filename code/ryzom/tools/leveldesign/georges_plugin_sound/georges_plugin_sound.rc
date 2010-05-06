@@ -1,0 +1,807 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\georges_plugin_sound.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "georges_plugin_test DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "georges_plugin_test\0"
+            VALUE "LegalCopyright", "Copyright (C) 2002\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "georges_plugin_test.DLL\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "georges_plugin_test Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TEST_LOCAL DIALOGEX 0, 0, 225, 252
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CONTEXTHELP
+CAPTION "Sound plugin"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "",IDC_CONTROL,7,6,20,20,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER
+    LTEXT           "",IDC_AUDIOFORMAT,93,177,104,8,NOT WS_VISIBLE
+    LTEXT           "",IDC_FILESIZE,93,186,104,8,NOT WS_VISIBLE
+    RTEXT           "00:00",IDC_TIME,30,13,29,8
+    LTEXT           "00:00.000",IDC_DURATION,70,13,38,8
+    LTEXT           "/",IDC_DIVIDER,61,13,8,8
+    LTEXT           "",IDC_FILENAME,93,166,104,8,NOT WS_VISIBLE
+    LTEXT           "",IDC_NAME,93,156,104,8,NOT WS_VISIBLE
+    GROUPBOX        "",IDC_STATIC,4,0,112,29
+    PUSHBUTTON      "Reload Samples Banks",IDC_BUTTON_RELOAD_SAMPLES,123,9,
+                    98,15
+    CONTROL         "",IDC_SHEET_POS,"Static",SS_BLACKFRAME,0,31,225,219
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_TEST_LOCAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 221
+        BOTTOMMARGIN, 249
+        HORZGUIDE, 235
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_START               BITMAP  DISCARDABLE     "start.bmp"
+IDB_STOP                BITMAP  DISCARDABLE     "stop.bmp"
+IDB_DESACTIVATED        BITMAP  DISCARDABLE     "bitmap1.bmp"
+IDB_NEW                 BITMAP  DISCARDABLE     "bitmap1.bmp"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_LOADING DIALOG DISCARDABLE  0, 0, 345, 34
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Initializing Sound plugin"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "Static",IDC_STATIC_MESSAGE,7,7,331,21,SS_CENTERIMAGE
+END
+
+IDD_PAGE_BG_FLAGS DIALOGEX 0, 0, 212, 196
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Backgound"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_FILTER_00,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,25,8,8,0,HIDC_FILTER_00
+    CONTROL         "",IDC_FILTER_01,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,36,8,8,0,HIDC_FILTER_01
+    CONTROL         "",IDC_FILTER_02,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,46,8,8,0,HIDC_FILTER_02
+    CONTROL         "",IDC_FILTER_03,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,55,8,8,0,HIDC_FILTER_03
+    CONTROL         "",IDC_FILTER_04,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,65,8,8,0,HIDC_FILTER_04
+    CONTROL         "",IDC_FILTER_05,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,76,8,8,0,HIDC_FILTER_05
+    CONTROL         "",IDC_FILTER_06,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,86,8,8,0,HIDC_FILTER_06
+    CONTROL         "",IDC_FILTER_07,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,95,8,8,0,HIDC_FILTER_07
+    CONTROL         "",IDC_FILTER_08,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,105,8,8,0,HIDC_FILTER_08
+    CONTROL         "",IDC_FILTER_09,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,116,8,8,0,HIDC_FILTER_09
+    CONTROL         "",IDC_FILTER_10,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,126,8,8,0,HIDC_FILTER_10
+    CONTROL         "",IDC_FILTER_11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,135,8,8,0,HIDC_FILTER_11
+    CONTROL         "",IDC_FILTER_12,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,145,8,8,0,HIDC_FILTER_12
+    CONTROL         "",IDC_FILTER_13,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,156,8,8,0,HIDC_FILTER_13
+    CONTROL         "",IDC_FILTER_14,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,166,8,8,0,HIDC_FILTER_14
+    CONTROL         "",IDC_FILTER_15,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,175,8,8,0,HIDC_FILTER_15
+    CONTROL         "",IDC_ENV_FLAG_00,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,25,8,8
+    CONTROL         "",IDC_ENV_FLAG_01,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,36,8,8
+    CONTROL         "",IDC_ENV_FLAG_02,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,46,8,8
+    CONTROL         "",IDC_ENV_FLAG_03,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,55,8,8
+    CONTROL         "",IDC_ENV_FLAG_04,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,65,8,8
+    CONTROL         "",IDC_ENV_FLAG_05,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,76,8,8
+    CONTROL         "",IDC_ENV_FLAG_06,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,86,8,8
+    CONTROL         "",IDC_ENV_FLAG_07,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,95,8,8
+    CONTROL         "",IDC_ENV_FLAG_08,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,105,8,8
+    CONTROL         "",IDC_ENV_FLAG_09,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,116,8,8
+    CONTROL         "",IDC_ENV_FLAG_10,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,126,8,8
+    CONTROL         "",IDC_ENV_FLAG_11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,135,8,8
+    CONTROL         "",IDC_ENV_FLAG_12,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,145,8,8
+    CONTROL         "",IDC_ENV_FLAG_13,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,156,8,8
+    CONTROL         "",IDC_ENV_FLAG_14,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,166,8,8
+    CONTROL         "",IDC_ENV_FLAG_15,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    150,175,8,8
+    LTEXT           "-",IDC_FILTER_NAME_00,20,25,45,8
+    LTEXT           "-",IDC_FILTER_NAME_01,20,36,45,8
+    LTEXT           "-",IDC_FILTER_NAME_02,20,46,45,8
+    LTEXT           "-",IDC_FILTER_NAME_03,20,55,45,8
+    LTEXT           "-",IDC_FILTER_NAME_04,20,65,45,8
+    LTEXT           "-",IDC_FILTER_NAME_05,20,76,45,8
+    LTEXT           "-",IDC_FILTER_NAME_06,20,86,45,8
+    LTEXT           "-",IDC_FILTER_NAME_07,20,95,45,8
+    LTEXT           "-",IDC_FILTER_NAME_08,20,105,45,8
+    LTEXT           "-",IDC_FILTER_NAME_09,20,116,45,8
+    LTEXT           "-",IDC_FILTER_NAME_10,20,126,45,8
+    LTEXT           "-",IDC_FILTER_NAME_11,20,135,45,8
+    LTEXT           "-",IDC_FILTER_NAME_12,20,145,45,8
+    LTEXT           "-",IDC_FILTER_NAME_13,20,156,45,8
+    LTEXT           "-",IDC_FILTER_NAME_14,20,166,45,8
+    LTEXT           "-",IDC_FILTER_NAME_15,20,175,45,8
+    CTEXT           "-",IDC_ENV_NAME_00,160,25,8,8
+    CTEXT           "-",IDC_ENV_NAME_01,160,36,8,8
+    CTEXT           "-",IDC_ENV_NAME_02,160,46,8,8
+    CTEXT           "-",IDC_ENV_NAME_03,160,55,8,8
+    CTEXT           "-",IDC_ENV_NAME_04,160,65,8,8
+    CTEXT           "-",IDC_ENV_NAME_05,160,76,8,8
+    CTEXT           "-",IDC_ENV_NAME_06,160,86,8,8
+    CTEXT           "-",IDC_ENV_NAME_07,160,95,8,8
+    CTEXT           "-",IDC_ENV_NAME_08,160,105,8,8
+    CTEXT           "-",IDC_ENV_NAME_09,160,116,8,8
+    CTEXT           "-",IDC_ENV_NAME_10,160,126,8,8
+    CTEXT           "-",IDC_ENV_NAME_11,160,135,8,8
+    CTEXT           "-",IDC_ENV_NAME_12,160,145,8,8
+    CTEXT           "-",IDC_ENV_NAME_13,160,156,8,8
+    CTEXT           "-",IDC_ENV_NAME_14,160,166,8,8
+    CTEXT           "-",IDC_ENV_NAME_15,160,175,8,8
+    CONTROL         "",IDC_FILTER_16,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,25,8,8,0,HIDC_FILTER_16
+    CONTROL         "",IDC_FILTER_17,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,36,8,8,0,HIDC_FILTER_17
+    CONTROL         "",IDC_FILTER_18,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,46,8,8,0,HIDC_FILTER_18
+    CONTROL         "",IDC_FILTER_19,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,55,8,8,0,HIDC_FILTER_19
+    CONTROL         "",IDC_FILTER_20,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,65,8,8,0,HIDC_FILTER_20
+    CONTROL         "",IDC_FILTER_21,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,76,8,8,0,HIDC_FILTER_21
+    CONTROL         "",IDC_FILTER_22,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,86,8,8,0,HIDC_FILTER_22
+    CONTROL         "",IDC_FILTER_23,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,95,8,8,0,HIDC_FILTER_23
+    CONTROL         "",IDC_FILTER_24,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,105,8,8,0,HIDC_FILTER_24
+    CONTROL         "",IDC_FILTER_25,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,116,8,8,0,HIDC_FILTER_25
+    CONTROL         "",IDC_FILTER_26,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,126,8,8,0,HIDC_FILTER_26
+    CONTROL         "",IDC_FILTER_27,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,135,8,8,0,HIDC_FILTER_27
+    CONTROL         "",IDC_FILTER_28,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,145,8,8,0,HIDC_FILTER_28
+    CONTROL         "",IDC_FILTER_29,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,156,8,8,0,HIDC_FILTER_29
+    CONTROL         "",IDC_FILTER_30,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,166,8,8,0,HIDC_FILTER_30
+    CONTROL         "",IDC_FILTER_31,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    75,175,8,8,0,HIDC_FILTER_31
+    LTEXT           "-",IDC_FILTER_NAME_16,85,25,45,8
+    LTEXT           "-",IDC_FILTER_NAME_17,85,36,45,8
+    LTEXT           "-",IDC_FILTER_NAME_18,85,46,45,8
+    LTEXT           "-",IDC_FILTER_NAME_19,85,55,45,8
+    LTEXT           "-",IDC_FILTER_NAME_20,85,65,45,8
+    LTEXT           "-",IDC_FILTER_NAME_21,85,76,45,8
+    LTEXT           "-",IDC_FILTER_NAME_22,85,86,45,8
+    LTEXT           "-",IDC_FILTER_NAME_23,85,95,45,8
+    LTEXT           "-",IDC_FILTER_NAME_24,85,105,45,8
+    LTEXT           "-",IDC_FILTER_NAME_25,85,116,45,8
+    LTEXT           "-",IDC_FILTER_NAME_26,85,126,45,8
+    LTEXT           "-",IDC_FILTER_NAME_27,85,135,45,8
+    LTEXT           "-",IDC_FILTER_NAME_28,85,145,45,8
+    LTEXT           "-",IDC_FILTER_NAME_29,85,156,45,8
+    LTEXT           "-",IDC_FILTER_NAME_30,85,166,45,8
+    LTEXT           "-",IDC_FILTER_NAME_31,85,175,45,8
+    GROUPBOX        "Edit Filter",IDC_STATIC,1,5,139,185
+    GROUPBOX        "Test Filter",IDC_STATIC,145,5,60,185
+    CONTROL         "",IDC_ENV_FLAG_16,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,25,8,8
+    CONTROL         "",IDC_ENV_FLAG_17,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,36,8,8
+    CONTROL         "",IDC_ENV_FLAG_18,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,46,8,8
+    CONTROL         "",IDC_ENV_FLAG_19,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,55,8,8
+    CONTROL         "",IDC_ENV_FLAG_20,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,65,8,8
+    CONTROL         "",IDC_ENV_FLAG_21,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,76,8,8
+    CONTROL         "",IDC_ENV_FLAG_22,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,86,8,8
+    CONTROL         "",IDC_ENV_FLAG_23,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,95,8,8
+    CONTROL         "",IDC_ENV_FLAG_24,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,105,8,8
+    CONTROL         "",IDC_ENV_FLAG_25,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,116,8,8
+    CONTROL         "",IDC_ENV_FLAG_26,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,126,8,8
+    CONTROL         "",IDC_ENV_FLAG_27,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,135,8,8
+    CONTROL         "",IDC_ENV_FLAG_28,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,145,8,8
+    CONTROL         "",IDC_ENV_FLAG_29,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,156,8,8
+    CONTROL         "",IDC_ENV_FLAG_30,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,166,8,8
+    CONTROL         "",IDC_ENV_FLAG_31,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    180,175,8,8
+    CTEXT           "-",IDC_ENV_NAME_16,190,25,8,8
+    CTEXT           "-",IDC_ENV_NAME_17,190,36,8,8
+    CTEXT           "-",IDC_ENV_NAME_18,190,46,8,8
+    CTEXT           "-",IDC_ENV_NAME_19,190,55,8,8
+    CTEXT           "-",IDC_ENV_NAME_20,190,65,8,8
+    CTEXT           "-",IDC_ENV_NAME_21,190,76,8,8
+    CTEXT           "-",IDC_ENV_NAME_22,190,86,8,8
+    CTEXT           "-",IDC_ENV_NAME_23,190,95,8,8
+    CTEXT           "-",IDC_ENV_NAME_24,190,105,8,8
+    CTEXT           "-",IDC_ENV_NAME_25,190,116,8,8
+    CTEXT           "-",IDC_ENV_NAME_26,190,126,8,8
+    CTEXT           "-",IDC_ENV_NAME_27,190,135,8,8
+    CTEXT           "-",IDC_ENV_NAME_28,190,145,8,8
+    CTEXT           "-",IDC_ENV_NAME_29,190,156,8,8
+    CTEXT           "-",IDC_ENV_NAME_30,190,166,8,8
+    CTEXT           "-",IDC_ENV_NAME_31,190,175,8,8
+    PUSHBUTTON      "All On",IDC_BTN_EDIT_ALL_ON,85,15,25,10
+    PUSHBUTTON      "All Off",IDC_BTN_EDIT_ALL_OFF,110,15,25,10
+    PUSHBUTTON      "All On",IDC_BTN_ENV_ALL_ON,150,15,25,10
+    PUSHBUTTON      "All Off",IDC_BTN_ENV_ALL_OFF,175,15,25,10
+    LTEXT           "Sub sound name",IDC_SUB_SOUND_NAME,10,15,70,10
+END
+
+IDD_PAGE_CONTEXT DIALOG DISCARDABLE  0, 0, 212, 181
+STYLE DS_3DLOOK | WS_CHILD | WS_CAPTION
+CAPTION "Context"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "0",IDC_STATIC,17,13,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_0,43,13,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,13,11,
+                    14
+    CTEXT           "1",IDC_STATIC,17,28,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_1,43,28,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,28,11,
+                    14
+    CTEXT           "2",IDC_STATIC,17,43,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_2,43,43,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN3,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,43,11,
+                    14
+    CTEXT           "3",IDC_STATIC,17,58,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_3,43,58,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN4,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,58,11,
+                    14
+    CTEXT           "4",IDC_STATIC,17,73,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_4,43,73,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN5,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,73,11,
+                    14
+    CTEXT           "5",IDC_STATIC,17,88,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_5,43,88,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN6,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,88,11,
+                    14
+    CTEXT           "6",IDC_STATIC,17,103,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_6,43,103,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,103,11,
+                    14
+    CTEXT           "7",IDC_STATIC,17,118,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_7,43,118,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,118,11,
+                    14
+    CTEXT           "8",IDC_STATIC,17,133,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_8,43,133,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,133,11,
+                    14
+    CTEXT           "9",IDC_STATIC,17,148,20,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ARG_9,43,148,40,15,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN10,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,148,11,
+                    14
+    LTEXT           "Use SPACE to trigger a sound",IDC_STATIC,97,14,96,8
+END
+
+IDD_PAGE_COMPLEX DIALOG DISCARDABLE  0, 0, 212, 145
+STYLE DS_3DLOOK | WS_CHILD | WS_CAPTION
+CAPTION "Complex"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_SEQ_SIZE,114,10,62,14,ES_RIGHT | ES_AUTOHSCROLL
+    RTEXT           "Sequence size",IDC_STATIC,19,9,90,14,SS_CENTERIMAGE
+    GROUPBOX        "Random sound sequence",IDC_STATIC,10,30,195,27
+    PUSHBUTTON      "&GENERATE",IDC_BTN_RANDOM_SOUND,22,42,173,11,
+                    WS_DISABLED
+    GROUPBOX        "Random delay sequence",IDC_STATIC,10,64,195,62
+    EDITTEXT        IDC_EDIT_MIN_DELAY,114,73,51,14,ES_RIGHT | 
+                    ES_AUTOHSCROLL
+    RTEXT           "Min delay",IDC_STATIC,23,74,87,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_MAX_DELAY,114,90,51,14,ES_RIGHT | 
+                    ES_AUTOHSCROLL
+    RTEXT           "Max delay",IDC_STATIC,23,89,87,14,SS_CENTERIMAGE
+    PUSHBUTTON      "G&ENERATE",IDC_BTN_RANDOM_DELAY,21,109,177,11,
+                    WS_DISABLED
+END
+
+IDD_PAGE_POSITION DIALOG DISCARDABLE  0, 0, 212, 196
+STYLE DS_3DLOOK | WS_CHILD | WS_CAPTION
+CAPTION "Position"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_PSEUDO_PICTURE,"Static",SS_BLACKFRAME,7,7,198,182
+END
+
+IDD_PAGE_SIMPLE DIALOG DISCARDABLE  0, 0, 212, 145
+STYLE DS_3DLOOK | WS_CHILD | WS_CAPTION
+CAPTION "Simple"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Format",IDC_STATIC,15,30,30,10
+    LTEXT           "",IDC_AUDIOFORMAT,50,30,155,10,SS_SUNKEN
+    LTEXT           "Size",IDC_STATIC,15,45,30,10
+    LTEXT           "",IDC_FILESIZE,50,45,155,10,SS_SUNKEN
+    LTEXT           "File",IDC_STATIC,15,15,30,10
+    LTEXT           "",IDC_FILENAME,50,15,155,10,SS_SUNKEN
+END
+
+IDD_PAGE_BG_FADES DIALOG DISCARDABLE  0, 0, 212, 186
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "BG Fades"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Filter name",IDC_FILTER_NAME_00,0,20,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_00,45,20,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_00,75,20,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_16,110,20,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_16,150,20,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_16,180,20,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CTEXT           "Filter name",IDC_STATIC,0,10,45,10
+    CTEXT           "IN",IDC_STATIC,45,10,30,10
+    CTEXT           "OUT",IDC_STATIC,75,10,30,10
+    CTEXT           "Filter name",IDC_STATIC,110,10,40,10
+    CTEXT           "IN",IDC_STATIC,150,10,30,10
+    CTEXT           "OUT",IDC_STATIC,180,10,29,10
+    LTEXT           "Filter name",IDC_FILTER_NAME_01,0,31,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_01,45,31,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_01,75,31,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_17,110,31,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_17,150,31,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_17,180,31,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_02,0,41,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_02,45,41,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_02,75,41,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_18,110,41,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_18,150,41,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_18,180,41,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_03,0,50,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_03,45,50,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_03,75,50,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_19,110,50,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_19,150,50,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_19,180,50,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_04,0,60,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_04,45,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_04,75,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_20,110,60,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_20,150,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_20,180,60,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_05,0,71,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_05,45,71,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_05,75,71,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_21,110,71,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_21,150,71,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_21,180,71,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_06,0,81,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_06,45,81,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_06,75,81,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_22,110,81,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_22,150,81,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_22,180,81,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_07,0,90,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_07,45,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_07,75,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_23,110,90,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_23,150,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_23,180,90,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_08,0,100,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_08,45,100,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_08,75,100,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_24,110,100,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_24,150,100,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_24,180,100,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_09,0,111,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_09,45,111,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_09,75,111,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_25,110,111,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_25,150,111,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_25,180,111,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_10,0,121,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_10,45,121,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_10,75,121,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_26,110,121,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_26,150,121,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_26,180,121,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_11,0,130,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_11,45,130,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_11,75,130,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_27,110,130,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_27,150,130,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_27,180,130,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_12,0,140,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_12,45,140,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_12,75,140,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_28,110,140,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_28,150,140,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_28,180,140,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_13,0,151,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_13,45,151,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_13,75,151,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_29,110,151,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_29,150,151,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_29,180,151,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_14,0,161,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_14,45,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_14,75,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_30,110,161,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_30,150,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_30,180,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_15,0,170,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_15,45,170,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_15,75,170,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Filter name",IDC_FILTER_NAME_31,110,170,40,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_FADE_IN_31,150,170,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_FADE_OUT_31,180,170,30,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CTEXT           "FADE",IDC_STATIC,45,0,60,10
+    CTEXT           "FADE",IDC_STATIC,150,0,60,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOG_LOADING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 338
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 27
+    END
+
+    IDD_PAGE_BG_FLAGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 208
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 191
+    END
+
+    IDD_PAGE_CONTEXT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 174
+    END
+
+    IDD_PAGE_COMPLEX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+    END
+
+    IDD_PAGE_POSITION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 189
+    END
+
+    IDD_PAGE_SIMPLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+    END
+
+    IDD_PAGE_BG_FADES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 179
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_CONTEXT             BITMAP  DISCARDABLE     "bmp00001.bmp"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\georges_plugin_sound.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

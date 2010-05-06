@@ -1,0 +1,64 @@
+<interface_config>
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+<lua file="ring_access_point_filter.lua" />
+
+
+<group type="container" id="ring_access_point_filter" title="uiR2EDScenarioFilters" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:OPT"	
+	on_close="" on_close_params="" on_deactive="" on_deactive_params="" 
+	pop_min_w="300" pop_min_h="270" w="300" h="270" pop_max_w="300" pop_max_h="270" 
+>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		
+		<!-- owner -->
+		<instance template="h_label_edit_box" id="owner" y="-20" x="10" posparent="parent" posref="TL TL" 
+		 hardtext="OWNER" w="265" w_label="65" w_box="200" fontsize="12" max_num_chars="20" onchange_params="" />
+
+		<!-- level -->
+		<instance template="h_label_combo_box" id="level"  
+		 posref="BL TL" posparent="owner" w="270" w_label="70" w_combo="195" x="0" y="-10" hardtext="LEVEL" 
+		 on_change_params="" />
+
+		<!-- genre -->
+		<instance template="h_label_combo_box" id="genre"  
+		 posref="BL TL" posparent="level" w="270" w_label="70" w_combo="195" x="0" y="-10" hardtext="GENRE" 
+		 on_change_params="" />
+
+		<!-- name -->
+		<instance template="h_label_edit_box" id="name" y="-10" x="0" posparent="genre" posref="BL TL" 
+		 hardtext="NAME" w="265" w_label="65" w_box="200" fontsize="12" max_num_chars="20" onchange_params="" />
+
+		<!-- label -->
+		<group id="label_gr" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="20" x="0" y="-10" 
+		 posref="BL TL" posparent="name" >
+			<view type="text" id="name_text" posref="TL TL" x="10" y="-10" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" multi_line="true" hardtext="uiFilterScenarioText" />
+		</group>
+
+		<view type="bitmap" id="sep_top" posparent="label_gr" posref="TL TL" sizeparent="label_gr" sizeref="w" w="0" h="1" 
+		 scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_left" posparent="label_gr" posref="TL TL" sizeparent="label_gr" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_right" posparent="label_gr" posref="BR BR" sizeparent="label_gr" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_bottom" posparent="label_gr" posref="BL BL" sizeparent="label_gr" sizeref="w" w="0" h="1" 
+		 y="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+
+		<ctrl style="button_ok" id="ok" active="true" x="0" y="-10" posref="BR TR" posparent="label_gr"
+		 text_y="-2" onclick_l="lua" params_l="game.RingAccessPointFilter:validate()" hardtext="OK" fontsize="10" />
+
+	</group>
+</group>
+
+<tree node="ring_access_point_filter">
+</tree>
+
+
+	
+
+
+</interface_config>

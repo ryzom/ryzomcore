@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.9 $" State="modified">
+  <ELEMENT Name="Zone" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Altitude" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="ForceLoadDist" Type="Type" Filename="float.typ" Default="200"/>
+  <ELEMENT Name="LoadDist" Type="Type" Filename="float.typ" Default="300"/>
+  <ELEMENT Name="UnloadDist" Type="Type" Filename="float.typ" Default="500"/>
+  <ELEMENT Name="CenterX" Type="Type" Filename="float.typ" Default="80"/>
+  <ELEMENT Name="CenterY" Type="Type" Filename="float.typ" Default="80"/>
+  <ELEMENT Name="IgList" Type="Dfn" Filename="village_ig.dfn" Array="true"/>
+  <ELEMENT Name="Width" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="Height" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="Rotation" Type="Type" Filename="float.typ" Default="0"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:03 2002 (corvazier) File converted from old format
+Mon Dec 30 18:27:50 2002 (corvazier) Dfn Structure = 
+Mon Dec 30 18:27:59 2002 (corvazier) Dfn Structure = 
+Mon Dec 30 18:45:46 2002 (corvazier) Dfn Structure = 
+Wed Oct 15 15:45:36 2003 (nevrax) Dfn Structure = 
+Wed Oct 15 15:47:29 2003 (nevrax) Dfn Structure = 
+Wed Oct 15 15:48:25 2003 (nevrax) Dfn Structure = 
+Wed Oct 15 15:52:30 2003 (nevrax) Dfn Structure = 
+Wed Oct 15 16:59:51 2003 (nevrax) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="NbCycles" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="DelayBetweenCycles" Type="Type" Filename="float.typ" Default="2.0"/>
+  <LOG>Thu Dec 05 19:00:51 2002 (fleury) Dfn Structure = 
+Thu May 29 17:01:33 2003 (fleury) Dfn Structure = 
+Thu May 29 18:12:58 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

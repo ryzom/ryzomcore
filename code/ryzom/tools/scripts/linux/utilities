@@ -1,0 +1,201 @@
+#!/bin/sh
+
+SSH_AGENT_FILE="$HOME/ssh_agent_file"
+
+BASENAME=`basename $0`
+LOG_INFO="$HOME/log/${BASENAME}_info.log"
+LOG_ERROR="$HOME/log/${BASENAME}_error.log"
+
+# first param is the subject line
+# others params are email
+function send_mail()
+{
+	SUBJECT=$1
+	shift
+	echo Send mail to $* with log $LOG_ERROR in body and subject $SUBJECT
+	cat $LOG_ERROR | mail -s "$SUBJECT on `hostname`" $*
+}
+
+function print_success()
+{
+	echo "*********************** $* SUCCESS !"
+	echo
+}
+
+function print_failure()
+{
+	echo "***************************************************"
+	echo "***************************************************"
+	echo "*********************** $* FAILED"
+	echo "***************************************************"
+	echo "***************************************************"
+}
+
+
+# failed fill the log and send email if necessary
+# argument are the error message
+function failed()
+{
+	print_failure $*
+	if [ "X$LOG_INFO" != "X" ]
+		then
+		print_failure $* >> $LOG_INFO
+	fi
+	if [ "X$LOG_ERROR" != "X" ]
+		then
+		print_failure $* >> $LOG_ERROR
+	fi
+
+	if [ "X$MAIL_ERROR" != "X" ]
+		then
+		send_mail "$* FAILED" $MAIL_ERROR
+		else
+		echo "No email to send the error mail" >> $LOG_ERROR
+	fi
+
+	echo "exiting..."
+	exit
+}
+
+# useful function to avoid continuing if something goes wrong
+# first param is $? and second is the string that will display
+function verify()
+{
+	if [ $1 -eq 0 ]
+		then
+		shift
+		print_success $*
+		if [ "X$LOG_INFO" != "X" ]
+			then
+			print_success $* >> $LOG_INFO
+		fi
+		if [ "X$LOG_ERROR" != "X" ]
+			then
+			print_success $* >> $LOG_ERROR
+		fi
+	else
+		shift
+		failed $*
+	fi
+}
+
+# step_failed() fills the log and increments $STEPS_FAILURES
+function step_failed()
+{
+	print_failure $*
+	if [ "X$LOG_INFO" != "X" ]
+		then
+		print_failure $* >> $LOG_INFO
+	fi
+	if [ "X$LOG_ERROR" != "X" ]
+		then
+		print_failure $* >> $LOG_ERROR
+	fi
+
+	if [ "X$STEPS_FAILURES" = "X" ]
+		then
+		STEPS_FAILURES=0
+		else
+		STEPS_FAILURES=`expr $STEPS_FAILURES + 1`
+	fi
+}
+
+# call init_steps() before you use step()
+# it takes a label for following steps as parameter
+function init_steps()
+{
+	STEPS_LABEL="$*"
+	STEPS_FAILURES=0
+}
+
+# like verify() but will continue even if step failed until verify_steps() is called
+# first param is $? and second is the string that will display
+function step()
+{
+	if [ $1 -eq 0 ]
+		then
+		shift
+		print_success $*
+		if [ "X$LOG_INFO" != "X" ]
+			then
+			print_success $* >> $LOG_INFO
+		fi
+		if [ "X$LOG_ERROR" != "X" ]
+			then
+			print_success $* >> $LOG_ERROR
+		fi
+	else
+		shift
+		step_failed $*
+	fi
+}
+
+# call verify_steps() when you want to stop if error(s) occured in previous steps
+function verify_steps()
+{
+    if [ $STEPS_FAILURES -eq 0 ]
+        then
+        print_success $STEPS_LABEL
+        if [ "X$LOG_INFO" != "X" ]
+            then
+            print_success $STEPS_LABEL >> $LOG_INFO
+        fi
+        if [ "X$LOG_ERROR" != "X" ]
+            then
+            print_success $STEPS_LABEL >> $LOG_ERROR
+        fi
+    else
+		if [ $STEPS_FAILURES -eq 1 ]
+			then
+			failed "1 step failed: $STEPS_LABEL"
+		else
+			failed "$STEPS_FAILURES steps failed: $STEPS_LABEL"
+		fi
+    fi
+}
+
+function ask_confirmation()
+{
+	echo "Using this script will destroy the current version, type 'yes' if you really want to do that"
+	read CONF
+	if [ "X$CONF" != "Xyes" ]; then
+		failed "You didn't answer 'yes', I stop the script!"
+	fi
+}
+
+function check_host()
+{
+	HOST=`hostname -s`
+	if [ "X$HOST" != "X$1" ]; then
+		failed "You can execute this script only on '$1' and not on '$HOST'"
+	fi
+}
+
+# useful function to initialize the default log for all scripts
+function init()
+{
+	if [ "X$LOG_INFO" != "X" ]
+		then
+		test ! -f $LOG_INFO || rm $LOG_INFO
+		touch $LOG_INFO
+		# display all ulimit in the log
+		ulimit -a >>$LOG_INFO
+	fi
+
+	if [ "X$LOG_ERROR" != "X" ]
+		then
+		test ! -f $LOG_ERROR || rm $LOG_ERROR
+		touch $LOG_ERROR
+	fi
+}
+
+function init_ssh()
+{
+	if [ ! -f $SSH_AGENT_FILE ]
+		then
+		failed "the file $SSH_AGENT_FILE not exist, you must call create_ssh_agent_file first"
+	fi
+
+	eval `cat $SSH_AGENT_FILE`
+
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="LowPressureValueFactor" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="LowPressurePercent" Type="Type" Filename="float.typ" Default="50"/>
+  <LOG>Wed Nov 06 17:15:04 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed Nov 06 17:35:40 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed May 19 15:44:37 2004 (vizerie) Dfn Structure = </LOG>
+</DFN>

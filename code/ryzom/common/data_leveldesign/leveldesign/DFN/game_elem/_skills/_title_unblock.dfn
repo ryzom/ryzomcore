@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.9 $" State="modified">
+  <ELEMENT Name="Title" Type="Type" Filename="_title.typ"/>
+  <ELEMENT Name="SkillsNeeded" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="BricksNeeded" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="MinFames" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="MaxFames" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="CivNeeded" Type="Type" Filename="_title_civ.typ"/>
+  <ELEMENT Name="CultNeeded" Type="Type" Filename="_title_cult.typ"/>
+  <ELEMENT Name="CharOldness" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="CharPlayedTime" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="AccountOldness" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="AuthorRating" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="AMRating" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="OrganizerRating" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Reserved" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ItemsNeeded" Type="Type" Filename="string.typ"/>
+  <LOG>Wed Oct 15 12:16:16 2003 (besson) Dfn Structure = 
+Wed Oct 15 12:23:33 2003 (besson) Dfn Structure = 
+Wed Oct 15 13:38:27 2003 (besson) Dfn Structure = 
+Wed Oct 13 11:34:51 2004 (besson) Dfn Structure = 
+Tue Nov 23 11:40:30 2004 (guignot) Dfn Structure = 
+Thu Mar 04 22:41:03 2010 (kervala) Dfn Structure = </LOG>
+</DFN>

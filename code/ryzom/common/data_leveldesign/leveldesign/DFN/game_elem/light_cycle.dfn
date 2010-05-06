@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Spring" Type="Dfn" Filename="_season_light_cycle.dfn"/>
+  <ELEMENT Name="Summer" Type="Dfn" Filename="_season_light_cycle.dfn"/>
+  <ELEMENT Name="Autumn" Type="Dfn" Filename="_season_light_cycle.dfn"/>
+  <ELEMENT Name="Winter" Type="Dfn" Filename="_season_light_cycle.dfn"/>
+  <ELEMENT Name="RealDayLenght" Type="Type" Filename="float.typ" Default="3000"/>
+  <ELEMENT Name="NumHours" Type="Type" Filename="float.typ" Default="24"/>
+  <ELEMENT Name="MaxNumColorSteps" Type="Type" Filename="float.typ" Default="128"/>
+  <LOG>Tue Oct 22 16:40:31 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed Nov 06 17:04:21 2002 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

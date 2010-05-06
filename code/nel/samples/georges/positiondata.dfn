@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN>
+	<ELEMENT Name="x" Type="Type" Filename="int.typ" Default="0" />
+	<ELEMENT Name="y" Type="Type" Filename="int.typ" Default="0" />
+	<ELEMENT Name="z" Type="Type" Filename="int.typ" Default="0" />
+</DFN>

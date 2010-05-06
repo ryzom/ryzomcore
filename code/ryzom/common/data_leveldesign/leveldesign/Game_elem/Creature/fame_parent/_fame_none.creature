@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="Fame" Value="none"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Oct 16 15:26:51 2003 (boucher) .Basics.Fame = matis
+Thu Jul 15 15:12:54 2004 (monnerot) .Basics.Fame = none</LOG>
+</FORM>

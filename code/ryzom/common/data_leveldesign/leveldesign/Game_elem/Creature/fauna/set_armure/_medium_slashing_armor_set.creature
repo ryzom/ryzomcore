@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <STRUCT Name="Equipment">
+        <STRUCT Name="Legs">
+          <ATOM Name="Item" Value="medium_slashing_legs.item"/>
+        </STRUCT>
+        <STRUCT Name="Arms">
+          <ATOM Name="Item" Value="medium_slashing_arms.item"/>
+        </STRUCT>
+        <STRUCT Name="Hands">
+          <ATOM Name="Item" Value="medium_slashing_hands.item"/>
+        </STRUCT>
+        <STRUCT Name="Feet">
+          <ATOM Name="Item" Value="medium_slashing_feet.item"/>
+        </STRUCT>
+        <STRUCT Name="Head">
+          <ATOM Name="Item" Value="medium_slashing_head.item"/>
+        </STRUCT>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Sep 25 14:58:19 2002 (favre) .Basics.Equipment.Arms.Item = medium_slashing_arms_lvl_01.item
+Wed Sep 25 14:58:19 2002 (favre) .Basics.Equipment.Feet.Item = medium_slashing_feet_lvl_01.item
+Wed Sep 25 14:58:19 2002 (favre) .Basics.Equipment.Hands.Item = medium_slashing_hands_lvl_01.item
+Wed Sep 25 14:58:19 2002 (favre) .Basics.Equipment.Head.Item = medium_slashing_head_lvl_01.item
+Wed Sep 25 14:58:19 2002 (favre) .Basics.Equipment.Legs.Item = medium_slashing_legs_lvl_01.item</LOG>
+</FORM>

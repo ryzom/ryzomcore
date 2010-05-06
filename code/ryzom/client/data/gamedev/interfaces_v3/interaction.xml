@@ -1,0 +1,3060 @@
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <lua file="interaction.lua" />
+  <!-- ********** -->
+  <!-- * TARGET * -->
+  <!-- ********** -->
+  <!-- Track when the user change its Faction PVP Mode -->
+  <variable entry="UI:VARIABLES:USER:TRACK_PVP_CHANGE_MODE"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE"
+            type="sint32"
+            value="0" />
+  <!-- The Target selected -->
+  <define id="target_name_id"
+          value="SERVER:Entities:E[UI:VARIABLES:TARGET:SLOT]:P6" />
+  <define id="target_uid"
+          value="SERVER:TARGET:BARS:UID" />
+  <define id="target_player_level"
+          value="SERVER:TARGET:BARS:PLAYER_LEVEL" />
+  <define id="region_force_1"
+          value="113 170 138 255" />
+  <!-- Newbieland creatures... -->
+  <define id="region_force_2"
+          value="112 112 221 255" />
+  <define id="region_force_3"
+          value="255 255 180 255" />
+  <define id="region_force_4"
+          value="238 160  96 255" />
+  <define id="region_force_5"
+          value="204  48  48 255" />
+  <define id="region_force_6"
+          value="144  48 144 255" />
+  <define id="force_level_1"
+          value="consider_1.tga" />
+  <define id="force_level_2"
+          value="consider_2.tga" />
+  <define id="force_level_3"
+          value="consider_3.tga" />
+  <define id="force_level_4"
+          value="consider_4.tga" />
+  <define id="force_level_5"
+          value="consider_5.tga" />
+  <define id="force_level_6"
+          value="consider_6.tga" />
+  <define id="force_level_7"
+          value="consider_6.tga" />
+  <define id="force_level_8"
+          value="consider_7.tga" />
+  <proc id="proc_target_changed">
+    <!-- Name -->
+    <action handler="set_target_name"
+            params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:uc_title|
+                                                                                                title=ui:interface:target:header_opened:target_title:uc_hardtext" />
+    <!-- Region force & Force level of the creature/player -->
+    <!-- old consider system -->
+    <!--
+        <action handler="set_force_region_level" params="slot=@@UI:VARIABLES:TARGET:SLOT|targetRegion=ui:interface:target:header_opened:target_force|targetLevel=ui:interface:target:header_opened:target_level" />
+        -->
+    <!-- new consider level : lua code only -->
+    <action handler="lua"
+            params="game:updateTargetConsiderUI()" />
+  </proc>
+  <link expr="depends(@%target_name_id)"
+        action="proc"
+        params="proc_target_changed" />
+  <!-- will be called if either UI:VARIABLES:TARGET:SLOT (local) or P6 (server) changes -->
+  <link expr="depends(@%target_uid)"
+        action="proc"
+        params="proc_target_changed" />
+  <!-- detects when the target has changed -->
+  <link expr="depends(@%target_player_level)"
+        action="proc"
+        params="proc_target_changed" />
+  <!-- detect when the player level has changed (or called after the target has changed and the player level been read) -->
+  <link expr="depends(@UI:VARIABLES:USER:TRACK_PVP_CHANGE_MODE)"
+        action="proc"
+        params="proc_target_changed" />
+  <!-- detect when the user PVP mode has changed -->
+  <link expr="depends(@UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE)"
+        action="proc"
+        params="proc_target_changed" />
+  <!-- detect when the target PVP mode has changed -->
+  <!-- Target bars and tooltips -->
+  <template name="jauges_target"
+            x="0"
+            y="0"
+            posref="TR TR">
+    <view type="bar3"
+          id="jauges"
+          posref="TR TR"
+          color1="%focus_color"
+          value1="%target_focus"
+          range1="UI:CONST:127"
+          color2="%sap_color"
+          value2="%target_sap"
+          range2="UI:CONST:127"
+          color3="%sta_color"
+          value3="%target_sta"
+          range3="UI:CONST:127" />
+    <ctrl type="tooltip"
+          id="tt1"
+          tooltip="uiStamina"
+          color="%sta_color"
+          posparent="jauges"
+          posref="TL TL"
+          x="0"
+          y="-1"
+          sizeref="wh3"
+          w="0"
+          h="0" />
+    <ctrl type="tooltip"
+          id="tt2"
+          tooltip="uiSap"
+          color="%sap_color"
+          posparent="tt1"
+          posref="BL BL"
+          x="0"
+          y="0"
+          sizeref="wh"
+          w="0"
+          h="0" />
+    <ctrl type="tooltip"
+          id="tt3"
+          tooltip="uiFocus"
+          color="%focus_color"
+          posparent="tt2"
+          posref="BL TL"
+          x="0"
+          y="0"
+          sizeref="wh"
+          w="0"
+          h="0" />
+  </template>
+  <template name="jauge_score_target"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            w="156"
+            color=""
+            text=""
+            val=""
+            maxval="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y">
+      <group id="jauge_bar"
+             posref="TL TL"
+             w="156"
+             h="16">
+        <view type="bitmap"
+              id="jauge_graph"
+              posref="TL TL"
+              texture="jauge.tga"
+              color="#color"
+              global_color="false" />
+      </group>
+      <link expr="depends(@#val)"
+            action="set"
+            params="target='ui:interface:target:content:#id:jauge_bar:w'|value=div(mul(@#val, 156), @UI:CONST:127)" />
+    </group>
+  </template>
+  <!-- the Main Group -->
+  <group type="container"
+         id="target"
+         w="182"
+         h="512"
+         title=""
+         min_w="182"
+         max_w="182"
+         min_h="56"
+         max_h="56"
+         resizer="false"
+         global_color="false"
+         global_color_over="true"
+         movable="true"
+         active="false"
+         opened="true"
+         openable="false"
+         right_button="false"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:TARGET|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:TARGET|value=0"
+         help_page="interf_target.html"
+         header_active="false"
+         title_delta_max_w="-44"
+         title_over_extend_view_text="true">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="28"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           h="32"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <view type="text"
+            id="target_title"
+            posref="BL BL"
+            x="0"
+            y="0"
+            color="255 255 255 255"
+            global_color="true"
+            fontsize="11"
+            shadow="true"
+            hardtext=""
+            line_maxw="135"
+            over_extend_view_text="true" />
+      <!-- complex level display version -->
+      <!--
+                <view type="bitmap" id="slot_force" posref="BR BR" x="0" y="0" color="255 255 255 255" texture="W_slot_consider.tga" />
+                <view type="bitmap" id="target_force" posparent="slot_force" posref="MM MM" x="0" y="0" w="30" h="14" scale="true" color="0 0 0 0" global_color="false" texture="blank.tga" />
+                <view type="bitmap" id="target_level" posparent="target_force" posref="MM MM" global_color="false" texture="consider_1.tga" />
+                <ctrl type="tooltip" id="force" tooltip="uiForce" color="0 0 0 255" posparent="slot_force" posref="MM MM" x="0" y="0" sizeref="wh" w="0" h="0" tooltip_parent="win" />
+                -->
+      <!-- simple level version -->
+      <view type="bitmap"
+            id="slot_force"
+            posref="BR BR"
+            x="0"
+            y="0"
+            color="0 0 0 0"
+            global_color="false"
+            texture="consider_bg.tga" />
+      <view type="text"
+            id="target_level"
+            posref="MM MM"
+            posparent="slot_force"
+            x="0"
+            y="-2"
+            color="255 255 255 255"
+            fontsize="10"
+            shadow="true"
+            hardtext=""
+            global_color="false" />
+      <view type="bitmap"
+            id="slot_ring"
+            posref="TL TL"
+            posparent="slot_force"
+            x="9"
+            y="0"
+            color="255 255 255 255"
+            texture="consider_ring.tga"
+            global_color="false"
+            render_layer="2"
+            active="false" />
+      <view type="bitmap"
+            id="impossible"
+            posref="TL TL"
+            posparent="slot_force"
+            x="-1"
+            y="6"
+			scale="true"
+			h="16"
+			w="32"
+            color="255 255 255 255"
+            texture="consider_impossible.tga"
+            global_color="false"
+            render_layer="1"
+            active="true" />
+      <ctrl type="tooltip"
+            id="target_tooltip"
+            tooltip="uittConsiderTargetNoSelection"
+            color="0 0 0 255"
+            posparent="slot_force"
+            posref="MM MM"
+            x="0"
+            y="0"
+            sizeref="wh"
+            w="0"
+            h="0"
+            tooltip_parent="win" />
+    </group>
+    <group id="content"
+           x="0"
+           y="-2"
+           w="164"
+           h="20"
+           posref="TL TL">
+      <!-- new Jauges -->
+      <view type="bitmap"
+            id="b_life"
+            posref="TL TL"
+            x="0"
+            y="-2"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <instance template="jauge_score_target"
+                id="jlife"
+                posparent="b_life"
+                posref="TL TL"
+                color="214 56 7 255"
+                text="uiHP"
+                val="%target_hp" />
+      <instance template="text_tt"
+                posparent="jlife"
+                tooltip="uittTargetHp"
+                tooltip_parent="win" />
+    </group>
+    <!-- when the level of the player change, we should update the consider widget, so add an observer to each of its skills -->
+    <link expr="depends(@SERVER:USER:SKILL_POINTS_0:VALUE)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:USER:SKILL_POINTS_1:VALUE)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:USER:SKILL_POINTS_2:VALUE)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:USER:SKILL_POINTS_3:VALUE)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <!-- As well, if member are added, rmoved from the team, then the player may see the level of stronger creature, so update -->
+    <!-- the consider widget a well -->
+    <link expr="depends(@SERVER:GROUP:0:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:1:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:2:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:3:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:4:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:5:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:6:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+    <link expr="depends(@SERVER:GROUP:7:PRESENT)"
+          action="lua"
+          params="game:updateTargetConsiderUI()" />
+  </group>
+  <tree node="target" />
+  <!-- **************************************** -->
+  <!-- * PEOPLE LISTS BASE CONTAINER TEMPLATE * -->
+  <!-- **************************************** -->
+  <!-- simple people list -->
+  <template name="people_list_container"
+            keep="true"
+            active="true"
+            movable="false"
+            openable="false"
+            opened="true"
+            id="system">
+    <group type="container"
+           id="#id"
+           w="222"
+           active="#active"
+           movable="#movable"
+           opened="#opened"
+           openable="#openable"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           pop_min_h="96">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+    </group>
+  </template>
+  <!-- ********************************** -->
+  <!-- FRIEND LIST & IGNORE LIST TEMPLATE -->
+  <!-- ********************************** -->
+  <template name="people_list_container_with_add_edit_box"
+            keep="true"
+            active="true"
+            movable="false"
+            opened="true"
+            id="system">
+    <group type="container"
+           id="#id"
+           w="252"
+           active="#active"
+           movable="#movable"
+           opened="#opened"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="16"
+             posref="TL TL">
+        <ctrl style="text_button_16"
+              id="add_button"
+              posref="MR MR"
+              x="-4"
+              y="0"
+              onclick_l="add_contact_begin"
+              params_l="group=ui:interface:add_contact"
+              hardtext="uiPeopleAdd" />
+      </group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             h="16"
+             posref="TL TL">
+        <ctrl style="text_button_16"
+              id="add_button"
+              posref="MR MR"
+              x="-4"
+              y="0"
+              onclick_l="add_contact_begin"
+              params_l="group=ui:interface:add_contact"
+              hardtext="uiPeopleAdd" />
+      </group>
+      <group id="content"
+             x="0"
+             y="0"
+             h="0"
+             posref="TL TL"></group>
+    </group>
+  </template>
+  <group type="modal"
+         id="add_contact"
+         exit_click_out="true"
+         posref="MM MR"
+         w="212"
+         child_resize_h="true"
+         child_resize_hmargin="14"
+         options="skin_modal"
+         on_active="set_keyboard_focus"
+         on_active_params="target=ui:interface:add_contact:add_contact_eb:eb|select_all=false">
+
+    <view type="text"
+          id="text"
+          case_mode="%case_first_word_letter_up"
+          posref="TL TL"
+          x="8"
+          y="-8"
+          color="255 255 255 255"
+          global_color="false"
+          fontsize="12"
+          shadow="true"
+          hardtext="uiPeopleAddContact" />
+    <instance template="edit_box_widget"
+              id="add_contact_eb"
+              posref="TL TL"
+              x="6"
+              y="-24"
+              child_resize_h="true"
+              w="200"
+              onenter="add_contact"
+              max_num_chars="255"
+              entry_type="playername" />
+    <instance template="button_ok_cancel"
+              posparent="add_contact_eb"
+              posref="BR TR"
+              x="0"
+              y="-2"
+              onclick_ok="add_contact"
+              onclick_ok_param=""
+              onclick_cancel="leave_modal"
+              onclick_cancel_param="" />
+  </group>
+  <!-- ***************** -->
+  <!-- * CHAT TEMPLATE * -->
+  <!-- ***************** -->
+  <template name="chat_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           title="#title"
+           resizer="true"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="13"
+             posref="TL TL"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="-24" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-10"
+                  onenter="chat_box_entry"
+                  backup_father_container_pos="true" />
+      </group>
+    </group>
+  </template>
+  <!-- chat window with a 'clear' button -->
+  <template name="clearable_chat_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           title="#title"
+           resizer="true"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="13"
+             posref="TL TL"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="-24" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-10"
+                  onenter="chat_box_entry"
+                  backup_father_container_pos="true" />
+        <ctrl style="text_button_16"
+              id="clear"
+              posref="TR TR"
+              posparent="chat_box"
+              x="-16"
+              y="-16"
+              wmargin="0"
+              color="255 255 255 255"
+              col_over="255 255 255 255"
+              col_pushed="255 255 255 255"
+              onclick_l="lua"
+              params_l="runCommand('clear', getUICaller().id)"
+              hardtext="clear" />
+      </group>
+    </group>
+  </template>
+  <!-- ********************************** -->
+  <!-- * CHAT WITH NO EDIT BOX TEMPLATE * -->
+  <!-- ********************************** -->
+  <template name="chat_no_eb_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           posparent="#posparent"
+           title="#title"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           lockable="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="13"
+             posref="TL TL"
+             child_resize_h="true"
+             child_resize_hmargin="8"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="0"
+                  w="0" />
+      </group>
+    </group>
+  </template>
+  <!-- ***************************** -->
+  <!-- * CHAT WITH FILTER TEMPLATE * -->
+  <!-- ***************************** -->
+  <template name="filtered_chat_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           title="#title"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           resizer="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"
+             group_onclick_r="select_chat_source"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"
+             group_onclick_r="select_chat_source"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  x="0"
+                  y="0"
+                  w="0"
+                  h="-24" />
+        <!-- display of filters -->
+        <ctrl style="text_button_16"
+              id="target_button"
+              posparent="cb"
+              posref="BL TL"
+              y="-4"
+              x="0"
+              hardtext="uiFilterAround"
+              onclick_l="select_chat_target"
+              params_l="menu=ui:interface:user_chat_target_menu|party_chats=false" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-26"
+                  onenter="chat_box_entry"
+                  backup_father_container_pos="true" />
+      </group>
+    </group>
+  </template>
+  <!-- ************* -->
+  <!-- GROUP OF CHAT -->
+  <!-- ************* -->
+  <!-- Change those value to change the tab color wether a new message is present or not -->
+  <define id="chat_group_tab_color_normal"
+          value="255 255 255 128" />
+  <define id="chat_group_tab_color_newmsg"
+          value="255 100 100 220" />
+  <group type="menu"
+         id="user_chat_target_menu"
+         extends="base_menu"
+         formatted="true">
+    <action id="around"
+            name="uiFilterMenuAround"
+            handler="chat_target_selected"
+            params="say"
+            formatted="true" />
+    <action id="region"
+            name="uiFilterMenuRegion"
+            handler="chat_target_selected"
+            params="region"
+            formatted="true" />
+    <action id="universe"
+            name="uiFilterMenuUniverse"
+            handler="chat_target_selected"
+            params="universe"
+            formatted="true" />
+    <action id="team"
+            name="uiFilterMenuTeam"
+            handler="chat_target_selected"
+            params="team"
+            formatted="true" />
+    <action id="guild"
+            name="uiFilterMenuGuild"
+            handler="chat_target_selected"
+            params="guild"
+            formatted="true" />
+  </group>
+  <!-- actual action handlers are created in code, this just lists the emotes we want to appear in the quick access menu -->
+  <group type="menu"
+         id="user_chat_emote_menu"
+         extends="base_menu"
+         case_mode="%case_first_word_letter_up"
+         on_active="lua:game:updateEmoteMenu()">
+    <action id="uiEM_Wave"
+            name="uiQuickEmote" />
+    <action id="uiEM_Bow"
+            name="uiQuickEmote" />
+    <action id="uiEM_Courtly"
+            name="uiQuickEmote" />
+    <action id="uiEM_Hiha"
+            name="uiQuickEmote" />
+    <action id="uiEM_Thankful"
+            name="uiQuickEmote" />
+    <action id="uiEM_Cheer"
+            name="uiQuickEmote" />
+    <action id="uiEM_Silly"
+            name="uiQuickEmote" />
+    <action id="uiEM_Dance"
+            name="uiQuickEmote" />
+    <action id="uiEM_Dramatic"
+            name="uiQuickEmote" />
+    <action id="uiEM_Heroic"
+            name="uiQuickEmote" />
+    <separator />
+    <action id="quick_chat"
+            name="uimQuickChat">
+      <action id="qc0"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="00" />
+      <action id="qc1"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="01" />
+      <action id="qc2"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="02" />
+      <action id="qc3"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="03" />
+      <action id="qc4"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="04" />
+      <action id="qc5"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="05" />
+      <action id="qc6"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="06" />
+      <action id="qc7"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="07" />
+      <action id="qc8"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="08" />
+      <action id="qc9"
+              name=""
+              formatted="true"
+              handler="talk_message"
+              params="09" />
+    </action>
+    <separator />
+  </group>
+  <!-- a template of a dynamic chat tab -->
+  <template name="temp_tab_dyn_chat"
+            keep="true"
+            nb=""
+            id=""
+            posparent=""
+            posref="TR TL">
+    <ctrl style="tab_button_new"
+          id="#id"
+          group="content:cb:dyn_chat#nb"
+          posparent="#posparent"
+          posref="#posref"
+          textid="SERVER:DYN_CHAT:CHANNEL#nb:NAME"
+          dynamic_string="true"
+          onclick_r="set"
+          params_r="dblink=UI:VARIABLES:DYNAMIC_CHAT#nb:WANT_POPUP|value=1"
+          onclick_l="chat_group_filter"
+          params_l="dyn_chat#nb" />
+    <link expr="and(ne(@SERVER:DYN_CHAT:CHANNEL#nb:NAME,0),
+                                        not(@UI:VARIABLES:DYNAMIC_CHAT#nb:WANT_POPUP))"
+          target="#id:active" />
+  </template>
+  <!-- To know if a dynamic chat has been selected and which -->
+  <variable entry="UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT"
+            type="sint32"
+            value="0" />
+  <define id="canWriteToMainChat"
+          value="and(@UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT, or(not(@UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT), @SERVER:DYN_CHAT:CHANNEL[UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT]:WRITE_RIGHT))" />
+  <proc id="main_chat_group_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:CHAT_GROUP|value=1" />
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:CHAT_GROUP|value=1" />
+  </proc>
+  <proc id="main_chat_group_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:CHAT_GROUP|value=0" />
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:CHAT_GROUP|value=0" />
+  </proc>
+  <!-- the main chat group -->
+  <!-- IMPORTANT : below there are no 'on_active' & 'on_deactive' because these are set by C++ code -->
+  <!-- these will call the 'main_chat_group_active' & 'main_chat_group_deactive' above -->
+  <template name="main_chat_group"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           resizer="true"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           header_active="false"
+           right_button="false"
+           pop_min_w="244"
+           pop_min_h="128"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           global_color="false"
+           global_color_over="true"
+           lockable="true"
+           help_page="interf_chat.html"
+           resizer_top_size="5">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="0"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="100"
+             h="28"
+             posref="TL TL"
+             group_onclick_r="select_chat_source">
+        <group type="tab"
+               id="channel_select"
+               child_resize_w="true"
+               h="24"
+               posref="TL TL"
+               x="0"
+               y="-4">
+          <ctrl style="tab_button_new"
+                id="tab0"
+                x="0"
+                posref="TL TL"
+                group="content:cb:around"
+                hardtext="uitabChatAround"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=1"
+                onclick_l="chat_group_filter"
+                params_l="around"
+                tooltip="uittChatAround"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab1"
+                posparent="tab0"
+                group="content:cb:region"
+                hardtext="uitabChatRegion"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=1"
+                onclick_l="chat_group_filter"
+                params_l="region"
+                tooltip="uittChatRegion"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab2"
+                posparent="tab1"
+                group="content:cb:team"
+                hardtext="uitabChatTeam"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:TEAM_CHAT|value=1"
+                onclick_l="chat_group_filter"
+                params_l="team"
+                tooltip="uittChatTeam"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab3"
+                posparent="tab2"
+                group="content:cb:guild"
+                hardtext="uitabChatGuild"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:GUILD_CHAT|value=1"
+                onclick_l="chat_group_filter"
+                params_l="guild"
+                tooltip="uittChatGuild"
+                tooltip_parent="win" />
+          <!-- Yes order is strange, but don't want to modify all the ugly hardcoded code -->
+          <ctrl style="tab_button_new"
+                id="tab7"
+                posparent="tab3"
+                group="content:cb:universe"
+                hardtext="uitabChatUniverse"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=1"
+                onclick_l="chat_group_filter"
+                params_l="universe"
+                tooltip="uittChatUniverse"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab4"
+                posparent="tab7"
+                group="content:cb:sysinfo"
+                hardtext="uitabChatSysInfo"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:SYSTEM_INFO|value=1"
+                onclick_l="chat_group_filter"
+                params_l="sysinfo"
+                tooltip="uittChatSysInfo"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab5"
+                posparent="tab4"
+                group="content:cb:user"
+                hardtext="uitabChatUser"
+                onclick_l="chat_group_filter"
+                params_l="user"
+                tooltip="uittChatUser"
+                tooltip_parent="win" />
+          <ctrl style="tab_button_new"
+                id="tab6"
+                posparent="tab5"
+                group="content:cb:yubo_chat"
+                hardtext="uitabChatYuboChat"
+                onclick_r="set"
+                params_r="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=1"
+                onclick_l="chat_group_filter"
+                params_l="yubo_chat"
+                tooltip="uittChatYubo"
+                tooltip_parent="win" />
+          <!-- Fixed number of dynamic chat allowed. force  _firstpos and _nextpos to have correctly aligned tab-->
+          <vector template="temp_tab_dyn_chat"
+                  _size="%max_dyn_chan_per_player"
+                  id="tab_array0_$i"
+                  nb="$i"
+                  posparent="tab6"
+                  _firstpos="TR TL"
+                  _nextpos="TR TL" />
+          <!-- Show or hide tabs : a tab is visible if it is not filtered into the user chat AND not detached -->
+          <link expr="and(@UI:SAVE:ISENABLED:AROUND_ME,
+                                                                not(@UI:SAVE:ISDETACHED:AROUND_ME))"
+                target="tab0:active" />
+          <link expr="and(@UI:SAVE:ISENABLED:REGION_CHAT,
+                                                                not(@UI:SAVE:ISDETACHED:REGION_CHAT))"
+                target="tab1:active" />
+          <link expr="and(@UI:SAVE:ISENABLED:UNIVERSE_CHAT,
+                                                                not(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT))"
+                target="tab7:active" />
+          <link expr="and (and(%is_team_present, @UI:SAVE:ISENABLED:TEAM_CHAT),
+                                                                not(@UI:SAVE:ISDETACHED:TEAM_CHAT))"
+                target="tab2:active" />
+          <link expr="and (and(%is_guild_present,@UI:SAVE:ISENABLED:GUILD_CHAT),
+                                                                not(@UI:SAVE:ISDETACHED:GUILD_CHAT))"
+                target="tab3:active" />
+          <link expr="and(@UI:SAVE:ISENABLED:SYSTEM_INFO,
+                                                                not(@UI:SAVE:ISDETACHED:SYSTEM_INFO))"
+                target="tab4:active" />
+          <link expr="not(@UI:SAVE:ISDETACHED:USER_CHAT)"
+                target="tab5:active" />
+          <link expr="and(and(%is_yubo_chat_present, @UI:SAVE:ISENABLED:YUBO_CHAT),
+                                                                not(@UI:SAVE:ISDETACHED:YUBO_CHAT))"
+                target="tab6:active" />
+          <!-- Show individual chat windows if needed -->
+          <link expr="and (@UI:SAVE:ISENABLED:AROUND_ME, 
+                                                                @UI:SAVE:ISDETACHED:AROUND_ME)"
+                target="ui:interface:around_me:active" />
+          <link expr="and (@UI:SAVE:ISENABLED:REGION_CHAT,
+                                                                @UI:SAVE:ISDETACHED:REGION_CHAT)"
+                target="ui:interface:region_chat:active" />
+          <link expr="and (@UI:SAVE:ISENABLED:UNIVERSE_CHAT,
+                                                                @UI:SAVE:ISDETACHED:UNIVERSE_CHAT)"
+                target="ui:interface:universe_chat:active" />
+          <link expr="and (and(%is_team_present, @UI:SAVE:ISENABLED:TEAM_CHAT),
+                                                                @UI:SAVE:ISDETACHED:TEAM_CHAT)"
+                target="ui:interface:team_chat:active" />
+          <link expr="and (and(%is_guild_present,@UI:SAVE:ISENABLED:GUILD_CHAT),
+                                                                @UI:SAVE:ISDETACHED:GUILD_CHAT)"
+                target="ui:interface:guild_chat:active" />
+          <link expr="and (@UI:SAVE:ISENABLED:SYSTEM_INFO,
+                                                                @UI:SAVE:ISDETACHED:SYSTEM_INFO)"
+                target="ui:interface:system_info:active" />
+          <link expr="@UI:SAVE:ISDETACHED:USER_CHAT"
+                target="ui:interface:user_chat:active" />
+          <link expr="and(and(%is_yubo_chat_present, @UI:SAVE:ISENABLED:YUBO_CHAT),
+                                                                @UI:SAVE:ISDETACHED:YUBO_CHAT)"
+                target="ui:interface:yubo_chat:active" />
+        </group>
+        <view type="bitmap"
+              id="sep"
+              posparent="channel_select"
+              posref="BR BL"
+              sizeparent="parent"
+              sizeref="w"
+              w="0"
+              h="1"
+              scale="true"
+              texture="blank.tga"
+              color="166 166 166 255" />
+      </group>
+      <group id="content"
+             x="0"
+             y="0"
+             h="100"
+             posref="TL TL">
+        <group id="cb"
+               posref="TL TL"
+               sizeref="wh"
+               y="-4"
+               w="0"
+               h="-32">
+          <instance template="chat_box_mainchat"
+                    id="around"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="region"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="team"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="guild"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="universe"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="sysinfo"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="user"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <instance template="chat_box_mainchat"
+                    id="yubo_chat"
+                    posref="TL TL"
+                    sizeref="wh"
+                    y="0"
+                    w="0"
+                    h="0" />
+          <!-- Fixed number of dynamic chat allowed -->
+          <vector template="chat_box_mainchat"
+                  id="dyn_chat$i"
+                  _size="%max_dyn_chan_per_player"
+                  posref="TL TL"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="0" />
+        </group>
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BL TL"
+                  posparent="cb"
+                  y="-4"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="60"
+                  onenter="chat_box_entry"
+                  reset_focus_on_hide="false"
+                  backup_father_container_pos="true" />
+        <ctrl style="text_button_16"
+              id="but_user"
+              posref="BL TL"
+              posparent="cb"
+              x="0"
+              y="-6"
+              hardtext="uiFilterAround"
+              tooltip="uittFilterChat"
+              tooltip_parent="win"
+              onclick_l="select_chat_target"
+              params_l="menu=ui:interface:user_chat_target_menu|party_chats=false"
+              case_mode="%case_first_word_letter_up" />
+        <ctrl style="text_button_16"
+              id="but_emote"
+              posref="BR TR"
+              posparent="cb"
+              x="0"
+              y="-6"
+              hardtext="uiEmoteTitle"
+              tooltip="uittEmote"
+              tooltip_parent="win"
+              active="false"
+              onclick_l="active_menu"
+              params_l="menu=ui:interface:user_chat_emote_menu" />
+        <view type="text"
+              id="cant_write_ebw"
+              posref="BL TL"
+              posparent="cb"
+              y="-8"
+              hardtext="uiCannotWriteDynChat"
+              global_color="true"
+              fontsize="10"
+              shadow="true" />
+        <!-- if dynamic chat, show the edit box only if write enabled -->
+        <link expr="%canWriteToMainChat"
+              target="ebw:active" />
+        <link expr="%canWriteToMainChat"
+              target="ebw:eb:enter_recover_focus" />
+        <!-- important else if press enter, then the edit box is reactivated! -->
+        <link expr="not(%canWriteToMainChat)"
+              target="cant_write_ebw:active" />
+      </group>
+    </group>
+  </template>
+  <!-- each time the chat colors are changed, must reset the chat group prompt -->
+  <link expr="@UI:SAVE:CHAT:COLORS"
+        action="chat_group_update_prompt" />
+  <!-- ************************ -->
+  <!-- * SYSTEM INFO TEMPLATE * -->
+  <!-- ************************ -->
+  <template name="system_info_id"
+            keep="true"
+            w="256"
+            h="16"
+            title=""
+            title_opened="uiInfosSystem">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           title="#title"
+           title_opened="#title_opened"
+           resizer="true"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           pop_min_w="256"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           lockable="true"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             w="176"
+             h="16"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="176"
+             h="16"
+             posref="TL TL"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  chat="true"
+                  id="cb"
+                  posref="TL TL"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="0" />
+      </group>
+    </group>
+  </template>
+  <!-- ************* -->
+  <!-- * TEAM_CHAT * -->
+  <!-- ************* -->
+  <proc id="team_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:TEAM_CHAT|value=0" />
+  </proc>
+  <!-- ************* -->
+  <!-- * AROUND_ME * -->
+  <!-- ************* -->
+  <proc id="around_me_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=0" />
+  </proc>
+  <!-- *************** -->
+  <!-- * REGION CHAT * -->
+  <!-- *************** -->
+  <proc id="region_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=0" />
+  </proc>
+  <!-- ***************** -->
+  <!-- * UNIVERSE CHAT * -->
+  <!-- ***************** -->
+  <proc id="universe_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=0" />
+  </proc>
+  <!-- When the universe chat is activated, we must display a warning the first time 
+        Must do it on the variable manipulation, not when the window is shown (because it is always shown/hid at start of game)
+-->
+  <link expr="@UI:SAVE:ISDETACHED:UNIVERSE_CHAT"
+        cond="eq(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT,1)"
+        action="set"
+        params="dblink=UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED|value=1" />
+  <!-- *************** -->
+  <!-- * SYSTEM INFO * -->
+  <!-- *************** -->
+  <proc id="sysinfo_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:SYSTEM_INFO|value=0" />
+  </proc>
+  <!-- ************* -->
+  <!-- * AROUND_ME * -->
+  <!-- ************* -->
+  <proc id="around_me_chat_proc_active"></proc>
+  <proc id="around_me_chat_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=0" />
+  </proc>
+  <!-- *************** -->
+  <!-- * REGION CHAT * -->
+  <!-- *************** -->
+  <proc id="region_chat_proc_active"></proc>
+  <proc id="region_chat_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=0" />
+  </proc>
+  <!-- *************** -->
+  <!-- * SYSTEM INFO * -->
+  <!-- *************** -->
+  <proc id="sysinfo_chat_proc_active"></proc>
+  <proc id="sysinfo_chat_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:SYSTEM_INFO|value=0" />
+  </proc>
+  <!-- ************* -->
+  <!-- * TEAM_LIST * -->
+  <!-- ************* -->
+  <!-- team_list container is defined in code -->
+  <proc id="team_list_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:TEAM_LIST|value=1" />
+    <action handler="set"
+            cond="not(%is_team_present)"
+            params="target='ui:interface:team_list:active'|value=0" />
+  </proc>
+  <proc id="team_list_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:TEAM_LIST|value=0" />
+  </proc>
+  <!-- To Open/Close the Team window auto (but the user is allowed to close it) -->
+  <variable entry="UI:VARIABLES:IS_TEAM_PRESENT"
+            type="sint32"
+            value="0" />
+  <link expr="%is_team_present"
+        action="set"
+        params="dblink=UI:VARIABLES:IS_TEAM_PRESENT|value=%is_team_present" />
+  <!-- ************* -->
+  <!-- * TEAM CHAT * -->
+  <!-- ************* -->
+  <link expr="%is_team_present"
+        action="leave_team_chat" />
+  <!-- ********************** -->
+  <!-- * TEAM_MATE TEMPLATE * -->
+  <!-- ********************** -->
+  <template name="mate_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title=""
+            leader="0"
+            team_mate_index="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           title="#title"
+           title_opened="#title"
+           popable="false"
+           openable="false"
+           open_when_popup="true"
+           pop_min_w="246"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           global_color="false"
+           global_color_over="true"
+           lockable="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="14"
+             posref="TL TL">
+        <view type="bar3"
+              id="jauges"
+              posref="MR MR"
+              mini="true"
+              x="-16"
+              color1="%sta_color"
+              value1="UI:VARIABLES:BARS:TEAM:#team_mate_index:STA"
+              range1="UI:CONST:127"
+              color2="%sap_color"
+              value2="UI:VARIABLES:BARS:TEAM:#team_mate_index:SAP"
+              range2="UI:CONST:127"
+              color3="%hp_color"
+              color3_negative="%hp_color_neg"
+              value3="UI:VARIABLES:BARS:TEAM:#team_mate_index:HP"
+              range3="UI:CONST:127" />
+        <view type="bitmap"
+              id="lead"
+              posparent="jauges"
+              posref="ML MR"
+              x="-4"
+              y="1"
+              texture="w_leader.tga"
+              global_color="false"
+              active="false" />
+        <view type="bitmap"
+              id="successor"
+              posparent="jauges"
+              posref="ML MR"
+              x="-4"
+              y="1"
+              texture="w_leader.tga"
+              color="255 255 255 128"
+              global_color="false"
+              active="false" />
+        <ctrl type="tooltip"
+              id="ttlead"
+              tooltip="uittLead"
+              instant_help="true"
+              posparent="lead"
+              posref="TL TL"
+              x="0"
+              y="0"
+              sizeref="wh"
+              w="0"
+              h="0" />
+        <ctrl type="tooltip"
+              id="ttsucc"
+              tooltip="uittSuccessor"
+              instant_help="true"
+              posparent="successor"
+              posref="TL TL"
+              x="0"
+              y="0"
+              sizeref="wh"
+              w="0"
+              h="0" />
+        <!-- BIG TRANSPARENT BUTTON TO TARGET THE TEAM MEMBER. w="-16" to let the "popup" button work -->
+        <ctrl type="button"
+              id="stop_button"
+              button_type="push_button"
+              posref="ML ML"
+              sizeref="wh"
+              w="-16"
+              h="0"
+              scale="true"
+              tx_normal="blank.tga"
+              tx_pushed="blank.tga"
+              tx_over="blank.tga"
+              color="0 0 0 0"
+              col_pushed="0 0 0 0"
+              col_over="255 255 255 32"
+              onclick_l="team_target"
+              params_l="#team_mate_index" />
+        <!-- Button to activate the chat -->
+        <ctrl type="button"
+              id="chat_button"
+              button_type="push_button"
+              posref="MR MR"
+              tx_normal="contact_chat.tga"
+              tx_pushed="contact_chat.tga"
+              tx_over="W_button_14_over.tga"
+              global_color_normal="false"
+              global_color_over="true"
+              global_color_pushed="false"
+              onclick_l="contact_direct_chat" />
+        <!-- links to display lead or successor -->
+        <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)"
+              target="lead:active" />
+        <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)"
+              target="successor:active" />
+        <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)"
+              target="ttlead:active" />
+        <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)"
+              target="ttsucc:active" />
+      </group>
+      <!--            
+                <group id="header_opened" x="0" y="0" w="160" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
+                        <view type="bar3" id="jauges" posref="TR TR" y="-2" mini="true" x="-16"
+                                                                color1="%sta_color" value1="UI:VARIABLES:BARS:TEAM:#team_mate_index:STA"        range1="UI:CONST:127" 
+                                                                color2="%sap_color"     value2="UI:VARIABLES:BARS:TEAM:#team_mate_index:SAP"            range2="UI:CONST:127"
+                                                                color3="%hp_color" color3_negative="%hp_color_neg" value3="UI:VARIABLES:BARS:TEAM:#team_mate_index:HP"  range3="UI:CONST:127" />
+                        <view type="bitmap" id="lead" posparent="jauges" posref="ML MR" x="-4" y="1" texture="w_leader.tga" global_color="false" />
+                        <view type="bitmap" id="successor" posparent="jauges" posref="ML MR" x="-4" y="1" texture="w_leader.tga" global_color="false" color="255 255 255 128" active="false"/>
+                        
+                        <ctrl type="tooltip" id="ttlead" tooltip="uittLead" instant_help="true" posparent="lead" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
+                        <ctrl type="tooltip" id="ttsucc" tooltip="uittSuccessor" instant_help="true" posparent="successor" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
+                                                
+                        <! - chat box - >
+                        <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
+                        <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-2" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="contact_entry" backup_father_container_pos="true"/>
+                                                
+                        <! - links to display lead or successor - >
+                        <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="lead:active"/>
+                        <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)" target="successor:active"/>
+                        
+                        <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="ttlead:active"/>
+                        <link expr="eq(@SERVER:GROUP:SUCCESSOR_INDEX, #team_mate_index)" target="ttsucc:active"/>
+                        
+                </group>                                        
+                -->
+      <!-- link to display the group when the team member is present -->
+      <link expr="ne(@SERVER:GROUP:#team_mate_index:NAME, 0)"
+            target="active" />
+      <!-- links to display the name of the team mate -->
+      <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)"
+            action="set_server_id"
+            params="value=@SERVER:GROUP:#team_mate_index:NAME|target=uc_title|remove_title=1" />
+      <!-- links to change the name color if it is the target -->
+      <link expr="ifthenelse(eq(@SERVER:GROUP:#team_mate_index:UID,@UI:VARIABLES:TARGET:UID),
+                                                                '255 0 0 255',
+                                                                '255 255 255 255')"
+            target="title_color" />
+      <!-- links to Open a Quick Help when a new team member comes. Only if the team_list window is not opeded -->
+      <link expr="depends(@SERVER:GROUP:#team_mate_index:PRESENT)"
+            action="context_help_html"
+            params="team_list"
+            cond="and(@SERVER:GROUP:#team_mate_index:PRESENT,eq(@UI:VARIABLES:ISACTIVE:TEAM_LIST,0))" />
+    </group>
+  </template>
+  <!-- ******************** -->
+  <!-- * CONTACT TEMPLATE * -->
+  <!-- ******************** -->
+  <!-- a contact of the ignore list -->
+  <template name="contact_id_ignore"
+            keep="true"
+            posparent="parent"
+            w="160"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           posparent="#posparent"
+           title="#title"
+           title_opened="#title"
+           openable="false"
+           popable="false"
+           movable_in_parent_list="true"
+           header_color="UI:SAVE:WIN:COLORS:COM">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL">
+        <view type="bitmap"
+              id="blocked"
+              posref="MR MR"
+              x="-20"
+              y="-2"
+              texture="w_answer_16_cancel.tga"
+              global_color="false"
+              active="false" />
+      </group>
+    </group>
+  </template>
+  <!-- a contact of the friend list -->
+  <template name="contact_id_friend"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           posparent="#posparent"
+           title="#title"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true"
+           movable_in_parent_list="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"
+             group_onclick_l="tell_contact">
+        <ctrl type="button"
+              id="chat_button"
+              button_type="push_button"
+              posref="MR MR"
+              x="-4"
+              tx_normal="contact_chat.tga"
+              tx_pushed="contact_chat.tga"
+              tx_over="W_button_14_over.tga"
+              global_color_normal="false"
+              global_color_over="true"
+              global_color_pushed="false"
+              onclick_l="contact_direct_chat"
+              tooltip="uittTell"
+              tooltip_parent="win" />
+        <view type="bitmap"
+              id="online"
+              posref="MR MR"
+              x="-20"
+              texture="w_online.tga"
+              global_color="false" />
+        <ctrl type="tooltip"
+              id="tt_online"
+              posparent="online"
+              posref="MR MR"
+              x="0"
+              y="0"
+              sizeref="wh"
+              w="0"
+              h="0"
+              tooltip="uittFriendsOnline"
+              tooltip_parent="win" />
+        <view type="bitmap"
+              id="blocked"
+              posref="MR MR"
+              x="-34"
+              y="-2"
+              texture="w_answer_16_cancel.tga"
+              global_color="false"
+              active="false" />
+      </group>
+    </group>
+  </template>
+  <!-- when you want to directly chat with a friend -->
+  <template name="contact_chat_friend"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           x="64"
+           y="128"
+           w="#w"
+           h="64"
+           posparent="#posparent"
+           title="#title"
+           resizer="true"
+           openable="true"
+           opened="true"
+           popable="false"
+           movable="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"
+             on_active="lua"
+             on_active_params="game:closeTellHeader('#id')">
+             </group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="16"
+             posref="TL TL"
+             on_active="lua"
+             on_active_params="game:openTellHeader('#id')">
+        <ctrl style="button_ok"
+              id="ignore"
+              active="true"
+              x="-16"
+              y="0"
+              posref="MR MR"
+              posparent="parent"
+              text_y="-2"
+              onclick_l="lua"
+              params_l="validMessageBox(i18n.get('uiAddTellerToIgnoreListWarning'), 'add_teller_to_ignore_list', 'id=ui:interface:#id', '', '' ,'ui:interface')"
+              hardtext="uiAddTellerToIgnoreList"
+              fontsize="10"
+              tooltip="uiAddTellerToIgnoreListTooltip"
+              tooltip_parent="win" />
+        <ctrl style="button_ok"
+              id="new_friend"
+              active="true"
+              x="-2"
+              y="0"
+              posref="ML MR"
+              posparent="ignore"
+              text_y="-2"
+              onclick_l="add_teller_to_friend_list"
+              params_l=""
+              hardtext="uiAddTellerToFriends"
+              fontsize="10"
+              tooltip="uiAddTellerToFriendsToolip"
+              tooltip_parent="win" />
+        <ctrl style="button_ok"
+              id="invite"
+              active="false"
+              x="-2"
+              y="0"
+              posref="ML MR"
+              posparent="new_friend"
+              text_y="-2"
+              onclick_l="invite_to_ring_session"
+              params_l=""
+              hardtext="uiInviteToRingSession"
+              fontsize="10"
+              tooltip="uiInviteToRingSessionTooltip"
+              tooltip_parent="win" />
+      </group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="-24" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-10"
+                  onenter="contact_entry"
+                  backup_father_container_pos="true" />
+      </group>
+    </group>
+  </template>
+  <!-- *************************** -->
+  <!-- *  BASE MENU FOR CHAT BOX * -->
+  <!-- *************************** -->
+  <!-- allow to create a party chat from any chat box -->
+  <group type="menu"
+         id="base_chat_box_menu"
+         extends="base_menu_with_color">
+    <separator />
+  </group>
+  <!-- allow to create a party chat from any chat box & to hide / show the edit box -->
+  <group type="menu"
+         id="base_chat_box_menu_with_eb_toggle"
+         extends="base_chat_box_menu">
+    <action id="toggle_chat_eb_vis"
+            name="uimToggleChatEBVis"
+            handler="toggle_chat_eb_vis"
+            params="" />
+    <separator />
+  </group>
+  <!-- MainChat Group menu. Code appends entries for selecting chat source (if tab is user chat) -->
+  <template name="chat_menu_button"
+            id="but"
+            chat_db="AROUND_ME"
+            keep="true">
+    <group id="#id"
+           posref="TL TL"
+           x="0"
+           y="0"
+           w="16"
+           h="16">
+      <ctrl type="button"
+            id="button"
+            button_type="toggle_button"
+            posref="ML ML"
+            x="0"
+            y="0"
+            pushed="false"
+            tx_normal="w_slot_on.tga"
+            tx_pushed="w_opacity_on.tga"
+            tx_over="w_slot_on.tga"
+            color="255 255 255 255"
+            col_pushed="255 255 255 255"
+            col_over="255 255 255 0"
+            onclick_l="lua:game:switchChatTab('#chat_db')" />
+      <link expr="@UI:SAVE:ISENABLED:#chat_db"
+            target="button:pushed" />
+    </group>
+  </template>
+  <group type="menu"
+         id="main_chat_source_menu"
+         extends="base_menu_with_color">
+    <separator />
+    <action id="tab"
+            name="uimChatTab">
+      <action id="around"
+              name="uiAroundMe"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=AROUND_ME"
+              handler="lua:game:switchChatTab('AROUND_ME')" />
+      <action id="region"
+              name="uiREGION"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=REGION_CHAT"
+              handler="lua:game:switchChatTab('REGION_CHAT')" />
+      <action id="team"
+              name="uiTeam"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=TEAM_CHAT"
+              handler="lua:game:switchChatTab('TEAM_CHAT')" />
+      <action id="guild"
+              name="uimGuild"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=GUILD_CHAT"
+              handler="lua:game:switchChatTab('GUILD_CHAT')" />
+      <action id="universe"
+              name="uiUNIVERSE"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=UNIVERSE_CHAT"
+              handler="lua:game:switchChatTab('UNIVERSE_CHAT')" />
+      <action id="system"
+              name="uiSystemInfo"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=SYSTEM_INFO"
+              handler="lua:game:switchChatTab('SYSTEM_INFO')" />
+      <action id="yubo_chat"
+              name="uitabChatYuboChat"
+              usergroup_l="chat_menu_button"
+              usergroup_params_l="chat_db=YUBO_CHAT"
+              handler="lua:game:switchChatTab('YUBO_CHAT')" />
+    </action>
+    <separator />
+  </group>
+  <!-- User Chat menu. Code append entries for selecting chat source -->
+  <group type="menu"
+         id="user_chat_source_menu"
+         extends="base_menu_with_color">
+    <separator />
+  </group>
+  <!-- Standard Chat menu (used for region, team, etc..) -->
+  <group type="menu"
+         id="std_chat_source_menu"
+         extends="base_menu_with_color">
+    <separator />
+  </group>
+  <!-- ****************** -->
+  <!-- * AROUND ME CHAT * -->
+  <!-- ****************** -->
+  <!-- Menu to select the target -->
+  <group type="menu"
+         id="around_me_target_menu"
+         extends="base_menu">
+    <action id="team_target"
+            name="uiSAY"
+            handler="chat_target_selected"
+            params="say" />
+    <action id="team_target"
+            name="uiSHOUT"
+            handler="chat_target_selected"
+            params="shout" />
+  </group>
+  <template name="around_me_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           posparent="#posparent"
+           title="#title"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"
+             group_onclick_r="active_menu"
+             group_params_r="menu=ui:interface:base_chat_box_menu_with_eb_toggle">
+      </group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="13"
+             posref="TL TL"
+             group_onclick_r="active_menu"
+             group_params_r="menu=ui:interface:base_chat_box_menu_with_eb_toggle">
+      </group>
+      <group id="content"
+             x="0"
+             y="0"
+             h="100"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="-8"
+                  w="0"
+                  h="-100" />
+        <!-- display of filters -->
+        <ctrl type="button"
+              id="target_button"
+              button_type="push_button"
+              posparent="cb"
+              posref="BL TL"
+              y="-4"
+              x="8"
+              tx_normal="W_arrow_up_0.tga"
+              tx_pushed="W_arrow_up_0.tga"
+              tx_over="W_button_16_over.tga"
+              color="255 255 255 128"
+              col_pushed="255 255 255 255"
+              onclick_l="select_chat_target"
+              params_l="menu=ui:interface:around_me_target_menu|party_chats=false" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-26"
+                  onenter="chat_box_entry"
+                  backup_father_container_pos="true" />
+      </group>
+    </group>
+  </template>
+  <!-- ************** -->
+  <!-- *  TEAM MENU * -->
+  <!-- ************** -->
+  <!-- menu on a member of the team for the leader -->
+  <group type="menu"
+         id="team_member_menu"
+         extends="base_menu_with_color">
+    <action id="dismiss"
+            name="uimDismiss"
+            handler="dismiss_member"
+            params="" />
+    <!--            <action id="successor"  name="uimSetSuccesor" handler="set_successor" params=""/>-->
+    <!--            <action id="emote" name="uimEmotes" hanlder="" params="">
+                        <action id="emote1"  name="uimEmote1" handler="emote" params="emote_id=0"/>     
+                        <action id="emote2"  name="uimEmote2" handler="emote" params="emote_id=1"/>     
+                        <action id="emote3"  name="uimEmote3" handler="emote" params="emote_id=2"/>     
+                        <action id="emote4"  name="uimEmote4" handler="emote" params="emote_id=3"/>     
+                        <action id="emote5"  name="uimEmote5" handler="emote" params="emote_id=4"/>
+                        <action id="emote6"  name="uimEmote6" handler="emote" params="emote_id=5"/>
+                        <action id="emote7"  name="uimEmote7" handler="emote" params="emote_id=6"/>
+                </action>-->
+    <!--            <action id="commands" name="uimCommands" hanlder="" params="">
+                        <action id="command1"  name="uimCommand1" handler="" params=""/>        
+                        <action id="command2"  name="uimCommand2" handler="" params=""/>        
+                        <action id="command3"  name="uimCommand3" handler="" params=""/>        
+                        <action id="command4"  name="uimCommand4" handler="" params=""/>        
+                        <action id="command5"  name="uimCommand5" handler="" params=""/>
+                        <action id="command6"  name="uimCommand6" handler="" params=""/>                        
+                </action>-->
+    <action id="target"
+            name="uimTarget"
+            handler="team_target"
+            params="" />
+    <action id="compass"
+            name="uimTeamCompass"
+            handler="set_team_compas"
+            params="compass=ui:interface:compass" />
+    <separator />
+  </group>
+  <!-- links to enable leader options -->
+  <link expr="eq(band(@SERVER:GROUP:LEADER_INDEX, 15), 15)"
+        target="ui:interface:team_member_menu:dismiss:active" />
+  <!-- menu on the chat of the team for the leader -->
+  <group type="menu"
+         id="team_chat_leader_menu"
+         extends="base_chat_box_menu_with_eb_toggle">
+    <action id="quit"
+            name="uimQuitTeam"
+            handler="quit_team"
+            params="" />
+    <action id="share_seeds"
+            name="uimSeedsSharing"
+            hanlder="share_seeds"
+            params="" />
+    <separator />
+  </group>
+  <group type="menu"
+         id="team_chat_member_menu"
+         extends="base_chat_box_menu_with_eb_toggle">
+    <action id="quit"
+            name="uimQuitTeam"
+            handler="quit_team"
+            params="" />
+    <separator />
+  </group>
+  <!-- ***************** -->
+  <!-- *  CONTACT_MENU * -->
+  <!-- ***************** -->
+  <group type="menu"
+         id="friend_list_menu"
+         extends="base_chat_box_menu_with_eb_toggle">
+    <action id="remove"
+            name="uimRemove"
+            handler="remove_contact"
+            params="" />
+    <action id="move"
+            name="uimMoveToIgnoreList"
+            handler="move_contact"
+            params="list=0" />
+    <separator />
+  </group>
+  <group type="menu"
+         id="friend_list_menu_offline_unblocked"
+         extends="friend_list_menu">
+    <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="friend_list_menu_online_unblocked"
+         extends="friend_list_menu">
+    <action id="remove"
+            name="uimTell"
+            handler="menu_tell_contact"
+            params="" />
+    <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="friend_list_menu_online_abroad_unblocked"
+         extends="friend_list_menu">
+    <action id="remove"
+            name="uimTell"
+            handler="menu_tell_contact"
+            params="" />
+    <!-- <action id="block"   name="uimBlock"        handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="friend_list_menu_offline_blocked"
+         extends="friend_list_menu">
+    <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="friend_list_menu_online_blocked"
+         extends="friend_list_menu">
+    <action id="remove"
+            name="uimTell"
+            handler="tell_contact"
+            params="" />
+    <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="friend_list_menu_online_abroad_blocked"
+         extends="friend_list_menu">
+    <action id="remove"
+            name="uimTell"
+            handler="tell_contact"
+            params="" />
+    <!-- <action id="block"   name="uimUnBlock"      handler="block_contact" params=""/> -->
+  </group>
+  <group type="menu"
+         id="ignore_list_menu"
+         extends="base_menu_with_color">
+    <action id="remove"
+            name="uimRemove"
+            handler="remove_contact"
+            params="" />
+    <action id="move"
+            name="uimMoveToFriendList"
+            handler="move_contact"
+            params="list=1" />
+    <separator />
+  </group>
+  <!-- menu for sorting -->
+  <group type="menu"
+         id="sort_menu"
+         extends="base_chat_box_menu">
+    <action id="sort"
+            name="uimSort"
+            handler="sort_contacts"
+            params="" />
+    <separator />
+  </group>
+  <!-- ******************** -->
+  <!-- *  PARTY CHAT MENU * -->
+  <!-- ******************** -->
+  <group type="menu"
+         id="party_chat_menu"
+         extends="base_chat_box_menu_with_eb_toggle">
+    <action id="remove_party_chat"
+            name="uimRemovePartyChat"
+            handler="remove_party_chat"
+            params="" />
+    <action id="invite_party_chat"
+            name="uimInvite"
+            handler="party_chat_invite"
+            params="" />
+    <separator />
+  </group>
+  <!-- ************************************ -->
+  <!-- *  PARTY CHAT MENU FOR GUILD CHIEF * -->
+  <!-- ************************************ -->
+  <group type="menu"
+         id="guild_chief_party_chat_menu"
+         extends="party_chat_menu">
+    <action id="add_all_guild_members"
+            name="uimAddAllGM"
+            handler="add_all_guild_members"
+            params="" />
+    <action id="remove_all_guild_members"
+            name="uimRemoveAllGM"
+            handler="remove_all_guild_members"
+            params="" />
+    <separator />
+  </group>
+  <!-- ************************************ -->
+  <!-- *  PARTY CHAT MENU FOR TEAM CHIEF  * -->
+  <!-- ************************************ -->
+  <group type="menu"
+         id="team_chief_party_chat_menu"
+         extends="party_chat_menu">
+    <action id="add_all_team_members"
+            name="uimAddAllTM"
+            handler="add_all_team_members"
+            params="" />
+    <action id="remove_all_team_members"
+            name="uimRemoveAllTM"
+            handler="remove_all_team_members"
+            params="" />
+    <separator />
+  </group>
+  <!-- ******************************************* -->
+  <!-- *  PARTY CHAT MENU FOR GUILD & TEAM CHIEF * -->
+  <!-- ******************************************* -->
+  <group type="menu"
+         id="team_and_guild_chief_party_chat_menu"
+         extends="team_chief_party_chat_menu">
+    <action id="add_all_guild_members"
+            name="uimAddAllGM"
+            handler="add_all_guild_members"
+            params="" />
+    <action id="remove_all_guild_members"
+            name="uimRemoveAllGM"
+            handler="remove_all_guild_members"
+            params="" />
+    <separator />
+  </group>
+  <!-- ****************************************************** -->
+  <!-- * WINDOW TO ASK IF A PLAYER WANT TO JOIN A TEAM      * -->
+  <!-- ****************************************************** -->
+  <!-- the modal. WARNING: change the "line_maxw" below if change the container w -->
+  <group style="container_proposal"
+         id="join_team_proposal"
+         on_close_button="lua:game:teamInvitationRefuse()"
+         title_opened="uiJoinTeamProposal">
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text_id"
+              id="invitor_name"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="250" />
+      </group>
+      <instance template="button_ok_cancel"
+                posparent="inside"
+                posref="BR TR"
+                x="-4"
+                y="-4"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok="lua:game:teamInvitationAccept()"
+                onclick_ok_param=""
+                onclick_cancel="lua:game:teamInvitationRefuse()"
+                onclick_cancel_param="" />
+    </group>
+  </group>
+  <tree node="join_team_proposal" />
+  <!-- ****************************************************** -->
+  <!-- * WINDOW TO ASK IF A PLAYER WANT TO JOIN A GUILD     * -->
+  <!-- ****************************************************** -->
+  <!-- the modal dont mess up with ids they are used in code -->
+  <group style="container_proposal"
+         id="join_guild_proposal"
+         on_close_button="refuse_guild_invitation"
+         title_opened="uiJoinGuildProposal">
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text"
+              id="phrase"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="250" />
+      </group>
+      <instance template="button_ok_cancel"
+                posparent="inside"
+                posref="BR TR"
+                x="-4"
+                y="-4"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok="accept_guild_invitation"
+                onclick_ok_param=""
+                onclick_cancel="refuse_guild_invitation"
+                onclick_cancel_param="" />
+    </group>
+  </group>
+  <tree node="join_guild_proposal" />
+  <!-- ************************************************************** -->
+  <!-- * WINDOW TO ASK IF A PLAYER WANT TO DUEL WITH ANOTHER PLAYER * -->
+  <!-- ************************************************************** -->
+  <!-- the modal. WARNING: change the "line_maxw" below if change the container w -->
+  <group style="container_proposal"
+         id="join_duel_proposal"
+         w="310"
+         right_button="false"
+         on_close_button="refuse_duel_invitation"
+         header_active="false">
+    <view type="text"
+          id="text"
+          posref="TM TM"
+          color="233 197 42 255"
+          x="10"
+          y="-10"
+          fontsize="14"
+          global_color="false"
+          shadow="true"
+          hardtext="uiJoinDuelProposal" />
+    <view type="bitmap"
+          id="warning"
+          posparent="text"
+          posref="ML MR"
+          y="4"
+          x="-4"
+          global_color="false"
+          texture="w_warning.tga" />
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text_id"
+              id="invitor_name"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="290" />
+      </group>
+      <instance template="button_ok_cancel"
+                posparent="inside"
+                posref="BR TR"
+                x="-4"
+                y="-4"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok="accept_duel_invitation"
+                onclick_ok_param=""
+                onclick_cancel="refuse_duel_invitation"
+                onclick_cancel_param="" />
+    </group>
+  </group>
+  <tree node="join_duel_proposal" />
+  <!-- ***************************************** -->
+  <!-- * WINDOW TO ASK IF A PLAYER WANT TO PVP * -->
+  <!-- ***************************************** -->
+  <!-- the modal. WARNING: change the "line_maxw" below if change the container w -->
+  <group style="container_proposal"
+         id="join_pvp_challenge_proposal"
+         w="290"
+         right_button="false"
+         on_close_button="refuse_duel_invitation"
+         header_active="false">
+    <view type="text"
+          id="text"
+          posref="TM TM"
+          color="233 197 42 255"
+          x="10"
+          y="-10"
+          fontsize="14"
+          global_color="false"
+          shadow="true"
+          hardtext="uiJoinDuelProposal" />
+    <view type="bitmap"
+          id="warning"
+          posparent="text"
+          posref="ML MR"
+          y="4"
+          x="-4"
+          global_color="false"
+          texture="w_warning.tga" />
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text_id"
+              id="invitor_name"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="250" />
+      </group>
+      <instance template="button_ok_cancel"
+                posparent="inside"
+                posref="BR TR"
+                x="-4"
+                y="-4"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok="accept_pvp_challenge_invitation"
+                onclick_ok_param=""
+                onclick_cancel="refuse_pvp_challenge_invitation"
+                onclick_cancel_param="" />
+    </group>
+  </group>
+  <tree node="join_pvp_challenge_proposal" />
+  <!-- *********************************************** -->
+  <!-- * WINDOW TO ASK CLAN PLAYER WANT JOIN FOR PVP * -->
+  <!-- *********************************************** -->
+  <!-- the modal. WARNING: change the "line_maxw" below if change the container w -->
+  <group style="container_proposal"
+         id="join_pvp_clan_proposal"
+         right_button="false"
+         header_active="false">
+    <view type="text"
+          id="text"
+          posref="TM TM"
+          color="233 197 42 255"
+          x="10"
+          y="-10"
+          fontsize="14"
+          global_color="false"
+          shadow="true"
+          hardtext="uiJoinClanProposalTitle" />
+    <view type="bitmap"
+          id="warning"
+          posparent="text"
+          posref="ML MR"
+          y="4"
+          x="-4"
+          global_color="false"
+          texture="w_warning.tga" />
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text"
+              id="pvp_clan_desc"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="250"
+              hardtext="uiJoinClanProposalDesc" />
+      </group>
+      <ctrl style="text_button_16"
+            id="neutral"
+            posref="BL TL"
+            posparent="inside"
+            onclick_l="pvp_clan_join"
+            params_l="neutral"
+            hardtext="uiPvpClanNeutral" />
+      <ctrl style="text_button_16"
+            id="clan1"
+            posref="BM TM"
+            posparent="inside"
+            onclick_l="pvp_clan_join"
+            params_l="clan1" />
+      <ctrl style="text_button_16"
+            id="clan2"
+            posref="BR TR"
+            posparent="inside"
+            onclick_l="pvp_clan_join"
+            params_l="clan2" />
+    </group>
+  </group>
+  <tree node="join_pvp_clan_proposal" />
+  <!-- ****************************************************** -->
+  <!-- * POPUP TO ASK IF A PLAYER WANT TO JOIN A PARTY CHAT * -->
+  <!-- ****************************************************** -->
+  <!-- TODO convert this to a container -->
+  <group id="join_party_chat_dialog"
+         type="modal"
+         exit_click_out="true"
+         mouse_pos="false"
+         posref="MM MM"
+         w="155"
+         h="80"
+         options="skin_modal">
+    <view type="text"
+          id="text"
+          posref="TM TM"
+          y="-4"
+          color="255 255 255 255"
+          fontsize="14"
+          shadow="true"
+          hardtext="uiJoinChatQuestion" />
+    <group id="indent_middle"
+           child_resize_w="true"
+           child_resize_h="true"
+           posref="BM BM"
+           y="4">
+      <instance template="button_ok_cancel"
+                posref="TR TR"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok=""
+                onclick_ok_param=""
+                onclick_cancel=""
+                onclick_cancel_param="" />
+    </group>
+  </group>
+  <!-- ****************************************************************** -->
+  <!-- * POPUP TO ASK IF A PLAYER WANT TO ENTER A MISSION CRITICAL ZONE * -->
+  <!-- ****************************************************************** -->
+  <group style="container_proposal"
+         id="enter_crzone_proposal"
+         right_button="false"
+         header_active="false">
+    <group id="content"
+           child_resize_h="true"
+           child_resize_hmargin="10">
+      <group id="inside"
+             sizeref="w"
+             posref="TL TL"
+             y="-4"
+             child_resize_h="true"
+             child_resize_hmargin="6">
+        <view type="text_id"
+              id="phrase"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              multi_line="true"
+              multi_line_space="0"
+              line_maxw="250" />
+      </group>
+      <instance template="button_ok_cancel"
+                posparent="inside"
+                posref="BR TR"
+                x="-4"
+                y="-4"
+                ok_text="uiAccept"
+                cancel_text="uiDecline"
+                onclick_ok="enter_crzone"
+                onclick_ok_param="1"
+                onclick_cancel="enter_crzone"
+                onclick_cancel_param="0" />
+    </group>
+  </group>
+  <tree node="enter_crzone_proposal" />
+  <!-- *************************************************** -->
+  <!-- * POPUP TO ASK THE PLAYER FOR A TELEPORT LOCATION * -->
+  <!-- *************************************************** -->
+  <proc id="proc_teleport">
+    <action handler="ascensor_teleport" />
+    <action handler="list_sheet_text_reset_selection"
+            params="ui:interface:ascensor_teleport_list:header_opened:list_of_items:all_items" />
+    <action handler="set"
+            params="target_property=ui:interface:ascensor_teleport_list:active|value=0" />
+    <action handler="set_compass_north"
+            params="compass=ui:interface:compass" />
+  </proc>
+  <group id="ascensor_teleport_list"
+         type="container"
+         posref="BL TL"
+         min_w="400"
+         max_w="400"
+         w="400"
+         x="302"
+         y="200"
+         pop_max_h="700"
+         max_h="2000"
+         active="false"
+         openable="false"
+         opened="true"
+         global_color="false"
+         movable="true"
+         resizer="false"
+         savable="false"
+         title="uiAscensorTeleportList"
+         header_color="UI:SAVE:WIN:COLORS:BOT">
+    <group id="header_opened"
+           child_resize_h="true"
+           w="388"
+           x="16"
+           y="-8"
+           posref="TL TL">
+      <!-- 2/ LIST OF ITEMS / BRICK / PACTS / SKILLS -->
+      <group id="list_of_items"
+             posref="TL TL"
+             x="0"
+             y="0"
+             w="388"
+             h="184">
+        <view type="bitmap"
+              id="sep"
+              sizeref="w"
+              w="0"
+              h="2"
+              posref="TL TL"
+              x="0"
+              y="0"
+              scale="true"
+              texture="W_line_hor.tga" />
+        <!-- text depending on the type of items -->
+        <view type="text"
+              id="items_tobuy"
+              posparent="sep"
+              posref="BL TL"
+              x="0"
+              y="-4"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              hardtext="uiTeleportLocation"
+              global_color="false"
+              active="false" />
+        <!-- The H should be "32+hspace" * Number of rows. Setup list.max_h too below-->
+        <group type="list_sheet_guild"
+               sizeref="w"
+               w="-10"
+               h="152"
+               id="all_items"
+               posparent="sep"
+               posref="BM TM"
+               x="0"
+               y="-24"
+               xitem="2"
+               yitem="-2"
+               xtext="46"
+               ytext="-16"
+               hspace="4"
+               array="false"
+               value="LOCAL:ASCENSOR"
+               selection_group="teleport_selection"
+               dragable="false"
+               nature="elevator_destination"
+               onclick_l="proc"
+               params_l="proc_teleport"
+               onclick_r=""
+               over_color="%bot_chat_sheet_selection_normal"
+               over_col_pushed="%bot_chat_sheet_selection_pushed"
+               over_col_over="%bot_chat_sheet_selection_over"
+               color="255 255 255 255"
+               fontsize="10"
+               shadow="true"
+               multi_line="true"
+               multi_line_space="0">
+          <!-- the scroll -->
+          <ctrl style="skin_scroll"
+                id="scroll_row"
+                posref="TL TL" />
+          <!-- the group to scroll -->
+          <group id="list"
+                 sizeref="w"
+                 posref="TL TL"
+                 max_h="152"
+                 x="8"
+                 y="0"
+                 w="-8"
+                 h="0" />
+        </group>
+      </group>
+    </group>
+  </group>
+  <tree node="ascensor_teleport_list" />
+  <!-- ******** -->
+  <!-- * TEST * -->
+  <!-- ******** -->
+  <!--
+<instance template="chat_id" id="chat1" title="LEMUEL" />
+<instance template="chat_id" id="chat2" title="CYRIL" />
+
+<instance template="mate_id" id="mate1" title="NICOLAS" />
+<instance template="mate_id" id="mate2" title="MATTHIEU" />
+<instance template="mate_id" id="mate3" title="LIONEL" />
+
+<instance template="contact_id" id="contact1" title="CYRIL" />
+<instance template="contact_id" id="contact2" title="LEMUEL" />
+<instance template="contact_id" id="contact3" title="LIONEL" />
+<instance template="contact_id" id="contact4" title="MATTHIEU" />
+<instance template="contact_id" id="contact5" title="NICOLAS" />
+
+<instance template="contact_id" id="ignore1" title="DON'T" />
+<instance template="contact_id" id="ignore2" title="TALK" />
+<instance template="contact_id" id="ignore3" title="2 ME" />
+-->
+  <!-- ******************* -->
+  <!-- *  SYSTEM INFOS   * -->
+  <!-- ******************* -->
+  <!--
+<group type="container" id="system_info" x="0" y="0" w="176" posref="TL TL" title="" title_opened="uiSystemInfoTitle" > 
+
+        <group id="header_closed" x="0" y="0" w="176" h="16" posref="TL TL" >
+                <group id="pipo" posref="MR MR"  sizeref="w" w="-24" h="16" >
+                        <instance template="chat_box" id="cb" posref="BR BR" sizeref="w" w="12" h="28" min_height="28" max_height="28"/>
+                </group>
+                <view type="bitmap" id="logo" posparent="pipo" posref="TL TR" x="-2" texture="W_user_info.tga" />
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
+        </group>
+        
+        <group id="content" x="0" y="0" w="168" h="0" posref="TL TL"  >
+        </group>
+
+</group>
+-->
+  <!-- ********* -->
+  <!-- * GUILD * -->
+  <!-- ********* -->
+  <!--
+<group type="container" id="guild" x="" y="" w="176" posref="TR TR" title="uiGuildChat" title_opened="uiGuildChat" >
+
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
+                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+
+</group>
+-->
+  <!-- ******** -->
+  <!-- * TEAM * -->
+  <!-- ******** -->
+  <!--
+<group type="container" id="team" x="" y="" w="176" posref="TR TR" title="uiTeamChatTitle" title_opened="uiTeamChatTitle" >
+
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+                <view type="bitmap" id="lead" posref="TL TL" x="48" texture="w_leader.tga" global_color="false" />
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <view type="bitmap" id="lead" posref="TL TL" x="48" texture="w_leader.tga" global_color="false" />
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
+                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+
+</group>
+-->
+  <!-- ************** -->
+  <!-- * PARTY CHAT * -->
+  <!-- ************** -->
+  <!--
+<group type="container" id="party" x="" y="" w="176" posref="TR TR" title="PARTY CHAT" title_opened="PARTY CHAT" >
+
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
+                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-4" posparent="cb" child_resize_h="true" sizeref="w" w="-12" onenter="chat_box_entry" backup_father_container_pos="true"/>
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+
+</group>
+-->
+  <!-- ************* -->
+  <!-- * AROUND ME * -->
+  <!-- ************* -->
+  <!--
+<group type="container" id="around" x="" y="" w="176" posref="TR TR" title="uiAroundMeTitle" title_opened="uiAroundMeTitle" >
+
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="64" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-4" w="-8" h="64" min_height="64" max_height="256"/>
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+
+</group>
+-->
+  <!-- **************** -->
+  <!-- * CONTACT LIST * -->
+  <!-- **************** -->
+  <group type="container"
+         id="contact_list"
+         w="260"
+         title="uiContactListTitle"
+         movable="true"
+         active="false"
+         opened="true"
+         resizer="false"
+         pop_min_h="89"
+         openable="false"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:CONTACT_LIST|value=0"
+         header_color="UI:SAVE:WIN:COLORS:COM"
+         global_color="false"
+         global_color_over="true">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="16"
+           posref="TL TL"></group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="176"
+           h="16"
+           posref="TL TL"></group>
+    <group id="content"
+           x="0"
+           y="0"
+           h="0"
+           posref="TL TL"></group>
+  </group>
+  <tree node="contact_list">
+    <!-- friend_list node created in code -->
+    <!-- ignore_list node created in code -->
+  </tree>
+  <!-- *************** -->
+  <!-- * IGNORE LIST * -->
+  <!-- *************** -->
+  <!--
+<group type="container" id="ignore" x="" y="" w="176" posref="TR TR" title="uiIgnoreList" title_opened="uiIgnoreList" >
+
+        <group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+        </group>
+        
+        <group id="header_opened" x="0" y="0" w="176" h="20" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+
+</group>
+-->
+  <!-- ****************************************************** -->
+  <!-- * WINDOW TO ENTER THE NAME OF A NEW PARTY CHAT       * -->
+  <!-- ****************************************************** -->
+  <proc id="validate_party_chat_name_proc">
+    <action handler="set"
+            params="target_property=ui:interface:create_new_party_chat:active|value=0" />
+    <action handler="validate_party_chat_name"
+            params="" />
+  </proc>
+  <group id="create_new_party_chat"
+         type="container"
+         w="300"
+         on_close_button="proc"
+         on_close_button_params=""
+         active="false"
+         savable="false"
+         openable="false"
+         opened="true"
+         movable="true"
+         title_opened="uiCreateNewPartyChat"
+         h="512"
+         pop_max_h="512">
+    <group id="header_opened"
+           h="80">
+      <group id="pc_name"
+             child_resize_w="true"
+             child_resize_h="true"
+             posref="TM TM"
+             y="-16">
+        <!-- 'ADD' text -->
+        <view type="text"
+              id="add_text"
+              posref="ML ML"
+              color="255 255 255 255"
+              fontsize="14"
+              shadow="true"
+              hardtext="uiChannel" />
+        <!-- the edit box -->
+        <instance template="edit_box_widget"
+                  id="pc_name_eb"
+                  posref="MR ML"
+                  x="4"
+                  posparent="add_text"
+                  w="200"
+                  onenter="proc"
+                  params="validate_party_chat_name_proc"
+                  entry_type="alpha" />
+      </group>
+      <group id="indent_middle"
+             posparent="pc_name"
+             child_resize_w="true"
+             child_resize_h="true"
+             posref="BM TM"
+             y="-8">
+        <instance template="button_ok_cancel"
+                  posref="TR TR"
+                  onclick_ok="proc"
+                  onclick_ok_param="validate_party_chat_name_proc"
+                  onclick_cancel="set"
+                  onclick_cancel_param="target_property=ui:interface:create_new_party_chat:active|value=0" />
+      </group>
+    </group>
+  </group>
+  <tree node="create_new_party_chat" />
+  <!-- ***************** -->
+  <!-- * DEBUG CONSOLE * -->
+  <!-- ***************** -->
+  <!--
+<group type="container" id="debug_console" w="320" title="uiDebugConsole" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:HELP"
+ title_bar_open="false" min_w="216" min_h="64" max_w="2000"
+ max_h="1600" pop_max_w="2000" pop_max_h="1600" lockable="true" openable="false" opened="true" movable="true" resizer="true" active="true">
+        <group id="header_closed" x="0" y="0" h="12" posref="TL TL" >
+        </group>
+
+        <group id="header_opened" x="0" y="0" w="160" h="13" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
+                <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
+                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-2" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="debug_console_entry" backup_father_container_pos="true"/>
+        </group>
+
+        <group id="content" x="0" y="0" h="0" posref="TL TL" >
+        </group>
+</group>        
+
+<tree node="debug_console">
+</tree>
+-->
+  <!-- ************* -->
+  <!-- * YUBO CHAT * -->
+  <!-- ************* -->
+  <proc id="yubo_chat_proc_close">
+    <action handler="set"
+            params="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=0" />
+  </proc>
+  <!-- **************** -->
+  <!-- * DYNAMIC CHAT * -->
+  <!-- **************** -->
+  <!-- fct to know if a dynamic channel is writable -->
+  <define id="canWriteToDynChat"
+          value="ne(@SERVER:DYN_CHAT:CHANNEL#dyn_chat_nb:WRITE_RIGHT,0)" />
+  <!-- template for a popuped dynamic chat window -->
+  <template name="dynamic_chat_id"
+            keep="true"
+            posparent="parent"
+            w="256"
+            h="64"
+            title=""
+            dyn_chat_nb="">
+    <group type="container"
+           id="#id"
+           w="#w"
+           h="#h"
+           posparent="#posparent"
+           title_class="text_dyn_string"
+           title="SERVER:DYN_CHAT:CHANNEL#dyn_chat_nb:NAME"
+           resizer="true"
+           openable="false"
+           popable="false"
+           open_when_popup="true"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           global_color="false"
+           global_color_over="true"
+           lockable="true"
+           pop_min_w="216"
+           pop_min_h="96"
+           pop_max_w="2000"
+           pop_max_h="1600"
+           active_savable="false">
+      <group id="header_closed"
+             x="0"
+             y="0"
+             h="12"
+             posref="TL TL"></group>
+      <group id="header_opened"
+             x="0"
+             y="0"
+             w="160"
+             h="13"
+             posref="TL TL"></group>
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="chat_box"
+                  id="cb"
+                  posref="TR TR"
+                  sizeref="wh"
+                  y="0"
+                  w="0"
+                  h="-24" />
+        <instance template="edit_box_widget"
+                  id="ebw"
+                  posref="BR TR"
+                  y="-2"
+                  posparent="cb"
+                  child_resize_h="true"
+                  sizeref="w"
+                  w="-10"
+                  onenter="chat_box_entry"
+                  reset_focus_on_hide="true"
+                  backup_father_container_pos="true" />
+        <view type="text"
+              id="cant_write_ebw"
+              posref="BL TL"
+              posparent="cb"
+              y="-6"
+              hardtext="uiCannotWriteDynChat"
+              global_color="true"
+              fontsize="10"
+              shadow="true" />
+        <link expr="%canWriteToDynChat"
+              target="ebw:active" />
+        <link expr="%canWriteToDynChat"
+              target="ebw:eb:enter_recover_focus" />
+        <!-- important else if press enter, then the edit box is reactivated! -->
+        <link expr="not(%canWriteToDynChat)"
+              target="cant_write_ebw:active" />
+      </group>
+      <!-- Show this window if popuped and present -->
+      <link expr="and(ne(@SERVER:DYN_CHAT:CHANNEL#dyn_chat_nb:NAME,0),
+                                                @UI:VARIABLES:DYNAMIC_CHAT#dyn_chat_nb:WANT_POPUP)"
+            target="active" />
+    </group>
+  </template>
+  <!-- those proc have the index in db of the dyn_chat, in parameter @0 -->
+  <proc id="dynamic_chat_proc_deactive">
+    <!-- The window is closed by the user, change the associated DB flag -->
+    <action handler="set"
+            params="dblink=UI:VARIABLES:DYNAMIC_CHAT@0:WANT_POPUP|value=0" />
+  </proc>
+</interface_config>

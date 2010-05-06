@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.10 $" State="modified">
+  <ELEMENT Name="Additional Damage" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Additional Damage Left Hand" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Damage Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Damage Resisted Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Light Armor Absorbtion Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Light Armor Absorbtion Resisted Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Light Armor Wear Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Medium Armor Absorbtion Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Medium Armor Absorbtion Resisted Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Medium Armor Wear Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Heavy Armor Absorbtion Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Heavy Armor Absorbtion Resisted Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Heavy Armor Wear Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Aggro Multiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Weapon Damage Type" Type="Type" Filename="item_damage_type.typ" Default="undefined"/>
+  <ELEMENT Name="Weapon Quality" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Weapon Type" Type="Type" Filename="item_category.typ" Default="unknown"/>
+  <ELEMENT Name="Sap Absorbtion" Type="Dfn" Filename="_absorb_score.dfn"/>
+  <ELEMENT Name="Stamina Absorbtion" Type="Dfn" Filename="_absorb_score.dfn"/>
+  <ELEMENT Name="RegisterDamagesToSentence" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Range Combat" Type="Dfn" Filename="_range_combat_damage_modifiers.dfn"/>
+  <LOG>Tue Nov 26 12:11:49 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:12:07 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:16:43 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:17:00 2002 (fleury) Dfn Structure = 
+Fri Nov 29 17:29:20 2002 (brigand) Dfn Structure = 
+Mon Dec 02 15:36:28 2002 (brigand) Dfn Structure = 
+Tue Dec 03 18:58:58 2002 (fleury) Dfn Structure = 
+Tue Dec 03 19:03:17 2002 (fleury) Dfn Structure = 
+Thu Dec 05 14:05:45 2002 (fleury) Dfn Structure = 
+Thu Dec 05 15:13:41 2002 (fleury) Dfn Structure = 
+Thu Dec 05 17:55:00 2002 (brigand) Dfn Structure = 
+Thu Dec 05 19:25:21 2002 (brigand) Dfn Structure = 
+Fri Dec 06 16:20:31 2002 (fleury) Dfn Structure = 
+Tue Apr 22 15:28:44 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

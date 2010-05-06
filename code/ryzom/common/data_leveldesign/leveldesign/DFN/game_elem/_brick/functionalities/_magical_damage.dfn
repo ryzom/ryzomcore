@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.10 $" State="modified">
+  <ELEMENT Name="WeaponType" Type="Type" Filename="item_category.typ" Default="unknown"/>
+  <ELEMENT Name="FixedDamageFactor" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="QualityModifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="CasterLevelModifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="BaseDamageMultiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="DamageModifier" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="DamageMultiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="DamageModifierOnResist" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="DamageMultiplierOnResist" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="DamageSecondaryModifier" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="DamageSecondaryMultiplier" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="DamageSecondaryModifierOnResist" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="DamageSecondaryMultiplierOnResist" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Sap Absorbtion" Type="Dfn" Filename="_absorb_score.dfn"/>
+  <ELEMENT Name="Stamina Absorbtion" Type="Dfn" Filename="_absorb_score.dfn"/>
+  <LOG>Tue Nov 26 12:05:39 2002 (fleury) Dfn Structure = 
+Thu Dec 19 17:44:53 2002 (fleury) Dfn Structure = 
+Thu Jan 02 16:23:01 2003 (fleury) Dfn Structure = 
+Thu Jan 02 16:34:14 2003 (fleury) Dfn Structure = 
+Thu Jan 02 17:17:49 2003 (fleury) Dfn Structure =
+Fri Dec 20 17:39:19 2002 (brigand) Dfn Structure = 
+Fri Dec 20 17:44:38 2002 (brigand) Dfn Structure = 
+Mon Jan 06 15:01:37 2003 (brigand) Dfn Structure = 
+Fri Jan 10 15:03:49 2003 (fleury) Dfn Structure = 
+Thu Jan 16 17:17:59 2003 (brigand) Dfn Structure = 
+Fri Jan 17 14:30:30 2003 (brigand) Dfn Structure = 
+Tue Apr 22 15:34:42 2003 (fleury) Dfn Structure = 
+Tue Apr 22 15:35:46 2003 (fleury) Dfn Structure = 
+Thu Jun 26 10:40:45 2003 (fleury) Dfn Structure = 
+Thu Jun 26 10:57:32 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

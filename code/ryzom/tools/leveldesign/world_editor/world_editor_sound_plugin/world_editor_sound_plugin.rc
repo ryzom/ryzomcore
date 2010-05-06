@@ -1,0 +1,197 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP_STOP         BITMAP  DISCARDABLE     "res/bitmap1.bmp"
+IDB_BITMAP_PLAY         BITMAP  DISCARDABLE     "res/bmp00001.bmp"
+IDB_BITMAP_EAR          BITMAP  DISCARDABLE     "res/bmp00002.bmp"
+IDB_BITMAP_MOVE_EAR     BITMAP  DISCARDABLE     "res/bmp00003.bmp"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_FLAGS DIALOGEX 0, 0, 172, 343
+STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "Background Flags"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Check00",IDC_CHECK_FLAG_00,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,40,74,13
+    CONTROL         "Check01",IDC_CHECK_FLAG_01,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,50,74,13
+    CONTROL         "Check02",IDC_CHECK_FLAG_02,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,60,74,13
+    CONTROL         "Check03",IDC_CHECK_FLAG_03,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,70,74,13
+    CONTROL         "Check04",IDC_CHECK_FLAG_04,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,80,74,13
+    CONTROL         "Check05",IDC_CHECK_FLAG_05,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,90,74,13
+    CONTROL         "Check06",IDC_CHECK_FLAG_06,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,100,74,13
+    CONTROL         "Check07",IDC_CHECK_FLAG_07,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,110,74,13
+    CONTROL         "Check08",IDC_CHECK_FLAG_08,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,120,74,13
+    CONTROL         "Check09",IDC_CHECK_FLAG_09,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,130,74,13
+    CONTROL         "Check10",IDC_CHECK_FLAG_10,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,140,74,13
+    CONTROL         "Check11",IDC_CHECK_FLAG_11,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,150,74,13
+    CONTROL         "Check12",IDC_CHECK_FLAG_12,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,160,74,13
+    CONTROL         "Check13",IDC_CHECK_FLAG_13,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,170,74,13
+    CONTROL         "Check14",IDC_CHECK_FLAG_14,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,180,74,13
+    CONTROL         "Check15",IDC_CHECK_FLAG_15,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,190,74,13
+    GROUPBOX        "Backgound flags",IDC_STATIC,5,30,160,175
+    PUSHBUTTON      "Button1",IDC_BUTTON_PLAY_STOP,5,5,20,20,BS_BITMAP
+    CONTROL         "Check1",IDC_CHECK_MOVE_EAR,"Button",BS_AUTOCHECKBOX | 
+                    BS_BITMAP | BS_PUSHLIKE | WS_TABSTOP,30,5,20,20
+    LTEXT           "Static",IDC_STATIC_SAMPLE_SIZE,57,7,111,18
+    CONTROL         "Check00",IDC_CHECK_FLAG_16,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,40,74,13
+    CONTROL         "Check01",IDC_CHECK_FLAG_17,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,50,74,13
+    CONTROL         "Check02",IDC_CHECK_FLAG_18,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,60,74,13
+    CONTROL         "Check03",IDC_CHECK_FLAG_19,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,70,74,13
+    CONTROL         "Check04",IDC_CHECK_FLAG_20,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,80,74,13
+    CONTROL         "Check05",IDC_CHECK_FLAG_21,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,90,74,13
+    CONTROL         "Check06",IDC_CHECK_FLAG_22,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,100,74,13
+    CONTROL         "Check07",IDC_CHECK_FLAG_23,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,110,74,13
+    CONTROL         "Check08",IDC_CHECK_FLAG_24,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,120,74,13
+    CONTROL         "Check09",IDC_CHECK_FLAG_25,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,130,74,13
+    CONTROL         "Check10",IDC_CHECK_FLAG_26,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,140,74,13
+    CONTROL         "Check11",IDC_CHECK_FLAG_27,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,150,74,13
+    CONTROL         "Check12",IDC_CHECK_FLAG_28,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,160,74,13
+    CONTROL         "Check13",IDC_CHECK_FLAG_29,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,170,74,13
+    CONTROL         "Check14",IDC_CHECK_FLAG_30,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,180,74,13
+    CONTROL         "Check15",IDC_CHECK_FLAG_31,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,190,74,13
+    GROUPBOX        "Loaded Sample banks",IDC_STATIC,7,211,160,125
+    CONTROL         "List1",IDC_SB_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SORTASCENDING | LVS_AUTOARRANGE | LVS_ALIGNLEFT | 
+                    WS_BORDER | WS_TABSTOP,15,225,145,105
+    PUSHBUTTON      "Reload",IDC_RELOAD,106,210,49,10,NOT WS_TABSTOP,
+                    WS_EX_TRANSPARENT
+END
+
+IDD_DIALOG_LOAD DIALOG DISCARDABLE  0, 0, 340, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Sound plugin init"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "no message",IDC_STATIC_MESSAGE,7,7,326,41,
+                    SS_CENTERIMAGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOG_FLAGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 336
+    END
+
+    IDD_DIALOG_LOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 333
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

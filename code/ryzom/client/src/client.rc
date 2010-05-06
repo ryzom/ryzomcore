@@ -1,0 +1,178 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include <windows.h>
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MAIN_ICON           ICON    DISCARDABLE     "ryzom_small.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#define IDC_STATIC -1
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SLASH_SCREEN DIALOGEX 0, 0, 333, 231
+STYLE WS_POPUP
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         117,IDC_STATIC,"Static",SS_BITMAP,0,0,333,231
+END
+
+IDD_CRASH_INFORMATION DIALOG DISCARDABLE  0, 0, 186, 301
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Ryzom information"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Ryzom has detected that the last game session has not quit properly. You have experienced :",
+                    IDC_STATIC,7,7,172,27
+    PUSHBUTTON      "A computer freeze.",FROZEN,7,38,172,29
+    PUSHBUTTON      "A computer self reboot.",REBOOTED,7,70,172,29
+    PUSHBUTTON      "A game crash with a NeL report window.",WINDOWED,7,102,
+                    172,29,BS_MULTILINE
+    PUSHBUTTON      "A game crash without NeL report window.",NO_WINDOW,7,
+                    134,172,29,BS_MULTILINE
+    PUSHBUTTON      "You killed the game process using the task manager.",
+                    KILLED,7,166,172,29,BS_MULTILINE
+    PUSHBUTTON      "Nothing wrong. The game quit normally.",NOT_CRASHED,7,
+                    198,172,29
+    PUSHBUTTON      "You don't remember what's happened",CRASHED,7,231,172,
+                    29
+    LTEXT           "If you experience lot of crash, please try to do a data check. Press the ""Check Data"" button at Login Screen.",
+                    IDC_STATIC,5,270,175,25
+END
+
+IDD_ERROR_HELP_MESSAGE_BOX DIALOGEX 0, 0, 373, 81
+STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "Ryzom"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Exit",IDOK,85,57,89,21
+    PUSHBUTTON      "Help",IDC_RYZOM_ERROR_HELP,178,57,92,21
+    LTEXT           "Static",IDC_ERROR_MSG_TEXT,143,7,228,47,0,
+                    WS_EX_CLIENTEDGE
+    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,7,7,70,63
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE
+BEGIN
+    IDD_SLASH_SCREEN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 326
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 224
+    END
+
+    IDD_CRASH_INFORMATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 294
+    END
+
+    IDD_ERROR_HELP_MESSAGE_BOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 366
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 74
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SLASH_SCREEN        BITMAP  DISCARDABLE     "splash_screen.bmp"
+IDB_ERROR_LOGO          BITMAP  DISCARDABLE     "error_logo.bmp"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

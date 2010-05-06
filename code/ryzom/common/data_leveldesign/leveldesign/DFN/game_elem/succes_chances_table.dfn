@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.9 $" State="modified">
+  <ELEMENT Name="Chances" Type="Dfn" Filename="_success_chances_line.dfn" Array="true"/>
+  <ELEMENT Name="Max Success" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Max Success Factor" Type="Type" Filename="int.typ" Default="1.0"/>
+  <ELEMENT Name="Max Partial Success Factor" Type="Type" Filename="int.typ" Default="&quot;Max Success Factor&quot;"/>
+  <ELEMENT Name="Min Partial Success Factor" Type="Type" Filename="int.typ" Default="&quot;Min Success Factor&quot;"/>
+  <ELEMENT Name="Min Success Factor" Type="Type" Filename="int.typ" Default="0.55"/>
+  <ELEMENT Name="Full Success Roll" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="Min Success Roll" Type="Type" Filename="int.typ" Default="90"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:10 2002 (corvazier) File converted from old format
+Thu Mar 25 16:23:09 2004 (fleury) Dfn Structure = 
+Thu Jun 03 20:40:35 2004 (fleury) Dfn Structure = 
+Thu Jun 03 20:40:57 2004 (fleury) Dfn Structure = 
+Tue Sep 07 18:53:34 2004 (fleury) Dfn Structure = </LOG>
+</DFN>

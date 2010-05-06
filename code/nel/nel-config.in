@@ -1,0 +1,254 @@
+#!/bin/sh
+
+#
+#
+# nel-config
+#
+# Script printing NeL's install library/include paths and some other
+# informations like NeL's version
+#
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+lib_dir="@libdir@"
+include_dir="@includedir@"
+
+enable_ligo=@enable_ligo@
+enable_georges=@enable_georges@
+enable_net=@enable_net@
+enable_3d=@enable_3d@
+enable_pacs=@enable_pacs@
+enable_sound=@enable_sound@
+enable_logic=@enable_logic@
+
+usage()
+{
+    cat <<EOF
+Usage: nel-config [OPTIONS] [LIBRARIES]
+Options:
+   [--prefix[=DIR]]
+   [--exec-prefix[=DIR]]
+   [--version]
+   [--libs]
+   [--libtool]
+   [--ldflags]
+   [--cflags]
+   [--without-ligo]
+   [--without-georges]
+   [--without-network]
+   [--without-3d]
+   [--without-pacs]
+   [--without-sound]
+   [--without-logic]
+EOF
+    exit $1
+}
+
+if test $# -eq 0
+then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0
+do
+    case "$1" in
+        -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+        *) optarg= ;;
+    esac
+
+    case $1 in
+        --prefix=*)
+            prefix=$optarg
+            local_prefix=yes
+            ;;
+        --prefix)
+            echo_prefix=yes
+            ;;
+        --exec-prefix=*)
+            exec_prefix=$optarg
+            exec_prefix_set=yes
+            local_prefix=yes
+            ;;
+        --exec-prefix)
+            echo_exec_prefix=yes
+            ;;
+        --version)
+            echo @VERSION@
+            exit 0
+            ;;
+        --cflags)
+            echo_cflags=yes
+            ;;
+        --ldflags)
+            echo_ldflags=yes
+            ;;
+        --libs)
+            echo_libs=yes
+            ;;
+        --libtool)
+            echo_libtool=yes
+            ;;
+        --without-ligo)
+            without_ligo=yes
+            ;;
+        --without-logic)
+            without_logic=yes
+            ;;
+        --without-georges)
+            without_georges=yes
+            ;;
+        --without-net|--without-network)
+            without_net=yes
+            ;;
+        --without-3d)
+            without_3d=yes
+            ;;
+        --without-pacs)
+            without_pacs=yes
+            ;;
+        --without-snd|--without-sound)
+            without_sound=yes
+            ;;
+        *)
+            usage 1 1>&2
+            ;;
+    esac
+    shift
+done
+
+if test "$local_prefix" = "yes"
+then
+    if test "$exec_prefix_set" != "yes"
+    then
+        exec_prefix=$prefix
+    fi
+fi
+
+if test "$echo_prefix" = "yes"
+then
+    echo $prefix
+fi
+
+if test "$echo_exec_prefix" = "yes"
+then
+    echo $exec_prefix
+fi
+
+if test "$echo_cflags" = "yes"
+then
+    cflags="-I$include_dir"
+    echo $cflags
+fi
+
+if test "$echo_ldflags" = "yes"
+then
+    ldflags="-L$lib_dir"
+    echo $ldflags
+fi
+
+if test "$echo_libs" = "yes"
+then
+    lib_misc="-lnelmisc"
+    lib_ligo="-lnelligo"
+    lib_logic="-lnellogic"
+    lib_georges="-lnelgeorges"
+    lib_net="-lnelnet"
+    lib_3d="-lnel3d"
+    lib_pacs="-lnelpacs"
+    lib_sound="-lnelsound -lnelsnd_lowlevel"
+    lib_ai="-lnelai"
+
+    libs="$lib_misc"
+
+    if test "$without_ligo" != "yes" -a '(' "$enable_ligo" = "yes" -o "$enable_ligo" = "ON" ')'
+    then
+        libs="$libs $lib_ligo"
+    fi
+
+    if test "$without_logic" != "yes" -a '(' "$enable_logic" = "yes" -o "$enable_logic" = "ON" ')'
+    then
+        libs="$libs $lib_logic"
+    fi
+
+    if test "$without_georges" != "yes" -a '(' "$enable_georges" = "yes" -o "$enable_georges" = "ON" ')'
+    then
+        libs="$libs $lib_georges"
+    fi
+
+    if test "$without_net" != "yes" -a '(' "$enable_net" = "yes" -o "$enable_net" = "ON" ')'
+    then
+        libs="$libs $lib_net"
+    fi
+
+    if test "$without_3d" != "yes" -a '(' "$enable_3d" = "yes" -o "$enable_3d" = "ON" ')'
+    then
+        libs="$libs $lib_3d"
+    fi
+
+    if test "$without_pacs" != "yes" -a '(' "$enable_pacs" = "yes" -o "$enable_pacs" = "ON" ')'
+    then
+        libs="$libs $lib_pacs"
+    fi
+
+    if test "$without_sound" != "yes" -a '(' "$enable_sound" = "yes" -o "$enable_sound" = "ON" ')'
+    then
+        libs="$libs $lib_sound"
+    fi
+
+    echo -L@libdir@ $libs
+fi
+
+if test "$echo_libtool" = "yes"
+then
+    libtool_misc="$lib_dir/libnelmisc.la"
+    libtool_ligo="$lib_dir/libnelligo.la"
+    libtool_logic="$lib_dir/libnellogic.la"
+    libtool_georges="$lib_dir/libnelgeorges.la"
+    libtool_net="$lib_dir/libnelnet.la"
+    libtool_3d="$lib_dir/libnel3d.la"
+    libtool_pacs="$lib_dir/libnelpacs.la"
+    libtool_sound="$lib_dir/libnelsnd.la"
+
+    libtool="$libtool_misc"
+
+    if test "$without_ligo" != "yes"
+    then
+        libtool="$libtool $libtool_ligo"
+    fi
+
+    if test "$without_logic" != "yes"
+    then
+        libtool="$libtool $libtool_logic"
+    fi
+
+    if test "$without_georges" != "yes"
+    then
+        libtool="$libtool $libtool_georges"
+    fi
+
+    if test "$without_net" != "yes"
+    then
+        libtool="$libtool $libtool_net"
+    fi
+
+    if test "$without_3d" != "yes"
+    then
+        libtool="$libtool $libtool_3d"
+    fi
+
+    if test "$without_pacs" != "yes"
+    then
+        libtool="$libtool $libtool_pacs"
+    fi
+
+    if test "$without_sound" != "yes"
+    then
+        libtool="$libtool $libtool_sound"
+    fi
+
+    echo $libtool
+fi
+
+# EOF
+

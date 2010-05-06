@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.14 $" State="modified">
+  <ELEMENT Name="category" Type="Type" Filename="item_category.typ"/>
+  <ELEMENT Name="skill" Type="Type" Filename="_range_skills.typ"/>
+  <ELEMENT Name="specialization" Type="Type" Filename="_range_specialized_skills.typ"/>
+  <ELEMENT Name="minimum score" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="RangeWeaponType" Type="Type" Filename="range_weapon_type.typ"/>
+  <ELEMENT Name="MissileRadius" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="MissileMinFactor" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="GatlingHeight" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="GatlingBase" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="GatlingAngle" Type="Type" Filename="int.typ" Default="0"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:19 2002 (corvazier) File converted from old format
+Wed Apr 02 18:00:54 2003 (fleury) Dfn Structure = 
+Tue Jan 06 19:12:39 2004 (vizerie) Dfn Structure = 
+Wed Jan 07 11:59:12 2004 (vizerie) Dfn Structure = 
+Wed Jan 07 12:08:36 2004 (vizerie) Dfn Structure = 
+Wed Jan 07 14:18:16 2004 (vizerie) Dfn Structure = 
+Wed Jan 07 15:10:55 2004 (vizerie) Dfn Structure = 
+Wed Jan 07 15:13:26 2004 (vizerie) Dfn Structure = 
+Thu Jan 08 19:04:46 2004 (nouveau) Dfn Structure = 
+Thu Jan 08 19:17:45 2004 (nouveau) Dfn Structure = 
+Thu Jan 08 19:21:13 2004 (nouveau) Dfn Structure = 
+Thu Jan 08 19:54:06 2004 (nouveau) Dfn Structure = </LOG>
+</DFN>

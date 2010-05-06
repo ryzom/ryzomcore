@@ -1,0 +1,266 @@
+rykolscript.txt
+---------------
+
+RykolPatchObject script fonctions:
+
+**********************************************
+NeLGetPatchVertex node patch vertex
+
+Return the id the vertex of a patch. 
+
+"node" must be a RykolPatchObject.
+"patch" is the id of the patch. First patch is 1.
+"vertex" is the id of the vertex (1 ~ 4).
+
+**********************************************
+SetRykolPatchSteps node step
+
+Like SetPatchSteps but works with rykolpatch. 
+
+**********************************************
+SetRykolTileSteps node step
+
+Set the tile step of a RykolPatchObject. 
+
+"node" must be a RykolPatchObject.
+"step" an integer in range [-4;4].
+
+return -1 if error else the id of the vertex.
+
+**********************************************
+GetRykolTileCount node patchId
+
+Return the number of tile in the patch with id "patchId" in the zone "node".
+
+"node" must be a RykolPatchObject.
+patchId is the number of the patch to get the number of tile
+
+**********************************************
+GetRykolPatchCount node
+
+Return the number of patch in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+GetRykolSelEdges node
+
+Return an array of integer. Each integer is the index of a selected edge in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+GetRykolEdgesVert1 node edge
+
+Return the index of the first vertex of the edge in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"edge" is the index of the selected edge.
+
+**********************************************
+GetRykolEdgesVert2 node edge
+
+Return the index of the second vertex of the edge in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"edge" is the index of the selected edge.
+
+**********************************************
+GetRykolEdgesVect1 node edge
+
+Return the index of the first vector of the edge in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"edge" is the index of the selected edge.
+
+**********************************************
+GetRykolEdgesVect2 node edge
+
+Return the index of the second vector of the edge in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"edge" is the index of the selected edge.
+
+**********************************************
+GetRykolVertexPos node vertex
+
+Return the position of the vertex in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"vertex" is the index of the vetrex.
+
+**********************************************
+SetRykolVertexPos node vertex
+
+Set the position of the vertex in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"vertex" is the index of the vetrex.
+
+**********************************************
+GetRykolVectorPos node vector
+
+Return the position of the vector in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"vector" is the index of the vector.
+
+**********************************************
+SetRykolVectorPos node vector
+
+Set the position of the vector in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+"vector" is the index of the vector.
+
+**********************************************
+GetRykolVectorCount node
+
+Return the number of vector in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+GetRykolVertexCount node
+
+Return the number of vertex in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+SetRykolInteriorMode node patch mode
+
+Set the patch auto interior mode
+
+"node" must be a RykolPatchObject.
+"patch" must be the index of the patch
+"mode" must be 0 for manual and 1 for auto
+
+**********************************************
+RykolComputeInterior node
+
+Recompute auto interior vertex
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+SetRykolTileMode node mode
+
+Set the tile mode
+
+"node" must be a RykolPatchObject.
+"mode" must be 0 for modeNormal and 1 for tileMode
+
+**********************************************
+GetRykolSelVertex node
+
+Return an array of integer. Each integer is the index of a selected vertex in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+GetRykolSelPatch node
+
+Return an array of integer. Each integer is the index of a selected patch in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+GetRykolSelTile node
+
+Return an array of integer. Each integer is the index of a selected tile in the selected RykolPatchObject.
+
+"node" must be a RykolPatchObject.
+
+**********************************************
+NelGetTileTileNumber node patchId tileId layer
+
+Return the tile number of a layer of a tile in a patch. If the layer is empty, it returns 0, else >0. -1 if error.
+
+"node" must be a RykolPatchObject.
+patchId is the id of the patch. (1 ~ patchCount)
+tileId is the id of the tile in the patch. (1 ~ tileCount)
+layer is the layer number (1, 2 or 3)
+
+**********************************************
+NelGetTileNoiseNumber node patchId tileId
+
+Return the noise number of a a tile in a patch. Noise number are 1 ~ 16. -1 if error.
+
+"node" must be a RykolPatchObject.
+patchId is the id of the patch. (1 ~ patchCount)
+tileId is the id of the tile in the patch. (1 ~ tileCount)
+
+**********************************************
+NelSetTileNoiseNumber node patchId tileId noise
+
+Set the noise number of a a tile in a patch.
+
+"node" must be a RykolPatchObject.
+patchId is the id of the patch. (1 ~ patchCount)
+tileId is the id of the tile in the patch. (1 ~ tileCount)
+noise is the noise value of the tile in the patch. (1 ~ 16)
+
+**********************************************
+NelLoadBank
+
+Load the bank file selected with tile_utility. Return true if successful, else false.
+
+**********************************************
+NelGetTileSet tilenumber
+
+Return the tileset of this tile number.
+
+**********************************************
+NelViewShape ()
+
+View the selected shapes with the NeL engine.
+
+**********************************************
+NelExportScene ObjectArray "Filename.ig"
+
+Export reference of the objects in the array in an instance group file.
+
+ObjectArray is an array of node
+Filename is the file name to export
+
+**********************************************
+NelExportAnimation ObjectArray "Filename.anim" boolean_scene
+
+Export an animation file.
+
+ObjectArray is an array of node
+Filename is the file name to export
+boolean_scene is false to export a model animation, true to export a scene animation.
+
+**********************************************
+NelExportSkeletonWeight ObjectArray "Filename.swt"
+
+Export a skeleton weight template.
+
+ObjectArray is an array of node
+Filename is the file name to export
+
+**********************************************
+NelExportSkeleton node "Filename.skel"
+
+Export a skeleton.
+
+node is the root of the skeleton
+Filename is the file name to export
+
+**********************************************
+NeLTestFileDate "file0" "file1"
+
+Test the date of the two file
+
+file0 is the name of the first file to test (destination file)
+file1 is the name of the second file to test (source file)
+
+If file0 doesn't exist the function return true
+If date (file0) <= date (file1) the function return true
+If date (file0) > date (file1) the function return false
+If file1 doesn't exist the function return undefined
+If an error occured, the function return undefined
+
+**********************************************

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.8 $" State="modified">
+  <PARENT Filename="_gza_l.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="refugee light boots"/>
+      <ATOM Name="ItemType" Value="Light boots"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Feet"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="CraftPlan" Value="bcraea02.sbrick"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="TR_HOM_underwear_bottes.shape"/>
+      <ATOM Name="shape_female" Value="TR_HOF_underwear_bottes.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon" Value="AR_botte.tga"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Aug 07 10:56:04 2002 (mauduit) Form Parents = 
+Fri Sep 27 14:21:50 2002 (favre) .basics.name = zorai light boots
+Wed Oct 02 17:47:39 2002 (favre) .basics.hit points = very low
+Wed Oct 02 17:47:39 2002 (favre) .basics.weight = middle
+Thu Sep 18 10:33:31 2003 (coutelas) .AsBrick.Client.Icon = AR_botte.tga
+Thu Sep 18 10:33:31 2003 (coutelas) .basics.ItemType = Light boots
+
+Thu Sep 18 10:33:31 2003 (coutelas) .faber.Skill = zorai light boots craft
+Thu Oct 30 18:34:12 2003 (coutelas) .basics.origin = common
+Fri Oct 31 11:36:58 2003 (coutelas) .3d.icon background = BK_generic.tga
+Tue Nov 04 11:40:16 2003 (coutelas) .basics.origin = refugee</LOG>
+</FORM>

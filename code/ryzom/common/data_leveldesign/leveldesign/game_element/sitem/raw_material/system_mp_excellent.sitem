@@ -1,0 +1,1184 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="family" Value="raw material (mp)"/>
+      <ATOM Name="stackable" Value="100"/>
+      <ATOM Name="Drop or Sell" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="mp">
+      <ATOM Name="Family" Value="System"/>
+      <ATOM Name="Ecosystem" Value="Common"/>
+      <ATOM Name="MpColor" Value="Beige"/>
+      <ATOM Name="Rarity" Value="1"/>
+      <STRUCT Name="MpParam">
+        <STRUCT Name="A MpL (Blade)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="B MpH (Hammer)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="C MpP (Point)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="D MpM (Shaft)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="E MpG (Grip)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="F MpC (Counterweight)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="G MpGA (Trigger)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="H MpPE (Firing pin)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="I MpCA (Barrel)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="J MpE (Explosive)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="K MpEN (Ammo jacket)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="L MpPR (Ammo bullet)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="M MpCR (Armor shell)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="N MpRI (Armor interior coating)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="O MpRE (Armor interieur stuffing)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="P MpAT (Armor clip)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="Q MpSU (Jewel stone support)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="R MpED (Jewel stone)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="S MpBT (Blacksmith tool)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="T MpPES (Pestle tool)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="U MpSH (Sharpener tool)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="V MpTK (Tunneling Knife)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="W MpJH (Jewelry hammer)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="X MpCF (Campfire)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="Y MpVE (Clothes)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+        <STRUCT Name="Z MpMF (Magic Focus)">
+          <ATOM Name="Durability" Value="65"/>
+          <ATOM Name="Weight" Value="65"/>
+          <ATOM Name="SapLoad" Value="65"/>
+          <ATOM Name="DMG" Value="65"/>
+          <ATOM Name="Speed" Value="65"/>
+          <ATOM Name="Range" Value="65"/>
+          <ATOM Name="DodgeModifier" Value="65"/>
+          <ATOM Name="ParryModifier" Value="65"/>
+          <ATOM Name="AdversaryDodgeModifier" Value="65"/>
+          <ATOM Name="AdversaryParryModifier" Value="65"/>
+          <ATOM Name="ProtectionFactor" Value="65"/>
+          <ATOM Name="MaxSlashingProtection" Value="65"/>
+          <ATOM Name="MaxBluntProtection" Value="65"/>
+          <ATOM Name="MaxPiercingProtection" Value="65"/>
+          <ATOM Name="AcidProtection" Value="65"/>
+          <ATOM Name="ColdProtection" Value="65"/>
+          <ATOM Name="FireProtection" Value="65"/>
+          <ATOM Name="RotProtection" Value="65"/>
+          <ATOM Name="ShockWaveProtection" Value="65"/>
+          <ATOM Name="PoisonProtection" Value="65"/>
+          <ATOM Name="ElectricityProtection" Value="65"/>
+          <ATOM Name="DesertResistance" Value="65"/>
+          <ATOM Name="ForestResistance" Value="65"/>
+          <ATOM Name="LacustreResistance" Value="65"/>
+          <ATOM Name="JungleResistance" Value="65"/>
+          <ATOM Name="PrimaryRootResistance" Value="65"/>
+          <ATOM Name="HpBuff" Value="0"/>
+          <ATOM Name="SapBuff" Value="0"/>
+          <ATOM Name="StaBuff" Value="0"/>
+          <ATOM Name="FocusBuff" Value="0"/>
+          <ATOM Name="ElementalCastingTimeFactor" Value="65"/>
+          <ATOM Name="ElementalPowerFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="OffensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="HealCastingTimeFactor" Value="65"/>
+          <ATOM Name="HealPowerFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionCastingTimeFactor" Value="65"/>
+          <ATOM Name="DefensiveAfflictionPowerFactor" Value="65"/>
+          <ATOM Name="CraftEstimatedQuality" Value="Slightly"/>
+        </STRUCT>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="MP_generic.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jun 18 15:00:49 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).Durability = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).DMG = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).MaxBluntProtection = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).MaxPiercingProtection = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).MaxSlashingProtection = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).ProtectionFactor = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).Range = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).Speed = 50
+Fri Jun 18 15:08:56 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).Weight = 50.0
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).DefensiveAfflictionCastingTimeFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).DefensiveAfflictionPowerFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).ElementalCastingTimeFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).ElementalPowerFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).HealCastingTimeFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).HealPowerFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).OffensiveAfflictionCastingTimeFactor = 50
+Fri Jun 18 15:09:50 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).OffensiveAfflictionPowerFactor = 50
+Fri Jun 18 15:10:06 2004 (coutelas) .mp.MpParam.Z MpMF (Magic Focus).Weight = 50
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).AdversaryDodgeModifier = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).AdversaryParryModifier = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).CraftEstimatedQuality = Slightly
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).DMG = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).DefensiveAfflictionCastingTimeFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).DefensiveAfflictionPowerFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).DodgeModifier = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).Durability = 1
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).ElementalCastingTimeFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).ElementalPowerFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).FocusBuff = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).HealCastingTimeFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).HealPowerFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).HpBuff = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).MaxBluntProtection = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).MaxPiercingProtection = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).MaxSlashingProtection = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).OffensiveAfflictionCastingTimeFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).OffensiveAfflictionPowerFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).ParryModifier = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).ProtectionFactor = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).Range = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).SapBuff = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).SapLoad = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).Speed = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).StaBuff = 0
+Fri Aug 13 17:32:18 2004 (puzin) .mp.MpParam.A MpL (Blade).Weight = 0
+Fri Aug 13 17:33:26 2004 (puzin) formName Pasted = 
+Mon Aug 30 16:21:08 2004 (puzin) .basics.Drop or Sell = false
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).AdversaryDodgeModifier = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).AdversaryParryModifier = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).DMG = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).DefensiveAfflictionCastingTimeFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).DefensiveAfflictionPowerFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).DodgeModifier = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).Durability = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).ElementalCastingTimeFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).ElementalPowerFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).FocusBuff = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).HealCastingTimeFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).HealPowerFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).HpBuff = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).MaxBluntProtection = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).MaxPiercingProtection = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).MaxSlashingProtection = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).OffensiveAfflictionCastingTimeFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).OffensiveAfflictionPowerFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).ParryModifier = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).ProtectionFactor = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).Range = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).SapBuff = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).SapLoad = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).Speed = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).StaBuff = 65
+Wed Nov 17 17:26:01 2004 (peloille) .mp.MpParam.A MpL (Blade).Weight = 65
+Wed Nov 17 17:26:01 2004 (peloille) formName Pasted = 
+Thu Nov 18 11:09:43 2004 (peloille) .mp.MpParam.A MpL (Blade).FocusBuff = 0
+Thu Nov 18 11:09:43 2004 (peloille) .mp.MpParam.A MpL (Blade).HpBuff = 0
+Thu Nov 18 11:09:43 2004 (peloille) .mp.MpParam.A MpL (Blade).SapBuff = 0
+Thu Nov 18 11:09:43 2004 (peloille) .mp.MpParam.A MpL (Blade).StaBuff = 0
+Thu Nov 18 11:09:43 2004 (peloille) formName Pasted = 
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).AcidProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).ColdProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).ElectricityProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).FireProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).PoisonProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).RotProtection = 65
+Thu Jul 28 19:44:33 2005 (puzin) .mp.MpParam.A MpL (Blade).ShockWaveProtection = 65
+Thu Jul 28 19:44:54 2005 (puzin) formName Pasted = 
+Thu Aug 04 19:33:06 2005 (puzin) .mp.MpParam.A MpL (Blade).DesertResistance = 65
+Thu Aug 04 19:33:06 2005 (puzin) .mp.MpParam.A MpL (Blade).ForestResistance = 65
+Thu Aug 04 19:33:06 2005 (puzin) .mp.MpParam.A MpL (Blade).JungleResistance = 65
+Thu Aug 04 19:33:06 2005 (puzin) .mp.MpParam.A MpL (Blade).LacustreResistance = 65
+Thu Aug 04 19:33:06 2005 (puzin) .mp.MpParam.A MpL (Blade).PrimaryRootResistance = 65
+Thu Aug 04 19:33:24 2005 (puzin) formName Pasted = </LOG>
+</FORM>

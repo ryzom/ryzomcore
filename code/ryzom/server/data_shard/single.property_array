@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="PropertyArray">
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="0"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="PropertyName" Value="X"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="1"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="PropertyName" Value="Y"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="2"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="PropertyName" Value="Z"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="3"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="PropertyName" Value="Theta"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+        <ATOM Name="DistThreshold" Value="50000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="4"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="Sheet"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint32"/>
+        <ATOM Name="DistThreshold" Value="500000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="5"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="Behaviour"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint32"/>
+        <ATOM Name="DistThreshold" Value="60000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="6"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="NameIndex"/>
+        <ATOM Name="ServiceOwner" Value="IOS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint32"/>
+        <ATOM Name="DistThreshold" Value="25000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="7"/>
+        <ATOM Name="NbBits" Value="64"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="Target"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="Sid"/>
+        <ATOM Name="DistThreshold" Value="20000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="8"/>
+        <ATOM Name="NbBits" Value="8"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="Mode"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint8"/>
+        <ATOM Name="DistThreshold" Value="500000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="9"/>
+        <ATOM Name="NbBits" Value="64"/>
+        <ATOM Name="PropertyName" Value="VisualPropertyA"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint64"/>
+        <ATOM Name="DistThreshold" Value="500000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="10"/>
+        <ATOM Name="NbBits" Value="40"/>
+        <ATOM Name="PropertyName" Value="VisualPropertyB"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint64"/>
+        <ATOM Name="DistThreshold" Value="20000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="11"/>
+        <ATOM Name="NbBits" Value="44"/>
+        <ATOM Name="PropertyName" Value="VisualPropertyC"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint64"/>
+        <ATOM Name="DistThreshold" Value="10000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="12"/>
+        <ATOM Name="NbBits" Value="64"/>
+        <ATOM Name="PropertyName" Value="EntityMounted"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="Sid"/>
+        <ATOM Name="DistThreshold" Value="500000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="13"/>
+        <ATOM Name="NbBits" Value="64"/>
+        <ATOM Name="PropertyName" Value="RiderEntity"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="Sid"/>
+        <ATOM Name="DistThreshold" Value="500000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="14"/>
+        <ATOM Name="NbBits" Value="16"/>
+        <ATOM Name="PropertyName" Value="ContextualProperty"/>
+        <ATOM Name="ServiceOwner" Value="EGS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint16"/>
+        <ATOM Name="DistThreshold" Value="100000"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="-1"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="false"/>
+        <ATOM Name="PropertyName" Value="TickPos"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="uint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="-3"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="Union" Value="true"/>
+        <ATOM Name="Shift" Value="32"/>
+        <ATOM Name="PropertyName" Value="LocalX"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="-4"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="Union" Value="true"/>
+        <ATOM Name="Shift" Value="32"/>
+        <ATOM Name="PropertyName" Value="LocalY"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="PropertyId" Value="-5"/>
+        <ATOM Name="NbBits" Value="32"/>
+        <ATOM Name="Continuous" Value="true"/>
+        <ATOM Name="Union" Value="true"/>
+        <ATOM Name="Shift" Value="32"/>
+        <ATOM Name="PropertyName" Value="LocalZ"/>
+        <ATOM Name="ServiceOwner" Value="GPMS"/>
+        <ATOM Name="UpdateFrequency" Value="1"/>
+        <ATOM Name="PropertyType" Value="sint32"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jan 24 14:13:14 2003 (saffray) formName Resized = 19
+Fri Jan 24 14:17:14 2003 (saffray) formName Deleted = </LOG>
+</FORM>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Version="0.3" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="character_characteristics.typ" Default="CurrentHitPoints"/>
+  <ELEMENT Name="Init" Type="Dfn" Filename="_ai_type_def.dfn"/>
+  <LOG>Wed Jul 24 16:39:03 2002 (chafik) Dfn Structure = </LOG>
+</DFN>

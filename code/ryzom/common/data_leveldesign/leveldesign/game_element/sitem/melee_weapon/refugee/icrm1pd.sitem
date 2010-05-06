@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_c_m1pd.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="refugee dagger"/>
+      <ATOM Name="origin" Value="refugee"/>
+      <ATOM Name="Drop or Sell" Value="false"/>
+      <ATOM Name="CraftPlan" Value="bcrmea06.sbrick"/>
+      <ATOM Name="Saleable" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="GE_Wea_Dague.shape"/>
+      <ATOM Name="shape_female" Value="GE_Wea_Dague.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+      <STRUCT Name="fx">
+        <ATOM Name="Trail" Value="GE_Wea_Dague_trail_00.shape"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 08 09:26:59 2002 (mauduit) .3d.map_variant = Low Quality
+Tue Sep 16 22:09:39 2003 (coutelas) .basics.origin = zorai
+Tue Sep 16 22:09:39 2003 (coutelas) .faber.Create.MP 1 Family = Resin
+Tue Sep 16 22:09:39 2003 (coutelas) .faber.Skill = zorai dagger craft
+Tue Sep 16 22:09:39 2003 (coutelas) .melee weapon.skill = dagger zorai
+Fri Sep 19 14:29:32 2003 (coutelas) .AsBrick.Client.IconBack = BK_zorai_brick.tga
+Fri Sep 19 14:29:32 2003 (coutelas) .basics.name = zorai dagger
+Mon Dec 22 11:08:53 2003 (gatto) .3d.fx.Trail = Zo_Wea_Dague_trail_00.shape
+Mon Mar 15 16:19:21 2004 (tran) .3d.shape = GE_Wea_Dague.shape
+Mon Mar 15 16:19:21 2004 (tran) .3d.shape_female = GE_Wea_Dague.shape
+Mon Mar 15 16:22:26 2004 (tran) .3d.fx.Trail = GE_Wea_Dague_trail_00.shape
+Fri Sep 03 10:05:11 2004 (coutelas) .basics.CraftPlan = bcrmea06.sbrick
+Fri Sep 03 10:05:11 2004 (coutelas) .basics.name = refugee dagger
+Fri Sep 03 10:05:11 2004 (coutelas) .basics.origin = refugee
+Tue Sep 07 15:43:06 2004 (coutelas) .basics.Drop or Sell = false
+Tue Sep 07 15:43:06 2004 (coutelas) .basics.Saleable = false</LOG>
+</FORM>

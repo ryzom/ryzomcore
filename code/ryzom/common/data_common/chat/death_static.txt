@@ -1,0 +1,16 @@
+# these sentences are used in the death system
+
+OPS_DEATH_KILLER_E "&BC&you have killed $0e."
+OPS_DEATH_KILLED_E "&RG&you have been killed by $0e."
+OPS_DEATH_KILLED_EE "&RG&you have been killed by $0e and $1e."
+OPS_DEATH_KILLED_EEE "&RG&you have been killed by $0e, $1e and $2e."
+
+OPS_DEATH_KILL_EE "&BC&$0e has killed $1e."
+OPS_DEATH_KILL_EEE "&BC&$0e and $1e have killed $2e."
+OPS_DEATH_KILL_EEEE "&BC&$0e, $1e and $2e have killed $3e."
+
+#OPS_DEATH_KAMI_RESURECT "&JA&The Kamis honor the pact:  Sap flows through you once again as you resuscitate."
+#OPS_DEATH_CARAVAN_RESURECT "&JA&The Karavan works its craft and you exist once more."
+OPS_DEATH_OLD "&RG&Old age has taken its toll, your Sap has run its course. Neither the Kamis nor the Karavan can reverse your fate... You return to the humus from which you first emerged."
+#OPS_DEATH_PERMANENT_KILLED "&RG&You no longer have a valid resurrection pact. You return to the humus from which you first emerged."
+OPS_DEATH_PERMANENT_KILL_E "&RG&$0e died without a valid resurrection pact. There is very little time left to bring $0e back among the living."

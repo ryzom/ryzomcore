@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.5 $" State="modified">
+  <ELEMENT Name="Skel" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="CharacterScalePos" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="AnimSetBaseName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="LodCharacterName" Type="Type" Filename="string.typ" Default="HOM_LOD"/>
+  <ELEMENT Name="LodCharacterDistance" Type="Type" Filename="float.typ" Default="40"/>
+  <ELEMENT Name="DefaultFace" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultChest" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultArms" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultLegs" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultHands" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultFeet" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="DefaultHair" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="CombatMovement" Type="Dfn" Filename="_creature_combat_move.dfn"/>
+  <ELEMENT Name="MorphTargetMin0" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax0" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin1" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax1" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin2" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax2" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin3" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax3" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin4" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax4" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin5" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax5" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin6" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax6" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="MorphTargetMin7" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="MorphTargetMax7" Type="Type" Filename="float.typ" Default="100.0"/>
+  <ELEMENT Name="NamePosZLow" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="NamePosZNormal" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="NamePosZHigh" Type="Type" Filename="float.typ" Default="0.0"/>
+  <LOG>Tue Sep 10 18:32:46 2002 (saffray) Dfn Structure = 
+Wed Sep 11 18:37:33 2002 (saffray) Dfn Structure = 
+Fri Feb 06 17:35:37 2004 (besson) Dfn Structure = 
+Mon Dec 20 20:16:18 2004 (guignot) Dfn Structure = </LOG>
+</DFN>

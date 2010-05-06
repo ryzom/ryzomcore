@@ -1,0 +1,16 @@
+sint8
+uint8
+sint16
+uint16
+sint32
+uint32
+sint64
+uint64
+sint
+uint
+string
+ucstring
+ucchar
+CSString
+CEntityId
+CSheetId

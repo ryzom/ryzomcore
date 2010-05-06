@@ -1,0 +1,19 @@
+
+enum_template.h
+enum_template.cpp
+
+You can use those file to easily build new Enum from .typ
+
+Simply replace (whith case sensitive but not whole word) in whole file:
+
+	enum_template
+	ENUM_TEMPLATE
+	EEnumTemplate
+
+with the true name (eg: item_origin, ITEM_ORIGIN and EItemOrigin)
+
+Then to add new enums, you must add them only in:
+
+	- the enum list in the .h, beetween UNKNOWN and NUM_....
+	- the StringArray list in the .cpp, with the same order as in the enum list
+

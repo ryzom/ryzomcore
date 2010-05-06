@@ -1,0 +1,402 @@
+TODO:
+- FAUNA
+- NPCs
+- PETS
+- SPAWN/ RESPAWN RULES TO REVIEW
+
+
+
+
+BB
+- SPLIT NPC GROUPS INTO TEAMS AND GROUPS (FOR GROUP SPLITTING AND PLAYER MANAGEMENT)
+-- teams contain one or more NPC groups, one or more players
+-- npc groups belong to one team
+-- teams may contain sub-teams. in this case parent team exists only for organisation purposes...
+-- teams have vision?
+2. ENHANCE PATAT READING - GEN RAND POINT SETS
+3. ADD RANDOM_POS() TO STATE_POSITIONAL (To work for patats and splines - return StartPos in case of doubt)
+2. BASIC BEHAVIOURS (NEED PATAT READ)
+- add handy counter class like timer class for counters
+- simple mobile obstacle avoidance (cell-based, no surface tesst)
+- better management of place concept wrt midPos(), distTo(), etc
+- Bots in towns lead you where you want to go
+- Teaming with bots
+-- players who are added to the team are considered to be teamed by the 'team chat' code
+-- bots must be able to 'invite to team'/ 'eject from team'/ etc
+
+
+PP
+
+SL
+- CODE CLEAN & HEADER COMMENT REVIEW
+-- make sure that no class that contains updateAliasTreeDelete() method is reffernced by a pointer
+---- consider using a special pointer class instead - eg ptr to vector + idx | linked list of ptrs
+---- by refferenced object allowing pointers to be NULLED out if need be
+- add bigadd to caicoord for fixed precision
+- integration with admin tools
+- quickDistTo from AIpos to AIvector
+- re-write fauna respawn mgmt code
+- PETS
+-- to stable
+-- from stable
+-- release (initally just despawn)
+- Pet API
+-- Spawn (location, owner, burden, control mode<ridden|lead|free>, leader entity) - reply with ID
+-- Despawn - reply with save message for backup/ respawn
+[-- TP (via despawn & spawn - may result in identity change)]
+-- Switch to remote control for riding
+-- Switch to autonomous control (after riding)
+-- Start following xxx
+-- Stop following (whoever)
+-- Save stats for backup (same messageing as despawn - above)
+- Go to stable & despawn
+-- Spawn from stable and go to 'leader' entity (bot or player)
+
+
+
+BL
+
+DM
+
+OTHER
+- ON-THE-FLY UPDATE (AIDS)
+- Split EGS property management into lib - use in both EGS and AIS - eliminate need for AIS parameters to be managed by EGS
+- Add Kami & Karavn tp parameters
+- read tribe docs
+- read fame docs
+- stress test
+- integration of AIDS with LD tools
+
+
+BUGS
+- bot identification in IOS - differentiate role master types for richer context text
+
+DEBUG STUFF & STATS
+- bots per manager
+- managers per ais
+- groups per ais
+- bots per ais
+- players registered in ais
+- players in view by ais poulation
+- players in view by mgr poulation (per mgr)
+- ave update rate of bots in ais/ mgr
+- graph of bot update count per tick
+- graph of bot moves/ tick
+- graph of bot actions/ tick (combat actions, spells, etc)
+
+PETS
+- command interface for pets (common to AI owners and player owners)
+-- follow
+-- wait
+-- be ridden
+-- to stables
+- ai behaviours for above points (and 'from stables')
+
+PETS (pets of PLAYERS)
+- add riding
+
+KAMIS & KARAVAN
+- Add spawn code to generate states, profiles, etc
+- gisements & fame for kamis
+
+FAUNA
+- nogo zones listed in managers (& hierachical regions)
+
+AIDS
+  * change file naming and numbering policy
+  * test **
+  * add spawn messages
+  * add despawn messages
+  * add info messages
+  * from AIS log all bots by name w/id & test static nature of ids
+- one bin file per .primitive (.ryzomai)
+- file listing ai primitive files with their manager quotas & base addresses
+- compile -> build: 1. alias tree, 2. map (by alias) of serialised argument sets (in cmd format) with src_id
+- src_id is the low dword of src file time stamp
+- on each re-compile bin compare map blocks (old and new) and replace old with new, updating src_id if different
+- src_id for alias tree treated in same way as map blocks
+- on connection of AIDS, AIS transmits alias tree src_id for each active mgr - if different, AIDS requests complete tree which AIS compiles and sends
+- AIDS stores alias tree and map of block src_ids for each manager on each AIS
+- AIDS transmits packets containing: alias tree delta (in the form of additions and suppressions), block count, blocks (alias, commands)
+- loading and re-loading forms (creature, manager, prims, etc)
+- landscape analysis & pathfinding & wandering etc
+- fixed ai numbering
+- collision detection
+- path finding
+
+NPCs
+- NPC groups have a 'script' state (eg 'going to xxx') and a 'punctual' state (eg 'fending off an attack')
+- both types of state are defined in the same way except that there is no location info in punctual states
+- if the punctual state is non-null it is used instead of the script state - the location is defined as group's current location
+- events can change punctual states & change script states
+- The state defines a number of sets of parameters (one for each NPC role)
+- There is a list of NPC roles in cfg file (eg group guardian, lead caravaneer, caravaneer, etc...)
+- The groups have a set of NPCs
+- The NPCs may have pets
+- NPC pets behave like player pets (spawn/ despawn at stables, vanish on NPC death, etc)
+- States define route and location information for the group
+- All states contain an 'end of state' action (may be a composite action, a decision tree, etc)
+-? How do we define the 'everyone is here so we can go' end of state condition for convoys?
+-? Can convoy leader invite you to group at a distance/ send 'we're waiting for you...' type messages, etc?
+-? If a convoy has no player protectors and is attacked - if aggressors repelled by players - can NPCs give reward?
+- NPC actions & events can trigger group events for their group (eg NPC has sold all of his goods -> group can change state
+- GRP Event examples
+- - The route is blocked in front
+- - The group is under attack (triggered each time a new group of attackers added)
+- - The group is no longer under attack (each time a group of attackers removed)
+- - A group of players/ bots comes into view
+- - A group member dies
+- - A pack animal dies
+- - The time is ... (time chosen by a random algo parameterised by 'earliest', 'latest' and 'spread' parameters- spread)
+- - - Note: normal distribution simulation via for(i=0,val=1.0;i<spread;++i)val*=frand();
+- - All of the subscribed players have arrived
+- - The group's been in this state for ... minutes 
+- - All of the pets are here (from the stable)
+- - All of the pets have gone (into the stable)
+- - The group has reached its destination
+- - Group members are LD (allows puntual state to wait for them for a short while before giving up)
+- - Player group member requests pause
+- - Player group members all ok to continue
+- - State timer[n] - time is up
+- - Group 'encounters' group (group dist calc below gives result <=5m)
+- GRP Events contain set of states to which they apply (& flag for 'scripted' states to say whether the punctual state must be NULL)
+- Internally we use linked lists of groups by state - setState moves GRP from one list to another
+- Action examples
+- - NOP
+- - set script state
+- - set punctual state
+- - send event to the mission system (eg mission accomplished, etc)
+- - set grp fame (for effect on FAUNA aggro - ctrl degree to which grp is attacked by predators, etc)
+- - if condition then sub-action0 else sub-action1
+- - for each group in view
+- - for each enemy group in fight do action
+- - for each friend group in fight do action
+- - select an action at random <set of actions with random weightings>
+- - ? is there some way of influencing random wirghtings dynamically - probably with a new type of action block (or allow variables & functions as well as constants)
+- - state var[n]=xxx*old_val+yyy
+- - state timer[n].set(xxx)
+- - state timer[n].add(xxx)
+- - state timer[n].pause
+- - state timer[n].resume
+- Condition components
+- - all of <set of sub conditions>
+- - any of <set of sub conditions>
+- - group is stronger than aggressors (note: not equivalent to !weaker)
+- - group is weaker than aggressors (note: not equivalent to !stronger)
+- - all pack animals are dead/ vanished
+- - all NPC group members are dead
+- - time in this state > xxx && < yyy
+- - grp state variable[n] > xxx && < yyy 
+- - there are > xxx bots(npcs) in the group
+- - there are > xxx && < yyy entities in place ppp
+- - there are > xxx NPC groups && < yyy NPC groups in place ppp
+- - target group is NPC/ player/ KAMI/ caravan/ predator/ fauna/ ...
+- - target group dist > xxx && < yyy (dist from group centrer to group center - dist from closest member of my group to their group center - dist from closest member of their group to my group center)
+- Roles & profiles:
+- - Each grp has a 'grp type' field to allow for sharing of states & events by groups but differentiaition at times
+- - Each NPC has a role, defining which set of props defined in a state apply to them
+- - The states define the AI_PROFILE to use for each role of bots & the associated parameter set
+- - AI Profiles determiine the set of inputs, set of goals, set of actions and set of internal parameters for the AI decision unit
+- Role info in states:
+- - each state may define role info for given roles (and an optional 'default' clause)
+- - role info includes:
+- - - chat info - allowing dynamic parameterisation of the chat system - eg "we're on the way to Matisville", "we're waiting for xxx", etc
+- - - AI_Profile parameterisation (see above)
+
+For bot placement:
+- with group placement we define the starting bot state and the 'group type' for state logic bot state
+- At save time we save bot group states, group positons & compositions
+
+
+Example 1: Walker and talker:
+- Group of walker and talker bots=1 or more bots who walk together
+- One state for each town road segment in each direction
+- One state for each public place (such as aggora) where bots can spend time without moving
+- One state for each stationary bot to whom walker & talker bots can talk
+- One event for 'arrived at destination' for each road segment -> random choice of new destinations
+- Event for 'group encounters group' for triggering 'chat to passers by' sub-state - use state timer[0] to fix time before next conversation possible
+- Event for 'group encounters player' for triggering 'appreciate' punctual state for admiring/ waving at/ hailing famous and/or friendly players
+- Event for 'group encounters player' for wandering merchants to hail players with 'merchant-like' calls
+
+
+Example 2: Newbee caravan escort mission:
+- Group of caravaneer bots includes: a lead merchant(A), a second merchant(B), a healer(C), a mercenary(D)
+- The mission description is as follows:
+- - At 8:00 and 14:00 every day caravans sets out from town(T) and go to village(V) to sell merchandise.
+- - After arriving at V the caravan master talks to merchant(M) in his shop - this done the caravan returns home
+- - The caravan should be attacked by Fauna  some time allong the route in each direction
+- - If the lead caravaneer dies or all of the pack animals die the group returns home directly
+- - The pack animals are left/ picked up from at the stables at the entrances to T and V
+- - Players may subscribe to the mission as follows: up to 2 fighters (range, melee, harvester or attack magic), up to 2 healers (or buffers), up to 2 merchants
+- - At 30 mins before the group departure time the NPCs spawn from the building in which they live and go to the aggora (as a meeting point)
+- - Every 10 mins a reminder message goes to subscribed players to ask them to join up
+- - When the subscribed players have all arrived the group goes to collect the pack animals and sets off on its journey
+- - At 30 mins after the intended departure time any players who have not turned up are considered late and are not waited for
+- - The healer, mercenary and 2nd caravaneer characters only join the group (at the moment of departure) if there are no players in the group with appropriate roles
+- States (scripted):
+- - Despawned
+- - Going to Agora
+- - - All say 'we're going to the Agora to prepare a convoy... go see xxx if you would like to join up'
+- - Waiting for players
+- - - Leader says 'we're waiting to leave with our convoy', also has 'join up' possibility (if not fully subscribed)
+- - - Default say 'talk to xxx - he's the leader' 
+- - Route T-agora to T-stables
+- - Getting beasts of burden from T stable
+- - Route from T to V
+- - Putting beasts of burden in V stable
+- - Route from V stable to merchant M
+- - Talking to merchant M
+- - Route from M to V stable
+- - Getting beasts from V stable
+- - Route from V to T
+- - Putting beasts into T stable
+- - Mission debrief and thanks to players
+- - Route T-stable to despawn point
+- - Flee back home (after mission failure due to death of lead caravaneer or pack animals)
+- States (punctual)
+- - Stand and face attack
+- - Wait for road to be cleared (in case of combat on road ahead)
+* Each state merits a complete formula describing activity of different bot roles during state
+* Note that many of these states may be shared by many different NPC groups
+- Roles:
+- - Caravan leader
+- - Guard
+- - Healer
+- - Caravan follower
+- Events:
+* * This is not the complete list ('cos I don't have time right now)
+- - State var used to evaluate group's 'difficulty' rating so far (increment each time a group member hp drops below a given threshold)
+- - State var used to evaluate 'action' rating (timer samples 'in combat' state and increments or decrements var as result
+- - Timer events used to modify aggro level dynamically to increase (or not) fauna attacks - as need be (in function of above ratings)
+* It would be handy to have comment fields with groups and events as a reminder/ fail safe for variable usage (eg one event uses var1 for one thing, another for another)
+* Alternatively, all grps are allowed all states so all vars must be present for all groups so use a variable list to list vars and compile-time associate
+
+
+bot chat - revisited
+- chat by composition:
+- fixed set of bot chat page formats on the client,
+- for each bot use a dynamic set of bot chat parameters,
+- - what shop inventory (list of items, tp, animals),
+- - what missions (defined by the mission system),
+- - what news (defined by the news system),
+- - what basic chat (automaton, text set)
+- - - basic chat for team mates (defined by group state), 
+- - - basic chat for friendlies (defined by group state), 
+- - - basic chat for unfriendlies (defined by group state),
+- Chat parameters are cumulative: "mission:...", "shop:...", etc add together
+- - "-missions", "-shop" ets override to dissable parts of of dialogue tree
+
+
+For an example we need an example NPC scenario:
+- BOT A at home point H, steed B, pack animal C, stable S0, stable S1
+- A spawns at H (if already spawned leave state machines untouched and return)
+- when present at spawn point route to S0
+- when at S0 trigger B & C to spawn from stable
+- when B & C are present setup convoy as A leads B leads C and route to S1
+- when arrived at S1 C to stable
+- when C in stable A mounts B
+- when mounted A rides B to S0
+- when arrived A dissmounts
+- when dissmounted B to stable and A route to H
+- when A arrives at H despawn and set respawn timer for 10 minutes
+
+
+NPC AI_Profiles:
+- AI Profiles for NPC roles
+- Based on a decision system of Pierre's/ Gabrielle's design
+- Need to determine set of inputs
+- - evaluation of 'is group in conflict'
+- - evaluation of 'is group threatened'
+- - evaluation of 'am I threatened'
+
+
+The classes are:
+
+SINGLETON TeamManager
+-- Singleton Code modules
+//???- contains vector of global event managers (code modules)
+//???- methods for registering new global event handlers
+//???- contains vector of AI_Profile modules (code modules)
+//???- methods for registering new AI profile modules
+
+-- Class factories
+- contains vector of Action	classes (for factory)
+- contains Action class factory fn(string action_name, vector<string> args)
+- contains methods for registering new factory-producable classes
+
+- contains vector of states (data units)
+- methods for adding new states
+- Set of teams
+- methods for setting the state of a team
+- methods for updating team
+- contains keyword set for teams
+- contains keyword set for bots
+- contains keyword set for states
+
+- contains vector of TickUpdateCallback callbacks (and methods for adding/ removing these callbacks)
+
+GlobalEventManager
+- may add an update into the 'update on tick' vector in singleton
+- Reacts to global events (eg change of time)
+- contains a vector of <event reaction>
+- constains a vector of <event reaction, state> pairs
+- when an event is triggered the event handler determines which <event reaction, state> pairs match the event
+  and triggers their execute() routines
+
+EventReaction
+- A module that defines the reaction to a given event (under given circumstances)
+- Contains a vector of states to which it applies
+- Contains an action
+- When event is triggered executes 'action' with refference to each state
+
+Action
+- A parameterised class instance generated by a class factory
+- execute method takes form execute(team)
+- may perform actions on the team (eg state change, trigger event, etc...)
+- contains a vector of sub-actions
+- sub actions are NOT executed automatically - they may be execute explicitly from the main execute() method
+
+AI_Profile
+- include a singleton
+- contains method begin(bot,team)		- called when a bot is given this profile
+- contains method end(bot,team)			- called when bot changes to another profile (or dies)
+- contains method update(bot,team,dt)	- called every time bot is updated (with tick count since last update)
+- may add an update into the 'update on tick' vector in singleton
+
+State
+- contains a keyword mask
+- contains vector of teams that are currently in this state
+- contains vector of 'role-state-info'
+- contains geometry (a vector of primitives)
+- an inti method (can verify the geometry validity)
+
+Role-state-info
+- contains bot chat args
+- contains ai profile ptr
+
+Team 
+- contains a keyword mask
+- contains a vector of bots
+- contains a vector of players
+- contains methods for managing pets of bots and players
+- contains a state ptr
+- contains a local event handler
+
+LocalEventHandler
+- Reacts to local events (eg end of path)
+- Contains a vector of event reactions
+
+KeywordMask
+- bitmask representing keywords matched or not matched for an entity
+
+KeywordFilter
+- 'must-include-all-of' mask to apply to KeywordMask
+- 'must-include-some-of' mask to apply to KeywordMask
+- 'must-not-include-any-of' mask to apply to KeywordMask
+
+KeywordSet 
+- vector of keywords (strings)
+- methods for converting a string to a keyword mask
+- methods for converting a string to a keyword filter
+- methods for converting keyword filters and keyword masks back to strings
+

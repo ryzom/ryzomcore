@@ -1,0 +1,296 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.8 $" State="modified">
+  <PARENT Filename="_craftsman.starting_role"/>
+  <PARENT Filename="_zorai.starting_role"/>
+  <PARENT Filename="_parent.starting_role"/>
+  <STRUCT>
+    <ARRAY Name="PreMemorizedSentences1">
+	  <!-- Boot Patterns -->
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+	  <!-- Dagger Patterns -->
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+	  <!-- Earring Patterns -->
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+	  <!-- Shield Patterns -->
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+	  <!-- Ammo Patterns -->
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+	  <!-- Range Weapon Patterns -->
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="armour phrase">
+        <ATOM Name="Sabrina Phrase" Value="abczaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+    </ARRAY>
+
+    <ARRAY Name="PreMemorizedSentences2">
+	  <!-- Boot Patterns -->
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+	  <!-- Dagger Patterns -->
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+	  <!-- Earring Patterns -->
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+	  <!-- Shield Patterns -->
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+	  <!-- Ammo Patterns -->
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+	  <!-- Range Weapon Patterns -->
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="armour phrase">
+        <ATOM Name="Sabrina Phrase" Value="abczaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Gaunt Plan">
+        <ATOM Name="Sabrina Phrase" Value="abczaea08.sphrase"/>
+      </STRUCT>
+    </ARRAY>
+
+    <ARRAY Name="PreMemorizedSentences3">
+	  <!-- Boot Patterns -->
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+	  <!-- Dagger Patterns -->
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+	  <!-- Earring Patterns -->
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+	  <!-- Shield Patterns -->
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+	  <!-- Ammo Patterns -->
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+	  <!-- Range Weapon Patterns -->
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="armour craft">
+        <ATOM Name="Sabrina Phrase" Value="abczaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+      <STRUCT Name="melee weapon craft">
+        <ATOM Name="Sabrina Phrase" Value="abczmca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Gaunt Plan">
+        <ATOM Name="Sabrina Phrase" Value="abczaea08.sphrase"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Feb 23 15:10:31 2004 (puzin)
+Mon Feb 23 16:58:20 2004 (puzin) Form Parents = </LOG>
+</FORM>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_c_al.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="zorai light armor"/>
+      <ATOM Name="origin" Value="zorai"/>
+    </STRUCT>
+    <STRUCT Name="armor">
+      <ATOM Name="Skill" Value="SDALZAE"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="map_variant" Value="Low Quality"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 06 12:08:42 2002 (mauduit) .3d.map_variant = Low Quality
+Tue Aug 06 16:37:01 2002 (mauduit) Form Parents = 
+Wed Feb 12 14:59:14 2003 (receveur) formName Pasted = 
+Wed Feb 26 13:44:01 2003 (favre) .faber.Race = Zorai
+Wed Feb 26 13:44:01 2003 (favre) .faber.Skill = make kamic clothes
+Thu Feb 27 15:30:42 2003 (receveur) .faber.Create.MP 1 = jungle_fiber.item
+Fri Mar 07 14:54:12 2003 (receveur) formName Pasted = 
+Thu Jun 05 17:08:26 2003 (receveur) Form Parents = 
+Thu Sep 18 10:28:33 2003 (coutelas) .armor.Skill = light armor wear zorai
+Thu Sep 18 10:28:33 2003 (coutelas) .basics.name = zorai light armor
+Thu Sep 18 10:28:33 2003 (coutelas) .basics.origin = zorai
+Thu Sep 18 10:28:33 2003 (coutelas) .faber.Skill = zorai light armor craft
+Thu Sep 18 10:31:10 2003 (coutelas) .faber.Create.MP 1 Family = Resin
+Thu Sep 18 10:31:10 2003 (coutelas) .faber.Create.MP 3 Property = Cushion
+Fri Sep 19 14:18:14 2003 (coutelas) .AsBrick.Client.IconBack = BK_zorai_brick.tga
+Thu Oct 02 15:01:37 2003 (coutelas) .faber.Create.MP 1 = 
+Tue Feb 10 15:19:27 2004 (fleury) .armor.Skill = SDALZAE</LOG>
+</FORM>

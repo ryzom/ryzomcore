@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="FileName" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FadeInLength" Type="Type" Filename="int.typ" Default="2000"/>
+  <ELEMENT Name="FadeOutLength" Type="Type" Filename="int.typ" Default="2000"/>
+  <ELEMENT Name="MinimumPlayTime" Type="Type" Filename="int.typ" Default="10000"/>
+  <ELEMENT Name="TimeBeforeCanReplay" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Tue Nov 02 11:28:10 2004 (berenguier) Dfn Structure = 
+Tue Nov 02 11:30:14 2004 (berenguier) Dfn Structure = 
+Tue Nov 02 11:40:09 2004 (berenguier) Dfn Structure = 
+Tue Nov 02 11:40:29 2004 (berenguier) Dfn Structure = 
+Wed Nov 03 10:54:07 2004 (berenguier) Dfn Structure = </LOG>
+</DFN>

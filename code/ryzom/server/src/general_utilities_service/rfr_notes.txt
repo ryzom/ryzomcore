@@ -1,0 +1,13 @@
+Module name:		Ryzom File Retriever
+Short name:			RFR
+Associated modules:	SAVES / RS (remote shard saves interface)
+Requires:			none
+
+Description
+-----------
+This is a singleton module providing a means to use NLMISC_COMMANDs to interrogate
+save directories on the shards and to retrieve files
+
+Todo
+----
+

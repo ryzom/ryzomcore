@@ -1,0 +1,38 @@
+#!/usr/bin/perl -n
+
+###########################################################################
+# $Id: buildquiet,v 1.2 2002/05/07 10:05:49 valignat Exp $
+###########################################################################
+###########################################################################
+###########################################################################
+# BUILDQUIET:
+#
+#     This tool is aimed to "cleanup" the 'make' command output to only
+#     print the compiled file name instead of the compilation 'command'.
+#
+#     'buildquiet' is used by the 'build' script.
+#
+###########################################################################
+
+if ( ! ( /^((Making)|(\/bin\/sh)|(.*rm)|(mkdir)|(mv)|(ar)|(ranlib)|(echo)|(\(cd)|(\(?ln))\s/ ))
+{
+    # Replace 'make[2]: ' line
+    s/^make\[\d\]\:\s(.*)$/$1/;
+
+    # Replace the library creation line by only the library file name
+    s/^(ccache\s+)?(((gcc)|([cg]\+\+))\s-shared)\s.*\.libs\/([\w\.]+)$/    $6/;
+
+    # Replace the file compilation line by only the compiled file name
+    s/^(ccache\s+)?(gcc|([cg]\+\+)).*\s.+\/([\w\.]+.cpp).*$/    $4/;
+    s/^(ccache\s+)?(gcc|([cg]\+\+)).*\s.+-o\s([\w\.]+).*$/    $4/;
+
+    # Replace the install line
+    s/\s*\/usr\/bin\/install\s.*\s+(\.libs\/)?([^-][\.\w\-]+)\s+.*$/    Installing $2/;
+
+    if ( ! /^Nothing/ ) {
+        print;
+    }
+}
+
+# End of file
+

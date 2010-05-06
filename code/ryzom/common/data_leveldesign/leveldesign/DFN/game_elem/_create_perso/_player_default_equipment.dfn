@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Version="0.2" State="modified">
+  <ELEMENT Name="Female equipment" Type="Dfn" Filename="_default_equipment.dfn"/>
+  <ELEMENT Name="Male equipment" Type="Dfn" Filename="_default_equipment.dfn"/>
+  <LOG>Tue Sep 10 18:32:46 2002 (saffray) Dfn Structure = 
+Wed Sep 11 18:37:33 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

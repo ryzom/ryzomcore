@@ -1,0 +1,385 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.16 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Role" Value="Caster"/>
+    <ARRAY Name="PreMemorizedSentences1">
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="acid">
+        <ATOM Name="Sabrina Phrase" Value="abm_mt_acid_00003.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+    </ARRAY>
+    <STRUCT Name="StartEquipment1">
+      <STRUCT Name="HandR">
+        <ATOM Name="Item" Value="icrm2ms.sitem"/>
+        <ATOM Name="Quality" Value="10"/>
+      </STRUCT>
+    </STRUCT>
+    <ARRAY Name="PreMemorizedSentences2">
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="fear">
+        <ATOM Name="Sabrina Phrase" Value="abm_ml_fear_00010.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="acid">
+        <ATOM Name="Sabrina Phrase" Value="abm_mt_acid_00003.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+    </ARRAY>
+    <ARRAY Name="PreMemorizedSentences3">
+      <STRUCT Name="Fyros Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Boot Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczaea07.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Dagger Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczmea06.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Earring Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczjea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Shield Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczsea01.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Ammo Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczpea17.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Fyros Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcfrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Matis Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abcmrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Tryker Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abctrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="Zorai Range Weapon Pattern">
+        <ATOM Name="Sabrina Phrase" Value="abczrea04.sphrase"/>
+      </STRUCT>
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="heal">
+        <ATOM Name="Sabrina Phrase" Value="abm_mt_heal_00005.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="acid">
+        <ATOM Name="Sabrina Phrase" Value="abm_mt_acid_00003.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="fear">
+        <ATOM Name="Sabrina Phrase" Value="abm_ml_fear_00010.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="root">
+        <ATOM Name="Sabrina Phrase" Value="abm_ml_root_00015.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sun Sep 21 05:16:47 2003 (saffray) .Race = matis
+Sun Sep 21 05:16:47 2003 (saffray) .Role = fighter
+Sun Sep 21 05:17:09 2003 (saffray) .Race = fyros
+Sun Sep 21 05:17:23 2003 (saffray) .Race = tryker
+Sun Sep 21 05:17:36 2003 (saffray) .Race = zorai
+Sun Sep 21 05:18:19 2003 (saffray) .Race = fyros
+Sun Sep 21 05:18:19 2003 (saffray) .Role = magician
+Sun Sep 21 05:18:37 2003 (saffray) .Race = matis
+Mon Sep 22 18:09:49 2003 (saffray) .PreMemorizedSentences[0].Sabrina Phrase = abm_blunt_dmg_1.sphrase
+Mon Sep 22 18:09:49 2003 (saffray) .PreMemorizedSentences[1].Sabrina Phrase = abm_slas_dmg_1.sphrase
+Mon Sep 22 18:09:49 2003 (saffray) .PreMemorizedSentences[2].Sabrina Phrase = abm_pierce_dmg_1.sphrase
+Mon Sep 22 18:09:49 2003 (saffray) formName Resized = 3
+Mon Sep 22 18:10:17 2003 (saffray) .PreMemorizedSentences[1].Sabrina Phrase = abm_slash_dmg_1.sphrase
+Mon Sep 22 19:54:56 2003 (saffray) .PreMemorizedSentences[0].Memory Type = EmptyHand
+Mon Sep 22 19:54:56 2003 (saffray) .PreMemorizedSentences[1].Memory Type = EmptyHand
+Mon Sep 22 19:54:56 2003 (saffray) .PreMemorizedSentences[2].Memory Type = EmptyHand
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Arms.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Arms.Item = refugee_sleeves_red.sitem
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Body.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Body.Item = refugee_vest_red.sitem
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Feet.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Feet.Item = refugee_boots_red.sitem
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Hands.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Hands.Item = refugee_gloves_red.sitem
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Legs.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:25:41 2003 (coutelas) .StartEquipment.Legs.Item = refugee_pants_red.sitem
+Wed Sep 24 14:30:32 2003 (coutelas) .Race = 
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Arms.Quality = 5
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Body.Quality = 5
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Feet.Quality = 5
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Hands.Quality = 5
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Head.Quality = 5
+Wed Sep 24 18:28:11 2003 (saffray) .StartEquipment.Legs.Quality = 5
+Mon Feb 23 16:47:41 2004 (puzin) .Role = Caster
+Mon Feb 23 17:11:20 2004 (puzin) .PreMemorizedSentences1[2] Renamed = self heal
+Mon Feb 23 17:11:20 2004 (puzin) .PreMemorizedSentences1[2].Sabrina Phrase = abm_mt_self_heal_00005.sphrase
+Mon Feb 23 17:11:20 2004 (puzin) formName Resized = 3
+Mon Feb 23 17:11:39 2004 (puzin) .PreMemorizedSentences2[2] Renamed = self heal
+Mon Feb 23 17:11:39 2004 (puzin) .PreMemorizedSentences2[2].Sabrina Phrase = abm_mt_self_heal_00005.sphrase
+Mon Feb 23 17:11:39 2004 (puzin) formName Resized = 3
+Mon Feb 23 17:11:53 2004 (puzin) .PreMemorizedSentences3[2] Renamed = self heal
+Mon Feb 23 17:11:53 2004 (puzin) .PreMemorizedSentences3[2].Sabrina Phrase = abm_mt_self_heal_00005.sphrase
+Mon Feb 23 17:11:53 2004 (puzin) formName Resized = 3
+Mon Feb 23 17:12:14 2004 (puzin) .PreMemorizedSentences2[3] Renamed = heal
+Mon Feb 23 17:12:14 2004 (puzin) .PreMemorizedSentences2[3].Sabrina Phrase = abm_mt_heal_00005.sphrase
+Mon Feb 23 17:12:14 2004 (puzin) formName Resized = 5
+Mon Feb 23 17:12:22 2004 (puzin) .PreMemorizedSentences3[3] Renamed = heal
+Mon Feb 23 17:12:22 2004 (puzin) .PreMemorizedSentences3[3].Sabrina Phrase = abm_mt_heal_00005.sphrase
+Mon Feb 23 17:12:22 2004 (puzin) formName Resized = 5
+Mon Feb 23 17:12:40 2004 (puzin) .PreMemorizedSentences2[4] Renamed = acid
+Mon Feb 23 17:12:40 2004 (puzin) .PreMemorizedSentences2[4].Sabrina Phrase = abm_mt_acid_00003.sphrase
+Mon Feb 23 17:12:40 2004 (puzin) .PreMemorizedSentences3[4] Renamed = acid
+Mon Feb 23 17:12:40 2004 (puzin) .PreMemorizedSentences3[4].Sabrina Phrase = abm_mt_acid_00003.sphrase
+Mon Feb 23 17:13:00 2004 (puzin) .PreMemorizedSentences3[5] Renamed = fear
+Mon Feb 23 17:13:00 2004 (puzin) .PreMemorizedSentences3[5].Sabrina Phrase = abm_ml_fear_00010.sphrase
+Mon Feb 23 17:13:00 2004 (puzin) formName Resized = 7
+Mon Feb 23 17:13:11 2004 (puzin) .PreMemorizedSentences3[6] Renamed = root
+Mon Feb 23 17:13:11 2004 (puzin) .PreMemorizedSentences3[6].Sabrina Phrase = abm_ml_root_00010.sphrase
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences1[0].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences1[1].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences1[2].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences2[0].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences2[1].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences2[2].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences2[3].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences2[4].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[0].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[1].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[2].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[3].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[4].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[5].Memory Type = EmptyHand
+Mon Feb 23 20:25:34 2004 (puzin) .PreMemorizedSentences3[6].Memory Type = EmptyHand
+Wed Jun 02 18:54:39 2004 (coutelas) formName Deleted = 
+Tue Jun 22 11:48:39 2004 (coutelas) .StartEquipment1.Hands.Item = iccm2ms.sitem
+Tue Jun 22 11:48:39 2004 (coutelas) .StartEquipment2.Hands.Item = iccm2ms.sitem
+Tue Jun 22 11:48:39 2004 (coutelas) .StartEquipment3.Hands.Item = iccm2ms.sitem
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment1.HandR.Item = iccm2ms.sitem
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment1.Hands.Item = 
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment2.HandR.Item = iccm2ms.sitem
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment2.Hands.Item = 
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment3.HandR.Item = iccm2ms.sitem
+Tue Jun 22 11:50:18 2004 (coutelas) .StartEquipment3.Hands.Item = 
+Tue Jun 22 11:51:24 2004 (coutelas) .StartEquipment1.HandR.Quality = 1
+Tue Jun 22 11:51:24 2004 (coutelas) .StartEquipment2.HandR.Quality = 1
+Tue Jun 22 11:51:24 2004 (coutelas) .StartEquipment3.HandR.Quality = 1
+Thu Jul 15 11:44:11 2004 (coutelas) .StartEquipment1.HandR.Quality = 10
+Thu Jul 15 11:44:26 2004 (coutelas) .StartEquipment2.HandR.Quality = 10
+Thu Jul 15 11:45:04 2004 (coutelas) .StartEquipment3.HandR.Quality = 10
+Fri Aug 13 19:19:54 2004 (puzin) .StartEquipment2.HandR.Item = 
+Fri Aug 13 19:19:54 2004 (puzin) .StartEquipment2.HandR.Quality = 
+Fri Aug 13 19:19:54 2004 (puzin) .StartEquipment3.HandR.Item = 
+Fri Aug 13 19:19:54 2004 (puzin) .StartEquipment3.HandR.Quality = 
+Thu Feb 02 18:52:50 2006 (berenguier) .PreMemorizedSentences2[26] Renamed = fear
+Thu Feb 02 18:52:50 2006 (berenguier) .PreMemorizedSentences2[26].Sabrina Phrase = abm_ml_fear_00010.sphrase</LOG>
+</FORM>

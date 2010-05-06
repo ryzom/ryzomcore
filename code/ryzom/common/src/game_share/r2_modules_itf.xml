@@ -1,0 +1,354 @@
+<generator header_tag="R2_MODULES_ITF">
+
+	<include file="game_share/far_position.h"/>
+	<include file="game_share/r2_share_itf.h"/>
+	<include file="game_share/r2_types.h"/>
+	<include file="game_share/base_types.h"/>
+	<include file="game_share/misc_const.h"/>
+
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="R2">
+
+
+		<module_interface name="CServerEditionItf" module_class='"ServerEditionItf"'>
+		</module_interface>
+
+
+		<!-- ____________________________________________________ -->
+		<module_interface name="CServerAnimationItf" module_class='"ServerAnimationModule"'>
+			<!--		<method name="tpPosition" msg="TPP">
+				<doc line="teleport a player to a chosen position, possibly changing the season"/>
+				<param type="TSessionId"					name="sessionId"/>
+				<param type="uint64"						name="entityId"/>
+				<param type="uint32"						name="x"/>
+				<param type="uint32"						name="y"/>
+				<param type="uint8"							name="scenarioSeason"/>
+			</method> -->
+			<method name="getStartParams" msg="GSP">
+				<doc line="Ask for the position, season and adventure mode of a connecting character"/>
+				<doc line="The reply will either give a new position or tell to load the last stored one"/>
+				<doc line="Used by the EGS of a Ring shard to send the start position to a connecting client"/>
+				<param type="uint32"						name="charId"/>
+				<param type="TSessionId"					name="lastStoredSessionId"/>
+			</method>
+			<method name="askSetUserCharActPosition" msg="ASUCAP">
+				<doc line="Ask to server animation module to re-send usre char entry point"/>
+				<doc line="The reply call CCharacterControlItf::setUserCharActPosition"/>
+				<param type="uint32"						name="charId"/>
+			</method>
+			<method name="activateEasterEgg" msg="SAEE">
+				<doc line="AIS Message to activate a scenario generated easter egg"/>
+				<param type="uint32"					name="easterEggId"/>
+				<param type="TSessionId"				name="scenarioId"/>
+				<param type="uint32"					name="actId"/>
+				<param type="std::string" name="items" byref="true"/>
+				<param type="float"						name="x"/>
+				<param type="float"						name="y"/>
+				<param type="float"						name="z"/>
+				<param type="float"						name="heading"/>
+				<param type="std::string"				name="grpCtrl" byref="true"/>
+				<param type="std::string"				name="name" byref="true"/>
+				<param type="std::string"				name="look" byref="true"/>
+			</method>
+			<method name="dssMessage" msg="SDSSM">
+				<doc line="AIS Message to make the dss send a message"/>
+				<param type="TSessionId"				name="sessionId"/>
+				<param type="std::string"				name="mode" byref="true"/>
+				<param type="std::string"				name="who" byref="true"/>
+				<param type="std::string"				name="msg" byref="true"/>
+			</method>
+			<method name="setScenarioPoints" msg="SSSP">
+				<doc line="AIS Message to make the dss set the scenario points"/>
+				<param type="TSessionId"				name="sessionId"/>
+				<param type="float"						name="scenarioPoints"/>
+			</method>
+			<method name="startScenarioTiming" msg="SST">
+				<doc line="AIS Message to make the dss start scenario timing"/>
+				<param type="TSessionId"				name="sessionId"/>
+			</method>
+			<method name="endScenarioTiming" msg="EST">
+				<doc line="AIS Message to make the dss end scenario timing"/>
+				<param type="TSessionId"				name="sessionId"/>
+			</method>
+			<method name="deactivateEasterEgg" msg="SDEE">
+				<doc line="AIS Message to activate a scenario generated easter egg"/>
+				<param type="uint32"					name="easterEggId"/>
+				<param type="TSessionId"				name="scenarioId"/>
+				<param type="uint32"					name="actId"/>
+			</method>
+			<method name="onEasterEggLooted" msg="SOEEL">
+			<doc line="EGS Message to indicates that an easter egg is looted"/>
+				<param type="uint32"					name="eggId" />
+				<param type="TSessionId"				name="scenarioId"/>
+			</method>
+
+			<method name="onCharTargetReceived" msg="SCTR">
+				<doc line="EGS message to indicates info of the target of a player"/>
+				<param type="NLMISC::CEntityId" name="eid" byref="true" />
+				<param type="NLMISC::CEntityId" name="creatureId" byref="true" />
+				<param type="uint32" name="creatureAlias"/>
+				<param type="TDataSetRow" name="creatureRowId" />
+				<param type="ucstring" name="name"  byref="true"/>
+				<param type="uint32" name="nameId" />
+				<param type="std::vector&lt;std::string&gt;" name="params" byref="true" serial="Cont"/>
+				<param type="bool" name="alived" />
+
+			</method>
+
+			<method name="teleportCharacter" msg="STOCTO">
+				<doc line="AIS message to ask the dss to teleport a character to a position"/>
+				<param type="NLMISC::CEntityId" name="player" byref="true"  />
+				<param type="float" name="x"  />
+				<param type="float" name="y"  />
+				<param type="float" name="z"  />
+			</method>
+
+			<method name="characterReady" msg="CRDY">
+				<doc line="EGS message to indicates that a character is ready in mirror"/>
+
+				<param type="NLMISC::CEntityId" name="charEid" byref="true" />
+			</method>
+
+		</module_interface>
+
+		<!-- ____________________________________________________ -->
+		<module_interface name="CCharacterControlItf">
+			<method name="setUserCharStartParams" msg="RSP">
+				<doc line="The reply of CServerAnimationItf::getStartParams. If reloadPos is true,"/>
+				<doc line="the character will start from his current saved pos, otherwise the character"/>
+				<doc line="will start at farPos. In all cases farPos is the respawn point to set."/>
+				<param type="uint32"						name="charId"/>
+				<param type="CFarPosition"					name="farPos" byref="true"/>
+				<param type="bool"							name="reloadPos"/>
+				<param type="uint8"							name="scenarioSeason"/>
+				<param type="R2::TUserRole"					name="role"/>
+			</method>
+
+			<method name="charJoinAnimSession" msg="CJAS">
+				<doc line="A character enter an anim session as player"/>
+
+				<param type="uint32"			 			name="charId"/>
+				<param type="uint32"			 			name="sessionId"/>
+			</method>
+
+			<method name="charLeaveAnimSession" msg="CLAS">
+				<doc line="A character leave an anim session as player"/>
+
+				<param type="uint32"			 			name="charId"/>
+				<param type="uint32"			 			name="sessionId"/>
+			</method>
+
+			<method name="setUserCharActPosition" msg="RSPP">
+				<doc line="The reply of CServerAnimationItf::startAct telling to teleport user"/>
+				<param type="uint32"			 			name="charId"/>
+				<param type="CFarPosition"					name="farPos" byref="true"/>
+				<param type="uint8"                         name="season" />
+			</method>
+
+			<method name="animSessionStarted" msg="AST">
+				<doc line="A DSS to EGS signal that an anim session is started"/>
+
+				<param type="TSessionId"					name="sessionId"/>
+				<param type="TRunningScenarioInfo"			name="scenarioInfo"	byref="true"/>
+			</method>
+
+			<method name="animSessionEnded" msg="ASE">
+				<doc line="A DSS to EGS signal that an anim session is ended"/>
+
+				<param type="TSessionId"					name="sessionId"/>
+				<param type="uint32"							name="scenarioScore"/>
+				<param type="NLMISC::TTime"					name="timeTaken"/>
+			</method>
+
+			<method name="scenarioEnded" msg="SSE">
+				<doc line="A DSS Message to signal that a session is ended"/>
+				<param type="TSessionId"					name="sessionId"/>
+			</method>
+
+			<method name="sendItemDescription" msg="SSIT">
+				<doc line="A DSS Message to register mission item of a scenario"/>
+				<param type="TSessionId"					name="sessionId"/>
+				<param type="std::vector&lt;R2::TMissionItem&gt;" name="missionItem" byref="true" serial="Cont"/>
+			</method>
+
+			<method name="activateEasterEgg" msg="AEE">
+			<doc line="AIS Message to activate a scenario generated easter egg"/>
+				<param type="uint32"						name="easterEggId"/>
+				<param type="TSessionId"					name="scenarioId"/>
+				<param type="uint32"						name="aiInstanceId"/>
+				<param type="std::vector&lt;R2::TItemAndQuantity&gt;" name="items" byref="true" serial="Cont"/>
+				<param type="CFarPosition"					name="pos" byref="true"/>
+				<param type="std::string"					name="name" byref="true"/>
+				<param type="std::string"					name="look" byref="true"/>
+			</method>
+
+			<method name="deactivateEasterEgg" msg="DEE1">
+			<doc line="AIS Message to deactivate a scenario generated easter egg"/>
+				<param type="uint32"						name="easterEggId"/>
+				<param type="TSessionId"					name="scenarioId"/>
+			</method>
+
+			<method name="deactivateEasterEggs" msg="DEE2">
+			<doc line="AIS Message to deactivate a multiple easterEgg scenario generated easter egg"/>
+				<param type="std::set&lt;uint32&gt;"		name="items" byref="true" serial="Cont"/>
+				<param type="TSessionId"					name="scenarioId"/>
+			</method>
+
+			<method name="sendCharTargetToDss" msg="SCT">
+				<doc line="DSS message to ask info of the target of a player"/>
+				<param type="NLMISC::CEntityId" name="eid" byref="true" />
+				<param type="std::vector&lt;std::string&gt;" name="params" byref="true" serial="Cont" />
+			</method>
+
+			<method name="onTpPositionAsked" msg="STPA">
+				<doc line="DSS message to ask the tp of a pioneer"/>
+				<param type="NLMISC::CEntityId" name="eid" byref="true" />
+				<param type="float" name="x"  />
+				<param type="float" name="y"  />
+				<param type="float" name="z"  />
+				<param type="uint8" name="season"  />
+				<param type="R2::TR2TpInfos" name="teleportInfos" byref="true"  />
+
+			</method>
+
+			<method name="disconnectChar" msg="SDC">
+				<doc line="DSS message to ask to disconnect a char"/>
+				<param type="uint32" name="charId"  />
+			</method>
+
+			<method name="returnToPreviousSession" msg="SRPS">
+				<doc line="DSS message to ask the egs to return a player to mainland"/>
+				<param type="uint32" name="charId"  />
+			</method>
+
+			<method name="setPioneerRight" msg="SSPR">
+				<doc line="DSS message to ask the egs to set DM righ (aggro, visible, god)"/>
+				<param type="uint32" name="charId"  />
+				<param type="bool" name="isDM"  />
+			</method>
+
+			<method name="teleportOneCharacterToAnother" msg="STOCTA">
+				<doc line="DSS message to ask the egs to teleport a character to another character"/>
+				<param type="uint32" name="sourceId"  />
+				<param type="uint32" name="destId"  />
+				<param type="uint8" name="season"  />
+			</method>
+
+			<method name="teleportCharacterToNpc" msg="STCTN">
+				<doc line="DSS message to ask the egs to teleport a character to a npc"/>
+				<param type="uint32" name="sourceId"  />
+				<param type="NLMISC::CEntityId" name="destEid"  byref="true"  />
+				<param type="uint8" name="season"  />
+			</method>
+
+
+			<method name="setUserCharCurrentSession" msg="SUCCS">
+				<doc line="DSS message to update the respawn point"/>
+				<param type="uint32" name="charId"  />
+				<param type="TSessionId" name="oldSessionId"  />
+				<param type="CFarPosition" name="respawnPoint" byref="true" />
+				<param type="R2::TUserRole" name="role"  />
+			</method>
+
+			<method name="reportLinkedSession" msg="SRLS">
+				<doc line="DSS message to indicates to the egs that session may be linked"/>
+				<param type="TSessionId" name="editionSession"/>
+				<param type="TSessionId" name="animationSession" />
+			</method>
+
+			<method name="reportUnlinkedSession" msg="SRUS">
+				<doc line="DSS message to indicates to the egs that linked session are no more linked"/>
+				<param type="TSessionId" name="editionSession"/>
+				<param type="TSessionId" name="animationSession" />
+			</method>
+
+			<method name="giveRewardMessage" msg="SGRM">
+			<doc line="AIS Message to give some reward to the player"/>
+				<param type="TDataSetRow"	name="characterRowId"/>
+				<param type="TDataSetRow"	name="creatureRowId"/>
+				<param type="std::string"	name="rewardText" byref="true"/>
+				<param type="std::string"	name="rareRewardText" byref="true"/>
+				<param type="std::string"	name="inventoryFullText" byref="true"/>
+				<param type="std::string"	name="notEnoughPointsText" byref="true"/>
+			</method>
+
+			<method name="reportNpcControl" msg="SRNC">
+			<doc line="AIS Message to indicates that a bot is being controled"/>
+				<param type="NLMISC::CEntityId"	name="playerEid" byref="true"/>
+				<param type="NLMISC::CEntityId"	name="botEid" byref="true"/>
+			</method>
+
+
+   			<method name="reportStopNpcControl" msg="SRSNC">
+			<doc line="AIS Message to indicates that a bot is stop being controled"/>
+				<param type="NLMISC::CEntityId"	name="playerEid" byref="true"/>
+				<param type="NLMISC::CEntityId"	name="botEid" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="subscribeCharacterInRingUniverse" msg="SCIRU">
+				<doc line="DSS ask to put a character in the ring universe channel"/>
+				<doc line="This is for editors and animator characters only"/>
+
+				<param type="uint32"		name="charId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="unsubscribeCharacterInRingUniverse" msg="UCIRU">
+				<doc line="DSS ask to remove a character from the ring universe channel"/>
+				<doc line="This is for editors and animator characters only"/>
+
+				<param type="uint32"		name="charId"/>
+			</method>
+
+
+		</module_interface>
+
+
+		<!-- ____________________________________________________ -->
+		<module_interface name="CAisControlItf">
+		</module_interface>
+
+		<!-- ____________________________________________________ -->
+
+
+		<class name="TR2SbmSessionInfo">
+			<doc line="Info about a connected character, used for block tranfert"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+			<property type="TSessionId"	name="SessionId"		doc="The SessionId"/>
+			<property type="uint32"				name="DateEmpty"	doc="the date of last disconnection of the last character"/>
+		</class>
+
+
+		<module_interface name="CR2SessionBackupModuleItf">
+			<method name="reportDeletedSessions" msg="SRDS">
+				<doc line="DSS message to report session backup that have been deleteed"/>
+				<param type="std::vector&lt;TSessionId&gt;" name="sessionIds" byref="true" serial="Cont"  />
+			</method>
+
+			<method name="reportHibernatedSessions" msg="SRHS">
+				<doc line="DSS message to report session backup that have been hibernated"/>
+				<param type="std::vector&lt;TSessionId&gt;" name="sessionIds" byref="true" serial="Cont"  />
+			</method>
+
+			<method name="reportSavedSessions" msg="SRSS">
+				<doc line="DSS message to report session backup that have been deleteed"/>
+				<param type="std::vector&lt; TR2SbmSessionInfo &gt;" name="sessionInfos" byref="true" serial="Cont"  />
+			</method>
+
+			<method name="registerDss" msg="SRDSS">
+				<doc line="DSS message to register itself to the R2SBM"/>
+				<param type="TShardId" name="shardId" />
+			</method>
+
+
+
+		</module_interface>
+
+
+	</namespace>
+</generator>
+

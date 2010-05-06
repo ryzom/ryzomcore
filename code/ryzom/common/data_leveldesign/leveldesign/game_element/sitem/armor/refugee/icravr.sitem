@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_c_ar.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="refugee red vest"/>
+      <ATOM Name="ItemType" Value="Light vest"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Chest"/>
+        </ARRAY>
+      </STRUCT>
+      <ATOM Name="CraftPlan" Value="bcraea37.sbrick"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="TR_HOM_refugee_gilet.shape"/>
+      <ATOM Name="shape_female" Value="TR_HOF_refugee_gilet.shape"/>
+      <ATOM Name="map_variant" Value="Low Quality"/>
+      <ATOM Name="icon" Value="AR_gilet.tga"/>
+      <ATOM Name="icon background" Value="BK_generic.tga"/>
+      <ATOM Name="color" Value="Red"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Tool type" Value="ArmorTool"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Wed Aug 07 10:54:58 2002 (mauduit) Form Parents = 
+Fri Sep 27 14:21:25 2002 (favre) .basics.name = zorai light vest
+Wed Oct 02 18:00:15 2002 (favre) .basics.weight = heavy
+Thu Sep 18 10:37:50 2003 (coutelas) .AsBrick.Client.Icon = AR_gilet.tga
+Thu Sep 18 10:37:50 2003 (coutelas) .basics.ItemType = Light vest
+Thu Sep 18 10:37:50 2003 (coutelas) .faber.Skill = zorai light vest craft
+Tue Sep 23 16:46:37 2003 (coutelas) .basics.name = zorai refugee vest
+Wed Sep 24 11:43:21 2003 (coutelas) .basics.name = refugee vest
+Wed Sep 24 11:43:21 2003 (coutelas) .basics.origin = 
+Wed Sep 24 11:44:46 2003 (coutelas) .basics.origin = refugee
+Wed Sep 24 11:53:07 2003 (coutelas) .3d.color = Red
+Wed Sep 24 11:53:07 2003 (coutelas) .basics.name = refugee red vest
+Wed Sep 24 12:18:53 2003 (coutelas) .basics.origin = 
+Fri Sep 26 17:33:45 2003 (saffray) .basics.EquipmentInfo.EquipmentSlots[0] = Chest
+Fri Sep 26 17:33:45 2003 (saffray) formName Resized = 1</LOG>
+</FORM>

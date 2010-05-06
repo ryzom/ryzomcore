@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.5 $" State="modified">
+  <ELEMENT Name="DayNumHours" Type="Type" Filename="int.typ" Default="24"/>
+  <ELEMENT Name="CycleLenght" Type="Type" Filename="int.typ" Default="25"/>
+  <ELEMENT Name="MinThunderPeriod" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="ThunderLenght" Type="Type" Filename="float.typ" Default="0.5"/>
+  <ELEMENT Name="CloudWindSpeedFactor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="CloudMinSpeed" Type="Type" Filename="float.typ" Default="0.0"/>
+  <LOG>Wed Nov 06 11:14:53 2002 (Nicolas Vizerie) Dfn Structure = 
+Wed Nov 06 11:17:06 2002 (Nicolas Vizerie) Dfn Structure = 
+Tue Nov 12 11:20:04 2002 (Nicolas Vizerie) Dfn Structure = 
+Tue Nov 12 17:48:46 2002 (Nicolas Vizerie) Dfn Structure = 
+Fri Nov 15 16:49:56 2002 (Nicolas Vizerie) Dfn Structure = 
+Fri Nov 15 17:02:09 2002 (Nicolas Vizerie) Dfn Structure = 
+Tue Nov 26 15:22:41 2002 (gatto) Dfn Structure = 
+Wed May 19 15:53:01 2004 (vizerie) Dfn Structure = </LOG>
+</DFN>

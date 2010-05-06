@@ -1,0 +1,43 @@
+;E:\Sheets\Raw Materials\creature_models.csv;;Creature Models;;;;;;;
+
+Aquatic;M;;AB;AA;;;;;;
+Aquatic;N;;Prakker;Baldusa;;;;;;
+Horses;M;;HH;HQ;HX;CL;;;;
+Horses;N;;Mektoub;Gnoof;Gubani;Ocyx;;;;
+Dogs;M;;CA;CD;CE;CH;HD;HO;CK;CP
+Dogs;N;;Gingo;Torbak;Ragus;Varinx;Yubo;Frippo;Cuttler;Yetin
+Runners;M;;HC;HF;HM;HP;;;;
+Runners;N;;Capryni;Messab;Raspal;Rendor;;;;
+Crustace;M;;CB;KA;HE;CC;CN;;;
+Crustace;N;;Clopper;Kidinak;Cray;Goari;Horncher;;;
+Great Ryzomians;M;;CF;CG;HS;HW;CO;;;
+Great Ryzomians;N;;Najab;Vorax;Shalah;Arana;Tyrancha;;;
+Walking Kitins;M;;KB;KD;KE;KC;KF;KG;KH;
+Walking Kitins;N;;Kinrey;Kincher;Kipucka;Kizarak;Kirosta;Kiban;Kipee;
+Flying Kitins;M;;KI;KJ;;;;;;
+Flying Kitins;N;;Kizoar;Kipesta;;;;;;
+Birds;M;;BA;BB;BC;CJ;;;;
+Birds;N;;Igara;Izam;Yber;Javing;;;;
+Pachiderms;M;;HA;HB;HL;HT;HV;;;
+Pachiderms;N;;Arma;Bodoc;Yelk;Ploderos;Madakam;;;
+Carnivore Plants;M;;PE;PB;PA;PC;PD;PF;;
+Carnivore Plants;N;;Cratcha;Stinga;Jubla;Psykopla;Slaveni;Shooki;;
+Ryzomians;M;;HG;HK;CI;HN;HR;HU;CM;
+Ryzomians;N;;Lumper;Timari;Zerx;Bawaab;Bolobi;Wombai;Jugula;
+Degenerated;M;;DA;DB;DC;;;;;
+Degenerated;N;;Cute;Gibbai;Frahar;;;;;
+
+;;;Clapclap;Ryzetacée;;;;;;
+;;;Mektoub;Mektoubpack;Mektoubselle;H5 / Schnoof;H12 / Wooah;C3 / Osyx;;
+;;;Chorani;Jungler;Regus;Varinx;Dag;H3 / Bini;C2 / Cuttle;C7
+;;;Capryni;Filin;H1;H4 / Rondor;;;
+;;;Cococlaw;Diranak;estrasson;Hachtaha;C5 / Rahley;;
+;;;Ryzerb;Ryzoholok;H7;H11;C6 / Peloedith;;
+;;;Kitihank;Kitimandib;Kitinagan;Kitinarak;Kitinega;Kitinokto;Pucetron
+;;;Kitifly;Kitikil;;;;;
+;;;Kazoar;Lightbird;Yber;C1 / Pyrinax;;;
+;;;Arma;Bul;Vampignon;H8 / Plodos;H10;;
+;;;Carnitree;Electroalg;Endrobouch;Phytopsy;Sapenslaver;Swarmplant;
+;;;Kakty;Ryzoholo;Zerx;H2;H6;H9 / Kiwai;C4 / Nobi
+
+;;;N row must be below M row;;;;;;

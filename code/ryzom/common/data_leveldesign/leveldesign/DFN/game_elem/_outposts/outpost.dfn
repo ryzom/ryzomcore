@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" State="modified">
+  <ELEMENT Name="Max Number of Spawned Squads" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Challenge Cost" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Max Total Squads" Type="Type" Filename="int.typ" Default="10"/>
+  <ELEMENT Name="Level" Type="Type" Filename="int.typ" Default="1"/>
+  <ELEMENT Name="MinimumGuildRoundLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="MinimumTribeRoundLevel" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Thu Jan 27 12:45:30 2005 (nouveau) Dfn Structure = 
+Thu Jan 27 12:51:52 2005 (nouveau) Dfn Structure = 
+Thu Apr 21 10:33:16 2005 (besson) Dfn Structure = 
+Thu Apr 21 10:34:29 2005 (besson) Dfn Structure = 
+Thu Apr 21 10:36:27 2005 (besson) Dfn Structure = 
+Wed Sep 21 10:07:46 2005 (besson) Dfn Structure = 
+Thu Sep 29 11:38:01 2005 (besson) Dfn Structure = 
+Mon Oct 17 11:22:30 2005 (vuarand) Dfn Structure = 
+Wed Oct 19 15:23:24 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

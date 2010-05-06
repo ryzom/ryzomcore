@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.12 $" State="modified">
+  <ELEMENT Name="Durability" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Weight" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="SapLoad" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="DMG" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Speed" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Range" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="DodgeModifier" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ParryModifier" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="AdversaryDodgeModifier" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="AdversaryParryModifier" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ProtectionFactor" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MaxSlashingProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MaxBluntProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="MaxPiercingProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="AcidProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ColdProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="FireProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="RotProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ShockWaveProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="PoisonProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ElectricityProtection" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="DesertResistance" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ForestResistance" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="LacustreResistance" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="JungleResistance" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="PrimaryRootResistance" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="HpBuff" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="SapBuff" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="StaBuff" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="FocusBuff" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ElementalCastingTimeFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="ElementalPowerFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="OffensiveAfflictionCastingTimeFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="OffensiveAfflictionPowerFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="HealCastingTimeFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="HealPowerFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="DefensiveAfflictionCastingTimeFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="DefensiveAfflictionPowerFactor" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="CraftCivSpec" Type="Type" Filename="item_origine.typ"/>
+  <ELEMENT Name="CraftEstimatedQuality" Type="Type" Filename="item_mp_property_depth.typ"/>
+  <LOG>Mon Oct 20 19:56:21 2003 (cado) Dfn Structure = 
+Thu Jan 08 15:01:23 2004 (berenguier) Dfn Structure = 
+Thu Jan 08 15:01:44 2004 (berenguier) Dfn Structure = 
+Fri Jun 18 11:33:13 2004 (coutelas) Dfn Structure = </LOG>
+</DFN>

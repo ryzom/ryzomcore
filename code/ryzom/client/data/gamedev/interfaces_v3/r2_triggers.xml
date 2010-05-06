@@ -1,0 +1,780 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+<template name="template_label_menu" keep="true" active="true" id="" x="0" y="0" sizeref="" w="" h="" posparent="" 
+ posref="" w_label="0" w_combo="0" hardtext="" on_change_params="" y_text="4" color_text="">	
+
+	<group id="#id" active="#active" x="#x" y="#y" sizeref="#sizeref" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label" sizeref="w5h" w="#w_label" h="0" x="0" y="0" posref="TL TL" posparent="parent" >
+
+			<view type="text" id="name_text" posref="BL BL" x="2" y="#y_text" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<instance template="menu_button_template" id="menu" x="0" y="0" sizeref="wh" posparent="label"
+		 posref="TR TL" w="#w_combo" h="0" params_l="#on_change_params" color_text="#color_text" />	
+
+	</group>
+</template>
+
+
+<template name="template_label_menu_resize" keep="true" active="true" id="" x="0" y="0" sizeref="" w="" h="" posparent="" 
+ posref="" w_combo="0" hardtext="" on_change_params="" y_text="4">	
+
+	<group id="#id" active="#active" x="#x" y="#y" sizeref="#sizeref" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label" sizeref="h" w="#w_label" h="0" x="0" y="0" posref="TL TL" posparent="parent" >
+
+			<view type="text" id="name_text" posref="BL BL" x="2" y="#y_text" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<instance template="menu_button_template" id="menu" x="#w_label" y="0" sizeref="wh" posparent="parent"
+		 posref="BL BL" w="#w_combo" h="0" params_l="#on_change_params" />	
+
+	</group>
+</template>
+
+<template name="template_menu_label" keep="true" active="true" id="" x="0" y="0" sizeref="" w="" h="" posparent="" 
+ posref="" w_label="0" w_combo="0" hardtext="" on_change_params="" y_text="4">	
+
+	<group id="#id" active="#active" x="#x" y="#y" sizeref="#sizeref" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+	
+		<!-- menu -->
+		<instance template="menu_button_template" id="menu" x="0" y="0" sizeref="w5h" posparent="parent"
+		 posref="TL TL" w="#w_combo" h="0" params_l="#on_change_params" />	
+
+		<!-- label -->
+		<group id="label" sizeref="wh" w="#w_label" h="0" x="0" y="0" posref="TR TL" posparent="menu" >
+			<view type="text" id="name_text" posref="BL BL" x="2" y="#y_text" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+	</group>
+</template>
+
+<template name="r2ed_triggers_button" keep="true" id="" x="0" y="0" active="true" posref="BL BM" posparent="parent" icon="" icon_over="" icon_pushed="" w="44" h="39" tooltip=""
+ color="" col_over="" col_pushed="" offset_x = "0" offset_y = "0" onclick_l="" params_l=""
+ >	
+	<group id="#id" active="#active" x="#x" y="#y" posref="#posref" posparent="#posparent"
+	 child_resize_w="true" child_resize_h="true" child_resize_wmargin="#offset_x" child_resize_hmargin="#offset_y"
+	 onclick_l="" params_l="" >	
+	 		
+		<group id="button_group" active="true" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" color="#color" w="8" h="8" posref="BL BL" texture="r2ed_triggers_corner.tga" rot="3"/>
+							
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon" tx_pushed="#icon_pushed" tx_over="#icon_over" tooltip="#tooltip"
+				 color="#color" col_over="#col_over" col_pushed="#col_pushed"
+				 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+				 onclick_l="#onclick_l" params_l="#params_l" over_when_pushed = "false" />	
+				 			
+			<view type="bitmap" id="bottom" color="#color" scale="true" posparent="button" posref="BL TL" sizeref="w" w="0" h="8" texture="r2ed_triggers_border.tga" rot="2"/>			
+			<view type="bitmap" id="top" color="#color" scale="true" posparent="button" posref="TL BL" sizeref="w" w="0" h="8" texture="r2ed_triggers_border.tga" rot="0"/>			
+			<view type="bitmap" id="left" color="#color" scale="true" posparent="button" posref="BL BR" sizeref="h" w="8" h="0" texture="r2ed_triggers_border.tga" rot="3"/>
+			<view type="bitmap" id="right" color="#color" scale="true" posparent="button" posref="BR BL" sizeref="h" w="8" h="0" texture="r2ed_triggers_border.tga" rot="1"/>			
+			<view type="bitmap" id="tl" color="#color" w="8" h="8" posref="TL BR" texture="r2ed_triggers_corner.tga" posparent="button" rot="0"/>
+			<view type="bitmap" id="tr" color="#color" w="8" h="8" posref="TR BL" texture="r2ed_triggers_corner.tga" posparent="button" rot="1"/>
+			<view type="bitmap" id="br" color="#color" w="8" h="8" posref="BR TL" texture="r2ed_triggers_corner.tga" posparent="button" rot="2"/>
+		</group>						
+	</group>
+</template>
+
+<!-- button tab style -->
+<style style="tab_button_sequence" keep="true" type="tab_button" button_type="radio_button"
+		x="0" posref="TR TL"		
+		text_x="4"
+		text_posref="ML ML"
+		tx_normal="r2_tab_wide_normal" tx_pushed="r2_tab_sequence_pushed" tx_over="r2_tab_wide_over"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false"
+		color="255 255 255 255" col_over="255 255 255 255" 
+		text_y="-2" fontsize="10" shadow="true" wmargin="8"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+		text_global_color_normal="true" 
+	    text_global_color_pushed="true" 
+	    text_global_color_over="true"
+		onclick_l="lua" params_l=""
+/>
+
+
+<template name="element_template" keep="true" id="" posref="" x="" y="" hardtext=""
+ select_elt="" open_elt_editor="" max_min_elt="" remove_elt="" 
+ col_over="" col_pushed="" multi_max_line="3" >	
+
+	<group id="#id" sizeref="w" posref="#posref" x="#x" y="#y" w="0" child_resize_h="true" child_resize_hmargin="0" >
+		<group id="element_list" active="true" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" >
+
+			<group id="element" active="true" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" >
+				
+				<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+				
+				<view type="bitmap" id="dismatch_filter" active="false" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+				 x="0" scale="false" tile="true" texture="r2ed_dismatch_filter.tga" color="255 255 255 255" />
+				
+				<ctrl type="button" button_type="toggle_button" id="select" sizeref="wh" w="0" h="0" 
+				 col_over="#col_over" col_pushed="#col_pushed" tx_over="blank.tga" tx_pushed="blank.tga" scale="true"
+				 onclick_l="lua" params_l="#select_elt" pushed="false" />
+
+				<group id="element_title" posparent="parent" sizeref="w" w="0" min_h="22" child_resize_h="true" posref="TL TL" x="0" y="0">
+
+					<group id="group_title" posparent="parent" sizeref="w" w="-26" child_resize_h="true" child_resize_hmargin="8" posref="TL TL" x="0" y="0">
+
+						<view type="text" id="title" posref="TL TL" x="10" y="-5" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" multi_line="true" multi_max_line="#multi_max_line"/>
+					</group>
+
+					<instance template="r2ed_triggers_little_button" id="minimize_element" x="-2" y="-2" posparent="parent" posref="TR TR"   
+					 onclick_l="lua" params_l="#max_min_elt" active="false" 
+					 icon="r2ed_triggers_minimize.tga" icon_over="r2ed_triggers_minimize.tga" icon_pushed="r2ed_triggers_minimize.tga"
+					 color="#col_pushed" col_over="#col_pushed" col_pushed="#col_pushed"/>
+
+					<instance template="r2ed_triggers_little_button" id="maximize_element" x="-2" y="-2" posparent="parent" posref="TR TR"   
+					 onclick_l="lua" params_l="#max_min_elt" active="false"
+					 icon="r2ed_triggers_maximize.tga" icon_over="r2ed_triggers_maximize.tga" icon_pushed="r2ed_triggers_maximize.tga"
+					 color="#col_pushed" col_over="#col_pushed" col_pushed="#col_pushed"/>
+
+					<ctrl type="button" button_type="toggle_button" id="invalid_event" active="false" posref="TR TR"  
+					 w="24" h="24" x="-2" y="-2" tooltip="uiR2EDInvalidEvent"
+					 tx_normal="r2ed_invalid_event_small.tga" tx_over="r2ed_invalid_event_small.tga" tx_pushed="r2ed_invalid_event_small.tga" scale="true" />
+					
+					<ctrl type="button" button_type="toggle_button" id="valid_event" active="false" posparent="parent" posref="TR TR" 
+					 w="24" h="24" x="-2" y="-2" tooltip=""
+					 tx_normal="r2ed_not_current_act.tga" tx_over="r2ed_not_current_act.tga" tx_pushed="r2ed_not_current_act.tga" scale="true" />
+					
+				</group>
+
+
+				<group id="element_text" active="false" posparent="element_title" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="0" posref="BL TL" x="0" y="0" >
+				
+					<view type="bitmap" id="sep" active="false" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="-40" h="1" 
+					 x="10" scale="true" texture="blank.tga" color="200 200 200 90" />
+
+					<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
+
+					<group id="scroll_text_gr" posparent="crop" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" 
+					 child_resize_hmargin="0" max_h="200" >
+				
+						<group type="scroll_text" id="scroll_activity" sizeref="w" child_resize_h="true" child_resize_hmargin="0" posref="TL TL" x="0" y="0" min_height="80" max_height="200" >
+							<group type="list" id="text_list" hardtext="" shadow="true" fontsize="12" justification="dont_clip_word" color="255 255 255 160" space="3" 
+							 global_color="true" posref="TL TL" x="10" y="0" sizeref="hw" w="-25" h="0" />
+						
+							<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" w="8" y="0" x="-2" tx_topright="w_scroll_l123_t.tga" 
+							 tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_l123_b.tga"/>
+							
+						</group>
+
+					</group>
+
+					<ctrl style="skin_scroll" id="scroll_bar_text" align="T" target="scroll_text_gr" posparent="crop" posref="TR TR" 
+				     x="-5" y="0" />
+
+				</group>
+
+			</group>
+		</group>
+	</group>
+</template>
+
+<!-- sequence tab template -->
+<template name="sequence_tab_template" keep="true" active="true" id="" posparent="" posref="" hardtext="" 
+ group="" col_pushed="" params_l="" >
+			
+	<ctrl style="tab_button_sequence" id="#id" x="0" posparent="#posparent" posref="#posref" group="#group"	
+	 hardtext="#hardtext" col_pushed="#col_pushed" params_l="#params_l" color="255 255 255 255" col_over="255 255 255 255" />	
+</template>
+
+
+<!-- sequence elements template -->
+<template name="sequence_elements_template" keep="true" active="true" id="" 
+ new_elt="" new_elt_text="" elt_order_text="" up_elt="" down_elt="" max_min_elts="" x="10" y="-30" 
+ posparent="parent" posref="TL TL" sizeparent="parent" w="-10" h="-30" down_up_color="" over_down_up_color="255 255 255 255">	
+
+	<group id="#id" posparent="#posparent" posref="#posref" sizeparent="#sizeparent" sizeref="wh" x="#x" w="#w" y="#y" h="#h" active="true">
+		<group id="sequence_content" posref="TL TL" sizeref="wh" x="0" w="0" y="0" h="0" >
+			
+			<ctrl style="button_ok" id="new_button" x="0" y="-10" posref="TL TL" posparent="parent"
+			 text_y="-2" onclick_l="lua" params_l="#new_elt" hardtext="#new_elt_text" />
+
+			<group id="mi_group" posparent="new_button" posref="BL BL" x="0" y="0" 
+			 sizeparent="parent" sizeref="w5" w="0" h="0" />
+
+			<group id="order_group" active="false" posparent="mi_group" posref="BR BL" x="-45" y="-4" w="200" h="27" >
+
+				<view type="text" id="element_order" posparent="parent" posref="BL BL" 
+				 x="0" y="0" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="#elt_order_text" />
+
+				<ctrl type="button" id="up_element" button_type="push_button" posparent="element_order" 
+				 x="10" y="-1" posref="BR BL" tx_normal="r2ed_up_element.tga" tx_pushed="r2ed_up_element.tga" 
+				 tx_over="r2ed_up_element.tga" onclick_l="lua" params_l="#up_elt" 
+				 color="#down_up_color" col_over="#over_down_up_color"
+				/>
+				
+				<ctrl type="button" id="down_element" button_type="push_button" posparent="up_element" 
+				 x="5" y="0" posref="BR BL" tx_normal="r2ed_down_element.tga" tx_pushed="r2ed_down_element.tga" 
+				 tx_over="r2ed_down_element.tga" onclick_l="lua" params_l="#down_elt" 
+				 color="#down_up_color" col_over="#over_down_up_color"
+				/>
+
+			 </group>
+
+			<instance template="r2ed_triggers_little_button" id="minimize_elements" x="-17" y="-10" posparent="parent" posref="TR TR"   
+			 onclick_l="lua" params_l="#max_min_elts" active="false" 
+			 icon="r2ed_triggers_minimize.tga" icon_over="r2ed_triggers_minimize.tga" icon_pushed="r2ed_triggers_minimize.tga"
+			 color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"/>
+
+			<instance template="r2ed_triggers_little_button" id="maximize_elements" x="-17" y="-10" posparent="parent" posref="TR TR"   
+			 onclick_l="lua" params_l="#max_min_elts" active="false"
+			 icon="r2ed_triggers_maximize.tga" icon_over="r2ed_triggers_maximize.tga" icon_pushed="r2ed_triggers_maximize.tga"
+			 color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"/>
+	
+			<group id="elts_list_border" posparent="parent" posref="TL TL" x="0" y="-40" sizeref="wh" w="0" h="-55">
+			
+				<group id="crop" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-17" h="0" />
+				
+				<group id="elts_list_gr" posparent="crop" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" 
+				 child_resize_hmargin="1" max_sizeparent="crop" max_sizeref="h" max_h="0" >
+			
+					<group id="elements_list" type="list" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0" >
+
+					</group>
+
+				</group>
+
+				<ctrl style="skin_scroll" id="scroll_objects" align="T" target="elts_list_gr" posparent="crop" posref="TR TR" 
+				 x="11" y="0" />
+
+				<view type="bitmap" id="sep_top" posparent="crop" posref="TL TL" sizeparent="crop" sizeref="w" w="0" h="1" 
+				 scale="true" texture="blank.tga" color="120 120 120 255" />
+
+				<view type="bitmap" id="sep_left" posparent="crop" posref="TL TL" sizeparent="crop" sizeref="h" h="0" w="1" 
+				 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+				<view type="bitmap" id="sep_right" posparent="crop" posref="BR BR" sizeparent="crop" sizeref="h" h="0" w="1" 
+				 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+				<view type="bitmap" id="sep_bottom" posparent="crop" posref="BL BL" sizeparent="crop" sizeref="w" w="0" h="1" 
+				 y="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+	
+			</group>
+		</group>
+	</group>
+</template>
+
+<!-- main menu button -->
+<template name="menu_button_template" keep="true" id="" sizeref="wh" posparent="parent" posref="TL TL" 
+ x="0" y="0" w="0" h="0" params_l="" params_over="" color_text="" >	
+	<group id="#id" x="#x" y="#y" posparent="#posparent" posref="#posref" sizeref="#sizeref" w="#w" h="#h">	
+		<!-- DECORATION -->
+		<instance template="inner_thin_border_group" />	
+		<view type="bitmap" id="arrow" posref="MR MR" x="-4" texture="W_arrow_down_2.tga" />
+
+		<!-- SYSTEM -->
+		<group id="text_group" posparent="parent" posref="TL TL" sizeref="wh" x="0" w="-17" y="0" h="0" >
+			<view type="text" id="text" posref="ML ML" x="2" multi_line="false"
+				auto_clamp="true" over_extend_view_text="true" over_extend_parent_rect="true" 
+				color="#color_text" />
+		</group>
+		
+		<ctrl type="button" button_type="push_button" id="select" sizeref="wh" w="0" h="0" 
+		 col_over="255 255 255 90" tx_over="blank.tga" scale="true" onclick_l="lua" params_l="#params_l" 
+		 onover="lua" params_over="#params_over" />
+
+		<view type="bitmap" id="dismatch_filter" active="false" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+		 x="0" scale="false" tile="true" texture="r2ed_dismatch_filter.tga" color="200 200 200 255" />
+	</group>
+</template>
+
+
+<template name="r2ed_triggers_little_button" keep="true" id="" x="0" y="0" active="true" posref="BL BM" posparent="parent" icon="" icon_over="" icon_pushed="" w="44" h="39" tooltip=""
+ color="" col_over="" col_pushed="" offset_x = "0" offset_y = "0" onclick_l="" params_l="" 
+ >	
+	<group id="#id" active="#active" x="#x" y="#y" posref="#posref" posparent="#posparent"
+	 child_resize_w="true" child_resize_h="true" child_resize_wmargin="#offset_x" child_resize_hmargin="#offset_y"
+	 onclick_l="" params_l="" >	
+	 		
+		<group id="button_group" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" color="#color" w="4" h="4" posref="BL BL" texture="r2ed_triggers_little_corner.tga" rot="3"/>
+							
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon" tx_pushed="#icon_pushed" tx_over="#icon_over" tooltip="#tooltip"
+				 color="#color" col_over="#col_over" col_pushed="#col_pushed"
+				 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+				 onclick_l="#onclick_l" params_l="#params_l" over_when_pushed = "false" />	
+				 			
+			<view type="bitmap" id="bottom" color="#color" scale="true" posparent="button" posref="BL TL" sizeref="w" w="0" h="4" texture="r2ed_triggers_little_border.tga" rot="2"/>			
+			<view type="bitmap" id="top" color="#color" scale="true" posparent="button" posref="TL BL" sizeref="w" w="0" h="4" texture="r2ed_triggers_little_border.tga" rot="0"/>			
+			<view type="bitmap" id="left" color="#color" scale="true" posparent="button" posref="BL BR" sizeref="h" w="4" h="0" texture="r2ed_triggers_little_border.tga" rot="3"/>
+			<view type="bitmap" id="right" color="#color" scale="true" posparent="button" posref="BR BL" sizeref="h" w="4" h="0" texture="r2ed_triggers_little_border.tga" rot="1"/>			
+			<view type="bitmap" id="tl" color="#color" w="4" h="4" posref="TL BR" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="0"/>
+			<view type="bitmap" id="tr" color="#color" w="4" h="4" posref="TR BL" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="1"/>
+			<view type="bitmap" id="br" color="#color" w="4" h="4" posref="BR TL" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="2"/>
+		</group>						
+	</group>
+</template>
+
+
+
+<!-- ************************************************************************************************** -->
+<!-- ************************************ ACTIVITY SEQUENCE EDITOR ************************************ -->
+<!-- ************************************************************************************************** -->	
+
+<style style="button_color" type="text_button" button_type="push_button" 
+		tx_normal="w_text_button_pushed" tx_pushed="w_text_button_over" tx_over="w_text_button_pushed"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_global_color_normal="true" text_global_color_pushed="true" text_global_color_over="true"
+		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" 
+		text_header_color="true" />
+
+<template name="window_sequence_template" new_seq="" new_seq_text="" remove_seq="" open_seq_editor=""
+ seq_color="" over_seq_color="" repeat_seq="" right_seq="" left_seq="" on_change="" >
+
+	<ctrl style="button_ok" id="new_sequence_button" posref="TL TL" x="30" y="-15"
+	 text_y="-2" onclick_l="lua" params_l="#new_seq" hardtext="#new_seq_text" />
+
+	<group id="sequence_menu" x="30" y="-40" sizeref="wh" w="-60" h="-90" posparent="parent" posref="TL TL" >		
+		<group type="tab" id="sequence_tabs" hide_out_tabs="true" child_resize_w="true" 
+		 onchange="lua" onchange_params="#on_change" h="24" posref="TL TL" x="0" y="-4" >
+		</group>
+
+		<view type="bitmap" id="sep_top" active="false" posparent="sequence_tabs" posref="BL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+		 scale="true" texture="blank.tga" color="120 120 120 255" />
+	
+		<view type="bitmap" id="sep_bottom" active="false" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_left" active="false" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="-28" w="1" 
+		 y="-28" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_right" active="false" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="-28" w="1" 
+		 y="-28" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+	</group>
+
+	<ctrl type="button" id="left_sequences" active="false" button_type="push_button" posparent="sequence_menu" 
+	 x="-3" y="-4" posref="TL TR" tx_normal="r2ed_left_sequence.tga" tx_pushed="r2ed_left_sequence.tga" 
+	 tx_over="r2ed_left_sequence.tga" onclick_l="lua" params_l="#left_seq" 
+	 color="#seq_color" col_over="#over_seq_color" />
+
+	<ctrl type="button" id="right_sequences" active="false" button_type="push_button" posparent="sequence_menu" 
+	 x="3" y="-4" posref="TR TL" tx_normal="r2ed_right_sequence.tga" tx_pushed="r2ed_right_sequence.tga" 
+	 tx_over="r2ed_right_sequence.tga" onclick_l="lua" params_l="#right_seq" 
+	 color="#seq_color" col_over="#over_seq_color" />
+
+	<instance template="r2ed_triggers_button" id="remove_sequence_button" active="false" 
+	 onclick_l="lua" params_l="#remove_seq" posparent="parent" posref="BL BL" x="10" y="8" 
+	 icon="r2ed_triggers_trash.tga" icon_over="r2ed_triggers_trash.tga" icon_pushed="r2ed_triggers_trash.tga"
+	 color="#seq_color" col_over="#seq_color" col_pushed="#seq_color"/>	
+
+	<instance template="r2ed_triggers_button" id="edit_sequence" active="false" 
+	 onclick_l="lua" params_l="#open_seq_editor" posparent="parent" posref="BR BR" x="-10" y="8" 
+	 icon="r2_suspension.tga" icon_over="r2_suspension.tga" icon_pushed="r2_suspension.tga"
+	 color="#seq_color" col_over="#seq_color" col_pushed="#seq_color"/>	
+
+	 <group id="repeat_group" x="0" y="5" sizeparent="parent" active="false" sizeref="w5" w="40" h="20" posparent="edit_sequence" posref="BR BR" >
+		<instance template="label_toggle_button" id="repeat" posparent="parent" 
+		 x="0" y="0" posref="BL BL" w="200" hardtext="uiR2EdRepeatSequence" fontsize="12" y_text="-3" 
+		 params_l="#repeat_seq"/>
+	</group>
+
+</template>
+
+
+<group type="container" id="r2ed_activities" title="uiR2EDActivitySequenceEditor" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_ACTIVITIES"	
+	on_close="lua" on_close_params="if r2 and r2.Mode == 'Edit' then r2.activities:closeEditor() end" on_deactive="lua" on_deactive_params="if r2 then r2.activities:closeEditor() end" 
+	pop_min_w="405" pop_min_h="231" w="420" h="565" pop_max_w="700" pop_max_h="800" 
+	savable="true"
+>	
+	<group id="header_opened" x="0" y="0" w="300" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>	
+	<group id="header_closed" x="0" y="0" w="700" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		<instance template="window_sequence_template" new_seq="r2.activities:newSequenceInst()" new_seq_text="New sequence" 
+		 remove_seq="r2.activities:removeSequenceInst()" seq_color="200 80 80 255" over_seq_color="255 120 120 255"
+		 open_seq_editor="r2.activities:openSequenceEditor()" 
+		 repeat_seq="r2.activities:repeatSequence()" right_seq="r2.activities:rightSequenceUI()" left_seq="r2.activities:leftSequenceUI()" 
+		 on_change="r2.activities:showSequencesUI()" />
+	
+	</group>
+</group>
+
+
+
+<tree node="r2ed_activities">
+</tree>
+
+<group type="container" id="r2ed_edit_activity_sequence" active="false" title="uiR2EDActivitySequenceProp" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_ACTIVITIES"	
+	on_close="lua" on_close_params="" pop_min_w="340" pop_min_h="95" pop_max_w="340" pop_max_h="95" w="340" h="95"
+>	
+	<!--
+	<group id="header_opened" x="0" y="0" w="340" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>			
+	</group>
+	-->
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		<instance template="back_widget" id="back" x="0" y="-7" sizeref="wh" w="0" h="-7" color="255 150 0 255" texture="r2ed_triggers_gray.tga" />
+	
+		<instance template="h_label_edit_box" id="sequence_name" y="-25" x="15" posparent="parent" posref="TL TL" 
+		 hardtext="uiR2EdSequenceName" w="290" w_label="105" w_box="185" fontsize="12" max_num_chars="15" 
+		 params="r2.activities:setSequenceName()" on_focus_lost_params="" />
+	</group>
+</group>
+
+<tree node="r2ed_edit_activity_sequence">
+</tree>
+
+
+<!-- ************************************************************************************************** -->
+<!-- ******************************************* EDIT ACTIVITY  *************************************** -->
+<!-- ************************************************************************************************** -->	
+
+<template name="back_widget" posref="TL TL" x="0" y="0" w="0" h="0"  id="" posparent="parent" sizeref="wh" 
+ keep="true" color="" texture="" >
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+		<group id="bg" sizeref="hw" h="0" w="0" />
+		<view type="bitmap" id="back" color="#color" scale="true" posparent="bg" posref="MM MM" sizeref="hw" h="0" w="0" texture="#texture" inherit_gc_alpha="false"/>
+		</group>
+</template>
+
+
+<!-- horizontal label/combo box template -->
+<template name="h_label_combo_box_resize" keep="true" active="true" id="" x="0" y="0" w="195" 
+ sizeref="w" w_label="" w_combo="" posparent="" posref="" hardtext=""
+ on_change_params="">	
+
+	<group id="#id" active="#active" sizeref="#sizeref" x="#x" y="#y" w="#w" h="20" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label" w="#w_label" h="20" x="0" y="0" posref="TL TL" posparent="parent" >
+			<view type="text" id="name_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- combo box -->
+		<group type="combo_box" id="combo_box" sizeref="w" w="#w_combo" h="20" x="#w_label" y="0" posref="TL TL" posparent="parent" 
+		 linked_to_db="false" on_change="lua" on_change_params="#on_change_params" >
+			<instance template="r2ed_combo_box" />
+		</group>
+
+	</group>
+
+</template>
+
+<template name="template_edit_activity" keep="true" sizeref="w" active="false" w="0" h="200" id="" 
+ col_pushed="200 120 80 255" >
+	
+	<group id="#id" active="#active" x="0" y="0" sizeref="#sizeref" w="#w" h="#h" posref="TL TL" >
+
+		<instance template="back_widget" id="back" x="0" y="0" sizeref="wh" w="0" h="0" color="#col_pushed" texture="r2ed_triggers_blank.tga" />
+
+		<ctrl type="button" button_type="toggle_button" id="select" sizeref="wh" w="0" h="0" 
+		 onclick_l="lua" params_l="r2.activities:closeElementEditor()" />
+
+		<group id="activity_name" posparent="parent" posref="TL TL" sizeref="w" x="5" w="0" y="0" h="20" >
+			<view type="text" id="name" posref="BL BL" x="5" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="" />
+		</group>
+
+		<view type="bitmap" id="sep" posparent="activity_name" posref="BL BL" sizeref="w" w="-20" h="1" 
+		 x="5" y="-2" scale="true" texture="blank.tga" color="200 200 200 200" />
+
+		<instance template="template_label_menu_resize" id="activity" sizeref="w" w="-50" h="20" x="18" y="-20" y_text="0"
+		 posparent="activity_name" posref="BL TL" w_label="80" w_combo="-80" hardtext="uiR2EdActivity" 
+		 on_change_params="r2.activities:initActivityMenu()"/>
+
+		<group id="limit_group" posparent="activity" posref="BL TL" sizeref="w" child_resize_h="true" x="0" w="0" y="-20" h="0" >
+				
+			<instance template="h_label_combo_box_resize" id="time_limit" sizeref="w" h="20" posparent="parent" 
+			 posref="TL TL" w="0" w_label="80" w_combo="-80" x="0" y="0" hardtext="uiR2EdTimeLimit" 
+			 on_change_params="r2.activities:setTimeLimit()" />
+
+			<group id="certain_time" active="false" posparent="time_limit" sizeref="w" posref="BL TL" w="-80" h="20" x="80" y="-5" >
+
+				<instance template="template_menu_label" id="hours" sizeref="w3" w="-3" h="20" x="0" y="0" y_text="0"
+				 posparent="parent" posref="TL TL" w_label="-14" w_combo="7" hardtext="uiR2EdShortHours" 
+				 on_change_params="r2.activities:initTimeMenu('r2.activities:activityForHours', true)"/>
+
+				<instance template="template_menu_label" id="minutes" sizeref="wh" w="10" h="0" x="2" y="0" y_text="0"
+				 posparent="hours" posref="BR BL" w_label="-14" w_combo="7" hardtext="uiR2EdShortMinutes" 
+				 on_change_params="r2.activities:initTimeMenu('r2.activities:activityForMinutes', false)"/>
+
+				<instance template="template_menu_label" id="seconds" sizeref="wh" w="0" h="0" x="5" y="0" y_text="0"
+				 posparent="minutes" posref="BR BL" w_label="-14" w_combo="7" hardtext="uiR2EdShortSeconds" 
+				 on_change_params="r2.activities:initTimeMenu('r2.activities:activityForSeconds', false)"/>
+				
+			</group>
+
+		</group>
+
+		<group id="road_count_group" posparent="limit_group" posref="BL TL" sizeref="w" child_resize_h="true" x="0" w="0" y="-20" h="0"  tooltip="uiR2EdRoadCountLimitTooltip">
+				
+			<instance template="h_label_combo_box_resize" id="road_count_limit" sizeref="w" h="20" posparent="parent" 
+			 posref="TL TL" w="0" w_label="80" w_combo="-80" x="0" y="0" hardtext="uiR2EdRoadCountLimit" 
+			 on_change_params="r2.activities:setRoadCountLimit()" />
+
+			<group id="certain_count" active="false" posparent="road_count_group" sizeref="w" posref="BL TL" w="-80" h="20" x="80" y="-5" >
+
+				<instance template="template_menu_label" id="hours" sizeref="w3" w="-3" h="20" x="0" y="0" y_text="0"
+				 posparent="parent" posref="TL TL" w_label="-14" w_combo="7" hardtext="uiR2EdShortHours" 
+				 on_change_params="r2.activities:initRoadCountMenu()"/>
+				
+			</group>
+
+		</group>
+ 
+		<group id="element_manage" active="true" posparent="parent" sizeref="w" w="0" h="20" posref="BL BL" x="0" y="0">
+			
+			<instance template="r2ed_triggers_little_button" id="remove_element" x="1" y="1" posparent="parent" posref="BL BL"   
+			 onclick_l="lua" params_l="r2.activities:removeElementInst()" 
+			 icon="r2ed_triggers_little_trash.tga" icon_over="r2ed_triggers_little_trash.tga" icon_pushed="r2ed_triggers_little_trash.tga"
+			 color="#col_pushed" col_over="#col_pushed" col_pushed="#col_pushed"/>
+
+		</group>
+	
+	</group>
+</template>
+
+
+<group type="menu" id="r2ed_triggers_menu" extends="base_menu" mouse_pos="false">
+</group>
+
+
+<!-- ************************************************************************************************** -->
+<!-- ************************************ CHAT SEQUENCE EDITOR ************************************ -->
+<!-- ************************************************************************************************** -->	
+
+<group type="container" id="r2ed_dialogs"  title="uiR2EDChatSequenceEditor" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_DIALOGS"	
+	on_close="lua" on_close_params="if r2 and r2.Mode == 'Edit' then r2.dialogs:closeEditor() end" 
+	on_deactive="lua" on_deactive_params="if r2 and r2.Mode == 'Edit' then r2.dialogs:closeEditor() end" 
+	on_active="lua" on_active_params="if r2 and r2.Mode == 'Edit' then r2.dialogs:checkDialog() end" 
+	pop_min_w="350" pop_min_h="231" pop_max_h="800" w="400" h="565" pop_max_w="700"
+>	
+	<group id="header_opened" x="0" y="0" h="16" w="2048" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+
+		<instance template="template_label_menu" id="dialogMenu" w="250" h="20" x="15" y="-15" y_text="0"
+		 posparent="parent" posref="TL TL" w_label="-20" w_combo="40" hardtext="uiR2EDDialogList" 
+		 on_change_params="r2.dialogs:initDialogsMenu()"/>
+
+		<instance template="sequence_elements_template" id="sequence_elts" x="0" y="-10" h="-65" posparent="dialogMenu" posref="BL TL" 
+		 new_elt="r2.dialogs:newElementInst()" new_elt_text="uiR2EdNewChat" elt_order_text="chat order" up_elt="r2.dialogs:upElementInst()" 
+		 down_elt="r2.dialogs:downElementInst()" max_min_elts="r2.dialogs:maximizeMinimizeElements()" 
+		 down_up_color="120 170 140 255" over_down_up_color="200 255 200 255"/>	
+
+		<group id="repeat_group" x="15" y="10" sizeparent="parent" active="true" sizeref="w5" w="40" h="20" posparent="parent" posref="BL BL" >
+			<instance template="label_toggle_button" id="repeat" posparent="parent" 
+			 x="0" y="0" posref="BL BL" w="200" hardtext="Repeat dialog" fontsize="12" y_text="-3" 
+			 params_l="r2.dialogs:repeatSequence()"/>
+		</group>
+
+	</group>
+</group>
+
+
+
+<tree node="r2ed_dialogs">
+</tree>
+
+
+<group type="container" id="r2ed_edit_chat_sequence" active="false" title="uiR2EDChatSequenceProp" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:CHAT_SEQUENCES"	
+	on_close="lua" on_close_params="" pop_min_w="300" pop_min_h="100" pop_max_w="300" pop_max_h="100" w="300" h="100"
+>	
+	<group id="header_opened" x="0" y="0" w="300" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		<instance template="back_widget" id="back" x="0" y="-7" sizeref="wh" w="0" h="-7" color="0 255 0 255" texture="r2ed_triggers_gray.tga" />
+
+			<instance template="h_label_edit_box" id="sequence_name" y="-25" x="15" posparent="parent" posref="TL TL" 
+			 hardtext="uiR2EdSequenceName" w="205" w_label="105" w_box="100" fontsize="12" max_num_chars="5" 
+			 params="r2:setSequenceName('r2ed_chat_sequence', 'r2ed_edit_chat_sequence')" 
+			 on_focus_lost_params="r2:setSequenceName('r2ed_chat_sequence', 'r2ed_edit_chat_sequence')" />
+	</group>
+</group>
+
+<tree node="r2ed_edit_chat_sequence">
+</tree>
+
+
+<!-- ************************************************************************************************** -->
+<!-- ******************************************* EDIT CHAT  ******************************************* -->
+<!-- ************************************************************************************************** -->
+
+<!-- horizontal label/edit box template/scroll -->
+<template name="h_label_edit_box_scroll" keep="true" active="true" id="" sizeparent="" sizeref="" h="20" x="0" y="0" posparent="" posref="" hardtext="" 
+ w="" w_label="" w_box="" fontsize="12" max_num_chars="100" h_min=""
+ onenter="lua" params="" onchange="lua" onchange_params="" on_focus_lost="lua" on_focus_lost_params="" >	
+
+	<group id="#id" active="#active" sizeparent="#sizeparent" sizeref="#sizeref" y="#y" x="#x" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+		
+		<!-- label -->
+		<group id="label" w="#w_label" h="20" x="0" y="0" posref="TL TL" posparent="parent" >
+			
+			<view type="text" id="name_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- Edit box -->
+		<group id="back_edit_box" posparent="parent" sizeref="w" posref="TL TL" x="#w_label" y="0" h="#h" w="#w_box">
+			<instance template="inner_thin_border_group" />	
+		</group>
+
+		<group id="crop_box_ed" posparent="back_edit_box" posref="TL TL" x="0" y="0" sizeref="wh" w="10" h="0">
+			
+			<group type="edit_box" id="edit_box_group" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" 
+			 child_resize_h="true" w="-10" child_resize_hmargin="#h_min" max_sizeparent="crop_box_ed" max_sizeref="h" 
+			 max_h="0" want_return="false" 
+			 onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" 
+			 on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params"
+			 prompt="" enter_loose_focus="true" >
+								
+				<view type="text" id="edit_text" x="4" y="-5" posref="TL TL" multi_line="true" 
+				 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+
+			</group>
+
+			<ctrl style="skin_scroll" id="edit_box_scroll_ed" align="B" target="edit_box_group" 
+			 posparent="crop_box_ed" posref="TR TR" x="0" y="0" />
+	
+		</group>
+
+	 </group>
+</template>
+<template name="template_edit_chat" keep="true" sizeref="w" active="false" w="0" h="315" id="" 
+ col_pushed="120 150 140 255" >
+	
+	<group id="#id" active="#active" x="0" y="0" sizeref="#sizeref" w="#w" h="#h" posref="TL TL" 
+	 group_onclick_l="lua" group_params_l="r2.dialogs:closeElementEditor()"
+	 on_deactive="lua" on_deactive_params="r2.dialogs:updateSaysWhat()" >
+
+		<instance template="back_widget" id="back" x="0" y="0" sizeref="wh" w="0" h="0" color="#col_pushed" texture="r2ed_triggers_blank.tga" />
+
+		<group id="chat_name" posparent="parent" posref="TL TL" sizeref="w" x="5" w="0" y="0" h="20" >
+			<view type="text" id="name" posref="BL BL" x="5" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="" />
+		</group>
+
+		<view type="bitmap" id="sep" posparent="chat_name" posref="BL BL" sizeref="w" w="-20" h="1" 
+		 x="5" y="-2" scale="true" texture="blank.tga" color="200 200 200 200" />
+
+		<group id="after_how_long" posparent="chat_name" posref="BL TL" sizeref="w" w="-20" h="20" x="17" y="-20" >
+
+			<instance template="template_label_menu" id="minutes" w="130" h="20" x="0" y="0" y_text="0"
+			 posparent="parent" posref="TL TL" w_label="10" w_combo="-20" hardtext="uiR2EdAfterHowLong" 
+			 on_change_params="r2.dialogs:initTimeMenu('r2.dialogs:chatAfterMinutes', false)"/>
+
+			<instance template="template_label_menu" id="seconds" w="100" h="20" x="2" y="0" y_text="0"
+			 posparent="minutes" posref="BR BL" w_label="-10" w_combo="20" hardtext="uiR2EdShortMinutes" 
+			 on_change_params="r2.dialogs:initTimeMenu('r2.dialogs:chatAfterSeconds', false)"/>
+
+			<view type="text" id="seconds_label" x="2" y="0" posparent="seconds" posref="BR BL"
+			 color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdShortSeconds" />
+		</group>
+
+		<instance template="template_label_menu_resize" id="whoMenu" sizeref="wh" w="-25" h="0" x="0" y="-15" y_text="0"
+	     posparent="after_how_long" posref="BL TL" w_label="75" w_combo="-75" hardtext="uiR2EdWho" 
+		 on_change_params="r2.dialogs:initWhoMenu('r2.dialogs:setWho', false)"/>
+		
+		<instance template="h_label_edit_box_scroll" id="says" sizeref="w" h="100" w="10" y="-15" x="0" posparent="whoMenu" posref="BL TL" 
+		 hardtext="uiR2EdSaysWhat" w_label="75" w_box="-85" fontsize="12" max_num_chars="1000" h_min="85"
+		 multi_line="true" on_focus_lost_params="" />
+		 
+		<instance template="template_label_menu_resize" id="toWhoMenu" sizeref="w" w="-10" h="20" x="0" y="-15" y_text="0"
+	     posparent="says" posref="BL TL" w_label="75" w_combo="-75" hardtext="uiR2EdToWho" 
+		 on_change_params="r2.dialogs:initWhoMenu('r2.dialogs:setToWho', true)"/>
+
+		<instance template="template_label_menu_resize" id="emote" sizeref="w" w="0" h="20" x="0" y="-15" y_text="0"
+	     posparent="toWhoMenu" posref="BL TL" w_label="75" w_combo="-75" hardtext="uiR2EdEmote" 
+		 on_change_params="r2.dialogs:initEmoteMenu()"/>
+
+
+		<group id="element_manage" active="true" posparent="parent" sizeref="w" w="0" h="20" posref="BL BL" x="0" y="0">
+			
+			<instance template="r2ed_triggers_little_button" id="remove_element" x="1" y="1" posparent="parent" posref="BL BL"   
+			 onclick_l="lua" params_l="r2.dialogs:removeElementInst()" 
+			 icon="r2ed_triggers_little_trash.tga" icon_over="r2ed_triggers_little_trash.tga" icon_pushed="r2ed_triggers_little_trash.tga"
+			 color="#col_pushed" col_over="#col_pushed" col_pushed="#col_pushed"/>
+	 	</group>
+
+		<!-- VL -->
+
+		 <group id="break_group" x="-150" y="0" sizeparent="parent" active="true" sizeref="w5" w="10" h="20" posparent="parent" posref="BR BL" >
+			<instance template="label_toggle_button" id="break" posparent="parent" 
+				x="1" y="3" posref="BL BL" w="200" hardtext="uiR2EdBreakChat" fontsize="12" y_text="-3" 
+				 params_l="r2.dialogs:setChatBreak()"/> 
+		</group>		
+
+	</group>
+</template>
+
+<!-- *********************** -->
+<!--   MINI ACTIVITIY VIEW   -->
+<!-- *********************** -->
+
+<define id="r2ed_max_num_mini_activities" value="14"/>
+
+<!-- mini activity template -->
+<template name="mini_activity" active="true" id="" x="0" y="0" posref="BL BM" posparent="parent" >	
+
+	<group id="#id" active="#active" x="#x" y="#y" child_resize_h="true" child_resize_w="true" 
+	 child_resize_wmargin="20" posparent="#posparent" posref="#posref" >
+
+		<instance template="r2ed_triggers_little_button" id="activity" x="2" y="0" h="50"
+		 posparent="parent" posref="TL TL"   
+		 onclick_l="lua" params_l="r2.miniActivities:openActivity()" 
+		 onclick_r="lua" params_r="" 
+		 icon="" icon_over="" icon_pushed=""
+		 color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"/>
+
+		<view type="text" id="activity_name" active="true" posparent="activity" posref="BR BL" 
+		 x="4" y="0" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="" />
+	</group>
+</template>
+
+
+<group id="r2ed_mini_activity_view" active="false" posparent="r2ed_contextual_toolbar_new" posref="TL BL" x="0" y="3" child_resize_w="true" child_resize_h="true">
+	
+	<instance template="r2ed_triggers_little_button" id="open_activities" x="0" y="0" 
+	 posref="TL TL" onclick_l="lua" params_l="r2.activities:openEditor()" 
+	 icon="r2ed_open_activities.tga" icon_over="r2ed_open_activities.tga" icon_pushed="r2ed_open_activities.tga"
+	 color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" />
+
+	<view type="text" id="no_activity" active="true" posparent="open_activities" posref="BL TL" 
+	 x="0" y="-2" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" hardtext="" />
+	
+	<group id="mini_activities" align="T" posparent="no_activity" posref="BL TL" child_resize_h="true" child_resize_w="true">			
+		<vector template="mini_activity" _size="%r2ed_max_num_mini_activities"
+		 _firstpos="TL TL" _nextpos="BL TL" id="$i" active="true"
+		/>		
+	</group>
+</group>
+
+<tree node="r2ed_mini_activity_view">
+</tree>
+
+<group type="menu" id="r2ed_chat_sequences_menu" extends="base_menu" mouse_pos="false">
+</group>
+
+
+</interface_config>

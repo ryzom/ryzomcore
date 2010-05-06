@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <ELEMENT Name="ActorMsg" Type="Dfn" Filename="_entity_msgs.dfn"/>
+  <ELEMENT Name="TargetsMsg" Type="Dfn" Filename="_entity_msgs.dfn"/>
+  <ELEMENT Name="SpectatorsMsg" Type="Dfn" Filename="_entity_msgs.dfn"/>
+  <ELEMENT Name="ActorMsgsSelf" Type="Dfn" Filename="_entity_msgs.dfn"/>
+  <ELEMENT Name="SpectatorsMsgsSelf" Type="Dfn" Filename="_entity_msgs.dfn"/>
+  <LOG>Mon Jan 20 16:06:42 2003 (fleury) Dfn Structure = 
+Fri Jan 24 14:00:27 2003 (fleury) Dfn Structure = 
+Fri Jan 24 14:01:01 2003 (fleury) Dfn Structure = 
+Fri Jan 24 17:07:03 2003 (fleury) Dfn Structure = 
+Wed Apr 09 10:52:42 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

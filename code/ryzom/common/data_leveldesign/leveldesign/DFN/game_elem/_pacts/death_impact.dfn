@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="death_impact" Type="Dfn" Filename="_stats.dfn" Array="true"/>
+  <ELEMENT Name="icon" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon_background" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <LOG>Tue Jul 02 10:26:47 2002 (saffray) Dfn Structure = 
+Mon Feb 17 16:45:17 2003 (Nicolas Vizerie) Dfn Structure = </LOG>
+</DFN>

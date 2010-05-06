@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="mp name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="quantity" Type="Type" Filename="int.typ"/>
+  <LOG>Mon Sep 16 10:51:45 2002 (fleury) Dfn Structure = 
+Mon Sep 16 11:09:39 2002 (fleury) Dfn Structure = 
+Thu Sep 26 12:07:20 2002 (fleury) Dfn Structure = 
+Thu Sep 26 12:11:01 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

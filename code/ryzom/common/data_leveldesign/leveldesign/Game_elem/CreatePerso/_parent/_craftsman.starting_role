@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.6 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Role" Value="Crafter"/>
+    <ARRAY Name="PreMemorizedSentences1">
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="armour phrase">
+        <ATOM Name="Sabrina Phrase" Value="abcfaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+    </ARRAY>
+    <STRUCT Name="StartEquipment1">
+      <STRUCT Name="HandR">
+        <ATOM Name="Item" Value="itrtar.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+    </STRUCT>
+    <ARRAY Name="PreMemorizedSentences2">
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="armour phrase">
+        <ATOM Name="Sabrina Phrase" Value="abcfaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+    </ARRAY>
+    <ARRAY Name="PreMemorizedSentences3">
+      <STRUCT Name="default atk">
+        <ATOM Name="Sabrina Phrase" Value="abf01.sphrase"/>
+        <ATOM Name="Memory Type" Value="EmptyHand"/>
+      </STRUCT>
+      <STRUCT Name="power">
+        <ATOM Name="Sabrina Phrase" Value="abe_use_item_power.sphrase"/>
+        <ATOM Name="Memory Type" Value="Dagger"/>
+      </STRUCT>
+      <STRUCT Name="armour craft">
+        <ATOM Name="Sabrina Phrase" Value="abcfaca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+      <STRUCT Name="melee weapon craft">
+        <ATOM Name="Sabrina Phrase" Value="abcfmca01.sphrase"/>
+        <ATOM Name="Memory Type" Value="Craft"/>
+      </STRUCT>
+    </ARRAY>
+    <STRUCT Name="StartEquipment3">
+      <STRUCT Name="HandR">
+        <ATOM Name="Item" Value="itrtmw.sitem"/>
+        <ATOM Name="Quality" Value="1"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sun Sep 21 05:16:47 2003 (saffray) .Race = matis
+Sun Sep 21 05:16:47 2003 (saffray) .Role = fighter
+Sun Sep 21 05:17:09 2003 (saffray) .Race = fyros
+Sun Sep 21 05:17:23 2003 (saffray) .Race = tryker
+Sun Sep 21 05:17:36 2003 (saffray) .Race = zorai
+Sun Sep 21 05:18:19 2003 (saffray) .Race = fyros
+Sun Sep 21 05:18:19 2003 (saffray) .Role = magician
+Sun Sep 21 05:18:37 2003 (saffray) .Race = matis
+Sun Sep 21 05:18:59 2003 (saffray) .Race = tryker
+Sun Sep 21 05:19:10 2003 (saffray) .Race = zorai
+Sun Sep 21 05:19:35 2003 (saffray) .Race = fyros
+Sun Sep 21 05:19:35 2003 (saffray) .Role = craftsman
+Sun Sep 21 05:19:47 2003 (saffray) .Race = matis
+Wed Sep 24 14:33:04 2003 (coutelas) .Race = 
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Arms.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Arms.Item = refugee_vest_beige.sitem
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Body.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Body.Item = refugee_vest_beige.sitem
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Feet.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Feet.Item = refugee_boots_beige.sitem
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Hands.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Hands.Item = refugee_gloves_beige.sitem
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Legs.Color = From Item (Item must NOT be in UserColor)
+Wed Sep 24 14:33:04 2003 (coutelas) .StartEquipment.Legs.Item = refugee_pants_beige.sitem
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Arms.Quality = 5
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Body.Quality = 5
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Feet.Quality = 5
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Hands.Quality = 5
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Head.Quality = &quot;Basics.Level&quot;
+Wed Sep 24 18:28:46 2003 (saffray) .StartEquipment.Legs.Quality = 5
+Mon Feb 23 16:47:14 2004 (puzin) .Role = Crafter
+Fri Aug 13 19:10:33 2004 (puzin) .StartEquipment1.HandR.Item = itarmor.sitem
+Fri Aug 13 19:10:39 2004 (puzin) .StartEquipment2.HandR.Item = itarmor.sitem
+Fri Aug 13 19:11:02 2004 (puzin) .StartEquipment1.HandR.Quality = 1
+Fri Aug 13 19:11:02 2004 (puzin) .StartEquipment2.HandR.Quality = 1
+Fri Aug 13 19:11:02 2004 (puzin) .StartEquipment3.HandR.Item = itmwea.sitem
+Fri Aug 13 19:11:02 2004 (puzin) .StartEquipment3.HandR.Quality = 1
+Fri Aug 13 19:17:26 2004 (puzin) .StartEquipment2.HandR.Item = 
+Fri Aug 13 19:17:26 2004 (puzin) .StartEquipment2.HandR.Quality = </LOG>
+</FORM>

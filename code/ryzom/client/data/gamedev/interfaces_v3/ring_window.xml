@@ -1,0 +1,1695 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+<lua file="ring_window.lua" />
+<lua file="r2_ui_char_tracking.lua" />
+<lua file="game_r2_loading.lua" />
+<lua file="r2_ui_scenario_scores.lua" />
+
+
+<!--<group type="container" id="r2ed_ring_window" w="410" h="400" title="uiR2EDRingWindow" global_color="false"
+ resizer="true" pop_min_w="100" pop_min_h="96" pop_max_w="2000" pop_max_h="1600"
+ title_bar_open="false" open_button="false" force_open_out="true"
+ lockable="true" openable="false" opened="true" movable="true" active="false"
+ on_active="lua" on_active_params="onRingWindowShown()"
+ >
+
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">			
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL">	
+
+			<ctrl style="button_ok" id="browse_home" active="true" x="-16" y="0" posref="MR MR" posparent="parent"
+			text_y="-2" onclick_l="lua" params_l="browseRingWindowHomePage()" hardtext="uiR2EDHomeButton" fontsize="10" />
+
+	</group>
+
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+
+		<group type="html" id="ring_page" posref="TL TL" posparent="parent" url="home" title_prefix="uiR2EDRingWindow"
+			sizeref="wh" x="6" y="0" w="-12" h="0"
+			timeout="60"
+			background_color="0 0 0 0"
+			error_color="255 240 48 255"
+			link_color="240 155 100 255"
+			text_color="210 210 210 255"
+			h1_color="255 255 255 255"
+			h2_color="255 255 255 255"
+			h3_color="255 255 255 255"
+			h4_color="255 255 255 255"
+			h5_color="255 255 255 255"
+			h6_color="255 255 255 255"
+			text_font_size="10"
+			h1_font_size="20"
+			h2_font_size="18"
+			h3_font_size="16"
+			h4_font_size="14"
+			h5_font_size="12"
+			h6_font_size="12"
+			
+			paragraph_begin_space="1"
+			multi_line_space_factor="0.25"
+			td_begin_space="16"
+			li_begin_space="4"
+			ul_begin_space="12"
+			li_indent="0"
+			ul_indent="30"
+			
+			checkbox_bitmap_normal="w_slot_on.tga"
+			checkbox_bitmap_pushed="w_opacity_on.tga"
+			checkbox_bitmap_over=""
+			background_bitmap_view="black2"
+			home=""
+			browse_next_time="true"			
+			form_text_area_group="edit_box_widget_multiline"
+			browse_tree=""
+			browse_undo=""
+			browse_redo=""
+			browse_refresh="ui:interface:r2ed_ring_window:header_opened:browse_refresh"
+			>
+			<group id="black" posref="BR BR" sizeref="hw" w="-12" h="-12" inherit_gc_alpha="true"/>
+			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+			<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+			<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+
+			<ctrl style="skin_scroll" id="scroll_bar" />
+
+		</group>		
+	</group>
+</group>
+
+<tree node="r2ed_ring_window">
+</tree>
+-->
+
+
+<!-- RING WINDOW REVAMP -->
+
+
+<style style="header_but_style" 
+ global_color_normal="true" global_color_over="true" global_color_pushed="true"
+ color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+ text_y="-4" fontsize="10" shadow="true" wmargin="8"
+ text_color_normal="255 255 255 192" text_color_pushed="255 255 255 255" text_color_over="255 255 255 220"
+ text_global_color_normal="true" 
+ text_global_color_pushed="false" 
+ text_global_color_over="true"
+/>
+
+<define id="rap_line_height" value="24" />
+
+
+<define id="rap_col_even_color" value="255 255 255 40" />
+<define id="rap_col_odd_color" value="255 255 255 20" />
+
+<template name="header_but" text="toto" id="" target="" w="64" criterion="" color="%rap_col_odd_color" 
+ tooltip="" 
+ handler="RingAccessPoint:headerLeftClick"
+ on_resize="lua"
+ on_resize_params="RingAccessPoint:onResize()"
+ >
+	<group type="header_entry" id="#id" w="#w" sizeref="h" h="0" x="0" wmin="16" resizer_size="7" target="#target" posref="TL TL" render_layer="7" on_resize="#on_resize" on_resize_params="#on_resize_params">
+		<!--
+		<view type="bitmap" id="bg" texture="blank.tga" scale="true" posref="TL TL" x="1" y="-1" sizeref="wh" h="-2" w="-2" color="127 127 127 255"/>
+		-->		
+		<ctrl style="header_but_style" id="tup" type="text_button" posref="TL TL" sizeref="w" w="0" button_type="push_button" hardtext="#text"
+		 tx_normal="w_tab_up_normal" tx_pushed="w_tab_up_pushed" tx_over="w_tab_up_over" active="false"
+		 onclick_l="lua" params_l="#handler(true, '#criterion')"
+		 auto_clamp="true" 
+		 auto_clamp_offset="12"		 
+		 tooltip="#tooltip"
+		 tooltip_parent="win"
+		/>		
+		<ctrl style="header_but_style" id="tdown" type="text_button" posref="TL TL" sizeref="w" w="0" button_type="push_button" hardtext="#text"
+		 tx_normal="w_tab_down_normal" tx_pushed="w_tab_down_pushed" tx_over="w_tab_down_over" active="true"		 
+		 onclick_l="lua" params_l="#handler(false, '#criterion')"
+		 auto_clamp="true" 
+		 auto_clamp_offset="12"		 
+		 tooltip="#tooltip"
+		 tooltip_parent="win"
+		/>
+		<view type="bitmap" id="bg" texture="blank.tga" scale="true" posref="TL TL" x="1" y="-%rap_line_height" h="-%rap_line_height" sizeref="wh" w="-2" color="#color"/>
+	</group>
+</template>
+
+
+<template name="rap_number" text="" id="" keep="true">
+	<group id="#id" child_resize_w="true" child_resize_wmargin="2" h="%rap_line_height" x="0">
+		<view type="text" x="0" id="t" posref="ML ML" hardtext="#text" fontsize="10" color="255 255 255 255"		 
+		 over_extend_view_text="true"
+		 over_extend_parent_rect="true"
+		 auto_clamp="true"		 
+		 clamp_right="false"
+		/>
+	</group>
+</template>
+
+
+<template name="rap_text" text="" id="" keep="true">
+	<group id="#id" child_resize_w="true" child_resize_wmargin="3" h="%rap_line_height" x="0">
+		<view type="text" x="3" id="t" posref="ML ML" hardtext="#text" fontsize="10" color="255 255 255 255"
+		 auto_clamp="true" 
+		 over_extend_view_text="true"
+		 over_extend_parent_rect="true"
+		/>
+	</group>
+</template>
+
+<template name="rap_text_centered" text="" id="" keep="true">
+	<group id="#id" child_resize_w="true" h="%rap_line_height" child_resize_wmargin="2" x="0">
+		<view type="text" x="0" id="t" posref="ML ML" hardtext="#text" fontsize="10" color="255 255 255 255"
+		 auto_clamp="true" 
+		 over_extend_view_text="true"
+		 over_extend_parent_rect="true"
+		/>
+	</group>
+</template>
+
+
+<template name="rap_bitmap" text="" id="" keep="true">
+	<group id="#id" child_resize_w="true" h="%rap_line_height" x="0">
+		<view type="bitmap" posref="MM MM" 
+		 texture="blank.tga" color="0 0 0 0"
+		 global_color="false"
+		 id="f"
+		/>
+	</group>
+</template>
+
+<template name="rap_rating" id="" keep="true" w="100" h="15" >
+	<group id="#id" child_resize_w="true" child_resize_wmargin="5" h="%rap_line_height" x="0">
+
+		<view type="bitmap" id="level_rating" 
+		 posref="ML ML" x="0" texture="flag-en.tga" inherit_gc_alpha="false" />
+
+		<view type="bitmap" posref="MR ML" posparent="level_rating" x="2"
+		 texture="slot_jauge.tga" color="255 255 255 255"
+		 global_color="false" scale="true" w="#w" h="#h"
+		 id="f"
+		/>
+
+		<group id="jauge_bar" posref="MR ML" posparent="level_rating" x="2" w="#w" h="#h" >
+			<view type="bitmap" id="jauge_graph" posref="TL TL" scale="true" texture="jauge.tga" color="255 0 0 255" global_color="false" />
+        </group>
+		
+	</group>
+</template>
+
+
+
+
+<template name="rap_select_line" keep="true" id="" 
+ params_l="RingAccessPoint:onLineLeftClick()" params_r="RingAccessPoint:onLineRightClick()" 
+ params_dblclick_l="RingAccessPoint:onLineLeftDblClick()" 
+ on_tooltip_params="RingAccessPoint:onLineSessionTooltip()" 
+ tooltip="uiRAP_HowToJoin" >
+
+	<group id="#id" sizeref="w" h="%rap_line_height" x="0">
+		<ctrl type="button" button_type="toggle_button" sizeref="w" 
+		 posref="TL TL"
+		 h="%rap_line_height"
+		 id="but"		 
+		 tx_normal="blank.tga"
+		 tx_pushed="blank.tga"
+		 tx_over="blank.tga"
+		 scale="true"		 
+		 color="255 255 255 0"
+		 col_pushed="255 255 255 64"
+		 col_over="255 255 255 24" 
+		 onclick_l="lua"		 
+		 params_l="#params_l"
+		 onclick_r="lua"
+		 params_r="#params_r"
+		 ondblclick_l="lua"
+		 params_dblclick_l="#params_dblclick_l"
+		 tooltip="#tooltip"
+		 on_tooltip="lua"
+		 on_tooltip_params="#on_tooltip_params"
+		 tooltip_parent="win"
+		/>
+	</group>
+</template>
+
+<template name="rap_column" id="" align="L" col_posref="TL TL" posref="TL TL">
+	<group id="#id" w="0" x="0" child_resize_h="true" h="0" posref="#posref">		
+		<group id="values" dynamic_display_size="true" type="list" posref="#col_posref" addelt="B" align="#align"/>
+	</group>
+</template>
+
+
+<define id="rap_column_path" value="ui:interface:ring_sessions:content:main:enclosing:columns:getw:column_group" />
+
+
+<group type="menu" id="ring_session_menu" options="context_menu_back" case_mode="0">
+	<action id="join" name="uiRAP_MenuJoin" handler="lua" params="RingAccessPoint:onJoin()" />
+	<action id="tell" name="uiRAP_MenuTell" handler="lua" params="RingAccessPoint:onTell()" />	
+</group>
+
+
+<style style="rap_checkbox" type="button" button_type="toggle_button" posref="BL TL" x="0" y="0"	
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+			color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
+			pushed="true"
+			/>
+
+<template name="r2_button" keep="true" id="" x="0" y="0" active="true" posref="BL BM" posparent="parent" icon="" icon_over="" icon_pushed="" w="44" h="39" tooltip=""
+ color="" col_over="" col_pushed="" offset_x = "0" offset_y = "0" onclick_l="" params_l="" 
+ >	
+	<group id="#id" active="#active" x="#x" y="#y" posref="#posref" posparent="#posparent"
+	 child_resize_w="true" child_resize_h="true" child_resize_wmargin="#offset_x" child_resize_hmargin="#offset_y"
+	 onclick_l="" params_l="" >	
+	 		
+		<group id="button_group" child_resize_w="true" child_resize_h="true" posref="BR BR">
+			<view type="bitmap" id="bl" color="#color" w="4" h="4" posref="BL BL" texture="r2ed_triggers_little_corner.tga" rot="3"/>
+							
+			<ctrl type="button" id="button" button_type="push_button" w="#w" h="#h" posref="TR BL" posparent="bl" 
+				 tx_normal="#icon" tx_pushed="#icon_pushed" tx_over="#icon_over" tooltip="#tooltip"
+				 color="#color" col_over="#col_over" col_pushed="#col_pushed"
+				 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+				 onclick_l="#onclick_l" params_l="#params_l" over_when_pushed = "false" />	
+				 			
+			<view type="bitmap" id="bottom" color="#color" scale="true" posparent="button" posref="BL TL" sizeref="w" w="0" h="4" texture="r2ed_triggers_little_border.tga" rot="2"/>			
+			<view type="bitmap" id="top" color="#color" scale="true" posparent="button" posref="TL BL" sizeref="w" w="0" h="4" texture="r2ed_triggers_little_border.tga" rot="0"/>			
+			<view type="bitmap" id="left" color="#color" scale="true" posparent="button" posref="BL BR" sizeref="h" w="4" h="0" texture="r2ed_triggers_little_border.tga" rot="3"/>
+			<view type="bitmap" id="right" color="#color" scale="true" posparent="button" posref="BR BL" sizeref="h" w="4" h="0" texture="r2ed_triggers_little_border.tga" rot="1"/>			
+			<view type="bitmap" id="tl" color="#color" w="4" h="4" posref="TL BR" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="0"/>
+			<view type="bitmap" id="tr" color="#color" w="4" h="4" posref="TR BL" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="1"/>
+			<view type="bitmap" id="br" color="#color" w="4" h="4" posref="BR TL" texture="r2ed_triggers_little_corner.tga" posparent="button" rot="2"/>
+		</group>						
+	</group>
+</template>
+
+<group type="container" id="ring_sessions" title="uiRAP_WinTitle" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_SESSION_BROWSER"	
+	pop_min_w="580" pop_min_h="200" pop_max_w="2000" pop_max_h="768"	
+	h="220"
+	w="580"
+	savable="false"
+	active="false"
+	on_active="lua"
+	on_active_params="RingAccessPoint:onShow()"
+	on_deactive="lua"
+	on_deactive_params="RingAccessPoint:clear()"
+	escapable="true"
+	on_resize="lua"
+	on_resize_params="RingAccessPoint:onResize()"
+>	
+	<group id="header_opened" x="0" y="0" w="2048" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" y="-4" sizeref="wh" w="0" h="0" posref="TL TL" >				
+		<group id="main" sizeref="wh" x="16" w="-16" h="-74" y="-4" posref="TL TL"> 
+		<!--
+			<group id="enclosing" posref="TL TL" y="0" child_resize_w="true" sizeparent="parent" sizeref="h" max_w="0">
+			-->
+			<view type="bitmap" posref="BL BL" 
+				 texture="ring_logo_big.tga" color="255 255 255 40"
+				 id="rl"
+			/>				
+			<group id="enclosing" child_resize_w="true" sizeref="h" w="0" h="0" max_w="0" max_sizeref="w">							
+				<!-- active = false TMP TMP for nico test -->
+				<group id="header_line" type="header" h="0" dynamic_display_size="true" y="0" header_max_size="2000" addelt="R" align="T" child_resize_w="true"  sizeref="h" posref="TL TL">
+					<instance template="header_but" tooltip="uiRAP_FlagsTooltip" color="%rap_col_even_color" w="40" id="flags" criterion="Flags" text="uiRAP_Flags" target="%rap_column_path:flags"/>
+					<instance template="header_but" tooltip="uiRAP_OwnerTooltip" color="%rap_col_odd_color" w="64" id="owner" criterion="Owner" text="uiRAP_Owner" target="%rap_column_path:owner"/>
+					<instance template="header_but" tooltip="uiRAP_TitleTooltip" color="%rap_col_even_color" w="170" id="title" criterion="Title" text="uiRAP_Title" target="%rap_column_path:title"/>
+
+					<instance template="header_but" tooltip="uiRAP_LevelTooltip" color="%rap_col_odd_color" w="60" id="level" criterion="Level" text="uiRAP_Level" target="%rap_column_path:level"/>					
+					<instance template="header_but" tooltip="uiRAP_PlayerCountTooltip" color="%rap_col_even_color" w="60" id="player_count" criterion="PlayerCount" text="uiRAP_PlayerCount" target="%rap_column_path:player_count"/>
+					<instance template="header_but" tooltip="uiRAP_LanguageTooltip" color="%rap_col_odd_color" w="70" id="language" criterion="Language" text="uiRAP_Language" target="%rap_column_path:language"/>
+					<instance template="header_but" tooltip="uiRAP_ScenarioTypeTooltip" color="%rap_col_even_color" w="40" id="launch_date" criterion="ScenarioType" text="uiRAP_ScenarioType" target="%rap_column_path:scenario_type"/>
+					<instance template="header_but" tooltip="uiRAP_LaunchDateTooltip" color="%rap_col_odd_color" w="120" id="scenario_type" criterion="LaunchDate" text="uiRAP_LaunchDate" target="%rap_column_path:launch_date"/>
+
+					<!--
+					<instance template="header_but" tooltip="uiRAP_AuthorRRPRatingTooltip" color="%rap_col_even_color" w="120" id="author_rrp_rating" criterion="AuthorRRPRating" text="uiRAP_AuthorRRPRating" target="%rap_column_path:author_rrp_rating"/>
+					<instance template="header_but" tooltip="uiRAP_OwnerRRPRatingTooltip" color="%rap_col_odd_color" w="70" id="owner_rrp_rating" criterion="OwnerRRPRating" text="uiRAP_OwnerRRPRating" target="%rap_column_path:owner_rrp_rating"/>
+					
+					<instance template="header_but" tooltip="uiRAP_ScenarioRRPRatingTooltip" color="%rap_col_even_color" w="60" id="scenario_rrp_rating" criterion="ScenarioRRPRating" text="uiRAP_ScenarioRRPRating" target="%rap_column_path:scenario_rrp_rating"/>
+					-->
+				</group>
+				<group id="columns" sizeref="wh" w="0"
+				 posparent="header_line" 
+				 posref="TL TL"				 
+				 y="-26"
+				 h="-26"
+				>
+					<group id="getw" child_resize_h="true" child_resize_hmargin="0" sizeref="w" w="0" h="0" max_h="0" max_sizeref="h" posref="TL TL">
+						<group id="column_group" dynamic_display_size="true" type="list" posref="TL TL" header_max_size="640" addelt="R" align="T" child_resize_h="true" sizeref="w">
+							<instance template="rap_column" id="flags" align="L" col_posref="TM TM"/>
+							<instance template="rap_column" id="owner"/>
+							<instance template="rap_column" id="title"/>
+							<instance template="rap_column" id="level" align="R" col_posref="TR TR"/>		
+							<instance template="rap_column" id="player_count" align="R" col_posref="TR TR"/>
+							<instance template="rap_column" id="language" align="M" col_posref="TM TM"/>
+							<instance template="rap_column" id="scenario_type" align="L" col_posref="TM TM"/>
+							<instance template="rap_column" id="launch_date" align="R" col_posref="TR TR"/>
+
+							<!--
+							<instance template="rap_column" id="author_rrp_rating" align="M" col_posref="TM TM"/>
+							<instance template="rap_column" id="owner_rrp_rating" align="M" col_posref="TM TM"/>
+
+							<instance template="rap_column" id="scenario_rrp_rating" align="R" col_posref="TR TR"/>
+							-->
+						</group>						
+						<group id="select" posref="TL TL" y="0" h="0" type="list" dynamic_display_size="true" sizeparent="columns" sizeref="w" w="0" addelt="B" align="L"/>
+					</group>																	
+				</group>				
+			</group>
+			<!--
+			<view type="text" x="16" id="errorMsg" multi_line="true" continuous_update="true" posref="ML ML" global_color="false" fontsize="15" shadow="true" active="false" hardtext=""/>
+			-->
+		</group>			
+		<group id="vscr_bg" posparent="main" posref="TL TR" sizeref="h" w="12" y="-24" h="-23" x="-2">
+			<instance template="inner_thin_border_group"/>
+		</group>
+		<group id="hscr_bg" posparent="main" posref="BL TL" sizeref="w" w="0" y="-3" h="14" x="0"
+		 sizeparent="main:enclosing"
+		>
+			<instance template="inner_thin_border_group"/>
+		</group>
+		<group id="suby" posparent="main" posref="TL TR" sizeref="h" y="-26" h="-26"/>
+		<ctrl style="skin_scroll"
+		 id="list_vscroll"
+		 posparent="suby"
+		 posref="TL TR"		 
+		 x="-4"
+		 y="0"
+		 align="B"
+		 target="main:enclosing:columns:getw"
+		/>			
+		<ctrl type="scroll" 
+		 id="list_hscroll" 
+		 tx_bottomleft="Skin_scroll_L.tga"
+		 tx_middle="Skin_scroll_H.tga"
+		 tx_topright="Skin_scroll_R.tga"
+		 h="8" 
+		 vertical="false" 
+		 align="L" 
+		 posparent="main" 
+		 posref="BL TL" 
+		 x="0" 
+		 y="-6" 
+		 target="main:enclosing"
+		/>
+		<view type="bitmap" id="sep" posparent="main" posref="BL TL" x="0" y="-18" scale="true" h="4" sizeref="w" texture="W_line_hor3.tga" />
+
+		<ctrl style="quit_button" id="new_scenario" x="0" y="-5" color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160"
+		 hardtext="uiRAP_NewDestination" posref="BL TL" posparent="sep" 
+		 onclick_l="lua" params_l="RingAccessPoint:newScenario()"/>
+		
+		<group id="lang_0" posparent="new_scenario" x="10" y="-0" posref="TR TL" child_resize_w="true" child_resize_h="true">
+			<ctrl type="button" id="lang_en" style="rap_checkbox" posref="TL TL" y="0" onclick_l="lua" params_l="RingAccessPoint:toggleLangfilter('en')"/>
+			<view type="bitmap" id="en_bm" x="4" posref="MR ML" posparent="lang_en" texture="flag-en.tga" global_color="false"/>
+			<ctrl type="button" id="lang_fr" style="rap_checkbox" posparent="lang_en" y="-4" onclick_l="lua" params_l="RingAccessPoint:toggleLangfilter('fr')"/>		
+			<view type="bitmap" id="fr_bm" x="4" posref="MR ML" posparent="lang_fr" texture="flag-fr.tga" global_color="false"/>
+		</group>		
+
+		<group id="lang_1" posparent="lang_0" x="16" posref="TR TL" child_resize_w="true" child_resize_h="true">
+			<ctrl type="button" id="lang_de" style="rap_checkbox" posref="TL TL" y="0" onclick_l="lua" params_l="RingAccessPoint:toggleLangfilter('de')"/>
+			<view type="bitmap" id="de_bm" x="4" posref="MR ML" posparent="lang_de" texture="flag-de.tga" global_color="false"/>
+			<ctrl type="button" id="lang_misc" style="rap_checkbox" posparent="lang_de" y="-4" onclick_l="lua" params_l="RingAccessPoint:toggleLangfilter('misc')"/>		
+			<view type="text" id="misc_bm" x="4" posref="BR BL" posparent="lang_misc" hardtext="uiR2EDother_lang" global_color="false" fontsize="10"/>
+		</group>
+
+		<ctrl type="text_button" id="enlarge" posref="TR TL" posparent="lang_1" frozen="false" x="8" y="0" style="text_button_16" hardtext="uiRAP_Enlarge" onclick_l="lua" params_l="RingAccessPoint:enlargeColumns()"
+		 tooltip="uiRAP_EnlargeTooltip"
+		 tooltip_parent="win"
+		/>
+
+		<view type="text" x="4" y="0" posparent="enlarge" id="refreshText" multi_line="false" posref="MR ML" global_color="false" fontsize="12" shadow="true" active="true" hardtext="refresh_text" color="255 255 255 100" />
+
+		<ctrl type="button" active="false" x="200" button_type="push_button" id="fill_rap1" posparent="sep" posref="BL TL" y="-4"
+		 tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		 color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		 hardtext="fill"
+		 onclick_l="lua" params_l="RingAccessPoint:testFill1()" />		 
+		<ctrl type="button" active="false" button_type="push_button" id="fill_rap2" posparent="fill_rap1" posref="TR TL" x="2" y="0"
+		 tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		 color="135 243 28 128" col_over="135 243 28 255" col_pushed="135 243 28 255"
+		 hardtext="fill"
+		 onclick_l="lua" params_l="RingAccessPoint:testFill2()" />
+		 <ctrl type="button" active="false" button_type="push_button" id="failed1" posparent="fill_rap2" posref="TR TL" x="2" y="0"
+		 tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		 color="127 0 0 255" col_over="192 0 0 255" col_pushed="255 0 0 255"
+		 hardtext="fill"
+		 onclick_l="lua" params_l="RingAccessPoint:onConnectionFailed()" />
+		 <ctrl type="button" active="false" button_type="push_button" id="failed2" posparent="failed1" posref="TR TL" x="2" y="0"
+		 tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		 color="127 0 0 255" col_over="192 0 0 255" col_pushed="255 0 0 255"
+		 hardtext="fill"
+		 onclick_l="lua" params_l="RingAccessPoint:onDisconnection()" />
+		 <ctrl type="button" active="false" button_type="push_button" id="failed3" posparent="failed2" posref="TR TL" x="2" y="0"
+		 tx_normal="but_left.tga" tx_pushed="but_left.tga" tx_over="but_left.tga"
+		 color="127 0 0 255" col_over="192 0 0 255" col_pushed="255 0 0 255"
+		 hardtext="fill"
+		 onclick_l="lua" params_l="RingAccessPoint:onConnectionClosed()" />
+
+		<ctrl type="text_button" id="join" frozen="true" x="-2" y="2" style="text_button_16" hardtext="uiRAP_Join" posref="BR BR" onclick_l="lua" params_l="RingAccessPoint:onJoin()"/>
+		<ctrl type="text_button" id="tell" frozen="true" x="-2" posparent="join" style="text_button_16" hardtext="uiRAP_AskForInvite" posref="TL TR" onclick_l="lua" params_l="RingAccessPoint:onTell()"/>
+
+	</group>
+</group>
+
+<tree node="ring_sessions"/>
+
+<lua file="ring_access_point.lua" />
+
+
+
+
+
+
+<!-- **************************************************************************************************************** -->
+<!-- ********************************************** PLAYERS TRACKING WINDOW ***************************************** -->
+<!-- **************************************************************************************************************** -->
+
+<define id="chars_column_path" value="ui:interface:ring_chars_tracking:content:main:enclosing:columns:getw:column_group" />
+
+
+<group type="menu" id="ring_char_menu" options="context_menu_back" case_mode="0">
+	<action id="teleport" name="uiRAP_MenuTeleportTo" handler="lua" params="CharTracking:onTeleportTo()" />
+	<action id="kick" name="uiRAP_MenuKick" handler="lua" params="CharTracking:onKick()" />
+	<action id="unkick" name="uiRAP_MenuUnkick" handler="lua" params="CharTracking:onUnkick()" />	
+	<action id="tell" name="uiRAP_MenuCharTell" handler="lua" params="CharTracking:onTell()" />	
+</group>
+
+<group type="container" id="ring_chars_tracking" title="uiRAP_CharsTitle" global_color="false" line_at_bottom="false"
+	movable="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_PLAYER_TRACKING"	
+	pop_min_w="320" pop_min_h="320" pop_max_w="2000" pop_max_h="2000"	
+	h="220"
+	w="220"
+	savable="false"
+	active="false"
+	on_active="lua"
+	on_active_params="CharTracking:onShow() if r2 and r2.ToolUI then r2.ToolUI:updateToggleWindowDMButtons() end"
+	on_deactive="lua"
+	on_deactive_params="CharTracking:clear() if r2 and r2.ToolUI then r2.ToolUI:updateToggleWindowDMButtons() end"
+	escapable="true"
+	on_resize="lua"
+	on_resize_params="CharTracking:onResize()"
+>	
+	<group id="header_opened" x="0" y="0" w="2048" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>
+	</group>
+	<group id="content" x="0" y="-4" sizeref="wh" w="0" h="0" posref="TL TL" >				
+		<group id="main" sizeref="wh" x="16" w="-16" h="-74" y="-4" posref="TL TL"> 
+		
+			<view type="bitmap" posref="BL BL" 
+				 texture="ring_logo_big.tga" color="255 255 255 40"
+				 id="rl"
+			/>				
+			<group id="enclosing" child_resize_w="true" sizeref="h" w="0" h="0" max_w="0" max_sizeref="w">							
+				<!-- active = false TMP TMP for nico test -->
+				<group id="header_line" type="header" h="0" dynamic_display_size="true" y="0" header_max_size="2000" addelt="R" align="T" child_resize_w="true"  sizeref="h" posref="TL TL">
+					<instance template="header_but" tooltip="uiRAP_CharFlagsTooltip" 
+					 color="%rap_col_even_color" w="50" id="flags" criterion="Flags" text="uiRAP_CharFlags" 
+					 target="%chars_column_path:flags" handler="CharTracking:headerLeftClick" 
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharNameTooltip" 
+					 color="%rap_col_odd_color" w="150" id="char" criterion="Char" text="uiRAP_CharName" 
+					 target="%chars_column_path:char" handler="CharTracking:headerLeftClick"
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharGuildTooltip" 
+					 color="%rap_col_even_color" w="150" id="guild" criterion="Guild" text="uiRAP_CharGuild" 
+					 target="%chars_column_path:guild" handler="CharTracking:headerLeftClick"
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharRaceTooltip" 
+					 color="%rap_col_odd_color" w="100" id="race" criterion="Race" text="uiRAP_CharRace" 
+					 target="%chars_column_path:race" handler="CharTracking:headerLeftClick" 
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharReligionTooltip" 
+					 color="%rap_col_even_color" w="100" id="religion" criterion="Religion" 
+					 text="uiRAP_CharReligion" target="%chars_column_path:religion" handler="CharTracking:headerLeftClick"
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharShardTooltip" 
+					 color="%rap_col_odd_color" w="100" id="shard" criterion="Shard" text="uiRAP_CharShard" 
+					 target="%chars_column_path:shard" handler="CharTracking:headerLeftClick"
+					 on_resize_params="CharTracking:onResize()"
+					 />
+					<instance template="header_but" tooltip="uiRAP_CharLevelTooltip" 
+					 color="%rap_col_even_color" w="70" id="level" criterion="Level" text="uiRAP_CharLevel" 
+					 target="%chars_column_path:level" handler="CharTracking:headerLeftClick"
+					 on_resize_params="CharTracking:onResize()"
+					/>
+				</group>
+				<group id="columns" sizeref="wh" w="0"
+				 posparent="header_line" 
+				 posref="TL TL"				 
+				 y="-26"
+				 h="-26"
+				>
+					<group id="getw" child_resize_h="true" child_resize_hmargin="0" sizeref="w" w="0" h="0" max_h="0" max_sizeref="h" posref="TL TL">
+						<group id="column_group" dynamic_display_size="true" type="list" posref="TL TL" header_max_size="640" addelt="R" align="T" child_resize_h="true" sizeref="w">
+							<instance template="rap_column" id="flags" align="L" col_posref="TM TM"/>
+							<instance template="rap_column" id="char"/>
+							<instance template="rap_column" id="guild"/>
+							<instance template="rap_column" id="race"/>
+							<instance template="rap_column" id="religion" />		
+							<instance template="rap_column" id="shard" />
+							<instance template="rap_column" id="level" align="M" col_posref="TM TM"/>
+						</group>						
+						<group id="select" posref="TL TL" y="0" h="0" type="list" dynamic_display_size="true" sizeparent="columns" sizeref="w" w="0" addelt="B" align="L"/>
+					</group>																	
+				</group>				
+			</group>
+			<view type="text" x="16" id="errorMsg" multi_line="true" continuous_update="true" posref="ML ML" global_color="false" fontsize="15" shadow="true" active="false" hardtext=""/>
+		</group>			
+		<group id="vscr_bg" posparent="main" posref="TL TR" sizeref="h" w="12" y="-24" h="-23" x="-2">
+			<instance template="inner_thin_border_group"/>
+		</group>
+		<group id="hscr_bg" posparent="main" posref="BL TL" sizeref="w" w="0" y="-3" h="14" x="0"
+		 sizeparent="main:enclosing"
+		>
+			<instance template="inner_thin_border_group"/>
+		</group>
+		<group id="suby" posparent="main" posref="TL TR" sizeref="h" y="-26" h="-26"/>
+		<ctrl style="skin_scroll"
+		 id="list_vscroll"
+		 posparent="suby"
+		 posref="TL TR"		 
+		 x="-4"
+		 y="0"
+		 align="B"
+		 target="main:enclosing:columns:getw"
+		/>			
+		<ctrl type="scroll" 
+		 id="list_hscroll" 
+		 tx_bottomleft="Skin_scroll_L.tga"
+		 tx_middle="Skin_scroll_H.tga"
+		 tx_topright="Skin_scroll_R.tga"
+		 h="8" 
+		 vertical="false" 
+		 align="L" 
+		 posparent="main" 
+		 posref="BL TL" 
+		 x="0" 
+		 y="-6" 
+		 target="main:enclosing"
+		/>
+		<view type="bitmap" id="sep" posparent="main" posref="BL TL" x="0" y="-18" scale="true" h="4" sizeref="w" texture="W_line_hor3.tga" />
+		
+		<ctrl type="text_button" id="enlarge" posref="BL TL" posparent="sep" frozen="false" x="0" y="-4" style="text_button_16" hardtext="uiRAP_Enlarge" onclick_l="lua" params_l="CharTracking:enlargeColumns()"
+		 tooltip="uiRAP_EnlargeTooltip"
+		 tooltip_parent="win"
+		/>
+
+		<ctrl type="text_button" id="resize" posref="BR BL" posparent="enlarge" frozen="false" x="4" y="0" style="text_button_16" hardtext="uiRAP_Resize" onclick_l="lua" params_l="CharTracking:resizeColumnsAndContainer()"
+		 tooltip="uiRAP_ResizeTooltip" />
+
+		 <view type="text" x="4" y="0" posparent="resize" id="refreshText" multi_line="false" posref="MR ML" global_color="false" fontsize="12" shadow="true" active="true" hardtext="refresh_text" color="255 255 255 100" />
+		
+		<ctrl type="text_button" id="invite" frozen="false" x="-2" y="2" style="text_button_16" hardtext="uiRAP_Invite" posref="BR BR" onclick_l="enter_modal" params_l="group=ui:interface:invite_character" />
+		<ctrl type="text_button" id="tell" frozen="true" x="-10" posparent="invite" style="text_button_16" hardtext="uiRAP_Tell" posref="TL TR" onclick_l="lua" params_l="CharTracking:onTell()"/>
+		<ctrl type="text_button" id="unkick" frozen="true" x="-2" posparent="tell" style="text_button_16" hardtext="uiRAP_Unkick" posref="TL TR" onclick_l="lua" params_l="CharTracking:onUnkick()"/>
+		<ctrl type="text_button" id="kick" frozen="true" x="-2" posparent="unkick" style="text_button_16" hardtext="uiRAP_Kick" posref="TL TR" onclick_l="lua" params_l="CharTracking:onKick()"/>
+		<ctrl type="text_button" id="teleport" frozen="true" x="-2" posparent="kick" style="text_button_16" hardtext="uiRAP_TeleportTo" posref="TL TR" onclick_l="lua" params_l="CharTracking:onTeleportTo()"/>
+	</group>
+</group>
+
+<tree node="ring_chars_tracking"/>
+
+<group type="modal" id="invite_character" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="8" options="skin_modal"
+	on_active="" on_active_params="" >
+
+	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiPeopleAddContact" />
+
+	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
+	
+	<instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="-4" 
+				onclick_ok="r2ed_invite_character" 
+				onclick_ok_param="" 
+				onclick_cancel="leave_modal"
+				onclick_cancel_param="" />
+
+</group>
+
+<!-- **************************************************************************************************************** -->
+<!-- ********************************************** SCENARIO CONTROL WINDOW ***************************************** -->
+<!-- **************************************************************************************************************** -->
+
+
+<!-- *************************************************** -->
+<!--            label/toggle button template             -->
+<template name="label_toggle_button" keep="true" active="true" id="" x="0" y="0" posparent="parent" posref="TL TL" w="256" 
+ hardtext="" fontsize="10" y_text="-2" onclick_l="lua" params_l="" tooltip="">	
+
+	<group id="#id" active="#active" x="#x" y="#y" w="#w" h="17" posparent="#posparent" posref="#posref" >
+		
+		<ctrl type="button" id="toggle_butt" button_type="toggle_button" pushed="true"	
+		 posref="BL BL" x="0" y="0" tx_normal="w_opacity_on.tga" 
+		 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+		 col_over="255 255 255 0" onclick_l="#onclick_l" params_l="#params_l"
+		 tooltip="#tooltip"
+		/>
+
+		<view type="text" id="button_text" posparent="toggle_butt" posref="BR BL" x="5" y="#y_text" 
+		 color="255 255 255 255" global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext" 
+		 auto_clamp="true" over_extend_view_text="true" over_extend_parent_rect="true" />
+
+	</group>
+
+</template>
+
+<!-- *************************************************** -->
+<proc id="scenario_control_close">
+	<action handler="set" 	params="target='ui:interface:r2ed_scenario_control:active'|value=0"/>
+	<action handler="open_ring_sessions" 	params=""/>
+</proc>
+
+<!-- *************************************************** -->
+<proc id="hide_chars_filters">
+	<action handler="hide_chars_filters" 	params=""/>
+</proc>
+
+<!-- template seps around group -->
+<template name="r2ed_sep" id=""  >
+	<group id="#id" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">	
+						
+		<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+		 scale="true" texture="blank.tga" color="120 120 120 255" />
+		<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+		<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+		<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+		 y="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+	</group>
+</template>
+
+
+<!-- Warning modal window for free trial account -->
+<group type="modal" id="warning_free_trial" exit_click_out="true" posref="MM MM" w="250" 
+ child_resize_h="true" child_resize_hmargin="46" 
+ on_enter="leave_modal" options="skin_modal"
+>
+	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
+	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
+	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningFreeTrial"/>
+	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
+</group>
+
+<!-- Warning modal window for newcomers -->
+<group type="modal" id="warning_newcomer" exit_click_out="true" posref="MM MM" w="250" 
+ child_resize_h="true" child_resize_hmargin="46" 
+ on_enter="leave_modal" options="skin_modal"
+>
+	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
+	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
+	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningNewcomer"/>
+	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
+</group>
+
+
+
+<group type="container" id="r2ed_scenario_control"  title="uiR2EDScenarioControl" global_color="false" line_at_bottom="false"
+	movable="true" active="true" opened="true" openable="false" resizer="false" header_color="UI:SAVE:WIN:COLORS:R2_SCENARIO_CONTROL"	
+	pop_min_w="150"  pop_max_w="600" w="570" pop_max_h="800"
+	savable="false" escapable="true" on_active="lua" on_active_params="if r2 and r2.ToolUI then r2.ToolUI:updateToggleWindowDMButtons() end runAH(getUICaller(), 'init_scenario_control', '') runAH(getUICaller(), 'hide_chars_filters', '')" 
+	on_deactive="lua" on_deactive_params="if r2 and r2.ToolUI then r2.ToolUI:updateToggleWindowDMButtons() end"
+>	
+	<group id="header_opened" x="0" y="0" w="2048" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" child_resize_h="true" child_resize_hmargin="20" >
+			
+		<group id="scenario_info" sizeref="w" child_resize_h="true" w="0" posref="TL TL" x="0" y="-5" child_resize_hmargin="20" >	
+			<group id="scenario_info_gr" sizeref="w" child_resize_h="true" x="10"  y="-10" w="-20" posparent="parent" posref="TL TL" >	
+				
+				<group id="scenario_info_title_gr" sizeref="w" h="20" x="10"  y="-5" w="-20" posref="TL TL" >
+				
+					<view type="bitmap" id="info_bitmap" posref="TL TL" x="0" y="0" texture="r2_scenario_small.tga" 
+					 color="255 255 255 255" global_color="false"/>	
+	
+					<view type="text" id="title" posref="MR ML" posparent="info_bitmap" x="10" y="0" color="255 255 255 255" 
+					 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioInformation" />
+				</group>
+
+				<group id="scenario_info_body_gr" sizeref="w" child_resize_h="true" x="0"  y="-10" w="0" 
+				 posref="BL TL" posparent="scenario_info_title_gr" child_resize_hmargin="20" >	
+					
+					<!-- SCENARIO NAME -->
+					<group id="scenario_name_gr" sizeref="w" child_resize_h="true" x="0"  y="0" w="0" 
+					 posref="TL TL" posparent="parent" >
+						
+						<!-- CURRENT SCENARIO -->
+						<group id="current_scenario_gr" sizeref="w" child_resize_h="true" x="0" y="0" w="0" 
+						 posref="TL TL" posparent="parent" >
+
+							<group id="current_scenario_label" h="20" w="120" x="0"  y="0" posref="TL TL" >	
+								<view type="text" id="current_scenario_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioName" />
+							</group>
+							
+							<group id="current_scenario_value" h="20" w="1024" x="0"  y="0" posref="TR TL" posparent="current_scenario_label" >	
+								<view type="text" id="scenario_value_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="" />
+							</group>
+						</group>
+					</group>
+
+					<!-- SCENARIO INFORMATION / PARAMETERS-->
+					<group id="scenario_info_prop" sizeref="w" child_resize_h="true" x="0" y="-10" w="0" 
+					 posref="BL TL" posparent="scenario_name_gr" >
+
+						<!-- SCENARIO INFORMATION -->
+						<group id="scenario_information_gr" sizeref="w" child_resize_h="true" x="0" y="0" w="0" 
+						 posref="TL TL" posparent="parent" >
+						 
+							<group id="rules_label" h="15" w="120" x="0"  y="0" posref="TL TL" >	
+								<view type="text" id="rules_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDRules" />
+							</group>
+
+							<group id="rules_value" h="15" w="120" x="0"  y="0" posref="TR TL" posparent="rules_label" >	
+								<view type="text" id="rules_value_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDRules" />
+							</group>
+
+							<group id="level_label" h="15" w="120" x="0"  y="-7" posref="BL TL" posparent="rules_label" >	
+								<view type="text" id="level_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioLevel" />
+							</group>
+
+							<group id="level_value" h="15" w="120" x="0"  y="0" posref="TR TL" posparent="level_label" >	
+								<view type="text" id="level_value_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioLevel" />
+							</group>
+
+							<group id="language_label" h="15" w="120" x="0"  y="-7" posref="BL TL" posparent="level_label" >	
+								<view type="text" id="language_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDLanguage" />
+							</group>
+
+							<group id="language_value" h="15" w="120" x="0"  y="0" posref="TR TL" posparent="language_label" >	
+								<view type="text" id="language_value_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDLanguage" />
+							</group>
+
+							<group id="type_label" h="15" w="120" x="0"  y="-7" posref="BL TL" posparent="language_label" >	
+								<view type="text" id="type_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDType" />
+							</group>
+
+							<group id="type_value" h="15" w="240" x="0"  y="0" posref="TR TL" posparent="type_label" >	
+								<view type="text" id="type_value_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+								 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDType" />
+							</group>
+						</group>
+					</group>
+
+					
+					<!-- DESCRIPTION -->
+					<group id="description_gr" sizeref="w" child_resize_h="true" x="0"  y="-10" w="0" 
+					 posref="BL TL" posparent="scenario_info_prop" tooltip="uiRingDescriptionScenarioTooltip"
+					 tooltip_parent="win">
+					 
+						<group id="description_label" h="20" w="120" x="0"  y="0" posref="TL TL" >	
+							<view type="text" id="label" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioDescription" />
+						</group>
+
+						<!-- Edit box -->
+						<group id="back_small_description" posparent="description_label" 
+						 posref="TR TL" y="0" h="120" sizeparent="parent" sizeref="w" w="-130">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+						</group>
+
+						<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-20" h="-12"/>
+
+						<group type="edit_box" id="edit_small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
+						 child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
+						 max_h="-4" want_return="true" 
+						 onenter="" params=""
+						 on_focus_lost="" on_focus_lost_params="" 
+						 reset_focus_on_hide="true"
+						 max_num_chars="256"
+						>
+											
+							<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 
+							 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+						</group>
+
+						<ctrl style="skin_scroll" id="small_description_scroll" align="B" target="edit_small_description" 
+						 posparent="crop_desc" posref="TR TL" x="5" y="0" />
+
+					</group>
+
+				</group>
+
+				<instance template="r2ed_sep" id="sep" />
+			</group>
+		</group>
+
+		<group id="access_players_filter" sizeref="w" child_resize_h="true" w="0" posparent="scenario_info" 
+		 posref="BL TL" x="0" y="0" child_resize_hmargin="20">	
+			
+			<group id="access_gr" sizeref="w" child_resize_h="true" x="10"  y="-5" w="-20" posparent="parent" posref="TL TL" >	
+				
+				<!-- LOOKING FOR PLAYERS -->
+				<group id="access_title_gr" sizeref="w" child_resize_h="true" x="10"  y="-5" w="-20" posref="TL TL" 
+				 child_resize_hmargin="5">	
+					
+					<group id="global_access_label" h="20" w="200" x="0"  y="0" posref="TL TL" >
+					
+						<view type="bitmap" id="filters_bitmap" posref="TL TL" x="0" y="0" texture="r2_allow_small.tga" 
+					     color="255 255 255 255" global_color="false"/>	
+		
+						<view type="text" id="label" posparent="filters_bitmap" posref="MR ML" x="10" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDGlobalAccess" />
+					</group>
+
+					<!-- radio button -->
+					<ctrl type="button" id="global_access_toggle_butt" button_type="toggle_button" pushed="true"	
+					 posref="TR TL" posparent="global_access_label" x="0" y="-2" tx_normal="w_opacity_on.tga" 
+					 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+					 col_over="255 255 255 0" onclick_l="proc" params_l="hide_chars_filters"
+					 tooltip="uiRingGlobalAccessToggle"/>
+
+
+					<!-- radio button -->
+					<ctrl type="button" id="auto_invite_toggle_butt" button_type="toggle_button" pushed="true"	
+					 posref="TR TR" x="-10" y="-2" tx_normal="w_opacity_on.tga" 
+					 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+					 col_over="255 255 255 0" onclick_l="proc" params_l="hide_chars_filters"
+					 tooltip="uiRingAutoInviteToggle"/>
+
+
+					<group id="auto_invite_label" h="20" w="100" x="-10"  y="0" posparent="auto_invite_toggle_butt" posref="TL TR" >
+					
+						<view type="text" id="label" posref="TL TL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDAutoInvite" />
+					</group>
+
+					
+				</group>
+
+				<view type="bitmap" id="sep_global_access" posparent="access_title_gr" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+				 y="0" x="-10" scale="true" texture="blank.tga" color="120 120 120 255" />		
+
+				<group id="access_body_gr" sizeref="w" sizeparent="parent" child_resize_h="true" x="-10"  y="-10" w="0" 
+				 posref="BL TL" posparent="access_title_gr" child_resize_hmargin="20" >
+					
+					<!-- RACE -->
+					<group id="race_gr" sizeref="w" child_resize_h="true" x="10"  y="0" w="-20" 
+					 posref="TL TL" posparent="parent" >
+					 
+						<group id="race_label" h="20" w="150" x="0"  y="0" posref="TL TL" >	
+							<view type="text" id="label" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EdRace" />
+						</group>
+						
+						<instance template="label_toggle_button" id="fyros" posparent="race_label" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDRaceFyros" 
+						 tooltip="uiRingFilterFyros"
+						/>
+						 
+						<instance template="label_toggle_button" id="matis" posparent="fyros" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDRaceMatis" 
+						 tooltip="uiRingFilterMatis"
+						/>	
+						 
+						<instance template="label_toggle_button" id="tryker" posparent="matis" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDRaceTryker" 
+						 tooltip="uiRingFilterTryker"
+						/>
+						 
+						<instance template="label_toggle_button" id="zorai" posparent="tryker" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDRaceZorai"
+						 tooltip="uiRingFilterZorai"
+						/>		
+						
+					</group>
+					
+					<!-- RELIGION -->
+					<group id="religion_gr" sizeref="w" child_resize_h="true" x="0"  y="-5" w="0" 
+					 posref="BL TL" posparent="race_gr" >	
+						
+						<group id="religion_label" h="20" w="150" x="0"  y="0" posref="TL TL" >	
+							<view type="text" id="label" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDReligion" />
+						</group>
+						
+						<instance template="label_toggle_button" id="kami" posparent="religion_label" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDReligionKami" 
+						 tooltip="uiRingFilterReligionKami"
+						/>
+						 
+						<instance template="label_toggle_button" id="karavan" posparent="kami" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDReligionKaravan" 
+						 tooltip="uiRingFilterReligionKaravan"
+						/>	
+						 
+						<instance template="label_toggle_button" id="neutral" posparent="karavan" 
+						 posref="TR TL" x="0" w="80" onclick_l="" hardtext="uiR2EDReligionNeutral" 
+						 tooltip="uiRingFilterReligionNeutral"
+						/>
+						 
+					</group>
+					
+					<!-- GUILD -->
+					<group id="guild_gr" sizeref="w" child_resize_h="true" x="0"  y="-5" w="0" 
+					 posref="BL TL" posparent="religion_gr" >	
+						
+						<group id="guild_label" h="20" w="150" x="0"  y="0" posref="TL TL" >	
+							<view type="text" id="label" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDNonGuildPlayers" />
+						</group>
+
+						<!-- radio button -->
+						<ctrl type="button" id="toggle_butt" button_type="toggle_button" pushed="true"	
+						 posref="TR TL" posparent="guild_label" x="0" y="-2" tx_normal="w_opacity_on.tga" 
+						 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+						 col_over="255 255 255 0" onclick_l="" params_l=""
+						 tooltip="uiRingFilterGuild"
+						/>
+
+					</group>										
+
+					<!-- SHARD LIST -->
+					<view type="text" id="shards_label" posref="BL TL" posparent="guild_gr" x="0" y="-7" color="255 255 255 255" 
+					 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDShard" />
+
+					<group id="shard_list" w="256" h="76" posref="BL TL" y="-2" posparent="shards_label">
+						<instance template="inner_thin_border"/>
+						<group id="inside" posref="TL TL" sizeref="wh" w="-8" h="-8" x="4" y="-4">						
+							<group id="enclosing" posref="TL TL" sizeref="w" w="-10" x="10" child_resize_h="true" 
+							 max_sizeparent="parent" max_sizeref="wh" max_w="0" max_h="0">							 
+								<group id="shards" type="list" posref="TL TL" 
+								 dynamic_display_size="true"
+								 sizeref="w"								 
+								 align="L"
+								 addelt="B"
+								 y="3"
+								>
+								</group>							
+							</group>							
+							<ctrl style="skin_scroll"
+							 id="shard_vscroll"						 
+							 posref="TL TL"						 
+							 y="0"
+							 x="1"
+							 target_stepy="17"
+							 align="T"
+							 target="enclosing"
+							/>
+						</group>						
+					</group>					
+					
+					<!-- COMBAT LEVEL -->
+					<group id="combat_level_gr" sizeref="w" sizeparent="parent" child_resize_h="true" x="0"  y="-5" w="0" 
+					 posref="BL TL" posparent="shard_list" >	
+						
+						<group id="combat_level_label" h="20" w="120" x="0"  y="0" posref="TL TL" >	
+							<view type="text" id="label" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDCombatLevel" />
+						</group>
+						
+						<instance template="label_toggle_button" id="20" posparent="combat_level_label" 
+						 posref="TR TL" x="0" w="62" onclick_l="" hardtext="0..20" 
+						 tooltip="uiRingFilterCombatLevel0"
+						/>
+
+						<instance template="label_toggle_button" id="50" posparent="20" 
+						 posref="TR TL" x="0" w="62" onclick_l="" hardtext="21..50" 
+						 tooltip="uiRingFilterCombatLevel1"
+						/>
+						 
+						<instance template="label_toggle_button" id="100" posparent="50" 
+						 posref="TR TL" x="0" w="62" onclick_l="" hardtext="51..100" 
+						 tooltip="uiRingFilterCombatLevel2"
+						/>	
+						 
+						<instance template="label_toggle_button" id="150" posparent="100" 
+						 posref="TR TL" x="0" w="72" onclick_l="" hardtext="101..150" 
+						 tooltip="uiRingFilterCombatLevel3"
+						/>
+						 
+						<instance template="label_toggle_button" id="200" posparent="150" 
+						 posref="TR TL" x="0" w="72" onclick_l="" hardtext="151..200" 
+						 tooltip="uiRingFilterCombatLevel4"
+						/>
+						 
+						<instance template="label_toggle_button" id="250" posparent="200" 
+						 posref="TR TL" x="0" w="72" onclick_l="" hardtext="201..250" 
+						 tooltip="uiRingFilterCombatLevel5"
+						/>	
+					</group>
+				</group>
+
+				<instance template="r2ed_sep" id="sep" />
+			</group>
+		</group>
+
+		<group id="invite_team" sizeref="w" child_resize_h="true" w="0" posparent="access_players_filter" 
+		 posref="BL TL" x="0" y="0" child_resize_hmargin="10">	
+			
+			<group id="invite_team_gr" sizeref="w" child_resize_h="true" x="10"  y="-5" w="-20" posparent="parent" posref="TL TL" >	
+				
+				<group id="invite_team_title_gr" h="30" x="10"  y="0" w="150" posref="TL TL" >	
+
+					<view type="text" id="title" posref="TL TL" x="0" y="-10" color="255 255 255 255" 
+					 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDInviteTeam" />
+				</group>
+
+				<group id="invite_team_body_gr" sizeparent="parent" sizeref="w" h="30" x="0"  y="0" w="-150" 
+				 posref="TR TL" posparent="invite_team_title_gr" >	
+					
+					<ctrl type="button" id="team_toggle_butt" button_type="toggle_button" pushed="true"	
+					 posref="TL TL" posparent="parent" x="90" y="-8" tx_normal="w_opacity_on.tga" 
+					 tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" 
+					 col_over="255 255 255 0" onclick_l="" params_l=""/>
+				</group>
+
+				<instance template="r2ed_sep" id="sep" />
+			</group>
+		</group>
+
+		<group id="valid_scenario_control" sizeref="w" child_resize_h="true" w="0" posparent="invite_team" 
+		 posref="BL TL" x="0" y="-5" >	
+			
+			<ctrl style="button_ok" id="ok_button" x="-50" y="0" posref="TM TM" text_y="-2"
+			 onclick_l="load_scenario" params_l="" hardtext="uittOK" wmin="100" 
+			 tooltip="uiRingLaunchScenarioTooltip"
+			 tooltip_parent="win" />
+
+			<ctrl style="button_ok" id="cancel_button" x="10" y="0" posparent="ok_button" posref="BR BL" text_y="-2"
+			 onclick_l="proc" params_l="scenario_control_close" hardtext="uittCancel" wmin="100" />
+
+			<ctrl style="button_ok" id="load_button" x="10" y="0" posref="TL TL" text_y="-2" 
+			 onclick_l="lua" params_l="GameR2Loading:displayLoadingWindow()" hardtext="uiR2EDChooseScenario" wmin="100" /> 
+	
+		</group>
+
+	</group>
+</group>
+
+<tree node="r2ed_scenario_control">
+
+</tree>
+
+<!-- rollout bar (formerly form_bar in r2ed)-->
+<template name="rollout_bar" posref="TL TL" posparent="parent" caption="" y="0" keep="true" color="255 255 255 255" global_color="true">
+	<group id="caption" sizeref="w" w="0" child_resize_h="true" y="#y" child_resize_hmargin="2" posref="#posref" posparent="#posparent">
+		<ctrl type="button" id="rollout_button" button_type="push_button" sizeref = "wh" posref="TL TL"				 
+		 tx_normal="grey_40.tga" 
+		 tx_pushed="grey_80.tga" 
+		 tx_over="grey_60.tga"
+		 scale="true"
+		 tooltip=""				 
+		 global_color="true"
+		 global_color_normal="127 127 127 127"
+		 global_color_over="127 127 127 127"
+		 global_color_pushed="false"
+		 onclick_l=""
+		 params_l=""
+		/>							
+		<view type="text" render_layer="2" id="rollout_text" auto_clamp="true" posref="ML ML" posparent="parent" x="2" y="-1" fontsize="12" shadow="false" hardtext="#caption"
+		 global_color="#global_color" color="#color"
+		 over_extend_view_text="true" over_extend_parent_rect="true"/>
+		<!-- enclosing -->		
+		<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+		<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+		<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+	</group>
+</template>
+<!-- ###################### -->
+<!--  LOAD SCENARIO WINDOW  -->
+<!-- ###################### -->
+<group type="container" savable="false" title_delta_max_w="-28" title="uiR2EDLoadScenarioWindow" global_color="false" line_at_bottom="false"
+	active="false"
+	escapable="true"
+	movable="true" opened="true" openable="false" header_color="UI:SAVE:WIN:COLORS:R2_SCENARIO_CONTROL"	
+	pop_min_h="440" pop_max_h="440" h="440"
+	on_active="lua"
+	on_active_params='GameR2Loading:displayLoadingWindow();' 
+	resizer="true"  pop_min_w="500" pop_max_w="500" w="500" on_deactive="lua" on_deactive_params="GameR2Loading:clear();" 
+	on_escape="" on_escape_params="" 
+	on_enter="" on_enter_params="" id="ring_scenario_loading_window"
+	>
+		<group id="content" x="0" y="-4" sizeref="wh" w="0" h="0" posref="TL TL" >		
+			<group id="enclosing" sizeref="wh" posref="TL TL" x="0" y="-4" w="0">
+
+				<group id="rollouts" sizeref="w" w="-2" posref="TL TL" x="0" y="0" max_h="-4" max_sizeref="h" child_resize_h="true"
+				 child_resize_hmargin="4">
+
+					<group id="sheet_header" posref="TL TL" y="-4" sizeref="w" child_resize_h="true" child_resize_hmargin="0">	
+						<group id="tb_enclosing" sizeref="wh" w="-16" h="0" x="16" y="0" posref="TL TL">
+							<instance template="inner_thin_border" inherit_gc_alpha="true"/>				
+						</group>
+						<group id="enclosing" sizeref="w" w="-10" h="196" x="5" y="-5" posref="TL TL">
+							<group id="tree_list" type="tree" active="true" tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_TreeInfo" posref="TL TL" x="16" y="0" col_over="255 255 255 48" col_select="255 255 255 80"
+								sizeref="w" max_sizeref="h" max_h="0">				
+							</group>						
+							<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
+						</group>
+						<group id="gap" posref="BL TL" posparent="enclosing" w="1" h="6" />
+					
+					</group> 
+					
+					<group id="0" x = "0" y="-2" sizeref="w" child_resize_h="true" posparent="sheet_header" posref="BL TL" w="0">  
+						
+						<instance template="rollout_bar" caption="uiR2EDRollout_ScenarioInfo" color="255 255 255 255" global_color="true" />
+						<group type="table" sizeparent="parent" posparent= "caption" posref="BL TL" x="0" y="-4" id="prop_table" sizeref="w" width="100%" border="0" bgcolor="0 0 0 255"
+							 cellspacing="1"
+							 cellpadding="0"
+							 continuous_update="true">	
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Title" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+														tooltip_parent="win"
+														tooltip_posref="auto"								
+														instant_help="true"
+														tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Title"> 
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Title_Caption" 
+														hardtext="uiR2EDProp_LoadScenario_Title" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Title" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Title"> 
+									
+									<view type="text" id="Title" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+
+
+
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Author" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+														tooltip_parent="win"
+														tooltip_posref="auto"								
+														instant_help="true"
+														tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Author"> 
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Author_Caption" 
+														hardtext="uiR2EDProp_LoadScenario_Author" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Author" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Author"> 
+									
+									<view type="text" id="Author" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+
+
+
+
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Description" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Description"> 
+								
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id ="Description_Caption" hardtext =  "uiR2EDProp_LoadScenario_Description" color =  "255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Description" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Description"> 
+									
+									<view type="text" id="Description" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" multi_line="true" multi_line_space="0" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Rules" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Rules"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id =        "Rules_Caption" hardtext =  "uiR2EDRules" color =  "255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Rules" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Rules"> 
+							
+									<view type="text" id="Rules" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Level" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Level"> 
+								
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id =        "Level_Caption" hardtext =  "uiR2EDProp_LoadScenario_Level" color =  "255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Level" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Level"> 
+									
+									<view type="text" id="Level" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Language" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Language"> 
+													
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id =        "Language_Caption" hardtext =  "uiR2EDProp_LoadScenario_Language" color =  "255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Language" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Language"> 
+									
+									<view type="text" id="Language" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_RingPointsLevel" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="RingPointsLevel_Caption" hardtext =  "uiR2EDProp_LoadScenario_RingPointsLevel" color =  "255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_RingPointsLevel" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel"> 
+									
+									<view type="text" id="RingPointsLevel" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+					</group>
+				</group> 
+
+				<!-- ROLLOUT RATINGS -->
+				<!--<group id ="rollout_ratings" x = "0" y="-4" sizeref="w" child_resize_h="true" posparent="0" posref="BL TL" w="0">  
+					
+					<instance template="rollout_bar" caption="uiR2EDRollout_Ratings" color="255 255 255 255" global_color="true" /> 
+					
+					<group type="table" sizeparent="parent" posparent= "caption" posref="BL TL" x="0" y="-4" id="prop_table" sizeref="w" width="100%" border="0" bgcolor="0 0 0 255"
+						cellspacing="1"
+						cellpadding="0"
+						continuous_update="true">	
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Fun" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_FunRating" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Fun" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun">
+									<view type="text" id="FunRating" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Diff" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_DifficultyRating" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Diff" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty">
+									<view type="text" id="DifficultyRating" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Accessibility" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_AccessibilityRating" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Accessibility" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility">
+									<view type="text" id="AccessibilityRating" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Originality" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_OriginalityRating" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Originality" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality">
+									<view type="text" id="OriginalityRating" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Direction" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_DirectionRating" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Direction" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction">
+									<view type="text" id="DirectionRating" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_RRP" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_RRPTotal" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_RRP" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal">
+									<view type="text" id="RRPTotal" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+
+					</group>
+				</group>-->
+
+
+
+
+				<!-- ROLLOUT FILENAME -->
+				<group id ="1" x = "0" y="-4" sizeref="w" child_resize_h="true" posparent="0" posref="BL TL" w="0">  
+					
+					<instance template="rollout_bar" caption="uiR2EDRollout_Load" color="255 255 255 255" global_color="true" /> 
+					
+					<group type="table" sizeparent="parent" posparent= "caption" posref="BL TL" x="0" y="-4" id="prop_table" sizeref="w" width="100%" border="0" bgcolor="0 0 0 255"
+						cellspacing="1"
+						cellpadding="0"
+						continuous_update="true">	
+						
+						<TR>
+							<TD width="35%" ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_Name" > 
+								<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"								
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Name"> 
+									
+									<view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true" id="Name_Caption" hardtext ="uiR2EDProp_LoadScenario_Name" color="255 255 255 255" global_color="true" fontsize="12" shadow="true" auto_clamp="true"/> 
+								</group>
+							</TD>
+
+							<TD width="65%" ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_Name" > 
+								<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
+									tooltip_parent="win"
+									tooltip_posref="auto"
+									tooltip_posref_alt="TL TR"
+									instant_help="true"
+									tooltip="uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Name">
+						
+									<!--<instance template="edit_box_widget" text_y="-1" posref="ML ML" sizeref="w" w="-8" fontsize="14" x="4" reset_focus_on_hide="true"
+									 child_resize_hmargin="4"
+									 max_historic="0"
+									 y="-2"		 
+									 prompt="" enter_loose_focus="true" 
+									 color="255 255 255 255"
+									 continuous_text_update="true"
+									 bg_texture="grey_40.tga"
+									 onchange="lua" onchange_params="getUICaller():setupDisplayText(); getUICaller():find('edit_text'):updateCoords(); getUICaller():getEnclosingContainer().Env.updateSize()"
+									 onenter="" on_focus_lost="" id="Name" text_ref="TL TL" entry_type="filename" multi_line="true" max_num_chars="512" params="" 
+									on_focus_lost_params = "" 
+									/> instance template edit box-->
+									<view type="text" id="Name" color="192 192 192 255" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> 
+								</group>
+							</TD>
+						</TR>
+					</group>
+				</group> 
+				<group id="okcancel" posparent="1" posref="BL TL" y="-10" sizeref="w" child_resize_h="true">
+					<ctrl style="text_button_16" id="validate" posref="MM ML" x="12" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="GameR2Loading:validateLoading()" hardtext="uiR2EDValidateForm"/>
+					<ctrl style="text_button_16" id="cancel" posref="MM MR" x="8" wmargin="8" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="GameR2Loading:cancelLoading()" hardtext="uiR2EDCancelForm"/>
+				</group>
+			</group> <!-- rollout --> 
+		</group>  <!-- enclosing -->
+	</group> <!-- content -->
+</group>	
+<tree node="ring_scenario_loading_window" >
+</tree>	
+
+
+
+<!-- horizontal label / combo box / slider template -->
+<template name="score_template" active="true" id="" x="0" y="0" posparent="" posref="" 
+ hardtext="" on_change_params="" params="" end_params="" cancel_params="" >	
+	
+	<group id="#id" x="#x" y="#y" sizeref="w" w="0" h="25" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label_rate" h="20" w="100" x="0"  y="-5" posref="TL TL" >	
+			<view type="text" id="rate_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- edit box -->
+		<instance template="edit_box_widget" id="edit_rate" posparent="label_rate" posref="BR BL" x="10" y="0" w="100"
+		 fontsize="12" entry_type="positive_integer"
+		 reset_focus_on_hide="true" max_num_chars="3" tooltip="" tooltip_parent="win"
+		 onchange="lua" onchange_params="ScenarioScores:limitRating()" 
+		/>	
+
+		<!-- max rating -->
+		<group id="max_rate" h="20" w="60" x="10"  y="0" posparent="edit_rate" posref="BR BL" >	
+			<view type="text" id="max_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="/ 100" />
+		</group>
+
+	</group>
+</template>
+
+<!-- horizontal label / combo box / slider template -->
+<template name="average_score_template" active="true" id="" x="0" y="0" posparent="" posref="" 
+ hardtext="" on_change_params="" params="" end_params="" cancel_params="" >	
+	
+	<group id="#id" x="#x" y="#y" sizeref="w" w="0" h="25" posparent="#posparent" posref="#posref" >
+	
+		<!-- label -->
+		<group id="label_rate" h="20" w="120" x="0"  y="-5" posref="TL TL" >	
+			<view type="text" id="rate_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="#hardtext" />
+		</group>
+
+		<!-- score -->
+		<group id="score" h="20" w="50" x="10"  y="0" posparent="label_rate" posref="BR BL" >	
+			<view type="text" id="score_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="" />
+		</group>
+
+		<!-- max rating -->
+		<group id="max_rate" h="20" w="50" x="10"  y="0" posparent="score" posref="BR BL" >	
+			<view type="text" id="max_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="/ 100" />
+		</group>
+
+	</group>
+</template>
+
+
+<group type="container" id="r2ed_scenario_scores" title="uiR2EDScenarioScores" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:OPT"	
+	pop_min_w="300" pop_min_h="300" pop_max_w="300" pop_max_h="300"
+	w="300"	h="300"
+	savable="true"
+	on_active="lua" on_active_params="ScenarioScores:initScenarioScores()"
+	on_deactive="" on_deactive_params=""
+>
+
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >	
+
+		<group id="no_ratings" x="5" y="-50" sizeref="wh" w="0" h="0" posref="TL TL" >
+			<view type="text" id="no_ratings_text" posref="TL TL" x="0" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="uiRingNoRatings" multi_line="true" />
+		</group>
+
+		<group id="ratings" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >	
+			<!-- fun rate -->
+			<instance template="score_template" id="fun_rate" x="10"  y="-30" posref="TL TL" posparent="parent" 
+			 hardtext="uiRAP_RateFun" />
+
+			<!-- difficulty rate -->
+			<instance template="score_template" id="diff_rate" x="0"  y="-13" posref="BL TL" posparent="fun_rate" 
+			 hardtext="uiRAP_RateDifficulty" />
+
+			<!-- accessibility rate -->
+			<instance template="score_template" id="access_rate" x="0"  y="-13" posref="BL TL" posparent="diff_rate" 
+			 hardtext="uiRAP_RateAccessibility" />
+
+			<!-- originality rate -->
+			<instance template="score_template" id="originality_rate" x="0"  y="-13" posref="BL TL" posparent="access_rate" 
+			 hardtext="uiRAP_RateOriginality" />
+
+			<!-- direction rate -->
+			<instance template="score_template" id="direction_rate" x="0"  y="-13" posref="BL TL" posparent="originality_rate" 
+			 hardtext="uiRAP_RateDirection" />
+
+			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+				onclick_l="lua" params_l="ScenarioScores:updateScores()" hardtext="uittOK" wmin="50" />
+
+			<ctrl style="button_ok" id="cancel" x="-30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+				onclick_l="lua" params_l="ScenarioScores:getWindow().active=false" hardtext="uittCancel" wmin="50" />
+
+		</group>
+
+		<group id="average_ratings" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >	
+			<!-- fun rate -->
+			<instance template="average_score_template" id="fun_rate" x="10"  y="-30" posref="TL TL" posparent="parent" 
+			 hardtext="uiRAP_RateFun" />
+
+			<!-- difficulty rate -->
+			<instance template="average_score_template" id="diff_rate" x="0"  y="-13" posref="BL TL" posparent="fun_rate" 
+			 hardtext="uiRAP_RateDifficulty" />
+
+			<!-- accessibility rate -->
+			<instance template="average_score_template" id="access_rate" x="0"  y="-13" posref="BL TL" posparent="diff_rate" 
+			 hardtext="uiRAP_RateAccessibility" />
+
+			<!-- originality rate -->
+			<instance template="average_score_template" id="originality_rate" x="0"  y="-13" posref="BL TL" posparent="access_rate" 
+			 hardtext="uiRAP_RateOriginality" />
+
+			<!-- direction rate -->
+			<instance template="average_score_template" id="direction_rate" x="0"  y="-13" posref="BL TL" posparent="originality_rate" 
+			 hardtext="uiRAP_RateDirection" />
+
+			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+				onclick_l="lua" params_l="getUI('ui:interface:r2ed_scenario_scores').active=false" hardtext="uittOK" wmin="50" />
+
+		</group>
+	</group>
+</group>
+
+<!-- 
+<tree node="r2ed_scenario_scores">
+</tree>
+-->
+
+
+</interface_config>

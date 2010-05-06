@@ -1,0 +1,188 @@
+<generator header_tag="MSG_AIS_EGS_GEN">
+
+	<include file="nel/misc/entity_id.h"/>
+	<include file="pvp_clan.h"/>
+	<include file="base_types.h"/>
+	<include file="sp_type.h"/>
+	<include file="r2_share/r2_share_itf.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="RYMSG">
+
+		<enum name="TTradeCurrency">
+			<item name="tc_dappers"			doc="The classicle currency in Atys, the dapper"/>
+			<item name="tc_rrps"			doc="A specific RingRewardPoint amount"/>
+			<item name="tc_item"			doc="A specific item required in exchange"/>
+			<item name="tc_faction_points"	doc="A specific faction points amount"/>
+			<item name="tc_skill_points"	doc="A specific skill points amount"/>
+		</enum>
+
+		<enum name="TExplicitSaleType">
+			<item name="est_item"/>
+			<item name="est_named_item"/>
+			<item name="est_brick"/>
+			<item name="est_phrase"/>
+			<item name="est_dappers"/>
+
+			<header_code>
+				<![CDATA[
+
+		static TExplicitSaleType fromFileTag(const std::string &tag)
+		{
+			TExplicitSaleType ret;
+			if (tag == "item")
+				ret._Value = est_item;
+			else if (tag == "named_item")
+				ret._Value = est_named_item;
+			else if (tag == "brick")
+				ret._Value = est_brick;
+			else if (tag == "phrase")
+				ret._Value = est_phrase;
+			else if (tag == "dappers")
+				ret._Value = est_dappers;
+			else
+				ret._Value = invalid_val;
+
+			return ret;
+		}
+
+				]]>
+			</header_code>
+		</enum>
+
+		<!-- ############################################################## -->
+		<class name="TPriceFactionFactor">
+			<doc line="A price factor that depends on the buyer faction"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="PVP_CLAN::TPVPClan"	name="Faction"		enum="true" serial="Enum"		doc="Specify the faction"/>
+			<property type="float"				name="Factor"		default="1"		doc="the factor to apply to the price"/>
+
+		</class>
+
+		<!-- ############################################################## -->
+		<class name="TPriceInfo">
+			<doc line="A price for an explicit sale"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="TTradeCurrency"		name="Currency"
+				enum="smart"
+				default="TTradeCurrency::tc_dappers"
+				doc="Specify the type of currency"/>
+			<property type="sint32"				name="Amount"
+				default="-1"
+				doc="The amount of the specified currency. -1 for dappers mean 'use normal price'"/>
+			<property type="R2::TSessionLevel"	name="RRPLevel"
+				enum="smart"
+				default="R2::TSessionLevel::invalid_val"
+				doc="For RRPs, specify the level required"/>
+			<property type="NLMISC::CSheetId"	name="SheetId"
+				byref="true"
+				default="NLMISC::CSheetId::Unknown"
+				doc="SheetId for item currency (must be an item sheet)"/>
+			<property type="EGSPD::CSPType::TSPType"	name="SkillType"
+				default="EGSPD::CSPType::Unknown"
+				serial="Enum"
+				doc="The skill type for skill points currency"/>
+			<property type="PVP_CLAN::TPVPClan"	name="Faction"
+				enum="true"
+				default="PVP_CLAN::None"
+				serial="Enum"
+				doc="For price in faction points, specify the faction"/>
+
+			<property type="std::vector&lt; TPriceFactionFactor &gt;"
+												name="FactionFactors"	serial="Cont"	doc="A list of price faction factor"/>
+
+		</class>
+
+
+		<!-- ############################################################## -->
+		<class name="TExplicitSale">
+			<doc line="Description of somethink explicitly sold by the NPC"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="TExplicitSaleType"	name="SaleType"								doc=""/>
+			<property type="NLMISC::CSheetId"	name="SheetId"	byref="true"	default="NLMISC::CSheetId::Unknown"	doc=""/>
+			<property type="std::string"		name="Named"	byref="true"				doc="Name of item for named item"/>
+			<property type="uint32"				name="Quantity"					default="1"	doc=""/>
+			<property type="uint32"				name="Quality"					default="0"	doc=""/>
+			<property type="TPriceInfo"			name="Price"	byref="true"				doc="The price of the item"/>
+
+		</class>
+
+		<!-- ############################################################## -->
+		<class name="TContextOption">
+			<doc line=""/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="std::string"	name="Title"	byref="true"	doc=""/>
+			<property type="std::string"	name="Detail"	byref="true"	doc=""/>
+
+		</class>
+
+		<!-- ############################################################## -->
+		<class name="TGenNpcDescMsg">
+			<doc line="Description of an NPC bot sent by AIS to EGS at spawn time"/>
+
+			<!-- activate message generation. The message name is the class name -->
+			<message/>
+
+
+			<property type="uint32"	name="Alias"		doc=""/>
+			<property type="uint32"	name="GrpAlias"		doc=""/>
+			<property type="std::vector&lt;uint32&gt;"	name="MissionIds"	byref="true"	serial="Cont"	doc=""/>
+
+			<property type="std::vector&lt; uint32 &gt;"	name="ShopCategories"	byref="true"	serial="Cont"	doc=""/>
+
+			<property type="std::vector&lt; TExplicitSale &gt;"	name="ExplicitSales"	byref="true"	serial="Cont"	doc=""/>
+
+			<property type="bool"	name="FilterExplicitActionTradeByPlayerRace"	doc=""/>
+			<property type="EGSPD::CSPType::TSPType"	name="ExplicitActionSPType"	serial="Enum"			doc=""/>
+			<property type="bool"	name="FilterExplicitActionTradeByBotRace"		doc=""/>
+
+			<property type="std::string"		name="WelcomePhrase"	byref="true"	doc=""/>
+			<property type="std::string"		name="WebPage"			byref="true"	doc=""/>
+			<property type="std::string"		name="WebPageName"		byref="true"	doc=""/>
+			<property type="NLMISC::CSheetId"	name="Sheet"			byref="true"	doc=""/>
+			<property type="TDataSetRow"		name="EntityIndex"		byref="true"	doc=""/>
+
+			<property type="bool"	name="PlayerAttackable"		doc=""/>
+			<property type="bool"	name="BotAttackable"		doc=""/>
+
+			<!-- active sheath description-->
+			<property type="NLMISC::CSheetId"	name="RightHandItem"	byref="true"	doc=""/>
+			<property type="NLMISC::CSheetId"	name="LeftHandItem"		byref="true"	doc=""/>
+			<property type="uint8"	name="RightHandItemQuality"		doc=""/>
+			<property type="uint8"	name="LeftHandItemQuality"		doc=""/>
+
+			<property type="bool"	name="DynamicMissionGiver"		doc="True if this bot can give dynamic mission"/>
+			<property type="bool"	name="DontFollow"		doc=""/>
+			<property type="bool"	name="BuildingBot"		doc="if that bot is a building bot it will be caught by outpost system"/>
+
+			<property type="std::vector&lt; std::string &gt;"	name="OptionalProperties"	byref="true"	serial="Cont"	doc="optionnal and rare properties"/>
+			<property type="std::vector&lt; std::string &gt;"	name="NewsChannels"	byref="true"	serial="Cont"	doc="List of news channel."/>
+
+			<property type="std::vector&lt; TContextOption &gt;"	name="ContextOptions"	byref="true"	serial="Cont"	doc="List of news channel."/>
+
+			<property type="std::vector&lt; NLMISC::CSheetId &gt;"	name="LootList"	byref="true"	serial="Cont"	doc="list of loot"/>
+			<property type="NLMISC::CSheetId"	name="Outpost"	byref="true"	doc=""/>
+			<property type="float"				name="MaxHitRangeForPC"	default="-1.f" />
+
+			<property type="std::string"		name="UserModelId"	byref="true"	doc=""/>
+			<property type="std::string"		name="CustomLootTableId"	byref="true"	doc=""/>
+			<property type="uint32"				name="PrimAlias"	doc=""/>
+		</class>
+
+
+	</namespace>
+</generator>
+
+

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Collisionable" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="CollisionMask" Type="Type" Filename="uint32.typ"/>
+  <ELEMENT Name="OcclusionMask" Type="Type" Filename="uint32.typ"/>
+  <ELEMENT Name="Obstacle" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Absorbtion" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="BoxWidth" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="BoxDepth" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Height" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Radius" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Type" Type="Type" Filename="primitive.typ"/>
+  <ELEMENT Name="Reaction" Type="Type" Filename="reaction.typ"/>
+  <ELEMENT Name="Trigger" Type="Type" Filename="trigger.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:02 2002 (corvazier) File converted from old format</LOG>
+</DFN>

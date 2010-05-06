@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.25 $" State="modified">
+  <ELEMENT Name="Skel" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="AnimSetBaseName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Basics" Type="Dfn" Filename="_creature_basics.dfn"/>
+  <ELEMENT Name="Inventory" Type="Type" Filename="filename.typ" FilenameExt="*.item" Array="true"/>
+  <ELEMENT Name="Pack Animal" Type="Type" Filename="filename.typ" FilenameExt="*.creature" Array="true"/>
+  <ELEMENT Name="PreMemorizedSentences" Type="Dfn" Filename="_sentence.dfn" Array="true"/>
+  <ELEMENT Name="KnownBricks" Type="Type" Filename="filename.typ" FilenameExt="*.brick" Array="true"/>
+  <ELEMENT Name="LodCharacterName" Type="Type" Filename="string.typ" Default="HOM_LOD"/>
+  <ELEMENT Name="LodCharacterDistance" Type="Type" Filename="float.typ" Default="40"/>
+  <ELEMENT Name="DefaultFace" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultChest" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultArms" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultLegs" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultHands" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultFeet" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="DefaultHair" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="CharacterScalePos" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="CombatMovement" Type="Dfn" Filename="_creature_combat_move.dfn"/>
+  <ELEMENT Name="AI" Type="DfnPointer"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:12 2002 (corvazier) File converted from old format
+Fri Jun 14 16:31:27 2002 (saffray) Dfn Structure = 
+Wed Jun 26 15:49:53 2002 (berenguier) Dfn Structure = 
+Mon Sep 30 16:07:53 2002 (fleury) Dfn Structure = 
+Mon Sep 30 16:08:08 2002 (fleury) Dfn Structure = 
+Mon Sep 30 16:15:18 2002 (fleury) Dfn Structure = 
+Wed Oct 09 12:05:57 2002 (fleury) Dfn Structure = 
+Fri Dec 06 17:09:54 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

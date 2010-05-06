@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="TargetTextureStage" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="WeatherToGradient" Type="Type" Filename="filename.typ" Array="true"/>
+  <LOG>Wed Mar 17 14:41:50 2004 (vizerie) Dfn Structure = </LOG>
+</DFN>

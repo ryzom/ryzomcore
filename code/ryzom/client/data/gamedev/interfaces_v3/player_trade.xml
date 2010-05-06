@@ -1,0 +1,345 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- some initialisations to do when the player trade window is opened -->
+<proc id="open_player_trade">
+	<!-- reset the price that the player proposes -->
+	<action handler="set" params="dblink=%money_proposal|value=0"/>	
+	<!-- allow the user to validate the trade -->
+	<action handler="set" params="dblink=%can_valid_player_trade|value=1"/>
+</proc>
+
+
+<!-- selection of the number of seeds that the player wants to give -->
+<proc id="sel_seed">
+	<action handler="editbox_number" params="value=@1|max_value=@2"/>
+	<action handler="validate_seed_sel" params="quantity=@1"/>
+</proc>
+
+<!-- validation of trade by the player -->
+<proc id="valid_player_trade">
+	<action handler="set" params="dblink=%can_valid_player_trade|value=0"/>
+	<action handler="accept_exchange" params="counter=@@%exchange_id"/>
+</proc>
+
+<!-- invalidation of trade by the player -->
+<proc id="invalidate_player_trade">
+	<action handler="set" params="dblink=%can_valid_player_trade|value=1"/>
+	<action handler="invalidate_exchange" params="counter=@@%exchange_id"/>
+</proc>
+
+
+<!-- reset the quantity of money that the player wants to trade -->
+<proc id="reset_money_quantity">
+	<!-- copy the values that have been entered in the box -->
+	<action handler="set" params="dblink=%money_proposal|value=0"/>	
+	<!-- send the new value to the server -->
+	<!-- for now, these are 4 msg => should use only one -->
+	<action handler="validate_seed_sel" params="quantity=0"/>	
+</proc>
+
+<!-- popup to choose an item in the bag (the item must not be worn) -->
+<group type="modal" id="exchange_choose_in_bag" options="skin_modal" x="0" y="0" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" child_resize_w="true" child_resize_wmargin="4" exit_click_b="true">
+	<group type="list_sheet_filter_exchangeable" id="list" posref="TL TL" value="%bag" wspace="2" hspace="2" array="false" x="0" y="0" 
+	    child_resize_h="true" child_resize_w="true"
+		child_resize_wmargin="4"
+		child_resize_hmargin="4"
+		display_empty_slot="true"
+		squarify="true"
+		onclick_l="put_bag_item_to_exchange"
+		onclick_r="open_help_auto" lmargin="4" rmargin="4" tmargin="4" bmargin="4" column_max="16" 
+		auto_grayed="true" >
+	</group>
+</group>
+
+
+
+<!-- Interface for trade between players -->
+<group id="player_trade" type="container" x="400" y="650" w="196" h="417" pop_max_h="438" title="uiTrade2Player" global_color="false"
+ on_active="proc" on_active_params="open_player_trade" active="false" openable="false" opened="true" movable="true" resizer="false" header_color="UI:SAVE:WIN:COLORS:TRADE"
+ escapable="true"
+ on_escape="end_exchange" 
+ on_close_button="end_exchange"
+>
+	<group id="header_opened" w="184"  h="410" posref="TL TL">			
+		
+		<!-- 1/ TITLE & INTRO -->
+		<!--
+		<view type="text" id="text" posref="TL TL" x="16" y="-8" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiTrade2Player" global_color="false" />
+		-->
+		<!-- 2/ QUIT TRADE -->
+		<!--
+		<ctrl type="button" id="close" button_type="push_button" posref="TR TR" x="-8" y="-10" tx_normal="W_close_1.tga" tx_pushed="W_close_1.tga" tx_over="W_button_12_over.tga" 
+				onclick_l="end_exchange" tooltip="uittClose" />
+		-->
+			
+		<!-- 3/ RECEIVING -->
+		<instance template="box_widget" id="receive_back" posref="TM TM" w="184" h="176" x="0" y="-19"/>
+		<view type="text" id="receive_text" posref="TL TL" posparent="receive_back" x="4" y="-4" color="255 255 255 255" fontsize="11" shadow="true" hardtext="uiOtherGive" global_color="true" />
+		
+		<group id="receive" posref="TM TM" x="0" y="-18" posparent="receive_back" w="174" h="156" >
+		
+			<!-- Money received -->
+			<view type="text" id="money_r" posref="TL TL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiMoneyTitle" />
+			<instance template="argent" id="money_received" posref="TL TL" x="0" y="-12" value="%exchange_receive_money"/>
+			<!--
+			<instance template="thunes" id="money_received" posref="TL TL" x="0" y="-12"
+			 value_1="%money_offer_from_other:SMALL_SEED"
+ 			 value_2="%money_offer_from_other:MEDIUM_SEED"
+  			 value_3="%money_offer_from_other:BIG_SEED"
+			 value_4="%money_offer_from_other:VERY_BIG_SEED"	
+			/>
+			-->
+			<!-- Items received (inventories:exchange_proposition in the database) -->
+			<group id="received_items" posref="BL TL" posparent="money_received" x="0" y="-16" h="86" w="174">
+				<!-- 8 sheets that can't be drag and dropped -->
+				<ctrl type="sheet" id="slot0" value="%exchange_receive:0" posparent="parent"     posref="TL TL" x="0" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot1" value="%exchange_receive:1" posparent="slot0"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot2" value="%exchange_receive:2" posparent="slot1"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot3" value="%exchange_receive:3" posparent="slot2"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				
+				<ctrl type="sheet" id="slot4" value="%exchange_receive:4" posparent="slot0"      posref="BL TL" x="0" y="-2" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot5" value="%exchange_receive:5" posparent="slot4"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot6" value="%exchange_receive:6" posparent="slot5"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				<ctrl type="sheet" id="slot7" value="%exchange_receive:7" posparent="slot6"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+			</group>
+			<view type="text" id="items_r" posref="TL BL" posparent="received_items" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiItems" />
+		
+		</group>
+
+
+
+		<!-- 4/ YOU GIVE -->
+		<instance template="box_widget" id="give_back" posref="BM TM" posparent="receive_back" w="184" h="176" x="0" y="-18"/>
+		<view type="text" id="give_text" posref="TL TL" posparent="give_back" x="4" y="-4" color="255 255 255 255" fontsize="11" shadow="true" hardtext="uiPlayerGive" global_color="true" />
+		
+		<group id="give" posref="TM TM" posparent="give_back" x="0" y="-18" w="174" h="156">
+
+			<!-- Money to give -->
+			<view type="text" id="money_r" posref="TL TL" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiMoneyTitle" />
+			<instance template="argent" id="money_given" posref="TL TL" x="0" y="-12" value="%money_proposal"/>
+			<!-- <instance template="thunes" id="money_given" posref="TL TL" x="0" y="-12"
+			 value_1="%money_proposal_1"
+ 			 value_2="%money_proposal_2"
+  			 value_3="%money_proposal_3"
+			 value_4="%money_proposal_4"	
+			/>
+			-->
+			<!-- Set money -->
+			<view type="bitmap" id="sep" posparent="money_given" posref="TR TL" x="2" y="-2" scale="true" h="36" w="2" texture="W_line_ver.tga" />
+		
+			<!-- Set money -->
+			<ctrl type="button" id="choose_money" button_type="push_button" posparent="sep" posref="BR BL" y="0"  x="4" tx_normal="w_button_edit.tga" tx_pushed="w_button_edit.tga" tx_over="W_button_16_over.tga"
+				onclick_l="enter_modal" params_l="group=ui:interface:money_choose_dialog" tooltip="uittSetMoney" />
+
+			<!-- Reset money -->
+			<ctrl type="button" id="reset_money" button_type="push_button" posparent="choose_money" posref="TL BL" y="1" x="0" tx_normal="w_button_reset.tga" tx_pushed="w_button_reset.tga" tx_over="W_button_16_over.tga"
+				onclick_l="proc" params_l="reset_money_quantity" tooltip="uittClearMoney" />
+			
+			<!-- Items to give -->
+			<group id="given_items" posref="BL TL" posparent="money_given" x="0" y="-32" h="86" w="174">
+				<!-- 8 sheets that can't be drag and dropped -->
+				<ctrl type="sheet" id="slot0" onclick_r="open_help_auto" value="%exchange_give:0" oncandrop="can_drop_to_exchange" dragable="true" posparent="parent"  ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TL TL" x="0" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot1" onclick_r="open_help_auto" value="%exchange_give:1" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot0"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot2" onclick_r="open_help_auto" value="%exchange_give:2" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot1"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot3" onclick_r="open_help_auto" value="%exchange_give:3" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot2"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				
+				<ctrl type="sheet" id="slot4" onclick_r="open_help_auto" value="%exchange_give:4" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot0"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="BL TL" x="0" y="-2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot5" onclick_r="open_help_auto" value="%exchange_give:5" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot4"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot6" onclick_r="open_help_auto" value="%exchange_give:6" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot5"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				<ctrl type="sheet" id="slot7" onclick_r="open_help_auto" value="%exchange_give:7" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot6"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+			</group>
+			<view type="text" id="items_r" posref="TL BL" posparent="given_items" x="0" y="0" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiItems" />
+		
+		</group>
+		
+		
+		
+		<!-- 5/ VALIDATIONS -->
+		<group id="validation" posparent="receive_back"  w="40" h="20" posref="BM TM" x="0" y="1">
+			
+			<view type="bitmap" id="not_ready" posref="TL TL" texture="W_trade_not_ready.tga"/>
+			
+			<!-- Player validation -->
+			<group id="player_validation" posref="BR BR" x="0" y="0" w="12" h="14" >
+				<!-- display 'ready' bitmap -->
+				<view type="bitmap" id="player_ready" posref="TL TL" texture="W_trade_player_ready.tga" global_color="true" active="false"/>
+			</group>
+			<!-- links to display the right bitmap for player validation -->
+			<!--<link expr="@%can_valid_player_trade" target="player_validation:player_not_ready:active"/>-->
+			<link expr="not(@%can_valid_player_trade)" target="player_validation:player_ready:active"/>
+			
+			
+			<!-- Other validation -->
+			<group id="other_player_validation" posref="TL TL" x="0" y="0" w="12" h="14" >
+				<!-- display 'ready' bitmap -->
+				<view type="bitmap" id="other_ready" posref="TL TL" texture="W_trade_other_ready.tga" global_color="true" active="false"/>
+			</group>
+			<!-- links to display the right bitmap for other player validation -->
+			<!--<link expr="not(@%other_player_accepted_trade)" target="other_player_validation:other_not_ready:active"/>-->
+			<link expr="@%exchange_accepted" target="other_player_validation:other_ready:active"/>
+			
+			
+		</group>
+
+		
+		<!-- group that allows the user to confirm the trade -->
+		<group id="confirm_trade" posparent="give_back" posref="BR TR" x="-4" y="-4" child_resize_h="true" child_resize_w="true">
+			<ctrl style="text_button_16" id="confirm_button" posref="TR TR" x="0" y="0" onclick_l="proc" params_l="valid_player_trade" hardtext="uiAccept" />
+		</group>
+		
+		<!-- group that allows the user to invalidate the trade -->
+		<group id="invalidate_trade" posparent="give_back" posref="BR TR" x="-4" y="-4" child_resize_h="true" child_resize_w="true" active="false">
+			<ctrl style="text_button_16" id="invalidate_button" posref="TR TR" x="0" y="0" onclick_l="proc" params_l="invalidate_player_trade" hardtext="uiRefuse" />
+		</group>
+		
+		
+		<!-- connect the 'confirm_trade' group to the 'can_valid_player_trade' flag -->
+		<link expr="@%can_valid_player_trade" target="confirm_trade:active"/>
+		<link expr="not(@%can_valid_player_trade)" target="invalidate_trade:active"/>
+		<!-- if money or item have been modified, should allow the player to validate again, so set the 'can_valid_player_trade' flag to 1 -->
+		<link expr="depends(@%exchange_receive, @%exchange_give, @%money_proposal, @%exchange_receive_money, @SERVER:EXCHANGE:FORCE_REFUSE)"
+		 action="set" params="dblink=%can_valid_player_trade|value=1"/>
+	</group>
+</group>
+
+<!-- link to connect the activation of this dialog to the database entry that given the signal to start -->
+<link expr="@%exchange_begun" action="player_trade_start" target="player_trade:active" />
+<link expr="depends(@%exchange_text)" action="set_server_string" params="value=@%exchange_text|target=ui:interface:player_trade:uc_title" />
+
+
+<!-- ************************************* -->
+<!-- *	MONEY SELECTION FOR PLAYER TRADE * -->
+<!-- ************************************* -->
+
+<!-- define for variables that contains initial quantity -->
+<define	id="choose_money" value="UI:VARIABLES:CHOOSE_MONEY" />
+
+<!-- declare variables that contains initial quantity -->
+<variable entry="%choose_money" type="sint32" value="0"/>
+
+
+
+<!-- proc that is executed when the user has confirmed the new quantity of money -->
+<proc id="confirm_money_quantity">	
+	<!-- copy the values that have been entered in the box -->
+	<action handler="set" params="dblink=%money_proposal|value=@@%choose_money"/>
+	<!-- send the new valu to the server -->
+	<!-- for now, these are 4 msg => should use only one -->
+	<action handler="validate_seed_sel" params="quantity=@@%money_proposal"/>
+	<!-- leave the modal box -->
+	<action handler="leave_modal" params=""/>
+</proc>
+
+
+<!-- proc that is executed when the modal box to choose money is opened -->
+<proc id="choose_money_opened">
+	<!-- copy the current money value in the temp variables -->
+	<action handler="set" params="dblink=%choose_money|value=@@%money_proposal"/>
+	<!-- copy the value as strings in the modal box -->
+	<action handler="set" params="target_property=ui:interface:money_choose_dialog:box1:eb:input_string|value=@@%money_proposal"/>
+	<!-- set the focus on the first selection box -->
+	<action handler="set_keyboard_focus" params="select_all=true|target=ui:interface:money_choose_dialog:box1:eb"/>
+</proc>
+
+
+<!-- QUANTITY OF MONEY MODAL BOX -->
+<group type="modal" id="money_choose_dialog" exit_click_out="true" posref="MM MM" w="170" h="64"
+ on_active="proc" on_active_params="choose_money_opened" options="skin_modal"
+>	
+	<!-- info text -->
+	<view type="text" id="title" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiSelMoney2Give" global_color="false" />
+	<!-- bitmap for the seeds -->
+	<view type="bitmap" id="money" posref="BL TL" posparent="title" x="20" y="-4" texture="money_seve.tga" global_color="false" />
+	
+	<!-- edit box for the seeds -->	
+	<instance template="edit_box_widget" id="box1" posparent="money" text_ref="TR TR" text_y="-1" posref="MR ML" w="92" h="16" fontsize="10" x="2" y="0" reset_focus_on_hide="true" 
+	 max_historic="0"
+	 onchange="editbox_number" 
+	 onchange_params="value=%choose_money|max_value=@%money|update_text=false" 
+	 prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="12"
+	 onenter="proc" color="135 243 28 255"
+	 params="confirm_money_quantity"
+	 entry_type="positive_integer"
+	/>
+	<!-- ok / cancel -->
+	<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" 
+				onclick_ok="proc" 
+				onclick_ok_param="confirm_money_quantity" 
+				onclick_cancel="leave_modal"
+				onclick_cancel_param="" />
+</group>
+
+
+
+
+<!-- the player accept the invitation -->
+<proc id="player_accept_invitation">
+	<action handler="accept_exchange_invitation"/>
+	<action handler="set" params="target_property=ui:interface:accept_trade_invitation:active|value=0"/>
+</proc>
+
+<!-- the player decline the invitation -->
+<proc id="player_decline_invitation">
+	<action handler="decline_exchange_invitation"/>
+	<action handler="set" params="target_property=ui:interface:accept_trade_invitation:active|value=0"/>
+</proc>
+
+<!-- init the trade invitation modal box -->
+<proc id="init_invitation_box">
+	<!-- set the name of the player that propose the invitation -->
+	<action handler="set_server_string" params="value=@@%other_player_name_id|target=other_player_name:uc_hardtext" />
+</proc>
+
+
+
+<!-- INVITATION TO TRADE -->
+
+<!--<group type="modal" id="accept_trade_invitation" posref="MM MM" w="192" h="56"
+ on_active="proc" on_active_params="init_invitation_box"
+ mouse_pos="false" exit_click_out="false"
+ on_enter="proc"
+ on_enter_params="player_accept_invitation"
+>-->
+	<!-- Title -->
+	<!-- <view type="text" id="invite_phrase" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiTradeWith" global_color="false" />-->
+	<!-- name of the other user -->
+	<!-- <view type="text" id="other_player_name" posref="MM MM" x="0" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiPlayerName" /> -->
+	<!--<view type="text_id" id="invite_phrase" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" />-->
+	<!-- ok / cancel buttons -->
+	<!--<ctrl type="button" id="ok" button_type="push_button" posref="BR BR" x="-4" y="4" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="player_accept_invitation" global_color_normal="false" global_color_pushed="false" />
+	<ctrl type="button" id="cancel" button_type="push_button" posparent="ok" posref="TL TR" x="-4" tx_normal="w_answer_16_cancel.tga" tx_pushed="w_answer_16_cancel.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="player_decline_invitation" global_color_normal="false" global_color_pushed="false" />	
+</group>-->
+
+
+
+<group type="container" id="accept_trade_invitation" w="260" h="512" resizer="false" pop_max_h="512"
+ active="false" savable="false" openable="false" opened="true" movable="true"
+ on_close_button="proc" on_close_button_params="player_decline_invitation" title_opened="uiTradeInvitation"  >
+
+	<group id="content" child_resize_h="true" child_resize_hmargin="10" >
+		<group id="inside" sizeref="w" posref="TL TL" y="-4" child_resize_h="true" child_resize_hmargin="6">
+			<view type="text_id" id="invite_phrase" posref="MM MM" x="0" y="0" color="255 255 255 255" fontsize="12" shadow="true"
+				multi_line="true" multi_line_space="0" line_maxw="250" />
+		</group>
+		<instance template="button_ok_cancel" posparent="inside" posref="BR TR" x="-4" y="-4"
+					ok_text="uiAccept"	cancel_text="uiDecline"
+					onclick_ok="proc"		onclick_ok_param="player_accept_invitation" 
+					onclick_cancel="proc"	onclick_cancel_param="player_decline_invitation" />
+	</group>
+
+</group>
+
+
+
+<tree node="player_trade">
+</tree>
+
+<tree node="accept_trade_invitation">
+</tree>
+
+</interface_config>

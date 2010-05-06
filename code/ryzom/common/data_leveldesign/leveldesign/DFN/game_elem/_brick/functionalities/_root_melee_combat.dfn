@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" State="modified">
+  <ELEMENT Name="SkillModifier" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="SkillModifierOnResist" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="LatencyModifier" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="LatencyModifierOnResist" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="ResistValue" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ResistThreshold" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="RightHandAttackSkill" Type="Type" Filename="_skills_and_specialized_skills.typ"/>
+  <ELEMENT Name="LeftHandAttackSkill" Type="Type" Filename="_skills_and_specialized_skills.typ"/>
+  <ELEMENT Name="UseDefaultStrike" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ItemSkill" Type="Type" Filename="_skills.typ"/>
+  <LOG>Tue Nov 26 14:02:49 2002 (fleury) Dfn Structure = 
+Mon Dec 02 19:06:02 2002 (brigand) Dfn Structure = 
+Mon Dec 02 19:08:20 2002 (brigand) Dfn Structure = 
+Wed Dec 04 11:36:50 2002 (fleury) Dfn Structure = 
+Thu Dec 05 17:31:09 2002 (fleury) Dfn Structure = 
+Wed Dec 11 15:56:50 2002 (brigand) Dfn Structure = 
+Wed Dec 11 17:05:17 2002 (brigand) Dfn Structure = 
+Wed Dec 11 17:05:27 2002 (brigand) Dfn Structure = 
+Wed Dec 11 17:06:02 2002 (brigand) Dfn Structure = 
+Wed Dec 11 17:06:14 2002 (brigand) Dfn Structure = 
+Wed Dec 11 17:22:36 2002 (brigand) Dfn Structure = 
+Fri Dec 20 16:26:55 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

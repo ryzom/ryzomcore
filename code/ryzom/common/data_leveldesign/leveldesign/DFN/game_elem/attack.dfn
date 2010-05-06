@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" State="modified">
+  <ELEMENT Name="ProjectileMode" Type="Type" Filename="spell_mode.typ" Default="Chain"/>
+  <ELEMENT Name="PlayImpactFXOnlyOnMainTarget" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ProjectileDelay" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="AttackBeginFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="AttackLoopFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="AttackEndFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="AttackFailFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="ProjectileFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="ImpactFX" Type="Type" Filename="filename.typ" FilenameExt="*.animation_fx_set"/>
+  <ELEMENT Name="IsImpactLocalised" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="DefaultCastingPoint" Type="Dfn" Filename="stick_mode.dfn"/>
+  <ELEMENT Name="DefaultAimingPoint" Type="Dfn" Filename="stick_mode.dfn"/>
+  <ELEMENT Name="PlayImpactAnim" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="LetProjectileStickedOnTarget" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="AttackStaticObjectCastFX" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="StaticObjectProjectileDelay" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="ForceUseProjectileDelay" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="ApplyItemOffsetToWeaponBone" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="AdditionnalStartOffsetX" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="AdditionnalStartOffsetY" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="AdditionnalStartOffsetZ" Type="Type" Filename="float.typ" Default="0"/>
+  <LOG>Tue Jan 27 10:48:41 2004 (vizerie) Dfn Structure = 
+Tue Jan 27 10:50:53 2004 (vizerie) Dfn Structure = 
+Tue Jan 27 11:01:56 2004 (vizerie) Dfn Structure = 
+Tue Jan 27 19:58:23 2004 (vizerie) Dfn Structure = 
+Wed Jan 28 10:55:10 2004 (vizerie) Dfn Structure = 
+Wed Jan 28 20:39:29 2004 (vizerie) Dfn Structure = 
+Wed Feb 04 15:00:30 2004 (vizerie) Dfn Structure = 
+Wed Feb 04 15:56:51 2004 (vizerie) Dfn Structure = 
+Thu Feb 05 11:40:36 2004 (vizerie) Dfn Structure = 
+Thu Feb 05 15:05:48 2004 (vizerie) Dfn Structure = 
+Thu Feb 05 17:20:40 2004 (vizerie) Dfn Structure = 
+Thu Feb 05 19:08:17 2004 (vizerie) Dfn Structure = 
+Fri Feb 13 16:04:58 2004 (vizerie) Dfn Structure = 
+Fri Feb 18 17:10:29 2005 (vizerie) Dfn Structure = 
+Thu Feb 24 10:37:09 2005 (vizerie) Dfn Structure = 
+Wed Mar 16 12:02:14 2005 (vizerie) Dfn Structure = 
+Thu Mar 17 17:55:04 2005 (vizerie) Dfn Structure = 
+Tue Mar 22 10:20:10 2005 (vizerie) Dfn Structure = 
+Tue Mar 22 10:29:27 2005 (vizerie) Dfn Structure = 
+Tue Mar 22 10:37:09 2005 (vizerie) Dfn Structure = 
+Tue Mar 22 11:13:33 2005 (vizerie) Dfn Structure = 
+Wed Mar 23 10:09:32 2005 (vizerie) Dfn Structure = 
+Wed Mar 23 10:15:35 2005 (vizerie) Dfn Structure = 
+Wed Mar 23 10:25:44 2005 (vizerie) Dfn Structure = </LOG>
+</DFN>

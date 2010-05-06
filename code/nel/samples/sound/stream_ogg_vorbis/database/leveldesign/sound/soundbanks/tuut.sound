@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <VSTRUCT DfnName="simple_sound.dfn" Name="SoundType">
+      <ATOM Name="Filename" Value="tuut.wav"/>
+      <ATOM Name="MinDistance" Value="5"/>
+      <ATOM Name="MaxDistance" Value="50"/>
+      <ATOM Name="Alpha" Value="0.5"/>
+    </VSTRUCT>
+    <ATOM Name="Loop" Value="true"/>
+    <ATOM Name="Gain" Value="0dB"/>
+    <ATOM Name="Transpose" Value="0"/>
+    <ATOM Name="ExternalGain" Value="-100dB"/>
+    <ATOM Name="AbsolutePosition" Value="true"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Oct 15 15:24:54 2004 (boucher) .SoundType = simple_sound.dfn
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.Alpha = 0.5
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.Filename = tuut.wav
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.MaxDistance = 50
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.MinDistance = 5
+Tue Mar 10 09:45:17 2009 (Kaetemi) .AbsolutePosition = true
+Tue Mar 10 09:45:17 2009 (Kaetemi) .ExternalGain = -100dB
+Tue Mar 10 09:45:17 2009 (Kaetemi) .Gain = 0dB
+Tue Mar 10 09:45:17 2009 (Kaetemi) .Loop = true
+Tue Mar 10 09:45:17 2009 (Kaetemi) .Transpose = 0</LOG>
+</FORM>

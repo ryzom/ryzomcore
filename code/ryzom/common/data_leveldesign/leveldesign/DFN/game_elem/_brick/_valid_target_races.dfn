@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="All Fauna" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Fauna Species" Type="Dfn" Filename="_fauna_races.dfn"/>
+  <ELEMENT Name="All Flora" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Flora Species" Type="Dfn" Filename="_flora_races.dfn"/>
+  <ELEMENT Name="All Homins" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Homin Species" Type="Dfn" Filename="_homins_races.dfn"/>
+  <LOG>Wed Jun 11 12:00:31 2003 (fleury) Dfn Structure = 
+Wed Jun 11 14:49:22 2003 (fleury) Dfn Structure = 
+Mon Jun 30 16:54:13 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

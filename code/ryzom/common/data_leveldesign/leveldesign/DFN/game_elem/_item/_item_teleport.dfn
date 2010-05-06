@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.7 $" State="modified">
+  <ELEMENT Name="SpawnZone" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Automatic" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Type" Type="Type" Filename="item_teleport_type.typ"/>
+  <ELEMENT Name="Ecosystem" Type="Type" Filename="_creature_ecosystem.typ"/>
+  <ELEMENT Name="Tp Price" Type="Type" Filename="float.typ" Default="1"/>
+  <LOG>Wed Dec 18 16:37:50 2002 (fleury) Dfn Structure = 
+Fri Jan 24 13:57:57 2003 (brigand) Dfn Structure = 
+Tue Feb 04 12:22:08 2003 (brigand) Dfn Structure = 
+Thu Jan 15 19:33:19 2004 (saffray) Dfn Structure = 
+Mon May 10 18:34:29 2004 (nouveau) Dfn Structure = </LOG>
+</DFN>

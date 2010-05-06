@@ -1,0 +1,1156 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="1">
+  <ROOT_PRIMITIVE TYPE="CPrimNode">
+    <ALIAS LAST_GENERATED="0"/>
+<!--@selected@expanded-->
+    <CHILD TYPE="CPrimZone">
+<!--@expanded-->
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>npc_manager</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>npc_manager</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="30"/>
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>npc_folder</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>npc_folder_1</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="29"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimZone">
+          <PROPERTY TYPE="string">
+            <NAME>ai_activity</NAME>
+            <STRING>normal</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>npc_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>good_guy</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>vertical_pos</NAME>
+            <STRING>auto</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="28"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>npc_group</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>good_guy_group</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimAlias">
+              <ALIAS VALUE="27"/>
+<!--@expanded-->
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_group_parameters</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>parameters</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimPoint">
+              <PT X="4191.825684" Y="-3474.212646" Z="0.000000"/>
+              <ANGLE VALUE="3.279037"/>
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_bot</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>equipment</NAME>
+                <STRING>CH: 0 1 2 3</STRING>
+                <STRING>CU:3</STRING>
+                <STRING>CL:3</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>good_guy$fct_mission_giver$</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sheet_client</NAME>
+                <STRING>mafc1</STRING>
+              </PROPERTY>
+              <CHILD TYPE="CPrimAlias">
+                <ALIAS VALUE="26"/>
+<!--@expanded-->
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+              </CHILD>
+              <CHILD TYPE="CPrimNode">
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>mission</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>TEST_COMPILATION</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string_array">
+                  <NAME>script</NAME>
+                  <STRING># script generated from 'test_compilateur.primitive'</STRING>
+                  <STRING></STRING>
+                  <STRING>#mission tags and pre-requisites</STRING>
+                  <STRING>replayable</STRING>
+                  <STRING>solo</STRING>
+                  <STRING>non_abandonnable</STRING>
+                  <STRING>mission_icon : the_icon</STRING>
+                  <STRING></STRING>
+                  <STRING>#Variables declaration</STRING>
+                  <STRING>decl : bot : giver</STRING>
+                  <STRING>decl : bot : player</STRING>
+                  <STRING>decl : bot : innocent_victim</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING>decl : creature_model : chdfa1</STRING>
+                  <STRING>decl : creature_model : chdfa2</STRING>
+                  <STRING>decl : bot : group_to_kill_group</STRING>
+                  <STRING>decl : item : m0246dxacb01</STRING>
+                  <STRING>decl : item : m0014dxacb01</STRING>
+                  <STRING>decl : item : m0151chdfa01</STRING>
+                  <STRING>decl : item : m0290chdfa01</STRING>
+                  <STRING>decl : item : ictm1pd</STRING>
+                  <STRING>decl : item : ictm1ss</STRING>
+                  <STRING>decl : place : the_place_to_be</STRING>
+                  <STRING>decl : faction : tribe_green_seed</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING>decl : bot : toto_the_forager</STRING>
+                  <STRING>decl : bot : popol</STRING>
+                  <STRING>decl_item : the_special_item : ic_code_item : 10 : Durability 0.5; Speed 1; SapBuff 1500; abm_ml_fire_00140 : ITEM_NAME : no_drop</STRING>
+                  <STRING>decl_item : the_special_item_2 : ic_code_item : 20 : Durability 0.5 : TEST_COMPILATION_ITEM2_NAME</STRING>
+                  <STRING>decl : bot : les_bastards</STRING>
+                  <STRING>decl : race : ragus</STRING>
+                  <STRING>decl : sphrase : amb0001</STRING>
+                  <STRING>decl : sbrick : brk001</STRING>
+                  <STRING>decl : creature_model : caaa</STRING>
+                  <STRING>decl : creature_model : cbbb</STRING>
+                  <STRING></STRING>
+                  <STRING>#pre-requisites</STRING>
+                  <STRING>req_skill : SM 0 100</STRING>
+                  <STRING>req_mission : DONE_MISSION</STRING>
+                  <STRING>req_mission_neg : NOT_DONE_MISSION</STRING>
+                  <STRING>req_mission_running : RUNNING_MISSION</STRING>
+                  <STRING>req_mission_running_neg : NOT_RUNNING_MISSION</STRING>
+                  <STRING>req_item : ictm1pd</STRING>
+                  <STRING>req_fame : tribe_green_seed 10</STRING>
+                  <STRING>req_fame : tryker 5</STRING>
+                  <STRING>req_fame : ricard 10</STRING>
+                  <STRING>req_guild</STRING>
+                  <STRING>req_grade : member</STRING>
+                  <STRING>req_team_size : 1</STRING>
+                  <STRING>req_brick : BMDHTMP00005</STRING>
+                  <STRING>req_season : winter</STRING>
+                  <STRING>req_encyclo_thema : REQ_THEMA_1</STRING>
+                  <STRING>req_event_faction : REQ_EVT_FACTION_1</STRING>
+                  <STRING></STRING>
+                  <STRING>#script</STRING>
+                  <STRING>mission_title : TEST_COMPILATION_TITLE</STRING>
+                  <STRING>mission_desc : TEST_COMPILATION_DESC</STRING>
+                  <STRING># step_failure_debut</STRING>
+                  <STRING>failure</STRING>
+                  <STRING>	recv_money : -100000</STRING>
+                  <STRING>/failure</STRING>
+                  <STRING># linear_dyn_chat_fail_brief</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_TEST_LITTERAL_1; innocent_victim : linear_dyn_chat_fail_brief_resp TEST_COMPILATION_AKNO_1</STRING>
+                  <STRING>fail</STRING>
+                  <STRING>jump_point : linear_dyn_chat_fail_brief_resp</STRING>
+                  <STRING># linear_dyn_chat_continue_brief_1</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_TEST_LITTERAL_2 : linear_dyn_chat_continue_brief_1_resp TEST_COMPILATION_AKNO_2</STRING>
+                  <STRING>jump_point : linear_dyn_chat_continue_brief_1_resp</STRING>
+                  <STRING># linear_dyn_chat_continue_brief_2</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_PHRASE_TEST_VARIABLE_2 : linear_dyn_chat_continue_brief_2_resp TEST_COMPILATION_AKNO_3</STRING>
+                  <STRING>jump_point : linear_dyn_chat_continue_brief_2_resp</STRING>
+                  <STRING># linear_dyn_chat_retry_brief_fin</STRING>
+                  <STRING>jump_point : linear_dyn_chat_retry_brief_fin_retry</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_TEST_LITTERAL_3 : linear_dyn_chat_retry_brief_fin_resp TEST_COMPILATION_AKNO_4</STRING>
+                  <STRING>jump : linear_dyn_chat_retry_brief_fin_retry</STRING>
+                  <STRING>jump_point : linear_dyn_chat_retry_brief_fin_resp</STRING>
+                  <STRING># step_failure_post_brief</STRING>
+                  <STRING>failure</STRING>
+                  <STRING>	recv_money : 0</STRING>
+                  <STRING>/failure</STRING>
+                  <STRING># step_debut_mission</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_SYSTEM_MSG_START</STRING>
+                  <STRING>set_obj : TEST_COMPILATION_TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TEST_COMPILATION_TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_NAMED_BOT; &quot;innocent_victim&quot;</STRING>
+                  <STRING># step_if_test_acid_damage</STRING>
+                  <STRING>jump_point : step_if_test_acid_damage</STRING>
+                  <STRING>if_bricks : BMOETMA00003 : step_test_yes</STRING>
+                  <STRING># step_test_no</STRING>
+                  <STRING>bot_chat : shout : giver : TEST_COMPILATION_SKILL_TEST_NO</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING>bot_chat : tell : giver : TEST_COMPILATION_SKILL_TEST_RETRY</STRING>
+                  <STRING># jump to step_if_test_acid_damage</STRING>
+                  <STRING>jump : step_if_test_acid_damage</STRING>
+                  <STRING># step_test_yes</STRING>
+                  <STRING>jump_point : step_test_yes</STRING>
+                  <STRING>bot_chat : shout : giver : TEST_COMPILATION_SKILL_TEST_YES; innocent_victim</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING># step_dyn_chat</STRING>
+                  <STRING>jump_point : step_dyn_chat</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_STEP_DYN_CHAT_NPC_TALK : step_1 TEST_COMPILATION_DYN_ANSWER_NO : step_ooo_test_target TEST_COMPILATION_DYN_ANSWER_OK</STRING>
+                  <STRING># step_no_answer</STRING>
+                  <STRING>bot_chat : shout : giver : TEST_COMPILATION_SOURD</STRING>
+                  <STRING># jump to step_dyn_chat</STRING>
+                  <STRING>jump : step_dyn_chat</STRING>
+                  <STRING># step_1</STRING>
+                  <STRING>jump_point : step_1</STRING>
+                  <STRING>bot_chat : tell : giver : TEST_COMPILATION_DYN_CHAT_EXIT</STRING>
+                  <STRING>fail</STRING>
+                  <STRING>end</STRING>
+                  <STRING># step_ooo_test_target</STRING>
+                  <STRING>jump_point : step_ooo_test_target</STRING>
+                  <STRING>recv_money : 1000</STRING>
+                  <STRING>ooo</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_OBJ_OVERLOAD_TARGET_CREATURE</STRING>
+                  <STRING>	target_fauna : chdfa1; chdfa2</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_OBJ_OVERLOAD_TARGET_CREATURE_PLACE</STRING>
+                  <STRING>	target_fauna : chdfa1; chdfa2 : the_place_to_be</STRING>
+                  <STRING>	target_npc : innocent_victim</STRING>
+                  <STRING>	target_npc : innocent_victim : the_place_to_be</STRING>
+                  <STRING>	target_race : goary; clopper</STRING>
+                  <STRING>	target_race : goary; clopper : the_place_to_be</STRING>
+                  <STRING>/ooo</STRING>
+                  <STRING>recv_money : -1000</STRING>
+                  <STRING># step_ooo_test_kill</STRING>
+                  <STRING>ooo</STRING>
+                  <STRING>	kill_faction : tribe_green_seed 5 : region_majesticgarden</STRING>
+                  <STRING>	kill_fauna : chdfa1 3; chdfa2 3</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_OBJ_KILL_OVERLOAD</STRING>
+                  <STRING>	kill_group : group_to_kill_group</STRING>
+                  <STRING>	kill_npc : innocent_victim</STRING>
+                  <STRING>	kill_race : dag 5; ragus 10</STRING>
+                  <STRING>	kill_npc_by_name : the_named_npcs 10 : quelquepart</STRING>
+                  <STRING>/ooo</STRING>
+                  <STRING># step_ooo_simple_objectives</STRING>
+                  <STRING>ooo</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_IN_OOO_PHRASE</STRING>
+                  <STRING>	cast : BMOETMA00003</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_IN_OOO_OTHER_PHRASE</STRING>
+                  <STRING>	forage : m0246dxacb01 1 10; m0014dxacb01 3 10</STRING>
+                  <STRING>	loot_mp : m0290chdfa01 2 10; m0151chdfa01 2 10</STRING>
+                  <STRING>	craft : ictm1pd 1 10; ictm1ss 1 10</STRING>
+                  <STRING>	sell : ictm1pd 1 10; ictm1ss 1 10 : giver</STRING>
+                  <STRING>	buy : ictm1pd 1 10; ictm1ss 1 10 : good_guy</STRING>
+                  <STRING>	give_item : m0290chdfa01 2 10; m0151chdfa01 2 10 : giver</STRING>
+                  <STRING>	give_money : 1000 : giver</STRING>
+                  <STRING>	visit : the_place_to_be</STRING>
+                  <STRING>	visit : the_place_to_be : m0290chdfa01</STRING>
+                  <STRING>	skill : SF 10</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_DO_MISSION_OBJ</STRING>
+                  <STRING>	mission : DONE_MISSION</STRING>
+                  <STRING>/ooo</STRING>
+                  <STRING># step_any_test_step_any</STRING>
+                  <STRING>any</STRING>
+                  <STRING>	set_obj : TEST_COMPILATION_IN_ANY_PHRASE</STRING>
+                  <STRING>	give_money : 10 : giver</STRING>
+                  <STRING>	system_msg : TEST_COMPILATION_SUPER_UNDER</STRING>
+                  <STRING>	set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>	talk_to : giver : TEST_COMPILATION_TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING>/any</STRING>
+                  <STRING># step_test_actions</STRING>
+                  <STRING>recv_money : 10000</STRING>
+                  <STRING>recv_fame : tribe_green_seed 1000</STRING>
+                  <STRING>recv_item : ictm1pd 1 10</STRING>
+                  <STRING>learn_action : abm_vampirism_00050 : giver</STRING>
+                  <STRING>learn_brick : BMOETMF00140 : giver</STRING>
+                  <STRING>add_compass_npc : giver</STRING>
+                  <STRING>add_compass_place : the_place_to_be</STRING>
+                  <STRING>teleport : the_place_to_spawn</STRING>
+                  <STRING>set_teleport : giver : the_place_to_tp : TEST_COMPILATION_MENU_TP</STRING>
+                  <STRING># step_failure_constrains_1</STRING>
+                  <STRING>failure</STRING>
+                  <STRING>/failure</STRING>
+                  <STRING># step_test_constrains_1</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING># step_test_constrains_2</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING># step_failure_constrains_2</STRING>
+                  <STRING>failure</STRING>
+                  <STRING>/failure</STRING>
+                  <STRING># step_test_constrains_3</STRING>
+                  <STRING>day_period : 0 0 ; 23 59</STRING>
+                  <STRING>season : winter</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING>season : none</STRING>
+                  <STRING>day_period : 0 0 ; 0 0</STRING>
+                  <STRING># step_talk_to_test_fail</STRING>
+                  <STRING>jump_point : step_talk_to_test_fail</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : TALK_TO_MENU_OVERLOAD</STRING>
+                  <STRING># step_dyn_chat_test_fail</STRING>
+                  <STRING>dyn_chat : giver : TEST_COMPILATION_TEST_FAIL : step_execute_end TEST_COMPILATION_DYN_ANSWER_GO_END : step_to_non_executed TEST_COMPILATION_DYN_ANSWER_GO_FAIL</STRING>
+                  <STRING># jump to step_talk_to_test_fail</STRING>
+                  <STRING>jump : step_talk_to_test_fail</STRING>
+                  <STRING># step_execute_end</STRING>
+                  <STRING>jump_point : step_execute_end</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_EXIT_SUCCESS</STRING>
+                  <STRING>end</STRING>
+                  <STRING># step_to_non_executed</STRING>
+                  <STRING>jump_point : step_to_non_executed</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_EXIT_FAILURE</STRING>
+                  <STRING>fail</STRING>
+                  <STRING># jump to step_not_executed</STRING>
+                  <STRING>jump : step_not_executed</STRING>
+                  <STRING># step_not_executed</STRING>
+                  <STRING>jump_point : step_not_executed</STRING>
+                  <STRING>learn_action : abm_vampirism_00050 : group</STRING>
+                  <STRING>recv_item : ictm1pd 1 10 : group</STRING>
+                  <STRING>ai_event : group_to_kill_group; 0</STRING>
+                  <STRING># step_test_parametre_phrase</STRING>
+                  <STRING>set_desc : TEST_COMPILATION_SET_DESC; good_guy</STRING>
+                  <STRING>talk_to : good_guy : TEST_COMPILATION_MENU_TALK_TO_FORGERON_2</STRING>
+                  <STRING>system_msg : EXISTING_MSG; good_guy; the_place_to_be</STRING>
+                  <STRING># step_13</STRING>
+                  <STRING>set_obj : TEST_COMPILATION_TALK_TO_CST</STRING>
+                  <STRING>talk_to : popol : TEST_COMPILATION_TALK_TO_CST_MENU</STRING>
+                  <STRING># step_any_14</STRING>
+                  <STRING>hide_obj</STRING>
+                  <STRING>set_obj : ANY_OVERLADED_OBJ</STRING>
+                  <STRING>recv_fame : matis -1234</STRING>
+                  <STRING>any</STRING>
+                  <STRING>	hide_obj</STRING>
+                  <STRING>	visit : place1</STRING>
+                  <STRING>	hide_obj</STRING>
+                  <STRING>	visit : place2</STRING>
+                  <STRING>	hide_obj</STRING>
+                  <STRING>	visit : place3</STRING>
+                  <STRING>	hide_obj</STRING>
+                  <STRING>	visit : place4</STRING>
+                  <STRING>/any</STRING>
+                  <STRING>recv_fame : matis 1234</STRING>
+                  <STRING># step_12</STRING>
+                  <STRING>talk_to : toto_the_forager</STRING>
+                  <STRING># step_15</STRING>
+                  <STRING>jump_point : step_15</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_SYSTEM_MSG; good_guy</STRING>
+                  <STRING># step_18</STRING>
+                  <STRING>jump_point : step_18</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_GROUP_SYS_MSG; &quot;les_bastards&quot;</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_PHRASE_SYS_MSG; amb0001</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_BRICK_SYS_MSG; brk001</STRING>
+                  <STRING>system_msg : TEST_COMPILATION_RACE_SYS_MSG; ragus</STRING>
+                  <STRING>wait_msg : the message from ia a long message in fact</STRING>
+                  <STRING>target_fauna : ckfb1</STRING>
+                  <STRING>jump : step_15</STRING>
+                  <STRING># step_dyn_chat_19</STRING>
+                  <STRING>dyn_chat :  :  : step_18  : step_15 </STRING>
+                  <STRING># jump to step_18</STRING>
+                  <STRING>jump : step_18</STRING>
+                  <STRING># jump to step_18</STRING>
+                  <STRING>jump : step_18</STRING>
+                  <STRING># jump to step_15</STRING>
+                  <STRING>jump : step_15</STRING>
+                  <STRING># step_default_params</STRING>
+                  <STRING>jump_point : step_default_params</STRING>
+                  <STRING>talk_to : giver : TEST_COMPILATION_TT_DEFAULT</STRING>
+                  <STRING>set_obj : TEST_COMPILATION_OVER_STRANGE_PARAM</STRING>
+                  <STRING>kill_fauna : chdfa1 1; chdfa2 10</STRING>
+                  <STRING># step_crash</STRING>
+                  <STRING>crash : fyros route_gouffre</STRING>
+                  <STRING>	recv_money : -1000</STRING>
+                  <STRING>	jump : step_default_params</STRING>
+                  <STRING>/crash</STRING>
+                  <STRING># step_param_order</STRING>
+                  <STRING>system_msg : THE_MSG_A_THEN_B; caaa; cbbb</STRING>
+                  <STRING>system_msg : THE_MSG_B_THEN_A; cbbb; caaa</STRING>
+                  <STRING># step_test_encyclo</STRING>
+                  <STRING>encyclo_unlock : album_1</STRING>
+                  <STRING># step_test_event_faction</STRING>
+                  <STRING>set_event_faction : the_event_faction</STRING>
+                  <STRING>chain_mission : NOT_DONE_MISSION : toto</STRING>
+                  <STRING>recv_money : itforage 10 0.5</STRING>
+                  <STRING>remove_compass_npc : toto</STRING>
+                  <STRING>remove_compass_place : the_place</STRING>
+                  <STRING># step_test_talk_to</STRING>
+                  <STRING>set_obj : TEST_COMPILATION_TALK_TO_OVLD; chdfa1</STRING>
+                  <STRING>talk_to : giver : TEST_COMPILATION_TALK_TO_TEXT; popol</STRING>
+                  <STRING># step_dyn_chat_26</STRING>
+                  <STRING>set_obj : TEST_COMPILATION_DYN_CHAT_TK_OV; chdfa1</STRING>
+                  <STRING>talk_to : giver : TEST_COMPILATION_DYN_CHAT_TK_MN; chdfa1</STRING>
+                  <STRING>dyn_chat : giver :  : step_char_26_yes </STRING>
+                  <STRING># step_chat_26_no</STRING>
+                  <STRING>end</STRING>
+                  <STRING># step_char_26_yes</STRING>
+                  <STRING>jump_point : step_char_26_yes</STRING>
+                  <STRING>end</STRING>
+                  <STRING></STRING>
+                </PROPERTY>
+                <CHILD TYPE="CPrimAlias">
+                  <ALIAS VALUE="1"/>
+                  <PROPERTY TYPE="string">
+                    <NAME>class</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                  <PROPERTY TYPE="string">
+                    <NAME>name</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                </CHILD>
+              </CHILD>
+              <CHILD TYPE="CPrimNode">
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>mission</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>DONE_MISSION</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string_array">
+                  <NAME>script</NAME>
+                  <STRING># script generated from 'test_compilateur.primitive'</STRING>
+                  <STRING></STRING>
+                  <STRING>#mission tags and pre-requisites</STRING>
+                  <STRING>replayable</STRING>
+                  <STRING>solo</STRING>
+                  <STRING>no_list</STRING>
+                  <STRING>not_proposed</STRING>
+                  <STRING>auto : DONE_MISSION_AUTO_MENU</STRING>
+                  <STRING></STRING>
+                  <STRING>#Variables declaration</STRING>
+                  <STRING>decl : bot : giver</STRING>
+                  <STRING>decl : bot : player</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING></STRING>
+                  <STRING>#pre-requisites</STRING>
+                  <STRING>req_encyclo_thema_neg : NEG_REG_THEMA_2</STRING>
+                  <STRING></STRING>
+                  <STRING>#script</STRING>
+                  <STRING>mission_title : DONE_MISSION_MISSION_TITLE</STRING>
+                  <STRING>mission_desc : DONE_MISSION_MISSION_DESC</STRING>
+                  <STRING># step_3</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : DONE_MISSION_PHRASE_TALK_TO</STRING>
+                  <STRING>recv_item : ictm1pd 1 50</STRING>
+                  <STRING>end</STRING>
+                  <STRING></STRING>
+                </PROPERTY>
+                <CHILD TYPE="CPrimAlias">
+                  <ALIAS VALUE="2"/>
+                  <PROPERTY TYPE="string">
+                    <NAME>class</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                  <PROPERTY TYPE="string">
+                    <NAME>name</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                </CHILD>
+              </CHILD>
+              <CHILD TYPE="CPrimNode">
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>mission</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>NOT_DONE_MISSION</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string_array">
+                  <NAME>script</NAME>
+                  <STRING># script generated from 'test_compilateur.primitive'</STRING>
+                  <STRING></STRING>
+                  <STRING>#mission tags and pre-requisites</STRING>
+                  <STRING>replayable</STRING>
+                  <STRING>solo</STRING>
+                  <STRING></STRING>
+                  <STRING>#Variables declaration</STRING>
+                  <STRING>decl : bot : giver</STRING>
+                  <STRING>decl : bot : player</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING></STRING>
+                  <STRING>#pre-requisites</STRING>
+                  <STRING></STRING>
+                  <STRING>#script</STRING>
+                  <STRING>mission_title : NOT_DONE_MISSION_MISSION_TITLE</STRING>
+                  <STRING>mission_desc : NOT_DONE_MISSION_MISSION_DESC</STRING>
+                  <STRING># step_3</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : NOT_DONE_MISSION_PHRASE_TALK_TO</STRING>
+                  <STRING>end</STRING>
+                  <STRING></STRING>
+                </PROPERTY>
+                <CHILD TYPE="CPrimAlias">
+                  <ALIAS VALUE="3"/>
+                  <PROPERTY TYPE="string">
+                    <NAME>class</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                  <PROPERTY TYPE="string">
+                    <NAME>name</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                </CHILD>
+              </CHILD>
+              <CHILD TYPE="CPrimNode">
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>mission</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>NOT_RUNNING_MISSION</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string_array">
+                  <NAME>script</NAME>
+                  <STRING># script generated from 'test_compilateur.primitive'</STRING>
+                  <STRING></STRING>
+                  <STRING>#mission tags and pre-requisites</STRING>
+                  <STRING>replayable</STRING>
+                  <STRING>solo</STRING>
+                  <STRING></STRING>
+                  <STRING>#Variables declaration</STRING>
+                  <STRING>decl : bot : giver</STRING>
+                  <STRING>decl : bot : player</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING></STRING>
+                  <STRING>#pre-requisites</STRING>
+                  <STRING></STRING>
+                  <STRING>#script</STRING>
+                  <STRING>mission_title : NOT_RUNNING_MISSION_MISSION_TITLE</STRING>
+                  <STRING>mission_desc : NOT_RUNNING_MISSION_MISSION_DESC</STRING>
+                  <STRING># step_3</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : NOT_RUNNING_MISSION_PHRASE_TALK_TO</STRING>
+                  <STRING>end</STRING>
+                  <STRING></STRING>
+                </PROPERTY>
+                <CHILD TYPE="CPrimAlias">
+                  <ALIAS VALUE="4"/>
+                  <PROPERTY TYPE="string">
+                    <NAME>class</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                  <PROPERTY TYPE="string">
+                    <NAME>name</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                </CHILD>
+              </CHILD>
+              <CHILD TYPE="CPrimNode">
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>mission</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>RUNNING_MISSION</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string_array">
+                  <NAME>script</NAME>
+                  <STRING># script generated from 'test_compilateur.primitive'</STRING>
+                  <STRING></STRING>
+                  <STRING>#mission tags and pre-requisites</STRING>
+                  <STRING>replayable</STRING>
+                  <STRING>solo</STRING>
+                  <STRING></STRING>
+                  <STRING>#Variables declaration</STRING>
+                  <STRING>decl : bot : giver</STRING>
+                  <STRING>decl : bot : player</STRING>
+                  <STRING>decl : bot : good_guy</STRING>
+                  <STRING></STRING>
+                  <STRING>#pre-requisites</STRING>
+                  <STRING></STRING>
+                  <STRING>#script</STRING>
+                  <STRING>mission_title : RUNNING_MISSION_MISSION_TITLE</STRING>
+                  <STRING>mission_desc : RUNNING_MISSION_MISSION_DESC</STRING>
+                  <STRING># step_3</STRING>
+                  <STRING>set_obj : TALK_TO_OBJ_OVERLOAD</STRING>
+                  <STRING>talk_to : giver : RUNNING_MISSION_PHRASE_TALK_TO</STRING>
+                  <STRING>end</STRING>
+                  <STRING></STRING>
+                </PROPERTY>
+                <CHILD TYPE="CPrimAlias">
+                  <ALIAS VALUE="5"/>
+                  <PROPERTY TYPE="string">
+                    <NAME>class</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                  <PROPERTY TYPE="string">
+                    <NAME>name</NAME>
+                    <STRING>alias</STRING>
+                  </PROPERTY>
+                </CHILD>
+              </CHILD>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimZone">
+          <PROPERTY TYPE="string">
+            <NAME>ai_activity</NAME>
+            <STRING>normal</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>ai_movement</NAME>
+            <STRING>stand_on_start_point</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>npc_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>innocent_victim</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>vertical_pos</NAME>
+            <STRING>auto</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="25"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>npc_group</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>innocent_victim_group</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimAlias">
+              <ALIAS VALUE="24"/>
+<!--@expanded-->
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_group_parameters</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>grp_parameters</NAME>
+                <STRING>attackable</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>parameters</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimPoint">
+              <PT X="4131.152344" Y="-3525.259521" Z="0.000000"/>
+              <ANGLE VALUE="0.647954"/>
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_bot</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>equipment</NAME>
+                <STRING>CH: 0 1 2 3</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>innocent_victim</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sheet_client</NAME>
+                <STRING>kami_preacher_b</STRING>
+              </PROPERTY>
+              <CHILD TYPE="CPrimAlias">
+                <ALIAS VALUE="23"/>
+<!--@expanded-->
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+              </CHILD>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimZone">
+          <PT X="4144.915527" Y="-3528.880127" Z="0.000000"/>
+          <PT X="4136.940430" Y="-3542.630127" Z="0.000000"/>
+          <PT X="4150.140625" Y="-3547.030029" Z="0.000000"/>
+          <PT X="4159.215332" Y="-3547.580078" Z="0.000000"/>
+          <PT X="4164.990723" Y="-3529.705078" Z="0.000000" SELECTED="true"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>npc_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>group_to_kill</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="22"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>bot_sheet_client</NAME>
+              <STRING>tribe_green_seed_diplomat_m_f</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>npc_group</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>count</NAME>
+              <STRING>5</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>group_to_kill_group</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimAlias">
+              <ALIAS VALUE="21"/>
+<!--@expanded-->
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_group_parameters</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>grp_parameters</NAME>
+                <STRING>attackable</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>parameters</STRING>
+              </PROPERTY>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimZone">
+          <PT X="4185.340332" Y="-3497.255127" Z="0.000000"/>
+          <PT X="4184.790527" Y="-3511.280029" Z="0.000000"/>
+          <PT X="4193.865723" Y="-3515.130127" Z="0.000000"/>
+          <PT X="4199.640625" Y="-3511.830078" Z="0.000000"/>
+          <PT X="4199.915527" Y="-3495.604980" Z="0.000000" SELECTED="true"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>npc_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>trykers_to_kill</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="20"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>bot_sheet_client</NAME>
+              <STRING>tribe_green_seed_wizard_m_f</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>npc_group</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>count</NAME>
+              <STRING>10</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>trykers_to_kill_group</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimAlias">
+              <ALIAS VALUE="19"/>
+<!--@expanded-->
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>alias</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>npc_group_parameters</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>grp_parameters</NAME>
+                <STRING>attackable</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>parameters</STRING>
+              </PROPERTY>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+    <CHILD TYPE="CPrimZone">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>fauna</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>fauna_2</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="18"/>
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>group_fauna</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>group_fauna_1</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="17"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="4126.658691" Y="-3484.626465" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>rest</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>rest</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="16"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="4131.608887" Y="-3502.776611" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>food</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>food</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="15"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="4146.458496" Y="-3485.726563" Z="0.000000"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>spawn</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>spawn</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="14"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>population</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>population_4</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimAlias">
+            <ALIAS VALUE="13"/>
+<!--@expanded-->
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>alias</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>people</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>count</NAME>
+              <STRING>5</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>creature_code</NAME>
+              <STRING>chdfa1</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>people_1</STRING>
+            </PROPERTY>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>people</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>count</NAME>
+              <STRING>5</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>creature_code</NAME>
+              <STRING>chdfa2</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>people_2</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>depositzone_list</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>depositzone_list_3</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimZone">
+        <PT X="4203.953125" Y="-3520.709961" Z="0.000000"/>
+        <PT X="4182.847168" Y="-3520.125488" Z="0.000000"/>
+        <PT X="4182.915527" Y="-3543.913086" Z="0.000000" SELECTED="true"/>
+        <PT X="4184.256348" Y="-3547.591309" Z="0.000000"/>
+        <PT X="4196.494141" Y="-3543.878662" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>auto_spawn_sources</NAME>
+          <STRING>true</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>depositzone</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>deposit_statquality_min</NAME>
+          <STRING>0</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string_array">
+          <NAME>exact_mp_item</NAME>
+          <STRING>m0246dxacb01</STRING>
+          <STRING>m0014dxacb01</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>region_majesticgarden_2</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>while_season_spring</NAME>
+          <STRING>true</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="12"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+    <CHILD TYPE="CPrimZone">
+      <PT X="4169.389648" Y="-3566.004639" Z="0.000000"/>
+      <PT X="4171.864746" Y="-3579.479736" Z="0.000000"/>
+      <PT X="4194.139648" Y="-3575.629639" Z="0.000000"/>
+      <PT X="4190.289551" Y="-3562.154541" Z="0.000000" SELECTED="true"/>
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>place</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>the_place_to_be</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimAlias">
+        <ALIAS VALUE="11"/>
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>alias</STRING>
+        </PROPERTY>
+      </CHILD>
+      <CHILD TYPE="CPrimPoint">
+        <PT X="4181.599609" Y="-3571.272705" Z="0.000000"/>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>teleport_spawn_zone</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>the_place_to_spawn</STRING>
+        </PROPERTY>
+      </CHILD>
+    </CHILD>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>

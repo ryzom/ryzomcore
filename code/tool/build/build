@@ -1,0 +1,440 @@
+#!/bin/sh
+
+###########################################################################
+# $Id: build,v 1.5 2002/05/21 15:44:16 valignat Exp $
+###########################################################################
+###########################################################################
+###########################################################################
+# BUILD:
+#
+#     This tool is aimed to help Nevrax programmers to manage the
+#     compilation of a "debug" and a "release" version of NeL, NeLNS,
+#     and Snowballs2 (http://www.nevrax.org) based on the same source
+#     code and with the possibility to not having to re-compile everything
+#     each time the compilation mode (debug/release) change.
+#
+#     This script is a simple wrapper around the 'bootstrap'/'configure'
+#     commands ('build init nel/nelns/snowballs ...'), and the 'make'
+#     command ('build nel/nelns/snowballs ...').
+#
+#     Example of use:
+#
+#         $ build mode debug dynamic quiet
+#         $ build init nel --enable-sound --enable-georges --enable-ai
+#         $ build nel all install
+#         $ build init nelns
+#         $ build nelns all install
+#         $ build init snowballs
+#         $ build snowballs all install
+#
+#     As you can see there is no need to specify the installed directory
+#     of NeL, etc ... These informations are automaticly provided to the
+#     configure script.
+#
+#     Check the following variables to get an idea of the place of the
+#     source code, object, and installed files.
+#
+#     In quiet mode it use a perl script named 'buildquiet' which
+#     "cleanup" the 'make' command output to only print the compiled
+#     file name instead of the compilation command line.
+#
+###########################################################################
+
+
+###########################################################################
+###########################################################################
+###########################################################################
+# VARIABLES
+
+# Set the source directory. Use the environment SRC_DIR variable, if it's
+# not set, use $HOME/cvs as a default value
+SRC_DIR="$HOME/cvs"
+
+# Build diretories
+BUILD_DEBUG="$HOME/build/debug"
+BUILD_RELEASE="$HOME/build/release"
+
+# Install directories
+INSTALL_DEBUG="$HOME/install/debug"
+INSTALL_RELEASE="$HOME/install/release"
+
+# PKG config
+STLPORT_DIR='/home/installs/STLport-4.5.3'
+PYTHON_VERSION=2
+
+# Compiler options
+BUILD_CFLAGS="$CFLAGS -pipe"
+BUILD_CXXFLAGS="$CXXFLAGS -pipe"
+
+# Configure options
+CONFIGURE_OPT="--disable-xmltest --enable-maintainer-mode"
+
+###########################################################################
+
+# Flag files associated to each mode
+DEBUG_FILE="$HOME/.mode_debug"
+STATIC_FILE="$HOME/.mode_static"
+DYNAMIC_FILE="$HOME/.mode_dynamic"
+SILENT_FILE="$HOME/.mode_silent"
+
+# Specify the source code directory of each projects
+NEL_SRC="$SRC_DIR/code/nel"
+SNOWBALLS_SRC="$SRC_DIR/code/snowballs2"
+NELNS_SRC="$SRC_DIR/code/nelns"
+
+
+###########################################################################
+###########################################################################
+###########################################################################
+# FUNCTIONS
+
+
+###########################################################################
+# Print command usage
+printUsage()
+{
+    echo ""
+    echo "Usage: $BUILD_CMD mode [debug] [static] [dynamic] [quiet]"
+    echo "                 debug   -> turn ON/OFF debug compilation"
+    echo "                 static  -> turn ON/OFF static linking"
+    echo "                 dynamic -> turn ON/OFF dynamic linking"
+    echo "                 quiet   -> turn ON/OFF quiet  compilation"
+    echo ""
+    echo "Usage: $BUILD_CMD [init] [nel | nelns | snowballs] [ARGS]"
+    echo "                 init                  -> init. the build system"
+    echo "                 nel, nelns, snowballs -> module to init./compile"
+    echo ""
+    echo "                 ARGS with init are passed to the 'configure' script"
+    echo "                      otherwise they are passed to 'make'"
+    echo ""
+}
+
+
+###########################################################################
+# Print status
+printMode()
+{
+	echo ""
+	echo "Compilation modes :"
+	echo ""
+	echo "   Debug mode      : $DEBUG_MODE"
+	echo ""
+	echo "   Static linking  : $STATIC_MODE"
+	echo "   Dynamic linking : $DYNAMIC_MODE"
+	echo ""
+	echo "   Quiet compilation  : $SILENT_MODE"
+	echo ""
+}
+
+
+###########################################################################
+# Print a message error (given in argument) and exit.
+printError()
+{
+    local MSG=$1
+
+    echo "*** ERROR: $MSG ***" >&2
+
+    exit 1
+}
+
+
+###########################################################################
+# Get the specific mode value and set the corresponding variable
+getMode()
+{
+    local VAR=$1
+    local FILE=$2
+
+    if test -f "$FILE"
+    then
+        eval $VAR=ON
+    else
+        eval $VAR=OFF
+    fi
+}
+
+
+###########################################################################
+# Set a specific mode to ON if it's OFF, and to OFF if its ON
+setMode()
+{
+    local VAR=$1
+    local FILE=$2
+    local OLD_VALUE NEW_VALUE
+
+    # Get the current mode value
+    OLD_VALUE=$(eval echo \$$VAR)
+
+    if test X"$OLD_VALUE" = "XOFF"
+    then
+        # Set the MODE to ON in case it's OFF
+        NEW_VALUE=ON
+        touch -f $FILE || printError "cannot create mode file: $FILE"
+    else
+        # Set the MODE to OFF in case it's ON
+        NEW_VALUE=OFF
+        rm -f $FILE || printError "cannot delete mode file: $FILE"
+    fi 
+
+    eval $VAR=$NEW_VALUE
+}
+
+
+###########################################################################
+###########################################################################
+###########################################################################
+
+BUILD_CMD=`basename $0`
+
+###########################################################################
+# Get current the mode settings
+getMode DEBUG_MODE   $DEBUG_FILE
+getMode STATIC_MODE  $STATIC_FILE
+getMode DYNAMIC_MODE $DYNAMIC_FILE
+getMode SILENT_MODE  $SILENT_FILE
+
+
+###########################################################################
+###########################################################################
+###########################################################################
+# BUILDMODE / BUILD MODE call
+
+if test "$BUILD_CMD" = 'buildmode' -o "$1" = 'mode'
+then
+
+    if test "$1" = 'mode'
+    then
+        shift
+    fi
+
+    # Print the mode values and exit if there is no argument
+    if test $# -eq 0
+    then
+        printMode
+        exit 0
+    fi
+
+    while test $# -gt 0
+    do
+        case $1 in
+
+           debug)
+               setMode DEBUG_MODE   $DEBUG_FILE
+               ;;
+
+           static) 
+               setMode STATIC_MODE  $STATIC_FILE
+               ;;
+
+           dynamic)
+               setMode DYNAMIC_MODE $DYNAMIC_FILE
+               ;;
+
+           quiet|silent)
+               setMode SILENT_MODE $SILENT_FILE
+               ;;
+
+           *)  echo "*** ERROR : $1 : Unknown building mode ***" >&2
+               printUsage
+               exit 1
+               ;;
+
+        esac
+
+        shift
+
+    done
+
+    printMode
+
+    exit 0 
+
+fi
+
+
+###########################################################################
+###########################################################################
+# Default call: BUILD
+
+
+###########################################################################
+# Set the LD_LIBRARY_PATH variable to use the STLPORT
+if test -n "$STLPORT_DIR"
+then
+    CONFIGURE_OPT="$CONFIGURE_OPT --with-stlport=$STLPORT_DIR"
+
+    if test -z "$LD_LIBRARY_PATH"
+    then
+        LD_LIBRARY_PATH="$STLPORT_DIR/lib"
+    else
+        LD_LIBRARY_PATH="$STLPORT_DIR/lib:$LD_LIBRARY_PATH"
+    fi
+fi
+
+# Set the configure option to use the rigth python version
+if test -n "$PYTHON_VERSION"
+then
+    CONFIGURE_OPT="$CONFIGURE_OPT --with-python-version=$PYTHON_VERSION"
+fi
+
+
+###########################################################################
+
+echo ""
+echo "Using source directory : $SRC_DIR"
+
+# If we are in debug mode we use the debug build and install directories
+# Otherwise we use the release build and install directories
+if test "$DEBUG_MODE" = 'ON'
+then
+    BUILD_DIR=$BUILD_DEBUG
+    INSTALL_DIR=$INSTALL_DEBUG
+    CONFIGURE_OPT="$CONFIGURE_OPT --with-debug"
+    PATH="$INSTALL_DEBUG/bin:$PATH"
+    LD_LIBRARY_PATH="$INSTALL_DEBUG/lib:LD_LIBRARY_PATH"
+else
+    BUILD_DIR=$BUILD_RELEASE
+    INSTALL_DIR=$INSTALL_RELEASE
+    BUILD_CFLAGS="$BUILD_CFLAGS -march=pentium"
+    BUILD_CXXFLAGS="$BUILD_CXXFLAGS -march=pentium"
+    PATH="$INSTALL_RELEASE/bin:$PATH"
+    LD_LIBRARY_PATH="$INSTALL_RELEASE/lib:$LD_LIBRARY_PATH"
+fi
+export PATH
+export LD_LIBRARY_PATH
+
+# Set where to install and where find NeL library files
+CONFIGURE_OPT="$CONFIGURE_OPT --prefix=$INSTALL_DIR --with-nel=$INSTALL_DIR"
+
+# Get if it's a static and/or a dynamic compilation
+if test "$STATIC_MODE" != "$DYNAMIC_MODE"
+then
+    if test "$STATIC_MODE" = 'ON'
+    then
+        CONFIGURE_OPT="--enable-static=yes --enable-shared=no $CONFIGURE_OPT"
+    fi
+
+    if test "$DYNAMIC_MODE" = 'ON'
+    then
+        CONFIGURE_OPT="--enable-static=no --enable-shared=yes $CONFIGURE_OPT"
+    fi
+else
+    if test "$DYNAMIC_MODE" = 'OFF' -a "$STATIC_MODE" = 'OFF'
+    then
+        echo "*** ERROR: You must set building of static and/or dynamic libraries ***" >&2
+        printUsage
+        exit 1
+    else
+        echo "*** WARNING: Building both static and dynamic libraries ***" >&2
+    fi
+fi
+
+if test $# -eq 0
+then
+    echo "*** ERROR: You have to decide what to do !... ***" >&2
+    printUsage
+    exit 1
+fi
+
+
+case $1 in
+
+    # Modules initialisation
+    init)
+        BUILD_ARG=$2
+
+        buildmode
+
+        case "$BUILD_ARG" in
+
+            nel|nelns|snowballs)
+                # Create the build directories
+                if test ! -d $BUILD_DIR/$BUILD_ARG
+                then
+                    echo -n "Creating $BUILD_DIR/$ARG ..."
+                    mkdir -p $BUILD_DIR/$BUILD_ARG \
+                        || printError "cannot create the $BUILD_DIR/$BUILD_ARG directory"
+                    echo " done"
+                fi
+
+                # Erase the already existing configuration cache
+                rm -f $BUILD_DIR/$BUILD_ARG/config.cache \
+                      $BUILD_DIR/$BUILD_ARG/config.h
+
+	            shift
+	            shift
+
+                # Run the bootstrap script
+	            cd  $SRC_DIR/code/$BUILD_ARG \
+                    || printError "You must get the source files first !..."
+                ./bootstrap
+
+                # Run the configure script
+	            cd $BUILD_DIR/$BUILD_ARG 
+                CFLAGS="$BUILD_CFLAGS" CXXFLAGS="$BUILD_CXXFLAGS" \
+                  $SRC_DIR/code/$BUILD_ARG/configure $CONFIGURE_OPT $* || exit 1
+            ;;
+
+        *)  echo "*** ERROR: $BUILD_ARG : Unknown module ***" >&2
+            printUsage
+            exit 1
+            ;;
+
+        esac
+        ;;
+
+    # Modules compilation
+    nel|nelns|snowballs)
+        BUILD_MODULE=$1
+        shift
+
+        # VPATH compilation and NeL include's Makefile.am command
+        # '$(wildcard *.h)' doesn't like each other very much. So the
+        # include files must be copied in NeL's compilation directory
+        # before each build (in case one or several header files changed).
+        if test "$BUILD_MODULE" = "nel"
+        then
+            # Delete any existing include file in the compilation
+            # directory to avoid any kind of conflict
+            if test -d $BUILD_DIR/nel/include/nel
+            then
+                cd $BUILD_DIR/nel/include/nel
+                find . -type f -name \*.h -exec rm -rf \{\} \;
+            else
+                printError "You must get the source files first !..."
+            fi
+
+            # Copy the headers
+            mkdir -p $BUILD_DIR/nel \
+                && cp -Rfdp $NEL_SRC/include $BUILD_DIR/nel
+
+            # Remove from the compilation directory the useless CVS
+            # informations
+            cd $BUILD_DIR/nel/include \
+                && find . -prune -type d -name CVS -exec rm -rf \{\} \;
+
+        fi
+
+        cd $BUILD_DIR/$BUILD_MODULE || exit 1
+
+        # Launch make in silent mode or not, depending of the config.
+        if test $SILENT_MODE = 'ON'
+        then
+            make $* | buildquiet
+        else
+            make $*
+        fi
+        ;;
+
+    *)  echo "*** ERROR: $1 : Unknown argument ***" >&2
+        printUsage
+        exit 1
+        ;;
+
+esac
+
+exit 0
+
+# End of file
+

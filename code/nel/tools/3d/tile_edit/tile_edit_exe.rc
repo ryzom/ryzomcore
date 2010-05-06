@@ -1,0 +1,429 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TERRITOIRE DIALOG  0, 0, 116, 162
+STYLE DS_SETFONT | WS_CHILD | WS_BORDER
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Territorial manager",IDC_BUTTON_GO,20,68,77,15
+END
+
+IDD_CHOOSE_VEGET DIALOG  0, 0, 186, 58
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Choose VegetSet"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,37,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,37,50,14
+    PUSHBUTTON      "Browse...",IDC_BROWSE,7,7,172,16
+    PUSHBUTTON      "Reset",IDRESET,69,37,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_TERRITOIRE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 109
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 155
+    END
+
+    IDD_CHOOSE_VEGET, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 51
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,6,0,0
+ PRODUCTVERSION 0,6,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileVersion", "0.6.0.0"
+            VALUE "InternalName", "tile_edit_exe"
+            VALUE "OriginalFilename", "tile_edit.exe"
+            VALUE "ProductName", "NeL Tilebank Editor"
+            VALUE "ProductVersion", "0.6.0.0"
+			VALUE "Comments", "http://www.opennel.org/"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "nevraxpill.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_CLASS_NAME          "Tile_edit"
+    IDS_PARAMS              "Parameters"
+    IDS_SPIN                "Spin"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TERRITOIREMANAGER DIALOGEX 0, 0, 170, 274
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Tile bank manager"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Quit",IDOK,5,215,50,14
+    PUSHBUTTON      "Add land",IDC_ADD_TERRITOIRE,115,5,49,14
+    PUSHBUTTON      "Del land",IDC_REMOVE_TERRITOIRE,115,25,50,15
+    LISTBOX         IDC_LIST_TERRITOIRE,5,5,105,55,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Edit land",IDC_EDIT_TERRITOIRE,115,45,50,15
+    PUSHBUTTON      "Load",ID_SELECT,5,235,50,14
+    PUSHBUTTON      "Save",ID_SAVE,61,215,50,14,WS_DISABLED
+    PUSHBUTTON      "Save as...",ID_SAVE_AS,61,235,50,14
+    PUSHBUTTON      "Add tile set",IDC_ADD_TILESET,115,65,49,14
+    PUSHBUTTON      "Del tile set",IDC_REMOVE_TILESET,115,86,50,15
+    PUSHBUTTON      "Edit tile set",IDC_EDIT_TILESET,115,105,50,15
+    LISTBOX         IDC_TILE_SET,5,65,105,145,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Choose Veget",IDC_CHOOSE_VEGET,115,126,50,15
+    PUSHBUTTON      "Up",IDC_EDIT_MONTER,115,145,50,15
+    PUSHBUTTON      "Down",IDC_EDIT_DESCENDRE,115,166,50,15
+    CTEXT           "Absolute path:",IDC_STATIC,5,255,50,15,SS_CENTERIMAGE
+    PUSHBUTTON      "",IDC_PATH,60,255,105,15
+    PUSHBUTTON      "Export...",ID_EXPORT,115,235,50,14
+    LTEXT           "Surface data:",IDC_STATIC,115,185,50,10
+    EDITTEXT        IDC_SURFACE_DATA,115,195,50,15,ES_AUTOHSCROLL | ES_NUMBER
+END
+
+IDD_GETSTR DIALOG  0, 0, 134, 46
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Enter a name"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_ADD_TERRITOIRE,7,7,120,13,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,7,25,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,77,25,50,14
+END
+
+IDD_BROWSER DIALOGEX 0, 0, 482, 503
+STYLE DS_SETFONT | DS_CENTER | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_ACCEPTFILES
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Diffuse",IDC_JOUR,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,20,45,8
+    CONTROL         "Additive",IDC_NUIT,"Button",BS_AUTORADIOBUTTON,15,30,42,8
+    CONTROL         "Alpha",IDC_ALPHA,"Button",BS_AUTORADIOBUTTON,15,40,45,8
+    GROUPBOX        "Texture",IDC_STATIC,5,5,65,50
+    GROUPBOX        "Size",IDC_STATIC,5,60,65,50
+    CONTROL         "Small",IDC_ZOOM1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,75,35,8
+    CONTROL         "Normal",IDC_ZOOM2,"Button",BS_AUTORADIOBUTTON,15,85,42,8
+    CONTROL         "Big",IDC_ZOOM3,"Button",BS_AUTORADIOBUTTON,15,95,25,8
+    DEFPUSHBUTTON   "Ok",IDC_OK,5,370,65,15
+    PUSHBUTTON      "Cancel",IDC_CANCEL,5,389,65,16
+    GROUPBOX        "Texte info",IDC_STATIC,5,115,65,40
+    CONTROL         "Index",IDC_INFONUM,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,130,43,10
+    CONTROL         "File name",IDC_FILENAME,"Button",BS_AUTORADIOBUTTON,15,140,43,9
+    CONTROL         "",IDC_VIEW,"Static",SS_GRAYFRAME,75,10,400,475,WS_EX_ACCEPTFILES | WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Update tiles",IDC_OK2,5,410,65,16
+    GROUPBOX        "Tiles",IDC_STATIC,5,160,65,60
+    CONTROL         "128 x 128",IDC_128X128,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,175,45,8
+    CONTROL         "256 x 256",IDC_ZOOM5,"Button",BS_AUTORADIOBUTTON,15,185,45,8
+    CONTROL         "Transitions",IDC_ZOOM6,"Button",BS_AUTORADIOBUTTON,15,195,50,8
+    PUSHBUTTON      "Batch load...",IDC_BATCH_LOAD,5,431,65,16
+    GROUPBOX        "Subtile set",IDC_STATIC,5,225,65,140
+    CONTROL         "Group 0",IDC_SUBGROUP0,"Button",BS_AUTO3STATE | WS_TABSTOP,15,240,45,8
+    CONTROL         "Group 1",IDC_SUBGROUP1,"Button",BS_AUTO3STATE | WS_TABSTOP,15,250,45,8
+    CONTROL         "Group 2",IDC_SUBGROUP2,"Button",BS_AUTO3STATE | WS_TABSTOP,15,260,45,8
+    CONTROL         "Group 3",IDC_SUBGROUP3,"Button",BS_AUTO3STATE | WS_TABSTOP,15,270,45,8
+    CONTROL         "Displace",IDC_DISPLACE,"Button",BS_AUTORADIOBUTTON,15,205,50,8
+    CONTROL         "Group 4",IDC_SUBGROUP4,"Button",BS_AUTO3STATE | WS_TABSTOP,15,280,45,8
+    CONTROL         "Group 5",IDC_SUBGROUP5,"Button",BS_AUTO3STATE | WS_TABSTOP,15,290,45,8
+    CONTROL         "Group 6",IDC_SUBGROUP6,"Button",BS_AUTO3STATE | WS_TABSTOP,15,300,45,8
+    CONTROL         "Group 7",IDC_SUBGROUP7,"Button",BS_AUTO3STATE | WS_TABSTOP,15,310,45,8
+    CONTROL         "Group 8",IDC_SUBGROUP8,"Button",BS_AUTO3STATE | WS_TABSTOP,15,320,45,8
+    CONTROL         "Group 9",IDC_SUBGROUP9,"Button",BS_AUTO3STATE | WS_TABSTOP,15,330,45,8
+    CONTROL         "Group 10",IDC_SUBGROUP10,"Button",BS_AUTO3STATE | WS_TABSTOP,15,340,45,8
+    CONTROL         "Group 11",IDC_SUBGROUP11,"Button",BS_AUTO3STATE | WS_TABSTOP,15,350,45,8
+    PUSHBUTTON      "Export border...",IDC_EXPORT_BORDER,5,450,65,16
+    PUSHBUTTON      "Import border...",IDC_IMPORT_BORDER2,5,470,65,16
+    CONTROL         "Oriented",IDC_ORIENTED,"Button",BS_AUTO3STATE | WS_TABSTOP,7,489,63,8
+END
+
+IDD_GROUPE DIALOG  0, 0, 225, 146
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Group manager"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOKGROUP,170,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCELGROUP,170,25,50,14
+    PUSHBUTTON      "Add",IDC_ADD_GROUP,170,105,49,14
+    PUSHBUTTON      "Remove",IDC_REMOVE_GROUP,170,125,49,15
+    LISTBOX         IDC_LISTGROUP,5,5,160,135,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Get",IDC_GETFLAG,170,55,49,14
+    PUSHBUTTON      "Select",IDC_SETFLAG,170,85,49,15
+END
+
+IDD_CUSTOM DIALOG  0, 0, 225, 83
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Custom"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,168,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,168,24,50,14
+    CONTROL         "or",IDC_OR,"Button",BS_AUTORADIOBUTTON | WS_GROUP,171,44,39,9
+    CONTROL         "and",IDC_AND,"Button",BS_AUTORADIOBUTTON,171,56,40,9
+END
+
+IDD_VIEWPOPUP DIALOG  0, 0, 196, 183
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "",IDC_BRIGHT,185,11,11,162
+    PUSHBUTTON      "",IDC_BLEFT,0,11,11,162
+    PUSHBUTTON      "",IDC_BTOP,11,0,174,11
+    PUSHBUTTON      "",IDC_BBOTTOM,11,173,174,10
+END
+
+IDD_COLUMN DIALOGEX 0, 0, 220, 146
+STYLE DS_SETFONT | DS_CENTERMOUSE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+END
+
+IDD_EDIT_LIST DIALOG  0, 0, 185, 114
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,5,95,40,14
+    PUSHBUTTON      "Cancel",IDCANCEL,140,95,40,14
+    LISTBOX         IDC_LIST1,5,5,175,65,LBS_SORT | LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO1,5,75,175,115,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add",ID_ADD,50,95,40,14
+    PUSHBUTTON      "Del",ID_DEL,95,95,40,14
+END
+
+IDD_DIALOG1 DIALOG  0, 0, 230, 66
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select the rotation used to import your alpha tile"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "0",ID_ROT0,5,35,40,25
+    PUSHBUTTON      "Cancel",IDCANCEL,185,35,40,25
+    PUSHBUTTON      "1",ID_ROT1,50,35,40,25
+    PUSHBUTTON      "2",ID_ROT2,95,35,40,25
+    PUSHBUTTON      "3",ID_ROT3,140,35,39,25
+    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,10,5,31,26
+    CONTROL         129,IDC_STATIC,"Static",SS_BITMAP,55,5,28,28
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,100,5,31,26
+    CONTROL         131,IDC_STATIC,"Static",SS_BITMAP,145,5,31,26
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_TERRITOIREMANAGER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+    END
+
+    IDD_GETSTR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 127
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 39
+    END
+
+    IDD_BROWSER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 474
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 497
+    END
+
+    IDD_GROUPE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 139
+    END
+
+    IDD_CUSTOM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+
+    IDD_EDIT_LIST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 178
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 107
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSOR1             CURSOR                  "cursor1.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP                  "tile32_32.bmp"
+IDB_BITMAP2             BITMAP                  "rot0.bmp"
+IDB_BITMAP3             BITMAP                  "rot1.bmp"
+IDB_BITMAP4             BITMAP                  "rot2.bmp"
+IDB_BITMAP5             BITMAP                  "rot3.bmp"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

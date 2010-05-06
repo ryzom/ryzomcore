@@ -1,0 +1,279 @@
+<generator header_tag="MODULE_ADMIN_ITF_H">
+
+	<!-- Nel includes -->
+	<include file="nel/misc/sstring.h"/>
+	<include file="nel/misc/md5.h"/>
+	<include file="nel/net/module_message.h"/>
+
+	<!-- Local includes -->
+	<include file="server_patch_types.h"/>
+	<include file="file_manager.h"/>
+
+	<namespace name="PATCHMAN">
+
+		<module_interface name="CFileReceiver">
+
+			<method name="setupSubscriptions" msg="FR_SETUP_SUBS">
+				<doc line=""/>
+			</method>
+
+			<method name="cbFileInfo" msg="FR_FILE_INFO">
+				<doc line=""/>
+
+				<param type="TFileInfoVector"	name="files"		byref="true" serial="Cont"/>
+			</method>
+
+			<method name="cbFileData" msg="FR_FILE_DATA">
+				<doc line=""/>
+
+				<param type="std::string"		name="fileName"		byref="true"/>
+				<param type="uint32"			name="startOffset"	/>
+				<param type="NLNET::TBinBuffer"	name="data"			byref="true"/>
+			</method>
+
+			<method name="cbFileDataFailure" msg="FR_FILE_ERR">
+				<doc line=""/>
+
+				<param type="std::string"		name="fileName"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+		<module_interface name="CFileRepository">
+
+			<method name="requestFileInfo" msg="FR_REQUEST_INFO">
+				<doc line="Request info concerning a particular file"/>
+
+				<param type="NLMISC::CSString"	name="fileName"		byref="true"/>
+			</method>
+
+			<method name="requestFileData" msg="FR_REQUEST_DATA">
+				<doc line="Request a data block for a particular file"/>
+
+				<param type="NLMISC::CSString"	name="fileName"		byref="true"/>
+				<param type="uint32"			name="startOffset"				/>
+				<param type="uint32"			name="numBytes"					/>
+			</method>
+
+			<method name="getInfo" msg="FR_GET_INFO">
+				<doc line="Ask for the info concerning files matching given filespec"/>
+
+				<param type="NLMISC::CSString"	name="fileSpec"		byref="true"/>
+			</method>
+
+			<method name="subscribe" msg="FR_SUBSCRIBE">
+				<doc line="Ask for the info concerning files matching given filespec to be forwarded to me now"/>
+				<doc line="and for updates to be sent to me as they are generated"/>
+
+				<param type="NLMISC::CSString"	name="fileSpec"		byref="true"/>
+			</method>
+
+			<method name="unsubscribe" msg="FR_UNSUBSCRIBE">
+				<doc line="Cancel subscription for given filespec"/>
+
+				<param type="NLMISC::CSString"	name="fileSpec"		byref="true"/>
+			</method>
+
+			<method name="unsubscribeAll" msg="FR_UNSUBSCRIBE_ALL">
+				<doc line="Cancel all subscriptions for given filespec"/>
+			</method>
+
+		</module_interface>
+
+		<module_interface name="CAdministeredModuleBase">
+
+			<method name="executeCommand" msg="ADMIN_EXEC">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to request execution of a command"/>
+
+				<param type="NLMISC::CSString"	name="originator"	byref="true"/>
+				<param type="NLMISC::CSString"	name="cmdline"		byref="true"/>
+			</method>
+
+			<method name="installVersion" msg="ADMIN_SETNEXT">
+				<doc line=""/>
+
+				<param type="NLMISC::CSString"	name="domainName"	byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+
+			<method name="launchVersion" msg="ADMIN_SETLIVE">
+				<doc line=""/>
+
+				<param type="NLMISC::CSString"	name="domainName"	byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+		</module_interface>
+
+
+		<module_interface name="CServerPatchTerminal">
+
+			<method name="declareState" msg="SPT_STATE">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to declare the state of a named module"/>
+				<doc line="This message is sent by the SPM for each connected SP / RE / RR type module on connection of SPT to SPM"/>
+				<doc line="This message is also sent by the SPM for each type the SPM receives a state update from a SP / RE / RR type module"/>
+
+				<param type="NLMISC::CSString"	name="moduleName"	byref="true"/>
+				<param type="NLMISC::CSString"	name="state"		byref="true"/>
+			</method>
+
+			<method name="declareModuleDown" msg="SPT_MODULEDOWN">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to declare module down for a connected SPA / SPR / SPB type module"/>
+
+				<param type="NLMISC::CSString"	name="moduleName"	byref="true"/>
+			</method>
+
+			<method name="declareVersionName" msg="SPT_VERSION_NAME">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to define a named version"/>
+
+				<param type="NLMISC::CSString"	name="versionName"	byref="true"/>
+				<param type="uint32"			name="clientVersion"			/>
+				<param type="uint32"			name="serverVersion"			/>
+			</method>
+
+			<method name="declareDomainInfo" msg="SPT_DOMAIN_INFO">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to give info on a named domain"/>
+
+				<param type="NLMISC::CSString"	name="domainName"	byref="true"/>
+				<param type="uint32"			name="installVersion"			/>
+				<param type="uint32"			name="launchVersion"			/>
+			</method>
+
+			<method name="ackVersionChange" msg="SPT_VERSION_ACK">
+				<doc line=""/>
+				<doc line="Message sent by SPM module to acknowledge a version change attempt"/>
+
+				<param type="NLMISC::CSString"	name="domainName"	byref="true"/>
+				<param type="bool"				name="success"					/>
+				<param type="NLMISC::CSString"	name="comment"		byref="true"/>
+			</method>
+			
+			<method name="setInstallVersion" msg="SPT_SETNEXT">
+				<doc line=""/>
+				<doc line="Message sent by SPM to inform us of the current installed version for a given domain"/>
+
+				<param type="NLMISC::CSString"	name="domain"		byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+			
+			<method name="setLaunchVersion" msg="SPT_SETLIVE">
+				<doc line=""/>
+				<doc line="Message sent by SPM to inform us of the current live version for a given domain"/>
+
+				<param type="NLMISC::CSString"	name="domain"		byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+			
+			<method name="executedCommandAck" msg="SPT_EXEC_ACK">
+				<doc line=""/>
+				<doc line="Message sent by SPM with result of command issuued via executeCommandOnModules()"/>
+
+				<param type="NLMISC::CSString"	name="result"		byref="true"/>
+			</method>
+
+			<method name="executedCommandResult" msg="SPT_EXEC_RESULT">
+				<doc line=""/>
+				<doc line="Message sent by SPM with result of command issuued via executeCommandOnModules()"/>
+
+				<param type="NLMISC::CSString"	name="originator"	byref="true"/>
+				<param type="NLMISC::CSString"	name="commandline"	byref="true"/>
+				<param type="NLMISC::CSString"	name="result"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+		<module_interface name="CServerPatchManager">
+
+			<method name="registerAdministeredModule" msg="SPM_REGISTER">
+				<doc line=""/>
+				<doc line="Message sent by an administered module to register"/>
+
+				<param type="bool"			name="requireApplierUpdates"	/>
+				<param type="bool"			name="requireTerminalUpdates"	/>
+				<param type="bool"			name="requireDepCfgUpdates"		/>
+				<param type="bool"			name="isAdministered"			/>
+			</method>
+
+			<method name="requestRefresh" msg="SPM_REFRESH">
+				<doc line=""/>
+				<doc line="Message sent by SPT module to request a refresh of state info etc"/>
+			</method>
+
+			<method name="setInstallVersion" msg="SPM_SETNEXT">
+				<doc line=""/>
+				<doc line="Message sent by SPT module to request a change of install version for a given domain"/>
+				<doc line="This message is forwarded to all SPA modules of the given domain"/>
+
+				<param type="NLMISC::CSString"	name="domain"		byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+
+			<method name="setLaunchVersion" msg="SPM_SETLIVE">
+				<doc line=""/>
+				<doc line="Message sent by SPT module to request a change of launch version for a given domain"/>
+				<doc line="This message is forwarded to all SPA modules of the given domain"/>
+
+				<param type="NLMISC::CSString"	name="domain"		byref="true"/>
+				<param type="uint32"			name="version"		/>
+			</method>
+
+			<method name="declareState" msg="SPM_STATE">
+				<doc line=""/>
+				<doc line="Message sent by SPR / SPB / SPA type modules to declare their states"/>
+				<doc line="This message is forwarded to all connected SPT modules"/>
+
+				<param type="NLMISC::CSString"	name="state"		byref="true"/>
+			</method>
+
+			<method name="declareVersionName" msg="SPM_VERSION_NAME">
+				<doc line=""/>
+				<doc line="Message sent by SPT module to define a new named version"/>
+
+				<param type="NLMISC::CSString"	name="versionName"	byref="true"/>
+				<param type="uint32"			name="clientVersion"			/>
+				<param type="uint32"			name="serverVersion"			/>
+			</method>
+
+			<method name="executeCommandOnModules" msg="SPM_EXEC">
+				<doc line=""/>
+				<doc line="Message sent by SPT module to request execution of a command on one or more modules"/>
+				<doc line="Note that the 'target' parameter may be a wildcard"/>
+
+				<param type="NLMISC::CSString"	name="target"		byref="true"/>
+				<param type="NLMISC::CSString"	name="commandline"	byref="true"/>
+			</method>
+
+			<method name="executedCommandResult" msg="SPM_EXEC_RESULT">
+				<doc line=""/>
+				<doc line="Message with result of command issuued via executeCommandOnSPA()"/>
+
+				<param type="NLMISC::CSString"	name="originator"	byref="true"/>
+				<param type="NLMISC::CSString"	name="commandline"	byref="true"/>
+				<param type="NLMISC::CSString"	name="result"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+		<module_interface name="CDeploymentConfigurationSynchroniser">
+
+			<method name="requestSync" msg="DEPCFG_REQUEST">
+				<doc line=""/>
+				<doc line="Request for a copy of another module's CDeploymentConfiguration singleton"/>
+			</method>
+
+			<method name="sync" msg="DEPCFG_SYNC">
+				<doc line=""/>
+				<doc line="A copy of the data from the CDeploymentConfiguration singleton"/>
+
+				<param type="NLNET::TBinBuffer"	name="dataBlob"	byref="true"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+
+</generator>

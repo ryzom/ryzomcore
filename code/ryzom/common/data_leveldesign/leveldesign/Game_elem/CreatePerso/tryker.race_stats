@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.18 $" State="modified">
+  <PARENT Filename="_parent_attacks.race_stats"/>
+  <STRUCT>
+    <ATOM Name="Race" Value="tryker"/>
+    <STRUCT Name="Characteristics">
+      <ATOM Name="Constitution" Value="30"/>
+      <ATOM Name="Intelligence" Value="30"/>
+      <ATOM Name="Strength" Value="20"/>
+      <ATOM Name="WellBalanced" Value="30"/>
+      <ATOM Name="Will" Value="20"/>
+    </STRUCT>
+    <STRUCT Name="Scores">
+      <ATOM Name="HitPoints" Value="90"/>
+      <ATOM Name="HitPointsRegenerateRate" Value="1.0"/>
+      <ATOM Name="Sap" Value="100"/>
+      <ATOM Name="SapRegenerateRate" Value="1.0"/>
+      <ATOM Name="Stamina" Value="80"/>
+      <ATOM Name="StaminaRegenerate" Value="&quot;Scores.Stamina&quot;/12+1"/>
+      <ATOM Name="StaminaRegenerateRate" Value="1.0"/>
+    </STRUCT>
+    <STRUCT Name="DefaultEquipment">
+      <STRUCT Name="Female equipment">
+        <ATOM Name="Skel" Value="TR_HOF_skel.skel"/>
+        <ATOM Name="CharacterScalePos" Value="0.88"/>
+        <ATOM Name="AnimSetBaseName" Value="fy_hof"/>
+        <ATOM Name="LodCharacterName" Value="TR_HOF_LOD"/>
+        <ATOM Name="DefaultFace" Value="tr_visage.sitem"/>
+        <ATOM Name="DefaultChest" Value="igtvu.sitem"/>
+        <ATOM Name="DefaultArms" Value="igtau.sitem"/>
+        <ATOM Name="DefaultLegs" Value="igtpu.sitem"/>
+        <ATOM Name="DefaultHands" Value="igtgu.sitem"/>
+        <ATOM Name="DefaultFeet" Value="igtbu.sitem"/>
+        <ATOM Name="DefaultHair" Value="tr_cheveux_medium01.sitem"/>
+        <ATOM Name="MorphTargetMin0" Value="-75"/>
+        <ATOM Name="MorphTargetMin1" Value="-70"/>
+        <ATOM Name="MorphTargetMin2" Value="-70"/>
+        <ATOM Name="MorphTargetMin3" Value="-50"/>
+        <ATOM Name="MorphTargetMin4" Value="-60"/>
+        <ATOM Name="MorphTargetMin5" Value="-60"/>
+        <ATOM Name="MorphTargetMin6" Value="-20"/>
+        <ATOM Name="MorphTargetMin7" Value="-50"/>
+        <ATOM Name="NamePosZLow" Value="1.15"/>
+        <ATOM Name="NamePosZNormal" Value="1.9"/>
+        <ATOM Name="NamePosZHigh" Value="3.5"/>
+      </STRUCT>
+      <STRUCT Name="Male equipment">
+        <ATOM Name="Skel" Value="TR_HOM_skel.skel"/>
+        <ATOM Name="CharacterScalePos" Value="0.88"/>
+        <ATOM Name="AnimSetBaseName" Value="fy_hom"/>
+        <ATOM Name="LodCharacterName" Value="TR_HOM_LOD"/>
+        <ATOM Name="DefaultFace" Value="tr_visage.sitem"/>
+        <ATOM Name="DefaultChest" Value="igtvu.sitem"/>
+        <ATOM Name="DefaultArms" Value="igtau.sitem"/>
+        <ATOM Name="DefaultLegs" Value="igtpu.sitem"/>
+        <ATOM Name="DefaultHands" Value="igtgu.sitem"/>
+        <ATOM Name="DefaultFeet" Value="igtbu.sitem"/>
+        <ATOM Name="DefaultHair" Value="tr_cheveux_medium01.sitem"/>
+        <ATOM Name="MorphTargetMin0" Value="-50"/>
+        <ATOM Name="MorphTargetMin1" Value="-35"/>
+        <ATOM Name="MorphTargetMin2" Value="-65"/>
+        <ATOM Name="MorphTargetMin3" Value="-70"/>
+        <ATOM Name="MorphTargetMin4" Value="-70"/>
+        <ATOM Name="MorphTargetMin5" Value="-75"/>
+        <ATOM Name="MorphTargetMin6" Value="0"/>
+        <ATOM Name="MorphTargetMax6" Value="100"/>
+        <ATOM Name="MorphTargetMin7" Value="-45"/>
+        <ATOM Name="NamePosZLow" Value="0.9"/>
+        <ATOM Name="NamePosZNormal" Value="1.9"/>
+        <ATOM Name="NamePosZHigh" Value="3.6"/>
+      </STRUCT>
+    </STRUCT>
+    <ATOM Name="Skin" Value="tryker"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Sep 27 11:37:24 2002 (simon) .Characteristics.Constitution = 30
+Fri Sep 27 11:37:24 2002 (simon) .Characteristics.Intelligence = 30
+Fri Sep 27 11:37:24 2002 (simon) .Characteristics.Strength = 20
+Fri Sep 27 11:37:24 2002 (simon) .Characteristics.WellBalanced = 30
+Fri Sep 27 11:37:24 2002 (simon) .Characteristics.Will = 20
+Fri Sep 27 11:37:24 2002 (simon) .Race = tryker
+Fri Sep 27 11:37:24 2002 (simon) .Scores.DiseaseResist = 10
+Fri Sep 27 11:37:24 2002 (simon) .Scores.FearResist = 10
+Fri Sep 27 11:37:24 2002 (simon) .Scores.HitPoints = &quot;Characteristics.Constitution&quot;
+Fri Sep 27 11:37:24 2002 (simon) .Scores.HitPointsRegenerate = &quot;Scores.HitPoints&quot;/100+1
+Fri Sep 27 11:37:24 2002 (simon) .Scores.ImpactResist = 10
+Fri Sep 27 11:37:24 2002 (simon) .Scores.MagicResistRegenerate = 10
+Fri Sep 27 11:37:24 2002 (simon) .Scores.Sap = (&quot;Characteristics.Intelligence&quot;+&quot;Characteristics.WellBalanced&quot;)/2
+Fri Sep 27 11:37:24 2002 (simon) .Scores.SapRegenerate = &quot;Scores.Sap&quot;/100+1
+Fri Sep 27 11:37:24 2002 (simon) .Scores.Stamina = (&quot;Characteristics.Constitution&quot;+&quot;Characteristics.Strength&quot;)/2
+Fri Sep 27 11:37:24 2002 (simon) .Scores.StaminaRegenerate = &quot;Scores.Stamina&quot;/100+1
+Fri Sep 27 11:37:24 2002 (simon) .Scores.TechnoResist = 10
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.AnimSetBaseName = fy_hof
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.CharacterScalePos = 0.88
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultArms = tr_underwear_armpad.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultChest = tr_underwear_gilet.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultFace = tr_visage.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultFeet = tr_underwear_bottes.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultHair = tr_cheveux_medium01.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultHands = tr_underwear_hand.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.DefaultLegs = tr_underwear_pantabottes.sitem
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Female equipment.Skel = TR_HOF_skel.skel
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Male equipment.AnimSetBaseName = fy_hom
+Wed Oct 02 16:30:47 2002 (mauduit) .DefaultEquipment.Male equipment.Skel = TR_HOM_skel.skel
+Wed Oct 02 16:30:47 2002 (mauduit) formName Pasted = 
+Mon Oct 07 14:50:47 2002 (puzin) .Skin = tryker
+Fri Oct 25 14:31:01 2002 (receveur) Form Parents = 
+Wed Oct 30 10:58:53 2002 (mauduit) .DefaultEquipment.Female equipment.LodCharacterName = TR_HOF_LOD
+Wed Oct 30 10:58:53 2002 (mauduit) .DefaultEquipment.Male equipment.LodCharacterName = TR_HOM_LOD
+Mon Jan 06 15:45:02 2003 (favre) .Characteristics.Charisme = 30
+Mon Jan 06 15:45:02 2003 (favre) .Characteristics.Empathie = 35
+Mon Jan 06 15:45:02 2003 (favre) .Characteristics.Perception = 35
+Tue Feb 25 15:16:58 2003 (favre) .Characteristics.Agility = 30
+Tue Feb 25 16:43:57 2003 (favre) .Characteristics.Agility = 35
+Tue May 06 18:46:26 2003 (favre) .Scores.HitPointsRegenerate = 
+Tue May 06 18:46:26 2003 (favre) .Scores.SapRegenerate = 
+Tue May 06 18:46:26 2003 (favre) .Scores.StaminaRegenerate = 
+Tue May 06 18:48:48 2003 (favre) .Scores.StaminaRegenerate = &quot;Scores.Stamina&quot;/12+1
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.HitPoints = 90
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.HitPointsRegenerateRate = 1.0
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.Sap = 100
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.SapRegenerateRate = 1.0
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.Stamina = 100
+Mon Aug 25 16:08:13 2003 (saffray) .Scores.StaminaRegenerateRate = 1.0
+Mon Aug 25 16:09:07 2003 (saffray) .Scores.Stamina = 80
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Female equipment.DefaultArms = igtau.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Female equipment.DefaultChest = igtvu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Female equipment.DefaultFeet = igtbu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Female equipment.DefaultHands = igtgu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Female equipment.DefaultLegs = igtpu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Male equipment.DefaultArms = igtau.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Male equipment.DefaultChest = igtvu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Male equipment.DefaultFeet = igtbu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Male equipment.DefaultHands = igtgu.sitem
+Fri Oct 03 19:09:48 2003 (saffray) .DefaultEquipment.Male equipment.DefaultLegs = igtpu.sitem
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin0 = -75
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin1 = -70
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin2 = -70
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin3 = -50
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin4 = -60
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin5 = -60
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin6 = -20
+Mon Feb 09 15:14:50 2004 (beaume) .DefaultEquipment.Female equipment.MorphTargetMin7 = -50
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin0 = -50
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin1 = -35
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin2 = -65
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin3 = -70
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin4 = -70
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin5 = -75
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin6 = -30
+Mon Feb 09 15:15:45 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin7 = -45
+Thu Oct 21 16:34:32 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMax6 = -30
+Thu Oct 21 16:34:32 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin6 = 100
+Thu Oct 21 17:00:15 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMax6 = 100
+Thu Oct 21 17:00:15 2004 (beaume) .DefaultEquipment.Male equipment.MorphTargetMin6 = 0
+Mon Jan 31 14:00:33 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZHigh = 2.9
+Mon Jan 31 14:00:33 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZLow = 1.0
+Mon Jan 31 14:00:33 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZNormal = 1.6
+Mon Jan 31 14:03:03 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZHigh = 3.0
+Mon Jan 31 14:03:03 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZLow = 0.88
+Mon Jan 31 14:03:03 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZNormal = 1.76
+Tue Feb 01 14:46:16 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZLow = 1.15
+Tue Feb 01 14:46:16 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZNormal = 1.9
+Tue Feb 01 14:46:16 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZLow = 1.15
+Tue Feb 01 14:46:16 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZNormal = 1.9
+Tue Feb 01 14:47:43 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZLow = 0.9
+Tue Feb 01 17:16:36 2005 (peloille) .DefaultEquipment.Female equipment.NamePosZHigh = 3.5
+Tue Feb 01 17:16:36 2005 (peloille) .DefaultEquipment.Male equipment.NamePosZHigh = 3.6</LOG>
+</FORM>

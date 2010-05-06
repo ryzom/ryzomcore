@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="Radius" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="MaxNbEntities" Type="Type" Filename="int.typ" Default="255"/>
+  <ELEMENT Name="CenterOnTarget" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="UsePrimaryTargetTypes" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Valid Secondary Target Races" Type="Dfn" Filename="_valid_target_races.dfn"/>
+  <LOG>Fri Nov 29 17:12:25 2002 (brigand) Dfn Structure = 
+Thu Jan 30 14:37:33 2003 (fleury) Dfn Structure = 
+Wed Feb 05 12:22:06 2003 (fleury) Dfn Structure = 
+Wed Feb 05 14:48:43 2003 (fleury) Dfn Structure = 
+Mon Jun 23 10:46:43 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

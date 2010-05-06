@@ -1,0 +1,1 @@
+named_items_2_csv.exe R:\code\ryzom\server\data_shard\named_items.txt named_items.script

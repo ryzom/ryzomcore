@@ -1,0 +1,410 @@
+' nevrax_macros.dsm
+'
+' Copyright (C) 2000-2004 Nevrax. All rights reserved.
+'
+' The redistribution, use and modification in source or binary forms of
+' this software is subject to the conditions set forth in the copyright
+' document ("Copyright") included with this distribution.
+'
+'------------------------------------------------------------------------------
+' FILE DESCRIPTION: Nevrax Visual Studio macro file
+' $Id: nevrax_macros_ryzom.dsm,v 1.6 2004/01/06 14:23:07 cado Exp $
+'------------------------------------------------------------------------------
+
+
+' *** NevraxNewClass ***
+
+
+' NevraxInsertFileHeader
+' Utility Sub for NevraxNewClass()
+' Author : Olivier Cado
+Sub NevraxInsertFileHeader( filename, productname )
+	ActiveDocument.Selection.StartOfDocument
+	ActiveDocument.Selection = _
+		"/** \file " + filename + vbLf + _
+		" * <File description>" + vbLf + _
+		" *" + vbLf + _
+		" * $Id: nevrax_macros_ryzom.dsm,v 1.6 2004/01/06 14:23:07 cado Exp $" + vbLf + _
+		" */" + vbLf + vbLf
+	ActiveDocument.Selection = _
+		"/* Copyright, 2000-2004 Nevrax Ltd." + vbLf + _
+		" *" + vbLf + _
+		" * This file is part of NEVRAX " + productname + "." + vbLf + _
+		" * NEVRAX " + productname + " is free software; you can redistribute it and/or modify" + vbLf + _
+		" * it under the terms of the GNU General Public License as published by" + vbLf + _
+		" * the Free Software Foundation; either version 2, or (at your option)" + vbLf + _
+		" * any later version." + vbLf + vbLf + _
+		" * NEVRAX " + productname + " is distributed in the hope that it will be useful, but" + vbLf + _
+		" * WITHOUT ANY WARRANTY; without even the implied warranty of" + vbLf + _
+		" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU" + vbLf + _
+		" * General Public License for more details." + vbLf + vbLf + _
+		" * You should have received a copy of the GNU General Public License" + vbLf + _
+		" * along with NEVRAX " + productname + "; see the file COPYING. If not, write to the" + vbLf + _
+		" * Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston," + vbLf + _
+		" * MA 02111-1307, USA." + vbLf + _
+		" */" + vbLf
+End Sub
+
+
+Function IsUpCase( str )
+	IsUpcase = ( str = Ucase(str) )
+End Function
+
+
+' NevraxClassNameToFileName
+' Utility Function for NevraxNewClass()
+' 1/08/2000 : now analyses the first character
+' Author : Olivier Cado
+Function NevraxClassNameToFileName( classname )
+	beginningpos = 1
+	first = left(classname,1)
+	if ((first="C") or (first="E") or (first="I")) then
+		if len(classname)>1 then
+			if IsUpCase( mid(classname,2,1) ) then
+				beginningpos = 2
+			end if
+		end if
+	end if
+	filename = lcase(mid(classname,beginningpos,1))
+	for i = beginningpos+1 to len( classname )
+		charact = mid(classname,i,1 )
+		if IsUpCase( charact ) then
+			if i+1 <= len( classname ) then
+				if not IsUpCase( mid(classname,i+1,1) ) then
+					filename = filename + "_"
+				end if
+			else
+				filename = filename + "_"
+			end if
+		end if
+		filename = filename + lcase(charact)
+	next
+	NevraxClassNameToFileName = filename
+End Function
+
+
+' NevraxProjectOpen
+' Utility Function for NevraxNewClass()
+' Author : Olivier Cado
+Function NevraxProjectOpen( projname )
+	found = 0
+	dim proj
+	for i = 1 to Projects.Count
+		if Projects(i).Name = projname then
+			found = i
+			exit for
+		end if
+	next
+	NevraxProjectOpen = found
+End Function
+
+
+' Global variable
+Dim CurrentDirectoryName
+Dim CurrentProgrammerName
+
+
+' NevraxNewClass
+' DESCRIPTION: Wizard for new class creation
+' 1/08/2000 : added input boxes for directories
+' 7/09/2000 : added programmer's name dialog and test for file existence (dirs & files)
+' 18/09/2000 : namespace, programmer's name saved in a file, file added to the right project
+' 12/10/2000 : modified output
+' Weird things :
+' - CreateObject( Scripting.FileSystemObject ) doesn't work on Win 98, but on 2000
+' - Projects.Item( string ) doesn't work. Using number instead
+' Author : Olivier Cado
+Sub NevraxNewClass()
+
+	' ** Input class name and file name
+	ClassName = InputBox( "Bienvenue dans l'assistant de création de classe." + vbLf + vbLf + _
+		"Nom de la nouvelle classe :", "Nouvelle classe (1)" )
+	if ClassName = "" then
+		Exit Sub
+	end if
+	Filename = NevraxClassNameToFileName( ClassName )
+	' Warning: do not enter an existing filename, or MsDev will crash when attempting to save
+	Filename = InputBox( "Nom de fichier sans l'extension:", "Nouvelle classe (2)", Filename )
+	if Filename = "" then
+		Exit Sub
+	end if
+	UniqueName = "NL_" + UCase( Filename ) + "_H"
+	HFilename = Filename + ".h"
+	CppFilename = Filename + ".cpp"
+
+	' Load configuration
+	dim fso
+	set fso = CreateObject("Scripting.FileSystemObject")
+	ConfigFileName = "R:\code\tool\visual_studio_macros\nevrax_new_class.cfg"
+	if fso.FileExists( ConfigFileName ) then
+		set f = fso.OpenTextFile( ConfigFileName, 1 ) ' 1 = ForReading
+		'if CurrentProgrammerName = "" then
+			CurrentProgrammerName = f.ReadLine
+		'else
+		'	CurrentProgrammerName = "Richard Stallman"
+		'end if
+		SrcDirectory = f.ReadLine
+		IncDirectory = f.ReadLine
+		f.Close
+	end if
+
+	' ** Directories (NB: input boxes cannot be canceled in this part)
+	SrcDirectory = InputBox( "Répertoire racine (existant) des sources (.cpp)" + vbLf + "(ex: R:\code\nel\src pour NeL) :","Nouvelle classe (3)", SrcDirectory )
+	if SrcDirectory <> "" then
+		if right(SrcDirectory,1)<>"\" then
+			SrcDirectory = SrcDirectory + "\"
+		end if
+	else
+		IncDirectory = ""
+	end if
+	IncDirectory = InputBox( "Répertoire racine (existant) des include (.h)" + vbLf + "(ex: R:\code\nel\include\nel pour NeL ; chaîne vide pour le même répertoire que les fichiers source ) :","Nouvelle classe (4)", IncDirectory )
+	if IncDirectory = "" then
+		IncDirectory = SrcDirectory
+	else
+		if (right(IncDirectory,1)<>"\") then
+			IncDirectory = IncDirectory + "\"
+		end if
+	end if
+	CurrentDirectoryName = InputBox( "Nom du répertoire de travail (ex: misc)" + vbLf + "(existant dans " + SrcDirectory + _
+		" et dans " + IncDirectory + ")" + vbLf + "Ce nom restera mémorisé" + vbLf + "(chaîne vide pour pour un projet hors-NeL).", "Nouvelle classe (5)", CurrentDirectoryName )
+	if CurrentDirectoryName<>"" then
+		CurrentDirectoryDir = CurrentDirectoryName + "\"
+		Namesp = "NL" + ucase(CurrentDirectoryName)
+	end if
+	If InStr( IncDirectory, "nel" ) then
+		ProdName = "NEL"
+		ShortIncDir = "nel/" + CurrentDirectoryName + "/"
+	else
+		ProdName = "RYZOM" ' HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE
+	end if
+
+	' ** Check for file existence
+	FinalCPPdir = SrcDirectory + CurrentDirectoryDir
+	FinalHdir = IncDirectory + CurrentDirectoryDir
+	if not fso.FolderExists( FinalHdir ) then
+		MsgBox "Erreur : le répertoire " + FinalHdir + " n'existe pas !", vbExclamation
+		Exit Sub
+	end if
+	if not fso.FolderExists( FinalCPPdir ) then
+		MsgBox "Erreur : le répertoire " + FinalCPPdir + " n'existe pas !", vbExclamation
+		Exit Sub
+	end if
+	FinalCPPfilename = FinalCPPdir + CppFilename
+	FinalHfilename = FinalHdir + HFilename
+	if fso.FileExists( FinalHfilename ) then
+		MsgBox "Erreur : le fichier " + FinalHfilename + " existe déjà !", vbExclamation
+		Exit Sub
+	end if
+	if fso.FileExists( FinalCPPfilename ) then
+		MsgBox "Erreur : le fichier " + FinalCPPfilename + " existe déjà !", vbExclamation
+		Exit Sub
+	end if
+
+	' ** Check for open project
+	if CurrentDirectoryName=""	then
+		AddToProject = 0
+	else
+		AddToProject = NevraxProjectOpen( CurrentDirectoryName )
+	end if
+
+	' ** Programmer's name
+	CurrentProgrammerName = InputBox( "Votre prénom et votre nom (qui restera mémorisé dans un fichier) :", "Nouvelle classe (6)", CurrentProgrammerName )
+	if CurrentProgrammerName = "" then
+		Exit Sub
+	end if
+
+	' Save configuration
+	set f = fso.OpenTextFile( ConfigFileName, 2, true ) ' 2 = ForWriting
+	f.WriteLine CurrentProgrammerName
+	f.WriteLine SrcDirectory
+	f.WriteLine IncDirectory
+	f.Close
+
+	' ** Input ancestor class name and file name
+	NoAncestor = "NO BASE CLASS"
+	AncClassName = InputBox( "Nom de la classe de base :", "Nouvelle classe (7)", NoAncestor )
+	if AncClassName = "" then
+		Exit Sub
+	else
+		if AncClassName = NoAncestor then
+			AncClassName = ""
+		else
+			AncFilename = InputBox( "Nom de fichier (avec chemin) sans l'extension (ex: nel/misc/toto) :", "Nouvelle classe (8)" )
+			if AncFileName = "" then
+				Exit Sub
+			end if
+			AncHFilename = AncFilename + ".h"
+			'if not fso.FileExists( AncHFilename ) then
+			'	MsgBox "Attention : le fichier " + AncHFilename + " n'existe pas encore.", vbInformation
+			'end if
+		end if
+	end if
+
+	' ** Now write .cpp
+	Documents.Add( "Text" )
+	NevraxInsertFileHeader CppFilename, ProdName
+	ActiveDocument.Selection = vbLf + "#include """ + ShortIncDir + HFilename + """" + vbLf + vbLf + vbLf
+	if ( CurrentDirectoryName<>"" ) then
+		ActiveDocument.Selection = "namespace " + Namesp + " {" + vbLf + vbLf + vbLf
+	end if
+	ActiveDocument.Selection = "/*" + vbLf + _
+		" * Constructor" + vbLf + _
+		" */" + vbLf + _
+		ClassName + "::" + ClassName + "()" + vbLf + _
+		"{" + vbLf + _
+		"}" + vbLf + vbLf + vbLf
+	if ( CurrentDirectoryName<>"" ) then
+		ActiveDocument.Selection = "} // " + Namesp + vbLf
+	end if
+	' Warning: ActiveDocument.Save raises an "Unknown error" if the directory does not exist"
+	ActiveDocument.Save( FinalCPPfilename )
+	if AddToProject=0 then
+		ActiveProject.AddFile( FinalCPPfilename )
+	else
+		Projects(AddToProject).AddFile( FinalCPPfilename )
+	end if
+
+	' ** Now write .h
+	Documents.Add( "Text" )
+	NevraxInsertFileHeader HFilename, ProdName
+	ActiveDocument.Selection = vbLf + "#ifndef " + UniqueName + vbLf + _
+		"#define " + UniqueName + vbLf + vbLf
+	ActiveDocument.Selection = "#include ""nel/misc/types_nl.h""" + vbLf
+	if AncClassName <> "" then
+		ActiveDocument.Selection = "#include """ + AncHFilename + """" + vbLf
+	end if
+	if ( CurrentDirectoryName<>"" ) then
+		ActiveDocument.Selection = vbLf + vbLf + "namespace " + Namesp + " {" + vbLf
+	end if
+	ActiveDocument.Selection = vbLf + vbLf + _
+		"/**" + vbLf + _
+		" * <Class description>" + vbLf + _
+		" * \author " + CurrentProgrammerName + vbLf + _
+		" * \author Nevrax France" + vbLf + _
+		" * \date 2004" + vbLf + _
+		" */" + vbLf + _
+		"class " + ClassName
+	if AncClassName <> "" then
+		ActiveDocument.Selection = " : public " + AncClassName
+	end if
+	ActiveDocument.Selection = vbLf + _
+		"{" + vbLf + _
+		"public:" + vbLf + vbLf + _
+		"	/// Constructor" + vbLf + _
+		"	" + ClassName + "();" + vbLf + vbLf + _
+		"};" + vbLf + vbLf
+	if ( CurrentDirectoryName<>"" ) then
+		ActiveDocument.Selection = vbLf + "} // " + Namesp + vbLf + vbLf
+	end if
+	ActiveDocument.Selection = vbLf + "#endif // " + UniqueName + vbLf
+	ActiveDocument.Selection = vbLf + "/* End of " + HFilename + " */" + vbLf
+	' Warning: ActiveDocument.Save raises an "Unknown error" if the directory does not exist"
+	ActiveDocument.Save( FinalHfilename )
+	if AddToProject=0 then
+		ActiveProject.AddFile( FinalHfilename )
+	else
+		Projects(AddToProject).AddFile( FinalHfilename )
+	end if
+
+End Sub
+
+' *** End of NevraxNewClass ***
+
+
+' ** NevraxToggleHCPP
+
+' NevraxToggleHCPP
+' DESCRIPTION: Opens the .cpp or .h file (toggles) for the current document.
+' TIP: Bind this macro to Ctrl+<
+' Last modification : 22/05/2001
+' Author : Olivier Cado
+Sub NevraxToggleHCPP()
+
+	' ** Get filename extension and ensure it is .h or .cpp
+	ActFilename = ActiveDocument.FullName
+	pos = InstrRev( ActFilename, "." )
+	if ( pos <> 0 ) then
+		Ext = mid(ActFilename,pos)		
+		if (Ext<>".h" and Ext<>".cpp") then
+			msgbox( "Error : Active document is not a .cpp or .h file" )
+			exit sub
+		end if
+	else
+		exit sub
+	end if
+	
+	' ** Build the alternative filename
+
+	' The module name is the word between the two last backslashes of the path\filename
+	ModuleDir = left( ActFilename, InstrRev(ActFilename,"\")-1 )
+	ModuleDir = mid( ModuleDir, InstrRev(ModuleDir, "\")+1 ) + "\"
+
+	dim SearchDirs (4)
+	if ( Ext = ".cpp" ) then
+		SearchDirs(1) = "R:\code\nel\include\nel\" + ModuleDir
+		SearchDirs(2) = "R:\code\nel\include_private\nel\" + ModuleDir
+		SearchDirs(3) = left( ActFilename, InstrRev(ActFilename,"\") ) 'dir of the current file
+		NbDirs = 3
+		Ext = "h"
+	else
+		SearchDirs(1) = "R:\code\nel\src\" + ModuleDir
+		SearchDirs(2) = left( ActFilename, InstrRev(ActFilename,"\") ) 'dir of the current file
+		NbDirs = 2
+		Ext = "cpp"
+	end if
+	DirIndex = 1
+	FileFound = False
+	Dirs = ""
+	while (DirIndex <= NbDirs) and (FileFound = False)
+		' NeL directory scheme
+		if InStr(ActFilename,"nel")<>0 then
+			' Add the search path and the filename
+			NewFilename = SearchDirs(DirIndex)
+			ShortFilenameDot = mid( ActFilename, InstrRev(ActFilename,"\")+1 )
+		else
+			' The complete filename
+			ShortFilenameDot = ActFilename
+		end if
+		ShortFilenameDot = left( ShortFilenameDot, Instr(ShortFilenameDot,".") )
+		NewFilename = NewFilename + ShortFilenameDot + Ext
+ 
+		' ** Open the alternative file
+		dim fso
+		set fso = CreateObject("Scripting.FileSystemObject")
+		if fso.FileExists( NewFilename ) then
+			Documents.Open( NewFilename )
+			FileFound = True
+		else
+			Dirs = Dirs + SearchDirs(DirIndex) + vbLf
+			DirIndex = DirIndex + 1
+		end if
+	wend
+	if FileFound <> True then
+		MsgBox "There is no file " + ShortFilenameDot + Ext + " in " + vbLf + Dirs
+	end if
+End Sub
+
+
+
+' ** NevraxToggleHCPP
+
+
+' NevraxFormatMethodHeader
+' DESCRIPTION: Edit a Doxygen .h style method header for a .cpp file.
+' The caret must be a the beginning of the first line of the header.
+' Author : Olivier Cado
+Sub NevraxFormatMethodHeader()
+	ActiveDocument.Selection.Delete
+	ActiveDocument.Selection.CharRight
+	ActiveDocument.Selection.Delete 2
+	ActiveDocument.Selection = "*" + vbLf + " *"
+	ActiveDocument.Selection.EndOfLine
+	ActiveDocument.Selection = vbLf + " */"
+	ActiveDocument.Selection.LineDown
+	ActiveDocument.Selection.Delete
+	ActiveDocument.Selection.EndOfLine
+	ActiveDocument.Selection.Backspace
+	ActiveDocument.Selection = vbLf + "{" + vbLf + vbLf + "}" + vbLf
+	ActiveDocument.Selection.LineDown dsMove,2
+End Sub
+

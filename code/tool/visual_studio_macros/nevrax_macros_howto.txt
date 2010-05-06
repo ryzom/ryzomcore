@@ -1,0 +1,149 @@
+Mode d'emploi des macros Nevrax
+02/08/00 cado@nevrax.com
+$Id: nevrax_macros_howto.txt,v 1.10 2001/05/22 12:08:47 cado Exp $
+----------
+
+Dernière mise à jour : 22/05/2001
+
+1. Nouveautés du 22/05/2001
+---------------------------
+
+- NevraxNewClass: Pour faire en sorte que le répertoire des
+fichiers include soit le même que celui des fichiers source,
+spécifier une chaîne vide pour le répertoire des fichiers
+include (boite de dialogue n°4)
+
+- Il existe maintenant un fichier nevrax_macros_ryzom.dsm.
+La seule différence avec nevrax_macros.dsm est que le nom
+du projet généré dans l'en-tête des fichiers n'est pas
+NEL mais RYZOM.
+
+- (Windows 2000 uniquement) La macro NevraxToggleHCPP
+recherche désormais le fichier .h dans les trois
+répertoires suivants si le fichier .cpp fait partie de NeL :
+  R:\code\nel\include\nel\<module>
+  R:\code\nel\include_private\nel\<module>
+  Le répertoire du fichier .cpp
+La recherche du .cpp correspondant à un .h appartenant à
+NeL se fait dans :
+  R:\code\nel\src\<module>
+  Le répertoire du fichier .h
+
+Si le fichier ne fait pas partie de nel, la recherche ne
+se fait que dans le même répertoire que le fichier de
+départ.
+
+
+1. Nouveauté du 14/12/2000
+--------------------------
+- La macro NevraxNewClass stocke les répertoires des sources
+et des include dans le fichier de configuration
+R:\code\tool\VisualStudioMacros\nevrax_new_class.cfg
+(sauf si vous utilisez nevrax_macros_98.dsm).
+IMPORTANT:
+Avant de lancer la macro, il faut rajouter les répertoires
+par défaut (par exemple R:\code\nel\src et
+R:\code\nel\include\nel) dans le fichier de config, à la
+main.
+
+
+2. Nouveautés du 18/09/2000
+--------------------------
+- La macro NevraxNewClass stocke votre nom dans un fichier
+(R:\code\tool\VisualStudioMacros\nevrax_new_class.cfg)
+(sauf si vous utilisez nevrax_macros_98.dsm).
+- Lorsque vous spécifiez un répertoire de travail (ex: misc,
+net), la macro définit le namespace correspondant, commençant
+par RKn dans les fichiers .h et .cpp.
+- Lorsque vous spécifiez un répertoire de travail (ex: misc,
+net), les fichiers .h et .cpp sont ajoutés dans le projet du
+même nom même si ce n'est pas le projet actif.
+
+
+3. Note du 13/09/2000
+---------------------
+
+Dans ce document, remplacez nevrax_macros.dsm par
+nevrax_macros_98.dsm si la macro NevraxNewClass de
+nevrax_macros.dsm génère une erreur en instanciant
+un objet ActiveX Automation "FileSystemObject".
+Ce problème a été constaté sous Windows 98, pas
+sous Windows 2000.
+Dans la version 98, il n'y a pas de test d'existence
+des fichiers et répertoires, et votre nom n'est pas
+stocké dans un fichier.
+
+
+4. Nouveautés du 07/09/2000
+---------------------------
+
+- La macro NevraxNewClass vous demande et mémorise votre nom, pour
+l'insérer dans le champ \name de Doxygen.
+- La macro NevraxNewClass teste l'existence des répertoires et des
+fichiers : elle vérifie que les fichiers .h et .cpp n'existent pas
+déjà, que les répertoires des fichiers include et source existent
+bien, et vous informe quand le fichier .h de l'éventuelle classe de
+base n'existe pas.
+
+
+5. Installation
+---------------
+
+a. Dans Visual Studio, menu Tools, Macros,
+Options>>, Loaded Files,
+Browse, R:\code\tool\VisualStudioMacros\nevrax_macros.dsm,
+Close
+
+b. (Facultatif) Raccourci clavier : Menu Tools, Macros, choisir
+nevrax_macros dans la liste Macro File, sélectionner NevraxToggleHCPP,
+Options>>, Keystrokes, dans "Press new shortcut key" taper la
+combinaison Ctrl+< (touche Ctrl et touche <). Dans Current keys, on
+voit s'afficher Ctrl+< ; Close
+
+c. (Facultatif) Bouton supplémentaire : Menu Tools, Macros,
+sélectionner NevraxNewClass (du fichier nevrax_macros), Options>>,
+oolbars, glisser-déposer NevraxNewClass sur une barre d'outil de Visual
+Studio, choisir une image pour le bouton (par exemple le petit crayon
+jaune), OK, Close.
+
+
+6. Utilisation
+--------------
+
+- NevraxToggleHCPP (raccourci-clavier "Ctrl-<" installé en 1.b. ci-dessus)
+  Cette macro sert à passer d'un .h à un .cpp et vice-versa.
+  Elle est compatible avec l'arborescence de NeL.
+
+- NevraxNewClass (bouton installé en 1.c. ci-dessus)
+  Cette macro est un assistant de création de classe, adaptée pour
+  NeL. Elle doit être utilisée quand un projet C++ est ouvert.
+  Les étapes :
+  1. Choix du nom de la classe. Ex: CMaClasse
+  2. Confirmation du nom des fichiers .h et .cpp à créer. Ex: Pour
+     CMaClasse, la macro propose ma_classe.
+  3. Confirmation du répertoire des sources .cpp. Par défaut :
+     R:\code\nel\src
+     Pour le répertoire courant du projet, entrer un point (.)
+  4. Confirmation du répertoire des includes .h. Par défaut :
+     R:\code\nel\include\nel
+     Pour le répertoire courant du projet, entrer un point (.)
+  5. Choix ou confirmation du répertoire de travail. Celui-ci doit
+     être tapé une fois par session de Visual Studio, après il est
+     mémorisé. Exs: misc ou system ou 3d ou ia ou network ou database
+     Les répertoires ainsi formés (ex: R:\code\nel\src\misc et
+     R:\code\nel\include\nel\misc) doivent déjà exister, sans
+     quoi Visual Studio déclenchera une "unknown error" lors de la
+     sauvegarde du fichier.
+     Pour le répertoire courant du projet, ne rien entrer.
+  6. Choix ou confirmation du nom du programmeur. Comme dans l'étape
+     précédente, on le tape une seule fois par session de Visual
+     Studio.
+  7. Choix d'une classe de base (si la nouvelle classe doit être
+     dérivée d'une classe parente) (ex: CBaseClass) ou NO BASE CLASS.
+  8. Si vous avez entré une classe de base, vous devez entrer le
+     nom du fichier include de cette classe. Ex: nel/misc/base_class
+     N'oubliez pas le chemin d'accès (comme dans l'exemple ci-dessus).
+  Remarque :
+  Le bouton Annuler fonctionne seulement dans les étapes 1,2,6,7,8
+  (merci VBScript !). Si vous vous trompez en 3,4 ou 5, cliquez sur
+  Annuler dans l'étape 6.

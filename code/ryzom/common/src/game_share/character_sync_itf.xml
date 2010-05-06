@@ -1,0 +1,406 @@
+<generator header_tag="CHARACTER_SYNC_ITF">
+
+	<include file="nel/misc/entity_id.h"/>
+	<include file="r2_share/r2_basic_types.h"/>
+	<include file="continent.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="CHARSYNC">
+
+		<enum name="TRace">
+			<item name="r_fyros"/>
+			<item name="r_matis"/>
+			<item name="r_tryker"/>
+			<item name="r_zorai"/>
+		</enum>
+
+		<enum name="TCivilisation">
+			<item name="c_neutral"/>
+			<item name="c_fyros"/>
+			<item name="c_matis"/>
+			<item name="c_tryker"/>
+			<item name="c_zorai"/>
+		</enum>
+
+		<enum name="TCult">
+			<item name="c_neutral"/>
+			<item name="c_kami"/>
+			<item name="c_karavan"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<class name="TCharInfo">
+			<doc line="Info about a character, used for block tranfert"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id the the character"/>
+			<property type="std::string"		name="CharName"		byref="true"	doc="The name of the character"/>
+			<property type="uint32"				name="HomeSessionId"				doc="The session id the the character home mainland"/>
+			<property type="sint32"				name="BestCombatLevel"				doc="The best combat level of the character"/>
+			<property type="uint32"				name="GuildId"						doc="The guild id of this player"/>
+			<property type="CONTINENT::TRespawnPointCounters" name="RespawnPoints"
+						byref="true"
+						serial="Cont"
+						doc="the list of respawn points validated by the character"/>
+			<property type="TRace"				name="Race"	/>
+			<property type="TCivilisation"		name="Civilisation"	/>
+			<property type="TCult"				name="Cult"	/>
+			<property type="bool"				name="Newcomer"	/>
+		</class>
+
+		<!-- ############################################################## -->
+		<class name="TCharBestLevelInfo">
+			<doc line="Info about a the best level of a character, used for block tranfert"/>
+
+			<!-- activate serial generation -->
+			<serial/>
+
+			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id the the character"/>
+			<property type="sint32"				name="BestCombatLevel"				doc="The best combat level of the character"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<module_interface name="CCharacterSync">
+			<doc line="Interface used by EGS and implemented in the SU"/>
+			<doc line="Used by EGS to send characters info update to the SU"/>
+			<doc line="for synchronising the ring database"/>
+
+			<!-- ========================================================== -->
+			<method name="addCharacter" msg="CS_ACH">
+				<doc line="A new character have been create by a client"/>
+
+				<param type="TCharInfo"		name="charInfo"		byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="deleteCharacter" msg="CS_DCH">
+				<doc line="A character have been deleted"/>
+
+				<param type="uint32"	name="charId"/>
+			</method>
+
+			<!-- ========================================================== -->
+<!--			<method name="updateCharName" msg="CS_UPDCN">
+				<doc line="The name of a character have been changed"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="std::string"		name="charName"		byref="true"/>
+			</method>
+-->
+			<!-- ========================================================== -->
+			<method name="updateCharGuild" msg="CS_UPDCG">
+				<doc line="A character guild have changed"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="uint32"			name="guildId"	/>
+			</method>
+
+			<method name="updateCharRespawnPoints" msg="CS_UPDCR">
+			<!-- ========================================================== -->
+				<doc line="Update the respawn points count of a character"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="CONTINENT::TRespawnPointCounters"	name="respawnPoints"	byref="true" serial="Cont"/>
+			</method>
+
+			<method name="updateCharsBestLevel" msg="CS_UPDCL">
+			<!-- ========================================================== -->
+				<doc line="Update the best level for a set of characters"/>
+
+				<param type="std::vector &lt; TCharBestLevelInfo &gt;"	name="charLevelInfos"		byref="true" serial="Cont"/>
+			</method>
+
+			<method name="updateCharNewbieFlag" msg="CS_UPCNF">
+			<!-- ========================================================== -->
+				<doc line="Update the newbie flag of a characters"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="bool"				name="newbie"	/>
+			</method>
+
+			<method name="updateCharAllegiance" msg="CS_UPDCA">
+			<!-- ========================================================== -->
+				<doc line="Update the allegiance of a characters"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="TCivilisation"		name="civilisation"	/>
+				<param type="TCult"				name="cult"	/>
+			</method>
+
+
+			<!-- ========================================================== -->
+			<method name="updateCharHomeMainlandSessionId" msg="CS_UPDCHMSI">
+				<doc line="The home mainland has changed (used when converting a character file from an old version)"/>
+
+				<param type="NLMISC::CEntityId"	name="charEId"		byref="true"/>
+				<param type="TSessionId"		name="homeMainlandSessionId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="syncUserChars" msg="CS_UPDCS">
+				<doc line="The characters for a player have been loaded"/>
+				<doc line="EGS send the full list to SU to make"/>
+				<doc line="sure any divergence in the database is cleared"/>
+				<doc line="SU send back the list of character with there"/>
+				<doc line="unified names and home session ID"/>
+
+				<param type="uint32"		name="userId"/>
+				<param type="std::vector &lt; TCharInfo &gt;"	name="charInfos"	byref="true"	serial="Cont"/>
+			</method>
+
+		</module_interface>
+
+		<!-- ========================================================== -->
+		<!-- ===  Name manager related methods    ===================== -->
+		<!-- ========================================================== -->
+
+		<!-- ############################################################## -->
+		<enum name="TCharacterNameResult">
+
+			<item name="cnr_ok"/>
+			<item name="cnr_invalid_name"/>
+			<item name="cnr_already_exist"/>
+		</enum>
+
+		<class name="CValidateNameResult">
+			<serial/>
+
+			<property type="TCharacterNameResult"	name="Result"/>
+			<property type="uint32"					name="UserId"/>
+			<property type="uint8"					name="CharIndex"/>
+			<property type="ucstring"				name="FullName"/>
+
+		</class>
+
+		<class name="CGuildInfo">
+			<serial/>
+
+			<property type="ucstring"		name="GuildName"	byref="true"/>
+			<property type="uint32"			name="GuildId"/>
+		</class>
+
+
+		<!-- ############################################################## -->
+		<module_interface name="CNameUnifier">
+			<doc line="Interface to the name unifier used by EGS, implemented in shard unifier"/>
+
+			<!-- ========================================================== -->
+			<method name="registerNameUnifierClient" msg="NU_RNUC">
+				<doc line="EGS register it's name unifier in order to receive"/>
+				<doc line="an updated eid to name translation table"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="validateCharacterName" msg="NU_VCN">
+				<doc line="EGS ask to validate a character name"/>
+				<doc line="If the NU valide the name, it temporary"/>
+				<doc line="lock it to the associated player."/>
+				<doc line="This function is called before character creation."/>
+
+<!--				<return type="CValidateNameResult"	/>-->
+
+				<param type="uint32"			name="userId"/>
+				<param type="uint8"				name="charIndex"/>
+				<param type="std::string"		name="name"		byref="true"/>
+				<param type="uint32"			name="homeMainlandSessionId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="assignNameToCharacter" msg="NU_ANTC">
+				<doc line="EGS ask to assign a name to a character"/>
+				<doc line="This function is called during character creation"/>
+
+<!--				<return type="CValidateNameResult"	/>-->
+
+				<param type="uint32"			name="charId"/>
+				<param type="std::string"		name="name"		byref="true"/>
+				<param type="uint32"			name="homeSessionId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="renameCharacter" msg="NU_RC">
+				<doc line="EGS ask to rename a character."/>
+				<doc line="Renaming consist of assigning a default ramdomly generated name to the character"/>
+
+				<param type="uint32"			name="charId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="registerLoadedGuildNames" msg="NU_RLGN">
+				<doc line="EGS send info about the list of loaded guild."/>
+				<doc line="The name unifier will update is internal name table if needed"/>
+				<doc line="and rename any guild having a conflicting name."/>
+				<doc line="If any guild is renamed, then the name unifier send back"/>
+				<doc line="a guildRenamed message to EGS."/>
+
+				<param type="uint32"							name="chardId"/>
+				<param type="std::vector &lt; CGuildInfo &gt;"	name="guildInfos" byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="validateGuildName" msg="NU_VGN">
+				<doc line="EGS ask to the name unifier to validate a new guild name"/>
+
+				<param type="uint32"		name="guildId"/>
+				<param type="ucstring"		name="guildName" byref="true"/>
+
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="addGuild" msg="NU_AG">
+				<doc line="EGS add newly created guild info"/>
+
+				<param type="uint32"		name="shardId"/>
+				<param type="uint32"		name="guildId"/>
+				<param type="ucstring"		name="guildName" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="removeGuild" msg="NU_RG">
+				<doc line="EGS remove deleted guild info"/>
+
+				<param type="uint32"		name="shardId"/>
+				<param type="uint32"		name="guildId"/>
+			</method>
+
+
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<class name="TNameEntry">
+			<serial/>
+
+			<property type="uint32"			name="UserId"/>
+			<property type="uint8"			name="CharIndex"/>
+			<property type="ucstring"		name="Name"			byref="true"/>
+			<property type="std::string"	name="UserName"		byref="true"/>
+			<property type="uint32"			name="ShardId"		byref="true"/>
+		</class>
+
+		<!-- ############################################################## -->
+		<class name="TCharSyncResultEntry">
+			<serial/>
+
+			<property type="uint32"			name="CharId"/>
+			<property type="ucstring"		name="CharName"		byref="true"/>
+			<property type="uint32"			name="HomeSessionId"/>
+			<property type="bool"			name="IsOwnerOfActiveAnimSession"/>
+			<property type="uint32"			name="ActiveAnimSessionId" default = "0"/>
+			<property type="uint32"			name="EditionSessionId"/>
+
+		</class>
+
+		<!-- ############################################################## -->
+		<module_interface name="CNameUnifierClient">
+			<doc line="Reponse interface for name unifier"/>
+
+			<!-- ========================================================== -->
+			<method name="initEIdTranslator" msg="NUC_IET">
+				<doc line="The name unifier send the initial content for the Eid translator."/>
+				<doc line="EGS need to wait until it receive this message before continuing"/>
+				<doc line="it's startup sequence in order to have coherent name in guild."/>
+
+				<param type="bool" name="firstPacket"/>
+				<param type="bool" name="lastPacket"/>
+				<param type="std::vector &lt; TNameEntry &gt;"	name="nameEntries" byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="updateEIdTranslator" msg="NUC_UET" broadcast="true">
+				<doc line="The name unifier send an update for the EID translator."/>
+				<doc line="releasedNames contains a list of charId whose names have been released"/>
+				<doc line="changedNames contains a list of add or update entries"/>
+
+				<param type="std::vector &lt; uint32 &gt;"	name="releasedNames" byref="true" serial="Cont"/>
+				<param type="std::vector &lt; TNameEntry &gt;"	name="changedNames" byref="true" serial="Cont"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="validateCharacterNameResult" msg="NUC_VCNR">
+				<doc line="The name unifier send the result for validation"/>
+				<doc line="of a character name before creation."/>
+
+				<param type="CValidateNameResult"	name="nameResult"	byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="assignCharacterNameResult" msg="NUC_ACNR">
+				<doc line="The name unifier send the result for name assignment"/>
+				<doc line="of a new character name during creation."/>
+
+				<param type="CValidateNameResult"	name="nameResult"	byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="characterRenamed" msg="NUC_CR" broadcast="true">
+				<doc line="The name unifier has renamed a character"/>
+				<doc line="EGS must do what it need to take the new name into account"/>
+
+				<param type="uint32"				name="charId"/>
+				<param type="std::string"			name="newName" byref="true"/>
+				<param type="bool"					name="sendSummary"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="userCharUpdatedAndValidated" msg="NUC_UCUAV">
+				<doc line="The name unifier has updated/validated/eventualy renamed"/>
+				<doc line="all the characters send by EGS for a user."/>
+				<doc line="EGS can proceed to send the characters summary to client"/>
+				<doc line="The result message contains the list of all characters"/>
+				<doc line="with their unified name and home session id from the"/>
+				<doc line="ring database"/>
+
+				<param type="uint32"				name="userId"/>
+				<param type="std::vector &lt; TCharSyncResultEntry &gt;"	name="charInfos" byref="true" serial="Cont"/>
+
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="userCharSyncFailed" msg="NUC_UCSF">
+				<doc line="The name unifier has failed tp updated/validated/eventualy renamed"/>
+				<doc line="all the characters send by EGS for a user."/>
+				<doc line="EGS can proceed to send the characters summary to client"/>
+				<doc line="but the character names are perhaps not good ?"/>
+
+				<param type="uint32"				name="userId"/>
+
+			</method>
+
+
+			<!-- ========================================================== -->
+			<method name="guildRenamed" msg="NUC_GR">
+				<doc line="The name unifier has renamed a guild to resolve a name conflict"/>
+
+				<param type="uint32"				name="guildId"/>
+				<param type="ucstring"				name="newName" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="validateGuildNameResult" msg="NUC_VGNR">
+				<doc line="The name unifier respond to EGS about guild name validation request"/>
+
+				<param type="uint32"				name="guildId"/>
+				<param type="ucstring"				name="guildName" byref="true"/>
+				<param type="TCharacterNameResult"	name="result"/>
+
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="removeCharFromGuild" msg="NUC_RCFG">
+				<doc line="The unifier has detected an invalid guild/character association"/>
+				<doc line="and ask to the EGS to remove the character from the guild"/>
+
+				<param type="uint32"				name="charId"/>
+				<param type="uint32"				name="guildId"/>
+
+			</method>
+
+
+		</module_interface>
+
+	</namespace>
+</generator>
+
+

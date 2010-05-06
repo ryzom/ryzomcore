@@ -1,0 +1,117 @@
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "NeL MMORPG Framework - Networking Services")
+SET(CPACK_PACKAGE_VENDOR "NeL")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README)
+SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING)
+SET(CPACK_PACKAGE_VERSION_MAJOR "${NL_VERSION_MAJOR}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${NL_VERSION_PATCH}")
+SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};NeLNS;ALL;/")
+SET(CPACK_PACKAGE_EXECUTABLES "nelns-${NL_VERSION}" "nelns")
+
+# NSIS Specific Packing Setup
+SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "NeLNS")
+SET(CPACK_NSIS_MODIFY_PATH "ON")
+SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
+SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
+SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/resources\\\\nel.bmp)
+SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} NeLNS")
+SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
+SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
+SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+SET(CPACK_NSIS_MENU_LINKS 
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\naming_service.exe" "Naming Service"
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\login_service.exe" "Login Service"
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\welcome_service.exe" "Welcome Service"
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\admin_executor_service.exe" "Admin Executor Service"
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\admin_service.exe" "Admin Service"
+	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\etc\\\\nel\\\\nelns\\\\naming_service.cfg" "Configs\\\\Naming Service Config"
+	"http://dev.ryzom.com/projects/nel" "NeL Web Site"
+)
+
+## Source Packages
+SET(CPACK_PACKAGE_FILE_NAME "nelns-${NL_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "nelns-${NL_VERSION}")
+IF(WIN32)
+  SET(CPACK_GENERATOR "NSIS")
+  SET(CPACK_SOURCE_GENERATOR "ZIP")
+ELSE(WIN32)
+  SET(CPACK_GENERATOR "TGZ")
+  SET(CPACK_SOURCE_GENERATOR "TGZ")
+ENDIF(WIN32)
+set(CPACK_SOURCE_IGNORE_FILES
+        "~$"
+        "\\\\.cvsignore$"
+        "^${CMAKE_SOURCE_DIR}.*/CVS/"
+        "^${CMAKE_SOURCE_DIR}.*/\\\\.svn/"
+        "^${CMAKE_SOURCE_DIR}/debian/"
+        "^${CMAKE_SOURCE_DIR}/old/")
+        
+IF(WIN32)
+  IF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+  ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+
+  IF(WITH_QT)
+    INCLUDE(${QT_USE_FILE})
+    INSTALL(FILES 
+      "${QT_LIBRARY_DIR}/QtGui4.dll"        
+      "${QT_LIBRARY_DIR}/QtXml4.dll"
+      "${QT_LIBRARY_DIR}/QtCore4.dll"
+      DESTINATION bin)
+  ENDIF(WITH_QT)
+        
+  # Only the tools require MFC.
+  IF(BUILD_RYZOM_LAUNCHER)
+    SET(CMAKE_INSTALL_MFC_LIBRARIES TRUE)
+  ENDIF(BUILD_RYZOM_LAUNCHER)
+  
+  INCLUDE(InstallRequiredSystemLibraries)
+ENDIF(WIN32)
+
+INCLUDE(CPack)
+
+cpack_add_install_type(Full DISPLAY_NAME "Full Install")
+cpack_add_install_type(Simple DISPLAY_NAME "Essential Services Install")
+
+cpack_add_component_group("Admin Services" 
+  EXPANDED 
+  DESCRPTION "The services necessary for shard administration.")
+cpack_add_component_group("Shard Servces"
+  EXPANDED 
+  DESCRPTION "The services necessary for running a shard.")
+cpack_add_component_group("Client Tools"
+  EXPANDED 
+  DESCRPTION "Client tools, such as launchers.")
+    
+cpack_add_component(aes
+  DISPLAY_NAME "Admin Executor Service"
+  DESCRIPTION "Admin Executor Service - starts shard servers on a machine."
+  GROUP "Admin Services"
+  INSTALL_TYPES Full)
+cpack_add_component(as
+  DISPLAY_NAME "Admin Service"
+  DESCRIPTION "Admin Service - performs high level shard management."
+  GROUP "Admin Services"
+  INSTALL_TYPES Full)
+
+cpack_add_component(ls
+  DISPLAY_NAME "Login Service"
+  DESCRIPTION "Login Service - performs player/client login authentication."
+  GROUP "Shard Services"
+  INSTALL_TYPES Full Simple)
+cpack_add_component(ns
+  DISPLAY_NAME "Naming Service"
+  DESCRIPTION "Naming Service - performs naming lookup for unified networking."
+  GROUP "Shard Services"
+  INSTALL_TYPES Full Simple)
+cpack_add_component(ws
+  DISPLAY_NAME "Welcome Service"
+  DESCRIPTION "Welcome Service - performs the task of identifying available front-ends for a given shard."
+  GROUP "Shard Services"
+  INSTALL_TYPES Full Simple)
+
+cpack_add_component(launcher
+  DISPLAY_NAME "Client Launcher"
+  DESCRIPTION "Client Launcher - connects to the web service and login service to find a shard."
+  GROUP "Client Tools"
+  INSTALL_TYPES Full Simple)

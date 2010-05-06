@@ -1,0 +1,548 @@
+<database_description>
+  <!-- Used because the skill points are locally updated (at buy phrase time)     -->
+  <branch name="USER"
+          bank="PLR">
+    <branch name="SKILL_POINTS_"
+            bank="PLR"
+            count="4">
+      <leaf name="VALUE"
+            type="I32" />
+    </branch>
+    <branch name="FACTION_POINTS_"
+            count="6">
+      <!-- game_share/pvp_clan.h (0 is BeginClans and size is EndClans-BeginClans+1 -->
+      <leaf name="VALUE"
+            type="I32" />
+    </branch>
+  </branch>
+  <!-- The Inventory Local DB -->
+  <branch name="INVENTORY"
+          bank="PLR">
+    <branch name="HAND">
+      <branch name=""
+              count="2">
+        <!-- 0 Right 1 Left -->
+        <leaf name="INDEX_IN_BAG"
+              type="I9" />
+        <!-- 0 nothing 1-256 index in bag from 0 to 255 -->
+      </branch>
+    </branch>
+    <branch name="BAG">
+      <branch name=""
+              count="500">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <leaf name="PRICE"
+              type="I32" />
+        <leaf name="RESALE_FLAG"
+              type="I2" />
+        <!-- TBotChatResaleFlag -->
+        <leaf name="WORNED"
+              type="I1" />
+        <!-- true if item is worned (show a red cross) -->
+      </branch>
+    </branch>
+    <!-- MAX_INVENTORY_ANIMAL -->
+    <branch name="PACK_ANIMAL"
+            count="4">
+      <branch name=""
+              count="500">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <leaf name="PRICE"
+              type="I32" />
+        <leaf name="RESALE_FLAG"
+              type="I2" />
+        <!-- TBotChatResaleFlag -->
+      </branch>
+    </branch>
+    <branch name="EQUIP">
+      <!-- jewelry + armor -->
+      <branch name=""
+              count="19">
+        <leaf name="INDEX_IN_BAG"
+              type="I9" />
+        <!-- same as hand -->
+      </branch>
+    </branch>
+    <branch name="TEMP">
+      <!-- used for harvest loot and bag full -->
+      <leaf name="TYPE"
+            type="I8" />
+      <!-- Type of temp inv see temp_inventory_mode in game_share -->
+      <branch name=""
+              count="16">
+        <!-- client/inventory_manager.h MAX_TEMPINV_ENTRIES and egs/player_inv_temp.h TempInvSize -->
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- No LOCKED state -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+      <leaf name="ENABLE_TAKE"
+            type="I1" />
+      <!-- Used only in forage -->
+    </branch>
+    <branch name="SHARE">
+      <!-- used to share items between team members (up to 8 players) -->
+      <leaf name="SESSION"
+            type="I8" />
+      <!-- session id -->
+      <branch name=""
+              count="16">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <!-- Additionnal info -->
+        <leaf name="NB_MEMBER"
+              type="I4" />
+        <!-- Number of team member who wants this item or phrase -->
+        <leaf name="WANTED"
+              type="I1" />
+        <!-- Does the player wants this item or phrase ? -->
+        <leaf name="CHANCE"
+              type="I7" />
+        <!-- Chance in percentage the player has to obtain this item -->
+      </branch>
+      <branch name="TM_"
+              count="8">
+        <!-- all the team members -->
+        <leaf name="NAME"
+              type="TEXT" />
+        <leaf name="VALID"
+              type="I1" />
+        <!-- is the team member has validated its own selection ? -->
+      </branch>
+    </branch>
+    <branch name="ROOM">
+      <leaf name="SESSION"
+            type="I16" />
+      <leaf name="BULK_MAX"
+            type="I32" />
+      <leaf name="MONEY"
+            type="I64" />
+      <branch name=""
+              count="1000">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <leaf name="MONEY"
+          type="I64" />
+  </branch>
+  <!-- gift from animator (dm) to player -->
+  <branch name="DM_GIFT"
+          bank="PLR">
+    <leaf name="TEXT"
+          type="I32" />
+    <!-- caption of the gift window -->
+  </branch>
+  <!-- player trade & gift to bot -->
+  <branch name="EXCHANGE">
+    <leaf name="TEXT"
+          type="I32" />
+    <leaf name="ID"
+          type="I8" />
+    <leaf name="BEGUN"
+          type="I1" />
+    <leaf name="ACCEPTED"
+          type="I1" />
+    <leaf name="MONEY"
+          type="I64" />
+    <branch name="GIVE">
+      <branch name=""
+              count="8">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <branch name="RECEIVE">
+      <branch name=""
+              count="8">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I5" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+  </branch>
+  <!-- NB this is not a copy of the server db, but the concatenation of all ascensor pages -->
+  <branch name="ASCENSOR">
+    <branch name=""
+            count="512">
+      <leaf name="ICON"
+            type="I64" />
+      <leaf name="NAME"
+            type="I32" />
+    </branch>
+  </branch>
+  <!-- NB this is not a copy of the server db, but the concatenation of all items pages -->
+  <branch name="TRADING">
+    <branch name=""
+            count="1024">
+      <!-- Common Item Data -->
+      <leaf name="SHEET"
+            type="I32" />
+      <leaf name="QUALITY"
+            type="I10" />
+      <leaf name="QUANTITY"
+            type="I10" />
+      <!-- No LOCKED state -->
+      <leaf name="USER_COLOR"
+            type="I3" />
+      <leaf name="WEIGHT"
+            type="I16" />
+      <!-- weight. see DB_WEIGHT_SCALE-->
+      <leaf name="NAMEID"
+            type="I32" />
+      <!-- 0 or special name of item -->
+      <leaf name="INFO_VERSION"
+            type="I8" />
+      <leaf name="ENCHANT"
+            type="I10" />
+      <leaf name="RM_CLASS_TYPE"
+            type="I3" />
+      <leaf name="RM_FABER_STAT_TYPE"
+            type="I5" />
+      <leaf name="PREREQUISIT_VALID"
+            type="I1" />
+      <!-- Special Trade -->
+      <leaf name="PRICE"
+            type="I32" />
+      <leaf name="PRICE_RETIRE"
+            type="I32" />
+      <leaf name="RESALE_TIME_LEFT"
+            type="I16" />
+      <leaf name="VENDOR_NAMEID"
+            type="I32" />
+      <!-- name id of player vendor -->
+      <leaf name="FACTION_TYPE"
+            type="I4" />
+      <!-- game_share/pvp_clan.h -->
+      <leaf name="FACTION_POINT_PRICE"
+            type="I32" />
+      <!-- 0 for standard behaviour -->
+      <!-- 1 if the sheet id is the one of an item, and if we got a plan for that item in the slot -->
+      <!-- 2 if the slot is for a skill. In this case the sheet ID must be interpreted as an enum for that skill -->
+      <!-- These values are defined as an enum in game_share/trade_slot_type.h -->
+      <leaf name="SLOT_TYPE"
+            type="I2" />
+      <!-- see TBotChatSellerType -->
+      <leaf name="SELLER_TYPE"
+            type="I2" />
+    </branch>
+  </branch>
+  <!-- NB this is not a copy of the server db, but the concatenation of all items pages -->
+  <!--
+        <branch name="ITEMS_FOR_MISSIONS">
+                <branch name="" count="512">
+                        -->
+  <!--<leaf name="SHEET"                  type="I32"/>
+                        <leaf name="QUALITY"            type="I16"/>
+                        <leaf name="WEIGHT"                     type="I16"/>
+                        <leaf name="NAMEID"                     type="I32"/>
+                        <leaf name="INFO_VERSION"       type="I8"/>
+                        -->
+  <!-- the same than for TRADING:x:SLOT_type -->
+  <!--
+                        <leaf name="SLOT_TYPE"                  type="I2"/>
+                        <leaf name="LOGIC_TEXT_ID"      type="I32"/>
+                        <leaf name="DESC_TEXT_ID"      type="I32"/>
+                </branch>
+        </branch>-->
+  <!-- NB this is not a copy of the server db, but the concatenation of all mission -->
+  <branch name="CHOOSE_MISSIONS">
+    <branch name=""
+            count="512">
+      <leaf name="ICON"
+            type="I32" />
+      <leaf name="TEXT"
+            type="I32" />
+      <leaf name="DETAIL_TEXT"
+            type="I32" />
+      <leaf name="PREREQ_STATE"
+            type="I8" />
+    </branch>
+  </branch>
+  <branch name="CHARACTER_INFO"
+          bank="PLR">
+    <branch name="CAREER"
+            count="16">
+      <branch name="JOB"
+              count="8">
+        <leaf name="JOB_CAP"
+              type="I12" />
+        <!-- (0,no) (10-250,valid more later) -->
+        <leaf name="STATUS"
+              type="I1" />
+        <!-- Bit 1 is the Frozen State. 1 for frozen -->
+        <leaf name="BEGIN_FREEZE_TIME"
+              type="I32" />
+        <!-- Valide if STATUS (Frozen State) is 1 (frozen), in SERVER TICKS TIME, can unfreeze if gamecycle > FREEZE_TIME -->
+        <leaf name="END_FREEZE_TIME"
+              type="I32" />
+        <!-- Valide if STATUS (Frozen State) is 1 (frozen), in SERVER TICKS TIME, can unfreeze if gamecycle > FREEZE_TIME -->
+      </branch>
+    </branch>
+  </branch>
+  <!-- context menu -->
+  <branch name="TARGET"
+          bank="PLR">
+    <branch name="CONTEXT_MENU"
+            bank="PLR"
+            atom="1">
+      <leaf name="PROGRAMMES"
+            type="I32" />
+      <!-- options for missions in the context menu -->
+      <branch name="MISSIONS_OPTIONS"
+              bank="PLR">
+        <branch name=""
+                count="8"
+                atom="1">
+          <leaf name="TITLE"
+                type="I32" />
+          <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
+          <leaf name="PLAYER_GIFT_NEEDED"
+                type="I1" />
+          <!-- want a player gift ? -->
+          <leaf name="PRIORITY"
+                type="I2" />
+          <!-- priority of the option : the higher it is, the higher the option will be displayed in the menu -->
+        </branch>
+      </branch>
+      <!-- A NPC may offer to view a webpage -->
+      <leaf name="WEB_PAGE_URL"
+            type="I32" />
+      <!-- a text ID of 0 means there's no WebPage -->
+      <leaf name="WEB_PAGE_TITLE"
+            type="I32" />
+      <!-- a text ID of 0 means there's no WebPage -->
+      <!-- A NPC may offer to view an outpost -->
+      <leaf name="OUTPOST"
+            type="I32" />
+      <!-- outpost this bot give access to (sheet id inside) -->
+      <!-- Mission rings -->
+      <branch name="MISSION_RING">
+        <branch name=""
+                count="4">
+          <leaf name="TITLE"
+                type="I32" />
+          <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
+          <leaf name="ID"
+                type="I32" />
+          <!-- the id of the action if selected -->
+        </branch>
+      </branch>
+    </branch>
+  </branch>
+  <!-- R2 specific -->
+  <branch name="R2">
+    <branch name="PLOT_ITEMS">
+      <!-- IMPORTANT : update the define in r2ed_scenario.xml if you change this value -->
+      <branch name=""
+              count="32"
+              atom="">
+        <leaf name="SHEET"
+              type="I32" />
+      </branch>
+    </branch>
+    <branch name="AVAILABLE_PLOT_ITEMS">
+      <!-- IMPORTANT : update the define in r2ed_scenario.xml if you change this value -->
+      <branch name=""
+              count="200"
+              atom="">
+        <leaf name="SHEET"
+              type="I32" />
+      </branch>
+    </branch>
+    <branch name="REFERENCE_PLOT_ITEMS">
+      <!-- IMPORTANT : update the define in r2ed_scenario.xml if you change this value -->
+      <branch name=""
+              count="200"
+              atom="">
+        <leaf name="SHEET"
+              type="I32" />
+      </branch>
+    </branch>
+    <branch name="CURR_PLOT_ITEM">
+      <leaf name="SHEET"
+            type="I32" />
+    </branch>
+    <!-- DM GIFT -->
+    <branch name="DM_GIFT">
+      <branch name=""
+              count="8"
+              atom="">
+        <leaf name="SHEET"
+              type="I32" />
+        <leaf name="QUANTITY"
+              type="I32" />
+      </branch>
+    </branch>
+  </branch>
+</database_description>

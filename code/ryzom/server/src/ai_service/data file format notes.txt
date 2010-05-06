@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="0">
+
+	<C>
+	prim hierachy built from
+	- nodes
+	- zones
+	- points
+	- splines
+
+	continent = node
+	- prop AI_TYPE=CONTINENT
+
+		manager = node
+		- prop AI_TYPE=MANAGER
+		- prop AI_MANAGER_TYPE=FAUNA/TRIBE/PETS/
+
+			manager delimiter = zone
+			- prop AI_TYPE=BOUDARY
+			- prop AI_BOUNDARY_TYPE=INCLUDE
+
+			manager exclusion areas = zone
+			- prop AI_TYPE=BOUNDARY
+			- prop AI_BOUNDARY_TYPE=EXCLUDE
+
+			fauna group = node
+			- prop AI_TYPE=GROUP_FAUNA
+			- prop AI_FAUNA_TYPE=HERBIVORE/PREDATOR/CARNIVORE
+			- prop AI_FAUNA_TIMER_xxx=timer value
+			- prop AI_FAUNA_DAYNIGHT=DAY/NIGHT/ALLWAYS/NEVER
+
+				fauna group spawn place, eat place, rest place = points/ zones
+				- prop AI_TYPE=PLACE
+				- prop AI_PLACE_TYPE=FAUNA_FOOD/FAUNA_REST/FAUNA_SPAWN
+				- prop AI_PLACE_RADIUS=radius
+
+				fauna group population = node
+				- prop AI_TYPE=FAUNA_SPAWN
+				- prop AI_FAUNA_SPAWN_WEIGHT=integer weight
+
+					fauna group population = node
+					- prop AI_TYPE=FAUNA_SPAWN_ATOM
+					- prop AI_CREATURE_TYPE=sheet name
+					- prop AI_CREATURE_COUNT=count (can be 'min max' later)
+	</C>
+
+  <ROOT_PRIMITIVE TYPE="node">
+
+    <CHILD TYPE="node">
+      <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>AI-LesFalaises</STRING> </PROPERTY>
+        <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>CONTINENT</STRING> </PROPERTY>
+
+      <CHILD TYPE="node">
+        <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>FAUNA-lesfalaises</STRING> </PROPERTY>
+        <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>MANAGER</STRING> </PROPERTY>
+        <PROPERTY TYPE="string"> <NAME>AI_MANAGER_TYPE</NAME> <STRING>FAUNA</STRING> </PROPERTY>
+
+        <CHILD TYPE="zone">
+          <PT X="12159.2" Y="-1281.5" Z="0"/>
+          <PT X="6874.8" Y="-1262.8" Z="0"/>
+          <PT X="6883.6" Y="-5596.8" Z="0"/>
+          <PT X="12159.8" Y="-5599" Z="0"/>
+          <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>AIMgr lesfalaises boundary</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>BOUNDARY</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_BOUNDARY_TYPE</NAME> <STRING>INCLUDE</STRING> </PROPERTY>
+        </CHILD>
+
+        <CHILD TYPE="zone">
+          <PT X="8100" Y="-2900" Z="0"/>
+          <PT X="7900" Y="-2900" Z="0"/>
+          <PT X="7900" Y="-3100" Z="0"/>
+          <PT X="8100" Y="-3100" Z="0"/>
+          <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>no go zone round village</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>BOUNDARY</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_BOUNDARY_TYPE</NAME> <STRING>INCLUDE</STRING> </PROPERTY>
+        </CHILD>
+
+        <CHILD TYPE="node">
+          <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>GROUP_FAUNA</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_FAUNA_TYPE</NAME> <STRING>HERBIVORE</STRING> </PROPERTY>
+          <PROPERTY TYPE="string"> <NAME>AI_SPAWN_TYPE</NAME> <STRING>ALLWAYS</STRING> </PROPERTY>
+
+          <CHILD TYPE="point">
+            <PT X="7100" Y="-2100" Z="0"/>
+            <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 spawn</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>PLACE</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_TYPE</NAME> <STRING>FAUNA_SPAWN</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_RADIUS</NAME> <STRING>10</STRING> </PROPERTY>
+          </CHILD>
+
+          <CHILD TYPE="point">
+            <PT X="7200" Y="-2000" Z="0"/>
+            <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 food</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>PLACE</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_TYPE</NAME> <STRING>FAUNA_FOOD</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_RADIUS</NAME> <STRING>10</STRING> </PROPERTY>
+          </CHILD>
+
+          <CHILD TYPE="point">
+            <PT X="7000" Y="-2000" Z="0"/>
+            <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 rest</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>PLACE</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_TYPE</NAME> <STRING>FAUNA_REST</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_PLACE_RADIUS</NAME> <STRING>10</STRING> </PROPERTY>
+          </CHILD>
+
+          <CHILD TYPE="node">
+            <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 population v1</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>FAUNA_SPAWN</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_FAUNA_SPAWN_WEIGHT</NAME> <STRING>5</STRING> </PROPERTY>
+            <CHILD TYPE="node">
+              <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 population v1 armas lvl 1</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>FAUNA_SPAWN_ATOM</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_TYPE</NAME> <STRING>arma_des_lvl_01.creature</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_COUNT</NAME> <STRING>4</STRING> </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="node">
+              <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 population v1 armas lvl 2</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>FAUNA_SPAWN_ATOM</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_TYPE</NAME> <STRING>arma_des_lvl_02.creature</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_COUNT</NAME> <STRING>2</STRING> </PROPERTY>
+            </CHILD>
+          </CHILD>
+
+          <CHILD TYPE="node">
+            <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 population v2</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>FAUNA_SPAWN</STRING> </PROPERTY>
+            <PROPERTY TYPE="string"> <NAME>AI_FAUNA_SPAWN_WEIGHT</NAME> <STRING>5</STRING> </PROPERTY>
+            <CHILD TYPE="node">
+              <PROPERTY TYPE="string"> <NAME>Name</NAME> <STRING>herb1 population v2 armas lvl 1</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_TYPE</NAME> <STRING>FAUNA_SPAWN_ATOM</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_TYPE</NAME> <STRING>arma_des_lvl_01.creature</STRING> </PROPERTY>
+              <PROPERTY TYPE="string"> <NAME>AI_CREATURE_COUNT</NAME> <STRING>5</STRING> </PROPERTY>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+
+      </CHILD>	<C> end of herb1 </C>
+
+    </CHILD>	<C> end of FAUNA-lesfalaises </C>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>

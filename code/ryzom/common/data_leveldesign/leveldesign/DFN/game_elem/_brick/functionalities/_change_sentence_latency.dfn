@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Modifier" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="Mode" Type="Type" Filename="_modifier_mode.typ"/>
+  <LOG>Tue Nov 26 11:44:02 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

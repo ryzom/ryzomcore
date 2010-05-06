@@ -1,0 +1,6 @@
+ADD_SUBDIRECTORY(chat)
+ADD_SUBDIRECTORY(collision)
+ADD_SUBDIRECTORY(frontend)
+ADD_SUBDIRECTORY(position)
+
+INSTALL(FILES common.cfg DESTINATION etc/snowballs COMPONENT services)

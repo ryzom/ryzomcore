@@ -1,0 +1,8 @@
+; georges_plugin_test.def : Declares the module parameters for the DLL.
+
+LIBRARY      "georges_plugin_test"
+DESCRIPTION  'georges_plugin_test Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
+	IGeorgesEditGetInterface

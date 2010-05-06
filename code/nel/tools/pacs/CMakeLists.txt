@@ -1,0 +1,1 @@
+SUBDIRS(build_ig_boxes build_indoor_rbank build_rbank)

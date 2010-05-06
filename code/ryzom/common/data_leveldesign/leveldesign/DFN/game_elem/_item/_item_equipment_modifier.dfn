@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="CharacteristicsModifier" Type="Type" Filename="_characteristic.typ" Array="true" Default="none"/>
+  <ELEMENT Name="RegenCharacteristicsModifier" Type="Dfn" Filename="_item_regen_characteristic_modifier.dfn" Array="true" Default="none"/>
+  <ELEMENT Name="ScoresModifier" Type="Dfn" Filename="_item_scores_modifier.dfn" Array="true" Default="none"/>
+  <ELEMENT Name="RegenScoresModifier" Type="Dfn" Filename="_item_regen_scores_modifier.dfn" Array="true" Default="none"/>
+  <ELEMENT Name="SkillsModifier" Type="Dfn" Filename="_item_skills_modifier.dfn" Array="true" Default="none"/>
+  <ELEMENT Name="LevelMini" Type="Type" Filename="int.typ" Default="0"/>
+  <LOG>Fri Jun 28 20:51:48 2002 (saffray) Dfn Structure = 
+Fri Jun 28 20:57:43 2002 (saffray) Dfn Structure = 
+Mon Jul 01 10:48:27 2002 (saffray) Dfn Structure = 
+Tue Dec 10 14:23:52 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

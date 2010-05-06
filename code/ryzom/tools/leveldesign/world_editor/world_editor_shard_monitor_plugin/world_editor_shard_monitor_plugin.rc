@@ -1,0 +1,201 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_FLAGS DIALOG DISCARDABLE  0, 0, 282, 274
+STYLE DS_MODALFRAME | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Shard displayer"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Connect",IDC_CONNECT,10,42,80,15
+    CONTROL         "Slider1",IDC_DOWNLOAD,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,151,62,89,10
+    COMBOBOX        IDC_DISPLAY_MODE_COMBO,62,94,143,56,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_COLOR_LIST,61,113,143,76,LBS_OWNERDRAWVARIABLE | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Change color ...",IDC_BROWSE_COLOR,209,113,64,15
+    PUSHBUTTON      "Select all",IDC_SELECT_ALL,209,133,64,14
+    PUSHBUTTON      "Unselect all",IDC_UNSELECT_ALL,209,152,64,14
+    CONTROL         "HP Down",IDC_HP_DOWN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,211,58,11
+    CONTROL         "Entity type",IDC_CLOSE_UP_SHOW_TYPE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,223,48,13
+    CONTROL         "Entity mode",IDC_CLOSE_UP_SHOW_MODE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,236,54,13
+    CONTROL         "Entity HP",IDC_CLOSE_UP_SHOW_HP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,250,54,13
+    CONTROL         "Slider1",IDC_DETAILS_DISTANCE,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,134,203,82,12
+    LTEXT           "Not connected",IDC_STATE,103,17,170,10
+    LTEXT           "0 received bytes",IDC_RECEIVED,104,30,108,10
+    LTEXT           "0 sent bytes",IDC_SENT,104,40,108,10
+    LTEXT           "0 entities visibles",IDC_ENTITES,104,51,108,10
+    LTEXT           "Shard name:",IDC_STATIC,10,12,65,10
+    LTEXT           "100.0 kB/s",IDC_DLDVALUE,104,62,35,10
+    LTEXT           "Display mode :",IDC_DISPLAY_MODE,10,97,50,8
+    LTEXT           "Entity colors :",IDC_ENTITY_COLORS,11,116,44,9
+    GROUPBOX        "Shard",IDC_STATIC_SHARD,2,3,277,74,WS_GROUP
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,2,82,276,112,WS_GROUP
+    GROUPBOX        "Details",IDC_STATIC_CLOSE_UP_DETAILS,2,197,66,70,
+                    WS_GROUP
+    LTEXT           "Details distance :",IDC_DETAIL_DISTANCE_STATIC,75,203,
+                    58,10
+    LTEXT           "Near",IDC_STATIC_NEAR,137,217,18,10
+    LTEXT           "Far",IDC_STATIC_FAR,200,218,13,10
+    LTEXT           "SHARD_LIST",IDC_SHARD_LIST_PLACEMENT,11,22,87,17,NOT 
+                    WS_VISIBLE | NOT WS_GROUP
+END
+
+IDD_DIALOG_LOGIN DIALOG DISCARDABLE  0, 0, 186, 79
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Authentification"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_LOGIN,48,14,118,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PASSWORD,48,31,118,15,ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,42,53,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,95,53,50,14
+    LTEXT           "Login :",IDC_LOGIN_TEXT,5,17,32,11
+    LTEXT           "Password :",IDC_PASSWORD_TEXT,5,34,36,11
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOG_FLAGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 275
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+    END
+
+    IDD_DIALOG_LOGIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 72
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIALOG_FLAGS DLGINIT
+BEGIN
+    IDC_DISPLAY_MODE_COMBO, 0x403, 12, 0
+0x6e45, 0x6974, 0x7974, 0x5420, 0x7079, 0x0065, 
+    IDC_DISPLAY_MODE_COMBO, 0x403, 11, 0
+0x6c41, 0x7669, 0x2f65, 0x6544, 0x6461, "\000" 
+    IDC_DISPLAY_MODE_COMBO, 0x403, 11, 0
+0x6948, 0x2074, 0x6f50, 0x6e69, 0x7374, "\000" 
+    IDC_DISPLAY_MODE_COMBO, 0x403, 5, 0
+0x6f4d, 0x6564, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// TGA
+//
+
+IDR_ENTITY_ICONS_TGA    TGA     DISCARDABLE     "entity_icons.tga"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CONNECT             "Connect"
+    IDS_NOT_CONNECTED       "Not Connected"
+    IDS_DISCONNECT          "Disconnect"
+    IDS_CONNECTED_TO        "Connected to "
+    IDS_BYTE_SENT           "bytes sent"
+    IDS_WAITING_SERVER_PARAMS "Waiting server params from "
+    IDS_CANCEL_CONNECT      "Cancel connect"
+    IDS_WAITING_LOGIN_CONFIRMATION "Waiting login confirmation from "
+    IDS_LOGIN_FAILED        "Login failed.\n"
+    IDS_ERROR               "Error"
+END
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

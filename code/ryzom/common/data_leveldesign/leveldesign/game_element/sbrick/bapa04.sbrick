@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BAPA"/>
+      <ATOM Name="SPCost" Value="0"/>
+      <ATOM Name="Property 0" Value="TA_UNMOUNT"/>
+      <ATOM Name="Level" Value="0"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="mektoub_steed.tga"/>
+      <ATOM Name="IconBack" Value="BK_generic.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Oct 01 17:46:09 2004 (fleury) .Client.Icon = TP_caravane.tga
+Fri Oct 01 17:46:09 2004 (fleury) .Client.IconBack = 
+Tue Dec 07 16:23:33 2004 (fleury) .Client.Icon = mektoub_steed.tga
+Tue Dec 07 16:23:33 2004 (fleury) .Client.IconBack = BK_generic.tga
+Mon Apr 04 14:48:51 2005 (fleury) .Basics.Level = 0</LOG>
+</FORM>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Version="0.4" State="modified">
+  <ELEMENT Name="PathName" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="FileName" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="PastatoidDef" Type="Dfn" Filename="_ai_pastatoid.dfn" Array="true"/>
+</DFN>

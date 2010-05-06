@@ -1,0 +1,80 @@
+# when an entity resists a spell
+BS_U_RESIST_SPELL_E			"&BC&You resist the spell from $0e."
+BS_UR_RESIST_SPELL_E			"&RG&$0e resists your spell."
+BS_RESIST_SPELL_EE			"&BC&$0e resists the spell from $1e."
+BS_RESIST_SPELL_E			"&BC&$0e resists a spell."
+
+# when an entity is protected against a special effect
+BS_TARGET_PROTECTED			"&RG&Your target is protected against this type of effect."
+BS_U_PROTECTED				"&VE&You are protected against this type of effect."
+
+# magic shield
+BS_MAGIC_SHIELD_I			"&VE&Your magic shield has absorbed $0i damage."
+BS_MAGIC_SHIELD_DEAD			"&VE&Your magic shield has been destroyed."
+
+# when an entity is hit by a spell
+BS_SUFFER_OFFENSIVE_SPELL_E		"&BC&An aggressive spell is cast on $0e."
+BS_SUFFER_NEUTRAL_SPELL_E		"&BC&A neutral spell is cast on $0e."
+BS_SUFFER_BENEFICIAL_SPELL_E		"&BC&A beneficial spell is cast on $0e."
+
+# when the player is hit by a spell
+BS_U_SUFFER_OFFENSIVE_SPELL_E		"&RG&$0e casts an aggressive spell on you."
+BS_U_SUFFER_NEUTRAL_SPELL_E		"&BC&$0e casts a neutral spell on you."
+BS_U_SUFFER_BENEFICIAL_SPELL_E		"&BC&$0e casts a beneficial spell on you."
+
+BS_SELF_CAST_S				"&BC&The $0s magic hits you."
+
+# when an entity is casting
+BS_CASTING_OFFENSIVE_E			"&BL&$0e casts an aggressive spell"
+BS_CASTING_NEUTRAL_E			"&BL&$0e casts a neutral spell"
+BS_CASTING_BENEFICIAL_E			"&BL&$0e casts a beneficial spell"
+
+
+# when an entity is healed
+BS_HEAL_EEI				"&BC&$0e heals $1e by $2i hp"
+BS_YOU_HEAL_EI				"&BC&You heal $0e by $1i hp."
+BS_HEALS_YOU_EI				"&BC&$0e heals you by $1i hp."
+
+
+# break cast
+BS_CAST_BREAK				"&RG&Your spell casting has been broken."
+BS_TARGET_HIGHER_LEVEL			"&RG&This spell has no effect because the target level is too high."
+
+
+EGS_MAGIC_U_SUFFER_OFFENSIVE_SPELL_SAP_EI	"&RG&$0e inflicts you $1i magic sap damage."
+EGS_MAGIC_U_CAST_OFFENSIVE_SPELL_SAP_EI		"&BC&You inflict $1i magic sap damage to $0e."
+EGS_MAGIC_U_SUFFER_OFFENSIVE_SPELL_STA_EI	"&RG&$0e inflicts you $1i magic stamina damage."
+EGS_MAGIC_U_CAST_OFFENSIVE_SPELL_STA_EI		"&BC&You inflict $1i magic stamina damage to $0e."
+EGS_MAGIC_U_SUFFER_OFFENSIVE_SPELL_HP_EI	"&RG&$0e inflicts you $1i magic hit points damage."
+EGS_MAGIC_U_CAST_OFFENSIVE_SPELL_HP_EI		"&BC&You inflict $1i magic hit points damage to $0e."
+
+EGS_MAGIC_U_SELFCAST_OFFENSIVE_SPELL_HP_I	"&BC&You inflict yourself $0i magic hit points damage."
+EGS_MAGIC_U_SELFCAST_OFFENSIVE_SPELL_SAP_I	"&BC&You inflict yourself $0i magic sap points damage."
+EGS_MAGIC_U_SELFCAST_OFFENSIVE_SPELL_STA_I	"&BC&You inflict yourself $0i magic stamina points damage."
+
+EGS_MAGIC_CAST_OFFENSIVE_SPELL_HP_EEI		"&BC&$0e inflicts $2i magic hit points damage on $1e."
+EGS_MAGIC_CAST_OFFENSIVE_SPELL_SAP_EEI		"&BC&$0e inflicts $2i magic sap points damage on $1e."
+EGS_MAGIC_CAST_OFFENSIVE_SPELL_STA_EEI		"&BC&$0e inflicts $2i magic stamina points damage on $1e."
+
+EGS_MAGIC_SELFCAST_OFFENSIVE_SPELL_HP_EI	"&BC&$0e inflicts himself $1i magic hit points damage."
+EGS_MAGIC_SELFCAST_OFFENSIVE_SPELL_SAP_EI	"&BC&$0e inflicts himself $1i magic sap points damage."
+EGS_MAGIC_SELFCAST_OFFENSIVE_SPELL_STA_EI	"&BC&$0e inflicts himself $1i magic stamina points damage."
+
+EGS_MAGIC_U_SUFFER_HEAL_SPELL_SAP_EI		"&BC&$0e heals you $1i sap."
+EGS_MAGIC_U_CAST_HEAL_SPELL_SAP_EI		"&BC&You heal $0e $1i sap."
+EGS_MAGIC_U_SUFFER_HEAL_SPELL_STA_EI		"&BC&$0e heals you $1i stamina."
+EGS_MAGIC_U_CAST_HEAL_SPELL_STA_EI		"&BC&You heal $0e $1i stamina."
+EGS_MAGIC_U_SUFFER_HEAL_SPELL_HP_EI		"&BC&$0e heals you $1i hit points."
+EGS_MAGIC_U_CAST_HEAL_SPELL_HP_EI		"&BC&You heal $0e $1i hit points."
+
+EGS_MAGIC_HEAL_SPELL_HP_EEI			"&BC&$0e heals $1e $2i hit points."
+EGS_MAGIC_HEAL_SPELL_SAP_EEI			"&BC&$0e heals $1e $2i sap points."
+EGS_MAGIC_HEAL_SPELL_STA_EEI			"&BC&$0e heals $1e $2i stamina points."
+
+EGS_MAGIC_U_SELF_HEAL_HP_I			"&BC&You heal yourself $0i hit points."
+EGS_MAGIC_U_SELF_HEAL_SAP_I			"&BC&You regain $0i sap points."
+EGS_MAGIC_U_SELF_HEAL_STA_I			"&BC&You regain $0i stamina points."
+EGS_MAGIC_SELF_HEAL_HP_EI			"&BC&$0e regains $1i hit points."
+EGS_MAGIC_SELF_HEAL_SAP_EI			"&BC&$0e regains $1i sap points."
+EGS_MAGIC_SELF_HEAL_STA_EI			"&BC&$0e regains $1i stamina points."
+

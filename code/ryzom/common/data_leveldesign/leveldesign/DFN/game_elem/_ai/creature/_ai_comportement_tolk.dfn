@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Active" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Operator" Type="Type" Filename="_ai_operator.typ" Default="Talk"/>
+  <LOG>Thu Aug 29 15:52:11 2002 (chafik) Dfn Parents = 
+Thu Aug 29 15:52:11 2002 (chafik) Dfn Structure = 
+Fri Aug 30 13:53:42 2002 (chafik) Dfn Parents = 
+Fri Aug 30 13:53:42 2002 (chafik) Dfn Structure = 
+Fri Aug 30 13:54:00 2002 (chafik) Dfn Structure = 
+Fri Aug 30 13:54:34 2002 (chafik) Dfn Structure = 
+Fri Aug 30 14:51:45 2002 (corvazier) Dfn Parents = 
+Mon Sep 09 16:50:17 2002 (robert) Dfn Structure = 
+Mon Sep 09 16:52:32 2002 (robert) Dfn Structure = </LOG>
+</DFN>

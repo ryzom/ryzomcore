@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="Main Effect" Type="Dfn" Filename="_effect.dfn"/>
+  <ELEMENT Name="Has end effect" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="End Effect Effect" Type="Dfn" Filename="_effect.dfn"/>
+  <ELEMENT Name="Targets Can Resist" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Tue Nov 26 11:56:29 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:57:55 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:58:10 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:58:23 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:00:15 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:00:48 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:12 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:26 2002 (fleury) Dfn Structure = 
+Tue Nov 26 12:01:49 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:34:08 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:34:18 2002 (fleury) Dfn Structure = 
+Tue Nov 26 16:37:38 2002 (fleury) Dfn Structure = 
+Thu Nov 28 12:12:45 2002 (fleury) Dfn Structure = 
+Thu Nov 28 12:14:14 2002 (fleury) Dfn Structure = 
+Mon Dec 02 10:36:06 2002 (fleury) Dfn Structure = 
+Mon Dec 02 11:00:49 2002 (fleury) Dfn Structure = 
+Thu Jan 16 14:55:36 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

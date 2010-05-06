@@ -1,0 +1,890 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include <windows.h>
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PANEL DIALOG DISCARDABLE  0, 0, 108, 251
+STYLE WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Export model",ID_SAVEMODEL,10,10,85,15
+    PUSHBUTTON      "Export model animations",ID_SAVE_MODEL_ANIM,10,90,85,15
+    PUSHBUTTON      "View the scene",ID_VIEW,10,152,85,15
+    PUSHBUTTON      "Export scene animations",ID_SAVE_SCENE_ANIM,10,110,85,
+                    15
+    PUSHBUTTON      "Export skeleton weights",ID_SAVESWT,10,50,85,15
+    PUSHBUTTON      "Export Instance Group",ID_EXPORTINSTANCEGROUP,10,70,85,
+                    15
+    PUSHBUTTON      "Export skeleton",ID_SAVESKELETON,10,30,85,15
+    PUSHBUTTON      "Options",ID_OPTIONS,10,173,85,15
+    PUSHBUTTON      "Node properties",ID_NODE_PROPERTIES,10,194,85,15
+    PUSHBUTTON      "Export Collision",ID_SAVECOLLISION,10,131,85,15
+    CTEXT           "Can't read the version",IDC_VERSION,15,234,75,10
+    PUSHBUTTON      "Test interface mesh",ID_TEST_INTERFACE_MESH,10,215,85,
+                    15
+END
+
+IDD_SWT DIALOG DISCARDABLE  0, 0, 186, 63
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Choose the channel to export"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,42,50,14
+    CONTROL         "All",IDC_ALLCHANNEL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,23,10
+    CONTROL         "Channel Position",IDC_CHANNELPOS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,23,69,10
+    CONTROL         "Channel Rotation",IDC_CHANNELROT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,34,71,10
+    CONTROL         "Channel Scale",IDC_CHANNELSCA,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,46,62,10
+END
+
+IDD_EXPORTSCENE DIALOG DISCARDABLE  0, 0, 171, 255
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,115,173,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,115,190,50,14
+    CONTROL         "Export Lighting",IDC_CHECKEXPORTLIGHTING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,18,63,10
+    GROUPBOX        "Light Method",IDC_STATIC,7,60,74,39,WS_GROUP
+    CONTROL         "Raytrace",IDC_RADIONORMALEXPORTLIGHTING,"Button",
+                    BS_AUTORADIOBUTTON,15,74,45,10
+    CONTROL         "Soft Shadow",IDC_RADIORADIOSITYEXPORTLIGHTING,"Button",
+                    BS_AUTORADIOBUTTON,15,84,57,10
+    EDITTEXT        IDC_EDITEXPORTLIGHTING,7,42,137,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTONEXPORTLIGHTING,151,42,13,14
+    LTEXT           "Lumel Size in meter",IDC_STATIC,90,63,62,8
+    EDITTEXT        IDC_EDITLUMELSIZE,90,73,40,14,ES_AUTOHSCROLL
+    GROUPBOX        "OverSampling",IDC_STATIC,7,104,60,54,WS_GROUP
+    CONTROL         "None",IDC_RADIOSS1,"Button",BS_AUTORADIOBUTTON,15,113,
+                    33,10
+    CONTROL         "4x",IDC_RADIOSS2,"Button",BS_AUTORADIOBUTTON,15,124,23,
+                    10
+    CONTROL         "16x",IDC_RADIOSS3,"Button",BS_AUTORADIOBUTTON,15,135,27,
+                    10
+    CONTROL         "64x",IDC_RADIOSS4,"Button",BS_AUTORADIOBUTTON,15,146,27,
+                    10
+    CONTROL         "Shadow",IDC_SHADOW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,81,18,42,10
+    CONTROL         "Exclude non selected nodes from lighting",IDC_EXCLUDE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,145,10
+    CONTROL         "Show Lumel",IDC_SHOWLUMEL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,91,100,55,10
+    CONTROL         "Export bg color",IDC_EXPORT_BG_COLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,91,115,63,10
+    CONTROL         "Test Surface Lighting",IDC_TEST_SURFACE_LIGHT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,173,84,10
+    EDITTEXT        IDC_EDITCELLSIZE,15,198,65,15,ES_AUTOHSCROLL
+    LTEXT           "Surface CellSize (in meter)",IDC_STATIC,15,188,85,10
+    EDITTEXT        IDC_EDITCELLDELTAZ,15,228,65,15,ES_AUTOHSCROLL
+    LTEXT           "Surface DeltaZ (in meter)",IDC_STATIC2,15,218,85,10
+    GROUPBOX        "Surface Lighting",IDC_STATIC,7,163,98,85
+    CONTROL         "Output lightmap log",IDC_CHECKOUTPUTLIGHTMAPLOG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,29,77,10
+END
+
+IDD_CALCULATING DIALOG DISCARDABLE  0, 0, 186, 181
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Calculating..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,
+                    7,41,172,14
+    LTEXT           "Please wait intializing...",IDC_STATICTIMELEFT,7,7,172,
+                    8
+    PUSHBUTTON      "Interrupt",IDC_BUTTONCANCEL,129,23,50,14,BS_NOTIFY
+    LTEXT           "Object progression",IDC_STATIC,7,28,79,8
+    LTEXT           "Lightmaps Informations...",IDC_STATICINFO,7,60,172,114
+END
+
+IDD_LOD DIALOG DISCARDABLE  0, 0, 360, 200
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "LOD Root Properties",IDC_STATIC,5,5,172,95
+    LTEXT           "List of lod mesh (ungrowing order):",IDC_STATIC,15,15,
+                    108,10,SS_CENTERIMAGE
+    LISTBOX         IDC_LIST1,15,25,111,70,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Add..",IDC_ADD,131,25,40,14
+    PUSHBUTTON      "Remove",IDC_REMOVE,131,39,40,14
+    PUSHBUTTON      "Up",IDC_UP,131,54,40,14
+    PUSHBUTTON      "Down",IDC_DOWN,131,68,40,14
+    GROUPBOX        "LOD Properties",IDC_STATIC,5,105,172,50
+    CONTROL         "Blend in",IDC_BLEND_IN,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,15,121,40,10
+    CONTROL         "Blend out",IDC_BLEND_OUT,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,15,130,45,10
+    CONTROL         "Coarse mesh",IDC_COARSE_MESH,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,15,140,55,10
+    CONTROL         "Dynamic mesh",IDC_DYNAMIC_MESH,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,80,120,60,10
+    LTEXT           "Dist Max:",IDC_STATIC,5,160,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_DIST_MAX,51,160,45,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Blend length:",IDC_STATIC,80,135,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_BLEND_LENGTH,125,135,45,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    GROUPBOX        "MRM properties",IDC_STATIC,185,5,172,95
+    CONTROL         "Active MRM",IDC_ACTIVE_MRM,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,195,20,60,10
+    LTEXT           "Skin reduction",IDC_STATIC,195,35,50,10,SS_CENTERIMAGE
+    CONTROL         "Min",IDC_SKIN_REDUCTION_MIN,"Button",BS_AUTORADIOBUTTON,
+                    195,45,45,8
+    CONTROL         "Max",IDC_SKIN_REDUCTION_MAX,"Button",BS_AUTORADIOBUTTON,
+                    195,55,45,8
+    CONTROL         "Best",IDC_SKIN_REDUCTION_BEST,"Button",
+                    BS_AUTORADIOBUTTON,195,65,45,8
+    LTEXT           "Steps count:",IDC_STATIC,260,20,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_NB_LOD,305,20,45,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Divisor poly:",IDC_STATIC,260,35,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_DIVISOR,305,35,45,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Dist Finest:",IDC_STATIC,260,50,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_DIST_FINEST,305,50,45,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Dist middle:",IDC_STATIC,260,65,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_DIST_MIDDLE,305,65,45,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Dist coarsest:",IDC_STATIC,260,80,45,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_DIST_COARSEST,305,80,45,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    GROUPBOX        "LOD Bones",IDC_STATIC,185,105,170,45
+    LTEXT           "Disable Distance (0 means always activated) :",
+                    IDC_STATIC,190,120,160,10
+    EDITTEXT        IDC_BONE_LOD_DISTANCE,190,130,45,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Export as Lod character (.clod)",IDC_EXPORT_CLOD,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,190,160,150,10
+END
+
+IDD_ACCEL DIALOG DISCARDABLE  0, 0, 360, 200
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Not an accelerator",IDC_RADIOACCELNO,"Button",
+                    BS_AUTORADIOBUTTON,5,5,75,10
+    CONTROL         "Portal",IDC_RADIOACCELPORTAL,"Button",
+                    BS_AUTORADIOBUTTON,5,21,34,10
+    CONTROL         "Cluster",IDC_RADIOACCELCLUSTER,"Button",
+                    BS_AUTORADIOBUTTON,5,70,37,10
+    CONTROL         "Father visible",IDC_FATHER_VISIBLE,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,27,81,57,10
+    CONTROL         "Visible from father",IDC_VISIBLE_FROM_FATHER,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,27,92,71,10
+    CONTROL         "Dynamic Portal",IDC_DYNAMIC_PORTAL,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,27,44,63,10
+    CONTROL         "Clusterize",IDC_CLUSTERIZE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,93,5,46,10
+    COMBOBOX        IDC_OCC_MODEL,209,30,123,134,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Occlusion model",IDC_STATIC,134,30,68,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_OPEN_OCC_MODEL,209,44,123,116,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Open portal occlusion model",IDC_STATIC,112,44,89,10,
+                    SS_CENTERIMAGE
+    GROUPBOX        "Audio properties",IDC_STATIC,105,19,237,141
+    RTEXT           "Sound group",IDC_STATIC,111,86,90,14
+    COMBOBOX        IDC_ENV_FX,209,106,123,87,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    RTEXT           "Environment FX",IDC_STATIC,112,106,89,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_SOUND_GROUP,209,86,123,101,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Father audible",IDC_FATHER_AUDIBLE,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,210,135,61,10
+    CONTROL         "Audible from father",IDC_AUDIBLE_FROM_FATHER,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,210,145,81,10
+    CONTROL         "Audible like visible",IDC_AUDIBLE_LIKE_VISIBLE,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,210,125,73,10
+END
+
+IDD_LIGHTMAP DIALOG DISCARDABLE  0, 0, 360, 211
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Properties for objects with lightmaps",IDC_STATIC,5,5,
+                    150,70
+    LTEXT           "Lumel Size Multiplier",IDC_STATIC,10,15,64,13,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_LUMELSIZEMUL,96,15,40,14,ES_AUTOHSCROLL
+    LTEXT           "Soft Shadow Radius",IDC_STATIC,10,35,66,13,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_SOFTSHADOW_RADIUS,96,35,40,14,ES_AUTOHSCROLL
+    LTEXT           "Soft Shadow Cone Length",IDC_STATIC,10,55,84,13,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_SOFTSHADOW_CONELENGTH,96,55,40,14,
+                    ES_AUTOHSCROLL
+    GROUPBOX        "Properties for objects without lightmaps",IDC_STATIC,5,
+                    80,150,60
+    CONTROL         "If checked, use per vertex lighting attenuation else use global lighting attenuation for the object. Doesn't work with per pixel lighting shader.",
+                    IDC_USE_LIGHT_LOCAL_ATTENUATION,"Button",BS_AUTO3STATE | 
+                    BS_TOP | BS_MULTILINE | WS_TABSTOP,15,95,120,41
+    GROUPBOX        "Properties for lights",IDC_STATIC,160,5,185,200
+    CONTROL         "RealTime Light. If set, this light will light scene objects.",
+                    IDC_EXPORT_REALTIME_LIGHT,"Button",BS_AUTO3STATE | 
+                    BS_TOP | BS_MULTILINE | WS_TABSTOP,170,15,165,20
+    CONTROL         "RealTime Sun Light. If set, this DIRECTIONNAL light will be used as sun light to light scene objects.",
+                    IDC_EXPORT_AS_SUN_LIGHT,"Button",BS_AUTO3STATE | BS_TOP | 
+                    BS_MULTILINE | WS_TABSTOP,170,34,170,25
+    CONTROL         "LightMap Light. If set, this light will be used to compute the lightmaps of the project objects.",
+                    IDC_EXPORT_LIGHTMAP_LIGHT,"Button",BS_AUTO3STATE | 
+                    BS_TOP | BS_MULTILINE | WS_TABSTOP,170,60,170,20
+    LTEXT           "LightMap Animation Name. This is the name of the animation used to flick the light color.",
+                    IDC_STATIC,170,135,170,20
+    EDITTEXT        IDC_EXPORT_LIGHTMAP_NAME,170,155,85,15,ES_AUTOHSCROLL
+    CONTROL         "Animated Dynamic Light",IDC_EXPORT_LIGHTMAP_ANIMATED,
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,170,175,125,10
+    CONTROL         "Always group",IDC_LIGHT_GROUP_ALWAYS,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,170,80,150,15
+    CONTROL         "Sun group",IDC_LIGHT_GROUP_DAY,"Button",
+                    BS_AUTORADIOBUTTON,170,95,150,15
+    CONTROL         "Night group",IDC_LIGHT_GROUP_NIGHT,"Button",
+                    BS_AUTORADIOBUTTON,170,110,150,15
+    GROUPBOX        "Misc",IDC_STATIC,5,145,150,60
+    CONTROL         "Don't cast shadow for Interior. Known as Trick of the ""Matis serre""",
+                    IDC_LIGHT_DONT_CAST_SHADOW_INTERIOR,"Button",
+                    BS_AUTO3STATE | BS_TOP | BS_MULTILINE | WS_TABSTOP,15,
+                    155,135,20
+    CONTROL         "Don't cast shadow for Exterior. Known as Trick of the ""Matis serre""",
+                    IDC_LIGHT_DONT_CAST_SHADOW_EXTERIOR,"Button",
+                    BS_AUTO3STATE | BS_TOP | BS_MULTILINE | WS_TABSTOP,15,
+                    175,135,20
+    CONTROL         "Add Realtime Ambient Light With sun Ambient",
+                    IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,190,160,10
+END
+
+IDD_MISC DIALOG DISCARDABLE  0, 0, 360, 221
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Floating Object",IDC_FLOATING_OBJECT,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,5,5,65,12
+    GROUPBOX        "Ligoscape",IDC_STATIC,5,100,120,45
+    CONTROL         "Symmetry",IDC_LIGO_SYMMETRY,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,11,110,44,12
+    LTEXT           "Rotation:",IDC_STATIC,11,125,30,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_LIGO_ROTATE,60,126,57,14,ES_AUTOHSCROLL
+    LTEXT           "Weight (0~1):",IDC_STATIC,10,75,43,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_SWT_WEIGHT,60,75,60,14,ES_AUTOHSCROLL
+    CONTROL         "Enable",IDC_SWT,"Button",BS_AUTO3STATE | WS_TABSTOP,10,
+                    60,40,10
+    GROUPBOX        "Skeleton template weight",IDC_STATIC,5,50,120,45
+    GROUPBOX        "Radial Normals",IDC_STATIC,135,5,130,105
+    LTEXT           "Smooth group 29",IDC_STATIC,140,45,55,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_RADIAL_NORMAL_29,200,45,57,14,ES_AUTOHSCROLL
+    LTEXT           "Smooth group 30",IDC_STATIC,140,60,55,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_RADIAL_NORMAL_30,200,60,57,14,ES_AUTOHSCROLL
+    LTEXT           "Smooth group 31",IDC_STATIC,140,75,55,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_RADIAL_NORMAL_31,200,75,57,14,ES_AUTOHSCROLL
+    LTEXT           "Smooth group 32",IDC_STATIC,140,90,55,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_RADIAL_NORMAL_32,200,90,57,14,ES_AUTOHSCROLL
+    LTEXT           "For the 4 last smoothing group, choose the node you want to use the position to compute radial normals from it.",
+                    IDC_STATIC,140,15,120,25
+    GROUPBOX        "Mesh interfaces",IDC_STATIC,134,110,219,56
+    LTEXT           "Interface .max file",IDC_STATIC,141,120,61,15,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_INTERFACE_FILE,221,120,110,14,ES_AUTOHSCROLL
+    LTEXT           "Interface weld threshold",IDC_STATIC,141,137,77,15,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_INTERFACE_THRESHOLD,221,137,110,14,
+                    ES_AUTOHSCROLL
+    GROUPBOX        "Bone Scale",IDC_STATIC,5,150,120,60
+    CONTROL         "Enable",IDC_EXPORT_BONE_SCALE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,10,160,38,10
+    LTEXT           "Bone Reference Name extension:",IDC_STATIC,10,175,110,
+                    13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EXPORT_BONE_SCALE_NAME_EXT,10,190,75,14,
+                    ES_AUTOHSCROLL
+    CONTROL         "Get interface normals from scene objects",
+                    IDC_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,142,151,145,15
+    GROUPBOX        "Remanence",IDC_STATIC,134,169,219,45
+    CONTROL         "Use remanence",IDC_USE_REMANENCE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,137,178,66,9
+    LTEXT           "Slice number :",IDC_STATIC,138,191,47,10,SS_CENTERIMAGE
+    EDITTEXT        IDC_REMANENCE_SLICE_NUMBER,186,189,19,14,ES_AUTOHSCROLL
+    LTEXT           "Sampling period :",IDC_STATIC,210,192,54,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_REMANENCE_SAMPLING_PERIOD,266,190,20,14,
+                    ES_AUTOHSCROLL
+    CONTROL         "Shift texture at start of animation",
+                    IDC_REMANENCE_SHIFTING_TEXTURE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,207,178,116,9
+    LTEXT           "Rollup ratio :",IDC_ROLLUP_RATIO,290,192,41,8
+    EDITTEXT        IDC_REMANENCE_ROLLUP_RATIO,332,190,16,14,ES_AUTOHSCROLL
+END
+
+IDD_VEGETABLE DIALOG DISCARDABLE  0, 0, 360, 200
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Vegetable",IDC_VEGETABLE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,5,50,12
+    CONTROL         "Alpha Blend ON (double sided)",
+                    IDC_VEGETABLE_ALPHA_BLEND_ON,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,21,30,112,15
+    CONTROL         "Alpha Blend OFF",IDC_VEGETABLE_ALPHA_BLEND_OFF,"Button",
+                    BS_AUTORADIOBUTTON,20,74,85,15
+    CONTROL         "Lighted - precomputed",
+                    IDC_VEGETABLE_AB_ON_LIGHTED_PRECOMPUTED,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,50,45,85,15
+    CONTROL         "Unlighted",IDC_VEGETABLE_AB_ON_UNLIGHTED,"Button",
+                    BS_AUTORADIOBUTTON,50,61,90,15
+    CONTROL         "Lighted - precomputed",
+                    IDC_VEGETABLE_AB_OFF_LIGHTED_PRECOMPUTED,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,50,90,85,15
+    CONTROL         "Lighted - dynamic",IDC_VEGETABLE_AB_OFF_LIGHTED_DYNAMIC,
+                    "Button",BS_AUTORADIOBUTTON,50,105,90,15
+    CONTROL         "Unighted",IDC_VEGETABLE_AB_OFF_UNLIGHTED,"Button",
+                    BS_AUTORADIOBUTTON,50,120,85,15
+    CONTROL         "Double sided",IDC_VEGETABLE_AB_OFF_DOUBLE_SIDED,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,50,135,85,15
+    GROUPBOX        "Alpha mode",IDC_STATIC,15,20,135,155
+    GROUPBOX        "Bend center",IDC_STATIC,160,20,105,45
+    CONTROL         "Center Null",IDC_CENTER_NULL,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,166,30,50,15
+    CONTROL         "Center Z",IDC_CENTER_Z,"Button",BS_AUTORADIOBUTTON,166,
+                    45,50,15
+    LTEXT           "Bend Factor (0 - 1)",IDC_STATIC,160,75,60,8
+    EDITTEXT        IDC_VEGETABLE_BEND_FACTOR,226,70,40,14,ES_AUTOHSCROLL
+    CONTROL         "Force Best Sided Lighting",
+                    IDC_VEGETABLE_FORCE_BEST_SIDED_LIGHTING,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,20,155,120,15
+END
+
+IDD_INSTANCE DIALOG DISCARDABLE  0, 0, 360, 226
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Instance shape",IDC_STATIC,5,5,51,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_INSTANCE_GROUP_SHAPE,80,5,110,14,ES_AUTOHSCROLL
+    LTEXT           "Name of the instancied object. (ex: ""table.shape"").",
+                    IDC_STATIC,195,5,160,8,SS_CENTERIMAGE
+    LTEXT           "Instance name",IDC_STATIC,5,25,49,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_INSTANCE_NAME,80,25,110,14,ES_AUTOHSCROLL
+    LTEXT           "String associed with the instance in the instance group file. Enter ... to erase all.",
+                    IDC_STATIC,195,26,160,16
+    LTEXT           "Instance group name",IDC_STATIC,5,45,70,15,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_INSTANCE_GROUP_NAME,80,45,110,14,ES_AUTOHSCROLL
+    LTEXT           "Name of the instance group where this instance will be inserted. Enter ... to erase all",
+                    IDC_STATIC,195,45,160,15
+    CONTROL         "Don't add to scene. If checked, this instance will not be added in the scene.",
+                    IDC_DONT_ADD_TO_SCENE,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,71,255,10
+    CONTROL         "Don't export the shape. If checked, no shape file will be exported from this object.",
+                    IDC_DONT_EXPORT,"Button",BS_AUTO3STATE | WS_TABSTOP,5,86,
+                    271,10
+    GROUPBOX        "Collision",IDC_STATIC,5,180,170,40
+    CONTROL         "Collision Mesh",IDC_CHECK_COLLISION,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,15,191,110,10
+    CONTROL         "Collision Mesh Exterior",IDC_CHECK_COLLISION_EXTERIOR,
+                    "Button",BS_AUTO3STATE | WS_TABSTOP,15,204,110,10
+    LTEXT           "Enter ... to erase all.",IDC_STATIC,195,15,108,10
+    GROUPBOX        "Camera Collision",IDC_STATIC,5,105,270,70
+    CONTROL         "Automatic (collision only if mesh is lightmapped)",
+                    IDC_CAMERA_COL_RADIO1,"Button",BS_AUTORADIOBUTTON,15,115,
+                    230,10
+    CONTROL         "Disable (don't collision with camera)",
+                    IDC_CAMERA_COL_RADIO2,"Button",BS_AUTORADIOBUTTON,15,130,
+                    230,10
+    CONTROL         "Forced (collision with camera, even if not lightmapped)",
+                    IDC_CAMERA_COL_RADIO3,"Button",BS_AUTORADIOBUTTON,15,145,
+                    230,10
+    CONTROL         "Camera collision only (mesh not displayed)",
+                    IDC_CAMERA_COL_RADIO4,"Button",BS_AUTORADIOBUTTON,15,160,
+                    230,10
+END
+
+IDD_ANIM DIALOG DISCARDABLE  0, 0, 360, 221
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Export note track",IDC_EXPORT_NOTE_TRACK,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,5,50,75,10
+    CONTROL         "Export animated materials",
+                    IDC_EXPORT_ANIMATED_MATERIALS,"Button",BS_AUTO3STATE | 
+                    WS_TABSTOP,5,35,98,10
+    CONTROL         "Export node animation",IDC_EXPORT_NODE_ANIMATION,"Button",
+                    BS_AUTO3STATE | WS_TABSTOP,5,5,98,10
+    CONTROL         "Prefixe tracks with node name (Instance name or, if emtpy, node name)",
+                    IDC_EXPORT_ANIMATION_PREFIXE_NAME,"Button",BS_AUTO3STATE | 
+                    BS_MULTILINE | WS_TABSTOP,5,20,245,10
+    CONTROL         "Allow automatic animation. If the shape is ""obj.shape"", then it will bind ""obj.anim"" automatically.",
+                    IDC_AUTOMATIC_ANIM,"Button",BS_AUTO3STATE | BS_MULTILINE | 
+                    WS_TABSTOP,5,65,315,10
+    CONTROL         "Export SSS track (Skeleton Spawn Script)",
+                    IDC_EXPORT_SSS_TRACK,"Button",BS_AUTO3STATE | WS_TABSTOP,
+                    5,80,310,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PANEL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 101
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 244
+    END
+
+    IDD_SWT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+
+    IDD_EXPORTSCENE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 164
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 248
+    END
+
+    IDD_CALCULATING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 174
+    END
+
+    IDD_LOD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_ACCEL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_LIGHTMAP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 204
+    END
+
+    IDD_MISC, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 214
+    END
+
+    IDD_VEGETABLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_INSTANCE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 219
+    END
+
+    IDD_ANIM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 214
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1, 0, 0, 117
+ PRODUCTVERSION 3,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "TECH: \0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileVersion", "1, 0, 0, 117\0"
+            VALUE "InternalName", "CNelExport\0"
+            VALUE "LegalCopyright", "\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "CNelExport.dlu\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "3D Studio MAX\0"
+            VALUE "ProductVersion", "3.0.0.0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_LIBDESCRIPTION      "Geometry Export/View"
+    IDS_CATEGORY            "Nel Tools"
+    IDS_CLASS_NAME          "CNelExport"
+    IDS_PARAMS              "Parameters"
+    IDS_SPIN                "Spin"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NODE_PROPERTIES_PANEL DIALOG DISCARDABLE  0, 0, 384, 290
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Node properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",0x0,7,7,370,258
+    DEFPUSHBUTTON   "Ok",IDOK,270,267,50,15
+    PUSHBUTTON      "Cancel",IDCANCEL,327,267,50,15
+END
+
+IDD_VERTEX_PROGRAM DIALOG DISCARDABLE  0, 0, 361, 211
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "VertexProgram :",IDC_VP_TEXT,5,5,70,10
+    COMBOBOX        IDC_COMBO_VP,80,0,105,55,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Can't use vp (needed by material shader)",IDC_BYPASS_VP,
+                    196,3,132,9
+END
+
+IDD_VP_WINDTREE DIALOG DISCARDABLE  0, 0, 356, 191
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Use VP SpecularLighting",IDC_CHECK_VP_SPECLIGHT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,5,105,10
+    LTEXT           "Frequency Scale :",IDC_STATIC,120,5,60,10
+    LTEXT           "Distance Scale :",IDC_STATIC,245,5,60,10
+    EDITTEXT        IDC_EDIT_VPWT_FREQ_SCALE,190,5,35,12,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN
+    EDITTEXT        IDC_EDIT_VPWT_DIST_SCALE,305,5,35,12,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN
+    GROUPBOX        "Level 0 (eg: Tree Trunk)",IDC_STATIC,0,20,355,50
+    GROUPBOX        "Level 1 (eg: branch)",IDC_STATIC,0,75,355,55
+    GROUPBOX        "Level 2 (eg: leaves)",IDC_STATIC,0,135,355,55
+    LTEXT           "Frequency :",IDC_STATIC,5,31,50,10
+    LTEXT           "DistanceXY :",IDC_STATIC,5,41,50,10
+    LTEXT           "Distance Bias :",IDC_STATIC,5,51,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQ_L0,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,30,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTXY_L0,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,41,100,11
+    LTEXT           "FreqWindDep :",IDC_STATIC,180,31,50,10
+    LTEXT           "DistanceZ :",IDC_STATIC,180,40,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQWD_L0,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,30,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTZ_L0,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,40,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_BIAS_L0,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,51,100,11
+    LTEXT           "Frequency :",IDC_STATIC,5,90,50,10
+    LTEXT           "DistanceXY :",IDC_STATIC,5,101,50,10
+    LTEXT           "Distance Bias :",IDC_STATIC,5,112,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQ_L1,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,91,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTXY_L1,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,101,100,11
+    LTEXT           "FreqWindDep :",IDC_STATIC,180,92,50,10
+    LTEXT           "DistanceZ :",IDC_STATIC,180,100,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQWD_L1,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,90,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTZ_L1,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,100,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_BIAS_L1,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,112,100,11
+    LTEXT           "Frequency :",IDC_STATIC,5,150,50,10
+    LTEXT           "DistanceXY :",IDC_STATIC,5,160,50,10
+    LTEXT           "Distance Bias :",IDC_STATIC,5,170,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQ_L2,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,150,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTXY_L2,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,160,100,11
+    LTEXT           "FreqWindDep :",IDC_STATIC,180,153,50,10
+    LTEXT           "DistanceZ :",IDC_STATIC,180,162,50,10
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_FREQWD_L2,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,151,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_DISTZ_L2,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,230,162,100,11
+    CONTROL         "Slider1",IDC_SLIDER_VPWT_BIAS_L2,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,170,100,11
+    LTEXT           "-0.12",IDC_STATIC_VPWT_FREQ_L0,155,31,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTXY_L0,155,41,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_BIAS_L0,155,51,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_FREQWD_L0,330,30,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTZ_L0,330,40,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_FREQ_L1,155,91,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTXY_L1,155,101,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_BIAS_L1,155,111,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_FREQWD_L1,330,90,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTZ_L1,330,100,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_FREQ_L2,155,151,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTXY_L2,155,161,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_BIAS_L2,155,171,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_FREQWD_L2,330,150,20,10,SS_SUNKEN
+    LTEXT           "0.12",IDC_STATIC_VPWT_DISTZ_L2,330,160,20,10,SS_SUNKEN
+    LTEXT           "-2",IDC_STATIC,55,60,10,8
+    LTEXT           "+2",IDC_STATIC,145,60,10,8
+    LTEXT           "-2",IDC_STATIC,55,120,10,8
+    LTEXT           "+2",IDC_STATIC,145,120,10,8
+    LTEXT           "-2",IDC_STATIC,55,180,10,8
+    LTEXT           "+2",IDC_STATIC,145,180,10,8
+END
+
+IDD_LIGHTMAP2 DIALOG DISCARDABLE  0, 0, 361, 211
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "LMC: 8Bits Lightmap compression",IDC_STATIC,5,5,195,190
+    LTEXT           "Always Group",IDC_LMC_STATIC0,10,75,50,10
+    LTEXT           "Sun Group",IDC_LMC_STATIC3,10,115,40,10
+    LTEXT           "Night Group",IDC_LMC_STATIC6,10,155,45,10
+    LTEXT           "Ambient:",IDC_LMC_STATIC1,10,90,45,10
+    CONTROL         "Custom1",IDC_LM_ALWAYS_AMBIENT,"ColorSwatch",WS_TABSTOP,
+                    65,85,30,15
+    LTEXT           "Diffuse:",IDC_LMC_STATIC2,105,90,45,10
+    CONTROL         "Custom1",IDC_LM_ALWAYS_DIFFUSE,"ColorSwatch",WS_TABSTOP,
+                    160,85,30,15
+    LTEXT           "Ambient:",IDC_LMC_STATIC4,10,130,45,10
+    CONTROL         "Custom1",IDC_LM_DAY_AMBIENT,"ColorSwatch",WS_TABSTOP,65,
+                    125,30,15
+    LTEXT           "Diffuse:",IDC_LMC_STATIC5,105,130,45,10
+    CONTROL         "Custom1",IDC_LM_DAY_DIFFUSE,"ColorSwatch",WS_TABSTOP,
+                    160,125,30,15
+    LTEXT           "Ambient:",IDC_LMC_STATIC7,10,170,45,10
+    CONTROL         "Custom1",IDC_LM_NIGHT_AMBIENT,"ColorSwatch",WS_TABSTOP,
+                    65,165,30,15
+    LTEXT           "Diffuse:",IDC_LMC_STATIC8,105,170,45,10
+    CONTROL         "Custom1",IDC_LM_NIGHT_DIFFUSE,"ColorSwatch",WS_TABSTOP,
+                    160,165,30,15
+    CONTROL         "Use 8Bits lightmaps",IDC_LM_COMPRESS_8BIT,"Button",
+                    BS_AUTO3STATE | BS_TOP | BS_MULTILINE | WS_TABSTOP,10,20,
+                    90,10
+    PUSHBUTTON      "Auto Setup All",IDC_LMC_AUTO_SETUP,15,45,65,15
+    PUSHBUTTON      "Auto Setup Visible",IDC_LMC_AUTO_SETUP_VISIBLEONLY,95,
+                    45,90,15
+    PUSHBUTTON      "Copy From",IDC_LMC_COPY_FROM,120,20,65,15
+END
+
+IDD_LMC_CHOOSE_FROM DIALOG DISCARDABLE  0, 0, 217, 290
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Choose LMC setup from object"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,160,240,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,160,265,50,14
+    LISTBOX         IDC_LMC_COPY_LIST,5,20,120,260,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "List of objects in LMC mode.",IDC_STATIC,5,10,120,10
+    CONTROL         "Custom1",IDC_LMC_COPY_ALWAYS_DIFFUSE,"ColorSwatch",
+                    WS_TABSTOP,180,45,30,15
+    CONTROL         "Custom1",IDC_LMC_COPY_ALWAYS_AMBIENT,"ColorSwatch",
+                    WS_TABSTOP,140,45,30,15
+    CONTROL         "Custom1",IDC_LMC_COPY_SUN_AMBIENT,"ColorSwatch",
+                    WS_TABSTOP,140,90,30,15
+    CONTROL         "Custom1",IDC_LMC_COPY_SUN_DIFFUSE,"ColorSwatch",
+                    WS_TABSTOP,180,90,30,15
+    CONTROL         "Custom1",IDC_LMC_COPY_NIGHT_DIFFUSE,"ColorSwatch",
+                    WS_TABSTOP,180,135,30,15
+    CONTROL         "Custom1",IDC_LMC_COPY_NIGHT_AMBIENT,"ColorSwatch",
+                    WS_TABSTOP,140,135,30,15
+    LTEXT           "Colors for this node:",IDC_STATIC,140,25,70,10
+    CONTROL         "Get",IDC_LMC_COPY_ALWAYS_AMBIENT_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,65,30,10
+    CONTROL         "Get",IDC_LMC_COPY_ALWAYS_DIFFUSE_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,65,30,10
+    CONTROL         "Get",IDC_LMC_COPY_SUN_DIFFUSE_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,110,30,10
+    CONTROL         "Get",IDC_LMC_COPY_SUN_AMBIENT_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,110,30,10
+    CONTROL         "Get",IDC_LMC_COPY_NIGHT_AMBIENT_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,140,155,30,10
+    CONTROL         "Get",IDC_LMC_COPY_NIGHT_DIFFUSE_FILTER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,155,30,10
+    PUSHBUTTON      "Clear All",IDC_LMC_COPY_CLEAR,140,175,70,15
+    PUSHBUTTON      "Get All",IDC_LMC_COPY_GET_ALL,140,195,70,15
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_NODE_PROPERTIES_PANEL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 377
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 283
+    END
+
+    IDD_VERTEX_PROGRAM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 354
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 204
+    END
+
+    IDD_VP_WINDTREE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 349
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
+    END
+
+    IDD_LIGHTMAP2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 354
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 204
+    END
+
+    IDD_LMC_CHOOSE_FROM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 283
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

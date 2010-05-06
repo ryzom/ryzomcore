@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<FORM Version="0.6" State="modified">
+  <STRUCT>
+    <ARRAY Name="Lines">
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="1"/>
+        <ATOM Name="Localisation" Value="head"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="2"/>
+        <ATOM Name="Localisation" Value="chest"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="3"/>
+        <ATOM Name="Localisation" Value="chest"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="4"/>
+        <ATOM Name="Localisation" Value="chest"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="5"/>
+        <ATOM Name="Localisation" Value="arms"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="6"/>
+        <ATOM Name="Localisation" Value="arms"/>
+      </STRUCT>
+	  <STRUCT>
+        <ATOM Name="ValueNumber" Value="7"/>
+        <ATOM Name="Localisation" Value="hands"/>
+      </STRUCT>
+		<STRUCT>
+        <ATOM Name="ValueNumber" Value="8"/>
+        <ATOM Name="Localisation" Value="hands"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="9"/>
+        <ATOM Name="Localisation" Value="legs"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="10"/>
+        <ATOM Name="Localisation" Value="legs"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="11"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="12"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="1"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="head"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="2"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="3"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="4"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="5"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="arms"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="6"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="arms"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+	  <STRUCT>
+        <ATOM Name="ValueNumber" Value="7"/>
+		<ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="hands"/>
+		<ATOM Name="ProtectionWorks" Value="false"/>
+      </STRUCT>
+		<STRUCT>
+        <ATOM Name="ValueNumber" Value="8"/>
+		<ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="hands"/>
+		<ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="9"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="legs"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="10"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="legs"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="11"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="12"/>
+        <ATOM Name="ShieldType" Value="small shield"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="1"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="head"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="2"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="3"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="4"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="chest"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="5"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="arms"/>
+        <ATOM Name="ProtectionWorks" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="6"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="arms"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+	  <STRUCT>
+        <ATOM Name="ValueNumber" Value="7"/>
+		<ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="hands"/>
+		<ATOM Name="ProtectionWorks" Value="false"/>
+      </STRUCT>
+		<STRUCT>
+        <ATOM Name="ValueNumber" Value="8"/>
+		<ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="hands"/>
+		<ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="9"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="legs"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="10"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="legs"/>
+        <ATOM Name="ProtectionWorks" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="11"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="ValueNumber" Value="12"/>
+        <ATOM Name="ShieldType" Value="large shield"/>
+        <ATOM Name="Localisation" Value="feet"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+</FORM>

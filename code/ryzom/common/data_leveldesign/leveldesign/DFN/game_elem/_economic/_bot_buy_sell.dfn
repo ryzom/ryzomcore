@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Buy" Type="Type" Filename="float.typ"/>
+  <ELEMENT Name="Sell" Type="Type" Filename="float.typ"/>
+  <LOG>Mon Nov 25 18:30:46 2002 (saffray) Dfn Structure = </LOG>
+</DFN>

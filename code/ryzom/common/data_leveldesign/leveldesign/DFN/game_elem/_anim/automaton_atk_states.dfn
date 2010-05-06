@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="1st_person atk"            Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="attack1"                   Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="attack2"                   Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="walk atk"                  Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="run atk"                   Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="backward atk"              Type="Dfn" Filename="automaton_state.dfn"/>
+  <!-- default atk -->
+  <ELEMENT Name="default atk low"           Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="default atk middle"        Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="default atk high"          Type="Dfn" Filename="automaton_state.dfn"/>
+  <!-- powerful atk -->
+  <ELEMENT Name="powerful atk low"          Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="powerful atk middle"       Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="powerful atk high"         Type="Dfn" Filename="automaton_state.dfn"/>
+  <!-- area atk -->
+  <ELEMENT Name="area atk low"              Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="area atk middle"           Type="Dfn" Filename="automaton_state.dfn"/>
+  <ELEMENT Name="area atk high"             Type="Dfn" Filename="automaton_state.dfn"/>
+  <LOG>Fri May 30 16:30:00 2003 (puzin)</LOG>
+</DFN>

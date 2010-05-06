@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.5 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Name" Value="t&#x9D29;"/>
+    <ATOM Name="MicroVeget" Value="microveget_fyros.tga"/>
+    <ATOM Name="SmallBank" Value="desert.smallbank"/>
+    <ATOM Name="FarBank" Value="desert.farbank"/>
+    <ATOM Name="CoarseMeshMap" Value="nel_coarse_mesh_desert.tga"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:23:59 2002 (corvazier) File converted from old format
+Mon Jul 22 10:06:03 2002 (corvazier) .FarBank = desert.farbank
+Mon Jul 22 10:06:03 2002 (corvazier) .SmallBank = desert.smallbank
+Wed Apr 21 14:07:53 2004 (corvazier) .Name = t&#x9D29;</LOG>
+</FORM>

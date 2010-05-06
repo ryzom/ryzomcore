@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.8 $" State="modified">
+  <ELEMENT Name="Basics" Type="Dfn" Filename="_brick_basics.dfn"/>
+  <ELEMENT Name="Client" Type="Dfn" Filename="_brick_client.dfn"/>
+  <ELEMENT Name="Learning" Type="Dfn" Filename="_brick_learning.dfn"/>
+  <ELEMENT Name="Valid Target Races" Type="Dfn" Filename="_valid_target_races.dfn"/>
+  <ELEMENT Name="MandatoryFamilies" Type="Type" Filename="_brick_families.typ" Array="true"/>
+  <ELEMENT Name="OptionalFamilies" Type="Type" Filename="_brick_families.typ" Array="true"/>
+  <ELEMENT Name="Attributes" Type="Dfn" Filename="_functionality_attribute.dfn" Array="true"/>
+  <ELEMENT Name="Functionality 1" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 2" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 3" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 4" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 5" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 6" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 7" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 8" Type="DfnPointer"/>
+  <ELEMENT Name="Functionality 9" Type="DfnPointer"/>
+  <ELEMENT Name="Alias" Type="Type" Filename="string.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:07 2002 (corvazier) File converted from old format
+Mon Jun 24 21:42:12 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:48:52 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:49:21 2002 (fleury) Dfn Structure = 
+Tue Jun 25 15:49:35 2002 (fleury) Dfn Structure = 
+Mon Jul 01 11:15:43 2002 (fleury) Dfn Structure = 
+Tue Jul 23 11:24:43 2002 (besson) Dfn Structure = 
+Thu Jul 25 11:28:31 2002 (brigand) Dfn Structure = 
+Thu Jul 25 11:29:31 2002 (brigand) Dfn Structure = 
+Tue Jul 30 15:30:46 2002 (fleury) Dfn Structure = 
+Thu Aug 22 16:53:29 2002 (fleury) Dfn Structure = 
+Mon Sep 16 10:49:23 2002 (fleury) Dfn Structure = 
+Tue Oct 08 11:07:44 2002 (fleury) Dfn Structure = 
+Tue Oct 08 11:09:36 2002 (fleury) Dfn Structure = 
+Wed Nov 13 15:13:19 2002 (fleury) Dfn Structure = 
+Wed Nov 13 15:14:00 2002 (fleury) Dfn Structure = 
+Wed Nov 13 15:15:20 2002 (fleury) Dfn Structure = 
+Mon Nov 18 11:36:32 2002 (fleury) Dfn Structure = 
+Tue Nov 26 11:30:11 2002 (fleury) Dfn Structure = 
+Fri Nov 29 17:04:26 2002 (fleury) Dfn Structure = 
+Fri Nov 29 17:08:26 2002 (fleury) Dfn Structure = 
+Thu Feb 06 12:10:05 2003 (fleury) Dfn Structure = 
+Wed Mar 19 16:11:41 2003 (coutelas) Dfn Structure = 
+Wed Jun 11 12:01:29 2003 (fleury) Dfn Structure = 
+Fri Jun 13 16:57:38 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

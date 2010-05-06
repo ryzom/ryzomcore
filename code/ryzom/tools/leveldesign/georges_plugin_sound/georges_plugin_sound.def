@@ -1,0 +1,8 @@
+; georges_plugin_sound.def : Declares the module parameters for the DLL.
+
+;LIBRARY      "georges_plugin_sound"
+;DESCRIPTION  'Sound Plugin for Georges'
+
+EXPORTS
+    ; Explicit exports can go here
+	IGeorgesEditGetInterface

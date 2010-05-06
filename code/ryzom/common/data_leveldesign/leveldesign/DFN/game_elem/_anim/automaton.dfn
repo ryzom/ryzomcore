@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <!-- Begin -->
+  <ELEMENT Name="comments"          Type="Type" Filename="edit.typ"                     />
+  <ELEMENT Name="move dist"         Type="Type" Filename="float.typ" Default="-1.0"     />
+  <ELEMENT Name="mode"              Type="Type" Filename="string.typ"                   />
+  <!-- States -->
+  <ELEMENT Name="idle"              Type="Dfn"  Filename="automaton_state.dfn"          />
+  <ELEMENT Name="motion states"     Type="Dfn"  Filename="automaton_motion_states.dfn"  />
+  <ELEMENT Name="generic states"    Type="Dfn"  Filename="automaton_generic_states.dfn" />
+  <ELEMENT Name="mode states"       Type="Dfn"  Filename="automaton_mode_states.dfn"    />
+  <ELEMENT Name="atk states"        Type="Dfn"  Filename="automaton_atk_states.dfn"     />
+  <ELEMENT Name="spell states"      Type="Dfn"  Filename="automaton_spell_states.dfn"   />
+  <ELEMENT Name="other states"      Type="Dfn"  Filename="automaton_other_states.dfn"   />
+  <!-- End -->
+  <COMMENTS>Added: 'comments' and 'move dist'.</COMMENTS>
+  <LOG>Fri May 30 16:30:00 2003 (puzin)
+Thu Aug 21 11:19:33 2003 (puzin) Dfn Structure = </LOG>
+</DFN>

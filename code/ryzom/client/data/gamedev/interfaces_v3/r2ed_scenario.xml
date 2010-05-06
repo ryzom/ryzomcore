@@ -1,0 +1,1065 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<define id="r2ed_max_num_additionnal_acts" value="10"/>
+<define id="r2ed_max_num_plot_items" value="32"/> <!-- IMPORTANT : update local_database.xml if you change this value --> 
+<define id="r2ed_max_num_plot_item_sheets" value = "200" /> <!-- IMPORTANT : update local_database.xml if you change this value --> 
+
+<!-- ******************************************************************************************************************* -->
+<!-- *                                                      R2ED SCENARIOS INTERFACE                                   * -->
+<!-- ******************************************************************************************************************* -->
+
+
+<!-- rollout bar -->
+<template name="rollout_bar" posref="TL TL" posparent="parent" caption="" y="0" content_name="" keep="true" color="255 255 255 255" global_color="true">
+	<group id="caption" sizeref="w" w="0" child_resize_h="true" y="#y" child_resize_hmargin="3" posref="#posref" posparent="#posparent">
+		<ctrl type="button" id="rollout_button" button_type="push_button" sizeref = "wh" posref="TL TL"		 
+		 tx_normal="grey_40.tga" 
+		 tx_pushed="grey_80.tga" 
+		 tx_over="grey_60.tga"
+		 scale="true"
+		 tooltip=""				 
+		 global_color="true"
+		 global_color_normal="127 127 127 127"
+		 global_color_over="255 255 255 255"
+		 global_color_pushed="false"
+		 onclick_l="lua"
+		 params_l="local target = getUICaller().parent.parent['#content_name']
+				   r2:setRolloutOpened(getUICaller().parent, target, not target.active)"
+		/>					
+		<group id="open_indicator" child_resize_h="true" x="3" y="-1" child_resize_w="true" posref="ML ML" posparent="rollout_button">
+			<view type="bitmap"  render_layer="2" id="opened" active="true" posref="TL TL" texture="rollout_opened.tga" color="255 255 255 255"/>
+			<view type="bitmap"  render_layer="2" id="closed" active="false" posref="TL TL" texture="rollout_closed.tga" color="255 255 255 255"/>
+		</group>
+		<view type="text" render_layer="2" id="rollout_text" auto_clamp="true" posref="MR ML" x="2" y="-1" posparent="open_indicator" global_color="#global_color" color="#color" fontsize="12" shadow="false" hardtext="#caption"
+		 over_extend_view_text="true" over_extend_parent_rect="true"/>
+		<!-- enclosing -->		
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+	</group>
+</template>
+
+
+<!-- form bar -->
+<template name="form_bar" posref="TL TL" posparent="parent" caption="" y="0" keep="true" color="255 255 255 255" global_color="true">
+	<group id="caption" sizeref="w" w="0" child_resize_h="true" y="#y" child_resize_hmargin="2" posref="#posref" posparent="#posparent">
+		<ctrl type="button" id="rollout_button" button_type="push_button" sizeref = "wh" posref="TL TL"				 
+		 tx_normal="grey_40.tga" 
+		 tx_pushed="grey_80.tga" 
+		 tx_over="grey_60.tga"
+		 scale="true"
+		 tooltip=""				 
+		 global_color="true"
+		 global_color_normal="127 127 127 127"
+		 global_color_over="127 127 127 127"
+		 global_color_pushed="false"
+		 onclick_l=""
+		 params_l=""
+		/>							
+		<view type="text" render_layer="2" id="rollout_text" auto_clamp="true" posref="ML ML" posparent="parent" x="2" y="-1" fontsize="12" shadow="false" hardtext="#caption"
+		 global_color="#global_color" color="#color"
+		 over_extend_view_text="true" over_extend_parent_rect="true"/>
+		<!-- enclosing -->		
+		<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+		<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+		<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+		<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+	</group>
+</template>
+
+
+<!-- template for acts tree -->
+<template name="r2ed_act_tree" id="" posparent="parent" posref="TL TL" x="0" y="0">
+	<group id="#id" type="tree" active="false"  x="#x" y="#y" posparent="#posparent" sizeparent="parent" posref="#posref" col_over="255 255 255 48" col_select="255 255 255 80"
+	 max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="0"				
+	>						
+		<!--
+		<node id="creatures"	show="false" name="uiR2EDCreatures" opened="true" handler="" params="" bitmap="r2ed_icon_creatures.tga"/>
+		<node id="people"	show="false" name="uiR2EDPeople" opened="true" handler="" params="" bitmap="r2ed_icon_npc.tga"/>		
+		-->
+		<node id="creatures"	show="false" name="uiR2EDCreatures" opened="true" handler="" params=""/>
+		<node id="people"	show="false" name="uiR2EDPeople" opened="true" handler="" params=""/>		
+	</group>
+</template>
+
+<!-- template for acts tree -->
+<template name="r2ed_act_macro_tree" id="" posparent="parent" posref="TL TL" x="0" y="0">
+	<group id="#id" type="tree" active="false"  x="#x" y="#y" posparent="#posparent" sizeparent="parent" posref="#posref" col_over="255 255 255 48" col_select="255 255 255 80"
+	 max_sizeparent="parent" max_sizeref="wh" max_w="-10" max_h="0"				
+	>						
+		<!--
+		<node id="macro_components" show="false" name="uiR2EDMacroComponents" opened="true" handler="" params=""/>
+		-->
+	</group>
+</template>
+
+<!-- template for level in scenario properties -->
+<template name="level_template" id="" w="50" h="30" posparent="parent" posref="TL TL" x="0" y="0" hardtext="50" color="92 92 201 255" color_pushed="112 112 221 255" >
+
+	<group id="#id" w="#w" h="#h" posparent="#posparent" posref="#posref" x="#x" y="#y" >
+
+		<ctrl type="text_button" button_type="toggle_button" id="button" x="0" y="0" posref="TL TL" posparent="parent"
+		 text_y="-2" hardtext="#hardtext" wmin="40" h="10"
+		 tx_normal="Quit_button_pushed" tx_pushed="Quit_button_pushed" tx_over="Quit_button_pushed"
+		 fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+		 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		 text_color_normal="100 100 100 255" text_color_pushed="255 255 255 255" text_color_over="180 180 180 255"
+		 color="#color" col_over="#color_pushed" col_pushed="#color_pushed" onclick_l="lua" params_l="r2.ScenarioWindow:scenarioLevel()"
+		/>
+
+	</group>
+</template>
+
+
+<!-- popup to choose plot item in the SCENARIO window -->
+<group type="modal" id="r2ed_choose_plot_item" options="skin_modal" x="0" y="0" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" child_resize_w="true" child_resize_wmargin="4" exit_click_b="true"
+ active="false"
+>	
+
+	<group type="list_sheet" id="list" posref="TL TL" value="LOCAL:R2:AVAILABLE_PLOT_ITEMS" wspace="2" hspace="2" array="false" x="0" y="0" 
+	    child_resize_h="true" child_resize_w="true"
+		child_resize_wmargin="4"
+		child_resize_hmargin="4"
+		display_empty_slot="false"
+		squarify="true"
+		onclick_l="lua"		
+		params_l="r2.PlotItemsPanel:createNewItem(getUICaller().sheet)"
+		use_quantity="false"
+		use_quality="false"
+		onclick_r=""
+		params_r=""
+		lmargin="4" rmargin="4" tmargin="4" bmargin="4" column_max="16" 
+		maxitem="%r2ed_max_num_plot_item_sheets"		
+	 >		
+	</group>
+</group>
+
+<!-- popup to choose a plot item in the PROPERTY window,(in fact a reference to a plot item created in the scenario) -->
+<group type="modal" id="r2ed_choose_property_sheet_plot_item" options="skin_modal" x="0" y="0" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" child_resize_w="true" child_resize_wmargin="4" exit_click_b="true"
+ active="false"
+>	
+
+	<group type="list_sheet" id="list" posref="TL TL" value="LOCAL:R2:PLOT_ITEMS" wspace="2" hspace="2" array="false" x="0" y="0" 
+	    child_resize_h="true" child_resize_w="true"
+		child_resize_wmargin="4"
+		child_resize_hmargin="4"
+		display_empty_slot="true"
+		squarify="true"
+		onclick_l="lua"		
+		params_l="r2.PlotItemsWidget:validateItem(getUICaller().sheet)"
+		use_quantity="false"
+		use_quality="false"
+		onclick_r=""
+		params_r=""
+		lmargin="4" rmargin="4" tmargin="4" bmargin="4" column_max="16" 
+		maxitem="%r2ed_max_num_plot_items"
+	 >		
+	</group>
+</group>
+
+<!-- template for plot items display -->
+<template name="r2ed_plot_item" posref="TL TL" posparent="parent" y="-4">	
+	<group id="#id" child_resize_h="true" sizeref="w" posref="#posref" posparent="#posparent" y="#y">
+		<ctrl type="button" button_type="toggle_button" sizeref="w" 
+		 posref="TL TL"
+		 h="42"
+		 id="but"		 
+		 tx_normal="blank.tga"
+		 tx_pushed="blank.tga"
+		 tx_over="blank.tga"
+		 scale="true"		 
+		 color="%bot_chat_sheet_selection_normal"
+		 col_pushed="%bot_chat_sheet_selection_pushed"
+		 col_over="%bot_chat_sheet_selection_over" 
+		 onclick_l="lua"		 
+		 params_l="r2.PlotItemsPanel:selectItem(#index)"
+		 onclick_r="lua"
+		 params_r="r2.PlotItemsPanel:rightClickItem(#index)"
+		/>
+		<ctrl type="sheet" value="#value" 
+		 id="sheet"
+		 posref="TL TL"		 
+		 display_empty_slot="true"
+		 onclick_r="lua"		 
+		 params_r="r2.PlotItemsPanel:rightClickItem(#index)"
+		 onclick_l="lua"		 
+		 params_l="r2.PlotItemsPanel:changeItem(#index)"		 
+		 use_quantity="false"
+		 use_quality="false"
+		 />
+		 <view type="text" id="t" posref="MR ML" posparent="sheet" x="4" color="255 255 255 255" global_color="true" fontsize="15" shadow="true" hardtext="PLOT ITEM"/>		 
+	</group>	
+	 
+</template>
+
+<!-- display of plot items in the property sheet -->
+<template name="r2ed_property_sheet_plot_item" posref="TL TL" posparent="parent" y="-2" keep="true">	
+	<group id="#id" child_resize_h="true" child_resize_hmargin="4" sizeref="w" x="4" posref="#posref" posparent="#posparent" y="#y">
+		<ctrl type="sheet" 
+		 id="sheet"
+		 posref="TL TL"		 
+		 display_empty_slot="true"
+		 value="UI:DUMMY"
+		 onclick_r="lua"
+		 params_r=""
+		 onclick_l="lua"		 
+		 params_l="r2.PlotItemsWidget:changeItem('#id')"
+		 use_quantity="false"
+		 use_quality="false"
+		 />
+		 <view type="text" id="t" posref="MR ML" posparent="sheet" x="4" color="255 255 255 255" global_color="true" fontsize="15" shadow="true" hardtext="PLOT ITEM"/>		 
+		 <ctrl style="text_button_16" id="new_plot_item" posref="BL TL" posparent="t" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+				 onclick_l="lua"
+				 y="0"
+				 params_l="r2.PlotItemsWidget:newPlotItem('#id')"
+				 hardtext="uiR2EDNewPlotItem"/>
+		<ctrl style="text_button_16" id="edit_plot_item" posref="TR TL" x="2" posparent="new_plot_item" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
+				 onclick_l="lua"
+				 params_l="r2.PlotItemsWidget:editPlotItem('#id')"
+				 hardtext="uiR2EDEditPlotItem"/>				 
+	</group>	
+	 
+</template>
+
+<!-- *************************************************** -->
+<!-- *                 FEATURES LIST / SCENARIO WINDOW * -->
+<!-- *************************************************** -->
+<group type="container" id="r2ed_scenario"  title="uiR2EDScenario" global_color="false" line_at_bottom="false"
+	movable="true" active="true" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_SCENARIO"	
+	pop_min_w="150" pop_min_h="150" pop_max_w="800" pop_max_h="600"	
+	w="220"
+	savable="true"
+	on_active="lua" on_active_params="if (r2 and r2.Mode == 'Edit') then  r2.ToolUI:updateToggleWindowButtons() end"
+	on_deactive="lua" on_deactive_params="if (r2 and r2.Mode == 'Edit') then  r2.ToolUI:updateToggleWindowButtons() end"
+>	
+	<group id="header_closed" x="0" y="0" child_resize_w="true" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"	
+	>
+	</group>
+	
+	<group id="header_opened" x="0" y="0" w="430" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>		
+	</group>
+	<group id="content" x="0" sizeref="wh" w="0" h="0" y="0" posref="TL TL" >
+		<group type="tab" id="scenario_tabs" child_resize_w="true" h="24" posref="TL TL" x="0" y="-4" >			
+			<ctrl style="tab_button_palette" id="tab0" x="0" posref="TL TL" group="scenario_properties"	hardtext=""	onclick_r="" params_r=""	onclick_l="" params_l="" tooltip="uiR2EDScenarioProperties" />
+			<view type="bitmap" global_color="false" texture="r2_palette_scenario.tga" scale="true" id="tab0_bm" posparent="tab0" posref="TL TL" w="24" h="24" x="4" y="-2" color="255 255 255 255" />
+			
+			<ctrl style="tab_button_palette" id="tab5" posparent="tab0"		group="act_properties"	hardtext=""	onclick_r="" params_r=""	onclick_l="" params_l="" tooltip="uiR2EDActProperties" />	
+			<view type="bitmap" global_color="false" texture="r2_palette_act.tga" scale="true" id="tab5_bm" posparent="tab5" posref="TL TL" w="24" h="24" x="4" y="-2" color="255 255 255 255" />
+
+			<ctrl style="tab_button_palette" id="tab4" x="0" posparent="tab5" group="scene_panel"		hardtext=""		onclick_r=""	 params_r=""	onclick_l="" params_l="" tooltip="uiR2EDScene" />			
+			<view type="bitmap" global_color="false" texture="r2_palette_entities.tga" scale="true" id="tab4_bm" posparent="tab4" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />			
+
+			<ctrl style="tab_button_palette" id="tab2" posparent="tab4"		group="scenery_objects"	hardtext=""	onclick_r="" params_r=""	onclick_l="" params_l="" tooltip="uiR2EDbotObjects" />	
+			<view type="bitmap" global_color="false" texture="r2_palette_objets.tga" scale="true" id="tab2_bm" posparent="tab2" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />
+			
+			<ctrl style="tab_button_palette" id="tab1" posparent="tab2"		group="macro_components"	hardtext="" tooltip="uiR2EDMacroComponents"	onclick_r="" params_r=""	onclick_l="" params_l=""/>		
+			<view type="bitmap" global_color="false" texture="r2_palette_components.tga" id="tab1_bm" posparent="tab1" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />						
+			
+			<ctrl style="tab_button_palette" id="tab3" posparent="tab1"		group="plot_items_panel"	hardtext=""	onclick_r="" params_r=""	onclick_l="" params_l="" tooltip="uiR2EDPlotItems" />	
+			<view type="bitmap" global_color="false" texture="ICO_mission_purse.tga" scale="true" id="tab3_bm" posparent="tab3" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />
+
+			<!-- COMMENT HERE TO DEACTIVATE EXPORT PANEL 
+			<ctrl style="tab_button_palette" id="tab4" posparent="tab3"		group="export_panel"	hardtext="uiR2EDExport"	onclick_r="" params_r=""	onclick_l="" params_l=""/>	
+			<view type="bitmap" global_color="false" texture="TO_wrench.tga" scale="true" id="tab4_bm" posparent="tab4" posref="TL TL" w="24" h="24" x="4" y="-2 " color="255 255 255 255" />	
+			 -->
+		</group>
+
+		<view type="bitmap" id="sep" posparent="scenario_tabs" posref="BL TL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+		
+		<group id="scene_panel" sizeref="wh" y="-32" h="-32" posref="TL TL">
+			<group id="scene_panel_content" sizeref="wh" w="-16" x="8" y="0" posref="TL TL" >
+
+				<group id="entities_budget" posref="TL TL" sizeref="w" h="30">
+					<ctrl type="button" id="back" button_type="push_button" sizeref="w" h="30" posref="TL TL"				 
+					 tx_normal="grey_40.tga" 
+					 tx_pushed="grey_80.tga" 
+					 tx_over="grey_60.tga"
+					 scale="true"
+					 tooltip=""				 
+					 global_color="true"
+					 global_color_normal="127 127 127 127"
+					 global_color_over="255 255 255 255"
+					 global_color_pushed="false"
+					 onclick_l=""
+					 params_l=""
+					/>
+					
+					<group id="content" sizeparent="back" sizeref="wh" w="0" h="0" y="0" posref="TL TL" posparent="parent">
+				
+						<group id="text_gr" sizeparent="parent" sizeref="wh" w="-56" h="0" y="0" posref="TL TL" posparent="parent">
+							<view type="text" render_layer="2" x="3" y="0" id="entity_budget_text" auto_clamp="true" posref="ML ML"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDEntitiesInAct"
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+
+						<group id="budget_gr" sizeref="h" w="51" h="0" y="0" x="20" posref="TR TL" posparent="text_gr">
+							<view type="text" render_layer="2" id="left_quota" posref="ML ML" x="0" y="-2" auto_clamp="true"  global_color="true" fontsize="12" shadow="false" hardtext="(10) "
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+
+						<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+						<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+						<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+						<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+					</group>
+				</group>
+
+				<group id="list_entities" sizeparent="parent" sizeref="wh" w="0" h="-30" x="0" y="-10" posref="BL TL" posparent="entities_budget" >				
+					
+					<group id="global_enclosing" sizeref="w" w="0" x="0" y="0" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" max_sizeref="h" max_h="-8">						
+
+						<group id="act_tree_enclosing" posref="TL TL" x="10" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+							<vector template="r2ed_act_tree" _size="%r2ed_max_num_additionnal_acts"  id="act_tree_$i" x="3" y="-2"/>
+						</group>	
+					</group>
+
+					<ctrl style="skin_scroll" id="scroll_bar" align="T" target="global_enclosing" y="8"/>
+				</group>
+			</group>
+		</group>
+
+		<group id="scenery_objects" sizeref="wh" y="-32" h="-32" posref="TL TL">
+			<group id="scenery_objects_content" sizeref="wh" w="-16" x="8" y="0" posref="TL TL" >
+				<group id="objects_budget" posref="TL TL" sizeref="w" h="30">
+					
+					<ctrl type="button" id="back" button_type="push_button" sizeref="w" h="30" posref="TL TL"				 
+					 tx_normal="grey_40.tga" 
+					 tx_pushed="grey_80.tga" 
+					 tx_over="grey_60.tga"
+					 scale="true"
+					 tooltip=""				 
+					 global_color="true"
+					 global_color_normal="127 127 127 127"
+					 global_color_over="255 255 255 255"
+					 global_color_pushed="false"
+					 onclick_l=""
+					 params_l=""
+					/>
+					
+					<group id="content" sizeparent="back" sizeref="wh" w="0" h="0" y="0" posref="TL TL" posparent="parent">
+							
+						<group id="text_gr" sizeparent="parent" sizeref="wh" w="-56" h="0" y="0" posref="TL TL" posparent="parent">
+							<view type="text" render_layer="2" x="3" y="0" id="budget_text" auto_clamp="true" posref="ML ML"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDPermanentSceneryObjects"
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+
+						<group id="budget_gr" sizeref="h" w="51" h="0" y="0" x="20" posref="TR TL" posparent="text_gr">
+							<view type="text" render_layer="2" id="left_quota_misc" posparent="parent" posref="ML ML" x="0" y="-2" auto_clamp="true"  global_color="true" fontsize="12" shadow="false" hardtext="(10) "
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+
+						<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+						<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+						<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+						<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+					</group>
+				</group>
+				<group id="list_objects" sizeparent="parent" sizeref="wh" w="0" h="-30" x="0" y="-10" posref="BL TL" posparent="objects_budget" >				
+					<group id="list_objects_gr" sizeref="w" w="0" x="0" y="0" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" max_sizeref="h" max_h="-8">					
+						
+						<group id ="content_tree" x="10" y="0" sizeref="w" w="-12" child_resize_h="true" posref="TL TL">
+							<group id="content_tree_list" type="tree" posref="TL TL" posparent="parent" x="3" y="0" col_over="255 255 255 48" col_select="255 255 255 80"						
+								sizeref="w" child_resize_h="true" w="0"			
+							>
+								
+							</group>
+						</group>	
+					</group>
+
+					<ctrl style="skin_scroll" id="scroll_bar" align="T" target="list_objects_gr" y="8" />
+				</group>
+			</group>
+		</group>
+
+		<group id="macro_components" sizeref="wh" y="-32" h="-32" posref="TL TL">
+			<group id="macro_components_content" sizeref="wh" w="-16" x="8" y="0" posref="TL TL" >
+
+				<group id="budget" posref="TL TL" sizeref="w" h="61">
+					<group id="macro_budget" sizeref="w" w="0" child_resize_h="true" y="0" child_resize_hmargin="0" posref="TL TL" posparent="parent">
+								
+						<ctrl type="button" id="back" button_type="push_button" sizeref="w" h="30" posref="TL TL"				 
+						 tx_normal="grey_40.tga" 
+						 tx_pushed="grey_80.tga" 
+						 tx_over="grey_60.tga"
+						 scale="true"
+						 tooltip=""				 
+						 global_color="true"
+						 global_color_normal="127 127 127 127"
+						 global_color_over="255 255 255 255"
+						 global_color_pushed="false"
+						 onclick_l=""
+						 params_l=""
+						/>
+						
+						<group id="content" sizeparent="back" sizeref="wh" w="0" h="0" y="0" posref="TL TL" posparent="parent">
+							
+							<group id="text_gr" sizeparent="parent" sizeref="wh" w="-56" h="0" y="0" posref="TL TL" posparent="parent">	
+								<view type="text" render_layer="2" x="3" y="0" id="macro_budget_text" auto_clamp="true" posref="ML ML"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDMacroComponentsInAct"
+								over_extend_view_text="true" over_extend_parent_rect="true"/>
+							</group>
+
+							<group id="budget_gr" sizeref="h" w="51" h="0" y="0" x="20" posref="TR TL" posparent="text_gr">
+								<view type="text" render_layer="2" id="left_quota_macro" posref="ML ML" x="0" y="-2" auto_clamp="true"  global_color="true" fontsize="12" shadow="false" hardtext="(10) "
+								over_extend_view_text="true" over_extend_parent_rect="true"/>
+							</group>
+
+							<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+							<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+							<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+							<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+						</group>
+					</group>
+						
+					<group id="objects_budget" sizeref="w" w="0" child_resize_h="true" y="-1" child_resize_hmargin="0" posref="BL TL" posparent="macro_budget">
+						
+						<ctrl type="button" id="back" button_type="push_button" sizeref="w" h="30" posref="TL TL"				 
+						 tx_normal="grey_40.tga" 
+						 tx_pushed="grey_80.tga" 
+						 tx_over="grey_60.tga"
+						 scale="true"
+						 tooltip=""				 
+						 global_color="true"
+						 global_color_normal="127 127 127 127"
+						 global_color_over="255 255 255 255"
+						 global_color_pushed="false"
+						 onclick_l=""
+						 params_l=""
+						/>
+						
+						<group id="content" sizeparent="back" sizeref="wh" w="0" h="0" y="0" posref="TL TL" posparent="parent">
+							
+							<group id="text_gr" sizeparent="parent" sizeref="wh" w="-56" h="0" y="0" posref="TL TL" posparent="parent">
+								<view type="text" render_layer="2" x="3" y="0" id="budget_text" auto_clamp="true" posref="ML ML"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDPermanentSceneryObjects"
+								 over_extend_view_text="true" over_extend_parent_rect="true"/>
+							</group>
+
+							<group id="budget_gr" sizeref="h" w="51" h="0" y="0" x="20" posref="TR TL" posparent="text_gr">
+								<view type="text" render_layer="2" id="left_quota_misc_2" posparent="parent" posref="ML ML" x="0" y="0" auto_clamp="true"  global_color="true" fontsize="12" shadow="false" hardtext="(10) "
+								 over_extend_view_text="true" over_extend_parent_rect="true"/>
+							</group>
+
+							<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+							<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+							<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+							<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+						</group>
+					</group>	
+				</group>
+
+				<group id="list_components" sizeparent="parent" sizeref="wh" w="0" h="-61" x="0" y="-10" posref="BL TL" posparent="budget" >				
+					<group id="list_components_gr" sizeref="w" w="0" x="0" y="0" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" max_sizeref="h" max_h="-8">				
+						
+						<group id="macro_act_tree_enclosing" posref="TL TL" x="10" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+							<vector template="r2ed_act_macro_tree" _size="%r2ed_max_num_additionnal_acts"  id="macro_act_tree_$i" x="3" y="-2"/>
+						</group>	
+					</group>
+
+					<ctrl style="skin_scroll" id="scroll_bar" align="T" target="list_components_gr" y="8"/>
+				</group>
+			</group>
+		</group>
+
+		<group id="plot_items_panel" sizeref="wh" y="-32" h="-32" posref="TL TL">
+			<group id="plot_items_buttons" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+				<ctrl style="text_button_16" frozen="true" id="new_plot_item" posref="TL TL" x="1" y="-3" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.PlotItemsPanel.CreateMode = 'CreateNew'; enableModalWindow(getUICaller(), 'ui:interface:r2ed_choose_plot_item')" hardtext="uiR2EDNewPlotItem"/>
+				<ctrl style="text_button_16" frozen="true" id="delete_plot_item" posref="TR TL" x="2" y="0" posparent="new_plot_item" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:getSelectedInstance():onDelete()" hardtext="uiR2EDDeletePlotItem"/>
+				<ctrl style="text_button_16" frozen="true" id="plot_item_properties" posref="TR TL" x="2" y="0" posparent="delete_plot_item" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2:showProperties(r2:getSelectedInstance())" hardtext="uiR2EDDPlotProperties"/>
+			</group>
+			<group id="enclosing" sizeref="wh" w="0" h="-20" x="0" y="-20" posref="TL TL">
+				<group id="plot_items_list" 
+				  active="true" x="16" y="0" posref="TL TL"				  
+				  sizeref="w"
+				  child_resize_h="true"
+				  child_resize_hmargin="4"
+				  max_sizeref="h"
+				  max_h="-4"
+				>				
+					<vector template="r2ed_plot_item" _size="%r2ed_max_num_plot_items"  id="item_$i" index="$i" value="LOCAL:R2:PLOT_ITEMS:$i"
+					 _firstpos="TL TL" _nextpos="BL TL"
+					/>						
+				</group>
+				<ctrl style="skin_scroll" id="scroll_bar" align="B" target="plot_items_list" y="4"/>
+			</group>
+			<!-- already created items -->						
+			<!--
+			<group type="list_sheet_text" sizeref="wh" w="0" h="-32" id="plot_items" child_resize_h="false"
+				posref="TL TL"
+				x="0" y="0"
+				xitem="2" yitem="-2"
+				xtext="46" ytext="-2"
+				hspace="2"
+				array="false" maxitem="%r2ed_max_num_plot_items" startitem="0"
+				value="LOCAL:R2:PLOT_ITEMS"
+
+				display_empty_slot="false"
+								
+				onclick_r="lua"
+				params_r="r2.PlotItemsPanel:rightClickItem(getUICaller().parent:getElementIndex(getUICaller()))"
+				onclick_l="lua"
+				params_l="r2.PlotItemsPanel:selectItem(getUICaller().parent:getElementIndex(getUICaller()))"
+
+				on_tooltip="lua"
+				on_tooltip_params="r2.PlotItemsPanel:getItemName(getUICaller().parent:getElementIndex(getUICaller()))"
+				
+				color="%bot_chat_sheet_selection_normal"
+				col_pushed="%bot_chat_sheet_selection_pushed"
+				col_over="%bot_chat_sheet_selection_over"
+				
+				color="255 255 255 255"
+				fontsize="10"
+				shadow="true"
+				multi_line="true"
+				multi_line_space="0"				
+				
+			>
+			
+				
+				<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="44" />
+
+				<group id="list" max_sizeref="h" max_sizeparent="parent" max_h="0" sizeref="w" posref="TL TL" x="8" y="0" w="-16" />			
+			</group>				
+			-->
+		</group>		
+
+	<!--
+		<group id="export_panel" sizeref="wh" y="-32" h="-32" posref="TL TL" active="true">
+			<group id="plot_items_buttons" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+				<ctrl style="text_button_16" frozen="true" id="add" posref="TL TL" x="1" y="-3" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onAdd()" hardtext="uiR2EDExportAdd"/>
+				<ctrl style="text_button_16" frozen="true" id="clear" posref="TR TL" x="2" y="0" posparent="add" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onClear()" hardtext="uiR2EDExportClear"/>
+				<ctrl style="text_button_16" frozen="true" id="export" posref="TR TL" x="2" y="0" posparent="clear" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onExport()" hardtext="uiR2EDExportDoIt"/>
+				<ctrl style="text_button_16" frozen="true" id="remove" posref="TR TL" x="2" y="0" posparent="export" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onRemove()" hardtext="uiR2EDExportRemove"/>
+				<ctrl style="text_button_16" frozen="false" id="load" posref="TR TL" x="2" y="0" posparent="remove" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onLoad()" hardtext="uiR2EDExportLoad"/>
+				<ctrl style="text_button_16" frozen="false" id="unload" posref="TR TL" x="2" y="0" posparent="load" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ui.ExportPanel:onUnload()" hardtext="uiR2EDExportUnload"/>
+
+			</group>
+			<group id="enclosing" sizeref="wh" w="0" h="-20" x="0" y="-20" posref="TL TL">					
+				<group id="export_list" type="tree" 				 
+				 active="true"
+				 col_over="255 255 255 48" 
+				 col_select="255 255 255 80"
+				 sizeref="w"
+				 child_resize_h="true"
+				 child_resize_hmargin="4"
+				 max_sizeref="h"
+				 max_h="-4"
+				 x="16"
+				 posref="TL TL"
+				>	
+				<node id="root"	show="true" name="uiR2EDExportList" opened="true" handler="" params="" bitmap=""/>
+						
+				</group>								
+				<ctrl style="skin_scroll" id="scroll_bar" align="B" target="export_list" y="4"/>
+			</group>		
+		</group>
+		-->
+		<!-- scenario properties -->
+		<group id="scenario_properties" sizeref="wh" y="-32" h="-32" posref="TL TL">
+
+			<group id="global_enclosing" sizeref="wh" w="-16" h="0" x="8" y="0" posref="TL TL" >				
+				
+				<group id="scenario_name" sizeref="w" w="0" child_resize_h="true" y="0" child_resize_hmargin="0" posref="TL TL" posparent="parent">
+					
+					<ctrl type="button" id="back" button_type="push_button" sizeref="w" h="30" posref="TL TL"				 
+					 tx_normal="grey_40.tga" 
+					 tx_pushed="grey_80.tga" 
+					 tx_over="grey_60.tga"
+					 scale="true"					 
+					 global_color="true"
+					 global_color_normal="127 127 127 127"
+					 global_color_over="255 255 255 255"
+					 global_color_pushed="false"
+					 onclick_l=""
+					 params_l=""
+					 tooltip="uiR2EDScenarioFilenameTooltip"
+					 tooltip_parent="win"
+					/>
+					
+					<group id="content" sizeparent="back" sizeref="wh" w="0" h="0" y="0" posref="TL TL" posparent="parent">
+				
+						<view type="text" render_layer="2" x="3" y="0" id="scenario_name_text" auto_clamp="true" posref="ML ML"  global_color="true" fontsize="12" shadow="false" hardtext=""
+						 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+						<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+						<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+						<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+					</group>
+				</group>
+
+				<group id="rules" x="0" y="-10" w="0" sizeref="w" h="30" posref="BL TL" posparent="scenario_name" >
+
+					<group id="label" w="70" sizeref="h" h="0" x="0" y="0" posref="TL TL" posparent="parent" >
+						<view type="text" id="name_text" posref="BL BL" x="0" y="10" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDRules" />
+					</group>			 
+
+					<group type="combo_box" id="rules_combo_box" w="150" h="20" x="0" y="0" posref="TR TL" posparent="label" 
+					 linked_to_db="false" on_change="lua" on_change_params="r2.ScenarioWindow:scenarioRules()">
+						<instance template="r2ed_combo_box" />
+					</group>
+				</group>
+
+				<group id="level" x="0" y="-7" w="0" sizeref="w" h="30" posref="BL TL" posparent="rules" >
+					
+					<group id="label" w="70" sizeref="h" h="0" x="0" y="0" posref="BL BL" posparent="parent" >
+						<view type="text" id="name_text" posref="BL BL" x="0" y="10" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioLevel" />
+					</group>
+
+					<group type="combo_box" id="level_combo_box" w="150" h="20" x="0" y="0" posref="TR TL" posparent="label" 
+					 linked_to_db="false" on_change="lua" on_change_params="r2.ScenarioWindow:scenarioLevel()">
+						<instance template="r2ed_combo_box" />
+					</group>
+				</group>
+				
+				<group id="langage" x="0" y="-7" w="0" sizeref="w" h="20" posref="BL TL" posparent="level" >
+
+					<group id="language_label" h="20" w="70" x="0"  y="0" posref="TL TL" posparent="parent" >	
+						<view type="text" id="language_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDLanguage" />
+					</group>
+
+					<group type="combo_box" id="language_combo_box" w="150" h="20" x="0" y="0" posref="TR TL" posparent="language_label" 
+					 linked_to_db="false" on_change="lua" on_change_params="r2.ScenarioWindow:scenarioLanguage()">
+						<instance template="r2ed_combo_box" />
+					</group>
+				</group>
+
+				<group id="type" x="0" y="-15" w="0" sizeref="w" h="20" posref="BL TL" posparent="langage" >
+
+					<group id="type_label" h="20" w="70" x="0"  y="0" posref="TL TL" posparent="parent" >	
+						<view type="text" id="type_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDType" />
+					</group>
+
+					<group type="combo_box" id="type_combo_box" w="150" h="20" x="0" y="0" posref="TR TL" posparent="type_label" 
+					 linked_to_db="false" on_change="lua" on_change_params="r2.ScenarioWindow:scenarioType()">
+						<instance template="r2ed_combo_box" />
+					</group>
+				</group>
+
+
+				<group id="locked" x="0" y="-15" w="0" sizeref="w" h="20" posref="BL TL" posparent="type" tooltip="uiR2EDScenarioOtherAccessTooltip">
+	
+					<group id="locked_label" h="20" w="70" x="0"  y="0" posref="TL TL" posparent="parent" >	
+						<view type="text" id="locked_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+							global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDEditionLocked"/>
+					</group>
+
+					<group type="combo_box" id="locked_combo_box" w="150" h="20" x="0" y="0" posref="TR TL" posparent="locked_label" 
+					 linked_to_db="false" on_change="lua" on_change_params="r2.ScenarioWindow:scenarioEditionLocked()" >
+						<instance template="r2ed_combo_box" />
+					</group>
+				</group>
+											
+				<group id="title" x="0" y="-15" w="0" sizeref="w" h="20" posref="BL TL" posparent="locked" >
+
+					<group id="title_label" h="20" w="70" x="0"  y="0" posref="TL TL" posparent="parent" >	
+						<view type="text" id="type_label_text" posref="BL BL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioTitle" />
+					</group>
+					<instance template="edit_box_widget" id="title_eb" posref="MR ML" x="0" posparent="title_label" w="200"
+					 onenter="lua" 
+					 negative_filter = '"{}[]'
+					 fontsize="12"
+					 params="r2.ScenarioWindow:onTitleChanged()"
+					 on_focus_lost="lua"
+					 on_focus_lost_params="r2.ScenarioWindow:onTitleChanged()"
+					 reset_focus_on_hide="true"
+					 max_num_chars="32"
+					 tooltip="uiR2EDScenarioTitleTooltip"		 
+					 tooltip_parent="win"
+					/>					
+				</group>				
+				
+
+				<!-- SCENARIO NOTES  -->
+				<group id="scenario_notes" x="0" y="-15" sizeparent="parent" sizeref="wh" w="0" h="-270" posparent="title" posref="BL TL">
+
+					<group id="label_notes" sizeref="w" w="0" h="20" x="0" y="0" posref="TL TL" posparent="parent" >
+						<view type="text" id="text" posref="TL TL" x="0" y="0" color="255 255 255 255" 
+						 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioDescription" />
+					</group>
+
+					<group id="back_small_description" sizeparent="parent" sizeref="wh" posparent="label_notes" posref="BL TL" y="0" h="-20" w="0">
+						<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+					</group>
+
+					<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12"/>
+
+					<group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
+					 negative_filter = '"{}[]'
+					 child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
+					 max_h="-4" want_return="true" 
+					 on_focus_lost="lua"
+					 on_focus_lost_params="r2.ScenarioWindow:setScenarioNotes() r2.ScenarioWindow:cancelFocusOnText()" 
+					 max_num_chars="256" max_num_return="20"
+					>
+										
+						<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 						 
+						 fontsize="12" shadow="true" hardtext="" global_color="false" />
+					</group>
+
+					<ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" 
+					 posparent="crop_desc" posref="TR TL" x="-12" y="0" />
+
+				</group>
+			</group>
+		</group>
+
+		<!-- act properties -->
+		<group id="act_properties" sizeref="wh" y="-32" h="-32" posref="TL TL">	
+			<group id="global_enclosing" sizeref="wh" w="-16" h="0" x="8" y="0" posref="TL TL" >
+						
+				<!-- acts -->
+				<group id ="acts" x = "0" y="0" sizeref="w" w="0" child_resize_h="true" posparent="parent" posref="TL TL" >		
+					<group id="caption" sizeref="w" w="0" child_resize_h="true" y="0" child_resize_hmargin="3" posref="TL TL" posparent="parent">
+						
+						<ctrl type="button" id="rollout_button" button_type="push_button" sizeref = "wh" posref="TL TL"				 
+						 tx_normal="grey_40.tga" 
+						 tx_pushed="grey_80.tga" 
+						 tx_over="grey_60.tga"
+						 scale="true"
+						 tooltip=""				 
+						 global_color="true"
+						 global_color_normal="127 127 127 127"
+						 global_color_over="255 255 255 255"
+						 global_color_pushed="false"
+						 onclick_l=""
+						 params_l=""
+						/>
+														
+						<group type="table" id="bbox" posref="TL TL" posparent="parent" sizeref="w" width="100%" border="0" bgcolor="0 0 0 0" y="-4"
+						 cellspacing="0"
+						 cellpadding="0"
+						 continuous_update="true"
+						> 
+							<TR>												
+								<TD width="0" left_margin="2" add_child_w="true" height="0" align="left" valign="middle">
+									<view type="text" render_layer="2" y="-1" id="act" auto_clamp="true"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDCurrentAct"
+									 over_extend_view_text="true" over_extend_parent_rect="true"/>							
+								</TD>
+								<TD width="100%" height="0" align="left" valign="middle" ignore_max_width="false" ignore_min_width="false">
+									<group type="combo_box" render_layer="2" id="act_combo_box" sizeref="w" w="-4" x="0" y="0" child_resize_h="true" child_resize_hmargin="10" linked_to_db="false"							  
+									  on_change="lua" on_change_params="r2.ScenarioWindow:showActProperties()">
+												<instance template="combo_box_def1" render_layer="2"/>												
+									</group>							
+								</TD>
+							</TR>
+						</group>								
+						
+						<view type="bitmap"  render_layer="2" scale="true" id="top" sizeref="w" h="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>				
+						<view type="bitmap" render_layer="2" scale="true" id="left" sizeref="h" w="1" posref="TL TL" texture="blank.tga" color="0 0 0 255"/>
+						<view type="bitmap" render_layer="2" scale="true" id="right" sizeref="h" w="1" posref="TR TR" texture="blank.tga" color="0 0 0 255"/>								
+						<view type="bitmap" render_layer="2" avoid_resize_parent="true" scale="true" id="bottom" sizeref="w" h="1" y="0" posref="BL BL" texture="blank.tga" color="0 0 0 255"/>		
+					</group>							
+					<group id="act_management" posref="BL TL" posparent="caption" x="0" y="0" sizeref="w" child_resize_h="true" child_resize_hmargin="4">
+						<ctrl style="text_button_16" render_layer="2" id="new_act" posref="TL TL" x="1" y="-3" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ScenarioWindow:newAct()" hardtext="uiR2EDNewAct"/>
+						<ctrl style="text_button_16" render_layer="2" id="delete_act" posref="TR TL" x="2" y="0" posparent="new_act" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ScenarioWindow:deleteAct()" hardtext="uiR2EDDeleteAct"/>						
+						<ctrl style="text_button_16" render_layer="2" id="go_to_act" posref="TR TL" x="2" y="0" posparent="new_act" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.ScenarioWindow:onChangeActFromUI()" hardtext="uiR2EDGoToAct"/>						
+					</group>			
+				</group>
+
+				<group id="properties" x="0" y="-10" sizeparent="parent" sizeref="wh" w="0" h="-70" posref="BL TL" posparent="acts" >
+				
+					<instance template="inner_thin_border_group" />
+
+					<!-- LOCATION AND SEASON -->
+					<group id="location_season" x="5" y="0" sizeparent="parent" sizeref="w" w="-10" h="40" posref="TL TL" posparent="parent" >
+						
+						<group id="properties" x="0" y="0" sizeparent="parent" sizeref="h" w="80" h="0" posref="TL TL" posparent="parent" >
+					
+							<view type="text" render_layer="2" x="3" y="-5" id="location_property" auto_clamp="true" posref="TL TL"  global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDLocationProperty"
+							 over_extend_view_text="true" over_extend_parent_rect="true" />
+
+							<view type="text" render_layer="2" x="0" y="-5" id="season_property" auto_clamp="true" posparent="location_property" posref="BL TL" global_color="true" fontsize="12" shadow="false" hardtext="uiR2EDSeasonProperty"
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+
+						<group id="names" x="0" y="0" sizeparent="parent" sizeref="wh" w="-80" h="0" posref="TR TL" posparent="properties" >
+					
+							<view type="text" render_layer="2" x="3" y="-5" id="location_name" auto_clamp="true" posref="TL TL"  global_color="true" fontsize="12" shadow="false" hardtext=""
+							 over_extend_view_text="true" over_extend_parent_rect="true" />
+
+							<view type="text" render_layer="2" x="0" y="-5" id="season_name" auto_clamp="true" posparent="location_name" posref="BL TL" global_color="true" fontsize="12" shadow="false" hardtext=""
+							 over_extend_view_text="true" over_extend_parent_rect="true"/>
+						</group>
+		
+					</group>
+				
+					<!-- WEATHER -->
+					<group id="weather" x="0" y="0" sizeparent="parent" sizeref="w" w="-10" h="80" posref="BL TL" posparent="location_season" >
+						
+						<instance template="label_toggle_button" id="manual_weather" posparent="parent" 
+						 x="3" y="-5" posref="TL TL" w="120" hardtext="uiR2EDManualWeather" fontsize="12" y_text="-5" params_l="r2.ScenarioWindow:manualWeather()"/>	
+
+						<group id="weather_slider" x="0" y="-5" sizeparent="parent" sizeref="w" h="50" w="0" 
+						 posparent="manual_weather" posref="BL TL" >
+
+							<view type="bitmap" id="line_slider" posref="BL BL" scale="true" 
+							 x="5" y="10" w="150" h="4" texture="W_line_hor2.tga" />
+
+							<!-- line -->
+							<ctrl type="scroll" id="slider" posparent="line_slider" posref="ML ML" 
+							 x="0" y="0" w="150" h="16" vertical="false" align="L" min="0" max="1022" tracksize="10" cancelable="true" 
+							 tx_topright="w_scroll_R.tga" 	tx_middle="w_scroll_l123_m.tga" 	tx_bottomleft="w_scroll_L.tga"  
+							 onscrollend="lua" end_params="r2.ScenarioWindow:weatherValue('commit')" 
+							 onscrollcancel="lua" cancel_params="r2.ScenarioWindow:weatherValue('cancel')" 
+							 onscroll="lua" params="r2.ScenarioWindow:weatherValue('local')"/>
+
+							<view type="bitmap" id="sun" posparent="line_slider" posref="TL BM" x="5" y="7" texture="r2ed_sun.tga" />
+
+							<view type="bitmap" id="clouds" posparent="line_slider" posref="TM BM" x="0" y="7" texture="r2ed_clouds.tga" />
+
+							<view type="bitmap" id="storm" posparent="line_slider" posref="TR BM" x="0" y="7" texture="r2ed_storm.tga" />
+
+						</group>
+					</group>
+
+					<group id="pre_act_notes" x="0" y="-15" w="0" sizeref="w" h="100" posref="BL TL" posparent="weather" tooltip="uiR2EDPreActDescriptionTooltip" >
+
+						<group id="label_notes" sizeref="w" w="0" h="15" x="0" y="0" posref="TL TL" posparent="parent" >
+							<view type="text" id="text" posref="TL TL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDPreActDescription" />
+						</group>
+
+						<group id="back_small_description" sizeparent="parent" sizeref="wh" posparent="label_notes" posref="BL TL" x="0" y="0" h="-15" w="0">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+						</group>
+
+						<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12"/>
+
+						<group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
+						 child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
+						 max_h="-4" want_return="true"
+						 onenter="" params="" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setActNotes() r2.ScenarioWindow:cancelFocusOnText()" >
+											
+							<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 
+							 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+						</group>
+
+						<ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" 
+						 posparent="crop_desc" posref="TR TL" x="-12" y="0" />
+
+
+					</group>				
+					
+
+					
+					<!-- ACT NOTES  -->
+					<group id="act_notes" x="0" y="-10" sizeparent="parent" sizeref="wh" w="-10" h="-250" posparent="pre_act_notes" posref="BL TL"
+					 tooltip="uiR2EDActDescriptionTooltip"> 
+
+						<group id="label_notes" sizeref="w" w="0" h="15" x="0" y="0" posref="TL TL" posparent="parent" >
+							<view type="text" id="text" posref="TL TL" x="0" y="0" color="255 255 255 255" 
+							 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDActDescription" />
+						</group>
+
+						<group id="back_small_description" sizeparent="parent" sizeref="wh" posparent="label_notes" posref="BL TL" x="0" y="0" h="-15" w="0">
+							<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />
+						</group>
+
+						<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-4" h="-12"/>
+
+						<group type="edit_box" id="small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
+						 child_resize_h="true" w="-15" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
+						 max_h="-4" want_return="true" max_num_chars="256"  max_num_return="20"
+						 onenter="" params="" on_focus_lost="lua" on_focus_lost_params="r2.ScenarioWindow:setActNotes() r2.ScenarioWindow:cancelFocusOnText()" >
+											
+							<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 
+							 fontsize="12" shadow="true" hardtext="" global_color="false" />
+						</group>
+
+						<ctrl style="skin_scroll" id="small_description_scroll" align="B" target="small_description" 
+						 posparent="crop_desc" posref="TR TL" x="-12" y="0" />
+
+					</group>
+				</group>
+			</group>
+		</group>
+	</group>
+</group>
+
+
+
+
+
+
+<tree node="r2ed_scenario">
+</tree>
+
+
+
+<!-- TMP TMP -->
+
+
+<!-- modal prompted if no plot items were defined -->
+<group type="modal" w="200" id="r2ed_dm_gift_no_plot_items" options="skin_modal" x="0" y="0" posref="BL TL" child_resize_h="true" child_resize_hmargin="32" exit_click_b="true"
+ active="false"
+>
+	<view type="text" id="rollout_text" posref="ML ML" sizeref="w" w="-16" x="8" y="-8" multi_line="true" fontsize="15" shadow="true" hardtext="uiR2EDNoPlotItemDefined"/>
+</group>
+
+
+
+<!-- modal prompted to choose a plot item to give -->
+<group type="modal" id="r2ed_dm_gift_choose_plot_item" options="skin_modal" x="0" y="0" posref="BL TL" child_resize_h="true" child_resize_hmargin="4" child_resize_w="true" child_resize_wmargin="4" exit_click_b="true"
+ active="false"
+>	
+
+	<group type="list_sheet" id="list" posref="TL TL" value="LOCAL:R2:PLOT_ITEMS" wspace="2" hspace="2" x="0" y="0" 
+	    child_resize_h="true" child_resize_w="true"
+		child_resize_wmargin="4"
+		child_resize_hmargin="4"
+		display_empty_slot="true"
+		array="false"
+		squarify="true"
+		onclick_l="lua"		
+		params_l="r2.DMGift:onItemChosen(getUICaller().sheet)"
+		use_quantity="false"
+		use_quality="false"
+		onclick_r=""
+		params_r=""
+		lmargin="4" rmargin="4" tmargin="4" bmargin="4" column_max="16" 
+		maxitem="%r2ed_max_num_plot_items"
+	 >		
+	</group>
+</group>
+
+
+
+<!-- modal to choose quantity for plot items -->
+<group type="modal" id="r2ed_choose_plot_item_quantity" exit_click_out="true" posref="TL TL" w="155" h="80" options="skin_modal"
+ on_enter="lua"
+ on_enter_params="r2.DMGift:onValidateQuantity()"
+>
+	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="SELECT QUANTITY" />
+	<ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="LOCAL:R2:CURR_PLOT_ITEM" posref="MM MM" x="-26" y="0" use_quantity="false" use_quality="false"/>
+	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
+	<instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12" posparent="sheet" posref="MR ML" x="16" y="0" text_x="-2" w="32" prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="3"	 
+	 onenter="lua" params="r2.DMGift:onValidateQuantity()" max_historic="0" />
+	
+	<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" 
+				onclick_ok="lua" 
+				onclick_ok_param="r2.DMGift:onValidateQuantity()" 
+				onclick_cancel="leave_modal"
+				onclick_cancel_param="" />
+</group>
+
+
+<!--
+ on_enter="lua"
+ on_enter_params="r2.DMGift:validate()"
+-->
+
+<!-- gift from DM to player -->
+<!-- Interface for trade between players -->
+<group id="r2ed_dm_gift" type="container" title="uiR2EDDMGift"  
+ escapable="true"
+ on_escape="lua" 
+ on_escape_params="r2.DMGift:cancel()"  
+ on_close_button="lua"
+ on_close_button_params="r2.DMGift:cancel()" 
+ savable="false"
+ header_color="UI:SAVE:WIN:COLORS:TRADE"
+ global_color="false"
+ line_at_bottom="false"
+ active="false"
+ movable="true" opened="true" openable="false" 
+ pop_min_w="195" pop_max_w="195" w="195" h="166" pop_min_h="166" pop_max_h="166"
+>
+	<group id="header_opened" x="0" y="0" w="2048" h="16" posref="TL TL" 
+	 group_onclick_r="active_menu"
+	 group_params_r="menu=ui:interface:base_menu_with_color"
+	>
+	</group>
+	<group id="content" sizeref="wh" posref="TL TL">
+		<view type="text" id="items_text" posref="TL TL" x="0" y="-10" color="255 255 255 128" fontsize="10" shadow="true" hardtext="uiItems" />
+		<!-- Items to give -->
+		<group id="given_items" posref="BL TL" posparent="items_text" x="0" y="-2" child_resize_h="true" child_resize_w="true">
+			<!-- 8 sheets that can't be drag and dropped -->
+			<ctrl type="sheet" id="slot0" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:0" posparent="parent"  posref="TL TL" x="0" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(0)"/>
+			<ctrl type="sheet" id="slot1" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:1" posparent="slot0"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(1)"/>
+			<ctrl type="sheet" id="slot2" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:2" posparent="slot1"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(2)"/>
+			<ctrl type="sheet" id="slot3" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:3" posparent="slot2"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(3)"/>
+			
+			<ctrl type="sheet" id="slot4" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:4" posparent="slot0"   posref="BL TL" x="0" y="-2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(4)"/>
+			<ctrl type="sheet" id="slot5" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:5" posparent="slot4"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(5)"/>
+			<ctrl type="sheet" id="slot6" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:6" posparent="slot5"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(6)"/>
+			<ctrl type="sheet" id="slot7" use_quality="false" onclick_r="open_help_auto" value="LOCAL:R2:DM_GIFT:7" posparent="slot6"   posref="TR TL" x="2" onclick_l="lua" params_l="r2.DMGift:onSlotClicked(7)"/>
+		</group>		
+		<ctrl style="text_button_16" id="ok" posparent="given_items" posref="BR TR" x="1" y="-3" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" onclick_l="lua" params_l="r2.DMGift:validate()" hardtext="uiR2EDOk"/>
+	</group>
+</group>
+
+<!-- title update -->
+<link expr="depends(@%dm_gift_text)" action="set_server_string" params="value=@%dm_gift_text|target=ui:interface:r2ed_dm_gift:uc_title" />
+
+<tree node="r2ed_dm_gift">
+</tree>
+
+
+<group type="container" id="r2ed_scenario_filter" title="uiR2EDScenarioFilters" global_color="false" line_at_bottom="false"
+	movable="true" active="false" opened="true" openable="false" resizer="true" header_color="UI:SAVE:WIN:COLORS:R2_SCENARIO_FILTER"	
+	on_close="" on_close_params="" on_deactive="" on_deactive_params="" 
+	pop_min_w="300" pop_min_h="270" w="300" h="270" pop_max_w="300" pop_max_h="270" 
+>	
+	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+		
+		<!-- owner -->
+		<instance template="h_label_edit_box" id="owner" y="-20" x="10" posparent="parent" posref="TL TL" 
+		 hardtext="uiR2EDOwner" w="265" w_label="65" w_box="200" fontsize="12" max_num_chars="20" onchange_params="" />
+
+		<!-- level -->
+		<instance template="h_label_combo_box" id="level"  
+		 posref="BL TL" posparent="owner" w="270" w_label="70" w_combo="195" x="0" y="-10" hardtext="uiR2EDScenarioLevel" 
+		 on_change_params="" />
+
+		<!-- genre -->
+		<instance template="h_label_combo_box" id="genre"  
+		 posref="BL TL" posparent="level" w="270" w_label="70" w_combo="195" x="0" y="-10" hardtext="uiR2EDGenre" 
+		 on_change_params="" />
+
+		<!-- name -->
+		<instance template="h_label_edit_box" id="name" y="-10" x="0" posparent="genre" posref="BL TL" 
+		 hardtext="uiR2EdName" w="265" w_label="65" w_box="200" fontsize="12" max_num_chars="20" onchange_params="" />
+
+		<!-- label -->
+		<group id="label_gr" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="20" x="0" y="-10" 
+		 posref="BL TL" posparent="name" >
+			<view type="text" id="name_text" posref="TL TL" x="10" y="-10" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" multi_line="true" hardtext="uiFilterScenarioText" />
+		</group>
+
+		<view type="bitmap" id="sep_top" posparent="label_gr" posref="TL TL" sizeparent="label_gr" sizeref="w" w="0" h="1" 
+		 scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_left" posparent="label_gr" posref="TL TL" sizeparent="label_gr" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_right" posparent="label_gr" posref="BR BR" sizeparent="label_gr" sizeref="h" h="0" w="1" 
+		 y="0" x="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+		<view type="bitmap" id="sep_bottom" posparent="label_gr" posref="BL BL" sizeparent="label_gr" sizeref="w" w="0" h="1" 
+		 y="0" scale="true" texture="blank.tga" color="120 120 120 255" />
+
+
+		<ctrl style="button_ok" id="ok" active="true" x="0" y="-10" posref="BR TR" posparent="label_gr"
+		 text_y="-2" onclick_l="lua" params_l="r2:showFilteredScenarios()" hardtext="OK" fontsize="10" />
+
+	</group>
+</group>
+
+<tree node="r2ed_scenario_filter">
+</tree>
+
+
+
+</interface_config>

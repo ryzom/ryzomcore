@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.27 $" State="modified">
+  <ELEMENT Name="Tool type" Type="Type" Filename="item_crafting_tool_type.typ"/>
+  <ELEMENT Name="Crafting Duration" Type="Type" Filename="float.typ" Default="2"/>
+  <ELEMENT Name="Price" Type="Type" Filename="formulae.typ" Default="0"/>
+  <ELEMENT Name="Durability Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Weight Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="DMG Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Slashing Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Blunt Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Piercing Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Acid Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Cold Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Fire Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Rot Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="ShockWave Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Poison Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Electricity Protection Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Desert Resistance Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Forest Resistance Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Lacustre Resistance Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Jungle Resistance Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="PrimaryRoot Resistance Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Dodge Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Parry Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Adversary Dodge Modifier Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Adversary Parry Modifier Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Speed Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Range Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="SapLoad Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Elemental Casting Time Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Elemental Power Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Offensive Affliction Casting Time Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Offensive Affliction Power Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Heal Casting Time Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Heal Power Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Defensive Affliction Casting Time Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Defensive Affliction Power Factor" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Item Max Level" Type="Type" Filename="int.typ" Default="250"/>
+  <ELEMENT Name="Create" Type="Dfn" Filename="_item_faber_plan.dfn"/>
+  <ELEMENT Name="HpBonusPerLevel" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="SapBonusPerLevel" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="StaBonusPerLevel" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="FocusBonusPerLevel" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="AllowPartialSuccess" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Wed Mar 16 11:02:55 2005 (fleury) Dfn Structure = 
+Wed Mar 16 11:03:03 2005 (fleury) Dfn Structure = 
+Wed Mar 16 11:06:13 2005 (fleury) Dfn Structure = 
+Thu Mar 17 14:48:56 2005 (fleury) Dfn Structure = 
+Thu Mar 17 14:49:19 2005 (fleury) Dfn Structure = 
+Fri Mar 18 18:38:54 2005 (fleury) Dfn Structure = 
+Fri Mar 18 18:51:25 2005 (fleury) Dfn Structure = 
+Mon Mar 21 12:00:58 2005 (fleury) Dfn Structure = 
+Mon Mar 21 12:01:19 2005 (fleury) Dfn Structure = 
+Fri Aug 05 11:00:25 2005 (berenguier) Dfn Structure = </LOG>
+</DFN>

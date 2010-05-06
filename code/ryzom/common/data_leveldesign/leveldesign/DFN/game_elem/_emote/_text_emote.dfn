@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<DFN Revision="$Revision: 1.5 $" State="modified">
+  <ELEMENT Name="Phrase With Target To The Crowd" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase With Target To The Actor" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase With Target To The Target" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase Without Target To The Crowd" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase Without Target To The Actor" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase Self Target To The Actor" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Phrase Self Target To The Crowd" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Access Path" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Usable From Client UI" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="EmoteId" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Animation" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FxToSpawn" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FxSpawnDelay" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="FxSpawnDist" Type="Type" Filename="float.typ" Default="0.5"/>
+  <LOG>Tue Apr 27 10:40:13 2004 (nouveau) Dfn Structure = 
+Wed Apr 28 18:39:18 2004 (nouveau) Dfn Structure = </LOG>
+</DFN>

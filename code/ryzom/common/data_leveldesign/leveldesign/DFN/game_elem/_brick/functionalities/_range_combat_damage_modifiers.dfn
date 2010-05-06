@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="PointBlank Multiplier" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="ShortRange Multiplier" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="MediumRange Multiplier" Type="Type" Filename="float.typ" Default="1"/>
+  <ELEMENT Name="LongRange Multiplier" Type="Type" Filename="float.typ" Default="1"/>
+  <LOG>Thu Dec 05 19:24:26 2002 (brigand) Dfn Structure = 
+Thu Dec 05 19:25:35 2002 (brigand) Dfn Structure = 
+Fri Dec 06 14:29:50 2002 (fleury) Dfn Structure = 
+Fri Dec 06 14:54:07 2002 (fleury) Dfn Structure = </LOG>
+</DFN>

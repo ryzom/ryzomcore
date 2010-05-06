@@ -1,0 +1,424 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_BUG_REPORT_DIALOG DIALOGEX 0, 0, 512, 326
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Nevrax Bug Report Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Subject:",IDC_STATIC,25,10,27,8
+    LTEXT           "Client Version:",IDC_STATIC,6,32,46,8
+    LTEXT           "Shard Name:",IDC_STATIC,10,54,42,8
+    LTEXT           "Shard Version:",IDC_STATIC,5,76,47,8
+    LTEXT           "Language:",IDC_STATIC,17,98,35,8
+    LTEXT           "SKU:",IDC_STATIC,195,28,18,8
+    LTEXT           "Class:",IDC_STATIC,193,50,20,8
+    LTEXT           "Category:",IDC_STATIC,182,72,31,8
+    LTEXT           "Can the bug be reproduced",IDC_STATIC,177,94,88,8
+    LTEXT           "Description:",IDC_STATIC,15,115,38,8
+    LTEXT           "Extended Description:",IDC_STATIC,20,250,37,22
+    LTEXT           "Attached File:",IDC_STATIC,385,5,44,8
+    LTEXT           "Requestor:",IDC_STATIC,365,90,36,8
+    LTEXT           "Queue:",IDC_STATIC,375,70,24,8
+    LTEXT           "Please describe steps to reproduce the bug:",IDC_STATIC,
+                    5,195,55,40
+    EDITTEXT        IDC_SUBJECT,70,5,300,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CLIENTVERSION,70,28,90,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_SHARDNAME,70,51,80,95,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    EDITTEXT        IDC_SHARDVERSION,70,72,90,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_LANGUAGE,70,95,80,115,CBS_DROPDOWNLIST | CBS_SORT |
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_SKU,220,29,80,95,CBS_DROPDOWNLIST | CBS_SORT |
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CLASS,220,50,80,95,CBS_DROPDOWNLIST | CBS_SORT |
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CATEGORY,220,71,137,139,CBS_DROPDOWNLIST |
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_FREQUENCY,275,95,80,70,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    EDITTEXT        IDC_DESCRIPTION,70,115,435,75,ES_MULTILINE |
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN
+    EDITTEXT        IDC_REPRODUCESTEPS,70,195,435,50,ES_MULTILINE |
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN
+    PUSHBUTTON      "Send Report Without Screenshot",IDSENDREPORT,315,310,
+                    130,14
+    PUSHBUTTON      "Quit",IDCANCEL,455,310,50,14
+    EDITTEXT        IDC_DESCRIPTIONEX,70,250,435,55,ES_MULTILINE |
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | NOT
+                    WS_TABSTOP
+    PUSHBUTTON      "Clear",IDC_CLEAR,35,310,50,14
+    PUSHBUTTON      "Attach File...",IDC_ATTACHFILE,385,30,55,14
+    PUSHBUTTON      "No Attach",IDC_NOATTACH,455,30,50,14
+    EDITTEXT        IDC_ATTACHEDFILE,385,15,120,14,ES_RIGHT | ES_AUTOHSCROLL |
+                    ES_READONLY,WS_EX_RIGHT
+    EDITTEXT        IDC_REQUESTOR,409,91,90,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_QUEUE,409,70,91,139,CBS_DROPDOWNLIST | WS_VSCROLL |
+                    WS_TABSTOP
+    PUSHBUTTON      "Send Report With Screenshot",IDSENDREPORTWITHSS,170,310,
+                    135,14
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "bug_report MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "bug_report\0"
+            VALUE "LegalCopyright", "Copyright (C) 2002\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "bug_report.EXE\0"
+            VALUE "ProductName", "bug_report Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE
+BEGIN
+    IDD_BUG_REPORT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 505
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 319
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_BUG_REPORT_DIALOG DLGINIT
+BEGIN
+    IDC_SHARDNAME, 0x403, 8, 0
+0x464f, 0x4c46, 0x4e49, 0x0045,
+    IDC_SHARDNAME, 0x403, 5, 0
+0x6542, 0x6174, "\000"
+    IDC_SHARDNAME, 0x403, 8, 0
+0x6f43, 0x706d, 0x6c69, 0x006f,
+    IDC_SHARDNAME, 0x403, 12, 0
+0x694c, 0x756e, 0x7378, 0x6168, 0x6472, 0x0030,
+    IDC_SHARDNAME, 0x403, 12, 0
+0x694c, 0x756e, 0x7378, 0x6168, 0x6472, 0x0031,
+    IDC_SHARDNAME, 0x403, 12, 0
+0x694c, 0x756e, 0x7378, 0x6168, 0x6472, 0x0032,
+    IDC_LANGUAGE, 0x403, 7, 0
+0x7266, 0x6e65, 0x6863, "\000"
+    IDC_LANGUAGE, 0x403, 8, 0
+0x6e65, 0x6c67, 0x7369, 0x0068,
+    IDC_LANGUAGE, 0x403, 7, 0
+0x6567, 0x6d72, 0x6e61, "\000"
+    IDC_SKU, 0x403, 6, 0
+0x6542, 0x6174, 0x0032,
+    IDC_SKU, 0x403, 6, 0
+0x6542, 0x6174, 0x0033,
+    IDC_CLASS, 0x403, 2, 0
+0x0041,
+    IDC_CLASS, 0x403, 2, 0
+0x0042,
+    IDC_CLASS, 0x403, 2, 0
+0x0043,
+    IDC_CLASS, 0x403, 2, 0
+0x0044,
+    IDC_CATEGORY, 0x403, 9, 0
+0x6148, 0x6472, 0x6177, 0x6572, "\000"
+    IDC_CATEGORY, 0x403, 15, 0
+0x6148, 0x6472, 0x6177, 0x6572, 0x412f, 0x6475, 0x6f69, "\000"
+    IDC_CATEGORY, 0x403, 15, 0
+0x6148, 0x6472, 0x6177, 0x6572, 0x562f, 0x6469, 0x6f65, "\000"
+    IDC_CATEGORY, 0x403, 17, 0
+0x6148, 0x6472, 0x6177, 0x6572, 0x4e2f, 0x7465, 0x6f77, 0x6b72, "\000"
+    IDC_CATEGORY, 0x403, 21, 0
+0x6148, 0x6472, 0x6177, 0x6572, 0x492f, 0x706e, 0x7475, 0x6544, 0x6976,
+0x6563, "\000"
+    IDC_CATEGORY, 0x403, 14, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x0079,
+    IDC_CATEGORY, 0x403, 21, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x2f79, 0x6553, 0x7672,
+0x7265, "\000"
+    IDC_CATEGORY, 0x403, 21, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x2f79, 0x6c43, 0x6569,
+0x746e, "\000"
+    IDC_CATEGORY, 0x403, 20, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x2f79, 0x6f4c, 0x6967,
+0x006e,
+    IDC_CATEGORY, 0x403, 23, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x2f79, 0x6150, 0x6374,
+0x6968, 0x676e, "\000"
+    IDC_CATEGORY, 0x403, 20, 0
+0x6f43, 0x6564, 0x7453, 0x6261, 0x6c69, 0x7469, 0x2f79, 0x6441, 0x696d,
+0x006e,
+    IDC_CATEGORY, 0x403, 9, 0
+0x6147, 0x656d, 0x6f43, 0x6564, "\000"
+    IDC_CATEGORY, 0x403, 16, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x432f, 0x6d6f, 0x6162, 0x0074,
+    IDC_CATEGORY, 0x403, 15, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x462f, 0x6261, 0x7265, "\000"
+    IDC_CATEGORY, 0x403, 15, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x4d2f, 0x6761, 0x6369, "\000"
+    IDC_CATEGORY, 0x403, 15, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x542f, 0x6172, 0x6564, "\000"
+    IDC_CATEGORY, 0x403, 20, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x412f, 0x4249, 0x6865, 0x7661, 0x6f69,
+0x0072,
+    IDC_CATEGORY, 0x403, 23, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x412f, 0x4949, 0x746e, 0x7265, 0x6361,
+0x6974, 0x6e6f, "\000"
+    IDC_CATEGORY, 0x403, 19, 0
+0x6147, 0x656d, 0x6f43, 0x6564, 0x492f, 0x746e, 0x7265, 0x6166, 0x6563,
+"\000"
+    IDC_CATEGORY, 0x403, 10, 0
+0x6147, 0x656d, 0x7552, 0x656c, 0x0073,
+    IDC_CATEGORY, 0x403, 15, 0
+0x6147, 0x656d, 0x7552, 0x656c, 0x2f73, 0x7449, 0x6d65, "\000"
+    IDC_CATEGORY, 0x403, 19, 0
+0x6147, 0x656d, 0x7552, 0x656c, 0x2f73, 0x7243, 0x6165, 0x7574, 0x6572,
+"\000"
+    IDC_CATEGORY, 0x403, 24, 0
+0x6147, 0x656d, 0x7552, 0x656c, 0x2f73, 0x4941, 0x6e49, 0x6574, 0x6172,
+0x7463, 0x6f69, 0x006e,
+    IDC_CATEGORY, 0x403, 9, 0
+0x7247, 0x7061, 0x6968, 0x7363, "\000"
+    IDC_CATEGORY, 0x403, 17, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x542f, 0x7865, 0x7574, 0x6572, "\000"
+    IDC_CATEGORY, 0x403, 23, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x4c2f, 0x6e61, 0x7364, 0x6163, 0x6570,
+0x6f48, 0x656c, "\000"
+    IDC_CATEGORY, 0x403, 19, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x432f, 0x6c6f, 0x696c, 0x6973, 0x6e6f,
+"\000"
+    IDC_CATEGORY, 0x403, 18, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x4c2f, 0x6769, 0x7468, 0x6e69, 0x0067,
+
+    IDC_CATEGORY, 0x403, 19, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x412f, 0x696e, 0x616d, 0x6974, 0x6e6f,
+"\000"
+    IDC_CATEGORY, 0x403, 19, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x492f, 0x746e, 0x7265, 0x6166, 0x6563,
+"\000"
+    IDC_CATEGORY, 0x403, 31, 0
+0x7247, 0x7061, 0x6968, 0x7363, 0x532f, 0x6174, 0x6974, 0x4f63, 0x6a62,
+0x6365, 0x5074, 0x616c, 0x6563, 0x656d, 0x746e, "\000"
+    IDC_CATEGORY, 0x403, 6, 0
+0x7541, 0x6964, 0x006f,
+    IDC_CATEGORY, 0x403, 18, 0
+0x7541, 0x6964, 0x2f6f, 0x6e45, 0x6976, 0x6f72, 0x6d6e, 0x6e65, 0x0074,
+
+    IDC_CATEGORY, 0x403, 15, 0
+0x7541, 0x6964, 0x2f6f, 0x6f46, 0x746f, 0x7473, 0x7065, "\000"
+    IDC_CATEGORY, 0x403, 15, 0
+0x7541, 0x6964, 0x2f6f, 0x7243, 0x6165, 0x7574, 0x6572, "\000"
+    IDC_CATEGORY, 0x403, 13, 0
+0x7541, 0x6964, 0x2f6f, 0x6550, 0x706f, 0x656c, "\000"
+    IDC_CATEGORY, 0x403, 13, 0
+0x7541, 0x6964, 0x2f6f, 0x6645, 0x6566, 0x7463, "\000"
+    IDC_CATEGORY, 0x403, 9, 0
+0x694d, 0x7373, 0x6f69, 0x736e, "\000"
+    IDC_CATEGORY, 0x403, 14, 0
+0x6f4c, 0x6163, 0x696c, 0x657a, 0x5464, 0x7865, 0x0074,
+    IDC_CATEGORY, 0x403, 9, 0
+0x6f44, 0x746e, 0x6e4b, 0x776f, "\000"
+    IDC_CATEGORY, 0x403, 12, 0
+0x654c, 0x6576, 0x446c, 0x7365, 0x6769, 0x006e,
+    IDC_FREQUENCY, 0x403, 7, 0
+0x6c41, 0x6177, 0x7379, "\000"
+    IDC_FREQUENCY, 0x403, 6, 0
+0x664f, 0x6574, 0x006e,
+    IDC_FREQUENCY, 0x403, 5, 0
+0x6e4f, 0x6563, "\000"
+    IDC_FREQUENCY, 0x403, 10, 0
+0x6f53, 0x656d, 0x6974, 0x656d, 0x0073,
+    IDC_FREQUENCY, 0x403, 9, 0
+0x6152, 0x646e, 0x6d6f, 0x796c, "\000"
+    IDC_QUEUE, 0x403, 6, 0
+0x7972, 0x6f7a, 0x006d,
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_EMAIL DIALOG DISCARDABLE  0, 0, 326, 69
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Enter your email"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,128,48,50,14
+    EDITTEXT        IDC_EMAIL,7,29,312,12,ES_AUTOHSCROLL
+    LTEXT           "Please enter your email so that the bur report tool can send your reports to the bug report database. If you wish to modify your email later, open the ""bug_report.cfg"" file in Notepad and replace it.",
+                    IDC_STATIC,7,7,312,21
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE
+BEGIN
+    IDD_EMAIL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 319
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 62
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\bug_report.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\bug_report.ico"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\bug_report.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN>
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ShortName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Ranking" Type="Type" Filename="int.typ" Default="101"/>
+  <ELEMENT Name="TopTenRanking" Type="Type" Filename="int.typ" Default="11"/>
+</DFN>

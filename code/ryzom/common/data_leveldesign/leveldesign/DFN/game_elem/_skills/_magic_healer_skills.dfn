@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Area" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Dryade" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="DryadeAutomn" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="DryadeSpring" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="DryadeSummer" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="DryadeWinter" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="HealingKamisKnowledge" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="LifeAlchemy" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorDryade" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorDryadeAutomn" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorDryadeSpring" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorDryadeSummer" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorDryadeWinter" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorHealLife" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorLifeRegeneration" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorSapHeal" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorSapRegenearation" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorTirednessHeal" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MajorTirednessRegenearation" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MinorLifeHeal" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MinorSapHeal" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="MinorTirednessHeal" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="SapAlchemy" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="StealBreath" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="StealLife" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="StealSap" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Target" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="TirednessAlchemy" Type="Type" Filename="creature_stat.typ"/>
+</DFN>

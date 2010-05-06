@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Running" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Swimming" Type="Type" Filename="creature_stat.typ"/>
+  <ELEMENT Name="Riding" Type="Type" Filename="creature_stat.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:15 2002 (corvazier) File converted from old format</LOG>
+</DFN>

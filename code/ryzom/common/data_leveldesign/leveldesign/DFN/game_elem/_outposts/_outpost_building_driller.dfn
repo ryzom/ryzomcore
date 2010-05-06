@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="quality_050" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="quality_100" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="quality_150" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="quality_200" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="quality_250" Type="Type" Filename="float.typ" Default="0"/>
+  <ELEMENT Name="mp0" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp1" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp2" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp3" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp4" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp5" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp6" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp7" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp8" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp9" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp10" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp11" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp12" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp13" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp14" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp15" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp16" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp17" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp18" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <ELEMENT Name="mp19" Type="Dfn" Filename="_outpost_building_driller_mp.dfn" />
+  <LOG>Fri Sep 23 10:43:20 2005 (besson) Dfn Structure = 
+Fri Sep 23 11:04:16 2005 (besson) Dfn Structure = </LOG>
+</DFN>

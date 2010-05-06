@@ -1,0 +1,257 @@
+<!-- ****************************************** -->
+<!-- *                  WIDGETS               * -->
+<!-- ****************************************** -->
+
+<interface_config>
+
+<root id="outgame" x="0" y="0" w="800" h="600" active="true" />
+
+<proc id="proc_nothing">
+</proc>
+
+<!-- *********** -->
+<!-- *  MODES  * -->
+<!-- *********** -->
+
+<template name="modes" id="" posparent="parent" posref="TL TL" x="0" y="0" w="40" h="28" 
+	onlist_modal="" restore_value="" mode_min="" mode_max="" >
+		<!-- the big button is used to restore the current specific mode -->
+		<ctrl type="button" id="#id" button_type="radio_button" posparent="#posparent" x="#x" y="#y" posref="#posref" 
+										tx_normal="#tx_normal" tx_pushed="#tx_pushed" tx_over="W_button_28_over.tga" 
+										color="255 255 255 128" col_pushed="255 255 255 255" 
+										onclick_l="copy" params_l="dbdst=UI:SAVE:CURRENT_MODE|dbsrc=#restore_value" global_color_pushed="false" />
+		<view type="bitmap" id="sep#id" posparent="#id" posref="BR BL" scale="true" x="0" y="2" w="2" h="10" texture="W_line_ver.tga" />
+		<!-- the arrow button open a modal to select the new specific mode -->
+		<ctrl type="button" id="arrow_up#id" button_type="push_button" posparent="sep#id" posref="TR TL"
+										tx_normal="W_arrow_up_2.tga" tx_pushed="W_arrow_up_2.tga" tx_over="W_button_10_over.tga"
+										color="255 255 255 128" col_pushed="255 255 255 255" 
+										onclick_l="enter_modal" params_l="group=#onlist_modal" />
+
+		<!-- the big button is pushed if one of our mode -->
+		<link expr="and( ge(@UI:SAVE:CURRENT_MODE,#mode_min), le(@UI:SAVE:CURRENT_MODE,#mode_max) )" target="#id:pushed"/>
+</template>
+
+<!-- ******************* -->
+<!-- *  SELECT NUMBER  * -->
+<!-- ******************* -->
+
+<template name="SNH" id="" value="" loop="true" min="0" max="9" posparent="parent" posref="MM MM" x="0" y="0" w="26" h="16" delta="1" >
+	<group type="select_number" id="#id" value="#value" loop="#loop" min="#min" max="#max" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" delta="#delta" >
+		<view type="bitmap" id="slot_number" posref="TL TL" texture="W_slot_number.tga" />
+		<view type="text" id="number" posparent="slot_number" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" global_color="false" />
+		<ctrl type="button" id="arrow_up" button_type="push_button" posref="TR TR" tx_normal="W_arrow_up_3.tga" tx_pushed="W_arrow_up_3.tga" tx_over="W_button_08_over.tga" />
+		<ctrl type="button" id="arrow_down" button_type="push_button" posref="BR BR" tx_normal="W_arrow_down_3.tga" tx_pushed="W_arrow_down_3.tga" tx_over="W_button_08_over.tga" />
+	</group>
+</template>
+
+
+<template name="SNV" id="" value="" loop="true" min="0" max="9" posparent="parent" posref="MM MM" x="0" y="0" w="16" h="40" delta="1" >
+	<group type="select_number" id="#id" value="#value" loop="#loop" min="#min" max="#max" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" delta="#delta" >
+		<view type="bitmap" id="slot_number" posref="MM MM" texture="W_slot_number.tga" />
+		<view type="text" id="number" posparent="slot_number" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" global_color="false" />
+		<ctrl type="button" id="arrow_up" button_type="push_button" posref="TM TM" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" />
+		<ctrl type="button" id="arrow_down" button_type="push_button" posref="BM BM" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" />
+	</group>
+</template>
+
+<!-- template for border inside of a group -->
+<template name="inner_thin_border" posparent="parent" keep="true">
+	<view type="bitmap" id="bg" texture="W_box_blank.tga" scale="true" posparent="#posparent" posref="MM MM" sizeref="hw" w="-8" h="-8"/>
+		<view type="bitmap" id="tlb" texture="W_box_top_left.tga" posref="TL TL" posparent="#posparent"/>
+		<view type="bitmap" id="trb" texture="W_box_top_right.tga" posref="TR TR" posparent="#posparent"/>
+		<view type="bitmap" id="brb" texture="W_box_bot_right.tga" posref="BR BR" posparent="#posparent"/>
+		<view type="bitmap" id="blb" texture="W_box_bot_left.tga" posref="BL BL" posparent="#posparent"/>		
+		<view type="bitmap" id="tb" texture="W_box_top.tga" posref="TM TM" posparent="#posparent" scale="true" sizeref="w" w="-8" h="4"/>
+		<view type="bitmap" id="bb" texture="W_box_bot.tga" posref="BM BM" posparent="#posparent" scale="true" sizeref="w" w="-8" h="4"/>
+		<view type="bitmap" id="lb" texture="W_box_left.tga" posref="ML ML" posparent="#posparent" scale="true" sizeref="h" h="-8" w="4"/>
+		<view type="bitmap" id="rb" texture="W_box_right.tga" posref="MR MR" posparent="#posparent" scale="true" sizeref="h" h="-8" w="4"/>
+</template>
+
+<!-- ********** -->
+<!-- *	CHAT  * -->
+<!-- ********** -->
+
+<template name="chat_box" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="64" sizeref="" min_height="64" max_height="256" maxelements="100" keep="true" chat="false">	
+	<group type="scroll_text" id="#id" w="#w" sizeref="#sizeref" posparent="#posparent" posref="#posref" y="#y" x="#x" min_height="#min_height" max_height="#max_height">
+		<ctrl type="button" id="button_add" posref="TR TR" button_type="push_button" tx_normal="W_scale_more_3.tga" tx_pushed="W_scale_more_3.tga" tx_over="W_button_08_over.tga"/>
+		<ctrl type="button" id="button_sub" posref="TL TR" posparent="button_add" x="-4" button_type="push_button" tx_normal="W_scale_less_3.tga" tx_pushed="W_scale_less_3.tga" tx_over="W_button_08_over.tga"/>
+		<group id="black" posref="BR BR" sizeref="hw" w="-12" h="-12" />
+		<instance template="inner_thin_border" posparent="black" />
+		<group type="list" id="text_list" chat="#chat" posref="BL BL" posparent="black" x="2" y="2" space="3" sizeref="hw" w="-4" h="-4" maxelements="#maxelements"/>
+		<ctrl type="scroll" id="scroll_bar" posref="BL BL" w="8" tx_topright="w_scroll_l123_t.tga" tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_l123_b.tga"/>
+	</group>	
+</template>
+
+
+<!-- ********************* -->
+<!-- *	EDIT BOX WIDGET  * -->
+<!-- ********************* -->
+
+<template name="edit_box_widget" posref="TL TL" text_x="0" text_ref="BL BL" child_resize_h="true" multi_line="true" x="0" y="0" w="0" h="0" 
+ sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true"
+ enter_loose_focus="true" prompt="&gt;" 
+ max_num_chars="256" 
+ menu_r="" 
+ onchange="" 
+ onchange_params="" 
+ entry_type="text"
+ keep="true" 
+ max_historic="40"
+ fontsize="12"
+>
+	<group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h">
+		<group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" >
+			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga"/>
+			<view id="edit_text" type="text" x="#text_x" posref="#text_ref" multi_line="#multi_line" fontsize="#fontsize" shadow="true" hardtext="" global_color="false"/>		
+		</group>
+	
+		<!-- border around the list -->
+		<view type="bitmap" id="tlb" texture="W_box_top_left.tga" posparent="eb" posref="TL BR" />
+		<view type="bitmap" id="trb" texture="W_box_top_right.tga" posparent="eb" posref="TR BL" />
+		<view type="bitmap" id="brb" texture="W_box_bot_right.tga" posparent="eb" posref="BR TL" />
+		<view type="bitmap" id="blb" texture="W_box_bot_left.tga" posparent="eb" posref="BL TR" />			
+		<view type="bitmap" id="tb" texture="W_box_top.tga" posparent="eb" posref="TL BL" scale="true" sizeref="w" w="0" h="4"/>
+		<view type="bitmap" id="bb" texture="W_box_bot.tga" posparent="eb" posref="BL TL" scale="true" sizeref="w" w="0" h="4"/>
+		<view type="bitmap" id="lb" texture="W_box_left.tga" posparent="eb" posref="TL TR"  scale="true" sizeref="h" h="0" w="4"/>
+		<view type="bitmap" id="rb" texture="W_box_right.tga" posparent="eb" posref="TR TL" scale="true" sizeref="h" h="0" w="4"/>
+	</group>
+</template>
+
+<!-- **************** -->
+<!-- *	BOX WIDGET  * -->
+<!-- **************** -->
+
+<template name="box_widget" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" keep="true">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
+		<group id="bg" sizeref="hw" h="0" w="0" />
+		<view type="bitmap" id="back" scale="true" posparent="bg" posref="MM MM" sizeref="hw" h="-8" w="-8" texture="W_box_blank.tga"/>
+		<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga"/>
+		<view type="bitmap" id="tlb" texture="W_box_top_left.tga"  posref="TL TL" />
+		<view type="bitmap" id="trb" texture="W_box_top_right.tga"  posref="TR TR" />
+		<view type="bitmap" id="brb" texture="W_box_bot_right.tga"  posref="BR BR" />
+		<view type="bitmap" id="blb" texture="W_box_bot_left.tga" posref="BL BL" />			
+		<view type="bitmap" id="tb" texture="W_box_top.tga" posref="TM TM" scale="true" sizeref="w" w="-8" h="4"/>
+		<view type="bitmap" id="bb" texture="W_box_bot.tga" posref="BM BM" scale="true" sizeref="w" w="-8" h="4"/>
+		<view type="bitmap" id="lb" texture="W_box_left.tga" posref="ML ML"  scale="true" sizeref="h" h="-8" w="4"/>
+		<view type="bitmap" id="rb" texture="W_box_right.tga" posref="MR MR" scale="true" sizeref="h" h="-8" w="4"/>
+	</group>
+</template>
+
+<!-- template for the inner border of a dialog, with thick border on the left -->
+<template name="inner_thick_border" id="inner_thick_border" posparent="parent" keep="true">
+	<group id="#id" posref="TL TL" sizeref="hw">
+		<view type="bitmap" id="tlb" texture="W_L0_TL.tga" posparent="#posparent" posref="TL TL" />
+		<view type="bitmap" id="trb" texture="W_L0_TR.tga" posparent="#posparent" posref="TR TR" />
+		<view type="bitmap" id="brb" texture="W_L0_BR.tga" posparent="#posparent" posref="BR BR" />
+		<view type="bitmap" id="blb" texture="W_L0_BL.tga" posparent="#posparent" posref="BL BL" />			
+		<view type="bitmap" id="tb" texture="W_L0_T.tga" posparent="#posparent" posref="TL TL" scale="true" sizeref="w" w="-32" h="8" x="24" />
+		<view type="bitmap" id="bb" texture="W_L0_B.tga" posparent="#posparent" posref="BL BL" scale="true" sizeref="w" w="-32" h="8" x="24" />
+		<view type="bitmap" id="lb" texture="W_L0_L.tga" posparent="#posparent" posref="TL TL"  scale="true" sizeref="h" h="-16" w="24" y="-8" />
+		<view type="bitmap" id="rb" texture="W_L0_R.tga" posparent="#posparent" posref="TR TR" scale="true" sizeref="h" h="-16" w="8" y="-8" />
+	</group>
+</template>
+
+<template name="window_border_black" posparent="parent">
+		<view type="bitmap" id="t" texture="border_hor.tga" posref="TM TM" posparent="#posparent" scale="true" sizeref="w" w="-2" h="1" color="0 0 0 255" />
+		<view type="bitmap" id="b" texture="border_hor.tga" posref="BM BM" posparent="#posparent" scale="true" sizeref="w" w="-2" h="1" color="0 0 0 255" />
+		<view type="bitmap" id="l" texture="border_ver.tga" posref="TL TL" posparent="#posparent" scale="true" sizeref="h" w="1" h="0" color="0 0 0 255" />
+		<view type="bitmap" id="r" texture="border_ver.tga" posref="TR TR" posparent="#posparent" scale="true" sizeref="h" w="1" h="0" color="0 0 0 255" />
+</template>
+
+
+
+<group type="modal" id="warning_box" exit_click_out="true" posref="BL TL" w="400" child_resize_h="true" child_resize_hmargin="16" mouse_pos="false" on_enter="leave_modal"
+>
+	<view type="bitmap" id="bg" sizeref="wh" posref="TL TL" x="0" y="0" texture="blank.tga" scale="true" color="123 8 8 192" global_color="false" />
+	<instance template="window_border_black" id="bord" posref="MM MM" />
+	
+	<view type="text" id="text" posref="MM MM" x="10" w="120" y="0" color="233 197 42 255" fontsize="18" shadow="true" multi_line="true" />
+	<view type="bitmap" id="warn" posparent="text" posref="ML MR"  x="-2" y="2"  texture="warning.tga" global_color="false" />
+	<!--
+	<ctrl type="button" id="ok" button_type="push_button" posparent="text" posref="BM TM" x="-10" y="-8" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="leave_modal" global_color_normal="false" global_color_pushed="false" />
+	-->
+</group>
+
+
+
+
+<!-- ***************** -->
+<!-- *	CONTEXT HELP * -->
+<!-- ***************** -->
+<group id="context_help" h="16" child_resize_w="true" child_resize_wmargin="12" posref="BL BL" >
+	<!--Decoration-->
+	<view type="bitmap" id="midblack" sizeref="wh" posref="MM MM" w="0" h="0"   scale="true" color="0 0 0 255" texture="blank.tga" />
+	<view type="bitmap" id="midcolor" sizeref="wh" posref="MM MM" h="-2" w="-2" scale="true" color="255 210 40 255" texture="blank.tga" />
+	<!--System-->
+	<view type="text" id="text" posref="MM MM" color="0 0 0 255" fontsize="12" shadow="false" multi_line="false" />
+</group>
+
+<!-- modal box to choose the number of item to drop/destroy -->
+<!--
+<group type="modal" id="drop_destroy_item_quantity_modal" exit_click_out="true" posref="TL TL" w="180" h="80" x="-8" y="8"
+ on_active="proc" on_active_params="setup_drop_destroy_item_modal"
+ on_enter="proc"
+ on_enter_params="drop_destroy_item_quantity_modal_ok"
+>
+	<view type="bitmap" id="warning" posref="TL TL" x="4" y="-4" global_color="false" texture="w_warning_2.tga" />
+	<view type="text" id="destroy_text" posref="TL TL" x="20" y="-4" fontsize="12" shadow="true" hardtext="QUANTITY TO DESTROY" global_color="false" color="233 197 42 255" />
+	<view type="text" id="drop_text" posref="TL TL" x="20" y="-4" fontsize="12" shadow="true" hardtext="QUANTITY TO DROP" global_color="false" color="233 197 42 255" />
+	<ctrl type="sheet" id="sheet" value="UI:DROP_DESTROY_ITEM:ITEM" posparent="parent" posref="MM MM" x="-26" y="0" />
+	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
+	<instance template="edit_box_widget" entry_type="positive_integer" id="edit" posparent="sheet" posref="MR ML" x="16" text_x="-2" text_ref="BR BR" w="32" prompt="" enter_loose_focus="false" multi_line="false" max_num_chars="2" 
+			onchange="editbox_number" onchange_params="value=UI:DROP_DESTROY_ITEM:QUANTITY|update_text=false" onenter="proc" params="drop_destroy_item_quantity_modal_ok" max_historic="0" />
+	<ctrl type="button" id="ok" button_type="push_button" posref="BR BR" x="-4" y="4" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="drop_destroy_item_quantity_modal_ok" global_color_normal="false" global_color_pushed="false" />
+	<ctrl type="button" id="cancel" button_type="push_button" posparent="ok" posref="TL TR" x="-4" tx_normal="w_answer_16_cancel.tga" tx_pushed="w_answer_16_cancel.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="leave_modal" global_color_normal="false" global_color_pushed="false" />		
+	<! - link to display the right text (drop or destroy) - >
+	<link expr="eq(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" target="drop_text:active"/>
+	<link expr="ne(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" target="destroy_text:active"/>
+</group>
+-->
+
+<!-- confirm drop/destroy item -->
+<!--
+<proc id="confirm_drop_destroy_item">
+	<action handler="leave_modal" params=""/>
+	<action cond="eq(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" handler="drop_item" params="quantity=@@UI:DROP_DESTROY_ITEM:QUANTITY"/>
+	<action cond="ne(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" handler="destroy_item" params="quantity=@@UI:DROP_DESTROY_ITEM:QUANTITY"/>
+</proc>
+-->
+
+<!-- modal box to confirm destruction of the item -->
+<!--
+<group type="modal" id="drop_destroy_item_confirm_modal" exit_click_out="true" posref="TL TL" x="-8" y="8" w="104" h="96"
+ on_enter="proc"
+ on_enter_params="confirm_drop_destroy_item"
+>
+	<view type="bitmap" id="warning" posref="TL TL" x="4" y="-4" global_color="false" texture="w_warning_2.tga" />
+	<view type="text" id="destroy_text" posref="TL TL" x="20" y="-4" color="233 197 42 255" fontsize="12" shadow="true" global_color="false" hardtext="DESTROY"/>
+	<view type="text" id="drop_text" posref="TL TL" x="20" y="-4" color="233 197 42 255" fontsize="12" shadow="true" global_color="false" hardtext="DROP"/>
+	<ctrl type="sheet" id="sheet" value="UI:DROP_DESTROY_ITEM:ITEM" posparent="parent" posref="MM MM" y="0" x="0" use_quantity="false"/>
+	<view type="text" id="disp_number" posref="BM TM" posparent="sheet" x="0" y="-4" color="255 255 255 255" fontsize="10" shadow="true" global_color="false" hardtext=""/>
+	<! - link to display the right number of item - >
+	<link expr="ifthenelse(eq(@UI:DROP_DESTROY_ITEM:QUANTITY, 1), '', str(' X  ', @UI:DROP_DESTROY_ITEM:QUANTITY))" target="disp_number:hardtext"/>
+	<ctrl type="button" id="ok" button_type="push_button" posparent="parent" posref="BR BR" y="4" x="-4" tx_normal="w_answer_16_valid.tga" tx_pushed="w_answer_16_valid.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="proc" params_l="confirm_drop_destroy_item" global_color_normal="false" global_color_pushed="false" />
+	<ctrl type="button" id="cancel" button_type="push_button" posparent="ok" posref="TL TR" x="-4" tx_normal="w_answer_16_cancel.tga" tx_pushed="w_answer_16_cancel.tga" tx_over="W_button_16_over.tga" 
+			onclick_l="leave_modal" global_color_normal="false" global_color_pushed="false" />
+	<! - link to display the right text (drop or destroy) - >
+	<link expr="eq(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" target="drop_text:active"/>
+	<link expr="ne(@UI:DROP_DESTROY_ITEM:DROP_MODE, 1)" target="destroy_text:active"/>
+</group>
+-->
+<!-- modal box -->
+<template name="modal_border" posparent="parent">
+	<view type="bitmap" id="tlb" texture="W_modal_TL.tga" posparent="#posparent" posref="TL TL" />
+	<view type="bitmap" id="trb" texture="W_modal_TR.tga" posparent="#posparent" posref="TR TR" />
+	<view type="bitmap" id="brb" texture="W_modal_BR.tga" posparent="#posparent" posref="BR BR" />
+	<view type="bitmap" id="blb" texture="W_modal_BL.tga" posparent="#posparent" posref="BL BL" />			
+	<view type="bitmap" id="tb" texture="W_modal_T.tga" posparent="#posparent" posref="TM TM" scale="true" sizeref="w" w="-8" h="4"/>
+	<view type="bitmap" id="bb" texture="W_modal_B.tga" posparent="#posparent" posref="BM BM" scale="true" sizeref="w" w="-8" h="4"/>
+	<view type="bitmap" id="lb" texture="W_modal_L.tga" posparent="#posparent" posref="ML ML"  scale="true" sizeref="h" h="-8" w="4"/>
+	<view type="bitmap" id="rb" texture="W_modal_R.tga" posparent="#posparent" posref="MR MR" scale="true" sizeref="h" h="-8" w="4"/>
+</template>
+
+</interface_config>

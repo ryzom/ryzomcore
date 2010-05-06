@@ -1,0 +1,277 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="npc_event_handler_action_files/filelist.xml">
+<title>npc_event_handler_action</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Boris Boucher</o:Author>
+  <o:LastAuthor>Guillaume PUZIN</o:LastAuthor>
+  <o:Revision>38</o:Revision>
+  <o:TotalTime>250</o:TotalTime>
+  <o:Created>2003-07-17T15:23:00Z</o:Created>
+  <o:LastSaved>2007-05-30T15:22:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>115</o:Words>
+  <o:Characters>661</o:Characters>
+  <o:Company>nevrax</o:Company>
+  <o:Lines>5</o:Lines>
+  <o:Paragraphs>1</o:Paragraphs>
+  <o:CharactersWithSpaces>775</o:CharactersWithSpaces>
+  <o:Version>10.2625</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>117</w:Zoom>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:HyphenationZone>21</w:HyphenationZone>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:ApplyBreakingRules/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:UseFELayout/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-alt:"\FF2D\FF33 \660E\671D";
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:\5B8B\4F53;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"\@MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;
+	mso-font-charset:128;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0mm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"MS Mincho";
+	mso-bidi-font-family:"Times New Roman";}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0mm;
+	margin-bottom:3.0pt;
+	margin-left:0mm;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+h2
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0mm;
+	margin-bottom:3.0pt;
+	margin-left:0mm;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{margin:0mm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"MS Mincho";
+	mso-bidi-font-family:"Times New Roman";}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 65.95pt 72.0pt 65.95pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0mm 5.4pt 0mm 5.4pt;
+	mso-para-margin:0mm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:36.0pt'>
+
+<div class=Section1>
+
+<h1><span style='color:#FF6600'>npc_event_handler_action<o:p></o:p></span></h1>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><i style='mso-bidi-font-style:
+normal'><span style='font-size:14.0pt;font-family:Arial;color:#999999'>Properties:<o:p></o:p></span></i></b></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><span class=GramE><b style='mso-bidi-font-weight:normal'><u>name
+</u></b>:</span> name of the action, by default the same name as the action
+name is used.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><span class=GramE><b style='mso-bidi-font-weight:normal'><u>action
+</u></b>:</span> One of the following action</p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>begin_state<o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span style='font-size:10.0pt'>code</span></span><span
+style='font-size:10.0pt'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>condition_if<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>condition_if_else<o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span style='font-size:10.0pt'>despawn</span></span><span
+style='font-size:10.0pt'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span style='font-size:10.0pt'>emot</span></span><span
+style='font-size:10.0pt'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>files.txt<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>modify_variable<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>multi_actions<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>null_action<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>outpost_giver_ready<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>punctual_state<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>punctual_state_end<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>random_select<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>random_select_state<o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span style='font-size:10.0pt'>say</span></span><span
+style='font-size:10.0pt'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>send_message<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_fauna_activity<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_flags_on_dyn_zones<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_state_timeout<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_timer_t0<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_timer_t1<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_timer_t2<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>set_timer_t3<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>sit_down<o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=GramE><span style='font-size:10.0pt'>spawn</span></span><span
+style='font-size:10.0pt'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>stand_up<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_0<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_1<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_2<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_3<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_4<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_5<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_6<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_7<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_8<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>trigger_event_9<o:p></o:p></span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:27.0pt;text-indent:-27.0pt'><b
+style='mso-bidi-font-weight:normal'><u>parameters :</u></b> depends of the
+action ; click on “view” to know.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:27.0pt;text-indent:-27.0pt'><span
+class=GramE><b style='mso-bidi-font-weight:normal'><u>weight </u></b>:</span>
+does not work for random_select</p>
+
+</div>
+
+</body>
+
+</html>

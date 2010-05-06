@@ -1,0 +1,452 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- base menu of landmark -->
+<group type="menu" id="land_mark_menu" extends="base_menu">	
+	<action id="target" name="uiTargetLM" handler="land_mark_selected" params=""/>		
+	<action id="lmteleport" name="uiTeleport" handler="land_mark_teleport" params=""/>		
+</group>
+
+
+<!-- menu of user landmark -->
+<group type="menu" id="user_land_mark_menu" extends="land_mark_menu">		
+	<action id="remove" name="uiRemove" handler="remove_user_landmark" params=""/>
+	<action id="rename" name="uiRename" handler="rename_user_landmark" params=""/>
+</group>
+
+<!-- menu of map -->
+<group type="menu" id="map_menu" extends="base_menu"
+ on_active="lua"
+ on_active_params="if r2 and r2.Mode == 'Edit' then r2:setCurrentTool('') end"
+>
+	<action id="create" name="uiCreateUserLM" handler="create_user_landmark" params=""/>
+	<action id="teleport" name="uiTeleport" handler="map_teleport" params=""/>
+	<action id="create_at_user_pos" name="uiCreateUserLMAtUserPos" handler="create_user_landmark_at_user_pos" params=""/>
+	<separator/>
+	<action id="center" name="uiMenuCenter" handler="map_center" params="map=ui:interface:map:content:map_content:actual_map"/>
+</group>
+
+<!-- menu of map (ring version) -->
+<group type="menu" id="map_menu_island" extends="base_menu"
+ on_active="lua"
+ on_active_params="if r2 and r2.Mode == 'Edit' then r2:setCurrentTool('') end"
+>	
+	<action id="center" name="uiMenuCenter" handler="map_center" params="map=ui:interface:map:content:map_content:actual_map"/>
+</group>
+
+
+<variable entry="UI:VARIABLES:CDB_INIT_IN_PROGRESS"	type="bool"   value="1" />
+
+
+<!-- ******************************************************************** -->
+<!-- * WINDOW TO ENTER THE NAME OF A USER LANDMARK (or to rename one)   * -->
+<!-- ******************************************************************** -->
+ <variable entry="UI:TEMP:LANDMARKTYPE" type="sint8" value="0" />
+
+<proc id="validate_user_landmark_name">
+	<action handler="set" params="target_property=ui:interface:create_new_party_chat:active|value=0"/>
+	<action handler="validate_user_landmark_name" params=""/>
+</proc>
+
+<group id="enter_landmark_name" 
+	type="container" 
+	modal="true" 
+	escapable="true" 
+	savable="false" 
+	openable="false"
+	opened="true"
+	movable="true" 
+	header_color="UI:SAVE:WIN:COLORS:LAB" 
+	global_color="false"
+	on_close_button="set" on_close_button_params="target_property=ui:interface:enter_landmark_name:active|value=0"
+	active="false" 
+	posparent="parent"
+	title_opened="uiCreateNewLandMark" 
+	w="450"
+	h="96"	
+   pop_min_w="300"
+   pop_min_h="96"
+   pop_max_w="1000"
+   pop_max_h="96">
+  <group id="header_opened"/>
+	
+	<group id="content"
+		 x="0"
+		 y="0"
+		 w="0"
+		 h="0"
+		 posref="TL TL">
+		   
+        <group type="combo_box"
+               id="landmarktypes"
+               w="160"
+               h="21"
+               value="UI:TEMP:LANDMARKTYPE"
+               posref="TR TR"
+			   posparent="content"
+               x="-2"
+               y="-12">
+          <instance template="combo_box_def1" />
+			<combo_text name="uiLMMiscColor" />
+			<combo_text name="uiLMTribeColor" />
+			<combo_text name="uiLMBanditColor" />
+			<combo_text name="uiLMCitizenColor" />
+			<combo_text name="uiLMFaunaColor" />
+			<combo_text name="uiLMFaunaExcelColor" />
+			<combo_text name="uiLMFaunaSupColor" />
+			<combo_text name="uiLMForageColor" />
+			<combo_text name="uiLMForageExcelColor" />
+			<combo_text name="uiLMForageSupColor" />
+			<combo_text name="uiLMSapColor" />
+			<combo_text name="uiLMAmberColor" />
+			<combo_text name="uiLMNodeColor" />
+			<combo_text name="uiLMFiberColor" />
+			<combo_text name="uiLMBarkColor" />
+			<combo_text name="uiLMSeedColor" />
+			<combo_text name="uiLMShellColor" />
+			<combo_text name="uiLMResinColor" />
+			<combo_text name="uiLMWoodColor" />
+			<combo_text name="uiLMOilColor" />
+			<combo_text name="uiLMMissionColor" />
+			<combo_text name="uiLMFoodColor" />
+			<combo_text name="uiLMConstructionColor" />
+			<combo_text name="uiLMGooColor" />
+			<combo_text name="uiLMInsectColor" />
+			<combo_text name="uiLMKitinColor" />
+			<combo_text name="uiLMNociveColor" />
+			<combo_text name="uiLMPreservativeColor" />
+			<combo_text name="uiLMPassageColor" />
+			<combo_text name="uiLMTeleporterColor" />
+        </group>		   
+
+		<instance 
+			template="edit_box_widget" 
+			id="lm_name_eb" 
+			sizeref="w"
+			posparent="content"
+			posref="TL TL" x="2" y="-12" w="-170"
+			onenter="proc" params="validate_user_landmark_name" entry_type="text"/>
+
+		<instance
+						posref="BR BR" sizeref="wh" x="-2" y="2"
+						template="button_ok_cancel"
+						onclick_ok="proc" 
+						onclick_ok_param="validate_user_landmark_name" 
+						onclick_cancel="set"
+						onclick_cancel_param="target_property=ui:interface:enter_landmark_name:active|value=0" />
+	</group>
+</group>
+
+
+<!-- ******************************************************************** -->
+<!-- *								USER MAP							* -->
+<!-- ******************************************************************** -->
+
+
+<proc id="map_proc_active">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP|value=1" />
+	<action handler="lua" params="if (r2 and r2.Mode == 'Edit') then r2.ToolUI:updateToggleWindowButtons() end" />
+</proc>
+
+<proc id="map_proc_deactive">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP|value=0" />
+	<action handler="lua" params="if (r2 and r2.Mode == 'Edit') then r2.ToolUI:updateToggleWindowButtons() end" />
+</proc>
+
+
+
+<define	id="map_min_size"	value="256" />
+
+<group id="map" type="container" posref="BL TL" min_w="%map_min_size" max_w="16384" w="256" h="256" x="352" y="200" min_h="%map_min_size" max_h="16384"
+ resizer="true" pop_max_h="16384" pop_min_h="%map_min_size" pop_max_w="16384" pop_min_w="%map_min_size"
+ openable="false" opened="true"
+ movable="true" open_button="false"
+ savable="true"
+ title="uiMapTitle" 
+ header_color="UI:SAVE:WIN:COLORS:LAB" global_color="false"
+ on_active="proc" on_active_params="map_proc_active"
+ on_deactive="proc"	on_deactive_params="map_proc_deactive"
+>
+	<group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" w="256" h="16" posref="TL TL"
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+
+	<group id="content" x="0" y="0" h="0" posref="TL TL" >
+		<group id="map_content" posref="TL TL" sizeref="wh" w="0" h="-12" y="-12" >
+
+			<!-- back -->
+			<ctrl type="button" id="map_back" button_type="push_button" posref="TL TL" y="0"  x="4" tx_normal="w_back_map.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+				onclick_l="map_back" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittBack" />			
+			<!-- zoom in -->			
+			<ctrl type="button" id="zoom_in" button_type="push_button" posparent="map_back" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_in.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+				onclick_l="map_zoom_in" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittZoomIn" />			
+			<!-- zoom out -->			
+			<ctrl type="button" id="zoom_out" button_type="push_button" posparent="zoom_in" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_out.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+				onclick_l="map_zoom_out" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittZoomOut" />			
+			<!-- center on player -->			
+			<ctrl type="button" id="center" button_type="push_button" posparent="zoom_out" posref="TR TL" y="0"  x="4" tx_normal="w_center_map.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+				onclick_l="map_center" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittCenter" />						
+
+			<view type="text" id="time" x="12" y="-1" posparent="center" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			<view type="text" id="weather" x="8" y="-18" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			
+			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-32" x="1" y="-32" render_layer="0" />
+			
+			<group type="map" id="actual_map" sizeref="wh" w="-4" h="-4" posparent="back" posref="TL TL" x="2" y="-2" render_layer="1"
+			 group_onclick_r="world_map_right_click" 
+			 group_params_r="map=ui:interface:map:content:map_content:actual_map"
+			 
+			 continent_landmark_tex_normal="LM_continent.tga"
+			 continent_landmark_tex_over="LM_over.tga"
+			 continent_landmark_tex_pushed="LM_continent_pushed.tga"			 
+			 continent_landmark_color_normal="255 255 255 255"
+			 continent_landmark_color_over="255 255 255 255"
+			 continent_landmark_color_pushed="255 255 255 255"
+			 continent_landmark_menu="ui:interface:land_mark_menu"
+			 
+			 user_landmark_tex_normal="LM_user.tga"
+			 user_landmark_tex_over="LM_over.tga"
+			 user_landmark_tex_pushed="LM_user_pushed.tga"
+			 user_landmark_color_normal="255 255 255 255"
+			 user_landmark_color_over="255 255 255 255"
+			 user_landmark_color_pushed="255 255 255 255"
+ 			 user_landmark_menu="ui:interface:user_land_mark_menu"
+
+			 mission_landmark_tex_normal="LM_mission.tga"
+			 mission_landmark_tex_over="LM_over.tga"
+			 mission_landmark_tex_pushed="LM_mission_pushed.tga"			 
+			 mission_landmark_color_normal="255 255 255 255"
+			 mission_landmark_color_over="255 255 255 255"
+			 mission_landmark_color_pushed="255 255 255 255"
+			 mission_landmark_menu="ui:interface:land_mark_menu"
+
+			 home_fyros_landmark_tex_normal="LM_home.tga"
+			 home_fyros_landmark_tex_over="LM_home_over.tga"
+			 home_fyros_landmark_tex_pushed="LM_home_pushed.tga"			 
+			 home_fyros_landmark_color_normal="255 255 255 255"
+			 home_fyros_landmark_color_over="255 255 255 255"
+			 home_fyros_landmark_color_pushed="255 255 255 255"
+			 home_fyros_landmark_menu="ui:interface:land_mark_menu"
+
+			 home_tryker_landmark_tex_normal="LM_home.tga"
+			 home_tryker_landmark_tex_over="LM_home_over.tga"
+			 home_tryker_landmark_tex_pushed="LM_home_pushed.tga"			 
+			 home_tryker_landmark_color_normal="255 255 255 255"
+			 home_tryker_landmark_color_over="255 255 255 255"
+			 home_tryker_landmark_color_pushed="255 255 255 255"
+			 home_tryker_landmark_menu="ui:interface:land_mark_menu"
+
+			 home_matis_landmark_tex_normal="LM_home.tga"
+			 home_matis_landmark_tex_over="LM_home_over.tga"
+			 home_matis_landmark_tex_pushed="LM_home_pushed.tga"			 
+			 home_matis_landmark_color_normal="255 255 255 255"
+			 home_matis_landmark_color_over="255 255 255 255"
+			 home_matis_landmark_color_pushed="255 255 255 255"
+			 home_matis_landmark_menu="ui:interface:land_mark_menu"
+
+			 home_zorai_landmark_tex_normal="LM_home.tga"
+			 home_zorai_landmark_tex_over="LM_home_over.tga"
+			 home_zorai_landmark_tex_pushed="LM_home_pushed.tga"			 
+			 home_zorai_landmark_color_normal="255 255 255 255"
+			 home_zorai_landmark_color_over="255 255 255 255"
+			 home_zorai_landmark_color_pushed="255 255 255 255"			 
+			 home_zorai_landmark_menu="ui:interface:land_mark_menu"
+
+			 target_landmark_tex_normal="LM_target.tga"
+			 target_landmark_tex_over="LM_target_over.tga"
+			 target_landmark_tex_pushed="LM_target_pushed.tga"			 
+			 target_landmark_color_normal="255 255 255 255"
+			 target_landmark_color_over="255 255 255 255"
+			 target_landmark_color_pushed="255 255 255 255"
+			 target_landmark_menu="ui:interface:land_mark_menu"
+
+			 respawn_landmark_tex_normal="LM_respawn.tga"
+			 respawn_landmark_tex_over="LM_respawn_over.tga"
+			 respawn_landmark_tex_pushed="LM_respawn_pushed.tga"			 
+			 respawn_landmark_color_normal="255 255 255 255"
+			 respawn_landmark_color_over="255 255 255 255"
+			 respawn_landmark_color_pushed="255 255 255 255"
+			 respawn_landmark_menu="ui:interface:land_mark_menu"
+
+			 animal_landmark_tex_normal="mektoub_map.tga"
+			 animal_landmark_tex_over="mektoub_map_over.tga"
+			 animal_landmark_tex_pushed="mektoub_map.tga"
+			 animal_landmark_color_normal="255 255 255 255"
+			 animal_landmark_color_over="255 255 255 255"
+			 animal_landmark_color_pushed="255 255 255 255"
+			 animal_landmark_menu="ui:interface:land_mark_menu"
+			 
+			 animal_stable_landmark_tex_normal="building_state2.tga"
+			 animal_stable_landmark_tex_over="mektoub_map_over.tga"
+			 animal_stable_landmark_tex_pushed="mektoub_map.tga"
+			 animal_stable_landmark_color_normal="255 255 255 255"
+			 animal_stable_landmark_color_over="255 255 255 255"
+			 animal_stable_landmark_color_pushed="255 255 255 255"
+			 animal_stable_landmark_menu="ui:interface:land_mark_menu"
+
+			 animal_dead_landmark_tex_normal="MP_skull.tga"
+			 animal_dead_landmark_tex_over="mektoub_map_over.tga"
+			 animal_dead_landmark_tex_pushed="mektoub_map.tga"
+			 animal_dead_landmark_color_normal="255 255 255 255"
+			 animal_dead_landmark_color_over="255 255 255 255"
+			 animal_dead_landmark_color_pushed="255 255 255 255"
+			 animal_dead_landmark_menu="ui:interface:land_mark_menu"
+			 
+			 teammate_landmark_tex_normal="teammate_map.tga"
+			 teammate_landmark_tex_over="teammate_map_over.tga"
+			 teammate_landmark_tex_pushed="teammate_map.tga"			 
+			 teammate_landmark_color_normal="255 255 255 255"
+			 teammate_landmark_color_over="255 255 255 255"
+			 teammate_landmark_color_pushed="255 255 255 255"
+			 teammate_landmark_menu="ui:interface:land_mark_menu"
+			 
+			 player_pos_tex="player_pos.tga"
+
+			 frustum_view_texture = "r2_frustum.tga"
+			 frustum_view_color = "255 255 255 255"
+			 frustum_view_color_over = "255 255 255 63"
+			 frustum_view_blend_time_in_ms = "600"
+
+			 selection_axis_color = "0 0 0 127"
+			 
+			 compass="ui:interface:compass"			 
+			 scale_max="2"
+			 scale_max_r2="8"
+			/>			
+			<!-- border around the map -->			
+			
+		</group>		
+	</group>
+</group>	
+
+
+<!-- ******************************************************************** -->
+<!-- *							RESPAWN MAP								* -->
+<!-- ******************************************************************** -->
+
+
+<!-- Change This to modify the delay before an auto respawn. In Server Ticks (300 => 30 seconds) -->
+<define id="time_before_auto_respawn" value="600" />
+<variable entry="UI:VARIABLES:RESPAWN:MSG_SENT" type="sint64" value="0" />
+
+<proc id="respawn_map_activated">
+	<action handler="exit_free_look" />
+	<action handler="set" params="dblink=UI:VARIABLES:RESPAWN:MSG_SENT|value=0" />
+<!-- <action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(div(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn),10))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" /> -->
+	<action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" />
+	<action handler="add_link" params="id=respawn_acttimer_link|expr=depends(@%player_hp_percent)|action=respawn_map_valid|params=map=ui:interface:respawn_map:content:map_content:actual_map|cond=and(eq(abs(@%player_hp_percent), %player_percent_max), and(lt(@%player_hp_percent,0), eq(@UI:VARIABLES:CDB_INIT_IN_PROGRESS, 0)) ,ne(@UI:VARIABLES:RESPAWN:MSG_SENT,1)) " />
+	<action handler="add_link" params="id=respawn_showtimer_link|expr=lt(abs(@%player_hp_percent), %player_percent_max)|target=ui:interface:respawn_map:content:map_content:timer:active" />
+</proc>
+
+<proc id="respawn_map_deactivated">
+	<action handler="remove_link" params="id=respawn_timer_link" />
+	<action handler="remove_link" params="id=respawn_acttimer_link" />
+	<action handler="remove_link" params="id=respawn_showtimer_link" />
+</proc>
+
+<!-- The Respawn Map Group -->
+<group id="respawn_map" type="container" posref="BL TL" min_w="%map_min_size" max_w="16384" w="256" h="256" x="352" y="200" min_h="%map_min_size" max_h="16384"
+ resizer="true" pop_max_h="16384" pop_min_h="%map_min_size" pop_max_w="16384" pop_min_w="%map_min_size"
+ openable="false" opened="true" right_button="false"
+ movable="true" open_button="false"
+ savable="true" active_savable="false"
+ title="uiRespawnMapTitle" 
+ header_color="UI:SAVE:WIN:COLORS:LAB" global_color="false"
+ win_priority="%win_priority_high"
+ on_active="proc" on_active_params="respawn_map_activated" 
+ on_deactive="proc" on_deactive_params="respawn_map_deactivated" 
+>
+	<group id="header_closed" x="0" y="0" h="16" posref="TL TL" >
+	</group>
+
+	<group id="header_opened" x="0" y="0" h="16" w="256" posref="TL TL"
+			group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
+	</group>
+
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
+		<group id="map_content" posref="TL TL" sizeref="wh" w="0" h="-12" y="-12" >
+
+			<!-- zoom in -->			
+			<ctrl type="button" id="zoom_in" button_type="push_button" posref="TL TL" y="0"  x="4" tx_normal="w_zoom_in.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+			onclick_l="map_zoom_in" params_l="map=ui:interface:respawn_map:content:map_content:actual_map" tooltip="uittZoomIn" />			
+			<!-- zoom out -->			
+			<ctrl type="button" id="zoom_out" button_type="push_button" posparent="zoom_in" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_out.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+			onclick_l="map_zoom_out" params_l="map=ui:interface:respawn_map:content:map_content:actual_map" tooltip="uittZoomOut" />			
+			<!-- center on player -->			
+			<ctrl type="button" id="center" button_type="push_button" posparent="zoom_out" posref="TR TL" y="0"  x="4" tx_normal="w_center_map.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+			 onclick_l="map_center" params_l="map=ui:interface:respawn_map:content:map_content:actual_map" tooltip="uittCenter" />						
+			
+			<ctrl style="button_ok" id="respawn" posparent="center" x="16" posref="TR TL" onclick_l="respawn_map_valid" params_l="map=ui:interface:respawn_map:content:map_content:actual_map" hardtext="uiRespawn"/>
+
+			<group id="timer" posparent="respawn" posref="TR TL" x="8" y="-5" child_resize_h="true" child_resize_w="true">
+				<view type="bar" id="b" ultra_mini="true" posref="TL TL" value="%player_hp_percent" range="%player_percent_max" color="255 255 255 255" color_negative="255 255 255 255" />
+				<view type="text" id="t" posparent="b" posref="TR TL" x="4" color="255 255 255 255" fontsize="8" shadow="true" hardtext="" />
+			</group>
+
+			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-22" x="1" y="-22" render_layer="0" />
+			
+			<group type="map" id="actual_map" sizeref="wh" w="-4" h="-4" posparent="back" posref="TL TL" x="2" y="-2" render_layer="1"
+			 group_onclick_r="world_map_right_click"
+			 group_params_r="map=ui:interface:respawn_map:content:map_content:actual_map"
+
+			 map_mode="death"
+			 respawn_selected="LM_respawn_over.tga"
+			 respawn_button="ui:interface:respawn_map:content:map_content:respawn"
+
+			 respawn_landmark_tex_normal="LM_respawn.tga"
+			 respawn_landmark_tex_over="LM_respawn_over.tga"
+			 respawn_landmark_tex_pushed="LM_respawn_pushed.tga"			 
+			 respawn_landmark_color_normal="255 255 255 255"
+			 respawn_landmark_color_over="255 255 255 255"
+			 respawn_landmark_color_pushed="255 255 255 255"
+			 respawn_landmark_menu="ui:interface:land_mark_menu"
+
+			 player_pos_tex="player_pos.tga"
+
+			 scale_max="2"
+			/>			
+			<!-- border around the map -->			
+			
+		</group>
+	</group>
+</group>
+
+<!-- Change This to modify the delay after wich the Respawn Map opens. In Ms -->
+<define id="time_to_open_respawn_map" value="4000" />
+<variable entry="UI:VARIABLES:OPEN_RESPAWN"				type="sint32" value="0" />
+<variable entry="UI:VARIABLES:OPEN_RESPAWN_AT_TIME"		type="sint32" value="0" />
+
+<!-- Avoid set Active each frame for possible speed up: Use OPEN_RESPAWN intermediate -->
+<link expr="@UI:VARIABLES:OPEN_RESPAWN" target="ui:interface:respawn_map:active" />
+
+<!-- Set the Open Flag when the delay has expired -->
+<link expr="depends(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, @UI:VARIABLES:CURRENT_TIME)" action="set" 
+	params="dblink=UI:VARIABLES:OPEN_RESPAWN|
+			value=and(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, le(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, @UI:VARIABLES:CURRENT_TIME) )" />
+
+<!-- 
+	Verify player mode. because at init, mode == 0, => the window won't be opened by default 
+	If Dead, then start The Timing counter, else reset.
+	NB: must not test player Life Percent, because inc each time => counter started when the user is in "coma mode"
+-->
+<link expr="depends(@SERVER:Entities:E0:P8)" action="set" 
+	params="dblink=UI:VARIABLES:OPEN_RESPAWN_AT_TIME|value=ifthenelse(
+		isUserEntityDead(), 
+		add(@UI:VARIABLES:CURRENT_TIME, %time_to_open_respawn_map),
+		0)" />
+
+
+<tree node="enter_landmark_name">
+</tree>
+<tree node="map">
+</tree>
+<tree node="respawn_map">
+</tree>
+
+
+</interface_config>

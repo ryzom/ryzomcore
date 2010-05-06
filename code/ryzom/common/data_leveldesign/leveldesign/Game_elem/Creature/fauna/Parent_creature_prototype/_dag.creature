@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.45 $" State="modified">
+  <PARENT Filename="_formuli.creature"/>
+  <PARENT Filename="_ai_herbivore_craintif.creature"/>
+  <PARENT Filename="_medium_slashing_armor_set.creature"/>
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="Race" Value="dag"/>
+      <ATOM Name="DamageLocalisationTable" Value="quadruped"/>
+      <ATOM Name="Size" Value="small"/>
+      <ATOM Name="Profile" Value="caster healer"/>
+      <STRUCT Name="Scores">
+        <ATOM Name="HitPoints" Value="very low"/>
+        <ATOM Name="Sap" Value="default"/>
+        <ATOM Name="Stamina" Value="very low"/>
+      </STRUCT>
+      <STRUCT Name="Equipment">
+        <STRUCT Name="Body">
+          <ATOM Name="Item" Value="dag_light_slashing_chest.item"/>
+        </STRUCT>
+        <STRUCT Name="Legs">
+          <ATOM Name="Item" Value="light_slashing_legs.item"/>
+        </STRUCT>
+        <STRUCT Name="Arms">
+          <ATOM Name="Item" Value="light_slashing_arms.item"/>
+        </STRUCT>
+        <STRUCT Name="Hands">
+          <ATOM Name="Item" Value="light_slashing_hands.item"/>
+        </STRUCT>
+        <STRUCT Name="Feet">
+          <ATOM Name="Item" Value="light_slashing_feet.item"/>
+        </STRUCT>
+        <STRUCT Name="Head">
+          <ATOM Name="Item" Value="light_slashing_head.item"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="MovementSpeeds">
+        <ATOM Name="WalkSpeed" Value="&quot;3d data.Scale&quot;*1.1"/>
+        <ATOM Name="RunSpeed" Value="&quot;3d data.Scale&quot;*3.536918"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d data">
+      <ATOM Name="Skel" Value="TR_MO_Dag.skel"/>
+      <ATOM Name="AnimSetBaseName" Value="dag"/>
+      <ATOM Name="LodCharacterName" Value="TR_MO_dag_LOD"/>
+      <ATOM Name="LodCharacterDistance" Value="50.0"/>
+      <ATOM Name="NamePosZLow" Value="0.5"/>
+      <ATOM Name="NamePosZNormal" Value="0.7"/>
+    </STRUCT>
+    <STRUCT Name="Harvest">
+      <STRUCT Name="MP1">
+        <ATOM Name="Name" Value="dag meat"/>
+      </STRUCT>
+      <STRUCT Name="MP2">
+        <ATOM Name="Name" Value="dag canines"/>
+      </STRUCT>
+      <STRUCT Name="MP3">
+        <ATOM Name="Name" Value="dag tongue"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="Collision">
+      <ATOM Name="CollisionRadius" Value="0.32"/>
+    </STRUCT>
+    <ATOM Name="attack_list1" Value="dag.attack_list"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:22:27 2002 (corvazier) File converted from old format
+Wed Jun 19 17:04:21 2002 (gatto) .3d data.AnimSetBaseName = dag
+Wed Jun 19 17:04:21 2002 (gatto) .3d data.Equipment[0].Shape = tr_mo_dag.shape
+Wed Jun 19 17:04:21 2002 (gatto) .3d data.Equipment[0].Texture = Default
+Wed Jun 19 17:04:21 2002 (gatto) .3d data.Skel = TR_Mo_familier.skel
+Wed Jun 19 17:04:21 2002 (gatto) formName Resized = 1
+Thu Jun 27 10:04:14 2002 (mauduit) .3d data.AnimSetCombat = dag_Combat.animation_set
+Thu Jun 27 10:04:14 2002 (mauduit) .3d data.AnimSetNormal = dag_normal.animation_set
+Thu Jun 27 10:04:14 2002 (mauduit) .3d data.AnimSetPursuit = dag_Poursuite.animation_set
+Thu Jun 27 13:59:19 2002 (mauduit) .3d data.Skel = TR_Mo_dag.skel
+Thu Jun 27 17:44:19 2002 (mauduit) Form Parents = 
+Tue Jul 09 11:43:19 2002 (mauduit) .3d data.AnimSetBaseName = dag
+Tue Jul 09 11:43:19 2002 (mauduit) .Basics.Equipment.Body.Item = tr_mo_dag.shape
+Mon Jul 22 19:31:28 2002 (gomes) .3d data.Skel = TR_MO_dag.skel
+Tue Jul 23 15:03:48 2002 (receveur) Form Parents = 
+Tue Jul 23 17:07:05 2002 (receveur) formName Pasted = 
+Wed Jul 24 10:43:05 2002 (receveur) .AI.Fame[8].Weight = 600
+Wed Jul 24 10:43:05 2002 (receveur) formName Pasted = 
+Wed Jul 24 11:52:05 2002 (receveur) .Basics.Size = small
+Wed Jul 24 16:40:39 2002 (miller) Form Parents = 
+Thu Jul 25 18:27:40 2002 (receveur) .AI.Foods[0].Weight = 40
+Thu Jul 25 18:27:40 2002 (receveur) .AI.Foods[1].Weight = 60
+Thu Jul 25 18:27:40 2002 (receveur) formName Pasted = 
+Thu Jul 25 19:07:14 2002 (receveur) .Basics.DamageLocalisationTable = quadruped
+Thu Jul 25 19:07:14 2002 (receveur) .Basics.Profile = melee warrior
+Thu Jul 25 19:07:14 2002 (receveur) .Basics.Race = dag
+Thu Jul 25 20:41:30 2002 (receveur) .Basics.CharacterName = dag
+
+Thu Aug 22 12:13:16 2002 (receveur) .Basics.Equipment.Sheath0RightHand.Item = light_piercing_creature_melee_weapon_lvl_01.item
+Thu Aug 22 18:37:51 2002 (receveur) .Basics.Scores.HitPoints = very low
+Thu Aug 22 18:37:51 2002 (receveur) .Basics.Scores.Sap = default
+Thu Aug 22 18:37:51 2002 (receveur) .Basics.Scores.Stamina = very low
+Mon Sep 02 15:01:40 2002 (receveur) .AI.Fame[37] Renamed = _IA_player.player
+Mon Sep 02 15:01:40 2002 (receveur) .AI.Fame[37].Name = _IA_player.player
+Mon Sep 02 15:01:40 2002 (receveur) .AI.Fame[37].Weight = -100.0
+Mon Sep 02 15:01:40 2002 (receveur) formName Resized = 38
+Fri Sep 20 16:01:11 2002 (receveur) Form Parents = 
+Fri Sep 20 16:33:17 2002 (receveur) .AI = _ai_model_creature.dfn
+Fri Sep 20 16:33:24 2002 (receveur) .AI.Fame.Dag           .Weight = 600
+Mon Sep 23 14:49:58 2002 (receveur) .Harvest.MP1.AssociatedItem = dag_meat_lvl_01.item
+Mon Sep 23 14:49:58 2002 (receveur) .Harvest.MP1.Name = dag meat
+Mon Sep 23 14:58:18 2002 (receveur) .Harvest.MP2.AssociatedItem = dag_canines_lvl_01.item
+Mon Sep 23 14:58:18 2002 (receveur) .Harvest.MP2.Name = dag canines
+Mon Sep 23 14:58:40 2002 (receveur) .Harvest.MP3.AssociatedItem = forest_dag_tongue_lvl_01.item
+Mon Sep 23 14:58:40 2002 (receveur) .Harvest.MP3.Name = dag tongue
+Wed Sep 25 15:27:25 2002 (favre) Form Parents = 
+Wed Sep 25 15:42:57 2002 (favre) .Basics.Equipment.Body.Item = dag_light_slashing_chest_lvl_01.item
+Fri Oct 25 14:42:44 2002 (receveur) .Basics.Profile = 
+Tue Dec 10 10:31:16 2002 (mauduit) .3d data.AnimSetBaseName = jungler
+Tue Dec 10 10:31:16 2002 (mauduit) .3d data.LodCharacterName = TR_MO_jungler_LOD
+Tue Dec 10 10:31:16 2002 (mauduit) .3d data.Skel = TR_MO_jungler.skel
+Tue Dec 10 10:50:22 2002 (mauduit) .3d data.LodCharacterDistance = 50.0
+Tue Dec 10 10:55:38 2002 (mauduit) .3d data.AnimSetBaseName = regus
+Tue Dec 10 10:55:38 2002 (mauduit) .3d data.LodCharacterName = TR_MO_regus_LOD
+Tue Dec 10 10:55:38 2002 (mauduit) .3d data.Skel = TR_MO_Regus.skel
+Tue Dec 10 10:55:38 2002 (mauduit) .Basics.Equipment.Body.Item = regus_light_piercing_chest.item
+Wed Feb 05 18:15:30 2003 (receveur) .Basics.Species = dag
+Fri Mar 28 11:32:05 2003 (favre) .Basics.CharacterName = 
+Wed Apr 23 10:34:24 2003 (mauduit) .3d data.AnimSetBaseName = dag
+Wed Apr 23 10:34:24 2003 (mauduit) .3d data.LodCharacterName = TR_MO_dag_LOD
+Wed Apr 23 10:34:24 2003 (mauduit) .3d data.Skel = TR_MO_Dag.skel
+Wed Apr 23 10:34:24 2003 (mauduit) .Basics.Equipment.Body.Item = dag_light_slashing_chest.item
+Wed Jun 04 14:52:21 2003 (receveur) Form Parents = 
+Tue Sep 23 16:58:23 2003 (ledorze) Form Parents = 
+Mon Oct 13 16:18:23 2003 (monnerot) .Harvest.MP1.AssociatedItem = 
+Mon Oct 13 16:18:23 2003 (monnerot) .Harvest.MP2.AssociatedItem = 
+Mon Oct 13 16:18:23 2003 (monnerot) .Harvest.MP3.AssociatedItem = 
+Fri Feb 20 14:05:21 2004 (ledorze) .Collision.CollisionRadius = 0.32
+Wed Feb 02 15:59:51 2005 (peloille) .3d data.NamePosZLow = 0.5
+Wed Feb 02 15:59:51 2005 (peloille) .3d data.NamePosZNormal = 0.7</LOG>
+</FORM>

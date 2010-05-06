@@ -1,0 +1,9 @@
+<xml>
+	<_QueueIdCounter type="UINT32" value="0"/>
+	<_QueueNamesToIds>
+	</_QueueNamesToIds>
+	<_Queues>
+	</_Queues>
+	<_PlayerQueues>
+	</_PlayerQueues>
+</xml>

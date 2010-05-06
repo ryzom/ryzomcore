@@ -1,0 +1,272 @@
+<ui version="4.0" >
+ <class>TileRotationDialog</class>
+ <widget class="QDialog" name="TileRotationDialog" >
+  <property name="windowModality" >
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>415</width>
+    <height>130</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle" >
+   <string>Choose rotation to import Alpha bitmap</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="tile_edit_qt.qrc" >
+    <normaloff>:/newPrefix/nel.png</normaloff>:/newPrefix/nel.png</iconset>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <widget class="QPushButton" name="_0PushButton" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>75</width>
+     <height>75</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/rotation0.png</normaloff>:/newPrefix/rotation0.png</iconset>
+   </property>
+   <property name="iconSize" >
+    <size>
+     <width>48</width>
+     <height>48</height>
+    </size>
+   </property>
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="_270PushButton" >
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>20</y>
+     <width>75</width>
+     <height>75</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/rotation270.png</normaloff>:/newPrefix/rotation270.png</iconset>
+   </property>
+   <property name="iconSize" >
+    <size>
+     <width>48</width>
+     <height>48</height>
+    </size>
+   </property>
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="_180PushButton" >
+   <property name="geometry" >
+    <rect>
+     <x>220</x>
+     <y>20</y>
+     <width>75</width>
+     <height>75</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/rotation180.png</normaloff>:/newPrefix/rotation180.png</iconset>
+   </property>
+   <property name="iconSize" >
+    <size>
+     <width>48</width>
+     <height>48</height>
+    </size>
+   </property>
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="_90PushButton" >
+   <property name="geometry" >
+    <rect>
+     <x>320</x>
+     <y>20</y>
+     <width>75</width>
+     <height>75</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+   <property name="icon" >
+    <iconset resource="tile_edit_qt.qrc" >
+     <normaloff>:/newPrefix/rotation90.png</normaloff>:/newPrefix/rotation90.png</iconset>
+   </property>
+   <property name="iconSize" >
+    <size>
+     <width>48</width>
+     <height>48</height>
+    </size>
+   </property>
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>100</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>0°</string>
+   </property>
+   <property name="alignment" >
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2" >
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>100</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>-90°</string>
+   </property>
+   <property name="alignment" >
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3" >
+   <property name="geometry" >
+    <rect>
+     <x>220</x>
+     <y>100</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>180°</string>
+   </property>
+   <property name="alignment" >
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4" >
+   <property name="geometry" >
+    <rect>
+     <x>320</x>
+     <y>100</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>90°</string>
+   </property>
+   <property name="alignment" >
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="tile_edit_qt.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>_0PushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TileRotationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>57</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>207</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>_180PushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TileRotationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>257</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>207</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>_270PushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TileRotationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>357</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>207</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>_90PushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TileRotationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>157</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>207</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

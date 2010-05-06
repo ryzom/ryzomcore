@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="MicroVeget" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="SmallBank" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="FarBank" Type="Type" Filename="filename.typ"/>
+  <ELEMENT Name="CoarseMeshMap" Type="Type" Filename="filename.typ"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:03 2002 (corvazier) File converted from old format</LOG>
+</DFN>

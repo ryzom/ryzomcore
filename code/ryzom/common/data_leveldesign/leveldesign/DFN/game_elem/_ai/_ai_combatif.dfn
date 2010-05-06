@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.3 $" State="modified">
+  <PARENT Name="_ai_object.dfn"/>
+  <ELEMENT Name="poids_rancune" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="rancune_initiale" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="seuil_belliqueux" Type="Type" Filename="float.typ" Default="20.0"/>
+  <ELEMENT Name="seuil_attaque" Type="Type" Filename="float.typ" Default="20.0"/>
+  <ELEMENT Name="poids_survie" Type="Type" Filename="float.typ" Default="2.0"/>
+  <ELEMENT Name="survie_initiale" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="seuil_danger" Type="Type" Filename="float.typ" Default="20.0"/>
+  <ELEMENT Name="seuil_fuite" Type="Type" Filename="float.typ" Default="80.0"/>
+  <ELEMENT Name="blessure_critique" Type="Type" Filename="float.typ" Default="20.0"/>
+  <ELEMENT Name="Profile" Type="Type" Filename="int.typ" Default="&quot;Basics.Profile&quot;"/>
+  <LOG>Thu Jul 18 15:59:41 2002 (chafik) Dfn Parents = 
+Thu Jul 18 15:59:41 2002 (chafik) Dfn Structure = 
+Thu Sep 12 15:30:10 2002 (robert) Dfn Parents = 
+Fri Sep 13 10:14:36 2002 (robert) Dfn Parents = 
+Fri Sep 13 10:19:00 2002 (robert) Dfn Parents = 
+Fri Sep 13 10:20:35 2002 (robert) Dfn Parents = </LOG>
+</DFN>

@@ -1,0 +1,3532 @@
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+  <lua file="info_player.lua" />
+  <variable entry="UI:VARIABLES:FAME_DETAIL"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:TOTAL_MALUS_EQUIP"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:TOTAL_MAGIC_ABSORB"
+            type="sint32"
+            value="0" />
+  <!-- <variable entry="UI:VARIABLES:CDB_INIT_IN_PROGRESS"        type="bool"   value="1" /> -->
+  <!-- Link to compute the Total_Magic absorb, in local, according to 
+        - jewels weared  (=> EQUIP and BAG)
+        - absorb factor
+        - max baseskilllevel of the player
+-->
+  <link expr="depends(
+                @LOCAL:INVENTORY:EQUIP,
+                @LOCAL:INVENTORY:BAG,
+                @%player_protect_absorbfactor,
+                @UI:VARIABLES:TRACK_SKILL_CHANGE)"
+        action="lua:game:computeMagicProtectTotalAbsorb()" />
+  <!--**************************-->
+  <!--*   info_player_skills   *-->
+  <!--**************************-->
+  <!-- Do not show skills but the progression of the player through its characs -->
+  <!-- Display characs and scores -->
+  <template name="tipc_score"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text=""
+            val=""
+            maxval=""
+            baseval=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text_number"
+            id="max"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            value="#maxval"
+            positive="true" />
+      <view type="text"
+            id="sep"
+            posparent="max"
+            posref="TL TR"
+            x="-1"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="/" />
+      <view type="text_number"
+            id="val"
+            posparent="max"
+            posref="TL TR"
+            x="-10"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            value="#val"
+            positive="true" />
+      <link expr="ifthenelse(lt(@#maxval,@#baseval),          '182 39 0 255',
+                                                ifthenelse(gt(@#maxval,@#baseval),      '180 165 0 255', '255 255 255 255'))"
+            target="max:color" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:game:tooltipScore('#baseval', '#maxval','#tooltip')" />
+    </group>
+  </template>
+  <!-- Dodge and Parry specific -->
+  <template name="tipc_scoreEP"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text=""
+            val=""
+            maxval=""
+            baseval=""
+            level=""
+            mod=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text_number"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            value="#val"
+            positive="true" />
+      <link expr="ifthenelse(lt(@#val,@#baseval),             '182 39 0 255',
+                                                ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))"
+            target="val:color" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:game:tooltipScoreEP('#baseval', '#val','#tooltip','#level','#mod')" />
+    </group>
+  </template>
+  <template name="tipc_charac"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text=""
+            val=""
+            suffix=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text_number"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            value="#val"
+            positive="true"
+            suffix="#suffix" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            tooltip="#tooltip" />
+    </group>
+  </template>
+  <template name="tipc_characReg"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text=""
+            val=""
+            baseval=""
+            suffix=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text_number"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            value="#val"
+            positive="true"
+            suffix="#suffix" />
+      <link expr="ifthenelse(lt(@#val,@#baseval),             '182 39 0 255',
+                                                ifthenelse(gt(@#val,@#baseval), '180 165 0 255', '255 255 255 255'))"
+            target="val:color" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:game:tooltipScore('#baseval', '#val','#tooltip')" />
+    </group>
+  </template>
+  <!-- Magic Protection -->
+  <template name="tipc_magic_protect"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            val=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="uiProtect_#id" />
+      <view type="text"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:game:tooltipMagicProtect('#val','uittProtect_#id')" />
+      <!-- change text when db change -->
+      <link expr="depends(@#val,@%player_protect_maxratio)"
+            action="lua:game:displayMagicProtect('#val')" />
+    </group>
+  </template>
+  <!-- Magic Resistance -->
+  <template name="tipc_magic_resist"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            val=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="uiResist_#id" />
+      <view type="text"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:game:tooltipMagicResist('#val','uittResist_#id')" />
+      <!-- change text when db change. NB: resist depends also on skill -->
+      <link expr="depends(@#val,@%player_resist_maxratio,@UI:VARIABLES:TRACK_SKILL_CHANGE)"
+            action="lua:game:displayMagicResist('#val')" />
+    </group>
+  </template>
+  <!-- Display ecosystem points -->
+  <template name="ecosystem_points"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text"
+            id="max"
+            posref="MR MR"
+            x="-4"
+            y="-1"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="0" />
+      <view type="text"
+            id="sep"
+            posref="MR MR"
+            x="-20"
+            y="-1"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="/" />
+      <view type="text"
+            id="val"
+            posref="MR MR"
+            x="-37"
+            y="-1"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="0" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh" />
+    </group>
+  </template>
+  <!-- Display RRPS -->
+  <template name="level_rrps"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text=""
+            val=""
+            tooltip="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="text"
+            id="val"
+            posref="MR MR"
+            x="-4"
+            y="-2"
+            color="255 255 255 255"
+            shadow="true"
+            fontsize="12"
+            hardtext="0" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh"
+            on_tooltip="lua:RingPlayerInfo:tooltipRRPs('#val','#tooltip')" />
+      <link expr="@#val"
+            action="lua:RingPlayerInfo:updateRRPSLevel('#val', '#tooltip')" />
+    </group>
+  </template>
+  <template name="jauge_rating"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="16"
+            posref="TL TL"
+            id=""
+            w="156"
+            color=""
+            color_gray=""
+            text=""
+            val=""
+            maxval="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y">
+      <group id="jauge_bar"
+             posref="TL TL"
+             w="#w"
+             h="16">
+        <view type="bitmap"
+              id="jauge_graph"
+              posref="TL TL"
+              texture="jauge.tga"
+              color="#color"
+              global_color="false" />
+      </group>
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            x="16"
+            y="-3"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="10"
+            shadow="true"
+            hardtext="#text" />
+      <!--  
+         <view type="text_number" id="max" posref="MR MR" x="-12" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#maxval" positive="true" />
+         <view type="text" id="sep" posparent="max" posref="TL TR" x="-1" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="/" />
+         <view type="text_number" id="val" posparent="max" posref="TL TR" x="-10" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#val" positive="true" />
+                 -->
+      <!--
+         <link expr="div(mul(abs(@#val_bar), #w), %player_percent_max)" target="jauge_bar:w" />
+         <link expr="ifthenelse(le(@#val_bar,0), '#color_gray', '#color')" target="jauge_bar:jauge_graph:color" />
+                 -->
+    </group>
+  </template>
+  <!-- Display Ring Rating -->
+  <template name="ring_rating"
+            posparent="parent"
+            x="0"
+            y="0"
+            h="20"
+            posref="TL TL"
+            id=""
+            sizeref="w"
+            w="0"
+            text="">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y"
+           sizeref="#sizeref">
+      <view type="text"
+            id="t"
+            posref="TL TL"
+            y="-1"
+            color="255 255 255 255"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <view type="bitmap"
+            id="b_jauge_rating"
+            posref="MR MR"
+            y="0"
+            texture="slot_jauge.tga"
+            inherit_gc_alpha="false" />
+      <instance template="jauge_rating"
+                id="jauge_rating"
+                posref="MR MR"
+                color="214 56 7 255"
+                color_gray="160 42 5 255"
+                text=""
+                val="0"
+                maxval="1" />
+      <view type="bitmap"
+            id="level_rating"
+            posparent="jauge_rating"
+            scale="true"
+            w="16"
+            h="16"
+            posref="BL BR"
+            x="-10"
+            texture=""
+            inherit_gc_alpha="false" />
+      <ctrl type="tooltip"
+            id="tt"
+            sizeref="wh" />
+    </group>
+  </template>
+  <proc id="progression_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:CAREERS|value=1" />
+    <action handler="title_init_combobox" />
+    <action handler="lua"
+            params="RingPlayerInfo:initRingStatPlayer()" />
+  </proc>
+  <proc id="progression_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:CAREERS|value=0" />
+  </proc>
+  <variable entry="UI:TITLE"
+            type="sint64"
+            value="-1" />
+  <group type="container"
+         id="info_player_skills"
+         w="500"
+         title="uiSkillsTitle"
+         global_color="false"
+         header_color="UI:SAVE:WIN:COLORS:PLA"
+         min_w="330"
+         max_w="500"
+         min_h="550"
+         max_h="1600"
+         pop_max_h="800"
+         on_active="proc"
+         on_active_params="progression_proc_active"
+         on_deactive="proc"
+         on_deactive_params="progression_proc_deactive"
+         open_button="false"
+         force_open_out="true"
+         title_bar_open="false"
+         lockable="true"
+         openable="false"
+         opened="true"
+         movable="true"
+         resizer="false"
+         active="true"
+         title_class="formated"
+         help_page="interf_identity.html">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="100"
+           h="48"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <group type="tab"
+             id="info_player_skills_tabs"
+             child_resize_w="true"
+             h="24"
+             posref="TL TL"
+             x="0"
+             y="-24">
+        <ctrl style="tab_button_new"
+              id="tab0"
+              x="0"
+              posref="TL TL"
+              group="content:basics_skills"
+              hardtext="uiR2EDBasicSkills"
+              onclick_r=""
+              params_r=""
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab1"
+              posparent="tab0"
+              group="content:ring_skills"
+              hardtext="uiR2EDRingSkills"
+              onclick_r=""
+              params_r=""
+              onclick_l=""
+              params_l="" />
+      </group>
+      <view type="bitmap"
+            id="sep"
+            posparent="info_player_skills_tabs"
+            posref="BR BL"
+            sizeparent="parent"
+            sizeref="w"
+            w="0"
+            h="1"
+            scale="true"
+            texture="blank.tga"
+            color="166 166 166 255" />
+    </group>
+    <group id="content"
+           x="0"
+           y="0"
+           h="550"
+           posref="TL TL">
+      <group id="basics_skills"
+             sizeref="wh"
+             w="0"
+             y="0"
+             h="0"
+             posref="TL TL">
+        <group id="title"
+               posref="TL TL"
+               sizeref="w"
+               w="-1"
+               h="24"
+               y="-22">
+          <view type="text"
+                id="player_title_txt"
+                posref="TL TL"
+                x="0"
+                y="-4"
+                hardtext="uiPlayerTitle"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group type="combo_box"
+                 id="player_title"
+                 w="300"
+                 h="20"
+                 value="UI:TITLE"
+                 posparent="player_title_txt"
+                 posref="TR TL"
+                 x="4"
+                 y="4"
+                 on_select_start="title_combobox_button">
+            <instance template="combo_box_def1" />
+          </group>
+          <instance template="text_tt"
+                    posparent="player_title"
+                    tooltip="uittIdentityTitle" />
+          <link expr="@UI:TITLE"
+                action="title_combobox_changed" />
+        </group>
+        <ctrl style="text_button_16"
+              id="inf"
+              posref="TR TR"
+              y="-24"
+              wmargin="8"
+              hardtext="uiInfo"
+              tooltip="uittIdentityInfo"
+              onclick_l="open_title_help"
+              params_l="from=user" />
+        <group id="guild"
+               posref="TL TL"
+               sizeref="w"
+               h="12"
+               y="-52">
+          <view type="text"
+                id="guild_title"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiGuildMembership"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <view type="text_id"
+                id="name"
+                posparent="guild_title"
+                posref="TR TL"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="true"
+                fontsize="12"
+                textid="SERVER:GUILD:NAME"
+                dynamic_string="false" />
+        </group>
+        <group id="scores"
+               posref="TL TL"
+               sizeref="w5"
+               w="-1"
+               h="188"
+               y="-72">
+          <view type="text"
+                id="Skill_t"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiScoreTable"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="172"
+                 inherit_gc_alpha="true">
+            <view type="text"
+                  id="values"
+                  posref="TL TL"
+                  x="4"
+                  y="-4"
+                  hardtext="uiValues"
+                  shadow="true"
+                  fontsize="10"
+                  color="255 255 255 255" />
+            <instance template="tipc_score"
+                      id="lif"
+                      posref="TL TL"
+                      x="8"
+                      y="-20"
+                      w="-8"
+                      tooltip="uittIdentityHP"
+                      text="uiHP"
+                      val="%player_hp"
+                      maxval="%player_hp_max"
+                      baseval="%player_hp_base" />
+            <instance template="tipc_score"
+                      id="sap"
+                      posparent="lif"
+                      posref="BL TL"
+                      y="0"
+                      tooltip="uittIdentitySap"
+                      text="uiSap"
+                      val="%player_sap"
+                      maxval="%player_sap_max"
+                      baseval="%player_sap_base" />
+            <instance template="tipc_score"
+                      id="sta"
+                      posparent="sap"
+                      posref="BL TL"
+                      y="0"
+                      tooltip="uittIdentitySta"
+                      text="uiStamina"
+                      val="%player_sta"
+                      maxval="%player_sta_max"
+                      baseval="%player_sta_base" />
+            <instance template="tipc_score"
+                      id="foc"
+                      posparent="sta"
+                      posref="BL TL"
+                      y="0"
+                      tooltip="uittIdentityFoc"
+                      text="uiFocus"
+                      val="%player_focus"
+                      maxval="%player_focus_max"
+                      baseval="%player_focus_base" />
+            <view type="text"
+                  id="Regen"
+                  posref="TL TL"
+                  x="4"
+                  y="-90"
+                  hardtext="uiRegeneration"
+                  shadow="true"
+                  fontsize="10"
+                  color="255 255 255 255" />
+            <instance template="tipc_characReg"
+                      id="hpreg"
+                      posref="TL TL"
+                      x="8"
+                      y="-105"
+                      w="-8"
+                      text="uiHP"
+                      val="%player_hpreg"
+                      baseval="%player_hpreg_base"
+                      tooltip="uittIdentityHPReg" />
+            <instance template="tipc_characReg"
+                      id="sapreg"
+                      posparent="hpreg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiSap"
+                      val="%player_sapreg"
+                      baseval="%player_sapreg_base"
+                      tooltip="uittIdentitySapReg" />
+            <instance template="tipc_characReg"
+                      id="stareg"
+                      posparent="sapreg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiStamina"
+                      val="%player_stareg"
+                      baseval="%player_stareg_base"
+                      tooltip="uittIdentityStaReg" />
+            <instance template="tipc_characReg"
+                      id="focreg"
+                      posparent="stareg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiFocus"
+                      val="%player_focreg"
+                      baseval="%player_focreg_base"
+                      tooltip="uittIdentityFocReg" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="caracs"
+               posref="TM TL"
+               sizeref="w5"
+               w="-1"
+               x="1"
+               h="188"
+               y="-72">
+          <view type="text"
+                id="Skill_t"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiCaracsTable"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="172"
+                 inherit_gc_alpha="true">
+            <instance template="tipc_charac"
+                      id="hpmax"
+                      posref="TL TL"
+                      x="8"
+                      y="-20"
+                      w="-8"
+                      text="uiCarac_HpMax"
+                      val="%player_carac_hpmax"
+                      tooltip="uittIdentityCons" />
+            <instance template="tipc_charac"
+                      id="sapmax"
+                      posparent="hpmax"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_SapMax"
+                      val="%player_carac_sapmax"
+                      tooltip="uittIdentityInt" />
+            <instance template="tipc_charac"
+                      id="stamax"
+                      posparent="sapmax"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_StaMax"
+                      val="%player_carac_stamax"
+                      tooltip="uittIdentityStr" />
+            <instance template="tipc_charac"
+                      id="focmax"
+                      posparent="stamax"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_WishMax"
+                      val="%player_carac_wishmax"
+                      tooltip="uittIdentityDex" />
+            <instance template="tipc_charac"
+                      id="hpreg"
+                      posref="TL TL"
+                      x="8"
+                      y="-105"
+                      w="-8"
+                      text="uiCarac_HpReg"
+                      val="%player_carac_hpreg"
+                      tooltip="uittIdentityMeta" />
+            <instance template="tipc_charac"
+                      id="sapreg"
+                      posparent="hpreg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_SapReg"
+                      val="%player_carac_sapreg"
+                      tooltip="uittIdentityWis" />
+            <instance template="tipc_charac"
+                      id="stareg"
+                      posparent="sapreg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_StaReg"
+                      val="%player_carac_stareg"
+                      tooltip="uittIdentityWB" />
+            <instance template="tipc_charac"
+                      id="focreg"
+                      posparent="stareg"
+                      posref="BL TL"
+                      y="0"
+                      text="uiCarac_WishReg"
+                      val="%player_carac_wishreg"
+                      tooltip="uittIdentityWill" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="skillpoints"
+               posref="TL TL"
+               sizeref="w5"
+               w="-1"
+               h="83"
+               y="-264">
+          <view type="text"
+                id="sp"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiSkillPoints"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="67"
+                 inherit_gc_alpha="true">
+            <instance template="skill_points_widget"
+                      id="sp0"
+                      global_color="true"
+                      posref="TL TL"
+                      x="0"
+                      y="-4"
+                      hardtext="uiSkillPoints0"
+                      value="%skill_points_0"
+                      tooltip="uittIdentitySkillFight"
+                      fontsize_text="12"
+                      fontsize_number="12" />
+            <instance template="skill_points_widget"
+                      id="sp1"
+                      posparent="sp0"
+                      global_color="true"
+                      posref="BL TL"
+                      x="0"
+                      hardtext="uiSkillPoints1"
+                      value="%skill_points_1"
+                      tooltip="uittIdentitySkillMagic"
+                      fontsize_text="12"
+                      fontsize_number="12" />
+            <instance template="skill_points_widget"
+                      id="sp2"
+                      posparent="sp1"
+                      global_color="true"
+                      posref="BL TL"
+                      x="0"
+                      hardtext="uiSkillPoints2"
+                      value="%skill_points_2"
+                      tooltip="uittIdentitySkillCraft"
+                      fontsize_text="12"
+                      fontsize_number="12" />
+            <instance template="skill_points_widget"
+                      id="sp3"
+                      posparent="sp2"
+                      global_color="true"
+                      posref="BL TL"
+                      x="0"
+                      hardtext="uiSkillPoints3"
+                      value="%skill_points_3"
+                      tooltip="uittIdentitySkillHarvest"
+                      fontsize_text="12"
+                      fontsize_number="12" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="misc"
+               posref="TM TL"
+               sizeref="w5"
+               w="-1"
+               x="1"
+               h="83"
+               y="-264">
+          <view type="text"
+                id="cm"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiCaracMisc"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="67"
+                 inherit_gc_alpha="true">
+            <!-- Total Malus: Must multiply by 2 the Equip Malus that is in Server DB, to have it in percentage -->
+            <instance template="tipc_charac"
+                      id="total_malus"
+                      posref="TL TL"
+                      x="8"
+                      y="-4"
+                      w="-8"
+                      text="uiTotalMalus"
+                      val="UI:VARIABLES:TOTAL_MALUS_EQUIP"
+                      tooltip="uittIdentityTotalMalus" />
+            <link expr="depends(@SERVER:MODIFIERS:TOTAL_MALUS_EQUIP)"
+                  action="set"
+                  params="dblink=UI:VARIABLES:TOTAL_MALUS_EQUIP|value=mul(@SERVER:MODIFIERS:TOTAL_MALUS_EQUIP,2)" />
+            <!-- Bag Bulk special: Current / Max -->
+            <group id="bag_bulk"
+                   posparent="total_malus"
+                   posref="BL TL"
+                   w="0"
+                   h="16"
+                   x="0"
+                   y="0"
+                   sizeref="w">
+              <view type="text"
+                    id="t"
+                    posref="TL TL"
+                    y="-1"
+                    color="255 255 255 255"
+                    fontsize="12"
+                    shadow="true"
+                    hardtext="uiBagBulk" />
+              <view type="text"
+                    id="val"
+                    posref="MR MR"
+                    x="-4"
+                    y="-2"
+                    color="255 255 255 255"
+                    shadow="true"
+                    fontsize="12"
+                    hardtext="0/0" />
+              <link expr="identity(getBulkStr('%bag', @%bag_bulk_max), @%bag)"
+                    target="val:hardtext" />
+            </group>
+            <instance template="text_tt"
+                      posparent="bag_bulk"
+                      tooltip="uittIdentitBagBulk" />
+            <!-- Weight Speed Factor -->
+            <instance template="tipc_charac"
+                      id="speed_factor"
+                      posparent="bag_bulk"
+                      posref="BL TL"
+                      y="0"
+                      tooltip="uittIdentitySpeedFactor"
+                      text="uiWeightSpeedFactor"
+                      val="%player_speed_factor"
+                      suffix="%" />
+            <!-- Code: when the Total Malus Equip change, must update Phrase InfoWindow -->
+            <link expr="@UI:VARIABLES:TOTAL_MALUS_EQUIP"
+                  action="phrase_update_from_action_malus" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="resists"
+               posref="TL TL"
+               sizeref="w5"
+               w="-1"
+               h="155"
+               y="-347">
+          <view type="text"
+                id="resists_t"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiResistsTable"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <instance template="text_tt"
+                    posparent="resists_t"
+                    tooltip="uittMagicResistTable" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="141"
+                 inherit_gc_alpha="true">
+            <instance template="tipc_magic_resist"
+                      id="Desert"
+                      posref="TL TL"
+                      x="8"
+                      y="-10"
+                      w="-8"
+                      val="%player_resist_desert" />
+            <instance template="tipc_magic_resist"
+                      id="Forest"
+                      posparent="Desert"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_resist_forest" />
+            <instance template="tipc_magic_resist"
+                      id="Lacustre"
+                      posparent="Forest"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_resist_lacustre" />
+            <instance template="tipc_magic_resist"
+                      id="Jungle"
+                      posparent="Lacustre"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_resist_jungle" />
+            <instance template="tipc_magic_resist"
+                      id="PrimRoot"
+                      posparent="Jungle"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_resist_primroot" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="magic_protect"
+               posref="TM TL"
+               sizeref="w5"
+               w="-1"
+               h="155"
+               y="-347">
+          <view type="text"
+                id="protections_t"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiMagicProtectTable"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <instance template="text_tt"
+                    posparent="protections_t"
+                    tooltip="uittMagicProtectTable" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="141"
+                 inherit_gc_alpha="true">
+            <instance template="tipc_magic_protect"
+                      id="Acid"
+                      posref="TL TL"
+                      x="8"
+                      y="-10"
+                      w="-8"
+                      val="%player_protect_acid" />
+            <instance template="tipc_magic_protect"
+                      id="Cold"
+                      posparent="Acid"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_cold" />
+            <instance template="tipc_magic_protect"
+                      id="Fire"
+                      posparent="Cold"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_fire" />
+            <instance template="tipc_magic_protect"
+                      id="Rot"
+                      posparent="Fire"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_rot" />
+            <instance template="tipc_magic_protect"
+                      id="Shockwave"
+                      posparent="Rot"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_shockwave" />
+            <instance template="tipc_magic_protect"
+                      id="Poison"
+                      posparent="Shockwave"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_poison" />
+            <instance template="tipc_magic_protect"
+                      id="Electricity"
+                      posparent="Poison"
+                      posref="BL TL"
+                      y="0"
+                      val="%player_protect_electricity" />
+            <instance template="tipc_charac"
+                      id="MaxAbsorb"
+                      posparent="Electricity"
+                      posref="BL TL"
+                      y="0"
+                      text="uiProtect_MaxAbsorb"
+                      val="UI:VARIABLES:TOTAL_MAGIC_ABSORB"
+                      tooltip="uittProtect_MaxAbsorb" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="dodge"
+               posref="TL TL"
+               sizeref="w5"
+               w="-1"
+               h="40"
+               y="-510">
+          <view type="text"
+                id="defense_t"
+                posref="TL TL"
+                x="0"
+                y="0"
+                hardtext="uiDefenseTitle"
+                shadow="true"
+                color="255 255 255 255"
+                global_color="false"
+                fontsize="12" />
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="26"
+                 inherit_gc_alpha="true">
+            <instance template="tipc_scoreEP"
+                      id="dodge"
+                      posref="TL TL"
+                      x="8"
+                      y="-7"
+                      w="-8"
+                      text="uiDodge"
+                      val="%player_dodge_current"
+                      maxval="%player_dodge_base"
+                      baseval="%player_dodge_base"
+                      tooltip="uittIdentityDodge"
+                      level="%player_dodge_current"
+                      mod="%player_dodge_success_mod" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+        <group id="parry"
+               posref="TM TL"
+               sizeref="w5"
+               w="-1"
+               h="40"
+               y="-510">
+          <group id="black"
+                 posref="TL TL"
+                 x="0"
+                 sizeref="w"
+                 y="-14"
+                 w="0"
+                 h="26"
+                 inherit_gc_alpha="true">
+            <instance template="tipc_scoreEP"
+                      id="parry"
+                      posref="TL TL"
+                      x="8"
+                      y="-7"
+                      w="-8"
+                      text="uiParry"
+                      val="%player_parry_current"
+                      maxval="%player_parry_base"
+                      baseval="%player_parry_base"
+                      tooltip="uittIdentityParry"
+                      level="%player_parry_current"
+                      mod="%player_parry_success_mod" />
+          </group>
+          <instance template="inner_thin_border"
+                    posparent="black"
+                    inherit_gc_alpha="true" />
+        </group>
+      </group>
+      <group id="ring_skills"
+             sizeref="wh"
+             w="0"
+             y="0"
+             h="0"
+             posref="TL TL">
+        <group id="ecosystem_points"
+               posref="TL TL"
+               y="-35"
+               sizeref="w5"
+               w="-4"
+               child_resize_h="true"
+               child_resize_hmargin="16">
+          <instance template="inner_thin_border_group" />
+          <instance template="ecosystem_points"
+                    id="basic"
+                    posref="TL TL"
+                    x="8"
+                    y="-8"
+                    w="-16"
+                    tooltip="uiR2EDBasicsPointsTooltip"
+                    text="uiR2EDBasicsPoints" />
+          <instance template="ecosystem_points"
+                    id="desert"
+                    posparent="basic"
+                    posref="BL TL"
+                    y="0"
+                    tooltip="uiR2EDDesertPointsTooltip"
+                    text="uiR2EDDesertPoints" />
+          <instance template="ecosystem_points"
+                    id="subtropic"
+                    posparent="desert"
+                    posref="BL TL"
+                    y="0"
+                    tooltip="uiR2EDSubtropicPointsTooltip"
+                    text="uiR2EDSubtropicPoints" />
+          <instance template="ecosystem_points"
+                    id="forest"
+                    posparent="subtropic"
+                    posref="BL TL"
+                    y="0"
+                    tooltip="uiR2EDForestPointsTooltip"
+                    text="uiR2EDForestPoints" />
+          <instance template="ecosystem_points"
+                    id="jungle"
+                    posparent="forest"
+                    posref="BL TL"
+                    y="0"
+                    tooltip="uiR2EDJunglePointsTooltip"
+                    text="uiR2EDJunglePoints" />
+          <instance template="ecosystem_points"
+                    id="primeroot"
+                    posparent="jungle"
+                    posref="BL TL"
+                    y="0"
+                    tooltip="uiR2EDPrimeRootPointsTooltip"
+                    text="uiR2EDPrimeRootPoints" />
+        </group>
+        <view type="text"
+              id="ecosystem_points_title"
+              posparent="ecosystem_points"
+              posref="TL BL"
+              x="0"
+              y="0"
+              hardtext="uiR2EDEcosystemPointsTitle"
+              shadow="true"
+              color="255 255 255 255"
+              global_color="false"
+              fontsize="12" />
+        <instance template="faction_points_widget"
+                  id="fp"
+                  posref="TL TL"
+                  x="0"
+                  y="-150" />
+        <!--
+                        <group id="level_rrps" posref="TR TL" posparent="ecosystem_points" y="0" x="8" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="16"> 
+                                
+                                <instance template="inner_thin_border_group" />         
+
+                                <instance template="level_rrps" id="rrps_20" posref="TL TL" x="8" y="-8" w="-16" tooltip="uiR2EDRrpsLevel20Tooltip"
+                                 text="uiR2EDRrpsLevel20" val="%rrps_level_20" />
+
+                                <instance template="level_rrps" id="rrps_50" posparent="rrps_20" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel50Tooltip"
+                                 text="uiR2EDRrpsLevel50" val="%rrps_level_50" />
+
+                                <instance template="level_rrps" id="rrps_100" posparent="rrps_50" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel100Tooltip"
+                                 text="uiR2EDRrpsLevel100" val="%rrps_level_100" />
+
+                                <instance template="level_rrps" id="rrps_150" posparent="rrps_100" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel150Tooltip"
+                                 text="uiR2EDRrpsLevel150" val="%rrps_level_150" />
+
+                                <instance template="level_rrps" id="rrps_200" posparent="rrps_150" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel200Tooltip"
+                                 text="uiR2EDRrpsLevel200" val="%rrps_level_200" />
+
+                                <instance template="level_rrps" id="rrps_250" posparent="rrps_200" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel250Tooltip"
+                                 text="uiR2EDRrpsLevel250" val="%rrps_level_250" />
+
+                        </group>
+                        <view type="text" id="level_rrps_title" posparent="level_rrps" posref="TL BL" x="0" y="0" hardtext="uiR2EDRrpsLevelTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
+                        -->
+        <!--
+                        <group id="ring_rating" posref="BL TL" sizeparent="parent" posparent="ecosystem_points" y="-30" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="16"> 
+                                
+                                <instance template="inner_thin_border_group" />         
+
+                                <instance template="ring_rating" id="author_ring_rating" posref="TL TL" x="8" y="-8" w="-16" 
+                                 text="uiR2EDAuthorRingRating" />
+
+                                <instance template="ring_rating" id="am_ring_rating" posparent="author_ring_rating" posref="BL TL" y="0" 
+                                 text="uiR2EDAMRingRating" />
+
+                                <instance template="ring_rating" id="masterless_ring_rating" posparent="am_ring_rating" posref="BL TL" y="0" 
+                                 text="uiR2EDMasterlessRingRating" />
+                        </group>
+                        <view type="text" id="ring_rating_title" posparent="ring_rating" posref="TL BL" x="0" y="0" hardtext="uiR2EDRingRatingTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
+                        -->
+      </group>
+    </group>
+  </group>
+  <tree node="info_player_skills" />
+  <!--***********-->
+  <!--*   FAME  *-->
+  <!--***********-->
+  <!-- * FAME template * -->
+  <template name="fame_bar"
+            x="0"
+            y="0"
+            w="204"
+            h="28"
+            posref="TL TL"
+            keep="true"
+            id=""
+            path="">
+    <group id="#id"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y">
+      <instance template="inner_thin_border_group"
+                inherit_gc_alpha="true"
+                posref="BL BL"
+                h="-4" />
+      <!-- Bars -->
+      <view type="bitmap"
+            id="p0"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="10"
+            h="16"
+            y="4"
+            global_color="false" />
+      <view type="bitmap"
+            id="p1"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="10"
+            h="16"
+            y="4"
+            global_color="false" />
+      <view type="bitmap"
+            id="p2"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="10"
+            h="16"
+            y="4"
+            global_color="false" />
+      <view type="bitmap"
+            id="p3"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="10"
+            h="16"
+            y="4"
+            global_color="false" />
+      <view type="bitmap"
+            id="p4"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="10"
+            h="16"
+            y="4"
+            global_color="false" />
+      <!-- beautiful 3D bar look -->
+      <group id="bar3d"
+             posref="BL BL"
+             x="0"
+             y="4"
+             w="0"
+             h="16">
+        <view type="bitmap"
+              id="bar"
+              texture="fame_bar_3d.tga"
+              scale="true"
+              sizeref="w"
+              x="0"
+              w="0"
+              h="16"
+              global_color="false" />
+      </group>
+      <!-- Tooltips above the Bars -->
+      <!-- For now, the KOS system does not work, so put instead no trade
+                <ctrl type="tooltip" id="ttp0" posref="BL BL" x="0" y="4" h="16" w="10" tooltip="uittFameKOS" />
+                -->
+      <ctrl type="tooltip"
+            id="ttp0"
+            posref="BL BL"
+            x="0"
+            y="4"
+            h="16"
+            w="10"
+            tooltip="uittFameNoTrade" />
+      <ctrl type="tooltip"
+            id="ttp1"
+            posref="BL BL"
+            x="0"
+            y="4"
+            h="16"
+            w="10"
+            tooltip="uittFameNoTrade" />
+      <ctrl type="tooltip"
+            id="ttp2"
+            posref="BL BL"
+            x="0"
+            y="4"
+            h="16"
+            w="10"
+            tooltip="uittFameWeakTrade" />
+      <ctrl type="tooltip"
+            id="ttp3"
+            posref="BL BL"
+            x="0"
+            y="4"
+            h="16"
+            w="10"
+            tooltip="uittFameNormal" />
+      <!-- max limit -->
+      <view type="bitmap"
+            id="m"
+            texture="blank.tga"
+            posref="BL BL"
+            scale="true"
+            x="0"
+            w="4"
+            h="24"
+            y="0"
+            global_color="false" />
+      <ctrl type="tooltip"
+            id="ttm"
+            posparent="m"
+            x="0"
+            y="0"
+            sizeref="wh"
+            w="0"
+            h="0"
+            on_tooltip="lua:game:updateFameBarTT('#path')" />
+      <view type="text_number"
+            id="t"
+            posref="BM BM"
+            x="0"
+            y="4"
+            color="255 255 255 255"
+            global_color="false"
+            fontsize="12"
+            value="#path:VALUE"
+            shadow="true" />
+      <link expr="depends(@SERVER:FAME:THRESHOLD_TRADE, @SERVER:FAME:THRESHOLD_KOS, @#path:VALUE, @#path:THRESHOLD)"
+            action="lua:game:updateFameBar('#path')" />
+    </group>
+  </template>
+  <template name="fame_tribe_line"
+            x="0"
+            y="0"
+            w="400"
+            h="28"
+            posref="TL TL"
+            keep="true"
+            id=""
+            path="">
+    <group id="#id"
+           posref="#posref"
+           w="#w"
+           h="#h"
+           x="#x"
+           y="#y">
+      <instance template="fame_bar"
+                id="fb"
+                x="180"
+                path="#path" />
+      <view type="text"
+            id="t"
+            posref="ML ML"
+            x="4"
+            y="-2"
+            color="255 255 255 255"
+            fontsize="10"
+            value="xxx tribe name"
+            shadow="true" />
+      <link expr="or(ne(@#path:VALUE,0),ne(@#path:TREND,0))"
+            target="active" />
+    </group>
+  </template>
+  <!-- **************** -->
+  <proc id="fame_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:FAME|value=1" />
+  </proc>
+  <proc id="fame_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:FAME|value=0" />
+  </proc>
+  <group type="container"
+         id="fame"
+         title="uiFameTitle"
+         global_color="false"
+         header_color="UI:SAVE:WIN:COLORS:PLA"
+         resizer="false"
+         pop_min_w="420"
+         pop_min_h="310"
+         pop_max_w="420"
+         pop_max_h="800"
+         w="420"
+         h="310"
+         on_active="proc"
+         on_active_params="fame_proc_active"
+         on_deactive="proc"
+         on_deactive_params="fame_proc_deactive"
+         lockable="true"
+         openable="false"
+         opened="true"
+         movable="true"
+         active="false"
+         title_class="formated">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="100"
+           h="48"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <group type="tab"
+             id="fame_select"
+             child_resize_w="true"
+             h="24"
+             posref="TL TL"
+             x="0"
+             y="-24">
+        <ctrl style="tab_button_new"
+              id="tab0"
+              x="0"
+              posref="TL TL"
+              group="content:you"
+              hardtext="uitabFameYou"
+              onclick_r=""
+              params_r=""
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab1"
+              posparent="tab0"
+              group="content:guild"
+              hardtext="uitabFameGuild"
+              onclick_r=""
+              params_r=""
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab2"
+              posparent="tab1"
+              group="content:tribes"
+              hardtext="uitabFameTribes"
+              onclick_r=""
+              params_r=""
+              onclick_l=""
+              params_l="" />
+        <!-- TODO_SPIRE: when spire OK, uncomment. see TODO_SPIRE -->
+        <!-- <ctrl style="tab_button_new" id="tab3" posparent="tab2"            group="content:pvp"             hardtext="uitabFamePvp"         onclick_r="" params_r="" onclick_l="" params_l="" /> -->
+        <link expr="and(%is_guild_present)"
+              target="tab1:active" />
+      </group>
+      <view type="bitmap"
+            id="sep"
+            posparent="fame_select"
+            posref="BR BL"
+            sizeparent="parent"
+            sizeref="w"
+            w="0"
+            h="1"
+            scale="true"
+            texture="blank.tga"
+            color="166 166 166 255" />
+    </group>
+    <group id="content"
+           x="0"
+           y="0"
+           h="272"
+           posref="TL TL">
+      <group id="you"
+             posref="TL TL"
+             x="0"
+             y="-4"
+             sizeref="wh"
+             w="0"
+             h="0"
+             lua_class="game:initFamePos()">
+        <!-- Civilisation -->
+        <view type="text"
+              id="fyros"
+              posref="TL TL"
+              x="4"
+              y="-10"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameFyros" />
+        <view type="text"
+              id="matis"
+              posref="TL TL"
+              x="4"
+              y="-40"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameMatis" />
+        <view type="text"
+              id="tryker"
+              posref="TL TL"
+              x="4"
+              y="-70"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameTryker" />
+        <view type="text"
+              id="zorai"
+              posref="TL TL"
+              x="4"
+              y="-100"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameZorai" />
+        <group id="civ_allegiance_group"
+               posref="TL TL"
+               x="4"
+               y="-130"
+               child_resize_h="true"
+               child_resize_w="true">
+          <view type="text"
+                id="civ_allegiance"
+                posref="TL TL"
+                x="0"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="true"
+                shadow="true"
+                hardtext="uiFameAllegianceCiv" />
+          <view type="text"
+                id="civ_allegiance_val"
+                posparent="civ_allegiance"
+                posref="MR ML"
+                x="4"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="false"
+                shadow="true" />
+          <link expr="@SERVER:FAME:CIV_ALLEGIANCE"
+                action="lua:game:updateAllegiance('SERVER:FAME:CIV_ALLEGIANCE', 'civ_allegiance_val')" />
+          <instance template="text_tt"
+                    posparent="parent"
+                    on_tooltip="lua:game:fameAllegianceTooltipCiv()" />
+        </group>
+        <ctrl style="text_button_16"
+              id="neutral_civ"
+              active="false"
+              posparent="civ_allegiance_group"
+              posref="MR ML"
+              x="14"
+              y="2"
+              hardtext="uiFameAllegianceCivSetNeutral"
+              tooltip="uiFameAllegianceCivSetNeutralTT"
+              onclick_l="fame_set_neutral"
+              params_l="type=civ|force=0"
+              global_color="true" />
+        <!-- <link expr="and(eq(@SERVER:FAME:CIV_ALLEGIANCE, 0),not(eq(@UI:VARIABLES:CDB_INIT_IN_PROGRESS, 0)))" target="neutral_civ:active" /> -->
+        <link expr="and(eq(@SERVER:FAME:CIV_ALLEGIANCE, 0),not(isDBInitInProgress()))"
+              target="neutral_civ:active" />
+        <!-- Cult -->
+        <view type="text"
+              id="kami"
+              posref="TL TL"
+              x="4"
+              y="-180"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameKami" />
+        <view type="text"
+              id="karavan"
+              posref="TL TL"
+              x="4"
+              y="-210"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameKaravan" />
+        <group id="cult_allegiance_group"
+               posref="TL TL"
+               x="4"
+               y="-240"
+               child_resize_h="true"
+               child_resize_w="true">
+          <view type="text"
+                id="cult_allegiance"
+                posref="TL TL"
+                x="0"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="true"
+                shadow="true"
+                hardtext="uiFameAllegianceCult" />
+          <view type="text"
+                id="cult_allegiance_val"
+                posparent="cult_allegiance"
+                posref="MR ML"
+                x="4"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="false"
+                shadow="true" />
+          <link expr="@SERVER:FAME:CULT_ALLEGIANCE"
+                action="lua:game:updateAllegiance('SERVER:FAME:CULT_ALLEGIANCE', 'cult_allegiance_val')" />
+          <instance template="text_tt"
+                    posparent="parent"
+                    on_tooltip="lua:game:fameAllegianceTooltipCult()" />
+        </group>
+        <ctrl style="text_button_16"
+              id="neutral_cult"
+              active="false"
+              posparent="cult_allegiance_group"
+              posref="MR ML"
+              x="14"
+              y="2"
+              hardtext="uiFameAllegianceCultSetNeutral"
+              tooltip="uiFameAllegianceCultSetNeutralTT"
+              onclick_l="fame_set_neutral"
+              params_l="type=cult|force=0"
+              global_color="true" />
+        <!-- <link expr="and(eq(@SERVER:FAME:CULT_ALLEGIANCE, 0),not(eq(@UI:VARIABLES:CDB_INIT_IN_PROGRESS, 0)))" target="neutral_cult:active" /> -->
+        <link expr="and(eq(@SERVER:FAME:CULT_ALLEGIANCE, 0),not(isDBInitInProgress()))"
+              target="neutral_cult:active" />
+        <!-- pool of bars (dynamically y-positionned from lua script) -->
+        <instance template="fame_bar"
+                  id="fb0"
+                  x="100"
+                  path="SERVER:FAME:PLAYER0" />
+        <instance template="fame_bar"
+                  id="fb1"
+                  x="100"
+                  path="SERVER:FAME:PLAYER1" />
+        <instance template="fame_bar"
+                  id="fb2"
+                  x="100"
+                  path="SERVER:FAME:PLAYER2" />
+        <instance template="fame_bar"
+                  id="fb3"
+                  x="100"
+                  path="SERVER:FAME:PLAYER3" />
+        <instance template="fame_bar"
+                  id="fb4"
+                  x="100"
+                  path="SERVER:FAME:PLAYER4" />
+        <instance template="fame_bar"
+                  id="fb5"
+                  x="100"
+                  path="SERVER:FAME:PLAYER5" />
+      </group>
+      <group id="guild"
+             posref="TL TL"
+             x="0"
+             y="-4"
+             sizeref="wh"
+             w="0"
+             h="0"
+             lua_class="game:initFamePos()">
+        <!-- Civilisation -->
+        <view type="text"
+              id="fyros"
+              posref="TL TL"
+              x="4"
+              y="-10"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameFyros" />
+        <view type="text"
+              id="matis"
+              posref="TL TL"
+              x="4"
+              y="-40"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameMatis" />
+        <view type="text"
+              id="tryker"
+              posref="TL TL"
+              x="4"
+              y="-70"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameTryker" />
+        <view type="text"
+              id="zorai"
+              posref="TL TL"
+              x="4"
+              y="-100"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameZorai" />
+        <group id="civ_allegiance_group"
+               posref="TL TL"
+               x="4"
+               y="-130"
+               child_resize_h="true"
+               child_resize_w="true">
+          <view type="text"
+                id="civ_allegiance"
+                posref="TL TL"
+                x="0"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="true"
+                shadow="true"
+                hardtext="uiFameAllegianceCiv" />
+          <view type="text"
+                id="civ_allegiance_val"
+                posparent="civ_allegiance"
+                posref="MR ML"
+                x="4"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="false"
+                shadow="true" />
+          <link expr="@SERVER:GUILD:FAME:CIV_ALLEGIANCE"
+                action="lua:game:updateAllegiance('SERVER:GUILD:FAME:CIV_ALLEGIANCE', 'civ_allegiance_val')" />
+          <instance template="text_tt"
+                    posparent="parent"
+                    on_tooltip="lua:game:fameAllegianceTooltipCivGuild()" />
+        </group>
+        <ctrl style="text_button_16"
+              id="neutral_civ"
+              posparent="civ_allegiance_group"
+              posref="MR ML"
+              x="14"
+              y="2"
+              hardtext="uiFameAllegianceCivSetNeutral"
+              tooltip="uiFameAllegianceCivSetNeutralGuildTT"
+              onclick_l="fame_set_neutral"
+              params_l="type=civ_guild|force=0"
+              global_color="true" />
+        <link expr="eq(@SERVER:GUILD:FAME:CIV_ALLEGIANCE, 0)"
+              target="neutral_civ:active" />
+        <link expr="ne(@UI:VARIABLES:USER:GUILD_GRADE, 0)"
+              target="neutral_civ:frozen" />
+        <!-- Cult -->
+        <view type="text"
+              id="kami"
+              posref="TL TL"
+              x="4"
+              y="-180"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameKami" />
+        <view type="text"
+              id="karavan"
+              posref="TL TL"
+              x="4"
+              y="-210"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiFameKaravan" />
+        <group id="cult_allegiance_group"
+               posref="TL TL"
+               x="4"
+               y="-240"
+               child_resize_h="true"
+               child_resize_w="true">
+          <view type="text"
+                id="cult_allegiance"
+                posref="TL TL"
+                x="0"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="true"
+                shadow="true"
+                hardtext="uiFameAllegianceCult" />
+          <view type="text"
+                id="cult_allegiance_val"
+                posparent="cult_allegiance"
+                posref="MR ML"
+                x="4"
+                y="0"
+                color="255 255 255 255"
+                fontsize="10"
+                global_color="false"
+                shadow="true" />
+          <link expr="@SERVER:GUILD:FAME:CULT_ALLEGIANCE"
+                action="lua:game:updateAllegiance('SERVER:GUILD:FAME:CULT_ALLEGIANCE', 'cult_allegiance_val')" />
+          <instance template="text_tt"
+                    posparent="parent"
+                    on_tooltip="lua:game:fameAllegianceTooltipCultGuild()" />
+        </group>
+        <ctrl style="text_button_16"
+              id="neutral_cult"
+              posparent="cult_allegiance_group"
+              posref="MR ML"
+              x="14"
+              y="2"
+              hardtext="uiFameAllegianceCultSetNeutral"
+              tooltip="uiFameAllegianceCultSetNeutralGuildTT"
+              onclick_l="fame_set_neutral"
+              params_l="type=cult_guild|force=0"
+              global_color="true" />
+        <link expr="eq(@SERVER:GUILD:FAME:CULT_ALLEGIANCE, 0)"
+              target="neutral_cult:active" />
+        <link expr="ne(@UI:VARIABLES:USER:GUILD_GRADE, 0)"
+              target="neutral_cult:frozen" />
+        <instance template="fame_bar"
+                  id="fb0"
+                  x="100"
+                  path="SERVER:GUILD:FAME:0" />
+        <instance template="fame_bar"
+                  id="fb1"
+                  x="100"
+                  path="SERVER:GUILD:FAME:1" />
+        <instance template="fame_bar"
+                  id="fb2"
+                  x="100"
+                  path="SERVER:GUILD:FAME:2" />
+        <instance template="fame_bar"
+                  id="fb3"
+                  x="100"
+                  path="SERVER:GUILD:FAME:3" />
+        <instance template="fame_bar"
+                  id="fb4"
+                  x="100"
+                  path="SERVER:GUILD:FAME:4" />
+        <instance template="fame_bar"
+                  id="fb5"
+                  x="100"
+                  path="SERVER:GUILD:FAME:5" />
+      </group>
+      <group id="tribes"
+             posref="TL TL"
+             x="0"
+             y="-4"
+             sizeref="wh"
+             w="0"
+             h="-10"
+             lua_class="game:initFameTribe()">
+        <group id="black"
+               posparent="list"
+               posref="TL TL"
+               x="0"
+               sizeref="wh"
+               w="-16"
+               h="4"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <group id="list"
+               type="list"
+               posref="TL TL"
+               x="14"
+               y="-4"
+               sizeref="wh"
+               w="-20"
+               h="-6">
+          <vector template="fame_tribe_line"
+                  _size="%max_fame_tribe"
+                  _firstpos="TL TL"
+                  _nextpos="BL TL"
+                  index="$i"
+                  id="line$i"
+                  path="SERVER:FAME:TRIBE$i" />
+        </group>
+        <ctrl style="skin_scroll"
+              id="scroll_bar"
+              target="list"
+              align="T"
+              target_stepy="28" />
+      </group>
+      <!-- TODO_SPIRE: when spire OK, remove active="false". see TODO_SPIRE -->
+      <group id="pvp"
+             posref="TL TL"
+             x="0"
+             y="-4"
+             sizeref="wh"
+             w="0"
+             h="-10"
+             active="false">
+        <!-- Texts -->
+        <view type="text"
+              id="allegiance_header"
+              posref="TL TL"
+              x="4"
+              y="-10"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiPvpFameAllegiance"
+              multi_line="true"
+              multi_line_space="0"
+              global_color="false" />
+        <view type="text"
+              id="cult_allegiance_pts"
+              posparent="allegiance_header"
+              posref="BL TL"
+              x="0"
+              y="-4"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext=""
+              multi_line="true"
+              multi_line_space="0" />
+        <view type="text"
+              id="civ_allegiance_pts"
+              posparent="cult_allegiance_pts"
+              posref="BL TL"
+              x="0"
+              y="-8"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext=""
+              multi_line="true"
+              multi_line_space="0" />
+        <view type="text"
+              id="pvpEffectsInfo"
+              posparent="civ_allegiance_pts"
+              posref="BL TL"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiPvpEffectInfo"
+              multi_line="true"
+              multi_line_space="0"
+              global_color="false" />
+        <!-- Tooltips -->
+        <instance template="text_tt"
+                  posparent="allegiance_header"
+                  tooltip="uittPvpFameAllegianceInfo" />
+        <instance template="text_tt"
+                  posparent="pvpEffectsInfo"
+                  tooltip="uittPvpFameInfo" />
+        <!-- Update allegiance faction points -->
+        <link expr="depends(@SERVER:PVP_EFFECTS:PVP_FACTION_POINTS)"
+              action="lua:game:getAllegiancePoints()" />
+        <!-- Black background -->
+        <group id="black"
+               posref="TL TL"
+               x="10"
+               y="-85"
+               sizeparent="parent"
+               sizeref="wh"
+               w="-14"
+               h="-85"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <!-- Spire effects with scroll bar -->
+        <group id="list"
+               posref="TL TL"
+               x="10"
+               y="-88"
+               sizeparent="parent"
+               sizeref="w"
+               w="-14"
+               h="0"
+               max_sizeparent="parent"
+               max_sizeref="h"
+               max_h="-91"
+               child_resize_h="true"
+               child_resize_hmargin="8">
+          <view type="text"
+                id="pvpEffectsBonusMalusInfo"
+                posref="TL TL"
+                x="4"
+                y="-2"
+                color="255 255 255 255"
+                fontsize="10"
+                shadow="true"
+                hardtext="uiPvpFameNoCivAllegiance"
+                multi_line="true"
+                multi_line_space="0"
+                global_color="false" />
+          <view type="text"
+                id="pvpEffectsBonusMalus"
+                posparent="pvpEffectsBonusMalusInfo"
+                posref="BL TL"
+                x="4"
+                y="-4"
+                color="255 255 255 255"
+                fontsize="10"
+                shadow="true"
+                hardtext="uiPvpFameNoCivAllegiance"
+                multi_line="true"
+                multi_line_space="0" />
+          <!-- Update spire effects -->
+          <link expr="depends(@SERVER:PVP_EFFECTS)"
+                action="lua:game:getPvpEffects()" />
+        </group>
+        <ctrl style="skin_scroll"
+              id="scroll_bar"
+              target="list"
+              align="T"
+              target_stepy="11" />
+      </group>
+    </group>
+  </group>
+  <tree node="fame" />
+  <!--**************************-->
+  <!--*   info_player_journal  *-->
+  <!--**************************-->
+  <define id="ipj_nb_mission"
+          value="15" />
+  <define id="ipj_last_title"
+          value="title14" />
+  <define id="ipj_nb_group_mission"
+          value="15" />
+  <define id="ipj_last_group_title"
+          value="group_title14" />
+  <define id="ipj_nb_histo"
+          value="30" />
+  <define id="ipj_nb_histo_minus_one"
+          value="29" />
+  <define id="ipj_last_step"
+          value="step0" />
+  <define id="ipj_last_histo"
+          value="histo29" />
+  <define id="ipj_nb_goal"
+          value="20" />
+  <define id="ipj_nb_goal_minus_one"
+          value="19" />
+  <variable entry="UI:TEMP:MISSION_ABANDON_BUTTON"
+            type="bool"
+            value="1" />
+  <variable entry="UI:TEMP:MISSION_WAKE_BUTTON"
+            type="bool"
+            value="0" />
+  <variable entry="UI:SAVE:MISSION_SELECTED"
+            type="sint32"
+            value="-1" />
+  <!-- On Active -->
+  <proc id="mission_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:MISSIONS|value=1" />
+    <action handler="mission_choose_next_valid" />
+    <action handler="lua:game:onMissionJournalOpened()" />
+  </proc>
+  <!-- Change Title -->
+  <template name="t_mission_proc_title_step"
+            nb="">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:step#nb:textid_dblink|value='SERVER:MISSIONS:@0:GOALS:#nb:TEXT'" />
+    <action handler="remove_link"
+            params="id=mission_link_step#nb" />
+    <action handler="add_link"
+            params="id=mission_link_step#nb|expr=ne(@SERVER:MISSIONS:@0:GOALS:#nb:TEXT,0)|target=ui:interface:info_player_journal:content:desc:step#nb:active|action=lua|params=game:onNewMissionStepAdded(#nb)" />
+  </template>
+  <template name="t_mission_proc_title_histo"
+            nb="">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:histo#nb:textid_dblink|value='SERVER:MISSIONS:@0:HISTO:#nb:TEXT'" />
+    <action handler="remove_link"
+            params="id=mission_link_histo#nb" />
+    <action handler="add_link"
+            params="id=mission_link_histo#nb|expr=ne(@SERVER:MISSIONS:@0:HISTO:#nb:TEXT,0)|target=ui:interface:info_player_journal:content:desc:histo#nb:active" />
+  </template>
+  <proc id="mission_proc_title">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:uppart:icon:sheet|value='SERVER:MISSIONS:@0'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:uppart:logic:textid_dblink|value='SERVER:MISSIONS:@0:DETAIL_TEXT'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:timer:b:range_dblink|value='SERVER:MISSIONS:@0:END_DATE'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:timer:b:reference_dblink|value='SERVER:MISSIONS:@0:BEGIN_DATE'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:close:onclick_l|value='mission_abandon'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:close:params_l|value='@0'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:wake:onclick_l|value='mission_wake'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:wake:params_l|value='@0'" />
+    <action handler="remove_link"
+            params="id=mission_abandon_text" />
+    <action handler="remove_link"
+            params="id=mission_finished_bitmap" />
+    <action handler="remove_link"
+            params="id=mission_abandon_active" />
+    <!--    <action handler="remove_link" params="id=mission_wake_text" /> -->
+    <action handler="remove_link"
+            params="id=mission_wake_active" />
+    <action handler="add_link"
+            params="id=mission_abandon_text|expr=ifthenelse(eq(@SERVER:MISSIONS:@0:FINISHED,0), 'uittMissionAbandon', 'uittMissionFinished')|target=ui:interface:info_player_journal:content:desc:close:hardtext" />
+    <action handler="add_link"
+            params="id=mission_finished_bitmap|expr=switch(@SERVER:MISSIONS:@0:FINISHED, 'blank2.tga', 'ICO_Task_Done.tga', 'ICO_Task_Failed.tga')|target=ui:interface:info_player_journal:content:desc:uppart:over_icon:texture" />
+    <action handler="add_link"
+            params="id=mission_abandon_active|expr=and(eq(@UI:TEMP:MISSION_ABANDON_BUTTON,1),ne(@UI:SAVE:MISSION_SELECTED,-1),or(eq(@SERVER:MISSIONS:@0:ABANDONNABLE,1),ne(@SERVER:MISSIONS:@0:FINISHED,0)))|target=ui:interface:info_player_journal:content:desc:close:active" />
+    <!--<action handler="add_link" params="id=mission_wake_text|expr=ne(@SERVER:MISSIONS:@0:SLEEP,0), 'uittMissionWake', |target=ui:interface:info_player_journal:content:desc:wake:hardtext" />-->
+    <action handler="add_link"
+            params="id=mission_wake_active|expr=and(eq(@UI:TEMP:MISSION_WAKE_BUTTON,1),ne(@UI:SAVE:MISSION_SELECTED,-1),or(eq(@SERVER:MISSIONS:@0:SLEEP,1)))|target=ui:interface:info_player_journal:content:desc:wake:active" />
+    <action handler="remove_link"
+            params="id=mission_timer_link" />
+    <action handler="remove_link"
+            params="id=mission_time2_link" />
+    <action handler="add_link"
+            params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:uc_hardtext" />
+    <action handler="add_link"
+            params="id=mission_time2_link|expr=ne(@SERVER:MISSIONS:@0:END_DATE,0)|target=ui:interface:info_player_journal:content:desc:timer:active" />
+    <vector template="t_mission_proc_title_histo"
+            _size="%ipj_nb_histo"
+            nb="$i" />
+    <vector template="t_mission_proc_title_step"
+            _size="%ipj_nb_goal"
+            nb="$i" />
+    <action handler="set"
+            params="dblink=UI:SAVE:MISSION_SELECTED|value=@0" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:mission_list:b_title@0:pushed|value=1" />
+    <action handler="lua"
+            params="game:onMissionSelected(@0)" />
+  </proc>
+  <!-- Display template -->
+  <template name="t_mission_title"
+            id=""
+            stepindex=""
+            x="0"
+            posref="BL TL"
+            posparent="parent"
+            tooltip="">
+    <view type="bitmap"
+          id="#id"
+          posref="#posref"
+          posparent="#posparent"
+          x="#x"
+          y="0"
+          texture="Small_Task_Generic.tga"
+          global_color="false"
+          inherit_gc_alpha="false" />
+    <view type="text_id"
+          id="title_#id"
+          x="4"
+          y="-1"
+          posref="MR ML"
+          posparent="#id"
+          fontsize="10"
+          textid="SERVER:MISSIONS:#stepindex:TITLE"
+          over_extend_view_text="true"
+          auto_clamp="true" />
+    <ctrl type="button"
+          id="b_#id"
+          button_type="radio_button"
+          posref="TL TL"
+          posparent="#id"
+          sizeparent="parent"
+          sizeref="w"
+          w="0"
+          h="16"
+          tooltip="#tooltip"
+          onclick_l="proc"
+          params_l="mission_proc_title|#stepindex"
+          click_when_pushed="true"
+          tx_normal="blank.tga"
+          tx_pushed="blank.tga"
+          tx_over="blank.tga"
+          scale="true"
+          color="0 0 0 0"
+          col_over="255 255 255 128"
+          col_pushed="0 0 0 192"
+          global_color_normal="true"
+          global_color_over="true"
+          global_color_pushed="true"
+          text_color_normal="255 255 255 255"
+          text_color_pushed="0 0 0 255"
+          text_color_over="255 255 255 255"
+          text_shadow_color_normal="0 0 0 255"
+          text_shadow_color_pushed="0 0 0 255"
+          text_shadow_color_over="0 0 0 255"
+          text_global_color_normal="true"
+          text_global_color_pushed="false"
+          text_global_color_over="false" />
+    <!-- active the line if the mission slot is here -->
+    <link expr="ne(@SERVER:MISSIONS:#stepindex:TITLE,0)"
+          target="#id:active,title_#id:active,b_#id:active" />
+    <!-- must set y to 0 if hole in the list -->
+    <link expr="ifthenelse(eq(@SERVER:MISSIONS:#stepindex:TITLE,0),0,-2)"
+          target="#id:y" />
+    <!-- set the correct bitmap according to mission type -->
+    <link expr="ifthenelse(ne(@SERVER:MISSIONS:#stepindex:FINISHED,0),
+                                        ifthenelse(eq(@SERVER:MISSIONS:#stepindex:FINISHED,1), 
+                                                'Small_Task_Done.tga', 
+                                                'Small_Task_Failed.tga'),
+                                                getMissionSmallIcon(@SERVER:MISSIONS:#stepindex:ICON) )"
+          target="#id:texture" />
+  </template>
+  <!-- Same for Group Missions -->
+  <!-- Change Title -->
+  <template name="t_group_mission_proc_title_step"
+            nb="">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:step#nb:textid_dblink|value='SERVER:GROUP:MISSIONS:@0:GOALS:#nb:TEXT'" />
+    <action handler="remove_link"
+            params="id=mission_link_step#nb" />
+    <action handler="add_link"
+            params="id=mission_link_step#nb|expr=ne(@SERVER:GROUP:MISSIONS:@0:GOALS:#nb:TEXT,0)|target=ui:interface:info_player_journal:content:desc:step#nb:active|action=lua|params=game:onNewMissionStepAdded(#nb)" />
+  </template>
+  <template name="t_group_mission_proc_title_histo"
+            nb="">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:histo#nb:textid_dblink|value='SERVER:GROUP:MISSIONS:@0:HISTO:#nb:TEXT'" />
+    <action handler="remove_link"
+            params="id=mission_link_histo#nb" />
+    <action handler="add_link"
+            params="id=mission_link_histo#nb|expr=ne(@SERVER:GROUP:MISSIONS:@0:HISTO:#nb:TEXT,0)|target=ui:interface:info_player_journal:content:desc:histo#nb:active" />
+  </template>
+  <proc id="group_mission_proc_title">
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:uppart:icon:sheet|value='SERVER:GROUP:MISSIONS:@0'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:uppart:logic:textid_dblink|value='SERVER:GROUP:MISSIONS:@0:DETAIL_TEXT'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:timer:b:range_dblink|value='SERVER:GROUP:MISSIONS:@0:END_DATE'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:timer:b:reference_dblink|value='SERVER:GROUP:MISSIONS:@0:BEGIN_DATE'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:close:onclick_l|value='group_mission_abandon'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:wake:onclick_l|value='group_mission_wake'" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:desc:close:params_l|value='@0'" />
+    <action handler="remove_link"
+            params="id=mission_abandon_text" />
+    <action handler="remove_link"
+            params="id=mission_finished_bitmap" />
+    <action handler="remove_link"
+            params="id=mission_abandon_active" />
+    <action handler="remove_link"
+            params="id=mission_wake_active" />
+    <action handler="add_link"
+            params="id=mission_abandon_text|expr=ifthenelse(eq(@SERVER:GROUP:MISSIONS:@0:FINISHED,0), 'uittMissionAbandon', 'uittMissionFinished')|target=ui:interface:info_player_journal:content:desc:close:hardtext" />
+    <action handler="add_link"
+            params="id=mission_finished_bitmap|expr=switch(@SERVER:GROUP:MISSIONS:@0:FINISHED, 'blank2.tga', 'ICO_Task_Done.tga', 'ICO_Task_Failed.tga')|target=ui:interface:info_player_journal:content:desc:uppart:over_icon:texture" />
+    <action handler="add_link"
+            params="id=mission_abandon_active|expr=and(eq(@UI:TEMP:MISSION_ABANDON_BUTTON,1),ne(@UI:SAVE:MISSION_SELECTED,-1),or(eq(@SERVER:GROUP:MISSIONS:@0:ABANDONNABLE,1),ne(@SERVER:GROUP:MISSIONS:@0:FINISHED,0)))|target=ui:interface:info_player_journal:content:desc:close:active" />
+    <action handler="add_link"
+            params="id=mission_wake_active|expr=and(eq(@UI:TEMP:MISSION_WAKE_BUTTON,1),ne(@UI:SAVE:MISSION_SELECTED,-1),or(eq(@SERVER:GROUP:MISSIONS:@0:SLEEP,1)))|target=ui:interface:info_player_journal:content:desc:wake:active" />
+    <action handler="remove_link"
+            params="id=mission_timer_link" />
+    <action handler="remove_link"
+            params="id=mission_time2_link" />
+    <action handler="add_link"
+            params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:GROUP:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:uc_hardtext" />
+    <action handler="add_link"
+            params="id=mission_time2_link|expr=ne(@SERVER:GROUP:MISSIONS:@0:END_DATE,0)|target=ui:interface:info_player_journal:content:desc:timer:active" />
+    <vector template="t_group_mission_proc_title_histo"
+            _size="%ipj_nb_histo"
+            nb="$i" />
+    <vector template="t_group_mission_proc_title_step"
+            _size="%ipj_nb_goal"
+            nb="$i" />
+    <action handler="set"
+            params="dblink=UI:SAVE:MISSION_SELECTED|value=add(@0,%ipj_nb_mission)" />
+    <action handler="set"
+            params="target_property=ui:interface:info_player_journal:content:mission_list:b_group_title@0:pushed|value=1" />
+    <action handler="lua"
+            params="game:onGroupMissionSelected(@0)" />
+  </proc>
+  <!-- Display template -->
+  <template name="t_group_mission_title"
+            id=""
+            stepindex=""
+            x="0"
+            posref="BL TL"
+            posparent="parent"
+            tooltip="">
+    <view type="bitmap"
+          id="#id"
+          posref="#posref"
+          posparent="#posparent"
+          x="#x"
+          y="0"
+          texture="Small_Task_Generic.tga"
+          global_color="false"
+          inherit_gc_alpha="false" />
+    <view type="text_id"
+          id="title_#id"
+          x="4"
+          y="-1"
+          posref="MR ML"
+          posparent="#id"
+          fontsize="10"
+          textid="SERVER:GROUP:MISSIONS:#stepindex:TITLE"
+          over_extend_view_text="true"
+          auto_clamp="true" />
+    <ctrl type="button"
+          id="b_#id"
+          button_type="radio_button"
+          posref="TL TL"
+          posparent="#id"
+          sizeparent="parent"
+          sizeref="w"
+          w="0"
+          h="16"
+          tooltip="#tooltip"
+          onclick_l="proc"
+          params_l="group_mission_proc_title|#stepindex"
+          click_when_pushed="true"
+          tx_normal="blank.tga"
+          tx_pushed="blank.tga"
+          tx_over="blank.tga"
+          scale="true"
+          color="0 0 0 0"
+          col_over="255 255 255 128"
+          col_pushed="0 0 0 192"
+          global_color_normal="true"
+          global_color_over="true"
+          global_color_pushed="true"
+          text_color_normal="255 255 255 255"
+          text_color_pushed="0 0 0 255"
+          text_color_over="255 255 255 255"
+          text_shadow_color_normal="0 0 0 255"
+          text_shadow_color_pushed="0 0 0 255"
+          text_shadow_color_over="0 0 0 255"
+          text_global_color_normal="true"
+          text_global_color_pushed="false"
+          text_global_color_over="false" />
+    <!-- active the line if the mission slot is here -->
+    <link expr="ne(@SERVER:GROUP:MISSIONS:#stepindex:TITLE,0)"
+          target="#id:active, title_#id:active, b_#id:active" />
+    <!-- must set y to 0 if hole in the list -->
+    <link expr="ifthenelse(eq(@SERVER:GROUP:MISSIONS:#stepindex:TITLE,0),0,-2)"
+          target="#id:y" />
+    <!-- set the correct bitmap according to mission type -->
+    <link expr="ifthenelse(ne(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,0),
+                                        ifthenelse(eq(@SERVER:GROUP:MISSIONS:#stepindex:FINISHED,1), 
+                                                'Small_Task_Done.tga', 
+                                                'Small_Task_Failed.tga'),
+                                        getMissionSmallIcon(@SERVER:GROUP:MISSIONS:#stepindex:ICON) )"
+          target="#id:texture" />
+  </template>
+  <!-- End of Group Missions -->
+  <template name="t_mission_step"
+            id=""
+            stepindex=""
+            x="0"
+            posref="BL TL"
+            posparent="parent">
+    <view type="text_id"
+          id="#id"
+          x="#x"
+          posref="#posref"
+          posparent="#posparent"
+          global_color="false"
+          multi_line="true"
+          multi_line_space="0"
+          fontsize="10" />
+  </template>
+  <template name="t_mission_histo"
+            id=""
+            stepindex=""
+            x="0"
+            posref="BL TL"
+            posparent="parent">
+    <view type="text_id"
+          id="#id"
+          x="#x"
+          posref="#posref"
+          posparent="#posparent"
+          multi_line="true"
+          multi_line_space="0"
+          fontsize="10"
+          color="160 160 160 255" />
+  </template>
+  <!-- mission combo box menu -->
+  <group id="mission_cb_menu"
+         type="modal"
+         mouse_pos="false"
+         exit_click_out="true"
+         w="300"
+         h="300"
+         active="false">
+    <group id="mission_list"
+           active="true"
+           posref="TL TL"
+           x="0"
+           y="-2"
+           sizeref="w"
+           w="-16"
+           child_resize_h="true"
+           child_resize_hmargin="2"
+           max_sizeref="wh"
+           max_w="-4"
+           max_h="-4">
+      <vector template="t_mission_title"
+              _size="%ipj_nb_mission"
+              _firstpos="TL TL"
+              _nextpos="BL TL"
+              _xfirst="0"
+              id="title$i"
+              stepindex="$i" />
+      <vector template="t_group_mission_title"
+              posparent="%ipj_last_title"
+              _size="%ipj_nb_group_mission"
+              _firstpos="BL TL"
+              _nextpos="BL TL"
+              _xfirst="0"
+              id="group_title$i"
+              stepindex="$i" />
+    </group>
+    <!--
+        <ctrl style="skin_scroll" id="sv" posref="TL TL" x="4" y="-8" target="mission_list"/>   
+        -->
+  </group>
+  <!-- bind lua observers to know when :
+     - a new mission or group mission has been selected
+         - a mission title has changed (0 indicating it is not there anymore
+         -a mission 'finished' state has changed
+  -->
+  <link expr="depends(@UI:SAVE:MISSION_SELECTED)"
+        action="lua:game:onMissionDBIndexChanged()" />
+  <template name="t_mission_title_changed_observer">
+    <link expr="depends(@#db_path:#index:#attr)"
+          action="lua:game:#handler(#index)" />
+  </template>
+  <vector template="t_mission_title_changed_observer"
+          _size="%ipj_nb_mission"
+          index="$i"
+          db_path="SERVER:MISSIONS"
+          attr="TITLE"
+          handler="onMissionTitleChanged" />
+  <vector template="t_mission_title_changed_observer"
+          _size="%ipj_nb_mission"
+          index="$i"
+          db_path="SERVER:GROUP:MISSIONS"
+          attr="TITLE"
+          handler="onGroupMissionTitleChanged" />
+  <vector template="t_mission_title_changed_observer"
+          _size="%ipj_nb_mission"
+          index="$i"
+          db_path="SERVER:MISSIONS"
+          attr="FINISHED"
+          handler="onMissionFinished" />
+  <vector template="t_mission_title_changed_observer"
+          _size="%ipj_nb_mission"
+          index="$i"
+          db_path="SERVER:GROUP:MISSIONS"
+          attr="FINISHED"
+          handler="onGroupMissionFinished" />
+  <group type="menu"
+         id="mission_journal_menu"
+         extends="base_menu_with_color">
+    <action id="caption_toggle"
+            name="uiCaptionToggle"
+            handler="lua:game:toggleMissionJournalCaption()" />
+  </group>
+  <!-- Main container : info_player_journal -->
+  <group type="container"
+         id="info_player_journal"
+         w="280"
+         h="182"
+         title="uiJournalTitle"
+         global_color="false"
+         opened="true"
+         openable="false"
+         header_color="UI:SAVE:WIN:COLORS:PLA"
+         resizer="true"
+         pop_min_w="292"
+         pop_min_h="152"
+         pop_max_w="800"
+         pop_max_h="800"
+         movable="true"
+         active="false"
+         on_active="proc"
+         on_active_params="mission_proc_active"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:MISSIONS|value=0">
+
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:mission_journal_menu">
+           </group>
+    <group id="no_available_missions"
+           x="0"
+           y="0"
+           sizeref="wh"
+           w="0"
+           h="0"
+           posref="TL TL"
+           active="false"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:mission_journal_menu">
+      <group id="main"
+             sizeref="w"
+             w="-16"
+             posref="MM MM"
+             child_resize_h="true">
+        <view type="text"
+              id="text"
+              global_color="true"
+              fontsize="14"
+              shadow="true"
+              hardtext="uiNoAvailableMissions"
+              multi_line="true"
+              continuous_update="true"
+              posref="TL TL" />
+        <group id="separator"
+               posref="BL TL"
+               posparent="text"
+               sizeparent="parent"
+               sizeref="w"
+               w="0"
+               h="8"
+               x="0"
+               y="0">
+          <view type="bitmap"
+                id="sep_lef"
+                posref="TL TL"
+                texture="Skin_Sep_L.tga"
+                inherit_gc_alpha="false" />
+          <view type="bitmap"
+                id="sep_mid"
+                posref="MM MM"
+                scale="true"
+                sizeref="w"
+                w="-16"
+                h="4"
+                texture="Skin_Sep_M.tga"
+                inherit_gc_alpha="false" />
+          <view type="bitmap"
+                id="sep_rig"
+                posref="TR TR"
+                texture="Skin_Sep_R.tga"
+                inherit_gc_alpha="false" />
+        </group>
+        <view type="text"
+              id="mission_fixed_entry"
+              active="true"
+              y="-2"
+              posref="BL TL"
+              posparent="separator"
+              fontsize="10"
+              hardtext="fixed entry"
+              over_extend_view_text="true"
+              auto_clamp="true" />
+      </group>
+    </group>
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:mission_journal_menu">
+      <group id="mission_combo"
+             type="group_wheel"
+             posref="TL TL"
+             x="0"
+             y="-6"
+             sizeref="w"
+             w="-21"
+             h="20"
+             on_wheel_up="lua"
+             on_wheel_up_params="game:onMissionComboWheelUp()"
+             on_wheel_down="lua"
+             on_wheel_down_params="game:onMissionComboWheelDown()">
+        <!-- DECORATION -->
+        <instance template="box_widget"
+                  id="back"
+                  sizeref="wh"
+                  w="0"
+                  h="0" />
+        <view type="bitmap"
+              active="false"
+              id="arrow"
+              posref="MR MR"
+              x="-2"
+              texture="W_arrow_down_0.tga" />
+        <view type="bitmap"
+              active="false"
+              id="mission_ico"
+              posref="ML ML"
+              x="1"
+              y="0"
+              texture="Small_Task_Generic.tga"
+              global_color="false"
+              inherit_gc_alpha="false" />
+        <view type="text_id"
+              active="false"
+              id="mission_title"
+              posparent="mission_ico"
+              x="4"
+              y="0"
+              posref="MR ML"
+              fontsize="10"
+              textid="SERVER:MISSIONS:0:TITLE"
+              over_extend_view_text="true"
+              auto_clamp="true"
+              auto_clamp_offset="16" />
+        <ctrl type="button"
+              active="false"
+              button_type="push_button"
+              id="select"
+              sizeref="wh"
+              w="0"
+              h="0"
+              col_over="255 255 255 90"
+              tx_over="blank.tga"
+              scale="true"
+              onclick_l="lua:game:popMissionList()"
+              tooltip="uittMissionCombo" />
+        <view type="text"
+              id="no_selected_mission"
+              active="false"
+              x="4"
+              y="0"
+              posref="ML ML"
+              fontsize="10"
+              hardtext="uiClickToSelectAMission" />
+        <view type="text"
+              id="no_available_mission"
+              active="true"
+              x="4"
+              y="0"
+              posref="ML ML"
+              fontsize="10"
+              hardtext="uiNoAvailableMission" />
+      </group>
+      <group id="mission_list"
+             w="-32"
+             active="false"
+             posref="TL TL"
+             x="12"
+             y="-8"
+             sizeref="w"
+             child_resize_h="true"
+             child_resize_hmargin="2"
+             max_sizeref="wh5"
+             max_w="-12"
+             max_h="-42">
+        <vector template="t_mission_title"
+                _size="%ipj_nb_mission"
+                _firstpos="TL TL"
+                _nextpos="BL TL"
+                _xfirst="0"
+                id="title$i"
+                stepindex="$i"
+                tooltip="uittMissionJournal" />
+        <vector template="t_group_mission_title"
+                posparent="%ipj_last_title"
+                _size="%ipj_nb_group_mission"
+                _firstpos="BL TL"
+                _nextpos="BL TL"
+                _xfirst="0"
+                id="group_title$i"
+                stepindex="$i"
+                tooltip="uittMissionJournal" />
+        <view type="text"
+              id="no_selected_mission"
+              active="false"
+              x="4"
+              y="0"
+              posref="ML ML"
+              fontsize="10"
+              hardtext="uiClickToSelectAMission" />
+        <view type="text"
+              id="no_available_mission"
+              active="true"
+              x="4"
+              y="0"
+              posref="ML ML"
+              fontsize="10"
+              hardtext="uiNoAvailableMission" />
+      </group>
+      <ctrl style="skin_scroll"
+            id="sv"
+            posref="TL TL"
+            x="0"
+            y="-8"
+            target="mission_list"
+            target_stepy="18" />
+      <ctrl type="button"
+            active="true"
+            button_type="push_button"
+            id="expand_mission_list"
+            w="20"
+            h="16"
+            scale="false"
+            color="192 192 192 255"
+            tx_normal="Switch_Ratio.tga"
+            col_over="255 255 255 225"
+            tx_over="Switch_Ratio.tga"
+            col_pushed="192 192 192 255"
+            tx_pushed="Switch_Ratio.tga"
+            posref="TR TR"
+            x="2"
+            y="-10"
+            tooltip="uittExpandMissionList"
+            onclick_l="lua:game:expandMissionList()" />
+      <group id="fake"
+             posref="TL TL"
+             x="0"
+             y="-8"
+             sizeref="wh5"
+             w="0"
+             h="-42"></group>
+      <!--
+                <group id="fake" posref="TL TL" x="0" y="-4" h="0">
+                </group>
+                -->
+      <group id="separator_bis"
+             posref="BL TL"
+             posparent="fake"
+             sizeparent="parent"
+             sizeref="w"
+             w="0"
+             h="8"
+             x="0"
+             y="0">
+        <view type="bitmap"
+              id="sep_lef"
+              posref="TL TL"
+              texture="Skin_Sep_L.tga"
+              inherit_gc_alpha="false" />
+        <view type="bitmap"
+              id="sep_mid"
+              posref="MM MM"
+              scale="true"
+              sizeref="w"
+              w="-16"
+              h="4"
+              texture="Skin_Sep_M.tga"
+              inherit_gc_alpha="false" />
+        <view type="bitmap"
+              id="sep_rig"
+              posref="TR TR"
+              texture="Skin_Sep_R.tga"
+              inherit_gc_alpha="false" />
+      </group>
+      <view type="text"
+            id="mission_fixed_entry"
+            posparent="separator_bis"
+            active="false"
+            y="-2"
+            posref="BL TL"
+            fontsize="10"
+            hardtext="bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"
+            over_extend_view_text="true"
+            auto_clamp="true" />
+      <group id="separator"
+             posref="BL TL"
+             posparent="mission_fixed_entry"
+             sizeparent="parent"
+             sizeref="w"
+             w="0"
+             h="8"
+             x="0"
+             y="0">
+        <view type="bitmap"
+              id="sep_lef"
+              posref="TL TL"
+              texture="Skin_Sep_L.tga"
+              inherit_gc_alpha="false" />
+        <view type="bitmap"
+              id="sep_mid"
+              posref="MM MM"
+              scale="true"
+              sizeref="w"
+              w="-16"
+              h="4"
+              texture="Skin_Sep_M.tga"
+              inherit_gc_alpha="false" />
+        <view type="bitmap"
+              id="sep_rig"
+              posref="TR TR"
+              texture="Skin_Sep_R.tga"
+              inherit_gc_alpha="false" />
+      </group>
+      <group id="desc"
+             posref="BL TL"
+             posparent="separator"
+             x="12"
+             y="0"
+             sizeparent="parent"
+             max_sizeref="wh5"
+             max_w="0"
+             max_h="18"
+             sizeref="w"
+             w="-12"
+             child_resize_h="true"
+             child_resize_hmargin="4"
+             h="0">
+        <group id="uppart"
+               x="0"
+               y="-4"
+               sizeref="w"
+               w="0"
+               h="0"
+               child_resize_h="true"
+               posref="TL TL">
+          <ctrl type="sheet"
+                id="icon"
+                nature="mission"
+                posref="TL TL"
+                x="0"
+                y="0"
+                value="SERVER:MISSIONS:0"
+                global_color="false" />
+          <view type="bitmap"
+                id="over_icon"
+                render_layer="1"
+                posref="MM MM"
+                x="0"
+                y="0"
+                posparent="icon"
+                texture="blank2.tga"
+                global_color="false"
+                color="255 255 255 255" />
+          <view type="text_id"
+                id="logic"
+                posref="TL TL"
+                x="44"
+                y="0"
+                textid="SERVER:MISSIONS:0:DETAIL_TEXT"
+                multi_line="true"
+                multi_line_space="0"
+                fontsize="10" />
+        </group>
+        <group id="timer"
+               posparent="uppart"
+               posref="BL TL"
+               x="5"
+               y="-5"
+               child_resize_h="true"
+               child_resize_w="true">
+          <view type="bar"
+                id="b"
+                ultra_mini="true"
+                posref="TL TL"
+                color="255 255 255 255"
+                value="UI:VARIABLES:CURRENT_SERVER_TICK"
+                range="SERVER:MISSIONS:0:END_DATE"
+                reference="SERVER:MISSIONS:0:BEGIN_DATE" />
+          <view type="text"
+                id="t"
+                posparent="b"
+                posref="TR TL"
+                x="4"
+                color="255 255 255 255"
+                fontsize="8"
+                shadow="true"
+                hardtext="" />
+        </group>
+        <view type="bitmap"
+              id="bottom_sizer"
+              posparent="uppart"
+              posref="BL TL"
+              x="0"
+              y="-20"
+              texture="blank.tga"
+              color="0 0 0 0"
+              scale="false"
+              global_color="false" />
+        <view type="bitmap"
+              id="mid_sep"
+              posref="BL BL"
+              y="4"
+              posparent="bottom_sizer"
+              sizeparent="parent"
+              scale="true"
+              sizeref="w"
+              w="0"
+              h="2"
+              texture="W_line_hor.tga" />
+        <!-- old to recent -->
+        <!--
+                        <vector template="t_mission_histo" posparent="bottom_sizer" _size="%ipj_nb_histo" _firstpos="BL TL" _nextpos="BL TL" _xfirst="0" id="histo$i" stepindex="$i" />
+                        <vector template="t_mission_step" posparent="%ipj_last_histo" _size="%ipj_nb_goal" _firstpos="BL TL" _nextpos="BL TL" _xfirst="0" id="step$i" stepindex="$i" />
+                        -->
+        <!-- recent to old -->
+        <vector template="t_mission_step"
+                posparent="bottom_sizer"
+                _firstindex="%ipj_nb_goal_minus_one"
+                _size="%ipj_nb_goal"
+                _step="-1"
+                _firstpos="BL TL"
+                _nextpos="BL TL"
+                _xfirst="0"
+                id="step$i"
+                stepindex="$i" />
+        <vector template="t_mission_histo"
+                posparent="%ipj_last_step"
+                _firstindex="%ipj_nb_histo_minus_one"
+                _size="%ipj_nb_histo"
+                _step="-1"
+                _firstpos="BL TL"
+                _nextpos="BL TL"
+                _xfirst="0"
+                id="histo$i"
+                stepindex="$i" />
+        <ctrl style="text_button_16"
+              id="close"
+              posparent="mid_sep"
+              posref="TR BR"
+              x="0"
+              y="2"
+              hardtext="uittMissionAbandon"
+              onclick_l="mission_abandon"
+              params_l="0"
+              global_color="true" />
+        <ctrl style="text_button_16"
+              id="wake"
+              posparent="close"
+              posref="BL BR"
+              x="-5"
+              y="0"
+              hardtext="uittMissionWake"
+              onclick_l="mission_wake"
+              params_l="0"
+              global_color="true" />
+      </group>
+      <ctrl style="skin_scroll"
+            id="sv_desc"
+            posparent="separator"
+            posref="BL TL"
+            x="0"
+            y="2"
+            target="desc" />
+      <link expr="ne(@UI:SAVE:MISSION_SELECTED,-1)"
+            target="desc:active" />
+      <link expr="depends(@SERVER:MISSIONS,@SERVER:GROUP:MISSIONS)"
+            action="set"
+            params="dblink=UI:TEMP:MISSION_ABANDON_BUTTON|value=1" />
+      <link expr="depends(@SERVER:MISSIONS,@SERVER:GROUP:MISSIONS)"
+            action="set"
+            params="dblink=UI:TEMP:MISSION_WAKE_BUTTON|value=1" />
+      <link expr="depends(@SERVER:MISSIONS,@SERVER:GROUP:MISSIONS)"
+            action="mission_choose_next_valid" />
+    </group>
+  </group>
+  <tree node="info_player_journal" />
+  <!-- update ui when one goes from start island to mainland -->
+  <link expr="depends(@SERVER:USER:IS_NEWBIE)"
+        action="lua:game:onMissionJournalOpened()" />
+  <link expr="depends(@SERVER:USER:IS_TRIAL)"
+        action="lua:game:onMissionJournalOpened()" />
+  <!--***********************-->
+  <!--*   POPUP  MESSAGES   *-->
+  <!--***********************-->
+  <define id="popup_pos_y"
+          value="80" />
+  <define id="popup_pos_y_center"
+          value="150" />
+  <!-- Message popup -->
+  <template name="message_popup"
+            keep="true"
+            posparent="parent"
+            posref="BM BM"
+            h="16"
+            id="">
+    <group id="#id"
+           h="#h"
+           child_resize_w="true"
+           posparent="#posparent"
+           posref="#posref"
+           win_priority="%win_priority_highest"
+           use_cursor="false">
+      <!-- do not change id (used for setting right skill name) -->
+      <view type="text"
+            id="name"
+            fontsize="10"
+            posref="TL TL"
+            shadow="true"
+            global_color="false"
+            line_maxw="1000" />
+      <!-- Delta -->
+      <!--<view type="text" id="delta" posparent="name" posref="TR TL" x="30" global_color="false" fontsize="10" shadow="true" color="255 0 0 255"/>-->
+    </group>
+  </template>
+  <!-- Message popup center -->
+  <template name="message_popup_center"
+            keep="true"
+            posparent="parent"
+            posref="BM BM"
+            id="">
+    <group id="#id"
+           child_resize_h="true"
+           sizeref="w"
+           w="-50"
+           posparent="#posparent"
+           posref="#posref"
+           win_priority="%win_priority_highest"
+           use_cursor="false">
+      <!-- do not change id (used for setting right skill name) -->
+      <view type="text"
+            id="name"
+            fontsize="16"
+            posref="TM TM"
+            shadow="true"
+            global_color="false"
+            line_maxw="1000"
+            multi_line="true"
+            justification="clip_word" />
+    </group>
+  </template>
+  <!-- Skill popup -->
+  <template name="skill_popup"
+            keep="true"
+            posparent="parent"
+            posref="BM BM"
+            h="16"
+            id=""
+            skillid="">
+    <group id="#id"
+           h="#h"
+           child_resize_w="true"
+           posparent="#posparent"
+           posref="#posref"
+           win_priority="%win_priority_highest"
+           use_cursor="false">
+      <!-- do not change id (used for setting right skill name) -->
+      <view type="text"
+            id="name"
+            fontsize="10"
+            posref="TL TL"
+            shadow="true"
+            global_color="false" />
+      <!-- Show Value of the skill and the Max_Skill. Do not change id -->
+      <view type="text"
+            id="lvl"
+            posparent="name"
+            posref="TR TL"
+            x="10"
+            fontsize="10"
+            shadow="true"
+            global_color="false" />
+      <view type="text"
+            id="sep"
+            posparent="lvl"
+            posref="TR TL"
+            x="10"
+            fontsize="10"
+            shadow="true"
+            hardtext="/"
+            global_color="false" />
+      <view type="text"
+            id="max"
+            posparent="sep"
+            posref="TR TL"
+            x="10"
+            fontsize="10"
+            shadow="true"
+            global_color="false" />
+      <!-- Delta -->
+      <view type="text"
+            id="delta"
+            posparent="max"
+            posref="TR TL"
+            x="30"
+            global_color="false"
+            fontsize="10"
+            shadow="true"
+            color="255 0 0 255" />
+    </group>
+  </template>
+  <!--***********************-->
+  <!--*     NPC WEB PAGE    *-->
+  <!--***********************-->
+  <group type="container"
+         id="npc_web_browser"
+         w="800"
+         h="600"
+         title="???"
+         global_color="false"
+         header_color="UI:SAVE:WIN:COLORS:HELP"
+         resizer="true"
+         pop_min_w="500"
+         pop_min_h="400"
+         pop_max_w="2000"
+         pop_max_h="1600"
+         title_bar_open="false"
+         open_button="false"
+         lockable="true"
+         openable="false"
+         opened="true"
+         movable="true"
+         active="false"
+         localize="false"
+         active_savable="false">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           h="12"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+           </group>
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="0"
+           h="16"
+           posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color">
+      <!-- must be frozen by default cause no undo/redo at start -->
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_redo"
+            posref="MR MR"
+            x="-16"
+            y="0"
+            hardtext="uiBrowseRedoButton"
+            tooltip="uittBrowseRedo"
+            onclick_l="browse_redo"
+            params_l="name=ui:interface:npc_web_browser:content:html"
+            frozen="true" />
+      <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_undo"
+            posparent="browse_redo"
+            posref="ML MR"
+            x="-4"
+            y="0"
+            hardtext="uiBrowseUndoButton"
+            tooltip="uittBrowseUndo"
+            onclick_l="browse_undo"
+            params_l="name=ui:interface:npc_web_browser:content:html"
+            frozen="true" />
+      <ctrl style="text_button_header"
+            active="false"
+            id="browse_filter"
+            x="-16"
+            y="0"
+            posref="ML MR"
+            posparent="browse_undo"
+            text_y="-2"
+            onclick_l="lua"
+            params_l="game.RingAccessPointFilter:open()"
+            hardtext="uiRingAccessPointFilter"
+            fontsize="10" />
+      <ctrl style="text_button_header"
+            active="false"
+            id="browse_refresh"
+            x="-4"
+            y="0"
+            posref="ML MR"
+            posparent="browse_filter"
+            text_y="-2"
+            onclick_l="lua"
+            params_l="game.RingAccessPointFilter:validate()"
+            hardtext="uiBotChatRefresh"
+            fontsize="10" />
+    </group>
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL">
+      <group type="webig_html"
+             id="html"
+             posref="TL TL"
+             posparent="parent"
+             url="home"
+             title_prefix=""
+             sizeref="wh"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="100 255 100 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="10"
+             paragraph_begin_space="1"
+             multi_line_space_factor="0.25"
+             td_begin_space="16"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="0"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             home=""
+             browse_next_time="true"
+             form_text_area_group="edit_box_widget_multiline"
+             browse_undo="ui:interface:npc_web_browser:header_opened:browse_undo"
+             browse_redo="ui:interface:npc_web_browser:header_opened:browse_redo"
+             lua_class="game:initNpcWebPage()">
+        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-12"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+      </group>
+    </group>
+  </group>
+  <tree node="npc_web_browser" />
+</interface_config>

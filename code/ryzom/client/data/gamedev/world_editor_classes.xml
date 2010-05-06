@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<NEL_LIGO_PRIMITIVE_CLASS>
+
+	<!-- **** CONFIG FOR RYZOM **** -->
+
+	<!-- Root primitive -->
+	<PRIMITIVE CLASS_NAME="root" TYPE="node" AUTO_INIT="true" DELETABLE="true">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
+		</PARAMETER>
+		<!--<DYNAMIC_CHILD CLASS_NAME="test"/>-->		
+		<DYNAMIC_CHILD CLASS_NAME="micro_life"/>		
+	</PRIMITIVE>
+
+	<!-- Micro life group -->
+	<PRIMITIVE CLASS_NAME="micro_life" TYPE="node" R="0" G="64" B="158" A="128" AUTO_INIT="false" DELETABLE="true">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
+		</PARAMETER>
+		<PARAMETER NAME="form" TYPE="string" VISIBLE="true">
+		</PARAMETER>		
+		<DYNAMIC_CHILD CLASS_NAME="micro_life_zone"/>				
+	</PRIMITIVE>
+	<!-- Micro life zone -->
+	<PRIMITIVE CLASS_NAME="micro_life_zone" TYPE="zone" R="0" G="64" B="158" A="128" AUTO_INIT="false" DELETABLE="true">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
+		</PARAMETER>
+		<DYNAMIC_CHILD CLASS_NAME="micro_life_exclude_zone"/>
+	</PRIMITIVE>
+	<!-- Micro life Exclude -->
+	<PRIMITIVE CLASS_NAME="micro_life_exclude_zone" TYPE="zone" R="72" G="64" B="36" A="64">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
+		</PARAMETER>
+	</PRIMITIVE>
+	
+</NEL_LIGO_PRIMITIVE_CLASS>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="name" Type="Type" Filename="filename.typ" FilenameExt="*.sitem"/>
+  <ELEMENT Name="quantity" Type="Type" Filename="float.typ" Default="0"/>
+  <LOG>Fri Sep 23 11:03:47 2005 (besson) Dfn Structure = </LOG>
+</DFN>

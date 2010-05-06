@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.4 $" State="modified">
+  <ELEMENT Name="type" Type="Type" Filename="outpost_building_type.typ" Default="Empty"/>
+  <ELEMENT Name="can_be_destroyed_or_built" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="name_when_constructing" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="shape" Type="Type" Filename="filename.typ" FilenameExt="*.creature"/>
+  <ELEMENT Name="shape_when_constructing" Type="Type" Filename="filename.typ" FilenameExt="*.creature"/>
+  <ELEMENT Name="cost_dapper" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="cost_time" Type="Type" Filename="int.typ" Default="0"/>
+  <ELEMENT Name="icon" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon background" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="icon overlay" Type="Type" Filename="filename.typ" FilenameExt="*.tga"/>
+  <ELEMENT Name="text overlay" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="upgrade" Type="Type" Filename="filename.typ" FilenameExt="*.outpost_building" Array="true"/>
+  <ELEMENT Name="driller" Type="Dfn" Filename="_outpost_building_driller.dfn"/>
+  <LOG>Tue Sep 20 18:14:55 2005 (besson) Dfn Structure = 
+Wed Sep 21 09:01:13 2005 (besson) Dfn Structure = 
+Wed Sep 21 09:41:46 2005 (besson) Dfn Structure = 
+Wed Sep 21 09:46:22 2005 (besson) Dfn Structure = 
+Wed Sep 21 09:51:52 2005 (besson) Dfn Structure = 
+Fri Sep 23 10:43:48 2005 (besson) Dfn Structure = 
+Fri Sep 23 11:05:09 2005 (besson) Dfn Structure = 
+Thu Sep 29 11:27:27 2005 (besson) Dfn Structure = 
+Mon Oct 03 18:45:35 2005 (besson) Dfn Structure = 
+Wed Oct 05 15:45:15 2005 (besson) Dfn Structure = 
+Thu Oct 06 11:50:18 2005 (besson) Dfn Structure = </LOG>
+</DFN>

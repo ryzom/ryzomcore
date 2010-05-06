@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<Imageset Name="OgreGuiImagery" Imagefile="./datafiles/imagesets/ogregui.tga" NativeHorzRes="800" NativeVertRes="600" AutoScaled="true">
+	<Image Name="OgreLogo" XPos="5" YPos="93" Width="244" Height="81" />
+	<Image Name="CeguiLogo" XPos="94" YPos="2" Width="152" Height="77" />
+	<Image Name="Bar" XPos="59" YPos="2" Width="10" Height="3" />
+	<Image Name="BoxTopLeft" XPos="2" YPos="2" Width="12" Height="15" />
+	<Image Name="BoxTopRight" XPos="40" YPos="2" Width="13" Height="15" />
+	<Image Name="BoxBottomLeft" XPos="2" YPos="43" Width="12" Height="15" />
+	<Image Name="BoxBottomRight" XPos="40" YPos="43" Width="13" Height="15" />
+	<Image Name="BoxLeft" XPos="2" YPos="23" Width="12" Height="14" />
+	<Image Name="BoxRight" XPos="40" YPos="23" Width="13" Height="14" />
+	<Image Name="BoxTop" XPos="20" YPos="2" Width="14" Height="15" />
+	<Image Name="BoxBottom" XPos="20" YPos="43" Width="14" Height="15" />
+	<Image Name="BoxBack" XPos="24" YPos="27" Width="6" Height="6" />
+</Imageset>
+

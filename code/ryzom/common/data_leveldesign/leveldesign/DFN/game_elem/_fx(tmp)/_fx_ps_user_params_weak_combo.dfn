@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="User Param 0" Type="Type" Filename="_fx_user_param.typ" Default="0.8"/>
+  <ELEMENT Name="User Param 1" Type="Type" Filename="_fx_user_param.typ" Default="0.8"/>
+  <ELEMENT Name="User Param 2" Type="Type" Filename="_fx_user_param.typ" Default="0.8"/>
+  <ELEMENT Name="User Param 3" Type="Type" Filename="_fx_user_param.typ" Default="0.8"/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:22 2002 (corvazier) File converted from old format
+Thu Aug 01 18:12:44 2002 (puzin) Dfn Structure = 
+Thu Aug 01 18:14:10 2002 (puzin) Dfn Structure = 
+Thu Aug 01 18:17:02 2002 (puzin) Dfn Structure = 
+Thu Aug 01 18:18:46 2002 (puzin) Dfn Structure = 
+Tue Aug 06 16:28:58 2002 (puzin) Dfn Structure = 
+Tue Aug 06 17:57:01 2002 (puzin) Dfn Structure = 
+Wed Aug 07 14:06:49 2002 (puzin) Dfn Structure = 
+Wed Aug 07 15:48:14 2002 (puzin) Dfn Structure = 
+Mon Sep 23 19:12:47 2002 (puzin) Dfn Structure = 
+Mon Sep 23 19:14:36 2002 (puzin) Dfn Structure = 
+Mon Sep 23 19:28:32 2002 (puzin) Dfn Structure = </LOG>
+</DFN>

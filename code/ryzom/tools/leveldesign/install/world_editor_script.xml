@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<NEL_WORLD_EDITOR_CONFIG>
+
+	<!-- **** CONFIG FOR RYZOM **** -->
+	<!-- Search pathes -->
+	<SEARCH_PATH PATH="l:/leveldesign/world_editor_files"/>
+	<SEARCH_PATH PATH="l:/primitives/" NO_RECURSE="true"/>
+	<SEARCH_PATH PATH="l:/leveldesign/game_elem/creature"/>
+	<SEARCH_PATH PATH="l:/leveldesign/game_elem/plant"/>
+	<SEARCH_PATH PATH="l:/leveldesign/game_elem/items/harvest/"/>
+	<SEARCH_PATH PATH="l:/leveldesign/dfn"/>
+	<SEARCH_PATH PATH="l:/leveldesign/game_elem/mission/"/>
+
+	<SEARCH_PATH PATH="continents"/>
+
+	<!-- Html help file for node class -->
+	<DOC_PATH PATH="l:/leveldesign/world_editor_files/class_doc"/>
+
+</NEL_WORLD_EDITOR_CONFIG>

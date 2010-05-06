@@ -1,0 +1,84 @@
+<!-- *************** -->
+<!-- Ingame commands -->
+<!-- *************** -->
+
+<interface_config>
+
+	<command name="tell" action="enter_tell" params="player=$" />
+	<command name="t" action="enter_tell" params="player=$" />
+
+	<command name="tell" action="tell" params="player=$|text=+" ctrlchar="false" />
+	<command name="t" action="tell" params="player=$|text=+" ctrlchar="false" />
+
+	<command name="say" action="enter_talk" params="mode=0" />
+	<command name="s"	action="enter_talk" params="mode=0" />
+
+	<command name="say" action="talk" params="mode=0|text=+" ctrlchar="false" />
+	<command name="s"	action="talk" params="mode=0|text=+" ctrlchar="false" />
+
+	<command name="shout" action="enter_talk" params="mode=1" />
+	<command name="sh" action="enter_talk" params="mode=1" />
+	<command name="yell" action="enter_talk" params="mode=1" />
+	<command name="y" action="enter_talk" params="mode=1" />
+
+	<command name="shout" action="talk" params="mode=1|text=+" ctrlchar="false" />
+	<command name="sh" action="talk" params="mode=1|text=+" ctrlchar="false" />
+	<command name="yell" action="talk" params="mode=1|text=+" ctrlchar="false" />
+	<command name="y" action="talk" params="mode=1|text=+" ctrlchar="false" />
+
+	<command name="team" action="enter_talk" params="mode=2" />
+	<command name="te" action="enter_talk" params="mode=2" />
+	<command name="party" action="enter_talk" params="mode=2" />
+	<command name="p" action="enter_talk" params="mode=2" />
+
+	<command name="team" action="talk" params="mode=2|text=+" ctrlchar="false" />
+	<command name="te" action="talk" params="mode=2|text=+" ctrlchar="false" />
+	<command name="party" action="talk" params="mode=2|text=+" ctrlchar="false" />
+	<command name="p" action="talk" params="mode=2|text=+" ctrlchar="false" />
+
+	<command name="universe" action="enter_talk" params="mode=6" />
+	<command name="u" action="enter_talk" params="mode=6" />
+
+	<command name="universe" action="talk" params="mode=6|text=+" ctrlchar="false" />
+	<command name="u" action="talk" params="mode=6|text=+" ctrlchar="false" />
+
+	<command name="region" action="enter_talk" params="mode=11" />
+	<command name="re" action="enter_talk" params="mode=11" />
+	<command name="r" action="enter_talk" params="mode=11" />
+
+	<command name="region" action="talk" params="mode=11|text=+" ctrlchar="false" />
+	<command name="re" action="talk" params="mode=11|text=+" ctrlchar="false" />
+	<command name="r" action="talk" params="mode=11|text=+" ctrlchar="false" />
+
+	<command name="guild" action="enter_talk" params="mode=3" />
+	<command name="gu" action="enter_talk" params="mode=3" />
+	<command name="g" action="enter_talk" params="mode=3" />
+
+	<command name="guild" action="talk" params="mode=3|text=+" ctrlchar="false" />
+	<command name="gu" action="talk" params="mode=3|text=+" ctrlchar="false" />
+	<command name="g" action="talk" params="mode=3|text=+" ctrlchar="false" />
+
+	<command name="self" action="self_target" params="" />
+
+	<command name="target" action="target" params="entity=$" />
+	<command name="tar" action="target" params="entity=$" />
+
+	<command name="target" action="no_target" params="" />
+	<command name="tar" action="no_target" params="" />
+
+	<command name="assist" action="assist_target" params="" />
+	<command name="as" action="assist_target" params="" />
+
+	<command name="assist" action="assist" params="entity=$" />
+	<command name="as" action="assist" params="entity=$" />
+
+	<command name="chat" action="swap_chat_mode" params="update_capture=1" />
+	<!-- NB: cannot put /c because of internal command) -->
+
+	<command name="guildinvite" action="command" params="a guildInvite $" />
+	<command name="invite" action="command" params="a teamInvite $" />
+
+	<!-- WebIG -->
+	<command name="go" action="browse" params="name=ui:interface:webig:content:html|url=home"/>
+
+</interface_config>

@@ -1,0 +1,697 @@
+<interface_config>
+
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+
+<!-- ecosystem template -->
+<template name="ecosystem_template" keep="true" id="" h="0" x="0" y="0" 
+ posparent="" posref="" w="0" params_l="" hardtext="" wmin="160" tx_ecosystem="" tx_ecosystem_pushed="" 
+ text_color="" col_over="" tooltip="" >	
+
+	<group id="#id" sizeref="w" y="#y" x="#x" w="#w" h="#h" posparent="#posparent" posref="#posref" 
+	 child_resize_h="true" child_resize_hmargin="0" >
+
+		<ctrl type="text_button" button_type="toggle_button" id="eco_button" x="10" y="0" posref="TL TL" 
+		 text_y="-2" onclick_l="lua" params_l="#params_l" hardtext="#hardtext" wmin="#wmin" 
+		 tx_normal="#tx_ecosystem" tx_pushed="#tx_ecosystem_pushed" tx_over="#tx_ecosystem"
+		 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+		 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		 text_color_normal="#text_color" text_color_pushed="#text_color" text_color_over="#text_color"
+		 color="255 255 255 255" col_over="#col_over" over_when_pushed="false"
+		 tooltip="#tooltip"
+		/>
+
+		<group id="two_lists" active="true" posparent="eco_button" posref="BL TL" x="0" y="-8" sizeparent="eco_button" sizeref="w" w="0" h="0" child_resize_h="true" child_resize_hmargin="1">
+	
+			<group id="islands_list1" type="list" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="w5h" w="0" h="0" >
+		
+			</group>
+
+			<group id="islands_list2" type="list" posparent="parent" posref="TR TR" x="0" y="0" sizeparent="parent" sizeref="w5h" w="0" h="0" >
+		
+			</group>
+
+		</group>
+
+	</group>
+</template>
+
+<template name="template_line" id="" h="" >
+
+	<group id="#id" type="list" addelt="R" align="L" posparent="parent" posref="TL TL" sizeref="w" 
+	 w="0" h="#h" x="0" y="0" >			
+		
+	</group>
+
+</template>
+
+<template name="template_lines" id="" posref="TL TL" >
+
+	<group id="#id" type="list" posparent="parent" posref="TL TL" sizeref="w" w="0" h="500" child_resize_h="true" 
+	 child_resize_hmargin="1"   >	
+
+	</group>
+
+</template>
+
+<template name="act_button_template" keep="true" id="" active="true" h="" w="0" posparent="" posref="" sizeref="w"
+ h_button="" w_button="" x_button="" y_button="" x="0" y="0"
+ h_button_texture="" w_button_texture="" x_button_texture="" y_button_texture="" icon="" 
+ tooltip="" scale="" scale_over="true" color="0 0 0 255" selected_color="255 0 0 255" col_over="" 
+ group_params_l="" params_l="" over_active="true" back_texture="blank.tga" back_color="0 0 0 255" >	
+
+	<group id="#id" y="#y" x="#x" sizeref="#sizeref" h="#h" w="#w" posparent="#posparent" posref="#posref" >
+		
+		<group id="button" active="#active" sizeref="wh" x="#x_button" y="#y_button" posref="TL TL" posparent="parent"
+		 w="#w_button" h="#h_button" group_onclick_l="lua" group_params_l="#group_params_l" >	
+
+			<view type="bitmap" id="bl" w="8" h="8" posref="BL BL" texture="r2ed_island_corner.tga" rot="3" color="#color" global_color="false" />
+			<view type="bitmap" id="tl" w="8" h="8" posref="TL TL" texture="r2ed_island_corner.tga" rot="0" color="#color" global_color="false" />
+			<view type="bitmap" id="tr" w="8" h="8" posref="TR TR" texture="r2ed_island_corner.tga" rot="1" color="#color" global_color="false" />
+			<view type="bitmap" id="br" w="8" h="8" posref="BR BR" texture="r2ed_island_corner.tga" rot="2" color="#color" global_color="false" />
+
+			<view type="bitmap" id="bg" x="6" y="-6" sizeref="wh" w="-12" h="-12" scale="true" tile="true" posparent="parent" posref="TL TL" texture="#back_texture" color="#back_color" global_color="false" />	
+
+			<view type="bitmap" id="bottom" posparent="parent" posref="BL BL" sizeparent="parent" x="8" sizeref="w" w="-16" h="8" texture="r2ed_island_border.tga" rot="2" scale="true" color="#color" global_color="false" />						
+			<view type="bitmap" id="top" posref="TL TL" x="8" sizeref="w" w="-16" h="8" texture="r2ed_island_border.tga" rot="0" scale="true" color="#color" global_color="false" />			
+			<view type="bitmap" id="left" posref="BL BL" y="8" sizeref="h" w="8" h="-16" texture="r2ed_island_border.tga" rot="3" scale="true" color="#color" global_color="false" />
+			<view type="bitmap" id="right" posref="BR BR" y="8" sizeref="h" w="8" h="-16" texture="r2ed_island_border.tga" rot="1" scale="true" color="#color" global_color="false" />			
+			
+			<ctrl type="button" id="center_button" button_type="push_button" posref="TL TL" posparent="parent" 
+			 w="#w_button_texture" h="#h_button_texture" x="#x_button_texture" y="#y_button_texture"
+			 tx_normal="#icon" tx_pushed="#icon" tx_over="#icon" tooltip="#tooltip" 
+			 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+			 onclick_l="lua" params_l="#params_l" col_over="#col_over" over_when_pushed="true" scale="#scale"
+		    />
+
+			<ctrl type="button" id="over_center_button" active="#over_active" button_type="push_button" posref="TL TL" posparent="parent" 
+			 x="5" y="-5" sizeref="wh" w="-10" h="-10" 
+			 tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" tooltip="#tooltip" 
+			 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+			 over_when_pushed="true" scale="#scale_over" color="0 0 0 0" col_over="#col_over" col_pushed="#col_over"
+			 onclick_l="lua" params_l="#params_l" />		
+					
+		</group>
+		
+		
+		<group id="selected_button" active="false" sizeref="wh" x="#x_button" y="#y_button" posref="TL TL" posparent="parent"
+		 w="#w_button" h="#h_button" >	
+
+			<view type="bitmap" id="bl" w="6" h="6" posref="BL BL" texture="r2ed_island_corner_select.tga" rot="3" color="#selected_color" global_color="false" />
+			<view type="bitmap" id="tl" w="6" h="6" posref="TL TL" texture="r2ed_island_corner_select.tga" rot="0" color="#selected_color" global_color="false" />
+			<view type="bitmap" id="tr" w="6" h="6" posref="TR TR" texture="r2ed_island_corner_select.tga" rot="1" color="#selected_color" global_color="false" />
+			<view type="bitmap" id="br" w="6" h="6" posref="BR BR" texture="r2ed_island_corner_select.tga" rot="2" color="#selected_color" global_color="false" />
+
+			<view type="bitmap" id="bg" x="6" y="-6" sizeref="wh" w="-12" h="-12" scale="true" tile="true" posparent="parent" posref="TL TL" texture="#back_texture" color="#back_color" global_color="false" />	
+
+			<view type="bitmap" id="bottom" posparent="parent" posref="BL BL" sizeparent="parent" x="6" sizeref="w" w="-12" h="6" texture="r2ed_island_border_select.tga" rot="2" scale="true" color="#selected_color" global_color="false" />						
+			<view type="bitmap" id="top" posref="TL TL" x="6" sizeref="w" w="-12" h="6" texture="r2ed_island_border_select.tga" rot="0" scale="true" color="#selected_color" global_color="false" />			
+			<view type="bitmap" id="left" posref="BL BL" y="6" sizeref="h" w="6" h="-12" texture="r2ed_island_border_select.tga" rot="3" scale="true" color="#selected_color" global_color="false" />
+			<view type="bitmap" id="right" posref="BR BR" y="6" sizeref="h" w="6" h="-12" texture="r2ed_island_border_select.tga" rot="1" scale="true" color="#selected_color" global_color="false" />			
+			
+			<ctrl type="button" id="center_button" button_type="push_button" posref="TL TL" posparent="parent" 
+			 w="#w_button_texture" h="#h_button_texture" x="#x_button_texture" y="#y_button_texture"
+			 tx_normal="#icon" tx_pushed="#icon" tx_over="#icon" tooltip="#tooltip" 
+			 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+			 onclick_l="lua" params_l="" over_when_pushed="false" scale="#scale" col_over="#col_over" />
+			 
+			<ctrl type="button" id="over_center_button" active="#over_active" button_type="push_button" posref="TL TL" posparent="parent" 
+			 x="6" y="-6" sizeref="wh" w="-12" h="-12" 
+			 tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" tooltip="#tooltip" 
+			 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+			 over_when_pushed="true" scale="#scale_over" color="0 0 0 0" col_over="#col_over" col_pushed="#col_over"
+			 onclick_l="lua" params_l="" />		
+					
+		</group>	
+	</group>
+
+</template>
+
+<template name="previous_loc_template" keep="true" id="" active="true" x="0" y="0" h="" w="0" posparent="" posref="" sizeref="w"
+ x_act="" y_act="" h_act="" w_act="" sizeref_act=""
+ h_button="" w_button="" x_button="" y_button="" h_button_texture="" w_button_texture="" x_button_texture="" y_button_texture="" icon="" 
+ tooltip="" scale="" scale_over="true" color="0 0 0 255" selected_color="255 0 0 255" col_over="" 
+ group_params_l="" params_l="" over_active="true" back_texture="blank.tga" back_color="0 0 0 255" 
+ w_text="" x_text="" h_text="" y_text="" >	
+	
+	<group id="#id" y="#y" x="#x" sizeref="#sizeref" h="#h" w="#w" posparent="#posparent" posref="#posref" >
+
+		<instance template="act_button_template" id="act_button" h="#h_act" w="#w_act" posparent="parent" 
+		 posref="TL TL" sizeref="#sizeref_act" x="#x_act" y="#y_act"
+		 h_button="#h_button" w_button="#w_button" x_button="#x_button" y_button="#y_button" 
+		 h_button_texture="#h_button_texture" w_button_texture="#w_button_texture" 
+		 x_button_texture="#x_button_texture" y_button_texture="#y_button_texture" icon="#icon" 
+		 tooltip="#tooltip" scale="#scale" scale_over="#scale_over" 
+		 color="#color" selected_color="#selected_color" col_over="#col_over" 
+		 group_params_l="#group_params_l" params_l="#params_l" over_active="#over_active" 
+		 back_texture="#back_texture" back_color="0#back_color" />
+		 
+		<group id="" x="#x_text" y="#y_text" posparent="act_button" posref="TR TL" sizeparent="parent" sizeref="wh" h="#h_text" w="#w_text" >
+
+			<group id="text_list" posparent="parent" sizeref="wh" w="0" h="" posref="TL TL" x="0" y="0">
+				<group id="crop" posparent="parent" posref="TL TL" x="4" y="-4" sizeref="wh" w="-8" h="-8" />
+
+				<group id="list" posparent="crop" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" 
+				 child_resize_hmargin="1" w="-15" max_sizeparent="crop" max_sizeref="h" max_h="0" >
+			
+					<group type="scroll_text" id="list_txt" sizeref="w" child_resize_h="true" child_resize_wmargin="1" 
+					 child_resize_hmargin="0" posref="TL TL" x="0" y="0">
+
+						<group type="list" id="previous_text" hardtext="" shadow="true" fontsize="12" 
+						 justification="justified" color="255 255 255 160" space="3" 
+						 global_color="true" posref="TL TL" x="0" y="0" sizeref="hw" w="0" h="0" />
+					</group>
+				</group>
+
+				<ctrl style="skin_scroll" id="scroll_previous" align="T" target="list" posparent="crop" posref="TR TR" 
+				 x="-5" y="0" />
+			</group>
+
+			<instance template="inner_thin_border_group" />
+
+			<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+			 scale="true" texture="blank.tga" color="100 0 0 255" />
+			<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="1" 
+			 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+			<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="1" 
+			 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+			<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+			 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+
+		</group>
+
+	</group>
+
+</template>
+
+
+
+<template name="entry_point_template" keep="true" id="" h="0" posparent="" >
+
+	<group id="#id" active="true" sizeref="wh" w="0" h="0" x="0" y="0" posref="TL TL" posparent="#posparent">
+		<ctrl type="button" id="flag" button_type="push_button" posref="TL TL" posparent="parent" 
+		 w="10" h="10" x="0" y="0"
+		 tx_normal="r2ed_entry_point.tga" tx_pushed="r2ed_entry_point_pushed.tga" tx_over="r2ed_entry_point_over.tga" tooltip="" 
+		 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+		 onclick_l="lua" params_l="r2.acts:selectEntryPoint()" over_when_pushed="false" render_layer="1" />	
+	</group>								
+</template>
+
+<template name="image_island_template" keep="true" id="" h="0" w="0" x="0" y="0" espace="" posref="TL TL" posparent="parent"
+ params_l="" >	
+
+	<group id="#id" active="true" w="#w" h="#h" x="#x" y="#y" posref="#posref" posparent="#posparent">
+		<group id="decal" sizeref="wh" h="0" w="-10" x="0" y="0" posref="TL TL" posparent="parent">	
+			<view type="bitmap" id="bl" w="4" h="4" posref="BL BL" texture="r2ed_little_island_corner_select.tga" rot="3" color="255 0 0 255" />
+			<view type="bitmap" id="tl" w="4" h="4" posref="TL TL" texture="r2ed_little_island_corner_select.tga" rot="0" color="255 0 0 255" />
+			<view type="bitmap" id="tr" w="4" h="4" posref="TR TR" texture="r2ed_little_island_corner_select.tga" rot="1" color="255 0 0 255" />
+			<view type="bitmap" id="br" w="4" h="4" posref="BR BR" texture="r2ed_little_island_corner_select.tga" rot="2" color="255 0 0 255" />
+
+			<view type="bitmap" id="bg" x="4" y="-4" sizeref="wh" w="-8" h="-8" scale="true" posparent="parent" posref="TL TL" texture="blank.tga" color="0 0 0 0"/>	
+
+			<view type="bitmap" id="bottom" posparent="parent" posref="BL BL" sizeparent="parent" x="4" sizeref="w" w="-8" h="4" texture="r2ed_little_island_border_select.tga" rot="2" scale="true" color="255 0 0 255" />						
+			<view type="bitmap" id="top" posref="TL TL" x="4" sizeref="w" w="-8" h="4" texture="r2ed_little_island_border_select.tga" rot="0" scale="true" color="255 0 0 255" />			
+			<view type="bitmap" id="left" posref="BL BL" y="4" sizeref="h" w="4" h="-8" texture="r2ed_little_island_border_select.tga" rot="3" scale="true" color="255 0 0 255" />
+			<view type="bitmap" id="right" posref="BR BR" y="4" sizeref="h" w="4" h="-8" texture="r2ed_little_island_border_select.tga" rot="1" scale="true" color="255 0 0 255" />			
+			
+			<ctrl type="button" id="island_bitmap" button_type="push_button" posref="TL TL" posparent="parent" 
+			 w="" h="" x="" y=""
+			 tx_normal="" tx_pushed="" tx_over="" tooltip="" 
+			 global_color="false" global_color_normal="false" global_color_over="false" global_color_pushed="false"
+			 onclick_l="lua" params_l="#params_l" over_when_pushed = "true" col_over="" />
+			 
+		</group>	
+	</group>
+
+</template>
+
+
+<style style="style_ok_act" type="text_button" button_type="push_button" 
+		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="208" wmargin="8"
+		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+		color="255 255 255 128" col_over="255 255 255 0" col_pushed="255 128 0 192"
+		text_y="-2" fontsize="12" shadow="true"
+		text_color_normal="255 255 255 255"
+	    text_color_pushed="255 255 255 255" 
+	    text_color_over="255 255 255 255" 
+	    text_shadow_color_normal="0 0 0 255"
+	    text_shadow_color_pushed="0 0 0 255" 
+	    text_shadow_color_over="0 0 0 255" 
+	    text_global_color_normal="false" 
+	    text_global_color_pushed="false"
+	    text_global_color_over="false" force_text_over="true" />
+
+
+<group id="r2ed_acts" active="true" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" 
+ on_enter="lua" on_enter_params="r2.acts:openPopupName()" >
+
+	<view type="bitmap" id="back" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" texture="Skin_Blank.tga" 
+	 scale="true" tile="true" color="200 200 200 255" />
+			
+	<group id="content" x="0" y="-5" sizeref="wh" w="0" h="-5" posref="TL TL" >
+
+		<!-- PREVIOUS LOCATION -->
+		<group id="previous_location" active="false" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+
+			<group id="previous_location_gr" posparent="parent" posref="TL TL" x="10" y="-5" sizeref="wh" w="-20" h="-15" >
+
+				<ctrl type="text_button" button_type="toggle_button" id="new_previous_title" x="0" y="0" posref="TL TL" 
+				 text_y="-2" hardtext="Choose new or previous location" wmin="170" 
+				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
+				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+				 text_color_normal="255 255 255 255" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+				 color="255 0 0 255" col_over="255 0 0 255" col_pushed="255 0 0 255"
+				 tooltip="uiR2EDTooltipChooseIsland"
+				/>
+
+				<group id="new _previous_island" posparent="parent" posref="TL TL" x="0" y="-23" sizeref="wh" h="-53" w="0" >
+
+					<group id="back_gr" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" >
+						<instance template="inner_thin_border_group" />	
+
+						<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="3" 
+						 scale="true" texture="blank.tga" color="100 0 0 255" />
+						<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="3" 
+						 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+						<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="3" 
+						 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+						<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="3" 
+						 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+						<view type="bitmap" id="back" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+						 y="0" scale="true" texture="blank.tga" color="100 0 0 120" />
+						
+					</group>
+
+					<group id="create_island" posparent="parent" posref="TL TL" x="10" y="-10" sizeref="w" h="160" w="-20" >
+				
+						<instance template="act_button_template" id="new_location_mode_2" sizeref="" h="150" w="150" 
+						 x="8" y="0" posparent="parent" posref="TL TL" tooltip="uiR2EDCreateLocation"
+						 h_button="0" w_button="0" x_button="0" y_button="0" 
+						 h_button_texture="138" w_button_texture="138" 
+						 x_button_texture="6" y_button_texture="-6" icon="r2ed_create_location.tga" 
+						 scale="true" color="255 255 0 255" back_color="255 255 0 255" selected_color="255 255 0 255" col_over="255 200 0 100" 
+						 group_params_l="r2.acts:locationIsland(getUICaller())" params_l="r2.acts:locationIsland()" 
+						 over_active="false" />
+
+					</group>
+
+					<group id="choose_previous_island" posparent="create_island" posref="BL TL" x="0" y="0" sizeparent="parent" sizeref="wh" h="-180" w="-20" >
+				
+						<group id="back_gr" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" >
+							<instance template="inner_thin_border_group" />	
+
+							<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+							 scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="1" 
+							 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="1" 
+							 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+							 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							
+						</group>
+						
+						<group id="crop_previous" posparent="parent" posref="TL TL" x="8" y="-8" 
+						 sizeref="wh" w="-8" h="-16" />
+							
+						<group id="previous_location_list" posparent="crop_previous" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" 
+						 child_resize_hmargin="1" max_sizeparent="crop_previous" max_sizeref="h" max_h="0" >
+					
+							<group id="location_list" type="list" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0" >
+		
+							</group>
+
+						</group>
+
+						<ctrl style="skin_scroll" id="scroll_previous_islands" align="T" target="previous_location_list" posparent="crop_previous" posref="TR TR" 
+						 x="0" y="0" step_value="10" />
+
+					</group>
+				</group>
+
+				<ctrl style="style_ok_act" id="previous_loc_ok" active="true" posparent="parent" posref="BR BR" x="0" y="0" hardtext="uiR2EDValidateForm"
+				 color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+				 wmin="50" onclick_l="lua" params_l="r2.acts:createLocationOrCreateAct()" />
+
+				<ctrl style="style_ok_act" id="previous_loc_cancel" active="true" posparent="previous_loc_ok" posref="BL BR" x="-10" y="0" hardtext="uiR2EDCancelForm"
+				 color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+				 wmin="50" onclick_l="lua" params_l="r2.acts:cancelActCreation()" />
+
+			</group>
+		</group>
+
+		<!-- LOCATION -->
+		<group id="location" active="false" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >
+
+			<group id="choose_island" posparent="parent" posref="TL TL" x="10" y="-5" sizeref="w" w="-20" h="203" >
+
+				<ctrl type="text_button" button_type="toggle_button" id="choose_island_title" x="0" y="0" posref="TL TL" 
+				 text_y="-2" hardtext="Choose island" wmin="170" 
+				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
+				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+				 text_color_normal="255 255 255 255" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+				 color="255 0 0 255" col_over="255 0 0 255" col_pushed="255 0 0 255"
+				 tooltip="uiR2EDTooltipChooseIsland"
+				/>
+
+				<group id="choose_island_gr" posparent="parent" posref="TL TL" x="0" y="-23" sizeref="wh" w="0" h="-23" >
+					
+					<instance template="inner_thin_border_group" />	
+					
+					<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="back" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 120" />
+
+					<group id="choose_ecosystem" posparent="parent" posref="TL TL" x="0" y="0" sizeref="h" w="190" h="0" >
+					
+						<group id="crop" posparent="parent" posref="TL TL" x="0" y="-10" sizeref="wh" w="0" h="-10" />
+								
+						<group id="islands_list_gr" posparent="crop" posref="TL TL" x="0" y="0" sizeref="w" w="0" child_resize_h="true" 
+						 child_resize_hmargin="1" max_sizeparent="crop" max_sizeref="h" max_h="0" >
+					
+							<group id="ecosystem_list" type="list" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0" >
+
+								<instance template="ecosystem_template" id="r2_desert" posparent="parent" posref="TL TL" x="10" y ="0" 
+								 hardtext="uiR2EDEcosystemDesert" params_l="r2.acts:openEcosystemIslands('r2_desert')" 
+								 tx_ecosystem="r2ed_desert" tx_ecosystem_pushed="r2ed_desert_pushed" text_color="152 60 39 255" 
+								 col_over="127 48 33 80" />
+								 
+								<instance template="ecosystem_template" id="r2_jungle" posparent="r2_desert" posref="BL TL" x="0" y ="0" 
+								 hardtext="uiR2EDEcosystemJungle" params_l="r2.acts:openEcosystemIslands('r2_jungle')" 
+								 tx_ecosystem="r2ed_jungle" tx_ecosystem_pushed="r2ed_jungle_pushed" text_color="18 156 51 255" 
+								 col_over="0 150 80 80" />
+								 
+								<instance template="ecosystem_template" id="r2_lakes" posparent="r2_jungle" posref="BL TL" x="0" y ="0" 
+								 hardtext="uiR2EDEcosystemLacustre" params_l="r2.acts:openEcosystemIslands('r2_lakes')" 
+								 tx_ecosystem="r2ed_lakes" tx_ecosystem_pushed="r2ed_lakes_pushed" text_color="66 93 82 255" 
+								 col_over="73 148 150 80" />	
+							 
+								<instance template="ecosystem_template" id="r2_forest" posparent="r2_lakes" posref="BL TL" x="0" y ="0" 
+								 hardtext="uiR2EDEcosystemForest" params_l="r2.acts:openEcosystemIslands('r2_forest')" 
+								 tx_ecosystem="r2ed_forest" tx_ecosystem_pushed="r2ed_forest_pushed" text_color="163 66 43 255" 
+								 col_over="170 0 0 80" />
+					 
+								<instance template="ecosystem_template" id="r2_roots" posparent="r2_forest" posref="BL TL" x="0" y ="0" 
+								 hardtext="uiR2EDEcosystemPrimeRoots" params_l="r2.acts:openEcosystemIslands('r2_roots')" 
+								 tx_ecosystem="r2ed_prime_roots" tx_ecosystem_pushed="r2ed_prime_roots_pushed" text_color="93 168 142 255" 
+								 col_over="86 150 180 80" />			
+			
+							</group>
+
+						</group>
+
+						<ctrl style="skin_scroll" id="scroll_islands" align="T" target="islands_list_gr" posparent="crop" posref="TR TR" 
+						 x="-5" y="0"/>
+
+					</group>
+
+					<group id="choose_island_2" posparent="parent" posref="TR TR" x="0" y="-8" sizeref="wh" h="-18" w="-180" >
+				
+						<group id="crop_2" posparent="parent" posref="TL TL" x="4" y="-2" sizeref="wh" w="-4" h="-4" />
+
+						
+						<group id="back_gr" posparent="parent" posref="TL TL" x="0" y="0" sizeref="wh" w="-15" h="0" >
+							<instance template="inner_thin_border_group" />	
+
+							<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="1" 
+							 scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="1" 
+							 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="1" 
+							 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="1" 
+							 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+							
+						</group>
+						
+								
+						<group id="islands_list_gr_2" posparent="crop_2" posref="TL TL" x="0" y="0" sizeref="w" w="-20" child_resize_h="true" 
+						 child_resize_hmargin="1" max_sizeparent="crop_2" max_sizeref="h" max_h="0" >
+					
+							<group id="ecosystem_list_2" type="list" posparent="parent" posref="TL TL" x="0" y="0" sizeparent="parent" sizeref="wh" w="0" h="0" >
+		
+							</group>
+
+						</group>
+
+						<ctrl style="skin_scroll" id="scroll_islands_2" align="T" target="islands_list_gr_2" posparent="crop_2" posref="TR TR" 
+						 x="-5" y="0" step_value="10" />
+
+					</group>
+				</group>
+
+			</group>
+
+
+			<!-- ISLAND IMAGES -->
+			<group id="island_images" x="190" y="-218" w="-200" sizeref="wh" h="-218" posref="TL TL" >
+
+				<ctrl type="text_button" button_type="toggle_button" id="card_title" x="0" y="0" posref="TL TL" 
+				 text_y="-2" hardtext="Island zoom" wmin="170" 
+				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
+				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+				 text_color_normal="255 255 255 255" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+				 color="255 0 0 255" col_over="255 0 0 255" col_pushed="255 0 0 255"
+				 tooltip="uiR2EDTooltipIslandZoom"
+				/>
+
+				<group id="island_current_image_gr" x="0" y="-23" w="0" sizeref="wh" h="-63" posref="TL TL" >
+					
+					<instance template="inner_thin_border_group" />	
+					
+					<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="back" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 120" />
+
+					<group id="island_current_image" x="5" y="-5" sizeref="wh" h="-10" w="-10" posref="TL TL" win_priority="2" >
+				
+						<group id="selected_button" active="true" sizeref="wh" x="0" y="0" posref="TL TL" posparent="parent">	
+	
+							<view type="bitmap" id="bl" w="6" h="6" posref="BL BL" texture="r2ed_island_corner_select.tga" rot="3" color="255 0 0 255" global_color="false" />
+							<view type="bitmap" id="tl" w="6" h="6" posref="TL TL" texture="r2ed_island_corner_select.tga" rot="0" color="255 0 0 255" global_color="false" />
+							<view type="bitmap" id="tr" w="6" h="6" posref="TR TR" texture="r2ed_island_corner_select.tga" rot="1" color="255 0 0 255" global_color="false" />
+							<view type="bitmap" id="br" w="6" h="6" posref="BR BR" texture="r2ed_island_corner_select.tga" rot="2" color="255 0 0 255" global_color="false" />
+
+							<view type="bitmap" id="bg" x="6" y="-6" sizeref="wh" w="-12" h="-12" scale="true" posparent="parent" posref="TL TL" texture="blank.tga" color="0 0 0 0" global_color="false" />	
+
+							<view type="bitmap" id="bottom" posparent="parent" posref="BL BL" sizeparent="parent" x="6" sizeref="w" w="-12" h="6" texture="r2ed_island_border_select.tga" rot="2" scale="true" color="255 0 0 255" global_color="false" />						
+							<view type="bitmap" id="top" posref="TL TL" x="6" sizeref="w" w="-12" h="6" texture="r2ed_island_border_select.tga" rot="0" scale="true" color="255 0 0 255" global_color="false" />			
+							<view type="bitmap" id="left" posref="BL BL" y="6" sizeref="h" w="6" h="-12" texture="r2ed_island_border_select.tga" rot="3" scale="true" color="255 0 0 255" global_color="false" />
+							<view type="bitmap" id="right" posref="BR BR" y="6" sizeref="h" w="6" h="-12" texture="r2ed_island_border_select.tga" rot="1" scale="true" color="255 0 0 255" global_color="false" />			
+							
+							<view type="bitmap" id="island_bitmap" posref="TL TL" posparent="parent" 
+							 w="" h="" x="" y=""
+							 texture="blank.tga" scale="true" color="255 255 255 255" global_color="false" />
+							
+							<group id="entry_points" posparent="island_bitmap" posref="TL TL" sizeparent="parent" sizeref="wh" >			
+								<vector template="entry_point_template" _size="10"
+								 _firstpos="TL TL" _nextpos="BL TL" id="entrypoint$i" active="true"
+								/>		
+							</group>
+							
+						</group>
+					</group>
+				</group>
+
+				<group id="island_cancel_ok" x="0" y="0" w="0" sizeref="w" h="40" posref="BL BL" posparent="parent" >
+
+					<view type="text" render_layer="2" id="ring_level" auto_clamp="true" posref="TL TL" x="10" y="-15" posparent="parent" 
+					 global_color="false" hardtext="RING LEVEL" over_extend_view_text="true" over_extend_parent_rect="true"/>
+
+					<ctrl style="style_ok_act" id="island_ok" active="false" posparent="parent" posref="BR BR" x="0" y="10" hardtext="uiR2EDEnterMap"
+					 color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+					 wmin="50" onclick_l="lua" params_l="r2.acts:openLocationName()" />
+
+					<ctrl style="style_ok_act" id="island_precedent" active="false" posparent="island_ok" posref="BL BR" x="-10" y="0" hardtext="uiR2EDBack"
+					 color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+					 wmin="50" onclick_l="lua" params_l="r2.acts:backPreviousLocations()" />
+
+					<ctrl style="style_ok_act" id="island_cancel" active="false" posparent="island_precedent" posref="BL BR" x="-10" y="0" hardtext="uiR2EDCancelForm"
+					 color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+					 wmin="50" onclick_l="lua" params_l="r2.acts:cancelActCreation()" />
+
+				</group>
+
+			</group>
+
+			<!-- SEASONS -->
+			<group id="island_season" x="10" y="-218" w="170" sizeref="h" h="-258" posref="TL TL" >
+
+				<ctrl type="text_button" button_type="toggle_button" id="season_title" x="0" y="0" posref="TL TL" 
+				 text_y="-2" hardtext="uiR2EDSeason" wmin="170" 
+				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
+				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
+				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
+				 text_color_normal="255 255 255 255" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255"
+				 color="255 0 0 255" col_over="255 0 0 255" col_pushed="255 0 0 255"
+				 tooltip="uiR2EDTooltipSeason"
+				/>
+
+				<group id="season_gr" x="0" y="-23" sizeref="wh" w="0" h="-23" posref="TL TL" >
+					
+					<instance template="inner_thin_border_group" />	
+					
+					<view type="bitmap" id="sep_top" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_left" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_right" posparent="parent" posref="TR TR" sizeparent="parent" sizeref="h" h="0" w="3" 
+					 y="0" x="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="sep_bottom" posparent="parent" posref="BL BL" sizeparent="parent" sizeref="w" w="0" h="3" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 255" />
+					<view type="bitmap" id="back" posparent="parent" posref="TL TL" sizeparent="parent" sizeref="wh" w="0" h="0" 
+					 y="0" scale="true" texture="blank.tga" color="100 0 0 120" />
+
+					<instance template="label_toggle_button" id="manual_season_2" posparent="parent" 
+					 x="30" y="-30" posref="TL TL" w="150" hardtext="uiR2EDManualSeason" fontsize="12" y_text="-5" params_l="r2.acts:manualSeason()"/>	
+
+					<group id="season_list_2" type="list" posparent="manual_season_2" posref="BL TL" x="10" y="-30" 
+					 sizeparent="parent" sizeref="wh" w="0" h="0" >
+
+						<instance template="act_button_template" id="Spring" sizeref="" h="90" w="80" 
+						 x="10" y="-10" posparent="parent" posref="TL TL" tooltip="uiR2EDSpring"
+						 h_button="-10" w_button="0" x_button="0" y_button="0" 
+						 h_button_texture="68" w_button_texture="68" 
+						 x_button_texture="6" y_button_texture="-6" icon="r2ed_spring.tga" 
+						 scale="true" color="254 254 95 255" back_color="254 254 95 255" selected_color="255 255 0 255" col_over="255 255 0 255" 
+						 group_params_l="r2.acts:locationSeason(getUICaller())" params_l="r2.acts:locationSeason()" 
+						 over_active="false" />
+						 
+						<instance template="act_button_template" id="Summer" sizeref="" h="90" w="80" 
+						 x="0" y="-15" posparent="Spring" posref="BL TL" tooltip="uiR2EDSummer"
+						 h_button="-10" w_button="0" x_button="0" y_button="0" 
+						 h_button_texture="68" w_button_texture="68" 
+						 x_button_texture="6" y_button_texture="-6" icon="r2ed_summer.tga" 
+						 scale="true" color="13 92 3 255" back_color="13 92 3 255" selected_color="106 250 94 255" col_over="13 92 3 100" 
+						 group_params_l="r2.acts:locationSeason(getUICaller())" params_l="r2.acts:locationSeason()" 
+						 over_active="false" />
+						 
+						<instance template="act_button_template" id="Autumn" sizeref="" h="90" w="80" 
+						 x="0" y="-15" posparent="Summer" posref="BL TL" tooltip="uiR2EDAutumn"
+						 h_button="-10" w_button="0" x_button="0" y_button="0" 
+						 h_button_texture="68" w_button_texture="68" 
+						 x_button_texture="6" y_button_texture="-6" icon="r2ed_fall.tga" 
+						 scale="true" color="255 60 20 255" back_color="255 60 20 255" selected_color="250 50 25 255" col_over="255 60 20 100" 
+						 group_params_l="r2.acts:locationSeason(getUICaller())" params_l="r2.acts:locationSeason()" 
+						 over_active="false" />
+						 
+						<instance template="act_button_template" id="Winter" sizeref="" h="80" w="80" 
+						 x="0" y="-15" posparent="Autumn" posref="BL TL" tooltip="uiR2EDWinter"
+						 h_button="0" w_button="0" x_button="0" y_button="0" 
+						 h_button_texture="68" w_button_texture="68" 
+						 x_button_texture="6" y_button_texture="-6" icon="r2ed_winter.tga" 
+						 scale="true" color="0 6 114 255" back_color="0 6 114 255" selected_color="25 107 250 255" col_over="0 6 114 100" 
+						 group_params_l="r2.acts:locationSeason(getUICaller())" params_l="r2.acts:locationSeason()" 
+						 over_active="false" />	
+						
+					</group>
+				</group>
+			</group>
+		</group>
+	</group>
+</group>
+
+<!-- ********************************* scenario/act names ********************** -->
+<group type="modal" id="r2ed_choose_scenario_act_name" exit_click_out="false" posref="ML ML" x="0" y="0" 
+ w="350" child_resize_h="true" child_resize_hmargin="15" on_enter="lua" on_enter_params="r2.acts:chooseScenarioActName()"
+ options="skin_modal">
+	
+	<group id="scenario_name" x="20" y="0" sizeref="w" w="-10" h="60" posparent="parent" posref="TL TL" >
+		
+		<!-- label -->
+		<group id="label" sizeref="w" w="0" h="12" x="0" y="-20" posref="TL TL" posparent="parent" >		
+			<view type="text" id="name_text" posref="TL TL" x="2" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDScenarioName" />
+		</group>
+
+		<!-- edit box -->
+		<group type="edit_box" id="edit_box_group" sizeparent="parent" sizeref="w" w="-30"
+		 posparent="label" posref="BL TL" x="0" y="-6" h="20"
+		 max_num_chars="30" prompt="" entry_type="text" reset_focus_on_hide="true" menu_r="" 
+		 onenter="lua" params="r2.acts:chooseScenarioActName()" >
+									
+			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
+			<view type="text" id="edit_text" x="4" y="-5" posref="TL TL" multi_line="false" 
+			 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+		</group>
+
+	</group>
+
+	<group id="act_name" x="0" y="0" sizeparent="parent" sizeref="w" w="-40" h="60" posparent="scenario_name" posref="BL TL" >
+		
+		<!-- label -->
+		<group id="label" sizeref="w" w="0" h="12" x="0" y="-20" posref="TL TL" posparent="parent" >		
+			<view type="text" id="name_text" posref="TL TL" x="2" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDActName" />
+		</group>
+
+		<!-- edit box -->
+		<group type="edit_box" id="edit_box_group" sizeparent="parent" sizeref="w" w="0"
+		 posparent="label" posref="BL TL" x="0" y="-6" h="20"
+		 max_num_chars="50" prompt="" entry_type="text" reset_focus_on_hide="true" menu_r="" 
+		 onenter="lua" params="r2.acts:chooseScenarioActName()" >
+									
+			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
+			<view type="text" id="edit_text" x="4" y="-5" posref="TL TL" multi_line="false" 
+			 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+		</group>
+
+	</group>
+
+	<ctrl style="style_ok_act" id="name_ok" active="true" posparent="act_name" posref="BR TR" x="0" y="-10" 
+	 hardtext="uiR2EDValidateForm" color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+	 wmin="50" onclick_l="lua" params_l="r2.acts:chooseScenarioActName()" />
+</group>
+
+
+<!-- ********************************* location name ************************* -->
+<group type="modal" id="r2ed_choose_location_name" exit_click_out="false" posref="ML ML" x="0" y="0" w="350" h="85" 
+ options="skin_modal" on_enter="lua" on_enter_params="r2.acts:chooseLocationName()" >
+	
+	<group id="name_group" x="20" y="-20" sizeref="wh" w="-40" h="-40" posparent="parent" posref="TL TL" >
+		
+		<!-- label -->
+		<group id="label" sizeref="w" w="0" h="12" x="0" y="0" posref="TL TL" posparent="parent" >		
+			<view type="text" id="name_text" posref="TL TL" x="2" y="0" color="255 255 255 255" 
+			 global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDLocationName" />
+		</group>
+
+		<!-- edit box -->
+		<group type="edit_box" id="edit_box_group" sizeparent="parent" sizeref="w" w="-70"
+		 posparent="label" posref="BL TL" x="0" y="-6" h="20"
+		 max_num_chars="50" prompt="" entry_type="text" reset_focus_on_hide="true" menu_r="" 
+		 onenter="lua" params="r2.acts:chooseLocationName()" >
+									
+			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
+			<view type="text" id="edit_text" x="4" y="-5" posref="TL TL" multi_line="false" 
+			 fontsize="12" shadow="true" hardtext="" global_color="false"/>
+		</group>
+
+		<ctrl style="style_ok_act" id="name_ok" active="true" posparent="edit_box_group" posref="BR BL" x="20" y="0" 
+		 hardtext="uiR2EDValidateForm" color="255 0 0 255" col_over="255 100 0 255" col_pushed="255 255 255 255"
+		 wmin="50" onclick_l="lua" params_l="r2.acts:chooseLocationName()" />
+	</group>
+</group>
+
+
+<tree node="r2ed_acts">
+</tree>
+
+</interface_config>

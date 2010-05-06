@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.6 $" State="modified">
+  <ELEMENT Name="SkillLevel" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="XpPerPointSkill" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="SpPointMultiplier" Type="Type" Filename="float.typ" Default="10.0"/>
+  <LOG>Mon Jun 17 21:07:58 2002 (saffray) Dfn Structure = 
+Mon Jun 17 21:09:09 2002 (saffray) Dfn Structure = 
+Tue Aug 26 10:43:39 2003 (saffray) Dfn Structure = 
+Fri Dec 05 14:58:11 2003 (fleury) Dfn Structure = </LOG>
+</DFN>

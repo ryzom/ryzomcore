@@ -1,0 +1,9 @@
+x1. make: identify primitive files and display 'compile (%s)'
+x2. link up the compiler - dump contents of the primitive file to console
+3. create the binary file to send to the ais & save to disk (with hierachy)
+4. setup messages between AIS & AIDS ( & remote ctrl )
+
+
+
+static file name ids?
+*** 2 places ais creates gpms message

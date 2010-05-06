@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.2 $" State="modified">
+  <ELEMENT Name="Icon" Type="Type" Filename="string.typ" FilenameExt="*.tga" Default="asc_unknown.tga"/>
+  <LOG>Tue Jun 14 17:48:07 2005 (vuarand) Dfn Structure = 
+Tue Jun 14 18:19:11 2005 (vuarand) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DFN Version="0.5" State="modified">
+  <ELEMENT Name="ValueNumber" Type="Type" Filename="int.typ"/>
+  <ELEMENT Name="ShieldType" Type="Type" Filename="item_shield_category.typ"/>
+  <ELEMENT Name="Localisation" Type="Type" Filename="item_slot.typ"/>
+  <ELEMENT Name="ProtectionWorks" Type="Type" Filename="boolean.typ"/>
+</DFN>
