@@ -1,32 +1,18 @@
-/**
- * This is the precompiled header for the NeLSound XAudio2 Driver.
- * It should only contain '#include's for files that are not part of this library,
- * as well as '#define's that are critical to the compilation consistency.
- * \file stdxaudio2.h
- * \brief Precompiled header for the NeLSound XAudio2 Driver
- * \date 2008-08-20 12:32GMT
- * \author Jan Boon (Kaetemi)
- */
-
-/* 
- * Copyright (C) 2008  Jan Boon (Kaetemi)
- * 
- * This file is part of NLSOUND XAudio2 Driver.
- * NLSOUND XAudio2 Driver is free software: you can redistribute it
- * and/or modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, either version 2 of
- * the License, or (at your option) any later version.
- * 
- * NLSOUND XAudio2 Driver is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with NLSOUND XAudio2 Driver; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA.
- */
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef NLSOUND_STDPCH_XAUDIO2_H
 #define NLSOUND_STDPCH_XAUDIO2_H

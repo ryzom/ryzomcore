@@ -1,29 +1,18 @@
-/**
- * \file sound_driver_xaudio2.cpp
- * \brief CSoundDriverXAudio2
- * \date 2008-08-20 10:52GMT
- * \author Jan Boon (Kaetemi)
- * CSoundDriverXAudio2
- */
-
-/* 
- * Copyright (C) 2008-2009  by authors
- * 
- * This file is part of NLSOUND XAudio2 Driver.
- * NLSOUND XAudio2 Driver is free software: you can redistribute it
- * and/or modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, either version 2 of
- * the License, or (at your option) any later version.
- * 
- * NLSOUND XAudio2 Driver is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with NLSOUND XAudio2 Driver; see the file COPYING.  If not,
- * see <http://www.gnu.org/licenses/>.
- */
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdxaudio2.h"
 #include "sound_driver_xaudio2.h"
