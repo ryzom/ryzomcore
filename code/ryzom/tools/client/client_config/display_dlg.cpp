@@ -219,9 +219,17 @@ bool GetHardwareSoundBuffer ()
 	HardwareSoundBuffer = 0;
 
 	// The DirectSound object
-    LPDIRECTSOUND8			_DirectSound;
+#if (DIRECTSOUND_VERSION >= 0x0800)
+    LPDIRECTSOUND8 _DirectSound;
+#else
+	LPDIRECTSOUND _DirectSound;
+#endif
 
+#if (DIRECTSOUND_VERSION >= 0x0800)
 	if (DirectSoundCreate8(NULL, &_DirectSound, NULL) == DS_OK)
+#else
+	if (DirectSoundCreate(NULL, &_DirectSound, NULL) == DS_OK)
+#endif
 	{
 		DSCAPS caps;
 		memset (&caps, 0, sizeof (DSCAPS));
