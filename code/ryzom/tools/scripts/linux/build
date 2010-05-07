@@ -298,8 +298,8 @@ then
 else
     BUILD_DIR=$BUILD_RELEASE
     INSTALL_DIR=$INSTALL_RELEASE
-    BUILD_CFLAGS="$BUILD_CFLAGS -march=pentium"
-    BUILD_CXXFLAGS="$BUILD_CXXFLAGS -march=pentium"
+    BUILD_CFLAGS="$BUILD_CFLAGS"
+    BUILD_CXXFLAGS="$BUILD_CXXFLAGS"
     PATH="$INSTALL_RELEASE/bin:$PATH"
     LD_LIBRARY_PATH="$INSTALL_RELEASE/lib:$LD_LIBRARY_PATH"
 fi
@@ -410,7 +410,7 @@ echo CFLAGS="$BUILD_CFLAGS" CXXFLAGS="$BUILD_CXXFLAGS"
 
             # Copy the headers
             mkdir -p $BUILD_DIR/nel \
-                && cp -Rfdp $NEL_SRC/include $BUILD_DIR/nel
+                && cp -RfPp $NEL_SRC/include $BUILD_DIR/nel
 
             # Remove from the compilation directory the useless CVS
             # informations
