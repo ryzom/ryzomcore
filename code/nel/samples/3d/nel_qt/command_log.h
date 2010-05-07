@@ -1,30 +1,18 @@
-/**
- * CCommandLog
- * $Id: command_log.h 2222 2010-02-06 19:16:59Z kaetemi $
- * \file command_log.h
- * \brief CCommandLog
- * \date 2010-02-05 20:27GMT
- * \author Jan Boon (Kaetemi)
- */
-
-/* 
- * Copyright (C) 2010  by authors
- * 
- * This file is part of NEL QT.
- * NEL QT is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- * 
- * NEL QT is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with NEL QT; see the file COPYING.  If not, see
- * <http://www.gnu.org/licenses/>.
- */
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef NLQT_COMMAND_LOG_H
 #define NLQT_COMMAND_LOG_H
