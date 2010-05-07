@@ -410,7 +410,7 @@ echo CFLAGS="$BUILD_CFLAGS" CXXFLAGS="$BUILD_CXXFLAGS"
 
             # Copy the headers
             mkdir -p $BUILD_DIR/nel \
-                && cp -Rfdp $NEL_SRC/include $BUILD_DIR/nel
+                && cp -RfPp $NEL_SRC/include $BUILD_DIR/nel
 
             # Remove from the compilation directory the useless CVS
             # informations
