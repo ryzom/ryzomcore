@@ -1197,7 +1197,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			// file not found, delete local file
 			throw Exception ("curl init failed");
 		}
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *) progress);
 		curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
