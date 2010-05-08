@@ -16,6 +16,9 @@ release
 test
 Temp
 
+# NeL cache
+*.packed_sheets
+
 # Windows compile
 *.exe
 *.dll
@@ -26,6 +29,7 @@ Temp
 *.a
 *.la
 *.o
+*_debug
 
 # Log dump files
 report_refused
@@ -39,6 +43,24 @@ log.txt
 *.dlx
 *.dlm
 *.dlu
+
+# Linux garbage
+Makefile.in
+aclocal.m4
+config.guess
+config.sub
+configure
+depcomp
+nelconfig.h.in
+install-sh
+ltmain.sh
+missing
+ylwrap
+*.config
+*.creator
+*.files
+*.includes
+*.mk
 
 # Visual Studio garbage
 *.opensdf
