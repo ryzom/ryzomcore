@@ -6,6 +6,7 @@
 # HeidiSQL version:             5.0.0.3272
 # Date/time:                    2010-05-08 15:31:21
 # --------------------------------------------------------
+USE `nel`;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
@@ -28,6 +29,7 @@ INSERT IGNORE INTO `shard` (`ShardId`, `domain_id`, `WsAddr`, `NbPlayers`, `Name
 # HeidiSQL version:             5.0.0.3272
 # Date/time:                    2010-05-08 15:31:22
 # --------------------------------------------------------
+USE `ring_open`;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
