@@ -1,0 +1,3024 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ARRAY Name="XpParPalier">
+      <STRUCT Name="Default">
+        <ARRAY Name="Type">
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="1"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="2"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="3"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="4"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="5"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="6"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="7"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="8"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="9"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="10"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="11"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="12"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="13"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="14"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="15"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="16"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="17"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="18"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="19"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="20"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="21"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="22"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="23"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="24"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="25"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="26"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="27"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="28"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="29"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="30"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="31"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="32"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="33"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="34"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="35"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="36"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="37"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="38"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="39"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="40"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="41"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="42"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="43"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="44"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="45"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="46"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="47"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="48"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="49"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="50"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="51"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="52"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="53"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="54"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="55"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="56"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="57"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="58"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="59"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="60"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="61"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="62"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="63"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="64"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="65"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="66"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="67"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="68"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="69"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="70"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="71"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="72"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="73"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="74"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="75"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="76"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="77"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="78"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="79"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="80"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="81"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="82"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="83"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="84"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="85"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="86"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="87"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="88"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="89"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="90"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="91"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="92"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="93"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="94"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="95"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="96"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="97"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="98"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="99"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="100"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="101"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="102"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="103"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="104"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="105"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="106"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="107"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="108"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="109"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="110"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="111"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="112"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="113"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="114"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="115"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="116"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="117"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="118"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="119"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="120"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="121"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="122"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="123"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="124"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="125"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="126"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="127"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="128"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="129"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="130"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="131"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="132"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="133"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="134"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="135"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="136"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="137"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="138"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="139"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="140"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="141"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="142"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="143"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="144"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="145"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="146"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="147"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="148"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="149"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="150"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="151"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="152"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="153"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="154"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="155"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="156"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="157"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="158"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="159"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="160"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="161"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="162"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="163"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="164"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="165"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="166"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="167"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="168"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="169"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="170"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="171"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="172"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="173"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="174"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="175"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="176"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="177"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="178"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="179"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="180"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="181"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="182"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="183"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="184"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="185"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="186"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="187"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="188"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="189"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="190"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="191"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="192"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="193"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="194"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="195"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="196"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="197"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="198"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="199"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="200"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="201"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="202"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="203"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="204"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="205"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="206"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="207"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="208"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="209"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="210"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="211"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="212"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="213"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="214"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="215"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="216"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="217"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="218"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="219"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="220"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="221"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="222"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="223"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="224"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="225"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="226"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="227"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="228"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="229"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="230"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="231"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="232"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="233"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="234"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="235"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="236"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="237"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="238"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="239"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="240"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="241"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="242"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="243"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="244"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="245"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="246"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="247"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="248"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="249"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="250"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="Craft">
+        <ARRAY Name="Type">
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="1"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="2"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="3"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="4"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="5"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="6"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="7"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="8"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="9"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="10"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="11"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="12"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="13"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="14"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="15"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="16"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="17"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="18"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="19"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="20"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="21"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="22"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="23"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="24"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="25"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="26"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="27"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="28"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="29"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="30"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="31"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="32"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="33"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="34"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="35"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="36"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="37"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="38"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="39"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="40"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="41"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="42"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="43"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="44"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="45"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="46"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="47"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="48"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="49"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="50"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="51"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="52"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="53"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="54"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="55"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="56"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="57"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="58"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="59"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="60"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="61"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="62"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="63"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="64"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="65"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="66"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="67"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="68"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="69"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="70"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="71"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="72"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="73"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="74"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="75"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="76"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="77"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="78"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="79"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="80"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="81"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="82"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="83"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="84"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="85"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="86"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="87"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="88"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="89"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="90"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="91"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="92"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="93"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="94"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="95"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="96"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="97"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="98"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="99"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="100"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="101"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="102"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="103"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="104"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="105"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="106"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="107"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="108"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="109"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="110"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="111"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="112"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="113"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="114"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="115"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="116"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="117"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="118"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="119"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="120"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="121"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="122"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="123"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="124"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="125"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="126"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="127"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="128"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="129"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="130"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="131"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="132"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="133"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="134"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="135"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="136"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="137"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="138"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="139"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="140"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="141"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="142"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="143"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="144"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="145"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="146"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="147"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="148"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="149"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="150"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="151"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="152"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="153"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="154"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="155"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="156"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="157"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="158"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="159"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="160"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="161"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="162"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="163"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="164"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="165"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="166"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="167"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="168"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="169"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="170"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="171"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="172"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="173"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="174"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="175"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="176"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="177"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="178"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="179"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="180"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="181"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="182"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="183"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="184"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="185"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="186"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="187"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="188"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="189"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="190"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="191"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="192"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="193"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="194"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="195"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="196"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="197"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="198"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="199"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="200"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="201"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="202"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="203"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="204"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="205"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="206"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="207"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="208"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="209"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="210"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="211"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="212"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="213"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="214"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="215"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="216"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="217"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="218"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="219"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="220"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="221"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="222"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="223"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="224"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="225"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="226"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="227"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="228"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="229"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="230"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="231"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="232"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="233"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="234"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="235"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="236"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="237"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="238"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="239"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="240"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="241"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="242"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="243"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="244"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="245"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="246"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="247"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="248"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="249"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="250"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="Forage">
+        <ARRAY Name="Type">
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="1"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="2"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="3"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="4"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="5"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="6"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="7"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="8"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="9"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="10"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="11"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="12"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="13"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="14"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="15"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="16"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="17"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="18"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="19"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="20"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="21"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="22"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="23"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="24"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="25"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="26"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="27"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="28"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="29"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="30"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="31"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="32"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="33"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="34"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="35"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="36"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="37"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="38"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="39"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="40"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="41"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="42"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="43"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="44"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="45"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="46"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="47"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="48"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="49"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="50"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="51"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="52"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="53"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="54"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="55"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="56"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="57"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="58"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="59"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="60"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="61"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="62"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="63"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="64"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="65"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="66"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="67"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="68"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="69"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="70"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="71"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="72"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="73"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="74"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="75"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="76"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="77"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="78"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="79"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="80"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="81"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="82"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="83"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="84"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="85"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="86"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="87"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="88"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="89"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="90"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="91"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="92"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="93"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="94"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="95"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="96"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="97"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="98"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="99"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="100"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="101"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="102"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="103"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="104"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="105"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="106"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="107"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="108"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="109"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="110"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="111"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="112"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="113"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="114"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="115"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="116"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="117"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="118"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="119"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="120"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="121"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="122"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="123"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="124"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="125"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="126"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="127"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="128"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="129"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="130"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="131"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="132"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="133"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="134"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="135"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="136"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="137"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="138"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="139"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="140"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="141"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="142"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="143"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="144"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="145"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="146"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="147"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="148"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="149"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="150"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="151"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="152"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="153"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="154"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="155"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="156"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="157"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="158"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="159"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="160"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="161"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="162"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="163"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="164"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="165"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="166"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="167"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="168"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="169"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="170"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="171"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="172"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="173"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="174"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="175"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="176"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="177"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="178"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="179"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="180"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="181"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="182"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="183"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="184"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="185"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="186"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="187"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="188"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="189"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="190"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="191"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="192"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="193"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="194"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="195"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="196"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="197"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="198"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="199"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="200"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="201"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="202"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="203"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="204"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="205"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="206"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="207"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="208"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="209"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="210"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="211"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="212"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="213"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="214"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="215"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="216"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="217"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="218"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="219"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="220"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="221"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="222"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="223"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="224"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="225"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="226"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="227"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="228"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="229"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="230"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="231"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="232"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="233"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="234"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="235"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="236"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="237"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="238"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="239"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="240"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="241"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="242"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="243"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="244"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="245"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="246"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="247"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="248"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="249"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="SkillLevel" Value="250"/>
+            <ATOM Name="XpPerPointSkill" Value="100"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+	</ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>
