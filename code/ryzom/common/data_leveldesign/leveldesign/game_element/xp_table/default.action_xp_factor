@@ -2,6 +2,22 @@
 <FORM Revision="" State="modified">
   <STRUCT>
     <ARRAY Name="XpFactor">
+      <ATOM Value="1.5"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="1.0"/>
+      <ATOM Value="0.5"/>
+      <ATOM Value="0.0"/>
     </ARRAY>
   </STRUCT>
   <STRUCT/>
