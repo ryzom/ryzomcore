@@ -30,6 +30,15 @@ Temp
 *.la
 *.o
 *_debug
+code/ryzom/server/src/entities_game_service/entities_game_service
+code/ryzom/server/src/frontend_service/frontend_service
+code/ryzom/server/src/gpm_service/gpm_service
+code/ryzom/server/src/input_output_service/input_output_service
+code/ryzom/server/src/mirror_service/mirror_service
+code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
+code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
+code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
+code/ryzom/server/src/tick_service/tick_service
 
 # Log dump files
 report_refused
@@ -51,15 +60,12 @@ config.guess
 config.sub
 configure
 depcomp
+config.h.in
 nelconfig.h.in
 install-sh
 ltmain.sh
 missing
 ylwrap
-*.config
-*.creator
-*.files
-*.includes
 *.mk
 
 # Visual Studio garbage
