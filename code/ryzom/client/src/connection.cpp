@@ -981,7 +981,7 @@ TInterfaceState globalMenu()
 	while (PlayerWantToGoInGame == false)
 	{
 
-		#ifdef NL_DEBUG
+		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
 			// tmp for debug
 			if (::GetAsyncKeyState(VK_SPACE))
 			{
@@ -1064,7 +1064,7 @@ TInterfaceState globalMenu()
 			nlSleep(ClientCfg.Sleep);
 		}
 
-		#ifdef NL_DEBUG
+		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
 			if (::GetAsyncKeyState(VK_CONTROL))
 			{
 				pIM->displayUIViewBBoxs("");
