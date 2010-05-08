@@ -406,7 +406,7 @@ int requestTerminater (HTRequest * request, HTResponse * /* response */,
 	// the parameter is actually an uint32
 	if (param != 0)
 	{
-		CGroupHTML::TGroupHtmlByUIDMap::iterator	it= CGroupHTML::_GroupHtmlByUID.find((uint32)param);
+		CGroupHTML::TGroupHtmlByUIDMap::iterator	it= CGroupHTML::_GroupHtmlByUID.find((uint32)(size_t)param);
 		if(it!=CGroupHTML::_GroupHtmlByUID.end())
 		{
 			// get the pointer. NB: the refptr should not be NULL
