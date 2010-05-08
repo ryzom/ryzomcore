@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="georges_exe"
 	ProjectGUID="{B579068A-FE3B-46A8-AE14-289BEAE5EBC0}"
+	RootNamespace="georges_exe"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -61,6 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="..\install\$(ProjectName)_d.exe"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
@@ -141,6 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="..\install\$(ProjectName)_r.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"

@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="translation_tools"
 	ProjectGUID="{DAB4B616-E628-433E-92CA-AFAB614A1656}"
+	RootNamespace="translation_tools"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -61,6 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(ProjectName)_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -143,6 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(ProjectName)_r.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
