@@ -2118,9 +2118,9 @@ public:
 		{
 			vector< pair < string, string > > params;
 			params.clear();
-			params.push_back(pair<string,string>::pair("id", toString(Mainlands[i].Id)));
+			params.push_back(pair<string,string>("id", toString(Mainlands[i].Id)));
 			if (i>0)
-				params.push_back(pair<string,string>::pair("posref", "BL TL"));
+				params.push_back(pair<string,string>("posref", "BL TL"));
 
 			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
 			if (pNewLine != NULL)
@@ -2240,10 +2240,10 @@ public:
 	{
 		vector< pair < string, string > > params;
 		params.clear();
-		params.push_back(pair<string,string>::pair("id", id));
+		params.push_back(pair<string,string>("id", id));
 		if (!First)
 		{
-			params.push_back(pair<string,string>::pair("posref", "BL TL"));
+			params.push_back(pair<string,string>("posref", "BL TL"));
 		}
 		First = false;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2712,9 +2712,9 @@ class CAHScenarioControl : public IActionHandler
 				{
 					vector< pair < string, string > > params;
 					params.clear();
-					params.push_back(pair<string,string>::pair("id", toString(Mainlands[i].Id)));
-					params.push_back(pair<string,string>::pair("w", "1024"));
-					params.push_back(pair<string,string>::pair("tooltip", "uiRingFilterShard"));
+					params.push_back(pair<string,string>("id", toString(Mainlands[i].Id)));
+					params.push_back(pair<string,string>("w", "1024"));
+					params.push_back(pair<string,string>("tooltip", "uiRingFilterShard"));
 					CInterfaceGroup *toggleGr =pIM->createGroupInstance("label_toggle_button", shardList->getId(), params);
 					shardList->addChild(toggleGr);
 					// set unicode name

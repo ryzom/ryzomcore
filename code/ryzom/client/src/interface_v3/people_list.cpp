@@ -73,13 +73,13 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 
 	// create the base container
 	vector< pair<string, string> > baseContainerParams;
-	baseContainerParams.push_back(pair<string, string>::pair("id", desc.Id));
+	baseContainerParams.push_back(pair<string, string>("id", desc.Id));
 	std::string baseId;
 	if (fatherContainer == NULL)
 	{
-		baseContainerParams.push_back(pair<string, string>::pair("movable","true"));
-		baseContainerParams.push_back(pair<string, string>::pair("active","false"));
-		baseContainerParams.push_back(pair<string, string>::pair("opened","true"));
+		baseContainerParams.push_back(pair<string, string>("movable","true"));
+		baseContainerParams.push_back(pair<string, string>("active","false"));
+		baseContainerParams.push_back(pair<string, string>("opened","true"));
 		baseId = "ui:interface";
 	}
 	else

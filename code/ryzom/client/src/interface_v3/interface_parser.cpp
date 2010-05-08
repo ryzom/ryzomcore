@@ -248,7 +248,7 @@ public:
 	{
 		string sTmp = child->getId();
 		sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-		_Accel.insert(pair<string,CInterfaceGroup*>::pair(sTmp, child));
+		_Accel.insert(pair<string,CInterfaceGroup*>(sTmp, child));
 		CInterfaceGroup::addGroup(child,eltOrder);
 	}
 

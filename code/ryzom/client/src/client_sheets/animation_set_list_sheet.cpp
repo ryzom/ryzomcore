@@ -493,7 +493,7 @@ void CAnimationStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStrea
 	// update statics maps
 	if (f.isReading())
 	{
-		_StringToAnimStateId.insert(pair<string, TAnimStateSheetId>::pair(sStateName, (TAnimStateSheetId)State));
+		_StringToAnimStateId.insert(pair<string, TAnimStateSheetId>(sStateName, (TAnimStateSheetId)State));
 		if (_AnimStateIdToString.size() <= State)
 			_AnimStateIdToString.resize(State+1);
 		_AnimStateIdToString[State] = sStateName;

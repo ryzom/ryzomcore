@@ -417,13 +417,13 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	pIM->getDbProp(DbComboDisp2P);
 
 	vector< pair<string,string> > vArgs;
-	vArgs.push_back(pair<string,string>::pair("id",name));
-	vArgs.push_back(pair<string,string>::pair("db_sel_cat",DbComboSelCat));
-	vArgs.push_back(pair<string,string>::pair("db_sel_act",DbComboSelAct));
-	vArgs.push_back(pair<string,string>::pair("db_sel_1p",DbComboSel1P));
-	vArgs.push_back(pair<string,string>::pair("db_sel_2p",DbComboSel2P));
-	vArgs.push_back(pair<string,string>::pair("db_disp_1p",DbComboDisp1P));
-	vArgs.push_back(pair<string,string>::pair("db_disp_2p",DbComboDisp2P));
+	vArgs.push_back(pair<string,string>("id",name));
+	vArgs.push_back(pair<string,string>("db_sel_cat",DbComboSelCat));
+	vArgs.push_back(pair<string,string>("db_sel_act",DbComboSelAct));
+	vArgs.push_back(pair<string,string>("db_sel_1p",DbComboSel1P));
+	vArgs.push_back(pair<string,string>("db_sel_2p",DbComboSel2P));
+	vArgs.push_back(pair<string,string>("db_disp_1p",DbComboDisp1P));
+	vArgs.push_back(pair<string,string>("db_disp_2p",DbComboDisp2P));
 
 	Win = dynamic_cast<CGroupContainer*>(pIM->createGroupInstance(TEMPLATE_EDITCMD, "ui:interface", vArgs));
 	if (Win == NULL)
