@@ -154,6 +154,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_patch_edit", "nel_patch
 		{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD} = {CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_vertex_tree_paint", "nel_vertex_tree_paint\nel_vertex_tree_paint.vcproj", "{680F9C48-975D-425A-89DF-D7AC3C093968}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -256,6 +258,10 @@ Global
 		{53B9D9A1-AE6B-4E39-82B2-E8EE01075EEC}.Debug|Win32.Build.0 = Debug|Win32
 		{53B9D9A1-AE6B-4E39-82B2-E8EE01075EEC}.Release|Win32.ActiveCfg = Release|Win32
 		{53B9D9A1-AE6B-4E39-82B2-E8EE01075EEC}.Release|Win32.Build.0 = Release|Win32
+		{680F9C48-975D-425A-89DF-D7AC3C093968}.Debug|Win32.ActiveCfg = Debug|Win32
+		{680F9C48-975D-425A-89DF-D7AC3C093968}.Debug|Win32.Build.0 = Debug|Win32
+		{680F9C48-975D-425A-89DF-D7AC3C093968}.Release|Win32.ActiveCfg = Release|Win32
+		{680F9C48-975D-425A-89DF-D7AC3C093968}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

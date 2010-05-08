@@ -1,0 +1,93 @@
+syntax: glob
+
+# Various build directories
+bin
+obj
+Debug
+Release
+ReleaseDebug
+DebugFast
+ReleaseDebugStatic
+DebugFastStatic
+
+# Test and application directories
+screenshots
+release
+test
+Temp
+
+# NeL cache
+*.packed_sheets
+
+# Windows compile
+*.exe
+*.dll
+*.lib
+*.obj
+
+# Linux compile
+*.a
+*.la
+*.o
+*_debug
+
+# Log dump files
+report_refused
+report_failed
+exception_catched
+*.stat
+*.log
+log.txt
+
+# Max plugin extensions
+*.dlx
+*.dlm
+*.dlu
+
+# Linux garbage
+Makefile.in
+aclocal.m4
+config.guess
+config.sub
+configure
+depcomp
+nelconfig.h.in
+install-sh
+ltmain.sh
+missing
+ylwrap
+*.config
+*.creator
+*.files
+*.includes
+*.mk
+
+# Visual Studio garbage
+*.opensdf
+UpgradeLog*.XML
+_UpgradeReport_Files
+BuildLog.htm
+mt.dep
+ipch
+*.suo
+*.ncb
+*.user
+*.ilk
+*.pdb
+*.aps
+*.exp
+*.idb
+*.sdf
+
+# Python cache
+*.pyd
+*.pyc
+
+# Qt compiler
+moc_*.cpp
+*.moc
+
+# Misc garbage
+*.cachefile
+*.cache
+*.7z

@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ARRAY Name="Chances">
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="50"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="49"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="48"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="47"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="46"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="45"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="44"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="43"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="42"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="41"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="40"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="39"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="38"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="37"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="36"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="35"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="34"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="33"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="31"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="30"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="29"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="28"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="27"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="26"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="25"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="24"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="23"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="22"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="21"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="20"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="19"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="18"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="17"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="16"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="15"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="14"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="13"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="12"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="11"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="10"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="9"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="8"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="7"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="6"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="4"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="2"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="0"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-2"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-4"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-6"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-7"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-8"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-9"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-10"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-11"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-12"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-13"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-14"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-15"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-16"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-17"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-18"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-19"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-20"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-21"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-22"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-23"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-24"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-25"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-26"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-27"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-28"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-29"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-30"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-31"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-32"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-33"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-34"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-35"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-36"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-37"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-38"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-39"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-40"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-41"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-42"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-43"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-44"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-45"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-46"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-47"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-48"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-49"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="RelativeLevel" Value="-50"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG/>
+</FORM>

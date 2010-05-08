@@ -52,9 +52,11 @@
 #	if _MSC_VER >= 1500
 #		define NL_COMP_VC9
 #		include <string> // This way we know about _HAS_TR1 :O
-#		if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack
-#			define NL_ISO_STDTR1_AVAILABLE
-#			define NL_ISO_STDTR1_HEADER(header) <header>
+#		ifndef _STLPORT_VERSION // STLport doesn't depend on MS STL features
+#			if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack
+#				define NL_ISO_STDTR1_AVAILABLE
+#				define NL_ISO_STDTR1_HEADER(header) <header>
+#			endif
 #		endif
 #	elif _MSC_VER >= 1400
 #		define NL_COMP_VC8
@@ -262,14 +264,18 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #ifndef NL_ISO_STDTR1_AVAILABLE
 #	include <hash_map>
 #	include <hash_set>
-#	if defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
-#		define CHashMap stdext::hash_map
-#		define CHashSet stdext::hash_set
-#		define CHashMultiMap stdext::hash_multimap
-#	else // MSVC6
+#	ifdef _STLP_HASH_MAP
 #		define CHashMap ::std::hash_map
 #		define CHashSet ::std::hash_set
 #		define CHashMultiMap ::std::hash_multimap
+#		pragma message("Using STLport")
+#	elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
+#		define CHashMap stdext::hash_map
+#		define CHashSet stdext::hash_set
+#		define CHashMultiMap stdext::hash_multimap
+#		pragma message("Using MS STL")
+#	else
+#		pragma error("You need to update your compiler")
 #	endif
 #endif // NL_ISO_STDTR1_AVAILABLE
 
@@ -331,6 +337,7 @@ template<> struct hash<uint64>
 #	define CHashMap std::tr1::unordered_map
 #	define CHashSet std::tr1::unordered_set
 #	define CHashMultiMap std::tr1::unordered_multimap
+#	pragma message("Using TR1 extensions")
 #endif
 
 /**

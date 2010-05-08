@@ -247,7 +247,7 @@ bool	CLogAnalyserService::getQueryResult(uint32 queryId, std::string& result, si
 					page = numpage-1;
 
 				uint	lmin = page*linePerPage;
-				uint	lmax = std::min((uint)(lmin+linePerPage), _Finished[i]->Result.size());
+				uint	lmax = std::min((uint)(lmin+linePerPage), (uint)_Finished[i]->Result.size());
 				uint	l;
 
 				result.clear();
@@ -329,7 +329,7 @@ bool	CLogAnalyserService::getQueryResult(uint32 queryId, std::string& result, si
 					page = numpage-1;
 
 				uint	lmin = page*linePerPage;
-				uint	lmax = std::min((uint)(lmin+linePerPage), matchingLines.size());
+				uint	lmax = std::min((uint)(lmin+linePerPage), (uint)matchingLines.size());
 
 				result.clear();
 
