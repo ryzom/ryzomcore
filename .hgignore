@@ -39,7 +39,7 @@ default_c
 *.Po
 *.Plo
 *.o
-*.so*
+*.so.*
 *_debug
 
 # Log dump files
