@@ -1,5 +1,5 @@
-; AutoExp.Dat - templates for automaticially expanding data
-; Copyright(c) 1997 Microsoft Corporation. All Rights Reserved.
+; AutoExp.Dat - templates for automatically expanding data
+; Copyright(c) Microsoft Corporation. All Rights Reserved.
 ;---------------------------------------------------------------
 ;
 ; Location: C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin
@@ -13,64 +13,65 @@
 ; For good examples, read the rules in this file.
 ;
 ; To find what the debugger considers the type of a variable to
-; be, add it to the Watch window and right-click and select
-; Properties.
+; be, add it to the Watch window and look at the Type column.
 ;
-; An AutoExpand rule is a line with the name of a type, an equals 
-; sign, and text with replaceable parts in angle brackets. The 
-; part in angle brackets names a member of the type and an 
+; An AutoExpand rule is a line with the name of a type, an equals
+; sign, and text with replaceable parts in angle brackets. The
+; part in angle brackets names a member of the type and an
 ; optional Watch format specifier.
 ;
-; AutoExpand rules use the following syntax. The equals sign (=), 
+; AutoExpand rules use the following syntax. The equals sign (=),
 ; angle brackets (<>), and comma are taken literally. Square
 ; brackets ([]) indicate optional items.
 ;
 ; type=[text]<member[,format]>...
 ;
-; type      Name of the type (may be followed by <*> for template
-;           types such as the ATL types listed below).
+; type		Name of the type (may be followed by <*> for template
+;			types such as the ATL types listed below).
 ;
-; text      Any text.Usually the name of the member to display, 
-;           or a shorthand name for the member.
+; text		Any text.Usually the name of the member to display,
+;			or a shorthand name for the member.
 ;
-; member    Name of a member to display.
+; member	Name of a member to display.
 ;
-; format    Watch format specifier. One of the following:
+; format	Watch format specifier. One of the following:
 ;
-;   Letter  Description                 Sample         Display
-;   ------  --------------------------  ------------   -------------
-;   d,i     Signed decimal integer      0xF000F065,d   -268373915
-;   u       Unsigned decimal integer    0x0065,u       101
-;   o       Unsigned octal integer      0xF065,o       0170145
-;   x,X     Hexadecimal integer         61541,X        0X0000F065
-;   l,h     long or short prefix for    00406042,hx    0x0c22
-;             d, i, u, o, x, X
-;   f       Signed floating-point       3./2.,f        1.500000
-;   e       Signed scientific-notation  3./2.,e        1.500000e+000
-;   g       Shorter of e and f          3./2.,g        1.5
-;   c       Single character            0x0065,c       'e'
-;   s       Zero-terminated string      0x0012fde8,s   "Hello world"
-;   su      Unicode string              0x007200c4,su  "Hello world"
-;   st      String in ANSI or Unicode depending on current setting
+;	Letter	Description					Sample		   Display
+;	------	--------------------------	------------   -------------
+;	d,i		Signed decimal integer		0xF000F065,d   -268373915
+;	u		Unsigned decimal integer	0x0065,u	   101
+;	o		Unsigned octal integer		0xF065,o	   0170145
+;	x,X		Hexadecimal integer			61541,X		   0X0000F065
+;	l,h		long or short prefix for	00406042,hx    0x0c22
+;			  d, i, u, o, x, X
+;	f		Signed floating-point		3./2.,f		   1.500000
+;	e		Signed scientific-notation	3./2.,e		   1.500000e+000
+;	g		Shorter of e and f			3./2.,g		   1.5
+;	c		Single character			0x0065,c	   'e'
+;	s		Zero-terminated string		pVar,s		   "Hello world"
+;	su		Unicode string				pVar,su		   "Hello world"
 ;
-; The special format <,t> specifies the name of the most-derived 
+; For details of other format specifiers see Help under:
+; "format specifiers/watch variable"
+;
+; The special format <,t> specifies the name of the most-derived
 ; type of the object. This is especially useful with pointers or
 ; references to a base class.
 ;
 ; If there is no rule for a class, the base classes are checked for
 ; a matching rule.
 ;
-; -------
-; Unicode
-; -------
+; There are some special entries allowed in the AutoExpand section:
+; $BUILTIN is used to display more complex types that need to do more
+; than just show a member variable or two.
+; $ADDIN allows external DLLs to be added to display even more complex
+; types via the EE Add-in API. The first argument is the DLL name, the
+; second argument is the name of the export from the DLL to use. For
+; further information on this API see the sample called EEAddIn.
 ;
-; If your application is built for Unicode, you'll want Unicode 
-; strings to automatically expand as text, rather than arrays of 
-; unsigned short.  To automatically display Unicode strings as 
-; text, go to Tools/Options/Debug tab and check 'Display Unicode
-; strings'.
-;
-;---------------------------------------------------------------
+; WARNING: if hexadecimal mode is on in the watch window, all numbers here are
+; evaluated in hex, e.g. 42 becomes 0x42
+
 [AutoExpand]
 
 ; from windef.h
