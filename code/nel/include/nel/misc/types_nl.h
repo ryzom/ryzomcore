@@ -268,12 +268,10 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #		define CHashMap ::std::hash_map
 #		define CHashSet ::std::hash_set
 #		define CHashMultiMap ::std::hash_multimap
-#		pragma message("Using STLport")
 #	elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
 #		define CHashMap stdext::hash_map
 #		define CHashSet stdext::hash_set
 #		define CHashMultiMap stdext::hash_multimap
-#		pragma message("Using MS STL")
 #	else
 #		pragma error("You need to update your compiler")
 #	endif
@@ -337,7 +335,6 @@ template<> struct hash<uint64>
 #	define CHashMap std::tr1::unordered_map
 #	define CHashSet std::tr1::unordered_set
 #	define CHashMultiMap std::tr1::unordered_multimap
-#	pragma message("Using TR1 extensions")
 #endif
 
 /**
