@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/debug.h"
-#include "nel/misc/file.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/file.h>
 
 
 #include <string>
@@ -68,10 +68,10 @@ sint main( sint argc, char ** argv )
 		getline(input,line,'\n');
 
 		// search the version motif
-		sint32 idx = line.find(argv[2]);
+		string::size_type idx = line.find(argv[2]);
 
 		// if motif not found
-		if( idx == -1 )
+		if( idx == string::npos )
 		{
 			// we write the line in output and continue to the next line
 			fprintf(output,"%s\n",line.c_str());
@@ -83,7 +83,7 @@ sint main( sint argc, char ** argv )
 
 			// search the main version number
 			idx = line.find(argv[3]);
-			if( idx == -1 )
+			if( idx == string::npos )
 			{
 				fprintf(output,"%s\n",line.c_str());
 				continue;
@@ -92,9 +92,9 @@ sint main( sint argc, char ** argv )
 			versionNumberFound = true;
 
 			// get old build version number
-			sint32 oldBuildVersionStartIdx = line.rfind(".") + 1;
-			sint32 oldBuildVersionEndIdx = line.find_first_of(" \"\t",oldBuildVersionStartIdx) - 1;
-			if( oldBuildVersionEndIdx == -1) 
+			string::size_type oldBuildVersionStartIdx = line.rfind(".") + 1;
+			string::size_type oldBuildVersionEndIdx = line.find_first_of(" \"\t",oldBuildVersionStartIdx) - 1;
+			if( oldBuildVersionEndIdx == string::npos) 
 			{
 				oldBuildVersionEndIdx = line.size() - 1;
 			}
