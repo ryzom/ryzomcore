@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
  * Message tables.

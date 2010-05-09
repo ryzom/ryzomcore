@@ -1,4 +1,4 @@
-<?
+<?php
 include_once('../tools/validate_cookie.php');
 include_once('ring_session_manager_itf.php');
 include_once('../tools/domain_info.php');
