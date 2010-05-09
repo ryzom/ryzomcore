@@ -42,7 +42,7 @@
 
 // Operating systems definition
 
-#ifdef WIN32
+#ifdef _WIN32
 #	define NL_OS_WINDOWS
 #	define NL_LITTLE_ENDIAN
 #	define NL_CPU_INTEL
