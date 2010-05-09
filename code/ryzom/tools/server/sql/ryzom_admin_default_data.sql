@@ -6,6 +6,7 @@
 # HeidiSQL version:             5.0.0.3272
 # Date/time:                    2010-05-08 18:16:57
 # --------------------------------------------------------
+USE `nel_tool`;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
