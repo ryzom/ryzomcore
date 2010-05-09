@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <nel/misc/event_server.h>
+#include <nel/3d/driver.h>
+#include <nel/3d/nelu.h>
+
 #include "move_listener.h"
-#include "nel/misc/event_server.h"
-#include "nel/../../src/3d/driver.h"
-#include "nel/../../src/3d/nelu.h"
 
 
 using namespace NLMISC;

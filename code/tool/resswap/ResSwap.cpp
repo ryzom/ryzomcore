@@ -17,7 +17,7 @@
 // ResSwap.cpp : Defines the entry point for the application.
 //
 
-#include "stdafx.h"
+#include <windows.h>
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,

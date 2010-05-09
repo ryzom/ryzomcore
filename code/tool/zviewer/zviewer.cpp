@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/config_file.h"
-#include "nel/misc/debug.h"
-#include "nel/misc/path.h"
-#include "nel/misc/i18n.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/config_file.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/path.h>
+#include <nel/misc/i18n.h>
 
-#include "nel/../../src/3d/driver.h"
-#include "nel/../../src/3d/camera.h"
-#include "nel/../../src/3d/landscape_model.h"
-#include "nel/../../src/3d/landscape.h"
-#include "nel/../../src/3d/text_context.h"
-#include "nel/../../src/3d/mini_col.h"
-#include "nel/../../src/3d/nelu.h"
-#include "nel/../../src/3d/scene_group.h"
-#include "nel/../../src/3d/texture_file.h"
+#include <nel/3d/driver.h>
+#include <nel/3d/camera.h>
+#include <nel/3d/landscape_model.h>
+#include <nel/3d/landscape.h>
+#include <nel/3d/text_context.h>
+#include <nel/3d/mini_col.h>
+#include <nel/3d/nelu.h>
+#include <nel/3d/scene_group.h>
+#include <nel/3d/texture_file.h>
 
 //#include "nel/net/local_entity.h"
 
 #include "move_listener.h"
 
 // Tempyoyo.
-#include "nel/3d/height_map.h"
+#include <nel/3d/height_map.h>
 
 
 #include <string>

@@ -17,7 +17,6 @@
 // mkdir_date.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include <time.h>
 #include <stdio.h>
 #include <direct.h> 

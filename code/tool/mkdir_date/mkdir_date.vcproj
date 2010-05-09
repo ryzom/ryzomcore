@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="increment_version"
-	ProjectGUID="{863828F8-3836-45E7-B205-32AF60D97493}"
+	Name="mkdir_date"
+	ProjectGUID="{5D7A1ECD-1058-42F0-83E7-74B784F3DD35}"
 	>
 	<Platforms>
 		<Platform
@@ -319,7 +319,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="increment_version.cpp"
+			RelativePath="mkdir_date.cpp"
 			>
 		</File>
 	</Files>

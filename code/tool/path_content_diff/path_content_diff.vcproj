@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="increment_version"
-	ProjectGUID="{863828F8-3836-45E7-B205-32AF60D97493}"
+	Name="path_content_diff"
+	ProjectGUID="{6E0A8A9C-AE12-4709-91E5-1A662FEF26D9}"
 	>
 	<Platforms>
 		<Platform
@@ -319,7 +319,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="increment_version.cpp"
+			RelativePath="path_content_diff.cpp"
 			>
 		</File>
 	</Files>

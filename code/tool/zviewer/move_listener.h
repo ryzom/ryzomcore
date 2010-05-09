@@ -17,14 +17,14 @@
 #ifndef NL_MOVE_LISTENER_H
 #define NL_MOVE_LISTENER_H
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/time_nl.h"
-#include "nel/misc/event_listener.h"
-#include "nel/misc/matrix.h"
-#include "nel/3d/viewport.h"
-#include "nel/../../src/3d/scene.h"
-#include "nel/../../src/3d/camera.h"
-#include "nel/../../src/3d/driver.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/time_nl.h>
+#include <nel/misc/event_listener.h>
+#include <nel/misc/matrix.h>
+#include <nel/3d/viewport.h>
+#include <nel/3d/scene.h>
+#include <nel/3d/camera.h>
+#include <nel/3d/driver.h>
 
 
 
