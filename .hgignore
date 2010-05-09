@@ -19,6 +19,13 @@ Temp
 # NeL cache
 *.packed_sheets
 
+# Ryzom save
+save_shard
+last_loaded_char.bin
+*.binprim
+default_c
+*.string_cache
+
 # Windows compile
 *.exe
 *.dll
