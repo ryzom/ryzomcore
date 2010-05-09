@@ -28,17 +28,12 @@ Temp
 # Linux compile
 *.a
 *.la
+*.lo
+*.Po
+*.Plo
 *.o
+*.so*
 *_debug
-code/ryzom/server/src/entities_game_service/entities_game_service
-code/ryzom/server/src/frontend_service/frontend_service
-code/ryzom/server/src/gpm_service/gpm_service
-code/ryzom/server/src/input_output_service/input_output_service
-code/ryzom/server/src/mirror_service/mirror_service
-code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
-code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
-code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
-code/ryzom/server/src/tick_service/tick_service
 
 # Log dump files
 report_refused
@@ -53,8 +48,14 @@ log.txt
 *.dlm
 *.dlu
 
+#cmake build files & directories
+CMakeFiles
+*.cmake
+CMakeCache.txt
+.libs
+
 # Linux garbage
-Makefile.in
+Makefile*
 aclocal.m4
 config.guess
 config.sub
@@ -85,6 +86,13 @@ ipch
 *.idb
 *.sdf
 
+# Vim and kwrite cache
+*~
+
+# Kdevelop4 garbage
+*.kdev4
+.kdev4
+
 # Python cache
 *.pyd
 *.pyc
@@ -94,6 +102,60 @@ moc_*.cpp
 *.moc
 
 # Misc garbage
+*.orig
 *.cachefile
 *.cache
 *.7z
+
+# Linux nel compile
+code/nel/build/nel-config
+code/nel/config.status
+code/nel/include/nelconfig.h
+code/nel/include/stamp-h1
+code/nel/libtool
+code/nel/nel-config
+code/nel/samples/3d/cluster_viewer/cluster_viewer
+code/nel/samples/3d/font/font
+code/nel/samples/georges/georges
+code/nel/samples/misc/command/command
+code/nel/samples/misc/configfile/configfile
+code/nel/samples/misc/debug/debug
+code/nel/samples/misc/i18n/i18n
+code/nel/samples/misc/log/log
+code/nel/samples/misc/strings/strings
+code/nel/samples/net/chat/chatclient
+code/nel/samples/net/chat/chatserver
+code/nel/samples/net/login_system/nls_frontend_service
+code/nel/samples/net/login_system/nls_login_client
+code/nel/samples/net/udp/udp_bench_client
+code/nel/samples/net/udp/udp_bench_service
+code/nel/samples/pacs/pacs_sample
+code/nel/tools/3d/build_coarse_mesh/build_coarse_mesh
+code/nel/tools/3d/build_far_bank/build_far_bank
+code/nel/tools/3d/build_smallbank/build_smallbank
+code/nel/tools/3d/ig_lighter/ig_lighter
+code/nel/tools/3d/zone_dependencies/zone_dependencies
+code/nel/tools/3d/zone_ig_lighter/zone_ig_lighter
+code/nel/tools/3d/zone_lighter/zone_lighter
+code/nel/tools/3d/zone_welder/zone_welder
+code/nel/tools/misc/bnp_make/bnp_make
+code/nel/tools/misc/disp_sheet_id/disp_sheet_id
+code/nel/tools/misc/make_sheet_id/make_sheet_id
+code/nel/tools/misc/xml_packer/xml_packer
+code/nel/tools/pacs/build_ig_boxes/build_ig_boxes
+code/nel/tools/pacs/build_indoor_rbank/build_indoor_rbank
+code/nel/tools/pacs/build_rbank/build_rbank
+code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
+code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
+code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
+
+# Linux server compile
+code/ryzom/server/src/entities_game_service/entities_game_service
+code/ryzom/server/src/frontend_service/frontend_service
+code/ryzom/server/src/gpm_service/gpm_service
+code/ryzom/server/src/input_output_service/input_output_service
+code/ryzom/server/src/mirror_service/mirror_service
+code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
+code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
+code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
+code/ryzom/server/src/tick_service/tick_service
