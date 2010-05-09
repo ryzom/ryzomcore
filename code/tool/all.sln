@@ -21,7 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "path_content_diff", "path_c
 		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ren_date", "ren_date\ren_date_8.vcproj", "{76FE68B4-653F-4D61-8EA5-D5EBCB8FA2A0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ren_date", "ren_date\ren_date.vcproj", "{76FE68B4-653F-4D61-8EA5-D5EBCB8FA2A0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResSwap", "resswap\ResSwap.vcproj", "{45255B61-CD45-484A-89DB-B4D75EF04993}"
 EndProject
