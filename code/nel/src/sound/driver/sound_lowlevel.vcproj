@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="sound_lowlevel"
 	ProjectGUID="{89064E9B-14E9-4FB2-8536-A9151DF55C68}"
 	RootNamespace="sound_lowlevel"
