@@ -49,7 +49,7 @@ CTaskManager::~CTaskManager()
 		nlSleep(10);
 
 	// There should be no remaining Tasks
-	CSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	nlassert(acces.value().empty());
 	_Thread->wait();
 	delete _Thread;
@@ -65,7 +65,7 @@ void CTaskManager::run(void)
 	while(_ThreadRunning)
 	{
 		{
-			CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+			CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 			if(acces.value().empty())
 			{
 				runnableTask = NULL;
@@ -126,14 +126,14 @@ void CTaskManager::run(void)
 // Add a task to TaskManager
 void CTaskManager::addTask(IRunnable *r, float priority)
 {
-	CSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	acces.value().push_back(CWaitingTask(r, priority));
 }
 
 /// Delete a task, only if task is not running, return true if found and deleted
 bool CTaskManager::deleteTask(IRunnable *r)
 {
-	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	for(list<CWaitingTask>::iterator it = acces.value().begin(); it != acces.value().end(); it++)
 	{
 		if(it->Task == r)
@@ -148,7 +148,7 @@ bool CTaskManager::deleteTask(IRunnable *r)
 /// Task list size
 uint CTaskManager::taskListSize(void)
 {
-	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	return acces.value().size();
 }
 
@@ -164,7 +164,7 @@ void	CTaskManager::waitCurrentTaskToComplete ()
 void CTaskManager::dump (std::vector<std::string> &result)
 {
 	CSynchronized<string>::CAccessor accesCurrent(&_RunningTask);
-	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	CSynchronized<deque<string> >::CAccessor accesDone(&_DoneTaskQueue);
 
 	const list<CWaitingTask> &taskList = acces.value();
@@ -215,7 +215,7 @@ void CTaskManager::clearDump()
 
 uint CTaskManager::getNumWaitingTasks()
 {
-	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	return acces.value().size();
 }
 
@@ -225,7 +225,7 @@ void CTaskManager::changeTaskPriority ()
 {
 	if (_ChangePriorityCallback)
 	{
-		CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+		CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 		list<CWaitingTask> &taskList = acces.value();
 
 		list<CWaitingTask>::iterator ite = taskList.begin();

@@ -611,13 +611,13 @@ public:
 		CAccessor(CUnfairSynchronized<T> *cs)
 		{
 			Synchronized = cs;
-			const_cast<CMutex&>(Synchronized->_Mutex).enter();
+			const_cast<CUnfairMutex&>(Synchronized->_Mutex).enter();
 		}
 
 		/// release the mutex
 		~CAccessor()
 		{
-			const_cast<CMutex&>(Synchronized->_Mutex).leave();
+			const_cast<CUnfairMutex&>(Synchronized->_Mutex).leave();
 		}
 
 		/// access to the Value
