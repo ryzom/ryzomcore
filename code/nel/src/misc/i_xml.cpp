@@ -101,7 +101,7 @@ void CIXml::release ()
 		// Free it
 		xmlClearParserCtxt (_Parser);
 		xmlFreeParserCtxt (_Parser);
-		xmlCleanupParser ();
+		// commented due to the bug #857 xmlCleanupParser ();
 
 		_Parser = NULL;
 	}
