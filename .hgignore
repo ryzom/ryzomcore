@@ -9,6 +9,7 @@ ReleaseDebug
 DebugFast
 ReleaseDebugStatic
 DebugFastStatic
+external
 
 # Test and application directories
 screenshots
