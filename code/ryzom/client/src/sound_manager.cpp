@@ -464,6 +464,12 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		UAudioMixer::TDriver	driverType= UAudioMixer::DriverAuto;
 		if(ClientCfg.DriverSound==CClientConfig::SoundDrvFMod)
 			driverType= UAudioMixer::DriverFMod;
+		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
+			driverType= UAudioMixer::DriverOpenAl;
+		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvDirectSound)
+			driverType= UAudioMixer::DriverDSound;
+		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvXAudio2)
+			driverType= UAudioMixer::DriverXAudio2;
 		_AudioMixer->init(ClientCfg.MaxTrack, ClientCfg.UseEax, ClientCfg.UseADPCM, progressCallBack, false, driverType, ClientCfg.SoundForceSoftwareBuffer);
 /*		int nbVoice = _AudioMixer->getPolyphony();
 		_AudioMixer->setPriorityReserve(HighPri, max(1, nbVoice /2));
