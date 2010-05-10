@@ -16,8 +16,8 @@
 
 #include "stdsound.h"
 
-#include "complex_source.h"
-#include "complex_sound.h"
+#include "nel/sound/complex_source.h"
+#include "nel/sound/complex_sound.h"
 
 using namespace std;
 using namespace NLMISC;

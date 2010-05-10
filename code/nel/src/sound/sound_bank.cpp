@@ -16,19 +16,19 @@
 
 #include "stdsound.h"
 
-#include "sound_bank.h"
-#include "simple_sound.h"
-#include "complex_sound.h"
-#include "context_sound.h"
-#include "background_sound.h"
-#include "music_sound.h"
-#include "stream_sound.h"
+#include "nel/sound/sound_bank.h"
+#include "nel/sound/simple_sound.h"
+#include "nel/sound/complex_sound.h"
+#include "nel/sound/context_sound.h"
+#include "nel/sound/background_sound.h"
+#include "nel/sound/music_sound.h"
+#include "nel/sound/stream_sound.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form.h"
 #include "nel/misc/path.h"
-#include "driver/buffer.h"
+#include "nel/sound/driver/buffer.h"
 
 #include "nel/georges/load_form.h"
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/types_nl.h>
-#include "music_channel.h"
+#include "nel/sound/driver/music_channel.h"
 
 // STL includes
 

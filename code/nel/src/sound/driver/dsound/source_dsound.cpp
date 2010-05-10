@@ -21,7 +21,7 @@
 #include "sound_driver_dsound.h"
 #include "buffer_dsound.h"
 #include "listener_dsound.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 
 #include <algorithm>
 
@@ -619,6 +619,7 @@ void CSourceDSound::fadeOut(const TLockedBufferInfo &lbi)
 
 	ptr = lbi.Ptr2;
 	count = lbi.Size2/2;
+
 
 	while (fade && count)
 	{

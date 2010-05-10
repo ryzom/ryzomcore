@@ -1,0 +1,3 @@
+FILE(GLOB HEADERS *.h)
+
+INSTALL(FILES ${HEADERS} DESTINATION include/nel/sound/driver COMPONENT headers)

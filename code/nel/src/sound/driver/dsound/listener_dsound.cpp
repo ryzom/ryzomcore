@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stddsound.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 
 #include "listener_dsound.h"
 #include "sound_driver_dsound.h"

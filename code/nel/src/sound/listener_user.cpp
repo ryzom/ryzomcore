@@ -16,8 +16,8 @@
 
 #include "stdsound.h"
 
-#include "listener_user.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/listener_user.h"
+#include "nel/sound/audio_mixer_user.h"
 
 
 namespace NLSOUND {

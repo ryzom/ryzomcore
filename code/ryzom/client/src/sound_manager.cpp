@@ -51,8 +51,8 @@
 
 #if defined(DEBUG_SOUND_IN_GAME)
 //sound
-# include "nel/../../src/sound/clustered_sound.h"
-# include "nel/../../src/sound/audio_mixer_user.h"
+# include "nel/sound/clustered_sound.h"
+# include "nel/sound/audio_mixer_user.h"
 // 3d
 # include "nel/3d/cluster.h"
 # include "nel/3d/portal.h"
@@ -1506,6 +1506,7 @@ void		CSoundManager::stopEventMusic(const string &fileName, uint xFadeTime)
 	if(_AudioMixer)
 	{
 		// if the event music is the one currently played, or if empty fileName
+
 		if(fileName.empty() || nlstricmp(_EventMusicPlayed,fileName)==0)
 		{
 			// stop the music

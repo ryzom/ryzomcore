@@ -22,7 +22,7 @@
 
 // NeL includes
 #include <nel/misc/mutex.h>
-#include "../buffer.h"
+#include "nel/sound/driver/buffer.h"
 
 // Project includes
 // #include "sound_driver_xaudio2.h"

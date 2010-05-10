@@ -18,9 +18,9 @@
 #define NL_LISTENER_FMOD_H
 
 
-#include "../listener.h"
+#include "nel/sound/driver/listener.h"
 #include "nel/misc/matrix.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 //#ifdef NL_OS_WINDOWS
 //#include <dsound.h>
 //#endif

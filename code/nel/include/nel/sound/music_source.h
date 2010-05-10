@@ -18,7 +18,7 @@
 #define NL_MUSIC_SOURCE_H
 
 #include "nel/misc/types_nl.h"
-#include "source_common.h"
+#include "nel/sound/source_common.h"
 
 
 namespace NLSOUND {

@@ -18,7 +18,7 @@
 #define NL_BACKGROUND_SOUND_MANAGER_H
 
 #include "nel/misc/types_nl.h"
-#include "background_sound.h"
+#include "nel/sound/background_sound.h"
 #include <vector>
 #include <set>
 

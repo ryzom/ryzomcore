@@ -18,7 +18,7 @@
 #define NL_MUSIC_SOUND_H
 
 #include "nel/misc/string_mapper.h"
-#include "sound.h"
+#include "nel/sound/sound.h"
 
 
 namespace NLSOUND {

@@ -26,15 +26,15 @@
 #include "nel/3d/cluster.h"
 
 #include "nel/sound/u_source.h"
-#include "clustered_sound.h"
-#include "sample_bank_manager.h"
-#include "sample_bank.h"
+#include "nel/sound/clustered_sound.h"
+#include "nel/sound/sample_bank_manager.h"
+#include "nel/sound/sample_bank.h"
 
-#include "background_sound_manager.h"
-#include "source_common.h"
-#include "clustered_sound.h"
+#include "nel/sound/background_sound_manager.h"
+#include "nel/sound/source_common.h"
+#include "nel/sound/clustered_sound.h"
 #include <algorithm>
-#include "background_source.h"
+#include "nel/sound/background_source.h"
 #include <list>
 
 using namespace std;

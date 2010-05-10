@@ -16,13 +16,13 @@
 
 #include "stdsound.h"
 
-#include "driver/buffer.h"
-#include "driver/source.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/driver/source.h"
 
-#include "simple_source.h"
-#include "mixing_track.h"
-#include "simple_sound.h"
-#include "clustered_sound.h"
+#include "nel/sound/simple_source.h"
+#include "nel/sound/mixing_track.h"
+#include "nel/sound/simple_sound.h"
+#include "nel/sound/clustered_sound.h"
 
 using namespace NLMISC;
 

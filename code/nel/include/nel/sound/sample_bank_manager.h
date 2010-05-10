@@ -27,7 +27,7 @@
 #include <nel/georges/u_form_elm.h>
 
 // Project includes
-#include "audio_mixer_user.h"
+#include "nel/sound/audio_mixer_user.h"
 
 namespace NLSOUND {
 	class ISoundDriver;

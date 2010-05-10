@@ -16,16 +16,16 @@
 
 #include "stdsound.h"
 
-#include "sound.h"
+#include "nel/sound/sound.h"
 #include "nel/misc/path.h"
-#include "sound_bank.h"
+#include "nel/sound/sound_bank.h"
 
-#include "simple_sound.h"
-#include "complex_sound.h"
-#include "background_sound.h"
-#include "context_sound.h"
-#include "music_sound.h"
-#include "stream_sound.h"
+#include "nel/sound/simple_sound.h"
+#include "nel/sound/complex_sound.h"
+#include "nel/sound/background_sound.h"
+#include "nel/sound/context_sound.h"
+#include "nel/sound/music_sound.h"
+#include "nel/sound/stream_sound.h"
 
 using namespace std;
 using namespace NLMISC;

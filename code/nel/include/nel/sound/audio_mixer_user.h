@@ -29,11 +29,11 @@
 #include <nel/georges/u_form.h>
 
 #include "driver/source.h"
-#include "listener_user.h"
+#include "nel/sound/listener_user.h"
 //#include "background_sound_manager.h"
-#include "mixing_track.h"
-#include "sound.h"
-#include "music_channel_fader.h"
+#include "nel/sound/mixing_track.h"
+#include "nel/sound/sound.h"
+#include "nel/sound/music_channel_fader.h"
 
 namespace NLLIGO {
 	class CLigoConfig;

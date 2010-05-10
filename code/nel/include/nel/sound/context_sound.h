@@ -17,7 +17,7 @@
 #ifndef NL_CONTEXT_SOUND_H
 #define NL_CONTEXT_SOUND_H
 
-#include "sound.h"
+#include "nel/sound/sound.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/string_mapper.h"
 

@@ -19,7 +19,7 @@
 
 #include "nel/misc/string_mapper.h"
 #include "nel/3d/cluster.h"
-#include "u_source.h"
+#include "nel/sound/u_source.h"
 
 
 namespace NLMISC

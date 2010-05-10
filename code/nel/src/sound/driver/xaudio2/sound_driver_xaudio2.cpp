@@ -27,7 +27,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/dynloadlib.h>
 #include <nel/misc/command.h>
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 #include "music_buffer.h" // ../
 
 // Project includes

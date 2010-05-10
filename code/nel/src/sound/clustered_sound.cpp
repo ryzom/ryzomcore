@@ -25,11 +25,11 @@
 #include "nel/3d/scene_user.h"
 #include "nel/3d/cluster.h"
 #include "nel/3d/portal.h"
-#include "driver/listener.h"
-#include "audio_mixer_user.h"
-#include "driver/sound_driver.h"
-#include "driver/effect.h"
-#include "clustered_sound.h"
+#include "nel/sound/driver/listener.h"
+#include "nel/sound/audio_mixer_user.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/effect.h"
+#include "nel/sound/clustered_sound.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -710,6 +710,7 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 									tc.OcclusionLFFactor = css.OcclusionLFFactor;
 									tc.OcclusionRoomRatio = css.OcclusionRoomRatio;
 									tc.Obstruction = css.Obstruction;
+
 									tc.Direction1 = d1;
 									tc.Direction2 = d2;
 									tc.NbPortal = travContext.NbPortal+1;
