@@ -961,7 +961,7 @@ void CDDXManager::release()
 // ***************************************************************************
 void CDDXManager::add(CInterfaceDDX *pDDX)
 {
-	_DDXes.insert(pair<string,CInterfaceDDX*>::pair(pDDX->getId(),pDDX));
+	_DDXes.insert(pair<string,CInterfaceDDX*>(pDDX->getId(),pDDX));
 }
 
 // ***************************************************************************

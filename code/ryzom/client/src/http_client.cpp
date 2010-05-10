@@ -193,7 +193,7 @@ void CHttpClient::disconnect()
 // ***************************************************************************
 bool CStartupHttpClient::connectToLogin()
 {
-	return connect("open.ryzom.com:40916");
+	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
 }
 
 CStartupHttpClient HttpClient;

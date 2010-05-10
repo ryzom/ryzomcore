@@ -116,7 +116,7 @@ static char rz_sccsid[] = "@(#)crypt.c	8.1 (Berkeley) 6/4/93";
  * define "LONG_IS_32_BITS" only if sizeof(long)==4.
  * This avoids use of bit fields (your compiler may be sloppy with them).
  */
-#if !defined(cray)
+#if !defined(cray) && !defined(__LP64__) && !defined(_LP64)
 #define	LONG_IS_32_BITS
 #endif
 
@@ -124,7 +124,7 @@ static char rz_sccsid[] = "@(#)crypt.c	8.1 (Berkeley) 6/4/93";
  * define "B64" to be the declaration for a 64 bit integer.
  * XXX this feature is currently unused, see "endian" comment below.
  */
-#if defined(cray)
+#if defined(cray) || defined(__LP64__) || defined(_LP64)
 #define	B64	long
 #endif
 #if defined(convex)

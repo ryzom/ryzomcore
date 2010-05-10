@@ -294,7 +294,12 @@ CClientConfig::CClientConfig()
 
 	ForceDeltaTime		= 0;						// Default ForceDeltaTime, disabled by default
 
+#ifdef NL_OS_WINDOWS
 	DisableDirectInput		= false;				// Default DisableDirectInput
+#else
+	DisableDirectInput		= true;					// no direct input on linux
+#endif
+
 	DisableDirectInputKeyboard = true;				// Default DisableDirectInput fort he keyboard only
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 0.85f;

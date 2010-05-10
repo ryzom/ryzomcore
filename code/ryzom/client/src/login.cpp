@@ -177,9 +177,9 @@ void createOptionalCatUI()
 	{
 		vector< pair < string, string > > params;
 		params.clear();
-		params.push_back(pair<string,string>::pair("id", "c"+toString(i)));
+		params.push_back(pair<string,string>("id", "c"+toString(i)));
 		if (i>0)
-			params.push_back(pair<string,string>::pair("posref", "BL TL"));
+			params.push_back(pair<string,string>("posref", "BL TL"));
 
 		CInterfaceGroup *pNewLine = pIM->createGroupInstance("t_cat", GROUP_LIST_CAT, params);
 		if (pNewLine != NULL)
@@ -1103,9 +1103,9 @@ void initShardDisplay()
 	{
 		vector< pair < string, string > > params;
 		params.clear();
-		params.push_back(pair<string,string>::pair("id", "s"+toString(i)));
+		params.push_back(pair<string,string>("id", "s"+toString(i)));
 		if (i>0)
-			params.push_back(pair<string,string>::pair("posref", "BL TL"));
+			params.push_back(pair<string,string>("posref", "BL TL"));
 
 		CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
 		if (pNewLine != NULL)
@@ -1229,9 +1229,9 @@ void onlogin(bool vanishScreen = true)
 //		{
 //			vector< pair < string, string > > params;
 //			params.clear();
-//			params.push_back(pair<string,string>::pair("id", "s"+toString(i)));
+//			params.push_back(pair<string,string>("id", "s"+toString(i)));
 //			if (i>0)
-//				params.push_back(pair<string,string>::pair("posref", "BL TL"));
+//				params.push_back(pair<string,string>("posref", "BL TL"));
 //
 //			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
 //			if (pNewLine != NULL)
@@ -2033,23 +2033,23 @@ class CAHInitResLod : public IActionHandler
 		// first indicates the preset-able cfg-variable
 		// second indicates if its a double variable (else it's an int)
 		CfgPresetList.clear();
-		CfgPresetList.push_back(pair<string,bool>::pair("LandscapeTileNear",	true));
-		CfgPresetList.push_back(pair<string,bool>::pair("LandscapeThreshold",	true));
-		CfgPresetList.push_back(pair<string,bool>::pair("Vision",				true));
-		CfgPresetList.push_back(pair<string,bool>::pair("MicroVeget",			false));
-		CfgPresetList.push_back(pair<string,bool>::pair("MicroVegetDensity",	true));
-		CfgPresetList.push_back(pair<string,bool>::pair("FxNbMaxPoly",			false));
-		CfgPresetList.push_back(pair<string,bool>::pair("Cloud",				false));
-		CfgPresetList.push_back(pair<string,bool>::pair("CloudQuality",			true));
-		CfgPresetList.push_back(pair<string,bool>::pair("CloudUpdate",			false));
-		CfgPresetList.push_back(pair<string,bool>::pair("Shadows",				false));
-		CfgPresetList.push_back(pair<string,bool>::pair("SkinNbMaxPoly",		false));
-		CfgPresetList.push_back(pair<string,bool>::pair("NbMaxSkeletonNotCLod",	false));
-		CfgPresetList.push_back(pair<string,bool>::pair("CharacterFarClip",		true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeTileNear",	true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeThreshold",	true));
+		CfgPresetList.push_back(pair<string,bool>("Vision",				true));
+		CfgPresetList.push_back(pair<string,bool>("MicroVeget",			false));
+		CfgPresetList.push_back(pair<string,bool>("MicroVegetDensity",	true));
+		CfgPresetList.push_back(pair<string,bool>("FxNbMaxPoly",			false));
+		CfgPresetList.push_back(pair<string,bool>("Cloud",				false));
+		CfgPresetList.push_back(pair<string,bool>("CloudQuality",			true));
+		CfgPresetList.push_back(pair<string,bool>("CloudUpdate",			false));
+		CfgPresetList.push_back(pair<string,bool>("Shadows",				false));
+		CfgPresetList.push_back(pair<string,bool>("SkinNbMaxPoly",		false));
+		CfgPresetList.push_back(pair<string,bool>("NbMaxSkeletonNotCLod",	false));
+		CfgPresetList.push_back(pair<string,bool>("CharacterFarClip",		true));
 
-		CfgPresetList.push_back(pair<string,bool>::pair("Bloom",				false));
-		CfgPresetList.push_back(pair<string,bool>::pair("SquareBloom",			false));
-		CfgPresetList.push_back(pair<string,bool>::pair("DensityBloom",			true));
+		CfgPresetList.push_back(pair<string,bool>("Bloom",				false));
+		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
+		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));
 
 		// Check if all the preset-able cfg-variable are in a preset mode
 		sint nPreset = -1;
