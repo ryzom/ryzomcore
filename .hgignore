@@ -9,7 +9,6 @@ ReleaseDebug
 DebugFast
 ReleaseDebugStatic
 DebugFastStatic
-external
 
 # Test and application directories
 screenshots
@@ -94,6 +93,12 @@ ipch
 *.idb
 *.sdf
 
+# Ryzom server garbage
+aes_nagios_report.txt
+aes_state.txt
+*.launch_ctrl
+*.state
+
 # Vim and kwrite cache
 *~
 
@@ -113,7 +118,9 @@ moc_*.cpp
 *.orig
 *.cachefile
 *.cache
+*.patch
 *.7z
+external
 
 # Linux nel compile
 code/nel/build/nel-config
