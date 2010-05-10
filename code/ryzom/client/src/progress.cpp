@@ -68,7 +68,7 @@ CProgress::CProgress ()
 	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
 	// instanciate the taskbar control COM object
-	if (SUCCEEDED(hr)) CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTaskbarList));
+//	if (SUCCEEDED(hr)) CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTaskbarList));
 #endif // TASKBAR_PROGRESS
 }
 
