@@ -477,8 +477,10 @@ string CSystemInfo::getOS()
 			{
 				if( GetSystemMetrics(89 /* SM_SERVERR2 */) )
 					OSString += " Windows Server 2003 R2";
+#ifdef VER_SUITE_STORAGE_SERVER
 				else if ( osvi.wSuiteMask == VER_SUITE_STORAGE_SERVER )
 					OSString += " Windows Storage Server 2003";
+#endif
 #ifdef VER_SUITE_WH_SERVER
 				else if ( osvi.wSuiteMask == VER_SUITE_WH_SERVER )
 					OSString += " Windows Home Server";
@@ -512,14 +514,20 @@ string CSystemInfo::getOS()
 
 					else
 					{
-						if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
-							OSString += " Compute Cluster Edition";
+						if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+							OSString += " Enterprise Edition";
+#ifdef VER_SUITE_DATACENTER
 						else if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
 							OSString += " Datacenter Edition";
-						else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-							OSString += " Enterprise Edition";
+#endif
+#ifdef VER_SUITE_BLADE
 						else if ( osvi.wSuiteMask & VER_SUITE_BLADE )
 							OSString += " Web Edition";
+#endif
+#ifdef VER_SUITE_COMPUTE_SERVER
+						else if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
+							OSString += " Compute Cluster Edition";
+#endif
 						else
 							OSString += " Standard Edition";
 					}
