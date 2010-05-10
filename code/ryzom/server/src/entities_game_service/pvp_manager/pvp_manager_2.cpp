@@ -1272,7 +1272,7 @@ NLMISC_COMMAND(setFactionWar, "Start/stop current wars between faction", "<Facti
 		return false;
 	}
 
-	if( faction1 < PVP_CLAN::BeginClans || faction1 > PVP_CLAN::EndClans )
+	if( faction2 < PVP_CLAN::BeginClans || faction2 > PVP_CLAN::EndClans )
 	{
 		log.displayNL("Invalid Faction2 name: '%s'", args[1].c_str());
 		return false;

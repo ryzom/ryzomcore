@@ -39,6 +39,7 @@ default_c
 *.Po
 *.Plo
 *.o
+*.so
 *.so.*
 *_debug
 
@@ -93,6 +94,12 @@ ipch
 *.idb
 *.sdf
 
+# Ryzom server garbage
+aes_nagios_report.txt
+aes_state.txt
+*.launch_ctrl
+*.state
+
 # Vim and kwrite cache
 *~
 
@@ -112,7 +119,9 @@ moc_*.cpp
 *.orig
 *.cachefile
 *.cache
+*.patch
 *.7z
+external
 
 # Linux nel compile
 code/nel/build/nel-config

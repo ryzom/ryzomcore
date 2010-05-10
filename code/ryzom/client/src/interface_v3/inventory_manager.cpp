@@ -2795,17 +2795,17 @@ class CHandlerInvTempAll : public IActionHandler
 
 		// Try to put all items in the DB order in all the bags of the player : (bag, pa0-3, steed)
 		vector <pair <double, double> > BagsBulk;
-		BagsBulk.push_back(pair <double, double>::pair(pInv->getBagBulk(0), pInv->getMaxBagBulk(0)));
+		BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(0), pInv->getMaxBagBulk(0)));
 
 		nlctassert(MAX_INVENTORY_ANIMAL==4);
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal1))
-			BagsBulk.push_back(pair <double, double>::pair(pInv->getBagBulk(2), pInv->getMaxBagBulk(2)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(2), pInv->getMaxBagBulk(2)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal2))
-			BagsBulk.push_back(pair <double, double>::pair(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal3))
-			BagsBulk.push_back(pair <double, double>::pair(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
-			BagsBulk.push_back(pair <double, double>::pair(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
 
 		bool bPlaceFound = true;
 
