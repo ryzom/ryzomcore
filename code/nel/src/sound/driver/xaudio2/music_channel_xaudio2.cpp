@@ -25,7 +25,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/stream.h>
-#include "music_buffer.h"
+#include "nel/sound/driver/music_buffer.h"
 
 // Project includes
 #include "sound_driver_xaudio2.h"

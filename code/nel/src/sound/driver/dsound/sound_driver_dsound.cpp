@@ -24,7 +24,7 @@
 #endif
 #define DIRECTSOUND_VERSION 0x0800
 
-#include ".nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 
 #include <cmath>
 
@@ -577,6 +577,7 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 
 		}
 	}
+
 
 	memset(ptr, 0, bytes);
 
