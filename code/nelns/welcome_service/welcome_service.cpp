@@ -118,7 +118,7 @@ CVariable<bool>		UsePatchMode("ws", "UsePatchMode", "Use Frontends as Patch serv
 /**
  * Use Patch mode
  */
-CVariable<bool>		DontUseLS("ws", "DontUseLS", "Dont use the login service", false, 0, true);
+CVariable<bool>		DontUseLS("ws", "DontUseLS", "Don't use the login service", false, 0, true);
 
 
 // Shortcut to the module instance
