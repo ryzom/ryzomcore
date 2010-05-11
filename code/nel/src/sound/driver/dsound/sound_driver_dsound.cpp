@@ -578,7 +578,6 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 		}
 	}
 
-
 	memset(ptr, 0, bytes);
 
 	_PrimaryBuffer->Unlock(ptr, bytes, 0, 0);
