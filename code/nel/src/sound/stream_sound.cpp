@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
-#include "stream_sound.h"
+#include "nel/sound/stream_sound.h"
 
 // STL includes
 

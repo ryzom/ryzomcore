@@ -25,9 +25,9 @@
 
 // Project includes
 #include <nel/sound/u_stream_source.h>
-#include "source_common.h"
-#include "mixing_track.h"
-#include "stream_sound.h"
+#include "nel/sound/source_common.h"
+#include "nel/sound/mixing_track.h"
+#include "nel/sound/stream_sound.h"
 
 namespace NLSOUND {
 	class IBuffer;

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
-#include "sample_bank_manager.h"
+#include "nel/sound/sample_bank_manager.h"
 
 // STL includes
 
@@ -25,12 +25,12 @@
 #include <nel/misc/file.h>
 
 // Project includes
-#include "driver/sound_driver.h"
-#include "driver/buffer.h"
-#include "sample_bank.h"
-#include "async_file_manager_sound.h"
-#include "background_sound_manager.h"
-#include "sound_bank.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/sample_bank.h"
+#include "nel/sound/async_file_manager_sound.h"
+#include "nel/sound/background_sound_manager.h"
+#include "nel/sound/sound_bank.h"
 
 using namespace std;
 using namespace NLMISC;

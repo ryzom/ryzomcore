@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
-#include "stream_source.h"
+#include "nel/sound/stream_source.h"
 
 // STL includes
 
@@ -24,10 +24,10 @@
 #include <nel/misc/vector.h>
 
 // Project includes
-#include "driver/buffer.h"
-#include "audio_mixer_user.h"
-#include "stream_sound.h"
-#include "clustered_sound.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/audio_mixer_user.h"
+#include "nel/sound/stream_sound.h"
+#include "nel/sound/clustered_sound.h"
 
 // using namespace std;
 using namespace NLMISC;

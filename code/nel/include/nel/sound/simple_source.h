@@ -21,9 +21,9 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/time_nl.h"
 
-#include "audio_mixer_user.h"
-#include "source_common.h"
-#include "simple_sound.h"
+#include "nel/sound/audio_mixer_user.h"
+#include "nel/sound/source_common.h"
+#include "nel/sound/simple_sound.h"
 
 namespace NLSOUND {
 	class ISource;

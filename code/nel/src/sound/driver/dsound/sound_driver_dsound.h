@@ -18,10 +18,10 @@
 #define NL_SOUND_DRIVER_DSOUND_H
 
 #include "nel/misc/log.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 #include "source_dsound.h"
 #include "buffer_dsound.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 #include <iostream>
 
 namespace NLSOUND {

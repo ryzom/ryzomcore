@@ -21,7 +21,7 @@
 #include "nel/sound/u_source.h"
 #include "nel/sound/u_stream_source.h"
 #include "nel/3d/cluster.h"
-#include "sound.h"
+#include "nel/sound/sound.h"
 
 
 namespace NLSOUND {

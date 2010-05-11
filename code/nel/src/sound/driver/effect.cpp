@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/types_nl.h>
-#include "effect.h"
+#include "nel/sound/driver/effect.h"
 
 // STL includes
 

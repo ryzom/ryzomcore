@@ -19,8 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 //#include "nel/sound/u_source.h"
-#include "source_common.h"
-#include "background_sound.h"
+#include "nel/sound/source_common.h"
+#include "nel/sound/background_sound.h"
 
 
 namespace NLSOUND {

@@ -17,7 +17,7 @@
 #ifndef NL_SOUND_ANIM_TRACK_H
 #define NL_SOUND_ANIM_TRACK_H
 
-#include "sound_anim_manager.h"
+#include "nel/sound/sound_anim_manager.h"
 
 namespace NLMISC
 {

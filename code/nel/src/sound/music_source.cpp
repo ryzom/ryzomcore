@@ -16,10 +16,10 @@
 
 #include "stdsound.h"
 
-#include "music_source.h"
-#include "music_sound.h"
-#include "audio_mixer_user.h"
-#include "music_sound_manager.h"
+#include "nel/sound/music_source.h"
+#include "nel/sound/music_sound.h"
+#include "nel/sound/audio_mixer_user.h"
+#include "nel/sound/music_sound_manager.h"
 
 
 namespace NLSOUND {

@@ -23,7 +23,7 @@
 // NeL includes
 
 // Project includes
-#include "sound.h"
+#include "nel/sound/sound.h"
 
 namespace NLSOUND {
 

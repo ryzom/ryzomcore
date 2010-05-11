@@ -21,7 +21,7 @@
 #include "sound_driver_fmod.h"
 #include "buffer_fmod.h"
 #include "listener_fmod.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 #include <cfloat>
 
 

@@ -22,7 +22,7 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/sound/u_source.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/audio_mixer_user.h"
 #include <string>
 
 namespace NLSOUND {

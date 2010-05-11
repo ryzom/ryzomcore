@@ -16,8 +16,8 @@
 
 #include "stdsound.h"
 
-#include "context_sound.h"
-#include "sound_bank.h"
+#include "nel/sound/context_sound.h"
+#include "nel/sound/sound_bank.h"
 
 using namespace std;
 using namespace NLMISC;

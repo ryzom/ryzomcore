@@ -16,7 +16,7 @@
 
 #include "stdsound.h"
 
-#include "mixing_track.h"
+#include "nel/sound/mixing_track.h"
 
 
 // leave not static else this workaround don't work

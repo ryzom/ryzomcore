@@ -28,9 +28,9 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/vector.h>
 
-#include "../sound_driver.h"
-#include "../buffer.h"
-#include "../source.h"
-#include "../listener.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/driver/source.h"
+#include "nel/sound/driver/listener.h"
 
 /* end of file */

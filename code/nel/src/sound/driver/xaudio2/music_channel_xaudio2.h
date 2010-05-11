@@ -21,7 +21,7 @@
 // STL includes
 
 // NeL includes
-#include "../music_channel.h"
+#include "nel/sound/driver/music_channel.h"
 
 // Project includes
 

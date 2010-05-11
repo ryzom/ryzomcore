@@ -16,7 +16,7 @@
 
 #include "stdsound.h"
 
-#include "music_sound.h"
+#include "nel/sound/music_sound.h"
 #include "nel/misc/path.h"
 #include "nel/georges/u_form_elm.h"
 

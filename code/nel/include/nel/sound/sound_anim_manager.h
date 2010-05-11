@@ -19,7 +19,7 @@
 
 
 #include "nel/misc/vector.h"
-#include "u_source.h"
+#include "nel/sound/u_source.h"
 
 namespace NL3D
 {

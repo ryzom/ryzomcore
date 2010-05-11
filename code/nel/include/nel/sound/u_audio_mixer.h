@@ -19,7 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "u_source.h"
+#include "nel/sound/u_source.h"
 #include "nel/ligo/primitive.h"
 #include <vector>
 

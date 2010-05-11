@@ -19,7 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/audio_mixer_user.h"
 #include <string>
 
 namespace NLSOUND {

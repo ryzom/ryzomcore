@@ -20,7 +20,7 @@
 // STL includes
 
 // NeL includes
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 #include <nel/misc/debug.h>
 
 // Project includes

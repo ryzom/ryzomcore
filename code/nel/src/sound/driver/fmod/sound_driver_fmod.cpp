@@ -23,7 +23,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/big_file.h"
-#include "../sound_driver.h"
+#include "nel/sound/driver/sound_driver.h"
 
 #include "sound_driver_fmod.h"
 #include "listener_fmod.h"

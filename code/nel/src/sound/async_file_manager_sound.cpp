@@ -17,10 +17,10 @@
 #include "stdsound.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
-#include "async_file_manager_sound.h"
+#include "nel/sound/async_file_manager_sound.h"
 #include "nel/misc/async_file_manager.h"
-#include "driver/buffer.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/audio_mixer_user.h"
 
 using namespace NLMISC;
 

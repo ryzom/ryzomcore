@@ -16,8 +16,8 @@
 
 #include "stdsound.h"
 
-#include "source_common.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/source_common.h"
+#include "nel/sound/audio_mixer_user.h"
 
 
 using namespace NLMISC;

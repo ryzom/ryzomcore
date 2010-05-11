@@ -21,7 +21,7 @@
 // STL includes
 
 // NeL includes
-#include "../buffer.h"
+#include "nel/sound/driver/buffer.h"
 
 // Project includes
 

@@ -18,7 +18,7 @@
 #define NL_BACKGROUND_SOUND_H
 
 #include "nel/misc/string_mapper.h"
-#include "sound.h"
+#include "nel/sound/sound.h"
 #include "nel/sound/u_audio_mixer.h"
 
 namespace NLSOUND {

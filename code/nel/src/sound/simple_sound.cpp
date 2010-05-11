@@ -17,12 +17,12 @@
 #include "stdsound.h"
 
 #include "nel/misc/path.h"
-#include "simple_sound.h"
-#include "sound_bank.h"
-#include "sample_bank_manager.h"
-#include "sample_bank.h"
-#include "driver/sound_driver.h"
-#include "driver/buffer.h"
+#include "nel/sound/simple_sound.h"
+#include "nel/sound/sound_bank.h"
+#include "nel/sound/sample_bank_manager.h"
+#include "nel/sound/sample_bank.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/buffer.h"
 
 using namespace std;
 using namespace NLMISC;

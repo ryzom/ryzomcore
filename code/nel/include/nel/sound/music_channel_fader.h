@@ -24,7 +24,6 @@
 
 #ifndef NLSOUND_MUSIC_CHANNEL_FADER_H
 #define NLSOUND_MUSIC_CHANNEL_FADER_H
-#include "stdsound.h"
 
 // STL includes
 

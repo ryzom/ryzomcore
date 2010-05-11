@@ -23,7 +23,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
-#include "music_channel_fader.h"
+#include "nel/sound/music_channel_fader.h"
 
 // STL includes
 
@@ -31,8 +31,8 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include "driver/sound_driver.h"
-#include "driver/music_channel.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/music_channel.h"
 
 using namespace std;
 using namespace NLMISC;

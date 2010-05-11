@@ -16,8 +16,8 @@
 
 #include "stdsound.h"
 
-#include "background_sound.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/background_sound.h"
+#include "nel/sound/audio_mixer_user.h"
 #include "nel/misc/path.h"
 #include <numeric>
 /*#include "simple_sound.h"

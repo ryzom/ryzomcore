@@ -15,9 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdsound.h"
-#include "background_sound_manager.h"
+#include "nel/sound/background_sound_manager.h"
 
-#include "background_source.h"
+#include "nel/sound/background_source.h"
 
 using namespace std;
 using namespace NLMISC;

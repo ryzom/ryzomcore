@@ -1,9 +1,9 @@
 
 #include "stdsound.h"
-#include "complex_sound.h"
+#include "nel/sound/complex_sound.h"
 #include "nel/misc/path.h"
 #include "nel/misc/common.h"
-#include "audio_mixer_user.h"
+#include "nel/sound/audio_mixer_user.h"
 #include <numeric>
 
 using namespace std;
