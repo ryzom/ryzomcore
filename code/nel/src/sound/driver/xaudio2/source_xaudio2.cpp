@@ -17,17 +17,6 @@
 // curve cone eax time
 
 #include "stdxaudio2.h"
-#include "source_xaudio2.h"
-
-// STL includes
-#include <cfloat>
-#include <algorithm>
-#include <limits>
-
-// NeL includes
-#include <nel/misc/hierarchical_timer.h>
-#include <nel/misc/debug.h>
-#include <nel/misc/variable.h>
 
 // Project includes
 #include "sound_driver_xaudio2.h"
@@ -35,6 +24,7 @@
 #include "listener_xaudio2.h"
 #include "adpcm_xaudio2.h"
 #include "effect_xaudio2.h"
+#include "source_xaudio2.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -16,13 +16,6 @@
 
 #ifndef NLSOUND_EFFECT_AL_H
 #define NLSOUND_EFFECT_AL_H
-#include <nel/misc/types_nl.h>
-
-// STL includes
-
-// NeL includes
-
-// Project includes
 
 namespace NLSOUND {
 	class CSoundDriverAL;

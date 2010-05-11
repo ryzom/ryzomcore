@@ -16,7 +16,6 @@
 
 #include "stdopenal.h"
 #include "listener_al.h"
-
 #include "sound_driver_al.h"
 
 using namespace NLMISC;

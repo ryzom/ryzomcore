@@ -16,16 +16,9 @@
 
 #ifndef NLSOUND_LISTENER_XAUDIO2_H
 #define NLSOUND_LISTENER_XAUDIO2_H
-#include "stdxaudio2.h"
 
-// STL includes
-
-// NeL includes
-#include "nel/sound/driver/listener.h"
-#include "nel/sound/driver/sound_driver.h"
-#include <nel/misc/matrix.h>
-
-// Project includes
+#include <nel/sound/driver/listener.h>
+#include <nel/sound/driver/sound_driver.h>
 
 namespace NLSOUND {
 	class CSoundDriverXAudio2;

@@ -15,11 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
-#include "buffer_al.h"
-
-#include <nel/misc/fast_mem.h>
-
 #include "sound_driver_al.h"
+#include "buffer_al.h"
 
 using namespace NLMISC;
 

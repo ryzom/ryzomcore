@@ -15,15 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdxaudio2.h"
-#include "music_buffer_vorbis.h"
-
-// STL includes
-
-// NeL includes
-#include <nel/misc/stream.h>
-#include <nel/misc/file.h>
 
 // Project includes
+#include "music_buffer_vorbis.h"
 
 using namespace std;
 using namespace NLMISC;

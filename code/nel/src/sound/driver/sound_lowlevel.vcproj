@@ -316,12 +316,36 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="include"
+			>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\buffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\effect.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\listener.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\music_channel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\sound_driver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\source.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="buffer.cpp"
-			>
-		</File>
-		<File
-			RelativePath="buffer.h"
 			>
 		</File>
 		<File
@@ -329,15 +353,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\effect.h"
-			>
-		</File>
-		<File
 			RelativePath="listener.cpp"
-			>
-		</File>
-		<File
-			RelativePath="listener.h"
 			>
 		</File>
 		<File
@@ -345,23 +361,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\music_channel.h"
-			>
-		</File>
-		<File
 			RelativePath="sound_driver.cpp"
 			>
 		</File>
 		<File
-			RelativePath="sound_driver.h"
-			>
-		</File>
-		<File
 			RelativePath="source.cpp"
-			>
-		</File>
-		<File
-			RelativePath="source.h"
 			>
 		</File>
 	</Files>

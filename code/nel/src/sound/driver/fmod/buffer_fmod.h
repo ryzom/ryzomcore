@@ -18,8 +18,7 @@
 #define NL_BUFFER_FMOD_H
 
 
-#include "nel/sound/driver/buffer.h"
-#include <fmod.h>
+#include <nel/sound/driver/buffer.h>
 
 
 namespace NLSOUND {

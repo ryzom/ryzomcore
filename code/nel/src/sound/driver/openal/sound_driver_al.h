@@ -16,7 +16,8 @@
 
 #ifndef NL_SOUND_DRIVER_AL_H
 #define NL_SOUND_DRIVER_AL_H
-#include <nel/misc/types_nl.h>
+
+#include <nel/sound/driver/sound_driver.h>
 
 namespace NLSOUND {
 	class CBufferAL;

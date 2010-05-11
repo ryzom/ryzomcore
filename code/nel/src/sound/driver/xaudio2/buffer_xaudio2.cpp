@@ -15,16 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdxaudio2.h"
-#include "buffer_xaudio2.h"
-
-// STL includes
-
-// NeL includes
-#include <nel/misc/debug.h>
-#include <nel/misc/path.h>
-#include <nel/misc/file.h>
 
 // Project includes
+#include "buffer_xaudio2.h"
 #include "sound_driver_xaudio2.h"
 
 using namespace std;

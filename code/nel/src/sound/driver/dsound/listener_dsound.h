@@ -17,9 +17,7 @@
 #ifndef NL_LISTENER_DSOUND_H
 #define NL_LISTENER_DSOUND_H
 
-#include "nel/sound/driver/listener.h"
-#include "nel/sound/driver/sound_driver.h"
-#include <dsound.h>
+#include <nel/sound/driver/listener.h>
 
 namespace NLSOUND {
 

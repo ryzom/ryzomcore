@@ -16,16 +16,10 @@
 
 
 #include "stdfmod.h"
-#include "nel/misc/hierarchical_timer.h"
 #include "source_fmod.h"
 #include "sound_driver_fmod.h"
 #include "buffer_fmod.h"
 #include "listener_fmod.h"
-#include "nel/sound/driver/sound_driver.h"
-#include <cfloat>
-
-
-#include <algorithm>
 
 
 using namespace NLMISC;

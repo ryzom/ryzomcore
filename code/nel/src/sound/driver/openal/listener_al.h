@@ -16,8 +16,8 @@
 
 #ifndef NL_LISTENER_AL_H
 #define NL_LISTENER_AL_H
-#include <nel/misc/types_nl.h>
 
+#include <nel/sound/driver/listener.h>
 #include <nel/misc/singleton.h>
 
 namespace NLSOUND {

@@ -16,13 +16,6 @@
 
 #ifndef NLSOUND_SOUND_DRIVER_XAUDIO2_H //todo: support MAKEINTRESOURCE for music files?
 #define NLSOUND_SOUND_DRIVER_XAUDIO2_H
-#include "stdxaudio2.h"
-
-// STL includes
-#include <iostream>
-
-// NeL includes
-#include <nel/misc/time_nl.h>
 
 // Project includes
 #include "source_xaudio2.h"

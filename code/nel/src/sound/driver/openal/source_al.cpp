@@ -15,16 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
-#include "source_al.h"
-
-#include <cfloat>
-#include <algorithm>
-#include <limits>
-
 #include "sound_driver_al.h"
 #include "listener_al.h"
 #include "effect_al.h"
 #include "buffer_al.h"
+#include "source_al.h"
 
 using namespace std;
 using namespace NLMISC;

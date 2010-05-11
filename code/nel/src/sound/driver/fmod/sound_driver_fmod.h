@@ -16,17 +16,8 @@
 
 #ifndef NL_SOUND_DRIVER_FMOD_H
 #define NL_SOUND_DRIVER_FMOD_H
-#include <nel/misc/types_nl.h>
 
-// STL includes
-#include <iostream>
-
-// NeL includes
-#include <nel/misc/log.h>
-
-// Project includes
-#include "source_fmod.h"
-#include "buffer_fmod.h"
+#include <nel/sound/driver/sound_driver.h>
 
 namespace NLSOUND {
 	class IListener;

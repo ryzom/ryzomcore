@@ -17,13 +17,9 @@
 #ifndef NL_SOURCE_FMOD_H
 #define NL_SOURCE_FMOD_H
 
-#include "nel/sound/driver/source.h"
-#include "nel/sound/driver/sound_driver.h"
-#include "nel/sound/driver/buffer.h"
-
-//#ifdef NL_OS_WINDOWS
-//#include <dsound.h>
-//#endif
+#include <nel/sound/driver/source.h>
+#include <nel/sound/driver/sound_driver.h>
+#include <nel/sound/driver/buffer.h>
 
 namespace NLSOUND {
 	class CBufferFMod;

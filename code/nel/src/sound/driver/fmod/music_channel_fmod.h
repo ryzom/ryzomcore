@@ -16,14 +16,8 @@
 
 #ifndef NL_MUSIC_CHANNEL_FMOD_H
 #define NL_MUSIC_CHANNEL_FMOD_H
-#include <nel/misc/types_nl.h>
 
-// STL includes
-
-// NeL includes
-#include "nel/sound/driver/music_channel.h"
-
-// Project includes
+#include <nel/sound/driver/music_channel.h>
 
 struct FSOUND_STREAM;
 

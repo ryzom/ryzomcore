@@ -16,16 +16,10 @@
 
 #ifndef NLSOUND_SOURCE_XAUDIO2_H
 #define NLSOUND_SOURCE_XAUDIO2_H
-#include "stdxaudio2.h"
 
-// STL includes
-
-// NeL includes
-#include "nel/sound/driver/source.h"
-#include "nel/sound/driver/sound_driver.h"
-#include "nel/sound/driver/buffer.h"
-
-// Project includes
+#include <nel/sound/driver/source.h>
+#include <nel/sound/driver/sound_driver.h>
+#include <nel/sound/driver/buffer.h>
 
 namespace NLSOUND {
 	class CSoundDriverXAudio2;

@@ -16,18 +16,11 @@
 
 #include "stdfmod.h"
 
-#include <cmath>
-
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/path.h"
-#include "nel/misc/file.h"
-#include "nel/misc/dynloadlib.h"
-#include "nel/misc/big_file.h"
-#include "nel/sound/driver/sound_driver.h"
-
 #include "sound_driver_fmod.h"
 #include "listener_fmod.h"
 #include "music_channel_fmod.h"
+#include "source_fmod.h"
+#include "buffer_fmod.h"
 
 using namespace std;
 using namespace NLMISC;

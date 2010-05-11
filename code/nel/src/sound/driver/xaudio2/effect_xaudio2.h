@@ -16,13 +16,6 @@
 
 #ifndef NLSOUND_EFFECT_XAUDIO2_H
 #define NLSOUND_EFFECT_XAUDIO2_H
-#include <nel/misc/types_nl.h>
-
-// STL includes
-
-// NeL includes
-
-// Project includes
 
 namespace NLSOUND {
 	class CSoundDriverXAudio2;

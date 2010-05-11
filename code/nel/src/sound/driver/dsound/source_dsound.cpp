@@ -16,14 +16,10 @@
 
 
 #include "stddsound.h"
-#include "nel/misc/hierarchical_timer.h"
 #include "source_dsound.h"
 #include "sound_driver_dsound.h"
 #include "buffer_dsound.h"
 #include "listener_dsound.h"
-#include "nel/sound/driver/sound_driver.h"
-
-#include <algorithm>
 
 
 using namespace NLMISC;

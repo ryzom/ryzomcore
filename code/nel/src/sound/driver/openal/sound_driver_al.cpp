@@ -16,11 +16,6 @@
 
 #include "stdopenal.h"
 #include "sound_driver_al.h"
-
-#include <nel/misc/path.h>
-#include <nel/misc/dynloadlib.h>
-#include <nel/misc/fast_mem.h>
-
 #include "buffer_al.h"
 #include "listener_al.h"
 #include "effect_al.h"

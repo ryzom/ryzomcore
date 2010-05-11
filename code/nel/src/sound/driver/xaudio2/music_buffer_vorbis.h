@@ -16,7 +16,6 @@
 
 #ifndef NLSOUND_MUSIC_BUFFER_VORBIS_H
 #define NLSOUND_MUSIC_BUFFER_VORBIS_H
-#include "stdxaudio2.h"
 
 // STL includes
 

@@ -17,8 +17,6 @@
 
 #include "stdfmod.h"
 #include "buffer_fmod.h"
-#include "nel/misc/path.h"
-#include "nel/misc/file.h"
 #include "sound_driver_fmod.h"
 
 #ifdef NL_OS_WINDOWS

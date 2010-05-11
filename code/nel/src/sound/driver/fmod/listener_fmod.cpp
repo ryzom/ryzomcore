@@ -15,12 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdfmod.h"
-#include "nel/sound/driver/sound_driver.h"
-
 #include "listener_fmod.h"
 #include "sound_driver_fmod.h"
-
-#include <fmod.h>
 
 
 using namespace NLMISC;

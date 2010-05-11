@@ -16,14 +16,8 @@
 
 #ifndef NLSOUND_MUSIC_CHANNEL_XAUDIO2_H
 #define NLSOUND_MUSIC_CHANNEL_XAUDIO2_H
-#include "stdxaudio2.h"
 
-// STL includes
-
-// NeL includes
-#include "nel/sound/driver/music_channel.h"
-
-// Project includes
+#include <nel/sound/driver/music_channel.h>
 
 namespace NLSOUND {
 	class CSoundDriverXAudio2;

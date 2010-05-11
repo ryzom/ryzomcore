@@ -17,8 +17,6 @@
 
 #include "stddsound.h"
 #include "buffer_dsound.h"
-#include "nel/misc/path.h"
-#include "nel/misc/file.h"
 #include "sound_driver_dsound.h"
 
 #define NOMINMAX

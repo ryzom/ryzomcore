@@ -15,26 +15,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdxaudio2.h"
-#include "sound_driver_xaudio2.h"
-
-// STL includes
-#include <cmath>
-
-// NeL includes
-#include <nel/misc/debug.h>
-#include <nel/misc/hierarchical_timer.h>
-#include <nel/misc/path.h>
-#include <nel/misc/file.h>
-#include <nel/misc/dynloadlib.h>
-#include <nel/misc/command.h>
-#include "nel/sound/driver/sound_driver.h"
-#include "music_buffer.h" // ../
 
 // Project includes
 #include "listener_xaudio2.h"
 #include "source_xaudio2.h"
 #include "music_channel_xaudio2.h"
 #include "effect_xaudio2.h"
+#include "sound_driver_xaudio2.h"
+#include "music_buffer.h"
 
 using namespace std;
 using namespace NLMISC;

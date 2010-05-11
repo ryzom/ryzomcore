@@ -16,18 +16,6 @@
 
 #include "stdfmod.h"
 #include "music_channel_fmod.h"
-
-// STL includes
-
-// 3rd Party includes
-#include <fmod.h>
-
-// NeL includes
-#include <nel/misc/path.h>
-#include <nel/misc/file.h>
-#include <nel/misc/big_file.h>
-
-// Project includes
 #include "sound_driver_fmod.h"
 
 using namespace std;
