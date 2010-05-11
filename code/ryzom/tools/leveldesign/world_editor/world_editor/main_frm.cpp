@@ -468,12 +468,19 @@ void CMainFrame::onLogicChanged(const std::vector<NLLIGO::CPrimRegion*> &regions
 
 bool CMainFrame::yesNoMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	return theApp.yesNoMessage (buffer);
 }
@@ -482,12 +489,19 @@ bool CMainFrame::yesNoMessage (const char *format, ... )
 
 void CMainFrame::errorMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	theApp.errorMessage (buffer);
 }
@@ -496,12 +510,19 @@ void CMainFrame::errorMessage (const char *format, ... )
 
 void CMainFrame::infoMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	theApp.infoMessage (buffer);
 }

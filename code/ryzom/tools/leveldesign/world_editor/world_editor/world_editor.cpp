@@ -430,47 +430,76 @@ void CWorldEditorApp::OnAppAbout()
 
 bool CWorldEditorApp::yesNoMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	return MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_YESNO|MB_ICONQUESTION) == IDYES;
 }
 
 void CWorldEditorApp::errorMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_OK|MB_ICONEXCLAMATION);
 }
 
 void CWorldEditorApp::infoMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_OK|MB_ICONINFORMATION);
 }
 
 void CWorldEditorApp::syntaxError (const char *filename, xmlNodePtr xmlNode, const char *format, ...)
 {
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	errorMessage ("(%s), node (%s), line (%d) :\n%s", filename, xmlNode->name, (int)xmlNode->content, buffer);
 }
@@ -784,12 +813,19 @@ CNoInteraction::~CNoInteraction ()
 
 void CMyLigoConfig::errorMessage (const char *format, ... )
 {
-	// Make a buffer string
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	theApp.errorMessage (buffer);
 }

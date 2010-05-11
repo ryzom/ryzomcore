@@ -1093,11 +1093,19 @@ void CPlugin::postRender(CDisplay &display)
 
 bool CPlugin::yesNoMessage (const char *format, ... )
 {
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	return _PluginAccess->yesNoMessage ("Plugin AI : %s", buffer);
 }
@@ -1106,11 +1114,19 @@ bool CPlugin::yesNoMessage (const char *format, ... )
 
 void CPlugin::errorMessage (const char *format, ... )
 {
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	_PluginAccess->errorMessage ("Plugin AI : %s", buffer);
 }
@@ -1119,11 +1135,19 @@ void CPlugin::errorMessage (const char *format, ... )
 
 void CPlugin::infoMessage (const char *format, ... )
 {
-	va_list args;
-	va_start( args, format );
 	char buffer[1024];
-	sint ret = vsnprintf( buffer, 1024, format, args );
-	va_end( args );
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
 
 	_PluginAccess->infoMessage ("Plugin AI : %s", buffer);
 }
