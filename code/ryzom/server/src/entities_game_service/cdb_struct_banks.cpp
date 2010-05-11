@@ -60,10 +60,10 @@ CCDBStructBanks	*CCDBStructBanks::_Instance = NULL;
 
 void cbSetNodeForIndex( ICDBStructNode *node, void *bank )
 {
-	//nldebug( "CDB: Mapping index %d of bank %s", node->getDataIndex(), CCDBStructBanks::getBankName((TCDBBank)(uint32)bank) );
-	nlassert( node->getDataIndex() < CCDBStructBanks::instance()->_IndexNb[(TCDBBank)(uint32)bank] );
-	nlassert( ! CCDBStructBanks::instance()->_IndexToNode [(TCDBBank)(uint32)bank] [node->getDataIndex()] );
-	CCDBStructBanks::instance()->_IndexToNode [(TCDBBank)(uint32)bank] [node->getDataIndex()] = node;
+	//nldebug( "CDB: Mapping index %d of bank %s", node->getDataIndex(), CCDBStructBanks::getBankName((TCDBBank)(uint32)(size_t)bank) );
+	nlassert( node->getDataIndex() < CCDBStructBanks::instance()->_IndexNb[(TCDBBank)(uint32)(size_t)bank] );
+	nlassert( ! CCDBStructBanks::instance()->_IndexToNode [(TCDBBank)(uint32)(size_t)bank] [node->getDataIndex()] );
+	CCDBStructBanks::instance()->_IndexToNode [(TCDBBank)(uint32)(size_t)bank] [node->getDataIndex()] = node;
 }
 
 
