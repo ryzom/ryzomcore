@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="driver_xaudio2"
 	ProjectGUID="{23DCF574-1CEB-4DF4-9C59-D614580AC0C0}"
 	RootNamespace="xaudio2"
@@ -51,12 +51,9 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
-				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="std$(RootNamespace).h"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -72,11 +69,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_d.dll"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrt"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
+				SubSystem="2"
 				ImportLibrary="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_d.lib"
 				TargetMachine="1"
 			/>
@@ -136,12 +132,9 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
-				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="std$(RootNamespace).h"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -157,12 +150,11 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_d.dll"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrt"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
-				ImportLibrary="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_d.lib"
+				SubSystem="2"
+				ImportLibrary="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_d.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -222,11 +214,10 @@
 				StringPooling="true"
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
-				DisableLanguageExtensions="false"
+				BufferSecurityCheck="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="std$(RootNamespace).h"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -242,10 +233,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_r.dll"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrtd"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
+				GenerateDebugInformation="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				ImportLibrary="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_r.lib"
@@ -309,11 +300,10 @@
 				StringPooling="true"
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
-				DisableLanguageExtensions="false"
+				BufferSecurityCheck="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="std$(RootNamespace).h"
-				WarningLevel="2"
-				SuppressStartupBanner="true"
+				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -329,13 +319,13 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_r.dll"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libcmt.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
+				GenerateDebugInformation="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_r.lib"
+				ImportLibrary="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_r.lib"
 				TargetMachine="17"
 			/>
 			<Tool

@@ -352,7 +352,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\audio_mixer_user.h"
+				RelativePath="..\include\nel\sound\audio_mixer_user.h"
 				>
 			</File>
 			<File
@@ -360,7 +360,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\listener_user.h"
+				RelativePath="..\include\nel\sound\listener_user.h"
 				>
 			</File>
 		</Filter>
@@ -372,7 +372,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\background_sound.h"
+				RelativePath="..\include\nel\sound\background_sound.h"
 				>
 			</File>
 			<File
@@ -380,7 +380,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\complex_sound.h"
+				RelativePath="..\include\nel\sound\complex_sound.h"
 				>
 			</File>
 			<File
@@ -388,7 +388,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\context_sound.h"
+				RelativePath="..\include\nel\sound\context_sound.h"
 				>
 			</File>
 			<File
@@ -396,7 +396,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\music_sound.h"
+				RelativePath="..\include\nel\sound\music_sound.h"
 				>
 			</File>
 			<File
@@ -404,7 +404,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\simple_sound.h"
+				RelativePath="..\include\nel\sound\simple_source.h"
 				>
 			</File>
 			<File
@@ -412,7 +412,7 @@
 				>
 			</File>
 			<File
-				RelativePath="sound\sound.h"
+				RelativePath="..\include\nel\sound\sound.h"
 				>
 			</File>
 			<File
@@ -420,7 +420,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\stream_sound.h"
+				RelativePath="..\include\nel\sound\stream_sound.h"
 				>
 			</File>
 		</Filter>
@@ -460,7 +460,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\background_source.h"
+				RelativePath="..\include\nel\sound\background_source.h"
 				>
 			</File>
 			<File
@@ -468,7 +468,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\complex_source.h"
+				RelativePath="..\include\nel\sound\complex_source.h"
 				>
 			</File>
 			<File
@@ -476,7 +476,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\music_source.h"
+				RelativePath="..\include\nel\sound\music_source.h"
 				>
 			</File>
 			<File
@@ -484,15 +484,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\simple_source.h"
-				>
-			</File>
-			<File
 				RelativePath="sound\source_common.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\sound\source_common.h"
+				RelativePath="..\include\nel\sound\source_common.h"
 				>
 			</File>
 			<File
@@ -500,7 +496,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sound\stream_source.h"
+				RelativePath="..\include\nel\sound\stream_source.h"
 				>
 			</File>
 		</Filter>
@@ -513,7 +509,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\async_file_manager_sound.h"
+			RelativePath="..\include\nel\sound\async_file_manager_sound.h"
 			>
 		</File>
 		<File
@@ -521,7 +517,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\background_sound_manager.h"
+			RelativePath="..\include\nel\sound\background_sound_manager.h"
 			>
 		</File>
 		<File
@@ -529,7 +525,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\clustered_sound.h"
+			RelativePath="..\include\nel\sound\clustered_sound.h"
 			>
 		</File>
 		<File
@@ -537,7 +533,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\mixing_track.h"
+			RelativePath="..\include\nel\sound\mixing_track.h"
 			>
 		</File>
 		<File
@@ -545,7 +541,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\sound\music_channel_fader.h"
+			RelativePath="..\include\nel\sound\music_channel_fader.h"
 			>
 		</File>
 		<File
@@ -553,7 +549,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\music_sound_manager.h"
+			RelativePath="..\include\nel\sound\music_sound_manager.h"
 			>
 		</File>
 		<File
@@ -561,7 +557,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\sample_bank.h"
+			RelativePath="..\include\nel\sound\sample_bank.h"
 			>
 		</File>
 		<File
@@ -569,7 +565,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\sound\sample_bank_manager.h"
+			RelativePath="..\include\nel\sound\sample_bank_manager.h"
 			>
 		</File>
 		<File
@@ -577,7 +573,7 @@
 			>
 		</File>
 		<File
-			RelativePath="sound\sound_bank.h"
+			RelativePath="..\include\nel\sound\sound_bank.h"
 			>
 		</File>
 		<File
