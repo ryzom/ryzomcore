@@ -109,6 +109,7 @@ private:
 // - () instead of [],
 // - immediate values prefixed by $
 
+/*
 // Tested: works on multi-processor
 #ifdef HAVE_X86_64
 #	define ASM_ASWAP_FOR_GCC_XCHG __asm__ volatile( \
@@ -129,7 +130,9 @@ private:
 		    : "m" (lockPtr) \
 		    : "eax", "ecx", "memory" ); // force to use registers and memory
 #endif
+*/
 
+/*
 // Tested: does not work (at least on multi-processor)! (with or without 'lock' prefix)
 #define ASM_ASWAP_FOR_GCC_CMPXCHG __asm__ volatile( \
 		    "mov $1, %%edx;" \
@@ -142,7 +145,7 @@ private:
 	        : "=m" (result) \
 		    : "m" (lockPtr) \
 		    : "eax", "ecx", "edx", "memory" ); // force to use registers and memory
-
+*/
 
 // Tested: does not work on hyper-threading processors!
 /*ASM_ASWAP_FOR_MSVC_CMPXCHG
@@ -237,7 +240,11 @@ public:
 #	endif // NL_DEBUG
 #	endif // NL_NO_ASM
 #else
-		ASM_ASWAP_FOR_GCC_XCHG
+	// GCC implements the same functionality using a builtin function
+	// http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
+	// the macro below crashed on Mac OS X 10.6 in a 64bit build
+	//ASM_ASWAP_FOR_GCC_XCHG
+    result = __sync_bool_compare_and_swap(lockPtr, 0, 1);
 #endif // NL_OS_WINDOWS
 		return result != 0;
 	}
