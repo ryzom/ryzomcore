@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lualib.lib gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
 				OutputFile="..\..\bin\client_ryzom_d.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
@@ -153,7 +153,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lualib.lib gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
 				OutputFile="..\..\bin64\client_ryzom_d.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
@@ -236,7 +236,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lualib.lib gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
 				OutputFile="..\..\bin\client_ryzom_r.exe"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""
@@ -324,7 +324,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lualib.lib gnu_regex.lib libcurl.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
 				OutputFile="..\..\bin64\client_ryzom_r.exe"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""

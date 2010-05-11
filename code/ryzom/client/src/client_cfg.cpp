@@ -382,9 +382,7 @@ CClientConfig::CClientConfig()
 	///////////
 	// SOUND //
 	SoundOn				= true;						// Default is with sound.
-	// hulud patch force fmod
-	// DriverSound			= SoundDrvAuto;
-	DriverSound			= SoundDrvFMod;
+	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
 	SoundOutGameMusic	= "Main Menu Loop.ogg";
 	SoundSFXVolume		= 1.f;
@@ -1119,19 +1117,17 @@ void CClientConfig::setValues()
 	// SoundOn
 	READ_BOOL_FV(SoundOn)
 	// Sound Driver
-#if !FINAL_VERSION
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("DriverSound");
 	if (varPtr)
 	{
-		/* hulud patch force fmod
 		if (nlstricmp(varPtr->asString(), "Auto") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvAuto;
 		else if (nlstricmp(varPtr->asString(), "FMod") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvFMod;
-		*/
-		ClientCfg.DriverSound = CClientConfig::SoundDrvFMod;
+		else if (nlstricmp(varPtr->asString(), "OpenAL") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvOpenAL;
+		else if (nlstricmp(varPtr->asString(), "DirectSound") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvDirectSound;
+		else if (nlstricmp(varPtr->asString(), "XAudio2") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvXAudio2;
 	}
 	else
 		cfgWarning ("Default value used for 'DriverSound' !!!");
-#endif // FINAL_VERSION
 	// SoundForceSoftwareBuffer
 	READ_BOOL_FV(SoundForceSoftwareBuffer);
 	// SoundOutGameMusic

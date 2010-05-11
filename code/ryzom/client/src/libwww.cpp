@@ -586,7 +586,7 @@ void initLibWWW()
 
 		/* Register the default set of MIME header parsers */
 		struct {
-			char * string;
+			const char * string;
 		HTParserCallback * pHandler;
 		} fixedHandlers[] = {
 		{"accept", &HTMIME_accept},

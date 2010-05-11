@@ -131,6 +131,21 @@ std::ostream &operator<<(std::ostream &str, const ucstring &value)
 	return str << value.toString();
 }
 
+struct CMiscFunctions
+{
+	static std::string fileLookup(const std::string &fileName)
+	{
+		return NLMISC::CPath::lookup(fileName,   false);
+	}
+	static void shellExecute(const char *operation,   const char *fileName,   const char *parameters)
+	{
+	#if !FINAL_VERSION
+		#ifdef NL_OS_WINDOWS
+			ShellExecute(NULL,   operation,   fileName,   parameters,  NULL,   SW_SHOWDEFAULT);
+		#endif
+	#endif
+	}
+};
 
 
 /**
@@ -191,6 +206,7 @@ bool CLuaIHM::pop(CLuaState &ls,   NLMISC::CRGBA &dest)
 		if (ls.isNil(-1)) return false;
 #if LUABIND_VERSION == 07
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
+		ls.pop();
 #else
 		luabind::object obj(ls.getStatePointer());
 		obj.set();
@@ -213,6 +229,7 @@ bool CLuaIHM::pop(CLuaState &ls,NLMISC::CVector2f &dest)
 		if (ls.isNil(-1)) return false;
 #if LUABIND_VERSION == 07
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
+		ls.pop();
 #else
 		luabind::object obj(ls.getStatePointer());
 		obj.set();
@@ -235,6 +252,7 @@ bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 		if (ls.isNil(-1)) return false;
 #if LUABIND_VERSION == 07
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
+		ls.pop();
 #else
 		luabind::object obj(ls.getStatePointer());
 		obj.set();
@@ -441,12 +459,12 @@ CLuaState * ELuaIHMException::getLuaState()
 
 // ***************************************************************************
 #define LUA_REGISTER_BASIC(_type_)															\
-yes_t is_user_defined(by_value<_type_>);													\
-_type_ convert_lua_to_cpp(lua_State* L,    by_value<_type_>,    int index)						\
+luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);													\
+_type_ convert_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)						\
 {																							\
 	return (_type_)lua_tonumber(L,    index);													\
 }																							\
-int match_lua_to_cpp(lua_State* L,    by_value<_type_>,    int index)								\
+int match_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)								\
 {																							\
 	if (lua_isnumber(L,    index)) return 0; else return -1;									\
 }																							\
@@ -1202,7 +1220,8 @@ void CLuaIHM::createLuaEnumTable(CLuaState &ls, const std::string &str)
 	} \
 
 // ***************************************************************************
-#define LUABIND_FUNC(__func__) luabind::function(L,    #__func__,    &__func__);
+#define LUABIND_FUNC(__func__) luabind::def(#__func__,    &__func__)
+
 void	CLuaIHM::registerIHM(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_registerIHM)
@@ -1323,89 +1342,101 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("getUserRace",  getUserRace);
 	// Through LUABind API
 	lua_State	*L= ls.getStatePointer();
-	LUABIND_FUNC(getDbProp);
-	LUABIND_FUNC(setDbProp);
-	LUABIND_FUNC(debugInfo);
-	LUABIND_FUNC(rawDebugInfo);
-	LUABIND_FUNC(dumpCallStack);
-	LUABIND_FUNC(getDefine);
-	LUABIND_FUNC(setContextHelpText);
-	luabind::function(L,    "messageBox",    (void(*)(const ucstring &)) &messageBox);
-	luabind::function(L,    "messageBox",    (void(*)(const ucstring &, const std::string &)) &messageBox);
-	luabind::function(L,    "messageBox",    (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBox);
-	luabind::function(L,    "messageBox",    (void(*)(const std::string &)) &messageBox);
-	luabind::function(L,    "messageBoxWithHelp",    (void(*)(const ucstring &)) &messageBoxWithHelp);
-	luabind::function(L,    "messageBoxWithHelp",    (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp);
-	luabind::function(L,    "messageBoxWithHelp",    (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp);
-	luabind::function(L,    "messageBoxWithHelp",    (void(*)(const std::string &)) &messageBoxWithHelp);
-	luabind::function(L,    "findReplaceAll",    (std::string(*)(const std::string &,  const std::string &,  const std::string &)) &findReplaceAll);
-	luabind::function(L,    "findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const ucstring &)) &findReplaceAll);
-	luabind::function(L,    "findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const std::string &)) &findReplaceAll);
-	luabind::function(L,    "findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const std::string &)) &findReplaceAll);
-	luabind::function(L,    "findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const ucstring &)) &findReplaceAll);
-	LUABIND_FUNC(getPlayerSelectedSlot)
-	LUABIND_FUNC(isInGame)
-	LUABIND_FUNC(pauseBGDownloader);
-	LUABIND_FUNC(unpauseBGDownloader);
-	LUABIND_FUNC(requestBGDownloaderPriority);
-	LUABIND_FUNC(getBGDownloaderPriority);
-	LUABIND_FUNC(getPatchLastErrorMessage);
-	LUABIND_FUNC(isPlayerSlotNewbieLand)
-	LUABIND_FUNC(getSkillIdFromName);
-	LUABIND_FUNC(getSkillLocalizedName);
-	LUABIND_FUNC(getMaxSkillValue);
-	LUABIND_FUNC(getBaseSkillValueMaxChildren);
-	LUABIND_FUNC(getMagicResistChance);
-	LUABIND_FUNC(getDodgeParryChance);
-	LUABIND_FUNC(browseNpcWebPage);
-	LUABIND_FUNC(clearHtmlUndoRedo);
-	LUABIND_FUNC(getDynString);
-	LUABIND_FUNC(isDynStringAvailable);
-	LUABIND_FUNC(isFullyPatched);
-	LUABIND_FUNC(getSheetType);
-	LUABIND_FUNC(getSheetName);
-	LUABIND_FUNC(getFameIndex);
-	LUABIND_FUNC(getFameName);
-	LUABIND_FUNC(getFameDBIndex);
-	LUABIND_FUNC(getFirstTribeFameIndex);
-	LUABIND_FUNC(getNbTribeFameIndex);
-	LUABIND_FUNC(getClientCfg);
-	LUABIND_FUNC(fileExists);
-	LUABIND_FUNC(sendMsgToServer);
-	LUABIND_FUNC(sendMsgToServerPvpTag);
-	LUABIND_FUNC(isGuildQuitAvailable);
-	LUABIND_FUNC(sortGuildMembers);
-	LUABIND_FUNC(getNbGuildMembers);
-	LUABIND_FUNC(getGuildMemberName);
-	LUABIND_FUNC(getGuildMemberGrade);
-	LUABIND_FUNC(isR2Player);
-	LUABIND_FUNC(getR2PlayerRace);
-	LUABIND_FUNC(isR2PlayerMale);
-	LUABIND_FUNC(getCharacterSheetSkel);
-	LUABIND_FUNC(getSheetId)
-	LUABIND_FUNC(getCharacterSheetRegionForce)
-	LUABIND_FUNC(getCharacterSheetRegionLevel)
-	LUABIND_FUNC(replacePvpEffectParam);
-	LUABIND_FUNC(getRegionByAlias);
-	LUABIND_FUNC(tell);
-	LUABIND_FUNC(isRingAccessPointInReach);
-	LUABIND_FUNC(updateTooltipCoords);
-	LUABIND_FUNC(secondsSince1970ToHour);
-	LUABIND_FUNC(isCtrlKeyDown);
-	LUABIND_FUNC(encodeURLUnicodeParam);
 
-	LUABIND_ENUM(PVP_CLAN::TPVPClan, "game.TPVPClan", PVP_CLAN::NbClans, PVP_CLAN::toString)
-	LUABIND_ENUM(BONUS_MALUS::TBonusMalusSpecialTT, "game.TBonusMalusSpecialTT", BONUS_MALUS::NbSpecialTT, BONUS_MALUS::toString)
+	luabind::module(L)
+	[
+		LUABIND_FUNC(getDbProp),
+		LUABIND_FUNC(setDbProp),
+		LUABIND_FUNC(debugInfo),
+		LUABIND_FUNC(rawDebugInfo),
+		LUABIND_FUNC(dumpCallStack),
+		LUABIND_FUNC(getDefine),
+		LUABIND_FUNC(setContextHelpText),
+		luabind::def("messageBox",    (void(*)(const ucstring &)) &messageBox),
+		luabind::def("messageBox",    (void(*)(const ucstring &, const std::string &)) &messageBox),
+		luabind::def("messageBox",    (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBox),
+		luabind::def("messageBox",    (void(*)(const std::string &)) &messageBox),
+		luabind::def("messageBoxWithHelp",    (void(*)(const ucstring &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp",    (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp",    (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp",    (void(*)(const std::string &)) &messageBoxWithHelp),
+		luabind::def("findReplaceAll",    (std::string(*)(const std::string &,  const std::string &,  const std::string &)) &findReplaceAll),
+		luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const ucstring &)) &findReplaceAll),
+		luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const std::string &)) &findReplaceAll),
+		luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const std::string &)) &findReplaceAll),
+		luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const ucstring &)) &findReplaceAll),
+		LUABIND_FUNC(getPlayerSelectedSlot),
+		LUABIND_FUNC(isInGame),
+		LUABIND_FUNC(pauseBGDownloader),
+		LUABIND_FUNC(unpauseBGDownloader),
+		LUABIND_FUNC(requestBGDownloaderPriority),
+		LUABIND_FUNC(getBGDownloaderPriority),
+		LUABIND_FUNC(getPatchLastErrorMessage),
+		LUABIND_FUNC(isPlayerSlotNewbieLand),
+		LUABIND_FUNC(getSkillIdFromName),
+		LUABIND_FUNC(getSkillLocalizedName),
+		LUABIND_FUNC(getMaxSkillValue),
+		LUABIND_FUNC(getBaseSkillValueMaxChildren),
+		LUABIND_FUNC(getMagicResistChance),
+		LUABIND_FUNC(getDodgeParryChance),
+		LUABIND_FUNC(browseNpcWebPage),
+		LUABIND_FUNC(clearHtmlUndoRedo),
+		LUABIND_FUNC(getDynString),
+		LUABIND_FUNC(isDynStringAvailable),
+		LUABIND_FUNC(isFullyPatched),
+		LUABIND_FUNC(getSheetType),
+		LUABIND_FUNC(getSheetName),
+		LUABIND_FUNC(getFameIndex),
+		LUABIND_FUNC(getFameName),
+		LUABIND_FUNC(getFameDBIndex),
+		LUABIND_FUNC(getFirstTribeFameIndex),
+		LUABIND_FUNC(getNbTribeFameIndex),
+		LUABIND_FUNC(getClientCfg),
+		LUABIND_FUNC(fileExists),
+		LUABIND_FUNC(sendMsgToServer),
+		LUABIND_FUNC(sendMsgToServerPvpTag),
+		LUABIND_FUNC(isGuildQuitAvailable),
+		LUABIND_FUNC(sortGuildMembers),
+		LUABIND_FUNC(getNbGuildMembers),
+		LUABIND_FUNC(getGuildMemberName),
+		LUABIND_FUNC(getGuildMemberGrade),
+		LUABIND_FUNC(isR2Player),
+		LUABIND_FUNC(getR2PlayerRace),
+		LUABIND_FUNC(isR2PlayerMale),
+		LUABIND_FUNC(getCharacterSheetSkel),
+		LUABIND_FUNC(getSheetId),
+		LUABIND_FUNC(getCharacterSheetRegionForce),
+		LUABIND_FUNC(getCharacterSheetRegionLevel),
+		LUABIND_FUNC(replacePvpEffectParam),
+		LUABIND_FUNC(getRegionByAlias),
+		LUABIND_FUNC(tell),
+		LUABIND_FUNC(isRingAccessPointInReach),
+		LUABIND_FUNC(updateTooltipCoords),
+		LUABIND_FUNC(secondsSince1970ToHour),
+		LUABIND_FUNC(isCtrlKeyDown),
+		LUABIND_FUNC(encodeURLUnicodeParam),
 
-	LUABIND_FUNC(getPlayerLevel);
-	LUABIND_FUNC(getTargetLevel);
-	LUABIND_FUNC(getTargetForceRegion);
-	LUABIND_FUNC(getTargetLevelForce);
-	LUABIND_FUNC(isTargetNPC)
-	LUABIND_FUNC(isTargetPlayer) // return 'true' if the target is an npc
-	LUABIND_FUNC(isTargetUser)
-	LUABIND_FUNC(isPlayerInPVPMode)
-	LUABIND_FUNC(isTargetInPVPMode)
+	#if !FINAL_VERSION
+		LUABIND_FUNC(openDoc),
+		LUABIND_FUNC(launchProgram),
+	#endif
+
+		luabind::def("fileLookup",    CMiscFunctions::fileLookup),
+		luabind::def("shellExecute",  CMiscFunctions::shellExecute),
+
+		LUABIND_FUNC(getPlayerLevel),
+		LUABIND_FUNC(getTargetLevel),
+		LUABIND_FUNC(getTargetForceRegion),
+		LUABIND_FUNC(getTargetLevelForce),
+		LUABIND_FUNC(isTargetNPC),
+		LUABIND_FUNC(isTargetPlayer), // return 'true' if the target is an npc
+		LUABIND_FUNC(isTargetUser),
+		LUABIND_FUNC(isPlayerInPVPMode),
+		LUABIND_FUNC(isTargetInPVPMode)
+	];
+
+	LUABIND_ENUM(PVP_CLAN::TPVPClan, "game.TPVPClan", PVP_CLAN::NbClans, PVP_CLAN::toString);
+	LUABIND_ENUM(BONUS_MALUS::TBonusMalusSpecialTT, "game.TBonusMalusSpecialTT", BONUS_MALUS::NbSpecialTT, BONUS_MALUS::toString);
 
 	// inside i18n table
 	luabind::module(L, "i18n")
@@ -1428,31 +1459,6 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 		luabind::def("getLocalTime", getLocalTime)	// NB : use CLuaIHM::getLocalTime instead of NLMISC::CTime::getLocalTime, because the NLMISC
 		                                            // version returns a uint64, which can't be casted into lua numbers (doubles ...)
 	];
-
-
-
-	#if !FINAL_VERSION
-		LUABIND_FUNC(openDoc)
-		LUABIND_FUNC(launchProgram)
-	#endif
-
-	#ifdef NL_OS_WINDOWS
-		struct CMiscFunctions
-		{
-			static std::string fileLookup(const std::string &fileName)
-			{
-				return NLMISC::CPath::lookup(fileName,   false);
-			}
-			static void shellExecute(const char *operation,   const char *fileName,   const char *parameters)
-			{
-			#if !FINAL_VERSION
-				ShellExecute(NULL,   operation,   fileName,   parameters,  NULL,   SW_SHOWDEFAULT);
-			#endif
-			}
-		};
-		luabind::function(L,    "fileLookup",    CMiscFunctions::fileLookup);
-		luabind::function(L,    "shellExecute",    CMiscFunctions::shellExecute);
-	#endif
 }
 
 
@@ -3317,6 +3323,7 @@ bool CLuaIHM::popString(CLuaState &ls, std::string & dest)
 	{
 #if LUABIND_VERSION == 07
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
+		ls.pop();
 #else
 		luabind::object obj(ls.getStatePointer());
 		obj.set();
@@ -3338,6 +3345,7 @@ bool CLuaIHM::popSINT32(CLuaState &ls, sint32 & dest)
 	{
 #if LUABIND_VERSION == 07
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
+		ls.pop();
 #else
 		luabind::object obj(ls.getStatePointer());
 		obj.set();
