@@ -670,7 +670,7 @@ NLMISC_COMMAND (testBuildingManager, "(debug) Unit test for building manager",
 		}
 	}
 
-	TestCharacters.resize( min(nbChars, FakeCharacters.size()) );
+	TestCharacters.resize( min(nbChars, (uint)FakeCharacters.size()) );
 	for (uint i = 0; i < TestCharacters.size(); i++)
 	{
 		CCharacter * c = PlayerManager.getChar( FakeCharacters[i] );
