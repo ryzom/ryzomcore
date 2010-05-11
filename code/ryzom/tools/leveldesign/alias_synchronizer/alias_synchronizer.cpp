@@ -280,8 +280,8 @@ struct TSetLastFolder
 		vector<string> folders;
 		str = CPath::standardizePath(str, false);
 #ifdef NL_OS_WINDOWS 
-		explode(str, "/", folders, true);
-#else // NL_OS_WINDOW 
+		explode(str, std::string("/"), folders, true);
+#else // NL_OS_WINDOW
 		NLMISC::splitString(str, "/", folders); 
 #endif // NL_OS_WINDOWS 
 		if (!folders.empty())
@@ -367,13 +367,13 @@ int main()
 	CConfigFile::CVar &filters = cf.getVar("Filters");
 
 	// store the filters
-	for (int i=0; i<filters.size(); ++i)
+	for (uint i=0; i<filters.size(); ++i)
 	{
 		Filters.push_back(filters.asString(i));
 	}
 
 	// add the search paths
-	for (int i=0; i<paths.size(); ++i)
+	for (uint i=0; i<paths.size(); ++i)
 	{
 		CPath::addSearchPath(paths.asString(i), true, false);
 	}
