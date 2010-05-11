@@ -39,6 +39,8 @@ libnelsnd_la_SOURCES = async_file_manager_sound.cpp \
 	music_source.h \
 	sample_bank.cpp \
 	sample_bank.h \
+	sample_bank_manager.cpp \
+	sample_bank_manager.h \
 	simple_sound.cpp \
 	simple_sound.h \
 	simple_source.cpp \
@@ -54,7 +56,11 @@ libnelsnd_la_SOURCES = async_file_manager_sound.cpp \
 	source_common.cpp \
 	source_common.h \
 	stdsound.cpp \
-	stdsound.h
+	stdsound.h \
+	stream_source.cpp \
+	stream_source.h \
+	stream_sound.cpp \
+	stream_sound.h
 
 AM_CXXFLAGS          = -I$(top_srcdir)/src
 

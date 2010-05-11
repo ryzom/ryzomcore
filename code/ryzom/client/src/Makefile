@@ -9,15 +9,15 @@ include ../../Variables.mk
 
 WWWFLAGS = $(shell libwww-config --cflags)
 WWWLDFLAGS = $(shell libwww-config --libs)
-LUAFLAGS = $(shell lua-config --include)
-LUALDFLAGS = $(shell lua-config --libs)
+LUAFLAGS = $(shell pkg-config lua5.1 --cflags)
+LUALDFLAGS = $(shell pkg-config lua5.1 --libs)
 
 # The flags for the C++ compiler
 CXXFLAGS     = $(WWWFLAGS) $(LUAFLAGS) \
 		$(FLAGS_CMN) $(FLAGS_DBG_$(DBG)) \
 		-I/usr/include/libxml2 \
 		-I$(RYZOM_PATH)/../../code/luabind \
-		-I$(NEL_PATH)/include \
+		-I$(NEL_INCLUDE) \
 		-I$(RYZOM_PATH)/common/src \
 		-I$(RYZOM_PATH)/client/src/seven_zip \
 		-I.. \
@@ -28,8 +28,8 @@ LDFLAGS      = 	$(WWWLDFLAGS) $(LUALDFLAGS) $(LD_FLAGS_CMN) \
 		-L$(RYZOM_PATH)/common/src/game_share \
 		-L$(RYZOM_PATH)/client/src/client_sheets \
 		-L$(RYZOM_PATH)/client/src/seven_zip \
-    -lclient_sheets \
-    -lseven_zip \
+		-lclient_sheets \
+		-lseven_zip \
 		-lgame_share \
 		-lnel3d \
 		-lnelpacs \
@@ -38,12 +38,12 @@ LDFLAGS      = 	$(WWWLDFLAGS) $(LUALDFLAGS) $(LD_FLAGS_CMN) \
 		-lnelgeorges \
 		-lnelnet \
 		-lnelmisc \
+		-lfreetype \
 		-lxml2 \
 		-ljpeg \
 		-lpng \
 		-lrt \
 		-ldl \
-		-llua50 \
 		-lluabind \
 		-lcurl \
 		-lX11
@@ -66,10 +66,10 @@ $(TARGETS): $(OBJS)
 	strip $(TARGETS)
 
 client_sheets:
-	+make $(MAKE_ALL_ARGS) -C client_sheets all
+	make $(MAKE_ALL_ARGS) -C client_sheets all
 
 seven_zip:
-	+make $(MAKE_ALL_ARGS) -C seven_zip all
+	make $(MAKE_ALL_ARGS) -C seven_zip all
 
 #############################################################################
 # Rules

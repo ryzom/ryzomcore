@@ -60,7 +60,7 @@ public:
 private:
 	CStreamSound(const CStreamSound &);
 	CStreamSound &operator=(const CStreamSound &);
-	
+
 private:
 	float				m_Alpha;
 
