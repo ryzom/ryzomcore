@@ -23,6 +23,8 @@ LIST(REMOVE_ITEM SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/scene_parser.h
 	${CMAKE_CURRENT_SOURCE_DIR}/motion/modes/free_head.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/motion/modes/free_head.h
+	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/lua_dll.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/lua_dll.h
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
 
