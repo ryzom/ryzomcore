@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 # make sure the args are valid
 if [ $# -lt 2 ]
@@ -25,7 +25,8 @@ done
 # if one of the files was missing then call the executable to rebuild the packed sheets
 if [ $REQUIRE_REBUILD == 1 ]
 then
-	PACK_SHEETS_FLAGS=$(grep PACK_SHEETS_FLAGS ../../../Variables.mk|cut -f2 -d=)
+	PACK_SHEETS_FLAGS=`grep PACK_SHEETS_FLAGS ../../../Variables.mk|cut -f2 -d=`
+	PACK_SHEETS_FLAGS=`eval echo $PACK_SHEETS_FLAGS`
 	echo "$EXE_NAME $PACK_SHEETS_FLAGS"
 	$EXE_NAME $PACK_SHEETS_FLAGS
 fi

@@ -1,6 +1,13 @@
 #!/bin/sh -
 
-RYZOM_PATH="$HOME/code/ryzom"
+#export RYZOM_PATH="$HOME/code/ryzom"
+
+if [ X"$RYZOM_PATH" = "X" ]
+then
+	echo Error: You need to setup \$RYZOM_PATH environement variable with the path where the ryzom code is
+	echo For example: export RYZOM_PATH=\"/home/user/code/ryzom\"
+	exit
+fi
 
 . $RYZOM_PATH/tools/scripts/linux/utilities
 

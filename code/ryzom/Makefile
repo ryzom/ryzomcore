@@ -1,8 +1,8 @@
-MAKE_NIGHT_ARGS=-j10
+MAKE_NIGHT_ARGS=-j2
 MAKE_ALL_ARGS=-j2
 CXX=g++
 CC=g++
-BIN_DIR=$(HOME)/code/ryzom/tools/scripts/linux
+BIN_DIR=$(RYZOM_PATH)/tools/scripts/linux
 
 night:
 	+make $(MAKE_NIGHT_ARGS) -k -C common night CXX=$(CXX)

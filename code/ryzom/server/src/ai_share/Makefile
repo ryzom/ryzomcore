@@ -20,13 +20,12 @@ LDFLAGS      = 	$(LD_FLAGS_CMN) \
 		-lxml2
 
 # The flags for the linker
-LDFLAGS2      = 	-L$(HOME)/install/$(DIR_DBG_$(DBG))/lib \
+LDFLAGS2      = 	-L$(RYZOM_PATH)/install/$(DIR_DBG_$(DBG))/lib \
 		-lnelnet \
 		-lnelgeorges \
 		-lnelpacs \
 		-L/usr/lib \
 		-L/usr/X11R6/lib \
-		-L$(HOME)/cvs/code/ryzom/src_v2/game_share \
 		-lnelmisc \
 		-lxml2 \
 		-lstlport \

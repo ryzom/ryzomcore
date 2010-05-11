@@ -20,12 +20,12 @@ FLAGS_DBG_off = -O3 -funroll-loops -DNL_RELEASE
 DIR_DBG_on    = debug
 DIR_DBG_off   = release
 
-PACK_SHEETS_FLAGS = -A/home/nevrax/code/ryzom/server -L/home/nevrax/code/ryzom/server -C/home/nevrax/code/ryzom/server/sheet_pack_cfg -Q --nons
+PACK_SHEETS_FLAGS = -A$RYZOM_PATH/server -L$RYZOM_PATH/server -C$RYZOM_PATH//server/sheet_pack_cfg -Q --nons
 
-NEL_PATH = $(HOME)/code/install/$(DIR_DBG_$(DBG))
-RYZOM_PATH = $(HOME)/code/ryzom
 
-NEL_INCLUDE = $(HOME)/code/nel/include
+NEL_PATH = $(RYZOM_PATH)/../../code/install/$(DIR_DBG_$(DBG))
+
+NEL_INCLUDE = $(RYZOM_PATH)/../../code/nel/include
 RYZOM_COMMON_SRC = $(RYZOM_PATH)/common/src
 
 ifeq (Objects.mk,$(wildcard Objects.mk))

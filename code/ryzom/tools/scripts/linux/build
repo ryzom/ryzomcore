@@ -45,11 +45,15 @@
 # VARIABLES
 
 #MAKE_ARGS="-j20 CC=distcc CXX=distcc"
-MAKE_ARGS="-j4"
+MAKE_ARGS="-j2"
 
 # Set the source directory. Use the environment SRC_DIR variable, if it's
 # not set, use $HOME/cvs as a default value
-SRC_DIR="$HOME/code"
+if test X"$RYZOM_PATH" = "X"
+then
+	RYZOM_PATH="$HOME/code"
+fi
+SRC_DIR="$RYZOM_PATH/../../code"
 
 # Build diretories
 BUILD_DEBUG="$SRC_DIR/build/debug"
@@ -60,7 +64,6 @@ INSTALL_DEBUG="$SRC_DIR/install/debug"
 INSTALL_RELEASE="$SRC_DIR/install/release"
 
 # PKG config
-#STLPORT_DIR='/home/installs/STLport-4.5.1'
 STLPORT_DIR='/usr'
 PYTHON_VERSION=2
 
@@ -74,10 +77,10 @@ CONFIGURE_OPT="--disable-xmltest --enable-maintainer-mode"
 ###########################################################################
 
 # Flag files associated to each mode
-DEBUG_FILE="$HOME/.mode_debug"
-STATIC_FILE="$HOME/.mode_static"
-DYNAMIC_FILE="$HOME/.mode_dynamic"
-SILENT_FILE="$HOME/.mode_silent"
+DEBUG_FILE="$RYZOM_PATH/.mode_debug"
+STATIC_FILE="$RYZOM_PATH/.mode_static"
+DYNAMIC_FILE="$RYZOM_PATH/.mode_dynamic"
+SILENT_FILE="$RYZOM_PATH/.mode_silent"
 
 # Specify the source code directory of each projects
 NEL_SRC="$SRC_DIR/nel"
@@ -346,7 +349,7 @@ case $1 in
     init)
         BUILD_ARG=$2
 
-        buildmode
+        $RYZOM_PATH/tools/scripts/linux/buildmode
 
         case "$BUILD_ARG" in
 
@@ -374,7 +377,6 @@ case $1 in
 
                 # Run the configure script
 	            cd $BUILD_DIR/$BUILD_ARG
-echo CFLAGS="$BUILD_CFLAGS" CXXFLAGS="$BUILD_CXXFLAGS"
                 CFLAGS="$BUILD_CFLAGS" CXXFLAGS="$BUILD_CXXFLAGS" \
                   $SRC_DIR/$BUILD_ARG/configure $CONFIGURE_OPT $* || exit 1
             ;;

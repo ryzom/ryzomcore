@@ -4,11 +4,11 @@
 ###########################################################################
 
 # Files associated to each mode
-DEBUG_FILE=$HOME/.mode_debug
-#RELEASE_FILE=$HOME/.mode_release
-STATIC_FILE=$HOME/.mode_static
-DYNAMIC_FILE=$HOME/.mode_dynamic
-SILENT_FILE=$HOME/.mode_silent
+DEBUG_FILE=$RYZOM_PATH/.mode_debug
+#RELEASE_FILE=$RYZOM_PATH/.mode_release
+STATIC_FILE=$RYZOM_PATH/.mode_static
+DYNAMIC_FILE=$RYZOM_PATH/.mode_dynamic
+SILENT_FILE=$RYZOM_PATH/.mode_silent
 
 
 ###########################################################################

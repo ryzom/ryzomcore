@@ -16,8 +16,8 @@ LUALDFLAGS = $(shell lua-config --libs)
 CXXFLAGS     = $(WWWFLAGS) $(LUAFLAGS) \
 		$(FLAGS_CMN) $(FLAGS_DBG_$(DBG)) \
 		-I/usr/include/libxml2 \
-		-I$(HOME)/code/luabind \
-		-I$(HOME)/code/nel/include \
+		-I$(RYZOM_PATH)/../../code/luabind \
+		-I$(NEL_PATH)/include \
 		-I$(RYZOM_PATH)/common/src \
 		-I$(RYZOM_PATH)/client/src/seven_zip \
 		-I.. \

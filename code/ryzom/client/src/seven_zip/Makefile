@@ -10,7 +10,7 @@ include ../../../Variables.mk
 # The flags for the C++ compiler
 CXXFLAGS     = $(FLAGS_CMN) $(FLAGS_DBG_$(DBG)) \
 		-D_SZ_ONE_DIRECTORY \
-		-I$(HOME)/code/nel/include \
+		-I$(NEL_PATH)/include \
 		-I$(RYZOM_PATH)/common/src \
 		-I.. \
 		-I.

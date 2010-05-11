@@ -11,8 +11,8 @@ include ../../../Variables.mk
 CXXFLAGS     = $(FLAGS_CMN) $(FLAGS_DBG_$(DBG)) \
 		-I/usr/include/libxml2 \
 		-I/usr/include/mysql \
-		-I$(HOME)/code/nel/include \
-		-I$(HOME)/code/ryzom/common/src \
+		-I$(NEL_INCLUDE) \
+		-I$(RYZOM_PATH)/common/src \
 		-I./ \
 		-I./character_structure \
 		-I./egs_sheets \
@@ -20,7 +20,7 @@ CXXFLAGS     = $(FLAGS_CMN) $(FLAGS_DBG_$(DBG)) \
 		-I./game_item_manager
 
 # The flags for the linker
-LDFLAGS      = 	$(LD_FLAGS_CMN) -L$(HOME)/install/$(DIR_DBG_$(DBG))/lib \
+LDFLAGS      = 	$(LD_FLAGS_CMN) -L$(RYZOM_PATH)/install/$(DIR_DBG_$(DBG))/lib \
 		-llibmysqlclient \
 		-lnelnet \
 		-lnelgeorges \

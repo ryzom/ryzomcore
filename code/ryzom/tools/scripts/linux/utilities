@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/sh -
 
 SSH_AGENT_FILE="$HOME/ssh_agent_file"
 
 BASENAME=`basename $0`
-LOG_INFO="$HOME/log/${BASENAME}_info.log"
-LOG_ERROR="$HOME/log/${BASENAME}_error.log"
+LOG_INFO="$RYZOM_PATH/log/${BASENAME}_info.log"
+LOG_ERROR="$RYZOM_PATH/log/${BASENAME}_error.log"
 
 # first param is the subject line
 # others params are email
-function send_mail()
+send_mail()
 {
 	SUBJECT=$1
 	shift
@@ -16,13 +16,13 @@ function send_mail()
 	cat $LOG_ERROR | mail -s "$SUBJECT on `hostname`" $*
 }
 
-function print_success()
+print_success()
 {
 	echo "*********************** $* SUCCESS !"
 	echo
 }
 
-function print_failure()
+print_failure()
 {
 	echo "***************************************************"
 	echo "***************************************************"
@@ -34,7 +34,7 @@ function print_failure()
 
 # failed fill the log and send email if necessary
 # argument are the error message
-function failed()
+failed()
 {
 	print_failure $*
 	if [ "X$LOG_INFO" != "X" ]
@@ -59,7 +59,7 @@ function failed()
 
 # useful function to avoid continuing if something goes wrong
 # first param is $? and second is the string that will display
-function verify()
+verify()
 {
 	if [ $1 -eq 0 ]
 		then
@@ -80,7 +80,7 @@ function verify()
 }
 
 # step_failed() fills the log and increments $STEPS_FAILURES
-function step_failed()
+step_failed()
 {
 	print_failure $*
 	if [ "X$LOG_INFO" != "X" ]
@@ -102,7 +102,7 @@ function step_failed()
 
 # call init_steps() before you use step()
 # it takes a label for following steps as parameter
-function init_steps()
+init_steps()
 {
 	STEPS_LABEL="$*"
 	STEPS_FAILURES=0
@@ -110,7 +110,7 @@ function init_steps()
 
 # like verify() but will continue even if step failed until verify_steps() is called
 # first param is $? and second is the string that will display
-function step()
+step()
 {
 	if [ $1 -eq 0 ]
 		then
@@ -131,7 +131,7 @@ function step()
 }
 
 # call verify_steps() when you want to stop if error(s) occured in previous steps
-function verify_steps()
+verify_steps()
 {
     if [ $STEPS_FAILURES -eq 0 ]
         then
@@ -154,7 +154,7 @@ function verify_steps()
     fi
 }
 
-function ask_confirmation()
+ask_confirmation()
 {
 	echo "Using this script will destroy the current version, type 'yes' if you really want to do that"
 	read CONF
@@ -163,7 +163,7 @@ function ask_confirmation()
 	fi
 }
 
-function check_host()
+check_host()
 {
 	HOST=`hostname -s`
 	if [ "X$HOST" != "X$1" ]; then
@@ -172,10 +172,11 @@ function check_host()
 }
 
 # useful function to initialize the default log for all scripts
-function init()
+init()
 {
 	if [ "X$LOG_INFO" != "X" ]
 		then
+		test -d `dirname $LOG_INFO` || mkdir -p `dirname $LOG_INFO`
 		test ! -f $LOG_INFO || rm $LOG_INFO
 		touch $LOG_INFO
 		# display all ulimit in the log
@@ -184,12 +185,13 @@ function init()
 
 	if [ "X$LOG_ERROR" != "X" ]
 		then
+		test -d `dirname $LOG_ERROR` || mkdir -p `dirname $LOG_ERROR`
 		test ! -f $LOG_ERROR || rm $LOG_ERROR
 		touch $LOG_ERROR
 	fi
 }
 
-function init_ssh()
+init_ssh()
 {
 	if [ ! -f $SSH_AGENT_FILE ]
 		then
@@ -197,5 +199,4 @@ function init_ssh()
 	fi
 
 	eval `cat $SSH_AGENT_FILE`
-
 }
