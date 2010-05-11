@@ -37,9 +37,9 @@
 
 #include "nel/misc/vector.h"
 
-#include "sound/driver/sound_driver.h"
-#include "sound/driver/source.h"
-#include "sound/driver/listener.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/source.h"
+#include "nel/sound/driver/listener.h"
 #include "sound/driver/dsound/source_dsound.h"
 
 #include "nel/sound/u_audio_mixer.h"

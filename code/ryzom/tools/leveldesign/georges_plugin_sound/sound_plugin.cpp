@@ -24,8 +24,8 @@
 #include "loading_dialog.h"
 #include "nel/ligo/primitive.h"
 
-#include "nel/../../src/sound/sound.h"
-#include "nel/../../src/sound/simple_sound.h"
+#include "nel/sound/sound.h"
+#include "nel/sound/simple_sound.h"
 #include <afxcmn.h>
 
 using namespace std;

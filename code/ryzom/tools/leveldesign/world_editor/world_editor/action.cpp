@@ -21,7 +21,7 @@
 #include "main_frm.h"
 #include "world_editor_doc.h"
 #include "editor_primitive.h"
-#include "sound/background_sound_manager.h"
+#include "nel/sound/background_sound_manager.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -24,8 +24,8 @@
 #include "nel/georges/u_form_elm.h"
 #include "sound_document_plugin.h"
 #include "nel/sound/u_audio_mixer.h"
-#include "sound/sound.h"
-#include "sound/simple_sound.h"
+#include "nel/sound/sound.h"
+#include "nel/sound/simple_sound.h"
 
 #include "PagePosition.h"
 
