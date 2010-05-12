@@ -19,6 +19,15 @@ ENDMACRO(CHECK_OUT_OF_SOURCE)
 
 MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
+  # Build options
+  ###
+
+  OPTION(WITH_CLIENT		"Build Ryzom Core Client"			ON )
+  OPTION(WITH_TOOLS		"Build Ryzom Core Tools"			ON )
+  OPTION(WITH_SERVER		"Build Ryzom Core Services"			ON )
+  OPTION(WITH_LUA51		"Build Ryzom Core using Lua51"			OFF)
+
+  ###
   # Features
   ###
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
@@ -66,7 +75,7 @@ MACRO(NL_SETUP_BUILD)
     SET(NL_RELEASE_CFLAGS "/Ox /Ob2 /Oi /Ot /Oy /GT /GF")
     SET(NL_RELEASEDEBUG_CFLAGS "/DNL_RELEASE_DEBUG /Ob2 /GF")
   ELSE(WIN32)
-    SET(PLATFORM_CFLAGS "-ftemplate-depth-24 -D_REENTRANT -Wall -ansi -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-long-long -Wno-unused")
+    SET(PLATFORM_CFLAGS "-ftemplate-depth-48 -D_REENTRANT -Wall -ansi -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-long-long -Wno-unused")
     IF(WITH_COVERAGE)
       SET(PLATFORM_CFLAGS "-fprofile-arcs -ftest-coverage ${PLATFORM_CFLAGS}")
     ENDIF(WITH_COVERAGE)
