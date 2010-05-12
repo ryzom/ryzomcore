@@ -57,10 +57,10 @@ const uint32 ISoundDriver::InterfaceVersion = 0x16; // Kaetemi
 #ifdef NL_STATIC
 
 #define NLSOUND_DECLARE_DRIVER(__soundDriver) \
-	extern ISoundDriver* createISoundDriverInstance##__soundDriver##(ISoundDriver::IStringMapperProvider *stringMapper); \
-	extern uint32 interfaceVersion##__soundDriver##(); \
-	extern void outputProfile##__soundDriver##(std::string &out); \
-	extern ISoundDriver::TDriver getDriverType##__soundDriver##();
+	extern ISoundDriver* createISoundDriverInstance##__soundDriver(ISoundDriver::IStringMapperProvider *stringMapper); \
+	extern uint32 interfaceVersion##__soundDriver(); \
+	extern void outputProfile##__soundDriver(std::string &out); \
+	extern ISoundDriver::TDriver getDriverType##__soundDriver();
 
 #if NL_FMOD_AVAILABLE
 	NLSOUND_DECLARE_DRIVER(FMod)
