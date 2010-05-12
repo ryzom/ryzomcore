@@ -1,8 +1,3 @@
-//file misc/dynloadlib.cpp
-/*
- * <dynloadlib.cpp>
- */
-
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
