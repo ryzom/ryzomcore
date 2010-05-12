@@ -67,6 +67,9 @@ void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 #ifdef NL_OS_WINDOWS
   const string	nlLibPrefix;	// empty
   const string	nlLibExt(".dll");
+#elif defined(NL_OS_MAC)
+  const string	nlLibPrefix("lib");
+  const string	nlLibExt(".dylib");
 #elif defined(NL_OS_UNIX)
   const string	nlLibPrefix("lib");
   const string	nlLibExt(".so");
