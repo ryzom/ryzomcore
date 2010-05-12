@@ -226,9 +226,10 @@ double CTime::ticksToSecond (TTicks ticks)
 		if (factor == 0.0)
 		{
 			mach_timebase_info_data_t tbInfo;
+			mach_timebase_info(&tbInfo);
 			factor = 1000000000.0 * (double)tbInfo.numer / (double)tbInfo.denom;
 		}
-		return double(ticks * factor);
+		return double(ticks / factor);
 	}
 #endif // NL_OS_WINDOWS
 	{
