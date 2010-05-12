@@ -162,6 +162,7 @@ CUserEntity::CUserEntity()
 
 	_ViewMode = FirstPV;
 	_PermanentDeath = false;
+	_FollowMode = false;
 
 	_CheckPrimitive = 0;
 	// The user is not in collision with someone else.
