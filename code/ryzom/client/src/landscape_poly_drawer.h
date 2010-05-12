@@ -66,7 +66,7 @@ private:
 // to infinity during shadow volume display.
 // To a best robustness and to join depth range [depthMin, depthMax] used in display of main scene, an epsilon
 // factor is calculated to transpose Z buffer values from [depthMin, 1] to [depthMin, depthMax]
-// while à [depthMin, 1] depth range is used during shadow volume display.
+// while in [depthMin, 1] depth range is used during shadow volume display.
 //-----------------------------------------------------------------------------------------------------------
 class CLandscapePolyDrawer : public NLMISC::CSingleton<CLandscapePolyDrawer>
 {

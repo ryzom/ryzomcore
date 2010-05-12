@@ -86,9 +86,9 @@ double angleBetween2Vect(const NLMISC::CVectorD &from, const NLMISC::CVectorD &t
 void makeUp(NL3D::UInstance face, sint idMakeUp);
 
 /**
- * qStart est le quaterion à t=0,
- * qEnd est le quaterion à t=TAnimEnd,
- * time est entre 0 et 1. (1=> TAnimEnd)
+ * qStart is the quaterion at t=0,
+ * qEnd is the quaterion at t=TAnimEnd,
+ * time is between 0 and 1. (1=> TAnimEnd)
  */
 NLMISC::CQuat applyRotationFactor(NLMISC::CQuat in, float rotFactor, NLMISC::CQuat qStart, NLMISC::CQuat qEnd, float time);
 

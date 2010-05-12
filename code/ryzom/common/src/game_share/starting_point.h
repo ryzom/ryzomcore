@@ -33,7 +33,7 @@ namespace RYZOM_STARTING_POINT
 			rosilio,
 			miani,
 
-		// zoraï start village
+		// zorai start village
 		zorai_start,
 			qai_lo = zorai_start,
 			sheng_wo,

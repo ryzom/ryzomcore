@@ -855,32 +855,6 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 		}
 	}
 }
-#if !FINAL_VERSION
-
-NLMISC_COMMAND(testChatOpen1, "", "")
-{
-	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-	if (selection != NULL)
-	{
-		const ucstring text("Ceci doit être la page1.Ceci doit être la page1.Ceci doit être la page1.Ceci doit être la page1.Ceci doit être la page1.{break}Ceci doit en principe être la seconde page... Elle comprends un certain nombre de caractères et est utilisée pour déterminée la moyenne maximale que l'on peut atteindre, entre les langues (par exemple l'allemand) la taille de tout ca peut changer du tout au tout. Il faut se donner une marge a ne pas depasser.{break}Et enfin cette page doit être la dernière!");
-		InSceneBubbleManager.chatOpen(selection->dataSetId(), text);
-	}
-	return true;
-}
-
-// TEMP TEMP TEMP
-NLMISC_COMMAND(testChatOpen2, "", "")
-{
-	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-	if (selection != NULL)
-	{
-		const ucstring text("Ceci doit être une page toute seule pour voir ce que ca fait ...");
-		InSceneBubbleManager.chatOpen(selection->dataSetId(), text);
-	}
-	return true;
-}
-
-#endif
 
 // ***************************************************************************
 

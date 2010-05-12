@@ -33,7 +33,7 @@
 #include "animation_misc.h"
 #include "debug_client.h"
 #include "client_cfg.h"
-#include "entity_animation_manager.h"	// \todo GUIGUI : ajouté pour recompiler les animations au chargement (faire mieux ?).
+#include "entity_animation_manager.h"	// \todo GUIGUI : added to recompile animations at loading (to do better ?).
 
 
 ///////////

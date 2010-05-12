@@ -599,7 +599,7 @@ void CUserControls::cameraLook(bool fullMode)
 //-----------------------------------------------
 // commonMove :
 // Manage some common actions.
-// \todo GUIGUI : gérer le control avant l'update des entités, mais la vue qu'après le déplacement.
+// \todo GUIGUI : manage control before entities update, but view only after move
 //-----------------------------------------------
 void CUserControls::commonMove()
 {

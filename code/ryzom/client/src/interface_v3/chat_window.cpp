@@ -820,8 +820,8 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 		inviteBut->setActive(isDM);
 		if (isDM)
 		{
-			inviteBut->setFrozen(false); // TODO Boris : true si le joueur est déjà invité dans l'anim + faire
-										 // PeopleInterraction.updateAllFreeTellerHeaders() quant la liste est updatée
+			inviteBut->setFrozen(false); // TODO Boris : true if player is already invited in anim + do
+										 // PeopleInterraction.updateAllFreeTellerHeaders() when list is updated
 		}
 	}
 }
