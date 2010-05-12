@@ -222,9 +222,13 @@ double CTime::ticksToSecond (TTicks ticks)
 	else
 #elif defined(NL_OS_MAC)
 	{
-		static mach_timebase_info_data_t tbInfo;
-		if(tbInfo.denom == 0) mach_timebase_info(&tbInfo);
-		return double(ticks * tbInfo.numer / tbInfo.denom)/1000000.0;
+		static double factor = 0.0;
+		if (factor == 0.0)
+		{
+			mach_timebase_info_data_t tbInfo;
+			factor = 1000000000.0 * (double)tbInfo.numer / (double)tbInfo.denom;
+		}
+		return double(ticks * factor);
 	}
 #endif // NL_OS_WINDOWS
 	{
