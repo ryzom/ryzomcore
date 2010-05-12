@@ -17,7 +17,7 @@ TARGET_LINK_LIBRARIES(frontend_service admin_modules game_share ${PLATFORM_LINKF
 IF(WIN32)
   SET_TARGET_PROPERTIES(frontend_service PROPERTIES 
 	LINK_FLAGS "/NODEFAULTLIB:libcmt /SUBSYSTEM:WINDOWS"
-	PROJECT_LABEL "Services: Frontend Service")
+	PROJECT_LABEL "Services: Frontend Service (FS)")
 ENDIF(WIN32)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
