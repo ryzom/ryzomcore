@@ -18,6 +18,7 @@ ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
       /usr/include/mysql
       /usr/local/include/mysql
+      /opt/local/include/mysql5/mysql
       $ENV{ProgramFiles}/MySQL/*/include
       $ENV{SystemDrive}/MySQL/*/include)
 
@@ -33,6 +34,7 @@ ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
       /usr/local/lib
       /usr/lib/mysql
       /usr/local/lib/mysql
+      /opt/local/lib/mysql5/mysql
       )
   ENDIF(WIN32 AND MSVC)
 
