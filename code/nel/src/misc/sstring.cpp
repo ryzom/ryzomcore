@@ -1325,7 +1325,7 @@ namespace NLMISC
 		if (toFind==NULL || *toFind==0)
 			return *this;
 
-		unsigned i,j;
+		std::string::size_type i,j;
 		CSString result;
 		for (i=0;i<size();)
 		{
@@ -1349,15 +1349,15 @@ namespace NLMISC
 		return result;
 	}
 
-	unsigned CSString::find(const char *toFind,unsigned startLocation) const
+	std::string::size_type CSString::find(const char *toFind, std::string::size_type startLocation) const
 	{
 	//	const char *constStr = c_str();
 
 		// just bypass the problems that can cause a crash...
 		if (toFind==NULL || *toFind==0 || startLocation>=size())
-			return (unsigned)std::string::npos;
+			return std::string::npos;
 
-		unsigned i,j;
+		std::string::size_type i,j;
 		for (i=startLocation;i<size();++i)
 		{
 			// string compare toFind against (*this)+i ...
@@ -1368,19 +1368,19 @@ namespace NLMISC
 			if (toFind[j]==0)
 				return i;
 		}
-		return (unsigned)std::string::npos;
+		return std::string::npos;
 	}
 
 	/// Find index at which a sub-string starts (case NOT sensitive) - if sub-string not found then returns string::npos
-	unsigned CSString::findNS(const char *toFind,unsigned startLocation) const
+	std::string::size_type CSString::findNS(const char *toFind, std::string::size_type startLocation) const
 	{
 		const char *constStr = c_str();
 
 		// just bypass the problems that can cause a crash...
 		if (toFind==NULL || *toFind==0 || startLocation>=size())
-			return (unsigned)std::string::npos;
+			return std::string::npos;
 
-		unsigned i,j;
+		std::string::size_type i,j;
 		for (i=startLocation;i<size();++i)
 		{
 			// string compare toFind against (*this)+i ...
@@ -1391,12 +1391,12 @@ namespace NLMISC
 			if (toFind[j]==0)
 				return i;
 		}
-		return (unsigned)std::string::npos;
+		return std::string::npos;
 	}
 
 	bool CSString::contains(const char *toFind) const
 	{
-		return find(toFind)!=(unsigned)std::string::npos;
+		return find(toFind)!=std::string::npos;
 	}
 
 	bool CSString::contains(int character) const
@@ -1482,7 +1482,7 @@ namespace NLMISC
 		return neg? -(sint32)result: (sint32)result;
 	}
 
-	int CSString::atosi() const
+	sint32 CSString::atosi() const
 	{
 		if (empty())
 			return 0;
@@ -1533,7 +1533,7 @@ namespace NLMISC
 		return neg? -(sint32)result: (sint32)result;
 	}
 
-	unsigned CSString::atoui() const
+	uint32 CSString::atoui() const
 	{
 		uint32 result=0;
 		for (const_iterator it=begin();it!=end();++it)

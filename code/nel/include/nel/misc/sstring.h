@@ -333,10 +333,10 @@ public:
 	CSString replace(const char *toFind,const char *replacement) const;
 
 	/// Find index at which a sub-string starts (case not sensitive) - if sub-string not found then returns string::npos
-	unsigned find(const char *toFind,unsigned startLocation=0) const;
+	std::string::size_type find(const char *toFind, std::string::size_type startLocation=0) const;
 
 	/// Find index at which a sub-string starts (case NOT sensitive) - if sub-string not found then returns string::npos
-	unsigned findNS(const char *toFind,unsigned startLocation=0) const;
+	std::string::size_type findNS(const char *toFind, std::string::size_type startLocation=0) const;
 
 	/// Return true if this contains given sub string
 	bool contains(const char *toFind) const;
@@ -346,8 +346,8 @@ public:
 
 	/// Handy atoi routines...
 	int atoi() const;
-	signed atosi() const;
-	unsigned atoui() const;
+	sint32 atosi() const;
+	uint32 atoui() const;
 	sint64 atoi64() const;
 	sint64 atosi64() const;
 	uint64 atoui64() const;
