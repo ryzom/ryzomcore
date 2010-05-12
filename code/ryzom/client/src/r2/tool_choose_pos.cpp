@@ -307,9 +307,9 @@ void CToolChoosePos::updateBeforeRender()
 
 		}
 		// see if all pos are accessible and update the _Valid flag
-		// NB NICO : LE CODE SUIVANT MARCHE MAIS
-		// voir avec les autres si c'est vraiment pertinent de tester ce type de collisions
-		// au final -> comme le test entre entité n'est pas fait, intérêt douteux ...
+		// NB NICO : THE FOLLOWING CODE IS WORKING BUT
+		// see with others if it's usefull to check this type of collisions
+		// finally -> since check is never done, limited/no interest ...
 		/*
 		if (shown && entity->getPrimitive())
 		{
