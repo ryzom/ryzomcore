@@ -37,14 +37,14 @@ public:
 		_Color= NLMISC::CRGBA::White;
 		_Int= 0;
 		_Float= 0;
-		_Bool= false;
+		_Boolean= false;
 	}
 
 	const std::string		&getValStr	() const {return _Str;}
 	sint32					getValSInt32() const {return _Int;}
 	float					getValFloat	() const {return _Float;}
 	NLMISC::CRGBA			getValColor	() const {return _Color;}
-	bool					getValBool	() const {return _Bool;}
+	bool					getValBool	() const {return _Boolean;}
 
 	void					init(const std::string &str);
 
@@ -57,7 +57,7 @@ private:
 	NLMISC::CRGBA	_Color;
 	sint32			_Int;
 	float			_Float;
-	bool			_Bool;
+	bool			_Boolean;
 };
 
 

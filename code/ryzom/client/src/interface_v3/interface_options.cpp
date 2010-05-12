@@ -48,7 +48,7 @@ void		CInterfaceOptionValue::init(const std::string &str)
 	fromString(str, _Int);
 	fromString(str, _Float);
 	_Color= CInterfaceElement::convertColor (str.c_str());
-	_Bool= CInterfaceElement::convertBool(str.c_str());
+	_Boolean= CInterfaceElement::convertBool(str.c_str());
 }
 
 
