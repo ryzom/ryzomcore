@@ -1058,7 +1058,7 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 		GLX_RGBA,
 		GLX_DOUBLEBUFFER,
 		//GLX_BUFFER_SIZE, 32,
-		GLX_DEPTH_SIZE, 24,
+		GLX_DEPTH_SIZE, 32,
 		GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8,
