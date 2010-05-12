@@ -25,19 +25,6 @@
 #    undef for
 #  endif
 #endif
-#include <luabind/luabind.hpp>
-
-#if LUABIND_MAX_ARITY == 10
-#	define LUABIND_VERSION 07
-#elif LUABIND_MAX_ARITY == 5
-#	define LUABIND_VERSION 06
-#else
-#	pragma error("luabind version not recognized")
-#endif
-
-#if LUABIND_VERSION == 07
-#	include <luabind/operator.hpp>
-#endif
 
 #include "lua_ihm.h"
 #include "reflect.h"
@@ -96,7 +83,6 @@
 #include "game_share/bg_downloader_msg.h"
 #include "game_share/constants.h"
 
-
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
@@ -113,6 +99,24 @@ to include luabind.hpp in every file.
 Compilation is VERY SLOW
 */
 // ***************************************************************************
+
+// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
+#include <cassert>
+#undef assert
+#define assert nlassert
+#include <luabind/luabind.hpp>
+
+#if LUABIND_MAX_ARITY == 10
+#	define LUABIND_VERSION 07
+#elif LUABIND_MAX_ARITY == 5
+#	define LUABIND_VERSION 06
+#else
+#	pragma error("luabind version not recognized")
+#endif
+
+#if LUABIND_VERSION == 07
+#	include <luabind/operator.hpp>
+#endif
 
 using namespace NLMISC;
 using namespace NLGEORGES;
