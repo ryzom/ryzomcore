@@ -69,7 +69,7 @@ SZ_RESULT SzFileSeekImp(void *object, CFileSize pos)
   return SZE_FAIL;
 }
 
-void PrintError(char *sz)
+void PrintError(const char *sz)
 {
   printf("\nERROR: %s\n", sz);
 }
@@ -179,7 +179,7 @@ int main(int numargs, char *args[])
         if (!testCommand)
         {
           FILE *outputHandle;
-          UInt32 processedSize;
+          size_t processedSize;
           char *fileName = f->Name;
           size_t nameLen = strlen(f->Name);
           for (; nameLen > 0; nameLen--)
