@@ -1041,6 +1041,18 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 		None
 	};
 
+	static int sAttribList24bpp[] =
+	{
+		GLX_RGBA,
+		GLX_DOUBLEBUFFER,
+		//GLX_BUFFER_SIZE, 16,
+		GLX_DEPTH_SIZE, 24,
+		GLX_RED_SIZE, 8,
+		GLX_GREEN_SIZE, 8,
+		GLX_BLUE_SIZE, 8,
+		None
+	};
+
 	static int sAttribList32bpp[] =
 	{
 		GLX_RGBA,
@@ -1054,8 +1066,10 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 		None
 	};
 
-	// first try 32bpp and if that fails 16bpp
+	// first try 32bpp and if that fails 24bpp or 16bpp
 	XVisualInfo *visual_info = glXChooseVisual (dpy, DefaultScreen(dpy), sAttribList32bpp);
+	if (visual_info == NULL)
+		visual_info = glXChooseVisual(dpy, DefaultScreen(dpy), sAttribList24bpp);
 	if (visual_info == NULL)
 		visual_info = glXChooseVisual(dpy, DefaultScreen(dpy), sAttribList16bpp);
 	if(visual_info == NULL)

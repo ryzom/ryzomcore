@@ -571,7 +571,7 @@ void checkDriverDepth ()
 #ifdef NL_OS_WINDOWS
 		if (mode.Depth != 32)
 #else
-		if (mode.Depth < 24)
+		if (mode.Depth != 16 && mode.Depth != 24 && mode.Depth != 32)
 #endif
 			ExitClientError (CI18N::get ("uiDesktopNotIn32").toUtf8().c_str ());
 	}
