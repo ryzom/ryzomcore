@@ -395,7 +395,7 @@ CPSTailDot::CVBnPB &CPSTailDot::getVBnPB()
 {
 	NL_PS_FUNC(CPSTailDot_getVBnPB)
 	/// choose the right vb
-	TVBMap &map = _ColorScheme ? (_ColorFading ? _FadedColoredVBMap : _ColoredVBMap)		// per ribbon coloçr
+	TVBMap &map = _ColorScheme ? (_ColorFading ? _FadedColoredVBMap : _ColoredVBMap)		// per ribbon color
 							   : (_ColorFading ? _FadedVBMap : _VBMap);     // global color
 	TVBMap::iterator it = map.find(_UsedNbSegs + 1);
 	if (it != map.end())

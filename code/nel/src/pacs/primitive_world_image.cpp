@@ -576,19 +576,19 @@ bool CPrimitiveWorldImage::evalCollisionPoverOC (CPrimitiveWorldImage& other, CC
 	 * p'(t) = p'0 + v'0*(t - t'0)
 	 *
 	 * Find t for this equation:
-	 * R² = Norm² (p(t) - p'(t))
-	 * R² = Norm² ( p0 + v0 ( t - t0 ) - p'0 - v'0 ( t - t'0 ) )
+	 * R^2 = Norm^2 (p(t) - p'(t))
+	 * R^2 = Norm^2 ( p0 + v0 ( t - t0 ) - p'0 - v'0 ( t - t'0 ) )
 	 *
 	 * A = p0 - v0*t0 - p'0 + v'0*t'0
 	 * B = (v0 - v'0)
 	 *
-	 * Norm² (B)*t² + 2*(A.B)*t + Norm² (A) - R² = 0
+	 * Norm^2 (B)*t^2 + 2*(A.B)*t + Norm^2 (A) - R^2 = 0
 	 *
-	 * a = Norm² (B)
+	 * a = Norm^2 (B)
 	 * b = 2*(A.B)
-	 * c = Norm² (A) - R²
+	 * c = Norm^2 (A) - R^2
 	 *
-	 * a*t² + b*t + c = 0
+	 * a*t^2 + b*t + c = 0
 	 */
 
 	// Let's go
@@ -784,19 +784,19 @@ bool CPrimitiveWorldImage::evalCollisionOCoverOC (CPrimitiveWorldImage& other, C
 	 * p'(t) = p'0 + v'0*(t - t'0)
 	 *
 	 * Find t for this equation:
-	 * (R + R')² = Norm² (p(t) - p'(t))
-	 * (R + R')² = Norm² ( p0 + v0 ( t - t0 ) - p'0 - v'0 ( t - t'0 ) )
+	 * (R + R')^2 = Norm^2 (p(t) - p'(t))
+	 * (R + R')^2 = Norm^2 ( p0 + v0 ( t - t0 ) - p'0 - v'0 ( t - t'0 ) )
 	 *
 	 * A = p0 - v0*t0 - p'0 + v'0*t'0
 	 * B = (v0 - v'0)
 	 *
-	 * Norm² (B)*t² + 2*(A.B)*t + Norm² (A) - (R + R')² = 0
+	 * Norm^2 (B)*t^2 + 2*(A.B)*t + Norm^2 (A) - (R + R')^2 = 0
 	 *
-	 * a = Norm² (B)
+	 * a = Norm^2 (B)
 	 * b = 2*(A.B)
-	 * c = Norm² (A) - (R + R')²
+	 * c = Norm^2 (A) - (R + R')^2
 	 *
-	 * a*t² + b*t + c = 0
+	 * a*t^2 + b*t + c = 0
 	 */
 
 	// Let's go

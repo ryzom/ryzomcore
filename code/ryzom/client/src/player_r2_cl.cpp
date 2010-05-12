@@ -692,7 +692,7 @@ void CPlayerR2CL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycle
 //-----------------------------------------------
 // updateVisualPropertyVpc :
 // Update the Visual Property C.
-// \todo GUIGUI : factoriser les tatouages avec la création de perso
+// \todo GUIGUI : factorize tatoos with character creation
 //-----------------------------------------------
 
 void CPlayerR2CL::updateVisualPropertyVpc(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)

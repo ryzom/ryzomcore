@@ -44,7 +44,7 @@ void		CQuatPack::pack(const CQuat &quat)
 	/*
 		This is the most precise/faster compression we can have. Some other tries have been made.
 
-		- deducing w from x,y,z is possible with w= 1-sqrt(x²+y²+z²) (with tradeoff of the W sign)
+		- deducing w from x,y,z is possible with w= 1-sqrt(x^2+y^2+z^2) (with tradeoff of the W sign)
 			but very not precise.
 		- Transform the quaternion to an AxisAngle is possible, but slower (some cos/sin or LUT).
 			Axis is encoded with sint16, and angle is encoded with uint16.

@@ -797,7 +797,7 @@ protected:
 	 * \param visualSlot: visual slot used by this item.
 	 * \param instIdx : if not CEntityCL::BadIndex, replace the equipement instance at this index.
 	 * \return uint32 : index of the instance or CEntityCL::BadIndex if there were a problem.
-	 * \todo GUIGUI : Trouver une facon d'éviter tous ces test de slotType.
+	 * \todo GUIGUI : find a better choice to avoid all these slotType tests
 	 */
 	uint32 buildEquipment(const CCharacterSheet::CEquipment &slot, SLOTTYPE::EVisualSlot visualSlot, sint color = -1, uint32 instIdx = CEntityCL::BadIndex);
 

@@ -455,10 +455,10 @@ void CBufFIFO::resize (uint32 s)
 
 	uint32 UsedSize = CBufFIFO::size();
 
-	// creer un nouveau tableau et copie l ancien dans le nouveau.
+	// create a new array and copy the old in the new one
 	if (s < _BufferSize && UsedSize > s)
 	{
-		// probleme, on a pas assez de place pour caser les datas => on fait pas
+		// problem, we don't have enough room for putting data => don't do it
 		nlwarning("BF: Can't resize the FIFO because there's not enough room in the new wanted buffer (%d bytes needed at least)", UsedSize);
 		return;
 	}

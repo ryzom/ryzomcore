@@ -113,7 +113,7 @@ public:
 		TurnLeft,
 		TurnRight,
 		Emote,
-		// Old Cast	// \todo GUIGUI : a enlever lorsqu'on sera passé au nouveau systeme.
+		// Old Cast	// \todo GUIGUI : to remove when the new system will be used
 		CastGoodBegin,
 		CastGoodSuccess,
 		CastGoodFail,

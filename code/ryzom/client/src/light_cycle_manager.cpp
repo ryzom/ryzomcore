@@ -45,7 +45,7 @@
 #include "misc.h"
 #include "interface_v3/interface_manager.h"
 
-//#include "sound_manager.h"	// \todo GUIGUI : SOUND_MANAGER A REMETTRE lorsque intégration nouveau FE fini et la class modifiée.
+//#include "sound_manager.h"	// \todo GUIGUI : uncomment after new FE done and class modified
 
 
 H_AUTO_DECL(RZ_LightCycleManager)

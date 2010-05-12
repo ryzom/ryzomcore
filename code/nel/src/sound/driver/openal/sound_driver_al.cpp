@@ -140,9 +140,16 @@ __declspec(dllexport) ISoundDriver::TDriver NLSOUND_getDriverType()
 
 #elif defined (NL_OS_UNIX)
 
+#ifndef NL_STATIC
 extern "C"
 {
+#endif
+
+#ifdef NL_STATIC
+ISoundDriver* createISoundDriverInstanceOpenAl(ISoundDriver::IStringMapperProvider *stringMapper)
+#else
 ISoundDriver* NLSOUND_createISoundDriverInstance(ISoundDriver::IStringMapperProvider *stringMapper)
+#endif
 {
 	return new CSoundDriverAL(stringMapper);
 }
@@ -151,7 +158,10 @@ uint32 NLSOUND_interfaceVersion ()
 {
 	return ISoundDriver::InterfaceVersion;
 }
+
+#ifndef NL_STATIC
 }
+#endif
 
 #endif // NL_OS_UNIX
 

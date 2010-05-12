@@ -44,7 +44,7 @@
 #include "pacs_client.h"
 #include "world_database_manager.h"
 #include "continent_manager.h"
-#include "sound_manager.h"	// \todo GUIGUI : SOUND_MANAGER A REMETTRE lorsque intégration nouveau FE fini et la class modifiée.
+#include "sound_manager.h"
 #include "weather.h"
 #include "weather_manager_client.h"
 #include "prim_file.h"

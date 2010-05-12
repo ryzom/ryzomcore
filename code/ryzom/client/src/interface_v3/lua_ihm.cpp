@@ -26,6 +26,21 @@
 #  endif
 #endif
 
+// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
+#include <cassert>
+#undef assert
+#define assert nlassert
+#include <luabind/luabind.hpp>
+#if LUABIND_MAX_ARITY == 10
+# include <luabind/version.hpp>
+# include <luabind/operator.hpp>
+#elif LUABIND_MAX_ARITY == 5
+# define LUABIND_VERSION 600
+#else
+# pragma error("luabind version not recognized")
+#endif
+
+
 #include "lua_ihm.h"
 #include "reflect.h"
 #include "action_handler.h"
@@ -99,24 +114,6 @@ to include luabind.hpp in every file.
 Compilation is VERY SLOW
 */
 // ***************************************************************************
-
-// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
-#include <cassert>
-#undef assert
-#define assert nlassert
-#include <luabind/luabind.hpp>
-
-#if LUABIND_MAX_ARITY == 10
-#	define LUABIND_VERSION 07
-#elif LUABIND_MAX_ARITY == 5
-#	define LUABIND_VERSION 06
-#else
-#	pragma error("luabind version not recognized")
-#endif
-
-#if LUABIND_VERSION == 07
-#	include <luabind/operator.hpp>
-#endif
 
 using namespace NLMISC;
 using namespace NLGEORGES;
@@ -208,7 +205,7 @@ bool CLuaIHM::pop(CLuaState &ls,   NLMISC::CRGBA &dest)
 	try
 	{
 		if (ls.isNil(-1)) return false;
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
 		ls.pop();
 #else
@@ -231,7 +228,7 @@ bool CLuaIHM::pop(CLuaState &ls,NLMISC::CVector2f &dest)
 	try
 	{
 		if (ls.isNil(-1)) return false;
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
 		ls.pop();
 #else
@@ -254,7 +251,7 @@ bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 	try
 	{
 		if (ls.isNil(-1)) return false;
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
 		ls.pop();
 #else
@@ -293,7 +290,7 @@ void CLuaIHM::push(CLuaState &ls, const ucstring &value)
 {
 	//H_AUTO(Lua_CLuaIHM_push)
 	luabind::object obj(ls.getStatePointer(), value);
-#if LUABIND_VERSION != 07
+#if LUABIND_VERSION == 600
 	obj.pushvalue();
 #endif
 }
@@ -651,7 +648,7 @@ void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflect
 		case CReflectedProperty::UCString:
 		{
 			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetUCString))() );
-#if LUABIND_VERSION != 07
+#if LUABIND_VERSION == 600
 			obj.pushvalue();
 #endif
 		}
@@ -659,7 +656,7 @@ void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflect
 		case CReflectedProperty::RGBA:
 		{
 			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetRGBA))());
-#if LUABIND_VERSION != 07
+#if LUABIND_VERSION == 600
 			obj.pushvalue();
 #endif
 		}
@@ -2672,7 +2669,7 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 				if(mustUseUCString)
 				{
 					luabind::object obj(ls.getStatePointer(),    ucstr );
-#if LUABIND_VERSION != 07
+#if LUABIND_VERSION == 600
 					obj.pushvalue();
 #endif
 				}
@@ -2685,7 +2682,7 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 		case CInterfaceExprValue::RGBA:
 			{
 				luabind::object obj(ls.getStatePointer(),    value.getRGBA());
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 				obj.push(ls.getStatePointer());
 #else
 				obj.pushvalue();
@@ -3325,7 +3322,7 @@ bool CLuaIHM::popString(CLuaState &ls, std::string & dest)
 	//H_AUTO(Lua_CLuaIHM_popString)
 	try
 	{
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
 		ls.pop();
 #else
@@ -3347,7 +3344,7 @@ bool CLuaIHM::popSINT32(CLuaState &ls, sint32 & dest)
 	//H_AUTO(Lua_CLuaIHM_popSINT32)
 	try
 	{
-#if LUABIND_VERSION == 07
+#if LUABIND_VERSION > 600
 		luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
 		ls.pop();
 #else

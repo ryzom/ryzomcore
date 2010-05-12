@@ -157,9 +157,9 @@ void makeUp(NL3D::UInstance face, sint idMakeUp)
 }// makeUp //
 
 //-----------------------------------------------
-// qStart est le quaterion à t=0,
-// qEnd est le quaterion à t=TAnimEnd,
-// time est entre 0 et 1. (1=> TAnimEnd)
+// qStart is the quaterion at t=0,
+// qEnd is the quaterion at t=TAnimEnd,
+// time is between 0 and 1. (1=> TAnimEnd)
 //-----------------------------------------------
 CQuat applyRotationFactor(CQuat in, float rotFactor, CQuat qStart, CQuat qEnd, float time)
 {
