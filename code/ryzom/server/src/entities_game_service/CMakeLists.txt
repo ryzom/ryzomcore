@@ -24,7 +24,9 @@ FILE(GLOB SRC	*.cpp *.h
 LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.h
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h)
+			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h
+			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.h)
 
 ADD_EXECUTABLE(entities_game_service ${SRC})
 
