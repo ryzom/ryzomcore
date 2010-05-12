@@ -26,6 +26,23 @@
 #  endif
 #endif
 
+// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
+#include <cassert>
+#undef assert
+#define assert nlassert
+#include <luabind/luabind.hpp>
+#if LUABIND_MAX_ARITY == 10
+# define LUABIND_VERSION 07
+#elif LUABIND_MAX_ARITY == 5
+# define LUABIND_VERSION 06
+#else
+# pragma error("luabind version not recognized")
+#endif
+#if LUABIND_VERSION == 07
+# include <luabind/operator.hpp>
+#endif
+
+
 #include "lua_ihm.h"
 #include "reflect.h"
 #include "action_handler.h"

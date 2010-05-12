@@ -31,9 +31,9 @@ LDFLAGS      = 	$(WWWLDFLAGS) $(LUALDFLAGS) $(LD_FLAGS_CMN) \
 		-lclient_sheets \
 		-lseven_zip \
 		-lgame_share \
-		-lnel3d \
+		-Wl,--start-group -lnel_drv_opengl -lnel3d -Wl,--end-group \
+		-Wl,--start-group -lnel_drv_openal -lnelsnd -Wl,--end-group \
 		-lnelpacs \
-		-lnelsnd \
 		-lnelligo \
 		-lnelgeorges \
 		-lnelnet \
@@ -45,7 +45,9 @@ LDFLAGS      = 	$(WWWLDFLAGS) $(LUALDFLAGS) $(LD_FLAGS_CMN) \
 		-lrt \
 		-ldl \
 		-lluabind \
+		-lopenal \
 		-lcurl \
+		-lGL \
 		-lX11
 
 #############################################################################
