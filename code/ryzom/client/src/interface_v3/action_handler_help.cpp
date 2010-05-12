@@ -1202,7 +1202,7 @@ static void setupSkillToTradeHelp(CSheetHelpSetup &setup)
 //			if (level != 0) // has the player this job ?
 //			{
 //				// check if level in this job is enough to get the skills
-//				// TODO finir ça
+//				// TODO finish it
 //				/*
 //				JOBS::TJob job = JOBS::getJobFromDBIndex(career, job);
 //				if (job != JOBS::Unknown)

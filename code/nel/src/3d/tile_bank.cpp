@@ -342,7 +342,7 @@ void TroncFileName (char* sDest, const char* sSrc)
 	}
 }
 // ***************************************************************************
-// Je parie que ce patch reste jusqu'à la fin du jeu. (Hulud)
+// TODO: this is a temporary hack, see if it could be removed
 void CTileBank::makeAllPathRelative ()
 {
 	// For all tiles

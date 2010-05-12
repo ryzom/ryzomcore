@@ -113,7 +113,7 @@ public:
 	  */
 	static void loadFromFilename (const std::string &filename, bool reload);
 
-	/// Returns the name of the language in the language name (English, Français, ...)
+	/// Returns the name of the language in the language name (English, Francais, ...)
 	static ucstring getCurrentLanguageName ();
 
 	/// Returns the code of the language ("fr", "en", ...)

@@ -568,7 +568,7 @@ class CHandlerContextAvailableMissions : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
-		startBotChatAtPage(BOTCHATTYPE::AvailableMissions); // page donnant accès au mission. Si une seule option possible, aller directement a la page ?
+		startBotChatAtPage(BOTCHATTYPE::AvailableMissions); // missions list page. If only one option, go to this page ?
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerContextAvailableMissions, "context_available_missions");
@@ -581,7 +581,7 @@ class CHandlerContextContinueMissions : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
-		startBotChatAtPage(BOTCHATTYPE::MissionProgress); // page donnant accès au mission. Si une seule option possible, aller directement a la page ?
+		startBotChatAtPage(BOTCHATTYPE::MissionProgress); // missions list page. If only one option, go to this page ?
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerContextContinueMissions, "context_continue_missions");
@@ -594,7 +594,7 @@ class CHandlerContextFinishMissions : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
-		startBotChatAtPage(BOTCHATTYPE::CompletedMissions); // page donnant accès au mission. Si une seule option possible, aller directement a la page ?
+		startBotChatAtPage(BOTCHATTYPE::CompletedMissions); // missions list page. If only one option, go to this page ?
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerContextFinishMissions, "context_finish_missions");

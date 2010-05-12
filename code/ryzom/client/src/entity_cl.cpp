@@ -1104,7 +1104,7 @@ USkeleton *CEntityCL::skeleton(const string &filename)
 			// Register the skeleton to the playlist.
 			_PlayList->registerTransform(_Skeleton);
 
-			// \todo GUIGUI : est-ce vraiment la bonne place pour ça ???
+			// \todo GUIGUI : is this location right for this ?
 			// Animation should not move alone.
 			uint posTmp = EAM->getAnimationSet()->getChannelIdByName("pos");
 			if(posTmp != UAnimationSet::NotFound)
@@ -1251,7 +1251,7 @@ void CEntityCL::show(bool s)
 //-----------------------------------------------
 // hideSkin :
 // hide the entity Skin (all entity instances).
-// todo GUIGUI : pour la video ça ne posera pas de pb mais après il faudrait faire mieux avec le current qui pourrait ne pas etre encore pres pendant que le Loading fini de charger.
+// todo GUIGUI : for video, it shouldn't be a problem, but we should improve with the current which could not be ready yet while loading not done
 //-----------------------------------------------
 void CEntityCL::hideSkin()
 {
