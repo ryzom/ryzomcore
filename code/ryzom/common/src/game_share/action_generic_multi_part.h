@@ -51,7 +51,7 @@ public:
 
 		uint32	size;
 		message.serial(size);
-// The following test removed by Sadge because it appears to be pointless and prevents ² testing to continue as required
+// The following test removed by Sadge because it appears to be pointless and prevents ^2 testing to continue as required
 //		if ( size > 512 )
 //		{
 //			throw NLMISC::EInvalidDataStream();

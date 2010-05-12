@@ -52,7 +52,7 @@ static const char *WaterVPNoWave =
  MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
  ADD o[TEX1], R3, c[8];											                \n\
  ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
- DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)²	\n\
+ DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
  RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
  MUL R0, R0, R1;                                                                \n\
  DP3 R1.x, R0.xyww, R0.xyww;                                                    \n\
@@ -73,7 +73,7 @@ ADD o[TEX0], R3, c[6];										                    \n\
 MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
 ADD o[TEX1], R3, c[8];											                \n\
 ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
-DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)²	\n\
+DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
 RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
 MUL R0, R0, R1;                                                                 \n\
 MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n\
@@ -103,7 +103,7 @@ END";
 static const char *WaterVPStartCode =
 "!!VP1.0\n\
 	ADD R1, c[7], -v[0];			      #r1 = eye - vertex						\n\
-	DP3 R2, R1, R1;				          #r1 = eye - vertex, r2 = (eye - vertex)²	\n\
+	DP3 R2, R1, R1;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
 	MAX R2, R2, c[16];                    # avoid imprecision around 0				\n\
 	RSQ R2, R2.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
 	RCP R3, R2.x;																    \n\

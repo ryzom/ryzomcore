@@ -1525,7 +1525,7 @@ void	NLPACS::CGlobalRetriever::testCollisionWithCollisionChains(CCollisionSurfac
 					nlassert(collidedSurface.RetrieverInstanceId < (sint)_Instances.size());
 
 					// insert or replace this collision in collisionDescs.
-					// NB: yes this looks like a N algorithm (so N²). But not so many collisions may arise, so don't bother.
+					// NB: yes this looks like a N algorithm (so N^2). But not so many collisions may arise, so don't bother.
 					sint	indexInsert= cst.CollisionDescs.size();
 					sint	colFound= -1;
 

@@ -185,7 +185,7 @@ CRational64	CEdgeCollide::testPointMove(const CVector2f &start, const CVector2f 
 // ***************************************************************************
 static	inline float		testCirclePoint(const CVector2f &start, const CVector2f &delta, float radius, const CVector2f &point)
 {
-	// factors of the qaudratic: at² + bt + c=0
+	// factors of the qaudratic: at^2 + bt + c=0
 	float		a,b,c;
 	float		dta;
 	float		r0, r1, res;
@@ -212,7 +212,7 @@ static	inline float		testCirclePoint(const CVector2f &start, const CVector2f &de
 		b= 2* (relC.x*relV.x + relC.y*relV.y);
 		c= relC.x*relC.x + relC.y*relC.y - radius*radius;
 		// compute delta of the quadratic.
-		dta= b*b - 4*a*c;	// b²-4ac
+		dta= b*b - 4*a*c;	// b^2-4ac
 		if(dta>=0)
 		{
 			dta= (float)sqrt(dta);
@@ -389,7 +389,7 @@ bool		CEdgeCollide::testEdgeMove(const CVector2f &q0, const CVector2f &q1, const
 	// compute D1 line equation of q0q1. bx - ay + c(t)=0, where c is function of time [0,1].
 	// ===========================
 	tmp= q1 - q0;		// NB: along time, the direction doesn't change.
-	// Divide by norm()², so that  a projection on this edge is true if the proj is in interval [0,1].
+	// Divide by norm()^2, so that  a projection on this edge is true if the proj is in interval [0,1].
 	tmp/= tmp.sqrnorm();
 	a= tmp.x;
 	b= tmp.y;
@@ -401,7 +401,7 @@ bool		CEdgeCollide::testEdgeMove(const CVector2f &q0, const CVector2f &q1, const
 	// compute D2 line equation of P0P1. ex - dy + f=0.
 	// ===========================
 	tmp= P1 - P0;
-	// Divide by norm()², so that  a projection on this edge is true if the proj is in interval [0,1].
+	// Divide by norm()^2, so that  a projection on this edge is true if the proj is in interval [0,1].
 	tmp/= tmp.sqrnorm();
 	d= tmp.x;
 	e= tmp.y;

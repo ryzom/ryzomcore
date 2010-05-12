@@ -51,7 +51,7 @@ public:
 public:
 	/// Name of the shape to use.
 	std::string					ShapeName;
-	/// Density== Number of instance to create / m².
+	/// Density== Number of instance to create / m^2.
 	NLMISC::CNoiseValue			Density;	// floor(Density*surface)== nbShape to create.
 	/// the maximum density computed. if <0, no maximum. -1 by default.
 	float						MaxDensity;

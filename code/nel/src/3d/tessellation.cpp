@@ -276,7 +276,7 @@ void		CTessFace::updateErrorMetric()
 	ErrorMetric= Size/ sqrdist;
 
 
-	// Hoppe97 formula:  k²= a² * ("v-e"² - ((v-e).n)²) / "v-e"^4.
+	// Hoppe97 formula:  k^2= a^2 * ("v-e"^2 - ((v-e).n)^2) / "v-e"^4.
 	//-----------------
 	// Can't do it because geomorph is made on Graphic card, so the simplier is the better.
 
