@@ -50,9 +50,9 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 	string allKind = ignoreInstances;
 	while (allKind.size() > 0)
 	{
-		int e = allKind.find(',');
+		std::string::size_type e = allKind.find(',');
 		string tmp;
-		if (e <= 0)
+		if (e == std::string::npos || e == 0)
 		{
 			tmp = allKind;
 			allKind="";

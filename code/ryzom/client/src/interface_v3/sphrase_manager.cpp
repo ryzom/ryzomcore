@@ -694,7 +694,7 @@ void				CSPhraseManager::updateBookDB()
 
 	// Fill All the book.
 	TPhraseMap::const_iterator	it= _PhraseMap.begin();
-	sint	numBookFill= _PhraseMap.size();
+	sint	numBookFill= (sint)_PhraseMap.size();
 	sint	i= 0;
 	while(i<numBookFill)
 	{
@@ -2731,7 +2731,7 @@ NLMISC::TGameCycle CSPhraseManager::getPowerDisableTime(const CSPhraseCom &phras
 			{
 				for (uint prop = 0; prop < brick->Properties.size(); ++prop)
 				{
-					size_t endPos = brick->Properties[prop].Text.find(":");
+					std::string::size_type endPos = brick->Properties[prop].Text.find(":");
 					if (endPos != std::string::npos)
 					{
 						std::string propName = brick->Properties[prop].Text.substr(0, endPos);
@@ -3432,7 +3432,7 @@ void				CSPhraseManager::updatePhraseProgressionDB()
 	// Fill All the progression db.
 	uint	numProgressFill= 0;
 	if(_BookSkillFitler!=SKILLS::unknown)
-		numProgressFill= _ProgressionPhrases[_BookSkillFitler].Phrases.size();
+		numProgressFill= (uint)_ProgressionPhrases[_BookSkillFitler].Phrases.size();
 	uint	i;
 	uint	progressIndex[NumProgressType];
 	for(i=0;i<NumProgressType;i++)
@@ -3756,7 +3756,7 @@ void				CSPhraseManager::computePhraseProgression()
 					ucstring	newNumber= toString("%3d", number);
 					pse.Text.replace(start, k-start, newNumber);
 					// and skip this number
-					k= start + newNumber.size();
+					k= start + (uint)newNumber.size();
 				}
 			}
 		}
@@ -4035,9 +4035,9 @@ void				CSPhraseManager::getCombatWeaponRestriction(ucstring &text, const CSPhra
 			if(i<skills.size()-1)
 				idName+= "_";
 
-			if( skillName.find("SFM") != -1 )
+			if( skillName.find("SFM") != std::string::npos )
 				usableWithMelee = true;
-			if( skillName.find("SFR") != -1 )
+			if( skillName.find("SFR") != std::string::npos )
 				usableWithRange = true;
 		}
 

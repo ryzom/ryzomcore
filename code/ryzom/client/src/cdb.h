@@ -19,11 +19,6 @@
 #ifndef CDB_H
 #define CDB_H
 
-// misc
-#include "nel/misc/types_nl.h"
-#include "nel/misc/smart_ptr.h"
-#include "nel/misc/string_mapper.h"
-
 #include <libxml/parser.h>
 
 namespace NLMISC
@@ -162,7 +157,7 @@ public:
 		/**
 		 *	Return the count of strings composing this id
 		 */
-		uint size() const { return _Ids.size(); }
+		uint size() const { return (uint)_Ids.size(); }
 
 		/** Return an element. empty if bad index
 		 */

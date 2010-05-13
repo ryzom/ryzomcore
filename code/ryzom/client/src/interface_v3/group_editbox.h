@@ -20,7 +20,6 @@
 #define RZ_CTRL_EDITBOX_H
 
 #include "interface_group.h"
-#include "nel/3d/u_texture.h"
 
 
 class CEventDescriptor;
@@ -37,7 +36,7 @@ public:
 	~CGroupEditBox();
 
 	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
 	virtual void draw();
 
@@ -109,7 +108,7 @@ public:
 	sint32	getCurrentHistoricIndex () const {return _CurrentHistoricIndex;}
 	void	setCurrentHistoricIndex (sint32 index) {_CurrentHistoricIndex=index;}
 	const ucstring	&getHistoric(uint32 index) const {return _Historic[index];}
-	uint32	getNumHistoric() const {return _Historic.size ();}
+	uint32	getNumHistoric() const {return (uint32)_Historic.size ();}
 
 	// Get on change action handler
 	const std::string	&getAHOnChange() const {return _AHOnChange;}
@@ -345,7 +344,7 @@ private:
 	//
 	bool isFiltered(ucchar c)
 	{
-		uint length = _NegativeFilter.size();
+		uint length = (uint)_NegativeFilter.size();
 		for (uint k = 0; k < length; ++k)
 		{
 			if ((ucchar) _NegativeFilter[k] == c) return true;

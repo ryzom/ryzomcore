@@ -98,7 +98,7 @@ public:
 	/** Process a win32 message.
 	  * Return true if the message must be trapped, false if DefWindowProc must be called afterwards
 	  */
-	bool processMessage (HWND hWnd, uint32 msg, uint32 wParam, uint32 lParam, CEventServer *server=NULL);
+	bool processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPARAM lParam, CEventServer *server=NULL);
 private:
 	CWinEventServer		_InternalServer;
 	HWND				_HWnd;

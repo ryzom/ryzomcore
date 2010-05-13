@@ -26,8 +26,6 @@
 #include "events_listener.h"
 #include "interface_v3/interface_manager.h"
 
-#include "nel/misc/algo.h"
-
 using namespace std;
 using namespace NLMISC;
 
@@ -520,7 +518,7 @@ void	CActionsManager::addCategory (const CCategory &category)
 	for (i=0; i<category.BaseActions.size (); i++)
 	{
 		CCategoryLocator locator;
-		locator.CategoryId = _Categories.size ()-1;
+		locator.CategoryId = (uint)_Categories.size ()-1;
 		locator.BaseActionId = i;
 		_ActionCategory.insert (TActionBaseActionMap::value_type (category.BaseActions[i].Name, locator));
 	}

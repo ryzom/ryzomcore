@@ -969,7 +969,7 @@ void setRegKey(const string &ValueName, const string &Value)
 
 	if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, RootKey.c_str(), 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
-		RegSetValueEx(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (Value.size())+1);
+		RegSetValueEx(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1);
 		RegCloseKey(hkey);
 	}
 	else
@@ -1922,7 +1922,7 @@ class CAHOpenURL : public IActionHandler
 			return;
 		}
 
-		size_t pos_lang = url.find("/en/");
+		string::size_type pos_lang = url.find("/en/");
 
 		if(pos_lang!=string::npos)
 			url.replace(pos_lang+1, 2, ClientCfg.getHtmlLanguageCode());
@@ -2579,7 +2579,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 				params += "&TaC=1";
 
 			std::string md5 = results[0] + results[1] + "" + results[3];
-			md5 = NLMISC::getMD5((uint8*)md5.data(), md5.size()).toString();
+			md5 = NLMISC::getMD5((uint8*)md5.data(), (uint32)md5.size()).toString();
 
 			params += "&SC=" + md5;
 			std::string lang = ClientCfg.LanguageCode;
@@ -2933,7 +2933,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(pPM->isVerboseLog())
 			{
-				nlinfo ("Exploded, with nl, %d res", lines.size());
+				nlinfo ("Exploded, with nl, %zu res", lines.size());
 	/*			for (uint i = 0; i < lines.size(); i++)
 				{
 					nlinfo (" > '%s'", lines[i].c_str());
@@ -2942,7 +2942,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(lines.size() != nbs+1)
 			{
-				nlwarning("bad shard lines number %d != %d", lines.size(), nbs+1);
+				nlwarning("bad shard lines number %zu != %d", lines.size(), nbs+1);
 				nlwarning("'%s'", res.c_str());
 				return "bad lines numbers (error code 5)";
 			}
@@ -2954,7 +2954,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if(pPM->isVerboseLog())
 				{
-					nlinfo ("Exploded with '%s', %d res", "|", res.size());
+					nlinfo ("Exploded with '%s', %zu res", "|", res.size());
 	/*				for (uint i = 0; i < res.size(); i++)
 					{
 						nlinfo (" > '%s'", res[i].c_str());
@@ -2963,7 +2963,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if (res.size() < 7 && res.size() > 8)
 				{
-					nlwarning("bad | numbers %d != %d", res.size(), 8);
+					nlwarning("bad | numbers %zu != %d", res.size(), 8);
 					nlwarning("'%s'", lines[i].c_str());
 					return "bad pipe numbers (error code 6)";
 				}

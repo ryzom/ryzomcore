@@ -102,7 +102,7 @@ TMouseButton CWinEventEmitter::getButtons() const
 }
 
 
-bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, uint32 wParam, uint32 lParam, CEventServer *server)
+bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPARAM lParam, CEventServer *server)
 {
 	if (!server)
 		server=&_InternalServer;
@@ -265,7 +265,7 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, uint32 wParam, uin
 		server->postEvent (new CEventDestroyWindow (this));
 		break;
 	case WM_DISPLAYCHANGE:
-		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), wParam, this));
+		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), (uint)wParam, this));
 		break;
 	case WM_MOUSEWHEEL:
 		if (_MouseEventsEnabled)
@@ -298,7 +298,7 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, uint32 wParam, uin
 	case WM_INPUTLANGCHANGE:
 		if ( _IMEEventsEnabled )
 		{
-			server->postEvent( new CEventIME( msg, wParam, lParam, this ) );
+			server->postEvent( new CEventIME( msg, (uint32)wParam, (uint32)lParam, this ) );
 			return true; // trap message
 		}
 		break;

@@ -74,9 +74,9 @@ std::string IActionHandler::getParam (const string &Params, const string &ParamN
 	string param = strlwr (ParamName);
 	while (allparam.size() > 0)
 	{
-		int e = allparam.find('=');
-		if (e <= 0) break;
-		int p = allparam.find('|');
+		std::string::size_type e = allparam.find('=');
+		if (e == std::string::npos || e == 0) break;
+		std::string::size_type p = allparam.find('|');
 		string tmp = strlwr(allparam.substr(0,e));
 		skipBlankAtEnd(tmp);
 		if (tmp == param)
@@ -86,7 +86,7 @@ std::string IActionHandler::getParam (const string &Params, const string &ParamN
 			skipBlankAtEnd(tmp2);
 			return tmp2;
 		}
-		if (p <= 0) break;
+		if (p == std::string::npos || p == 0) break;
 		allparam = allparam.substr(p+1,allparam.size());
 		skipBlankAtStart (allparam);
 	}
@@ -100,9 +100,9 @@ void IActionHandler::getAllParams (const string &Params, vector< pair<string,str
 	skipBlankAtStart (allparam);
 	while (allparam.size() > 0)
 	{
-		int e = allparam.find('=');
-		if (e <= 0) break;
-		int p = allparam.find('|');
+		std::string::size_type e = allparam.find('=');
+		if (e == std::string::npos || e == 0) break;
+		std::string::size_type p = allparam.find('|');
 		string tmp = strlwr(allparam.substr(0,e));
 		skipBlankAtEnd(tmp);
 
@@ -112,7 +112,7 @@ void IActionHandler::getAllParams (const string &Params, vector< pair<string,str
 
 		vAllParams.push_back(pair<string,string>(tmp,tmp2));
 
-		if (p <= 0) break;
+		if (p == std::string::npos || p == 0) break;
 		allparam = allparam.substr(p+1,allparam.size());
 		skipBlankAtStart (allparam);
 	}

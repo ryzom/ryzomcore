@@ -23,19 +23,9 @@
 /////////////
 // INCLUDE //
 /////////////
-// misc
-#include "nel/misc/types_nl.h"
-#include "nel/misc/events.h"
-#include "nel/misc/stream.h"
-#include "nel/misc/file.h"
+
 // client
 #include "events_listener.h"
-// std
-#include <string>
-#include <list>
-#include <map>
-#include <set>
-
 
 ///////////
 // CLASS //

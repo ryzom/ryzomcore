@@ -642,10 +642,10 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 inline double ecoRingPoints(const std::string & ecoPoints, char * c)
 {
-	uint cPlace = ecoPoints.find(c);
+	std::string::size_type cPlace = ecoPoints.find(c);
 	if(cPlace==string::npos)
 		return 0;
-	uint sepPlace = ecoPoints.find(":", cPlace);
+	std::string::size_type sepPlace = ecoPoints.find(":", cPlace);
 	std::string points = ecoPoints.substr(cPlace+1, sepPlace);
 	double ret;
 	fromString(points, ret);

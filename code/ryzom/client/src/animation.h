@@ -22,12 +22,7 @@
 /////////////
 // INCLUDE //
 /////////////
-#include "nel/misc/types_nl.h"
-#include "nel/misc/string_mapper.h"
 
-// 3d
-#include "nel/3d/u_animation_set.h"
-#include "nel/sound/sound_anim_manager.h"
 //
 #include "game_share/magic_fx.h"
 #include "client_sheets/animation_set_list_sheet.h"

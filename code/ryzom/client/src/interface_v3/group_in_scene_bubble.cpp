@@ -168,7 +168,7 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		if (pRoot)
 		{
-			sint i = rList.size ()-1;
+			sint i = (sint)rList.size ()-1;
 
 			rList[i].Group->invalidateCoords();
 			rList[i].Group->updateCoords();
@@ -229,7 +229,7 @@ void CGroupInSceneBubbleManager::init ()
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 		CInterfaceGroup *group = pIM->createGroupInstance ("3dbulle_L",
-			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 		if (group)
 		{
 			// Link to the interface
@@ -457,7 +457,7 @@ void CGroupInSceneBubbleManager::update ()
 				ucstring finalString = res;
 				for(;;)
 				{
-					uint index = finalString.find (ucstring("{break}"));
+					std::string::size_type index = finalString.find (ucstring("{break}"));
 					if (index == ucstring::npos) break;
 					finalString = finalString.substr (0, index) + finalString.substr(index+7,finalString.size());
 				}
@@ -509,7 +509,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	templateParams.push_back (std::pair<std::string,std::string>("delta", toString(delta)));
 
 	CInterfaceGroup *group = pIM->createGroupInstance ("skill_popup",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
@@ -575,7 +575,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
@@ -624,7 +624,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup_center",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
@@ -695,7 +695,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = pIM->createGroupInstance (templateName+v+h,
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Target available ?
@@ -1331,7 +1331,7 @@ void CGroupInSceneBubble::next()
 void CGroupInSceneBubble::skip()
 {
 	if (_TextParts.empty()) return;
-	_CurrentPart = _TextParts.size()-1;
+	_CurrentPart = (uint32)_TextParts.size()-1;
 	_TimeOut = TimeInSec;
 }
 

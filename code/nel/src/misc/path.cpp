@@ -387,11 +387,15 @@ void CFileContainer::loadRemappedFiles (const std::string &file)
 	{
 		f.getline(sTmp, 512);
 		str = sTmp;
-		if (str.find(','))
+		std::string::size_type pos = str.find(',');
+		if (pos != string::npos)
 		{
 			removeAllUnusedChar(str);
 			if (!str.empty())
-				remapFile( str.substr(0,str.find(',')), str.substr(str.find(',')+1, str.size()) );
+			{
+				pos = str.find(',');
+				remapFile( str.substr(0,pos), str.substr(pos+1, str.size()) );
+			}
 		}
 	}
 }
@@ -1551,7 +1555,7 @@ void CFileContainer::memoryCompress()
 
 	SSMext.memoryCompress();
 	SSMpath.memoryCompress();
-	uint nDbg = _Files.size();
+	uint nDbg = (uint)_Files.size();
 	nlinfo ("PATH: Number of file : %d", nDbg);
 	nDbg = SSMext.getCount();
 	nlinfo ("PATH: Number of different extension : %d", nDbg);
@@ -1570,7 +1574,7 @@ void CFileContainer::memoryCompress()
 		}
 		else
 		{
-			nSize += it->second.Name.size() + 1;
+			nSize += (uint)it->second.Name.size() + 1;
 		}
 		nNb++;
 		it++;
@@ -1591,7 +1595,7 @@ void CFileContainer::memoryCompress()
 		{
 			strcpy(_AllFileNames+nSize, rFE.Name.c_str());
 			_MCFiles[nNb].Name = _AllFileNames+nSize;
-			nSize += rFE.Name.size() + 1;
+			nSize += (uint)rFE.Name.size() + 1;
 		}
 		else
 		{
@@ -1678,7 +1682,7 @@ int CFile::getLastSeparator (const string &filename)
 			pos = filename.find_last_of ('@');
 		}
 	}
-	return pos;
+	return (int)pos;
 }
 
 string CFile::getFilename (const string &filename)
@@ -2122,7 +2126,7 @@ static bool CopyMoveFile(const char *dest, const char *src, bool copyFile, bool 
 		{
 			if (progress)
 			{
-				readSize += s;
+				readSize += (uint32)s;
 				progress->progress((float) readSize / totalSize);
 			}
 			size_t ws = fwrite(buffer, s, 1, fp2);
@@ -2314,7 +2318,7 @@ bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
 		if (strncmp (tmp.c_str (), src.c_str (), tmp.length ()) == 0)
 		{
 			// Truncate
-			uint size = tmp.length ();
+			uint size = (uint)tmp.length ();
 
 			// Same path ?
 			if (size == src.length ())

@@ -72,8 +72,8 @@ int main(int argc, char **argv)
 	// extract the 2 first param (argv[1] and argv[2]) it must be cookie and addr
 
 	string cmd = cmdline;
-	int pos1 = cmd.find_first_not_of (' ');
-	int pos2;
+	std::string::size_type pos1 = cmd.find_first_not_of (' ');
+	std::string::size_type pos2;
 	if (pos1 != string::npos)
 	{
 		pos2 = cmd.find (' ', pos1);

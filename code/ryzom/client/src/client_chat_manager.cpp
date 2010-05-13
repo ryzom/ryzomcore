@@ -707,10 +707,10 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 		// search if a parameter exists in the string
 		sprintf(chTmp,"$%d",dynParamIdx);
 		ucstring ucstrTmp( chTmp );
-		sint32 idx = ucstr.find(ucstrTmp);
+		ucstring::size_type idx = ucstr.find(ucstrTmp);
 
 		// if there's a parameter in the string
-		if( idx != -1 )
+		if( idx != ucstring::npos )
 		{
 			char c = (char)ucstr[idx+ucstrTmp.size()];
 			switch( c )
@@ -856,10 +856,10 @@ bool CClientChatManager::getString( ucstring &result, std::vector<uint64>& args,
 		// search if a parameter exists in the string
 		sprintf(chTmp,"$%d",dynParamIdx);
 		ucstring ucstrTmp( chTmp );
-		sint32 idx = result.find(ucstrTmp);
+		ucstring::size_type idx = result.find(ucstrTmp);
 
 		// if there's a parameter in the string
-		if( idx != -1 )
+		if( idx != ucstring::npos )
 		{
 			ucstring rep;
 			rep = "???";

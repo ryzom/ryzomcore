@@ -179,7 +179,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 								access.value().push_back(str);
 							}
 							cwd->_History.push_back(str);
-							cwd->_PosInHistory = cwd->_History.size();
+							cwd->_PosInHistory = (uint)cwd->_History.size();
 						}
 					}
 				}
@@ -440,9 +440,9 @@ void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint 
 	_HInputEdit = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, RICHEDIT_CLASSW, L"", WS_CHILD | WS_VISIBLE
 		/*| ES_MULTILINE*/ | ES_WANTRETURN | ES_NOHIDESEL | ES_AUTOHSCROLL, 0, h-_InputEditHeight, w, _InputEditHeight,
 		_HWnd, NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
-	SendMessage (_HInputEdit, WM_SETFONT, (LONG) _HFont, TRUE);
+	SendMessageW (_HInputEdit, WM_SETFONT, (LONG) _HFont, TRUE);
 
-	DWORD dwEvent = SendMessage(_HInputEdit, EM_GETEVENTMASK, (WPARAM)0, (LPARAM)0);
+	LRESULT dwEvent = SendMessageW(_HInputEdit, EM_GETEVENTMASK, (WPARAM)0, (LPARAM)0);
 	dwEvent |= ENM_MOUSEEVENTS | ENM_KEYEVENTS | ENM_CHANGE;
 	SendMessage(_HInputEdit, EM_SETEVENTMASK, (WPARAM)0, (LPARAM)dwEvent);
 
@@ -481,23 +481,23 @@ void CWinDisplayer::clear ()
 	}
 
 	// get number of line
-	sint nLine = SendMessage (_HEdit, EM_GETLINECOUNT, 0, 0) - 1;
+	LRESULT nLine = SendMessageW (_HEdit, EM_GETLINECOUNT, 0, 0) - 1;
 
 	// get size of the last line
-	sint nIndex = SendMessage (_HEdit, EM_LINEINDEX, nLine, 0);
+	LRESULT nIndex = SendMessageW (_HEdit, EM_LINEINDEX, nLine, 0);
 
 	// select all the text
-	SendMessage (_HEdit, EM_SETSEL, 0, nIndex);
+	SendMessageW (_HEdit, EM_SETSEL, 0, nIndex);
 
 	// clear all the text
-	SendMessage (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
+	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
 
-	SendMessage(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
+	SendMessageW(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
 	if ( focus )
 	{
-		SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOVSCROLL);
-		SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOHSCROLL);
+		SendMessageW(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOVSCROLL);
+		SendMessageW(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOHSCROLL);
 	}
 }
 
@@ -544,7 +544,7 @@ void CWinDisplayer::display_main ()
 				// find how many lines we have to remove in the current output to add new lines
 
 				// get number of line
-				sint nLine = SendMessage (_HEdit, EM_GETLINECOUNT, 0, 0) - 1;
+				LRESULT nLine = SendMessageW (_HEdit, EM_GETLINECOUNT, 0, 0) - 1;
 
 				if (_HistorySize > 0 && nLine+vecSize > _HistorySize)
 				{
@@ -558,15 +558,15 @@ void CWinDisplayer::display_main ()
 					}
 					else
 					{
-						sint oldIndex1 = SendMessage (_HEdit, EM_LINEINDEX, 0, 0);
+						LRESULT oldIndex1 = SendMessageW (_HEdit, EM_LINEINDEX, 0, 0);
 						//nlassert (oldIndex1 != -1);
-						sint oldIndex2 = SendMessage (_HEdit, EM_LINEINDEX, nblineremove, 0);
+						LRESULT oldIndex2 = SendMessageW (_HEdit, EM_LINEINDEX, nblineremove, 0);
 						//nlassert (oldIndex2 != -1);
-						SendMessage (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
-						SendMessage (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
+						SendMessageW (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
+						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
 
 						// update the selection due to the erasing
-						sint dt = oldIndex2 - oldIndex1;
+						sint dt = (sint)(oldIndex2 - oldIndex1);
 						if (startSel < 65000)
 						{
 							if ((sint)startSel-dt < 0) startSel = -1;

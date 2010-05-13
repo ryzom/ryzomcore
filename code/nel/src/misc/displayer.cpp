@@ -287,7 +287,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			OutputDebugString("\n");*/
 
 			sint count = 0;
-			uint n = strlen(message);
+			uint n = (uint)strlen(message);
 			std::string s(&str2.c_str()[0], (str2.size() - n));
 			OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(s).c_str());
 
@@ -655,7 +655,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 		// procname is host/service_name-sid we only want the service_name to avoid redondant mail
 		string procname;
-		sint pos = args.ProcessName.find ("/");
+		string::size_type pos = args.ProcessName.find ("/");
 		if (pos == string::npos)
 		{
 			procname =  args.ProcessName;

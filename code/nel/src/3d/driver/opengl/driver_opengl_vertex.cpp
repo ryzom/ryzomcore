@@ -664,7 +664,7 @@ void		CDriverGL::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 			{
 				case CVertexBufferInfo::HwATI:
 					nglArrayObjectATI(GL_TEXTURE_COORD_ARRAY, numTexCoord, GL_FLOAT, VB.VertexSize, VB.VertexObjectId,
-						              /*(uint)*/ (ptrdiff_t) VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
+						              (ptrdiff_t) VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
 				break;
 				case CVertexBufferInfo::HwARB:
 					_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
@@ -928,7 +928,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 			nlassert (numVertexCoord >= 2);
 
 			_DriverGLStates.enableVertexArray(true);
-			nglArrayObjectATI(GL_VERTEX_ARRAY, numVertexCoord, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t)  vb.ValuePtr[CVertexBuffer::Position]);
+			nglArrayObjectATI(GL_VERTEX_ARRAY, numVertexCoord, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[CVertexBuffer::Position]);
 			// setup normal ptr.
 			//-----------
 			// Check for normal param in vertex buffer
@@ -937,7 +937,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 				// Check type
 				nlassert (vb.Type[CVertexBuffer::Normal]==CVertexBuffer::Float3);
 				_DriverGLStates.enableNormalArray(true);
-					nglArrayObjectATI(GL_NORMAL_ARRAY, 3, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t)  vb.ValuePtr[CVertexBuffer::Normal]);
+					nglArrayObjectATI(GL_NORMAL_ARRAY, 3, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[CVertexBuffer::Normal]);
 			}
 			else
 			{

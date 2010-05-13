@@ -3472,7 +3472,7 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 	}
 	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, progID);
 	GLint errorPos, isNative;
-	nglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(prog), prog);
+	nglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(prog), prog);
 	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
 	glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
 	nglGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative);

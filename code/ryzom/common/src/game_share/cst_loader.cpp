@@ -48,10 +48,10 @@ void CSTLoader::buildTableFormat( string fileName, list<pair<string,TDataType> >
 
 	// extract type from token
 	string stoken = string( token );
-	sint typeStart = stoken.find_last_of("<");
-	nlassert(typeStart != -1);
-	sint typeEnd = stoken.find_first_of(">",typeStart);
-	nlassert(typeEnd != -1);
+	string::size_type typeStart = stoken.find_last_of("<");
+	nlassert(typeStart != string::npos);
+	string::size_type typeEnd = stoken.find_first_of(">",typeStart);
+	nlassert(typeEnd != string::npos);
 	string type_str = stoken.substr( typeStart+1, (typeEnd-typeStart-1) );
 	TDataType type_enum = convertType(type_str);
 
@@ -75,9 +75,9 @@ void CSTLoader::buildTableFormat( string fileName, list<pair<string,TDataType> >
 
 			// extract type from token
 			typeStart = stoken.find_last_of("<");
-			nlassert(typeStart != -1);
+			nlassert(typeStart != string::npos);
 			typeEnd = stoken.find_first_of(">",typeStart);
-			nlassert(typeEnd != -1);
+			nlassert(typeEnd != string::npos);
 			type_str = stoken.substr( typeStart+1, (typeEnd-typeStart-1) );
 			type_enum = convertType(type_str);
 
@@ -321,7 +321,7 @@ bool CSTLoader::readLine()
 		return false;
 	}
 
-	const uint nbColumn = _Columns.size();
+	const uint nbColumn = (uint)_Columns.size();
 	char readBuffer[4096];
 	char * token;
 	bool firstToken = true;

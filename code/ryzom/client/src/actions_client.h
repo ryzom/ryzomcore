@@ -23,8 +23,7 @@
 /////////////
 // INCLUDE //
 /////////////
-// Misc.
-#include "nel/misc/types_nl.h"
+
 // Client
 #include "actions.h"			// Manage Inputs
 

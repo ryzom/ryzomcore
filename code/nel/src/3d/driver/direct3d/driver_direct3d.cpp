@@ -2308,13 +2308,13 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 	if( mode.Windowed )
 	{
 		// Set windowed-mode style
-		SetWindowLongPtrW( _HWnd, GWL_STYLE, D3D_WINDOWED_STYLE|WS_VISIBLE);
+		SetWindowLongW( _HWnd, GWL_STYLE, D3D_WINDOWED_STYLE|WS_VISIBLE);
 		_FullScreen = false;
 	}
 	else
 	{
 		// Set fullscreen-mode style
-		SetWindowLongPtrW( _HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE|WS_VISIBLE);
+		SetWindowLongW( _HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE|WS_VISIBLE);
 		_FullScreen = true;
 	}
 
@@ -2332,7 +2332,7 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			WndRect.top=_WindowY;
 			WndRect.right=_WindowX+_CurrentMode.Width;
 			WndRect.bottom=_WindowY+_CurrentMode.Height;
-			AdjustWindowRect(&WndRect, GetWindowLongPtrW (_HWnd, GWL_STYLE), FALSE);
+			AdjustWindowRect(&WndRect, GetWindowLongW (_HWnd, GWL_STYLE), FALSE);
 
 			SetWindowPos( _HWnd, HWND_NOTOPMOST,
 				std::max ((int)WndRect.left, 0), std::max ((int)WndRect.top, 0),
@@ -3742,7 +3742,7 @@ void CDriverD3D::findNearestFullscreenVideoMode()
 	{
 		sint32 nbPixels = _CurrentMode.Width * _CurrentMode.Height;
 		sint32 minError = nbPixels;
-		uint bestMode = modes.size();
+		uint bestMode = (uint)modes.size();
 		for(uint i=0; i < modes.size(); i++)
 		{
 			if(!modes[i].Windowed)
