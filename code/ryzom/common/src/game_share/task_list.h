@@ -97,7 +97,7 @@ public:
 	// Complexity is in similar to stable_sort (high)
 	void addTask(CTask<T>* task) { _Tasks.push_back(task); _Clean = false; }
 	void addTaskAt(T t, CTask<T>* task) {  task->setTime(t); _Tasks.push_back(task);_Clean = false; }
-	uint32 getSize() const { return _Tasks.size(); }
+	uint32 getSize() const { return (uint32)_Tasks.size(); }
 	CTask<T>* getTaskAt(uint32 index) const { nlassert( index < _Tasks.size()); return _Tasks[index].getTask();}
 	void removeTaskAt(uint32 index){ nlassert( index < _Tasks.size()); _Tasks.erase(_Tasks.begin() + index); };
 

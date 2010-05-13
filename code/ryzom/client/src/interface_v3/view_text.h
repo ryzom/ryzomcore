@@ -54,7 +54,7 @@ public:
 
 	void parseTextOptions (xmlNodePtr cur);
 	bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
 	/// Updating
 	virtual void draw ();
@@ -308,7 +308,7 @@ private:
 			// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
 			void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, uint fontWidth);
 			void    addWord(const CWord &word, uint fontWidth);
-			uint	getNumWords() const { return _Words.size(); }
+			uint	getNumWords() const { return (uint)_Words.size(); }
 			CWord   &getWord(uint index) { return _Words[index]; }
 			float	getSpaceWidth() const { return _SpaceWidth; }
 			void    setSpaceWidth(float width) { _SpaceWidth = width; }

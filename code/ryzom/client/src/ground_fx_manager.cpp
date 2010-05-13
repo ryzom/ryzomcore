@@ -320,10 +320,10 @@ void CGroundFXManager::checkIntegrity()
 			}
 		}
 	}
-	uint numFX = _ActiveFXs.size();
+	uint numFX = (uint)_ActiveFXs.size();
 	nlassert(numFX == _NumFX);
 	nlassert(numFX <= _MaxNumFX);
-	uint numCachedFX = _CachedFXs.size();
+	uint numCachedFX = (uint)_CachedFXs.size();
 	nlassert(numCachedFX == _NumCachedFX);
 	nlassert(numCachedFX <= _MaxNumCachedFX);
 }

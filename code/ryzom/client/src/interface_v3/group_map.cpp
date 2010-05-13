@@ -1175,7 +1175,7 @@ void CGroupMap::checkCoords()
 	uint i;
 	if (_RespawnPos.size() < _RespawnLM.size())
 	{
-		for (i = _RespawnPos.size(); i < _RespawnLM.size(); i++)
+		for (i = (uint)_RespawnPos.size(); i < _RespawnLM.size(); i++)
 		{
 			delCtrl(_RespawnLM[i]);
 			_RespawnLM[i] = NULL;
@@ -2245,7 +2245,7 @@ void CGroupMap::setScale(float newScale)
 //============================================================================================================
 void CGroupMap::updateLandMarkList(TLandMarkButtonVect &lmVect)
 {
-	uint numLM = lmVect.size();
+	uint numLM = (uint)lmVect.size();
 	for(uint k = 0; k < numLM; ++k)
 	{
 		CLandMarkButton *lmb = lmVect[k];
@@ -2259,7 +2259,7 @@ void CGroupMap::updateLandMarkList(TLandMarkButtonVect &lmVect)
 //============================================================================================================
 void CGroupMap::updateLandMarkTextList(TLandMarkTextVect &lmVect)
 {
-	uint numLM = lmVect.size();
+	uint numLM = (uint)lmVect.size();
 	for(uint k = 0; k < numLM; ++k)
 	{
 		CLandMarkText *lmt = lmVect[k];
@@ -2276,7 +2276,7 @@ void CGroupMap::updateLandMarkTextList(TLandMarkTextVect &lmVect)
 //============================================================================================================
 void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 {
-	uint numLM = lm.size();
+	uint numLM = (uint)lm.size();
 	for(uint k = 0; k < numLM; ++k)
 	{
 		if (lm[k])
@@ -2491,7 +2491,7 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 	_CurContinent->UserLandMarks.push_back(ulm);
 
 	// add a landmark with a menu to remove it
-	addLandMark(_UserLM, pos, title, getUserLandMarkOptions(_CurContinent->UserLandMarks.size() - 1));
+	addLandMark(_UserLM, pos, title, getUserLandMarkOptions((uint32)_CurContinent->UserLandMarks.size() - 1));
 
 	// Save the config file each time a user landmark is created
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2571,7 +2571,7 @@ void CGroupMap::removeExceedingUserLandMarks(uint maxNumber)
 uint CGroupMap::getNumUserLandMarks() const
 {
 	if (_CurContinent == NULL) return 0;
-	return _CurContinent->UserLandMarks.size();
+	return (uint)_CurContinent->UserLandMarks.size();
 }
 //============================================================================================================
 CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const

@@ -48,7 +48,7 @@ public:
 	const char *getAdvantageFX() const;
 	const char *getAttackFX() const;
 	// static fxs
-	uint getNumStaticFX() const { return _StaticFXs.size(); }
+	uint getNumStaticFX() const { return (uint)_StaticFXs.size(); }
 	const char *getStaticFXName(uint index) const;
 	const char *getStaticFXBone(uint index) const;
 	const NLMISC::CVector &getStaticFXOffset(uint index) const;

@@ -452,7 +452,7 @@ void CHugeListObs::update(ICDBNode * /* node */)
 	// In the display we want a contiguous set of items. Not For Trading, because of Resale
 	if(_Category==Trading)
 	{
-		numLoadedPages= itemPages->size();
+		numLoadedPages= (uint)itemPages->size();
 	}
 	else
 	{

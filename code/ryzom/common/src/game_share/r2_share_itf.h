@@ -199,7 +199,7 @@ namespace R2
 				// skill name too short
 				_Value = invalid_val;
 			}
-			uint32 size = skillName.size()-1;
+			uint32 size = (uint32)skillName.size()-1;
 			if (size < end_of_enum)
 				_Value = TValues(size);
 			else

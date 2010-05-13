@@ -967,7 +967,7 @@ void CSkillManager::tryToUnblockTitleFromItems()
 //			if (_TitlesUnblocked[i].UnblockedItemLists[j]) // Not already unblocked
 //				continue;
 
-			uint numItemsFromListToValidate = rTU.ItemsNeeded[j].size();
+			uint numItemsFromListToValidate = (uint)rTU.ItemsNeeded[j].size();
 
 			for (uint k = 0; k < rTU.ItemsNeeded[j].size(); ++k) // for all items in current item list
 			{

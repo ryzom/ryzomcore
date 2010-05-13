@@ -342,7 +342,7 @@ bool CGroupSubMenu::parse (xmlNodePtr cur,  CInterfaceGroup *parent)
 				string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
 				CInterfaceGroup *pUGLeft = im->createGroupInstance((const char*)usergroup, completeId, vparams);
 				if (pUGLeft)
-					setUserGroupLeft(_Lines.size()-1, pUGLeft, true);
+					setUserGroupLeft((uint)_Lines.size()-1, pUGLeft, true);
 			}
 			usergroup = (char*) xmlGetProp (cur,  (xmlChar*)"usergroup_r");
 			if (usergroup)
@@ -357,7 +357,7 @@ bool CGroupSubMenu::parse (xmlNodePtr cur,  CInterfaceGroup *parent)
 				string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
 				CInterfaceGroup *pUG = im->createGroupInstance((const char*)usergroup, completeId, vparams);
 				if (pUG)
-					setUserGroupRight(_Lines.size()-1, pUG, true);
+					setUserGroupRight((uint)_Lines.size()-1, pUG, true);
 			}
 		}
 		cur = cur->next;
@@ -1123,7 +1123,7 @@ CInterfaceElement* CGroupSubMenu::getElement (const std::string &id)
 // ------------------------------------------------------------------------------------------------
 void CGroupSubMenu::addSeparator(const std::string &id)
 {
-	addSeparatorAtIndex(_Lines.size(), id);
+	addSeparatorAtIndex((uint)_Lines.size(), id);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1377,7 +1377,7 @@ void CGroupSubMenu::hideSubMenus ()
 // ------------------------------------------------------------------------------------------------
 void	CGroupSubMenu::reset()
 {
-	uint lineCount = _Lines.size();
+	uint lineCount = (uint)_Lines.size();
 	for(sint k = lineCount - 1; k >= 0; --k)
 	{
 		removeLine(k);
@@ -1516,7 +1516,7 @@ void CGroupSubMenu::setUserGroupLeft(uint line, CInterfaceGroup *group, bool own
 CGroupSubMenu *CGroupSubMenu::cloneMenu(CGroupSubMenu *appendToMenu,  CGroupMenu	*newFather,  CInterfaceGroup *initGroup /* = NULL */) const
 {
 	CGroupSubMenu *copyMenu = appendToMenu ? appendToMenu : new CGroupSubMenu(CViewText::TCtorParam());
-	uint startSize = copyMenu->_Lines.size();
+	uint startSize = (uint)copyMenu->_Lines.size();
 	copyMenu->_GroupMenu = newFather;
 	copyMenu->initOptions(initGroup);
 	copyMenu->_Lines.reserve(_Lines.size() + startSize);

@@ -436,7 +436,7 @@ void CActionHistoric::CAction::undo(IDynamicMapClient *dmc, CScenario &scenario)
 	nlassert(_FlushedCount <= _Requests.size());
 	nlassert(_Completed);
 	nlassert(dmc);
-	for (sint k = _Requests.size() - 1; k >= 0; --k)
+	for (sint k = (sint)_Requests.size() - 1; k >= 0; --k)
 	{
 		_Requests[k]->undo(dmc, scenario);
 	}

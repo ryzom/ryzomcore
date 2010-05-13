@@ -4197,7 +4197,7 @@ bool CEditor::isPostFixedByNumber(const ucstring &baseName)
 {
 	//H_AUTO(R2_CEditor_isPostFixedByNumber)
 	// strip number & spaces at the end of the name
-	sint lastIndex = baseName.length() - 1;
+	sint lastIndex = (sint)baseName.length() - 1;
 	while (lastIndex > 0)
 	{
 		int currChar = (int) baseName[lastIndex];
@@ -4220,7 +4220,7 @@ ucstring CEditor::genInstanceName(const ucstring &baseName)
 	uint maxIndex = 0;
 	// strip number & spaces at the end of the name
 	ucstring strippedName = baseName;
-	sint lastIndex = strippedName.length() - 1;
+	sint lastIndex = (sint)strippedName.length() - 1;
 	while (lastIndex > 0)
 	{
 		int currChar = (int) strippedName[lastIndex];
@@ -7260,13 +7260,13 @@ void CEditor::initClassInheritanceTable()
 		}
 		if (name.isString())
 		{
-			_ClassNameToIndex[name.toString()] = classes.size();
+			_ClassNameToIndex[name.toString()] = (uint)classes.size();
 			classes.push_back(name.toString());
 			baseClasses[name.toString()] = baseName;
 		}
 	}
 
-	_KindOfTable.init(classes.size(), classes.size(), 0);
+	_KindOfTable.init((uint)classes.size(), (uint)classes.size(), 0);
 	_BaseClassIndices.resize(classes.size());
 	for (uint k = 0; k < classes.size(); ++k)
 	{

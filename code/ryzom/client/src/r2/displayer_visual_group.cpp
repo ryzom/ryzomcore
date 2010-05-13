@@ -400,7 +400,7 @@ void CDisplayerVisualGroup::updateAccessibility()
 	}
 	_LastIsland = getEditor().getIslandCollision().getPackedIsland();
 	updatePrimVertices();
-	uint numVerts = _Prim.getVertices().size();
+	uint numVerts = (uint)_Prim.getVertices().size();
 	_CurrPrimInaccessible = false;
 	// Old version : path should be accessible along the edges
 	/*
@@ -882,7 +882,7 @@ uint CDisplayerVisualGroup::getNumSons() const
 {
 	//H_AUTO(R2_CDisplayerVisualGroup_getNumSons)
 	updateInstanceList();
-	return _Instances.size();
+	return (uint)_Instances.size();
 }
 
 // *********************************************************************************************************

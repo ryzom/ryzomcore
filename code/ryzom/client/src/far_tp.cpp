@@ -170,7 +170,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 				string sLog = NLMISC::toString("[%s] %s -> %s\n", CLoginStateMachine::toString(ev).c_str(), CLoginStateMachine::toString(_CurrentState).c_str(), CLoginStateMachine::toString(stateId).c_str()); \
 				if ( outputF.open( "error_join.log", true, true ) ) \
 				{							\
-					outputF.serialBuffer( (uint8*)(&sLog[0]), sLog.size() ); \
+					outputF.serialBuffer( (uint8*)(&sLog[0]), (uint)sLog.size() ); \
 					outputF.close();		\
 				}							\
 			} \
@@ -902,7 +902,7 @@ retryJoinEdit:
 				time_t currentTime;
 				time( &currentTime );
 				string headerS = NLMISC::toString( "\n\n%s%s\n\n", asctime(localtime(&currentTime)), outErrorMsg.c_str() );
-				outputF.serialBuffer( (uint8*)(&headerS[0]), headerS.size() );
+				outputF.serialBuffer( (uint8*)(&headerS[0]), (uint)headerS.size() );
 //				outputF.serialBuffer( (uint8*)(&res[0]), res.size() );
 				outputF.close();
 			}

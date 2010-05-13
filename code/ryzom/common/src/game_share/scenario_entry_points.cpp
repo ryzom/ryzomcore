@@ -189,7 +189,7 @@ void CScenarioEntryPoints::loadFromFile()
 	// read the file contents into a string 's'
 	CSString s;
 	s.resize(inf.getFileSize());
-	inf.serialBuffer((uint8*)&s[0],s.size());
+	inf.serialBuffer((uint8*)&s[0],(uint)s.size());
 
 	// close the file
 	inf.close();

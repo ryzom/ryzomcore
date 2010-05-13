@@ -943,7 +943,7 @@ void CTimedFXManager::updateInstanciatedFXList()
 	CManagedFX *toInstanciateListHead = NULL;
 	CManagedFX *alreadyInstanciatedListHead = NULL;
 	uint numInstances = 0;
-	uint numDistanceRanges = _CandidateFXListSortedByDist.size();
+	uint numDistanceRanges = (uint)_CandidateFXListSortedByDist.size();
 	sint maxNumPossibleInstance = (sint) (_MaxNumberOfFXInstances - _FXManager.getNumFXtoRemove());
 	if (maxNumPossibleInstance > 0)
 	{
@@ -1075,7 +1075,7 @@ void CTimedFXManager::updateCandidateFXListSorting()
 	H_AUTO_USE(RZ_TimedFX)
 	// re-sort all instances by distance
 	nlassert(_CandidateFXListSortedByDist.size() == _CandidateFXListSortedByDistTmp.size());
-	uint numDistanceRanges = _CandidateFXListSortedByDist.size();
+	uint numDistanceRanges = (uint)_CandidateFXListSortedByDist.size();
 	for(uint k = 0; k < numDistanceRanges; ++k)
 	{
 		CManagedFX *currCandidate = _CandidateFXListSortedByDist[k];

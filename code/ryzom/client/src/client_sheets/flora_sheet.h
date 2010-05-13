@@ -74,7 +74,7 @@ public:
 	  */
 	const CPlantInfo *getPlantInfoFromWeightedIndex(uint64 index) const;
 	// Plant info access
-	uint getNumPlantInfos() const { return _Plants.size(); }
+	uint getNumPlantInfos() const { return (uint)_Plants.size(); }
 	const CPlantInfo &getPlantInfo(uint index) const { return _Plants[index]; }
 private:
 	std::vector<CPlantInfo>  _Plants;

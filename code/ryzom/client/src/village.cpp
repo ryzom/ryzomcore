@@ -101,7 +101,7 @@ bool CVillage::setupFromSheet(NL3D::UScene *scene, const CVillageSheet &sheet, C
 	_IG.setLoadedIGMap(loadedIGMap);
 
 
-	_IG.reserve(sheet.IGs.size());
+	_IG.reserve((uint)sheet.IGs.size());
 
 	_IG.Name = sheet.Name;
 

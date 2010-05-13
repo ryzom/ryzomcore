@@ -145,7 +145,7 @@ void CSmallStringManager::serial(NLMISC::IStream& stream)
 	//serialize maxId
 	stream.serial(_MaxId);
 	//serialize the number of free ids
-	uint32 tmp = _FreeIds.size();
+	uint32 tmp = (uint32)_FreeIds.size();
 	stream.serial(tmp);
 	//serialize the free ids
 	std::set< uint32 >::const_iterator first(_FreeIds.begin()),last(_FreeIds.end());
@@ -154,7 +154,7 @@ void CSmallStringManager::serial(NLMISC::IStream& stream)
 		tmp = *first;
 		stream.serial(tmp);
 	}
-	tmp = _IdToString.size();
+	tmp = (uint32)_IdToString.size();
 	nlassert(tmp==_StringToId.size());
 
 	//serialize the number of entries

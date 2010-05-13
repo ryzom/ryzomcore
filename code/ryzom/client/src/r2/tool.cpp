@@ -590,7 +590,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			sint8 bestCandidateLayer = -128;
 			// see if the element is under the mouse
 			const std::vector<CCtrlBase *> &ctrlsUnder = getUI().getCtrlsUnderPointer();
-			for(sint k = ctrlsUnder.size() - 1; k >= 0; --k)
+			for(sint k = (sint)ctrlsUnder.size() - 1; k >= 0; --k)
 			{
 				IDisplayerUIHandle *handle = dynamic_cast<IDisplayerUIHandle *>(ctrlsUnder[k]);
 				if (handle != NULL)

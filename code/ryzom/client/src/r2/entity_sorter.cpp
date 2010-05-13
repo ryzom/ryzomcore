@@ -191,7 +191,7 @@ void CEntitySorter::updateVisibleList()
 				#ifdef NL_DEBUG
 					nlassert(_EntityDisplayers.count(dve));
 				#endif
-				_EntityDisplayers[dve] = _VisibleList.size() - 1;
+				_EntityDisplayers[dve] = (sint)_VisibleList.size() - 1;
 
 			}
 		}

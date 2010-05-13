@@ -403,7 +403,7 @@ void CGroupTable::updateCoords()
 			}
 
 			// Width of cells and table borders
-			sint32 borderWidth = 2*Border + (_Columns.size()+1) * CellSpacing + (_Columns.size()*2) * CellPadding;
+			sint32 borderWidth = 2*Border + ((sint32)_Columns.size()+1) * CellSpacing + ((sint32)_Columns.size()*2) * CellPadding;
 
 			// Get the width
 			sint32 tableWidthMax = ForceWidthMin?ForceWidthMin:_LastParentW; // getWReal();
@@ -786,7 +786,7 @@ sint32	CGroupTable::getMaxUsedW() const
 	for (i=0; i<columns.size(); i++)
 		maxWidth += columns[i];
 
-	maxWidth += 2*Border + (columns.size()+1) * CellSpacing + (columns.size()*2) * CellPadding;
+	maxWidth += 2*Border + ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
 
 	return maxWidth;
 }
@@ -831,7 +831,7 @@ sint32	CGroupTable::getMinUsedW() const
 	for (i=0; i<columns.size(); i++)
 		maxWidth += columns[i];
 
-	maxWidth += 2*Border + (columns.size()+1) * CellSpacing + (columns.size()*2) * CellPadding;
+	maxWidth += 2*Border + ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
 
 	return maxWidth;
 }

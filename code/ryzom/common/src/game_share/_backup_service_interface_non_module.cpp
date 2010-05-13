@@ -261,7 +261,7 @@ void cbBSPingPong(NLNET::CMessage& /* msgin */, const std::string &/* serviceNam
 	SPingPongStruct& thePingPong= PingPongs[serviceId];
 
 	// workout the size of the Times vector
-	uint32 numTimes= thePingPong.Times.size();
+	uint32 numTimes= (uint32)thePingPong.Times.size();
 
 	// store away the current time in the next available slot
 	TTime timeNow=NLMISC::CTime::getLocalTime();
@@ -335,7 +335,7 @@ void CBSIINonModule::serviceUpdate()
 		displayStr+=NLMISC::toString("%sBS(%hu)[",displayStr.empty()?"":"; ",it->first.get());
 
 		// workout the size of the Times vector
-		uint32 numTimes= it->second.Times.size();
+		uint32 numTimes= (uint32)it->second.Times.size();
 
 		// iterate down from min(...)-1 to 1
 		for (uint32 i=numTimes;--i;)
@@ -767,7 +767,7 @@ NLMISC::TTime CBSIINonModule::getLastAckTime() const
 		SPingPongStruct& thePingPong= it->second;
 
 		// workout the size of the Times vector
-		uint32 numTimes= thePingPong.Times.size();
+		uint32 numTimes= (uint32)thePingPong.Times.size();
 
 		// compare the last entry in the times vector to the result so far...
 		result= min(result,thePingPong.Times[(thePingPong.Count-1)%numTimes]);

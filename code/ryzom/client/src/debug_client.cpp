@@ -147,17 +147,17 @@ void flushDebugStack(const std::string &title)
 		{
 			// Log Title.
 			string strTmp = toString("  %s\n", title.c_str());
-			DebugFile.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+			DebugFile.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 
 			for(uint i=0; i<DebugStack.size(); ++i)
 			{
 				strTmp = toString("  %s\n", DebugStack[i].c_str());
-				DebugFile.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+				DebugFile.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 			}
 
 			// Empty line separator
 			strTmp = toString("\n");
-			DebugFile.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+			DebugFile.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 		}
 		// No Output File -> nlwarning
 		else

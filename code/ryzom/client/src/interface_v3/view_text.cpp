@@ -500,14 +500,14 @@ void CViewText::draw ()
 					}
 
 					// next word
-					charIndex+= currWord.Text.length();
+					charIndex+= (sint)currWord.Text.length();
 				}
 				charIndex += currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
 			}
 		}
 
 		// draw
-		for (sint i = _Lines.size()-1; i >= 0; --i)
+		for (sint i = (sint)_Lines.size()-1; i >= 0; --i)
 		{
 			CLine &currLine = *_Lines[i];
 			// current x position
@@ -848,7 +848,7 @@ void CViewText::updateTextContextMultiLine(uint nMaxWidth)
 	float	rWidthCurrentLine = 0, rWidthLetter;
 	bool	linePushed= false;
 	// for all the text
-	uint	textSize= _Text.size();
+	uint	textSize= (uint)_Text.size();
 	uint	formatTagIndex= 0;
 	for (i = 0; i < textSize; ++i)
 	{
@@ -1019,14 +1019,14 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 			}
 
 			// Detect change of wordFormat at the begining of the word
-			if(isFormatTagChange(spaceEnd, formatTagIndex))
+			if(isFormatTagChange((uint)spaceEnd, formatTagIndex))
 			{
-				getFormatTagChange(spaceEnd, formatTagIndex, wordFormat);
+				getFormatTagChange((uint)spaceEnd, formatTagIndex, wordFormat);
 			}
 
 			// Get word until a space, a \n, or a FormatTagChange is encountered
 			uint	i;
-			for(i= spaceEnd;i<_Text.length();i++)
+			for(i= (uint)spaceEnd;i<(uint)_Text.length();i++)
 			{
 				ucchar	c= _Text[i];
 				if(c==' ' || c=='\n')
@@ -1364,7 +1364,7 @@ void CViewText::updateTextContext ()
 			}
 			else
 			{
-				for (sint i = _Text.size() - 1; i >= 0; --i)
+				for (sint i = (sint)_Text.size() - 1; i >= 0; --i)
 				{
 					ucLetter= _Text[i];
 					ucstring ucStrLetter;
@@ -1465,7 +1465,7 @@ sint CViewText::getLineFromIndex(uint index, bool cursorDisplayedAtEndOfPrevious
 			}
 			charIndex = newCharIndex;
 		}
-		return _Lines.size() - 1;
+		return (sint)_Lines.size() - 1;
 	}
 	else
 	{
@@ -1629,7 +1629,7 @@ void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousL
 							return;
 						}
 					}
-					charIndex += currWord.Text.length() + currWord.NumSpaces;
+					charIndex += (uint)currWord.Text.length() + currWord.NumSpaces;
 					px += currWord.NumSpaces * currLine.getSpaceWidth() + currWord.Info.StringWidth;
 				}
 			}
@@ -1690,12 +1690,12 @@ void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool 
 		float py = 0.f;
 		if (py > y)
 		{
-			index = _Text.length();
+			index = (uint)_Text.length();
 			cursorAtPreviousLineEnd = false;
 			return;
 		}
 		sint line;
-		for (line = _Lines.size() - 1; line >= 0; --line)
+		for (line = (uint)_Lines.size() - 1; line >= 0; --line)
 		{
 			float newPy = py + _FontHeight + _MultiLineSpace;
 			if (newPy > y)
@@ -1758,7 +1758,7 @@ void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool 
 				}
 			}
 			px = newPx;
-			charPos += currWord.Text.length() + currWord.NumSpaces;
+			charPos += (uint)currWord.Text.length() + currWord.NumSpaces;
 		}
 		index =  charPos;
 		cursorAtPreviousLineEnd = false;
@@ -1769,7 +1769,7 @@ void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool 
 		cursorAtPreviousLineEnd = false;
 		if (y < 0)
 		{
-			index = _Text.length();
+			index = (uint)_Text.length();
 			return;
 		}
 		if (y > (sint) _FontHeight)
@@ -1833,7 +1833,7 @@ uint CViewText::getNumLine() const
 {
 	if (_MultiLine)
 	{
-		return _Lines.size();
+		return (uint)_Lines.size();
 	}
 	else
 	{
@@ -1935,7 +1935,7 @@ void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
 // ***************************************************************************
 void CViewText::removeEndSpaces()
 {
-	int i = _Text.size()-1;
+	int i = (int)_Text.size()-1;
 	while ((i>=0) && ((_Text[i] < 0x20) || (_Text[i] == ' ')))
 	{
 		i--;
@@ -2252,7 +2252,7 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 
 	// Build the text without the formatTags, and get the color tags separately
 	textBuild.reserve(text.size());
-	uint	textSize= text.size();
+	uint	textSize= (uint)text.size();
 	// Must herit all the props from old tags.
 	CViewText::CFormatTag	precTag;	// set default.
 	for (uint i = 0; i < textSize;)
@@ -2263,7 +2263,7 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 			CViewText::CFormatTag ct= precTag;
 			// get new color and skip tag.
 			ct.Color= getColorTag(text, i);
-			ct.Index= textBuild.size();
+			ct.Index= (uint)textBuild.size();
 			formatTags.push_back(ct);
 		}
 		else if(isTabTag(text, i, textSize))
@@ -2272,7 +2272,7 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 			CViewText::CFormatTag ct= precTag;
 			// get new Tab and skip tag.
 			ct.TabX= getTabTag(text, i);
-			ct.Index= textBuild.size();
+			ct.Index= (uint)textBuild.size();
 			formatTags.push_back(ct);
 		}
 		else if(isTooltipTag(text, i, textSize))
@@ -2287,11 +2287,11 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 			}
 			else
 			{
-				ct.IndexTt= tooltips.size();
+				ct.IndexTt= (uint)tooltips.size();
 				tooltips.push_back(uitt);
 			}
 
-			ct.Index= textBuild.size();
+			ct.Index= (uint)textBuild.size();
 			formatTags.push_back(ct);
 		}
 		else
@@ -2307,7 +2307,7 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 			{
 				CViewText::CFormatTag ct= precTag;
 				ct.TabX= 0;
-				ct.Index= textBuild.size();
+				ct.Index= (uint)textBuild.size();
 				formatTags.push_back(ct);
 			}
 		}

@@ -80,7 +80,7 @@ uint CHairSet::getNumHairItem(EGSPD::CPeople::TPeople gspeople) const
 {
 	H_AUTO_USE(RZ_HairSet)
 	EPeople people = convPeople(gspeople);
-	return people != DontKnow ? _Hairs[people].size() : 0;
+	return people != DontKnow ? (uint)_Hairs[people].size() : 0;
 }
 
 
@@ -102,7 +102,7 @@ sint CHairSet::getHairItemFromId(EGSPD::CPeople::TPeople gspeople, uint Id) cons
 	EPeople people = convPeople(gspeople);
 	if (people == DontKnow) return -1;
 	TIntArray::const_iterator it = std::find(_Hairs[people].begin(), _Hairs[people].end(), Id);
-	if (it != _Hairs[people].end()) return it - _Hairs[people].begin();
+	if (it != _Hairs[people].end()) return (sint)(it - _Hairs[people].begin());
 	else return -1;
 }
 

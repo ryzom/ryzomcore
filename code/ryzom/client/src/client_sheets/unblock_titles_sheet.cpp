@@ -174,7 +174,7 @@ void CUnblockTitlesSheet::build(const UFormElm &item)
 
 					if( !strSkillsNeeded.empty() )
 					{
-						uint16 skillsNeededSz = TitlesUnblock[title].SkillsNeeded.size();
+						uint16 skillsNeededSz = (uint16)TitlesUnblock[title].SkillsNeeded.size();
 						TitlesUnblock[title].SkillsNeeded.resize(skillsNeededSz+1);
 						TitlesUnblock[title].SkillsLevelNeeded.resize(skillsNeededSz+1);
 
@@ -235,7 +235,7 @@ void CUnblockTitlesSheet::build(const UFormElm &item)
 
 					if( !strItemsNeeded.empty() )
 					{
-						uint16 itemsNeededSz = TitlesUnblock[title].ItemsNeeded.size();
+						uint16 itemsNeededSz = (uint16)TitlesUnblock[title].ItemsNeeded.size();
 						TitlesUnblock[title].ItemsNeeded.resize(itemsNeededSz+1);
 						TitlesUnblock[title].ItemsQualityNeeded.resize(itemsNeededSz+1);
 

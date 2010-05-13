@@ -246,7 +246,7 @@ public:
 	// try to rename a window
 	bool rename(const ucstring &oldName, const ucstring &newName, bool newNameLocalize);
 	// warning : this is slow
-	uint getNumChatWindow() const { return _ChatWindowMap.size(); }
+	uint getNumChatWindow() const { return (uint)_ChatWindowMap.size(); }
 	// warning : this is slow : for debug only
 	CChatWindow *getChatWindowByIndex(uint index);
 ///////////////////////////////////////////////////////////////////////////////////////

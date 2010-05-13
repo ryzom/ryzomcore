@@ -244,7 +244,7 @@ public:
 	CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
 	{
 		if (templateParams.size() > 0)
-			return createGroupInstance(templateName, parentID, &templateParams[0], templateParams.size(), updateLinks);
+			return createGroupInstance(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 		else
 			return createGroupInstance(templateName, parentID, NULL, 0, updateLinks);
 	}
@@ -258,7 +258,7 @@ public:
 	CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
 	{
 		if (templateParams.size() > 0)
-			return createUIElement(templateName, parentID, &templateParams[0], templateParams.size(), updateLinks);
+			return createUIElement(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 		else
 			return createUIElement(templateName, parentID, NULL, 0, updateLinks);
 	}

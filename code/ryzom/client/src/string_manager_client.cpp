@@ -713,8 +713,8 @@ restartLoop:
 								if(str.size()>PlayerSelectedHomeShardNameWithParenthesis.size())
 								{
 									// If the shard name is the same as the player home shard name, remove it
-									uint	len= PlayerSelectedHomeShardNameWithParenthesis.size();
-									uint	start= str.size()-len;
+									uint	len= (uint)PlayerSelectedHomeShardNameWithParenthesis.size();
+									uint	start= (uint)str.size()-len;
 									if(ucstrnicmp(str, start, len, PlayerSelectedHomeShardNameWithParenthesis)==0)
 										str.resize(start);
 								}
@@ -1319,11 +1319,11 @@ void CStringManagerClient::specialWordsMemoryCompress()
 	while (it != _SpecItem_TempMap.end())
 	{
 		nNbEntries++;
-		nLabelSize += it->first.size() + 1;
-		nNameDescSize += it->second.Name.size() + 1;
-		nNameDescSize += it->second.WomenName.size() + 1;
-		nNameDescSize += it->second.Desc.size() + 1;
-		nNameDescSize += it->second.Desc2.size() + 1;
+		nLabelSize += (uint32)it->first.size() + 1;
+		nNameDescSize += (uint32)it->second.Name.size() + 1;
+		nNameDescSize += (uint32)it->second.WomenName.size() + 1;
+		nNameDescSize += (uint32)it->second.Desc.size() + 1;
+		nNameDescSize += (uint32)it->second.Desc2.size() + 1;
 		it++;
 	}
 
@@ -1347,27 +1347,27 @@ void CStringManagerClient::specialWordsMemoryCompress()
 
 		_SpecItems[nNbEntries].Label = _SpecItem_Labels+nLabelSize;
 		strcpy(_SpecItems[nNbEntries].Label, it->first.c_str());
-		nLabelSize += it->first.size() + 1;
+		nLabelSize += (uint32)it->first.size() + 1;
 
 		_SpecItems[nNbEntries].Name = _SpecItem_NameDesc+nNameDescSize;
 		memcpy(_SpecItems[nNbEntries].Name, it->second.Name.c_str(), 2*(it->second.Name.size()+1));
 		_SpecItems[nNbEntries].Name[it->second.Name.size()] = 0;
-		nNameDescSize += it->second.Name.size() + 1;
+		nNameDescSize += (uint32)it->second.Name.size() + 1;
 
 		_SpecItems[nNbEntries].WomenName = _SpecItem_NameDesc+nNameDescSize;
 		memcpy(_SpecItems[nNbEntries].WomenName, it->second.WomenName.c_str(), 2*(it->second.WomenName.size()+1));
 		_SpecItems[nNbEntries].WomenName[it->second.WomenName.size()] = 0;
-		nNameDescSize += it->second.WomenName.size() + 1;
+		nNameDescSize += (uint32)it->second.WomenName.size() + 1;
 
 		_SpecItems[nNbEntries].Desc = _SpecItem_NameDesc+nNameDescSize;
 		memcpy(_SpecItems[nNbEntries].Desc, it->second.Desc.c_str(), 2*(it->second.Desc.size()+1));
 		_SpecItems[nNbEntries].Desc[it->second.Desc.size()] = 0;
-		nNameDescSize += it->second.Desc.size() + 1;
+		nNameDescSize += (uint32)it->second.Desc.size() + 1;
 
 		_SpecItems[nNbEntries].Desc2 = _SpecItem_NameDesc+nNameDescSize;
 		memcpy(_SpecItems[nNbEntries].Desc2, it->second.Desc2.c_str(), 2*(it->second.Desc2.size()+1));
 		_SpecItems[nNbEntries].Desc2[it->second.Desc2.size()] = 0;
-		nNameDescSize += it->second.Desc2.size() + 1;
+		nNameDescSize += (uint32)it->second.Desc2.size() + 1;
 
 		nNbEntries++;
 		it++;

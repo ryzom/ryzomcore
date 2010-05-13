@@ -133,7 +133,7 @@ CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CP
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent)
 {
-	return attachToParent(parent,parent==NULL?~0u:parent->_Children.size());
+	return attachToParent(parent,parent==NULL?~0u:(uint32)parent->_Children.size());
 }
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uint32 idx)

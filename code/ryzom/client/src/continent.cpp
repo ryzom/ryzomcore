@@ -382,7 +382,7 @@ static uint getNumZones()
 	if (Landscape == NULL) return 0;
 	std::vector<std::string> zoneLoaded;
 	Landscape->getAllZoneLoaded(zoneLoaded);
-	return zoneLoaded.size();
+	return (uint)zoneLoaded.size();
 }
 
 //-----------------------------------------------

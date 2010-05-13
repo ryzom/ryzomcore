@@ -88,14 +88,14 @@ uint CActionFactory::getNbActionsInStore()
 	for ( std::vector<TActionStore>::iterator iv=RegisteredAction.begin(); iv!=RegisteredAction.end(); ++iv )
 	{
 		TActionStore& actionStore = (*iv);
-		nb += actionStore.second.size();
+		nb += (uint)actionStore.second.size();
 	}
 	return nb;
 }
 
 uint CActionFactory::getNbActionsInStore(uint code)
 {
-	return RegisteredAction[code].second.size();
+	return (uint)RegisteredAction[code].second.size();
 }
 
 

@@ -518,7 +518,7 @@ std::string CKeysHolder::getSignature(const std::string& md5, const std::string&
 	}
 	std::string tmp = md5;
 	tmp += found->second.PrivateKeyValue;
-	std::string wantedSignature = NLMISC::CHashKeyMD5(NLMISC::getMD5((uint8*)tmp.data(), tmp.size())).toString();
+	std::string wantedSignature = NLMISC::CHashKeyMD5(NLMISC::getMD5((uint8*)tmp.data(), (uint32)tmp.size())).toString();
 	return key + ":" + wantedSignature;
 
 }
@@ -1184,7 +1184,7 @@ void CServerEditionModule::updateRSMGR()
 		{
 			runningSession->setSessionId(first->first);
 			runningSession->setInstanceId(first->second->getAiInstanceId());
-			runningSession->setNbPlayingChars(first->second->getCurrentChars().size());
+			runningSession->setNbPlayingChars((uint32)first->second->getCurrentChars().size());
 			runningSession->setSessionType(first->second->getSessionType());
 		}
 
@@ -4304,7 +4304,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, displaySession)
 				log.displayNL("HighLevel data:");
 				std::vector<std::string> lines;
 				NLMISC::splitString(ss, "\n", lines);
-				uint first=0, last=lines.size();
+				uint first=0, last=(uint)lines.size();
 				for (; first != last ; ++first) {	log.displayNL("%s", lines[first].c_str()); }
 			}
 		}
@@ -4329,7 +4329,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, displaySession)
 
 				std::vector<std::string> lines;
 				NLMISC::splitString(ss, "\n", lines);
-				uint first=0, last=lines.size();
+				uint first=0, last=(uint)lines.size();
 				for (; first != last ; ++first) {	log.displayNL("%s", lines[first].c_str()); }
 			}
 
@@ -4405,7 +4405,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, dumpSession)
 				log.displayNL("HighLevel data:");
 				std::vector<std::string> lines;
 				NLMISC::splitString(ss, "\n", lines);
-				uint first=0, last=lines.size();
+				uint first=0, last=(uint)lines.size();
 				for (; first != last ; ++first) {	log.displayNL("%s", lines[first].c_str()); }
 			}
 		}
@@ -4430,7 +4430,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, dumpSession)
 
 				std::vector<std::string> lines;
 				NLMISC::splitString(ss, "\n", lines);
-				uint first=0, last=lines.size();
+				uint first=0, last=(uint)lines.size();
 				for (; first != last ; ++first) {	log.displayNL("%s", lines[first].c_str()); }
 			}
 
@@ -5504,7 +5504,7 @@ void CServerEditionModule::updateSessionListFile()
 
 		nldebug("UPDATING ring access override file list - BSI send file: %s",getOverrideRingAccessFilename().c_str());
 		CBackupMsgSaveFile msg( getOverrideRingAccessFilename(), CBackupMsgSaveFile::SaveFileCheck, Bsi );
-		msg.DataMsg.serialBuffer((uint8*)copy.c_str(), copy.size());
+		msg.DataMsg.serialBuffer((uint8*)copy.c_str(), (uint)copy.size());
 		Bsi.sendFile( msg );
 		_MustUpdateOverrideRingAcess = false;
 	}
@@ -6320,7 +6320,7 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message  part but the first part seems to have been lost.", charId) ;return;	}
 
-	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), data.size());
+	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), (uint)data.size());
 	//info->WaitingMsgCurrentSize += data.size();
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
@@ -6328,7 +6328,7 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 	{
 		NLNET::TModuleProxyPtr clientEditionProxy = (*clientEditionProxyPtr);
 		CShareClientEditionItfProxy proxy( *clientEditionProxyPtr );
-		proxy.multiPartMsgBody(this, partId, data.size());
+		proxy.multiPartMsgBody(this, partId, (uint32)data.size());
 	}
 }
 

@@ -325,7 +325,7 @@ public :
 	/** Count the number of emot
 	 * \return uint : the number of emot already known.
 	 */
-	uint getNbEmots() {return _EmotList->Emots.size();}
+	uint getNbEmots() {return (uint)_EmotList->Emots.size();}
 	/** Method to get the emot associated to an index.
 	 * \param index : number of the emot asked.
 	 * \param result : will be filled with the name of the emot associated.

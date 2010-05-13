@@ -125,7 +125,7 @@ public:
 	TDataSetIndex		last() const { return _OuterBound-1; }
 
 	/// Return the number of rows ready to be given back
-	TDataSetIndex		nbReleasedIndexes() const { return _ReleasedIndexes.size(); }
+	TDataSetIndex		nbReleasedIndexes() const { return (TDataSetIndex)_ReleasedIndexes.size(); }
 
 	/// Serial the range (minimal info)
 	void				serial( NLMISC::IStream& s )

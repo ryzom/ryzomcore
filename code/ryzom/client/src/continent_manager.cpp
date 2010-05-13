@@ -491,7 +491,7 @@ void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
 	f.serialVersion(1);
 	if (!f.isReading())
 	{
-		uint32 numCont = _Continents.size();
+		uint32 numCont = (uint32)_Continents.size();
 		f.serial(numCont);
 		for(TContinents::iterator it = _Continents.begin(); it != _Continents.end(); ++it)
 		{

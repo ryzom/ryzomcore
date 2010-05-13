@@ -987,7 +987,7 @@ void CObjectTable::sort()
 		std::string key = keyObject->toString();
 
 		uint32 firstValue = 0;
-		uint32 lastValue = _Value.size();
+		uint32 lastValue = (uint32)_Value.size();
 		for (; firstValue != lastValue; ++firstValue)
 		{
 			if ( key == _Value[firstValue].first)
@@ -999,7 +999,7 @@ void CObjectTable::sort()
 	}
 	{
 		uint32 firstValue = 0;
-		uint32 lastValue = _Value.size();
+		uint32 lastValue = (uint32)_Value.size();
 		for (; firstValue != lastValue; ++firstValue)
 		{
 			if (  _Value[firstValue].first != "Keys" && _Value[firstValue].second != 0)
@@ -1087,7 +1087,7 @@ void CObjectTable::doSerialize(std::string& out,  CSerializeContext& context) co
 
 	std::vector<CValueIndex> indexs;
 	uint32 i = 0;
-	uint32 size = _Value.size();
+	uint32 size = (uint32)_Value.size();
 	indexs.reserve(size);
 	for (; i < size ; ++i)
 	{
@@ -1170,7 +1170,7 @@ CObject* CObjectTable::getAttr(const std::string & name) const
 	if (name.size() >= 1 && '0' <= name[0] && name[0] <='9')
 	{
 		uint32 first2 = 0;
-		uint32 end2 = name.size();
+		uint32 end2 = (uint32)name.size();
 		for ( ; first2 != end2 && '0' <= name[first2] && name[first2] <= '9'; ++first2)	{}
 		if (first2 == end2)
 		{
@@ -1309,7 +1309,7 @@ void CObjectTable::clear()
 uint32 CObjectTable::getSize() const
 {
 	//H_AUTO(R2_CObjectTable_getSize)
-	return _Value.size();
+	return (uint32)_Value.size();
 }
 
 bool CObjectTable::doIsTable() const { return true;}
@@ -1321,7 +1321,7 @@ sint32 CObjectTable::findIndex(const CObject* child) const
 {
 	//H_AUTO(R2_CObjectTable_findIndex)
 	CHECK_TABLE_INTEGRITY
-	uint32 first(0),  last(_Value.size());
+	uint32 first = 0, last = (uint32)_Value.size();
 	for (; first != last && _Value[first].second != child ; ++first){}
 	if (first == last) return -1;
 	return first;
@@ -1331,7 +1331,7 @@ sint32 CObjectTable::findIndex(const std::string &key) const
 {
 	//H_AUTO(R2_CObjectTable_findIndex)
 	CHECK_TABLE_INTEGRITY
-	uint32 first(0),  last(_Value.size());
+	uint32 first = 0, last = (uint32)_Value.size();
 	for (; first != last && _Value[first].first != key ; ++first){}
 	if (first == last) return -1;
 	return first;
@@ -1399,7 +1399,7 @@ bool CObjectTable::insert(const std::string& key,  CObject* value,  sint32 posit
 {
 	//H_AUTO(R2_CObjectTable_insert)
 	CHECK_TABLE_INTEGRITY
-	uint32 count = _Value.size();
+	uint32 count = (uint32)_Value.size();
 
 	BOMB_IF(!( -1 <= position && position <= static_cast<sint32>(count)), "Try to take an element that does not exist", return false);
 	BOMB_IF(!value, "Try to insert a Null value", return false);
@@ -1892,7 +1892,7 @@ uint32 CObject::instanceIdToUint32(const std::string& instanceId)
 {
 	//H_AUTO(R2_CObject_instanceIdToUint32)
 	if (instanceId.empty()) return 0;
-	uint32 size = instanceId.size();
+	uint32 size = (uint32)instanceId.size();
 	if ( instanceId.substr(0, 6) != "Client")
 	{
 		nlwarning("R2Share: Wrong InstanceId(%s)", instanceId.c_str());
@@ -2231,13 +2231,13 @@ public:
 			{
 				uint initLength = stream.getPos();
 				serializer->Level +=2;
-				uint32 first(0), last(optionalPropFoundIndex.size());
+				uint32 first = 0, last = (uint32)optionalPropFoundIndex.size();
 				uint8 optionalSize = static_cast<uint8>(last);
 				stream.serial(optionalSize);
 				for (; first != last; ++first)
 				{
 					std::string key = data->getKey(optionalPropFoundIndex[first]);
-					uint32 uiKey(0), lastLocal(_OptionalProp.size());
+					uint32 uiKey = 0, lastLocal = (uint32)_OptionalProp.size();
 
 					for ( ; uiKey != lastLocal && _OptionalProp[uiKey]!=key ; ++uiKey){}
 
@@ -2261,7 +2261,7 @@ public:
 				uint initLength = stream.getPos();
 				serializer->Level +=2;
 
-				uint32 first(0), last(valuePropFoundIndex.size());
+				uint32 first = 0, last = (uint32)valuePropFoundIndex.size();
 				uint16 last16 = static_cast<uint16>(last);
 				stream.serial(last16);
 				for (; first != last; ++first)
@@ -2285,7 +2285,7 @@ public:
 				serializer->Level +=2;
 
 
-				uint32 first(0), last(otherPropFoundIndex.size());
+				uint32 first = 0, last = (uint32)otherPropFoundIndex.size();
 				uint16 last16 = static_cast<uint16>(last);
 				stream.serial(last16);
 				for (; first != last; ++first)
@@ -2960,7 +2960,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 		{
 			uint initLength = stream.getPos();
 			std::string value = data->toString();
-			uint32 size =  value.size();
+			uint32 size = (uint32)value.size();
 
 			if (size == 0)
 			{

@@ -281,7 +281,7 @@ sint32		CSBrickManager::CBrickContainer::getNumParameters(NLMISC::CSheetId id) c
 	CSBrickSheet	*brick= pBM->getBrick(id);
 	if(brick)
 	{
-		return brick->ParameterFamilies.size();
+		return (sint32)brick->ParameterFamilies.size();
 	}
 	else
 	{
@@ -449,7 +449,7 @@ void			CSBrickManager::compileBrickProperties()
 			textTemp.erase();
 
 			// Parse the text
-			uint	textSize= text.size();
+			uint	textSize= (uint)text.size();
 			for(uint j=0;j<textSize;)
 			{
 				// Property parsing?

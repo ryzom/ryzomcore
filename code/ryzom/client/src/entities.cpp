@@ -735,7 +735,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 //-----------------------------------------------
 void CEntityManager::removeCollision()
 {
-	const uint nbEntities = _Entities.size();
+	const uint nbEntities = (uint)_Entities.size();
 	for(uint i=0; i<nbEntities; ++i)
 	{
 		// Is the entity allocated.
@@ -1391,7 +1391,7 @@ void CEntityManager::updatePostCamera(uint clippedUpdateTime, const std::vector<
 	}
 
 	// Update visible entities post positions.
-	const uint count = _VisibleEntities.size ();
+	const uint count = (uint)_VisibleEntities.size ();
 	for(i=0; i<count; ++i)
 	{
 		CEntityReference &visibleEntity = _VisibleEntities[i];
@@ -1419,7 +1419,7 @@ void CEntityManager::updatePostRender()
 	TextContext->setFontSize(ClientCfg.NameFontSize);
 	CRGBA color;
 
-	const uint activeCount = _ActiveEntities.size ();
+	const uint activeCount = (uint)_ActiveEntities.size ();
 	uint i;
 	for(i=0; i<activeCount; i++)
 	{
@@ -1429,7 +1429,7 @@ void CEntityManager::updatePostRender()
 		visibleEntity.Entity->updateAllPostRender ();
 	}
 
-	const uint count = _VisibleEntities.size ();
+	const uint count = (uint)_VisibleEntities.size ();
 	for(i=0; i<count; ++i)
 	{
 		CEntityReference &visibleEntity = _VisibleEntities[i];
@@ -1551,20 +1551,20 @@ void CEntityManager::writeEntities()
 		return;
 
 	string strTmp = "StartCommands = {\n";
-	f.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+	f.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 
-	const uint nb = _Entities.size();
+	const uint nb = (uint)_Entities.size();
 	for(uint i=1; i<nb; ++i)
 	{
 		if(_Entities[i])
 		{
 			strTmp = toString("\"%s\",\t\"%f\", \"%f\", \"%f\", \"%f\", \"%f\", \"%f\",\t// %3d\n", _Entities[i]->sheetId().toString().c_str(), _Entities[i]->pos().x, _Entities[i]->pos().y, _Entities[i]->pos().z, _Entities[i]->front().x, _Entities[i]->front().y, _Entities[i]->front().z, i);
-			f.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+			f.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 		}
 	}
 
 	strTmp = "};\n";
-	f.serialBuffer((uint8*)strTmp.c_str(), strTmp.size());
+	f.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 
 	// Close the File.
 	f.close();
@@ -1587,7 +1587,7 @@ void CEntityManager::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 //	f.serial(_EntitiesAllocated);	no need to serialize this one except maybe to check.
 
 	// Serialize each entity.
-	const uint nb = _Entities.size();
+	const uint nb = (uint)_Entities.size();
 	for(uint i=0; i<nb; ++i)
 	{
 		NLMISC::CSheetId si;
@@ -1636,7 +1636,7 @@ void CEntityManager::dumpXML(class NLMISC::IStream &f)
 	// Start the opening of a new node named Identity
 	f.xmlPush("Entities");
 
-		const uint nb = _Entities.size();
+		const uint nb = (uint)_Entities.size();
 		for(uint i=0; i<nb; ++i)
 		{
 			// Add a comment
@@ -1731,7 +1731,7 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 	if (stringId)
 	{
 		uint i;
-		const uint count = _Entities.size();
+		const uint count = (uint)_Entities.size();
 		for (i=0; i<count; i++)
 		{
 			if(_Entities[i])
@@ -1747,7 +1747,7 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const
 {
 	ucstring source = name;
-	const uint size = source.size();
+	const uint size = (uint)source.size();
 	if (!caseSensitive)
 	{
 		uint j;
@@ -1756,7 +1756,7 @@ CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensi
 	}
 
 	uint i;
-	const uint count = _Entities.size();
+	const uint count = (uint)_Entities.size();
 	uint selectedEntityId;
 	float selectedEntityDist = FLT_MAX; // No selected Entity
 
@@ -1818,7 +1818,7 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 	if (compressedIndex != INVALID_DATASET_ROW)
 	{
 		uint i;
-		const uint count = _Entities.size();
+		const uint count = (uint)_Entities.size();
 		for (i=0; i<count; i++)
 		{
 			if(_Entities[i])
@@ -1861,7 +1861,7 @@ void CEntityManager::managePACSTriggers()
 void CEntityManager::removeColUserOther()
 {
 	uint i;
-	const uint count = _Entities.size();
+	const uint count = (uint)_Entities.size();
 	for(i=1; i<count; i++)
 	{
 		if(_Entities[i])
@@ -1883,7 +1883,7 @@ void CEntityManager::removeColUserOther()
 void CEntityManager::restoreColUserOther()
 {
 	uint i;
-	const uint count = _Entities.size();
+	const uint count = (uint)_Entities.size();
 	for(i=1; i<count; i++)
 	{
 		if(_Entities[i])

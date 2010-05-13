@@ -336,7 +336,7 @@ public:
 	TDataSetIndex				maxNbRows() const { return _MaxNbRows; }
 
 	/// Return the number of properties in the dataset
-	TPropertyIndex				nbProperties() const { return _PropIndexToType.size(); }
+	TPropertyIndex				nbProperties() const { return (TPropertyIndex)_PropIndexToType.size(); }
 
 	/// Return the type of the specified property
 	TTypeOfProp					getPropType( TPropertyIndex propIndex ) const

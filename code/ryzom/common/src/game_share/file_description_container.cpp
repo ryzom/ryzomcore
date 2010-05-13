@@ -154,7 +154,7 @@ void CFileDescriptionContainer::addFiles(const std::string& directory, const std
 	// extract the files that match the given wildcard and build a result vector
 	{
 		H_AUTO(fdcAddFilesTestWildcards)
-		for (uint32 i=rawFileNames.size();i--;)
+		for (uint32 i=(uint32)rawFileNames.size();i--;)
 		{
 			uint32 j;
 			for (j=0;j<wildcards.size();++j)
@@ -183,8 +183,8 @@ void CFileDescriptionContainer::addFiles(const CFileDescriptionContainer& other)
 	// but I don't have an stl refference to hand so doing it longhand...
 
 	// make room in the file description container for the data from the other object
-	uint32 otherSize= other._FileDescriptions.size();
-	uint32 oldSize= _FileDescriptions.size();
+	uint32 otherSize= (uint32)other._FileDescriptions.size();
+	uint32 oldSize= (uint32)_FileDescriptions.size();
 	uint32 newSize= oldSize + otherSize;
 	_FileDescriptions.resize(newSize);
 
@@ -237,7 +237,7 @@ void CFileDescriptionContainer::serial(NLMISC::IStream& stream)
 
 uint32 CFileDescriptionContainer::size() const
 {
-	return _FileDescriptions.size();
+	return (uint32)_FileDescriptions.size();
 }
 
 bool CFileDescriptionContainer::empty() const

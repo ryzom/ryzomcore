@@ -276,7 +276,7 @@ uint32 CBotControler::getBotsCount(uint32 charId) const
 	TControlledEntitiesList::const_iterator found(_List.find(charId));
 	if ( found == _List.end()) { return 0; }
 	const std::map<uint32, NLMISC::CEntityId>&  entities =found->second.getAToBMap();
-	return entities.size();
+	return (uint32)entities.size();
 }
 
 
@@ -426,7 +426,7 @@ public:
 
 	void sendSeasonToChar(uint32 charId, uint8 season) const;
 
-	uint32 getActCount() const { return Pdrs.size(); }
+	uint32 getActCount() const { return (uint32)Pdrs.size(); }
 
 	void updateUserTriggerDescriptions(TUserTriggerDescriptions& userTriggerDescriptions);
 
@@ -503,11 +503,11 @@ void CAnimationSession::updateUserTriggerDescriptions(TUserTriggerDescriptions& 
 
 	//Act0 trigger
 	uint32 actIndex = 0;
-	uint32 actCount = Acts.size();
+	uint32 actCount = (uint32)Acts.size();
 	for ( ; actIndex != actCount; ++actIndex)
 	{
 		CRtAct* act = Acts[actIndex];
-		uint32 userTriggerCount = act->UserTriggers.size();
+		uint32 userTriggerCount = (uint32)act->UserTriggers.size();
 		uint32 index = 0;
 		for ( ; index != userTriggerCount; ++index)
 		{
@@ -527,7 +527,7 @@ void CAnimationSession::updateActPositionDescriptions(TActPositionDescriptions& 
 	actPositionDescriptions.clear();
 
 	uint32 actIndex = 0;
-	uint32 actCount = Acts.size();
+	uint32 actCount = (uint32)Acts.size();
 	for ( ; actIndex != actCount; ++actIndex)
 	{
 		CRtAct* act = Acts[actIndex];
@@ -594,7 +594,7 @@ public:
 			vector<string> result;
 			NLMISC::splitString(str, "\n", result);
 
-			uint32 first(0), last(result.size());
+			uint32 first = 0, last = (uint32)result.size();
 			for ( ; first != last ; ++first)
 			{
 				result[first] = prefix + result[first] ;
@@ -948,7 +948,7 @@ void CServerAnimationModule::init(NLNET::IModuleSocket* gateway, CDynamicMapServ
 
 	// check if the AI service is up
 	const std::vector<TServiceId> &connectionList = CUnifiedNetwork::getInstance()->getConnectionList();
-	for( uint i = connectionList.size(); i > 0; --i )
+	for( uint i = (uint)connectionList.size(); i > 0; --i )
 	{
 		nldebug( "R2An: %s is already up", CUnifiedNetwork::getInstance()->getServiceName(connectionList[i-1]).c_str() );
 		if( "AIS" == CUnifiedNetwork::getInstance()->getServiceName(connectionList[i-1]) )
@@ -1053,7 +1053,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 				vector<string> result;
 				NLMISC::splitString(str, "\n", result);
 
-				uint32 first(0), last(result.size());
+				uint32 first = 0, last = (uint32)result.size();
 				for ( ; first != last ; ++first)
 				{
 					if (first == 0)
@@ -1139,7 +1139,7 @@ bool CServerAnimationModule::queueSession(CAnimationSession* session, bool /* ru
 			std::string ss;
 			output.open("outpout.rt");
 			session->RtData->serialize(ss);
-			output.serialBuffer((uint8*)ss.c_str(), ss.size());
+			output.serialBuffer((uint8*)ss.c_str(), (uint)ss.size());
 			output.flush();
 			output.close();
 		}
@@ -1638,7 +1638,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 				std::string sheet_client = objectNpc->toString("SheetClient");
 				{
-					uint32 len = sheet_client.length();
+					uint32 len = (uint32)sheet_client.length();
 					//9=".creature".length()
 					if(len>9)
 					{
@@ -1651,7 +1651,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				std::string sheet = objectNpc->toString("Sheet");
 				{
 
-					uint32 len = sheet.length();
+					uint32 len = (uint32)sheet.length();
 					//9=".creature".length()
 					if(len>9)
 					{
@@ -1664,13 +1664,13 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				if (UseSheetClientWithLevel)
 				{
 					static std::string basic="basic_";
-					static uint32 basicSize = basic.size();
+					static uint32 basicSize = (uint32)basic.size();
 					static std::string female = "_female";
-					static uint32 femaleSize = female.size();
+					static uint32 femaleSize = (uint32)female.size();
 					static std::string male = "_male";
-					static uint32 maleSize = male.size();
+					static uint32 maleSize = (uint32)male.size();
 
-					uint32 sheetClientSize = sheet_client.size();
+					uint32 sheetClientSize = (uint32)sheet_client.size();
 
 					// Special case of basic_*_female or basic_*_female
 					if ( (sheetClientSize > basicSize && sheet_client.substr(0, basicSize) == basic) && !sheet.empty() &&
@@ -2006,7 +2006,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		}
 	}
 
-	uint32 first(0), last(primDocs.size());
+	uint32 first = 0, last = (uint32)primDocs.size();
 	animSession->Pdrs.resize(last);
 
 
@@ -3728,14 +3728,14 @@ void CServerAnimationModule::requestLoadTable(CAnimationSession* session)
 	msg.serial(scenarioId);
 
 	{
-		uint32 size = session->ConnectedChars.size();
+		uint32 size = (uint32)session->ConnectedChars.size();
 		std::vector<const TModuleProxyPtr*> connected;
 		for(uint32 i=0; i<size; ++i)
 		{
 			const NLNET::TModuleProxyPtr* ptr = getEditionModule()->getClientProxyPtr(session->ConnectedChars[i]);
 			if (ptr){ connected.push_back(ptr); }
 		}
-		uint32 connectedSize = connected.size();
+		uint32 connectedSize = (uint32)connected.size();
 
 		msg.serial( connectedSize );
 		for(uint32 i=0; i<connectedSize ;++i)
@@ -3923,7 +3923,7 @@ void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* ai
 	std::vector<R2::TItemAndQuantity> itemsAndQuantities;
 
 
-	uint32 first(0), last(itemNames.size());
+	uint32 first = 0, last = (uint32)itemNames.size();
 	for (; first != last ; ++first)
 	{
 		std::vector<std::string> itemAndQt;
@@ -4292,7 +4292,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, displayMissionItems)
 	CAnimationSession* animationSession = getSession(sessionId);
 	if (animationSession)
 	{
-		uint32 first(0), last(animationSession->MissionItems.size());
+		uint32 first = 0, last = (uint32)animationSession->MissionItems.size();
 		log.displayNL("%d Missions Item:", last);
 		for ( ;first != last ; ++first)
 		{
@@ -4331,7 +4331,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, displayUserTriggers)
 		animationSession->updateUserTriggerDescriptions(userTriggerDescriptions);
 
 
-		uint32 first(0), last(userTriggerDescriptions.size());
+		uint32 first = 0, last = (uint32)userTriggerDescriptions.size();
 		log.displayNL("%d User Trigger:", last);
 		for ( ;first != last ; ++first)
 		{

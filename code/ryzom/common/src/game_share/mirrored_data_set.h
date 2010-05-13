@@ -419,7 +419,7 @@ public:
 	uint				lookForValue( NLMISC::CLog& log=*NLMISC::InfoLog, const std::string& propName="", bool anyValue=false, const std::string& searchedValueStr="0", uint8 onlyEntityType=0xFF, uint8 onlyCreatorId=0xFF, uint8 onlyDynamicId=0xFF, bool hideUndeclaredbool=false, bool displayLocalCreationTimestamp=true, bool sortByEntityId=false, bool sortByDatasetRow=false ) const;
 
 	/// Return the number of declared entities
-	uint				getNbOnlineEntities() const { return _EntityIdToEntityIndex.size() - _NumberOfUndeclaredEntities; }
+	uint				getNbOnlineEntities() const { return (uint)_EntityIdToEntityIndex.size() - _NumberOfUndeclaredEntities; }
 
 	/// Return the number of undeclared entities
 	uint				getNbOfflineEntities() const { return _NumberOfUndeclaredEntities; }

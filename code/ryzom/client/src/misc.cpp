@@ -143,7 +143,7 @@ void makeUp(NL3D::UInstance face, sint idMakeUp)
 				std::string::size_type pos = texFilename.find(tattooStr, 0);
 				if (pos != std::string::npos)
 				{
-					uint charIndex = pos + strlen(tattooStr);
+					uint charIndex = (uint)(pos + strlen(tattooStr));
 					if (texFilename.length() >= charIndex + 2)
 					{
 						texFilename[charIndex] = '0' + (unsigned char) (idMakeUp / 10);
@@ -948,7 +948,7 @@ std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
 			ucstring::size_type nextPos = src.find((ucchar) '&', startPos+1);
 			if (nextPos != ucstring::npos)
 			{
-				uint codeSize = nextPos - startPos - 1;
+				uint codeSize = (uint)nextPos - startPos - 1;
 				colorCode.resize( codeSize );
 				for(uint k = 0; k < codeSize; ++k)
 				{
@@ -1022,7 +1022,7 @@ inline bool isEndSentence (ucstring& str, uint index)
 
 void setCase (ucstring &str, TCaseMode mode)
 {
-	const uint length = str.length();
+	const uint length = (uint)str.length();
 	uint i;
 	bool newString = true;
 	bool newSentence = true;
@@ -1090,9 +1090,9 @@ sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1)
 {
 	// start
 	const ucchar	*start1= s1.c_str();
-	uint			lenS1= s1.size();
+	uint			lenS1= (uint)s1.size();
 	const ucchar	*start0= s0.c_str();
-	uint			lenS0= s0.size();
+	uint			lenS0= (uint)s0.size();
 	if(p0!=0)
 	{
 		if(p0<lenS0)

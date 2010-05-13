@@ -3205,7 +3205,7 @@ int CLuaIHM::tableToString(CLuaState &ls)
 	while (ls.next(-2))
 	{
 		ls.toString(-1);
-		length += ls.strlen(-1);
+		length += (uint)ls.strlen(-1);
 		ls.pop(2);
 	}
 	std::string result;
@@ -3215,7 +3215,7 @@ int CLuaIHM::tableToString(CLuaState &ls)
 	ls.pushNil();
 	while (ls.next(-2))
 	{
-		uint length = ls.strlen(-1);
+		uint length = (uint)ls.strlen(-1);
 		if (length)
 		{
 			memcpy(dest, ls.toString(-1), length);
@@ -3658,7 +3658,7 @@ void CLuaIHM::sortGuildMembers()
 sint32 CLuaIHM::getNbGuildMembers()
 {
 	//H_AUTO(Lua_CLuaIHM_getNbGuildMembers)
-	return CGuildManager::getInstance()->getGuildMembers().size();
+	return (sint32)CGuildManager::getInstance()->getGuildMembers().size();
 }
 
 // ***************************************************************************

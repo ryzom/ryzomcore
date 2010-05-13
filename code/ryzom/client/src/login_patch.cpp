@@ -159,7 +159,7 @@ public:
 		try
 		{
 			CNel7ZipInStream *me = (CNel7ZipInStream*)object;
-			me->_Stream->serialBuffer((uint8*)buffer, size);
+			me->_Stream->serialBuffer((uint8*)buffer, (uint)size);
 			*processedSize = size;
 			return SZ_OK;
 		}
@@ -248,7 +248,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	}
 
 	srand(NLMISC::CTime::getSecondsSince1970());
-	UsedServer = rand() * PatchServers.size() / (RAND_MAX+1);
+	UsedServer = rand() * (sint)PatchServers.size() / (RAND_MAX+1);
 
 	ServerPath = CPath::standardizePath (sServerPath);
 	ServerVersion = sServerVersion;
@@ -589,10 +589,10 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 	}
 
 	// Add all required categories
-	uint32 nSize = CatsSelected.size();
+	uint32 nSize = (uint32)CatsSelected.size();
 	do
 	{
-		nSize = CatsSelected.size();
+		nSize = (uint32)CatsSelected.size();
 
 		for (i = 0; i < CatsSelected.size(); ++i)
 		{
@@ -1380,7 +1380,7 @@ void CPatchManager::decompressFile (const string &filename)
 		currentSize += res;
 
 		//if(isVerboseLog()) nlinfo("Calling fwrite for %d bytes", res);
-		int res2 = fwrite (buffer, 1, res, fp);
+		int res2 = (int)fwrite (buffer, 1, res, fp);
 		//if(isVerboseLog()) nlinfo("fwrite returns %d", res2);
 		if (res2 != res)
 		{
@@ -1846,7 +1846,7 @@ uint CPatchManager::applyScanDataResult()
 	{
 		TSyncDataScanState::CAccessor	ac(&DataScanState);
 		CDataScanState	&val= ac.value();
-		numError= val.FilesWithScanDataError.size();
+		numError= (uint)val.FilesWithScanDataError.size();
 
 		// Touch the files with error (will be reloaded at next patch)
 		for(uint i=0;i<numError;i++)
@@ -2009,7 +2009,7 @@ bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::strin
 		nlerror("Can not open output file '%s'", destFileName.c_str());
 		return false;
 	}
-	processedSize = fwrite(outBuffer + offset, 1, outSizeProcessed, outputHandle);
+	processedSize = (UInt32)fwrite(outBuffer + offset, 1, outSizeProcessed, outputHandle);
 	if (processedSize != outSizeProcessed)
 	{
 		nlerror("Failed to write %u char to output file '%s'", outSizeProcessed-processedSize, destFileName.c_str());
@@ -2075,7 +2075,7 @@ bool CPatchManager::unpackLZMA(const std::string &lzmaFile, const std::string &d
 	// allocate the output buffer
 	auto_ptr<uint8> outBuffer = auto_ptr<uint8>(new uint8[fileSize]);
 	// decompress the file in memory
-	ret = LzmaDecode(&state, (unsigned char*) pos, inSize-(pos-inBuffer.get()), &inProcessed, (unsigned char*)outBuffer.get(), fileSize, &outProcessed);
+	ret = LzmaDecode(&state, (unsigned char*) pos, (SizeT)(inSize-(pos-inBuffer.get())), &inProcessed, (unsigned char*)outBuffer.get(), (SizeT)fileSize, &outProcessed);
 	if (ret != 0 || outProcessed != fileSize)
 	{
 		nlwarning("Failed to decode lzma file '%s'", lzmaFile.c_str());
@@ -2084,7 +2084,7 @@ bool CPatchManager::unpackLZMA(const std::string &lzmaFile, const std::string &d
 
 	// store on output buffer
 	COFile outStream(destFileName);
-	outStream.serialBuffer(outBuffer.get(), fileSize);
+	outStream.serialBuffer(outBuffer.get(), (uint)fileSize);
 
 	return true;
 }
@@ -3316,7 +3316,7 @@ void CDownloadThread::run()
 	// At first launch calculat the amount of data need to download
 	if (_FirstTime)
 	{
-		for (unsigned int first = 0,last = _Entries.size() ; first != last; ++first)
+		for (uint first = 0,last = (uint)_Entries.size() ; first != last; ++first)
 		{
 			_FullSize += _Entries[first].SZipFileSize;
 		}
@@ -3325,7 +3325,7 @@ void CDownloadThread::run()
 	}
 
 
-	for (unsigned int first = 0,last = _Entries.size() ; first != last; ++first)
+	for (uint first = 0,last = (uint)_Entries.size() ; first != last; ++first)
 	{
 		std::string patchName = CPath::standardizePath (_Entries[first].PatchName, false);
 		std::string sourceName = CPath::standardizePath (_Entries[first].SourceName, false);
@@ -3413,9 +3413,9 @@ void CInstallThread::run()
 
 	std::set<std::string> allowed;
 
-	unsigned int first, last;
+	uint first, last;
 
-	for (first = 0,last = _Entries.size() ; first != last; ++first)
+	for (first = 0,last = (uint)_Entries.size() ; first != last; ++first)
 	{
 		std::string correct = CPath::standardizePath (patchPath + _Entries[first].PatchName, false);
 		allowed.insert(correct);
@@ -3440,7 +3440,7 @@ void CInstallThread::run()
 	// calculate size of data to download in order to know the install speed
 	if (_FirstTime)
 	{
-		for (unsigned int first = 0,last = _Entries.size() ; first != last; ++first)
+		for (uint first = 0,last = (uint)_Entries.size() ; first != last; ++first)
 		{
 			_FullSize += _Entries[first].Size;
 		}
@@ -3449,7 +3449,7 @@ void CInstallThread::run()
 	}
 
 
-	for (first = 0,last = _Entries.size() ; first != last; ++first)
+	for (first = 0,last = (uint)_Entries.size() ; first != last; ++first)
 	{
 		std::string patchName = CPath::standardizePath (patchPath +_Entries[first].PatchName, false);
 		std::string sourceName = CPath::standardizePath (_Entries[first].SourceName, false);

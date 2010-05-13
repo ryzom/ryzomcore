@@ -77,7 +77,7 @@ void CStreamableEntityComposite::remove(IStreamableEntity *entity)
 /*virtual*/ void CStreamableEntityComposite::forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress)
 {
 	H_AUTO_USE(RZ_StremableEntityComposite)
-	const uint size = _Entities.size();
+	const uint size = (uint)_Entities.size();
 	uint count = 0;
 	for(TStreambleEntities::iterator it = _Entities.begin(); it != _Entities.end(); ++it)
 	{

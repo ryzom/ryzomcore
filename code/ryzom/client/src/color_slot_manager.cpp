@@ -116,7 +116,7 @@ CColorSlotManager::TIntCouple CColorSlotManager::findFileExtensionInSlot(const s
 		TStringVect::const_iterator extIt = std::find(it->begin(), it->end(), ext);
 		if (extIt != it->end())
 		{
-			return std::make_pair(it - _Slots.begin(), extIt - it->begin());
+			return std::make_pair((uint)(it - _Slots.begin()), (uint)(extIt - it->begin()));
 		}
 	}
 	return TIntCouple((uint) NotFound, 0);
@@ -136,7 +136,7 @@ uint CColorSlotManager::addSlot(const TStringVect &slotDescs)
 	{
 		NLMISC::strupr(_Slots.back()[k]);
 	}
-	return _Slots.size() - 1;
+	return (uint)_Slots.size() - 1;
 }
 
 
@@ -327,7 +327,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 	{
 		return false;
 	}
-	uint startSlot = _Slots.size();
+	uint startSlot = (uint)_Slots.size();
 
 
 
@@ -362,7 +362,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 	}
 
 	startSlotDest = startSlot;
-	numSlots	  = _Slots.size() - startSlot;
+	numSlots	  = (uint)_Slots.size() - startSlot;
 	return true;
 }
 

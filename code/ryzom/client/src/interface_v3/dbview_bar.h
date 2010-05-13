@@ -50,7 +50,7 @@ public:
 	void setType (TViewBar vb);
 
 	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 	virtual void updateCoords ();
 	virtual void draw ();
 

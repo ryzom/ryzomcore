@@ -1410,7 +1410,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		}
 
 		uncompressedFile = new uint8[uncompressedFileLength];
-		int length = fread(uncompressedFile, sizeof(char), uncompressedFileLength, file);
+		int length = (int)fread(uncompressedFile, sizeof(char), uncompressedFileLength, file);
 		if (length <0)
 		{
 			nlwarning("Error while reading %s", filename.c_str());
@@ -1456,7 +1456,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		}
 
 		// REGENERATE HEADER
-		md5Id =	getMD5((uint8*)data.data(), data.size());
+		md5Id =	getMD5((uint8*)data.data(), (uint32)data.size());
 		timeStamp = NLMISC::CTime::getSecondsSince1970();
 
 		//std::stringstream ss;
@@ -1487,7 +1487,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		delete [] uncompressedFile;
 		uncompressedFile = new uint8[ data.size() ];
 		memcpy(uncompressedFile, data.c_str(), data.size());
-		uncompressedFileLength = data.size();
+		uncompressedFileLength = (uint32)data.size();
 
 
 
@@ -2570,7 +2570,7 @@ bool CClientEditionModule::hasCharacterSameCharacterIdMd5(const std::string & ch
 	}
 
 	uint32 val = 0;
-	uint32 first=0,last=charIdMd5.size();
+	uint32 first=0,last=(uint32)charIdMd5.size();
 	for (;first != last; ++first)
 	{
 

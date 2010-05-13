@@ -132,7 +132,7 @@ void CEncyclopediaManager::updateAlbum(const CEncyMsgAlbum &a)
 	CEncyMsgAlbum *pA = getAlbum(a.Name);
 	if (pA == NULL)
 	{
-		uint32 nBack = _Albums.size();
+		uint32 nBack = (uint32)_Albums.size();
 		_Albums.push_back(CEncyMsgAlbum());
 		pA = &_Albums[nBack];
 	}
@@ -152,7 +152,7 @@ void CEncyclopediaManager::updateThema(uint32 nAlbumName, const CEncyMsgThema &t
 	// Thema not found add it !
 	if (pT == NULL)
 	{
-		uint32 nBack = pA->Themas.size();
+		uint32 nBack = (uint32)pA->Themas.size();
 		pA->Themas.push_back(CEncyMsgThema());
 		pT = &pA->Themas[nBack];
 

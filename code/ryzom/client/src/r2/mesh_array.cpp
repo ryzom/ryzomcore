@@ -63,7 +63,7 @@ void CMeshArray::resize(uint newSize)
 	}
 	else
 	{
-		uint oldSize = _MeshInstances.size();
+		uint oldSize = (uint)_MeshInstances.size();
 		_MeshInstances.resize(newSize);
 		for(uint k = oldSize; k < newSize; ++k)
 		{

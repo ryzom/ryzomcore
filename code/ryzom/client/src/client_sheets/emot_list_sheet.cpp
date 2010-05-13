@@ -103,7 +103,7 @@ void CEmotListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 	else
 	{
-		size = Emots.size();
+		size = (uint32)Emots.size();
 		f.serial (size);
 	}
 	for (uint i = 0; i < size; i++)

@@ -318,7 +318,7 @@ CDynChatSession *CDynChat::getSession(TChanID chan, const TDataSetRow &client)
 //================================================================
 void CDynChat::getChans(std::vector<CDynChatChan *> &channels)
 {
-	uint numChans = _Chans.size();
+	uint numChans = (uint)_Chans.size();
 	channels.resize(numChans);
 	uint k = 0;
 	for(TChanMap::iterator it = _Chans.begin(); it != _Chans.end(); ++it, ++k)

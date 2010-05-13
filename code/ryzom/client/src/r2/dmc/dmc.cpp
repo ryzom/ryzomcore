@@ -279,7 +279,7 @@ void CDynamicMapClient::saveRtData(const std::string& filename)
 		out2 += "scenario = ";
 		scenario->serialize(out2);
 		//std::string tmp=out2.str();
-		out.serialBuffer((uint8*)out2.c_str(),out2.size());
+		out.serialBuffer((uint8*)out2.c_str(),(uint)out2.size());
 		return;
 	}
 	nlwarning("Can't save: no scenario yet");
@@ -371,7 +371,7 @@ void CDynamicMapClient::show() const
 
 	std::vector<std::string> lines;
 	NLMISC::splitString(ss, "\n", lines);
-	uint first=0, last=lines.size();
+	uint first=0, last=(uint)lines.size();
 	for (; first != last ; ++first) { nlinfo("%s", lines[first].c_str()); }
 
 /*	while ( std::getline(ss, s))

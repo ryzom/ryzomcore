@@ -228,7 +228,7 @@ bool CRingAccess::isSheetClient(const NLMISC::CSheetId& sheet) const
 
 
 	std::string sheetStr = sheet.toString();
-	uint32 sheetLength = sheetStr.length();
+	uint32 sheetLength = (uint32)sheetStr.length();
 
 
 

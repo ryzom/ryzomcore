@@ -297,7 +297,7 @@ void CDBGroupListSheet::updateCoords ()
 		uint numValidSheets;
 		if (_Array)
 		{
-			numValidSheets = _SheetChildren.size();
+			numValidSheets = (uint)_SheetChildren.size();
 		}
 		else
 		{

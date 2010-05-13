@@ -136,7 +136,7 @@ void CWaterMap::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC:
 	float height = worldMatrix.getPos().z;
 	// transform the water shape in grid coordinates
 	CWaterInfo wi;
-	uint numVerts = shape.Vertices.size();
+	uint numVerts = (uint)shape.Vertices.size();
 	wi.Shape.Vertices.resize(numVerts);
 	wi.SplashEnabled = splashEnabled;
 	NLMISC::CMatrix toGridMatrix;
@@ -202,8 +202,8 @@ void CWaterMap::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC:
 					currWI = &_WaterInfoIndexVectVect[_Grid[x + (y + minY) * _Width]];
 					_WaterInfoIndexVectVect.back().resize(currWI->size() + 1);
 					std::copy(currWI->begin(), currWI->end(), _WaterInfoIndexVectVect.back().begin());
-					_WaterInfoIndexVectVect.back().back() = _WaterInfoVect.size() - 1;
-					goodList = _WaterInfoIndexVectVect.size() - 1;
+					_WaterInfoIndexVectVect.back().back() = (uint16)_WaterInfoVect.size() - 1;
+					goodList = (sint)_WaterInfoIndexVectVect.size() - 1;
 				}
 				_Grid[x + (y + minY) * _Width] = goodList; // reassign new list
 			}

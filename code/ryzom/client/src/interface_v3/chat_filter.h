@@ -57,7 +57,7 @@ public:
 		void			addListeningWindow(CChatWindow *w);
 		void			removeListeningWindow(CChatWindow *w);
 		bool			isListeningWindow(CChatWindow *w) const;
-		uint			getNumListeningWindows() const { return _ListeningWindows.size(); }
+		uint			getNumListeningWindows() const { return (uint)_ListeningWindows.size(); }
 		CChatWindow		*getListeningWindow(uint index);
 		// helpers : depending on the 'listening' flag value, remove or add the window from the list
 		void			 setWindowState(CChatWindow *cw, bool listening);

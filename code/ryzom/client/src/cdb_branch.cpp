@@ -149,7 +149,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	{
 		if ( ! bankName.empty() )
 		{
-			CCDBNodeBranch::mapNodeByBank( newNode, bankName, clientOnly, nodes.size()-1 );
+			CCDBNodeBranch::mapNodeByBank( newNode, bankName, clientOnly, (uint)nodes.size()-1 );
 			//nldebug( "CDB: Mapping %s for %s (node %u)", newName.c_str(), bankName.c_str(), nodes.size()-1 );
 		}
 		else
@@ -273,7 +273,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 		_IdBits = 0;
 		for ( uint b=0; b!=NB_CDB_BANKS; ++b )
 		{
-			uint nbNodesOfBank = _CDBBankToUnifiedIndexMapping[b].size();
+			uint nbNodesOfBank = (uint)_CDBBankToUnifiedIndexMapping[b].size();
 			uint idb = 0;
 			if ( nbNodesOfBank > 0 )
 				for ( idb=1; nbNodesOfBank > unsigned(1<<idb) ; idb++ ) {}

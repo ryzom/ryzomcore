@@ -342,7 +342,7 @@ void CPrimRender::update()
 	if (!_Look.VertexShapeName.empty())
 	{
 		_VertexShapeInstances.setShapeName(_Look.VertexShapeName);
-		_VertexShapeInstances.resize(_Vertices.size());
+		_VertexShapeInstances.resize((uint)_Vertices.size());
 	}
 	else
 	{
@@ -373,14 +373,14 @@ void CPrimRender::update()
 	switch(_Look.Shape)
 	{
 		case CPrimLook::Star:
-			_NumEdges = _Vertices.size() <= 1 ? 0 : _Vertices.size() - 1;
+			_NumEdges = _Vertices.size() <= 1 ? 0 : (sint)_Vertices.size() - 1;
 		break;
 		case CPrimLook::PolyLine:
-			_NumEdges = _Vertices.size() <= 1 ? 0 : _Vertices.size() - 1;
+			_NumEdges = _Vertices.size() <= 1 ? 0 : (sint)_Vertices.size() - 1;
 			if (!_Look.LastEdgeIsValid && _NumEdges != 0) -- _NumEdges;
 		break;
 		case CPrimLook::ClosedPolyLine:
-			_NumEdges = _Vertices.size() >= 3 ? _Vertices.size() : std::max((sint) 0, (sint) (_Vertices.size() - 1));
+			_NumEdges = _Vertices.size() >= 3 ? (sint)_Vertices.size() : std::max((sint) 0, (sint) (_Vertices.size() - 1));
 			if (!_Look.LastEdgeIsValid && _NumEdges != 0) -- _NumEdges;
 		break;
 		default:
@@ -435,7 +435,7 @@ void CPrimRender::updatePos()
 	// world map
 	if (_AddedToWorldMap)
 	{
-		setWorldMapNumVertices(_Look.VertexLook.WorldMapTexture.empty() ? 0 : _Vertices.size());
+		setWorldMapNumVertices(_Look.VertexLook.WorldMapTexture.empty() ? 0 : (uint)_Vertices.size());
 		setWorldMapNumEdges(_Look.EdgeLook.WorldMapTexture.empty() ? 0 : _NumEdges);
 	}
 	//
@@ -598,7 +598,7 @@ void CPrimRender::setWorldMapNumVertices(uint count)
 	}
 	else
 	{
-		uint left = count - _WorldMapVertices.size();
+		uint left = count - (uint)_WorldMapVertices.size();
 		while (left --)
 		{
 			CViewBitmap *bm = new CViewBitmap(CViewBase::TCtorParam());
@@ -638,10 +638,10 @@ void CPrimRender::setWorldMapNumEdges(uint count)
 	}
 	else
 	{
-		uint left = count - _WorldMapEdges.size();
+		uint left = count - (uint)_WorldMapEdges.size();
 		while (left --)
 		{
-			CCtrlQuad *cq = newCtrlQuad(_WorldMapEdges.size());
+			CCtrlQuad *cq = newCtrlQuad((uint)_WorldMapEdges.size());
 			cq->setModulateGlobalColor(false);
 			cq->setActive(_Active);
 			gm->addCtrl(cq);

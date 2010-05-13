@@ -380,7 +380,7 @@ void CStringManagerModule::registerTableRequested(const CMessage& msgin)
 void CStringManagerModule::registerTableRequested(TSessionId sessionId, std::vector<std::pair<std::string,std::string> >& entries)
 {
 	std::string id,text;
-	uint32 nbEntry = entries.size();
+	uint32 nbEntry = (uint32)entries.size();
 
 	releaseTable(sessionId.asInt());
 	for(uint i=0;i<nbEntry;++i)
@@ -433,10 +433,10 @@ void CStringManagerModule::unregisterTableRequested(TSessionId sessionId)
 
 static std::string formatString(std::string str,std::vector<float> args)
 {
-	uint32 size = args.size();
+	uint32 size = (uint32)args.size();
 	std::string ret="";
 	{
-		uint pos = 0;
+		std::string::size_type pos = 0;
 		CSString cstring(str);
 		for(uint i=0;i<size;++i)
 		{
@@ -628,7 +628,7 @@ void CStringManagerModule::sendIdList(TSessionId scenarioId,NLNET::IModuleProxy*
 	{
 		TLocalTable::const_iterator first(localTable->begin()),last(localTable->end());
 		CMessage msg("idList");
-		uint32 nb = localTable->size();
+		uint32 nb = (uint32)localTable->size();
 		msg.serial(nb);
 		for( ; first!=last; ++first)
 		{
@@ -655,7 +655,7 @@ void CStringManagerModule::sendTable(TSessionId scenarioId,IModuleProxy *moduleP
 	TLocalTable* localTable = getLocalTable(scenarioId.asInt());
 	if (localTable != NULL)
 	{
-		uint32 nb = localTable->size();
+		uint32 nb = (uint32)localTable->size();
 		if(nb==0)return;
 		CMessage msg("stringTable");
 		//eid of the client requesting the string table
@@ -761,7 +761,7 @@ void ClientInfo::addIncarnation(TChanID chanId,TDataSetRow& npcId)
 //release all channels used by this client
 void ClientInfo::clear()
 {
-	uint32 size = _Incarnations.size();
+	uint32 size = (uint32)_Incarnations.size();
 	for(uint32 i=0;i<size;++i)
 	{
 		_Incarnations[i].release();

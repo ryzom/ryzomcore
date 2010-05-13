@@ -731,7 +731,7 @@ void CCharacterSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	// body to bone
 	f.serial(BodyToBone);
 	// attack list
-	uint32 size = AttackLists.size();
+	uint32 size = (uint32)AttackLists.size();
 	f.serial(size);
 	AttackLists.resize(size);
 	//

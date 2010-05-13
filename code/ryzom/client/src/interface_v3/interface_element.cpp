@@ -1232,7 +1232,7 @@ CInterfaceElement *CInterfaceElement::clone()
 		std::copy(dupStream.buffer(), dupStream.buffer() + dupStream.length(), datas.begin());
 		dupStream.resetPtrTable();
 		dupStream.invert();
-		dupStream.fill(&datas[0], datas.size());
+		dupStream.fill(&datas[0], (uint32)datas.size());
 		dupStream.serialPolyPtr(begunThisCloneWarHas);
 	}
 	catch(NLMISC::EStream &)

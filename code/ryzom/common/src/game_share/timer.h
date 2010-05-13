@@ -416,7 +416,7 @@ inline void CTimerEvent::set(CTimer* owner,NLMISC::TGameCycle time,uint32 variat
 	for (uint32 i=0;i<variation;++i)
 	{
 		CTimerManager::TEventVector& vect= mgr->getEventVector(time+i);
-		uint32 length=vect.size();
+		uint32 length=(uint32)vect.size();
 		if (length<=bestLength)
 		{
 			bestLength= length;

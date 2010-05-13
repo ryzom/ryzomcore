@@ -430,7 +430,7 @@ static DECLARE_INTERFACE_USER_FCT(userFctSwitch)
 		return false;
 
 	sint64 n = args[0].getInteger();
-	if ((n > (args.size()-2)) || (n < 0))
+	if ((n > ((sint64)args.size()-2)) || (n < 0))
 		return false;
 
 	result = args[(uint)n+1];

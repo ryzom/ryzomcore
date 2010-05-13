@@ -917,7 +917,7 @@ uint CSheetManager::getNumItem(SLOTTYPE::EVisualSlot slot)
 	// Check slot.
 	if(s < _VisualSlots.size())
 	{
-		return _VisualSlots[s].size();
+		return (uint)_VisualSlots[s].size();
 	}
 	else
 	{

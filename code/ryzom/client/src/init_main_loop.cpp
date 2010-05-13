@@ -207,7 +207,7 @@ struct CStatThread : public NLMISC::IRunnable
 			name = UserEntity->getEntityName().toString();
 
 		std::string userid = toString("u%d", NetMngr.getUserId())+name;
-		return toUpper(getMD5((const uint8 *)userid.c_str(), userid.size()).toString());
+		return toUpper(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
 	}
 
 	// return true if we sent the connect because we have all information
@@ -222,7 +222,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "ra", randomString());
 		std::string session = toString("%d%d", NetMngr.getUserId(), CTime::getSecondsSince1970());
-		addParam(params, "sessioncookie", toUpper(getMD5((const uint8 *)session.c_str(), session.size()).toString()));
+		addParam(params, "sessioncookie", toUpper(getMD5((const uint8 *)session.c_str(), (uint32)session.size()).toString()));
 		addParam(params, "cookie", cookie());
 		addParam(params, "browsertoken", "X");
 		addParam(params, "platformtoken", "Win32");

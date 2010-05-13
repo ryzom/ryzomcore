@@ -36,7 +36,7 @@ public:
 	CDBViewBar3(const TCtorParam &param);
 
 	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 	virtual void updateCoords ();
 
 	void setMini (bool mini);

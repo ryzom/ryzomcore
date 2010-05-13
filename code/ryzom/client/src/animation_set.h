@@ -106,7 +106,7 @@ public:
 	}
 
 	// get number of animation states
-	uint	getNumAnimationState() const { return _AnimationStates.size(); }
+	uint	getNumAnimationState() const { return (uint)_AnimationStates.size(); }
 	// get an animation state by its index
 	CAnimationState *getAnimationStateByIndex(uint index);
 

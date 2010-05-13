@@ -139,7 +139,7 @@ bool CToolDrawPrim::init(const CLuaObject &parameters)
 	_CookieValue = parameters["CookieValue"];
 	_PrimType = parameters["Type"].toString() == "Region" ? Region : Road;
 	_Prim.setLook(_PrimLook);
-	_NumPoints = _Points.size();
+	_NumPoints = (uint)_Points.size();
 
 	if (!parameters["ForceShowPrims"].isNil())
 	{
@@ -715,7 +715,7 @@ bool CToolDrawPrim::isValidPolyShape(bool ignoreLast, std::list<CPolygon> &split
 bool CToolDrawPrim::testAccessibleEdges(bool ignoreLast)
 {
 	//H_AUTO(R2_CToolDrawPrim_testAccessibleEdges)
-	uint numPoints = _Points.size();
+	uint numPoints = (uint)_Points.size();
 	if (_PrimType == Road)
 	{
 		numPoints -= ignoreLast ? 2 : 1;
@@ -813,7 +813,7 @@ void CToolDrawPrim::onActivate()
 		{
 			_Points.push_back(sons[k]->getWorldPos().asVector());
 		}
-		_NumPoints = _Points.size();
+		_NumPoints = (uint)_Points.size();
 		_StartNumPoints = _NumPoints;
 		_InitialPoints = _Points;
 	}

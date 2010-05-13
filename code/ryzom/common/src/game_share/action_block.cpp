@@ -42,7 +42,7 @@ void	CActionBlock::serial(CBitMemStream &msg)
 
 	uint	i;
 
-	uint8	num = Actions.size();
+	uint8	num = (uint8)Actions.size();
 	msg.serial(num);
 
 	//static char	buff[1024], cat[128];

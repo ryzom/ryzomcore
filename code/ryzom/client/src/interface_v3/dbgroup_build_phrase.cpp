@@ -322,7 +322,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 			// simulate a root selection
 			validateRoot(rootBrick);
 			// setup params of the root
-			numParam= rootBrick->ParameterFamilies.size();
+			numParam= (uint)rootBrick->ParameterFamilies.size();
 			brickIndexForParam= 0;
 
 			// For all brick not the root
@@ -344,7 +344,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 					curParam++;
 					// If this parameter has additonal parameter they follow
 					if( brick && !brick->ParameterFamilies.empty() )
-						numParam+= brick->ParameterFamilies.size();
+						numParam+= (uint)brick->ParameterFamilies.size();
 				}
 				// a mandatory/optional/credit?
 				else
@@ -363,7 +363,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 					curParam= 0;
 					numParam= 0;
 					if(brick)
-						numParam= brick->ParameterFamilies.size();
+						numParam= (uint)brick->ParameterFamilies.size();
 				}
 			}
 		}
@@ -1749,7 +1749,7 @@ void		CDBGroupBuildPhrase::updateDisplayFromRootBrick()
 	// else ok, setup the composition
 	else
 	{
-		_NumMandatories= brick->MandatoryFamilies.size();
+		_NumMandatories= (uint32)brick->MandatoryFamilies.size();
 		// Don't enable any optional/credit by default
 		_NumCredits= 0;
 		_NumOptionals= 0;

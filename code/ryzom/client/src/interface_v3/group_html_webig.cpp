@@ -58,7 +58,7 @@ static string getWebAuthKey()
 		UserEntity->getDisplayName().toString() +
 		toString(cid) +
 		NetMngr.getLoginCookie().toString();
-	string key = getMD5((const uint8*)rawKey.c_str(), rawKey.size()).toString();
+	string key = getMD5((const uint8*)rawKey.c_str(), (uint32)rawKey.size()).toString();
 	//nlinfo("rawkey = '%s'", rawKey.c_str());
 	//nlinfo("authkey = %s", key.c_str());
 	return key;

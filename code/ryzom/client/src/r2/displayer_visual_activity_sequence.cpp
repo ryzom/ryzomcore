@@ -236,7 +236,7 @@ void CDisplayerVisualActivitySequence::update()
 	}
 	if (_AddedToWorldMap)
 	{
-		setWorldMapNumEdges(_FootSteps.size());
+		setWorldMapNumEdges((uint)_FootSteps.size());
 		nlassert(gm);
 		onUpdate(*gm);
 	}
@@ -545,7 +545,7 @@ void CDisplayerVisualActivitySequence::setWorldMapNumEdges(uint count)
 	}
 	else
 	{
-		uint left = count - _WorldMapEdges.size();
+		uint left = count - (uint)_WorldMapEdges.size();
 		while (left --)
 		{
 			CCtrlQuad *cq = new CCtrlQuad;
@@ -571,7 +571,7 @@ void CDisplayerVisualActivitySequence::onAdd(CGroupMap &/* owner */)
 	nlassert(!_AddedToWorldMap);
 	_AddedToWorldMap = true;
 	_Touched = true;
-	setWorldMapNumEdges(_FootSteps.size());
+	setWorldMapNumEdges((uint)_FootSteps.size());
 }
 
 //*********************************************************

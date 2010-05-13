@@ -434,7 +434,7 @@ PRIVATE int HTNeLReader_read (HTInputStream * me)
     /* Read the file desriptor */
     while (fp)
 	{
-		if ((me->b_read = nel_fread(me->data, FILE_BUFFER_SIZE, fp)) == 0)
+		if ((me->b_read = (int)nel_fread(me->data, FILE_BUFFER_SIZE, fp)) == 0)
 		{
 			HTAlertCallback *cbf = HTAlert_find(HT_PROG_DONE);
 			// HTTRACE(PROT_TRACE, "ANSI read... Finished loading file %p\n" _ fp);
@@ -509,7 +509,7 @@ PRIVATE int HTNeLReader_close (HTInputStream * me)
 PUBLIC int HTNeLReader_consumed (HTInputStream * me, size_t bytes)
 {
     me->write += bytes;
-    me->b_read -= bytes;
+    me->b_read -= (int)bytes;
     HTHost_setRemainingRead(me->host, me->b_read);
     return HT_OK;
 }

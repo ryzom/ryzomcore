@@ -42,7 +42,7 @@ class CCtrlPolygon : public CCtrlBase
 {
 public:
 	CCtrlPolygon();
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 	virtual void updateCoords();
 	virtual void draw();
 	/** Change the vertices. This is costly because concav / complex polys are split in a list of triangles

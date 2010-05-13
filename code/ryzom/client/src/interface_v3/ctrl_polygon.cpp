@@ -50,7 +50,7 @@ void CCtrlPolygon::updateBoudingRect()
 	sint32 ymin = INT_MAX;
 	sint32 xmax = INT_MIN;
 	sint32 ymax = INT_MIN;
-	uint numVerts = _Poly.Vertices.size();
+	uint numVerts = (uint)_Poly.Vertices.size();
 	_XFormPoly.Vertices.resize(numVerts);
 	for(uint k = 0; k < numVerts; ++k)
 	{
@@ -155,7 +155,7 @@ void CCtrlPolygon::draw()
 	if (_Touched)
 	{
 		_RealTris.clear();
-		uint numTris = _Tris.size();
+		uint numTris = (uint)_Tris.size();
 		sint32 cornerX, cornerY;
 		static std::vector<NLMISC::CTriangle> winTris;
 		winTris.resize(numTris);

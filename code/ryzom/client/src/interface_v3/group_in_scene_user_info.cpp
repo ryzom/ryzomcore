@@ -686,7 +686,7 @@ class CHandlerResetCharacterInScene : public IActionHandler
 		bool	pvpOnly= nlstricmp(sParams,"pvponly")==0;
 		// Reset all entities
 		uint i;
-		uint numEntity = EntitiesMngr.entities().size();
+		uint numEntity = (uint)EntitiesMngr.entities().size();
 		for (i=0; i<numEntity; i++)
 		{
 			CEntityCL *entity = EntitiesMngr.entity(i);
@@ -1098,7 +1098,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 		groupInfo = CInterfaceManager::getInstance()->createGroupInstance ( templateName,
-			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	}
 
 	CGroupInSceneUserInfo *info = dynamic_cast<CGroupInSceneUserInfo*>(groupInfo);

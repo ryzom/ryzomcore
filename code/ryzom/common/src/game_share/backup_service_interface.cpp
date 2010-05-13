@@ -51,7 +51,7 @@ public:
 	// return true if the file name is ok, otherwise false
 	bool checkFileName(const std::string& fileName) const
 	{
-		for (uint32 i=fileName.size();i--;)
+		for (uint32 i=(uint32)fileName.size();i--;)
 		{
 			if (operator[](fileName[i])==true)
 				continue;

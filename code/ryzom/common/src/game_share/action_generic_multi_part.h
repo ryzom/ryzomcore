@@ -68,7 +68,7 @@ public:
 	virtual uint32	size ()
 	{
 		uint32	bytesize = 1 + 2 + 2 + 4;	// header
-		bytesize += PartCont.size();
+		bytesize += (uint32)PartCont.size();
 		return bytesize*8;
 	}
 
@@ -81,7 +81,7 @@ public:
 		uint32 start = part*size;
 		uint32 end = start + size;
 		if (end > v.size())
-			end = v.size();
+			end = (uint32)v.size();
 		PartCont.resize (end-start);
 		std::copy (v.begin()+start, v.begin()+end, PartCont.begin());
 

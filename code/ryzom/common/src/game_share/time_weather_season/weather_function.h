@@ -73,7 +73,7 @@ public:
 	  * The maxima and minima are in the range [0, numWeatherSetups]
 	  * \param pressure 0 for low pressure and 1 for high pressure
 	  */
-	uint                getNumWeatherSetups() const { return _WeatherSetups.size(); }
+	uint                getNumWeatherSetups() const { return (uint)_WeatherSetups.size(); }
 	const CWeatherSetup *getWeatherSetup(uint index) const { return _WeatherSetups.empty() ? NULL : _WeatherSetups[index].WS; }
 	uint32              getWeatherSetupWeight(uint index) const { return _WeatherSetups[index].Weight; }
 	uint32				getWeatherSetupsTotalWeight() const { return _TotalWeight; }

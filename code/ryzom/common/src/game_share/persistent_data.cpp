@@ -105,7 +105,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 //	H_AUTO(CPersistentDataRecordAddString);
 
 	// store the length of the input string for speed of access (just to help the optimiser do its job)
-	uint32 len=	name.size();
+	uint32 len=	(uint32)name.size();
 
 	//Disabled to allow >=256 char strings.
 	//DROP_IF(len>=256,"Attempt to add a string of > 256 characters to the string table",return 0);
@@ -115,7 +115,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 	{
 	case 0:
 		// run through the existing strings looking for a match
-		for (uint32 i=_StringTable.size();i--;)
+		for (uint32 i=(uint32)_StringTable.size();i--;)
 		{
 			if (_StringTable[i].empty())
 				return (uint16)i;
@@ -127,7 +127,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			char c0= name[0];	// first and only char of name
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && s[0]==c0)
@@ -141,7 +141,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			uint16 c01= *(uint16*)&name[0];	// first and only 2 chars of name
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint16*)&s[0]==c01) )
@@ -156,7 +156,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			char c2= name[2];				// third and final char of name
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint16*)&s[0]==c01)  && s[2]==c2)
@@ -170,7 +170,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			uint32 c0123= *(uint32*)&name[0];	// first and only 4 chars of name
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint32*)&s[0]==c0123) )
@@ -189,7 +189,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			uint32 cLast= *(uint32*)&name[endOffs];	// last 4 chars of name (touch or overlap with first 4 chars)
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint32*)&s[0]==cFirst) && (*(uint32*)&s[endOffs]==cLast))
@@ -209,7 +209,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			uint32 cLast= *(uint32*)&name[endOffs];	// last 4 chars of name (touch or overlap with middle 4 chars)
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint32*)&s[0]==cFirst) && (*(uint32*)&s[endOffs]==cLast) && (*(uint32*)&s[4]==cMid))
@@ -230,7 +230,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 			uint32 cLast= *(uint32*)&name[endOffs];	// last 4 chars of name (touch or overlap with third 4 chars)
 
 			// run through the existing strings looking for a match
-			for (uint32 i=_StringTable.size();i--;)
+			for (uint32 i=(uint32)_StringTable.size();i--;)
 			{
 				const string &s= _StringTable[i];
 				if (s.size()==len && (*(uint32*)&s[0]==cFirst) && (*(uint32*)&s[endOffs]==cLast)
@@ -278,7 +278,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 	{
 //		H_AUTO(CPersistentDataRecordAddString_NoMatchFound);
 
-		uint16 result= _StringTable.size();
+		uint16 result= (uint16)_StringTable.size();
 		_StringTable.push_back(name);
 		BOMB_IF(result==(uint16)~0u,"No more room in string table!!!",_StringTable.pop_back());
 		return result;
@@ -547,8 +547,8 @@ uint32 CPersistentDataRecord::totalDataSize() const
 	result+= sizeof(uint32);						// sizeof 'number of args in the arg table' variable
 	result+= sizeof(uint32);						// sizeof 'number of strings in the string table' variable
 	result+= sizeof(uint32);						// sizeof 'string table data size' variable
-	result+= _TokenTable.size()*sizeof(TToken);		// sizeof the token data
-	result+= _ArgTable.size()*sizeof(_ArgTable[0]);	// size of the args data
+	result+= (uint32)_TokenTable.size()*sizeof(TToken);		// sizeof the token data
+	result+= (uint32)_ArgTable.size()*sizeof(_ArgTable[0]);	// size of the args data
 	result+= stringDataSize();						// the data size for the strings in the string table
 
 	return result;
@@ -559,7 +559,7 @@ uint32 CPersistentDataRecord::stringDataSize() const
 {
 	uint32 result=0;
 	for (uint32 i=0;i<_StringTable.size();++i)
-		result+=_StringTable[i].size()+1;			// the data size for the strings in the string table
+		result+=(uint32)_StringTable[i].size()+1;			// the data size for the strings in the string table
 	return result;
 }
 
@@ -568,7 +568,7 @@ bool CPersistentDataRecord::toStream(NLMISC::IStream& dest)
 	H_AUTO(CPersistentDataRecordWriteToStream);
 
 	#define WRITE(type,what) { type v= (type)(what); dest.serial(v); }
-	#define WRITE_BUFF(type,what) dest.serialBuffer( (uint8*)&what[0], sizeof(type) * what.size() )
+	#define WRITE_BUFF(type,what) dest.serialBuffer( (uint8*)&what[0], sizeof(type) * (uint)what.size() )
 
 	// mark the amount of data in output stream before we start adding pdr contents
 	uint32 dataStart= dest.getPos();
@@ -618,9 +618,9 @@ bool CPersistentDataRecord::toBuffer(char *dest,uint32 bufferSize)
 	// write the header block
 	WRITE(uint32,0);
 	WRITE(uint32,totalDataSize());
-	WRITE(uint32,_TokenTable.size());
-	WRITE(uint32,_ArgTable.size());
-	WRITE(uint32,_StringTable.size());
+	WRITE(uint32,(uint32)_TokenTable.size());
+	WRITE(uint32,(uint32)_ArgTable.size());
+	WRITE(uint32,(uint32)_StringTable.size());
 	WRITE(uint32,stringDataSize());
 
 	// write the tokens
@@ -787,7 +787,7 @@ bool CPersistentDataRecord::writeToTxtFile(const char* fileName,TStringFormat st
 	// write the binary data to file
 	try
 	{
-		f.serialBuffer((uint8*)&s[0],s.size());
+		f.serialBuffer((uint8*)&s[0],(uint)s.size());
 	}
 	catch(...)
 	{
@@ -952,7 +952,7 @@ bool CPersistentDataRecord::fromXML(const std::string& s)
 	// to contain any data of their own - they are just a fonctionality wrapper round a std::string
 	nlctassert(sizeof(string)==sizeof(CSString));
 	const CSString& buff= static_cast<const CSString&>(s);
-	uint32 len=s.size();
+	uint32 len=(uint32)s.size();
 
 	// make sure the persistent data record is cleared out before we fill it with data
 	clear();
@@ -989,7 +989,7 @@ bool CPersistentDataRecord::fromXML(const std::string& s)
 
 	DROP_IF(clauses.size()<2||clauses[0]!="/xml"||clauses.back()!="xml","Invalid data file - didn't find <xml>..</xml> structure",return false)
 	// run through the set of clauses to add them to the data block...
-	for (uint32 i=clauses.size()-1;--i;)
+	for (uint32 i=(uint32)clauses.size()-1;--i;)
 	{
 		// clauses are of four types: <...>=struct_begin  </..>=struct_end, <../>=prop, <!..>=comment
 		if (clauses[i].left(1)=="!" || clauses[i].left(1)=="?")
@@ -1075,7 +1075,7 @@ bool CPersistentDataRecord::fromStream(NLMISC::IStream& stream, uint32 size)
 	// read the file data
 	try
 	{
-		stream.serialBuffer((uint8*)&buff[0],buff.size());
+		stream.serialBuffer((uint8*)&buff[0],(uint)buff.size());
 	}
 	catch(...)
 	{
@@ -1134,7 +1134,7 @@ bool CPersistentDataRecord::readFromFile(const char* fileName)
 	buffer.resize(length);
 
 	// read the data
-	uint32 blocksRead= fread(&buffer[0],length,1,inf);
+	uint32 blocksRead= (uint32)fread(&buffer[0],length,1,inf);
 	fclose(inf);
 	DROP_IF( blocksRead!=1, "Failed to read data from file "<<fileName, return false);
 
@@ -1188,7 +1188,7 @@ bool CPersistentDataRecord::readFromBinFile(const char* fileName)
 	// read the file data
 	try
 	{
-		f.serialBuffer((uint8*)&s[0],s.size());
+		f.serialBuffer((uint8*)&s[0],(uint)s.size());
 	}
 	catch(...)
 	{
@@ -1196,7 +1196,7 @@ bool CPersistentDataRecord::readFromBinFile(const char* fileName)
 	}
 
 	// parse the buffer contents to re-generate the data
-	bool result= fromBuffer(&s[0],s.size());
+	bool result= fromBuffer(&s[0],(uint32)s.size());
 	DROP_IF( !result, "Failed to parse input file "<<fileName, return false);
 
 	return true;
@@ -1221,7 +1221,7 @@ bool CPersistentDataRecord::readFromTxtFile(const char* fileName)
 	// read the file data
 	try
 	{
-		f.serialBuffer((uint8*)&buff[0],buff.size());
+		f.serialBuffer((uint8*)&buff[0],(uint)buff.size());
 	}
 	catch(...)
 	{
@@ -1291,7 +1291,7 @@ uint16 CPdrTokenRegistry::addToken(const std::string& family,const std::string& 
 
 	// append new entry to the string table and return the new index
 	stringTable.push_back(token);
-	return stringTable.size()-1;
+	return (uint16)stringTable.size()-1;
 }
 
 const CPersistentDataRecord::TStringTable& CPdrTokenRegistry::getStringTable(const std::string& family)

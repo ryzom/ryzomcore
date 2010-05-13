@@ -68,7 +68,7 @@ inline void npcChatParamToChannel(const TDataSetRow &senderId, CChatGroup::TGrou
 	msgout.serialEnum(groupType);
 	msgout.serial(const_cast<std::string&>(phraseId));
 
-	uint32 size = params.size();
+	uint32 size = (uint32)params.size();
 	msgout.serial(size);
 //	params.resize(size);
 	for ( uint i = 0; i < size; i++ )
@@ -153,7 +153,7 @@ inline void forwardToDssArg(const TDataSetRow &senderId, CChatGroup::TGroupType 
 	msgout.serialEnum(groupType);
 	msgout.serial(sentenceId);
 	msgout.serial(scenarioId);
-	uint32 size=argValues.size(),i=0;
+	uint32 size=(uint32)argValues.size(),i=0;
 	msgout.serial(size);
 	for(;i<size;++i)
 	{

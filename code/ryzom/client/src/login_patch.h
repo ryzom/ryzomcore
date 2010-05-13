@@ -533,7 +533,7 @@ public:
 	// Add files to be patched (avoid multiple time the same file)
 	void add(const CPatchManager::SFileToPatch &ftp);
 
-	int getNbFileToPatch() { return AllFilesToPatch.size(); }
+	int getNbFileToPatch() { return (int)AllFilesToPatch.size(); }
 	int getCurrentFilePatched() { return (int) floorf(CurrentFilePatched); }
 	int getPatchingSize() { return PatchSizeProgress; }
 	float getCurrentFileProgress() const { return fmodf(CurrentFilePatched, 1.f); }

@@ -89,7 +89,7 @@ public:
 	  */
 	void				removeTarget(CInterfaceElement *elem);
 	// Get the number of targets of this link
-	uint				getNumTargets() const { return _Targets.size(); }
+	uint				getNumTargets() const { return (uint)_Targets.size(); }
 	// Get the i-th target
 	CInterfaceElement	*getTarget(uint index) const { return _Targets[index]._InterfaceElement; }
 

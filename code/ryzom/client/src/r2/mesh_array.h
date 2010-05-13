@@ -37,7 +37,7 @@ public:
 	void setShapeName(const std::string &shapeName);
 	const std::string &getShapeName() const{ return _ShapeName; }
 	void resize(uint newSize);
-	uint getSize() const { return _MeshInstances.size(); }
+	uint getSize() const { return (uint)_MeshInstances.size(); }
 	NL3D::UInstance &getInstance(uint index);
 	const NL3D::UInstance &getInstance(uint index) const;
 	NL3D::UInstance operator[](uint index) { return getInstance(index); }

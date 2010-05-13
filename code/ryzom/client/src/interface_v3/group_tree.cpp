@@ -63,7 +63,7 @@ void CGroupTree::SNode::updateLastVisibleSon()
 {
 	LastVisibleSon = NULL;
 	if (!Show || !Opened) return;
-	for (sint sonIndex = Children.size() - 1; sonIndex >= 0; -- sonIndex)
+	for (sint sonIndex = (sint)Children.size() - 1; sonIndex >= 0; -- sonIndex)
 	{
 		if (Children[sonIndex]->Show)
 		{
@@ -82,7 +82,7 @@ CGroupTree::SNode::~SNode()
 {
 	makeOrphan();
 	// IMPORTANT : must delete in reverse order because "makeOrphan" is called when deleting sons, thus changing vector size...
-	for (sint i = Children.size() - 1; i >= 0; --i)
+	for (sint i = (sint)Children.size() - 1; i >= 0; --i)
 		delete Children[i];
 	Children.clear();
 	// TestYoyo
@@ -667,7 +667,7 @@ void CGroupTree::draw()
 					col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
 				}
 
-				drawSelection( getHrcIconXEnd(_Lines[_OverLine].Depth + _Lines[_OverLine].getNumAdditionnalBitmap()),  (_Lines.size()-_OverLine-1)*_BmpH,
+				drawSelection( getHrcIconXEnd(_Lines[_OverLine].Depth + _Lines[_OverLine].getNumAdditionnalBitmap()),  ((sint)_Lines.size()-_OverLine-1)*_BmpH,
 					_WReal-getHrcIconXEnd(_Lines[_OverLine].Depth + _Lines[_OverLine].getNumAdditionnalBitmap()),  col);
 			}
 			// Draw extended over
@@ -703,7 +703,7 @@ void CGroupTree::draw()
 			col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
 		}
 
-		drawSelection( getHrcIconXEnd(_Lines[_SelectedLine].Depth + _Lines[_SelectedLine].getNumAdditionnalBitmap()),  (_Lines.size()-_SelectedLine-1)*_BmpH,
+		drawSelection( getHrcIconXEnd(_Lines[_SelectedLine].Depth + _Lines[_SelectedLine].getNumAdditionnalBitmap()),  ((sint)_Lines.size()-_SelectedLine-1)*_BmpH,
 									_WReal-getHrcIconXEnd(_Lines[_SelectedLine].Depth + _Lines[_SelectedLine].getNumAdditionnalBitmap()),  col );
 	}
 
@@ -913,7 +913,7 @@ void CGroupTree::rebuild()
 		addTextLine (0,  _RootNode);
 
 	// Reformating
-	sint32 sizeH = _Lines.size()*_BmpH;
+	sint32 sizeH = (sint32)_Lines.size()*_BmpH;
 	for (uint i = 0; i < _Lines.size(); ++i)
 		_Lines[i].TextOrTemplate->setY (_Lines[i].Node->YDecal + sizeH - ((1+_Lines[i].TextOrTemplate->getY())*_BmpH));
 	// Add the hierarchy bitmaps
@@ -1013,7 +1013,7 @@ void CGroupTree::addTextLine (uint8 nDepth,  CGroupTree::SNode *pNode)
 		line.TextOrTemplate->setParent (this);
 		line.TextOrTemplate->setParentPos (NULL);
 		line.TextOrTemplate->setX (getHrcIconXEnd(nDepth-1 + line.getNumAdditionnalBitmap()));
-		line.TextOrTemplate->setY (_Lines.size());
+		line.TextOrTemplate->setY ((sint32)_Lines.size());
 		line.TextOrTemplate->setModulateGlobalColor(this->getModulateGlobalColor());
 		if (pNode->DisplayText)
 			addView (line.TextOrTemplate);
@@ -1099,7 +1099,7 @@ void CGroupTree::addHierarchyBitmaps ()
 			// A Bitmap must be created
 			CViewBitmap *pVB = createViewBitmap(nLine, "t",  "blank.tga");
 			pVB->setX (getHrcIconXStart(nLayer));
-			pVB->setY (_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
+			pVB->setY ((sint32)_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
 
 			bool bAddBitmap = true;
 			bool bAddXExtendBitmap =  false;
@@ -1225,7 +1225,7 @@ void CGroupTree::addHierarchyBitmaps ()
 				{
 					CViewBitmap *pVB = createViewBitmap(nLine, "ext_t",  _ArboXExtend);
 					pVB->setX (getHrcIconXStart(nLayer) - _XExtend);
-					pVB->setY (_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
+					pVB->setY ((sint32)_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
 					addView (pVB);
 					_Lines[nLine].Bmps.push_back(pVB);
 				}
@@ -1243,7 +1243,7 @@ void CGroupTree::addHierarchyBitmaps ()
 		{
 			CViewBitmap *pVB = createViewBitmap(nLine,  "custom_bm",  _Lines[nLine].Node->Bitmap);
 			pVB->setX (getHrcIconXStart(_Lines[nLine].Depth + 1));
-			pVB->setY (_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
+			pVB->setY ((sint32)_Lines.size()*_BmpH - ((1+nLine)*_BmpH));
 			_Lines[nLine].Bmps.push_back(pVB);
 			addView (pVB);
 		}

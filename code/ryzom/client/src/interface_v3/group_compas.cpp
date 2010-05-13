@@ -887,7 +887,7 @@ void CGroupCompasMenu::setActive (bool state)
 
 			// and add each entry
 			const std::vector<CCompassDialogsManager::CCompassDialogsEntry> & entries = CCompassDialogsManager::getInstance().getEntries();
-			const uint size = entries.size();
+			const uint size = (uint)entries.size();
 			for( uint i = 0; i < size; ++i)
 			{
 				CCompassTarget ct;
@@ -993,7 +993,7 @@ class CCompassDialogsStringCallback : public IStringWaitCallback
 {
 	virtual void onDynStringAvailable(uint /* stringId */, const ucstring &value)
 	{
-		uint size = CCompassDialogsManager::getInstance()._Entries.size();
+		uint size = (uint)CCompassDialogsManager::getInstance()._Entries.size();
 		for ( uint i = 0; i < size; i++)
 		{
 			ucstring name;

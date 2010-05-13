@@ -208,7 +208,7 @@ bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"negative_filter" );
 	if (prop)
 	{
-		uint length = strlen(prop);
+		uint length = (uint)strlen(prop);
 		_NegativeFilter.resize(length);
 		std::copy((const char *) prop, (const char *) prop + length, _NegativeFilter.begin());
 	}
@@ -254,8 +254,8 @@ void CGroupEditBox::draw ()
 		sint32	blankTextId= rVR.getBlankTextureId();
 		CRGBA	col= _BackSelectColor;
 		col.A= pIM->getGlobalColorForContent().A;
-		sint32	minPos= min(_CursorPos, _SelectCursorPos) + _Prompt.length();
-		sint32	maxPos= max(_CursorPos, _SelectCursorPos) + _Prompt.length();
+		sint32	minPos= min(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
+		sint32	maxPos= max(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 
 		// get its position on screen
 		sint cxMinPos, cyMinPos;
@@ -311,7 +311,7 @@ void CGroupEditBox::draw ()
 			// get its position on screen
 			sint cx, cy;
 			sint height;
-			_ViewText->getCharacterPositionFromIndex(_CursorPos + _Prompt.length(), _CursorAtPreviousLineEnd, cx, cy, height);
+			_ViewText->getCharacterPositionFromIndex(_CursorPos + (sint)_Prompt.length(), _CursorAtPreviousLineEnd, cx, cy, height);
 			// display the cursor
 			// get the texture for the cursor
 			if (_CursorTexID == -1)
@@ -394,7 +394,7 @@ void CGroupEditBox::paste()
 					else
 						sString = (const char*)hLock;
 
-					sint length = sString.length();
+					sint length = (sint)sString.length();
 
 					ucstring toAppend;
 					// filter character depending on the netry type
@@ -524,14 +524,14 @@ void CGroupEditBox::paste()
 							}
 						}
 					}
-					length = toAppend.size();
+					length = (sint)toAppend.size();
 					if ((uint) (_InputString.length() + length) > _MaxNumChar)
 					{
-						length = _MaxNumChar - _InputString.length();
+						length = _MaxNumChar - (sint)_InputString.length();
 					}
 					ucstring toAdd = toAppend.substr(0, length);
 					_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
-					_CursorPos += toAdd.length();
+					_CursorPos += (sint32)toAdd.length();
 					GlobalUnlock (hObj);
 					nlinfo ("Chat input was pasted from the clipboard");
 				}
@@ -712,7 +712,7 @@ bool CGroupEditBox::undo()
 	setInputString(_StartInputString);
 	_CanUndo = false;
 	_CanRedo = true;
-	setCursorPos(_InputString.length());
+	setCursorPos((sint32)_InputString.length());
 	setSelectionAll();
 	return true;
 }
@@ -726,7 +726,7 @@ bool CGroupEditBox::redo()
 	setInputString(_ModifiedInputString);
 	_CanUndo = true;
 	_CanRedo = false;
-	setCursorPos(_InputString.length());
+	setCursorPos((sint32)_InputString.length());
 	setSelectionAll();
 	return true;
 }
@@ -769,7 +769,7 @@ bool CGroupEditBox::expand()
 			// then back to ucstring
 			_InputString.fromUtf8(command);
 			_InputString = '/' + _InputString;
-			_CursorPos = _InputString.length();
+			_CursorPos = (sint32)_InputString.length();
 			_CursorAtPreviousLineEnd = false;
 			triggerOnChangeAH();
 			return true;
@@ -895,7 +895,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 			_ViewText->getCharacterIndexFromPosition(eventDesc.getX() - _ViewText->getXReal(), eventDesc.getY() - _ViewText->getYReal(), newCurPos, cursorAtPreviousLineEnd);
 			_CursorAtPreviousLineEnd = cursorAtPreviousLineEnd;
 			_CursorPos = newCurPos;
-			_CursorPos -= _Prompt.length();
+			_CursorPos -= (sint32)_Prompt.length();
 			_CursorPos = std::max(_CursorPos, sint32(0));
 
 			return true;
@@ -990,7 +990,7 @@ void CGroupEditBox::updateCoords()
 			// Check if cursor visible
 			sint xCursVT, xCurs, yTmp, hTmp;
 			// Get the cursor pos from the BL of the viewtext
-			_ViewText->getCharacterPositionFromIndex(_CursorPos+_Prompt.size(), false, xCursVT, yTmp, hTmp);
+			_ViewText->getCharacterPositionFromIndex(_CursorPos+(sint)_Prompt.size(), false, xCursVT, yTmp, hTmp);
 			// Get the cursor pos from the BL of the edit box
 			xCurs = xCursVT - (_XReal - _ViewText->getXReal());
 			// If the cursor is outside the edit box move the view text to show the cursor
@@ -1098,7 +1098,7 @@ void CGroupEditBox::setInputString(const ucstring &str)
 	_InputString = str;
 	if (_CursorPos > (sint32) str.length())
 	{
-		_CursorPos = str.length();
+		_CursorPos = (sint32)str.length();
 		_CursorAtPreviousLineEnd = false;
 	}
 	if (!_ViewText) return;
@@ -1192,7 +1192,7 @@ void		CGroupEditBox::setSelectionAll()
 	{
 		_CurrSelection = this;
 		_SelectCursorPos= 0;
-		_CursorPos= _InputString.size();
+		_CursorPos= (sint32)_InputString.size();
 		_CursorAtPreviousLineEnd = false;
 	}
 }
@@ -1254,7 +1254,7 @@ void CGroupEditBox::setCommand(const ucstring &command, bool execute)
 	else
 	{
 		CInterfaceManager::getInstance()->setCaptureKeyboard (this);
-		_CursorPos = _InputString.length();
+		_CursorPos = (sint32)_InputString.length();
 	}
 }
 
@@ -1392,8 +1392,8 @@ void CGroupEditBox::setFocusOnText()
 	pIM->setCaptureKeyboard (this);
 
 	_CurrSelection = this;
-	_SelectCursorPos= _InputString.size();
-	_CursorPos= _InputString.size();
+	_SelectCursorPos= (sint32)_InputString.size();
+	_CursorPos= (sint32)_InputString.size();
 	_CursorAtPreviousLineEnd = false;
 }
 

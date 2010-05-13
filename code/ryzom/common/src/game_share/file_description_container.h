@@ -64,7 +64,7 @@ protected:
 	// remove the provided string if found at the beginning of FileName
 	void removeHeaderFromFileName( const std::string& header )
 	{
-		uint hdsize = header.size();
+		uint hdsize = (uint)header.size();
 		if ( FileName.substr( 0, hdsize ) == header )
 		{
 			FileName = FileName.substr( hdsize );

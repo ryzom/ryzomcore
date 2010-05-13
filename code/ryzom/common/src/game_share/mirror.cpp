@@ -1904,7 +1904,7 @@ void CMirror::executeMirrorReleaseCommands()
  */
 void CMirror::pushEntityRanges( CMessage& msgout )
 {
-	uint32 nbDatasets = _SDataSets.size();
+	uint32 nbDatasets = (uint32)_SDataSets.size();
 	msgout.serial( nbDatasets );
 	for ( TSDataSets::iterator ids=_SDataSets.begin(); ids!=_SDataSets.end(); ++ids )
 	{

@@ -359,7 +359,7 @@ namespace R2
 			uint32 size = 0;
 			if (!f.isReading() )
 			{
-				size = Value.size();
+				size = (uint32)Value.size();
 				f.serial(size);
 			}
 			else

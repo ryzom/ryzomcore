@@ -113,7 +113,7 @@ ucstring CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &fi
 	}
 
 	// Check number of arguments
-	uint n = (effectMap[name]).size();
+	uint n = (uint)(effectMap[name]).size();
 	if (params.size() != n)
 	{
 		nlinfo("Bad arguments for : %s", effect.c_str());

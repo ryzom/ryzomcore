@@ -231,7 +231,7 @@ uint CSky::setup(const CClientDate &date, const CClientDate &animationDate, floa
 {
 	if (!_Scene) return 0;
 	uint numVisibleObjects = 0;
-	uint numObjects = _Objects.size();
+	uint numObjects = (uint)_Objects.size();
 	float dayPart = date.Hour / _NumHourInDay;
 	clamp(dayPart, 0.f, 1.f);
 	clamp(weatherLevel, 0.f, 1.f);

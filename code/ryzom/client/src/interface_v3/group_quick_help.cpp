@@ -246,7 +246,7 @@ void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, co
 
 						// Extract the string
 						step.EventToComplete.insert (events.substr (first, last-first));
-						first = last+1;
+						first = (uint)last+1;
 					}
 				}
 			}

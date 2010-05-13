@@ -72,7 +72,7 @@ void CTimerManager::tickUpdate()
 
 	// iterate through the vector processing its events
 	uint32 nextFreeSlot=0;
-	uint32 size=vect.size();
+	uint32 size=(uint32)vect.size();
 	for (uint32 i=0;i<size;++i)
 	{
 		NLMISC::CSmartPtr<CTimerEvent> eventPtr=vect[i];
@@ -97,7 +97,7 @@ void CTimerManager::tickUpdate()
 	if (!vect.empty())
 	{
 		//nlinfo("TimerManagerUpdate: Processed %d of %d events",vect.size()-nextFreeSlot, vect.size());
-		NbEventsToProcessInTimerManagerUpdate = vect.size();
+		NbEventsToProcessInTimerManagerUpdate = (uint32)vect.size();
 		NbProcessedEventsInTimerManagerUpdate = NbEventsToProcessInTimerManagerUpdate.get() - nextFreeSlot;
 	}
 	// resize the vector back down to keep only the events that we haven't dealt with yet

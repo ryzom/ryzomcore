@@ -55,7 +55,7 @@ std::string CLoginRegistry::getProductInstallId()
 		r <<= 16;
 		r |= rand();
 		std::string id = NLMISC::toString(r);
-		if (RegSetValueEx(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) id.c_str(), (id.size())+1) == ERROR_SUCCESS)
+		if (RegSetValueEx(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) id.c_str(), (DWORD)(id.size())+1) == ERROR_SUCCESS)
 		{
 			return id;
 		}

@@ -166,7 +166,7 @@ void					CPropertyDecoder::getPosition(TCLEntityId entity, CAction::TValue &posx
 
 void	CPropertyDecoder::clear()
 {
-	uint	sz = _Entities.size();
+	uint	sz = (uint)_Entities.size();
 	_Entities.clear();
 	_Entities.resize(sz);
 }

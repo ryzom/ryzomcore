@@ -352,7 +352,7 @@ void CWeatherManagerClient::setupFXs(const NLMISC::CMatrix &camMat, NLPACS::UGlo
 	CRGBAF localNoPrecipitation = continent.FogMap.getMapValue (CFogMapBuild::NoPrecipitation, pos.x, pos.y, CRGBAF(0.f, 0.f, 0.f, 0.f));
 	_LocalPrecipitationFactor = 1.f - localNoPrecipitation.R;
 	//
-	uint numAskedFXs = _CurrWeatherStateClient.FXs.size();
+	uint numAskedFXs = (uint)_CurrWeatherStateClient.FXs.size();
 	askedPrecipitations.resize(numAskedFXs);
 	uint k;
 	for(k = 0; k < numAskedFXs; ++k)

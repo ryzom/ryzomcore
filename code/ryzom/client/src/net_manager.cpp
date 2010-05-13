@@ -344,9 +344,9 @@ void copyKeySet(const std::string &srcPath, const std::string &destPath)
 	try
 	{
 		CIFile ifile(srcPath);
-		ifile.serialBuffer((uint8 *) &srcStr[0], srcStr.size());
+		ifile.serialBuffer((uint8 *) &srcStr[0], (uint)srcStr.size());
 		COFile ofile(destPath);
-		ofile.serialBuffer((uint8 *) &srcStr[0], srcStr.size());
+		ofile.serialBuffer((uint8 *) &srcStr[0], (uint)srcStr.size());
 	}
 	catch(EStream &)
 	{
@@ -1459,7 +1459,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		{
 			tpReason = CI18N::get(tpInfos.TpReasonId);
 
-			uint32 size = tpInfos.TpReasonParams.size();
+			uint32 size = (uint32)tpInfos.TpReasonParams.size();
 			uint32 first = 0;
 			CSString  str(tpReason.toString());
 			for (;first != size ; ++first)

@@ -59,7 +59,7 @@ public:
 	// Get the index of a sheet inserted in this list. Returns -1 if it is not an index of that list
 	virtual	sint			getIndexOf(const CDBCtrlSheet	*sheet) const;
 	// get number of sheets
-	virtual uint			getNbSheet() const { return _SheetChildren.size(); }
+	virtual uint			getNbSheet() const { return (uint)_SheetChildren.size(); }
 	// get a sheet by its index
 	virtual	CDBCtrlSheet	*getSheet(uint index) const;
 	// Get the number of active elements

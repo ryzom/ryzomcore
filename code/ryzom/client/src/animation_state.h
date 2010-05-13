@@ -155,7 +155,7 @@ public:
 	//@}
 
 
-	uint getNumAnimation() const { return _Animations.size(); }
+	uint getNumAnimation() const { return (uint)_Animations.size(); }
 	CAnimation *getAnimationByIndex(uint index);
 
 	// Transform a string in state id

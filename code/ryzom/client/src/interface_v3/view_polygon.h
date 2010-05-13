@@ -35,7 +35,7 @@ class CViewPolygon : public CViewBase
 {
 public:
 	CViewPolygon();
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 	virtual void updateCoords();
 	virtual void draw();
 	void	setVertices(const std::vector<NLMISC::CVector> &vertices);

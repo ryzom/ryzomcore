@@ -250,7 +250,7 @@ void CYuboChat::sendInternal(const ucstring &msg)
 		}
 		// append linefield
 		toSend+= "\r\n";
-		uint32	size= toSend.size();
+		uint32	size= (uint32)toSend.size();
 		uint32	off= 0;
 		// until the whole message is sent
 		while(size!=0)
@@ -262,7 +262,7 @@ void CYuboChat::sendInternal(const ucstring &msg)
 			}
 			// maybe send the rest of the message (very rare....)
 			off+=size;
-			size= toSend.size()-off;
+			size= (uint32)toSend.size()-off;
 		}
 	}
 	catch(Exception &e)

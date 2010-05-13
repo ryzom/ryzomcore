@@ -379,7 +379,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 				nlwarning("<loadCosmetics> Can't load the VPValue from sheet name in sheet %s", Id.toString().c_str() );
 			else
 			{
-				sint i = pos - 1;
+				sint i = (sint)pos - 1;
 				for(; i >= 0; i-- )
 				{
 					if ( !isdigit( sheetName[i] ) )

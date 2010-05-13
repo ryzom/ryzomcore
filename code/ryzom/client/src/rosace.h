@@ -148,7 +148,7 @@ public:
 	CRosacePage();
 	CRosacePage(sint nb);
 	/// Return the number of components in the page.
-	inline uint size() const {return _Components.size();}
+	inline uint size() const {return (uint)_Components.size();}
 	/// Display all the components in the page.
 	void display();
 	/// Execute the callback associated to the selected component.
@@ -207,7 +207,7 @@ public:
 	CRosaceContext();
 	CRosaceContext(sint nb);
 	/// Return the number of pages in the context.
-	inline uint size() const {return _Pages.size();}
+	inline uint size() const {return (uint)_Pages.size();}
 	/// Display all the pages in the context.
 	void display();
 	/// Execute the callback associated to the selected component in the selected page.

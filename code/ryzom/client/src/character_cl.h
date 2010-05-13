@@ -278,7 +278,7 @@ public:
 	virtual uint nbStage();
 
 	/// Return the number of attached FXs remaining to remove.
-	virtual uint nbAttachedFXToRemove() {return _AttachedFXListToRemove.size();}
+	virtual uint nbAttachedFXToRemove() {return (uint)_AttachedFXListToRemove.size();}
 
 	/// Set the animation state key.
 	bool animationStateKey(TAnimationType channel, TAnimStateId value);

@@ -143,7 +143,7 @@ const TEntityRange&	CMirroredDataSet::addEntityTypeRange( uint8 entityTypeId, TD
 uint	CMirroredDataSet::serialOutOwnedRanges( NLMISC::IStream& s ) const
 {
 	nlassert( ! s.isReading() );
-	uint32 nbRanges = _EntityTypesRanges.size();
+	uint32 nbRanges = (uint32)_EntityTypesRanges.size();
 	s.serial( nbRanges );
 	TEntityRangeOfType::const_iterator ir;
 	for ( ir=_EntityTypesRanges.begin(); ir!=_EntityTypesRanges.end(); ++ir )
@@ -825,7 +825,7 @@ TDataSetRow			CMirroredDataSet::getNextRemovedEntity( NLMISC::CEntityId **entity
 			// Try to unmap row and entity
 			nlassert( entityIndex.isValid() );
 			const CEntityId& leavingEntityId = getEntityId( entityIndex );
-			nbremoved = _EntityIdToEntityIndex.erase( leavingEntityId );
+			nbremoved = (uint)_EntityIdToEntityIndex.erase( leavingEntityId );
 			if ( nbremoved != 0 )
 			{
 				// Return the entity id

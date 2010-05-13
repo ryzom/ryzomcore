@@ -65,7 +65,7 @@ extern CActionsContext ActionsContext;
 string CGroupHTML::localImageName(const string &url)
 {
 	string dest = "cache/";
-	dest += getMD5((uint8 *)url.c_str(), url.size()).toString();
+	dest += getMD5((uint8 *)url.c_str(), (uint32)url.size()).toString();
 	dest += ".cache";
 	return dest;
 }
@@ -358,7 +358,7 @@ void CGroupHTML::addText (const char * buf, int len)
 		// Build the final unicode string
 		ucstring tmp;
 		tmp.reserve(len);
-		uint ucLen = inputUCString.size();
+		uint ucLen = (uint)inputUCString.size();
 		//uint ucLenWithoutSpace = 0;
 		for (uint i=0; i<ucLen; i++)
 		{
@@ -1096,7 +1096,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					_Forms.back().Entries.back().SelectValues.push_back(optionValue);
 					if (selected)
 					{
-						_Forms.back().Entries.back().InitialSelection = _Forms.back().Entries.back().SelectValues.size() - 1;
+						_Forms.back().Entries.back().InitialSelection = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
 					}
 
 				}
@@ -2181,7 +2181,7 @@ CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const 
 		templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 		templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", "1024"));
 		CInterfaceGroup *textArea = im->createGroupInstance (templateName.c_str(),
-			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 		// Group created ?
 		if (textArea)
@@ -2221,7 +2221,7 @@ CDBGroupComboBox *CGroupHTML::addComboBox(const std::string &templateName, const
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 		CInterfaceGroup *group = im->createGroupInstance (templateName.c_str(),
-			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), templateParams.size());
+			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 		// Group created ?
 		if (group)

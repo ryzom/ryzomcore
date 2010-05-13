@@ -30,7 +30,7 @@ using namespace std;
 size_t CCurlHttpClient::writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient)
 {
 	CCurlHttpClient * httpClient = static_cast<CCurlHttpClient*>(pHttpClient);
-	httpClient->pushReceivedData((uint8*)buffer, size*nmemb);
+	httpClient->pushReceivedData((uint8*)buffer, (uint)(size*nmemb));
 	return size*nmemb;
 }
 

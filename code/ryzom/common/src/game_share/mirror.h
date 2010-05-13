@@ -410,7 +410,7 @@ public:
 	bool				isDataSetExist(const std::string &dataSetName) { return _NDataSets.find(dataSetName) != _NDataSets.end(); }
 
 	/// Return the number of dataSet availables
-	uint32				getDataSetCount() const	{ return _NDataSets.size(); }
+	uint32				getDataSetCount() const	{ return (uint32)_NDataSets.size(); }
 
 	/// Destructor
 	~CMirror();

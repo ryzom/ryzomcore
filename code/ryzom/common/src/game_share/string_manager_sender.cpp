@@ -262,7 +262,7 @@ namespace STRING_MANAGER
 		msgout2.serial( const_cast<TDataSetRow&>(clientRowId) );
 		msgout2.serial(const_cast<string&>(stringNameStr));
 
-		uint32 size = params.size();
+		uint32 size = (uint32)params.size();
 		msgout2.serial(size);
 		for ( uint i = 0; i < size; i++ )
 		{

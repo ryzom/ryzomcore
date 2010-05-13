@@ -223,7 +223,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// update WindowList if possible
 	initWindows();
-	sint	maxHelpWindow= _InfoWindows.size();
+	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 
 	// Update Active window list
@@ -429,7 +429,7 @@ void			CInterfaceHelp::closeAll()
 {
 	// update WindowList if possible
 	initWindows();
-	sint	maxHelpWindow= _InfoWindows.size();
+	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 	_ActiveWindows.clear();
 	// For all windows
@@ -447,7 +447,7 @@ void			CInterfaceHelp::resetWindowPos(sint y)
 
 	// update WindowList if possible
 	initWindows();
-	sint	maxHelpWindow= _InfoWindows.size();
+	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 	uint32	w, h;
 	pIM->getViewRenderer().getScreenSize(w,h);
@@ -473,7 +473,7 @@ void			CInterfaceHelp::serialInfoWindows(NLMISC::IStream &f)
 		resetWindowPos(-100);
 
 		f.serialCont(infoWindowSave);
-		uint	minSize= min(infoWindowSave.size(), _InfoWindows.size());
+		uint	minSize= (uint)min(infoWindowSave.size(), _InfoWindows.size());
 		for(uint i=0;i<minSize;i++)
 		{
 			_InfoWindows[i].Window->setX(infoWindowSave[i].X);
@@ -2508,7 +2508,7 @@ void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos)
 	}
 
 	// inactivate other lines
-	for (uint i = infos.Prerequisits.size(); i < 15	; ++i)
+	for (uint i = (uint)infos.Prerequisits.size(); i < 15	; ++i)
 	{
 		const std::string text = setup.HelpWindow->getId() + ":content:scroll_text_id:text_list:" + NLMISC::toString("text_%u",i+1);
 		CViewText *viewText = dynamic_cast<CViewText *>(setup.HelpWindow->getElement(text));

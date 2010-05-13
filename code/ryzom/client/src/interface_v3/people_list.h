@@ -76,7 +76,7 @@ public:
 	// Get index from the id of the container that represent the people
 	sint getIndexFromContainerID(const std::string &id) const;
 	// Get the number of people in this list
-	uint getNumPeople() const { return _Peoples.size(); }
+	uint getNumPeople() const { return (uint)_Peoples.size(); }
 	// Get name of a people
 	ucstring getName(uint index) const;
 	// Sort people alphabetically

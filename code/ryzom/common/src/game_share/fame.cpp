@@ -79,7 +79,7 @@ NLMISC_COMMAND(displayStaticFames, "Display the fame for each factions", "[<fact
 	const std::vector<NLMISC::TStringId> &names = sf.getFactionNames();
 
 	uint start =0;
-	uint end = names.size();
+	uint end = (uint)names.size();
 
 
 	if (args.size() == 1)
@@ -431,7 +431,7 @@ void CStaticFames::loadStaticFame( const string& filename )
 			}
 		}
 		// 3rd, allocate fame table and load the data
-		_FameTableSize = _FactionNameIndex.size();
+		_FameTableSize = (uint)_FactionNameIndex.size();
 
 		_FameTable = new sint32[_FameTableSize*_FameTableSize];
 		_PropagationFactorTable = new float[_FameTableSize*_FameTableSize];

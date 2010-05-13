@@ -86,7 +86,7 @@ public:
 	void removeHead();
 
 	// Get the number of children
-	uint getNumChildren() const { return _Elements.size(); }
+	uint getNumChildren() const { return (uint)_Elements.size(); }
 
 	// Get the number of active children
 	uint getNumActiveChildren() const;
@@ -132,7 +132,7 @@ public:
 	virtual CInterfaceElement* getElement (const std::string &id)
 	{ return CInterfaceGroup::getElement (id); }
 
-	sint32 getNbElement() { return _Elements.size(); }
+	sint32 getNbElement() { return (sint32)_Elements.size(); }
 	sint32 getSpace() { return _Space; }
 
 	void	setDynamicDisplaySize (bool dds) { _DynamicDisplaySize = dds; }

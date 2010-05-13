@@ -128,7 +128,7 @@ public:
 	void addSeparatorAtIndex(uint index, const std::string &id = "");
 
 
-	uint	getNumLine() const { return _Lines.size(); }
+	uint	getNumLine() const { return (uint)_Lines.size(); }
 	void	removeLine(uint index);
 	const std::string getActionHandler(uint lineIndex) const;
 	const std::string getActionHandlerParam(uint lineIndex) const;
@@ -157,7 +157,7 @@ public:
 
 	void removeAllUserGroups();
 
-	uint getNumLines() const { return _Lines.size(); }
+	uint getNumLines() const { return (uint)_Lines.size(); }
 
 	// return pointer to submenu or NULL if there's none
 	CGroupSubMenu *getSubMenu(uint index) const;

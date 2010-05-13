@@ -840,14 +840,14 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 		static const char * slashheader = "---- /Header\n\n";
 		static const char * comment = "-- ";
 
-		static const unsigned int headerLen = strlen(header);
-		static const unsigned int slasheaderLen = strlen(slashheader);
-		static const unsigned int commentLen = strlen(comment);
+		static const unsigned int headerLen = (unsigned int)strlen(header);
+		static const unsigned int slasheaderLen = (unsigned int)strlen(slashheader);
+		static const unsigned int commentLen = (unsigned int)strlen(comment);
 
 
 		NLMISC::CSString tmp;
 		tmp.resize( inf.getFileSize() );
-		inf.serialBuffer((uint8*)&tmp[0], tmp.size());
+		inf.serialBuffer((uint8*)&tmp[0], (uint)tmp.size());
 		_ScenarioBody = tmp.replace("\r\n", "\n");
 
 
@@ -902,12 +902,12 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 			std::string::size_type subHeader = _ScenarioBody.find("-- BodyMD5", startHeader);
 			if (checkMD5)
 			{
-				std::string md5Id1 = NLMISC::getMD5((uint8*)(_ScenarioBody.data() + subHeader), endHeader - subHeader).toString();
+				std::string md5Id1 = NLMISC::getMD5((uint8*)(_ScenarioBody.data() + subHeader), (uint32)(endHeader - subHeader)).toString();
 				if (values[2].second != md5Id1 )
 				{
 					return false;
 				}
-				std::string md5Id2 = NLMISC::getMD5((uint8*)(_ScenarioBody.data() + endHeader + slasheaderLen), _ScenarioBody.size() - (endHeader + slasheaderLen)).toString();
+				std::string md5Id2 = NLMISC::getMD5((uint8*)(_ScenarioBody.data() + endHeader + slasheaderLen), (uint32)(_ScenarioBody.size() - (endHeader + slasheaderLen))).toString();
 				if (values[3].second != md5Id2)
 				{
 					return false;
@@ -965,7 +965,7 @@ bool CScenarioValidator::setScenarioToSave(const std::string& filename, CObject*
 
 	_ScenarioBody = out2;
 	{
-		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_ScenarioBody.data(), _ScenarioBody.size());
+		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_ScenarioBody.data(),(uint32) _ScenarioBody.size());
 		_BodyMd5 = md5Id.toString().c_str();
 	}
 
@@ -986,7 +986,7 @@ bool CScenarioValidator::setScenarioToSave(const std::string& filename, CObject*
 	_HeaderBody =out2;
 	std::string headerBodyMd5;
 	{
-		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_HeaderBody.data(), _HeaderBody.size());
+		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_HeaderBody.data(), (uint32)_HeaderBody.size());
 		_HeaderMd5 = md5Id.toString().c_str();
 		headerMD5 = _HeaderMd5;
 	}
@@ -1044,7 +1044,7 @@ bool CScenarioValidator::applySave(const std::string& signature)
 		out2 += "---- /Header\n\n";
 		out2 += _ScenarioBody;
 
-		out.serialBuffer((uint8*)out2.c_str(), out2.size());
+		out.serialBuffer((uint8*)out2.c_str(), (uint)out2.size());
 		if (_Filename != std::string("data/r2_buffer.dat") )
 		{
 			nlinfo("Scenario %s saved", _Filename.c_str());
@@ -1099,14 +1099,14 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 		static const char * slashheader = "---- /Header\n\n";
 		static const char * comment = "-- ";
 
-		static const unsigned int headerLen = strlen(header);
-		static const unsigned int slasheaderLen = strlen(slashheader);
-		static const unsigned int commentLen = strlen(comment);
+		static const unsigned int headerLen = (unsigned int)strlen(header);
+		static const unsigned int slasheaderLen = (unsigned int)strlen(slashheader);
+		static const unsigned int commentLen = (unsigned int)strlen(comment);
 
 
 		NLMISC::CSString tmp;
 		tmp.resize( inf.getFileSize() );
-		inf.serialBuffer((uint8*)&tmp[0], tmp.size());
+		inf.serialBuffer((uint8*)&tmp[0], (uint)tmp.size());
 		_UserComponentBody = tmp.replace("\r\n", "\n");
 
 		// Scenario without header
@@ -1157,12 +1157,12 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 			std::string::size_type subHeader = _UserComponentBody.find("-- BodyMD5", startHeader);
 			if (checkMD5)
 			{
-				std::string md5Id1 = NLMISC::getMD5((uint8*)(_UserComponentBody.data() + subHeader), endHeader - subHeader).toString();
+				std::string md5Id1 = NLMISC::getMD5((uint8*)(_UserComponentBody.data() + subHeader), (uint32)(endHeader - subHeader)).toString();
 				if (values[2].second != md5Id1 )
 				{
 					return false;
 				}
-				std::string md5Id2 = NLMISC::getMD5((uint8*)(_UserComponentBody.data() + endHeader + slasheaderLen), _UserComponentBody.size() - (endHeader + slasheaderLen)).toString();
+				std::string md5Id2 = NLMISC::getMD5((uint8*)(_UserComponentBody.data() + endHeader + slasheaderLen), (uint32)(_UserComponentBody.size() - (endHeader + slasheaderLen))).toString();
 				if (values[3].second != md5Id2)
 				{
 					return false;
@@ -1213,7 +1213,7 @@ bool CUserComponentValidator::setUserComponentToSave(const std::string& filename
 	_UserComponentBody = body;
 
 	{
-		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_UserComponentBody.data(), _UserComponentBody.size());
+		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_UserComponentBody.data(), (uint32)_UserComponentBody.size());
 		_BodyMd5 = md5Id.toString().c_str();
 	}
 
@@ -1248,7 +1248,7 @@ bool CUserComponentValidator::setUserComponentToSave(const std::string& filename
 
 	std::string headerBodyMd5;
 	{
-		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_HeaderBody.data(), _HeaderBody.size());
+		NLMISC::CHashKeyMD5 md5Id = NLMISC::getMD5((uint8*)_HeaderBody.data(), (uint32)_HeaderBody.size());
 		_HeaderMd5 = md5Id.toString().c_str();
 		headerMD5 = _HeaderMd5;
 	}
@@ -1311,7 +1311,7 @@ bool CUserComponentValidator::applySave(const std::string& signature)
 		out2 += _UserComponentBody;
 
 
-		out.serialBuffer((uint8*)out2.c_str(),out2.size());
+		out.serialBuffer((uint8*)out2.c_str(),(uint)out2.size());
 		if (_Filename != std::string("data/r2_buffer.dat") )
 		{
 			nlinfo("UserComponent %s saved", _Filename.c_str());

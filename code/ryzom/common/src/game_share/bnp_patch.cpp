@@ -278,7 +278,7 @@ uint32 CBNPFile::getLatestVersionNumber(uint32 max) const
 	if (_Versions.empty())
 		return 0;
 	uint32 i=0;
-	for (i=_Versions.size();i--;)
+	for (i=(uint32)_Versions.size();i--;)
 		if (_Versions[i].getVersionNumber()<=max)
 			return _Versions[i].getVersionNumber();
 
@@ -288,7 +288,7 @@ uint32 CBNPFile::getLatestVersionNumber(uint32 max) const
 
 uint32 CBNPFile::versionCount() const
 {
-	return _Versions.size();
+	return (uint32)_Versions.size();
 }
 
 const CBNPFileVersion& CBNPFile::getVersion(uint32 idx) const
@@ -371,7 +371,7 @@ uint32 CBNPFileSet::addVersion(const std::string& bnpDirectory, const std::strin
 	uint32 result=0;
 
 	// add versions to different files
-	for (uint32 i=_Files.size();i--;)
+	for (uint32 i=(uint32)_Files.size();i--;)
 		if (_Files[i].addVersion(bnpDirectory,refDirectory,version)!=false)
 			result= std::max(result,_Files[i].getLatestVersionNumber());
 
@@ -383,7 +383,7 @@ uint32 CBNPFileSet::getVersionNumber() const
 {
 	uint32 result=0;
 
-	for (uint32 i=_Files.size();i--;)
+	for (uint32 i=(uint32)_Files.size();i--;)
 		result= std::max(result,_Files[i].getLatestVersionNumber());
 
 	return result;
@@ -396,7 +396,7 @@ void CBNPFileSet::clear()
 
 uint32 CBNPFileSet::fileCount() const
 {
-	return _Files.size();
+	return (uint32)_Files.size();
 }
 
 const CBNPFile& CBNPFileSet::getFile(uint32 idx) const
@@ -539,7 +539,7 @@ bool CBNPCategory::isHidden() const
 
 uint32 CBNPCategory::fileCount() const
 {
-	return _Files.size();
+	return (uint32)_Files.size();
 }
 
 const std::string& CBNPCategory::getFile(uint32 idx) const
@@ -637,7 +637,7 @@ const std::string& CBNPCategorySet::getFile(uint32 idx) const
 
 uint32 CBNPCategorySet::categoryCount() const
 {
-	return _Category.size();
+	return (uint32)_Category.size();
 }
 
 CBNPCategory& CBNPCategorySet::getCategory(uint32 idx)

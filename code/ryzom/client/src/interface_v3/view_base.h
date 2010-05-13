@@ -49,7 +49,7 @@ public:
 	virtual void updateCoords() { CInterfaceElement::updateCoords(); }
 
 	/// Debug
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
 	/// Reflection
 	virtual sint32 getAlpha() const  { return -1; }	// Not obliged to implement this

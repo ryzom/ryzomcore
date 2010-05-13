@@ -155,7 +155,7 @@ void CPrimFileMgr::load (sint primFileIndex)
 				for (seg = 0; seg < _PrimRegion.VPaths.size (); seg++)
 				{
 					// For each
-					uint pointCount = _PrimRegion.VPaths[seg].VPoints.size ();
+					uint pointCount = (uint)_PrimRegion.VPaths[seg].VPoints.size ();
 
 					for (point = 0; point < pointCount; point++)
 					{
@@ -167,7 +167,7 @@ void CPrimFileMgr::load (sint primFileIndex)
 				for (seg = 0; seg < _PrimRegion.VZones.size (); seg++)
 				{
 					// For each
-					uint pointCount = _PrimRegion.VZones[seg].VPoints.size ();
+					uint pointCount = (uint)_PrimRegion.VZones[seg].VPoints.size ();
 
 					for (point = 0; point < pointCount; point ++)
 					{
@@ -291,7 +291,7 @@ void CPrimFileMgr::display (NL3D::UDriver &driver)
 			CVector pos (0,0,0);
 
 			// For each
-			uint pointCount = _PrimRegion.VPaths[seg].VPoints.size ();
+			uint pointCount = (uint)_PrimRegion.VPaths[seg].VPoints.size ();
 			vector<CPrimVector> &points = _PrimRegion.VPaths[seg].VPoints;
 
 			// Some points ?
@@ -324,7 +324,7 @@ void CPrimFileMgr::display (NL3D::UDriver &driver)
 			changeColor (currentColor);
 
 			// For each
-			uint pointCount = _PrimRegion.VZones[seg].VPoints.size ();
+			uint pointCount = (uint)_PrimRegion.VZones[seg].VPoints.size ();
 			vector<CPrimVector> &points = _PrimRegion.VZones[seg].VPoints;
 
 			// Some points ?

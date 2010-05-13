@@ -305,7 +305,7 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 	{
 		{
 			CVertexBufferReadWrite vba;
-			_VB.setNumVertices(_TriCache.size());
+			_VB.setNumVertices((uint32)_TriCache.size());
 			_VB.lock(vba);
 			memcpy(vba.getVertexCoordPointer(), &_TriCache[0], sizeof(CRGBAVertex) * _TriCache.size());
 		}
@@ -337,23 +337,23 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			simpleMat.texEnvArg0RGB(0, CMaterial::Constant, CMaterial::SrcColor);
 			simpleMat.setDoubleSided(true);
 			simpleMat.texConstantColor(0, CRGBA::White);
-			drv.renderRawTriangles(simpleMat, 0, _TriCache.size() / 3);
+			drv.renderRawTriangles(simpleMat, 0, (uint32)_TriCache.size() / 3);
 			IDriver::TPolygonMode pm = drv.getPolygonMode();
 			drv.setPolygonMode(IDriver::Line);
 			simpleMat.texConstantColor(0, CRGBA::Red);
-			drv.renderRawTriangles(simpleMat, 0, _TriCache.size() / 3);
+			drv.renderRawTriangles(simpleMat, 0, (uint32)_TriCache.size() / 3);
 			drv.setPolygonMode(pm);
 		}
 		else
 		{
-			drv.renderRawTriangles(_Material, 0, _TriCache.size() / 3);
+			drv.renderRawTriangles(_Material, 0, (uint32)_TriCache.size() / 3);
 		}
 	}
 	else
 	{
 		{
 			CVertexBufferReadWrite vba;
-			_VB.setNumVertices(_TriCache.size());
+			_VB.setNumVertices((uint32)_TriCache.size());
 			_VB.lock(vba);
 			NLMISC::CRGBA col = _Diffuse;
 			if (drv.getVertexColorFormat()==CVertexBuffer::TBGRA)
@@ -391,11 +391,11 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			static CMaterial simpleMat2;
 			simpleMat2.initUnlit();
 			simpleMat2.setDoubleSided(true);
-			drv.renderRawTriangles(simpleMat2, 0, _TriCache.size() / 3);
+			drv.renderRawTriangles(simpleMat2, 0, (uint32)_TriCache.size() / 3);
 		}
 		else
 		{
-			drv.renderRawTriangles(_Material, 0, _TriCache.size() / 3);
+			drv.renderRawTriangles(_Material, 0, (uint32)_TriCache.size() / 3);
 		}
 	}
 }
@@ -515,7 +515,7 @@ void CDecal::render(NL3D::UDriver &/* drv */,
 	planes[1].make(-CVector::J, camPos - tileNear * CVector::J),
 	planes[2].make(CVector::I, camPos + tileNear * CVector::I),
 	planes[3].make(-CVector::I, camPos - tileNear * CVector::I);
-	uint numVerts = clipPoly.Vertices.size();
+	uint numVerts = (uint)clipPoly.Vertices.size();
 	clipPoly2D.Vertices.resize(numVerts);
 	for (uint k = 0; k < numVerts; ++k)
 	{

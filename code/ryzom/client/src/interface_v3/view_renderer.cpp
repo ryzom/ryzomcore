@@ -664,7 +664,7 @@ void CViewRenderer::drawUnclippedTriangles(sint layerId, const std::vector<NLMIS
 	layerId+= VR_BIAS_LAYER;
 	nlassert(layerId>=0 && layerId<VR_NUM_LAYER);
 	CLayer	&layer = _BlankGlobalTexture->Layers[layerId];
-	uint startCount = layer.FilteredAlphaBlendedTris.size();
+	uint startCount = (uint)layer.FilteredAlphaBlendedTris.size();
 	layer.FilteredAlphaBlendedTris.resize(startCount + tris.size());
 	const NLMISC::CTriangle *src =&tris[0];
 	const NLMISC::CTriangle *last = src + tris.size();
@@ -1167,7 +1167,7 @@ void CViewRenderer::flush ()
 				// alpha blended
 				if (!layer.FilteredAlphaBlendedQuads.empty())
 				{
-					Driver->drawQuads (&(layer.FilteredAlphaBlendedQuads[0]), layer.FilteredAlphaBlendedQuads.size(), _Material);
+					Driver->drawQuads (&(layer.FilteredAlphaBlendedQuads[0]), (uint32)layer.FilteredAlphaBlendedQuads.size(), _Material);
 					layer.FilteredAlphaBlendedQuads.clear();
 				}
 				if (!layer.FilteredAlphaBlendedTris.empty())
@@ -1182,7 +1182,7 @@ void CViewRenderer::flush ()
 					_Material.setBlendFunc (NL3D::UMaterial::one, NL3D::UMaterial::one);
 					if (!layer.FilteredAdditifQuads.empty())
 					{
-						Driver->drawQuads (&(layer.FilteredAdditifQuads[0]), layer.FilteredAdditifQuads.size(), _Material);
+						Driver->drawQuads (&(layer.FilteredAdditifQuads[0]), (uint32)layer.FilteredAdditifQuads.size(), _Material);
 						layer.FilteredAdditifQuads.clear();
 					}
 					if (!layer.FilteredAdditifTris.empty())

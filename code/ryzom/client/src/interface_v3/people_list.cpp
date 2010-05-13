@@ -307,7 +307,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	_Peoples.push_back(CPeople());
 	_Peoples.back().Container = gc;
 	_Peoples.back().GlobalID = _CurrPeopleID;
-	updatePeopleMenu(_Peoples.size() - 1);
+	updatePeopleMenu((uint)_Peoples.size() - 1);
 
 	++_CurrPeopleID;
 

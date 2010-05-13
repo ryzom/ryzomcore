@@ -309,7 +309,7 @@ void CRaceStatsSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(Automaton);
 	f.serial(BodyToBone);
 	// attack list
-	uint32 size = AttackLists.size();
+	uint32 size = (uint32)AttackLists.size();
 	f.serial(size);
 	AttackLists.resize(size);
 	//

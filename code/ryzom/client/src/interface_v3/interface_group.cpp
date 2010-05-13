@@ -724,7 +724,7 @@ bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
 			return true;
 
 		// For each child group
-		for (sint i = _ChildrenGroups.size()-1; i >= 0; --i)
+		for (sint i = (sint)_ChildrenGroups.size()-1; i >= 0; --i)
 		{
 			CInterfaceGroup *pIG = _ChildrenGroups[i];
 			if (pIG->getActive())

@@ -49,7 +49,7 @@ public:
 	CDBGroupListSheetText(const TCtorParam &param);
 	virtual	~CDBGroupListSheetText();	// AJM: make base class destructors virtual to avoid memory leaks!
 
-	virtual uint getNbSheet() const { return _SheetChildren.size(); }
+	virtual uint getNbSheet() const { return (uint)_SheetChildren.size(); }
 
 	/// CInterfaceGroup Interface
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);

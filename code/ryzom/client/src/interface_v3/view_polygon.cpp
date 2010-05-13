@@ -81,7 +81,7 @@ void CViewPolygon::draw()
 	if (_Touched)
 	{
 		_RealTris.clear();
-		uint numTris = _Tris.size();
+		uint numTris = (uint)_Tris.size();
 		sint32 cornerX, cornerY;
 		static std::vector<NLMISC::CTriangle> winTris;
 		winTris.resize(numTris);

@@ -113,7 +113,7 @@ void CLandscapePolyDrawer::addPoly(const NLMISC::CPolygon2D &poly,
 	_PolyColor.push_back(color);
 	_BBoxes.push_back(bBox);
 
-	buildShadowVolume(_Polygons.size());
+	buildShadowVolume((uint)_Polygons.size());
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ void CLandscapePolyDrawer::buildShadowVolume(uint poly)
 	CIndexBuffer  ib;
 	CVector2f barycenter(0, 0);
 	const CPolygon2D & polygon = _Polygons[poly-1];
-	uint verticesNb = polygon.Vertices.size();
+	uint verticesNb = (uint)polygon.Vertices.size();
 
 	// barycenter polygon
 	for(i=0; i<verticesNb; i++)
@@ -482,7 +482,7 @@ void CLandscapePolyDrawer::drawShadowVolume(uint poly, bool firstPass)
 		CVertexBuffer & vb = _PolyVB[poly-1];
 		const CPolygon2D & polygon = _Polygons[poly-1];
 		const CVector2f & barycenter = _Barycenters[poly-1];
-		uint verticesNb = polygon.Vertices.size();
+		uint verticesNb = (uint)polygon.Vertices.size();
 
 		uint i;
 		CVector2f vertex;
@@ -534,7 +534,7 @@ void CLandscapePolyDrawer::drawShadowVolume(uint poly, bool firstPass)
 	((CDriverUser*)Driver)->getDriver()->activeVertexBuffer(_PolyVB[poly-1]);
 	((CDriverUser*)Driver)->getDriver()->activeIndexBuffer(_PolyIB[poly-1]);
 	((CDriverUser*)Driver)->getDriver()->renderTriangles(
-		*GenericMat.getObjectPtr(), 0, 4*_Polygons[poly-1].Vertices.size());
+		*GenericMat.getObjectPtr(), 0, 4*(uint32)_Polygons[poly-1].Vertices.size());
 
 	if(!firstPass)
 	{

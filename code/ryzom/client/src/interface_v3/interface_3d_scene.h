@@ -93,7 +93,7 @@ public:
 
 	void remove(NL3D::UInstanceGroup *pIG);
 
-	uint					getCharacter3DCount() const { return _Characters.size(); }
+	uint					getCharacter3DCount() const { return (uint)_Characters.size(); }
 	CInterface3DCharacter	*getCharacter3D(uint index);
 
 	CInterface3DCamera		*getCamera(uint index);

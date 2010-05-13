@@ -270,7 +270,7 @@ float percentileRev( const multiset<uint32>& dataset, float rp )
 {
 	//nlassert( ! dataset.empty() );
 	//nlassert( (rp >= 0) && (rp <= 1) );
-	uint ds = dataset.size();
+	uint ds = (uint)dataset.size();
 	if ( ds == 1 )
 		return (float)(*dataset.begin());
 	float fpIndex = rp * (float)(ds-1);
@@ -344,7 +344,7 @@ NLMISC::CHashKeyMD5	getTextMD5(const std::string& filename)
 		return NLMISC::CHashKeyMD5();
 
 	std::vector<uint8>	buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), buffer.size());
+	fi.serialBuffer(&(buffer[0]), (uint)buffer.size());
 
 	std::vector<uint8>::iterator	it = buffer.begin();
 	do
@@ -357,7 +357,7 @@ NLMISC::CHashKeyMD5	getTextMD5(const std::string& filename)
 	}
 	while (it != buffer.end());
 
-	return NLMISC::getMD5((&buffer[0]), buffer.size());
+	return NLMISC::getMD5((&buffer[0]), (uint32)buffer.size());
 }
 
 /*
@@ -2219,7 +2219,7 @@ void	CNetworkConnection::sendSystemAckProbe()
 	buildSystemHeader(message);
 
 	uint8			probe = SYSTEM_ACK_PROBE_CODE;
-	uint32			numprobes = _LatestProbes.size();
+	uint32			numprobes = (uint32)_LatestProbes.size();
 
 	message.serial(probe);
 	message.serial(numprobes);
@@ -3041,7 +3041,7 @@ void CNetworkConnection::CGenericMultiPartTemp::set (CActionGenericMultiPart *ag
 	BlockReceived[agmp->Part] = true;
 
 	NbCurrentBlock++;
-	TempSize += agmp->PartCont.size();
+	TempSize += (uint32)agmp->PartCont.size();
 
 	if (NbCurrentBlock == NbBlock)
 	{

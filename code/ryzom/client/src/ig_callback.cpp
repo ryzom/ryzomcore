@@ -375,7 +375,7 @@ void CIGCallback::CIGInstance::updateFromSheets()
 	H_AUTO_USE(RZ_IGCallback)
 	nlassert(_EntitySheets.size() == _IG->getNumInstance());
 	// See for which objects distance should be overriden (object which use a .PLANT sheet)
-	uint numInstances = _EntitySheets.size();
+	uint numInstances = (uint)_EntitySheets.size();
 	for(uint k = 0; k < numInstances; ++k)
 	{
 		if (_EntitySheets[k] && _EntitySheets[k]->Type == CEntitySheet::PLANT)
@@ -402,7 +402,7 @@ void CIGCallback::CIGInstance::updateManagedFXs()
 	H_AUTO_USE(RZ_IGCallback)
 	nlassert(_EntitySheets.size() == _IG->getNumInstance());
 	// See for which objects distance should be overriden (object which use a .PLANT sheet)
-	uint numInstances = _EntitySheets.size();
+	uint numInstances = (uint)_EntitySheets.size();
 	// vector of fx that should be managed by the dedicated manager. static for malloc perf
 	static std::vector<CTimedFX> timedFXs;
 	timedFXs.clear();

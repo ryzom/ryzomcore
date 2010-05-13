@@ -83,7 +83,7 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 {
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 	CMacroCmdManager	*pMCM = CMacroCmdManager::getInstance();
-	uint	lineId= pMCM->NewKey->AllLines.size();
+	uint	lineId= (uint)pMCM->NewKey->AllLines.size();
 	string templateId = pParent->getId() + ":k" + NLMISC::toString(lineId);
 	vector< pair<string, string> > vParams;
 	vParams.push_back(make_pair(string("id"), templateId));

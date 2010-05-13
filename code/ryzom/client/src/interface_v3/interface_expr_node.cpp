@@ -41,7 +41,7 @@ void CInterfaceExprNodeValue::getDepends(std::vector<ICDBNode *> &/* nodes */)
 void CInterfaceExprNodeValueFnCall::eval(CInterfaceExprValue &result)
 {
 	nlassert(Func);
-	uint numParams = Params.size();
+	uint numParams = (uint)Params.size();
 	std::vector<CInterfaceExprValue> params(numParams);
 	for(uint k = 0; k < numParams; ++k)
 	{
@@ -53,7 +53,7 @@ void CInterfaceExprNodeValueFnCall::eval(CInterfaceExprValue &result)
 void CInterfaceExprNodeValueFnCall::evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes)
 {
 	nlassert(Func);
-	uint numParams = Params.size();
+	uint numParams = (uint)Params.size();
 	std::vector<CInterfaceExprValue> params(numParams);
 	for(uint k = 0; k < numParams; ++k)
 	{
@@ -64,7 +64,7 @@ void CInterfaceExprNodeValueFnCall::evalWithDepends(CInterfaceExprValue &result,
 
 void CInterfaceExprNodeValueFnCall::getDepends(std::vector<ICDBNode *> &nodes)
 {
-	uint numParams = Params.size();
+	uint numParams = (uint)Params.size();
 	for(uint k = 0; k < numParams; ++k)
 	{
 		Params[k]->getDepends(nodes);

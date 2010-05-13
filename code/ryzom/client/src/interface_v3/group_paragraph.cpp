@@ -71,10 +71,10 @@ void CGroupParagraph::addChild (CViewBase* child, bool deleteOnRemove)
 	}
 
 	// add child at last index
-	addChildAtIndex(child, _Elements.size(), deleteOnRemove);
+	addChildAtIndex(child, (uint)_Elements.size(), deleteOnRemove);
 	if (_Elements.size() >= 2)
 	{
-		setOrder(_Elements.size() - 1, getOrder(_Elements.size() - 2) + 1);
+		setOrder((uint)_Elements.size() - 1, getOrder((uint)_Elements.size() - 2) + 1);
 	}
 	invalidateContent();
 }
@@ -487,7 +487,7 @@ void CGroupParagraph::updateCoords()
 
 			// For each elements, place them
 			uint firstElementOnLine = 0;
-			const uint elmCount = _Elements.size();
+			const uint elmCount = (uint)_Elements.size();
 			uint i;
 			for (i = 0; i < elmCount+1; ++i)
 			{

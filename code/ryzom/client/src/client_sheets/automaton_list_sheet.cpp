@@ -302,7 +302,7 @@ void CAutomatonStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStrea
 	}
 	else
 	{
-		size = ModeTransition.size ();
+		size = (uint32)ModeTransition.size ();
 		f.serial (size);
 	}
 	for (uint i = 0; i < size; i++)
@@ -560,7 +560,7 @@ void CAutomatonListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream
 	}
 	else
 	{
-		uint32 nNb = Automatons.size();
+		uint32 nNb = (uint32)Automatons.size();
 		f.serial(nNb);
 		map<string, CAutomatonSheet*>::iterator it = Automatons.begin();
 		while (it != Automatons.end())

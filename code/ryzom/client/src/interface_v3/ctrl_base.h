@@ -63,7 +63,7 @@ public:
 	virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 
 	/// Debug
-	virtual uint32		getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32		getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
 
 	/// Get the ContextHelp for this control. Default is to return _ContextHelp

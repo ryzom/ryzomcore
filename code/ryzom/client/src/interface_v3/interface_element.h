@@ -173,7 +173,7 @@ public:
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	/// Debug info on memory
-	virtual uint32 getMemory () { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory () { return (uint32)(sizeof(*this)+_Id.size()); }
 
 	/// helper: display a parse error with the id of the lement
 	void parseError (CInterfaceGroup *parentGroup, const char *reason = NULL);

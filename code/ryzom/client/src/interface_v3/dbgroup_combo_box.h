@@ -68,7 +68,7 @@ public:
 	const ucstring	&getText(uint i) const;
 	const ucstring	&getTexture(uint i) const;
 	void			removeText(uint i);
-	uint			getNumTexts() const {return _Texts.size();}
+	uint			getNumTexts() const {return (uint)_Texts.size();}
 
 	// selection
 	void			setSelection(sint32 val);

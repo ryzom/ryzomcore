@@ -754,7 +754,7 @@ NLMISC_COMMAND(log, "Add/Del Positive/Negative Filters for logs", "Log System <d
 
 NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 {
-	int size = args.size();
+	int size = (int)args.size();
 	if (size != 1)
 		return false;
 
@@ -839,7 +839,7 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	int size = args.size();
+	int size = (int)args.size();
  	if (size == 2)
 	{
 #if !FINAL_VERSION
@@ -4046,7 +4046,7 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 		}
 
 		// header
-		uint	numMpSlots= brick->FaberPlan.ItemPartMps.size();
+		uint	numMpSlots= (uint)brick->FaberPlan.ItemPartMps.size();
 		nlinfo("**********  FABERLOG  **********");
 		nlinfo("  ItemBuilt Origin: %s", ITEM_ORIGIN::enumToString(itemBuilt->ItemOrigin).c_str() );
 		nlinfo("  NumMPSlot: %d", numMpSlots);
@@ -5028,8 +5028,8 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 
 	// Find the good keyword table
 	CMode *mode = NULL;
-	if (FixedArgModes.find (args.size()) != FixedArgModes.end())
-		mode = &(FixedArgModes[args.size()]);
+	if (FixedArgModes.find ((uint)args.size()) != FixedArgModes.end())
+		mode = &(FixedArgModes[(uint)args.size()]);
 	else
 		if (!InfiniteMode.Keywords.empty() && (args.size() >= InfiniteMode.KeywordsCount))
 			mode = &InfiniteMode;
@@ -5258,7 +5258,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 	{
 		COFile stream;
 		stream.open(path);
-		stream.serialBuffer((uint8 *) &srcFile[0], srcFile.size());
+		stream.serialBuffer((uint8 *) &srcFile[0], (uint)srcFile.size());
 	}
 	catch(NLMISC::EStream &e)
 	{

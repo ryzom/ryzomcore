@@ -1184,7 +1184,7 @@ uint32 CEntityCL::addInstance(const string &shapeName, const std::string &stickP
 		// Create new instance slot?
 		if(instIdx == CEntityCL::BadIndex)
 		{
-			idx= _Instances.size();
+			idx= (uint32)_Instances.size();
 			_Instances.push_back(SInstanceCL());
 		}
 
@@ -1255,7 +1255,7 @@ void CEntityCL::show(bool s)
 //-----------------------------------------------
 void CEntityCL::hideSkin()
 {
-	const uint nbInst = _Instances.size();
+	const uint nbInst = (uint)_Instances.size();
 	for(uint i = 0; i<nbInst; ++i)
 	{
 		if(!_Instances[i].Current.empty())
@@ -2061,7 +2061,7 @@ bool CEntityCL::clipped (const std::vector<NLMISC::CPlane> &clippingPlanes, cons
 		// Speed Clip: clip just the sphere.
 
 		// if out of only plane, entirely out.
-		const uint count = clippingPlanes.size ();
+		const uint count = (uint)clippingPlanes.size ();
 		uint i;
 		for(i=0;i<count;i++)
 		{
@@ -2391,7 +2391,7 @@ ucstring CEntityCL::removeShardFromName(const ucstring &name)
 		return name;
 
 	// if it is the same as the shard name of the user, remove it
-	if(ucstrnicmp(name, p0+1, p1-p0-1, PlayerSelectedHomeShardName)==0)
+	if(ucstrnicmp(name, (uint)p0+1, (uint)(p1-p0-1), PlayerSelectedHomeShardName)==0)
 		return name.substr(0,p0) + name.substr(p1+1);
 	// else don't modify
 	else

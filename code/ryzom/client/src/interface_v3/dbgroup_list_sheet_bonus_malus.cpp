@@ -91,7 +91,7 @@ void CDBGroupListSheetBonusMalus::draw ()
 //	sint32	drl= getRenderLayer()+1;
 
 	// May draw disable bitmaps on the ctrl sheets if disabled.
-	uint	numCtrls= min(_SheetChildren.size(), _DisableStates.size());
+	uint	numCtrls= (uint)min(_SheetChildren.size(), _DisableStates.size());
 	for(uint i=0;i<numCtrls;i++)
 	{
 		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;

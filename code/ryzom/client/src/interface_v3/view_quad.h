@@ -42,7 +42,7 @@ public:
 	bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup);
 	virtual void updateCoords();
 	virtual void draw();
-	virtual uint32 getMemory() { return sizeof(*this)+_Id.size(); }
+	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
 	// from CViewBase
 	virtual sint32 getAlpha() const { return (sint32) _Color.A; }

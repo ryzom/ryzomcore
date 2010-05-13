@@ -411,7 +411,7 @@ bool CLuaState::executeFile(const std::string &pathName)
 	}
 	*/
 	script.resize(CFile::getFileSize(pathName));
-	inputFile.serialBuffer((uint8 *) &script[0],  script.size());
+	inputFile.serialBuffer((uint8 *) &script[0],  (uint)script.size());
 
 
 	// execute the script text,   with dbgSrc==filename (use @ for lua internal purpose)

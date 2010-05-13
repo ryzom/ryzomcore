@@ -2814,7 +2814,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 			{
 				// Take the top most control.
 				uint nMaxDepth = 0;
-				for (sint32 i = _CtrlsUnderPointer.size()-1; i >= 0; i--)
+				for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
 				{
 					CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
 					if (ctrl && ctrl->isCapturable() && isControlInWindow(ctrl, pNewCurrentWnd))
@@ -2863,7 +2863,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 			// Take the top most control.
 			{
 				uint nMaxDepth = 0;
-				for (sint32 i = _CtrlsUnderPointer.size()-1; i >= 0; i--)
+				for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
 				{
 					CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
 					if (ctrl && ctrl->isCapturable() && isControlInWindow(ctrl, pNewCurrentWnd))
@@ -3956,7 +3956,7 @@ uint CInterfaceManager::getProcedureNumActions(const std::string &procName) cons
 	if(it!=_ProcedureMap.end())
 	{
 		const CProcedure	&proc= it->second;
-		return proc.Actions.size();
+		return (uint)proc.Actions.size();
 	}
 	else
 		return 0;

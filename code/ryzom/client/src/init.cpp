@@ -193,7 +193,7 @@ void *XmlMalloc4NeL (size_t size)
 //	if (XmlAllocUsesSTL)
 	{
 		int *newB = (int *) xmlStlAlloc.allocate(size + sizeof(int));
-		*newB = size;
+		*newB = (int)size;
 		return (void *) (newB + 1);
 	}
 // 	else

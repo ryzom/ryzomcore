@@ -680,7 +680,7 @@ sint CComLuaModule::luaPrint(lua_State* state)
 	object->serialize(ss);
 	std::vector<std::string> lines;
 	NLMISC::splitString(ss, "\n", lines);
-	uint first=0, last=lines.size();
+	uint first=0, last=(uint)lines.size();
 	for (; first != last ; ++first) { nlinfo("%s", lines[first].c_str()); }
 
 	//this2->_Client->requestCreateScenario(object);
@@ -1107,7 +1107,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 		{
 
 			first = 0;
-			last = keys.size();
+			last = (uint32)keys.size();
 	//				if (!keys.empty())
 			{
 				lua_pushstring(state, "Keys");
@@ -1332,7 +1332,7 @@ CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::strin
 	if (dump)
 	{
 		COFile testNico("test_nico.lua");
-		testNico.serialBuffer(const_cast<uint8 * >((const uint8 *) &data[0]), data.size());
+		testNico.serialBuffer(const_cast<uint8 * >((const uint8 *) &data[0]), (uint)data.size());
 	}
 	CObject* object = NULL;
 	// TMP TMP
@@ -1681,7 +1681,7 @@ sint CComLuaModule::luaGetUserTriggers(lua_State* state)
 
 	const TUserTriggerDescriptions&  triggers = this2->_Client->getEditionModule().getUserTriggers();
 
-	uint32 first = 0, last = triggers.size();
+	uint32 first = 0, last = (uint32)triggers.size();
 	lua_newtable(state);
 	for ( ; first != last ; ++first)
 	{
@@ -1728,7 +1728,7 @@ sint CComLuaModule::luaGetRuntimeActs(lua_State* state)
 
 	const TActPositionDescriptions& actPositionDescriptions = this2->_Client->getEditionModule().getRuntimeActs();
 
-	uint32 first = 0, last = actPositionDescriptions.size();
+	uint32 first = 0, last = (uint32)actPositionDescriptions.size();
 	lua_newtable(state);
 	for ( ; first != last ; ++first)
 	{

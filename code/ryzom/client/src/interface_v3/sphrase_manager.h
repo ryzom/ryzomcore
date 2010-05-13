@@ -163,7 +163,7 @@ public:
 	const CSPhraseCom	&getPhrase(uint32 slot) const;
 
 	/// get the number of memory lines.
-	uint32				getNbMemoryLines() const { return _Memories.size(); }
+	uint32				getNbMemoryLines() const { return (uint32)_Memories.size(); }
 
 	/** Allocate a Free Slot (for NEW phrase setup). 0 is not a free slot
 	 *	NB: the slot is not still correctly filled(), and getPhrase() will return Empty. use setPhrase() just after

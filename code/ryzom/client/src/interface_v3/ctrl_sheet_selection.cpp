@@ -45,8 +45,8 @@ sint  CCtrlSheetSelection::addGroup(const std::string &name)
 		return - 1;
 	}
 	_Groups.push_back(CSheetSelectionGroup(name));
-	_GroupNameToIndex[name] = _Groups.size() - 1;
-	return _Groups.size() - 1;
+	_GroupNameToIndex[name] = (uint)_Groups.size() - 1;
+	return (sint)_Groups.size() - 1;
 }
 
 //=============================================================

@@ -487,7 +487,7 @@ static void interfaceScriptAsMemStream(const std::string &script, CMemStream &de
 	}
 	destStream.seek(0, NLMISC::IStream::begin);
 	if (script.empty()) return;
-	destStream.serialBuffer(const_cast<uint8 *>((const uint8 *) &script[0]), script.size());
+	destStream.serialBuffer(const_cast<uint8 *>((const uint8 *) &script[0]), (uint)script.size());
 	destStream.invert();
 	destStream.seek(0, NLMISC::IStream::begin);
 }
@@ -701,7 +701,7 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 
 	// Resize action category array
 	uint actionCategoryCount = CIXml::countChildren(curNode, "action_category");
-	Actions.reserveCategories(Actions.getCategories ().size()+actionCategoryCount);
+	Actions.reserveCategories((uint)Actions.getCategories ().size()+actionCategoryCount);
 	EditActions.reserveCategories(1);
 
 	while (curNode)
@@ -2625,7 +2625,7 @@ bool				CInterfaceParser::solveDefine(const std::string &propVal, std::string &n
 			curPos++;
 
 			// get the id pos
-			uint	startIdPos= curPos;
+			uint	startIdPos= (uint)curPos;
 			while( curPos<propVal.size() && validDefineChar(propVal[curPos]) )
 				curPos++;
 			// get the id
@@ -2754,7 +2754,7 @@ void		CInterfaceParser::CAction::buildBlocks (const std::string &in, std::vector
 
 			// get the id pos
 			uint countNbDigit = 0;
-			uint startIdPos= curPos;
+			uint startIdPos= (uint)curPos;
 			while (curPos<in.size() && in[curPos]>='0' && in[curPos]<='9')
 			{
 				curPos++;
@@ -2772,7 +2772,7 @@ void		CInterfaceParser::CAction::buildBlocks (const std::string &in, std::vector
 				// There is some digit it is an argument
 
 				// copy the last not param sub string.
-				sint nbToCopy = curPos-countNbIdent-countNbDigit-lastPos;
+				sint nbToCopy = (sint)(curPos-countNbIdent-countNbDigit-lastPos);
 				if (nbToCopy > 0)
 					lastString += in.substr(lastPos, nbToCopy);
 

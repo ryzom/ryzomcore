@@ -38,7 +38,7 @@ public:
 	/// Remove all entities (& elte them)
 	void			  removeAll();
 	/// Get the number of entity
-	uint			  getNumEntities() const { return _Entities.size(); }
+	uint			  getNumEntities() const { return (uint)_Entities.size(); }
 	/// Get an entity by its index
 	IStreamableEntity *getEntity(uint index) const { return _Entities[index]; }
 	//\name from IStreamableEntity

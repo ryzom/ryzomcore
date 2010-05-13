@@ -69,7 +69,7 @@ static inline uint getCharacterCategory(ucchar c)
 static uint skipUCCharsRight(uint startPos, const ucstring &str)
 {
 	uint pos = startPos;
-	uint endIndex = str.length();
+	uint endIndex = (uint)str.length();
 	uint ccat = getCharacterCategory(str[pos]);
 	// skip characters of the same category
 	while (pos != endIndex && getCharacterCategory(str[pos]) == ccat) ++pos;
@@ -284,11 +284,11 @@ class CAHEditGotoLineBegin : public CAHEdit
 		// go to the start of line
 		if (_GroupEdit->getViewText())
 		{
-			sint line = _GroupEdit->getViewText()->getLineFromIndex(_GroupEdit->getCursorPos() + _GroupEdit->getPrompt().length());
+			sint line = _GroupEdit->getViewText()->getLineFromIndex(_GroupEdit->getCursorPos() + (uint)_GroupEdit->getPrompt().length());
 			if (line == -1) return;
 			sint newPos = std::max(_GroupEdit->getViewText()->getLineStartIndex(line), (sint) _GroupEdit->getPrompt().length());
 			if (newPos == -1) return;
-			_GroupEdit->setCursorPos(newPos - _GroupEdit->getPrompt().length());
+			_GroupEdit->setCursorPos(newPos - (sint32)_GroupEdit->getPrompt().length());
 			_GroupEdit->setCursorAtPreviousLineEnd(false);
 		}
 	}
@@ -306,20 +306,20 @@ class CAHEditGotoLineEnd : public CAHEdit
 		{
 			if (_GroupEdit->getViewText()->getMultiLine())
 			{
-				sint line = _GroupEdit->getViewText()->getLineFromIndex(_GroupEdit->getCursorPos() + _GroupEdit->getPrompt().length(), _GroupEdit->isCursorAtPreviousLineEnd());
+				sint line = _GroupEdit->getViewText()->getLineFromIndex(_GroupEdit->getCursorPos() + (uint)_GroupEdit->getPrompt().length(), _GroupEdit->isCursorAtPreviousLineEnd());
 				if (line == -1) return;
 				sint newPos;
 				bool endOfPreviousLine;
 				_GroupEdit->getViewText()->getLineEndIndex(line, newPos, endOfPreviousLine);
 				if (newPos != -1)
 				{
-					_GroupEdit->setCursorPos(newPos - _GroupEdit->getPrompt().length());
+					_GroupEdit->setCursorPos(newPos - (sint32)_GroupEdit->getPrompt().length());
 					_GroupEdit->setCursorAtPreviousLineEnd(endOfPreviousLine);
 				}
 			}
 			else
 			{
-				_GroupEdit->setCursorPos(_GroupEdit->getPrompt().length() + _GroupEdit->getInputString().length());
+				_GroupEdit->setCursorPos((sint32)_GroupEdit->getPrompt().length() + (sint32)_GroupEdit->getInputString().length());
 			}
 		}
 	}
@@ -344,7 +344,7 @@ class CAHEditGotoBlockEnd : public CAHEdit
 {
 	void actionPart ()
 	{
-		_GroupEdit->setCursorPos(_GroupEdit->getInputStringRef().length());
+		_GroupEdit->setCursorPos((sint32)_GroupEdit->getInputStringRef().length());
 		_GroupEdit->setCursorAtPreviousLineEnd(false);
 	}
 };
@@ -374,7 +374,7 @@ class CAHEditPreviousLine : public CAHEdit
 		}
 		else if (!_GroupEdit->getMaxHistoric() && _GroupEdit->getViewText()->getMultiLine())
 		{
-			uint cursorPosInText = _GroupEdit->getCursorPos() + _GroupEdit->getPrompt().length();
+			uint cursorPosInText = _GroupEdit->getCursorPos() + (uint)_GroupEdit->getPrompt().length();
 			if (
 				(_GroupEdit->getCursorPos() == (sint32) _GroupEdit->getInputStringRef().length() && _GroupEdit->getViewText()->getNumLine() == 1) ||
 				_GroupEdit->getViewText()->getLineFromIndex(cursorPosInText, _GroupEdit->isCursorAtPreviousLineEnd()) == 0
@@ -392,7 +392,7 @@ class CAHEditPreviousLine : public CAHEdit
 			_GroupEdit->getViewText()->getCharacterIndexFromPosition(cx, cy, newCharIndex, newLineEnd);
 			if (newLineEnd)
 			{
-				_GroupEdit->setCursorPos(newCharIndex - _GroupEdit->getPrompt().length());
+				_GroupEdit->setCursorPos(newCharIndex - (sint32)_GroupEdit->getPrompt().length());
 				_GroupEdit->setCursorAtPreviousLineEnd(true);
 				sint32 newPos = _GroupEdit->getCursorPos();
 				clamp(newPos, (sint32) 0, (sint32) _GroupEdit->getInputStringRef().size());
@@ -413,7 +413,7 @@ class CAHEditPreviousLine : public CAHEdit
 			{
 				_GroupEdit->setCursorPos(newCharIndex + 1);
 			}
-			_GroupEdit->setCursorPos(_GroupEdit->getCursorPos()-_GroupEdit->getPrompt().length());
+			_GroupEdit->setCursorPos(_GroupEdit->getCursorPos()-(sint32)_GroupEdit->getPrompt().length());
 			sint32 newpos = _GroupEdit->getCursorPos();
 			clamp(newpos, (sint32) 0, (sint32)_GroupEdit->getInputStringRef().size());
 			_GroupEdit->setCursorPos(newpos);
@@ -448,7 +448,7 @@ class CAHEditNextLine : public CAHEdit
 		{
 			sint cx, cy;
 			sint height;
-			_GroupEdit->getViewText()->getCharacterPositionFromIndex(_GroupEdit->getCursorPos() + _GroupEdit->getPrompt().length(), _GroupEdit->isCursorAtPreviousLineEnd(), cx, cy, height);
+			_GroupEdit->getViewText()->getCharacterPositionFromIndex(_GroupEdit->getCursorPos() + (sint)_GroupEdit->getPrompt().length(), _GroupEdit->isCursorAtPreviousLineEnd(), cx, cy, height);
 			if (cy != 0)
 			{
 				cy -= height;
@@ -457,7 +457,7 @@ class CAHEditNextLine : public CAHEdit
 				_GroupEdit->getViewText()->getCharacterIndexFromPosition(cx, cy, newCharIndex, newLineEnd);
 				if (newLineEnd)
 				{
-					_GroupEdit->setCursorPos(newCharIndex - _GroupEdit->getPrompt().length());
+					_GroupEdit->setCursorPos(newCharIndex - (sint32)_GroupEdit->getPrompt().length());
 					_GroupEdit->setCursorAtPreviousLineEnd(true);
 					sint32 newPos = _GroupEdit->getCursorPos();
 					clamp(newPos, (sint32) 0, (sint32) _GroupEdit->getInputStringRef().size());
@@ -478,7 +478,7 @@ class CAHEditNextLine : public CAHEdit
 				{
 					_GroupEdit->setCursorPos(min(sint32(newCharIndex + 1), sint32(_GroupEdit->getInputStringRef().length() + _GroupEdit->getPrompt().length())));
 				}
-				_GroupEdit->setCursorPos(_GroupEdit->getCursorPos()-_GroupEdit->getPrompt().length());
+				_GroupEdit->setCursorPos(_GroupEdit->getCursorPos()-(sint32)_GroupEdit->getPrompt().length());
 				sint32 newPos = _GroupEdit->getCursorPos();
 				clamp(newPos, (sint32) 0, (sint32) _GroupEdit->getInputStringRef().size());
 				_GroupEdit->setCursorPos(newPos);

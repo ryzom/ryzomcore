@@ -69,7 +69,7 @@ public:
 	bool delElement (const std::string &id, bool noWarning=false);
 	bool delElement (CInterfaceElement *pIE, bool noWarning=false);
 
-	uint getNumGroup() const { return _ChildrenGroups.size(); }
+	uint getNumGroup() const { return (uint)_ChildrenGroups.size(); }
 	CInterfaceGroup *getGroup(uint index) const;
 
 	sint32	getMaxUsedW() const;

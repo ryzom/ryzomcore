@@ -176,7 +176,7 @@ static bool send(const string &url)
 			"Host: crashcounter.nevrax.com\n"
 			"User-agent: Ryzom\n"
 			"\n";
-		uint32 size = buffer.size();
+		uint32 size = (uint32)buffer.size();
 		if(!url.empty())
 		{
 			if(CrashCounterSock.send((uint8 *)buffer.c_str(), size, false) != CSock::Ok)
