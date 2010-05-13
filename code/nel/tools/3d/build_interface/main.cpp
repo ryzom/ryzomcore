@@ -146,9 +146,9 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 string getBaseName (const string &fullname)
 {
 	string sTmp2 = "";
-	int pos = fullname.rfind('_');
-	for (int j = 0; j <= pos; ++j)
-		sTmp2 += fullname[j];
+	string::size_type pos = fullname.rfind('_');
+	if (pos != string::npos)
+		sTmp2 = fullname.substr(0, pos+1);
 	return sTmp2;
 }
 
@@ -214,7 +214,7 @@ int main(int nNbArg, char **ppArgs)
 	}
 
 	string fmtName;
-	uint iNumDirs = inputDirs.size(); 
+	uint iNumDirs =  (uint)inputDirs.size(); 
 	if( iNumDirs )
 	{
 		fmtName = inputDirs.front();
