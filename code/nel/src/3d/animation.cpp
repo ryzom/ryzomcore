@@ -189,7 +189,7 @@ TAnimationTime CAnimation::getBeginTime () const
 	if (_BeginTimeTouched)
 	{
 		// Track count
-		uint trackCount=_TrackVector.size();
+		uint trackCount=(uint)_TrackVector.size();
 
 		// Track count empty ?
 		if (trackCount==0)
@@ -220,7 +220,7 @@ TAnimationTime CAnimation::getEndTime () const
 	if (_EndTimeTouched)
 	{
 		// Track count
-		uint trackCount=_TrackVector.size();
+		uint trackCount=(uint)_TrackVector.size();
 
 		// Track count empty ?
 		if (trackCount==0)
@@ -254,7 +254,7 @@ bool			CAnimation::allTrackLoop() const
 	if(_AnimLoopTouched)
 	{
 		// Track count
-		uint trackCount=_TrackVector.size();
+		uint trackCount=(uint)_TrackVector.size();
 
 		// Default is true
 		_AnimLoop= true;
@@ -393,7 +393,7 @@ void	CAnimation::applyTrackQuatHeaderCompression()
 		_TrackSamplePack= new CTrackSamplePack;
 
 		// just copy the built track headers
-		_TrackSamplePack->TrackHeaders.resize(sampleCounter.TrackHeaders.size());
+		_TrackSamplePack->TrackHeaders.resize((uint32)sampleCounter.TrackHeaders.size());
 		for(i=0;i<_TrackSamplePack->TrackHeaders.size();i++)
 		{
 			_TrackSamplePack->TrackHeaders[i]= sampleCounter.TrackHeaders[i];

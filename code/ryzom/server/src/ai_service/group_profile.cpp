@@ -74,7 +74,7 @@ void CGrpProfileDynFollowPath::calcPath()
 	_FollowRoute.setAIProfile(new	CGrpProfileFollowRoute(_Grp,	_CurrentRoad->coords(),	_CurrentRoad->verticalPos(), true));
 	CGrpProfileFollowRoute*const	fr = static_cast<CGrpProfileFollowRoute*>(_FollowRoute.getAIProfile());
 	
-	nlassert(_CurrentZone==_CurrentRoad->startZone() || _CurrentZone==_CurrentRoad->endZone())
+	nlassert(_CurrentZone==_CurrentRoad->startZone() || _CurrentZone==_CurrentRoad->endZone());
 	fr->setDirection(_CurrentRoad->startZone()==_CurrentZone);
 }
 

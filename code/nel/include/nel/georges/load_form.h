@@ -363,8 +363,8 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 					{
 						uint dicIndex;
 						// add a new dictionnary entry
-						dicIndex = dictionnary.size();
-						dictionnaryIndex.insert(std::make_pair(filename, dictionnary.size()));
+						dicIndex = (uint)dictionnary.size();
+						dictionnaryIndex.insert(std::make_pair(filename, (uint)dictionnary.size()));
 						dictionnary.push_back(filename);
 
 						// add the dependecy index
@@ -430,7 +430,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.serialCont(dictionnary);
 
 			// write the dependencies data
-			uint32 depSize = dependencies.size();
+			uint32 depSize = (uint32)dependencies.size();
 			ofile.serial(depSize);
 			std::map<NLMISC::CSheetId, std::vector<uint32> >::iterator first(dependencies.begin()), last(dependencies.end());
 			for (; first != last; ++first)
@@ -448,7 +448,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.seek(endBlockSize, NLMISC::IStream::begin);
 
 			// write the sheet data
-			uint32 nbEntries = sheetIds.size();
+			uint32 nbEntries = (uint32)sheetIds.size();
 			uint32 ver = T::getVersion ();
 			ofile.serial (nbEntries);
 			ofile.serial (ver);
@@ -1086,8 +1086,8 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 						if (dictionnaryIndex.find(filename) == dictionnaryIndex.end())
 						{
 							// add a new dictionnary entry
-							dicIndex = dictionnary.size();
-							dictionnaryIndex.insert(std::make_pair(filename, dictionnary.size()));
+							dicIndex = (uint)dictionnary.size();
+							dictionnaryIndex.insert(std::make_pair(filename, (uint)dictionnary.size()));
 							dictionnary.push_back(filename);
 						}
 						else
@@ -1157,7 +1157,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.serialCont(dictionnary);
 
 			// write the dependencies data
-			uint32 depSize = dependencies.size();
+			uint32 depSize = (uint32)dependencies.size();
 			ofile.serial(depSize);
 			std::map<std::string, std::vector<uint32> >::iterator first(dependencies.begin()), last(dependencies.end());
 			for (; first != last; ++first)
@@ -1175,7 +1175,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.seek(endBlockSize, NLMISC::IStream::begin);
 
 			// write the sheet data
-			uint32 nbEntries = sheetNames.size();
+			uint32 nbEntries = (uint32)sheetNames.size();
 			uint32 ver = T::getVersion ();
 			ofile.serial (nbEntries);
 			ofile.serial (ver);

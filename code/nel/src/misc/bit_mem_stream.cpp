@@ -515,7 +515,7 @@ void	CBitMemStream::serial(std::string &b)
 	}
 	else
 	{
-		len = b.size();
+		len = (uint32)b.size();
 		if (len>1000000)
 			throw NLMISC::EInvalidDataStream( "BMS: Trying to write a string of %u bytes", len );
 		serial( len );
@@ -556,7 +556,7 @@ inline	void		CBitMemStream::serial(ucstring &b)
 		}
 		else
 		{
-			len= b.size();
+			len= (uint32)b.size();
 			if (len>1000000)
 				throw NLMISC::EInvalidDataStream( "BMS: Trying to write an ucstring of %u bytes", len );
 			serial(len);
@@ -664,7 +664,7 @@ void CBitMemStream::serialCont(std::vector<bool> &cont)
 	}
 	else
 	{
-		len= cont.size();
+		len= (sint32)cont.size();
 		serial(len);
 
 		std::vector<bool>::iterator it= cont.begin();

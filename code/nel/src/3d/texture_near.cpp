@@ -55,7 +55,7 @@ CTextureNear::CTextureNear(sint size)
 // ***************************************************************************
 sint			CTextureNear::getNbAvailableTiles()
 {
-	return _FreeTiles.size();
+	return (sint)_FreeTiles.size();
 }
 // ***************************************************************************
 uint			CTextureNear::getTileAndFillRect(CRGBA  map[NL_TILE_LIGHTMAP_SIZE*NL_TILE_LIGHTMAP_SIZE])

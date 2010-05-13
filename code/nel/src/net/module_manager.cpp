@@ -661,12 +661,12 @@ namespace NLNET
 
 		virtual uint32 getNbModule()
 		{
-			return _ModuleInstances.getAToBMap().size();
+			return (uint32)_ModuleInstances.getAToBMap().size();
 		}
 
 		virtual uint32 getNbModuleProxy()
 		{
-			return _ModuleProxyIds.getAToBMap().size();
+			return (uint32)_ModuleProxyIds.getAToBMap().size();
 		}
 
 

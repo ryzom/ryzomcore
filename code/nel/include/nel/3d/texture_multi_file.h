@@ -51,7 +51,7 @@ public:
 	 */
 	void					setFileName(uint index, const char *);
 	//
-	uint					getNumFileName() const { return _FileNames.size(); }
+	uint					getNumFileName() const { return (uint)_FileNames.size(); }
 	/**
 	 * get the name of the file containing the texture for the given index
 	 * \return name of the file

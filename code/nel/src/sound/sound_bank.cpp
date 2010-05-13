@@ -358,7 +358,7 @@ void				CSoundBank::getNames( std::vector<NLMISC::TStringId> &names )
  */
 uint				CSoundBank::countSounds()
 {
-	return _Sounds.size();
+	return (uint)_Sounds.size();
 }
 
 

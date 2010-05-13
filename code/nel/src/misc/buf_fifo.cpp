@@ -118,7 +118,7 @@ void CBufFIFO::push(const std::vector<uint8> &buffer1, const std::vector<uint8> 
 	TTicks before = CTime::getPerformanceTime();
 #endif
 
-	TFifoSize s = buffer1.size() + buffer2.size();
+	TFifoSize s = (TFifoSize)(buffer1.size() + buffer2.size());
 
 #if DEBUG_FIFO
 	nldebug("%p push2(%d)", this, s);
@@ -421,16 +421,16 @@ uint32 CBufFIFO::size ()
 		if (_Rewinder == NULL)
 			return _BufferSize;
 		else
-			return _Rewinder - _Buffer;
+			return (uint32)(_Rewinder - _Buffer);
 	}
 	else if (_Head > _Tail)
 	{
-		return _Head - _Tail;
+		return (uint32)(_Head - _Tail);
 	}
 	else if (_Head < _Tail)
 	{
 		nlassert (_Rewinder != NULL);
-		return (_Rewinder - _Tail) + (_Head - _Buffer);
+		return (uint32)((_Rewinder - _Tail) + (_Head - _Buffer));
 	}
 	nlstop;
 	return 0;
@@ -489,9 +489,9 @@ void CBufFIFO::resize (uint32 s)
 		{
 			nlassert (_Rewinder != NULL);
 
-			uint size1 = _Rewinder - _Tail;
+			uint size1 = (uint)(_Rewinder - _Tail);
 			CFastMem::memcpy (NewBuffer, _Tail, size1);
-			uint size2 = _Head - _Buffer;
+			uint size2 = (uint)(_Head - _Buffer);
 			CFastMem::memcpy (NewBuffer + size1, _Buffer, size2);
 
 			nlassert (size1+size2==UsedSize);
@@ -582,7 +582,7 @@ void CBufFIFO::display ()
 		{
 			if (strlen(str) < 1023)
 			{
-				uint32 p = strlen(str);
+				uint32 p = (uint32)strlen(str);
 				if (isprint(*pos))
 					str[p] = *pos;
 				else

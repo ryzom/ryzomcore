@@ -1339,7 +1339,7 @@ bool			CTransform::clipHasParent(CTransform *parent)
 void			CTransform::clipDelFromParent(CTransform *parent)
 {
 	// search O(n) for all Parents
-	uint	numParents= _ClipParents.size();
+	uint	numParents= (uint)_ClipParents.size();
 	for(uint i=0;i<numParents;i++)
 	{
 		if(_ClipParents[i]->Parent==parent)

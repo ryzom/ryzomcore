@@ -47,7 +47,7 @@ void			CHLSTextureBank::reset()
 uint32			CHLSTextureBank::addColorTexture(const CHLSColorTexture &tex)
 {
 	_ColorTextures.push_back(tex);
-	return _ColorTextures.size()-1;
+	return (uint32)_ColorTextures.size()-1;
 }
 // ***************************************************************************
 void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 colorTextureId, const vector<CHLSColorDelta> &cols)
@@ -62,14 +62,14 @@ void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 color
 	// new instance
 	CTextureInstance	textInst;
 	textInst._ColorTextureId= colorTextureId;
-	textInst._DataIndex= _TextureInstanceData.size();
+	textInst._DataIndex= (uint32)_TextureInstanceData.size();
 	// leave ptrs undefined
 	textInst._DataPtr= NULL;
 	textInst._ColorTexturePtr= NULL;
 
 	// allocate/fill data
-	uint32	nameSize= (nameLwr.size()+1);
-	uint32	colSize= cols.size()*sizeof(CHLSColorDelta);
+	uint32	nameSize= (uint32)(nameLwr.size()+1);
+	uint32	colSize= (uint32)cols.size()*sizeof(CHLSColorDelta);
 	_TextureInstanceData.resize(_TextureInstanceData.size() + nameSize + colSize);
 	// copy name
 	memcpy(&_TextureInstanceData[textInst._DataIndex], nameLwr.c_str(), nameSize);
@@ -176,7 +176,7 @@ bool			CHLSTextureBank::CTextureInstance::sameName(const char *str)
 void			CHLSTextureBank::CTextureInstance::buildColorVersion(NLMISC::CBitmap &out)
 {
 	// get ptr to color deltas.
-	uint	nameSize= strlen((const char*)_DataPtr)+1;
+	uint	nameSize= (uint)strlen((const char*)_DataPtr)+1;
 	CHLSColorDelta		*colDeltas= (CHLSColorDelta*)(_DataPtr + nameSize);
 
 	// build the texture.

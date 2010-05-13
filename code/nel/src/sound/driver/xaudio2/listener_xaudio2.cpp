@@ -75,8 +75,9 @@ CListenerXAudio2::~CListenerXAudio2()
 	if (soundDriver) soundDriver->removeListener(this);
 }
 
-#define NLSOUND_XAUDIO2_RELEASE_EX(pointer, command) if (_ListenerOk) nlassert(pointer) \
+#define NLSOUND_XAUDIO2_RELEASE_EX(pointer, command) if (_ListenerOk) nlassert(pointer); \
 	if (pointer) { command; pointer = NULL; }
+
 void CListenerXAudio2::release()
 {
 	NLSOUND_XAUDIO2_RELEASE_EX(_FilterVoice, _FilterVoice->DestroyVoice())

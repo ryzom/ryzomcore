@@ -723,7 +723,7 @@ public:
 
 					do
 					{
-						const uint numShapes = m._Meshes.size();
+						const uint numShapes = (uint)m._Meshes.size();
 						const uint8 *m0, *m1;
 						float lambda;
 						float opLambda;
@@ -1105,7 +1105,7 @@ uint	    CPSConstraintMesh::getNumShapes() const
 	{
 		const_cast<CPSConstraintMesh *>(this)->update();
 	}
-	return _MeshShapeFileName.size();
+	return (uint)_MeshShapeFileName.size();
 }
 
 //====================================================================================
@@ -1434,7 +1434,7 @@ void CPSConstraintMesh::fillIndexesInPrecompBasis(void)
 {
 	NL_PS_FUNC(CPSConstraintMesh_fillIndexesInPrecompBasis)
 	// TODO : avoid code duplication with CPSFace ...
-	const uint32 nbConf = _PrecompBasis.size();
+	const uint32 nbConf = (uint32)_PrecompBasis.size();
 	if (_Owner)
 	{
 		_IndexInPrecompBasis.resize( _Owner->getMaxSize() );
@@ -1475,7 +1475,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 	else
 	{
-		uint32 nbConfigurations = _PrecompBasis.size();
+		uint32 nbConfigurations = (uint32)_PrecompBasis.size();
 		f.serial(nbConfigurations);
 		if (nbConfigurations)
 		{
@@ -1977,7 +1977,7 @@ void CPSConstraintMesh::newElement(const CPSEmitterInfo &info)
 	newSizeElement(info);
 	newPlaneBasisElement(info);
 	// TODO : avoid code cuplication with CPSFace ...
-	const uint32 nbConf = _PrecompBasis.size();
+	const uint32 nbConf = (uint32)_PrecompBasis.size();
 	if (nbConf) // do we use precomputed basis ?
 	{
 		_IndexInPrecompBasis[_Owner->getNewElementIndex()] = rand() % nbConf;

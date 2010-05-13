@@ -93,14 +93,14 @@ bool	CPrimitiveConfigurations::belong (const IPrimitive &primitive) const
 {
 	// For each match group
 	uint group;
-	const uint numGroup = MatchPairs.size();
+	const uint numGroup = (uint)MatchPairs.size();
 	for (group=0; group<numGroup; group++)
 	{
 		const CMatchGroup &matchGroup = MatchPairs[group];
 
 		// For each rules
 		uint rules;
-		const uint numRules = matchGroup.Pairs.size();
+		const uint numRules = (uint)matchGroup.Pairs.size();
 		for (rules=0; rules<numRules; rules++)
 		{
 			const std::pair<std::string, std::string> &pairs = matchGroup.Pairs[rules];

@@ -42,7 +42,7 @@ void		CShadowSkin::applySkin(CVector *dst, std::vector<CMatrix3x4> &boneMat3x4)
 {
 	if(Vertices.empty())
 		return;
-	uint	numVerts= Vertices.size();
+	uint	numVerts= (uint)Vertices.size();
 	CShadowVertex	*src= &Vertices[0];
 
 	// Then do the skin

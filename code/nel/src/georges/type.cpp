@@ -340,7 +340,7 @@ public:
 
 				// While the filename as a number
 				sint i;
-				for (i=filename.size ()-1; i>=0; i--)
+				for (i=(sint)filename.size ()-1; i>=0; i--)
 				{
 					if ((filename[i]<'0') || (filename[i]>'9'))
 						break;
@@ -575,7 +575,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 	{
 		// Evaluate predefinition
 		uint i;
-		uint predefCount = Definitions.size ();
+		uint predefCount = (uint)Definitions.size ();
 		for (i=0; i<predefCount; i++)
 		{
 			// Ref on the value
@@ -596,7 +596,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 		{
 			// Evaluate predefinition
 			uint i;
-			uint predefCount = Definitions.size ();
+			uint predefCount = (uint)Definitions.size ();
 			for (i=0; i<predefCount; i++)
 			{
 				// Ref on the value
@@ -647,7 +647,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 					{
 						// Build a nice error output in warning
 						char msg[512];
-						buildError (msg, result.size ());
+						buildError (msg, (uint)result.size ());
 						warning (false, formName, form->getFilename ().c_str (), "getValue", "Missing closing quote\n%s\n%s", result.c_str (), msg);
 						return false;
 					}
@@ -702,7 +702,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 					{
 						// Build a nice error output in warning
 						char msg[512];
-						buildError (msg, result.size ());
+						buildError (msg, (uint)result.size ());
 						warning (false, formName, form->getFilename ().c_str (), "getValue", "Missing double quote\n%s\n%s", result.c_str (), msg);
 						return false;
 					}
@@ -757,7 +757,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 				{
 					// Evaluate predefinition
 					uint i;
-					uint predefCount = Definitions.size ();
+					uint predefCount = (uint)Definitions.size ();
 					for (i=0; i<predefCount; i++)
 					{
 						// Ref on the value
@@ -877,7 +877,7 @@ const string	&CType::getIncrement () const
 
 uint CType::getNumDefinition () const
 {
-	return Definitions.size ();
+	return (uint)Definitions.size ();
 }
 
 // ***************************************************************************

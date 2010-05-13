@@ -108,7 +108,7 @@ public:
 
 	/// get lod information.
 	const CLod		&getLod(uint lod) const {return _Lods[lod];}
-	uint			getNumLods() const {return _Lods.size();}
+	uint			getNumLods() const {return (uint)_Lods.size();}
 
 // ***************************
 private:

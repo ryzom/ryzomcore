@@ -131,7 +131,7 @@ public:
 	bool			isShared() const { return _Sharing; }
 
 	// Get the number of cached textures
-	uint			getNumCachedTextures() const { return _CachedTex.size(); }
+	uint			getNumCachedTextures() const { return (uint)_CachedTex.size(); }
 
 	// Get a cached texture
 	ITexture		*getCachedTexture(uint index) const { return _CachedTex[index]; }

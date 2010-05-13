@@ -175,13 +175,13 @@ public:
 
 	/** get the number of LOD.
 	 */
-	uint getNbLod() const { return _Lods.size() ; }
+	uint getNbLod() const { return (uint)_Lods.size() ; }
 
 
 	/** get the number of rendering pass of a LOD.
 	 *	\param lodId the id of the LOD.
 	 */
-	uint getNbRdrPass(uint lodId) const { return _Lods[lodId].RdrPass.size() ; }
+	uint getNbRdrPass(uint lodId) const { return (uint)_Lods[lodId].RdrPass.size() ; }
 
 
 	/** get the primitive block associated with a rendering pass of a LOD.
@@ -211,7 +211,7 @@ public:
 	}
 
 	/// get the number of BlendShapes
-	uint getNbBlendShapes() const { return _MeshMorpher.BlendShapes.size(); }
+	uint getNbBlendShapes() const { return (uint)_MeshMorpher.BlendShapes.size(); }
 
 	/** Build a geometry copy for the given Lod. The VBuffer/IndexBuffer must not be resident. false if bad lodId
 	 *	The process ensure there is no hole in the resulting vertices array. Hence VB num Verts != vertices.size().

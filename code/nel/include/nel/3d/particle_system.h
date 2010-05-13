@@ -263,7 +263,7 @@ public:
 		void						remove(CParticleSystemProcess *process);
 
 		/// get the number of process that are attached to the system
-		uint32						getNbProcess(void) const { return _ProcessVect.size(); }
+		uint32						getNbProcess(void) const { return (uint32)_ProcessVect.size(); }
 
 		/**
 		 *  Get a pointer to the nth process.

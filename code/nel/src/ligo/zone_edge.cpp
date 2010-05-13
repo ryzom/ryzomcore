@@ -53,7 +53,7 @@ bool CZoneEdge::build (const std::vector<NLMISC::CVector> &theEdge, const std::v
 	}
 
 	// Check last position
-	uint lastIndex = theEdge.size()-1;
+	uint lastIndex = (uint)theEdge.size()-1;
 	toCheck  = CVector (theEdge[lastIndex].x, theEdge[lastIndex].y, 0);
 	if (((toCheck-CVector (config.CellSize, 0, 0)).norm())>config.Snap)
 	{

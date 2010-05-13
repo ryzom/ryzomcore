@@ -1057,7 +1057,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 		}
 
@@ -1116,7 +1116,7 @@ protected:
 		}
 		else
 		{
-			len= cont.size();
+			len = (sint32)cont.size();
 			serial(len);
 
 			// Close the node header
@@ -1238,7 +1238,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 		}
 
@@ -1393,7 +1393,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 		}
 
@@ -1587,7 +1587,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 			__iterator		it= cont.begin();
 

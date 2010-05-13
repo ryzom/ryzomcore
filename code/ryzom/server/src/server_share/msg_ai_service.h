@@ -653,7 +653,7 @@ struct COutpostCreateSquadMsg
 		static uint32 const s_version = 1;
 		uint32 version = s_version;
 		s.serial(version);
-		nlassert(version==s_version)
+		nlassert(version==s_version);
 		s.serial(Outpost);
 		s.serial(Group);
 		s.serial(Zone);

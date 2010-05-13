@@ -298,7 +298,7 @@ void nlSleep( uint32 ms );
 #endif
 
 /// Returns Thread Id (note: on Linux, Process Id is the same as the Thread Id)
-uint getThreadId();
+size_t getThreadId();
 
 /// Returns a readable string from a vector of bytes. unprintable char are replaced by '?'
 std::string stringFromVector( const std::vector<uint8>& v, bool limited = true );

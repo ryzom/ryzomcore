@@ -91,7 +91,7 @@ inline void COXml::flushContentString ()
 	nlassert (_CurrentNode);
 
 	// String size
-	uint size=_ContentString.length();
+	uint size=(uint)_ContentString.length();
 
 	// Some content to write ?
 	if (size)
@@ -226,7 +226,7 @@ void COXml::serialSeparatedBufferOut( const char *value )
 			else
 			{
 				// Get the content buffer size
-				uint size=_ContentString.length();
+				uint size=(uint)_ContentString.length();
 
 				// Add a separator
 				if ((size) && (_ContentString[size-1]!='\n'))

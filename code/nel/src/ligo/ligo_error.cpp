@@ -53,7 +53,7 @@ void CLigoError::pushVertexError (TError code, uint id, uint edge)
 
 uint CLigoError::numVertexError () const
 {
-	return _VertexError.size ();
+	return (uint)_VertexError.size ();
 }
 
 // ***************************************************************************

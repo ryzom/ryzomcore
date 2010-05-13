@@ -127,7 +127,7 @@ uint		searchLowerBound(const T *array, uint arraySize, const T &key)
 template<class T>
 uint		searchLowerBound(const std::vector<T> &array, const T &key)
 {
-	uint	size= array.size();
+	uint	size= (uint)array.size();
 	if(size==0)
 		return 0;
 	else

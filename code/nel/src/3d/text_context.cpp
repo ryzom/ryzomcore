@@ -73,7 +73,7 @@ uint32 CTextContext::textPush (const char *format, ...)
 		_CacheStrings.push_back (csTmp);
 		if (_CacheFreePlaces.size() == 0)
 			_CacheFreePlaces.resize (1);
-		_CacheFreePlaces[0] = _CacheStrings.size()-1;
+		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
 		_CacheNbFreePlaces = 1;
 	}
 
@@ -99,7 +99,7 @@ uint32 CTextContext::textPush (const ucstring &str)
 		_CacheStrings.push_back (csTmp);
 		if (_CacheFreePlaces.size() == 0)
 			_CacheFreePlaces.resize (1);
-		_CacheFreePlaces[0] = _CacheStrings.size()-1;
+		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
 		_CacheNbFreePlaces = 1;
 	}
 

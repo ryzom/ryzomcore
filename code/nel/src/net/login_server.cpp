@@ -170,7 +170,7 @@ void cbWSChooseShard (CMessage &msgin, const std::string &/* serviceName */, TSe
 	msgout.serial (reason);
 	msgout.serial (cookie);
 	msgout.serial (ListenAddr);
-	uint32 nbPending = PendingUsers.size();
+	uint32 nbPending = (uint32)PendingUsers.size();
 	msgout.serial (nbPending);
 	CUnifiedNetwork::getInstance()->send ("WS", msgout);
 }
@@ -302,7 +302,7 @@ void CLoginServer::setListenAddress(const string &la)
 
 uint32 CLoginServer::getNbPendingUsers()
 {
-	return PendingUsers.size();
+	return (uint32)PendingUsers.size();
 }
 
 void cfcbListenAddress (CConfigFile::CVar &var)

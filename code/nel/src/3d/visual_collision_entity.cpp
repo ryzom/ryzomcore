@@ -149,7 +149,7 @@ CTrianglePatch		*CVisualCollisionEntity::getPatchTriangleUnderUs(const CVector &
 		CPatchQuadBlock		&qb= *_PatchQuadBlocks[qbId];
 
 		// Build the 2 triangles of this tile Id.
-		sint	idStart= testTriangles.size();
+		sint	idStart= (sint)testTriangles.size();
 		testTriangles.resize(idStart+2);
 		qb.buildTileTriangles((uint8)ptr->QuadId, &testTriangles[idStart]);
 

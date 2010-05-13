@@ -132,7 +132,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	// at this point, the image must be converted to an 24bit image RGB
 
 	// rowbytes is the width x number of channels
-	uint32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+	uint32 rowbytes = (uint32)png_get_rowbytes(png_ptr, info_ptr);
 	uint32 srcChannels = png_get_channels(png_ptr, info_ptr);
 
 	// allocates buffer to copy image data
@@ -326,7 +326,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 	png_set_packing(png_ptr);
 
 	// rowbytes is the width x number of channels
-	uint32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+	uint32 rowbytes = (uint32)png_get_rowbytes(png_ptr, info_ptr);
 	uint32 dstChannels = png_get_channels(png_ptr, info_ptr);
 
 	// get channels number of bitmap

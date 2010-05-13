@@ -84,7 +84,7 @@ public:
 	/// Get the head on the array of elements. NULL if none
 	void			**begin() { if(_Elements.empty()) return NULL; else return &_Elements[0];}
 	/// get the number of elements
-	uint			size() const {return _Elements.size();}
+	uint			size() const {return (uint)_Elements.size();}
 	bool			empty() const {return _Elements.empty();}
 
 	/// clear the list

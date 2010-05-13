@@ -276,7 +276,7 @@ bool					CVisualCollisionMesh::build(const std::vector<CVector> &vertices, const
 		localBBox.extend(vertices[i]);
 
 	// Build the Static Grid
-	uint	numTris= triangles.size()/3;
+	uint	numTris= (uint)triangles.size()/3;
 	_QuadGrid.create(16, numTris, localBBox);
 	// Add all triangles
 	for(i=0;i<numTris;i++)

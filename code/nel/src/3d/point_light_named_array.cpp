@@ -130,7 +130,7 @@ void			CPointLightNamedArray::build(const std::vector<CPointLightNamed> &pointLi
 void			CPointLightNamedArray::setPointLightFactor(const CScene &scene)
 {
 	// Search in the map.
-	const uint count = _PointLightGroupMap.size ();
+	const uint count = (uint)_PointLightGroupMap.size ();
 	uint i;
 	for (i=0; i<count; i++)
 	{
@@ -183,7 +183,7 @@ void			CPointLightNamedArray::serial(NLMISC::IStream &f)
 void			CPointLightNamedArray::initAnimatedLightIndex (const CScene &scene)
 {
 	// Search in the map.
-	const uint count = _PointLightGroupMap.size ();
+	const uint count = (uint)_PointLightGroupMap.size ();
 	uint i;
 	for (i=0; i<count; i++)
 	{

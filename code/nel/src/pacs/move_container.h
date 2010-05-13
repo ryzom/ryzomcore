@@ -120,7 +120,7 @@ public:
 	/// Get number of trigger informations
 	uint						getNumTriggerInfo() const
 	{
-		return _Triggers.size();
+		return (uint)_Triggers.size();
 	}
 
 	/// Get the n-th trigger informations

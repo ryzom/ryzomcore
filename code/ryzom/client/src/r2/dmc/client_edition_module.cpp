@@ -1762,7 +1762,7 @@ uint32 CClientEditionModule::getCurrentMaxId()
 		return 1000;
 	std::string eid = getEid();
 	sint32 currentId = _Factory->getMaxId(eid);
-	nlassert(currentId >= -1)
+	nlassert(currentId >= -1);
 
 	return static_cast<uint32>(currentId + 1);
 }

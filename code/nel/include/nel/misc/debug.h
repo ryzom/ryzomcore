@@ -374,19 +374,19 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 // Linux set of asserts is reduced due to that there is no message box displayer
 
 #define nlassert(exp) \
-{ \
+do { \
 	if (!(exp)) { \
 		NLMISC::createDebug (); \
 		NLMISC::INelContext::getInstance().getAssertLog()->setPosition (__LINE__, __FILE__, __FUNCTION__); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayNL ("\"%s\" ", #exp); \
 		NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 #define nlassertonce(exp) nlassert(exp)
 
 #define nlassertex(exp, str) \
-{ \
+do { \
 	if (!(exp)) { \
 		NLMISC::createDebug (); \
 		NLMISC::INelContext::getInstance().getAssertLog()->setPosition (__LINE__, __FILE__, __FUNCTION__); \
@@ -394,7 +394,7 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 		NLMISC::INelContext::getInstance().getAssertLog()->displayRawNL str; \
 		NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 #define nlverify(exp) nlassert(exp)
 #define nlverifyonce(exp) nlassert(exp)
@@ -403,7 +403,7 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 #	else // NL_OS_UNIX
 
 #define nlassert(exp) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!ignoreNextTime && !_expResult_) { \
@@ -411,20 +411,20 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 			NLMISC_BREAKPOINT; \
 	} \
 	ASSERT_THROW_EXCEPTION_CODE_EX(_expResult_, #exp) \
-}
+} while(0)
 
 #define nlassertonce(exp) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	if (!ignoreNextTime && !(exp)) { \
 		ignoreNextTime = true; \
 		if(NLMISC::_assert_stop(ignoreNextTime, __LINE__, __FILE__, __FUNCTION__, #exp)) \
 			NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 #define nlassertex(exp, str) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!ignoreNextTime && !_expResult_) { \
@@ -434,10 +434,10 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 			NLMISC_BREAKPOINT; \
 	} \
 	ASSERT_THROW_EXCEPTION_CODE_EX(_expResult_, #exp) \
-}
+} while(0)
 
 #define nlverify(exp) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!_expResult_ && !ignoreNextTime) { \
@@ -445,10 +445,10 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 			NLMISC_BREAKPOINT; \
 	} \
 	ASSERT_THROW_EXCEPTION_CODE_EX(_expResult_, #exp) \
-}
+} while(0)
 
 #define nlverifyonce(exp) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!_expResult_ && !ignoreNextTime) { \
@@ -456,10 +456,10 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 		if(NLMISC::_assert_stop(ignoreNextTime, __LINE__, __FILE__, __FUNCTION__, #exp)) \
 			NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 #define nlverifyex(exp, str) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!_expResult_ && !ignoreNextTime) { \
@@ -469,7 +469,7 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 			NLMISC_BREAKPOINT; \
 	} \
 	ASSERT_THROW_EXCEPTION_CODE_EX(_expResult_, #exp) \
-}
+} while(0)
 
 #	endif // NL_OS_UNIX
 
@@ -478,28 +478,28 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 #define nlunreferenced(identifier) (identifier)
 
 #define nlstop \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	if (!ignoreNextTime) { \
 		if(NLMISC::_assert_stop(ignoreNextTime, __LINE__, __FILE__, __FUNCTION__, NULL)) \
 			NLMISC_BREAKPOINT; \
 	} \
 	ASSERT_THROW_EXCEPTION_CODE(false) \
-}
+} while(0)
 
 #define nlstoponce \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	if (!ignoreNextTime) { \
 		ignoreNextTime = true; \
 		if(NLMISC::_assert_stop(ignoreNextTime, __LINE__, __FILE__, __FUNCTION__, NULL)) \
 			NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 
 #define nlstopex(str) \
-{ \
+do { \
 	static bool ignoreNextTime = false; \
 	if (!ignoreNextTime) { \
 		NLMISC::_assertex_stop_0(ignoreNextTime, __LINE__, __FILE__, __FUNCTION__, NULL); \
@@ -507,7 +507,7 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 		if(NLMISC::_assertex_stop_1(ignoreNextTime)) \
 			NLMISC_BREAKPOINT; \
 	} \
-}
+} while(0)
 
 
 struct EFatalError : public Exception

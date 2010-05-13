@@ -35,8 +35,13 @@
 #include <algorithm>
 #include <limits>
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#ifdef NL_OS_MAC
+#	include <al.h>
+#	include <alc.h>
+#else
+#	include <AL/al.h>
+#	include <AL/alc.h>
+#endif
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>

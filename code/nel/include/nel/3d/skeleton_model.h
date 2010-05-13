@@ -199,7 +199,7 @@ public:
 	bool		forceComputeBone(uint boneId);
 
 	/// return the number of bones currently animated/computed (because of bindSkin()/stickObject() / Lod system).
-	uint		getNumBoneComputed() const {return _BoneToCompute.size();}
+	uint		getNumBoneComputed() const {return (uint)_BoneToCompute.size();}
 
 	/** change the Lod Bone interpolation distance (in meters). If 0, interpolation is disabled.
 	 *	The smaller this value is, the more Lod skeleton system will "pop". Default is 0.5 meters.

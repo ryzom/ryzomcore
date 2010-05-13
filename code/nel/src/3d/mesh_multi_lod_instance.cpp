@@ -97,7 +97,7 @@ void		CMeshMultiLodInstance::traverseLoadBalancing()
 		float polygonCount= getNumTrianglesAfterLoadBalancing ();
 
 		// Look for the good slot
-		uint meshCount=shape->_MeshVector.size();
+		uint meshCount=(uint)shape->_MeshVector.size();
 		Lod0=0;
 		if (meshCount>1)
 		{

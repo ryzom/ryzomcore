@@ -193,7 +193,7 @@ void CAsyncFileManagerSound::CLoadWavFile::run (void)
 		}
 
 		_pDestbuffer->setFormat(bufferFormat, channels, bitsPerSample, frequency);
-		if (!_pDestbuffer->fill(&result[0], result.size()))
+		if (!_pDestbuffer->fill(&result[0], (uint)result.size()))
 		{
 			nlwarning("CAsyncFileManagerSound::CLoadWavFile::run : _pDestbuffer->fill returned false !");
 			return;

@@ -41,7 +41,7 @@ template<class TIndex>
 static bool	getRayIntersectionT(std::vector<NLMISC::CVector> &vertices, const std::vector<TIndex> &tris,
 							   float &dist2D, float &distZ, bool computeDist2D)
 {
-	uint	numTris= tris.size()/3;
+	uint	numTris= (uint)tris.size()/3;
 	if(!numTris)
 		return false;
 
@@ -243,7 +243,7 @@ bool		CRayMesh::fastIntersect(const NLMISC::CMatrix &worldMatrix, const NLMISC::
 
 
 	// *** Make all points in ray space
-	uint	numVerts= Vertices.size();
+	uint	numVerts= (uint)Vertices.size();
 	const CVector	*src= &Vertices[0];
 	// enlarge temp buffer
 	static std::vector<CVector>	meshInRaySpace;

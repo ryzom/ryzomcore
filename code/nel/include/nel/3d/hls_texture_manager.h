@@ -58,7 +58,7 @@ public:
 	bool			buildTexture(sint textId, NLMISC::CBitmap &out) const;
 
 	/// Texture name access
-	uint			getNumTextures() const {return _Instances.size();}
+	uint			getNumTextures() const {return (uint)_Instances.size();}
 	const char		*getTextureName(uint i) const;
 
 private:

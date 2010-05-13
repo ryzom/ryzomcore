@@ -35,7 +35,7 @@ bool CCoarseMeshBuild::build (const std::vector<CCoarseMeshDesc>& coarseMeshes, 
 		return false;
 
 	// 2. remap coordinates
-	remapCoordinates (coarseMeshes, desc, bitmaps.size ());
+	remapCoordinates (coarseMeshes, desc, (uint)bitmaps.size ());
 
 	// 3. ok
 	return true;

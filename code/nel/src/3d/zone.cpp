@@ -230,8 +230,8 @@ void			CZone::build(const CZoneInfo &zoneInfo, uint32 numVertices)
 	NumVertices= max((uint32)NumVertices, numVertices);
 
 	// Init the Clip Arrays
-	_PatchRenderClipped.resize(Patchs.size());
-	_PatchOldRenderClipped.resize(Patchs.size());
+	_PatchRenderClipped.resize((uint)Patchs.size());
+	_PatchOldRenderClipped.resize((uint)Patchs.size());
 	_PatchRenderClipped.setAll();
 	_PatchOldRenderClipped.setAll();
 
@@ -373,8 +373,8 @@ void			CZone::build(const CZone &zone)
 	PatchConnects= zone.PatchConnects;
 
 	// Init the Clip Arrays
-	_PatchRenderClipped.resize(Patchs.size());
-	_PatchOldRenderClipped.resize(Patchs.size());
+	_PatchRenderClipped.resize((uint)Patchs.size());
+	_PatchOldRenderClipped.resize((uint)Patchs.size());
 	_PatchRenderClipped.setAll();
 	_PatchOldRenderClipped.setAll();
 
@@ -488,8 +488,8 @@ void			CZone::serial(NLMISC::IStream &f)
 	// If read, must create and init Patch Clipped state to true (clipped even if not compiled)
 	if(f.isReading())
 	{
-		_PatchRenderClipped.resize(Patchs.size());
-		_PatchOldRenderClipped.resize(Patchs.size());
+		_PatchRenderClipped.resize((uint)Patchs.size());
+		_PatchOldRenderClipped.resize((uint)Patchs.size());
 		_PatchRenderClipped.setAll();
 		_PatchOldRenderClipped.setAll();
 	}
@@ -999,7 +999,7 @@ void			CZone::clip(const std::vector<CPlane>	&pyramid)
 		// get BitSet as Raw Array of uint32
 		uint32	*oldRenderClip= const_cast<uint32*>(&_PatchOldRenderClipped.getVector()[0]);
 		const	uint32	*newRenderClip= &_PatchRenderClipped.getVector()[0];
-		uint	numPatchs= Patchs.size();
+		uint	numPatchs= (uint)Patchs.size();
 		// Then, we must test by patch.
 		for(uint i=0;i<numPatchs;oldRenderClip++, newRenderClip++)
 		{
@@ -1815,7 +1815,7 @@ void CPatchInfo::transform256Case (const CTileBank &bank, uint8 &case256, uint t
 
 bool CPatchInfo::transform (std::vector<CPatchInfo> &patchInfo, NL3D::CZoneSymmetrisation &zoneSymmetry, const NL3D::CTileBank &bank, bool symmetry, uint rotate, float snapCell, float weldThreshold, const NLMISC::CMatrix &toOriginalSpace)
 {
-	uint patchCount = patchInfo.size ();
+	uint patchCount = (uint)patchInfo.size ();
 	uint i;
 
 	// --- Export tile info Symmetry of the bind info.

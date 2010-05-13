@@ -420,7 +420,7 @@ public:
 		uint nb;
 		{
 			NLMISC::CSynchronized<CConnections>::CAccessor connectionssync( &_Connections );
-			nb = connectionssync.value().size();
+			nb = (uint)connectionssync.value().size();
 		}
 		return nb;
 	}

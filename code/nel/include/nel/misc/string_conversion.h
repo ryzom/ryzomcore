@@ -97,7 +97,7 @@ public:
 	const std::string &toString(const TDestType &value) const;
 
 	// nb of pairs in the map
-	inline uint16 getNbPairs() const { return _String2DestType.size(); }
+	inline uint16 getNbPairs() const { return (uint16)_String2DestType.size(); }
 
 	// Check a value against the list a value, return true if the value exist in the container
 	bool isValid(const DestType &value) const;

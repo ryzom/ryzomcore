@@ -390,7 +390,7 @@ void CFormDfn::getParentDfn (std::vector<const CFormDfn*> &array, uint32 round) 
 
 uint CFormDfn::getNumParent () const
 {
-	return Parents.size ();
+	return (uint)Parents.size ();
 }
 
 // ***************************************************************************
@@ -411,7 +411,7 @@ const string& CFormDfn::getParentFilename (uint parent) const
 
 uint CFormDfn::getNumEntry () const
 {
-	return Entries.size();
+	return (uint)Entries.size();
 }
 
 // ***************************************************************************
@@ -586,11 +586,11 @@ CFormDfn *CFormDfn::getSubDfn (uint index, uint &dfnIndex)
 	// For each parent
 	uint dfn;
 	dfnIndex = index;
-	uint parentSize = parentDfn.size();
+	uint parentSize = (uint)parentDfn.size();
 	for (dfn=0; dfn<parentSize; dfn++)
 	{
 		// Good element ?
-		uint size = parentDfn[dfn]->Entries.size ();
+		uint size = (uint)parentDfn[dfn]->Entries.size ();
 		if (dfnIndex<size)
 			return parentDfn[dfn];
 		dfnIndex -= size;
@@ -613,11 +613,11 @@ const CFormDfn *CFormDfn::getSubDfn (uint index, uint &dfnIndex) const
 	// For each parent
 	uint dfn;
 	dfnIndex = index;
-	uint parentSize = parentDfn.size();
+	uint parentSize = (uint)parentDfn.size();
 	for (dfn=0; dfn<parentSize; dfn++)
 	{
 		// Good element ?
-		uint size = parentDfn[dfn]->Entries.size ();
+		uint size = (uint)parentDfn[dfn]->Entries.size ();
 		if (dfnIndex<size)
 			return parentDfn[dfn];
 		dfnIndex -= size;
@@ -724,7 +724,7 @@ bool	CFormDfn::getEntryDfn (uint entry, UFormDfn **dfn)
 
 bool	CFormDfn::getEntryByName (const std::string &name, CFormDfn::CEntry **entry)
 {
-	int	entryIndex=Entries.size ()-1;
+	int	entryIndex=(int)Entries.size ()-1;
 	while (entryIndex>=0)
 	{
 		CEntry	*entryPtr=&Entries[entryIndex];
@@ -783,7 +783,7 @@ bool CFormDfn::getEntryType (uint entry, UType **type)
 
 uint CFormDfn::getNumParents () const
 {
-	return Parents.size ();
+	return (uint)Parents.size ();
 }
 
 // ***************************************************************************

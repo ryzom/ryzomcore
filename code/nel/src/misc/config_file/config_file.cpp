@@ -56,13 +56,13 @@ int CConfigFile::CVar::asInt (int index) const
 	switch (Type)
 	{
 	case T_STRING:
-		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, StrValues.size (), index);
+		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
 		return atoi(StrValues[index].c_str());
 	case T_REAL:
-		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, RealValues.size (), index);
+		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		return (int)RealValues[index];
 	default:
-		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, IntValues.size (), index);
+		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 		return IntValues[index];
 	}
 }
@@ -73,13 +73,13 @@ double CConfigFile::CVar::asDouble (int index) const
 	switch (Type)
 	{
 	case T_INT:
-		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, IntValues.size (), index);
+		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 		return (double)IntValues[index];
 	case T_STRING:
-		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, StrValues.size (), index);
+		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
 		return atof(StrValues[index].c_str());
 	default:
-		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, RealValues.size (), index);
+		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		return RealValues[index];
 	}
 }
@@ -95,13 +95,13 @@ std::string CConfigFile::CVar::asString (int index) const
 	switch (Type)
 	{
 	case T_INT:
-		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, IntValues.size (), index);
+		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 		return toString(IntValues[index]);
 	case T_REAL:
-		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, RealValues.size (), index);
+		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		return toString(RealValues[index]);
 	default:
-		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, StrValues.size (), index);
+		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
 		return StrValues[index];
 	}
 }
@@ -111,7 +111,7 @@ bool CConfigFile::CVar::asBool (int index) const
 	switch (Type)
 	{
 	case T_STRING:
-		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, StrValues.size (), index);
+		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
 		if(StrValues[index] == "true")
 		{
 			return true;
@@ -121,7 +121,7 @@ bool CConfigFile::CVar::asBool (int index) const
 			return false;
 		}
 	case T_REAL:
-		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, RealValues.size (), index);
+		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		if ((int)RealValues[index] == 1)
 		{
 			return true;
@@ -131,7 +131,7 @@ bool CConfigFile::CVar::asBool (int index) const
 			return false;
 		}
 	default:
-		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, IntValues.size (), index);
+		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 		if (IntValues[index] == 1)
 		{
 			return true;
@@ -146,7 +146,7 @@ bool CConfigFile::CVar::asBool (int index) const
 void CConfigFile::CVar::setAsInt (int val, int index)
 {
 	if (Type != T_INT) throw EBadType (Name, Type, T_INT);
-	else if (index > (int)IntValues.size () || index < 0) throw EBadSize (Name, IntValues.size (), index);
+	else if (index > (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 	else if (index == (int)IntValues.size ()) IntValues.push_back(val);
 	else IntValues[index] = val;
 	Root = false;
@@ -155,7 +155,7 @@ void CConfigFile::CVar::setAsInt (int val, int index)
 void CConfigFile::CVar::setAsDouble (double val, int index)
 {
 	if (Type != T_REAL) throw EBadType (Name, Type, T_REAL);
-	else if (index > (int)RealValues.size () || index < 0) throw EBadSize (Name, RealValues.size (), index);
+	else if (index > (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 	else if (index == (int)RealValues.size ()) RealValues.push_back(val);
 	else RealValues[index] = val;
 	Root = false;
@@ -169,7 +169,7 @@ void CConfigFile::CVar::setAsFloat (float val, int index)
 void CConfigFile::CVar::setAsString (const std::string &val, int index)
 {
 	if (Type != T_STRING) throw EBadType (Name, Type, T_STRING);
-	else if (index > (int)StrValues.size () || index < 0) throw EBadSize (Name, StrValues.size (), index);
+	else if (index > (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
 	else if (index == (int)StrValues.size ()) StrValues.push_back(val);
 	else StrValues[index] = val;
 	Root = false;
@@ -277,9 +277,9 @@ uint CConfigFile::CVar::size () const
 {
 	switch (Type)
 	{
-	case T_INT: return IntValues.size ();
-	case T_REAL: return RealValues.size ();
-	case T_STRING: return StrValues.size ();
+	case T_INT: return (uint)IntValues.size ();
+	case T_REAL: return (uint)RealValues.size ();
+	case T_STRING: return (uint)StrValues.size ();
 	default: return 0;
 	}
 }
@@ -356,7 +356,7 @@ bool CConfigFile::loaded()
 
 uint32 CConfigFile::getVarCount()
 {
-	return _Vars.size();
+	return (uint32)_Vars.size();
 }
 
 
@@ -396,7 +396,7 @@ void CConfigFile::reparse (bool lookupPaths)
 			string utf8 = content.toUtf8();
 
 			CMemStream stream;
-			stream.serialBuffer((uint8*)(utf8.data()), utf8.size());
+			stream.serialBuffer((uint8*)(utf8.data()), (uint)utf8.size());
 			cf_ifile = stream;
 			if (!cf_ifile.isReading())
 			{
@@ -856,7 +856,7 @@ void CConfigFile::clearVars ()
 
 uint CConfigFile::getNumVar () const
 {
-	return _Vars.size ();
+	return (uint)_Vars.size ();
 }
 
 CConfigFile::CVar *CConfigFile::getVar (uint varId)

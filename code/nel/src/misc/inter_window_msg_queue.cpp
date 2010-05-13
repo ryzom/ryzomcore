@@ -501,7 +501,7 @@ namespace NLMISC
 			dest.clear();
 		}
 		std::vector<uint8> &msgIn = _InMessageQueue.front().Msg;
-		dest.serialBuffer(&(msgIn[0]), msgIn.size());
+		dest.serialBuffer(&(msgIn[0]), (uint)msgIn.size());
 		_InMessageQueue.pop_front();
 		// make dest a read stream
 		dest.invert();
@@ -519,13 +519,13 @@ namespace NLMISC
 	uint CInterWindowMsgQueue::getSendQueueSize() const
 	{
 		CSynchronized<TMsgList>::CAccessor outMessageQueue(&const_cast<CSynchronized<TMsgList> &>(_OutMessageQueue));
-		return outMessageQueue.value().size();
+		return (uint)outMessageQueue.value().size();
 	}
 
 	//**************************************************************************************************
 	uint CInterWindowMsgQueue::getReceiveQueueSize() const
 	{
-		return _InMessageQueue.size();
+		return (uint)_InMessageQueue.size();
 	}
 
 } // NLMISC

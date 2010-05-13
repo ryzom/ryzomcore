@@ -396,7 +396,7 @@ void	CMeshBase::applyMaterialUsageOptim(const std::vector<bool> &materialUsed, s
 	}
 
 	// apply the remap to LightMaps infos
-	const uint count = _LightInfos.size ();
+	const uint count = (uint)_LightInfos.size ();
 	for (i=0; i<count; i++)
 	{
 		CLightMapInfoList &mapInfoList = _LightInfos[i];
@@ -425,7 +425,7 @@ void	CMeshBase::applyMaterialUsageOptim(const std::vector<bool> &materialUsed, s
 void	CMeshBase::flushTextures(IDriver &driver, uint selectedTexture)
 {
 	// Mat count
-	uint matCount=_Materials.size();
+	uint matCount=(uint)_Materials.size();
 
 	// Flush each material textures
 	for (uint mat=0; mat<matCount; mat++)
@@ -443,7 +443,7 @@ void	CMeshBase::computeIsLightable()
 	_IsLightable= false;
 
 	// Mat count
-	uint matCount=_Materials.size();
+	uint matCount=(uint)_Materials.size();
 
 	// for each material
 	for (uint mat=0; mat<matCount; mat++)

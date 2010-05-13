@@ -71,7 +71,7 @@ public:
 	{
 		_BlockSize= other._BlockSize;
 		// if other block is rebinded, don't copy its rebinded size.
-		_EltSize= std::max(sizeof(T), sizeof(void*));
+		_EltSize= (uint)std::max(sizeof(T), sizeof(void*));
 		// No elts allocated
 		_NextFreeElt= NULL;
 		_NAllocatedElts= 0;

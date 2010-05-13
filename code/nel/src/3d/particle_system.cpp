@@ -603,10 +603,10 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 			// nodes sorted by degree
 			InsideSimLoop = true;
 			// make enough room for spawns
-			uint numProcess = _ProcessVect.size();
+			uint numProcess = (uint)_ProcessVect.size();
 			if (numProcess > _Spawns.size())
 			{
-				uint oldSize = _Spawns.size();
+				uint oldSize = (uint)_Spawns.size();
 				_Spawns.resize(numProcess);
 				for(uint k = oldSize; k < numProcess; ++k)
 				{
@@ -1044,7 +1044,7 @@ bool CParticleSystem::attach(CParticleSystemProcess *ptr)
 	//nlassert(ptr->getOwner() == NULL);
 	_ProcessVect.push_back(ptr);
 	ptr->setOwner(this);
-	ptr->setIndex(_ProcessVect.size() - 1);
+	ptr->setIndex((uint32)_ProcessVect.size() - 1);
 	//notifyMaxNumFacesChanged();
 	if (getBypassMaxNumIntegrationSteps())
 	{
@@ -1299,7 +1299,7 @@ void CParticleSystem::unregisterLocatedBindableExternID(CPSLocatedBindable *lb)
 uint CParticleSystem::getNumLocatedBindableByExternID(uint32 id) const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_getNumLocatedBindableByExternID)
-	return _LBMap.count(id);
+	return (uint)_LBMap.count(id);
 }
 
 ///=======================================================================================
@@ -1502,7 +1502,7 @@ uint CParticleSystem::getIndexOf(const CParticleSystemProcess &process) const
 uint CParticleSystem::getNumID() const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_getNumID)
-	return _LBMap.size();
+	return (uint)_LBMap.size();
 }
 
 ///=======================================================================================
@@ -2127,7 +2127,7 @@ void CParticleSystem::addRefForUserSysCoordInfo(uint numRefs)
 	{
 		_UserCoordSystemInfo = new CUserCoordSystemInfo;
 	}
-	nlassert(_UserCoordSystemInfo)
+	nlassert(_UserCoordSystemInfo);
 	_UserCoordSystemInfo->NumRef += numRefs;
 
 }
@@ -2138,7 +2138,7 @@ void CParticleSystem::releaseRefForUserSysCoordInfo(uint numRefs)
 	NL_PS_FUNC_MAIN(CParticleSystem_releaseRefForUserSysCoordInfo)
 	if (!numRefs) return;
 	nlassert(_UserCoordSystemInfo);
-	nlassert(numRefs <= _UserCoordSystemInfo->NumRef)
+	nlassert(numRefs <= _UserCoordSystemInfo->NumRef);
 	_UserCoordSystemInfo->NumRef -= numRefs;
 	if (_UserCoordSystemInfo->NumRef == 0)
 	{

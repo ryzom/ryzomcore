@@ -331,7 +331,7 @@ public:
 	void addWaterShape(CWaterShape *shape, const NLMISC::CMatrix &MT);
 
 	/// get the number of water shapes added
-	uint getNumWaterShape() const {return _WaterShapes.size();}
+	uint getNumWaterShape() const {return (uint)_WaterShapes.size();}
 
 	/// check whether a shape is lightable.
 	static bool isLightableShape(IShape &shape);

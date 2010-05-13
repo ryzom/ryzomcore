@@ -142,7 +142,7 @@ public:
 	/// Get slot mesh count.
 	uint			getNumSlotMesh () const
 	{
-		return _MeshVector.size();
+		return (uint)_MeshVector.size();
 	}
 
 	/// Get a slot mesh.

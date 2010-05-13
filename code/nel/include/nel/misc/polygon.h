@@ -52,7 +52,7 @@ public:
 	/// Constructor. Init with a triangle.
 	CPolygon(const CVector &a, const CVector &b, const CVector &c);
 
-	sint			getNumVertices() const {return Vertices.size();}
+	sint			getNumVertices() const {return (sint)Vertices.size();}
 
 	// build a triangle fan from this polygon, appending resulting tris to 'dest'
 	void		toTriFan(std::vector<NLMISC::CTriangle> &dest) const;

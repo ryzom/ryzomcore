@@ -970,7 +970,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		CVector center = zoneBB.getCenter ();
 
 		// *** Compute planes
-		const uint size=obstacles.size();
+		const uint size=(uint)obstacles.size();
 		uint triangleId;
 		for (triangleId=0; triangleId<size; triangleId++)
 		{
@@ -1013,7 +1013,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		_ProcessExited = 0;
 
 		// Number of triangle to render per thread
-		uint numTriangle = (obstacles.size () / _ProcessCount) + 1;
+		uint numTriangle = ((uint)obstacles.size () / _ProcessCount) + 1;
 
 		// First triangle for the thread
 		uint firstTriangle = 0;
@@ -1026,7 +1026,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 			// Get list of triangles to render
 			uint lastTriangle=firstTriangle+numTriangle;
 			if (lastTriangle>obstacles.size ())
-				lastTriangle=obstacles.size ();
+				lastTriangle=(uint)obstacles.size ();
 
 			// Create a thread
 			CRenderZBuffer *runnable = new CRenderZBuffer (process, this, &description, firstTriangle, lastTriangle - firstTriangle, &obstacles);
@@ -1132,7 +1132,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		pZone->retrieve (_PatchInfo, _BorderVertices);
 
 		// Number of patch
-		uint patchCount=_PatchInfo.size();
+		uint patchCount=(uint)_PatchInfo.size();
 
 		// Bit array to know if the lumel is shadowed
 		if (description.Shadow)
@@ -1150,7 +1150,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	}
 
 	// Number of patch
-	uint patchCount=_PatchInfo.size();
+	uint patchCount=(uint)_PatchInfo.size();
 
 	// Reset patch count
 	{
@@ -1294,7 +1294,7 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 			std::vector<CLumelDescriptor> &lumels=_Lumels[patch];
 
 			// Lumel count
-			uint lumelCount=lumels.size();
+			uint lumelCount=(uint)lumels.size();
 			CPatchInfo &patchInfo=_PatchInfo[patch];
 			nlassert (patchInfo.Lumels.size()==lumelCount);
 
@@ -1315,7 +1315,7 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 			std::vector<CLumelDescriptor> &lumels=_Lumels[patch];
 
 			// Lumel count
-			uint lumelCount=lumels.size();
+			uint lumelCount=(uint)lumels.size();
 			CPatchInfo &patchInfo=_PatchInfo[patch];
 			nlassert (patchInfo.Lumels.size()==lumelCount);
 
@@ -1613,7 +1613,7 @@ void CZoneLighter::addTriangles (CLandscape &landscape, vector<uint> &listZone, 
 	landscape.getTessellationLeaves(leaves);
 
 	// Number of leaves
-	uint leavesCount=leaves.size();
+	uint leavesCount=(uint)leaves.size();
 
 	// Reserve the array
 	triangleArray.reserve (triangleArray.size()+leavesCount);
@@ -1997,7 +1997,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	vector<vector<uint> > visited;
 
 	// Zone count
-	uint zoneCount=listZone.size();
+	uint zoneCount=(uint)listZone.size();
 
 	// Resize arries
 	_Locator.resize (zoneCount);
@@ -2164,7 +2164,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	uint zoneNumber=_ZoneId[_ZoneToLight];
 
 	// Scan each leaves
-	uint leavesCount=leaves.size();
+	uint leavesCount=(uint)leaves.size();
 	uint leave;
 	for (leave=0; leave<leavesCount; leave++)
 	{
@@ -2425,7 +2425,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	landscape.getTessellationLeaves(leaves);
 
 	// Scan each leaves
-	leavesCount=leaves.size();
+	leavesCount=(uint)leaves.size();
 	for (leave=0; leave<leavesCount; leave++)
 	{
 		// Progress bar
@@ -2707,7 +2707,7 @@ void CZoneLighter::computeTileFlagsOnly (CLandscape &landscape, CZone& output, u
 
 
 	// Zone count
-	uint zoneCount=listZone.size();
+	uint zoneCount=(uint)listZone.size();
 
 	// For each zone
 	for (uint zone=0; zone<zoneCount; zone++)
@@ -2851,7 +2851,7 @@ void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
 	/// compute light for the lightable shapes in the given zone
 	if (_LightableShapes.size() == 0) return;
 
-	uint numShapePerThread = 1 + (_LightableShapes.size() / _ProcessCount);
+	uint numShapePerThread = 1 + ((uint)_LightableShapes.size() / _ProcessCount);
 	uint currShapeIndex = 0;
 	uint process = 0;
 	_ProcessExited = 0;
@@ -3133,7 +3133,7 @@ void CZoneLighter::makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox)
 	_WaterShapeQuadGrid.create(numCells, dim / numCells);
 
 
-	uint count = 0, totalCount = _WaterShapes.size();
+	uint count = 0, totalCount = (uint)_WaterShapes.size();
 
 	/// now, insert all water shapes
 	for (TShapeVect::iterator it = _WaterShapes.begin(); it != _WaterShapes.end(); ++it, ++count)
@@ -3280,7 +3280,7 @@ void			CZoneLighter::compilePointLightRT(uint gridSize, float gridCellSize, std:
 			// ===========
 			CQuadGrid<CTriangle*>	obstacleGrid;
 			obstacleGrid.create(gridSize, gridCellSize);
-			uint	size= obstacles.size();
+			uint	size= (uint)obstacles.size();
 			for(i=0; i<size; i++)
 			{
 				// bbox of triangle
@@ -3624,7 +3624,7 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 	//  First, build the bbox for all tiles  //
 	///////////////////////////////////////////
 
-	uint triCount = 0, totalTriCount = tessFaces.size();
+	uint triCount = 0, totalTriCount = (uint)tessFaces.size();
 
 	nlinfo("Dealing with %d tessFaces", tessFaces.size());
 	for (std::vector<const CTessFace*>::iterator it = tessFaces.begin(); it != tessFaces.end(); ++it, ++triCount)
@@ -3673,7 +3673,7 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 	NLMISC::CPolygon2D tilePoly;
 	tilePoly.Vertices.resize(4);
 
-	uint tileCount = 0, totalTileCount = tiles.size();
+	uint tileCount = 0, totalTileCount = (uint)tiles.size();
 
 	for (TTileOfPatchMap::iterator tileIt = tiles.begin(); tileIt != tiles.end(); ++tileIt, ++tileCount)
 	{

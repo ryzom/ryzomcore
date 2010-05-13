@@ -151,7 +151,7 @@ public:
 	/**
 	* count the number of bound objects
 	*/
-	uint32 getNbBoundObjects(void) const { NL_PS_FUNC(getNbBoundObjects); return _LocatedBoundCont.size(); }
+	uint32 getNbBoundObjects(void) const { NL_PS_FUNC(getNbBoundObjects); return (uint32)_LocatedBoundCont.size(); }
 
 	/**
 	* get a pointer to a bound object (const version)
@@ -989,7 +989,7 @@ public:
 	  */
 	virtual void			 releaseAllRef();
 	/// return the number of targets
-	uint32				getNbTargets(void) const { return _Targets.size(); }
+	uint32				getNbTargets(void) const { return (uint32)_Targets.size(); }
 	/// Return a ptr on a target. Invalid range -> nlassert
 	CPSLocated			*getTarget(uint32 index)
 	{

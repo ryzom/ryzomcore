@@ -145,7 +145,7 @@ void CBackgroundSoundManager::addSound(const std::string &rawSoundName, const st
 	uint n = 0;
 	string name;
 	// count the number of '-' in the string.
-	n = std::count(rawSoundName.begin(), rawSoundName.end(), '-');
+	n = (uint)std::count(rawSoundName.begin(), rawSoundName.end(), '-');
 
 	if (n == 2)
 	{

@@ -112,7 +112,7 @@ TSoundAnimId CSoundAnimManager::createAnimation(std::string& name)
 	nlassert(!name.empty());
 
 	// create and insert animations
-	TSoundAnimId id = _Animations.size();
+	TSoundAnimId id = (TSoundAnimId)_Animations.size();
 	CSoundAnimation* anim = new CSoundAnimation(name, id);
 	_Animations.push_back(anim);
 

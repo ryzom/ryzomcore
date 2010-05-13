@@ -87,14 +87,14 @@ void	NLPACS::COrderedChain::traverse(sint from, sint to, bool forward, vector<NL
 	if (forward)
 	{
 		if (from < 0)	from = 0;
-		if (to < 0)		to = _Vertices.size()-1;
+		if (to < 0)		to = (sint)_Vertices.size()-1;
 
 		for (i=from+1; i<=to; ++i)
 			path.push_back(_Vertices[i]);
 	}
 	else
 	{
-		if (from < 0)	from = _Vertices.size()-2;
+		if (from < 0)	from = (sint)_Vertices.size()-2;
 		if (to < 0)		to = -1;
 
 		for (i=from; i>to; --i)
@@ -216,7 +216,7 @@ void	NLPACS::CChain::make(const vector<CVector> &vertices, sint32 left, sint32 r
 
 		if (useOChainId.empty())
 		{
-			subChainId = chains.size();
+			subChainId = (uint32)chains.size();
 			if (subChainId > 65535)
 				nlerror("in NLPACS::CChain::make(): reached the maximum number of ordered chains");
 

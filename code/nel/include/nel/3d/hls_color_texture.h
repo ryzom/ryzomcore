@@ -78,7 +78,7 @@ public:
 	void			addMask(const NLMISC::CBitmap &bmp, uint threshold= 15);
 
 	/// get num of masks
-	uint			getNumMasks() const {return _Masks.size();}
+	uint			getNumMasks() const {return (uint)_Masks.size();}
 
 	/** build a texture with a HLS Color Delta
 	 *	\param colDelta array of delta to apply to the bitmap (must be of numMasks entries)

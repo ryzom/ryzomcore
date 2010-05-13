@@ -263,7 +263,7 @@ void CSock::createSocket( int type, int protocol )
 {
 	nlassert( _Sock == INVALID_SOCKET );
 
-	_Sock = socket( AF_INET, type, protocol ); // or IPPROTO_IP (=0) ?
+	_Sock = (SOCKET)socket( AF_INET, type, protocol ); // or IPPROTO_IP (=0) ?
 	if ( _Sock == INVALID_SOCKET )
 	{
 		throw ESocket( "Socket creation failed" );

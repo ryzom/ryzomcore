@@ -46,7 +46,7 @@ uint32						CLodCharacterShapeBank::addShape()
 	// Alloc a new shape
 	_ShapeArray.resize(_ShapeArray.size()+1);
 
-	return _ShapeArray.size()-1;
+	return (uint32)_ShapeArray.size()-1;
 }
 
 // ***************************************************************************
@@ -105,7 +105,7 @@ bool						CLodCharacterShapeBank::compile()
 // ***************************************************************************
 uint						CLodCharacterShapeBank::getNumShapes() const
 {
-	return _ShapeArray.size();
+	return (uint)_ShapeArray.size();
 }
 
 // ***************************************************************************

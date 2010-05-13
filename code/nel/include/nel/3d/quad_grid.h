@@ -802,7 +802,7 @@ template<class T> void	CQuadGrid<T>::buildSelectionShape(TSelectionShape &dest, 
 {
 	dest.clear();
 	sint minY;
-	uint numVerts = poly.Vertices.size();
+	uint numVerts = (uint)poly.Vertices.size();
 	_ScaledPoly.Vertices.resize(numVerts);
 	nlassert(_EltSize != 0.f);
 	float invScale = 1.f / _EltSize;
@@ -814,7 +814,7 @@ template<class T> void	CQuadGrid<T>::buildSelectionShape(TSelectionShape &dest, 
 	_ScaledPoly.computeOuterBorders(_PolyBorders, minY);
 	if (_PolyBorders.empty()) return;
 	initSelectStamps();
-	sint numSegs = _PolyBorders.size();
+	sint numSegs = (sint)_PolyBorders.size();
 	for (sint y = 0; y < numSegs; ++y)
 	{
 		sint currIndex = ((minY + y) & (_Size - 1)) << _SizePower;

@@ -320,7 +320,7 @@ const std::string &CForm::getParentFilename (uint parent) const
 
 uint CForm::getParentCount () const
 {
-	return ParentList.size ();
+	return (uint)ParentList.size ();
 }
 
 // ***************************************************************************

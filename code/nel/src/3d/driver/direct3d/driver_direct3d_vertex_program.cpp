@@ -334,7 +334,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 
 			LPD3DXBUFFER pShader;
 			LPD3DXBUFFER pErrorMsgs;
-			if (D3DXAssembleShader (dest.c_str(), dest.size(), NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
+			if (D3DXAssembleShader (dest.c_str(), (UINT)dest.size(), NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
 			{
 				if (_DeviceInterface->CreateVertexShader((DWORD*)pShader->GetBufferPointer(), &(getVertexProgramD3D(*program)->Shader)) != D3D_OK)
 					return false;

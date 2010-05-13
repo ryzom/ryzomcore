@@ -103,7 +103,7 @@ public:
 	  */
 	uint getNumAnimation () const
 	{
-		return _Animation.size();
+		return (uint)_Animation.size();
 	}
 
 	/**
@@ -138,7 +138,7 @@ public:
 	  */
 	uint getNumSkeletonWeight () const
 	{
-		return _SkeletonWeight.size();
+		return (uint)_SkeletonWeight.size();
 	}
 
 	/**

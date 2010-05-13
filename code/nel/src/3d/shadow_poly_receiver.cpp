@@ -59,9 +59,9 @@ uint			CShadowPolyReceiver::addTriangle(const NLMISC::CTriangle &tri)
 	if(_FreeTriangles.empty())
 	{
 		_Triangles.push_back(TTriangleGrid::CIterator());
-		id= _Triangles.size()-1;
+		id= (uint)_Triangles.size()-1;
 		// enlarge render size.
-		_RenderTriangles.setNumIndexes(_Triangles.size() * 3);
+		_RenderTriangles.setNumIndexes((uint32)_Triangles.size() * 3);
 	}
 	else
 	{
@@ -140,10 +140,10 @@ uint			CShadowPolyReceiver::allocateVertex(const CVector &v)
 	{
 		// Add the vertex, and init refCount to 0.
 		_Vertices.push_back(v);
-		id= _Vertices.size()-1;
+		id= (uint)_Vertices.size()-1;
 
 		// Resize the VBuffer at max possible
-		_VB.setNumVertices(_Vertices.size());
+		_VB.setNumVertices((uint32)_Vertices.size());
 	}
 	else
 	{
@@ -223,8 +223,8 @@ inline void	CShadowPolyReceiver::renderSelection(IDriver *drv, CMaterial &shadow
 	uint	currentTriIdx= 0;
 	{
 		// Volatile: must resize before lock
-		_VB.setNumVertices(_Vertices.size());
-		_RenderTriangles.setNumIndexes(_Triangles.size() * 3);
+		_VB.setNumVertices((uint32)_Vertices.size());
+		_RenderTriangles.setNumIndexes((uint32)_Triangles.size() * 3);
 
 		// lock volatile, to avoid cpu stall
 		CVertexBufferReadWrite vba;
@@ -401,7 +401,7 @@ void CShadowPolyReceiver::computeClippedTrisWithPolyClip(const CShadowMap *shado
 		}
 	}
 
-	uint numVisibleTris = visibleTris.size();
+	uint numVisibleTris = (uint)visibleTris.size();
 	// compute normals if needed
 	if (colorUpfacingVertices)
 	{

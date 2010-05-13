@@ -50,7 +50,7 @@ sint	CMRMSewingMesh::mustCollapseEdge(uint lod, const CMRMEdge &edge, uint &vert
 sint	CMRMSewingMesh::getNumCollapseEdge(uint lod) const
 {
 	nlassert(lod<_Lods.size());
-	return _Lods[lod].EdgeToCollapse.size();
+	return (sint)_Lods[lod].EdgeToCollapse.size();
 }
 
 
@@ -65,7 +65,7 @@ void	CMRMSewingMesh::build(const CMesh::CInterface &meshInt, uint nWantedLods, u
 
 	// build edge list
 	std::vector<CMRMEdge>	edgeList;
-	uint	nMaxEdges= meshInt.Vertices.size();
+	uint	nMaxEdges= (uint)meshInt.Vertices.size();
 	edgeList.resize(nMaxEdges);
 	for(uint i=0;i<nMaxEdges;i++)
 	{
@@ -92,7 +92,7 @@ void	CMRMSewingMesh::build(const CMesh::CInterface &meshInt, uint nWantedLods, u
 			uint	bestEdgeId= 0;
 			for(uint j=0;j<edgeList.size();j++)
 			{
-				uint	precEdgeId= (j + edgeList.size() -1) % edgeList.size();
+				uint	precEdgeId= (uint)((j + edgeList.size() -1) % edgeList.size());
 				CVector	edgeDelta= (meshInt.Vertices[edgeList[j].v1].Pos - meshInt.Vertices[edgeList[j].v0].Pos);
 
 				// compute dist between 2 verts
@@ -127,7 +127,7 @@ void	CMRMSewingMesh::build(const CMesh::CInterface &meshInt, uint nWantedLods, u
 			// mark as remove it
 			_Lods[lod].EdgeToCollapse.push_back(edgeList[bestEdgeId]);
 			// changes vert ids of the prec edge. eg: edge(12) is deleted=> 01 12 23... becomes 02 23 (NB: 1 is collapsed to 2)
-			uint	precEdgeId= (bestEdgeId+edgeList.size()-1)%edgeList.size();
+			uint	precEdgeId= (uint)((bestEdgeId+edgeList.size()-1)%edgeList.size());
 			edgeList[precEdgeId].v1= edgeList[bestEdgeId].v1;
 			// and erase the edge from the current list
 			edgeList.erase( edgeList.begin()+bestEdgeId );

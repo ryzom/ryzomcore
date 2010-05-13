@@ -68,7 +68,7 @@ public:
 	~CBufFIFO ();
 
 	/// Push 'buffer' in the head of the FIFO
-	void	 push (const std::vector<uint8> &buffer) { push (&buffer[0], buffer.size()); }
+	void	 push (const std::vector<uint8> &buffer) { push (&buffer[0], (uint32)buffer.size()); }
 
 	void	 push (const NLMISC::CMemStream &buffer) { push (buffer.buffer(), buffer.length()); }
 

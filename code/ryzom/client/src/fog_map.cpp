@@ -132,7 +132,7 @@ void CFogMap::getFogParams(float startDist, float endDist, float x, float y, flo
 NLMISC::CRGBAF CFogMap::getMapValue(TMapType type, float x, float y, NLMISC::CRGBAF defaultValue) const
 {
 	H_AUTO_USE(RZ_FogMap)
-	nlassert(type < CFogMapBuild::NumMap)
+	nlassert(type < CFogMapBuild::NumMap);
 	if (_Map[type].getWidth() == 0) return defaultValue;
 	float mx, my;
 	worldPosToMapPos(x, y, mx, my);
@@ -143,7 +143,7 @@ NLMISC::CRGBAF CFogMap::getMapValue(TMapType type, float x, float y, NLMISC::CRG
 NLMISC::CRGBAF CFogMap::getMapValueFromMapCoord(TMapType type, float x, float y, NLMISC::CRGBAF defaultValue) const
 {
 	H_AUTO_USE(RZ_FogMap)
-	nlassert(type < CFogMapBuild::NumMap)
+	nlassert(type < CFogMapBuild::NumMap);
 	if (_Map[type].getWidth() == 0) return defaultValue;
 	return _Map[type].getColor(x, y);
 }

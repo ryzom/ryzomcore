@@ -3187,7 +3187,7 @@ IOcclusionQuery::TOcclusionType COcclusionQueryD3D::getOcclusionType()
 	H_AUTO_D3D(COcclusionQueryD3D_getOcclusionType);
 	nlassert(Driver);
 	nlassert(Query);
-	nlassert(Driver->_CurrentOcclusionQuery != this) // can't query result between a begin/end pair!
+	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (OcclusionType == NotAvailable)
 	{
 		DWORD numPix;
@@ -3207,7 +3207,7 @@ uint COcclusionQueryD3D::getVisibleCount()
 	H_AUTO_D3D(COcclusionQueryD3D_getVisibleCount);
 	nlassert(Driver);
 	nlassert(Query);
-	nlassert(Driver->_CurrentOcclusionQuery != this) // can't query result between a begin/end pair!
+	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (getOcclusionType() == NotAvailable) return 0;
 	return VisibleCount;
 }

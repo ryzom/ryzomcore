@@ -861,7 +861,7 @@ void			CDriverUser::drawQuads(const std::vector<NLMISC::CQuadColorUV> &q, UMater
 	H_AUTO2;
 
 	const CQuadColorUV *qptr = &(q[0]);
-	drawQuads(qptr , q.size(), mat);
+	drawQuads(qptr , (uint32)q.size(), mat);
 }
 
 // ***************************************************************************
@@ -870,7 +870,7 @@ void			CDriverUser::drawQuads(const std::vector<NLMISC::CQuadColorUV2> &q, UMate
 	H_AUTO2;
 
 	const CQuadColorUV2 *qptr = &(q[0]);
-	drawQuads(qptr , q.size(), mat);
+	drawQuads(qptr , (uint32)q.size(), mat);
 }
 
 // ***************************************************************************

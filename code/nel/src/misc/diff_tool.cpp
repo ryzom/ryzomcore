@@ -721,7 +721,7 @@ bool readExcelSheet(const ucstring &str, TWorksheet &worksheet, bool checkUnique
 
 	// enlarge Worksheet row size, as needed
 	uint	startLine= worksheet.size();
-	worksheet.resize(startLine + lines.size());
+	worksheet.resize(startLine + (uint)lines.size());
 
 
 	// **** fill worksheet
@@ -850,7 +850,7 @@ void makeHashCode(TWorksheet &sheet, bool forceRehash)
 		}
 		else
 		{
-			uint index = it - sheet.Data[0].begin();
+			uint index = (uint)(it - sheet.Data[0].begin());
 			for (uint j=1; j<sheet.Data.size(); ++j)
 			{
 				ucstring &field = sheet.Data[j][index];
@@ -873,7 +873,7 @@ ucstring prepareExcelSheet(const TWorksheet &worksheet)
 	{
 		for (uint j=0; j<worksheet.Data[i].size(); ++j)
 		{
-			approxSize+= worksheet.Data[i][j].size() + 1;
+			approxSize+= (uint)worksheet.Data[i][j].size() + 1;
 		}
 		approxSize++;
 	}

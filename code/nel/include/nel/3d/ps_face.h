@@ -104,7 +104,7 @@ public:
 	{
 		min = _MinAngularVelocity;
 		max = _MaxAngularVelocity;
-		return _PrecompBasis.size();
+		return (uint32)_PrecompBasis.size();
 	}
 
 	/// from CPSParticle : return true if there are lightable faces in the object

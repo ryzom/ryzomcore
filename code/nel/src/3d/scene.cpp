@@ -840,7 +840,7 @@ void CScene::animate( TGlobalAnimationTime atTime )
 	//----------------
 
 	// First list all current AnimatedLightmaps (for faster vector iteration per ig)
-	const uint count = _AnimatedLightPtr.size ();
+	const uint count = (uint)_AnimatedLightPtr.size ();
 	uint i;
 	for (i=0; i<count; i++)
 	{
@@ -1163,11 +1163,11 @@ CTransform	*CScene::createModel(const CClassId &idModel)
 		m->initModel();
 
 		// Ensure all the Traversals has enough space for visible list.
-		ClipTrav.reserveVisibleList(_Models.size());
-		AnimDetailTrav.reserveVisibleList(_Models.size());
-		LoadBalancingTrav.reserveVisibleList(_Models.size());
-		LightTrav.reserveLightedList(_Models.size());
-		RenderTrav.reserveRenderList(_Models.size());
+		ClipTrav.reserveVisibleList((uint)_Models.size());
+		AnimDetailTrav.reserveVisibleList((uint)_Models.size());
+		LoadBalancingTrav.reserveVisibleList((uint)_Models.size());
+		LightTrav.reserveLightedList((uint)_Models.size());
+		RenderTrav.reserveRenderList((uint)_Models.size());
 
 		return m;
 	}
@@ -1309,9 +1309,9 @@ void CScene::setAutomaticAnimationSet(CAnimationSet *as)
 					cm->setAnimationSet( _AutomaticAnimationSet );
 
 					// Add an automatic animation
-					_AnimatedLight.push_back ( CAnimatedLightmap (_LightGroupColor.size ()) );
+					_AnimatedLight.push_back ( CAnimatedLightmap ((uint)_LightGroupColor.size ()) );
 					_AnimatedLightPtr.push_back ( &_AnimatedLight.back () );
-					_AnimatedLightNameToIndex.insert ( std::map<std::string, uint>::value_type (lightName, _AnimatedLightPtr.size ()-1 ) );
+					_AnimatedLightNameToIndex.insert ( std::map<std::string, uint>::value_type (lightName, (uint32)_AnimatedLightPtr.size ()-1 ) );
 					CAnimatedLightmap &animLM = _AnimatedLight.back ();
 					animLM.setName( *itSel );
 

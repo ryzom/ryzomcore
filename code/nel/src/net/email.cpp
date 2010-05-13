@@ -77,7 +77,7 @@ static void uuencode (const char *s, const char *store, const int length)
 bool sendEMailCommand (CTcpSock &sock, const std::string &command, uint32 code = 250)
 {
 	string buffer = command + "\r\n";
-	uint32 size = buffer.size();
+	uint32 size = (uint32)buffer.size();
 	if(!command.empty())
 	{
 		if (sock.send ((uint8 *)buffer.c_str(), size) != CSock::Ok)
@@ -285,7 +285,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 						memset(&src_buf[size], 0, src_buf_size - size);
 					}
 					/* Encode the buffer we just read in */
-					uuencode(src_buf, dst_buf, size);
+					uuencode(src_buf, dst_buf, (int)size);
 
 					formatedBody += dst_buf;
 					formatedBody += "\r\n";

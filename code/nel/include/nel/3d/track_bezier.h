@@ -155,7 +155,7 @@ protected:
 		ITrackKeyFramer<CKeyBezierQuat>::compile();
 
 		// makeclosest quaternions, Tangents Precompute.
-		sint	nKeys= _MapKey.size();
+		sint	nKeys= (sint)_MapKey.size();
 		if(nKeys<=1)
 			return;
 

@@ -463,7 +463,7 @@ void CVertexBuffer::initEx ()
 
 	// Compute new capacity
 	if (_VertexSize)
-		_Capacity = _NonResidentVertices.size()/_VertexSize;
+		_Capacity = (uint32)_NonResidentVertices.size()/_VertexSize;
 	else
 		_Capacity = 0;
 

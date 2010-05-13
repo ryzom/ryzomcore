@@ -417,7 +417,7 @@ float	NLPACS::CSurfaceQuadTree::getInterpZ(const CVector &v) const
 		static const sint	ct[4][4] = { {-1, 1, 3,-1}, {-1,-1, 2, 0}, { 1,-1,-1, 3}, { 0, 2,-1,-1} };	// child table
 		static const sint	nt[4][4] = { { 3, 1, 3, 1}, { 2, 0, 2, 0}, { 1, 3, 1, 3}, { 0, 2, 0, 2} };	// neighbor table
 
-		sint	nlev = nodes.size()-1;
+		sint	nlev = (sint)nodes.size()-1;
 		sint	child = -1;
 
 		while (nlev > 0)

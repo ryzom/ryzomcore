@@ -81,7 +81,7 @@ TLandscapeIndexType	*CLandscapeFaceVectorManager::createFaceVector(uint numTri)
 		// Allocate a block of max tris. +1 is for the NumTris entry at index 0.
 		uint	numTriMax= 1<<blockId;
 		// allocate max of (sizeof(uint32*), (numTriMax*3+1)*sizeof(uint32));
-		uint	sizeInByteToAllocate= max(sizeof(TLandscapeIndexType*), (numTriMax*3 + 1)*sizeof(TLandscapeIndexType));
+		uint	sizeInByteToAllocate= (uint)max(sizeof(TLandscapeIndexType*), (numTriMax*3 + 1)*sizeof(TLandscapeIndexType));
 		_Blocks[blockId]= new TLandscapeIndexType[(sizeInByteToAllocate + (sizeof(TLandscapeIndexType) - 1)) /sizeof(TLandscapeIndexType)];
 		// Init it as a free faceVector, with no Next.
 		*(TLandscapeIndexType**)_Blocks[blockId]= NULL;

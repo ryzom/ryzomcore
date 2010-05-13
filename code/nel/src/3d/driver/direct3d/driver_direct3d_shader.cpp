@@ -167,7 +167,7 @@ HRESULT CDriverD3D::SetTexture (DWORD Stage, LPDIRECT3DBASETEXTURE9 pTexture)
 	H_AUTO_D3D(CDriverD3D_SetTexture )
 	// Look for the current texture
 	uint i;
-	const uint count = _CurrentShaderTextures.size();
+	const uint count = (uint)_CurrentShaderTextures.size();
 	for (i=0; i<count; i++)
 	{
 		const CTextureRef &ref = _CurrentShaderTextures[i];
@@ -355,7 +355,7 @@ bool CDriverD3D::activeShader(CShader *shd)
 
 		// Assemble the shader
 		LPD3DXBUFFER pErrorMsgs;
-		if (D3DXCreateEffect(_DeviceInterface,	shd->getText(), strlen(shd->getText())+1, NULL, NULL, 0, NULL, &(shaderInfo->Effect), &pErrorMsgs)
+		if (D3DXCreateEffect(_DeviceInterface,	shd->getText(), (UINT)strlen(shd->getText())+1, NULL, NULL, 0, NULL, &(shaderInfo->Effect), &pErrorMsgs)
 			== D3D_OK)
 		{
 			// Get the texture handle
@@ -3713,7 +3713,7 @@ HRESULT STDMETHODCALLTYPE CFXPassRecorder::SetTexture(DWORD Stage, LPDIRECT3DBAS
 	nlassert(Target);
 	// Look for the current texture
 	uint i;
-	const uint count = Driver->getCurrentShaderTextures().size();
+	const uint count = (uint)Driver->getCurrentShaderTextures().size();
 	for (i=0; i<count; i++)
 	{
 		const CDriverD3D::CTextureRef &ref = Driver->getCurrentShaderTextures()[i];

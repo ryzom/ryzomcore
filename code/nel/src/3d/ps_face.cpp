@@ -310,7 +310,7 @@ void CPSFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 	else
 	{
-		uint32 nbConfigurations = _PrecompBasis.size();
+		uint32 nbConfigurations = (uint32)_PrecompBasis.size();
 		f.serial(nbConfigurations);
 		if (nbConfigurations)
 		{
@@ -364,7 +364,7 @@ void CPSFace::hintRotateTheSame(uint32 nbConfiguration
 void CPSFace::fillIndexesInPrecompBasis(void)
 {
 	NL_PS_FUNC(CPSFace_fillIndexesInPrecompBasis)
-	const uint32 nbConf = _PrecompBasis.size();
+	const uint32 nbConf = (uint32)_PrecompBasis.size();
 	if (_Owner)
 	{
 		_IndexInPrecompBasis.resize( _Owner->getMaxSize() );
@@ -381,7 +381,7 @@ void CPSFace::newElement(const CPSEmitterInfo &info)
 	NL_PS_FUNC(CPSFace_newElement)
 	CPSQuad::newElement(info);
 	newPlaneBasisElement(info);
-	const uint32 nbConf = _PrecompBasis.size();
+	const uint32 nbConf = (uint32)_PrecompBasis.size();
 	if (nbConf) // do we use precomputed basis ?
 	{
 		_IndexInPrecompBasis[_Owner->getNewElementIndex()] = rand() % nbConf;

@@ -294,7 +294,7 @@ public:
 		void					resize(uint32 nbInstances);
 
 		/// return the number of instance in the container
-		uint32 getSize(void) const { return _Tab.size(); }
+		uint32 getSize(void) const { return (uint32)_Tab.size(); }
 
 		/// return the max number of instance in the container
 		uint32 getMaxSize(void) const { return _MaxSize; }
@@ -411,7 +411,7 @@ sint32 CPSAttrib<T>::insert(const T &t)
 		return -1;
 	}
 	_Tab.push_back(t);
-	return _Tab.size() - 1;
+	return (sint32)_Tab.size() - 1;
 }
 
 
@@ -455,7 +455,7 @@ void CPSAttrib<T>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		}
 		else
 		{
-			uint32 size = _Tab.size();
+			uint32 size = (uint32)_Tab.size();
 			f.serial(size);
 			f.serial(_MaxSize);
 			f.serial(size);
@@ -537,7 +537,7 @@ void CPSAttrib<T>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		}
 		else
 		{
-			uint32 size = _Tab.size(), capacity = _Tab.capacity();
+			uint32 size = (uint32)_Tab.size(), capacity = (uint32)_Tab.capacity();
 			if (ver == 3)
 			{
 				f.serial(size, capacity);

@@ -71,7 +71,7 @@ void			CFastPtrListBase::insert(void *element, CFastPtrListNode *node)
 	_Elements.push_back(element);
 	_Nodes.push_back(node);
 	node->_Owner= this;
-	node->_IndexInOwner= _Nodes.size()-1;
+	node->_IndexInOwner= (uint32)_Nodes.size()-1;
 }
 
 // ***************************************************************************
@@ -83,7 +83,7 @@ void			CFastPtrListBase::erase(CFastPtrListNode *node)
 
 	// Take the indexes,
 	uint	nodeIndex= node->_IndexInOwner;
-	uint	lastIndex= _Nodes.size()-1;
+	uint	lastIndex= (uint)_Nodes.size()-1;
 
 	// swap the last element and the erased one.
 	swap(_Elements[nodeIndex], _Elements[lastIndex]);

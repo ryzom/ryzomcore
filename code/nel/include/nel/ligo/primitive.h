@@ -211,7 +211,7 @@ public:
 	/** Get the children primitive count */
 	uint				getNumChildren () const
 	{
-		return _Children.size ();
+		return (uint)_Children.size ();
 	}
 
 	/** Get a child primitive */

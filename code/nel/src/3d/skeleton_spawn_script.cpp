@@ -155,7 +155,7 @@ void	CSkeletonSpawnScript::parseCache(CScene *scene, CSkeletonModel *skeleton)
 					// Delay the model creation at end of CScene::render()
 					CSSSModelRequest	req;
 					req.Skel= skeleton;
-					req.InstanceId= _Instances.size()-1;
+					req.InstanceId= (uint)_Instances.size()-1;
 					req.Shape= words[2];
 					// World Spawned Objects are sticked to the root bone (for CLod hiding behavior)
 					req.BoneId= 0;
@@ -211,7 +211,7 @@ void	CSkeletonSpawnScript::parseCache(CScene *scene, CSkeletonModel *skeleton)
 						// Delay the model creation at end of CScene::render()
 						CSSSModelRequest	req;
 						req.Skel= skeleton;
-						req.InstanceId= _Instances.size()-1;
+						req.InstanceId= (uint)_Instances.size()-1;
 						req.Shape= words[2];
 						req.BoneId= boneId;
 						req.SSSWO= false;

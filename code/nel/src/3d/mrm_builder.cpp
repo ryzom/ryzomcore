@@ -137,7 +137,7 @@ float	CMRMBuilder::getDeltaFaceNormals(sint numvertex)
 	CMRMVertex	&vert= TmpVertices[numvertex];
 	float	delta=0;
 	CVector	refNormal;
-	sint	nfaces=vert.SharedFaces.size();
+	sint	nfaces=(sint)vert.SharedFaces.size();
 	for(sint i=0;i<nfaces;i++)
 	{
 		CVector	normal;
@@ -815,7 +815,7 @@ sint	CMRMBuilder::collapseEdge(const CMRMEdge &edge)
 		Vertex2.SharedFaces.end());
 
 
-	return deletedFaces.size();
+	return (sint)deletedFaces.size();
 }
 
 
@@ -937,7 +937,7 @@ void	CMRMBuilder::collapseEdges(sint nWantedFaces)
 {
 	ItEdgeMap		EdgeIt;
 
-	sint	nCurrentFaces=TmpFaces.size();
+	sint	nCurrentFaces=(sint)TmpFaces.size();
 	sint	bug0=0,bug2=0,bug3=0;
 
 	while(nCurrentFaces>nWantedFaces)
@@ -1278,7 +1278,7 @@ void	CMRMBuilder::makeFromMesh(const CMRMMesh &baseMesh, CMRMMeshGeom &lodMesh, 
 void	CMRMBuilder::buildAllLods(const CMRMMesh &baseMesh, std::vector<CMRMMeshGeom> &lodMeshs,
 								  uint nWantedLods, uint divisor)
 {
-	sint	nFaces= baseMesh.Faces.size();
+	sint	nFaces= (sint)baseMesh.Faces.size();
 	sint	nBaseFaces;
 	sint	i;
 	CMRMMesh srcMesh = baseMesh;
@@ -1328,7 +1328,7 @@ void	CMRMBuilder::buildFinalMRM(std::vector<CMRMMeshGeom> &lodMeshs, CMRMMeshFin
 {
 	sint	i,j;
 	sint	lodId, attId;
-	sint	nLods= lodMeshs.size();
+	sint	nLods= (sint)lodMeshs.size();
 
 	// Init.
 	// ===============
@@ -1401,7 +1401,7 @@ void	CMRMBuilder::buildFinalMRM(std::vector<CMRMMeshGeom> &lodMeshs, CMRMMeshFin
 		}
 
 		// Here, the number of wedge indicate the max number of wedge this LOD needs.
-		finalMRM.Lods[lodId].NWedges= finalMRM.Wedges.size();
+		finalMRM.Lods[lodId].NWedges= (sint)finalMRM.Wedges.size();
 	}
 
 
@@ -1647,7 +1647,7 @@ sint			CMRMBuilder::findInsertAttributeInBaseMesh(CMRMMesh &baseMesh, sint attId
 	// if attribute not found in the map, then insert a new one.
 	if(it==_AttributeMap[attId].end())
 	{
-		sint	idx= baseMesh.Attributes[attId].size();
+		sint	idx= (sint)baseMesh.Attributes[attId].size();
 		// insert into the array.
 		baseMesh.Attributes[attId].push_back(att);
 		// insert into the map.
@@ -1779,7 +1779,7 @@ uint32			CMRMBuilder::buildMrmBaseMesh(const CMesh::CMeshBuild &mbuild, CMRMMesh
 	if(_HasMeshInterfaces)
 		baseMesh.InterfaceLinks= mbuild.InterfaceLinks;
 	// Resize faces.
-	nFaces= mbuild.Faces.size();
+	nFaces= (sint)mbuild.Faces.size();
 	baseMesh.Faces.resize(nFaces);
 	for(i=0; i<nFaces; i++)
 	{
@@ -1985,7 +1985,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMGeo
 	// Setup the VertexBuffer.
 	// ========================
 	// resize the VB.
-	mbuild.VBuffer.setNumVertices(finalMRM.Wedges.size());
+	mbuild.VBuffer.setNumVertices((uint32)finalMRM.Wedges.size());
 	// Setup SkinWeights.
 	if(_Skinned)
 		mbuild.SkinWeights.resize(finalMRM.Wedges.size());
@@ -2098,7 +2098,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMGeo
 			else
 			{
 				// map material to rdrPass.
-				sint	idRdrPass= destLod.RdrPass.size();
+				sint	idRdrPass= (sint)destLod.RdrPass.size();
 				rdrPassIndex[j]= idRdrPass;
 				// create a rdrPass.
 				destLod.RdrPass.push_back(CMeshMRMGeom::CRdrPass());
@@ -2217,7 +2217,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMGeo
 							map<uint, uint>::iterator	it= matrixInfMap.find(matId);
 							if( it==matrixInfMap.end() )
 							{
-								uint matInfId= destLod.MatrixInfluences.size();
+								uint matInfId= (uint)destLod.MatrixInfluences.size();
 								matrixInfMap.insert( make_pair(matId, matInfId) );
 								// create the new MatrixInfluence.
 								destLod.MatrixInfluences.push_back(matId);
@@ -2244,7 +2244,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMGeo
 	for (k = 0; k < (sint)mbuild.BlendShapes.size(); ++k)
 	{
 		CBlendShape &rBS = mbuild.BlendShapes[k];
-		sint32 nNbVertVB = finalMRM.Wedges.size();
+		sint32 nNbVertVB = (sint32)finalMRM.Wedges.size();
 		bool bIsDeltaPos = false;
 		rBS.deltaPos.resize (nNbVertVB, CVector(0.0f,0.0f,0.0f));
 		bool bIsDeltaNorm = false;
@@ -2489,7 +2489,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMSki
 	// Setup the VertexBuffer.
 	// ========================
 	// resize the VB.
-	mbuild.VBuffer.setNumVertices(finalMRM.Wedges.size());
+	mbuild.VBuffer.setNumVertices((uint32)finalMRM.Wedges.size());
 
 	CVertexBufferReadWrite vba;
 	mbuild.VBuffer.lock (vba);
@@ -2603,7 +2603,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMSki
 			else
 			{
 				// map material to rdrPass.
-				sint	idRdrPass= destLod.RdrPass.size();
+				sint	idRdrPass= (sint)destLod.RdrPass.size();
 				rdrPassIndex[j]= idRdrPass;
 				// create a rdrPass.
 				destLod.RdrPass.push_back(CMeshMRMSkinnedGeom::CRdrPass());
@@ -2719,7 +2719,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMSki
 							map<uint, uint>::iterator	it= matrixInfMap.find(matId);
 							if( it==matrixInfMap.end() )
 							{
-								uint matInfId= destLod.MatrixInfluences.size();
+								uint matInfId= (uint)destLod.MatrixInfluences.size();
 								matrixInfMap.insert( make_pair(matId, matInfId) );
 								// create the new MatrixInfluence.
 								destLod.MatrixInfluences.push_back(matId);
@@ -2746,7 +2746,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMSki
 	for (k = 0; k < (sint)mbuild.BlendShapes.size(); ++k)
 	{
 		CBlendShape &rBS = mbuild.BlendShapes[k];
-		sint32 nNbVertVB = finalMRM.Wedges.size();
+		sint32 nNbVertVB = (sint32)finalMRM.Wedges.size();
 		bool bIsDeltaPos = false;
 		rBS.deltaPos.resize (nNbVertVB, CVector(0.0f,0.0f,0.0f));
 		bool bIsDeltaNorm = false;

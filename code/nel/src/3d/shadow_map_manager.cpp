@@ -308,7 +308,7 @@ void			CShadowMapManager::renderGenerate(CScene *scene)
 	// Allow Writing on alpha only. => don't write on RGB objects!
 	driverForShadowGeneration->setColorMask(false, false, false, true);
 
-	uint	numSC= _GenerateShadowCasters.size();
+	uint	numSC= (uint)_GenerateShadowCasters.size();
 	uint	baseSC= 0;
 	while(numSC>0)
 	{

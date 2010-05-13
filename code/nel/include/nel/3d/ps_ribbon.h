@@ -132,7 +132,7 @@ public:
 	// See if shape is in brace mode (rather then in closed loop mode)
 	bool getBraceMode() const { return _BraceMode; }
 	/// get the number of vertice in the shape used for ribbons
-	uint32 getNbVerticesInShape(void) const { return _Shape.size(); }
+	uint32 getNbVerticesInShape(void) const { return (uint32)_Shape.size(); }
 
 	/** Get a copy of the shape used for ribbon
 	 *  \param dest a table of cvector that has the right size, it will be filled with vertices

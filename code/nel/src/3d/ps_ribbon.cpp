@@ -288,11 +288,11 @@ inline uint CPSRibbon::getNumVerticesInSlice() const
 	NL_PS_FUNC(CPSRibbon_getNumVerticesInSlice)
 	if (_BraceMode)
 	{
-		return _Shape.size();
+		return (uint)_Shape.size();
 	}
 	else
 	{
-		return _Shape.size() + (_Tex == NULL ? 0 : 1);
+		return (uint)_Shape.size() + (_Tex == NULL ? 0 : 1);
 	}
 }
 
@@ -724,7 +724,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 	// Compute ribbons //
 	/////////////////////
 		const uint numVerticesInSlice = getNumVerticesInSlice();
-		const uint numVerticesInShape = _Shape.size();
+		const uint numVerticesInShape = (uint)_Shape.size();
 		//
 		static std::vector<float> sizes;
 		static std::vector<NLMISC::CVector> ribbonPos;  // this is where the position of each ribbon slice center i stored
@@ -943,7 +943,7 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 						 ];
 
 	const uint numVerticesInSlice = getNumVerticesInSlice(); /// 1 vertex added for textured ribbon (to avoid texture stretching)
-	const uint numVerticesInShape = _Shape.size();
+	const uint numVerticesInShape = (uint)_Shape.size();
 
 
 	// The number of slice is encoded in the upper word of the vb index
@@ -974,11 +974,11 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 		// set the primitive block size
 		if (_BraceMode)
 		{
-			pb.setNumIndexes(6 * _UsedNbSegs * numRibbonInVB * (_Shape.size() / 2));
+			pb.setNumIndexes(6 * _UsedNbSegs * numRibbonInVB * (uint32)(_Shape.size() / 2));
 		}
 		else
 		{
-			pb.setNumIndexes(6 * _UsedNbSegs * numRibbonInVB * _Shape.size());
+			pb.setNumIndexes(6 * _UsedNbSegs * numRibbonInVB * (uint32)_Shape.size());
 		}
 		//
 		CIndexBufferReadWrite ibaWrite;

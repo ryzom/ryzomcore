@@ -1168,7 +1168,7 @@ void CServerEditionModule::init(NLNET::IModuleSocket* gateway, CDynamicMapServic
 
 void CServerEditionModule::updateRSMGR()
 {
-	nlassert(!_SessionManager.isNull())
+	nlassert(!_SessionManager.isNull());
 	nlassert(!_WaitingForBS);
 
 	RSMGR::CRingSessionManagerProxy rsm(_SessionManager);
@@ -5131,7 +5131,7 @@ void CServerEditionModule::wakeUpSessionImpl(CEditionSession* session)
 	{
 
 		CEditionSession* previous = found->second ;
-		nlassert( session != previous)
+		nlassert( session != previous);
 		sessionPtr->swap( *previous);
 		session = previous;
 	}

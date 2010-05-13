@@ -900,7 +900,7 @@ bool CGroupList::addChildAtIndex(CViewBase *child,   uint index,   bool deleteOn
 			addView (pVB,   (sint) index);
 			return true;
 		}
-		nlstop
+		nlstop;
 		return false;
 	}
 	return false;

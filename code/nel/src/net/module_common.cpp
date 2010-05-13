@@ -31,7 +31,7 @@ namespace NLNET
 
 
 
-		uint first = 0, last = copy.SubParams.size();
+		uint first = 0, last = (uint)copy.SubParams.size();
 		SubParams.resize( last );
 		for (; first != last; ++first)
 		{

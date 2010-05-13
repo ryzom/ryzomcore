@@ -846,7 +846,7 @@ struct TPredicateNode : public TQueryNode
 				}
 			}
 			else
-				nlstop
+				nlstop;
 		}
 		else
 		{

@@ -58,7 +58,7 @@ public:
 	{}
 
 	// attach a group family to the action if it supports it (assert otherwise)
-	virtual void addGroupFamily(CGroupFamily *gf) { nlassert(0) }
+	virtual void addGroupFamily(CGroupFamily *gf) { nlassert(0); }
 };
 
 // Code use by native functions and LogicAction

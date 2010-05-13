@@ -331,7 +331,7 @@ public:
 	}
 	sint getNumTile256 () const
 	{
-		return _Tile256.size();
+		return (sint)_Tile256.size();
 	}
 	sint32 getTile128 (sint index) const
 	{
@@ -494,40 +494,40 @@ public:
 	// Get
 	sint getLandCount () const
 	{
-		return _LandVector.size();
-	};
+		return (sint)_LandVector.size();
+	}
 	const CTileLand* getLand (int landIndex) const
 	{
 		return &_LandVector[landIndex];
-	};
+	}
 	CTileLand* getLand (int landIndex)
 	{
 		return &_LandVector[landIndex];
-	};
+	}
 	sint getTileSetCount () const
 	{
-		return _TileSetVector.size();
-	};
+		return (sint)_TileSetVector.size();
+	}
 	const CTileSet* getTileSet (int tileIndex) const
 	{
 		return &_TileSetVector[tileIndex];
-	};
+	}
 	CTileSet* getTileSet (int tileIndex)
 	{
 		return &_TileSetVector[tileIndex];
-	};
+	}
 	sint getTileCount () const
 	{
-		return _TileVector.size();
-	};
+		return (sint)_TileVector.size();
+	}
 	const CTile* getTile (int tileIndex) const
 	{
 		return &_TileVector[tileIndex];
-	};
+	}
 	CTile* getTile (int tileIndex)
 	{
 		return &_TileVector[tileIndex];
-	};
+	}
 	sint addLand (const std::string& name);
 	void removeLand (sint landIndex);
 	sint addTileSet (const std::string& name);

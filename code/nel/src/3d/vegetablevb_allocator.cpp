@@ -170,7 +170,7 @@ void			CVegetableVBAllocator::unlockBuffer()
 uint			CVegetableVBAllocator::getNumUserVerticesAllocated() const
 {
 	// get the number of vertices which are allocated by allocateVertex().
-	return _NumVerticesAllocated - _VertexFreeMemory.size();
+	return _NumVerticesAllocated - (uint)_VertexFreeMemory.size();
 }
 
 // ***************************************************************************

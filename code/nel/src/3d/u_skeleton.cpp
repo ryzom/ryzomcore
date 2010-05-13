@@ -161,7 +161,7 @@ uint		USkeleton::getNumBones() const
 {
 	NL3D_HAUTO_UI_SKELETON;
 	CSkeletonModel	*object = getObjectPtr();
-	return object->Bones.size();
+	return (uint)object->Bones.size();
 }
 
 // ***************************************************************************

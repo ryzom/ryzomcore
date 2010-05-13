@@ -212,7 +212,7 @@ public:
 		}
 
 #if !FINAL_VERSION
-		nlassert(character->getId().getType() == RYZOMID::player)
+		nlassert(character->getId().getType() == RYZOMID::player);
 #endif
 
 		_Character = character;

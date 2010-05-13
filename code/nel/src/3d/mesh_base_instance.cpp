@@ -117,7 +117,7 @@ ITrack*		CMeshBaseInstance::getDefaultTrack (uint valueId)
 uint32 CMeshBaseInstance::getNbLightMap()
 {
 	CMeshBase* pMesh=(CMeshBase*)(IShape*)Shape;
-	return pMesh->_LightInfos.size();
+	return (uint32)pMesh->_LightInfos.size();
 }
 
 // ***************************************************************************
@@ -132,7 +132,7 @@ void CMeshBaseInstance::getLightMapName( uint32 nLightMapNb, std::string &LightM
 // ***************************************************************************
 uint32 CMeshBaseInstance::getNbBlendShape()
 {
-	return _AnimatedMorphFactor.size();
+	return (uint32)_AnimatedMorphFactor.size();
 }
 
 // ***************************************************************************
@@ -228,8 +228,8 @@ void CMeshBaseInstance::traverseAnimDetail()
 	// Lightmap automatic animation
 
 	// Animated lightmap must have the same size than shape info lightmap.
-	const uint count0 = _AnimatedLightmap.size();
-	const uint count1 = mb->_LightInfos.size ();
+	const uint count0 = (uint)_AnimatedLightmap.size();
+	const uint count1 = (uint)mb->_LightInfos.size ();
 	nlassert (count0 == count1);
 	if (count0 == count1)
 	{
@@ -316,7 +316,7 @@ void CMeshBaseInstance::initAnimatedLightIndex (const CScene &scene)
 
 	// For each lightmap in the shape
 	CMeshBase *pMB = static_cast<CMeshBase*> (static_cast<IShape*> (Shape));
-	const uint count = pMB->_LightInfos.size ();
+	const uint count = (uint)pMB->_LightInfos.size ();
 	uint i;
 
 	// Resize the index array
@@ -339,7 +339,7 @@ void CMeshBaseInstance::initAnimatedLightIndex (const CScene &scene)
 // ***************************************************************************
 uint CMeshBaseInstance::getNumMaterial () const
 {
-	return Materials.size ();
+	return (uint)Materials.size ();
 }
 
 

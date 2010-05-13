@@ -114,7 +114,7 @@ void CPSValueBlendSampleFuncRGBA::setColorType(CVertexBuffer::TVertexColorType c
 void CPSValueGradientFuncRGBA::setColorType(CVertexBuffer::TVertexColorType colorType)
 {
 	if (colorType == _ColorType) return;
-	convertVBColor(&_Tab.front(), _Tab.size(), CVertexBuffer::TBGRA);
+	convertVBColor(&_Tab.front(), (uint)_Tab.size(), CVertexBuffer::TBGRA);
 	_ColorType = colorType;
 }
 

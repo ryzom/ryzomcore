@@ -236,7 +236,7 @@ public:
 	// unlink from all parent clip
 	void			clipUnlinkFromAll();
 	// get Parents links. NB: indices are no more valid after a clipDelChild()
-	uint			clipGetNumParents() const {return _ClipParents.size();}
+	uint			clipGetNumParents() const {return (uint)_ClipParents.size();}
 	CTransform		*clipGetParent(uint index) const;
 	// get Sons links. NB: indices are no more valid after a clipDelChild()
 	uint			clipGetNumChildren() const {return _ClipSons.size();}

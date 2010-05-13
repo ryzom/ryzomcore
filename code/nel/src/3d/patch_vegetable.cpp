@@ -59,7 +59,7 @@ void		CPatch::generateTileVegetable(CVegetableInstanceGroup *vegetIg, uint distT
 	const CTileVegetableDesc		&tileVegetDesc= getLandscape()->getTileVegetableDesc(tileId);
 	const std::vector<CVegetable>	&vegetableList= tileVegetDesc.getVegetableList(distType);
 	uint							distAddSeed= tileVegetDesc.getVegetableSeed(distType);
-	uint							numVegetable= vegetableList.size();
+	uint							numVegetable= (uint)vegetableList.size();
 
 	// If no vegetables at all, skip.
 	if(numVegetable==0)
@@ -221,7 +221,7 @@ void		CPatch::generateTileVegetable(CVegetableInstanceGroup *vegetIg, uint distT
 
 		// reseve instance space for this vegetable.
 		// instanceUVArray[i].size() is the number of instances to create.
-		veget.reserveIgAddInstances(vegetIgReserve, (CVegetable::TVegetableWater)vegetWaterState, instanceUVArray[i].size());
+		veget.reserveIgAddInstances(vegetIgReserve, (CVegetable::TVegetableWater)vegetWaterState, (uint)instanceUVArray[i].size());
 	}
 	// actual reseve memory of the ig.
 	getLandscape()->_VegetableManager->reserveIgCompile(vegetIg, vegetIgReserve);

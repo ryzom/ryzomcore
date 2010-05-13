@@ -357,7 +357,7 @@ void			CEdgeQuad::build(const CExteriorMesh &em,
 			// add an entry for Len.
 			memSize+= sizeof(uint16);
 			// add N entry of CEdgeChainEntry.
-			memSize+= quadNode.size()*sizeof(uint16);
+			memSize+= (sint)quadNode.size()*sizeof(uint16);
 		}
 	}
 
@@ -614,7 +614,7 @@ void		CEdgeQuad::serial(NLMISC::IStream &f)
 	else
 	{
 		// len/resize.
-		len= _Quad.size();
+		len= (uint32)_Quad.size();
 		f.serial(len);
 
 		// write offsets.

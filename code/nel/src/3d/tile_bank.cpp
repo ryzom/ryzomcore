@@ -162,7 +162,7 @@ void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 // ***************************************************************************
 sint CTileBank::addLand (const std::string& name)
 {
-	sint last=_LandVector.size();
+	sint last=(sint)_LandVector.size();
 	_LandVector.push_back(CTileLand());
 	_LandVector[last].setName (name);
 	return last;
@@ -179,7 +179,7 @@ void CTileBank::removeLand (sint landIndex)
 // ***************************************************************************
 sint CTileBank::addTileSet (const std::string& name)
 {
-	sint last=_TileSetVector.size();
+	sint last=(sint)_TileSetVector.size();
 	_TileSetVector.push_back(CTileSet());
 	_TileSetVector[last].setName (name);
 	for (int i=0; i<CTileSet::count; i++)
@@ -233,7 +233,7 @@ sint CTileBank::createTile ()
 	_TileVector[_TileVector.size()-1].setFileName (CTile::diffuse, "");
 	_TileVector[_TileVector.size()-1].setFileName (CTile::additive, "");
 	_TileVector[_TileVector.size()-1].setFileName (CTile::alpha, "");
-	return _TileVector.size()-1;
+	return (sint)_TileVector.size()-1;
 }
 // ***************************************************************************
 void CTileBank::freeTile (int tileIndex)
@@ -273,7 +273,7 @@ sint CTileBank::getNumBitmap (CTile::TBitmap bitmap) const
 			}
 		}
 	}
-	return setString.size();
+	return (sint)setString.size();
 }
 // ***************************************************************************
 void CTileBank::computeXRef ()
@@ -630,7 +630,7 @@ void CTileBank::setDisplacementMap (uint noiseMap, const char *newName)
 // ***************************************************************************
 uint CTileBank::getDisplacementMapCount () const
 {
-	return _DisplacementMap.size();
+	return (uint)_DisplacementMap.size();
 }
 
 
@@ -991,7 +991,7 @@ void CTileSet::addTile128 (int& indexInTileSet, CTileBank& bank)
 	sint index=bank.createTile ();
 
 	// Index of the new tile
-	indexInTileSet=_Tile128.size();
+	indexInTileSet=(int)_Tile128.size();
 
 	// Add to the end of the list
 	_Tile128.push_back (index);
@@ -1050,7 +1050,7 @@ void CTileSet::addTile256 (int& indexInTileSet, CTileBank& bank)
 	sint index=bank.createTile ();
 
 	// Index of the new tile
-	indexInTileSet=_Tile256.size();
+	indexInTileSet=(int)_Tile256.size();
 
 	// Add to the end of the list
 	_Tile256.push_back (index);
@@ -1778,7 +1778,7 @@ void CTileBorder::rotate()
 
 	// Top inverted becomes left
 	uint i, size;
-	size=_Borders[top].size();
+	size=(uint)_Borders[top].size();
 	_Borders[left].resize (size);
 
 	// copy inverted
@@ -1789,7 +1789,7 @@ void CTileBorder::rotate()
 	_Borders[top]=_Borders[right];
 
 	// bottom inverted becomes right
-	size=_Borders[bottom].size();
+	size=(uint)_Borders[bottom].size();
 	_Borders[right].resize (size);
 
 	// copy inverted

@@ -570,7 +570,7 @@ void CPSEmitter::processRegularEmissionWithNoLOD(uint firstInstanceIndex)
 						{
 							*phaseIt -= ::floorf(*phaseIt / *currEmitPeriod) * *currEmitPeriod;
 						}
-						const uint32 k = phaseIt - (_Phase.begin());
+						const uint32 k = (uint32)(phaseIt - _Phase.begin());
 						nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 						processEmit(k, nbToGenerate);
 					}
@@ -591,7 +591,7 @@ void CPSEmitter::processRegularEmissionWithNoLOD(uint firstInstanceIndex)
 						{
 							*phaseIt -= ::floorf((*phaseIt - _EmitDelay)  / *currEmitPeriod) * *currEmitPeriod;
 						}
-						const uint32 k = phaseIt - (_Phase.begin());
+						const uint32 k = (uint32)(phaseIt - _Phase.begin());
 						nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 						processEmit(k, nbToGenerate);
 					}
@@ -618,7 +618,7 @@ void CPSEmitter::processRegularEmissionWithNoLOD(uint firstInstanceIndex)
 							{
 								*phaseIt -= ::floorf(*phaseIt / *currEmitPeriod) * *currEmitPeriod;
 							}
-							const uint32 k = phaseIt - (_Phase.begin());
+							const uint32 k = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 							processEmit(k, nbToGenerate);
 							++*numEmitIt;
@@ -643,7 +643,7 @@ void CPSEmitter::processRegularEmissionWithNoLOD(uint firstInstanceIndex)
 							{
 								*phaseIt -= ::floorf((*phaseIt - _EmitDelay) / *currEmitPeriod) * *currEmitPeriod;
 							}
-							const uint32 k = phaseIt - (_Phase.begin());
+							const uint32 k = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 							processEmit(k, nbToGenerate);
 							++*numEmitIt;
@@ -744,7 +744,7 @@ void CPSEmitter::processRegularEmission(uint firstInstanceIndex, float emitLOD)
 						{
 							*phaseIt -= ::floorf(*phaseIt / *currEmitPeriod) * *currEmitPeriod;
 						}
-						const uint32 k = phaseIt - (_Phase.begin());
+						const uint32 k = (uint32)(phaseIt - _Phase.begin());
 						nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 						if (nbToGenerate)
 						{
@@ -788,7 +788,7 @@ void CPSEmitter::processRegularEmission(uint firstInstanceIndex, float emitLOD)
 						{
 							*phaseIt -= ::floorf((*phaseIt - _EmitDelay)  / *currEmitPeriod) * *currEmitPeriod;
 						}
-						const uint32 k = phaseIt - (_Phase.begin());
+						const uint32 k = (uint32)(phaseIt - _Phase.begin());
 						nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 						if (nbToGenerate)
 						{
@@ -820,7 +820,7 @@ void CPSEmitter::processRegularEmission(uint firstInstanceIndex, float emitLOD)
 							{
 								*phaseIt -= ::floorf(*phaseIt / *currEmitPeriod) * *currEmitPeriod;
 							}
-							const uint32 k = phaseIt - (_Phase.begin());
+							const uint32 k = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -874,7 +874,7 @@ void CPSEmitter::processRegularEmission(uint firstInstanceIndex, float emitLOD)
 							{
 								*phaseIt -= ::floorf((*phaseIt - _EmitDelay) / *currEmitPeriod) * *currEmitPeriod;
 							}
-							const uint32 k = phaseIt - (_Phase.begin());
+							const uint32 k = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, k) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -1112,7 +1112,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 							uint numEmissions = (uint) ::floorf(*phaseIt / *currEmitPeriod);
 							*phaseIt -= *currEmitPeriod * numEmissions;
 
-							uint emitterIndex = phaseIt - _Phase.begin();
+							uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -1149,7 +1149,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 						}
 						else
 						{
-							const uint32 emitterIndex = phaseIt - (_Phase.begin());
+							const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -1201,7 +1201,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 							float deltaT = std::max(*phaseIt - _EmitDelay, 0.f);
 							//nlassert(deltaT >= 0.f);
 							/// process each emission at the right pos at the right date
-							uint emitterIndex = phaseIt - _Phase.begin();
+							uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -1235,7 +1235,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 						}
 						else
 						{
-							const uint32 emitterIndex = phaseIt - (_Phase.begin());
+							const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							if (nbToGenerate)
 							{
@@ -1275,7 +1275,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 								*phaseIt -= *currEmitPeriod * numEmissions;
 								float deltaT = std::max(*phaseIt, 0.f);
 								//nlassert(deltaT >= 0.f);
-								uint emitterIndex = phaseIt - _Phase.begin();
+								uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 								if (*numEmitIt > _MaxEmissionCount) // make sure we don't go over the emission limit
 								{
 									numEmissions -= *numEmitIt - _MaxEmissionCount;
@@ -1314,7 +1314,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 							}
 							else
 							{
-								const uint32 emitterIndex = phaseIt - _Phase.begin();
+								const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 								nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 								if (nbToGenerate)
 								{
@@ -1375,7 +1375,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 								*phaseIt -= *currEmitPeriod * numEmissions;
 								float deltaT = std::max(*phaseIt - _EmitDelay, 0.f);
 								//nlassert(deltaT >= 0.f);
-								uint emitterIndex = phaseIt - _Phase.begin();
+								uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 								if (*numEmitIt > _MaxEmissionCount) // make sure we don't go over the emission limit
 								{
 									numEmissions -= *numEmitIt - _MaxEmissionCount;
@@ -1413,7 +1413,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 							}
 							else
 							{
-								const uint32 emitterIndex = phaseIt - (_Phase.begin());
+								const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 								nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 								if (nbToGenerate)
 								{
@@ -1535,7 +1535,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 							*phaseIt -= *currEmitPeriod * numEmissions;
 							float deltaT = std::max(0.f, *phaseIt);
 							//nlassert(deltaT >= 0.f);
-							uint emitterIndex = phaseIt - _Phase.begin();
+							uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 
 							/// compute the position of the emitter for the needed dates
 							numEmissions = GenEmitterPositions(_Owner,
@@ -1563,7 +1563,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 						}
 						else
 						{
-							const uint32 emitterIndex = phaseIt - (_Phase.begin());
+							const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							processEmit(emitterIndex, nbToGenerate);
 						}
@@ -1592,7 +1592,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 							float deltaT = std::max(*phaseIt - _EmitDelay, 0.f);
 							//nlassert(deltaT >= 0.f);
 
-							uint emitterIndex = phaseIt - _Phase.begin();
+							uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 							/// compute the position of the emitter for the needed date
 							numEmissions = GenEmitterPositions(_Owner,
 										        _EmittedType,
@@ -1618,7 +1618,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 						}
 						else
 						{
-							const uint32 emitterIndex = phaseIt - (_Phase.begin());
+							const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 							nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 							processEmit(emitterIndex, nbToGenerate);
 						}
@@ -1653,7 +1653,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 								*phaseIt -= *currEmitPeriod * numEmissions;
 								float deltaT = std::max(*phaseIt, 0.f);
 								//nlassert(deltaT >= 0.f);
-								uint emitterIndex = phaseIt - _Phase.begin();
+								uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 								if (*numEmitIt > _MaxEmissionCount) // make sure we don't go over the emission limit
 								{
 									numEmissions -= *numEmitIt - _MaxEmissionCount;
@@ -1684,7 +1684,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 							}
 							else
 							{
-								const uint32 emitterIndex = phaseIt - _Phase.begin();
+								const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 								nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 								processEmit(emitterIndex, nbToGenerate);
 								++*numEmitIt;
@@ -1717,7 +1717,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 								*phaseIt -= *currEmitPeriod * numEmissions;
 								float deltaT = std::max(*phaseIt - _EmitDelay, 0.f);
 								//nlassert(deltaT >= 0.f);
-								uint emitterIndex = phaseIt - _Phase.begin();
+								uint emitterIndex = (uint)(phaseIt - _Phase.begin());
 								if (*numEmitIt > _MaxEmissionCount) // make sure we don't go over the emission limit
 								{
 									numEmissions -= *numEmitIt - _MaxEmissionCount;
@@ -1748,7 +1748,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 							}
 							else
 							{
-								const uint32 emitterIndex = phaseIt - (_Phase.begin());
+								const uint32 emitterIndex = (uint32)(phaseIt - _Phase.begin());
 								nbToGenerate = _GenNbScheme ? _GenNbScheme->get(_Owner, emitterIndex) : _GenNb;
 								processEmit(emitterIndex, nbToGenerate);
 								++*numEmitIt;

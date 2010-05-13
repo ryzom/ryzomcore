@@ -466,7 +466,7 @@ void	buildExteriorMesh(CCollisionMeshBuild &cmb, CExteriorMesh &em)
 		sint			pivot = (edge+1)%3;
 		sint			nextEdge = edge;
 
-		uint			firstExtEdge = edges.size();
+		uint			firstExtEdge = (uint)edges.size();
 
 		for(;;)
 		{

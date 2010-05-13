@@ -121,7 +121,7 @@ void CCallbackNetBase::addCallbackArray (const TCallbackItem *callbackarray, sin
 	}
 
 	// resize the array
-	sint oldsize = _CallbackArray.size();
+	sint oldsize = (sint)_CallbackArray.size();
 
 	_CallbackArray.resize (oldsize + arraysize);
 

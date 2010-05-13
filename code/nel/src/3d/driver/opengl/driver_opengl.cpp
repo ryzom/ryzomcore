@@ -4231,7 +4231,7 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 	H_AUTO_OGL(COcclusionQueryGL_getOcclusionType)
 	nlassert(Driver);
 	nlassert(ID);
-	nlassert(Driver->_CurrentOcclusionQuery != this) // can't query result between a begin/end pair!
+	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (OcclusionType == NotAvailable)
 	{
 		GLuint result;
@@ -4254,7 +4254,7 @@ uint COcclusionQueryGL::getVisibleCount()
 	H_AUTO_OGL(COcclusionQueryGL_getVisibleCount)
 	nlassert(Driver);
 	nlassert(ID);
-	nlassert(Driver->_CurrentOcclusionQuery != this) // can't query result between a begin/end pair!
+	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (getOcclusionType() == NotAvailable) return 0;
 	return VisibleCount;
 }

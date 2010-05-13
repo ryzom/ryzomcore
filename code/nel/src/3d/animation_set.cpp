@@ -54,7 +54,7 @@ CAnimationSet::~CAnimationSet ()
 // ***************************************************************************
 uint CAnimationSet::getNumChannelId () const
 {
-	return _ChannelIdByName.size ();
+	return (uint)_ChannelIdByName.size ();
 }
 
 // ***************************************************************************
@@ -76,10 +76,10 @@ uint CAnimationSet::addAnimation (const char* name, CAnimation* animation)
 	_AnimationName.push_back (name);
 
 	// Add an entry name / animation
-	_AnimationIdByName.insert (std::map <std::string, uint32>::value_type (name, _Animation.size()-1));
+	_AnimationIdByName.insert (std::map <std::string, uint32>::value_type (name, (uint32)_Animation.size()-1));
 
 	// Return animation id
-	return _Animation.size()-1;
+	return (uint)_Animation.size()-1;
 }
 
 // ***************************************************************************
@@ -90,10 +90,10 @@ uint CAnimationSet::addSkeletonWeight (const char* name, CSkeletonWeight* skelet
 	_SkeletonWeightName.push_back (name);
 
 	// Add an entry name / animation
-	_SkeletonWeightIdByName.insert (std::map <std::string, uint32>::value_type (name, _SkeletonWeight.size()-1));
+	_SkeletonWeightIdByName.insert (std::map <std::string, uint32>::value_type (name, (uint32)_SkeletonWeight.size()-1));
 
 	// Return animation id
-	return _SkeletonWeight.size()-1;
+	return (uint)_SkeletonWeight.size()-1;
 }
 
 // ***************************************************************************

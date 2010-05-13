@@ -115,7 +115,7 @@ void CMeshMultiLod::build(CMeshMultiLodBuild &mbuild)
 	}
 
 	// Sort the slot by the distance...
-	for (int i=mbuild.LodMeshes.size()-1; i>0; i--)
+	for (int i=(uint)mbuild.LodMeshes.size()-1; i>0; i--)
 	for (int j=0; j<i; j++)
 	{
 		// Bad sort ?
@@ -204,7 +204,7 @@ CTransformShape	*CMeshMultiLod::createInstance(CScene &scene)
 bool CMeshMultiLod::clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix)
 {
 	// Look for the biggest mesh
-	uint meshCount=_MeshVector.size();
+	uint meshCount=(uint)_MeshVector.size();
 	for (uint i=0; i<meshCount; i++)
 	{
 		// Ref on slot
@@ -315,7 +315,7 @@ void CMeshMultiLod::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 float CMeshMultiLod::getNumTrianglesWithCoarsestDist(float distance, float coarsestMeshDist) const
 {
 	// Look in the table for good distances..
-	uint meshCount=_MeshVector.size();
+	uint meshCount=(uint)_MeshVector.size();
 
 	// At least on mesh
 	if (meshCount>0)
@@ -378,7 +378,7 @@ float CMeshMultiLod::getNumTrianglesWithCoarsestDist(float distance, float coars
 void CMeshMultiLod::getAABBox(NLMISC::CAABBox &bbox) const
 {
 	// Get count
-	uint count=_MeshVector.size();
+	uint count=(uint)_MeshVector.size();
 	for (uint slot=0; slot<count; slot++)
 	{
 		// Shape ?

@@ -113,7 +113,7 @@ float CPSFloatCurveFunctor::getValue(float date) const
 	else // hermite interpolation
 	{
 		float width = it->Date - precIt->Date;
-		uint index = precIt - _CtrlPoints.begin();
+		uint index = (uint)(precIt - _CtrlPoints.begin());
 		float t1 = getSlope(index) * width, t2 = getSlope(index + 1) * width;
 		const float lambda2 = NLMISC::sqr(lambda);
 		const float lambda3 = lambda2 * lambda;

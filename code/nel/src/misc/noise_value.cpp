@@ -300,7 +300,7 @@ void	CNoiseValue::serial(IStream &f)
 void	CNoiseColorGradient::eval(const CVector &posInWorld, CRGBAF &result) const
 {
 	// test if not null grads.
-	uint	nGrads= Gradients.size();
+	uint	nGrads= (uint)Gradients.size();
 	if(nGrads==0)
 		return;
 	// if only one color, easy

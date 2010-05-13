@@ -135,7 +135,7 @@ namespace NLNET
 
 		virtual uint32 getRouteCount() const
 		{
-			return _Routes.size();
+			return (uint32)_Routes.size();
 		}
 
 		void dump(NLMISC::CLog &log) const
@@ -566,7 +566,7 @@ namespace NLNET
 
 		virtual uint32 getRouteCount() const
 		{
-			return _Routes.size();
+			return (uint32)_Routes.size();
 		}
 
 		void dump(NLMISC::CLog &log) const
@@ -661,12 +661,12 @@ namespace NLNET
 			// affect a connection id
 			if (_FreeRoutesIds.empty())
 			{
-				connId = _RouteIds.size();
+				connId = (uint32)_RouteIds.size();
 				_RouteIds.push_back(InvalidSockId);
 			}
 			else
 			{
-				connId = _FreeRoutesIds.back();
+				connId = (uint32)_FreeRoutesIds.back();
 				_FreeRoutesIds.pop_back();
 			}
 

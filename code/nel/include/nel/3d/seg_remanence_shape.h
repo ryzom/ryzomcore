@@ -97,7 +97,7 @@ public:
 	  */
 	void				setNumCorners(uint numCorners);
 	// get the number of corners
-	uint32				getNumCorners() const { return _Corners.size(); }
+	uint32				getNumCorners() const { return (uint32)_Corners.size(); }
 	// Set a corner
 	void				setCorner(uint corner, const NLMISC::CVector &value);
 	// Get a corner

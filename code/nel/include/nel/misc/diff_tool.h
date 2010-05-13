@@ -145,7 +145,7 @@ namespace STRING_MANAGER
 
 		uint size() const
 		{
-			return Data.size();
+			return (uint)Data.size();
 		}
 
 		void insertColumn(uint colIndex)
@@ -230,7 +230,7 @@ namespace STRING_MANAGER
 					// Return the first column for which the title does not begin with '*'
 					if ( columnTitle[0] != '*' )
 					{
-						colIndex = (it - Data[0].begin());
+						colIndex = (uint)(it - Data[0].begin());
 						return true;
 					}
 				}
@@ -246,7 +246,7 @@ namespace STRING_MANAGER
 			if (it == Data[0].end())
 				return false;
 
-			colIndex = it - Data[0].begin();
+			colIndex = (uint)(it - Data[0].begin());
 			return true;
 		}
 
@@ -261,7 +261,7 @@ namespace STRING_MANAGER
 		// resize the rows
 		void resize(uint numRows)
 		{
-			uint	oldSize= Data.size();
+			uint	oldSize= (uint)Data.size();
 			Data.resize(numRows);
 			// alloc good Column count for new lines
 			for(uint i= oldSize;i<Data.size();i++)
@@ -278,7 +278,7 @@ namespace STRING_MANAGER
 			{
 				if (first->operator[](colIndex) == colValue)
 				{
-					rowIndex = first - Data.begin();
+					rowIndex = (uint)(first - Data.begin());
 					return true;
 				}
 
@@ -497,7 +497,7 @@ namespace STRING_MANAGER
 					else
 					{
 //						nlassert(it != context.Reference.begin()+refCount);
-						uint index = find_if(context.Reference.begin(), context.Reference.end(), TestItem(getIdentifier(context.Addition, addCount))) - context.Reference.begin();
+						uint index = (uint)(find_if(context.Reference.begin(), context.Reference.end(), TestItem(getIdentifier(context.Addition, addCount))) - context.Reference.begin());
 
 //						callback->onSwap(it - context.Reference.begin(), refCount, context);
 						callback->onSwap(index, refCount, context);

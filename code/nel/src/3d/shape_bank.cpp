@@ -712,7 +712,7 @@ sint CShapeBank::getShapeCacheFreeSpace(const std::string &shapeCacheName) const
 	TShapeCacheMap::const_iterator scmIt = ShapeCacheNameToShapeCache.find( shapeCacheName );
 	if( scmIt != ShapeCacheNameToShapeCache.end() )
 	{
-		return scmIt->second.MaxSize - scmIt->second.Elements.size();
+		return scmIt->second.MaxSize - (sint)scmIt->second.Elements.size();
 	}
 	return 0;
 }

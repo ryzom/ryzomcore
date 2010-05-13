@@ -449,7 +449,7 @@ public:
 	{
 		string shortExc, longExc, subject;
 		string addr, ext;
-		sint skipNFirst = 0;
+		ULONG_PTR skipNFirst = 0;
 		_Reason = "";
 
 		if (m_pexp == NULL)
@@ -555,7 +555,7 @@ public:
 	}
 
 	// display the callstack
-	void addStackAndLogToReason (sint /* skipNFirst */ = 0)
+	void addStackAndLogToReason (ULONG_PTR /* skipNFirst */ = 0)
 	{
 #ifdef NL_OS_WINDOWS
 		// ace hack

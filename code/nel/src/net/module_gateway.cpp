@@ -540,12 +540,12 @@ namespace NLNET
 
 		virtual uint32	getTransportCount() const
 		{
-			return _Transports.size();
+			return (uint32)_Transports.size();
 		}
 
 		virtual uint32	getRouteCount() const
 		{
-			return _Routes.size();
+			return (uint32)_Routes.size();
 		}
 
 		virtual uint32 getReceivedPingCount() const
@@ -1279,7 +1279,7 @@ namespace NLNET
 
 		virtual uint32	getProxyCount() const
 		{
-			return _ModuleProxies.size();
+			return (uint32)_ModuleProxies.size();
 		}
 
 		/// Fill a vector with the list of proxies managed here. The module are filled in ascending proxy id order.

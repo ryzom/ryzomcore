@@ -134,7 +134,7 @@ inline void CFaceGrid::create(const CFaceGrid::CFaceGridBuild &fgb)
 	uint	i;
 	for (i=0; i<fgb.Grid.size(); ++i)
 	{
-		_Grid.push_back(_GridData.size());
+		_Grid.push_back((uint)_GridData.size());
 		_GridData.insert(_GridData.end(), fgb.Grid[i].begin(), fgb.Grid[i].end());
 	}
 }
@@ -152,7 +152,7 @@ inline void	CFaceGrid::select(const NLMISC::CVector &pos, std::vector<uint32> &s
 	idx = x+(y<<_Log2Width);
 
 	start = _Grid[idx++];
-	stop = (idx == _Grid.size()) ? _GridData.size() : _Grid[idx];
+	stop = (idx == _Grid.size()) ? (uint)_GridData.size() : _Grid[idx];
 
 	for (; start<stop; ++start)
 		selected.push_back(_GridData[start]);
