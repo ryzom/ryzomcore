@@ -94,7 +94,7 @@ void			CMeshBlockManager::addInstance(IMeshGeom *meshGeom, CMeshBaseInstance *in
 
 	// link to the head of the list.
 	instInfo.NextInstance= meshGeom->_RootInstanceId;
-	meshGeom->_RootInstanceId= hb->RdrInstances.size();
+	meshGeom->_RootInstanceId= (sint32)hb->RdrInstances.size();
 
 	// add this instance
 	hb->RdrInstances.push_back(instInfo);
@@ -311,7 +311,7 @@ void			CMeshBlockManager::allocateMeshVBHeap(IMeshGeom *mesh)
 	// else, must add to the array
 	else
 	{
-		meshId= vbHeapBlock->AllocatedMeshGeoms.size();
+		meshId= (uint)vbHeapBlock->AllocatedMeshGeoms.size();
 		vbHeapBlock->AllocatedMeshGeoms.push_back(mesh);
 	}
 
@@ -414,7 +414,7 @@ bool			CMeshBlockManager::addVBHeap(IDriver *drv, uint vertexFormat, uint maxVer
 
 	// add an entry to the array, and the map.
 	_VBHeapBlocks.push_back(hb);
-	_VBHeapMap[vertexFormat]= _VBHeapBlocks.size()-1;
+	_VBHeapMap[vertexFormat]= (uint)_VBHeapBlocks.size()-1;
 
 	return true;
 }

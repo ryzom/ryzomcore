@@ -490,7 +490,7 @@ void			CDRU::drawTrianglesUnlit(const std::vector<NLMISC::CTriangleUV> &trilist,
 	if(trilist.size()==0)
 		return;
 
-	CDRU::drawTrianglesUnlit( &(*trilist.begin()), trilist.size(), mat, driver);
+	CDRU::drawTrianglesUnlit( &(*trilist.begin()), (uint)trilist.size(), mat, driver);
 }
 
 
@@ -529,7 +529,7 @@ void			CDRU::drawLinesUnlit(const std::vector<NLMISC::CLine> &linelist, CMateria
 {
 	if(linelist.size()==0)
 		return;
-	CDRU::drawLinesUnlit( &(*linelist.begin()), linelist.size(), mat, driver);
+	CDRU::drawLinesUnlit( &(*linelist.begin()), (sint)linelist.size(), mat, driver);
 }
 // ***************************************************************************
 void			CDRU::drawLine(const CVector &a, const CVector &b, CRGBA color, IDriver& driver)

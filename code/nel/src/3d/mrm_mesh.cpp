@@ -48,7 +48,7 @@ sint	CMRMMeshFinal::findInsertWedge(const CWedge &w)
 	// if not found, must add it.
 	if(it==_WedgeMap.end())
 	{
-		ret= Wedges.size();
+		ret= (sint)Wedges.size();
 		// insert into the map, with good id.
 		_WedgeMap.insert(make_pair(w, ret));
 		// add it to the array.

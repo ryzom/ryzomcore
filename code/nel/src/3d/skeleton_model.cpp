@@ -807,7 +807,7 @@ void	CSkeletonModel::traverseAnimDetail()
 
 	// must test / update the hierarchy of Bones.
 	// Since they are orderd in depth-first order, we are sure that parent are computed before sons.
-	uint							numBoneToCompute= _BoneToCompute.size();
+	uint							numBoneToCompute= (uint)_BoneToCompute.size();
 	CSkeletonModel::CBoneCompute	*pBoneCompute= numBoneToCompute? &_BoneToCompute[0] : NULL;
 	// traverse only bones which need to be computed
 	for(;numBoneToCompute>0;numBoneToCompute--, pBoneCompute++)
@@ -951,7 +951,7 @@ void		CSkeletonModel::computeLodTexture()
 				// Ok, compute influence of this instance on the Lod.
 
 				// ---- Build all bmps of the instance with help of the asyncTextureManager
-				uint	numMats= mbi->Materials.size();
+				uint	numMats= (uint)mbi->Materials.size();
 				// 256 materials possibles for the lod Manager
 				numMats= min(numMats, 256U);
 				// for endTexturecompute

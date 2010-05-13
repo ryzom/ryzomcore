@@ -189,7 +189,7 @@ void			CLodCharacterBuilder::addAnim(const char *animName, CAnimation *animation
 // ***************************************************************************
 void			CLodCharacterBuilder::applySkin(CSkeletonModel *skeleton, CVector	*dstVertices)
 {
-	uint	numVerts= _LodBuild->Vertices.size();
+	uint	numVerts= (uint)_LodBuild->Vertices.size();
 
 	// for all vertices.
 	for(uint i=0; i<numVerts; i++)

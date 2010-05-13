@@ -204,7 +204,7 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 	nlassert(NL3D_MESH_SKINNING_MAX_MATRIX==4);
 	for(uint i=0;i<NL3D_MESH_SKINNING_MAX_MATRIX;i++)
 	{
-		uint		nInf= lod.InfluencedVertices[i].size();
+		uint		nInf= (uint)lod.InfluencedVertices[i].size();
 		if( nInf==0 )
 			continue;
 		uint32		*infPtr= &(lod.InfluencedVertices[i][0]);

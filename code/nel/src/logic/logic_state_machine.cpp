@@ -504,7 +504,7 @@ bool testNameWithFilter( sint8 filter, string motif, string varName )
 			// *xxx
 			case 1 :
 			{
-				sint beginIndex = varName.size() - motif.size() - 1;
+				sint beginIndex = (sint)(varName.size() - motif.size() - 1);
 				string endOfVarName = varName.substr(beginIndex,motif.size());
 				if( endOfVarName == motif )
 				{

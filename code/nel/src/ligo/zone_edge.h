@@ -64,7 +64,7 @@ public:
 	void invert (const CLigoConfig &config);
 
 	/// Return the vertex count
-	uint getNumVertex () const { return _TheEdge.size(); }
+	uint getNumVertex () const { return (uint)_TheEdge.size(); }
 
 	/// Return the vertex
 	const NLMISC::CVector& getVertex (uint id) const { return _TheEdge[id]; }

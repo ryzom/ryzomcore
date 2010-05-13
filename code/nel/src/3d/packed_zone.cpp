@@ -175,7 +175,7 @@ void CVectorPacker::flush(CBitMemStream &bits)
 		bits.serial(isRLE, 1);
 		bits.serial(_LastTag, 2);
 		nlassert(_LastDeltas.size() <= 255);
-		uint8 length = _LastDeltas.size();
+		uint8 length = (uint8)_LastDeltas.size();
 		//nlwarning("begin RLE, length = %d, tag = %d", (int) length, (int) repeatTag);
 		bits.serial(length);
 		for(uint k = 0; k < _LastDeltas.size(); ++k)
@@ -223,7 +223,7 @@ void CVectorPacker::serialPackedVector16(std::vector<uint16> &v,NLMISC::IStream 
 		CBitMemStream bits(true);
 		std::vector<uint8> datas;
 		f.serialCont(datas);
-		bits.fill(&datas[0], datas.size());
+		bits.fill(&datas[0], (uint32)datas.size());
 		uint32 numValues = 0;
 		bits.serial(numValues);
 		v.resize(numValues);
@@ -312,7 +312,7 @@ void CVectorPacker::serialPackedVector16(std::vector<uint16> &v,NLMISC::IStream 
 		_Repeated[AbsOrRLE] = 0;
 		//
 		CBitMemStream bits(false);
-		uint32 numValues = v.size();
+		uint32 numValues = (uint32)v.size();
 		bits.serial(numValues);
 		_LastTag = std::numeric_limits<uint32>::max();
 		_LastDeltas.clear();
@@ -723,7 +723,7 @@ void CPackedZone32::build(std::vector<const CTessFace*> &leaves,
 		{
 			if (!triListGrid(x, y).empty())
 			{
-				Grid(x, y) = TriLists.size();
+				Grid(x, y) = (uint32)TriLists.size();
 				std::copy(triListGrid(x, y).begin(), triListGrid(x, y).end(), std::back_inserter(TriLists));
 				TriLists.push_back(UndefIndex); // mark the end of the list
 			}
@@ -902,7 +902,7 @@ void CPackedZone32::addTri(const CTriangle &tri, TVertexGrid &vertexGrid, TTriLi
 		{
 			if (x < 0) continue;
 			if (x >= (sint) triListGrid.getWidth()) break;
-			triListGrid(x, gridY).push_back(Tris.size() - 1);
+			triListGrid(x, gridY).push_back((uint32)Tris.size() - 1);
 		}
 	}
 }
@@ -940,8 +940,8 @@ uint32 CPackedZone32::allocVertex(const CVector &src, TVertexGrid &vertexGrid)
 
 	// create a new vertex
 	Verts.push_back(pv);
-	vertList.push_front(Verts.size() - 1);
-	return Verts.size() - 1;
+	vertList.push_front((uint32)Verts.size() - 1);
+	return (uint32)Verts.size() - 1;
 }
 
 // ***************************************************************************************
@@ -1013,7 +1013,7 @@ void CPackedZone32::render(CVertexBuffer &vb, IDriver &drv, CMaterial &material,
 			}
 		}
 		vba.unlock();
-		uint numRemainingTris = batchSize - ((endDest - dest) / 3);
+		uint numRemainingTris = batchSize - (uint)((endDest - dest) / 3);
 		if (numRemainingTris)
 		{
 			drv.setPolygonMode(IDriver::Filled);
@@ -1236,7 +1236,7 @@ void CPackedZone16::render(CVertexBuffer &vb, IDriver &drv, CMaterial &material,
 			}
 		}
 		vba.unlock();
-		uint numRemainingTris = batchSize - ((endDest - dest) / 3);
+		uint numRemainingTris = batchSize - (uint)((endDest - dest) / 3);
 		if (numRemainingTris)
 		{
 			drv.setPolygonMode(IDriver::Filled);

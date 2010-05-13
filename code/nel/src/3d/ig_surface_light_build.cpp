@@ -51,7 +51,7 @@ void			CIGSurfaceLightBuild::buildSunDebugMesh(CMesh::CMeshBuild &meshBuild,
 			// Resize vector.
 			uint	wVert= surface.Width;
 			uint	hVert= surface.Height;
-			uint	vId0= meshBuild.Vertices.size();
+			uint	vId0= (uint)meshBuild.Vertices.size();
 			// Allocate vertices / colors
 			meshBuild.Vertices.resize(vId0 + wVert*hVert);
 			vector<CRGBA>	colors;
@@ -98,7 +98,7 @@ void			CIGSurfaceLightBuild::buildPLDebugMesh(CMesh::CMeshBuild &meshBuild, CMes
 	meshBuild.VertexFlags= CVertexBuffer::PositionFlag | CVertexBuffer::PrimaryColorFlag;
 
 	// Get the number of lights in Ig.
-	uint	numLight= igOut.getPointLightList().size();
+	uint	numLight= (uint)igOut.getPointLightList().size();
 	numLight= raiseToNextPowerOf2(numLight);
 	uint	idMultiplier= 256/ numLight;
 
@@ -132,7 +132,7 @@ void			CIGSurfaceLightBuild::buildPLDebugMesh(CMesh::CMeshBuild &meshBuild, CMes
 			// Resize vector.
 			uint	wVert= surface.Width;
 			uint	hVert= surface.Height;
-			uint	vId0= meshBuild.Vertices.size();
+			uint	vId0= (uint)meshBuild.Vertices.size();
 			// Allocate vertices / colors
 			meshBuild.Vertices.resize(vId0 + wVert*hVert);
 			vector<CRGBA>	colors;

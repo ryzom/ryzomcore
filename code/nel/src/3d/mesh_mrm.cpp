@@ -107,7 +107,7 @@ void		CMeshMRMGeom::CLod::buildSkinVertexBlocks()
 	uint	i;
 	for(i=0;i<NL3D_MESH_SKINNING_MAX_MATRIX;i++)
 	{
-		uint		nInf= InfluencedVertices[i].size();
+		uint		nInf= (uint)InfluencedVertices[i].size();
 		if( nInf==0 )
 			continue;
 		uint32		*infPtr= &(InfluencedVertices[i][0]);
@@ -299,7 +299,7 @@ void			CMeshMRMGeom::build(CMesh::CMeshBuild &m, std::vector<CMesh::CMeshBuild*>
 		// LodOffset is filled in serial() when stream is input.
 	}
 	// After build, all lods are present in memory.
-	_NbLodLoaded= _Lods.size();
+	_NbLodLoaded= (uint)_Lods.size();
 
 
 	// For load balancing.
@@ -549,7 +549,7 @@ void	CMeshMRMGeom::applyGeomorphWithVBHardPtr(std::vector<CMRMWedgeGeom>  &geoms
 
 
 		// For all geomorphs.
-		uint			nGeoms= geoms.size();
+		uint			nGeoms= (uint)geoms.size();
 		CMRMWedgeGeom	*ptrGeom= &(geoms[0]);
 		uint8			*destPtr= vertexDestPtr;
 		/* NB: optimisation: lot of "if" in this Loop, but because of BTB, they always cost nothing (prediction is good).
@@ -751,7 +751,7 @@ void	CMeshMRMGeom::applyGeomorphWithVBHardPtr(std::vector<CMRMWedgeGeom>  &geoms
 		// For all stages after 4.
 		for(i=4;i<CVertexBuffer::MaxStage;i++)
 		{
-			uint			nGeoms= geoms.size();
+			uint			nGeoms= (uint)geoms.size();
 			CMRMWedgeGeom	*ptrGeom= &(geoms[0]);
 			uint8			*destPtr= vertexDestPtr;
 
@@ -793,7 +793,7 @@ void	CMeshMRMGeom::applyGeomorphPosNormalUV0(std::vector<CMRMWedgeGeom>  &geoms,
 
 
 	// For all geomorphs.
-	uint			nGeoms= geoms.size();
+	uint			nGeoms= (uint)geoms.size();
 	CMRMWedgeGeom	*ptrGeom= &(geoms[0]);
 	uint8			*destPtr= vertexDestPtr;
 	for(; nGeoms>0; nGeoms--, ptrGeom++, destPtr+= vertexSize )
@@ -1355,7 +1355,7 @@ sint	CMeshMRMGeom::renderSkinGroupGeom(CMeshMRMInstance	*mi, float alphaMRM, uin
 		applyRawSkinWithNormal (lod, *(mi->_RawSkinCache), skeleton, vbDest, alphaLod);
 
 		// Vertices are packed in RawSkin mode (ie no holes due to MRM!)
-		return	mi->_RawSkinCache->Geomorphs.size() +
+		return	(sint)mi->_RawSkinCache->Geomorphs.size() +
 				mi->_RawSkinCache->TotalSoftVertices +
 				mi->_RawSkinCache->TotalHardVertices;
 	}
@@ -1519,7 +1519,7 @@ void	CMeshMRMGeom::updateShiftedTriangleCache(CMeshMRMInstance *mi, sint curLodI
 		}
 
 		// Build RdrPass
-		mi->_ShiftedTriangleCache->RdrPass.resize(pbList.size());
+		mi->_ShiftedTriangleCache->RdrPass.resize((uint32)pbList.size());
 
 		// First pass, count number of triangles, and fill header info
 		uint	totalTri= 0;
@@ -1764,7 +1764,7 @@ void	CMeshMRMGeom::load(NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 
 	// Now, all lods are loaded.
-	_NbLodLoaded= _Lods.size();
+	_NbLodLoaded= (uint)_Lods.size();
 
 	// If version doen't have boneNames, must build BoneId now.
 	if(verHeader <= 2)
@@ -1951,7 +1951,7 @@ void	CMeshMRMGeom::loadFirstLod(NLMISC::IStream &f)
 	*/
 	uint	numLodToLoad;
 	if(verHeader<4)
-		numLodToLoad= _LodInfos.size();
+		numLodToLoad= (uint)_LodInfos.size();
 	else
 		numLodToLoad= 1;
 
@@ -2152,7 +2152,7 @@ void	CMeshMRMGeom::restoreOriginalSkinPart(CLod &lod)
 	//===========================
 	for(uint i=0;i<NL3D_MESH_SKINNING_MAX_MATRIX;i++)
 	{
-		uint		nInf= lod.InfluencedVertices[i].size();
+		uint		nInf= (uint)lod.InfluencedVertices[i].size();
 		if( nInf==0 )
 			continue;
 		uint32		*infPtr= &(lod.InfluencedVertices[i][0]);
@@ -2588,7 +2588,7 @@ bool	CMeshMRMGeom::buildGeometryForLod(uint lodId, std::vector<CVector> &vertice
 
 	// **** count number of vertices really used (skip geomorphs)
 	uint	numUsedVertices=0;
-	for(i=geomorphs.size();i<vertexRemap.size();i++)
+	for(i=(uint)geomorphs.size();i<vertexRemap.size();i++)
 	{
 		if(vertexRemap[i]>=0)
 			numUsedVertices++;
@@ -2607,13 +2607,13 @@ bool	CMeshMRMGeom::buildGeometryForLod(uint lodId, std::vector<CVector> &vertice
 		_VBufferFinal.lock(vba);
 
 		// get the start vert, beginning at end of geomorphs
-		const uint8	*pSrcVert= (const uint8*)vba.getVertexCoordPointer(geomorphs.size());
+		const uint8	*pSrcVert= (const uint8*)vba.getVertexCoordPointer((uint)geomorphs.size());
 		uint32		vertSize= _VBufferFinal.getVertexSize();
 		CVector		*pDstVert= &vertices[0];
 		uint		dstIndex= 0;
 
 		// Then run all input vertices (skip geomorphs)
-		for(i=geomorphs.size();i<vertexRemap.size();i++)
+		for(i=(uint)geomorphs.size();i<vertexRemap.size();i++)
 		{
 			// if the vertex is used
 			if(vertexRemap[i]>=0)
@@ -2710,7 +2710,7 @@ uint	CMeshMRMGeom::getNumRdrPassesForMesh() const
 // ***************************************************************************
 uint	CMeshMRMGeom::getNumRdrPassesForInstance(CMeshBaseInstance *inst) const
 {
-	return _Lods[_MBRCurrentLodId].RdrPass.size();
+	return (uint)_Lods[_MBRCurrentLodId].RdrPass.size();
 }
 // ***************************************************************************
 void	CMeshMRMGeom::beginMesh(CMeshGeomRenderContext &rdrCtx)
@@ -2884,7 +2884,7 @@ void			CMeshMRM::build (CMeshBase::CMeshBaseBuild &mBase, CMesh::CMeshBuild &m,
 	CMeshBase::buildMeshBase (mBase);
 
 	// Then build the geom.
-	_MeshMRMGeom.build (m, listBS, mBase.Materials.size(), params);
+	_MeshMRMGeom.build (m, listBS, (uint)mBase.Materials.size(), params);
 }
 // ***************************************************************************
 void			CMeshMRM::build (CMeshBase::CMeshBaseBuild &m, const CMeshMRMGeom &mgeom)
@@ -3196,10 +3196,10 @@ void		CMeshMRMGeom::updateRawSkinNormal(bool enabled, CMeshMRMInstance *mi, sint
 
 
 			// Resize the dest array.
-			skinLod.Vertices1.resize(lod.InfluencedVertices[0].size());
-			skinLod.Vertices2.resize(lod.InfluencedVertices[1].size());
-			skinLod.Vertices3.resize(lod.InfluencedVertices[2].size());
-			skinLod.Vertices4.resize(lod.InfluencedVertices[3].size());
+			skinLod.Vertices1.resize((uint32)lod.InfluencedVertices[0].size());
+			skinLod.Vertices2.resize((uint32)lod.InfluencedVertices[1].size());
+			skinLod.Vertices3.resize((uint32)lod.InfluencedVertices[2].size());
+			skinLod.Vertices4.resize((uint32)lod.InfluencedVertices[3].size());
 
 			// Remap for BlendShape. Lasts 2 bits tells what RawSkin Array to seek (1 to 4),
 			// low Bits indicate the number in them. 0xFFFFFFFF is a special value indicating "NotUsed in this lod"
@@ -3308,7 +3308,7 @@ void		CMeshMRMGeom::updateRawSkinNormal(bool enabled, CMeshMRMInstance *mi, sint
 
 			// Remap Geomorphs.
 			//========
-			uint	numGeoms= lod.Geomorphs.size();
+			uint	numGeoms= (uint)lod.Geomorphs.size();
 			skinLod.Geomorphs.resize( numGeoms );
 			for(i=0;i<numGeoms;i++)
 			{
@@ -3369,7 +3369,7 @@ void		CMeshMRMGeom::updateRawSkinNormal(bool enabled, CMeshMRMInstance *mi, sint
 			//========
 			if(_MeshMorpher.BlendShapes.size()>0)
 			{
-				skinLod.VertexRemap.resize(vertexFinalRemap.size());
+				skinLod.VertexRemap.resize((uint32)vertexFinalRemap.size());
 
 				for(i=0;i<vertexFinalRemap.size();i++)
 				{
@@ -3424,13 +3424,13 @@ void			CMeshMRMGeom::setShadowMesh(const std::vector<CShadowVertex> &shadowVerti
 // ***************************************************************************
 uint			CMeshMRMGeom::getNumShadowSkinVertices() const
 {
-	return _ShadowSkin.Vertices.size();
+	return (uint)_ShadowSkin.Vertices.size();
 }
 
 // ***************************************************************************
 sint			CMeshMRMGeom::renderShadowSkinGeom(CMeshMRMInstance	*mi, uint remainingVertices, uint8 *vbDest)
 {
-	uint	numVerts= _ShadowSkin.Vertices.size();
+	uint	numVerts= (uint)_ShadowSkin.Vertices.size();
 
 	// if no verts, no draw
 	if(numVerts==0)
@@ -3496,7 +3496,7 @@ void			CMeshMRMGeom::renderShadowSkinPrimitives(CMeshMRMInstance	*mi, CMaterial 
 	if(shiftedTris.getNumIndexes()<_ShadowSkin.Triangles.size())
 	{
 		shiftedTris.setFormat(NL_MESH_MRM_INDEX_FORMAT);
-		shiftedTris.setNumIndexes(_ShadowSkin.Triangles.size());
+		shiftedTris.setNumIndexes((uint32)_ShadowSkin.Triangles.size());
 	}
 	shiftedTris.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
 	{
@@ -3504,7 +3504,7 @@ void			CMeshMRMGeom::renderShadowSkinPrimitives(CMeshMRMInstance	*mi, CMaterial 
 		shiftedTris.lock(iba);
 		const uint32	*src= &_ShadowSkin.Triangles[0];
 		TMeshMRMIndexType *dst= (TMeshMRMIndexType *) iba.getPtr();
-		for(uint n= _ShadowSkin.Triangles.size();n>0;n--, src++, dst++)
+		for(uint n= (uint)_ShadowSkin.Triangles.size();n>0;n--, src++, dst++)
 		{
 			*dst= (TMeshMRMIndexType)(*src + baseVertex);
 		}
@@ -3513,7 +3513,7 @@ void			CMeshMRMGeom::renderShadowSkinPrimitives(CMeshMRMInstance	*mi, CMaterial 
 	// Render Triangles with cache
 	//===========
 
-	uint	numTris= _ShadowSkin.Triangles.size()/3;
+	uint	numTris= (uint)_ShadowSkin.Triangles.size()/3;
 
 	// Render with the Materials of the MeshInstance.
 	drv->activeIndexBuffer(shiftedTris);

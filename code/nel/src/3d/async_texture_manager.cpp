@@ -157,7 +157,7 @@ uint			CAsyncTextureManager::addTextureRef(const string &textNameNotLwr, CMeshBa
 	if(it==_TextureEntryMap.end())
 	{
 		// search a free id.
-		uint	i= _TextureEntries.size();
+		uint	i= (uint)_TextureEntries.size();
 		if(!_FreeTextureIds.empty())
 		{
 			i= _FreeTextureIds.back();
@@ -301,7 +301,7 @@ void			CAsyncTextureManager::releaseTexture(uint id, CMeshBaseInstance *instance
 
 	// find an instance in this texture an remove it.
 	CTextureEntry	*text= _TextureEntries[id];
-	uint			instSize= text->Instances.size();
+	uint			instSize= (uint)text->Instances.size();
 	for(uint i=0;i<instSize;i++)
 	{
 		if(text->Instances[i]== instance)
@@ -701,7 +701,7 @@ void			CAsyncTextureManager::updateTextureLodSystem(IDriver *pDriver)
 	uint	pivot= 0;
 	uint	currentWantedSize= currentBaseSize;
 	uint	currentLoadedSize= currentBaseSize;
-	for(i=lodArray.size()-1;i>=0;i--)
+	for(i=(sint)lodArray.size()-1;i>=0;i--)
 	{
 		uint	lodSize= lodArray[i].Lod->ExtraSize;
 		currentWantedSize+= lodSize;
@@ -731,7 +731,7 @@ void			CAsyncTextureManager::updateTextureLodSystem(IDriver *pDriver)
 	{
 		unload= false;
 		// search from end of the list to pivot (included), the first LOD (ie the most important) to load.
-		for(i=lodArray.size()-1;i>=(sint)pivot;i--)
+		for(i=(sint)lodArray.size()-1;i>=(sint)pivot;i--)
 		{
 			if(!lodArray[i].Lod->UpLoaded)
 			{

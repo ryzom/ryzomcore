@@ -290,7 +290,7 @@ void	CMeshGeom::build (CMesh::CMeshBuild &m, uint numMaxMaterial)
 	TCornerSet	corners;
 	const CFaceTmp		*pFace= &(*tmpFaces.begin());
 	uint32		nFaceMB = 0;
-	sint		N= tmpFaces.size();
+	sint		N= (sint)tmpFaces.size();
 	sint		currentVBIndex=0;
 
 	m.VertLink.clear ();
@@ -336,7 +336,7 @@ void	CMeshGeom::build (CMesh::CMeshBuild &m, uint numMaxMaterial)
 	/// 4. Then, for all faces, build the RdrPass PBlock.
 	//===================================================
 	pFace= &(*tmpFaces.begin());
-	N= tmpFaces.size();
+	N= (sint)tmpFaces.size();
 	for(;N>0;N--, pFace++)
 	{
 		sint	mbId= pFace->MatrixBlockId;
@@ -1302,7 +1302,7 @@ void	CMeshGeom::buildSkin(CMesh::CMeshBuild &m, std::vector<CFaceTmp>	&tmpFaces)
 					}
 
 					// to Which matrixblock this face is inserted.
-					face.MatrixBlockId= _MatrixBlocks.size()-1;
+					face.MatrixBlockId= (sint)_MatrixBlocks.size()-1;
 
 					// remove the face from remain face list.
 					itFace= remainingFaces.erase(itFace);
@@ -1450,13 +1450,13 @@ float	CMeshGeom::getNumTriangles (float distance)
 	uint32 triCount=0;
 
 	// For each matrix block
-	uint mbCount=_MatrixBlocks.size();
+	uint mbCount=(uint)_MatrixBlocks.size();
 	for (uint mb=0; mb<mbCount; mb++)
 	{
 		CMatrixBlock &block=_MatrixBlocks[mb];
 
 		// Count of primitive block
-		uint pCount=block.RdrPass.size();
+		uint pCount=(uint)block.RdrPass.size();
 		for (uint pb=0; pb<pCount; pb++)
 		{
 			// Ref on the primitive block
@@ -1797,7 +1797,7 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 		skinType= SkinWithTgSpace;
 
 	// Get VB src/dst info/ptrs.
-	uint	numVertices= _OriginalSkinVertices.size();
+	uint	numVertices= (uint)_OriginalSkinVertices.size();
 	uint	dstStride= _VBuffer.getVertexSize();
 	// Get dst TgSpace.
 	uint	tgSpaceStage = 0;
@@ -2208,12 +2208,12 @@ bool	CMeshGeom::sortPerMaterial() const
 // ***************************************************************************
 uint	CMeshGeom::getNumRdrPassesForMesh() const
 {
-	return _MatrixBlocks[0].RdrPass.size();
+	return (uint)_MatrixBlocks[0].RdrPass.size();
 }
 // ***************************************************************************
 uint	CMeshGeom::getNumRdrPassesForInstance(CMeshBaseInstance *inst) const
 {
-	return _MatrixBlocks[0].RdrPass.size();
+	return (uint)_MatrixBlocks[0].RdrPass.size();
 }
 // ***************************************************************************
 void	CMeshGeom::beginMesh(CMeshGeomRenderContext &rdrCtx)
@@ -2502,7 +2502,7 @@ void	CMesh::build (CMeshBase::CMeshBaseBuild &mbase, CMeshBuild &m)
 	CMeshBase::buildMeshBase (mbase);
 
 	// build the geometry.
-	_MeshGeom->build (m, mbase.Materials.size());
+	_MeshGeom->build (m, (uint)mbase.Materials.size());
 
 	// compile some stuff
 	compileRunTime();

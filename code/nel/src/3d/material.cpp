@@ -226,7 +226,7 @@ void		CMaterial::serial(NLMISC::IStream &f)
 			}
 			else
 			{
-				n = _LightMaps.size();
+				n = (uint32)_LightMaps.size();
 				f.serial(n);
 			}
 			for (uint32 i = 0; i < n; ++i)

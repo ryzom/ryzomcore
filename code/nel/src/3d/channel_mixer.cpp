@@ -187,7 +187,7 @@ void CChannelMixer::eval (bool detail, uint64 evalDetailDate)
 	uint		numChans;
 	if(detail)
 	{
-		numChans= _DetailListToEval.size();
+		numChans= (uint)_DetailListToEval.size();
 		if(numChans)
 			channelArrayPtr= &_DetailListToEval[0];
 		else
@@ -195,7 +195,7 @@ void CChannelMixer::eval (bool detail, uint64 evalDetailDate)
 	}
 	else
 	{
-		numChans= _GlobalListToEval.size();
+		numChans= (uint)_GlobalListToEval.size();
 		if(numChans)
 			channelArrayPtr= &_GlobalListToEval[0];
 		else

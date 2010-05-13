@@ -244,7 +244,7 @@ uint UInstance::getNumMaterials() const
 {
 	CMeshBaseInstance	*mi= dynamic_cast<CMeshBaseInstance*>(_Object);
 	if(mi)
-		return mi->Materials.size();
+		return (uint)mi->Materials.size();
 	else
 		return 0;
 }

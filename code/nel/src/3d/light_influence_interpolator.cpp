@@ -61,7 +61,7 @@ void		CLightInfluenceInterpolator::interpolate(std::vector<CPointLightInfluence>
 			{
 				// append a PointLightInfluence
 				pointLightList.push_back(CPointLightInfluence());
-				sint	id= pointLightList.size()-1;
+				sint	id= (sint)pointLightList.size()-1;
 				// setup the PointLightInfluence
 				corner.Lights[0]->_IdInInfluenceList= id;
 				pointLightList[id].PointLight= corner.Lights[0];
@@ -82,7 +82,7 @@ void		CLightInfluenceInterpolator::interpolate(std::vector<CPointLightInfluence>
 			{
 				// append a PointLightInfluence
 				pointLightList.push_back(CPointLightInfluence());
-				sint	id= pointLightList.size()-1;
+				sint	id= (sint)pointLightList.size()-1;
 				// setup the PointLightInfluence
 				corner.Lights[1]->_IdInInfluenceList= id;
 				pointLightList[id].PointLight= corner.Lights[1];

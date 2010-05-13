@@ -58,7 +58,7 @@ void CQuadEffect::makeRasters(const TPoint2DVect &poly
 	dest.clear();
     const float epsilon = 10E-5f;
 
-	sint size = poly.size();
+	sint size = (sint)poly.size();
 	uint aelSize = 0; // size of active edge list
 
 	sint k; // loop counter

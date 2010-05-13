@@ -347,7 +347,7 @@ CLodCharacterShape::CLodCharacterShape()
 // ***************************************************************************
 void			CLodCharacterShape::buildMesh(const std::string &name, const CLodCharacterShapeBuild &lodBuild)
 {
-	uint	numVertices= lodBuild.Vertices.size();
+	uint	numVertices= (uint)lodBuild.Vertices.size();
 	const vector<uint32>				&triangleIndices= lodBuild.TriangleIndices;
 	const vector<CMesh::CSkinWeight>	&skinWeights= lodBuild.SkinWeights;
 	const vector<CUV>					&uvs= lodBuild.UVs;
@@ -372,7 +372,7 @@ void			CLodCharacterShape::buildMesh(const std::string &name, const CLodCharacte
 	// Copy data.
 	_Name= name;
 	_NumVertices= numVertices;
-	_NumTriangles= triangleIndices.size()/3;
+	_NumTriangles= (uint32)triangleIndices.size()/3;
 	#ifdef NL_LOD_CHARACTER_INDEX16
 		_TriangleIndices.resize(triangleIndices.size());
 		for(uint k = 0; k < triangleIndices.size(); ++k)
@@ -492,7 +492,7 @@ bool			CLodCharacterShape::addAnim(const CAnimBuild &animBuild)
 
 	// Add the anim to the array, and add an entry to the map
 	_Anims.push_back(dstAnim);
-	_AnimMap.insert(make_pair(dstAnim.Name, _Anims.size()-1));
+	_AnimMap.insert(make_pair(dstAnim.Name, (uint32)_Anims.size()-1));
 
 	return true;
 }

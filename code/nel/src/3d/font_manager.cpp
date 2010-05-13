@@ -100,7 +100,7 @@ void CFontManager::computeString (const ucstring &s,
 	}
 
 	// Setting vertices format
-	output.Vertices.setNumVertices (4 * s.size());
+	output.Vertices.setNumVertices (4 * (uint32)s.size());
 
 	// 1 character <-> 1 quad
 	sint32 penx = 0, dx;

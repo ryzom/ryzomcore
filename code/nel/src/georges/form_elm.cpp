@@ -1153,7 +1153,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const char *name, const CForm
 
 								// The array pointer
 								CFormElmArray *array = safe_cast<CFormElmArray*>(*node);
-								uint oldSize = array->Elements.size ();
+								uint oldSize = (uint)array->Elements.size ();
 								array->Elements.resize (arrayIndex+1);
 
 								// Insert empty element
@@ -1358,7 +1358,7 @@ exit:;
 		// Get the path name
 		string formName;
 		backupFirstElm->getFormName (formName);
-		uint formNameSize = formName.size ();
+		uint formNameSize = (uint)formName.size ();
 		if ((formNameSize > 0) && (formName[formNameSize-1] != '.') && (formName[formNameSize-1] != '['))
 			formName += ".";
 		formName += name;
@@ -1712,7 +1712,7 @@ bool CFormElmStruct::isStruct () const
 
 bool CFormElmStruct::getStructSize (uint &size) const
 {
-	size = Elements.size();
+	size = (uint)Elements.size();
 	return true;
 }
 
@@ -2275,7 +2275,7 @@ bool CFormElmArray::isArray () const
 
 bool CFormElmArray::getArraySize (uint &size) const
 {
-	size = Elements.size ();
+	size = (uint)Elements.size ();
 	return true;
 }
 

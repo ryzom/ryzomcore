@@ -235,7 +235,7 @@ void CPSZonePlane::computeCollisions(CPSLocated &target, uint firstInstanceIndex
 				ci.Dist = startEnd.norm();
 				// we translate the particle from an epsilon so that it won't get hooked to the plane
 				ci.NewPos = *itPosBefore  + startEnd + PSCollideEpsilon * p.getNormal();
-				const CVector &speed = target.getSpeed()[itPosBefore - posBefore];
+				const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 				ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * p.getNormal()) * p.getNormal());
 				ci.CollisionZone = this;
 				CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -346,7 +346,7 @@ void CPSZoneSphere::computeCollisions(CPSLocated &target, uint firstInstanceInde
 						ci.Dist = startEnd.norm();
 						// we translate the particle from an epsilon so that it won't get hooked to the sphere
 						ci.NewPos = pos  + startEnd + PSCollideEpsilon * normal;
-						const CVector &speed = target.getSpeed()[itPosBefore - posBefore];
+						const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 						ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * normal) * normal);
 						ci.CollisionZone = this;
 						CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -503,7 +503,7 @@ void CPSZoneDisc::computeCollisions(CPSLocated &target, uint firstInstanceIndex,
 				hitRadius2 = (ci.NewPos - center) * (ci.NewPos - center);
 				if (hitRadius2 < radiusIt->R2) // check collision against disc
 				{
-					const CVector &speed = target.getSpeed()[itPosBefore - posBefore];
+					const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 					ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * p.getNormal()) * p.getNormal());
 					ci.CollisionZone = this;
 					CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -953,7 +953,7 @@ void CPSZoneCylinder::computeCollisions(CPSLocated &target, uint firstInstanceIn
 
 								if (alphaCyl < 0.f) alphaCyl = 1.f;
 					}
-					const CVector &speed = target.getSpeed()[itPosBefore - posBefore];
+					const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 					// now, choose the minimum positive dist
 					if (alphaTop < alphaBottom && alphaTop < alphaCyl)
 					{
@@ -1175,7 +1175,7 @@ void CPSZoneRectangle::computeCollisions(CPSLocated &target, uint firstInstanceI
 				if ( fabs( (ci.NewPos - center) * X ) < *widthIt && fabs( (ci.NewPos - center) * Y ) < *heightIt) // check collision against rectangle
 				{
 					ci.NewPos += PSCollideEpsilon * p.getNormal();
-					const CVector &speed = target.getSpeed()[itPosBefore - posBefore];
+					const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 					ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * p.getNormal()) * p.getNormal());
 					ci.CollisionZone = this;
 					CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);

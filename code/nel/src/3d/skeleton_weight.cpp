@@ -28,7 +28,7 @@ namespace NL3D
 
 uint CSkeletonWeight::getNumNode () const
 {
-	return _Elements.size();
+	return (uint)_Elements.size();
 }
 
 // ***************************************************************************

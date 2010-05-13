@@ -238,7 +238,7 @@ void		CSkeletonShape::getAABBox(NLMISC::CAABBox &bbox) const
 uint		CSkeletonShape::getLodForDistance(float dist) const
 {
 	uint	start=0;
-	uint	end= _Lods.size();
+	uint	end= (uint)_Lods.size();
 	// find lower_bound by dichotomy
 	while(end-1>start)
 	{

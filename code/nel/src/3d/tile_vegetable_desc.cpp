@@ -68,7 +68,7 @@ void		CTileVegetableDesc::build(const std::vector<CVegetable> &vegetables)
 	{
 		_VegetableSeed[i]= sumVeget;
 		// add number of vegetable for next seed.
-		sumVeget+= _VegetableList[i].size();
+		sumVeget+= (uint)_VegetableList[i].size();
 	}
 
 	// compile some data

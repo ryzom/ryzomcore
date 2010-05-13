@@ -149,7 +149,7 @@ void	CTrackSampledQuat::build(const std::vector<uint16> &timeList, const std::ve
 	uint i;
 
 	// reset.
-	uint	numKeys= keyList.size();
+	uint	numKeys= (uint)keyList.size();
 	_Keys.clear();
 	_TimeBlocks.clear();
 
@@ -230,7 +230,7 @@ void CTrackSampledQuat::applySampleDivisor(uint sampleDivisor)
 
 	// **** rebuild the keys
 	NLMISC::CObjectVector<CQuatPack, false>		newKeys;
-	newKeys.resize(keepKeys.size());
+	newKeys.resize((uint32)keepKeys.size());
 	for(uint i=0;i<newKeys.size();i++)
 	{
 		newKeys[i]= _Keys[keepKeys[i]];

@@ -134,7 +134,7 @@ void CDeform2d::doDeform(const TPoint2DVect &surf, IDriver *drv, IPerturbUV *uvp
 	/** setup the whole vertex buffer
 	  * we don't share vertices here, as we work with unaligned quads
 	  */
-	vb.setNumVertices(dest.size() << 2);
+	vb.setNumVertices((uint32)dest.size() << 2);
 	mat.setTexture(0, _Tex);
 	{
 		CVertexBufferReadWrite vba;
@@ -173,7 +173,7 @@ void CDeform2d::doDeform(const TPoint2DVect &surf, IDriver *drv, IPerturbUV *uvp
 	}
 
 	drv->activeVertexBuffer(vb);
-	drv->renderRawQuads(mat, 0, dest.size());
+	drv->renderRawQuads(mat, 0, (uint32)dest.size());
 }
 
 } // NL3D

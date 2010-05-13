@@ -83,7 +83,7 @@ void CInstanceLighter::addTriangles (CLandscape &landscape, std::vector<uint> &l
 	landscape.getTessellationLeaves(leaves);
 
 	// Number of leaves
-	uint leavesCount=leaves.size();
+	uint leavesCount=(uint)leaves.size();
 
 	// Reserve the array
 	triangleArray.reserve (triangleArray.size()+leavesCount);
@@ -332,7 +332,7 @@ void CInstanceLighter::light (const CInstanceGroup &igIn, CInstanceGroup &igOut,
 		// For all retrievers Infos in _IGSurfaceLightBuild
 		while(itSrc!=_IGSurfaceLightBuild->RetrieverGridMap.end())
 		{
-			uint	numSurfaces= itSrc->second.Grids.size();
+			uint	numSurfaces= (uint)itSrc->second.Grids.size();
 			// If !empty retriever.
 			if(numSurfaces>0)
 			{
@@ -355,7 +355,7 @@ void CInstanceLighter::light (const CInstanceGroup &igIn, CInstanceGroup &igOut,
 					surfDst.Origin= surfSrc.Origin;
 					surfDst.Width= surfSrc.Width;
 					surfDst.Height= surfSrc.Height;
-					surfDst.Cells.resize(surfSrc.Cells.size());
+					surfDst.Cells.resize((uint32)surfSrc.Cells.size());
 					surfDst.Cells.fill(defaultCellCorner);
 					// The grid must be valid an not empty
 					nlassert( surfDst.Cells.size() == surfDst.Width*surfDst.Height );
@@ -1050,7 +1050,7 @@ void			CInstanceLighter::compilePointLightRT(uint gridSize, float gridCellSize, 
 		// ===========
 		CQuadGrid<CTriangle*>	obstacleGrid;
 		obstacleGrid.create(gridSize, gridCellSize);
-		uint	size= obstacles.size();
+		uint	size= (uint)obstacles.size();
 		for(i=0; i<size; i++)
 		{
 			// bbox of triangle

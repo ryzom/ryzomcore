@@ -319,7 +319,7 @@ void		CAnimationOptimizer::sampleQuatTrack(const ITrack *trackIn, float beginTim
 // ***************************************************************************
 bool		CAnimationOptimizer::testConstantQuatTrack()
 {
-	uint	numSamples= _QuatKeyList.size();
+	uint	numSamples= (uint)_QuatKeyList.size();
 	nlassert(numSamples>0);
 
 	// Get the first sample as the reference quaternion, and test others from this one.
@@ -339,7 +339,7 @@ bool		CAnimationOptimizer::testConstantQuatTrack()
 // ***************************************************************************
 void		CAnimationOptimizer::optimizeQuatTrack()
 {
-	uint	numSamples= _QuatKeyList.size();
+	uint	numSamples= (uint)_QuatKeyList.size();
 	nlassert(numSamples>0);
 
 	// <=2 key? => no opt possible..
@@ -477,7 +477,7 @@ void		CAnimationOptimizer::sampleVectorTrack(const ITrack *trackIn, float beginT
 // ***************************************************************************
 bool		CAnimationOptimizer::testConstantVectorTrack()
 {
-	uint	numSamples= _VectorKeyList.size();
+	uint	numSamples= (uint)_VectorKeyList.size();
 	nlassert(numSamples>0);
 
 	// Get the first sample as the reference Vectorer, and test others from this one.
@@ -497,7 +497,7 @@ bool		CAnimationOptimizer::testConstantVectorTrack()
 // ***************************************************************************
 void		CAnimationOptimizer::optimizeVectorTrack()
 {
-	uint	numSamples= _VectorKeyList.size();
+	uint	numSamples= (uint)_VectorKeyList.size();
 	nlassert(numSamples>0);
 
 	// <=2 key? => no opt possible..

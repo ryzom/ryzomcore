@@ -1401,7 +1401,7 @@ bool CDriverD3D::needsConstants (uint &numConstant, uint &firstConstant, uint &s
 		alphaPipe[0].clear();
 	}
 	add(rgbPipe[0], alphaPipe[0]);
-	numConstant = rgbPipe[0].size();
+	numConstant = (uint)rgbPipe[0].size();
 	if (numConstant)
 	{
 		firstConstant = *(rgbPipe[0].begin());
@@ -1919,7 +1919,7 @@ IDirect3DPixelShader9	*CDriverD3D::buildPixelShader (const CNormalShaderDesc &no
 	// Assemble and create the shader
 	LPD3DXBUFFER pShader;
 	LPD3DXBUFFER pErrorMsgs;
-	if (D3DXAssembleShader (shaderText.c_str(), shaderText.size(), NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
+	if (D3DXAssembleShader (shaderText.c_str(), (UINT)shaderText.size(), NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
 	{
 		IDirect3DPixelShader9 *shader;
 		if (_DeviceInterface->CreatePixelShader((DWORD*)pShader->GetBufferPointer(), &shader) == D3D_OK)

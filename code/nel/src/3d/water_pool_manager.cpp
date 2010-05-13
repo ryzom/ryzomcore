@@ -187,7 +187,7 @@ bool CWaterPoolManager::isWaterShapeObserver(const CWaterShape *shape) const
 
 uint		CWaterPoolManager::getNumPools() const
 {
-	return _PoolMap.size();
+	return (uint)_PoolMap.size();
 }
 
 //===============================================================================================
@@ -219,7 +219,7 @@ void CWaterPoolManager::serial(NLMISC::IStream &f)  throw(NLMISC::EStream)
 	TPoolMap::iterator it;
 	if (!f.isReading())
 	{
-		size = _PoolMap.size();
+		size = (uint32)_PoolMap.size();
 		it  = _PoolMap.begin();
 	}
 	else

@@ -168,7 +168,7 @@ void CInstanceGroup::CInstance::serial (NLMISC::IStream& f)
 
 uint CInstanceGroup::getNumInstance () const
 {
-	return _InstancesInfos.size();
+	return (uint)_InstancesInfos.size();
 }
 
 // ***************************************************************************
@@ -483,11 +483,11 @@ void CInstanceGroup::serial (NLMISC::IStream& f)
 			uint32 i, j;
 			for (i = 0; i < _ClusterInfos.size(); ++i)
 			{
-				uint32 nNbPortals = _ClusterInfos[i]._Portals.size();
+				uint32 nNbPortals = (uint32)_ClusterInfos[i]._Portals.size();
 				f.serial (nNbPortals);
 				for (j = 0; j < nNbPortals; ++j)
 				{
-					sint32 nPortalNb = (_ClusterInfos[i]._Portals[j] - &_Portals[0]);
+					sint32 nPortalNb = (sint32)(_ClusterInfos[i]._Portals[j] - &_Portals[0]);
 					f.serial (nPortalNb);
 				}
 			}
@@ -546,7 +546,7 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 	_Instances.resize (_InstancesInfos.size(), NULL);
 
 	if (_IGAddBeginCallback)
-		_IGAddBeginCallback->startAddingIG(_InstancesInfos.size());
+		_IGAddBeginCallback->startAddingIG((uint)_InstancesInfos.size());
 
 	// Creation and positionning of the new instance
 
@@ -740,7 +740,7 @@ bool CInstanceGroup::addToSceneWhenAllShapesLoaded (CScene& scene, IDriver *driv
 		if (_Portals[i]._Clusters[j])
 		{
 			sint32 nClusterNb;
-			nClusterNb = (_Portals[i]._Clusters[j] - &_ClusterInfos[0]);
+			nClusterNb = (sint32)(_Portals[i]._Clusters[j] - &_ClusterInfos[0]);
 			_Portals[i]._Clusters[j] = _ClusterInstances[nClusterNb];
 		}
 	}
@@ -828,7 +828,7 @@ bool CInstanceGroup::addToSceneAsync (CScene& scene, IDriver *driver, uint selec
 	_Instances.resize (_InstancesInfos.size(), NULL);
 
 	if (_IGAddBeginCallback)
-		_IGAddBeginCallback->startAddingIG(_InstancesInfos.size());
+		_IGAddBeginCallback->startAddingIG((uint)_InstancesInfos.size());
 
 	// Creation and positionning of the new instance
 
@@ -1374,14 +1374,14 @@ void			CInstanceGroup::displayDebugClusters(IDriver *drv, class CTextContext *tx
 				// count the number of vertices / triangles / lines to add
 				if(poly.Vertices.size()>=3)
 				{
-					numTotalVertices+= poly.Vertices.size();
+					numTotalVertices+= (uint)poly.Vertices.size();
 				}
 			}
 
 			// **** count the number of portals vertices
 			for(j=0;j<cluster->_Portals.size();j++)
 			{
-				numTotalVertices+= cluster->_Portals[j]->_Poly.size();
+				numTotalVertices+= (uint)cluster->_Portals[j]->_Poly.size();
 			}
 
 			// **** Draw those cluster polygons, and portals
@@ -1436,7 +1436,7 @@ void			CInstanceGroup::displayDebugClusters(IDriver *drv, class CTextContext *tx
 							}
 						}
 
-						iVert+= poly.Vertices.size();
+						iVert+= (uint)poly.Vertices.size();
 					}
 				}
 
@@ -1489,7 +1489,7 @@ void			CInstanceGroup::displayDebugClusters(IDriver *drv, class CTextContext *tx
 							}
 						}
 
-						iVert+= portalVerts.size();
+						iVert+= (uint)portalVerts.size();
 					}
 				}
 

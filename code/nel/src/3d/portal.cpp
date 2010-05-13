@@ -83,7 +83,7 @@ bool CPortal::clipPyramid (CVector &observer, std::vector<CPlane> &pyramid)
 	// Clip portal with pyramid
 	CPolygon p;
 	p.Vertices = _Poly;
-	p.clip( &pyramid[1], pyramid.size()-1 );
+	p.clip( &pyramid[1], (uint)pyramid.size()-1 );
 
 	// Construct pyramid with clipped portal
 	if( p.Vertices.size() > 2 )
@@ -292,7 +292,7 @@ bool CPortal::clipRay(const NLMISC::CVector &startWorld, const NLMISC::CVector &
 
 	// Do convex test on each border
 	sint	sign= 0;
-	uint	polySize= _Poly.size();
+	uint	polySize= (uint)_Poly.size();
 	for(uint i=0;i<polySize;i++)
 	{
 		const	CVector	v0= _Poly[i] - refVert;

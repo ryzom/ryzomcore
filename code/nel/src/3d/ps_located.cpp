@@ -1853,7 +1853,7 @@ void CPSLocated::updateCollisions()
 				#ifdef NL_DEBUG
 					nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 				#endif
-				CParticleSystem::_ParticleRemoveListIndex[currCollision->Index] = CParticleSystem::_ParticleToRemove.size() - 1;
+				CParticleSystem::_ParticleRemoveListIndex[currCollision->Index] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 
 			}
 			currCollision = currCollision->Next;
@@ -1899,7 +1899,7 @@ void CPSLocated::updateCollisions()
 					#ifdef NL_DEBUG
 						nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 					#endif
-					CParticleSystem::_ParticleRemoveListIndex[currCollision->Index] = CParticleSystem::_ParticleToRemove.size() - 1;
+					CParticleSystem::_ParticleRemoveListIndex[currCollision->Index] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 				}
 			}
 			currCollision = currCollision->Next;
@@ -2012,7 +2012,7 @@ void CPSLocated::updateLife()
 					#ifdef NL_DEBUG
 						nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 					#endif
-					CParticleSystem::_ParticleRemoveListIndex[k] = CParticleSystem::_ParticleToRemove.size() - 1;
+					CParticleSystem::_ParticleRemoveListIndex[k] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 				}
 				++itTime;
 				++itTimeInc;
@@ -2040,7 +2040,7 @@ void CPSLocated::updateLife()
 							#ifdef NL_DEBUG
 								nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 							#endif
-							CParticleSystem::_ParticleRemoveListIndex[k] = CParticleSystem::_ParticleToRemove.size() - 1;
+							CParticleSystem::_ParticleRemoveListIndex[k] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 						}
 						++ itTime;
 					}
@@ -2068,7 +2068,7 @@ void CPSLocated::updateLife()
 					#ifdef NL_DEBUG
 						nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 					#endif
-					CParticleSystem::_ParticleRemoveListIndex[k] = CParticleSystem::_ParticleToRemove.size() - 1;
+					CParticleSystem::_ParticleRemoveListIndex[k] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 				}
 			}
 		}
@@ -2396,7 +2396,7 @@ void CPSLocated::addNewlySpawnedParticles()
 			{
 				sint32 insertionIndex = newElement(*it, false, CParticleSystem::EllapsedTime);
 				#ifdef NL_DEBUG
-					nlassert(insertionIndex != -1)
+					nlassert(insertionIndex != -1);
 				#endif
 				if (_Time[insertionIndex] >= 1.f)
 				{
@@ -2407,7 +2407,7 @@ void CPSLocated::addNewlySpawnedParticles()
 					#ifdef NL_DEBUG
 						nlassert(CParticleSystem::_ParticleToRemove.size() <= _Size);
 					#endif
-					CParticleSystem::_ParticleRemoveListIndex[insertionIndex] = CParticleSystem::_ParticleToRemove.size() - 1;
+					CParticleSystem::_ParticleRemoveListIndex[insertionIndex] = (sint)CParticleSystem::_ParticleToRemove.size() - 1;
 				}
 			}
 			//CParticleSystem::InsideSimLoop = true;

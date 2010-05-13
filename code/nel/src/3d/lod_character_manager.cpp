@@ -139,7 +139,7 @@ uint32			CLodCharacterManager::createShapeBank()
 
 	// no free entrey, resize array.
 	_ShapeBankArray.push_back(new CLodCharacterShapeBank);
-	return _ShapeBankArray.size()-1;
+	return (uint32)_ShapeBankArray.size()-1;
 }
 
 // ***************************************************************************

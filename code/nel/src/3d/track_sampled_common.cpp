@@ -100,7 +100,7 @@ void	CTrackSampledCommon::buildCommon(const std::vector<uint16> &timeList, float
 	uint i;
 
 	// reset.
-	uint	numKeys= timeList.size();
+	uint	numKeys= (uint)timeList.size();
 	_TimeBlocks.clear();
 
 	// Special case of 0 or 1 key.
@@ -158,7 +158,7 @@ void	CTrackSampledCommon::buildCommon(const std::vector<uint16> &timeList, float
 	}
 
 	// Build the timeBlocks.
-	_TimeBlocks.resize(timeBlockKeyId.size());
+	_TimeBlocks.resize((uint32)timeBlockKeyId.size());
 	for(i=0; i<timeBlockKeyId.size(); i++)
 	{
 		CTimeBlock	&timeBlock= _TimeBlocks[i];
@@ -346,7 +346,7 @@ void	CTrackSampledCommon::applySampleDivisorCommon(uint sampleDivisor, std::vect
 		CTimeBlock	&timeBlock= _TimeBlocks[i];
 
 		// keep track of the start new key for this block
-		blockKeepStart[i]= keepKeys.size();
+		blockKeepStart[i]= (uint32)keepKeys.size();
 
 		for(j=0;j<timeBlock.Times.size();j++)
 		{
@@ -363,7 +363,7 @@ void	CTrackSampledCommon::applySampleDivisorCommon(uint sampleDivisor, std::vect
 		}
 
 		// keep track of the end (not included) new key for this block
-		blockKeepEnd[i]= keepKeys.size();
+		blockKeepEnd[i]= (uint32)keepKeys.size();
 	}
 
 	// **** rebuild the TimeBlocks

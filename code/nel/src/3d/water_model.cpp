@@ -1245,12 +1245,12 @@ uint CWaterModel::getNumWantedVertices()
 	projPoly.computeOuterBorders(border, minYBorder);
 	// border - inside -> gives grid cells that must be clipped to fit the shape boundaries
 	// Make sure that rasters  array for inside has the same size that raster array for borders (by inserting NULL rasters)
-	sint height = border.size();
+	sint height = (sint)border.size();
 	if (_Inside.empty())
 	{
 		_MinYInside = minYBorder;
 	}
-	sint bottomGap = border.size() - _Inside.size();
+	sint bottomGap = (sint)(border.size() - _Inside.size());
 	_Inside.resize(height);
 	nlassert(minYBorder == _MinYInside);
 
@@ -1285,7 +1285,7 @@ uint CWaterModel::getNumWantedVertices()
 
 	const CVector2f *prevVert = &projPoly.Vertices.back();
 	const CVector2f *currVert = &projPoly.Vertices.front();
-	uint numVerts = projPoly.Vertices.size();
+	uint numVerts = (uint)projPoly.Vertices.size();
 	bool ccw = projPoly.isCCWOriented();
 	clipPlanes.resize(numVerts);
 	for(uint k = 0; k < numVerts; ++k)
@@ -1324,11 +1324,11 @@ uint CWaterModel::getNumWantedVertices()
 			if (!clipPoly.Vertices.empty())
 			{
 				// backup result (will be unprojected later)
-				_ClippedTriNumVerts.push_back(clipPoly.Vertices.size());
-				uint prevSize = _ClippedTris.size();
+				_ClippedTriNumVerts.push_back((uint)clipPoly.Vertices.size());
+				uint prevSize = (uint)_ClippedTris.size();
 				_ClippedTris.resize(_ClippedTris.size() + clipPoly.Vertices.size());
 				std::copy(clipPoly.Vertices.begin(), clipPoly.Vertices.end(), _ClippedTris.begin() + prevSize); // append to packed list
-				totalNumVertices += (clipPoly.Vertices.size() - 2) * 3;
+				totalNumVertices += ((uint)clipPoly.Vertices.size() - 2) * 3;
 			}
 		}
 		// middle block, are not clipped, but count the number of wanted vertices
@@ -1348,11 +1348,11 @@ uint CWaterModel::getNumWantedVertices()
 			if (!clipPoly.Vertices.empty())
 			{
 				// backup result (will be unprojected later)
-				_ClippedTriNumVerts.push_back(clipPoly.Vertices.size());
-				uint prevSize = _ClippedTris.size();
+				_ClippedTriNumVerts.push_back((uint)clipPoly.Vertices.size());
+				uint prevSize = (uint)_ClippedTris.size();
 				_ClippedTris.resize(_ClippedTris.size() + clipPoly.Vertices.size());
 				std::copy(clipPoly.Vertices.begin(), clipPoly.Vertices.end(), _ClippedTris.begin() + prevSize); // append to packed list
-				totalNumVertices += (clipPoly.Vertices.size() - 2) * 3;
+				totalNumVertices += ((uint)clipPoly.Vertices.size() - 2) * 3;
 			}
 		}
 	}
@@ -1512,7 +1512,7 @@ uint CWaterModel::fillVBSoft(void *datas, uint startTri)
 		}
 	}
 	nlassert((dest - (uint8 * ) datas) % (3 * WATER_VERTEX_SOFT_SIZE) == 0);
-	uint endTri = (dest - (uint8 * ) datas) / (3 * WATER_VERTEX_SOFT_SIZE);
+	uint endTri = (uint)(dest - (uint8 * ) datas) / (3 * WATER_VERTEX_SOFT_SIZE);
 	_NumTris = endTri - _StartTri;
 	return endTri;
 }
@@ -1600,7 +1600,7 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 		}
 	}
 	nlassert((dest - (uint8 * ) datas) % (3 * WATER_VERTEX_HARD_SIZE) == 0);
-	uint endTri = (dest - (uint8 * ) datas) / (3 * WATER_VERTEX_HARD_SIZE);
+	uint endTri = (uint)(dest - (uint8 * ) datas) / (3 * WATER_VERTEX_HARD_SIZE);
 	_NumTris = endTri - _StartTri;
 	return endTri;
 }

@@ -535,7 +535,7 @@ void CPrimPoint::write (xmlNodePtr xmlNode, const char *filename) const
 
 uint CPrimPath::getNumVector () const
 {
-	return VPoints.size ();
+	return (uint)VPoints.size ();
 }
 
 // ***************************************************************************
@@ -608,7 +608,7 @@ void CPrimPath::write (xmlNodePtr xmlNode, const char *filename) const
 
 uint CPrimZone::getNumVector () const
 {
-	return VPoints.size ();
+	return (uint)VPoints.size ();
 }
 
 // ***************************************************************************
@@ -916,7 +916,7 @@ float CPrimZone::getSegmentDist(const NLMISC::CVector v, const NLMISC::CVector &
 NLMISC::CVector CPrimZone::getBarycentre() const
 {
 	CVector sum( CVector::Null );
-	uint n = VPoints.size();
+	uint n = (uint)VPoints.size();
 	if ( n != 0 )
 	{
 		for ( uint i=0; i!=n; ++i )
@@ -1049,7 +1049,7 @@ void IPrimitive::serial (NLMISC::IStream &f)
 	}
 	else
 	{
-		uint32 size = _Properties.size();
+		uint32 size = (uint32)_Properties.size();
 		f.serial(size);
 		std::map<std::string, IProperty*>::iterator first(_Properties.begin()), last(_Properties.end());
 		for (; first != last; ++first)
@@ -1100,7 +1100,7 @@ void IPrimitive::serial (NLMISC::IStream &f)
 void IPrimitive::updateChildId (uint index)
 {
 	uint i;
-	uint count = _Children.size ();
+	uint count = (uint)_Children.size ();
 	for (i=index; i<count; i++)
 		_Children[i]->_ChildId = i;
 }
@@ -1598,7 +1598,7 @@ bool IPrimitive::insertChild (IPrimitive *primitive, uint index)
 {
 	// At the end ?
 	if (index == AtTheEnd)
-		index = _Children.size ();
+		index = (uint)_Children.size ();
 
 	// Index valid ?
 	if (index>_Children.size ())
@@ -1854,7 +1854,7 @@ void IPrimitive::initDefaultValues (CLigoConfig &config)
 	if (primitiveClass)
 	{
 		// For each properties
-		uint count = primitiveClass->Parameters.size ();
+		uint count = (uint)primitiveClass->Parameters.size ();
 		uint i;
 		for (i=0; i<count; i++)
 		{
@@ -2018,7 +2018,7 @@ bool IPrimitive::getChildId (uint &childId, const IPrimitive *child) const
 
 uint IPrimitive::getNumProperty () const
 {
-	return _Properties.size ();
+	return (uint)_Properties.size ();
 }
 
 // ***************************************************************************

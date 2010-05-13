@@ -350,7 +350,7 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k)
 	Accel.insert (map<uint32, SLetterInfo*>::value_type(k.getVal(),Front[cat]));
 
 	// Invalidate the zone
-	sint index = (Front[cat] - &Letters[cat][0]);// / sizeof (SLetterInfo);
+	sint index = (sint)(Front[cat] - &Letters[cat][0]);// / sizeof (SLetterInfo);
 	sint sizex = TextureSizeX / Categories[cat];
 	sint x = index % sizex;
 	sint y = index / sizex;

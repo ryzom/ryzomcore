@@ -2260,7 +2260,7 @@ CPatchRdrPass*	CLandscape::getFarRenderPass(CPatch* pPatch, uint farIndex, float
 	// If no one found, must allocate a new render pass.
 	if(bestRdrPass==-1)
 	{
-		bestRdrPass= _TextureFars.size();
+		bestRdrPass= (sint)_TextureFars.size();
 
 		// add a new render pass
 		CPatchRdrPass	*pass=new CPatchRdrPass;
@@ -3809,7 +3809,7 @@ void			CLandscape::initAnimatedLightIndex(const CScene &scene)
 void			CLandscape::releaseAllTiles()
 {
 	nlassert(Zones.empty());
-	releaseTiles (0, TileInfos.size());
+	releaseTiles (0, (uint32)TileInfos.size());
 }
 
 

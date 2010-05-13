@@ -120,7 +120,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			program->_DrvInfo=drvInfo;
 
 			// Compile the program
-			nglLoadProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID, program->getProgram().length(), (const GLubyte*)program->getProgram().c_str());
+			nglLoadProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID, (GLsizei)program->getProgram().length(), (const GLubyte*)program->getProgram().c_str());
 
 			// Get loading error code
 			GLint errorOff;
@@ -130,7 +130,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			if (errorOff>=0)
 			{
 				// String length
-				uint length = program->getProgram ().length();
+				uint length = (uint)program->getProgram ().length();
 				const char* sString= program->getProgram ().c_str();
 
 				// Line count and char count
@@ -1392,7 +1392,7 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 	//
 	nglBindProgramARB( GL_VERTEX_PROGRAM_ARB, id);
 	glGetError();
-	nglProgramStringARB( GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, code.size(), code.c_str() );
+	nglProgramStringARB( GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)code.size(), code.c_str() );
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR)
 	{

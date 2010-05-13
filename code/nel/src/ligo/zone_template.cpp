@@ -104,7 +104,7 @@ bool CZoneTemplate::build (const std::vector<NLMISC::CVector> &vertices, const s
 	vector<uint>		boundaryFlags;
 
 	// Vertices count
-	uint vertexCount = vertices.size();
+	uint vertexCount = (uint)vertices.size();
 
 	// Resize the array
 	boundaryFlags.resize (vertexCount, 0);
@@ -131,7 +131,7 @@ bool CZoneTemplate::build (const std::vector<NLMISC::CVector> &vertices, const s
 	multimap<uint, uint>	edgePairReverse;
 
 	// Index count
-	uint edgeCount = indexes.size();
+	uint edgeCount = (uint)indexes.size();
 
 	// For each vertices
 	uint edge;

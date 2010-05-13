@@ -405,7 +405,7 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 		if (rFactor != 0.0f)
 		{
 			rFactor*= 0.01f;
-			uint32		numVertices= rBS.VertRefs.size();
+			uint32		numVertices= (uint32)rBS.VertRefs.size();
 			// don't know why, but cases happen where deltaNorm not empty while deltaPos is
 			bool		hasPos= rBS.deltaPos.size()>0;
 			bool		hasNorm= rBS.deltaNorm.size()>0;

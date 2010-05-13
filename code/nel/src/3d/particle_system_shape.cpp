@@ -125,7 +125,7 @@ void	CParticleSystemShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	{
 		std::vector<uint8> buf;
 		f.serialCont(buf);
-		_ParticleSystemProto.fill(&buf[0], buf.size());
+		_ParticleSystemProto.fill(&buf[0], (uint32)buf.size());
 	}
 	else
 	{

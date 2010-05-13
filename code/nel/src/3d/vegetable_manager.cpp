@@ -891,7 +891,7 @@ void			CVegetableManager::reserveIgAddInstances(CVegetableInstanceGroupReserve &
 
 	// Reserve space in the rdrPass.
 	vegetRdrPass.NVertices+= numInstances * shape->VB.getNumVertices();
-	vegetRdrPass.NTriangles+= numInstances * shape->TriangleIndices.size()/3;
+	vegetRdrPass.NTriangles+= numInstances * (uint)shape->TriangleIndices.size()/3;
 	// if the instances are lighted, reserve space for lighting updates
 	if(instanceLighted)
 		vegetRdrPass.NLightedInstances+= numInstances;
@@ -1206,8 +1206,8 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 
 	// Vertex/triangle Info.
 	uint	numNewVertices= shape->VB.getNumVertices();
-	uint	numNewTris= shape->TriangleIndices.size()/3;
-	uint	numNewIndices= shape->TriangleIndices.size();
+	uint	numNewTris= (uint)shape->TriangleIndices.size()/3;
+	uint	numNewIndices= (uint)shape->TriangleIndices.size();
 
 	// src info.
 	uint	srcNormalOff= (instanceLighted? shape->VB.getNormalOff() : 0);
@@ -2519,7 +2519,7 @@ uint		CVegetableManager::updateInstanceLighting(CVegetableInstanceGroup *ig, uin
 	CMatrix		&normalMat= vegetLI.NormalMat;
 	// array of vertex id to update
 	uint32		*ptrVid= vegetRdrPass.Vertices.getPtr() + vegetLI.StartIdInRdrPass;
-	uint		numVertices= shape->InstanceVertices.size();
+	uint		numVertices= (uint)shape->InstanceVertices.size();
 
 	// Copy Dynamic Lightmap UV in Alpha part (save memory for an extra cost of 1 VP instruction)
 	primaryRGBA.A= vegetLI.DlmUV.U;
