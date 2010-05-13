@@ -256,7 +256,7 @@ void	CIgLighterLib::lightIg(CInstanceLighter &instanceLighter,
 
 		// For any retreiverInstance with this identifier.
 		//----------------
-		uint	numInstances= globalRetriever->getInstances().size();
+		uint	numInstances= (uint)globalRetriever->getInstances().size();
 		for(uint instanceId=0; instanceId<numInstances; instanceId++)
 		{
 			const CRetrieverInstance	&instance= globalRetriever->getInstance(instanceId);
@@ -286,7 +286,7 @@ void	CIgLighterLib::lightIg(CInstanceLighter &instanceLighter,
 						CIGSurfaceLightBuild::CRetrieverLightGrid	&rlg= itRgm->second;
 
 						// Resize Grids.
-						uint	numSurfaces= localRetriever.getSurfaces().size();
+						uint	numSurfaces= (uint)localRetriever.getSurfaces().size();
 						rlg.Grids.resize( numSurfaces );
 
 						// Compute the bbox for all surfaces. (NB: local to the localRetriever).

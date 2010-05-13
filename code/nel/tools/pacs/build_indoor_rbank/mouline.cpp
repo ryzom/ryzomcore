@@ -182,7 +182,7 @@ void	buildExteriorMesh(CCollisionMeshBuild &cmb, CExteriorMesh &em)
 		bool		allowThis = true;
 
 		uint		numLink = 0;
-		uint		firstEdge = edges.size();
+		uint		firstEdge = (uint)edges.size();
 
 		vector<CExteriorMesh::CEdge>	loop;
 
@@ -224,7 +224,7 @@ void	buildExteriorMesh(CCollisionMeshBuild &cmb, CExteriorMesh &em)
 		// this way, collisions won't be checked in the pacs engine
 		if (loop.size() >= 3)
 		{
-			uint	n = loop.size();
+			uint	n = (uint)loop.size();
 			while (loop.front().Link >= 0 && loop.back().Link >= 0 && n > 0)
 			{
 				loop.push_back(loop.front());

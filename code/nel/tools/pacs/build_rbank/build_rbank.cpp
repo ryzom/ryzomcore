@@ -629,7 +629,7 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 							CChainRef	cr;
 							cr.Chain = chain;
 							cr.Previous = chain;
-							cr.From = fci.Vertices.size();
+							cr.From = (uint)fci.Vertices.size();
 							cr.BorderId = NLPACS::CChain::convertBorderChainId(retriever.getChain(chain).getRight());
 
 							while (!it.end())
@@ -638,7 +638,7 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 								++it;
 							}
 
-							cr.To = fci.Vertices.size()-1;
+							cr.To = (uint)fci.Vertices.size()-1;
 
 							if (l < inst.Reconstructed[j].Chains.size()-1)
 								fci.Vertices.pop_back();
@@ -654,7 +654,7 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 							CChainRef	cr;
 							cr.Chain = chain;
 							cr.Previous = chain;
-							cr.From = fcn.Vertices.size();
+							cr.From = (uint)fcn.Vertices.size();
 							cr.BorderId = NLPACS::CChain::convertBorderChainId(nretriever.getChain(chain).getRight());
 
 							while (!it.end())
@@ -663,7 +663,7 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 								++it;
 							}
 
-							cr.To = fcn.Vertices.size()-1;
+							cr.To = (uint)fcn.Vertices.size()-1;
 
 							if (l < neighb.Reconstructed[k].Chains.size()-1)
 								fcn.Vertices.pop_back();
@@ -692,8 +692,8 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 						if (l<fci.Vertices.size())
 							break;
 
-						uint	newChaini = retriever.getChains().size(),
-								newChainn = nretriever.getChains().size();
+						uint	newChaini = (uint)retriever.getChains().size(),
+								newChainn = (uint)nretriever.getChains().size();
 
 						// save free border ids in order to renumerate them after splits
 						vector<uint>	ifreeBorderIds, nfreeBorderIds;
@@ -701,18 +701,18 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 
 						for (l=0; l<fci.Chains.size(); ++l)
 							ifreeBorderIds.push_back(fci.Chains[l].BorderId);
-						inextBorderId = retriever.getBorderChains().size();
+						inextBorderId = (uint)retriever.getBorderChains().size();
 
 						for (l=0; l<fcn.Chains.size(); ++l)
 							nfreeBorderIds.push_back(fcn.Chains[l].BorderId);
-						nnextBorderId = nretriever.getBorderChains().size();
+						nnextBorderId = (uint)nretriever.getBorderChains().size();
 
 						// generate splits from first chain on second chain
 						for (l=0; l<fci.Chains.size()-1; ++l)
 						{
-							uint	splitAt = fci.Vertices.size()-1 - fci.Chains[l].To;
+							uint	splitAt = (uint)fci.Vertices.size()-1 - fci.Chains[l].To;
 
-							for (m=fcn.Chains.size()-1; (sint)m>=0 && fcn.Chains[m].From>splitAt; --m)
+							for (m=(uint)fcn.Chains.size()-1; (sint)m>=0 && fcn.Chains[m].From>splitAt; --m)
 								;
 
 							// no split ?
@@ -729,9 +729,9 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 						// generate splits from second chain on first chain
 						for (l=0; l<fcn.Chains.size()-1; ++l)
 						{
-							uint	splitAt = fcn.Vertices.size()-1 - fcn.Chains[l].To;
+							uint	splitAt = (uint)fcn.Vertices.size()-1 - fcn.Chains[l].To;
 
-							for (m=fci.Chains.size()-1; (sint)m>=0 && fci.Chains[m].From>splitAt; --m)
+							for (m=(uint)fci.Chains.size()-1; (sint)m>=0 && fci.Chains[m].From>splitAt; --m)
 								;
 
 							// no split ?
@@ -862,7 +862,7 @@ void	fixFaultyLinks(map<uint, CFaultyInstance> &faultyInstances,
 						// force links between instances (border chain links)
 						for (l=0; l<fci.Chains.size(); ++l)
 						{
-							m = fci.Chains.size()-1-l;
+							m = (uint)fci.Chains.size()-1-l;
 							(const_cast<NLPACS::CRetrieverInstance&>(instance)).forceBorderChainLink(fci.Chains[l].BorderId, 
 																									 neighb.Instance,
 																									 fcn.Chains[m].BorderId,

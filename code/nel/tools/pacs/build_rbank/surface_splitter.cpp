@@ -49,8 +49,8 @@ void	CSurfaceSplitter::build(CLocalRetriever &lr)
 		buildSurface(lr, i);
 
 	nlinfo("converted %d chains & %d surfaces", lr.getChains().size(), lr.getSurfaces().size());
-	_NumSurfaces = lr.getSurfaces().size();
-	_NumChains = lr.getChains().size();
+	_NumSurfaces = (uint)lr.getSurfaces().size();
+	_NumChains = (uint)lr.getChains().size();
 
 	//splitChains();
 
@@ -502,7 +502,7 @@ void	CSurfaceSplitter::replaceChain(CChainId chainId, const vector<CChainId> &ch
 				{
 					it = ploop.Chains.erase(it);
 					sint	i;
-					for (i=chains.size()-1; i>=0; --i)
+					for (i=(sint)chains.size()-1; i>=0; --i)
 					{
 						it = ploop.Chains.insert(it, chains[i]);
 					}

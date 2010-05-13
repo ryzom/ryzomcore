@@ -112,7 +112,7 @@ sint16 getFirstFreeFileTypeId()
 {
 	for( sint16 id=0; id<256; ++id )
 	{
-		if( IdToFileType.find(id) == IdToFileType.end() )
+		if( IdToFileType.find((uint8)id) == IdToFileType.end() )
 		{
 			return id;
 		}
@@ -609,7 +609,7 @@ int main( int argc, char ** argv )
 	{
 		//string outputLine = "type: " + toString((*it1).first.FormIDInfos.Type) +" id: " + toString((*it1).first.FormIDInfos.Id) + " file: " + (*it1).second +"\n";
 		string outputLine = " id: " + toString((*it1).first.Id) + " file: " + (*it1).second +"\n";
-		output.serialBuffer((uint8*)(const_cast<char*>(outputLine.data())),outputLine.size());
+		output.serialBuffer((uint8*)(const_cast<char*>(outputLine.data())),(uint)outputLine.size());
 	}
 
 	nlinfo ("------------- results ----------------");

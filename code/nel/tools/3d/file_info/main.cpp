@@ -137,7 +137,7 @@ uint	MaxNumLightMap= 0;
 void	displayMeshBase(FILE *logStream, CMeshBase *meshBase)
 {
 	uint	nMat= meshBase->getNbMaterial();
-	uint	nLms= meshBase->_LightInfos.size();
+	uint	nLms= (uint)meshBase->_LightInfos.size();
 	MaxNumLightMap= max(MaxNumLightMap, nLms);
 	if(nLms)
 	{
