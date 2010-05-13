@@ -226,7 +226,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 		map<string,BNPFile>::iterator it = tempMap.begin();
 		while (it != tempMap.end())
 		{
-			nSize += it->first.size() + 1;
+			nSize += (uint)it->first.size() + 1;
 			nNb++;
 			it++;
 		}
@@ -246,7 +246,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 			bnp.Files[nNb].Size = it->second.Size;
 			bnp.Files[nNb].Pos = it->second.Pos;
 
-			nSize += it->first.size() + 1;
+			nSize += (uint)it->first.size() + 1;
 			nNb++;
 			it++;
 		}

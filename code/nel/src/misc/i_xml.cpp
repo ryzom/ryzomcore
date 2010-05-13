@@ -304,7 +304,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 			else
 			{
 				// Content length
-				uint length = _ContentString.length();
+				uint length = (uint)_ContentString.length();
 
 				// String empty ?
 				if (length==0)
@@ -352,7 +352,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 						_ContentStringIndex = 0;
 
 						// New length
-						length = _ContentString.length();
+						length = (uint)_ContentString.length();
 					}
 				}
 

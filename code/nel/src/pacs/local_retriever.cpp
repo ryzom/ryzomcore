@@ -317,7 +317,7 @@ sint32	NLPACS::CLocalRetriever::addSurface(uint8 normalq, uint8 orientationq,
 											sint8 quantHeight)
 {
 	// creates a new surface...
-	sint32	newId = _Surfaces.size();
+	sint32	newId = (sint32)_Surfaces.size();
 	_Surfaces.resize(newId+1);
 	CRetrievableSurface	&surf = _Surfaces.back();
 
@@ -409,7 +409,7 @@ sint32	NLPACS::CLocalRetriever::addChain(const vector<CVector> &verts,
 		return -1;
 	}
 
-	sint32		newId = _Chains.size();
+	sint32		newId = (sint32)_Chains.size();
 	_Chains.resize(newId+1);
 	CChain		&chain = _Chains.back();
 
@@ -471,13 +471,13 @@ void	NLPACS::CLocalRetriever::computeLoopsAndTips()
 			if (j == chainFlags.size())
 				break;
 
-			uint32						loopId = surface._Loops.size();
+			uint32						loopId = (uint32)surface._Loops.size();
 			surface._Loops.push_back(CRetrievableSurface::TLoop());
 			CRetrievableSurface::TLoop	&loop = surface._Loops.back();
 
 			CVector	loopStart = getStartVector(surface._Chains[j].Chain, i);
 			CVector	currentEnd = getStopVector(surface._Chains[j].Chain, i);
-			_Chains[surface._Chains[j].Chain].setLoopIndexes(i, loopId, loop.size());
+			_Chains[surface._Chains[j].Chain].setLoopIndexes(i, loopId, (uint)loop.size());
 			loop.push_back(uint16(j));
 			chainFlags[j] = true;
 
@@ -532,7 +532,7 @@ void	NLPACS::CLocalRetriever::computeLoopsAndTips()
 				}
 
 				currentEnd = getStopVector(surface._Chains[bestChain].Chain, i);
-				_Chains[surface._Chains[bestChain].Chain].setLoopIndexes(i, loopId, loop.size());
+				_Chains[surface._Chains[bestChain].Chain].setLoopIndexes(i, loopId, (uint)loop.size());
 				loop.push_back(uint16(bestChain));
 				chainFlags[bestChain] = true;
 				++totalAdded;
@@ -673,21 +673,21 @@ void	NLPACS::CLocalRetriever::buildSurfacePolygons(uint32 surface, list<CPolygon
 					}
 					else
 					{
-						for (l=ochain.getVertices().size()-1; l>0; --l)
+						for (l=(uint)ochain.getVertices().size()-1; l>0; --l)
 							poly.Vertices.push_back(ochain[l].unpack3f());
 					}
 				}
 			}
 			else
 			{
-				for (k=chain._SubChains.size(); (sint)k>0; --k)
+				for (k=(uint)chain._SubChains.size(); (sint)k>0; --k)
 				{
 					const COrderedChain		&ochain = _OrderedChains[chain._SubChains[k]];
 					bool					ochainforward = ochain.isForward();
 
 					if (ochainforward)
 					{
-						for (l=ochain.getVertices().size()-1; (sint)l>0; --l)
+						for (l=(uint)ochain.getVertices().size()-1; (sint)l>0; --l)
 							poly.Vertices.push_back(ochain[l].unpack3f());
 					}
 					else
@@ -733,21 +733,21 @@ void	NLPACS::CLocalRetriever::build3dSurfacePolygons(uint32 surface, list<CPolyg
 					}
 					else
 					{
-						for (l=ochain.getVertices().size()-1; l>0; --l)
+						for (l=(uint)ochain.getVertices().size()-1; l>0; --l)
 							poly.Vertices.push_back(ochain[l]);
 					}
 				}
 			}
 			else
 			{
-				for (k=chain._SubChains.size()-1; (sint)k>=0; --k)
+				for (k=(uint)chain._SubChains.size()-1; (sint)k>=0; --k)
 				{
 					const COrderedChain3f	&ochain = _FullOrderedChains[chain._SubChains[k]];
 					bool					ochainforward = ochain.isForward();
 
 					if (ochainforward)
 					{
-						for (l=ochain.getVertices().size()-1; (sint)l>0; --l)
+						for (l=(uint)ochain.getVertices().size()-1; (sint)l>0; --l)
 							poly.Vertices.push_back(ochain[l]);
 					}
 					else
@@ -779,7 +779,7 @@ void	NLPACS::CLocalRetriever::findBorderChains()
 	for (chain=0; chain<_Chains.size(); ++chain)
 		if (_Chains[chain].isBorderChain())
 		{
-			sint32	index = _BorderChains.size();
+			sint32	index = (sint32)_BorderChains.size();
 			_BorderChains.push_back(uint16(chain));
 			_Chains[chain].setBorderChainIndex(index);
 		}
@@ -1108,7 +1108,7 @@ void	NLPACS::CLocalRetriever::retrievePosition(CVector estimated, CCollisionSurf
 		else
 		{
 			const vector<CVector2s>	&vertices = sub.getVertices();
-			uint					start = 0, stop = vertices.size()-1;
+			uint					start = 0, stop = (uint)vertices.size()-1;
 
 			// then finds the smallest segment of the chain that includes the estimated position.
 			while (stop-start > 1)
@@ -1282,7 +1282,7 @@ void	NLPACS::CLocalRetriever::retrieveAccuratePosition(CVector2s estim, CCollisi
 		else
 		{
 			const vector<CVector2s>	&vertices = sub.getVertices();
-			uint					start = 0, stop = vertices.size()-1;
+			uint					start = 0, stop = (uint)vertices.size()-1;
 
 			// then finds the smallest segment of the chain that includes the estimated position.
 			while (stop-start > 1)
@@ -1705,7 +1705,7 @@ void	NLPACS::CLocalRetriever::findPath(const NLPACS::CLocalRetriever::CLocalPosi
 	sort(intersections.begin(), intersections.end());
 
 	uint	intersStart = 0;
-	uint	intersEnd = intersections.size();
+	uint	intersEnd = (uint)intersections.size();
 
 	if (intersEnd > 0)
 	{
@@ -1834,13 +1834,13 @@ void	NLPACS::CLocalRetriever::findPath(const NLPACS::CLocalRetriever::CLocalPosi
 				{
 					loopIndex--;
 					if (loopIndex < 0)
-						loopIndex = loop.size()-1;
+						loopIndex = (sint)loop.size()-1;
 				}
 
 				thisChainId = surface._Chains[loop[loopIndex]].Chain;
 				thisChainForward = (_Chains[thisChainId].getLeft() == surfaceId);
 				thisOChainIndex = (thisChainForward && forward || !thisChainForward && !forward) ?
-					0 : _Chains[thisChainId]._SubChains.size()-1;
+					0 : (sint)_Chains[thisChainId]._SubChains.size()-1;
 			}
 
 			thisOChainId = _Chains[thisChainId]._SubChains[thisOChainIndex];
@@ -1894,7 +1894,7 @@ void	NLPACS::CLocalRetriever::testCollision(CCollisionSurfaceTemp &cst, const CA
 	uint16	*chainLUT= cst.OChainLUT;
 
 	// bkup where we begin to add chains.
-	uint	firstChainAdded= cst.CollisionChains.size();
+	uint	firstChainAdded= (uint)cst.CollisionChains.size();
 
 	// For all edgechain entry.
 	for(i=0;i<nEce;i++)
@@ -1927,7 +1927,7 @@ void	NLPACS::CLocalRetriever::testCollision(CCollisionSurfaceTemp &cst, const CA
 		{
 //			H_AUTO(PACS_LR_testCol_addToLUT);
 			// add a new CCollisionChain.
-			ccId= cst.CollisionChains.size();
+			ccId= (uint)cst.CollisionChains.size();
 			cst.CollisionChains.push_back(CCollisionChain());
 			// Fill it with default.
 			cst.CollisionChains[ccId].Tested= false;
@@ -2232,7 +2232,7 @@ bool	NLPACS::CLocalRetriever::checkSurfaceIntegrity(uint surf, NLMISC::CVector t
 
 	const CRetrievableSurface&	surface = _Surfaces[surf];
 
-	uint	nloops = surface.getLoops().size();
+	uint	nloops = (uint)surface.getLoops().size();
 
 	std::vector<std::pair<CVector2s, CVector2s> >	edges;
 

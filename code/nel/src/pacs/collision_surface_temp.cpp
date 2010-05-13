@@ -58,7 +58,7 @@ void				CCollisionSurfaceTemp::resetEdgeCollideNodes()
 // ***************************************************************************
 uint32				CCollisionSurfaceTemp::allocEdgeCollideNode(uint32 size)
 {
-	uint32	id= _EdgeCollideNodes.size();
+	uint32	id= (uint32)_EdgeCollideNodes.size();
 	_EdgeCollideNodes.resize(id+size);
 	return id;
 }

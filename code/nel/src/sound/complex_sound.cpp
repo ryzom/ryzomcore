@@ -227,7 +227,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 	}
 	else
 	{
-		uint32 nb = _Sounds.size();
+		uint32 nb = (uint32)_Sounds.size();
 		s.serial(nb);
 		for (uint i=0; i<nb; ++i)
 		{

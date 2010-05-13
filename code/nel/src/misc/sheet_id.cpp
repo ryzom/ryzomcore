@@ -173,7 +173,7 @@ void CSheetId::loadSheetId ()
 		if (_RemoveUnknownSheet)
 		{
 			uint32 removednbfiles = 0;
-			uint32 nbfiles = tempMap.size();
+			uint32 nbfiles = (uint32)tempMap.size();
 
 			// now we remove all files that not available
 			map<uint32,string>::iterator itStr2;
@@ -204,7 +204,7 @@ void CSheetId::loadSheetId ()
 			map<uint32,string>::const_iterator it = tempMap.begin();
 			while (it != tempMap.end())
 			{
-				nSize += it->second.size()+1;
+				nSize += (uint32)it->second.size()+1;
 				nNb++;
 				it++;
 			}
@@ -220,7 +220,7 @@ void CSheetId::loadSheetId ()
 				tempVec[nNb].Ptr = _AllStrings.Ptr+nSize;
 				strcpy(_AllStrings.Ptr+nSize, it->second.c_str());
 				toLower(_AllStrings.Ptr+nSize);
-				nSize += it->second.size()+1;
+				nSize += (uint32)it->second.size()+1;
 				nNb++;
 				it++;
 			}
@@ -243,7 +243,7 @@ void CSheetId::loadSheetId ()
 
 		// Build the invert map (Name to Id) & file extension vector
 		{
-			uint32 nSize = _SheetIdToName.size();
+			uint32 nSize = (uint32)_SheetIdToName.size();
 			_SheetNameToId.reserve(nSize);
 			CStaticMap<uint32,CChar>::iterator itStr;
 			for( itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr )

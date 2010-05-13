@@ -322,7 +322,7 @@ inline void								COrderedChain3f::unpack(const COrderedChain &chain)
 {
 	uint	i, mx;
 	const std::vector<CVector2s>	&vertices = chain.getVertices();
-	mx = _Vertices.size();
+	mx = (uint)_Vertices.size();
 	_Vertices.resize(vertices.size());
 	_Forward = chain.isForward();
 	_ParentId = chain.getParentId();

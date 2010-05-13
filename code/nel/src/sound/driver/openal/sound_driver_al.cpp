@@ -532,7 +532,7 @@ uint CSoundDriverAL::countMaxSources()
 	// software allows 256 sources (software audio ftw!)
 	// cheap openal cards 32, expensive openal cards 128
 	// trying to go too high is safely handled anyways
-	return getMaxNumSourcesInternal() + _Sources.size();
+	return getMaxNumSourcesInternal() + (uint)_Sources.size();
 }
 
 /// Return the maximum number of effects that can be created, which is only 1 in openal software mode :(
@@ -569,7 +569,7 @@ ALuint CSoundDriverAL::createItem(TGenFunctionAL algenfunc, TTestFunctionAL alte
 			index = nbalive;
 			// FIXME assumption about inner workings of std::vector;
 			// &(names[...]) only works with "names.size() - nbalive == 1"
-			generateItems(algenfunc, altestfunc, names.size() - nbalive, &(names[nbalive]));
+			generateItems(algenfunc, altestfunc, (uint)names.size() - nbalive, &(names[nbalive]));
 		}
 	}
 
@@ -598,7 +598,7 @@ uint CSoundDriverAL::compactAliveNames( vector<ALuint>& names, TTestFunctionAL a
 		}
 	}
 	nlassert( ibcompacted <= names.end() );
-	return ibcompacted - names.begin();
+	return (uint)(ibcompacted - names.begin());
 }
 
 

@@ -181,12 +181,12 @@ void CAudioMixerUser::initClusteredSound(NL3D::CScene *scene, float minGain, flo
 
 void CAudioMixerUser::setPriorityReserve(TSoundPriority priorityChannel, size_t reserve)
 {
-	_PriorityReserve[priorityChannel] = min(_Tracks.size(), reserve);
+	_PriorityReserve[priorityChannel] = (uint32)min(_Tracks.size(), reserve);
 }
 
 void CAudioMixerUser::setLowWaterMark(size_t value)
 {
-	_LowWaterMark = min(_Tracks.size(), value);
+	_LowWaterMark = (uint32)min(_Tracks.size(), value);
 }
 
 
@@ -544,7 +544,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	_LowWaterMark = 0;
 	for (i=0; i<NbSoundPriorities; ++i)
 	{
-		_PriorityReserve[i] = _Tracks.size();
+		_PriorityReserve[i] = (uint32)_Tracks.size();
 		_ReserveUsage[i] = 0;
 	}
 
@@ -743,14 +743,14 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 		}
 		
 		vector<sint16> mono16Data;
-		if (!IBuffer::convertToMono16PCM(&result[0], result.size(), mono16Data, bufferFormat, channels, bitsPerSample))
+		if (!IBuffer::convertToMono16PCM(&result[0], (uint)result.size(), mono16Data, bufferFormat, channels, bitsPerSample))
 		{
 			nlwarning("    IBuffer::convertToMono16PCM returned false");
 			continue;
 		}
 		
 		vector<uint8> adpcmData;
-		if (!IBuffer::convertMono16PCMToMonoADPCM(&mono16Data[0], mono16Data.size(), adpcmData))
+		if (!IBuffer::convertMono16PCMToMonoADPCM(&mono16Data[0], (uint)mono16Data.size(), adpcmData))
 		{
 			nlwarning("    IBuffer::convertMono16PCMToMonoADPCM returned false");
 			continue;
@@ -763,7 +763,7 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 		adpcmBuffers[j].swap(adpcmData);
 		mono16Buffers[j].swap(mono16Data);
 		
-		hdr.addSample(CFile::getFilename(sampleList[j]), frequency, mono16Data.size(), mono16Buffers[j].size() * 2, adpcmBuffers[j].size());
+		hdr.addSample(CFile::getFilename(sampleList[j]), frequency, (uint32)mono16Data.size(), (uint32)mono16Buffers[j].size() * 2, (uint32)adpcmBuffers[j].size());
 	}
 
 	// write the sample bank (if any sample available)
@@ -776,8 +776,8 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 		nlassert(mono16Buffers.size() == adpcmBuffers.size());
 		for (uint j = 0; j < mono16Buffers.size(); ++j)
 		{
-			sbf.serialBuffer((uint8*)(&mono16Buffers[j][0]), mono16Buffers[j].size()*2);
-			sbf.serialBuffer((uint8*)(&adpcmBuffers[j][0]), adpcmBuffers[j].size());
+			sbf.serialBuffer((uint8*)(&mono16Buffers[j][0]), (uint)mono16Buffers[j].size()*2);
+			sbf.serialBuffer((uint8*)(&adpcmBuffers[j][0]), (uint)adpcmBuffers[j].size());
 		}
 
 		return filename;
@@ -1134,7 +1134,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		s.serial(name);
 		s.serialEnum(ParamId);
 
-		uint32 size = SoundNames.size();
+		uint32 size = (uint32)SoundNames.size();
 		s.serial(size);
 
 		for (uint i=0; i<size; ++i)
@@ -2159,12 +2159,12 @@ uint			CAudioMixerUser::getPlayingSourcesCount() const
 
 uint			CAudioMixerUser::getAvailableTracksCount() const
 {
-	return _FreeTracks.size();
+	return (uint)_FreeTracks.size();
 }
 
 uint			CAudioMixerUser::getUsedTracksCount() const
 {
-	return _Tracks.size() - _FreeTracks.size();
+	return (uint)_Tracks.size() - (uint)_FreeTracks.size();
 }
 
 

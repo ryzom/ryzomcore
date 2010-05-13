@@ -67,7 +67,7 @@ public:
 	const std::vector<CLocalRetriever>	&getRetrievers() const { return _Retrievers; }
 
 	/// Returns the number of retrievers in the bank.
-	uint								size() const { return _Retrievers.size(); }
+	uint								size() const { return (uint)_Retrievers.size(); }
 
 	/// Gets nth retriever.
 	const CLocalRetriever				&getRetriever(uint n) const
@@ -79,7 +79,7 @@ public:
 	}
 
 	/// Adds the given retriever to the bank.
-	uint								addRetriever(const CLocalRetriever &retriever) { _Retrievers.push_back(retriever); return _Retrievers.size()-1; }
+	uint								addRetriever(const CLocalRetriever &retriever) { _Retrievers.push_back(retriever); return (uint)_Retrievers.size()-1; }
 
 	/// Loads the retriever named 'filename' (using defined search paths) and adds it to the bank.
 	uint								addRetriever(const std::string &filename)
@@ -92,7 +92,7 @@ public:
 		localRetriever.serial(input);
 		input.close();
 
-		return _Retrievers.size()-1;
+		return (uint)_Retrievers.size()-1;
 	}
 
 	/// Cleans the bank up.
@@ -166,7 +166,7 @@ public:
 			}
 			else
 			{
-				uint32	num = _Retrievers.size();
+				uint32	num = (uint32)_Retrievers.size();
 				f.serial(num);
 			}
 		}

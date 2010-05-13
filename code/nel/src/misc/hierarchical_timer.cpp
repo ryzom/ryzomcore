@@ -323,7 +323,7 @@ void	CHTimer::display(CLog *log, TSortCriterion criterion, bool displayInline /*
 	{
 		statsPtr[k] = &stats[k];
 		stats[k].Timer = it->first;
-		stats[k].buildFromNodes(&(it->second[0]), it->second.size(), _MsPerTick);
+		stats[k].buildFromNodes(&(it->second[0]), (uint)it->second.size(), _MsPerTick);
 		++k;
 	}
 
@@ -521,7 +521,7 @@ void		CHTimer::displayByExecutionPath(CLog *log, TSortCriterion criterion, bool 
 			TNodeVect &execNodes = nodeMap[currTimer];
 			if (execNodes.size() > 0)
 			{
-				currNodeStats.buildFromNodes(&execNodes[0], execNodes.size(), _MsPerTick);
+				currNodeStats.buildFromNodes(&execNodes[0], (uint)execNodes.size(), _MsPerTick);
 				currNodeStats.getStats(resultStats, displayEx, rootStats.TotalTime, _WantStandardDeviation);
 				log->displayRawNL("HTIMER: %s", (resultName + resultStats).c_str());
 			}
@@ -639,7 +639,7 @@ void		CHTimer::displayByExecutionPath(CLog *log, TSortCriterion criterion, bool 
 			// build the indented node name.
 			resultName.resize(labelNumChar);
 			std::fill(resultName.begin(), resultName.end(), '.');
-			uint startIndex = (examStack.size()-1) * indentationStep;
+			uint startIndex = (uint)(examStack.size()-1) * indentationStep;
 			uint endIndex = std::min(startIndex + (uint)::strlen(node->Owner->_Name), labelNumChar);
 			if ((sint) (endIndex - startIndex) >= 1)
 			{
@@ -759,7 +759,7 @@ void		CHTimer::displayByExecutionPath(CLog *log, TSortCriterion criterion, bool 
 			// build the indented node name.
 			resultName.resize(labelNumChar);
 			std::fill(resultName.begin(), resultName.end(), '.');
-			uint startIndex = (examStack.size()-1) * indentationStep;
+			uint startIndex = (uint)(examStack.size()-1) * indentationStep;
 			uint endIndex = std::min(startIndex + (uint)::strlen(node->Owner->_Name), labelNumChar);
 			if ((sint) (endIndex - startIndex) >= 1)
 			{
@@ -849,7 +849,7 @@ void CHTimer::CStats::buildFromNodes(CNode **nodes, uint numNodes, double msPerT
 	uint   numMeasures = 0;
 	for(k = 0; k < numNodes; ++k)
 	{
-		numMeasures += nodes[k]->Measures.size();
+		numMeasures += (uint)nodes[k]->Measures.size();
 		for(l = 0; l < nodes[k]->Measures.size(); ++l)
 		{
 			varianceSum += NLMISC::sqr(nodes[k]->Measures[l] - MeanTime);

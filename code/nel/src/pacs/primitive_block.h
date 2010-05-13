@@ -99,7 +99,7 @@ public:
 	//@{
 	static UPrimitiveBlock *createPrimitiveBlock(NLMISC::IStream &src);
 	static UPrimitiveBlock *createPrimitiveBlockFromFile(const std::string &fileName);
-	uint						getNbPrimitive() { return Primitives.size(); }
+	uint						getNbPrimitive() { return (uint)Primitives.size(); }
 	UMovePrimitive::TUserData	getUserData(uint nPrimNb) { nlassert(nPrimNb < Primitives.size());
 															return Primitives[nPrimNb].UserData; }
 	//@}

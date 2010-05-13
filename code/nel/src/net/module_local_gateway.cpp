@@ -260,7 +260,7 @@ namespace NLNET
 
 		virtual uint32	getProxyCount() const
 		{
-			return _ModuleProxies.getAToBMap().size();
+			return (uint32)_ModuleProxies.getAToBMap().size();
 		}
 
 		/// Fill a vector with the list of proxies managed here. The module are filled in ascending proxy id order.

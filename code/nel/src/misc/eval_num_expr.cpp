@@ -449,7 +449,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 				return MustBeDoubleQuote;
 
 			// This is a user string, copy the string
-			uint size = _ExprPtr - start;
+			uint size = (uint)(_ExprPtr - start);
 			if (size >= (InternalStringLen-1))
 			{
 				_InternalStlString.resize (size);
@@ -496,7 +496,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 	}
 
 	// This is a user string, copy the string
-	uint size = _ExprPtr - start;
+	uint size = (uint)(_ExprPtr - start);
 	if (size >= (InternalStringLen-1))
 	{
 		_InternalStlString.resize (size);
@@ -590,14 +590,14 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (const char *expression,
 		else
 		{
 			if (errorIndex)
-				*errorIndex = _ExprPtr - expression;
+				*errorIndex = (int)(_ExprPtr - expression);
 			return MustBeEnd;
 		}
 	}
 	else
 	{
 		if (errorIndex)
-			*errorIndex = _ExprPtr - expression;
+			*errorIndex = (int)(_ExprPtr - expression);
 		return error;
 	}
 }

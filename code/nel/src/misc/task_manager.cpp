@@ -149,7 +149,7 @@ bool CTaskManager::deleteTask(IRunnable *r)
 uint CTaskManager::taskListSize(void)
 {
 	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
-	return acces.value().size();
+	return (uint)acces.value().size();
 }
 
 
@@ -216,7 +216,7 @@ void CTaskManager::clearDump()
 uint CTaskManager::getNumWaitingTasks()
 {
 	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
-	return acces.value().size();
+	return (uint)acces.value().size();
 }
 
 // ***************************************************************************

@@ -1907,8 +1907,8 @@ ucstring	toLower (const ucstring &str)
 {
 	uint i;
 	ucstring temp = str;
-	const uint size = temp.size();
-	for (i=0; i<size; i++)
+	const uint size = (uint)temp.size();
+	for (i=0; i<(uint)size; i++)
 	{
 		// Search the key in the table
 		ucchar *result = toLowerUpperSearch (&(temp[i]), UnicodeUpperToLower);
@@ -1949,7 +1949,7 @@ ucstring	toUpper (const ucstring &str)
 {
 	uint i;
 	ucstring temp = str;
-	const uint size = temp.size();
+	const uint size = (uint)temp.size();
 	for (i=0; i<size; i++)
 	{
 		// Search the key in the table

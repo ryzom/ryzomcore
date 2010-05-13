@@ -155,7 +155,7 @@ void CStaticStringMapper::memoryCompress()
 	uint32 nNbStrings = 0;
 	while (it != _TempIdTable.end())
 	{
-		nTotalSize += it->second.size() + 1;
+		nTotalSize += (uint)it->second.size() + 1;
 		nNbStrings++;
 		it++;
 	}
@@ -169,7 +169,7 @@ void CStaticStringMapper::memoryCompress()
 	{
 		strcpy(_AllStrings + nTotalSize, it->second.c_str());
 		_IdToStr[nNbStrings] = _AllStrings + nTotalSize;
-		nTotalSize += it->second.size() + 1;
+		nTotalSize += (uint)it->second.size() + 1;
 		nNbStrings++;
 		it++;
 	}

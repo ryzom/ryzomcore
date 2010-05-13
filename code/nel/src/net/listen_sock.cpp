@@ -17,7 +17,8 @@
 #include "stdnet.h"
 
 #include "nel/net/listen_sock.h"
-#include "nel/net/net_log.h"
+#include "nel/net/net_log.h"
+
 
 #ifdef NL_OS_WINDOWS
 
@@ -122,8 +123,8 @@ CTcpSock *CListenSock::accept()
 {
 	// Accept connection
 	sockaddr_in saddr;
-	socklen_t saddrlen = sizeof(saddr);
-	SOCKET newsock = ::accept( _Sock, (sockaddr*)&saddr, &saddrlen );
+	socklen_t saddrlen = (socklen_t)sizeof(saddr);
+	SOCKET newsock = (SOCKET)::accept( _Sock, (sockaddr*)&saddr, &saddrlen );
 	if ( newsock == INVALID_SOCKET )
 	{
 		if (_Sock == INVALID_SOCKET)

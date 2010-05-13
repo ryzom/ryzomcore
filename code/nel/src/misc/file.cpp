@@ -98,7 +98,7 @@ void		CIFile::loadIntoCache()
 	if(!_IsAsyncLoading)
 	{
 		_ReadingFromFile += _FileSize;
-		int read = fread (_Cache, _FileSize, 1, _F);
+		int read = (int)fread (_Cache, _FileSize, 1, _F);
 		_FileRead++;
 		_ReadingFromFile -= _FileSize;
 		_ReadFromFile += read * _FileSize;
@@ -113,7 +113,7 @@ void		CIFile::loadIntoCache()
 				sint	n= READPACKETSIZE-_NbBytesLoaded;
 				n= max(n, 1);
 				_ReadingFromFile += n;
-				int read = fread (_Cache+index, n, 1, _F);
+				int read = (int)fread (_Cache+index, n, 1, _F);
 				_FileRead++;
 				_ReadingFromFile -= n;
 				_ReadFromFile += read * n;
@@ -126,7 +126,7 @@ void		CIFile::loadIntoCache()
 			{
 				uint	n= _FileSize-index;
 				_ReadingFromFile += n;
-				int read = fread (_Cache+index, n, 1, _F);
+				int read = (int)fread (_Cache+index, n, 1, _F);
 				_FileRead++;
 				_ReadingFromFile -= n;
 				_ReadFromFile += read * n;
@@ -428,7 +428,7 @@ void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
 	{
 		int read;
 		_ReadingFromFile += len;
-		read=fread(buf, len, 1, _F);
+		read=(int)fread(buf, len, 1, _F);
 		_FileRead++;
 		_ReadingFromFile -= len;
 		_ReadFromFile += /*read **/ len;
@@ -771,7 +771,7 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 	uint32 count=0;
 	while (it!=itEnd)
 	{
-		uint32 numTimes= it->second.size();
+		uint32 numTimes= (uint32)it->second.size();
 		CSString fileName= it->first;
 		if (fileName.contains("@"))
 		{

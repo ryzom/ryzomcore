@@ -481,18 +481,18 @@ void CI18N::_readTextFile(const string &filename,
 	string text;
 	text.resize(file.getFileSize());
 	if (file.getFileSize() > 0)
-		file.serialBuffer((uint8*)(&text[0]), text.size());
+		file.serialBuffer((uint8*)(&text[0]), (uint)text.size());
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		readTextBuffer((uint8*)&text[0], text.size(), result, forceUtf8);
+		readTextBuffer((uint8*)&text[0], (uint)text.size(), result, forceUtf8);
 
 	if (preprocess)
 	{
 		// a string to old the result of the preprocess
 		ucstring final;
 		// make rooms to reduce allocation cost
-		final.reserve(raiseToNextPowerOf2(result.size()));
+		final.reserve(raiseToNextPowerOf2((uint)result.size()));
 
 		// parse the file, looking for preprocessor command.
 		ucstring::const_iterator it(result.begin()), end(result.end());

@@ -199,7 +199,7 @@ namespace NLMISC
 		}
 
 		// scan the string for binary characters
-		uint32 i=size();
+		uint32 i=(uint32)size();
 	//	while (i && !tbl[i-1])
 	//	{
 	//		i--;
@@ -228,14 +228,14 @@ namespace NLMISC
 				return false;
 
 			// iterate from size-2 to 1
-			for (uint32 i=size()-1; --i;)
+			for (uint32 i=(uint32)size()-1; --i;)
 				if (!isValidFileNameChar((*this)[i]) && (*this)[i]!=' ')
 					return false;
 		}
 		else
 		{
 			// iterate from size-1 to 0
-			for (uint32 i=size(); i--;)
+			for (uint32 i=(uint32)size(); i--;)
 				if (!isValidFileNameChar((*this)[i]))
 					return false;
 		}
@@ -256,7 +256,7 @@ namespace NLMISC
 			return false;
 
 		// iterate from size-1 to 1
-		for (uint32 i=size(); --i;)
+		for (uint32 i=(uint32)size(); --i;)
 			if (!isValidKeywordChar((*this)[i]))
 				return false;
 
@@ -492,9 +492,9 @@ namespace NLMISC
 		CSString s=strip();
 		while(!s.empty())
 		{
-			uint32 pre=s.size();
+			uint32 pre=(uint32)s.size();
 			result.push_back(s.firstWord(true));
-			uint32 post=s.size();
+			uint32 post=(uint32)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -506,9 +506,9 @@ namespace NLMISC
 		CSString s=*this;
 		while(!s.empty())
 		{
-			uint32 pre=s.size();
+			uint32 pre=(uint32)s.size();
 			result.push_back(s.firstWordOrWords(true,useSlashStringEscape,useRepeatQuoteStringEscape));
-			uint32 post=s.size();
+			uint32 post=(uint32)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -524,7 +524,7 @@ namespace NLMISC
 			s=s.replace("\r","");
 
 		uint32 it=0;
-		uint32 len= s.size();
+		uint32 len= (uint32)s.size();
 		while(it<len)
 		{
 			// extract the text up to the next '\n'character
@@ -545,12 +545,12 @@ namespace NLMISC
 		CSString s=*this;
 		while(!s.empty())
 		{
-			uint32 pre=s.size();
+			uint32 pre=(uint32)s.size();
 			result.push_back(s.splitToSeparator(separator,true,useAngleBrace,useSlashStringEscape,
 												useRepeatQuoteStringEscape,true));
 			if (skipBlankEntries && result.back().empty())
 				result.pop_back();
-			uint32 post=s.size();
+			uint32 post=(uint32)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -571,7 +571,7 @@ namespace NLMISC
 
 		while(!s.empty())
 		{
-			uint32 pre=s.size();
+			uint32 pre=(uint32)s.size();
 			result.push_back(s.splitToOneOfSeparators(	separators,true,useAngleBrace,useSlashStringEscape,
 														useRepeatQuoteStringEscape,!retainSeparators ));
 
@@ -589,7 +589,7 @@ namespace NLMISC
 				}
 			}
 
-			uint32 post=s.size();
+			uint32 post=(uint32)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -630,7 +630,7 @@ namespace NLMISC
 	{
 		CSString result;
 		int i,j;
-		for (j=size()-1; j>=0 && isWhiteSpace((*this)[j]); --j) {}
+		for (j=(int)size()-1; j>=0 && isWhiteSpace((*this)[j]); --j) {}
 		for (i=0;		 i<j  && isWhiteSpace((*this)[i]); ++i) {}
 		result=substr(i,j-i+1);
 		return result;
@@ -639,7 +639,7 @@ namespace NLMISC
 	CSString CSString::leftStrip() const
 	{
 		CSString result;
-		int i,j=size()-1;
+		int i,j=(int)size()-1;
 		for (i=0; i<j  && isWhiteSpace((*this)[i]); ++i) {}
 		result=substr(i,j-i+1);
 		return result;
@@ -649,7 +649,7 @@ namespace NLMISC
 	{
 		CSString result;
 		int i=0,j;
-		for (j=size()-1; j>=0 && isWhiteSpace((*this)[j]); --j) {}
+		for (j=(int)size()-1; j>=0 && isWhiteSpace((*this)[j]); --j) {}
 		result=substr(i,j-i+1);
 		return result;
 	}
@@ -1025,7 +1025,7 @@ namespace NLMISC
 		}
 		else if ((*this)[0]=='\"' && isDelimitedMonoBlock(false,useSlashStringEscape,useRepeatQuoteStringEscape))
 		{
-			i=size();
+			i=(uint32)size();
 		}
 		if (i!=size())
 			return quote(useSlashStringEscape,useRepeatQuoteStringEscape);
@@ -1227,7 +1227,7 @@ namespace NLMISC
 	{
 		bool foundToken= false;
 
-		for (uint32 i=size();i--;)
+		for (uint32 i=(uint32)size();i--;)
 		{
 			switch((*this)[i])
 			{
@@ -1277,7 +1277,7 @@ namespace NLMISC
 
 	bool CSString::isXMLCompatible(bool isParameter) const
 	{
-		for (uint32 i=size();i--;)
+		for (uint32 i=(uint32)size();i--;)
 		{
 			switch((*this)[i])
 			{
@@ -1749,7 +1749,7 @@ namespace NLMISC
 			return false;
 		}
 		resize(NLMISC::CFile::getFileSize(file));
-		uint32 bytesRead=fread(const_cast<char*>(data()),1,size(),file);
+		uint32 bytesRead=(uint32)fread(const_cast<char*>(data()),1,size(),file);
 		fclose(file);
 		if (bytesRead!=size())
 		{
@@ -1769,7 +1769,7 @@ namespace NLMISC
 			nlwarning("Failed to open file for writing: %s",fileName.c_str());
 			return false;
 		}
-		uint32 recordsWritten=fwrite(const_cast<char*>(data()),size(),1,file);
+		uint32 recordsWritten=(uint32)fwrite(const_cast<char*>(data()),size(),1,file);
 		fclose(file);
 		if (recordsWritten!=1)
 		{

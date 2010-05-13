@@ -104,7 +104,7 @@ void			CPolygon::clip(const std::vector<CPlane> &planes)
 {
 	if(planes.size()==0)
 		return;
-	clip(&(*planes.begin()), planes.size());
+	clip(&(*planes.begin()), (uint)planes.size());
 }
 
 
@@ -122,7 +122,7 @@ void CPolygon::getBestTriplet(uint &index0,uint &index1,uint &index2)
 	nlassert(Vertices.size() >= 3);
 	uint i, j, k;
 	float bestArea = 0.f;
-	const uint numVerts = Vertices.size();
+	const uint numVerts = (uint)Vertices.size();
 	for (i = 0; i < numVerts; ++i)
 	{
 		for (j = 0; j < numVerts; ++j)
@@ -402,7 +402,7 @@ bool CPolygon::toConvexPolygonsInCone (const std::vector<CVector> &vertex, uint 
 		a0=0;
 	uint a1;
 	if (a==0)
-		a1=vertex.size()-1;
+		a1= (uint)vertex.size()-1;
 	else
 		a1= a-1;
 
@@ -442,7 +442,7 @@ void CPolygon::toConvexPolygonsLocalAndBSP (std::vector<CVector> &localVertices,
 	invert.invert ();
 
 	// Insert vertices in an ordered table
-	uint vertexCount = Vertices.size();
+	uint vertexCount = (uint)Vertices.size();
 	TCConcavePolygonsVertexMap vertexMap;
 	localVertices.resize (vertexCount);
 	uint i, j;
@@ -456,7 +456,7 @@ void CPolygon::toConvexPolygonsLocalAndBSP (std::vector<CVector> &localVertices,
 
 	// Plane direction
 	i=0;
-	j=Vertices.size()-1;
+	j=(uint)Vertices.size()-1;
 	CVector normal = localVertices[i] - localVertices[j];
 	normal = normal ^ CVector::K;
 	CPlane clipPlane;
@@ -699,11 +699,11 @@ bool CPolygon::chain (const std::vector<CPolygon> &other, const CMatrix& basis)
 	}
 
 	// Look for a couple..
-	uint thisCount = Vertices.size();
+	uint thisCount = (uint)Vertices.size();
 	uint i, j;
 	for (o=0; o<other.size(); o++)
 	{
-		uint otherCount = other[o].Vertices.size();
+		uint otherCount = (uint)other[o].Vertices.size();
 
 		// Try to link in the main polygon
 		for (i=0; i<thisCount; i++)
@@ -758,7 +758,7 @@ bool CPolygon::chain (const std::vector<CPolygon> &other, const CMatrix& basis)
 			uint otherToCheck;
 			for (otherToCheck=o+1; otherToCheck<other.size(); otherToCheck++)
 			{
-				uint otherToCheckCount = other[otherToCheck].Vertices.size();
+				uint otherToCheckCount = (uint)other[otherToCheck].Vertices.size();
 				for (i=0; i<otherToCheckCount; i++)
 				{
 					for (j=0; j<otherCount; j++)
@@ -837,7 +837,7 @@ CPolygon2D::CPolygon2D(const CPolygon &src, const CMatrix &projMat)
 // ***************************************************************************
 void CPolygon2D::fromPolygon(const CPolygon &src, const CMatrix &projMat /*=CMatrix::Identity*/)
 {
-	uint size = src.Vertices.size();
+	uint size = (uint)src.Vertices.size();
 	Vertices.resize(size);
 	for (uint k = 0; k < size; ++k)
 	{
@@ -852,7 +852,7 @@ bool		CPolygon2D::isConvex()
 	bool Front  = true, Back = false;
 	// we apply a dummy algo for now : check whether every vertex is in the same side
 	// of every plane defined by a segment of this poly
-	uint numVerts = Vertices.size();
+	uint numVerts = (uint)Vertices.size();
 	if (numVerts < 3) return true;
 	CVector		segStart, segEnd;
 	CPlane		clipPlane;
@@ -895,7 +895,7 @@ void		CPolygon2D::buildConvexHull(CPolygon2D &dest) const
 		return;
 	}
 	uint k, l;
-	uint numVerts = Vertices.size();
+	uint numVerts = (uint)Vertices.size();
 	CVector2f p, curr, prev;
 	uint      pIndex, p1Index, p2Index, pCurr, pPrev;
 	// this is not optimized, but not used in realtime.. =)
@@ -1021,7 +1021,7 @@ void		CPolygon2D::getBestTriplet(uint &index0, uint &index1, uint &index2)
 	nlassert(Vertices.size() >= 3);
 	uint i, j, k;
 	float bestArea = 0.f;
-	const uint numVerts = Vertices.size();
+	const uint numVerts = (uint)Vertices.size();
 	for (i = 0; i < numVerts; ++i)
 	{
 		for (j = 0; j < numVerts; ++j)
@@ -2011,7 +2011,7 @@ bool  CPolygon2D::getNonNullSeg(uint &index) const
 	float norm2 = (Vertices[Vertices.size() - 1] - Vertices[0]).sqrnorm();
 	if ( norm2 > bestLength)
 	{
-		index = Vertices.size() - 1;
+		index = (uint)Vertices.size() - 1;
 		return true;
 	}
 
@@ -2084,7 +2084,7 @@ bool		CPolygon2D::contains(const CVector2f &p, bool hintIsConvex /*= true*/) con
 {
 	if (hintIsConvex)
 	{
-		uint numVerts = Vertices.size();
+		uint numVerts = (uint)Vertices.size();
 		nlassert(numVerts >= 0.f);
 		for (uint k = 0; k < numVerts; ++k)
 		{
@@ -2163,7 +2163,7 @@ void CPolygon2D::getBoundingRect(CVector2f &minCorner, CVector2f &maxCorner) con
 {
 	nlassert(!Vertices.empty());
 	minCorner = maxCorner = Vertices[0];
-	uint numVertices = Vertices.size();
+	uint numVertices = (uint)Vertices.size();
 	for(uint k = 0; k < numVertices; ++k)
 	{
 		minCorner.minof(minCorner, Vertices[k]);
@@ -2224,7 +2224,7 @@ static inline bool testSegmentIntersection(const CVector2f &a, const CVector2f &
 bool CPolygon2D::selfIntersect() const
 {
 	if (Vertices.size() < 3) return false;
-	uint numEdges = Vertices.size();
+	uint numEdges = (uint)Vertices.size();
 	for(uint k = 0; k < numEdges; ++k)
 	{
 		// test intersection with all other edges that don't share a vertex with this one

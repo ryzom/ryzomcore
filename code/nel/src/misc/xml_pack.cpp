@@ -179,8 +179,8 @@ namespace NLMISC
 
 			// ok, the file is parsed, store it
 			fileInfo.FileName = CStringMapper::map(subFileName);
-			fileInfo.FileOffset = beginOfFile - buffer.begin();
-			fileInfo.FileSize = endOfFile - beginOfFile;
+			fileInfo.FileOffset = (uint32)(beginOfFile - buffer.begin());
+			fileInfo.FileSize = (uint32)(endOfFile - beginOfFile);
 //			fileInfo.FileHandler = fopen(xmlPackFileName.c_str(), "rb");
 			packInfo._XMLFiles.insert(make_pair(fileInfo.FileName, fileInfo));
 

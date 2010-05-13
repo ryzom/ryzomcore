@@ -117,7 +117,7 @@ public:
 		uint32 size;
 		if (!s.isReading())
 		{
-			size = _SoundGroupAssoc.size();
+			size = (uint32)_SoundGroupAssoc.size();
 		}
 		s.serial(size);
 
@@ -1021,7 +1021,7 @@ float CClusteredSound::getPolyNearestPos(const std::vector<CVector> &poly, const
 	CVector proj = plane.project(pos);
 	float	minDist = FLT_MAX;
 	bool	projIn = true;
-	uint	nbVertex = poly.size();
+	uint	nbVertex = (uint)poly.size();
 
 	// loop throw all vertex
 	for (uint j=0; j<nbVertex; ++j)

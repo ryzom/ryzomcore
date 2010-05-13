@@ -1131,12 +1131,12 @@ void	NLPACS::CGlobalRetriever::findPath(const NLPACS::UGlobalPosition &begin,
 			{
 				if (ochain.getVertices().size() & 1)
 				{
-					surf.End.Estimation = ochain[ochain.getVertices().size()/2].unpack3f();
+					surf.End.Estimation = ochain[(uint)ochain.getVertices().size()/2].unpack3f();
 				}
 				else
 				{
-					surf.End.Estimation = (ochain[ochain.getVertices().size()/2].unpack3f()+
-										  ochain[ochain.getVertices().size()/2-1].unpack3f())*0.5f;
+					surf.End.Estimation = (ochain[(uint)ochain.getVertices().size()/2].unpack3f()+
+										  ochain[(uint)ochain.getVertices().size()/2-1].unpack3f())*0.5f;
 				}
 			}
 		}
@@ -1239,7 +1239,7 @@ void	NLPACS::CGlobalRetriever::findCollisionChains(CCollisionSurfaceTemp &cst, c
 
 		// add possible collision chains with movement.
 		//================
-		sint		firstCollisionChain= cst.CollisionChains.size();
+		sint		firstCollisionChain= (sint)cst.CollisionChains.size();
 		CVector2f	transBase(-deltaOrigin.x, -deltaOrigin.y);
 //		H_AFTER(PACS_GR_findCC_getAndComputeMove);
 
@@ -1251,7 +1251,7 @@ void	NLPACS::CGlobalRetriever::findCollisionChains(CCollisionSurfaceTemp &cst, c
 			retrieverInstance.testExteriorCollision(cst, bboxMoveLocal, transBase, localRetriever);
 
 		// how many collision chains added?  : nCollisionChain-firstCollisionChain.
-		sint		nCollisionChain= cst.CollisionChains.size();
+		sint		nCollisionChain= (sint)cst.CollisionChains.size();
 //		H_AFTER(PACS_GR_findCC_testCollision);
 
 
@@ -1526,7 +1526,7 @@ void	NLPACS::CGlobalRetriever::testCollisionWithCollisionChains(CCollisionSurfac
 
 					// insert or replace this collision in collisionDescs.
 					// NB: yes this looks like a N algorithm (so N^2). But not so many collisions may arise, so don't bother.
-					sint	indexInsert= cst.CollisionDescs.size();
+					sint	indexInsert= (sint)cst.CollisionDescs.size();
 					sint	colFound= -1;
 
 					// start to search with nextCollisionSurfaceTested, because can't insert before.

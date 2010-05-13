@@ -207,7 +207,7 @@ void			CChainQuad::build(const std::vector<COrderedChain> &ochains)
 			// add an entry for Len.
 			memSize+= sizeof(uint16);
 			// add N entry of CEdgeChainEntry.
-			memSize+= quadNode.size()*sizeof(CEdgeChainEntry);
+			memSize+= (sint)quadNode.size()*sizeof(CEdgeChainEntry);
 		}
 	}
 
@@ -516,7 +516,7 @@ void		CChainQuad::serial(NLMISC::IStream &f)
 	else
 	{
 		// len/resize.
-		len= _Quad.size();
+		len= (uint32)_Quad.size();
 		f.serial(len);
 
 		// write offsets.

@@ -451,7 +451,7 @@ IBuffer*			CSampleBank::getSample(const NLMISC::TStringId &name)
 
 uint				CSampleBank::countSamples()
 {
-	return _Samples.size();
+	return (uint)_Samples.size();
 }
 
 // ********************************************************

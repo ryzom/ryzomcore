@@ -684,7 +684,7 @@ bool CMoveContainer::evalOneTerrainCollision (double beginTime, CMovePrimitive *
 			testMoveValid=true;
 
 			// Size of the array
-			uint size=result->size();
+			uint size=(uint)result->size();
 
 			// For each detected collisions
 			for (uint c=0; c<size; c++)
@@ -1086,7 +1086,7 @@ void CMoveContainer::newCollision (CMovePrimitive* first, CMovePrimitive* second
 			if (index >= (int)_TimeOT.size())
 			{
 				nlwarning("PACS: newCollision() failure, index [%d] >= (int)_TimeOT.size() [%d], clamped to max", index, (int)_TimeOT.size());
-				index = _TimeOT.size()-1;
+				index = (int)_TimeOT.size()-1;
 			}
 			_TimeOT[index].link (info);
 
@@ -1197,7 +1197,7 @@ void CMoveContainer::newCollision (CMovePrimitive* first, const CCollisionSurfac
 			if (index >= (int)_TimeOT.size())
 			{
 				nlwarning("PACS: newCollision() failure, index [%d] >= (int)_TimeOT.size() [%d], clamped to max", index, (int)_TimeOT.size());
-				index = _TimeOT.size()-1;
+				index = (int)_TimeOT.size()-1;
 			}
 			_TimeOT[index].link (info);
 
@@ -1212,7 +1212,7 @@ void CMoveContainer::newCollision (CMovePrimitive* first, const CCollisionSurfac
 void CMoveContainer::newTrigger (CMovePrimitive* first, CMovePrimitive* second, const CCollisionDesc& desc, uint triggerType)
 {
 	// Element index
-	uint index=_Triggers.size();
+	uint index=(uint)_Triggers.size();
 
 	// Add one element
 	_Triggers.resize (index+1);
@@ -1503,7 +1503,7 @@ void CMoveContainer::removeNCFromModifiedList (CMovePrimitive* primitive, uint8 
 {
 	// For each world image
 	uint i;
-	uint worldImageCount = _ChangedRoot.size();
+	uint worldImageCount = (uint)_ChangedRoot.size();
 	for (i=0; i<worldImageCount; i++)
 	{
 		// For each changed primitives

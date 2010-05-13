@@ -342,7 +342,7 @@ void			IStream::serialCont(vector<uint8> &cont)
 	}
 	else
 	{
-		len= cont.size();
+		len= (sint32)cont.size();
 		serial(len);
 		if (len != 0)
 			serialBuffer( (uint8*)&(*cont.begin()) ,  len);
@@ -366,7 +366,7 @@ void			IStream::serialCont(vector<sint8> &cont)
 	}
 	else
 	{
-		len= cont.size();
+		len= (sint32)cont.size();
 		serial(len);
 		if (len != 0)
 			serialBuffer( (uint8*)&(*cont.begin()) ,  len);
@@ -403,7 +403,7 @@ void			IStream::serialCont(vector<bool> &cont)
 	}
 	else
 	{
-		len= cont.size();
+		len= (sint32)cont.size();
 		serial(len);
 
 		if (len != 0)

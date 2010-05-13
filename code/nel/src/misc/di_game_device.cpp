@@ -366,7 +366,7 @@ BOOL CDIGameDevice::processEnumObject(LPCDIDEVICEOBJECTINSTANCE lpddoi)
 		if (_Buttons.size() < MaxNumButtons)
 		{
 			_Buttons.push_back(CButton());
-			uint buttonIndex = _Buttons.size() - 1;
+			uint buttonIndex = (uint)_Buttons.size() - 1;
 			char defaultButtonName[32];
 			smprintf(defaultButtonName, 32, "BUTTON %d", buttonIndex + 1);
 			BuildCtrlName(lpddoi, _Buttons[buttonIndex].Name, defaultButtonName);
@@ -382,7 +382,7 @@ BOOL CDIGameDevice::processEnumObject(LPCDIDEVICEOBJECTINSTANCE lpddoi)
 		if (_Sliders.size() < MaxNumSliders)
 		{
 			_Sliders.push_back(CSlider());
-			uint sliderIndex = _Sliders.size() - 1;
+			uint sliderIndex = (uint)_Sliders.size() - 1;
 			GetDIAxisRange(_Device, lpddoi->dwOfs, lpddoi->dwType, _Sliders[sliderIndex].Min, _Sliders[sliderIndex].Max);
 			char defaultSliderName[32];
 			smprintf(defaultSliderName, 32, "SLIDER %d", sliderIndex + 1);
@@ -400,7 +400,7 @@ BOOL CDIGameDevice::processEnumObject(LPCDIDEVICEOBJECTINSTANCE lpddoi)
 		if (_POVs.size() < MaxNumPOVs)
 		{
 			_POVs.push_back(CPOV());
-			uint povIndex = _POVs.size() - 1;
+			uint povIndex = (uint)_POVs.size() - 1;
 			char defaultPOVName[16];
 			smprintf(defaultPOVName, 16, "POV %d", povIndex + 1);
 			BuildCtrlName(lpddoi, _POVs[povIndex].Name, defaultPOVName);
@@ -435,7 +435,7 @@ uint  CDIGameDevice::getBufferSize() const
 //============================================================================
 uint  CDIGameDevice::getNumButtons() const
 {
-	return _Buttons.size();
+	return (uint)_Buttons.size();
 }
 
 //============================================================================
@@ -448,13 +448,13 @@ bool		CDIGameDevice::hasAxis(TAxis axis) const
 //============================================================================
 uint		CDIGameDevice::getNumSliders() const
 {
-	return _Sliders.size();
+	return (uint)_Sliders.size();
 }
 
 //============================================================================
 uint		CDIGameDevice::getNumPOV() const
 {
-	return _POVs.size();
+	return (uint)_POVs.size();
 }
 //============================================================================
 const char *CDIGameDevice::getButtonName(uint index) const

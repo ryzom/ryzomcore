@@ -124,7 +124,7 @@ uint32 LastTimeInCallback = 0;
 
 // this is the thread that initialized the signal redirection
 // we'll ignore other thread signals
-static uint SignalisedThread;
+static size_t SignalisedThread;
 
 static CFileDisplayer fd;
 static CNetDisplayer commandDisplayer(false);
@@ -409,7 +409,7 @@ string IService::getArg (char argName) const
 					begin++;
 
 				// End
-				uint size = _Args[i].size();
+				uint size = (uint)_Args[i].size();
 				if (size && _Args[i][size-1] == '"')
 					size--;
 				size = (uint)(std::max((int)0, (int)size-(int)begin));

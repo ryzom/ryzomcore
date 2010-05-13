@@ -1686,7 +1686,7 @@ CCallbackNetBase	*CUnifiedNetwork::getNetBase(const std::string &name, TSockId &
 
 	if (ThreadCreator != NLMISC::getThreadId()) nlwarning ("HNETL5: Multithread access but this class is not thread safe thread creator = %u thread used = %u", ThreadCreator, NLMISC::getThreadId());
 
-	sint	count = _NamedCnx.count(name);
+	sint	count = (sint)_NamedCnx.count(name);
 
 	if (count <= 0)
 	{
@@ -2132,7 +2132,7 @@ void CUnifiedNetwork::CUnifiedConnection::display (bool full, CLog *log)
 	log->displayNL ("> %s-%hu %s %s %s (%d ExtAddr %d Cnx) TotalCb %d", ServiceName.c_str (), ServiceId.get(), IsExternal?"External":"NotExternal",
 		AutoRetry?"AutoRetry":"NoAutoRetry", SendId?"SendId":"NoSendId", ExtAddress.size (), Connections.size (), TotalCallbackCalled);
 
-	uint maxc = std::max (ExtAddress.size (), Connections.size ());
+	uint maxc = (uint)std::max (ExtAddress.size (), Connections.size ());
 
 	for (uint j = 0; j < maxc; j++)
 	{

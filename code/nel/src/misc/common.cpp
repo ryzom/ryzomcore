@@ -128,7 +128,7 @@ string stringFromVector( const vector<uint8>& v, bool limited )
 
 	if (!v.empty())
 	{
-		int size = v.size ();
+		int size = (int)v.size ();
 		if (limited && size > 1000)
 		{
 			string middle = "...<buf too big,skip middle part>...";

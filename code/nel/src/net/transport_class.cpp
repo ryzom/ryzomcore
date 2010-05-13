@@ -377,7 +377,7 @@ void CTransportClass::createLocalRegisteredClassMessage ()
 		TempMessage.invert();
 	TempMessage.setType ("CT_LRC");
 
-	uint32 nbClass = LocalRegisteredClass.size ();
+	uint32 nbClass = (uint32)LocalRegisteredClass.size ();
 	TempMessage.serial (nbClass);
 
 	for (TRegisteredClass::iterator it = LocalRegisteredClass.begin(); it != LocalRegisteredClass.end (); it++)
@@ -386,7 +386,7 @@ void CTransportClass::createLocalRegisteredClassMessage ()
 
 		TempMessage.serial ((*it).second.Instance->Name);
 
-		uint32 nbProp = (*it).second.Instance->Prop.size ();
+		uint32 nbProp = (uint32)(*it).second.Instance->Prop.size ();
 		TempMessage.serial (nbProp);
 
 		for (uint j = 0; j < (*it).second.Instance->Prop.size (); j++)

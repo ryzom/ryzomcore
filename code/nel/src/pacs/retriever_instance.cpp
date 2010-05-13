@@ -637,7 +637,7 @@ void	NLPACS::CRetrieverInstance::testExteriorCollision(NLPACS::CCollisionSurface
 	uint16	*edgeLUT= cst.OChainLUT;
 
 	// bkup where we begin to add chains.
-	uint	firstChainAdded= cst.CollisionChains.size();
+	uint	firstChainAdded= (uint)cst.CollisionChains.size();
 
 	// For all exterioredge entry.
 	for(i=0;i<nEei;i++)
@@ -660,7 +660,7 @@ void	NLPACS::CRetrieverInstance::testExteriorCollision(NLPACS::CCollisionSurface
 		if(edgeLUT[eei]==0xFFFF)
 		{
 			// add a new CCollisionChain.
-			ccId= cst.CollisionChains.size();
+			ccId= (uint)cst.CollisionChains.size();
 			cst.CollisionChains.push_back(CCollisionChain());
 			// Fill it with default.
 			cst.CollisionChains[ccId].Tested= false;
