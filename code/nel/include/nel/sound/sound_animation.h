@@ -54,7 +54,7 @@ public:
 
 	/** Return the number of markers in this track
 	 */
-	virtual uint32				countMarkers()							{ return _Markers.size(); }
+	virtual uint32				countMarkers()							{ return (uint32)_Markers.size(); }
 
 	/** Return a marker of this track given its index */
 	virtual CSoundAnimMarker*	getMarker(uint32 i)						{ return _Markers[i]; }

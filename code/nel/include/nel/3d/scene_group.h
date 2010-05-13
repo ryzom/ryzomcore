@@ -341,7 +341,7 @@ public:
 	const std::vector<CPointLightNamed> &getPointLightList() const {return _PointLightArray.getPointLights();}
 
 	/// Get the number of point lights
-	uint								 getNumPointLights() const { return _PointLightArray.getPointLights().size(); }
+	uint								 getNumPointLights() const { return (uint)_PointLightArray.getPointLights().size(); }
 
 	/// Get a mutable ref on a point light named
 	CPointLightNamed					&getPointLightNamed(uint index)

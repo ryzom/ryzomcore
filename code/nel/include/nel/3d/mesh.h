@@ -392,12 +392,12 @@ public:
 	const CVertexBuffer &getVertexBuffer() const { return _VBuffer ; }
 
 	/// get the number of matrix block
-	uint getNbMatrixBlock() const { return _MatrixBlocks.size() ; }
+	uint getNbMatrixBlock() const { return (uint)_MatrixBlocks.size() ; }
 
 	/** get the number of rendering pass for a given matrix block
 	 *  \param matrixBlockIndex the index of the matrix block the rendering passes belong to
 	 */
-	uint getNbRdrPass(uint matrixBlockIndex) const { return _MatrixBlocks[matrixBlockIndex].RdrPass.size() ; }
+	uint getNbRdrPass(uint matrixBlockIndex) const { return (uint)_MatrixBlocks[matrixBlockIndex].RdrPass.size() ; }
 
 	/** get the primitive block associated with a rendering pass of a matrix block
 	 *  \param matrixBlockIndex the index of the matrix block the renderin pass belong to
@@ -418,7 +418,7 @@ public:
 	}
 
 	/// get the number of BlendShapes
-	uint getNbBlendShapes() const { if(_MeshMorpher) return _MeshMorpher->BlendShapes.size(); return 0; }
+	uint getNbBlendShapes() const { if(_MeshMorpher) return (uint)_MeshMorpher->BlendShapes.size(); return 0; }
 
 	/** Tool function to retrieve vector geometry only of the mesh.
 	 *	return false if the vbuffer cannot be read (resident)

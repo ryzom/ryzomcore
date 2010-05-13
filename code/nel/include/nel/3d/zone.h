@@ -490,7 +490,7 @@ public:
 	float			getPatchScale() const {return PatchScale;}
 	bool			compiled() const {return Compiled;}
 	uint16			getZoneId() const {return ZoneId;}
-	sint			getNumPatchs() const {return Patchs.size();}
+	sint			getNumPatchs() const {return (sint)Patchs.size();}
 	// Return the Bounding Box of the zone.
 	const CAABBoxExt	&getZoneBB() const {return ZoneBB;}
 

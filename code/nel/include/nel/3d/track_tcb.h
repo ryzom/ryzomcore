@@ -246,7 +246,7 @@ protected:
 
 
 		// Tangents Precompute.
-		sint	nKeys= this->_MapKey.size();
+		sint	nKeys= (sint)this->_MapKey.size();
 		if(nKeys<=1)
 			return;
 
@@ -458,7 +458,7 @@ public:
 		}
 
 		// Tangents Precompute.
-		sint	nKeys= _MapKey.size();
+		sint	nKeys= (sint)_MapKey.size();
 		if(nKeys<=1)
 			return;
 

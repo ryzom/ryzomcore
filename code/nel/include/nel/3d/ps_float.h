@@ -121,7 +121,7 @@ class CPSFloatCurveFunctor
 		void							addControlPoint(const CCtrlPoint &ctrlPoint);
 
 		/// retrieve the number of control points
-		uint							getNumCtrlPoints(void) const { return _CtrlPoints.size(); }
+		uint							getNumCtrlPoints(void) const { return (uint)_CtrlPoints.size(); }
 
 		/** get a control point.
 		  * \return a <date, value> std::pair

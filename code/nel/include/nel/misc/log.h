@@ -53,7 +53,7 @@ public:
 		time_t				Date;
 		TLogType			LogType;
 		std::string			ProcessName;
-		uint				ThreadId;
+		size_t				ThreadId;
 		const char			*FileName;
 		sint				Line;
 		const char			*FuncName;

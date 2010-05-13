@@ -152,13 +152,13 @@ public:
 
 	/** get the number of LOD.
 	 */
-	uint getNbLod() const { return _Lods.size() ; }
+	uint getNbLod() const { return (uint)_Lods.size() ; }
 
 
 	/** get the number of rendering pass of a LOD.
 	 *	\param lodId the id of the LOD.
 	 */
-	uint getNbRdrPass(uint lodId) const { return _Lods[lodId].RdrPass.size() ; }
+	uint getNbRdrPass(uint lodId) const { return (uint)_Lods[lodId].RdrPass.size() ; }
 
 
 	/** get the primitive block associated with a rendering pass of a LOD.
@@ -294,7 +294,7 @@ private:
 		// Get num triangle
 		uint getNumTriangle () const
 		{
-			return PBlock.size()/3;
+			return (uint)PBlock.size()/3;
 		}
 	};
 
@@ -476,7 +476,7 @@ public:
 		// Acces it
 		uint getNumVertices() const
 		{
-			return _PackedBuffer.size();
+			return (uint)_PackedBuffer.size();
 		}
 
 		// Decompact position

@@ -570,7 +570,7 @@ protected:
 #define writenumber(src,format,digits) \
 	char number_as_cstring [digits+1]; \
 	sprintf( number_as_cstring, format, src ); \
-	serialSeparatedBufferOut( (uint8*)number_as_cstring, strlen(number_as_cstring) );
+	serialSeparatedBufferOut( (uint8*)number_as_cstring, (uint)strlen(number_as_cstring) );
 
 /*
  * atoihex

@@ -41,7 +41,7 @@ public:
 	/// test whether e is in the emitter list
 	bool	isEmitter(IEventEmitter *e) const;
 	// Get the number of registered emitters
-	uint	getNumEmitters() const { return _Emitters.size(); }
+	uint	getNumEmitters() const { return (uint)_Emitters.size(); }
 	// Get an emitter
 	IEventEmitter *getEmitter(uint index);
 	const IEventEmitter *getEmitter(uint index) const;

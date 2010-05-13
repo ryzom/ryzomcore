@@ -43,7 +43,7 @@ public:
 	/// remove a device from this server (but does not delete it).
 	void	removeDevice(IInputDevice *device);
 	// returns the number of registered devices
-	uint	getNumDevices() const { return _Devices.size(); }
+	uint	getNumDevices() const { return (uint)_Devices.size(); }
 	// return a device
 	IInputDevice *getDevice(uint index) { return _Devices[index]; }
 	/// Test whether the given device is handled by this server.

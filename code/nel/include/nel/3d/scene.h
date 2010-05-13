@@ -419,7 +419,7 @@ public:
 	/// get the number of light group.
 	uint			getNumLightGroup () const
 	{
-		return _LightGroupColor.size ();
+		return (uint)_LightGroupColor.size ();
 	}
 	/// get the color of a lightmap group.
 	NLMISC::CRGBA	getLightmapGroupColor(uint lightGroup) const

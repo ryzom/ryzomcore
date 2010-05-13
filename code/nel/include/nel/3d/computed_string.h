@@ -98,7 +98,7 @@ public:
 
 	uint size() const
 	{
-		return _indexedColors.size();
+		return (uint)_indexedColors.size();
 	}
 
 	uint getIndex(uint i) const

@@ -46,7 +46,7 @@ public:
 	// Set number of entries in the historic. Oldest entries are removed
 	inline void		setMaxSize(uint maxSize);
 	// Get current size of historic
-	uint			getSize() const { return _Historic.size(); }
+	uint			getSize() const { return (uint)_Historic.size(); }
 	// Access to an element in history, 0 being the oldest, size - 1 being the lastest added element
 	const T		   &operator[](uint index) const { return _Historic[index]; /* let STL do out of range check */ }
 	// Clear historic

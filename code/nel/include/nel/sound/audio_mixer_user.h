@@ -237,9 +237,9 @@ public:
 	/// Return the names of the sounds (call this method after loadSounds())
 	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const;
 	/// Return the number of mixing tracks (voices)
-	virtual uint				getPolyphony() const { return _Tracks.size(); }
+	virtual uint				getPolyphony() const { return (uint)_Tracks.size(); }
 	/// Return the number of sources instance.
-	virtual uint				getSourcesInstanceCount() const { return _Sources.size(); }
+	virtual uint				getSourcesInstanceCount() const { return (uint)_Sources.size(); }
 	/// Return the number of playing sources (slow)
 	virtual uint				getPlayingSourcesCount() const;
 	/// Return the number of available tracks

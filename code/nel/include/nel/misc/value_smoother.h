@@ -87,7 +87,7 @@ public:
 		_CurFrame++;
 //		_CurFrame%=_LastFrames.size();
 		if (_CurFrame >= _LastFrames.size())
-			_CurFrame -= _LastFrames.size();
+			_CurFrame -= (uint)_LastFrames.size();
 
 		// update the number of frames added.
 		_NumFrame++;

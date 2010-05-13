@@ -111,7 +111,7 @@ public:
 	void link (CPortal* portal);
 	void unlink (CPortal* portal);
 
-	uint32 getNbPortals() {return _Portals.size();}
+	uint32 getNbPortals() {return (uint32)_Portals.size();}
 	CPortal* getPortal(uint32 pos) {return _Portals[pos];}
 
 	/// Serial

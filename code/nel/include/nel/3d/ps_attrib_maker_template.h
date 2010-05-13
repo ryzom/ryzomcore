@@ -466,7 +466,7 @@ void CPSValueGradientFunc<T>::setValues(const T *valueTab, uint32 numValues, uin
 	computeGradient(valueTab, numValues, nbStages, _Tab, _MinValue, _MaxValue);
 	//
 	_NbStages = nbStages;
-	_NbValues = _Tab.size() - 1;
+	_NbValues = (uint32)_Tab.size() - 1;
 
 }
 

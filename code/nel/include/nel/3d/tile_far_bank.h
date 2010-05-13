@@ -79,7 +79,7 @@ public:
 		/// Return the pixel array size. Should be 0 for empty, 64 for a 128x128 tile and 256 for a 256x256 tile.
 		uint				getSize (TFarType type, TFarOrder order) const
 		{
-			return _Pixels[type][order].size();
+			return (uint)_Pixels[type][order].size();
 		}
 
 		/// Set the pixel array of a far Tile

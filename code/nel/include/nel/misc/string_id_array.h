@@ -71,7 +71,7 @@ public:
 		nlassert (!str.empty());
 
 		// add at the end
-		addString (str, _StringArray.size ());
+		addString (str, (TStringId)_StringArray.size ());
 	}
 
 	/** Returns the id associated to string str. If the id is not found, the string will be added in
@@ -138,7 +138,7 @@ public:
 	/// Returns the size of the _StringArray
 	TStringId size () const
 	{
-		return _StringArray.size ();
+		return (TStringId)_StringArray.size ();
 	}
 
 	/// Returns all string in the _NeedToAskStringArray

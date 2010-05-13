@@ -185,7 +185,7 @@ public:
 	/// Get the number of materials in the mesh
 	uint getNbMaterial() const
 	{
-		return _Materials.size();
+		return (uint)_Materials.size();
 	}
 
 	/// Get a material

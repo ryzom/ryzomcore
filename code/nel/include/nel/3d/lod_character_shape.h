@@ -178,7 +178,7 @@ public:
 	uint			getNumTriangles() const {return _NumTriangles;}
 
 	/// get the number of bones
-	uint			getNumBones() const {return _Bones.size();}
+	uint			getNumBones() const {return (uint)_Bones.size();}
 
 	/// get a bone id, according to its name. -1 if not found
 	sint			getBoneIdByName(const std::string &name) const;
