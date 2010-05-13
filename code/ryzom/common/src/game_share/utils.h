@@ -84,7 +84,7 @@ inline ucstring capitalize(const ucstring & s)
 //-------------------------------------------------------------------------------------------------
 
 #ifdef NL_DEBUG
-	#define DEBUG_STOP nlstop
+	#define DEBUG_STOP nlstop;
 	#define nlassertd(a) nlassert(a)
 #else
 	#define DEBUG_STOP \
