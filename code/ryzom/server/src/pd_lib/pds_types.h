@@ -333,6 +333,9 @@ inline bool	isIntegerType(TDataType type)
 		CHECK_IS_INTEGER_TYPE(uint64)
 		CHECK_IS_INTEGER_TYPE(sint64)
 		CHECK_IS_INTEGER_TYPE(dimension)
+		default:
+			return false;
+			break;
 	}
 
 	return false;
@@ -346,6 +349,9 @@ inline bool	isFloatType(TDataType type)
 	{
 		CHECK_IS_FLOAT_TYPE(float)
 		CHECK_IS_FLOAT_TYPE(double)
+		default:
+			return false;
+			break;
 	}
 
 	return false;
@@ -432,6 +438,9 @@ inline bool			checkDataTypeCompatible(TDataType from, TDataType into)
 	case PDS_float:
 	case PDS_double:
 		return isIntegerType(into) || isFloatType(into);
+		break;
+	default:
+		return false;
 		break;
 	}
 
