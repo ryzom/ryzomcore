@@ -34,7 +34,7 @@ using namespace NLMISC;
 
 namespace NLNET {
 
-static uint ThreadCreator = 0;
+static size_t ThreadCreator = 0;
 
 static const uint64 AppIdDeadConnection = 0xDEAD;
 
