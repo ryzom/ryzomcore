@@ -144,7 +144,7 @@ public:
 	{
 		iterator __i = find(__k);
 		// The key MUST exist no automatic insertion done in this class
-		nlassert(__i != end())
+		nlassert(__i != end());
 		return (*__i).second;
 	}
 
