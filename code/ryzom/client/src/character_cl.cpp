@@ -591,7 +591,7 @@ uint32 CCharacterCL::addColoredInstance(const std::string &shapeName, const std:
 // \param slot: structure of the equipement.
 // \param visualSlot: visual slot used by this item.
 // \return uint32 : index of the instance or 0xFFFFFFFF.
-// \todo GUIGUI : Trouver une facon d'éviter tous ces test de visualSlot.
+// \todo GUIGUI : find a better choice to avoid all visualSlot checks
 //-----------------------------------------------
 uint32 CCharacterCL::buildEquipment(const CCharacterSheet::CEquipment &slot, SLOTTYPE::EVisualSlot visualSlot, sint color, uint32 instIdx)
 {
@@ -1021,7 +1021,6 @@ bool CCharacterCL::isUnknownRace() const
 //-----------------------------------------------
 // getAttackHeight :
 // Return the atk height.
-// \todo GUIGUI : faire la hauteur en relatif à l'attaquant au lieu d'en global (<1 >2).
 //-----------------------------------------------
 CCharacterCL::TAtkHeight CCharacterCL::getAttackHeight(CEntityCL *target, BODY::TBodyPart localisation, BODY::TSide side) const
 {
@@ -2033,7 +2032,7 @@ double CCharacterCL::computeTimeStep(const double &currentTime)
 
 //-----------------------------------------------
 // computeSpeed :
-// \todo GUIGUI : faire une vitesse moyenne car pb si le temps devient très petit car frame petite ou car _LastFrameTime augmente en cours de frame à force de boucler.
+// \todo GUIGUI : to do an average speed, there is a problem if time become very small because small frame or _LastFrameTime increase when looping
 //-----------------------------------------------
 double CCharacterCL::computeSpeed()
 {
@@ -2097,7 +2096,7 @@ double CCharacterCL::computeSpeedFactor(double speedToDest)
 						else
 							nlwarning("The animation is a move but animation speed is %f !", animSpeed);
 					}
-					// \todo GUIGUI : Vitesse infini, retourner peut-être une valeur spéciale.
+					// \todo GUIGUI : unlimited speed, perhaps return a special value.
 					// We should be arrived so speed is maximum.
 					else
 						speedFactor = 1000.0;
@@ -2317,7 +2316,7 @@ CCharacterCL::TOnMove CCharacterCL::onMove(const CAutomatonStateSheet &curAnimSt
 	// Animation is breakable if the distance to destination is long enough (at least > 0).
 	if(curAnimState.BreakableOnMove && dist2Dest()>0.0)
 	{
-		// \todo GUIGUI : prendre la prochaine position différente de la notre (il se peut qu'on soit au même endroit que la première).
+		// \todo GUIGUI : take the next position to current one (it could be possible this position was the same as the first).
 		CVectorD dirToFirstPos = _FirstPos-pos();
 		dirToFirstPos.z = 0.0;
 		if(dirToFirstPos != CVectorD::Null)
@@ -2465,8 +2464,8 @@ bool CCharacterCL::onBadHeading(const CAutomatonStateSheet &curAnimState)
 //-----------------------------------------------
 // setAnim :
 // Select a new animation for the entity.
-// \todo GUIGUI : gérer mieux le fait qu'il n'y a pas de squelette.
-// \todo GUIGUI : revoir comment controler la tête plus simplement.
+// \todo GUIGUI : better manage when there is no skeleton
+// \todo GUIGUI : simplify head control
 //-----------------------------------------------
 ADD_METHOD(void CCharacterCL::setAnim(TAnimStateKey newKey, TAnimStateKey subKey, uint animID))
 	if(ClientCfg.Light)
@@ -2762,7 +2761,7 @@ KeyChosen:
 	//// END LOOP /////
 
 
-	// \todo GUIGUI : gérer mieux le changement d'automate.
+	// \todo GUIGUI : better manage automate change
 	// Current animation is not of the same kind as the old one.
 	bool sameAnim = lastAnimStateId == animState(MOVE) && _OldAutomaton == _CurrentAutomaton;
 	if(!sameAnim)
@@ -2841,7 +2840,7 @@ KeyChosen:
 				if(animAngle != 0.0)
 					_RotationFactor = fabs(angToDest/animAngle);
 				else
-					_RotationFactor = -1.0;	// \todo GUIGUI : voir quelle valeur il faut vraiment mettre si jamais on a un anim de rot sans rot et qui doit quand meme faire tourner le perso.
+					_RotationFactor = -1.0;	// \todo GUIGUI : see which value we should use if we have a rot anim without rot and which should rotate character
 			}
 
 			// If the animation is an atk or forage extraction -> Start all dynamic FXs.
@@ -2905,7 +2904,7 @@ KeyChosen:
 					{
 						animIndex(MOVE_BLEND_OUT, animationBlendState->chooseAnim(_AnimJobSpecialisation, people(), getGender()));
 						_PlayList->setAnimation(MOVE_BLEND_OUT, animId(MOVE_BLEND_OUT));
-						_PlayList->setWeight(MOVE_BLEND_OUT, 1.0f);		// \todo GUIGUI : vérifier ce qu'il se passe si animId est "empty".
+						_PlayList->setWeight(MOVE_BLEND_OUT, 1.0f);		// \todo GUIGUI : verify what is happening if animId is "empty".
 					}
 					else
 						nlwarning("setAnim:%d: animationBlendState is Null.", _Slot);
@@ -3374,8 +3373,8 @@ ADD_METHOD(void CCharacterCL::setAnimLOD(bool changed))
 
 //-----------------------------------------------
 // updateAnimationState :
-// \todo GUIGUI : précalculer la distance à la destination au moment de la réception des Stages.
-// \todo GUIGUI : faire ça mimeux, on set souvent 'idle' pour recalculer l'orientation en fin d'animation au lieu de faire direct la bonne anime.
+// \todo GUIGUI : precalculate distance to destination when receiving Stages.
+// \todo GUIGUI : improve, we are setting often 'idle' to recompute orientation at the end of animation instead of doing directly the right one.
 //-----------------------------------------------
 ADD_METHOD(void CCharacterCL::updateAnimationState())
 	// If the current state is invalid -> return.
@@ -5423,7 +5422,7 @@ ADD_METHOD(void CCharacterCL::playToEndAnim(const double &startTimeOffset, doubl
 //-----------------------------------------------
 // updateStages :
 // Call this method to give a time for each stage, compute distance to destination and some more informations.
-// \todo GUIGUI : faire un peu de netoyage là dedans.
+// \todo GUIGUI : clean up
 //-----------------------------------------------
 void CCharacterCL::updateStages()
 {
@@ -5716,7 +5715,7 @@ ADD_METHOD(bool CCharacterCL::beginImpact(NL3D::UAnimation *anim, NL3D::TAnimati
 // Manage Events that could be created by the animation (like sound).
 // \param startTime : time to start processing events from the current animation.
 // \param stopTime : time to stop processing events from the current animation.
-// \todo GUIGUI : Optimiser le déclenchement des FXs lorsqu'on aura le temps.
+// \todo GUIGUI : Optimize FXs launch when we would have time
 //-----------------------------------------------
 void CCharacterCL::animEventsProcessing(double startTime, double stopTime)
 {
@@ -6525,10 +6524,10 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 		// ANTI-FREEZE SYSTEM //
 		//--------------------//
 		//--------------------//
-		// \todo GUIGUI : updater dist2first et dist2dest mieux que ça si possible.
+		// \todo GUIGUI : improve dist2first and dist2dest
 		// Update Stages
 		updateStages();
-		// \todo GUIGUI : Bug avec _TargetAngle en combat float, on écrase ici l'angle donné par le serveur ?
+		// \todo GUIGUI : Bug with _TargetAngle in fight float, we overwrite here angle sent by the server ?
 		// If the entity is too far (orientation not received yet), set the front vector as the moving direction.
 		CVectorD distToUser = pos()-UserEntity->pos();
 		distToUser.z = 0.0;
@@ -6620,7 +6619,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 				// Update Animation Time Offset (move greater than the dist to next stage; update animation time to get them equal).
 				animOffset(MOVE,           oldMovingTimeOffset    + (animOffset(MOVE)          -oldMovingTimeOffset   )*percent);
 				animOffset(MOVE_BLEND_OUT, oldMovingTimeOffsetRun + (animOffset(MOVE_BLEND_OUT)-oldMovingTimeOffsetRun)*percent);
-				// \todo GUIGUI : vérifier la pertinace de la ligne suivante.
+				// \todo GUIGUI : check if the following line is necessary
 				buLoopTimeStep = loopTimeStep;
 				// First Position Reached
 				pos(_FirstPos);
@@ -6879,7 +6878,7 @@ void CCharacterCL::processStage(CStage &stage)
 				// Restore collisions.
 				if(_Primitive)
 				{
-					// \todo GUIGUI : faire ça sans dynamic cast serait sans doute mieux.
+					// \todo GUIGUI : do that without dynamic cast
 					if(dynamic_cast<CPlayerCL *>(this))
 						_Primitive->setOcclusionMask(MaskColPlayer);
 					else
@@ -7789,7 +7788,7 @@ void CCharacterCL::slotRemoved(const CLFECOMMON::TCLEntityId &slotRemoved)
 //---------------------------------------------------
 uint CCharacterCL::nbStage()
 {
-	return _Stages._StageSet.size();
+	return (uint)_Stages._StageSet.size();
 }// nbStage //
 
 
@@ -7806,7 +7805,7 @@ double CCharacterCL::attackRadius() const
 // getAttackerPos :
 // Return the position the attacker should have to combat according to the attack angle.
 // \param ang : 0 = the front, >0 and <Pi = left side, <0 and >-Pi = right side.
-// \todo : GUIGUI precalculer la matrice de cette entité.
+// \todo : GUIGUI precalculate entity matrix
 //---------------------------------------------------
 CVectorD CCharacterCL::getAttackerPos(double ang, double dist) const
 {
@@ -8993,7 +8992,7 @@ void CCharacterCL::setLinkFX(const CAnimationFX *fx, const CAnimationFX *dispell
 //***********************************************************************************************************************
 void CCharacterCL::startItemAttackFXs(bool activateTrails, uint intensity)
 {
-	uint numItems = _Items.size();
+	uint numItems = (uint)_Items.size();
 	forceEvalAnim(); // force to eval bones at least once when fx are created
 	for(uint k = 0; k < numItems; ++k)
 	{
@@ -9004,7 +9003,7 @@ void CCharacterCL::startItemAttackFXs(bool activateTrails, uint intensity)
 //***********************************************************************************************************************
 void CCharacterCL::stopItemAttackFXs()
 {
-	uint numItems = _Items.size();
+	uint numItems = (uint)_Items.size();
 	for(uint k = 0; k < numItems; ++k)
 	{
 		if (_Items[k].Sheet)
