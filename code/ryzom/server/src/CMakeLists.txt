@@ -1,9 +1,8 @@
 ADD_SUBDIRECTORY(admin_modules)
+ADD_SUBDIRECTORY(server_share)
 
 ADD_SUBDIRECTORY(frontend_service)
-
-# Still working on this.
-#ADD_SUBDIRECTORY(entities_game_service)
+ADD_SUBDIRECTORY(entities_game_service)
 
 #ags_test
 #ai_data_service

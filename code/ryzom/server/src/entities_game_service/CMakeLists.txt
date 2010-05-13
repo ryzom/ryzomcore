@@ -18,20 +18,30 @@ FILE(GLOB SRC	*.cpp *.h
 		pvp_manager/pvp_faction_reward_manager/*.h pvp_manager/pvp_faction_reward_manager/*.cpp
 		shop_type/*.h shop_type/*.cpp
 		stables/*.h stables/*.cpp
-		team_manager/*.h team_manager/*.cpp
-		weather/*.h weather/*.cpp)
+		team_manager/*.h team_manager/*.cpp)
 
 LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.h
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h
 			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.h)
+			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.h
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.h
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.h
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_cure.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_debuff.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_hot.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.h
+			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.h)
 
 ADD_EXECUTABLE(entities_game_service ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(entities_game_service admin_modules game_share ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} ${MYSQL_LIBRARIES} ${ZLIB_LIBRARIES} ${NELMISC_LIBRARY} ${NELNET_LIBRARY} ${NELGEORGES_LIBRARY} ${NELLIGO_LIBRARY})
+TARGET_LINK_LIBRARIES(entities_game_service admin_modules game_share server_share ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} ${MYSQL_LIBRARIES} ${ZLIB_LIBRARIES} ${NELMISC_LIBRARY} ${NELNET_LIBRARY} ${NELGEORGES_LIBRARY} ${NELLIGO_LIBRARY})
 
 IF(WIN32)
   SET_TARGET_PROPERTIES(entities_game_service PROPERTIES 
