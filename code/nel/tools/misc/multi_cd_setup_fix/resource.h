@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by multi_cd_setup_fix.rc
 //
+#define IDC_STATIC                       -1
 #define IDI_ICON1                       101
 #define IDI_ICON2                       102
 #define IDI_ICON3                       103
