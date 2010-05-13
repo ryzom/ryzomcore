@@ -2127,7 +2127,7 @@ void CParticleSystem::addRefForUserSysCoordInfo(uint numRefs)
 	{
 		_UserCoordSystemInfo = new CUserCoordSystemInfo;
 	}
-	nlassert(_UserCoordSystemInfo)
+	nlassert(_UserCoordSystemInfo);
 	_UserCoordSystemInfo->NumRef += numRefs;
 
 }
@@ -2138,7 +2138,7 @@ void CParticleSystem::releaseRefForUserSysCoordInfo(uint numRefs)
 	NL_PS_FUNC_MAIN(CParticleSystem_releaseRefForUserSysCoordInfo)
 	if (!numRefs) return;
 	nlassert(_UserCoordSystemInfo);
-	nlassert(numRefs <= _UserCoordSystemInfo->NumRef)
+	nlassert(numRefs <= _UserCoordSystemInfo->NumRef);
 	_UserCoordSystemInfo->NumRef -= numRefs;
 	if (_UserCoordSystemInfo->NumRef == 0)
 	{

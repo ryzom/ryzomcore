@@ -418,7 +418,7 @@ void	CAIS::update()
 		// send agglomerated hp changes
 		if (!_CreatureChangeHPList.Entities.empty())
 		{
-			nlassert(_CreatureChangeHPList.Entities.size()==_CreatureChangeHPList.DeltaHp.size())
+			nlassert(_CreatureChangeHPList.Entities.size()==_CreatureChangeHPList.DeltaHp.size());
 			_CreatureChangeHPList.send("EGS");
 			_CreatureChangeHPList.Entities.clear();
 			_CreatureChangeHPList.DeltaHp.clear();

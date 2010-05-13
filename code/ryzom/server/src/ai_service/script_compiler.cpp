@@ -1146,7 +1146,7 @@ void CCompiler::dumpByteCode (const string &sourceCode, const string &fullName, 
 		fclose (file);
 	}
 	else
-		nlstop ("can't open %s for writing", tmp.c_str ());
+		nlstopex(("can't open %s for writing", tmp.c_str ()));
 }
 	
 CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeOld (const string &sourceCode, const string &fullName, bool debug) const

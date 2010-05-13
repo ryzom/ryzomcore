@@ -1074,7 +1074,7 @@ bool CGroupParagraph::addChildAtIndex(CViewBase *child, uint index, bool deleteO
 			addView (pVB, (sint) index);
 			return true;
 		}
-		nlstop
+		nlstop;
 		return false;
 	}
 	return false;

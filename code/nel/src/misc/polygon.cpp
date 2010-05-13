@@ -2161,7 +2161,7 @@ CPolygon2D::CPolygon2D(const CTriangle &tri, const CMatrix &projMat)
 // *******************************************************************************
 void CPolygon2D::getBoundingRect(CVector2f &minCorner, CVector2f &maxCorner) const
 {
-	nlassert(!Vertices.empty())
+	nlassert(!Vertices.empty());
 	minCorner = maxCorner = Vertices[0];
 	uint numVertices = Vertices.size();
 	for(uint k = 0; k < numVertices; ++k)

@@ -55,7 +55,7 @@ CToolChoosePosLua::CToolChoosePosLua(uint ghostSlot,
 void CToolChoosePosLua::commit(const NLMISC::CVector &createPosition, float /* createAngle */)
 {
 	//H_AUTO(R2_CToolChoosePosLua_commit)
-	nlassert(!_Commited)
+	nlassert(!_Commited);
 	if (_ValidFunc.isFunction())
 	{
 		CLuaState &lua = *_ValidFunc.getLuaState();

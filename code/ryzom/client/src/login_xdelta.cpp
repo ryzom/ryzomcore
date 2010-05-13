@@ -626,7 +626,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	if (_Ctrl.SourceInfo.size() == 2)
 	{
 		// _Ctrl.SourceInfo[0].IsData must be true
-		nlassert(_Ctrl.SourceInfo[0].IsData)
+		nlassert(_Ctrl.SourceInfo[0].IsData);
 		// index 0 == Data from patch file
 		if (!XDFR[0].init(_FileName, _HeaderOffset, _CtrlOffset, isPatchCompressed()))
 		{

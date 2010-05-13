@@ -923,7 +923,7 @@ void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bo
 					nglDisableVariantClientStateEXT(variants[CDriverGL::EVSPaletteSkinVariant]);
 			break;
 			case 7: // empty
-				nlstop
+				nlstop;
 			break;
 			case 8:
 			case 9:

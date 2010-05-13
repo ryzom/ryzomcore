@@ -1400,7 +1400,7 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 		{
 			GLint position;
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &position);
-			nlassert(position != -1) // there was an error..
+			nlassert(position != -1); // there was an error..
 			nlassert(position < (GLint) code.size());
 			uint line = 0;
 			const char *lineStart = code.c_str();

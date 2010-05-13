@@ -5599,7 +5599,7 @@ void CEditor::onAttrModified(const CObject *value)
 	{
 		CInstance *parentInstance = getInstanceFromObject(parent);
 		sint32 indexInParent = parent->findIndex(son);
-		nlassert(indexInParent != -1)
+		nlassert(indexInParent != -1);
 		if (parentInstance)
 		{
 			// we are in an instance (a CObjectTable with an instance id)

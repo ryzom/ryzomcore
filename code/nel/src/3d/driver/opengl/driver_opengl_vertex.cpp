@@ -1413,7 +1413,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 					}
 					break;
 					case CVertexBuffer::Empty: // empty
-						nlstop
+						nlstop;
 						break;
 					case CVertexBuffer::TexCoord0:
 					case CVertexBuffer::TexCoord1:
@@ -1483,7 +1483,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 						}
 						break;
 						case CVertexBuffer::Empty: // empty
-							nlstop
+							nlstop;
 						break;
 						case CVertexBuffer::TexCoord0:
 						case CVertexBuffer::TexCoord1:

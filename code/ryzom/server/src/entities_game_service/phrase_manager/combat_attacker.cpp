@@ -278,7 +278,7 @@ void CCombatAttackerAI::initFromRowId( const TDataSetRow &rowId )
 		return;
 
 #if !FINAL_VERSION
-	nlassert(entity->getId().getType() == RYZOMID::creature)
+	nlassert(entity->getId().getType() == RYZOMID::creature);
 #endif
 
 	const CStaticCreatures * form = entity->getForm();
@@ -400,7 +400,7 @@ void CCombatAttackerNpc::initFromRowId( const TDataSetRow &rowId )
 		return;
 
 #if !FINAL_VERSION
-	nlassert(entity->getId().getType() == RYZOMID::npc)
+	nlassert(entity->getId().getType() == RYZOMID::npc);
 #endif
 
 	const CStaticCreatures * form = entity->getForm();

@@ -34,7 +34,7 @@ void CPackedWorld::build(std::vector<TPackedZoneBaseSPtr> &packedZones)
 	_Zones.clear();
 	if (packedZones.empty()) return;
 	CAABBox box;
-	nlassert(packedZones[0])
+	nlassert(packedZones[0]);
 	box = packedZones[0]->Box;
 	for(uint k = 1; k < packedZones.size(); ++k)
 	{

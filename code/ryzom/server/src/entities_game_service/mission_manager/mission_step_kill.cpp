@@ -864,7 +864,7 @@ class CMissionStepKillByName : public IMissionStepTemplate
 		retParams[0].Type = STRING_MANAGER::bot_name;
 		retParams[0].Identifier = TargetName;
 		retParams[1].Type = STRING_MANAGER::integer;
-		nlassert( subStepStates.size() == 1 )
+		nlassert( subStepStates.size() == 1 );
 		retParams[1].Int = subStepStates[0];
 		if ( Place != 0xFFFF )
 		{

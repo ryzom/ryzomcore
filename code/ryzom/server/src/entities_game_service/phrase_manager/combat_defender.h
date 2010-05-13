@@ -95,7 +95,7 @@ public:
 		if ( !TheDataset.isAccessible(rowId))
 		{
 			nlwarning("<CCombatDefender> ERROR Get an invalid row id as param for the constructor, should never happens");
-			nlstop("");
+			nlstop;
 			return;
 		}
 
