@@ -1,7 +1,7 @@
 FILE(GLOB SRC	*.cpp *.h 
 		backward_compatibility/*.h backward_compatibility/*.cpp
-		building_manager
-		character_structure
+		building_manager/*.h building_manager/*.cpp
+		character_structure/*.h character_structure/*.cpp
 		creature_manager/*.h creature_manager/*.cpp
 		egs_sheets/*.h egs_sheets/*.cpp
 		entity_manager/*.h entity_manager/*.cpp
@@ -26,6 +26,8 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h
 			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.h
+			${CMAKE_CURRENT_SOURCE_DIR}/building_manager/room.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/building_manager/room.h
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.h
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.cpp
@@ -41,7 +43,20 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 ADD_EXECUTABLE(entities_game_service ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(entities_game_service admin_modules game_share server_share ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} ${MYSQL_LIBRARIES} ${ZLIB_LIBRARIES} ${NELMISC_LIBRARY} ${NELNET_LIBRARY} ${NELGEORGES_LIBRARY} ${NELLIGO_LIBRARY})
+TARGET_LINK_LIBRARIES(entities_game_service	admin_modules 
+						game_share 
+						server_share 
+						ai_share 
+						pd_lib 
+						gameplay_module_lib
+						${PLATFORM_LINKFLAGS} 
+						${LIBXML2_LIBRARIES} 
+						${MYSQL_LIBRARIES} 
+						${ZLIB_LIBRARIES} 
+						${NELMISC_LIBRARY} 
+						${NELNET_LIBRARY} 
+						${NELGEORGES_LIBRARY} 
+						${NELLIGO_LIBRARY})
 
 IF(WIN32)
   SET_TARGET_PROPERTIES(entities_game_service PROPERTIES 

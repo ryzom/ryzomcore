@@ -1,5 +1,8 @@
 ADD_SUBDIRECTORY(admin_modules)
 ADD_SUBDIRECTORY(server_share)
+ADD_SUBDIRECTORY(ai_share)
+ADD_SUBDIRECTORY(gameplay_module_lib)
+ADD_SUBDIRECTORY(pd_lib)
 
 ADD_SUBDIRECTORY(frontend_service)
 ADD_SUBDIRECTORY(entities_game_service)
