@@ -38,7 +38,7 @@ class CTrack
 {
 public:
 	/// Constructor
-	CTrack() : m_PhysicalSource(NULL), m_LogicalSource(NULL) { }
+	CTrack() : m_LogicalSource(NULL), m_PhysicalSource(NULL) { }
 	/// Init
 	inline void init(ISoundDriver *soundDriver) { m_PhysicalSource = soundDriver->createSource(); }
 	/// Destructor

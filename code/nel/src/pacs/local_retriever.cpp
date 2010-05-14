@@ -95,7 +95,7 @@ const CVector	&NLPACS::CLocalRetriever::getStartVector(uint32 chain, sint32 surf
 	const COrderedChain3f	&ochain = onLeft ? _FullOrderedChains[_Chains[chain].getSubChains().front()] :
 											   _FullOrderedChains[_Chains[chain].getSubChains().back()];
 
-	if (ochain.isForward() && onLeft || !ochain.isForward() && !onLeft)
+	if (ochain.isForward() == onLeft)
 		return ochain.getVertices().front();
 	else
 		return ochain.getVertices().back();
@@ -107,7 +107,7 @@ const CVector	&NLPACS::CLocalRetriever::getStopVector(uint32 chain, sint32 surfa
 	const COrderedChain3f	&ochain = onLeft ? _FullOrderedChains[_Chains[chain].getSubChains().back()] :
 											   _FullOrderedChains[_Chains[chain].getSubChains().front()];
 
-	if (ochain.isForward() && onLeft || !ochain.isForward() && !onLeft)
+	if (ochain.isForward() == onLeft)
 		return ochain.getVertices().back();
 	else
 		return ochain.getVertices().front();
@@ -525,7 +525,7 @@ void	NLPACS::CLocalRetriever::computeLoopsAndTips()
 					nlwarning("loopCloseDistance=%f", loopCloseDistance);
 					nlerror("Couldn't close loop on surface=%d", i);
 				}
-				else if (best > 1.0e0f && loopCloseDistance < 3.0e-2f ||
+				else if ((best > 1.0e0f && loopCloseDistance < 3.0e-2f) ||
 						 loopCloseDistance < 1.0e-3f)
 				{
 					break;
@@ -1132,8 +1132,8 @@ void	NLPACS::CLocalRetriever::retrievePosition(CVector estimated, CCollisionSurf
 					++stop;
 
 				// if upper or lower the bounds, do nothing
-				if (estim.y > vertices[start].y && estim.y > vertices[stop].y ||
-					estim.y < vertices[start].y && estim.y < vertices[stop].y)
+				if ((estim.y > vertices[start].y && estim.y > vertices[stop].y) ||
+					(estim.y < vertices[start].y && estim.y < vertices[stop].y))
 					continue;
 
 				isOnBorder = true;
@@ -1306,8 +1306,8 @@ void	NLPACS::CLocalRetriever::retrieveAccuratePosition(CVector2s estim, CCollisi
 					++stop;
 
 				// if upper or lower the bounds, do nothing
-				if (estim.y > vertices[start].y && estim.y > vertices[stop].y ||
-					estim.y < vertices[start].y && estim.y < vertices[stop].y)
+				if ((estim.y > vertices[start].y && estim.y > vertices[stop].y) ||
+					(estim.y < vertices[start].y && estim.y < vertices[stop].y))
 					continue;
 
 				onBorder = true;
@@ -1839,7 +1839,7 @@ void	NLPACS::CLocalRetriever::findPath(const NLPACS::CLocalRetriever::CLocalPosi
 
 				thisChainId = surface._Chains[loop[loopIndex]].Chain;
 				thisChainForward = (_Chains[thisChainId].getLeft() == surfaceId);
-				thisOChainIndex = (thisChainForward && forward || !thisChainForward && !forward) ?
+				thisOChainIndex = (thisChainForward == forward) ?
 					0 : (sint)_Chains[thisChainId]._SubChains.size()-1;
 			}
 
