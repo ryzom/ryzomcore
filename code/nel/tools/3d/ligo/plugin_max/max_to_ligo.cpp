@@ -17,14 +17,13 @@
 // From MAXSDK
 #include <MaxScrpt/maxscrpt.h>
 
+#include "max_to_ligo.h"
 
 #undef min
 #undef max
 
 // From nel misc
 #include "nel/misc/stream.h"
-
-#include "max_to_ligo.h"
 
 // From ligo library
 #include "nel/../../src/ligo/zone_template.h"
