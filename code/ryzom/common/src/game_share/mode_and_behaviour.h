@@ -453,7 +453,7 @@ namespace MBEHAV
 		sint16		DeltaHP;
 		uint16		Unused; /// Keep it, used to make the class size = 64 bits (sizeof(CBehaviour) MUST return 8 (bytes))
 
-		inline CBehaviour() : Behaviour(UNKNOWN_BEHAVIOUR), Data(0), Data2(0), DeltaHP(0), Unused(0) {}
+		inline CBehaviour() : Data(0), Data2(0), Behaviour(UNKNOWN_BEHAVIOUR), DeltaHP(0), Unused(0) {}
 
 		inline CBehaviour( EBehaviour behaviour )
 		{

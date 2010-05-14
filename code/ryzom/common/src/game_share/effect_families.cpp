@@ -214,6 +214,9 @@ namespace EFFECT_FAMILIES
 			case DMGTYPE::POISON : return DebuffResistPoison;
 			case DMGTYPE::ELECTRICITY : return DebuffResistElectricity;
 			case DMGTYPE::SHOCK : return DebuffResistSchock;
+			default:
+				return Unknown;
+				break;
 		}
 		return Unknown;
 	}
@@ -229,6 +232,9 @@ namespace EFFECT_FAMILIES
 		case DMGTYPE::POISON : return CombatDoTPoison;
 		case DMGTYPE::ELECTRICITY : return CombatDoTElectricity;
 		case DMGTYPE::SHOCK : return CombatDoTShock;
+		default:
+			return Unknown;
+			break;
 		}
 		return Unknown;
 	}
