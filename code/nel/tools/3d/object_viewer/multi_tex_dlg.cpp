@@ -39,7 +39,7 @@ CMultiTexDlg::CMultiTexDlg(CParticleWorkspace::CNode *ownerNode, NL3D::CPSMultiT
 	  _MainTexDlg(NULL), _AltTexDlg(NULL),
 	  _PN(pn)
 {
-	nlassert(_MTP)
+	nlassert(_MTP);
 	//{{AFX_DATA_INIT(CMultiTexDlg)
 	m_ForceBasicCaps = NL3D::CPSMultiTexturedParticle::areBasicCapsForced();
 	m_UseParticleDateAlt = _MTP->getUseLocalDateAlt();

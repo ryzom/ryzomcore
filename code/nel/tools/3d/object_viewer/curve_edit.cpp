@@ -346,7 +346,7 @@ void CurveEdit::drawUnits(CDC &dc)
 	sint upVal = (sint) floorf(coordsFromScreen(0, _X).Value);
 	sint downVal = (sint) floorf(coordsFromScreen(0, _X + _Width).Value);
 
-	nlassert(upVal >= downVal)
+	nlassert(upVal >= downVal);
 	for (sint k = downVal ; k <= upVal ; ++k)
 	{
 		CGdiObject *oldPen = dc.SelectObject(&pens[k == 0 ? 1 : 0]); 

@@ -198,7 +198,7 @@ public:
 				Scheme->setValues(tab, Scheme->getNumValues() - 1, Scheme->getNumStages());
 			break;
 			case IValueGradientDlgClient::Up:
-				nlassert(index > 0)
+				nlassert(index > 0);
 				std::swap(tab[index], tab[index - 1]);
 				Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
 			break;
