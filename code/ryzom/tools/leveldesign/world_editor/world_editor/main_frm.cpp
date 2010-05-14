@@ -4291,7 +4291,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 			// Can be extended to support more file types
 			else
 			{
-				errorMessage("File not supported? %s", pFilename);
+				errorMessage("File not supported: %s", pFilename);
 			}
 		}
 	}
