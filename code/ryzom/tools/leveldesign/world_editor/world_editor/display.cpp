@@ -2170,7 +2170,7 @@ void CDisplay::OnLButtonDown (UINT nFlags, CPoint point)
 
 	if ((CNELU::Driver == NULL)||(_MainFrame == NULL)) return;
 
-	nlassert (!_MouseLeftDown)
+	nlassert (!_MouseLeftDown);
 	_MouseLeftDown = true;
 
 	// Mouse capture On !

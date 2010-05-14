@@ -1708,7 +1708,7 @@ bool CActionRotate::redo ()
 
 bool CActionRotate::getText (string &result)
 {
-	result = toString ("Rotate %.2f°", 180*_Angle/Pi);
+	result = toString ("Rotate %.2f degrees", 180*_Angle/Pi);
 	return true;
 }
 

@@ -1839,7 +1839,7 @@ void CMainFrame::OnProjectAddPrimitive()
 				if (!getDocument()->isPrimitiveLoaded(path))
 					getDocument ()->addModification (new CActionLoadPrimitive (path.c_str()));
 				else
-					infoMessage("Primitive déjà présente : %s", path.c_str());
+					infoMessage("Primitive already existing: %s", path.c_str());
 			}
 		}
 		getDocument ()->endModification ();
@@ -2616,7 +2616,7 @@ void CMainFrame::buildFilenameVector (const IPrimitive &primitive, std::vector<s
 void CMainFrame::OnOpenFile (UINT nID)
 {
 	// Single selection
-	nlassert (Selection.size () == 1)
+	nlassert (Selection.size () == 1);
 
 	// Good id
 	nID -= ID_EDIT_OPEN_FILE_BEGIN;
@@ -4278,7 +4278,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 				if (!getDocument()->isPrimitiveLoaded(path))
 					getDocument ()->addModification (new CActionLoadPrimitive (path.c_str()));
 				else
-					infoMessage("Primitive déjà présente : %s", path.c_str());
+					infoMessage("Primitive already existing: %s", path.c_str());
 
 				getDocument()->endModification ();
 
@@ -4291,7 +4291,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 			// Can be extended to support more file types
 			else
 			{
-				errorMessage("Fichier non supporté: %s", pFilename);
+				errorMessage("File not supported? %s", pFilename);
 			}
 		}
 	}

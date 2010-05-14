@@ -303,7 +303,7 @@ void CGeorgesEditView::updateTab ()
 					}
 
 					// Should be found
-					nlassert (tabSelected!=-1)
+					nlassert (tabSelected!=-1);
 					TabCtrl.SetCurSel (tabSelected);
 
 					UpdateData (FALSE);
