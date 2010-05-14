@@ -899,6 +899,8 @@ CAliasTreeOwner	*CGroupDesc<FamilyT>::createChild(IAliasCont	*cont, CAIAliasDesc
 	case AITYPES::AITypeBotTemplateMultiLevel:
 		child = new CBotDesc<FamilyT>(this, aliasTree->getAlias(), aliasTree->getName());
 		break;
+	default:
+		break;
 	}
 	
 	if	(child)
