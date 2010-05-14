@@ -30,9 +30,9 @@ namespace NLSOUND {
 
 CSimpleSource::CSimpleSource(CSimpleSound *simpleSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
 	: CSourceCommon(simpleSound, spawn, cb, cbUserParam, cluster), 
+	_SimpleSound(simpleSound),
 	_Track(NULL), 
-	_PlayMuted(false), 
-	_SimpleSound(simpleSound)
+	_PlayMuted(false)
 {
 	nlassert(_SimpleSound != 0);
 

@@ -270,7 +270,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 			return NoError;
 		}
 		// Is a number ?
-		else if ((currentChar >= '0') && (currentChar <= '9') || (currentChar == '.'))
+		else if (((currentChar >= '0') && (currentChar <= '9')) || (currentChar == '.'))
 		{
 			// This is a number
 			token = Number;

@@ -182,8 +182,8 @@ public:
 		// check each edge of each face
 		for (i=0; i<Faces.size(); ++i)
 		{
-			if (Faces[i].Surface == CCollisionFace::ExteriorSurface && linkInterior ||
-				Faces[i].Surface >= CCollisionFace::InteriorSurfaceFirst && !linkInterior)
+			if ((Faces[i].Surface == CCollisionFace::ExteriorSurface && linkInterior) ||
+				(Faces[i].Surface >= CCollisionFace::InteriorSurfaceFirst && !linkInterior))
 				continue;
 
 			for (j=0; j<3; ++j)

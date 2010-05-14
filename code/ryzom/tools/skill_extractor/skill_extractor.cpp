@@ -363,7 +363,7 @@ sint main( sint argc, char ** argv )
 			if (its == itSkillEnd)
 			{
 				nlwarning("ERROR : cannot find the parent skill %s for skill %s (skill %u)", (*itSkill).second.ParentSkill.c_str(), (*itSkill).second.SkillName.c_str(), count );
-				nlstop("");
+				nlstop;
 			}			
 			(*itSkill).second.ParentSkillPtr = &((*its).second);
 			(*its).second.Children.push_back(&((*itSkill).second));

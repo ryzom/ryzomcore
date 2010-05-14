@@ -231,7 +231,7 @@ static TCallbackItem NamingClientCallbackArray[] =
 
 void CNamingClient::connect( const CInetAddress &addr, CCallbackNetBase::TRecordingState rec, const vector<CInetAddress> &/* addresses */ )
 {
-	nlassert (_Connection == NULL || _Connection != NULL && !_Connection->connected ());
+	nlassert (_Connection == NULL || (_Connection != NULL && !_Connection->connected ()));
 
 	if (_Connection == NULL)
 	{
