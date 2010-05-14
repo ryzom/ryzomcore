@@ -95,7 +95,7 @@ inline ucstring capitalize(const ucstring & s)
 		nldebug("Dumping callstack :"); \
 		for (uint i=0; i<contexts.size(); ++i) \
 			nldebug("  %3u : %s", i, contexts[i].c_str());
-	#define	nlassertd(a) if (0) ; else
+	#define	nlassertd(a) if (0) { } else { }
 #endif
 
 // the following set of definess can be undefined and re-defined to add user code to execute

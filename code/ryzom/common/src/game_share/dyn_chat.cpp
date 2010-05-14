@@ -29,10 +29,10 @@ uint CDynChatSession::_NumSessions = 0;
 /////////////////////
 //================================================================
 CDynChatSession::CDynChatSession(CDynChatClient *client, CDynChatChan *channel)
-							    : _Client(client),
-                                  _Channel(channel),
-								  StringID(0),
-								  WriteRight(false)
+							    :	StringID(0),
+								WriteRight(false),
+								_Client(client),
+								_Channel(channel)
 {
 	nlassert(client);
 	nlassert(channel);
@@ -102,7 +102,7 @@ CDynChatSession::~CDynChatSession()
 // CDynChatClient //
 ////////////////////
 //================================================================
-CDynChatClient::CDynChatClient(const TDataSetRow &client) : _ID(client), _FirstSession(NULL)
+CDynChatClient::CDynChatClient(const TDataSetRow &client) : _FirstSession(NULL), _ID(client)
 {
 }
 
@@ -136,26 +136,26 @@ CDynChatSession *CDynChatClient::getSession(TChanID chan) const
 // CDynChatChan //
 //////////////////
 CDynChatChan::CDynChatChan()
-:	_ID(CEntityId::Unknown),
-	_FirstSession(NULL),
-	HistoricSize(0),
-	_DontBroadcastPlayerInputs(false),
-	_ForwardPlayerIntputToOwnerService(false),
-	_UnifyChannel(false),
-	HideBubble(false)
+	:	HistoricSize(0),
+		HideBubble(false),
+		_FirstSession(NULL),
+		_ID(CEntityId::Unknown),
+		_DontBroadcastPlayerInputs(false),
+		_ForwardPlayerIntputToOwnerService(false),
+		_UnifyChannel(false)	
 {
 }
 
 //================================================================
 //CDynChatChan::CDynChatChan(TChanID id) : _ID(id), _FirstSession(NULL), HistoricSize(0)
 CDynChatChan::CDynChatChan(TChanID id, bool noBroadcast, bool forwardInput, bool unified)
-	: _ID(id),
-	_FirstSession(NULL),
-	HistoricSize(0),
-	_DontBroadcastPlayerInputs(noBroadcast),
-	_ForwardPlayerIntputToOwnerService(forwardInput),
-	_UnifyChannel(unified),
-	HideBubble(false)
+	:	HistoricSize(0),
+		HideBubble(false),
+		_FirstSession(NULL),
+		_ID(id),
+		_DontBroadcastPlayerInputs(noBroadcast),
+		_ForwardPlayerIntputToOwnerService(forwardInput),
+		_UnifyChannel(unified)
 {
 }
 

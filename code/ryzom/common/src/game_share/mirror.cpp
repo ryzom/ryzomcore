@@ -1485,17 +1485,17 @@ void CMirror::changeValue( const NLMISC::CEntityId& entityId, const std::string&
  */
 CMirror::CMirror() :
 	_PendingEntityTypesRanges(0),
-	_MirrorAllReady(false),
 	_ReadyL1Callback(NULL),
 	_NotificationCallback(NULL),
+	_UserSyncCallback(NULL),
+	_MirrorAllReady(false),	
 	_MirrorGotReadyLevel1(false),
 	_MirrorGotReadyLevel2(false),
 	_ListOfOtherPropertiesReceived(false),
 	_AwaitingAllMirrorsOnline(false),
 	_IsExecutingSynchronizedCode(false),
-	MonitoredEntity(CEntityId::Unknown),
 	_ClosureRequested(false),
-	_UserSyncCallback(NULL)
+	MonitoredEntity(CEntityId::Unknown)
 {
 	nlassert( ! MirrorInstance ); // singleton check
 	MirrorInstance = this;
