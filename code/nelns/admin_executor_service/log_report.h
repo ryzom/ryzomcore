@@ -149,7 +149,7 @@ public:
 
 	std::string		service() { return _Service; }
 
-	virtual uint	getNbDistinctLines() const { return _LogLineInfo.size(); }
+	virtual uint	getNbDistinctLines() const { return (uint)_LogLineInfo.size(); }
 
 	virtual uint	getNbTotalLines( NLMISC::CLog::TLogType logType );
 

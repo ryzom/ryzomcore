@@ -40,8 +40,8 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 	std::string zoneName(name);
 
 	// y
-	uint ind1 = zoneName.find("_");
-	if(ind1>=zoneName.length())
+	string::size_type ind1 = zoneName.find("_");
+	if(ind1 == string::npos || ind1>=zoneName.length())
 	{
 		nlwarning("bad file name");
 		return false;
@@ -59,7 +59,7 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 
 	// x
 	x = 0;
-	uint ind2 = zoneName.length();
+	uint ind2 = (uint)zoneName.length();
 	if((ind2-ind1-1)!=2)
 	{
 		nlwarning("x code size is not a 2 characters code");

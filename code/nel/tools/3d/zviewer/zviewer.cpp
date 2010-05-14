@@ -173,7 +173,7 @@ string getZoneNameByCoord(float x, float y)
 	string zoneName;
 	char ych[32];
 	sprintf(ych,"%d",(sint)ycount);
-	sint sz = strlen(ych);
+	sint sz = (sint)strlen(ych);
 	for(sint i = 0; i<sz; i++)
 	{
 		zoneName += ych[i];
@@ -376,7 +376,7 @@ void displayZones()
 	if (ViewerCfg.AllPathRelative)
 		Landscape->Landscape.TileBank.makeAllPathRelative();
 
-	sint idx = ViewerCfg.Bank.find(".");
+	sint idx = (sint)ViewerCfg.Bank.find(".");
 	string farBank = ViewerCfg.Bank.substr(0,idx);
 	farBank += ".farbank";
 

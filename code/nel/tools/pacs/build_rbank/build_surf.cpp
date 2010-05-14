@@ -467,7 +467,7 @@ void	NLPACS::CComputableSurfaceBorder::smooth(float val)
 		}
 	}
 
-	before = Vertices.size();
+	before = (uint)Vertices.size();
 	while (Vertices.size()>3)	// don't smooth blow 3 vertices to avoid degenrated surfaces
 	{
 		minArea = val;
@@ -496,7 +496,7 @@ void	NLPACS::CComputableSurfaceBorder::smooth(float val)
 			break;
 		}
 	}
-	after = Vertices.size();
+	after = (uint)Vertices.size();
 
 	if (Verbose)
 		nlinfo("smoothed border %d-%d: %d -> %d", Left, Right, before, after);
@@ -622,7 +622,7 @@ void	NLPACS::CComputableSurface::buildBorders(CZoneTessellation *zoneTessel)
 			if ((Elements[elem]->EdgeLinks[edge] == NULL || Elements[elem]->EdgeLinks[edge]->SurfaceId != SurfaceId) &&
 				!Elements[elem]->EdgeFlag[edge])
 			{
-				BorderIds.push_back(BorderKeeper->size());
+				BorderIds.push_back((uint16)BorderKeeper->size());
 
 				BorderKeeper->resize(BorderKeeper->size()+1);
 				CComputableSurfaceBorder	&border = BorderKeeper->back();
@@ -1225,7 +1225,7 @@ void	NLPACS::CZoneTessellation::build()
 			// if doesn't exist, create a new vertex
 			if ((vremapit = vremap.find(v[i])) == vremap.end())
 			{
-				element.Tri[i] = _Vertices.size();
+				element.Tri[i] = (uint32)_Vertices.size();
 				_Vertices.push_back(*(v[i]));
 				vremap.insert(make_pair(v[i], element.Tri[i]));
 			}
@@ -1633,13 +1633,13 @@ void	NLPACS::CZoneTessellation::generateBorders(float smooth)
 		}
 
 		float	smScale = (Borders[border].Right < 0) ? 0.2f : 1.0f;
-		uint	before = Borders[border].Vertices.size();
+		uint	before = (uint)Borders[border].Vertices.size();
 		if (SmoothBorders && !Borders[border].DontSmooth)
 		{
 			Borders[border].smooth(smooth*smScale);
 		}
 		Borders[border].computeLength();
-		uint	after = Borders[border].Vertices.size();
+		uint	after = (uint)Borders[border].Vertices.size();
 		totalBefore += before;
 		totalAfter += after;
 
@@ -1678,7 +1678,7 @@ void	NLPACS::CZoneTessellation::saveTessellation(COFile &output)
 	for (i=0; i<_Tessellation.size(); ++i)
 		_Tessellation[i].ElemId = i;
 
-	uint32	numTessel = _Tessellation.size();
+	uint32	numTessel = (uint32)_Tessellation.size();
 	output.serial(numTessel);
 
 	for (i=0; i<_Tessellation.size(); ++i)

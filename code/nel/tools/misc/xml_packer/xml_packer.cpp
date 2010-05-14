@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 			CPath::getPathContent(dirName, false, true, false, subDirs);
 			
 			// filter the directories
-			for (uint i=subDirs.size(); i>0; --i)
+			for (uint i=(uint)subDirs.size(); i>0; --i)
 			{
 				if (!isExcludedDir(subDirs[i-1]))
 					dirStack.push_back(subDirs[i-1]);

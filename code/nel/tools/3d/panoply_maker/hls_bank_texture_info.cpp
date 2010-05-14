@@ -96,7 +96,7 @@ void		CHLSBankTextureInfo::CDXTCBitmap::build(const NLMISC::CBitmap &src)
 void		CHLSBankTextureInfo::CDXTCBitmap::buildBitmap(NLMISC::CBitmap &dst)
 {
 	CMemStream		memStream(true);
-	memStream.fill(&_Data[0], _Data.size());
+	memStream.fill(&_Data[0], (uint32)_Data.size());
 	// load the DXTC5 from memStream
 	dst.reset();
 	dst.load(memStream);

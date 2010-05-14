@@ -70,7 +70,7 @@ inline bool isASCII (uint8 c)
 bool isASCII(vector<char> &fileArray)
 {
 	// Array size
-	uint size = fileArray.size();
+	uint size = (uint)fileArray.size();
 
 	if (size)
 	{
@@ -110,7 +110,7 @@ void removeBeginEndSpaces (string &str)
 		str = str.substr (index, str.length ()-index);
 
 	// Remove end space
-	index=str.length ()-1;
+	index=(sint)str.length ()-1;
 	while ( (index>0) && (str[index]==' ') )
 		index--;
 	str.resize (index+1);
@@ -128,17 +128,17 @@ void removeChar (string &str, char ch)
 void removeDirectory (string &str)
 {
 	// Remove begin space
-	int pos = str.rfind ('\\');
-	int pos2 = str.rfind ('/');
+	string::size_type pos = str.rfind ('\\');
+	string::size_type pos2 = str.rfind ('/');
 	pos = std::max (pos, pos2);
-	if (pos>=0)
+	if (pos != string::npos)
 		str = str.substr (pos+1, str.size());
 }
 
 bool filterExtension (const char *str, const vector<string> &extensions)
 {
 	// String size
-	uint size = strlen (str);
+	uint size = (uint)strlen (str);
 
 	// For each filter
 	for (uint i=0; i<extensions.size(); i++)
@@ -164,14 +164,14 @@ const char *getExtension (const char *filename)
 
 void removeExtension (string &filename)
 {
-	int index = filename.rfind ('.');
+	string::size_type index = filename.rfind ('.');
 	filename.resize (index);
 }
 
 void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filenameStrings, const vector<string> &extensions)
 {
 	// Array size
-	uint size = fileArray.size();
+	uint size = (uint)fileArray.size();
 
 	// Array pointer
 	const char *arrayPointer = &fileArray[0];
@@ -238,7 +238,7 @@ void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filen
 void extractStringsFromASCII (const vector<char> &fileArray, set<string> &filenameStrings, const vector<string> &extensions)
 {
 	// Array size
-	uint size = fileArray.size();
+	uint size = (uint)fileArray.size();
 	if (size)
 	{
 		// Array pointer
@@ -470,7 +470,7 @@ void progress (const char *message, float progress)
 	pgId= min(pgId, (uint)(BAR_LENGTH-1));
 	sprintf (msg, "\r%s %s", progressbar[pgId], message );
 	uint i;
-	for (i=strlen(msg); i<79; i++)
+	for (i=(uint)strlen(msg); i<79; i++)
 		msg[i]=' ';
 	msg[i]=0;
 	printf (msg);
@@ -506,7 +506,7 @@ int main(int argc, char* argv[])
 			printf ("\rScaning files...                 \n");
 
 			uint size = 0;
-			uint maxSize = inputFiles.size();
+			uint maxSize = (uint)inputFiles.size();
 			set<string>::iterator ite = inputFiles.begin();
 			while (ite != inputFiles.end())
 			{

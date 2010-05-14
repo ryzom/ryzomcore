@@ -405,7 +405,7 @@ int main(int argc, char **argv)
 			{
 				nSelected--;
 				if(nSelected == -1)
-					nSelected = DispCS.size()-1;
+					nSelected = (sint32)DispCS.size()-1;
 			}
 			if (CNELU::AsyncListener.isKeyPushed (KeyS))
 			{

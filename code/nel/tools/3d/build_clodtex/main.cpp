@@ -83,7 +83,7 @@ bool	computeOneShape(const char *lodFile, const char *shapeIn, const char *shape
 			throw Exception("The shape %s is not a Mesh, a MeshMRM or MeshMMRMSkinned", shapeIn);
 
 		// store in mesh
-		nlassert (base)
+		nlassert (base);
 		base->setupLodCharacterTexture(lodTexture);
 
 		// serial

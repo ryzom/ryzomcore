@@ -155,23 +155,24 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y)
 string getBaseName (const string &fullname)
 {
 	string sTmp2 = "";
-	int pos = fullname.rfind('_');
-	for (int j = 0; j <= pos; ++j)
-		sTmp2 += fullname[j];
+	string::size_type pos = fullname.rfind('_');
+	if (pos != string::npos)
+		sTmp2 = fullname.substr(0, pos+1);
 	return sTmp2;
 }
 
 // ---------------------------------------------------------------------------
 uint8 getLayerNb (const string &fullname)
 {
-	string sTmp2;
 	uint8 nRet = 0;
-	int beg = fullname.rfind('_');
-	int end = fullname.rfind('.');
-	for (int j = beg+1; j < end; ++j)
-		sTmp2 += fullname[j];
+	string::size_type beg = fullname.rfind('_');
+	string::size_type end = fullname.rfind('.');
+	if (beg != string::npos)
+	{
+		string sTmp2 = fullname.substr(beg+1, end-beg-1);
+		NLMISC::fromString(sTmp2, nRet);
+	}
 
-	NLMISC::fromString(sTmp2, nRet);
 	return nRet;
 }
 
@@ -478,7 +479,7 @@ int main(int nNbArg, char **ppArgs)
 						std::string start = AllLightmapNames[k].substr(0, tags[l].size());
 						if (NLMISC::nlstricmp(start, tags[l]) == 0)
 						{
-							bestLength = tags[l].size();
+							bestLength = (uint)tags[l].size();
 							// the tag matchs
 							AllLightmapTags[k] = l;						
 						}

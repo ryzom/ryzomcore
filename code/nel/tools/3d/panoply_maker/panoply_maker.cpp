@@ -760,7 +760,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 		std::string outputFileName = fileName;
 		
 		// Add an instance entry to the hlsInfo
-		uint	instId= hlsInfo.Instances.size();
+		uint	instId= (uint)hlsInfo.Instances.size();
 		hlsInfo.Instances.resize(instId+1);
 		CHLSBankTextureInfo::CTextureInstance	&hlsTextInstance= hlsInfo.Instances[instId];
 		hlsTextInstance.Mods.resize(masks.size());

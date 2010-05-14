@@ -37,7 +37,7 @@ enum TLogLineHeader { LHDate, LHTime, LHType, LHThread, LHService, LHCodeFile, L
 ///
 bool isLogFile( const std::string& filename )
 {
-	uint len = filename.size();
+	uint len = (uint)filename.size();
 	return (len >= 4 ) && (filename.substr( len-4 ) == ".log");
 }
 
@@ -180,7 +180,7 @@ const uint CurrentVersion = ~0;
 // Return true and logVersion, or false if not a log with version
 bool getLogVersion( const std::string& filename, uint& logVersion )
 {
-	uint len = filename.size();
+	uint len = (uint)filename.size();
 	if ( (len > 4) && (filename.substr( len-4 ) == ".log") )
 	{
 		if ( filename.substr(0, 3) == "log" )
@@ -242,7 +242,7 @@ void	CMakeLogTask::run()
 {
 	// Parse log target
 	uint targetVersion = CurrentVersion;
-	uint lts = _LogTarget.size();
+	uint lts = (uint)_LogTarget.size();
 	if ( _LogTarget.empty() || (_LogTarget == "v") )
 	{
 		targetMode = TTMMatchExactV;
@@ -314,7 +314,7 @@ void	CMakeLogTask::run()
 		CIFile logfile;
 		if ( logfile.open( *ilf, true ) )
 		{
-			_OutputLogReport->setProgress( ilf-filenames.begin(), filenames.size() );
+			_OutputLogReport->setProgress( (uint)(ilf-filenames.begin()), (uint)filenames.size() );
 			while ( ! logfile.eof() )
 			{
 				logfile.getline( line, MAX_LOG_LINE_SIZE );

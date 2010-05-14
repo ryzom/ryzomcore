@@ -110,7 +110,7 @@ void		addShadowMesh(T *meshIn, float paramFaceRatio, sint paramMaxFace, const st
 	map<CShadowVertex, uint>	shadowVertexMap;
 	uint						numMerged= 0;
 	// Skip Geomorphs.
-	for(i=geomorphs.size();i<vertexUsed.size();i++)
+	for(i=(uint)geomorphs.size();i<vertexUsed.size();i++)
 	{
 		// If this vertex is used.
 		if(vertexUsed[i]!=-1)
@@ -140,7 +140,7 @@ void		addShadowMesh(T *meshIn, float paramFaceRatio, sint paramMaxFace, const st
 			if(it==shadowVertexMap.end())
 			{
 				// Append
-				uint	index= shadowVertices.size();
+				uint	index= (uint)shadowVertices.size();
 				vertexToVSkin[i]= index;
 				shadowVertices.push_back(shadowVert);
 				shadowVertexMap.insert(make_pair(shadowVert, index));
@@ -210,7 +210,7 @@ void		addShadowMesh(T *meshIn, float paramFaceRatio, sint paramMaxFace, const st
 	{
 		CIndexBuffer		pb;
 		// fill
-		pb.setNumIndexes(shadowTriangles.size());
+		pb.setNumIndexes((uint32)shadowTriangles.size());
 		{
 			CIndexBufferReadWrite iba;
 			pb.lock (iba);

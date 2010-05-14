@@ -367,7 +367,7 @@ public:
 				Direction = forward ? +1 : -1;
 				if (splitter == NULL || pLoop == NULL)
 					return;
-				Chain = (Direction>0 ? 0 : pLoop->Chains.size()-1);
+				Chain = (Direction>0 ? 0 : (sint)pLoop->Chains.size()-1);
 				resetChain();
 			}
 			iterator(const iterator &it)
@@ -420,7 +420,7 @@ public:
 				}
 				pChain = pSplitter->getChain(pLoop->Chains[Chain]);
 				ChainDirection = (pChain->Left == pLoop->Surface ? Direction : -Direction);
-				ChainVertex = (ChainDirection>0 ? 0 : pChain->Vertices.size()-1);
+				ChainVertex = (ChainDirection>0 ? 0 : (sint)pChain->Vertices.size()-1);
 			}
 
 			CVector2s64	operator * () const

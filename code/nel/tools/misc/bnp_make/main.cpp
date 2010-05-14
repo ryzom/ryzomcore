@@ -78,11 +78,11 @@ struct BNPHeader
 		FILE *f = fopen (filename.c_str(), "ab");
 		if (f == NULL) return false;
 
-		uint32 nNbFile = Files.size();
+		uint32 nNbFile = (uint32)Files.size();
 		fwrite (&nNbFile, sizeof(uint32), 1, f);
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
-			uint8 nStringSize = Files[i].Name.size();
+			uint8 nStringSize = (uint8)Files[i].Name.size();
 			fwrite (&nStringSize, 1, 1, f);
 			fwrite (Files[i].Name.c_str(), 1, nStringSize, f);
 			fwrite (&Files[i].Size, sizeof(uint32), 1, f);

@@ -79,7 +79,7 @@ void progress (const char *message, float progress)
 	pgId= min(pgId, (uint)(BAR_LENGTH-1));
 	sprintf (msg, "\r%s: %s", message, progressbar[pgId]);
 	uint i;
-	for (i=strlen(msg); i<79; i++)
+	for (i=(uint)strlen(msg); i<79; i++)
 		msg[i]=' ';
 	msg[i]=0;
 	printf (msg);
