@@ -206,7 +206,7 @@ public:
 	{
 		nlwarning("setting mode %s for a creature !!! Forbidden", mode.toString().c_str());
 #ifdef NL_DEBUG
-		nlstop("set mode %s for creature", mode.toString().c_str());
+		nlstopex(("set mode %s for creature", mode.toString().c_str()));
 #endif
 	}
 
