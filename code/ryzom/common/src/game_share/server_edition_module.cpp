@@ -141,7 +141,7 @@ namespace R2
 	public:
 
 		CCurrentChar(TCharId charId, uint32 editSlotId, const R2::TUserRole& userRole = R2::TUserRole::ur_editor)
-			:_CharId(charId), _EditSlotId(editSlotId), _UserRole(userRole){}
+			:_EditSlotId(editSlotId), _CharId(charId), _UserRole(userRole){}
 
 		void setUserRole(const R2::TUserRole& userRole)
 		{
@@ -256,7 +256,7 @@ namespace R2
 	{
 	public:
 		CTaskUpdateScenarioVision(NLMISC::TTime now, CServerEditionModule* module, TSessionId sessionId)
-			:CTask<NLMISC::TTime>(now), _Module(module),_SessionId(sessionId){}
+			:CTask<NLMISC::TTime>(now), _SessionId(sessionId), _Module(module){}
 		virtual void doOperation()
 		{
 			_Module->updateScenarioVision(_SessionId);
@@ -340,7 +340,7 @@ namespace R2
 
 	public:
 		CKickPlayerIfStillConnected(NLMISC::TTime taskDate, CServerEditionModule* serverEditionModule, TSessionId sessionId, TCharId charId)
-			: CTask<NLMISC::TTime>(taskDate),_ServerEditionModule(serverEditionModule), _SessionId(sessionId), _CharId(charId)
+			: CTask<NLMISC::TTime>(taskDate),_ServerEditionModule(serverEditionModule), _CharId(charId), _SessionId(sessionId)
 		{
 		}
 
@@ -374,7 +374,7 @@ namespace R2
 		typedef uint32 TCharId;
 	public:
 		CVerifyRingAccess(NLMISC::TTime taskDate, CServerEditionModule* serverEditionModule, TSessionId sessionId, TCharId charId)
-			:CTask<NLMISC::TTime>(taskDate),_ServerEditionModule(serverEditionModule), _SessionId(sessionId), _CharId(charId)
+			:CTask<NLMISC::TTime>(taskDate),_ServerEditionModule(serverEditionModule), _CharId(charId), _SessionId(sessionId)
 		{
 		}
 
@@ -764,7 +764,7 @@ _Scenario(scenario), SessionId(sessionId), _AiInstance(aiInstanceId),_EditSlotId
 
 
 CEditionSession::CEditionSession(RSMGR::TSessionType sessionType, TSessionId sessionId, CEditionSession* edit)
-:_EditSlotIdMaker(1), SessionId(sessionId)
+: SessionId(sessionId), _EditSlotIdMaker(1)
 {
 	IsAnimationStopped = false;
 	DateSinceNoPlayer = 0;
@@ -6370,5 +6370,4 @@ void CServerEditionModule::forwardToDss(NLNET::IModuleProxy *senderModuleProxy, 
 	}
 	onReceiveModuleMessage(senderModuleProxy, message);
 }
-
 

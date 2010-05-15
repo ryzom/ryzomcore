@@ -452,7 +452,7 @@ private:
 	class CDBForageQQObs : public ICDBNode::IPropertyObserver
 	{
 	public:
-		CDBForageQQObs() : WhichOne(~0), FullValue(0.0f), ICDBNode::IPropertyObserver() {}
+		CDBForageQQObs() : ICDBNode::IPropertyObserver(), WhichOne(~0), FullValue(0.0f) {}
 		virtual void update(ICDBNode *node);
 		uint	WhichOne;
 		float	FullValue;
@@ -794,4 +794,3 @@ public:
 #endif // RY_INVENTORY_MANAGER_H
 
 /* End of inventory_manager.h */
-

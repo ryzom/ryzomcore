@@ -742,8 +742,8 @@ SKILLS::ESkills CItemSheet::getRequiredSkill() const
 			return Tool.Skill;
 		case ITEMFAMILY::CRAFTING_TOOL:
 			return SKILLS::SC;
+		default: return SKILLS::unknown;
 	}
-	return SKILLS::unknown;
 }
 
 // ***************************************************************************
@@ -936,4 +936,3 @@ void	CItemSheet::getItemPartListAsText(ucstring &ipList) const
 		ipList= CI18N::get("uihelpItemMPAllCraft");
 	}
 }
-

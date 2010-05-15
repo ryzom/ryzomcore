@@ -955,7 +955,7 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 	}
 
 	// Don't enable anything if index not found (e.g. the character is not the owner of the animal)
-	if ( (index == -1) || (!UserEntity) )
+	if ( (index == (uint)-1) || (!UserEntity) )
 		return false;
 
 	// Get animal status and type
@@ -1055,4 +1055,3 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 
 	return true;
 }
-

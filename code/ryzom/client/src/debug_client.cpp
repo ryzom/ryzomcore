@@ -22,6 +22,8 @@
 /////////////
 #include "stdpch.h"	// First include for pre-compiled headers.
 
+#include <limits>
+
 // OS.
 #ifdef NL_OS_WINDOWS
 #	include <windows.h>
@@ -249,6 +251,7 @@ double memoryUsedSinceLastCall()
 	nlwarning("There are %*lx free %sbytes of virtual memory.\n", WIDTH, stat.dwAvailVirtual/DIV, divisor);
 */
 #endif
+	return std::numeric_limits<double>::quiet_NaN();
 }
 
 
@@ -687,7 +690,6 @@ bool verboseVPAdvanceTest(CEntityCL *en, uint32 form)
 		return false;
 	}
 }
-
 
 
 

@@ -787,6 +787,9 @@ restartLoop:
 						move = dynInfo.String.begin()+param.ReplacementPoint+2;
 					}
 					break;
+				 default:
+					nlwarning("Unknown parameter type.");
+					break;
 				}
 			}
 			// append the rest of the string
@@ -1245,7 +1248,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					while(strFindReplace(_SpecItem_TempMap[keyStr].Name, "\\n", "\n"));
 
 					// insert in map of Women Name if OK.
-					if(womenNameColIndex!=(~0))
+					if(womenNameColIndex!=((uint)~0))
 					{
 						const ucstring &womenName= ws.getData(j, womenNameColIndex);
 						_SpecItem_TempMap[keyStr].WomenName= womenName;
@@ -1254,7 +1257,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					}
 
 					// insert in map of Description if OK.
-					if(descColIndex!=(~0))
+					if(descColIndex!=((uint)~0))
 					{
 						const ucstring &desc= ws.getData(j, descColIndex);
 						_SpecItem_TempMap[keyStr].Desc= desc;
@@ -1263,7 +1266,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					}
 
 					// insert in map of Description2 if OK.
-					if(descColIndex2!=(~0))
+					if(descColIndex2!=((uint)~0))
 					{
 						const ucstring &desc= ws.getData(j, descColIndex2);
 						_SpecItem_TempMap[keyStr].Desc2= desc;

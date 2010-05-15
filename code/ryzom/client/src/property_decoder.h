@@ -87,7 +87,7 @@ public:
 	uint16&	associationBits( CLFECOMMON::TCLEntityId entity ) { return _Entities[entity].AssociationBits; }
 
 	bool	isUsed(CLFECOMMON::TCLEntityId entity) const { return _Entities[entity].EntryUsed; }
-	const CLFECOMMON::TSheetId	sheet(CLFECOMMON::TCLEntityId entity) const { return _Entities[entity].Sheet; }
+	CLFECOMMON::TSheetId	sheet(CLFECOMMON::TCLEntityId entity) const { return _Entities[entity].Sheet; }
 
 
 	/** Receives actions from the front end. Actually transmits actions received

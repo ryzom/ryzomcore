@@ -49,7 +49,7 @@ public:
 		bool				FromIG; // true if the fx comes from an ig, or false if it was generated dynamically
 	#endif
 public:
-	CTimedFX() : FXSheet(NULL), SpawnPosition(0.f, 0.f, 0.f)
+	CTimedFX() : SpawnPosition(0.f, 0.f, 0.f), FXSheet(NULL)
 	{
 #if !FINAL_VERSION
 			FromIG = true;
@@ -283,7 +283,6 @@ public:
 
 
 #endif
-
 
 
 

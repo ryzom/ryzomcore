@@ -47,13 +47,14 @@ CRGBA CForageSourceCL::SafeSourceColor(64, 192, 255);
  * Constructor
  */
 CForageSourceCL::CForageSourceCL() :
-	CFxCL(), _IsExtractionInProgress( false ),
+	CFxCL(),
+	_InSceneUserInterface( NULL ),
+	_IconFilename( NULL ),
+	_IsExtractionInProgress( false ),
 	_SafeSource( false ),
 	_KnowledgeLevel( 0 ),
-	_InSceneUserInterface( NULL ),
 	_LastExplosionSwitch( 0 ),
 	_ProspectorSlot( 255 ),
-	_IconFilename( NULL ),
 	_ExtraTime(0),
 	_InclBonusExtraTime(0),
 	_InitialQuantity(BarNotInit),

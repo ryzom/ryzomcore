@@ -35,7 +35,7 @@ static const float DEFAUT_PRECIPITATION_TIMEOUT = 10.f; // at most 10 second bef
 
 
 //============================================================
-CPrecipitation::CPrecipitation() : _Strenght(0), _XSize(0), _YSize(0), _ClipGrid(NULL), _Touched(false), _OldX(0), _OldY(0), _TimeOut(0.f)
+CPrecipitation::CPrecipitation() : _ClipGrid(NULL), _Strenght(0), _TimeOut(0.f), _XSize(0), _YSize(0), _OldX(0), _OldY(0), _Touched(false)
 {
 	H_AUTO_USE(RZ_Precipitation)
 }

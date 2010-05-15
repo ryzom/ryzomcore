@@ -64,7 +64,7 @@ class CInstallThreadEntry
 public:
 	CInstallThreadEntry(){ Timestamp = 0; }
 	CInstallThreadEntry(const char* patchName, const char* sourceName, uint32 timestamp, const char* extractPath, uint32 size, uint32 sZipFileSize)
-		:PatchName(patchName), SourceName(sourceName), Timestamp(timestamp),ExtractPath(extractPath), Size(size),SZipFileSize(sZipFileSize){}
+		:PatchName(patchName), SourceName(sourceName), Timestamp(timestamp),Size(size),SZipFileSize(sZipFileSize),ExtractPath(extractPath) {}
 	std::string PatchName;
 	std::string SourceName;
 	uint32 Timestamp;

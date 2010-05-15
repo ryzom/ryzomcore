@@ -656,8 +656,8 @@ bool isUserColorSupported(const CPlayerSheet &playerSheet, SLOTTYPE::EVisualSlot
 		case SLOTTYPE::FEET_SLOT:			return isUserColorSupported(playerSheet.Feet);
 		case SLOTTYPE::RIGHT_HAND_SLOT:	return isUserColorSupported(playerSheet.ObjectInRightHand);
 		case SLOTTYPE::LEFT_HAND_SLOT:	return isUserColorSupported(playerSheet.ObjectInLeftHand);
+		default: return false;
 	}
-	return false;
 }// isUserColorSupported //
 
 
@@ -1081,6 +1081,10 @@ void setCase (ucstring &str, TCaseMode mode)
 			}
 		}
 		break;
+	case CaseNormal:
+		break;
+	case CaseCount:
+		break;
 	}
 }
 
@@ -1482,5 +1486,4 @@ uint getCurrentColorDepth()
 	#endif
 	return depth;
 }
-
 

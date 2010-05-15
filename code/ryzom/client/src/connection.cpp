@@ -440,7 +440,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		{
 			case AUTO_LOGIN:
 				InterfaceState = autoLogin (cookie, fsaddr, firstConnection);
-			break;
+				break;
 
 			case GLOBAL_MENU:
 				if (!ClientCfg.Local)
@@ -451,7 +451,11 @@ bool connection (const string &cookie, const string &fsaddr)
 					}
 				}
 				InterfaceState = globalMenu();
- 			break;
+ 				break;
+			case GOGOGO_IN_THE_GAME:
+				break;
+			case QUIT_THE_GAME:
+				break;
 		}
 	}
 
@@ -3408,4 +3412,3 @@ class CAHOpenRingSessions : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenRingSessions, "open_ring_sessions");
-

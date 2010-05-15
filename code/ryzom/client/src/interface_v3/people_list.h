@@ -136,7 +136,7 @@ public:
 private:
 	struct CPeople
 	{
-		CPeople() : Online(ccs_offline), Blocked(false), Container(NULL), Chat(NULL), ContactId(0) {}
+		CPeople() : Container(NULL), Chat(NULL), Online(ccs_offline), Blocked(false), ContactId(0) {}
 		NLMISC::CRefPtr<CGroupContainer> Container; // todo : replace this with a CChatWindow one day, for consistency
 		NLMISC::CRefPtr<CGroupContainer> Chat;
 		uint							GlobalID;

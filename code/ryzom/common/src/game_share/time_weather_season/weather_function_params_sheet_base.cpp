@@ -26,12 +26,13 @@
 
 
 //=======================================================================
-CWeatherFunctionParamsSheetBase::CWeatherFunctionParamsSheetBase() :   CycleLenght(25),
-																	   DayLenght(24),
-																	   MinThunderPeriod(1.f),
-																	   ThunderLenght(0.5f),
-																	   CloudWindSpeedFactor(1.f),
-																	   CloudMinSpeed(0.f)
+CWeatherFunctionParamsSheetBase::CWeatherFunctionParamsSheetBase()
+:							DayLenght(24),
+							CycleLenght(25),
+							MinThunderPeriod(1.f),
+							ThunderLenght(0.5f),
+							CloudWindSpeedFactor(1.f),
+							CloudMinSpeed(0.f)
 {
 }
 
@@ -79,5 +80,4 @@ void CWeatherFunctionParamsSheetBase::build(const std::string &sheetName)
 	}
 	NLGEORGES::UFormLoader::releaseLoader(loader);
 }
-
 

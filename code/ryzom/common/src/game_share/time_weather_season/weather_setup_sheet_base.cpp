@@ -39,10 +39,10 @@ CWeatherStateSheet::CWeatherStateSheet()	: 	FogRatio(0),
 												FogColorDay(NLMISC::CRGBA::Black),
 												FogColorDusk(NLMISC::CRGBA::Black),
 												FogColorNight(NLMISC::CRGBA::Black),
+												FogGradientFactor(1.f),
 												Lighting(1.f),
 												WindIntensity(0),
-												ThunderIntensity(0),
-												FogGradientFactor(1.f)
+												ThunderIntensity(0)
 
 {
 	for(uint k = 0; k < NumFogType; ++k)

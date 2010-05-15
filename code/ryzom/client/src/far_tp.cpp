@@ -636,6 +636,9 @@ void CLoginStateMachine::run()
 				SM_EVENT(ev_quit, st_end);
 			SM_END_EVENT_TABLE
 			break;
+		default:
+			nlwarning("Unhandeled state");
+			break;
 		}
 	}
 }
@@ -747,7 +750,9 @@ retryJoinEdit:
 					throw "Protocol error";
 				if (sb._LastJoinSessionResult == 16)
 				{
-#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
+#ifdef NL_OS_WINDOWS
+	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
+#endif // NL_OS_WINDOWS
 					throw "User ban from the ring";
 				}
 				if (sb._LastJoinSessionResult != 0)
@@ -1447,6 +1452,5 @@ void CFarTP::farTPmainLoop()
 	if(welcomeWindow)
 		initWelcomeWindow();
 }
-
 
 

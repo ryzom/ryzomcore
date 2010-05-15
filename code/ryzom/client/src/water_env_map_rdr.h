@@ -47,7 +47,7 @@ public:
 	NL3D::TGlobalAnimationTime CurrTime;
 	CSky					   *Sky;
 public:
-	CWaterEnvMapRdr() : _LastRenderStartTime(-1), CurrTime(-1)
+	CWaterEnvMapRdr() : CurrTime(-1), _LastRenderStartTime(-1)
 	{
 		_CurrCanopyCamPos = CVector::Null;
 	}

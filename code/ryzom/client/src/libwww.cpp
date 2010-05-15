@@ -55,7 +55,7 @@ struct _HText
 // Here, modify the DTD table to change the HTML parser (add new tags for examples)
 
 #undef HTML_ATTR
-#define HTML_ATTR(a,b) { #b }
+#define HTML_ATTR(a,b) { (char*) #b }
 
 HTAttr a_attr[] =
 {
@@ -551,7 +551,7 @@ void initLibWWW()
 		// HTCacheInit(NULL, 20);
 
 		/* Setup up transfer coders */
-		HTFormat_addTransferCoding("chunked", HTChunkedEncoder, HTChunkedDecoder, 1.0);
+		HTFormat_addTransferCoding((char*)"chunked", HTChunkedEncoder, HTChunkedDecoder, 1.0);
 
 		/* Setup MIME stream converters */
 		HTFormat_addConversion("message/rfc822", "*/*", HTMIMEConvert, 1.0, 0.0, 0.0);
@@ -630,8 +630,8 @@ void initLibWWW()
 			{"authentication-info", &HTMIME_authenticationInfo},
 			{"proxy-authentication-info", &HTMIME_proxyAuthenticationInfo}
 		};
-		int i;
-		for (i = 0; i < sizeof(fixedHandlers)/sizeof(fixedHandlers[0]); i++)
+
+		for (uint i = 0; i < sizeof(fixedHandlers)/sizeof(fixedHandlers[0]); i++)
 			HTHeader_addParser(fixedHandlers[i].string, NO, fixedHandlers[i].pHandler);
 
 		/* Set up default event loop */
@@ -689,4 +689,3 @@ void initLibWWW()
 }
 
 // ***************************************************************************
-

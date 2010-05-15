@@ -41,7 +41,7 @@ extern CNetManager NetMngr;
 // #pragma optimize ("", off)
 
 
-CNPCIconCache::CNPCIconCache() : _LastTimerUpdateTimestamp(0), _LastRequestTimestamp(0), _Enabled(true)
+CNPCIconCache::CNPCIconCache() : _LastRequestTimestamp(0), _LastTimerUpdateTimestamp(0), _Enabled(true)
 {
 	_Icons[NPC_ICON::IconNone].init("", "");
 	_Icons[NPC_ICON::IconNotAMissionGiver].init("", "");

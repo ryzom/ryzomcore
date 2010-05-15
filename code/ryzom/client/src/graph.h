@@ -93,8 +93,8 @@ public:
 			NLMISC::TTime quantum,
 			float maxValue, uint page,
 			bool lineMode = false)
-		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), Quantum(quantum),
-		CurrentQuantumStart(ryzomGetLocalTime ()), MaxValue(maxValue), Peak(0.0f), LineMode(lineMode), PrevY(y), Page(page)
+		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), MaxValue(maxValue),
+		  Peak(0.0f), LineMode(lineMode), PrevY(y), Page(page), Quantum(quantum), CurrentQuantumStart(ryzomGetLocalTime ())
 	{
 		if (_Graphs == NULL)
 		{

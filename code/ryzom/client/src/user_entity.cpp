@@ -745,6 +745,8 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 				return true;
 			}
 		break;
+		default:
+			nlwarning("Invalid behaviour change.");
 	}
 
 	// Reset Parent, unless we stay in mount mode
@@ -1324,7 +1326,7 @@ void CUserEntity::resetAnyMoveTo()
 	if(_MoveToAction==CUserEntity::CombatPhrase || _MoveToAction==CUserEntity::ExtractRM)
 	{
 		// the clientExecute has not been called in case of "ExtractRM autoFind"
-		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == ~0;
+		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == (uint)~0;
 		if(!autoFindExtractRM)
 		{
 			CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -1644,9 +1646,11 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	case CUserEntity::BuildTotem:
 		buildTotem();
 		break;
-	}
 	// Move To Done.
-	resetAnyMoveTo();
+	default:
+		resetAnyMoveTo();
+		break;
+	}
 }// moveToAction //
 
 
@@ -3519,7 +3523,7 @@ bool CUserEntity::CMountHunger::canRun() const
 		if ( ((CLFECOMMON::TClientDataSetIndex)uidLeaf->getValue32()) == mountEntity->dataSetId() )
 		{
 			CCDBNodeLeaf *hungerLeaf = safe_cast<CCDBNodeLeaf*>(beastNode->getNode( ICDBNode::CTextId( "HUNGER" ) ));
-			return (hungerLeaf->getValue32() != ANIMAL_TYPE::DbHungryValue);
+			return (hungerLeaf->getValue32() != (sint)ANIMAL_TYPE::DbHungryValue);
 		}
 	}
 	return false;
@@ -3751,7 +3755,7 @@ void CUserEntity::extractRM()
 	CSPhraseManager *pm = CSPhraseManager::getInstance();
 	uint index;
 	uint memoryLine;
-	bool autoFindPhrase = (_MoveToPhraseMemoryLine == ~0);
+	bool autoFindPhrase = (_MoveToPhraseMemoryLine == (uint)~0);
 	if ( ! autoFindPhrase )
 	{
 		// Use clicked phrase
@@ -3781,7 +3785,7 @@ void CUserEntity::extractRM()
 		}
 	}
 
-	if ( memoryLine != ~0 )
+	if ( memoryLine != (uint)~0 )
 	{
 		// Open the forage (but not for care actions). Necessary for the case of redoing an extraction after a Drop All on the same source.
 		uint32 phraseId = pm->getMemorizedPhrase( memoryLine, index );

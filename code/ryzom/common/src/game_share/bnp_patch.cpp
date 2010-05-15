@@ -190,7 +190,9 @@ bool CBNPFileVersion::operator!=(const CBNPFileVersion& other) const
 	PROP(uint32,_PatchSize) \
 	PROP_VECT(uint32,_HashKey)
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -340,7 +342,9 @@ bool CBNPFile::isIncremental()
 	PROP(std::string,_FileName)\
 	STRUCT_VECT(_Versions)
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -453,8 +457,9 @@ void CBNPFileSet::addFile(const std::string& fileName,bool isIncremental)
 #define PERSISTENT_CLASS CBNPFileSet
 #define PERSISTENT_DATA\
 	STRUCT_VECT(_Files)
-
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -574,7 +579,9 @@ void CBNPCategory::addFile(const std::string& fileName)
 	LPROP(bool,				_Hidden,		if(_Hidden))\
 	PROP_VECT(std::string,	_Files)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -724,8 +731,9 @@ bool CBNPCategorySet::isFileIncremental(const std::string& fileName) const
 #define PERSISTENT_CLASS CBNPCategorySet
 #define PERSISTENT_DATA\
 	STRUCT_VECT(_Category)
-
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -814,7 +822,9 @@ void CProductDescriptionForClient::serial(NLMISC::IStream &f)
 	STRUCT(_Files)\
 	STRUCT(_Categories)
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+#      pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif //NL_OS_WINDOWS
 #include "persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -1169,4 +1179,3 @@ void CProductDescriptionForClient::serial(NLMISC::IStream &f)
 //
 //
 //#endif
-

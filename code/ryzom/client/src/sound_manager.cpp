@@ -116,9 +116,9 @@ enum TFilterMapping
 // constructor
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
-: _UserEntitySoundLevel(1.0f),
-	_AudioMixer(NULL),
-	_EnvSoundRoot(NULL)
+:	_AudioMixer(NULL),
+	_EnvSoundRoot(NULL),
+	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;
 	_GameMusicVolume= 1.f;
@@ -1288,6 +1288,9 @@ void CSoundManager::update ()
 		_BackgroundFlags.Flags[MORNING] = false;
 		_BackgroundFlags.Flags[DUSK] = true;
 		break;
+	case CLightCycleManager::StateUnknown:
+		nlwarning("Unknown light cycle  state reached.");
+		break;
 	}
 
 	// update the filter for season.
@@ -1318,6 +1321,8 @@ void CSoundManager::update ()
 		_BackgroundFlags.Flags[AUTUMN] = false;
 		_BackgroundFlags.Flags[WINTER] = true;
 		break;
+	default:
+		nlwarning("Updating unknown season.");
 	}
 	// TODO : update the filter state for weather effet
 	CWeatherState weatherState = WeatherManager.getCurrWeatherState();
@@ -1855,5 +1860,4 @@ bool CMaterialStepSounds::getSounds( TMoveType moveType, bool soft, vector<strin
 	return true;
 
 } // getSounds //*/
-
 

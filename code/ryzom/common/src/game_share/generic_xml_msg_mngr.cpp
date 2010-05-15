@@ -177,7 +177,7 @@ void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &result
 /*
  * Constructor
  */
-CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), NbBits(0), Callback(NULL), UseCycle(false)
+CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), UseCycle(false), NbBits(0), Callback(NULL)
 {
 	UserData[0] = 0;
 	UserData[1] = 0;

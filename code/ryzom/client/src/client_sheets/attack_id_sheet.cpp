@@ -113,8 +113,8 @@ bool operator == (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 		case CAttackIDSheet::Magic: return lhs.SpellInfo == rhs.SpellInfo;
 		case CAttackIDSheet::Creature: return lhs.CreatureAttackIndex == rhs.CreatureAttackIndex;
 		case CAttackIDSheet::DamageShield: return lhs.DamageShieldType == rhs.DamageShieldType;
+		default: return false;
 	}
-	return false;
 }
 
 //*****************************************************************************************
@@ -128,8 +128,8 @@ bool operator < (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 		case CAttackIDSheet::Magic: return lhs.SpellInfo < rhs.SpellInfo;
 		case CAttackIDSheet::Creature: return lhs.CreatureAttackIndex < rhs.CreatureAttackIndex;
 		case CAttackIDSheet::DamageShield: return lhs.DamageShieldType < rhs.DamageShieldType;
+		default: return false;
 	}
-	return false;
 }
 
 //*****************************************************************************************

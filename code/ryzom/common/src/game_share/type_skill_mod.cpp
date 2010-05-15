@@ -43,5 +43,8 @@
 	PROP(sint32, Modifier)\
 	PROP2(Type,	std::string,	EGSPD::CClassificationType::toString(Type),	Type=EGSPD::CClassificationType::fromString(val))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#ifdef NL_OS_WINDOWS
+	#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#endif // NL_OS_WINDOWS
+
 #include "persistent_data_template.h"

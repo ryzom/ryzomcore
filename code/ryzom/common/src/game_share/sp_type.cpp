@@ -21,7 +21,7 @@
 namespace EGSPD
 {
 
-static const struct { char* Name; CSPType::TSPType Value; } TSPTypeConvert[] =
+static const struct { const char* Name; CSPType::TSPType Value; } TSPTypeConvert[] =
 {
 	{ "Fight", CSPType::Fight },
 	{ "Magic", CSPType::Magic },

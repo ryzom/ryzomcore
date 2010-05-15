@@ -86,6 +86,6 @@ const char *CBodyToBoneSheet::getBoneName(BODY::TBodyPart part, BODY::TSide side
 		case BODY::HHands:  return ClientSheetsStrings.get(side == BODY::Left ? LeftHand : RightHand);
 		case BODY::HLegs:   return ClientSheetsStrings.get(side == BODY::Left ? LeftLeg  : RightLeg);
 		case BODY::HFeet:   return ClientSheetsStrings.get(side == BODY::Left ? LeftFoot : RightFoot);
+		default: return NULL;
 	}
-	return NULL;
 }

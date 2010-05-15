@@ -96,15 +96,16 @@ float CLightCycleDesc::getDawnTransitionLength() const
 }
 
 //-----------------------------------------------
-CLightCycleManager::CLightCycleManager() : _Touched(true),
-                                           _ValidDesc(false),
-										   _LightLevel(0),
-										   _WeatherLighting(0),
-										   _LastWeatherLighting(0),
-										   _Hour(0),
-										   _UpdateFreq(0),
-										   _State(StateUnknown),
-										   _PrevState(StateUnknown)
+CLightCycleManager::CLightCycleManager() : 
+					_Hour(0),
+					_Touched(true),
+                                        _ValidDesc(false),
+					_LightLevel(0),
+					_WeatherLighting(0),
+					_LastWeatherLighting(0),
+					_UpdateFreq(0),
+					_State(StateUnknown),
+					_PrevState(StateUnknown)
 {
 	H_AUTO_USE(RZ_LightCycleManager)
 }

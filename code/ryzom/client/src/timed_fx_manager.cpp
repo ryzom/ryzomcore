@@ -336,6 +336,7 @@ void CTimedFXManager::remove(TFXGroupHandle handle)
 		{
 			case CManagedFX::InAddList:	   _FXToAdd.erase(fi.SetHandle); break;
 			case CManagedFX::InRemoveList: _FXToRemove.erase(fi.SetHandle); break;
+			default: break;
 		}
 		fi.unlinkFromCandidateFXList();
 		fi.unlinkFromInstanciatedFXList();
@@ -848,6 +849,7 @@ void CTimedFXManager::displayFXBoxes(TDebugDisplayMode displayMode) const
 				case CManagedFX::Permanent: color = (!mf.Instance.empty()) ? CRGBA::Magenta : CRGBA::Cyan; break;
 				case CManagedFX::InAddList: color = CRGBA::Blue; break;
 				case CManagedFX::InRemoveList: color = (!mf.Instance.empty()) ? CRGBA::Red : CRGBA::Yellow; break;
+				case CManagedFX::Unknown: break;
 			}
 			drawBox(CVector(- size, - size, - size),
 					CVector(size, size, size),
@@ -1151,7 +1153,6 @@ NLMISC_COMMAND(setMaxNumTimedFXs, "set the max number of timed fx that are visib
 	CTimedFXManager::getInstance().setMaxNumFXInstances(maxNumInstances);
 	return true;
 }
-
 
 
 

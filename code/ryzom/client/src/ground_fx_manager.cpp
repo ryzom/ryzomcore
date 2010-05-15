@@ -60,17 +60,18 @@ static const float MAX_DIST_TO_REUSE_OLD_FX = 1.5f;
 using namespace NLMISC;
 
 //*****************************************************************************
-CGroundFXManager::CGroundFXManager() : _MaxDist(50.f),
-									   _MaxNumFX(10),
-									   _NumFX(0),
-									   _MaxNumCachedFX(10),
-									   _NumCachedFX(0),
-									   _NumInstances(0),
-									   _Scene(NULL),
-									   _MinSpeed(1.5f),
-									   _MaxSpeed(6.f),
-									   _SpeedWaterWalkFast(3.f),
-									   _SpeedWaterSwimFast(3.f)
+CGroundFXManager::CGroundFXManager() :
+					   _MinSpeed(1.5f),
+					   _MaxSpeed(6.f),
+					   _SpeedWaterWalkFast(3.f),
+					   _SpeedWaterSwimFast(3.f),
+					   _MaxDist(50.f),
+					   _MaxNumFX(10),
+					   _NumFX(0),
+					   _MaxNumCachedFX(10),
+					   _NumCachedFX(0),
+					   _NumInstances(0),
+					   _Scene(NULL)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
 	// Construct

@@ -116,8 +116,8 @@ CHairSet::EPeople CHairSet::convPeople(EGSPD::CPeople::TPeople people)
 		case EGSPD::CPeople::Matis: return Matis;
 		case EGSPD::CPeople::Tryker: return Tryker;
 		case EGSPD::CPeople::Zorai: return Zorai;
+		default: return DontKnow;
 	}
-	return DontKnow;
 }
 
 //=========================================================================
@@ -157,5 +157,4 @@ EGSPD::CPeople::TPeople CHairSet::getPeopleFromHairItemID(uint id) const
 	}
 	return EGSPD::CPeople::EndPeople;
 }
-
 
