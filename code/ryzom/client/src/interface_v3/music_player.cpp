@@ -108,8 +108,11 @@ void CMusicPlayer::previous ()
 	if (!_Songs.empty())
 	{
 		// Point the previous song
-		_CurrentSong--;
-		_CurrentSong%=_Songs.size();
+		if (_CurrentSong == 0)
+			_CurrentSong = _Songs.size()-1;
+		else
+			_CurrentSong--;
+
 		play ();
 	}
 }
