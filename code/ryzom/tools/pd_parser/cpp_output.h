@@ -623,7 +623,7 @@ inline void	CCppOutput::clear()
 
 inline bool	searchForId(char* buffer, char** start, char** end)
 {
-	char*	id = "$Id:";
+	const char*	id = "$Id:";
 	uint	len = strlen(id);
 	for (; *buffer != '\0'; ++buffer)
 	{

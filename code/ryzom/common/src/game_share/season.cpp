@@ -21,7 +21,7 @@
 namespace EGSPD
 {
 
-static const struct { char* Name; CSeason::TSeason Value; } TSeasonConvert[] =
+static const struct { const char* Name; CSeason::TSeason Value; } TSeasonConvert[] =
 {
 	{ "Spring", CSeason::Spring },
 	{ "Summer", CSeason::Summer },

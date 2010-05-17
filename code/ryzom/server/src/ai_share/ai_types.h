@@ -51,7 +51,7 @@ namespace AITYPES
 		{
 		public:
 			CDescTypeEntry(char *name, T value)	: _name(name), _value(value)	{}
-			char	*_name;
+			const char	*_name;
 			T		_value;
 		};
 		static	CDescTypeEntry	_entries[];

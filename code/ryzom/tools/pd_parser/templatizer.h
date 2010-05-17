@@ -648,7 +648,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name", "ref" };
+		static const char*	args[] = { "name", "ref" };
 		return (const char**)args;
 	}
 
@@ -685,7 +685,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name", "ref" };
+		static const char*	args[] = { "name", "ref" };
 		return (const char**)args;
 	}
 
@@ -815,7 +815,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -845,7 +845,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -875,7 +875,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name", "evalinsub" };
+		static const char*	args[] = { "name", "evalinsub" };
 		return (const char**)args;
 	}
 };
@@ -903,7 +903,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -931,7 +931,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -959,7 +959,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -987,7 +987,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "value" };
+		static const char*	args[] = { "value" };
 		return (const char**)args;
 	}
 };
@@ -1020,7 +1020,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -1045,7 +1045,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -1078,7 +1078,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -1105,7 +1105,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -1136,7 +1136,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "cond" };
+		static const char*	args[] = { "cond" };
 		return (const char**)args;
 	}
 };
@@ -1165,7 +1165,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "cond" };
+		static const char*	args[] = { "cond" };
 		return (const char**)args;
 	}
 };
@@ -1201,7 +1201,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "separator" };
+		static const char*	args[] = { "separator" };
 		return (const char**)args;
 	}
 };
@@ -1279,7 +1279,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };
@@ -1319,7 +1319,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "class", "name" };
+		static const char*	args[] = { "class", "name" };
 		return (const char**)args;
 	}
 
@@ -1344,7 +1344,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		static char*	args[] = { "name" };
+		static const char*	args[] = { "name" };
 		return (const char**)args;
 	}
 };

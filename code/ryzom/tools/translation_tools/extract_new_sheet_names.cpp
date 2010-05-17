@@ -375,7 +375,7 @@ int extractNewSheetNames(int argc, char *argv[])
 	
 	
 	// **** Parse all the different type of sheets
-	char	*sheetDefs[]=
+	const char	*sheetDefs[]=
 	{
 		// 1st is the name of the worksheet file. 
 		// 2nd is the Key column identifier. 
