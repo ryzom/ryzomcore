@@ -4119,7 +4119,7 @@ CBotProfileFollowPos::CBotProfileFollowPos(CPathCont* pathCont, CProfileOwner* o
 {
 	PROFILE_LOG("bot", "follow_pos", "ctor", "");
 #ifdef NL_DEBUG
-	nlassert(pathCont)
+	nlassert(pathCont);
 #endif
 }
 

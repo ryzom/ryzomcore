@@ -623,7 +623,7 @@ void	CWorldMap::serial(NLMISC::IStream &f)
 						{
 #ifdef NL_DEBUG
 							nlassert(wpos.getRootCell()==rootCell);
-							nlassert(wpos.y()<=0 && wpos.x()>=0)
+							nlassert(wpos.y()<=0 && wpos.x()>=0);
 #endif
 							rootCell->setWorldPosition(wpos, ind);
 							ind++;
