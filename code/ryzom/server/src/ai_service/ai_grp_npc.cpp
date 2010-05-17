@@ -1070,7 +1070,7 @@ std::string	CGroupNpc::buildDebugString(uint idx) const
 void CGroupNpc::display(CStringWriter	&stringWriter) const
 {
 #ifdef NL_DEBUG
-	nlstop("not implemented");
+	nlstopex(("not implemented"));
 #endif
 }
 

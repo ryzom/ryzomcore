@@ -72,7 +72,7 @@ CHarvestable::~CHarvestable()
 		{
 			nlwarning("CHarvestable::~CHarvestable> WARNING harvester row id not reset but can't find corresponding entity.");
 #ifdef NL_DEBUG
-			nlstop("");
+			nlstop;
 #endif
 		}
 	}
