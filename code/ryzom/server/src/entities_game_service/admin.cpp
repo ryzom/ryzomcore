@@ -1245,17 +1245,17 @@ NLMISC_COMMAND (createItemInBag, "Create an item and put it in the player bag", 
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 //		if (player != NULL && !player->havePriv(":DEV:") )
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -1333,16 +1333,16 @@ NLMISC_COMMAND (createItemInTmpInv, "Create an item and put it in the player tem
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -1403,16 +1403,16 @@ NLMISC_COMMAND (createItemInInv, "Create items and put them in the given invento
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -4039,12 +4039,12 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	uint32 during = 0;
 	uint32 every = 0;
 
-	sint32 posMessage = 0;
+	string::size_type posMessage = 0;
 
-	sint32 pos = message.find("repeat");
+	string::size_type pos = message.find("repeat");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			repeat = atoi( message.substr( posEgale+1 ).c_str() );
@@ -4056,7 +4056,7 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	pos = message.find("during");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			during = atoi( message.substr( posEgale+1 ).c_str() );
@@ -4068,7 +4068,7 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	pos = message.find("every");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			every = atoi( message.substr( posEgale+1 ).c_str() );

@@ -605,7 +605,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const N
 {
 	bool	selected = false;
 
-	uint	pos = valuePath.find('.');
+	std::string::size_type pos = valuePath.find('.');
 	if (pos == std::string::npos)
 		return false;
 

@@ -335,7 +335,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 		if(Family==BRICK_FAMILIES::Unknown)
 		{
 			string	sheetName= sheetId.toString();
-			sint	end= sheetName.find(".sbrick")-NB_LETTERS_AFTER_FAMILY;
+			string::size_type	end= sheetName.find(".sbrick")-NB_LETTERS_AFTER_FAMILY;
 			string sub = sheetName.substr(0,end);
 			sub = strupr(sub);
 			Family = BRICK_FAMILIES::toSBrickFamily ( sub );

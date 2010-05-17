@@ -976,8 +976,8 @@ void loadCosmetics(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC:
 
 	std::string name = sheetId.toString();
 
-	sint pos = (sint)name.find('.',0);
-	if ( pos == (sint) string::npos)
+	string::size_type pos = name.find('.',0);
+	if ( pos == string::npos)
 		nlwarning("<loadCosmetics> Can't load the VPValue from sheet name in sheet %s", sheetId.toString().c_str() );
 	else
 	{

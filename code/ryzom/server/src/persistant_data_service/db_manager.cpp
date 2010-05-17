@@ -571,7 +571,8 @@ bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 		anode.Set = false;
 		anode.Array = false;
 
-		uint	pos = node.find_first_of("[<");
+		string::size_type pos = node.find_first_of("[<");
+
 		if (pos != string::npos)
 		{
 			if (node[pos] == '[')
@@ -581,7 +582,7 @@ bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 
 			anode.Name = node.substr(0, pos);
 
-			uint	end = node.find((anode.Array ? ']' : '>'), pos);
+			string::size_type end = node.find((anode.Array ? ']' : '>'), pos);
 			if (end == string::npos)
 				return false;
 
