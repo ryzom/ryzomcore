@@ -1117,7 +1117,7 @@ void CCompiler::dumpByteCode (const string &sourceCode, const string &fullName, 
 {
 	// Build a valid filename
 	string tmp = fullName;
-	int pos;
+	string::size_type pos;
 	while ((pos=tmp.find (':')) != string::npos)
 		tmp[pos] = '-';
 
