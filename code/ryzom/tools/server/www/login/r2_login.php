@@ -93,7 +93,7 @@
 			// $_SERVER['SCRIPT_FILENAME'] = 'r:/code/ryzom/www/login//r2_login.php'
 			global $LogRelativePath;
 			$pathInfo = pathinfo(__FILE__);
-			$logPath = $pathInfo['dirname'].$LogRelativePath;
+			$logPath = $pathInfo['dirname'].'/'.$LogRelativePath;
 			if (!is_dir($logPath))
 			{
 				$res = mkdir($LogPath, 0700);
