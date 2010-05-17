@@ -14,9 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+/* 
+ * Completely implemented in xml_auto_ptr.h
+ */
 
 #include "stdpch.h"
+
+/*
 #include "xml_auto_ptr.h"
 #include <libxml/parser.h>
 
@@ -45,10 +49,4 @@ CXMLAutoPtr &CXMLAutoPtr::operator = (const char *other)
 	return *this;
 }
 
-
-
-
-
-
-
-
+*/

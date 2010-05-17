@@ -28,7 +28,7 @@ class CXMLAutoPtr
 public:
 	CXMLAutoPtr(const char *value = NULL) : _Value(value) {}
 	CXMLAutoPtr(const unsigned char *value) : _Value((const char *) value) {}
-	~CXMLAutoPtr();
+	~CXMLAutoPtr() { destroy(); }
 	operator const char *() const { return _Value; }
 	operator bool() const { return _Value != NULL; }
 	operator std::string() const { return std::string(_Value); }
@@ -36,7 +36,14 @@ public:
 	operator const unsigned char *() const { return (const unsigned char *)  _Value; }
 	const char operator * ()  const { nlassert(_Value); return *_Value; }
 	/// NB : This remove previous owned pointer with xmlFree
-	CXMLAutoPtr &operator = (const char *other);
+	CXMLAutoPtr &operator = (const char *other)
+	{
+		if (other == _Value) return *this;
+		destroy();
+		_Value = other;
+		return *this;
+	}
+
 	CXMLAutoPtr &operator = (const unsigned char *other)
 	{
 		*this = (const char *) other;
@@ -47,7 +54,15 @@ public:
 private:
 	const char *_Value;
 private:
-	void destroy();
+	void destroy()
+	{
+		if (_Value)
+		{
+			xmlFree(const_cast<char *>(_Value));
+			_Value = NULL;
+		}
+	}
+
 	// We'd rather avoid problems
 	CXMLAutoPtr(const CXMLAutoPtr &/* other */)
 	{
