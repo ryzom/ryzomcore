@@ -2625,7 +2625,7 @@ void CGroupHTML::handle ()
 					_URL = home();
 
 				string finalUrl;
-				lookupLocalFile (finalUrl, _URL.c_str(), true);
+				bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
 
 				// Reset the title
 				if(_TitlePrefix.empty())
@@ -2664,7 +2664,12 @@ void CGroupHTML::handle ()
 				C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
 
 				// Create an anchor
+#ifdef NL_OS_WINDOWS
 				if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
+#else
+				// temporarily disable local URL's until LibWWW can be replaced.
+				if (isLocal || ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL))
+#endif
 				{
 					browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
 				}
