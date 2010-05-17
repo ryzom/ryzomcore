@@ -2568,8 +2568,7 @@ bool mainLoop()
 					screenShotPNG();
 					ScreenshotRequest = ScreenshotRequestNone;
 				break;
-				case ScreenshotRequestNone:
-					nlwarning("Screenshot of unspecified type requested.");
+				default:
 				break;
 			}
 
