@@ -3261,7 +3261,7 @@ static void parsePrimOutpost(const IPrimitive *prim, const std::string &mapName,
 	CAIActions::exec("OUTPOST", aliasNode, continent, filename, familyName);
 
 	// link squads
-	char* props[] = { "tribe_squads", "tribe_squads2", "default_squads", "buyable_squads" };
+	const char* props[] = { "tribe_squads", "tribe_squads2", "default_squads", "buyable_squads" };
 	size_t nprops = sizeof(props)/sizeof(props[0]);
 	for (size_t i=0; i!=nprops; ++i)
 	{

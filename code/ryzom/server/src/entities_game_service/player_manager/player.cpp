@@ -54,7 +54,7 @@ NL_INSTANCE_COUNTER_IMPL(CPlayer);
 bool wipeAndRestore(const std::string &fileName);
 
 FILE	*LastLoad = NULL;
-char	*LastLoadFileName = "last_loaded_char.bin";
+const char	*LastLoadFileName = "last_loaded_char.bin";
 
 extern CVariable<uint32>	MonkeyLoadEnable;
 extern uint32 CharacterSaveCounter;

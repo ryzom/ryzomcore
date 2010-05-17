@@ -40,7 +40,7 @@ enum TTemplatizerToken
 	Unknown
 };
 
-struct { TTemplatizerToken Token; char* Text; }	SimpleTokens[] =
+struct { TTemplatizerToken Token; const char* Text; }	SimpleTokens[] =
 {
 	{	BlocStart,		"{"		},
 	{	BlocEnd,		"}"		},

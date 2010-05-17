@@ -227,7 +227,7 @@ protected:
 	uint	getIndex(sint value)
 	{
 	  int i;
-		for (i=0; i<4 && Values[i]!=value; ++i);
+		for (i=0; i<4 && Values[i]!=value; ++i) ;
 		return i&3;
 	}
 };
