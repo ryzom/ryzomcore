@@ -2943,7 +2943,7 @@ void CHeap<T, V>::push(T key, V const& value)
 {
 	_Heap.push_back(THeapNode(key, value));
 	
-	backwardLeveling(_Heap.size()-1);
+	backwardLeveling((uint)_Heap.size()-1);
 }
 
 template <typename T, typename V>

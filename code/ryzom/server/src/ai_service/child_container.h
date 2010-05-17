@@ -492,7 +492,7 @@ uint32 CAliasCont<TChld>::getChildIndexByAlias(uint32 alias) const
 	{
 		TChld* child = this->_Childs[i];
 		if (child!=NULL && child->getAlias()==alias)
-			return i;
+			return (uint32)i;
 	}
 	return ~0;
 }
