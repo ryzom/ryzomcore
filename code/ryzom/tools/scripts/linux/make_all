@@ -17,7 +17,7 @@ init
 #### BUILD NEL
 ##############################################################################
 
-CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" $RYZOM_PATH/tools/scripts/linux/build init nel --disable-3d --disable-samples --disable-tools >>$LOG_INFO 2>>$LOG_ERROR
+$RYZOM_PATH/tools/scripts/linux/build init nel --disable-3d --disable-samples --disable-tools >>$LOG_INFO 2>>$LOG_ERROR
 verify $? BUILD INIT NEL
 
 #$RYZOM_PATH/tools/scripts/linux/build nel clean
@@ -32,18 +32,19 @@ verify $? BUILD NEL INSTALL
 ##############################################################################
 #### BUILD NELNS
 ##############################################################################
+# update: we don't need nelns to run a ryzom shard
 
-CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" $RYZOM_PATH/tools/scripts/linux/build init nelns >>$LOG_INFO 2>>$LOG_ERROR
-verify $? BUILD INIT NELNS
+#$RYZOM_PATH/tools/scripts/linux/build init nelns >>$LOG_INFO 2>>$LOG_ERROR
+#verify $? BUILD INIT NELNS
 
 #$RYZOM_PATH/tools/scripts/linux/build nelns clean
 #verify $? BUILD NEL CLEAN
 
-$RYZOM_PATH/tools/scripts/linux/build nelns >>$LOG_INFO 2>>$LOG_ERROR
-verify $? BUILD NELNS
+#$RYZOM_PATH/tools/scripts/linux/build nelns >>$LOG_INFO 2>>$LOG_ERROR
+#verify $? BUILD NELNS
 
-$RYZOM_PATH/tools/scripts/linux/build nelns install >>$LOG_INFO 2>>$LOG_ERROR
-verify $? BUILD NELNS INSTALL
+#$RYZOM_PATH/tools/scripts/linux/build nelns install >>$LOG_INFO 2>>$LOG_ERROR
+#verify $? BUILD NELNS INSTALL
 
 
 ##############################################################################
@@ -64,7 +65,7 @@ cd $RYZOM_PATH/common
 make update >>$LOG_INFO 2>>$LOG_ERROR
 verify $? UPDATE RYZOM MAKEFILE COMMON
 
-CFLAGS="-DFINAL_VERSION=1" CXXFLAGS="-DFINAL_VERSION=1" make night >>$LOG_INFO 2>>$LOG_ERROR
+make night >>$LOG_INFO 2>>$LOG_ERROR
 verify $? BUILD RYZOM COMMON
 
 ##############################################################################
