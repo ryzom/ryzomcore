@@ -289,9 +289,11 @@ bool CLuaIHM::getUCStringOnStack(CLuaState &ls, sint index, ucstring &dest)
 void CLuaIHM::push(CLuaState &ls, const ucstring &value)
 {
 	//H_AUTO(Lua_CLuaIHM_push)
-	luabind::object obj(ls.getStatePointer(), value);
 #if LUABIND_VERSION == 600
+	luabind::object obj(ls.getStatePointer(), value);
 	obj.pushvalue();
+#else
+	luabind::detail::push(ls.getStatePointer(), value);
 #endif
 }
 
