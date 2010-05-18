@@ -722,7 +722,7 @@ r2.ActUIDisplayer.LastSelfCreatedActInstanceId = nil -- id of the last act creat
 		for i = 0, r2:getMaxNumberOfAdditionnalActs() - 1 do
 			local tree = self:getContainer():find(treeName .. tostring(i))
 			local used = false
-			for index, entry in self:getActTable() do
+			for index, entry in pairs(self:getActTable()) do
 				local entryTree = entry.Tree
 				if macroTree==true then entryTree = entry.MacroTree end	
 				if entryTree == tree then

@@ -1889,7 +1889,7 @@ function r2:buildAllPropertySheetsAndForms()
 	
 	--debugInfo('building forms')
 	if r2.Forms ~= nil then
-		for formName, form in r2.Forms do
+		for formName, form in pairs(r2.Forms) do
 			local mustRebuild = true			
 			if r2FormsCache[formName] ~= nil then
 				if isEqualIgnoreFunctions(r2FormsCache[formName], form.Prop) then

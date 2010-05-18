@@ -289,11 +289,11 @@ bool CLuaIHM::getUCStringOnStack(CLuaState &ls, sint index, ucstring &dest)
 void CLuaIHM::push(CLuaState &ls, const ucstring &value)
 {
 	//H_AUTO(Lua_CLuaIHM_push)
-#if LUABIND_VERSION == 600
+#if LUABIND_VERSION > 600
+	luabind::detail::push(ls.getStatePointer(), value);
+#else
 	luabind::object obj(ls.getStatePointer(), value);
 	obj.pushvalue();
-#else
-	luabind::detail::push(ls.getStatePointer(), value);
 #endif
 }
 
@@ -649,16 +649,20 @@ void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflect
 		break;
 		case CReflectedProperty::UCString:
 		{
+#if LUABIND_VERSION > 600
+			luabind::detail::push(ls.getStatePointer(), (reflectedObject.*(property.GetMethod.GetUCString))() );
+#else
 			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetUCString))() );
-#if LUABIND_VERSION == 600
 			obj.pushvalue();
 #endif
 		}
 		break;
 		case CReflectedProperty::RGBA:
 		{
+#if LUABIND_VERSION > 600
+			luabind::detail::push(ls.getStatePointer(), (reflectedObject.*(property.GetMethod.GetRGBA))() );
+#else
 			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetRGBA))());
-#if LUABIND_VERSION == 600
 			obj.pushvalue();
 #endif
 		}
@@ -2670,8 +2674,10 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 				// push a ucstring?
 				if(mustUseUCString)
 				{
-					luabind::object obj(ls.getStatePointer(),    ucstr );
-#if LUABIND_VERSION == 600
+#if LUABIND_VERSION > 600
+					luabind::detail::push(ls.getStatePointer(), ucstr);
+#else
+					luabind::object obj(ls.getStatePointer(), ucstr);
 					obj.pushvalue();
 #endif
 				}
@@ -2683,10 +2689,10 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 			}
 		case CInterfaceExprValue::RGBA:
 			{
-				luabind::object obj(ls.getStatePointer(),    value.getRGBA());
 #if LUABIND_VERSION > 600
-				obj.push(ls.getStatePointer());
+				luabind::detail::push(ls.getStatePointer(), value.getRGBA());
 #else
+				luabind::object obj(ls.getStatePointer(), value.getRGBA());
 				obj.pushvalue();
 #endif
 				break;

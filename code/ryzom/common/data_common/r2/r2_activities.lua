@@ -1078,7 +1078,7 @@ function r2.activities:initActivityMenu()
 			activityMenu:addSubMenu(activitiesNb)
 			local zonesMenu = activityMenu:getSubMenu(activitiesNb)
 			local zonesTable = r2.Scenario:getAllInstancesByType(zone)
-			for key, z in zonesTable do
+			for key, z in pairs(zonesTable) do
 				uc_activity:fromUtf8(z.Name)
 				zonesMenu:addLine(uc_activity, "lua", "r2.activities:setActivityType('"..actType.."', '".. z.InstanceId .."')", z.InstanceId)
 			end

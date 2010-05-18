@@ -83,7 +83,7 @@ function r2.ContextualCommands:update()
 	end
 	-- if one of the command is highlighted, let it highlighted after the toolbar has been rebuilt
 	--local highlightedCommand
-	--for index, button in self.IndexToButton do
+	--for index, button in pairs(self.IndexToButton) do
 	--	if button == r2.ToolUI:getActiveToolUI() then
 	--		debugInfo("highlighted command found")
 	--		highlightedCommand = self.CurrentCommands[index]
