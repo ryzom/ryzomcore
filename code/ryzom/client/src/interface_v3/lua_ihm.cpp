@@ -649,20 +649,22 @@ void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflect
 		break;
 		case CReflectedProperty::UCString:
 		{
+			ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
 #if LUABIND_VERSION > 600
-			luabind::detail::push(ls.getStatePointer(), (reflectedObject.*(property.GetMethod.GetUCString))() );
+			luabind::detail::push(ls.getStatePointer(), str);
 #else
-			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetUCString))() );
+			luabind::object obj(ls.getStatePointer(), str);
 			obj.pushvalue();
 #endif
 		}
 		break;
 		case CReflectedProperty::RGBA:
 		{
+			CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
 #if LUABIND_VERSION > 600
-			luabind::detail::push(ls.getStatePointer(), (reflectedObject.*(property.GetMethod.GetRGBA))() );
+			luabind::detail::push(ls.getStatePointer(), color);
 #else
-			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetRGBA))());
+			luabind::object obj(ls.getStatePointer(), color);
 			obj.pushvalue();
 #endif
 		}
@@ -1137,17 +1139,17 @@ int CLuaIHM::getClientCfgVar(CLuaState &ls)
 		ls.newTable();
 		CLuaObject result(ls);
 		uint count = 0;
-		for(uint i = 0; (sint)i<v->StrValues.size(); i++)
+		for(uint i = 0; i<v->StrValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), v->StrValues[i]);
 			count++;
 		}
-		for(uint i = 0; (sint)i<v->IntValues.size(); i++)
+		for(uint i = 0; i<v->IntValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), (double)v->IntValues[i]);
 			count++;
 		}
-		for(uint i = 0; (sint)i<v->RealValues.size(); i++)
+		for(uint i = 0; i<v->RealValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), (double)v->RealValues[i]);
 			count++;
@@ -2000,7 +2002,7 @@ void CLuaIHM::unpauseBGDownloader()
 // ***************************************************************************
 void CLuaIHM::requestBGDownloaderPriority(uint priority)
 {
-	if (priority < 0 || priority >= BGDownloader::ThreadPriority_Count)
+	if (priority >= BGDownloader::ThreadPriority_Count)
 	{
 		throw NLMISC::Exception("requestBGDownloaderPriority() : invalid priority");
 	}
@@ -2689,10 +2691,11 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 			}
 		case CInterfaceExprValue::RGBA:
 			{
+				CRGBA color = value.getRGBA();
 #if LUABIND_VERSION > 600
-				luabind::detail::push(ls.getStatePointer(), value.getRGBA());
+				luabind::detail::push(ls.getStatePointer(), color);
 #else
-				luabind::object obj(ls.getStatePointer(), value.getRGBA());
+				luabind::object obj(ls.getStatePointer(), color);
 				obj.pushvalue();
 #endif
 				break;
