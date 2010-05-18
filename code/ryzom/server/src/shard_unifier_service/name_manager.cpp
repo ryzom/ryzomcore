@@ -655,7 +655,7 @@ void CNameManager::saveGuildNames()
 		nlinfo("NAMEMGR::save: send message to BS");
 		
 		CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, Bsi );
-		msg.DataMsg.serialBuffer((uint8*)s.c_str(), s.size());
+		msg.DataMsg.serialBuffer((uint8*)s.c_str(), (uint)s.size());
 		Bsi.sendFile(msg);
 	}
 
@@ -760,7 +760,7 @@ bool CNameManager::loadAccountNamesFromTxt()
 	// read the file content into a buffer
 	uint32 size=NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= fread(&input[0],1,size,f);
+	uint32 readSize= (uint32)fread(&input[0],1,size,f);
 	fclose(f);
 	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
 
@@ -873,7 +873,7 @@ bool CNameManager::loadCharacterNamesFromTxt()
 	// read the file content into a buffer
 	uint32 size=NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= fread(&input[0],1,size,f);
+	uint32 readSize= (uint32)fread(&input[0],1,size,f);
 	fclose(f);
 	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
 
@@ -1105,7 +1105,7 @@ bool CNameManager::loadGuildsNamesFromTxt()
 	// read the file content into a buffer
 	uint32 size=NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= fread(&input[0],1,size,f);
+	uint32 readSize= (uint32)fread(&input[0],1,size,f);
 	fclose(f);
 	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
 

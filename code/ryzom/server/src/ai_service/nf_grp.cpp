@@ -928,7 +928,7 @@ void getGroupTemplateWithFlags_sss_s(CStateInstance* entity, CScriptStack& stack
 		return;
 	}
 	
-	CGroupDesc<CGroupFamily> const* groupDesc = groupDescs[CAIS::rand16(groupDescs.size())];
+	CGroupDesc<CGroupFamily> const* groupDesc = groupDescs[CAIS::rand16((uint32)groupDescs.size())];
 	stack.push(groupDesc->getFullName());
 	return;
 }

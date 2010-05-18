@@ -2358,7 +2358,7 @@ bool CEntityBase::canEntityDefend()
 		return false;
 
 	const uint8 size = sizeof(ForbidDefenseEffects) / sizeof(EFFECT_FAMILIES::TEffectFamily);
-	const uint8 nbEffects = _SEffects.size();
+	const uint8 nbEffects = (uint8)_SEffects.size();
 
 	// look for forbidden effects
 	for (uint i = 0; i < nbEffects; ++i )

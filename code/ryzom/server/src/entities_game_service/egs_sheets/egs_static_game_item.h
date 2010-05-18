@@ -680,7 +680,7 @@ public:
 			f.serial( (uint32&)getGroup() ); // The number never changes
 
 			// Parameters
-			uint8 size = MpFaberParameters.size();
+			uint8 size = (uint8)MpFaberParameters.size();
 			f.serial( size );
 			for( uint i = 0; i < size; ++i )
 			{
@@ -695,7 +695,7 @@ public:
 	const RM_GROUP::TRMGroup&	getGroup() const { return _RMGroupsByFamily[Family]; }
 
 	/// Return the number of raw material group slots. The actual number of groups is the number of non-empty slots.
-	static uint					nbRmGroupSlots() { return _RMGroupNames.size(); }
+	static uint					nbRmGroupSlots() { return (uint)_RMGroupNames.size(); }
 
 	/// Return the name of a raw material group. Precondition: group < nbRmGroupSlots()
 	static const std::string&	rmGroupToString( const RM_GROUP::TRMGroup& group ) { return _RMGroupNames[group]; }

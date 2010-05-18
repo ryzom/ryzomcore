@@ -237,7 +237,7 @@ public:
 	const std::string& name() const { return _Name; }
 
 	/// Return the number of MPS in the deposit
-	uint			getContentSize() const { return _RawMaterials.size(); }
+	uint			getContentSize() const { return (uint)_RawMaterials.size(); }
 
 	/// Return the MPS
 	const			std::vector<CStaticDepositRawMaterial>& getContents() const { return _RawMaterials; }

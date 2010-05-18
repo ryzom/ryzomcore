@@ -334,7 +334,7 @@ void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
 {
 #if !FINAL_VERSION
 	uint32	 botIndex = spawnBot.getChildIndex();
-	for	(uint32 i=_BotsToRespawn.size(); i--; )
+	for	(uint32 i=(uint32)_BotsToRespawn.size(); i--; )
 	{
 		if (_BotsToRespawn[i].getBotIndex()==botIndex)
 		{
@@ -344,7 +344,7 @@ void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
 			_BotsToRespawn.pop_back();
 		}
 	}
-	for	(uint32 i=_BotsToDespawn.size(); i--; )
+	for	(uint32 i=(uint32)_BotsToDespawn.size(); i--; )
 	{
 		if (_BotsToDespawn[i].getBotIndex()==botIndex)
 		{

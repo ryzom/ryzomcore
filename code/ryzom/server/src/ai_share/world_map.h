@@ -3588,7 +3588,7 @@ CWorldPosition CWorldMap::getWorldPosition(CMapPosition const& mapPos, TLevel le
 	std::sort(slots.begin(), slots.end());
 	
 	// get heightest slot
-	level = slots.size()-1 - level;
+	level = (RYAI_MAP_CRUNCH::TLevel)(slots.size()-1) - level;
 	
 	// if slot exists, return it or invalid position
 	return (level < 0 && level >= (sint)slots.size()) ? CWorldPosition() : CWorldPosition(cell, mapPos, CSlot(slots[level]&3));

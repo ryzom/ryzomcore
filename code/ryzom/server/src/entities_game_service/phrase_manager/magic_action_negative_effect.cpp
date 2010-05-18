@@ -263,7 +263,7 @@ protected:
 		if (!actor)
 			return;
 
-		const uint nbTargets = _ApplyTargets.size();
+		const uint nbTargets = (uint)_ApplyTargets.size();
 		for ( uint i = 0; i < nbTargets; i++ )
 		{
 			// check target

@@ -1070,7 +1070,7 @@ void CStatDB::saveValueLeaves(const CStatDBValueLeavesPD & valueLeavesPD)
 	{
 		string s;
 		pdr.toString(s);
-		msg.DataMsg.serialBuffer((uint8*)&s[0], s.size());
+		msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
 	}
 	else
 	{
@@ -1098,7 +1098,7 @@ void CStatDB::saveTableLeaf(const CStatDBTableLeafPD & tableLeafPD)
 	{
 		string s;
 		pdr.toString(s);
-		msg.DataMsg.serialBuffer((uint8*)&s[0], s.size());
+		msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
 	}
 	else
 	{

@@ -147,7 +147,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	// read rest of file, and get additional chunks in info_ptr
 	png_read_end(png_ptr, info_ptr);
 
-	uint32 dstChannels, firstChannel, lastChannel;
+	uint32 dstChannels = 0, firstChannel = 0, lastChannel = 0;
 
 	if (iColorType == PNG_COLOR_TYPE_RGBA || iColorType == PNG_COLOR_TYPE_RGB || iColorType == PNG_COLOR_TYPE_PALETTE)
 	{

@@ -644,7 +644,7 @@ bool CSpecialPowerPhrase::validate()
 	_Targets.push_back(entity->getTargetDataSetRow());
 
 	// validate all powers
-	const uint nbPowers = _Powers.size();
+	const uint nbPowers = (uint)_Powers.size();
 	for (uint i = 0 ; i < nbPowers ; ++i)
 	{
 #ifdef NL_DEBUG
@@ -712,7 +712,7 @@ void CSpecialPowerPhrase::apply()
 void CSpecialPowerPhrase::applyPowers()
 {
 	// apply powers
-	const uint nbPowers = _Powers.size();
+	const uint nbPowers = (uint)_Powers.size();
 	for (uint i = 0 ; i < nbPowers ; ++i)
 	{
 	#ifdef NL_DEBUG

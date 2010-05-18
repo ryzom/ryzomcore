@@ -262,7 +262,7 @@ bool CCharacterEncyclopedia::checkIfThemaCompleted(uint32 nAlbum, uint32 nThemaI
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
 	const CStaticEncycloThema *pThm = rSE.getThema(nAlbum, nThemaInt+1);
 	if (pThm == NULL) return false;
-	uint32 nNbTask = pThm->Tasks.size();
+	uint32 nNbTask = (uint32)pThm->Tasks.size();
 
 	bool bRiteFinished = (_EncyCharAlbums[nAlbum].Themas[nThemaInt].getTaskState(0) == 2);
 	bool bTasksFinished[7];

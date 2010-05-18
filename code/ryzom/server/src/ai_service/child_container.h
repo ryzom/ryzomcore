@@ -463,7 +463,7 @@ uint32 CCont<TChld>::getFirstFreeChild()
 		if (!_Childs[index])
 			break;
 	}
-	return index;
+	return (uint32)index;
 }
 
 template <class TChld>

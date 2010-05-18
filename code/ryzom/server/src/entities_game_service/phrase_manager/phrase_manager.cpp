@@ -378,7 +378,7 @@ void CPhraseManager::updatePhrases()
 	// update max nb entities
 	if (_MaxNbEntities < _PhrasesIndex.size())
 	{
-		_MaxNbEntities = _PhrasesIndex.size();
+		_MaxNbEntities = (uint32)_PhrasesIndex.size();
 #ifdef NL_DEBUG
 		nlinfo("New record in nb of processed entities ! %u", _MaxNbEntities);
 #endif
@@ -764,7 +764,7 @@ void CPhraseManager::sendEventReports()
 	{
 		// send to registered services for AI 
 		CBSAIEventReportMsg msgAI;
-		const uint nbAiReports = _AIEventReports.size();
+		const uint nbAiReports = (uint)_AIEventReports.size();
 		for (uint i = 0 ; i < nbAiReports ; ++i )
 		{
 			msgAI.pushBack( _AIEventReports[i] );
@@ -848,7 +848,7 @@ bool CPhraseManager::addPhrase( const TDataSetRow &actorRowId, CSPhrasePtr &phra
 		if (_FreeIndex.empty())
 		{
 			_EntityPhrases.push_back(entityPhrases);
-			index = _EntityPhrases.size()-1;
+			index = (uint32)_EntityPhrases.size()-1;
 		}
 		else
 		{
@@ -1879,7 +1879,7 @@ void CPhraseManager::breakCast( sint32 attackSkillValue, CEntityBase * entity, C
 						}
 						if (!magicPhrase->getSkills().empty())
 						{
-							magicSkillValue /= magicPhrase->getSkills().size();
+							magicSkillValue /= (sint32)magicPhrase->getSkills().size();
 						}
 
 						// boost magic skill for low level characters

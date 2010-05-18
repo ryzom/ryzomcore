@@ -39,7 +39,7 @@ CPacketHistory::CPacketHistory()
 
 void	CPacketHistory::clear()
 {
-	uint32	num = _ClientsHistories.size();
+	uint32	num = (uint32)_ClientsHistories.size();
 	_ClientsHistories.clear();
 	_ClientsHistories.resize(num);
 }

@@ -125,7 +125,7 @@ bool CHarvestable::writeMpInfos()
 	invTemp->enterMode(TEMP_INV_MODE::Quarter);
 
 	uint validMps = 0;
-	uint nbMp = _Mps.size();
+	uint nbMp = (uint)_Mps.size();
 
 	// Count number of valid mps
 	if (nbMp > INVENTORIES::NbTempInvSlots)
@@ -241,7 +241,7 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 		TRMQuantityVariable quantityVariable = (TRMQuantityVariable)mps[rmIndices[RMUTotalQuantity][0]].quantityVariable();
 		const float totalQuarteringQuantityAverage = *QuarteringQuantityByVariable[quantityVariable]; // if a creature is in RMTotalQuantity mode, all the RMs have the same quantityVariable() shared for all
 		const uint MinFilledSlots = 1;
-		uint rndNbSlotsToFill = MinFilledSlots + RandomGenerator.rand( rmIndices[RMUTotalQuantity].size() - MinFilledSlots );
+		uint rndNbSlotsToFill = MinFilledSlots + RandomGenerator.rand( (uint16)rmIndices[RMUTotalQuantity].size() - MinFilledSlots );
 		float quantityAveragePerFilledSlot = totalQuarteringQuantityAverage / ((float)rndNbSlotsToFill);
 		bool limitTo10PctFromAverage = ((quantityVariable >= RMQVBossBegin) && (quantityVariable <= RMQVBossEnd));
 		uint intQuantityAveragePerFilledSlot = (uint)quantityAveragePerFilledSlot;
@@ -251,7 +251,7 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 		for ( uint i=0; i!=rndNbSlotsToFill; ++i )
 		{
 			// Select a random slot
-			uint iLastSlotIndex = rmIndices[RMUTotalQuantity].size() - 1;
+			uint iLastSlotIndex = (uint)rmIndices[RMUTotalQuantity].size() - 1;
 			uint iSlotIndex = RandomGenerator.rand( iLastSlotIndex ); // index in rmIndices[RMUCraft]
 			uint iSlot = rmIndices[RMUTotalQuantity][iSlotIndex]; // index in mps
 

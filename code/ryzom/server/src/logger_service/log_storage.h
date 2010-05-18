@@ -64,7 +64,7 @@ public:
 			s.serial(ContextStack);
 			s.serial(ShardId);
 			s.serialCont(ParamIndex);
-			uint32 nbList = ListParamIndex.size();
+			uint32 nbList = (uint32)ListParamIndex.size();
 			s.serial(nbList);
 			ListParamIndex.resize(nbList);
 			for (uint i=0; i<ListParamIndex.size(); ++i)
@@ -256,7 +256,7 @@ public:
 
 		dle.ContextStack = _ContextStack;
 		// set the type of the log
-		dle.LogType = _LogDefIndex[logEntry.LogInfo.getLogName()];
+		dle.LogType = (uint32)_LogDefIndex[logEntry.LogInfo.getLogName()];
 
 		// post increment if open context
 		if (dle.LogDate == 0)
@@ -271,7 +271,7 @@ public:
 			lpi.ParamType = pv.getType();
 
 			TParamsTable &pt = _ParamTables[lpi];
-			uint32 index = pt.size();
+			uint32 index = (uint32)pt.size();
 			pt.push_back(pv);
 
 			// store the index in the persistent log entry
@@ -293,7 +293,7 @@ public:
 			std::list < LGS::TParamValue >::const_iterator first(lpv.getParams().begin()), last(lpv.getParams().end());
 			for (; first != last; ++first)
 			{
-				uint32 index = pt.size();
+				uint32 index = (uint32)pt.size();
 				pt.push_back(*first);
 
 				// store the index in the persistent log entry
@@ -313,7 +313,7 @@ public:
 		// serial the log entryes
 		s.serialCont(_DiskLogEntries);
 		// serial the param tables
-		uint32 nbTable = _ParamTables.size();
+		uint32 nbTable = (uint32)_ParamTables.size();
 		if (s.isReading())
 		{
 			s.serial(nbTable);

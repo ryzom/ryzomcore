@@ -913,7 +913,7 @@ void CScriptVM::interpretCode(
 				IScriptContext* const sc = stack.top();
 				stack.pop();
 				string const& funcName = CStringMapper::unmap(*((TStringId*)&opcodes[++index]));
-				int mode = opcodes[++index];
+				int mode = (int)opcodes[++index];
 				string const& inParamsSig = CStringMapper::unmap(*((TStringId*)&opcodes[++index]));
 				string const& outParamsSig = CStringMapper::unmap(*((TStringId*)&opcodes[++index]));
 				if (sc)
@@ -949,7 +949,7 @@ void CScriptVM::interpretCode(
 			continue;
 		case	RAND:
 			{
-				const	size_t	randIndex=rand32(opcodes[index+1]); // rand(RANDCOUNT)
+				const	size_t	randIndex=rand32((uint32)opcodes[index+1]); // rand(RANDCOUNT)
 				index+=3;	//	pass RAND + RANDCOUNT + 1
 				
 				stack.push((int)(index+opcodes[index]));	//	push the absolute address for RET.

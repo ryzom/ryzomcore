@@ -301,7 +301,7 @@ void	CDbMessage::getHRContent(const CDBDescriptionParser& description, std::stri
 				if (_LogBuffer.empty())
 					return;
 				const NLMISC::CEntityId*	ptr = (const NLMISC::CEntityId*)(&(_LogBuffer[0]));
-				uint	num = _LogBuffer.size()/sizeof(NLMISC::CEntityId);
+				uint	num = (uint)_LogBuffer.size()/sizeof(NLMISC::CEntityId);
 				uint	i;
 				for (i=0; i<num; ++i)
 				{
@@ -408,7 +408,7 @@ bool	CDbMessage::contains(const CDBDescriptionParser& description, const NLMISC:
 					break;
 
 				const NLMISC::CEntityId*	ptr = (const NLMISC::CEntityId*)(&(_LogBuffer[0]));
-				uint	num = _LogBuffer.size()/sizeof(NLMISC::CEntityId);
+				uint	num = (uint)_LogBuffer.size()/sizeof(NLMISC::CEntityId);
 				uint	i;
 				for (i=0; i<num; ++i)
 					if (compareEId(ptr[i], id))

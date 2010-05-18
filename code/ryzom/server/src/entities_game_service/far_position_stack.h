@@ -44,7 +44,7 @@ public:
 	bool			empty() const { return _Vec.empty(); }
 
 	/// Return the number of elements in the stack
-	uint			size() const { return _Vec.size(); }
+	uint			size() const { return (uint)_Vec.size(); }
 
 	/// Return the latest pushed position (no bound check)
 	const T&		top() const { return _Vec.back(); }

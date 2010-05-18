@@ -910,7 +910,7 @@ void CTickServiceGameCycleTimeMeasure::displayStat( NLMISC::CLog *log, TTimeMeas
 		if ( HistoryByMirror.size() > 1 )
 		{
 			log->displayRawNL( "\tAll mirror services:" );
-			gatheredStats[stat].displayStat( log, MirrorTimeMeasureTypeToCString, (stat==MHTSum) ? HistoryByMirror.size() : 1 ); // not displaying the 3 stats
+			gatheredStats[stat].displayStat( log, MirrorTimeMeasureTypeToCString, (stat==MHTSum) ? (uint)HistoryByMirror.size() : 1 ); // not displaying the 3 stats
 		}
 	}
 	{
@@ -927,7 +927,7 @@ void CTickServiceGameCycleTimeMeasure::displayStat( NLMISC::CLog *log, TTimeMeas
 		if ( HistoryByService.size() > 1 )
 		{
 			log->displayRawNL( "\tAll client services:" );
-			gatheredStats[stat].displayStat( log, ServiceTimeMeasureTypeToCString, (stat==MHTSum) ? HistoryByService.size() : 1 ); // not displaying the 3 stats
+			gatheredStats[stat].displayStat( log, ServiceTimeMeasureTypeToCString, (stat==MHTSum) ? (uint)HistoryByService.size() : 1 ); // not displaying the 3 stats
 		}
 	}
 }

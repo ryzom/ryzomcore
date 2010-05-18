@@ -94,7 +94,7 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 	FOREACH(it, CCont<CManager>, _Managers)
 	{
 		std::string name = it->getName();
-		uint32 size = name.size();
+		uint32 size = (uint32)name.size();
 		const uint32 extensionSize   = 13; // strlen(".zone_trigger");
 		if (size >= 13 && name.substr(size - extensionSize, extensionSize) == ".zone_trigger" )
 		{

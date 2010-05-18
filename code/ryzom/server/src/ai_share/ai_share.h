@@ -86,7 +86,7 @@ namespace AI_SHARE
 		keyword=input.substr(i,k-i);
 
 		// find the end of the tail text
-		for (k=input.size();k>j && isWhiteSpace(input[k-1]);) --k;	// k points to character after end of tail text
+		for (k=(uint)input.size();k>j && isWhiteSpace(input[k-1]);) --k;	// k points to character after end of tail text
 
 		// find start of tail text
 		do { ++j; } while(j<k && isWhiteSpace(input[j]));			// j points to start of tail text
@@ -122,7 +122,7 @@ namespace AI_SHARE
 		word=input.substr(i,j-i);
 
 		// find the end of the tail text
-		for (i=input.size();i>j && isWhiteSpace(input[i-1]);) --i;	// i points to character after end of tail text
+		for (i=(uint)input.size();i>j && isWhiteSpace(input[i-1]);) --i;	// i points to character after end of tail text
 
 		// find start of tail text
 		do { ++j; } while(j<i && isWhiteSpace(input[j]));			// j points to start of tail text

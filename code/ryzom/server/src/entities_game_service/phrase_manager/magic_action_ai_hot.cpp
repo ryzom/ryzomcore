@@ -82,7 +82,7 @@ void CMagicAiActionHoT::launch( CMagicPhrase * phrase, sint deltaLevel, sint ski
 		return;
 
 	const vector<CSpellTarget> &targets = phrase->getTargets();
-	const uint nbTargets = targets.size();
+	const uint nbTargets = (uint)targets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(targets[i].getId()))
@@ -143,7 +143,7 @@ void CMagicAiActionHoT::apply( CMagicPhrase * phrase, sint deltaLevel, sint skil
 		endDate = CTickEventHandler::getGameCycle() + _EffectDuration;
 	}
 
-	const uint nbTargets = _ApplyTargets.size();
+	const uint nbTargets = (uint)_ApplyTargets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(_ApplyTargets[i].RowId))

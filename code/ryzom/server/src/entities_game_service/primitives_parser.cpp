@@ -80,7 +80,7 @@ void CPrimitivesParser::init()
 	for	(uint i=0; i<mapConfigNames.size(); ++i)
 	{
 		const vector<std::string> &prims = CPrimitiveCfg::getMap(mapConfigNames[i]);
-		primCount += prims.size();
+		primCount += (uint)prims.size();
 	}
 
 	uint numLoadedPrim = 0;

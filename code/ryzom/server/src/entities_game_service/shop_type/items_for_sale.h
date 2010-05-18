@@ -61,7 +61,7 @@ public:
 	void checkSellStore( NLMISC::CEntityId charId );
 
 	// return nb item in shop store
-	uint32 getNbItemInShopStore() const { return _ItemsForSale.size(); }
+	uint32 getNbItemInShopStore() const { return (uint32)_ItemsForSale.size(); }
 
 	// returns the number of items for sale on the given continent
 	uint32 getNbItemsForSaleOnContinent(CONTINENT::TContinent continent) const;

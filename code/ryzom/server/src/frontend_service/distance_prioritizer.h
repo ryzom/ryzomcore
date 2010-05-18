@@ -161,7 +161,7 @@ public:
 
 	static void		fastFillDiscreetProperties(TOutBox& outbox)
 	{
-		uint	i = 0, size = SortedFlatVPTreeFill.size();
+		uint	i = 0, size = (uint)SortedFlatVPTreeFill.size();
 		while (i < size)
 		{
 			CSortedFlatVPTreeFillItem&	item = SortedFlatVPTreeFill[i++];

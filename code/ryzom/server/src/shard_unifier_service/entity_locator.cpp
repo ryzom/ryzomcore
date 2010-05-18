@@ -315,7 +315,7 @@ namespace ENTITYLOC
 		void onModuleUpdate()
 		{
 			// update the Total concurent user varialb
-			TotalConcurentUser.set(_ConnectedUsers.size());
+			TotalConcurentUser.set((uint32)_ConnectedUsers.size());
 		}
 
 		/////////////////////////////////////////////////////////////

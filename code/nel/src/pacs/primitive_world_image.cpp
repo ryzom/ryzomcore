@@ -1183,7 +1183,7 @@ void CPrimitiveWorldImage::reaction (CPrimitiveWorldImage& second, const CCollis
 	collisionPosition+=_Speed*desc.ContactTime;
 
 	// Calc new speed
-	CVectorD newSpeed;
+	CVectorD newSpeed(0.0, 0.0, 0.0);
 
 	// Obstacle ?
 	if (collision)

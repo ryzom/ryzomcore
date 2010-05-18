@@ -72,7 +72,7 @@ bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
 		
 		// create or update effect on entities returned
 		const vector<CEntityBase*> &entities = entitiesSelector.getEntities();
-		const uint size = entities.size();
+		const uint size = (uint)entities.size();
 		for (uint i = 0; i < size ; ++i)
 		{
 			if (entities[i] && (entities[i] != (CEntityBase*)_AffectedEntity) && isEntityValidTarget(entities[i]) )

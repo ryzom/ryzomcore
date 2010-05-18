@@ -549,7 +549,7 @@ public:
 	 const CEntityPhrases *getEntityPhrases(TDataSetRow rowId) const;
 
 	 /// get current nb of entities in manager
-	 uint32 getNbEntitiesInManager() const { return _PhrasesIndex.size(); }
+	 uint32 getNbEntitiesInManager() const { return (uint32)_PhrasesIndex.size(); }
 
 	 /// get max nb of entities in manager
 	 uint32 getMaxNbEntitiesInManager() const { return _MaxNbEntities; }

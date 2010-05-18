@@ -425,7 +425,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 				gift = true;
 				TVectorParamCheck vect( 1 + _Params.size() );
 				vect[0].Type = STRING_MANAGER::integer;
-				vect[0].Int = _SubSteps.size();
+				vect[0].Int = (sint32)_SubSteps.size();
 				
 				if ( !_PhraseId.empty() )
 				{

@@ -135,9 +135,9 @@ public:
 	
 	uint32 nbSpawnedBot() const { return _NbSpawnedBot; }
 	
-	uint32 nbBotToRespawn() const { return _BotsToRespawn.size(); }
+	uint32 nbBotToRespawn() const { return (uint32)_BotsToRespawn.size(); }
 	
-	uint32 nbBotToDespawn()	const { return _BotsToDespawn.size(); }
+	uint32 nbBotToDespawn()	const { return (uint32)_BotsToDespawn.size(); }
 	
 	bool isGroupAlive(uint32 const nbMoreKilledBot = 0) const;
 	

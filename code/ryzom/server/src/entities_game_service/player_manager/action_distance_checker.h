@@ -143,7 +143,7 @@ void CActionDistanceChecker::tickUpdate()
 		_LastCheck = 0;
 	
 	// compute the higher check index that will be done this tick
-	uint max = _Checks.size();
+	uint max = (uint)_Checks.size();
 	if ( max > _LastCheck + _NbCheckPerTick )
 		max = _LastCheck + _NbCheckPerTick;
 

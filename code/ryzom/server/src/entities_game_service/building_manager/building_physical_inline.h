@@ -116,7 +116,7 @@ void CBuildingPhysicalGuild::addGuild( uint32 guildId )
 	_StateCounter++;
 	_Guilds.push_back( guildId );
 	// add an instance cell to each room for this guild
-	const uint size = _Rooms.size();
+	const uint size = (uint)_Rooms.size();
 	for ( uint i = 0; i < size; i++ )
 	{
 		_Rooms[i].Cells.push_back( 0 );
@@ -175,7 +175,7 @@ inline void CBuildingPhysicalPlayer::addPlayer( const NLMISC::CEntityId & userId
 	_StateCounter++;
 	_Players.push_back( userId );
 	// add an instance cell to each room for this player
-	const uint size = _Rooms.size();
+	const uint size = (uint)_Rooms.size();
 	for ( uint i = 0; i < size; i++ )
 	{
 		_Rooms[i].Cells.push_back( 0 );

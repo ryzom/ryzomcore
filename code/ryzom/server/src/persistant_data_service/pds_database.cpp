@@ -1179,7 +1179,7 @@ CDatabase*	CDatabase::adapt(const string& description)
 	// get 'From' HashKey
 	CHashKey	hash1 = _Description.getHashKey();
 	// get 'Into' HashKey
-	CHashKey	hash2 = getSHA1((const uint8*)(description.c_str()), description.size());
+	CHashKey	hash2 = getSHA1((const uint8*)(description.c_str()), (uint32)description.size());
 
 	// same hash, ok go on
 	if (hash1 == hash2)

@@ -203,7 +203,7 @@ inline bool CCharacter::isNearPetTpIsAllowed() const
 
 inline uint8 CCharacter::getNbPact()
 {
-	return _Pact.size(); 
+	return (uint8)_Pact.size(); 
 }
 
 //------------------------------------------------------------------------------

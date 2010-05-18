@@ -74,8 +74,8 @@ void	CPatatGrid::readPrimitive(IPrimitive *primitive, std::vector<uint32> &inFil
 			primitive->getPropertyByName("class", className) &&
 			_PrimZoneFilters.find(className) != _PrimZoneFilters.end())
 		{
-			_ZoneMap.insert(TZoneMap::value_type(primName, _PrimZones.size()));
-			inFile.push_back(_PrimZones.size());
+			_ZoneMap.insert(TZoneMap::value_type(primName, (sint32)_PrimZones.size()));
+			inFile.push_back((uint32)_PrimZones.size());
 			_PrimZones.push_back(static_cast<CPrimZone&>(*primitive));
 //			_PrimZones.back().Name = primName;
 		}
@@ -146,7 +146,7 @@ void	CPatatGrid::usePrim(const string &primFile, std::vector<uint32> &inFile)
 	}
 
 	uint	i;
-	uint	firstPrimZone = _PrimZones.size();
+	uint	firstPrimZone = (uint)_PrimZones.size();
 	inFile.clear();
 
 	// get CPrimNode
@@ -268,7 +268,7 @@ void	CPatatGrid::usePrim(const string &primFile, std::vector<uint32> &inFile)
 					}
 					else
 					{
-						newIndex = _EntryTable.size();
+						newIndex = (uint32)_EntryTable.size();
 						_EntryTable.resize(newIndex+1);
 					}
 

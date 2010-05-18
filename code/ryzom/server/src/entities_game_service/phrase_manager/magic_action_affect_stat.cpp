@@ -317,7 +317,7 @@ protected:
 		TReportAction reportAction = actionReport;
 		reportAction.ActionNature = (_IsOffensive?ACTNATURE::OFFENSIVE_MAGIC:ACTNATURE::CURATIVE_MAGIC);
 
-		const uint nbTargets = _ApplyTargets.size();
+		const uint nbTargets = (uint)_ApplyTargets.size();
 		for ( uint i = 0; i < nbTargets; i++ )
 		{
 			reportAction.TargetRowId = _ApplyTargets[i].RowId;

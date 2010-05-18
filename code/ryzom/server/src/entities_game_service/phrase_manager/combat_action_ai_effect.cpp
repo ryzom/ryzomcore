@@ -67,7 +67,7 @@ void CCombatAiActionEffect::apply( CCombatPhrase *phrase )
 	H_AUTO(CCombatAiActionEffect_apply);
 		
 	const vector<CCombatPhrase::TTargetInfos> & targets = phrase->getTargets();
-	const uint nbTargets = targets.size();
+	const uint nbTargets = (uint)targets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		//if ( !phrase->hasTargetDodged(i) )

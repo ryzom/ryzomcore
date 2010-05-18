@@ -989,7 +989,7 @@ public:
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
 		
-		const	uint32	nbSubScript=params.size();
+		const	uint32	nbSubScript=(uint32)params.size();
 		
 		std::vector<CSmartPtr<CFightScriptComp> >	scriptComps;
 		try

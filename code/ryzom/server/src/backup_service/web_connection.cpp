@@ -262,7 +262,7 @@ void	cbGetSaveList(CMemStream &msgin, TSockId host)
 	{
 		std::sort(incrementalDirectories.begin(), incrementalDirectories.end());
 
-		for (i=incrementalDirectories.size()-1; (sint)i>=0; --i)
+		for (i=(uint)incrementalDirectories.size()-1; (sint)i>=0; --i)
 		{
 			string	p = CPath::standardizePath(incrementalDirectories[i], true);
 			// avoid double / inside path

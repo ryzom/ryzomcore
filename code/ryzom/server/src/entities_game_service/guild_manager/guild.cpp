@@ -1420,7 +1420,7 @@ void CGuild::addOwnedOutpost(TAIAlias outpostAlias)
 
 		// update all outposts following the new one (included)
 		// it will shift right
-		uint i = _OwnedOutposts.size() - 1;
+		uint i = (uint)_OwnedOutposts.size() - 1;
 		while (i < _OwnedOutposts.size() + _ChallengedOutposts.size())
 		{
 			if (!updateOutpostDB(i))
@@ -1511,7 +1511,7 @@ void CGuild::addChallengedOutpost(TAIAlias outpostAlias)
 		nlassert(getOutpostCount() < OUTPOSTENUMS::MAX_OUTPOST);
 
 		_ChallengedOutposts.push_back(outpostAlias);
-		updateOutpostDB( _OwnedOutposts.size()+_ChallengedOutposts.size()-1 );
+		updateOutpostDB( (uint32)(_OwnedOutposts.size()+_ChallengedOutposts.size()-1) );
 
 		updateGUILD_OUTPOST_CANDEL();
 	}
@@ -1536,7 +1536,7 @@ void CGuild::removeChallengedOutpost(TAIAlias outpostAlias)
 
 	// update all outposts following the removed one
 	// it will shift left
-	i += _OwnedOutposts.size();
+	i += (uint)_OwnedOutposts.size();
 	while (i < _OwnedOutposts.size() + _ChallengedOutposts.size())
 	{
 		if (!updateOutpostDB(i))
@@ -1557,7 +1557,7 @@ void CGuild::removeChallengedOutpost(TAIAlias outpostAlias)
 //-----------------------------------------------------------------------------
 uint32 CGuild::getOutpostCount() const
 {
-	return (_OwnedOutposts.size() + _ChallengedOutposts.size());
+	return (uint32)(_OwnedOutposts.size() + _ChallengedOutposts.size());
 }
 
 //-----------------------------------------------------------------------------
@@ -1650,7 +1650,7 @@ bool CGuild::getOutpostDBIndex(TAIAlias outpostAlias, uint32 & outpostIndex, boo
 	{
 		if (_ChallengedOutposts[i] == outpostAlias)
 		{
-			outpostIndex = _OwnedOutposts.size() + i;
+			outpostIndex = (uint32)_OwnedOutposts.size() + i;
 			ownedOutpost = false;
 			return true;
 		}
@@ -1673,7 +1673,7 @@ bool CGuild::updateOutpostDB(uint32 outpostIndex)
 	}
 	else
 	{
-		i -= _OwnedOutposts.size();
+		i -= (uint32)_OwnedOutposts.size();
 		if (i < _ChallengedOutposts.size())
 		{
 			outpostAlias = _ChallengedOutposts[i];

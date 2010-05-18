@@ -92,7 +92,7 @@ CEntityBase *CBounceEffect::getTargetForBounce() const
 
 	// select valid entities
 	const vector<CEntityBase*> &entities = entitiesSelector.getEntities();
-	const uint size = entities.size();
+	const uint size = (uint)entities.size();
 	
 	vector<CEntityBase*> selectedEntities;	
 	selectedEntities.reserve(size);
@@ -108,7 +108,7 @@ CEntityBase *CBounceEffect::getTargetForBounce() const
 	if (selectedEntities.empty())
 		return NULL;
 
-	uint32 num = RandomGenerator.rand(selectedEntities.size()-1);
+	uint32 num = RandomGenerator.rand((uint16)selectedEntities.size()-1);
 
 	return selectedEntities[num];
 		

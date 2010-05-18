@@ -336,7 +336,7 @@ CCombatPhrase::~CCombatPhrase()
 	
 	clearTargets();
 	
-	const uint size = _CombatActions.size();
+	const uint size = (uint)_CombatActions.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
 		if (_CombatActions[i] != NULL)
@@ -1933,7 +1933,7 @@ bool CCombatPhrase::launch()
 
 		buildTargetList(true, false);
 
-		const uint32 nbTargets = _Targets.size();
+		const uint32 nbTargets = (uint32)_Targets.size();
 
 		// update behaviour
 		if ( _Behaviour.isCombat() )
@@ -1994,7 +1994,7 @@ bool CCombatPhrase::launch()
 		buildTargetList(true, _IsMad);
 
 		// resize datas
-		const uint32 nbTargets = _Targets.size();
+		const uint32 nbTargets = (uint32)_Targets.size();
 
 		// update behaviour
 		if ( _Behaviour.isCombat() )
@@ -2060,7 +2060,7 @@ bool CCombatPhrase::launch()
 	CMirrorPropValueList<uint32>	targetList(TheDataset, _Attacker->getEntityRowId(), DSPropertyTARGET_LIST);
 	targetList.clear();
 
-	const sint size = _Targets.size();
+	const sint size = (sint)_Targets.size();
 	for (sint i = size-1 ; i >= 0 ; --i)
 	{
 		PHRASE_UTILITIES::updateMirrorTargetList(targetList, _Targets[i].Target->getEntityRowId(), _Targets[i].Distance, false);
@@ -2349,7 +2349,7 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 	}
 	else
 	{
-		uint32 nbTargets = _Targets.size();
+		uint32 nbTargets = (uint32)_Targets.size();
 #if !FINAL_VERSION
 		nlassert(nbTargets);
 #endif
@@ -2818,7 +2818,7 @@ void CCombatPhrase::applyAttack(CEntityBase * actingEntity, bool rightHand)
 	
 	std::vector<TApplyAction> & actions = rightHand ? _RightApplyActions : _LeftApplyActions;
 
-	const uint nbActions = actions.size();
+	const uint nbActions = (uint)actions.size();
 
 	// if there is no action for this hand, the attack failed
 	if (nbActions == 0)
@@ -2832,7 +2832,7 @@ void CCombatPhrase::applyAttack(CEntityBase * actingEntity, bool rightHand)
 		applyAction(actions[i], actionReports, rightHand);
 	}
 
-	const uint nbReports = actionReports.size();
+	const uint nbReports = (uint)actionReports.size();
 
 	// if attacker is mad, change reports
 	if (_IsMad)
@@ -3524,7 +3524,7 @@ float CCombatPhrase::testOpponentDefense(CCombatDefenderPtr &combatDefender, boo
 	// compute defender malus when facing several opponents
 	const set<TDataSetRow> &aggressors = CPhraseManager::getInstance().getMeleeAggressors(targetRowId);
 	sint32 defenseModifier = 0;
-	uint32 nb = aggressors.size();
+	uint32 nb = (uint32)aggressors.size();
 	if (nb > NbOpponentsBeforeMalus)
 	{
 		defenseModifier = (nb - NbOpponentsBeforeMalus) * ModPerSupernumeraryOpponent;
@@ -4045,7 +4045,7 @@ bool CCombatPhrase::validateCombatActions( string &errorCode )
 {
 	H_AUTO(CCombatPhrase_validateCombatActions);
 
-	const uint size = _CombatActions.size();
+	const uint size = (uint)_CombatActions.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
 		if ( _CombatActions[i] != NULL)
@@ -4067,7 +4067,7 @@ void CCombatPhrase::applyCombatActions()
 	
 //	if (!_Defender) return;
 
-	const uint size = _CombatActions.size();
+	const uint size = (uint)_CombatActions.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
 		if ( _CombatActions[i] != NULL)
@@ -4493,7 +4493,7 @@ void CCombatPhrase::buildTargetList(bool rightHand, bool isMad)
 	{
 		string dummy;
 
-		const uint previousNbTargets = _Targets.size();
+		const uint previousNbTargets = (uint)_Targets.size();
 	
 		const set<TDataSetRow> &aggressors = CPhraseManager::getInstance().getMeleeAggressors(_Attacker->getEntityRowId());
 		set<TDataSetRow>::const_iterator it;
@@ -4522,7 +4522,7 @@ void CCombatPhrase::buildTargetList(bool rightHand, bool isMad)
 			}
 		}
 
-		const uint nbTargets = _Targets.size();
+		const uint nbTargets = (uint)_Targets.size();
 		const float damageFactor = min( 1.0f, _MultiTargetGlobalDamageFactor.applyValue(_WeaponSabrinaValue) / ( 1 + nbTargets - previousNbTargets) );
 
 		// start to previousNbTarget as previous targets already processed

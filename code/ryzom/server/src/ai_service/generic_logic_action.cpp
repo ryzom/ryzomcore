@@ -195,7 +195,7 @@ public:
 			nlwarning("begin_state failed because state list is empty");
 			return false;
 		}
-		uint i=CAIS::rand16(_states.size());
+		uint i=CAIS::rand16((uint32)_states.size());
 
 		entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
 			entity->getState()->getAliasNode()->fullName().c_str(),
@@ -458,7 +458,7 @@ public:
 
 		bool result=true;
 
-		const	uint32 nbActions=_subActions.size();
+		const	uint32 nbActions=(uint32)_subActions.size();
 		for (uint32 i=0;i<nbActions;i++)
 		{
 			if(_subActions[i]==NULL)
@@ -513,7 +513,7 @@ public:
 			nlwarning("begin_punctual_state failed because state list is empty");
 			return false;
 		}
-		entity->setNextPunctualState(_states[CAIS::rand16(_states.size())]);
+		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]);
 		entity->getDebugHistory()->addHistory("GRP BeginPunctual State: %s",
 					entity->getNextPunctualState()->getAliasNode()->fullName().c_str());
 		return true;
@@ -587,7 +587,7 @@ public:
 			nlwarning("random_select failed because sub-action list is empty");
 			return false;
 		}
-		_subActions[CAIS::rand16(_subActions.size())]->executeAction(entity,event);
+		_subActions[CAIS::rand16((uint32)_subActions.size())]->executeAction(entity,event);
 
 		return true;
 	}
@@ -1193,7 +1193,7 @@ static	CGroup* findGroup(const std::string& groupName,CStateMachine *stateMachin
 			{
 				CGroup	*igroup=NULL;
 				//	Check if theres a group with the good name in the same stateMachine (and only one).
-				for		(sint32	grpIndex=grps.size()-1;grpIndex>=0;grpIndex--)
+				for		(sint32	grpIndex=(sint32)grps.size()-1;grpIndex>=0;grpIndex--)
 				{
 					if	(grps[grpIndex]->getManager().getStateMachine()!=stateMachine)
 						continue;
@@ -1376,7 +1376,7 @@ public:
 			{
 				CGroup	*igroup=NULL;
 				//	Check if theres a group with the good name in the same stateMachine (and only one).
-				for		(sint32	grpIndex=grps.size()-1;grpIndex>=0;grpIndex--)
+				for		(sint32	grpIndex=(sint32)grps.size()-1;grpIndex>=0;grpIndex--)
 				{
 					if	(grps[grpIndex]->getManager().getStateMachine()!=stateMachine)
 						continue;
@@ -1822,7 +1822,7 @@ public:
 			// r2 mode groupename:botname
 			if (_R2)
 			{
-				uint first(0), last(_Groups.size());
+				uint first = 0, last = (uint)_Groups.size();
 				for (; first != last; ++first)
 				{
 					CGroup	*grp = _Groups[first];
@@ -2165,7 +2165,7 @@ public:
 	{
 		// this line treated first ... in case we bomb out in one of the if(...) { ... return; } cases
 
-		uint32 nbArgs = args.size();
+		uint32 nbArgs = (uint32)args.size();
 		if (nbArgs==0)
 		{
 			nlwarning("switch_actions (%s) need an argument !", eventNode->fullName().c_str());
@@ -2943,7 +2943,7 @@ public:
 		if(cstring=="DSS_")
 		{
 			_Id=true;
-			NLMISC::CSString tmp = NLMISC::CSString (_Sentence).right(_Sentence.length()-4);
+			NLMISC::CSString tmp = NLMISC::CSString (_Sentence).right((unsigned int)_Sentence.length()-4);
 			NLMISC::CSString tmp2 = tmp.strtok(" ",false,false,false,false);
 			_ScenarioId = atoi(tmp2.c_str());
 			_Sentence = tmp;
@@ -3021,7 +3021,7 @@ public:
 			else
 			{
 				float val;
-				uint32 size=_Vars.size(),i=0;
+				uint32 size=(uint32)_Vars.size(),i=0;
 				std::vector<float> values;
 				for(;i<size;++i)
 				{

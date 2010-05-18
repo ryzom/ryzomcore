@@ -285,7 +285,7 @@ void		CInventoryUpdater<CInventoryCategoryTemplate>::resetItem( TInventoryId inv
 			if ( itemUpdate.IUMode != CItemUpdate::IUAll )
 			{
 				// Cancel any additional IUOneProp updates
-				cancelAllUpdatesFromIndex( itu - _ItemUpdates[invId].begin() + 1, invId, slotIndex );
+				cancelAllUpdatesFromIndex( (uint)(itu - _ItemUpdates[invId].begin() + 1), invId, slotIndex );
 			}
 			// Overwrite any previous IUAll, IUReset, IUOneProp, IUInfoVersion
 			itemUpdate.IUMode = CItemUpdate::IUReset;
@@ -328,7 +328,7 @@ void		CInventoryUpdater<CInventoryCategoryTemplate>::setItemProps( TInventoryId 
 				if ( itemUpdate.IUMode != CItemUpdate::IUAll )
 				{
 					// Cancel any additional IUOneProp updates
-					cancelAllUpdatesFromIndexExcept( itu - _ItemUpdates[invId].begin() + 1, invId, itemSlot.getSlotIndex(), CItemUpdate::IUInfoVersion );
+					cancelAllUpdatesFromIndexExcept( (uint)(itu - _ItemUpdates[invId].begin() + 1), invId, itemSlot.getSlotIndex(), CItemUpdate::IUInfoVersion );
 				}
 				// Overwrite previous IUAll, IUReset, or first IUOneProp
 				itemUpdate.IUMode = CItemUpdate::IUAll;
@@ -488,7 +488,7 @@ bool		CInventoryUpdater<CInventoryCategoryTemplate>::fillAllUpdates( NLMISC::CBi
 		hasContentToSend = true;
 
 		// Number field
-		uint32 nbChanges = _ItemUpdates[invId].size();
+		uint32 nbChanges = (uint32)_ItemUpdates[invId].size();
 		if ( nbChanges < INVENTORIES::LowNumberBound )
 		{
 			destStream.serial( nbChanges, INVENTORIES::LowNumberBits );

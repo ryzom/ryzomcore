@@ -946,7 +946,7 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 	static uint32 s_maxBotsVisible = 0;
 	static double s_maxBotsVisionTime = 0.0;
 	
-	uint32 numBotsVisible = GuardVision.bots().size();
+	uint32 numBotsVisible = (uint32)GuardVision.bots().size();
 	double deltaVisionTime = CTime::ticksToSecond(endVisionTime-startVisionTime);
 	bool bTellUs = false;
 	if( s_maxBotsVisible < numBotsVisible )
@@ -1443,7 +1443,7 @@ void CGrpProfileGoToPoint::calcRatios()
 	if (_Shape!=SHAPE_RECTANGLE)
 		return;
 	
-	const	uint32	nbbots=_NpcList.size();
+	const	uint32	nbbots=(uint32)_NpcList.size();
 	
 	_NbRange	= (uint32)	sqrt(_Ratio*nbbots);
 	if (_NbRange==0)
@@ -1922,7 +1922,7 @@ void	CGrpProfileFollowRoute::calcRatios	()
 	if	(_Shape!=SHAPE_RECTANGLE)
 		return;
 
-	const	uint32	nbbots=_NpcList.size();
+	const	uint32	nbbots=(uint32)_NpcList.size();
 
 	_NbRange	= (uint32)	sqrt(_Ratio*nbbots);
 	if (_NbRange==0)
@@ -2574,8 +2574,8 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 				if (!_DestinationReachedAll)
 				{
 					
-					uint32 npcSize =  pgrp.bots().size();
-					uint32 reachedSize = _NpcDestinationReached.size();
+					uint32 npcSize =  (uint32)pgrp.bots().size();
+					uint32 reachedSize = (uint32)_NpcDestinationReached.size();
 					if (reachedSize!= npcSize)
 					{
 						_NpcDestinationReached.resize(npcSize);
@@ -2600,7 +2600,7 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 				if (!vision.players().empty())
 				{
 					// there are some player near, look at one if it is not behin us
-					uint index = CAIS::rand16(vision.players().size());
+					uint index = CAIS::rand16((uint32)vision.players().size());
 					CAngle angle(CAngle::pi());
 
 					while (index < vision.players().size() && !target)
@@ -2619,7 +2619,7 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 				if (!target && !vision.bots().empty())
 				{
 					// there are some bots near, look at one if it is not behin us
-					uint index = CAIS::rand16(vision.bots().size());
+					uint index = CAIS::rand16((uint32)vision.bots().size());
 					CAngle angle(CAngle::pi());
 
 					while (index < vision.bots().size() && !target)
@@ -2726,7 +2726,7 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 			pgrp.processStateEvent(pgrp.mgr().EventDestinationReachedFirst);
 		}
 
-		uint32 first=0, last=_NpcDestinationReached.size();
+		uint32 first=0, last=(uint32)_NpcDestinationReached.size();
 		for ( ; first != last && _NpcDestinationReached[first]; ++first) {}
 		
 		if (first == last)
@@ -2912,7 +2912,7 @@ void CGrpProfileWanderNoPrim::updateProfile(uint ticksSinceLastUpdate)
 				if (!vision.players().empty())
 				{
 					// there are some player near, look at one if it is not behin us
-					uint index = CAIS::rand16(vision.players().size());
+					uint index = CAIS::rand16((uint32)vision.players().size());
 					CAngle angle(CAngle::pi());
 
 					while (index < vision.players().size() && !target)
@@ -2931,7 +2931,7 @@ void CGrpProfileWanderNoPrim::updateProfile(uint ticksSinceLastUpdate)
 				if (!target && !vision.bots().empty())
 				{
 					// there are some bots near, look at one if it is not behin us
-					uint index = CAIS::rand16(vision.bots().size());
+					uint index = CAIS::rand16((uint32)vision.bots().size());
 					CAngle angle(CAngle::pi());
 
 					while (index < vision.bots().size() && !target)

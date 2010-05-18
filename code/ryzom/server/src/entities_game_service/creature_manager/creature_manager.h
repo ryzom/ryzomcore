@@ -119,7 +119,7 @@ public:
 	~CCreatureManager();
 
 	/// Get Number of creaturein manager
-	uint32 getNumberCreature() { return _Creatures.size(); }
+	uint32 getNumberCreature() { return (uint32)_Creatures.size(); }
 
 	/// Get a reference on creature in manager
 	const TMapCreatures& getCreature() { return _Creatures; }

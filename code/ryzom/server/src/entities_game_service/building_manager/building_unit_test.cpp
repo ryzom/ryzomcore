@@ -151,7 +151,7 @@ void CBuildingTest::timerCallback(CTimer * timer)
 		nlinfo("*** BuildingUnitTest *** callback count %u", _Count);
 	}
 
-	const uint randomNumber = (uint) RandomGenerator.rand( TestCharacters.size()-1 );
+	const uint randomNumber = (uint) RandomGenerator.rand( (uint16)TestCharacters.size()-1 );
 	for (uint i = 0; i < _Simultaneous; i++)
 	{
 		checkIntegrity();
@@ -172,7 +172,7 @@ IDestination * CBuildingTest::getRandomDestination()
 	IDestination * dest = NULL;
 	do
 	{
-		sint32 randomNumber = RandomGenerator.rand( bm->_Triggers.size()-1 );
+		sint32 randomNumber = RandomGenerator.rand( (uint16)bm->_Triggers.size()-1 );
 		CHashMap<sint,CBuildingManager::CTrigger>::iterator itTrigger = bm->_Triggers.begin();
 		for (sint32 i = 0; i < randomNumber; i++)
 		{
@@ -189,7 +189,7 @@ IDestination * CBuildingTest::getRandomDestination()
 			continue;
 		}
 
-		randomNumber = RandomGenerator.rand( trigger.Destinations.size()-1 );
+		randomNumber = RandomGenerator.rand( (uint16)trigger.Destinations.size()-1 );
 		dest = trigger.Destinations[randomNumber];
 	} while ( !dest );
 
@@ -419,7 +419,7 @@ bool CBuildingTest::changeRoom(uint charIndex)
 	{
 		nlassert(++nbLoops <= maxLoops);
 
-		newRoomIndex = (uint16) RandomGenerator.rand( rooms.size()-1 );
+		newRoomIndex = (uint16) RandomGenerator.rand( (uint16)rooms.size()-1 );
 		if (newRoomIndex >= rooms.size())
 			newRoomIndex = 0;
 
@@ -656,7 +656,7 @@ NLMISC_COMMAND (testBuildingManager, "(debug) Unit test for building manager",
 
 	if (FakeCharacters.size() < nbChars)
 	{
-		for (uint i = FakeCharacters.size(); i < nbChars; i++)
+		for (uint i = (uint)FakeCharacters.size(); i < nbChars; i++)
 		{
 			CEntityId id = createFakeCharacter( firstPlayerId+i, toString("fake%u", i), EGSPD::CPeople::Fyros, GSGENDER::female );
 			if (id == CEntityId::Unknown)

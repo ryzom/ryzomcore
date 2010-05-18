@@ -239,7 +239,7 @@ static inline void addNode( ICDBStructNode *newNode,
 							NLMISC::IProgressCallback &progressCallBack )
 {
 	names.push_back(newName);
-	index.insert(make_pair(newName,nodes.size()));
+	index.insert(make_pair(newName,(NLMISC::TSStringId)nodes.size()));
 	nodes.push_back(newNode);
 	nodes.back()->setParent(parent);
 	nodes.back()->setLabel(bankName);
@@ -415,7 +415,7 @@ void CCDBStructNodeBranch::attachChild( ICDBStructNode * node, const string& nod
 	node->setParent(this);
 	_Nodes.push_back( node );
 	_Names.push_back( nodeName );
-	_Index.insert( make_pair(nodeName,_Nodes.size() -1) );
+	_Index.insert( make_pair(nodeName,(NLMISC::TSStringId)_Nodes.size() -1) );
 
 	calcIdBits();
 } // attachChild //
@@ -480,7 +480,7 @@ ICDBStructNode * CCDBStructNodeBranch::getNode (const CTextId& id , bool bCreate
 
 			_Nodes.push_back( newNode );
 			_Names.push_back( str );
-			_Index.insert( make_pair(str,_Nodes.size()-1) );
+			_Index.insert( make_pair(str,(NLMISC::TSStringId)_Nodes.size()-1) );
 			newNode->setParent(this);
 			itIdx = _Index.find(str);
 		}

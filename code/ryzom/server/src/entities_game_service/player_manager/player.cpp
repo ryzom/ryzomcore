@@ -110,7 +110,7 @@ void CPlayer::checkCrashMarker()
 		
 		// check 
 		uint32	lastBad[2];
-		uint32 nbRead = fread(lastBad, 1, 4*2, LastLoad);
+		uint32 nbRead = (uint32)fread(lastBad, 1, 4*2, LastLoad);
 		if (nbRead == 8 && lastBad[0] != 0xffffffff)
 		{
 			// there is a char to to backup

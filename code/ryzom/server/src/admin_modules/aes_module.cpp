@@ -809,7 +809,7 @@ namespace ADMIN
 
 			// read the text from the file - note that the number of bytes read may be less than the
 			// number of bytes requested because we've opened the file in text mode and not binary mode
-			uint32 bytesRead= fread(&txt[0],1,fileSize,f);
+			uint32 bytesRead= (uint32)fread(&txt[0],1,fileSize,f);
 			txt.resize(bytesRead);
 			fclose(f);
 
@@ -833,7 +833,7 @@ namespace ADMIN
 
 			// read the text from the file - note that the number of bytes read may be less than the
 			// number of bytes requested because we've opened the file in text mode and not binary mode
-			uint32 bytesRead= fread(&txt[0],1,fileSize,f);
+			uint32 bytesRead= (uint32)fread(&txt[0],1,fileSize,f);
 			txt.resize(bytesRead);
 			fclose(f);
 
@@ -859,7 +859,7 @@ namespace ADMIN
 
 			// read the text from the file - note that the number of bytes read may be less than the
 			// number of bytes requested because we've opened the file in text mode and not binary mode
-			uint32 bytesRead= fread(&txt[0],1,fileSize,f);
+			uint32 bytesRead= (uint32)fread(&txt[0],1,fileSize,f);
 			txt.resize(bytesRead);
 			fclose(f);
 

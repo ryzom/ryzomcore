@@ -664,7 +664,7 @@ void CMagicActionBasicDamage::launch(
 
 	bool targetChanged = false;
 
-	const uint nbTargets = targets.size();
+	const uint nbTargets = (uint)targets.size();
 
 	for ( uint i = 0; i < nbTargets ; ++i )
 	{
@@ -834,7 +834,7 @@ void CMagicActionBasicDamage::apply(
 	if (!actor)
 		return;
 	
-	uint const nbTargets = _ApplyTargets.size();
+	uint const nbTargets = (uint)_ApplyTargets.size();
 	
 	std::vector<TReportAction> actionReports;
 	actionReports.reserve(nbTargets);

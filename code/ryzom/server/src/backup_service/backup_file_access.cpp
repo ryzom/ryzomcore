@@ -368,7 +368,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 	try
 	{
-		f.serialBuffer(&(Data[0]), Data.size());
+		f.serialBuffer(&(Data[0]), (uint)Data.size());
 		fileSaved = true;
 
 		if (VerboseLog)

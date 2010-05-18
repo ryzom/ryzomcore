@@ -433,7 +433,7 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 				// Decide how many mission items will be given away (supports any float average; typically 1.0)
 				uint quantityOfMissionItemsToGive = 0;
 				vector<uint> quantityPerMatchingMissionItem( matchingItemsForMissions.size(), 0 );
-				uint iMaxMatchingMissionItem = quantityPerMatchingMissionItem.size() - 1;
+				uint iMaxMatchingMissionItem = (uint)quantityPerMatchingMissionItem.size() - 1;
 				quantityOfMissionItemsToGive = (uint)QuarteringQuantityAverageForMissions.get();
 				float decimalPart = (uint)QuarteringQuantityAverageForMissions.get() - (float)floor( QuarteringQuantityAverageForMissions.get() );
 				quantityOfMissionItemsToGive = RandomGenerator.rand( quantityOfMissionItemsToGive * 2 );
@@ -1136,7 +1136,7 @@ void CCharacterProgressionPVE::clearPlayerDamage(const NLMISC::CEntityId &player
 
 			if (removeDamageFromTeam == true)
 			{
-				uint8 teamSize = (*itCreature).second.PlayerInflictedDamage[index].TeamMembers.size();
+				uint8 teamSize = (uint8)(*itCreature).second.PlayerInflictedDamage[index].TeamMembers.size();
 				(*itCreature).second.PlayerInflictedDamage[index].TotalDamage -= (*itCreature).second.PlayerInflictedDamage[index].TotalDamage / teamSize;
 			}
 
@@ -1555,7 +1555,7 @@ void CCharacterProgressionPVE::removeCreature(TDataSetRow creature)
 			vector<TDataSetRow> &creatures = (*itTeam).second;
 
 			uint j;
-			const uint size = creatures.size();
+			const uint size = (uint)creatures.size();
 			for (j = 0  ; j < size ; ++j)
 			{
 				if (creatures[j] == creature)
@@ -1590,7 +1590,7 @@ void CCharacterProgressionPVE::removeCreature(TDataSetRow creature)
 			vector<TDataSetRow> &creatures = (*itPlayer).second;
 
 			uint j;
-			const uint size = creatures.size();
+			const uint size = (uint)creatures.size();
 			for (j = 0  ; j < size ; ++j)
 			{
 				if (creatures[j] == creature)
@@ -1622,7 +1622,7 @@ void CCharacterProgressionPVE::removeCreature(TDataSetRow creature)
 			vector<TDataSetRow> &creatures = (*itCreature).second;
 
 			uint j;
-			const uint size = creatures.size();
+			const uint size = (uint)creatures.size();
 			for (j = 0  ; j < size ; ++j)
 			{
 				if (creatures[j] == creature)
@@ -1670,7 +1670,7 @@ void CCharacterProgressionPVE::transferDamageOnFictitiousCreature(TDataSetRow pl
 	if (itPlayer != _PlayersWoundedCreatures.end())
 	{
 		vector<TDataSetRow> &playerAttackedCreatures = (*itPlayer).second;
-		uint nbCreatures = playerAttackedCreatures.size();
+		uint nbCreatures = (uint)playerAttackedCreatures.size();
 		while (nbCreatures > 0)
 		{
 			// clear player damage against this creature
@@ -1999,7 +1999,7 @@ bool CCharacterActions::forgetXpGain( TDataSetRow creature )
 //----------------------------------------------------------------------------
 void CSkillProgress::incNbAction( SKILLS::ESkills skill )
 {
-	const uint size = _SkillsProgress.size();
+	const uint size = (uint)_SkillsProgress.size();
 
 	for( uint i = 0; i < size; ++i )
 	{
@@ -2026,7 +2026,7 @@ bool CSkillProgress::applyXp( CCharacter * c, float xpGainPerOpponent )
 
 
 	// compute total number of action  (BUT skip all 'unknown' skills actions)
-	const uint size = _SkillsProgress.size();
+	const uint size = (uint)_SkillsProgress.size();
 	double totalNbActions = 0;
 	for( uint i = 0; i < size; ++i )
 	{
@@ -2233,7 +2233,7 @@ void CCreatureTakenDamage::attributeKillsForMission(TDataSetRow victimRowId)
 {
 	// compute the minimum damade to do to hava a kill attributed
 	float minDamage = TotalCreatureInflictedDamage;
-	const uint size = PlayerInflictedDamage.size();
+	const uint size = (uint)PlayerInflictedDamage.size();
 	for ( uint i = 0; i < PlayerInflictedDamage.size(); i++ )
 		minDamage += PlayerInflictedDamage[i].TotalDamage;
 	minDamage = KillAttribMinFactor * minDamage;
@@ -2294,7 +2294,7 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 	bool retValue = false;
 	bool found = false;
 
-	const uint size = PlayerInflictedDamage.size();
+	const uint size = (uint)PlayerInflictedDamage.size();
 	for ( uint i = 0 ; i < size ; ++i)
 	{
 		float damage;
@@ -2329,7 +2329,7 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 		{
 			TotalCreatureInflictedDamage += damage;
 
-			const uint nbC = CreatureInflictedDamage.size();
+			const uint nbC = (uint)CreatureInflictedDamage.size();
 			for ( uint j = 0 ; j < nbC ; ++j)
 			{
 				if (CreatureInflictedDamage[j].CreatureId == CEntityId::Unknown)
@@ -2391,7 +2391,7 @@ void CCreatureTakenDamage::attributeKill( uint16 teamId, TDataSetRow victimRowId
 
 			while ( !members.empty() )
 			{
-				uint idx = RandomGenerator.rand( members.size() - 1 );
+				uint idx = RandomGenerator.rand( (uint16)members.size() - 1 );
 				CCharacter * c = PlayerManager.getChar( members[idx] );
 				if ( c  && c->getEnterFlag() )
 				{

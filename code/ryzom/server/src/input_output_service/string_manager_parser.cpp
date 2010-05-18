@@ -1337,11 +1337,11 @@ void	CStringManager::mergeEntityWords(CEntityWords& dest, const CEntityWords& so
 	uint32	extraRows = 0;
 
 	// extra columns not supported yet
-	uint32	osz = source._ColumnInfo.size();
+	uint32	osz = (uint32)source._ColumnInfo.size();
 	std::map<std::string, uint32>::const_iterator	iti;
 	for (iti=source._ColumnInfo.begin(); iti!=source._ColumnInfo.end(); ++iti)
 		if (dest._ColumnInfo.find((*iti).first) == dest._ColumnInfo.end())
-			extraColumns.push_back(std::make_pair<std::string, uint32>((*iti).first, osz+extraColumns.size()));
+			extraColumns.push_back(std::make_pair<std::string, uint32>((*iti).first, osz+(uint32)extraColumns.size()));
 
 	for (iti=source._RowInfo.begin(); iti!=source._RowInfo.end(); ++iti)
 		if (dest._RowInfo.find((*iti).first) == dest._RowInfo.end())
@@ -1350,10 +1350,10 @@ void	CStringManager::mergeEntityWords(CEntityWords& dest, const CEntityWords& so
 	bool	dataSizeChanged = (extraRows != 0);
 	uint32*	data = dest._Data;
 
-	uint	sCols = source._ColumnInfo.size();
-	uint	sRows = source._RowInfo.size();
-	uint	oCols = dest._ColumnInfo.size();
-	uint	oRows = dest._RowInfo.size();
+	uint	sCols = (uint)source._ColumnInfo.size();
+	uint	sRows = (uint)source._RowInfo.size();
+	uint	oCols = (uint)dest._ColumnInfo.size();
+	uint	oRows = (uint)dest._RowInfo.size();
 	uint	nCols = oCols;
 	uint	nRows = oRows+extraRows;
 
@@ -1457,15 +1457,15 @@ void	CStringManager::displayEntityWords(TLanguages language, STRING_MANAGER::TPa
 	{
 		CDisplayColumnInfo	inf;
 		inf.Name = (*iti).first;
-		inf.MaxWidth = inf.Name.size();
+		inf.MaxWidth = (uint)inf.Name.size();
 		inf.InRow = (*iti).second;
 		columns.push_back(inf);
 	}
 
 	std::sort(columns.begin(), columns.end());
 
-	uint	nCols = words._ColumnInfo.size();
-	uint	rRows = words._RowInfo.size();
+	uint	nCols = (uint)words._ColumnInfo.size();
+	uint	rRows = (uint)words._RowInfo.size();
 
 	for (iti=words._RowInfo.begin(); iti!=words._RowInfo.end(); ++iti)
 	{
@@ -1480,7 +1480,7 @@ void	CStringManager::displayEntityWords(TLanguages language, STRING_MANAGER::TPa
 
 		for (uint col=0; col<columns.size(); ++col)
 		{
-			uint	sz = getString(pData[columns[col].InRow]).toString().size();
+			uint	sz = (uint)getString(pData[columns[col].InRow]).toString().size();
 			if (columns[col].MaxWidth < sz)
 				columns[col].MaxWidth = sz;
 		}
@@ -1516,7 +1516,7 @@ void	CStringManager::displayEntityWords(TLanguages language, STRING_MANAGER::TPa
  */
 void	CStringManager::setEntityWord(const std::string& path, const ucstring& value)
 {
-	uint	start = 0, end = 0;
+	std::string::size_type	start = 0, end = 0;
 
 	if ((end = path.find('.', start)) == string::npos)
 		return;

@@ -772,7 +772,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 						H_AUTO(SavePlayerPDRMakeTxtMsgBS);
 						std::string s;
 						pdr.toString(s);
-						msg.DataMsg.serialBuffer((uint8*)&s[0], s.size());
+						msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
 					}
 					else
 					{

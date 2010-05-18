@@ -366,7 +366,7 @@ public:
 
 	void	writeLine()
 	{
-		File.serialBuffer((uint8*)(&(Line[0])), Line.size()*2);
+		File.serialBuffer((uint8*)(&(Line[0])), (uint)Line.size()*2);
 	}
 };
 
@@ -397,7 +397,7 @@ public:
 
 	void writeLine()
 	{
-		File.serialBuffer((uint8*)(&(GreyLine[0])), GreyLine.size()*sizeof(GreyLine[0]));
+		File.serialBuffer((uint8*)(&(GreyLine[0])), (uint)GreyLine.size()*sizeof(GreyLine[0]));
 	}
 };
 

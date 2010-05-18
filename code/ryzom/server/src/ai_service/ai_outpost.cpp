@@ -837,7 +837,7 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	//	FOREACH(itState, CCont<CAIState>, stateMachine->states())
 		for (size_t i=0; i<stateMachine->cstStates().size(); ++i)
 		{
-			CAIState* state = stateMachine->cstStates()[i];
+			CAIState* state = stateMachine->cstStates()[(uint32)i];
 			if (state->getName()==initialStateName)
 				initialState = state;
 		}

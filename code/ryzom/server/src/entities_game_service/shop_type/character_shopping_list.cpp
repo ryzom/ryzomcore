@@ -410,7 +410,7 @@ void CCharacterShoppingList::initPageToUpdate( uint32 nbSlotPerPage )
 {
 	_NbSlotPerPage = nbSlotPerPage;
 
-	const uint nbPages = (_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size() + _CurrentTradeListYours.size() + nbSlotPerPage-1) / nbSlotPerPage ;
+	const uint nbPages = (uint)(_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size() + _CurrentTradeListYours.size() + nbSlotPerPage-1) / nbSlotPerPage ;
 	
 	// Yoyo: to avoid "my YOURS list is refreshing too late"
 	/*for (uint i = 0 ; i < nbPages ; ++i)
@@ -423,9 +423,9 @@ void CCharacterShoppingList::initPageToUpdate( uint32 nbSlotPerPage )
 
 	// compute iterator for the 3 lists
 	curPageForList[0]= 0;
-	endPageForList[0]= (_CurrentTradeListNpc.size()) / nbSlotPerPage;
+	endPageForList[0]= (uint32)(_CurrentTradeListNpc.size()) / nbSlotPerPage;
 	curPageForList[1]= endPageForList[0];
-	endPageForList[1]= (_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size()) / nbSlotPerPage;
+	endPageForList[1]= (uint32)(_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size()) / nbSlotPerPage;
 	curPageForList[2]= endPageForList[1];
 	endPageForList[2]= nbPages;
 
@@ -473,7 +473,7 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 	uint end;
 	bool hasNext;
 
-	const uint nbTradeListItems = _CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size() + _CurrentTradeListYours.size();
+	const uint nbTradeListItems = (uint)(_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size() + _CurrentTradeListYours.size());
 
 	if ( begin + _NbSlotPerPage < nbTradeListItems )
 	{

@@ -48,7 +48,7 @@ public:
 	bool getReferencingModule( ModuleClass* & module)const
 	{
 		module = NULL;
-		const uint size = _ModulesReferencingMe.size();
+		const uint size = (uint)_ModulesReferencingMe.size();
 		for (uint i = 0; i < size; i++ )
 		{	
 			ModuleClass * moduleChecked = dynamic_cast<ModuleClass*>( (::IModule*)_ModulesReferencingMe[i] );

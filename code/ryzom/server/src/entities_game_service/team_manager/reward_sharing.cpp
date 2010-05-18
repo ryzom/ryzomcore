@@ -378,7 +378,7 @@ void CRewardSharing::setUsersDb()
 				}
 				// set generic property
 //				user->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:SHARE:%u:NB_MEMBER",j), _Rewards[j].Candidates.size() );
-				shareItem.setNB_MEMBER(user->_PropertyDatabase, _Rewards[j].Candidates.size());
+				shareItem.setNB_MEMBER(user->_PropertyDatabase, (uint8)_Rewards[j].Candidates.size());
 				
 				uint p = 0;
 				for (; p < _Rewards[j].Candidates.size();p++)

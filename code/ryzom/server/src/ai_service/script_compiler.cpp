@@ -2168,7 +2168,7 @@ bool compileExternalScript (const char *filename, const char *outputFilename)
 		string content;
 		char buffer[512];
 		int read;
-		while ((read = fread (buffer, 1, sizeof(buffer)-1, file)) == sizeof(buffer)-1)
+		while ((read = (int)fread (buffer, 1, sizeof(buffer)-1, file)) == sizeof(buffer)-1)
 		{
 			buffer[read] = 0;
 			content += buffer;

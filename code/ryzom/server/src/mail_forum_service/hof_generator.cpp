@@ -200,9 +200,9 @@ void CHoFGenerator::setNextStep()
 			static const string phpHeader = "<?php\n";
 			static const string phpFooter = "?>\n";
 			
-			ofile.serialBuffer((uint8*)(&phpHeader[0]), phpHeader.size());
-			ofile.serialBuffer((uint8*)(&_GeneratedScript[0]), _GeneratedScript.size());
-			ofile.serialBuffer((uint8*)(&phpFooter[0]), phpFooter.size());
+			ofile.serialBuffer((uint8*)(&phpHeader[0]), (uint)phpHeader.size());
+			ofile.serialBuffer((uint8*)(&_GeneratedScript[0]), (uint)_GeneratedScript.size());
+			ofile.serialBuffer((uint8*)(&phpFooter[0]), (uint)phpFooter.size());
 
 			if (HoFVerbose.get())
 			{
@@ -706,7 +706,7 @@ void CHoFGenerator::generatePHPArray(const std::string & varName, const CTable &
 	phpArray.clear();
 	phpArray += toString("$%s = array(", varName.c_str());
 
-	uint32 nbRows = tableRows->size();
+	uint32 nbRows = (uint32)tableRows->size();
 	if (maxRows < nbRows)
 		nbRows = maxRows;
 

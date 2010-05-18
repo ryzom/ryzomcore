@@ -350,7 +350,7 @@ void CGuildManager::saveGuild( CGuild* guild )
 				}
 				// serial it to file
 				CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, Bsi );
-				msg.DataMsg.serialBuffer((uint8*)&buffer.front(), buffer.size());
+				msg.DataMsg.serialBuffer((uint8*)&buffer.front(), (uint)buffer.size());
 				Bsi.sendFile( msg );
 			}
 			catch( Exception& )
@@ -636,7 +636,7 @@ void CGuildManager::playerConnection( CGuildCharProxy & proxy )
 void CGuildManager::removeInvitation(CGuildInvitation* invitation)
 {
 	nlassert(invitation);
-	const uint size = _Invitations.size();
+	const uint size = (uint)_Invitations.size();
 	for ( uint i = 0; i < size; ++i )
 	{
 		if ( _Invitations[i] == invitation )
@@ -1126,7 +1126,7 @@ void CGuildManager::loadGuild(const std::string &fileName)
 //----------------------------------------------------------------------------
 void CGuildManager::callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
 {
-	const uint len = strlen("guild_XXXXX.ext");
+	const uint len = (uint)strlen("guild_XXXXX.ext");
 
 	string file = CFile::getFilename(fileDescription.FileName);
 
@@ -1529,7 +1529,7 @@ bool CGuildManager::checkGuildStrings(CGuildCharProxy & proxy,const ucstring & n
 	}
 
 	/// check if name and description are ethically	acceptable
-	const uint size = CEntityIdTranslator::getInstance()->getInvalidNames().size();
+	const uint size = (uint)CEntityIdTranslator::getInstance()->getInvalidNames().size();
 	string nameStr = CEntityIdTranslator::getInstance()->getRegisterableString( name );
 	string descriptionStr = CEntityIdTranslator::getInstance()->getRegisterableString( description );
 	for (uint i = 0; i < CEntityIdTranslator::getInstance()->getInvalidNames().size(); i++)

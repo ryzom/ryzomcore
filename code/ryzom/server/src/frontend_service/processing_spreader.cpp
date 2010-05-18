@@ -48,7 +48,7 @@ void CProcessingSpreader::init()
 void CProcessingSpreader::getProcessingBounds( THostMap::iterator& firstit, sint& firstindex, sint& outerboundindex )
 {
 	THostMap& clientmap = CFrontEndService::instance()->receiveSub()->clientMap();
-	sint nbClients = clientmap.size();
+	sint nbClients = (sint)clientmap.size();
 
 	// Test if the index has reached the end of the client map
 	if ( _ClientMapIndex >= nbClients )

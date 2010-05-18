@@ -48,7 +48,7 @@ size_t makeStringId (const char *str)
 
 void addSignature (char *dest, char s)
 {
-	uint size = strlen (dest);
+	uint size = (uint)strlen (dest);
 	if (size+1 < (uint)(AICOMP_MAX_SIGNATURE))
 	{
 		dest[size] = s;
@@ -58,8 +58,8 @@ void addSignature (char *dest, char s)
 			
 void addSignature (char *dest, char *src)
 {
-	uint size0 = strlen (dest);
-	uint size1 = strlen (src);
+	uint size0 = (uint)strlen (dest);
+	uint size1 = (uint)strlen (src);
 	if (size0+size1+1 < (uint)(AICOMP_MAX_SIGNATURE))
 		strcat (dest, src);
 }

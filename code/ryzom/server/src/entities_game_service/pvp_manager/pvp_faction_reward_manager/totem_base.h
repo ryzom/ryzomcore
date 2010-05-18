@@ -73,7 +73,7 @@ public :
 	inline void		addNeighbour( TAIAlias neighbour )	{ _Neighbours.push_back( neighbour ); }
 
 	/// Get the number of neighbours
-	inline uint		getNumNeighbours() const			{ return _Neighbours.size(); }
+	inline uint		getNumNeighbours() const			{ return (uint)_Neighbours.size(); }
 
 	/// Get the list of neighbours
 	inline TAIAlias	getNeighbour( uint index ) const	{ return _Neighbours[index]; }

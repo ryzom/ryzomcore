@@ -169,7 +169,7 @@ public:
 	void		pop_back()					{ nlassert(_Top > _Array); --_Top; }
 	//T			&front()					{ return _Array[0]; }
 	T			&back()						{ nlassert(_Top > _Array); return *(_Top-1); }
-	uint		size()						{ return _Top-_Array; }
+	uint		size()						{ return (uint)(_Top-_Array); }
 	bool		empty()						{ return _Top == _Array; }
 	void		clear()						{ _Top = _Array; }
 };

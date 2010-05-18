@@ -73,7 +73,7 @@ void CCombatActionDoT::apply( CCombatPhrase *phrase )
 	const TGameCycle endDate = CTickEventHandler::getGameCycle() + _EffectDuration;
 
 	const vector<CCombatPhrase::TTargetInfos> &targets = phrase->getTargets();
-	const uint nbTargets = targets.size();
+	const uint nbTargets = (uint)targets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 //		if ( !phrase->hasTargetDodged(i) )

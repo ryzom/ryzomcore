@@ -307,9 +307,9 @@ protected:
 	/// standard FILE handler
 	FILE*				_File;
 
-	bool				readBuffer(void* buf, uint len)					{ if (_File == NULL) return false; uint32 rb = fread(buf, 1, len, _File); _ReadBytes += rb; return rb == len; }
-	bool				writeBuffer(const void* buf, uint len)			{ if (_File == NULL) return false; uint32 wb = fwrite(buf, 1, len, _File); _WrittenBytes += wb; return wb == len; }
-	bool				readBuffer(void* buf, uint len, uint& readlen)	{ if (_File == NULL) return false; readlen = fread(buf, 1, len, _File); return readlen == len; }
+	bool				readBuffer(void* buf, uint len)					{ if (_File == NULL) return false; uint32 rb = (uint32)fread(buf, 1, len, _File); _ReadBytes += rb; return rb == len; }
+	bool				writeBuffer(const void* buf, uint len)			{ if (_File == NULL) return false; uint32 wb = (uint32)fwrite(buf, 1, len, _File); _WrittenBytes += wb; return wb == len; }
+	bool				readBuffer(void* buf, uint len, uint& readlen)	{ if (_File == NULL) return false; readlen = (uint)fread(buf, 1, len, _File); return readlen == len; }
 
 	static uint64		_ReadBytes;
 	static uint64		_WrittenBytes;
@@ -432,7 +432,7 @@ public:
 	/**
 	 * Get Number of Mapped rows
 	 */
-	uint32					numMapped() const				{ return _KeyMap.size(); }
+	uint32					numMapped() const				{ return (uint32)_KeyMap.size(); }
 
 
 

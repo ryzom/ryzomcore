@@ -583,7 +583,7 @@ inline const CAIEntityMatrixIteratorTblRandom::iterator CAIEntityMatrixIteratorT
 
 inline uint32 CAIEntityMatrixIteratorTblRandom::size() const
 {
-	return _tbl.size();
+	return (uint32)_tbl.size();
 }
 
 
@@ -631,7 +631,7 @@ inline const CAIEntityMatrixIteratorTblLinear::iterator CAIEntityMatrixIteratorT
 
 inline uint32 CAIEntityMatrixIteratorTblLinear::size() const
 {
-	return _tbl.size();
+	return (uint32)_tbl.size();
 }
 
 

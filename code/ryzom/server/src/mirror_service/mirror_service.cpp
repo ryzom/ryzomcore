@@ -695,7 +695,7 @@ void	CMirrorService::buildAndSendAllDeltas()
 						if ( tracker.needsSyncAfterAllATEAcknowledgesReceived() )
 						{
 							// "Sync delta". Switches tracker.isAllowedToSendToRemoteMS() to true (and the corresponding removal one as well).
-							syncOnlineLocallyManagedEntitiesIntoDeltaAndOpenEntityTrackersToRemoteMS( delta, dataset, tracker, isl-dataset._EntityTrackers[ADDING].begin() );
+							syncOnlineLocallyManagedEntitiesIntoDeltaAndOpenEntityTrackersToRemoteMS( delta, dataset, tracker, (uint)(isl-dataset._EntityTrackers[ADDING].begin()) );
 						}
 						else
 						{
@@ -2999,7 +2999,7 @@ void	CMirrorService::synchronizeSubscriptionsToNewMS( TServiceId newRemoteMSId )
 	msgout.serial( mainTag() );
 
 	// Send sync corresponding to MARCS message (list of client services)
-	uint32 nbClientServices = _ClientServices.size();
+	uint32 nbClientServices = (uint32)_ClientServices.size();
 	msgout.serial( nbClientServices );
 	TClientServices::const_iterator ics;
 	for ( ics=_ClientServices.begin(); ics!=_ClientServices.end(); ++ics )

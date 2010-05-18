@@ -304,7 +304,7 @@ void COutpostManager::loadOutpostPrimitives()
 										OUTPOST_INF("Outpost '%s' was successfully parsed", outpost->getName().c_str());
 									
 										// nb : short id starts at 1, 0 is used for invalid
-										_OutpostAliasToShortId.insert( make_pair( outpost->getAlias(), _Outposts.size()) );
+										_OutpostAliasToShortId.insert( make_pair( outpost->getAlias(), (uint16)_Outposts.size()) );
 									}
 								}
 							}
@@ -681,7 +681,7 @@ void COutpostManager::tickUpdate()
 		}
 		else
 		{
-			uint32 nbOutpost = _Outposts.size();
+			uint32 nbOutpost = (uint32)_Outposts.size();
 			uint32 nbOutpostPerTick = (uint32)floor(double(nbOutpost) / double(OutpostUpdatePeriod.get()));
 			nbOutpostPerTick = std::max(uint32(1), nbOutpostPerTick); // The strict minimum is a single outpost update per tick
 			
@@ -705,7 +705,7 @@ void COutpostManager::tickUpdate()
 				}
 				else
 				{
-					endIndex -= _Outposts.size();
+					endIndex -= (uint32)_Outposts.size();
 					for (uint32 i = beginIndex; i < _Outposts.size(); i++)
 						_Outposts[i]->updateOutpost(currentTime);
 					for (uint32 i = 0; i < endIndex; i++)
@@ -784,7 +784,7 @@ void COutpostManager::saveOutpost(NLMISC::CSmartPtr<COutpost> outpost)
 				H_AUTO(COutpostSerialXML);
 				std::string s;
 				pdr.toString(s);
-				msg.DataMsg.serialBuffer((uint8*)&s[0], s.size());
+				msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
 			}
 			else
 			{

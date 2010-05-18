@@ -234,7 +234,7 @@ NLMISC_CATEGORISED_COMMAND(utils,pdrInfo,"Extract info from pdr file(s)","<input
 
 	NLMISC::CSString outputFileName;
 	NLMISC::CSString csvTxt;
-	uint32 numFileSpecs=args.size();
+	uint32 numFileSpecs=(uint32)args.size();
 
 	if (numFileSpecs>0 && NLMISC::CSString(args.back()).right(4)==".csv")
 	{
@@ -420,7 +420,7 @@ NLMISC_CATEGORISED_COMMAND(utils,dir,"list files in the current directory","[<wi
 
 	std::vector<std::string> directories;
 	NLMISC::CPath::getPathContent(".",false,true,false,directories);
-	for (uint32 i=directories.size();i--;)
+	for (uint32 i=(uint32)directories.size();i--;)
 	{
 		if (!NLMISC::testWildCard(directories[i],wildcard))
 		{
@@ -436,7 +436,7 @@ NLMISC_CATEGORISED_COMMAND(utils,dir,"list files in the current directory","[<wi
 
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(".",false,false,true,files);
-	for (uint32 i=files.size();i--;)
+	for (uint32 i=(uint32)files.size();i--;)
 	{
 		if (!NLMISC::testWildCard(files[i],wildcard))
 		{
@@ -577,7 +577,7 @@ NLMISC_CATEGORISED_COMMAND(utils,viewBinFile,"view a binary file segment","<file
 	// clamp the value of 'count'
 	if (start+count>fileBody.size())
 	{
-		count= fileBody.size()-start;
+		count= (uint32)fileBody.size()-start;
 	}
 
 	// display the data

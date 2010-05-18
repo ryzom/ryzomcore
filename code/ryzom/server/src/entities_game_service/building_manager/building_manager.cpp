@@ -393,7 +393,7 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 	request.Session = 0;
 
 	CTriggerRequestEntry entry;
-	const uint destCount = trigger.Destinations.size();
+	const uint destCount = (uint)trigger.Destinations.size();
 	for ( uint i = 0; i < destCount; i++ )
 	{
 		entry.Destination = trigger.Destinations[i];
@@ -477,7 +477,7 @@ void CBuildingManager::fillTriggerPage(const NLMISC::CEntityId & eId, uint16 cli
 	uint end = start + MaxEntryPerLiftPage;
 	if ( end >= request.Entries.size() )
 	{
-		end = request.Entries.size();
+		end = (uint)request.Entries.size();
 //		user->_PropertyDatabase.setProp( "ASCENSOR:HAS_NEXT",0 );
 		CBankAccessor_PLR::getASCENSOR().setHAS_NEXT(user->_PropertyDatabase, false);
 	}
@@ -723,7 +723,7 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 
 	// check if sessions mactch between user and system
 	uint16 session = 0;
-	const uint16 destCount = (*it).second.Entries.size();
+	const uint16 destCount = (uint16)(*it).second.Entries.size();
 	IDestination * currentDest = NULL;
 	for ( uint i = 0; i < destCount; i++ )
 	{

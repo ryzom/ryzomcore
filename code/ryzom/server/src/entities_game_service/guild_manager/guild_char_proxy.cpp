@@ -128,7 +128,7 @@ void CGuildCharProxy::updateTarget()
 //----------------------------------------------------------------------------
 uint16 CGuildCharProxy::getMainPlace()
 {
-	uint size = _ModuleCore->getPlaces().size();
+	uint size = (uint)_ModuleCore->getPlaces().size();
 	for ( uint i = 0; i < size; i++ )
 	{
 		const CPlace * place = CZoneManager::getInstance().getPlaceFromId( _ModuleCore->getPlaces()[i] );

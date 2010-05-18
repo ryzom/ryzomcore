@@ -105,7 +105,7 @@ I16x16Layer		*I16x16Layer::compress(I16x16Layer *layer, sint32 blank)
 			++((*it).second);
 	}
 
-	uint	msize = count.size();
+	uint	msize = (uint)count.size();
 
 	if (msize == 1)
 	{

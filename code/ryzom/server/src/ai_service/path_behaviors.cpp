@@ -698,7 +698,7 @@ bool CPathCont::getPathForSource(CPathPosition& pathPos, RYAI_MAP_CRUNCH::CWorld
 		
 		if (topoItFind!=topoItEnd)
 		{
-			pathPos._Index = topoItFind-topoItBegin;
+			pathPos._Index = (uint)(topoItFind-topoItBegin);
 			pathPos._Path = *it;
 			return true;
 		}
@@ -834,7 +834,7 @@ RYAI_MAP_CRUNCH::CTopology::TTopologyRef const& CPathPosition::getNextTopology()
 
 bool CPathPosition::isFinished() const
 {
-	uint32 size = _Path->topologiesPath().size();
+	uint32 size = (uint32)_Path->topologiesPath().size();
 	return (size==0 || _Index==size-1);
 }
 

@@ -919,7 +919,7 @@ void CMovementMagnet::getNewDestination(RYAI_MAP_CRUNCH::CWorldPosition const& a
 	{
 		// first, try to take the same way as another bot of the group with the same comportment.		
 		CCont<CBot >	&bots	=	_BotFauna.spawnGrp().bots();
-		uint32	nbBots=bots.size();
+		uint32	nbBots=(uint32)bots.size();
 
 		float		bestScore=0.f;
 		CAIVector	bestDest;

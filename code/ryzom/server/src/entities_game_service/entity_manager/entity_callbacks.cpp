@@ -1242,7 +1242,7 @@ void sendCharactersSummary( CPlayer *player, bool AllAutorized, uint32 bitfieldO
 	player->getCharactersSummary( chars );
 	if (bitfieldOwnerOfActiveAnimSession != 0)
 	{
-		for ( uint i=0, len=chars.size(); i!=len; ++i )
+		for ( uint i=0, len=(uint)chars.size(); i!=len; ++i )
 		{
 			chars[i].InRingSession = ((bitfieldOwnerOfActiveAnimSession & (1 << i)) != 0);		
 		}
@@ -1250,7 +1250,7 @@ void sendCharactersSummary( CPlayer *player, bool AllAutorized, uint32 bitfieldO
 
 	if (bitfieldOwnerOfEditSession != 0)
 	{
-		for ( uint i=0, len=chars.size(); i!=len; ++i )
+		for ( uint i=0, len=(uint)chars.size(); i!=len; ++i )
 		{			
 			chars[i].HasEditSession = ((bitfieldOwnerOfEditSession & (1 << i)) != 0);
 		}
