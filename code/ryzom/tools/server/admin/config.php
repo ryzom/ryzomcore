@@ -10,7 +10,7 @@
 
 	// site paths definitions
 	define('NELTOOL_SITEBASE','http://open.ryzom.com/');
-	define('NELTOOL_SYSTEMBASE','/home/nevrax/code/ryzom/tools/server/admin/');
+	define('NELTOOL_SYSTEMBASE','/home/nevrax/hg/code/ryzom/tools/server/admin/');
 	define('NELTOOL_LOGBASE', NELTOOL_SYSTEMBASE .'/logs/');
 	define('NELTOOL_IMGBASE', NELTOOL_SYSTEMBASE .'/imgs/');
 
