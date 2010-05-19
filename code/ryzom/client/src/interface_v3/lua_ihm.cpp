@@ -31,9 +31,15 @@
 #undef assert
 #define assert nlassert
 #include <luabind/luabind.hpp>
+// in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
 #if LUABIND_MAX_ARITY == 10
-# include <luabind/version.hpp>
 # include <luabind/operator.hpp>
+# include <luabind/version.hpp>
+# ifndef LUABIND_VERSION
+// luabind 0.7 doesn't define LUABIND_VERSION
+#   define LUABIND_VERSION 700
+# endif
+// luabind 0.6 doesn't define LUABIND_VERSION but LUABIND_MAX_ARITY is set to 5
 #elif LUABIND_MAX_ARITY == 5
 # define LUABIND_VERSION 600
 #else
