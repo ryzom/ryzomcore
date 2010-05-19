@@ -65,6 +65,11 @@ bool							SetMousePosFirstTime = true;
 // mask for mouse buttons that are known to be down
 uint							DownMouseButtons = 0;
 
+#ifdef NL_OS_UNIX
+// on X11, store whether the mouse was captured or not
+bool							MouseCapture = false;
+#endif
+
 //////////////
 // FUNCTION //
 //////////////
@@ -244,6 +249,13 @@ void	SetMouseFreeLook ()
 		}
 		UpdateMouse ();
 	}
+	
+#ifdef NL_OS_UNIX
+	// on X11 the mouse needs to get pulled into the middle each update, else
+	// the cursor would reach the border of the window / desktop 
+	// and freelook would hang
+	Driver->setMousePos(0.5f, 0.5f);
+#endif
 }
 
 //*********************************************************************************
@@ -360,24 +372,28 @@ void CaptureSystemCursor()
 	HWND drvWnd = (HWND) Driver->getDisplay();
 	if (!drvWnd) return;
 	SetCapture(drvWnd);
+#else
+	// on X11, set driver mouse capture on and store it locally as well
+	Driver->setCapture(MouseCapture = true);
 #endif
 }
 
 //*********************************************************************************
 void ReleaseSystemCursor()
 {
+	if (!IsSystemCursorCaptured()) return;
 #ifdef NL_OS_WINDOWS
-	if (IsSystemCursorCaptured())
+	// if hardware mouse and not in client area, then force to update its aspect by updating its pos
+	if (!IsSystemCursorInClientArea())
 	{
-		// if hardware mouse and not in client area, then force to update its aspect by updating its pos
-		if (!IsSystemCursorInClientArea())
-		{
-			// force update
-			ShowCursor(FALSE);
-			ShowCursor(TRUE);
-		}
-		ReleaseCapture();
+		// force update
+		ShowCursor(FALSE);
+		ShowCursor(TRUE);
 	}
+	ReleaseCapture();
+#else
+	// on X11, set driver mouse capture off and store it locally as well
+	Driver->setCapture(MouseCapture = false);
 #endif
 }
 
@@ -388,7 +404,7 @@ bool IsSystemCursorCaptured()
 #ifdef NL_OS_WINDOWS
 	return GetCapture() == (HWND) Driver->getDisplay();
 #else
-	return false;
+	return MouseCapture;
 #endif
 }
 
