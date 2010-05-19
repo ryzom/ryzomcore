@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="admin_service"
 	ProjectGUID="{AA03E539-FE77-4B63-BE0E-DE637635E5A9}"
 	RootNamespace="admin_service"
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -68,7 +68,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="mysqlclient.lib"
-				OutputFile="$(RootNamespace)_d.exe"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="msvcrt"
 				GenerateDebugInformation="true"
@@ -101,8 +100,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)obj64\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -150,7 +149,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="mysqlclient.lib"
-				OutputFile="$(RootNamespace)_d.exe"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -183,8 +181,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -231,7 +229,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib mysqlclient.lib"
-				OutputFile="$(RootNamespace)_r.exe"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrtd"
 				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
@@ -265,8 +262,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)obj64\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -314,7 +311,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib mysqlclient.lib"
-				OutputFile="$(RootNamespace)_r.exe"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrtd"
 				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
