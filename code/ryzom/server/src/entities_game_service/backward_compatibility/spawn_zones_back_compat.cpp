@@ -34,6 +34,7 @@ namespace BACK_COMPAT
 // !!! DO NOT EDIT THIS TABLE !!!
 static const string OldSpawnZones[] =
 {
+/*
 	"spawn_global_fyros_matis",
 	"spawn_global_tryker_matis",
 	"spawn_global_bagne_matis",
@@ -615,6 +616,7 @@ static const string OldSpawnZones[] =
 	"spawn_outpost_prime_root_01",
 	"spawn_outpost_prime_root_02",
 	"spawn_outpost_prime_root_03"
+*/
 };
 
 static vector<uint16> OldToNewSpawnZoneId;

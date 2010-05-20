@@ -34,6 +34,7 @@ namespace BACK_COMPAT
 // !!! DO NOT EDIT THIS TABLE !!!
 static const string OldPlaces[] =
 {
+/*
 	"region_groveofconfusion",
 	"region_hiddensource",
 	"region_hereticshovel",
@@ -551,6 +552,7 @@ static const string OldPlaces[] =
 	"goo_border_24",
 	"goo_border_23",
 	"goo_border_22"
+*/
 };
 
 static vector<uint16> OldToNewPlaceId;
