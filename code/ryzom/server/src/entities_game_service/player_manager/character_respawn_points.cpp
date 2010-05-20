@@ -23,7 +23,7 @@
 #include "game_share/fame.h"
 #include "game_share/continent.h"
 
-#include "backward_compatibility/spawn_zones_back_compat.h"
+//#include "backward_compatibility/spawn_zones_back_compat.h"
 #include "player_manager/character_respawn_points.h"
 #include "player_manager/character.h"
 #include "pvp_manager/pvp_manager_2.h"

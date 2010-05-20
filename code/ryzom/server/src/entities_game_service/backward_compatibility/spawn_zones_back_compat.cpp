@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "spawn_zones_back_compat.h"
+//#include "spawn_zones_back_compat.h"
 
 // game_share
 #include "game_share/utils.h"
@@ -27,14 +27,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
+/*
 namespace BACK_COMPAT
 {
 
 // !!! DO NOT EDIT THIS TABLE !!!
 static const string OldSpawnZones[] =
 {
-/*
 	"spawn_global_fyros_matis",
 	"spawn_global_tryker_matis",
 	"spawn_global_bagne_matis",
@@ -616,7 +615,6 @@ static const string OldSpawnZones[] =
 	"spawn_outpost_prime_root_01",
 	"spawn_outpost_prime_root_02",
 	"spawn_outpost_prime_root_03"
-*/
 };
 
 static vector<uint16> OldToNewSpawnZoneId;
@@ -650,3 +648,4 @@ uint16 oldToNewSpawnZoneId(uint16 oldId)
 }
 
 } // namespace BACK_COMPAT
+*/

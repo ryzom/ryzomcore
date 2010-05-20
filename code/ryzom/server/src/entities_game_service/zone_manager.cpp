@@ -43,7 +43,7 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "pvp_manager/pvp_safe_zone.h"
 
-#include "backward_compatibility/spawn_zones_back_compat.h"
+//#include "backward_compatibility/spawn_zones_back_compat.h"
 #include "backward_compatibility/places_back_compat.h"
 
 #include "pvp_manager/pvp.h"
@@ -636,7 +636,7 @@ void CZoneManager::initInstance()
 	CPVPManager::getInstance()->applyConfigToPVPZones();
 
 	// for backward compatibility
-	BACK_COMPAT::initSpawnZonesCompat();
+	//BACK_COMPAT::initSpawnZonesCompat();
 	BACK_COMPAT::initPlacesCompat();
 
 
