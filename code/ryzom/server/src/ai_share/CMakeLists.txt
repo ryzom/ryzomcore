@@ -1,7 +1,8 @@
 FILE(GLOB SRC *.cpp *.h)
 
 # Filter out the source files not actually compiled.
-#LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ admin_modules.cpp)
+LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/world_map.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/world_map.h)
 
 ADD_LIBRARY(ai_share STATIC ${SRC})
 

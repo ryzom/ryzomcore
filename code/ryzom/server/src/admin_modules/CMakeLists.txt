@@ -3,11 +3,8 @@ FILE(GLOB SRC *.cpp *.h)
 # Filter out the source files not actually compiled.
 LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ admin_modules.cpp)
 
-IF(WIN32)
-  ADD_LIBRARY(admin_modules STATIC ${SRC})
-ELSE(WIN32)
-  ADD_LIBRARY(admin_modules SHARED ${SRC})
-ENDIF(WIN32)
+
+ADD_LIBRARY(admin_modules STATIC ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 TARGET_LINK_LIBRARIES(admin_modules ${NELMISC_LIBRARY})

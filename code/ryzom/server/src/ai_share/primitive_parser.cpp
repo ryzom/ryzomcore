@@ -3232,6 +3232,8 @@ static void parsePrimSquadTemplate(const IPrimitive *prim, const std::string &ma
 			case AITypeSquadTemplateVariant:
 				parsePrimSquadTemplateVariant(nextTreeNode(aliasNode,child), child, name);
 				break;
+			default:
+				break;
 			}
 		}
 	}

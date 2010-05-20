@@ -25,7 +25,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_CLIENT		"Build Ryzom Core Client"			ON )
   OPTION(WITH_TOOLS		"Build Ryzom Core Tools"			ON )
   OPTION(WITH_SERVER		"Build Ryzom Core Services"			ON )
-  OPTION(WITH_LUA51		"Build Ryzom Core using Lua51"			OFF)
+  OPTION(WITH_LUA51		"Build Ryzom Core using Lua51"			ON )
+  OPTION(FINAL_VERSION		"Build in Final Version mode"			ON )
 
   ###
   # Features
