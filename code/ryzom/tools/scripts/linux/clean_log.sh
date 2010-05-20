@@ -1,5 +1,5 @@
-rm ~/code/ryzom/server/*.log
-rm ~/code/ryzom/server/core*
-rm ~/code/ryzom/server/*core
-rm ~/code/ryzom/server/v*_core.*
-rm ~/code/ryzom/server/core*
+rm $RYZOM_PATH/server/*.log
+rm $RYZOM_PATH/server/core*
+rm $RYZOM_PATH/server/*core
+rm $RYZOM_PATH/server/v*_core.*
+rm $RYZOM_PATH/server/core*
