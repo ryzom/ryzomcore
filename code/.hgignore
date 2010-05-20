@@ -1,5 +1,0 @@
-syntax: glob
-code/nel/build/*
-code/nelns/build/*
-code/snowballs/build/*
-code/ryzom/build/*

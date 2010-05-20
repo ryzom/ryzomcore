@@ -23,8 +23,9 @@ Temp
 save_shard
 last_loaded_char.bin
 *.binprim
-default_c
 *.string_cache
+graphs_output
+default_c
 
 # Windows compile
 *.exe
@@ -42,6 +43,7 @@ default_c
 *.so
 *.so.*
 *_debug
+core
 
 # Log dump files
 report_refused
@@ -55,6 +57,10 @@ log.txt
 *.dlx
 *.dlm
 *.dlu
+
+#makeall build
+.mode_static
+
 
 #cmake build files & directories
 CMakeFiles
@@ -95,10 +101,12 @@ ipch
 *.sdf
 
 # Ryzom server garbage
+aes_alias_name.cfg
 aes_nagios_report.txt
 aes_state.txt
 *.launch_ctrl
 *.state
+*.start_count
 
 # Vim and kwrite cache
 *~
@@ -122,6 +130,12 @@ moc_*.cpp
 *.patch
 *.7z
 external
+
+# build
+code/nel/build/*
+code/nelns/build/*
+code/snowballs/build/*
+code/ryzom/build/*
 
 # Linux nel compile
 code/nel/build/nel-config
