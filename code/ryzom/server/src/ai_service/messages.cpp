@@ -785,7 +785,7 @@ void	CAIAskForInfosOnEntityImp::callback (const std::string &name, NLNET::TServi
 
 void	CChangeActionFlagMsgImp::callback (const std::string &name, NLNET::TServiceId id)
 {
-	const uint32 size = Entities.size();
+	const uint32 size = (uint32)Entities.size();
 	nlassert( size == ActionFlags.size() && size == Values.size());
 	
 	for (uint32 i = 0 ; i < size ; ++i)

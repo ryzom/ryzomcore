@@ -217,7 +217,7 @@ bool CBotPlayer::isAggressive() const
 void CBotPlayer::addAggroer(TDataSetRow const& row)
 {
 #if !FINAL_VERSION
-	for	(sint32 i=_AggroerList.size()-1;i>=0;i--)
+	for	(sint32 i=(sint32)_AggroerList.size()-1;i>=0;i--)
 		nlassert(_AggroerList[i]!=row);
 #endif
 	_AggroerList.push_back(row);
@@ -225,7 +225,7 @@ void CBotPlayer::addAggroer(TDataSetRow const& row)
 
 void CBotPlayer::removeAggroer(TDataSetRow const& row)
 {
-	for	(sint32 i=_AggroerList.size()-1;i>=0;i--)
+	for	(sint32 i=(sint32)_AggroerList.size()-1;i>=0;i--)
 	{
 		if (_AggroerList[i]==row)
 		{
@@ -407,7 +407,7 @@ void CManagerPlayer::getTeamIds(std::vector<uint16>& teamIds)
 void CBotPlayer::forgotAggroForAggroer()
 {
 
-	for	(sint32 i=_AggroerList.size()-1; i>=0; --i)
+	for	(sint32 i=(sint32)_AggroerList.size()-1; i>=0; --i)
 	{
 		CAIEntityPhysical* const phys = CAIS::instance().getEntityPhysical(_AggroerList[i]);
 		if (!phys)

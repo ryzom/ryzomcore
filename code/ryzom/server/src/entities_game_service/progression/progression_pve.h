@@ -158,7 +158,7 @@ public:
 		if (MaxSkillValue < skillValue)
 			MaxSkillValue = skillValue;
 
-		const uint size = TeamMembers.size();
+		const uint size = (uint)TeamMembers.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
 			if (TeamMembers[i].Id == playerId)
@@ -176,7 +176,7 @@ public:
 	/// remove a team member
 	void removeMember(const NLMISC::CEntityId &playerId)
 	{
-		const uint size = TeamMembers.size();
+		const uint size = (uint)TeamMembers.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
 			if (TeamMembers[i].Id == playerId)
@@ -232,7 +232,7 @@ struct CCreatureTakenDamage
 
 	sint16 getIndexForTeam(uint16 teamId)
 	{
-		const uint size = PlayerInflictedDamage.size();
+		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
 		{
 			if ( PlayerInflictedDamage[i].TeamId == teamId )
@@ -245,7 +245,7 @@ struct CCreatureTakenDamage
 
 	sint16 getIndexForPlayer(const NLMISC::CEntityId &id)
 	{
-		const uint size = PlayerInflictedDamage.size();
+		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
 		{
 			if ( PlayerInflictedDamage[i].PlayerId == id )
@@ -258,7 +258,7 @@ struct CCreatureTakenDamage
 
 	sint16 getIndexForCreature(const NLMISC::CEntityId &id)
 	{
-		const uint size = CreatureInflictedDamage.size();
+		const uint size = (uint)CreatureInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
 		{
 			if ( CreatureInflictedDamage[i].CreatureId == id )
@@ -274,7 +274,7 @@ struct CCreatureTakenDamage
 	{
 		float maxDmg = TotalCreatureInflictedDamage;
 		sint16 index = -1;
-		const uint size = PlayerInflictedDamage.size();
+		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
 		{
 			if ( PlayerInflictedDamage[i].TotalDamage > maxDmg )

@@ -823,7 +823,7 @@ public:
 				fb->setModifier	(_value, nrjIndex);
 			return;
 		}
-		fb->setModifier	(_value, _index);
+		fb->setModifier	(_value, (uint32)_index);
 	}
 	
 	virtual	void	doOnCellZone(CCellZone	*cz)	const
@@ -2874,7 +2874,7 @@ static int const MULTI_LINE_FORMATER_maxn = 78;
 void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string>& container, std::string const& text)
 {
 	int const maxn = MULTI_LINE_FORMATER_maxn;
-	int n = maxn - text.length() - 4;
+	int n = maxn - (int)text.length() - 4;
 	container.push_back(" _/");
 	container.back() += text;
 	container.back() += "\\" + std::string(n, '_');

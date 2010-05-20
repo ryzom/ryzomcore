@@ -964,7 +964,7 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 
 		// send number of players on FS
 		CMessage			msgPlr("NBPLAYERS2");
-		uint32				nbClients = CFrontEndService::instance()->receiveSub()->clientMap().size();
+		uint32				nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
 		uint32				nbPendingClients = CLoginServer::getNbPendingUsers();
 		
 		msgPlr.serial(nbClients);
@@ -1019,7 +1019,7 @@ void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void
 			nlinfo( "Entering SERVER_DOWN mode" );
 
 			// remove all limbo clients
-			uint	clientsInLimbo = CFrontEndService::instance()->receiveSub()->LimboClients.size();
+			uint	clientsInLimbo = (uint)CFrontEndService::instance()->receiveSub()->LimboClients.size();
 			CFrontEndService::instance()->receiveSub()->LimboClients.clear();
 			nlinfo("Removed %d clients in limbo mode", clientsInLimbo);
 		}

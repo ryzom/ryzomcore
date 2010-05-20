@@ -299,10 +299,10 @@ uint	CImpulseEncoder::queueSize(uint level) const
 	case 2: channels = _Level2; break;
 	}
 
-	uint	size = _MainQueues[level].size();
+	uint	size = (uint)_MainQueues[level].size();
 
 	for (channel=0; channel<maxChannel; ++channel)
-		size += channels[channel].Queue.size();
+		size += (uint)channels[channel].Queue.size();
 
 	return size;
 }

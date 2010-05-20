@@ -119,7 +119,7 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 
 			NLMISC::strlwr(name);
 			//remove AI name parameters
-			uint trash = name.find('$');
+			string::size_type trash = name.find('$');
 			if ( trash != string::npos )
 			{
 				name.resize(trash);
@@ -157,7 +157,7 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 
 		//	NLMISC::strlwr(name);
 			//remove AI name parameters
-		//	uint trash = name.find('$');
+		//	string::size_type trash = name.find('$');
 		//	if ( trash != string::npos )
 		//	{
 		//		name.resize(trash);

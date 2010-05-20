@@ -531,7 +531,7 @@ bool CCharacter::pickUpItem(const CEntityId& entity)
 			}
 
 			// Check if this character have loot right
-			uint32 nRightSize = pCreature->getLootRight().size();
+			uint32 nRightSize = (uint32)pCreature->getLootRight().size();
 			if (nRightSize > 0)
 			{
 				bool bLootRight = false;
@@ -1243,8 +1243,8 @@ bool CCharacter::checkItemValidityWithEquipmentSlot( const CSheetId& sheet, uint
 //----------------------------------------------------------------------------
 bool CCharacter::checkRightLeftHandCompatibility( const std::vector<std::string> itemRight, const std::vector<std::string> itemLeft )
 {
-	const int itemRightSlotSize = itemRight.size();
-	const int itemLeftSlotSize = itemLeft.size();
+	const int itemRightSlotSize = (int)itemRight.size();
+	const int itemLeftSlotSize = (int)itemLeft.size();
 	
 	for( int i = 0; i < itemRightSlotSize; ++i )
 	{
@@ -1265,8 +1265,8 @@ bool CCharacter::checkRightLeftHandCompatibility( const std::vector<std::string>
 //----------------------------------------------------------------------------
 bool CCharacter::checkIfItemCompatibleWithSlots( const std::vector<std::string> itemSlot, std::vector< uint16 > slots )
 {
-	const int itemSlotSize = itemSlot.size();
-	const int typeSlotSize = slots.size();
+	const int itemSlotSize = (int)itemSlot.size();
+	const int typeSlotSize = (int)slots.size();
 	for( int i = 0; i < itemSlotSize; ++i )
 	{
 		for( int j = 0; j < typeSlotSize; ++j )

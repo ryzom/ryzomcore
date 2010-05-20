@@ -225,7 +225,7 @@ public:
 						PHRASE_UTILITIES::sendDynamicSystemMessage(phrase->getActor(), "FABER_TEMP_INVENTORY_FULL");
 
 						// Delete remaining stacks so that the vector 'items' contains only valid items
-						uint sizeOk = itemStacks.size();
+						uint sizeOk = (uint)itemStacks.size();
 						if ( sizeOk == 0 )
 							c->sendCloseTempInventoryImpulsion();
 						++itSt;
@@ -403,14 +403,14 @@ protected:
 				uint32 mpOccurence = 0;
 				
 				// parsing faber plan 
-				uint32 neededMp = phrase->getRootFaberPlan()->Faber->NeededMps.size();
+				uint32 neededMp = (uint32)phrase->getRootFaberPlan()->Faber->NeededMps.size();
 				for( uint mp = 0; mp < neededMp; ++mp )
 				{
 					//for each type of Mp needed
 					for( uint k = 0; k < phrase->getRootFaberPlan()->Faber->NeededMps[ mp ].Quantity; ++k )
 					{
 						// for each Mp of one type (we have Quantity by type)
-						uint32 NumMpParameters = phrase->getMps()[ mpOccurence ]->Mp->MpFaberParameters.size();
+						uint32 NumMpParameters = (uint32)phrase->getMps()[ mpOccurence ]->Mp->MpFaberParameters.size();
 						// for each Faber parameters in Mp
 						for( uint j = 0; j < NumMpParameters; ++j )
 						{
@@ -698,14 +698,14 @@ protected:
 		uint16 Quality = 0;
 		
 		// parsing faber plan 
-		uint32 neededMp = phrase->getRootFaberPlan()->Faber->NeededMps.size();
+		uint32 neededMp = (uint32)phrase->getRootFaberPlan()->Faber->NeededMps.size();
 		for( uint mp = 0; mp < neededMp; ++mp )
 		{
 			//for each type of Mp needed
 			for( uint k = 0; k < phrase->getRootFaberPlan()->Faber->NeededMps[ mp ].Quantity; ++k )
 			{
 				// for each Mp of one type (we have Quantity by type)
-				uint32 NumMpParameters = phrase->getMps()[ mp ]->Mp->MpFaberParameters.size();
+				uint32 NumMpParameters = (uint32)phrase->getMps()[ mp ]->Mp->MpFaberParameters.size();
 				// for each Faber parameters in Mp
 				for( uint j = 0; j < NumMpParameters; ++j )
 				{
@@ -1845,7 +1845,7 @@ protected:
 				
 				// Count number of MPs required (for possible XP gain)
 				uint32 mpOccurence = 0;
-				uint32 neededMp = phrase->getRootFaberPlan()->Faber->NeededMps.size();
+				uint32 neededMp = (uint32)phrase->getRootFaberPlan()->Faber->NeededMps.size();
 				for( uint mp = 0; mp < neededMp; ++mp )
 				{
 					mpOccurence+= phrase->getRootFaberPlan()->Faber->NeededMps[ mp ].Quantity;

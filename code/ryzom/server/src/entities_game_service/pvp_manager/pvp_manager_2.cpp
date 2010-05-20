@@ -705,7 +705,7 @@ void CPVPManager2::characterKilledInPvPFaction( CCharacter * character, PVP_CLAN
 //----------------------------------------------------------------------------
 bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2 )
 {
-	uint32 factionWarOccursSize = _FactionWarOccurs.size();
+	uint32 factionWarOccursSize = (uint32)_FactionWarOccurs.size();
 	for( uint32 i = 0; i < factionWarOccursSize; ++i )
 	{
 		if( _FactionWarOccurs[ i ].inPvPFaction( clan1, clan2 ) )
@@ -876,7 +876,7 @@ bool CPVPManager2::factionWarOccurs( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPCla
 {
 	if( clan1 != PVP_CLAN::Neutral && clan2 != PVP_CLAN::Neutral )
 	{
-		uint32 factionWarOccursSize = _FactionWarOccurs.size();
+		uint32 factionWarOccursSize = (uint32)_FactionWarOccurs.size();
 		for( uint32 i = 0; i < factionWarOccursSize; ++i )
 		{
 			if( _FactionWarOccurs[ i ].inPvPFaction( clan1, clan2 ) )
@@ -910,7 +910,7 @@ bool CPVPManager2::factionWarOccurs( pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan
 //----------------------------------------------------------------------------
 bool CPVPManager2::isFactionInWar( PVP_CLAN::TPVPClan clan )
 {
-	uint32 factionWarOccursSize = _FactionWarOccurs.size();
+	uint32 factionWarOccursSize = (uint32)_FactionWarOccurs.size();
 	for( uint32 i = 0; i < factionWarOccursSize; ++i )
 	{
 		if( _FactionWarOccurs[ i ].Clan1 == clan || _FactionWarOccurs[ i ].Clan2 == clan )

@@ -124,7 +124,7 @@ void CConsumable::serial(class NLMISC::IStream &f)
 		f.serial(familyName);
 		if (FamiliesFromName.find(familyName) == FamiliesFromName.end())
 		{
-			Family = FamiliesFromIndex.size();
+			Family = (uint16)FamiliesFromIndex.size();
 			FamiliesFromName.insert( make_pair(familyName, Family) );
 			FamiliesFromIndex.push_back(familyName);
 		}
@@ -135,7 +135,7 @@ void CConsumable::serial(class NLMISC::IStream &f)
 
 		// Params
 		Params.clear();
-		uint size = StringParams.size();
+		uint size = (uint)StringParams.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
 			addParam(StringParams[i], Params);
@@ -976,12 +976,12 @@ void loadCosmetics(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC:
 
 	std::string name = sheetId.toString();
 
-	sint pos = (sint)name.find('.',0);
-	if ( pos == (sint) string::npos)
+	string::size_type pos = name.find('.',0);
+	if ( pos == string::npos)
 		nlwarning("<loadCosmetics> Can't load the VPValue from sheet name in sheet %s", sheetId.toString().c_str() );
 	else
 	{
-		sint i = pos - 1;
+		sint i = (sint)pos - 1;
 		for(; i >= 0; i-- )
 		{
 			if ( !isdigit( name[i] ) )
@@ -1059,7 +1059,7 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 
 	if (CConsumable::FamiliesFromName.find(familyName) == CConsumable::FamiliesFromName.end())
 	{
-		const uint16 index = CConsumable::FamiliesFromIndex.size();
+		const uint16 index = (uint16)CConsumable::FamiliesFromIndex.size();
 		CConsumable::FamiliesFromName.insert( make_pair(familyName, index) );
 		CConsumable::FamiliesFromIndex.push_back(familyName);
 		item->ConsumableItem->Family= index;
@@ -1120,7 +1120,7 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 	}
 	// Parse Params
 	item->ConsumableItem->Params.clear();
-	const uint size = item->ConsumableItem->StringParams.size();
+	const uint size = (uint)item->ConsumableItem->StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
 		addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params);

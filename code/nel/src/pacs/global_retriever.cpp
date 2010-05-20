@@ -206,7 +206,7 @@ void	NLPACS::CGlobalRetriever::check() const
 			}
 
 			if (chain.getRight()>=(sint)retriever.getSurfaces().size() ||
-				chain.getRight()<=CChain::getDummyBorderChainId() && !CChain::isBorderChainId(chain.getRight()))
+				(chain.getRight()<=CChain::getDummyBorderChainId() && !CChain::isBorderChainId(chain.getRight())))
 			{
 				nlwarning("retriever %d, chain %d: reference on right surface is not valid", instance.getRetrieverId(), j);
 			}
@@ -313,7 +313,7 @@ void	NLPACS::CGlobalRetriever::getBorders(const CAABBox &sbox, std::vector<std::
 				bool	luw = (lsurface.getFlags() & (1 << CRetrievableSurface::IsUnderWaterBit)) != 0;
 				bool	ruw = (rsurface.getFlags() & (1 << CRetrievableSurface::IsUnderWaterBit)) != 0;
 
-				if (luw && !ruw || !luw && ruw)
+				if (luw != ruw)
 					chainType = 3;
 			}
 
@@ -1461,7 +1461,7 @@ void	NLPACS::CGlobalRetriever::testCollisionWithCollisionChains(CCollisionSurfac
 				//========================
 
 				float		t=0.0, tMin=1;
-				CVector2f	normal, normalMin;
+				CVector2f	normal, normalMin(0.0f, 0.0f);
 				// run list of edge.
 				sint32		curEdge= colChain.FirstEdgeCollide;
 				while(curEdge!=(sint32)0xFFFFFFFF)

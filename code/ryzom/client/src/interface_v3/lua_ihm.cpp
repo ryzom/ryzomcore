@@ -31,9 +31,15 @@
 #undef assert
 #define assert nlassert
 #include <luabind/luabind.hpp>
+// in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
 #if LUABIND_MAX_ARITY == 10
-# include <luabind/version.hpp>
 # include <luabind/operator.hpp>
+# include <luabind/version.hpp>
+# ifndef LUABIND_VERSION
+// luabind 0.7 doesn't define LUABIND_VERSION
+#   define LUABIND_VERSION 700
+# endif
+// luabind 0.6 doesn't define LUABIND_VERSION but LUABIND_MAX_ARITY is set to 5
 #elif LUABIND_MAX_ARITY == 5
 # define LUABIND_VERSION 600
 #else
@@ -289,8 +295,10 @@ bool CLuaIHM::getUCStringOnStack(CLuaState &ls, sint index, ucstring &dest)
 void CLuaIHM::push(CLuaState &ls, const ucstring &value)
 {
 	//H_AUTO(Lua_CLuaIHM_push)
+#if LUABIND_VERSION > 600
+	luabind::detail::push(ls.getStatePointer(), value);
+#else
 	luabind::object obj(ls.getStatePointer(), value);
-#if LUABIND_VERSION == 600
 	obj.pushvalue();
 #endif
 }
@@ -647,16 +655,22 @@ void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflect
 		break;
 		case CReflectedProperty::UCString:
 		{
-			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetUCString))() );
-#if LUABIND_VERSION == 600
+			ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
+#if LUABIND_VERSION > 600
+			luabind::detail::push(ls.getStatePointer(), str);
+#else
+			luabind::object obj(ls.getStatePointer(), str);
 			obj.pushvalue();
 #endif
 		}
 		break;
 		case CReflectedProperty::RGBA:
 		{
-			luabind::object obj(ls.getStatePointer(),    (reflectedObject.*(property.GetMethod.GetRGBA))());
-#if LUABIND_VERSION == 600
+			CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
+#if LUABIND_VERSION > 600
+			luabind::detail::push(ls.getStatePointer(), color);
+#else
+			luabind::object obj(ls.getStatePointer(), color);
 			obj.pushvalue();
 #endif
 		}
@@ -1131,17 +1145,17 @@ int CLuaIHM::getClientCfgVar(CLuaState &ls)
 		ls.newTable();
 		CLuaObject result(ls);
 		uint count = 0;
-		for(uint i = 0; (sint)i<v->StrValues.size(); i++)
+		for(uint i = 0; i<v->StrValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), v->StrValues[i]);
 			count++;
 		}
-		for(uint i = 0; (sint)i<v->IntValues.size(); i++)
+		for(uint i = 0; i<v->IntValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), (double)v->IntValues[i]);
 			count++;
 		}
-		for(uint i = 0; (sint)i<v->RealValues.size(); i++)
+		for(uint i = 0; i<v->RealValues.size(); i++)
 		{
 			result.setValue(toString(count).c_str(), (double)v->RealValues[i]);
 			count++;
@@ -1994,7 +2008,7 @@ void CLuaIHM::unpauseBGDownloader()
 // ***************************************************************************
 void CLuaIHM::requestBGDownloaderPriority(uint priority)
 {
-	if (priority < 0 || priority >= BGDownloader::ThreadPriority_Count)
+	if (priority >= BGDownloader::ThreadPriority_Count)
 	{
 		throw NLMISC::Exception("requestBGDownloaderPriority() : invalid priority");
 	}
@@ -2668,8 +2682,10 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 				// push a ucstring?
 				if(mustUseUCString)
 				{
-					luabind::object obj(ls.getStatePointer(),    ucstr );
-#if LUABIND_VERSION == 600
+#if LUABIND_VERSION > 600
+					luabind::detail::push(ls.getStatePointer(), ucstr);
+#else
+					luabind::object obj(ls.getStatePointer(), ucstr);
 					obj.pushvalue();
 #endif
 				}
@@ -2681,10 +2697,11 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 			}
 		case CInterfaceExprValue::RGBA:
 			{
-				luabind::object obj(ls.getStatePointer(),    value.getRGBA());
+				CRGBA color = value.getRGBA();
 #if LUABIND_VERSION > 600
-				obj.push(ls.getStatePointer());
+				luabind::detail::push(ls.getStatePointer(), color);
 #else
+				luabind::object obj(ls.getStatePointer(), color);
 				obj.pushvalue();
 #endif
 				break;

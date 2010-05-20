@@ -357,7 +357,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -375,7 +375,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -1010,7 +1010,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -1028,7 +1028,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -1610,7 +1610,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getSessionParticipantsByIndex(childs.size()-1)->remove(connection);
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -1623,7 +1623,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getKnownByByIndex(childs.size()-1)->remove(connection);
+						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -1752,7 +1752,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -1770,7 +1770,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -2603,7 +2603,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getKnownUsersByIndex(childs.size()-1)->remove(connection);
+						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -2742,7 +2742,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -2760,7 +2760,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -3504,7 +3504,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getSessionParticipantsByIndex(childs.size()-1)->remove(connection);
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -3517,7 +3517,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getGuildInvitesByIndex(childs.size()-1)->remove(connection);
+						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -3530,7 +3530,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getJournalEntriesByIndex(childs.size()-1)->remove(connection);
+						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -3649,7 +3649,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -3667,7 +3667,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -4656,7 +4656,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -4674,7 +4674,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -5106,7 +5106,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getInvitesByIndex(childs.size()-1)->remove(connection);
+						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -5221,7 +5221,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -5239,7 +5239,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -5891,7 +5891,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -5909,7 +5909,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -6529,7 +6529,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -6547,7 +6547,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -7157,7 +7157,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -7175,7 +7175,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -7631,7 +7631,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getFolderAccessByIndex(childs.size()-1)->remove(connection);
+						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -7750,7 +7750,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -7768,7 +7768,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -8423,7 +8423,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -8441,7 +8441,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -8945,7 +8945,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getSessionLogsByIndex(childs.size()-1)->remove(connection);
+						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -8958,7 +8958,7 @@ namespace RSMGR
 
 					while (!childs.empty())
 					{
-						getPlayerRatingsByIndex(childs.size()-1)->remove(connection);
+						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -9049,7 +9049,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -9067,7 +9067,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -9689,7 +9689,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -9707,7 +9707,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -10240,7 +10240,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -10258,7 +10258,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);

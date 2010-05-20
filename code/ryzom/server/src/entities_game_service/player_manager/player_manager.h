@@ -179,7 +179,7 @@ public :
 	void init();
 
 	/// get number of player character in manager
-	uint32 getNumberPlayers() { return _Players.size(); }
+	uint32 getNumberPlayers() { return (uint32)_Players.size(); }
 
 	/// get a reference on player in manager
 	const IPlayerManager::TMapPlayers& getPlayers() { return _Players; }

@@ -16,7 +16,7 @@
 
 #ifndef RY_SPAWN_ZONES_BACK_COMPAT_H
 #define RY_SPAWN_ZONES_BACK_COMPAT_H
-
+/*
 namespace BACK_COMPAT
 {
 
@@ -24,7 +24,7 @@ void initSpawnZonesCompat();
 uint16 oldToNewSpawnZoneId(uint16 oldId);
 
 } // namespace BACK_COMPAT
-
+*/
 
 #endif // RY_SPAWN_ZONES_BACK_COMPAT_H
 

@@ -1647,7 +1647,7 @@ class CMissionActionRecvMoney : public IMissionAction
 
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
-		uint amount = _Amount / entities.size();
+		uint amount = _Amount / (uint)entities.size();
 		if ( amount == 0 || _Amount % entities.size() )
 			amount++;
 		for ( uint i = 0; i < entities.size(); i++ )

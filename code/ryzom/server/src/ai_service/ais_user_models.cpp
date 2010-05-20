@@ -35,8 +35,8 @@ void stripWhitespaces(std::string& str)
 {
    if(str.empty()) return;
 
-   int startIndex = str.find_first_not_of(" ");
-   int endIndex = str.find_last_not_of(" ");
+   string::size_type startIndex = str.find_first_not_of(" ");
+   string::size_type endIndex = str.find_last_not_of(" ");
    std::string tmp = str;
    str.erase();
 
@@ -46,7 +46,7 @@ void stripWhitespaces(std::string& str)
 
 std::string removeComment(const std::string &str) 
 {
-	uint newPos= str.find("//",0);
+	string::size_type newPos= str.find("//",0);
 	
 	if (newPos != string::npos)
 	{

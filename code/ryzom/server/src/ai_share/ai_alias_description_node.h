@@ -113,7 +113,7 @@ public:
 	const	NLMISC::CSmartPtr<CAIAliasDescriptionNode>	&getParent	()	const { return _parent; }
 
 	// tree parse and search routines
-	uint32				getChildCount		()	const	{ nlassert(this!=NULL);	return	_children.size();	}
+	uint32				getChildCount		()	const	{ nlassert(this!=NULL);	return	(uint32)_children.size();	}
 	CAIAliasDescriptionNode		* const &getChild	(uint32 idx)	const	{ return	_children[idx];		}
 	const	CAIAliasDescriptionNode	*lookupAlias	(uint32 alias)	const
 	{

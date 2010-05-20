@@ -358,7 +358,7 @@ double CSkills::getMaxXPToGain(SKILLS::ESkills &skill)
 	static CSheetId sheet("skills.skill_tree");
 	const CStaticSkillsTree * skillsTree = CSheets::getSkillsTreeForm( sheet );
 	nlassert( skillsTree );
-	const uint size = _Skills.size();
+	const uint size = (uint)_Skills.size();
 
 	double xp = 0.0f;
 	for ( uint i = 0; i < size; ++i )

@@ -791,7 +791,7 @@ public:
 	virtual void stopAllLinks(float factorOnSurvivalTime = 1.0f);
 
 	/// get current number of links cast by this entity
-	inline uint8 getNbLinks() const { return _SEffectLinks.size(); }
+	inline uint8 getNbLinks() const { return (uint8)_SEffectLinks.size(); }
 
 	/**
 	 * look for a particular effect. 

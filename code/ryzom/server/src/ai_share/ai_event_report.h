@@ -82,7 +82,7 @@ struct CAiEventReport
 
 	inline void addDelta(AI_EVENT_REPORT::TAIReportStat stat, sint32 delta)
 	{
-		const uint size = AffectedStats.size();
+		const uint size = (uint)AffectedStats.size();
 		for (uint i = 0; i < size;  ++i)
 		{
 			if (AffectedStats[i] == stat)

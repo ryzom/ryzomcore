@@ -1225,8 +1225,8 @@ bool CMagicPhrase::launch()
 				}
 				if (!_Skills.empty())
 				{
-					skillValue /= _Skills.size();
-					skillBaseValue /= _Skills.size();
+					skillValue /= (sint)_Skills.size();
+					skillBaseValue /= (sint)_Skills.size();
 				}
 			}
 			else
@@ -1495,7 +1495,7 @@ bool CMagicPhrase::launch()
 	}
 
 	/// test Invulnerabilty of each target !
-	const uint nbTargets = _Targets.size();
+	const uint nbTargets = (uint)_Targets.size();
 
 	NLMISC::CBitSet invulnerabilityOffensive(nbTargets);
 	NLMISC::CBitSet invulnerabilityAll(nbTargets);
@@ -1520,7 +1520,7 @@ bool CMagicPhrase::launch()
 
 	if ( _Area )
 	{
-		const sint size = _Targets.size();		
+		const sint size = (sint)_Targets.size();		
 		nlassertex( size == (sint32)affectedTargets.size(), ("%d %d", size, affectedTargets.size() ) );
 		nlassertex( size == (sint32)invulnerabilityAll.size(), ("%d %d", size, invulnerabilityAll.size() ) );
 		nlassertex( size == (sint32)invulnerabilityOffensive.size(), ("%d %d", size, invulnerabilityOffensive.size() ) );
@@ -1536,7 +1536,7 @@ bool CMagicPhrase::launch()
 	}
 	else if (!_Targets.empty())
 	{
-		const sint size = _Targets.size();		
+		const sint size = (sint)_Targets.size();		
 		nlassertex( size == (sint32)invulnerabilityAll.size(), ("%d %d", size, invulnerabilityAll.size() ) );
 		nlassertex( size == (sint32)invulnerabilityOffensive.size(), ("%d %d", size, invulnerabilityOffensive.size() ) );
 
@@ -1700,7 +1700,7 @@ void CMagicPhrase::apply()
 
 	if ( _Area )
 	{
-		const sint size = _Targets.size();
+		const sint size = (sint)_Targets.size();
 		for (sint i = size-1 ; i >= 0 ; --i)
 		{
 			if ( affectedTargets[i] )
@@ -1893,7 +1893,7 @@ bool CMagicPhrase::buildProc( const TDataSetRow & actorRowId, const std::vector<
 	H_AUTO(CMagicPhrase_buildProc);
 	
 	// get the brick forms
-	const uint size = brickIds.size();
+	const uint size = (uint)brickIds.size();
 	vector< const CStaticBrick* > bricks(size);
 	for( uint i = 0; i < size; i++ )
 	{
@@ -1943,7 +1943,7 @@ void CMagicPhrase::testTargetsInvulnerabilities( CBitSet &invulnerabilityOffensi
 {
 	H_AUTO(CMagicPhrase_testTargetsInvulnerabilities);
 	
-	const uint nbTargets = _Targets.size();
+	const uint nbTargets = (uint)_Targets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_Targets[i].getId());

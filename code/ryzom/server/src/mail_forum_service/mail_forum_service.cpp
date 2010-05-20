@@ -238,7 +238,7 @@ void	CMailForumService::openSession( uint32 shardid, string username, string coo
 	if (ofile.open(sessionfile))
 	{
 		cookie += "\n";
-		ofile.serialBuffer((uint8*)(&cookie[0]), cookie.size());
+		ofile.serialBuffer((uint8*)(&cookie[0]), (uint)cookie.size());
 	}
 
 	if (CFile::fileExists(checkmailfile))

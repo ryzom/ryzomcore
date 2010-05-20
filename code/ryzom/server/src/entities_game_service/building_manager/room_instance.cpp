@@ -184,7 +184,7 @@ bool IRoomInstance::create( IBuildingPhysical * building, uint16 roomIdx,uint16 
 
 	// spawn the bots
 	const CRoomTemplate & templ = building->getTemplate()->Rooms[roomIdx];
-	const uint size = templ.Bots.size();
+	const uint size = (uint)templ.Bots.size();
 	_Bots.reserve( size );
 	for ( uint i = 0; i < size; i++ )
 	{

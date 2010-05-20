@@ -229,7 +229,7 @@ const CStaticEncycloThema * CStaticEncyclo::getThemaForm( const NLMISC::CSheetId
 
 uint32 CStaticEncyclo::getNbAlbum () const
 {
-	return _OrderedAlbums.size();
+	return (uint32)_OrderedAlbums.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ const CStaticEncycloAlbum * CStaticEncyclo::getAlbum ( uint32 nAlbumNb ) const
 uint32 CStaticEncyclo::getNbThema ( uint32 nAlbumNb ) const
 {
 	nlassert(nAlbumNb < _OrderedAlbums.size());
-	return _OrderedAlbums[nAlbumNb].ThemaSheets.size();
+	return (uint32)_OrderedAlbums[nAlbumNb].ThemaSheets.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +318,7 @@ void CStaticEncyclo::getRiteInfos( string& rite, uint32& nAlbum, uint32& nThema,
 		if( rite == (*itTh).second.Rite )
 		{
 			nThema = (*itTh).second.ThemaNumber;
-			taskCount = (*itTh).second.Tasks.size();
+			taskCount = (uint32)(*itTh).second.Tasks.size();
 			themaSheet = (*itTh).first;
 			break;
 		}

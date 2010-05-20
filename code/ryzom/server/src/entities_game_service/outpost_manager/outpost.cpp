@@ -1332,7 +1332,7 @@ bool COutpost::insertDefaultSquad(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot)
 	// right shift slots
 	if (squads->size() >= 2)
 	{
-		uint32 i = squads->size()-2;
+		uint32 i = (uint32)squads->size()-2;
 		while (i >= squadIndex)
 		{
 			(*squads)[i+1] = (*squads)[i];
@@ -1400,7 +1400,7 @@ uint32 COutpost::getChallengeCost() const
 TAIAlias COutpost::getRandomSpawnZone() const
 {
 	// choose a random spawn zone
-	sint32 randomCount = RandomGenerator.rand(_SpawnZones.size() - 1);
+	sint32 randomCount = RandomGenerator.rand((uint16)_SpawnZones.size() - 1);
 	nlassert(randomCount >= 0 && randomCount < (sint32)_SpawnZones.size());
 	return _SpawnZones[randomCount].alias();
 }
@@ -1845,7 +1845,7 @@ bool COutpost::convertShopSquadIndex(uint32 shopSquadIndex, COutpostSquadDescrip
 	}
 	else
 	{
-		shopSquadIndex -= _DefaultSquads.size();
+		shopSquadIndex -= (uint32)_DefaultSquads.size();
 		if (shopSquadIndex < _BuyableSquads.size())
 		{
 			squadDesc = _BuyableSquads[shopSquadIndex];

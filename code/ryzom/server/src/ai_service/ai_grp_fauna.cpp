@@ -1008,7 +1008,7 @@ void CGrpFauna::setCyles(std::string const& cycles)
 		{
 			if (curCycle==~0)
 			{
-				curCycle = _Cycles.size();
+				curCycle = (uint32)_Cycles.size();
 				_Cycles.push_back(Cycle());
 			}
 			Cycle& CycleRef = _Cycles[curCycle];
@@ -1067,7 +1067,7 @@ void CGrpFauna::allocateBots()
 		CPopulation* pop = *(it);
 		uint count=0;
 		
-		for (sint j=pop->size()-1;j>=0;j--)
+		for (sint j=(sint)pop->size()-1;j>=0;j--)
 			count+=(*pop)[j].getBotCount(getCountMultiplierFlag());
 		
 		if (count>maxPopulation)

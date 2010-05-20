@@ -110,7 +110,7 @@ public:
 	/// \accessors
 	//@{
 	inline uint16	getSabrinaCost() const							{ return (uint16)(_SabrinaCost * _SabrinaRelativeCost);	}
-	inline uint		getNbActions() const							{ return _Actions.size();	}
+	inline uint		getNbActions() const							{ return (uint)_Actions.size();	}
 	inline sint32	getSapCost() const								{ return _SapCost;			}
 	inline sint32	getHPCost() const								{ return _HPCost;			}
 	inline ACTNATURE::TActionNature getNature()	const				{ return _Nature;			}

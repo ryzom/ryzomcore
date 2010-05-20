@@ -135,8 +135,8 @@ public:
 	
 	void doOnFamily(CFamilyBehavior* fb) const
 	{
-		float value = fb->getModifier(_IndexSrc);
-		fb->setModifier(value, _IndexDest);
+		float value = fb->getModifier((uint32)_IndexSrc);
+		fb->setModifier(value, (uint32)_IndexDest);
 	}
 	void doOnCellZone(CCellZone* cz) const { }
 	
@@ -167,7 +167,7 @@ public:
 				fb->setModifier	(_value, nrjIndex);
 			return;
 		}
-		fb->setModifier	(_value, _index);
+		fb->setModifier	(_value, (uint32)_index);
 	}
 	void doOnCellZone(CCellZone *cz) const { }
 	

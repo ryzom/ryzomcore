@@ -636,7 +636,7 @@ void CTeamManager::update()
 	const TGameCycle time = CTickEventHandler::getGameCycle();
 
 	// update team members position every 5s
-	const uint size = _Teams.size();
+	const uint size = (uint)_Teams.size();
 	for ( uint i = 0 ; i < size ; ++i)
 	{
 		if ( (time + _Teams[i].getTeamId()) % 30 == 0)

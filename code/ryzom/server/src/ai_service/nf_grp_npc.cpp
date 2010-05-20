@@ -2109,7 +2109,7 @@ void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 	if(prefix=="DSS_")
 	{
 		
-		NLMISC::CSString phrase = NLMISC::CSString (text).right(text.length()-4);
+		NLMISC::CSString phrase = NLMISC::CSString (text).right((unsigned int)text.length()-4);
 		NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
 		uint32 scenarioId = atoi(idStr.c_str());
 		forwardToDss(spawnBot->dataSetRow(), CChatGroup::say, phrase, scenarioId);
@@ -2118,7 +2118,7 @@ void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 	
 	if (prefix=="RAW ")
 	{
-		NLMISC::CSString phrase = NLMISC::CSString (text).right(text.length()-4);
+		NLMISC::CSString phrase = NLMISC::CSString (text).right((unsigned int)text.length()-4);
 		npcChatToChannelSentence(spawnBot->dataSetRow(),CChatGroup::say, phrase);
 		return;
 	}

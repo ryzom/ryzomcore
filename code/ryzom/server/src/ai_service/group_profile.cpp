@@ -136,9 +136,9 @@ void CGrpProfileDynFollowPath::updateProfile(uint ticksSinceLastUpdate)
 				_FollowRoute.setAIProfile(fr);
 
 				//	faire gaffe à l'init du CGrpProfileFollowRouteSpawn dans le cadre statique .. :\ (adapter?)
-		#ifdef NL_DEBUG
-				nlassert(_CurrentZone==_CurrentRoad->startZone() || _CurrentZone==_CurrentRoad->endZone())
-		#endif
+#ifdef NL_DEBUG
+				nlassert(_CurrentZone==_CurrentRoad->startZone() || _CurrentZone==_CurrentRoad->endZone());
+#endif
 				fr->setDirection(_CurrentRoad->startZone()==_CurrentZone);	//	CurrentZone);
 			}
 			else

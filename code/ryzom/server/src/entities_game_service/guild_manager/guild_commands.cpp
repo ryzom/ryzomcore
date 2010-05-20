@@ -481,7 +481,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 	}
 
 	// ok, the file is available.
-	const uint len = strlen("guild_XXXXX.ext");
+	const uint len = (uint)strlen("guild_XXXXX.ext");
 	string file = CFile::getFilename(args[0]);
 	CGuild *guild = NULL;
 

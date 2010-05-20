@@ -44,7 +44,7 @@ CPropertyHistory::CPropertyHistory()
 
 void	CPropertyHistory::clear()
 {
-	uint32	num = _ClientEntries.size();
+	uint32	num = (uint32)_ClientEntries.size();
 	_ClientEntries.clear();
 	_ClientEntries.resize(num);
 }

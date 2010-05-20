@@ -68,15 +68,15 @@ void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
 
 	if (IsRingShard.get())
 	{
-		if ( entity->isUserEventBlocked( eventIndex)	) { return; } // Do not allow uservent recursion on ring shard
-		entity->blockUserEvent(eventIndex);
+		if ( entity->isUserEventBlocked( (uint32)eventIndex)	) { return; } // Do not allow uservent recursion on ring shard
+		entity->blockUserEvent((uint32)eventIndex);
 	}	
 	
 	entity->processStateEvent(entity->getPersistentStateInstance()->getEventContainer().EventUserEvent[eventIndex]);
 
 	if (IsRingShard.get())
 	{
-		entity->unblockUserEvent(eventIndex);
+		entity->unblockUserEvent((uint32)eventIndex);
 	}
 
 }
@@ -118,7 +118,7 @@ void setTimer_ff_(CStateInstance* si, CScriptStack& stack)
 		nlassert(false);
 	}
 	
-	si->timerUser(timerId).set(deltaTime);
+	si->timerUser((uint)timerId).set((uint32)deltaTime);
 }
 
 //----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	si->timerUser(timerId).set(timeTicks);		
+	si->timerUser((uint)timerId).set((uint32)timeTicks);		
 }
 
 //----------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	float isEnabled = si->timerUser(timerId).isEnabled();
+	float isEnabled = si->timerUser((uint)timerId).isEnabled();
 	stack.push(isEnabled);
 }
 
@@ -262,7 +262,7 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	float isSuspended = si->timerUser(timerId).isSuspended();
+	float isSuspended = si->timerUser((uint)timerId).isSuspended();
 	stack.push(isSuspended);
 }
 
@@ -301,7 +301,7 @@ void timerSuspend_f_(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	si->timerUser(timerId).suspend();
+	si->timerUser((uint)timerId).suspend();
 }
 
 //----------------------------------------------------------------------------
@@ -339,7 +339,7 @@ void timerDisable_f_(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	si->timerUser(timerId).disable();
+	si->timerUser((uint)timerId).disable();
 }
 
 //----------------------------------------------------------------------------
@@ -377,7 +377,7 @@ void timerResume_f_(CStateInstance* si, CScriptStack& stack)
 		return;
 	}
 	
-	si->timerUser(timerId).resume();	
+	si->timerUser((uint)timerId).resume();	
 }
 
 //----------------------------------------------------------------------------
@@ -423,12 +423,12 @@ void timerAdd_ff_(CStateInstance* si, CScriptStack& stack)
 	if (dt > 0)
 	{
 		uint32 dt2 = static_cast<uint32>(dt);
-		si->timerUser(timerId).add(dt2);
+		si->timerUser((uint)timerId).add(dt2);
 	}
 	else
 	{
 		uint32 dt2 = static_cast<uint32>(-dt);
-		si->timerUser(timerId).sub(dt2);
+		si->timerUser((uint)timerId).sub(dt2);
 	}
 }
 

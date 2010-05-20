@@ -113,7 +113,7 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 	if (it == _IndexMap.end())
 	{
 		// seek to end (should be after last row)
-		uint32	rowSeek = _DataStart + _Header.FullRowSize*_IndexMap.size();
+		uint32	rowSeek = _DataStart + _Header.FullRowSize*(uint32)_IndexMap.size();
 
 		// a little check
 		if (fseek(_File, 0, SEEK_END) != 0)

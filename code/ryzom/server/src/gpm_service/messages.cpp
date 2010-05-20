@@ -816,7 +816,7 @@ void cbVisionRequest( NLNET::CMessage& msgin, const std::string &serviceName, NL
 	CMessage	msgout("VISION_ANSWER");
 	msgout.serial(rid);
 	uint	i;
-	const uint size = entities.size();
+	const uint size = (uint)entities.size();
 	for ( i = 0 ; i < size ; ++i)
 		msgout.serial(entities[i].first, entities[i].second);
 

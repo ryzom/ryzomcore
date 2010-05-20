@@ -263,7 +263,7 @@ static void	base64Decode(std::vector<uint8>& buffer, const std::string& encoded)
 			base64Revert[base64Table[i]] = i;
 	}
 
-	uint	sz = encoded.size();
+	uint	sz = (uint)encoded.size();
 	uint	inbits = 0;
 	uint	bitbuffer = 0;
 	for (i=0; i<sz; ++i)
@@ -353,7 +353,7 @@ NLMISC_COMMAND (getFileBase64Content, "dump file content in Base64 encoded form"
 	base64Encode(buffer, encoded);
 
 	uint	numcharperline = 224;
-	uint	numlines = (encoded.size()+numcharperline-1)/numcharperline;
+	uint	numlines = ((uint)encoded.size()+numcharperline-1)/numcharperline;
 
 	log.displayRawNL("file %s lines %d size %d haskey %s", args[0].c_str(), numlines, filesize, key.toString().c_str());
 
@@ -385,7 +385,7 @@ NLMISC_COMMAND (putFileBase64Content, "fill file with content in Base64 encoded 
 	std::vector<uint8>	buffer;
 	base64Decode(buffer, encoded);
 
-	f.serialBuffer(&(buffer[0]), buffer.size());
+	f.serialBuffer(&(buffer[0]), (uint)buffer.size());
 	f.close();
 
 	return true;

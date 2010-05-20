@@ -11,8 +11,8 @@ using	namespace	NLMISC;
 void	explodeSubStrings(const	std::string	&str, vector<std::string>	&strings, sint32 parenthesis=0)
 {
 	const	std::string	separators("(),");
-	uint32	current=0;
-	uint32	nextCurrent=current;
+	string::size_type	current=0;
+	string::size_type	nextCurrent=current;
 	strings.clear();
 	
 	nextCurrent=str.find_first_of(separators.c_str(), current);
@@ -989,7 +989,7 @@ public:
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
 		
-		const	uint32	nbSubScript=params.size();
+		const	uint32	nbSubScript=(uint32)params.size();
 		
 		std::vector<CSmartPtr<CFightScriptComp> >	scriptComps;
 		try
@@ -1060,7 +1060,7 @@ CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)	t
 {
 	string	scriptCompName;
 	{
-		const	uint32	index=str.find_first_of("()", 0);
+		const	string::size_type	index=str.find_first_of("()", 0);
 		if	(index==string::npos)
 			throw	ReadFightActionException("ScriptComp Creation of :"+str+" Failed because of bad Syntax");
 		scriptCompName=str.substr(0,index);

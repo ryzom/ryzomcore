@@ -886,7 +886,7 @@ uint32	CStringManager::storeString(const ucstring &str)
 	{
 		// create a new entry
 		std::pair<TMappedUStringContainer::iterator, bool> ret;
-		ret = _StringIdx.insert(std::make_pair(str, _StringBase.size()));
+		ret = _StringIdx.insert(std::make_pair(str, (uint32)_StringBase.size()));
 		nlassert(ret.second);
 		_StringBase.push_back(str);
 
@@ -1016,7 +1016,7 @@ void	CStringManager::retrieveEntityNames( TServiceId serviceId )
 		}
 	}
 	NLNET::CMessage msgout( "ENTITY_NAMES" );
-	uint32 len = names.size();
+	uint32 len = (uint32)names.size();
 	msgout.serial( len );
 	vector< pair<TDataSetRow,string> >::const_iterator itn;
 	for ( itn=names.begin(); itn!=names.end(); ++itn )

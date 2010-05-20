@@ -58,7 +58,7 @@ bool aiCompile (std::vector<size_t> &dest, const char *script, const char *scrip
 	aiLine = 1;
 	aiErrorCount = 0;
 	aiInputScript = script;
-	aiInputScriptLength = strlen (script);
+	aiInputScriptLength = (uint)strlen (script);
 	strcpy (aiFile, scriptName);
 	aiRoot = NULL;
 	
@@ -189,7 +189,7 @@ uint getChildrenByteCodeSize (const list<vector<size_t> * > *l)
 	list<vector<size_t> * >::const_iterator ite = l->begin();
 	while (ite != l->end())
 	{
-		size += (*ite)->size ();
+		size += (uint)(*ite)->size ();
 		ite++;
 	}	
 	return size;
@@ -229,7 +229,7 @@ uint getChildrenByteCodeSize (const map<size_t, CCase *> *l)
 	map<size_t, CCase *>::const_iterator ite = l->begin ();
 	while (ite != l->end ())
 	{
-		size += ite->second->ByteCode->size();
+		size += (uint)ite->second->ByteCode->size();
 		ite ++;
 	}	
 	return size;
@@ -528,22 +528,22 @@ statement:		openStatement { $$ = $1; }
 
 openStatement:	TOKEN_IF TOKEN_LP condition TOKEN_RP statement
 				{
-					int sizeToJump = $5.ByteCode->size() + 1;	// 1 jump instruction to escape
+					int sizeToJump = (int)$5.ByteCode->size() + 1;	// 1 jump instruction to escape
 					NODE4 ($$, $3, CScriptVM::JE, sizeToJump, $5);
 				}
 				| TOKEN_IF TOKEN_LP condition statement {ERROR_DETECTED ($$, "missing ')' at the end of the if condition");}
 				| TOKEN_IF condition TOKEN_RP statement {ERROR_DETECTED ($$, "missing '(' at the begining of the if condition");}
 				| TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE openStatement 
 				{ 
-					int sizeToJump0 = $5.ByteCode->size() + 3;	// 2 jump instructions to escape
-					int sizeToJump1 = $7.ByteCode->size() + 1;	// 1 jump instruction to escape
+					int sizeToJump0 = (int)$5.ByteCode->size() + 3;	// 2 jump instructions to escape
+					int sizeToJump1 = (int)$7.ByteCode->size() + 1;	// 1 jump instruction to escape
 					NODE7 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1, $7);
 				}
 				| TOKEN_IF TOKEN_LP condition closedStatement TOKEN_ELSE openStatement  { ERROR_DETECTED ($$, "missing ')' at the end of the if condition");}
 				| TOKEN_IF condition TOKEN_RP closedStatement TOKEN_ELSE openStatement  { ERROR_DETECTED ($$, "missing '(' at the begining of the if condition");}
 				| TOKEN_WHILE TOKEN_LP condition TOKEN_RP openStatement
 				{ 
-					int sizeToJump0 = $5.ByteCode->size() + 3;		// 2 jump instructions to escape
+					int sizeToJump0 = (int)$5.ByteCode->size() + 3;		// 2 jump instructions to escape
 					int sizeToJump1 = -(int)$5.ByteCode->size() - 3 - (int)$3.ByteCode->size();	// 1 jump instruction to escape
 					NODE6 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1);
 				}
@@ -552,15 +552,15 @@ openStatement:	TOKEN_IF TOKEN_LP condition TOKEN_RP statement
 
 closedStatement:TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE closedStatement
 				{ 
-					int sizeToJump0 = $5.ByteCode->size() + 3;	// 2 jump instructions to escape
-					int sizeToJump1 = $7.ByteCode->size() + 1;	// 1 jump instruction to escape
+					int sizeToJump0 = (int)$5.ByteCode->size() + 3;	// 2 jump instructions to escape
+					int sizeToJump1 = (int)$7.ByteCode->size() + 1;	// 1 jump instruction to escape
 					NODE7 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1, $7);
 				}
 				| TOKEN_IF TOKEN_LP condition closedStatement TOKEN_ELSE closedStatement { ERROR_DETECTED ($$, "missing ')' at the end of the if condition");}
 				| TOKEN_IF condition TOKEN_RP closedStatement TOKEN_ELSE closedStatement { ERROR_DETECTED ($$, "missing '(' at the end of the if condition");}
 				| TOKEN_WHILE TOKEN_LP condition TOKEN_RP closedStatement
 				{ 
-					int sizeToJump0 = $5.ByteCode->size() + 3;		// 2 jump instructions to escape
+					int sizeToJump0 = (int)$5.ByteCode->size() + 3;		// 2 jump instructions to escape
 					int sizeToJump1 = -(int)$5.ByteCode->size() - 3 - (int)$3.ByteCode->size();	// 1 jump instruction to escape
 					NODE6 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1);
 				}
@@ -697,7 +697,7 @@ switch:			TOKEN_SWITCH TOKEN_LP expression TOKEN_RP TOKEN_LA cases TOKEN_RA
 
 						addNode ($$, _case->Case);
 						addNode ($$, sizeToJump);
-						sizeToJump += _case->ByteCode->size ();
+						sizeToJump += (uint)_case->ByteCode->size ();
 						sizeToJump += 1;	// One for the RET
 						sizeToJump -= 1;	// One for the case key
 						sizeToJump -= 1;	// One for the offset

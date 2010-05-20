@@ -47,7 +47,7 @@ CModuleManager::CModuleManager(const char *name, bool independent)
 
 	_StackName = (name != NULL) ? string(name) : "<unnamed>";
 
-	_Id = _RegisteredManagers.size();
+	_Id = (uint)_RegisteredManagers.size();
 	_Cycle = 0;
 	_CompleteCycle = false;
 	_RegisteredManagers.push_back(this);

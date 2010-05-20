@@ -375,7 +375,7 @@ CAdminCommand * findAdminCommand(const string & name)
 {
 	H_AUTO(findAdminCommand);
 
-	const uint nbCommands = AdminCommands.size();
+	const uint nbCommands = (uint)AdminCommands.size();
 	for (uint i = 0; i < nbCommands; i++)
 	{
 		if (name == AdminCommands[i].Name)
@@ -438,7 +438,7 @@ static void loadCommandsPrivileges(const string & fileName, bool init)
 	}
 
 	// reset privileges with default value
-	const uint nbCommands = AdminCommands.size();
+	const uint nbCommands = (uint)AdminCommands.size();
 	for (uint i = 0; i < nbCommands; i++)
 	{
 		AdminCommands[i].Priv = DefaultPriv;
@@ -1245,17 +1245,17 @@ NLMISC_COMMAND (createItemInBag, "Create an item and put it in the player bag", 
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 //		if (player != NULL && !player->havePriv(":DEV:") )
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -1333,16 +1333,16 @@ NLMISC_COMMAND (createItemInTmpInv, "Create an item and put it in the player tem
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -1403,16 +1403,16 @@ NLMISC_COMMAND (createItemInInv, "Create items and put them in the given invento
 	}
 
 	// banners are the only items in game which use privilege
-	if( sheetName.find("banner") != -1 )
+	if( sheetName.find("banner") != string::npos )
 	{
 		CPlayer * player = PlayerManager.getPlayer( PlayerManager.getPlayerId(eid) );
 		if (player != NULL && player->havePriv(BannerPriv) )
 		{
-			if( sheetName.find("_gu") != -1 && !player->havePriv(":G:") )	return false;
-			if( sheetName.find("_sgu") != -1 && !player->havePriv(":SG:") )	return false;
-			if( sheetName.find("_vgu") != -1 && !player->havePriv(":VG:") )	return false;
-			if( sheetName.find("_gm") != -1 && !player->havePriv(":GM:") )	return false;
-			if( sheetName.find("_sgm") != -1 && !player->havePriv(":SGM:") )	return false;
+			if( sheetName.find("_gu") != string::npos && !player->havePriv(":G:") )	return false;
+			if( sheetName.find("_sgu") != string::npos && !player->havePriv(":SG:") )	return false;
+			if( sheetName.find("_vgu") != string::npos && !player->havePriv(":VG:") )	return false;
+			if( sheetName.find("_gm") != string::npos && !player->havePriv(":GM:") )	return false;
+			if( sheetName.find("_sgm") != string::npos && !player->havePriv(":SGM:") )	return false;
 		}
 	}
 
@@ -1664,7 +1664,7 @@ NLMISC_COMMAND (learnAllBricks, "Specified player learns all possible bricks for
 		const CStaticRolemasterPhrase *phrase = CSheets::getSRolemasterPhrase(phrases[i]);
 		if(phrase != NULL)
 		{
-			const uint size = phrase->Bricks.size();
+			const uint size = (uint)phrase->Bricks.size();
 			for ( uint j = 0; j < size ; ++j)
 			{
 				c->addKnownBrick( phrase->Bricks[j] );
@@ -1740,7 +1740,7 @@ NLMISC_COMMAND (learnAllRolemasterBricks, "Specified player learns all possible 
 		const CStaticRolemasterPhrase *phrase = CSheets::getSRolemasterPhrase(phrases[i]);
 		if(phrase != NULL)
 		{
-			const uint size = phrase->Bricks.size();
+			const uint size = (uint)phrase->Bricks.size();
 			for ( uint j = 0; j < size ; ++j)
 			{
 				c->addKnownBrick( phrase->Bricks[j] );
@@ -2106,7 +2106,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,listPDRFiles,"list files in the current directory
 
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(".",false,false,true,files);
-	for (uint32 i=files.size();i--;)
+	for (uint32 i=(uint32)files.size();i--;)
 	{
 		if (!NLMISC::testWildCard(files[i],"*.xml") && !NLMISC::testWildCard(files[i],"*.pdr"))
 		{
@@ -3429,7 +3429,7 @@ NLMISC_COMMAND( dssTarget, "target a mob and send information to dss( /b dssTarg
 	msgout.serial(alias); //mob targeted
 	msgout.serial(entityRowId); //datasetrow
 
-	uint32 args_size = args.size() - 1;
+	uint32 args_size = (uint32)args.size() - 1;
 	uint32 i = 0;
 	msgout.serial(args_size);
 	for ( ; i != args_size ; ++i)
@@ -4039,12 +4039,12 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	uint32 during = 0;
 	uint32 every = 0;
 
-	sint32 posMessage = 0;
+	string::size_type posMessage = 0;
 
-	sint32 pos = message.find("repeat");
+	string::size_type pos = message.find("repeat");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			repeat = atoi( message.substr( posEgale+1 ).c_str() );
@@ -4056,7 +4056,7 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	pos = message.find("during");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			during = atoi( message.substr( posEgale+1 ).c_str() );
@@ -4068,7 +4068,7 @@ NLMISC_COMMAND(broadcast,"[repeat=<num repeat> or during=<time in seconds>] [eve
 	pos = message.find("every");
 	if( pos != string::npos )
 	{
-		sint32 posEgale = message.find("=", pos);
+		string::size_type posEgale = message.find("=", pos);
 		if( posEgale != string::npos )
 		{
 			every = atoi( message.substr( posEgale+1 ).c_str() );
@@ -5299,7 +5299,7 @@ NLMISC_COMMAND(eventNpcGroupScript, "executes a script on an event npc group", "
 
 	uint32 instanceNumber = e->getInstanceNumber();
 
-	uint32 nbString = args.size();
+	uint32 nbString = (uint32)args.size();
 
 	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 	uint32 messageVersion = 1;
@@ -5361,7 +5361,7 @@ NLMISC_COMMAND(eventSetNpcGroupAggroRange, "changes the aggro range of a npc gro
 	args2.push_back(args[0]);
 	args2.push_back(NLMISC::toString("()setAggro(%f, 0);", atof(args[1].c_str())));
 
-	uint32 nbString = args2.size();
+	uint32 nbString = (uint32)args2.size();
 
 	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 	uint32 messageVersion = 1;

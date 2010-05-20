@@ -1569,7 +1569,7 @@ void CChatManager::sendChatParam( CChatGroup::TGroupType senderChatMode, const T
 	// send the chat phrase to the client	
 	params2[0].Type = STRING_MANAGER::bot;
 	params2[0].setEId(  TheDataset.getEntityId(sender) );
-	uint32 first = 0, last = params.size();
+	uint32 first = 0, last = (uint32)params.size();
 	for ( ; first != last ; ++first)
 	{
 		params2[first + 1] = params[first];

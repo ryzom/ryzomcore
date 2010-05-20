@@ -1132,7 +1132,7 @@ sint32 CPVPManager:: allocatePVPIsland(CPVPChallenge* challenge)
 	static const uint allocStep = 128;
 #endif
 	// reallocate vector if necessary
-	const uint oldSize = _ChallengeIslands.size();
+	const uint oldSize = (uint)_ChallengeIslands.size();
 	if ( _FirstFreeIslandIdx >= oldSize )
 	{
 		const uint newSize = oldSize + allocStep;

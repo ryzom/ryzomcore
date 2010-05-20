@@ -561,7 +561,7 @@ namespace R2_VISION
 		H_AUTO(CInstance_addEntity)
 
 		// setup the field in the entity to say where it is in the instance's _Entities vector
-		entity.InstanceIndex= _Entities.size();
+		entity.InstanceIndex= (uint32)_Entities.size();
 
 		// setup the new record for the entity (at the end of the _Entities vector)
 		SInstanceEntity& theEntity=	vectAppend(_Entities);
@@ -576,7 +576,7 @@ namespace R2_VISION
 		{
 			// try to add add the entity into an existing vision group (must be within 50 meters of the group)
 			bool foundVisionGroup= false;
-			for (uint32 i=_VisionGroups.size();i--;)
+			for (uint32 i=(uint32)_VisionGroups.size();i--;)
 			{
 				// if the group is empty then skip it
 				if (_VisionGroups[i]==NULL)
@@ -603,7 +603,7 @@ namespace R2_VISION
 			// no group was found so scan vector for an unused slot to use
 			if (!foundVisionGroup)
 			{
-				for (uint32 i=_VisionGroups.size();i--;)
+				for (uint32 i=(uint32)_VisionGroups.size();i--;)
 				{
 					NLMISC::CSmartPtr<CVisionGroup>& theVision= _VisionGroups[i];
 					if (theVision==NULL)
@@ -625,7 +625,7 @@ namespace R2_VISION
 			{
 				NLMISC::CSmartPtr<CVisionGroup>& theVision= vectAppend(_VisionGroups);
 				theVision= new CVisionGroup;
-				theVision->setVisionId(_VisionGroups.size()-1);
+				theVision->setVisionId((uint32)_VisionGroups.size()-1);
 				theVision->addViewer(entity.ViewerRecord);
 			}
 		}
@@ -674,7 +674,7 @@ namespace R2_VISION
 		visionGroups.clear();
 
 		// run throught the vision groups once updating the bounding coordinates and sort keys
-		for (uint32 i=_VisionGroups.size();i--;)
+		for (uint32 i=(uint32)_VisionGroups.size();i--;)
 		{
 			NLMISC::CSmartPtr<CVisionGroup>& theVisionGroup= _VisionGroups[i];
 
@@ -693,7 +693,7 @@ namespace R2_VISION
 
 			// add the vision group to the local vision group list (sorting as we go)
 			uint32 theSortKey= theVisionGroup->getSortKey();
-			uint32 j=visionGroups.size();	// point to back entry in vision group
+			uint32 j=(uint32)visionGroups.size();	// point to back entry in vision group
 			visionGroups.push_back(NULL);	// create the new space that we're going to fill
 			while (j!=0 && visionGroups[j-1]->getSortKey()>theSortKey)
 			{
@@ -708,7 +708,7 @@ namespace R2_VISION
 			return;
 
 		// run through the vision groups to update them
-		for (uint32 i=visionGroups.size();i--;)
+		for (uint32 i=(uint32)visionGroups.size();i--;)
 		{
 			NLMISC::CSmartPtr<CVisionGroup>& vi= visionGroups[i];
 
@@ -854,7 +854,7 @@ namespace R2_VISION
 	void CInstance::release()
 	{
 		// iterate over vision groups getting them to clear their childrens' visions
-		for (uint32 i=_VisionGroups.size();i--;)
+		for (uint32 i=(uint32)_VisionGroups.size();i--;)
 		{
 			if (_VisionGroups[i]!=NULL)
 			{
@@ -863,7 +863,7 @@ namespace R2_VISION
 		}
 
 		// remove all of the entities from the instance
-		for (uint32 i=_Entities.size();i--;)
+		for (uint32 i=(uint32)_Entities.size();i--;)
 		{
 			SUniverseEntity* theEntity= _TheUniverse->getEntity(_Entities[i].DataSetRow);
 			BOMB_IF(theEntity==NULL,"Failed to locate universe entity corresponding to instance entity in CInstance::realease()",continue);
@@ -931,7 +931,7 @@ namespace R2_VISION
 
 		// flag the viewer as belongning to this vision, with this vision index
 		viewer->VisionId=_VisionId;
-		viewer->VisionIndex=_Viewers.size();
+		viewer->VisionIndex=(uint32)_Viewers.size();
 
 		// add the new viewer to the viewers vector
 		_Viewers.push_back(viewer);
@@ -978,14 +978,14 @@ namespace R2_VISION
 		TEST(("merge %d with %d",_VisionId,other->_VisionId));
 
 		// merge the viewer vectors
-		for (uint32 i=other->_Viewers.size();i--;)
+		for (uint32 i=(uint32)other->_Viewers.size();i--;)
 		{
 			// get a pointer to the viewer object that we're moving from the other vision group
 			NLMISC::CSmartPtr<CViewer>& theViewer= other->_Viewers[i];
 
 			// update the vision id to point to ourselves and the next slot in our viewers vector
 			theViewer->VisionId=_VisionId; 
-			theViewer->VisionIndex=_Viewers.size(); 
+			theViewer->VisionIndex=(uint32)_Viewers.size(); 
 
 			TEST(("moveGroup ent=%d old grp=%d new grp=%d",theViewer->getViewerId().getIndex(),other->_VisionId,_VisionId));
 
@@ -1018,7 +1018,7 @@ namespace R2_VISION
 		BOMB_IF(_Viewers.empty(),"Attempting to split a vision group with no members",return);
 
 		// setup some handy locals
-		uint32 viewerSize= _Viewers.size();
+		uint32 viewerSize= (uint32)_Viewers.size();
 
 		// setup a couple of vectors to hold x coordinates and y coordinates
 		static std::vector <uint32> xvect;
@@ -1175,7 +1175,7 @@ namespace R2_VISION
 		uint32 ymin= ~0u;
 		uint32 xmax= 0;
 		uint32 ymax= 0;
-		for (uint32 i=_Viewers.size();i--;)
+		for (uint32 i=(uint32)_Viewers.size();i--;)
 		{
 			const CViewer& viewer=*_Viewers[i];
 			xmin= std::min(xmin,viewer.getX());
@@ -1215,7 +1215,7 @@ namespace R2_VISION
 		TInvisibilityLevel visionLevel= getVisionLevel();
 
 		// calculate the distance from each of the entities to our ref position
-		for (uint32 i=entities.size();i--;)
+		for (uint32 i=(uint32)entities.size();i--;)
 		{
 			// get a refference to the nth entity
 			const SInstanceEntity& theEntity= entities[i];
@@ -1282,7 +1282,7 @@ namespace R2_VISION
 	void CVisionGroup::updateViewers(CUniverse* theUniverse)
 	{
 		// iterate over the viewers, udating their vision
-		for (uint32 i=_Viewers.size();i--;)
+		for (uint32 i=(uint32)_Viewers.size();i--;)
 		{
 			_Viewers[i]->updateVision(_Vision,theUniverse,false);
 		}
@@ -1353,7 +1353,7 @@ namespace R2_VISION
 
 	inline uint32 CVisionGroup::numViewers() const
 	{
-		return _Viewers.size();
+		return (uint32)_Viewers.size();
 	}
 
 	inline void CVisionGroup::setVisionId(uint32 visionId)
@@ -1425,7 +1425,7 @@ namespace R2_VISION
 		uint32 playerVisionEntryIndex=1;
 		
 		// iterate down from the last vision entry to vision entry 1 (don't touch entry 0 because it's reserved)
-		for (uint32 i=_Vision.size()-1; i>0; i--)
+		for (uint32 i=(uint32)_Vision.size()-1; i>0; i--)
 		{
 			// get a refference to the vision entry to be dealt with (removed)
 			SViewedEntity& visionEntry= _Vision[i];
@@ -1461,8 +1461,8 @@ namespace R2_VISION
 	void CViewer::_updateVisionNormal(const TVision& vision,CUniverse* theUniverse,bool firstTime,CPlayerVisionDelta& result)
 	{
 		// prepare to apply our group's vision to our own...
-		sint32 oldVisionIdx= _Vision.size()-1;			// note that there is always a dummy entry at start of vision vector
-		sint32 newVisionIdx= vision.size()-1;			// note that there is always a dummy entry at start of vision vector
+		sint32 oldVisionIdx= (sint32)_Vision.size()-1;			// note that there is always a dummy entry at start of vision vector
+		sint32 newVisionIdx= (sint32)vision.size()-1;			// note that there is always a dummy entry at start of vision vector
 		static std::vector<uint32> newVisionEntries;	// temp vector - static for reasons of optimisation
 		newVisionEntries.clear();
 
@@ -1536,7 +1536,7 @@ namespace R2_VISION
 		BOMB_IF(freeVisionSlotOffset<0,"BIG BAD BUG generating vision ... too few free vision slots found",newVisionEntries.resize(_FreeVisionSlots.size()));
 
 		// deal with new vision entries
-		for (uint32 i= newVisionEntries.size();i--;)
+		for (uint32 i= (uint32)newVisionEntries.size();i--;)
 		{
 			// derefference the new vision entry
 			const SViewedEntity& visionEntry= vision[newVisionEntries[i]];
@@ -1620,7 +1620,7 @@ namespace R2_VISION
 
 		// the entity's free vision slots
 		std::string freeVisionSlotsString;
-		for (uint32 i=_FreeVisionSlots.size();i--;)
+		for (uint32 i=(uint32)_FreeVisionSlots.size();i--;)
 		{
 			if (!freeVisionSlotsString.empty())
 				freeVisionSlotsString+= ' ';

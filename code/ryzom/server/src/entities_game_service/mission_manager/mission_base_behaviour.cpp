@@ -715,7 +715,7 @@ void CMissionBaseBehaviour::jump( uint32 step, uint32 action,std::list< CMission
 			// if they are actions in this out of order bloc, we launch them
 			if( oooIndex < templ->OOOActions.size() )
 			{
-				action -= templ->Steps[step]->getActions().size();
+				action -= (uint32)templ->Steps[step]->getActions().size();
 				for ( uint i = action; i < templ->OOOActions[oooIndex].size(); i++ )
 				{
 					templ->OOOActions[oooIndex][i]->launch(_Mission,eventList);
@@ -1149,7 +1149,7 @@ void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &
 			else if ( templ->getOutOfOrderSteps((*it).first - 1) == 0xFFFFFFFF )
 			{
 				uint firstOOOStepIndex = ~0;
-				const uint size = templ->OutOfOrderSteps.size();
+				const uint size = (uint)templ->OutOfOrderSteps.size();
 				for ( uint i = 0; i < size; i++ )
 				{
 					if ( templ->OutOfOrderSteps[i].first <= (*it).first - 1 &&  (*it).first - 1 <= templ->OutOfOrderSteps[i].second  )

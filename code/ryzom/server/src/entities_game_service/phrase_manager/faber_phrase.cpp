@@ -391,10 +391,10 @@ void CFaberPhrase::apply()
 	// TODO check compatibility of Rms with plan
 	// temporary only check number of Mp match with plan
 
-	sint32 nbMp = _Mps.size();
+	sint32 nbMp = (sint32)_Mps.size();
 
 	uint32 nbMpNeedeInPlan = 0;
-	uint32 neededMp = _RootFaberPlan->Faber->NeededMps.size();
+	uint32 neededMp = (uint32)_RootFaberPlan->Faber->NeededMps.size();
 	for( uint mp = 0; mp < _RootFaberPlan->Faber->NeededMps.size(); ++mp )
 	{
 		//for each type of Mp needed
@@ -409,10 +409,10 @@ void CFaberPhrase::apply()
 		return;
 	}
 
-	nbMp = _MpsFormula.size();
+	nbMp = (sint32)_MpsFormula.size();
 	
 	nbMpNeedeInPlan = 0;
-	neededMp = _RootFaberPlan->Faber->NeededMpsFormula.size();
+	neededMp = (uint32)_RootFaberPlan->Faber->NeededMpsFormula.size();
 	for( uint mp = 0; mp < _RootFaberPlan->Faber->NeededMpsFormula.size(); ++mp )
 	{
 		//for each type of Mp needed

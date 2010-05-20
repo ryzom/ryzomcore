@@ -151,7 +151,7 @@ bool	CAttribute::buildColumns()
 {
 	vector<CColumn>&	columns = _Parent->_Columns;
 
-	_Offset = columns.size();
+	_Offset = (uint32)columns.size();
 
 	switch (_MetaType)
 	{
@@ -160,7 +160,7 @@ bool	CAttribute::buildColumns()
 			CColumn	column;
 			column._Parent = this;
 			column._Root = _Root;
-			column._Id = columns.size();
+			column._Id = (uint32)columns.size();
 			column._Name = _Name;
 			column._MetaType = PDS_Type;
 			column._DataType = _DataType;
@@ -190,7 +190,7 @@ bool	CAttribute::buildColumns()
 				CColumn	column = sub->_Columns[i];
 				column._Parent = this;
 				column._Root = _Root;
-				column._Id = columns.size();
+				column._Id = (uint32)columns.size();
 				column._Name = _Name+"."+column._Name;
 				column._Init = true;
 				columns.push_back(column);
@@ -205,7 +205,7 @@ bool	CAttribute::buildColumns()
 			CColumn	column;
 			column._Parent = this;
 			column._Root = _Root;
-			column._Id = columns.size();
+			column._Id = (uint32)columns.size();
 			column._Name = _Name;
 			column._MetaType = _MetaType;
 			column._DataType = _DataType;
@@ -239,7 +239,7 @@ bool	CAttribute::buildColumns()
 				CColumn	column;
 				column._Parent = this;
 				column._Root = _Root;
-				column._Id = columns.size();
+				column._Id = (uint32)columns.size();
 				column._Name = _Name+"["+index->getIndexName(i)+"]";
 				column._MetaType = PDS_Type;
 				column._DataType = _DataType;
@@ -277,7 +277,7 @@ bool	CAttribute::buildColumns()
 					CColumn	column = sub->_Columns[j];
 					column._Parent = this;
 					column._Root = _Root;
-					column._Id = columns.size();
+					column._Id = (uint32)columns.size();
 					column._Name = _Name+"["+index->getIndexName(i)+"]"+"."+column._Name;
 					column._Init = true;
 					columns.push_back(column);
@@ -302,7 +302,7 @@ bool	CAttribute::buildColumns()
 				CColumn	column;
 				column._Parent = this;
 				column._Root = _Root;
-				column._Id = columns.size();
+				column._Id = (uint32)columns.size();
 				column._Name = _Name+"["+index->getIndexName(i)+"]";;
 				column._MetaType = PDS_ForwardRef;
 				column._DataType = _DataType;
@@ -320,7 +320,7 @@ bool	CAttribute::buildColumns()
 		break;
 	}
 
-	_Columns = columns.size() - _Offset;
+	_Columns = (uint32)columns.size() - _Offset;
 
 	return true;
 }

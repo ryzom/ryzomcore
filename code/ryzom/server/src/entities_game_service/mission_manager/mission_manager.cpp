@@ -513,7 +513,7 @@ void CMissionManager::tickUpdate()
 	for ( map< CMission*, std::vector<CPlaceChecker> >::iterator it = _PlaceDependantMissions.begin(); it != _PlaceDependantMissions.end();)
 	{
 		uint i = 0;
-		uint size = (*it).second.size();
+		uint size = (uint)(*it).second.size();
 		map< CMission*, std::vector<CPlaceChecker> >::iterator itBack= it;
 		++itBack;
 		for ( ; i < size; i++ )
@@ -1125,7 +1125,7 @@ void CMissionManager::addDynChat( CMission * instance, CMissionStepDynChat * ste
 			return;
 		}
 
-		const uint size = room->getBots().size();
+		const uint size = (uint)room->getBots().size();
 		for ( uint i = 0; i < size; i++ )
 		{
 			CCreature * c = CreatureManager.getCreature( room->getBots()[i] );
@@ -1184,7 +1184,7 @@ void CMissionManager::addDynChat( CMission * instance, CMissionStepDynChat * ste
 
 	// For each concern mission, send an end dyn chat event to the player, specifying the mission
 	CMissionEventEndDynChat event;
-	const uint eventCount = aliases.size();
+	const uint eventCount = (uint)aliases.size();
 	for ( uint i = 0; i < eventCount; ++i )
 	{
 		user->processMissionEvent(event,aliases[i]);
@@ -1338,7 +1338,7 @@ void CMissionManager::removeAllUserDynChat(CCharacter * user)
 	// This must be after _DynChats.erase(user->getEntityRowId()), otherwise the event (e.g. jump
 	// back) can trigger a openDynChat() on the same bot that would lead to a reentrance bug.
 	CMissionEventEndDynChat event;
-	const uint eventCount = aliases.size();
+	const uint eventCount = (uint)aliases.size();
 	for ( uint i = 0; i < eventCount; ++i )
 		user->processMissionEvent(event,aliases[i] );
 }
@@ -1431,7 +1431,7 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
             }
             const std::string & jump = dynChat->Answers[choice].Jump;
             uint i = 0;
-            uint nbJumpPoints = templ->JumpPoints.size();
+            uint nbJumpPoints = (uint)templ->JumpPoints.size();
             bool updateJournal = false;
             for (; i < nbJumpPoints; i++ )
             {
@@ -1841,7 +1841,7 @@ void CMissionManager::checkPlaceConstraints ( CMission* mission)
 	/// check outside constraints
 	for ( map<TAIAlias, EGSPD::CMissionOutsidePlacePD>::iterator it = mission->getOutsidePlacesBegin(); it != mission->getOutsidePlacesEnd(); ++it )
 	{
-		const uint size = user->getPlaces().size();
+		const uint size = (uint)user->getPlaces().size();
 		for ( uint i = 0; i < size; i++ )
 		{
 			if ( (*it).second.getAlias() == user->getPlaces()[i] )
@@ -1873,7 +1873,7 @@ void CMissionManager::checkPlaceConstraints ( CMission* mission)
 	map<TAIAlias, EGSPD::CMissionInsidePlacePD>::iterator itIn = mission->getInsidePlacesBegin();
 	for (; itIn != mission->getInsidePlacesEnd(); ++itIn )
 	{
-		const uint size = user->getPlaces().size();
+		const uint size = (uint)user->getPlaces().size();
 		uint i = 0;
 		for (; i < size; i++ )
 		{
@@ -2078,7 +2078,7 @@ void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 	string name;
 	if (CWorldInstances::instance().getAIInstanceNameFromeServiceId(aiServiceId,name))
 	{
-		const uint size = _CrashHandlingMissions.size();
+		const uint size = (uint)_CrashHandlingMissions.size();
 		for ( uint i = 0; i < size; i++ )
 		{
 			if ( _CrashHandlingMissions[i] )

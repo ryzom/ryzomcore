@@ -332,7 +332,7 @@ protected:
 		// apply used item power factor on cost per update
 //		_CostPerUpdate = sint32( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
 		
-		const uint nbTargets = _ApplyTargets.size();
+		const uint nbTargets = (uint)_ApplyTargets.size();
 		for ( uint i = 0; i < nbTargets; i++ )
 		{
 			TReportAction reportAction = actionReport;

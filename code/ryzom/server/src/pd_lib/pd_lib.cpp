@@ -598,7 +598,7 @@ void	CPDSLib::update()
 		// setup update logs with full timestamp
 		if (!_DbMessageQueue.empty())
 		{
-			i = _UpdateLogs.size();
+			i = (uint)_UpdateLogs.size();
 			_UpdateLogs.resize(_DbMessageQueue.size());
 
 			for (; i<_UpdateLogs.size(); ++i)
@@ -1025,7 +1025,7 @@ std::string	CPDSLib::getPDSRootDirectory(const std::string& shard, bool wantRemo
 	}
 
 	std::string	findstr("$shard");
-	uint		p = dir.find(findstr);
+	std::string::size_type p = dir.find(findstr);
 
 	if (p != std::string::npos)
 		dir.replace(p, findstr.size(), shard);

@@ -22,7 +22,7 @@
 IModuleCore::~IModuleCore()
 {
 	MODULE_INFO( "Module core destructor : inform all referencing module and delete the contained module parent" );
-	const uint size = _ModulesReferencingMe.size();
+	const uint size = (uint)_ModulesReferencingMe.size();
 	for ( uint i = 0; i < size; i++ )
 	{
 		if ( _ModulesReferencingMe[i] )

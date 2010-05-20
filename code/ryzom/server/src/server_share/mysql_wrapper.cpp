@@ -58,7 +58,7 @@ namespace MSW
 		static string buffer;
 		// reserve space in the buffer according to the mysql documentation
 		buffer.resize(str.size()*2+1);
-		unsigned long resultSize = mysql_escape_string((char*)buffer.data(), str.data(), str.size());
+		unsigned long resultSize = mysql_escape_string((char*)buffer.data(), str.data(), (unsigned long)str.size());
 		
 		// now, resize to the real size
 		buffer.resize(resultSize);
@@ -186,14 +186,14 @@ namespace MSW
 
 		TTime startDate = CTime::getLocalTime();
 
-		int result = mysql_real_query(_MysqlContext, queryString.c_str(), queryString.size());
+		int result = mysql_real_query(_MysqlContext, queryString.c_str(), (unsigned long)queryString.size());
 		if (result != 0)
 		{
 			if (result == CR_SERVER_GONE_ERROR)
 			{
 				// reconnect and retry the request
 				if (_connect())
-					result = mysql_real_query(_MysqlContext, queryString.c_str(), queryString.size());
+					result = mysql_real_query(_MysqlContext, queryString.c_str(), (unsigned long)queryString.size());
 				else
 				{
 					nlwarning("Failed to reopen closed connection to send query '%s'", queryString.c_str());
@@ -277,7 +277,7 @@ namespace MSW
 				myTm.tm_wday = -1;
 				myTm.tm_yday = -1;
 				// Convert the local date into a UTC unix time
-				uint32 t = nl_mktime(&myTm);
+				uint32 t = (uint32)nl_mktime(&myTm);
 
 				time = t;
 			}
@@ -300,7 +300,7 @@ namespace MSW
 				myTm.tm_wday = -1;
 				myTm.tm_yday = -1;
 				// Convert the local date into a UTC unix time
-				uint32 t = nl_mktime(&myTm);
+				uint32 t = (uint32)nl_mktime(&myTm);
 
 				time = t;
 			}
@@ -323,7 +323,7 @@ namespace MSW
 				myTm.tm_wday = -1;
 				myTm.tm_yday = -1;
 				// Convert the local date into a UTC unix time
-				uint32 t = nl_mktime(&myTm);
+				uint32 t = (uint32)nl_mktime(&myTm);
 
 				time = t;
 			}
@@ -346,7 +346,7 @@ namespace MSW
 				myTm.tm_wday = -1;
 				myTm.tm_yday = -1;
 				// Convert the local date into a UTC unix time
-				uint32 t = nl_mktime(&myTm);
+				uint32 t = (uint32)nl_mktime(&myTm);
 
 				time = t;
 			}

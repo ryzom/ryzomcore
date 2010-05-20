@@ -87,7 +87,7 @@ void CKnapsackSolver::optimizeOptimal()
 	for (size_t i=0; i<size(); ++i)
 		take[i] = false;
 	// Run the optimization recursion
-	optimizeOptimalRec(size()-1, _WMax, 0, take);
+	optimizeOptimalRec((int)size()-1, _WMax, 0, take);
 	// Delete temporary solution
 	delete [] take;
 }
@@ -129,7 +129,7 @@ void CKnapsackSolver::optimizeOptimalRec(int i, float w, float v, bool* take)
 void CKnapsackSolver::optimizeAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeAddCheck);
-	int i = size()-1;
+	int i = (int)size()-1;
 	float w = _WMax - _WBest;
 	while (i>=0)
 	{
@@ -149,7 +149,7 @@ void CKnapsackSolver::optimizeAddCheck()
 void CKnapsackSolver::optimizeFullAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeFullAddCheck);
-	int i = size()-1;
+	int i = (int)size()-1;
 	float w = _WMax - _WBest;
 	while (i>=0)
 	{
@@ -168,7 +168,7 @@ void CKnapsackSolver::optimizeFullAddCheck()
 void CKnapsackSolver::optimizeFastAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeFastAddCheck);
-	int i = size()-1;
+	int i = (int)size()-1;
 	float w = _WMax - _WBest;
 	while (i>=0)
 	{
@@ -192,7 +192,7 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 {
 	optimizeFullAddCheck();
 	H_AUTO(CKnapsackSolver_optimizeFullSingleReplace);
-	int i = size()-1;
+	int i = (int)size()-1;
 	while (i>=0)
 	{
 		// For each not taken ith element
@@ -202,7 +202,7 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = size()-1;
+			int j = (int)size()-1;
 			while (j>=0)
 			{
 				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
@@ -239,7 +239,7 @@ void CKnapsackSolver::optimizeSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeSingleReplace);
-	int i = size()-1;
+	int i = (int)size()-1;
 	while (i>=0)
 	{
 		// For each not taken ith element
@@ -249,7 +249,7 @@ void CKnapsackSolver::optimizeSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = size()-1;
+			int j = (int)size()-1;
 			while (j>=0)
 			{
 				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
@@ -286,7 +286,7 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeFastSingleReplace);
-	int i = size()-1;
+	int i = (int)size()-1;
 	while (i>=0)
 	{
 		// For each not taken ith element
@@ -296,7 +296,7 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = size()-1;
+			int j = (int)size()-1;
 			while (j>=0)
 			{
 				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
@@ -334,7 +334,7 @@ void CKnapsackSolver::optimizeVeryFastSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeVeryFastSingleReplace);
-	int i = size()-1;
+	int i = (int)size()-1;
 	while (i>=0)
 	{
 		// For each not taken ith element
@@ -344,7 +344,7 @@ void CKnapsackSolver::optimizeVeryFastSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = size()-1;
+			int j = (int)size()-1;
 			while (j>=0)
 			{
 				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
@@ -377,7 +377,7 @@ void CKnapsackSolver::optimizeTakeAll()
 	H_AUTO(CKnapsackSolver_optimizeTakeAll);
 	_WBest = 0;
 	_VBest = 0;
-	int i = size()-1;
+	int i = (int)size()-1;
 	while (i>=0)
 	{
 		_Take[i] = true;

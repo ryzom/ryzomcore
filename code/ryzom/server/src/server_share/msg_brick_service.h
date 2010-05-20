@@ -159,8 +159,8 @@ public:
 	//void pushBack( const TDataSetRow& originator, const TDataSetRow& target, const CAiEventReport &report)
 	void pushBack( const CAiEventReport &report)
 	{
-		const uint size = Originator.size();
-		const uint nbElts = report.AffectedStats.empty() ? 1 : report.AffectedStats.size();
+		const uint size = (uint)Originator.size();
+		const uint nbElts = report.AffectedStats.empty() ? 1 : (uint)report.AffectedStats.size();
 
 		Originator.resize(size+nbElts);
 		Target.resize(size+nbElts);

@@ -167,7 +167,7 @@ void AISHEETS::CActionList::serial(NLMISC::IStream& s)
 	}
 	else
 	{
-		uint32 nbSheet = _Actions.size();
+		uint32 nbSheet = (uint32)_Actions.size();
 		s.serial(nbSheet);
 		for (uint32 i=0; i<nbSheet; ++i)
 		{
@@ -777,7 +777,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 	}
 	else
 	{
-		uint32 nbScript = _ScriptCompList.size();
+		uint32 nbScript = (uint32)_ScriptCompList.size();
 		s.serial(nbScript);
 		for (uint32 index=0; index<nbScript; ++index)
 		{
@@ -968,7 +968,7 @@ uint32 AISHEETS::CSheets::getGroupPropertiesIndex(std::string groupIndexName)
 	std::map<string, uint32>::iterator it = _NameToGroupIndex.find(groupIndexName);
 	if (it==_NameToGroupIndex.end())
 	{
-		uint32 groupIndex = _NameToGroupIndex.size();
+		uint32 groupIndex = (uint32)_NameToGroupIndex.size();
 		_NameToGroupIndex.insert(make_pair(groupIndexName, groupIndex));
 #if !FINAL_VERSION
 		nldebug("GroupIndex Entry: %s %d", groupIndexName.c_str(), groupIndex);

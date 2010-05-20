@@ -147,7 +147,7 @@ protected:
 
 		// Get Spell Targets
 		const std::vector< CSpellTarget > & targets = phrase->getTargets();
-		const uint nbTargets = targets.size();
+		const uint nbTargets = (uint)targets.size();
 		
 		// apply power factor os used item
 		successFactor *= (1 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost()) );
@@ -214,7 +214,7 @@ protected:
 		if (!actor)
 			return;
 
-		const uint nbTargets = _ApplyTargets.size();
+		const uint nbTargets = (uint)_ApplyTargets.size();
 
 		vector<TReportAction> actionReports;
 		if (reportXp)

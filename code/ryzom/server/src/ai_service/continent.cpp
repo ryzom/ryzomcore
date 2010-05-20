@@ -800,7 +800,7 @@ bool CContinent::spawn()
 	// Spawn regions
 	for (size_t i=0; i<_Regions.size(); ++i)
 	{
-		CRegion* region = _Regions[i];
+		CRegion* region = _Regions[(uint32)i];
 		if (!region)
 			continue;
 		region->spawn();
@@ -808,7 +808,7 @@ bool CContinent::spawn()
 	// Spawn outposts
 	for (size_t i=0; i<_Outposts.size(); ++i)
 	{
-		COutpost* outpost = _Outposts[i];
+		COutpost* outpost = _Outposts[(uint32)i];
 		if (!outpost)
 			continue;
 		outpost->spawn();
@@ -822,7 +822,7 @@ bool CContinent::despawn()
 	// Despawn regions
 	for (size_t i=0; i<_Regions.size(); ++i)
 	{
-		CRegion* region = _Regions[i];
+		CRegion* region = _Regions[(uint32)i];
 		if (!region)
 			continue;
 		region->despawn();
@@ -830,7 +830,7 @@ bool CContinent::despawn()
 	// Despawn outposts
 	for (size_t i=0; i<_Outposts.size(); ++i)
 	{
-		COutpost* outpost = _Outposts[i];
+		COutpost* outpost = _Outposts[(uint32)i];
 		if (!outpost)
 			continue;
 		outpost->despawn();
@@ -1113,7 +1113,7 @@ bool CRegion::spawn()
 	// Spawn cellzones
 	for (size_t j=0; j<_CellZones.size(); ++j)
 	{
-		CCellZone* cellZone = _CellZones[j];
+		CCellZone* cellZone = _CellZones[(uint32)j];
 		if (!cellZone)
 			continue;
 		cellZone->spawn();
@@ -1127,7 +1127,7 @@ bool CRegion::despawn()
 	// Despawn cellzones
 	for (size_t j=0; j<_CellZones.size(); ++j)
 	{
-		CCellZone* cellZone = _CellZones[j];
+		CCellZone* cellZone = _CellZones[(uint32)j];
 		if (!cellZone)
 			continue;
 		cellZone->despawn();
@@ -1760,7 +1760,7 @@ const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TASta
 		}
 	}
 	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16(candidates.size())];
+		return	candidates[CAIS::rand16((uint32)candidates.size())];
 	return NULL;
 }
 
@@ -1868,7 +1868,7 @@ const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t re
 	}
 				
 	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16(candidates.size())];
+		return	candidates[CAIS::rand16((uint32)candidates.size())];
 
 	// warning only once
 	{
@@ -2099,7 +2099,7 @@ const	CNpcZone	*CCellZone::lookupNpcZoneScorer	(std::vector<CCell*>	cells,	const
 		
 	}
 	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16(candidates.size())];
+		return	candidates[CAIS::rand16((uint32)candidates.size())];
 	return NULL;
 }
 
@@ -2108,7 +2108,7 @@ bool CCellZone::spawn()
 	// Spawn families
 	for (size_t k=0; k<_Families.size(); ++k)
 	{
-		CFamilyBehavior* familyBehavior = _Families[k];
+		CFamilyBehavior* familyBehavior = _Families[(uint32)k];
 		if (!familyBehavior)
 			continue;
 		familyBehavior->spawn();
@@ -2122,7 +2122,7 @@ bool CCellZone::despawn()
 	// Despawn families
 	for (size_t k=0; k<_Families.size(); ++k)
 	{
-		CFamilyBehavior* familyBehavior = _Families[k];
+		CFamilyBehavior* familyBehavior = _Families[(uint32)k];
 		if (!familyBehavior)
 			continue;
 		familyBehavior->despawn();

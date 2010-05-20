@@ -480,7 +480,7 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 
 	if (!forceTopOfQueue)
 	{
-		entity.Position = _Entities.size();
+		entity.Position = (uint16)_Entities.size();
 		entity.PositionOnline = nbOnline;
 
 		_Entities.push_back(entity);

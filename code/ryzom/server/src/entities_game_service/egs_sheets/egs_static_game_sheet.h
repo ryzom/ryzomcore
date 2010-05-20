@@ -536,7 +536,7 @@ public:
 	virtual float							getRegen(size_t index) const { return _Regen[index]; }
 	virtual SMirrorEquipment const&			getItems(size_t index) const { return _Items[index]; }
 	virtual std::string						getLootTable(uint i) const { if (i<_LootTables.size()) return _LootTables[i]; else return ""; }
-	virtual uint							getLootTableCount() const { return _LootTables.size(); }
+	virtual uint							getLootTableCount() const { return (uint)_LootTables.size(); }
 	virtual uint8							getMeleeReachValue() const { return _MeleeReachValue; }
 	
 	virtual bool							getDodgeAsDefense() const { return _DodgeAsDefense; }
@@ -1145,7 +1145,7 @@ public :
 			}
 			else
 			{
-				uint16 size = ChildSkills.size();
+				uint16 size = (uint16)ChildSkills.size();
 				f.serial( size );
 				for( std::vector<SKILLS::ESkills>::iterator it = ChildSkills.begin(); it != ChildSkills.end(); ++it )
 				{

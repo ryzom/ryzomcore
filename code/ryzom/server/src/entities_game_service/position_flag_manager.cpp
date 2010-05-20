@@ -115,7 +115,7 @@ void CPositionFlagManager::serial(NLMISC::IStream & f) throw(NLMISC::EStream)
 	}
 	else
 	{
-		len = _FlagPositions.size();
+		len = (uint32)_FlagPositions.size();
 		f.serial(len);
 
 		f.xmlPushEnd();

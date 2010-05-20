@@ -12,7 +12,7 @@ bind K kill
 bind I login on
 bind O login off
 
-chdir "~/code/ryzom/server"
+chdir $RYZOM_PATH/server
 
 screen -t aes /bin/sh service_launcher.sh aes src/ryzom_admin_service/ryzom_admin_service -A. -C. -L. --nobreak --fulladminname=admin_executor_service --shortadminname=AES
 

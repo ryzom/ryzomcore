@@ -139,7 +139,7 @@ public:
 
 	virtual uint32 getRouteCount() const
 	{
-		return _Routes.size();
+		return (uint32)_Routes.size();
 	}
 
 	void dump(NLMISC::CLog &log) const

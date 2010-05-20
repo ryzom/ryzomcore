@@ -299,7 +299,7 @@ TPairSlotShield  getLocalisation( SHIELDTYPE::EShieldType shield, sint8 adjustem
 	TPairSlotShield slotShield;
 	SLocalisation local;
 
-	const uint nbLoc = LocalisationTable.size() / 3;
+	const uint nbLoc = (uint)LocalisationTable.size() / 3;
 
 	if ( forcedSlot == SLOT_EQUIPMENT::UNDEFINED)
 	{
@@ -350,7 +350,7 @@ TPairSlotShield  getLocalisation( SHIELDTYPE::EShieldType shield, sint8 adjustem
 		}
 		else
 		{
-			local.LocalisationNumber = 1 + (uint8)RandomGenerator.rand(subTable.size()-1);
+			local.LocalisationNumber = 1 + (uint8)RandomGenerator.rand((uint16)subTable.size()-1);
 			local.ShieldType = shield;
 
 			it = subTable.find( local );

@@ -81,7 +81,7 @@ static bool s_attack(CAIEntityPhysical const& target, float const& dist,
 					if (action->SelfAction() == self)
 						phraseList.push_back(action);
 				}
-				uint32 const size = phraseList.size();
+				uint32 const size = (uint32)phraseList.size();
 				if (size>0)
 				{
 					nlassert(target.getRyzomType()!=debugCheckedType);

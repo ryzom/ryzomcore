@@ -53,7 +53,7 @@ public:
 	bool getModule( ModuleClass* & module )const
 	{
 		module = NULL;
-		const uint size = _Modules.size();
+		const uint size = (uint)_Modules.size();
 		for (uint i = 0;i < size; i++ )
 		{	
 			ModuleClass * moduleChecked = dynamic_cast<ModuleClass*>( (::IModule*)_Modules[i] );

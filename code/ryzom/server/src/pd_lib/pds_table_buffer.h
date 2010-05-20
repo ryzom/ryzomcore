@@ -301,12 +301,12 @@ public:
 	/**
 	 * Get the number of actually loaded rows
 	 */
-	uint32				getLoadedRows() const							{ return _RowMap.size(); }
+	uint32				getLoadedRows() const							{ return (uint32)_RowMap.size(); }
 
 	/**
 	 * Get memory load
 	 */
-	uint32				getMemoryLoad() const							{ return _RowMap.size()*_InternalRowSize; }
+	uint32				getMemoryLoad() const							{ return (uint32)_RowMap.size()*_InternalRowSize; }
 
 
 

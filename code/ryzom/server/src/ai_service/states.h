@@ -116,7 +116,7 @@ public:
 	bool	hasPoints	()	const	{ return _Geometry.size()!=0; } 
 	
 	// accessors for path & patat geometry - whichever of the 2 exists
-	uint32 numPoints()						{ return _Geometry.size(); }
+	uint32 numPoints()						{ return (uint32)_Geometry.size(); }
 	const TPosition *point(uint32 idx)		{ return idx<_Geometry.size()? &_Geometry[idx]: NULL; }
 	
 	const std::vector<TPosition>	&getGeometry()	const { return	_Geometry; }

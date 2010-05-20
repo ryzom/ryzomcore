@@ -425,7 +425,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 				gift = true;
 				TVectorParamCheck vect( 1 + _Params.size() );
 				vect[0].Type = STRING_MANAGER::integer;
-				vect[0].Int = _SubSteps.size();
+				vect[0].Int = (sint32)_SubSteps.size();
 				
 				if ( !_PhraseId.empty() )
 				{
@@ -674,7 +674,7 @@ bool CMissionStepDynChat::buildStep( uint32 line, const std::vector< std::string
 	for  (uint i = 3; i < script.size(); i++ )
 	{
 		string answerStr = CMissionParser::getNoBlankString( script[i] );
-		uint pos = answerStr.find( ' ' );
+		string::size_type pos = answerStr.find( ' ' );
 		if( pos == string::npos || answerStr.empty() )
 		{
 			MISLOGERROR1("invalid answer '%s'", answerStr.c_str());

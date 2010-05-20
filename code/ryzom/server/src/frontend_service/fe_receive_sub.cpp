@@ -1527,7 +1527,7 @@ void		CFeReceiveSub::removeFromRemoveList( TClientId clientid )
 
 uint32	 CFeReceiveSub::getNbClient()
 {
-	return _ClientMap.size();
+	return (uint32)_ClientMap.size();
 }
 
 
@@ -1685,7 +1685,7 @@ NLMISC_DYNVARIABLE( uint32, NbPlayers, "Number of connected players" )
 {
 	// We can only read the value
 	if ( get )
-		*pointer = CFrontEndService::instance()->receiveSub()->clientMap().size();
+		*pointer = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
 }
 
 

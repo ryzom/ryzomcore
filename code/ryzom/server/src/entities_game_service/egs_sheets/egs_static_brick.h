@@ -247,14 +247,14 @@ public:
 		}
 		else
 		{
-			uint8 size = NeededMps.size();
+			uint8 size = (uint8)NeededMps.size();
 			f.serial(size);
 			for (uint8 i = 0; i < size ; ++i)
 			{
 				f.serial( NeededMps[i] ); 
 			}
 
-			size = NeededMpsFormula.size();
+			size = (uint8)NeededMpsFormula.size();
 			f.serial(size);
 			for (uint8 i = 0; i < size ; ++i)
 			{

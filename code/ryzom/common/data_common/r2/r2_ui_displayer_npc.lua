@@ -2193,7 +2193,7 @@ function r2:updateEquipment(instance, init)
 			
 			comboBox:resetTexts()
 			
-			for k1, v1 in v do
+			for k1, v1 in pairs(v) do
 				comboBox:addText(ucstring(v1.trad))
 			end	
 		end

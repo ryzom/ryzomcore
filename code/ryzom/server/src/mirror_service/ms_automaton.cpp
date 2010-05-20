@@ -496,7 +496,7 @@ void CMirrorService::tellLocalServicesAndSendMessages()
 		{
 			serialToMessageFromLocalQueue( msgout, (*im) );
 		}
-		uint32 nbMsgs = nbBroadcastedMsgs + GET_CLIENT_SERVICE_INFO(ics).Messages.size();
+		uint32 nbMsgs = nbBroadcastedMsgs + (uint32)GET_CLIENT_SERVICE_INFO(ics).Messages.size();
 		msgout.poke( nbMsgs, nbBufPos );
 		//H_BEFORE(tellUMMSend);
 		CUnifiedNetwork::getInstance()->send( (*ics).first, msgout );

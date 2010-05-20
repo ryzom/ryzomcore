@@ -1504,7 +1504,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 			__iterator		it= cont.begin();
 
@@ -1667,7 +1667,7 @@ private:
 		}
 		else
 		{
-			len= cont.size();
+			len= (sint32)cont.size();
 			serial(len);
 			__iterator		it= cont.begin();
 

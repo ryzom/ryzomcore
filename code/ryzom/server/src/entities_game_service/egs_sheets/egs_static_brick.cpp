@@ -130,7 +130,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 
 	// Params
 		Params.clear();
-		size = StringParams.size();
+		size = (uint16)StringParams.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
 			addParam(StringParams[i], Params);
@@ -232,7 +232,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		// mandatory
 		set<BRICK_FAMILIES::TBrickFamily>::const_iterator it = MandatoryFamilies.begin();
 		set<BRICK_FAMILIES::TBrickFamily>::const_iterator itEnd = MandatoryFamilies.end();
-		uint16 size = MandatoryFamilies.size();
+		uint16 size = (uint16)MandatoryFamilies.size();
 		f.serial(size);
 		for ( ; it != itEnd ; ++it)
 		{
@@ -243,7 +243,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		// optional
 		it = OptionalFamilies.begin();
 		itEnd = OptionalFamilies.end();
-		size = OptionalFamilies.size();
+		size = (uint16)OptionalFamilies.size();
 
 		f.serial(size);
 		for ( ; it != itEnd ; ++it)
@@ -255,7 +255,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		// credit
 		it = CreditFamilies.begin();
 		itEnd = CreditFamilies.end();
-		size = CreditFamilies.size();
+		size = (uint16)CreditFamilies.size();
 
 		f.serial(size);
 		for ( ; it != itEnd ; ++it)
@@ -271,7 +271,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		}
 
 		// skills
-		size = Skills.size();
+		size = (uint16)Skills.size();
 		f.serial(size);
 		for (uint i = 0 ; i < size ; ++i )
 		{
@@ -335,7 +335,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 		if(Family==BRICK_FAMILIES::Unknown)
 		{
 			string	sheetName= sheetId.toString();
-			sint	end= sheetName.find(".sbrick")-NB_LETTERS_AFTER_FAMILY;
+			string::size_type	end= sheetName.find(".sbrick")-NB_LETTERS_AFTER_FAMILY;
 			string sub = sheetName.substr(0,end);
 			sub = strupr(sub);
 			Family = BRICK_FAMILIES::toSBrickFamily ( sub );
@@ -490,7 +490,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	}
 	// Parse Params
 	Params.clear();
-	const uint size = StringParams.size();
+	const uint size = (uint)StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
 		addParam(StringParams[i], Params);

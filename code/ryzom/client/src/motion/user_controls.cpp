@@ -431,6 +431,11 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 	// The mouse may still "StandardMove" ie through a CEventMouseMove
 	// This can happens cause DirectInputDisabled, or because of the "Rotation Anti-Lag system"
 	// which start to rotate before the mouse is hid and message mode passed to RawMode
+	// 
+	// If we are not on Windows; on X11 there is always StandardMove/CEventMouseMove.
+	// Currently, there is only a direct input IMouseDevice, not available on X11.
+
+#ifdef NL_OS_WINDOWS
 	extern IMouseDevice				*MouseDevice;
 	if (MouseDevice)
 	{
@@ -446,6 +451,35 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 			EventsListener.updateFreeLookPos(dmpx, dmpy);
 		}
 	}
+#else
+	// On X11, do the thing without IMouseDevice implementation
+	if( EventsListener.getMousePosX() != _LastFrameMousePosX ||
+		EventsListener.getMousePosY() != _LastFrameMousePosY )
+	{
+		float	dmpx, dmpy;
+		
+		// On X11 in free look mode, the mouse is pulled back to (0.5, 0.5) 
+		// every update to prevent reaching a border and get stuck.
+		if(IsMouseFreeLook()) 
+		{
+			dmpx = EventsListener.getMousePosX() - 0.5;
+			dmpy = EventsListener.getMousePosY() - 0.5;
+		}
+		else 
+		{
+			dmpx = EventsListener.getMousePosX() - _LastFrameMousePosX;
+			dmpy = EventsListener.getMousePosY() - _LastFrameMousePosY;
+		}
+		
+		// TODO: read desktop mouse speed value on X11 / implement X11MouseDevice
+		dmpx *= 450.0f; 
+		dmpy *= 450.0f;
+
+		if(ClientCfg.FreeLookInverted) dmpy = -dmpy;
+		// update free look
+		EventsListener.updateFreeLookPos(dmpx, dmpy);
+	}
+#endif
 
 	// If the mouse move on the axis X, with a CGDMouseMove
 	if(EventsListener.isMouseAngleX())

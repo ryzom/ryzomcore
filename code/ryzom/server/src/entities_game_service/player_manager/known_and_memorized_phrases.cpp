@@ -164,7 +164,7 @@ bool CMemorizationSet::memorizeStarterPhrase(const std::vector<NLMISC::CSheetId>
 	const CStaticBrick * brick = CSheets::getSBrickForm( bricks[0] );
 	if( brick )
 	{
-		uint n = Phrases.size() / 2;
+		uint n = (uint)Phrases.size() / 2;
 		BRICK_TYPE::EBrickType phraseType = BRICK_FAMILIES::brickType(brick->Family);
 		if (phraseType == BRICK_TYPE::FORAGE_PROSPECTION || phraseType == BRICK_TYPE::FORAGE_EXTRACTION)
 		{
@@ -296,7 +296,7 @@ void CMemorizationSet::executePhrase(uint8 i, CCharacter *actor, const TDataSetR
 //-----------------------------------------------
 void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId)
 {
-	const uint nbPhrases = Phrases.size();
+	const uint nbPhrases = (uint)Phrases.size();
 	for(uint phraseIndex=0; phraseIndex<nbPhrases; ++phraseIndex)
 	{
 		if(Phrases[phraseIndex]!=0)
@@ -332,7 +332,7 @@ void CMemorizationSet::forget(uint8 i)
 //-----------------------------------------------
 void CMemorizationSet::forgetAll()
 {
-	const uint nbPhrases = Phrases.size();
+	const uint nbPhrases = (uint)Phrases.size();
 	for(uint phraseIndex=0; phraseIndex<nbPhrases; ++phraseIndex)
 	{
 		if(Phrases[phraseIndex]!=0)
@@ -473,7 +473,7 @@ void CPlayerPhraseMemory::executePhrase(uint8 memorizationSet, uint8 i, CCharact
 //-----------------------------------------------
 void CPlayerPhraseMemory::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId)
 {
-	const uint nbSet = _MemSets.size();
+	const uint nbSet = (uint)_MemSets.size();
 	for(uint i=0; i<nbSet; ++i)
 	{
 		// Re-build phrases in cases bricks inside had changed.
@@ -500,7 +500,7 @@ void CPlayerPhraseMemory::forget(uint8 memorizationSet, uint8 i)
 //-----------------------------------------------
 void CPlayerPhraseMemory::forgetAll()
 {
-	const uint nbSet = _MemSets.size();
+	const uint nbSet = (uint)_MemSets.size();
 	for(uint i=0; i<nbSet; ++i)
 	{
 		if(_MemSets[i] != 0)

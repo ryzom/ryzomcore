@@ -502,7 +502,7 @@ end
 -- default is to look recursively in the 'son select bar container'
 function baseClass.getFirstSelectBarSon(this)
 	local sons = this:getSelectBarSons()
-   if not sons then return nil end
+	if not sons then return nil end
 	for k, v in specPairs(sons) do
 		if v:displayInSelectBar() then
 			return v

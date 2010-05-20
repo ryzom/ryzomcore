@@ -166,7 +166,7 @@ ISelectionGenerator::TSelectionLevel	CScoringGenerator::getNext()
 
 	// Return the index of the smallest score and add index+1 to the min score
 	TLevelScores::iterator iminscore = min_element( _LevelScores.begin(), _LevelScores.end() );
-	uint32 index = iminscore - _LevelScores.begin();
+	uint32 index = (uint32)(iminscore - _LevelScores.begin());
 	(*iminscore) += (index + 1);
 	//printScores();
 	return index;

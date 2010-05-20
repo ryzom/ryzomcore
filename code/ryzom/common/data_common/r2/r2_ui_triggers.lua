@@ -903,7 +903,7 @@ function r2:openActivityMenu()
 --	activityMenu:addSubMenu(6)
 --	local regionsMenu = activityMenu:getSubMenu(6)
 --	local regionsTable = r2.Scenario:getAllInstancesByType("Region")
---	for key, region in regionsTable do
+--	for key, region in pairs(regionsTable) do
 --		regionsMenu:addLine(ucstring(region.Name), "lua", "r2:setActivity('Deploy', '".. region.InstanceId .."')", region.InstanceId)
 --	end
 --	if table.getn(regionsTable) == 0 then

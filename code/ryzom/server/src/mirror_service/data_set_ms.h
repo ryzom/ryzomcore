@@ -491,7 +491,7 @@ public:
 	const std::vector<NLNET::TServiceId8>& remoteClientServicesToSync() const { return _RemoteClientServicesToSync; }
 
 	/// Return the number of acknowledges still expected
-	NLNET::TServiceId8::size_type		nbAcksExpected() const { return _LocalClientsDueToSendATEAck.size(); }
+	NLNET::TServiceId8::size_type		nbAcksExpected() const { return (NLNET::TServiceId8::size_type)_LocalClientsDueToSendATEAck.size(); }
 
 protected:
 

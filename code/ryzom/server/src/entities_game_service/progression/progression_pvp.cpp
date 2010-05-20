@@ -201,7 +201,7 @@ void CDamageScoreTable::changeAllDamageEquitably(sint32 damageDelta)
 	if (damageDelta == 0)
 		return;
 
-	const uint32 nbEntities = _TeamDamageScores.size() + _PlayerDamageScores.size() + _CreatureDamageScores.size();
+	const uint32 nbEntities = (uint32)(_TeamDamageScores.size() + _PlayerDamageScores.size() + _CreatureDamageScores.size());
 	if (nbEntities == 0)
 		return;
 
@@ -336,7 +336,7 @@ void CDamageScoreTable::playerLeavesTeam(TDataSetRow playerRowId, TTeamId teamId
 		return;
 
 	vector<TDataSetRow> & beneficiaries = teamScore->Beneficiaries;
-	const uint32 nbBeneficiaries = beneficiaries.size();
+	const uint32 nbBeneficiaries = (uint32)beneficiaries.size();
 
 	// remove player from beneficiaries
 	const bool isBeneficiary = removeElementFromVector(playerRowId, beneficiaries);

@@ -137,7 +137,7 @@ public:
 		/**
 		 *	Return the count of strings composing this id
 		 */
-		uint size() const { return _Ids.size(); }
+		uint size() const { return (uint)_Ids.size(); }
 
 	private:
 		std::vector<std::string> _Ids;

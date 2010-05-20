@@ -298,7 +298,7 @@ end
 --function logicEntity.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
 --
 --	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
---	for key, entity in entitiesTable do
+--	for key, entity in pairs(entitiesTable) do
 --		local uc_name = ucstring()
 --		uc_name:fromUtf8(entity.Name)
 --		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)

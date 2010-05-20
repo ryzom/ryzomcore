@@ -1415,7 +1415,7 @@ void	NLPACS::CLocalRetriever::snapToInteriorGround(NLPACS::ULocalPosition &posit
 	CVector						posh = pos+CVector(0.0f, 0.0f, 1.0f);
 	CVector2f					pos2d = position.Estimation;
 	float						bestDist = 1.0e10f;
-	CVector						best;
+	CVector						best(0.0f, 0.0f, 0.0f);
 	vector<uint32>::iterator	it;
 	snapped = false;
 	for (it=selection.begin(); it!=selection.end(); ++it)
@@ -1483,7 +1483,7 @@ float	NLPACS::CLocalRetriever::getHeight(const NLPACS::ULocalPosition &position)
 		CVector	pos = position.Estimation;
 		CVector	posh = pos+CVector(0.0f, 0.0f, 1.0f);
 		float	bestDist = 1.0e10f;
-		CVector	best;
+		CVector	best(0.0f, 0.0f, 0.0f);
 		vector<uint32>::iterator	it;
 		for (it=selection.begin(); it!=selection.end(); ++it)
 		{
@@ -1580,7 +1580,7 @@ float	NLPACS::CLocalRetriever::getInteriorHeightAround(const ULocalPosition &pos
 		CVector	pos = position.Estimation;
 		CVector	posh = pos+CVector(0.0f, 0.0f, 1.0f);
 		float	bestDist = 1.0e10f;
-		CVector	best;
+		CVector	best(0.0f, 0.0f, 0.0f);
 		vector<uint32>::iterator	it;
 		for (it=selection.begin(); it!=selection.end(); ++it)
 		{

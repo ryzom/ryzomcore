@@ -43,7 +43,7 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "pvp_manager/pvp_safe_zone.h"
 
-#include "backward_compatibility/spawn_zones_back_compat.h"
+//#include "backward_compatibility/spawn_zones_back_compat.h"
 #include "backward_compatibility/places_back_compat.h"
 
 #include "pvp_manager/pvp.h"
@@ -636,7 +636,7 @@ void CZoneManager::initInstance()
 	CPVPManager::getInstance()->applyConfigToPVPZones();
 
 	// for backward compatibility
-	BACK_COMPAT::initSpawnZonesCompat();
+	//BACK_COMPAT::initSpawnZonesCompat();
 	BACK_COMPAT::initPlacesCompat();
 
 
@@ -751,7 +751,7 @@ bool CZoneManager::parseRegions( const NLLIGO::IPrimitive* prim )
 	if ( zone && prim->getPropertyByName("class",value) && value == "region" )
 	{
 		CRegion * region = new CRegion();
-		if ( region->build( zone,_Places.size() ) )
+		if ( region->build( zone,(uint16)_Places.size() ) )
 		{
 			bool found = false;
 			for (uint i = 0; i < _Continents.size(); i++ )
@@ -802,7 +802,7 @@ bool CZoneManager::parseZones( const NLLIGO::IPrimitive* prim )
 			if ( value == "place" )
 			{
 				CPlace* place = new CPlace();
-				if ( place->build( zone,_Places.size() ) )
+				if ( place->build( zone,(uint16)_Places.size() ) )
 				{
 					for (uint i = 0; i < _Continents.size(); i++ )
 					{
@@ -1027,7 +1027,7 @@ bool CZoneManager::parseStables( const NLLIGO::IPrimitive* prim )
 							bool found = false;
 
 							CPlace* place = new CPlace();
-							if ( place->build( primZone,_Places.size(), true ) )
+							if ( place->build( primZone,(uint16)_Places.size(), true ) )
 							{
 								for (uint i = 0; i < _Continents.size(); i++ )
 								{
@@ -1205,7 +1205,7 @@ bool CZoneManager::parseGooBorder( const NLLIGO::IPrimitive* prim )
 			if( path )
 			{
 				CPlace* place = new CPlace();
-				if ( place->build( path,_Places.size() ) ) //assume CPrimPath and CPrimZone has the same members, method needed are only in CPrimZone
+				if ( place->build( path,(uint16)_Places.size() ) ) //assume CPrimPath and CPrimZone has the same members, method needed are only in CPrimZone
 				{
 					for (uint i = 0; i < _Continents.size(); i++ )
 					{
@@ -1815,7 +1815,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 		}
 		
 		// get new places
-		const uint newPlacesSize = places.size();
+		const uint newPlacesSize = (uint)places.size();
 		//bool sendWarning = false;
 		bool changed = false;
 		for ( uint i = 0; i < newPlacesSize; i++ )
@@ -1848,7 +1848,7 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 		}
 
 		// get left places
-		const uint oldPlacesSize = user->getPlaces().size();
+		const uint oldPlacesSize = (uint)user->getPlaces().size();
 		for ( uint i = 0; i < oldPlacesSize; i++ )
 		{
 			uint j = 0;
@@ -1977,7 +1977,7 @@ void CZoneManager::tickUpdate()
 {
 	// *** Update deposits at low frequency (each deposit is updated once per DepositUpdateFrequency (which is a period in game cycles, actually))
 	// CPU is smoothed if there are more deposits than cycles in the period.
-	uint32 nbDeposit = _Deposits.size();
+	uint32 nbDeposit = (uint32)_Deposits.size();
 	if( ( (_NextDepositIndexUpdated != 0) || (CTickEventHandler::getGameCycle() - _SpreadUpdateLoopBeginTick ) >= DepositUpdateFrequency.get()) )
 	{
 		if ( _NextDepositIndexUpdated == 0 )
@@ -2081,7 +2081,7 @@ void CZoneManager::answerWhere(const NLMISC::CEntityId & eId)
 			return;
 		}
 
-		uint size = c->getPlaces().size();
+		uint size = (uint)c->getPlaces().size();
 		CPlace * place = NULL;
 		for ( uint i = 0; i < size; i++ )
 		{

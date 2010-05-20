@@ -260,8 +260,8 @@ void CMonitorClient::update ()
 		}
 	}
 
-	uint		addTotalSize = PendingAdd.size()*addSize;
-	uint		rmvTotalSize = PendingRemove.size()*rmvSize;
+	uint		addTotalSize = (uint)PendingAdd.size()*addSize;
+	uint		rmvTotalSize = (uint)PendingRemove.size()*rmvSize;
 	uint		posTotalSize = posToSend*posSize;
 	uint		miscPropTotalSize = miscPropToSend*miscPropSize;
 	uint		strTotalSize = 0;
@@ -274,7 +274,7 @@ void CMonitorClient::update ()
 		std::map<TYPE_NAME_STRING_ID, std::string>::iterator ite = StringMap.find (id);
 		nlassert (ite != StringMap.end());
 		strToSend.push_back( make_pair<TYPE_NAME_STRING_ID, string*>(id, &((*ite).second)) );
-		strTotalSize += 4+4+(*ite).second.size();
+		strTotalSize += 4+4+(uint)(*ite).second.size();
 	}
 
 	bool		restrictAdd =      (addTotalSize > maxAddSize);
@@ -340,9 +340,9 @@ void CMonitorClient::update ()
 		++Removed;
 	}
 
-	StillToAdd = PendingAdd.size();
-	StillToRemove = PendingRemove.size();
-	CurrentlyInVision = InVision.size();
+	StillToAdd = (uint32)PendingAdd.size();
+	StillToRemove = (uint32)PendingRemove.size();
+	CurrentlyInVision = (uint32)InVision.size();
 
 	if (StartOffset >= InVision.size())
 		StartOffset = 0;
@@ -411,7 +411,7 @@ void CMonitorClient::update ()
 		msgout.setType("ADD");
 		// version 1 : added sheet ID of the entity
 		msgout.serialVersion(1);
-		uint32 count = Add.size();
+		uint32 count = (uint32)Add.size();
 		msgout.serial(count);
 		uint i;
 		for (i=0; i<count; i++)
@@ -433,7 +433,7 @@ void CMonitorClient::update ()
 		CMessage msgout;
 		msgout.setType("RMV");
 		msgout.serialVersion(0);
-		uint32 count = Rmv.size();
+		uint32 count = (uint32)Rmv.size();
 		msgout.serial(count);
 		uint i;
 		for (i=0; i<count; i++)
@@ -451,7 +451,7 @@ void CMonitorClient::update ()
 		CMessage msgout;
 		msgout.setType("POS");
 		msgout.serialVersion(0);
-		uint32 count = Pos.size();
+		uint32 count = (uint32)Pos.size();
 		msgout.serial(count);
 		uint i;
 		for (i=0; i<count; i++)
@@ -471,7 +471,7 @@ void CMonitorClient::update ()
 		CMessage msgout;
 		msgout.setType("MISC_PROP");
 		msgout.serialVersion(0);
-		uint32 count = MiscProp.size();
+		uint32 count = (uint32)MiscProp.size();
 		msgout.serial(count);
 		uint i;
 		for (i=0; i<count; i++)
@@ -497,7 +497,7 @@ void CMonitorClient::update ()
 		uint	sentStrSize = 0;
 		uint	i;
 		for (i=0; i<strToSend.size() && sentStrSize < strTotalSize; ++i)
-			sentStrSize += 4+4+(strToSend[i].second)->size();
+			sentStrSize += 4+4+(uint)(strToSend[i].second)->size();
 
 		uint32 count = i;
 		msgout.serial(count);

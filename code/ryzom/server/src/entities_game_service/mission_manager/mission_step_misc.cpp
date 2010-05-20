@@ -995,7 +995,7 @@ void CMissionStepVisit::getTextParams( uint & nbSubSteps,const std::string* & te
 	static std::vector<std::string> wornTexts;
 	if ( _WornItems.size() > wornTexts.size() )
 	{
-		uint i = wornTexts.size();
+		uint i = (uint)wornTexts.size();
 		wornTexts.resize( _WornItems.size() );
 		for (; i < wornTexts.size(); i++ )
 		{

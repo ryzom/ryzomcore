@@ -110,7 +110,7 @@ CEntityBase *CRedirectAttacksEffect::getTargetForRedirection() const
 		set<TDataSetRow> aggroList = _AffectedCreature->getAggroList();
 		
 		// select valid target
-		const uint size = aggroList.size();
+		const uint size = (uint)aggroList.size();
 		
 		vector<CEntityBase*> selectedEntities;	
 		selectedEntities.reserve(size);
@@ -127,7 +127,7 @@ CEntityBase *CRedirectAttacksEffect::getTargetForRedirection() const
 		if (selectedEntities.empty())
 			return NULL;
 		
-		uint32 num = RandomGenerator.rand(selectedEntities.size()-1);
+		uint32 num = RandomGenerator.rand((uint16)selectedEntities.size()-1);
 		
 		_TargetEntityForRedirection = selectedEntities[num];
 	}

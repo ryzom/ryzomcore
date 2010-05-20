@@ -83,7 +83,7 @@ PVP_RELATION::TPVPRelation CPVPChallenge::getPVPRelation( CCharacter * user, CEn
 void CPVPChallenge::addUserTeam(CCharacter *user)
 {
 	nlassert(user);
-	const CTpSpawnZone * zone = CPVPManager::getInstance()->getChallengeSpawnZone( _Teams.size() );
+	const CTpSpawnZone * zone = CPVPManager::getInstance()->getChallengeSpawnZone( (uint)_Teams.size() );
 	nlassert(zone);
 	sint32 x,y,z;
 	float heading;
@@ -186,7 +186,7 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 					sendChallengeMessage( i, "CHALLENGE_HE_ABANDON",params);
 			}
 
-			const uint size = _Teams[ teamIdx ].Members.size();
+			const uint size = (uint)_Teams[ teamIdx ].Members.size();
 			for ( uint i = 0; i < size; i++ )
 			{
 				CCharacter * c = PlayerManager.getChar( _Teams[ teamIdx ].Members[i].Row );
@@ -244,7 +244,7 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 	
 	/// check if there remains only 1 team
 	uint lastTeamIdx = ~0;
-	const uint size = _Teams.size();
+	const uint size = (uint)_Teams.size();
 	for ( uint i = 0; i < size; i++ )
 	{
 		if ( !_Teams[i].Members.empty() )
@@ -265,7 +265,7 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 		sendChallengeMessage( lastTeamIdx, "CHALLENGE_WON");
 		// free the island
 		nlassert( lastTeamIdx < _Teams.size() );
-		const uint size = _Teams[ lastTeamIdx ].Members.size();
+		const uint size = (uint)_Teams[ lastTeamIdx ].Members.size();
 		for ( uint i = 0; i < size; i++ )
 		{
 			CCharacter * c = PlayerManager.getChar( _Teams[ lastTeamIdx ].Members[i].Row );
@@ -355,10 +355,10 @@ bool CPVPChallenge::canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTa
 //----------------------------------------------------------------------------
 const CPVPChallenge::CMember * CPVPChallenge::getMember( const TDataSetRow & userRow, uint16& teamIdx, uint16 & memberIdx )const
 {
-	const uint size = _Teams.size();
+	const uint size = (uint)_Teams.size();
 	for  ( uint i = 0; i < size ; i++ )
 	{
-		const uint size2 = _Teams[i].Members.size();
+		const uint size2 = (uint)_Teams[i].Members.size();
 		for  ( uint j = 0; j < size2 ; j++ )
 		{
 			if ( userRow == _Teams[i].Members[j].Row )

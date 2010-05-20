@@ -380,7 +380,7 @@ function r2.events:filterEvents(logicEntityId)
 		end
 
 		table.insert(allLogicEntities, r2.Scenario)
-		for k0, entity in allLogicEntities do
+		for k0, entity in pairs(allLogicEntities) do
 			
 			local behavior = self:getBehavior(entity)
 			if not self.memberManagement then		-- TEMP

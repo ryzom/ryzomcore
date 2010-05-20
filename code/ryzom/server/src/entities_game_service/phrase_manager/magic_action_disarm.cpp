@@ -63,7 +63,7 @@ void CMagicActionDisarm::launch( CMagicPhrase * phrase, sint deltaLevel, sint sk
 		return;
 
 	const vector<CSpellTarget> &targets = phrase->getTargets();
-	const uint nbTargets = targets.size();
+	const uint nbTargets = (uint)targets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(targets[i].getId()))
@@ -108,7 +108,7 @@ void CMagicActionDisarm::apply( CMagicPhrase * phrase, sint deltaLevel, sint ski
 	if (!actor)
 		return;
 
-	const uint nbTargets = _ApplyTargets.size();
+	const uint nbTargets = (uint)_ApplyTargets.size();
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(_ApplyTargets[i].RowId))

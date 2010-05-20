@@ -328,8 +328,8 @@ void CMissionParser::tokenizeString(const std::string &str, const std::string &s
 	retList.clear();
 	if ( str.empty() )
 		return;
-	uint	pos=0;
-	uint	newPos=0;
+	std::string::size_type	pos=0;
+	std::string::size_type	newPos=0;
 	while( (newPos= str.find_first_of(separators,pos)) != string::npos)
 	{
 		// if not empty sub str. (skip repetition of separator )

@@ -141,7 +141,7 @@ NLMISC_COMMAND(listShopContent, "list the item of a shop category", "<shop_categ
 			return true;
 		}
 		
-		rawCategory.push_back(it - CShopTypeManager::_CategoryName.begin());
+		rawCategory.push_back((uint32)(it - CShopTypeManager::_CategoryName.begin()));
 	}
 	
 	// 3rd pass, generate list for the addShopBase call
