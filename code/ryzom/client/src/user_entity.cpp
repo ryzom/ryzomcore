@@ -1596,7 +1596,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 			IM->runActionHandler("mission_ring", 0, param);
 		}
 		break;
-		// Create Guild
+	// Create Guild
 	case CUserEntity::CreateGuild:
 		IM->runActionHandler("context_create_guild", 0);
 		break;
@@ -1641,16 +1641,16 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	case CUserEntity::Outpost:
 		IM->executeLuaScript("game:outpostBCOpenStateWindow()", 0);
 		break;
-
-
+	// BuildTotem
 	case CUserEntity::BuildTotem:
 		buildTotem();
 		break;
-	// Move To Done.
 	default:
-		resetAnyMoveTo();
 		break;
 	}
+
+	// Move To Done.
+	resetAnyMoveTo();
 }// moveToAction //
 
 
