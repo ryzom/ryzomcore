@@ -1141,66 +1141,7 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
 
-#ifdef XF86VIDMODE
-	if (!mode.Windowed)
-	{
-		// Set window to the right size, map it to the display, and raise it to the front
-		XResizeWindow(dpy, win, width, height);
-		XMapRaised(dpy, win);
-		XRaiseWindow(dpy, win);
-
-		// grab the mouse and keyboard on the fullscreen window
-		if ((XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime) != GrabSuccess) ||
-			(XGrabKeyboard(dpy, win, True, GrabModeAsync, GrabModeAsync, CurrentTime) != 0) )
-		{
-			// Until I work out how to deal with this nicely, it just gives
-			// an error and exits the prorgam.
-			nlerror("Unable to grab keyboard and mouse");
-		}
-		else
-		{
-			// Save the old screen mode and dotclock and viewport
-			memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
-			XF86VidModeGetModeLine(dpy, DefaultScreen(dpy), &_OldDotClock, &_OldScreenMode);
-			XF86VidModeGetViewPort(dpy, DefaultScreen(dpy), &_OldX, &_OldY);
-
-			// Get a list of modes, search for an appropriate one.
-			XF86VidModeModeInfo **modes;
-			int nmodes;
-			if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &nmodes, &modes))
-			{
-				int mode_index = -1; // Gah, magic numbers all bad.
-				for (int i = 0; i < nmodes; i++)
-				{
-					nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-					if(modes[i]->hdisplay == width && modes[i]->vdisplay == height)
-					{
-						mode_index = i;
-						break;
-					}
-				}
-				// Switch to the mode
-				if (mode_index != -1)
-				{
-					if(XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), modes[mode_index]))
-					{
-						nlinfo("3D: Switching to mode %dx%d", modes[mode_index]->hdisplay, modes[mode_index]->vdisplay);
-						XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), 0, 0);
-						_FullScreen = true;
-					}
-				}
-				else
-				{
-					// This is a problem, since we've nuked the border from
-					// window in the setup stage, until I work out how
-					// to get it back (recreate window? seems excessive)
-					nlerror("Couldn't find an appropriate mode %dx%d", width, height);
-				}
-			}
-		}
-	}
-
-#endif // XF86VIDMODE
+	setMode(mode);
 
 #endif // NL_OS_UNIX
 
@@ -1603,6 +1544,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 #ifdef XF86VIDMODE
 	if (!mode.Windowed)
 	{
+		// Store old mdoe in order to restore it when leaving fullscreen
 		if (mode.Windowed == _FullScreen)
 		{
 			memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
@@ -1610,6 +1552,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 			XF86VidModeGetViewPort(dpy, DefaultScreen(dpy), &_OldX, &_OldY);
 		}
 
+		// Find the requested mode and use it
 		XF86VidModeModeInfo **modes;
 		int nmodes;
 		if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &nmodes, &modes))
