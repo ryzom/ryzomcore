@@ -1612,9 +1612,46 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
 	_FullScreen = !mode.Windowed;
-#else
-	// TODO linux version !!!
-#endif
+
+#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+
+	// Update WM hints (update size and disallow resizing)
+	XSizeHints size_hints;
+	size_hints.x = 0;
+	size_hints.y = 0;
+	size_hints.width = mode.Width;
+	size_hints.height = mode.Height;
+	size_hints.flags = PSize | PMinSize | PMaxSize;
+	size_hints.min_width = mode.Width;
+	size_hints.min_height = mode.Height;
+	size_hints.max_width = mode.Width;
+	size_hints.max_height = mode.Height;
+
+	XSetWMNormalHints(dpy, win, &size_hints);
+
+	// Toggle fullscreen
+	if (mode.Windowed == _FullScreen)
+	{
+		XEvent xev;
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = win;
+		xev.xclient.message_type =  XInternAtom(dpy, "_NET_WM_STATE", false);
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = !mode.Windowed;
+		xev.xclient.data.l[1] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", false);
+		xev.xclient.data.l[2] = 0;
+		XSendEvent(dpy, DefaultRootWindow(dpy), false, SubstructureNotifyMask, &xev);
+
+		//TODO: Change X display mode
+	}
+	_FullScreen = !mode.Windowed;
+
+	// Resize and update the window
+	XResizeWindow(dpy, win, mode.Width, mode.Height);
+	XMapWindow(dpy, win);
+
+#endif // NL_OS_UNIX
 	return true;
 }
 
