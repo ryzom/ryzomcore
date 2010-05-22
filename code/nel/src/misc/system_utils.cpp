@@ -339,14 +339,69 @@ uint CSystemUtils::getCurrentColorDepth()
 		}
 	}
 #else
+	depth = 24; // temporary fix for compilation under Linux
+/*
 	Display *display = XOpenDisplay(NULL);
 	if (display)
 	{
 		depth = (uint) DefaultDepth(display, DefaultScreen(display));
 		XCloseDisplay(display);
 	}
+*/
 #endif
 	return depth;
+}
+
+bool CSystemUtils::isSystemCursorInClientArea()
+{
+#ifdef NL_OS_WINDOWS
+	if (s_window == NULL)
+	{
+		nlwarning("No window has be set with CSystemUtils::setWindow()");
+		return false;
+	}
+
+	POINT cursPos;
+	// the mouse should be in the client area of the window
+	if (!GetCursorPos(&cursPos))
+	{
+		return false;
+	}
+	HWND wnd = WindowFromPoint(cursPos);
+	if (wnd != (HWND)s_window)
+	{
+		return false; // not the same window
+	}
+	// want that the mouse be in the client area
+	RECT clientRect;
+	if (!GetClientRect((HWND)s_window, &clientRect))
+	{
+		return false;
+	}
+	POINT tl, br;
+	tl.x = clientRect.left;
+	tl.y = clientRect.top;
+	br.x = clientRect.right;
+	br.y = clientRect.bottom;
+	if (!ClientToScreen((HWND)s_window, &tl))
+	{
+		return false;
+	}
+	if (!ClientToScreen((HWND)s_window, &br))
+	{
+		return false;
+	}
+	if (cursPos.x < tl.x ||
+		cursPos.x >= br.x ||
+		cursPos.y < tl.y ||
+		cursPos.y >= br.y)
+	{
+		return false;
+	}
+#else
+	// TODO for Linux and Mac OS
+#endif
+	return true;
 }
 
 } // NLMISC
