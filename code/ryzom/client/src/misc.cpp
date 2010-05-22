@@ -47,6 +47,7 @@
 #include "nel/misc/fast_floor.h"
 #include "nel/misc/noise_value.h"
 #include "nel/misc/bitmap.h"
+#include "nel/misc/system_utils.h"
 // Game Share
 #include "game_share/player_visual_properties.h"
 #include "game_share/seeds.h"
@@ -1464,26 +1465,7 @@ uint getCurrentColorDepth()
 			return videoMode.Depth;
 		}
 	}
-	uint depth = 0;
-	#ifdef NL_OS_WINDOWS
-		HWND desktopWnd = GetDesktopWindow();
-		if (desktopWnd)
-		{
-			HDC desktopDC = GetWindowDC(desktopWnd);
-			if (desktopDC)
-			{
-				depth = (uint) GetDeviceCaps(desktopDC, BITSPIXEL);
-				ReleaseDC(desktopWnd, desktopDC);
-			}
-		}
-	#else
-		Display *display = XOpenDisplay(NULL);
-		if (display)
-		{
-			depth = (uint) DefaultDepth(display, DefaultScreen(display));
-			XCloseDisplay(display);
-		}
-	#endif
-	return depth;
+
+	return CSystemUtils::getCurrentColorDepth();
 }
 

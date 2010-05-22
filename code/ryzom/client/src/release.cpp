@@ -24,6 +24,7 @@
 // Misc.
 #include "nel/misc/debug.h"
 #include "nel/misc/async_file_manager.h"
+#include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fasthls_modifier.h"
@@ -525,11 +526,8 @@ void release()
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
 	STRING_MANAGER::CStringManagerClient::release(true);
 
-#ifdef NL_OS_WINDOWS
-	{
-		SystemParametersInfo (SPI_SETSCREENSAVEACTIVE, LastScreenSaverEnabled?TRUE:FALSE, NULL, 0);
-	}
-#endif // NL_OS_WINDOWS
+	// restore screensaver state
+	CSystemUtils::enableScreensaver(LastScreenSaverEnabled);
 
 	// release PACS primitives
 	deletePrimitiveBlocks();

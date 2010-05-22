@@ -656,16 +656,11 @@ void prelogInit()
 
 		set_new_handler(outOfMemory);
 
-#ifdef NL_OS_WINDOWS
-		{
-			BOOL bRetValue;
-			SystemParametersInfo (SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
-			LastScreenSaverEnabled = (bRetValue == TRUE);
-			SystemParametersInfo (SPI_SETSCREENSAVEACTIVE, FALSE, NULL, 0);
-		}
-#else // NL_OS_WINDOWS
-		// Not tested, not compiled
-#endif // NL_OS_WINDOWS
+		// save screen saver state and disable it
+		LastScreenSaverEnabled = CSystemUtils::isScreensaverEnabled();
+
+		if (LastScreenSaverEnabled)
+			CSystemUtils::enableScreensaver(false);
 
 		// Random init
 		srand ((uint)CTime::getLocalTime());

@@ -27,6 +27,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
@@ -2394,14 +2395,7 @@ public:
 		}
 
 		// default to 'ZQSD' for French and Belgian keyboard, 'WASD' else
-		bool wasd = true;
-#ifdef NL_OS_WINDOWS
-		uint16 klId = uint16((uint32)GetKeyboardLayout(0) & 0xFFFF);
-		if (klId == 0x040c || klId == 0x080c)
-		{
-			wasd = false;
-		}
-#endif
+		bool wasd = !CSystemUtils::isAzertyKeyboard();
 
 		/*sint startIndex = wasd ? wasdIndex : zqsdIndex;
 		if (startIndex == -1) startIndex = 0;

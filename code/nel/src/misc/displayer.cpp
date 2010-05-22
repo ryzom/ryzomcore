@@ -38,6 +38,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/mutex.h"
 #include "nel/misc/report.h"
+#include "nel/misc/system_utils.h"
 
 #include "nel/misc/debug.h"
 
@@ -568,19 +569,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	str += message;
 
-	if (OpenClipboard (NULL))
-	{
-		HGLOBAL mem = GlobalAlloc (GHND|GMEM_DDESHARE, str.size()+1);
-		if (mem)
-		{
-			char *pmem = (char *)GlobalLock (mem);
-			strcpy (pmem, str.c_str());
-			GlobalUnlock (mem);
-			EmptyClipboard ();
-			SetClipboardData (CF_TEXT, mem);
-		}
-		CloseClipboard ();
-	}
+	CSystemUtils::copyTextToClipboard(str);
 
 	// create the string on the screen
 	needSpace = false;
@@ -758,19 +747,7 @@ void CMsgBoxDisplayer::display (const std::string& str)
 {
 #ifdef NL_OS_WINDOWS
 
-	if (OpenClipboard (NULL))
-	{
-		HGLOBAL mem = GlobalAlloc (GHND|GMEM_DDESHARE, str.size()+1);
-		if (mem)
-		{
-			char *pmem = (char *)GlobalLock (mem);
-			strcpy (pmem, str.c_str());
-			GlobalUnlock (mem);
-			EmptyClipboard ();
-			SetClipboardData (CF_TEXT, mem);
-		}
-		CloseClipboard ();
-	}
+	CSystemUtils::copyTextToClipboard(str);
 
 	string strf = str;
 	strf += "\n\n(this message was copied in the clipboard)";

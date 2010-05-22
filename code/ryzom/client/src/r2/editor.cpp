@@ -3028,13 +3028,9 @@ void CEditor::updateSelectingDecals()
 void CEditor::reset()
 {
 	//H_AUTO(R2_CEditor_reset)
-	#ifdef NL_OS_WINDOWS
-		if (ClientCfg.R2EDExtendedDebug)
-		{
-			HWND hWnd = (HWND)Driver->getDisplay ();
-			SetWindowText(hWnd, "Resetting R2ED editor ...");
-		}
-	#endif // NL_OS_WINDOW
+	if (ClientCfg.R2EDExtendedDebug)
+		Driver->setWindowTitle(ucstring("Resetting R2ED editor ..."));
+
 	CHECK_EDITOR
 	_SerializeUIConfig = false; // prevent reloading of ui for speed
 	_WantedActOnInit.clear();
@@ -3077,18 +3073,17 @@ void CEditor::reset()
 	// try to return to the act with the same title
 	_SerializeUIConfig = true;
 
-	#ifdef NL_OS_WINDOWS
-		if (ClientCfg.R2EDExtendedDebug)
-		{
-			HWND hWnd = (HWND)Driver->getDisplay ();
-			nlassert (hWnd);
-			SetWindowTextW (hWnd, (WCHAR*)CI18N::get("TheSagaOfRyzom").c_str ());
-			// Get the window
-			// Show the window
-			ShowWindow (hWnd, SW_SHOW);
-			SetForegroundWindow(hWnd);
-		}
-	#endif
+	if (ClientCfg.R2EDExtendedDebug)
+	{
+		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
+		Driver->showWindow();
+		// TODO: check
+		// Get the window
+		// Show the window
+//		ShowWindow (hWnd, SW_SHOW);
+//		SetForegroundWindow(hWnd);
+	}
+
 	getUI().displaySystemInfo(CI18N::get("uiR2EDEditorReseted"), "BC");
 }
 

@@ -22,6 +22,7 @@
 #include "interface_manager.h"
 #include "input_handler_manager.h"
 #include "nel/misc/command.h"
+#include "nel/misc/system_utils.h"
 #include "view_text.h"
 #include "game_share/xml_auto_ptr.h"
 #include "interface_options.h"
@@ -335,30 +336,10 @@ void CGroupEditBox::copy()
 		nlwarning("Selection can only be on focus");
 	}
 	stopParentBlink();
-	// get the selection
-	ucstring	selection= getSelection();
 
-	// copy
-	#ifdef NL_OS_WINDOWS
-		if (selection.size() > 0 && OpenClipboard (NULL))
-		{
-			bool isUnicode = IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE;
-			HGLOBAL mem = GlobalAlloc (GHND|GMEM_DDESHARE, (selection.size()+1) * (isUnicode ? 2:1));
-			if (mem)
-			{
-				void *hLock = GlobalLock (mem);
-				if (isUnicode)
-					wcscpy ((wchar_t*)hLock, (const wchar_t*)selection.c_str());
-				else
-					strcpy ((char*)hLock, selection.toString().c_str());
-				GlobalUnlock (mem);
-				EmptyClipboard ();
-				SetClipboardData (isUnicode ? CF_UNICODETEXT:CF_TEXT, mem);
-			}
-			CloseClipboard ();
-			nlinfo ("Chat input was copied in the clipboard");
-		}
-	#endif // NL_OS_WINDOWS
+	// get the selection and copy it
+	if (CSystemUtils::copyTextToClipboard(getSelection()))
+		nlinfo ("Chat input was copied in the clipboard");
 }
 
 // ----------------------------------------------------------------------------
@@ -374,172 +355,154 @@ void CGroupEditBox::paste()
 	}
 	stopParentBlink();
 	makeTopWindow();
-	#ifdef NL_OS_WINDOWS
-		if (OpenClipboard (NULL))
+
+	ucstring sString;
+
+	if (CSystemUtils::pasteTextFromClipboard(sString))
+	{
+		sint length = (sint)sString.length();
+
+		ucstring toAppend;
+		// filter character depending on the netry type
+		switch (_EntryType)
 		{
-			bool isUnicode = IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE;
-
-			HANDLE hObj = GetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT);
-
-			if (hObj)
+			case Text:
+			case Password:
 			{
-				void *hLock = GlobalLock(hObj);
-
-				if (hLock != NULL)
+				if (_NegativeFilter.empty())
 				{
-					ucstring sString;
-				
-					if (isUnicode)
-						sString = (const ucchar*)hLock;
-					else
-						sString = (const char*)hLock;
-
-					sint length = (sint)sString.length();
-
-					ucstring toAppend;
-					// filter character depending on the netry type
-					switch (_EntryType)
+					toAppend = sString;
+				}
+				else
+				{
+					for (sint k = 0; k < length; ++k)
 					{
-						case Text:
-						case Password:
+						if (!isFiltered(sString[k]))
 						{
-							if (_NegativeFilter.empty())
-							{
-								toAppend = sString;
-							}
-							else
-							{
-								for (sint k = 0; k < length; ++k)
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-							// remove '\r' characters
-							toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (ucchar) '\r'), toAppend.end());
-
-						}
-						break;
-						case PositiveInteger:
-						case PositiveFloat:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isdigit(sString[k]) || sString[k]== ' ' ||
-									(_EntryType==PositiveFloat && sString[k]=='.') )
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case Integer:
-						case Float:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isdigit(sString[k]) || sString[k]== ' ' || sString[k]== '-' ||
-									(_EntryType==Float && sString[k]=='.') )
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case AlphaNumSpace:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isValidAlphaNumSpace(sString[k]))
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case AlphaNum:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isValidAlphaNum(sString[k]))
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case Alpha:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isValidAlpha(sString[k]))
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case Filename:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isValidFilenameChar(sString[k]))
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
-						}
-						break;
-						case PlayerName:
-						{
-							for (sint k = 0; k < length; ++k)
-							{
-								if (isValidPlayerNameChar(sString[k]))
-								{
-									if (!isFiltered(sString[k]))
-									{
-										toAppend += sString[k];
-									}
-								}
-							}
+							toAppend += sString[k];
 						}
 					}
-					length = (sint)toAppend.size();
-					if ((uint) (_InputString.length() + length) > _MaxNumChar)
+				}
+				// remove '\r' characters
+				toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (ucchar) '\r'), toAppend.end());
+
+			}
+			break;
+			case PositiveInteger:
+			case PositiveFloat:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isdigit(sString[k]) || sString[k]== ' ' ||
+						(_EntryType==PositiveFloat && sString[k]=='.') )
 					{
-						length = _MaxNumChar - (sint)_InputString.length();
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
 					}
-					ucstring toAdd = toAppend.substr(0, length);
-					_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
-					_CursorPos += (sint32)toAdd.length();
-					GlobalUnlock (hObj);
-					nlinfo ("Chat input was pasted from the clipboard");
 				}
 			}
-			CloseClipboard ();
-			triggerOnChangeAH();
+			break;
+			case Integer:
+			case Float:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isdigit(sString[k]) || sString[k]== ' ' || sString[k]== '-' ||
+						(_EntryType==Float && sString[k]=='.') )
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
+			break;
+			case AlphaNumSpace:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isValidAlphaNumSpace(sString[k]))
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
+			break;
+			case AlphaNum:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isValidAlphaNum(sString[k]))
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
+			break;
+			case Alpha:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isValidAlpha(sString[k]))
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
+			break;
+			case Filename:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isValidFilenameChar(sString[k]))
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
+			break;
+			case PlayerName:
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (isValidPlayerNameChar(sString[k]))
+					{
+						if (!isFiltered(sString[k]))
+						{
+							toAppend += sString[k];
+						}
+					}
+				}
+			}
 		}
-	#endif // NL_OS_WINDOWS
+		length = (sint)toAppend.size();
+		if ((uint) (_InputString.length() + length) > _MaxNumChar)
+		{
+			length = _MaxNumChar - (sint)_InputString.length();
+		}
+		ucstring toAdd = toAppend.substr(0, length);
+		_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
+		_CursorPos += (sint32)toAdd.length();
+		nlinfo ("Chat input was pasted from the clipboard");
+
+		triggerOnChangeAH();
+	}
+
 	_CursorAtPreviousLineEnd = false;
 }
 

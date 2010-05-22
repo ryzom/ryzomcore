@@ -44,6 +44,39 @@ public:
 
 	/// Create/update a progress bar with an appearance depending on system.
 	static bool updateProgressBar(uint value, uint total);
+
+	/// Copy a string to system clipboard.
+	static bool copyTextToClipboard(const ucstring &text);
+
+	/// Paste a string from system clipboard.
+	static bool pasteTextFromClipboard(ucstring &text);
+
+	/// Check if system supports unicode.
+	static bool supportUnicode();
+
+	/// Check if keyboard layout is AZERTY.
+	static bool isAzertyKeyboard();
+
+	/// Check if screensaver is enabled.
+	static bool isScreensaverEnabled();
+
+	/// Enable or disable screeensaver.
+	static bool enableScreensaver(bool screensaver);
+
+	/// Get the ROOT registry key used by getRegKey and setRegKey.
+	static std::string getRootKey();
+
+	/// Set the ROOT registry key used by getRegKey and setRegKey.
+	static void setRootKey(const std::string &root);
+
+	/// Read a value from registry.
+	static std::string getRegKey(const std::string &Entry);
+
+	/// Write a value to registry.
+	static bool setRegKey(const std::string &ValueName, const std::string &Value);
+
+	/// Get desktop current color depth without using UDriver.
+	static uint getCurrentColorDepth();
 };
 
 } // NLMISC

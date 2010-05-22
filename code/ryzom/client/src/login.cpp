@@ -26,9 +26,11 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/path.h"
 #include "nel/misc/thread.h"
+#include "nel/misc/big_file.h"
+#include "nel/misc/system_utils.h"
+
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
-#include "nel/misc/big_file.h"
 
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/input_handler_manager.h"
@@ -94,10 +96,6 @@ string	R2BackupPatchURL;
 /// a list of patch server to use randomly
 vector<string>	R2PatchURLs;
 
-
-// Key in registry
-static const string RootKey = "SOFTWARE\\Nevrax\\Ryzom";
-static const uint32 KeyMaxLength = 1024;
 
 #define CTRL_EDITBOX_LOGIN		"ui:login:checkpass:content:eb_login:eb"
 #define CTRL_EDITBOX_PASSWORD	"ui:login:checkpass:content:eb_password:eb"
@@ -736,7 +734,9 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	string l = getRegKeyValue("Login").c_str();
+	CSystemUtils::setRootKey("SOFTWARE\\Nevrax\\Ryzom");
+
+	string l = CSystemUtils::getRegKey("Login");
 
 	if(!l.empty())
 	{
@@ -928,60 +928,6 @@ bool login()
 // ***************************************************************************
 
 // ***************************************************************************
-string getRegKeyValue(const string &Entry)
-{
-	string ret;
-#ifdef NL_OS_WINDOWS
-	HKEY hkey;
-
-	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, RootKey.c_str(), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
-	{
-		DWORD	dwType	= 0L;
-		DWORD	dwSize	= KeyMaxLength;
-		unsigned char	Buffer[KeyMaxLength];
-
-		if(RegQueryValueEx(hkey, Entry.c_str(), NULL, &dwType, Buffer, &dwSize) != ERROR_SUCCESS)
-		{
-			nlwarning("Can't get the reg key '%s'", Entry.c_str());
-		}
-		else
-		{
-			ret = (char*)Buffer;
-		}
-		RegCloseKey(hkey);
-	}
-	else
-	{
-		nlwarning("Can't get the reg key '%s'", Entry.c_str());
-	}
-#else
-	// TODO for Linux and Mac OS
-#endif
-	return ret;
-}
-
-// ***************************************************************************
-void setRegKey(const string &ValueName, const string &Value)
-{
-#ifdef NL_OS_WINDOWS
-	HKEY hkey;
-	DWORD dwDisp;
-
-	if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, RootKey.c_str(), 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
-	{
-		RegSetValueEx(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1);
-		RegCloseKey(hkey);
-	}
-	else
-	{
-		nlwarning("Can't set the reg key '%s' '%s'", ValueName.c_str(), Value.c_str());
-	}
-#else
-	// TODO for Linux and Mac OS
-#endif
-}
-
-// ***************************************************************************
 void removeSpace(string &s)
 {
 	uint i = 0;
@@ -1162,7 +1108,7 @@ void onlogin(bool vanishScreen = true)
 	removeSpace(LoginPassword);
 
 	if(!LoginLogin.empty())
-		setRegKey("Login", LoginLogin);
+		CSystemUtils::setRegKey("Login", LoginLogin);
 
 	if(vanishScreen)
 		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
@@ -1836,24 +1782,18 @@ class CAHOpenURL : public IActionHandler
 
 #ifdef NL_OS_WINDOWS
 
-		const LONG BUFFER_LEN = 1024;
-		LONG bufferLenght = BUFFER_LEN;
-		char buffer[BUFFER_LEN];
 		// Check for special install tag
-		const char *KeyName = "Software\\Nevrax\\Ryzom\\InstallTag";
+		const char *KeyName = "InstallTag";
 
-		LONG ret = RegQueryValueA(HKEY_LOCAL_MACHINE, KeyName, buffer, &bufferLenght);
-		if (ret == ERROR_SUCCESS)
+		installTag = CSystemUtils::getRegKey(KeyName);
+
+		if (installTag.length() > 1)
 		{
-			if (bufferLenght > 1)
-			{
-				installTag = buffer;
-
-				nldebug("Found install tag '%s'", url.c_str());
-			}
+			nldebug("Found install tag '%s'", url.c_str());
 		}
 		else
 		{
+			DWORD ret = 0;
 			LPVOID lpMsgBuf;
 			FormatMessage(
 				FORMAT_MESSAGE_ALLOCATE_BUFFER |

@@ -61,11 +61,6 @@ std::string getBGDownloaderCommandLine();
 bool login();
 void loginIntro();
 
-// helpers
-std::string getRegKeyValue(const std::string &Entry);
-void setRegKey(const std::string &ValueName, const std::string &Value);
-
-
 // force patch for the mainland part
 void mainLandPatch();
 
