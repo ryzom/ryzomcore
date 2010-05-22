@@ -365,7 +365,12 @@ CClientConfig::CClientConfig()
 	MouseOverFX = "sfx_selection_mouseover.ps";
 	SelectionFXSize = 0.8f;
 
+	// only force patching under Windows by default
+#ifdef NL_OS_WINDOWS
 	PatchWanted = true;
+#else
+	PatchWanted = false;
+#endif
 	PatchUrl = "";
 	PatchVersion = "";
 	RingReleaseNotePath = "http://atys.ryzom.com/releasenotes_ring/index.php";
