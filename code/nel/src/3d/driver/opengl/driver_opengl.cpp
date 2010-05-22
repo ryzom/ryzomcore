@@ -1096,22 +1096,7 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 	XSetWindowAttributes attr;
 	attr.colormap = cmap;
 	attr.background_pixel = BlackPixel(dpy, DefaultScreen(dpy));
-
-#ifdef XF86VIDMODE
-	// If we're going to attempt fullscreen, we need to set redirect to True,
-	// This basically places the window with no borders in the top left
-	// corner of the screen.
-	if (mode.Windowed)
-	{
-		attr.override_redirect = False;
-	}
-	else
-	{
-		attr.override_redirect = True;
-	}
-#else
 	attr.override_redirect = False;
-#endif
 
 	int attr_flags = CWOverrideRedirect | CWColormap | CWBackPixel;
 
@@ -1615,6 +1600,52 @@ bool CDriverGL::setMode(const GfxMode& mode)
 
 #elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
 
+#ifdef XF86VIDMODE
+	if (!mode.Windowed)
+	{
+		if (mode.Windowed == _FullScreen)
+		{
+			memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
+			XF86VidModeGetModeLine(dpy, DefaultScreen(dpy), &_OldDotClock, &_OldScreenMode);
+			XF86VidModeGetViewPort(dpy, DefaultScreen(dpy), &_OldX, &_OldY);
+		}
+
+		XF86VidModeModeInfo **modes;
+		int nmodes;
+		if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &nmodes, &modes))
+		{
+			for (int i = 0; i < nmodes; i++)
+			{
+				nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+				if(modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height)
+				{
+					if(XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), modes[i]))
+					{
+						nlinfo("3D: Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+						XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), 0, 0);
+					}
+					break;
+				}
+			}
+		}
+	}
+	else if (mode.Windowed == _FullScreen)
+	{
+		XF86VidModeModeInfo info;
+		nlinfo("3D: Switching back to original mode");
+
+		// This is a bit ugly - a quick hack to copy the ModeLine structure
+		// into the modeInfo structure.
+		memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)),&_OldScreenMode, sizeof(XF86VidModeModeLine));
+		info.dotclock = _OldDotClock;
+
+		nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
+		XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
+		nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
+		XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
+	}
+#endif // XF86VIDMODE
+
 	// Update WM hints (update size and disallow resizing)
 	XSizeHints size_hints;
 	size_hints.x = 0;
@@ -1642,8 +1673,6 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		xev.xclient.data.l[1] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", false);
 		xev.xclient.data.l[2] = 0;
 		XSendEvent(dpy, DefaultRootWindow(dpy), false, SubstructureNotifyMask, &xev);
-
-		//TODO: Change X display mode
 	}
 	_FullScreen = !mode.Windowed;
 
