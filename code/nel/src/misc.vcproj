@@ -1542,6 +1542,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\misc\system_utils.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\nel\misc\system_utils.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\nel\misc\timeout_assertion_thread.h"
 				>
 			</File>

@@ -33,6 +33,7 @@
 #include "nel/misc/class_registry.h"
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
+#include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -898,6 +899,10 @@ void prelogInit()
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
+
+		// initialize system utils class
+		CSystemUtils::init();
+		CSystemUtils::setWindow(Driver->getDisplay());
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
 

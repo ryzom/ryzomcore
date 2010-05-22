@@ -23,11 +23,6 @@
 #include "nel/3d/u_texture.h"
 #include "game_share/ryzom_version.h"
 #include "nel/misc/i18n.h"
-#if defined(NL_OS_WINDOWS) && defined(_WIN32_WINNT_WIN7)
-	// only supported by Windows 7 Platform SDK
-	#include <ShObjIdl.h>
-	#define TASKBAR_PROGRESS 1
-#endif
 #include "continent.h"
 #include "weather.h"
 #include "weather_manager_client.h"
@@ -37,6 +32,7 @@
 #include "client_cfg.h"
 #include "interface_v3/custom_mouse.h"
 #include "bg_downloader_access.h"
+#include "nel/misc/system_utils.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -52,10 +48,6 @@ extern uint TipsOfTheDayIndex;
 extern ucstring			TipsOfTheDay;
 extern bool					UseEscapeDuringLoading;
 
-#ifdef TASKBAR_PROGRESS
-	static ITaskbarList3* pTaskbarList = NULL;
-#endif
-
 CProgress::CProgress ()
 {
 	_LastUpdate = ryzomGetLocalTime ();
@@ -63,22 +55,10 @@ CProgress::CProgress ()
 	pushCropedValues (0, 1);
 	ApplyTextCommands = false;
 	_TPCancelFlag = false;
-
-#ifdef TASKBAR_PROGRESS
-	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-	// instanciate the taskbar control COM object
-//	if (SUCCEEDED(hr)) CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTaskbarList));
-#endif // TASKBAR_PROGRESS
 }
 
 CProgress::~CProgress ()
 {
-#ifdef TASKBAR_PROGRESS
-	if (pTaskbarList) pTaskbarList->Release();
-
-	CoUninitialize();
-#endif // TASKBAR_PROGRESS
 }
 
 void CProgress::setFontFactor(float temp)
@@ -394,10 +374,15 @@ void CProgress::internalProgress (float value)
 	CCDBNodeBranch::flushObserversCalls();
 	//CustomMouse.updateCursor();
 
-#ifdef TASKBAR_PROGRESS
-	// update the taskbar progress
-	if (pTaskbarList) pTaskbarList->SetProgressValue((HWND)Driver->getDisplay(), ULONGLONG(value * 1000), 1000);
-#endif // TASKBAR_PROGRESS
+	// update system dependent progress bar
+	static uint previousValue = 0;
+	uint currentValue = (uint)(value*100.0f);
+
+	if (currentValue != previousValue)
+	{
+		CSystemUtils::updateProgressBar(currentValue, 100);
+		previousValue = currentValue;
+	}
 }
 
 
@@ -430,9 +415,6 @@ void CProgress::release()
 
 void CProgress::finish()
 {
-#ifdef TASKBAR_PROGRESS
-	// don't update anymore the progress
-	if (pTaskbarList && Driver) pTaskbarList->SetProgressState((HWND)Driver->getDisplay(), TBPF_NOPROGRESS);
-#endif // TASKBAR_PROGRESS
+	// stop system dependent progress bar
+	CSystemUtils::updateProgressBar(1, 0);
 }
-
