@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3d", "..\..\nel\src\3d.vcproj", "{2B48BE83-108B-4E8E-8A55-6627CF09AC5A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
@@ -161,6 +161,17 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csv_transform", "leveldesign\csv_transform\csv_transform.vcproj", "{FA681701-91A3-44D7-878B-92E3B3BCBE43}"
 	ProjectSection(ProjectDependencies) = postProject
 		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "land_export_lib", "leveldesign\world_editor\land_export_lib\land_export_lib.vcproj", "{4B934267-7476-40FF-8701-817DFC63A7F9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "land_export", "leveldesign\world_editor\land_export\land_export.vcproj", "{FECBB892-F33C-4195-AB69-9B708BFBCDEA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{4B934267-7476-40FF-8701-817DFC63A7F9} = {4B934267-7476-40FF-8701-817DFC63A7F9}
+		{9D284C6B-BE12-4549-87E5-2337D64F31BE} = {9D284C6B-BE12-4549-87E5-2337D64F31BE}
+		{2B48BE83-108B-4E8E-8A55-6627CF09AC5A} = {2B48BE83-108B-4E8E-8A55-6627CF09AC5A}
+		{1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C} = {1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C}
 	EndProjectSection
 EndProject
 Global
@@ -403,6 +414,18 @@ Global
 		{FA681701-91A3-44D7-878B-92E3B3BCBE43}.Release|Win32.Build.0 = Release|Win32
 		{FA681701-91A3-44D7-878B-92E3B3BCBE43}.Release|x64.ActiveCfg = Release|x64
 		{FA681701-91A3-44D7-878B-92E3B3BCBE43}.Release|x64.Build.0 = Release|x64
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Debug|Win32.Build.0 = Debug|Win32
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Debug|x64.ActiveCfg = Debug|Win32
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Release|Win32.ActiveCfg = Release|Win32
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Release|Win32.Build.0 = Release|Win32
+		{4B934267-7476-40FF-8701-817DFC63A7F9}.Release|x64.ActiveCfg = Release|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Debug|Win32.Build.0 = Debug|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Debug|x64.ActiveCfg = Debug|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Release|Win32.ActiveCfg = Release|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Release|Win32.Build.0 = Release|Win32
+		{FECBB892-F33C-4195-AB69-9B708BFBCDEA}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
