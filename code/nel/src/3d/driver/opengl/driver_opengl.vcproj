@@ -503,6 +503,14 @@
 			RelativePath="stdopengl.h"
 			>
 		</File>
+		<File
+			RelativePath=".\unix_event_emitter.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\unix_event_emitter.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

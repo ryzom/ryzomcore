@@ -52,19 +52,36 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	}
 }
 
+#ifndef AltMask
+# ifdef NL_OS_MAC
+#  define AltMask     (8192)
+# else
+#  define AltMask     (Mod1Mask)
+# endif
+#endif
+
 TMouseButton getMouseButton (uint32 state)
 {
-	TMouseButton button=noButton;
-	if (state&ControlMask) (int&)button|=ctrlButton;
-	if (state&Button1Mask) (int&)button|=leftButton;
-	if (state&Button3Mask) (int&)button|=rightButton;
-	if (state&Button2Mask) (int&)button|=middleButton;
-	if (state&ShiftMask)   (int&)button|=shiftButton;
-	// TODO manage ALT key
-	//	if (GetAsyncKeyState(VK_MENU)&(1<<15))
-	//	(int&)button|=altButton;
-	return button;
+	uint32 button=noButton;
+	if (state&Button1Mask) button|=leftButton;
+	if (state&Button2Mask) button|=middleButton;
+	if (state&Button3Mask) button|=rightButton;
+	if (state&ControlMask) button|=ctrlButton;
+	if (state&ShiftMask)   button|=shiftButton;
+	if (state&AltMask)     button|=altButton;
+
+	return (TMouseButton)button;
 }
+
+TKeyButton getKeyButton (uint32 state)
+{
+	uint32 button=noKeyButton;
+	if (state&ControlMask) button|=ctrlKeyButton;
+	if (state&ShiftMask)   button|=shiftKeyButton;
+	if (state&AltMask)     button|=altKeyButton;
+
+	return (TKeyButton)button;
+}	
 
 TKey getKey (KeySym keysym)
 {
@@ -122,11 +139,16 @@ TKey getKey (KeySym keysym)
 	case XK_Shift_R: return KeySHIFT;
 	case XK_Control_L: return KeyCONTROL;
 	case XK_Control_R: return KeyCONTROL;
+	case XK_Super_L: return KeyLWIN;
+	case XK_Super_R: return KeyRWIN;
 ///	case XK_Caps_Lock: return Key;
 ///	case XK_Meta_L: return Key;
 ///	case XK_Meta_R: return Key;
-///	case XK_Alt_L: return Key;
-///	case XK_Alt_R: return Key;
+	case XK_Mode_switch: return KeyMENU;
+	case XK_ISO_Level3_Shift: return KeyMENU;
+	case XK_Menu: return KeyAPPS;
+	case XK_Alt_L: return KeyMENU;
+	case XK_Alt_R: return KeyMENU;
 	case XK_space: return KeySPACE;
 //	case XK_comma: return Key;
 //	case XK_minus: return Key;
@@ -199,9 +221,9 @@ TKey getKey (KeySym keysym)
 	case XK_y: return KeyY;
 	case XK_Z:
 	case XK_z: return KeyZ;
-	default: nldebug ("0x%x %d '%c'", keysym, keysym, keysym);
+	default: //nldebug ("0x%x %d '%c'", keysym, keysym, keysym);
 	}
-	return KeyNUMLOCK;
+	return KeyNOKEY;
 }
 
 
@@ -282,9 +304,11 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		int c;
 		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
 
-		TKey key = getKey (k);
+		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
+		if(key == KeyNOKEY)
+			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
 		// TODO manage the bool (first time pressed)
-		server.postEvent (new CEventKeyDown (key, noKeyButton, true, this));
+		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), true, this));
 
 		Text[c] = '\0';
 		if(c>0)
@@ -303,9 +327,11 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		int c;
 		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
 
-		TKey key = getKey (k);
+		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
+		if(key == KeyNOKEY)
+			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
 		// TODO manage the bool (first time pressed)
-		server.postEvent (new CEventKeyUp (key, noKeyButton, this));
+		server.postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 		break;
 	}
 	Case(FocusIn)
