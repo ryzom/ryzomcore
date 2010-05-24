@@ -328,26 +328,27 @@ plugin material NelMaterial
     classID:#(0x64c75fec, 0x222b9eb9)
     extends:standard 
 	replaceUI:true
-	version:12.0
+	version:14.0
 (
 	local loadShader
 	local globalUpdateUI
 	local updateTextureName
 
 	local updateToVersion4 = false
+	local updateToVersion14 = false
 	
 	parameters nlbp rollout:nelBasicParameters
 	(
-		bTwoSided type:#boolean ui:cbTwoSided
-		cAmbient type:#color ui:cpAmbient
-		cDiffuse type:#color ui:cpDiffuse
-		pOpacity type:#percent ui:spOpacity
-		cSpecular type:#color ui:cpSpecular
-		pSpecularLevel type:#percent ui:spSpecularLevel
-		pGlossiness type:#percent ui:spGlossiness
-		cSelfIllumColor type:#color ui:cpSelfIllumColor
-		pSelfIllumAmount type:#percent ui:spSelfIllumAmount
-		bUseSelfIllumColor type:#boolean ui:cbUseSelfIllumColor
+		bTwoSided type:#boolean
+		cAmbient type:#color
+		cDiffuse type:#color
+		pOpacity type:#percent
+		cSpecular type:#color 
+		pSpecularLevel type:#percent
+		pGlossiness type:#percent
+		cSelfIllumColor type:#color
+		pSelfIllumAmount type:#percent
+		bUseSelfIllumColor type:#boolean
 	)
 
     parameters main rollout:NelParams
@@ -549,8 +550,8 @@ plugin material NelMaterial
 		
 		group "Standard Lighting"
 		(
-			Label lblNlbpslA "Diffuse is the color in light, ambient in the dark." align:#right
-			Label lblNlbpslB "Ambient and diffuse multiply with the textures and global sun." align:#right
+			-- Label lblNlbpslA "Diffuse is the color in light, ambient in the dark." align:#right
+			-- Label lblNlbpslB "Ambient and diffuse multiply with the textures and global sun." align:#right
 			ColorPicker cpAmbient "Ambient" color:[63,63,63] align:#left across:3
 			ColorPicker cpDiffuse "Diffuse" color:[127,127,127] align:#left
 			Spinner spOpacity "Opacity" range:[0,100,100] type:#integer scale:1 align:#left
@@ -558,8 +559,8 @@ plugin material NelMaterial
 		
 		group "Specular"
 		(
-			Label lblNlbpsA "Increase the specular level to see the specular color." align:#right
-			Label lblNlbpsB "Multiplies with sun. Glossiness changes the size of the specular." align:#right
+			-- Label lblNlbpsA "Increase the specular level to see the specular color." align:#right
+			-- Label lblNlbpsB "Multiplies with sun. Glossiness changes the size of the specular." align:#right
 			ColorPicker cpSpecular "Specular" color:[255,255,255] align:#left across:3
 			Spinner spSpecularLevel "Level" range:[0,100,0] type:#integer scale:1 align:#left
 			Spinner spGlossiness "Glossiness"range:[0,80,10] type:#integer scale:1 align:#left
@@ -567,64 +568,91 @@ plugin material NelMaterial
 		
 		group "Self Illumination"
 		(
-			Label lblNlbpsiA "Set the self illumination by color or by amount." align:#right
+			-- Label lblNlbpsiA "Set the self illumination by color or by amount." align:#right
 			ColorPicker cpSelfIllumColor "Self Illum"color:[0,0,0] align:#left across:3
 			Spinner spSelfIllumAmount "Self Illum" range:[0,100,0] type:#integer scale:1 align:#left
 			CheckBox cbUseSelfIllumColor "Use Color" checked:false align:#right
 		)
 		
 		on cbTwoSided changed bval do
-			delegate.twoSided = bval
+			updateUI false
 		
 		on cpAmbient changed cval do
-			delegate.ambient = cval
+			updateUI false
 		
 		on cpDiffuse changed cval do
-			delegate.diffuse = cval
+			updateUI false
 		
 		on spOpacity changed pval do
-			delegate.opacity = pval
+			updateUI false
 		
 		on cpSpecular changed cval do
-			delegate.specular = cval
+			updateUI false
 		
 		on spSpecularLevel changed pval do
-			delegate.specularLevel = pval
+			updateUI false
 		
 		on spGlossiness changed pval do
-			delegate.glossiness = pval
+			updateUI false
 		
 		on cpSelfIllumColor changed cval do
-			delegate.selfIllumColor = cval
+			updateUI false
 		
 		on spSelfIllumAmount changed bval do
-			delegate.selfIllumAmount = bval
+			updateUI false
 		
 		on cbUseSelfIllumColor changed bval do
-		(
-			delegate.useSelfIllumColor = bval
-			spSelfIllumAmount.visible = not bval
-			cpSelfIllumColor.visible = bval
-		)
+			updateUI false
 		
 		Fn updateUI update =
 		(
-			cbTwoSided.checked = delegate.twoSided
-			cpAmbient.color = delegate.ambient
-			cpDiffuse.color = delegate.diffuse
-			spOpacity.value = delegate.opacity
-			cpSpecular.color = delegate.specular
-			spSpecularLevel.value = delegate.specularLevel
-			spGlossiness.value = delegate.glossiness
-			cpSelfIllumColor.color = delegate.selfIllumColor
-			spSelfIllumAmount.value = delegate.selfIllumAmount
-			cbUseSelfIllumColor.checked = delegate.useSelfIllumColor
-			
-			spSelfIllumAmount.visible = not delegate.useSelfIllumColor
-			cpSelfIllumColor.visible = delegate.useSelfIllumColor
-			delegate.adTextureLock = false
-			delegate.adLock = false
-			delegate.dsLock = false
+			if (version >= 14) then
+			(
+				if update == true then
+				(
+					cbTwoSided.checked = bTwoSided
+					cpAmbient.color = cAmbient
+					cpDiffuse.color = cDiffuse
+					spOpacity.value = pOpacity
+					cpSpecular.color = cSpecular
+					spSpecularLevel.value = pSpecularLevel
+					spGlossiness.value = pGlossiness
+					cpSelfIllumColor.color = cSelfIllumColor
+					spSelfIllumAmount.value = pSelfIllumAmount
+					cbUseSelfIllumColor.checked = bUseSelfIllumColor
+					
+					spSelfIllumAmount.visible = not bUseSelfIllumColor
+					cpSelfIllumColor.visible = bUseSelfIllumColor
+				)
+				else
+				(					
+					bTwoSided = cbTwoSided.checked
+					cAmbient = cpAmbient.color
+					cDiffuse = cpDiffuse.color
+					pOpacity = spOpacity.value
+					cSpecular = cpSpecular.color
+					pSpecularLevel = spSpecularLevel.value
+					pGlossiness = spGlossiness.value
+					cSelfIllumColor = cpSelfIllumColor.color
+					pSelfIllumAmount = spSelfIllumAmount.value
+					bUseSelfIllumColor = cbUseSelfIllumColor.checked
+					
+					delegate.twoSided = bTwoSided
+					delegate.ambient = cAmbient
+					delegate.diffuse = cDiffuse
+					delegate.opacity = pOpacity
+					delegate.specular = cSpecular
+					delegate.specularLevel = pSpecularLevel
+					delegate.glossiness = pGlossiness
+					delegate.selfIllumColor = cSelfIllumColor
+					delegate.selfIllumAmount = pSelfIllumAmount
+					delegate.useSelfIllumColor = bUseSelfIllumColor
+				)
+				
+				delegate.adTextureLock = false
+				delegate.adLock = false
+				delegate.dsLock = false
+			)
 		)
 		
 		on nelBasicParameters open do
@@ -2050,16 +2078,16 @@ plugin material NelMaterial
 	)
 
 	on load do 
-	( 
+	(
 		-- Trap Patch
-		if version >= 4 then
+		if version >= 4 and version < 14 then
 		(
 			if (delegate.DiffuseMap != undefined) and (tTexture_1 == undefined) then
 			(
 				tTexture_1 = delegate.DiffuseMap
 			)
 		)
-
+		
 		-- Update to version 4 ?
 		if updateToVersion4 == true then
 		(
@@ -2135,18 +2163,35 @@ plugin material NelMaterial
 				)
 			)
 		)
-
+		
 		updateToVersion4 = false
+		
+		if updateToVersion14 == true then
+		(			
+			bTwoSided = delegate.twoSided
+			cAmbient = delegate.ambient
+			cDiffuse = delegate.diffuse
+			pOpacity = delegate.opacity
+			cSpecular = delegate.specular
+			pSpecularLevel = delegate.specularLevel
+			pGlossiness = delegate.glossiness
+			cSelfIllumColor = delegate.selfIllumColor
+			pSelfIllumAmount = delegate.selfIllumAmount
+			bUseSelfIllumColor = delegate.useSelfIllumColor
+		)
+		
+		updateToVersion14 = false
+		
 	)
 
 	on create do 
-	( 
+	(
 		-- Single shader
 		loadShader ShaderSingleTexture
 	)
 
 	on update do 
-	( 
+	(
 		-- Initialise V3 fields.
 		if (version < 3) and (version >= 1) then
 		(
@@ -2168,10 +2213,16 @@ plugin material NelMaterial
 		(
 			updateToVersion4 = true
 		)
+		
+		if (version < 14) and (version >= 1) then
+		(
+			updateToVersion14 = true
+		)
 	) 
 
 	fn globalUpdateUI update =
 	(
+		nelBasicParameters.updateUI update
 		NelParams.updateUI update
 		NelTexture.updateUI update
 		NelMultitextureSlot1.updateUI update
