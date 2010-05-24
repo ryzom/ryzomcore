@@ -221,7 +221,9 @@ TKey getKey (KeySym keysym)
 	case XK_y: return KeyY;
 	case XK_Z:
 	case XK_z: return KeyZ;
-	default: //nldebug ("0x%x %d '%c'", keysym, keysym, keysym);
+	default:
+	//nldebug ("0x%x %d '%c'", keysym, keysym, keysym);
+	break;
 	}
 	return KeyNOKEY;
 }
