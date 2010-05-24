@@ -59,7 +59,7 @@ CStringEx CTypeUnitDouble::FormatDouble( const double dvalue ) const
 		sx.insert(decimal,".");
 
 	while( sx[sx.length()-1] == '0' )
-		sx.left( sx.length() -1 );
+		sx.left( (int)sx.length() -1 );
 	
 	if( sx[sx.length()-1] == '.' )
 		sx += '0';
@@ -94,12 +94,12 @@ CStringEx CTypeUnitDouble::Format( const CStringEx _sxvalue ) const
 	value.purge();
 	while( value[0] == '<' )
 	{
-		unsigned int pos = value.find( '>' );
-		if( pos == -1 )
+		std::string::size_type pos = value.find( '>' );
+		if( pos == std::string::npos )
 			break;
 		CStringEx sxoperateur = value.get_mid( 1, 1 );
-		CStringEx sxoperande = value.get_mid( 2, pos-2);
-		value.right( value.size()-pos-1 );
+		CStringEx sxoperande = value.get_mid( 2, (int)pos-2);
+		value.right( (int)(value.size()-pos-1) );
 		modificationValues.push_back( std::make_pair( sxoperateur, sxoperande ) );
 	}
 	if( modificationValues.size() )
@@ -144,12 +144,12 @@ CStringEx CTypeUnitDouble::CalculateResult( const CStringEx _sxbasevalue, const 
 	value.purge();
 	while( value[0] == '<' )
 	{
-		unsigned int pos = value.find( '>' );
-		if( pos == -1 )
+		std::string::size_type pos = value.find( '>' );
+		if( pos == std::string::npos )
 			break;
 		CStringEx sxoperateur = value.get_mid( 1, 1 );
-		CStringEx sxoperande = value.get_mid( 2, pos-2);
-		value.right( value.size()-pos-1 );
+		CStringEx sxoperande = value.get_mid( 2, (int)pos-2);
+		value.right( (int)(value.size()-pos-1) );
 		modificationValues.push_back( std::make_pair( sxoperateur, sxoperande ) );
 	}
 	if( modificationValues.size() )

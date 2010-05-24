@@ -833,7 +833,7 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 	{
 		string dst, src = _FilesToPublish[i];
 
-		uint n = src.find("primitives");
+		string::size_type n = src.find("primitives");
 		if (n == string::npos)
 		{
 			// text files : copy it and check include in phrase_rites_wk.txt
@@ -2229,7 +2229,7 @@ std::vector<TCompilerVarName> TCompilerVarName::getPropertyArrayWithText(const s
 
 	std::vector<std::string> values = md.getPropertyArray(prim, arrayProperyName,false, false);
 	uint first = 0;
-	uint last = values.size();
+	uint last = (uint)values.size();
 	compilerParams.resize(last);
 	for ( ; first != last; ++first) 
 	{		
@@ -2244,7 +2244,7 @@ std::vector<TCompilerVarName> TCompilerVarName::getPropertyArrayWithTextStaticDe
 	std::vector<TCompilerVarName> compilerParams;
 	std::vector<std::string> values = md.getPropertyArray(prim, arrayProperyName,false, false);
 	uint first = 0;
-	uint last = values.size();
+	uint last = (uint)values.size();
 	compilerParams.resize(last);
 	for ( ; first != last; ++first) 
 	{		

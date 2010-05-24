@@ -28,11 +28,11 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 
-#include "3d/zone.h"
-#include "3d/landscape.h"
-#include "3d/scene_group.h"
-#include "3d/visual_collision_manager.h"
-#include "3d/visual_collision_entity.h"
+#include "nel/3d/zone.h"
+#include "nel/3d/landscape.h"
+#include "nel/3d/scene_group.h"
+#include "nel/3d/visual_collision_manager.h"
+#include "nel/3d/visual_collision_entity.h"
 
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"

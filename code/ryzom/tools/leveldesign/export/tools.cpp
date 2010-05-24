@@ -39,10 +39,13 @@ void CTools::mkdir (const string &dirName)
 	SetCurrentDirectory (newDir.c_str());
 	// Create upper levels
 	newDir = "";
-	int pos = dirName.rfind('\\');
-	for (int i = 0; i < pos; ++i)
-		newDir += dirName[i];
-	mkdir (newDir);
+	string::size_type pos = dirName.rfind('\\');
+	if (pos != string::npos)
+	{
+		for (uint i = 0; i < pos; ++i)
+			newDir += dirName[i];
+		mkdir (newDir);
+	}
 	// Create Directory
 	if (!CreateDirectory(dirName.c_str(),NULL))
 		throw Exception(string("Cannot create directory ")+dirName);

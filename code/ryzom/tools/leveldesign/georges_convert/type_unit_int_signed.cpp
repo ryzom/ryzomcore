@@ -51,12 +51,12 @@ CStringEx CTypeUnitIntSigned::Format( const CStringEx _sxvalue ) const
 	value.purge();
 	while( value[0] == '<' )
 	{
-		unsigned int pos = value.find( '>' );
-		if( pos == -1 )
+		std::string::size_type pos = value.find( '>' );
+		if( pos == std::string::npos )
 			break;
 		CStringEx sxoperateur = value.get_mid( 1, 1 );
 		CStringEx sxoperande = value.get_mid( 2, pos-2);
-		value.right( value.size()-pos-1 );
+		value.right( (int)(value.size()-pos-1) );
 		modificationValues.push_back( std::make_pair( sxoperateur, sxoperande ) );
 	}
 	if( modificationValues.size() )
@@ -96,12 +96,12 @@ CStringEx CTypeUnitIntSigned::CalculateResult( const CStringEx _sxbasevalue, con
 	value.purge();
 	while( value[0] == '<' )
 	{
-		unsigned int pos = value.find( '>' );
-		if( pos == -1 )
+		std::string::size_type pos = value.find( '>' );
+		if( pos == std::string::npos )
 			break;
 		CStringEx sxoperateur = value.get_mid( 1, 1 );
-		CStringEx sxoperande = value.get_mid( 2, pos-2);
-		value.right( value.size()-pos-1 );
+		CStringEx sxoperande = value.get_mid( 2, (int)pos-2);
+		value.right( (int)(value.size()-pos-1) );
 		modificationValues.push_back( std::make_pair( sxoperateur, sxoperande ) );
 	}
 	if( modificationValues.size() )

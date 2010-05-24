@@ -37,7 +37,7 @@ void splitStringCSV(const CSString& in,const CSString& separator,vector<CSString
 {
 	bool	lastEmpty = false;
 	CSString s=in.strip();
-	if (s.right(separator.size()) == separator)
+	if (s.right((uint)separator.size()) == separator)
 	{
 		// there is en empty column at end of line, remember this
 		lastEmpty = true;
@@ -46,16 +46,16 @@ void splitStringCSV(const CSString& in,const CSString& separator,vector<CSString
 	while (!s.empty())
 	{
 		// deal with empty columns first
-		while (s.left(separator.size())==separator)
+		while (s.left((uint)separator.size())==separator)
 		{
-			s=s.leftCrop(separator.size());
+			s=s.leftCrop((uint)separator.size());
 			result.push_back("");
 		}
 		if (!s.empty())
 		{
-			uint pos = s.find(separator.c_str(), 0);
-			CSString col = s.left(pos);
-			s=s.leftCrop(pos);
+			string::size_type pos = s.find(separator.c_str(), 0);
+			CSString col = s.left((uint)pos);
+			s=s.leftCrop((uint)pos);
 			if (!col.empty() && col[0] == '\"')
 			{
 				result.push_back(s.firstWordOrWords(true));
@@ -67,7 +67,7 @@ void splitStringCSV(const CSString& in,const CSString& separator,vector<CSString
 			while (s.left(separator.size())!=separator && !s.empty())
 				result.back()+=s.firstWordOrWords(true);
 */
-			s=s.leftCrop(separator.size());
+			s=s.leftCrop((uint)separator.size());
 		}
 	}
 	if (lastEmpty)
@@ -176,7 +176,7 @@ private:
 	void closeFooters()
 	{
 		// deal with footer paragraphs
-		for (uint32 i=tblColumnNames.size();i--;)
+		for (uint32 i=(uint32)tblColumnNames.size();i--;)
 		{
 			if (headerIsOpen[tblColumnNames[i]])
 			{
@@ -195,7 +195,7 @@ private:
 		CSString str = fileHeader + fileBody + fileFooter;
 
 		NLMISC::COFile of(filename, false, true);
-		of.serialBuffer((uint8*)str.data(), str.size());
+		of.serialBuffer((uint8*)str.data(), (uint)str.size());
 /*		out<<fileHeader;
 		out<<fileBody;
 		out<<fileFooter;
@@ -236,7 +236,7 @@ private:
 					}
 				}
 
-				for (uint32 i=tblColumnNames.size();(i--)>firstChange;)
+				for (uint32 i=(uint32)tblColumnNames.size();(i--)>firstChange;)
 				{
 					CSString s=footers[tblColumnNames[i]];
 					for (uint32 j=1;j<lastTblCols.size()&&j<tblColumnNames.size();++j)

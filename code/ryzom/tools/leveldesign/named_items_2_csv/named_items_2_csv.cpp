@@ -136,7 +136,7 @@ void processItemLine(const string &s)
 			if (!CSString::isValidFileNameChar(s[field.size()]))
 			{
 				// get value
-				int pos = s.find("=");
+				string::size_type pos = s.find("=");
 				nlassert(pos != string::npos);
 				string val(s, pos+1);
 
@@ -349,7 +349,7 @@ void updateItemField(CVectorSString &lines, uint itemIndex, uint fieldIndex, uin
 	for (i=a ; i<b ; i++)
 	{
 		string line = s + "= " + val;
-		uint pos = pos = lines[i].find(line.c_str());
+		string::size_type pos = lines[i].find(line.c_str());
 		if (pos != string::npos)
 		{
 			found = true;
@@ -361,7 +361,7 @@ void updateItemField(CVectorSString &lines, uint itemIndex, uint fieldIndex, uin
 	i = a-1;
 	while (++i<b && !found)
 	{
-		uint pos;
+		string::size_type pos;
 
 		// store the line "_CraftParameters" : reference line
 		if (craftLine == 0)

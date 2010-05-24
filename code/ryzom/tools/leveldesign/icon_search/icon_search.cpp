@@ -57,7 +57,7 @@ void findIcons(CConfigFile::CVar *var)
 	vector<string> files;
 
 	// Scan each directory
-	for (int i=0 ; i<var->size() ; i++)
+	for (uint i=0 ; i<var->size() ; i++)
 	{
 		// clear files list
 		files.clear();
@@ -82,7 +82,7 @@ string remap2Jpg(const string &s)
 {
 	// change extension from TGA to JPG
 	string jpg(s);
-	uint n = jpg.find(".tga");
+	string::size_type n = jpg.find(".tga");
 	nlassert(n != string::npos);
 	jpg.erase(n);
 	jpg += ".jpg";
@@ -92,7 +92,7 @@ string remap2Jpg(const string &s)
 
 void writeString(COFile &f, const string &s)
 {
-	f.serialBuffer((uint8*)s.c_str(), s.size());
+	f.serialBuffer((uint8*)s.c_str(), (uint)s.size());
 }
 
 void writeHTMLline(COFile &f, const string &icon, const StringVector files, uint sizeLimit)
@@ -113,9 +113,9 @@ void writeHTMLline(COFile &f, const string &icon, const StringVector files, uint
 	// fix limit based on configuration file
 	uint n;
 	if (sizeLimit == 0)
-		n = files.size();
+		n = (uint)files.size();
 	else
-		n = sizeLimit > files.size() ? files.size() : sizeLimit;
+		n = sizeLimit > files.size() ? (uint)files.size() : sizeLimit;
 
 	// write each file using this icon
 	for (uint i=0 ; i<n ; i++)
@@ -174,7 +174,7 @@ void convertImages(CConfigFile::CVar *var)
 		CFile::createDirectory("images");
 
 	// Scan each directory
-	for (int i=0 ; i<var->size() ; i++)
+	for (uint i=0 ; i<var->size() ; i++)
 	{
 		string path = CPath::standardizePath(var->asString(i));
 		vector<string> files;
@@ -206,7 +206,7 @@ void convertImages(CConfigFile::CVar *var)
 
 bool endsWith( const CSString& s, const CSString& substring )
 {
-	return ( s.right( substring.size() ) == substring );
+	return ( s.right( (uint)substring.size() ) == substring );
 }
 
 void ProcessDirectory( const CSString& dir, const StringVector& extensions )
@@ -220,7 +220,7 @@ void ProcessDirectory( const CSString& dir, const StringVector& extensions )
 	printf( "%s\n", dir.c_str() );
 	CPath::getPathContent ( dir.c_str(), true, false, true, files );
 
-	sixieme = files.size() / 6;
+	sixieme = (int)files.size() / 6;
 
 	printf( "%d files are processed", files.size() );
 
@@ -240,7 +240,7 @@ void ProcessDirectory( const CSString& dir, const StringVector& extensions )
 			data.readFromFile( files[i] );
 
 			// Don't parse LOG
-			uint n = data.find("<LOG>");
+			string::size_type n = data.find("<LOG>");
 			if (n != CSString::npos)
 				data.erase(n);
 
@@ -328,7 +328,7 @@ void main()
 
 	var = cf.getVarPtr("Wildcard");
 	if (var)
-	for (int i=0 ; i<var->size() ; i++)
+	for (uint i=0 ; i<var->size() ; i++)
 	for (uint it=0; it<listeIcones.size(); it++)
 	{
 		string wild = var->asString(i);

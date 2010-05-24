@@ -30,9 +30,9 @@
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
 
-#include "nel/../../src/3d/zone.h"
-#include "nel/../../src/3d/landscape.h"
-#include "nel/../../src/3d/scene_group.h"
+#include "nel/3d/zone.h"
+#include "nel/3d/landscape.h"
+#include "nel/3d/scene_group.h"
 
 #include <windows.h>
 
@@ -121,7 +121,7 @@ public:
 			pgId= min(pgId, (uint)(BAR_LENGTH-1));
 			sprintf (msg, "\r%s: %s", DisplayString.c_str (), progressbar[pgId]);
 			uint i;
-			for (i=strlen(msg); i<79; i++)
+			for (i=(uint)strlen(msg); i<79; i++)
 				msg[i]=' ';
 			msg[i]=0;
 			printf (msg);
@@ -161,8 +161,8 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 	std::string zoneName(name);
 
 	// y
-	uint ind1 = zoneName.find("_");
-	if(ind1>=zoneName.length())
+	std::string::size_type ind1 = zoneName.find("_");
+	if(ind1 == std::string::npos)
 	{
 		nlwarning("bad file name");
 		return false;
@@ -180,7 +180,7 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 
 	// x
 	x = 0;
-	uint ind2 = zoneName.length();
+	uint ind2 = (uint)zoneName.length();
 	if((ind2-ind1-1)!=2)
 	{
 		nlwarning("x code size is not a 2 characters code");
@@ -868,7 +868,7 @@ int main (int argc, char**argv)
 				CPath::getPathContent (options.PrimDirs[i], true, false, true, files);
 
 			// For each
-			uint fileCount = files.size ();
+			uint fileCount = (uint)files.size ();
 			for (i=0; i<fileCount; i++)
 			{
 				// Primitive file ?
@@ -1005,7 +1005,7 @@ int main (int argc, char**argv)
 										uint layer = instance.AdditionnalInfo[i].SnapLayer;
 										
 										// Found some triangles ?
-										const uint setSize = selectedHeight.size ();
+										const uint setSize = (uint)selectedHeight.size ();
 										if (setSize)
 										{
 											// Look for the triangle in the good layer
