@@ -123,6 +123,8 @@ bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTi
 // Go go go !
 int main (int argc, char **argv)
 {
+	NLMISC::CApplicationContext myApplicationContext;
+
 	// Options
 	bool useCurrentPath=false;
 	bool forceRecomputation=false;
