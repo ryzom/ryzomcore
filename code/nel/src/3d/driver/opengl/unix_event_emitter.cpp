@@ -23,12 +23,11 @@
 #include <GL/glx.h>
 
 #include "nel/misc/debug.h"
-#include "nel/misc/events.h"
 #include "unix_event_emitter.h"
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ()
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY)
 {
 }
 
@@ -309,8 +308,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
 		if(key == KeyNOKEY)
 			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
-		// TODO manage the bool (first time pressed)
-		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), true, this));
+
+		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
+ 		_PreviousKey = key;
 
 		// don't send a control character when deleting
 		if (key == KeyDELETE)
@@ -336,8 +336,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
 		if(key == KeyNOKEY)
 			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
-		// TODO manage the bool (first time pressed)
+
 		server.postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
+		_PreviousKey = KeyNOKEY;
 		break;
 	}
 	Case(FocusIn)

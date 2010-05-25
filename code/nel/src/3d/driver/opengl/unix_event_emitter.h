@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
+#include "nel/misc/events.h"
 
 #ifdef NL_OS_UNIX
 
@@ -38,10 +39,10 @@ class CUnixEventEmitter : public IEventEmitter
 {
 public:
 
-  /// Constructor
-  CUnixEventEmitter();
+	/// Constructor
+	CUnixEventEmitter();
 
-  void init (Display *dpy, Window win);
+	void init (Display *dpy, Window win);
 
 	/**
 	 * sends all events to server
@@ -53,9 +54,10 @@ public:
 public:
 	void processMessage (XEvent &event, CEventServer &server);
 
- private:
+private:
 	Display *_dpy;
 	Window   _win;
+	TKey     _PreviousKey;
 };
 
 
