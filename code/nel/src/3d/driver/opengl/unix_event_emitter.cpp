@@ -312,6 +312,10 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		// TODO manage the bool (first time pressed)
 		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), true, this));
 
+		// don't send a control character when deleting
+		if (key == KeyDELETE)
+			c = 0;
+
 		Text[c] = '\0';
 		if(c>0)
 		{
