@@ -304,9 +304,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		int c;
 		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
 
-		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
+		TKey key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
 		if(key == KeyNOKEY)
-			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
+			key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 1));
 
 		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
  		_PreviousKey = key;
@@ -332,9 +332,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		int c;
 		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
 
-		TKey key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 0));
+		TKey key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
 		if(key == KeyNOKEY)
-			key = getKey(XKeycodeToKeysym(_dpy, ((XKeyEvent*)&event)->keycode, 1));
+			key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 1));
 
 		server.postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 		_PreviousKey = KeyNOKEY;
