@@ -98,7 +98,7 @@ uint CDriverGL::_Registered=0;
 #endif // NL_OS_WINDOWS
 
 // Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-const uint32 CDriverGL::ReleaseVersion = 0xf;
+const uint32 CDriverGL::ReleaseVersion = 0x10;
 
 // Number of register to allocate for the EXTVertexShader extension
 const uint CDriverGL::_EVSNumConstant = 97;
@@ -551,7 +551,7 @@ void CDriverGL::disableHardwareTextureShader()
 
 // --------------------------------------------------
 
-bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
@@ -1091,10 +1091,7 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 	    nldebug("3D: glXCreateContext() OK");
 	}
 
-	Colormap cmap = XCreateColormap (dpy, RootWindow(dpy, DefaultScreen(dpy)), visual_info->visual, AllocNone);
-
 	XSetWindowAttributes attr;
-	attr.colormap = cmap;
 	attr.background_pixel = BlackPixel(dpy, DefaultScreen(dpy));
 
 #ifdef XF86VIDMODE
@@ -1113,17 +1110,30 @@ bool CDriverGL::setDisplay(void *wnd, const GfxMode &mode, bool show, bool resiz
 	attr.override_redirect = False;
 #endif
 
-	int attr_flags = CWOverrideRedirect | CWColormap | CWBackPixel;
+	int attr_flags = CWOverrideRedirect | CWBackPixel;
 
-	win = XCreateWindow (dpy, RootWindow(dpy, DefaultScreen(dpy)), 0, 0, width, height, 0, visual_info->depth, InputOutput, visual_info->visual, attr_flags, &attr);
-
-	if(!win)
+	if(wnd == EmptyWindow)
 	{
-	    nlerror("XCreateWindow() failed");
+		nlWindow root = RootWindow(dpy, DefaultScreen(dpy));
+
+		attr.colormap = XCreateColormap(dpy, root, visual_info->visual, AllocNone);
+		attr_flags |= CWColormap;
+
+		win = XCreateWindow (dpy, root, 0, 0, width, height, 0, visual_info->depth, InputOutput, visual_info->visual, attr_flags, &attr);
+
+		if (win == EmptyWindow)
+		{
+			nlerror("3D: XCreateWindow() failed");
+		}
+		else
+		{
+		    nldebug("3D: XCreateWindow() OK");
+		}
 	}
 	else
 	{
-	    nldebug("3D: XCreateWindow() OK");
+		win = wnd;
+		XChangeWindowAttributes(dpy, win, attr_flags, &attr);
 	}
 
 	XSizeHints size_hints;

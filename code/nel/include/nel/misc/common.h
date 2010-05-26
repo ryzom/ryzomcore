@@ -33,6 +33,7 @@
 #ifdef NL_OS_WINDOWS
 #	include <process.h>
 #	include <intrin.h>
+#	include <windows.h>
 #else
 #	include <cmath>
 #	include <unistd.h>
@@ -41,6 +42,13 @@
 
 #include "string_common.h"
 
+#ifdef NL_OS_WINDOWS
+	typedef HWND nlWindow;
+	#define EmptyWindow NULL
+#else
+	typedef int nlWindow;
+	#define EmptyWindow 0
+#endif
 
 /// This namespace contains all miscellaneous classes used by other modules
 namespace	NLMISC

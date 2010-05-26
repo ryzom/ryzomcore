@@ -224,11 +224,11 @@ bool			CDriverUser::setDisplay(const CMode &mode, bool show, bool resizeable)
 {
 	NL3D_HAUTO_UI_DRIVER;
 
-	return setDisplay(NULL, mode, show, resizeable);
+	return setDisplay(EmptyWindow, mode, show, resizeable);
 }
 
 // ***************************************************************************
-bool			CDriverUser::setDisplay(void *wnd, const CMode &mode, bool show, bool resizeable)
+bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool resizeable)
 {
 	NL3D_HAUTO_UI_DRIVER;
 

@@ -1295,7 +1295,7 @@ const D3DFORMAT FinalPixelFormat[ITexture::UploadFormatCount][CDriverD3D::FinalP
 
 // ***************************************************************************
 
-bool CDriverD3D::setDisplay(void* wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay)
 {
 	H_AUTO_D3D(CDriver3D_setDisplay);
 	if (!_D3D)

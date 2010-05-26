@@ -34,7 +34,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x63; // added supportNonPowerOfTwoTextures()
+const uint32 IDriver::InterfaceVersion = 0x64; // Added nlWindow patch.
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

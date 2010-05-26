@@ -178,7 +178,7 @@ public:
 	  * \param show show or hide the window in window mode.
 	  */
 	virtual	bool			setDisplay(const CMode &mode, bool show = true, bool resizeable = true) =0;
-	virtual	bool			setDisplay(void *wnd, const CMode &mode, bool show = true, bool resizeable = true) =0;
+	virtual	bool			setDisplay(nlWindow wnd, const CMode &mode, bool show = true, bool resizeable = true) =0;
 	virtual bool			setMode(const CMode& mode)=0;
 	virtual bool			getModes(std::vector<CMode> &modes)=0;
 	virtual bool			getCurrentScreenMode(CMode &mode)=0;

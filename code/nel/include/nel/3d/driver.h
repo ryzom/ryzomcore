@@ -178,7 +178,7 @@ public:
 
 	// first param is the associated window.
 	// Must be a HWND for Windows (WIN32).
-	virtual bool			setDisplay(void* wnd, const GfxMode& mode, bool show = true, bool resizeable = true) throw(EBadDisplay)=0;
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show = true, bool resizeable = true) throw(EBadDisplay)=0;
 	// Must be called after a setDisplay that initialize the mode
 	virtual bool			setMode(const GfxMode& mode)=0;
 	virtual bool			getModes(std::vector<GfxMode> &modes)=0;

@@ -138,7 +138,7 @@ public:
 
 	/// create the window.
 	virtual	bool			setDisplay(const CMode &mode, bool show, bool resizeable);
-	virtual	bool			setDisplay(void *wnd, const CMode &mode, bool show, bool resizeable);
+	virtual	bool			setDisplay(nlWindow wnd, const CMode &mode, bool show, bool resizeable);
 	virtual bool			setMode(const CMode& mode);
 	virtual bool			getModes(std::vector<CMode> &modes);
 	virtual bool			getCurrentScreenMode(CMode &mode);

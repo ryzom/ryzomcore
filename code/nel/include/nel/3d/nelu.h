@@ -64,7 +64,7 @@ public:
 	 *
 	 * You can access the driver with CNELU::Driver.
 	 */
-	static bool		initDriver(uint w, uint h, uint bpp=32, bool windowed=true, void *systemWindow=NULL, bool offscreen=false, bool direct3d=false) throw(EDru);
+	static bool		initDriver(uint w, uint h, uint bpp=32, bool windowed=true, nlWindow systemWindow=EmptyWindow, bool offscreen=false, bool direct3d=false) throw(EDru);
 
 	/** Init all that we need for a Scene.
 	 * - register scene basics models,
@@ -108,7 +108,7 @@ public:
 	 * - initScene();
 	 * - initEventServer();
 	 */
-	static bool		init(uint w, uint h, CViewport viewport=CViewport(), uint bpp=32, bool windowed=true, void *systemWindow=NULL, bool offscreen = false, bool direct3d = false) throw(EDru);
+	static bool		init(uint w, uint h, CViewport viewport=CViewport(), uint bpp=32, bool windowed=true, nlWindow systemWindow=EmptyWindow, bool offscreen = false, bool direct3d = false) throw(EDru);
 
 	/** Delete all:
 	 * - releaseEventServer();
