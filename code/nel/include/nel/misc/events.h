@@ -209,7 +209,7 @@ enum TKey
 	KeyRCONTROL       =0xA3,
 	KeyLMENU          =0xA4,
 	KeyRMENU          =0xA5,
-	KeySEMICOLON	  =0xBA,
+	KeySEMICOLON      =0xBA,
 	KeyEQUALS         =0xBB,
 	KeyCOMMA          =0xBC,
 	KeyDASH           =0xBD,
@@ -219,7 +219,7 @@ enum TKey
 	KeyLBRACKET       =0xDB,
 	KeyBACKSLASH      =0xDC,
 	KeyRBRACKET       =0xDD,
-	KeyAPOSTROPHE	  =0xDE,
+	KeyAPOSTROPHE     =0xDE,
 	KeyPARAGRAPH      =0xDF,
 	KeyOEM_102        =0xE2,
 	KeyPROCESSKEY     =0xE5,
@@ -237,21 +237,21 @@ enum TKey
 
 enum TMouseButton
 {
-	noButton		=0x0,
-	leftButton		=0x1,
-	middleButton	=0x2,
-	rightButton		=0x4,
-	ctrlButton		=0x8,
-	shiftButton		=0x10,
-	altButton		=0x20
+	noButton      =0x0,
+	leftButton    =0x1,
+	middleButton  =0x2,
+	rightButton   =0x4,
+	ctrlButton    =0x8,
+	shiftButton   =0x10,
+	altButton     =0x20
 };
 
 enum TKeyButton
 {
-	noKeyButton			=0x0,
-	ctrlKeyButton		=0x8,
-	shiftKeyButton		=0x10,
-	altKeyButton		=0x20
+	noKeyButton     =0x0,
+	ctrlKeyButton   =0x8,
+	shiftKeyButton  =0x10,
+	altKeyButton    =0x20
 };
 
 /**

@@ -80,7 +80,7 @@ TKeyButton getKeyButton (uint32 state)
 	if (state&AltMask)     button|=altKeyButton;
 
 	return (TKeyButton)button;
-}	
+}
 
 TKey getKey (KeySym keysym)
 {
@@ -88,13 +88,12 @@ TKey getKey (KeySym keysym)
 	{
 	case XK_BackSpace: return KeyBACK;
 	case XK_Tab: return KeyTAB;
-//	case XK_Clear: return Key;
 	case XK_Return: return KeyRETURN;
+	case XK_Sys_Req: return KeySNAPSHOT;
+	case XK_Scroll_Lock: return KeySCROLL;
 	case XK_Pause: return KeyPAUSE;
-//	case XK_Scroll_Lock: return Key;
 	case XK_Escape: return KeyESCAPE;
 	case XK_Delete: return KeyDELETE;
-//	case XK_Kanji: return Key;
 	case XK_Home: return KeyHOME;
 	case XK_Left: return KeyLEFT;
 	case XK_Up: return KeyUP;
@@ -116,12 +115,23 @@ TKey getKey (KeySym keysym)
 	case XK_KP_7: return KeyNUMPAD7;
 	case XK_KP_8: return KeyNUMPAD8;
 	case XK_KP_9: return KeyNUMPAD9;
+	case XK_KP_Enter: return KeyRETURN;
+	case XK_KP_Home: return KeyHOME;
+	case XK_KP_Left: return KeyLEFT;
+	case XK_KP_Up: return KeyUP;
+	case XK_KP_Right: return KeyRIGHT;
+	case XK_KP_Down: return KeyDOWN;
+	case XK_KP_Page_Up: return KeyPRIOR;
+	case XK_KP_Page_Down: return KeyNEXT;
+	case XK_KP_End: return KeyEND;
+	case XK_KP_Begin: return KeyCANCEL;
+	case XK_KP_Insert: return KeyINSERT;
+	case XK_KP_Delete: return KeyDELETE;
+	case XK_KP_Multiply: return KeyMULTIPLY;
 	case XK_KP_Add: return KeyADD;
 	case XK_KP_Subtract: return KeySUBTRACT;
-	case XK_KP_Divide: return KeyDIVIDE;
-	case XK_KP_Multiply: return KeyMULTIPLY;
 	case XK_KP_Decimal: return KeyDECIMAL;
-	case XK_KP_Enter: return KeyRETURN;
+	case XK_KP_Divide: return KeyDIVIDE;
 	case XK_F1: return KeyF1;
 	case XK_F2: return KeyF2;
 	case XK_F3: return KeyF3;
@@ -138,21 +148,15 @@ TKey getKey (KeySym keysym)
 	case XK_Shift_R: return KeySHIFT;
 	case XK_Control_L: return KeyCONTROL;
 	case XK_Control_R: return KeyCONTROL;
+	case XK_Caps_Lock: return KeyCAPITAL;
 	case XK_Super_L: return KeyLWIN;
 	case XK_Super_R: return KeyRWIN;
-///	case XK_Caps_Lock: return Key;
-///	case XK_Meta_L: return Key;
-///	case XK_Meta_R: return Key;
 	case XK_Mode_switch: return KeyMENU;
 	case XK_ISO_Level3_Shift: return KeyMENU;
 	case XK_Menu: return KeyAPPS;
 	case XK_Alt_L: return KeyMENU;
 	case XK_Alt_R: return KeyMENU;
 	case XK_space: return KeySPACE;
-//	case XK_comma: return Key;
-//	case XK_minus: return Key;
-//	case XK_period: return Key;
-//	case XK_slash: return Key;
 	case XK_0: return Key0;
 	case XK_1: return Key1;
 	case XK_2: return Key2;
@@ -163,11 +167,6 @@ TKey getKey (KeySym keysym)
 	case XK_7: return Key7;
 	case XK_8: return Key8;
 	case XK_9: return Key9;
-//	case XK_semicolon: return Key;
-//	case XK_equal: return Key;
-//	case XK_bracketleft: return Key;
-//	case XK_backslash: return Key;
-//	case XK_bracketright: return Key;
 	case XK_A:
 	case XK_a: return KeyA;
 	case XK_B:
