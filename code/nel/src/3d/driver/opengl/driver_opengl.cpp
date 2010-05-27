@@ -1127,7 +1127,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		}
 		else
 		{
-		    nldebug("3D: XCreateWindow() OK");
+			nldebug("3D: XCreateWindow() OK");
 		}
 	}
 	else

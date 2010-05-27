@@ -382,13 +382,17 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	}
 	Case(KeyPress)
 	{
+		// save keycode because XFilterEvent could set it to 0
 		uint keyCode = event.xkey.keycode;
-		KeySym k = XKeycodeToKeysym(_dpy, keyCode, 0);
-		char Text[256];
+		KeySym k;
+		static char Text[256];
 		int c = 0;
 
-		// if key event is filtered, we must NOT use XLookupString
-		if (!XFilterEvent(&event, _win))
+		// check if event is filtered
+		bool filtered = XFilterEvent(&event, _win);
+
+		// if key event is filtered, we shouldn't use XLookupString to retrieve KeySym
+		if (!filtered)
 		{
 			Status status = XLookupNone;
 
@@ -400,24 +404,37 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 			if (status == XLookupNone)
 				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, NULL);
 		}
+		else
+		{
+			k = XKeycodeToKeysym(_dpy, keyCode, 0);
+		}
 
-		TKey key = getKeyFromKeySym(k);
-		if(key == KeyNOKEY)
-			key = getKeyFromKeycode(keyCode);
+		// send CEventKeyDown event only if keyCode is defined
+		if (keyCode)
+		{
+			TKey key = getKeyFromKeySym(k);
+			if(key == KeyNOKEY)
+				key = getKeyFromKeycode(keyCode);
 
-		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
-		_PreviousKey = key;
+			server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
+			_PreviousKey = key;
 
-		// don't send a control character when deleting
-		if (key == KeyDELETE)
-			c = 0;
+			// don't send a control character when deleting
+			if (key == KeyDELETE)
+				c = 0;
+		}
 
 		Text[c] = '\0';
 		if(c>0)
 		{
+#ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;
 			ucstr.fromUtf8(Text);
 			server.postEvent (new CEventChar (ucstr[0], noKeyButton, this));
+#else
+			for (int i = 0; i < c; i++)
+				server.postEvent (new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this));
+#endif
 		}
 		break;
 	}
