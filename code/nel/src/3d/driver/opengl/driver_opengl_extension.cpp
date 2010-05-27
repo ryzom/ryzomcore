@@ -1144,6 +1144,14 @@ static bool	setupNVTextureRectangle(const char	*glext)
 }
 
 // ***************************************************************************
+static bool	setupEXTTextureRectangle(const char	*glext)
+{
+	H_AUTO_OGL(setupEXTTextureRectangle);
+	CHECK_EXT("GL_EXT_texture_rectangle");
+	return true;
+}
+
+// ***************************************************************************
 static bool	setupFrameBufferObject(const char	*glext)
 {
 	H_AUTO_OGL(setupFrameBufferObject);
@@ -1310,6 +1318,9 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_NV_texture_rectangle
 	ext.NVTextureRectangle = setupNVTextureRectangle(glext);
+
+	// Check GL_EXT_texture_rectangle
+	ext.EXTTextureRectangle = setupEXTTextureRectangle(glext);
 
 	// Check GL_EXT_framebuffer_object
 	ext.FrameBufferObject = setupFrameBufferObject(glext);

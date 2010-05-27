@@ -1273,7 +1273,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, _Extensions.NVTextureRectangle, _MaxDriverLight);
+	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle), _MaxDriverLight);
 
 
 	// Init OpenGL/Driver defaults.
@@ -4158,7 +4158,8 @@ bool CDriverGL::supportOcclusionQuery() const
 bool CDriverGL::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL_supportTextureRectangle)
-	return _Extensions.NVTextureRectangle;
+	return (_Extensions.NVTextureRectangle || 
+	        _Extensions.EXTTextureRectangle);
 }
 
 // ***************************************************************************
