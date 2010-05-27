@@ -162,7 +162,7 @@ bool CFormBodyEltStruct::Empty() const
 
 uint32 CFormBodyEltStruct::GetNbElt () const
 {
-	return vpbodyelt.size();
+	return (uint32)vpbodyelt.size();
 }
 
 CFormBodyElt* CFormBodyEltStruct::GetElt( const unsigned int _index ) const

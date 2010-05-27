@@ -235,19 +235,19 @@ void CItem::SetCurrentValue( const unsigned int _index, const CStringEx s )
 	pitemes->SetModified( _index );
 }
 
-unsigned int CItem::GetNbElt() const
+uint CItem::GetNbElt() const
 {
 	if( pitemes )
 		return( pitemes->GetNbElt() );
 	return( 0 );
 }
 
-unsigned int CItem::GetNbParents() const
+uint CItem::GetNbParents() const
 {
-	return( vsxparents.size() );
+	return (uint)vsxparents.size();
 }
 
-unsigned int CItem::GetNbElt( const unsigned int _index ) const
+uint CItem::GetNbElt( const unsigned int _index ) const
 {
 	CItemElt* pie = GetElt( _index );
 	if( !pie )
@@ -255,7 +255,7 @@ unsigned int CItem::GetNbElt( const unsigned int _index ) const
 	return( pie->GetNbElt() );
 }
 
-unsigned int CItem::GetInfos( const unsigned int _index ) const
+uint CItem::GetInfos( const unsigned int _index ) const
 {
 	CItemElt* pie = GetElt( _index );
 	if( !pie )

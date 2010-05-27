@@ -304,7 +304,7 @@ void GetItemColor( int color, char eco, int level, CSString& outStr )
 
 bool endsWith( const CSString& s, const CSString& substring )
 {
-	return (s.right( substring.size() ) == substring);
+	return (s.right( (uint)substring.size() ) == substring);
 }
 
 

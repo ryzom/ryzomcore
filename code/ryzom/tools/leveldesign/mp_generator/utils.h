@@ -143,7 +143,7 @@ public:
 		{
 			for ( std::vector<std::string>::const_iterator ik=item.Fields[c].begin(); ik!=item.Fields[c].end(); ++ik )
 			{
-				_Indices[c].insert( make_pair( *ik, _Items.size()-1 ) );
+				_Indices[c].insert( make_pair( *ik, (uint32)_Items.size()-1 ) );
 			}
 		}
 	}

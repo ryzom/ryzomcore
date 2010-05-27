@@ -457,7 +457,7 @@ public:
 
 
 	/// Get full paths of files to publish
-	uint getFileToPublishCount() { return _FilesToPublish.size(); }
+	uint getFileToPublishCount() { return (uint)_FilesToPublish.size(); }
 	std::string getFileToPublish(uint index) { nlassert(index < _FilesToPublish.size()); return _FilesToPublish[index]; }
 
 	
@@ -467,7 +467,7 @@ public:
 	}
 	uint getMissionsCount()
 	{
-		return _CompiledMission.size();
+		return (uint)_CompiledMission.size();
 	}
 	TMissionDataPtr	getMission(uint index)
 	{

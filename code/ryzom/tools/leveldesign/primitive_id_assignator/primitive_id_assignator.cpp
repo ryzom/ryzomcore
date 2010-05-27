@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	// Add the search paths
 	CConfigFile::CVar &sp = cf.getVar("SearchPath");
 
-	for (int i=0; i<sp.size(); ++i)
+	for (uint i=0; i<sp.size(); ++i)
 	{
 		CPath::addSearchPath(sp.asString(i), true, false);
 	}
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 	// parse the index file
 	CConfigFile::CVar &fl = indexFile.getVar("Files");
-	for (int i=0; i<(fl.size())/2; i++)
+	for (uint i=0; i<(fl.size())/2; i++)
 	{
 		string fileName;
 		uint32 index;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	}
 
 	// scan the search path
-	for (int i=0; i<ext.size(); ++i)
+	for (uint i=0; i<ext.size(); ++i)
 	{
 		vector<string> files;
 		CPath::getFileList(ext.asString(i), files);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 				// check the first on full path
 				bool filtered = false;
 				string path = CPath::lookup(fileName);
-				for (int i=0; i<filters.size(); ++i)
+				for (uint i=0; i<filters.size(); ++i)
 				{
 					if (path.find(filters.asString(i)) != string::npos)
 					{

@@ -57,10 +57,10 @@ public:
 	void MakeItem (CForm &in);
 
 	void SetCurrentValue( const unsigned int _index, const CStringEx s );
-	unsigned int GetNbElt() const;
-	unsigned int GetNbParents() const;
-	unsigned int GetNbElt( const unsigned int _index ) const;
-	unsigned int GetInfos( const unsigned int _index ) const;
+	uint GetNbElt() const;
+	uint GetNbParents() const;
+	uint GetNbElt( const unsigned int _index ) const;
+	uint GetInfos( const unsigned int _index ) const;
 	CStringEx GetName( const unsigned int _index ) const;
 	CStringEx GetCurrentResult( const unsigned int _index ) const;
 	CStringEx GetCurrentValue( const unsigned int _index ) const;
