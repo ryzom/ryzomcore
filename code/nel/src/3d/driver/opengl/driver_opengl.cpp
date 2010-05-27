@@ -245,15 +245,15 @@ extern "C"
 /*
 static Bool WndProc(Display *d, XEvent *e, char *arg)
 {
-  nlinfo("3D: glop %d %d", e->type, e->xmap.window);
-  CDriverGL *pDriver = (CDriverGL*)arg;
-  if (pDriver != NULL)
-    {
-      // Process the message by the emitter
-      pDriver->_EventEmitter.processMessage();
-    }
-  // TODO i'don t know what to return exactly
-  return (e->type == MapNotify) && (e->xmap.window == (Window) arg);
+	nlinfo("3D: glop %d %d", e->type, e->xmap.window);
+	CDriverGL *pDriver = (CDriverGL*)arg;
+	if (pDriver != NULL)
+	{
+		// Process the message by the emitter
+		pDriver->_EventEmitter.processMessage();
+	}
+	// TODO i'don t know what to return exactly
+	return (e->type == MapNotify) && (e->xmap.window == (Window) arg);
 }
 */
 #endif // NL_OS_UNIX
@@ -867,7 +867,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_hDC = NULL;
 			return false;
 		}
- 	}
+	}
 	else
 	{
 		_FullScreen= false;
@@ -1074,21 +1074,21 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		visual_info = glXChooseVisual(dpy, DefaultScreen(dpy), sAttribList16bpp);
 	if(visual_info == NULL)
 	{
-	    nlerror("glXChooseVisual() failed");
+		nlerror("glXChooseVisual() failed");
 	}
 	else
 	{
-	    nldebug("3D: glXChooseVisual OK");
+		nldebug("3D: glXChooseVisual OK");
 	}
 
 	ctx = glXCreateContext (dpy, visual_info, None, GL_TRUE);
 	if(ctx == NULL)
 	{
-	    nlerror("glXCreateContext() failed");
+		nlerror("glXCreateContext() failed");
 	}
 	else
 	{
-	    nldebug("3D: glXCreateContext() OK");
+		nldebug("3D: glXCreateContext() OK");
 	}
 
 	XSetWindowAttributes attr;
@@ -1136,6 +1136,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		XChangeWindowAttributes(dpy, win, attr_flags, &attr);
 	}
 
+	const char *title="NeL window";
+
 	XSizeHints size_hints;
 	size_hints.x = 0;
 	size_hints.y = 0;
@@ -1147,13 +1149,14 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	size_hints.max_width = width;
 	size_hints.max_height = height;
 
+#ifdef X_HAVE_UTF8_STRING
+	Xutf8SetWMProperties (dpy, win, (char*)title, (char*)title, NULL, 0, &size_hints, NULL, NULL);
+#else
 	XTextProperty text_property;
-	// FIXME char*s are created as const char*, but that doesn't work
-	// with XStringListToTextProperty()'s char** ...
-	const char *title="NeL window";
 	XStringListToTextProperty((char**)&title, 1, &text_property);
-
 	XSetWMProperties (dpy, win, &text_property, &text_property,  0, 0, &size_hints, 0, 0);
+#endif
+
 	glXMakeCurrent (dpy, win, ctx);
 	XMapRaised (dpy, win);
 
@@ -1310,8 +1313,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if(_Extensions.EXTSeparateSpecularColor)
 	{
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
-
-
 	}
 
 	_VertexProgramEnabled= false;
@@ -3594,7 +3595,7 @@ void CDriverGL::initFragmentShaders()
 			//
 			nglEndFragmentShaderATI();
 			GLenum error = glGetError();
-		    nlassert(error == GL_NONE);
+			nlassert(error == GL_NONE);
 
 			// The same but with a diffuse map added
 			nglBindFragmentShaderATI(ATIWaterShaderHandle);
@@ -3608,7 +3609,7 @@ void CDriverGL::initFragmentShaders()
 
 			nglEndFragmentShaderATI();
 			error = glGetError();
-		    nlassert(error == GL_NONE);
+			nlassert(error == GL_NONE);
 			nglBindFragmentShaderATI(0);
 		}
 
@@ -4139,8 +4140,8 @@ void CDriverGL::checkTextureOn() const
 				nlassert(!flag2D);
 				nlassert(flagCM);
 			break;
-            default:
-                break;
+			default:
+			break;
 		}
 	}
 	dgs.activeTextureARB(currTexStage);

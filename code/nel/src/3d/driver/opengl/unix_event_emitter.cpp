@@ -29,12 +29,42 @@ namespace NLMISC {
 
 CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY)
 {
+	_im = 0;
+	_ic = 0;
+}
+
+CUnixEventEmitter::~CUnixEventEmitter()
+{
+	if (_ic) XDestroyIC(_ic);
+	if (_im) XCloseIM(_im);
 }
 
 void CUnixEventEmitter::init (Display *dpy, Window win)
 {
 	_dpy = dpy;
 	_win = win;
+
+	createIM();
+}
+
+void CUnixEventEmitter::createIM()
+{
+	_im = XOpenIM(_dpy, NULL, NULL, NULL);
+	if (_im)
+	{
+		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
+//		XSetICFocus(_ic);
+	}
+	else
+	{
+		_ic = 0;
+		nlwarning("XCreateIM failed");
+	}
+
+	if (!_ic)
+	{
+		nlwarning("XCreateIC failed");
+	}
 }
 
 void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
@@ -352,14 +382,28 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	}
 	Case(KeyPress)
 	{
+		uint keyCode = event.xkey.keycode;
+		KeySym k = XKeycodeToKeysym(_dpy, keyCode, 0);
 		char Text[256];
-		KeySym k;
 		int c = 0;
-		c = XLookupString(&event.xkey, Text, sizeof(Text), &k, NULL);
+
+		// if key event is filtered, we must NOT use XLookupString
+		if (!XFilterEvent(&event, _win))
+		{
+			Status status = XLookupNone;
+
+#ifdef X_HAVE_UTF8_STRING
+			if (_ic)
+				c = Xutf8LookupString(_ic, &event.xkey, Text, sizeof(Text), &k, &status);
+#endif
+
+			if (status == XLookupNone)
+				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, NULL);
+		}
 
 		TKey key = getKeyFromKeySym(k);
 		if(key == KeyNOKEY)
-			key = getKeyFromKeycode(event.xkey.keycode);
+			key = getKeyFromKeycode(keyCode);
 
 		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
 		_PreviousKey = key;
@@ -371,10 +415,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		Text[c] = '\0';
 		if(c>0)
 		{
-			for (int i = 0; i < c; i++)
-			{
-				server.postEvent (new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this));
-			}
+			ucstring ucstr;
+			ucstr.fromUtf8(Text);
+			server.postEvent (new CEventChar (ucstr[0], noKeyButton, this));
 		}
 		break;
 	}
@@ -389,8 +432,10 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		break;
 	}
 	Case(FocusIn)
+		if (_ic) XSetICFocus(_ic);
 		return;
 	Case(FocusOut)
+		if (_ic) XUnsetICFocus(_ic);
 		return;
 	Case(Expose)
 		break;
@@ -398,6 +443,8 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		XRefreshKeyboardMapping((XMappingEvent *)&event);
 		break;
 	Case(DestroyNotify)
+		// XIM server has crashed
+		createIM();
 		break;
 	Case(ConfigureNotify)
 		/* if (event.xconfigure.width==gmaxx && event.xconfigure.height==gmaxy) {

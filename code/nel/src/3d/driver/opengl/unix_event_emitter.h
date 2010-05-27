@@ -41,6 +41,7 @@ public:
 
 	/// Constructor
 	CUnixEventEmitter();
+	virtual ~CUnixEventEmitter();
 
 	void init (Display *dpy, Window win);
 
@@ -55,9 +56,13 @@ public:
 	void processMessage (XEvent &event, CEventServer &server);
 
 private:
+	void createIM();
+
 	Display *_dpy;
 	Window   _win;
 	TKey     _PreviousKey;
+	XIM      _im;
+	XIC      _ic;
 };
 
 
