@@ -82,8 +82,70 @@ TKeyButton getKeyButton (uint32 state)
 	return (TKeyButton)button;
 }
 
-TKey getKey (KeySym keysym)
+TKey getKeyFromKeycode (uint keycode)
 {
+	// keycodes are depending on system
+	switch (keycode)
+	{
+#ifdef NL_OS_MAC
+	case 0x12: return Key1;
+	case 0x13: return Key2;
+	case 0x14: return Key3;
+	case 0x15: return Key4;
+	case 0x16: return Key6;
+	case 0x17: return Key5;
+	case 0x18: return KeyEQUALS;
+	case 0x19: return Key9;
+	case 0x1a: return Key7;
+	case 0x1c: return Key8;
+	case 0x1d: return Key0;
+	case 0x1e: return KeyRBRACKET;
+	case 0x21: return KeyLBRACKET;
+	case 0x27: return KeyAPOSTROPHE;
+	case 0x29: return KeySEMICOLON;
+	case 0x2a: return KeyBACKSLASH;
+	case 0x2b: return KeyCOMMA;
+	case 0x2c: return KeySLASH;
+	case 0x2f: return KeyPERIOD;
+//	case 0x5e: return KeyOEM_102;
+//	case 0x30: return KeyTILDE;
+//	case 0x3d: return KeyPARAGRAPH;
+#else
+	case 0x0a: return Key1;
+	case 0x0b: return Key2;
+	case 0x0c: return Key3;
+	case 0x0d: return Key4;
+	case 0x0e: return Key5;
+	case 0x0f: return Key6;
+	case 0x10: return Key7;
+	case 0x11: return Key8;
+	case 0x12: return Key9;
+	case 0x13: return Key0;
+	case 0x14: return KeyLBRACKET;
+	case 0x15: return KeyEQUALS;
+	case 0x22: return KeyRBRACKET;
+	case 0x23: return KeySEMICOLON;
+	case 0x2f: return KeyCOMMA;
+	case 0x30: return KeyTILDE;
+	case 0x31: return KeyAPOSTROPHE;
+	case 0x33: return KeyBACKSLASH;
+	case 0x5e: return KeyOEM_102;
+	case 0x3a: return KeyCOMMA;
+	case 0x3b: return KeyPERIOD;
+	case 0x3c: return KeySLASH;
+	case 0x3d: return KeyPARAGRAPH;
+#endif
+	default:
+//	nlwarning("missing keycode 0x%x %d '%c'", keycode, keycode, keycode);
+	break;
+	}
+
+	return KeyNOKEY;
+}
+
+TKey getKeyFromKeySym (KeySym keysym)
+{
+//	nlwarning("0x%x %d '%c'", keysym, keysym, keysym);
 	switch (keysym)
 	{
 	case XK_BackSpace: return KeyBACK;
@@ -131,6 +193,7 @@ TKey getKey (KeySym keysym)
 	case XK_KP_Add: return KeyADD;
 	case XK_KP_Subtract: return KeySUBTRACT;
 	case XK_KP_Decimal: return KeyDECIMAL;
+//	case XK_period: return KeyDECIMAL;
 	case XK_KP_Divide: return KeyDIVIDE;
 	case XK_F1: return KeyF1;
 	case XK_F2: return KeyF2;
@@ -157,16 +220,6 @@ TKey getKey (KeySym keysym)
 	case XK_Alt_L: return KeyMENU;
 	case XK_Alt_R: return KeyMENU;
 	case XK_space: return KeySPACE;
-	case XK_0: return Key0;
-	case XK_1: return Key1;
-	case XK_2: return Key2;
-	case XK_3: return Key3;
-	case XK_4: return Key4;
-	case XK_5: return Key5;
-	case XK_6: return Key6;
-	case XK_7: return Key7;
-	case XK_8: return Key8;
-	case XK_9: return Key9;
 	case XK_A:
 	case XK_a: return KeyA;
 	case XK_B:
@@ -220,7 +273,7 @@ TKey getKey (KeySym keysym)
 	case XK_Z:
 	case XK_z: return KeyZ;
 	default:
-	//nldebug ("0x%x %d '%c'", keysym, keysym, keysym);
+	// other keys don't need to be processed here
 	break;
 	}
 	return KeyNOKEY;
@@ -299,17 +352,17 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	}
 	Case(KeyPress)
 	{
-		char Text[1024];
+		char Text[256];
 		KeySym k;
-		int c;
-		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
+		int c = 0;
+		c = XLookupString(&event.xkey, Text, sizeof(Text), &k, NULL);
 
-		TKey key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
+		TKey key = getKeyFromKeySym(k);
 		if(key == KeyNOKEY)
-			key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 1));
+			key = getKeyFromKeycode(event.xkey.keycode);
 
 		server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
- 		_PreviousKey = key;
+		_PreviousKey = key;
 
 		// don't send a control character when deleting
 		if (key == KeyDELETE)
@@ -327,14 +380,9 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	}
 	Case (KeyRelease)
 	{
-		char Text[1024];
-		KeySym k;
-		int c;
-		c = XLookupString(&event.xkey, Text, 1024-1, &k, NULL);
-
-		TKey key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
+		TKey key = getKeyFromKeySym(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
 		if(key == KeyNOKEY)
-			key = getKey(XKeycodeToKeysym(_dpy, event.xkey.keycode, 1));
+			key = getKeyFromKeycode(event.xkey.keycode);
 
 		server.postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 		_PreviousKey = KeyNOKEY;
