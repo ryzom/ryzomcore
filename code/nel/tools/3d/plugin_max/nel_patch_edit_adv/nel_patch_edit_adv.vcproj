@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
-	Name="nel_patch_edit"
+	Version="9.00"
+	Name="nel_patch_edit_adv"
 	ProjectGUID="{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}"
-	RootNamespace="nel_patch_edit"
+	RootNamespace="nel_patch_edit_adv"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -86,6 +87,8 @@
 				ProgramDatabaseFile=".\DebugFast/neleditpatch.pdb"
 				SubSystem="2"
 				BaseAddress="0x05830000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\DebugFast/neleditpatch.lib"
 				TargetMachine="1"
 			/>
@@ -106,9 +109,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -187,6 +187,8 @@
 				ProgramDatabaseFile=".\Debug/neleditpatch.pdb"
 				SubSystem="2"
 				BaseAddress="0x05830000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Debug/neleditpatch.lib"
 				TargetMachine="1"
 			/>
@@ -207,9 +209,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -289,6 +288,8 @@
 				SubSystem="2"
 				SetChecksum="true"
 				BaseAddress="0x05830000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Release/neleditpatch.lib"
 				TargetMachine="1"
 			/>
@@ -309,9 +310,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -391,6 +389,8 @@
 				SubSystem="2"
 				SetChecksum="true"
 				BaseAddress="0x05830000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\ReleaseDebug/neleditpatch.lib"
 				TargetMachine="1"
 			/>
@@ -411,9 +411,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -492,6 +489,8 @@
 				ProgramDatabaseFile=".\Hybrid/neleditpatch.pdb"
 				SubSystem="2"
 				BaseAddress="0x05830000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Hybrid/neleditpatch.lib"
 				TargetMachine="1"
 			/>
@@ -512,9 +511,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
