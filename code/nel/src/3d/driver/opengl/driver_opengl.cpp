@@ -315,8 +315,6 @@ CDriverGL::CDriverGL()
 	for(i=0;i<MaxLight;i++)
 		_LightDirty[i]= false;
 
-
-
 	_CurrentGlNormalize= false;
 	_ForceNormalize= false;
 
@@ -746,7 +744,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			DestroyWindow (tmpHWND);
 			return false;
 		}
-
 
 		/* After determining a compatible pixel format, the next step is to create a pbuffer of the
 			chosen format. Fortunately this step is fairly easy, as you merely select one of the formats
@@ -1273,7 +1270,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle), _MaxDriverLight);
+	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
 
 
 	// Init OpenGL/Driver defaults.
@@ -1293,7 +1290,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_COLOR_SUM_EXT);
-
 
 	_CurrViewport.init(0.f, 0.f, 1.f, 1.f);
 	_CurrScissor.initFullScreen();
@@ -1434,8 +1430,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		params[0]=0; params[1]=0; params[2]=0; params[3]=1;
 		glTexGenfv(GL_Q, GL_OBJECT_PLANE, params);
 		glTexGenfv(GL_Q, GL_EYE_PLANE, params);
-
-
 	}
 	resetTextureShaders();
 
@@ -1448,7 +1442,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// meaning that light direction is always (0,1,0) in eye-space
 	// use enableLighting(0....), to get normal behaviour
 	_DriverGLStates.enableLight(0, true);
-
 
 	_Initialized = true;
 
@@ -1473,7 +1466,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_EVSNormalHandle   = nglBindParameterEXT(GL_CURRENT_NORMAL);
 			_EVSColorHandle    = nglBindParameterEXT(GL_CURRENT_COLOR);
 
-
 			if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
 			{
 				nlwarning("Unable to bind input parameters for use with EXT_vertex_shader, vertex program support is disabled");
@@ -1485,8 +1477,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 				for(uint k = 0; k < 8; ++k)
 				{
 					_EVSTexHandle[k] = nglBindTextureUnitParameterEXT(GL_TEXTURE0_ARB + k, GL_CURRENT_TEXTURE_COORDS);
-
-
 				}
 				// Other attributes are managed using variant pointers :
 				// Secondary color
@@ -1497,8 +1487,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 				// Allocate invariants. One assitionnal variant is needed for fog coordinate if fog bug is not fixed in driver version
 				_EVSConstantHandle = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_INVARIANT_EXT, GL_FULL_RANGE_EXT, _EVSNumConstant + (_ATIFogRangeFixed ? 0 : 1));
-
-
 
 				if (_EVSConstantHandle == 0)
 				{
@@ -1827,8 +1815,6 @@ bool CDriverGL::activate()
 	if (nctx != NULL && nctx!=ctx)
 	{
 		glXMakeCurrent(dpy, win,ctx);
-
-
 	}
 #endif // NL_OS_WINDOWS
 	return true;
@@ -1860,10 +1846,7 @@ bool CDriverGL::clear2D(CRGBA rgba)
 	H_AUTO_OGL(CDriverGL_clear2D)
 	glClearColor((float)rgba.R/255.0f,(float)rgba.G/255.0f,(float)rgba.B/255.0f,(float)rgba.A/255.0f);
 
-
 	glClear(GL_COLOR_BUFFER_BIT);
-
-
 
 	return true;
 }
@@ -1875,11 +1858,8 @@ bool CDriverGL::clearZBuffer(float zval)
 	H_AUTO_OGL(CDriverGL_clearZBuffer)
 	glClearDepth(zval);
 
-
 	_DriverGLStates.enableZWrite(true);
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-
 
 	return true;
 }
@@ -1891,9 +1871,7 @@ bool CDriverGL::clearStencilBuffer(float stencilval)
 	H_AUTO_OGL(CDriverGL_clearStencilBuffer)
 	glClearStencil((int)stencilval);
 
-
 	glClear(GL_STENCIL_BUFFER_BIT);
-
 
 	return true;
 }
@@ -1904,8 +1882,6 @@ void CDriverGL::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 {
 	H_AUTO_OGL(CDriverGL_setColorMask )
 	glColorMask (bRed, bGreen, bBlue, bAlpha);
-
-
 }
 
 // --------------------------------------------------
@@ -1995,16 +1971,11 @@ bool CDriverGL::swapBuffers()
 		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
 	}
 
-
 #ifdef NL_OS_WINDOWS
 	SwapBuffers(_hDC);
 #else // NL_OS_WINDOWS
 	glXSwapBuffers(dpy, win);
-
-
 #endif // NL_OS_WINDOWS
-
-
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
@@ -2024,7 +1995,6 @@ bool CDriverGL::swapBuffers()
 		forceActivateTexEnvColor(stage, env);
 	}
 
-
 	// Activate the default material.
 	//===========================================================
 	// Same reasoning as textures :)
@@ -2032,8 +2002,6 @@ bool CDriverGL::swapBuffers()
 	if (_NVTextureShaderEnabled)
 	{
 		glDisable(GL_TEXTURE_SHADER_NV);
-
-
 		_NVTextureShaderEnabled = false;
 	}
 	_CurrentMaterial= NULL;
@@ -2085,8 +2053,6 @@ bool CDriverGL::release()
 
 	// Reset VertexArrayRange.
 	resetVertexArrayRange();
-
-
 
 	// delete containers
 	delete _AGPVertexArrayRange;
@@ -2674,8 +2640,6 @@ bool CDriverGL::fillBuffer (CBitmap &bitmap)
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glDrawPixels (rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]) );
 
-
-
 	return true;
 }
 
@@ -2747,8 +2711,6 @@ void CDriverGL::setPolygonMode (TPolygonMode mode)
 		glPolygonMode (GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	}
-
-
 }
 
 
@@ -2798,8 +2760,6 @@ void			CDriverGL::setupFog(float start, float end, CRGBA color)
 	}
 	_FogStart = start;
 	_FogEnd = end;
-
-
 }
 
 
@@ -2950,8 +2910,6 @@ void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const floa
 	nlassert(stage < inlGetNumTextStages() );
 	_DriverGLStates.activeTextureARB(stage);
 	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
-
-
 }
 
 
@@ -2972,8 +2930,6 @@ void      CDriverGL::enableNVTextureShader(bool enabled)
 			glDisable(GL_TEXTURE_SHADER_NV);
 		}
 		_NVTextureShaderEnabled = enabled;
-
-
 	}
 }
 
@@ -3127,6 +3083,7 @@ bool			CDriverGL::supportBlendConstantColor() const
 	H_AUTO_OGL(CDriverGL_supportBlendConstantColor)
 	return _Extensions.EXTBlendColor;
 }
+
 // ***************************************************************************
 void			CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 {
@@ -3140,9 +3097,8 @@ void			CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 		return;
 	static const	float	OO255= 1.0f/255;
 	nglBlendColorEXT(col.R*OO255, col.G*OO255, col.B*OO255, col.A*OO255);
-
-
 }
+
 // ***************************************************************************
 NLMISC::CRGBA	CDriverGL::getBlendConstantColor() const
 {
@@ -3169,10 +3125,7 @@ void CDriverGL::refreshProjMatrixFromGL()
 	glGetFloatv(GL_PROJECTION_MATRIX, mat);
 	_GLProjMat.set(mat);
 	_ProjMatDirty = false;
-
-
 }
-
 
 // ***************************************************************************
 bool			CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &properties)
@@ -3272,7 +3225,6 @@ void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
 void CDriverGL::initEMBM()
 {
 	H_AUTO_OGL(CDriverGL_initEMBM)
-
 
 	if (supportEMBM())
 	{
@@ -3741,7 +3693,6 @@ void	CDriverGL::enablePolygonSmoothing(bool smooth)
 	else
 		glDisable(GL_POLYGON_SMOOTH);
 
-
 	_PolygonSmooth= smooth;
 }
 
@@ -3756,7 +3707,6 @@ bool	CDriverGL::isPolygonSmoothingEnabled() const
 // ***************************************************************************
 void	CDriverGL::startProfileVBHardLock()
 {
-
 	if(_VBHardProfiling)
 		return;
 
@@ -3771,7 +3721,6 @@ void	CDriverGL::startProfileVBHardLock()
 // ***************************************************************************
 void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
 {
-
 	if(!_VBHardProfiling)
 		return;
 
@@ -3810,7 +3759,6 @@ void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
 // ***************************************************************************
 void	CDriverGL::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 {
-
 	// must allocate a new place?
 	if(_CurVBHardLockCount>=_VBHardProfiles.size())
 	{
@@ -3854,7 +3802,6 @@ void CDriverGL::profileIBAllocation(std::vector<std::string> &/* result */)
 // ***************************************************************************
 void	CDriverGL::profileVBHardAllocation(std::vector<std::string> &result)
 {
-
 	result.clear();
 	result.reserve(1000);
 	result.push_back(toString("Memory Allocated: %4d Ko in AGP / %4d Ko in VRAM",
@@ -4074,7 +4021,6 @@ bool CDriverGL::activeShader(CShader * /* shd */)
 
 void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
 {
-
 	CHTimer::startBench (wantStandardDeviation, quick, reset);
 }
 
@@ -4082,7 +4028,6 @@ void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
 
 void CDriverGL::endBench ()
 {
-
 	CHTimer::endBench ();
 }
 
@@ -4090,7 +4035,6 @@ void CDriverGL::endBench ()
 
 void CDriverGL::displayBench (class NLMISC::CLog *log)
 {
-
 	// diplay
 	CHTimer::displayHierarchicalByExecutionPathSorted(log, CHTimer::TotalTime, true, 48, 2);
 	CHTimer::displayHierarchical(log, true, 48, 2);
@@ -4113,7 +4057,7 @@ void CDriverGL::checkTextureOn() const
 	// tmp for debug
 	CDriverGLStates &dgs = const_cast<CDriverGLStates &>(_DriverGLStates);
 	uint currTexStage = dgs.getActiveTextureARB();
-	for(uint k = 0; k < getNbTextureStages(); ++k)
+	for(uint k = 0; k < this->getNbTextureStages(); ++k)
 	{
 		dgs.activeTextureARB(k);
 		GLboolean flag2D;
@@ -4158,8 +4102,7 @@ bool CDriverGL::supportOcclusionQuery() const
 bool CDriverGL::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL_supportTextureRectangle)
-	return (_Extensions.NVTextureRectangle || 
-	        _Extensions.EXTTextureRectangle);
+	return (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle);
 }
 
 // ***************************************************************************

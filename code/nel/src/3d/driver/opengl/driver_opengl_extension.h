@@ -71,6 +71,7 @@ struct	CGlExtensions
 	bool    NVOcclusionQuery;
 	bool	NVTextureRectangle;
 	bool    EXTTextureRectangle;
+	bool    ARBTextureRectangle;
 	bool	FrameBufferObject;
 	bool	PackedDepthStencil;
 	// true if NVVertexProgram and if we know that VP is emulated
@@ -183,6 +184,7 @@ public:
 		result += ATIEnvMapBumpMap ? "ATIEnvMapBumpMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
+		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
 		result += ARBTextureNonPowerOfTwo ? "ARBTextureNonPowerOfTwo " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);
