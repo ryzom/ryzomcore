@@ -25,6 +25,14 @@ IF(WIN32)
     LINK_FLAGS "/NODEFAULTLIB:libcmt")
   ADD_DEFINITIONS(/DDRIVER_OPENGL_EXPORTS)
 ELSE(WIN32)
+  # NOTE: I know, those hardcoded things are evil. But FindOpenGL on Mac simply 
+  # does not look for X11's OpenGL, just for the native one.
+  # TODO: FIXME remove as soon as Cocoa Support is stable on Mac
+  IF(APPLE)
+    INCLUDE_DIRECTORIES("/usr/X11/include")
+    TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} ${CARBON} "-L/usr/X11/lib" "-lGL")
+  ENDIF(APPLE)
+  TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} ${X11_LIBRARIES})
   IF(XF86VidMode_FOUND)
     INCLUDE_DIRECTORIES(${XF86VidMode_INCLUDE_DIR})
     ADD_DEFINITIONS(${XF86VidMode_DEFINITIONS})

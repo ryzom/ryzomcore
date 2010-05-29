@@ -1,5 +1,11 @@
 FILE(GLOB SRC *.cpp *.h)
 
+# TODO: fixes a linking problem for libnelsound.dylib, but does not look like
+# the cleanest way to solve the issue. FIXME!
+IF(APPLE)
+  SET(SRC ${SRC} driver/sound_driver.cpp driver/buffer.cpp)
+ENDIF(APPLE)
+
 IF(NOT WIN32)
   ADD_LIBRARY(nelsound SHARED ${SRC})
 ELSE(NOT WIN32)

@@ -92,8 +92,13 @@ IF(WITH_3D)
   IF(WITH_DRIVER_OPENGL)
     FIND_PACKAGE(OpenGL)
     IF(NOT WIN32)
+      FIND_PACKAGE(X11)
       FIND_PACKAGE(XF86VidMode)
     ENDIF(NOT WIN32)
+    IF(APPLE)
+      # TODO: remove Carbon as soon as Cocoa Support is stable on Mac
+      FIND_LIBRARY(CARBON NAMES Carbon)
+    ENDIF(APPLE)
   ENDIF(WITH_DRIVER_OPENGL)
 
   IF(WITH_CEGUI)
