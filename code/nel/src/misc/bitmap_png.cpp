@@ -163,7 +163,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 		dstChannels = 1;
 		firstChannel = 0;
 		lastChannel = 0;
-		resize (width, height, Luminance);
+		resize (width, height, _LoadGrayscaleAsAlpha ? Alpha : Luminance);
 	}
 	else if (iColorType == PNG_COLOR_TYPE_GRAY_ALPHA)
 	{
