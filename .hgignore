@@ -66,8 +66,11 @@ log.txt
 
 # cmake build files & directories
 CMakeFiles
-*.cmake
 CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
 .libs
 
 # Linux garbage
