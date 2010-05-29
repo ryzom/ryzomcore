@@ -158,7 +158,7 @@ uint8 CBitmap::readJPG( NLMISC::IStream &f )
 	{
 		dstChannels = 1;
 		srcChannels = 1;
-		resize (cinfo.image_width, cinfo.image_height, Luminance);
+		resize (cinfo.image_width, cinfo.image_height, _LoadGrayscaleAsAlpha ? Alpha : Luminance);
 	}
 	else
 	{
