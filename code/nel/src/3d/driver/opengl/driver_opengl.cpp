@@ -1691,7 +1691,19 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Frequency= devmode.dmDisplayFrequency,
 	mode.Width= (uint16)devmode.dmPelsWidth;
 	mode.Height= (uint16)devmode.dmPelsHeight;
-#else
+#elif defined(NL_OS_MAC)
+
+	/*
+		TODO this is just a hack to get the ryzom client running on mac os x x11.
+			the implementation below relies on the vidmode extension which is not
+			availeble on mac os x's x11. for that reason the color depth value is 
+			hard coded here.
+		FIXME replace this hack by native cocoa color depth retrieval
+	*/
+	nlwarning("FIXME: returning hardcoded color depth of 24bit");
+	mode.Depth= 24;
+
+#elif defined(NL_OS_UNIX)
 
 #	ifdef XF86VIDMODE
 	sint pixelClock;
