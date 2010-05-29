@@ -389,6 +389,8 @@ void CTileBank::makeAllExtensionDDS ()
 		// Diffuse
 		tmp= _TileVector[nTile].getRelativeFileName (CTile::diffuse);
 		pos= tmp.rfind(".tga");
+		if (pos == string::npos)
+			pos = tmp.rfind(".png");
 		if(pos!= string::npos)
 		{
 			tmp.replace(pos, 4, ".dds");
@@ -398,6 +400,8 @@ void CTileBank::makeAllExtensionDDS ()
 		// Additive.
 		tmp= _TileVector[nTile].getRelativeFileName (CTile::additive);
 		pos= tmp.rfind(".tga");
+		if (pos == string::npos)
+			pos = tmp.rfind(".png");
 		if(pos!= string::npos)
 		{
 			tmp.replace(pos, 4, ".dds");
@@ -407,6 +411,8 @@ void CTileBank::makeAllExtensionDDS ()
 		// Alpha.
 		tmp= _TileVector[nTile].getRelativeFileName (CTile::alpha);
 		pos= tmp.rfind(".tga");
+		if (pos == string::npos)
+			pos = tmp.rfind(".png");
 		if(pos!= string::npos)
 		{
 			tmp.replace(pos, 4, ".dds");
