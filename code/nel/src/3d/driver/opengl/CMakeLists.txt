@@ -37,7 +37,8 @@ ELSE(WIN32)
       # NOTE: I know, those hardcoded things are evil. But FindOpenGL on Mac 
       # simply does not look for X11's OpenGL, just for the native one.
       INCLUDE_DIRECTORIES("/usr/X11/include")
-      TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} "-L/usr/X11/lib" "-lGL")
+      TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} 
+        "-L/usr/X11/lib" "-lGL" ${X11_LIBRARIES})
     ENDIF(WITH_COCOA)
   ELSE(APPLE)
     TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} ${X11_LIBRARIES})
