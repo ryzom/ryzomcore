@@ -1770,8 +1770,7 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 	SetWindowTextW(_hWnd,(WCHAR*)title.c_str());
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	NL3D::MAC::setWindowTitle(title);
 
 #elif defined (NL_OS_UNIX)
 	XTextProperty text_property;
@@ -1790,11 +1789,11 @@ void CDriverGL::setWindowPos(uint32 x, uint32 y)
 	SetWindowPos(_hWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	NL3D::MAC::setWindowPos(x, y);
 
 #elif defined (NL_OS_UNIX)
 	XMoveWindow(dpy, win, _WindowX, _WindowY);
+
 #endif // NL_OS_WINDOWS
 }
 
@@ -2289,11 +2288,9 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	int clientHeight = _WindowHeight;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Temporary Mac Implementation"
-	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
 
-	int clientWidth = 1024;
-	int clientHeight = 768;
+	uint32 clientWidth, clientHeight;
+	NL3D::MAC::getWindowSize(clientWidth, clientHeight);
 
 #elif defined (NL_OS_UNIX)
 
@@ -2544,11 +2541,8 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 		}
 	}
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Temporary Mac Implementation"
-	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
 
-	width = 1024;
-	height = 768;
+	NL3D::MAC::getWindowSize(width, height);
 
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
@@ -2579,8 +2573,8 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 		}
 	}
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+	NL3D::MAC::getWindowPos(x, y);
 
 #elif defined (NL_OS_UNIX)
 	x = y = 0;

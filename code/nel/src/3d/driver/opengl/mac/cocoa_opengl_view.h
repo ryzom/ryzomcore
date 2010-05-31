@@ -27,5 +27,6 @@
 
 -(BOOL)acceptsFirstResponder;
 -(BOOL)needsPanelToBecomeKey;
+-(void)keyDown:(NSEvent*)event;
 
 @end

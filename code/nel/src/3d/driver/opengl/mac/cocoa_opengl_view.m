@@ -30,4 +30,13 @@
 	return NO;
 }
 
+-(void)keyDown:(NSEvent*)event
+{
+	// we handle the key here, so os x does not make a sound :)
+	/*
+		TODO do it in the event emitter? eg do not forward key down? 
+			does command+q / command+m still work then?
+	*/
+}
+
 @end

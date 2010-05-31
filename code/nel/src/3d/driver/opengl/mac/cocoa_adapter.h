@@ -34,26 +34,43 @@
  *
  * this can as well be seen as a preparation to pull platform specific code
  * out of driver_opengl.cpp ;)
+ *
+ * btw: we cannot simply use a c++ class here, because then NSWindow* and friends
+ * would be members, but then we would need to add obj-c code here using an
+ * include or a forward declaration. this again would break compiling cpp files
+ * including this one (eg. driver_opengl.cpp)
  */
 
 namespace NL3D { namespace MAC {
 
-/// mac specific stuff todo while calling CDriverGL::CDriverGL()
+/// mac specific stuff while calling CDriverGL::CDriverGL()
 void ctor();
 
-/// mac specific stuff todo while calling CDriverGL::~CDriverGL()
+/// mac specific stuff while calling CDriverGL::~CDriverGL()
 void dtor();
 
-/// mac specific stuff todo while calling CDriverGL::init()
+/// mac specific stuff while calling CDriverGL::init()
 bool init(uint windowIcon = 0, emptyProc exitFunc = 0);
 
-/// mac specific stuff todo while calling CDriverGL::setDisplay()
+/// mac specific stuff while calling CDriverGL::setDisplay()
 bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 
-/// mac specific stuff todo while calling CDriverGL::swapBuffers()
+/// mac specific stuff while calling CDriverGL::getWindowSize()
+void getWindowSize(uint32 &width, uint32 &height);
+
+/// mac specific stuff while calling CDriverGL::getWindowPos()
+void getWindowPos(uint32 &x, uint32 &y);
+
+/// mac specific stuff while calling CDriverGL::setWindowPos()
+void setWindowPos(uint32 x, uint32 y);
+
+/// mac specific stuff while calling CDriverGL::setWindowTitle()
+void setWindowTitle(const ucstring &title);
+
+/// mac specific stuff while calling CDriverGL::swapBuffers()
 void swapBuffers();
 
-/// mac specific stuff todo while calling CCocoaEventEmitter::submitEvents()
+/// mac specific stuff while calling CCocoaEventEmitter::submitEvents()
 void submitEvents(NLMISC::CEventServer& server, 
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter);
 

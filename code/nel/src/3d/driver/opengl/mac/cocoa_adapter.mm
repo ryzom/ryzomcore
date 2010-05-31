@@ -69,7 +69,8 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	nldebug("mac cpp bridge called with %u %u %u %u", wnd, &mode, show, resizeable);
 
 	// create a window
-	g_window = [[CocoaWindow alloc] initWithContentRect:NSMakeRect(10, 10, 1024, 768)
+	/* TODO: NSBackingStoreBuffered ??? */
+	g_window = [[CocoaWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1024, 768)
 		styleMask:NSTitledWindowMask | NSResizableWindowMask |
 		NSClosableWindowMask | NSMiniaturizableWindowMask
 		backing:NSBackingStoreBuffered
@@ -100,7 +101,6 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	g_glctx  = [g_glview openGLContext];
 
 	// setup some stuff in the window
-	[g_window setTitle:@"NeL Cocoa Test"];
 	[g_window setContentView:g_glview];
 	[g_window makeKeyAndOrderFront:nil];
 	[g_window setAcceptsMouseMovedEvents:YES];
@@ -115,6 +115,39 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	[format release];
 
 	return true;
+}
+
+void getWindowSize(uint32 &width, uint32 &height)
+{
+	NSRect rect = [g_glview bounds];
+	width = rect.size.width;
+	height = rect.size.height;
+}
+
+void getWindowPos(uint32 &x, uint32 &y)
+{
+	/*
+		TODO mac os gives bottom left
+	*/
+
+	NSRect rect = [g_window frame];
+	x = rect.origin.x;
+	y = rect.origin.y;
+
+	nldebug("%d %d", x, y);
+}
+
+void setWindowPos(uint32 x, uint32 y)
+{
+	/*
+		TODO mac os gets bottom left
+	*/
+	[g_window setFrameOrigin:NSMakePoint(x, y)];
+}
+
+void setWindowTitle(const ucstring &title)
+{
+	[g_window setTitle:[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 }
 
 void swapBuffers()
@@ -274,6 +307,7 @@ void submitEvents(NLMISC::CEventServer& server,
 	g_pool = [[NSAutoreleasePool alloc] init];
 
 	// we break if there was no event to handle
+	/* TODO maximum? */
 	while(true)
 	{
 		// get the next event to handle
@@ -285,11 +319,15 @@ void submitEvents(NLMISC::CEventServer& server,
 		if(!event)
 			break;
 
-		NSLog(@"%@", event);
+		// NSLog(@"%@", event);
+
+		uint32 width, height;
+		/* TODO cache? */
+		getWindowSize(width, height);
 
 		// get the mouse position in nel style (relative)
-		float mouseX = event.locationInWindow.x / 1024.0;
-		float mouseY = event.locationInWindow.y /  768.0;
+		float mouseX = event.locationInWindow.x / (float)width;
+		float mouseY = event.locationInWindow.y / (float)height;
 
 		// string to store symbols in case of key press
 		ucstring ucstr;
