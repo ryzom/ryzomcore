@@ -17,7 +17,6 @@
 #ifndef NL_DRIVER_OPENGL_H
 #define NL_DRIVER_OPENGL_H
 
-
 #include "nel/misc/types_nl.h"
 
 //#define NL_PROFILE_DRIVER_OGL
@@ -31,15 +30,18 @@
 #	define WIN32_LEAN_AND_MEAN
 #	define NOMINMAX
 #	include <windows.h>
-#else // NL_OS_UNIX
+#	include <GL/gl.h>
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#	define GL_GLEXT_LEGACY
+#	include <OpenGL/gl.h>
+#elif defined (NL_OS_UNIX)
 #	define GLX_GLXEXT_PROTOTYPES
+#	include <GL/gl.h>
 #	include <GL/glx.h>
 #	ifdef XF86VIDMODE
 #		include <X11/extensions/xf86vmode.h>
 #	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
-
-#include <GL/gl.h>
 
 #include "driver_opengl_extension.h"
 
@@ -68,6 +70,8 @@
 
 #ifdef NL_OS_WINDOWS
 #include "nel/misc/win_event_emitter.h"
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#include "mac/cocoa_event_emitter.h"
 #elif defined (NL_OS_UNIX)
 #include "unix_event_emitter.h"
 #endif // NL_OS_UNIX
@@ -303,7 +307,9 @@ public:
 	{
 #ifdef NL_OS_WINDOWS
 		return _hWnd;
-#else // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+		return NULL;
+#elif defined(NL_OS_UNIX)
 		return win;
 #endif // NL_OS_WINDOWS
 	}
@@ -672,6 +678,9 @@ private:
 
 	// Off-screen rendering in Dib section
 	HPBUFFERARB					_PBuffer;
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NLMISC::CCocoaEventEmitter	_EventEmitter;
 
 #elif defined (NL_OS_UNIX)
 

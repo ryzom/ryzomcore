@@ -20,8 +20,14 @@
 
 #include "nel/misc/types_nl.h"
 
-#include <GL/gl.h>
-#include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
+#ifdef NL_MAC_NATIVE
+# define GL_GLEXT_LEGACY
+# include <OpenGL/gl.h>
+# include "mac/glext.h"
+#else
+# include <GL/gl.h>
+# include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -24,12 +24,17 @@
 #	define WIN32_LEAN_AND_MEAN
 #	define NOMINMAX
 #	include <windows.h>
-#else // NL_OS_UNIX
+#	include <GL/gl.h>
+#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#	define GL_GLEXT_LEGACY
+#	include <OpenGL/gl.h>
+#	include "mac/glext.h"
+#elif defined (NL_OS_UNIX)
+#	include <GL/gl.h>
+#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
 #	include <GL/glx.h>
 #endif // NL_OS_UNIX
-
-#include <GL/gl.h>
-#include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
 
 #ifndef GL_GLEXT_VERSION
 #	error "I need a newer <GL/glext.h>. Please download it from http://www.opengl.org/registry/"

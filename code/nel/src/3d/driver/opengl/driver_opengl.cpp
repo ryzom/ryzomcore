@@ -27,12 +27,18 @@
 #	include <windows.h>
 #	include <windowsx.h>
 #	include <string>
-#else // NL_OS_UNIX
-#	include <GL/glx.h>
+# include <GL/gl.h>
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# define GL_GLEXT_LEGACY
+# include <OpenGL/gl.h>
+# include "mac/glext.h"
+# include "mac/cocoa_adapter.h"
+#elif defined (NL_OS_UNIX)
+# include <GL/gl.h>
+# include <GL/glx.h>
 #endif // NL_OS_UNIX
 
 #include <vector>
-#include <GL/gl.h>
 
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -282,15 +288,18 @@ CDriverGL::CDriverGL()
 	_hDC = NULL;
 	_NeedToRestaureGammaRamp = false;
 	_Interval = 1;
-#elif defined (NL_OS_UNIX) // NL_OS_WINDOWS
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::ctor();
+
+#elif defined (NL_OS_UNIX)
 	cursor = None;
 
-#ifdef XF86VIDMODE
+#	ifdef XF86VIDMODE
 	// zero the old screen mode
 	memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
-#endif //XF86VIDMODE
 
+#	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
 	_FullScreen= false;
@@ -412,6 +421,10 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
+
+#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::dtor();
+#endif
 }
 
 // ***************************************************************************
@@ -460,7 +473,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	// ati specific : try to retrieve driver version
 	retrieveATIDriverVersion();
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	return NL3D::MAC::init(windowIcon, exitFunc);
+
+#elif defined (NL_OS_UNIX)
 
 	dpy = XOpenDisplay(NULL);
 	if (dpy == NULL)
@@ -1024,7 +1041,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlinfo(e.what());
 	}
 
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
+
+#elif defined (NL_OS_UNIX)
 
 	static int sAttribList16bpp[] =
 	{
@@ -1611,7 +1632,11 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
 	_FullScreen = !mode.Windowed;
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 	// TODO linux version !!!
 #endif
 	return true;
@@ -1643,7 +1668,11 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	}
 #elif defined(NL_OS_MAC)
 	getMacModes(modes);
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 
 #	ifdef XF86VIDMODE
 	int nmodes;
@@ -1691,8 +1720,13 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Frequency= devmode.dmDisplayFrequency,
 	mode.Width= (uint16)devmode.dmPelsWidth;
 	mode.Height= (uint16)devmode.dmPelsHeight;
-#elif defined(NL_OS_MAC)
+	
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	nlwarning("OpenGL Driver: Temporary Mac Implementation");
+	mode.Depth = 24;
 
+#elif defined(NL_OS_MAC)
 	/*
 		TODO this is just a hack to get the ryzom client running on mac os x x11.
 			the implementation below relies on the vidmode extension which is not
@@ -1734,7 +1768,12 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 {
 #ifdef NL_OS_WINDOWS
 	SetWindowTextW(_hWnd,(WCHAR*)title.c_str());
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 	XTextProperty text_property;
 	char *t = (char*)title.toUtf8().c_str();
 	XStringListToTextProperty(&t, 1, &text_property);
@@ -1749,7 +1788,12 @@ void CDriverGL::setWindowPos(uint32 x, uint32 y)
 	_WindowY = (sint32)y;
 #ifdef NL_OS_WINDOWS
 	SetWindowPos(_hWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 	XMoveWindow(dpy, win, _WindowX, _WindowY);
 #endif // NL_OS_WINDOWS
 }
@@ -1759,7 +1803,11 @@ void CDriverGL::showWindow(bool show)
 {
 #ifdef NL_OS_WINDOWS
 	ShowWindow (_hWnd, show ? SW_SHOW:SW_HIDE);
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 	if (show)
 		XMapWindow(dpy, win);
 	else
@@ -1822,6 +1870,12 @@ bool CDriverGL::activate()
 	{
 		wglMakeCurrent(_hDC,_hRC);
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	// already done in setDisplay, not needed here - unclean! FIXME
+
 #elif defined (NL_OS_UNIX)
 	GLXContext nctx=glXGetCurrentContext();
 	if (nctx != NULL && nctx!=ctx)
@@ -1985,8 +2039,13 @@ bool CDriverGL::swapBuffers()
 
 #ifdef NL_OS_WINDOWS
 	SwapBuffers(_hDC);
-#else // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::swapBuffers();
+
+#elif defined (NL_OS_UNIX)
 	glXSwapBuffers(dpy, win);
+
 #endif // NL_OS_WINDOWS
 
 	// Activate the default texture environnments for all stages.
@@ -2128,7 +2187,11 @@ bool CDriverGL::release()
 		}
 	}
 
-#elif defined (NL_OS_UNIX)// NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 
 #ifdef XF86VIDMODE
 	if(_FullScreen)
@@ -2225,7 +2288,14 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	int clientWidth = _WindowWidth;
 	int clientHeight = _WindowHeight;
 
-#else // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	int clientWidth = 1024;
+	int clientHeight = 768;
+
+#elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
 	if (!XGetWindowAttributes(dpy, win, &win_attributes))
@@ -2297,7 +2367,14 @@ void	CDriverGL::setupScissor (const class CScissor& scissor)
 	int clientWidth = _WindowWidth;
 	int clientHeight = _WindowHeight;
 
-#else // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	int clientWidth = 1024;
+	int clientHeight = 768;
+
+#elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
 	if (!XGetWindowAttributes(dpy, win, &win_attributes))
@@ -2383,6 +2460,10 @@ void CDriverGL::showCursor(bool b)
 		while (ShowCursor(b) >= 0)
 			;
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
 
 	if (b)
@@ -2427,6 +2508,10 @@ void CDriverGL::setMousePos(float x, float y)
 		ClientToScreen (_hWnd, &pt);
 		SetCursorPos(pt.x, pt.y);
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
 	XGetWindowAttributes (dpy, win, &xwa);
@@ -2458,6 +2543,13 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 			height = (uint32)(_WindowHeight);
 		}
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	width = 1024;
+	height = 768;
+
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
 	XGetWindowAttributes (dpy, win, &xwa);
@@ -2486,6 +2578,10 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 			y = (uint32)(_WindowY);
 		}
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
 	x = y = 0;
 #endif // NL_OS_UNIX
@@ -2500,9 +2596,14 @@ bool CDriverGL::isActive()
 	H_AUTO_OGL(CDriverGL_isActive)
 #ifdef NL_OS_WINDOWS
 	return (IsWindow(_hWnd) != 0);
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	// nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
-	return true;
+
 #endif // NL_OS_UNIX
+	return true;
 }
 
 uint8 CDriverGL::getBitPerPixel ()
@@ -2562,7 +2663,15 @@ void CDriverGL::setCapture (bool b)
 		ReleaseCapture ();
 	*/
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
+
+	/*
+		TODO x11 funtion: setCapture
+	*/
 
 	if(b) // capture the cursor.
 	{
@@ -3008,9 +3117,14 @@ NLMISC::IMouseDevice	*CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 			diee->releaseMouse();
 			return NULL;
 		}
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3037,9 +3151,14 @@ NLMISC::IKeyboardDevice		*CDriverGL::enableLowLevelKeyboard(bool enable)
 			diee->releaseKeyboard();
 			return NULL;
 		}
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3050,9 +3169,14 @@ NLMISC::IInputDeviceManager		*CDriverGL::getLowLevelInputDeviceManager()
 		if (_EventEmitter.getNumEmitters() < 2) return NULL;
 		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
 		return diee;
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3083,7 +3207,11 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 		}
 		// try to read the good value from windows
 		return ::GetDoubleClickTime();
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 		// TODO for Linux FIXME: FAKE FIX
 		return 250;
 #endif
@@ -3190,7 +3318,11 @@ bool			CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &prop
 		return false;
 	}
 
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 
 	// TODO for Linux: implement CDriverGL::setMonitorColorProperties
 	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
@@ -3956,9 +4088,13 @@ void CDriverGL::retrieveATIDriverVersion()
 			}
 			RegCloseKey(parentKey);
 		}
-	#else
-		// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
-	#endif
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
+#endif
 }
 
 

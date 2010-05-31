@@ -18,6 +18,8 @@
 
 #ifdef NL_OS_UNIX
 
+#ifndef NL_MAC_NATIVE
+
 #include <X11/keysym.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -478,5 +480,7 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 }
 
 } // NLMISC
+
+#endif // NL_MAC_NATIVE
 
 #endif // NL_OS_UNIX

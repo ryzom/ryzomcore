@@ -17,6 +17,8 @@
 #ifndef NL_UNIX_EVENT_EMITTER_H
 #define NL_UNIX_EVENT_EMITTER_H
 
+#ifndef NL_MAC_NATIVE
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/events.h"
@@ -69,6 +71,8 @@ private:
 } // NLMISC
 
 #endif // NL_OS_UNIX
+
+#endif // NL_MAC_NATIVE
 
 #endif // NL_UNIX_EVENT_EMITTER_H
 
