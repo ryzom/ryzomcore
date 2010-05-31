@@ -749,7 +749,7 @@ public:
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface
-	virtual void*			getDisplay();
+	virtual nlWindow		getDisplay();
 	virtual emptyProc		getWindowProc();
 	virtual NLMISC::IEventEmitter	*getEventEmitter();
 	virtual void			getWindowSize (uint32 &width, uint32 &height);

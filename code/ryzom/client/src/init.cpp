@@ -283,7 +283,7 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 				{
 					if (Driver)
 					{
-						HWND wnd = (HWND) Driver->getDisplay();
+						HWND wnd = Driver->getDisplay();
 						ShowWindow(wnd, SW_MINIMIZE);
 					}
 					browseFAQ(ClientCfg.ConfigFile);
@@ -461,7 +461,7 @@ static string crashCallback()
 			Driver->getCurrentScreenMode(mode);
 			if (!mode.Windowed)
 			{
-				HWND wnd = (HWND) Driver->getDisplay();
+				HWND wnd = Driver->getDisplay();
 				ShowWindow(wnd, SW_MINIMIZE);
 			}
 		}
@@ -1227,7 +1227,7 @@ void postlogInit()
 				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
 				// not the Ryzom one, then sound init fails
 				#ifdef NL_OS_WINDOWS
-					HWND hWnd = (HWND)Driver->getDisplay ();
+					HWND hWnd = Driver->getDisplay ();
 					nlassert (hWnd);
 					ShowWindow(hWnd, SW_RESTORE);
 					SetForegroundWindow(hWnd);

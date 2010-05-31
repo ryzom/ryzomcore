@@ -221,7 +221,7 @@ public:
 	virtual bool			isActive()=0;
 
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
-	virtual void			*getDisplay () = 0;
+	virtual nlWindow		getDisplay () = 0;
 	// @}
 
 

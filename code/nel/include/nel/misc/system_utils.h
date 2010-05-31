@@ -30,7 +30,7 @@ namespace NLMISC
  */
 class CSystemUtils
 {
-	static void *s_window;
+	static nlWindow s_window;
 public:
 
 	/// Initialize data which needs it before using them.
@@ -40,7 +40,7 @@ public:
 	static bool uninit();
 
 	/// Set the window which will be used by some functions.
-	static void setWindow(void *window);
+	static void setWindow(nlWindow window);
 
 	/// Create/update a progress bar with an appearance depending on system.
 	static bool updateProgressBar(uint value, uint total);

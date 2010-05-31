@@ -870,7 +870,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_FullScreen= false;
 		if (wnd)
 		{
-			_hWnd=(HWND)wnd;
+			_hWnd=wnd;
 			_DestroyWindow=false;
 		}
 		else

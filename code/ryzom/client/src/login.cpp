@@ -425,7 +425,7 @@ void loginMainLoop()
 					#ifdef NL_OS_WINDOWS
 					{
 						// Get the window
-						HWND hWnd = (HWND)Driver->getDisplay ();
+						HWND hWnd = Driver->getDisplay();
 						nlassert (hWnd);
 						// Show the window, unless it has been minimized, in
 						// which case we don't pop it unexpectedly

@@ -162,7 +162,7 @@ public:
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive();
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
-	virtual void			*getDisplay ();
+	virtual nlWindow		getDisplay ();
 
 	// @}
 

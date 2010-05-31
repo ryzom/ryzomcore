@@ -284,7 +284,7 @@ void CCustomMouse::release()
 {
 	if (!isAlphaBlendedCursorSupported()) return;
 	nlassert(Driver);
-	HWND drvWnd = (HWND) Driver->getDisplay();
+	HWND drvWnd = Driver->getDisplay();
 	if (drvWnd)
 	{
 		SetClassLongPtr(drvWnd, GCLP_HCURSOR, 0);
@@ -353,7 +353,7 @@ void CCustomMouse::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 r
 		if (CInputHandlerManager::getInstance()->hasFocus())
 		{
 			::SetCursor(cursorHandle);
-			HWND drvWnd = (HWND) Driver->getDisplay();
+			HWND drvWnd = Driver->getDisplay();
 			if (drvWnd)
 			{
 				SetClassLongPtr(drvWnd, GCLP_HCURSOR, (LONG_PTR) cursorHandle); // set default mouse icon to the last one
@@ -449,7 +449,7 @@ void CCustomMouse::setSystemArrow()
 	{
 		::SetCursor(arrow);
 	}
-	HWND drvWnd = (HWND) Driver->getDisplay();
+	HWND drvWnd = Driver->getDisplay();
 	if (drvWnd)
 	{
 		SetClassLongPtr(drvWnd, GCLP_HCURSOR, (LONG_PTR) arrow); // set default mouse icon to the last one

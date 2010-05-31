@@ -299,12 +299,12 @@ public:
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show);
 
-	virtual void*			getDisplay()
+	virtual nlWindow		getDisplay()
 	{
 #ifdef NL_OS_WINDOWS
-		return (void*)_hWnd;
+		return _hWnd;
 #else // NL_OS_WINDOWS
-		return NULL;
+		return win;
 #endif // NL_OS_WINDOWS
 	}
 

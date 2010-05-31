@@ -369,7 +369,7 @@ void CaptureSystemCursor()
 {
 	if (IsSystemCursorCaptured()) return;
 #ifdef NL_OS_WINDOWS
-	HWND drvWnd = (HWND) Driver->getDisplay();
+	HWND drvWnd = Driver->getDisplay();
 	if (!drvWnd) return;
 	SetCapture(drvWnd);
 #else
@@ -402,7 +402,7 @@ bool IsSystemCursorCaptured()
 {
 	if (!Driver) return false;
 #ifdef NL_OS_WINDOWS
-	return GetCapture() == (HWND) Driver->getDisplay();
+	return GetCapture() == Driver->getDisplay();
 #else
 	return MouseCapture;
 #endif
@@ -445,7 +445,7 @@ bool IsSystemCursorInClientArea()
 {
 	if (!Driver) return false;
 #ifdef NL_OS_WINDOWS
-	HWND drvWnd = (HWND) Driver->getDisplay();
+	HWND drvWnd = Driver->getDisplay();
 	if (!drvWnd) return false;
 	UDriver::CMode videoMode;
 	Driver->getCurrentScreenMode(videoMode);

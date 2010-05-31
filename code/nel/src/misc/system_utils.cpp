@@ -36,7 +36,7 @@ static const uint32 KeyMaxLength = 1024;
 
 namespace NLMISC {
 
-void *CSystemUtils::s_window = NULL;
+nlWindow CSystemUtils::s_window = EmptyWindow;
 
 bool CSystemUtils::init()
 {
@@ -59,7 +59,7 @@ bool CSystemUtils::uninit()
 	return true;
 }
 
-void CSystemUtils::setWindow(void *window)
+void CSystemUtils::setWindow(nlWindow window)
 {
 	s_window = window;
 }
@@ -83,12 +83,12 @@ bool CSystemUtils::updateProgressBar(uint value, uint total)
 	if (total)
 	{
 		// update the taskbar progress
-		hr = pTaskbarList->SetProgressValue((HWND)s_window, (ULONGLONG)value, (ULONGLONG)total);
+		hr = pTaskbarList->SetProgressValue(s_window, (ULONGLONG)value, (ULONGLONG)total);
 	}
 	else
 	{
 		// don't update anymore the progress
-		hr = pTaskbarList->SetProgressState((HWND)s_window, value == 0 ? TBPF_INDETERMINATE:TBPF_NOPROGRESS);
+		hr = pTaskbarList->SetProgressState(s_window, value == 0 ? TBPF_INDETERMINATE:TBPF_NOPROGRESS);
 	}
 
 	// release the interface
@@ -368,13 +368,13 @@ bool CSystemUtils::isSystemCursorInClientArea()
 		return false;
 	}
 	HWND wnd = WindowFromPoint(cursPos);
-	if (wnd != (HWND)s_window)
+	if (wnd != s_window)
 	{
 		return false; // not the same window
 	}
 	// want that the mouse be in the client area
 	RECT clientRect;
-	if (!GetClientRect((HWND)s_window, &clientRect))
+	if (!GetClientRect(s_window, &clientRect))
 	{
 		return false;
 	}
@@ -383,11 +383,11 @@ bool CSystemUtils::isSystemCursorInClientArea()
 	tl.y = clientRect.top;
 	br.x = clientRect.right;
 	br.y = clientRect.bottom;
-	if (!ClientToScreen((HWND)s_window, &tl))
+	if (!ClientToScreen(s_window, &tl))
 	{
 		return false;
 	}
-	if (!ClientToScreen((HWND)s_window, &br))
+	if (!ClientToScreen(s_window, &br))
 	{
 		return false;
 	}

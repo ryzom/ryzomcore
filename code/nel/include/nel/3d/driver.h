@@ -201,7 +201,7 @@ public:
 
 	// Return is the associated window information. (Implementation dependent)
 	// Must be a HWND for Windows (WIN32).
-	virtual void			*getDisplay() =0;
+	virtual nlWindow		getDisplay() =0;
 
 	/**
 	  * Setup monitor color properties.

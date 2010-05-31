@@ -386,7 +386,7 @@ bool			CDriverUser::isActive()
 
 
 // ***************************************************************************
-void			*CDriverUser::getDisplay ()
+nlWindow		CDriverUser::getDisplay ()
 {
 	NL3D_HAUTO_UI_DRIVER;
 
