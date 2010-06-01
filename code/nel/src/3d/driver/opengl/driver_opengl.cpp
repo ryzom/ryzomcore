@@ -1636,11 +1636,15 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	size_hints.y = 0;
 	size_hints.width = mode.Width;
 	size_hints.height = mode.Height;
-	size_hints.flags = PSize | PMinSize | PMaxSize;
-	size_hints.min_width = mode.Width;
-	size_hints.min_height = mode.Height;
-	size_hints.max_width = mode.Width;
-	size_hints.max_height = mode.Height;
+	size_hints.flags = PSize;
+	if (!mode.Windowed)
+	{
+		size_hints.flags = PSize | PMinSize | PMaxSize;
+		size_hints.min_width = mode.Width;
+		size_hints.min_height = mode.Height;
+		size_hints.max_width = mode.Width;
+		size_hints.max_height = mode.Height;
+	}
 
 	XSetWMNormalHints(dpy, win, &size_hints);
 
