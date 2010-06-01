@@ -1467,6 +1467,37 @@ static void modifyStyle (HWND hWnd, int nStyleOffset, LONG_PTR dwRemove, LONG_PT
 #endif
 
 // --------------------------------------------------
+void CDriverGL::switchBackToOldMode()
+{
+#ifdef NL_OS_WINDOWS
+	ChangeDisplaySettings(&_OldScreenMode, 0);
+#elif defined(XF86VIDMODE)
+	XF86VidModeModeInfo info;
+	nlinfo("3D: Switching back to original mode");
+
+	// This is UGLY
+	info.dotclock = _OldDotClock;
+	info.hdisplay = _OldScreenMode.hdisplay;
+	info.hsyncstart = _OldScreenMode.hsyncstart;
+	info.hsyncend = _OldScreenMode.hsyncend;
+	info.htotal = _OldScreenMode.htotal;
+	info.vdisplay = _OldScreenMode.vdisplay;
+	info.vsyncstart = _OldScreenMode.vsyncstart;
+	info.vsyncend = _OldScreenMode.vsyncend;
+	info.vtotal = _OldScreenMode.vtotal;
+	info.flags = _OldScreenMode.flags;
+	info.privsize = _OldScreenMode.privsize;
+	info.c_private = _OldScreenMode.c_private;
+
+	nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
+	XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
+	nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
+	XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
+#endif // XF86VIDMODE
+}
+
+
+// --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
 	H_AUTO_OGL(CDriverGL_setMode)
@@ -1475,7 +1506,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	{
 		if (_FullScreen)
 		{
-			ChangeDisplaySettings (NULL,0);
+			switchBackToOldMode();
 			modifyStyle(_hWnd, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS);
 		}
 		_WindowWidth  = mode.Width;
@@ -1596,20 +1627,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		}
 	}
 	else if (mode.Windowed == _FullScreen)
-	{
-		XF86VidModeModeInfo info;
-		nlinfo("3D: Switching back to original mode");
-
-		// This is a bit ugly - a quick hack to copy the ModeLine structure
-		// into the modeInfo structure.
-		memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)),&_OldScreenMode, sizeof(XF86VidModeModeLine));
-		info.dotclock = _OldDotClock;
-
-		nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
-		XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
-		nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
-		XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
-	}
+		switchBackToOldMode();
 #endif // XF86VIDMODE
 
 	// Update WM hints (update size and disallow resizing)
@@ -2166,7 +2184,7 @@ bool CDriverGL::release()
 
 		if(_FullScreen)
 		{
-			ChangeDisplaySettings(&_OldScreenMode, 0);
+			switchBackToOldMode();
 			_FullScreen= false;
 		}
 	}
@@ -2199,28 +2217,15 @@ bool CDriverGL::release()
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
 #elif defined (NL_OS_UNIX)
-
-#ifdef XF86VIDMODE
 	if(_FullScreen)
 	{
-		XF86VidModeModeInfo info;
-		nlinfo("3D: Switching back to original mode");
+		switchBackToOldMode();
 
-		// This is a bit ugly - a quick hack to copy the ModeLine structure
-		// into the modeInfo structure.
-		memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)),&_OldScreenMode, sizeof(XF86VidModeModeLine));
-		info.dotclock = _OldDotClock;
-
-		nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
-		XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
-		nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
-		XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
 		// Ungrab the keyboard (probably not necessary);
 		XUnmapWindow(dpy, win);
 		XSync(dpy, True);
 		XUngrabKeyboard(dpy, CurrentTime);
 	}
-#endif // XF86VIDMODE
 
 	if (ctx)
 	{
