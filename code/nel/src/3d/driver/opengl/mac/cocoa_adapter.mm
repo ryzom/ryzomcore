@@ -98,7 +98,7 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 		initWithFrame:NSMakeRect(0, 0, 1024, 768) pixelFormat: format];
 
 	// create a opengl context for the view
-	g_glctx  = [g_glview openGLContext];
+	g_glctx = [g_glview openGLContext];
 
 	// setup some stuff in the window
 	[g_window setContentView:g_glview];
@@ -203,8 +203,8 @@ NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 		case kVK_ANSI_Minus:           return NLMISC::KeySUBTRACT;
 		case kVK_ANSI_RightBracket:    return NLMISC::KeyRBRACKET;
 		case kVK_ANSI_LeftBracket:     return NLMISC::KeyLBRACKET;
-		case kVK_ANSI_Quote:break;     
-		case kVK_ANSI_Grave:break;
+		case kVK_ANSI_Quote:           return NLMISC::KeyAPOSTROPHE;
+		case kVK_ANSI_Grave:           return NLMISC::KeyPARAGRAPH;
 		case kVK_ANSI_Slash:           return NLMISC::KeySLASH;
 		case kVK_ANSI_Backslash:       return NLMISC::KeyBACKSLASH;
 		case kVK_ANSI_Comma:           return NLMISC::KeyCOMMA;
@@ -231,15 +231,12 @@ NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 		case kVK_Return:               return NLMISC::KeyRETURN;
 		case kVK_Tab:                  return NLMISC::KeyTAB;
 		case kVK_Space:                return NLMISC::KeySPACE;
-		case kVK_Delete:               return NLMISC::KeyDELETE;
-		case kVK_ForwardDelete:break;
+		case kVK_Delete:               return NLMISC::KeyBACK;
+		case kVK_ForwardDelete:        return NLMISC::KeyDELETE;
 		case kVK_Escape:               return NLMISC::KeyESCAPE;
-		case kVK_Command:break;        
 		case kVK_Shift:                return NLMISC::KeySHIFT;
 		case kVK_RightShift:           return NLMISC::KeyRSHIFT;
 		case kVK_CapsLock:             return NLMISC::KeyCAPITAL;
-		case kVK_Option:break;         
-		case kVK_RightOption:break;
 		case kVK_Control:              return NLMISC::KeyCONTROL;
 		case kVK_RightControl:         return NLMISC::KeyRCONTROL;
 		case kVK_F1:                   return NLMISC::KeyF1;
@@ -264,12 +261,15 @@ NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 		case kVK_F20:                  return NLMISC::KeyF20;
 		case kVK_Home:                 return NLMISC::KeyHOME;
 		case kVK_End:                  return NLMISC::KeyEND;
-		case kVK_PageUp:break;
-		case kVK_PageDown:break;
+		case kVK_PageUp:               return NLMISC::KeyPRIOR;
+		case kVK_PageDown:             return NLMISC::KeyNEXT;
 		case kVK_LeftArrow:            return NLMISC::KeyLEFT;
 		case kVK_RightArrow:           return NLMISC::KeyRIGHT;
 		case kVK_DownArrow:            return NLMISC::KeyDOWN;
 		case kVK_UpArrow:              return NLMISC::KeyUP;
+		case kVK_Command:break;        
+		case kVK_Option:break;         
+		case kVK_RightOption:break;
 		case kVK_Function:break;
 		case kVK_VolumeUp:break;
 		case kVK_VolumeDown:break;
@@ -297,6 +297,58 @@ NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
 	if (modifierFlags & NSShiftKeyMask)     buttons |= NLMISC::shiftKeyButton;
 	if (modifierFlags & NSAlternateKeyMask) buttons |= NLMISC::altKeyButton;
 	return (NLMISC::TKeyButton)buttons;
+}
+
+bool isTextKeyEvent(NSEvent* event)
+{
+	// if there are no characters provided with this event, is is not a text event
+	if([[event characters] length] == 0)
+		return false;
+
+	NLMISC::TKey nelKey = virtualKeycodeToNelKey([event keyCode]);
+
+	// ryzom ui wants to have "escape key string" to leave text box
+	if(nelKey == NLMISC::KeyESCAPE)
+		return true;
+
+	// ryzom ui wants to have "return key string" to submit text box (send chat)
+	if(nelKey == NLMISC::KeyRETURN)
+		return true;
+
+	// get the character reported by cocoa
+	unsigned int character = [[event characters] characterAtIndex:0];
+		
+	// printable ascii characters
+	if(isprint(character))
+		return true;
+	
+	/*
+		TODO check why iswprint(character) does not solve it. 
+			it always returns false, even for π é ...
+	*/
+	// > 127 but not printable
+	if( nelKey == NLMISC::KeyF1    || nelKey == NLMISC::KeyF2    || 
+			nelKey == NLMISC::KeyF3    || nelKey == NLMISC::KeyF4    || 
+			nelKey == NLMISC::KeyF5    || nelKey == NLMISC::KeyF6    || 
+			nelKey == NLMISC::KeyF7    || nelKey == NLMISC::KeyF8    || 
+			nelKey == NLMISC::KeyF9    || nelKey == NLMISC::KeyF10   ||
+			nelKey == NLMISC::KeyF11   || nelKey == NLMISC::KeyF12   || 
+			nelKey == NLMISC::KeyF13   || nelKey == NLMISC::KeyF14   || 
+			nelKey == NLMISC::KeyF15   || nelKey == NLMISC::KeyF16   || 
+			nelKey == NLMISC::KeyF17   || nelKey == NLMISC::KeyF18   || 
+			nelKey == NLMISC::KeyF19   || nelKey == NLMISC::KeyF20   ||
+			nelKey == NLMISC::KeyUP    || nelKey == NLMISC::KeyDOWN  || 
+			nelKey == NLMISC::KeyLEFT  || nelKey == NLMISC::KeyRIGHT ||
+			nelKey == NLMISC::KeyHOME  || nelKey == NLMISC::KeyEND   ||
+			nelKey == NLMISC::KeyPRIOR || nelKey == NLMISC::KeyNEXT  ||
+			nelKey == NLMISC::KeyDELETE)
+		return false;
+			
+	// all the fancy wide characters
+	if(character > 127)
+		return true;
+
+	return false;
 }
 
 void submitEvents(NLMISC::CEventServer& server,
@@ -328,9 +380,6 @@ void submitEvents(NLMISC::CEventServer& server,
 		// get the mouse position in nel style (relative)
 		float mouseX = event.locationInWindow.x / (float)width;
 		float mouseY = event.locationInWindow.y / (float)height;
-
-		// string to store symbols in case of key press
-		ucstring ucstr;
 
 		switch(event.type)
 		{
@@ -370,23 +419,27 @@ void submitEvents(NLMISC::CEventServer& server,
 						Unicode_Utilities_Ref/Reference/reference.html#//apple_ref/c/func/
 						UCKeyTranslate
 		 	*/
-		
+			
 			// push the key press event to the new event server
 			server.postEvent(new NLMISC::CEventKeyDown(
 				virtualKeycodeToNelKey([event keyCode]), 
 				modifierFlagsToNelKeyButton([event modifierFlags]), 
 				[event isARepeat] == NO, 
 				eventEmitter));
+			
+			if(isTextKeyEvent(event)) 
+			{
+				ucstring ucstr;
 
-			// get the string associated with the key press event
-			ucstr.fromUtf8([[event characters] UTF8String]);
+				// get the string associated with the key press event
+				ucstr.fromUtf8([[event characters] UTF8String]);
 
-			// if any, push it to the event server as well
-			if([[event characters] length] > 0)
+				// push to event server
 				server.postEvent(new NLMISC::CEventChar(
 					ucstr[0], 
 					NLMISC::noKeyButton, 
 					eventEmitter));
+			}
 		break;
 		case NSKeyUp:
 			server.postEvent(new NLMISC::CEventKeyUp(

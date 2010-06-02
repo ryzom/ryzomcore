@@ -23,7 +23,7 @@ namespace NLMISC
 
 void CCocoaEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 {
-	// just forwarding to out cocoa adapter
+	// just forwarding to our cocoa adapter
 	NL3D::MAC::submitEvents(server, allWindows, this);
 }
 
