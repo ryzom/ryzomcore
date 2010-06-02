@@ -841,6 +841,8 @@ private:
 	bool					_CurrentGlNormalize;
 
 private:
+	void					switchBackToOldMode();
+
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();
 
