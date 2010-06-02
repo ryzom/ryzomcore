@@ -126,23 +126,18 @@ void getWindowSize(uint32 &width, uint32 &height)
 
 void getWindowPos(uint32 &x, uint32 &y)
 {
-	/*
-		TODO mac os gives bottom left
-	*/
-
-	NSRect rect = [g_window frame];
-	x = rect.origin.x;
-	y = rect.origin.y;
-
-	nldebug("%d %d", x, y);
+	NSRect screenRect = [[g_window screen] frame];
+	NSRect windowRect = [g_window frame];
+	x = windowRect.origin.x;
+	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
 void setWindowPos(uint32 x, uint32 y)
 {
-	/*
-		TODO mac os gets bottom left
-	*/
-	[g_window setFrameOrigin:NSMakePoint(x, y)];
+	NSRect screenRect = [[g_window screen] frame];
+	NSRect windowRect = [g_window frame];
+	y = screenRect.size.height - y;  
+	[g_window setFrameTopLeftPoint:NSMakePoint(x, y)];
 }
 
 void setWindowTitle(const ucstring &title)
