@@ -3725,7 +3725,7 @@ public:
 		#ifdef NL_OS_WINDOWS
 			if (Driver)
 			{
-				HWND wnd = (HWND) Driver->getDisplay();
+				HWND wnd = Driver->getDisplay();
 				ShowWindow(wnd, SW_MINIMIZE);
 			}
 		#endif

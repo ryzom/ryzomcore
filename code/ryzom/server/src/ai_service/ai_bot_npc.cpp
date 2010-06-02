@@ -690,7 +690,7 @@ void CBotNpc::sendVPA()	// alternate VPA
 	visProp.Element.ColorBoot  = getSheet()->ColorFeets();
 	visProp.Element.ColorArm   = getSheet()->ColorArms();
 	visProp.Element.Hat = _Hat;
-	visProp.Element.Seed = getAlias()!=0?getAlias():(uint32)this;
+	visProp.Element.Seed = getAlias()!=0?getAlias():(uint32)(size_t)(void*)this;
 	LOG("BOT: %s  L: %d  R: %u  H: %u  CHEAD: %u  CARMS: %u  CHANDS: %u CBODY: %u CLEGS: %u CFEETS: %u SEED: %u",
 		getName().c_str(),
 		visProp.Element.WeaponLeftHand,

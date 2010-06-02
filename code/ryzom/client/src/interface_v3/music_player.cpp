@@ -109,7 +109,7 @@ void CMusicPlayer::previous ()
 	{
 		// Point the previous song
 		if (_CurrentSong == 0)
-			_CurrentSong = _Songs.size()-1;
+			_CurrentSong = (uint)_Songs.size()-1;
 		else
 			_CurrentSong--;
 
@@ -228,7 +228,7 @@ public:
 				OPENFILENAME ofn;
 				memset (&ofn, 0, sizeof(OPENFILENAME));
 				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.hwndOwner = Driver?(HWND)Driver->getDisplay ():NULL;
+				ofn.hwndOwner = Driver ? Driver->getDisplay():NULL;
 				ofn.hInstance = HInstance;
 				ofn.lpstrFilter = szFilter;
 				ofn.nFilterIndex = 0;

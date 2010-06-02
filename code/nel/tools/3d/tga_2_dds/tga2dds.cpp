@@ -19,7 +19,7 @@
 
 #include "nel/misc/file.h"
 #include "nel/misc/bitmap.h"
-#include "nel/misc/file.h"
+#include "nel/misc/path.h"
 #include "nel/misc/debug.h"
 #include <math.h>
 
@@ -352,6 +352,8 @@ void dividSize (CBitmap &bitmap)
 // ***************************************************************************
 int main(int argc, char **argv)
 {
+	CApplicationContext applicationContext;
+
 	uint8 algo;
 
 	// Parse Command Line.
@@ -495,9 +497,9 @@ int main(int argc, char **argv)
 	}
 	
 	
-	// Reading second Tga for user color
+	// Reading second Tga for user color, don't complain if _usercolor is missing
 	NLMISC::CIFile input2;
-	if (input2.open(userColorFileName))
+	if (CPath::exists(userColorFileName) && input2.open(userColorFileName))
 	{
 		picTga2.load(input2);
 		uint32 height2 = picTga2.getHeight();

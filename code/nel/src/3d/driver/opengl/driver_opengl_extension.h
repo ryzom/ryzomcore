@@ -24,12 +24,17 @@
 #	define WIN32_LEAN_AND_MEAN
 #	define NOMINMAX
 #	include <windows.h>
-#else // NL_OS_UNIX
+#	include <GL/gl.h>
+#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#	define GL_GLEXT_LEGACY
+#	include <OpenGL/gl.h>
+#	include "mac/glext.h"
+#elif defined (NL_OS_UNIX)
+#	include <GL/gl.h>
+#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
 #	include <GL/glx.h>
 #endif // NL_OS_UNIX
-
-#include <GL/gl.h>
-#include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
 
 #ifndef GL_GLEXT_VERSION
 #	error "I need a newer <GL/glext.h>. Please download it from http://www.opengl.org/registry/"
@@ -70,6 +75,8 @@ struct	CGlExtensions
 	bool	NVTextureShader;
 	bool    NVOcclusionQuery;
 	bool	NVTextureRectangle;
+	bool    EXTTextureRectangle;
+	bool    ARBTextureRectangle;
 	bool	FrameBufferObject;
 	bool	PackedDepthStencil;
 	// true if NVVertexProgram and if we know that VP is emulated
@@ -181,6 +188,8 @@ public:
 		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
 		result += ATIEnvMapBumpMap ? "ATIEnvMapBumpMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
+		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
+		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
 		result += ARBTextureNonPowerOfTwo ? "ARBTextureNonPowerOfTwo " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);

@@ -894,7 +894,9 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 		COutpostSquadCreatedMsg params;
 		params.Outpost = this->getAlias();
 		params.CreateOrder = createOrder;
-		params.GroupId = reinterpret_cast<uint32>(grp);
+		// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+		//params.GroupId = reinterpret_cast<uint32>(grp);
+		params.GroupId = (uint32)(size_t)(void*)grp;
 		sendOutpostMessage("OUTPOST_SQUAD_CREATED", params);
 	}
 
@@ -911,7 +913,9 @@ void COutpost::spawnSquad(uint32 groupId)
 		{
 			CGroup* group = *itGroup;
 			CGroupNpc* groupNpc = static_cast<CGroupNpc*>(group);
-			uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+			//uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			uint32 thisGroupId = (uint32)(size_t)(void*)groupNpc;
 			if (groupId==thisGroupId)
 			{
 				group->getSpawnObj()->spawnBots();
@@ -932,7 +936,9 @@ void COutpost::spawnSquad(uint32 groupId)
 		{
 			CGroup* group = *itGroup;
 			CGroupNpc* groupNpc = static_cast<CGroupNpc*>(group);
-			uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+			//uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			uint32 thisGroupId = (uint32)(size_t)(void*)groupNpc;
 			OUTPOST_WRN("- 0x%08x", thisGroupId);
 		}
 	}
@@ -948,7 +954,9 @@ void COutpost::despawnSquad(uint32 groupId)
 		{
 			CGroup* group = *itGroup;
 			CGroupNpc* groupNpc = static_cast<CGroupNpc*>(group);
-			uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+			//uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			uint32 thisGroupId = (uint32)(size_t)(void*)groupNpc;
 			if (groupId==thisGroupId)
 			{
 				group->despawnBots();
@@ -973,7 +981,9 @@ void COutpost::deleteSquad(uint32 groupId)
 		{
 			CGroup* group = *itGroup;
 			CGroupNpc* groupNpc = static_cast<CGroupNpc*>(group);
-			uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+			//uint32 thisGroupId = reinterpret_cast<uint32>(groupNpc);
+			uint32 thisGroupId = (uint32)(size_t)(void*)groupNpc;
 			if (groupId==thisGroupId)
 			{
 				manager->groups().removeChildByIndex(group->getChildIndex());
@@ -988,7 +998,9 @@ void COutpost::deleteSquad(uint32 groupId)
 void COutpost::sendOutpostSquadStatus(CGroupNpc* group)
 {
 	uint32 alias = this->getAlias();
-	uint32 groupId = reinterpret_cast<uint32>(group);
+	// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+	//uint32 groupId = reinterpret_cast<uint32>(group);
+	uint32 groupId = (uint32)(size_t)(void*)group;
 	bool groupAlive = false;
 	bool leaderAlive = group->getSquadLeader()!=NULL;
 	uint32 botCount = 0;
@@ -1011,7 +1023,9 @@ void COutpost::sendOutpostSquadStatus(CGroupNpc* group)
 void COutpost::squadLeaderDied(CGroupNpc* group)
 {
 	uint32 alias = this->getAlias();
-	uint32 groupId = reinterpret_cast<uint32>(group);
+	// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+	//uint32 groupId = reinterpret_cast<uint32>(group);
+	uint32 groupId = (uint32)(size_t)(void*)group;
 	NLNET::CMessage msgout("OUTPOST_SQUAD_LEADER_DIED");
 	msgout.serial(alias);
 	msgout.serial(groupId);
@@ -1021,7 +1035,9 @@ void COutpost::squadLeaderDied(CGroupNpc* group)
 void COutpost::squadDied(CGroupNpc* group)
 {
 	uint32 alias = this->getAlias();
-	uint32 groupId = reinterpret_cast<uint32>(group);
+	// Bug #847: Just downcast the pointer to make the groupId, the collision in 64b is negligible
+	//uint32 groupId = reinterpret_cast<uint32>(group);
+	uint32 groupId = (uint32)(size_t)(void*)group;
 	NLNET::CMessage msgout("OUTPOST_SQUAD_DIED");
 	msgout.serial(alias);
 	msgout.serial(groupId);

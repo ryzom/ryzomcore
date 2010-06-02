@@ -33,9 +33,37 @@ IF(UNIX)
   INCLUDE(${CMAKE_BINARY_DIR})
 ENDIF(UNIX)
 
-ADD_EXECUTABLE(client ${SRC})
+# on Mac, create a .App Bundle
+if(APPLE)
+  SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core Client")
+  SET(MACOSX_BUNDLE_ICON_FILE "")
+  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
+  SET(MACOSX_BUNDLE_LONG_VERSION_STRING "0.8.0")
+  SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Core Client")
+  SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "0.8")
+  SET(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
+  SET(MACOSX_BUNDLE_COPYRIGHT "Winchgate and The Ryzom Core Community")
 
-INCLUDE_DIRECTORIES(	${LIBXML2_INCLUDE_DIR} 
+  ADD_EXECUTABLE(client MACOSX_BUNDLE ${SRC})
+
+  # TODO: in release mode, cmake could copy all the dylibs into the .app
+  # bundle for redistribution... should some part of cpack handle that?
+  # ADD_CUSTOM_COMMAND(TARGET client POST_BUILD
+  #   # make frameworks directory in app bundle
+  #   COMMAND ${CMAKE_COMMAND} -E make_directory
+  #     ${CMAKE_CURRENT_BINARY_DIR}/client.app/Contents/Frameworks
+  #   # copy framework into app bundle
+  #   COMMAND ${CMAKE_COMMAND} -E copy ${SOME_LIBRARY} 
+  #     ${CMAKE_CURRENT_BINARY_DIR}/client.app/Contents/Frameworks
+  #   # ...
+  #   # install_name_tool the lib pathes
+
+ELSE(APPLE)
+  ADD_EXECUTABLE(client ${SRC})
+ENDIF(APPLE)
+
+INCLUDE_DIRECTORIES(
+			${LIBXML2_INCLUDE_DIR} 
 			${NEL_INCLUDE_DIR} 
 			${LUA_INCLUDE_DIR} 
 			${LIBWWW_INCLUDE_DIR} 
@@ -49,6 +77,7 @@ TARGET_LINK_LIBRARIES(client 	${PLATFORM_LINKFLAGS}
 				${NELNET_LIBRARY} 
 				${NELLIGO_LIBRARY} 
 				${NELGEORGES_LIBRARY} 
+				${NEL3D_LIBRARY} 
 				${LUA_LIBRARIES} 
 				${CURL_LIBRARIES} 
 				${NELSOUND_LIBRARY} 
@@ -57,9 +86,13 @@ TARGET_LINK_LIBRARIES(client 	${PLATFORM_LINKFLAGS}
 				${NELPACS_LIBRARY} 
 				${LIBWWW_LIBRARY} 
 				${Boost_LIBRARIES} 
-				${X11_LIBRARIES}
 				seven_zip
 				luabind)
+				
+IF(NOT WITH_COCOA)
+	TARGET_LINK_LIBRARIES(client ${X11_LIBRARIES})
+ENDIF(NOT WITH_COCOA)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS client RUNTIME DESTINATION bin COMPONENT client)
+INSTALL(TARGETS client RUNTIME DESTINATION bin COMPONENT client BUNDLE DESTINATION /Applications)

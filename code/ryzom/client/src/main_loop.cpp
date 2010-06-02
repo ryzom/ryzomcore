@@ -1498,14 +1498,7 @@ bool mainLoop()
 		{
 			beep( 680, 400 );
 			beep( 440, 400 );
-			#ifdef NL_OS_WINDOWS
-				// Get the window
-				HWND hWnd = (HWND)Driver->getDisplay ();
-				nlassert (hWnd);
-				// Show the window
-				ShowWindow (hWnd, SW_SHOW);
-				SetForegroundWindow(hWnd);
-			#endif // NL_OS_WINDOW
+			Driver->showWindow();
 		}
 
 		FPU_CHECKER_ONCE

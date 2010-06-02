@@ -17,6 +17,8 @@
 #ifndef NL_UNIX_EVENT_EMITTER_H
 #define NL_UNIX_EVENT_EMITTER_H
 
+#ifndef NL_MAC_NATIVE
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/events.h"
@@ -41,6 +43,7 @@ public:
 
 	/// Constructor
 	CUnixEventEmitter();
+	virtual ~CUnixEventEmitter();
 
 	void init (Display *dpy, Window win);
 
@@ -55,15 +58,21 @@ public:
 	void processMessage (XEvent &event, CEventServer &server);
 
 private:
+	void createIM();
+
 	Display *_dpy;
 	Window   _win;
 	TKey     _PreviousKey;
+	XIM      _im;
+	XIC      _ic;
 };
 
 
 } // NLMISC
 
 #endif // NL_OS_UNIX
+
+#endif // NL_MAC_NATIVE
 
 #endif // NL_UNIX_EVENT_EMITTER_H
 

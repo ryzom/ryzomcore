@@ -160,7 +160,7 @@ void CStateInstance::dumpVarsAndFunctions(CStringWriter& sw) const
 	
 	sw.append("context variables:");
 	FOREACHC(varIt, TCtxLogicVarList, _CtxLogicVar)
-		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+(int)(void*)varIt->second);
+		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+(int)(size_t)(void*)varIt->second);
 	
 	sw.append("callBacks:");
 	FOREACHC(varIt, TCallBackList, _CallBacks)

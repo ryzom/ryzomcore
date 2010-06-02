@@ -150,7 +150,7 @@ CLuaState::CLuaState()
 					TGetLuaIDEInterface getter = (TGetLuaIDEInterface) GetProcAddress(LuaDebuggerModule, "GetLuaIDEInterface");
 					nlassert(getter);
 					LuaDebuggerIDE = getter();
-					LuaDebuggerIDE->prepareDebug("save\\___external_debug.lpr", l_realloc_func, l_free_func, (HWND)Driver->getDisplay());
+					LuaDebuggerIDE->prepareDebug("save\\___external_debug.lpr", l_realloc_func, l_free_func, Driver->getDisplay());
 					_State = LuaDebuggerIDE->getLuaState();
 				}
 			}

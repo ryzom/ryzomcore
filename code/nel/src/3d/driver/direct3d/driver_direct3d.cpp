@@ -1323,7 +1323,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	}
 
 	// Create a window
-	_HWnd = (HWND)wnd;
+	_HWnd = wnd;
 
 	// Reset window state
 	_Maximized = false;
@@ -1440,19 +1440,19 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	}
 
 	// Create the D3D device
-	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, (HWND)_HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
+	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
 	{
 		nlwarning ("Can't create device hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
 
 		// Create the D3D device without puredevice
-		HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, (HWND)_HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
+		HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 		if (result != D3D_OK)
 		{
 			nlwarning ("Can't create device without puredevice hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
 
 			// Create the D3D device without puredevice and hardware
-			HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, (HWND)_HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
+			HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 			if (result != D3D_OK)
 			{
 				nlwarning ("Can't create device without puredevice and hardware hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
@@ -1462,7 +1462,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
-//	_D3D->CreateDevice (adapter, _Rasterizer, (HWND)_HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
+//	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
 	D3DCAPS9 caps;
@@ -1794,9 +1794,9 @@ bool CDriverD3D::isActive ()
 
 // ***************************************************************************
 
-void* CDriverD3D::getDisplay()
+nlWindow CDriverD3D::getDisplay()
 {
-	return (void*)_HWnd;
+	return _HWnd;
 }
 
 // ***************************************************************************

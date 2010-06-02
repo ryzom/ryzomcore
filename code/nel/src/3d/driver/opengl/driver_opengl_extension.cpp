@@ -44,7 +44,7 @@ void *nglGetProcAddress(const char *name)
     free (symbolName);
     return symbol ? NSAddressOfSymbol (symbol) : NULL;
 }
-#else	// NL_OS_WINDOWS
+#elif defined (NL_OS_UNIX)
 void (*nglGetProcAddress(const char *procName))()
 {
 	return glXGetProcAddressARB((const GLubyte *)procName);
@@ -1144,6 +1144,22 @@ static bool	setupNVTextureRectangle(const char	*glext)
 }
 
 // ***************************************************************************
+static bool	setupEXTTextureRectangle(const char	*glext)
+{
+	H_AUTO_OGL(setupEXTTextureRectangle);
+	CHECK_EXT("GL_EXT_texture_rectangle");
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupARBTextureRectangle(const char	*glext)
+{
+	H_AUTO_OGL(setupARBTextureRectangle);
+	CHECK_EXT("GL_ARB_texture_rectangle");
+	return true;
+}
+
+// ***************************************************************************
 static bool	setupFrameBufferObject(const char	*glext)
 {
 	H_AUTO_OGL(setupFrameBufferObject);
@@ -1310,6 +1326,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_NV_texture_rectangle
 	ext.NVTextureRectangle = setupNVTextureRectangle(glext);
+
+	// Check GL_EXT_texture_rectangle
+	ext.EXTTextureRectangle = setupEXTTextureRectangle(glext);
+
+	// Check GL_ARB_texture_rectangle
+	ext.ARBTextureRectangle = setupARBTextureRectangle(glext);
 
 	// Check GL_EXT_framebuffer_object
 	ext.FrameBufferObject = setupFrameBufferObject(glext);

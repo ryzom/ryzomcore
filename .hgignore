@@ -45,6 +45,9 @@ default_c
 *_debug
 core
 
+# Mac OS X compile
+*.dylib
+
 # Log dump files
 report_refused
 report_failed
@@ -58,14 +61,16 @@ log.txt
 *.dlm
 *.dlu
 
-#makeall build
+# makeall build
 .mode_static
 
-
-#cmake build files & directories
+# cmake build files & directories
 CMakeFiles
-*.cmake
 CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
 .libs
 
 # Linux garbage
@@ -99,6 +104,9 @@ ipch
 *.exp
 *.idb
 *.sdf
+
+# Mac OS X garbage
+.DS_Store
 
 # Ryzom server garbage
 aes_alias_name.cfg

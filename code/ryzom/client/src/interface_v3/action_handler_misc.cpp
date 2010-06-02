@@ -58,6 +58,9 @@ extern NLMISC::CLog				g_log;
 ////////////
 //static CCDBNodeLeaf *MenuColorWidgetValue = NULL; // db entry for the color menu widget (Red)
 
+
+static const string ScreenshotsDirectory("screenshots/");	// don't forget the final /
+
 void preRenderNewSky ();
 
 // ***************************************************************************
@@ -596,7 +599,9 @@ void screenShotTGA()
 {
 	CBitmap btm;
 	getBuffer (btm);
-	string filename = CFile::findNewFile ("screenshot.tga");
+
+	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
+	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.tga");
 	COFile fs(filename);
 	btm.writeTGA(fs, 24, false);
 	nlinfo("Screenshot '%s' saved in tga format (%dx%d)", filename.c_str(), (int) ClientCfg.ScreenShotWidth, (int) ClientCfg.ScreenShotHeight);
@@ -607,7 +612,9 @@ void screenShotPNG()
 {
 	CBitmap btm;
 	getBuffer (btm);
-	string filename = CFile::findNewFile ("screenshot.png");
+
+	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
+	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.png");
 	COFile fs(filename);
 	if (!btm.writePNG(fs, 24))
 	{
@@ -626,7 +633,9 @@ void screenShotJPG()
 {
 	CBitmap btm;
 	getBuffer (btm);
-	string filename = CFile::findNewFile ("screenshot.jpg");
+
+	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
+	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.jpg");
 	COFile fs(filename);
 	btm.writeJPG(fs);
 	nlinfo("Screenshot '%s' saved in jpg format (%dx%d)", filename.c_str(), (int) ClientCfg.ScreenShotWidth, (int) ClientCfg.ScreenShotHeight);

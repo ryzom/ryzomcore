@@ -452,20 +452,25 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 		}
 	}
 #else
-	// On X11, do the thing without IMouseDevice implementation
+	// On X11 and Mac, do the thing without IMouseDevice implementation
 	if( EventsListener.getMousePosX() != _LastFrameMousePosX ||
 		EventsListener.getMousePosY() != _LastFrameMousePosY )
 	{
 		float	dmpx, dmpy;
 		
+#ifndef NL_MAC_NATIVE
 		// On X11 in free look mode, the mouse is pulled back to (0.5, 0.5) 
 		// every update to prevent reaching a border and get stuck.
 		if(IsMouseFreeLook()) 
 		{
+			/*
+				TODO use setCapture to not fake it
+			*/
 			dmpx = EventsListener.getMousePosX() - 0.5;
 			dmpy = EventsListener.getMousePosY() - 0.5;
 		}
 		else 
+#endif
 		{
 			dmpx = EventsListener.getMousePosX() - _LastFrameMousePosX;
 			dmpy = EventsListener.getMousePosY() - _LastFrameMousePosY;

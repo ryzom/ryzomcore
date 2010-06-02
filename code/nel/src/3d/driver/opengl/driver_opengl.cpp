@@ -27,12 +27,18 @@
 #	include <windows.h>
 #	include <windowsx.h>
 #	include <string>
-#else // NL_OS_UNIX
-#	include <GL/glx.h>
+# include <GL/gl.h>
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# define GL_GLEXT_LEGACY
+# include <OpenGL/gl.h>
+# include "mac/glext.h"
+# include "mac/cocoa_adapter.h"
+#elif defined (NL_OS_UNIX)
+# include <GL/gl.h>
+# include <GL/glx.h>
 #endif // NL_OS_UNIX
 
 #include <vector>
-#include <GL/gl.h>
 
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -245,15 +251,15 @@ extern "C"
 /*
 static Bool WndProc(Display *d, XEvent *e, char *arg)
 {
-  nlinfo("3D: glop %d %d", e->type, e->xmap.window);
-  CDriverGL *pDriver = (CDriverGL*)arg;
-  if (pDriver != NULL)
-    {
-      // Process the message by the emitter
-      pDriver->_EventEmitter.processMessage();
-    }
-  // TODO i'don t know what to return exactly
-  return (e->type == MapNotify) && (e->xmap.window == (Window) arg);
+	nlinfo("3D: glop %d %d", e->type, e->xmap.window);
+	CDriverGL *pDriver = (CDriverGL*)arg;
+	if (pDriver != NULL)
+	{
+		// Process the message by the emitter
+		pDriver->_EventEmitter.processMessage();
+	}
+	// TODO i'don t know what to return exactly
+	return (e->type == MapNotify) && (e->xmap.window == (Window) arg);
 }
 */
 #endif // NL_OS_UNIX
@@ -282,15 +288,18 @@ CDriverGL::CDriverGL()
 	_hDC = NULL;
 	_NeedToRestaureGammaRamp = false;
 	_Interval = 1;
-#elif defined (NL_OS_UNIX) // NL_OS_WINDOWS
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::ctor();
+
+#elif defined (NL_OS_UNIX)
 	cursor = None;
 
-#ifdef XF86VIDMODE
+#	ifdef XF86VIDMODE
 	// zero the old screen mode
 	memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
-#endif //XF86VIDMODE
 
+#	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
 	_FullScreen= false;
@@ -314,8 +323,6 @@ CDriverGL::CDriverGL()
 	uint i;
 	for(i=0;i<MaxLight;i++)
 		_LightDirty[i]= false;
-
-
 
 	_CurrentGlNormalize= false;
 	_ForceNormalize= false;
@@ -414,6 +421,10 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
+
+#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::dtor();
+#endif
 }
 
 // ***************************************************************************
@@ -462,7 +473,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	// ati specific : try to retrieve driver version
 	retrieveATIDriverVersion();
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	return NL3D::MAC::init(windowIcon, exitFunc);
+
+#elif defined (NL_OS_UNIX)
 
 	dpy = XOpenDisplay(NULL);
 	if (dpy == NULL)
@@ -747,7 +762,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			return false;
 		}
 
-
 		/* After determining a compatible pixel format, the next step is to create a pbuffer of the
 			chosen format. Fortunately this step is fairly easy, as you merely select one of the formats
 			returned in the list in step #2 and call the function: */
@@ -867,13 +881,13 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_hDC = NULL;
 			return false;
 		}
- 	}
+	}
 	else
 	{
 		_FullScreen= false;
 		if (wnd)
 		{
-			_hWnd=(HWND)wnd;
+			_hWnd=wnd;
 			_DestroyWindow=false;
 		}
 		else
@@ -1027,7 +1041,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlinfo(e.what());
 	}
 
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
+
+#elif defined (NL_OS_UNIX)
 
 	static int sAttribList16bpp[] =
 	{
@@ -1074,41 +1092,26 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		visual_info = glXChooseVisual(dpy, DefaultScreen(dpy), sAttribList16bpp);
 	if(visual_info == NULL)
 	{
-	    nlerror("glXChooseVisual() failed");
+		nlerror("glXChooseVisual() failed");
 	}
 	else
 	{
-	    nldebug("3D: glXChooseVisual OK");
+		nldebug("3D: glXChooseVisual OK");
 	}
 
 	ctx = glXCreateContext (dpy, visual_info, None, GL_TRUE);
 	if(ctx == NULL)
 	{
-	    nlerror("glXCreateContext() failed");
+		nlerror("glXCreateContext() failed");
 	}
 	else
 	{
-	    nldebug("3D: glXCreateContext() OK");
+		nldebug("3D: glXCreateContext() OK");
 	}
 
 	XSetWindowAttributes attr;
 	attr.background_pixel = BlackPixel(dpy, DefaultScreen(dpy));
-
-#ifdef XF86VIDMODE
-	// If we're going to attempt fullscreen, we need to set redirect to True,
-	// This basically places the window with no borders in the top left
-	// corner of the screen.
-	if (mode.Windowed)
-	{
-		attr.override_redirect = False;
-	}
-	else
-	{
-		attr.override_redirect = True;
-	}
-#else
 	attr.override_redirect = False;
-#endif
 
 	int attr_flags = CWOverrideRedirect | CWBackPixel;
 
@@ -1127,7 +1130,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		}
 		else
 		{
-		    nldebug("3D: XCreateWindow() OK");
+			nldebug("3D: XCreateWindow() OK");
 		}
 	}
 	else
@@ -1135,6 +1138,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		win = wnd;
 		XChangeWindowAttributes(dpy, win, attr_flags, &attr);
 	}
+
+	const char *title="NeL window";
 
 	XSizeHints size_hints;
 	size_hints.x = 0;
@@ -1147,13 +1152,14 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	size_hints.max_width = width;
 	size_hints.max_height = height;
 
+#ifdef X_HAVE_UTF8_STRING
+	Xutf8SetWMProperties (dpy, win, (char*)title, (char*)title, NULL, 0, &size_hints, NULL, NULL);
+#else
 	XTextProperty text_property;
-	// FIXME char*s are created as const char*, but that doesn't work
-	// with XStringListToTextProperty()'s char** ...
-	const char *title="NeL window";
 	XStringListToTextProperty((char**)&title, 1, &text_property);
-
 	XSetWMProperties (dpy, win, &text_property, &text_property,  0, 0, &size_hints, 0, 0);
+#endif
+
 	glXMakeCurrent (dpy, win, ctx);
 	XMapRaised (dpy, win);
 
@@ -1166,66 +1172,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
 
-#ifdef XF86VIDMODE
-	if (!mode.Windowed)
-	{
-		// Set window to the right size, map it to the display, and raise it to the front
-		XResizeWindow(dpy, win, width, height);
-		XMapRaised(dpy, win);
-		XRaiseWindow(dpy, win);
-
-		// grab the mouse and keyboard on the fullscreen window
-		if ((XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime) != GrabSuccess) ||
-			(XGrabKeyboard(dpy, win, True, GrabModeAsync, GrabModeAsync, CurrentTime) != 0) )
-		{
-			// Until I work out how to deal with this nicely, it just gives
-			// an error and exits the prorgam.
-			nlerror("Unable to grab keyboard and mouse");
-		}
-		else
-		{
-			// Save the old screen mode and dotclock and viewport
-			memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
-			XF86VidModeGetModeLine(dpy, DefaultScreen(dpy), &_OldDotClock, &_OldScreenMode);
-			XF86VidModeGetViewPort(dpy, DefaultScreen(dpy), &_OldX, &_OldY);
-
-			// Get a list of modes, search for an appropriate one.
-			XF86VidModeModeInfo **modes;
-			int nmodes;
-			if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &nmodes, &modes))
-			{
-				int mode_index = -1; // Gah, magic numbers all bad.
-				for (int i = 0; i < nmodes; i++)
-				{
-					nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-					if(modes[i]->hdisplay == width && modes[i]->vdisplay == height)
-					{
-						mode_index = i;
-						break;
-					}
-				}
-				// Switch to the mode
-				if (mode_index != -1)
-				{
-					if(XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), modes[mode_index]))
-					{
-						nlinfo("3D: Switching to mode %dx%d", modes[mode_index]->hdisplay, modes[mode_index]->vdisplay);
-						XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), 0, 0);
-						_FullScreen = true;
-					}
-				}
-				else
-				{
-					// This is a problem, since we've nuked the border from
-					// window in the setup stage, until I work out how
-					// to get it back (recreate window? seems excessive)
-					nlerror("Couldn't find an appropriate mode %dx%d", width, height);
-				}
-			}
-		}
-	}
-
-#endif // XF86VIDMODE
+	setMode(mode);
 
 #endif // NL_OS_UNIX
 
@@ -1270,7 +1217,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, _Extensions.NVTextureRectangle, _MaxDriverLight);
+	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
 
 
 	// Init OpenGL/Driver defaults.
@@ -1291,7 +1238,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_COLOR_SUM_EXT);
 
-
 	_CurrViewport.init(0.f, 0.f, 1.f, 1.f);
 	_CurrScissor.initFullScreen();
 	_CurrentGlNormalize= false;
@@ -1310,8 +1256,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if(_Extensions.EXTSeparateSpecularColor)
 	{
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
-
-
 	}
 
 	_VertexProgramEnabled= false;
@@ -1433,8 +1377,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		params[0]=0; params[1]=0; params[2]=0; params[3]=1;
 		glTexGenfv(GL_Q, GL_OBJECT_PLANE, params);
 		glTexGenfv(GL_Q, GL_EYE_PLANE, params);
-
-
 	}
 	resetTextureShaders();
 
@@ -1447,7 +1389,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// meaning that light direction is always (0,1,0) in eye-space
 	// use enableLighting(0....), to get normal behaviour
 	_DriverGLStates.enableLight(0, true);
-
 
 	_Initialized = true;
 
@@ -1472,7 +1413,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_EVSNormalHandle   = nglBindParameterEXT(GL_CURRENT_NORMAL);
 			_EVSColorHandle    = nglBindParameterEXT(GL_CURRENT_COLOR);
 
-
 			if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
 			{
 				nlwarning("Unable to bind input parameters for use with EXT_vertex_shader, vertex program support is disabled");
@@ -1484,8 +1424,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 				for(uint k = 0; k < 8; ++k)
 				{
 					_EVSTexHandle[k] = nglBindTextureUnitParameterEXT(GL_TEXTURE0_ARB + k, GL_CURRENT_TEXTURE_COORDS);
-
-
 				}
 				// Other attributes are managed using variant pointers :
 				// Secondary color
@@ -1496,8 +1434,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 				// Allocate invariants. One assitionnal variant is needed for fog coordinate if fog bug is not fixed in driver version
 				_EVSConstantHandle = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_INVARIANT_EXT, GL_FULL_RANGE_EXT, _EVSNumConstant + (_ATIFogRangeFixed ? 0 : 1));
-
-
 
 				if (_EVSConstantHandle == 0)
 				{
@@ -1531,6 +1467,37 @@ static void modifyStyle (HWND hWnd, int nStyleOffset, LONG_PTR dwRemove, LONG_PT
 #endif
 
 // --------------------------------------------------
+void CDriverGL::switchBackToOldMode()
+{
+#ifdef NL_OS_WINDOWS
+	ChangeDisplaySettings(&_OldScreenMode, 0);
+#elif defined(XF86VIDMODE)
+	XF86VidModeModeInfo info;
+	nlinfo("3D: Switching back to original mode");
+
+	// This is UGLY
+	info.dotclock = _OldDotClock;
+	info.hdisplay = _OldScreenMode.hdisplay;
+	info.hsyncstart = _OldScreenMode.hsyncstart;
+	info.hsyncend = _OldScreenMode.hsyncend;
+	info.htotal = _OldScreenMode.htotal;
+	info.vdisplay = _OldScreenMode.vdisplay;
+	info.vsyncstart = _OldScreenMode.vsyncstart;
+	info.vsyncend = _OldScreenMode.vsyncend;
+	info.vtotal = _OldScreenMode.vtotal;
+	info.flags = _OldScreenMode.flags;
+	info.privsize = _OldScreenMode.privsize;
+	info.c_private = _OldScreenMode.c_private;
+
+	nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
+	XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
+	nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
+	XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
+#endif // XF86VIDMODE
+}
+
+
+// --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
 	H_AUTO_OGL(CDriverGL_setMode)
@@ -1539,7 +1506,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	{
 		if (_FullScreen)
 		{
-			ChangeDisplaySettings (NULL,0);
+			switchBackToOldMode();
 			modifyStyle(_hWnd, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS);
 		}
 		_WindowWidth  = mode.Width;
@@ -1622,9 +1589,86 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
 	_FullScreen = !mode.Windowed;
-#else
-	// TODO linux version !!!
-#endif
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+#elif defined(NL_OS_UNIX)
+
+#ifdef XF86VIDMODE
+	if (!mode.Windowed)
+	{
+		// Store old mdoe in order to restore it when leaving fullscreen
+		if (mode.Windowed == _FullScreen)
+		{
+			memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
+			XF86VidModeGetModeLine(dpy, DefaultScreen(dpy), &_OldDotClock, &_OldScreenMode);
+			XF86VidModeGetViewPort(dpy, DefaultScreen(dpy), &_OldX, &_OldY);
+		}
+
+		// Find the requested mode and use it
+		XF86VidModeModeInfo **modes;
+		int nmodes;
+		if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &nmodes, &modes))
+		{
+			for (int i = 0; i < nmodes; i++)
+			{
+				nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+				if(modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height)
+				{
+					if(XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), modes[i]))
+					{
+						nlinfo("3D: Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+						XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), 0, 0);
+					}
+					break;
+				}
+			}
+		}
+	}
+	else if (mode.Windowed == _FullScreen)
+		switchBackToOldMode();
+#endif // XF86VIDMODE
+
+	// Update WM hints (update size and disallow resizing)
+	XSizeHints size_hints;
+	size_hints.x = 0;
+	size_hints.y = 0;
+	size_hints.width = mode.Width;
+	size_hints.height = mode.Height;
+	size_hints.flags = PSize;
+	if (!mode.Windowed)
+	{
+		size_hints.flags = PSize | PMinSize | PMaxSize;
+		size_hints.min_width = mode.Width;
+		size_hints.min_height = mode.Height;
+		size_hints.max_width = mode.Width;
+		size_hints.max_height = mode.Height;
+	}
+
+	XSetWMNormalHints(dpy, win, &size_hints);
+
+	// Toggle fullscreen
+	if (mode.Windowed == _FullScreen)
+	{
+		XEvent xev;
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = win;
+		xev.xclient.message_type =  XInternAtom(dpy, "_NET_WM_STATE", false);
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = !mode.Windowed;
+		xev.xclient.data.l[1] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", false);
+		xev.xclient.data.l[2] = 0;
+		XSendEvent(dpy, DefaultRootWindow(dpy), false, SubstructureNotifyMask, &xev);
+	}
+	_FullScreen = !mode.Windowed;
+
+	// Resize and update the window
+	XResizeWindow(dpy, win, mode.Width, mode.Height);
+	XMapWindow(dpy, win);
+
+#endif // NL_OS_UNIX
 	return true;
 }
 
@@ -1654,7 +1698,11 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	}
 #elif defined(NL_OS_MAC)
 	getMacModes(modes);
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 
 #	ifdef XF86VIDMODE
 	int nmodes;
@@ -1702,7 +1750,24 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Frequency= devmode.dmDisplayFrequency,
 	mode.Width= (uint16)devmode.dmPelsWidth;
 	mode.Height= (uint16)devmode.dmPelsHeight;
-#else
+	
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	nlwarning("OpenGL Driver: Temporary Mac Implementation");
+	mode.Depth = 24;
+
+#elif defined(NL_OS_MAC)
+	/*
+		TODO this is just a hack to get the ryzom client running on mac os x x11.
+			the implementation below relies on the vidmode extension which is not
+			availeble on mac os x's x11. for that reason the color depth value is 
+			hard coded here.
+		FIXME replace this hack by native cocoa color depth retrieval
+	*/
+	nlwarning("FIXME: returning hardcoded color depth of 24bit");
+	mode.Depth= 24;
+
+#elif defined(NL_OS_UNIX)
 
 #	ifdef XF86VIDMODE
 	sint pixelClock;
@@ -1733,7 +1798,11 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 {
 #ifdef NL_OS_WINDOWS
 	SetWindowTextW(_hWnd,(WCHAR*)title.c_str());
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::setWindowTitle(title);
+
+#elif defined (NL_OS_UNIX)
 	XTextProperty text_property;
 	char *t = (char*)title.toUtf8().c_str();
 	XStringListToTextProperty(&t, 1, &text_property);
@@ -1748,8 +1817,13 @@ void CDriverGL::setWindowPos(uint32 x, uint32 y)
 	_WindowY = (sint32)y;
 #ifdef NL_OS_WINDOWS
 	SetWindowPos(_hWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::setWindowPos(x, y);
+
+#elif defined (NL_OS_UNIX)
 	XMoveWindow(dpy, win, _WindowX, _WindowY);
+
 #endif // NL_OS_WINDOWS
 }
 
@@ -1758,7 +1832,11 @@ void CDriverGL::showWindow(bool show)
 {
 #ifdef NL_OS_WINDOWS
 	ShowWindow (_hWnd, show ? SW_SHOW:SW_HIDE);
-#elif defined(NL_OS_UNIX) // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 	if (show)
 		XMapWindow(dpy, win);
 	else
@@ -1821,13 +1899,17 @@ bool CDriverGL::activate()
 	{
 		wglMakeCurrent(_hDC,_hRC);
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Temporary Mac Implementation"
+	nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	// already done in setDisplay, not needed here - unclean! FIXME
+
 #elif defined (NL_OS_UNIX)
 	GLXContext nctx=glXGetCurrentContext();
 	if (nctx != NULL && nctx!=ctx)
 	{
 		glXMakeCurrent(dpy, win,ctx);
-
-
 	}
 #endif // NL_OS_WINDOWS
 	return true;
@@ -1859,10 +1941,7 @@ bool CDriverGL::clear2D(CRGBA rgba)
 	H_AUTO_OGL(CDriverGL_clear2D)
 	glClearColor((float)rgba.R/255.0f,(float)rgba.G/255.0f,(float)rgba.B/255.0f,(float)rgba.A/255.0f);
 
-
 	glClear(GL_COLOR_BUFFER_BIT);
-
-
 
 	return true;
 }
@@ -1874,11 +1953,8 @@ bool CDriverGL::clearZBuffer(float zval)
 	H_AUTO_OGL(CDriverGL_clearZBuffer)
 	glClearDepth(zval);
 
-
 	_DriverGLStates.enableZWrite(true);
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-
 
 	return true;
 }
@@ -1890,9 +1966,7 @@ bool CDriverGL::clearStencilBuffer(float stencilval)
 	H_AUTO_OGL(CDriverGL_clearStencilBuffer)
 	glClearStencil((int)stencilval);
 
-
 	glClear(GL_STENCIL_BUFFER_BIT);
-
 
 	return true;
 }
@@ -1903,8 +1977,6 @@ void CDriverGL::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 {
 	H_AUTO_OGL(CDriverGL_setColorMask )
 	glColorMask (bRed, bGreen, bBlue, bAlpha);
-
-
 }
 
 // --------------------------------------------------
@@ -1994,16 +2066,16 @@ bool CDriverGL::swapBuffers()
 		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
 	}
 
-
 #ifdef NL_OS_WINDOWS
 	SwapBuffers(_hDC);
-#else // NL_OS_WINDOWS
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	NL3D::MAC::swapBuffers();
+
+#elif defined (NL_OS_UNIX)
 	glXSwapBuffers(dpy, win);
 
-
 #endif // NL_OS_WINDOWS
-
-
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
@@ -2023,7 +2095,6 @@ bool CDriverGL::swapBuffers()
 		forceActivateTexEnvColor(stage, env);
 	}
 
-
 	// Activate the default material.
 	//===========================================================
 	// Same reasoning as textures :)
@@ -2031,8 +2102,6 @@ bool CDriverGL::swapBuffers()
 	if (_NVTextureShaderEnabled)
 	{
 		glDisable(GL_TEXTURE_SHADER_NV);
-
-
 		_NVTextureShaderEnabled = false;
 	}
 	_CurrentMaterial= NULL;
@@ -2085,8 +2154,6 @@ bool CDriverGL::release()
 	// Reset VertexArrayRange.
 	resetVertexArrayRange();
 
-
-
 	// delete containers
 	delete _AGPVertexArrayRange;
 	delete _VRAMVertexArrayRange;
@@ -2121,7 +2188,7 @@ bool CDriverGL::release()
 
 		if(_FullScreen)
 		{
-			ChangeDisplaySettings(&_OldScreenMode, 0);
+			switchBackToOldMode();
 			_FullScreen= false;
 		}
 	}
@@ -2149,29 +2216,20 @@ bool CDriverGL::release()
 		}
 	}
 
-#elif defined (NL_OS_UNIX)// NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
-#ifdef XF86VIDMODE
+#elif defined (NL_OS_UNIX)
 	if(_FullScreen)
 	{
-		XF86VidModeModeInfo info;
-		nlinfo("3D: Switching back to original mode");
+		switchBackToOldMode();
 
-		// This is a bit ugly - a quick hack to copy the ModeLine structure
-		// into the modeInfo structure.
-		memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)),&_OldScreenMode, sizeof(XF86VidModeModeLine));
-		info.dotclock = _OldDotClock;
-
-		nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
-		XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
-		nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
-		XF86VidModeSetViewPort(dpy, DefaultScreen(dpy), _OldX, _OldY);
 		// Ungrab the keyboard (probably not necessary);
 		XUnmapWindow(dpy, win);
 		XSync(dpy, True);
 		XUngrabKeyboard(dpy, CurrentTime);
 	}
-#endif // XF86VIDMODE
 
 	if (ctx)
 	{
@@ -2246,7 +2304,12 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	int clientWidth = _WindowWidth;
 	int clientHeight = _WindowHeight;
 
-#else // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	uint32 clientWidth, clientHeight;
+	NL3D::MAC::getWindowSize(clientWidth, clientHeight);
+
+#elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
 	if (!XGetWindowAttributes(dpy, win, &win_attributes))
@@ -2318,7 +2381,14 @@ void	CDriverGL::setupScissor (const class CScissor& scissor)
 	int clientWidth = _WindowWidth;
 	int clientHeight = _WindowHeight;
 
-#else // NL_OS_WINDOWS
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
+
+	int clientWidth = 1024;
+	int clientHeight = 768;
+
+#elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
 	if (!XGetWindowAttributes(dpy, win, &win_attributes))
@@ -2404,6 +2474,10 @@ void CDriverGL::showCursor(bool b)
 		while (ShowCursor(b) >= 0)
 			;
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
 
 	if (b)
@@ -2448,6 +2522,10 @@ void CDriverGL::setMousePos(float x, float y)
 		ClientToScreen (_hWnd, &pt);
 		SetCursorPos(pt.x, pt.y);
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
 	XGetWindowAttributes (dpy, win, &xwa);
@@ -2479,6 +2557,10 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 			height = (uint32)(_WindowHeight);
 		}
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::getWindowSize(width, height);
+
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
 	XGetWindowAttributes (dpy, win, &xwa);
@@ -2507,6 +2589,10 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 			y = (uint32)(_WindowY);
 		}
 	}
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::getWindowPos(x, y);
+
 #elif defined (NL_OS_UNIX)
 	x = y = 0;
 #endif // NL_OS_UNIX
@@ -2521,9 +2607,14 @@ bool CDriverGL::isActive()
 	H_AUTO_OGL(CDriverGL_isActive)
 #ifdef NL_OS_WINDOWS
 	return (IsWindow(_hWnd) != 0);
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	// nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
-	return true;
+
 #endif // NL_OS_UNIX
+	return true;
 }
 
 uint8 CDriverGL::getBitPerPixel ()
@@ -2583,7 +2674,15 @@ void CDriverGL::setCapture (bool b)
 		ReleaseCapture ();
 	*/
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
 #elif defined (NL_OS_UNIX)
+
+	/*
+		TODO x11 funtion: setCapture
+	*/
 
 	if(b) // capture the cursor.
 	{
@@ -2673,8 +2772,6 @@ bool CDriverGL::fillBuffer (CBitmap &bitmap)
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glDrawPixels (rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]) );
 
-
-
 	return true;
 }
 
@@ -2746,8 +2843,6 @@ void CDriverGL::setPolygonMode (TPolygonMode mode)
 		glPolygonMode (GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	}
-
-
 }
 
 
@@ -2797,8 +2892,6 @@ void			CDriverGL::setupFog(float start, float end, CRGBA color)
 	}
 	_FogStart = start;
 	_FogEnd = end;
-
-
 }
 
 
@@ -2949,8 +3042,6 @@ void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const floa
 	nlassert(stage < inlGetNumTextStages() );
 	_DriverGLStates.activeTextureARB(stage);
 	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
-
-
 }
 
 
@@ -2971,8 +3062,6 @@ void      CDriverGL::enableNVTextureShader(bool enabled)
 			glDisable(GL_TEXTURE_SHADER_NV);
 		}
 		_NVTextureShaderEnabled = enabled;
-
-
 	}
 }
 
@@ -3039,9 +3128,14 @@ NLMISC::IMouseDevice	*CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 			diee->releaseMouse();
 			return NULL;
 		}
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3068,9 +3162,14 @@ NLMISC::IKeyboardDevice		*CDriverGL::enableLowLevelKeyboard(bool enable)
 			diee->releaseKeyboard();
 			return NULL;
 		}
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3081,9 +3180,14 @@ NLMISC::IInputDeviceManager		*CDriverGL::getLowLevelInputDeviceManager()
 		if (_EventEmitter.getNumEmitters() < 2) return NULL;
 		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
 		return diee;
-#else
-		return NULL;
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+
 #endif
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3114,7 +3218,11 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 		}
 		// try to read the good value from windows
 		return ::GetDoubleClickTime();
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 		// TODO for Linux FIXME: FAKE FIX
 		return 250;
 #endif
@@ -3126,6 +3234,7 @@ bool			CDriverGL::supportBlendConstantColor() const
 	H_AUTO_OGL(CDriverGL_supportBlendConstantColor)
 	return _Extensions.EXTBlendColor;
 }
+
 // ***************************************************************************
 void			CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 {
@@ -3139,9 +3248,8 @@ void			CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 		return;
 	static const	float	OO255= 1.0f/255;
 	nglBlendColorEXT(col.R*OO255, col.G*OO255, col.B*OO255, col.A*OO255);
-
-
 }
+
 // ***************************************************************************
 NLMISC::CRGBA	CDriverGL::getBlendConstantColor() const
 {
@@ -3168,10 +3276,7 @@ void CDriverGL::refreshProjMatrixFromGL()
 	glGetFloatv(GL_PROJECTION_MATRIX, mat);
 	_GLProjMat.set(mat);
 	_ProjMatDirty = false;
-
-
 }
-
 
 // ***************************************************************************
 bool			CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &properties)
@@ -3224,7 +3329,11 @@ bool			CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &prop
 		return false;
 	}
 
-#else
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
 
 	// TODO for Linux: implement CDriverGL::setMonitorColorProperties
 	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
@@ -3271,7 +3380,6 @@ void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
 void CDriverGL::initEMBM()
 {
 	H_AUTO_OGL(CDriverGL_initEMBM)
-
 
 	if (supportEMBM())
 	{
@@ -3594,7 +3702,7 @@ void CDriverGL::initFragmentShaders()
 			//
 			nglEndFragmentShaderATI();
 			GLenum error = glGetError();
-		    nlassert(error == GL_NONE);
+			nlassert(error == GL_NONE);
 
 			// The same but with a diffuse map added
 			nglBindFragmentShaderATI(ATIWaterShaderHandle);
@@ -3608,7 +3716,7 @@ void CDriverGL::initFragmentShaders()
 
 			nglEndFragmentShaderATI();
 			error = glGetError();
-		    nlassert(error == GL_NONE);
+			nlassert(error == GL_NONE);
 			nglBindFragmentShaderATI(0);
 		}
 
@@ -3740,7 +3848,6 @@ void	CDriverGL::enablePolygonSmoothing(bool smooth)
 	else
 		glDisable(GL_POLYGON_SMOOTH);
 
-
 	_PolygonSmooth= smooth;
 }
 
@@ -3755,7 +3862,6 @@ bool	CDriverGL::isPolygonSmoothingEnabled() const
 // ***************************************************************************
 void	CDriverGL::startProfileVBHardLock()
 {
-
 	if(_VBHardProfiling)
 		return;
 
@@ -3770,7 +3876,6 @@ void	CDriverGL::startProfileVBHardLock()
 // ***************************************************************************
 void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
 {
-
 	if(!_VBHardProfiling)
 		return;
 
@@ -3809,7 +3914,6 @@ void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
 // ***************************************************************************
 void	CDriverGL::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 {
-
 	// must allocate a new place?
 	if(_CurVBHardLockCount>=_VBHardProfiles.size())
 	{
@@ -3853,7 +3957,6 @@ void CDriverGL::profileIBAllocation(std::vector<std::string> &/* result */)
 // ***************************************************************************
 void	CDriverGL::profileVBHardAllocation(std::vector<std::string> &result)
 {
-
 	result.clear();
 	result.reserve(1000);
 	result.push_back(toString("Memory Allocated: %4d Ko in AGP / %4d Ko in VRAM",
@@ -3996,9 +4099,13 @@ void CDriverGL::retrieveATIDriverVersion()
 			}
 			RegCloseKey(parentKey);
 		}
-	#else
-		// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
-	#endif
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+# warning "OpenGL Driver: Missing Mac Implementation"
+	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+#elif defined (NL_OS_UNIX)
+	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
+#endif
 }
 
 
@@ -4073,7 +4180,6 @@ bool CDriverGL::activeShader(CShader * /* shd */)
 
 void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
 {
-
 	CHTimer::startBench (wantStandardDeviation, quick, reset);
 }
 
@@ -4081,7 +4187,6 @@ void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
 
 void CDriverGL::endBench ()
 {
-
 	CHTimer::endBench ();
 }
 
@@ -4089,7 +4194,6 @@ void CDriverGL::endBench ()
 
 void CDriverGL::displayBench (class NLMISC::CLog *log)
 {
-
 	// diplay
 	CHTimer::displayHierarchicalByExecutionPathSorted(log, CHTimer::TotalTime, true, 48, 2);
 	CHTimer::displayHierarchical(log, true, 48, 2);
@@ -4112,7 +4216,7 @@ void CDriverGL::checkTextureOn() const
 	// tmp for debug
 	CDriverGLStates &dgs = const_cast<CDriverGLStates &>(_DriverGLStates);
 	uint currTexStage = dgs.getActiveTextureARB();
-	for(uint k = 0; k < getNbTextureStages(); ++k)
+	for(uint k = 0; k < this->getNbTextureStages(); ++k)
 	{
 		dgs.activeTextureARB(k);
 		GLboolean flag2D;
@@ -4139,8 +4243,8 @@ void CDriverGL::checkTextureOn() const
 				nlassert(!flag2D);
 				nlassert(flagCM);
 			break;
-            default:
-                break;
+			default:
+			break;
 		}
 	}
 	dgs.activeTextureARB(currTexStage);
@@ -4157,7 +4261,7 @@ bool CDriverGL::supportOcclusionQuery() const
 bool CDriverGL::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL_supportTextureRectangle)
-	return _Extensions.NVTextureRectangle;
+	return (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle);
 }
 
 // ***************************************************************************

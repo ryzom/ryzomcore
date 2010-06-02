@@ -1677,7 +1677,7 @@ class CContentKill : public CContentObjective
 	{
 		if (!_KillFaunas.empty())
 		{
-			numEntry = _KillFaunas.size();
+			numEntry = (uint32)_KillFaunas.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<_KillFaunas.size(); ++i)
 			{
@@ -1691,7 +1691,7 @@ class CContentKill : public CContentObjective
 		}
 		else if (!_KillRaces.empty())
 		{
-			numEntry = _KillRaces.size();
+			numEntry = (uint32)_KillRaces.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<_KillRaces.size(); ++i)
 			{
@@ -1712,7 +1712,7 @@ class CContentKill : public CContentObjective
 		}
 		else if (!_KillNpcs.empty())
 		{
-			numEntry = _KillNpcs.size();
+			numEntry = (uint32)_KillNpcs.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<_KillNpcs.size(); ++i)
 			{
@@ -2013,7 +2013,7 @@ class CContentCast : public CContentObjective
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	
 	{
-		numEntry = _Actions.size();
+		numEntry = (uint32)_Actions.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2083,7 +2083,7 @@ class CContentForage : public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Mps.size();
+		numEntry = (uint32)_Mps.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2166,7 +2166,7 @@ class CContentLoot : public CContentObjective
 	{
 		if (_Mode == lm_item)
 		{
-			numEntry = _Items.size();
+			numEntry = (uint32)_Items.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<numEntry; ++i)
 			{
@@ -2179,7 +2179,7 @@ class CContentLoot : public CContentObjective
 		}
 		else if (_Mode == lm_mp)
 		{
-			numEntry = _Items.size();
+			numEntry = (uint32)_Items.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<numEntry; ++i)
 			{
@@ -2282,7 +2282,7 @@ class CContentCraft : public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Items.size();
+		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2357,7 +2357,7 @@ class CContentTarget : public CContentObjective
 
 		if (!_Npcs.empty())
 		{
-			numEntry = _Npcs.size();
+			numEntry = (uint32)_Npcs.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<numEntry; ++i)
 			{
@@ -2370,7 +2370,7 @@ class CContentTarget : public CContentObjective
 		}
 		else if (!_Faunas.empty())
 		{
-			numEntry = _Faunas.size();
+			numEntry = (uint32)_Faunas.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<numEntry; ++i)
 			{
@@ -2383,7 +2383,7 @@ class CContentTarget : public CContentObjective
 		}
 		else if (!_Races.empty())
 		{
-			numEntry = _Races.size();
+			numEntry = (uint32)_Races.size();
 			predef.resize(numEntry);
 			for (uint i=0; i<numEntry; ++i)
 			{
@@ -2486,7 +2486,7 @@ class CContentSell : public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Items.size();
+		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2571,7 +2571,7 @@ class CContentBuy : public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Items.size();
+		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2653,7 +2653,7 @@ class CContentGive : public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Items.size();
+		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
 		for (uint i=0; i<numEntry; ++i)
 		{
@@ -2882,7 +2882,7 @@ class CContentSkill: public CContentObjective
 
 	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
-		numEntry = _Skills.size();
+		numEntry = (uint32)_Skills.size();
 		predef.resize(numEntry);
 
 		for (uint i=0; i<numEntry; ++i)

@@ -287,7 +287,7 @@ int Height = 100;
 CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::string &fontExFileName)
 {
 
-//	HWND win=(HWND)winHack;
+//	HWND win=winHack;
 //	WindowHandle = win;
 //	Format = format;
 //	RECT rect;

@@ -1889,7 +1889,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 			PatchTransfered[i] = true;
 			DstPI.push_back (rPI);
 			DstPINoHeightmap.push_back (rPINoHeightmap);
-			OldToNewPatchId.insert (pair<int,int>(i, DstPI.size()-1));
+			OldToNewPatchId.insert (pair<int,int>(i, (int)DstPI.size()-1));
 		}
 	}
 
@@ -1940,7 +1940,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 									PatchTransfered[i] = true;
 									DstPI.push_back (rPI);
 									DstPINoHeightmap.push_back (rPINoHeightmap);
-									OldToNewPatchId.insert (pair<int,int>(i, DstPI.size()-1));
+									OldToNewPatchId.insert (pair<int,int>(i, (int)DstPI.size()-1));
 									foundOne = true;
 									break;
 								}
@@ -1956,7 +1956,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 	while (foundOne);
 
 	// Add all patch that are binded to one of those of the DstPI list 
-	uint32 nPreviousDstPISize = DstPI.size();
+	uint32 nPreviousDstPISize = (uint32)DstPI.size();
 	for (;;)
 	{
 		for (i = 0; i < DstPI.size(); ++i)
@@ -1977,7 +1977,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 						}
 						DstPI.push_back (rPITmp);
 						DstPINoHeightmap.push_back (rPITmpNoHeightmap);
-						OldToNewPatchId.insert (pair<int,int>(next, DstPI.size()-1));
+						OldToNewPatchId.insert (pair<int,int>(next, (int)DstPI.size()-1));
 						PatchTransfered[next] = true;
 					}
 				}
@@ -1998,7 +1998,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 							}
 							DstPI.push_back (rPITmp);
 							DstPINoHeightmap.push_back (rPITmpNoHeightmap);
-							OldToNewPatchId.insert (pair<int,int>(next, DstPI.size()-1));
+							OldToNewPatchId.insert (pair<int,int>(next, (int)DstPI.size()-1));
 							PatchTransfered[next] = true;
 						}
 					}
@@ -2009,7 +2009,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 		// Do it until no more patch added
 		if (nPreviousDstPISize == DstPI.size())
 			break;
-		nPreviousDstPISize = DstPI.size();
+		nPreviousDstPISize = (uint32)DstPI.size();
 	}
 
 	for (i = 0; i < DstPI.size(); ++i)
