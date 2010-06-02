@@ -9,12 +9,13 @@ ADD_SUBDIRECTORY(leveldesign)
 ADD_SUBDIRECTORY(patch_gen)
 ADD_SUBDIRECTORY(pdr_util)
 ADD_SUBDIRECTORY(stats_scan)
+ADD_SUBDIRECTORY(sheets_packer) 
 
 # Old stuff that doesn't compile anymore.
 #ADD_SUBDIRECTORY(occ2huff)
 #ADD_SUBDIRECTORY(phrase_generator)
 #ADD_SUBDIRECTORY(sheet_random_generator)
-#ADD_SUBDIRECTORY(sheets_packer) - this relies on something in the client
+#- this relies on something in the client
 
 # Not building these
 #xml_packer - this is in NeL tools.

@@ -1,11 +1,13 @@
 ADD_SUBDIRECTORY(alias_synchronizer)
+ADD_SUBDIRECTORY(prim_export)
+ADD_SUBDIRECTORY(uni_conv)
+ADD_SUBDIRECTORY(csv_transform)
+ADD_SUBDIRECTORY(icon_search)
 
-
-# Not working for one reason or another. Old code?
-#ADD_SUBDIRECTORY(csv_transform)
+# Legacy folders, do not build
+#ADD_SUBDIRECTORY(export)
 
 # folders not handled yet.
-#export
 #georges_convert
 #georges_dll
 #georges_exe
@@ -19,9 +21,9 @@ ADD_SUBDIRECTORY(alias_synchronizer)
 #mission_simulator
 #mp_generator
 #named_items_2_csv
-#prim_export
+#
 #primitive_id_assignator
 #test_root
-#uni_conv
+#
 #variable_parser
 #world_editor

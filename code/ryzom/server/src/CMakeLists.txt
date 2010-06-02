@@ -7,17 +7,21 @@ ADD_SUBDIRECTORY(pd_lib)
 ADD_SUBDIRECTORY(frontend_service)
 ADD_SUBDIRECTORY(entities_game_service)
 ADD_SUBDIRECTORY(ai_service)
+ADD_SUBDIRECTORY(backup_service)
+ADD_SUBDIRECTORY(dynamic_scenario_service)
+
 
 # Deprecated, no longer used.
 #ADD_SUBDIRECTORY(ai_data_service)
+#ADD_SUBDIRECTORY(entity_view_service)
+#ADD_SUBDIRECTORY(general_utilities_service)
 
 #ags_test
 #
-#backup_service
-#dynamic_scenario_service
+#
+#
 
-#entity_view_service
-#general_utilities_service
+#
 #gpm_service
 #input_output_service
 #log_analyser_service

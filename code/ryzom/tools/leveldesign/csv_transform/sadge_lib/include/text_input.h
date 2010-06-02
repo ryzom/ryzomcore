@@ -33,8 +33,6 @@
 #include "sadge_lib/include/text_output.h"
 
 #include <stdio.h>
-#include <io.h>
-
 
 //----------------------------------------------------------------------
 // CTextInput - an object that encapsulates output
