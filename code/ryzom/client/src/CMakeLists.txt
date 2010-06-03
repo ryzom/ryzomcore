@@ -87,7 +87,8 @@ TARGET_LINK_LIBRARIES(client 	${PLATFORM_LINKFLAGS}
 				${LIBWWW_LIBRARY} 
 				${Boost_LIBRARIES} 
 				seven_zip
-				luabind)
+				luabind # TODO: find luabind and expat cleanly using a find script
+				expat)
 				
 IF(NOT WITH_COCOA)
 	TARGET_LINK_LIBRARIES(client ${X11_LIBRARIES})
