@@ -17,11 +17,10 @@
 #include "std3d.h"
 
 #include "nel/3d/bezier_patch.h"
+
 using namespace NLMISC;
 
-
 namespace NL3D {
-
 
 // ***************************************************************************
 void		CBezierPatch::make(CVector vertices[4], CVector	normals[4])
@@ -48,6 +47,7 @@ void		CBezierPatch::make(CVector vertices[4], CVector	normals[4])
 
 	makeInteriors();
 }
+
 // ***************************************************************************
 void		CBezierPatch::makeInteriors()
 {
@@ -60,6 +60,7 @@ void		CBezierPatch::makeInteriors()
 	Interiors[2] = Tangents[3] + Tangents[4] - c;
 	Interiors[3] = Tangents[5] + Tangents[6] - d;
 }
+
 // ***************************************************************************
 void		CBezierPatch::applyMatrix(const CMatrix &m)
 {
@@ -73,7 +74,6 @@ void		CBezierPatch::applyMatrix(const CMatrix &m)
 		Interiors[i]= m*Interiors[i];
 }
 
-
 // ***************************************************************************
 static inline	void	mulAdd(CVector &tgt, const CVector &src, float f)
 {
@@ -82,7 +82,6 @@ static inline	void	mulAdd(CVector &tgt, const CVector &src, float f)
 	tgt.z+= src.z*f;
 }
 
-
 // ***************************************************************************
 static inline	void	mulAddD(CVectorD &tgt, const CVector &src, double f)
 {
@@ -90,7 +89,6 @@ static inline	void	mulAddD(CVectorD &tgt, const CVector &src, double f)
 	tgt.y+= src.y*f;
 	tgt.z+= src.z*f;
 }
-
 
 // ***************************************************************************
 CVector		CBezierPatch::eval(float ps, float pt) const
@@ -132,6 +130,7 @@ CVector		CBezierPatch::eval(float ps, float pt) const
 
 	return p;
 }
+
 // ***************************************************************************
 CVectorD	CBezierPatch::evalDouble(double ps, double pt) const
 {
@@ -172,7 +171,6 @@ CVectorD	CBezierPatch::evalDouble(double ps, double pt) const
 
 	return p;
 }
-
 
 // ***************************************************************************
 CVector		CBezierPatch::evalNormal(float ps, float pt) const
@@ -250,13 +248,11 @@ CVector		CBezierPatch::evalNormal(float ps, float pt) const
 	mulAdd(tgtT, Tangents[3] , s2 * t3);
 	mulAdd(tgtT, Vertices[2] , s3 * t3);
 
-
 	// Return the normal.
 	CVector	norm= tgtT^tgtS;
 	norm.normalize();
 	return norm;
 }
-
 
 // ***************************************************************************
 CVector		CBezierPatch::evalTangentS(float ps, float pt) const
@@ -307,7 +303,6 @@ CVector		CBezierPatch::evalTangentS(float ps, float pt) const
 	return tgtS.normed();
 }
 
-
 // ***************************************************************************
 CVector		CBezierPatch::evalTangentT(float ps, float pt) const
 {
@@ -357,7 +352,6 @@ CVector		CBezierPatch::evalTangentT(float ps, float pt) const
 	return tgtT.normed();
 }
 
-
 // ***************************************************************************
 void		CBezierPatch::CBezierCurve::subdivide(CBezierCurve &left, CBezierCurve &right, float t)
 {
@@ -376,7 +370,6 @@ void		CBezierPatch::CBezierCurve::subdivide(CBezierCurve &left, CBezierCurve &ri
 
 	left.P3= right.P0= t1*left.P2 + t*right.P1;
 }
-
 
 // ***************************************************************************
 void		CBezierPatch::subdivideS(CBezierPatch &left, CBezierPatch &right, float s) const
@@ -408,7 +401,6 @@ void		CBezierPatch::subdivideS(CBezierPatch &left, CBezierPatch &right, float s)
 	curveTRight[3].get(right.Vertices[1], right.Tangents[2] , right.Tangents[3] , right.Vertices[2]);
 }
 
-
 // ***************************************************************************
 void		CBezierPatch::subdivideT(CBezierPatch &top, CBezierPatch &bottom, float t) const
 {
@@ -438,7 +430,5 @@ void		CBezierPatch::subdivideT(CBezierPatch &top, CBezierPatch &bottom, float t)
 	curveSBottom[2].get(bottom.Tangents[6], bottom.Interiors[3], bottom.Interiors[2], bottom.Tangents[3]);
 	curveSBottom[3].get(bottom.Vertices[3], bottom.Tangents[5] , bottom.Tangents[4] , bottom.Vertices[2]);
 }
-
-
 
 } // NL3D

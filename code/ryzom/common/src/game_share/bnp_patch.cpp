@@ -19,13 +19,6 @@
 //-----------------------------------------------------------------------------
 
 #include "stdpch.h"
-#ifdef NL_OS_WINDOWS
-//#include <sys/utime.h>
-#else
-//#include <utime.h>
-//#define _utimbuf utimbuf
-//#define _utime utime
-#endif
 #include "nel/misc/path.h"
 #include "nel/misc/sha1.h"
 #include "bnp_patch.h"

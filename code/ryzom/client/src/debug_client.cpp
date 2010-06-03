@@ -26,9 +26,8 @@
 
 // OS.
 #ifdef NL_OS_WINDOWS
+#	define NOMINMAX
 #	include <windows.h>
-#	undef min
-#	undef max
 #endif
 
 // Misc

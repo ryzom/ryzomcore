@@ -31,10 +31,6 @@
 #include "../time_client.h"
 #include "lua_ihm.h"
 
-#ifdef NL_OS_WINDOWS
-#include <windows.h>
-#endif
-
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
