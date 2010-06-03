@@ -1056,6 +1056,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		GLX_RED_SIZE, 4,
 		GLX_GREEN_SIZE, 4,
 		GLX_BLUE_SIZE, 4,
+		GLX_STENCIL_SIZE, 8,
 		None
 	};
 
@@ -1068,6 +1069,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8,
+		GLX_STENCIL_SIZE, 8,
 		None
 	};
 
@@ -1081,6 +1083,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8,
 		GLX_ALPHA_SIZE, 8,
+		GLX_STENCIL_SIZE, 8,
 		None
 	};
 
