@@ -264,7 +264,7 @@ void ProcessDirectory( const CSString& dir, const StringVector& extensions )
 	printf( " %d results found\n\n", nbResults );
 }
 
-void main()
+int main()
 {
 	StringVector extensions;
 

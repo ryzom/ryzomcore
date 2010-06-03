@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <sstream>
 
 #include "nel/misc/config_file.h"
 #include "nel/misc/file.h"
@@ -34,7 +35,9 @@
 #include "nel/3d/landscape.h"
 #include "nel/3d/scene_group.h"
 
+#ifdef NL_OS_WINDOWS
 #include <windows.h>
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 
@@ -225,7 +228,7 @@ sint getYFromZoneName (const string &ZoneName)
 
 // ***************************************************************************
 
-void outString (string &sText)
+void outString (const string &sText)
 {
 	createDebug ();
 	InfoLog->displayRaw(sText.c_str());

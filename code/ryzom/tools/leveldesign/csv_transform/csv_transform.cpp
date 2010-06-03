@@ -18,7 +18,6 @@
 //
 
 #include <nel/misc/types_nl.h>
-#include "conio.h"
 
 #include "nel/misc/sstring.h"
 #include "nel/misc/file.h"

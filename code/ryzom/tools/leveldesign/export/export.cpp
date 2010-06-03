@@ -17,11 +17,13 @@
 #include "export.h"
 #include "formFlora.h"
 #include "formPlant.h"
-
+#ifdef NL_OS_WINDOWS
 #include <windows.h>
 #undef max
 #undef min
-#include "ligo/zone_region.h"
+#endif // NL_OS_WINDOWS
+
+#include "nel/ligo/zone_region.h"
 #include "nel/ligo/primitive.h"
 
 #include "nel/georges/u_form_loader.h"
@@ -41,8 +43,6 @@
 
 #include "tools.h"
 #include "../master/continentcfg.h"
-
-#include <windows.h>
 
 using namespace std;
 using namespace NLMISC;

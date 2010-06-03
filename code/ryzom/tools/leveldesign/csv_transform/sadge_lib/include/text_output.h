@@ -35,8 +35,6 @@
 #include "nel/misc/sstring.h"
 
 #include <stdio.h>
-#include <io.h>
-
 
 //----------------------------------------------------------------------
 // CTextOutput - an object that encapsulates output
