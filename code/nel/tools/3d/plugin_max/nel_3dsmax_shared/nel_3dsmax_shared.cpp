@@ -27,7 +27,10 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
-		new NLMISC::CApplicationContext();
+	{
+		GetSharedNelContext();
+		nldebug("NeL 3ds Max Shared: DllMain");
+	}
 
     switch (ul_reason_for_call)
 	{
@@ -51,10 +54,20 @@ void init ()
 // The static allocator
 static CPatchAllocator Allocator;
 
-NEL_3DSMAX_SHARED_API CPatchAllocator& GetAllocator ()
+NEL_3DSMAX_SHARED_API CPatchAllocator &GetAllocator ()
 {
 	// Init fonction
 	init ();
 
 	return Allocator;
+}
+
+NEL_3DSMAX_SHARED_API NLMISC::INelContext &GetSharedNelContext()
+{
+	if (!NLMISC::INelContext::isContextInitialised())
+	{
+		new NLMISC::CApplicationContext();
+		NLMISC::createDebug();
+	}
+	return NLMISC::INelContext::getInstance();
 }
