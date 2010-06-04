@@ -1170,6 +1170,11 @@ LocalModData* VertexPaintData::Clone()
 
 void VertexPaintData::SynchVerts(Mesh &m)
 {
+	if (mesh == NULL)
+	{
+		nlwarning("mesh == NULL");
+		return;
+	}
 
 	if(nverts)
 		delete [] nverts;

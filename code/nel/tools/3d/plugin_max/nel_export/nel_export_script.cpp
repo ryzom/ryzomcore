@@ -88,18 +88,31 @@ Value* export_shape_cf (Value** arg_list, int count)
 	// Ok ?
 	Boolean *ret=&false_value;
 
-	// Is the flag dont export set ?
-	if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_DONTEXPORT, 0))
-		return ret;
-	// Object is flagged as a collision?
-	int	bCol= CExportNel::getScriptAppData(node, NEL3D_APPDATA_COLLISION, BST_UNCHECKED);
-	if(bCol == BST_CHECKED)
-		return ret;
+	try
+	{
 
-	// Export
-	theCNelExport._ExportNel->deleteLM( *node);
-	if (theCNelExport.exportMesh (sPath, *node, ip->GetTime()))
-		ret = &true_value;
+		// Is the flag dont export set ?
+		if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_DONTEXPORT, 0))
+			return ret;
+		// Object is flagged as a collision?
+		int	bCol= CExportNel::getScriptAppData(node, NEL3D_APPDATA_COLLISION, BST_UNCHECKED);
+		if(bCol == BST_CHECKED)
+			return ret;
+
+		// Export
+		theCNelExport._ExportNel->deleteLM( *node);
+		if (theCNelExport.exportMesh (sPath, *node, ip->GetTime()))
+			ret = &true_value;
+	}
+	catch (Exception &e)
+	{
+		nlwarning ("ERROR (NelExportShape) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportShape) catch (...)");
+	}
+	nlinfo("ret");
 
 	return ret;
 }
@@ -129,7 +142,8 @@ Value* export_shape_ex_cf (Value** arg_list, int count)
 
 	// Get a INode pointer from the argument passed to us
 	INode *node = arg_list[0]->to_node();
-	nlassert (node);
+	nlassert(node);
+	nlassert(node->GetName());
 
 	// Export path 
 	std::string sPath=arg_list[1]->to_string();
@@ -167,9 +181,13 @@ Value* export_shape_ex_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportShapeEx) %s", e.what());
 	}
-
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportShapeEx) catch (...)");
+	}
+	nlinfo("ret");
 	return ret;
 }
 
@@ -207,7 +225,11 @@ Value* export_skeleton_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportSkeleton) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportSkeleton) catch (...)");
 	}
 
 	return ret;
@@ -274,7 +296,11 @@ Value* export_animation_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportAnimation) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportAnimation) catch (...)");
 	}
 	return ret;
 }
@@ -328,7 +354,11 @@ Value* export_ig_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportInstanceGroup) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportInstanceGroup) catch (...)");
 	}
 
 	return ret;
@@ -383,7 +413,11 @@ Value* export_skeleton_weight_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportSkeletonWeight) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportSkeletonWeight) catch (...)");
 	}
 
 	return ret;
@@ -397,9 +431,20 @@ Value* view_shape_cf (Value** arg_list, int count)
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
 
-	theCNelExport.init (true, true, ip, true);
+	try 
+	{
+		theCNelExport.init (true, true, ip, true);
 
-	theCNelExport.viewMesh (ip->GetTime());
+		theCNelExport.viewMesh (ip->GetTime());		
+	}
+	catch (Exception &e)
+	{
+		nlwarning ("ERROR %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR catch (...)");
+	}
 
 	return &true_value;
 }
@@ -496,9 +541,20 @@ Value* export_vegetable_cf (Value** arg_list, int count)
 	// Ok ?
 	Boolean *ret=&false_value;
 
-	// Export
-	if (theCNelExport.exportVegetable (sPath, *node, ip->GetTime()))
-		ret = &true_value;
+	try
+	{
+		// Export
+		if (theCNelExport.exportVegetable (sPath, *node, ip->GetTime()))
+			ret = &true_value;
+	}
+	catch (Exception &e)
+	{
+		nlwarning ("ERROR (NelExportVegetable) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportVegetable) catch (...)");
+	}
 
 	return ret;
 }
@@ -586,7 +642,11 @@ Value* export_collision_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportCollision) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportCollision) catch (...)");
 	}
 	return ret;
 }
@@ -639,7 +699,11 @@ Value* export_pacs_primitives_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
-		nlwarning ("ERROR %s", e.what());
+		nlwarning ("ERROR (NelExportPACSPrimitives) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportPACSPrimitives) catch (...)");
 	}
 	return ret;
 }
@@ -674,9 +738,20 @@ Value* export_lod_character_cf (Value** arg_list, int count)
 	// Ok ?
 	Boolean *ret=&false_value;
 
-	// Export
-	if (theCNelExport.exportLodCharacter (sPath, *node, ip->GetTime()))
-		ret = &true_value;
+	try
+	{
+		// Export
+		if (theCNelExport.exportLodCharacter (sPath, *node, ip->GetTime()))
+			ret = &true_value;
+	}
+	catch (Exception &e)
+	{
+		nlwarning ("ERROR (NelExportLodCharacter) %s", e.what());
+	}
+	catch (...)
+	{
+		nlwarning ("ERROR (NelExportLodCharacter) catch (...)");
+	}
 
 	return ret;
 }

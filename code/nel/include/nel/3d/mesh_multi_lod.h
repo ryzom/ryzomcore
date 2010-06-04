@@ -61,6 +61,7 @@ public:
 		class CBuildSlot
 		{
 		public:
+			CBuildSlot() : MeshGeom(NULL) { }
 			/**
 			  * Flags for the build of a slot
 			  *
