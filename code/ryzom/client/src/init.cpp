@@ -761,6 +761,7 @@ void prelogInit()
 
 		// Remap tga files on dds files.
 		CPath::remapExtension ("dds", "tga", true);
+		CPath::remapExtension ("dds", "png", true);
 		FPU_CHECKER_ONCE
 
 		uint i;
