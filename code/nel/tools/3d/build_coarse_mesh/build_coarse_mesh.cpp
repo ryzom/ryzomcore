@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 	if (argc!=2)
 	{
 		// Doc..
-		printf("build_coarse_mesh [config_file.cfg]\n");
+		nlinfo("build_coarse_mesh [config_file.cfg]\n");
 	}
 	else
 	{
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 				std::string outputPath=list_mesh.asString (i*2+1);
 
 				// Output
-				printf ("Loading %s...\n", intputPath.c_str());
+				nlinfo ("Loading %s...\n", intputPath.c_str());
 
 				// File
 				CIFile inputFile;
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 			if (coarseMeshes.size()>0)
 			{
 				// Output text
-				printf ("Compute the coarse meshes...\n");
+				nlinfo ("Compute the coarse meshes...\n");
 
 				// A bitmap
 				vector<CBitmap> coarseBitmap;
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 					for (i=0; i<shapes.size(); i++)
 					{
 						// Output text
-						printf ("Write %s...\n", shapes[i].FileName.c_str());
+						nlinfo ("Write %s...\n", shapes[i].FileName.c_str());
 
 						// File output
 						COFile outputFile;
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 					// Write the bitmaps
 					for (i=0; i<texture_output_path.size (); i++)
 					{
-						printf ("Write textures %s...\n", texture_output_path[i].c_str());
+						nlinfo ("Write textures %s...\n", texture_output_path[i].c_str());
 
 						// File for the texture
 						COFile outputFile;
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Show stats
-					printf ("\nCoarse meshes computed: %d\nTexture size: %dx%d\nArea of the texture used: %f%%\nCompute time (s): %f\n", 
+					nlinfo ("\nCoarse meshes computed: %d\nTexture size: %dx%d\nArea of the texture used: %f%%\nCompute time (s): %f\n", 
 						shapes.size(), coarseBitmap[0].getWidth(), coarseBitmap[0].getHeight(), stats.TextureUsed*100.f, 
 						((float)(uint32)CTime::getLocalTime ()-startTime)/1000.f);
 				}
