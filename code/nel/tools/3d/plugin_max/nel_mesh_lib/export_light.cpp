@@ -237,7 +237,7 @@ void CExportNel::getLights (std::vector<CLight>& vectLight, TimeValue time, INod
 
 			// Delete the triObject if we should...
 			if (deleteIt)
-				delete maxLight;
+				maxLight->DeleteMe();
 		}
 	}
 

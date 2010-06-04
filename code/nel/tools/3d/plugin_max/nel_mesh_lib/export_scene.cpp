@@ -597,6 +597,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 					else
 					{
 						// What???
+						nlerror("sLightBuild.Type == %i", (uint32)(sLightBuild.Type));
 						nlstop;
 					}
 

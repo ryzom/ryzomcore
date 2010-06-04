@@ -178,7 +178,7 @@ bool CMeshInterface::buildFromMaxMesh(INode &node, TimeValue tvTime)
 		//
 		if (deleteIt)
 		{
-			delete tri;
+			tri->DeleteMe();
 		}
 		return true;						
 	}
@@ -358,7 +358,7 @@ static void AddNodeToQuadGrid(const NLMISC::CAABBox &delimiter, TNodeFaceQG &des
 					//
 					if (deleteIt)
 					{
-						delete tri;
+						tri->DeleteMe();
 					}					
 				}
 			}
@@ -487,7 +487,7 @@ static bool SelectVerticesInMeshFromInterfaces(const std::vector<CMeshInterface>
 		if (obj != tri) 
 		{
 			// not a mesh object, so do nothing
-			delete tri;			
+			tri->DeleteMe();			
 			return false;
 		}
 		
