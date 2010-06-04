@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_3dsmax_shared", "nel_3dsmax_shared\nel_3dsmax_shared.vcproj", "{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{263C0F2E-112D-437F-A6AB-DEA151A7A1F0} = {263C0F2E-112D-437F-A6AB-DEA151A7A1F0}
@@ -155,8 +155,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_patch_edit", "nel_patch
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_vertex_tree_paint", "nel_vertex_tree_paint\nel_vertex_tree_paint.vcproj", "{680F9C48-975D-425A-89DF-D7AC3C093968}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_patch_edit_adv", "nel_patch_edit_adv\nel_patch_edit_adv.vcproj", "{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD} = {CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -366,14 +368,6 @@ Global
 		{680F9C48-975D-425A-89DF-D7AC3C093968}.Release|Win32.Build.0 = Release|Win32
 		{680F9C48-975D-425A-89DF-D7AC3C093968}.Release|x64.ActiveCfg = Release|x64
 		{680F9C48-975D-425A-89DF-D7AC3C093968}.Release|x64.Build.0 = Release|x64
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Debug|Win32.Build.0 = Debug|Win32
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Debug|x64.ActiveCfg = Debug|x64
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Debug|x64.Build.0 = Debug|x64
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Release|Win32.ActiveCfg = Release|Win32
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Release|Win32.Build.0 = Release|Win32
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Release|x64.ActiveCfg = Release|x64
-		{F8D52EA9-5C60-4C40-912B-F049B85B9DC0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
