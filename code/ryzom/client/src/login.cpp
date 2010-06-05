@@ -734,7 +734,7 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	CSystemUtils::setRootKey("SOFTWARE\\Nevrax\\Ryzom");
+	CSystemUtils::setRootKey("Software\\Nevrax\\Ryzom");
 
 	string l = CSystemUtils::getRegKey("Login");
 

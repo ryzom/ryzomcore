@@ -684,9 +684,7 @@ public:
 			return;
 
 		// *** must update time zone, in case of user changed it during play
-#ifdef NL_OS_WINDOWS
-		_tzset();
-#endif
+		tzset();
 
 		// *** Get the difference of time => timezone
 		time_t	tGmt=0, tLocal=0;
