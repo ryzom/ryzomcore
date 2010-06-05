@@ -160,35 +160,6 @@ void CMusicPlayer::update ()
 
 // ***************************************************************************
 
-bool supportUnicode()
-{
-	static bool init = false;
-	static bool unicodeSupported = false;
-	if (!init)
-	{
-		init = true;
-#ifdef NL_OS_WINDOWS
-		OSVERSIONINFO osvi;
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		if (::GetVersionEx (&osvi))
-		{
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
-			{
-				if (osvi.dwMajorVersion >= 4)
-				{
-					unicodeSupported = true;
-				}
-			}
-		}
-#else
-		unicodeSupported = true;
-#endif
-	}
-	return unicodeSupported;
-}
-
-// ***************************************************************************
-
 class CMusicPlayerPlaySongs: public IActionHandler
 {
 public:
