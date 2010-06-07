@@ -87,9 +87,13 @@ IgLandBuildDirectory = "_invalid"
 IgVillageBuildDirectory = "_invalid"
 
 # Rbank directories
-RbankCmbBuildDirectory = ContinentPath + "/rbank_cmb"
-
-# Rbank directories
+RbankBboxBuildDirectory = ContinentPath + "/rbank_bbox"
+RbankTessellationBuildDirectory = ContinentPath + "/rbank_tessellation"
+RbankSmoothBuildDirectory = ContinentPath + "/rbank_smooth"
+RbankRawBuildDirectory = ContinentPath + "/rbank_raw"
+RbankPreprocBuildDirectory = ContinentPath + "/rbank_preproc"
+RbankMeshBuildDirectory = ContinentPath + "/rbank_cmb"
+RbankRetrieversBuildDirectory = ContinentPath + "/rbank_retrievers"
 RbankOutputBuildDirectory = ContinentPath + "/rbank_output"
 
 

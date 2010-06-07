@@ -36,8 +36,6 @@ from process import *
 from tools import *
 from directories import *
 
-# ################### result = subprocess.Popen([ dfdsklfjslk ], stdout = PIPE).communicate()[0]  ######################################
-
 printLog(log, "")
 printLog(log, "-------")
 printLog(log, "--- Export rbank")
@@ -46,50 +44,14 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-TgaToDds = findTool(log, ToolDirectories, TgaToDdsTool, ToolSuffix)
 printLog(log, "")
 
 # For each rbank directory
-printLog(log, ">>> Export rbank test 1 <<<")
-#mkPath(log, ExportBuildDirectory + "/" + rbankExportDirectory)
-#for dir in rbankSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	niouname = dir.replace("/", "_")
-#	newpath = ExportBuildDirectory + "/" + rbankExportDirectory + "/" + niouname
-#	mkPath(log, newpath)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
-printLog(log, "")
+printLog(log, ">>> Export rbank 3dsmax <<<")
+printLog(log, "********************************")
+printLog(log, "********      TODO      ********")
+printLog(log, "********************************")
 
-# For each rbank directory to compress in one DXTC
-printLog(log, ">>> Export rbank test 2 <<<")
-#mkPath(log, ExportBuildDirectory + "/" + rbankDxtcExportDirectory)
-#for dir in rbankDxtcSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + rbankDxtcExportDirectory, ".tga")
-printLog(log, "")
-
-# For each rbank fullscreen directory compress independently all in dds
-printLog(log, ">>> Export rbank test 3 <<<")
-#if TgaToDds == "":
-#	toolLogFail(log, TgaToDdsTool, ToolSuffix)
-#else:
-#	mkPath(log, ExportBuildDirectory + "/" + rbankFullscreenExportDirectory)
-#	for dir in rbankFullscreenSourceDirectories:
-#		mkPath(log, DatabaseDirectory + "/" + dir)
-#		files = findFiles(log, DatabaseDirectory + "/" + dir, "", ".tga")
-#		for file in files:
-#			sourceFile = DatabaseDirectory + "/" + dir + "/" + file
-#			destFile = ExportBuildDirectory + "/" + rbankFullscreenExportDirectory + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
-#			if needUpdateLogRemoveDest(log, sourceFile, destFile):
-#				subprocess.call([ TgaToDds, sourceFile, "-o", destFile, "-a", "5" ])
-printLog(log, "")
-
-# For each rbank 3d directory
-printLog(log, ">>> Export rbank test 4 <<<")
-#mkPath(log, ExportBuildDirectory + "/" + rbank3DExportDirectory)
-#for dir in rbank3DSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + rbank3DExportDirectory, ".tga")
 printLog(log, "")
 
 log.close()

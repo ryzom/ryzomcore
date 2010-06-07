@@ -25,8 +25,8 @@
 # 
 
 # *** PROCESS TIMEOUT ***
-SkelExportTimeout = 60000
-SwtExportTimeout = 60000
+SkelExportTimeout = 600000
+SwtExportTimeout = 600000
 ShapeExportTimeout = 3600000
 ZoneExportTimeout = 1800000
 ZoneBuildDependTimeout = 1800000
@@ -39,15 +39,15 @@ AnimExportTimeout = 1800000
 IgExportTimeout = 600000
 MapsBuildTimeout = 10000
 CmbExportTimeout = 60000
-RbankBuildTesselTimeout = 60000
-RbankBuildSmoothTimeout = 60000
-RbankBuildProclocalTimeout = 60000
-RbankBuildProcglobalTimeout = 180000
-RbankBuildIndoorTimeout = 180000
+RbankBuildTesselTimeout = 6000000
+RbankBuildSmoothTimeout = 6000000
+RbankBuildProclocalTimeout = 6000000
+RbankBuildProcglobalTimeout = 18000000
+RbankBuildIndoorTimeout = 18000000
 # WmapBuildTimeout = 60000
 LigoExportTimeout = 3600000
 LigoBuildTimeout = 1800000
-PacsPrimExportTimeout = 60000
+PacsPrimExportTimeout = 600000
 
 # *** TOOLS CONFIGURATION ***
 

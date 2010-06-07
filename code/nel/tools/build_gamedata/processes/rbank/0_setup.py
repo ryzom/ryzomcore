@@ -46,22 +46,10 @@ printLog(log, "")
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
 mkPath(log, LeveldesignWorldDirectory)
-#for dir in rbankSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#for dir in rbankDxtcSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#for dir in rbankFullscreenSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#for dir in rbank3DSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
-#mkPath(log, ExportBuildDirectory + "/" + rbankExportDirectory)
-#mkPath(log, ExportBuildDirectory + "/" + rbankDxtcExportDirectory)
-#mkPath(log, ExportBuildDirectory + "/" + rbankFullscreenExportDirectory)
-#mkPath(log, ExportBuildDirectory + "/" + rbank3DExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
@@ -79,6 +67,7 @@ mkPath(log, ExportBuildDirectory + "/" + RbankRawBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankPreprocBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankMeshBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")

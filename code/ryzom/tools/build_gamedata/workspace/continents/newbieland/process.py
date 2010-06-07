@@ -33,7 +33,7 @@ ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process 
 ProcessToComplete += [ "zone" ]
 #ProcessToComplete += [ "ig" ] # not implemented
 ProcessToComplete += [ "zone_light" ]
-#ProcessToComplete += [ "rbank" ]
+ProcessToComplete += [ "rbank" ]
 #ProcessToComplete += [ "ig_light" ]
 #ProcessToComplete += [ "ps" ]
 
@@ -72,6 +72,8 @@ ZoneRegion = [ "65_bz", "77_cs" ]
 # *** RBANK OPTIONS ***
 
 # Options
+RBankVerbose = 0
+RBankConsistencyCheck = 0
 RbankReduceSurfaces = 1
 RbankSmoothBorders = 1
 RbankComputeElevation = 0
