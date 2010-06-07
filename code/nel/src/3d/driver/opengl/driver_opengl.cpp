@@ -294,8 +294,8 @@ CDriverGL::CDriverGL()
 
 #elif defined (NL_OS_UNIX)
 	cursor = None;
-	_win = 0;
-	_dpy = 0;
+	win = 0;
+	dpy = 0;
 
 #	ifdef XF86VIDMODE
 	// zero the old screen mode
