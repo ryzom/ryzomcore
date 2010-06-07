@@ -1614,21 +1614,23 @@ void	NLPACS::CZoneTessellation::generateBorders(float smooth)
 		sint	lsurf = cborder.Left;
 		sint	rsurf = cborder.Right;
 
-		if (lsurf >= 0)
+		if (CheckConsistency)
 		{
-			CComputableSurface&	surf = Surfaces[lsurf];
-			if (!surf.checkConsistency())
+			if (lsurf >= 0)
 			{
-				nlwarning("Before smooth of border '%d', surface '%d' not consistent", border, lsurf);
+				CComputableSurface&	surf = Surfaces[lsurf];
+				if (!surf.checkConsistency())
+				{
+					nlwarning("Before smooth of border '%d', surface '%d' not consistent", border, lsurf);
+				}
 			}
-		}
-
-		if (rsurf >= 0)
-		{
-			CComputableSurface&	surf = Surfaces[rsurf];
-			if (!surf.checkConsistency())
+			if (rsurf >= 0)
 			{
-				nlwarning("Before smooth of border '%d', surface '%d' not consistent", border, rsurf);
+				CComputableSurface&	surf = Surfaces[rsurf];
+				if (!surf.checkConsistency())
+				{
+					nlwarning("Before smooth of border '%d', surface '%d' not consistent", border, rsurf);
+				}
 			}
 		}
 
@@ -1642,22 +1644,24 @@ void	NLPACS::CZoneTessellation::generateBorders(float smooth)
 		uint	after = (uint)Borders[border].Vertices.size();
 		totalBefore += before;
 		totalAfter += after;
-
-		if (lsurf >= 0)
+		
+		if (CheckConsistency)
 		{
-			CComputableSurface&	surf = Surfaces[lsurf];
-			if (!surf.checkConsistency())
+			if (lsurf >= 0)
 			{
-				nlwarning("After smooth of border '%d', surface '%d' not consistent", border, lsurf);
+				CComputableSurface&	surf = Surfaces[lsurf];
+				if (!surf.checkConsistency())
+				{
+					nlwarning("After smooth of border '%d', surface '%d' not consistent", border, lsurf);
+				}
 			}
-		}
-
-		if (rsurf >= 0)
-		{
-			CComputableSurface&	surf = Surfaces[rsurf];
-			if (!surf.checkConsistency())
+			if (rsurf >= 0)
 			{
-				nlwarning("After smooth of border '%d', surface '%d' not consistent", border, rsurf);
+				CComputableSurface&	surf = Surfaces[rsurf];
+				if (!surf.checkConsistency())
+				{
+					nlwarning("After smooth of border '%d', surface '%d' not consistent", border, rsurf);
+				}
 			}
 		}
 	}
