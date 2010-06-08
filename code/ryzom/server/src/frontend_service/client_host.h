@@ -33,7 +33,7 @@
 #include "entity_container.h"
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/entity_types.h"
-#include "../../nelns/welcome_service/welcome_service_itf.h"
+#include "game_share/welcome_service_itf.h"
 
 #include <vector>
 #include <deque>
