@@ -319,7 +319,7 @@ bool isTextKeyEvent(NSEvent* event)
 	
 	/*
 		TODO check why iswprint(character) does not solve it. 
-			it always returns false, even for π é ...
+			it always returns false, even for π, é, ...
 	*/
 	// > 127 but not printable
 	if( nelKey == NLMISC::KeyF1    || nelKey == NLMISC::KeyF2    || 
@@ -408,13 +408,6 @@ void submitEvents(NLMISC::CEventServer& server,
 		case NSMouseEntered:break;
 		case NSMouseExited:break;
 		case NSKeyDown:
-		 	/*
-		 		TODO dead keys
-					http://developer.apple.com/mac/library/documentation/Carbon/Reference/
-						Unicode_Utilities_Ref/Reference/reference.html#//apple_ref/c/func/
-						UCKeyTranslate
-		 	*/
-			
 			// push the key press event to the new event server
 			server.postEvent(new NLMISC::CEventKeyDown(
 				virtualKeycodeToNelKey([event keyCode]), 

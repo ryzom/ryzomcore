@@ -32,7 +32,7 @@ namespace NLMISC {
 
 
 /**
- * TODO Class description
+ * CEventEmitter UNIX implementation
  * \author Vianney Lecroart
  * \author Nevrax France
  * \date 2000

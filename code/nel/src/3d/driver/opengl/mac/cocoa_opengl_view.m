@@ -20,6 +20,21 @@
 
 @implementation CocoaOpenGLView
 
+- (id)initWithFrame:(NSRect)frame 
+{
+	if(self = [super initWithFrame:frame]) 
+	{
+		backingStore = [[NSMutableAttributedString alloc] initWithString:@""];
+		return self;
+	}
+	return nil;
+}
+
+- (void)dealloc
+{
+	[backingStore release];
+	[super dealloc];
+}
 -(BOOL)acceptsFirstResponder
 {
 	return YES;
@@ -32,11 +47,87 @@
 
 -(void)keyDown:(NSEvent*)event
 {
-	// we handle the key here, so os x does not make a sound :)
-	/*
-		TODO do it in the event emitter? eg do not forward key down? 
-			does command+q / command+m still work then?
-	*/
+	[[self inputContext] handleEvent:event];
+}
+
+/******************************************************************************/
+/* NSTextInputClient Protocol */
+
+-(BOOL)hasMarkedText 
+{
+	return (markedRange.location == NSNotFound ? NO : YES);
+}
+
+-(NSRange)markedRange 
+{
+	return markedRange;
+}
+
+-(NSRange)selectedRange 
+{
+	return NSMakeRange(NSNotFound, 0);
+}
+
+-(void)setMarkedText:(id)aString 
+	selectedRange:(NSRange)newSelection 
+	replacementRange:(NSRange)replacementRange
+{
+	if(replacementRange.location == NSNotFound)
+		replacementRange = markedRange;
+
+	if([aString length] == 0) 
+	{
+		[backingStore deleteCharactersInRange:replacementRange];
+		[self unmarkText];
+	} 
+	else 
+	{
+		markedRange = NSMakeRange(replacementRange.location, [aString length]);
+		[backingStore replaceCharactersInRange:replacementRange withString:aString];
+	}
+}
+
+-(void)unmarkText
+{
+	markedRange = NSMakeRange(NSNotFound, 0);
+	[[self inputContext] discardMarkedText];
+}
+
+-(NSArray*)validAttributesForMarkedText
+{
+	return [NSArray arrayWithObjects:
+		NSMarkedClauseSegmentAttributeName, NSGlyphInfoAttributeName, nil];
+}
+
+-(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange 
+	actualRange:(NSRangePointer)actualRange
+{
+	return [backingStore attributedSubstringFromRange:aRange];
+}
+
+-(void)insertText:(id)aString 
+	replacementRange:(NSRange)replacementRange
+{
+	if(replacementRange.location == NSNotFound)
+		replacementRange = markedRange;
+
+	[backingStore replaceCharactersInRange:replacementRange withString:aString];
+}
+
+-(NSUInteger)characterIndexForPoint:(NSPoint)aPoint
+{
+	return 0;
+}
+
+-(NSRect)firstRectForCharacterRange:(NSRange)aRange 
+	actualRange:(NSRangePointer)actualRange
+{
+	return NSMakeRect(0, 0, 0, 0);
+}
+
+-(void)doCommandBySelector:(SEL)aSelector
+{
+	[super doCommandBySelector:aSelector];
 }
 
 @end

@@ -257,7 +257,7 @@ void			CShadowMapManager::renderGenerate(CScene *scene)
 	if(driverForShadowGeneration)
 		driverForShadowGeneration->getWindowSize(wndW, wndH);
 	uint	baseTextureSize= scene->getShadowMapTextureSize();
-	// Minimize the Dest Texture size, so the blurTexture don't get to heavy in VRAM.
+	// Minimize the Dest Texture size, so the blurTexture don't get too heavy in VRAM.
 	uint32	textDestW= min(wndW, (uint32)NL3D_SMM_MAX_TEXTDEST_SIZE);
 	uint32	textDestH= min(wndH, (uint32)NL3D_SMM_MAX_TEXTDEST_SIZE);
 

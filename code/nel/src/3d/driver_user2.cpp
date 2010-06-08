@@ -135,17 +135,16 @@ UMaterial		CDriverUser::createMaterial()
 // ***************************************************************************
 void			CDriverUser::deleteMaterial(UMaterial &umat)
 {
-
 	delete umat.getObjectPtr();
 	umat.detach();
 }
 
 // ***************************************************************************
-UAnimationSet			*CDriverUser::createAnimationSet()
+UAnimationSet			*CDriverUser::createAnimationSet(bool headerOptim)
 {
-
-	return _AnimationSets.insert(new CAnimationSetUser(this));
+	return _AnimationSets.insert(new CAnimationSetUser(this, headerOptim));
 }
+
 // ***************************************************************************
 UAnimationSet			*CDriverUser::createAnimationSet(const std::string &animationSetFile)
 {
@@ -157,10 +156,10 @@ UAnimationSet			*CDriverUser::createAnimationSet(const std::string &animationSet
 	f.open(path);
 	return _AnimationSets.insert(new CAnimationSetUser(this, f));
 }
+
 // ***************************************************************************
 void			CDriverUser::deleteAnimationSet(UAnimationSet *animationSet)
 {
-
 	_AnimationSets.erase((CAnimationSetUser*)animationSet, "deleteAnimationSet(): Bad AnimationSet ptr");
 }
 

@@ -18,6 +18,7 @@
 #include "nel_export.h"
 #include "nel/3d/register_3d.h"
 #include "nel/misc/app_context.h"
+#include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 
 
 extern ClassDesc2* GetCNelExportDesc();
@@ -30,7 +31,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
-		new NLMISC::CApplicationContext();
+	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Export: DllMain");
+	}
 			
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.
 

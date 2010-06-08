@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_3dsmax_shared", "nel_3dsmax_shared\nel_3dsmax_shared.vcproj", "{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{263C0F2E-112D-437F-A6AB-DEA151A7A1F0} = {263C0F2E-112D-437F-A6AB-DEA151A7A1F0}
@@ -155,6 +155,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_patch_edit", "nel_patch
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nel_vertex_tree_paint", "nel_vertex_tree_paint\nel_vertex_tree_paint.vcproj", "{680F9C48-975D-425A-89DF-D7AC3C093968}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD} = {CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

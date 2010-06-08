@@ -294,7 +294,7 @@ public:
 	/// \name AnimationSet gestion.
 	// @{
 	/// Create an empty AnimationSet.
-	virtual	UAnimationSet		*createAnimationSet() =0;
+	virtual	UAnimationSet		*createAnimationSet(bool headerOptim = true) =0;
 	/// Create a new AnimationSet, load it from a file. Use CPath to search the animation set.  exception EPathNotFound if not found.
 	virtual	UAnimationSet		*createAnimationSet(const std::string &animationSetFile) =0;
 	/// Delete a AnimationSet. NB: actually, this animation set is internally deleted only when no more UPlayList use it.

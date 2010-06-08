@@ -21,8 +21,6 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
 
-
-
 namespace NL3D {
 
 static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
@@ -86,7 +84,6 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 		GL_DOT_PRODUCT_DIFFUSE_CUBE_MAP_NV, GL_DOT_PRODUCT_DEPTH_REPLACE_NV
 	};
 
-
 	static const GLenum glTexCubeAddrModesNV[] =
 	{
 		GL_NONE, GL_TEXTURE_CUBE_MAP_ARB, GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
@@ -106,8 +103,6 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 		glenum = glTexCubeAddrModesNV[(uint) mode];
 	}
 }
-
-
 
 // --------------------------------------------------
 void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
@@ -151,7 +146,6 @@ void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
 		}
 	}
 }
-
 
 //--------------------------------
 void CDriverGL::setupUserTextureMatrix(uint numStages, CMaterial& mat)
@@ -219,7 +213,6 @@ void CDriverGL::disableUserTextureMatrix()
 	}
 }
 
-
 // --------------------------------------------------
 CMaterial::TShader	CDriverGL::getSupportedShader(CMaterial::TShader shader)
 {
@@ -234,9 +227,6 @@ CMaterial::TShader	CDriverGL::getSupportedShader(CMaterial::TShader shader)
 		default: return shader;
 	}
 }
-
-
-
 
 // --------------------------------------------------
 void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<ITexture> *textures)
@@ -256,10 +246,7 @@ void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<
 	}
 }
 
-
-
 // --------------------------------------------------
-
 bool CDriverGL::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL_setupMaterial)
@@ -267,7 +254,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	GLenum		glenum;
 	uint32		touched=mat.getTouched();
 	uint		stage;
-
 
 	// profile.
 	_NbSetupMaterialCall++;
@@ -286,7 +272,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		touched= IDRV_TOUCHED_ALL;
 	}
 	pShader=static_cast<CShaderGL*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
-
 
 	// 1. Setup modified fields of material.
 	//=====================================
@@ -329,7 +314,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 				pShader->SupportedShader= getSupportedShader(mat.getShader());
 			}
 
-
 			// Since modified, must rebind all openGL states. And do this also for the delete/new problem.
 			/* If an old material is deleted, _CurrentMaterial is invalid. But this is grave only if a new
 				material is created, with the same pointer (bad luck). Since an newly allocated material always
@@ -341,7 +325,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		// Optimize: reset all flags at the end.
 		mat.clearTouched(0xFFFFFFFF);
 	}
-
 
 	// Now we can get the supported shader from the cache.
 	CMaterial::TShader matShader = pShader->SupportedShader;
@@ -417,7 +400,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		}
 	}
 
-
 	// 3. Bind OpenGL States.
 	//=======================
 	if (_CurrentMaterial!=&mat)
@@ -445,7 +427,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 			// setup alphaTest threshold.
 			_DriverGLStates.alphaFunc(mat.getAlphaTestThreshold());
 		}
-
 
 		// Bind ZBuffer Part.
 		//===================
@@ -526,7 +507,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		_CurrentMaterial=&mat;
 	}
 
-
 	// 4. Misc
 	//=====================================
 
@@ -546,7 +526,6 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 
 	return true;
 }
-
 
 // ***************************************************************************
 sint			CDriverGL::beginMultiPass()
@@ -574,6 +553,7 @@ sint			CDriverGL::beginMultiPass()
 	default: return 1;
 	}
 }
+
 // ***************************************************************************
 void			CDriverGL::setupPass(uint pass)
 {
@@ -607,7 +587,6 @@ void			CDriverGL::setupPass(uint pass)
 	}
 }
 
-
 // ***************************************************************************
 void			CDriverGL::endMultiPass()
 {
@@ -639,7 +618,6 @@ void			CDriverGL::endMultiPass()
 	default: return;
 	}
 }
-
 
 // ***************************************************************************
 void CDriverGL::computeLightMapInfos (const CMaterial &mat)
@@ -682,7 +660,6 @@ void CDriverGL::computeLightMapInfos (const CMaterial &mat)
 	// NB: _NLightMaps==0 means there is no lightmaps at all.
 }
 
-
 // ***************************************************************************
 sint CDriverGL::beginLightMapMultiPass ()
 {
@@ -714,12 +691,12 @@ sint CDriverGL::beginLightMapMultiPass ()
 	// Manage too if no lightmaps.
 	return	std::max (_NLightMapPass, (uint)1);
 }
+
 // ***************************************************************************
 void			CDriverGL::setupLightMapPass(uint pass)
 {
 	H_AUTO_OGL(CDriverGL_setupLightMapPass)
 	const CMaterial &mat= *_CurrentMaterial;
-
 
 	// common colors
 	static	uint32	packedColorBlack= CRGBA(0,0,0,255).getPacked();
@@ -758,7 +735,6 @@ void			CDriverGL::setupLightMapPass(uint pass)
 	}
 
 	nlassert(pass<_NLightMapPass);
-
 
 	// setup Texture Pass.
 	//=========================
@@ -953,7 +929,6 @@ void			CDriverGL::setupLightMapPass(uint pass)
 		}
 	}
 
-
 	// setup blend / lighting.
 	//=========================
 
@@ -1012,7 +987,6 @@ void			CDriverGL::setupLightMapPass(uint pass)
 		}
 	}
 
-
 	// Dynamic lighting: The influence of the dynamic light must be added only in the first pass (only one time)
 	if(pass==0)
 	{
@@ -1026,6 +1000,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 	else if(pass==1)
 		_DriverGLStates.setDiffuse(packedColorBlack, glcolBlack);
 }
+
 // ***************************************************************************
 void			CDriverGL::endLightMapMultiPass()
 {
@@ -1057,7 +1032,6 @@ void			CDriverGL::endLightMapMultiPass()
 	}
 }
 
-
 // ***************************************************************************
 void			CDriverGL::resetLightMapVertexSetup()
 {
@@ -1078,7 +1052,6 @@ void			CDriverGL::resetLightMapVertexSetup()
 	// flag
 	_LastVertexSetupIsLightMap= false;
 }
-
 
 // ***************************************************************************
 void			CDriverGL::startSpecularBatch()
@@ -1185,6 +1158,7 @@ sint			CDriverGL::beginSpecularMultiPass()
 	else
 		return 2;
 }
+
 // ***************************************************************************
 void			CDriverGL::setupSpecularPass(uint pass)
 {
@@ -1308,10 +1282,9 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		}
 	}
 	else
-	{ // We have to do it in 2 passes
-
+	{
+		// We have to do it in 2 passes
 		// For Both Pass, setup correct Env.
-
 		if( pass == 0 )
 		{ // Just display the texture
 			_DriverGLStates.enableBlend(false);
@@ -1332,7 +1305,6 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			env.Env.OpArg0RGB = CMaterial::SrcAlpha;
 
 			activateTexEnvMode(0, env);
-
 
 			// Set stage 1
 			if( mat.getTexture(0) == NULL )
@@ -1355,6 +1327,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		}
 	}
 }
+
 // ***************************************************************************
 void			CDriverGL::endSpecularMultiPass()
 {
@@ -1363,7 +1336,6 @@ void			CDriverGL::endSpecularMultiPass()
 	if(!_SpecularBatchOn)
 		setupSpecularEnd();
 }
-
 
 // a functor that can is used to generate a cube map used for specular / diffuse lighting
 struct CSpecCubeMapFunctor : ICubeMapFunctor
@@ -1380,12 +1352,10 @@ struct CSpecCubeMapFunctor : ICubeMapFunctor
 	float Exp;
 };
 
-
 /* /// parameters for specular cube map generation
 const uint MaxSpecularExp = 64;
 const uint SpecularExpStep = 8;
 const uint SpecularMapSize = 32; */
-
 
 // ***************************************************************************
 CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
@@ -1433,7 +1403,6 @@ CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
 	}
 
 	NLMISC::clamp(exp, 1u, (MaxExponent - 1));
-
 
 	uint cubeMapIndex = expToCubeMap[exp];
 	nlassert(cubeMapIndex < numCubeMap);
@@ -1542,7 +1511,6 @@ void			CDriverGL::setupPPLPass(uint pass)
 
 	// setup the tex envs
 
-
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1
 	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
 	{
@@ -1590,8 +1558,6 @@ void			CDriverGL::setupPPLPass(uint pass)
 	static CMaterial::CTexEnv	env;
 	env.Env.SrcArg1Alpha = CMaterial::Diffuse;
 	activateTexEnvMode(1, env);
-
-
 
 	// Stage 2 is rgb = SpecularCubeMap * SpecularLightColor + Prec * 1
 	// alpha = prec alpha
@@ -1674,7 +1640,6 @@ void			CDriverGL::endPPLMultiPass()
 	// nothing to do there ...
 }
 
-
 // ******PER PIXEL LIGHTING, NO SPECULAR**************************************
 sint			CDriverGL::beginPPLNoSpecMultiPass()
 {
@@ -1704,14 +1669,12 @@ void			CDriverGL::setupPPLNoSpecPass(uint pass)
 	activateTexture(0, tex0);
 	activateTexture(1, mat.getTexture(0));
 
-
 	for (uint k = 2; k < inlGetNumTextStages(); ++k)
 	{
 		activateTexture(k, NULL);
 	}
 
 	// setup the tex envs
-
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1 (TODO : EnvCombine3)
 	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
@@ -1783,7 +1746,6 @@ void			CDriverGL::endPPLNoSpecMultiPass()
 				return 1;
 	}
 }*/
-
 
 // ***************************************************************************
 /*inline void		CDriverGL::setupCausticsFirstTex(const CMaterial &mat)
@@ -1999,7 +1961,6 @@ void		CDriverGL::endCloudMultiPass()
 	}
 }
 
-
 // ***************************************************************************
 sint CDriverGL::beginWaterMultiPass()
 {
@@ -2088,7 +2049,6 @@ void CDriverGL::setupWaterPassR200(const CMaterial &mat)
 	}
 }
 
-
 // ***************************************************************************
 /** water setup for ARB_fragment_program
   */
@@ -2175,7 +2135,6 @@ void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 	}
 }
 
-
 // ***************************************************************************
 /** Presetupped texture shader for water shader on NV20
   */
@@ -2187,7 +2146,6 @@ static const uint8 WaterNoDiffuseTexAddrMode[IDRV_MAT_MAXTEXTURES] =
 	CMaterial::TextureOff
 };
 
-
 static const uint8 WaterTexAddrMode[IDRV_MAT_MAXTEXTURES] =
 {
 	CMaterial::FetchTexture,
@@ -2197,7 +2155,6 @@ static const uint8 WaterTexAddrMode[IDRV_MAT_MAXTEXTURES] =
 };
 
 static const float IdentityTexMat[4] = { 1.f, 0.f, 0.f, 1.f };
-
 
 // ***************************************************************************
 void CDriverGL::setupWaterPassNV20(const CMaterial &mat)

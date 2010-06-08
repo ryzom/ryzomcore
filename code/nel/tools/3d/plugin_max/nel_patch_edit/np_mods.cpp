@@ -15,6 +15,7 @@
 #include "editpat.h"
 
 #include <nel/misc/debug.h>
+#include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -24,6 +25,13 @@ using namespace NLMISC;
 /** public functions **/
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved) 
 {
+	// initialize nel context
+	if (!NLMISC::INelContext::isContextInitialised())
+	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Patch Edit: DllMain");
+	}
+
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
 		hInstance = hinstDLL;

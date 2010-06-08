@@ -17,6 +17,8 @@
 #include "nel/sound/driver/source.h"
 #include "nel/misc/common.h"
 
+#include <limits>
+
 using namespace NLMISC;
 
 namespace NLSOUND
@@ -25,12 +27,15 @@ namespace NLSOUND
 // common method used only with OptionManualRolloff. return the volume in 1/100th DB ( = mB) modified
 sint32 ISource::computeManualRollOff(sint32 volumeMB, sint32 mbMin, sint32 mbMax, double alpha, float sqrdist, float distMin, float distMax)
 {
+	// root square of max float value
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+
 	if (sqrdist < distMin * distMin)
 	{
 		// no attenuation
 		return volumeMB;
 	}
-	else if (sqrdist > distMax * distMax)
+	else if ((distMax < maxSqrt) && (sqrdist > distMax * distMax))
 	{
 		// full attenuation
 		return mbMin;

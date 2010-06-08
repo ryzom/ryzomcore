@@ -18,10 +18,6 @@
 
 #include "stdpch.h"
 
-#ifdef NL_OS_WINDOWS
-#include <windows.h>
-#endif
-
 #include "actions.h"
 #include "events_listener.h"
 #include "interface_v3/interface_manager.h"

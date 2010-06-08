@@ -3076,12 +3076,8 @@ void CEditor::reset()
 	if (ClientCfg.R2EDExtendedDebug)
 	{
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
-		Driver->showWindow();
-		// TODO: check
-		// Get the window
 		// Show the window
-//		ShowWindow (hWnd, SW_SHOW);
-//		SetForegroundWindow(hWnd);
+		Driver->showWindow();
 	}
 
 	getUI().displaySystemInfo(CI18N::get("uiR2EDEditorReseted"), "BC");
@@ -4491,24 +4487,12 @@ void CEditor::updatePreCamera()
 {
 	//H_AUTO(R2_CEditor_updatePreCamera)
 
-	/*
-	#ifdef NL_DEBUG
-		#ifdef NL_OS_WINDOWS
-			_CrtCheckMemory();
-		#endif
-	#endif
-	*/
-
-
-
 	if (_Mode == EditionMode)
 	{
-
 		static uint32 loop = 0;
 		++loop;
 		if (loop % 200 == 0) // minimal wait between to save = 20 seconds
 		{
-
 			if ( (CTime::getLocalTime() -_LastAutoSaveTime)/1000 > ClientCfg.R2EDAutoSaveWait) // 5 minutes if not  change in Confile
 			{
 				autoSave();
@@ -4525,7 +4509,6 @@ void CEditor::updatePreCamera()
 			_DMC->getActionHistoric().flushPendingAction();
 		}
 	}
-
 }
 
 // *********************************************************************************************************

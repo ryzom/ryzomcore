@@ -317,9 +317,15 @@ static BOOL CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 						// Get the node
 						INode* pNode=theCNelExport._Ip->GetSelNode (nNode);
 
+						if (pNode == NULL)
+							nlwarning("pNode == NULL");
+
+						if (pNode->GetName() == NULL)
+							nlwarning("pNode->GetName()");
+
 						// Name of the node
 						char sNodeMsg[256];
-						sprintf (sNodeMsg, "Save %s model...", pNode->GetName());
+						nlwarning (sNodeMsg, "Save %s model...", pNode->GetName());
 
 						// It is a zone ?
 						if (RPO::isZone (*pNode, time))

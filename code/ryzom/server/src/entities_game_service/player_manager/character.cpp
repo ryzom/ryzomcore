@@ -5660,7 +5660,8 @@ bool CCharacter::onAnimalHungry( uint petIndex, bool justBecameHungry )
 			{
 				// Consume to full satiety (last useful unit is entirely consumed)
 				animal.Satiety = animal.MaxSatiety;
-				nbUnits = (sint)((caloriesNeeded / caloriesPerUnit) + 1);
+				nbUnits = (sint)ceil(caloriesNeeded / caloriesPerUnit);
+
 			}
 			nbItemsLeftToConsume -= nbUnits;
 

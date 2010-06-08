@@ -12,6 +12,8 @@
  **********************************************************************/
 #include "ligoscape_utility.h"
 #include "nel/misc/app_context.h"
+#include <nel/misc/debug.h>
+#include "../../plugin_max/nel_3dsmax_shared/nel_3dsmax_shared.h"
 
 extern ClassDesc2* GetLigoscapeDesc();
 
@@ -26,6 +28,13 @@ int controlsInit = FALSE;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
+	// initialize nel context
+	if (!NLMISC::INelContext::isContextInitialised())
+	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Ligoscape Utility: DllMain");
+	}
+
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.
 
 	if (!controlsInit) 

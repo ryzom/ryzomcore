@@ -322,7 +322,7 @@ std::string			DebugUIFilter;
 bool				ShowHelp = false;	// Do the Help have to be displayed.
 uint8				ShowInfos = 0;		// 0=no info 1=text info 2=graph info
 
-bool				bZeroCpu = 0;	// For no Cpu use if application is minimize  TODO: intercept minimize message, called by CTRL + Z at this
+bool				bZeroCpu = false;	// For no Cpu use if application is minimize  TODO: intercept minimize message, called by CTRL + Z at this
 
 bool				Profiling = false;			// Are we in Profile mode?
 uint				ProfileNumFrame = 0;
@@ -2287,8 +2287,11 @@ bool mainLoop()
 					smoothFPS.addValue((float)deltaTime);
 					moreSmoothFPS.addValue((float)deltaTime);
 					deltaTime = smoothFPS.getSmoothValue ();
-					CCDBNodeLeaf*pNL = pIMinstance->getDbProp("UI:VARIABLES:FPS");
-					pNL->setValue64((sint64)(1.f/deltaTime));
+					if (deltaTime > 0.0)
+					{
+						CCDBNodeLeaf*pNL = pIMinstance->getDbProp("UI:VARIABLES:FPS");
+						pNL->setValue64((sint64)(1.f/deltaTime));
+					}
 				}
 
 				// Detect disconnection / server down: display information text

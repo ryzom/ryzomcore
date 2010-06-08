@@ -98,7 +98,7 @@ bool SLightBuild::canConvertFromMaxLight (INode *node, TimeValue tvTime)
 		return false;
 
 	if( deleteIt )
-		delete maxLight;
+		maxLight->DeleteMe();
 
 	return true;
 }
@@ -295,7 +295,7 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	this->rSoftShadowConeLength = (float)atof(sTmp.c_str());
 
 	if( deleteIt )
-		delete maxLight;
+		maxLight->DeleteMe();
 }
 
 // ***********************************************************************************************

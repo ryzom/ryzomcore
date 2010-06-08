@@ -2,6 +2,7 @@
 #include "nel_patch_paint.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/app_context.h"
+#include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -13,7 +14,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
-		new NLMISC::CApplicationContext();
+	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Patch Paint: DllMain");
+	}
 			
 	hInstance = hinstDLL;
 

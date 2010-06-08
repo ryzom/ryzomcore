@@ -57,7 +57,7 @@ void		CAsyncTextureManager::CTextureEntry::createCoarseBitmap()
 	CoarseBitmap= *Texture;
 	// remove all mipmaps, and convert to DXTC1 (if possible, ie if was DXTC5 or DXTC3 as example)
 	CoarseBitmap.releaseMipMaps();
-	// TODODO: consersion to DXTC1
+	// TODODO: conversion to DXTC1
 	CoarseBitmap.convertToType(CBitmap::DXTC1);
 }
 

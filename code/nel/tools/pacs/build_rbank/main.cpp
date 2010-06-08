@@ -86,6 +86,7 @@ string												LevelDesignWorldPath;
 string												IgLandPath;
 string												IgVillagePath;
 bool												Verbose = false;
+bool												CheckConsistency = true;
 
 CPrimChecker										PrimChecker;
 
@@ -186,6 +187,8 @@ void	initMoulinette()
 		UseZoneSquare = getBool(cf, "UseZoneSquare", false);
 
 		WaterThreshold = getFloat(cf, "WaterThreshold", 1.0);
+
+		CheckConsistency = getBool(cf, "CheckConsistency", true);
 
 		//if (TessellateZones || MoulineZones)
 		{
