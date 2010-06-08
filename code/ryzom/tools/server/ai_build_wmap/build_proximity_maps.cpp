@@ -24,9 +24,10 @@
 #include "nel/misc/command.h"
 #include "nel/misc/path.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/file.h"
 
 // Game share
-#include "game_share/bmp4image.h"
+#include "server_share/bmp4image.h"
 
 // AI share
 #include "ai_share/world_map.h"

@@ -36,10 +36,13 @@
 using namespace std;
 using namespace NLMISC;
 
-
 //-------------------------------------------------------------------------------------------------
 // constants & utilities
 //-------------------------------------------------------------------------------------------------
+
+// From spa_server_patch_applier.cpp
+extern void writeVersionFile(const NLMISC::CSString& fileName, uint32 version);
+extern uint32 readVersionFile(const NLMISC::CSString& fileName);
 
 NLMISC::CSString getRepositoryIndexFileName(const NLMISC::CSString& repositoryName)
 {
@@ -380,7 +383,7 @@ CRepository::const_iterator CRepository::end() const
 	return _Files.end();
 }
 
-void CRepository::fillShortList(TFileInfoVector	&files) const
+void CRepository::fillShortList(PATCHMAN::TFileInfoVector	&files) const
 {
 	// start by clearing out any previous contents in the files vector
 	files.clear();

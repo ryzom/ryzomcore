@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 // game share
-#include "game_share/deployment_configuration.h"
+//#include "game_share/deployment_configuration.h"
 
 // local
 #include "module_admin_itf.h"
