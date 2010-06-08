@@ -4,7 +4,7 @@
 #include "nel/net/module_builder_parts.h"
 #include "nel/net/callback_server.h"
 
-#include "../../nelns/welcome_service/welcome_service_itf.h"
+#include "game_share/welcome_service_itf.h"
 #include "game_share/r2_types.h"
 
 

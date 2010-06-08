@@ -229,7 +229,7 @@ public:
 	/// \name AnimationSet gestion.
 	// @{
 	/// Create an empty AnimationSet.
-	virtual	UAnimationSet	*createAnimationSet();
+	virtual	UAnimationSet	*createAnimationSet(bool headerOptim = true);
 	/// Create a new AnimationSet, load it from a file. Use CPath to search the animation set. exception EPathNotFound if not found.
 	virtual	UAnimationSet	*createAnimationSet(const std::string &animationSetFile);
 	/// Delete a AnimationSet.

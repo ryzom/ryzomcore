@@ -14,11 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+class CPatchAllocator;
+
 #ifdef NEL_3DSMAX_SHARED_EXPORTS
 #define NEL_3DSMAX_SHARED_API __declspec(dllexport)
 #else
 #define NEL_3DSMAX_SHARED_API __declspec(dllimport)
 #endif
 
-extern NEL_3DSMAX_SHARED_API CPatchAllocator& GetAllocator ();
+extern NEL_3DSMAX_SHARED_API CPatchAllocator& GetAllocator();
 
+extern NEL_3DSMAX_SHARED_API NLMISC::INelContext &GetSharedNelContext();

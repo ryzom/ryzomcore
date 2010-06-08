@@ -1,11 +1,19 @@
 #include "vertex_tree_paint.h"
+#include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 
 
 HINSTANCE hInstance;
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
+{
+	// initialize nel context
+	if (!NLMISC::INelContext::isContextInitialised())
 	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Vertex Tree Paint: DllMain");
+	}
+
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.
 
 	switch (fdwReason) {
@@ -16,31 +24,31 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		}
 			
 	return (TRUE);
-	}
+}
 
 __declspec( dllexport ) const TCHAR* LibDescription()
-	{
+{
 	return GetString(IDS_LIBDESCRIPTION);
-	}
+}
 
 
 __declspec( dllexport ) int LibNumberClasses()
-	{
+{
 	return 1;
-	}
+}
 
 __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
-	{
+{
 	switch(i) {
 		case 0: return GetVertexPaintDesc();
 		default: return 0;
 		}
-	}
+}
 
 __declspec( dllexport ) ULONG LibVersion()
-	{
+{
 	return VERSION_3DSMAX;
-	}
+}
 
 // Let the plug-in register itself for deferred loading
 __declspec( dllexport ) ULONG CanAutoDefer()
@@ -49,11 +57,11 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 }
 
 TCHAR *GetString(int id)
-	{
+{
 	static TCHAR buf[256];
 
 	if (hInstance)
 		return LoadString(hInstance, id, buf, sizeof(buf)) ? buf : NULL;
 	return NULL;
-	}
+}
 

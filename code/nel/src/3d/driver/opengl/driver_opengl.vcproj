@@ -428,6 +428,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\driver_opengl_mac.cpp"
+			>
+		</File>
+		<File
 			RelativePath="driver_opengl_material.cpp"
 			>
 		</File>
@@ -461,6 +465,10 @@
 		</File>
 		<File
 			RelativePath="driver_opengl_vertex_program.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\driver_opengl_window.cpp"
 			>
 		</File>
 		<File

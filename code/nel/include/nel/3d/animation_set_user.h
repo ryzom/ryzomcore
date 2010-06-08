@@ -54,7 +54,7 @@ private:
 public:
 
 	/// Constructor
-	CAnimationSetUser(CDriverUser *owner)
+	CAnimationSetUser(CDriverUser *owner, bool headerOptim = true)
 	{
 		nlassert(owner);
 		_Owner= owner;
@@ -62,7 +62,7 @@ public:
 		nlassert((uint)UAnimationSet::NotFound == (uint)CAnimationSet::NotFound );
 
 		// create a smartptred animation set. Allow header compression
-		_AnimationSet= new CAnimationSet(true);
+		_AnimationSet= new CAnimationSet(headerOptim);
 	}
 
 	/// Constructor

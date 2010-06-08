@@ -16,7 +16,9 @@
 
 #include "tile_utility.h"
 #include <nel/misc/common.h>
+#include <nel/misc/debug.h>
 #include "nel/misc/app_context.h"
+#include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <vector>
 
 extern ClassDesc2* GetTile_utilityDesc();
@@ -35,7 +37,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
-		new NLMISC::CApplicationContext();
+	{
+		new NLMISC::CLibraryContext(GetSharedNelContext());
+		nldebug("NeL Tile Utility: DllMain");
+	}
 			
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.
 

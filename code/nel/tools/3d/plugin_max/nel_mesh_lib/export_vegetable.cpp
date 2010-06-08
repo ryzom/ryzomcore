@@ -151,7 +151,7 @@ bool  CExportNel::buildVegetableShape (NL3D::CVegetableShape& skeletonShape, INo
 			}
 
 			if (deleteIt)
-				delete tri;
+				tri->DeleteMe();
 		}
 	}
 

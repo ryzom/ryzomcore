@@ -247,7 +247,6 @@ bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (prop)
 		_TextShadowColorOver = convertColor(prop);
 
-
 	// *** Read Text Global Color
 	// Default: take "global_color" param interface_element option.
 	_TextModulateGlobalColorNormal= _TextModulateGlobalColorPushed= _TextModulateGlobalColorOver= getModulateGlobalColor();
@@ -262,11 +261,9 @@ bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"force_text_over" );
 	if (prop)	_ForceTextOver= convertBool(prop);
 
-
 	// read Text header color
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"text_header_color" );
 	if (prop)	_TextHeaderColor= convertBool(prop);
-
 
 	return true;
 }

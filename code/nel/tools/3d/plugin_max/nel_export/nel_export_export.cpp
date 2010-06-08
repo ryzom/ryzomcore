@@ -103,11 +103,23 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				}
 				catch (...)
 				{
+					nlwarning("Shape serialization failed!");
+					file.close();
+					remove(sPath);
 				}
 			}
 
 			// Delete the pointer
-			delete pShape;
+			nldebug ("Delete the pointer");
+			try
+			{
+				// memory leak, fixme
+				// delete pShape;
+			}
+			catch (...)
+			{
+				nlwarning("Failed to delete pShape pointer! Something might be wrong.");
+			}
 		}
 	}
 	return bRet;

@@ -19,6 +19,15 @@
 #include "istdplug.h"
 #include "modstack.h"
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#define NL_MAP_ASSERT
+#include <nel/misc/debug.h>
+
 
 #define VERTEX_TREE_PAINT_CLASS_ID	Class_ID(0x40c7005e, 0x2a95082c)
 #define CID_PAINT				(CID_USER+0x439c)

@@ -110,7 +110,7 @@ public:
 	iterator		end();
 	const_iterator	end() const;
 
-	void			fillShortList(TFileInfoVector	&files) const;
+	void			fillShortList(PATCHMAN::TFileInfoVector	&files) const;
 
 private:
 

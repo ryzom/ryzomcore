@@ -459,51 +459,51 @@ private:
 #if EAX_AVAILABLE == 1
 	LPKSPROPERTYSET			_EAXSource;
 #endif
-	
-	
+
+
 #if NLSOUND_PROFILE
-	
+
 public:
-	
-    static double _LastSwapTime;
-    static double _TotalSwapTime;
-    static double _MaxSwapTime;
-    static double _MinSwapTime;
-    static uint32 _SwapCount;
-	
-    static double _TotalUpdateTime;
-    static double _MaxUpdateTime;
-    static double _MinUpdateTime;
-    static uint32 _UpdateCount;
-    static uint32 _TotalUpdateSize;
-	
-    static double _PosTime;
-    static double _LockTime;
-    static double _CopyTime;
-    static double _UnlockTime;
-    static uint32 _CopyCount;
-	
+
+	static double _LastSwapTime;
+	static double _TotalSwapTime;
+	static double _MaxSwapTime;
+	static double _MinSwapTime;
+	static uint32 _SwapCount;
+
+	static double _TotalUpdateTime;
+	static double _MaxUpdateTime;
+	static double _MinUpdateTime;
+	static uint32 _UpdateCount;
+	static uint32 _TotalUpdateSize;
+
+	static double _PosTime;
+	static double _LockTime;
+	static double _CopyTime;
+	static double _UnlockTime;
+	static uint32 _CopyCount;
+
 public:
-	
-    static double getTestLast()    { return 1000.0f * _LastSwapTime; };
-    static double getTestMax()     { return 1000.0f * _MaxSwapTime; };
-    static double getTestMin()     { return 1000.0f * _MinSwapTime; };
-    static double getTestAverage() { return (_SwapCount > 0) ? 1000.0f * _TotalSwapTime / _SwapCount : 0.0; };
-	
-    static double getAveragePosTime()    { return (_CopyCount > 0) ? 1000.0f * _PosTime / _CopyCount : 0.0; };
-    static double getAverageLockTime()   { return (_CopyCount > 0) ? 1000.0f * _LockTime / _CopyCount : 0.0; };
-    static double getAverageCopyTime()   { return (_CopyCount > 0) ? 1000.0f * _CopyTime / _CopyCount : 0.0; };
-    static double getAverageUnlockTime() { return (_CopyCount > 0) ? 1000.0f * _UnlockTime / _CopyCount : 0.0; };
-    static double getAverageCumulTime()  { return (_CopyCount > 0) ? 1000.0f * (_PosTime + _LockTime + _CopyTime +  _UnlockTime) / _CopyCount : 0.0; };
-    static uint   getAverageUpdateSize() { return (_CopyCount > 0) ? (uint) (_TotalUpdateSize / _CopyCount) : 0; };
-	
-    static double getMaxUpdateTime() { return 1000.0f * _MaxUpdateTime; };
-    static double getMinUpdateTime() { return 1000.0f * _MinUpdateTime; };
-    static double getAverageUpdateTime() { return (_UpdateCount > 0) ? 1000.0f * _TotalUpdateTime / _UpdateCount : 0.0; };
-	
-    static double getTotalUpdateTime() { return 1000.0f * _TotalUpdateTime; };
-    static double getUpdateBytesPerMsec() { return (_UpdateCount > 0) ? _TotalUpdateSize / _TotalUpdateTime / 1000.0 : 0.0; }
-	
+
+	static double getTestLast()    { return 1000.0f * _LastSwapTime; };
+	static double getTestMax()     { return 1000.0f * _MaxSwapTime; };
+	static double getTestMin()     { return 1000.0f * _MinSwapTime; };
+	static double getTestAverage() { return (_SwapCount > 0) ? 1000.0f * _TotalSwapTime / _SwapCount : 0.0; };
+
+	static double getAveragePosTime()    { return (_CopyCount > 0) ? 1000.0f * _PosTime / _CopyCount : 0.0; };
+	static double getAverageLockTime()   { return (_CopyCount > 0) ? 1000.0f * _LockTime / _CopyCount : 0.0; };
+	static double getAverageCopyTime()   { return (_CopyCount > 0) ? 1000.0f * _CopyTime / _CopyCount : 0.0; };
+	static double getAverageUnlockTime() { return (_CopyCount > 0) ? 1000.0f * _UnlockTime / _CopyCount : 0.0; };
+	static double getAverageCumulTime()  { return (_CopyCount > 0) ? 1000.0f * (_PosTime + _LockTime + _CopyTime +  _UnlockTime) / _CopyCount : 0.0; };
+	static uint   getAverageUpdateSize() { return (_CopyCount > 0) ? (uint) (_TotalUpdateSize / _CopyCount) : 0; };
+
+	static double getMaxUpdateTime() { return 1000.0f * _MaxUpdateTime; };
+	static double getMinUpdateTime() { return 1000.0f * _MinUpdateTime; };
+	static double getAverageUpdateTime() { return (_UpdateCount > 0) ? 1000.0f * _TotalUpdateTime / _UpdateCount : 0.0; };
+
+	static double getTotalUpdateTime() { return 1000.0f * _TotalUpdateTime; };
+	static double getUpdateBytesPerMsec() { return (_UpdateCount > 0) ? _TotalUpdateSize / _TotalUpdateTime / 1000.0 : 0.0; }
+
 #endif
 	
 };

@@ -1,0 +1,17 @@
+FILE(GLOB SRC *.cpp *.h)
+
+ADD_EXECUTABLE(ai_build_wmap ${SRC})
+
+INCLUDE_DIRECTORIES(	${CMAKE_SOURCE_DIR}/server/src 
+			${CMAKE_SOURCE_DIR}/common/src
+			${LIBXML2_INCLUDE_DIR} 
+			${NEL_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(ai_build_wmap	game_share
+					server_share 
+					ai_share 
+					${PLATFORM_LINKFLAGS} 
+					${LIBXML2_LIBRARIES} 
+					${NELMISC_LIBRARY})
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
+INSTALL(TARGETS ai_build_wmap RUNTIME DESTINATION bin COMPONENT tools)

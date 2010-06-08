@@ -77,6 +77,7 @@ extern std::string				GlobalUL;
 extern std::string				GlobalDR;
 extern bool						ProcessGlobal;
 extern bool						Verbose;
+extern bool						CheckConsistency;
 
 extern CPrimChecker				PrimChecker;
 
@@ -392,7 +393,8 @@ public:
 	template<class A>
 	void	floodFill(CSurfElement *first, sint32 surfId, const A &cmp, CZoneTessellation *zoneTessel)
 	{
-		nldebug("flood fill surface %d", surfId);
+		if (Verbose)
+			nldebug("flood fill surface %d", surfId);
 
 		std::vector<CSurfElement *>	stack;
 		sint					i;
@@ -433,7 +435,8 @@ public:
 			}
 		}
 
-		nldebug("%d elements added", Elements.size());
+		if (Verbose)
+			nldebug("%d elements added", Elements.size());
 
 		Center = NLMISC::CVector::Null;
 		for (i=0; i<(sint)Elements.size(); ++i)
