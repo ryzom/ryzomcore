@@ -1594,8 +1594,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	_FullScreen = !mode.Windowed;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	NL3D::MAC::setMode(mode);
 #elif defined(NL_OS_UNIX)
 
 #ifdef XF86VIDMODE

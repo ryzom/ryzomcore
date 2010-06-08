@@ -55,6 +55,9 @@ bool init(uint windowIcon = 0, emptyProc exitFunc = 0);
 /// mac specific stuff while calling CDriverGL::setDisplay()
 bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 
+/// mac specific stuff while calling CDriverGL::setMode()
+bool setMode(const GfxMode& mode);
+
 /// mac specific stuff while calling CDriverGL::getWindowSize()
 void getWindowSize(uint32 &width, uint32 &height);
 

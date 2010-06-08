@@ -25,7 +25,7 @@
 #include "cocoa_opengl_view.h"
 #include "cocoa_window.h"
 
-// virtual key codes are only defined here. we still do not need to link carbon
+// Virtual key codes are only defined here. We still do not need to link carbon.
 // see: http://lists.apple.com/archives/Cocoa-dev/2009/May/msg01180.html
 #include <Carbon/Carbon.h>
 
@@ -33,120 +33,301 @@
 
 namespace NL3D { namespace MAC {
 
-static NSApplication*     g_app    = 0;
-static NSAutoreleasePool* g_pool   = 0;
-static CocoaWindow*       g_window = 0;
-static CocoaOpenGLView*   g_glview = 0;
-static NSOpenGLContext*   g_glctx  = 0;
+static NSApplication*     g_app    = nil;
+static NSAutoreleasePool* g_pool   = nil;
+static CocoaWindow*       g_window = nil;
+static CocoaOpenGLView*   g_glview = nil;
+static NSOpenGLContext*   g_glctx  = nil;
+
+#define UGLY_BACKBUFFER_SIZE_WORKAROUND
+
+#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
+static int g_bufferSize[2];
+#endif
 
 void ctor()
 {
-	nldebug("mac cpp bridge called");
-
 	// create a pool, cocoa code would leak memory otherwise
 	g_pool = [[NSAutoreleasePool alloc] init];
-
+	
 	// init the application object
 	g_app	 = [NSApplication sharedApplication];
 }
 
 void dtor()
 {
-	nldebug("mac cpp bridge called");
-
+	/*
+		TODO there might be some more stuff to release ;)
+	*/
+	
 	// release the pool
 	[g_pool release];
 }
 
 bool init(uint windowIcon, emptyProc exitFunc)
 {
-	nldebug("mac cpp bridge called with %u %u", windowIcon, exitFunc);
+	/*
+		TODO nothing to do here? split other stuff to match api cleanly.
+	*/
 	return true;
 }
 
 bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
-	nldebug("mac cpp bridge called with %u %u %u %u", wnd, &mode, show, resizeable);
-
-	// create a window
-	/* TODO: NSBackingStoreBuffered ??? */
-	g_window = [[CocoaWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1024, 768)
+	// create a cocoa window with the size provided by the mode parameter
+	g_window = [[CocoaWindow alloc] 
+		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:NSTitledWindowMask | NSResizableWindowMask |
-		NSClosableWindowMask | NSMiniaturizableWindowMask
+			NSClosableWindowMask | NSMiniaturizableWindowMask
 		backing:NSBackingStoreBuffered
 		defer:NO];
 
+	if(!g_window)
+		nlerror("cannot create window");
+
+	/*
+		TODO use mode.Depth
+		TODO NSOpenGLPFAOffScreen
+	*/
 	// setup opengl settings
 	NSOpenGLPixelFormatAttribute att[] =
 	{
-		NSOpenGLPFAWindow,
 		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFAColorSize, 24,
-		NSOpenGLPFAAlphaSize, 8,
-		NSOpenGLPFADepthSize, 24,
+		NSOpenGLPFAColorSize,    24,
+		NSOpenGLPFADepthSize,    24,
+		NSOpenGLPFAAlphaSize,     8,
+		NSOpenGLPFAStencilSize,   8,
 		NSOpenGLPFANoRecovery,
 		NSOpenGLPFAAccelerated,
+		NSOpenGLPFABackingStore,
 		0
 	};
 
 	// put the settings into a format object
 	NSOpenGLPixelFormat* format =
 		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
+	
+	if(!format)
+		nlerror("cannot create NSOpenGLPixelFormat");
 
 	// create a opengl view with the created format
 	g_glview = [[CocoaOpenGLView alloc]
-		initWithFrame:NSMakeRect(0, 0, 1024, 768) pixelFormat: format];
+		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
+
+	if(!g_glview)
+		nlerror("cannot create view");
+
+	// put the view into the window
+	[g_window setContentView:g_glview];
+
+	// set the window to non transparent
+	[g_window setOpaque:YES];
+
+	// enable mouse move events, NeL wants them
+	[g_window setAcceptsMouseMovedEvents:YES];
 
 	// create a opengl context for the view
 	g_glctx = [g_glview openGLContext];
 
-	// setup some stuff in the window
-	[g_window setContentView:g_glview];
-	[g_window makeKeyAndOrderFront:nil];
-	[g_window setAcceptsMouseMovedEvents:YES];
+	if(!g_glctx)
+		nlerror("cannot create context");
 
 	// make the views opengl context the currrent one
 	[g_glctx makeCurrentContext];
+
+	// put the window to the front and make it the key window
+	[g_window makeKeyAndOrderFront:nil];
 
 	// tell the application that we are running now
 	[g_app finishLaunching];
 
 	// free the pixel format object
 	[format release];
+	
+	// further mode setting, like switching to fullscreen and resolution setup
+	setMode(mode);
+
+	return true;
+}
+
+bool setMode(const GfxMode& mode)
+{
+	// for fullscreen mode, adjust the back buffer size to the desired resolution
+	if(!mode.Windowed)
+	{
+		// set the back buffer manually to match the desired rendering resolution
+		GLint dim[2]   = { mode.Width, mode.Height };
+		CGLError error = CGLSetParameter((CGLContextObj)[g_glctx CGLContextObj], 
+			kCGLCPSurfaceBackingSize, dim);
+
+		if(error != kCGLNoError)
+			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)", 
+				CGLErrorString(error));
+	}
+
+	// leave fullscreen mode, enter windowed mode
+	if(mode.Windowed && [g_glview isInFullScreenMode])
+	{
+		// pull the view back from fullscreen restoring windows options
+		[g_glview exitFullScreenModeWithOptions:nil];
+
+		// disable manual setting of back buffer size, cocoa handles this 
+		// automatically as soon as the window gets resized
+		CGLError error = CGLDisable((CGLContextObj)[g_glctx CGLContextObj], 
+			kCGLCESurfaceBackingSize);
+
+		if(error != kCGLNoError)
+			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)", 
+				CGLErrorString(error));
+	}
+
+	// enter fullscreen, leave windowed mode
+	else if(!mode.Windowed && ![g_glview isInFullScreenMode])
+	{
+		// enable manual back buffer size for mode setting in fullscreen
+		CGLError error = CGLEnable((CGLContextObj)[g_glctx CGLContextObj], 
+			kCGLCESurfaceBackingSize);
+
+		if(error != kCGLNoError)
+			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)", 
+				CGLErrorString(error));
+
+		// put the view in fullscreen mode, hiding the dock but enabling the menubar
+		// to pop up if the mouse hits the top screen border.
+		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
+		/*
+			TODO check if simply using NSView enterFullScreenMode is a good idea.
+			 the context can be set to full screen as well? performance differences?
+		*/
+		[g_glview enterFullScreenMode:[NSScreen mainScreen] withOptions: 		
+			[NSDictionary dictionaryWithObjectsAndKeys:
+				[NSNumber numberWithInt:
+					NSApplicationPresentationHideDock | 
+					NSApplicationPresentationAutoHideMenuBar],
+				NSFullScreenModeApplicationPresentationOptions, nil]];
+	}	
+		
+		
+#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
+	g_bufferSize[0] = mode.Width;
+	g_bufferSize[1] = mode.Height;
+#endif
 
 	return true;
 }
 
 void getWindowSize(uint32 &width, uint32 &height)
 {
-	NSRect rect = [g_glview bounds];
-	width = rect.size.width;
-	height = rect.size.height;
+	if(!g_glctx)
+		return;
+	
+	// A cocoa fullscreen view stays at the native resolution of the display.
+	// When changing the rendering resolution, the size of the back buffer gets
+	// changed, but the view still stays at full resolution. So the scaling of 
+	// the image from the rendered resolution to the view's resolution is done
+	// by cocoa automatically while flushing buffers.
+	// That's why, in fullscreen mode, return the resolution from the back buffer,
+	// not the one from the window.
+	
+	// check if manual back buffer sizing is enabled (thats only in fullscreen)
+
+#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
+	if([g_glview isInFullScreenMode])
+	{
+		width = g_bufferSize[0];
+		height = g_bufferSize[1];
+	}
+	else
+	{
+		NSRect rect = [g_glview frame];
+		width = rect.size.width;
+		height = rect.size.height;
+	}
+#else
+
+	/*
+		TODO does not work atm, "invalid enumeration"
+	*/
+	GLint surfaceBackingSizeSet = 0;
+	CGLError error = CGLIsEnabled((CGLContextObj)[g_glctx CGLContextObj], 
+		kCGLCESurfaceBackingSize, &surfaceBackingSizeSet);
+	
+	if(error != kCGLNoError)
+		nlerror("cannot check kCGLCESurfaceBackingSize state (%s)", 
+			CGLErrorString(error));
+	
+	// if in fullscreen mode
+	if(surfaceBackingSizeSet)
+	{
+		/*
+			TODO does not work atm, "invalid enumeration"
+		*/
+		// get the back buffer size
+		GLint dim[2];
+		CGLError error = CGLGetParameter((CGLContextObj)[g_glctx CGLContextObj], 
+			kCGLCPSurfaceBackingSize, dim);
+	
+		if(error != kCGLNoError)
+			nlerror("cannot get kCGLCPSurfaceBackingSize value (%s)", 
+				CGLErrorString(error));
+	
+		// put size into ref params
+		width = dim[0];
+		height = dim[1];
+	}
+	
+	// if in windowed mode
+	else
+	{
+		// return the views size
+		NSRect rect = [g_glview frame];
+
+		// put size into ref params
+		width = rect.size.width;
+		height = rect.size.height;
+	}
+#endif
 }
 
 void getWindowPos(uint32 &x, uint32 &y)
 {
+	// get the size of the screen
 	NSRect screenRect = [[g_window screen] frame];
+
+	// get the size of the window
 	NSRect windowRect = [g_window frame];
+
+	// simply return x
 	x = windowRect.origin.x;
+
+	// map y from cocoa to NeL coordinates before returning
 	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
 void setWindowPos(uint32 x, uint32 y)
 {
+	// get the size of the screen
 	NSRect screenRect = [[g_window screen] frame];
+
+	// get the size of the window
 	NSRect windowRect = [g_window frame];
+
+	// convert y from NeL coordinates to cocoa coordinates
 	y = screenRect.size.height - y;  
+
+	// tell cocoa to move the window
 	[g_window setFrameTopLeftPoint:NSMakePoint(x, y)];
 }
 
 void setWindowTitle(const ucstring &title)
 {
+	// well... set the title of the window
 	[g_window setTitle:[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 }
 
 void swapBuffers()
 {
+	// make cocoa draw buffer contents to the view
 	[g_glctx flushBuffer];
 }
 
@@ -321,7 +502,7 @@ bool isTextKeyEvent(NSEvent* event)
 		TODO check why iswprint(character) does not solve it. 
 			it always returns false, even for π, é, ...
 	*/
-	// > 127 but not printable
+	// characters > 127 but not printable
 	if( nelKey == NLMISC::KeyF1    || nelKey == NLMISC::KeyF2    || 
 			nelKey == NLMISC::KeyF3    || nelKey == NLMISC::KeyF4    || 
 			nelKey == NLMISC::KeyF5    || nelKey == NLMISC::KeyF6    || 
@@ -354,7 +535,7 @@ void submitEvents(NLMISC::CEventServer& server,
 	g_pool = [[NSAutoreleasePool alloc] init];
 
 	// we break if there was no event to handle
-	/* TODO maximum? */
+	/* TODO maximum number of events processed in one update? */
 	while(true)
 	{
 		// get the next event to handle
@@ -368,53 +549,74 @@ void submitEvents(NLMISC::CEventServer& server,
 
 		// NSLog(@"%@", event);
 
-		uint32 width, height;
-		/* TODO cache? */
-		getWindowSize(width, height);
+		// get the views size
+		NSRect rect = [g_glview frame];
 
-		// get the mouse position in nel style (relative)
-		float mouseX = event.locationInWindow.x / (float)width;
-		float mouseY = event.locationInWindow.y / (float)height;
+		// convert the mouse position to NeL style (relative)
+		float mouseX = event.locationInWindow.x / (float)rect.size.width;
+		float mouseY = event.locationInWindow.y / (float)rect.size.height;
 
 		switch(event.type)
 		{
 		case NSLeftMouseDown:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
 		break;
 		case NSLeftMouseUp:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
 		break;
 		case NSRightMouseDown:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
 				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
 		break;
 		case NSRightMouseUp:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
 				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
 		break;
 		case NSMouseMoved:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseMove(
 				mouseX, mouseY, (NLMISC::TMouseButton)0 /* modifiers */, eventEmitter));
 		break;
 		case NSLeftMouseDragged:
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseMove(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
 		break;
 		case NSRightMouseDragged:break;
+			/*
+				TODO modifiers with mouse events
+			*/
 			server.postEvent(new NLMISC::CEventMouseMove(
 				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
 		case NSMouseEntered:break;
 		case NSMouseExited:break;
 		case NSKeyDown:
-			// push the key press event to the new event server
+			// push the key press event to the event server
 			server.postEvent(new NLMISC::CEventKeyDown(
 				virtualKeycodeToNelKey([event keyCode]), 
 				modifierFlagsToNelKeyButton([event modifierFlags]), 
 				[event isARepeat] == NO, 
 				eventEmitter));
 			
+			// if this was a text event
 			if(isTextKeyEvent(event)) 
 			{
 				ucstring ucstr;
@@ -422,7 +624,7 @@ void submitEvents(NLMISC::CEventServer& server,
 				// get the string associated with the key press event
 				ucstr.fromUtf8([[event characters] UTF8String]);
 
-				// push to event server
+				// push the text event to event server as well
 				server.postEvent(new NLMISC::CEventChar(
 					ucstr[0], 
 					NLMISC::noKeyButton, 
@@ -430,6 +632,7 @@ void submitEvents(NLMISC::CEventServer& server,
 			}
 		break;
 		case NSKeyUp:
+			// push the key release event to the event server
 			server.postEvent(new NLMISC::CEventKeyUp(
 				virtualKeycodeToNelKey([event keyCode]), 
 				modifierFlagsToNelKeyButton([event modifierFlags]), 
