@@ -1,29 +1,30 @@
+# Supporting modules and libraries.
 ADD_SUBDIRECTORY(admin_modules)
 ADD_SUBDIRECTORY(server_share)
 ADD_SUBDIRECTORY(ai_share)
 ADD_SUBDIRECTORY(gameplay_module_lib)
 ADD_SUBDIRECTORY(pd_lib)
 
-ADD_SUBDIRECTORY(frontend_service)
-ADD_SUBDIRECTORY(entities_game_service)
+# Ryzom Services
 ADD_SUBDIRECTORY(ai_service)
 ADD_SUBDIRECTORY(backup_service)
 ADD_SUBDIRECTORY(dynamic_scenario_service)
+ADD_SUBDIRECTORY(entities_game_service)
+ADD_SUBDIRECTORY(frontend_service)
+ADD_SUBDIRECTORY(gpm_service)
+ADD_SUBDIRECTORY(input_output_service)
+
 
 
 # Deprecated, no longer used.
+#ADD_SUBDIRECTORY(ags_test)
 #ADD_SUBDIRECTORY(ai_data_service)
 #ADD_SUBDIRECTORY(entity_view_service)
 #ADD_SUBDIRECTORY(general_utilities_service)
+#ADD_SUBDIRECTORY(patchman_service)
 
-#ags_test
-#
-#
-#
-
-#
 #gpm_service
-#input_output_service
+#
 #log_analyser_service
 #logger_service
 #mail_forum_service

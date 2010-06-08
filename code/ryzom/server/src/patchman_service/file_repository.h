@@ -45,7 +45,7 @@
 #include "nel/net/module_builder_parts.h"
 
 // game share
-#include "game_share/deployment_configuration.h"
+//#include "game_share/deployment_configuration.h"
 
 // local
 #include "module_admin_itf.h"
