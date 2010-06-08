@@ -468,6 +468,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\driver_opengl_window.cpp"
+			>
+		</File>
+		<File
 			RelativePath="stdopengl.cpp"
 			>
 			<FileConfiguration
