@@ -56,7 +56,7 @@ using NLMISC::CSmartPtr;
 using NLMISC::CRGBA;
 using NLMISC::CVector;
 using NLMISC::CMatrix;
-using NLMISC::CSynchronized;
+using NLMISC::CUnfairSynchronized;
 
 
 class CMaterial;
@@ -144,7 +144,7 @@ public:
 
 protected:
 
-	CSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
+	CUnfairSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
 
 	TTexDrvSharePtrList		_TexDrvShares;
 	TMatDrvInfoPtrList		_MatDrvInfos;

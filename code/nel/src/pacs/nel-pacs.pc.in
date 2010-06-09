@@ -3,10 +3,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: nel-3d
+Name: nel-pacs
 Version: @NL_VERSION@
 Description: NeL @NL_VERSION@
 Reqiures:
 Libs: -L${libdir}
-Libs.private: @LIBS@ @FREETYPE_LIBS@ -lc
-Cflags: -I${includedir} @FREETYPE_CFLAGS@
+Libs.private: @LIBS@ -lc -lpthread -lrt -ldl
+Cflags: -I${includedir} -lc -lpthread -lrt -ldl

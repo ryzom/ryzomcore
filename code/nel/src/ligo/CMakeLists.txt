@@ -2,6 +2,8 @@ FILE(GLOB SRC *.cpp *.h)
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelligo SHARED ${SRC})
+  CONFIGURE_FILE(nel-ligo.pc.in nel-ligo.pc)
+  INSTALL(FILES nel-ligo.pc DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelligo STATIC ${SRC})
 ENDIF(NOT WIN32)

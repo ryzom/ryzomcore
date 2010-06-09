@@ -374,7 +374,7 @@ void showCursor(bool b)
 	}
 	
 	if(error != kCGErrorSuccess)
-		nlerror("cannot get capture / un-capture cursor");
+		nlerror("cannot capture / un-capture cursor");
 }
 
 void setMousePos(float x, float y) 
