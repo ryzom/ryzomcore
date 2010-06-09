@@ -2,6 +2,8 @@ FILE(GLOB SRC *.cpp *.h config_file/*.cpp config_file/*.h)
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelmisc SHARED ${SRC})
+  CONFIGURE_FILE(nel-misc.pc.in nel-misc.pc)
+  INSTALL(FILES nel-misc.pc DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelmisc STATIC ${SRC})
 ENDIF(NOT WIN32)

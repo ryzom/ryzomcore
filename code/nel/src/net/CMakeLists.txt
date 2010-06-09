@@ -9,6 +9,8 @@ SET(NLNET_LIB ${LIBNAME})
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelnet SHARED ${SRC})
+  CONFIGURE_FILE(nel-net.pc.in nel-net.pc)
+  INSTALL(FILES nel-net.pc DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelnet STATIC ${SRC})
 ENDIF(NOT WIN32)
