@@ -1288,8 +1288,8 @@ void CDriverGL::showCursor(bool b)
 			;
 	}
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+	NL3D::MAC::showCursor(b);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1335,8 +1335,8 @@ void CDriverGL::setMousePos(float x, float y)
 		SetCursorPos(pt.x, pt.y);
 	}
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+	NL3D::MAC::setMousePos(x, y);
 
 #elif defined (NL_OS_UNIX)
 	XWindowAttributes xwa;
@@ -1459,8 +1459,8 @@ void CDriverGL::setCapture (bool b)
 	*/
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+
+	NL3D::MAC::setCapture(b);
 
 #elif defined (NL_OS_UNIX)
 

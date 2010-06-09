@@ -66,7 +66,7 @@ bool							SetMousePosFirstTime = true;
 uint							DownMouseButtons = 0;
 
 #ifdef NL_OS_UNIX
-// on X11, store whether the mouse was captured or not
+// on X11 and cocoa, store whether the mouse was captured or not
 bool							MouseCapture = false;
 #endif
 
@@ -251,8 +251,8 @@ void	SetMouseFreeLook ()
 	}
 	
 #ifdef NL_OS_UNIX
-	// on X11 the mouse needs to get pulled into the middle each update, else
-	// the cursor would reach the border of the window / desktop 
+	// on X11 and cocoa the mouse needs to get pulled into the middle each update, 
+	// else the cursor would reach the border of the window / desktop 
 	// and freelook would hang
 	Driver->setMousePos(0.5f, 0.5f);
 #endif
@@ -373,7 +373,7 @@ void CaptureSystemCursor()
 	if (!drvWnd) return;
 	SetCapture(drvWnd);
 #else
-	// on X11, set driver mouse capture on and store it locally as well
+	// on X11 and cocoa, set driver mouse capture on and store it locally as well
 	Driver->setCapture(MouseCapture = true);
 #endif
 }
@@ -392,7 +392,7 @@ void ReleaseSystemCursor()
 	}
 	ReleaseCapture();
 #else
-	// on X11, set driver mouse capture off and store it locally as well
+	// on X11 and cocoa, set driver mouse capture off and store it locally as well
 	Driver->setCapture(MouseCapture = false);
 #endif
 }

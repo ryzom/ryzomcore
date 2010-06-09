@@ -74,6 +74,10 @@ bool init(uint windowIcon, emptyProc exitFunc)
 
 bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
+	/*
+		TODO use show and resizable flags
+	*/
+	
 	// create a cocoa window with the size provided by the mode parameter
 	g_window = [[CocoaWindow alloc] 
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
@@ -126,6 +130,9 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	// enable mouse move events, NeL wants them
 	[g_window setAcceptsMouseMovedEvents:YES];
 
+	// there are no overlapping subview, so we can use the magical optimization!
+	[g_window useOptimizedDrawing:YES];
+
 	// create a opengl context for the view
 	g_glctx = [g_glview openGLContext];
 
@@ -137,6 +144,9 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 
 	// put the window to the front and make it the key window
 	[g_window makeKeyAndOrderFront:nil];
+
+	// this is our main window
+	[g_window makeMainWindow];
 
 	// tell the application that we are running now
 	[g_app finishLaunching];
@@ -168,11 +178,11 @@ bool setMode(const GfxMode& mode)
 	// leave fullscreen mode, enter windowed mode
 	if(mode.Windowed && [g_glview isInFullScreenMode])
 	{
-		// pull the view back from fullscreen restoring windows options
+		// pull the view back from fullscreen restoring window options
 		[g_glview exitFullScreenModeWithOptions:nil];
 
 		// disable manual setting of back buffer size, cocoa handles this 
-		// automatically as soon as the window gets resized
+		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[g_glctx CGLContextObj], 
 			kCGLCESurfaceBackingSize);
 
@@ -197,7 +207,7 @@ bool setMode(const GfxMode& mode)
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
 		/*
 			TODO check if simply using NSView enterFullScreenMode is a good idea.
-			 the context can be set to full screen as well? performance differences?
+			 the context can be set to full screen as well, performance differences?
 		*/
 		[g_glview enterFullScreenMode:[NSScreen mainScreen] withOptions: 		
 			[NSDictionary dictionaryWithObjectsAndKeys:
@@ -207,8 +217,8 @@ bool setMode(const GfxMode& mode)
 				NSFullScreenModeApplicationPresentationOptions, nil]];
 	}	
 		
-		
 #ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
+	// due to the back buffer size reading problem, just store the size
 	g_bufferSize[0] = mode.Width;
 	g_bufferSize[1] = mode.Height;
 #endif
@@ -226,11 +236,9 @@ void getWindowSize(uint32 &width, uint32 &height)
 	// changed, but the view still stays at full resolution. So the scaling of 
 	// the image from the rendered resolution to the view's resolution is done
 	// by cocoa automatically while flushing buffers.
-	// That's why, in fullscreen mode, return the resolution from the back buffer,
+	// That's why, in fullscreen mode, return the resolution of the back buffer,
 	// not the one from the window.
 	
-	// check if manual back buffer sizing is enabled (thats only in fullscreen)
-
 #ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
 	if([g_glview isInFullScreenMode])
 	{
@@ -244,10 +252,10 @@ void getWindowSize(uint32 &width, uint32 &height)
 		height = rect.size.height;
 	}
 #else
-
 	/*
 		TODO does not work atm, "invalid enumeration"
 	*/
+	// check if manual back buffer sizing is enabled (thats only in fullscreen)
 	GLint surfaceBackingSizeSet = 0;
 	CGLError error = CGLIsEnabled((CGLContextObj)[g_glctx CGLContextObj], 
 		kCGLCESurfaceBackingSize, &surfaceBackingSizeSet);
@@ -291,10 +299,10 @@ void getWindowSize(uint32 &width, uint32 &height)
 
 void getWindowPos(uint32 &x, uint32 &y)
 {
-	// get the size of the screen
+	// get the rect (position, size) of the screen
 	NSRect screenRect = [[g_window screen] frame];
 
-	// get the size of the window
+	// get the rect (position, size) of the window
 	NSRect windowRect = [g_window frame];
 
 	// simply return x
@@ -329,6 +337,92 @@ void swapBuffers()
 {
 	// make cocoa draw buffer contents to the view
 	[g_glctx flushBuffer];
+}
+
+void setCapture(bool b)
+{
+	/*
+		TODO implement capture cursor, no need to fake using pull back to 0.5 / 0.5
+			set a flag and then act accordingly in event loop?
+			
+			// no screen bounds...
+			void CGGetLastMouseDelta(CGMouseDelta* deltaX, CGMouseDelta* deltaY);
+	*/
+	nlwarning("not implemented");
+}
+
+void showCursor(bool b)
+{
+	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
+	// twice requires two calls to show to make the cursor visible again.
+	// Since other platforms seem to not do this, the functionality is masked here
+	// by only calling hide if the cursor is visible and only calling show if
+	// the cursor was hidden.
+
+	CGDisplayErr error  = kCGErrorSuccess;	
+	static bool visible = true;
+	
+	if(b && !visible)
+	{
+		error = CGDisplayShowCursor(kCGDirectMainDisplay);
+		visible = true;
+	}
+	else if(!b && visible)
+	{
+		error = CGDisplayHideCursor(kCGDirectMainDisplay);
+		visible = false;
+	}
+	
+	if(error != kCGErrorSuccess)
+		nlerror("cannot get capture / un-capture cursor");
+}
+
+void setMousePos(float x, float y) 
+{
+	// CG wants absolute coordinates related to screen top left
+	CGFloat fromScreenLeft = 0.0;
+	CGFloat fromScreenTop  = 0.0;
+
+	// get the gl view's rect for height and width
+	NSRect viewRect = [g_glview frame];
+
+	// if the view is not fullscreen, window top left is needed as offset
+	if(![g_glview isInFullScreenMode])
+	{
+		// get the rect (position, size) of the screen
+		NSRect screenRect = [[g_window screen] frame];
+
+		// get the rect (position, size) of the window
+		NSRect windowRect = [g_window frame];
+
+		// window's x is ok
+		fromScreenLeft = windowRect.origin.x;
+
+		// TODO this code assumes, that the view fills the window
+		
+		// map window bottom to view top
+		fromScreenTop = screenRect.size.height - 
+			viewRect.size.height - windowRect.origin.y;
+	}	
+
+	// position inside the view
+	fromScreenLeft += (viewRect.size.width * x);
+	fromScreenTop  += (viewRect.size.height * (1 - y));
+
+	// actually set the mouse position
+	CGDisplayErr error = CGDisplayMoveCursorToPoint(
+		kCGDirectMainDisplay, CGPointMake(fromScreenLeft, fromScreenTop));
+
+	if(error != kCGErrorSuccess)
+		nlerror("cannot set mouse position");
+}
+
+void release()
+{
+	/*
+		TODO release some stuff
+	*/
+	nlwarning("not implemented");
 }
 
 /*
@@ -552,9 +646,18 @@ void submitEvents(NLMISC::CEventServer& server,
 		// get the views size
 		NSRect rect = [g_glview frame];
 
+		// TODO this code assumes, that the view fills the window
 		// convert the mouse position to NeL style (relative)
 		float mouseX = event.locationInWindow.x / (float)rect.size.width;
 		float mouseY = event.locationInWindow.y / (float)rect.size.height;
+
+		// if the mouse event was placed on the window's titlebar, ignore it
+		if(mouseY > 1.0 && event.type != NSKeyDown && event.type != NSKeyUp)
+		{
+			[g_app sendEvent:event];
+			[g_app updateWindows];
+			continue;
+		}
 
 		switch(event.type)
 		{
@@ -597,6 +700,8 @@ void submitEvents(NLMISC::CEventServer& server,
 			/*
 				TODO modifiers with mouse events
 			*/
+			// nldebug("mouse left drag %f %f", mouseX, mouseY);
+
 			server.postEvent(new NLMISC::CEventMouseMove(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
 		break;

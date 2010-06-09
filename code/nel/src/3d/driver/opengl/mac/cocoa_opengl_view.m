@@ -35,6 +35,7 @@
 	[characterStorage release];
 	[super dealloc];
 }
+
 -(BOOL)acceptsFirstResponder
 {
 	return YES;

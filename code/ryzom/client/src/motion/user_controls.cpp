@@ -458,25 +458,24 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 	{
 		float	dmpx, dmpy;
 		
-#ifndef NL_MAC_NATIVE
-		// On X11 in free look mode, the mouse is pulled back to (0.5, 0.5) 
+		// On X11 and Cocoa in free look mode, the mouse is pulled back to (0.5, 0.5) 
 		// every update to prevent reaching a border and get stuck.
 		if(IsMouseFreeLook()) 
 		{
 			/*
-				TODO use setCapture to not fake it
+				TODO on X11, use setCapture to not fake it, capture on mac?
 			*/
 			dmpx = EventsListener.getMousePosX() - 0.5;
 			dmpy = EventsListener.getMousePosY() - 0.5;
 		}
 		else 
-#endif
 		{
 			dmpx = EventsListener.getMousePosX() - _LastFrameMousePosX;
 			dmpy = EventsListener.getMousePosY() - _LastFrameMousePosY;
 		}
 		
-		// TODO: read desktop mouse speed value on X11 / implement X11MouseDevice
+		// TODO: read desktop mouse speed value on X11 and Cocoa
+		// implement X11MouseDevice/CocoaMouseDevice?
 		dmpx *= 450.0f; 
 		dmpy *= 450.0f;
 

@@ -73,6 +73,18 @@ void setWindowTitle(const ucstring &title);
 /// mac specific stuff while calling CDriverGL::swapBuffers()
 void swapBuffers();
 
+/// mac specific stuff while calling CDriverGL::setCapture()
+void setCapture(bool b);
+
+/// mac specific stuff while calling CDriverGL::showCursor()
+void showCursor(bool b);
+
+/// mac specific stuff while calling CDriverGL::setMousePos()
+void setMousePos(float x, float y);
+
+/// mac specific stuff while calling CDriverGL::release()
+void release();
+
 /// mac specific stuff while calling CCocoaEventEmitter::submitEvents()
 void submitEvents(NLMISC::CEventServer& server, 
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter);
