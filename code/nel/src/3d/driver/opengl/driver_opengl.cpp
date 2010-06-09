@@ -720,7 +720,7 @@ bool CDriverGL::isTextureExist(const ITexture&tex)
 	getTextureShareName (tex, name);
 
 	{
-		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+		CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 		result = (rTexDrvInfos.find(name) != rTexDrvInfos.end());
 	}
