@@ -28,14 +28,14 @@ CTextureBlend::CTextureBlend() : _BlendFactor(0), _SharingEnabled(true)
 }
 
 
-//************************************************************************
+// ************************************************************************
 bool	CTextureBlend::supportSharing() const
 {
 	return _BlendTex[0] && _BlendTex[0]->supportSharing()
 			&& _BlendTex[1] && _BlendTex[1]->supportSharing();
 }
 
-//************************************************************************
+// ************************************************************************
 std::string		CTextureBlend::getShareName() const
 {
 	nlassert(supportSharing());
@@ -48,14 +48,14 @@ std::string		CTextureBlend::getShareName() const
 }
 
 
-//************************************************************************
+// ************************************************************************
 void CTextureBlend::enableSharing(bool enabled /*= false*/)
 {
 	_SharingEnabled = enabled;
 }
 
 
-//************************************************************************
+// ************************************************************************
 void CTextureBlend::release()
 {
 	if (_BlendTex[0] && _BlendTex[0]->getReleasable()) _BlendTex[0]->release();
@@ -63,7 +63,7 @@ void CTextureBlend::release()
 	ITexture::release();
 }
 
-//************************************************************************
+// ************************************************************************
 bool CTextureBlend::setBlendFactor(uint16 factor)
 {
 	nlassert(factor <= 256);
@@ -77,7 +77,7 @@ bool CTextureBlend::setBlendFactor(uint16 factor)
 }
 
 
-//************************************************************************
+// ************************************************************************
 void CTextureBlend::setBlendTexture(uint index, ITexture *tex)
 {
 	nlassert(index < 2);
@@ -89,7 +89,7 @@ void CTextureBlend::setBlendTexture(uint index, ITexture *tex)
 }
 
 
-//************************************************************************
+// ************************************************************************
 void CTextureBlend::doGenerate(bool async)
 {
 	if (!_BlendTex[0] || !_BlendTex[1])
@@ -107,7 +107,7 @@ void CTextureBlend::doGenerate(bool async)
 }
 
 
-//************************************************************************
+// ************************************************************************
 void	CTextureBlend::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialVersion(0);

@@ -49,14 +49,14 @@ using namespace NLMISC;
 
 CInterfaceItemEdition *CInterfaceItemEdition::_Instance = NULL;
 
-//********************************************************************************************
+// ********************************************************************************************
 CInterfaceItemEdition *CInterfaceItemEdition::getInstance()
 {
 	if (!_Instance) _Instance = new CInterfaceItemEdition;
 	return _Instance;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::releaseInstance()
 {
 	if( _Instance )
@@ -66,7 +66,7 @@ void CInterfaceItemEdition::releaseInstance()
 	}
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::setCurrWindow(CDBCtrlSheet* ctrlSheet, const std::string &windowName, const bool &isInEditionMode)
 {
 	_CurrWindow.end();
@@ -84,19 +84,19 @@ void CInterfaceItemEdition::setCurrWindow(CDBCtrlSheet* ctrlSheet, const std::st
 	
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::update()
 {
 	_CurrWindow.update();
 }
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::validate()
 {
 	_CurrWindow.validate();
 	setCurrWindow(NULL);
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 {
 	if(_CurrItemSheet && !WindowName.empty())
@@ -164,7 +164,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 
 
 
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::update()
 {
 	if(_CurrItemSheet && (ItemSheet != _CurrItemSheet->getSheetId()))
@@ -172,7 +172,7 @@ void CInterfaceItemEdition::CItemEditionWindow::update()
 		end();
 	}
 }
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::begin()
 {
 	if(_CurrItemSheet && !WindowName.empty())
@@ -291,7 +291,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 		}
 	}
 }
-//********************************************************************************************
+// ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::end()
 {
 	

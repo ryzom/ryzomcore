@@ -23,7 +23,7 @@
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolMaintainedAction::CToolMaintainedAction()
 {
 	_State = Idle;
@@ -33,13 +33,13 @@ CToolMaintainedAction::CToolMaintainedAction()
 	_LostFocusRecover = false;
 }
 
-//***************************************************************
+// ***************************************************************
 CToolMaintainedAction::~CToolMaintainedAction()
 {
 //	getEditor().setFocusedInstance(NULL);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolMaintainedAction::cancel()
 {
 	//H_AUTO(R2_CToolMaintainedAction_cancel)
@@ -55,7 +55,7 @@ void CToolMaintainedAction::cancel()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseLeftButtonDown()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseLeftButtonDown)
@@ -86,7 +86,7 @@ bool CToolMaintainedAction::onMouseLeftButtonDown()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseLeftButtonUp()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseLeftButtonUp)
@@ -124,7 +124,7 @@ bool CToolMaintainedAction::onMouseLeftButtonUp()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseRightButtonDown()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseRightButtonDown)
@@ -149,7 +149,7 @@ bool CToolMaintainedAction::onMouseRightButtonDown()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseRightButtonUp()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseRightButtonUp)
@@ -166,7 +166,7 @@ bool CToolMaintainedAction::onMouseRightButtonUp()
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseLeftButtonClicked()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseLeftButtonClicked)
@@ -190,21 +190,21 @@ bool CToolMaintainedAction::onMouseLeftButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolMaintainedAction::getDefaultCursor() const
 {
 	//H_AUTO(R2_CToolMaintainedAction_getDefaultCursor)
 	return DEFAULT_CURSOR;
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolMaintainedAction::getPickCursor() const
 {
 	//H_AUTO(R2_CToolMaintainedAction_getPickCursor)
 	return "curs_pick.tga";
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolMaintainedAction::updateBeforeRender()
 {
 	//H_AUTO(R2_CToolMaintainedAction_updateBeforeRender)
@@ -212,7 +212,7 @@ void CToolMaintainedAction::updateBeforeRender()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolMaintainedAction::onFocusGained()
 {
 	if (_State == Idle)
@@ -222,7 +222,7 @@ void CToolMaintainedAction::onFocusGained()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::onMouseMove()
 {
 	if (_LostFocusRecover)
@@ -240,7 +240,7 @@ bool CToolMaintainedAction::onMouseMove()
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolMaintainedAction::updateFocusedInstance()
 {
 	//handleMouseOverInstance(DEFAULT_CURSOR, , getCursorForPossibleAction());
@@ -280,7 +280,7 @@ void CToolMaintainedAction::updateFocusedInstance()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolMaintainedAction::updateAfterRender()
 {
 	//H_AUTO(R2_CToolMaintainedAction_updateAfterRender)
@@ -306,7 +306,7 @@ void CToolMaintainedAction::updateAfterRender()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolMaintainedAction::getPreviousToolClickEndFlag(bool clear /*=true*/)
 {
 	//H_AUTO(R2_CToolMaintainedAction_getPreviousToolClickEndFlag)

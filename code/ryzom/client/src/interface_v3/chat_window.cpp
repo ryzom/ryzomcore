@@ -1225,7 +1225,7 @@ CChatWindow *CChatWindowManager::getChatWindowByIndex(uint index)
 /////////////////////
 
 
-//***************************************************************************************
+// ***************************************************************************************
 class CHandlerChatBoxEntry : public IActionHandler
 {
 public:
@@ -1298,7 +1298,7 @@ static ucstring getFreeTellerName(CInterfaceElement *pCaller)
 	return cgw->getFreeTellerName(freeTeller->getId());
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 class CHandlerAddTellerToFriendList : public IActionHandler
 {
 public:
@@ -1323,7 +1323,7 @@ public:
 REGISTER_ACTION_HANDLER(CHandlerAddTellerToFriendList, "add_teller_to_friend_list");
 
 
-//***************************************************************************************
+// ***************************************************************************************
 class CHandlerAddTellerToIgnoreList : public IActionHandler
 {
 public:
@@ -1358,7 +1358,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerAddTellerToIgnoreList, "add_teller_to_ignore_list");
 
-//***************************************************************************************
+// ***************************************************************************************
 class CHandlerInviteToRingSession : public IActionHandler
 {
 public:

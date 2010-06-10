@@ -48,20 +48,20 @@ using namespace std;
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolCreateEntity::~CToolCreateEntity()
 {
 	clearArray();
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::cancel()
 {
 	CToolChoosePos::cancel();
 	clearArray();
 }
 
-//***************************************************************
+// ***************************************************************
 CToolCreateEntity::CToolCreateEntity(uint ghostSlot, const std::string &paletteId, bool arrayMode) : CToolChoosePos(ghostSlot)
 {
 	_PaletteId = paletteId;
@@ -88,7 +88,7 @@ CToolCreateEntity::CToolCreateEntity(uint ghostSlot, const std::string &paletteI
 	_ArrayWantedAction = ArrayActionNone;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::updateInvalidCursorOnUI()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateInvalidCursorOnUI)
@@ -105,7 +105,7 @@ void CToolCreateEntity::updateInvalidCursorOnUI()
 	setMouseCursor(DEFAULT_CURSOR);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float createAngle)
 {
 	//H_AUTO(R2_CToolCreateEntity_commit)
@@ -145,7 +145,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolCreateEntity::isBotObjectSheet(const NLMISC::CSheetId &sheetId) const
 {
 	//H_AUTO(R2_CToolCreateEntity_isBotObjectSheet)
@@ -159,7 +159,7 @@ bool CToolCreateEntity::isBotObjectSheet(const NLMISC::CSheetId &sheetId) const
 }
 
 
-//***************************************************************
+// ***************************************************************
 std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 												const NLMISC::CVector &createPosition,
 												float createAngle,
@@ -537,14 +537,14 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 	return instanceId;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::onActivate()
 {
 	//H_AUTO(R2_CToolCreateEntity_onActivate)
 	setContextHelp(CI18N::get("uiR2EDToolCreateEntity"));
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::updateBeforeRender()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateBeforeRender)
@@ -599,7 +599,7 @@ void CToolCreateEntity::updateBeforeRender()
 	setMouseCursor(_ValidArray ? _CursValid.c_str() : _CursInvalid.c_str());
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::updateAfterRender()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateAfterRender)
@@ -633,7 +633,7 @@ void CToolCreateEntity::updateAfterRender()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolCreateEntity::onMouseLeftButtonClicked()
 {
 	//H_AUTO(R2_CToolCreateEntity_onMouseLeftButtonClicked)
@@ -648,7 +648,7 @@ bool CToolCreateEntity::onMouseLeftButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolCreateEntity::onMouseRightButtonClicked()
 {
 	//H_AUTO(R2_CToolCreateEntity_onMouseRightButtonClicked)
@@ -660,7 +660,7 @@ bool CToolCreateEntity::onMouseRightButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::clearArray()
 {
 	//H_AUTO(R2_CToolCreateEntity_clearArray)
@@ -673,7 +673,7 @@ void CToolCreateEntity::clearArray()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::updateArray(CEntityCL *clonee)
 {
 	//H_AUTO(R2_CToolCreateEntity_updateArray)
@@ -784,7 +784,7 @@ void CToolCreateEntity::updateArray(CEntityCL *clonee)
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolCreateEntity::commitArray()
 {
 	//H_AUTO(R2_CToolCreateEntity_commitArray)
@@ -803,7 +803,7 @@ void CToolCreateEntity::commitArray()
 	getEditor().getDMC().flushActions();
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolCreateEntity::stopAfterCommit() const
 {
 	//H_AUTO(R2_CToolCreateEntity_stopAfterCommit)
@@ -812,7 +812,7 @@ bool CToolCreateEntity::stopAfterCommit() const
 
 
 
-//***************************************************************
+// ***************************************************************
 class CAHR2EDToggleDrawArray : public IActionHandler
 {
 	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */)

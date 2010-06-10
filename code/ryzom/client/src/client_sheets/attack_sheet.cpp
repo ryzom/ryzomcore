@@ -24,7 +24,7 @@
 #include "nel/georges/u_form_loader.h"
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CAttackSheet::CAttackSheet()
 {
 	ProjectileDelay = 0.f;
@@ -37,7 +37,7 @@ CAttackSheet::CAttackSheet()
 	AdditionnalStartOffset.set(0.f, 0.f, 0.f);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CAttackSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	bool ok = true;
@@ -71,7 +71,7 @@ void CAttackSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CAttackSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialEnum(ProjectileMode);

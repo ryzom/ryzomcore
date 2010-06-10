@@ -30,14 +30,14 @@ using namespace NLMISC;
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolDrawRoad::CToolDrawRoad()
 {
 	_NumWayPoints = 0;
 	_ValidPos = false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawRoad::updateAfterRender()
 {
 }
@@ -48,7 +48,7 @@ void CToolDrawRoad::cancel()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawRoad::updateBeforeRender()
 {
 	// Build vector for direction pointed by mouse in world
@@ -107,7 +107,7 @@ void CToolDrawRoad::updateBeforeRender()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawRoad::onMouseLeftButtonClicked()
 {
 	if (_ValidPos)
@@ -118,7 +118,7 @@ bool CToolDrawRoad::onMouseLeftButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawRoad::onMouseLeftButtonDown()
 {
 	if (!checkDoubleClick()) return false;
@@ -168,7 +168,7 @@ bool CToolDrawRoad::onMouseLeftButtonDown()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawRoad::onMouseRightButtonClicked()
 {
 	// cancel the drawing

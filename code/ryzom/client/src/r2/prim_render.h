@@ -31,7 +31,7 @@ class CCtrlPolygon;
 namespace R2
 {
 
-//*******************************************************************************
+// *******************************************************************************
 class CVertexLook
 {
 public:
@@ -65,7 +65,7 @@ inline bool operator == (const CVertexLook &lhs, const CVertexLook &rhs)
 inline bool operator != (const CVertexLook &lhs, const CVertexLook &rhs) { return !(lhs == rhs); }
 
 
-//*******************************************************************************
+// *******************************************************************************
 class CEdgeLook
 {
 public:
@@ -132,7 +132,7 @@ inline bool operator==(const CEdgeLook &lhs, const CEdgeLook &rhs)
 inline bool operator!=(const CEdgeLook &lhs, const CEdgeLook &rhs) { return !(lhs == rhs); }
 
 
-//*******************************************************************************
+// *******************************************************************************
 // look of a primitive
 class CPrimLook
 {

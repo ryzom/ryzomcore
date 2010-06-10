@@ -39,7 +39,7 @@ using NLMISC::CBitmap;
 class	IDriver;
 
 
-//****************************************************************************
+// ****************************************************************************
 
 // List typedef.
 class	ITextureDrvInfos;
@@ -89,7 +89,7 @@ public:
 };
 
 
-//****************************************************************************
+// ****************************************************************************
 /**
  * Interface for textures
  *
@@ -405,7 +405,7 @@ public:
 	// get the texture category
 	CTextureCategory	*getTextureCategory() const {return _TextureCategory;}
 
-//****************************
+// ****************************
 // Private part.
 protected:
 	// Derived texture should set it to true when they are updated.

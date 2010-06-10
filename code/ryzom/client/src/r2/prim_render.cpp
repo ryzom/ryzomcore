@@ -66,7 +66,7 @@ void readFromLua(const CLuaObject &table, const char *key, CRGBA &dest)
 
 #define READ_FROM_LUA(dest) readFromLua(params, #dest, dest);
 
-//*********************************************************
+// *********************************************************
 void CVertexLook::init(const CLuaObject &params)
 {
 	//H_AUTO(R2_CVertexLook_init)
@@ -79,7 +79,7 @@ void CVertexLook::init(const CLuaObject &params)
 }
 
 
-//*********************************************************
+// *********************************************************
 void CEdgeLook::init(const CLuaObject &params)
 {
 	//H_AUTO(R2_CEdgeLook_init)
@@ -103,7 +103,7 @@ void CEdgeLook::init(const CLuaObject &params)
 	if (worldMapWrapMode < WrapModeCount) WorldMapWrapMode = (TWrapMode) worldMapWrapMode;
 }
 
-//*********************************************************
+// *********************************************************
 bool operator ==(const CPrimLook &lhs, const CPrimLook &rhs)
 {
 	return lhs.Shape == rhs.Shape &&
@@ -117,7 +117,7 @@ bool operator ==(const CPrimLook &lhs, const CPrimLook &rhs)
 }
 
 
-//*********************************************************
+// *********************************************************
 void CPrimLook::init(const CLuaObject &params)
 {
 	//H_AUTO(R2_CPrimLook_init)
@@ -148,7 +148,7 @@ void CPrimLook::init(const CLuaObject &params)
 	//
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setLook(const CPrimLook &look)
 {
 	//H_AUTO(R2_CPrimRender_setLook)
@@ -166,7 +166,7 @@ void CPrimRender::setLook(const CPrimLook &look)
 	update();
 }
 
-//*********************************************************
+// *********************************************************
 CPrimRender::~CPrimRender()
 {
 	if (_AddedToWorldMap)
@@ -182,7 +182,7 @@ CPrimRender::~CPrimRender()
 	}
 }
 
-//*********************************************************
+// *********************************************************
 CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 {
 	//H_AUTO(R2_CPrimRender_newCtrlPolygon)
@@ -200,14 +200,14 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 	return new CCtrlMapPolygon;
 }
 
-//*********************************************************
+// *********************************************************
 CCtrlQuad *CPrimRender::newCtrlQuad(uint /* edgeIndex */) const
 {
 	//H_AUTO(R2_CPrimRender_newCtrlQuad)
 	return new CCtrlQuad;
 }
 
-//*********************************************************
+// *********************************************************
 bool CPrimRender::contains(const NLMISC::CVector2f &pos) const
 {
 	//H_AUTO(R2_CPrimRender_contains)
@@ -222,7 +222,7 @@ bool CPrimRender::contains(const NLMISC::CVector2f &pos) const
 	return false;
 }
 
-//*********************************************************
+// *********************************************************
 sint CPrimRender::isOnEdge(const NLMISC::CVector2f &pos) const
 {
 	//H_AUTO(R2_CPrimRender_isOnEdge)
@@ -233,7 +233,7 @@ sint CPrimRender::isOnEdge(const NLMISC::CVector2f &pos) const
 	return -1;
 }
 
-//*********************************************************
+// *********************************************************
 CPrimRender::CPrimRender()
 {
 	_Emissive = CRGBA::Black;
@@ -244,14 +244,14 @@ CPrimRender::CPrimRender()
 	_Active = true;
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::clear()
 {
 	//H_AUTO(R2_CPrimRender_clear)
 	setVertices(std::vector<NLMISC::CVector>());
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setVertices(const std::vector<NLMISC::CVector> &vertices)
 {
 	//H_AUTO(R2_CPrimRender_setVertices)
@@ -272,7 +272,7 @@ void CPrimRender::setVertices(const std::vector<NLMISC::CVector> &vertices)
 	update();
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setVertices(const std::vector<NLMISC::CVector2f> &vertices)
 {
 	//H_AUTO(R2_CPrimRender_setVertices)
@@ -284,7 +284,7 @@ void CPrimRender::setVertices(const std::vector<NLMISC::CVector2f> &vertices)
 	setVertices(vertices3D);
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setCustomWorldMapEdgeUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 {
 	//H_AUTO(R2_CPrimRender_setCustomWorldMapEdgeUVMatrix)
@@ -294,7 +294,7 @@ void CPrimRender::setCustomWorldMapEdgeUVMatrix(bool on, const NLMISC::CMatrix &
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setCustomDecalEdgeUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 {
 	//H_AUTO(R2_CPrimRender_setCustomDecalEdgeUVMatrix)
@@ -304,7 +304,7 @@ void CPrimRender::setCustomDecalEdgeUVMatrix(bool on, const NLMISC::CMatrix &mat
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setEmissive(NLMISC::CRGBA color)
 {
 	//H_AUTO(R2_CPrimRender_setEmissive)
@@ -312,7 +312,7 @@ void CPrimRender::setEmissive(NLMISC::CRGBA color)
 	forceSetEmissive(color);
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::forceSetEmissive(NLMISC::CRGBA emissive)
 {
 	//H_AUTO(R2_CPrimRender_forceSetEmissive)
@@ -329,7 +329,7 @@ void CPrimRender::forceSetEmissive(NLMISC::CRGBA emissive)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::update()
 {
 	//H_AUTO(R2_CPrimRender_update)
@@ -428,7 +428,7 @@ void CPrimRender::update()
 }
 
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::updatePos()
 {
 	//H_AUTO(R2_CPrimRender_updatePos)
@@ -512,7 +512,7 @@ void CPrimRender::updatePos()
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::updateEdge(NL3D::UInstance edge,const NLMISC::CVector &start, const NLMISC::CVector &end)
 {
 	//H_AUTO(R2_CPrimRender_updateEdge)
@@ -529,7 +529,7 @@ void CPrimRender::updateEdge(NL3D::UInstance edge,const NLMISC::CVector &start, 
 	edge.show();
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::updateEdgeDecal(CDecal &edgeDecal, const NLMISC::CVector &start, const NLMISC::CVector &end, float distToStartVertex, float distToEndVertex)
 {
 	//H_AUTO(R2_CPrimRender_updateEdgeDecal)
@@ -567,7 +567,7 @@ void CPrimRender::updateEdgeDecal(CDecal &edgeDecal, const NLMISC::CVector &star
 	edgeDecal.setTextureMatrix(uvMatrix);
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::addDecalsToRenderList()
 {
 	//H_AUTO(R2_CPrimRender_addDecalsToRenderList)
@@ -582,7 +582,7 @@ void CPrimRender::addDecalsToRenderList()
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setWorldMapNumVertices(uint count)
 {
 	//H_AUTO(R2_CPrimRender_setWorldMapNumVertices)
@@ -622,7 +622,7 @@ void CPrimRender::setWorldMapNumVertices(uint count)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setWorldMapNumEdges(uint count)
 {
 	//H_AUTO(R2_CPrimRender_setWorldMapNumEdges)
@@ -662,7 +662,7 @@ void CPrimRender::setWorldMapNumEdges(uint count)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::updateWorldMapDisplay()
 {
 	//H_AUTO(R2_CPrimRender_updateWorldMapDisplay)
@@ -672,7 +672,7 @@ void CPrimRender::updateWorldMapDisplay()
 	this->onUpdate(*gm);
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::onAdd(CGroupMap &owner)
 {
 	//H_AUTO(R2_CPrimRender_onAdd)
@@ -689,7 +689,7 @@ void CPrimRender::onAdd(CGroupMap &owner)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::onRemove(CGroupMap &owner)
 {
 	//H_AUTO(R2_CPrimRender_onRemove)
@@ -704,14 +704,14 @@ void CPrimRender::onRemove(CGroupMap &owner)
 	_AddedToWorldMap = false;
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::onPreRender(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CPrimRender_onPreRender)
 	// no-op
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::onUpdate(CGroupMap &worldMap)
 {
 	//H_AUTO(R2_CPrimRender_onUpdate)
@@ -828,7 +828,7 @@ void CPrimRender::onUpdate(CGroupMap &worldMap)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 CViewBitmap *CPrimRender::getWorldMapVertexView(uint index) const
 {
 	//H_AUTO(R2_CPrimRender_getWorldMapVertexView)
@@ -836,14 +836,14 @@ CViewBitmap *CPrimRender::getWorldMapVertexView(uint index) const
 	return _WorldMapVertices[index];
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setWorldMapPolyColor(NLMISC::CRGBA color)
 {
 	//H_AUTO(R2_CPrimRender_setWorldMapPolyColor)
 	if (_WorldMapPoly) _WorldMapPoly->setColorRGBA(color);
 }
 
-//*********************************************************
+// *********************************************************
 void CPrimRender::setActive(bool active)
 {
 	//H_AUTO(R2_CPrimRender_setActive)

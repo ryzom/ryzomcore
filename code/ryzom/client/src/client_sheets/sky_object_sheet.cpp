@@ -21,7 +21,7 @@
 // CSkyObjectSheet::CColorInfo //
 /////////////////////////////////
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CColorInfoSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	item.getValueByName(MapName, (prefix + "MapName").c_str());
@@ -30,7 +30,7 @@ void CSkyObjectSheet::CColorInfoSheet::build(const NLGEORGES::UFormElm &item, co
 	Mode = (TSkyColorMode) mode;
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CColorInfoSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(MapName);
@@ -41,7 +41,7 @@ void CSkyObjectSheet::CColorInfoSheet::serial(class NLMISC::IStream &f) throw(NL
 // CSkyObjectSheet::CColorGradientInfo //
 /////////////////////////////////////////
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CColorGradientInfoSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	item.getValueByName(TargetTextureStage, (prefix + "TargetTextureStage").c_str());
@@ -59,7 +59,7 @@ void CSkyObjectSheet::CColorGradientInfoSheet::build(const NLGEORGES::UFormElm &
 	}
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CColorGradientInfoSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(TargetTextureStage);
@@ -70,7 +70,7 @@ void CSkyObjectSheet::CColorGradientInfoSheet::serial(class NLMISC::IStream &f) 
 // CSkyObjectSheet::CVersion //
 ///////////////////////////////
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CVersionSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	item.getValueByName(ShapeName, (prefix + "ShapeName").c_str());
@@ -101,7 +101,7 @@ void CSkyObjectSheet::CVersionSheet::build(const NLGEORGES::UFormElm &item, cons
 	}
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::CVersionSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(ShapeName);
@@ -125,14 +125,14 @@ void CSkyObjectSheet::CVersionSheet::serial(class NLMISC::IStream &f) throw(NLMI
 // CSkyObjectSheet //
 /////////////////////
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 CSkyObjectSheet::CSkyObjectSheet()
 {
 	VisibleInMainScene = true;
 	VisibleInEnvMap = true;
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	Std.build(item, prefix + "StdVersion.");
@@ -142,7 +142,7 @@ void CSkyObjectSheet::build(const NLGEORGES::UFormElm &item, const std::string &
 	item.getValueByName(VisibleInEnvMap, (prefix + "VisibleInEnvMap").c_str());
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkyObjectSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(Std);

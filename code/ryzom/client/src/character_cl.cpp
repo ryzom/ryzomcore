@@ -3754,7 +3754,7 @@ void CCharacterCL::endCast(const MBEHAV::CBehaviour &behaviour, const MBEHAV::CB
 }// endCast //
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CCharacterCL::updateCurrentAttack()
 {
 	// This is a behaviour for the magic.
@@ -3842,7 +3842,7 @@ inline static void getResistAndDistance(uint8 packedInfo, bool isDirectAttack, b
 		resist = (packedInfo & 128) != 0;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool directOffensifSpell, vector<double> &targetHitDates, TAnimStateKey animForCombat)
 {
 	if (!_CurrentAttack) return;
@@ -4213,7 +4213,7 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 	*/
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CCharacterCL::buildStaticObjectCastFX(const NLMISC::CVector &castWorldOrigin, NLMISC::CVector &castWorldPos, const CAttackSheet &/* sheet */, uint intensity)
 {
 	if (intensity == 0) return;
@@ -4250,7 +4250,7 @@ void CCharacterCL::buildStaticObjectCastFX(const NLMISC::CVector &castWorldOrigi
 	}
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CCharacterCL::computeTargetStickMode(const CAttackSheet &sheet, const CAttackInfo &attackInfo, CFXStickMode &dest, CEntityCL &target)
 {
 	bool hasPhysicalImpact = false;
@@ -4290,7 +4290,7 @@ void CCharacterCL::computeTargetStickMode(const CAttackSheet &sheet, const CAtta
 }
 
 
-//*********************************************************************************************
+// *********************************************************************************************
 bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 											  const CAttack *currentAttack,
 											  const CCharacterCL &target,
@@ -4393,7 +4393,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 }
 
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CCharacterCL::computeBestCastRay(CEntityCL			 &targetEntity,
 									  const CFXStickMode &targetStickMode,
 									  NLMISC::CVector    &castWorldOrigin,
@@ -4425,7 +4425,7 @@ void CCharacterCL::computeBestCastRay(CEntityCL			 &targetEntity,
 	}
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 bool CCharacterCL::isCurrentBehaviourAttackEnd() const
 {
 	switch(_CurrentBehaviour.Behaviour)
@@ -8928,7 +8928,7 @@ void	CCharacterCL::attachFX(const CAttachedFX::TSmartPtr fx)
 
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 {
 	nlassert(index < MaxNumAura);
@@ -8959,7 +8959,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::setLinkFX(const CAnimationFX *fx, const CAnimationFX *dispell)
 {
 	// no-op if same link
@@ -8989,7 +8989,7 @@ void CCharacterCL::setLinkFX(const CAnimationFX *fx, const CAnimationFX *dispell
 
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::startItemAttackFXs(bool activateTrails, uint intensity)
 {
 	uint numItems = (uint)_Items.size();
@@ -9000,7 +9000,7 @@ void CCharacterCL::startItemAttackFXs(bool activateTrails, uint intensity)
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::stopItemAttackFXs()
 {
 	uint numItems = (uint)_Items.size();
@@ -9083,7 +9083,7 @@ void CCharacterCL::applyVisualFX(sint64 prop)
 	setLinkFX(linkFX, dispellFX);
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const char *CCharacterCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide side) const
 {
 	if (!_Sheet) return CEntityCL::getBoneNameFromBodyPart(part, side);
@@ -9091,14 +9091,14 @@ const char *CCharacterCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TS
 }
 
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CCharacterCL::getRightHandItemSheet() const
 {
 	if (_RHandInstIdx == CEntityCL::BadIndex) return NULL;
 	return _Items[_RHandInstIdx].Sheet;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CCharacterCL::getLeftHandItemSheet() const
 {
 	if (_LHandInstIdx == CEntityCL::BadIndex) return NULL;
@@ -9120,7 +9120,7 @@ void	CCharacterCL::resetAllSoundAnimId()
 /////////////////////////////
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::startAttackFX(NL3D::USkeleton skeleton, uint intensity, SLOTTYPE::EVisualSlot visualSlot, bool activateTrail)
 {
 	if (intensity < 1 || intensity > 5) return;
@@ -9203,13 +9203,13 @@ void CCharacterCL::CWornItem::startAttackFX(NL3D::USkeleton skeleton, uint inten
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::stopAttackFX()
 {
 	if (!Trail.empty()) Trail.stop();
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::initFXs(SLOTTYPE::EVisualSlot /* visualSlot */, NL3D::UInstance parent)
 {
 	releaseFXs();
@@ -9236,7 +9236,7 @@ void CCharacterCL::CWornItem::initFXs(SLOTTYPE::EVisualSlot /* visualSlot */, NL
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 {
 	if (!Sheet) return;
@@ -9278,7 +9278,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::releaseFXs()
 {
 	if (Scene)
@@ -9290,7 +9290,7 @@ void CCharacterCL::CWornItem::releaseFXs()
 	}
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::CWornItem::setTrailSize(uint size)
 {
 	if (Trail.empty()) return;
@@ -9308,14 +9308,14 @@ void CCharacterCL::CWornItem::setTrailSize(uint size)
 }
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 const CAttack *CCharacterCL::getAttack(const CAttackIDSheet &id) const
 {
 	if (!_Sheet) return NULL;
 	return getAttack(id, _Sheet->AttackLists);
 }
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 const CAttack *CCharacterCL::getAttack(const CAttackIDSheet &id, const std::vector<NLMISC::TSStringId> &attackList) const
 {
 	for(std::vector<NLMISC::TSStringId>::const_reverse_iterator it = attackList.rbegin(); it != attackList.rend(); ++it)
@@ -9331,7 +9331,7 @@ const CAttack *CCharacterCL::getAttack(const CAttackIDSheet &id, const std::vect
 }
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 void CCharacterCL::initStaticFX()
 {
 	_StaticFX = NULL;

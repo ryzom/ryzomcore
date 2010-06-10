@@ -24,7 +24,7 @@
 
 using namespace NLMISC;
 
-//*********************************************************************************
+// *********************************************************************************
 CCtrlPolygon::CCtrlPolygon() : CCtrlBase(TCtorParam())
 {
 	// Construct
@@ -33,7 +33,7 @@ CCtrlPolygon::CCtrlPolygon() : CCtrlBase(TCtorParam())
 	_Valid = true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlPolygon::updateBoudingRect()
 {
 	H_AUTO(Rz_CCtrlPolygon_updateBoudingRect)
@@ -68,7 +68,7 @@ void CCtrlPolygon::updateBoudingRect()
 	setH(ymax - ymin);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CCtrlPolygon::contains(const CVector2f &pos) const
 {
 	H_AUTO(Rz_CCtrlPolygon_contains)
@@ -76,7 +76,7 @@ bool CCtrlPolygon::contains(const CVector2f &pos) const
 	return _XFormPoly.contains(pos, false);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlPolygon::setVertices(const std::vector<NLMISC::CVector> &vertices)
 {
 	H_AUTO(Rz_CCtrlPolygon_setVertices)
@@ -132,7 +132,7 @@ static inline bool totallyOutside(const CVector &minCorner, const CVector &maxCo
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 /*void CCtrlPolygon::setMatrix(const NLMISC::CMatrix &mat)
 {
 	const float *lhs = mat.get();
@@ -144,7 +144,7 @@ static inline bool totallyOutside(const CVector &minCorner, const CVector &maxCo
 }*/
 
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlPolygon::draw()
 {
 	H_AUTO(Rz_CCtrlPolygon_draw)
@@ -262,7 +262,7 @@ void CCtrlPolygon::draw()
 	vr.drawUnclippedTriangles(_RenderLayer, _RealTris, col);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlPolygon::updateCoords()
 {
 	H_AUTO(Rz_CCtrlPolygon_updateCoords)
@@ -272,21 +272,21 @@ void CCtrlPolygon::updateCoords()
 	_Touched = true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlPolygon::setAlpha(sint32 a)
 {
 	H_AUTO(Rz_CCtrlPolygon_setAlpha)
 	_Color.A = (uint8) a;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CCtrlPolygon::handleEvent(const CEventDescriptor &/* event */)
 {
 	H_AUTO(Rz_CCtrlPolygon_handleEvent)
 	return false;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // TMP TMP
 void CCtrlPolygon::computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
 {
@@ -294,7 +294,7 @@ void CCtrlPolygon::computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CV
 	dest.set(src.x, src.y);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // TMP TMP
 void CCtrlPolygon::touch()
 {

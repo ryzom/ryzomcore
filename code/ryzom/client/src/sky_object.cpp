@@ -33,7 +33,7 @@ using namespace NL3D;
 // CSkyObject::CColorInfo //
 ////////////////////////////
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CSkyObject::CColorInfo::init(const CSkyObjectSheet::CColorInfoSheet &ci,
 								  std::map<std::string, CBitmap *> &bitmapByName,
 								  std::vector<CBitmap *> &builtBitmaps)
@@ -43,7 +43,7 @@ void CSkyObject::CColorInfo::init(const CSkyObjectSheet::CColorInfoSheet &ci,
 	Map = buildSharedBitmap(ci.MapName, bitmapByName, builtBitmaps, alreadyBuilt);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 CRGBA CSkyObject::CColorInfo::computeColor(float dayPart, float weatherLevel, CRGBA fogColor)
 {
 	switch(Mode)
@@ -73,7 +73,7 @@ CRGBA CSkyObject::CColorInfo::computeColor(float dayPart, float weatherLevel, CR
 }
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 ////////////////////////////////////
 // CSkyObject::CColorGradientInfo //
 ////////////////////////////////////
@@ -131,7 +131,7 @@ static void dumpGrad(CBitmap &bm)
 */
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CSkyObject::CColorGradientInfo::setup(NL3D::UInstance instance, float dayPart, float weatherLevel, CBitmap &gradientCache, CBitmap &gradientCacheBlurred)
 {
 	if (instance.empty()) return;
@@ -214,7 +214,7 @@ void CSkyObject::CColorGradientInfo::setup(NL3D::UInstance instance, float dayPa
 	}
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 ////////////////
 // CSkyObject //
 ////////////////
@@ -266,7 +266,7 @@ void CSkyObject::init(const CSkyObjectSheet::CVersionSheet &sheet,
 }
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 bool CSkyObject::setup(const CClientDate &date, const CClientDate &animationDate, float numHoursInDay, float weatherLevel, CRGBA fogColor, bool envMapScene)
 {
 	if (Instance.empty()) return false;
@@ -439,7 +439,7 @@ bool CSkyObject::setup(const CClientDate &date, const CClientDate &animationDate
 	return Active;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 CSkyObject::~CSkyObject()
 {
 }

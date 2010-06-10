@@ -73,7 +73,7 @@ const float DEFAULT_SPAWNED_FX_TIMED_OUT = 100.f;
 H_AUTO_DECL(RZ_TimedFX)
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 NLMISC::CMatrix CTimedFX::getInstanceMatrix() const
 {
 	FPU_CHECKER
@@ -87,7 +87,7 @@ NLMISC::CMatrix CTimedFX::getInstanceMatrix() const
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 CTimedFXManager::CTimedFXManager()
 {
 	FPU_CHECKER
@@ -101,7 +101,7 @@ CTimedFXManager::CTimedFXManager()
 	_MaxNumberOfFXInstances = 0;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 CTimedFXManager::~CTimedFXManager()
 {
 	FPU_CHECKER
@@ -109,7 +109,7 @@ CTimedFXManager::~CTimedFXManager()
 	reset();
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::init(NL3D::UScene *scene,
 						   const CClientDate &startDate,
 						   float /* dayLength */,
@@ -141,7 +141,7 @@ void CTimedFXManager::init(NL3D::UScene *scene,
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::reset()
 {
 	FPU_CHECKER
@@ -161,7 +161,7 @@ void CTimedFXManager::reset()
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::setDate(const CClientDate &date)
 {
 	FPU_CHECKER
@@ -169,7 +169,7 @@ void CTimedFXManager::setDate(const CClientDate &date)
 	_CurrDate = date;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX> &fxs, EGSPD::CSeason::TSeason /* season */)
 {
 	FPU_CHECKER
@@ -316,7 +316,7 @@ CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX>
 
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::remove(TFXGroupHandle handle)
 {
 	FPU_CHECKER
@@ -346,7 +346,7 @@ void CTimedFXManager::remove(TFXGroupHandle handle)
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::update(const CClientDate &date, EGSPD::CSeason::TSeason /* season */, const NLMISC::CVector &camPos)
 {
 	FPU_CHECKER
@@ -475,7 +475,7 @@ void CTimedFXManager::update(const CClientDate &date, EGSPD::CSeason::TSeason /*
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::shutDown(TFXGroupHandle handle)
 {
 	FPU_CHECKER
@@ -493,7 +493,7 @@ void CTimedFXManager::shutDown(TFXGroupHandle handle)
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::unlinkFromCandidateFXList()
 {
 	FPU_CHECKER
@@ -510,7 +510,7 @@ void CTimedFXManager::CManagedFX::unlinkFromCandidateFXList()
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::unlinkFromInstanciatedFXList()
 {
 	FPU_CHECKER
@@ -527,7 +527,7 @@ void CTimedFXManager::CManagedFX::unlinkFromInstanciatedFXList()
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::shutDown(NL3D::UScene *scene, CFXManager &fxManager)
 {
 	FPU_CHECKER
@@ -563,7 +563,7 @@ void CTimedFXManager::CManagedFX::shutDown(NL3D::UScene *scene, CFXManager &fxMa
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::cycleToDate(sint32 cycle, float hour, float cycleLength, float dayLength, CClientDate &result)
 {
 	FPU_CHECKER
@@ -578,7 +578,7 @@ void CTimedFXManager::cycleToDate(sint32 cycle, float hour, float cycleLength, f
 	result.Hour = (float) (resultHour - (double) result.Day * (double) dayLength);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 sint32 CTimedFXManager::dateToCycle(const CClientDate &date, float cycleLength, float dayLength)
 {
 	FPU_CHECKER
@@ -590,7 +590,7 @@ sint32 CTimedFXManager::dateToCycle(const CClientDate &date, float cycleLength, 
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::computeHour(sint32 cycle, float bias, CClientDate &resultDate, float cycleLength, float dayLength, const NLMISC::CNoiseValue &nv, float minHour, float maxHour) const
 {
 	FPU_CHECKER
@@ -618,7 +618,7 @@ void CTimedFXManager::CManagedFX::computeHour(sint32 cycle, float bias, CClientD
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::computeStartHour(sint32 cycle, CClientDate &resultDate, float cycleLength, float dayLength, const NLMISC::CNoiseValue &nv) const
 {
 	FPU_CHECKER
@@ -631,7 +631,7 @@ void CTimedFXManager::CManagedFX::computeStartHour(sint32 cycle, CClientDate &re
 	computeHour(cycle, 0.f, resultDate, cycleLength, dayLength, nv, FXSheet->StartHourMin, FXSheet->StartHourMax);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::CManagedFX::computeEndHour(sint32 cycle, CClientDate &resultDate, float cycleLength, float dayLength, const NLMISC::CNoiseValue &nv) const
 {
 	FPU_CHECKER
@@ -672,7 +672,7 @@ void CTimedFXManager::CManagedFX::computeEndHour(sint32 cycle, CClientDate &resu
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::dumpFXToAdd() const
 {
 	FPU_CHECKER
@@ -693,7 +693,7 @@ void CTimedFXManager::dumpFXToAdd() const
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::dumpFXToRemove() const
 {
 	FPU_CHECKER
@@ -714,7 +714,7 @@ void CTimedFXManager::dumpFXToRemove() const
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::dumpFXInfo() const
 {
 	FPU_CHECKER
@@ -737,7 +737,7 @@ void CTimedFXManager::dumpFXInfo() const
 	nlinfo("Num Intanciated FX = %d", (int) numInstance);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::checkIntegrity()
 {
 	FPU_CHECKER
@@ -772,7 +772,7 @@ void CTimedFXManager::checkIntegrity()
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::setupUserParams(CManagedFX &fi, uint cycle)
 {
 	FPU_CHECKER
@@ -802,7 +802,7 @@ void CTimedFXManager::setupUserParams(CManagedFX &fi, uint cycle)
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 // from a fx mode, get a description string
 const char *timedFXModeToStr(CSeasonFXSheet::TMode mode)
 {
@@ -819,7 +819,7 @@ const char *timedFXModeToStr(CSeasonFXSheet::TMode mode)
 	return "???";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::displayFXBoxes(TDebugDisplayMode displayMode) const
 {
 	FPU_CHECKER
@@ -897,7 +897,7 @@ void CTimedFXManager::displayFXBoxes(TDebugDisplayMode displayMode) const
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::linkCandidateFX(TCandidateFXListSortedByDist &targetList, float dist, CManagedFX *fx)
 {
 	FPU_CHECKER
@@ -915,7 +915,7 @@ void CTimedFXManager::linkCandidateFX(TCandidateFXListSortedByDist &targetList, 
 	targetList[rank] = fx;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::linkInstanciatedFX(CManagedFX *&listHead, CManagedFX *fx)
 {
 	FPU_CHECKER
@@ -931,7 +931,7 @@ void CTimedFXManager::linkInstanciatedFX(CManagedFX *&listHead, CManagedFX *fx)
 	listHead = fx;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::updateInstanciatedFXList()
 {
 	FPU_CHECKER
@@ -1070,7 +1070,7 @@ void CTimedFXManager::updateInstanciatedFXList()
 	_CandidateFXListTouched = false;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::updateCandidateFXListSorting()
 {
 	FPU_CHECKER
@@ -1094,7 +1094,7 @@ void CTimedFXManager::updateCandidateFXListSorting()
 	_CandidateFXListSortedByDist.swap(_CandidateFXListSortedByDistTmp);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CTimedFXManager::setMaxNumFXInstances(uint maxNumInstances)
 {
 	FPU_CHECKER
@@ -1103,7 +1103,7 @@ void CTimedFXManager::setMaxNumFXInstances(uint maxNumInstances)
 	_CandidateFXListTouched;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 NLMISC_COMMAND(dumpFXToAdd, "dumpFXToAdd", "<>")
 {
@@ -1112,7 +1112,7 @@ NLMISC_COMMAND(dumpFXToAdd, "dumpFXToAdd", "<>")
 	return true;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 NLMISC_COMMAND(dumpFXToRemove, "dumpFXToRemove", "<>")
 {
@@ -1122,7 +1122,7 @@ NLMISC_COMMAND(dumpFXToRemove, "dumpFXToRemove", "<>")
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 NLMISC_COMMAND(dumpFXInfo, "dumpFXInfo", "<>")
 {
@@ -1134,7 +1134,7 @@ NLMISC_COMMAND(dumpFXInfo, "dumpFXInfo", "<>")
 
 extern class CIGCallback		*IGCallbacks;
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 NLMISC_COMMAND(updateSeason, "updateSeason", "<>")
 {
@@ -1143,7 +1143,7 @@ NLMISC_COMMAND(updateSeason, "updateSeason", "<>")
 	return true;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 NLMISC_COMMAND(setMaxNumTimedFXs, "set the max number of timed fx that are visible at a time", "<numInst>")
 {

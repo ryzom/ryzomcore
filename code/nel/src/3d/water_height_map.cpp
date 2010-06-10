@@ -699,7 +699,7 @@ void CWaterHeightMap::serial(NLMISC::IStream &f)  throw(NLMISC::EStream)
 
 
 
-//*** perform a bilinear on 4 values
+// *** perform a bilinear on 4 values
 //   0---1
 //   |   |
 //   3---2

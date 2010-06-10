@@ -25,7 +25,7 @@ namespace NL3D
 // CWaterEnvMapUser //
 //////////////////////
 
-//***********************************************************************************
+// ***********************************************************************************
 void CWaterEnvMapUser::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimationTime updateTime)
 {
 	EnvMap.init(cubeMapSize, projection2DSize, updateTime, *(EnvMap.Driver->getDriver()));
@@ -36,7 +36,7 @@ void CWaterEnvMapUser::init(uint cubeMapSize, uint projection2DSize, TGlobalAnim
 //////////////////////////////
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void CWaterEnvMapRenderHelper::render(TFace face, TGlobalAnimationTime time, UDriver &drv)
 {
 	CMatrix mat;
@@ -61,7 +61,7 @@ void CWaterEnvMapRenderHelper::render(TFace face, TGlobalAnimationTime time, UDr
 // CWaterEnvMapRenderFromUScene //
 //////////////////////////////////
 
-//***********************************************************************************
+// ***********************************************************************************
 CWaterEnvMapRenderFromUScene::CWaterEnvMapRenderFromUScene()
 {
 	_Scene = NULL;
@@ -70,7 +70,7 @@ CWaterEnvMapRenderFromUScene::CWaterEnvMapRenderFromUScene()
 	_RenderPart = UScene::RenderAll;
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CWaterEnvMapRenderFromUScene::setScene(UScene *scene, UCamera cam)
 {
 	_Scene = scene;
@@ -82,7 +82,7 @@ void CWaterEnvMapRenderFromUScene::setScene(UScene *scene, UCamera cam)
 }
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void CWaterEnvMapRenderFromUScene::doRender(const CMatrix &camMatrix, TGlobalAnimationTime time, UDriver &drv)
 {
 	if (!_Scene) return;
@@ -108,7 +108,7 @@ void CWaterEnvMapRenderFromUScene::doRender(const CMatrix &camMatrix, TGlobalAni
 	postRender(time, drv);
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CWaterEnvMapUser::invalidate()
 {
 	EnvMap.invalidate();

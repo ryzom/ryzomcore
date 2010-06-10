@@ -606,7 +606,7 @@ void CGuildManager::initDBObservers()
 // CDBGroupListAscensor
 // ***************************************************************************
 
-//**********************************************************************************
+// **********************************************************************************
 void CDBGroupListAscensor::CSheetChildAscensor::init(CDBGroupListSheetText *pFather, uint index)
 {
 	// init my parent
@@ -617,7 +617,7 @@ void CDBGroupListAscensor::CSheetChildAscensor::init(CDBGroupListSheetText *pFat
 	SecondSheetIdCache = 0;
 }
 
-//**********************************************************************************
+// **********************************************************************************
 bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetText * /* pFather */)
 {
 	if (Ctrl->getSheetId() != SecondSheetIdCache)
@@ -663,7 +663,7 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 	return false;
 }
 
-//**********************************************************************************
+// **********************************************************************************
 bool CDBGroupListAscensor::CSheetChildAscensor::isSheetValid(CDBGroupListSheetText * /* pFather */)
 {
 	if (!Ctrl) return false;

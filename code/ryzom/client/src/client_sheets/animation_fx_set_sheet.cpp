@@ -20,7 +20,7 @@
 #include "animation_fx_set_sheet.h"
 #include "nel/georges/u_form_elm.h"
 
-//****************************************************************************************************
+// ****************************************************************************************************
 CAnimationFXSetSheet::CAnimationFXSetSheet()
 {
 	Type = ANIMATION_FX_SET;
@@ -31,13 +31,13 @@ CAnimationFXSetSheet::CAnimationFXSetSheet()
 	}
 }
 
-//****************************************************************************************************
+// ****************************************************************************************************
 void CAnimationFXSetSheet::build(const NLGEORGES::UFormElm &item)
 {
 	buildWithPrefix(item);
 }
 
-//****************************************************************************************************
+// ****************************************************************************************************
 void CAnimationFXSetSheet::buildWithPrefix(const NLGEORGES::UFormElm &item, const std::string &prefix /*=""*/)
 {
 	FX.clear();
@@ -55,7 +55,7 @@ void CAnimationFXSetSheet::buildWithPrefix(const NLGEORGES::UFormElm &item, cons
 	}
 }
 
-//****************************************************************************************************
+// ****************************************************************************************************
 void CAnimationFXSetSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialCont(FX);

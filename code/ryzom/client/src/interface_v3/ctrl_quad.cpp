@@ -23,7 +23,7 @@
 
 using namespace NLMISC;
 
-//*********************************************************************************
+// *********************************************************************************
 CCtrlQuad::CCtrlQuad() : CCtrlBase(TCtorParam()), _Color(CRGBA::White),
 												  _Additif(false),
 												  _Filtered(true),
@@ -39,14 +39,14 @@ CCtrlQuad::CCtrlQuad() : CCtrlBase(TCtorParam()), _Color(CRGBA::White),
 	_RealQuad.Uv3.set(0.f, 1.f);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CCtrlQuad::parse(xmlNodePtr /* cur */, CInterfaceGroup * /* parentGroup */)
 {
 	nlassert(0); // NOT IMPLEMENTED (only created dynamically at this time)
 	return false;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::updateCoords()
 {
 	H_AUTO(Rz_CCtrlQuad_updateCoords)
@@ -57,7 +57,7 @@ void CCtrlQuad::updateCoords()
 	_RealQuad.set(_Quad.V0 + delta, _Quad.V1 + delta, _Quad.V2 + delta, _Quad.V3 + delta);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::draw()
 {
 	H_AUTO(Rz_CCtrlQuad_draw)
@@ -287,14 +287,14 @@ void CCtrlQuad::draw()
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setAlpha(sint32 a)
 {
 	H_AUTO(Rz_CCtrlQuad_setAlpha)
 	_Color.A = (uint8) a;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setTexture(const std::string &texName)
 {
 	H_AUTO(Rz_CCtrlQuad_setTexture)
@@ -303,7 +303,7 @@ void CCtrlQuad::setTexture(const std::string &texName)
 	_TextureId.setTexture(texName.c_str());
 }
 
-//*********************************************************************************
+// *********************************************************************************
 std::string CCtrlQuad::getTexture() const
 {
 	H_AUTO(Rz_CCtrlQuad_getTexture)
@@ -312,7 +312,7 @@ std::string CCtrlQuad::getTexture() const
 	return rVR.getTextureNameFromId (_TextureId);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setQuad(const CQuad &quad)
 {
 	H_AUTO(Rz_CCtrlQuad_setQuad)
@@ -328,7 +328,7 @@ void CCtrlQuad::setQuad(const CQuad &quad)
 	_Quad = quad;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setQuad(const NLMISC::CVector &start, const NLMISC::CVector &end, float thickness)
 {
 	H_AUTO(Rz_CCtrlQuad_setQuad)
@@ -338,7 +338,7 @@ void CCtrlQuad::setQuad(const NLMISC::CVector &start, const NLMISC::CVector &end
 	setQuad(CQuad(start + up, end + up, end - up, start - up));
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setQuad(const NLMISC::CVector &pos, float radius, float angle /*=0.f*/)
 {
 	H_AUTO(Rz_CCtrlQuad_setQuad)
@@ -353,7 +353,7 @@ void CCtrlQuad::setQuad(const NLMISC::CVector &pos, float radius, float angle /*
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setQuad(const std::string &texName, const NLMISC::CVector &srcPos, float angle /*= 0.f*/, float offCenter /* = 0.f*/)
 {
 	H_AUTO(Rz_CCtrlQuad_setQuad)
@@ -379,21 +379,21 @@ void CCtrlQuad::setQuad(const std::string &texName, const NLMISC::CVector &srcPo
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setAdditif(bool additif)
 {
 	H_AUTO(Rz_CCtrlQuad_setAdditif)
 	_Additif = additif;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setFiltered(bool filtered)
 {
 	H_AUTO(Rz_CCtrlQuad_setFiltered)
 	_Filtered = filtered;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setPattern(float umin, float umax, TWrapMode wrapMode)
 {
 	H_AUTO(Rz_CCtrlQuad_setPattern)
@@ -403,7 +403,7 @@ void CCtrlQuad::setPattern(float umin, float umax, TWrapMode wrapMode)
 	_WrapMode = wrapMode;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CCtrlQuad::setCustomUVs(const CUV uvs[4])
 {
 	H_AUTO(Rz_CCtrlQuad_setCustomUVs)
@@ -411,14 +411,14 @@ void CCtrlQuad::setCustomUVs(const CUV uvs[4])
 	_WrapMode = CustomUVs;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CCtrlQuad::handleEvent(const CEventDescriptor &/* event */)
 {
 	H_AUTO(Rz_CCtrlQuad_handleEvent)
 	return false;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CCtrlQuad::contains(const NLMISC::CVector2f &pos) const
 {
 	H_AUTO(Rz_CCtrlQuad_contains)

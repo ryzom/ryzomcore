@@ -66,7 +66,7 @@ class UWaterEnvMap;
 
 typedef void (*emptyProc)(void);
 
-//****************************************************************************
+// ****************************************************************************
 /// Monitor color properties
 struct CMonitorColorProperties
 {

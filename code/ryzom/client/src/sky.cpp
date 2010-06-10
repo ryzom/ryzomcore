@@ -38,7 +38,7 @@ using namespace NLMISC;
 H_AUTO_DECL ( RZ_Client_Render_Sky )
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 CSky::CSky()
 {
 	_Scene = NULL;
@@ -57,13 +57,13 @@ CSky::CSky()
 	_WaterEnvMapAlpha = 255;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 CSky::~CSky()
 {
 	release();
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CSky::release()
 {
 	if (_PlayListManager)
@@ -99,7 +99,7 @@ void CSky::release()
 	}
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CSky::init(UDriver *drv, const CSkySheet &sheet, bool forceFallbackVersion /*= false*/, float numHourInDay /*= 24.f*/, std::vector<std::string> *unsupportedObjects /*= NULL*/)
 {
 	release();
@@ -226,7 +226,7 @@ void CSky::init(UDriver *drv, const CSkySheet &sheet, bool forceFallbackVersion 
 	_WaterEnvMapAlpha= sheet.WaterEnvMapAlpha;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 uint CSky::setup(const CClientDate &date, const CClientDate &animationDate, float weatherLevel, CRGBA fogColor, const NLMISC::CVector &sunLightDir, bool envMapScene)
 {
 	if (!_Scene) return 0;
@@ -268,7 +268,7 @@ uint CSky::setup(const CClientDate &date, const CClientDate &animationDate, floa
 	return numVisibleObjects;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 NLMISC::CRGBA CSky::computeFogColor(const CClientDate &date, float weatherLevel) const
 {
 	if (!_FogColor) return CRGBA::White;
@@ -279,7 +279,7 @@ NLMISC::CRGBA CSky::computeFogColor(const CClientDate &date, float weatherLevel)
 }
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 CBitmap *buildSharedBitmap(const std::string &filename,
 					 std::map<std::string, CBitmap *> &bitmapByName,
 					 std::vector<CBitmap *> &builtBitmaps,

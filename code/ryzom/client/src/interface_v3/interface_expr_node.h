@@ -39,7 +39,7 @@ public:
 };
 
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 /** A constant value already parsed by interface (in a interface expr parse tree)
   */
 class CInterfaceExprNodeValue : public CInterfaceExprNode
@@ -52,7 +52,7 @@ public:
 	virtual void getDepends(std::vector<ICDBNode *> &nodes);
 };
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 /** A fct call (in a interface expr parse tree)
   */
 class CInterfaceExprNodeValueFnCall : public CInterfaceExprNode
@@ -68,7 +68,7 @@ public:
 	virtual ~CInterfaceExprNodeValueFnCall();
 };
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 /** A db leaf read (in a interface expr parse tree)
   */
 class CInterfaceExprNodeDBLeaf : public CInterfaceExprNode
@@ -81,7 +81,7 @@ public:
 	virtual void getDepends(std::vector<ICDBNode *> &nodes);
 };
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 /** A db branch read (in a interface expr parse tree)
   */
 class CInterfaceExprNodeDBBranch : public CInterfaceExprNode
@@ -94,7 +94,7 @@ public:
 	virtual void getDepends(std::vector<ICDBNode *> &nodes);
 };
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 /** A dependant db read (in a interface expr parse tree)
   * This is rarely used so no real optim there..
   */

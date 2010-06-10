@@ -28,7 +28,7 @@ namespace R2
 
 uint CDisplayerBase::ObjCount = 0;
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerBase::CDisplayerBase() : _DisplayedInstance(NULL)
 {
 	++ ObjCount;
@@ -42,14 +42,14 @@ CDisplayerBase::~CDisplayerBase()
 
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerBase::pushLuaAccess(CLuaState &ls)
 {
 	//H_AUTO(R2_CDisplayerBase_pushLuaAccess)
 	CLuaIHM::pushReflectableOnStack(ls, this);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 const CObjectTable &CDisplayerBase::getProps() const
 {
 	//H_AUTO(R2_CDisplayerBase_getProps)
@@ -64,7 +64,7 @@ const CObjectTable &CDisplayerBase::getProps() const
 	return *props;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CLuaObject &CDisplayerBase::getLuaProjection()
 {
 	//H_AUTO(R2_CDisplayerBase_getLuaProjection)

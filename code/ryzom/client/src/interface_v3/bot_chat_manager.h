@@ -76,7 +76,7 @@ public:
 	void					setChosenMissionFlags(uint flag) { _ChosenMissionFlags = flag; }
 	*/
 
-	//***
+	// ***
 	// Add a Waiter on mission prereq info (MissionHelp opening). no-op if here, but reorder
 	void				addMissionInfoWaiter(IMissionPrereqInfosWaiter *waiter);
 	// remove a Waiter on mission prereq info (MissionHelp closing). no-op if not here. NB: no delete
@@ -95,7 +95,7 @@ private:
 	static CBotChatManager *_Instance;
 	//uint           _ChosenMissionFlags;
 
-	//*** keep infos on opened mission help windows (for prerequisits)
+	// *** keep infos on opened mission help windows (for prerequisits)
 	typedef std::list<IMissionPrereqInfosWaiter*>	TMissionPrereqInfosWaiter;
 	TMissionPrereqInfosWaiter						_MissionInfoWaiters;
 

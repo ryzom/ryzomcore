@@ -107,25 +107,25 @@ private:
 };
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CAccessibilityTexture::CAccessibilityTexture() : _IslandCol(NULL)
 {
 	nlassert(0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CAccessibilityTexture::CAccessibilityTexture(CIslandCollision *islandCol) : _IslandCol(islandCol)
 {
 	// nlwarning new accessiblity texture created
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CAccessibilityTexture::~CAccessibilityTexture()
 {
 	nlwarning("Accessibility texture removed");
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CIslandCollision::CIslandCollision()
 {
 	_LastPackedIslandTestPos.set(0.f, 0.f);
@@ -135,7 +135,7 @@ CIslandCollision::CIslandCollision()
 	_AccessibilityTexture = NULL;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::releaseAccessibilityTexture()
 {
 	//H_AUTO(R2_CIslandCollision_releaseAccessibilityTexture)
@@ -145,7 +145,7 @@ void CIslandCollision::releaseAccessibilityTexture()
 	vr.setExternalTexture(_AccessibilityTextureId, NULL, 0, 0, 0, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::release()
 {
 	//H_AUTO(R2_CIslandCollision_release)
@@ -155,13 +155,13 @@ void CIslandCollision::release()
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CIslandCollision::~CIslandCollision()
 {
 	release();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CRefCountedPackedWorld *CIslandCollision::getPackedIsland()
 {
 	//H_AUTO(R2_CIslandCollision_getPackedIsland)
@@ -179,7 +179,7 @@ inline sint clamped(sint value, sint size)
 	clamp(value, 0, size - 1);
 	return value;
 }
-//*********************************************************************************************************
+// *********************************************************************************************************
 R2::CScenarioEntryPoints::CCompleteIsland *CIslandCollision::getCurrIslandDesc()
 {
 	//H_AUTO(R2_CIslandCollision_getCurrIslandDesc)
@@ -239,7 +239,7 @@ R2::CScenarioEntryPoints::CCompleteIsland *CIslandCollision::getCurrIslandDesc()
 	return &_IslandDesc;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 const NLMISC::CArray2D<sint16> &CIslandCollision::getHeightMap()
 {
 	//H_AUTO(R2_CIslandCollision_getHeightMap)
@@ -248,7 +248,7 @@ const NLMISC::CArray2D<sint16> &CIslandCollision::getHeightMap()
 	return _HeightMap;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CIslandCollision::findEmptyPlace(const CVector2f &startPos, NLMISC::CVector &dest)
 {
 	//H_AUTO(R2_CIslandCollision_findEmptyPlace)
@@ -373,7 +373,7 @@ bool CIslandCollision::findEmptyPlace(const CVector2f &startPos, NLMISC::CVector
 	return false;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::updateCurrPackedIsland()
 {
 	//H_AUTO(R2_CIslandCollision_updateCurrPackedIsland)
@@ -400,7 +400,7 @@ void CIslandCollision::updateCurrPackedIsland()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::CCompleteIsland &islandDesc)
 {
 	//H_AUTO(R2_CIslandCollision_reloadPackedIsland)
@@ -487,7 +487,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 	return _PackedIsland;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::mergeWaterSurfaces()
 {
 	//H_AUTO(R2_CIslandCollision_mergeWaterSurfaces)
@@ -531,7 +531,7 @@ void CIslandCollision::mergeWaterSurfaces()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::addInaccessibleRegion(const NLMISC::CPolygon2D &poly)
 {
 	//H_AUTO(R2_CIslandCollision_addInaccessibleRegion)
@@ -559,7 +559,7 @@ void CIslandCollision::addInaccessibleRegion(const NLMISC::CPolygon2D &poly)
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::loadEntryPoints()
 {
 	//H_AUTO(R2_CIslandCollision_loadEntryPoints)
@@ -580,7 +580,7 @@ void CIslandCollision::loadEntryPoints()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CIslandCollision::isValidPoly(const NLMISC::CPolygon2D &poly)
 {
 	//H_AUTO(R2_CIslandCollision_isValidPoly)
@@ -680,7 +680,7 @@ bool CIslandCollision::isValidPoly(const NLMISC::CPolygon2D &poly)
 	return true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CIslandCollision::isValidSegment(const NLMISC::CVector2f start, const NLMISC::CVector2f end)
 {
 	//H_AUTO(R2_CIslandCollision_isValidSegment)
@@ -704,7 +704,7 @@ bool CIslandCollision::isValidSegment(const NLMISC::CVector2f start, const NLMIS
 	return isValidPoly(extrudedSegment);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CIslandCollision::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC::CMatrix &worldMatrix)
 {
 	//H_AUTO(R2_CIslandCollision_waterSurfaceAdded)
@@ -732,7 +732,7 @@ void CIslandCollision::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const 
 	_WaterSurfs.push_back(ws);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CIslandCollision::isValidPos(const NLMISC::CVector2f &pos)
 {
 	//H_AUTO(R2_CIslandCollision_isValidPos)

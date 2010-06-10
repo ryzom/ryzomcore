@@ -57,7 +57,7 @@ static const float ImpactUserParams[MAGICFX::NUM_SPELL_POWER][4] =
 
 
 
-//*****************************************************************************************
+// *****************************************************************************************
 CProjectileManager &CProjectileManager::getInstance()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -65,7 +65,7 @@ CProjectileManager &CProjectileManager::getInstance()
 	return manager;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 const float *CProjectileManager::getProjectileFXUserParams(uint power)
 {
 	if (power < 1 || power > MAGICFX::NUM_SPELL_POWER) return NULL;
@@ -73,14 +73,14 @@ const float *CProjectileManager::getProjectileFXUserParams(uint power)
 }
 
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::addProjectileToQueue(const CProjectileBuild &pb)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
 	_ProjectileQueue.insert(pb);
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::addProjectile(const CProjectileBuild &pb)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -156,7 +156,7 @@ void CProjectileManager::addProjectile(const CProjectileBuild &pb)
 	proj.ParabolaHeight = dist * 0.01f * BOMB_MISSILE_PARABOLA_HEIGHT_FOR_100_METERS;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::updateProjectileQueue()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -170,7 +170,7 @@ void CProjectileManager::updateProjectileQueue()
 }
 
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::update()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -411,7 +411,7 @@ void CProjectileManager::update()
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 CProjectileManager::CProjectile::CProjectile()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -423,7 +423,7 @@ CProjectileManager::CProjectile::CProjectile()
 	LocalizedImpact = false;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 CProjectileManager::CProjectile::~CProjectile()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -440,7 +440,7 @@ CProjectileManager::CProjectile::~CProjectile()
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::evalFXPosition(const CFXStickMode *stickMode, CEntityCL &entity, NLMISC::CVector &result, const NLMISC::CVector &additionnalOffset /* = NLMISC::CVector::Null*/)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -497,7 +497,7 @@ void CProjectileManager::evalFXPosition(const CFXStickMode *stickMode, CEntityCL
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 sint CProjectileManager::CProjectile::getImpactBoneID(CEntityCL &target)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -507,7 +507,7 @@ sint CProjectileManager::CProjectile::getImpactBoneID(CEntityCL &target)
 	return TargetBoneID;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::CProjectile::updateTargetPos()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -601,7 +601,7 @@ void CProjectileManager::CProjectile::updateTargetPos()
 	// else use value already present in impactPos
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::CProjectile::setMatrix(const NLMISC::CMatrix &pos)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -631,7 +631,7 @@ static void convertFreeFXToAttachedFX(NL3D::UParticleSystemInstance  instance,
 	holder.attachFX(af);
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::CProjectile::shutDown(CCharacterCL *target)
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -677,7 +677,7 @@ void CProjectileManager::CProjectile::shutDown(CCharacterCL *target)
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::reset()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
@@ -686,7 +686,7 @@ void CProjectileManager::reset()
 	_ToShutDownProjectiles.clear();
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CProjectileManager::entityRemoved(uint slot)
 {
 	// TODO nico : adding anchor objects  (that can be "CRefPtr'ed" ...) to define rays / projectile paths would be a more elegant solution now (and a CAnchorRef object to dlte anchor automatically)
@@ -729,7 +729,7 @@ void CProjectileManager::entityRemoved(uint slot)
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 const CAnimationFX *CProjectileManager::getResistFX(uint level)
 {
 	H_AUTO_USE(RZ_ProjectileManager)

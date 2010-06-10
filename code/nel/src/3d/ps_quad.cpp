@@ -666,7 +666,7 @@ void CPSQuad::updateMatBeforeRendering(IDriver *drv, CVertexBuffer &vb)
 	}
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv)
 {
 	NL_PS_FUNC(CPSQuad_enumTexs)
@@ -674,7 +674,7 @@ void CPSQuad::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver 
 	CPSMultiTexturedParticle::enumTexs(dest, drv);
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::setZBias(float value)
 {
 	NL_PS_FUNC(CPSQuad_setZBias)
@@ -682,7 +682,7 @@ void CPSQuad::setZBias(float value)
 }
 
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::setTexture(CSmartPtr<ITexture> tex)
 {
 	NL_PS_FUNC(CPSQuad_setTexture)
@@ -690,7 +690,7 @@ void CPSQuad::setTexture(CSmartPtr<ITexture> tex)
 	CPSMultiTexturedParticle::touch();
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::setTextureGroup(NLMISC::CSmartPtr<CTextureGrouped> texGroup)
 {
 	NL_PS_FUNC(CPSQuad_setTextureGroup)
@@ -698,21 +698,21 @@ void CPSQuad::setTextureGroup(NLMISC::CSmartPtr<CTextureGrouped> texGroup)
 	CPSMultiTexturedParticle::touch();
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::setTexture2(ITexture *tex)
 {
 	NL_PS_FUNC(CPSQuad_setTexture2)
 	CPSMultiTexturedParticle::setTexture2(tex);
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::setTexture2Alternate(ITexture *tex)
 {
 	NL_PS_FUNC(CPSQuad_setTexture2Alternate)
 	CPSMultiTexturedParticle::setTexture2Alternate(tex);
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CPSQuad::updateTexWrapMode(IDriver &drv)
 {
 	NL_PS_FUNC(CPSQuad_updateTexWrapMode)

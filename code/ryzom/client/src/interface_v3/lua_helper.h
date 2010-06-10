@@ -54,7 +54,7 @@ private:
 
 };
 
-//**************************************************************************
+// **************************************************************************
 /** Helper class to restore the lua stack to the desired size when this object goes out of scope
   */
 class CLuaStackRestorer

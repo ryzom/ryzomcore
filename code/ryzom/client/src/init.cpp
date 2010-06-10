@@ -152,7 +152,7 @@ extern CContinentManager ContinentMngr;
 ucstring				TipsOfTheDay;
 uint					TipsOfTheDayIndex;
 
-// includes pour les register class qui suivent (grrrr !!!!)
+// includes for following register classes
 #include "entities.h"
 #include "character_cl.h"
 #include "player_cl.h"
@@ -578,7 +578,6 @@ void checkDriverDepth ()
 	}
 }
 
-
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -744,7 +743,6 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
-
 		// tmp for patcher debug
 		extern void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf);
 		extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
@@ -790,7 +788,6 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 
-
 		switch (getCurrentColorDepth())
 		{
 			case 16: CustomMouse.setColorDepth(CCustomMouse::ColorDepth16); break;
@@ -800,7 +797,6 @@ void prelogInit()
 				ExitClientError(CI18N::get("uiUnsupportedColorDepth").toUtf8().c_str());
 			break;
 		}
-
 
 		// Check driver version
 		checkDriverVersion();
@@ -834,8 +830,6 @@ void prelogInit()
 			break;
 		}
 		Driver = UDriver::createDriver ((uint)LoadIcon (HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON)), direct3D);
-
-
 
 #else // NL_OS_WINDOWS
 		Driver = UDriver::createDriver ();

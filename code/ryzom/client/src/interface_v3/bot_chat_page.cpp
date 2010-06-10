@@ -23,7 +23,7 @@
 #include "../user_entity.h"
 
 
-//*****************************************************************************
+// *****************************************************************************
 void CBotChatPage::activateWindow(const char *windowName, bool active)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();

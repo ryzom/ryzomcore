@@ -27,7 +27,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//**********************************************
+// **********************************************
 CToolPick::CToolPick(const std::string &cursCanPickInstance,
 					 const std::string &cursCannotPickInstance,
 					 const std::string &cursCanPickPos,
@@ -43,7 +43,7 @@ CToolPick::CToolPick(const std::string &cursCanPickInstance,
 	_WantMouseUp = wantMouseUp;
 }
 
-//**********************************************
+// **********************************************
 void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 {
 	//H_AUTO(R2_CToolPick_setIgnoreInstances)
@@ -81,7 +81,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 	}
 }
 
-//**********************************************
+// **********************************************
 void CToolPick::updateAfterRender()
 {
 	//H_AUTO(R2_CToolPick_updateAfterRender)
@@ -138,7 +138,7 @@ void CToolPick::updateAfterRender()
 	}
 }
 
-//**********************************************
+// **********************************************
 bool CToolPick::onMouseRightButtonClicked()
 {
 	//H_AUTO(R2_CToolPick_onMouseRightButtonClicked)
@@ -147,7 +147,7 @@ bool CToolPick::onMouseRightButtonClicked()
 	return true;
 }
 
-//**********************************************
+// **********************************************
 bool CToolPick::validate()
 {
 	//H_AUTO(R2_CToolPick_validate)
@@ -166,7 +166,7 @@ bool CToolPick::validate()
 	return true;
 }
 
-//**********************************************
+// **********************************************
 bool CToolPick::onMouseLeftButtonDown()
 {
 	//H_AUTO(R2_CToolPick_onMouseLeftButtonDown)
@@ -174,7 +174,7 @@ bool CToolPick::onMouseLeftButtonDown()
 	return validate();
 }
 
-//**********************************************
+// **********************************************
 bool CToolPick::onMouseLeftButtonClicked()
 {
 	//H_AUTO(R2_CToolPick_onMouseLeftButtonClicked)
@@ -182,7 +182,7 @@ bool CToolPick::onMouseLeftButtonClicked()
 	return validate();
 }
 
-//**********************************************
+// **********************************************
 int CToolPick::luaPick(CLuaState &ls)
 {
 	//H_AUTO(R2_CToolPick_luaPick)
@@ -191,7 +191,7 @@ int CToolPick::luaPick(CLuaState &ls)
 	return 0;
 }
 
-//**********************************************
+// **********************************************
 int CToolPick::luaCanPick(CLuaState &ls)
 {
 	//H_AUTO(R2_CToolPick_luaCanPick)

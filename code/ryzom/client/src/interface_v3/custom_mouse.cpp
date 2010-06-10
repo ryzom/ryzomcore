@@ -30,7 +30,7 @@ using namespace NL3D;
 
 #ifdef NL_OS_WINDOWS
 
-//*************************************************************************************
+// *************************************************************************************
 CCustomMouse::CCursor::CCursor() : ColorDepth(CCustomMouse::ColorDepth32),
 								   OrigHeight(32),
 								   HotspotScale(1.f),
@@ -44,7 +44,7 @@ CCustomMouse::CCursor::CCursor() : ColorDepth(CCustomMouse::ColorDepth32),
 {
 }
 
-//*************************************************************************************
+// *************************************************************************************
 CCustomMouse::CCursor::~CCursor()
 {
 	if (Icon)
@@ -53,7 +53,7 @@ CCustomMouse::CCursor::~CCursor()
 	}
 }
 
-//*************************************************************************************
+// *************************************************************************************
 CCustomMouse::CCustomMouse()
 {
 	_ColorDepth = CCustomMouse::ColorDepth32;
@@ -68,7 +68,7 @@ CCustomMouse::CCustomMouse()
 
 
 
-//*************************************************************************************
+// *************************************************************************************
 bool CCustomMouse::isAlphaBlendedCursorSupported()
 {
 	if (!_AlphaBlendedCursorSupportRetrieved)
@@ -96,7 +96,7 @@ namespace NLMISC
 	extern bool TempMaxVerboseResample;
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::addCursor(const std::string &name, const NLMISC::CBitmap &cursorBitmap)
 {
 	if (!isAlphaBlendedCursorSupported()) return;
@@ -279,7 +279,7 @@ void CCustomMouse::addCursor(const std::string &name, const NLMISC::CBitmap &cur
 }
 
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::release()
 {
 	if (!isAlphaBlendedCursorSupported()) return;
@@ -292,7 +292,7 @@ void CCustomMouse::release()
 	_Cursors.clear();
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setColorDepth(TColorDepth colorDepth)
 {
 	if (colorDepth == _ColorDepth) return;
@@ -300,14 +300,14 @@ void CCustomMouse::setColorDepth(TColorDepth colorDepth)
 	updateCursor(true);
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::updateCursor(bool forceRebuild)
 {
 	if (!Driver) return;
 	setCursor(_CurrName, _CurrCol, _CurrRot, _CurrHotSpotX, _CurrHotSpotY, forceRebuild);
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
 {
 	if (!isAlphaBlendedCursorSupported()) return;
@@ -363,7 +363,7 @@ void CCustomMouse::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 r
 
 }
 
-//*************************************************************************************
+// *************************************************************************************
 HICON CCustomMouse::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
@@ -440,7 +440,7 @@ HICON CCustomMouse::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot
 }
 
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setSystemArrow()
 {
 	extern HINSTANCE HInstance;
@@ -460,31 +460,31 @@ void CCustomMouse::setSystemArrow()
 
 // not implemented yet for other OS
 
-//*************************************************************************************
+// *************************************************************************************
 CCustomMouse::CCustomMouse()
 {
 	// NOT IMPLEMENTED
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
 {
 	// NOT IMPLEMENTED
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::release()
 {
 	// NOT IMPLEMENTED
 }
 
-//*************************************************************************************
+// *************************************************************************************
 bool CCustomMouse::isAlphaBlendedCursorSupported()
 {
 	return false;
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setSystemArrow()
 {
 	//
@@ -495,13 +495,13 @@ void CCustomMouse::addCursor(const std::string &name, const NLMISC::CBitmap &cur
 	// TODO for Linux
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::setColorDepth(TColorDepth colorDepth)
 {
 	// TODO for Linux
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CCustomMouse::updateCursor(bool forceRebuild)
 {
 	// TODO for Linux

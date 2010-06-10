@@ -27,7 +27,7 @@
 
 using namespace NLMISC;
 
-//*****************************************************************************
+// *****************************************************************************
 CDecalAnim::CDecalAnim()
 {
 	DurationInMs = 1000;
@@ -39,7 +39,7 @@ CDecalAnim::CDecalAnim()
 	EndEmissive = CRGBA::Black;
 }
 
-//*****************************************************************************
+// *****************************************************************************
 void CDecalAnim::updateDecal(const NLMISC::CVector2f &pos, float animRatio, CDecal &dest, float refScale) const
 {
 	dest.setTexture(Texture);
@@ -51,7 +51,7 @@ void CDecalAnim::updateDecal(const NLMISC::CVector2f &pos, float animRatio, CDec
 
 
 
-//*****************************************************************************
+// *****************************************************************************
 void CDecalAnim::buildFromLuaTable(CLuaObject &table)
 {
 	// retrieve a value from a lua table or affect a default value if not found

@@ -37,7 +37,7 @@
 
 CBotChatPageAll *BotChatPageAll = NULL;
 
-//*******************************************************************
+// *******************************************************************
 CBotChatPageAll::CBotChatPageAll()
 {
 	Trade			= NULL;
@@ -50,7 +50,7 @@ CBotChatPageAll::CBotChatPageAll()
 	RingSessions	= NULL;
 }
 
-//*******************************************************************
+// *******************************************************************
 CBotChatPageAll::~CBotChatPageAll()
 {
 	delete Trade;
@@ -63,7 +63,7 @@ CBotChatPageAll::~CBotChatPageAll()
 	delete RingSessions;
 }
 
-//*******************************************************************
+// *******************************************************************
 void CBotChatPageAll::init()
 {
 	Trade			= new CBotChatPageTrade;

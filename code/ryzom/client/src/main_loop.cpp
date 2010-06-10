@@ -990,7 +990,7 @@ void	endRenderSkyPart(TSkyMode skyMode)
 }
 
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // Render a part of the canopy
 static void renderCanopyPart(UScene::TRenderPart renderPart)
 {
@@ -1012,7 +1012,7 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 	SceneRoot->renderPart(renderPart);
 }
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // Render a part of the main scene
 static void renderMainScenePart(UScene::TRenderPart renderPart)
 {
@@ -1030,7 +1030,7 @@ static void renderMainScenePart(UScene::TRenderPart renderPart)
 }
 
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // Render a part of the sky
 static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
 {
@@ -1057,7 +1057,7 @@ static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
 }
 
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // Render all scenes
 void renderAll(bool forceFullDetail)
 {

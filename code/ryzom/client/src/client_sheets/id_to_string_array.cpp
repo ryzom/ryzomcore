@@ -22,13 +22,13 @@
 
 using namespace NLGEORGES;
 
-//****************************************************************************************
+// ****************************************************************************************
 CIDToStringArraySheet::CIDToStringArraySheet()
 {
 	Type = ID_TO_STRING_ARRAY;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CIDToStringArraySheet::build(const NLGEORGES::UFormElm &item)
 {
 	const UFormElm *stringArray = NULL;
@@ -50,20 +50,20 @@ void CIDToStringArraySheet::build(const NLGEORGES::UFormElm &item)
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CIDToStringArraySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialCont(Array);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CIDToString::build(const NLGEORGES::UFormElm &item)
 {
 	item.getValueByName(String, "String");
 	item.getValueByName(ID, "ID");
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CIDToString::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(ID);

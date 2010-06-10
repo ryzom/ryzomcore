@@ -22,7 +22,7 @@
 namespace R2
 {
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerLua::init(const CLuaObject &parameters)
 {
 	//H_AUTO(R2_CDisplayerLua_init)
@@ -52,13 +52,13 @@ bool CDisplayerLua::init(const CLuaObject &parameters)
 	return CDisplayerBase::init(parameters);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerLua &CDisplayerLua::CToLua::getEnclosing()
 {
 	return *(CDisplayerLua *) ((uint8 *) this - offsetof(CDisplayerLua, _ToLua)); // ugly, yes ...
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::CToLua::executeHandler(const CLuaString &eventName, int numArgs)
 {
 	CLuaState &ls = *getLua();
@@ -87,7 +87,7 @@ void CDisplayerLua::CToLua::executeHandler(const CLuaString &eventName, int numA
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::CToLua::pushLuaAccess(CLuaState &ls)
 {
 	if (_LuaTable.isValid())
@@ -102,14 +102,14 @@ void CDisplayerLua::CToLua::pushLuaAccess(CLuaState &ls)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::pushLuaAccess(CLuaState &ls)
 {
 	//H_AUTO(R2_CDisplayerLua_pushLuaAccess)
 	_ToLua.pushLuaAccess(ls);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CLuaState *CDisplayerLua::CToLua::getLua()
 {
 	if (!_LuaTable.isValid())
@@ -120,112 +120,112 @@ CLuaState *CDisplayerLua::CToLua::getLua()
 	return _LuaTable.getLuaState();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onActChanged()
 {
 	//H_AUTO(R2_CDisplayerLua_onActChanged)
 	_ToLua.onActChanged();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onContinentChanged()
 {
 	//H_AUTO(R2_CDisplayerLua_onContinentChanged)
 	_ToLua.onContinentChanged();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onPostCreate()
 {
 	//H_AUTO(R2_CDisplayerLua_onPostCreate)
 	_ToLua.onPostCreate();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onCreate()
 {
 	//H_AUTO(R2_CDisplayerLua_onCreate)
 	_ToLua.onCreate();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onErase()
 {
 	//H_AUTO(R2_CDisplayerLua_onErase)
 	_ToLua.onErase();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onPreHrcMove()
 {
 	//H_AUTO(R2_CDisplayerLua_onPreHrcMove)
 	_ToLua.onPreHrcMove();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onPostHrcMove()
 {
 	//H_AUTO(R2_CDisplayerLua_onPostHrcMove)
 	_ToLua.onPostHrcMove();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onFocus(bool focused)
 {
 	//H_AUTO(R2_CDisplayerLua_onFocus)
 	_ToLua.onFocus(focused);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onSelect(bool selected)
 {
 	//H_AUTO(R2_CDisplayerLua_onSelect)
 	_ToLua.onSelect(selected);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onAttrModified(const std::string &attrName,sint32 index)
 {
 	//H_AUTO(R2_CDisplayerLua_onAttrModified)
 	_ToLua.onAttrModified(attrName, index);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstanceCreated(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstanceCreated)
 	_ToLua.onTargetInstanceCreated(refMakerAttr, refMakerAttrIndex);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstanceErased(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstanceErased)
 	_ToLua.onTargetInstanceErased(refMakerAttr, refMakerAttrIndex);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstanceEraseRequested(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstanceEraseRequested)
 	_ToLua.onTargetInstanceEraseRequested(refMakerAttr, refMakerAttrIndex);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstanceAttrModified(const std::string &refMakerAttr,sint32 refMakerAttrIndex,const std::string &targetAttrName,sint32 targetAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstanceAttrModified)
 	_ToLua.onTargetInstanceAttrModified(refMakerAttr, refMakerAttrIndex, targetAttrName, targetAttrIndex);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstancePreHrcMove(const std::string &refMakerAttr,sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstancePreHrcMove)
 	_ToLua.onTargetInstancePreHrcMove(refMakerAttr, refMakerAttrIndex);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerLua::onTargetInstancePostHrcMove(const std::string &refMakerAttr,sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CDisplayerLua_onTargetInstancePostHrcMove)

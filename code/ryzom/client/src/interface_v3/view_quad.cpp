@@ -21,7 +21,7 @@
 
 using namespace NLMISC;
 
-//*********************************************************************************
+// *********************************************************************************
 CViewQuad::CViewQuad() : CViewBase(TCtorParam()), _Color(CRGBA::White),
 												  _Additif(false),
 												  _UMin(0.f),
@@ -36,14 +36,14 @@ CViewQuad::CViewQuad() : CViewBase(TCtorParam()), _Color(CRGBA::White),
 	_RealQuad.Uv3.set(0.f, 1.f);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool CViewQuad::parse(xmlNodePtr /* cur */, CInterfaceGroup * /* parentGroup */)
 {
 	nlassert(0); // NOT IMPLEMENTED (only created dynamically at this time)
 	return false;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::updateCoords()
 {
 	CViewBase::updateCoords();
@@ -53,7 +53,7 @@ void CViewQuad::updateCoords()
 	_RealQuad.set(_Quad.V0 + delta, _Quad.V1 + delta, _Quad.V2 + delta, _Quad.V3 + delta);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::draw()
 {
 	nlassert(_Parent);
@@ -270,13 +270,13 @@ void CViewQuad::draw()
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setAlpha(sint32 a)
 {
 	_Color.A = (uint8) a;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setTexture(const std::string &texName)
 {
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -284,7 +284,7 @@ void CViewQuad::setTexture(const std::string &texName)
 	_TextureId.setTexture(texName.c_str());
 }
 
-//*********************************************************************************
+// *********************************************************************************
 std::string CViewQuad::getTexture() const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -292,7 +292,7 @@ std::string CViewQuad::getTexture() const
 	return rVR.getTextureNameFromId (_TextureId);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setQuad(const CQuad &quad)
 {
 	float qXMin = minof(quad.V0.x, quad.V1.x, quad.V2.x, quad.V3.x);
@@ -307,7 +307,7 @@ void CViewQuad::setQuad(const CQuad &quad)
 	_Quad = quad;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setQuad(const NLMISC::CVector &start, const NLMISC::CVector &end, float thickness)
 {
 	CVector right = end - start;
@@ -316,7 +316,7 @@ void CViewQuad::setQuad(const NLMISC::CVector &start, const NLMISC::CVector &end
 	setQuad(CQuad(start + up, end + up, end - up, start - up));
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setQuad(const NLMISC::CVector &pos, float radius, float angle /*=0.f*/)
 {
 	if (angle == 0.f)
@@ -330,7 +330,7 @@ void CViewQuad::setQuad(const NLMISC::CVector &pos, float radius, float angle /*
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setQuad(const std::string &texName, const NLMISC::CVector &srcPos, float angle /*= 0.f*/, float offCenter /* = 0.f*/)
 {
 	NLMISC::CVector pos = srcPos;
@@ -355,13 +355,13 @@ void CViewQuad::setQuad(const std::string &texName, const NLMISC::CVector &srcPo
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setAdditif(bool additif)
 {
 	_Additif = additif;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewQuad::setPattern(float umin, float umax, TWrapMode wrapMode)
 {
 	nlassert((uint) wrapMode < WrapModeCount);

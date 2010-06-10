@@ -1583,7 +1583,7 @@ void CEntityCL::setClusterSystem(UInstanceGroup *cluster)
 	}
 }// setCluster //
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 NL3D::UInstanceGroup *CEntityCL::getClusterSystem()
 {
 	if (!_Skeleton.empty()) return _Skeleton.getClusterSystem();

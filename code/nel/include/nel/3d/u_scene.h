@@ -49,7 +49,7 @@ class UPointLight;
 class UWaterEnvMap;
 
 
-//****************************************************************************
+// ****************************************************************************
 // useful callback for createInstanceGroupAndAddToSceneAsync
 class IAsyncLoadCallback
 {
@@ -80,7 +80,7 @@ public:
 };
 
 
-//****************************************************************************
+// ****************************************************************************
 /**
  * Game Interface for Scene.
  * A UScene create instances, camera lights etc...  Those objects are not sharable through different scenes. You

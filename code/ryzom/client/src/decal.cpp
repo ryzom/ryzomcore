@@ -89,7 +89,7 @@ static NL3D::CVertexProgram DecalAttenuationVertexProgram(DecalAttenuationVertex
 
 typedef CShadowPolyReceiver::CRGBAVertex CRGBAVertex;
 
-//****************************************************************************
+// ****************************************************************************
 CDecal::CDecal()
 {
 	_ShadowMap = new CShadowMap(&(((CSceneUser *) Scene)->getScene().getRenderTrav().getShadowMapManager()));
@@ -134,7 +134,7 @@ CDecal::CDecal()
 	_TopBlendZMax = 10100.f;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 {
 	if (_CustomUVMatrix.set(on, matrix))
@@ -143,7 +143,7 @@ void CDecal::setCustomUVMatrix(bool on, const NLMISC::CMatrix &matrix)
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 const std::string &CDecal::getTextureFileName() const
 {
 	CTextureFile *tf = dynamic_cast<CTextureFile *>(_Material.getTexture(0));
@@ -152,39 +152,39 @@ const std::string &CDecal::getTextureFileName() const
 	return emptyString;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setupMaterialColor()
 {
 	_Material.texConstantColor(1,  NLMISC::CRGBA(_Emissive.R, _Emissive.G, _Emissive.B, _Diffuse.A));
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setEmissive(NLMISC::CRGBA emissive)
 {
 	_Emissive = emissive;
 	setupMaterialColor();
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setDiffuse(NLMISC::CRGBA diffuse)
 {
 	_Diffuse = diffuse;
 	setupMaterialColor();
 }
 
-//****************************************************************************
+// ****************************************************************************
 CRGBA CDecal::getDiffuse() const
 {
 	return _Diffuse;
 }
 
-//****************************************************************************
+// ****************************************************************************
 CDecal::~CDecal()
 {
 	delete _ShadowMap;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clampV, bool filtered)
 {
 	if (getTextureFileName() != fileName)
@@ -225,7 +225,7 @@ void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clamp
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setWorldMatrix(const NLMISC::CMatrix &matrix)
 {
 	float newMat[16];
@@ -253,7 +253,7 @@ void CDecal::setWorldMatrix(const NLMISC::CMatrix &matrix)
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 bool CDecal::clipFront(const NLMISC::CPlane &p) const
 {
 	for(uint k = 0; k < 8; ++k)
@@ -263,7 +263,7 @@ bool CDecal::clipFront(const NLMISC::CPlane &p) const
 	return true;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start,    const NLMISC::CVector2f &end,    float halfWidth)
 {
 	CMatrix matrix;
@@ -274,7 +274,7 @@ void CDecal::setWorldMatrixForArrow(const NLMISC::CVector2f &start,    const NLM
 	setWorldMatrix(matrix);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos,  float radius, float angleInRadians)
 {
 	CMatrix matrix;
@@ -288,7 +288,7 @@ void CDecal::setWorldMatrixForSpot(const NLMISC::CVector2f &pos,  float radius, 
 NLMISC::CVector r2MaskOffset(1.f / 4.f,  1.f / 4.f,  0.f);
 
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* receiver */, bool useVertexProgram)
 {
 	if (_TriCache.empty()) return;
@@ -400,7 +400,7 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::render(NL3D::UDriver &/* drv */,
 					NL3D::CShadowPolyReceiver &receiver,
 					const std::vector<CPlane> &worldPyramid,
@@ -534,7 +534,7 @@ void CDecal::render(NL3D::UDriver &/* drv */,
 	renderTriCache(*drvInternal, receiver, useVertexProgram);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecalRenderList::renderAllDecals()
 {
 	if (_Empty) return;
@@ -588,7 +588,7 @@ void CDecalRenderList::renderAllDecals()
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecalRenderList::clearRenderList()
 {
 	for(uint k = 0; k < DECAL_NUM_PRIORITIES; ++k)
@@ -598,7 +598,7 @@ void CDecalRenderList::clearRenderList()
 	_Empty = true;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::addToRenderList(uint priority /*=0*/)
 {
 	if( !Landscape)
@@ -611,14 +611,14 @@ void CDecal::addToRenderList(uint priority /*=0*/)
 	drl._Empty = false;
 }
 
-//****************************************************************************
+// ****************************************************************************
 bool CDecal::contains(const NLMISC::CVector2f &pos) const
 {
 	CVector posIn = _InvertedWorldMatrix * CVector(pos.x, pos.y, 0.f);
 	return posIn.x >= 0.f && posIn.x <= 1.f && posIn.y >= 0.f && posIn.y <= 1.f;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setClipDownFacing(bool clipDownFacing)
 {
 	if (clipDownFacing != _ClipDownFacing)
@@ -628,7 +628,7 @@ void CDecal::setClipDownFacing(bool clipDownFacing)
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setBottomBlend(float zMin, float zMax)
 {
 	if (zMin > zMax) std::swap(zMin, zMax);
@@ -636,7 +636,7 @@ void CDecal::setBottomBlend(float zMin, float zMax)
 	_BottomBlendZMax = zMax;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDecal::setTopBlend(float zMin, float zMax)
 {
 	if (zMin > zMax) std::swap(zMin, zMax);
