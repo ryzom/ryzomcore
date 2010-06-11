@@ -397,22 +397,24 @@ void CContinentManager::select(const CVectorD &pos, NLMISC::IProgressCallback &p
 		CContinent *pCont = it->second;
 		nlinfo("Looking into %s", pCont->SheetName.c_str());
 		if (pCont->Zone.VPoints.size() > 0) // Patch because some continent have not been done yet
-		if (pCont->Zone.contains(fPos))
 		{
-			// load the continent selected.
-			select (it->first, pos, progress);
-			return;
-		}
-		else
-		{
-			/*
-			nlwarning("**********************************************");
-			nlwarning("Start position (%s) not found in continent %s", NLMISC::toString(pos.asVector()).c_str(), it->first.c_str());
-			for(uint k = 0; k < pCont->Zone.VPoints.size(); ++k)
+			if (pCont->Zone.contains(fPos))
 			{
-				nlwarning("zone point %d = %s", (int)k, NLMISC::toString(pCont->Zone.VPoints[k]).c_str());
+				// load the continent selected.
+				select (it->first, pos, progress);
+				return;
 			}
-			*/
+			else
+			{
+				/*
+				nlwarning("**********************************************");
+				nlwarning("Start position (%s) not found in continent %s", NLMISC::toString(pos.asVector()).c_str(), it->first.c_str());
+				for(uint k = 0; k < pCont->Zone.VPoints.size(); ++k)
+				{
+					nlwarning("zone point %d = %s", (int)k, NLMISC::toString(pCont->Zone.VPoints[k]).c_str());
+				}
+				*/
+			}
 		}
 		it++;
 	}

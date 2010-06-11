@@ -80,7 +80,7 @@ namespace R2
 	public:
 		virtual ~IServerEditionModule(){}
 		virtual void createSessionWithoutSu(uint32 charId, NLMISC::CEntityId clientEid) = 0;
-		virtual TPioneersSessionsAllowed * const getSessionAllowedForChar(TCharId charId) const = 0;
+		virtual TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const = 0;
 		virtual CScenario* getScenarioById(TSessionId sessionId) const = 0;
 		// getEditing position (use AdminModule::getPosition for having a position in editing and animation mode)
 		virtual	bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 locationIndex = 0) = 0;

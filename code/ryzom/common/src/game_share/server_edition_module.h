@@ -474,7 +474,7 @@ namespace R2
 		TUserRole getRoleByCharId(TCharId charId) const;
 
 		// get the session that is about to be joined by a client, or NULL if not found
-		TPioneersSessionsAllowed * const getSessionAllowedForChar(TCharId charId) const;
+		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const;
 		// get the scenario use by the user
 
 		CScenario*  getScenarioByCharId(TCharId charId) const;

@@ -1208,7 +1208,7 @@ public:
 protected:
 
 	/// Default constructor
-	CMirrorPropValueList() : _PtFront(NULL), _Container(NULL), _PropLocation() {}
+	CMirrorPropValueList() : _Container(NULL), _PtFront(NULL), _PropLocation() {}
 
 	TSharedListRow		allocateNewCell();
 

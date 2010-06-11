@@ -192,7 +192,7 @@ public:
 					}
 					if (newStep)
 					{
-						if (loginStep.Step == LoginStep_Stop)
+						if (loginStep.Step == (uint)LoginStep_Stop)
 						{
 							break;
 						}
