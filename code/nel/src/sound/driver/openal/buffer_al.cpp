@@ -24,7 +24,7 @@ namespace NLSOUND {
 
 CBufferAL::CBufferAL(ALuint buffername) :
 	IBuffer(), _BufferName(buffername), _SampleFormat(AL_INVALID), _Frequency(0),
-	_DataAligned(NULL), _DataPtr(NULL), _Capacity(0), _Size(0), _StorageMode(IBuffer::StorageAuto)
+	_DataAligned(NULL), _DataPtr(NULL), _Capacity(0), _Size(0), _StorageMode(IBuffer::StorageAuto), _IsLoaded(false)
 {
 	
 }
@@ -76,6 +76,8 @@ uint8 *CBufferAL::lock(uint capacity)
 {
 	nlassert((_SampleFormat != AL_INVALID) && (_Frequency != 0));
 
+	_IsLoaded = false;
+
 	if (_DataPtr)
 	{
 		if (capacity > _Capacity) 
@@ -114,9 +116,12 @@ bool CBufferAL::unlock(uint size)
 		_DataPtr = NULL;
 		_Capacity = 0;
 	}
-
+	
 	// Error handling
-	return (alGetError() == AL_NO_ERROR);
+	if (alGetError() == AL_NO_ERROR)
+		_IsLoaded = true;
+	
+	return _IsLoaded;
 }
 
 /// Copy the data with specified size into the buffer. A readable local copy is only guaranteed when OptionLocalBufferCopy is set. Returns true if ok.
@@ -153,9 +158,12 @@ bool CBufferAL::fill(const uint8 *src, uint size)
 	
 	// Fill buffer (OpenAL one)
 	alBufferData(_BufferName, _SampleFormat, src, size, _Frequency);
-
+	
 	// Error handling
-	return (alGetError() == AL_NO_ERROR);
+	if (alGetError() == AL_NO_ERROR)
+		_IsLoaded = true;
+	
+	return _IsLoaded;
 }
 
 /// Return the sample format informations.
@@ -233,7 +241,7 @@ NLMISC::TStringId CBufferAL::getName() const
 
 bool CBufferAL::isBufferLoaded() const
 {
-	return (_SampleFormat != AL_INVALID && _DataPtr != NULL /* ? */ && _Size > 0 && _Frequency > 0);
+	return _IsLoaded;
 }
 
 	

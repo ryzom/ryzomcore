@@ -96,6 +96,8 @@ private:
 	uint _Size;
 	/// Storage mode
 	IBuffer::TStorageMode _StorageMode;
+	/// Buffer loaded or not
+	bool _IsLoaded;
 
 };
 
