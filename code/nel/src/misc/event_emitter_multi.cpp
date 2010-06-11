@@ -83,7 +83,6 @@ void CEventEmitterMulti::submitEvents(CEventServer &server, bool allWindows)
 ///============================================================
 void CEventEmitterMulti::emulateMouseRawMode(bool enable)
 {
-	nlerror("no raw mode emulation on windows, the CDIMouse has a real raw mode");
 }
 
 ///============================================================
