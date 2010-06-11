@@ -26,6 +26,7 @@ class CCocoaEventEmitter : public IEventEmitter
 {
 public:
 	virtual void submitEvents(CEventServer & server, bool allWindows);
+	virtual void emulateMouseRawMode(bool enable);
 };
 	
 }

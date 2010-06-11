@@ -427,72 +427,46 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 	dx = 0.0f;
 	dy = 0.0f;
 
-
 	// The mouse may still "StandardMove" ie through a CEventMouseMove
-	// This can happens cause DirectInputDisabled, or because of the "Rotation Anti-Lag system"
-	// which start to rotate before the mouse is hid and message mode passed to RawMode
+	// This can happens cause DirectInputDisabled, or because of the 
+	// "Rotation Anti-Lag system" which start to rotate before the mouse is hid 
+	// and message mode passed to RawMode
 	// 
-	// If we are not on Windows; on X11 there is always StandardMove/CEventMouseMove.
-	// Currently, there is only a direct input IMouseDevice, not available on X11.
+	// On X11 and Cocoa, there is no MouseDevice, do it without.
 
-#ifdef NL_OS_WINDOWS
 	extern IMouseDevice				*MouseDevice;
-	if (MouseDevice)
-	{
-		if( EventsListener.getMousePosX() != _LastFrameMousePosX ||
-			EventsListener.getMousePosY() != _LastFrameMousePosY )
-		{
-			float	dmpx= EventsListener.getMousePosX() - _LastFrameMousePosX;
-			float	dmpy= EventsListener.getMousePosY() - _LastFrameMousePosY;
-			// simulate mickeys mode
-			MouseDevice->convertStdMouseMoveInMickeys(dmpx, dmpy);
-			if(ClientCfg.FreeLookInverted) dmpy = -dmpy;
-			// update free look
-			EventsListener.updateFreeLookPos(dmpx, dmpy);
-		}
-	}
-#else
-	// On X11 and Mac, do the thing without IMouseDevice implementation
+
+	// if the mouse position changed
 	if( EventsListener.getMousePosX() != _LastFrameMousePosX ||
 		EventsListener.getMousePosY() != _LastFrameMousePosY )
 	{
-		float	dmpx, dmpy;
-		
-		// On X11 and Cocoa in free look mode, the mouse is pulled back to (0.5, 0.5) 
-		// every update to prevent reaching a border and get stuck.
-		if(IsMouseFreeLook()) 
-		{
-			/*
-				TODO on X11, use setCapture to not fake it, capture on mac?
-			*/
-			dmpx = EventsListener.getMousePosX() - 0.5;
-			dmpy = EventsListener.getMousePosY() - 0.5;
-		}
-		else 
-		{
-			dmpx = EventsListener.getMousePosX() - _LastFrameMousePosX;
-			dmpy = EventsListener.getMousePosY() - _LastFrameMousePosY;
-		}
-		
-		// TODO: read desktop mouse speed value on X11 and Cocoa
-		// implement X11MouseDevice/CocoaMouseDevice?
-		dmpx *= 450.0f; 
-		dmpy *= 450.0f;
+		// get the mouse movement delta
+		float	dmpx= EventsListener.getMousePosX() - _LastFrameMousePosX;
+		float	dmpy= EventsListener.getMousePosY() - _LastFrameMousePosY;
 
+		// simulate mickeys mode if there is a mouse device
+		if (MouseDevice)
+			MouseDevice->convertStdMouseMoveInMickeys(dmpx, dmpy);
+		else
+		{
+			dmpx *= (float)Driver->getWindowWidth();
+			dmpy *= (float)Driver->getWindowHeight();
+		}
+
+		// handle inverted mouse, if enabled
 		if(ClientCfg.FreeLookInverted) dmpy = -dmpy;
+		
 		// update free look
 		EventsListener.updateFreeLookPos(dmpx, dmpy);
 	}
-#endif
 
 	// If the mouse move on the axis X, with a CGDMouseMove
 	if(EventsListener.isMouseAngleX())
 		dx = -EventsListener.getMouseAngleX ();
+
 	// If the mouse move on the axis Y, with a CGDMouseMove
 	if(EventsListener.isMouseAngleY())
 		dy = EventsListener.getMouseAngleY ();
-
-
 }
 
 

@@ -571,6 +571,11 @@ public:
 		  */
 		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
 
+		/**
+		 * wrapper for IEventEmitter::emulateMouseRawMode()
+		 */
+		virtual void emulateMouseRawMode(bool enable) = 0;
+
 		// get delay used for mouse double click
 		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;
 

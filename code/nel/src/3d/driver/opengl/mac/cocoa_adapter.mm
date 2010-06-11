@@ -19,6 +19,7 @@
 #include "cocoa_adapter.h"
 
 #include "nel/misc/events.h"
+#include "nel/misc/game_device_events.h"
 #include "nel/3d/driver.h"
 
 #include "cocoa_event_emitter.h"
@@ -33,11 +34,13 @@
 
 namespace NL3D { namespace MAC {
 
-static NSApplication*     g_app    = nil;
-static NSAutoreleasePool* g_pool   = nil;
-static CocoaWindow*       g_window = nil;
-static CocoaOpenGLView*   g_glview = nil;
-static NSOpenGLContext*   g_glctx  = nil;
+static NSApplication*     g_app            = nil;
+static NSAutoreleasePool* g_pool           = nil;
+static CocoaWindow*       g_window         = nil;
+static CocoaOpenGLView*   g_glview         = nil;
+static NSOpenGLContext*   g_glctx          = nil;
+static bool               g_emulateRawMode = false;
+
 
 #define UGLY_BACKBUFFER_SIZE_WORKAROUND
 
@@ -77,13 +80,17 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	/*
 		TODO use show and resizable flags
 	*/
+
+	/*
+		TODO add menu, on quit send EventDestroyWindowId
+	*/
 	
 	// create a cocoa window with the size provided by the mode parameter
 	g_window = [[CocoaWindow alloc] 
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
-		styleMask:NSTitledWindowMask | NSResizableWindowMask |
-			NSClosableWindowMask | NSMiniaturizableWindowMask
-		backing:NSBackingStoreBuffered
+		styleMask:NSTitledWindowMask | NSResizableWindowMask | 
+			NSClosableWindowMask | NSMiniaturizableWindowMask 
+		backing:NSBackingStoreBuffered 
 		defer:NO];
 
 	if(!g_window)
@@ -130,7 +137,7 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	// enable mouse move events, NeL wants them
 	[g_window setAcceptsMouseMovedEvents:YES];
 
-	// there are no overlapping subview, so we can use the magical optimization!
+	// there are no overlapping subviews, so we can use the magical optimization!
 	[g_window useOptimizedDrawing:YES];
 
 	// create a opengl context for the view
@@ -139,7 +146,7 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 	if(!g_glctx)
 		nlerror("cannot create context");
 
-	// make the views opengl context the currrent one
+	// make the view's opengl context the currrent one
 	[g_glctx makeCurrentContext];
 
 	// put the window to the front and make it the key window
@@ -178,9 +185,6 @@ bool setMode(const GfxMode& mode)
 	// leave fullscreen mode, enter windowed mode
 	if(mode.Windowed && [g_glview isInFullScreenMode])
 	{
-		// pull the view back from fullscreen restoring window options
-		[g_glview exitFullScreenModeWithOptions:nil];
-
 		// disable manual setting of back buffer size, cocoa handles this 
 		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[g_glctx CGLContextObj], 
@@ -189,6 +193,9 @@ bool setMode(const GfxMode& mode)
 		if(error != kCGLNoError)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)", 
 				CGLErrorString(error));
+
+		// pull the view back from fullscreen restoring window options
+		[g_glview exitFullScreenModeWithOptions:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
@@ -205,20 +212,21 @@ bool setMode(const GfxMode& mode)
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-		/*
-			TODO check if simply using NSView enterFullScreenMode is a good idea.
-			 the context can be set to full screen as well, performance differences?
-		*/
 		[g_glview enterFullScreenMode:[NSScreen mainScreen] withOptions: 		
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
 					NSApplicationPresentationHideDock | 
 					NSApplicationPresentationAutoHideMenuBar],
 				NSFullScreenModeApplicationPresentationOptions, nil]];
+
+		/*
+			TODO check if simply using NSView enterFullScreenMode is a good idea.
+			 the context can be set to full screen as well, performance differences?
+		*/
 	}	
 		
 #ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
-	// due to the back buffer size reading problem, just store the size
+	// due to a back buffer size reading problem, just store the size
 	g_bufferSize[0] = mode.Width;
 	g_bufferSize[1] = mode.Height;
 #endif
@@ -240,13 +248,18 @@ void getWindowSize(uint32 &width, uint32 &height)
 	// not the one from the window.
 	
 #ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
+	// in fullscreen mode
 	if([g_glview isInFullScreenMode])
 	{
+		// use the size stored in setMode()
 		width = g_bufferSize[0];
 		height = g_bufferSize[1];
 	}
+
+	// in windowed mode
 	else
 	{
+		// use the size of the view
 		NSRect rect = [g_glview frame];
 		width = rect.size.width;
 		height = rect.size.height;
@@ -264,7 +277,7 @@ void getWindowSize(uint32 &width, uint32 &height)
 		nlerror("cannot check kCGLCESurfaceBackingSize state (%s)", 
 			CGLErrorString(error));
 	
-	// if in fullscreen mode
+	// if in fullscreen mode (only in fullscreen back buffer sizing is used)
 	if(surfaceBackingSizeSet)
 	{
 		/*
@@ -341,20 +354,13 @@ void swapBuffers()
 
 void setCapture(bool b)
 {
-	/*
-		TODO implement capture cursor, no need to fake using pull back to 0.5 / 0.5
-			set a flag and then act accordingly in event loop?
-			
-			// no screen bounds...
-			void CGGetLastMouseDelta(CGMouseDelta* deltaX, CGMouseDelta* deltaY);
-	*/
-	nlwarning("not implemented");
+	// no need to capture
 }
 
 void showCursor(bool b)
 {
 	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
-	// twice requires two calls to show to make the cursor visible again.
+	// twice requires two calls to "show" to make the cursor visible again.
 	// Since other platforms seem to not do this, the functionality is masked here
 	// by only calling hide if the cursor is visible and only calling show if
 	// the cursor was hidden.
@@ -379,6 +385,10 @@ void showCursor(bool b)
 
 void setMousePos(float x, float y) 
 {
+	/*
+		TODO FIXME for windows placed on non primary monitor
+	*/
+	
 	// CG wants absolute coordinates related to screen top left
 	CGFloat fromScreenLeft = 0.0;
 	CGFloat fromScreenTop  = 0.0;
@@ -571,7 +581,7 @@ NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
 
 bool isTextKeyEvent(NSEvent* event)
 {
-	// if there are no characters provided with this event, is is not a text event
+	// if there are no characters provided with this event, it is not a text event
 	if([[event characters] length] == 0)
 		return false;
 
@@ -621,6 +631,11 @@ bool isTextKeyEvent(NSEvent* event)
 	return false;
 }
 
+void emulateMouseRawMode(bool enable)
+{
+	g_emulateRawMode = enable;
+}
+
 void submitEvents(NLMISC::CEventServer& server,
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter)
 {
@@ -641,8 +656,6 @@ void submitEvents(NLMISC::CEventServer& server,
 		if(!event)
 			break;
 
-		// NSLog(@"%@", event);
-
 		// get the views size
 		NSRect rect = [g_glview frame];
 
@@ -651,7 +664,7 @@ void submitEvents(NLMISC::CEventServer& server,
 		float mouseX = event.locationInWindow.x / (float)rect.size.width;
 		float mouseY = event.locationInWindow.y / (float)rect.size.height;
 
-		// if the mouse event was placed on the window's titlebar, ignore it
+		// if the mouse event was placed on the window's titlebar, don't tell NeL :)
 		if(mouseY > 1.0 && event.type != NSKeyDown && event.type != NSKeyUp)
 		{
 			[g_app sendEvent:event];
@@ -662,58 +675,106 @@ void submitEvents(NLMISC::CEventServer& server,
 		switch(event.type)
 		{
 		case NSLeftMouseDown:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
+		}
 		break;
 		case NSLeftMouseUp:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
 				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
-		break;
+			break;
+		}
 		case NSRightMouseDown:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
 				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
-		break;
+			break;
+		}
 		case NSRightMouseUp:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
 				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
-		break;
+			break;
+		}
 		case NSMouseMoved:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
-			server.postEvent(new NLMISC::CEventMouseMove(
-				mouseX, mouseY, (NLMISC::TMouseButton)0 /* modifiers */, eventEmitter));
-		break;
-		case NSLeftMouseDragged:
-			/*
-				TODO modifiers with mouse events
-			*/
-			// nldebug("mouse left drag %f %f", mouseX, mouseY);
+			NLMISC::CEvent* nelEvent;
+			
+			// when emulating raw mode, send the delta in a CGDMouseMove event 
+			if(g_emulateRawMode)
+				nelEvent = new NLMISC::CGDMouseMove(
+					eventEmitter, NULL /* no mouse device */, event.deltaX, -event.deltaY);
 
-			server.postEvent(new NLMISC::CEventMouseMove(
-				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
-		break;
-		case NSRightMouseDragged:break;
+			// normally send position in a CEventMouseMove
+			else
+				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY, 
+					(NLMISC::TMouseButton)0 /* modifiers */, eventEmitter);
+
+
+			server.postEvent(nelEvent);
+			break;
+		}
+		case NSLeftMouseDragged:
+		{
 			/*
 				TODO modifiers with mouse events
 			*/
-			server.postEvent(new NLMISC::CEventMouseMove(
-				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
+			NLMISC::CEvent* nelEvent;
+
+			// when emulating raw mode, send the delta in a CGDMouseMove event 
+			if(g_emulateRawMode)
+				nelEvent = new NLMISC::CGDMouseMove(
+					eventEmitter, NULL /* no mouse device */, event.deltaX, -event.deltaY);
+
+			// normally send position in a CEventMouseMove
+			else
+				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY, 
+					NLMISC::leftButton /* modifiers */, eventEmitter);
+
+			server.postEvent(nelEvent);
+			break;
+		}
+		case NSRightMouseDragged:
+		{
+			/*
+				TODO modifiers with mouse events
+			*/
+			NLMISC::CEvent* nelEvent;
+
+			// when emulating raw mode, send the delta in a CGDMouseMove event 
+			if(g_emulateRawMode)
+				nelEvent = new NLMISC::CGDMouseMove(
+					eventEmitter, NULL /* no mouse device */, event.deltaX, -event.deltaY);
+
+			// normally send position in a CEventMouseMove
+			else
+				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY, 
+					NLMISC::rightButton /* modifiers */, eventEmitter);
+
+			server.postEvent(nelEvent);
+			break;
+		}
 		case NSMouseEntered:break;
 		case NSMouseExited:break;
 		case NSKeyDown:
+		{
 			// push the key press event to the event server
 			server.postEvent(new NLMISC::CEventKeyDown(
 				virtualKeycodeToNelKey([event keyCode]), 
@@ -735,14 +796,17 @@ void submitEvents(NLMISC::CEventServer& server,
 					NLMISC::noKeyButton, 
 					eventEmitter));
 			}
-		break;
+			break;
+		}
 		case NSKeyUp:
+		{
 			// push the key release event to the event server
 			server.postEvent(new NLMISC::CEventKeyUp(
 				virtualKeycodeToNelKey([event keyCode]), 
 				modifierFlagsToNelKeyButton([event modifierFlags]), 
 				eventEmitter));
-		break;
+			break;
+		}
 		case NSFlagsChanged:break;
 		case NSAppKitDefined:break;
 		case NSSystemDefined:break;
@@ -762,9 +826,11 @@ void submitEvents(NLMISC::CEventServer& server,
 		case NSEventTypeBeginGesture:break;
 		case NSEventTypeEndGesture:break;
 		default:
+		{
 			nlwarning("Unknown event type. dropping.");
 			// NSLog(@"%@", event);
-		break;
+			break;
+		}
 		}
 
 		[g_app sendEvent:event];

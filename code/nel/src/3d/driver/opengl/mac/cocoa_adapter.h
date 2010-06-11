@@ -89,6 +89,9 @@ void release();
 void submitEvents(NLMISC::CEventServer& server, 
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter);
 
+/// mac specific stuff while calling CCocoaEventEmitter::emulateMouseRawMode()
+void emulateMouseRawMode(bool enable);
+
 }}
 
 #endif

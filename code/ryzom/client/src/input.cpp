@@ -198,20 +198,24 @@ void	UpdateMouse ()
 		// Raw mode
 		if (MouseDevice)
 		{
-
 			MouseDevice->setMessagesMode(IMouseDevice::RawMode);
 			MouseDevice->setMouseAcceleration(ClientCfg.FreeLookAcceleration);
+		}
+		else
+		{
+			// no mouse device implementation on X11 and Cocoa, emulate raw mode
+			Driver->emulateMouseRawMode(true);
 		}
 	}
 	else
 	{
-		// Get the driver size
-		uint32 width, height;
-		Driver->getWindowSize(width, height);
-
 		// Set the mouse properties
 		if (MouseDevice)
 		{
+			// Get the driver size
+			uint32 width, height;
+			Driver->getWindowSize(width, height);
+
 			MouseDevice->setMessagesMode(IMouseDevice::NormalMode);
 			MouseDevice->setMouseMode(IMouseDevice::XAxis, IMouseDevice::Clamped);
 			MouseDevice->setMouseMode(IMouseDevice::YAxis, IMouseDevice::Clamped);
@@ -220,6 +224,11 @@ void	UpdateMouse ()
 			MouseDevice->setFactors(1.f/std::max((float)width, 1.0f), 1.f/std::max((float)height, 1.0f));
 			MouseDevice->setMouseSpeed(MouseCursorSpeed);
 			MouseDevice->setMouseAcceleration(MouseCursorAcceleration);
+		}
+		else
+		{
+			// no mouse device implementation on X11 and Cocoa, emulate raw mode
+			Driver->emulateMouseRawMode(false);
 		}
 	}
 	if (!IsSystemCursorCaptured())
@@ -249,13 +258,6 @@ void	SetMouseFreeLook ()
 		}
 		UpdateMouse ();
 	}
-	
-#ifdef NL_OS_UNIX
-	// on X11 and cocoa the mouse needs to get pulled into the middle each update, 
-	// else the cursor would reach the border of the window / desktop 
-	// and freelook would hang
-	Driver->setMousePos(0.5f, 0.5f);
-#endif
 }
 
 //*********************************************************************************
@@ -404,6 +406,9 @@ bool IsSystemCursorCaptured()
 #ifdef NL_OS_WINDOWS
 	return GetCapture() == Driver->getDisplay();
 #else
+	/*
+		TODO there should be a way to ask the driver if capturing is on or off
+	*/
 	return MouseCapture;
 #endif
 }

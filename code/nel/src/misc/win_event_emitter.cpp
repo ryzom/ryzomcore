@@ -52,6 +52,13 @@ void CWinEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	_InternalServer.pump (allWindows);
 }
 
+/*------------------------------------------------------------------*\
+							emulateMouseRawMode()
+\*------------------------------------------------------------------*/
+void CWinEventEmitter::emulateMouseRawMode(bool enable)
+{
+	nlerror("no raw mode emulation on windows, the CDIMouse has a real raw mode");
+}
 
 /*------------------------------------------------------------------*\
 							processMessage()

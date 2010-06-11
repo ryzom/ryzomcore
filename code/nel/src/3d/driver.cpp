@@ -34,7 +34,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x65; // Added nlWindow patch.
+const uint32 IDriver::InterfaceVersion = 0x66; // added IEventEmitter::emulateMouseRawMode(bool)
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

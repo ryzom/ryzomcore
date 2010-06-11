@@ -22,6 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/events.h"
+#include "nel/misc/game_device_events.h"
 
 #ifdef NL_OS_UNIX
 
@@ -54,6 +55,8 @@ public:
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows);
 
+	virtual void emulateMouseRawMode(bool);
+
 public:
 	void processMessage (XEvent &event, CEventServer &server);
 
@@ -65,6 +68,7 @@ private:
 	TKey     _PreviousKey;
 	XIM      _im;
 	XIC      _ic;
+	bool     _emulateRawMode;
 };
 
 
