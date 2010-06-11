@@ -611,16 +611,19 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		// Get ith param (params are nameOfParam=argumentOfAction strings separated by |)
 		// except for the last real param (which can then contains | chars) if it is the last param
 
-		if ((curStr.find('|') == string::npos) ||
-			((noParam == nbRealParam-1) && (rP.Type != CBaseAction::CParameter::Hidden)) && (i == (pBA->Parameters.size()-1)))
+		string::size_type pos = curStr.find('|');
+
+		if ((pos == string::npos) ||
+			(((noParam == nbRealParam-1) && (rP.Type != CBaseAction::CParameter::Hidden)) && (i == (pBA->Parameters.size()-1))))
 		{
 			sTmp = curStr;
 			curStr = "";
 		}
 		else
 		{
-			sTmp = curStr.substr(0,curStr.find('|'));
-			curStr = curStr.substr(curStr.find('|')+1,curStr.size());
+			
+			sTmp = curStr.substr(0, pos);
+			curStr = curStr.substr(pos+1, curStr.size());
 		}
 
 		// Remove 'name='

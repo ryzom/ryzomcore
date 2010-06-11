@@ -289,13 +289,17 @@ void CChatStdInput::registerListeningWindow(CChatWindow *cw)
 	Universe.addListeningWindow(cw);
 }
 
+
 //===========================================================================================================
-CPeopleInterraction::CPeopleInterraction() : SystemInfo(NULL),
+CPeopleInterraction::CPeopleInterraction() : Region(NULL),
+											 Universe(NULL),
+											 TeamChat(NULL),
 											 GuildChat(NULL),
-											 CurrPartyChatID(0),
+											 SystemInfo(NULL),
 											 TellWindow(NULL),
 											 DebugInfo(NULL),
-											 YuboChat(NULL)
+											 YuboChat(NULL),
+											 CurrPartyChatID(0)
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{

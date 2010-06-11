@@ -22,7 +22,7 @@
 
 using namespace NLMISC;
 
-//*********************************************************************************
+// *********************************************************************************
 CViewPolygon::CViewPolygon() : CViewBase(TCtorParam())
 {
 	// Construct
@@ -30,7 +30,7 @@ CViewPolygon::CViewPolygon() : CViewBase(TCtorParam())
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewPolygon::setVertices(const std::vector<NLMISC::CVector> &vertices)
 {
 	if (vertices.size() == _Poly.Vertices.size() &&
@@ -71,7 +71,7 @@ static inline bool totallyOutside(const CVector &minCorner, const CVector &maxCo
 			(sint32) maxCorner.y < cy;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewPolygon::draw()
 {
 	if (_Tris.empty()) return;
@@ -178,14 +178,14 @@ void CViewPolygon::draw()
 	vr.drawUnclippedTriangles(_RenderLayer, _RealTris, col);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewPolygon::updateCoords()
 {
 	// assume that clipping will have to be done again, real update of triangle will be done at render time
 	_Touched = true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewPolygon::setAlpha(sint32 a)
 {
 	_Color.A = (uint8) a;

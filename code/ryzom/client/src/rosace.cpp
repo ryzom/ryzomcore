@@ -245,6 +245,8 @@ void CRosacePage::update(float x, float y, TMode mode)
 	case NbRosaceMode:
 		nlwarning("Rosace Mode reached.");
 		break;
+	default:
+		break;
 	}
 }// update //
 

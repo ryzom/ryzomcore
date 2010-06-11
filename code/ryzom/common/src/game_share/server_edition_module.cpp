@@ -2572,7 +2572,7 @@ TUserRole CServerEditionModule::getRoleByCharId(TCharId charId) const
 }
 
 
-TPioneersSessionsAllowed * const CServerEditionModule::getSessionAllowedForChar(TCharId charId) const
+TPioneersSessionsAllowed * CServerEditionModule::getSessionAllowedForChar(TCharId charId) const
 {
 	TPioneersSessionsAlloweds::const_iterator found = _PioneersSessionsAllowed.find(charId);
 	if (found == _PioneersSessionsAllowed.end()) return NULL;

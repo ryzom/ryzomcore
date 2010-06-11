@@ -28,7 +28,7 @@ class CFontGenerator;
 #define TEXTUREFONT_NBCATEGORY	5 // Config 1
 //#define TEXTUREFONT_NBCATEGORY	4
 
-//****************************************************************************
+// ****************************************************************************
 /**
  * CTextureFont
  */

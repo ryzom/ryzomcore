@@ -30,12 +30,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
-#ifdef FAST_MIRROR
-#  pragma message(NL_LOC_MSG "Using **** FAST_MIRROR ****")
-#else
-#  pragma message(NL_LOC_MSG "Not using FAST_MIRROR")
-#endif
+#ifdef NL_OS_WINDOWS
+#    ifdef FAST_MIRROR
+#        pragma message(NL_LOC_MSG "Using **** FAST_MIRROR ****")
+#    else
+#    	 pragma message(NL_LOC_MSG "Not using FAST_MIRROR")
+#    endif
+#endif // NL_OS_WINDOWS
 
 
 const string MirrorVersion = string("1.10-")+string(ListRowSizeString); // ADDED: Unidirectional Mode (don't wait for delta)
@@ -841,7 +842,9 @@ void				CMirror::releaseTrackers( NLNET::CMessage& msgin )
 	for ( istfar=smidsToFindAndRemove.begin(); istfar!=smidsToFindAndRemove.end(); ++istfar )
 	{
 		if ( (*istfar) != InvalidSMId )
+		{
 			MIRROR_INFO( "MIRROR: Need to remove tracker with smid %d", (*istfar) );
+		}
 	}
 #endif
 

@@ -23,7 +23,7 @@
 
 static const char *WIN_BOT_CHAT_PAGE_NEWS = "ui:interface:bot_chat_news";
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageNews::begin()
 {
 	CBotChatPage::begin();
@@ -34,7 +34,7 @@ void CBotChatPageNews::begin()
 	activateWindow(WIN_BOT_CHAT_PAGE_NEWS, true);
 }
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageNews::end()
 {
 	activateWindow(WIN_BOT_CHAT_PAGE_NEWS, false);

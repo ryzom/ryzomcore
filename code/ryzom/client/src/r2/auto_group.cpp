@@ -28,7 +28,7 @@ namespace R2
 {
 
 
-//***************************************************************
+// ***************************************************************
 CAutoGroup::CAutoGroup()
 {
 	CPrimLook primGroup;
@@ -37,13 +37,13 @@ CAutoGroup::CAutoGroup()
 	_AutoGroupEnabled = false;
 }
 
-//***************************************************************
+// ***************************************************************
 CAutoGroup::~CAutoGroup()
 {
 	clear();
 }
 
-//***************************************************************
+// ***************************************************************
 void CAutoGroup::clear()
 {
 	//H_AUTO(R2_CAutoGroup__clear)
@@ -58,7 +58,7 @@ void CAutoGroup::clear()
 	_AutoGroup.clear();
 }
 
-//***************************************************************
+// ***************************************************************
 void CAutoGroup::update(const CVector &testPos, const std::string &paletteEntry, bool valid)
 {
 	//H_AUTO(R2_CAutoGroup_update)
@@ -92,7 +92,7 @@ void CAutoGroup::update(const CVector &testPos, const std::string &paletteEntry,
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 CInstance *CAutoGroup::getGroupingCandidate()
 {
 	//H_AUTO(R2_CAutoGroup_getGroupingCandidate)
@@ -229,7 +229,7 @@ CInstance *CAutoGroup::getGroupingCandidate()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPosition)
 {
 	//H_AUTO(R2_CAutoGroup_group)

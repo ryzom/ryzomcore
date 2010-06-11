@@ -56,7 +56,7 @@ CPSCollisionInfo *CPSLocated::_FirstCollision = NULL;
 
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 /**
  * Constructor
  */
@@ -81,7 +81,7 @@ CPSLocated::CPSLocated() : /*_MaxNumFaces(0),*/
 }
 
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 const NLMISC::CMatrix &CPSLocated::getLocalToWorldMatrix() const
 {
 	NL_PS_FUNC(CPSLocated_getLocalToWorldMatrix)
@@ -98,7 +98,7 @@ const NLMISC::CMatrix &CPSLocated::getLocalToWorldMatrix() const
 	return NLMISC::CMatrix::Identity;
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 const NLMISC::CMatrix &CPSLocated::getWorldToLocalMatrix() const
 {
 	NL_PS_FUNC(CPSLocated_getWorldToLocalMatrix)
@@ -116,7 +116,7 @@ const NLMISC::CMatrix &CPSLocated::getWorldToLocalMatrix() const
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 float CPSLocated::evalMaxDuration() const
 {
 	NL_PS_FUNC(CPSLocated_evalMaxDuration)
@@ -125,7 +125,7 @@ float CPSLocated::evalMaxDuration() const
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::checkIntegrity() const
 {
 	NL_PS_FUNC(CPSLocated_checkIntegrity)
@@ -147,7 +147,7 @@ void CPSLocated::checkIntegrity() const
 	//
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 bool CPSLocated::setLastForever()
 {
 	NL_PS_FUNC(CPSLocated_setLastForever)
@@ -168,7 +168,7 @@ bool CPSLocated::setLastForever()
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::systemDateChanged()
 {
 	NL_PS_FUNC(CPSLocated_systemDateChanged)
@@ -181,7 +181,7 @@ void CPSLocated::systemDateChanged()
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::releaseRefTo(const CParticleSystemProcess *other)
 {
 	NL_PS_FUNC(CPSLocated_releaseRefTo)
@@ -209,7 +209,7 @@ void CPSLocated::releaseRefTo(const CParticleSystemProcess *other)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::releaseAllRef()
 {
 	NL_PS_FUNC(CPSLocated_releaseAllRef)
@@ -241,7 +241,7 @@ void CPSLocated::releaseAllRef()
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::notifyMotionTypeChanged(void)
 {
 	NL_PS_FUNC(CPSLocated_notifyMotionTypeChanged)
@@ -254,7 +254,7 @@ void CPSLocated::notifyMotionTypeChanged(void)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::integrateSingle(float startDate, float deltaT, uint numStep,
 								uint32 indexInLocated,
 								NLMISC::CVector *destPos,
@@ -302,7 +302,7 @@ void CPSLocated::integrateSingle(float startDate, float deltaT, uint numStep,
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::performParametricMotion(TAnimationTime date)
 {
 	NL_PS_FUNC(CPSLocated_performParametricMotion)
@@ -340,7 +340,7 @@ void CPSLocated::performParametricMotion(TAnimationTime date)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// allocate parametric infos
 void  CPSLocated::allocateParametricInfos(void)
 {
@@ -364,7 +364,7 @@ void  CPSLocated::allocateParametricInfos(void)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// release parametric infos
 void  CPSLocated::releaseParametricInfos(void)
 {
@@ -377,7 +377,7 @@ void  CPSLocated::releaseParametricInfos(void)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// Test whether this located support parametric motion
 bool      CPSLocated::supportParametricMotion(void) const
 {
@@ -385,7 +385,7 @@ bool      CPSLocated::supportParametricMotion(void) const
 	return _NonIntegrableForceNbRefs == 0 && _NumIntegrableForceWithDifferentBasis == 0;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /** When set to true, this tells the system to use parametric motion. This is needed in a few case only,
   * and can only work if all the forces that apply to the system are integrable
   */
@@ -405,7 +405,7 @@ void	CPSLocated::enableParametricMotion(bool enable /*= true*/)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setMatrixMode(TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC(CPSLocated_setMatrixMode)
@@ -426,7 +426,7 @@ void CPSLocated::setMatrixMode(TPSMatrixMode matrixMode)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /*
 void CPSLocated::notifyMaxNumFacesChanged(void)
 {
@@ -448,7 +448,7 @@ void CPSLocated::notifyMaxNumFacesChanged(void)
 }
 */
 
-///***************************************************************************************
+/// ***************************************************************************************
 uint CPSLocated::getNumWantedTris() const
 {
 	NL_PS_FUNC(CPSLocated_getNumWantedTris)
@@ -488,7 +488,7 @@ bool CPSLocated::hasParticles(void) const
 	return false;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// tells whether there are alive emitters
 bool CPSLocated::hasEmitters(void) const
 {
@@ -502,7 +502,7 @@ bool CPSLocated::hasEmitters(void) const
 	return false;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::getLODVect(NLMISC::CVector &v, float &offset, TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC(CPSLocated_getLODVect)
@@ -512,7 +512,7 @@ void CPSLocated::getLODVect(NLMISC::CVector &v, float &offset, TPSMatrixMode mat
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 float CPSLocated::getUserParam(uint numParam) const
 {
 	NL_PS_FUNC(CPSLocated_getUserParam)
@@ -521,7 +521,7 @@ float CPSLocated::getUserParam(uint numParam) const
 	return _Owner->getUserParam(numParam);
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 CScene *CPSLocated::getScene(void)
 {
 	NL_PS_FUNC(CPSLocated_getScene)
@@ -530,7 +530,7 @@ CScene *CPSLocated::getScene(void)
 	return _Owner->getScene();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::incrementNbDrawnParticles(uint num)
 {
 	NL_PS_FUNC(CPSLocated_incrementNbDrawnParticles)
@@ -538,7 +538,7 @@ void CPSLocated::incrementNbDrawnParticles(uint num)
 	CParticleSystem::NbParticlesDrawn += num; // for benchmark purpose
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setInitialLife(TAnimationTime lifeTime)
 {
 	NL_PS_FUNC(CPSLocated_setInitialLife)
@@ -563,7 +563,7 @@ void CPSLocated::setInitialLife(TAnimationTime lifeTime)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setLifeScheme(CPSAttribMaker<float> *scheme)
 {
 	NL_PS_FUNC(CPSLocated_setLifeScheme)
@@ -581,7 +581,7 @@ void CPSLocated::setLifeScheme(CPSAttribMaker<float> *scheme)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setInitialMass(float mass)
 {
 	NL_PS_FUNC(CPSLocated_setInitialMass)
@@ -592,7 +592,7 @@ void CPSLocated::setInitialMass(float mass)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setMassScheme(CPSAttribMaker<float> *scheme)
 {
 	NL_PS_FUNC(CPSLocated_setMassScheme)
@@ -604,7 +604,7 @@ void CPSLocated::setMassScheme(CPSAttribMaker<float> *scheme)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// get a matrix that helps to express located B coordinate in located A basis
 const NLMISC::CMatrix &CPSLocated::getConversionMatrix(const CParticleSystem &ps, TPSMatrixMode destMode, TPSMatrixMode srcMode)
 {
@@ -648,7 +648,7 @@ const NLMISC::CMatrix &CPSLocated::getConversionMatrix(const CParticleSystem &ps
 	return NLMISC::CMatrix::Identity;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 NLMISC::CVector CPSLocated::computeI(void) const
 {
 	NL_PS_FUNC(CPSLocated_computeI)
@@ -679,7 +679,7 @@ NLMISC::CVector CPSLocated::computeI(void) const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 NLMISC::CVector CPSLocated::computeIWithZAxisAligned(void) const
 {
 	NL_PS_FUNC(CPSLocated_computeIWithZAxisAligned)
@@ -713,7 +713,7 @@ NLMISC::CVector CPSLocated::computeIWithZAxisAligned(void) const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 NLMISC::CVector CPSLocated::computeJ(void) const
 {
 	NL_PS_FUNC(CPSLocated_computeJ)
@@ -744,7 +744,7 @@ NLMISC::CVector CPSLocated::computeJ(void) const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 NLMISC::CVector CPSLocated::computeK(void) const
 {
 	NL_PS_FUNC(CPSLocated_computeK)
@@ -776,7 +776,7 @@ NLMISC::CVector CPSLocated::computeK(void) const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 NLMISC::CVector CPSLocated::computeKWithZAxisAligned(void) const
 {
 	NL_PS_FUNC(CPSLocated_computeKWithZAxisAligned)
@@ -807,7 +807,7 @@ NLMISC::CVector CPSLocated::computeKWithZAxisAligned(void) const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 IDriver *CPSLocated::getDriver() const
 {
 	NL_PS_FUNC(CPSLocated_getDriver)
@@ -817,7 +817,7 @@ IDriver *CPSLocated::getDriver() const
 	return _Owner->getDriver();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// dtor
 CPSLocated::~CPSLocated()
 {
@@ -852,7 +852,7 @@ CPSLocated::~CPSLocated()
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /**
 * sorted insertion  (by decreasing priority order) of a bindable (particle e.g an aspect, emitter) in a located
 */
@@ -915,7 +915,7 @@ bool CPSLocated::bind(CPSLocatedBindable *lb)
 	return true;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::remove(const CPSLocatedBindable *p)
 {
 	NL_PS_FUNC(CPSLocated_remove)
@@ -932,7 +932,7 @@ void CPSLocated::remove(const CPSLocatedBindable *p)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::registerDtorObserver(CPSLocatedBindable *anObserver)
 {
 	NL_PS_FUNC(CPSLocated_registerDtorObserver)
@@ -943,7 +943,7 @@ void CPSLocated::registerDtorObserver(CPSLocatedBindable *anObserver)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::unregisterDtorObserver(CPSLocatedBindable *anObserver)
 {
 	NL_PS_FUNC(CPSLocated_unregisterDtorObserver)
@@ -956,7 +956,7 @@ void CPSLocated::unregisterDtorObserver(CPSLocatedBindable *anObserver)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::postNewElement(const NLMISC::CVector &pos,
 							    const NLMISC::CVector &speed,
 							    CPSLocated &emitterLocated,
@@ -1028,7 +1028,7 @@ void CPSLocated::postNewElement(const NLMISC::CVector &pos,
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 sint32 CPSLocated::newElement(const CPSSpawnInfo &si, bool doEmitOnce /* = false */, TAnimationTime ellapsedTime)
 {
 	NL_PS_FUNC(CPSLocated_newElement)
@@ -1236,7 +1236,7 @@ sint32 CPSLocated::newElement(const CPSSpawnInfo &si, bool doEmitOnce /* = false
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 sint32 CPSLocated::newElement(const CVector &pos, const CVector &speed, CPSLocated *emitter, uint32 indexInEmitter,
 							  TPSMatrixMode speedCoordSystem, bool doEmitOnce /* = false */)
 {
@@ -1265,7 +1265,7 @@ sint32 CPSLocated::newElement(const CVector &pos, const CVector &speed, CPSLocat
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 static inline uint32 IDToLittleEndian(uint32 input)
 {
 	NL_PS_FUNC(IDToLittleEndian)
@@ -1279,7 +1279,7 @@ static inline uint32 IDToLittleEndian(uint32 input)
 	#endif
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 inline void CPSLocated::deleteElementBase(uint32 index)
 {
 	NL_PS_FUNC(CPSLocated_deleteElementBase)
@@ -1316,7 +1316,7 @@ inline void CPSLocated::deleteElementBase(uint32 index)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::deleteElement(uint32 index)
 {
 	NL_PS_FUNC(CPSLocated_deleteElement)
@@ -1336,7 +1336,7 @@ void CPSLocated::deleteElement(uint32 index)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::deleteElement(uint32 index, TAnimationTime timeToNextSimStep)
 {
 	NL_PS_FUNC(CPSLocated_deleteElement)
@@ -1355,7 +1355,7 @@ void CPSLocated::deleteElement(uint32 index, TAnimationTime timeToNextSimStep)
 }
 
 /// Resize the located container
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::resize(uint32 newSize)
 {
 	NL_PS_FUNC(CPSLocated_resize)
@@ -1417,7 +1417,7 @@ public:
 	};
 };
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	NL_PS_FUNC(CPSLocated_serial)
@@ -1636,7 +1636,7 @@ void CPSLocated::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 // integrate speed of particles. Makes eventually use of SSE instructions when present
 static void IntegrateSpeed(uint count, float *src1, const float *src2, float *dest, float ellapsedTime)
 {
@@ -1767,7 +1767,7 @@ static void IntegrateSpeed(uint count, float *src1, const float *src2, float *de
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::computeMotion()
 {
 	NL_PS_FUNC(CPSLocated_computeMotion)
@@ -1797,7 +1797,7 @@ void CPSLocated::computeMotion()
 
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::computeNewParticleMotion(uint firstInstanceIndex)
 {
 	NL_PS_FUNC(CPSLocated_computeNewParticleMotion)
@@ -1806,7 +1806,7 @@ void CPSLocated::computeNewParticleMotion(uint firstInstanceIndex)
 	computeCollisions(firstInstanceIndex, &CParticleSystem::_SpawnPos[0], &_Pos[0]);
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::resetCollisions(uint numInstances)
 {
 	NL_PS_FUNC(CPSLocated_resetCollisions)
@@ -1828,7 +1828,7 @@ void CPSLocated::resetCollisions(uint numInstances)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::updateCollisions()
 {
 	NL_PS_FUNC(CPSLocated_updateCollisions)
@@ -1908,7 +1908,7 @@ void CPSLocated::updateCollisions()
 
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::doLODDegradation()
 {
 	NL_PS_FUNC(CPSLocated_doLODDegradation)
@@ -1940,7 +1940,7 @@ void CPSLocated::doLODDegradation()
 	CParticleSystem::InsideRemoveLoop = false;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::step(TPSProcessPass pass)
 {
 	NL_PS_FUNC(CPSLocated_step)
@@ -1989,7 +1989,7 @@ void CPSLocated::step(TPSProcessPass pass)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::updateLife()
 {
 	NL_PS_FUNC(CPSLocated_updateLife)
@@ -2086,7 +2086,7 @@ void CPSLocated::updateLife()
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 // When a particle is deleted, it is replaced by the last particle in the array
 // if this particle is to be deleted to, must update its new index
 static inline void removeParticleFromRemoveList(uint indexToRemove, uint arraySize)
@@ -2131,7 +2131,7 @@ void checkRemoveArray(uint size)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 #ifndef NL_DEBUG
 	inline
 #endif
@@ -2150,7 +2150,7 @@ TAnimationTime CPSLocated::computeDateFromCollisionToNextSimStep(uint particleIn
 	return std::max(0.f, result);
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::removeOldParticles()
 {
 	NL_PS_FUNC(CPSLocated_removeOldParticles)
@@ -2360,7 +2360,7 @@ void CPSLocated::removeOldParticles()
 	#endif
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::addNewlySpawnedParticles()
 {
 	NL_PS_FUNC(CPSLocated_addNewlySpawnedParticles)
@@ -2418,7 +2418,7 @@ void CPSLocated::addNewlySpawnedParticles()
 	#endif
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 bool CPSLocated::computeBBox(NLMISC::CAABBox &box) const
 {
 	NL_PS_FUNC(CPSLocated_computeBBox)
@@ -2478,7 +2478,7 @@ bool CPSLocated::computeBBox(NLMISC::CAABBox &box) const
 
 
 /// Setup the driver model matrix. It is set accordingly to the basis used for rendering
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setupDriverModelMatrix(void)
 {
 	NL_PS_FUNC(CPSLocated_setupDriverModelMatrix)
@@ -2487,7 +2487,7 @@ void CPSLocated::setupDriverModelMatrix(void)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::queryCollisionInfo(void)
 {
 	NL_PS_FUNC(CPSLocated_queryCollisionInfo)
@@ -2509,7 +2509,7 @@ void CPSLocated::queryCollisionInfo(void)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::releaseCollisionInfo(void)
 {
 	NL_PS_FUNC(CPSLocated_releaseCollisionInfo)
@@ -2527,7 +2527,7 @@ void CPSLocated::releaseCollisionInfo(void)
 
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::registerIntegrableForce(CPSForce *f)
 {
 	NL_PS_FUNC(CPSLocated_registerIntegrableForce)
@@ -2543,7 +2543,7 @@ void CPSLocated::registerIntegrableForce(CPSForce *f)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::unregisterIntegrableForce(CPSForce *f)
 {
 	NL_PS_FUNC(CPSLocated_unregisterIntegrableForce)
@@ -2559,7 +2559,7 @@ void CPSLocated::unregisterIntegrableForce(CPSForce *f)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::addNonIntegrableForceRef(void)
 {
 	NL_PS_FUNC(CPSLocated_addNonIntegrableForceRef)
@@ -2569,7 +2569,7 @@ void CPSLocated::addNonIntegrableForceRef(void)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::releaseNonIntegrableForceRef(void)
 {
 	NL_PS_FUNC(CPSLocated_releaseNonIntegrableForceRef)
@@ -2580,7 +2580,7 @@ void CPSLocated::releaseNonIntegrableForceRef(void)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::integrableForceBasisChanged(TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC(CPSLocated_integrableForceBasisChanged)
@@ -2598,7 +2598,7 @@ void CPSLocated::integrableForceBasisChanged(TPSMatrixMode matrixMode)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 CPSLocatedBindable *CPSLocated::unbind(uint index)
 {
 	NL_PS_FUNC(CPSLocated_unbind)
@@ -2611,7 +2611,7 @@ CPSLocatedBindable *CPSLocated::unbind(uint index)
 	CHECK_PS_INTEGRITY
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 bool CPSLocated::isBound(const CPSLocatedBindable *lb) const
 {
 	NL_PS_FUNC(CPSLocated_isBound)
@@ -2620,7 +2620,7 @@ bool CPSLocated::isBound(const CPSLocatedBindable *lb) const
 	return it != _LocatedBoundCont.end();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 uint CPSLocated::getIndexOf(const CPSLocatedBindable *lb) const
 {
 	NL_PS_FUNC(CPSLocated_getIndexOf)
@@ -2640,14 +2640,14 @@ uint CPSLocated::getIndexOf(const CPSLocatedBindable *lb) const
 ///////////////////////////////////////
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 CPSLocatedBindable::CPSLocatedBindable() : _Owner(NULL), _ExternID(0), _LOD(PSLod1n2), _Active(true)
 {
 	NL_PS_FUNC(CPSLocatedBindable_CPSLocatedBindable)
 	_Owner = NULL;
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::setOwner(CPSLocated *psl)
 {
 	NL_PS_FUNC(CPSLocatedBindable_setOwner)
@@ -2675,7 +2675,7 @@ void CPSLocatedBindable::setOwner(CPSLocated *psl)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::finalize(void)
 {
 	NL_PS_FUNC(CPSLocatedBindable_finalize)
@@ -2685,7 +2685,7 @@ void CPSLocatedBindable::finalize(void)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 CPSLocatedBindable::~CPSLocatedBindable()
 {
 	NL_PS_FUNC(CPSLocatedBindable_CPSLocatedBindableDtor)
@@ -2698,14 +2698,14 @@ CPSLocatedBindable::~CPSLocatedBindable()
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::notifyTargetRemoved(CPSLocated *ptr)
 {
 	NL_PS_FUNC(CPSLocatedBindable_notifyTargetRemoved)
 	ptr->unregisterDtorObserver(this);
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	NL_PS_FUNC(CPSLocatedBindable_IStream )
@@ -2742,7 +2742,7 @@ void CPSLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::displayIcon2d(const CVector tab[], uint nbSegs, float scale)
 {
 	NL_PS_FUNC(CPSLocatedBindable_displayIcon2d)
@@ -2796,7 +2796,7 @@ void CPSLocatedBindable::displayIcon2d(const CVector tab[], uint nbSegs, float s
 
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 CFontManager *CPSLocatedBindable::getFontManager(void)
 {
 	NL_PS_FUNC(CPSLocatedBindable_getFontManager)
@@ -2804,7 +2804,7 @@ CFontManager *CPSLocatedBindable::getFontManager(void)
 	return _Owner->getFontManager();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
  /// Shortcut to get the font manager if one was set (const version)
 const CFontManager *CPSLocatedBindable::getFontManager(void) const
 {
@@ -2814,7 +2814,7 @@ const CFontManager *CPSLocatedBindable::getFontManager(void) const
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 // Shortcut to get the matrix of the system
  const NLMISC::CMatrix &CPSLocatedBindable::getSysMat(void) const
 {
@@ -2823,7 +2823,7 @@ const CFontManager *CPSLocatedBindable::getFontManager(void) const
 	return _Owner->getOwner()->getSysMat();
 }
 
- ///***************************************************************************************
+ /// ***************************************************************************************
 /// shortcut to get the inverted matrix of the system
 const NLMISC::CMatrix &CPSLocatedBindable::getInvertedSysMat(void) const
 {
@@ -2833,7 +2833,7 @@ const NLMISC::CMatrix &CPSLocatedBindable::getInvertedSysMat(void) const
 
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// shortcut to get the view matrix
 const NLMISC::CMatrix &CPSLocatedBindable::getViewMat(void) const
 {
@@ -2843,7 +2843,7 @@ const NLMISC::CMatrix &CPSLocatedBindable::getViewMat(void) const
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// shortcut to get the inverted view matrix
 const NLMISC::CMatrix &CPSLocatedBindable::getInvertedViewMat(void) const
 {
@@ -2852,7 +2852,7 @@ const NLMISC::CMatrix &CPSLocatedBindable::getInvertedViewMat(void) const
 	return _Owner->getOwner()->getInvertedViewMat();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 /// shortcut to setup the model matrix (system basis or world basis)
 void CPSLocatedBindable::setupDriverModelMatrix(void)
 {
@@ -2861,7 +2861,7 @@ void CPSLocatedBindable::setupDriverModelMatrix(void)
 	_Owner->setupDriverModelMatrix();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void	CPSLocatedBindable::setExternID(uint32 id)
 {
 	NL_PS_FUNC(CPSLocatedBindable_setExternID)
@@ -2883,7 +2883,7 @@ void	CPSLocatedBindable::setExternID(uint32 id)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocatedBindable::releaseAllRef()
 {
 	NL_PS_FUNC(CPSLocatedBindable_releaseAllRef)
@@ -2897,7 +2897,7 @@ void CPSLocatedBindable::releaseAllRef()
 // CPSTargetLocatedBindable implementation //
 /////////////////////////////////////////////
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_serial)
@@ -2917,7 +2917,7 @@ void CPSTargetLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::attachTarget(CPSLocated *ptr)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_attachTarget)
@@ -2939,7 +2939,7 @@ void CPSTargetLocatedBindable::attachTarget(CPSLocated *ptr)
 }
 
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::notifyTargetRemoved(CPSLocated *ptr)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_notifyTargetRemoved)
@@ -2955,7 +2955,7 @@ void CPSTargetLocatedBindable::notifyTargetRemoved(CPSLocated *ptr)
 
 // dtor
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::finalize(void)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_finalize)
@@ -2969,7 +2969,7 @@ void CPSTargetLocatedBindable::finalize(void)
 	CPSLocatedBindable::finalize();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 CPSTargetLocatedBindable::~CPSTargetLocatedBindable()
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_CPSTargetLocatedBindable)
@@ -2980,7 +2980,7 @@ CPSTargetLocatedBindable::~CPSTargetLocatedBindable()
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::releaseRefTo(const CParticleSystemProcess *other)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_releaseRefTo)
@@ -2992,7 +2992,7 @@ void CPSTargetLocatedBindable::releaseRefTo(const CParticleSystemProcess *other)
 	nlassert(std::find(_Targets.begin(), _Targets.end(), other) == _Targets.end());
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSTargetLocatedBindable::releaseAllRef()
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_releaseAllRef)
@@ -3005,7 +3005,7 @@ void CPSTargetLocatedBindable::releaseAllRef()
 	CPSLocatedBindable::releaseAllRef();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 uint CPSLocated::getUserMatrixUsageCount() const
 {
 	NL_PS_FUNC(CPSLocated_getUserMatrixUsageCount)
@@ -3017,7 +3017,7 @@ uint CPSLocated::getUserMatrixUsageCount() const
 	return count + CParticleSystemProcess::getUserMatrixUsageCount();
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv)
 {
 	NL_PS_FUNC(CPSLocated_enumTexs)
@@ -3027,7 +3027,7 @@ void CPSLocated::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriv
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::setZBias(float value)
 {
 	NL_PS_FUNC(CPSLocated_setZBias)
@@ -3037,7 +3037,7 @@ void CPSLocated::setZBias(float value)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::computeCollisions(uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
 {
 	NL_PS_FUNC(CPSLocated_computeCollisions)
@@ -3050,7 +3050,7 @@ void CPSLocated::computeCollisions(uint firstInstanceIndex, const NLMISC::CVecto
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::computeSpawns(uint firstInstanceIndex, bool includeEmitOnce)
 {
 	NL_PS_FUNC(CPSLocated_computeSpawns)
@@ -3084,7 +3084,7 @@ void CPSLocated::computeSpawns(uint firstInstanceIndex, bool includeEmitOnce)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::computeForces()
 {
 	NL_PS_FUNC(CPSLocated_computeForces)
@@ -3099,7 +3099,7 @@ void CPSLocated::computeForces()
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSCollisionInfo::update(const CPSCollisionInfo &other)
 {
 	NL_PS_FUNC(CPSCollisionInfo_update)
@@ -3122,7 +3122,7 @@ void CPSCollisionInfo::update(const CPSCollisionInfo &other)
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::checkLife() const
 {
 	NL_PS_FUNC(CPSLocated_checkLife)
@@ -3136,7 +3136,7 @@ void CPSLocated::checkLife() const
 	}
 }
 
-///***************************************************************************************
+/// ***************************************************************************************
 void CPSLocated::onShow(bool shown)
 {
 	for(TLocatedBoundCont::iterator it = _LocatedBoundCont.begin(); it != _LocatedBoundCont.end(); ++it)

@@ -22,7 +22,7 @@
 #include "nel/georges/u_form_elm.h"
 
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CAttackIDSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	uint32 attackType = 0;
@@ -57,7 +57,7 @@ void CAttackIDSheet::build(const NLGEORGES::UFormElm &item, const std::string &p
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CAttackIDSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialEnum(Type);
@@ -84,7 +84,7 @@ void CAttackIDSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CAttackIDSheet::CSpellInfo::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	uint32 spellID = 0;
@@ -95,14 +95,14 @@ void CAttackIDSheet::CSpellInfo::build(const NLGEORGES::UFormElm &item, const st
 	Mode = (MAGICFX::TSpellMode) spellMode;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 void CAttackIDSheet::CSpellInfo::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialEnum(Mode);
 	f.serialEnum(ID);
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 bool operator == (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 {
 	if (lhs.Type != rhs.Type) return false;
@@ -117,7 +117,7 @@ bool operator == (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 bool operator < (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 {
 	if (lhs.Type != rhs.Type) return lhs.Type < rhs.Type;
@@ -132,13 +132,13 @@ bool operator < (const CAttackIDSheet &lhs, const CAttackIDSheet &rhs)
 	}
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 bool operator == (const CAttackIDSheet::CSpellInfo &lhs, const CAttackIDSheet::CSpellInfo &rhs)
 {
 	return lhs.Mode == rhs.Mode && lhs.ID == rhs.ID;
 }
 
-//*****************************************************************************************
+// *****************************************************************************************
 bool operator < (const CAttackIDSheet::CSpellInfo &lhs, const CAttackIDSheet::CSpellInfo &rhs)
 {
 	if (lhs.Mode != rhs.Mode) return lhs.Mode < rhs.Mode;

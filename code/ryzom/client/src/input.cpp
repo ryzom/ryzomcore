@@ -33,6 +33,7 @@
 // Misc
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/mouse_smoother.h"
+#include "nel/misc/system_utils.h"
 // Game Share
 
 
@@ -74,13 +75,13 @@ bool							MouseCapture = false;
 // FUNCTION //
 //////////////
 
-//*********************************************************************************
+// *********************************************************************************
 uint GetMouseButtonsState()
 {
 	return DownMouseButtons;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Initialize the mouse
 bool	InitMouseWithCursor (bool hardware)
 {
@@ -181,14 +182,14 @@ bool	InitMouseWithCursor (bool hardware)
 	return true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Is mouse cursor hardware ?
 bool	IsMouseCursorHardware ()
 {
 	return MouseHardware;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Set the mouse mode. Call this method once per frame to update window size
 void	UpdateMouse ()
 {
@@ -237,7 +238,7 @@ void	UpdateMouse ()
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to toggle the mouse (freelook <- cursor)
 void	SetMouseFreeLook ()
 {
@@ -260,14 +261,14 @@ void	SetMouseFreeLook ()
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsMouseFreeLook()
 {
 	return MouseFreeLook;
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to toggle the mouse (freelook -> cursor)
 void	SetMouseCursor (bool updatePos)
 {
@@ -350,7 +351,7 @@ void	SetMouseCursor (bool updatePos)
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to set the cursor speed
 void	SetMouseSpeed (float speed)
 {
@@ -358,7 +359,7 @@ void	SetMouseSpeed (float speed)
 	UpdateMouse ();
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to set the cursor acceleration
 void	SetMouseAcceleration (uint accel)
 {
@@ -366,7 +367,7 @@ void	SetMouseAcceleration (uint accel)
 	UpdateMouse ();
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CaptureSystemCursor()
 {
 	if (IsSystemCursorCaptured()) return;
@@ -380,7 +381,7 @@ void CaptureSystemCursor()
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void ReleaseSystemCursor()
 {
 	if (!IsSystemCursorCaptured()) return;
@@ -399,7 +400,7 @@ void ReleaseSystemCursor()
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsSystemCursorCaptured()
 {
 	if (!Driver) return false;
@@ -413,7 +414,7 @@ bool IsSystemCursorCaptured()
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void HandleSystemCursorCapture(const CEvent &event)
 {
 	if (event == EventMouseDownId)
@@ -445,7 +446,7 @@ void HandleSystemCursorCapture(const CEvent &event)
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsSystemCursorInClientArea()
 {
 	if (!Driver) return false;

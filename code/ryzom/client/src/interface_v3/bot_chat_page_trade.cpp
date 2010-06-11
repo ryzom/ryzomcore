@@ -503,7 +503,7 @@ uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 	return pLeaf->getValue32();
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageTrade::notifyDownloadComplete(bool completed)
 {	
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -527,7 +527,7 @@ void CBotChatPageTrade::notifyDownloadComplete(bool completed)
 	gc->visit(&visitor);
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageTrade::updateTradeModal()
 {
 	// if loading is finished, then signal it to all sheet list, so they can display an help message if they

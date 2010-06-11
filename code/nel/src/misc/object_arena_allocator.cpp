@@ -25,7 +25,7 @@ namespace NLMISC
 CObjectArenaAllocator *CObjectArenaAllocator::_DefaultAllocator = NULL;
 
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CObjectArenaAllocator::CObjectArenaAllocator(uint maxAllocSize, uint granularity /* = 4*/)
 {
 	nlassert(granularity > 0);
@@ -40,7 +40,7 @@ CObjectArenaAllocator::CObjectArenaAllocator(uint maxAllocSize, uint granularity
 	#endif
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CObjectArenaAllocator::~CObjectArenaAllocator()
 {
 	for(uint k = 0; k < _ObjectSizeToAllocator.size(); ++k)
@@ -49,7 +49,7 @@ CObjectArenaAllocator::~CObjectArenaAllocator()
 	}
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void *CObjectArenaAllocator::alloc(uint size)
 {
 	#ifdef NL_DEBUG
@@ -90,7 +90,7 @@ void *CObjectArenaAllocator::alloc(uint size)
 	return (void *) ((uint8 *) block + sizeof(uint));
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CObjectArenaAllocator::free(void *block)
 {
 	if (!block) return;
@@ -127,7 +127,7 @@ void CObjectArenaAllocator::free(void *block)
 	#endif
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 uint CObjectArenaAllocator::getNumAllocatedBlocks() const
 {
 	uint numObjs = 0;
@@ -138,7 +138,7 @@ uint CObjectArenaAllocator::getNumAllocatedBlocks() const
 	return numObjs;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CObjectArenaAllocator &CObjectArenaAllocator::getDefaultAllocator()
 {
 	if (!_DefaultAllocator)
@@ -151,7 +151,7 @@ CObjectArenaAllocator &CObjectArenaAllocator::getDefaultAllocator()
 
 #ifdef NL_DEBUG
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CObjectArenaAllocator::dumpUnreleasedBlocks()
 {
 	for(std::map<void *, uint>::iterator it = _MemBlockToAllocID.begin(); it != _MemBlockToAllocID.end(); ++it)
@@ -160,7 +160,7 @@ void CObjectArenaAllocator::dumpUnreleasedBlocks()
 	}
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CObjectArenaAllocator::setBreakForAllocID(bool enabled, uint id)
 {
 	_WantBreakOnAlloc = enabled;

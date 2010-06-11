@@ -301,7 +301,7 @@ bool CWinProcess::setCPUMask(uint64 mask)
 	return SetProcessAffinityMask((HANDLE)_ProcessHandle, processAffinityMask)!=0;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 /**
  * Simple wrapper around the PSAPI library
  * \author Nicolas Vizerie
@@ -327,7 +327,7 @@ private:
 	bool	  _LoadFailed;
 };
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 CPSAPILib::CPSAPILib()
 {
 	_LoadFailed = false;
@@ -337,7 +337,7 @@ CPSAPILib::CPSAPILib()
 	EnumProcessModules  = NULL;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 CPSAPILib::~CPSAPILib()
 {
 	if (_PSAPILibHandle)
@@ -346,7 +346,7 @@ CPSAPILib::~CPSAPILib()
 	}
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 bool CPSAPILib::init()
 {
 	//
@@ -381,7 +381,7 @@ static CPSAPILib PSAPILib;
 
 
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 bool CWinProcess::enumProcessesId(std::vector<uint32> &processesId)
 {
 	if (!PSAPILib.init()) return false;
@@ -407,7 +407,7 @@ bool CWinProcess::enumProcessesId(std::vector<uint32> &processesId)
 	return true;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 bool CWinProcess::enumProcessModules(uint32 processId, std::vector<std::string> &moduleNames)
 {
 	if (!PSAPILib.init()) return false;
@@ -445,7 +445,7 @@ bool CWinProcess::enumProcessModules(uint32 processId, std::vector<std::string> 
 	return true;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 uint32 CWinProcess::getProcessIdFromModuleFilename(const std::string &moduleFileName)
 {
 	std::vector<uint32> processesId;
@@ -467,7 +467,7 @@ uint32 CWinProcess::getProcessIdFromModuleFilename(const std::string &moduleFile
 	return 0;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 bool CWinProcess::terminateProcess(uint32 processId, uint exitCode)
 {
 	if (!processId) return false;
@@ -478,7 +478,7 @@ bool CWinProcess::terminateProcess(uint32 processId, uint exitCode)
 	return ok != FALSE;
 }
 
-//****************************************************************************************************************
+// ****************************************************************************************************************
 bool CWinProcess::terminateProcessFromModuleName(const std::string &moduleName, uint exitCode)
 {
 	return terminateProcess(getProcessIdFromModuleFilename(moduleName), exitCode);

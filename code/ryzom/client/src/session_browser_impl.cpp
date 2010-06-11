@@ -29,7 +29,7 @@ using namespace R2;
 CVariable<uint16> SBSPortOffset("client", "SBSPortOffset", "Offset of the SBS port from the FS port", 1000, 0, true);
 
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::init(CLuaState *ls)
 {
 	if (ls != NULL)
@@ -66,7 +66,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 }
 
 
-//***************************************************************************
+// ***************************************************************************
 const NLNET::CLoginCookie &CSessionBrowserImpl::getCookie()
 {
 	/*if (CInterfaceManager::getInstance()->isInGame())
@@ -77,7 +77,7 @@ const NLNET::CLoginCookie &CSessionBrowserImpl::getCookie()
 	return FakeCookie; // TMP TMP : for Nico's test*/
 }
 
-//****************************************************************************
+// ****************************************************************************
 const std::string &CSessionBrowserImpl::getFrontEndAddress()
 {
 	if (!NetMngr.getFrontendAddress().empty())
@@ -88,14 +88,14 @@ const std::string &CSessionBrowserImpl::getFrontEndAddress()
 	return testAddress; // TMP TMP : for Nico's test
 }
 
-//****************************************************************************
+// ****************************************************************************
 uint32 CSessionBrowserImpl::getCharId()
 {
 	if (ClientCfg.Local)  return 0;
 	return (getCookie().getUserId() << 4) + (uint32) PlayerSelectedSlot;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetRingSessionList(CLuaState &ls)
 {
 	nldebug("SB: luaGetRingSessionList");
@@ -105,7 +105,7 @@ int CSessionBrowserImpl::luaGetRingSessionList(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetRingCharList(CLuaState &ls)
 {
 	nldebug("SB: luaGetRingCharList");
@@ -117,7 +117,7 @@ int CSessionBrowserImpl::luaGetRingCharList(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetRingStats(CLuaState &ls)
 {
 	nldebug("SB: luaGetRingStats");
@@ -127,7 +127,7 @@ int CSessionBrowserImpl::luaGetRingStats(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetScenarioScores(CLuaState &ls)
 {
 	nldebug("SB: luaGetScenarioScores");
@@ -139,7 +139,7 @@ int CSessionBrowserImpl::luaGetScenarioScores(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetSessionAverageScores(CLuaState &ls)
 {
 	nldebug("SB: luaGetSessionAverageScores");
@@ -151,7 +151,7 @@ int CSessionBrowserImpl::luaGetSessionAverageScores(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaGetScenarioAverageScores(CLuaState &ls)
 {
 	nldebug("SB: luaGetScenarioAverageScores");
@@ -164,7 +164,7 @@ int CSessionBrowserImpl::luaGetScenarioAverageScores(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaUpdateScenarioScores(CLuaState &ls)
 {
 	nldebug("SB: luaUpdateScenarioScores");
@@ -185,7 +185,7 @@ int CSessionBrowserImpl::luaUpdateScenarioScores(CLuaState &ls)
 	return 0;
 }
 
-//****************************************************************************
+// ****************************************************************************
 int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 {
 	nldebug("SB: luaJoinRingSession");
@@ -213,7 +213,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 	return 0;
 }
 
-//*****************************************************************************
+// *****************************************************************************
 int CSessionBrowserImpl::luaCheckRingAccess(CLuaState &ls)
 {
 	lua_State* state = ls.getStatePointer();
@@ -221,7 +221,7 @@ int CSessionBrowserImpl::luaCheckRingAccess(CLuaState &ls)
 
 }
 
-//*****************************************************************************
+// *****************************************************************************
 int CSessionBrowserImpl::luaGetFileHeader(CLuaState &ls)
 {
 	lua_State* state = ls.getStatePointer();
@@ -229,28 +229,28 @@ int CSessionBrowserImpl::luaGetFileHeader(CLuaState &ls)
 }
 
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_connectionFailed()
 {
 	nldebug("SB: on_connectionFailed");
 	callRingAccessPointMethod("onConnectionFailed", 0, 0);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_CRingSessionManagerWebClient_Disconnection(NLNET::TSockId /* from */)
 {
 	nldebug("SB: on_CRingSessionManagerWebClient_Disconnection");
 	callRingAccessPointMethod("onDisconnection", 0, 0);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_connectionClosed()
 {
 	nldebug("SB: on_connectionClosed");
 	callRingAccessPointMethod("onConnectionClosed", 0, 0);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_invokeResult(NLNET::TSockId /* from */, uint32 /* userId */, uint32 resultCode, const std::string &resultString)
 {
 	nldebug("SB: on_invokeResult : result = %u, msg='%s'", resultCode, resultString.c_str());
@@ -259,7 +259,7 @@ void CSessionBrowserImpl::on_invokeResult(NLNET::TSockId /* from */, uint32 /* u
 	_LastInvokeResultMsg = resultString;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_scheduleSessionResult(NLNET::TSockId /* from */, uint32 charId, TSessionId sessionId, uint8 result, const std::string &resultString)
 {
 	nldebug("SB: on_scheduleSessionResult : result = %u, msg = '%s'", result, resultString.c_str());
@@ -282,7 +282,7 @@ void CSessionBrowserImpl::on_scheduleSessionResult(NLNET::TSockId /* from */, ui
 //	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_sessionInfoResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const RSMGR::TRaceFilter &raceFilter, const RSMGR::TReligionFilter &religionFilter,
 		const RSMGR::TGuildFilter &guildFilter, const RSMGR::TShardFilter &shardFilter, const RSMGR::TLevelFilter &levelFilter, bool subscriptionClosed, bool autoInvite, const std::string &language,
 		const TSessionOrientation &/* orientation */, const std::string &description)
@@ -298,7 +298,7 @@ void CSessionBrowserImpl::on_sessionInfoResult(NLNET::TSockId from, uint32 charI
 	_LastDescription = description;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_joinSessionResult(NLNET::TSockId /* from */, uint32 /* userId */, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus)
 {
 	nldebug("SB: on_joinSessionResult : result = %u; msg = '%s'", result, shardAddr.c_str());
@@ -315,7 +315,7 @@ void CSessionBrowserImpl::on_joinSessionResult(NLNET::TSockId /* from */, uint32
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_joinSessionResultExt(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus, const CSecurityCode& securityCode)
 {
 	nldebug("SB: on_joinSessionResultExt : result = %u, msg = '%s'", result, shardAddr.c_str());
@@ -324,27 +324,27 @@ void CSessionBrowserImpl::on_joinSessionResultExt(NLNET::TSockId from, uint32 us
 	on_joinSessionResult(from, userId, sessionId, result, shardAddr, participantStatus);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_getShardsResult(NLNET::TSockId /* from */, uint32 /* userId */, const std::string &/* result */)
 {
 	nldebug("SB: on_getShardsResult");
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId /* from */)
 {
 	nldebug("SB: on_CSessionBrowserServerWebClient_Disconnection");
 	callRingAccessPointMethod("onDisconnection", 0, 0);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_sessionList(NLNET::TSockId /* from */, uint32 /* charId */, const std::vector <RSMGR::TSessionDesc > &sessions)
 {
 	nldebug("SB: on_sessionList");
 	fill(sessions);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &sessions)
 {
 	// build datas & send to lua
@@ -418,7 +418,7 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::playerRatingFill(bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection)
 {
 	nlassert(_Lua);
@@ -445,7 +445,7 @@ void CSessionBrowserImpl::playerRatingFill(bool scenarioRated, uint32 rateFun, u
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::averageScoresFill(bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal)
 {
 	nlassert(_Lua);
@@ -474,7 +474,7 @@ void CSessionBrowserImpl::averageScoresFill(bool scenarioRated, uint32 rateFun, 
 }
 
 
-//****************************************************************************
+// ****************************************************************************
 static RSMGR::TSessionDesc buildSession(uint32 id, const std::string &owner, const std::string &title, const std::string &description, uint32 level, uint32 playerCount, const std::string &/* language */, uint32 launchTime, bool dm, bool invited)
 {
 	RSMGR::TSessionDesc result;
@@ -490,7 +490,7 @@ static RSMGR::TSessionDesc buildSession(uint32 id, const std::string &owner, con
 	return result;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::testFill()
 {
 	std::vector <RSMGR::TSessionDesc > sessions;
@@ -514,27 +514,27 @@ void CSessionBrowserImpl::testFill()
 	fill(sessions);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_charList(NLNET::TSockId /* from */, uint32 /* charId */, TSessionId /* sessionId */, const std::vector <RSMGR::TCharDesc > &chars)
 {
 	nldebug("SB: on_charList");
 	charsFill(chars);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_playerRatings(NLNET::TSockId /* from */, uint32 /* charId */, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection)
 {
 	playerRatingFill(scenarioRated, rateFun, rateDifficulty, rateAccessibility, rateOriginality, rateDirection);
 }
 
-//****************************************************************************
+// ****************************************************************************
 // Return average scores of a session
 void CSessionBrowserImpl::on_sessionAverageScores(NLNET::TSockId /* from */, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal)
 {
 	averageScoresFill(scenarioRated, rateFun, rateDifficulty, rateAccessibility, rateOriginality, rateDirection, rrpTotal);
 }
 
-//****************************************************************************
+// ****************************************************************************
 // Return average scores of a scenario
 void CSessionBrowserImpl::on_scenarioAverageScores(NLNET::TSockId /* from */, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal)
 {
@@ -564,7 +564,7 @@ void CSessionBrowserImpl::on_scenarioAverageScores(NLNET::TSockId /* from */, bo
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_ringRatings(NLNET::TSockId /* from */, uint32 /* charId */, uint32 authorRating, uint32 AMRating, uint32 masterlessRating)
 {
 	_LastAuthorRating = authorRating;
@@ -573,7 +573,7 @@ void CSessionBrowserImpl::on_ringRatings(NLNET::TSockId /* from */, uint32 /* ch
 	ringStatsFill();
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::on_ringPoints(NLNET::TSockId /* from */, uint32 /* charId */, const std::string &ringPoints, const std::string &maxRingPoints)
 {
 	_LastRingPoints = ringPoints;
@@ -581,7 +581,7 @@ void CSessionBrowserImpl::on_ringPoints(NLNET::TSockId /* from */, uint32 /* cha
 	ringStatsFill();
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars)
 {
 	// build datas & send to lua
@@ -638,7 +638,7 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 
 inline double ecoRingPoints(const std::string & ecoPoints, char * c)
 {
@@ -697,7 +697,7 @@ void CSessionBrowserImpl::ringStatsFill()
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 static RSMGR::TCharDesc buildChar(uint32 id, const std::string &charName, const std::string &guild,
 									TRace race, TCult cult, uint32 shardId, TSessionLevel level, bool connected)
 {
@@ -713,7 +713,7 @@ static RSMGR::TCharDesc buildChar(uint32 id, const std::string &charName, const 
 	return result;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::testCharsFill()
 {
 	std::vector <RSMGR::TCharDesc > chars;
@@ -736,7 +736,7 @@ void CSessionBrowserImpl::testCharsFill()
 	charsFill(chars);
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::callRingAccessPointMethod(const char *name, int numArg, int numResult)
 {
 	// when you load an animation, lua state isn't initialized for a short time
@@ -751,7 +751,7 @@ void CSessionBrowserImpl::callRingAccessPointMethod(const char *name, int numArg
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::callRingCharTrackingMethod(const char *name, int numArg, int numResult)
 {
 	// when you load an animation, lua state isn't initialized for a short time
@@ -766,7 +766,7 @@ void CSessionBrowserImpl::callRingCharTrackingMethod(const char *name, int numAr
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::callRingPlayerInfoMethod(const char *name, int numArg, int numResult)
 {
 	// when you load an animation, lua state isn't initialized for a short time
@@ -781,7 +781,7 @@ void CSessionBrowserImpl::callRingPlayerInfoMethod(const char *name, int numArg,
 	}
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CSessionBrowserImpl::callScenarioScoresMethod(const char *name, int numArg, int numResult)
 {
 	// when you load an animation, lua state isn't initialized for a short time

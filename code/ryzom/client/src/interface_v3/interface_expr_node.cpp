@@ -21,7 +21,7 @@
 #include "../cdb_leaf.h"
 #include "../cdb_branch.h"
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 void CInterfaceExprNodeValue::eval(CInterfaceExprValue &result)
 {
 	result = Value;
@@ -37,7 +37,7 @@ void CInterfaceExprNodeValue::getDepends(std::vector<ICDBNode *> &/* nodes */)
 }
 
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 void CInterfaceExprNodeValueFnCall::eval(CInterfaceExprValue &result)
 {
 	nlassert(Func);
@@ -80,7 +80,7 @@ CInterfaceExprNodeValueFnCall::~CInterfaceExprNodeValueFnCall()
 	}
 }
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 void CInterfaceExprNodeDBLeaf::eval(CInterfaceExprValue &result)
 {
 	nlassert(Leaf);
@@ -107,7 +107,7 @@ void CInterfaceExprNodeDBLeaf::getDepends(std::vector<ICDBNode *> &nodes)
 }
 
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 void CInterfaceExprNodeDBBranch::eval(CInterfaceExprValue &result)
 {
 	nlassert(Branch);
@@ -134,7 +134,7 @@ void CInterfaceExprNodeDBBranch::getDepends(std::vector<ICDBNode *> &nodes)
 }
 
 
-//*******************************************************************************************************
+// *******************************************************************************************************
 void CInterfaceExprNodeDependantDBRead::eval(CInterfaceExprValue &result)
 {
 	// no gain there, but barely used

@@ -56,10 +56,6 @@
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
 
-#ifndef NL_OS_WINDOWS
-	#include <X11/Xlib.h>
-#endif
-
 ///////////
 // USING //
 ///////////

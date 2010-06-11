@@ -24,7 +24,7 @@ namespace NL3D
 {
 
 
-//****************************************************************************
+// ****************************************************************************
 /**
  * This global function register all Serialisable Polymorphic 3D classes.
  * \author Lionel Berenguier

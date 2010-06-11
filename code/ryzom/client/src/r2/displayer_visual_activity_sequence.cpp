@@ -29,7 +29,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisualActivitySequence::CDisplayerVisualActivitySequence()
 {
 	_Touched = true;
@@ -38,14 +38,14 @@ CDisplayerVisualActivitySequence::CDisplayerVisualActivitySequence()
 	_DecalColor = CRGBA(0, 0, 0, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisualActivitySequence::~CDisplayerVisualActivitySequence()
 {
 	clear();
 	_WPCache.clear();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::clear(bool wantRemoveFromWorldMap)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_clear)
@@ -64,7 +64,7 @@ void CDisplayerVisualActivitySequence::clear(bool wantRemoveFromWorldMap)
 	_TraversedPrimInfos.clear();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onAttrModified(const std::string &attrName,sint32 /* attrIndex */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onAttrModified)
@@ -74,14 +74,14 @@ void CDisplayerVisualActivitySequence::onAttrModified(const std::string &attrNam
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::touch()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_touch)
 	_Touched = true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisual *CDisplayerVisualActivitySequence::getParentDV() const
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_getParentDV)
@@ -96,7 +96,7 @@ CDisplayerVisual *CDisplayerVisualActivitySequence::getParentDV() const
 	return prevDV;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::update()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_update)
@@ -242,7 +242,7 @@ void CDisplayerVisualActivitySequence::update()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::addFootSteps(const NLMISC::CLine &line)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_addFootSteps)
@@ -262,7 +262,7 @@ void CDisplayerVisualActivitySequence::addFootSteps(const NLMISC::CLine &line)
 	_FootSteps.push_back(line);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::addWanderSteps(const CVector &pos)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_addWanderSteps)
@@ -280,7 +280,7 @@ static void updateState(TSequenceState &state, CDisplayerVisual *dv)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisual *CDisplayerVisualActivitySequence::getPossibleGroupDV(CDisplayerVisual *entityDV)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_getPossibleGroupDV)
@@ -298,7 +298,7 @@ CDisplayerVisual *CDisplayerVisualActivitySequence::getPossibleGroupDV(CDisplaye
 	return entityDV;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerVisualActivitySequence::isVisible(CDisplayerVisual *groupDV, CDisplayerVisual *entityDV)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_isVisible)
@@ -321,7 +321,7 @@ bool CDisplayerVisualActivitySequence::isVisible(CDisplayerVisual *groupDV, CDis
 	return true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::removeFromWorldMap()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_removeFromWorldMap)
@@ -335,7 +335,7 @@ void CDisplayerVisualActivitySequence::removeFromWorldMap()
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onPostRender()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onPostRender)
@@ -435,7 +435,7 @@ void CDisplayerVisualActivitySequence::onPostRender()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onPreRender()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onPreRender)
@@ -475,7 +475,7 @@ void CDisplayerVisualActivitySequence::onPreRender()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::updateWorldPos()
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_updateWorldPos)
@@ -483,28 +483,28 @@ void CDisplayerVisualActivitySequence::updateWorldPos()
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onInstanceCreated(CInstance &/* instance */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onInstanceCreated)
 	touch();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onInstanceErased(CInstance &/* instance */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onInstanceErased)
 	touch();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::onAttrModified(CInstance &/* instance */,const std::string &/* attrName */,sint32 /* attrIndex */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onAttrModified)
 	touch();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualActivitySequence::setActive(bool active)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_setActive)
@@ -520,7 +520,7 @@ void CDisplayerVisualActivitySequence::setActive(bool active)
 	_Active = active;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerVisualActivitySequence::getActive() const
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_getActive)
@@ -528,7 +528,7 @@ bool CDisplayerVisualActivitySequence::getActive() const
 }
 
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::setWorldMapNumEdges(uint count)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_setWorldMapNumEdges)
@@ -564,7 +564,7 @@ void CDisplayerVisualActivitySequence::setWorldMapNumEdges(uint count)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::onAdd(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onAdd)
@@ -574,7 +574,7 @@ void CDisplayerVisualActivitySequence::onAdd(CGroupMap &/* owner */)
 	setWorldMapNumEdges((uint)_FootSteps.size());
 }
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::onRemove(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onRemove)
@@ -583,14 +583,14 @@ void CDisplayerVisualActivitySequence::onRemove(CGroupMap &/* owner */)
 	_AddedToWorldMap = false;
 }
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::onPreRender(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onPreRender)
 
 }
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::onUpdate(CGroupMap &owner)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onUpdate)
@@ -615,7 +615,7 @@ void CDisplayerVisualActivitySequence::onUpdate(CGroupMap &owner)
 	}
 }
 
-//*********************************************************
+// *********************************************************
 void CDisplayerVisualActivitySequence::setWorldMapColor(CRGBA color)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_setWorldMapColor)

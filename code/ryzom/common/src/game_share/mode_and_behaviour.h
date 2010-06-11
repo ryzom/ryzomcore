@@ -318,7 +318,7 @@ namespace MBEHAV
 		}
 
 		/// Cons cast into behaviour enum
-		operator const EBehaviour () const
+		operator EBehaviour () const
 		{
 			return (EBehaviour)Behaviour8;
 		}

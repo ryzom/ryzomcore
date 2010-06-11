@@ -634,6 +634,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		case EGSPD::CPeople::Matis: loadLandmarkInfo(cur, "home_matis", _HomeLMOptions); break;
 		case EGSPD::CPeople::Zorai: loadLandmarkInfo(cur, "home_zorai", _HomeLMOptions); break;
 		case EGSPD::CPeople::Tryker: loadLandmarkInfo(cur, "home_tryker", _HomeLMOptions); break;
+		default: break;
 	}
 	loadLandmarkInfo(cur, "respawn", _RespawnLMOptions);
 	// animal landmark

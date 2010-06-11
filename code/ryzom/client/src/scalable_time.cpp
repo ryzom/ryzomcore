@@ -21,7 +21,7 @@
 #include "time_client.h"
 #include "nel/misc/time_nl.h"
 
-//*************************************************************************************************
+// *************************************************************************************************
 CScalableTime::CScalableTime()
 {
 	_LastPerformanceTime = NLMISC::CTime::getPerformanceTime();
@@ -29,27 +29,27 @@ CScalableTime::CScalableTime()
 	_TimeScale = 1.f;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 TTime CScalableTime::getScaledLocalTime()
 {
 	update();
 	return (TTime) (NLMISC::CTime::ticksToSecond ((NLMISC::TTicks) _ScaledPerformanceTime) * 1000.0);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 NLMISC::TTicks CScalableTime::getScaledPerformanceTime()
 {
 	update();
 	return (NLMISC::TTicks) _ScaledPerformanceTime;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CScalableTime::setTimeScale(float scale)
 {
 	_TimeScale = std::max(0.f, scale);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CScalableTime::update()
 {
 	NLMISC::TTicks dt = NLMISC::CTime::getPerformanceTime() - _LastPerformanceTime;

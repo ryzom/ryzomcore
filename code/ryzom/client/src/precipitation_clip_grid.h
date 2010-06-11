@@ -26,7 +26,7 @@
 
 /*
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T> class CArray2D
 {
 public:
@@ -130,7 +130,7 @@ private:
 };
 
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::getUpdateRects(sint moveOffsetX, sint moveOffsetY, std::vector<CRect> &rectsToUpdate)
 {
@@ -189,14 +189,14 @@ void CArray2D<T>::getUpdateRects(sint moveOffsetX, sint moveOffsetY, std::vector
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::getDiscardRects(sint moveOffsetX, sint moveOffsetY,std::vector<CRect> &discardedRects)
 {
 	getUpdateRects(- moveOffsetX, - moveOffsetY, discardedRects);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::moveSubArray(sint dstX, sint dstY, sint srcX, sint srcY, sint width, sint height)
 {
@@ -337,14 +337,14 @@ void CArray2D<T>::moveSubArray(sint dstX, sint dstY, sint srcX, sint srcY, sint 
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::move(sint offsetX, sint offsetY)
 {
 	moveSubArray(offsetX, offsetY, 0, 0, _Width, _Height);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::init(uint width, uint height)
 {
@@ -353,7 +353,7 @@ void CArray2D<T>::init(uint width, uint height)
 	_Height = height;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 template <class T>
 void CArray2D<T>::init(uint width,uint height, const T &defaultValue)
 {
@@ -363,7 +363,7 @@ void CArray2D<T>::init(uint width,uint height, const T &defaultValue)
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 // A height grid with wrapping
 
 class CHeightGridWrapped
@@ -404,13 +404,13 @@ private:
 
 
 
-//*********************************************************************************
+// *********************************************************************************
 inline void  CHeightGridWrapped::insert(const CGridElem &ge)
 {
 	_Grid(ge.X & _SizeMask, ge.Y & _SizeMask).push_back(ge);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 inline void  CHeightGridWrapped::remove(const CGridElem &ge)
 {
 	TGridElemList &gel = _Grid(ge.X & _SizeMask, ge.Y & _SizeMask);
@@ -486,13 +486,13 @@ private:
 	void	addCollisionMesh(const UVisualCollisionManager::CMeshInstanceColInfo &colMesh);
 };
 
-//***********************************************************************************
+// ***********************************************************************************
 inline void CHeightGrid::gridCoordToWorld(sint x, sint y, CVector &dest) const
 {
 	dest.set(x * _CellSize, y * _CellSize, 0.f);
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 inline CVector CHeightGrid::gridCoordToWorld(sint x, sint y) const
 {
 	CVector dest;

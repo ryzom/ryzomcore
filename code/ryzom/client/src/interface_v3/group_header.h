@@ -23,7 +23,7 @@
 
 class CGroupHeaderEntry;
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 /** Display a header with movable entries.
   * Usually used with a table to change the size of each column (much like the windows file explorer in 'details' mode)
   *
@@ -54,7 +54,7 @@ private:
 	int luaResizeColumnsAndContainer(CLuaState &ls);
 };
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 // an entry in a header, includes a "mover control" to move it inside its parent header
 // NOTE : when not used inside a CGroupHeader, will work, but there will be no 'max_size'
 class CGroupHeaderEntry : public CInterfaceGroup

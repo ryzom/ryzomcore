@@ -39,14 +39,14 @@ static const char *WIN_BOT_CHAT_PAGE_MISSION = "ui:interface:bot_chat_missions";
 static const char *WIN_BOT_CHAT_ACCEPT_MISSION = "ui:interface:bot_chat_accept_mission";
 
 
-//***************************************************************************************
+// ***************************************************************************************
 CBotChatPageMission::CBotChatPageMission()
 {
 	_MissionPagesObs.setListType(CHugeListObs::Missions);
 	_CurrSel = NULL;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CBotChatPageMission::init()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -55,7 +55,7 @@ void CBotChatPageMission::init()
 }
 
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageMission::begin()
 {
 	CBotChatPage::begin();
@@ -83,14 +83,14 @@ void CBotChatPageMission::begin()
 
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageMission::end()
 {
 	activateWindow(WIN_BOT_CHAT_PAGE_MISSION, false);
 	activateWindow(WIN_BOT_CHAT_ACCEPT_MISSION, false);
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 {
 	if (!missionSheet) return;
@@ -132,7 +132,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	_CurrSel = missionSheet;
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageMission::acceptMission()
 {
 	if (!_CurrSel) return;

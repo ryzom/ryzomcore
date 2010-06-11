@@ -33,7 +33,7 @@ H_AUTO_DECL( NL3D_Misc_VisualCollisionEntity_GetLight )
 #define	NL3D_HAUTO_LIGHT_VCE				H_AUTO_USE( NL3D_Misc_VisualCollisionEntity_GetLight )
 
 
-//****************************************************************************
+// ****************************************************************************
 bool	CVisualCollisionEntityUser::snapToGround(CVector &pos)
 {
 	NL3D_HAUTO_SNAP_VCE;

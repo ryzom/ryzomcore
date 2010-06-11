@@ -43,7 +43,7 @@ static CLuaString LuaStr_onTargetInstancePreHrcMove("onTargetInstancePreHrcMove"
 
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onActChanged()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onActChanged)
@@ -51,7 +51,7 @@ void CLuaEventForwarder::onActChanged()
 	executeHandler(LuaStr_onActChanged, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onContinentChanged()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onContinentChanged)
@@ -59,7 +59,7 @@ void CLuaEventForwarder::onContinentChanged()
 	executeHandler(LuaStr_onContinentChanged, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onCreate()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onCreate)
@@ -67,7 +67,7 @@ void CLuaEventForwarder::onCreate()
 	executeHandler(LuaStr_onCreate, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onPostCreate()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onPostCreate)
@@ -75,7 +75,7 @@ void CLuaEventForwarder::onPostCreate()
 	executeHandler(LuaStr_onPostCreate, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onErase()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onErase)
@@ -83,7 +83,7 @@ void CLuaEventForwarder::onErase()
 	executeHandler(LuaStr_onErase, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onPreHrcMove()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onPreHrcMove)
@@ -91,7 +91,7 @@ void CLuaEventForwarder::onPreHrcMove()
 	executeHandler(LuaStr_onPreHrcMove, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onPostHrcMove()
 {
 	//H_AUTO(R2_CLuaEventForwarder_onPostHrcMove)
@@ -99,7 +99,7 @@ void CLuaEventForwarder::onPostHrcMove()
 	executeHandler(LuaStr_onPostHrcMove, 0);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onFocus(bool focused)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onFocus)
@@ -109,7 +109,7 @@ void CLuaEventForwarder::onFocus(bool focused)
 	executeHandler(LuaStr_onFocus, 1);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onSelect(bool selected)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onSelect)
@@ -119,7 +119,7 @@ void CLuaEventForwarder::onSelect(bool selected)
 	executeHandler(LuaStr_onSelect, 1);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onAttrModified(const std::string &attrName, sint32 index)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onAttrModified)
@@ -130,7 +130,7 @@ void CLuaEventForwarder::onAttrModified(const std::string &attrName, sint32 inde
 	executeHandler(LuaStr_onAttrModified, 2);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 /*void CDisplayerLua::onTableModified(const std::string &tableName, const std::string &keyInTable, sint32 indexInTable)
 {
 	//H_AUTO(R2_CDisplayerLua_onTableModified)
@@ -142,7 +142,7 @@ void CLuaEventForwarder::onAttrModified(const std::string &attrName, sint32 inde
 	executeHandler("onTableModified", 3);
 }*/
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstanceCreated(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstanceCreated)
@@ -153,7 +153,7 @@ void CLuaEventForwarder::onTargetInstanceCreated(const std::string &refMakerAttr
 	executeHandler(LuaStr_onTargetInstanceCreated, 2);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstanceErased(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstanceErased)
@@ -164,7 +164,7 @@ void CLuaEventForwarder::onTargetInstanceErased(const std::string &refMakerAttr,
 	executeHandler(LuaStr_onTargetInstanceErased, 2);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstanceEraseRequested(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstanceEraseRequested)
@@ -175,7 +175,7 @@ void CLuaEventForwarder::onTargetInstanceEraseRequested(const std::string &refMa
 	executeHandler(LuaStr_onTargetInstanceEraseRequested, 2);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstanceAttrModified(const std::string &refMakerAttr, sint32 refMakerAttrIndex, const std::string &targetAttrName, sint32 targetAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstanceAttrModified)
@@ -188,7 +188,7 @@ void CLuaEventForwarder::onTargetInstanceAttrModified(const std::string &refMake
 	executeHandler(LuaStr_onTargetInstanceAttrModified, 4);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstancePreHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstancePreHrcMove)
@@ -199,7 +199,7 @@ void CLuaEventForwarder::onTargetInstancePreHrcMove(const std::string &refMakerA
 	executeHandler(LuaStr_onTargetInstancePreHrcMove, 2);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CLuaEventForwarder::onTargetInstancePostHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex)
 {
 	//H_AUTO(R2_CLuaEventForwarder_onTargetInstancePostHrcMove)

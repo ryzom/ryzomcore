@@ -17,7 +17,7 @@
 #include "stdpch.h"
 #include "sky_sheet.h"
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 CSkySheet::CSkySheet()
 {
 	AnimLengthInSeconds = 3; // by default, anim last 3 secconds (over 90 frames)
@@ -26,7 +26,7 @@ CSkySheet::CSkySheet()
 	WaterEnvMapAlpha = 255;
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkySheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	item.getValueByName(InstanceGroupName, (prefix + "InstanceGroupName").c_str());
@@ -55,7 +55,7 @@ void CSkySheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix
 	item.getValueByName(WaterEnvMapAlpha, (prefix + "WaterEnvMapAlpha").c_str());
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(InstanceGroupName);
@@ -69,7 +69,7 @@ void CSkySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(WaterEnvMapAlpha);
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 void CSkySheet::build(const NLGEORGES::UFormElm &item)
 {
 	build(item, "");

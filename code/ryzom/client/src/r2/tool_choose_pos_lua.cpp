@@ -27,7 +27,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolChoosePosLua::CToolChoosePosLua(uint ghostSlot,
 									 const CLuaObject &validFunc,
 									 const CLuaObject &cancelFunc,
@@ -51,7 +51,7 @@ CToolChoosePosLua::CToolChoosePosLua(uint ghostSlot,
 	_Commited = false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolChoosePosLua::commit(const NLMISC::CVector &createPosition, float /* createAngle */)
 {
 	//H_AUTO(R2_CToolChoosePosLua_commit)
@@ -67,7 +67,7 @@ void CToolChoosePosLua::commit(const NLMISC::CVector &createPosition, float /* c
 	_Commited = true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CToolChoosePosLua::cancel()
 {
 	//H_AUTO(R2_CToolChoosePosLua_cancel)

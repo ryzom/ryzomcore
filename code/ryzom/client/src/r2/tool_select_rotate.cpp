@@ -34,7 +34,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolSelectRotate::CToolSelectRotate()
 {
 	_StartAngle = 0;
@@ -43,7 +43,7 @@ CToolSelectRotate::CToolSelectRotate()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::updateAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectRotate_updateAction)
@@ -56,7 +56,7 @@ void CToolSelectRotate::updateAction(CInstance &instance)
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::setRotateInProgress(bool rotateInProgress, CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectRotate_setRotateInProgress)
@@ -64,7 +64,7 @@ void CToolSelectRotate::setRotateInProgress(bool rotateInProgress, CInstance &in
 	if (dv) dv->setRotateInProgress(rotateInProgress);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::beginAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectRotate_beginAction)
@@ -73,7 +73,7 @@ void CToolSelectRotate::beginAction(CInstance &instance)
 	setRotateInProgress(true, instance);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::cancelAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectRotate_cancelAction)
@@ -83,7 +83,7 @@ void CToolSelectRotate::cancelAction(CInstance &instance)
 	setRotateInProgress(false, instance);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::commitAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectRotate_commitAction)
@@ -93,7 +93,7 @@ void CToolSelectRotate::commitAction(CInstance &instance)
 	setRotateInProgress(false, instance);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectRotate::setEntityAngle(CEntityCL &/* entity */, CInstance &instance, float angle)
 {
 	//H_AUTO(R2_CToolSelectRotate_setEntityAngle)
@@ -102,7 +102,7 @@ void CToolSelectRotate::setEntityAngle(CEntityCL &/* entity */, CInstance &insta
 	delete angleObject;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolSelectRotate::isActionPossibleOn(const CInstance &instance) const
 {
 	//H_AUTO(R2_CToolSelectRotate_isActionPossibleOn)
@@ -119,7 +119,7 @@ bool CToolSelectRotate::isActionPossibleOn(const CInstance &instance) const
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolSelectRotate::onMouseLeftButtonDown()
 {
 	//H_AUTO(R2_CToolSelectRotate_onMouseLeftButtonDown)

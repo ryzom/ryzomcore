@@ -29,7 +29,7 @@ static void build(NLMISC::TSStringId &result, const NLGEORGES::UFormElm &item, c
 	result = ClientSheetsStrings.add(str);
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 CBodyToBoneSheet::CBodyToBoneSheet()
 {
 	Head = 0;
@@ -44,7 +44,7 @@ CBodyToBoneSheet::CBodyToBoneSheet()
 	RightFoot = 0;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CBodyToBoneSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	::build(Head, item, prefix, "Head");
@@ -59,7 +59,7 @@ void CBodyToBoneSheet::build(const NLGEORGES::UFormElm &item, const std::string 
 	::build(RightFoot, item, prefix, "RightFoot");
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 void CBodyToBoneSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	ClientSheetsStrings.serial(f, Head);
@@ -74,7 +74,7 @@ void CBodyToBoneSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	ClientSheetsStrings.serial(f, RightFoot);
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const char *CBodyToBoneSheet::getBoneName(BODY::TBodyPart part, BODY::TSide side) const
 {
 	BODY::TBodyPart hominPart = BODY::getMatchingHominBodyPart(part);

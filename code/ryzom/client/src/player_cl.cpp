@@ -1292,33 +1292,33 @@ void CPlayerCL::load()	// virtual
 	}
 }// load //
 
-//*********************************************************************************************
+// *********************************************************************************************
 const char *CPlayerCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide side) const
 {
 	if (!_PlayerSheet) return CCharacterCL::getBoneNameFromBodyPart(part, side);
 	return _PlayerSheet->BodyToBone.getBoneName(part, side);
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CPlayerCL::getRightHandItemSheet() const
 {
 	return _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CPlayerCL::getLeftHandItemSheet() const
 {
 	return _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CAttack *CPlayerCL::getAttack(const CAttackIDSheet &id) const
 {
 	if (!_PlayerSheet) return NULL;
 	return CCharacterCL::getAttack(id, _PlayerSheet->AttackLists);
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 float CPlayerCL::getScaleRef() const
 {
 	float fyrosRefScale = GabaritSet.getRefHeightScale(0, EGSPD::CPeople::Fyros);
@@ -1327,7 +1327,7 @@ float CPlayerCL::getScaleRef() const
 
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 float CPlayerCL::getNamePosZ() const
 {
 	if (!_PlayerSheet)

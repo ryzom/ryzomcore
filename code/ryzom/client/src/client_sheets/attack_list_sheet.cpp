@@ -23,27 +23,27 @@
 
 using namespace NLGEORGES;
 
-//*******************************************************************************************
+// *******************************************************************************************
 CAttackListSheet::CAttackListSheet()
 {
 	Type = ATTACK_LIST;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListSheetEntry::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	ID.build(item, prefix + "ID."	);
 	Attack.build(item, prefix + "Attack.");
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListSheetEntry::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(ID);
 	f.serial(Attack);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListSheet::build(const NLGEORGES::UFormElm &item)
 {
 	const UFormElm *attacks = NULL;
@@ -64,7 +64,7 @@ void CAttackListSheet::build(const NLGEORGES::UFormElm &item)
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialCont(Attacks);

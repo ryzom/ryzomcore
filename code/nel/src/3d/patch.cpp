@@ -2293,7 +2293,7 @@ CTileElement *CPatch::getTileElement(const CUV &uv)
 	return &(Tiles[ts+tt*OrderS]);
 }
 
-//***************************************************************
+// ***************************************************************
 uint32	CPatch::countNumTriFar0() const
 {
 	uint32 numIndex = MasterBlock.Far0FaceVector ? *MasterBlock.Far0FaceVector : 0;
@@ -2311,7 +2311,7 @@ uint32	CPatch::countNumTriFar0() const
 	return numIndex;
 }
 
-//***************************************************************
+// ***************************************************************
 uint32	CPatch::countNumTriFar1() const
 {
 	uint32 numIndex = MasterBlock.Far1FaceVector ? *MasterBlock.Far1FaceVector : 0;

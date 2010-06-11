@@ -32,13 +32,13 @@ NL_END_STRING_CONVERSION_TABLE(TRangeWeaponType, RangeWeaponTypeConversion, Unkn
 
 
 
-//*********************************************************************************
+// *********************************************************************************
 TRangeWeaponType stringToRangeWeaponType(const std::string &str)
 {
 	return RangeWeaponTypeConversion.fromString(str);
 }
 
-//*********************************************************************************
+// *********************************************************************************
 std::string toString(TRangeWeaponType type)
 {
 	return RangeWeaponTypeConversion.toString(type);

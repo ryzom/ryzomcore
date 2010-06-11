@@ -20,7 +20,7 @@
 #include "item_fx_sheet.h"
 #include "nel/georges/u_form_elm.h"
 
-//*******************************************************************************************
+// *******************************************************************************************
 CItemFXSheet::CItemFXSheet()
 {
 	_Trail = 0;
@@ -32,7 +32,7 @@ CItemFXSheet::CItemFXSheet()
 	AttackFXRot.set(0.f, 0.f, 0.f);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CItemFXSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	std::string trail;
@@ -72,7 +72,7 @@ void CItemFXSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 	}
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CItemFXSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(TrailMinSliceTime);
@@ -86,25 +86,25 @@ void CItemFXSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serialCont(_StaticFXs);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const char *CItemFXSheet::getTrail() const
 {
 	return _Trail ? ClientSheetsStrings.get(_Trail) : "";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const char *CItemFXSheet::getAdvantageFX() const
 {
 	return _AdvantageFX ? ClientSheetsStrings.get(_AdvantageFX) : "";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const char *CItemFXSheet::getAttackFX() const
 {
 	return _AttackFX ? ClientSheetsStrings.get(_AttackFX) : "";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CItemFXSheet::CStaticFX::build(const NLGEORGES::UFormElm &item)
 {
 	std::string name;
@@ -118,7 +118,7 @@ void CItemFXSheet::CStaticFX::build(const NLGEORGES::UFormElm &item)
 	item.getValueByName(Offset.z,    "OffsetZ");
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CItemFXSheet::CStaticFX::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	ClientSheetsStrings.serial(f, Name);
@@ -126,21 +126,21 @@ void CItemFXSheet::CStaticFX::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(Offset);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const char *CItemFXSheet::getStaticFXName(uint index) const
 {
 	nlassert(index < _StaticFXs.size());
 	return _StaticFXs[index].Name ? ClientSheetsStrings.get(_StaticFXs[index].Name) : "";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const char *CItemFXSheet::getStaticFXBone(uint index) const
 {
 	nlassert(index < _StaticFXs.size());
 	return _StaticFXs[index].Bone ? ClientSheetsStrings.get(_StaticFXs[index].Bone) : "";
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 const NLMISC::CVector &CItemFXSheet::getStaticFXOffset(uint index) const
 {
 	nlassert(index < _StaticFXs.size());

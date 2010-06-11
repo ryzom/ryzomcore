@@ -35,7 +35,7 @@
 #define DB_LOCAL_BRANCH_FOR_MISSIONS			"LOCAL:CHOOSE_MISSIONS"
 
 
-//****************************************************************************
+// ****************************************************************************
 /** Database observer to update incrementaly a list of items
  * Class synchronizing huge list of leaves from server to local
  * This is done through a small window in the server database of 8 (for the moment) elements

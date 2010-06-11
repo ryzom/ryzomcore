@@ -502,7 +502,7 @@ struct CCameraBackup
 };
 
 
-//*********************************************************
+// *********************************************************
 CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uint top, uint bottom, uint screenShotWidth, uint screenShotHeight)
 {
 	CCameraBackup cb;
@@ -530,7 +530,7 @@ CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uin
 }
 
 
-//*********************************************************
+// *********************************************************
 static void restoreCamera(UScene &scene, const CCameraBackup &backup)
 {
 	scene.getCam().setFrustum (backup.Frustum);

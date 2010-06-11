@@ -47,7 +47,7 @@ static const char *DM_VALID_DB_PATH = "UI:TEMP:DYNAMIC_MISSION_VALID";
 using namespace STRING_MANAGER;
 using NLMISC::toString;
 
-//*************************************************************************************************
+// *************************************************************************************************
 CBotChatPageDynamicMission::CBotChatPageDynamicMission()
 {
 	std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
@@ -62,7 +62,7 @@ CBotChatPageDynamicMission::CBotChatPageDynamicMission()
 	_MissionValid = false;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CBotChatPageDynamicMission::invalidateMission()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -72,7 +72,7 @@ void CBotChatPageDynamicMission::invalidateMission()
 	_MissionValid = false;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CBotChatPageDynamicMission::begin()
 {
 	CBotChatPage::begin();
@@ -119,7 +119,7 @@ void CBotChatPageDynamicMission::begin()
 	}
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CBotChatPageDynamicMission::end()
 {
 	// if a menu is currently poped, disable it
@@ -128,13 +128,13 @@ void CBotChatPageDynamicMission::end()
 	activateWindow(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION, false);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CBotChatPageDynamicMission::init()
 {
 
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CBotChatPageDynamicMission::update()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -223,7 +223,7 @@ void CBotChatPageDynamicMission::update()
 	}
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageDynamicMission::sendChoices()
 {
 	uint k;
@@ -250,7 +250,7 @@ void CBotChatPageDynamicMission::sendChoices()
 	}
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageDynamicMission::selectionChanged(uint choice)
 {
 	if (choice > DYNAMIC_MISSION_NUM_CHOICES)
@@ -268,7 +268,7 @@ void CBotChatPageDynamicMission::selectionChanged(uint choice)
 	sendChoices();
 }
 
-//***************************************************************************************
+// ***************************************************************************************
 void CBotChatPageDynamicMission::regen()
 {
 	if (!_MissionValid) return;
@@ -282,7 +282,7 @@ void CBotChatPageDynamicMission::regen()
 // ACTION HANDLERS //
 /////////////////////
 
-//***************************************************************************************
+// ***************************************************************************************
 // the player has clicked on an item to buy it
 class CAHChangeDMOption : public IActionHandler
 {
@@ -301,7 +301,7 @@ class CAHChangeDMOption : public IActionHandler
 };
 REGISTER_ACTION_HANDLER(CAHChangeDMOption, "change_dm_option");
 
-//***************************************************************************************
+// ***************************************************************************************
 // regenerate current mission
 class CAHRegenDM : public IActionHandler
 {
@@ -313,7 +313,7 @@ class CAHRegenDM : public IActionHandler
 REGISTER_ACTION_HANDLER(CAHRegenDM, "regen_dm");
 
 
-//***************************************************************************************
+// ***************************************************************************************
 // the player accepted the mission
 class CAHAcceptDM : public IActionHandler
 {

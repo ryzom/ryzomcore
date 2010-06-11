@@ -38,7 +38,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//***************************************************************
+// ***************************************************************
 CToolSelectMove::CToolSelectMove()
 {
 	_MouseX = -1;
@@ -57,7 +57,7 @@ CToolSelectMove::CToolSelectMove()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolSelectMove::checkAdditionnalRoomLeftFor(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_checkAdditionnalRoomLeftFor)
@@ -86,7 +86,7 @@ bool CToolSelectMove::checkAdditionnalRoomLeftFor(CInstance &instance)
 }
 
 
-//***************************************************************
+// ***************************************************************
 CInstance *CToolSelectMove::createGhost(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_createGhost)
@@ -139,7 +139,7 @@ CInstance *CToolSelectMove::createGhost(CInstance &instance)
 	return NULL;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::beginAction(CInstance &instance)
 {
 	_DeltaAnchor.set(0, 0, 0);
@@ -265,7 +265,7 @@ void CToolSelectMove::beginAction(CInstance &instance)
 	dv->setMoveInProgress(true);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::cancelAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_cancelAction)
@@ -291,7 +291,7 @@ void CToolSelectMove::cancelAction(CInstance &instance)
 	_Duplicating = false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::commitAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_commitAction)
@@ -435,14 +435,14 @@ void CToolSelectMove::commitAction(CInstance &instance)
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolSelectMove::getCursorForPossibleAction() const
 {
 	//H_AUTO(R2_CToolSelectMove_getCursorForPossibleAction)
 	return isShiftDown() ? "curs_can_pan_dup.tga" : "curs_can_pan.tga";
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolSelectMove::getDefaultCursor() const
 {
 	//H_AUTO(R2_CToolSelectMove_getDefaultCursor)
@@ -450,7 +450,7 @@ const char *CToolSelectMove::getDefaultCursor() const
 	return isShiftDown() ? "curs_dup.tga" : DEFAULT_CURSOR;
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolSelectMove::getPickCursor() const
 {
 	//H_AUTO(R2_CToolSelectMove_getPickCursor)
@@ -458,7 +458,7 @@ const char *CToolSelectMove::getPickCursor() const
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::updateAction(CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_updateAction)
@@ -647,7 +647,7 @@ void CToolSelectMove::updateAction(CInstance &instance)
 	*/
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::setInstancePos(const NLMISC::CVectorD &pos, CInstance &instance)
 {
 	//H_AUTO(R2_CToolSelectMove_setInstancePos)
@@ -658,7 +658,7 @@ void CToolSelectMove::setInstancePos(const NLMISC::CVectorD &pos, CInstance &ins
 	delete newPos;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolSelectMove::isActionPossibleOn(const CInstance &instance) const
 {
 	//H_AUTO(R2_CToolSelectMove_isActionPossibleOn)
@@ -681,14 +681,14 @@ bool CToolSelectMove::isActionPossibleOn(const CInstance &instance) const
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::onActivate()
 {
 	//H_AUTO(R2_CToolSelectMove_onActivate)
 	setContextHelp(CI18N::get("uiR2EDToolSelectMove"));
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolSelectMove::updateBeforeRender()
 {
 	//H_AUTO(R2_CToolSelectMove_updateBeforeRender)

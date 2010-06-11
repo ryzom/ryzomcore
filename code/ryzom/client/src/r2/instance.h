@@ -241,7 +241,7 @@ private:
 	// For editor : Create this object from the CObjectTable it materialize in the editor
 	CInstance(const CObjectTable *objectTable, CLuaState &ls);
 	// copy not supported
-	CInstance(const CInstance &/* other */) { nlassert(0); }
+	CInstance(const CInstance &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CInstance &operator = (const CInstance &/* other */) { nlassert(0); return *this; }
 	//
 	void executeHandler(const CLuaString &name, int numArgs);

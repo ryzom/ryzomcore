@@ -34,7 +34,7 @@ using namespace NLNET;
 CBotChatManager *CBotChatManager::_Instance = NULL;
 
 
-//********************************************************************************************
+// ********************************************************************************************
 CBotChatManager::CBotChatManager()
 {
 	_CurrPage = NULL;
@@ -42,21 +42,21 @@ CBotChatManager::CBotChatManager()
 	//_ChosenMissionFlags = 0;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 CBotChatManager::~CBotChatManager()
 {
 	// Destruct
 	nlassert(_CurrPage == NULL); // should have called setCurrPage(NULL) before quitting (and before releasing the interface) !
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 CBotChatManager *CBotChatManager::getInstance()
 {
 	if (!_Instance) _Instance = new CBotChatManager;
 	return _Instance;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CBotChatManager::releaseInstance()
 {
 	if( _Instance )
@@ -66,7 +66,7 @@ void CBotChatManager::releaseInstance()
 	}
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CBotChatManager::setCurrPage(CBotChatPage *page)
 {
 	if (_CurrPage)
@@ -85,13 +85,13 @@ void CBotChatManager::setCurrPage(CBotChatPage *page)
 	_CurrPage = page;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CBotChatManager::update()
 {
 	if (_CurrPage) _CurrPage->update();
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CBotChatManager::endDialog()
 {
 	NLMISC::CBitMemStream out;
@@ -212,7 +212,7 @@ void CBotChatManager::debugLocalReceiveMissionInfo()
 }
 
 
-//********************************************************************************************
+// ********************************************************************************************
 /*void CBotChatManager::processMissionHelpInfos(uint8 index, CPrerequisitInfos &infos)
 {
 	std::map<uint8,CInterfaceGroup*>::iterator it = _MissionHelpWindowsWaiting.find(index);

@@ -600,7 +600,7 @@ namespace BRICK_FAMILIES
 		EndBonus = BPBGLA,
 
 		// TITLE
-		//******
+		// ******
 		BeginTitle,
 		BPTEA = BeginTitle,
 		EndTitle = BPTEA,
