@@ -230,7 +230,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			printf ("%s", str.c_str());
 
 		if (!args.CallstackAndLog.empty())
-			printf (args.CallstackAndLog.c_str());
+			printf ("%s", args.CallstackAndLog.c_str());
 
 		fflush(stdout);
 	}
