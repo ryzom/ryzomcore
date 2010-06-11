@@ -983,6 +983,9 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	size_hints.width = mode.Width;
 	size_hints.height = mode.Height;
 	size_hints.flags = PSize;
+
+	// x11 fullscreen is not working on mac os x
+#if !defined(NL_OS_MAC)
 	if (!mode.Windowed)
 	{
 		size_hints.flags = PSize | PMinSize | PMaxSize;
@@ -991,9 +994,12 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		size_hints.max_width = mode.Width;
 		size_hints.max_height = mode.Height;
 	}
+#endif
 
 	XSetWMNormalHints(dpy, win, &size_hints);
 
+	// x11 fullscreen is not working on mac os x
+#if !defined(NL_OS_MAC)
 	// Toggle fullscreen
 	if (mode.Windowed == _FullScreen)
 	{
@@ -1008,7 +1014,13 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		xev.xclient.data.l[2] = 0;
 		XSendEvent(dpy, DefaultRootWindow(dpy), false, SubstructureNotifyMask, &xev);
 	}
+#endif
+
+#if !defined(NL_OS_MAC)
 	_FullScreen = !mode.Windowed;
+#else
+	_FullScreen = false;
+#endif
 
 	// Resize and update the window
 	XResizeWindow(dpy, win, mode.Width, mode.Height);
@@ -1125,7 +1137,13 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		return false;
 	}
 
+	// x11 fullscreen is not working on mac os x
+#if !defined(NL_OS_MAC)
 	mode.Windowed = !_FullScreen;
+#else
+	mode.Windowed = true;
+#endif
+
 	mode.OffScreen = false;
 	mode.Depth = (uint) DefaultDepth(dpy, DefaultScreen(dpy));
 	mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
@@ -1659,6 +1677,7 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	return false;
 
 #elif defined (NL_OS_UNIX)
 
