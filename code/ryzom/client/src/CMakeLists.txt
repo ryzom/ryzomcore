@@ -44,22 +44,22 @@ if(APPLE)
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
   SET(MACOSX_BUNDLE_COPYRIGHT "Winchgate and The Ryzom Core Community")
 
-  ADD_EXECUTABLE(client MACOSX_BUNDLE ${SRC})
+  ADD_EXECUTABLE(ryzom_client MACOSX_BUNDLE ${SRC})
 
   # TODO: in release mode, cmake could copy all the dylibs into the .app
   # bundle for redistribution... should some part of cpack handle that?
-  # ADD_CUSTOM_COMMAND(TARGET client POST_BUILD
+  # ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD
   #   # make frameworks directory in app bundle
   #   COMMAND ${CMAKE_COMMAND} -E make_directory
-  #     ${CMAKE_CURRENT_BINARY_DIR}/client.app/Contents/Frameworks
+  #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
   #   # copy framework into app bundle
   #   COMMAND ${CMAKE_COMMAND} -E copy ${SOME_LIBRARY} 
-  #     ${CMAKE_CURRENT_BINARY_DIR}/client.app/Contents/Frameworks
+  #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
   #   # ...
   #   # install_name_tool the lib pathes
 
 ELSE(APPLE)
-  ADD_EXECUTABLE(client ${SRC})
+  ADD_EXECUTABLE(ryzom_client ${SRC})
 ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
@@ -70,10 +70,10 @@ INCLUDE_DIRECTORIES(
 			${CURL_INCLUDE_DIRS} 
 			${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(client 	${PLATFORM_LINKFLAGS} 
+TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS} 
 				${LIBXML2_LIBRARIES} 
 				${NELMISC_LIBRARY} 
-				game_share 
+				ryzom_gameshare 
 				${NELNET_LIBRARY} 
 				${NELLIGO_LIBRARY} 
 				${NELGEORGES_LIBRARY} 
@@ -82,18 +82,17 @@ TARGET_LINK_LIBRARIES(client 	${PLATFORM_LINKFLAGS}
 				${CURL_LIBRARIES} 
 				${NELSOUND_LIBRARY} 
 				${NELSNDDRV_LIBRARY}
-				client_sheets 
+				ryzom_clientsheets 
 				${NELPACS_LIBRARY} 
 				${LIBWWW_LIBRARY} 
-				${Boost_LIBRARIES} 
-				seven_zip
+				ryzom_sevenzip
 				luabind # TODO: find luabind and expat cleanly using a find script
 				expat)
 				
 IF(NOT WITH_COCOA)
-	TARGET_LINK_LIBRARIES(client ${X11_LIBRARIES})
+	TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})
 ENDIF(NOT WITH_COCOA)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS client RUNTIME DESTINATION bin COMPONENT client BUNDLE DESTINATION /Applications)
+INSTALL(TARGETS ryzom_client RUNTIME DESTINATION bin COMPONENT client BUNDLE DESTINATION /Applications)
