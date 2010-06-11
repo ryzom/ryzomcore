@@ -162,10 +162,37 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x31: return KeyAPOSTROPHE;
 	case 0x33: return KeyBACKSLASH;
 	case 0x5e: return KeyOEM_102;
-	case 0x3a: return KeyCOMMA;
+//	case 0x3a: return KeyCOMMA;
 	case 0x3b: return KeyPERIOD;
 	case 0x3c: return KeySLASH;
 	case 0x3d: return KeyPARAGRAPH;
+	// for non-standard keyboards, maps to QWERTY keys
+	case 0x18: return KeyQ;
+	case 0x19: return KeyW;
+	case 0x1a: return KeyE;
+	case 0x1b: return KeyR;
+	case 0x1c: return KeyT;
+	case 0x1d: return KeyY;
+	case 0x1e: return KeyU;
+	case 0x1f: return KeyI;
+	case 0x20: return KeyO;
+	case 0x21: return KeyP;
+	case 0x26: return KeyQ;
+	case 0x27: return KeyS;
+	case 0x28: return KeyD;
+	case 0x29: return KeyF;
+	case 0x2a: return KeyG;
+	case 0x2b: return KeyH;
+	case 0x2c: return KeyJ;
+	case 0x2d: return KeyK;
+	case 0x2e: return KeyL;
+	case 0x34: return KeyZ;
+	case 0x35: return KeyX;
+	case 0x36: return KeyC;
+	case 0x37: return KeyV;
+	case 0x38: return KeyB;
+	case 0x39: return KeyN;
+	case 0x3a: return KeyM;
 #endif
 	default:
 //	nlwarning("missing keycode 0x%x %d '%c'", keycode, keycode, keycode);
