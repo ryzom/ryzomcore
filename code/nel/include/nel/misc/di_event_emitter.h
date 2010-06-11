@@ -135,6 +135,7 @@ public:
 
 	/// from IEventEmitter
 	virtual void			submitEvents(CEventServer &server, bool allWindows);
+	virtual void			emulateMouseRawMode(bool enable);
 
 	// Build a TMouseButton value from the current buttons state
 	TMouseButton	buildButtonsFlags() const;

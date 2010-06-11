@@ -249,6 +249,12 @@ void	CDIEventEmitter::submitEvents(CEventServer &server, bool allWindows)
 }
 
 //==========================================================================
+void	CDIEventEmitter::emulateMouseRawMode(bool enable)
+{
+	nlerror("no raw mode emulation on windows, the CDIMouse has a real raw mode");
+}
+
+//==========================================================================
 /// Tool fct to retrieve the game devices.
 static BOOL CALLBACK DIEnumDevicesDescCallback
 (

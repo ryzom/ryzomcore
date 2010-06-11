@@ -47,6 +47,7 @@ public:
 	const IEventEmitter *getEmitter(uint index) const;
 	/// From IEventEmitter. This call submitEvents on all the emitters
 	virtual void submitEvents(CEventServer &server, bool allWindows);
+	virtual void emulateMouseRawMode(bool enable);
 private:
 	typedef std::vector<std::pair<IEventEmitter *, bool> > TEmitterCont;
 	TEmitterCont	_Emitters;
