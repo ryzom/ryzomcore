@@ -54,7 +54,7 @@ private:
 
 };
 
-//**************************************************************************
+// **************************************************************************
 /** Helper class to restore the lua stack to the desired size when this object goes out of scope
   */
 class CLuaStackRestorer
@@ -354,7 +354,7 @@ private:
 
 private:
 	// this object isn't intended to be copied
-	CLuaState(const CLuaState &/* other */) { nlassert(0); }
+	CLuaState(const CLuaState &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CLuaState &operator=(const CLuaState &/* other */) { nlassert(0); return *this; }
 
 	void				executeScriptInternal(const std::string &code, const std::string &dbgSrc, int numRet = 0);

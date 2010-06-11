@@ -29,13 +29,13 @@ namespace R2
 {
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CToolNewVertex::CToolNewVertex() : CToolChoosePos(-1, "curs_create.tga", "curs_create_vertex_invalid.tga"), _CurrEdge(-1), _CurrPos(CVector::Null)
 {
 	lockMultiPos();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CToolNewVertex::isValidChoosePos(const CVector2f &pos) const
 {
 	//H_AUTO(R2_CToolNewVertex_isValidChoosePos)
@@ -65,7 +65,7 @@ bool CToolNewVertex::isValidChoosePos(const CVector2f &pos) const
 	return _CurrEdge != -1;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CToolNewVertex::commit(const NLMISC::CVector &createPosition, float /* createAngle */)
 {
 	//H_AUTO(R2_CToolNewVertex_commit)
@@ -96,14 +96,14 @@ void CToolNewVertex::commit(const NLMISC::CVector &createPosition, float /* crea
 	delete wp;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 const char *CToolNewVertex::getToolUIName() const
 {
 	//H_AUTO(R2_CToolNewVertex_getToolUIName)
 	return "new_vertex";
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CToolNewVertex::onDeleteCmd()
 {
 	//H_AUTO(R2_CToolNewVertex_onDeleteCmd)

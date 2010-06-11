@@ -46,7 +46,7 @@ extern UVisualCollisionManager	*CollisionManager;
 
 
 /*
-//***********************************************************************************
+// ***********************************************************************************
 void	CHeightGrid::tileAdded(const CTileAddedInfo &infos)
 {
 	// insert in point grid
@@ -62,7 +62,7 @@ void	CHeightGrid::tileAdded(const CTileAddedInfo &infos)
 	addTri(corners, infos.Center.z);
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void	CHeightGrid::tileRemoved(uint64 id)
 {
 	CHashMap<uint64, CTileAddedInfo>::iterator it = _TileInfos.find(id);
@@ -79,7 +79,7 @@ void	CHeightGrid::tileRemoved(uint64 id)
 	removeTri(corners, infos.Center.z);
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::addTri(const CVector2f corners[3], float z)
 {
 	_Tri.Vertices.resize(3);
@@ -109,7 +109,7 @@ void CHeightGrid::addTri(const CVector2f corners[3], float z)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::removeTri(const CVector2f corners[3], float z)
 {
 	_Tri.Vertices.resize(3);
@@ -133,7 +133,7 @@ void CHeightGrid::removeTri(const CVector2f corners[3], float z)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 CHeightGrid::CHeightGrid()
 {
 	_CellSize = 0.f;
@@ -148,7 +148,7 @@ CHeightGrid::CHeightGrid()
 
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::init(float cellSize, uint heightGridSize, uint wrappedHeightGridSize, float minZ)
 {
 	nlassert(cellSize > 0.f);
@@ -164,14 +164,14 @@ void CHeightGrid::init(float cellSize, uint heightGridSize, uint wrappedHeightGr
 	updateBBox();
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::updateBBox()
 {
 	_BBox.setMinMax(CVector(_PosX * _CellSize, _PosY * _CellSize, _MinZ),
 		            CVector((_PosX + _GridSize) * _CellSize, (_PosY + _GridSize) * _CellSize, -_MinZ));
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::update(const CVector &newPos)
 {
 	if (_CellSize == 0.f) return;
@@ -200,7 +200,7 @@ void CHeightGrid::update(const CVector &newPos)
 
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::addCollisionMesh(const UVisualCollisionManager::CMeshInstanceColInfo &colMesh)
 {
 	const std::vector<CVector> &vertices = colMesh.Mesh.getVertices();
@@ -236,7 +236,7 @@ void CHeightGrid::addCollisionMesh(const UVisualCollisionManager::CMeshInstanceC
 	_Meshs[colMesh.ID] = colMesh;
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::removeCollisionMesh(uint id)
 {
 	TColMeshMap::iterator it = _Meshs.find(id);
@@ -274,7 +274,7 @@ void CHeightGrid::removeCollisionMesh(uint id)
 }
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::updateRect(const NLMISC::CRect &rect)
 {
 	// add incoming meshs into the quad grid
@@ -299,7 +299,7 @@ void CHeightGrid::updateRect(const NLMISC::CRect &rect)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::discardRect(const CRect &rect)
 {
 	// remove meshs that are totally out of the grid
@@ -315,7 +315,7 @@ void CHeightGrid::discardRect(const CRect &rect)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CHeightGrid::updateCell(sint px, sint py)
 {
 	sint worldX = px + _PosX;
@@ -334,7 +334,7 @@ void CHeightGrid::updateCell(sint px, sint py)
 }
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void	CHeightGrid::display(NL3D::UDriver &drv) const
 {
 	extern UCamera MainCam;
@@ -387,7 +387,7 @@ void	CHeightGrid::display(NL3D::UDriver &drv) const
 // CPointGrid //
 ////////////////
 
-//*********************************************************************************
+// *********************************************************************************
 CHeightGridWrapped::CHeightGridWrapped()
 {
 	_CellSize = 0.f;
@@ -395,7 +395,7 @@ CHeightGridWrapped::CHeightGridWrapped()
 	_InvCellSize = 1.f;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 uint CHeightGridWrapped::getListMaxLength() const
 {
 	uint sizeMax = 0;
@@ -406,7 +406,7 @@ uint CHeightGridWrapped::getListMaxLength() const
 	return sizeMax;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CHeightGridWrapped::init(uint size, float cellSize)
 {
 	nlassert(cellSize > 0.f)

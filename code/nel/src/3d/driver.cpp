@@ -34,7 +34,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x65; // Added nlWindow patch.
+const uint32 IDriver::InterfaceVersion = 0x66; // added IEventEmitter::emulateMouseRawMode(bool)
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -50,7 +50,7 @@ IDriver::~IDriver()
 	// Must clean up everything before closing driver.
 	// Must doing this in release(), so assert here if not done...
 	{
-		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+		CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 		nlassert( rTexDrvInfos.size() == 0 );
 	}
@@ -81,7 +81,7 @@ bool		IDriver::release(void)
 
 	// Release refptr of TextureDrvInfos. Should be all null (because of precedent pass).
 	{
-		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+		CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 
 		// must be empty, because precedent pass should have deleted all.
@@ -234,7 +234,7 @@ void			IDriver::removeIBDrvInfoPtr(ItIBDrvInfoPtrList  ibDrvInfoIt)
 // ***************************************************************************
 void			IDriver::removeTextureDrvInfoPtr(ItTexDrvInfoPtrMap texDrvInfoIt)
 {
-	CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+	CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 	TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 
 	rTexDrvInfos.erase(texDrvInfoIt);
@@ -268,7 +268,7 @@ bool			IDriver::invalidateShareTexture (ITexture &texture)
 	getTextureShareName (texture, name);
 
 	// Look for the driver info for this share name
-	CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+	CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 	TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 	TTexDrvInfoPtrMap::iterator iteDrvInfo = rTexDrvInfos.find (name);
 	if (iteDrvInfo != rTexDrvInfos.end())

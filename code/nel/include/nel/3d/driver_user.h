@@ -413,6 +413,12 @@ public:
 	//
 	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
 	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
+
+	/**
+	 * wrapper for IEventEmitter::emulateMouseRawMode()
+	 */
+	virtual void emulateMouseRawMode(bool enable);
+
 	virtual uint	getDoubleClickDelay(bool hardwareMouse);
 
 	/// show cursor if b is true, or hide it if b is false

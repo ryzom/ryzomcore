@@ -66,13 +66,13 @@ static void buildAttackPart(const std::string &sheetName, CAnimationFXSet &fxSet
 	}
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 CAttack::CAttack()
 {
 	Sheet = NULL;
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CAttack::init(const CAttackSheet *sheet, NL3D::UAnimationSet *as)
 {
 	nlassert(!Sheet); // init already done
@@ -88,7 +88,7 @@ void CAttack::init(const CAttackSheet *sheet, NL3D::UAnimationSet *as)
 	buildAttackPart(Sheet->ImpactFX, ImpactFX, as);
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CAttackList::init(const CAttackListSheet *attackList, NL3D::UAnimationSet *as)
 {
 	nlassert(_Attacks.empty());
@@ -125,7 +125,7 @@ struct CAttackEntryComp2
 	}
 };
 
-//***********************************************************************************************
+// ***********************************************************************************************
 const CAttack *CAttackList::getAttackFromID(const CAttackIDSheet &id) const
 {
 	H_AUTO_USE(RZ_AttackList);
@@ -139,7 +139,7 @@ const CAttack *CAttackList::getAttackFromID(const CAttackIDSheet &id) const
 	return &(it->Attack);
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 CAttackListManager &CAttackListManager::getInstance()
 {
 	H_AUTO_USE(RZ_AttackList)
@@ -148,7 +148,7 @@ CAttackListManager &CAttackListManager::getInstance()
 	return *_Instance;
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CAttackListManager::releaseInstance()
 {
 	if( _Instance )
@@ -156,7 +156,7 @@ void CAttackListManager::releaseInstance()
 	_Instance = NULL;
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CAttackListManager::init()
 {
 	if (_AnimationSet) return; // init already done
@@ -185,7 +185,7 @@ void CAttackListManager::init()
 	buildLinkFXs();
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CAttackListManager::release()
 {
 	if (!_AnimationSet) return;
@@ -197,7 +197,7 @@ void CAttackListManager::release()
 	_Instance = NULL;
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 const CAttackList *CAttackListManager::getAttackList(const std::string &name) const
 {
 	H_AUTO_USE(RZ_AttackList)
@@ -206,19 +206,19 @@ const CAttackList *CAttackListManager::getAttackList(const std::string &name) co
 	return NULL;
 }
 
-//***********************************************************************************************
+// ***********************************************************************************************
 CAttackListManager::CAttackListManager()
 {
 	_AnimationSet = NULL;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListManager::buildAurasFXs()
 {
 	_Auras.init("auras.id_to_string_array", _AnimationSet, false /* must not delete animset, owned by this object */);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CAttackListManager::buildLinkFXs()
 {
 	_Links.init("links.id_to_string_array", _AnimationSet, false /* must not delete animset, owned by this object */);

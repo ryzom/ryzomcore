@@ -41,7 +41,7 @@ extern uint	SkipFrame;
 namespace R2
 {
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisualShape::CDisplayerVisualShape(const std::string &shapeName, float scale, bool worldMapDisplay)
 {
 	_ShapeName = shapeName;
@@ -54,14 +54,14 @@ CDisplayerVisualShape::CDisplayerVisualShape(const std::string &shapeName, float
 	_WorldMapDisplay = worldMapDisplay;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CDisplayerVisualShape::~CDisplayerVisualShape()
 {
 	deleteShape();
 	deleteVisualCollisionEntity();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::deleteVisualCollisionEntity()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_deleteVisualCollisionEntity)
@@ -75,7 +75,7 @@ void CDisplayerVisualShape::deleteVisualCollisionEntity()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::deleteShape()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_deleteShape)
@@ -93,7 +93,7 @@ void CDisplayerVisualShape::deleteShape()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onPreRender()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onPreRender)
@@ -191,7 +191,7 @@ void CDisplayerVisualShape::onPreRender()
 	_Touched = false;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::drawBBox(NLMISC::CRGBA color) const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_drawBBox)
@@ -202,7 +202,7 @@ void CDisplayerVisualShape::drawBBox(NLMISC::CRGBA color) const
 	::drawBox(bbox.getMin(),     bbox.getMax(), color);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onPostRender()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onPostRender)
@@ -232,7 +232,7 @@ void CDisplayerVisualShape::onPostRender()
 	CDisplayerVisual::onPostRender();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onAttrModified(const std::string &name,    sint32 index)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onAttrModified)
@@ -248,7 +248,7 @@ void CDisplayerVisualShape::onAttrModified(const std::string &name,    sint32 in
 	}*/
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::setDisplayMode(sint32 mode)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_setDisplayMode)
@@ -257,14 +257,14 @@ void CDisplayerVisualShape::setDisplayMode(sint32 mode)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onParentDisplayModeChanged()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onParentDisplayModeChanged)
 	updateMapDeco();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onFocus(bool focused)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onFocus)
@@ -272,7 +272,7 @@ void CDisplayerVisualShape::onFocus(bool focused)
 	updateMapDeco();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onSelect(bool selected)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onSelect)
@@ -281,7 +281,7 @@ void CDisplayerVisualShape::onSelect(bool selected)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::setActive(bool active)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_setActive)
@@ -307,7 +307,7 @@ void CDisplayerVisualShape::setActive(bool active)
 	_Active = active;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::updateMapDeco()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_updateMapDeco)
@@ -322,14 +322,14 @@ void CDisplayerVisualShape::updateMapDeco()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerVisualShape::getActive() const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_getActive)
 	return _Active;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerVisualShape::init(const CLuaObject &parameters)
 {
 	//H_AUTO(R2_CDisplayerVisualSh_initSape)
@@ -346,7 +346,7 @@ bool CDisplayerVisualShape::init(const CLuaObject &parameters)
 	return CDisplayerVisual::init(parameters);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CDisplayerVisualShape::getLastClip() const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_getLastClip)
@@ -354,7 +354,7 @@ bool CDisplayerVisualShape::getLastClip() const
 	return !_Instance.getLastClippedState();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 NLMISC::CAABBox CDisplayerVisualShape::getSelectBox() const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_getSelectBox)
@@ -366,7 +366,7 @@ NLMISC::CAABBox CDisplayerVisualShape::getSelectBox() const
 	return bbox;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 float CDisplayerVisualShape::preciseIntersectionTest(const NLMISC::CVector &worldRayStart,const NLMISC::CVector &worldRayDir) const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_preciseIntersectionTest)
@@ -385,7 +385,7 @@ float CDisplayerVisualShape::preciseIntersectionTest(const NLMISC::CVector &worl
 	return FLT_MAX;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 const NLMISC::CMatrix &CDisplayerVisualShape::getInvertedMatrix() const
 {
 	//H_AUTO(R2_CDisplayerVisualShape_getInvertedMatrix)
@@ -394,7 +394,7 @@ const NLMISC::CMatrix &CDisplayerVisualShape::getInvertedMatrix() const
 	return _InvertedMatrix;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::updateWorldPos()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_updateWorldPos)
@@ -407,7 +407,7 @@ void CDisplayerVisualShape::updateWorldPos()
 
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::snapToGround()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_snapToGround)
@@ -432,7 +432,7 @@ void CDisplayerVisualShape::snapToGround()
 	_Touched = true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::visualSnapToGround()
 {
 	//H_AUTO(R2_CDisplayerVisualShape_visualSnapToGround)
@@ -478,7 +478,7 @@ void CDisplayerVisualShape::visualSnapToGround()
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 NLMISC::CVector CDisplayerVisualShape::evalLinkPoint(bool /* leader */)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_evalLinkPoint)
@@ -493,27 +493,27 @@ NLMISC::CVector CDisplayerVisualShape::evalLinkPoint(bool /* leader */)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onAdd(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onAdd)
 
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onRemove(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onRemove)
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onPreRender(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onPreRender)
 
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CDisplayerVisualShape::onUpdate(CGroupMap &/* owner */)
 {
 	//H_AUTO(R2_CDisplayerVisualShape_onUpdate)

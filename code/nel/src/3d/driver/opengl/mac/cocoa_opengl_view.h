@@ -23,7 +23,7 @@
  */
 @interface CocoaOpenGLView : NSOpenGLView<NSTextInputClient>
 {
-  NSMutableAttributedString* backingStore;
+  NSMutableAttributedString* characterStorage;
   NSRange markedRange;
 }
 

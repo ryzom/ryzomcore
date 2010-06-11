@@ -21,7 +21,7 @@ namespace NL3D
 {
 
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<uint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	CPSAttribMakerMemoryBase<uint32>::serial(f);
@@ -39,7 +39,7 @@ void CPSAttribMakerMemory<uint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStr
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<uint32>::newElement(const CPSEmitterInfo &info)
 {
 	CPSAttribMakerMemoryBase<uint32>::newElement(info);
@@ -54,7 +54,7 @@ void CPSAttribMakerMemory<uint32>::newElement(const CPSEmitterInfo &info)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<sint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	CPSAttribMakerMemoryBase<sint32>::serial(f);
@@ -72,7 +72,7 @@ void CPSAttribMakerMemory<sint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStr
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<sint32>::newElement(const CPSEmitterInfo &info)
 {
 	CPSAttribMakerMemoryBase<sint32>::newElement(info);
@@ -87,7 +87,7 @@ void CPSAttribMakerMemory<sint32>::newElement(const CPSEmitterInfo &info)
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<float>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	CPSAttribMakerMemoryBase<float>::serial(f);
@@ -105,7 +105,7 @@ void CPSAttribMakerMemory<float>::serial(NLMISC::IStream &f) throw(NLMISC::EStre
 	}
 }
 
-//***********************************************************************************
+// ***********************************************************************************
 void CPSAttribMakerMemory<float>::newElement(const CPSEmitterInfo &info)
 {
 	CPSAttribMakerMemoryBase<float>::newElement(info);

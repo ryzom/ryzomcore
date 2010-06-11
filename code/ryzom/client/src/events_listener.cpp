@@ -145,16 +145,11 @@ void CEventsListener::operator()(const CEvent& event)
 	// Event from the Mouse (ANGLE)
 	if(event == EventGDMouseMove)
 	{
-#ifdef NL_OS_WINDOWS
 		CGDMouseMove* mouseEvent=(CGDMouseMove*)&event;
 		// Mouse acceleration
 		sint dX = mouseEvent->X;
 		sint dY = ClientCfg.FreeLookInverted ? -mouseEvent->Y : mouseEvent->Y;
 		updateFreeLookPos((float) dX, (float) dY);
-#else
-		// just to make sure that there is no game device implementation un unix
-		nlerror("not expecting EventGDMouseMove on unix");
-#endif
 	}
 	// Event from the Mouse (MOVE)
 	else if(event == EventMouseMoveId)
@@ -214,7 +209,7 @@ void CEventsListener::operator()(const CEvent& event)
 
 
 
-//***********************************************************************
+// ***********************************************************************
 void CEventsListener::smoothMouseCoordinates(float &x, float &y, float smoothingPeriod)
 {
 	if (smoothingPeriod > 0.001f)
@@ -227,7 +222,7 @@ void CEventsListener::smoothMouseCoordinates(float &x, float &y, float smoothing
 }
 
 
-//*************************************************************
+// *************************************************************
 void CEventsListener::updateMouseSmoothing()
 {
 	if (_LastFreeLookUpdateDate != TimeInSec)
@@ -245,7 +240,7 @@ void CEventsListener::updateMouseSmoothing()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CEventsListener::enableMouseSmoothing(bool on)
 {
 	if (on == _MouseSmoothingOn) return;
@@ -263,7 +258,7 @@ void CEventsListener::enableMouseSmoothing(bool on)
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CEventsListener::updateFreeLookPos(float x, float y)
 {
 
@@ -329,7 +324,7 @@ void CEventsListener::updateFreeLookPos(float x, float y)
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CEventsListener::updateCursorPos(float x, float y)
 {
 	// Backup mouse

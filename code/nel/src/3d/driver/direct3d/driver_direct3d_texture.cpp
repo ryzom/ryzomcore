@@ -549,7 +549,7 @@ bool CDriverD3D::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 
 		// insert or get the texture.
 		{
-			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+			CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 			TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 
 			ItTexDrvInfoPtrMap	itTex;
@@ -1013,7 +1013,7 @@ bool CDriverD3D::isTextureExist(const ITexture&tex)
 	getTextureShareName (tex, name);
 
 	{
-		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+		CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 		result = (rTexDrvInfos.find(name) != rTexDrvInfos.end());
 	}

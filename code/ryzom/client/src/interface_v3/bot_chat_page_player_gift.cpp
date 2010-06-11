@@ -29,7 +29,7 @@
 
 static const char *WIN_BOT_CHAT_PAGE_PLAYER_GIFT = "ui:interface:bot_chat_player_gift";
 
-//*************************************************************************************
+// *************************************************************************************
 void CBotChatPagePlayerGift::begin()
 {
 	CBotChatPage::begin();
@@ -55,7 +55,7 @@ void CBotChatPagePlayerGift::begin()
 	PlayerTrade.BotChatGiftContext= true;
 }
 
-//*************************************************************************************
+// *************************************************************************************
 void CBotChatPagePlayerGift::end()
 {
 	// If the player gift was not validated, restore all items. else must not!

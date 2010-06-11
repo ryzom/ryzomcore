@@ -66,7 +66,7 @@ class UWaterEnvMap;
 
 typedef void (*emptyProc)(void);
 
-//****************************************************************************
+// ****************************************************************************
 /// Monitor color properties
 struct CMonitorColorProperties
 {
@@ -570,6 +570,11 @@ public:
 		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game devices (joysticks, joypads ...)
 		  */
 		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
+
+		/**
+		 * wrapper for IEventEmitter::emulateMouseRawMode()
+		 */
+		virtual void emulateMouseRawMode(bool enable) = 0;
 
 		// get delay used for mouse double click
 		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;

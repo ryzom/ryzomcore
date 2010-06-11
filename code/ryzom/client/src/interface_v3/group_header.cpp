@@ -32,12 +32,12 @@ using namespace NLMISC;
 // CGroupHeader //
 //////////////////
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CGroupHeader::CGroupHeader(const TCtorParam &param) : CGroupList(param), _HeaderMaxSize(32767)
 {
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CGroupHeader::enlargeColumns(sint32 margin)
 {
 	std::vector<CGroupHeaderEntry *> entries;
@@ -115,7 +115,7 @@ void CGroupHeader::enlargeColumns(sint32 margin)
 	invalidateCoords();
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CGroupHeader::resizeColumnsAndContainer(sint32 margin)
 {
 	std::vector<CGroupHeaderEntry *> entries;
@@ -182,7 +182,7 @@ void CGroupHeader::resizeColumnsAndContainer(sint32 margin)
 	invalidateCoords();
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void CGroupHeader::getEntries(std::vector<CGroupHeaderEntry *> &dest)
 {
 	dest.clear();
@@ -197,7 +197,7 @@ void CGroupHeader::getEntries(std::vector<CGroupHeaderEntry *> &dest)
 	}
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 int CGroupHeader::luaEnlargeColumns(CLuaState &ls)
 {
 	const char *funcName = "enlargeColumns";
@@ -207,7 +207,7 @@ int CGroupHeader::luaEnlargeColumns(CLuaState &ls)
 	return 0;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 int CGroupHeader::luaResizeColumnsAndContainer(CLuaState &ls)
 {
 	const char *funcName = "resizeColumnsAndContainer";
@@ -217,7 +217,7 @@ int CGroupHeader::luaResizeColumnsAndContainer(CLuaState &ls)
 	return 0;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 bool CGroupHeader::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	if(!CGroupList::parse(cur, parentGroup)) return false;
@@ -373,13 +373,13 @@ private:
 	sint32	_WMin;
 };
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CGroupHeaderEntry::CGroupHeaderEntry(const TCtorParam &param) : CInterfaceGroup(param)
 {
 	_MinSize = 4;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 bool CGroupHeaderEntry::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	if (!CInterfaceGroup::parse(cur, parentGroup)) return false;
@@ -416,14 +416,14 @@ bool CGroupHeaderEntry::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	return true;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CInterfaceGroup *CGroupHeaderEntry::getTargetColumn() const
 {
 	CInterfaceManager	*im = CInterfaceManager::getInstance();
 	return dynamic_cast<CInterfaceGroup*>(im->getElementFromId(_TargetColumnId));
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 void	CGroupHeaderEntry::updateCoords()
 {
 	CInterfaceGroup::updateCoords();

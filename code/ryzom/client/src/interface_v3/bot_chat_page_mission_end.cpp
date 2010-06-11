@@ -31,7 +31,7 @@ static const char *WIN_BOT_CHAT_PAGE_MISSION_END = "ui:interface:bot_chat_missio
 // Context help
 extern void contextHelp (const std::string &help);
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageMissionEnd::begin()
 {
 	return;
@@ -71,7 +71,7 @@ void CBotChatPageMissionEnd::begin()
 	*/
 }
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageMissionEnd::end()
 {
 	activateWindow(WIN_BOT_CHAT_PAGE_MISSION_END, false);

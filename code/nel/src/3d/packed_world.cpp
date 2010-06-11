@@ -27,7 +27,7 @@ namespace NL3D
 {
 
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CPackedWorld::build(std::vector<TPackedZoneBaseSPtr> &packedZones)
 {
 	_ZoneGrid.clear();
@@ -77,7 +77,7 @@ void CPackedWorld::build(std::vector<TPackedZoneBaseSPtr> &packedZones)
 	_RaytraceCounter = ~0;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 bool CPackedWorld::raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles /*= NULL*/, NLMISC::CVector *normal)
 {
 	if (_ZoneGrid.empty()) return false;
@@ -138,7 +138,7 @@ bool CPackedWorld::raytrace(const NLMISC::CVector &start, const NLMISC::CVector 
 	return false;
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CPackedWorld::getZones(std::vector<TPackedZoneBaseSPtr> &zones)
 {
 	zones.clear();
@@ -148,7 +148,7 @@ void CPackedWorld::getZones(std::vector<TPackedZoneBaseSPtr> &zones)
 	}
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CPackedWorld::serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialVersion(1);
@@ -156,7 +156,7 @@ void CPackedWorld::serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serialCont(ZoneNames);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CPackedWorld::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	serialZoneNames(f);
@@ -166,7 +166,7 @@ void CPackedWorld::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(_ZoneMinY);
 }
 
-//*************************************************************************************************
+// *************************************************************************************************
 void CPackedWorld::select(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const
 {
 	selectedTriangles.clear();

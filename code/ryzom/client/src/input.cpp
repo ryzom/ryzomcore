@@ -33,6 +33,7 @@
 // Misc
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/mouse_smoother.h"
+#include "nel/misc/system_utils.h"
 // Game Share
 
 
@@ -66,7 +67,7 @@ bool							SetMousePosFirstTime = true;
 uint							DownMouseButtons = 0;
 
 #ifdef NL_OS_UNIX
-// on X11, store whether the mouse was captured or not
+// on X11 and cocoa, store whether the mouse was captured or not
 bool							MouseCapture = false;
 #endif
 
@@ -74,13 +75,13 @@ bool							MouseCapture = false;
 // FUNCTION //
 //////////////
 
-//*********************************************************************************
+// *********************************************************************************
 uint GetMouseButtonsState()
 {
 	return DownMouseButtons;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Initialize the mouse
 bool	InitMouseWithCursor (bool hardware)
 {
@@ -181,14 +182,14 @@ bool	InitMouseWithCursor (bool hardware)
 	return true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Is mouse cursor hardware ?
 bool	IsMouseCursorHardware ()
 {
 	return MouseHardware;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Set the mouse mode. Call this method once per frame to update window size
 void	UpdateMouse ()
 {
@@ -198,20 +199,24 @@ void	UpdateMouse ()
 		// Raw mode
 		if (MouseDevice)
 		{
-
 			MouseDevice->setMessagesMode(IMouseDevice::RawMode);
 			MouseDevice->setMouseAcceleration(ClientCfg.FreeLookAcceleration);
+		}
+		else
+		{
+			// no mouse device implementation on X11 and Cocoa, emulate raw mode
+			Driver->emulateMouseRawMode(true);
 		}
 	}
 	else
 	{
-		// Get the driver size
-		uint32 width, height;
-		Driver->getWindowSize(width, height);
-
 		// Set the mouse properties
 		if (MouseDevice)
 		{
+			// Get the driver size
+			uint32 width, height;
+			Driver->getWindowSize(width, height);
+
 			MouseDevice->setMessagesMode(IMouseDevice::NormalMode);
 			MouseDevice->setMouseMode(IMouseDevice::XAxis, IMouseDevice::Clamped);
 			MouseDevice->setMouseMode(IMouseDevice::YAxis, IMouseDevice::Clamped);
@@ -221,6 +226,11 @@ void	UpdateMouse ()
 			MouseDevice->setMouseSpeed(MouseCursorSpeed);
 			MouseDevice->setMouseAcceleration(MouseCursorAcceleration);
 		}
+		else
+		{
+			// no mouse device implementation on X11 and Cocoa, emulate raw mode
+			Driver->emulateMouseRawMode(false);
+		}
 	}
 	if (!IsSystemCursorCaptured())
 	{
@@ -228,7 +238,7 @@ void	UpdateMouse ()
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to toggle the mouse (freelook <- cursor)
 void	SetMouseFreeLook ()
 {
@@ -249,23 +259,16 @@ void	SetMouseFreeLook ()
 		}
 		UpdateMouse ();
 	}
-	
-#ifdef NL_OS_UNIX
-	// on X11 the mouse needs to get pulled into the middle each update, else
-	// the cursor would reach the border of the window / desktop 
-	// and freelook would hang
-	Driver->setMousePos(0.5f, 0.5f);
-#endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsMouseFreeLook()
 {
 	return MouseFreeLook;
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to toggle the mouse (freelook -> cursor)
 void	SetMouseCursor (bool updatePos)
 {
@@ -348,7 +351,7 @@ void	SetMouseCursor (bool updatePos)
 	}
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to set the cursor speed
 void	SetMouseSpeed (float speed)
 {
@@ -356,7 +359,7 @@ void	SetMouseSpeed (float speed)
 	UpdateMouse ();
 }
 
-//*********************************************************************************
+// *********************************************************************************
 // Use this method to set the cursor acceleration
 void	SetMouseAcceleration (uint accel)
 {
@@ -364,7 +367,7 @@ void	SetMouseAcceleration (uint accel)
 	UpdateMouse ();
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CaptureSystemCursor()
 {
 	if (IsSystemCursorCaptured()) return;
@@ -373,12 +376,12 @@ void CaptureSystemCursor()
 	if (!drvWnd) return;
 	SetCapture(drvWnd);
 #else
-	// on X11, set driver mouse capture on and store it locally as well
+	// on X11 and cocoa, set driver mouse capture on and store it locally as well
 	Driver->setCapture(MouseCapture = true);
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void ReleaseSystemCursor()
 {
 	if (!IsSystemCursorCaptured()) return;
@@ -392,23 +395,26 @@ void ReleaseSystemCursor()
 	}
 	ReleaseCapture();
 #else
-	// on X11, set driver mouse capture off and store it locally as well
+	// on X11 and cocoa, set driver mouse capture off and store it locally as well
 	Driver->setCapture(MouseCapture = false);
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsSystemCursorCaptured()
 {
 	if (!Driver) return false;
 #ifdef NL_OS_WINDOWS
 	return GetCapture() == Driver->getDisplay();
 #else
+	/*
+		TODO there should be a way to ask the driver if capturing is on or off
+	*/
 	return MouseCapture;
 #endif
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void HandleSystemCursorCapture(const CEvent &event)
 {
 	if (event == EventMouseDownId)
@@ -440,7 +446,7 @@ void HandleSystemCursorCapture(const CEvent &event)
 }
 
 
-//*********************************************************************************
+// *********************************************************************************
 bool IsSystemCursorInClientArea()
 {
 	if (!Driver) return false;

@@ -27,4 +27,10 @@ void CCocoaEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	NL3D::MAC::submitEvents(server, allWindows, this);
 }
 
+void CCocoaEventEmitter::emulateMouseRawMode(bool enable)
+{
+	// just forwarding to our cocoa adapter
+	NL3D::MAC::emulateMouseRawMode(enable);
+}
+
 }

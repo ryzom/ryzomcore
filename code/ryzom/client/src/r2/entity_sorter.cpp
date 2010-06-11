@@ -30,12 +30,12 @@ namespace R2
 	#define CHECK_INTEGRITY
 #endif
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CEntitySorter::CEntitySorter()
 {
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::registerEntityDisplayer(CDisplayerVisualEntity *dve)
 {
 	nlassert(dve);
@@ -49,7 +49,7 @@ void CEntitySorter::registerEntityDisplayer(CDisplayerVisualEntity *dve)
 	CHECK_INTEGRITY
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::unregisterEntityDisplayer(CDisplayerVisualEntity *dve)
 {
 	nlassert(dve);
@@ -67,14 +67,14 @@ void CEntitySorter::unregisterEntityDisplayer(CDisplayerVisualEntity *dve)
 	CHECK_INTEGRITY
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 uint CEntitySorter::getMaxEntityCount() const
 {
 	static volatile uint MAX_NUM_VISIBLE_ENTITIES = 253;
 	return MAX_NUM_VISIBLE_ENTITIES;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CEntitySorter::isWithinDisplayRange(CDisplayerVisualEntity *displayer) const
 {
 	if (!displayer) return false;
@@ -82,7 +82,7 @@ bool CEntitySorter::isWithinDisplayRange(CDisplayerVisualEntity *displayer) cons
 	return CSortedEntity(displayer, (UserEntity->pos() - displayer->getWorldPos()).sqrnorm()) < _FarthestEntity;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::sortByEntitiesByDistance()
 {
 	CHECK_INTEGRITY
@@ -101,7 +101,7 @@ void CEntitySorter::sortByEntitiesByDistance()
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::updateFadeInOut()
 {
 	CHECK_INTEGRITY
@@ -148,7 +148,7 @@ void CEntitySorter::updateFadeInOut()
 	CHECK_INTEGRITY
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::eraseVisibleListEntry(sint index)
 {
 	if (index == -1) return;
@@ -167,7 +167,7 @@ void CEntitySorter::eraseVisibleListEntry(sint index)
 	_VisibleList.pop_back();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::updateVisibleList()
 {
 	CHECK_INTEGRITY
@@ -229,7 +229,7 @@ void CEntitySorter::updateVisibleList()
 	CHECK_INTEGRITY
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::clipEntitiesByDist()
 {
 	CHECK_INTEGRITY
@@ -250,7 +250,7 @@ void CEntitySorter::clipEntitiesByDist()
 	CHECK_INTEGRITY
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntitySorter::checkIntegrity()
 {
 	#ifdef NL_DEBUG

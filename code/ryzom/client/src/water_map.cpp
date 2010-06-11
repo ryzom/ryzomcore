@@ -43,7 +43,7 @@ using namespace NLMISC;
 
 H_AUTO_DECL(RZ_WaterMap)
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CWaterMap::CWaterMap()
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -54,7 +54,7 @@ CWaterMap::CWaterMap()
 
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CWaterMap::init(const NLMISC::CVector2f &minCorner, const NLMISC::CVector2f &maxCorner, float cellSize /*=20.f*/)
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -80,7 +80,7 @@ void CWaterMap::init(const NLMISC::CVector2f &minCorner, const NLMISC::CVector2f
 	Scene->setWaterCallback(this);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CWaterMap::release()
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -93,7 +93,7 @@ void CWaterMap::release()
 	Scene->setWaterCallback(NULL);
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CWaterMap::getWaterHeight(const NLMISC::CVector2f &pos, float &height, bool &splashEnabled)
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -122,7 +122,7 @@ bool CWaterMap::getWaterHeight(const NLMISC::CVector2f &pos, float &height, bool
 	return false;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CWaterMap::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC::CMatrix &worldMatrix, bool splashEnabled, bool usesSceneWaterEnvMap)
 {
 	if (ClientCfg.R2EDEnabled)
@@ -211,7 +211,7 @@ void CWaterMap::waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC:
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CWaterMap::waterSurfaceRemoved(bool usesSceneWaterEnvMap)
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -233,7 +233,7 @@ static const NLMISC::CRGBA DebugCols[] =
 static const uint NumDebugCols = sizeof(DebugCols) / sizeof(DebugCols[0]);
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CWaterMap::dump(const std::string &filename)
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -295,7 +295,7 @@ void CWaterMap::dump(const std::string &filename)
 	f.close();
 }
 
-//******************************************************************************************************************
+// ******************************************************************************************************************
 void CWaterMap::render(const NLMISC::CVector2f &camPos, float maxDist /*=100.f*/)
 {
 	H_AUTO_USE(RZ_WaterMap)
@@ -332,7 +332,7 @@ void CWaterMap::render(const NLMISC::CVector2f &camPos, float maxDist /*=100.f*/
 
 #if !FINAL_VERSION
 
-//******************************************************************************************************************
+// ******************************************************************************************************************
 // dump water map in a tga file
 NLMISC_COMMAND(dumpWaterMap, "dump water map", "<filename>")
 {
@@ -342,7 +342,7 @@ NLMISC_COMMAND(dumpWaterMap, "dump water map", "<filename>")
 	return true;
 }
 
-//******************************************************************************************************************
+// ******************************************************************************************************************
 // display the water map
 NLMISC_COMMAND(displayWaterMap, "dump water map", "<0 = on / 1 = off>")
 {

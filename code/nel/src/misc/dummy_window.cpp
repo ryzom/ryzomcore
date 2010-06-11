@@ -31,12 +31,12 @@ static LRESULT CALLBACK nlDefaultWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 }
 
 
-//***************************************************************
+// ***************************************************************
 CDummyWindow::CDummyWindow() : _HWnd(NULL)
 {
 }
 
-//***************************************************************
+// ***************************************************************
 bool CDummyWindow::init(HINSTANCE hInstance, WNDPROC winProc)
 {
 	release();
@@ -72,7 +72,7 @@ bool CDummyWindow::init(HINSTANCE hInstance, WNDPROC winProc)
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CDummyWindow::release()
 {
 	if (_HWnd)
@@ -82,7 +82,7 @@ void CDummyWindow::release()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 CDummyWindow::~CDummyWindow()
 {
 	release();

@@ -24,7 +24,7 @@
 {
 	if(self = [super initWithFrame:frame]) 
 	{
-		backingStore = [[NSMutableAttributedString alloc] initWithString:@""];
+		characterStorage = [[NSMutableAttributedString alloc] initWithString:@""];
 		return self;
 	}
 	return nil;
@@ -32,9 +32,10 @@
 
 - (void)dealloc
 {
-	[backingStore release];
+	[characterStorage release];
 	[super dealloc];
 }
+
 -(BOOL)acceptsFirstResponder
 {
 	return YES;
@@ -77,13 +78,13 @@
 
 	if([aString length] == 0) 
 	{
-		[backingStore deleteCharactersInRange:replacementRange];
+		[characterStorage deleteCharactersInRange:replacementRange];
 		[self unmarkText];
 	} 
 	else 
 	{
 		markedRange = NSMakeRange(replacementRange.location, [aString length]);
-		[backingStore replaceCharactersInRange:replacementRange withString:aString];
+		[characterStorage replaceCharactersInRange:replacementRange withString:aString];
 	}
 }
 
@@ -102,7 +103,7 @@
 -(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange 
 	actualRange:(NSRangePointer)actualRange
 {
-	return [backingStore attributedSubstringFromRange:aRange];
+	return [characterStorage attributedSubstringFromRange:aRange];
 }
 
 -(void)insertText:(id)aString 
@@ -111,7 +112,7 @@
 	if(replacementRange.location == NSNotFound)
 		replacementRange = markedRange;
 
-	[backingStore replaceCharactersInRange:replacementRange withString:aString];
+	[characterStorage replaceCharactersInRange:replacementRange withString:aString];
 }
 
 -(NSUInteger)characterIndexForPoint:(NSPoint)aPoint

@@ -26,7 +26,7 @@ using namespace NLMISC;
 namespace R2
 {
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntityCustomSelectBox::toTable(CLuaObject &table)
 {
 	//H_AUTO(R2_CEntityCustomSelectBox_toTable)
@@ -48,7 +48,7 @@ void CEntityCustomSelectBox::toTable(CLuaObject &table)
 
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CEntityCustomSelectBox::fromTable(CLuaObject &table)
 {
 	//H_AUTO(R2_CEntityCustomSelectBox_fromTable)

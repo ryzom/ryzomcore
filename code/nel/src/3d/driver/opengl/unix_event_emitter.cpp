@@ -29,7 +29,7 @@
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY), _emulateRawMode(false)
 {
 	_im = 0;
 	_ic = 0;
@@ -83,6 +83,19 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	}
 }
 
+void CUnixEventEmitter::emulateMouseRawMode(bool enable)
+{
+	_emulateRawMode = enable;
+
+	if(_emulateRawMode)
+	{
+		XWindowAttributes xwa;
+		XGetWindowAttributes(_dpy, _win, &xwa);
+		XWarpPointer(_dpy, None, _win, None, None, None, None, 
+			(xwa.width / 2), (xwa.height / 2));
+	}
+}
+
 #ifndef AltMask
 # ifdef NL_OS_MAC
 #  define AltMask     (8192)
@@ -120,6 +133,9 @@ TKey getKeyFromKeycode (uint keycode)
 	switch (keycode)
 	{
 #ifdef NL_OS_MAC
+	/*
+		TODO use key mapping from driver/opengl/mac/cocoa_adapter.mm
+	*/
 	case 0x12: return Key1;
 	case 0x13: return Key2;
 	case 0x14: return Key3;
@@ -162,10 +178,37 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x31: return KeyAPOSTROPHE;
 	case 0x33: return KeyBACKSLASH;
 	case 0x5e: return KeyOEM_102;
-	case 0x3a: return KeyCOMMA;
+//	case 0x3a: return KeyCOMMA;
 	case 0x3b: return KeyPERIOD;
 	case 0x3c: return KeySLASH;
 	case 0x3d: return KeyPARAGRAPH;
+	// for non-standard keyboards, maps to QWERTY keys
+	case 0x18: return KeyQ;
+	case 0x19: return KeyW;
+	case 0x1a: return KeyE;
+	case 0x1b: return KeyR;
+	case 0x1c: return KeyT;
+	case 0x1d: return KeyY;
+	case 0x1e: return KeyU;
+	case 0x1f: return KeyI;
+	case 0x20: return KeyO;
+	case 0x21: return KeyP;
+	case 0x26: return KeyQ;
+	case 0x27: return KeyS;
+	case 0x28: return KeyD;
+	case 0x29: return KeyF;
+	case 0x2a: return KeyG;
+	case 0x2b: return KeyH;
+	case 0x2c: return KeyJ;
+	case 0x2d: return KeyK;
+	case 0x2e: return KeyL;
+	case 0x34: return KeyZ;
+	case 0x35: return KeyX;
+	case 0x36: return KeyC;
+	case 0x37: return KeyV;
+	case 0x38: return KeyB;
+	case 0x39: return KeyN;
+	case 0x3a: return KeyM;
 #endif
 	default:
 //	nlwarning("missing keycode 0x%x %d '%c'", keycode, keycode, keycode);
@@ -316,6 +359,9 @@ TKey getKeyFromKeySym (KeySym keysym)
 
 void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 {
+	XWindowAttributes xwa;
+	XGetWindowAttributes (_dpy, _win, &xwa);
+
 	switch (event.type)
 	{
 	Case(ReparentNotify)
@@ -325,8 +371,6 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	Case(ButtonPress)
 	{
 		//nlinfo("%d %d %d", event.xbutton.button, event.xbutton.x, event.xbutton.y);
-		XWindowAttributes xwa;
-		XGetWindowAttributes (_dpy, _win, &xwa);
 		float fX = (float) event.xbutton.x / (float) xwa.width;
 		float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
 		TMouseButton button=getMouseButton(event.xbutton.state);
@@ -353,8 +397,6 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	Case(ButtonRelease)
 	{
 		//nlinfo("%d %d %d", event.xbutton.button, event.xbutton.x, event.xbutton.y);
-		XWindowAttributes xwa;
-		XGetWindowAttributes (_dpy, _win, &xwa);
 		float fX = (float) event.xbutton.x / (float) xwa.width;
 		float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
 		switch(event.xbutton.button)
@@ -373,13 +415,36 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 	}
 	Case(MotionNotify)
 	{
-		XWindowAttributes xwa;
-		XGetWindowAttributes (_dpy, _win, &xwa);
-		float fX = (float) event.xbutton.x / (float) xwa.width;
-		float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
-		if ((fX == 0.5f) && (fY == 0.5f)) break;
 		TMouseButton button=getMouseButton (event.xbutton.state);
-		server.postEvent (new CEventMouseMove (fX, fY, button, this));
+
+		// if raw mode should be emulated
+		if(_emulateRawMode)
+		{
+			// when we just wrapped back the pointer to 0.5 / 0.5, ignore event
+			if(event.xbutton.x == xwa.width / 2 && event.xbutton.y == xwa.height / 2)
+				break;
+
+			// post a CGDMouseMove with the movement delta to the event server
+			server.postEvent(
+				new CGDMouseMove(this, NULL /* no mouse device */, 
+					event.xbutton.x - (xwa.width / 2), 
+					(xwa.height / 2) - event.xbutton.y));
+		
+			// move the pointer back to the center of the window
+			XWarpPointer(_dpy, None, _win, None, None, None, None, 
+				(xwa.width / 2), (xwa.height / 2));
+		}
+		
+		// if in normal mouse mode
+		else
+		{
+			// get the relative mouse position
+			float fX = (float) event.xbutton.x / (float) xwa.width;
+			float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
+
+			// post a normal mouse move event to the event server
+			server.postEvent (new CEventMouseMove (fX, fY, button, this));
+		}
 		break;
 	}
 	Case(KeyPress)

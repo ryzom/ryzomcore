@@ -59,7 +59,7 @@ static uint32 inline getFVBVertex(uint section, uint side)
 const uint NUM_FACES_TO_RENDER = 5;
 
 
-//*******************************************************************************
+// *******************************************************************************
 CWaterEnvMap::CWaterEnvMap()
 {
 	_UpdateTime = 0;
@@ -73,7 +73,7 @@ CWaterEnvMap::CWaterEnvMap()
 	_Alpha = 255;
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimationTime updateTime, IDriver &driver)
 {
 	// Allocate cube map
@@ -154,7 +154,7 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 	_Env2DSize = projection2DSize;
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 {
 	if (_LastRenderTime == time) return;
@@ -206,7 +206,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 	driver.setRenderTarget(NULL);
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::doInit()
 {
 	if (!_FlattenVBInitialized)
@@ -241,7 +241,7 @@ static CVertexProgram testMeshVP(
 
 
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::renderTestMesh(IDriver &driver)
 {
 	doInit();
@@ -269,7 +269,7 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 	driver.activeVertexProgram(NULL);
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::initFlattenVB()
 {
 	_FlattenVB.setPreferredMemory(CVertexBuffer::AGPPreferred, true);
@@ -336,7 +336,7 @@ void CWaterEnvMap::initFlattenVB()
 	}
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::invalidate()
 {
 	_LastRenderTime = -1;
@@ -352,7 +352,7 @@ void CWaterEnvMap::invalidate()
 	_NumRenderedFaces = 0;
 }
 
-//*******************************************************************************
+// *******************************************************************************
 void CWaterEnvMap::initTestVB()
 {
 	_TestVB.setPreferredMemory(CVertexBuffer::AGPPreferred, true);

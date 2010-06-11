@@ -34,6 +34,7 @@
 #include "nel/3d/water_pool_manager.h"
 #include "nel/3d/u_camera.h"
 #include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/event_emitter.h"
 
 
 using namespace NLMISC;
@@ -1592,6 +1593,11 @@ NLMISC::IKeyboardDevice			*CDriverUser::enableLowLevelKeyboard(bool enable)
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->enableLowLevelKeyboard(enable);
+}
+
+void CDriverUser::emulateMouseRawMode(bool enable)
+{
+	_Driver->getEventEmitter()->emulateMouseRawMode(enable);
 }
 
 uint CDriverUser::getDoubleClickDelay(bool hardwareMouse)

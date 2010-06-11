@@ -2,6 +2,8 @@ FILE(GLOB SRC *.cpp *.h)
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelpacs SHARED ${SRC})
+  CONFIGURE_FILE(nel-pacs.pc.in nel-pacs.pc)
+  INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/nel-pacs.pc" DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelpacs STATIC ${SRC})
 ENDIF(NOT WIN32)

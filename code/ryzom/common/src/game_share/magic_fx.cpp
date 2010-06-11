@@ -45,7 +45,7 @@ namespace MAGICFX
 		NL_STRING_CONVERSION_TABLE_ENTRY (UnknownSpellCastStage)
 	NL_END_STRING_CONVERSION_TABLE(TSpellCastStage, SpellCastStageConversion, UnknownSpellCastStage)
 	//
-	//*************************************************************************************
+	// *************************************************************************************
 	const std::string& toString(TSpellMode mode)
 	{
 		return SpellModeConversion.toString(mode);
@@ -56,19 +56,19 @@ namespace MAGICFX
 		return SpellModeConversion.fromString(str);
 	}
 
-	//*************************************************************************************
+	// *************************************************************************************
 	const std::string& toString(TSpellType mode)
 	{
 		return SpellTypeConversion.toString(mode);
 	}
 
-	//*************************************************************************************
+	// *************************************************************************************
 	const std::string& toString(TSpellCastStage mode)
 	{
 		return SpellCastStageConversion.toString(mode);
 	}
 
-	//*************************************************************************************
+	// *************************************************************************************
 	TMagicFx toMagicFx( DMGTYPE::EDamageType type ,bool /* Link */)
 	{
 		switch(type)
@@ -89,7 +89,7 @@ namespace MAGICFX
 		}
 	}
 
-	//*************************************************************************************
+	// *************************************************************************************
 	TMagicFx toMagicFx( EFFECT_FAMILIES::TEffectFamily effect)
 	{
 		switch(effect)
@@ -152,7 +152,7 @@ namespace MAGICFX
 		}
 	}
 
-	//*************************************************************************************
+	// *************************************************************************************
 	TMagicFx healtoMagicFx(  sint32 healHp, sint32 healSap, sint32 healSta, bool link )
 	{
 		if ( !link )

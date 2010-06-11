@@ -28,7 +28,7 @@
 namespace NL3D {
 
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 CFlareShape::CFlareShape()  : _Color(NLMISC::CRGBA::White),
 							  _DazzleColor(NLMISC::CRGBA::Black),
 							  _SizeDisappear(0.f),
@@ -59,7 +59,7 @@ CFlareShape::CFlareShape()  : _Color(NLMISC::CRGBA::White),
 }
 
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 void CFlareShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	// Version 4 : - added occlusion test mesh, size reduction, angle modification when object is occluded
@@ -112,7 +112,7 @@ void CFlareShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	}
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 CTransformShape		*CFlareShape::createInstance(CScene &scene)
 {
 	CFlareModel *fm = NLMISC::safe_cast<CFlareModel *>(scene.createModel(FlareModelClassId) );
@@ -123,7 +123,7 @@ CTransformShape		*CFlareShape::createInstance(CScene &scene)
 	return fm;
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 float				CFlareShape::getNumTriangles (float distance)
 {
 	float count = 0;
@@ -134,7 +134,7 @@ float				CFlareShape::getNumTriangles (float distance)
 	return count;
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 bool				CFlareShape::clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix)
 {
 	// compute flare pos in world basis :
@@ -150,7 +150,7 @@ bool				CFlareShape::clip(const std::vector<CPlane>	&pyramid, const CMatrix &wor
 	return true;
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 void				CFlareShape::getAABBox(NLMISC::CAABBox &bbox) const
 {
 	// the flare himself is a point
@@ -158,7 +158,7 @@ void				CFlareShape::getAABBox(NLMISC::CAABBox &bbox) const
 	bbox.setHalfSize(CVector::Null);
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 void				CFlareShape::flushTextures (IDriver &driver, uint selectedTexture)
 {
 	// Flush each texture
@@ -175,7 +175,7 @@ void				CFlareShape::flushTextures (IDriver &driver, uint selectedTexture)
 	}
 }
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 void CFlareShape::setOcclusionTestMeshName(const std::string &shapeName)
 {
 	if (shapeName == _OcclusionTestMeshName) return;
@@ -184,7 +184,7 @@ void CFlareShape::setOcclusionTestMeshName(const std::string &shapeName)
 }
 
 
-//***************************************************************************************************************
+// ***************************************************************************************************************
 CMesh *CFlareShape::getOcclusionTestMesh(CShapeBank &sb)
 {
 	if (_OcclusionTestMesh) return _OcclusionTestMesh;

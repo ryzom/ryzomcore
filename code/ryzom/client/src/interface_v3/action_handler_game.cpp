@@ -2785,7 +2785,7 @@ public:
 		}
 
 		// If no modes are available, display a message and exit
-		if (nFoundMode == -1)
+		if (!ClientCfg.Windowed && nFoundMode == -1)
 		{
 			Driver->systemMessageBox("No Video Modes available!\n"
 																"Minimum Video mode to play Ryzom is 800x600.\n",

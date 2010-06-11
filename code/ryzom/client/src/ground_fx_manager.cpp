@@ -59,7 +59,7 @@ static const float MAX_DIST_TO_REUSE_OLD_FX = 1.5f;
 
 using namespace NLMISC;
 
-//*****************************************************************************
+// *****************************************************************************
 CGroundFXManager::CGroundFXManager() :
 					   _MinSpeed(1.5f),
 					   _MaxSpeed(6.f),
@@ -77,7 +77,7 @@ CGroundFXManager::CGroundFXManager() :
 	// Construct
 }
 
-//*****************************************************************************
+// *****************************************************************************
 CGroundFXManager::~CGroundFXManager()
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -85,7 +85,7 @@ CGroundFXManager::~CGroundFXManager()
 	CHECK_INTEGRITY
 }
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::reset()
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -124,7 +124,7 @@ void CGroundFXManager::reset()
 	_Scene = NULL;
 }
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::init(NL3D::UScene *scene, float maxDist, uint maxNumFX, uint fxCacheSize)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -135,7 +135,7 @@ void CGroundFXManager::init(NL3D::UScene *scene, float maxDist, uint maxNumFX, u
 	_MaxNumCachedFX = fxCacheSize;
 }
 
-//*****************************************************************************
+// *****************************************************************************
 CGroundFXManager::TEntityHandle CGroundFXManager::add(CEntityCL *entity)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -162,7 +162,7 @@ CGroundFXManager::TEntityHandle CGroundFXManager::add(CEntityCL *entity)
 	return _InstancesList.begin();
 }
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::remove(TEntityHandle handle)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -195,7 +195,7 @@ void CGroundFXManager::remove(TEntityHandle handle)
 
 // predicate to test a ground id
 
-//*****************************************************************************
+// *****************************************************************************
 // Predicate for binary search in a vector of sorted ground fx sheets
 struct CCmpGroundIDPred
 {
@@ -205,7 +205,7 @@ struct CCmpGroundIDPred
 	}
 };
 
-//*****************************************************************************
+// *****************************************************************************
 void	CGroundFXManager::CInstance::getFXNameFromGroundType(uint32 groundID, std::string &fxName) const
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -224,7 +224,7 @@ void	CGroundFXManager::CInstance::getFXNameFromGroundType(uint32 groundID, std::
 	fxName= it->getFXName();
 }
 
-//*****************************************************************************
+// *****************************************************************************
 /** Predicate to sort instances by distances.
   */
 struct CSortInstancePred
@@ -235,7 +235,7 @@ struct CSortInstancePred
 	}
 };
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::invalidateFX(TEntityHandle instance)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -272,7 +272,7 @@ void CGroundFXManager::invalidateFX(TEntityHandle instance)
 
 }
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::moveFXInCache(TGroundFXList &ownerList, TGroundFXHandle fx)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -295,7 +295,7 @@ void CGroundFXManager::moveFXInCache(TGroundFXList &ownerList, TGroundFXHandle f
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CGroundFXManager::checkIntegrity()
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -330,7 +330,7 @@ void CGroundFXManager::checkIntegrity()
 }
 
 
-//*****************************************************************************
+// *****************************************************************************
 void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -759,7 +759,7 @@ using NLMISC::toString;
 
 CTestGroundFX TestGroundFX;
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CTestGroundFX::update()
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -796,7 +796,7 @@ void CTestGroundFX::update()
 
 
 
-//***********************************************************************************************
+// ***********************************************************************************************
 void CTestGroundFX::displayFXBoxes() const
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -832,7 +832,7 @@ void CTestGroundFX::displayFXBoxes() const
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CGroundFXManager::setMinSpeed(float minSpeed)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -840,7 +840,7 @@ void CGroundFXManager::setMinSpeed(float minSpeed)
 	_MinSpeed = minSpeed;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CGroundFXManager::setMaxSpeed(float maxSpeed)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -848,7 +848,7 @@ void CGroundFXManager::setMaxSpeed(float maxSpeed)
 	_MaxSpeed = maxSpeed;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CGroundFXManager::setSpeedWaterWalkFast(float speed)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -856,7 +856,7 @@ void CGroundFXManager::setSpeedWaterWalkFast(float speed)
 	_SpeedWaterWalkFast = speed;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CGroundFXManager::setSpeedWaterSwimFast(float speed)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
@@ -866,7 +866,7 @@ void CGroundFXManager::setSpeedWaterSwimFast(float speed)
 
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 // temp, for debug
 
 // add an entity for test

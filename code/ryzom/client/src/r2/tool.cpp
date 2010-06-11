@@ -68,7 +68,7 @@ static const CVector cardinals[] =
 	CVector(1.f, -1.f, 0.f).normed()
 };
 
-//***************************************************************
+// ***************************************************************
 CTool::CTool()
 {
 	_DoubleClickStartTime = -1;
@@ -80,7 +80,7 @@ CTool::CTool()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CTool::startDoubleClickCheck()
 {
 	//H_AUTO(R2_CTool_startDoubleClickCheck)
@@ -88,7 +88,7 @@ void CTool::startDoubleClickCheck()
 	getMousePos(_DoubleClickX, _DoubleClickY);
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::checkDoubleClick()
 {
 	//H_AUTO(R2_CTool_checkDoubleClick)
@@ -101,7 +101,7 @@ bool CTool::checkDoubleClick()
 	return abs(mx - _DoubleClickX) <= moveThrehsold && abs(my - _DoubleClickY) <= moveThrehsold;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::isShiftDown()
 {
 	//H_AUTO(R2_CTool_isShiftDown)
@@ -110,7 +110,7 @@ bool CTool::isShiftDown()
 	Driver->AsyncListener.isKeyDown(KeyRSHIFT);
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::isCtrlDown()
 {
 	//H_AUTO(R2_CTool_isCtrlDown)
@@ -119,21 +119,21 @@ bool CTool::isCtrlDown()
 	Driver->AsyncListener.isKeyDown(KeyRCONTROL);
 }
 
-//***************************************************************
+// ***************************************************************
 CInterfaceManager &CTool::getUI()
 {
 	//H_AUTO(R2_CTool_getUI)
 	return CEditor::getUI();
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::getScreenSize(uint32 &scrW, uint32 &scrH)
 {
 	//H_AUTO(R2_CTool_getScreenSize)
 	getUI().getViewRenderer().getScreenSize(scrW, scrH);
 }
 
-//***************************************************************
+// ***************************************************************
 uint32 CTool::getScreenWidth()
 {
 	//H_AUTO(R2_CTool_getScreenWidth)
@@ -142,7 +142,7 @@ uint32 CTool::getScreenWidth()
 	return scrW;
 }
 
-//***************************************************************
+// ***************************************************************
 uint32 CTool::getScreenHeight()
 {
 	//H_AUTO(R2_CTool_getScreenHeight)
@@ -151,7 +151,7 @@ uint32 CTool::getScreenHeight()
 	return scrH;
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::getMousePos(sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
@@ -164,7 +164,7 @@ void CTool::getMousePos(sint32 &x, sint32 &y)
 	cursor->getPointerPos(x, y);
 }
 
-//***************************************************************
+// ***************************************************************
 sint32 CTool::getMouseX()
 {
 	//H_AUTO(R2_CTool_getMouseX)
@@ -173,7 +173,7 @@ sint32 CTool::getMouseX()
 	return x;
 }
 
-//***************************************************************
+// ***************************************************************
 sint32 CTool::getMouseY()
 {
 	//H_AUTO(R2_CTool_getMouseY)
@@ -182,7 +182,7 @@ sint32 CTool::getMouseY()
 	return y;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::isMouseOnUI()
 {
 	//H_AUTO(R2_CTool_isMouseOnUI)
@@ -190,7 +190,7 @@ bool CTool::isMouseOnUI()
 }
 
 
-//***************************************************************
+// ***************************************************************
 CGroupMap *CTool::getWorldMap()
 {
 	//H_AUTO(R2_CTool_getWorldMap)
@@ -203,7 +203,7 @@ CGroupMap *CTool::getWorldMap()
 	return mapPtr;
 }
 
-//***************************************************************
+// ***************************************************************
 CGroupMap *CTool::isMouseOnWorldMap()
 {
 	//H_AUTO(R2_CTool_isMouseOnWorldMap)
@@ -217,7 +217,7 @@ CGroupMap *CTool::isMouseOnWorldMap()
 	return NULL;
 }
 
-//***************************************************************
+// ***************************************************************
 CGroupContainer *CTool::isMouseOnContainer()
 {
 	//H_AUTO(R2_CTool_isMouseOnContainer)
@@ -231,7 +231,7 @@ CGroupContainer *CTool::isMouseOnContainer()
 	return NULL;
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::computeWorldViewRay(sint32 posX, sint32 posY, CWorldViewRay &dest)
 {
 	//H_AUTO(R2_CTool_computeWorldViewRay)
@@ -288,7 +288,7 @@ void CTool::computeWorldViewRay(sint32 posX, sint32 posY, CWorldViewRay &dest)
 	dest.Origin += distBias * dest.Dir;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::isInScreen(sint32 x, sint32 y)
 {
 	//H_AUTO(R2_CTool_isInScreen)
@@ -297,7 +297,7 @@ bool CTool::isInScreen(sint32 x, sint32 y)
 	return x >= 0 && y >=0 && x < (sint32) scrW && y < (sint32) scrH;
 }
 
-//***************************************************************
+// ***************************************************************
 CTool::TRayIntersectionType CTool::getPacsType(const NLMISC::CVector &pos, float threshold, NLPACS::UGlobalPosition &destPos)
 {
 	//H_AUTO(R2_CTool_getPacsType)
@@ -319,7 +319,7 @@ CTool::TRayIntersectionType CTool::getPacsType(const NLMISC::CVector &pos, float
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::raytrace(const NLMISC::CVector &segmentStart, const NLMISC::CVector &dir, NLMISC::CVector &inter)
 {
 	//H_AUTO(R2_CTool_raytrace)
@@ -353,7 +353,7 @@ bool CTool::raytrace(const NLMISC::CVector &segmentStart, const NLMISC::CVector 
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 CTool::TRayIntersectionType CTool::computeWorldMapIntersection(float x, float y, NLMISC::CVector &inter)
 {
 	//H_AUTO(R2_CTool_computeWorldMapIntersection)
@@ -395,7 +395,7 @@ CTool::TRayIntersectionType CTool::computeWorldMapIntersection(float x, float y,
 	return interType;
 }
 
-//***************************************************************
+// ***************************************************************
 inline bool CTool::isIslandValidPos(const CArray2D<sint16> &heightMap, const CScenarioEntryPoints::CCompleteIsland &islandDesc, float x, float y)
 {
 	//H_AUTO(R2_CTool_isIslandValidPos)
@@ -431,7 +431,7 @@ static bool areaRaytrace(CPackedWorld &pw, const CVector &start, const CVector &
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CVector &inter)
 {
 	//H_AUTO(R2_CTool_computeNearestValidSurfaceFromHeightMap)
@@ -488,14 +488,14 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::isValid2DPos(const NLMISC::CVector2f &pos)
 {
 	//H_AUTO(R2_CTool_isValid2DPos)
 	return getEditor().getIslandCollision().isValidPos(CVector2f(pos.x, pos.y));
 }
 
-//***************************************************************
+// ***************************************************************
 CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldViewRay &worldViewRay, NLMISC::CVector &inter)
 {
 	//H_AUTO(R2_CTool_computeLandscapeRayIntersection)
@@ -545,7 +545,7 @@ CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldV
 	}
 }
 
-//**********************************************
+// **********************************************
 void CTool::handleMouseOverPlayer(bool over)
 {
 	//H_AUTO(R2_CTool_handleMouseOverPlayer)
@@ -563,7 +563,7 @@ void CTool::handleMouseOverPlayer(bool over)
 		UserEntity->makeTransparent(false);
 }
 
-//***************************************************************
+// ***************************************************************
 CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*= NULL*/)
 {
 	//H_AUTO(R2_CTool_checkInstanceUnderMouse)
@@ -658,7 +658,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CTool::handleMouseOverInstance(const char *cursorDefault, const char *cursorOverUnselectedInstance, const char *cursorOverSelectedInstance)
 {
 	//H_AUTO(R2_CTool_handleMouseOverInstance)
@@ -682,7 +682,7 @@ void CTool::handleMouseOverInstance(const char *cursorDefault, const char *curso
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::onMouseRightButtonClicked()
 {
 	//H_AUTO(R2_CTool_onMouseRightButtonClicked)
@@ -696,7 +696,7 @@ bool CTool::onMouseRightButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::defaultRightButtonDownHandling()
 {
 	//H_AUTO(R2_CTool_defaultRightButtonDownHandling)
@@ -712,7 +712,7 @@ bool CTool::defaultRightButtonDownHandling()
 	return false;
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::captureMouse()
 {
 	//H_AUTO(R2_CTool_captureMouse)
@@ -730,7 +730,7 @@ void CTool::captureMouse()
 	_MouseCaptured = true;
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::releaseMouse()
 {
 	//H_AUTO(R2_CTool_releaseMouse)
@@ -741,14 +741,14 @@ void CTool::releaseMouse()
 	_MouseCaptured = false;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CTool::isMouseCaptured()
 {
 	//H_AUTO(R2_CTool_isMouseCaptured)
 	return _MouseCaptured;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CTool::setMouseCursor(const char *cursorTexture)
 {
 	//H_AUTO(R2_CTool_setMouseCursor)
@@ -759,7 +759,7 @@ void CTool::setMouseCursor(const char *cursorTexture)
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CTool::handleEvent(const CEventDescriptor &event)
 {
 	//H_AUTO(R2_CTool_handleEvent)
@@ -805,14 +805,14 @@ bool CTool::handleEvent(const CEventDescriptor &event)
 	return handled;
 }
 
-//***************************************************************
+// ***************************************************************
 CDynamicMapClient &CTool::getDMC()
 {
 	//H_AUTO(R2_CTool_getDMC)
 	return  getEditor().getDMC();
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::handleWorldMapAutoPan(sint32 &outDx, sint32 &outDy)
 {
 	//H_AUTO(R2_CTool_handleWorldMapAutoPan)
@@ -866,7 +866,7 @@ void CTool::handleWorldMapAutoPan(sint32 &outDx, sint32 &outDy)
 	return;
 }
 
-//***************************************************************
+// ***************************************************************
 int CTool::luaIsPickTool(CLuaState &ls)
 {
 	//H_AUTO(R2_CTool_luaIsPickTool)
@@ -875,7 +875,7 @@ int CTool::luaIsPickTool(CLuaState &ls)
 	return 1;
 }
 
-//***************************************************************
+// ***************************************************************
 void CTool::setContextHelp(const ucstring &contextHelp)
 {
 	//H_AUTO(R2_CTool_setContextHelp)
@@ -886,7 +886,7 @@ void CTool::setContextHelp(const ucstring &contextHelp)
 	getEditor().callEnvMethod("setToolContextHelp", 1, 0);
 }
 
-//***************************************************************
+// ***************************************************************
 NLMISC::CRGBA CTool::getInvalidPosColor()
 {
 	//H_AUTO(R2_CTool_getInvalidPosColor)

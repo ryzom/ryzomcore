@@ -99,6 +99,9 @@ public:
 	  * Return true if the message must be trapped, false if DefWindowProc must be called afterwards
 	  */
 	bool processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPARAM lParam, CEventServer *server=NULL);
+
+	void emulateMouseRawMode(bool enable);
+
 private:
 	CWinEventServer		_InternalServer;
 	HWND				_HWnd;

@@ -53,7 +53,7 @@ private:
 	class CEntityEntry
 	{
 	public:
-		CEntityEntry() : EntryUsed(false), PosIsRelative(false), AssociationBits(0) {}
+		CEntityEntry() : AssociationBits(0), EntryUsed(false), PosIsRelative(false), PosIsInterior(false) {}
 		CLFECOMMON::TSheetId							Sheet;
 		uint16											AssociationBits;
 		bool											EntryUsed;

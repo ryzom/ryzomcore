@@ -26,14 +26,14 @@
 
 NLMISC_REGISTER_OBJECT(CViewBase, CInterfaceGroupWheel, std::string, "group_wheel");
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 CInterfaceGroupWheel::CInterfaceGroupWheel(const TCtorParam &param) : CInterfaceGroup(param)
 {
 	_AHWheelUp = NULL;
 	_AHWheelDown = NULL;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	if (!CInterfaceGroup::parse(cur, parentGroup)) return false;
@@ -42,7 +42,7 @@ bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	return true;
 }
 
-//*****************************************************************************************************************
+// *****************************************************************************************************************
 bool CInterfaceGroupWheel::handleEvent(const CEventDescriptor &event)
 {
 	if (CInterfaceGroup::handleEvent(event)) return true;

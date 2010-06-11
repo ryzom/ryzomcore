@@ -41,7 +41,7 @@ namespace R2
 {
 
 
-//***************************************************************
+// ***************************************************************
 CToolDrawPrim::CToolDrawPrim(TPrimType primType, CInstance *extending /*= NULL*/)
 {
 	_NumPoints = 0;
@@ -60,14 +60,14 @@ CToolDrawPrim::CToolDrawPrim(TPrimType primType, CInstance *extending /*= NULL*/
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::canTerminate() const
 {
 	//H_AUTO(R2_CToolDrawPrim_canTerminate)
 	return ((_PrimType == Road && _NumPoints >= 1) || _NumPoints >= 3) && _ValidPrim;
 }
 
-//***************************************************************
+// ***************************************************************
 const char *CToolDrawPrim::getToolUIName() const
 {
 	//H_AUTO(R2_CToolDrawPrim_getToolUIName)
@@ -75,7 +75,7 @@ const char *CToolDrawPrim::getToolUIName() const
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::init(const CLuaObject &parameters)
 {
 	//H_AUTO(R2_CToolDrawPrim_init)
@@ -163,13 +163,13 @@ bool CToolDrawPrim::init(const CLuaObject &parameters)
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::updateAfterRender()
 {
 	//H_AUTO(R2_CToolDrawPrim_updateAfterRender)
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::removeFromWorldMap()
 {
 	//H_AUTO(R2_CToolDrawPrim_removeFromWorldMap)
@@ -187,7 +187,7 @@ void CToolDrawPrim::removeFromWorldMap()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::cancel()
 {
 	//H_AUTO(R2_CToolDrawPrim_cancel)
@@ -209,7 +209,7 @@ void CToolDrawPrim::cancel()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::setPrimLook(bool closed, bool lastEdgeIsValid, bool valid)
 {
 	//H_AUTO(R2_CToolDrawPrim_setPrimLook)
@@ -221,7 +221,7 @@ void CToolDrawPrim::setPrimLook(bool closed, bool lastEdgeIsValid, bool valid)
 	_Prim.setLook(*look);
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::updateBeforeRender()
 {
 	//H_AUTO(R2_CToolDrawPrim_updateBeforeRender)
@@ -233,7 +233,7 @@ void CToolDrawPrim::updateBeforeRender()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::doUpdateBeforeRender()
 {
 	//H_AUTO(R2_CToolDrawPrim_doUpdateBeforeRender)
@@ -418,7 +418,7 @@ void CToolDrawPrim::doUpdateBeforeRender()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::updateInaccessiblePrimRenderLook(CPrimRender &dest)
 {
 	//H_AUTO(R2_CToolDrawPrim_updateInaccessiblePrimRenderLook)
@@ -435,7 +435,7 @@ void CToolDrawPrim::updateInaccessiblePrimRenderLook(CPrimRender &dest)
 	dest.setCustomDecalEdgeUVMatrix(true, getEditor().getIslandCollision().getWorldToAccessibilityTexMat(true)); // cropped version for decal rendering
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::onMouseLeftButtonClicked()
 {
 	//H_AUTO(R2_CToolDrawPrim_onMouseLeftButtonClicked)
@@ -455,7 +455,7 @@ bool CToolDrawPrim::onMouseLeftButtonClicked()
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::onMouseLeftButtonDown()
 {
 	//H_AUTO(R2_CToolDrawPrim_onMouseLeftButtonDown)
@@ -480,7 +480,7 @@ bool CToolDrawPrim::onMouseLeftButtonDown()
 }
 
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::commit()
 {
 	//H_AUTO(R2_CToolDrawPrim_commit)
@@ -626,7 +626,7 @@ void CToolDrawPrim::commit()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::onMouseRightButtonClicked()
 {
 	//H_AUTO(R2_CToolDrawPrim_onMouseRightButtonClicked)
@@ -653,7 +653,7 @@ bool CToolDrawPrim::onMouseRightButtonClicked()
 	//return true;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::onDeleteCmd()
 {
 	//H_AUTO(R2_CToolDrawPrim_onDeleteCmd)
@@ -679,7 +679,7 @@ bool CToolDrawPrim::onDeleteCmd()
 }
 
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::isValidPolyShape(bool ignoreLast, std::list<CPolygon> &splitPoly) const
 {
 	//H_AUTO(R2_CToolDrawPrim_isValidPolyShape)
@@ -711,7 +711,7 @@ bool CToolDrawPrim::isValidPolyShape(bool ignoreLast, std::list<CPolygon> &split
 	return validPrim;
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::testAccessibleEdges(bool ignoreLast)
 {
 	//H_AUTO(R2_CToolDrawPrim_testAccessibleEdges)
@@ -734,7 +734,7 @@ bool CToolDrawPrim::testAccessibleEdges(bool ignoreLast)
 	return true;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::updateValidityFlag(bool ignoreLast)
 {
 	//H_AUTO(R2_CToolDrawPrim_updateValidityFlag)
@@ -789,7 +789,7 @@ void CToolDrawPrim::updateValidityFlag(bool ignoreLast)
 	}
 }*/
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::onActivate()
 {
 	//H_AUTO(R2_CToolDrawPrim_onActivate)
@@ -819,14 +819,14 @@ void CToolDrawPrim::onActivate()
 	}
 }
 
-//***************************************************************
+// ***************************************************************
 bool CToolDrawPrim::checkRoomLeft()
 {
 	//H_AUTO(R2_CToolDrawPrim_checkRoomLeft)
 	return _NumPoints < PrimMaxNumPoints;
 }
 
-//***************************************************************
+// ***************************************************************
 void CToolDrawPrim::displayNoMoreRoomLeftMsg()
 {
 	//H_AUTO(R2_CToolDrawPrim_displayNoMoreRoomLeftMsg)

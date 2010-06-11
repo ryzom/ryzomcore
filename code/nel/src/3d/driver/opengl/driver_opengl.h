@@ -842,6 +842,7 @@ private:
 
 private:
 	void					switchBackToOldMode();
+	bool					setupDisplay();
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();

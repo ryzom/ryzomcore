@@ -25,14 +25,14 @@
 
 #define WIN_BOT_CHAT_PAGE_RING_SESSION "ui:interface:ring_sessions"
 
-//*************************************************
+// *************************************************
 CBotChatPageRingSessions::CBotChatPageRingSessions()
 {
 	RingAccessPointPos.set(0.f, 0.f, 0.f);
 }
 
 
-//*************************************************
+// *************************************************
 void CBotChatPageRingSessions::begin()
 {
 	CBotChatPage::begin();
@@ -43,7 +43,7 @@ void CBotChatPageRingSessions::begin()
 	}
 }
 
-//*************************************************
+// *************************************************
 void CBotChatPageRingSessions::end()
 {
 	activateWindow(WIN_BOT_CHAT_PAGE_RING_SESSION, false);

@@ -20,7 +20,7 @@
 namespace NLMISC
 {
 
-//*******************************************************************************************
+// *******************************************************************************************
 /// build some hermite spline value, with the given points and tangents
 static inline void BuildHermiteVector(const NLMISC::CVector2f &P0,
 									  const NLMISC::CVector2f &P1,
@@ -41,7 +41,7 @@ static inline void BuildHermiteVector(const NLMISC::CVector2f &P0,
 		h1 * P0.y + h2 * P1.y + h3 * T0.y + h4 * T1.y);
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 CMouseSmoother::CMouseSmoother(double samplingPeriod /*=0.2f*/)
 {
 	nlassert(samplingPeriod > 0);
@@ -50,7 +50,7 @@ CMouseSmoother::CMouseSmoother(double samplingPeriod /*=0.2f*/)
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CMouseSmoother::setSamplingPeriod(double period)
 {
 	if (period == _SamplingPeriod) return;
@@ -60,7 +60,7 @@ void CMouseSmoother::setSamplingPeriod(double period)
 }
 
 
-//*******************************************************************************************
+// *******************************************************************************************
 NLMISC::CVector2f CMouseSmoother::samplePos(const CVector2f &wantedPos, double date)
 {
 	if (!_Init)
@@ -124,7 +124,7 @@ NLMISC::CVector2f CMouseSmoother::samplePos(const CVector2f &wantedPos, double d
 	return result;
 }
 
-//*******************************************************************************************
+// *******************************************************************************************
 void CMouseSmoother::reset()
 {
 	_Init = false;

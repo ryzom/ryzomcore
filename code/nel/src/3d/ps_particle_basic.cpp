@@ -1126,7 +1126,7 @@ void CPSMultiTexturedParticle::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> 
 	if (_Texture2) dest.push_back(_Texture2);
 }
 
-//*****************************************************************************************************
+// *****************************************************************************************************
 bool CPSMultiTexturedParticle::isAlternateTextureUsed(IDriver &driver) const
 {
 	NL_PS_FUNC(CPSMultiTexturedParticle_isAlternateTextureUsed)

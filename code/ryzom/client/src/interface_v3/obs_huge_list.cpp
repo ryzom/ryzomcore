@@ -125,7 +125,7 @@ void CHugeListObs::setListType(ListType listType)
 }
 
 
-//****************************************************************************
+// ****************************************************************************
 bool CHugeListObs::init()
 {
 	nlassert((uint) _Category < ListTypeCount); // must call setListType
@@ -233,7 +233,7 @@ bool CHugeListObs::init()
 	return true;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CHugeListObs::start()
 {
 	nlassert((uint) _Category < ListTypeCount); // must call setListType
@@ -301,7 +301,7 @@ void CHugeListObs::start()
 	_PhraseClientFill= false;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CHugeListObs::update(ICDBNode * /* node */)
 {
 	nlassert((uint) _Category < ListTypeCount); // must call setListType
@@ -493,7 +493,7 @@ void CHugeListObs::update(ICDBNode * /* node */)
 }
 
 
-//****************************************************************************
+// ****************************************************************************
 void CHugeListObs::updateUIItemPage(uint index)
 {
 	nlassert((uint) _Category < ListTypeCount); // must call setListType

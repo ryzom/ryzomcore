@@ -32,7 +32,7 @@ using namespace STRING_MANAGER;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextIDFormated, std::string, "text_id_formated");
 
-//*********************************************************************************
+// *********************************************************************************
 bool CViewTextIDFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 {
 	if (!CViewTextID::parse(cur, parentGroup)) return false;
@@ -44,7 +44,7 @@ bool CViewTextIDFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	return true;
 }
 
-//*********************************************************************************
+// *********************************************************************************
 void CViewTextIDFormated::checkCoords()
 {
 	if (_IsDBLink)

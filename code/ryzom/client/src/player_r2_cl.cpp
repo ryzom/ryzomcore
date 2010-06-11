@@ -1038,7 +1038,7 @@ void CPlayerR2CL::load()	// virtual
 	}
 }// load //
 
-//*********************************************************************************************
+// *********************************************************************************************
 /*
 const char *CPlayerR2CL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide side) const
 {
@@ -1046,26 +1046,26 @@ const char *CPlayerR2CL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSi
 	return _PlayerSheet->BodyToBone.getBoneName(part, side);
 }*/
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CPlayerR2CL::getRightHandItemSheet() const
 {
 	return _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 const CItemSheet *CPlayerR2CL::getLeftHandItemSheet() const
 {
 	return _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 /*const CAttack *CPlayerR2CL::getAttack(const CAttackIDSheet &id) const
 {
 	if (!_PlayerSheet) return NULL;
 	return CCharacterCL::getAttack(id, _PlayerSheet->AttackLists);
 }*/
 
-//*********************************************************************************************
+// *********************************************************************************************
 float CPlayerR2CL::getScaleRef() const
 {
 	float fyrosRefScale = GabaritSet.getRefHeightScale(0, EGSPD::CPeople::Fyros);
@@ -1074,7 +1074,7 @@ float CPlayerR2CL::getScaleRef() const
 
 }
 
-//*********************************************************************************************
+// *********************************************************************************************
 /*
 float CPlayerR2CL::getNamePosZ() const
 {

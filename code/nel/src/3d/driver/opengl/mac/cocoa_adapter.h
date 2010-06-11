@@ -55,6 +55,9 @@ bool init(uint windowIcon = 0, emptyProc exitFunc = 0);
 /// mac specific stuff while calling CDriverGL::setDisplay()
 bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 
+/// mac specific stuff while calling CDriverGL::setMode()
+bool setMode(const GfxMode& mode);
+
 /// mac specific stuff while calling CDriverGL::getWindowSize()
 void getWindowSize(uint32 &width, uint32 &height);
 
@@ -70,9 +73,24 @@ void setWindowTitle(const ucstring &title);
 /// mac specific stuff while calling CDriverGL::swapBuffers()
 void swapBuffers();
 
+/// mac specific stuff while calling CDriverGL::setCapture()
+void setCapture(bool b);
+
+/// mac specific stuff while calling CDriverGL::showCursor()
+void showCursor(bool b);
+
+/// mac specific stuff while calling CDriverGL::setMousePos()
+void setMousePos(float x, float y);
+
+/// mac specific stuff while calling CDriverGL::release()
+void release();
+
 /// mac specific stuff while calling CCocoaEventEmitter::submitEvents()
 void submitEvents(NLMISC::CEventServer& server, 
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter);
+
+/// mac specific stuff while calling CCocoaEventEmitter::emulateMouseRawMode()
+void emulateMouseRawMode(bool enable);
 
 }}
 

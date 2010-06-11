@@ -29,7 +29,7 @@ using namespace NLMISC;
 #define REGKEY_PERMANENT_BAN "PB"
 
 
-//************************************************************
+// ************************************************************
 static void setPermanentBanRegistryKey(bool on)
 {
 #ifndef NL_OS_WINDOWS
@@ -52,7 +52,7 @@ static void setPermanentBanRegistryKey(bool on)
 #endif
 }
 
-//************************************************************
+// ************************************************************
 static bool getPermanentBanRegistryKey()
 {
 #ifndef NL_OS_WINDOWS
@@ -74,7 +74,7 @@ static bool getPermanentBanRegistryKey()
 #endif
 }
 
-//***********************************************************
+// ***********************************************************
 static void setPermanentBanFileMarker(const std::string &path, bool on)
 {
 	if (on)
@@ -98,7 +98,7 @@ static void setPermanentBanFileMarker(const std::string &path, bool on)
 	}
 }
 
-//***********************************************************
+// ***********************************************************
 static bool getPermanentBanFileMarker(const std::string &path)
 {
 	return CFile::isExists(path);
@@ -107,7 +107,7 @@ static bool getPermanentBanFileMarker(const std::string &path)
 #define PERMANENT_BAN_FILE0 "c:\\3289763c1ecd044e"
 #define PERMANENT_BAN_FILE1 "78d0732e50bf2bbd"
 
-//************************************************************
+// ************************************************************
 void setPermanentBanMarkers(bool on)
 {
 	setPermanentBanRegistryKey(on);
@@ -116,7 +116,7 @@ void setPermanentBanMarkers(bool on)
 }
 
 
-//************************************************************
+// ************************************************************
 bool testPermanentBanMarkers()
 {
 	/*#ifndef NL_OS_WINDOWS
@@ -234,7 +234,7 @@ static void markBNPFile(std::string &path)
 	fclose (f);
 }
 
-//************************************************************
+// ************************************************************
 void applyPermanentBanPunishment()
 {
 	// go in the data directory & touch all bnp files so that the client should repatch all its datas

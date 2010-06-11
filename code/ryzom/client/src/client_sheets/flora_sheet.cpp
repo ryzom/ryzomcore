@@ -23,14 +23,14 @@
 
 using namespace NLGEORGES;
 
-//***************************************************************************************************
+// ***************************************************************************************************
 CFloraSheet::CFloraSheet()
 {
 	Type = FLORA;
 	_TotalWeight = 0;
 }
 
-//***************************************************************************************************
+// ***************************************************************************************************
 void CFloraSheet::build(const NLGEORGES::UFormElm &item)
 {
 	const UFormElm *plantArray = NULL;
@@ -55,7 +55,7 @@ void CFloraSheet::build(const NLGEORGES::UFormElm &item)
 	item.getValueByName(MicroLifeThreshold, "MicroLifeThreshold");
 }
 
-//***************************************************************************************************
+// ***************************************************************************************************
 void CFloraSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialCont(_Plants);
@@ -63,7 +63,7 @@ void CFloraSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(_TotalWeight);
 }
 
-//***************************************************************************************************
+// ***************************************************************************************************
 void CPlantInfo::build(const NLGEORGES::UFormElm &item)
 {
 	item.getValueByName(SheetName, "File name");
@@ -74,14 +74,14 @@ void CPlantInfo::build(const NLGEORGES::UFormElm &item)
 	}
 }
 
-//***************************************************************************************************
+// ***************************************************************************************************
 void CPlantInfo::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serial(SheetName);
 	f.serial(CumulatedWeight);
 }
 
-//***************************************************************************************************
+// ***************************************************************************************************
 const CPlantInfo *CFloraSheet::getPlantInfoFromWeightedIndex(uint64 index) const
 {
 	if (_TotalWeight == 0) return NULL;

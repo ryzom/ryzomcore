@@ -65,7 +65,7 @@ extern NL3D::UMaterial		GenericMat;
 H_AUTO_DECL(RZ_MicroLifeManager)
 
 
-//********************************************************************************************
+// ********************************************************************************************
 CMicroLifeManager::CMicroLifeManager()
 {
 	FPU_CHECKER
@@ -77,7 +77,7 @@ CMicroLifeManager::CMicroLifeManager()
 	_Noise.Rand = 1.f;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 CMicroLifeManager &CMicroLifeManager::getInstance()
 {
 	FPU_CHECKER
@@ -86,7 +86,7 @@ CMicroLifeManager &CMicroLifeManager::getInstance()
 	return instance;
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::init(const NLMISC::CVector2f &minCorner, const NLMISC::CVector2f &maxCorner, float cellSize /* = 30.f*/)
 {
 	FPU_CHECKER
@@ -132,7 +132,7 @@ void CMicroLifeManager::init(const NLMISC::CVector2f &minCorner, const NLMISC::C
 //              - we search for redundant lists and store the result as index in the final grid. This is done in packBuildGrid
 
 
-//*********************************************************************************************************************************
+// *********************************************************************************************************************************
 bool CMicroLifeManager::CGridOverlapPolyInfo::operator < (const CMicroLifeManager::CGridOverlapPolyInfo &other) const
 {
 	FPU_CHECKER
@@ -144,7 +144,7 @@ bool CMicroLifeManager::CGridOverlapPolyInfo::operator < (const CMicroLifeManage
 	return Poly < other.Poly;
 }
 
-//*********************************************************************************************************************************
+// *********************************************************************************************************************************
 bool CMicroLifeManager::CGridOverlapPolyInfo::operator == (const CMicroLifeManager::CGridOverlapPolyInfo &other) const
 {
 	FPU_CHECKER
@@ -156,7 +156,7 @@ bool CMicroLifeManager::CGridOverlapPolyInfo::operator == (const CMicroLifeManag
 		   Poly == other.Poly;
 }
 
-//*********************************************************************************************************************************
+// *********************************************************************************************************************************
 bool CMicroLifeManager::CGridOverlapPolyInfoVector::operator < (const CMicroLifeManager::CGridOverlapPolyInfoVector &other) const
 {
 	FPU_CHECKER
@@ -169,7 +169,7 @@ bool CMicroLifeManager::CGridOverlapPolyInfoVector::operator < (const CMicroLife
 	return false;
 }
 
-//*********************************************************************************************************************************
+// *********************************************************************************************************************************
 bool CMicroLifeManager::CGridOverlapPolyInfoVector::operator == (const CMicroLifeManager::CGridOverlapPolyInfoVector &other) const
 {
 	FPU_CHECKER
@@ -179,7 +179,7 @@ bool CMicroLifeManager::CGridOverlapPolyInfoVector::operator == (const CMicroLif
 }
 
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 void CMicroLifeManager::drawPolyInBuildGrid(const std::vector<NLLIGO::CPrimVector> &primPoly,
 											uint primitiveIndex,
 											CMicroLifeManager::TBuildGrid &buildGrid,
@@ -261,7 +261,7 @@ public:
 };
 
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // pack the build grid so that each cell only contains index into a small set of poly list, instead of a full poly list
 // (a lot of cells share the same poly list)
 void CMicroLifeManager::packBuildGrid(TBuildGrid									  &buildGrid,
@@ -313,7 +313,7 @@ void CMicroLifeManager::packBuildGrid(TBuildGrid									  &buildGrid,
 	finalPossibleLists.swap(flatSet);
 }
 
-//***************************************************************************************************************************
+// ***************************************************************************************************************************
 // read a .primitive file and add its content to a build grid
 void CMicroLifeManager::addPrimitiveToBuildGrid(const std::string &fileName, uint &primitiveIndex, CMicroLifeManager::TBuildGrid &buildGrid)
 {
@@ -420,7 +420,7 @@ void CMicroLifeManager::addPrimitiveToBuildGrid(const std::string &fileName, uin
 	}
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::build(const std::vector<std::string> &fileNames)
 {
 	FPU_CHECKER
@@ -437,7 +437,7 @@ void CMicroLifeManager::build(const std::vector<std::string> &fileNames)
 }
 
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::release()
 {
 	FPU_CHECKER
@@ -463,7 +463,7 @@ void CMicroLifeManager::release()
 	#endif
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::tileAdded(const NL3D::CTileAddedInfo &infos)
 {
 	FPU_CHECKER
@@ -694,7 +694,7 @@ void CMicroLifeManager::tileAdded(const NL3D::CTileAddedInfo &infos)
 	}
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::tileRemoved(uint64 id)
 {
 	FPU_CHECKER
@@ -730,7 +730,7 @@ static const NLMISC::CRGBA DebugCols[] =
 };
 static const uint NumDebugCols = sizeof(DebugCols) / sizeof(DebugCols[0]);
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::dumpMLGrid(const std::string &filename)
 {
 	FPU_CHECKER
@@ -767,7 +767,7 @@ void CMicroLifeManager::dumpMLGrid(const std::string &filename)
 	f.close();
 }
 
-//********************************************************************************************
+// ********************************************************************************************
 void CMicroLifeManager::renderMLZones(const NLMISC::CVector2f &camPos, float maxDist /*=1000.f*/)
 {
 	FPU_CHECKER
@@ -839,7 +839,7 @@ void CMicroLifeManager::renderMLZones(const NLMISC::CVector2f &camPos, float max
 }
 
 #ifdef NL_DEBUG
-	//********************************************************************************************
+	// ********************************************************************************************
 	void CMicroLifeManager::renderActiveTiles()
 	{
 		FPU_CHECKER
@@ -894,7 +894,7 @@ void CMicroLifeManager::renderMLZones(const NLMISC::CVector2f &camPos, float max
 #if !FINAL_VERSION
 	#include "continent_manager.h"
 
-	//******************************************************************************************************************
+	// ******************************************************************************************************************
 	// display micro-life zone on screen
 	NLMISC_COMMAND(showMLZones,"display micro-life zones", "<0 = off, 1 = on>")
 	{
@@ -904,7 +904,7 @@ void CMicroLifeManager::renderMLZones(const NLMISC::CVector2f &camPos, float max
 	}
 
 
-	//******************************************************************************************************************
+	// ******************************************************************************************************************
 	// dump micro-life zone in a tga file
 	NLMISC_COMMAND(dumpMLZones,"display micro-life zones", "<filename>")
 	{
@@ -914,7 +914,7 @@ void CMicroLifeManager::renderMLZones(const NLMISC::CVector2f &camPos, float max
 	}
 
 
-	//******************************************************************************************************************
+	// ******************************************************************************************************************
 	// reload micro-life zones
 	NLMISC_COMMAND(reloadMLZones, "reload micro-life zones", "")
 	{

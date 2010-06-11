@@ -23,7 +23,7 @@ uint PSEnterLeaveDepth = 0;
 uint PSEnterLeaveMaxDepth = 1;
 std::string PSCurrName;
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 CPSEnterLeave::CPSEnterLeave(const char *name)
 {
 	++ PSEnterLeaveDepth;
@@ -35,7 +35,7 @@ CPSEnterLeave::CPSEnterLeave(const char *name)
 	}
 }
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 CPSEnterLeave::~CPSEnterLeave()
 {
 	if (PSEnterLeaveDepth <= PSEnterLeaveMaxDepth)
@@ -54,7 +54,7 @@ namespace NL3D {
 // CParticleSystemProcess implementation   //
 /////////////////////////////////////////////
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 void CParticleSystemProcess::setOwner(CParticleSystem *ps)
 {
 	NL_PS_FUNC(CParticleSystemProcess_setOwner)
@@ -69,14 +69,14 @@ void CParticleSystemProcess::setOwner(CParticleSystem *ps)
 }
 
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 uint CParticleSystemProcess::getUserMatrixUsageCount() const
 {
 	NL_PS_FUNC(CParticleSystemProcess_getUserMatrixUsageCount)
 	return _MatrixMode == PSUserMatrix;
 }
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 void CParticleSystemProcess::setMatrixMode(TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC(CParticleSystemProcess_setMatrixMode)
@@ -90,7 +90,7 @@ void CParticleSystemProcess::setMatrixMode(TPSMatrixMode matrixMode)
 }
 
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 CFontGenerator *CParticleSystemProcess::getFontGenerator(void)
 {
 	NL_PS_FUNC(CParticleSystemProcess_getFontGenerator)
@@ -98,7 +98,7 @@ CFontGenerator *CParticleSystemProcess::getFontGenerator(void)
 	return _Owner->getFontGenerator();
 }
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 const CFontGenerator *CParticleSystemProcess::getFontGenerator(void) const
 {
 	NL_PS_FUNC(CParticleSystemProcess_getFontGenerator)
@@ -106,7 +106,7 @@ const CFontGenerator *CParticleSystemProcess::getFontGenerator(void) const
 	return _Owner->getFontGenerator();
 }
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 CFontManager *CParticleSystemProcess::getFontManager(void)
 {
 	NL_PS_FUNC(CParticleSystemProcess_getFontManager)
@@ -114,7 +114,7 @@ CFontManager *CParticleSystemProcess::getFontManager(void)
 	return _Owner->getFontManager();
 }
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 const CFontManager *CParticleSystemProcess::getFontManager(void) const
 {
 	NL_PS_FUNC(CParticleSystemProcess_getFontManager)
@@ -124,7 +124,7 @@ const CFontManager *CParticleSystemProcess::getFontManager(void) const
 
 
 
-//***********************************************************************************************************
+// ***********************************************************************************************************
 void CParticleSystemProcess::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	NL_PS_FUNC(CParticleSystemProcess_serial)

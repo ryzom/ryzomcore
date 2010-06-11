@@ -25,13 +25,13 @@
 
 extern NL3D::UScene *Scene;
 
-//*********************************************************************
+// *********************************************************************
 CAnimationFXIDArray::CAnimationFXIDArray()
 {
 	_AnimSet = NULL;
 }
 
-//*********************************************************************
+// *********************************************************************
 void CAnimationFXIDArray::release()
 {
 	_IDToFXArray.clear();
@@ -42,7 +42,7 @@ void CAnimationFXIDArray::release()
 	_AnimSet = NULL;
 }
 
-//*********************************************************************
+// *********************************************************************
 void CAnimationFXIDArray::init(const CIDToStringArraySheet &sheet, NL3D::UAnimationSet *animSet, bool mustDeleteAnimSet /* = false*/)
 {
 	release();
@@ -66,7 +66,7 @@ void CAnimationFXIDArray::init(const CIDToStringArraySheet &sheet, NL3D::UAnimat
 	}
 }
 
-//*********************************************************************
+// *********************************************************************
 void CAnimationFXIDArray::init(const std::string &sheetName, NL3D::UAnimationSet *animSet, bool mustDeleteAnimSet /*= false*/)
 {
 	CIDToStringArraySheet *array = dynamic_cast<CIDToStringArraySheet *>(SheetMngr.get(NLMISC::CSheetId(sheetName)));
@@ -77,7 +77,7 @@ void CAnimationFXIDArray::init(const std::string &sheetName, NL3D::UAnimationSet
 }
 
 
-//*********************************************************************
+// *********************************************************************
 const CAnimationFX *CAnimationFXIDArray::getFX(uint32 id) const
 {
 	// after init, element are sorted by ids

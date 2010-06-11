@@ -8,6 +8,8 @@ ENDIF(APPLE)
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelsound SHARED ${SRC})
+  CONFIGURE_FILE(nel-sound.pc.in nel-sound.pc)
+  INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/nel-sound.pc" DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelsound STATIC ${SRC})
 ENDIF(NOT WIN32) 

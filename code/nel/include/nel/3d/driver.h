@@ -56,7 +56,7 @@ using NLMISC::CSmartPtr;
 using NLMISC::CRGBA;
 using NLMISC::CVector;
 using NLMISC::CMatrix;
-using NLMISC::CSynchronized;
+using NLMISC::CUnfairSynchronized;
 
 
 class CMaterial;
@@ -69,7 +69,7 @@ struct IOcclusionQuery;
 
 
 
-//****************************************************************************
+// ****************************************************************************
 /// A Graphic Mode descriptor.
 struct GfxMode
 {
@@ -94,17 +94,17 @@ struct GfxMode
 	GfxMode(uint16 w, uint16 h, uint8 d, bool windowed = true, bool offscreen = false, uint frequency = 0, sint8 aa = -1);
 };
 
-//****************************************************************************
+// ****************************************************************************
 // Exceptions.
 struct EBadDisplay : public NLMISC::Exception
 {
 	EBadDisplay(const std::string &reason) : Exception(reason) { }
 };
 
-//****************************************************************************
+// ****************************************************************************
 typedef void (*emptyProc)(void);
 
-//****************************************************************************
+// ****************************************************************************
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
 // **********************************
@@ -144,7 +144,7 @@ public:
 
 protected:
 
-	CSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
+	CUnfairSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
 
 	TTexDrvSharePtrList		_TexDrvShares;
 	TMatDrvInfoPtrList		_MatDrvInfos;

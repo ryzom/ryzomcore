@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: nel-3d
-Version: @VERSION@
-Description: NeL @VERSION@
+Version: @NL_VERSION@
+Description: NeL @NL_VERSION@
 Reqiures:
 Libs: -L${libdir}
 Libs.private: @LIBS@ @FREETYPE_LIBS@ -lc

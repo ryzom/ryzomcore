@@ -11,7 +11,7 @@ ENDIF(XF86VidMode_LIBRARY AND XF86VidMode_INCLUDE_DIR)
 
 
 FIND_PATH(XF86VidMode_INCLUDE_DIR
-  xf86vm.h
+  xf86vmode.h
   PATHS
   $ENV{XF86VidMode_DIR}/include
   /usr/include/X11/

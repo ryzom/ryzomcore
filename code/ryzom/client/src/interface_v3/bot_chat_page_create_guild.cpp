@@ -32,7 +32,7 @@ using namespace std;
 
 static const char *WIN_BOT_CHAT_PAGE_CREATE_GUILD = "ui:interface:bot_chat_create_guild";
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageCreateGuild::begin()
 {
 	CBotChatPage::begin();
@@ -43,7 +43,7 @@ void CBotChatPageCreateGuild::begin()
 	activateWindow(WIN_BOT_CHAT_PAGE_CREATE_GUILD, true);
 }
 
-//***************************************************************************
+// ***************************************************************************
 void CBotChatPageCreateGuild::end()
 {
 	activateWindow(WIN_BOT_CHAT_PAGE_CREATE_GUILD, false);

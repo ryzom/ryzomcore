@@ -6,6 +6,8 @@ SOURCE_GROUP(headers FILES ${PRIV_H} ${PUB_H})
 
 IF(NOT WIN32)
   ADD_LIBRARY(nelgeorges SHARED ${SRC})
+  CONFIGURE_FILE(nel-georges.pc.in nel-georges.pc)
+  INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/nel-georges.pc" DESTINATION lib/pkgconfig)
 ELSE(NOT WIN32)
   ADD_LIBRARY(nelgeorges STATIC ${SRC})
 ENDIF(NOT WIN32)

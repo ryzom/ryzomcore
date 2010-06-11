@@ -179,11 +179,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	// Cull order
 	_CullMode = CCW;
 	glCullFace(GL_BACK);
-
-
 }
-
-
 
 // ***************************************************************************
 void			CDriverGLStates::enableBlend(uint enable)

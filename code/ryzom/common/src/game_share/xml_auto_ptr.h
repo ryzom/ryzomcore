@@ -34,7 +34,7 @@ public:
 	operator std::string() const { return std::string(_Value); }
 	bool operator ! () const { return _Value == NULL; }
 	operator const unsigned char *() const { return (const unsigned char *)  _Value; }
-	const char operator * ()  const { nlassert(_Value); return *_Value; }
+	char operator * ()  const { nlassert(_Value); return *_Value; }
 	/// NB : This remove previous owned pointer with xmlFree
 	CXMLAutoPtr &operator = (const char *other)
 	{

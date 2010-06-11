@@ -32,7 +32,7 @@ class CGroupInScene;
 namespace R2
 {
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 // Interface for object selection in the scene
 struct ISelectableObject
 {
@@ -51,7 +51,7 @@ struct ISelectableObject
 	virtual CInstance		*getInstanceInEditor() const = 0;
 };
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 // Decoration in a CGroupMap that expose this interface (through dynamic_cast) are representation of CInstance in the island map
 struct IDisplayerUIHandle
 {
@@ -66,7 +66,7 @@ struct IDisplayerUIHandle
 };
 
 
-//***********************************************************************************************************************
+// ***********************************************************************************************************************
 // Displays an object of the editor in the 3D scene / in the worldmap
 class CDisplayerVisual : public CDisplayerBase, public ISelectableObject
 {

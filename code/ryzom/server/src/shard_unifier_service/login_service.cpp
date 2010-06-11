@@ -5,7 +5,7 @@
 #include "nel/net/module_builder_parts.h"
 #include "nel/net/login_cookie.h"
 
-#include "../../nelns/welcome_service/welcome_service_itf.h"
+#include "game_share/welcome_service_itf.h"
 
 #include "game_share/utils.h"
 #include "server_share/mysql_wrapper.h"
@@ -22,8 +22,6 @@ using namespace NLNET;
 using namespace MSW;
 using namespace RSMGR;
 using namespace ENTITYLOC;
-
-#include "../../../../nelns/welcome_service/welcome_service_itf.cpp"
 
 namespace LS
 {

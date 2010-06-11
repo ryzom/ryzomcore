@@ -107,13 +107,13 @@ inline NLMISC::CRGBA PSBinOpSubtract(NLMISC::CRGBA t1, NLMISC::CRGBA t2)
 /////////////////////////////////////////////////////////////////////////////
 // CPSAttribMakerBinOp specializations to return the correct min/max value //
 /////////////////////////////////////////////////////////////////////////////
-//*************************************************************************************************************
+// *************************************************************************************************************
 /** template specialization implementations
   * They're useful to get the correct min / max values depending on the type
   */
 
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline uint32 CPSAttribMakerBinOp<uint32>::getMinValue(void) const
 {
@@ -138,7 +138,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMinValue(void) const
 	return 0;
 }
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline uint32 CPSAttribMakerBinOp<uint32>::getMaxValue(void) const
 {
@@ -163,7 +163,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMaxValue(void) const
 	return 0;
 }
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline sint32 CPSAttribMakerBinOp<sint32>::getMinValue(void) const
 {
@@ -190,7 +190,7 @@ inline sint32 CPSAttribMakerBinOp<sint32>::getMinValue(void) const
 	return 0;
 }
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline sint32 CPSAttribMakerBinOp<sint32>::getMaxValue(void) const
 {
@@ -217,7 +217,7 @@ inline sint32 CPSAttribMakerBinOp<sint32>::getMaxValue(void) const
 	return 0;
 }
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline float CPSAttribMakerBinOp<float>::getMinValue(void) const
 {
@@ -244,7 +244,7 @@ inline float CPSAttribMakerBinOp<float>::getMinValue(void) const
 	return 0;
 }
 
-//***********************************************************************
+// ***********************************************************************
 template <>
 inline float CPSAttribMakerBinOp<float>::getMaxValue(void) const
 {

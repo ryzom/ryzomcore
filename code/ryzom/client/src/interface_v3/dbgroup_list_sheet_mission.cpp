@@ -29,7 +29,7 @@ using namespace NLMISC;
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetMission, std::string, "list_sheet_mission");
 
 
-//**********************************************************************************
+// **********************************************************************************
 void CDBGroupListSheetMission::CSheetChildMission::init(CDBGroupListSheetText *pFather, uint index)
 {
 	// init my parent
@@ -46,7 +46,7 @@ void CDBGroupListSheetMission::CSheetChildMission::init(CDBGroupListSheetText *p
 
 }
 
-//**********************************************************************************
+// **********************************************************************************
 CViewText *CDBGroupListSheetMission::CSheetChildMission::createViewText() const
 {
 	// create a view text id because mission text is send by the server
@@ -57,7 +57,7 @@ CViewText *CDBGroupListSheetMission::CSheetChildMission::createViewText() const
 	return vti;
 }
 
-//**********************************************************************************
+// **********************************************************************************
 bool CDBGroupListSheetMission::CSheetChildMission::isInvalidated(CDBGroupListSheetText * /* pFather */)
 {
 	uint8 newPreReqState = (uint8)CurrentPreReqState.getSInt32();
@@ -78,7 +78,7 @@ void CDBGroupListSheetMission::CSheetChildMission::update(CDBGroupListSheetText 
 	CSheetChild::update(pFather);
 }
 
-//**********************************************************************************
+// **********************************************************************************
 void CDBGroupListSheetMission::CSheetChildMission::updateViewText(CDBGroupListSheetText *pFather)
 {
 	CSheetChild::updateViewText(pFather);
@@ -130,7 +130,7 @@ void CDBGroupListSheetMission::CSheetChildMission::updateViewText(CDBGroupListSh
 
 }
 
-//**********************************************************************************
+// **********************************************************************************
 bool CDBGroupListSheetMission::CSheetChildMission::isSheetValid(CDBGroupListSheetText * /* pFather */)
 {
 	if (!Ctrl) return false;

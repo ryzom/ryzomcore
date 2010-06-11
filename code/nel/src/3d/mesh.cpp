@@ -2429,7 +2429,7 @@ void CMesh::CMeshBuild::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }*/
 
 
-//************************************
+// ************************************
 CMesh::CMeshBuild::CMeshBuild()
 {
 	for (uint k = 0; k < CVertexBuffer::MaxStage; ++k)

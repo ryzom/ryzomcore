@@ -30,7 +30,7 @@
 namespace R2
 {
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
 {
 	//H_AUTO(R2_CCtrlButtonEntity_getContextHelp)
@@ -38,14 +38,14 @@ void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
 	if (help == NLMISC::CI18N::get("uiR2EDNoName")) help.clear();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const CEventDescriptor &/* event */)
 {
 	//H_AUTO(R2_CCtrlButtonEntity_handleEvent)
 	return false; // just a display with tooltip capability
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CInstanceMapDeco::CInstanceMapDeco()
 {
 	//H_AUTO(R2_CInstanceMapDeco_CInstanceMapDeco)
@@ -64,7 +64,7 @@ CInstanceMapDeco::CInstanceMapDeco()
 	_InvalidPos = false;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::setDisplayedInstance(CInstance *instance, bool orientable)
 {
 	//H_AUTO(R2_CInstanceMapDeco_setDisplayedInstance)
@@ -74,7 +74,7 @@ void CInstanceMapDeco::setDisplayedInstance(CInstance *instance, bool orientable
 	_Orientable = orientable;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CVector2f CInstanceMapDeco::getWorldPos() const
 {
 	//H_AUTO(R2_CInstanceMapDeco_getWorldPos)
@@ -84,7 +84,7 @@ CVector2f CInstanceMapDeco::getWorldPos() const
 	return vd->getWorldPos2f();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::invalidateCoords()
 {
 	//H_AUTO(R2_CInstanceMapDeco_invalidateCoords)
@@ -103,7 +103,7 @@ void CInstanceMapDeco::invalidateCoords()
 	if (_Orient) _Orient->invalidateCoords();
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 CCtrlQuad *CInstanceMapDeco::newQuad(CGroupMap &owner)
 {
 	//H_AUTO(R2_CInstanceMapDeco_newQuad)
@@ -117,7 +117,7 @@ CCtrlQuad *CInstanceMapDeco::newQuad(CGroupMap &owner)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::onAdd(CGroupMap &owner)
 {
 	//H_AUTO(R2_CInstanceMapDeco_onAdd)
@@ -168,7 +168,7 @@ void CInstanceMapDeco::onAdd(CGroupMap &owner)
 	_AddedToMap = true;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::onRemove(CGroupMap &owner)
 {
 	//H_AUTO(R2_CInstanceMapDeco_onRemove)
@@ -199,7 +199,7 @@ void CInstanceMapDeco::onRemove(CGroupMap &owner)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::onPreRender(CGroupMap &groupMap)
 {
 	//H_AUTO(R2_CInstanceMapDeco_onPreRender)
@@ -268,7 +268,7 @@ void CInstanceMapDeco::onPreRender(CGroupMap &groupMap)
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::onUpdate(CGroupMap &groupMap)
 {
 	//H_AUTO(R2_CInstanceMapDeco_onUpdate)
@@ -444,7 +444,7 @@ void CInstanceMapDeco::onUpdate(CGroupMap &groupMap)
 }
 
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::setTextureAndFit(const std::string &bitmapName)
 {
 	//H_AUTO(R2_CInstanceMapDeco_setTextureAndFit)
@@ -463,7 +463,7 @@ void CInstanceMapDeco::setTextureAndFit(const std::string &bitmapName)
 	}
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::setActive(bool active)
 {
 	//H_AUTO(R2_CInstanceMapDeco_setActive)
@@ -476,7 +476,7 @@ void CInstanceMapDeco::setActive(bool active)
 	_Active = active;
 }
 
-//*********************************************************************************************************
+// *********************************************************************************************************
 void CInstanceMapDeco::setInvalidPosFlag(bool invalid)
 {
 	//H_AUTO(R2_CInstanceMapDeco_setInvalidPosFlag)

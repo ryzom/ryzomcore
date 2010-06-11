@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "multi_target.h"
 
-//***********************************************************************
+// ***********************************************************************
 void CMultiTarget::pack(uint64 *destVP, uint numVP)
 {
 	nlassert(numVP * 4 >= Targets.size()); // not enough room to stores visual properties!
@@ -37,7 +37,7 @@ void CMultiTarget::pack(uint64 *destVP, uint numVP)
 	}
 }
 
-//***********************************************************************
+// ***********************************************************************
 void CMultiTarget::unpack(const uint64 *srcVP, uint numVP)
 {
 	Targets.clear();
