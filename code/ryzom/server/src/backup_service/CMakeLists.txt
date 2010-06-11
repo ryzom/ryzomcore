@@ -4,7 +4,7 @@ ADD_EXECUTABLE(backup_service ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR}  ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(backup_service	admin_modules 
-					game_share 
+					ryzom_gameshare 
 					server_share
 					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 

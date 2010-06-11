@@ -14,7 +14,7 @@ ADD_EXECUTABLE(ios_service ${SRC})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(ios_service	admin_modules 
 					pd_lib
-					game_share 
+					ryzom_gameshare 
 					server_share
 					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 

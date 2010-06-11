@@ -44,7 +44,7 @@ ADD_EXECUTABLE(entities_game_service ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(entities_game_service	admin_modules 
-						game_share 
+						ryzom_gameshare 
 						server_share 
 						ai_share 
 						pd_lib 

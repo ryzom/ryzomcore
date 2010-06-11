@@ -9,8 +9,8 @@ ADD_EXECUTABLE(sheets_packer	${SRC}
 INCLUDE_DIRECTORIES(	${LIBXML2_INCLUDE_DIR} 
 			${NEL_INCLUDE_DIR} 
 			${CMAKE_SOURCE_DIR}/client/src)
-TARGET_LINK_LIBRARIES(sheets_packer	client_sheets
-					game_share
+TARGET_LINK_LIBRARIES(sheets_packer	ryzom_clientsheets
+					ryzom_gameshare
 					${NELMISC_LIBRARY}
 					${NELGEORGES_LIBRARY}
 					${NELNET_LIBRARY}

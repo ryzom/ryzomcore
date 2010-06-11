@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(	${CMAKE_SOURCE_DIR}/server/src
 			${CMAKE_SOURCE_DIR}/common/src
 			${LIBXML2_INCLUDE_DIR} 
 			${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(ai_build_wmap	game_share
+TARGET_LINK_LIBRARIES(ai_build_wmap	ryzom_gameshare
 					server_share 
 					ai_share 
 					${PLATFORM_LINKFLAGS} 
