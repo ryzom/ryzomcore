@@ -81,7 +81,7 @@ private:
 	virtual void chatWindowRemoved(CChatWindow *cw);
 	//
 	// copy not supported
-	CChatInputFilter(const CChatInputFilter &/* other */) { nlassert(0); }
+	CChatInputFilter(const CChatInputFilter &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CChatInputFilter &operator=(const CChatInputFilter &/* other */) { nlassert(0); return *this; }
 
 };
@@ -157,7 +157,7 @@ private:
 	void chatWindowRemoved(CChatWindow *cw);
 	void msgEntered(const ucstring &msg, CChatWindow *chatWindow);
 	// copy not supported
-	CChatTargetFilter(const CChatTargetFilter &/* other */) { nlassert(0); }
+	CChatTargetFilter(const CChatTargetFilter &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CChatTargetFilter& operator=(const CChatTargetFilter &/* other */) { nlassert(0); return *this; }
 };
 

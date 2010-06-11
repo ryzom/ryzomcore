@@ -167,7 +167,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 // ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::update()
 {
-	if(_CurrItemSheet && (ItemSheet != _CurrItemSheet->getSheetId()))
+	if(_CurrItemSheet && ((sint32)ItemSheet != _CurrItemSheet->getSheetId()))
 	{
 		end();
 	}

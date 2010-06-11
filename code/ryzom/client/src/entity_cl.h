@@ -233,7 +233,7 @@ public:
 	void sheetId(const NLMISC::CSheetId &id) {_SheetId = id;}
 
 	/// Return the persistent NPC alias of entity (0 if N/A).
-	const uint32 npcAlias() const {return _NPCAlias; }
+	uint32 npcAlias() const {return _NPCAlias; }
 	/// Set the persistent NPC alias of the entity.	
 	void npcAlias(uint32 alias) {_NPCAlias = alias; }
 
@@ -411,7 +411,7 @@ public:
 
 
 	/// Return the entity current behaviour.
-	const MBEHAV::EBehaviour behaviour() const {return _CurrentBehaviour.Behaviour;}
+	MBEHAV::EBehaviour behaviour() const {return _CurrentBehaviour.Behaviour;}
 
 	/**
 	 * Show or Hide the entity.

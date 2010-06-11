@@ -354,7 +354,7 @@ private:
 
 private:
 	// this object isn't intended to be copied
-	CLuaState(const CLuaState &/* other */) { nlassert(0); }
+	CLuaState(const CLuaState &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CLuaState &operator=(const CLuaState &/* other */) { nlassert(0); return *this; }
 
 	void				executeScriptInternal(const std::string &code, const std::string &dbgSrc, int numRet = 0);

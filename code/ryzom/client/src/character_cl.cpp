@@ -2291,6 +2291,8 @@ void CCharacterCL::endAnimTransition()
 			dir(front());
 			*/
 			break;
+		default:
+			break;
 		}
 		// Change the current mode.
 		if ( _ModeWanted != MBEHAV::UNKNOWN_MODE )
@@ -2658,6 +2660,8 @@ KeyChosen:
 		else
 			nlwarning("CH::setAnim:%d: automaton '%s': state '%s': OnMoveRight '%s' is not valid.",    _Slot, _CurrentAutomaton.c_str(), CAnimationState::getAnimationStateName(curAnimState.MoveState).c_str(), CAnimationState::getAnimationStateName(curAnimState.OnMoveRight).c_str());
 		break;
+	default:
+		break;
 	}
 
 	// On Rotation/About Face
@@ -2683,6 +2687,8 @@ KeyChosen:
 		}
 		else
 			nlwarning("CH::setAnim:%d: automaton '%s': state '%s': OnRightRotation '%s' is not valid.",    _Slot, _CurrentAutomaton.c_str(), CAnimationState::getAnimationStateName(curAnimState.MoveState).c_str(), CAnimationState::getAnimationStateName(curAnimState.OnRightRotation).c_str());
+		break;
+	default:
 		break;
 	}
 
@@ -2728,6 +2734,8 @@ KeyChosen:
 		}
 		else
 			nlwarning("CH::setAnim:%d: automaton '%s': state '%s': OnBigBendRight '%s' is not valid.",    _Slot, _CurrentAutomaton.c_str(), CAnimationState::getAnimationStateName(curAnimState.MoveState).c_str(), CAnimationState::getAnimationStateName(curAnimState.OnBigBendRight).c_str());
+		break;
+	default:
 		break;
 	}
 
@@ -3084,6 +3092,7 @@ KeyChosen:
 								case MAGICFX::CastLoop:  afs = &_CurrentAttack->AttackLoopFX; break;
 								case MAGICFX::CastEnd:   afs = &_CurrentAttack->AttackEndFX; break;
 								case MAGICFX::CastFail:  afs = &_CurrentAttack->AttackFailFX; break;
+								default: break;
 							}
 							playCastFX(afs, _CurrentAttackInfo.Intensity);
 						}
@@ -3444,6 +3453,8 @@ ADD_METHOD(void CCharacterCL::updateAnimationState())
 		case OnMoveRight:
 			setAnim(_CurrentState->OnMoveRight);
 			return;
+		default:
+			break;
 		}
 
 		// ON ROTATION
@@ -3458,6 +3469,8 @@ ADD_METHOD(void CCharacterCL::updateAnimationState())
 		case OnRotRight:
 			setAnim(CAnimationStateSheet::Idle);
 			return;
+		default:
+			break;
 		}
 
 		// ON BAD HEADING
@@ -3475,6 +3488,8 @@ ADD_METHOD(void CCharacterCL::updateAnimationState())
 		case OnBendRight:
 			setAnim(_CurrentState->MoveState);
 			return;
+		default:
+			break;
 		}
 
 		// \todo GUIGUI : changer de place cette partie je pense.
@@ -3640,6 +3655,8 @@ void CCharacterCL::beginCast(const MBEHAV::CBehaviour &behaviour)
 	case MBEHAV::CAST_STUN:
 		setAnim(CAnimationStateSheet::StunCastInit);
 		break;
+	default:
+		break;
 	}
 }// beginCast //
 
@@ -3745,6 +3762,8 @@ void CCharacterCL::endCast(const MBEHAV::CBehaviour &behaviour, const MBEHAV::CB
 					break;
 				case MBEHAV::CAST_MIX_LINK:
 					setAnim(CAnimationStateSheet::MixedCastLink);
+					break;
+				default:
 					break;
 				}
 			}
@@ -4443,8 +4462,9 @@ bool CCharacterCL::isCurrentBehaviourAttackEnd() const
 		case MBEHAV::POWERFUL_ATTACK:
 		case MBEHAV::AREA_ATTACK:
 			return true;
+		default:
+			return false;
 	}
-	return false;
 }
 
 
@@ -4626,6 +4646,8 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 			// Range Animation
 			case RANGE_ATTACK:
 				combatAnimState= CAnimationStateSheet::Attack1;
+				break;
+			default:
 				break;
 			}
 		}
@@ -9150,6 +9172,8 @@ void CCharacterCL::CWornItem::startAttackFX(NL3D::USkeleton skeleton, uint inten
 							stickPoint = "Box_bouclier";
 						else
 							stickPoint = "box_arme_gauche";
+					break;
+					default:
 					break;
 				}
 			}

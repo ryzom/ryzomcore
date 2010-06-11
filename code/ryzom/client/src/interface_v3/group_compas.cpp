@@ -230,7 +230,7 @@ void CGroupCompas::draw()
 	//
 	const NLMISC::CVectorD &userPosD = UserEntity->pos();
 	NLMISC::CVector userPos((float) userPosD.x, (float) userPosD.y, (float) userPosD.z);
-	NLMISC::CVector2f targetPos;
+	NLMISC::CVector2f targetPos(0.f, 0.f);
 	// if a position tracker is provided, use it
 	CCompassTarget displayedTarget = _Target;
 
@@ -807,7 +807,7 @@ void CGroupCompasMenu::setActive (bool state)
 				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
 				for(k = 0; k < nbUserLandMarks; ++k)
 				{
-					if (currCont->UserLandMarks[k].Type >= 0 && currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
+					if (currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
 					{
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
