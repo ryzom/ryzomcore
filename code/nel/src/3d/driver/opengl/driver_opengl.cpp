@@ -104,7 +104,7 @@ uint CDriverGL::_Registered=0;
 #endif // NL_OS_WINDOWS
 
 // Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-const uint32 CDriverGL::ReleaseVersion = 0x10;
+const uint32 CDriverGL::ReleaseVersion = 0x11;
 
 // Number of register to allocate for the EXTVertexShader extension
 const uint CDriverGL::_EVSNumConstant = 97;
@@ -196,7 +196,6 @@ CDriverGL::CDriverGL()
 #ifdef NL_OS_WINDOWS
 
 	_PBuffer = NULL;
-	_hWnd = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
 	_NeedToRestaureGammaRamp = false;
@@ -208,7 +207,6 @@ CDriverGL::CDriverGL()
 
 #elif defined (NL_OS_UNIX)
 	_cursor = None;
-	_win = 0;
 	_dpy = 0;
 
 #	ifdef XF86VIDMODE
@@ -218,9 +216,12 @@ CDriverGL::CDriverGL()
 #	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
+	_win = EmptyWindow;
+
 	_OffScreen = false;
 	_FullScreen = false;
 	_Resizable = false;
+	_AntiAliasing = -1;
 
 	_CurrentMaterial=NULL;
 	_Initialized = false;
@@ -952,87 +953,9 @@ bool CDriverGL::release()
 	_AGPVertexArrayRange= NULL;
 	_VRAMVertexArrayRange= NULL;
 
-#ifdef NL_OS_WINDOWS
-	// Then delete.
-	// wglMakeCurrent(NULL,NULL);
+	destroyWindow();
 
-	// Off-screen rendering ?
-	if (_OffScreen)
-	{
-		if (_PBuffer)
-		{
-			wglDeleteContext( _hRC );
-			nwglReleasePbufferDCARB( _PBuffer, _hDC );
-			nwglDestroyPbufferARB( _PBuffer );
-		}
-	}
-	else
-	{
-		if (_hRC)
-			wglDeleteContext(_hRC);
-
-		if (_hWnd&&_hDC)
-		{
-			ReleaseDC(_hWnd,_hDC);
-			if (_DestroyWindow)
-				DestroyWindow (_hWnd);
-		}
-
-		if(_FullScreen)
-		{
-			restoreScreenMode();
-			_FullScreen= false;
-		}
-	}
-
-	_hRC=NULL;
-	_hDC=NULL;
-	_hWnd=NULL;
-	_PBuffer = NULL;
-
-	// Restaure monitor color parameters
-	if (_NeedToRestaureGammaRamp)
-	{
-		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
-		if (dc)
-		{
-			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
-				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
-
-			// Release the DC
-			ReleaseDC (NULL, dc);
-		}
-		else
-		{
-			nlwarning ("(CDriverGL::release): can't create DC");
-		}
-	}
-
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-
-	NL3D::MAC::release();
-
-#elif defined (NL_OS_UNIX)
-	if (_FullScreen)
-	{
-		restoreScreenMode();
-
-		// Ungrab the keyboard (probably not necessary);
-		XUnmapWindow(_dpy, _win);
-		XSync(_dpy, True);
-		XUngrabKeyboard(_dpy, CurrentTime);
-	}
-
-	if (_ctx)
-	{
-		glXDestroyContext(_dpy, _ctx);
-		_ctx = NULL;
-	}
-
-	XCloseDisplay(_dpy);
-	_dpy = NULL;
-
-#endif // NL_OS_UNIX
+	unInit();
 
 	// released
 	_Initialized= false;
@@ -1045,7 +968,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 {
 	H_AUTO_OGL(CDriverGL_setupViewport )
 #ifdef NL_OS_WINDOWS
-	if (_hWnd == NULL) return;
+	if (_win == EmptyWindow) return;
 
 	// Setup gl viewport
 	int clientWidth = _WindowWidth;
@@ -1117,7 +1040,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 {
 	H_AUTO_OGL(CDriverGL_setupScissor )
 #ifdef NL_OS_WINDOWS
-	if (_hWnd == NULL) return;
+	if (_win == EmptyWindow) return;
 
 	// Setup gl viewport
 	int clientWidth = _WindowWidth;

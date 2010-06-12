@@ -54,7 +54,7 @@ static bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam,
 		if (driver != NULL)
 		{
 			RECT rect;
-			GetClientRect (driver->_hWnd, &rect);
+			GetClientRect (driver->_win, &rect);
 
 			// Setup gl viewport
 			driver->_WindowWidth = rect.right-rect.left;
@@ -201,68 +201,100 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	return true;
 }
 
+// ***************************************************************************
+bool CDriverGL::unInit()
+{
+	H_AUTO_OGL(CDriverGL_unInit)
+
+	if (_FullScreen)
+	{
+		restoreScreenMode();
+		showCursor(true);
+
+		_FullScreen = false;
+	}
+
+#ifdef NL_OS_WINDOWS
+
+	// Off-screen rendering ?
+	if (_PBuffer)
+	{
+		nwglReleasePbufferDCARB(_PBuffer, _hDC);
+		nwglDestroyPbufferARB(_PBuffer);
+		_PBuffer = NULL;
+	}
+
+	if (!UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
+		nlwarning("Can't unregister NLClass");
+
+	// Restaure monitor color parameters
+	if (_NeedToRestaureGammaRamp)
+	{
+		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+		if (dc)
+		{
+			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
+				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
+
+			// Release the DC
+			ReleaseDC (NULL, dc);
+		}
+		else
+		{
+			nlwarning ("(CDriverGL::release): can't create DC");
+		}
+	}
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::release();
+
+#elif defined (NL_OS_UNIX)
+
+	XCloseDisplay(_dpy);
+	_dpy = NULL;
+
+#endif // NL_OS_UNIX
+
+	return true;
+}
+
 // --------------------------------------------------
 bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
-	uint width = mode.Width;
-	uint height = mode.Height;
-
-	if (!setScreenMode(mode))
-		return false;
+	_win = EmptyWindow;
+	_WindowWidth = _WindowHeight = _WindowX = _WindowY = 0;
+	_FullScreen = false;
+	_Resizable = resizeable;
+	_OffScreen = mode.OffScreen;
+	_DestroyWindow = false;
 
 #ifdef NL_OS_WINDOWS
+
+	// Init pointers
+	_PBuffer = NULL;
+	_hRC = NULL;
+	_hDC = NULL;
 
 	// Driver caps.
 	//=============
 	// Retrieve the WGL extensions before init the driver.
 	int						pf;
 
-	_OffScreen = mode.OffScreen;
-
-	// Init pointers
-	_PBuffer = NULL;
-	_hWnd = NULL;
-	_WindowWidth = _WindowHeight = _WindowX = _WindowY = 0;
-	_hRC = NULL;
-	_hDC = NULL;
-
 	// Offscreen mode ?
 	if (_OffScreen)
 	{
-		// Get a hdc
-
-		ULONG WndFlags=WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS;
-		WndFlags&=~WS_VISIBLE;
-		RECT	WndRect;
-		WndRect.left=0;
-		WndRect.top=0;
-		WndRect.right=width;
-		WndRect.bottom=height;
-		AdjustWindowRect(&WndRect,WndFlags,FALSE);
-		HWND tmpHWND = CreateWindowW(L"NLClass",
-									L"",
-									WndFlags,
-									CW_USEDEFAULT,CW_USEDEFAULT,
-									WndRect.right,WndRect.bottom,
-									NULL,
-									NULL,
-									GetModuleHandleW(NULL),
-									NULL);
-		if (!tmpHWND)
-		{
-			nlwarning ("CDriverGL::setDisplay: CreateWindowW failed");
+#if 0
+		if (!createWindow(mode))
 			return false;
-		}
 
 		// resize the window
 		RECT rc;
 		SetRect (&rc, 0, 0, width, height);
-		_WindowWidth = width;
-		_WindowHeight = height;
-		AdjustWindowRectEx (&rc, GetWindowStyle (_hWnd), GetMenu (_hWnd) != NULL, GetWindowExStyle (_hWnd));
-		SetWindowPos (_hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
+		AdjustWindowRectEx (&rc, GetWindowStyle (_win), GetMenu (_win) != NULL, GetWindowExStyle (_win));
+		SetWindowPos (_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
 
 		// Get the
 		HDC tempHDC = GetDC(tmpHWND);
@@ -310,7 +342,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			nlwarning ("CDriverGL::setDisplay: wglCreateContext failed: 0x%x", error);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -324,7 +356,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -341,7 +373,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			nlwarning ("CDriverGL::setDisplay: wglGetCurrentDC failed: 0x%x", error);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -413,7 +445,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -427,7 +459,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -440,7 +472,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -462,7 +494,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -480,7 +512,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
@@ -512,85 +544,26 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			nwglDestroyPbufferARB( _PBuffer );
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
-			_hWnd = NULL;
+			_win = EmptyWindow;
 			_hRC = NULL;
 			_hDC = NULL;
 			return false;
 		}
+#endif
 	}
 	else
 	{
-		_FullScreen= false;
-		if (wnd)
+		if (wnd == EmptyWindow)
 		{
-			_hWnd=wnd;
-			_DestroyWindow=false;
+			if (!createWindow(mode))
+				return false;
 		}
 		else
 		{
-			ULONG	WndFlags;
-			RECT	WndRect;
-
-			// Must destroy this window
-			_DestroyWindow=true;
-
-			if(mode.Windowed)
-				if(resizeable)
-					WndFlags=WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS;
-				else
-					WndFlags=WS_SYSMENU+WS_DLGFRAME+WS_CLIPCHILDREN+WS_CLIPSIBLINGS;
-			else
-			{
-				WndFlags=WS_POPUP;
-
-				_FullScreen= true;
-			}
-			WndRect.left=0;
-			WndRect.top=0;
-			WndRect.right=width;
-			WndRect.bottom=height;
-			AdjustWindowRect(&WndRect,WndFlags,FALSE);
-			_hWnd = CreateWindowW(	L"NLClass",
-									L"",
-									WndFlags,
-									CW_USEDEFAULT,CW_USEDEFAULT,
-									WndRect.right,WndRect.bottom,
-									NULL,
-									NULL,
-									GetModuleHandleW(NULL),
-									NULL);
-			if (_hWnd == NULL)
-			{
-				DWORD res = GetLastError();
-				nlwarning("CreateWindow failed: %u", res);
-				return false;
-			}
-
-			SetWindowLongPtr (_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-
-			// resize the window
-			RECT rc;
-			SetRect (&rc, 0, 0, width, height);
-			AdjustWindowRectEx (&rc, GetWindowStyle (_hWnd), GetMenu (_hWnd) != NULL, GetWindowExStyle (_hWnd));
-			UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
-			if (mode.Windowed)
-				flags |= SWP_NOMOVE;
-			SetWindowPos (_hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
-
-			if (show || _FullScreen)
-				showWindow(true);
+			_win = wnd;
 		}
 
-		// Init Window Width and Height
-		RECT clientRect;
-		GetClientRect (_hWnd, &clientRect);
-		_WindowWidth = clientRect.right-clientRect.left;
-		_WindowHeight = clientRect.bottom-clientRect.top;
-		GetWindowRect (_hWnd, &clientRect);
-		_WindowX = clientRect.left;
-		_WindowY = clientRect.top;
-
-		_hDC=GetDC(_hWnd);
+		_hDC=GetDC(_win);
 		wglMakeCurrent(_hDC,NULL);
 
 		_Depth=uint8(GetDeviceCaps(_hDC,BITSPIXEL));
@@ -643,7 +616,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	/// try to get direct input
 	try
 	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _hWnd, we);
+		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _win, we);
 		if (diee)
 		{
 			_EventEmitter.addEmitter(diee, true);
@@ -696,75 +669,52 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	}
 
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
-	if(_ctx == NULL)
+	if (_ctx == NULL)
 	{
 		nlerror("glXCreateContext() failed");
 	}
 
-	XSetWindowAttributes attr;
-	attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
-	attr.override_redirect = False;
-
-	int attr_flags = CWOverrideRedirect | CWBackPixel;
-
-	if(wnd == EmptyWindow)
+	if (wnd != EmptyWindow)
 	{
-		nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
-
-		attr.colormap = XCreateColormap(_dpy, root, visual_info->visual, AllocNone);
-		attr_flags |= CWColormap;
-
-		_win = XCreateWindow (_dpy, root, 0, 0, width, height, 0, visual_info->depth, InputOutput, visual_info->visual, attr_flags, &attr);
-
-		if (_win == EmptyWindow)
-		{
-			nlerror("3D: XCreateWindow() failed");
-		}
+		if (!createWindow(mode))
+			return false;
 	}
 	else
 	{
 		_win = wnd;
+
+		XSetWindowAttributes attr;
+		attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
+		attr.override_redirect = False;
+
+		int attr_flags = CWOverrideRedirect | CWBackPixel;
+
 		XChangeWindowAttributes(_dpy, _win, attr_flags, &attr);
 	}
-
-	const char *title="NeL window";
-
-	XSizeHints size_hints;
-	size_hints.x = 0;
-	size_hints.y = 0;
-	size_hints.width = width;
-	size_hints.height = height;
-	size_hints.flags = PSize | PMinSize | PMaxSize;
-	size_hints.min_width = width;
-	size_hints.min_height = height;
-	size_hints.max_width = width;
-	size_hints.max_height = height;
-
-#ifdef X_HAVE_UTF8_STRING
-	Xutf8SetWMProperties (_dpy, _win, (char*)title, (char*)title, NULL, 0, &size_hints, NULL, NULL);
-#else
-	XTextProperty text_property;
-	XStringListToTextProperty((char**)&title, 1, &text_property);
-	XSetWMProperties (_dpy, _win, &text_property, &text_property,  0, 0, &size_hints, 0, 0);
-#endif
 
 	glXMakeCurrent (_dpy, _win, _ctx);
 	XMapRaised (_dpy, _win);
 
 	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask);
 
-	XMapWindow(_dpy, _win);
+//	XMapWindow(_dpy, _win);
 
 	_EventEmitter.init (_dpy, _win);
 
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
 
-	setMode(mode);
-
 #endif // NL_OS_UNIX
 
-	return setupDisplay();
+	setMode(mode);
+
+	if (!setupDisplay())
+		return false;
+
+	if (show || _FullScreen)
+		showWindow(true);
+
+	return true;
 }
 
 #ifdef NL_OS_WINDOWS
@@ -950,6 +900,139 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 	return true;
 }
 
+// ***************************************************************************
+bool CDriverGL::createWindow(const GfxMode &mode)
+{
+	H_AUTO_OGL(CDriverGL_createWindow)
+
+	nlWindow window = EmptyWindow;
+
+#ifdef NL_OS_WINDOWS
+
+	// create the OpenGL window
+	window = CreateWindowW(L"NLClass", L"NeL Window", WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
+		CW_USEDEFAULT, CW_USEDEFAULT, mode.Width, mode.Height, HWND_DESKTOP, NULL, GetModuleHandle(NULL), NULL);
+
+	if (window == EmptyWindow)
+	{
+		DWORD res = GetLastError();
+		nlwarning("CreateWindow failed: %u", res);
+		return false;
+	}
+
+	// associate OpenGL driver to window
+	SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	// TODO
+
+#elif defined (NL_OS_UNIX)
+
+	XSetWindowAttributes attr;
+	attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
+
+#ifdef XF86VIDMODE
+	// If we're going to attempt fullscreen, we need to set redirect to True,
+	// This basically places the window with no borders in the top left
+	// corner of the screen.
+	if (mode.Windowed)
+	{
+		attr.override_redirect = False;
+	}
+	else
+	{
+		attr.override_redirect = True;
+	}
+#else
+	attr.override_redirect = False;
+#endif
+
+	int attr_flags = CWOverrideRedirect | CWBackPixel;
+
+	nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
+
+	attr.colormap = XCreateColormap(_dpy, root, visual_info->visual, AllocNone);
+	attr_flags |= CWColormap;
+
+	window = XCreateWindow (_dpy, root, 0, 0, mode.Width, mode.Height, 0, visual_info->depth, InputOutput, visual_info->visual, attr_flags, &attr);
+
+	if (window == EmptyWindow)
+	{
+		nlerror("3D: XCreateWindow() failed");
+		return false;
+	}
+
+#endif // NL_OS_UNIX
+
+	_win = window;
+
+	_WindowWidth = mode.Width;
+	_WindowHeight = mode.Height;
+
+	// Must destroy this window
+	_DestroyWindow = true;
+
+	setWindowTitle(ucstring("NeL window"));
+
+	return true;
+}
+
+// ***************************************************************************
+bool CDriverGL::destroyWindow()
+{
+	H_AUTO_OGL(CDriverGL_destroyWindow)
+
+#ifdef NL_OS_WINDOWS
+
+	// Then delete.
+	// wglMakeCurrent(NULL,NULL);
+
+	if (_hDC)
+		wglMakeCurrent(_hDC, NULL);
+
+	if (_hRC)
+	{
+		wglDeleteContext(_hRC);
+		_hRC = NULL;
+	}
+
+	if (_win && _hDC)
+	{
+		ReleaseDC(_win, _hDC);
+		_hDC = NULL;
+
+		if (_DestroyWindow)
+			DestroyWindow(_win);
+	}
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	// TODO
+
+#elif defined (NL_OS_UNIX)
+
+	if (_ctx)
+	{
+		glXDestroyContext(_dpy, _ctx);
+		_ctx = NULL;
+	}
+
+	if (_win && _DestroyWindow)
+		XDestroyWindow(_dpy, _win);
+
+	// Ungrab the keyboard (probably not necessary);
+//	XUnmapWindow(_dpy, _win);
+	XSync(_dpy, True);
+	XUngrabKeyboard(_dpy, CurrentTime);
+
+#endif
+
+	_win = EmptyWindow;
+
+	return true;
+}
+
 // --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
@@ -958,22 +1041,20 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!setScreenMode(mode))
 		return false;
 
+	_WindowWidth = mode.Width;
+	_WindowHeight = mode.Height;
+
 #ifdef NL_OS_WINDOWS
 
 	if (mode.Windowed)
 	{
 		if (_FullScreen)
-			modifyStyle(_hWnd, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS);
-
-		_WindowWidth  = mode.Width;
-		_WindowHeight = mode.Height;
+			modifyStyle(_win, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS);
 	}
 	else
 	{
 		// mode ok => copy changes
-		_WindowWidth  = mode.Width;
-		_WindowHeight = mode.Height;
-		_Depth= mode.Depth;
+		_Depth = mode.Depth;
 
 		// if old mode was not fullscreen
 		if (!_FullScreen)
@@ -981,7 +1062,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 			// Under the XP theme desktop, this function call the winproc WM_SIZE and change _WindowWidth and _WindowHeight
 			sint32 windowWidth = _WindowWidth;
 			sint32 windowHeight = _WindowHeight;
-			modifyStyle(_hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS, WS_POPUP);
+			modifyStyle(_win, GWL_STYLE, WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS, WS_POPUP);
 			_WindowWidth = windowWidth;
 			_WindowHeight = windowHeight;
 		}
@@ -990,23 +1071,22 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	// Resize the window
 	RECT rc;
 	SetRect (&rc, 0, 0, _WindowWidth, _WindowHeight);
-	AdjustWindowRectEx (&rc, GetWindowStyle (_hWnd), false, GetWindowExStyle (_hWnd));
+	AdjustWindowRectEx (&rc, GetWindowStyle (_win), GetMenu (_win) != NULL, GetWindowExStyle (_win));
 	UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
 	if (mode.Windowed)
 		flags |= SWP_NOMOVE;
-	SetWindowPos (_hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
+	SetWindowPos (_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
 
-	showWindow(true);
+//	showWindow(true);
 
 	// Init Window Width and Height
 	RECT clientRect;
-	GetClientRect (_hWnd, &clientRect);
+	GetClientRect (_win, &clientRect);
 	_WindowWidth = clientRect.right-clientRect.left;
 	_WindowHeight = clientRect.bottom-clientRect.top;
-	GetWindowRect (_hWnd, &clientRect);
+	GetWindowRect (_win, &clientRect);
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
-	_FullScreen = !mode.Windowed;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
@@ -1054,17 +1134,17 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	}
 #endif
 
+	// Resize and update the window
+	XResizeWindow(_dpy, _win, mode.Width, mode.Height);
+//	XMapWindow(_dpy, _win);
+
+#endif // NL_OS_UNIX
+
 #if !defined(NL_OS_MAC)
 	_FullScreen = !mode.Windowed;
 #else
 	_FullScreen = false;
 #endif
-
-	// Resize and update the window
-	XResizeWindow(_dpy, _win, mode.Width, mode.Height);
-	XMapWindow(_dpy, _win);
-
-#endif // NL_OS_UNIX
 
 	return true;
 }
@@ -1149,7 +1229,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Frequency = devmode.dmDisplayFrequency,
 	mode.Width = (uint16)devmode.dmPelsWidth;
 	mode.Height = (uint16)devmode.dmPelsHeight;
-	mode.AntiAlias = -1;
+	mode.AntiAlias = _AntiAliasing;
 	
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Temporary Mac Implementation"
@@ -1204,7 +1284,7 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 {
 #ifdef NL_OS_WINDOWS
 
-	SetWindowTextW(_hWnd, (WCHAR*)title.c_str());
+	SetWindowTextW(_win, (WCHAR*)title.c_str());
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
@@ -1231,7 +1311,7 @@ void CDriverGL::setWindowPos(uint32 x, uint32 y)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowPos(_hWnd, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
@@ -1248,7 +1328,7 @@ void CDriverGL::setWindowPos(uint32 x, uint32 y)
 void CDriverGL::showWindow(bool show)
 {
 #ifdef NL_OS_WINDOWS
-	ShowWindow (_hWnd, show ? SW_SHOW:SW_HIDE);
+	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
@@ -1409,13 +1489,13 @@ void CDriverGL::setMousePos(float x, float y)
 
 #ifdef NL_OS_WINDOWS
 
-	if (_hWnd)
+	if (_win)
 	{
 		// NeL window coordinate to MSWindows coordinates
 		POINT pt;
-		pt.x = (int)((float)(_WindowWidth)*x);
-		pt.y = (int)((float)(_WindowHeight)*(1.0f-y));
-		ClientToScreen (_hWnd, &pt);
+		pt.x = (sint)((float)(_WindowWidth)*x);
+		pt.y = (sint)((float)(_WindowHeight)*(1.0f-y));
+		ClientToScreen (_win, &pt);
 		SetCursorPos(pt.x, pt.y);
 	}
 
@@ -1451,7 +1531,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	}
 	else
 	{
-		if (_hWnd)
+		if (_win)
 		{
 			width = (uint32)(_WindowWidth);
 			height = (uint32)(_WindowHeight);
@@ -1488,7 +1568,7 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 	}
 	else
 	{
-		if (_hWnd)
+		if (_win)
 		{
 			x = (uint32)_WindowX;
 			y = (uint32)_WindowY;
@@ -1535,7 +1615,7 @@ bool CDriverGL::isActive()
 
 #ifdef NL_OS_WINDOWS
 
-	res = (IsWindow(_hWnd) != FALSE);
+	res = (IsWindow(_win) != FALSE);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
@@ -1557,14 +1637,14 @@ void CDriverGL::setCapture (bool b)
 	if (b)
 	{
 		RECT client;
-		GetClientRect (_hWnd, &client);
+		GetClientRect (_win, &client);
 		POINT pt1,pt2;
 		pt1.x = client.left;
 		pt1.y = client.top;
-		ClientToScreen (_hWnd, &pt1);
+		ClientToScreen (_win, &pt1);
 		pt2.x = client.right;
 		pt2.y = client.bottom;
-		ClientToScreen (_hWnd, &pt2);
+		ClientToScreen (_win, &pt2);
 		client.bottom = pt2.y;
 		client.top = pt1.y;
 		client.left = pt1.x;

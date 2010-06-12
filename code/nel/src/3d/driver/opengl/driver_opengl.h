@@ -305,13 +305,11 @@ public:
 
 	virtual nlWindow		getDisplay()
 	{
-#ifdef NL_OS_WINDOWS
-		return _hWnd;
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 		return NULL;
-#elif defined(NL_OS_UNIX)
+#else
 		return _win;
-#endif // NL_OS_WINDOWS
+#endif
 	}
 
 	virtual uint32			getAvailableVertexAGPMemory ();
@@ -655,20 +653,22 @@ private:
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-	static const uint32		ReleaseVersion;
+	static const uint32			ReleaseVersion;
 
 	bool						_FullScreen;
 	bool						_OffScreen;
 	bool						_Resizable;
 	uint						_Interval;
+	sint8						_AntiAliasing;
 
 	sint32						_WindowWidth, _WindowHeight, _WindowX, _WindowY;
+
+	nlWindow					_win;
 
 #ifdef NL_OS_WINDOWS
 
 	friend static bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	HWND						_hWnd;
 	HDC							_hDC;
 	PIXELFORMATDESCRIPTOR		_pfd;
     HGLRC						_hRC;
@@ -687,7 +687,6 @@ private:
 
 	Display*					_dpy;
 	GLXContext					_ctx;
-	Window						_win;
 	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 
@@ -843,7 +842,11 @@ private:
 
 private:
 	bool					setupDisplay();
+	bool					unInit();
 
+	bool					createWindow(const GfxMode& mode);
+	bool					destroyWindow();
+	// Methods to manage screen resolutions
 	bool					restoreScreenMode();
 	bool					saveScreenMode();
 	bool					setScreenMode(const GfxMode &mode);
