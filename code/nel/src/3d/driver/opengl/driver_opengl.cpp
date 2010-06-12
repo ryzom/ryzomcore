@@ -207,9 +207,9 @@ CDriverGL::CDriverGL()
 	NL3D::MAC::ctor();
 
 #elif defined (NL_OS_UNIX)
-	cursor = None;
-	win = 0;
-	dpy = 0;
+	_cursor = None;
+	_win = 0;
+	_dpy = 0;
 
 #	ifdef XF86VIDMODE
 	// zero the old screen mode
@@ -220,6 +220,7 @@ CDriverGL::CDriverGL()
 
 	_OffScreen = false;
 	_FullScreen = false;
+	_Resizable = false;
 
 	_CurrentMaterial=NULL;
 	_Initialized = false;
@@ -339,72 +340,6 @@ CDriverGL::~CDriverGL()
 #if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 	NL3D::MAC::dtor();
 #endif
-}
-
-// ***************************************************************************
-bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect */, ITexture * /* destText */, NLMISC::CRect &/* destRect */)
-{
-	H_AUTO_OGL(CDriverGL_stretchRect)
-
-	return false;
-}
-
-// ***************************************************************************
-bool CDriverGL::supportBloomEffect() const
-{
-	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
-}
-
-// ***************************************************************************
-bool CDriverGL::supportNonPowerOfTwoTextures() const
-{
-	return _Extensions.ARBTextureNonPowerOfTwo;
-}
-
-// ***************************************************************************
-bool CDriverGL::isTextureRectangle(ITexture * tex) const
-{
-	return (supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
-			&& (!isPowerOf2(tex->getWidth()) || !isPowerOf2(tex->getHeight())));
-}
-
-// ***************************************************************************
-bool CDriverGL::activeFrameBufferObject(ITexture * tex)
-{
-	if(supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
-	{
-		if(tex)
-		{
-			CTextureDrvInfosGL*	gltext = (CTextureDrvInfosGL*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
-			return gltext->activeFrameBufferObject(tex);
-		}
-		else
-		{
-			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-// --------------------------------------------------
-void CDriverGL::disableHardwareVertexProgram()
-{
-	H_AUTO_OGL(CDriverGL_disableHardwareVertexProgram)
-	_Extensions.DisableHardwareVertexProgram= true;
-}
-
-void CDriverGL::disableHardwareVertexArrayAGP()
-{
-	H_AUTO_OGL(CDriverGL_disableHardwareVertexArrayAGP)
-	_Extensions.DisableHardwareVertexArrayAGP= true;
-}
-
-void CDriverGL::disableHardwareTextureShader()
-{
-	H_AUTO_OGL(CDriverGL_disableHardwareTextureShader)
-	_Extensions.DisableHardwareTextureShader= true;
 }
 
 // --------------------------------------------------
@@ -682,6 +617,74 @@ bool CDriverGL::setupDisplay()
 	return true;
 }
 
+// ***************************************************************************
+bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect */, ITexture * /* destText */, NLMISC::CRect &/* destRect */)
+{
+	H_AUTO_OGL(CDriverGL_stretchRect)
+
+	return false;
+}
+
+// ***************************************************************************
+bool CDriverGL::supportBloomEffect() const
+{
+	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
+}
+
+// ***************************************************************************
+bool CDriverGL::supportNonPowerOfTwoTextures() const
+{
+	return _Extensions.ARBTextureNonPowerOfTwo;
+}
+
+// ***************************************************************************
+bool CDriverGL::isTextureRectangle(ITexture * tex) const
+{
+	return (supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
+			&& (!isPowerOf2(tex->getWidth()) || !isPowerOf2(tex->getHeight())));
+}
+
+// ***************************************************************************
+bool CDriverGL::activeFrameBufferObject(ITexture * tex)
+{
+	if(supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
+	{
+		if(tex)
+		{
+			CTextureDrvInfosGL*	gltext = (CTextureDrvInfosGL*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
+			return gltext->activeFrameBufferObject(tex);
+		}
+		else
+		{
+			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// --------------------------------------------------
+void CDriverGL::disableHardwareVertexProgram()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwareVertexProgram)
+	_Extensions.DisableHardwareVertexProgram= true;
+}
+
+// ***************************************************************************
+void CDriverGL::disableHardwareVertexArrayAGP()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwareVertexArrayAGP)
+	_Extensions.DisableHardwareVertexArrayAGP= true;
+}
+
+// ***************************************************************************
+void CDriverGL::disableHardwareTextureShader()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwareTextureShader)
+	_Extensions.DisableHardwareTextureShader= true;
+}
+
 // --------------------------------------------------
 void CDriverGL::resetTextureShaders()
 {
@@ -863,7 +866,7 @@ bool CDriverGL::swapBuffers()
 	NL3D::MAC::swapBuffers();
 
 #elif defined (NL_OS_UNIX)
-	glXSwapBuffers(dpy, win);
+	glXSwapBuffers(_dpy, _win);
 
 #endif // NL_OS_WINDOWS
 
@@ -977,7 +980,7 @@ bool CDriverGL::release()
 
 		if(_FullScreen)
 		{
-			switchBackToOldMode();
+			restoreScreenMode();
 			_FullScreen= false;
 		}
 	}
@@ -1010,24 +1013,24 @@ bool CDriverGL::release()
 	NL3D::MAC::release();
 
 #elif defined (NL_OS_UNIX)
-	if(_FullScreen)
+	if (_FullScreen)
 	{
-		switchBackToOldMode();
+		restoreScreenMode();
 
 		// Ungrab the keyboard (probably not necessary);
-		XUnmapWindow(dpy, win);
-		XSync(dpy, True);
-		XUngrabKeyboard(dpy, CurrentTime);
+		XUnmapWindow(_dpy, _win);
+		XSync(_dpy, True);
+		XUngrabKeyboard(_dpy, CurrentTime);
 	}
 
-	if (ctx)
+	if (_ctx)
 	{
-		glXDestroyContext(dpy, ctx);
-		ctx = NULL;
+		glXDestroyContext(_dpy, _ctx);
+		_ctx = NULL;
 	}
 
-	XCloseDisplay(dpy);
-	dpy = NULL;
+	XCloseDisplay(_dpy);
+	_dpy = NULL;
 
 #endif // NL_OS_UNIX
 
@@ -1056,7 +1059,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 #elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
-	if (!XGetWindowAttributes(dpy, win, &win_attributes))
+	if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
 		throw EBadDisplay("Can't get window attributes.");
 
 	// Setup gl viewport
@@ -1130,7 +1133,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 #elif defined (NL_OS_UNIX)
 
 	XWindowAttributes win_attributes;
-	if (!XGetWindowAttributes(dpy, win, &win_attributes))
+	if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
 		throw EBadDisplay("Can't get window attributes.");
 
 	// Setup gl viewport
@@ -2729,7 +2732,7 @@ void CDriverGL::stencilFunc(TStencilFunc stencilFunc, int ref, uint mask)
 {
 	H_AUTO_OGL(CDriverGL_CDriverGL)
 
-	GLenum glstencilFunc;
+	GLenum glstencilFunc = 0;
 
 	switch(stencilFunc)
 	{
@@ -2752,7 +2755,7 @@ void CDriverGL::stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass)
 {
 	H_AUTO_OGL(CDriverGL_CDriverGL)
 
-	GLenum glFail, glZFail, glZPass;
+	GLenum glFail = 0, glZFail = 0, glZPass = 0;
 
 	switch(fail)
 	{

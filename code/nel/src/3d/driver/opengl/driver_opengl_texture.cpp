@@ -53,14 +53,18 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	// The id is auto created here.
 	glGenTextures(1,&ID);
 
-	Compressed= false;
-	MipMap= false;
-	TextureMemory= 0;
+	Compressed = false;
+	MipMap = false;
+	TextureMemory = 0;
 
 	// Nb: at Driver dtor, all tex infos are deleted, so _Driver is always valid.
 	_Driver= drvGl;
 
 	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE_NV:GL_TEXTURE_2D;
+
+	FBOId = 0;
+	DepthFBOId = 0;
+	StencilFBOId = 0;
 
 	InitFBO = false;
 	AttachDepthStencil = true;
@@ -157,33 +161,41 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 				InitFBO = true;
 				break;
 			case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-				nlwarning("Unsupported framebuffer format\n");
+				nlwarning("Unsupported framebuffer format");
 				break;
-#if GL_GLEXT_VERSION > 24
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-				nlwarning("Framebuffer incomplete attachment\n");
+				nlwarning("Framebuffer incomplete attachment");
 				break;
 #endif
 			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-				nlwarning("Framebuffer incomplete, missing attachment\n");
+				nlwarning("Framebuffer incomplete, missing attachment");
 				break;
-#if GL_GLEXT_VERSION < 39
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
-				nlwarning("Framebuffer incomplete, duplicate attachment\n");
+				nlwarning("Framebuffer incomplete, duplicate attachment");
 				break;
 #endif
 			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-				nlwarning("Framebuffer incomplete, attached images must have same dimensions\n");
+				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
 				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-				nlwarning("Framebuffer incomplete, attached images must have same format\n");
+				nlwarning("Framebuffer incomplete, attached images must have same format");
 				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-				nlwarning("Framebuffer incomplete, missing draw buffer\n");
+				nlwarning("Framebuffer incomplete, missing draw buffer");
 				break;
 			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-				nlwarning("Framebuffer incomplete, missing read buffer\n");
+				nlwarning("Framebuffer incomplete, missing read buffer");
 				break;
+			case GL_FRAMEBUFFER_BINDING_EXT:
+				nlwarning("Framebuffer BINDING_EXT");
+				break;
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
+			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+				nlwarning("Framebuffer incomplete multisample");
+				break;
+#endif
 			default:
 				nlwarning("Framebuffer incomplete\n");
 				//nlassert(0);
@@ -237,7 +249,6 @@ static	inline CTextureDrvInfosGL*	getTextureGl(ITexture& tex)
 	return gltex;
 }
 
-
 // ***************************************************************************
 // Translation of TexFmt mode.
 GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
@@ -268,7 +279,6 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 		}
 	}
 
-
 	// Get gl tex format, try S3TC compressed ones.
 	if(_Extensions.EXTTextureCompressionS3TC)
 	{
@@ -283,7 +293,6 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 			default: break;
 		}
 	}
-
 
 	// Get standard gl tex format.
 	compressed= false;
@@ -312,7 +321,6 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 		default: return GL_RGBA8;
 	}
 }
-
 
 // ***************************************************************************
 static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
@@ -392,7 +400,6 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 	return w*h* 4;
 }
 
-
 // ***************************************************************************
 // Translation of Wrap mode.
 static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtensions	&extensions)
@@ -408,7 +415,6 @@ static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtens
 			return GL_CLAMP;
 	}
 }
-
 
 // ***************************************************************************
 static inline GLenum	translateMagFilterToGl(CTextureDrvInfosGL *glText)
@@ -472,7 +478,6 @@ static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL *glText)
 #endif // NEL_FORCE_NEAREST
 }
 
-
 // ***************************************************************************
 static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 {
@@ -488,7 +493,6 @@ static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 
 	return false;
 }
-
 
 // ***************************************************************************
 static inline bool		isDXTCFormat(GLint glfmt)
@@ -506,7 +510,6 @@ static inline bool		isDXTCFormat(GLint glfmt)
 	return false;
 }
 
-
 // ***************************************************************************
 bool CDriverGL::setupTexture (ITexture& tex)
 {
@@ -514,8 +517,6 @@ bool CDriverGL::setupTexture (ITexture& tex)
 	bool nTmp;
 	return setupTextureEx (tex, true, nTmp);
 }
-
-
 
 // ***************************************************************************
 #ifndef NL_DEBUG
@@ -624,14 +625,11 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		return true; // Do not do anything
 	}
 
-
 	// 1. If modified, may (re)load texture part or all of the texture.
 	//=================================================================
 
-
 	bool	mustLoadAll= false;
 	bool	mustLoadPart= false;
-
 
 	// To avoid any delete/new ptr problem, disable all texturing.
 	/* If an old texture is deleted, _CurrentTexture[*] and _CurrentTextureInfoGL[*] are invalid.
@@ -642,7 +640,6 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 	{
 		activateTexture(stage, NULL);
 	}
-
 
 	// A. Share mgt.
 	//==============
@@ -786,7 +783,6 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 							glTexImage2D (NLCubeFaceToGLCubeFace[nText], i, glfmt, w, h, 0, glSrcFmt, glSrcType, ptr);
 							bAllUploaded = true;
 							NEL_MEASURE_UPLOAD_TIME_END
-
 						}
 						else
 						{
@@ -915,7 +911,6 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			}
 			//printf("%d,%d,%d\n", tex.getMipMapCount(), tex.getWidth(0), tex.getHeight(0));
 
-
 			// profiling. add new TextureMemory usage.
 			_AllocatedTextureMemory+= gltext->TextureMemory;
 		}
@@ -983,8 +978,6 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 						else
 							glTexSubImage2D (GL_TEXTURE_2D, i, x0, y0, x1-x0, y1-y0, glSrcFmt,glSrcType, NULL);
 
-
-
 						// Next mipmap!!
 						// floor .
 						x0= x0/2;
@@ -999,11 +992,8 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-
-
 			}
 		}
-
 
 		// Release, if wanted.
 		if(tex.getReleasable())
@@ -1019,12 +1009,10 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
 	}
 
-
 	// The texture is correctly setuped.
 	tex.clearTouched();
 	return true;
 }
-
 
 // ***************************************************************************
 bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
@@ -1067,13 +1055,10 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
-
-
 	bool dummy;
 	GLint glfmt = getGlTextureFormat (tex, dummy);
 	GLint glSrcFmt = getGlSrcTextureFormat (tex, glfmt);
 	GLenum  glSrcType= getGlSrcTextureComponentType(glSrcFmt);
-
 
 	// If DXTC format
 	if (_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
@@ -1116,7 +1101,6 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 			return false;
 		}
 
-
 		nlassert (((x0&3) == 0) && ((y0&3) == 0));
 		if ((w>=4) && (h>=4))
 		{
@@ -1132,8 +1116,6 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 			nglCompressedTexImage2DARB (GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 										glfmt, w, h, 0, imageSize, ptr);
 		}
-
-
 	}
 	else
 	{
@@ -1150,8 +1132,6 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 		glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
-
-
 	}
 
 	// Disable texture 0
@@ -1195,7 +1175,6 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 				_TextureUsed.insert (gltext);
 			}
 
-
 			if(tex->isTextureCube())
 			{
 				// setup texture mode, after activeTextureARB()
@@ -1215,7 +1194,6 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 						// setup this texture
 						glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
 
-
 						// Change parameters of texture, if necessary.
 						//============================================
 						if(gltext->MagFilter!= tex->getMagFilter())
@@ -1228,8 +1206,6 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 							gltext->MinFilter= tex->getMinFilter();
 							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
 						}
-
-
 					}
 				}
 			}
@@ -1319,7 +1295,6 @@ static void	forceActivateTexEnvModeEnvCombine4(const CMaterial::CTexEnv  &env)
 {
 	H_AUTO_OGL(forceActivateTexEnvModeEnvCombine4)
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE4_NV);
-
 
 	//== RGB ==
 	switch(env.Env.OpRGB)
@@ -1683,7 +1658,6 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			//=====
 			if (env.Env.OpAlpha == CMaterial::Mad)
 			{
-
 				if (_Extensions.ATITextureEnvCombine3)
 				{
 					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
@@ -1737,11 +1711,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
-
-
-
 }
-
 
 // ***************************************************************************
 void		CDriverGL::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
@@ -1752,7 +1722,6 @@ void		CDriverGL::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
 		forceActivateTexEnvColor(stage, col);
 	}
 }
-
 
 // ***************************************************************************
 void		CDriverGL::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
@@ -1825,7 +1794,13 @@ void		CDriverGL::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	swap(t0->WrapT, t1->WrapT);
 	swap(t0->MagFilter, t1->MagFilter);
 	swap(t0->MinFilter, t1->MinFilter);
-
+	swap(t0->TextureMode, t1->TextureMode);
+	swap(t0->FBOId, t1->FBOId);
+	swap(t0->DepthFBOId, t1->DepthFBOId);
+	swap(t0->StencilFBOId, t1->StencilFBOId);
+	swap(t0->InitFBO, t1->InitFBO);
+	swap(t0->AttachDepthStencil, t1->AttachDepthStencil);
+	swap(t0->UsePackedDepthStencil, t1->UsePackedDepthStencil);
 }
 
 
@@ -1879,6 +1854,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 			getWindowSize(w, h);
 
 			getViewport(_OldViewport);
+
 			CViewport newVP;
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
 			setupViewport(newVP);
@@ -1972,7 +1948,7 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 
 #elif defined (NL_OS_UNIX)
 		XWindowAttributes win_attributes;
-		if (!XGetWindowAttributes(dpy, win, &win_attributes))
+		if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
 			throw EBadDisplay("Can't get window attributes.");
 
 		// Setup gl viewport

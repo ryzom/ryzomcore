@@ -158,7 +158,15 @@ public:
 		ARBFragmentProgram = false;
 		ARBVertexBufferObject = false;
 		ARBVertexProgram = false;
+		NVTextureRectangle = false;
+		EXTTextureRectangle = false;
+		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
+		NVOcclusionQuery = false;
+		FrameBufferObject = false;
+		PackedDepthStencil = false;
+		NVVertexArrayRange2 = false;
+		NVStateVARWithoutFlush = 0;
 
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
 		DisableHardwareVertexProgram= false;
@@ -167,6 +175,7 @@ public:
 
 		// misc
 		IsATI9500OrAbove = false;
+		IsGeforceFXOrAbove = false;
 	};
 
 	std::string toString()
@@ -643,9 +652,9 @@ extern NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC nglGetOcclusionQueryuivNV;
 // Pbuffer extension
 //==================
 extern PFNWGLCREATEPBUFFERARBPROC			nwglCreatePbufferARB;
-extern PFNWGLGETPUFFERDCARBPROC				nwglGetPbufferDCARB;
-extern PFNWGLRELEASEPUFFERDCARBPROC			nwglReleasePbufferDCARB;
-extern PFNWGLDESTROYPUFFERARBPROC			nwglDestroyPbufferARB;
+extern PFNWGLGETPBUFFERDCARBPROC			nwglGetPbufferDCARB;
+extern PFNWGLRELEASEPBUFFERDCARBPROC		nwglReleasePbufferDCARB;
+extern PFNWGLDESTROYPBUFFERARBPROC			nwglDestroyPbufferARB;
 extern PFNWGLQUERYPBUFFERARBPROC			nwglQueryPbufferARB;
 
 
@@ -663,7 +672,7 @@ extern PFNWGLGETSWAPINTERVALEXTPROC			nwglGetSwapIntervalEXT;
 
 
 // WGL_ARB_extensions_string
-extern PFNWGFGETEXTENSIONSSTRINGARB			nwglGetExtensionsStringARB;
+extern PFNWGLGETEXTENSIONSSTRINGARBPROC			nwglGetExtensionsStringARB;
 
 #endif
 

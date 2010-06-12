@@ -416,9 +416,9 @@ PFNWGLFREEMEMORYNVPROC							nwglFreeMemoryNV;
 
 // Pbuffer extension
 PFNWGLCREATEPBUFFERARBPROC						nwglCreatePbufferARB;
-PFNWGLGETPUFFERDCARBPROC						nwglGetPbufferDCARB;
-PFNWGLRELEASEPUFFERDCARBPROC					nwglReleasePbufferDCARB;
-PFNWGLDESTROYPUFFERARBPROC						nwglDestroyPbufferARB;
+PFNWGLGETPBUFFERDCARBPROC						nwglGetPbufferDCARB;
+PFNWGLRELEASEPBUFFERDCARBPROC					nwglReleasePbufferDCARB;
+PFNWGLDESTROYPBUFFERARBPROC						nwglDestroyPbufferARB;
 PFNWGLQUERYPBUFFERARBPROC						nwglQueryPbufferARB;
 
 // Get Pixel format extension
@@ -431,9 +431,8 @@ PFNWGLSWAPINTERVALEXTPROC						nwglSwapIntervalEXT;
 PFNWGLGETSWAPINTERVALEXTPROC					nwglGetSwapIntervalEXT;
 
 // WGL_ARB_extensions_string
-PFNWGFGETEXTENSIONSSTRINGARB					nwglGetExtensionsStringARB;
+PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
 #endif
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -857,9 +856,9 @@ static bool	setupWGLARBPBuffer(const char	*glext)
 
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLCREATEPBUFFERARBPROC, wglCreatePbufferARB);
-	CHECK_ADDRESS(PFNWGLGETPUFFERDCARBPROC, wglGetPbufferDCARB);
-	CHECK_ADDRESS(PFNWGLRELEASEPUFFERDCARBPROC, wglReleasePbufferDCARB);
-	CHECK_ADDRESS(PFNWGLDESTROYPUFFERARBPROC, wglDestroyPbufferARB);
+	CHECK_ADDRESS(PFNWGLGETPBUFFERDCARBPROC, wglGetPbufferDCARB);
+	CHECK_ADDRESS(PFNWGLRELEASEPBUFFERDCARBPROC, wglReleasePbufferDCARB);
+	CHECK_ADDRESS(PFNWGLDESTROYPBUFFERARBPROC, wglDestroyPbufferARB);
 	CHECK_ADDRESS(PFNWGLQUERYPBUFFERARBPROC, wglQueryPbufferARB);
 #endif
 
@@ -1411,7 +1410,7 @@ bool	registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 {
 	H_AUTO_OGL(registerWGlExtensions);
 	// Get proc address
-	CHECK_ADDRESS(PFNWGFGETEXTENSIONSSTRINGARB, wglGetExtensionsStringARB);
+	CHECK_ADDRESS(PFNWGLGETEXTENSIONSSTRINGARBPROC, wglGetExtensionsStringARB);
 
 	// Get extension string
 	const char *glext = nwglGetExtensionsStringARB (hDC);

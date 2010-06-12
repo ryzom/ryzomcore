@@ -310,7 +310,7 @@ public:
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 		return NULL;
 #elif defined(NL_OS_UNIX)
-		return win;
+		return _win;
 #endif // NL_OS_WINDOWS
 	}
 
@@ -659,6 +659,7 @@ private:
 
 	bool						_FullScreen;
 	bool						_OffScreen;
+	bool						_Resizable;
 	uint						_Interval;
 
 	sint32						_WindowWidth, _WindowHeight, _WindowX, _WindowY;
@@ -684,16 +685,16 @@ private:
 
 #elif defined (NL_OS_UNIX)
 
-	Display						*dpy;
-	GLXContext					ctx;
-	Window						win;
-	Cursor						cursor;
+	Display*					_dpy;
+	GLXContext					_ctx;
+	Window						_win;
+	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 
 #ifdef XF86VIDMODE
-	int						_OldDotClock;   // old dotclock
-	XF86VidModeModeLine		_OldScreenMode;	// old modeline
-	int						_OldX, _OldY;   //Viewport settings
+	int							_OldDotClock;   // old dotclock
+	XF86VidModeModeLine			_OldScreenMode;	// old modeline
+	int							_OldX, _OldY;   //Viewport settings
 #endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
@@ -841,8 +842,10 @@ private:
 	bool					_CurrentGlNormalize;
 
 private:
-	void					switchBackToOldMode();
 	bool					setupDisplay();
+
+	bool					restoreScreenMode();
+	bool					saveScreenMode();
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();
