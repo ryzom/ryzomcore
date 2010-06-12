@@ -48,7 +48,6 @@ uint32 CIFile::_ReadingFromFile = 0;
 uint32 CIFile::_FileOpened = 0;
 uint32 CIFile::_FileRead = 0;
 CSynchronized<std::deque<std::string> > CIFile::_OpenedFiles("");
-    // = CSynchronized<std::deque<std::string> >("");
 
 // ======================================================================================================
 CIFile::CIFile() : IStream(true)
