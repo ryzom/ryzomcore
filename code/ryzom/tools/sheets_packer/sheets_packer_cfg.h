@@ -43,29 +43,7 @@ struct CClientConfig
 
 	/// Save the cfg file when exit the client ?
 	bool			SaveConfig;
-	/// Window position in windowed mode
-	sint			PositionX;
-	sint			PositionY;
-	
-	/// Window frequency
-	uint			Frequency;
-	/// Application start in a window or in fullscreen.
-	bool			Windowed;
-	/// Width for the Application.
-	uint16			Width;
-	/// Height for the Application.
-	uint16			Height;
-	/// Bit Per Pixel (only used in Fullscreen mode).
-	uint16			Depth;
-	/// Monitor Constrast [-1 ~ 1], default 0
-	float			Contrast;
-	/// Monitor Luminosity [-1 ~ 1], default 0
-	float			Luminosity;
-	/// Monitor Gamma [-1 ~ 1], default 0
-	float			Gamma;
 
-	/// Pre Data Path.
-	std::vector<std::string>			PreDataPath;
 	/// Data Path.
 	std::vector<std::string>			DataPath;
 	/// True if we want the packed sheet to be updated if needed

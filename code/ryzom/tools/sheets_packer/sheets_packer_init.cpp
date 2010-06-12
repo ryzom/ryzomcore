@@ -81,26 +81,6 @@ bool init()
 	nlinfo("Loading config file...");
 	AppCfg.init(ConfigFileName);
 
-
-/*
-	// Create the driver (most important part of the client).
-	nlinfo("Creating 3d driver...");
-	Driver = UDriver::createDriver ();
-	if(Driver == 0)
-	{
-		nlerror("sheets_packer_init: Cannot create a Driver.");
-		return false;
-	}
-
-	UDriver::CMode mode;
-	mode.Windowed = AppCfg.Windowed;
-	mode.Depth    = AppCfg.Depth;
-	mode.Width    = AppCfg.Width;
-	mode.Height   = AppCfg.Height;
-
-	// Set the mode of the window.
-	Driver->setDisplay(mode);
-*/
 	// Define the root path that contains all data needed for the application.
 	nlinfo("Adding search paths...");
 	for(uint i = 0; i < AppCfg.DataPath.size(); i++)

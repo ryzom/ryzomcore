@@ -21,25 +21,15 @@
 // INCLUDE //
 /////////////
 #include "stdpch.h"
-// Misc.
-#include "nel/misc/debug.h"
-// 3D Interface.
-//#include "nel/3d/u_driver.h"
-// Client
 #include "sheets_packer_release.h"
+
+#include "nel/misc/debug.h"
 
 
 ///////////
 // USING //
 ///////////
-//using namespace NL3D;
 using namespace NLMISC;
-
-
-////////////
-// EXTERN //
-////////////
-//extern UDriver	*Driver;
 
 
 ///////////////
@@ -51,20 +41,9 @@ using namespace NLMISC;
 //---------------------------------------------------
 void release()
 {	
-	// Delete the driver.
-/*	if(Driver)
-	{
-		// Release Scene, textcontexts, materials, ...
-		Driver->release();
-
-		// Delete the driver.
-		delete Driver;
-		Driver = 0;
-	}
-*/
-	DebugLog->removeDisplayer ("CLIENT.LOG");
-	InfoLog->removeDisplayer ("CLIENT.LOG");
-	WarningLog->removeDisplayer ("CLIENT.LOG");
-	ErrorLog->removeDisplayer ("CLIENT.LOG");
-	AssertLog->removeDisplayer ("CLIENT.LOG");
+	DebugLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	InfoLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	WarningLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	ErrorLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	AssertLog->removeDisplayer ("SHEETS_PACKER.LOG");
 }// release //
