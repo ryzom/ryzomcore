@@ -395,6 +395,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml_packer", "misc\xml_pack
 		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shapes_exporter", "3d\shapes_exporter\shapes_exporter.vcproj", "{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2B48BE83-108B-4E8E-8A55-6627CF09AC5A} = {2B48BE83-108B-4E8E-8A55-6627CF09AC5A}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -931,6 +936,14 @@ Global
 		{222663AE-5BAD-49B3-837F-26A518A3373A}.Release|Win32.Build.0 = Release|Win32
 		{222663AE-5BAD-49B3-837F-26A518A3373A}.Release|x64.ActiveCfg = Release|x64
 		{222663AE-5BAD-49B3-837F-26A518A3373A}.Release|x64.Build.0 = Release|x64
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Debug|Win32.Build.0 = Debug|Win32
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Debug|x64.ActiveCfg = Debug|x64
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Debug|x64.Build.0 = Debug|x64
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|Win32.ActiveCfg = Release|Win32
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|Win32.Build.0 = Release|Win32
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|x64.ActiveCfg = Release|x64
+		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
