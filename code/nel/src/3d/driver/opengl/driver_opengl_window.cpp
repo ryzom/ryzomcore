@@ -1483,7 +1483,32 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 
 #elif defined (NL_OS_UNIX)
 
-	x = y = 0;
+	int screen = DefaultScreen(_dpy);
+
+#if 0
+	// Display size is a member of display structure
+	int display_width = DisplayWidth(_dpy, screen);
+	int display_height = DisplayHeight(_dpy, screen);
+#endif
+
+	int xtmp = 0, ytmp = 0;
+	unsigned int width = 0, height = 0;
+	unsigned int border_width = 0;
+	unsigned int depth = 0;
+
+	// Get geometry information about root window
+	if (XGetGeometry(_dpy, RootWindow(_dpy, screen), &_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
+	{
+		display_width = width;
+		display_height = height;
+	}
+	else
+	{
+		nlwarning("can't get root window geometry");
+	}
+
+	x = xtmp;
+	y = ytmp;
 
 #endif // NL_OS_UNIX
 }
