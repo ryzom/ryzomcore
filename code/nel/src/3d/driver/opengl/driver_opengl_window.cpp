@@ -1515,12 +1515,7 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 	unsigned int depth = 0;
 
 	// Get geometry information about root window
-	if (XGetGeometry(_dpy, RootWindow(_dpy, screen), &_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
-	{
-		display_width = width;
-		display_height = height;
-	}
-	else
+	if (!XGetGeometry(_dpy, RootWindow(_dpy, screen), &_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
 	{
 		nlwarning("can't get root window geometry");
 	}
