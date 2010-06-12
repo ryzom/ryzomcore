@@ -451,8 +451,8 @@ NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 		case kVK_ANSI_2:               return NLMISC::Key2;
 		case kVK_ANSI_3:               return NLMISC::Key3;
 		case kVK_ANSI_4:               return NLMISC::Key4;
-		case kVK_ANSI_5:               return NLMISC::Key6;
-		case kVK_ANSI_6:               return NLMISC::Key5;
+		case kVK_ANSI_5:               return NLMISC::Key5;
+		case kVK_ANSI_6:               return NLMISC::Key6;
 		case kVK_ANSI_7:               return NLMISC::Key7;
 		case kVK_ANSI_8:               return NLMISC::Key8;
 		case kVK_ANSI_9:               return NLMISC::Key9;
