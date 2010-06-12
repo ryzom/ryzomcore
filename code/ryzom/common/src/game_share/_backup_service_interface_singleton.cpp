@@ -174,7 +174,7 @@ uint32 CBackupInterfaceSingleton::pushGenericAckCallback(NLMISC::CSmartPtr<IBack
 	++_Counter;
 	if (!_GenericResponses.empty())
 	{
-		nlassert((_GenericResponses.front().first-requestId)<0);
+		nlassert(((sint32)_GenericResponses.front().first-(sint32)requestId)<0);
 	}
 
 	// if we have no callback then just return the generated request Id...

@@ -220,10 +220,16 @@ void	releaseMainLoopReselect()
 
 	// Remove all entities.
 	if (Driver)
+	{
 		nldebug("RCSR1: %u textures", Driver->getTotalAsyncTextureSizeAsked());
+	}
+
 	EntitiesMngr.release();
+
 	if (Driver)
+	{
 		nldebug("RCSR2: %u textures", Driver->getTotalAsyncTextureSizeAsked());
+	}
 
 	// Reset Fx manager (must be done after EntitiesMngr.release()) Important because may still point to 3D elements
 	FXMngr.reset();
@@ -266,11 +272,17 @@ void	releaseMainLoopReselect()
 	// Release the Entities Animation Manager (Yoyo: fuckingly important because keep a pointer
 	// on a _PlayListManager that is created from Scene)
 	if (Driver)
+	{
 		nldebug("RCSR3: %u textures", Driver->getTotalAsyncTextureSizeAsked());
+	}
+
 	CEntityAnimationManager::delInstance();
 	EAM= NULL;
+
 	if (Driver)
+	{
 		nldebug("RCSR4: %u textures", Driver->getTotalAsyncTextureSizeAsked());
+	}
 
 	// Not necessary I think because owns only static data (string + function ptrs)
 	// --releaseContextualCursor();

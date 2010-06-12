@@ -66,7 +66,7 @@
 #include "../../far_tp.h"
 #include "../../net_manager.h"
 
-#include "zlib.h"
+#include <zlib.h>
 
 
 

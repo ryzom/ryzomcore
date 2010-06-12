@@ -3,8 +3,6 @@
 #ifndef __COMMON_TYPES_H
 #define __COMMON_TYPES_H
 
-#include "nel/misc/types_nl.h"
-
 #ifndef _7ZIP_BYTE_DEFINED
 #define _7ZIP_BYTE_DEFINED
 typedef unsigned char Byte;

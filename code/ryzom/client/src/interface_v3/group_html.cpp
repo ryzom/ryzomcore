@@ -2475,13 +2475,12 @@ void CGroupHTML::setTitle (const ucstring &title)
 	CInterfaceElement *parent = getParent();
 	if (parent)
 	{
-		if (parent = parent->getParent())
+		parent = parent->getParent();
+
+		CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
+		if (container)
 		{
-			CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
-			if (container)
-			{
-				container->setUCTitle (title);
-			}
+			container->setUCTitle (title);
 		}
 	}
 }

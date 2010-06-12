@@ -1396,7 +1396,7 @@ void CCharacterCL::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &gameC
 	// New Behaviour Received.
 	CBehaviour beh(prop);
 	if(verboseVP(this))
-		nlinfo("(%05d,%03d) CH::updateVPBeha:%d: '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, behaviourToString(beh.Behaviour).c_str(), beh.Behaviour);
+		nlinfo("(%05d,%03d) CH::updateVPBeha:%d: '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, behaviourToString((EBehaviour)beh.Behaviour).c_str(), beh.Behaviour);
 
 	// Add in right stage.
 	_Stages.addStage(gameCycle, PROPERTY_BEHAVIOUR, prop);
@@ -2219,7 +2219,11 @@ void CCharacterCL::endAnimTransition()
 	// If the animation is a rotation, set the character direction he should have at the end of the animation.
 	if(_CurrentState->Rotation)
 	{
-		if(isUser()) nldebug("<CCharacterCL::endAnimTransition> rotation : set dir as end anim dir");
+		if(isUser())
+		{
+			nldebug("<CCharacterCL::endAnimTransition> rotation : set dir as end anim dir");
+		}
+
 		dir(dirEndAnim());
 	}
 	// Fit the current direction to the target when attacking.
@@ -4173,6 +4177,8 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 			}
 		}
 		break;
+		default:
+		break;
 	}
 
 	// if object has a list of cast rays, then we assume it is a static object (like guard towers)
@@ -4671,7 +4677,7 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 
 	// INFO : display some debug informations.
 	if((VerboseAnimUser && _Slot==0) || (VerboseAnimSelection && _Slot == UserEntity->selection()))
-		nlinfo("CH:applyBeh:%d: '%d(%s)'", _Slot, behaviour.Behaviour, behaviourToString(behaviour.Behaviour).c_str());
+		nlinfo("CH:applyBeh:%d: '%d(%s)'", _Slot, behaviour.Behaviour, behaviourToString((EBehaviour)behaviour.Behaviour).c_str());
 
 
 	// ***** Apply the behaviour according to type
@@ -4729,6 +4735,8 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 			case MBEHAV::CAST_MIX_SUCCESS:
 			case MBEHAV::CAST_MIX_LINK:
 				endCast(behaviour, previousBehaviour);
+			break;
+			default:
 			break;
 		}
 		// DeltaHP
@@ -6668,7 +6676,9 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			// Else : There is no move.
 		}
 		else
+		{
 			CHECK(posInStage==false && dist2Dest()<=0.0);
+		}
 
 		// If there is no position in the next stage and the stage should be done already.
 		if(!_Stages._StageSet.empty() && !posInStage && !stageReach && !allToFirstPos && ((_LastFrameTime+loopTimeStep) >= stageTime))
@@ -6682,7 +6692,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			if(loopTimeStep < 0.0)
 				loopTimeStep = 0.0;
 			//
-			// \todo GUIGUI : ajuster le timeOffset comme on arrete la boucle avant l'heure
+			// \todo GUIGUI : adjust timeOffset, because we stopped the loop before
 			//
 			// Stage complete.
 			stageReach = true;

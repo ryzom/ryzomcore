@@ -61,7 +61,7 @@ class CNPCMissionGiverDesc
 public:
 
 	/// Constructor
-	CNPCMissionGiverDesc() : _MissionGiverState(NPC_ICON::AwaitingFirstData), _IsDescTransient(true), _HasChanged(false)
+	CNPCMissionGiverDesc() : _MissionGiverState(NPC_ICON::AwaitingFirstData), _LastUpdateTimestamp(0), _IsDescTransient(true), _HasChanged(false)
 	{}
 
 	// Current assignment operator: bitwise copy

@@ -1,6 +1,5 @@
 /* LzmaRamDecode.c */
 
-#include "nel/misc/types_nl.h"
 #include "LzmaRamDecode.h"
 #ifdef _SZ_ONE_DIRECTORY
 #include "LzmaDecode.h"
