@@ -926,7 +926,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		for (int i = 0; i < nmodes; i++)
 		{
 			nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-			if (modes[i]->hdisplay == width && modes[i]->vdisplay == height)
+			if (modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height)
 			{
 				if (XF86VidModeSwitchToMode(_dpy, DefaultScreen(_dpy), modes[i]))
 				{
