@@ -664,6 +664,7 @@ private:
 	sint32						_WindowWidth, _WindowHeight, _WindowX, _WindowY;
 
 	nlWindow					_win;
+	bool						_DestroyWindow;
 
 #ifdef NL_OS_WINDOWS
 
@@ -675,7 +676,6 @@ private:
 	static uint					_Registered;
 	DEVMODE						_OldScreenMode;
 	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
-	bool						_DestroyWindow;
 
 	// Off-screen rendering in Dib section
 	HPBUFFERARB					_PBuffer;
@@ -689,6 +689,7 @@ private:
 	GLXContext					_ctx;
 	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
+	XVisualInfo*				_visual_info;
 
 #ifdef XF86VIDMODE
 	int							_OldDotClock;   // old dotclock

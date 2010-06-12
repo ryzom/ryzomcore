@@ -206,17 +206,20 @@ CDriverGL::CDriverGL()
 	NL3D::MAC::ctor();
 
 #elif defined (NL_OS_UNIX)
+
 	_cursor = None;
 	_dpy = 0;
+	_visual_info = NULL;
 
 #	ifdef XF86VIDMODE
 	// zero the old screen mode
 	memset(&_OldScreenMode, 0, sizeof(_OldScreenMode));
-
 #	endif //XF86VIDMODE
+
 #endif // NL_OS_UNIX
 
 	_win = EmptyWindow;
+	_DestroyWindow = false;
 
 	_OffScreen = false;
 	_FullScreen = false;

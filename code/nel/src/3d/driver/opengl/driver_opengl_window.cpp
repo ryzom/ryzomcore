@@ -674,7 +674,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlerror("glXCreateContext() failed");
 	}
 
-	if (wnd != EmptyWindow)
+	_visual_info = visual_info;
+
+	if (wnd == EmptyWindow)
 	{
 		if (!createWindow(mode))
 			return false;
@@ -929,6 +931,9 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 #elif defined (NL_OS_UNIX)
 
+	if (_visual_info == NULL)
+		return false;
+
 	XSetWindowAttributes attr;
 	attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
 
@@ -952,10 +957,10 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
 
-	attr.colormap = XCreateColormap(_dpy, root, visual_info->visual, AllocNone);
+	attr.colormap = XCreateColormap(_dpy, root, _visual_info->visual, AllocNone);
 	attr_flags |= CWColormap;
 
-	window = XCreateWindow (_dpy, root, 0, 0, mode.Width, mode.Height, 0, visual_info->depth, InputOutput, visual_info->visual, attr_flags, &attr);
+	window = XCreateWindow (_dpy, root, 0, 0, mode.Width, mode.Height, 0, _visual_info->depth, InputOutput, _visual_info->visual, attr_flags, &attr);
 
 	if (window == EmptyWindow)
 	{
@@ -1595,7 +1600,7 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 	unsigned int depth = 0;
 
 	// Get geometry information about root window
-	if (!XGetGeometry(_dpy, RootWindow(_dpy, screen), &_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
+	if (!XGetGeometry(_dpy, RootWindow(_dpy, screen), (Window*)&_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
 	{
 		nlwarning("can't get root window geometry");
 	}
