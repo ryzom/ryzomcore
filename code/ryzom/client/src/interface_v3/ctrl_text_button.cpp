@@ -342,6 +342,8 @@ void CCtrlTextButton::draw ()
 			}
 		}
 		break;
+		default:
+		break;
 	}
 
 	// *** Draw

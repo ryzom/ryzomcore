@@ -123,6 +123,8 @@ static bool affect(const CInterfaceExprValue &value, CInterfaceElement &destElem
 				return false;
 			}
 		break;
+		default:
+		break;
 	}
 
 	return true;

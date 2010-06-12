@@ -239,7 +239,8 @@ void CBotChatManager::debugLocalReceiveMissionInfo()
 		{
 			viewTextID->setTextId(infos.Prerequisits[i].Description);
 		}
-		/*if (!help->ScrollTextGroup.empty())
+#if 0
+		if (!help->ScrollTextGroup.empty())
 		{
 			CInterfaceGroup *viewTextGroup = help->HelpWindow->getGroup(help->ScrollTextGroup);
 			if (viewTextGroup)
@@ -248,8 +249,8 @@ void CBotChatManager::debugLocalReceiveMissionInfo()
 		CInterfaceGroup *viewTextGroup = help->HelpWindow->getGroup(help->ScrollTextIdGroup);
 		if (viewTextGroup)
 			viewTextGroup->setActive(true);
-			*/
-/*	}
+#endif
+	}
 
 	_MissionHelpWindowsWaiting.erase(index);
 }

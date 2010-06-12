@@ -69,9 +69,9 @@ extern CClientChatManager		ChatMngr;
 
 CChatWindowDesc::CChatWindowDesc() :	InsertPosition(-1),
 										ParentBlink(false),
-										Listener(NULL),
 										Savable(false),
-										Localize(false)
+										Localize(false),
+										Listener(NULL)
 {
 }
 
@@ -80,7 +80,7 @@ CChatWindowDesc::CChatWindowDesc() :	InsertPosition(-1),
 /////////////////
 
 //=================================================================================
-CChatWindow::CChatWindow() : _Listener(NULL), _Chat(NULL), _ParentBlink(false), _EB(NULL)
+CChatWindow::CChatWindow() : _Listener(NULL), _Chat(NULL), _EB(NULL), _ParentBlink(false)
 {
 }
 

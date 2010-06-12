@@ -192,6 +192,8 @@ void CCtrlButton::draw ()
 			}
 		}
 		break;
+		default:
+		break;
 	}
 
 	color.A = (uint8)(((sint32)color.A*((sint32)globalColor.A+1))>>8);
