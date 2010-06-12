@@ -1570,26 +1570,32 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 {
 	H_AUTO_OGL(CDriverGL_enableLowLevelMouse)
 
+	NLMISC::IMouseDevice *res = NULL;
+
 #ifdef NL_OS_WINDOWS
-		if (_EventEmitter.getNumEmitters() < 2) return NULL;
-		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-		if (enable)
+
+	NLMISC::CDIEventEmitter *diee = NULL;
+
+	if (_EventEmitter.getNumEmitters() > 1)
+		diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
+
+	if (enable)
+	{
+		try
 		{
-			try
-			{
-				NLMISC::IMouseDevice *md = diee->getMouseDevice(exclusive);
-				return md;
-			}
-			catch (EDirectInput &)
-			{
-				return NULL;
-			}
+			if (diee)
+				res = diee->getMouseDevice(exclusive);
 		}
-		else
+		catch (EDirectInput &)
 		{
+		}
+	}
+	else
+	{
+		if (diee)
 			diee->releaseMouse();
-			return NULL;
-		}
+	}
+
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
@@ -1597,33 +1603,41 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 #elif defined (NL_OS_UNIX)
 
 #endif
-	return NULL;
+
+	return res;
 }
 
 // ***************************************************************************
 NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 {
 	H_AUTO_OGL(CDriverGL_enableLowLevelKeyboard)
+
+	NLMISC::IKeyboardDevice *res = NULL;
+
 #ifdef NL_OS_WINDOWS
-		if (_EventEmitter.getNumEmitters() < 2) return NULL;
-		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-		if (enable)
+
+	NLMISC::CDIEventEmitter *diee = NULL;
+
+	if (_EventEmitter.getNumEmitters() > 1)
+		diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
+
+	if (enable)
+	{
+		try
 		{
-			try
-			{
-				NLMISC::IKeyboardDevice *md = diee->getKeyboardDevice();
-				return md;
-			}
-			catch (EDirectInput &)
-			{
-				return NULL;
-			}
+			if (diee)
+				res = diee->getKeyboardDevice();
 		}
-		else
+		catch (EDirectInput &)
 		{
+		}
+	}
+	else
+	{
+		if (diee)
 			diee->releaseKeyboard();
-			return NULL;
-		}
+	}
+
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
@@ -1631,17 +1645,22 @@ NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 #elif defined (NL_OS_UNIX)
 
 #endif
-	return NULL;
+
+	return res;
 }
 
 // ***************************************************************************
 NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 {
 	H_AUTO_OGL(CDriverGL_getLowLevelInputDeviceManager)
+
+	NLMISC::IInputDeviceManager *res = NULL;
+
 #ifdef NL_OS_WINDOWS
-		if (_EventEmitter.getNumEmitters() < 2) return NULL;
-		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-		return diee;
+
+	if (_EventEmitter.getNumEmitters() > 1)
+		res = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
+
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
@@ -1649,7 +1668,8 @@ NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 #elif defined (NL_OS_UNIX)
 
 #endif
-	return NULL;
+
+	return res;
 }
 
 // ***************************************************************************
@@ -1657,37 +1677,49 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 {
 	H_AUTO_OGL(CDriverGL_getDoubleClickDelay)
 
+	uint res = 250;
+
 #ifdef NL_OS_WINDOWS
-		NLMISC::IMouseDevice *md = NULL;
-		if (_EventEmitter.getNumEmitters() >= 2)
+
+	NLMISC::IMouseDevice *md = NULL;
+
+	if (_EventEmitter.getNumEmitters() >= 2)
+	{
+		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
+		if (diee->isMouseCreated())
 		{
-			NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-			if (diee->isMouseCreated())
+			try
 			{
-				try
-				{
-					md = diee->getMouseDevice(hardwareMouse);
-				}
-				catch (EDirectInput &)
-				{
-					// could not get device ..
-				}
+				md = diee->getMouseDevice(hardwareMouse);
+			}
+			catch (EDirectInput &)
+			{
+				// could not get device ..
 			}
 		}
-		if (md)
-		{
-			return md->getDoubleClickDelay();
-		}
+	}
+
+	if (md)
+	{
+		res = md->getDoubleClickDelay();
+	}
+	else
+	{
 		// try to read the good value from windows
-		return ::GetDoubleClickTime();
+		res = ::GetDoubleClickTime();
+	}
+
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
 #elif defined (NL_OS_UNIX)
-		// TODO for Linux FIXME: FAKE FIX
-		return 250;
+
+	// TODO for Linux
+
 #endif
+
+	return res;
 }
 
 // ***************************************************************************

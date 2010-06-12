@@ -1248,13 +1248,13 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Disable feature ???
 	if(!ext.DisableHardwareVertexArrayAGP)
 		ext.NVVertexArrayRange= setupNVVertexArrayRange(glext);
+
 	if(ext.NVVertexArrayRange)
 	{
 		GLint	nverts;
 		glGetIntegerv((GLenum)GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV, &nverts);
 		ext.NVVertexArrayRangeMaxVertex= nverts;
 	}
-
 
 	// Compression S3TC OK iff ARBTextureCompression.
 	ext.EXTTextureCompressionS3TC= (ext.ARBTextureCompression && setupEXTTextureCompressionS3TC(glext));
@@ -1267,7 +1267,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check NVTextureEnvCombine4.
 	ext.NVTextureEnvCombine4= setupNVTextureEnvCombine4(glext);
-
 
 	// Check for cube mapping
 	ext.ARBTextureCubeMap = setupARBTextureCubeMap(glext);
@@ -1304,8 +1303,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.ARBFragmentProgram = false;
 	}
 
-
-
 	// For now, the only way to know if emulation, is to test some extension which exist only on GeForce3.
 	// if GL_NV_texture_shader is not here, then we are not on GeForce3.
 	ext.NVVertexProgramEmulated= ext.NVVertexProgram && (strstr(glext, "GL_NV_texture_shader")==NULL);
@@ -1318,6 +1315,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check NVVertexArrayRange2
 	ext.NVVertexArrayRange2= setupNVVertexArrayRange2(glext);
+
 	// if supported
 	if(ext.NVVertexArrayRange2)
 		// VBHard swap without flush of the VAR.
