@@ -209,6 +209,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	uint width = mode.Width;
 	uint height = mode.Height;
 
+	if (!setScreenMode(mode))
+		return false;
+
 #ifdef NL_OS_WINDOWS
 
 	// Driver caps.
@@ -541,32 +544,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 				WndFlags=WS_POPUP;
 
 				_FullScreen= true;
-				DEVMODE		devMode;
-				_OldScreenMode.dmSize= sizeof(DEVMODE);
-				_OldScreenMode.dmDriverExtra= 0;
-				EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &_OldScreenMode);
-				_OldScreenMode.dmFields= DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY ;
-
-				devMode.dmSize= sizeof(DEVMODE);
-				devMode.dmDriverExtra= 0;
-				devMode.dmFields= DM_PELSWIDTH | DM_PELSHEIGHT;
-				devMode.dmPelsWidth= width;
-				devMode.dmPelsHeight= height;
-
-				if(mode.Depth > 0)
-				{
-					devMode.dmBitsPerPel= mode.Depth;
-					devMode.dmFields |= DM_BITSPERPEL;
-				}
-
-				if(mode.Frequency > 0)
-				{
-					devMode.dmDisplayFrequency= mode.Frequency;
-					devMode.dmFields |= DM_DISPLAYFREQUENCY;
-				}
-
-				if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-					return false;
 			}
 			WndRect.left=0;
 			WndRect.top=0;
@@ -877,51 +854,122 @@ bool CDriverGL::restoreScreenMode()
 }
 
 // --------------------------------------------------
+bool CDriverGL::setScreenMode(const GfxMode &mode)
+{
+	H_AUTO_OGL(CDriverGL_setScreenMode)
+
+	if (mode.Windowed)
+	{
+		// if fullscreen, switch back to desktop screen mode
+		if (_FullScreen)
+			restoreScreenMode();
+
+		return true;
+	}
+
+	// save previous screen mode only if switching from windowed to fullscreen
+	if (!_FullScreen)
+		saveScreenMode();
+
+	// if switching exactly to the same screen mode, doesn't change it
+	GfxMode previousMode;
+	if (getCurrentScreenMode(previousMode)
+		&& mode.Width == previousMode.Width
+		&& mode.Height == previousMode.Height
+		&& mode.Depth == previousMode.Depth
+		&& mode.Frequency == previousMode.Frequency)
+		return true;
+
+#if defined(NL_OS_WINDOWS)
+
+	DEVMODE devMode;
+	memset(&devMode, 0, sizeof(DEVMODE));
+	devMode.dmSize        = sizeof(DEVMODE);
+	devMode.dmDriverExtra = 0;
+	devMode.dmFields      = DM_PELSWIDTH | DM_PELSHEIGHT;
+	devMode.dmPelsWidth   = mode.Width;
+	devMode.dmPelsHeight  = mode.Height;
+
+	if(mode.Depth > 0)
+	{
+		devMode.dmBitsPerPel  = mode.Depth;
+		devMode.dmFields     |= DM_BITSPERPEL;
+	}
+
+	if(mode.Frequency > 0)
+	{
+		devMode.dmDisplayFrequency  = mode.Frequency;
+		devMode.dmFields           |= DM_DISPLAYFREQUENCY;
+	}
+
+	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+	{
+		nlwarning("Fullscreen mode switch failed");
+		return false;
+	}
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	// TODO
+
+#elif defined(NL_OS_UNIX)
+
+#if defined(XF86VIDMODE)
+
+	bool found = false;
+
+	// Find the requested mode and use it
+	XF86VidModeModeInfo **modes;
+	int nmodes;
+	if (XF86VidModeGetAllModeLines(_dpy, DefaultScreen(_dpy), &nmodes, &modes))
+	{
+		for (int i = 0; i < nmodes; i++)
+		{
+			nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+			if (modes[i]->hdisplay == width && modes[i]->vdisplay == height)
+			{
+				if (XF86VidModeSwitchToMode(_dpy, DefaultScreen(_dpy), modes[i]))
+				{
+					nlinfo("3D: Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+					XF86VidModeSetViewPort(_dpy, DefaultScreen(_dpy), 0, 0);
+					found = true;
+				}
+				break;
+			}
+		}
+		XFree(modes);
+	}
+
+	if (!found)
+		return false;
+
+#endif // XF86VIDMODE
+
+#endif // NL_OS_WINDOWS
+
+	return true;
+}
+
+// --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
 	H_AUTO_OGL(CDriverGL_setMode)
+
+	if (!setScreenMode(mode))
+		return false;
+
 #ifdef NL_OS_WINDOWS
+
 	if (mode.Windowed)
 	{
 		if (_FullScreen)
-		{
-			restoreScreenMode();
 			modifyStyle(_hWnd, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW+WS_CLIPCHILDREN+WS_CLIPSIBLINGS);
-		}
+
 		_WindowWidth  = mode.Width;
 		_WindowHeight = mode.Height;
-
 	}
 	else
 	{
-		// get old mode.
-		if (!_FullScreen)
-			saveScreenMode();
-
-		// setup new mode
-		DEVMODE		newDevMode;
-		newDevMode.dmSize= sizeof(DEVMODE);
-		newDevMode.dmDriverExtra= 0;
-		newDevMode.dmFields= DM_PELSWIDTH | DM_PELSHEIGHT;
-		newDevMode.dmPelsWidth= mode.Width;
-		newDevMode.dmPelsHeight= mode.Height;
-
-		if(mode.Depth > 0)
-		{
-			newDevMode.dmBitsPerPel= mode.Depth;
-			newDevMode.dmFields |= DM_BITSPERPEL;
-		}
-
-		if(mode.Frequency > 0)
-		{
-			newDevMode.dmDisplayFrequency= mode.Frequency;
-			newDevMode.dmFields |= DM_DISPLAYFREQUENCY;
-		}
-
-		// try to really change the display mode
-		if (ChangeDisplaySettings(&newDevMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-			return false;
-
 		// mode ok => copy changes
 		_WindowWidth  = mode.Width;
 		_WindowHeight = mode.Height;
@@ -961,41 +1009,10 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	_FullScreen = !mode.Windowed;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
 	NL3D::MAC::setMode(mode);
+
 #elif defined(NL_OS_UNIX)
-
-#ifdef XF86VIDMODE
-	if (!mode.Windowed)
-	{
-		int screen = DefaultScreen(_dpy);
-
-		// Store old mdoe in order to restore it when leaving fullscreen
-		if (mode.Windowed == _FullScreen)
-			saveScreenMode();
-
-		// Find the requested mode and use it
-		XF86VidModeModeInfo **modes;
-		int nmodes;
-		if (XF86VidModeGetAllModeLines(_dpy, screen, &nmodes, &modes))
-		{
-			for (int i = 0; i < nmodes; i++)
-			{
-				nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-				if(modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height)
-				{
-					if(XF86VidModeSwitchToMode(_dpy, screen, modes[i]))
-					{
-						nlinfo("3D: Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-						XF86VidModeSetViewPort(_dpy, screen, 0, 0);
-					}
-					break;
-				}
-			}
-		}
-	}
-	else if (mode.Windowed == _FullScreen)
-		restoreScreenMode();
-#endif // XF86VIDMODE
 
 	// Update WM hints (update size and disallow resizing)
 	XSizeHints size_hints;
@@ -1048,6 +1065,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	XMapWindow(_dpy, _win);
 
 #endif // NL_OS_UNIX
+
 	return true;
 }
 

@@ -846,6 +846,7 @@ private:
 
 	bool					restoreScreenMode();
 	bool					saveScreenMode();
+	bool					setScreenMode(const GfxMode &mode);
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();
