@@ -1928,7 +1928,7 @@ NLMISC_COMMAND(displayTarget,"display bot target status for given bot(s) or play
 
 		if	(!found)
 		{
-			log.displayNL("=> can't display informations for the target of: %s", args[i].c_str());		
+			log.displayNL("=> can't display information for the target of: %s", args[i].c_str());		
 		}
 		
 	}

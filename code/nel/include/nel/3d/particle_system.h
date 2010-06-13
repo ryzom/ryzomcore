@@ -63,7 +63,7 @@ const uint MaxPSUserParam = 4;
  * It can be used directly to create a shape.
  * If you plan to use this without a particle system model, make sure :
  * - you've setup the driver before calls to step()
- * - you've setup the font manager if you want to display font informations
+ * - you've setup the font manager if you want to display font information
  * \author Nicolas Vizerie
  * \author Nevrax France
  * \date 2001

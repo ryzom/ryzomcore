@@ -91,7 +91,7 @@ string	CGroupHTMLCS::home ()
 // ***************************************************************************
 
 extern string getDebugInformation();
-extern string getSystemInformations();
+extern string getSystemInformation();
 
 string convertToHTML (const string &s)
 {
@@ -118,7 +118,7 @@ string convertToHTML (const string &s)
 void CGroupHTMLCS::getParameters (std::vector<CParameter> &parameters, bool encodeForUrl)
 {
 	string s = getDebugInformation();
-	s += getSystemInformations();
+	s += getSystemInformation();
 
 	// For each line
 	string::size_type startOfLine = 0;

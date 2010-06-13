@@ -242,7 +242,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::getNextToken (TToken &token)
 				}
 
 				// Can't found the operator
-				return UnkownOperator;
+				return UnknownOperator;
 			}
 		}
 		// Is End, '(', ')', '.' ?
@@ -1173,21 +1173,21 @@ const bool CEvalNumExpr::_StringChar[128] =
 
 CEvalNumExpr::TReturnState CEvalNumExpr::evalValue (const char *value, double &result, uint32 userData)
 {
-	return UnkownValue;
+	return UnknownValue;
 }
 
 // ***************************************************************************
 
 CEvalNumExpr::TReturnState CEvalNumExpr::evalFunction (const char *funcName, double arg0, double &result)
 {
-	return UnkownFunction;
+	return UnknownFunction;
 }
 
 // ***************************************************************************
 
 CEvalNumExpr::TReturnState CEvalNumExpr::evalFunction (const char *funcName, double arg0, double arg1, double &result)
 {
-	return UnkownFunction;
+	return UnknownFunction;
 }
 
 // ***************************************************************************
@@ -1259,12 +1259,12 @@ const CEvalNumExpr::TToken CEvalNumExpr::_ReservedWordToken[ReservedWordCount] =
 const char *CEvalNumExpr::_ErrorString[ReturnValueCount]=
 {
 	"No error",
-	"Unkown value",
+	"Unknown value",
 	"Error during user defined value evaluation",
-	"Unkown function",
+	"Unknown function",
 	"Error during user defined function evaluation",
 	"Syntax error in a number expression",
-	"Unkown operator",
+	"Unknown operator",
 	"Should be a open parentesis",
 	"Should be a close parentesis",
 	"Should be a coma character",

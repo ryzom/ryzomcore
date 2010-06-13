@@ -665,49 +665,49 @@ void sqlInit ()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sendAESInformations (TServiceId sid)
+void sendAESInformation (TServiceId sid)
 {
 	AESIT aesit = findAES (sid);
 
-	vector<string> informations;
+	vector<string> information;
 
 	CMessage msgout("AES_INFO");
 	
 	//
 	// send services that should be running on this AES
 	//
-	informations.clear ();
+	information.clear ();
 	MYSQL_ROW row = sqlQuery ("select name from service where server='%s'", (*aesit).Name.c_str());
 	while (row != NULL)
 	{
 		string service = row[0];
 		nlinfo ("Adding '%s' in registered services to AES-%hu", row[0], sid.get());
-		informations.push_back (service);
+		information.push_back (service);
 		row = sqlNextRow ();
 	}
 	sqlFlushResult();
-	msgout.serialCont (informations);
+	msgout.serialCont (information);
 
 	//
 	// send variable alarms for services that should running on this AES
 	//
-	informations.clear ();
+	information.clear ();
 	row = sqlQuery ("select path, error_bound, alarm_order from variable where error_bound!=-1");
 	while (row != NULL)
 	{
 		nlinfo ("Adding '%s' '%s' '%s' in alarm to AES-%hu", row[0], row[1], row[2], sid.get());
-		informations.push_back (row[0]);
-		informations.push_back (row[1]);
-		informations.push_back (row[2]);
+		information.push_back (row[0]);
+		information.push_back (row[1]);
+		information.push_back (row[2]);
 		row = sqlNextRow ();
 	}
 	sqlFlushResult();
-	msgout.serialCont (informations);
+	msgout.serialCont (information);
 	
 	//
 	// send graph update for services that should running on this AES
 	//
-	informations.clear ();
+	information.clear ();
 	row = sqlQuery ("select path, graph_update from variable where graph_update!=0");
 	while (row != NULL)
 	{
@@ -726,8 +726,8 @@ void sendAESInformations (TServiceId sid)
 					if(varpath2.Destination[j].first == "*" || varpath2.Destination[j].first == (*aesit).Name)
 					{
 						nlinfo ("Adding '%s' '%s' in graph to AES-%hu", row[0], row[1], sid.get());
-						informations.push_back (row[0]);
-						informations.push_back (row[1]);
+						information.push_back (row[0]);
+						information.push_back (row[1]);
 					}
 				}
 			}
@@ -735,9 +735,9 @@ void sendAESInformations (TServiceId sid)
 		row = sqlNextRow ();
 	}
 	sqlFlushResult();
-	msgout.serialCont (informations);
+	msgout.serialCont (information);
 	
-	nlinfo ("Sending all informations about %s AES-%hu (hostedservices, alarms,grapupdate)", (*aesit).Name.c_str(), (*aesit).SId.get());
+	nlinfo ("Sending all information about %s AES-%hu (hostedservices, alarms,grapupdate)", (*aesit).Name.c_str(), (*aesit).SId.get());
 	CUnifiedNetwork::getInstance ()->send (sid, msgout);
 }
 
@@ -798,7 +798,7 @@ static void cbNewAESConnection (const std::string &serviceName, TServiceId sid, 
 	nlinfo ("%s-%hu, server name %s, for shard %s connected and added in the list", serviceName.c_str(), sid.get(), server.c_str(), shard.c_str());
 	
 	// send him services that should run on this server
-	sendAESInformations (sid);
+	sendAESInformation (sid);
 }
 
 // i'm disconnected from an admin executor service
@@ -855,7 +855,7 @@ void cbRegisterAES(CMessage &msgin, const std::string &serviceName, TServiceId s
 	nlinfo ("%s-%hu, server name %s, for shard %s connected and added in the list", serviceName.c_str(), sid.get(), server.c_str(), shard.c_str());
 	
 	// send him services that should run on this server
-	sendAESInformations (sid);
+	sendAESInformation (sid);
 }
 
 static void cbView (CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -965,7 +965,7 @@ void addRequest (const string &rawvarpath, TSockId from)
 		// it means the we have to resend the list of services managed by AES from the mysql tables
 		for (AESIT aesit = AdminExecutorServices.begin(); aesit != AdminExecutorServices.end(); aesit++)
 		{
-			sendAESInformations ((*aesit).SId);
+			sendAESInformation ((*aesit).SId);
 		}
 
 		// send an empty string to say to php that there's nothing

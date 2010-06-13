@@ -106,7 +106,7 @@ public:
 	void getLightMapName( uint32 nLightMapNb, std::string &LightMapName );
 	// @}
 
-	// To init lightmap informations
+	// To init lightmap information
 	void initAnimatedLightIndex (const CScene &scene);
 
 	/// \name BlendShape properties

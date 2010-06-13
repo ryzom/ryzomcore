@@ -601,7 +601,7 @@ NLMISC_COMMAND(dump, "Command to create a file with the current state of the cli
 	return true;
 }
 
-NLMISC_COMMAND(verbose, "Enable/Disable some Debug Informations", "none or magic")
+NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic")
 {
 	// Check parameters.
 	if(args.size() != 1)
@@ -4901,7 +4901,7 @@ NLMISC_COMMAND(luaScript, "Execute a lua script", "direct_script_code")
 	}
 }
 
-NLMISC_COMMAND(luaInfo, "Dump some informations on LUA state", "detaillevel from 0 to 2")
+NLMISC_COMMAND(luaInfo, "Dump some information on LUA state", "detaillevel from 0 to 2")
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ClientCfg.AllowDebugLua)

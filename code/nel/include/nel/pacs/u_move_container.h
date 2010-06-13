@@ -208,10 +208,10 @@ public:
 
 	/// \name Triggers info.
 
-	/// Get number of trigger informations
+	/// Get number of trigger information
 	virtual uint				getNumTriggerInfo() const=0;
 
-	/// Get the n-th trigger informations
+	/// Get the n-th trigger information
 	virtual const UTriggerInfo &getTriggerInfo (uint id) const=0;
 
 	/// \name Create methods.

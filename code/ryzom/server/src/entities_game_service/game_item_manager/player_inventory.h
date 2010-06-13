@@ -225,7 +225,7 @@ public:
 	/// An item has changed (can be a removing)
 	void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
 
-	/// The inventory informations has changed (like total bulk or weight)
+	/// The inventory information has changed (like total bulk or weight)
 	void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
 
 	//@name item callback
@@ -356,7 +356,7 @@ public:
 	//@name Virtual to overload
 	/// An item has changed (can be a removing)
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) =0;
-	/// The inventory informations has changed (like total bulk or weight)
+	/// The inventory information has changed (like total bulk or weight)
 	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) =0;
 	/** Callback from item when an item stack size change
 	 *	This callback is used to update the weight and bulk

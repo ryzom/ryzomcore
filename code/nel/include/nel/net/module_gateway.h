@@ -420,7 +420,7 @@ namespace NLNET
 		std::set<TModuleId>		FirewallDisclosed;
 
 		//@{
-		/// @name Informations on the next module message to dispatch
+		/// @name Information on the next module message to dispatch
 
 		/// next message type, set to CModuleMessageHeaderCodec::mt_invalid when no module message are awaited
 		CModuleMessageHeaderCodec::TMessageType	NextMessageType;

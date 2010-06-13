@@ -413,7 +413,7 @@ string getVersionString (uint64 version)
 }
 
 
-string getSystemInformations()
+string getSystemInformation()
 {
 	string s;
 	s += "Memory: " + bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()) + "/" + bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()) + "\n";
@@ -452,7 +452,7 @@ string getSystemInformations()
 static string crashCallback()
 {
 	string s = getDebugInformation();
-	s += getSystemInformations();
+	s += getSystemInformation();
 
 	#ifdef NL_OS_WINDOWS
 		if (Driver)

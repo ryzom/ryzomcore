@@ -420,7 +420,7 @@ public:
 	void	setPointLightFactor(const CScene &scene);
 
 
-	// To init lightmap informations
+	// To init lightmap information
 	void	initAnimatedLightIndex(const CScene &scene);
 
 

@@ -24,7 +24,7 @@
 namespace NLMISC
 {
 
-/** Class that gives informations about a type. Useful to do some optimization in templates functions / class
+/** Class that gives information about a type. Useful to do some optimization in templates functions / class
   * This class is intended to be specialized and taylored for each type of interest
   *
   * \author Nicolas Vizerie

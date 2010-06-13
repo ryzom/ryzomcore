@@ -24,9 +24,9 @@ public:
 	SelectionTerritoire(CWnd* pParent = NULL);   // standard constructor
 
 //owner data
-	CString DefautPath; //repertoire qui contient toutes les informations
-	CString MainFileName; //nom du fichier txt principale (contient la liste des territoires)
-	CString CurrentTerritory; //nom du territoire en cours d'edition
+	CString DefautPath; // folder which contains all data
+	CString MainFileName; // txt main filename (contains territories list)
+	CString CurrentTerritory; // territory name currently being editing
 	int MainFileOk;
 
 // Dialog Data

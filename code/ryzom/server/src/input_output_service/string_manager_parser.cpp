@@ -997,7 +997,7 @@ bool CStringManager::parseCondition(const CPhrase &phrase, const ucstring &str, 
 			cond.Operator = lessEqual;
 		else
 		{
-			nlwarning("Unkown operator [%s] in condition [%s] part %u", opstr.c_str(), str.toString().c_str(), count);
+			nlwarning("Unknown operator [%s] in condition [%s] part %u", opstr.c_str(), str.toString().c_str(), count);
 			return false;
 		}
 

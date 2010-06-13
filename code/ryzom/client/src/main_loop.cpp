@@ -426,9 +426,6 @@ void displayDebugUIUnderMouse();
 // Display an Help.
 void displayHelp();
 
-// Draw a Bar to show when the user will be disconnected.
-void drawDisco();
-
 //update the sound manager (listener pos, user walk/run sound...)
 void updateSound();
 
@@ -2847,7 +2844,7 @@ bool mainLoop()
 				if(UserEntity->sendToServer(out))
 					NetMngr.push(out);
 			}
-			// Give informations to the server about the combat position (ability to strike).
+			// Give information to the server about the combat position (ability to strike).
 			{
 				CBitMemStream out;
 				if(UserEntity->msgForCombatPos(out))
@@ -3109,7 +3106,7 @@ void displayDebugFps()
 static NLMISC::CRefPtr<CInterfaceElement> HighlightedDebugUI;
 
 // displayDebug :
-// Display informations about ui elements that are under the mouse
+// Display information about ui elements that are under the mouse
 //---------------------------------------------------
 void displayDebugUIUnderMouse()
 {
@@ -3357,14 +3354,14 @@ void displayDebug()
 	// Now Displaying the selection.
 	TextContext->printfAt(0.0f, line, "--*** Watched entity ***--");
 	line -= lineStep;
-	// Display informations about the debug entity slot.
+	// Display information about the debug entity slot.
 	if(WatchedEntitySlot != CLFECOMMON::INVALID_SLOT)
 	{
 		// Get a pointer on the target.
 		CEntityCL *watchedEntity = EntitiesMngr.entity(WatchedEntitySlot);
 		if(watchedEntity)
 		{
-			// Display Debug Informations about the Selection.
+			// Display Debug Information about the Selection.
 			watchedEntity->displayDebug(0.0f, line, -lineStep);
 
 			// Distance of the target
@@ -3392,7 +3389,7 @@ void displayDebug()
 	line -= lineStep;
 	TextContext->printfAt(0.0f, line, "Mem Used: %d",nMem);*/
 
-	// 3D Filters informations:
+	// 3D Filters information:
 #ifdef _PROFILE_ON_
 	line-= lineStep;
 	TextContext->printfAt(0.0f, line, "3D Filters:");

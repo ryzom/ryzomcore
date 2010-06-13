@@ -803,12 +803,12 @@ NLMISC_CATEGORISED_COMMAND(nel,entityNameValid,"Tell if an entity name is valid 
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(nel,playerInfo,"Get informations about a player or all players in CEntityIdTranslator","[<entityname>|<eid>|<username>|<uid>]")
+NLMISC_CATEGORISED_COMMAND(nel,playerInfo,"Get information about a player or all players in CEntityIdTranslator","[<entityname>|<eid>|<username>|<uid>]")
 {
 	if (args.size () == 0)
 	{
 		const map<CEntityId, CEntityIdTranslator::CEntity>	&res = CEntityIdTranslator::getInstance()->getRegisteredEntities ();
-		log.displayNL("%d result(s) for 'all players informations'", res.size());
+		log.displayNL("%d result(s) for 'all players information'", res.size());
 		for (map<CEntityId, CEntityIdTranslator::CEntity>::const_iterator it = res.begin(); it != res.end(); it++)
 		{
 			const CEntityIdTranslator::CEntity &entity = it->second;

@@ -46,7 +46,7 @@ public:
 	/// the NEL log used for in the mission log
 	NLMISC::CLog			*Log;
 private:
-	/// the file displayer used to log the mission informations
+	/// the file displayer used to log the mission information
 	NLMISC::CFileDisplayer	_Fd;
 	/// log file name
 	std::string				_LogFile;
@@ -57,7 +57,7 @@ extern CMissionLog	MissionLog;
 
 /// macro used to log missions script error 
 #define MISLOG MissionLog.display
-/// macro used to log missions informations in verbose mode (at run time)
+/// macro used to log missions information in verbose mode (at run time)
 #define MISDBG if ( !VerboseMissions ){} else MISLOG
 
 // Syntax error logged to egs_mission.log

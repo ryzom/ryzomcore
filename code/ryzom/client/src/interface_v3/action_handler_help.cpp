@@ -2811,7 +2811,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 		// Display the ToolType required.
 		strFindReplace(brickText, "%tool", CI18N::get("tool"+TOOL_TYPE::toString(pBR->FaberPlan.ToolType)));
 
-		// --- Display MP itempart informations
+		// --- Display MP itempart information
 		if(pBR->FaberPlan.ItemPartMps.empty())
 		{
 			strFindReplace(brickText, "%mpinfo", CI18N::get("uihelpMpNone"));
@@ -2832,7 +2832,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 			strFindReplace(brickText, "%mpinfo", mpInfo);
 		}
 
-		// --- Display MP formula informations
+		// --- Display MP formula information
 		if(pBR->FaberPlan.FormulaMps.empty())
 		{
 			strFindReplace(brickText, "%mpformula", CI18N::get("uihelpMpNone"));
@@ -3664,7 +3664,7 @@ void updateStatReport ()
 
 // ***************************************************************************
 
-extern string getSystemInformations();
+extern string getSystemInformation();
 class CAHSendStatReport : public IActionHandler
 {
 public:
@@ -3674,7 +3674,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		pIM->displaySystemInfo(CI18N::get ("uiSendingStatReport"));
 		string s = getDebugInformation();
-		s += getSystemInformations();
+		s += getSystemInformation();
 
 		string progname;
 		char name[1024] = "";

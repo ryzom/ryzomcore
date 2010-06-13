@@ -947,7 +947,7 @@ void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 
 		CGroupContainer *pGC = createFreeTeller(sTitle, "");
 
-		// With version 1 all tells are active because windows informations have "title based" ids and no "sID based".
+		// With version 1 all tells are active because windows information have "title based" ids and no "sID based".
 		if ((ver == 1) && (pGC != NULL))
 			pGC->setActive(false);
 	}

@@ -1806,7 +1806,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 					// Set the playlist
 					_ListInstance[instance]->Saved.PlayList = readed[i].PlayList;
 
-					// Set the slot informations
+					// Set the slot information
 					for (uint slot=0; slot<NL3D::CChannelMixer::NumAnimationSlot; slot++)
 						_ListInstance[instance]->Saved.SlotInfo[slot] = readed[i].SlotInfo[slot];
 				}
@@ -1840,11 +1840,11 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 		}
 		else
 		{
-			// Build informations
+			// Build information
 			std::vector<CInstanceSave> readed (_ListInstance.size());
 			for (uint instance=0; instance<_ListInstance.size(); instance++)
 			{
-				// Copy the save insformation
+				// Copy the save information
 				readed[instance] = _ListInstance[instance]->Saved;
 			}
 
@@ -3485,7 +3485,7 @@ void CInstanceSave::serial (NLMISC::IStream &f)
 	// Slot info for this object
 	nlassert (NL3D::CChannelMixer::NumAnimationSlot == 8);
 	for (uint slot=0; slot<8; slot++)
-		// Serial the slot informations
+		// Serial the slot information
 		f.serial (SlotInfo[slot]);
 
 	// Input file

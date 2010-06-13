@@ -2483,7 +2483,7 @@ void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 		return;
 	}
 	getEditionModule()->updateCharPioneerRight(charId);
-	// TODO send this informations only if client
+	// TODO send this information only if client
 	askMissionItemsDescription(*clientProxyPtr);
 	askActPositionDescriptions(*clientProxyPtr);
 	askUserTriggerDescriptions(*clientProxyPtr);

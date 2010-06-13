@@ -209,7 +209,7 @@ void CTotemBase::setBotObject( CCreature* botObject )
 
 	// if the totem is totem is currently building, it means
 	// that this method was called because of the sheetId change
-	// we must then restore some informations
+	// we must then restore some information
 	if ( _IsBuildingFinished == false )
 	{
 		_BotObject->getScores()._PhysicalScores[SCORES::hit_points].Max = (sint32)_TotemMaxHP;

@@ -43,7 +43,7 @@ class CReportAIInstanceDespawnMsgImp : public CReportAIInstanceDespawnMsg
 };
 
 
-/* This class store instance informations as well as
+/* This class store instance information as well as
  * AIS list with available collision information.
  * The AIS collision information is used to select the
  * AIS for spawning a new dynamic instance.

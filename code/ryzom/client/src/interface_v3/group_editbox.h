@@ -103,7 +103,7 @@ public:
 	// Get the view text
 	const CViewText	*getViewText () const {return _ViewText;}
 
-	// Get the historic informations
+	// Get the historic information
 	sint32	getMaxHistoric() const {return _MaxHistoric;}
 	sint32	getCurrentHistoricIndex () const {return _CurrentHistoricIndex;}
 	void	setCurrentHistoricIndex (sint32 index) {_CurrentHistoricIndex=index;}

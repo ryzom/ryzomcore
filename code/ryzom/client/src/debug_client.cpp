@@ -99,7 +99,7 @@ bool VerboseVP				= false;
 CLFECOMMON::TCLEntityId WatchedEntitySlot = CLFECOMMON::INVALID_SLOT;
 
 
-// To Display some Debug informations
+// To Display some Debug information
 uint32 Verbose = 0;
 
 // Time in main loop
@@ -362,7 +362,7 @@ void displayStreamingDebug ()
 
 		// FPS and Ms per frame
 		line = 0.99f;
-		TextContext->printfAt(0.01f, line, "STREAMING INFORMATIONS");
+		TextContext->printfAt(0.01f, line, "STREAMING INFORMATION");
 		if(deltaTimeSmooth != 0.f)
 			TextContext->printfAt(0.8f, line,"%.1f fps", 1.f/deltaTimeSmooth);
 		else
@@ -519,7 +519,7 @@ string getDebugInformation()
 	}
 	else
 	{
-		str += "No user entity informations\n";
+		str += "No user entity information\n";
 	}
 
 	str += toString("ViewPosition: %.2f %.2f %.2f\n", View.viewPos().x, View.viewPos().y, View.viewPos().z);
@@ -634,7 +634,7 @@ void displayNetDebug ()
 	TextContext->setHotSpot(UTextContext::BottomLeft);
 	float	xUser= 0.3f;
 	float	xWatched= 0.5f;
-	// Display informations about the debug entity slot.
+	// Display information about the debug entity slot.
 	if(WatchedEntitySlot != CLFECOMMON::INVALID_SLOT)
 	{
 		line = 0.f;
@@ -645,7 +645,7 @@ void displayNetDebug ()
 		if(watchedEntity)
 			watchedEntity->displayDebugPropertyStages(xWatched, line, lineStep);
 	}
-	// Display informations about the user
+	// Display information about the user
 	if(UserEntity)
 	{
 		line = 0.f;

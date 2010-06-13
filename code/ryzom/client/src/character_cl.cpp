@@ -4675,7 +4675,7 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 		performCurrentAttackEnd(bc, selfSpell && isOffensif, targetHitDates, combatAnimState);
 	}
 
-	// INFO : display some debug informations.
+	// INFO : display some debug information.
 	if((VerboseAnimUser && _Slot==0) || (VerboseAnimSelection && _Slot == UserEntity->selection()))
 		nlinfo("CH:applyBeh:%d: '%d(%s)'", _Slot, behaviour.Behaviour, behaviourToString((EBehaviour)behaviour.Behaviour).c_str());
 
@@ -5302,7 +5302,7 @@ bool CCharacterCL::applyCurrentStage()
 	else
 		nlwarning("CCharacterCL::applyCurrentStage: there is no stage.");
 
-	// Upate informations from remaining stages.
+	// Update information from remaining stages.
 	updateStages();
 
 	return bRet;
@@ -5345,7 +5345,7 @@ void CCharacterCL::applyAllStagesToFirstPos()
 	else
 		nlwarning("CH:applyAllStagesToFirstPos:%d: There is no stage with a position.", _Slot);
 
-	// Upate informations from remaining stages.
+	// Upate information from remaining stages.
 	updateStages();
 }// applyAllStagesToFirstPos //
 
@@ -5451,7 +5451,7 @@ ADD_METHOD(void CCharacterCL::playToEndAnim(const double &startTimeOffset, doubl
 
 //-----------------------------------------------
 // updateStages :
-// Call this method to give a time for each stage, compute distance to destination and some more informations.
+// Call this method to give a time for each stage, compute distance to destination and some more information.
 // \todo GUIGUI : clean up
 //-----------------------------------------------
 void CCharacterCL::updateStages()
@@ -5513,7 +5513,7 @@ void CCharacterCL::updateStages()
 	}
 
 
-	// ***** Compute Stages to give them a time and get some informations from those stages.
+	// ***** Compute Stages to give them a time and get some information from those stages.
 	// yoyo: use any stage with no LCT, until it is to be played AFTER a position
 	bool	stageForceLCTFound= false;
 	CStageSet::TStageSet::iterator itTmp;
@@ -6836,7 +6836,7 @@ void CCharacterCL::updateAllPostRender()
 //-----------------------------------------------
 void CCharacterCL::processFrame(const TTime &currentTimeInMs)
 {
-	// Prepare stages and update informations from them.
+	// Prepare stages and update information from them.
 	updateStages();
 
 	// Compute the time remaining until frame completely processed.
@@ -8274,7 +8274,7 @@ void CCharacterCL::setAlive()	// virtual
 
 //---------------------------------------------------
 // displayDebug :
-// Display Debug Informations.
+// Display Debug Information.
 //---------------------------------------------------
 ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	// virtual
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();

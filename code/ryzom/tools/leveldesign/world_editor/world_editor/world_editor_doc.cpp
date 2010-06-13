@@ -323,7 +323,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 				else
 				{
 					// Error
-					theApp.syntaxError (filename, rootNode, "Unkown file header : %s", rootNode->name);
+					theApp.syntaxError (filename, rootNode, "Unknown file header : %s", rootNode->name);
 				}
 			}
 			

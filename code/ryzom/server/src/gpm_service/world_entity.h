@@ -322,7 +322,7 @@ typedef	CObjectList<CWorldEntity, CWorldEntityPtr>	TEntityList;
 
 
 /**
- * Player Infos : contains all informations specific to players (like vision and original front end)
+ * Player Infos : contains all information specific to players (like vision and original front end)
  * \author David Fleury
  * \author Nevrax France
  * \date 2002

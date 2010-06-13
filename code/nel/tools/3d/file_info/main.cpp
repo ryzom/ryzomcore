@@ -253,7 +253,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 				CZoneInfo zoneInfo;
 				zone.retrieve (zoneInfo);
 
-				// Patch informations
+				// Patch information
 				uint k;
 				for(k = 0; k < zoneInfo.Patchs.size(); ++k)
 				{
@@ -644,9 +644,9 @@ int		main(int argc, const char *argv[])
 		puts("    Results are displayed too in \"c:/temp/file_info.log\" ");
 		puts("    [opt] can get: ");
 		puts("    -ms display only a Warning if file is a .shape and is a Mesh, skinned, but without MRM");
-		puts("    -vi verbose instance informations");
-		puts("    -vl verbose light informations");
-		puts("    -vp verbose patche informations");
+		puts("    -vi verbose instance information");
+		puts("    -vl verbose light information");
+		puts("    -vp verbose patche information");
 		puts("    -veil verbose instances bound to light extra information");
 		puts("Press any key");
 		_getch();

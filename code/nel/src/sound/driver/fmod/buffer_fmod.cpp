@@ -96,7 +96,7 @@ bool CBufferFMod::fill(const uint8 *src, uint size)
 	return _FModSample != NULL;
 }
 
-/// Return the sample format informations.
+/// Return the sample format information.
 void CBufferFMod::getFormat(TBufferFormat &format, uint8 &channels, uint8 &bitsPerSample, uint &frequency) const
 {
 	sampleFormatToBufferFormat(_Format, format, channels, bitsPerSample);

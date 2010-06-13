@@ -2274,7 +2274,7 @@ void CDriverGL::endWaterMultiPass()
 {
 	H_AUTO_OGL(CDriverGL_endWaterMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
-	// NB : as fragment shaders / programms bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
+	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
 	if (_Extensions.NVTextureShader) return;
 	if (ARBWaterShader[0])
 	{

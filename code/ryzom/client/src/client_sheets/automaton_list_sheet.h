@@ -185,7 +185,7 @@ public:
 	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
 
 	/**
-	 * Return a pointer on the informations about the state corresponding to the key.
+	 * Return a pointer on the information about the state corresponding to the key.
 	 * \param key : state key.
 	 * \return CAutomatonStateSheet * : pointer on the state or 0.
 	 */

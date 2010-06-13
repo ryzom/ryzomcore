@@ -211,9 +211,8 @@ public:
 	void deleteBatchFile();
 	void reboot();
 
-	// TODO : Revoir ca pour la seconde partie ...
-	// On a peut etre pas les informations de taille des patches ... voir avec daniel
-	// pour l'instant c'est un fake qui retourne 1 !
+	// TODO : modify it for the second part ...
+	// Maybe we can't get patchs size ... currently, it only returns 1!
 
 	int getTotalFilesToGet();
 	int getCurrentFilesToGet();

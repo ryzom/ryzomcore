@@ -192,7 +192,7 @@ bool CBufferDSound::fill(const uint8 *src, uint size)
 	return unlock(size);
 }
 
-/// Return the sample format informations.
+/// Return the sample format information.
 void CBufferDSound::getFormat(TBufferFormat &format, uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const
 {
 	sampleFormatToBufferFormat(_Format, format, channels, bitsPerSample);

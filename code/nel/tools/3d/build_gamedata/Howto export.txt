@@ -563,7 +563,7 @@ Each automatic data process must have the following batch command files:
 
 		* All sucessful export should be log in the log file prefixed bt the word "OK ".
 
-		* All others warning and error informations are welcome in the log file.
+		* All others warning and error information are welcome in the log file.
 
 		* The export process must use "build_gamedata/the config.cfg" file to get the database or 3dsmax directories.
 
@@ -587,7 +587,7 @@ Each automatic data process must have the following batch command files:
 
 		* All sucessful build should be log in the log file prefixed bt the word "OK "
 
-		* All others warning and error informations are welcome in the log file.
+		* All others warning and error information are welcome in the log file.
 
 
 	- build_gamedata/processes/my_process/4_install.bat: This command will install exported / builded files in the client directory.
@@ -610,6 +610,6 @@ Each automatic data process must have the following batch command files:
 
 		* All sucessful install should be log in the log file prefixed bt the word "OK "
 
-		* All others warning and error informations are welcome in the log file.
+		* All others warning and error information are welcome in the log file.
 
 -----------------------------------------------------------------------------------------------------

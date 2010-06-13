@@ -3601,7 +3601,7 @@ namespace RSMGR
 		// get session info (anim)
 		virtual void on_getSessionInfo(NLNET::TSockId from, uint32 charId, TSessionId sessionId) =0;
 
-		// Update the informations of a planned or running session
+		// Update the information of a planned or running session
 		// Return 'invokeResult' : 0 : ok, session updated
 		//                         1 : unknown character
 		//                         2 : unknown session
@@ -4012,7 +4012,7 @@ namespace RSMGR
 
 			_CallbackClient->send(message);
 		}
-		// Update the informations of a planned or running session
+		// Update the information of a planned or running session
 		// Return 'invokeResult' : 0 : ok, session updated
 		//                         1 : unknown character
 		//                         2 : unknown session

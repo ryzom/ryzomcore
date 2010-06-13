@@ -501,7 +501,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 			gradientTriangle.computeGradient (triangle.V[0], triangle.V[1], triangle.V[2], vGradient);
 		}
 
-		// Texture informations
+		// Texture information
 		uint width=0;
 		uint height=0;
 		const CObjectVector<uint8> *pixels = 0;
@@ -1142,7 +1142,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		vector<vector<CLumelDescriptor>	> lumels;
 		lumels.resize (patchCount);
 
-		// Build zone informations
+		// Build zone information
 		buildZoneInformation (landscape,
 							  listZone,
 							  description);
@@ -1717,7 +1717,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 
 			// ** Get the bitmap
 
-			// Texture informations, not NULL only if texture is used for alpha test
+			// Texture information, not NULL only if texture is used for alpha test
 			CBitmap *texture;
 			bool clampU;
 			bool clampV;
@@ -1801,7 +1801,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 
 bool CZoneLighter::getTexture (const CMaterial &material, CBitmap *&result, bool &clampU, bool &clampV, uint8 &alphaTestThreshold, bool &doubleSided)
 {
-	// Texture informations, not NULL only if texture is used for alpha test
+	// Texture information, not NULL only if texture is used for alpha test
 	result = NULL;
 	clampU = false;
 	clampV = false;
@@ -1885,7 +1885,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &
 
 		// ** Get the bitmap
 
-		// Texture informations, not NULL only if texture is used for alpha test
+		// Texture information, not NULL only if texture is used for alpha test
 		CBitmap *texture;
 		bool clampU;
 		bool clampV;
@@ -2361,7 +2361,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 		}
 	}
 
-	// *** Now, finalise patch informations for shadow source positions
+	// *** Now, finalise patch information for shadow source positions
 
 	// For each patches
 	uint patchCount=landscape.getZone(_ZoneToLight)->getNumPatchs();
@@ -2478,7 +2478,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 		}
 	}
 
-	// *** Now, finalise patch informations
+	// *** Now, finalise patch information
 
 	// For each patches
 	patchCount=landscape.getZone(_ZoneToLight)->getNumPatchs();

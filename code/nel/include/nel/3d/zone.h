@@ -218,7 +218,7 @@ public:
 	  * Transform an array of patchInfo by a symmetry on OY axis followed by a 90deg CCW rotation (0, 1, 2, 3).
 	  *
 	  * The method doesn't transform vertices.
-	  * If symmetry, the method invert 0-3 and 1-2 vertices indexes to get CCW oriented patches. It will fix bind informations.
+	  * If symmetry, the method invert 0-3 and 1-2 vertices indexes to get CCW oriented patches. It will fix bind information.
 	  * The method fixes tile and color vertex arrays.
 	  * The method fixes tile rotation, 256 cases and tile transistions.
 	  *

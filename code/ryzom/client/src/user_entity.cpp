@@ -3578,7 +3578,7 @@ CCDBNodeBranch *CUserEntity::getBeastDBEntry( CLFECOMMON::TClientDataSetIndex ui
 
 //---------------------------------------------------
 // displayDebug :
-// Display Debug Informations.
+// Display Debug Information.
 //---------------------------------------------------
 void CUserEntity::displayDebug(float x, float &y, float lineStep)	// virtual
 {

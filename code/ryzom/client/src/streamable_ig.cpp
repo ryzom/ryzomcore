@@ -356,7 +356,7 @@ void CStreamableIG::addLoadedIGToMap()
 	if (!_IGMap) return;
 	for(uint k = 0; k < _IGs.size(); ++k)
 	{
-		if (_IGs[k].IG && _IGs[k].IG != (NL3D::UInstanceGroup *)-1) // is this a succesfully loaded ig ?
+		if (_IGs[k].IG && _IGs[k].IG != (NL3D::UInstanceGroup *)-1) // is this a successfully loaded ig ?
 		{
 			// insert the new ig if it hasn't before..
 			if( _IGMap->insert(std::make_pair(NLMISC::strlwr(_IGs[k].Name), _IGs[k].IG)).second )
@@ -373,7 +373,7 @@ void CStreamableIG::removeLoadedIGFromMap()
 	if (!_IGMap) return;
 	for(uint k = 0; k < _IGs.size(); ++k)
 	{
-		if (_IGs[k].IG && _IGs[k].IG != (NL3D::UInstanceGroup *)-1) // is this a succesfully loaded ig ?
+		if (_IGs[k].IG && _IGs[k].IG != (NL3D::UInstanceGroup *)-1) // is this a successfully loaded ig ?
 		{
 			TString2IG::iterator it = _IGMap->find(_IGs[k].Name);
 			if (it != _IGMap->end())

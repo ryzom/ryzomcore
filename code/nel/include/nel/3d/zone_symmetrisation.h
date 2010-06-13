@@ -31,7 +31,7 @@ class CTileBank;
 /**
  * Environnement used to symmetrise zones
  *
- * This class build symmetry specific informations needed to know how
+ * This class build symmetry specific information needed to know how
  * transform tiles when a zone is symmetrise.
  *
  * There is two states for a tile : Regular or Goofy.
@@ -88,9 +88,9 @@ public:
 	bool getOrientedTileCorner (uint patch, uint tile);
 
 	/**
-	  * Build symmetry informations
+	  * Build symmetry information
 	  *
-	  * \param zone is the zone to build symmetry informations
+	  * \param zone is the zone to build symmetry information
 	  * \param snapCell is the unit size of the zones
 	  * \param weldThreshold is the threshold used to check vertex over snaped positions
 	  * \param errorDesc is a structure used to return errors

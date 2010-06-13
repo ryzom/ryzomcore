@@ -1188,7 +1188,7 @@ static void cbAESInfo(CMessage &msgin, const std::string &serviceName, TServiceI
 	msgin.serialCont(AllGraphUpdates);
 
 	// set our own alarms for this service
-	setInformations(AllAdminAlarms, AllGraphUpdates);
+	setInformation(AllAdminAlarms, AllGraphUpdates);
 
 	// now send alarms to all services
 	for (uint j = 0; j < Services.size(); j++)

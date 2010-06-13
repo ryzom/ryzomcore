@@ -800,7 +800,7 @@ static bool	setupEXTVertexShader(const char	*glext)
 	glGetIntegerv(GL_MAX_VERTEX_SHADER_LOCALS_EXT, &numVSLocals);
 	if (numVSLocals < 4 * (12 + 4) + 1 + 3)
 	{
-		nlwarning("EXT_vertex_shader extension has not much register. Some vertex programm may fail loading");
+		nlwarning("EXT_vertex_shader extension has not much register. Some vertex program may fail loading");
 		return false;
 	}
 	//

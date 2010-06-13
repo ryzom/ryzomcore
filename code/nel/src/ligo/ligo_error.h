@@ -84,7 +84,7 @@ public:
 		/// Boundary vertex used by multiple edge
 		VertexAlreadyUsed,
 
-		/// Unkown error
+		/// Unknown error
 		UnknownError,
 
 		/// Error count

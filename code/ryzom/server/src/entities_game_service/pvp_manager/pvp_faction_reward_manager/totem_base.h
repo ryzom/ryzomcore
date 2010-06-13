@@ -150,7 +150,7 @@ private :
 	/// Tick when last time attack message for totem has sended
 	NLMISC::TGameCycle	_LastTickAttackMessageSended;
 
-	// these informations must be kept or they will be lost
+	// these information must be kept or they will be lost
 	// while changing the bot object sheetId
 	/// HP Gained during building
 	float	_BuildHpGain;

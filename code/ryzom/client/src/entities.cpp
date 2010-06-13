@@ -1462,7 +1462,7 @@ void CEntityManager::updatePostRender()
 //-----------------------------------------------
 void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const uint &slot, const uint &prop, const NLMISC::TGameCycle &predictedInterval)
 {
-	// INFO : log some debug informations about visual properties.
+	// INFO : log some debug information about visual properties.
 	if(verboseVP(NULL))
 		nlinfo("EM:updateVP: received prop '%d' for the slot '%d'.", prop, slot);
 
@@ -1476,7 +1476,7 @@ void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, c
 	// Entity still not allocated -> backup values received for the entity.
 	if(_Entities[slot] == 0)
 	{
-		// INFO : log some debug informations about visual properties.
+		// INFO : log some debug information about visual properties.
 		if(verboseVP(NULL))
 			nlinfo("EM:updateVP: backup the property as long as the entity is not allocated.", prop, slot);
 

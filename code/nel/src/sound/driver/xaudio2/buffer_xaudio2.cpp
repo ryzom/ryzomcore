@@ -129,7 +129,7 @@ void CBufferXAudio2::setFormat(TBufferFormat format, uint8 channels, uint8 bitsP
 	_BitsPerSample = bitsPerSample;
 }
 
-/// Return the sample format informations.
+/// Return the sample format information.
 void CBufferXAudio2::getFormat(TBufferFormat &format, uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const
 {
 	format = _Format;

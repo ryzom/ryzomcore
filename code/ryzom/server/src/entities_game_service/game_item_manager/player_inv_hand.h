@@ -45,7 +45,7 @@ class CHandlingInvView : public CCharacterInvView
 {
 public:
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
-	/// The inventory informations has changed (like total bulk or weight)
+	/// The inventory information has changed (like total bulk or weight)
 	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
 
 protected:

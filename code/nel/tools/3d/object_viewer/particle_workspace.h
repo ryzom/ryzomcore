@@ -57,7 +57,7 @@ public:
 		const std::string		   &getRelativePath() const { return _RelativePath; }
 		std::string				   getFullPath() const;
 		std::string				   getFilename() const { return NLMISC::CFile::getFilename(_RelativePath); }
-		// Serial node informations into workspace stream. This does not save the particle system shape, only a reference to its file
+		// Serial node information into workspace stream. This does not save the particle system shape, only a reference to its file
 		void					   serial(NLMISC::IStream &f);
 		// Save the particle system target file
 		void					   savePS() throw(NLMISC::EStream);

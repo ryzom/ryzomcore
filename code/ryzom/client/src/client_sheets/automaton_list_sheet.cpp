@@ -500,7 +500,7 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 					string modeName = NLMISC::strlwr(MBEHAV::modeToString((MBEHAV::EMode)mode));
 					// Compute the automaton name
 					string filename = NLMISC::strlwr(automatonType) + "_" + modeName + ".automaton";
-					// Push some informations
+					// Push some information
 					nlinfo("loading automaton '%s'.", filename.c_str());
 					// Load the automaton's form.
 					form = formLoader->loadForm(filename.c_str());

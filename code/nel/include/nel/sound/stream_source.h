@@ -104,7 +104,7 @@ public:
 	//@{
 	/// Set the sample format. (channels = 1, 2, ...; bitsPerSample = 8, 16; frequency = samples per second, 44100, ...)
 	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency);	
-	/// Return the sample format informations.
+	/// Return the sample format information.
 	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const;	
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
 	virtual uint8					*lock(uint capacity);	

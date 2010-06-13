@@ -117,13 +117,13 @@ public:
 		return _Retriever;
 	}
 
-	/// Get number of trigger informations
+	/// Get number of trigger information
 	uint						getNumTriggerInfo() const
 	{
 		return (uint)_Triggers.size();
 	}
 
-	/// Get the n-th trigger informations
+	/// Get the n-th trigger information
 	const UTriggerInfo			&getTriggerInfo (uint id) const
 	{
 		// check

@@ -1274,7 +1274,7 @@ uint32 CCharacter::tickUpdate()
 
 			{
 				H_AUTO(CharacterUpdateTargetCoordinatesCompass);
-				// update compass coordinates informations
+				// update compass coordinates information
 				compassDatabaseUpdate();
 			}
 			if( !checkCharacterStillValide("<CCharacter::tickUpdate> Character corrupted : after compassDatabaseUpdate() !!!") )
@@ -2452,7 +2452,7 @@ void CCharacter::processStaticAction()
 
 
 //---------------------------------------------------
-// update compass coordinates informations
+// update compass coordinates information
 //---------------------------------------------------
 void CCharacter::compassDatabaseUpdate()
 {
@@ -8746,7 +8746,7 @@ CEvalNumExpr::TReturnState CCharacter::evalValue (const char *value, double &res
 			return CEvalNumExpr::NoError;
 		}
 	}
-	return CEvalNumExpr::UnkownValue;
+	return CEvalNumExpr::UnknownValue;
 }
 
 //-----------------------------------------------------------------------------
@@ -10549,7 +10549,7 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
-		//if the client had the good trade informations
+		//if the client had the good trade information
 		if (isExchanging() && c->isExchanging() && exchangeId == c->_ExchangeId)
 		{
 			if (!tempInventoryEmpty())
