@@ -1559,10 +1559,10 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	if (!_FullScreen)
 	{
 		size_hints.flags = PSize | PMinSize | PMaxSize;
-		size_hints.min_width = mode.Width;
-		size_hints.min_height = mode.Height;
-		size_hints.max_width = mode.Width;
-		size_hints.max_height = mode.Height;
+		size_hints.min_width = width;
+		size_hints.min_height = height;
+		size_hints.max_width = width;
+		size_hints.max_height = height;
 	}
 #endif
 
