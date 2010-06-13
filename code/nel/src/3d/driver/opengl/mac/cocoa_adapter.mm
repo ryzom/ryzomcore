@@ -388,43 +388,23 @@ void showCursor(bool b)
 
 void setMousePos(float x, float y)
 {
-	/*
-		TODO FIXME for windows placed on non primary monitor
-	*/
+	// CG wants absolute coordinates related to first screen's top left
 
-	// CG wants absolute coordinates related to screen top left
-	CGFloat fromScreenLeft = 0.0;
-	CGFloat fromScreenTop  = 0.0;
+	// get the first screen's (conaints menubar) rect (this is not mainScreen)
+	NSRect firstScreenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+
+	// get the rect (position, size) of the window
+	NSRect windowRect = [g_window frame];
 
 	// get the gl view's rect for height and width
 	NSRect viewRect = [g_glview frame];
 
-	// if the view is not fullscreen, window top left is needed as offset
-	if(![g_glview isInFullScreenMode])
-	{
-		// get the rect (position, size) of the screen
-		NSRect screenRect = [[g_window screen] frame];
-
-		// get the rect (position, size) of the window
-		NSRect windowRect = [g_window frame];
-
-		// window's x is ok
-		fromScreenLeft = windowRect.origin.x;
-
-		// TODO this code assumes, that the view fills the window
-
-		// map window bottom to view top
-		fromScreenTop = screenRect.size.height -
-			viewRect.size.height - windowRect.origin.y;
-	}
-
-	// position inside the view
-	fromScreenLeft += (viewRect.size.width * x);
-	fromScreenTop  += (viewRect.size.height * (1 - y));
-
-	// actually set the mouse position
+	// set the cursor position
 	CGDisplayErr error = CGDisplayMoveCursorToPoint(
-		kCGDirectMainDisplay, CGPointMake(fromScreenLeft, fromScreenTop));
+		kCGDirectMainDisplay, CGPointMake(
+			windowRect.origin.x + (viewRect.size.width * x), 
+			firstScreenRect.size.height - windowRect.origin.y - 
+				viewRect.size.height + ((1.0 - y) * viewRect.size.height)));
 
 	if(error != kCGErrorSuccess)
 		nlerror("cannot set mouse position");
