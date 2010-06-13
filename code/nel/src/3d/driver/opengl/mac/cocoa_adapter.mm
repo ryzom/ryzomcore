@@ -427,6 +427,10 @@ void setMousePos(float x, float y)
 
 	// get the rect (position, size) of the window
 	NSRect windowRect = [g_window frame];
+	if([g_glview isInFullScreenMode])
+		windowRect = [[g_window screen] frame];
+	else
+		windowRect = [g_window frame];
 
 	// get the gl view's rect for height and width
 	NSRect viewRect = [g_glview frame];
