@@ -287,7 +287,6 @@ public:
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
-	virtual void			setWindowSize(uint32 width, uint32 height);
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
@@ -306,11 +305,7 @@ public:
 
 	virtual nlWindow		getDisplay()
 	{
-#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-		return NULL;
-#else
 		return _win;
-#endif
 	}
 
 	virtual uint32			getAvailableVertexAGPMemory ();
@@ -848,6 +843,9 @@ private:
 
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
+
+	void					setWindowSize(uint32 width, uint32 height);
+
 	// Methods to manage screen resolutions
 	bool					restoreScreenMode();
 	bool					saveScreenMode();
