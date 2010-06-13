@@ -117,7 +117,7 @@
 StopCompilingDueBUG
 #endif
 
-int LzmaDecodeProperties(CLzmaProperties *propsRes, const unsigned char *propsData, size_t size)
+int LzmaDecodeProperties(CLzmaProperties *propsRes, const unsigned char *propsData, SizeT size)
 {
   unsigned char prop0;
   if (size < LZMA_PROPERTIES_SIZE)
