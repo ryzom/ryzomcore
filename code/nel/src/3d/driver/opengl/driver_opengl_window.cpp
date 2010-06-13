@@ -862,7 +862,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	// TODO
+	return NL3D::MAC::setMode(mode);
 
 #elif defined(NL_OS_UNIX)
 
@@ -1237,9 +1237,8 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.AntiAlias = _AntiAliasing;
 	
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Temporary Mac Implementation"
-	nlwarning("OpenGL Driver: Temporary Mac Implementation");
-	mode.Depth = 24;
+
+	NL3D::MAC::getCurrentScreenMode(mode);
 
 #elif defined(NL_OS_MAC)
 	/*
@@ -1309,10 +1308,10 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 }
 
 // ***************************************************************************
-void CDriverGL::setWindowPos(uint32 x, uint32 y)
+void CDriverGL::setWindowPos(sint32 x, sint32 y)
 {
-	_WindowX = (sint32)x;
-	_WindowY = (sint32)y;
+	_WindowX = x;
+	_WindowY = y;
 
 #ifdef NL_OS_WINDOWS
 
@@ -1557,7 +1556,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 #endif // NL_OS_UNIX
 }
 
-void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
+void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 {
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
@@ -1575,8 +1574,8 @@ void CDriverGL::getWindowPos(uint32 &x, uint32 &y)
 	{
 		if (_win)
 		{
-			x = (uint32)_WindowX;
-			y = (uint32)_WindowY;
+			x = _WindowX;
+			y = _WindowY;
 		}
 	}
 

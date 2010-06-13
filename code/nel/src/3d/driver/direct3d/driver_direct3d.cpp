@@ -1817,7 +1817,7 @@ void CDriverD3D::getWindowSize (uint32 &width, uint32 &height)
 
 // ***************************************************************************
 
-void CDriverD3D::getWindowPos (uint32 &x, uint32 &y)
+void CDriverD3D::getWindowPos (sint32 &x, sint32 &y)
 {
 	H_AUTO_D3D(CDriverD3D_getWindowPos);
 	x = _WindowX;
@@ -2187,10 +2187,10 @@ void CDriverD3D::setWindowTitle(const ucstring &title)
 }
 
 // ***************************************************************************
-void CDriverD3D::setWindowPos(uint32 x, uint32 y)
+void CDriverD3D::setWindowPos(sint32 x, sint32 y)
 {
-	_WindowX = (sint32)x;
-	_WindowY = (sint32)y;
+	_WindowX = x;
+	_WindowY = y;
 	SetWindowPos(_HWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 }
 

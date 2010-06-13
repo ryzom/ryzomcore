@@ -908,7 +908,7 @@ void prelogInit()
 		// Set the title
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
 
-		uint32 posX = 0, posY = 0;
+		sint32 posX = 0, posY = 0;
 
 		if (ClientCfg.Windowed)
 		{

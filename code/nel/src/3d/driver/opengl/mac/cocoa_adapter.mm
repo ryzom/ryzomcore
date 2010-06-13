@@ -237,11 +237,36 @@ bool setMode(const GfxMode& mode)
 	return true;
 }
 
+void getCurrentScreenMode(GfxMode& mode)
+{
+	// the sceen with the menu bar
+	NSScreen* screen = [[NSScreen screens] objectAtIndex:0];
+
+	mode.OffScreen = false;
+	mode.Frequency = 0;
+	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
+
+	// in fullscreen mode
+	if([g_glview isInFullScreenMode])
+	{
+		// return the size of the back buffer (like having switched monitor mode)
+		mode.Windowed  = false;
+		mode.Width     = (uint16)g_bufferSize[0];
+		mode.Height    = (uint16)g_bufferSize[1];
+	}
+	
+	// in windowes mode
+	else
+	{
+		// return the size of the screen with menu bar
+		mode.Windowed  = true;
+		mode.Width     = (uint16)[screen frame].size.width;
+		mode.Height    = (uint16)[screen frame].size.height;
+	}
+}
+
 void getWindowSize(uint32 &width, uint32 &height)
 {
-	if(!g_glctx)
-		return;
-
 	// A cocoa fullscreen view stays at the native resolution of the display.
 	// When changing the rendering resolution, the size of the back buffer gets
 	// changed, but the view still stays at full resolution. So the scaling of
@@ -313,10 +338,17 @@ void getWindowSize(uint32 &width, uint32 &height)
 #endif
 }
 
-void getWindowPos(uint32 &x, uint32 &y)
+void getWindowPos(sint32 &x, sint32 &y)
 {
-	// get the rect (position, size) of the screen
-	NSRect screenRect = [[g_window screen] frame];
+	// for IDriver conformity
+	if([g_glview isInFullScreenMode])
+	{
+		x = y = 0;
+		return;
+	}
+	
+	// get the rect (position, size) of the screen with menu bar
+	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
 	// get the rect (position, size) of the window
 	NSRect windowRect = [g_window frame];
@@ -328,12 +360,12 @@ void getWindowPos(uint32 &x, uint32 &y)
 	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
-void setWindowPos(uint32 x, uint32 y)
+void setWindowPos(sint32 x, sint32 y)
 {
-	// get the size of the screen
-	NSRect screenRect = [[g_window screen] frame];
+	// get the rect (position, size) of the screen with menu bar
+	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
-	// get the size of the window
+	// get the rect (position, size) of the window
 	NSRect windowRect = [g_window frame];
 
 	// convert y from NeL coordinates to cocoa coordinates

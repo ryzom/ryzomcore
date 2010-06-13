@@ -187,7 +187,7 @@ public:
 	virtual void			setWindowTitle(const ucstring &title)=0;
 
 	/// Set the position of the NeL window
-	virtual void			setWindowPos(uint32 x, uint32 y)=0;
+	virtual void			setWindowPos(sint32 x, sint32 y)=0;
 
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show = true)=0;
@@ -499,7 +499,7 @@ public:
 	virtual uint			getWindowHeight () =0;
 
 	/// Get the x and y coord of the windows always (0,0) in fullscreen
-	virtual void			getWindowPos (uint32 &x, uint32 &y) = 0;
+	virtual void			getWindowPos (sint32 &x, sint32 &y) = 0;
 
 	/** Return the amount of AGP memory allocated by initVertexArrayRange() to store vertices.
 	*/

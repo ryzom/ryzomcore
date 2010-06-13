@@ -187,7 +187,7 @@ public:
 	virtual void			setWindowTitle(const ucstring &title)=0;
 
 	/// Set the position of the NeL window
-	virtual void			setWindowPos(uint32 x, uint32 y)=0;
+	virtual void			setWindowPos(sint32 x, sint32 y)=0;
 
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show)=0;
@@ -748,7 +748,7 @@ public:
 	virtual void			getWindowSize (uint32 &width, uint32 &height) = 0;
 
 	/// Get the position of the window always (0,0) in fullscreen
-	virtual void			getWindowPos (uint32 &x, uint32 &y) = 0;
+	virtual void			getWindowPos (sint32 &x, sint32 &y) = 0;
 
 	/** get the RGBA back buffer. After swapBuffers(), the content of the back buffer is undefined.
 	  *

@@ -2009,7 +2009,8 @@ void CClientConfig::release ()
 			// Driver still alive ?
 			if (Driver && Driver->isActive ())
 			{
-				uint32 x, y, width, height;
+				sint32 x, y;
+				uint32 width, height;
 
 				Driver->getWindowPos(x, y);
 				Driver->getWindowSize(width, height);

@@ -328,7 +328,7 @@ void CDriverUser::setWindowTitle(const ucstring &title)
 }
 
 // ***************************************************************************
-void CDriverUser::setWindowPos(uint32 x, uint32 y)
+void CDriverUser::setWindowPos(sint32 x, sint32 y)
 {
 	NL3D_HAUTO_UI_DRIVER;
 	_Driver->setWindowPos(x, y);
@@ -1530,7 +1530,7 @@ uint			CDriverUser::getWindowHeight ()
 	_Driver->getWindowSize (width, height);
 	return height;
 }
-void			CDriverUser::getWindowPos (uint32 &x, uint32 &y)
+void			CDriverUser::getWindowPos (sint32 &x, sint32 &y)
 {
 	NL3D_HAUTO_UI_DRIVER;
 

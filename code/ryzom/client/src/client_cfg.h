@@ -61,8 +61,8 @@ struct CClientConfig
 	bool			SaveConfig;
 
 	/// Window position in windowed mode
-	sint			PositionX;
-	sint			PositionY;
+	sint32		PositionX;
+	sint32		PositionY;
 
 	/// Window frequency
 	uint			Frequency;

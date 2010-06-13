@@ -58,14 +58,17 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 /// mac specific stuff while calling CDriverGL::setMode()
 bool setMode(const GfxMode& mode);
 
+/// mac specific stuff while calling CDriverGL::getCurrentScreenMode()
+void getCurrentScreenMode(GfxMode& mode);
+
 /// mac specific stuff while calling CDriverGL::getWindowSize()
 void getWindowSize(uint32 &width, uint32 &height);
 
 /// mac specific stuff while calling CDriverGL::getWindowPos()
-void getWindowPos(uint32 &x, uint32 &y);
+void getWindowPos(sint32 &x, sint32 &y);
 
 /// mac specific stuff while calling CDriverGL::setWindowPos()
-void setWindowPos(uint32 x, uint32 y);
+void setWindowPos(sint32 x, sint32 y);
 
 /// mac specific stuff while calling CDriverGL::setWindowTitle()
 void setWindowTitle(const ucstring &title);
