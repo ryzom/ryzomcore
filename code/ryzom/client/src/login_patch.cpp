@@ -38,14 +38,17 @@
 #include "nel/misc/big_file.h"
 #include "nel/misc/i18n.h"
 
+#ifdef NL_OS_WINOWS
+	#define NL_USE_SEVENZIP 1
+#endif
+
 // 7 zip includes
-//extern "C"
-//{
-#include "seven_zip/7zCrc.h"
-#include "seven_zip/7zIn.h"
-#include "seven_zip/7zExtract.h"
-#include "seven_zip/LzmaDecode.h"
-//};
+#ifdef NL_USE_SEVENZIP
+	#include "seven_zip/7zCrc.h"
+	#include "seven_zip/7zIn.h"
+	#include "seven_zip/7zExtract.h"
+	#include "seven_zip/LzmaDecode.h"
+#endif
 
 #include "game_share/bg_downloader_msg.h"
 
@@ -137,8 +140,7 @@ struct EPatchDownloadException : public Exception
 
 CPatchManager *CPatchManager::_Instance = NULL;
 
-
-
+#ifdef NL_USE_SEVENZIP
 /// Input stream class for 7zip archive
 class CNel7ZipInStream : public _ISzInStream
 {
@@ -187,7 +189,7 @@ public:
 		}
 	}
 };
-
+#endif
 
 
 // ****************************************************************************
@@ -1939,6 +1941,7 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTra
 
 bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName)
 {
+#ifdef NL_USE_SEVENZIP
 	nlinfo("Uncompressing 7zip archive '%s' to '%s'",
 		sevenZipFile.c_str(),
 		destFileName.c_str());
@@ -2023,10 +2026,14 @@ bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::strin
 
 	// ok, all is fine, file is unpacked
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool CPatchManager::unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 {
+#ifdef NL_USE_SEVENZIP
 	nldebug("unpackLZMA : decompression the lzma file '%s' into output file '%s", lzmaFile.c_str(), destFileName.c_str());
 	CIFile inStream(lzmaFile);
 	uint32 inSize = inStream.getFileSize();
@@ -2087,6 +2094,9 @@ bool CPatchManager::unpackLZMA(const std::string &lzmaFile, const std::string &d
 	outStream.serialBuffer(outBuffer.get(), (uint)fileSize);
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 
@@ -3420,7 +3430,7 @@ void CInstallThread::run()
 		std::string correct = CPath::standardizePath (patchPath + _Entries[first].PatchName, false);
 		allowed.insert(correct);
 	}
-	// Delete file from tmp directory that are not "allowed" (torrent protocol can downlaod partial file that are not asked)
+	// Delete file from tmp directory that are not "allowed" (torrent protocol can download partial file that are not asked)
 	std::vector<std::string> vFiles;
 	CPath::getPathContent(patchPath , true, false, true, vFiles);
 	for (uint32 i = 0; i < vFiles.size(); ++i)

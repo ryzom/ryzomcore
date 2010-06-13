@@ -771,7 +771,7 @@ public:
 	void clearHarvestDB();
 	void openHarvest();
 
-	// get reference on deposit harvest informations
+	// get reference on deposit harvest information
 	HARVEST_INFOS::CHarvestInfos& getHarvestInfos();
 
 	// Process static actions (like harvest, faber...)
@@ -1005,7 +1005,7 @@ public:
      *
      * \param value is the value to parse.
      * \param result is the result to fill if the value has been succesfully parsed.
-     * \return UnkownValue if the value is not known, ValueError is the value evaluation failed or NoError 
+     * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
      * if it has been parsed.
      */
 	virtual TReturnState evalValue (const char *value, double &result, uint32 userData);
@@ -1058,7 +1058,7 @@ public:
 	/// clear bot gift
 	void clearBotGift();
 
-	/// accept the exchange (exchangeId is a counter informing the server of the informations received by the client)
+	/// accept the exchange (exchangeId is a counter informing the server of the information received by the client)
 	void acceptExchange(uint8 exchangeId);
 
 	///exchange money
@@ -1209,7 +1209,7 @@ public:
 	/// update scores infos in database
 	void updateScoresInDatabase();
 
-	/// Set database with all character informations
+	/// Set database with all character information
 	void setDatabase();
 
 	/// cancel any static action in progress (ie actions canceled if the player moves like casting, harvest, faber...)
@@ -3027,7 +3027,7 @@ private:
 	bool						_HarvestDeposit;
 	/// if harvesting a deposit, the skill used
 	SKILLS::ESkills				_DepositSearchSkill;
-	/// Harvest deposit informations
+	/// Harvest deposit information
 	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformations;		
 	//@}
 

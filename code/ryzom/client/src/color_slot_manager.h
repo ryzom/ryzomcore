@@ -87,7 +87,7 @@ public:
 	  * \param path the path textures should be retrieved from.
 	  * \param validExtensions an array of the valid bitmap files extensions.
 	  * \param numExtensions number of texture extensions in the array
-	  * \return true if all texture where added succesfully
+	  * \return true if all texture where added successfully
 	  */
 	bool					addTexturesFromPath(const std::string &path,
 												const char *validExtensions[] = _DefaultTextureExtension,
@@ -98,7 +98,7 @@ public:
 	  * \param instance the instance to change
 	  * \param slotID The slot to change
 	  * \param the value to assign to that slot
-	  * \return true if all slots where changed succesfully
+	  * \return true if all slots where changed successfully
 	  * NB : If you must activate a texture slot on an instance, you should do it before calling this method.
 	  */
 	bool					setInstanceSlot(NL3D::UInstance instance, uint slotID, uint value) const;
@@ -107,7 +107,7 @@ public:
 	  * \param instance the instance to change
 	  * \param slotIDs An array of pairs (slotID, slotValue)
 	  * \param numValues Number of values in the array
-	  * \return true if all slots where changed succesfully
+	  * \return true if all slots where changed successfully
 	  * NB : If you must activate a texture slot on an instance, you should do it before calling this method.
 	  */
 	bool					setInstanceSlot(NL3D::UInstance instance, TIntCouple *slotIDs, uint numValues) const;

@@ -197,8 +197,8 @@ public :
 	void processLogic(const std::string &animListName, TAnimStateKey animationId, CAnimationTime startTimeOffset, CAnimationTime endTimeOffset, NL3D::UTrack *&soundTrack, std::vector<NL3D::CAnimationTime>& result);
 
 
-	/** \name INFORMATIONS ABOUT ANIMATIONS
-	 * Methods to get informations about an animation.
+	/** \name INFORMATION ABOUT ANIMATIONS
+	 * Methods to get information about an animation.
 	 */
 	//@{
 	/**

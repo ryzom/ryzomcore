@@ -245,7 +245,7 @@ float						SlowWeaponHit = 5.0f;
 CCharacterBotChatBeginEnd	CharacterBotChatBeginEnd;
 CCharacterDynChatBeginEnd	CharacterDynChatBeginEnd;
 //*** Removed by Sadge ***
-//// Transport class for EGS asking informations about creatures/Npc
+//// Transport class for EGS asking information about creatures/Npc
 //CCreatureAskInformationMsg	CreatureNpcInformations;
 //*** ***
 //	Transport class sent to AIS to set bot mode as death.

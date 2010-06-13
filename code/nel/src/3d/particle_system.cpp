@@ -861,7 +861,7 @@ void CParticleSystem::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		}
 	}
 
-	if (version > 4) // lifetime informations
+	if (version > 4) // lifetime information
 	{
 		bool destroyModelWhenOutOfRange = _DestroyModelWhenOutOfRange; // read from bitfield
 		f.serial(destroyModelWhenOutOfRange);

@@ -20,7 +20,7 @@
 #include "data_set_base.h"
 #include <nel/georges/u_form_elm.h>
 
-// Dependancy on NLNET::IService only for config file access for TDataSetSheet::getConfigDataSetSize()
+// Dependency on NLNET::IService only for config file access for TDataSetSheet::getConfigDataSetSize()
 #include <nel/net/service.h>
 #include "ryzom_entity_id.h"
 

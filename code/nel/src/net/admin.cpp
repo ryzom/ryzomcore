@@ -91,14 +91,14 @@ uint32 RequestTimeout = 4;	// in second
 
 static void cbInfo (CMessage &msgin, const std::string &/* serviceName */, TServiceId /* sid */)
 {
-	nlinfo ("ADMIN: Updating admin informations");
+	nlinfo ("ADMIN: Updating admin information");
 
 	vector<string> alarms;
 	msgin.serialCont (alarms);
 	vector<string> graphupdate;
 	msgin.serialCont (graphupdate);
 
-	setInformations (alarms, graphupdate);
+	setInformation (alarms, graphupdate);
 }
 
 static void cbServGetView (CMessage &msgin, const std::string &/* serviceName */, TServiceId sid)
@@ -779,7 +779,7 @@ void updateAdmin()
 	}
 }
 
-void setInformations (const vector<string> &alarms, const vector<string> &graphupdate)
+void setInformation (const vector<string> &alarms, const vector<string> &graphupdate)
 {
 	uint i;
 	sint tmp;
@@ -860,7 +860,7 @@ void setInformations (const vector<string> &alarms, const vector<string> &graphu
 // Commands
 //
 
-NLMISC_CATEGORISED_COMMAND(nel, displayInformations, "displays all admin informations", "")
+NLMISC_CATEGORISED_COMMAND(nel, displayInformation, "displays all admin information", "")
 {
 	nlunreferenced(rawCommandString);
 	nlunreferenced(args);

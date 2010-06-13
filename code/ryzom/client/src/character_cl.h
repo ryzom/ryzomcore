@@ -84,7 +84,7 @@ public:
 	enum { MaxNumAura = 2 };
 	enum	TAtkHeight
 	{
-		AtkUnkownHeight = 0,
+		AtkUnknownHeight = 0,
 		AtkLow,
 		AtkMiddle,
 		AtkHigh
@@ -289,9 +289,9 @@ public:
 	std::string currentAnimationSetName(TAnimationType animType) const;
 	/// Change the entity colors.
 	virtual void changeColors(sint userColor, sint hair, sint eyes, sint part);
-	/// Display Debug Informations.
+	/// Display Debug Information.
 	virtual void displayDebug(float x, float &y, float lineStep);
-	/// Display Debug Informations for property stages
+	/// Display Debug Information for property stages
 	virtual void displayDebugPropertyStages(float x, float &y, float lineStep);
 	/// set the NameId for debug in local
 	void	debugSetNameId(uint32 nameId) {updateVisualPropertyName(0, nameId);}
@@ -899,7 +899,7 @@ protected:
 	/// Play the time step for the loop and truncate to End Anim if Time Step too big.
 	void playToEndAnim(const double &startTimeOffset, double &length);
 
-	/// Call this method to give a time for each stage, compute distance to destination and some more informations.
+	/// Call this method to give a time for each stage, compute distance to destination and some more information.
 	void updateStages();
 
 	/**

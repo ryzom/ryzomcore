@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
 			infoMaskGen.init();
 			infoMaskGen.process();
 		}
-		else if( !strcmp(argv[2], "cgi")) /// colorized informations 
+		else if( !strcmp(argv[2], "cgi")) /// colorized information
 		{
 			CInfoColorGeneration infoColor(_Path_Input_TexBases,
 										   _Path_Input_Masks,

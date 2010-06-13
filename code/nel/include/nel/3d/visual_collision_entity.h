@@ -89,10 +89,10 @@ public:
 	bool	getSnapToRenderedTesselation() const {return _SnapToRenderedTesselation;}
 
 
-	/** Get surface informations.
+	/** Get surface information.
 	 * pos is checked with polygons that are at least (cache dependent) at +- 10m in altitude.
-	 * \param info will be filled with surface informations if the method returns true.
-	 * \return true if the surface has been found and informations has been filled.
+	 * \param info will be filled with surface information if the method returns true.
+	 * \return true if the surface has been found and information has been filled.
 	 */
 	bool	getSurfaceInfo(const CVector &pos, CSurfaceInfo &info);
 

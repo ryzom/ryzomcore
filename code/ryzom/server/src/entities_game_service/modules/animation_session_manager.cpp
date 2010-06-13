@@ -299,7 +299,7 @@ public:
 		log.displayNL("Dumping AnimSessionManager state");
 		log.displayNL("--------------------------------");
 
-		// dump some general informations
+		// dump some general information
 		log.displayNL(" This module know %u ring session manager module, %u server animation module", 
 			_RingSessionManagerTracker.getTrackedModules().size(),
 			_ServerAnimationModuleTracker.getTrackedModules().size());

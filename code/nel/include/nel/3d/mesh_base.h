@@ -305,7 +305,7 @@ protected:
 	CRayMesh		_SystemGeometry;
 
 protected:
-	/// Just copy informations from a CMeshBaseBuild.
+	/// Just copy information from a CMeshBaseBuild.
 	void	buildMeshBase(CMeshBaseBuild &m);
 
 	/// instanciate MeshBase part to an instance (a CMeshBaseInstance).

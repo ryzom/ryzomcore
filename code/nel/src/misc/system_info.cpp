@@ -1169,7 +1169,7 @@ uint64 CSystemInfo::getAllocatedSystemMemory ()
 {
 	uint64 systemMemory = 0;
 #ifdef NL_OS_WINDOWS
-	// Get system memory informations
+	// Get system memory information
 	HANDLE hHeap[100];
 	DWORD heapCount = GetProcessHeaps (100, hHeap);
 

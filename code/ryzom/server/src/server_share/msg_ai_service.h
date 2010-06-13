@@ -34,7 +34,7 @@
 // Transport class messages interface for AIS / EGS communication
 
 //----------------------------------------------------------------------------
-// EGS ask informations about creatures / npcs against characters
+// EGS ask information about creatures / npcs against characters
 //----------------------------------------------------------------------------
 class CCreatureAskInformationMsg : public CMirrorTransportClass
 {

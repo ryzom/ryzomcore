@@ -124,7 +124,7 @@ void CQueryEgsImp::callback (const std::string &name, NLNET::TServiceId id)
 	
 	CCharacter* character = 0;
 
-	// the third parameter is the entity id of the player from which we query informations
+	// the third parameter is the entity id of the player from which we query information
 	if (Params.size() < 3)
 	{
 		nlwarning("Error in CQueryEgsImpl playerId not defined for function '%s'", funName.c_str() );

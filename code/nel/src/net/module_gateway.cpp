@@ -914,7 +914,7 @@ namespace NLNET
 			}
 		}
 
-		/** A gateway send new modules informations */
+		/** A gateway send new modules information */
 		void onReceiveModuleAdd(CGatewayRoute *from, const CMessage &msgin)
 		{
 			H_AUTO(CModuleGetaway_onReceiveModuleAdd);
@@ -1765,7 +1765,7 @@ namespace NLNET
 			}
 			CModuleProxy *modProx = static_cast<CModuleProxy *>(it2->second.getPtr());
 
-			// remove module informations
+			// remove module information
 			pair<TKnownModuleInfos::iterator, TKnownModuleInfos::iterator> range;
 			range = _KnownModules.equal_range(modProx->_FullyQualifiedModuleName);
 			nlassert(range.first != range.second);
@@ -2327,7 +2327,7 @@ namespace NLNET
 			NLMISC_CLASS_COMMAND_CALL_BASE(CModuleBase, dump);
 
 			log.displayNL("------------------------------");
-			log.displayNL("Dumping gateway informations :");
+			log.displayNL("Dumping gateway information :");
 			log.displayNL("------------------------------");
 
 			log.displayNL("The gateway has %u locally plugged module :", _PluggedModules.getAToBMap().size());

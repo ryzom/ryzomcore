@@ -33,12 +33,12 @@ public:
 	enum TReturnState
 	{
 		NoError,			// No error
-		UnkownValue,		// Unkown value has been parsed
+		UnknownValue,		// Unknown value has been parsed
 		ValueError,			// Error during user defined value evaluation
-		UnkownFunction,		// Unkown function has been parsed
+		UnknownFunction,	// Unknown function has been parsed
 		FunctionError,		// Error during user defined function evaluation
 		NumberSyntaxError,	// Syntax error in a number expression
-		UnkownOperator,		// Unkown operator
+		UnknownOperator,	// Unknown operator
 		MustBeOpen,			// Should be a open parenthesis
 		MustBeClose,		// Should be a close parenthesis
 		MustBeComa,			// Should be a coma character
@@ -166,21 +166,21 @@ protected:
 	/// Overridable functions
 
 	/**
-	  * Eval a user defined value. Default implementation returns UnkownValue.
-	  * The user can parse the value and fill the result double and return NoError, UnkownValue or
+	  * Eval a user defined value. Default implementation returns UnknownValue.
+	  * The user can parse the value and fill the result double and return NoError, UnknownValue or
 	  * ValueError.
 	  *
 	  * \param value is the value to parse.
-	  * \param result is the result to fill if the value has been succesfully parsed.
+	  * \param result is the result to fill if the value has been successfully parsed.
 	  * \param userData is a user data used by user eval function.
-	  * \return UnkownValue if the value is not known, ValueError is the value evaluation failed or NoError
+	  * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError
 	  * if it has been parsed.
 	  */
 	virtual TReturnState evalValue (const char *value, double &result, uint32 userData);
 
 	/**
-	  * Eval a user defined function. Default implementation returns UnkownFunction.
-	  * The user can parse the function name and fill the result double and return NoError, UnkownFunction
+	  * Eval a user defined function. Default implementation returns UnknownFunction.
+	  * The user can parse the function name and fill the result double and return NoError, UnknownFunction
 	  * or FunctionError.
 	  *
 	  * To convert double argu in boolean argu, use (round (value) != 0.0) ? true : false
@@ -188,8 +188,8 @@ protected:
 	  * \param funcName is the name of the function to evaluate.
 	  * \param arg0 is the first parameter passed to the function.
 	  * \param arg1 is the second parameter passed to the function.
-	  * \param result is the result to fill if the value has been succesfully parsed.
-	  * \return UnkownFunction if the function doesn't exist, FunctionError if the function evaluation
+	  * \param result is the result to fill if the value has been successfully parsed.
+	  * \return UnknownFunction if the function doesn't exist, FunctionError if the function evaluation
 	  * failed, NoError if it has been parsed.
 	  */
 	virtual TReturnState evalFunction (const char *funcName, double arg0, double &result);

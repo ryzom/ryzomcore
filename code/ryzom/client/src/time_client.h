@@ -117,7 +117,7 @@ void insertPacketTime(uint8 numPacket, TTime time);
 void ackPacketTimeBefore(uint8 ackPacketNumber);
 
 void removePacket(uint8 numPacket);
-/// Insert the packet received informations in a list.
+/// Insert the packet received information in a list.
 void insertPacket(const CPacketInfos &packetInfos);
 /// Return the sent time for a given packet or 0 if the packet is not found
 TTime getSentPacketTime(uint8 numPacket);

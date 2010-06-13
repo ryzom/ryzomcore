@@ -1549,7 +1549,7 @@ CEvalNumExpr::TReturnState CShopTypeManager::evalValue (const char *value, doubl
 {
 	nlwarning("<CShopTypeManager::evalValue> 'standart.prices_table' still used");
 	result = userData * pow( 1.2, (int)userData ); 
-	return CEvalNumExpr::UnkownValue;
+	return CEvalNumExpr::UnknownValue;
 }
 
 

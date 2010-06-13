@@ -793,7 +793,7 @@ namespace NLNET
 
 		/// base module command table
 		NLMISC_COMMAND_HANDLER_TABLE_BEGIN(CModuleBase)
-			NLMISC_COMMAND_HANDLER_ADD(CModuleBase, dump, "display informations about module instance status", "no args")
+			NLMISC_COMMAND_HANDLER_ADD(CModuleBase, dump, "display information about module instance status", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CModuleBase, plug, "plug the module in a module socket", "<socket_name>")
 			NLMISC_COMMAND_HANDLER_ADD(CModuleBase, unplug, "unplug the module out of a module socket", "<socket_name>")
 			NLMISC_COMMAND_HANDLER_ADD(CModuleBase, sendPing, "send a ping message to another module using the first available route", "<addresseeModuleName>")
@@ -812,7 +812,7 @@ namespace NLNET
 		friend class CModuleManager;
 		friend class CStandardGateway;
 
-		/// The gateway that received the module informations
+		/// The gateway that received the module information
 		IModuleGateway		*_Gateway;
 		/// The route to use for reaching the module
 		CGatewayRoute		*_Route;

@@ -1566,7 +1566,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			WindowDisplayer = NULL;
 		}
 
-		nlinfo ("SERVICE: Service released succesfully");
+		nlinfo ("SERVICE: Service released successfully");
 	}
 	catch (EFatalError &)
 	{

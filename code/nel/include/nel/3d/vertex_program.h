@@ -98,7 +98,7 @@ private:
 	std::string									_Program;
 
 public:
-	/// The driver informations. For the driver implementation only.
+	/// The driver information. For the driver implementation only.
 	NLMISC::CRefPtr<IVertexProgramDrvInfos>		_DrvInfo;
 };
 

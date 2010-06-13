@@ -236,7 +236,7 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 		}
 	}
 
-	// Flush debug informations
+	// Flush debug information
 	flushDebugStack("-- ANIMATIONS OTHER --");
 
 	// Stop to Log in the animation file.

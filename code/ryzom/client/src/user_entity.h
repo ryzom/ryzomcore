@@ -344,7 +344,7 @@ public:
 	 * Methods only here for the debug.
 	 */
 	//@{
-	/// Display Debug Informations.
+	/// Display Debug Information.
 	virtual void displayDebug(float x, float &y, float lineStep);
 	//@}
 

@@ -90,7 +90,7 @@ void initAdmin (bool dontUseAES);
 
 void updateAdmin ();
 
-void setInformations (const std::vector<std::string> &alarms, const std::vector<std::string> &graphupdate);
+void setInformation (const std::vector<std::string> &alarms, const std::vector<std::string> &graphupdate);
 
 void serviceGetView (uint32 rid, const std::string &rawvarpath, TAdminViewResult& answer, bool async=false);
 

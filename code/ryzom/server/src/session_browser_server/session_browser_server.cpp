@@ -230,7 +230,7 @@ public:
 	}
 
 
-	// Update the informations of a planned or running session
+	// Update the information of a planned or running session
 	// Return 'invokeResult' : 0 : ok, session updated
 	//                         1 : unknown character
 	//                         2 : unknown session

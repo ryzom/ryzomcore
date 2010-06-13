@@ -166,14 +166,14 @@ void removePacket(uint8 numPacket)
 
 //-----------------------------------------------
 // insertPacket :
-// Insert the packet received informations in a list.
+// Insert the packet received information in a list.
 //-----------------------------------------------
 void insertPacket(const CPacketInfos &packetInfos)
 {
 	// Upadte the last packet received.
 	LastPacketReceived = packetInfos.Num;
 
-	// Insert the packet informations.
+	// Insert the packet information.
 	PacketInfos.insert(make_pair(LastPacketReceived, packetInfos));
 
 	// Check Local Time Step with the new packet.

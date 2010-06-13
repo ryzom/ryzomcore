@@ -114,7 +114,7 @@ public:
 	void						setDistMax(float distMax);
 
 	/** Profiling. Called in RenderPass if Current Frame profiled. No-Op by default
-	 *	Informations must be added in rdrTrav->Scene
+	 *	Information must be added in rdrTrav->Scene
 	 */
 	virtual void				profileSceneRender(CRenderTrav * /* rdrTrav */, CTransformShape * /* trans */, bool /* opaquePass */) { }
 

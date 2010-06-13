@@ -94,7 +94,7 @@ const char* CLigoError::_StringError[CLigoError::ErrorCount]=
 	"A edge has two times the same corner",	// TwoCornerVertices
 	"A corner is missing in this edge", // CornerIsMissing
 	"A boundary vertex is used by multiple edges", // VertexAlreadyUsed
-	"Unkown error",						// UnknownError
+	"Unknown error",						// UnknownError
 };
 
 // ***************************************************************************

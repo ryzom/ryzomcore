@@ -87,7 +87,7 @@ public:
 									 CScene *scene,
 									 CVertexBuffer *vb) = 0;
 
-	// Test whether this vertex program need tangent space informations (stored in the last texture coordinate of the mesh)
+	// Test whether this vertex program need tangent space information (stored in the last texture coordinate of the mesh)
 	virtual	bool	needTangentSpace() const { return false; }
 
 

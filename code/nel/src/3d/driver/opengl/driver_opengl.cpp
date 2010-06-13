@@ -956,8 +956,10 @@ bool CDriverGL::release()
 	_AGPVertexArrayRange= NULL;
 	_VRAMVertexArrayRange= NULL;
 
+	// destroy window and associated ressources
 	destroyWindow();
 
+	// other uninitializations
 	unInit();
 
 	// released
@@ -1324,7 +1326,7 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 	{
 		if (!_ATIFogRangeFixed)
 		{
-			// last constant is used to store fog informations (fog must be rescaled to [0, 1], because of a driver bug)
+			// last constant is used to store fog information (fog must be rescaled to [0, 1], because of a driver bug)
 			if (start != end)
 			{
 				setConstant(_EVSNumConstant, 1.f / (start - end), - end / (start - end), 0, 0);

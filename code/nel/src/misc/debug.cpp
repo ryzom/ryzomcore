@@ -1273,7 +1273,7 @@ std::string CInstanceCounterManager::displayCounters() const
 	map<string, TInstanceCounterData> counters;
 
 	{
-		// gather counter informations
+		// gather counter information
 		std::set<CInstanceCounterLocalManager*>::const_iterator first2(_InstanceCounterMgrs.begin()), last2(_InstanceCounterMgrs.end());
 		for (; first2 != last2; ++first2)
 		{

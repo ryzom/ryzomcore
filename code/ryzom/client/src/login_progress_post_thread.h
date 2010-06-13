@@ -44,7 +44,7 @@ public:
 
 
 /** Notify the http logon server from the various step that have been reached in the client.
-  * Php scripts on server side use these informations to collect statistics such as :
+  * Php scripts on server side use these information to collect statistics such as :
   * - how many player manage to do a successful video driver initialization ?
   * - how many player did pass the login screen ?
   * - what is the mean loading time from character selection until in game ?
@@ -89,7 +89,7 @@ enum
 	LoginStep_VideoModeSetupHighColor = 2000,
 	LoginStep_LoginScreen		      = 3000,
 	LoginStep_PostLogin			      = 4000,
-	// following are not really part of the login, but are useful informations as well (TODO : find a better name for the class ...)
+	// following are not really part of the login, but are useful information as well (TODO : find a better name for the class ...)
 	LoginStep_CharacterSelection      = 5000,
 	LoginStep_InGameEntry		      = 6000,
 	LoginStep_GameExit				  = 7000

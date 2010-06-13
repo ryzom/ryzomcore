@@ -602,9 +602,9 @@ public:
 
 	/// Change the entity colors.
 	virtual void changeColors(sint /* userColor */, sint /* hair */, sint /* eyes */, sint /* part */) { }
-	/// Display Debug Informations.
+	/// Display Debug Information.
 	virtual void displayDebug(float x, float &y, float lineStep);
-	/// Display Debug Informations for property stages
+	/// Display Debug Information for property stages
 	virtual void displayDebugPropertyStages(float x, float &y, float lineStep);
 	//@}
 

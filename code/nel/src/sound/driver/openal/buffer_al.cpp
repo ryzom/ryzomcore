@@ -166,7 +166,7 @@ bool CBufferAL::fill(const uint8 *src, uint size)
 	return _IsLoaded;
 }
 
-/// Return the sample format informations.
+/// Return the sample format information.
 void CBufferAL::getFormat(TBufferFormat &format, uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const
 {
 	TSampleFormat sampleFormat;

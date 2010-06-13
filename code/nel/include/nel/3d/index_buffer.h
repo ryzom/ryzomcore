@@ -477,7 +477,7 @@ private:
 };
 
 /**
-  * Index buffer driver informations.
+  * Index buffer driver information.
   */
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL

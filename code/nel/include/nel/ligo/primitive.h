@@ -34,7 +34,7 @@ namespace NLLIGO
 
 
 /**
-  * Ligo primitives are used to add logical geometrical gameplay informations.
+  * Ligo primitives are used to add logical geometrical gameplay information.
   * Ligo primitives are NODES, POINTS, PATHES or ZONES.
   * Ligo primitives have a CLASS.
   *

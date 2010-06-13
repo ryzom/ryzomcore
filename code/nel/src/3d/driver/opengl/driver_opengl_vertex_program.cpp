@@ -356,7 +356,7 @@ static void doSwizzle(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum ou
 
 }
 
-// Perform write mask and output de bug informations
+// Perform write mask and output de bug information
 static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum outZ, GLenum outW)
 {
 	H_AUTO_OGL(doWriteMask)

@@ -525,7 +525,7 @@ CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldV
 	const CArray2D<sint16> &heightMap = getEditor().getIslandCollision().getHeightMap();
 	if (!heightMap.empty())
 	{
-		// if heightmap is present, use it because it gives us more reliable informations
+		// if heightmap is present, use it because it gives us more reliable information
 		CVector surfPos;
 		if (!computeNearestValidSurfaceFromHeightMap(inter.x, inter.y, surfPos)) return InvalidPacsPos;
 		static volatile float threshold = 2.f;

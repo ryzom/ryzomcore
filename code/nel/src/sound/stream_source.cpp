@@ -348,7 +348,7 @@ void CStreamSource::setFormat(uint8 channels, uint8 bitsPerSample, uint32 freque
 	m_BytesPerSecond = ((uint)bitsPerSample * (uint)frequency * (uint)channels) / 8;
 }
 
-/// Return the sample format informations.
+/// Return the sample format information.
 void CStreamSource::getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const
 {
 	IBuffer::TBufferFormat bufferFormat;

@@ -63,7 +63,7 @@ public:
 	};
 
 
-	/**	light an Ig with all PACS / 3D informations:
+	/**	light an Ig with all PACS / 3D information:
 	 *	\param instanceLighter used to light the ig. Should not be reused for successive lightIg()
 	 *	\param igIn is the ig which contains all light/object information.
 	 *	\param igOut is the ig resulting of lighting

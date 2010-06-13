@@ -2093,7 +2093,7 @@ void CEntityCL::setEntityName(const ucstring &name)
 
 //---------------------------------------------------
 // displayDebug :
-// Display Debug Informations.
+// Display Debug Information.
 //---------------------------------------------------
 void CEntityCL::displayDebug(float x, float &y, float lineStep)	// virtual
 {

@@ -93,7 +93,7 @@ CPlayerCL::CPlayerCL()
 	_HairColor = 0;
 	_EyesColor = 0;
 
-	// Not enough informations to display the player.
+	// Not enough information to display the player.
 	_WaitForAppearance = true;
 
 	_PlayerCLAsyncTextureLoading= false;
@@ -680,7 +680,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 
-	// Player will now have enough informations to display the character.
+	// Player will now have enough information to display the character.
 	_WaitForAppearance = false;
 
 	// Get the property.
@@ -1223,7 +1223,7 @@ double CPlayerCL::getMaxSpeed()	const// virtual
 
 //---------------------------------------------------
 // displayDebug :
-// Display Debug Informations.
+// Display Debug Information.
 //---------------------------------------------------
 void CPlayerCL::displayDebug(float x, float &y, float lineStep)	// virtual
 {

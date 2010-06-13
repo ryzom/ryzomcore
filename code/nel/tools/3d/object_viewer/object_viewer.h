@@ -197,7 +197,7 @@ public:
 	// True, must delete this shape
 	bool						MustDelete;
 
-	// Save informations
+	// Save information
 	CInstanceSave				Saved;
 
 	// The current playlist

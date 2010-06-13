@@ -688,7 +688,7 @@ void GET_CHARACTER_Helper(std::string& command, const NLMISC::CEntityId& id, con
 	CCharacter *c = PlayerManager.getChar(eid);  \
 	if (!c) \
 	{ \
-		nlwarning("Unkown character '%s'", args[0].c_str()); \
+		nlwarning("Unknown character '%s'", args[0].c_str()); \
 		return false; \
 	}
 

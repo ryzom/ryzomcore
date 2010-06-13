@@ -536,7 +536,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 							if(igZone == outpostZone)
 							{
 								nlctassert(RZ_MAX_BUILDING_PER_OUTPOST==4);
-								// Check there is all informations in the IG for a ZC and initialize.
+								// Check there is all information in the IG for a ZC and initialize.
 								bool zcOK[RZ_MAX_BUILDING_PER_OUTPOST+1] = {false, false, false, false, false};
 								UInstanceGroup *ig = igsWithNames[i].first;
 								uint k;
@@ -564,7 +564,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 									}
 								}
 
-								// There are not enough informations in the IG for ZC.
+								// There are not enough information in the IG for ZC.
 								for (k=0; k<RZ_MAX_BUILDING_PER_OUTPOST+1; k++)
 									if (!zcOK[k])
 										break;

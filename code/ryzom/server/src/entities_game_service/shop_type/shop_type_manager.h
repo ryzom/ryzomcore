@@ -134,7 +134,7 @@ public:
      * \param value is the value to parse.
      * \param result is the result to fill if the value has been succesfully parsed.
 	 * \param userData is quality of evaluated item
-     * \return UnkownValue if the value is not known, ValueError is the value evaluation failed or NoError if it has been parsed.
+     * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError if it has been parsed.
      */
 	NLMISC::CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 userData);
 

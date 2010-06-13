@@ -477,13 +477,13 @@ public:
 	virtual uint32			getImplementationVersion () const = 0;
 
 	/**
-	  * Get driver informations.
+	  * Get driver information.
 	  * get the nel name of the driver (ex: "Opengl 1.2 NeL Driver")
 	  */
 	virtual const char*		getDriverInformation () = 0;
 
 	/**
-	  * Get videocard informations.
+	  * Get videocard information.
 	  * get the official name of the driver
 	  */
 	virtual const char*		getVideocardInformation () = 0;

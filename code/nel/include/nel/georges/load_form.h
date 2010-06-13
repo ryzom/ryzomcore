@@ -1027,7 +1027,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			{
 				if (dependencyDates[depends[i]] > packedFiledate)
 				{
-					nldebug("Dependancy on %s for %s not up to date !",
+					nldebug("Dependency on %s for %s not up to date !",
 						dictionnary[depends[i]].c_str(), sheetNames[k].c_str());
 					NeededToRecompute.push_back(k);
 					break;

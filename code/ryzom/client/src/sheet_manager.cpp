@@ -627,7 +627,7 @@ void CSheetManager::loadAllSheet(NLMISC::IProgressCallback &callBack, bool updat
 	callBack.progress (0);
 	callBack.pushCropedValues (0, 0.5f);
 
-	// Get some informations from typ files.
+	// Get some information from typ files.
 	loadTyp();
 
 	// prepare a list of sheets extension to load.
@@ -970,7 +970,7 @@ CItemSheet *CSheetManager::getItem(SLOTTYPE::EVisualSlot slot, uint index)
 
 //-----------------------------------------------
 // loadTyp :
-// Get Some informations from 'typ' files.
+// Get Some information from 'typ' files.
 //-----------------------------------------------
 void CSheetManager::loadTyp()
 {
