@@ -426,7 +426,7 @@ void setMousePos(float x, float y)
 	NSRect firstScreenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
 	// get the rect (position, size) of the window
-	NSRect windowRect = [g_window frame];
+	NSRect windowRect;
 	if([g_glview isInFullScreenMode])
 		windowRect = [[g_window screen] frame];
 	else
