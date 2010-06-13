@@ -1074,53 +1074,13 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		}
 	}
 
-	// Resize the window
-	RECT rc;
-	SetRect (&rc, 0, 0, _WindowWidth, _WindowHeight);
-	AdjustWindowRectEx (&rc, GetWindowStyle (_win), GetMenu (_win) != NULL, GetWindowExStyle (_win));
-	UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
-	if (mode.Windowed)
-		flags |= SWP_NOMOVE;
-	SetWindowPos (_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
-
-//	showWindow(true);
-
-	// Init Window Width and Height
-	RECT clientRect;
-	GetClientRect (_win, &clientRect);
-	_WindowWidth = clientRect.right-clientRect.left;
-	_WindowHeight = clientRect.bottom-clientRect.top;
-	GetWindowRect (_win, &clientRect);
-	_WindowX = clientRect.left;
-	_WindowY = clientRect.top;
-
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
 	NL3D::MAC::setMode(mode);
 
 #elif defined(NL_OS_UNIX)
 
-	// Update WM hints (update size and disallow resizing)
-	XSizeHints size_hints;
-	size_hints.x = 0;
-	size_hints.y = 0;
-	size_hints.width = mode.Width;
-	size_hints.height = mode.Height;
-	size_hints.flags = PSize;
 
-	// x11 fullscreen is not working on mac os x
-#if !defined(NL_OS_MAC)
-	if (!mode.Windowed)
-	{
-		size_hints.flags = PSize | PMinSize | PMaxSize;
-		size_hints.min_width = mode.Width;
-		size_hints.min_height = mode.Height;
-		size_hints.max_width = mode.Width;
-		size_hints.max_height = mode.Height;
-	}
-#endif
-
-	XSetWMNormalHints(_dpy, _win, &size_hints);
 
 	// x11 fullscreen is not working on mac os x
 #if !defined(NL_OS_MAC)
@@ -1140,9 +1100,6 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	}
 #endif
 
-	// Resize and update the window
-	XResizeWindow(_dpy, _win, mode.Width, mode.Height);
-//	XMapWindow(_dpy, _win);
 
 #endif // NL_OS_UNIX
 
@@ -1151,6 +1108,8 @@ bool CDriverGL::setMode(const GfxMode& mode)
 #else
 	_FullScreen = false;
 #endif
+
+	setWindowSize(mode.Width, mode.Height);
 
 	return true;
 }
@@ -1555,6 +1514,64 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	height = (uint32) xwa.height;
 
 #endif // NL_OS_UNIX
+}
+
+void CDriverGL::setWindowSize(uint32 width, uint32 height)
+{
+	H_AUTO_OGL(CDriverGL_setWindowSize)
+
+#if defined(NL_OS_WINDOWS)
+
+	// resize the window
+	RECT rc;
+	SetRect (&rc, 0, 0, width, height);
+	AdjustWindowRectEx(&rc, GetWindowStyle(_win), GetMenu(_win) != NULL, GetWindowExStyle(_win));
+	UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
+	if (!_FullScreen)
+		flags |= SWP_NOMOVE;
+	SetWindowPos(_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
+
+	// init window width and height
+	RECT clientRect;
+	GetClientRect(_win, &clientRect);
+	_WindowWidth = clientRect.right-clientRect.left;
+	_WindowHeight = clientRect.bottom-clientRect.top;
+	GetWindowRect(_win, &clientRect);
+	_WindowX = clientRect.left;
+	_WindowY = clientRect.top;
+
+#elif defined(NL_OS_UNIX) && !defined(NL_MAC_NATIVE)
+
+	// Resize and update the window
+	XResizeWindow(_dpy, _win, width, height);
+//	XMapWindow(_dpy, _win);
+
+	// Update WM hints (update size and allow resizing)
+	XSizeHints size_hints;
+	size_hints.x = 0;
+	size_hints.y = 0;
+	size_hints.width = width;
+	size_hints.height = height;
+	size_hints.flags = PSize;
+
+	// x11 fullscreen is not working on mac os x
+#if !defined(NL_OS_MAC)
+	if (!_FullScreen)
+	{
+		size_hints.flags = PSize | PMinSize | PMaxSize;
+		size_hints.min_width = mode.Width;
+		size_hints.min_height = mode.Height;
+		size_hints.max_width = mode.Width;
+		size_hints.max_height = mode.Height;
+	}
+#endif
+
+	XSetWMNormalHints(_dpy, _win, &size_hints);
+
+	_WindowWidth = width;
+	_WindowHeight = height;
+
+#endif // NL_OS_WINDOWS
 }
 
 void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
