@@ -416,9 +416,9 @@ PFNWGLFREEMEMORYNVPROC							nwglFreeMemoryNV;
 
 // Pbuffer extension
 PFNWGLCREATEPBUFFERARBPROC						nwglCreatePbufferARB;
-PFNWGLGETPUFFERDCARBPROC						nwglGetPbufferDCARB;
-PFNWGLRELEASEPUFFERDCARBPROC					nwglReleasePbufferDCARB;
-PFNWGLDESTROYPUFFERARBPROC						nwglDestroyPbufferARB;
+PFNWGLGETPBUFFERDCARBPROC						nwglGetPbufferDCARB;
+PFNWGLRELEASEPBUFFERDCARBPROC					nwglReleasePbufferDCARB;
+PFNWGLDESTROYPBUFFERARBPROC						nwglDestroyPbufferARB;
 PFNWGLQUERYPBUFFERARBPROC						nwglQueryPbufferARB;
 
 // Get Pixel format extension
@@ -431,9 +431,8 @@ PFNWGLSWAPINTERVALEXTPROC						nwglSwapIntervalEXT;
 PFNWGLGETSWAPINTERVALEXTPROC					nwglGetSwapIntervalEXT;
 
 // WGL_ARB_extensions_string
-PFNWGFGETEXTENSIONSSTRINGARB					nwglGetExtensionsStringARB;
+PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
 #endif
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -857,9 +856,9 @@ static bool	setupWGLARBPBuffer(const char	*glext)
 
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLCREATEPBUFFERARBPROC, wglCreatePbufferARB);
-	CHECK_ADDRESS(PFNWGLGETPUFFERDCARBPROC, wglGetPbufferDCARB);
-	CHECK_ADDRESS(PFNWGLRELEASEPUFFERDCARBPROC, wglReleasePbufferDCARB);
-	CHECK_ADDRESS(PFNWGLDESTROYPUFFERARBPROC, wglDestroyPbufferARB);
+	CHECK_ADDRESS(PFNWGLGETPBUFFERDCARBPROC, wglGetPbufferDCARB);
+	CHECK_ADDRESS(PFNWGLRELEASEPBUFFERDCARBPROC, wglReleasePbufferDCARB);
+	CHECK_ADDRESS(PFNWGLDESTROYPBUFFERARBPROC, wglDestroyPbufferARB);
 	CHECK_ADDRESS(PFNWGLQUERYPBUFFERARBPROC, wglQueryPbufferARB);
 #endif
 
@@ -1249,13 +1248,13 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Disable feature ???
 	if(!ext.DisableHardwareVertexArrayAGP)
 		ext.NVVertexArrayRange= setupNVVertexArrayRange(glext);
+
 	if(ext.NVVertexArrayRange)
 	{
 		GLint	nverts;
 		glGetIntegerv((GLenum)GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV, &nverts);
 		ext.NVVertexArrayRangeMaxVertex= nverts;
 	}
-
 
 	// Compression S3TC OK iff ARBTextureCompression.
 	ext.EXTTextureCompressionS3TC= (ext.ARBTextureCompression && setupEXTTextureCompressionS3TC(glext));
@@ -1268,7 +1267,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check NVTextureEnvCombine4.
 	ext.NVTextureEnvCombine4= setupNVTextureEnvCombine4(glext);
-
 
 	// Check for cube mapping
 	ext.ARBTextureCubeMap = setupARBTextureCubeMap(glext);
@@ -1305,8 +1303,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.ARBFragmentProgram = false;
 	}
 
-
-
 	// For now, the only way to know if emulation, is to test some extension which exist only on GeForce3.
 	// if GL_NV_texture_shader is not here, then we are not on GeForce3.
 	ext.NVVertexProgramEmulated= ext.NVVertexProgram && (strstr(glext, "GL_NV_texture_shader")==NULL);
@@ -1319,6 +1315,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check NVVertexArrayRange2
 	ext.NVVertexArrayRange2= setupNVVertexArrayRange2(glext);
+
 	// if supported
 	if(ext.NVVertexArrayRange2)
 		// VBHard swap without flush of the VAR.
@@ -1411,7 +1408,7 @@ bool	registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 {
 	H_AUTO_OGL(registerWGlExtensions);
 	// Get proc address
-	CHECK_ADDRESS(PFNWGFGETEXTENSIONSSTRINGARB, wglGetExtensionsStringARB);
+	CHECK_ADDRESS(PFNWGLGETEXTENSIONSSTRINGARBPROC, wglGetExtensionsStringARB);
 
 	// Get extension string
 	const char *glext = nwglGetExtensionsStringARB (hDC);

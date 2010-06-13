@@ -139,7 +139,10 @@ void CSeasonFXSheet::build(const NLGEORGES::UFormElm &item, NLMISC::CSheetId par
 	NLMISC::clamp(MinDuration, 0.f, CycleDuration /*- startHourMaxInterval*/);
 	NLMISC::clamp(MaxDuration, 0.f, CycleDuration /*- startHourMaxInterval*/);
 
-	if (!ok) nldebug("Key not found.");
+	if (!ok)
+	{
+		nldebug("Key not found.");
+	}
 }
 
 //=======================================================
@@ -210,10 +213,11 @@ void CPlantSheet::build(const NLGEORGES::UFormElm &item)
 {
 	if(!(item.getValueByName(_ShapeName, "3D.Shape") &&
 		 item.getValueByName(_MaxDist, "3D.MaxDist") &&
-		 item.getValueByName(_CoarseMeshDist, "3D.CoarseMeshDist")
-		)
-	   )
-	nldebug("Key not found.");
+		 item.getValueByName(_CoarseMeshDist, "3D.CoarseMeshDist")))
+	{
+		nldebug("Key not found.");
+	}
+
 	// serial fxs by season
 	SeasonFX[EGSPD::CSeason::Spring].build(item, Id, "3D.SpringFX.");
 	SeasonFX[EGSPD::CSeason::Summer].build(item, Id, "3D.SummerFX.");

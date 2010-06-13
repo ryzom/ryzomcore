@@ -106,6 +106,15 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		return false;
 	}
 
+	// input path
+	try
+	{
+		settings.input_path = CPath::standardizePath(cf.getVar("input_path").asString());
+	}
+	catch (EUnknownVar &)
+	{
+	}
+
 	// output path
 	try
 	{
@@ -332,7 +341,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	return true;
 }
 
-bool ShapesExporter::setupLight()
+bool ShapesExporter::setupLight(const CVector &position, const CVector &direction)
 {
 	// create the light
 	ULight *Light = ULight::createLight();
@@ -342,7 +351,8 @@ bool ShapesExporter::setupLight()
 	Light->setMode(ULight::DirectionalLight);
 
 	// set position of the light
-	Light->setupDirectional(settings.light_ambiant, settings.light_diffuse, settings.light_specular, settings.light_direction);
+//	Light->setupDirectional(settings.light_ambiant, settings.light_diffuse, settings.light_specular, settings.light_direction);
+	Light->setupPointLight(settings.light_ambiant, settings.light_diffuse, settings.light_specular, position, direction + settings.light_direction);
 
 	// set and enable the light
 	Driver->setLight(0, *Light);
@@ -351,21 +361,117 @@ bool ShapesExporter::setupLight()
 	return true;
 }
 
-void ShapesExporter::setCamera(CAABBox &bbox, UInstance &entity, bool high_z)
+void ShapesExporter::setCamera(CAABBox &bbox, UTransform &entity, bool high_z)
 {
+	CVector pos(0.f, 0.f, 0.f);
+	CQuat quat(0.f, 0.f, 0.f, 0.f);
+	NL3D::UInstance inst;
+	inst.cast(entity);
+	if (!inst.empty())
+	{
+		inst.getDefaultPos(pos);
+		inst.getDefaultRotQuat(quat);
+/*
+		if (quat.getAxis().isNull())
+		{
+			quat.set(0, 0, 0, 0);
+			inst.setRotQuat(quat);
+		}
+*/
+//		quat.set(1.f, 1.f, 0.f, 0.f);
+
+//		inst.setRotQuat(quat);
+//		inst.getRotQuat(quat);
+
+		// check for presence of all textures from each sets
+		bool allGood = true;
+
+		for(uint s = 0; s < 5; ++s)
+		{
+			inst.selectTextureSet(s);
+
+			uint numMat = inst.getNumMaterials();
+
+			// by default, all textures are present
+			allGood = true;
+
+			for(uint i = 0; i < numMat; ++i)
+			{
+				UInstanceMaterial mat = inst.getMaterial(i);
+
+				for(sint j = 0; j <= mat.getLastTextureStage(); ++j)
+				{
+					// if a texture is missing
+					if (mat.isTextureFile(j) && mat.getTextureFileName(j) == "CTextureMultiFile:Dummy")
+						allGood = false;
+				}
+			}
+
+			// if all textures have been found for this set, skip other sets
+			if (allGood)
+				break;
+		}
+	}
+
+	// fix scale (some shapes have a different value)
+	entity.setScale(1.f, 1.f, 1.f);
+
 	UCamera Camera = Scene->getCam();
-	CVector center = bbox.getCenter();
 	CVector max_radius = bbox.getHalfSize();
 
+	CVector center = bbox.getCenter();
 	entity.setPivot(center);
+	center += pos;
 
 	float fov = float(20.0*Pi/180.0);
 	Camera.setPerspective (fov, 1.0f, 0.1f, 1000.0f);
 	float radius = max(max(max_radius.x, max_radius.y), max_radius.z);
+	if (radius == 0.f) radius = 1.f;
 	float left, right, bottom, top, znear, zfar;
 	Camera.getFrustum(left, right, bottom, top, znear, zfar);
 	float dist = radius / (tan(fov/2));
-	Camera.lookAt(CVector(center.x+dist+max_radius.x, center.y, center.z+(high_z?max_radius.z/1.0f:0.0f)), center);
+	CVector eye(center);
+/*	if (axis == CVector::I)
+		eye.y -= dist+radius;
+	else if (axis == CVector::J)
+		eye.x += dist+radius;
+*/
+//	quat.normalize();
+
+	CVector ax(quat.getAxis());
+
+//	float angle = quat.getAngle();
+/*
+	if (ax.isNull())
+	{
+		if (int(angle*100.f) == int(NLMISC::Pi * 200.f))
+		{
+			ax = CVector::J;
+		}
+	}
+	else 
+*/
+	if (ax.isNull() || ax == CVector::I)
+	{
+		ax = CVector::I;
+	}
+	else if (ax == -CVector::K)
+	{
+		ax = -CVector::J;
+	}
+/*	else if (ax.x < -0.9f && ax.y == 0.f && ax.z == 0.f)
+	{
+		ax = -CVector::J ;
+	}
+*/
+//	ax.normalize();
+
+	eye -= ax * (dist+radius);
+	if (high_z)
+		eye.z += max_radius.z/1.0f;
+	Camera.lookAt(eye, center);
+
+	setupLight(eye, center - eye);
 }
 
 bool ShapesExporter::exportShape(const string &filename, const string &output_path)
@@ -397,15 +503,15 @@ bool ShapesExporter::exportShape(const string &filename, const string &output_pa
 	Scene->animate(1.0);
 	Scene->render();
 
-	UParticleSystemInstance *psi = static_cast<UParticleSystemInstance*>(&Entity);
-	if(psi)
-	{
-		psi->getSystemBBox(bbox);
-		setCamera(bbox, Entity);
-	}
-
 	if(CFile::getExtension(filename) == "ps")
 	{
+		UParticleSystemInstance *psi = static_cast<UParticleSystemInstance*>(&Entity);
+		if(psi)
+		{
+			psi->getSystemBBox(bbox);
+			setCamera(bbox, Entity);
+		}
+
 		// first pass to detect bbox & duration
 		CAABBox bbox2;
 		double duration = 0.0;
@@ -418,7 +524,7 @@ bool ShapesExporter::exportShape(const string &filename, const string &output_pa
 	}
 	else
 	{
-		renderShape(Entity, CVector::I, output_path);
+		renderShape(Entity, output_path);
 	}
 
 	// delete entity
@@ -470,22 +576,9 @@ bool ShapesExporter::exportSkeleton(const string &skeleton, const vector<string>
 	// get AABox of Entity
 	CAABBox bbox;
 	Skeleton.computeCurrentBBox(bbox, NULL);
+	setCamera(bbox, Skeleton);
 
-	CVector center = bbox.getCenter();
-	CVector max_radius = bbox.getMax();
-
-	Skeleton.setPivot(center);
-
-	float radius = max_radius.x;
-
-	if (max_radius.y > radius) radius = max_radius.y;
-	if (max_radius.z > radius) radius = max_radius.z;
-
-	// camera will look at entities
-//	Camera.lookAt(CVector(center.x, center.y - bbox.getRadius() * 1.5f, center.z * 2.f), CVector(center.x, center.y, center.z * 2.f));
-	Camera.lookAt(CVector(center.x + bbox.getRadius() * 2.0f, center.y, center.z), CVector(center.x, center.y, center.z));
-
-	renderShape(Skeleton, CVector::J, output_path);
+	renderShape(Skeleton, output_path);
 
 	// delete entities
 	for(size_t i = 0; i < Entities.size(); ++i)
@@ -499,6 +592,95 @@ bool ShapesExporter::exportSkeleton(const string &skeleton, const vector<string>
 
 	return true;
 }
+
+/*
+bool ShapesExporter::exportAnimation(const std::string &animation, const std::string &skeleton, const std::vector<std::string> &parts, const std::string &output_path)
+{
+	UPlayListManager *PlayListManager = Scene->createPlayListManager();
+	UAnimationSet *AnimSet = Driver->createAnimationSet();
+
+//	uint anim_id = AnimSet->addAnimation("anim.anim", "anim_name", false);
+//	uint weight_id = AnimSet->addSkeletonWeight("file.wgt", "skel_name"):
+
+//	UAnimation *anim = AnimSet->getAnimation(anim_id);
+//	anim->getEndTime();
+
+//	UPlayList *playlist = playlist_manager->createPlayList(AnimSet);
+//	playlist->registerTransform(Skeleton);
+
+//	playlist->setAnimation(0, anim_id);
+//	playlist->setTimeOrigin(newSlot, time);
+//	playlist->setWeightSmoothness(newSlot, 1.0f);
+
+	// get scene camera
+	UCamera Camera = Scene->getCam();
+	if (Camera.empty())
+	{
+		nlwarning("can't get camera from scene");
+		return false;
+	}
+
+	// add a skeleton to the scene
+	USkeleton Skeleton = Scene->createSkeleton(skeleton);
+
+	// if we can't create entity, skip it
+	if (Skeleton.empty())
+	{
+		nlwarning("can't create skeleton from %s", skeleton.c_str());
+		return false;
+	}
+
+	std::vector<UInstance> Entities(parts.size());
+
+	for(size_t i = 0; i < parts.size(); ++i)
+	{
+		Entities[i] = Scene->createInstance(parts[i]);
+
+		// if we can't create entity, skip it
+		if (Entities[i].empty())
+		{
+			nlwarning("can't create instance from %s", parts[i].c_str());
+			return false;
+		}
+
+		if (!Skeleton.bindSkin(Entities[i]))
+		{
+			nlwarning("can't bind %s to skeleton", parts[i].c_str());
+			return false;
+		}
+	}
+
+	// get AABox of Entity
+	CAABBox bbox;
+	Skeleton.computeCurrentBBox(bbox, NULL);
+
+	setCamera();
+
+	// camera will look at skeleton
+	Camera.lookAt(CVector(center.x + dist - radius, center.y, center.z), center);
+
+	renderAllImages(Skeleton, CVector::J, output_path);
+
+	// delete entities
+	for(size_t i = 0; i < Entities.size(); ++i)
+	{
+		Skeleton.detachSkeletonSon(Entities[i]);
+		Scene->deleteInstance(Entities[i]);
+	}
+
+	// delete skeleton
+	Scene->deleteSkeleton(Skeleton);
+
+	Scene->deletePlayListManager(PlayListManager);
+	Driver->deleteAnimationSet(AnimSet);
+
+//	m_playlist->emptyPlayList();
+//	m_playlist->resetAllChannels();
+//	m_playlistman->deletePlayList(m_playlist);
+
+	return true;
+}
+*/
 
 bool ShapesExporter::saveOneImage(const string &filename)
 {
@@ -543,21 +725,49 @@ bool ShapesExporter::saveOneImage(const string &filename)
 		nlwarning("can't create %s", filename.c_str());
 		return false;
 	}
+
 	return true;
 }
 
-bool ShapesExporter::renderShape(UTransform &entity, const CVector &axis, const string &output_path)
+bool ShapesExporter::renderShape(UTransform &entity, const string &output_path)
 {
+	CQuat quat(0.f, 0.f, 0.f, 0.f);
+
+	CVector axis1 = CVector::J, axis2 = CVector::K;
+	int orientation1 = -1, orientation2 = 1;
+
+	NL3D::UInstance inst;
+	inst.cast(entity);
+	if (!inst.empty())
+	{
+//		inst.getDefaultRotQuat(quat);
+		inst.getRotQuat(quat);
+/*		if (!quat.getAxis().isNull())
+		{
+			CVector a = quat.getAxis();
+			if (a.z != 0 && a.x == 0.f)
+			{
+				axis1 = CVector::J;
+				orientation1 = -1;
+			}
+			if (a.y != 0.f)
+			{
+				axis2 = CVector::J;
+			}
+		}
+*/
+	}
+
 	// main loop
 	for (uint step_z = 0; step_z < settings.output_steps_z; ++step_z)
 	{
-		CQuat z(axis, (float)step_z * ((float)NLMISC::Pi*2.f / (float)settings.output_steps_z));
+		CQuat z(axis1, orientation1 * (float)step_z * ((float)NLMISC::Pi*2.f / (float)settings.output_steps_z));
 
 		for (uint step_x = 0; step_x < settings.output_steps_x; ++step_x)
 		{
-			CQuat x(CVector::K, (float)step_x * ((float)NLMISC::Pi*2.f / (float)settings.output_steps_x));
+			CQuat x(axis2, orientation2 * (float)step_x * ((float)NLMISC::Pi*2.f / (float)settings.output_steps_x));
 
-			entity.setRotQuat(z * x);
+			entity.setRotQuat(quat * z * x);
 
 			string filename = CPath::standardizePath(output_path) + toString("%03d_%03d.%s", step_z, step_x, settings.output_format.c_str());
 
@@ -728,4 +938,66 @@ bool ShapesExporter::createThumbnail(const string &filename, const string &path)
 	}
 
 	return true;
+}
+
+std::string ShapesExporter::findSkeleton(const std::string &shape)
+{
+	std::string baseFilename = CFile::getFilenameWithoutExtension(shape);
+
+	// work in 60% of cases
+	std::string skeleton = CPath::lookup(baseFilename + ".skel", false, false, false);
+
+	if (!skeleton.empty())
+		return skeleton;
+
+	// remove last part
+	size_t pos = baseFilename.rfind("_");
+
+	if (pos != std::string::npos)
+	{
+		skeleton = CPath::lookup(baseFilename.substr(0, pos) + ".skel", false, false, false);
+
+		if (!skeleton.empty())
+			return skeleton;
+
+		pos = baseFilename.find("_");
+
+		std::vector<std::string> filenames;
+
+		CPath::getFileListByName("skel", baseFilename.substr(pos), filenames);
+
+		if (filenames.size() == 1)
+		{
+			skeleton = filenames[0];
+			return skeleton;
+		}
+
+	}
+
+	int gender = 0;
+
+	if (baseFilename.find("_hom_") != std::string::npos)
+	{
+		gender = 1;
+	}
+	else if (baseFilename.find("_hof_") != std::string::npos)
+	{
+		gender = 2;
+	}
+
+	// bipeds
+	if (gender > 0)
+	{
+		// karavan
+		if (baseFilename.find("ca_") == 0)
+			return gender == 1 ? "ca_hom_armor01.skel":"ca_hof_armor01.skel";
+
+		return gender == 1 ? "fy_hom_skel.skel":"fy_hof_skel.skel";
+	}
+
+	nlwarning("can't find skeleton for %s", shape.c_str());
+	// goo mobs
+//	CPath::getFileListByName("max", "_hof_", filenames);
+
+	return "";
 }

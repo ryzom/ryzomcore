@@ -1,6 +1,5 @@
 /* 7zCrc.c */
 
-#include "nel/misc/types_nl.h"
 #include "7zCrc.h"
 
 #define kCrcPoly 0xEDB88320

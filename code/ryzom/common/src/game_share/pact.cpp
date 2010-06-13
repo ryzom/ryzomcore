@@ -46,7 +46,7 @@ static std::string pactTypeStrings[]=
 
 const std::string& toString (EPactNature pactNature)
 {
-	if (pactNature >= sizeof(pactNatureStrings)/sizeof(string) )
+	if ((uint)pactNature >= sizeof(pactNatureStrings)/sizeof(string) )
 	{
 		nlwarning("<toString (EPactNature pactNature) : invalid pact nature %d",pactNature);
 		return pactNatureStrings[(uint)Unknown];
@@ -56,7 +56,7 @@ const std::string& toString (EPactNature pactNature)
 
 const std::string& toString (EPactType pactType)
 {
-	if (pactType >= sizeof(pactTypeStrings)/sizeof(string) )
+	if ((uint)pactType >= sizeof(pactTypeStrings)/sizeof(string) )
 	{
 		nlwarning("<toString (EPactType pactType) : invalid pact type %d",pactType);
 		return pactTypeStrings[(uint)UnknownType];

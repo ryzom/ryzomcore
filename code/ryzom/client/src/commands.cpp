@@ -890,7 +890,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 static bool talkInChan(uint32 nb,std::vector<std::string>args)
 {
 	uint32 maxChans = CChatGroup::MaxDynChanPerPlayer;
-	if (nb<0||nb>=maxChans)
+	if (nb>=maxChans)
 	{
 		return false;
 	}

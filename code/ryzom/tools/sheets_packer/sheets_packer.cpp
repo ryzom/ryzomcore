@@ -65,50 +65,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline,
 int main(int argc, char **argv)
 #endif
 {
-
-/*
-#if defined(NL_OS_WINDOWS)
-
-	// extract the 2 first param (argv[1] and argv[2]) it must be cookie and addr
-
-	string cmd = cmdline;
-	std::string::size_type pos1 = cmd.find_first_not_of (' ');
-	std::string::size_type pos2;
-	if (pos1 != string::npos)
-	{
-		pos2 = cmd.find (' ', pos1);
-		if(pos2 != string::npos)
-		{
-			cookie = cmd.substr (pos1, pos2-pos1);
-
-			pos1 = cmd.find_first_not_of (' ', pos2);
-			if (pos1 != string::npos)
-			{
-				pos2 = cmd.find (' ', pos1);
-				if(pos2 == string::npos)
-				{
-					fsaddr = cmd.substr (pos1);
-				}
-				else if (pos1 != pos2)
-				{
-					fsaddr = cmd.substr (pos1, pos2-pos1);
-				}
-			}
-		}
-	}
-
-#else
-
-	if (argc>=3)
-	{
-		cookie = argv[1];
-		fsaddr = argv[2];
-	}
-	nlinfo ("From command line (argc=%d): cookie '%s' addr '%s'", argc, cookie.c_str (), fsaddr.c_str());
-#endif
-*/
-
-
 	/////////////////////////////////
 	// Initialize the application. //
 	try

@@ -615,6 +615,8 @@ void CGroupTable::updateCoords()
 						alignmentX = _Columns[column].Width - cell->WidthMax;
 						widthReduceX = alignmentX;
 						break;
+					default:
+						break;
 					}
 				}
 
@@ -664,6 +666,8 @@ void CGroupTable::updateCoords()
 						break;
 					case CGroupCell::Bottom:
 						alignmentY = _Rows[row].Height - (sint32)cell->Group->getH();
+						break;
+					default:
 						break;
 					}
 				}

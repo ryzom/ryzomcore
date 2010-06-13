@@ -49,7 +49,7 @@ struct CChatWindowDesc
 	ucstring				Title;                // unique title for the window
 	std::string				FatherContainer;      // name of the father container. If empty, the chat box must be added manually in the hierarchy
 	std::string				ChatTemplate;         // Template for the chat interface, or "" to use the default one
-	TTemplateParams			ChatTemplateParams;	  // optional tempalte parameters
+	TTemplateParams			ChatTemplateParams;	  // optional template parameters
 	sint					InsertPosition;       // [optional] -1 if the chat box should be inserted at the end of the container list, or the index otherwise
 	bool 					ParentBlink;          // [optional] when true, make the parent group blink
 	bool                    Savable;              // should the position of the chat box be saved between session ? Default is false

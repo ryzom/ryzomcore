@@ -22,21 +22,12 @@
 /////////////
 #include "stdpch.h"
 
-#if defined(NL_OS_WINDOWS)
-#include <windows.h>
-#endif
 // Misc.
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
 // Client.
 #include "sheets_packer_cfg.h"
-#include "debug_client.h"
-// 3D Interface.
-//#include "nel/3d/u_driver.h"
-//#include "nel/3d/u_scene.h"
 
-// Game Share.
-#include "game_share/time_weather_season/time_and_season.h"
 
 ///////////
 // MACRO //
@@ -138,7 +129,6 @@
 // USING //
 ///////////
 using namespace NLMISC;
-//using namespace NL3D;
 
 
 ////////////
@@ -147,13 +137,6 @@ using namespace NLMISC;
 CClientConfig AppCfg;
 const std::string ConfigFileName = "sheets_packer.cfg";
 
-
-////////////
-// EXTERN //
-////////////
-//extern NL3D::UScene		*Scene;
-//extern NL3D::UDriver	*Driver;
-extern CRyzomTime		RT;
 
 /////////////
 // METHODS //
@@ -165,17 +148,6 @@ extern CRyzomTime		RT;
 CClientConfig::CClientConfig()
 {
 	SaveConfig			= false;
-	PositionX			= 0;
-	PositionY			= 0;
-	Frequency			= 60;
-	Windowed			= false;					// Default is windowed mode.
-	Width				= 800;						// Default Width for the window.
-	Height				= 600;						// Default Height for the window.
-	Depth				= 32;						// Default Bit per Pixel.
-	Contrast			= 0.f;						// Default Monitor Contrast.
-	Luminosity			= 0.f;						// Default Monitor Luminosity.
-	Gamma				= 0.f;						// Default Monitor Gamma.
-	PreDataPath.push_back("../../client/data/gamedev/language/");	// Default Path for the language data
 	DataPath.push_back("../../client/data/");					// Default Path for the Data.
 	DataPath.push_back("../../common/data_leveldesign/");		// Default Path for the Level Design Directory.
 	DataPath.push_back("../../common/data_common/");				// Default Path for the Level Design Directory.
@@ -197,69 +169,8 @@ void setValues()
 
 	CConfigFile::CVar *varPtr = 0;
 
-	
-	///////////////////
-	// WINDOW CONFIG //
-	// Mode.
-
-	// SaveConfig
-	varPtr = AppCfg.ConfigFile.getVarPtr ("SaveConfig");
-	if (varPtr)
-		AppCfg.SaveConfig = varPtr->asInt() ? true : false;
-	else
-		nlwarning ("Default value used for 'SaveConfig' !!!");
-
-	// Window Positon
-	varPtr = AppCfg.ConfigFile.getVarPtr ("PositionX");
-	if (varPtr)
-		AppCfg.PositionX = varPtr->asInt();
-	else
-		nlwarning ("Default value used for 'PositionX' !!!");
-	varPtr = AppCfg.ConfigFile.getVarPtr ("PositionY");
-	if (varPtr)
-		AppCfg.PositionY = varPtr->asInt();
-	else
-		nlwarning ("Default value used for 'PositionY' !!!");
-
-	// Window frequency
-	varPtr = AppCfg.ConfigFile.getVarPtr ("Frequency");
-	if (varPtr)
-		AppCfg.Frequency = varPtr->asInt();
-	else
-		nlwarning ("Default value used for 'Frequency' !!!");
-
-	try
-	{
-		CConfigFile::CVar &cvFullScreen = AppCfg.ConfigFile.getVar("FullScreen");
-		AppCfg.Windowed = cvFullScreen.asInt() ? false : true;
-	}
-	catch(EUnknownVar &) {nlwarning("Default value used for 'Fullscreen' !!!");}
-	// Width
-	READ_INT(Width)
-	// Height
-	READ_INT(Height)
-	// Depth : Bit Per Pixel
-	READ_INT(Depth)
-	// Contrast
-	READ_FLOAT(Contrast)
-	// Luminosity
-	READ_FLOAT(Luminosity)
-	// Gamma
-	READ_FLOAT(Gamma)
-
-
 	//////////
 	// MISC //
-	// Pre Data Path.
-	try
-	{
-		CConfigFile::CVar &cvPreDataPath = AppCfg.ConfigFile.getVar("PreDataPath");
-		AppCfg.PreDataPath.clear ();
-		for (uint i = 0; i < cvPreDataPath.size(); i++)
-			AppCfg.PreDataPath.push_back(cvPreDataPath.asString(i));
-	}
-	catch(EUnknownVar &) {nlwarning("Default value used for 'PreDataPath' !!!");}
-	
 	// Data Path.
 	try
 	{
@@ -314,35 +225,7 @@ void setValues()
 	// LanguageCode
 	READ_STRING(LanguageCode)
 
-
 	READ_BOOL(FPExceptions)
-
-
-
-	//////////
-	// INIT //
-	// FPU
-#ifdef NL_OS_WINDOWS
-	if(AppCfg.FPExceptions)
-		_control87(_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
-	else
-		_control87(_EM_INVALID|_EM_DENORMAL|_EM_ZERODIVIDE|_EM_OVERFLOW|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
-#endif // NL_OS_WINDOWS
-
-/*	if(Driver)
-	{
-		// Set the monitor color properties
-		CMonitorColorProperties monitorColor;
-		for(uint i=0; i<3; i++)
-		{
-			monitorColor.Contrast[i]	= AppCfg.Contrast;
-			monitorColor.Luminosity[i]	= AppCfg.Luminosity;
-			monitorColor.Gamma[i]		= AppCfg.Gamma;
-		}
-		if(!Driver->setMonitorColorProperties(monitorColor))
-			nlwarning("reloadCFG: setMonitorColorProperties fails");
-	}
-*/
 }// load //
 
 
@@ -354,41 +237,6 @@ void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	// Start the opening of a new node named ClientCFG.
 	f.xmlPush("ClientCFG");
-
-		f.xmlPushBegin("Windowed");
-		f.xmlPushEnd();
-		f.serial(Windowed);
-		f.xmlPop();
-
-		f.xmlPushBegin("Width");
-		f.xmlPushEnd();
-		f.serial(Width);
-		f.xmlPop();
-
-		f.xmlPushBegin("Height");
-		f.xmlPushEnd();
-		f.serial(Height);
-		f.xmlPop();
-
-		f.xmlPushBegin("Depth");
-		f.xmlPushEnd();
-		f.serial(Depth);
-		f.xmlPop();
-
-		f.xmlPushBegin("Contrast");
-		f.xmlPushEnd();
-		f.serial(Contrast);
-		f.xmlPop();
-
-		f.xmlPushBegin("Luminosity");
-		f.xmlPushEnd();
-		f.serial(Luminosity);
-		f.xmlPop();
-
-		f.xmlPushBegin("Gamma");
-		f.xmlPushEnd();
-		f.serial(Gamma);
-		f.xmlPop();
 
 	// Close the serial for hte Client CFG.
 	f.xmlPop();
@@ -412,52 +260,13 @@ void CClientConfig::init(const std::string &configFileName)
 
 
 //-----------------------------------------------
-// init :
+// release :
 //-----------------------------------------------
 void CClientConfig::release ()
 {
 	// Do we have to save the cfg file ?
 	if (AppCfg.SaveConfig)
 	{
-		// Are we in window mode ?
-		if (AppCfg.Windowed)
-		{
-/*			// Driver still alive ?
-			if (Driver && Driver->isActive ())
-			{
-#ifdef NL_OS_WINDOWS
-				HWND hWnd = (HWND)Driver->getDisplay ();
-
-				// Get the window position
-				RECT window;
-				RECT client;
-				GetWindowRect (hWnd, &window);
-				GetClientRect (hWnd, &client);
-
-				// Save values
-				try
-				{
-					CConfigFile::CVar *varPtr = AppCfg.ConfigFile.getVarPtr ("PositionX");
-					if (varPtr)
-						varPtr->setAsInt (window.left);
-					varPtr = AppCfg.ConfigFile.getVarPtr ("PositionY");
-					if (varPtr)
-						varPtr->setAsInt (window.top);
-					varPtr = AppCfg.ConfigFile.getVarPtr ("Width");
-					if (varPtr)
-						varPtr->setAsInt (client.right - client.left);
-					varPtr = AppCfg.ConfigFile.getVarPtr ("Height");
-					if (varPtr)
-						varPtr->setAsInt (client.bottom - client.top);
-				}
-				catch (Exception &e)
-				{
-					nlwarning ("Error while set config file variables : %s", e.what ());
-				}
-#endif // NL_OS_WINDOWS
-			}
-*/		}
-
 		// Save it
 		AppCfg.ConfigFile.save ();
 	}

@@ -1,7 +1,5 @@
 /* 7zBuffer.c */
 
-#include "nel/misc/types_nl.h"
-
 #include "7zBuffer.h"
 #include "7zAlloc.h"
 

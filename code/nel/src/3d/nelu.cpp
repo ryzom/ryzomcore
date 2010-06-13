@@ -61,15 +61,11 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 		CNELU::Driver= CDRU::createD3DDriver();
 	}
 	else
+#endif // NL_OS_WINDOWS
 	{
 		CNELU::Driver= CDRU::createGlDriver();
 	}
-#else // NL_OS_WINDOWS
 
-	CNELU::Driver= CDRU::createGlDriver();
-	//CNELU::Driver= CDRU::createD3DDriver();
-
-#endif // NL_OS_WINDOWS
 	if (!CNELU::Driver->init())
 	{
 		nlwarning ("CNELU::initDriver: init() failed");

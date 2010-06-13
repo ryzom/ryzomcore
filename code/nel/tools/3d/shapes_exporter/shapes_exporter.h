@@ -26,6 +26,7 @@ struct Settings
 {
 	Settings();
 
+	std::string input_path;
 	std::string output_path;
 
 	std::string preview_format;
@@ -56,17 +57,18 @@ public:
 
 	bool init();
 	bool parseConfigFile(const std::string &filename);
-	bool setupLight();
+	bool setupLight(const NLMISC::CVector &position, const NLMISC::CVector &direction);
 
 	bool exportShape(const std::string &filename, const std::string &output_path);
 	bool exportSkeleton(const std::string &skeleton, const std::vector<std::string> &parts, const std::string &output_path);
-
-	void setCamera(NLMISC::CAABBox &bbox, NL3D::UInstance &entity, bool high_z=false);
+	void setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z=false);
 
 	bool saveOneImage(const std::string &output_path);
-	bool renderShape(NL3D::UTransform &entity, const NLMISC::CVector &axis, const std::string &output_path);
+	bool renderShape(NL3D::UTransform &entity, const std::string &output_path);
 	bool renderPS(NL3D::UInstance &entity, const std::string &output_path, double &duration, NLMISC::CAABBox &bbox);
 	bool createThumbnail(const std::string &filename, const std::string &path);
+
+	static std::string findSkeleton(const std::string &shape);
 
 	Settings settings;
 	NL3D::UDriver* Driver;

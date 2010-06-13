@@ -2907,7 +2907,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		// window handling. if not handled by a control
 		if (!handled)
 		{
-			if ((pNewCurrentWnd != NULL) && _ModalStack.empty() || (!_ModalStack.empty() && _ModalStack.back().ModalWindow == pNewCurrentWnd))
+			if (((pNewCurrentWnd != NULL) && _ModalStack.empty()) || ((!_ModalStack.empty() && _ModalStack.back().ModalWindow == pNewCurrentWnd)))
 			{
 				CEventDescriptorMouse ev2 = eventDesc;
 				sint32 x= eventDesc.getX(), y = eventDesc.getY();

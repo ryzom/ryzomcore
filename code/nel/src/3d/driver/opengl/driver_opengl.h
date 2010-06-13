@@ -305,13 +305,11 @@ public:
 
 	virtual nlWindow		getDisplay()
 	{
-#ifdef NL_OS_WINDOWS
-		return _hWnd;
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 		return NULL;
-#elif defined(NL_OS_UNIX)
-		return win;
-#endif // NL_OS_WINDOWS
+#else
+		return _win;
+#endif
 	}
 
 	virtual uint32			getAvailableVertexAGPMemory ();
@@ -655,26 +653,29 @@ private:
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-	static const uint32		ReleaseVersion;
+	static const uint32			ReleaseVersion;
 
 	bool						_FullScreen;
 	bool						_OffScreen;
+	bool						_Resizable;
 	uint						_Interval;
+	sint8						_AntiAliasing;
 
 	sint32						_WindowWidth, _WindowHeight, _WindowX, _WindowY;
+
+	nlWindow					_win;
+	bool						_DestroyWindow;
 
 #ifdef NL_OS_WINDOWS
 
 	friend static bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	HWND						_hWnd;
 	HDC							_hDC;
 	PIXELFORMATDESCRIPTOR		_pfd;
     HGLRC						_hRC;
 	static uint					_Registered;
 	DEVMODE						_OldScreenMode;
 	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
-	bool						_DestroyWindow;
 
 	// Off-screen rendering in Dib section
 	HPBUFFERARB					_PBuffer;
@@ -684,16 +685,16 @@ private:
 
 #elif defined (NL_OS_UNIX)
 
-	Display						*dpy;
-	GLXContext					ctx;
-	Window						win;
-	Cursor						cursor;
+	Display*					_dpy;
+	GLXContext					_ctx;
+	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
+	XVisualInfo*				_visual_info;
 
 #ifdef XF86VIDMODE
-	int						_OldDotClock;   // old dotclock
-	XF86VidModeModeLine		_OldScreenMode;	// old modeline
-	int						_OldX, _OldY;   //Viewport settings
+	int							_OldDotClock;   // old dotclock
+	XF86VidModeModeLine			_OldScreenMode;	// old modeline
+	int							_OldX, _OldY;   //Viewport settings
 #endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
@@ -841,8 +842,15 @@ private:
 	bool					_CurrentGlNormalize;
 
 private:
-	void					switchBackToOldMode();
 	bool					setupDisplay();
+	bool					unInit();
+
+	bool					createWindow(const GfxMode& mode);
+	bool					destroyWindow();
+	// Methods to manage screen resolutions
+	bool					restoreScreenMode();
+	bool					saveScreenMode();
+	bool					setScreenMode(const GfxMode &mode);
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();

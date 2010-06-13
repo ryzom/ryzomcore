@@ -377,6 +377,7 @@ void CLoginStateMachine::run()
 			{
 				mustReboot = CPatchManager::getInstance()->mustLaunchBatFile();
 			}
+
 			if (mustReboot)
 			{
 				// skip eula and show reboot screen

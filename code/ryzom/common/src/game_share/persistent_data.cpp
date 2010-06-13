@@ -962,7 +962,7 @@ bool CPersistentDataRecord::fromXML(const std::string& s)
 	// we have a buffer of xml-like blocks so we're going to start by chunking it up (from the back)
 	vector<CSString> clauses;
 	bool clauseOpen=false;
-	uint32 clauseEnd;
+	uint32 clauseEnd = 0;
 	for (uint32 i=len;i--;)
 	{
 		switch(buff[i])
