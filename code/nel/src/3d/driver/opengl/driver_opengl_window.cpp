@@ -224,8 +224,10 @@ bool CDriverGL::unInit()
 		_PBuffer = NULL;
 	}
 
-	if (!UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
+	if (_Registered && !UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
+	{
 		nlwarning("Can't unregister NLClass");
+	}
 
 	// Restaure monitor color parameters
 	if (_NeedToRestaureGammaRamp)
@@ -563,6 +565,10 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_win = wnd;
 		}
 
+		// associate OpenGL driver to window
+		SetWindowLongPtr(_win, GWLP_USERDATA, (LONG_PTR)this);
+
+
 		_hDC=GetDC(_win);
 		wglMakeCurrent(_hDC,NULL);
 
@@ -668,13 +674,13 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlerror("glXChooseVisual() failed");
 	}
 
+	_visual_info = visual_info;
+
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
 	if (_ctx == NULL)
 	{
 		nlerror("glXCreateContext() failed");
 	}
-
-	_visual_info = visual_info;
 
 	if (wnd == EmptyWindow)
 	{
@@ -922,9 +928,6 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		return false;
 	}
 
-	// associate OpenGL driver to window
-	SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
-
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
 	// TODO
@@ -934,8 +937,11 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	if (_visual_info == NULL)
 		return false;
 
+	nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
+
 	XSetWindowAttributes attr;
 	attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
+	attr.colormap = XCreateColormap(_dpy, root, _visual_info->visual, AllocNone);
 
 #ifdef XF86VIDMODE
 	// If we're going to attempt fullscreen, we need to set redirect to True,
@@ -953,12 +959,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	attr.override_redirect = False;
 #endif
 
-	int attr_flags = CWOverrideRedirect | CWBackPixel;
-
-	nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
-
-	attr.colormap = XCreateColormap(_dpy, root, _visual_info->visual, AllocNone);
-	attr_flags |= CWColormap;
+	int attr_flags = CWOverrideRedirect | CWBackPixel | CWColormap;
 
 	window = XCreateWindow (_dpy, root, 0, 0, mode.Width, mode.Height, 0, _visual_info->depth, InputOutput, _visual_info->visual, attr_flags, &attr);
 
@@ -1538,8 +1539,8 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	{
 		if (_win)
 		{
-			width = (uint32)(_WindowWidth);
-			height = (uint32)(_WindowHeight);
+			width = (uint32)_WindowWidth;
+			height = (uint32)_WindowHeight;
 		}
 	}
 
