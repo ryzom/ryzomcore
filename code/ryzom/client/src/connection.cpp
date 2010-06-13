@@ -2688,7 +2688,7 @@ class CAHScenarioControl : public IActionHandler
 		}
 		setScenarioInformation(scenarioWnd, "");
 
-		// hide description and informations?
+		// hide description and information?
 		result = scenarioWnd->findFromShortId(string("scenario_info_prop"));
 		if(result)
 			result->setActive(R2::getEditor().isInitialized());
@@ -2863,7 +2863,7 @@ class CAHScenarioInformation : public IActionHandler
 			}
 		}
 
-		// active description and informations
+		// active description and information
 		result = scenarioWnd->findFromShortId(string("scenario_info_prop"));
 		if(result)
 			result->setActive(true);
