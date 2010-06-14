@@ -701,7 +701,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	}
 
 	glXMakeCurrent (_dpy, _win, _ctx);
-	XMapRaised (_dpy, _win);
+//	XMapRaised (_dpy, _win);
 
 	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask);
 
@@ -714,8 +714,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 #endif // NL_OS_UNIX
 
-	setMode(mode);
+	// setup window size and screen mode
+	if (!setMode(mode))
+		return false;
 
+	// setup OpenGL structures
 	if (!setupDisplay())
 		return false;
 
@@ -724,21 +727,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	return true;
 }
-
-#ifdef NL_OS_WINDOWS
-// --------------------------------------------------
-// This code comes from MFC
-static void modifyStyle (HWND hWnd, int nStyleOffset, LONG_PTR dwRemove, LONG_PTR dwAdd)
-{
-	H_AUTO_OGL(modifyStyle)
-	LONG_PTR dwStyle = ::GetWindowLongPtr(hWnd, nStyleOffset);
-	LONG_PTR dwNewStyle = (dwStyle & ~dwRemove) | dwAdd;
-	if (dwStyle == dwNewStyle)
-		return;
-
-	::SetWindowLongPtr(hWnd, nStyleOffset, dwNewStyle);
-}
-#endif
 
 // --------------------------------------------------
 bool CDriverGL::saveScreenMode()
@@ -868,7 +856,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	return NL3D::MAC::setMode(mode);
+	// TODO
 
 #elif defined(NL_OS_UNIX)
 
@@ -1008,6 +996,7 @@ bool CDriverGL::destroyWindow()
 		ReleaseDC(_win, _hDC);
 		_hDC = NULL;
 
+		// don't destroy window if it hasn't been created by our driver
 		if (_DestroyWindow)
 			DestroyWindow(_win);
 	}
@@ -1039,6 +1028,87 @@ bool CDriverGL::destroyWindow()
 	return true;
 }
 
+CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
+{
+	H_AUTO_OGL(CDriverGL_getWindowStyle)
+
+	if (_FullScreen)
+		return EWSFullscreen;
+
+	return EWSWindowed;
+}
+
+bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
+{
+	H_AUTO_OGL(CDriverGL_setWindowStyle)
+
+#if defined(NL_OS_WINDOWS)
+
+	// get current style
+	LONG dwStyle = GetWindowLong(_win, GWL_STYLE);
+
+	// prepare new style
+	LONG dwNewStyle = WS_CLIPCHILDREN|WS_CLIPSIBLINGS;
+
+	// get window current state
+	WINDOWPLACEMENT wndpl;
+	wndpl.length = sizeof(WINDOWPLACEMENT);
+
+	bool isMaximized = GetWindowPlacement(_win, &wndpl) && (wndpl.showCmd == SW_SHOWMAXIMIZED);
+	bool isVisible = false;
+
+	if (windowStyle == EWSWindowed && !_OffScreen)
+	{
+		dwNewStyle |= WS_OVERLAPPEDWINDOW;
+
+		// if we can't resize window, remove maximize box and resize anchors
+		if (!_Resizable) dwNewStyle ^= WS_MAXIMIZEBOX|WS_THICKFRAME;
+
+		isVisible = (dwStyle & WS_VISIBLE) != 0;
+	}
+	else if (windowStyle == EWSFullscreen)
+	{
+		dwNewStyle |= WS_POPUP;
+		isVisible = true;
+	}
+
+	if (isVisible)
+		dwNewStyle |= WS_VISIBLE;
+
+	if (dwStyle != dwNewStyle)
+		SetWindowLong(_win, GWL_STYLE, dwNewStyle);
+
+//	if (windowStyle == EWSMaximized && isVisible && !isMaximized)
+//		ShowWindow(_hWnd, SW_SHOWMAXIMIZED);
+//	else if (isMaximized && isVisible)
+//		ShowWindow(_hWnd, SW_RESTORE);
+
+#elif defined(NL_OS_UNIX)
+
+	// x11 fullscreen is not working on mac os x
+#if !defined(NL_OS_MAC)
+	// Toggle fullscreen
+	if (windowStyle != getWindowStyle())
+	{
+		XEvent xev;
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = _win;
+		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? 1:0;
+		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+		xev.xclient.data.l[2] = 0;
+		XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureNotifyMask, &xev);
+	}
+
+#endif
+
+#endif // NL_OS_WINDOWS
+
+	return true;
+}
+
 // --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
@@ -1047,67 +1117,27 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!setScreenMode(mode))
 		return false;
 
+	// when changing window style, it's possible system change window size too
+	setWindowStyle(mode.Windowed ? EWSWindowed:EWSFullscreen);
+
 	_WindowWidth = mode.Width;
 	_WindowHeight = mode.Height;
 
-#ifdef NL_OS_WINDOWS
-
-	if (mode.Windowed)
-	{
-		if (_FullScreen)
-			modifyStyle(_win, GWL_STYLE, WS_POPUP, WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS);
-	}
-	else
-	{
-		// mode ok => copy changes
+	if (!mode.Windowed)
 		_Depth = mode.Depth;
 
-		// if old mode was not fullscreen
-		if (!_FullScreen)
-		{
-			// Under the XP theme desktop, this function call the winproc WM_SIZE and change _WindowWidth and _WindowHeight
-			sint32 windowWidth = _WindowWidth;
-			sint32 windowHeight = _WindowHeight;
-			modifyStyle(_win, GWL_STYLE, WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS, WS_POPUP);
-			_WindowWidth = windowWidth;
-			_WindowHeight = windowHeight;
-		}
-	}
-
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-
-	NL3D::MAC::setMode(mode);
-
-#elif defined(NL_OS_UNIX)
-
-
-
-	// x11 fullscreen is not working on mac os x
-#if !defined(NL_OS_MAC)
-	// Toggle fullscreen
-	if (mode.Windowed == _FullScreen)
-	{
-		XEvent xev;
-		memset(&xev, 0, sizeof(xev));
-		xev.type = ClientMessage;
-		xev.xclient.window = _win;
-		xev.xclient.message_type =  XInternAtom(_dpy, "_NET_WM_STATE", false);
-		xev.xclient.format = 32;
-		xev.xclient.data.l[0] = !mode.Windowed;
-		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", false);
-		xev.xclient.data.l[2] = 0;
-		XSendEvent(_dpy, DefaultRootWindow(_dpy), false, SubstructureNotifyMask, &xev);
-	}
-#endif
-
-
-#endif // NL_OS_UNIX
-
-#if !defined(NL_OS_MAC)
 	_FullScreen = !mode.Windowed;
+
+#if defined(NL_OS_MAC)
+
+#if defined(NL_MAC_NATIVE)
+	NL3D::MAC::setMode(mode);
 #else
+	// X11 under Mac OS can't use fullscreen
 	_FullScreen = false;
-#endif
+#endif // NL_MAC_NATIVE
+
+#endif // NL_OS_MAC
 
 	setWindowSize(mode.Width, mode.Height);
 
@@ -1527,6 +1557,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	SetRect (&rc, 0, 0, width, height);
 	AdjustWindowRectEx(&rc, GetWindowStyle(_win), GetMenu(_win) != NULL, GetWindowExStyle(_win));
 	UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
+	// set position to (0, 0) if fullscreen
 	if (!_FullScreen)
 		flags |= SWP_NOMOVE;
 	SetWindowPos(_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
@@ -1542,31 +1573,33 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_UNIX) && !defined(NL_MAC_NATIVE)
 
-	// Resize and update the window
-	XResizeWindow(_dpy, _win, width, height);
-//	XMapWindow(_dpy, _win);
-
-	// Update WM hints (update size and allow resizing)
-	XSizeHints size_hints;
-	size_hints.x = 0;
-	size_hints.y = 0;
-	size_hints.width = width;
-	size_hints.height = height;
-	size_hints.flags = PSize;
-
-	// x11 fullscreen is not working on mac os x
-#if !defined(NL_OS_MAC)
-	if (!_FullScreen)
+	// set position to (0, 0) if fullscreen
+	if (_FullScreen)
 	{
-		size_hints.flags = PSize | PMinSize | PMaxSize;
+		// move and resize the window
+		XMoveResizeWindow(_dpy, _win, 0, 0, width, height);
+	}
+	else
+	{
+		// resize the window
+		XResizeWindow(_dpy, _win, width, height);
+	}
+
+	if (!_Resizable)
+	{
+		// Update WM hints (update size and allow resizing)
+		XSizeHints size_hints;
+
+		size_hints.flags = PMinSize | PMaxSize;
 		size_hints.min_width = width;
 		size_hints.min_height = height;
 		size_hints.max_width = width;
 		size_hints.max_height = height;
-	}
-#endif
 
-	XSetWMNormalHints(_dpy, _win, &size_hints);
+		XSetWMNormalHints(_dpy, _win, &size_hints);
+	}
+
+//	XMapWindow(_dpy, _win);
 
 	_WindowWidth = width;
 	_WindowHeight = height;

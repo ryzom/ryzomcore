@@ -844,7 +844,12 @@ private:
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
 
+	enum EWindowStyle { EWSWindowed, EWSFullscreen };
+
 	void					setWindowSize(uint32 width, uint32 height);
+
+	EWindowStyle			getWindowStyle() const;
+	bool					setWindowStyle(EWindowStyle windowStyle);
 
 	// Methods to manage screen resolutions
 	bool					restoreScreenMode();
