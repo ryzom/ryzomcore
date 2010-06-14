@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="3d"
 	ProjectGUID="{2B48BE83-108B-4E8E-8A55-6627CF09AC5A}"
 	RootNamespace="3d"
@@ -268,7 +268,6 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="../include"
 				PreprocessorDefinitions="_LIB;WIN32;NDEBUG;ASSERT_THROW_EXCEPTION"
 				StringPooling="true"
@@ -365,10 +364,6 @@
 			</File>
 			<File
 				RelativePath="..\include\nel\3d\render_trav.h"
-				>
-			</File>
-			<File
-				RelativePath="3d\trav_scene.cpp"
 				>
 			</File>
 			<File
@@ -1108,10 +1103,6 @@
 				>
 			</File>
 			<File
-				RelativePath="3d\mesh_vertex_program.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\include\nel\3d\mesh_vertex_program.h"
 				>
 			</File>
@@ -1239,10 +1230,6 @@
 		<Filter
 			Name="Textures"
 			>
-			<File
-				RelativePath="3d\async_texture_block.cpp"
-				>
-			</File>
 			<File
 				RelativePath="..\include\nel\3d\async_texture_block.h"
 				>
@@ -2134,15 +2121,7 @@
 						>
 					</File>
 					<File
-						RelativePath="3d\ps_particle.cpp"
-						>
-					</File>
-					<File
 						RelativePath="..\include\nel\3d\ps_particle.h"
-						>
-					</File>
-					<File
-						RelativePath="3d\ps_particle2.cpp"
 						>
 					</File>
 					<File
