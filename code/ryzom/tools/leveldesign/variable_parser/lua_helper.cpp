@@ -23,20 +23,14 @@
 
 extern "C"
 {
-#ifdef max
-# undef max
-#endif
 #include "lualib.h"
-}	
+}
 
-#ifdef NL_OS_WINDOWS
-#  ifndef NL_EXTENDED_FOR_SCOPE
-#    undef for
-#  endif
-#endif
-#undef new
+// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
+#include <cassert>
+#undef assert
+#define assert nlassert
 #include <luabind/luabind.hpp>
-#define new NL_NEW
 
 using namespace std;
 using namespace NLMISC;
@@ -57,30 +51,91 @@ void CLuaStackChecker::decrementExceptionContextCounter()
 	nlassert(_ExceptionContextCounter > 0);
 	-- _ExceptionContextCounter;
 }
-	
+
+
+#ifdef LUA_NEVRAX_VERSION
+	ILuaIDEInterface *LuaDebuggerIDE = NULL;
+	static bool LuaDebuggerVisible = false;
+#endif
+
+#ifdef NL_OS_WINDOWS
+	HMODULE		LuaDebuggerModule = 0;
+#endif
+
+void luaDebuggerMainLoop()
+{
+#ifdef LUA_NEVRAX_VERSION
+	if (!LuaDebuggerIDE) return;
+	if (!LuaDebuggerVisible)
+	{
+		LuaDebuggerIDE->showDebugger(true);
+		LuaDebuggerIDE->expandProjectTree();
+		LuaDebuggerIDE->sortFiles();
+		LuaDebuggerVisible = true;
+	}
+	LuaDebuggerIDE->doMainLoop();
+#endif
+}
+
+
+
+static std::allocator<uint8> l_stlAlloc;
+
+
+static void l_free_func(void *block, int oldSize)
+{
+	l_stlAlloc.deallocate((uint8 *) block, oldSize);
+}
+
+static void *l_realloc_func(void *b, int os, int s)
+{
+	if (os == s) return b;
+	void *newB = l_stlAlloc.allocate(s);
+	memcpy(newB, b, std::min(os, s));
+	l_free_func(b, os);
+	return newB;
+}
+
+
+
+const int MinGCThreshold = 128; // min value at which garbage collector will be triggered (in kilobytes)
 // ***************************************************************************
 CLuaState::CLuaState()
-{		
+{
+	_State = NULL;
+
 	#ifdef LUA_NEVRAX_VERSION
-		_State = lua_open(NULL, NULL);
-	#else
-		_State = lua_open();
+		_GCThreshold = MinGCThreshold;
 	#endif
-	nlassert(_State);
+
+	if (!_State)
+	{
+		#ifdef LUA_NEVRAX_VERSION
+			_State = lua_open(l_realloc_func, l_free_func);
+		#else
+			_State = lua_open();
+		#endif
+		nlassert(_State);
+	}
 
 	// *** Load base libs
 	{
 		CLuaStackChecker lsc(this);
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+		luaL_openlibs(_State);
+#else
 		luaopen_base (_State);
 		luaopen_table (_State);
 		luaopen_io (_State);
 		luaopen_string (_State);
 		luaopen_math (_State);
 		luaopen_debug (_State);
+#endif
+
 		// open are buggy????
 		clear();
 	}
-	
+
 	// *** Register basics
 	CLuaStackChecker lsc(this);
 
@@ -88,15 +143,15 @@ CLuaState::CLuaState()
 	pushLightUserData((void *) this);
 	newTable();
 	push("classes");
-	newTable(); // registry class		
+	newTable(); // registry class
 	setTable(-3);
 	setTable(LUA_REGISTRYINDEX);
 
 	// add pointer from lua state to this CLuaState object
 	// do: LUA_REGISTRYINDEX.(lightuserdata*)_State= this
 	pushLightUserData((void *) _State); // NB : as creator of the state,   we make the assumption that
-	                       // no one will be using this pointer in the registry (cf. ref manual about registry) 
-	pushLightUserData((void *) this); 
+	                       // no one will be using this pointer in the registry (cf. ref manual about registry)
+	pushLightUserData((void *) this);
 	setTable(LUA_REGISTRYINDEX);
 
 	// Create the Table that contains Function cache for small script execution
@@ -111,7 +166,7 @@ CLuaState::CLuaState()
 
 
 // ***************************************************************************
-CLuaStackRestorer::CLuaStackRestorer(CLuaState *state, int finalSize) : _State(state), _FinalSize(finalSize) 
+CLuaStackRestorer::CLuaStackRestorer(CLuaState *state, int finalSize) : _State(state), _FinalSize(finalSize)
 {
 }
 
@@ -122,11 +177,43 @@ CLuaStackRestorer::~CLuaStackRestorer()
 	_State->setTop(_FinalSize);
 }
 
+#ifdef NL_OS_WINDOWS
+	static int NoOpReportHook( int /* reportType */, char * /* message */, int * /* returnValue */ )
+	{
+		return TRUE;
+	}
+#endif
+
+
 // ***************************************************************************
 CLuaState::~CLuaState()
 {
-	nlassert(_State);	
-	lua_close(_State);	
+	nlassert(_State);
+
+	#ifdef LUA_NEVRAX_VERSION
+		if (!LuaDebuggerIDE)
+	#else
+		if (1)
+	#endif
+	{
+		lua_close(_State);
+	}
+	else
+	{
+		#ifdef LUA_NEVRAX_VERSION
+			LuaDebuggerIDE->stopDebug(); // this will also close the lua state
+			LuaDebuggerIDE = NULL;
+			LuaDebuggerVisible = false;
+			#ifdef NL_OS_WINDOWS
+				nlassert(LuaDebuggerModule)
+				_CrtSetReportHook(NoOpReportHook); // prevent dump of memory leaks at this point
+				//::FreeLibrary(LuaDebuggerModule); // don't free the library now (seems that it destroy, the main window, causing
+													// a crash when the app window is destroyed for real...
+													// -> FreeLibrary will be called when the application is closed
+				LuaDebuggerModule = 0;
+			#endif
+		#endif
+	}
 
 	// Clear Small Script Cache
 	_SmallScriptPool= 0;
@@ -135,7 +222,7 @@ CLuaState::~CLuaState()
 
 // ***************************************************************************
 CLuaState *CLuaState::fromStatePointer(lua_State *state)
-{	
+{
 	nlassert(state);
 	int initialStackSize = lua_gettop(state);
 	lua_checkstack(state,   initialStackSize + 2);
@@ -161,9 +248,10 @@ struct CLuaReader
 
 void CLuaState::loadScript(const std::string &code,   const std::string &dbgSrc)
 {
+	if (code.empty()) return;
 	struct CHelper
 	{
-		static const char *luaChunkReaderFromString(lua_State *L,   void *ud,   size_t *sz)
+		static const char *luaChunkReaderFromString(lua_State * /* L */,   void *ud,   size_t *sz)
 		{
 			CLuaReader *rd = (CLuaReader *) ud;
 			if (!rd->Done)
@@ -182,6 +270,7 @@ void CLuaState::loadScript(const std::string &code,   const std::string &dbgSrc)
 	CLuaReader rd;
 	rd.Str = &code;
 	rd.Done = false;
+
 	int result = lua_load(_State,   CHelper::luaChunkReaderFromString,   (void *) &rd,   dbgSrc.c_str());
 	if (result !=0)
 	{
@@ -190,17 +279,17 @@ void CLuaState::loadScript(const std::string &code,   const std::string &dbgSrc)
 		pop();
 		// throw error
 		throw ELuaParseError(err);
-	}	
+	}
 }
 
 // ***************************************************************************
 void CLuaState::executeScriptInternal(const std::string &code,   const std::string &dbgSrc, int numRet)
 {
-	CLuaStackChecker lsc(this, numRet);	
-	
+	CLuaStackChecker lsc(this, numRet);
+
 	// load the script
 	loadScript(code,   dbgSrc);
-	
+
 	// execute
 	if (pcall(0,   numRet) != 0)
 	{
@@ -240,7 +329,16 @@ bool CLuaState::executeFile(const std::string &pathName)
 	CIFile	inputFile;
 	if(!inputFile.open(pathName))
 		return false;
-	
+
+	#ifdef LUA_NEVRAX_VERSION
+		if (LuaDebuggerIDE)
+		{
+			std::string path = NLMISC::CPath::getCurrentPath() + "/" + pathName.c_str();
+			path = CPath::standardizeDosPath(path);
+			LuaDebuggerIDE->addFile(path.c_str());
+		}
+	#endif
+
 	// load the script text
 	string	script;
 	/*
@@ -253,9 +351,9 @@ bool CLuaState::executeFile(const std::string &pathName)
 	}
 	*/
 	script.resize(NLMISC::CFile::getFileSize(pathName));
-	inputFile.serialBuffer((uint8 *) &script[0],  script.size());
+	inputFile.serialBuffer((uint8 *) &script[0],  (uint)script.size());
 
-	
+
 	// execute the script text,   with dbgSrc==filename (use @ for lua internal purpose)
 	executeScriptInternal(script,   string("@") + NLMISC::CFile::getFilename(pathName));
 
@@ -265,15 +363,16 @@ bool CLuaState::executeFile(const std::string &pathName)
 // ***************************************************************************
 void CLuaState::executeSmallScript(const std::string &script)
 {
+	if (script.empty()) return;
 	// *** if the small script has not already been called before,   parse it now
 	TSmallScriptCache::iterator it= _SmallScriptCache.find(script);
 	if(it==_SmallScriptCache.end())
 	{
-		CLuaStackChecker lsc(this);	
+		CLuaStackChecker lsc(this);
 
 		// add it to a function
 		loadScript(script,   script);
-		
+
 		// Assign the method to the NEL table: NELSmallScriptTable[_SmallScriptPool]= function
 		push(_NELSmallScriptTableName);		// 1:function 2:NelTableName
 		getTable(LUA_REGISTRYINDEX);		// 1:function 2:NelTable
@@ -289,7 +388,7 @@ void CLuaState::executeSmallScript(const std::string &script)
 	}
 
 	// *** Execute the function associated to the script
-	CLuaStackChecker lsc(this);	
+	CLuaStackChecker lsc(this);
 	push(_NELSmallScriptTableName);		// 1:NelTableName
 	getTable(LUA_REGISTRYINDEX);		// 1:NelTable
 	// get the function at the given index in the "NELSmallScriptTable" table
@@ -311,12 +410,11 @@ void CLuaState::executeSmallScript(const std::string &script)
 		// Stack: 1:NelTable
 		pop();			// ....
 	}
-	
 }
 
 // ***************************************************************************
 void		CLuaState::registerFunc(const char *name,   lua_CFunction function)
-{	
+{
 	lua_register(_State,   name,   function);
 }
 
@@ -355,7 +453,7 @@ void CLuaState::push(TLuaWrappedFunction function)
 				lua_pushstring(ls,   e.what());
 				// TODO : see if this is safe to call lua error there" ... (it does a long jump)
 				lua_error(ls);
-			}			
+			}
 			return numResults;
 		}
 	};
@@ -446,16 +544,16 @@ int CLuaState::pcallByName(const char *functionName,   int nargs,   int nresults
 	nlassert(functionName);
 	nlassert(isTable(funcTableIndex));
 	pushValue(funcTableIndex);
-	push(functionName);	
+	push(functionName);
 	getTable(-2);
 	remove(-2); // get rid of the table
 	nlassert(getTop() >= nargs); // not enough arguments on the stack
 	// insert function before its arguments
-	insert(- 1 - nargs);	
-	int result =  pcall(nargs,  nresults,  errfunc);	
+	insert(- 1 - nargs);
+	int result =  pcall(nargs,  nresults,  errfunc);
 	int currSize = getTop();
 	if (result == 0)
-	{		
+	{
 		nlassert(currSize == initialStackSize - nargs + nresults);
 	}
 	else
@@ -488,7 +586,7 @@ void CLuaState::dumpStack()
 // ***************************************************************************
 void CLuaState::getStackAsString(std::string &dest)
 {
-	dest = NLMISC::toString("Stack size = %d\n", getTop());	
+	dest = NLMISC::toString("Stack size = %d\n", getTop());
 	CLuaStackChecker lsc(this);
 	for(int k = 1; k <= getTop(); ++k)
 	{
@@ -512,10 +610,10 @@ CLuaStackChecker::~CLuaStackChecker()
 			if (assertWanted)
 			{
 				nlwarning("Lua stack size error : expected size is %d, current size is %d", _FinalWantedSize, currSize);
-				_State->dumpStack();			
+				_State->dumpStack();
 				nlassert(0);
 			}
-		}		
+		}
 	}
 	else
 	{
@@ -527,37 +625,102 @@ CLuaStackChecker::~CLuaStackChecker()
 
 // ***************************************************************************
 void	ELuaWrappedFunctionException::init(CLuaState *ls, const std::string &reason)
-{		
-/*	// Print first Lua Stack Context
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();		
+{
+	// Print first Lua Stack Context
+/*
+	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ls)
 	{
 		ls->getStackContext(_Reason, 1);		// 1 because 0 is the current C function => return 1 for script called
 		// enclose with cool colors
 		pIM->formatLuaStackContext(_Reason);
 	}
-
+*/
 	// Append the reason
-	_Reason+= reason;*/
+	_Reason+= reason;
 }
 
 // ***************************************************************************
 ELuaWrappedFunctionException::ELuaWrappedFunctionException(CLuaState *luaState)
-{ 
-	init(luaState, ""); 
+{
+	init(luaState, "");
 }
 
 // ***************************************************************************
 ELuaWrappedFunctionException::ELuaWrappedFunctionException(CLuaState *luaState, const std::string &reason)
-{ 
+{
 	init(luaState, reason);
 }
 
 // ***************************************************************************
 ELuaWrappedFunctionException::ELuaWrappedFunctionException(CLuaState *luaState, const char *format, ...)
-{	
+{
+	//H_AUTO(Lua_ELuaWrappedFunctionException_ELuaWrappedFunctionException)
 	std::string	reason;
-	NLMISC_CONVERT_VARGS (reason, format, NLMISC::MaxCStringSize); 
+	NLMISC_CONVERT_VARGS (reason, format, NLMISC::MaxCStringSize);
 	init(luaState, reason);
 }
+
+//================================================================================
+void         CLuaState::newTable()
+{
+	nlverify( lua_checkstack(_State, 1) );
+	lua_newtable(_State);
+}
+
+//================================================================================
+int          CLuaState::getGCCount()
+{
+	return lua_getgccount(_State);
+}
+
+//================================================================================
+int          CLuaState::getGCThreshold()
+{
+	//H_AUTO(Lua_CLuaState_getGCThreshold)
+#ifdef LUA_NEVRAX_VERSION
+	return _GCThreshold;
+#else
+#	if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+	return lua_gc(_State, LUA_GCCOUNT, 0);
+#	else
+	return lua_getgcthreshold(_State);
+#	endif
+#endif
+}
+
+//================================================================================
+void          CLuaState::setGCThreshold(int kb)
+{
+	//H_AUTO(Lua_CLuaState_setGCThreshold)
+#ifdef LUA_NEVRAX_VERSION
+	_GCThreshold = kb;
+	handleGC();
+#else
+#	if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+	lua_gc(_State, LUA_GCCOLLECT, kb);
+#	else
+	lua_setgcthreshold(_State, kb);
+#	endif
+#endif
+}
+
+//================================================================================
+void CLuaState::handleGC()
+{
+	//H_AUTO(Lua_CLuaState_handleGC)
+	#ifdef LUA_NEVRAX_VERSION
+		// must handle gc manually with the refcounted version
+		int gcCount = getGCCount();
+		if (gcCount >= _GCThreshold)
+		{
+			nlwarning("Triggering GC : memory in use = %d kb, current threshold = %d kb", gcCount, _GCThreshold);
+			lua_setgcthreshold(_State, 0);
+			gcCount = getGCCount();
+			_GCThreshold = std::max(MinGCThreshold, gcCount * 2);
+			nlwarning("After GC : memory in use = %d kb, threshold = %d kb", gcCount, _GCThreshold);
+		}
+	#endif
+}
+
 

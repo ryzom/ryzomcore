@@ -198,7 +198,7 @@ void CVariableParserDlg::OnLUABrowse()
 
 void CleanString( CSString &str )
 {
-	int i = str.size();
+	int i = (int)str.size();
 	bool ok = false;
 
 	while ( !ok && ( i > 0 ) )
@@ -288,7 +288,7 @@ void CVariableParserDlg::BuildParseParameters( ParseParameters& params, uint lig
 		params.push_back( "" );	
 		CString str = m_variables[colonne][0].c_str();
 			
-		for ( uint j=m_nomVariables.size(); j>0; j-- )
+		for ( uint j=(uint)m_nomVariables.size(); j>0; j-- )
 		{
 			str.Replace( toString( "C%d", j-1 ).c_str(), params[j-1].c_str() );
 		}

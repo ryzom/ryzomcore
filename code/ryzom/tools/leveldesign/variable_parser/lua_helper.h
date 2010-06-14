@@ -21,7 +21,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 
-extern "C" 
+extern "C"
 {
 	#include <lua.h>
 }
@@ -53,17 +53,17 @@ private:
 
 };
 
-//**************************************************************************
+// **************************************************************************
 /** Helper class to restore the lua stack to the desired size when this object goes out of scope
-  */ 
+  */
 class CLuaStackRestorer
 {
-public:		
+public:
 	CLuaStackRestorer(CLuaState *state, int finalSize);
-	~CLuaStackRestorer();	
+	~CLuaStackRestorer();
 private:
 	int _FinalSize;
-	CLuaState *_State;		
+	CLuaState *_State;
 };
 
 ////////////////
@@ -74,7 +74,7 @@ class ELuaError : public NLMISC::Exception
 {
 public:
 	ELuaError() { CLuaStackChecker::incrementExceptionContextCounter(); }
-	virtual ~ELuaError() { CLuaStackChecker::decrementExceptionContextCounter(); }
+	virtual ~ELuaError() throw() { CLuaStackChecker::decrementExceptionContextCounter(); }
 	ELuaError(const std::string &reason) : Exception(reason) { CLuaStackChecker::incrementExceptionContextCounter(); }
 	// what(), plus append the Reason
 	virtual std::string luaWhat() const throw() {return NLMISC::toString("LUAError: %s", what());}
@@ -86,21 +86,23 @@ class ELuaParseError : public ELuaError
 public:
 	ELuaParseError() {}
 	ELuaParseError(const std::string &reason) : ELuaError(reason) {}
+	virtual ~ELuaParseError() throw() { }
 	// what(), plus append the Reason
 	virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaParseError: %s", what());}
 };
 
-/** Exception thrown when something when wrong inside a wrapped function called by lua
+/** Exception thrown when something went wrong inside a wrapped function called by lua
   */
 class ELuaWrappedFunctionException : public ELuaError
 {
 public:
-	ELuaWrappedFunctionException(CLuaState *luaState);	
-	ELuaWrappedFunctionException(CLuaState *luaState, const std::string &reason);	
-	ELuaWrappedFunctionException(CLuaState *luaState, const char *format, ...);	
-	virtual const char	*what() const {return _Reason.c_str();}
+	ELuaWrappedFunctionException(CLuaState *luaState);
+	ELuaWrappedFunctionException(CLuaState *luaState, const std::string &reason);
+	ELuaWrappedFunctionException(CLuaState *luaState, const char *format, ...);
+	virtual ~ELuaWrappedFunctionException() throw() { }
+	virtual const char	*what() const throw() {return _Reason.c_str();}
 protected:
-	void	init(CLuaState *ls, const std::string &reason);	
+	void	init(CLuaState *ls, const std::string &reason);
 protected:
 	std::string	_Reason;
 };
@@ -111,6 +113,7 @@ class ELuaExecuteError : public ELuaError
 public:
 	ELuaExecuteError() {}
 	ELuaExecuteError(const std::string &reason) : ELuaError(reason) {}
+	virtual ~ELuaExecuteError() throw() { }
 	// what(), plus append the Reason
 	virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaExecuteError: %s", what());}
 };
@@ -142,11 +145,13 @@ typedef int (* TLuaWrappedFunction) (CLuaState &ls);
 
 
 // ***************************************************************************
-/** C++ version of a lua state  
+/** C++ version of a lua state
   */
 class CLuaState : public NLMISC::CRefCount
 {
 public:
+	typedef NLMISC::CRefPtr<CLuaState>   TRefPtr;
+
 	// Create a new environement
 	CLuaState();
 	~CLuaState();
@@ -157,7 +162,7 @@ public:
 	// register a wrapped function
 	void				registerFunc(const char *name, TLuaWrappedFunction function);
 	// @}
-	
+
 
 	/// \name Script execution
 	// @{
@@ -179,7 +184,6 @@ public:
 	bool				executeScriptNoThrow(const std::string &code, int numRet = 0);
 
 	/** Load a Script from a File (maybe in a BNP), and execute it
-	 *	The script is executed, so it may contains only function/variable declaration
 	 *	\return false if file not found
 	 *	\throw ELuaParseError, ELuaExecuteError
 	 */
@@ -241,7 +245,7 @@ public:
 	const void			*toPointer(int index = -1);
 	/** Helper functions : get value of the wanted type in the top table after conversion
 	* A default value is used if the stack entry is NULL.
-	* If conversion fails then an exception is thrown (with optionnal msg)
+	* If conversion fails then an exception is thrown (with optional msg)
 	*/
 	bool				getTableBooleanValue(const char *name, bool        defaultValue= false);
 	double				getTableNumberValue(const char *name,  double      defaultValue= 0);
@@ -258,7 +262,8 @@ public:
 	void				pushLightUserData(void *);			// push a light user data (use newUserData to push a full userdata)
 	// metatables
 	bool				getMetaTable(int index = -1);
-	bool				setMetaTable(int index = -1);
+	bool				setMetaTable(int index = -1);  // set the metatable at top of stack to the object at 'index' (usually -2), then pop the metatable
+	                                                   // even if asignment failed
 	// comparison
 	bool				equal(int index1, int index2);
 	bool				rawEqual(int index1, int index2);
@@ -284,15 +289,15 @@ public:
 	void				call(int nargs, int nresults);
 	int					pcall(int nargs, int nresults, int errfunc = 0);
 	/** Helper : Execute a function by name. Lookup for the function is done in the table at the index 'funcTableIndex'
-	  * the behaviour is the same than with call of pcall.	  
+	  * the behaviour is the same than with call of pcall.
 	  */
 	int                 pcallByName(const char *functionName, int nargs, int nresults, int funcTableIndex = LUA_GLOBALSINDEX, int errfunc = 0);
-	
+
 	// push a C closure (pop n element from the stack and associate with the function)
 	void				pushCClosure(lua_CFunction function, int n);
 	// @}
 
-	
+
 	/// \name Misc
 	// @{
 	/** Retrieve pointer to a CLuaState environment from its lua_State pointer, or NULL
@@ -305,16 +310,19 @@ public:
 	// an assertion is raised if the index is not valid
 	void				checkIndex(int index);
 
-	// registering C function to use with a lua state pointer	  
+	// registering C function to use with a lua state pointer
 	void				registerFunc(const char *name, lua_CFunction function);
-	
+
 	// Garbage collector
 	int					getGCCount();      // get memory in use in KB
 	int					getGCThreshold();  // get max memory in KB
-	void				setGCThreshold(int kb);   // set max memory in KB
-	
+	void				setGCThreshold(int kb);   // set max memory in KB (no-op with ref-counted version)
+
+	// handle garbage collector for ref-counted version of lua (no-op with standard version, in which case gc handling is automatic)
+	void				handleGC();
+
 	/** For Debug: get the Stack context of execution (filename / line)
-	 *	\param stackLevel: get the context of execution of the given stackLevel. 
+	 *	\param stackLevel: get the context of execution of the given stackLevel.
 	 *		0 for the current function
 	 *		1 for the function that called 0
 	 *		2 ....
@@ -327,8 +335,9 @@ public:
 
 	// for debug : dump the current content of the stack (no recursion)
 	void				dumpStack();
+	static void			dumpStack(lua_State *ls);
 	void				getStackAsString(std::string &dest);
-	
+
 
 private:
 	lua_State			*_State;
@@ -341,13 +350,20 @@ private:
 
 private:
 	// this object isn't intended to be copied
-	CLuaState(const CLuaState &other) { nlassert(0); }
-	CLuaState &operator=(const CLuaState &other) { nlassert(0); return *this; }
+	CLuaState(const CLuaState &/* other */):NLMISC::CRefCount() { nlassert(0); }
+	CLuaState &operator=(const CLuaState &/* other */) { nlassert(0); return *this; }
 
 	void				executeScriptInternal(const std::string &code, const std::string &dbgSrc, int numRet = 0);
-	
+
 };
- 
+
+
+// Access to lua function
+// one should not include lua.h directly because if a debugger is present, lua
+// function pointer will be taken from a dynamic library.
+
+
+
 //=============================================================================================
 // include implementation
 #define RZ_INCLUDE_LUA_HELPER_INLINE

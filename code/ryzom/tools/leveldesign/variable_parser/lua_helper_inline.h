@@ -41,7 +41,7 @@ inline void CLuaState::checkIndex(int index)
 {
 	// NB : more restrictive test that in the documentation there, because
 	// we don't expose the check stack function
-	nlassert( (index!=0 && abs(index) <= getTop()) 
+	nlassert( (index!=0 && abs(index) <= getTop())
 		|| index == LUA_REGISTRYINDEX
 		|| index == LUA_GLOBALSINDEX
 		);
@@ -248,7 +248,7 @@ inline const void *CLuaState::toPointer(int index)
 inline void CLuaState::push(bool value)
 {
 	nlverify( lua_checkstack(_State, 1) );
-	lua_pushboolean(_State, (int) value);	
+	lua_pushboolean(_State, (int) value);
 }
 
 //================================================================================
@@ -348,49 +348,24 @@ inline void         CLuaState::concat(int numElem)
 }
 
 //================================================================================
-inline int          CLuaState::getGCCount()
-{
-	return lua_getgccount(_State);
-}
-
-//================================================================================
-inline int          CLuaState::getGCThreshold()
-{
-	return lua_getgcthreshold(_State);
-}
-
-//================================================================================
-inline void          CLuaState::setGCThreshold(int kb)
-{
-	lua_setgcthreshold(_State, kb);
-}
-
-//================================================================================
-inline void         CLuaState::newTable()
-{
-	nlverify( lua_checkstack(_State, 1) );
-	lua_newtable(_State);
-}
-
-//================================================================================
 inline void         CLuaState::getTable(int index)
 {
 	checkIndex(index);
-	nlassert(isTable(index));
+	nlassert(isTable(index) || isUserData(index));
 	lua_gettable(_State, index);
 }
 
 //================================================================================
 inline void                CLuaState::rawGet(int index)
 {
-	checkIndex(index);	
+	checkIndex(index);
 	lua_rawget(_State, index);
 }
 
 //================================================================================
 inline void                CLuaState::setTable(int index)
 {
-	checkIndex(index);	
+	checkIndex(index);
 	nlassert(getTop() >= 2);
 	nlassert(isTable(index));
 	lua_settable(_State, index);
@@ -399,41 +374,43 @@ inline void                CLuaState::setTable(int index)
 //================================================================================
 inline void                CLuaState::rawSet(int index)
 {
-	checkIndex(index);	
+	checkIndex(index);
 	lua_rawset(_State, index);
 }
 
 //================================================================================
 inline bool                CLuaState::next(int index)
 {
-	checkIndex(index);	
+	//H_AUTO(Lua_CLuaState_next)
+	checkIndex(index);
 	return lua_next(_State, index) != 0;
 }
 
 //================================================================================
 inline void                CLuaState::rawSetI(int index, int n)
 {
-	checkIndex(index);	
+	//H_AUTO(Lua_CLuaState_rawSetI)
+	checkIndex(index);
 	lua_rawseti(_State, index, n);
 }
 
 //================================================================================
 inline void                CLuaState::rawGetI(int index, int n)
 {
-	checkIndex(index);	
+	checkIndex(index);
 	lua_rawgeti(_State, index, n);
 }
 
 //================================================================================
 inline void                CLuaState::call(int nargs, int nresults)
 {
-	nlassert(getTop() >= nargs); 
+	nlassert(getTop() >= nargs);
 	lua_call(_State, nargs, nresults);
 }
 
 //================================================================================
 inline int                 CLuaState::pcall(int nargs, int nresults, int errfunc)
-{	
+{
 	return lua_pcall(_State, nargs, nresults, errfunc);
 }
 
