@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="matis"/>
+      <ATOM Name="family" Value="undefined"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Face"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="MA_HOM_visage.shape"/>
+      <ATOM Name="shape_female" Value="MA_HOF_visage.shape"/>
+      <ATOM Name="color" Value="None"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:18 2002 (mauduit) .3d.shape = TR_HOM_VISAGE.shape
+Tue Jul 09 14:09:29 2002 (mauduit) .3d.shape_female = TR_HOF_VISAGE.shape
+Tue Jul 09 14:09:29 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:09:29 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:11:40 2002 (mauduit) formName Resized = Face
+Tue Jul 09 14:11:46 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Face
+Fri Jul 12 09:30:19 2002 (mauduit) .3d.shape = MA_HOM_visage.shape
+Fri Jul 12 09:30:19 2002 (mauduit) .3d.shape_female = MA_HOF_visage.shape
+Fri Jul 12 09:30:19 2002 (mauduit) .basics.origin = matis
+Mon Jul 15 14:12:15 2002 (mauduit) .3d.color = UserColor
+Wed Sep 04 10:17:45 2002 (besson) .basics.family = undefined
+Fri Oct 04 17:00:41 2002 (mauduit) .3d.color = None</LOG>
+</FORM>

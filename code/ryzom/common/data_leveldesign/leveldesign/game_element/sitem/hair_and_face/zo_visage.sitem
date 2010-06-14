@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="zorai"/>
+      <ATOM Name="family" Value="undefined"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Face"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="ZO_HOM_VISAGE.shape"/>
+      <ATOM Name="shape_female" Value="ZO_HOF_VISAGE.shape"/>
+      <ATOM Name="color" Value="None"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:18 2002 (mauduit) .3d.shape = TR_HOM_VISAGE.shape
+Tue Jul 09 14:09:29 2002 (mauduit) .3d.shape_female = TR_HOF_VISAGE.shape
+Tue Jul 09 14:09:29 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:09:29 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:11:40 2002 (mauduit) formName Resized = Face
+Tue Jul 09 14:11:46 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Face
+Mon Jul 15 14:09:52 2002 (mauduit) .3d.color = UserColor
+Wed Aug 07 09:21:44 2002 (mauduit) .3d.shape = ZO_HOM_VISAGE.shape
+Wed Aug 07 09:21:44 2002 (mauduit) .3d.shape_female = ZO_HOF_VISAGE.shape
+Mon Aug 26 17:13:47 2002 (receveur) .basics.origin = matis
+Wed Sep 04 16:19:04 2002 (besson) .basics.family = undefined
+Fri Oct 04 12:16:57 2002 (mauduit) .basics.origin = zorai
+Fri Oct 04 17:01:57 2002 (mauduit) .3d.color = None</LOG>
+</FORM>

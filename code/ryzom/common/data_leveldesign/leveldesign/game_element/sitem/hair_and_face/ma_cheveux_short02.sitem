@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="matis"/>
+      <ATOM Name="family" Value="undefined"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Head"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="MA_HOM_cheveux_medium02.shape"/>
+      <ATOM Name="shape_female" Value="MA_HOF_cheveux_short02.shape"/>
+      <ATOM Name="color" Value="UserColor"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:26 2002 (mauduit) .3d.shape = TR_HOM_cheveux_shave01.shape
+Tue Jul 09 14:12:02 2002 (mauduit) .3d.shape_female = TR_HOF_cheveux_shave01.shape
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Head
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:12:02 2002 (mauduit) formName Resized = 1
+Tue Jul 09 14:19:06 2002 (mauduit) .3d.shape = TR_HOM_ cheveux_medium01.shape
+Tue Jul 09 14:19:06 2002 (mauduit) .3d.shape_female = TR_HOF_ cheveux_medium01.shape
+Tue Jul 09 19:19:25 2002 (mauduit) .3d.shape = TR_HOM_cheveux_medium01.shape
+Tue Jul 09 19:19:25 2002 (mauduit) .3d.shape_female = TR_HOF_cheveux_medium01.shape
+Fri Jul 12 09:31:24 2002 (mauduit) .3d.shape = MA_HOM_cheveux01.shape
+Fri Jul 12 09:31:24 2002 (mauduit) .3d.shape_female = MA_HOF_cheveux01.shape
+Fri Jul 12 09:31:24 2002 (mauduit) .basics.origin = matis
+Mon Jul 15 14:12:07 2002 (mauduit) .3d.color = UserColor
+Thu Jul 25 15:21:40 2002 (mauduit) .3d.shape = MA_HOM_cheveux_short01.shape
+Thu Jul 25 15:21:40 2002 (mauduit) .3d.shape_female = MA_HOF_cheveux_short01.shape
+Wed Sep 04 10:17:30 2002 (besson) .basics.family = undefined
+Thu Oct 02 18:05:36 2003 (tran) .3d.shape = MA_HOM_cheveux_medium02.shape
+Thu Oct 02 18:05:36 2003 (tran) .3d.shape_female = MA_HOF_cheveux_short02.shape</LOG>
+</FORM>

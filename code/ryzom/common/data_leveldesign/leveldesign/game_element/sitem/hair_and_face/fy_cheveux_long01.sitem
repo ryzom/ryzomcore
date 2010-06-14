@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="fyros"/>
+      <ATOM Name="family" Value="undefined"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Head"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="fy_HOM_cheveux_long01.shape"/>
+      <ATOM Name="shape_female" Value="fy_HOF_cheveux_long01.shape"/>
+      <ATOM Name="color" Value="UserColor"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:26 2002 (mauduit) .3d.shape = TR_HOM_cheveux_shave01.shape
+Tue Jul 09 14:12:02 2002 (mauduit) .3d.shape_female = TR_HOF_cheveux_shave01.shape
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Head
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.family = armor
+Tue Jul 09 14:12:02 2002 (mauduit) .basics.origin = tryker
+Tue Jul 09 14:12:02 2002 (mauduit) formName Resized = 1
+Mon Jul 15 14:09:59 2002 (mauduit) .3d.color = UserColor
+Thu Jul 25 17:01:44 2002 (mauduit) .3d.shape = fy_HOM_cheveux_shave01.shape
+Thu Jul 25 17:01:44 2002 (mauduit) .3d.shape_female = fy_HOF_cheveux_shave01.shape
+Thu Jul 25 17:01:44 2002 (mauduit) .basics.origin = fyros
+Wed Sep 04 10:16:58 2002 (besson) .basics.family = undefined
+Wed Jan 29 15:04:04 2003 (mauduit) .3d.shape = fy_HOM_cheveux_long01.shape
+Wed Jan 29 15:04:04 2003 (mauduit) .3d.shape_female = fy_HOF_cheveux_long01.shape</LOG>
+</FORM>
