@@ -161,7 +161,7 @@ void	CLandscapeModel::clipAndRenderLandscape()
 	CRenderTrav		&renderTrav= getOwnerScene()->getRenderTrav();
 
 	// Yes, this is ugly, but the clip pass is finished in render(), for clipping TessBlocks.
-	// This saves an other Landscape patch traversal, so this is faster...
+	// This saves another Landscape patch traversal, so this is faster...
 	// Order them in order which clip faster (first horizontal, then vertical).
 	// NB: TessBlock are ALWAYS clipped with the frustum pyramid, not the clustered one (faster clip for most common cases).
 	CurrentPyramid[0]= clipTrav.WorldFrustumPyramid[NL3D_CLIP_PLANE_LEFT];

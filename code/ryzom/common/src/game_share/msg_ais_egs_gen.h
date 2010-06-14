@@ -861,7 +861,7 @@ namespace RYMSG
 		bool	_DontFollow;
 		// if that bot is a building bot it will be caught by outpost system
 		bool	_BuildingBot;
-		// optionnal and rare properties
+		// optional and rare properties
 		std::vector< std::string >	_OptionalProperties;
 		// List of news channel.
 		std::vector< std::string >	_NewsChannels;
@@ -1224,7 +1224,7 @@ namespace RYMSG
 				_BuildingBot = value;
 
 		}
-			// optionnal and rare properties
+			// optional and rare properties
 		const std::vector< std::string > &getOptionalProperties() const
 		{
 			return _OptionalProperties;

@@ -671,7 +671,7 @@ static void addGroupDescriptionToEventAction(const CAIAliasDescriptionNode *tree
 			case AITypeFolder:
 			{
 				string cname = nodeClass(child);
-				// parse optionnal group descriptions			
+				// parse optional group descriptions			
 				if (cname == "group_descriptions")
 				{										
 					CAIActions::exec("SETACTN", treeNode?treeNode->getAlias():uniqueId);

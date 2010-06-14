@@ -149,7 +149,7 @@ bool CHugeListObs::init()
 	_HasNext =	im->getDbProp(dbPath + ":HAS_NEXT", false);
 	if (!_HasNext) return false;
 
-	// optionnal (rolemaster Trading only)
+	// optional (rolemaster Trading only)
 	_RoleMasterFlagDB = im->getDbProp(dbPath + ":ROLEMASTER_FLAGS", false);
 	_RoleMasterRaceDB = im->getDbProp(dbPath + ":ROLEMASTER_RACE", false);
 

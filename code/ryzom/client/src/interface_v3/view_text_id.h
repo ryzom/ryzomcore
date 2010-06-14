@@ -122,7 +122,7 @@ protected:
 	// If true, setTextFormatted() is used instead of setText()
 	bool					_IsTextFormatTaged;
 
-	// Optionnal ucstring modifier
+	// Optional ucstring modifier
 	IOnReceiveTextId		*_StringModifier;
 
 	#if defined(NL_DEBUG)

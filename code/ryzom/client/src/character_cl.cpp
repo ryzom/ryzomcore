@@ -4371,7 +4371,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	//
 
 	destPB.LocalizedImpact = sheet.IsImpactLocalised;
-	// If this is a secondary projectile, it may start from an other location, which is the impact point of the previous projectile
+	// If this is a secondary projectile, it may start from another location, which is the impact point of the previous projectile
 	// (so it doesn't start from the caster hand, or any around settings that is read from the spell sheet)
 	if (sm) // start stickmode wanted ?
 	{

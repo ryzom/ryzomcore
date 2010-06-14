@@ -180,7 +180,7 @@ void	CTrackSampledCommon::buildCommon(const std::vector<uint16> &timeList, float
 	//===================
 	_BeginTime= beginTime;
 	_EndTime= endTime;
-	// compute deltatime for a frame to an other
+	// compute deltatime for a frame to another
 	uint	totalFrameCount= timeList[numKeys-1] - timeList[0];
 	nlassert(totalFrameCount>0);
 	_DeltaTime= (_EndTime-_BeginTime) / totalFrameCount;

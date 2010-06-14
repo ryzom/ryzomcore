@@ -191,7 +191,7 @@ void		splitString(const std::string &str, const std::string &separator, std::vec
 void		splitUCString(const ucstring &ucstr, const ucstring &separator, std::vector<ucstring> &retList);
 
 // ***************************************************************************
-/// In a string or ucstring, find a substr and replace it with an other. return true if replaced
+/// In a string or ucstring, find a substr and replace it with another. return true if replaced
 template<class T, class U>
 bool		strFindReplace(T &str, const T &strFind, const U &strReplace)
 {

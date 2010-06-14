@@ -114,7 +114,7 @@ bool	InitMouseWithCursor (bool hardware)
 				return false;
 		}
 
-		// Update mouse informations
+		// Update mouse information
 		UpdateMouse ();
 
 		if (InitMouseFirstTime)

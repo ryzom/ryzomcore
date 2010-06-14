@@ -59,7 +59,7 @@ private:
 
 public:
 
-	/// Copy this tile flags from an other tile
+	/// Copy this tile flags from another tile
 	void	copyFlagsFromOther(const CTileElement &other) { Flags = other.Flags; }
 
 	/** The three tile ident. NL_TILE_ELM_LAYER_EMPTY means no Tile for this pass. Tile[0] should be !=NL_TILE_ELM_LAYER_EMPTY.

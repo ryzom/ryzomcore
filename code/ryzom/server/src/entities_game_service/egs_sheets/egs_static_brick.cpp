@@ -559,7 +559,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			if(bf != BRICK_FAMILIES::Unknown)
 				OptionalFamilies.insert( bf );
 			else
-				nlwarning("Unknown optionnal family %s",value.c_str());
+				nlwarning("Unknown optional family %s",value.c_str());
 		}
 	}
 	

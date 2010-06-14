@@ -188,7 +188,7 @@ public:
 	 */
 	float StringLine;
 
-	/// Optionnal: each render*() method can draw a subset of letters. Default is 0/FFFFFFFF
+	/// Optional: each render*() method can draw a subset of letters. Default is 0/FFFFFFFF
 	uint32	SelectStart;
 	uint32	SelectSize;
 

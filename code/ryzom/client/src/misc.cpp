@@ -400,11 +400,11 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 
 //-----------------------------------------------
 // dump :
-// Create a file with informations to debug.
+// Create a file with information to debug.
 //-----------------------------------------------
 void dump(const std::string &name)
 {
-	// Write informations to start as the version
+	// Write information to start as the version
 	COFile fStart;
 	if(fStart.open(name + "_start.rec", false, false))
 	{
@@ -477,7 +477,7 @@ void loadDump(const std::string &name)
 {
 	CVectorD currentPos;
 
-	// Load informations to start as the version
+	// Load information to start as the version
 	CIFile fStart;
 	if(fStart.open(name + "_start.rec", false))
 	{

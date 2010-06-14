@@ -369,7 +369,7 @@ private:
 	void	allocTileUv(TTileUvId id);
 	// delete a CTessNearVertex "id", removing it from Patch RenderList, for each not NULL TileFace of "this" face.
 	void	deleteTileUv(TTileUvId id);
-	// Just ptr-copy a CTessNearVertex "id" from an other face/vertex id. Do this for each not NULL TileFace.
+	// Just ptr-copy a CTessNearVertex "id" from another face/vertex id. Do this for each not NULL TileFace.
 	void	copyTileUv(TTileUvId id, CTessFace *srcFace, TTileUvId srcId);
 
 	// The Base NearVertex must be allocated before.

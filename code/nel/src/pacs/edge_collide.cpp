@@ -329,7 +329,7 @@ float		CEdgeCollide::testCircleMove(const CVector2f &start, const CVector2f &del
 			 It is important for CGlobalRetriever::testCollisionWithCollisionChains() because of the
  			 "SURFACEMOVE NOT DETECTED" Problem.
 			 Suppose we can walk on this chain SA/SB (separate Surface A/SurfaceB). Suppose we are near this edge,
-			 and on Surface SA, and suppose there is an other chain SB/SC the circle collide with. If we
+			 and on Surface SA, and suppose there is another chain SB/SC the circle collide with. If we
 			 return 1 (no collision), SB/SC won't be detected (because only SA/?? chains will be tested) and
 			 so the cylinder will penetrate SB/SC...
 			 This case arise at best if chains SA/SB and chain SB/SC do an angle of 45deg

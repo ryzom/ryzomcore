@@ -1280,7 +1280,7 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 		_ContextTexts[i].second = description.getContextOptions()[i].getDetail();
 	}
 
-	// let's parse optionnal properties
+	// let's parse optional properties
 	for ( uint i = 0; i < description.getOptionalProperties().size(); i++ )
 	{
 		std::vector< std::string > result;

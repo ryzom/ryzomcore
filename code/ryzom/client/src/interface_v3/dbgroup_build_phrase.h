@@ -106,7 +106,7 @@ public:
 		// enable disaply and set the brick
 		void			setBrick(uint32 sheetId);
 		void			setParamBrick(uint param, uint32 sheetId);
-		// for optional delete, copy state from an other word
+		// for optional delete, copy state from another word
 		void			copySetup(const CWord &w);
 
 		CWord()

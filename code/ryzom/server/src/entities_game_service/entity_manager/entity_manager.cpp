@@ -58,7 +58,7 @@ void CAIInfosOnEntityMsgImp::callback (const std::string &name, NLNET::TServiceI
 	CEntityBase *entity = CEntityBaseManager::getEntityBasePtr(EntityRowId);
 	if (!entity)
 	{
-		nlwarning("<CAIInfosOnEntityMsgImp> recieved infos on unknown entity");
+		nlwarning("<CAIInfosOnEntityMsgImp> received infos on unknown entity");
 		return;
 	}
 

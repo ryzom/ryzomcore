@@ -533,7 +533,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 				{
 					// NB : we dont activate emitters has soon as the fx is allocated by an entity, because of the way the fx works.
 					// As a matter of fact, if an object move from A to B, the fx may spawn several particles on [AB] in a single frame
-					// So if the FX was previously used by an other entity, a trail of particles may appear between the 2 entities when
+					// So if the FX was previously used by another entity, a trail of particles may appear between the 2 entities when
 					// fx is deallocated from first entity and allocated by the new one
 					if (!_SortedInstances[k]->FXHandle->FX.empty())
 					{
@@ -550,7 +550,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 				{
 					// NB : we dont activate emitters has soon as the fx is allocated by an entity, because of the way the fx works.
 					// As a matter of fact, if an object move from A to B, the fx may spawn several particles on [AB] in a single frame
-					// So if the FX was previously used by an other entity, a trail of particles may appear between the 2 entities when
+					// So if the FX was previously used by another entity, a trail of particles may appear between the 2 entities when
 					// fx is deallocated from first entity and allocated by the new one
 					if (!_SortedInstances[k]->FXHandle->FXUnderWater.empty())
 					{

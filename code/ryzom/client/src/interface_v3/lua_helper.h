@@ -246,7 +246,7 @@ public:
 	const void			*toPointer(int index = -1);
 	/** Helper functions : get value of the wanted type in the top table after conversion
 	* A default value is used if the stack entry is NULL.
-	* If conversion fails then an exception is thrown (with optionnal msg)
+	* If conversion fails then an exception is thrown (with optional msg)
 	*/
 	bool				getTableBooleanValue(const char *name, bool        defaultValue= false);
 	double				getTableNumberValue(const char *name,  double      defaultValue= 0);

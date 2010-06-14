@@ -28,7 +28,7 @@
 namespace NLMISC
 {
 
-/** A simple invisible win32 window, with an optionnal message handling function.
+/** A simple invisible win32 window, with an optional message handling function.
   * Possible uses include :
   * - Creating an icon in the tray (require a window to be passed)
   * - Creating a message queue (in order to use an IPC mechanism such as WM_COPYDATA)
@@ -42,7 +42,7 @@ class CDummyWindow
 {
 public:
 	CDummyWindow();
-	/** Init a dummy window, with an optionnal message handling procedure
+	/** Init a dummy window, with an optional message handling procedure
 	  * \return true on success
 	  */
 	bool init(HINSTANCE hInstance, WNDPROC winProc = NULL);

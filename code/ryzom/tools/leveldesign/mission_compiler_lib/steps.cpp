@@ -448,7 +448,7 @@ public:
 				}
 			}
 		}
-		// look for an optionnal jump
+		// look for an optional jump
 		child = getPrimitiveChild(prim, TPrimitiveClassPredicate("jump_to"));
 		if (child)
 		{

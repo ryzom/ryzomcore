@@ -59,7 +59,7 @@ public:
 	///\name Object
 	//@{
 		/** Create a keyboard device, that must then be deleted by the caller
-		  * An optionnal WinEventEmiter can be provided, so that its flags can be in sync
+		  * An optional WinEventEmiter can be provided, so that its flags can be in sync
 		  * with a win32 keyboard flags (shift, ctrl, and alt)
 		  */
 		static CDIKeyboard *createKeyboardDevice(IDirectInput8 *di8,

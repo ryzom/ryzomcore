@@ -55,7 +55,7 @@ CVariable<string>	SaveShardRoot("variables", "SaveShardRoot", "Root directory of
 // stats variables
 CVariable<NLMISC::TTime> BSLastAckTime("BSIF", "BSLastAckTime", "The timestamp of the last ack received from backup system", 0, 0, true);
 CVariable<NLMISC::TTime> BSTimeSinceLastAck("BSIF", "BSTimeSinceLastAck", "The time since the last ack from the backup system", 0, 0, true);
-CVariable<NLMISC::TTime> BSLastAckDelay("BSIF", "BSLastAckDelay", "The time it took for the last received ack to be recieved from slowest of our connected BS services", 0, 0, true);
+CVariable<NLMISC::TTime> BSLastAckDelay("BSIF", "BSLastAckDelay", "The time it took for the last received ack to be received from slowest of our connected BS services", 0, 0, true);
 CVariable<uint32>		 BSResponseTime("BSIF", "BSResponseTime", "Latest/average time (in sec) between BS request and response", 0, 20, false );
 
 
@@ -220,7 +220,7 @@ NLMISC::CSmartPtr<IBackupGenericAckCallback>	CBackupInterfaceSingleton::popGener
 	// if there are untreated callbacks in the generic responses container then yell
 	while (!_GenericResponses.empty() && sint32(_GenericResponses.front().first-requestId)<0)
 	{
-		STOP("Skipping untreated generic callback for request: "<<_GenericResponses.front().first<<" becuase we are treating request id: "<<requestId);
+		STOP("Skipping untreated generic callback for request: "<<_GenericResponses.front().first<<" because we are treating request id: "<<requestId);
 		_GenericResponses.pop_front();
 	}
 

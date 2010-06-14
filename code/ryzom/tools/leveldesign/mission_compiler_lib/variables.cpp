@@ -457,7 +457,7 @@ private:
 	string					_ReqSkill;
 	/// The list of properties
 	vector<TItemProperty>	_Properties;
-	// Optionnal action (enchantement)
+	// Optional action (enchantement)
 	string					_Action;
 	// Name of the item
 	CPhrase					_ItemPhrase;

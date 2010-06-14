@@ -183,7 +183,7 @@ namespace ADMIN
 			// precompute the service name
 			_ServiceAlias = makeServiceAlias();
 
-			// loop for an optionnal 'dontUseShardOrders' flag in init params
+			// loop for an optional 'dontUseShardOrders' flag in init params
 			const TParsedCommandLine *duso = pcl.getParam("dontUseShardOrders");
 			if (duso != NULL)
 				_DontUseShardOrders = (duso->ParamValue == "true" || duso->ParamName == "1");

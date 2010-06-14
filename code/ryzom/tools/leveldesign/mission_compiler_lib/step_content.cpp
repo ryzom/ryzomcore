@@ -1741,7 +1741,7 @@ class CContentKill : public CContentObjective
 
 		}
 
-		// add optionnal place
+		// add optional place
 		if (!_Place._VarValue.empty())
 		{
 			for (uint i=0; i<predef.size(); ++i)

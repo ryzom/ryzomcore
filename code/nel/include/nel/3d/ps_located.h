@@ -117,7 +117,7 @@ public:
 
 	/** Detach a bindable object from this located. Ownership is transferred to the caller
 	  * Any reference the object may have in the system is lost (targets..)
-	  * After that is may be inserted an other system.
+	  * After that is may be inserted another system.
 	  */
 	CPSLocatedBindable *unbind(uint index);
 

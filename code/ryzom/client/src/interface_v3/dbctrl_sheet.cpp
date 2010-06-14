@@ -2709,7 +2709,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 					// In all case, quit
 					_Draging = false;
 					_LastDraggedSheet = NULL;
-					// In call case, end of drag => consider handled to not call an other action
+					// In call case, end of drag => consider handled to not call another action
 					return true;
 				}
 			}

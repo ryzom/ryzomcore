@@ -559,7 +559,7 @@ void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 								- mesh load async is ended, and the texture is not found in the driver
 									=> texture generate()-d too
 								- mesh state is AsyncLoad_Texture, and begin (but doesn't end) to upload the texture
-								- an other mesh is created syncrhonously using also this texture (thus
+								- another mesh is created syncrhonously using also this texture (thus
 									found in driver, and so just referencing it, no generate)
 								- the async mesh is then canceled, while the texture has not end to load!
 								- the texture is still in memory (the sync mesh still point to it), but with
@@ -742,7 +742,7 @@ void CShapeBank::linkShapeToShapeCache(const string &shapeNameNotLwr, const stri
 			// abort, since same cache name / cache ptr
 			return;
 
-		// If The shape is In the cache of an other Shape Cache, abort.
+		// If The shape is In the cache of another Shape Cache, abort.
 		if( shapeInfo.isAdded )
 			// Abort, because impossible.
 			return;

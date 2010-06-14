@@ -327,7 +327,7 @@ protected:
 	/// Atomic flag: is the branch an atomic group, or is the leaf a member of an atomic group
 	bool					_Atomic;
 
-	/// Optionnal callback pointer.
+	/// Optional callback pointer.
 	TNodeChangeCallback		_ChangeCallback;
 
 };

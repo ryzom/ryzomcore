@@ -60,7 +60,7 @@ public:
 	/// Removed
 	void removed() {}
 
-	/// called to copy from an other sheet (operator= + care ptrs)
+	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticRolemasterPhrase &o);
 
 public:

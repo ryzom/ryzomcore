@@ -59,7 +59,7 @@ void CToolMaintainedAction::cancel()
 bool CToolMaintainedAction::onMouseLeftButtonDown()
 {
 	//H_AUTO(R2_CToolMaintainedAction_onMouseLeftButtonDown)
-	CTool::TSmartPtr holdThis(this); // prevent deletion by son (if they set an other tool)
+	CTool::TSmartPtr holdThis(this); // prevent deletion by son (if they set another tool)
 									 // TODO nico : find a more general system than this, because
 	if (_State == Action) return true; // may happen if focus was lost
 	if (_State == Canceling)

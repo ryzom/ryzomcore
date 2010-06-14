@@ -1269,7 +1269,7 @@ void	NLPACS::CGlobalRetriever::findCollisionChains(CCollisionSurfaceTemp &cst, c
 			// LeftSurface retrieverInstance is always curInstance.
 			cc.LeftSurface.RetrieverInstanceId= curInstance;
 
-			// If RightSurface is not an "edgeId" ie a pointer on a neighbor surface on an other retrieverInstance.
+			// If RightSurface is not an "edgeId" ie a pointer on a neighbor surface on another retrieverInstance.
 			const	CChain		&originalChain= localRetriever.getChain(cc.ChainId);
 			if( !originalChain.isBorderChainId(cc.RightSurface.SurfaceId) )
 			{

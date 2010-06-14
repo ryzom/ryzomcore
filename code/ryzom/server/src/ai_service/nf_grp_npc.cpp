@@ -1518,7 +1518,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 				}
 			}
 
-			// A npc give a mission to take an item given by an other npc
+			// A npc give a mission to take an item given by another npc
 			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
 			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
 			{
@@ -1683,7 +1683,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 				}
 			}
 
-			// A npc give a mission to give a item to an other npc
+			// A npc give a mission to give a item to another npc
 			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
 			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
 			{

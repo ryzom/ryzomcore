@@ -3018,10 +3018,10 @@ void CScanDataThread::run ()
 // ****************************************************************************
 uint32 CPatchManager::SPatchInfo::getAvailablePatchsBitfield() const
 {
-	// About the test (until a patch enum is added, we use the 'optionnal' flag)
-	// Non optionnal -> must patch it (will be for RoS)
-	// Optionnal -> Will be for Mainland
-	// Required : stands for 'bnp' required by the Optionnal bnps !! so ignore only RoS is wanted
+	// About the test (until a patch enum is added, we use the 'optional' flag)
+	// Non optional -> must patch it (will be for RoS)
+	// Optional -> Will be for Mainland
+	// Required : stands for 'bnp' required by the Optional bnps !! so ignore only RoS is wanted
 
 	uint32 result = 0;
 	if (!NonOptCat.empty())

@@ -149,20 +149,20 @@ static const char *WaterVpBump1LayersCode =
  ADD R0, R2, -R1;				#compute reflection vector			\n\
  MAD o[TEX1], R0, c[8], c[8];									    \n\
 ";
-/** Optionnal diffuse texture in stage 3
+/** Optional diffuse texture in stage 3
   */
 static const char *WaterVpDiffuseMapStage3Code =
 "DP4 o[TEX3].x, R4, c[13]; #compute uv for diffuse texture					\n\
  DP4 o[TEX3].y, R4, c[14];													\n\
 ";
-/** Optionnal diffuse texture in stage 2
+/** Optional diffuse texture in stage 2
   */
 static const char *WaterVpDiffuseMapStage2Code =
 "DP4 o[TEX2].x, R4, c[13]; #compute uv for diffuse texture					\n\
  DP4 o[TEX2].y, R4, c[14];													\n\
 ";
 
-/** Optionnal diffuse texture in stage 1
+/** Optional diffuse texture in stage 1
   */
 static const char *WaterVpDiffuseMapStage1Code =
 "DP4 o[TEX1].x, R4, c[13]; #compute uv for diffuse texture					\n\

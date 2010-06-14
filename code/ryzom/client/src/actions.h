@@ -191,10 +191,10 @@ public:
 		// Init default values
 		CParameter ();
 
-		// The parameter name (optionnal)
+		// The parameter name (optional)
 		std::string		Name;
 
-		// The parameter localized name (optionnal)
+		// The parameter localized name (optional)
 		std::string		LocalizedName;
 
 		// Default value

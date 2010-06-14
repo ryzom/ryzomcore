@@ -107,7 +107,7 @@ public:
 	 *	setting <0 means -1 and so means DistMax = infinite (default in meshs but multilod meshes).
 	 *	NB: This apply to the shape direclty!! ie All instances using same shape will be affected
 	 *
-	 *	Note: If the skeleton himself is sticked to an other skeleton, this setup is not taken into account.
+	 *	Note: If the skeleton himself is sticked to another skeleton, this setup is not taken into account.
 	 *	ie the skeleton clip follow the ancestor skeleton clip result (ie the first skeleton in hierarchy
 	 *	which is not sticked).
 	 *

@@ -464,7 +464,7 @@ void			CDBGroupBuildPhrase::fillSelectionMain(uint index)
 		filterBrickSetuped(bricks);
 	}
 
-	// For optionnal or credit, filter by BrickExclusion.
+	// For optional or credit, filter by BrickExclusion.
 	if(index>=1/*+_NumMandatories*/)
 		filterBrickExclusion(bricks, index);
 
@@ -967,7 +967,7 @@ void			CDBGroupBuildPhrase::updateParamHrc(uint index)
 
 	// **** From the current View setup of 'word', build the Parameter Hierarchy (in simple tree form)
 	CParamTreeNode		rootNode(NULL);
-	// NB: here rootNode represent the Main (ie mandatory, optionnal or credit) brick. Therefore, it is not a real parameter.
+	// NB: here rootNode represent the Main (ie mandatory, optional or credit) brick. Therefore, it is not a real parameter.
 	rootNode.Brick= word->Slot.Brick->asSBrickSheet();
 	rootNode.Valid= true;
 	rootNode.ViewParamFamilies= word->Slot.ViewParamFamilies;

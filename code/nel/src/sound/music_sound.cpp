@@ -78,7 +78,7 @@ void		CMusicSound::importForm(const std::string& filename, NLGEORGES::UFormElm& 
 uint32		CMusicSound::getDuration()
 {
 	// Cannot know the length of this music sound.
-	// Since its not really a sound (played in an other "channel"), suppose 0
+	// Since its not really a sound (played in another "channel"), suppose 0
 	return 0;
 }
 

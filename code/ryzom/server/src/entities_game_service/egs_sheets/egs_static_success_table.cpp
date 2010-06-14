@@ -218,7 +218,7 @@ void CStaticSuccessTable::readGeorges (const CSmartPtr<UForm> &form, const CShee
 //--------------------------------------------------------------
 // reloadSheet
 //--------------------------------------------------------------
-/// called to copy from an other sheet (operator= + care ptrs)
+/// called to copy from another sheet (operator= + care ptrs)
 void CStaticSuccessTable::reloadSheet(const CStaticSuccessTable &o)
 {
 	// nothing special, but check correct size

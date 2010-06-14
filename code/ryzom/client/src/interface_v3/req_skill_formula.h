@@ -82,10 +82,10 @@ public:
 	// Or operation with a SkillValue.
 	void		orV(const CSkillValue &req);
 
-	// And operation with an other Req Skill Formula. NB: if this.empty, ope=
+	// And operation with another Req Skill Formula. NB: if this.empty, ope=
 	void		andV(const CReqSkillFormula &req);
 
-	// Or operation with an other Req Skill Formula
+	// Or operation with another Req Skill Formula
 	void		orV(const CReqSkillFormula &req);
 
 	// empty formula?

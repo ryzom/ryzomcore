@@ -1530,7 +1530,7 @@ void		CMatrix::serial(IStream &f)
 // ======================================================================================================
 void		CMatrix::setArbitraryRotI(const CVector &idir)
 {
-	// avoid gimbal lock. if idir == nearly K, use an other second lead vector
+	// avoid gimbal lock. if idir == nearly K, use another second lead vector
 	if( fabs(idir.z)<0.9f )
 		setRot(idir, CVector::J, CVector::K);
 	else
@@ -1540,7 +1540,7 @@ void		CMatrix::setArbitraryRotI(const CVector &idir)
 
 void		CMatrix::setArbitraryRotJ(const CVector &jdir)
 {
-	// avoid gimbal lock. if jdir == nearly K, use an other second lead vector
+	// avoid gimbal lock. if jdir == nearly K, use another second lead vector
 	if(fabs(jdir.z)<0.9f)
 		setRot(CVector::I, jdir, CVector::K);
 	else
@@ -1550,7 +1550,7 @@ void		CMatrix::setArbitraryRotJ(const CVector &jdir)
 
 void		CMatrix::setArbitraryRotK(const CVector &kdir)
 {
-	// avoid gimbal lock. if kdir == nearly I, use an other second lead vector
+	// avoid gimbal lock. if kdir == nearly I, use another second lead vector
 	if( fabs(kdir.y)<0.9f )
 		setRot(CVector::I, CVector::J, kdir);
 	else

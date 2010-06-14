@@ -1362,7 +1362,7 @@ bool CInterfaceParser::parseLink(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
 		splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
 	}
-	// optionnal action handler
+	// optional action handler
 	std::string action;
 	std::string params;
 	std::string cond;
@@ -3065,7 +3065,7 @@ bool CInterfaceParser::parseCareerGenerator(xmlNodePtr /* cur */)
 		return false;
 
 
-	// knownWindow (optionnal)
+	// knownWindow (optional)
 	prop = xmlGetProp (cur, (xmlChar*)"known_window");
 	if(prop) knownWindow= (const char*)prop;
 

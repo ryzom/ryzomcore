@@ -170,7 +170,7 @@ private:
   * To be used by both IOS & EGS
   *
   * \TODO : Would be good to generalize the pattern used as something like NLMISC::CBinaryRelation<CompoundA, CompoundB, Relation>
-  *         This would avoid to have fields for one service that aren't used by an other (like the historic...)
+  *         This would avoid to have fields for one service that aren't used by another (like the historic...)
   *
   * \author Nicolas Vizerie
   * \author Nevrax France

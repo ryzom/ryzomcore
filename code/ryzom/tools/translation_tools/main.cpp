@@ -153,7 +153,7 @@ void showUsage(char *exeName)
 	LOG("    extract_bot_names [-r]\n");
 	LOG("    extract_new_sheet_names [-r]\n");
 	LOG("\n");
-	LOG("Language code are ISO 639-2 + optionnaly ISO 3166 country code.\n");
+	LOG("Language code are ISO 639-2 + optionally ISO 3166 country code.\n");
 	LOG("Reference language is always the first language in languages.txt\n");
 }
 

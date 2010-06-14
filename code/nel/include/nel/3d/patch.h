@@ -509,7 +509,7 @@ public:
 	  */
 	void setupColorsFromTileFlags(const NLMISC::CRGBA colors[4]);
 
-	/** Set this patch flags from an other one.
+	/** Set this patch flags from another one.
 	  * The patchs must match
 	  */
 	void copyTileFlagsFromPatch(const CPatch *src);

@@ -457,7 +457,7 @@ public:
 	// get brick from family/index
 	static const CStaticBrick *getBrickFromFamilyIndex(uint16 family, uint16 index);
 			
-	/// called to copy from an other sheet (operator= + care ptrs)
+	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticBrick &o);
 	
 private:

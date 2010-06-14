@@ -774,7 +774,7 @@ public:
 	virtual void			forceTextureResize(uint divisor);
 	virtual void			forceNativeFragmentPrograms(bool /* nativeOnly */) {} // ignored
 
-	// Driver informations
+	// Driver information
 	virtual uint			getNumAdapter() const;
 	virtual bool			getAdapter(uint adapter, CAdapter &desc) const;
 	virtual bool			setAdapter(uint adapter);

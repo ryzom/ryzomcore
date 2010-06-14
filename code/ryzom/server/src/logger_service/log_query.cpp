@@ -733,7 +733,7 @@ bool CQueryParser::parseDATE(CQueryParser::iterator &it, CQueryParser::iterator 
 			goto noHour;
 		if (!parseINT(it, end))
 			goto noHour;
-		// optionnal sec
+		// optional sec
 		rew = it;
 		if (getNextToken(it, end).TokenType != tt_COLON)
 			goto noHour;

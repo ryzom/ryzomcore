@@ -2258,7 +2258,7 @@ void CInterfaceManager::drawContextHelp ()
 	// ***************
 	// **** try to disable
 	// ***************
-	// test disable first, so can recheck asap if an other present. see below
+	// test disable first, so can recheck asap if another present. see below
 	if(_CurCtrlContextHelp)
 	{
 		if(x!=_LastXContextHelp || y!=_LastYContextHelp)
@@ -4469,7 +4469,7 @@ void	CInterfaceManager::setMode(uint8 newMode)
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*itw);
 					if ((pGC != NULL)&&(pGC->getActive()))
 					{
-						// if this GC is a Full modal window, or if it is a modal son of an other GC,
+						// if this GC is a Full modal window, or if it is a modal son of another GC,
 						if (pGC->isModal() || pGC->isModalSon())
 						{
 							setTopWindow(pGC);

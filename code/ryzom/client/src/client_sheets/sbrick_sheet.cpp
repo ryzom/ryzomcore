@@ -167,7 +167,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 			if(bf != BRICK_FAMILIES::Unknown)
 				OptionalFamilies.push_back( bf );
 			else
-				nlwarning("Unknown optionnal family %s",sTmp.c_str());
+				nlwarning("Unknown optional family %s",sTmp.c_str());
 		}
 	}
 

@@ -83,7 +83,7 @@ bool CNameManager::assignName(uint32 charId, const ucstring & ucName, uint32 hom
 
 	if (_Names.getBToAMap().find(charSlot) != _Names.getBToAMap().end())
 	{
-		// the character is associated to an other name
+		// the character is associated to another name
 		_Names.removeWithB(charSlot);
 	}
 

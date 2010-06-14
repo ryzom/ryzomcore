@@ -226,7 +226,7 @@ public:
 	CCtrlSheetInfo::TSheetType getType () const;
 	void  setType (CCtrlSheetInfo::TSheetType type);
 
-	// Swap the content with an other ctrl_sheet (debug): SheetId, Quantity and Quality
+	// Swap the content with another ctrl_sheet (debug): SheetId, Quantity and Quality
 	void	swapSheet(CDBCtrlSheet *other);
 	void	setSheetId(sint32 val) {_SheetId.setSInt32(val);}
 	void	setQuality(sint32 val) {_Quality.setSInt32(val);}
@@ -355,7 +355,7 @@ public:
 	/// Special ContextHelp for ctrl sheet.
 	virtual void			getContextHelp(ucstring &help) const;
 
-	/** true if an item of an other ctrlSheet can be dropped on this slot.
+	/** true if an item of another ctrlSheet can be dropped on this slot.
 	 *	also return true if src is 0, or if _ItemSlot==UNDEFINED
 	 */
 	bool					canDropItem(CDBCtrlSheet *src) const;
@@ -670,7 +670,7 @@ protected:
 	// For an Item only. Usefull for LeftHand Filtering: must have a pointer to the right hand
 	CDBCtrlSheet		*_OtherHandItemFilter;
 
-	// This String is optionnal and usage dependent for Item, Macro, or Sentence
+	// This String is optional and usage dependent for Item, Macro, or Sentence
 	std::string			_OptString;
 
 	CCDBNodeLeaf		*_GrayedLink;

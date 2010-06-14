@@ -1580,7 +1580,7 @@ void initPatch()
 }
 
 // ***************************************************************************
-// Called after the check has been done. The page is full of optionnal categories that must be selected for patching
+// Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHLoginPatch : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
@@ -1638,7 +1638,7 @@ class CAHLoginPatch : public IActionHandler
 REGISTER_ACTION_HANDLER (CAHLoginPatch, "login_patch");
 
 // ***************************************************************************
-// Called after the check has been done. The page is full of optionnal categories that must be selected for patching
+// Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHClosePatch : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
@@ -2174,7 +2174,7 @@ void initDataScan()
 }
 
 // ***************************************************************************
-// Called after the check has been done. The page is full of optionnal categories that must be selected for patching
+// Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHOnScanDataStart : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)

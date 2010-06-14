@@ -89,7 +89,7 @@ public:
 	struct SFileToPatch
 	{
 		std::string			FileName;			// Dest file for the patch
-		std::string			SrcFileName;		// Optionnal src file to which apply patch (empty unless some version of the file, possibly with
+		std::string			SrcFileName;		// Optional src file to which apply patch (empty unless some version of the file, possibly with
 												// all patchs applied, was found in the /unpack directory due to a download by the background downloader)
 		std::vector<uint32>	Patches;
 		std::vector<uint32>	PatcheSizes;
@@ -178,7 +178,7 @@ public:
 	// if the checkThread ended and is ok then the getDesc* methods can be called
 	bool isCheckThreadEnded(bool &ok);
 
-	// Get all the optionnal categories to display for patching
+	// Get all the optional categories to display for patching
 	void getInfoToDisp(SPatchInfo &piOut);
 
 	void forceStopCheckThread();

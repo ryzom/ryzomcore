@@ -1779,35 +1779,30 @@ IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const 
 }
 
 // ***************************************************************************
-
 bool CDriverD3D::activate()
 {
 	return true;
 }
 
 // ***************************************************************************
-
 bool CDriverD3D::isActive ()
 {
 	return (IsWindow(_HWnd) != 0);
 }
 
 // ***************************************************************************
-
 nlWindow CDriverD3D::getDisplay()
 {
 	return _HWnd;
 }
 
 // ***************************************************************************
-
 NLMISC::IEventEmitter	*CDriverD3D::getEventEmitter()
 {
 	return &_EventEmitter;
 }
 
 // ***************************************************************************
-
 void CDriverD3D::getWindowSize (uint32 &width, uint32 &height)
 {
 	H_AUTO_D3D(CDriverD3D_getWindowSize);
@@ -1825,7 +1820,6 @@ void CDriverD3D::getWindowPos (sint32 &x, sint32 &y)
 }
 
 // ***************************************************************************
-
 uint32 CDriverD3D::getImplementationVersion () const
 {
 	H_AUTO_D3D(CDriverD3D_getImplementationVersion);
@@ -1833,21 +1827,18 @@ uint32 CDriverD3D::getImplementationVersion () const
 }
 
 // ***************************************************************************
-
 const char *CDriverD3D::getDriverInformation ()
 {
 	return "Directx 9 NeL Driver";
 }
 
 // ***************************************************************************
-
 uint8 CDriverD3D::getBitPerPixel ()
 {
 	return _CurrentMode.Depth;
 }
 
 // ***************************************************************************
-
 bool CDriverD3D::clear2D(CRGBA rgba)
 {
 	H_AUTO_D3D(CDriverD3D_clear2D);
@@ -2712,7 +2703,7 @@ const char *CDriverD3D::getVideocardInformation ()
 		return name;
 	}
 	else
-		return "Can't get video card informations";
+		return "Can't get video card information";
 }
 
 // ***************************************************************************
@@ -3077,14 +3068,14 @@ bool CDriverD3D::setMonitorColorProperties (const CMonitorColorProperties &prope
 }
 // ***************************************************************************
 
-//****************************************************************************
+// ****************************************************************************
 bool CDriverD3D::supportEMBM() const
 {
 	H_AUTO_D3D(CDriverD3D_supportEMBM);
 	return _EMBMSupported;
 }
 
-//****************************************************************************
+// ****************************************************************************
 bool CDriverD3D::isEMBMSupportedAtStage(uint stage) const
 {
 	H_AUTO_D3D(CDriverD3D_isEMBMSupportedAtStage);
@@ -3092,7 +3083,7 @@ bool CDriverD3D::isEMBMSupportedAtStage(uint stage) const
 	return stage < _NbNeLTextureStages - 1;
 }
 
-//****************************************************************************
+// ****************************************************************************
 void CDriverD3D::setEMBMMatrix(const uint stage, const float mat[4])
 {
 	H_AUTO_D3D(CDriverD3D_setEMBMMatrix);

@@ -2470,7 +2470,7 @@ void		CTessFace::averageTesselationVertices()
 	{
 		// NB: here, just need to compute average of myself with FLeft, because my neighbor FBase
 		// is on same patch (see splitRectangular()), and is average with its FLeft neighbor is done
-		// on an other branch of the recurs call.
+		// on another branch of the recurs call.
 		neighbor= FLeft;
 	}
 
@@ -2514,7 +2514,7 @@ void		CTessFace::refreshTesselationGeometry()
 
 
 	/* NB: rectangular case: just need to take SonLeft->VBase, because my neighbor on FBase will compute his son
-		on an other branch of the recurs call.
+		on another branch of the recurs call.
 	*/
 	// re-compute this position (maybe with new noise geometry in Tile Edition).
 	SonLeft->VBase->EndPos= Patch->computeVertex(SonLeft->PVBase.getS(), SonLeft->PVBase.getT());

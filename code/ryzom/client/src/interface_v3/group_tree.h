@@ -33,7 +33,7 @@ class CGroupTree : public CInterfaceGroup
 public:
 
 	struct SNode;
-	// optionnal callback that is called when a node has been added
+	// optional callback that is called when a node has been added
 	struct INodeAddedCallback
 	{
 		/** A node has just been added in the CGroupTree object

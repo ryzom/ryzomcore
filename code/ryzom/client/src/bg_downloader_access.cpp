@@ -279,7 +279,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 					for (uint catIndex = 0; catIndex < bnpCatSet.categoryCount(); ++catIndex)
 					{
 						const CBNPCategory	&cat = bnpCatSet.getCategory(catIndex);
-						if (cat.isOptional()) // NB : 'optionnal' flag meaning has changed : it now means 'Mainland Patch'
+						if (cat.isOptional()) // NB : 'optional' flag meaning has changed : it now means 'Mainland Patch'
 											  // until an enum is added
 						{
 							for (uint f = 0; f < cat.fileCount(); ++f)

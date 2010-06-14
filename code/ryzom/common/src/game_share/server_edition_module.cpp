@@ -3289,7 +3289,7 @@ bool CServerEditionModule::unkickPioneerImpl(TSessionId sessionId, TCharId charI
 		if (connectedSessionId != sessionId)
 		{
 			outMsg += NLMISC::toString(
-				"Refuse to unkick the character %u from session %u because he is connected to an other session %u",
+				"Refuse to unkick the character %u from session %u because he is connected to another session %u",
 				charId, sessionId.asInt(), connectedSessionId.asInt() ) ;
 			return false;
 		}
@@ -3362,7 +3362,7 @@ bool CServerEditionModule::kickPioneerImpl(TSessionId sessionId, TCharId charId,
 		if (connectedSessionId != sessionId)
 		{
 			outMsg += NLMISC::toString(
-				"Refuse to kick the character %u from session %u because he is connected to an other session %u",
+				"Refuse to kick the character %u from session %u because he is connected to another session %u",
 				charId, sessionId.asInt(), connectedSessionId.asInt() ) ;
 			return false;
 		}
@@ -3409,7 +3409,7 @@ bool CServerEditionModule::kickPioneerImpl(TSessionId sessionId, TCharId charId,
 		if (allowedChar->second.SessionId != sessionId)
 		{
 			outMsg += NLMISC::toString(
-				"R2Ed: Refuse to kick the character %u from session %u because he is connecting to an other session %u",
+				"R2Ed: Refuse to kick the character %u from session %u because he is connecting to another session %u",
 				charId, sessionId.asInt(), allowedChar->second.SessionId.asInt()
 				);
 
@@ -3472,7 +3472,7 @@ bool CServerEditionModule::removeCharacterFromSessionImpl(TSessionId sessionId, 
 		TSessionId connectedSessionId = foundPioneerSession->second;
 		if (connectedSessionId != sessionId)
 		{
-			outMsg += NLMISC::toString("Refuse to remove the character %u from session %u because he is connected to an other session %u",
+			outMsg += NLMISC::toString("Refuse to remove the character %u from session %u because he is connected to another session %u",
 				charId, sessionId.asInt(), connectedSessionId.asInt()	);
 			return false;
 		}
@@ -3503,7 +3503,7 @@ bool CServerEditionModule::removeCharacterFromSessionImpl(TSessionId sessionId, 
 
 		if (allowedChar->second.SessionId != sessionId)
 		{
-			outMsg += NLMISC::toString("R2Ed: Refuse to remove the character %u from session %u because he is connecting to an other session %u",
+			outMsg += NLMISC::toString("R2Ed: Refuse to remove the character %u from session %u because he is connecting to another session %u",
 				charId, sessionId.asInt(), allowedChar->second.SessionId.asInt());
 
 			return false;
@@ -3567,7 +3567,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 	if (session) { scenario = session->getScenario(); }
 	if (!session || !scenario)
 	{
-		msg = toString("Try to teleport a character %u to an other character %u but in a session  %u that do not exist", source, dest, session);
+		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, session);
 		return false;
 	}
 
@@ -3578,7 +3578,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 
 	if (! sourceCharOk || !destCharOk)
 	{
-		msg = toString("Try to teleport a character %u %sto an other character %u %sin the session  %u",
+		msg = toString("Try to teleport a character %u %sto another character %u %sin the session  %u",
 			source,  sourceCharOk?"":"that is not present in the current session ",
 			dest,  destCharOk?"":"that is not present in the current session ",
 			session);
@@ -3596,7 +3596,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 
 	if (_CharacterControlProxy.isNull())
 	{
-		msg="Try to tp to an other player but no EGS?";
+		msg="Try to tp to another player but no EGS?";
 		return false;
 	}
 	CCharacterControlItfProxy proxy(_CharacterControlProxy);

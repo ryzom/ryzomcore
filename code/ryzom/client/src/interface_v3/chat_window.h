@@ -63,7 +63,7 @@ struct CChatWindowDesc
 	std::string				AHOnCloseButton;
 	std::string				AHOnCloseButtonParams;
 	std::string				HeaderColor;
-	// default ctor : build optionnal parameters with their default values
+	// default ctor : build optional parameters with their default values
 	CChatWindowDesc();
 };
 
@@ -224,7 +224,7 @@ public:
 	// dtor
 	~CChatWindowManager();
 	/** Create a new chat window. Each chat window should have a unique name
-	  * The window should be inserted in an other container by the caller.
+	  * The window should be inserted in another container by the caller.
 	  * \param name A unique title to affect to that window
 	  * \param listener A listener to react to the event of the window
 	  * \return A pointer on the window, or NULL, if creation failed or if name already exists.

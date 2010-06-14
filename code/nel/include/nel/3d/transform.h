@@ -663,7 +663,7 @@ protected:
 	 */
 	virtual	sint			renderSkinGroupGeom(float /* alphaMRM */, uint /* remainingVertices */, uint8 * /* dest */) {return 0;}
 	/** if supportSkinGrouping(), called to render the primitives of the already skinned vertices (VB activated in the driver)
-	 *	Optionnaly, fill specRdrPasses with specular rdrPass to sort (used for specular grouping).
+	 *	Optionally, fill specRdrPasses with specular rdrPass to sort (used for specular grouping).
 	 *	\param baseVertex value to add to each PBlock index.
 	 */
 	virtual	void			renderSkinGroupPrimitives(uint /* baseVertex */, std::vector<CSkinSpecularRdrPass> &/* specularRdrPasses */, uint /* skinIndex */) { }

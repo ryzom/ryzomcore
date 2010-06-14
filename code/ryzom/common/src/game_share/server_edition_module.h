@@ -163,7 +163,7 @@ namespace R2
 		virtual void characterKicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId);
 		virtual void characterUnkicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId);
 
-		// Session manager report that a character must be teleport to an other location
+		// Session manager report that a character must be teleport to another location
 		virtual void teleportOneCharacterToAnother(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId sourceCharId, TCharId destCharId);
 		virtual void teleportWhileUploadingScenario(NLNET::IModuleProxy *sender, const std::string& island, const std::string& entryPoint, const std::string& season);
 
@@ -340,7 +340,7 @@ namespace R2
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listPioneers, "display the list of pionnieers", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, kickPioneer, "Kick a player out of a session", "<sesionId> <charId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, unkickPioneer, "Unkick a player from a session", "<sesionId> <charId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, teleportOneCharacterToAnother, "Teleport a player to an other player in the same session", "<sesionId> <charId> <targetCharId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, teleportOneCharacterToAnother, "Teleport a player to another player in the same session", "<sesionId> <charId> <targetCharId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayPioneer, "display a pionnieer", "<charId>")
 
 

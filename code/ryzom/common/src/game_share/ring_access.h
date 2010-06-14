@@ -69,7 +69,7 @@ namespace R2
 		std::string getSheetAccessInfo(const std::string& sheetClient, const std::string& sheetServer="") const;
 		std::string getIslandAccessInfo(const std::string& islandeName) const;
 		void getRingAccessAsMap(const std::string& ringAccess, std::map<std::string, int> & ringAccessAsMap) const;
-		// Upgrade a ring access by an other eg "d1:f3:l1" +  "d3:f1:j1" => "d3:f2:l1:j1"
+		// Upgrade a ring access by another eg "d1:f3:l1" +  "d3:f1:j1" => "d3:f2:l1:j1"
 		std::string upgradeRingAccess(const std::string& defaultValue, const std::string& bonusValue) const;
 		bool verifyRight(const std::string& askedAcces, const std::string& allowedAccess) const;
 		bool verifyRight(const std::map<std::string, int>& askedAccesMap, const std::map<std::string, int>& allowedAccessMap, std::string& package, int& neededLevel, int& charLevel) const;

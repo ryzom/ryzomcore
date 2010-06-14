@@ -115,7 +115,7 @@ public:
 		return _VarName;
 	}
 	
-	/// Evaluate the content of the variable with an optionnal sub part.
+	/// Evaluate the content of the variable with an optional sub part.
 	virtual std::string evalVar(const std::string &subPart) = 0;
 	
 	/** Factory method to create new variable. Caller become responsible
@@ -435,7 +435,7 @@ public:
 	/** Install the generated script into the destination primitive files */
 	bool installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, const std::string &primFileName);
 
-	/// Publish the modified to the path paramater
+	/// Publish the modified to the path parameter
 	bool publishFiles(const std::string &serverPathPrim, const std::string &serverPathText, const std::string &localPathText);
 
 	/// Search for text in the file : add it if it's not in

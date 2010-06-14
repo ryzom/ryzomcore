@@ -615,7 +615,7 @@ NLMISC_COMMAND( displayChatClients, "Display the list of clients", "" )
 	return true;
 }
 
-NLMISC_COMMAND( displayChatGroups, "Display the list of chat groups, optionnaly, display universe chat group and/or player audience groups", "[universe] [player]" )
+NLMISC_COMMAND( displayChatGroups, "Display the list of chat groups, optionally, display universe chat group and/or player audience groups", "[universe] [player]" )
 {
 	bool displayUniverse = false;
 	bool playerAudience = false;
@@ -638,7 +638,7 @@ NLMISC_COMMAND( displayChatGroups, "Display the list of chat groups, optionnaly,
 	return true;
 }
 
-NLMISC_COMMAND( displayChatAudience, "Display the current chat dynamic audience for a player, optionnaly, force the update", "<playerId> [update]" )
+NLMISC_COMMAND( displayChatAudience, "Display the current chat dynamic audience for a player, optionally, force the update", "<playerId> [update]" )
 {
 	bool update = false;
 	if (args.size() < 1)

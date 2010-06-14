@@ -185,7 +185,7 @@ public :
 	/// called when the sheet is removed
 	void removed() {}
 
-	/// called to copy from an other sheet (operator= + care ptrs)
+	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticXpStagesTable &o);
 	
 	std::vector< SStageTable > XpStagesTables;
@@ -647,7 +647,7 @@ public:
 	/// called when the sheet is removed
 	void removed() { }
 	
-	/// called to copy from an other sheet (operator= + care ptrs)
+	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticCreatures &o);
 	
 	/// recompute CreatureDamagePerHit according to success chance table and CreatureDamagePerHitWithoutAverageDodge

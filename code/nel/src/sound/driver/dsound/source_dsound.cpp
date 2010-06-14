@@ -2569,7 +2569,7 @@ void CSourceDSound::crossFade()
 	_Buffer->getFormat(sampleFormat, freq);
 
 
-	// The source is currently playing an other buffer. We will do a hot
+	// The source is currently playing another buffer. We will do a hot
 	// swap between the old and the new buffer. DirectSound maintains two
 	// cursors into the buffer: the play cursor and the write cursor.
 	// The write cursor indicates where we can start writing the new samples.

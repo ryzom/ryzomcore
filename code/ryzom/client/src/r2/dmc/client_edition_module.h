@@ -249,7 +249,7 @@ He can change the current act
 - getRuntimeActs() : return act description
 - requestStartAct(): ask the DSS to start another act
 - updateActPositionDescriptions(): update the description of acts
-He can use DM function such teleport himself to an other character
+He can use DM function such teleport himself to another character
 - requestTeleportOneCharacterToAnother: teleport the dm to another plyer character.
 He can dynamically change the Weather or the Season.
 - requestSetWeather: change the current weather at runtime or edit mode
@@ -380,7 +380,7 @@ Sessions infos:
 - getAiInstance: get the id of the current AiInstance. One AiInstance is created by session.
 - getSessionType: get the type of the current session (edition / animation)
 - isSessionOwner: is the player the owner of the current session
-- getEditSessionLink: is the current session linked to an other session
+- getEditSessionLink: is the current session linked to another session
 - getScenarioHeader: get header info of current scenario (animation function). Enable to know divers info set into the header of a scenario.
 Quotas infos:
 - getMaxNpcs: get the maximal number of npc allowed by scenario.
@@ -502,7 +502,7 @@ public:
 			const std::string& instanceId, const std::string& attrName, sint32 position,
 			const std::string& key, CObject* value);
 
-	/*! Move a node form the current Scenario from a position to an other (in edition Mode)
+	/*! Move a node form the current Scenario from a position to another (in edition Mode)
 	The initial position is defined by instanceId, attrName, position.
 	The final position is defined by desInstanceId, destAttrName, destPosition.
 	*/
@@ -679,7 +679,7 @@ public:
 	const TActPositionDescriptions& getRuntimeActs() const { return _ActPositionDescriptions; }
 
 	/*!
-		DM function that enable the dm to teleport to an other character (player).
+		DM function that enable the dm to teleport to another character (player).
 		(Right click in the participant list)
 		\param sessionId The id of the session
 		\param sourceCharId The id of the character that will be teleport

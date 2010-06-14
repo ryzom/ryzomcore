@@ -672,7 +672,7 @@ bool scanHTMLColor(const char *src, CRGBA &dest)
 		src = scanColorComponent(src, result.A);
 		if (!src)
 		{
-			// Alpha is optionnal
+			// Alpha is optional
 			result.A = 255;
 		}
 		dest = result;

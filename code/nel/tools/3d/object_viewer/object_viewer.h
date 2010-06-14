@@ -345,7 +345,7 @@ public:
 	// @}
 
 	/** an interface for objects that want to be called during the loop
-	  * First use : display of an optionnal bbox for a particle system
+	  * First use : display of an optional bbox for a particle system
 	  */
 	struct IMainLoopCallBack
 	{

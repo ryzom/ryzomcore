@@ -572,7 +572,7 @@ private:
 	/**  Just for build process.
 	 * NB: we must store palette info by corner (not by vertex) because Matrix Block grouping may insert vertex
 	 * discontinuities. eg: a vertex use Matrix18. After Matrix grouping (16matrix max), Matrix18 could be Matrix2 for a group
-	 * of face, but Matrix13 for an other!!
+	 * of face, but Matrix13 for another!!
 	 */
 	struct	CCornerTmp : public CMesh::CCorner
 	{

@@ -532,7 +532,7 @@ public:
 		CCDBNodeLeaf *progs = im->getDbProp("SERVER:TARGET:PROGRAMMES", false);
 		if (!progs)
 		{
-			nlwarning("<CHandlerContextMissions::execute> can't retrieve programms.");
+			nlwarning("<CHandlerContextMissions::execute> can't retrieve programs.");
 			return;
 		}
 		bool missionsToDo = (progs->getValue32() & (1 << BOTCHATTYPE::AvailableMissionFamily)) != 0;

@@ -1318,14 +1318,14 @@ END
 
 IDD_VEGETABLE_SELECT_OTHER DIALOG DISCARDABLE  0, 0, 187, 146
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Select An Other Vegetable"
+CAPTION "Select Another Vegetable"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
     LISTBOX         IDC_LIST1,5,5,95,130,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Selet the vegetable to copy colors from",IDC_STATIC,110,
+    LTEXT           "Select the vegetable to copy colors from",IDC_STATIC,110,
                     75,75,35
 END
 

@@ -120,7 +120,7 @@ public:
 	 * \param quat a UNIT quaternion
 	 */
 	void		setRot(const CQuat &quat);
-	/** Explicit setup the Rotation/Scale matrix (base) with the rotation part of an other matrix.
+	/** Explicit setup the Rotation/Scale matrix (base) with the rotation part of another matrix.
 	 * \param matrix the matrix to copy rot part.
 	 */
 	void		setRot(const CMatrix &matrix);

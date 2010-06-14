@@ -80,7 +80,7 @@ bool		testWildCard(const char *strIn, const char *wildCard)
 					if( testWildCard(strIn+pos+token.size(), wildCard) )
 						// if succeed, end
 						return true;
-					// fails=> test with an other occurence of token in the string.
+					// fails=> test with another occurence of token in the string.
 					pos= sCopy.find(token, pos+1);
 				}
 

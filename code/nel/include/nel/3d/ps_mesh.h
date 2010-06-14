@@ -398,7 +398,7 @@ protected:
 	void				releaseShapes();
 
 
-	/** Compute (optionnal) mesh colors.
+	/** Compute (optional) mesh colors.
 	  * \param startIndex   Index of the mesh being processed
 	  * \param toProcess    Number of meshs to process
 	  */

@@ -67,7 +67,7 @@ public:
 	CPeopleList();
 	/** create a list of people from the given description
 	  * \param desc description of the people list
-	  * \param chat optionnal chat box in the list
+	  * \param chat optional chat box in the list
 	  * \return true if the list could be
 	  */
 	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = NULL);

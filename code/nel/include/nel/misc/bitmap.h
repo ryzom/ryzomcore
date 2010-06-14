@@ -572,7 +572,7 @@ public:
 	 * \param tiled If false coordinate are clamped, else the bitmap is considered to tile
 	 */
 	CRGBAF getColor (float x, float y) const;
-	// Get Color with optionnal tiling on axis
+	// Get Color with optional tiling on axis
 	CRGBAF getColor (float x, float y, bool tileU, bool tileV) const;
 
 

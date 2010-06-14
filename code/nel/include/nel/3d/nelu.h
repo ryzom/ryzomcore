@@ -72,7 +72,7 @@ public:
 	 * - create a default camera, linked to the scene, and with default frustum as specified above.
 	 *
 	 * After creation, use the CNELU::Camera to manipulates the camera of scene (but you may change all you want
-	 * to this camera or create/use an other camera if you want...)
+	 * to this camera or create/use another camera if you want...)
 	 * \param viewport the viewport, fullscreen by default.
 	 */
 	static void		initScene(CViewport viewport=CViewport());

@@ -297,7 +297,7 @@ float	CMRMBuilder::computeEdgeCost(const CMRMEdge &edge)
 			{
 				/* The edge is between 2 interfaces but not the same. If we collide it we'll have holes!
 					This problem arise if space beetween interfaces is small. eg: if we setup an interface beetween
-					hair and head, and an other one beetween head and torso, then we'll have this problem in the
+					hair and head, and another one beetween head and torso, then we'll have this problem in the
 					back of the neck.
 					The solution is to make a big big cost to hope we'll never collide them (else Holes...)!!
 					Don't use FLT_MAX to still have a correct order if we don't have choice...
@@ -1030,7 +1030,7 @@ void	CMRMBuilder::saveCoarserMesh(CMRMMesh &coarserMesh)
 			index++;
 		}
 		else
-			vert.CoarserIndex=-1;	// indicate that this vertex no more exist and is to be geomorphed to an other.
+			vert.CoarserIndex=-1;	// indicate that this vertex no more exist and is to be geomorphed to another.
 	}
 
 
@@ -1059,7 +1059,7 @@ void	CMRMBuilder::saveCoarserMesh(CMRMMesh &coarserMesh)
 				index++;
 			}
 			else
-				wedge.CoarserIndex=-1;	// indicate that this wedge no more exist and is to be geomorphed to an other.
+				wedge.CoarserIndex=-1;	// indicate that this wedge no more exist and is to be geomorphed to another.
 		}
 	}
 

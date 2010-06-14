@@ -4886,7 +4886,7 @@ void CCombatPhrase::flushDelayedEvents()
 			case EventDodge:
 			case EventParry:
 				{
-					// don't send a flying text if some damage is done (for instance on an other entity or with the left weapon)
+					// don't send a flying text if some damage is done (for instance on another entity or with the left weapon)
 					// don't send a flying text if not wanted
 					bool	sendFlyingText= _Behaviour.DeltaHP==0 && ae.SendFlyingText;
 					// don't send a dodge/parry flying text if both Miss and DodgeParry happened (eg: can happen if right weapon attack miss, and left weapon attack is dodged)

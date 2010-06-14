@@ -1304,7 +1304,7 @@ public:
 	sint processMissionMultipleEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
 	/// process a mission event for the missions took by this player
 	bool processMissionUserEvent(std::list< CMissionEvent* > & eventList,TAIAlias alias);
-	/// process a mission event for a specific mission and optionnally for a specific step
+	/// process a mission event for a specific mission and optionally for a specific step
 	bool processMissionStepUserEvent(std::list< CMissionEvent* > & eventList, uint missionAlias, uint32 stepIndex );
 	/// make a mission advance through bot chat
 	void botChatMissionAdvance( uint8 index );

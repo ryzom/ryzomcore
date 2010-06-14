@@ -687,7 +687,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 
 
 // ***************************************************************************
-/** Swap an item with an other in the inventory.
+/** Swap an item with another in the inventory.
  *	eg: place in sword in the set, or place an armor in the kit, or swap 2 items in bags
  */
 class CHandlerSwapItem: public IActionHandler

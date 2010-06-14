@@ -59,7 +59,7 @@ void alTestWarning(const char *src)
 	switch (errcode)
 	{
 	case AL_NO_ERROR: break;
-	case AL_INVALID_NAME: nlwarning("AL: Invalid Name paramater passed to AL call (%s)", src); break;
+	case AL_INVALID_NAME: nlwarning("AL: Invalid Name parameter passed to AL call (%s)", src); break;
 	case AL_INVALID_ENUM: nlwarning("AL: Invalid parameter passed to AL call (%s)", src); break;
 	case AL_INVALID_VALUE: nlwarning("AL: Invalid enum parameter value (%s)", src); break;
 	case AL_INVALID_OPERATION: nlwarning("AL: Illegal call (%s)", src); break;

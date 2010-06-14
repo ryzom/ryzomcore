@@ -885,7 +885,7 @@ int CLuaIHM::luaUINewIndex(CLuaState &ls)
 	}
 
 	CInterfaceElement	*pIE = dynamic_cast<CInterfaceElement *>(pRPT);
-	// ** try to get an other UI (child or parent)
+	// ** try to get another UI (child or parent)
 	CInterfaceElement	*uiRelative= getUIRelative(pIE,    propName);
 	if(uiRelative)
 	{

@@ -25,7 +25,7 @@
 
 // ***************************************************************************
 /**
- * Special IconList for displaying Phrase Sheet. Optionnaly display progression info
+ * Special IconList for displaying Phrase Sheet. Optionally display progression info
  * \author Lionel Berenguier
  * \author Nevrax France
  * \date 2004
