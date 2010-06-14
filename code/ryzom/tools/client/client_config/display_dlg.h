@@ -153,8 +153,8 @@ extern uint							CPUFrequency;
 // Register video modes
 void RegisterVideoModes (uint mode, NL3D::IDriver *driver);
 
-// Get opengl informations
-bool GetSystemInformations (NL3D::IDriver *d3dDriver);
+// Get opengl information
+bool GetSystemInformation (NL3D::IDriver *d3dDriver);
 
 // ***************************************************************************
 

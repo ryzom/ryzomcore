@@ -22,6 +22,8 @@
 #include "client_configDlg.h"
 #include "cfg_file.h"
 
+#include <nel/misc/system_utils.h>
+
 using namespace NLMISC;
 using namespace NL3D;
 
@@ -147,10 +149,10 @@ BOOL CClientConfigApp::InitInstance()
 		IDriver *glDriver = CDRU::createGlDriver();
 		IDriver *d3dDriver = CDRU::createD3DDriver();
 
-		// Get some informations about the system
+		// Get some information about the system
 		RegisterVideoModes (0, glDriver);
 		RegisterVideoModes (1, d3dDriver);
-		GetSystemInformations (d3dDriver);
+		GetSystemInformation (d3dDriver);
 
 		// Load the config file
 		if (!LoadConfigFile ())
@@ -257,35 +259,10 @@ CString GetString (uint res)
 	return str;
 }
 
-
-// ***************************************************************************
-bool supportUnicode()
-{
-	static bool init = false;
-	static bool unicodeSupported = false;
-	if (!init)
-	{		
-		init = true;
-		OSVERSIONINFO osvi;
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		if (::GetVersionEx (&osvi))
-		{		
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
-			{
-				if (osvi.dwMajorVersion >= 4)
-				{
-					unicodeSupported = true;
-				}
-			}
-		}		
-	}
-	return unicodeSupported;
-}
-
 // ***************************************************************************
 void setWindowText(HWND hwnd, LPCWSTR lpText)
 {		
-	if (supportUnicode())
+	if (CSystemUtils::supportUnicode())
 	{
 		SetWindowTextW(hwnd, lpText);
 	}

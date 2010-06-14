@@ -44,7 +44,7 @@ uint					HardwareSoundBuffer;
 uint64					SystemMemory;
 uint					CPUFrequency;
 
-bool GetGLInformations ()
+bool GetGLInformation ()
 {
 	// *** INIT VARIABLES
 	
@@ -66,7 +66,7 @@ bool GetGLInformations ()
 	wc.hIcon			= (HICON)NULL;
 	wc.hCursor			= LoadCursor(NULL,IDC_ARROW);
 	wc.hbrBackground	= WHITE_BRUSH;
-	wc.lpszClassName	= "RyzomGetGlInformations";
+	wc.lpszClassName	= "RyzomGetGlInformation";
 	wc.lpszMenuName		= NULL;
 	if ( !RegisterClass(&wc) ) 
 		return false;
@@ -78,7 +78,7 @@ bool GetGLInformations ()
 	WndRect.top=0;
 	WndRect.right=100;
 	WndRect.bottom=100;
-	HWND hWnd = CreateWindow (	"RyzomGetGlInformations",
+	HWND hWnd = CreateWindow (	"RyzomGetGlInformation",
 							"",
 							WndFlags,
 							CW_USEDEFAULT,CW_USEDEFAULT,
@@ -122,7 +122,7 @@ bool GetGLInformations ()
 	HGLRC hRC = wglCreateContext (hDC);
 	wglMakeCurrent(hDC, hRC);
 
-	// *** GET INFORMATIONS
+	// *** GET INFORMATION
 
 	GLVendor = (const char *) glGetString (GL_VENDOR);
 	GLRenderer = (const char *) glGetString (GL_RENDERER);
@@ -168,7 +168,7 @@ bool GetGLInformations ()
 
 // ***************************************************************************
 
-bool GetD3DInformations (NL3D::IDriver *d3dDriver)
+bool GetD3DInformation (NL3D::IDriver *d3dDriver)
 {
 	IDriver::CAdapter desc;
 	if (d3dDriver->getAdapter (0xffffffff, desc))
@@ -248,10 +248,10 @@ bool GetHardwareSoundBuffer ()
 
 // ***************************************************************************
 
-bool GetSystemInformations (IDriver *d3dDriver)
+bool GetSystemInformation (IDriver *d3dDriver)
 {
-	bool result = GetGLInformations ();
-	result |= GetD3DInformations (d3dDriver);
+	bool result = GetGLInformation ();
+	result |= GetD3DInformation (d3dDriver);
 	result |= GetVideoMemory ();
 	result |= GetHardwareSoundBuffer ();
 	SystemMemory = CSystemInfo::totalPhysicalMemory ();
