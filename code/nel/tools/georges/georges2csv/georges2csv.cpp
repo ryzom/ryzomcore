@@ -88,10 +88,10 @@ class	CDfnField
 {
 public:
 
-	explicit	CDfnField	(const std::string	&name)	:	_name(name), _isAnArray(false)
+	explicit	CDfnField	(const std::string	&name)	:	_isAnArray(false), _name(name)
 	{}
 
-	CDfnField	(const std::string	&name, const bool &isAnArray)	:	_name(name), _isAnArray(isAnArray)
+	CDfnField	(const std::string	&name, const bool &isAnArray)	:	_isAnArray(isAnArray), _name(name)
 	{}
 
 	virtual	~CDfnField	()

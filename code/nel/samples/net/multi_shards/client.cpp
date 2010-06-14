@@ -60,11 +60,11 @@ void main (int argc, char **argv)
 
 	char	buf[256];
 	printf("Login: ");
-	gets(buf);
+	fgets(buf, 256, stdin);
 	string	Login(buf);
 
 	printf("Password: ");
-	gets(buf);
+	fgets(buf, 256, stdin);
 	string	Password(buf);
 
 	if (Login.empty ())

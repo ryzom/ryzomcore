@@ -56,8 +56,8 @@ public:
 	NLMISC::TTime CurrentQuantumStart;
 
 	CGraph (std::string name, float x, float y, float width, float height, NLMISC::CRGBA backColor, NLMISC::TTime quantum, float maxValue)
-		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), Quantum(quantum),
-		CurrentQuantumStart(NLMISC::CTime::getLocalTime()), MaxValue(maxValue), Peak(0.0f)
+		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), MaxValue(maxValue), Peak(0.0f), Quantum(quantum),
+		CurrentQuantumStart(NLMISC::CTime::getLocalTime())
 	{
 		if (_Graphs == NULL)
 		{

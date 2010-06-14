@@ -54,8 +54,8 @@ using namespace NLMISC;
 
 struct CSharedClass : public CTransportClass
 {
-	uint16	i2;
 	uint32	i1;
+	uint16	i2;
 	float	f1, f2;
 	
 	vector<uint32> vi1;

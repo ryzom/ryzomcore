@@ -84,8 +84,7 @@ int main (int argc, char **argv)
 	{
 		char buf[256];
 		printf("Login: ");
-		// gcc says: warning: the `gets' function is dangerous and should not be used.
-		Login = gets(buf);
+		Login = fgets(buf, 256, stdin);
 	}
 
 	ucstring Password = ConfigFile.getVar("Password").asString();
@@ -93,8 +92,7 @@ int main (int argc, char **argv)
 	{
 		char buf[256];
 		printf("Password: ");
-		// gcc says: warning: the `gets' function is dangerous and should not be used.
-		Password = gets(buf);
+		Password = fgets(buf, 256, stdin);
 	}
 	// crypt with md5 the password
 	CHashKeyMD5 hk = getMD5((uint8*)Password.c_str(), Password.size());
@@ -120,9 +118,7 @@ int main (int argc, char **argv)
 	if(sid == 0)
 	{
 		printf("Enter the SharId you want to connect to: ");
-		char buf[256];
-		gets(buf);
-		sid = atoi(buf);
+		scanf("%d", sid);
 	}
 
 	/* Try to connect to the shard number 0 in the list.

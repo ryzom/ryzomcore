@@ -119,7 +119,7 @@ void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, v
 		loop = false;
 		// -1 means no neighbor at all, -2 means a neighbor that is not available yet
 		sint32	thisOpposite = (next != NULL) ? next->InternalSurface : (current->Visibility[nextEdge] ? -1 : -2);
-		if (thisOpposite != currentSurfId && thisOpposite != oppositeSurfId ||
+		if ((thisOpposite != currentSurfId && thisOpposite != oppositeSurfId) ||
 			(loop = (current->EdgeFlags[nextEdge] && !allowThis)))
 		{
 			// if reaches the end of the border, then quits.

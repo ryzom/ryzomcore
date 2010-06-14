@@ -63,7 +63,7 @@ struct CSharedClass : public CTransportClass
 
 	CEntityId eid;
 
-	CSharedClass () : i1(10), i2(10), f1(10), i3(10), str("str10") { vi1.push_back(111); vi1.push_back(222); vi1.push_back(255); }
+	CSharedClass () : i1(10), i2(10), i3(10), f1(10), str("str10") { vi1.push_back(111); vi1.push_back(222); vi1.push_back(255); }
 
 	virtual void description ()
 	{

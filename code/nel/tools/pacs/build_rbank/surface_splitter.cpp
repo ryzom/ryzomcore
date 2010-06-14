@@ -511,7 +511,7 @@ void	CSurfaceSplitter::replaceChain(CChainId chainId, const vector<CChainId> &ch
 		}
 	}
 
-	if (surf = getSurface(chain.Right))
+	if ((surf = getSurface(chain.Right)))
 	{
 		uint	loop;
 		for (loop=0; loop<surf->Loops.size(); ++loop)
