@@ -718,15 +718,12 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if (!setupDisplay())
 		return false;
 
-	if (_DestroyWindow)
-	{
-		// setup window size and screen mode
-		if (!setMode(mode))
-			return false;
+	// setup window size and screen mode
+	if (!setMode(mode))
+		return false;
 
-		if (show || _FullScreen)
-			showWindow(true);
-	}
+	if (show || _FullScreen)
+		showWindow(true);
 
 	return true;
 }
@@ -971,7 +968,7 @@ bool CDriverGL::destroyWindow()
 	if (_hDC)
 		wglMakeCurrent(_hDC, NULL);
 
-	if (_hRC)
+	if (_DestroyWindow && _hRC)
 	{
 		wglDeleteContext(_hRC);
 		_hRC = NULL;
@@ -993,14 +990,16 @@ bool CDriverGL::destroyWindow()
 
 #elif defined (NL_OS_UNIX)
 
-	if (_ctx)
+	if (_DestroyWindow)
 	{
-		glXDestroyContext(_dpy, _ctx);
-		_ctx = NULL;
+		if (_ctx)
+			glXDestroyContext(_dpy, _ctx);
+
+		if (_win)
+			XDestroyWindow(_dpy, _win);
 	}
 
-	if (_win && _DestroyWindow)
-		XDestroyWindow(_dpy, _win);
+	_ctx = NULL;
 
 	// Ungrab the keyboard (probably not necessary);
 //	XUnmapWindow(_dpy, _win);
@@ -1027,6 +1026,10 @@ CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
 bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 {
 	H_AUTO_OGL(CDriverGL_setWindowStyle)
+
+	// don't change window style, if we did not create the window
+	if (!_DestroyWindow)
+		return true;
 
 #if defined(NL_OS_WINDOWS)
 
@@ -1329,6 +1332,12 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 // ***************************************************************************
 void CDriverGL::showWindow(bool show)
 {
+	H_AUTO_OGL(CDriverGL_showWindow)
+
+	// don't change window visibility, if we didn't create the window
+	if (!_DestroyWindow)
+		return;
+
 #ifdef NL_OS_WINDOWS
 	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
@@ -1354,6 +1363,7 @@ void CDriverGL::showWindow(bool show)
 emptyProc CDriverGL::getWindowProc()
 {
 	H_AUTO_OGL(CDriverGL_getWindowProc)
+
 #ifdef NL_OS_WINDOWS
 	return (emptyProc)GlWndProc;
 #else // NL_OS_WINDOWS
