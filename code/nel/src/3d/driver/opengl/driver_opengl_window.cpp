@@ -714,16 +714,19 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 #endif // NL_OS_UNIX
 
-	// setup window size and screen mode
-	if (!setMode(mode))
-		return false;
-
 	// setup OpenGL structures
 	if (!setupDisplay())
 		return false;
 
-	if (show || _FullScreen)
-		showWindow(true);
+	if (_DestroyWindow)
+	{
+		// setup window size and screen mode
+		if (!setMode(mode))
+			return false;
+
+		if (show || _FullScreen)
+			showWindow(true);
+	}
 
 	return true;
 }
@@ -930,24 +933,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	XSetWindowAttributes attr;
 	attr.background_pixel = BlackPixel(_dpy, DefaultScreen(_dpy));
 	attr.colormap = XCreateColormap(_dpy, root, _visual_info->visual, AllocNone);
-
-#ifdef XF86VIDMODE
-	// If we're going to attempt fullscreen, we need to set redirect to True,
-	// This basically places the window with no borders in the top left
-	// corner of the screen.
-	if (mode.Windowed)
-	{
-		attr.override_redirect = False;
-	}
-	else
-	{
-		attr.override_redirect = True;
-	}
-#else
-	attr.override_redirect = False;
-#endif
-
-	int attr_flags = CWOverrideRedirect | CWBackPixel | CWColormap;
+	int attr_flags = CWBackPixel | CWColormap;
 
 	window = XCreateWindow (_dpy, root, 0, 0, mode.Width, mode.Height, 0, _visual_info->depth, InputOutput, _visual_info->visual, attr_flags, &attr);
 
@@ -1084,6 +1070,28 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 //		ShowWindow(_hWnd, SW_RESTORE);
 
 #elif defined(NL_OS_UNIX)
+
+	XSetWindowAttributes attr;
+
+#ifdef XF86VIDMODE
+	// If we're going to attempt fullscreen, we need to set redirect to True,
+	// This basically places the window with no borders in the top left
+	// corner of the screen.
+	if (mode.Windowed)
+	{
+		attr.override_redirect = False;
+	}
+	else
+	{
+		attr.override_redirect = True;
+	}
+#else
+	attr.override_redirect = False;
+#endif
+
+	int attr_flags = CWOverrideRedirect;
+
+	XChangeWindowAttributes(_dpy, _win, attr_flags, &attr);
 
 	// x11 fullscreen is not working on mac os x
 #if !defined(NL_OS_MAC)
@@ -1573,18 +1581,6 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_UNIX) && !defined(NL_MAC_NATIVE)
 
-	// set position to (0, 0) if fullscreen
-	if (_FullScreen)
-	{
-		// move and resize the window
-		XMoveResizeWindow(_dpy, _win, 0, 0, width, height);
-	}
-	else
-	{
-		// resize the window
-		XResizeWindow(_dpy, _win, width, height);
-	}
-
 	if (!_Resizable)
 	{
 		// Update WM hints (update size and allow resizing)
@@ -1597,6 +1593,18 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		size_hints.max_height = height;
 
 		XSetWMNormalHints(_dpy, _win, &size_hints);
+	}
+
+	// set position to (0, 0) if fullscreen
+	if (_FullScreen)
+	{
+		// move and resize the window
+		XMoveResizeWindow(_dpy, _win, 0, 0, width, height);
+	}
+	else
+	{
+		// resize the window
+		XResizeWindow(_dpy, _win, width, height);
 	}
 
 //	XMapWindow(_dpy, _win);
