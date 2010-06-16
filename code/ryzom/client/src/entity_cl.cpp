@@ -849,7 +849,11 @@ bool CEntityCL::initPrimitive(float radius, float height, float length, float wi
 			}
 			_Primitive->setCollisionMask(collisionMask);
 			_Primitive->setObstacle(true);
-			_Primitive->UserData = UserDataEntity + (((uint64)this)<<16);
+			_Primitive->UserData = UserDataEntity;
+
+			if (_DataSetId != CLFECOMMON::INVALID_CLIENT_DATASET_INDEX)
+				_Primitive->UserData += (((uint64)_DataSetId)<<16);
+
 			primitiveOk= true;
 		}
 		else
@@ -2880,6 +2884,9 @@ bool CEntityCL::getPackAnimalIndexInDB(sint &dbIndex) const
 void CEntityCL::dataSetId(CLFECOMMON::TClientDataSetIndex dataSet)
 {
 	_DataSetId = dataSet;
+
+	if (_Primitive &&  _Primitive->UserData == UserDataEntity)
+		_Primitive->UserData |= (((uint64)_DataSetId)<<16);
 
 	// additionaly, on a UID change, must check the IsInTeam and IsAniml flags
 	updateIsInTeam();

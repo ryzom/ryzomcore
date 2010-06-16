@@ -22,6 +22,7 @@
 #include "pacs_client.h"
 #include "time_client.h"
 #include "entity_cl.h"
+#include "entities.h"
 
 #include "nel/pacs/u_primitive_block.h"
 #include "nel/pacs/u_move_container.h"
@@ -38,6 +39,10 @@ using namespace NL3D;
 CIGDoorAddedCallback		IGDoorCallback;
 
 CDoorManager *CDoorManager::_Instance = NULL;
+
+extern CEntityManager		EntitiesMngr;
+
+uint32 CDoorManager::s_nextId = 0;
 
 // ***************************************************************************
 void CDoorManager::releaseInstance()
@@ -308,7 +313,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 				if ((pPrim->UserData&0xffff) == UserDataDoor)
 				{
 					// First byte is for type (2 for door 1 for ascensor)
-					pPrim->UserData |= (((uint64)pDoor) << 16);
+					pPrim->UserData |= ((uint64)pDoor->ID << 16);
 				}
 			}
 
@@ -488,13 +493,30 @@ void CDoorManager::getPACSTriggers()
 				nUserDataEntity = rTI.Object0;
 			}
 
-			// Retrieve the door pointer
-			SDoor *pDoor = (SDoor*)((nUserDataDoor >> 16)&0xffffffffff);
-			// Retrieve the entity pointer
-			CEntityCL *pEntity = (CEntityCL*)((nUserDataEntity >> 16)&0xffffffffff);
+			if (rTI.CollisionType != UTriggerInfo::Inside)
+				continue;
 
-			if (rTI.CollisionType == UTriggerInfo::Inside)
-				pDoor->entityCollide(pEntity);
+			// Retrieve the door pointer
+			SDoor *pDoor = NULL;
+			CEntityCL *pEntity = NULL;
+
+			uint32 doorId = ((nUserDataDoor >> 16) & 0xffffffff);
+			uint32 entityId = ((nUserDataEntity >> 16) & 0xffffffff);
+
+			for(uint i = 0; i < _Doors.size(); ++i)
+			{
+				pDoor = _Doors[i];
+
+				if (pDoor && pDoor->ID == doorId)
+				{
+					pEntity = EntitiesMngr.getEntityByCompressedIndex(entityId);
+
+					if (pEntity)
+						pDoor->entityCollide(pEntity);
+
+					break;
+				}
+			}
 		}
 	}
 }

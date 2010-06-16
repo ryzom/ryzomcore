@@ -28,9 +28,11 @@ class CEntityCL;
 
 class CDoorManager : public NL3D::ITransformName
 {
+	static uint32 s_nextId;
 
 	struct SDoor
 	{
+		uint32					ID;
 		std::string				Name;				// Name of the door (type_id ie: ma_asc_3portes_02)
 		std::vector<NLPACS::UMovePrimitive *> Prims;// All collisions prims for that door
 		NL3D::UInstanceGroup	*InstanceGroup;		// Instance Group where the door is.
@@ -51,6 +53,7 @@ class CDoorManager : public NL3D::ITransformName
 
 		SDoor()
 		{
+			ID = ++s_nextId;
 			InstanceGroup = NULL;
 			Opened = false;
 			OCState = 0;
