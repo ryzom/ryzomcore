@@ -489,9 +489,9 @@ void CDoorManager::getPACSTriggers()
 			}
 
 			// Retrieve the door pointer
-			SDoor *pDoor = (SDoor*)((nUserDataDoor >> 16)&0xffffffff);
+			SDoor *pDoor = (SDoor*)((nUserDataDoor >> 16)&0xffffffffff);
 			// Retrieve the entity pointer
-			CEntityCL *pEntity = (CEntityCL*)((nUserDataEntity >> 16)&0xffffffff);
+			CEntityCL *pEntity = (CEntityCL*)((nUserDataEntity >> 16)&0xffffffffff);
 
 			if (rTI.CollisionType == UTriggerInfo::Inside)
 				pDoor->entityCollide(pEntity);
