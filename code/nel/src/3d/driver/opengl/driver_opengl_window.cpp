@@ -1080,7 +1080,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	// If we're going to attempt fullscreen, we need to set redirect to True,
 	// This basically places the window with no borders in the top left
 	// corner of the screen.
-	if (mode.Windowed)
+	if (windowStyle == EWSWindowed)
 	{
 		attr.override_redirect = False;
 	}
@@ -1591,19 +1591,22 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_UNIX) && !defined(NL_MAC_NATIVE)
 
+	// Update WM hints (update size and allow resizing)
+	XSizeHints size_hints;
+	size_hints.width = width;
+	size_hints.height = height;
+	size_hints.flags = PSize;
+
 	if (!_Resizable)
 	{
-		// Update WM hints (update size and allow resizing)
-		XSizeHints size_hints;
-
-		size_hints.flags = PMinSize | PMaxSize;
+		size_hints.flags |= PMinSize | PMaxSize;
 		size_hints.min_width = width;
 		size_hints.min_height = height;
 		size_hints.max_width = width;
 		size_hints.max_height = height;
-
-		XSetWMNormalHints(_dpy, _win, &size_hints);
 	}
+
+	XSetWMNormalHints(_dpy, _win, &size_hints);
 
 	// set position to (0, 0) if fullscreen
 	if (_FullScreen)
