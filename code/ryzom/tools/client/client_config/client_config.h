@@ -72,8 +72,6 @@ extern CClientConfigApp theApp;
 // Helper to set text in a window
 // fallback to ascii set if the OS doesn't support unicode (windows 95/98/me)
 void setWindowText(HWND hwnd, LPCWSTR lpText);
-// Test if os support unicode. Shouldn't call function such as SendMessageW if not supported
-bool supportUnicode();
 
 
 

@@ -24,6 +24,7 @@
 #include "database.h"
 
 #include <nel/misc/debug.h>
+#include <nel/misc/system_utils.h>
 
 #define ICON_ZONE_WIDTH 128
 
@@ -299,7 +300,7 @@ void CClient_configDlg::changeLanguage (const char *language)
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu)
 	{
-		if (supportUnicode())
+		if (CSystemUtils::supportUnicode())
 		{		
 			nlverify (::ModifyMenuW(*pSysMenu, IDM_ABOUTBOX, MF_BYCOMMAND|MF_STRING, IDM_ABOUTBOX, (WCHAR*)NLMISC::CI18N::get ("uiConfigMenuAbout").c_str()));
 		}
@@ -321,7 +322,7 @@ void CClient_configDlg::translateTree ()
 		// Set the item text
 		uint page = Tree.GetItemData (item);
 		ucstring name = NLMISC::CI18N::get (Pages[page].Name);		
-		if (supportUnicode())		
+		if (CSystemUtils::supportUnicode())		
 		{		
 			TVITEMEXW itemDesc;
 			memset (&itemDesc, 0, sizeof(TVITEMEXW));
