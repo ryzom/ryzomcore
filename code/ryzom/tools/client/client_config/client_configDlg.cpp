@@ -300,7 +300,7 @@ void CClient_configDlg::changeLanguage (const char *language)
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu)
 	{
-		if (CSystemUtils::supportUnicode())
+		if (NLMISC::CSystemUtils::supportUnicode())
 		{		
 			nlverify (::ModifyMenuW(*pSysMenu, IDM_ABOUTBOX, MF_BYCOMMAND|MF_STRING, IDM_ABOUTBOX, (WCHAR*)NLMISC::CI18N::get ("uiConfigMenuAbout").c_str()));
 		}
@@ -322,7 +322,7 @@ void CClient_configDlg::translateTree ()
 		// Set the item text
 		uint page = Tree.GetItemData (item);
 		ucstring name = NLMISC::CI18N::get (Pages[page].Name);		
-		if (CSystemUtils::supportUnicode())		
+		if (NLMISC::CSystemUtils::supportUnicode())		
 		{		
 			TVITEMEXW itemDesc;
 			memset (&itemDesc, 0, sizeof(TVITEMEXW));
