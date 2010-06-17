@@ -1501,7 +1501,7 @@ public:
 		row[0] = ucstring(temp);
 
 		nlinfo("Added %s at %u", row[2].toString().c_str(), addIndex);
-		context.Diff.insertRow(context.Diff.Data.size(), row);
+		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
 	void onRemove(uint addIndex, uint refIndex, TWordsDiffContext &context)
 	{
@@ -1519,7 +1519,7 @@ public:
 		row[0] = ucstring(temp);
 
 		nlinfo("Removed %s at %u", row[2].toString().c_str(), refIndex);
-		context.Diff.insertRow(context.Diff.Data.size(), row);
+		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
 	void onChanged(uint addIndex, uint refIndex, TWordsDiffContext &context)
 	{
@@ -1541,7 +1541,7 @@ public:
 		row[0] = temp;
 
 		nlinfo("Changed %s at %u", row[2].toString().c_str(), addIndex);
-		context.Diff.insertRow(context.Diff.Data.size(), row);
+		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
 
 	void onSwap(uint newIndex, uint refIndex, TWordsDiffContext &context)
@@ -1553,7 +1553,7 @@ public:
 		row[0] = temp;
 
 		nlinfo("Swap %u with %u", newIndex, refIndex);
-		context.Diff.insertRow(context.Diff.Data.size(), row);
+		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
 
 };
@@ -1918,10 +1918,10 @@ int	makeWork()
 
 			bool	changedFile = false;
 
-			uint	p = 0;
+			string::size_type	p = 0;
 			while ( (p=text.find("#include", p)) != string::npos)
 			{
-				uint	start = p, end;
+				string::size_type	start = p, end;
 				while (start < text.size() && text[start++] != '"')
 					;
 				end = start;
@@ -2412,7 +2412,7 @@ int updatePhraseWork()
 	preprocessTextFile(addDir+"phrase_wk.txt", outputResult);
 
 	uint firstFile = 0;
-	uint lastFile = outputResult.size();
+	uint lastFile = (uint)outputResult.size();
 	for (; firstFile != lastFile ; ++firstFile)
 	{
 
@@ -2571,7 +2571,7 @@ void CMakePhraseDiff2::run(const vector<TPhrase> &addition, vector<TPhrase> &ref
 
 	{
 		uint first = 0;
-		uint last = reference.size();
+		uint last = (uint)reference.size();
 
 		for ( ;first != last; ++first)
 		{
@@ -2583,7 +2583,7 @@ void CMakePhraseDiff2::run(const vector<TPhrase> &addition, vector<TPhrase> &ref
 
 	{
 		uint first = 0;
-		uint last = addition.size();
+		uint last = (uint)addition.size();
 
 		for ( ;first != last; ++first)
 		{
@@ -2945,12 +2945,12 @@ void preprocessTextFile(const std::string &filename,
 	// Fast read all the text in binary mode.
 	std::string text;
 	text.resize(file.getFileSize());
-	file.serialBuffer((uint8*)(&text[0]), text.size());
+	file.serialBuffer((uint8*)(&text[0]), (uint)text.size());
 
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		CI18N::readTextBuffer((uint8*)&text[0], text.size(), result, false);
+		CI18N::readTextBuffer((uint8*)&text[0], (uint)text.size(), result, false);
 
 	
 
