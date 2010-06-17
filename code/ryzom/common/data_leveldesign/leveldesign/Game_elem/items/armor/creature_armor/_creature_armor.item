@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="creature_armor"/>
+      <ATOM Name="family" Value="armor"/>
+      <ATOM Name="sack_type" Value="1"/>
+      <ATOM Name="quality level" Value="$filename"/>
+    </STRUCT>
+    <STRUCT Name="armor">
+      <ATOM Name="skill" Value="heavy armour wear"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <STRUCT Name="Create">
+        <ATOM Name="Cost" Value="HP Default"/>
+        <ATOM Name="Difficulty" Value="(&quot;basics.quality level&quot;-2)*5*(0.6-0.15*(&quot;#faber.Create.MP 1&quot;+&quot;#faber.Create.MP 2&quot;+&quot;#faber.Create.MP 3&quot;+&quot;#faber.Create.MP 4&quot;+&quot;#faber.Create.MP 5&quot;))"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>sert pour cr&#x9972; des armures virtuelles aux cr&#x9874;ures</COMMENTS>
+  <LOG>Thu Jul 25 15:24:22 2002 (receveur) .armor.skill = heavy armour wear
+Thu Jul 25 15:24:22 2002 (receveur) .basics.family = armor
+Thu Jul 25 15:24:22 2002 (receveur) .basics.name = armor
+Thu Jul 25 15:24:22 2002 (receveur) .basics.quality level = &quot;Basics.Level&quot;
+Thu Jul 25 15:24:22 2002 (receveur) .basics.sack_type = armor
+Thu Jul 25 15:25:25 2002 (receveur) Header Comments = sert pour cr&#x9972; des armures virtuelles aux cr&#x9874;ures
+Thu Jul 25 15:26:13 2002 (receveur) .basics.name = creature_armor
+Thu Jul 25 15:40:14 2002 (receveur) .basics.quality level = $filename
+Tue Jul 30 17:41:09 2002 (receveur) .basics.sack_type = 1</LOG>
+</FORM>

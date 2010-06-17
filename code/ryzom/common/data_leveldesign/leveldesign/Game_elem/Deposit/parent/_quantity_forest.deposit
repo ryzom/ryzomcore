@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="MP1">
+      <STRUCT Name="Spring">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP2">
+      <STRUCT Name="Spring">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP3">
+      <STRUCT Name="Spring">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP4">
+      <STRUCT Name="Spring">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="MinQuantity" Value="2"/>
+        <ATOM Name="MaxQuantity" Value="4"/>
+        <ATOM Name="RegenRate" Value="0"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Sep 24 16:23:50 2002 (receveur) .MP1.Spring.RegenRate = 60
+Tue Sep 24 17:59:53 2002 (receveur) .MP1.Winter.RegenRate = 0
+Tue Sep 24 17:59:59 2002 (receveur) formName Pasted = </LOG>
+</FORM>

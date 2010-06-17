@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="MP1">
+      <ATOM Name="MinQuality" Value="0"/>
+      <ATOM Name="MaxQuality" Value="&quot;MP1.MinQuality&quot;+4"/>
+    </STRUCT>
+    <STRUCT Name="MP2">
+      <ATOM Name="MinQuality" Value="0"/>
+      <ATOM Name="MaxQuality" Value="&quot;MP2.MinQuality&quot;+4"/>
+    </STRUCT>
+    <STRUCT Name="MP3">
+      <ATOM Name="MaxQuality" Value="&quot;MP3.MinQuality&quot;+4"/>
+    </STRUCT>
+    <STRUCT Name="MP4">
+      <ATOM Name="MaxQuality" Value="&quot;MP4.MinQuality&quot;+4"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Sep 24 14:50:19 2002 (receveur) .MP1.MaxQuality = &quot;MP1.MinQuality&quot;+4
+Tue Sep 24 14:50:19 2002 (receveur) .MP1.MinQuality = 1
+Tue Sep 24 14:50:19 2002 (receveur) .MP2.MaxQuality = &quot;MP2.MinQuality&quot;+4
+Tue Sep 24 14:50:19 2002 (receveur) .MP2.MinQuality = 1
+Tue Sep 24 14:50:32 2002 (receveur) .MP2.MinQuality = 0
+Tue Sep 24 14:50:36 2002 (receveur) .MP1.MinQuality = 0
+Tue Sep 24 14:50:47 2002 (receveur) .MP3.MaxQuality = &quot;MP3.MinQuality&quot;+4
+Tue Sep 24 14:50:53 2002 (receveur) .MP4.MaxQuality = &quot;MP4.MinQuality&quot;+4</LOG>
+</FORM>

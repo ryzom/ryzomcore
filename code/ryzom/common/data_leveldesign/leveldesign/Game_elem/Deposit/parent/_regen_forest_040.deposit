@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="MP1">
+      <STRUCT Name="Spring">
+        <ATOM Name="RegenRate" Value="40"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="RegenRate" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="RegenRate" Value="80"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="RegenRate" Value="100"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP2">
+      <STRUCT Name="Spring">
+        <ATOM Name="RegenRate" Value="40"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="RegenRate" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="RegenRate" Value="80"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="RegenRate" Value="100"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP3">
+      <STRUCT Name="Spring">
+        <ATOM Name="RegenRate" Value="40"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="RegenRate" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="RegenRate" Value="80"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="RegenRate" Value="100"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="MP4">
+      <STRUCT Name="Spring">
+        <ATOM Name="RegenRate" Value="40"/>
+      </STRUCT>
+      <STRUCT Name="Summer">
+        <ATOM Name="RegenRate" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="Autumn">
+        <ATOM Name="RegenRate" Value="80"/>
+      </STRUCT>
+      <STRUCT Name="Winter">
+        <ATOM Name="RegenRate" Value="100"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Sep 24 16:25:18 2002 (receveur) .MP1.Spring.RegenRate = 40
+Tue Sep 24 16:25:22 2002 (receveur) .MP1.Summer.RegenRate = 60
+Tue Sep 24 16:25:27 2002 (receveur) .MP1.Autumn.RegenRate = 80
+Tue Sep 24 16:25:31 2002 (receveur) .MP1.Winter.RegenRate = 100
+Tue Sep 24 16:25:39 2002 (receveur) formName Pasted = 
+Tue Sep 24 16:25:40 2002 (receveur) formName Pasted = 
+Tue Sep 24 16:25:41 2002 (receveur) formName Pasted = </LOG>
+</FORM>

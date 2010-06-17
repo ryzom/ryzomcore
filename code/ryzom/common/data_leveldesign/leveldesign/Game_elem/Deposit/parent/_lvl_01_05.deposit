@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_level.deposit"/>
+  <STRUCT>
+    <STRUCT Name="MP1">
+      <ATOM Name="MinQuality" Value="1"/>
+    </STRUCT>
+    <STRUCT Name="MP2">
+      <ATOM Name="MinQuality" Value="1"/>
+    </STRUCT>
+    <STRUCT Name="MP3">
+      <ATOM Name="MinQuality" Value="1"/>
+    </STRUCT>
+    <STRUCT Name="MP4">
+      <ATOM Name="MinQuality" Value="1"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Sep 24 15:06:11 2002 (receveur) .MP1.MinQuality = 1
+Tue Sep 24 15:06:17 2002 (receveur) .MP2.MinQuality = 1
+Tue Sep 24 15:06:20 2002 (receveur) .MP3.MinQuality = 1
+Tue Sep 24 15:06:23 2002 (receveur) .MP4.MinQuality = 1</LOG>
+</FORM>
