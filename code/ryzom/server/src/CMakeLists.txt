@@ -20,6 +20,9 @@ ADD_SUBDIRECTORY(log_analyser_service)
 ADD_SUBDIRECTORY(logger_service)
 ADD_SUBDIRECTORY(mail_forum_service)
 ADD_SUBDIRECTORY(mirror_service)
+ADD_SUBDIRECTORY(monitor_service)
+ADD_SUBDIRECTORY(pd_reference_builder)
+ADD_SUBDIRECTORY(pd_support_service)
 
 # Deprecated, no longer used.
 #ADD_SUBDIRECTORY(ags_test)
@@ -28,10 +31,6 @@ ADD_SUBDIRECTORY(mirror_service)
 #ADD_SUBDIRECTORY(general_utilities_service)
 #ADD_SUBDIRECTORY(patchman_service)
 
-#mirror_service
-#monitor_service
-#pd_reference_builder
-#pd_support_service
 #persistant_data_service
 #sabrina
 #server_share
