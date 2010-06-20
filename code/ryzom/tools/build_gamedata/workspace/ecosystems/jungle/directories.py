@@ -196,6 +196,7 @@ IgVillageBuildDirectory = "_invalid"
 
 # Rbank directories
 RbankOutputBuildDirectory = "_invalid"
+RbankMeshBuildDirectory = "_invalid"
 
 # Ligo directories
 

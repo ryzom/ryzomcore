@@ -65,7 +65,7 @@ if LigoExportLand != "":
 	mkPath(log, ExportBuildDirectory + "/" + LigoZoneBuildDirectory)
 	mkPath(log, ExportBuildDirectory + "/" + LigoIgLandBuildDirectory)
 	mkPath(log, ExportBuildDirectory + "/" + LigoIgOtherBuildDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + RbankCmbBuildDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + RbankMeshBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
@@ -102,7 +102,7 @@ if LigoExportLand != "":
 	cf.write("\n")
 	cf.write("DFNDir = \"" + LeveldesignDfnDirectory + "\";\n")
 	cf.write("RefCMBDir = \"" + DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory + "\";\n") # FIXME
-	cf.write("OutCMBDir = \"" + ExportBuildDirectory + "/" + RbankCmbBuildDirectory + "\";\n") # FIXME
+	cf.write("OutCMBDir = \"" + ExportBuildDirectory + "/" + RbankMeshBuildDirectory + "\";\n") # FIXME
 	cf.write("\n")
 	cf.write("ContinentFile = \"" + LeveldesignWorldDirectory + "/" + ContinentFile + "\";\n")
 	cf.write("\n")
