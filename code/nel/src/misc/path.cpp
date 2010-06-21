@@ -1755,6 +1755,19 @@ bool CFile::isExists (const string &filename)
 #endif // NL_OS_WINDOWS
 }
 
+bool CFile::createEmptyFile (const std::string& filename)
+{
+	FILE *file = fopen (filename.c_str(), "wb");
+
+	if (file)
+	{
+		fclose (file);
+		return true;
+	}
+
+	return false;
+}
+
 bool CFile::fileExists (const string& filename)
 {
 	//H_AUTO(FileExists);

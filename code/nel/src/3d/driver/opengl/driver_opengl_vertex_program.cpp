@@ -1535,7 +1535,7 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 			}
 
 			/*
-			FILE *f = fopen("c:\\test.txt", "wb");
+			FILE *f = fopen(getLogDirectory() + "test.txt", "wb");
 			if (f)
 			{
 				std::string vpText;

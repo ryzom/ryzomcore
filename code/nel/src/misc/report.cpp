@@ -22,6 +22,7 @@
 #include "nel/misc/ucstring.h"
 
 #include "nel/misc/report.h"
+#include "nel/misc/path.h"
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
@@ -95,15 +96,13 @@ static void sendEmail()
 			// EnableWindow(sendReport, FALSE);
 			// MessageBox (dialog, "The email was successfully sent", "email", MB_OK);
 #ifndef NL_NO_DEBUG_FILES
-			FILE *file = fopen ("report_sent", "wb");
-			fclose (file);
+			CFile::createEmptyFile(getLogDirectory() + "report_sent");
 #endif
 		}
 		else
 		{
 #ifndef NL_NO_DEBUG_FILES
-			FILE *file = fopen ("report_failed", "wb");
-			fclose (file);
+			CFile::createEmptyFile(getLogDirectory() + "report_failed");
 #endif
 			// MessageBox (dialog, "Failed to send the email", "email", MB_OK | MB_ICONERROR);
 		}
@@ -111,8 +110,7 @@ static void sendEmail()
 	else
 	{
 #ifndef NL_NO_DEBUG_FILES
-		FILE *file = fopen ("report_refused", "wb");
-		fclose (file);
+		CFile::createEmptyFile(getLogDirectory() + "report_refused");
 #endif
 	}
 }
@@ -171,8 +169,7 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					EnableWindow(sendReport, FALSE);
 					MessageBox (dialog, "The email was successfully sent", "email", MB_OK);
-					FILE *file = fopen ("report_sent", "wb");
-					fclose (file);
+					CFile::createEmptyFile(getLogDirectory() + "report_sent");
 				}
 				else
 				{

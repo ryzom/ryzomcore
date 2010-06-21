@@ -562,6 +562,12 @@ struct CFile
 	static bool isExists (const std::string& filename);
 
 	/**
+	 * Create an empty file.
+	 * Return true if the file has been correctly created.
+	 */
+	static bool createEmptyFile (const std::string& filename);
+
+	/**
 	 * Return a new filename that doesn't exists. It's used for screenshot filename for example.
 	 * example: findNewFile("foobar.tga");
 	 * will try foobar001.tga, if the file exists, try foobar002.tga and so on until it finds an unexistant file.
