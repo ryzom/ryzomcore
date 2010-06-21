@@ -1382,6 +1382,12 @@ exit:;
 			CForm *parentPtr = form->getParent (parent);
 			nlassert (parentPtr);
 
+			if (parentPtr->getFilename() == form->getFilename())
+			{
+				nlerror("parent is identical to current sheet %s!", form->getFilename().c_str());
+				return false;
+			}
+
 			// Get the node by name in the parent
 			const CFormDfn *parentDfnParent = NULL;
 			uint indexDfnParent = 0xffffffff;
