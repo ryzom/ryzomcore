@@ -23,6 +23,10 @@ ADD_SUBDIRECTORY(mirror_service)
 ADD_SUBDIRECTORY(monitor_service)
 ADD_SUBDIRECTORY(pd_reference_builder)
 ADD_SUBDIRECTORY(pd_support_service)
+ADD_SUBDIRECTORY(persistant_data_service)
+ADD_SUBDIRECTORY(session_browser_server)
+ADD_SUBDIRECTORY(shard_unifier_service)
+ADD_SUBDIRECTORY(tick_service)
 
 # Deprecated, no longer used.
 #ADD_SUBDIRECTORY(ags_test)
@@ -31,11 +35,7 @@ ADD_SUBDIRECTORY(pd_support_service)
 #ADD_SUBDIRECTORY(general_utilities_service)
 #ADD_SUBDIRECTORY(patchman_service)
 
-#persistant_data_service
+# Not sure, no longer used maybe?
 #sabrina
-#server_share
-#session_browser_server
-#shard_unifier_service
 #simulation_service
 #testing_tool_service
-#tick_service
