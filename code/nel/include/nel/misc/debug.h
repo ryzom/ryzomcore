@@ -89,6 +89,9 @@ void destroyDebug();
 // call this if you want to change the dir of the log.log file
 void changeLogDirectory(const std::string &dir);
 
+// call this if you want to get the dir of the log.log file
+std::string getLogDirectory();
+
 // internal breakpoint window
 void enterBreakpoint (const char *message);
 

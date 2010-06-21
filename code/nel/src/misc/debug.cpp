@@ -93,6 +93,7 @@ namespace NLMISC
 bool DisableNLDebug= false;
 NLMISC::CVariablePtr<bool> _DisableNLDebug("nel","DisableNLDebug","Disables generation and output of nldebug logs (no code associated with the log generation is executed)",&DisableNLDebug,true);
 
+static std::string LogPath = "";
 
 //bool DebugNeedAssert = false;
 //bool NoAssert = false;
@@ -1116,8 +1117,14 @@ void getCallStackAndLog (string &result, sint /* skipNFirst */)
 void changeLogDirectory(const std::string &dir)
 {
 	if (fd == NULL)return;
-	string p = CPath::standardizePath(dir) + "log.log";
+	LogPath = CPath::standardizePath(dir);
+	string p = LogPath + "log.log";
 	fd->setParam(p);
+}
+
+std::string getLogDirectory()
+{
+	return LogPath;
 }
 
 // You should not call this, unless you know what you're trying to do (it kills debug/log)!
@@ -1196,7 +1203,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 			string fn;
 			if (logPath != NULL)
 			{
-				fn += logPath;
+				LogPath = CPath::standardizePath(logPath);
+				fn += LogPath;
 			}
 			else
 			{
