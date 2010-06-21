@@ -1729,7 +1729,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 				ParticleWorkspaceFilename = "";
 			}
 			// First instance
-			uint firstInstance = _ListInstance.size();
+			uint firstInstance = (uint)_ListInstance.size();
 
 			// Read information
 			std::vector<CInstanceSave> readed;
@@ -2211,7 +2211,7 @@ uint CObjectViewer::addMesh (NL3D::IShape* pMeshShape, const char* meshName, uin
 		}
 
 		// Return the instance index
-		return _ListInstance.size()-1;
+		return (uint)_ListInstance.size()-1;
 	}
 	else
 		return 0xffffffff;
@@ -2291,13 +2291,13 @@ uint CObjectViewer::addCamera (const NL3D::CCameraInfo &cameraInfo, const char* 
 	iInfo->Saved.CameraInfo = cameraInfo;
 	iInfo->Saved.Camera = true;
 	_ListInstance.push_back (iInfo);
-	_Cameras.push_back (_ListInstance.size()-1);
+	_Cameras.push_back ((uint)_ListInstance.size()-1);
 
 	// Reinit camera
 	initCamera ();
 
 	// Return the instance index
-	return _ListInstance.size()-1;
+	return (uint)_ListInstance.size()-1;
 }
 
 // ***************************************************************************
@@ -2353,7 +2353,7 @@ uint CObjectViewer::addSkel (NL3D::IShape* pSkelShape, const char* skelName)
 		_SkeletonScaleDlg->setSkeletonToEdit(skelModel, skelName);
 
 		// Return the instance
-		return _ListInstance.size()-1;
+		return (uint)_ListInstance.size()-1;
 	}
 	return 0xffffffff;
 }
@@ -2773,7 +2773,7 @@ void CObjectViewer::evalSoundTrack (float lastTime, float currentTime)
 uint CObjectViewer::addInstanceGroup(NL3D::CInstanceGroup *ig)
 {
 	// First instance
-	uint first = _ListInstance.size();
+	uint first = (uint)_ListInstance.size();
 
 	// Add all models to the scene		
 	ig->addToScene(*CNELU::Scene, CNELU::Driver);
@@ -3184,7 +3184,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			// progress
 			dlgProgress.ProgressText.SetWindowText("Loading Zones...");
 			dlgProgress.ProgressBar.SetPos(0);
-			uint	nbZones= _VegetableLandscapeZoneNames.size();
+			uint	nbZones= (uint)_VegetableLandscapeZoneNames.size();
 			for(uint i=0; i<nbZones;i++)
 			{
 				// open the file
@@ -3417,7 +3417,7 @@ CInstanceInfo *CObjectViewer::getInstance (uint instance)
 // ***************************************************************************
 uint CObjectViewer::getNumInstance () const
 {
-	return _ListInstance.size ();
+	return (uint)_ListInstance.size ();
 }
 
 // ***************************************************************************
@@ -3864,7 +3864,7 @@ uint CObjectViewer::getCameraInstance (uint cameraId) const
 
 uint CObjectViewer::getNumCamera () const
 {
-	return _Cameras.size ();
+	return (uint)_Cameras.size ();
 }
 
 int localizedMessageBox(HWND parentWindow, int messageStringID, int captionStringID, UINT nType)

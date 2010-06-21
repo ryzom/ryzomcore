@@ -448,7 +448,7 @@ void CParticleWorkspace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serialVersion(0);
 	f.xmlSerial(_Name, "NAME");	
 	f.xmlPush("PS_LIST");
-	uint32 numNodes = _Nodes.size();
+	uint32 numNodes = (uint32)_Nodes.size();
 	// TODO : avoid to store the number of nodes
 	f.xmlSerial(numNodes, "NUM_NODES");		
 	if (f.isReading())

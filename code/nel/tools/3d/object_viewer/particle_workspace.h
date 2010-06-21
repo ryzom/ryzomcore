@@ -168,7 +168,7 @@ public:
 	std::string getPath() const;	
 	std::string getFilename() const { return _Filename; }	
 	// Get Number of nodes in the workspace
-	uint		getNumNode() const { return _Nodes.size(); }
+	uint		getNumNode() const { return (uint)_Nodes.size(); }
 	/** Get a node in workspace
 	  * Can keep pointer safely as long as the node is not deleted
 	  */

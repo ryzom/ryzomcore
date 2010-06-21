@@ -260,7 +260,7 @@ void CTextureAnimDlg::CGradientInterface::modifyGradient(TAction action, uint in
 		break;
 	}
 
-	P->getTextureGroup()->setTextures(&textureList[0], textureList.size());
+	P->getTextureGroup()->setTextures(&textureList[0], (uint)textureList.size());
 }
 void CTextureAnimDlg::CGradientInterface::displayValue(CDC *dc, uint index, sint x, sint y)
 {
@@ -350,7 +350,7 @@ void CTextureAnimDlg::CGradientInterface::CTextureWrapper::set(NL3D::ITexture *t
 	textureList[Index] = t;
 
 
-	P->getTextureGroup()->setTextures(&textureList[0], textureList.size());
+	P->getTextureGroup()->setTextures(&textureList[0], (uint)textureList.size());
 	
 	Dlg->invalidateGrad();
 }
