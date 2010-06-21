@@ -484,11 +484,11 @@ void	CBitMemStream::serial(float &b)
 	if ( isReading() )
 	{
 		internalSerial( uf, sizeof(b)*8 );
-		b = *(float*)&uf;
+		memcpy(&b, &uf, sizeof(b));
 	}
 	else
 	{
-		uf = *(uint32*)&b;
+		memcpy(&uf, &b, sizeof(b));
 		internalSerial( uf, sizeof(b)*8 );
 	}
 }

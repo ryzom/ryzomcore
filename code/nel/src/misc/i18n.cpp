@@ -600,7 +600,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename = CFile::getPath(filename)+subFilename;
 									if (!CFile::fileExists(subFilename))
 									{
-										// not found but optionnal, only emit a debug log
+										// not found but optional, only emit a debug log
 										// the include file is not found, issue a warning
 										nldebug("Preprocess: In file %s(%u) : Cannot include optional file '%s'",
 											filename.c_str(), currentLine,
@@ -1072,10 +1072,8 @@ uint64	CI18N::makeHash(const ucstring &str)
 // convert a hash value to a readable string
 string CI18N::hashToString(uint64 hash)
 {
-	uint32 *ph = (uint32*)&hash;
-
 	char temp[] = "0011223344556677";
-	sprintf(temp, "%08X%08X", ph[0], ph[1]);
+	sprintf(temp, "%08X%08X", (uint32)(hash & 0xffffffff), (uint32)(hash >> 32));
 
 	return string(temp);
 }
@@ -1098,20 +1096,19 @@ void	CI18N::hashToUCString(uint64 hash, ucstring &dst)
 uint64 CI18N::stringToHash(const string &str)
 {
 	nlassert(str.size() == 16);
-	uint32	low, hight;
+	uint32	low, high;
 
 	string sl, sh;
 	sh = str.substr(0, 8);
 	sl = str.substr(8, 8);
 
-	sscanf(sh.c_str(), "%08X", &hight);
+	sscanf(sh.c_str(), "%08X", &high);
 	sscanf(sl.c_str(), "%08X", &low);
 
 	uint64 hash;
-	uint32 *ph = (uint32*)&hash;
 
-	ph[0] = hight;
-	ph[1] = low;
+	memcpy(&hash, &high, sizeof(high));
+	memcpy((uint32*)&hash + 1, &low, sizeof(low));
 
 	return hash;
 }
