@@ -781,7 +781,7 @@ void CViewDialog::resizeView( int nbViews, int top, int left )
  */
 int CViewDialog::getNbLines() const
 {
-	return Buffer.size();
+	return (int)Buffer.size();
 }
 
 
@@ -812,7 +812,7 @@ void CViewDialog::fillGaps( int maxNbLines )
  */
 void CViewDialog::commitAddedLines()
 {
-	m_ListCtrl.SetItemCount( Buffer.size() );
+	m_ListCtrl.SetItemCount( (int)Buffer.size() );
 	m_ListCtrl.SetColumnWidth( 0, LVSCW_AUTOSIZE );
 }
 
@@ -1124,7 +1124,7 @@ bool matchString( const CString& str, const CString& substr, bool matchCase, int
 /*
  *
  */
-afx_msg LONG CViewDialog::OnFindReplace(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CViewDialog::OnFindReplace(WPARAM wParam, LPARAM lParam)
 {
 	// Test 'Cancel'
 	if ( FindDialog->IsTerminating() )

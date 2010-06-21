@@ -403,7 +403,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 		{
 			// Ensure that a log file without number comes *after* the ones with a number
 			string name = string(pathNames[i]);
-			unsigned int dotpos = name.find_last_of('.');
+			string::size_type dotpos = name.find_last_of('.');
 			if ( (dotpos!=string::npos) && (dotpos > 2) )
 			{
 				if ( ! (isNumberChar(name[dotpos-1]) && isNumberChar(name[dotpos-2]) && isNumberChar(name[dotpos-3])) )
@@ -418,7 +418,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 		{
 			// Set the original names back
 			string name = pathNames[i];
-			unsigned int tokenpos = name.find( "ZZZ." );
+			string::size_type tokenpos = name.find( "ZZZ." );
 			if ( tokenpos != string::npos )
 			{
 				name = name.substr( 0, tokenpos ) + name.substr( tokenpos + 3 );
@@ -487,7 +487,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 	// Create view
 	CViewDialog *view = new CViewDialog();
 	view->Create( IDD_View, this );
-	view->Index = Views.size();
+	view->Index = (int)Views.size();
 	RECT editRect;
 	m_Edit.GetWindowRect( &editRect );
 	ScreenToClient( &editRect );
@@ -498,7 +498,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 	for ( i=0; i!=(int)Views.size(); ++i )
 	{
 		Views[i]->WidthR = 1.0f/(float)Views.size();
-		Views[i]->resizeView( Views.size(), editRect.bottom+10, w );
+		Views[i]->resizeView( (int)Views.size(), editRect.bottom+10, w );
 		w += (int)(Views[i]->WidthR*(parentRect.right-32));
 	}
 	view->ShowWindow( SW_SHOW );
@@ -901,7 +901,7 @@ void CLog_analyserDlg::resizeViews()
 	int i, w = 0;
 	for ( i=0; i!=(int)Views.size(); ++i )
 	{
-		Views[i]->resizeView( Views.size(), editRect.bottom+10, w );
+		Views[i]->resizeView( (int)Views.size(), editRect.bottom+10, w );
 		w += (int)(Views[i]->WidthR*(parentRect.right-32));
 	}
 }

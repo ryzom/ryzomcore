@@ -127,7 +127,7 @@ void CPickSound::OnPlaySound()
 }
 
 //========================================================================================
-void CPickSound::OnTimer(UINT nIDEvent) 
+void CPickSound::OnTimer(UINT_PTR nIDEvent) 
 {
 	CSoundSystem::poll();
 

@@ -342,7 +342,7 @@ void CBranch_patcherDlg::OnButtonPatch()
 }
 
 
-static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
+static unsigned long CALLBACK MyStreamInCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
 {
 	CFile* pFile = (CFile*) dwCookie;
 	*pcb = pFile->Read(pbBuff, cb);
@@ -350,7 +350,7 @@ static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb,
 }
 
 
-static DWORD CALLBACK MyStreamOutCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
+static unsigned long CALLBACK MyStreamOutCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
 {
 	CFile* pFile = (CFile*) dwCookie;
 	pFile->Write(pbBuff, cb);
@@ -363,7 +363,7 @@ void CBranch_patcherDlg::displayFile( const CString& filename )
 {
 	CFile cFile( filename, CFile::modeRead );
 	EDITSTREAM es;
-	es.dwCookie = (DWORD) &cFile;
+	es.dwCookie = (DWORD_PTR) &cFile;
 	es.pfnCallback = MyStreamInCallback;
 	m_Display->StreamIn( SF_TEXT, es );
 }
@@ -373,7 +373,7 @@ void CBranch_patcherDlg::saveFile( const CString& filename )
 {
 	CFile cFile( filename, CFile::modeCreate | CFile::modeWrite );
 	EDITSTREAM es;
-	es.dwCookie = (DWORD) &cFile;
+	es.dwCookie = (DWORD_PTR) &cFile;
 	es.pfnCallback = MyStreamOutCallback; 
 	m_Display->StreamOut( SF_TEXT, es );
 }

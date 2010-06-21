@@ -175,7 +175,7 @@ public:
 // Implementation
 protected:
 
-	afx_msg LONG OnFindReplace(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplace(WPARAM wParam, LPARAM lParam);
 
 	// Generated message map functions
 	//{{AFX_MSG(CViewDialog)

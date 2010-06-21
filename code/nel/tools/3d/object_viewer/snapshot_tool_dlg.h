@@ -101,7 +101,7 @@ protected:
 	afx_msg void OnSelchangeOutputpathOption();
 	afx_msg void OnSelchangeFormat();
 	afx_msg void OnCloseButton();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnStopSnapshots();
 	afx_msg void OnViewFront();
 	afx_msg void OnViewLeft();

@@ -559,7 +559,7 @@ std::string CSnapshotToolDlg::viewToString(uint view)
 }
 
 //****************************************************************************************
-void CSnapshotToolDlg::OnTimer(UINT nIDEvent) 
+void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	if (_FilteredFiles.empty()) return;	
 	if (nIDEvent == 1)

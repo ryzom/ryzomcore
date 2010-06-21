@@ -65,7 +65,7 @@ protected:
 	TNameVect			_Names;
 	NLMISC::TStringId	_CurrName;
 
-	UINT _Timer;
+	UINT_PTR _Timer;
 
 	NLMISC::CVector _BackupVel;
 	float _BackupGain;
@@ -76,7 +76,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchange();
 	afx_msg void OnPlaySound();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
 	afx_msg void OnDblclkList();
 	afx_msg void OnClose();

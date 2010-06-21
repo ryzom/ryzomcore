@@ -166,7 +166,7 @@ void			CVegetableDlg::setVegetableToEdit(NL3D::CVegetable *vegetable)
 // ***************************************************************************
 uint				CVegetableDlg::getNumVegetables() const
 {
-	return _Vegetables.size();
+	return (uint)_Vegetables.size();
 }
 // ***************************************************************************
 std::string			CVegetableDlg::getVegetableName(uint id) const
@@ -286,7 +286,7 @@ void		CVegetableDlg::CVegetableDesc::updateVegetableName()
 	}
 	else
 	{
-		sint	pos= Vegetable->ShapeName.find(".veget");
+		std::string::size_type pos= Vegetable->ShapeName.find(".veget");
 		VegetableName= Vegetable->ShapeName.substr(0, pos);
 		// And (to be clearer) append distance of creation.
 		char	str[256];
@@ -380,7 +380,7 @@ void		CVegetableDlg::buildVegetableSet(NL3D::CTileVegetableDesc &vegetSet, bool 
 
 		vegetables.push_back(*_Vegetables[i].Vegetable);
 		// get dst index.
-		uint	dstId= vegetables.size()-1;
+		uint	dstId= (uint)vegetables.size()-1;
 		// transform degrees in radians.
 		vegetables[dstId].Rx.Abs*= degToRad;
 		vegetables[dstId].Rx.Rand*= degToRad;
@@ -422,7 +422,7 @@ void		CVegetableDlg::appendVegetableSet(NL3D::CTileVegetableDesc &vegetSet)
 
 			// Add a new vegetable to the list.
 			_Vegetables.push_back( CVegetableDesc ());
-			uint	id= _Vegetables.size()-1;
+			uint	id= (uint)_Vegetables.size()-1;
 			_Vegetables[id].initVegetable(veget);
 
 			// update view
@@ -512,7 +512,7 @@ void CVegetableDlg::OnButtonVegetableAdd()
 {
 	// Add a new vegetable to the list.
 	_Vegetables.push_back(CVegetableDesc ());
-	uint	id= _Vegetables.size()-1;
+	uint	id= (uint)_Vegetables.size()-1;
 	_Vegetables[id].initDefaultVegetable();
 
 	// update view
@@ -607,7 +607,7 @@ void CVegetableDlg::OnButtonVegetableLoadDesc()
 				f.serial(veget);
 				// Add a new vegetable to the list.
 				_Vegetables.push_back(CVegetableDesc ());
-				uint	id= _Vegetables.size()-1;
+				uint	id= (uint)_Vegetables.size()-1;
 				_Vegetables[id].initVegetable(veget);
 
 				// update view

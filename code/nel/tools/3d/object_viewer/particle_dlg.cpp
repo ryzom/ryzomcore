@@ -535,7 +535,7 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 	checkModifiedWorkSpace();
 	// ask name of the new workspace to create
 	CCreateFileDlg cf(getStrRsc(IDS_CHOOSE_WORKSPACE_NAME), "", "pws");
-	int result = cf.DoModal();
+	INT_PTR result = cf.DoModal();
 	if (result = IDOK)
 	{			
 		if (cf.touchFile())
@@ -566,7 +566,7 @@ void CParticleDlg::OnLoadPSWorkspace()
 	checkModifiedWorkSpace();
 	static const char BASED_CODE szFilter[] = "particle workspaces(*.pws)|*.pws||";
 	CFileDialog fd( TRUE, ".pws", "*.pws", 0, szFilter);
-	int result = fd.DoModal();
+	INT_PTR result = fd.DoModal();
 	if (result != IDOK) return;
 	loadWorkspace((LPCTSTR) fd.GetPathName());
 }

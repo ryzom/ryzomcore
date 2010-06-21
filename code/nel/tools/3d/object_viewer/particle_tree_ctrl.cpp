@@ -885,7 +885,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			nlassert(nt->Type = CNodeType::locatedBindable);
 			nlassert(nt->Bind);
 			CLBExternIDDlg 	dlg(nt->Bind->getExternID());
-			int res = dlg.DoModal();
+			INT_PTR res = dlg.DoModal();
 			if ( res == IDOK )
 			{
 				nt->Bind->setExternID( dlg.getNewID() );

@@ -376,7 +376,7 @@ void displayZones()
 	if (ViewerCfg.AllPathRelative)
 		Landscape->Landscape.TileBank.makeAllPathRelative();
 
-	sint idx = (sint)ViewerCfg.Bank.find(".");
+	string::size_type idx = ViewerCfg.Bank.find(".");
 	string farBank = ViewerCfg.Bank.substr(0,idx);
 	farBank += ".farbank";
 

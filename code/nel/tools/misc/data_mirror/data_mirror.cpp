@@ -62,7 +62,7 @@ BOOL CData_mirrorApp::InitInstance()
 		{
 			if (exePath[0] == '\"')
 			{
-				uint end=exePath.find ('\"', 1);
+				string::size_type end=exePath.find ('\"', 1);
 				if (end != string::npos)
 				{
 					exePath = exePath.substr (1, end-1);
@@ -74,7 +74,7 @@ BOOL CData_mirrorApp::InitInstance()
 			}
 			else
 			{
-				uint end=exePath.find (' ', 1);
+				string::size_type end=exePath.find (' ', 1);
 				exePath = exePath.substr (0, end);
 			}
 		}
