@@ -296,7 +296,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		}
 
 		// debug, display what we send into a file
-		//	{	FILE *fp = fopen (CFile::findNewFile("mail.txt").c_str(), "wb");
+		//	{	FILE *fp = fopen (CFile::findNewFile(getLogDirectory() + "mail.txt").c_str(), "wb");
 		//	fwrite (formatedBody.c_str(), 1, formatedBody.size(), fp);
 		//	fclose (fp); }
 
