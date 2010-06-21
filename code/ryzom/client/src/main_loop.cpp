@@ -518,7 +518,7 @@ void	testLaunchProfile()
 
 		// Display and save profile to a File.
 		CLog	log;
-		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile("profile.log"));
+		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "profile.log"));
 		CStdDisplayer	stdDisplayer;
 		log.addDisplayer(&fileDisplayer);
 		log.addDisplayer(&stdDisplayer);

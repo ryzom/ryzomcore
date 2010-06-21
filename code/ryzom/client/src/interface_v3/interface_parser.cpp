@@ -677,7 +677,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 	NLMISC::CHTimer::endBench();
 	// Display and save profile to a File.
 	CLog	log;
-	CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile("profile_parseInterface.log"));
+	CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "profile_parseInterface.log"));
 	log.addDisplayer(&fileDisplayer);
 	// diplay
 	NLMISC::CHTimer::displayHierarchicalByExecutionPathSorted(&log, CHTimer::TotalTime, true, 48, 2);

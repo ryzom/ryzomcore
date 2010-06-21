@@ -702,7 +702,7 @@ void prelogInit()
 
 		// Client.Log displayer
 		nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
-		CFileDisplayer *ClientLogDisplayer = new CFileDisplayer("client.log", true, "CLIENT.LOG");
+		CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
 		DebugLog->addDisplayer (ClientLogDisplayer);
 		InfoLog->addDisplayer (ClientLogDisplayer);
 		WarningLog->addDisplayer (ClientLogDisplayer);

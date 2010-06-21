@@ -1306,7 +1306,7 @@ void initMainLoop()
 
 		// Display and save profile to a File.
 		CLog	log;
-		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile("profile_startup.log"));
+		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "profile_startup.log"));
 		log.addDisplayer(&fileDisplayer);
 		// display
 		NLMISC::CHTimer::displayHierarchicalByExecutionPathSorted(&log, CHTimer::TotalTime, true, 48, 2);

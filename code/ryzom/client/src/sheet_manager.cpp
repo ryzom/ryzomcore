@@ -598,7 +598,7 @@ void CSheetManager::release()
 void CSheetManager::load(NLMISC::IProgressCallback &callBack, bool updatePackedSheet, bool needComputeVS, bool dumpVSIndex)
 {
 	// Open The Item Association File
-	if(!fItemAssoc.open("item_association.dbg", false, true))
+	if(!fItemAssoc.open(getLogDirectory() + "item_association.dbg", false, true))
 		nlwarning("CSheetManager::load: Cannot Open the 'item_association.txt'.");
 	else
 		ItemAssocFileOpen = true;
@@ -1020,7 +1020,7 @@ void CSheetManager::dumpVisualSlots()
 // ***************************************************************************
 void CSheetManager::dumpVisualSlotsIndex()
 {
-	FILE * vsIndexFile = fopen("vs_index.txt","w");
+	FILE * vsIndexFile = fopen(std::string(getLogDirectory() + "vs_index.txt").c_str(),"w");
 	if( vsIndexFile )
 	{
 		for (uint i=0; i < SLOTTYPE::NB_SLOT; ++i)

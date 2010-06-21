@@ -206,7 +206,7 @@ void createOptionalCatUI()
 void initEula()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (!ClientCfg.SkipEULA && CFile::fileExists("show_eula"))
+	if (!ClientCfg.SkipEULA && CFile::fileExists(getLogDirectory() + "show_eula"))
 	{
 		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_EULA);
 
@@ -599,9 +599,7 @@ void loginMainLoop()
 					// the patcher to overwrite them)
 
 					// create a file to prompt eula next time
-					FILE *file = fopen ("show_eula", "wb");
-					fclose (file);
-
+					CFile::createEmptyFile(getLogDirectory() + "show_eula");
 
 					if (taskResult == BGDownloader::TaskResult_Error)
 					{
@@ -1707,9 +1705,10 @@ class CAHReboot : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
 	{
 		nlinfo("CAHReboot called");
+
 		// create a file to prompt eula next time
-		FILE *file = fopen ("show_eula", "wb");
-		fclose (file);
+		CFile::createEmptyFile(getLogDirectory() + "show_eula");
+
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		try
 		{
@@ -1747,7 +1746,7 @@ class CAHAcceptEula : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
 	{
 		nlinfo("CAHAcceptEula called");
-		CFile::deleteFile("show_eula");
+		CFile::deleteFile(getLogDirectory() + "show_eula");
 		LoginSM.pushEvent(CLoginStateMachine::ev_accept_eula);
 
 //		if (ClientCfg.R2Mode)

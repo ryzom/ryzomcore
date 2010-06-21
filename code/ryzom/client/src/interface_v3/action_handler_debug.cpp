@@ -151,7 +151,7 @@ class CAHProfileTexture : public IActionHandler
 
 			// Display and save profile to a File.
 			CLog	log;
-			CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile("texture.log"));
+			CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "texture.log"));
 			CStdDisplayer	stdDisplayer;
 			log.addDisplayer(&fileDisplayer);
 			log.addDisplayer(&stdDisplayer);

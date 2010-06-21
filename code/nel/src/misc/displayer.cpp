@@ -669,7 +669,9 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		{
 			// yoyo: allow only to send the crash report once. Because users usually click ignore,
 			// which create noise into list of bugs (once a player crash, it will surely continues to do it).
-			if  (ReportDebug == report (args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)), "", subject, body, true, 2, true, 1, !isCrashAlreadyReported(), IgnoreNextTime, NL_CRASH_DUMP_FILE))
+			std::string filename = getLogDirectory() + NL_CRASH_DUMP_FILE;
+
+			if  (ReportDebug == report (args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)), "", subject, body, true, 2, true, 1, !isCrashAlreadyReported(), IgnoreNextTime, filename.c_str()))
 			{
 				INelContext::getInstance().setDebugNeedAssert(true);
 			}

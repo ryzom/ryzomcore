@@ -376,7 +376,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 		CBitmap btm;
 		Driver->getBuffer(btm);
-		string filename = CFile::findNewFile ("screenshot.jpg");
+		string filename = CFile::findNewFile (getLogDirectory() + "screenshot.jpg");
 		COFile fs(filename);
 		btm.writeJPG(fs, quality);
 		sys += "AttachedFile "+filename+" ";
@@ -390,7 +390,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 	if (ClientCfg.Local)
 		sys += "ShardName OFFLINE ";
 
-	FILE *fp = fopen ("bug_report.txt", "wb");
+	FILE *fp = fopen (std::string(getLogDirectory() + "bug_report.txt").c_str(), "wb");
 	if (fp != NULL)
 	{
 		string res = addSlashR(getDebugInformation());

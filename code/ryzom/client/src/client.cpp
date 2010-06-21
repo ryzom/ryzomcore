@@ -95,8 +95,8 @@ static CTcpSock CrashCounterSock;
 
 void quitCrashReport ()
 {
-	if (NLMISC::CFile::fileExists("ryzom_started"))
-		CFile::deleteFile ("ryzom_started");
+	if (NLMISC::CFile::fileExists(getLogDirectory() + "ryzom_started"))
+		CFile::deleteFile (getLogDirectory() + "ryzom_started");
 	// must disconnect now, else could crash at dtor time because nldebug -> access a new INelContext()
 	contReset(CrashCounterSock);
 }
@@ -285,7 +285,7 @@ INT_PTR CALLBACK ReportDialogProc(
 void initCrashReport ()
 {
 	//
-	bool crashed = CFile::isExists ("ryzom_started");
+	bool crashed = CFile::isExists (getLogDirectory() + "ryzom_started");
 	bool during_release = false;
 	bool exception_catched = false;
 	bool breakpointed = false;
@@ -293,22 +293,21 @@ void initCrashReport ()
 	bool report_failed = false;
 	bool report_refused = false;
 	bool report_sent = false;
-	if (crashed && CFile::isExists ("during_release"))
-		during_release = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("during_release");
-	if (crashed && CFile::isExists ("exception_catched"))
-		exception_catched = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("exception_catched");
-	if (crashed && CFile::isExists ("breakpointed"))
-		breakpointed = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("breakpointed");
-	if (crashed && CFile::isExists ("nel_debug.dmp"))
-		dumped = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("nel_debug.dmp");
-	if (crashed && CFile::isExists ("report_failed"))
-		report_failed = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("report_failed");
-	if (crashed && CFile::isExists ("report_refused"))
-		report_refused = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("report_refused");
-	if (crashed && CFile::isExists ("report_sent"))
-		report_sent = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate ("report_sent");
-	FILE *file = fopen ("ryzom_started", "wb");
-	fclose (file);
+	if (crashed && CFile::isExists (getLogDirectory() + "during_release"))
+		during_release = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "during_release");
+	if (crashed && CFile::isExists (getLogDirectory() + "exception_catched"))
+		exception_catched = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "exception_catched");
+	if (crashed && CFile::isExists (getLogDirectory() + "breakpointed"))
+		breakpointed = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "breakpointed");
+	if (crashed && CFile::isExists (getLogDirectory() + "nel_debug.dmp"))
+		dumped = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "nel_debug.dmp");
+	if (crashed && CFile::isExists (getLogDirectory() + "report_failed"))
+		report_failed = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_failed");
+	if (crashed && CFile::isExists (getLogDirectory() + "report_refused"))
+		report_refused = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_refused");
+	if (crashed && CFile::isExists (getLogDirectory() + "report_sent"))
+		report_sent = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_sent");
+	CFile::createEmptyFile(getLogDirectory() + "ryzom_started");
 	connect();
 	if (report_sent)
 		send("/?crashtype=REPORT_SENT");
@@ -580,8 +579,7 @@ int main(int argc, char **argv)
 	//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
 
-	FILE *file = fopen ("during_release", "wb");
-	fclose (file);
+	CFile::createEmptyFile(getLogDirectory() + "during_release");
 
 #ifdef TEST_CRASH_COUNTER
 	if (string(cmdline) == "/release")

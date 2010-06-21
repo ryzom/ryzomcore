@@ -133,7 +133,7 @@ void			initReceiveLog()
 {
 	try
 	{
-		ReceiveLogDisp = new CFileDisplayer( "ReceiveLog.log" );
+		ReceiveLogDisp = new CFileDisplayer( getLogDirectory() + "ReceiveLog.log" );
 		ReceiveLogger.addDisplayer( ReceiveLogDisp );
 		//ReceiveLogger.displayNL( "Searching for param LogReceive in the config file..." );
 		NCConfigFile.load( string( "client.cfg" ) );
