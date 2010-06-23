@@ -359,7 +359,7 @@ int main (int nNbArg, char **ppArgs)
 		gBNPHeader.OffsetFromBeginning = 0;	
 		packSubRecurse();
 		gBNPHeader.append (gDestBNPFile);
-		return 1;
+		return 0;
 	}
 
 	if ((strcmp(ppArgs[1], "/u") == 0) || (strcmp(ppArgs[1], "/U") == 0) ||
@@ -405,7 +405,7 @@ int main (int nNbArg, char **ppArgs)
 
 		unpack (dirName);
 
-		return 1;
+		return 0;
 	}
 
 	if ((strcmp(ppArgs[1], "/l") == 0) || (strcmp(ppArgs[1], "/L") == 0) ||
@@ -450,7 +450,7 @@ int main (int nNbArg, char **ppArgs)
 		for (i = 0; i < gBNPHeader.Files.size(); ++i)
 			printf ("%s\n", gBNPHeader.Files[i].Name.c_str());
 
-		return 1;
+		return 0;
 	}
 
 	usage ();
