@@ -52,41 +52,56 @@ void dtor();
 /// mac specific stuff while calling CDriverGL::init()
 bool init(uint windowIcon = 0, emptyProc exitFunc = 0);
 
-/// mac specific stuff while calling CDriverGL::setDisplay()
-bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
+/// mac specific stuff while calling CDriverGL::unInit()
+bool unInit();
 
-/// mac specific stuff while calling CDriverGL::setMode()
-bool setMode(const GfxMode& mode);
+/// mac specific stuff while calling CDriverGL::createWindow()
+nlWindow createWindow(const GfxMode& mode);
+
+/// mac specific stuff while calling CDriverGL::destroyWindow()
+bool destroyWindow(nlWindow wnd);
+
+/// mac specific stuff while calling CDriverGL::setDisplay()
+nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
+
+/// mac specific stuff while calling CDriverGL::setWindowStyle()
+bool setWindowStyle(nlWindow wnd, bool fullscreen);
 
 /// mac specific stuff while calling CDriverGL::getCurrentScreenMode()
-void getCurrentScreenMode(GfxMode& mode);
+void getCurrentScreenMode(nlWindow wnd, GfxMode& mode);
 
 /// mac specific stuff while calling CDriverGL::getWindowSize()
-void getWindowSize(uint32 &width, uint32 &height);
+void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height);
+
+/// mac specific stuff while calling CDriverGL::setWindowSize()
+void setWindowSize(nlWindow wnd, uint32 width, uint32 height);
 
 /// mac specific stuff while calling CDriverGL::getWindowPos()
-void getWindowPos(sint32 &x, sint32 &y);
+void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y);
 
 /// mac specific stuff while calling CDriverGL::setWindowPos()
-void setWindowPos(sint32 x, sint32 y);
+void setWindowPos(nlWindow wnd, sint32 x, sint32 y);
 
 /// mac specific stuff while calling CDriverGL::setWindowTitle()
-void setWindowTitle(const ucstring &title);
+void setWindowTitle(nlWindow wnd, const ucstring& title);
+
+/// mac specific stuff while calling CDriverGL::showWindow()
+void showWindow(bool show);
+
+/// mac specific stuff while calling CDriverGL::activate()
+bool activate(nlWindow wnd);
 
 /// mac specific stuff while calling CDriverGL::swapBuffers()
-void swapBuffers();
+void swapBuffers(nlWindow wnd);
 
 /// mac specific stuff while calling CDriverGL::setCapture()
-void setCapture(bool b);
+void setCapture(bool capture);
 
 /// mac specific stuff while calling CDriverGL::showCursor()
-void showCursor(bool b);
+void showCursor(bool show);
 
 /// mac specific stuff while calling CDriverGL::setMousePos()
-void setMousePos(float x, float y);
-
-/// mac specific stuff while calling CDriverGL::release()
-void release();
+void setMousePos(nlWindow wnd, float x, float y);
 
 /// mac specific stuff while calling CCocoaEventEmitter::submitEvents()
 void submitEvents(NLMISC::CEventServer& server, 

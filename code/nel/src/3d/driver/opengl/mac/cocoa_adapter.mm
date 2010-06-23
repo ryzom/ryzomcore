@@ -36,17 +36,8 @@ namespace NL3D { namespace MAC {
 
 static NSApplication*     g_app            = nil;
 static NSAutoreleasePool* g_pool           = nil;
-static CocoaWindow*       g_window         = nil;
-static CocoaOpenGLView*   g_glview         = nil;
-static NSOpenGLContext*   g_glctx          = nil;
 static bool               g_emulateRawMode = false;
-
-
-#define UGLY_BACKBUFFER_SIZE_WORKAROUND
-
-#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
-static int g_bufferSize[2];
-#endif
+static int                g_bufferSize[2]  = { 0, 0 };
 
 void ctor()
 {
@@ -55,13 +46,15 @@ void ctor()
 
 	// init the application object
 	g_app	 = [NSApplication sharedApplication];
+
+	// tell the application that we are running now
+	[g_app finishLaunching];
 }
 
 void dtor()
 {
-	/*
-		TODO there might be some more stuff to release ;)
-	*/
+	// shut down the application
+	[g_app terminate:nil];
 
 	// release the pool
 	[g_pool release];
@@ -69,40 +62,77 @@ void dtor()
 
 bool init(uint windowIcon, emptyProc exitFunc)
 {
-	/*
-		TODO nothing to do here? split other stuff to match api cleanly.
-	*/
 	return true;
 }
 
-bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
+bool unInit()
+{
+	return true;
+}
+
+nlWindow createWindow(const GfxMode& mode)
+{
+	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
+		NSMiniaturizableWindowMask | NSResizableWindowMask;
+
+	// create a cocoa window with the size provided by the mode parameter
+	CocoaWindow* window = [[CocoaWindow alloc]
+		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
+		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
+
+	if(!window)
+		nlerror("cannot create window");
+
+	// set the window to non transparent
+	[window setOpaque:YES];
+
+	// enable mouse move events, NeL wants them
+	[window setAcceptsMouseMovedEvents:YES];
+
+	// there are no overlapping subviews, so we can use the magical optimization!
+	[window useOptimizedDrawing:YES];
+
+	// put the window to the front and make it the key window
+	[window makeKeyAndOrderFront:nil];
+
+	// this is our main window
+	[window makeMainWindow];
+
+	return window;
+}
+
+bool destroyWindow(nlWindow wnd)
+{
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLView*    view   = [window contentView];
+
+	[view release];
+	[window release];
+
+	return true;
+}
+
+nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
 	/*
 		TODO use show
+			call showWindow()
 	*/
 
 	/*
 		TODO add menu, on quit send EventDestroyWindowId
 	*/
 
-	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
-		NSMiniaturizableWindowMask;
+	NSWindow* window = (NSWindow*)wnd;
 
-	if(resizeable)
-		styleMask |= NSResizableWindowMask;
-
-	// create a cocoa window with the size provided by the mode parameter
-	g_window = [[CocoaWindow alloc]
-		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
-		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
-
-	if(!g_window)
-		nlerror("cannot create window");
+	if(wnd == EmptyWindow)
+		window = (NSWindow*)createWindow(mode);
 
 	/*
 		TODO use mode.Depth
 		TODO NSOpenGLPFAOffScreen
 	*/
+
 	// setup opengl settings
 	NSOpenGLPixelFormatAttribute att[] =
 	{
@@ -125,72 +155,45 @@ bool setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 		nlerror("cannot create NSOpenGLPixelFormat");
 
 	// create a opengl view with the created format
-	g_glview = [[CocoaOpenGLView alloc]
+	NSOpenGLView* view = [[CocoaOpenGLView alloc]
 		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
 
-	if(!g_glview)
+	if(!view)
 		nlerror("cannot create view");
 
 	// put the view into the window
-	[g_window setContentView:g_glview];
-
-	// set the window to non transparent
-	[g_window setOpaque:YES];
-
-	// enable mouse move events, NeL wants them
-	[g_window setAcceptsMouseMovedEvents:YES];
-
-	// there are no overlapping subviews, so we can use the magical optimization!
-	[g_window useOptimizedDrawing:YES];
+	[window setContentView:view];
 
 	// create a opengl context for the view
-	g_glctx = [g_glview openGLContext];
+	NSOpenGLContext* ctx = [view openGLContext];
 
-	if(!g_glctx)
+	if(!ctx)
 		nlerror("cannot create context");
-
-	// make the view's opengl context the currrent one
-	[g_glctx makeCurrentContext];
-
-	// put the window to the front and make it the key window
-	[g_window makeKeyAndOrderFront:nil];
-
-	// this is our main window
-	[g_window makeMainWindow];
-
-	// tell the application that we are running now
-	[g_app finishLaunching];
 
 	// free the pixel format object
 	[format release];
 
-	// further mode setting, like switching to fullscreen and resolution setup
-	setMode(mode);
-
-	return true;
+	return window;
 }
 
-bool setMode(const GfxMode& mode)
+bool setWindowStyle(nlWindow wnd, bool fullscreen)
 {
-	// for fullscreen mode, adjust the back buffer size to the desired resolution
-	if(!mode.Windowed)
+	if(wnd == EmptyWindow)
 	{
-		// set the back buffer manually to match the desired rendering resolution
-		GLint dim[2]   = { mode.Width, mode.Height };
-		CGLError error = CGLSetParameter((CGLContextObj)[g_glctx CGLContextObj],
-			kCGLCPSurfaceBackingSize, dim);
-
-		if(error != kCGLNoError)
-			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)",
-				CGLErrorString(error));
+		nlwarning("cannot set window style on an empty window");
+		return false;		
 	}
-
+	
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLView*    view   = [window contentView];
+	NSOpenGLContext* ctx    = [view openGLContext];
+	
 	// leave fullscreen mode, enter windowed mode
-	if(mode.Windowed && [g_glview isInFullScreenMode])
+	if(!fullscreen && [view isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
-		CGLError error = CGLDisable((CGLContextObj)[g_glctx CGLContextObj],
+		CGLError error = CGLDisable((CGLContextObj)[ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
 		if(error != kCGLNoError)
@@ -198,14 +201,14 @@ bool setMode(const GfxMode& mode)
 				CGLErrorString(error));
 
 		// pull the view back from fullscreen restoring window options
-		[g_glview exitFullScreenModeWithOptions:nil];
+		[view exitFullScreenModeWithOptions:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(!mode.Windowed && ![g_glview isInFullScreenMode])
+	else if(fullscreen && ![view isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
-		CGLError error = CGLEnable((CGLContextObj)[g_glctx CGLContextObj],
+		CGLError error = CGLEnable((CGLContextObj)[ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
 		if(error != kCGLNoError)
@@ -215,7 +218,7 @@ bool setMode(const GfxMode& mode)
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-		[g_glview enterFullScreenMode:[NSScreen mainScreen] withOptions:
+		[view enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
 					NSApplicationPresentationHideDock |
@@ -228,17 +231,15 @@ bool setMode(const GfxMode& mode)
 		*/
 	}
 
-#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
-	// due to a back buffer size reading problem, just store the size
-	g_bufferSize[0] = mode.Width;
-	g_bufferSize[1] = mode.Height;
-#endif
-
 	return true;
 }
 
-void getCurrentScreenMode(GfxMode& mode)
+
+void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 {
+	NSWindow*     window = (NSWindow*)wnd;
+	NSOpenGLView* view   = [window contentView];
+	
 	// the sceen with the menu bar
 	NSScreen* screen = [[NSScreen screens] objectAtIndex:0];
 
@@ -247,7 +248,7 @@ void getCurrentScreenMode(GfxMode& mode)
 	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
 
 	// in fullscreen mode
-	if([g_glview isInFullScreenMode])
+	if([view isInFullScreenMode])
 	{
 		// return the size of the back buffer (like having switched monitor mode)
 		mode.Windowed  = false;
@@ -255,7 +256,7 @@ void getCurrentScreenMode(GfxMode& mode)
 		mode.Height    = (uint16)g_bufferSize[1];
 	}
 	
-	// in windowes mode
+	// in windowed mode
 	else
 	{
 		// return the size of the screen with menu bar
@@ -265,8 +266,12 @@ void getCurrentScreenMode(GfxMode& mode)
 	}
 }
 
-void getWindowSize(uint32 &width, uint32 &height)
+void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 {
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLView*    view   = [window contentView];
+	NSOpenGLContext* ctx    = [view openGLContext];
+	
 	// A cocoa fullscreen view stays at the native resolution of the display.
 	// When changing the rendering resolution, the size of the back buffer gets
 	// changed, but the view still stays at full resolution. So the scaling of
@@ -275,11 +280,10 @@ void getWindowSize(uint32 &width, uint32 &height)
 	// That's why, in fullscreen mode, return the resolution of the back buffer,
 	// not the one from the window.
 
-#ifdef UGLY_BACKBUFFER_SIZE_WORKAROUND
 	// in fullscreen mode
-	if([g_glview isInFullScreenMode])
+	if([view isInFullScreenMode])
 	{
-		// use the size stored in setMode()
+		// use the size stored in setWindowSize()
 		width = g_bufferSize[0];
 		height = g_bufferSize[1];
 	}
@@ -288,60 +292,56 @@ void getWindowSize(uint32 &width, uint32 &height)
 	else
 	{
 		// use the size of the view
-		NSRect rect = [g_glview frame];
+		NSRect rect = [view frame];
 		width = rect.size.width;
 		height = rect.size.height;
 	}
-#else
-	/*
-		TODO does not work atm, "invalid enumeration"
-	*/
-	// check if manual back buffer sizing is enabled (thats only in fullscreen)
-	GLint surfaceBackingSizeSet = 0;
-	CGLError error = CGLIsEnabled((CGLContextObj)[g_glctx CGLContextObj],
-		kCGLCESurfaceBackingSize, &surfaceBackingSizeSet);
+}
 
-	if(error != kCGLNoError)
-		nlerror("cannot check kCGLCESurfaceBackingSize state (%s)",
-			CGLErrorString(error));
-
-	// if in fullscreen mode (only in fullscreen back buffer sizing is used)
-	if(surfaceBackingSizeSet)
+void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
+{
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLView*    view   = [window contentView];
+	NSOpenGLContext* ctx    = [view openGLContext];
+	
+	// for fullscreen mode, adjust the back buffer size to the desired resolution
+	if([view isInFullScreenMode])
 	{
-		/*
-			TODO does not work atm, "invalid enumeration"
-		*/
-		// get the back buffer size
-		GLint dim[2];
-		CGLError error = CGLGetParameter((CGLContextObj)[g_glctx CGLContextObj],
+		// set the back buffer manually to match the desired rendering resolution
+		GLint dim[2]   = { width, height };
+		CGLError error = CGLSetParameter((CGLContextObj)[ctx CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);
 
 		if(error != kCGLNoError)
-			nlerror("cannot get kCGLCPSurfaceBackingSize value (%s)",
+			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)",
 				CGLErrorString(error));
-
-		// put size into ref params
-		width = dim[0];
-		height = dim[1];
 	}
-
-	// if in windowed mode
 	else
 	{
-		// return the views size
-		NSRect rect = [g_glview frame];
+		// get the windows current frame
+		NSRect rect = [window frame];
 
-		// put size into ref params
-		width = rect.size.width;
-		height = rect.size.height;
+		// convert the desired content size to window size
+		rect = [window frameRectForContentRect:
+			NSMakeRect(rect.origin.x, rect.origin.y, width, height)];
+
+		// update window dimensions
+		[window setFrame:rect display:YES];
 	}
-#endif
+	
+	// store the size
+	g_bufferSize[0] = width;
+	g_bufferSize[1] = height;
 }
 
-void getWindowPos(sint32 &x, sint32 &y)
+
+void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y)
 {
+	NSWindow* window = (NSWindow*)wnd;
+	NSOpenGLView* view = [window contentView];
+	
 	// for IDriver conformity
-	if([g_glview isInFullScreenMode])
+	if([view isInFullScreenMode])
 	{
 		x = y = 0;
 		return;
@@ -351,7 +351,7 @@ void getWindowPos(sint32 &x, sint32 &y)
 	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
 	// get the rect (position, size) of the window
-	NSRect windowRect = [g_window frame];
+	NSRect windowRect = [window frame];
 
 	// simply return x
 	x = windowRect.origin.x;
@@ -360,39 +360,63 @@ void getWindowPos(sint32 &x, sint32 &y)
 	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
-void setWindowPos(sint32 x, sint32 y)
+void setWindowPos(nlWindow wnd, sint32 x, sint32 y)
 {
+	NSWindow* window = (NSWindow*)wnd;
+	
 	// get the rect (position, size) of the screen with menu bar
 	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
 	// get the rect (position, size) of the window
-	NSRect windowRect = [g_window frame];
+	NSRect windowRect = [window frame];
 
 	// convert y from NeL coordinates to cocoa coordinates
 	y = screenRect.size.height - y;
 
 	// tell cocoa to move the window
-	[g_window setFrameTopLeftPoint:NSMakePoint(x, y)];
+	[window setFrameTopLeftPoint:NSMakePoint(x, y)];
 }
 
-void setWindowTitle(const ucstring &title)
+void setWindowTitle(nlWindow wnd, const ucstring& title)
 {
+	NSWindow* window = (NSWindow*)wnd;
+
 	// well... set the title of the window
-	[g_window setTitle:[NSString stringWithUTF8String:title.toUtf8().c_str()]];
+	[window setTitle:[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 }
 
-void swapBuffers()
+void showWindow(bool show)
 {
-	// make cocoa draw buffer contents to the view
-	[g_glctx flushBuffer];
+	nldebug("show: %d - implement me!", show);
 }
 
-void setCapture(bool b)
+bool activate(nlWindow wnd)
+{
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLContext* ctx    = [[window contentView] openGLContext];
+
+	// if our context is not the current one, make it the current
+	if([NSOpenGLContext currentContext] != ctx)
+		[ctx makeCurrentContext];
+	
+	return true;
+}
+
+void swapBuffers(nlWindow wnd)
+{
+	NSWindow*        window = (NSWindow*)wnd;
+	NSOpenGLContext* ctx    = [[window contentView] openGLContext];
+	
+	// make cocoa draw buffer contents to the view
+	[ctx flushBuffer];
+}
+
+void setCapture(bool capture)
 {
 	// no need to capture
 }
 
-void showCursor(bool b)
+void showCursor(bool show)
 {
 	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
 	// twice requires two calls to "show" to make the cursor visible again.
@@ -403,23 +427,26 @@ void showCursor(bool b)
 	CGDisplayErr error  = kCGErrorSuccess;
 	static bool visible = true;
 
-	if(b && !visible)
+	if(show && !visible)
 	{
 		error = CGDisplayShowCursor(kCGDirectMainDisplay);
 		visible = true;
 	}
-	else if(!b && visible)
+	else if(!show && visible)
 	{
 		error = CGDisplayHideCursor(kCGDirectMainDisplay);
 		visible = false;
 	}
 
 	if(error != kCGErrorSuccess)
-		nlerror("cannot capture / un-capture cursor");
+		nlerror("cannot show / hide cursor");
 }
 
-void setMousePos(float x, float y)
+void setMousePos(nlWindow wnd, float x, float y)
 {
+	NSWindow* window = (NSWindow*)wnd;
+	NSOpenGLView* view = [window contentView];
+	
 	// CG wants absolute coordinates related to first screen's top left
 
 	// get the first screen's (conaints menubar) rect (this is not mainScreen)
@@ -427,13 +454,13 @@ void setMousePos(float x, float y)
 
 	// get the rect (position, size) of the window
 	NSRect windowRect;
-	if([g_glview isInFullScreenMode])
-		windowRect = [[g_window screen] frame];
+	if([view isInFullScreenMode])
+		windowRect = [[window screen] frame];
 	else
-		windowRect = [g_window frame];
+		windowRect = [window frame];
 
 	// get the gl view's rect for height and width
-	NSRect viewRect = [g_glview frame];
+	NSRect viewRect = [view frame];
 
 	// set the cursor position
 	CGDisplayErr error = CGDisplayMoveCursorToPoint(
@@ -444,14 +471,6 @@ void setMousePos(float x, float y)
 
 	if(error != kCGErrorSuccess)
 		nlerror("cannot set mouse position");
-}
-
-void release()
-{
-	/*
-		TODO release some stuff
-	*/
-	nlwarning("not implemented");
 }
 
 /*
@@ -675,16 +694,16 @@ void submitEvents(NLMISC::CEventServer& server,
 		if(!event)
 			break;
 
-		// get the views size
-		NSRect rect = [g_glview frame];
+		NSRect viewRect = [[[event window] contentView] frame];
 
 		// TODO this code assumes, that the view fills the window
 		// convert the mouse position to NeL style (relative)
-		float mouseX = event.locationInWindow.x / (float)rect.size.width;
-		float mouseY = event.locationInWindow.y / (float)rect.size.height;
+		float mouseX = event.locationInWindow.x / (float)viewRect.size.width;
+		float mouseY = event.locationInWindow.y / (float)viewRect.size.height;
 
-		// if the mouse event was placed on the window's titlebar, don't tell NeL :)
-		if(mouseY > 1.0 && event.type != NSKeyDown && event.type != NSKeyUp)
+		// if the mouse event was placed outside the view, don't tell NeL :)
+		if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
+				event.type != NSKeyDown && event.type != NSKeyUp)
 		{
 			[g_app sendEvent:event];
 			[g_app updateWindows];

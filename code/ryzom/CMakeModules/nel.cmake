@@ -39,6 +39,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_SOUND       "Build Sound Support"                                   OFF)
   OPTION(BUILD_DASHBOARD  "Build to the CDash dashboard"                          OFF)
+  OPTION(WITH_COCOA       "Build with native Mac OS X Cocoa support"              OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 
@@ -88,6 +89,9 @@ MACRO(NL_SETUP_BUILD)
     SET(NL_RELEASE_CFLAGS "-DNL_RELEASE -O6")
     SET(NL_RELEASEDEBUG_CFLAGS "-DNL_RELEASE_DEBUG -g -finline-functions -O3 ")
     SET(NL_NONE_CFLAGS "-DNL_RELEASE -g -finline-functions -O2 ")
+    IF(WITH_COCOA)
+      SET(PLATFORM_CFLAGS "-DNL_MAC_NATIVE")
+    ENDIF(WITH_COCOA)
   ENDIF(WIN32)
 
   # Determine host CPU

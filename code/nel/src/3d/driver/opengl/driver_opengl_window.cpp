@@ -132,7 +132,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	return trapMessage ? 0 : DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-#endif // NL_OS_UNIX
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
@@ -182,7 +182,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	return NL3D::MAC::init(windowIcon, exitFunc);
+	if(!NL3D::MAC::init(windowIcon, exitFunc))
+	{
+		nldebug("cannot init");
+		return false;
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -249,7 +253,11 @@ bool CDriverGL::unInit()
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::release();
+	if(!NL3D::MAC::unInit())
+	{
+		nldebug("cannot uninit");
+		return false;
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -635,7 +643,10 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
+	_win = NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
+
+	if(_win != EmptyWindow)
+		_DestroyWindow = true;
 
 #elif defined (NL_OS_UNIX)
 
@@ -739,6 +750,10 @@ bool CDriverGL::saveScreenMode()
 
 	// don't need to save it because Windows will use default desktop resolution
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	// no need to store because the screen mode is never really changed
+
 #elif defined(NL_OS_UNIX)
 
 #if defined(XF86VIDMODE)
@@ -765,6 +780,11 @@ bool CDriverGL::restoreScreenMode()
 #if defined(NL_OS_WINDOWS)
 
 	res = (ChangeDisplaySettings(NULL, 0) == DISP_CHANGE_SUCCESSFUL);
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	// no need to restore because the screen mode was never really changed
+	res = true;
 
 #elif defined(NL_OS_UNIX)
 
@@ -856,7 +876,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	// TODO
+	// no need to do anything here, on mac os, the screen mode is never changed
 
 #elif defined(NL_OS_UNIX)
 
@@ -918,7 +938,13 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	// TODO
+	window = NL3D::MAC::createWindow(mode);
+
+	if(window == EmptyWindow)
+	{
+		nldebug("cannot create window");
+		return false;
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -986,7 +1012,14 @@ bool CDriverGL::destroyWindow()
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	// TODO
+	if(_DestroyWindow)
+	{
+		if(!NL3D::MAC::destroyWindow(_win))
+		{
+			nldebug("cannot destroy window");
+			return false;
+		}
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -1072,6 +1105,14 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 //	else if (isMaximized && isVisible)
 //		ShowWindow(_hWnd, SW_RESTORE);
 
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	if(!NL3D::MAC::setWindowStyle(_win, windowStyle == EWSFullscreen))
+	{
+		nldebug("cannot set window style");
+		return false;
+	}
+
 #elif defined(NL_OS_UNIX)
 
 	XSetWindowAttributes attr;
@@ -1129,7 +1170,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		return false;
 
 	// when changing window style, it's possible system change window size too
-	setWindowStyle(mode.Windowed ? EWSWindowed:EWSFullscreen);
+	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
 
 	_WindowWidth = mode.Width;
 	_WindowHeight = mode.Height;
@@ -1139,16 +1180,10 @@ bool CDriverGL::setMode(const GfxMode& mode)
 
 	_FullScreen = !mode.Windowed;
 
-#if defined(NL_OS_MAC)
-
-#if defined(NL_MAC_NATIVE)
-	NL3D::MAC::setMode(mode);
-#else
+#if defined(NL_OS_MAC) && !defined(NL_MAC_NATIVE)
 	// X11 under Mac OS can't use fullscreen
 	_FullScreen = false;
 #endif // NL_MAC_NATIVE
-
-#endif // NL_OS_MAC
 
 	setWindowSize(mode.Width, mode.Height);
 
@@ -1239,7 +1274,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::getCurrentScreenMode(mode);
+	NL3D::MAC::getCurrentScreenMode(_win, mode);
 
 #elif defined(NL_OS_MAC)
 	/*
@@ -1293,7 +1328,7 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::setWindowTitle(title);
+	NL3D::MAC::setWindowTitle(_win, title);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1320,7 +1355,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::setWindowPos(x, y);
+	NL3D::MAC::setWindowPos(_win, x, y);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1341,9 +1376,9 @@ void CDriverGL::showWindow(bool show)
 #ifdef NL_OS_WINDOWS
 	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
+	MAC::showWindow(show);
+	
 #elif defined (NL_OS_UNIX)
 
 	if (show)
@@ -1384,10 +1419,11 @@ bool CDriverGL::activate()
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-# warning "OpenGL Driver: Temporary Mac Implementation"
-	nlwarning("OpenGL Driver: Temporary Mac Implementation");
-
-	// already done in setDisplay, not needed here - unclean! FIXME
+	if(!MAC::activate(_win))
+	{
+		nlwarning("cannot activate");
+		return false;
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -1513,7 +1549,7 @@ void CDriverGL::setMousePos(float x, float y)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::setMousePos(x, y);
+	NL3D::MAC::setMousePos(_win, x, y);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1552,7 +1588,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::getWindowSize(width, height);
+	NL3D::MAC::getWindowSize(_win, width, height);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1589,7 +1625,11 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
 
-#elif defined(NL_OS_UNIX) && !defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+	NL3D::MAC::setWindowSize(_win, width, height);
+
+#elif defined(NL_OS_UNIX)
 
 	// Update WM hints (update size and allow resizing)
 	XSizeHints size_hints;
@@ -1653,7 +1693,7 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
-	NL3D::MAC::getWindowPos(x, y);
+	NL3D::MAC::getWindowPos(_win, x, y);
 
 #elif defined (NL_OS_UNIX)
 

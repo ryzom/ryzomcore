@@ -867,7 +867,7 @@ bool CDriverGL::swapBuffers()
 	SwapBuffers(_hDC);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-	NL3D::MAC::swapBuffers();
+	NL3D::MAC::swapBuffers(_win);
 
 #elif defined (NL_OS_UNIX)
 	glXSwapBuffers(_dpy, _win);
@@ -972,8 +972,10 @@ bool CDriverGL::release()
 void CDriverGL::setupViewport (const class CViewport& viewport)
 {
 	H_AUTO_OGL(CDriverGL_setupViewport )
-#ifdef NL_OS_WINDOWS
+
 	if (_win == EmptyWindow) return;
+
+#ifdef NL_OS_WINDOWS
 
 	// Setup gl viewport
 	int clientWidth = _WindowWidth;
@@ -982,7 +984,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
 	uint32 clientWidth, clientHeight;
-	NL3D::MAC::getWindowSize(clientWidth, clientHeight);
+	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
 
 #elif defined (NL_OS_UNIX)
 
@@ -1052,11 +1054,11 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	int clientHeight = _WindowHeight;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	// nlwarning("OpenGL Driver: Temporary Mac Implementation");
 
-	int clientWidth = 1024;
-	int clientHeight = 768;
+	uint32 clientWidth  = 0;
+	uint32 clientHeight = 0;
+
+	getWindowSize(clientWidth, clientHeight);
 
 #elif defined (NL_OS_UNIX)
 
