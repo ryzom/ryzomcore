@@ -1201,7 +1201,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 			mode.Width = (uint16)ms[j]->hdisplay;
 			mode.Height = (uint16)ms[j]->vdisplay;
 			const uint16 pixelsCount = ms[j]->htotal * ms[j]->vtotal;
-			mode.Frequency = pixelCount ? 1000 * ms[j]->dotclock / pixelCount:0;
+			mode.Frequency = pixelsCount ? 1000 * ms[j]->dotclock / pixelsCount:0;
 			nldebug("3D:   Mode %d: %dx%d, %d Hz", j, mode.Width, mode.Height, mode.Frequency);
 			modes.push_back (mode);
 		}
@@ -1246,7 +1246,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	/*
 		TODO this is just a hack to get the ryzom client running on mac os x x11.
 			the implementation below relies on the vidmode extension which is not
-			availeble on mac os x's x11. for that reason the color depth value is
+			available on mac os x's x11. for that reason the color depth value is
 			hard coded here.
 		FIXME replace this hack by native cocoa color depth retrieval
 	*/
