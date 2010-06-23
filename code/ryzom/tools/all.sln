@@ -176,6 +176,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "icon_search", "leveldesign\
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "alias_synchronizer", "leveldesign\alias_synchronizer\alias_synchronizer.vcproj", "{3ECD7F32-6603-45D2-91AB-5FBC278F6DC8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C} = {1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "land_export", "leveldesign\world_editor\land_export\land_export.vcproj", "{FECBB892-F33C-4195-AB69-9B708BFBCDEA}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -213,6 +217,13 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "georges_convert", "leveldesign\georges_convert\georges_convert.vcproj", "{3539CE53-2596-4BC4-A177-045BBAFF4A82}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "export", "leveldesign\export\export.vcproj", "{577230FF-399C-4C9D-9495-CEC106326441}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "patch_gen", "patch_gen\patch_gen.vcproj", "{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{4B320F68-0B9B-4065-A2ED-AF5D4B163006} = {4B320F68-0B9B-4065-A2ED-AF5D4B163006}
+		{67AF56A4-A228-4BFB-BDA8-026CBEDE8BF9} = {67AF56A4-A228-4BFB-BDA8-026CBEDE8BF9}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -550,6 +561,14 @@ Global
 		{577230FF-399C-4C9D-9495-CEC106326441}.Release|Win32.Build.0 = Release|Win32
 		{577230FF-399C-4C9D-9495-CEC106326441}.Release|x64.ActiveCfg = Release|x64
 		{577230FF-399C-4C9D-9495-CEC106326441}.Release|x64.Build.0 = Release|x64
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Debug|Win32.Build.0 = Debug|Win32
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Debug|x64.ActiveCfg = Debug|x64
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Debug|x64.Build.0 = Debug|x64
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Release|Win32.ActiveCfg = Release|Win32
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Release|Win32.Build.0 = Release|Win32
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Release|x64.ActiveCfg = Release|x64
+		{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
