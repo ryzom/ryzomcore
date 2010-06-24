@@ -2676,7 +2676,7 @@ void CPSRadialEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 void CPSRadialEmitter::emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed)
 {
 	NL_PS_FUNC(CPSRadialEmitter_emit)
-	// TODO : verifier que ca marche si une particule s'emet elle-mem
+	// TODO : verify if it works when a particle emits itself
 	nlassert(_EmittedType);
 
 	static const double divRand = (2.0 / RAND_MAX);

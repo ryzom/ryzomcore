@@ -1093,7 +1093,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 			else // it is the only word on the line..
 			{
 				// .. so split it
-				// 1 °) Check if spaces go beyond the end of line
+				// 1) Check if spaces go beyond the end of line
 				if (numSpaces * _SpaceWidth > nMaxWidth)
 				{
 					uint maxNumSpaces = std::max(1U, (uint) (nMaxWidth / _SpaceWidth));

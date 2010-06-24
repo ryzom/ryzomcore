@@ -952,10 +952,10 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		_ProcessCount=MAX_CPU_PROCESS;
 
 	// Number of obstacle polygones
-	printf ("Obstacle polygones : %zu\n", obstacles.size ());
+	nlinfo ("Obstacle polygones : %zu", obstacles.size ());
 
 	// Number of CPUS used
-	printf ("Number of CPU used: %d\n", _ProcessCount);
+	nlinfo ("Number of CPU used: %d", _ProcessCount);
 
 	// Zone pointer
 	CZone *pZone=landscape.getZone (_ZoneToLight);
@@ -999,14 +999,14 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 			lightPos = description.SunCenter - (description.SunDirection * description.SunDistance) + lightPos;
 
 			InitZBuffer (zbuffer, lightPos, _RayBasis, zoneBB, description.ZBufferLandscapeSize, description);
-			printf ("Zbuffer %d size : %d x %d\n", sampleX+sampleY*description.SoftShadowSamplesSqrt, zbuffer.LocalZBufferWidth, zbuffer.LocalZBufferHeight);
+			nlinfo ("Zbuffer %d size : %d x %d", sampleX+sampleY*description.SoftShadowSamplesSqrt, zbuffer.LocalZBufferWidth, zbuffer.LocalZBufferHeight);
 		}
 
 
 		// *** Init the zbuffer for the vegetation
 		CVector lightPos = description.SunCenter - (description.SunDirection * description.SunDistance);
 		InitZBuffer (_ZBufferObject, lightPos, _RayBasis, zoneBB, description.ZBufferObjectSize, description);
-		printf ("Zbuffer object size : %d x %d\n", _ZBufferObject.LocalZBufferWidth, _ZBufferObject.LocalZBufferHeight);
+		nlinfo ("Zbuffer object size : %d x %d", _ZBufferObject.LocalZBufferWidth, _ZBufferObject.LocalZBufferHeight);
 
 
 		// Compute the zbuffer in multi thread

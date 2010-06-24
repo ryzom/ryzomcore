@@ -152,7 +152,7 @@ public:
 	  *	Speed is in O(1 * L*H) where L*H is the number of squares surrounded by the element
 	  *
 	  *	Warning! : bboxmin and bboxmax are multiplied by matrix setuped by changeBase. This work for any
-	  *	matrix with 90deg rotations (min and max are recomputed internally), but not with any rotation (43° ...)
+	  *	matrix with 90deg rotations (min and max are recomputed internally), but not with any rotation (43 degrees ...)
 	  *	because of the nature of AABBox. To do this correclty you should compute the bbox min and max in the
 	  *	basis given in changeBase, and insert() with multiplying min and max with inverse of this basis.
 	  *	eg:

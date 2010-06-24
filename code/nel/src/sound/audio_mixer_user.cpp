@@ -92,12 +92,12 @@ UAudioMixer	*UAudioMixer::createAudioMixer()
 
 CAudioMixerUser::CAudioMixerUser() : _AutoLoadSample(false),
 									 _UseADPCM(true),
-									 _SoundDriver(NULL), 
-									 _SoundBank(NULL), 
-									 _SampleBankManager(NULL), 
+									 _SoundDriver(NULL),
+									 _SoundBank(NULL),
+									 _SampleBankManager(NULL),
 									 _BackgroundSoundManager(NULL),
 									 _ClusteredSound(0),
-									 _ReverbEffect(NULL), 
+									 _ReverbEffect(NULL),
 									 _ListenPosition(CVector::Null),
 									 _BackgroundMusicManager(NULL),
 									 _PlayingSources(0),
@@ -136,7 +136,7 @@ CAudioMixerUser::~CAudioMixerUser()
 	reset();
 
 	_Leaving = true;
-	
+
 	// Release all the SampleBanks
 	delete _SampleBankManager; _SampleBankManager = NULL;
 	// Release the sound bank
@@ -167,14 +167,14 @@ void CAudioMixerUser::initClusteredSound(NL3D::UScene *uscene, float minGain, fl
 {
 	NL3D::CScene *scene = 0;
 	if (uscene) scene = &(static_cast<NL3D::CSceneUser*>(uscene)->getScene());
-	
+
 	initClusteredSound(scene, minGain, maxDistance, portalInterpolate);
 }
 
 void CAudioMixerUser::initClusteredSound(NL3D::CScene *scene, float minGain, float maxDistance, float portalInterpolate = 20.0f)
 {
 	if (!_ClusteredSound) _ClusteredSound = new CClusteredSound();
-	
+
 	_ClusteredSound->init(scene, portalInterpolate, maxDistance, minGain);
 }
 
@@ -359,7 +359,7 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 	else if (dn == "dsound") driverType = ISoundDriver::DriverDSound;
 	else if (dn == "openal") driverType = ISoundDriver::DriverOpenAl;
 	else if (dn == "xaudio2") driverType = ISoundDriver::DriverXAudio2;
-	else 
+	else
 	{
 		driverType = ISoundDriver::DriverAuto;
 		nlwarning("AM: driverName value '%s' ('%s') is invalid.", driverName.c_str(), dn.c_str());
@@ -383,7 +383,6 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 		delete _SoundDriver; _SoundDriver = NULL;
 		throw;
 	}
-
 }
 
 /// Get the available devices on the loaded driver.
@@ -422,7 +421,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	try
 	{
 		_profile(( "AM: DRIVER: %s", _SoundDriver->getDllName().c_str() ));
-		
+
 		// the options to init the driver
 		sint driverOptions = ISoundDriver::OptionHasBufferStreaming;
 		if (_UseEax) driverOptions |= ISoundDriver::OptionEnvironmentEffects;
@@ -430,10 +429,10 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		if (forceSoftware) driverOptions |= ISoundDriver::OptionSoftwareBuffer;
 		if (manualRolloff) driverOptions |= ISoundDriver::OptionManualRolloff;
 		if (_AutoLoadSample) driverOptions |= ISoundDriver::OptionLocalBufferCopy;
-		
+
 		// init the driver with selected device and needed options
 		_SoundDriver->initDevice(deviceName, (ISoundDriver::TSoundOptions)driverOptions);
-		
+
 		// verify the options, OptionHasBufferStreaming not checked
 		if (_UseEax && !_SoundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
 		{
@@ -474,7 +473,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	}
 
 	uint i;
-		
+
 	// Init registrable classes
 	static bool initialized = false;
 	if (!initialized)
@@ -556,19 +555,15 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		buildSampleBankList();
 	}
 	
-
 	// Init music channels
 	for (i = 0; i < _NbMusicChannelFaders; ++i)
 		_MusicChannelFaders[i].init(_SoundDriver);
 
-
 	// Create the background sound manager.
 	_BackgroundSoundManager = new CBackgroundSoundManager();
 
-
 	// Create the background music manager
 	_BackgroundMusicManager = new CMusicSoundManager();
-
 
 	// Load the sound bank
 	CSoundBank *soundBank = new CSoundBank();
@@ -598,7 +593,6 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			form = formLoader->loadForm(mixerConfigFile.c_str());
 
 			NLGEORGES::UFormElm &root = form->getRootNode();
-
 
 			// read track reserve
 			uint32 highestRes, highRes, midRes, lowRes;
@@ -694,7 +688,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 /// Build a sample bank from a directory containing .wav files, and return the path to the written file.
 std::string UAudioMixer::buildSampleBank(const std::string &wavDir, const std::string &bankDir, const std::string &bankName)
-{	
+{
 	vector<string> sampleList;
 	CPath::getPathContent(wavDir, false, false, true, sampleList);
 	// remove any non wav file
@@ -707,7 +701,7 @@ std::string UAudioMixer::buildSampleBank(const std::string &wavDir, const std::s
 		}
 	}
 	sort(sampleList.begin(), sampleList.end());
-	
+
 	return buildSampleBank(sampleList, bankDir, bankName);
 }
 
@@ -723,46 +717,46 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 	for (uint j = 0; j < sampleList.size(); ++j)
 	{
 		nldebug("  Adding sample [%s] into bank", CFile::getFilename(sampleList[j]).c_str());
-		
+
 		CIFile sample(sampleList[j]);
 		uint size = sample.getFileSize();
 		std::vector<uint8> buffer;
 		buffer.resize(size);
 		sample.serialBuffer(&buffer[0], sample.getFileSize());
-		
+
 		std::vector<uint8> result;
 		IBuffer::TBufferFormat bufferFormat;
 		uint8 channels;
 		uint8 bitsPerSample;
 		uint32 frequency;
-		
+
 		if (!IBuffer::readWav(&buffer[0], size, result, bufferFormat, channels, bitsPerSample, frequency))
 		{
 			nlwarning("    IBuffer::readWav returned false");
 			continue;
 		}
-		
+
 		vector<sint16> mono16Data;
 		if (!IBuffer::convertToMono16PCM(&result[0], (uint)result.size(), mono16Data, bufferFormat, channels, bitsPerSample))
 		{
 			nlwarning("    IBuffer::convertToMono16PCM returned false");
 			continue;
 		}
-		
+
 		vector<uint8> adpcmData;
 		if (!IBuffer::convertMono16PCMToMonoADPCM(&mono16Data[0], (uint)mono16Data.size(), adpcmData))
 		{
 			nlwarning("    IBuffer::convertMono16PCMToMonoADPCM returned false");
 			continue;
 		}
-		
+
 		// Sample number MUST be even
 		nlassert(mono16Data.size() == (mono16Data.size() & 0xfffffffe));
 		nlassert(adpcmData.size() == mono16Data.size() / 2);
-		
+
 		adpcmBuffers[j].swap(adpcmData);
 		mono16Buffers[j].swap(mono16Data);
-		
+
 		hdr.addSample(CFile::getFilename(sampleList[j]), frequency, (uint32)mono16Data.size(), (uint32)mono16Buffers[j].size() * 2, (uint32)adpcmBuffers[j].size());
 	}
 
@@ -1340,7 +1334,7 @@ void				CAudioMixerUser::reloadSampleBanks(bool async)
 //	{
 //		CTrack *free_track = _FreeTracks.back();
 //		_FreeTracks.pop_back();
-//		nlassert(!free_track->getLogicalSource());		
+//		nlassert(!free_track->getLogicalSource());
 //		++_ReserveUsage[HighestPri];
 //		if (_UseEax) free_track->getPhysicalSource()->setEffect(NULL); // no reverb!
 //		return free_track;
@@ -1396,7 +1390,7 @@ CTrack *CAudioMixerUser::getFreeTrack(CSourceCommon *source)
 	{
 		float srcMinDist = source->getSound()->getMinDistance();
 		float srcMaxDist = source->getSound()->getMaxDistance();
-		
+
 		float d1, d2, t1, t2;
 		d1 = source->getSourceRelativeMode() ? source->getPos().norm() : (source->getPos() - _ListenPosition).norm();
 		t1 = max(0.0f, 1.0f - ((d1 - srcMinDist) / (srcMaxDist - srcMinDist)));
@@ -1408,10 +1402,10 @@ CTrack *CAudioMixerUser::getFreeTrack(CSourceCommon *source)
 			{
 				float src2MinDist = src2->getSound()->getMinDistance();
 				float src2MaxDist = src2->getSound()->getMaxDistance();
-				
+
 				d2 = src2->getSourceRelativeMode() ? src2->getPos().norm() : (src2->getPos() - _ListenPosition).norm();
 				t2 = max(0.0f, 1.0f - ((d2 - src2MinDist) / (src2MaxDist - src2MinDist)));
-				
+
 				const float tfactor = 1.3f;
 				if (t1 > t2 * tfactor)
 //				if (d1 < d2)
@@ -1485,8 +1479,8 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 				if (virtualPos)
 					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0, 
-						source->getSourceRelativeMode() 
+					pos.push_back(make_pair(source->getTrack() == 0,
+						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
 
@@ -1509,8 +1503,8 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 				if (virtualPos)
 					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0, 
-						source->getSourceRelativeMode() 
+					pos.push_back(make_pair(source->getTrack() == 0,
+						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
 				
@@ -1904,7 +1898,7 @@ retrySound:
 	}
 
 	switch (id->getSoundType())
-	{ 
+	{
 	case CSound::SOUND_SIMPLE:
 		{
 			CSimpleSound *simpleSound = static_cast<CSimpleSound *>(id);
@@ -2473,11 +2467,11 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 	uint max_track_old = maxTrack;
 	maxTrack = min(maxTrack, _SoundDriver->countMaxSources());
 	if (maxTrack != max_track_old) nlwarning("AM: MaxTrack limited from %u to %u", (uint32)max_track_old, (uint32)maxTrack);
-	
+
 	// if same, no op
 	if (maxTrack == _Tracks.size())
 		return;
-	
+
 	uint prev_track_nb = (uint)_Tracks.size();
 	// **** if try to add new tracks, easy
 	if (maxTrack > prev_track_nb)
@@ -2709,11 +2703,11 @@ void CAudioMixerUser::getMusicExtensions(std::vector<std::string> &extensions)
 /// Add a reverb environment
 void CAudioMixerUser::addEnvironment(const std::string &environmentName, const IReverbEffect::CEnvironment &environment)
 {
-	if (_ReverbEffect) 
+	if (_ReverbEffect)
 	{
 		TStringId environment_name = CStringMapper::map(environmentName);
 
-		if (_Environments.find(environment_name) != _Environments.end()) 
+		if (_Environments.find(environment_name) != _Environments.end())
 			nlwarning("Reverb environment %s already exists, replacing with new one", CStringMapper::unmap(environment_name).c_str());
 
 		_Environments[environment_name] = environment;
@@ -2723,7 +2717,7 @@ void CAudioMixerUser::addEnvironment(const std::string &environmentName, const I
 /// Set the current reverb environment
 void CAudioMixerUser::setEnvironment(NLMISC::TStringId environmentName, float roomSize)
 {
-	if (_ReverbEffect) 
+	if (_ReverbEffect)
 	{
 		_ReverbEffect->setEnvironment(getEnvironment(environmentName), roomSize);
 	}

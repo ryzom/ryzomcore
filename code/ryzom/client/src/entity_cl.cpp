@@ -3500,6 +3500,7 @@ void CEntityCL::setStateFx(const std::string &fxName)
 		}
 
 		NL3D::UInstance instance = Scene->createInstance(fxName);
+
 		if (!instance.empty())
 		{
 			_StateFX.cast (instance);
