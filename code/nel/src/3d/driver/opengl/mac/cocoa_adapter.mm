@@ -34,10 +34,70 @@
 
 namespace NL3D { namespace MAC {
 
-static NSApplication*     g_app            = nil;
 static NSAutoreleasePool* g_pool           = nil;
+/*
+	TODO move to event emitter class
+*/
 static bool               g_emulateRawMode = false;
 static int                g_bufferSize[2]  = { 0, 0 };
+
+static void setupApplicationMenu()
+{
+	NSMenu*     menu;
+	NSMenuItem* menuItem;
+	NSString*   title;
+	NSString*   appName;
+
+	// get the applications name from it's process info
+	appName = [[NSProcessInfo processInfo] processName];
+
+	// create an empty menu object
+	menu    = [[NSMenu alloc] initWithTitle:@""];
+
+	// add the about menu item
+	title = [@"About " stringByAppendingString:appName];
+	[menu addItemWithTitle:title 
+		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
+
+	// separator
+	[menu addItem:[NSMenuItem separatorItem]];
+
+	// add the hide application menu item
+	title = [@"Hide " stringByAppendingString:appName];
+	[menu addItemWithTitle:title 
+		action:@selector(hide:) keyEquivalent:@"h"];
+
+	// add the hide others menu item
+	menuItem = [menu addItemWithTitle:@"Hide Others" 
+		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+
+	// add the show all menu item
+	[menu addItemWithTitle:@"Show All" 
+		action:@selector(unhideAllApplications:) keyEquivalent:@""];
+
+	// separator
+	[menu addItem:[NSMenuItem separatorItem]];
+
+	/*
+		TODO on quit send EventDestroyWindowId
+	*/
+	// add the quit menu item
+	title = [@"Quit " stringByAppendingString:appName];
+	[menu addItemWithTitle:title 
+		action:@selector(terminate:) keyEquivalent:@"q"];
+
+	// create an empty menu item and put the new menu into it as a subitem
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"" 
+		action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:menu];
+
+	// create a menu for the application
+	[NSApp setMainMenu:[[NSMenu alloc] initWithTitle:@""]];
+
+	// attach the new menu to the applications menu
+	[[NSApp mainMenu] addItem:menuItem];
+}
 
 void ctor()
 {
@@ -45,16 +105,19 @@ void ctor()
 	g_pool = [[NSAutoreleasePool alloc] init];
 
 	// init the application object
-	g_app	 = [NSApplication sharedApplication];
+	[NSApplication sharedApplication];
+	
+	// create the menu in the top screen bar
+	setupApplicationMenu();
 
 	// tell the application that we are running now
-	[g_app finishLaunching];
+	[NSApp finishLaunching];
 }
 
 void dtor()
 {
 	// shut down the application
-	[g_app terminate:nil];
+	[NSApp terminate:nil];
 
 	// release the pool
 	[g_pool release];
@@ -106,7 +169,10 @@ bool destroyWindow(nlWindow wnd)
 	NSWindow*        window = (NSWindow*)wnd;
 	NSOpenGLView*    view   = [window contentView];
 
+	// release the view we alloced
 	[view release];
+
+	// release the window we alloced
 	[window release];
 
 	return true;
@@ -117,10 +183,6 @@ nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeabl
 	/*
 		TODO use show
 			call showWindow()
-	*/
-
-	/*
-		TODO add menu, on quit send EventDestroyWindowId
 	*/
 
 	NSWindow* window = (NSWindow*)wnd;
@@ -405,10 +467,12 @@ bool activate(nlWindow wnd)
 void swapBuffers(nlWindow wnd)
 {
 	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLContext* ctx    = [[window contentView] openGLContext];
+	NSOpenGLView*    view   = [window contentView];
+	NSOpenGLContext* ctx    = [view openGLContext];
 	
 	// make cocoa draw buffer contents to the view
 	[ctx flushBuffer];
+	[view display];
 }
 
 void setCapture(bool capture)
@@ -686,7 +750,7 @@ void submitEvents(NLMISC::CEventServer& server,
 	while(true)
 	{
 		// get the next event to handle
-		NSEvent* event = [g_app nextEventMatchingMask:NSAnyEventMask
+		NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask
 			untilDate:nil /*[NSDate distantFuture]*/
 			inMode:NSDefaultRunLoopMode dequeue:YES];
 
@@ -705,8 +769,8 @@ void submitEvents(NLMISC::CEventServer& server,
 		if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
 				event.type != NSKeyDown && event.type != NSKeyUp)
 		{
-			[g_app sendEvent:event];
-			[g_app updateWindows];
+			[NSApp sendEvent:event];
+			[NSApp updateWindows];
 			continue;
 		}
 
@@ -880,8 +944,8 @@ void submitEvents(NLMISC::CEventServer& server,
 		}
 		}
 
-		[g_app sendEvent:event];
-		[g_app updateWindows];
+		[NSApp sendEvent:event];
+		[NSApp updateWindows];
 	}
 }
 
