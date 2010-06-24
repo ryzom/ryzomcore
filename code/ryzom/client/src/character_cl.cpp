@@ -7197,7 +7197,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			AnimMatrixRot.identity();
 			AnimMatrixRot.setRot(currentAnimRot);
 
-			// Rotation 180° Matrix
+			// Rotation 180 degrees Matrix
 			CMatrix rot180;
 			rot180.identity();
 			if(parent == 0)
@@ -7273,7 +7273,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 		{
 			H_AUTO ( RZ_Client_Entity_CL_Update_Display_Unknown_Anim )
 
-			// Rotation 90° Matrix
+			// Rotation 90 degrees Matrix
 			CMatrix rot90;
 			rot90.identity();
 			if(parent == 0)

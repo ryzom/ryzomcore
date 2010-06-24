@@ -76,7 +76,7 @@ class CDisplayerVisualEntity;
   *
   * No tool is displayed as "highlighted"
   *
-  * 1°) Mouse in 3D view
+  * 1) Mouse in 3D view
   * --------------------
   *         The mouse cursor has a little star to indicate "creation mode".
   *         If creation is not possible at the mouse position, then there's is a little 'stop' icon shown
@@ -89,7 +89,7 @@ class CDisplayerVisualEntity;
   *
   *         NB : we don't do creation on LDOWN or RUP in order to allow camera manipulation
   *
-  *     2°) Mouse over UI
+  *     2) Mouse over UI
   *     -----------------
   *         The mouse cursor still has a little star to indicate "creation mode".
   *         Ideally on some actions, the creation is canceled, and the default tool is backuped;
@@ -120,7 +120,7 @@ class CDisplayerVisualEntity;
   * - Rotate
   * ...
   *
-  *     1°) Mouse in 3D view
+  *     1) Mouse in 3D view
   *         --------------------
   *         a ) Mouse over empty space in scene
   *         -----------------------------------
@@ -168,7 +168,7 @@ class CDisplayerVisualEntity;
   *          This would requires using something like the middle button or some shift / control combination
   *          to avoid conflict with the previous events ...
   *
-  *     2°) Mouse over UI
+  *     2) Mouse over UI
   *     -----------------
   *         The mouse is dipslayed as usual
   *         Events are taken in account by the UI, not by the tool

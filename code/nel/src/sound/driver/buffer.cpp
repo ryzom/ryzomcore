@@ -223,12 +223,12 @@ void IBuffer::encodeADPCM(const sint16 *indata, uint8 *outdata, uint nbSample, T
 		/* Step 4 - Clamp previous value to 16 bits */
 		if ( valpred > 32767 )
 		{
-			printf("over+ %d\n",valpred);
+			nlwarning("over+ %d",valpred);
 			valpred = 32767;
 		}
 		else if ( valpred < -32768 )
 		{
-			printf("over- %d\n",valpred);
+			nlwarning("over- %d",valpred);
 			valpred = -32768;
 		}
 

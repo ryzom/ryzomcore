@@ -202,7 +202,7 @@ public:
 
 
 	/*
-	 * drawBitmap : draw a bitmap roted by 90° in CW 'rot times'
+	 * drawBitmap : draw a bitmap roted by 90 degrees in CW 'rot times'
 	 *				flipv is a boolean that indicates if there is a vertical flip
 	 *				this is a 1:1 ratio so if texture is x long there are x pixels on screen
 	 */

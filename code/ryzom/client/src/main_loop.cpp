@@ -3978,11 +3978,11 @@ void updateClouds()
 		if (InitCloudScape)
 		{
 			InitCloudScape = false;
-			// 1 ° ) set current state
+			// 1 ) set current state
 			CCloudState cs;
 			WeatherManager.computeCloudState(RT.getRyzomDay(), DayNightCycleHour, wc, cs);
 			updateCloudScape(cs, wc, WeatherManager.getCurrWeatherState().WindIntensity, LightCycleManager.getLightLevel(), 0.f, true);
-			// 2 ° )set next state
+			// 2 )set next state
 			// compute date of next update
 			const CLightCycleDesc &lcd = LightCycleManager.getLightDesc();
 			float updateDelay = 0.f;
@@ -4404,7 +4404,7 @@ NLMISC_DYNVARIABLE(float, FPS, "The second smoothed frame rate per second")
 	if (get) *pointer = 1.0f/smoothFPS.getSmoothValue ();
 }
 
-// show hide all the debuginf of ui
+// show hide all the debuging of ui
 NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", "debugUI 1 or 0")
 {
 	if (args.size() > 1) return false;
@@ -4428,28 +4428,28 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 }
 
 
-// show hide the debuginf of ui
+// show hide the debuging of ui
 NLMISC_COMMAND(debugUIView, "Debug the ui : show/hide quads of bboxs and hotspots for views", "")
 {
 	DebugUIView = !DebugUIView;
 	return true;
 }
 
-// show hide the debuginf of ui
+// show hide the debuging of ui
 NLMISC_COMMAND(debugUICtrl, "Debug the ui : show/hide quads of bboxs and hotspots for ctrl", "")
 {
 	DebugUICtrl = !DebugUICtrl;
 	return true;
 }
 
-// show hide the debuginf of ui
+// show hide the debuging of ui
 NLMISC_COMMAND(debugUIGroup, "Debug the ui : show/hide quads of bboxs and hotspots for group", "")
 {
 	DebugUIGroup = !DebugUIGroup;
 	return true;
 }
 
-// show hide the debuginf of cells
+// show hide the debuging of cells
 NLMISC_COMMAND(debugUICell, "Debug the ui : show/hide quads of bboxs for cells", "")
 {
 	DebugUICell = !DebugUICell;
