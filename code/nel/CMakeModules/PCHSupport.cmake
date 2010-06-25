@@ -45,9 +45,9 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 
   IF(CMAKE_COMPILER_IS_GNUCXX)
 	GET_TARGET_PROPERTY(_targetType ${_PCH_current_target} TYPE)
-	IF(${_targetType} STREQUAL SHARED_LIBRARY)
+	IF(${_targetType} STREQUAL SHARED_LIBRARY AND NOT WIN32)
 	  LIST(APPEND ${_out_compile_flags} "${${_out_compile_flags}} -fPIC")
-	ENDIF(${_targetType} STREQUAL SHARED_LIBRARY)
+	ENDIF(${_targetType} STREQUAL SHARED_LIBRARY AND NOT WIN32)
 
   ELSE(CMAKE_COMPILER_IS_GNUCXX)
 	## TODO ... ? or does it work out of the box
@@ -59,8 +59,10 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
   ENDFOREACH(item)
 
   GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-  #MESSAGE("_directory_flags ${_directory_flags}" )
+  GET_DIRECTORY_PROPERTY(_global_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+  #MESSAGE("_directory_flags ${_directory_flags} ${_global_definitions}" )
   LIST(APPEND ${_out_compile_flags} ${_directory_flags})
+  LIST(APPEND ${_out_compile_flags} ${_global_definitions})
   LIST(APPEND ${_out_compile_flags} ${CMAKE_CXX_FLAGS} )
 
   SEPARATE_ARGUMENTS(${_out_compile_flags})
@@ -202,7 +204,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
    _PCH_WRITE_PCHDEP_CXX(${_targetName} ${_input} _pch_dephelp_cxx)
 
   IF(${_targetType} STREQUAL SHARED_LIBRARY)
-	ADD_LIBRARY(${_targetName}_pch_dephelp SHARED ${_pch_dephelp_cxx} )
+	ADD_LIBRARY(${_targetName}_pch_dephelp STATIC ${_pch_dephelp_cxx} )
   ELSE(${_targetType} STREQUAL SHARED_LIBRARY)
 	ADD_LIBRARY(${_targetName}_pch_dephelp STATIC ${_pch_dephelp_cxx})
   ENDIF(${_targetType} STREQUAL SHARED_LIBRARY)
