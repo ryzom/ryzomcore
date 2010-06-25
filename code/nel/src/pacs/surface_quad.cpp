@@ -15,12 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpacs.h"
-
-#include "nel/misc/file.h"
-
 #include "surface_quad.h"
 
-#include <vector>
+#include "nel/misc/file.h"
 
 using namespace NLMISC;
 using namespace std;

@@ -18,7 +18,6 @@
 
 #include "nel/3d/deform_2d.h"
 
-#include <vector>
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/3d/heat_haze.h"

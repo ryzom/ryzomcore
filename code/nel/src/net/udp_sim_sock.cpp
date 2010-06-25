@@ -16,8 +16,6 @@
 
 #include "stdnet.h"
 
-#include <queue>
-
 #include "nel/misc/config_file.h"
 
 #include "nel/net/udp_sock.h"

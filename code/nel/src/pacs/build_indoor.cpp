@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <map>
-#include <vector>
-
 #include "stdpacs.h"
+#include "build_indoor.h"
 
 #include "collision_mesh_build.h"
 #include "local_retriever.h"
 #include "exterior_mesh.h"
-
-#include "build_indoor.h"
 
 using namespace std;
 using namespace NLMISC;

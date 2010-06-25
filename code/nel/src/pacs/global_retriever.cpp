@@ -16,21 +16,17 @@
 
 #include "stdpacs.h"
 
-#include "nel/misc/path.h"
-#include "nel/misc/line.h"
-#include "nel/misc/async_file_manager.h"
-#include "nel/misc/common.h"
-#include "nel/misc/variable.h"
-
-#include "nel/misc/hierarchical_timer.h"
-
 #include "global_retriever.h"
 #include "retriever_bank.h"
 
-#include <set>
-
-
+#include "nel/misc/async_file_manager.h"
+#include "nel/misc/common.h"
+#include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/line.h"
+#include "nel/misc/path.h"
 #include "nel/misc/time_nl.h"
+#include "nel/misc/variable.h"
+
 NLMISC::TTicks			AStarTicks;
 NLMISC::TTicks			PathTicks;
 NLMISC::TTicks			ChainTicks;

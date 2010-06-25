@@ -18,7 +18,6 @@
 
 #include "nel/3d/point_light_named_array.h"
 #include "nel/3d/scene.h"
-#include <algorithm>
 
 
 using namespace std;

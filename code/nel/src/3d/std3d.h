@@ -30,6 +30,8 @@
 #include <utility>
 #include <algorithm>
 #include <exception>
+#include <memory>
+#include <functional>
 
 #include "nel/misc/rgba.h"
 #include "nel/misc/debug.h"

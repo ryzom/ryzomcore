@@ -21,13 +21,6 @@
 
 #include "stdnet.h"
 
-#include <ctime>
-
-#ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#   include <windows.h>
-#endif
-
 #include "nel/net/service.h"
 #include "nel/net/admin.h"
 #include "nel/net/varpath.h"

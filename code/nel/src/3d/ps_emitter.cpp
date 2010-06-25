@@ -16,7 +16,6 @@
 
 #include "std3d.h"
 
-#include <cstdlib>
 #include "nel/3d/ps_emitter.h"
 #include "nel/3d/material.h"
 #include "nel/misc/line.h"

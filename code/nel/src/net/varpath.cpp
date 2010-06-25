@@ -18,13 +18,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#include <cstdio>
-#include <cctype>
-#include <cmath>
-
-#include <vector>
-#include <map>
-
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"
 #include "nel/misc/displayer.h"

@@ -6,8 +6,6 @@
 
 #include "stdnet.h"
 
-#include <string>
-
 #include "nel/misc/common.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/command.h"

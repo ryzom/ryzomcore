@@ -32,10 +32,6 @@
 #	include <unistd.h>
 #endif
 
-#include <cstdlib>
-#include <csignal>
-#include <ctime>
-
 #include "nel/misc/config_file.h"
 #include "nel/misc/displayer.h"
 #include "nel/misc/mutex.h"

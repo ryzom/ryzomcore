@@ -20,7 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/transform.h"
 #include "nel/misc/common.h"
-#include <algorithm>
 
 using namespace NLMISC;
 using namespace std;

@@ -17,6 +17,7 @@
 #include <exception>
 #include <utility>
 #include <deque>
+#include <memory>
 
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"

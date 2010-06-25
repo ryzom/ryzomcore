@@ -18,9 +18,9 @@
 #include "sound_driver_al.h"
 #include "buffer_al.h"
 #include "listener_al.h"
-#include "effect_al.h"
 #include "source_al.h"
 #include "ext_al.h"
+#include "effect_al.h"
 
 using namespace std;
 using namespace NLMISC;

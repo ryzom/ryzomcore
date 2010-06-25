@@ -25,7 +25,6 @@
 #include "nel/misc/algo.h"
 
 
-#include <memory>
 
 using namespace std;
 using namespace NLMISC;

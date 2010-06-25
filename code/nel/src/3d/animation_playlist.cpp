@@ -19,7 +19,6 @@
 #include "nel/3d/animation_playlist.h"
 #include "nel/misc/common.h"
 #include "nel/misc/stream.h"
-#include <cmath>
 
 using namespace NLMISC;
 

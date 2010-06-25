@@ -23,8 +23,6 @@
 #include "nel/misc/hierarchical_timer.h"
 
 #include "nel/misc/i_xml.h"
-#include <cmath>
-#include <cfloat>
 
 using namespace NLMISC;
 

@@ -32,9 +32,6 @@
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
 
-#include <memory>
-#include <functional>
-
 
 
 
