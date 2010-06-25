@@ -17,6 +17,7 @@
 #include "stdopenal.h"
 #include "effect_al.h"
 #include "sound_driver_al.h"
+#include "ext_al.h"
 
 using namespace std;
 // using namespace NLMISC;

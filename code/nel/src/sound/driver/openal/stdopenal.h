@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -43,19 +43,17 @@
 #	include <AL/alc.h>
 #endif
 
-#include <nel/misc/common.h>
-#include <nel/misc/debug.h>
-#include <nel/misc/vector.h>
-#include <nel/misc/singleton.h>
-#include <nel/misc/fast_mem.h>
-#include <nel/misc/path.h>
-#include <nel/misc/dynloadlib.h>
-#include <nel/sound/driver/sound_driver.h>
-#include <nel/sound/driver/buffer.h>
-#include <nel/sound/driver/source.h>
-#include <nel/sound/driver/listener.h>
-#include <nel/sound/driver/effect.h>
-
-#include "ext_al.h"
+#include "nel/misc/common.h"
+#include "nel/misc/debug.h"
+#include "nel/misc/vector.h"
+#include "nel/misc/singleton.h"
+#include "nel/misc/fast_mem.h"
+#include "nel/misc/path.h"
+#include "nel/misc/dynloadlib.h"
+#include "nel/sound/driver/sound_driver.h"
+#include "nel/sound/driver/buffer.h"
+#include "nel/sound/driver/source.h"
+#include "nel/sound/driver/listener.h"
+#include "nel/sound/driver/effect.h"
 
 /* end of file */
