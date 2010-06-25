@@ -710,7 +710,6 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 									tc.OcclusionLFFactor = css.OcclusionLFFactor;
 									tc.OcclusionRoomRatio = css.OcclusionRoomRatio;
 									tc.Obstruction = css.Obstruction;
-
 									tc.Direction1 = d1;
 									tc.Direction2 = d2;
 									tc.NbPortal = travContext.NbPortal+1;
