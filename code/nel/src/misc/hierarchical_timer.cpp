@@ -26,8 +26,6 @@
 #include "nel/misc/time_nl.h"
 #endif
 
-#include <map>
-
 namespace NLMISC
 {
 

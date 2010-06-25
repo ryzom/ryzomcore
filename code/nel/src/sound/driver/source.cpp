@@ -17,8 +17,6 @@
 #include "nel/sound/driver/source.h"
 #include "nel/misc/common.h"
 
-#include <limits>
-
 using namespace NLMISC;
 
 namespace NLSOUND

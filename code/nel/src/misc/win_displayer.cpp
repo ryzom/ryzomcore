@@ -18,13 +18,6 @@
 
 #ifdef NL_OS_WINDOWS
 
-#include <iostream>
-#include <fstream>
-//#include <sstream>
-#include <iomanip>
-#include <csignal>
-#include <cstring>
-
 #define NOMINMAX
 #include <windows.h>
 #include <windowsx.h>

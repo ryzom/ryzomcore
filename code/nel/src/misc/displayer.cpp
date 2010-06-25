@@ -26,15 +26,6 @@
 #	include <cerrno>
 #endif // NL_OS_WINDOWS
 
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-
-#include <iostream>
-#include <fstream>
-//#include <sstream>
-#include <iomanip>
-
 #include "nel/misc/path.h"
 #include "nel/misc/mutex.h"
 #include "nel/misc/report.h"

@@ -16,8 +16,6 @@
 
 #include "stdsound.h"
 
-#include <iomanip>
-
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/big_file.h"

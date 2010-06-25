@@ -17,12 +17,7 @@
 #include "stdmisc.h"
 #include "nel/misc/cpu_time_stat.h"
 
-#include <nel/misc/common.h>
-
-#include <string>
-#include <vector>
-
-#include <cstdio>
+#include "nel/misc/common.h"
 
 #ifdef NL_OS_UNIX
 #include <unistd.h>

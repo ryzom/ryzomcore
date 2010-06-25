@@ -19,13 +19,7 @@
 #include "nel/sound/background_sound.h"
 #include "nel/sound/audio_mixer_user.h"
 #include "nel/misc/path.h"
-#include <numeric>
-/*#include "simple_sound.h"
-#include "sound_bank.h"
-#include "sample_bank.h"
-#include "driver/sound_driver.h"
-#include "driver/buffer.h"
-*/
+
 using namespace std;
 using namespace NLMISC;
 

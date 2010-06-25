@@ -18,9 +18,6 @@
 #include "stdmisc.h"
 #include "di_game_device.h"
 #include "nel/misc/game_device_events.h"
-#include <cstddef>
-#include <memory>
-#include <algorithm>
 
 #ifdef NL_OS_WINDOWS
 

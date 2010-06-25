@@ -19,8 +19,6 @@
 //
 #include "stdmisc.h"
 
-#include <string>
-
 #include "nel/misc/types_nl.h"
 #include "nel/misc/sstring.h"
 

@@ -16,8 +16,6 @@
 
 #include "stdmisc.h"
 
-#include <memory>
-#include <algorithm>
 #include "nel/misc/bitmap.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/file.h"

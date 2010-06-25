@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "nel/sound/driver/buffer.h"
-#include <nel/misc/fast_mem.h>
-#include <nel/misc/stream.h>
+#include "nel/misc/fast_mem.h"
+#include "nel/misc/stream.h"
 
 namespace NLSOUND {
 	

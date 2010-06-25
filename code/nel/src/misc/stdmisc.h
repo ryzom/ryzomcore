@@ -16,19 +16,30 @@
 
 #include "nel/misc/types_nl.h"
 
-#include <map>
-#include <set>
-#include <list>
-#include <cmath>
-#include <deque>
-#include <cstdio>
-#include <string>
-#include <vector>
-#include <cstdlib>
-#include <utility>
 #include <algorithm>
+#include <cmath>
+#include <csignal>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <deque>
 #include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
 #include <memory>
+#include <numeric>
+#include <set>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"

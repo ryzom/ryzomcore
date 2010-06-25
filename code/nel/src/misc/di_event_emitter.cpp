@@ -24,9 +24,7 @@
 #include "di_mouse_device.h"
 #include "di_keyboard_device.h"
 #include "di_game_device.h"
-//
-#include <memory>
-#include <algorithm>
+
 
 #ifdef NL_OS_WINDOWS
 

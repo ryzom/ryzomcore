@@ -20,12 +20,6 @@
 
 #include "stdmisc.h"
 
-#include <cstdio>
-#include <cstring>
-#include <string>
-#include <map>
-#include <vector>
-
 #include "nel/misc/sha1.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"

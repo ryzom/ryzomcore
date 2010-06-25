@@ -16,8 +16,6 @@
 
 #include "stdmisc.h"
 
-#include <map>
-
 #include "nel/misc/string_mapper.h"
 
 using namespace std;

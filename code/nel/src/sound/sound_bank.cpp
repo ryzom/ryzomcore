@@ -32,8 +32,6 @@
 
 #include "nel/georges/load_form.h"
 
-#include <limits>
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLGEORGES;

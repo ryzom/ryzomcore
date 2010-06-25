@@ -17,16 +17,6 @@
 #include "stdsound.h"
 #include "nel/sound/stream_sound.h"
 
-// STL includes
-
-// NeL includes
-// #include <nel/misc/debug.h>
-
-// Project includes
-
-// using namespace std;
-// using namespace NLMISC;
-
 namespace NLSOUND {
 
 CStreamSound::CStreamSound()

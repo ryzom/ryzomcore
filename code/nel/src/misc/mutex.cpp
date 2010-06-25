@@ -23,10 +23,6 @@
 #include "nel/misc/mutex.h"
 #include "nel/misc/time_nl.h"
 
-#ifdef MUTEX_DEBUG
-#include <iostream>
-#endif
-
 using namespace std;
 
 #ifndef MUTEX_DEBUG

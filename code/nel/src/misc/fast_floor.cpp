@@ -17,7 +17,6 @@
 #include "stdmisc.h"
 
 #include "nel/misc/fast_floor.h"
-#include <cmath>
 
 namespace NLMISC {
 

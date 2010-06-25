@@ -20,9 +20,8 @@
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
-#include <nel/misc/path.h>
-#include <nel/misc/file.h>
+#include "nel/misc/path.h"
+#include "nel/misc/file.h"
 
 // Project includes
 #include "nel/sound/driver/sound_driver.h"

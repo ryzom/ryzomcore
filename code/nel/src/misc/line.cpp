@@ -17,7 +17,6 @@
 #include "stdmisc.h"
 
 #include "nel/misc/line.h"
-#include <limits>
 
 namespace NLMISC
 {

@@ -4,7 +4,6 @@
 #include "nel/misc/path.h"
 #include "nel/misc/common.h"
 #include "nel/sound/audio_mixer_user.h"
-#include <numeric>
 
 using namespace std;
 using namespace NLMISC;

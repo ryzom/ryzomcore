@@ -25,11 +25,6 @@
 #include "stdsound.h"
 #include "nel/sound/music_channel_fader.h"
 
-// STL includes
-
-// NeL includes
-// #include <nel/misc/debug.h>
-
 // Project includes
 #include "nel/sound/driver/sound_driver.h"
 #include "nel/sound/driver/music_channel.h"

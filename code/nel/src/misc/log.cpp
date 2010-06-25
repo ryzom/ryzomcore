@@ -24,9 +24,6 @@
 #	include <unistd.h>
 #endif
 
-#include <ctime>
-#include <cstdarg>
-
 #include "nel/misc/displayer.h"
 #include "nel/misc/log.h"
 #include "nel/misc/debug.h"

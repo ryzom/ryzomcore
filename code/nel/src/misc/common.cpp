@@ -23,9 +23,7 @@
 #	include <tchar.h>
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
-#	include <cstring>
 #	include <cerrno>
-#	include <csignal>
 #	include <pthread.h>
 #	include <sched.h>
 #endif

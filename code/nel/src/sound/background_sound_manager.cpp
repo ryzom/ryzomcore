@@ -33,9 +33,7 @@
 #include "nel/sound/background_sound_manager.h"
 #include "nel/sound/source_common.h"
 #include "nel/sound/clustered_sound.h"
-#include <algorithm>
 #include "nel/sound/background_source.h"
-#include <list>
 
 using namespace std;
 using namespace NLMISC;

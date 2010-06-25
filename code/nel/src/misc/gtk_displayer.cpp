@@ -31,11 +31,6 @@
 #pragma comment(lib, "gthread-1.3.lib")
 #endif
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <csignal>
-
 #include "nel/misc/path.h"
 #include "nel/misc/command.h"
 #include "nel/misc/thread.h"

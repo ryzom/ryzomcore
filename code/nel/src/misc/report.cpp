@@ -16,8 +16,6 @@
 
 #include "stdmisc.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include "nel/misc/common.h"
 #include "nel/misc/ucstring.h"
 

@@ -18,8 +18,6 @@
 
 #include "nel/misc/class_registry.h"
 
-#include <typeinfo>
-
 using namespace std;
 
 namespace NLMISC

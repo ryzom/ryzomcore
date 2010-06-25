@@ -23,12 +23,6 @@
 
 #ifdef NL_OS_WINDOWS
 
-#include <memory>
-#include <algorithm>
-
-
-
-
 namespace NLMISC
 {
 

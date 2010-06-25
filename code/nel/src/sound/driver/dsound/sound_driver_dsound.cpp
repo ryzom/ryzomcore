@@ -26,8 +26,6 @@
 
 #include "nel/sound/driver/sound_driver.h"
 
-#include <cmath>
-
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "sound_driver_dsound.h"

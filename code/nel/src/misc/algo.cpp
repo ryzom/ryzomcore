@@ -17,7 +17,6 @@
 #include "stdmisc.h"
 
 #include "nel/misc/algo.h"
-#include <string>
 
 
 using	namespace std;

@@ -18,14 +18,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#include <cstdio>
-
-#include <iostream>
-#include <fstream>
-//#include <sstream>
-#include <iomanip>
-#include <string>
-
 #include "nel/misc/mem_displayer.h"
 #include "nel/misc/path.h"
 #include "nel/misc/command.h"

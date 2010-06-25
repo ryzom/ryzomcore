@@ -17,12 +17,6 @@
 #include "stdsound.h"
 #include "nel/sound/stream_source.h"
 
-// STL includes
-
-// NeL includes
-// #include <nel/misc/debug.h>
-#include <nel/misc/vector.h>
-
 // Project includes
 #include "nel/sound/driver/buffer.h"
 #include "nel/sound/audio_mixer_user.h"

@@ -17,8 +17,6 @@
 
 #include "stdmisc.h"
 
-#include <fstream>
-
 #include "nel/misc/big_file.h"
 #include "nel/misc/path.h"
 #include "nel/misc/hierarchical_timer.h"
@@ -36,6 +34,7 @@
 #	include <fcntl.h>
 #	include <sys/types.h>
 #	include <sys/stat.h>
+#	include <shlobj.h>
 #else
 #   include <sys/types.h>
 #   include <sys/stat.h>

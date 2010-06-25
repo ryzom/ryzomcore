@@ -17,15 +17,7 @@
 #include <nel/misc/types_nl.h>
 #include "nel/sound/driver/music_channel.h"
 
-// STL includes
-
-// NeL includes
-// #include <nel/misc/debug.h>
-
-// Project includes
-
 using namespace std;
-// using namespace NLMISC;
 
 namespace NLSOUND {
 

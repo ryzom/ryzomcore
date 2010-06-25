@@ -20,10 +20,6 @@
 
 #include "stdmisc.h"
 
-#include <string>
-#include <vector>
-#include <map>
-
 #include "nel/misc/algo.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"

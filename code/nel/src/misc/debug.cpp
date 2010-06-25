@@ -45,8 +45,6 @@
 #	endif // NL_OS_WIN64
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
-#	include <cstdio>
-#	include <cstdlib>
 #	define IsDebuggerPresent() false
 #   ifndef NL_OS_MAC
 #	    include <execinfo.h>
@@ -54,9 +52,6 @@
 //#	include <malloc.h>
 #	include <errno.h>
 #endif
-
-#include <cstdarg>
-#include <iostream>
 
 using namespace std;
 

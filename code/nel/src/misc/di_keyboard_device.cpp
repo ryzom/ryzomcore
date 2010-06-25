@@ -22,7 +22,6 @@
 #ifdef NL_OS_WINDOWS
 
 #include "nel/misc/win_event_emitter.h"
-#include <memory>
 #include <dinput.h>
 #include <Winuser.h>
 

@@ -15,9 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
+#include "ext_al.h"
 #include "effect_al.h"
 #include "sound_driver_al.h"
-#include "ext_al.h"
 
 using namespace std;
 // using namespace NLMISC;

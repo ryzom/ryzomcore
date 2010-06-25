@@ -17,7 +17,6 @@
 #include "stdmisc.h"
 
 #include "nel/misc/stop_watch.h"
-#include <numeric>
 
 using namespace std;
 
