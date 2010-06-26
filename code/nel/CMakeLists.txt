@@ -2,7 +2,7 @@
 #
 # NeL
 #  Authors: Nevrax and the NeL Community
-#  Version: 0.6.1
+#  Version: 0.7.0
 #
 # Notes:
 #   * Changing install location: add -DCMAKE_INSTALL_PREFIX:PATH=/my/new/path
