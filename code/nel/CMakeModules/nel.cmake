@@ -47,6 +47,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
+  OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
 
   ###
   # Core libraries
