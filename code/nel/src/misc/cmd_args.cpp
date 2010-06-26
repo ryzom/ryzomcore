@@ -64,7 +64,7 @@ std::string CCmdArgs::getArg(char argName) const
 					begin++;
 
 				// End
-				uint size = _Args[i].size();
+				uint size = (uint)_Args[i].size();
 				if(size && _Args[i][size-1] == '"')
 					size--;
 				size = (uint)(std::max((int)0, (int)size-(int)begin));
