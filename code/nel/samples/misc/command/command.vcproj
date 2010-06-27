@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="command"
 	ProjectGUID="{27741BA9-01BA-4676-9E3C-73AFD78876C0}"
 	RootNamespace="command"

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="stream_ogg_vorbis"
 	ProjectGUID="{FBA76D80-E22A-4C76-9E52-FAF2894F6C4F}"
 	RootNamespace="stream_ogg_vorbis"

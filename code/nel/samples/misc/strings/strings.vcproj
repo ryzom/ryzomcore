@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="strings"
 	ProjectGUID="{EB51C9A6-97CC-4043-9F71-DF453240E3F2}"
 	RootNamespace="strings"

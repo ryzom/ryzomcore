@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="seven_zip"
 	ProjectGUID="{F74C0046-00DA-4A77-9B4D-D9FE5831E705}"
 	RootNamespace="seven_zip"
@@ -356,10 +356,6 @@
 		</File>
 		<File
 			RelativePath=".\7zItem.h"
-			>
-		</File>
-		<File
-			RelativePath=".\7zMain.cpp"
 			>
 		</File>
 		<File

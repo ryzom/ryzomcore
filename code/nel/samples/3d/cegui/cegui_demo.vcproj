@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="cegui_demo"
 	ProjectGUID="{F055BA8A-C3CF-4990-B3F8-39660350B9F6}"
 	RootNamespace="cegui_demo_nel"

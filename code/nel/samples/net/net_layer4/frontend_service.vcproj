@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="frontend_service"
 	ProjectGUID="{1904FD7D-8588-47B5-A798-8D0A257C2116}"
 	RootNamespace="frontend_service"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="shape_viewer"
 	ProjectGUID="{5792755F-5122-4145-B66A-FE04A650163C}"
 	RootNamespace="shape_viewer"

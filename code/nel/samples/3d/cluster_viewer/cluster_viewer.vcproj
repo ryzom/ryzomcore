@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="cluster_viewer"
 	ProjectGUID="{BA6F1342-3C0C-44D0-BE24-87839E33C383}"
 	RootNamespace="cluster_viewer"

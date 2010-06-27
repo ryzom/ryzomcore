@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="font"
 	ProjectGUID="{F672DDD3-B793-4864-80E2-B76FB34856C4}"
 	RootNamespace="main"

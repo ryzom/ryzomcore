@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="configfile"
 	ProjectGUID="{F15C4E9E-FEF4-4FFC-A8A7-DFA6E9CACB7B}"
 	RootNamespace="configfile"

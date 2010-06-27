@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="client"
 	ProjectGUID="{67A46334-4F1D-4B7B-AE79-F0903AA30EB7}"
 	RootNamespace="client"
