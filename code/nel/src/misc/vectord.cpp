@@ -16,7 +16,7 @@
 
 #include "stdmisc.h"
 
-#include	"../../include/nel/misc/vectord.h"
+#include	"nel/misc/vectord.h"
 
 
 namespace	NLMISC

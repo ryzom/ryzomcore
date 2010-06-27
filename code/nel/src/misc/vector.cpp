@@ -16,7 +16,7 @@
 
 #include "stdmisc.h"
 
-#include	"../../include/nel/misc/vector.h"
+#include	"nel/misc/vector.h"
 
 using namespace std;
 

@@ -951,7 +951,7 @@ std::string ShapesExporter::findSkeleton(const std::string &shape)
 		return skeleton;
 
 	// remove last part
-	size_t pos = baseFilename.rfind("_");
+	std::string::size_type pos = baseFilename.rfind("_");
 
 	if (pos != std::string::npos)
 	{

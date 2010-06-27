@@ -28,7 +28,7 @@
 #ifdef NL_GEN_DEBUG_MSG
 #define NL_CT_DEBUG nldebug
 #else
-#define NL_CT_DEBUG if(0)nldebug
+#define NL_CT_DEBUG while(0)nldebug
 #endif
 
 #if defined(NL_USE_THREAD_COTASK)

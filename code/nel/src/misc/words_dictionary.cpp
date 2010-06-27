@@ -205,16 +205,14 @@ void CWordsDictionary::lookup( const CSString& inputStr, CVectorSString& resultV
 	}
 
 	// Search
-	const vector<string> &vec = reinterpret_cast<const vector<string>&>(_Keys);
-//	for ( CVectorSString::const_iterator ivs=_Keys.begin(); ivs!=_Keys.end(); ++ivs )
-	for ( vector<string>::const_iterator ivs=vec.begin(); ivs!=vec.end(); ++ivs )
+	for ( CVectorSString::const_iterator ivs=_Keys.begin(); ivs!=_Keys.end(); ++ivs )
 	{
 		const CSString& key = *ivs;
 		string::size_type p;
 		if ( (p = key.findNS( searchStr.c_str() )) != string::npos )
 		{
 			if ( ((!findAtBeginning) || (p==0)) && ((!findAtEnd) || (p==key.size()-searchStr.size())) )
-				resultVec.push_back( makeResult( key, _Words[ivs-vec.begin()] ) );
+				resultVec.push_back( makeResult( key, _Words[ivs-_Keys.begin()] ) );
 		}
 	}
 	for ( CVectorSString::const_iterator ivs=_Words.begin(); ivs!=_Words.end(); ++ivs )
