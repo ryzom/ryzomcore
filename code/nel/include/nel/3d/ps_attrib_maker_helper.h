@@ -22,6 +22,8 @@
 #include "nel/misc/fast_floor.h" // inline assembly for fast float<->int conversions
 #include "nel/3d/ps_attrib_maker_iterators.h" // some iterators we use
 
+#include <memory>
+
 namespace NL3D
 {
 
