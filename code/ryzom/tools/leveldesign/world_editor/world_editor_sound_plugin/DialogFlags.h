@@ -83,7 +83,7 @@ protected:
 	//{{AFX_MSG(CDialogFlags)
 	afx_msg void OnButtonPlayStop();
 	afx_msg void OnCheckMoveEar();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
 	afx_msg void OnReload();

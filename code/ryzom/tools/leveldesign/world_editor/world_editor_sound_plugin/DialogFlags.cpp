@@ -208,7 +208,7 @@ void CDialogFlags::lostPositionControl()
 	CheckMoveEar.SetBitmap(EarBitmap);
 }
 
-void CDialogFlags::OnTimer(UINT nIDEvent) 
+void CDialogFlags::OnTimer(UINT_PTR nIDEvent) 
 {
 	CDialog::OnTimer(nIDEvent);
 

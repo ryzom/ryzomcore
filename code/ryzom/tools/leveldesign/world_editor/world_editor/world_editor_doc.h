@@ -76,8 +76,8 @@ public:
 	bool						operator== (const CDatabaseLocator &other) const;
 	bool						operator< (const CDatabaseLocator &other) const
 	{
-		const uint size = _LocateStack.size ();
-		const uint otherSize = other._LocateStack.size ();
+		const uint size = (uint)_LocateStack.size ();
+		const uint otherSize = (uint)other._LocateStack.size ();
 		const uint minSize = std::min (size, otherSize);
 		uint i;
 		for (i=0; i<minSize; i++)
