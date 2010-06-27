@@ -77,7 +77,7 @@ public:
 protected:
 
 	/// Make a result string
-	static CSString		makeResult( const CSString key, const CSString word );
+	static CSString		makeResult( const CSString &key, const CSString &word );
 
 private:
 

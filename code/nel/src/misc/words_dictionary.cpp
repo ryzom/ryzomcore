@@ -247,10 +247,9 @@ void CWordsDictionary::exactLookupByKey( const CSString& key, CVectorSString& re
 /*
  * Make a result string
  */
-inline CSString CWordsDictionary::makeResult( const CSString key, const CSString word )
+inline CSString CWordsDictionary::makeResult( const CSString &key, const CSString &word )
 {
-	CSString res = key + CSString(": ") + word;
-	return res;
+	return key + CSString(": ") + word;
 }
 
 
