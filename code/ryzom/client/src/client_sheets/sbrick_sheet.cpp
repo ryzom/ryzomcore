@@ -534,4 +534,3 @@ bool							CSBrickSheet::mustDisplayLevel() const
 				(BrickFamily>= BRICK_FAMILIES::BeginInterface && BrickFamily<= BRICK_FAMILIES::EndInterface && IndexInFamily!=63) ||
 				Level==0 );
 }
-

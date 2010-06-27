@@ -16,6 +16,8 @@
 
 
 #include "stdpch.h"
+#include "continent_manager_build.h"
+#include "sheet_manager.h"
 
 // Misc
 #include "nel/misc/types_nl.h"
@@ -25,8 +27,6 @@
 #include <map>
 #include <string>
 
-#include "continent_manager_build.h"
-#include "sheet_manager.h"
 // Ligo
 #include "nel/ligo/primitive_utils.h"
 
