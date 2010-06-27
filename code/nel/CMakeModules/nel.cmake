@@ -89,12 +89,6 @@ MACRO(NL_SETUP_BUILD)
   #-----------------------------------------------------------------------------
   # Setup the buildmode variables.
   #
-  # None                  = NL_RELEASE_DEBUG
-  # Debug                 = NL_DEBUG
-  # Release               = NL_RELEASE
-  # RelWithDebInfo        = NL_RELEASE_DEBUG
-  # MinSizeRel            = NL_RELEASE_DEBUG
-
   # None                  = NL_RELEASE
   # Debug                 = NL_DEBUG
   # Release               = NL_RELEASE, NL_NO_DEBUG
@@ -130,7 +124,7 @@ MACRO(NL_SETUP_BUILD)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -lrt")
     ENDIF(NOT APPLE)
     SET(NL_DEBUG_CFLAGS "-DNL_DEBUG -g")
-    SET(NL_RELEASE_CFLAGS "-DNL_RELEASE -O6")
+    SET(NL_RELEASE_CFLAGS "-DNL_RELEASE -O6 -g")
     SET(NL_RELEASEDEBUG_CFLAGS "-DNL_RELEASE_DEBUG -g -finline-functions -O3 ")
     SET(NL_NONE_CFLAGS "-DNL_RELEASE -g -finline-functions -O2 ")
     IF(WITH_COCOA)
