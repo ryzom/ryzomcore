@@ -23,6 +23,23 @@ FIND_PATH(FREETYPE_INCLUDE_DIRS
   PATH_SUFFIXES freetype freetype2
 )
 
+# ft2build.h does not reside in the freetype include dir
+FIND_PATH(FREETYPE_ADDITIONAL_INCLUDE_DIR
+  ft2build.h
+  PATHS
+  /usr/local/include
+  /usr/include
+  /sw/include
+  /opt/local/include
+  /opt/csw/include
+  /opt/include
+)
+
+# combine both include directories into one variable
+IF(FREETYPE_ADDITIONAL_INCLUDE_DIR)
+  SET(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS} ${FREETYPE_ADDITIONAL_INCLUDE_DIR})
+ENDIF(FREETYPE_ADDITIONAL_INCLUDE_DIR)
+
 FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS
