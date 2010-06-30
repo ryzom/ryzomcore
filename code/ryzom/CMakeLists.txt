@@ -1,6 +1,6 @@
 #-----------------------------------------------------------------------------
 #
-# Ryzom 
+# Ryzom
 #    Author: Spiderweb
 #
 # Notes:
@@ -56,7 +56,7 @@ IF(COMMAND cmake_policy)
   # have absolute paths (e.g. -lpthreads)
   cmake_policy(SET CMP0003 NEW)
 
-  # Works around warnings about escaped quotes in ADD_DEFINITIONS 
+  # Works around warnings about escaped quotes in ADD_DEFINITIONS
   # statements
   cmake_policy(SET CMP0005 OLD)
 ENDIF(COMMAND cmake_policy)
@@ -107,6 +107,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common/src )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common )
 
 NL_SETUP_BUILD_FLAGS()
+
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)

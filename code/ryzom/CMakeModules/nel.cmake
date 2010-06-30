@@ -33,6 +33,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
+  OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
 
   ###
   # Optional support
@@ -48,12 +49,6 @@ MACRO(NL_SETUP_BUILD)
   #-----------------------------------------------------------------------------
   # Setup the buildmode variables.
   #
-  # None                  = NL_RELEASE_DEBUG
-  # Debug                 = NL_DEBUG
-  # Release               = NL_RELEASE
-  # RelWithDebInfo        = NL_RELEASE_DEBUG
-  # MinSizeRel            = NL_RELEASE_DEBUG
-
   # None                  = NL_RELEASE
   # Debug                 = NL_DEBUG
   # Release               = NL_RELEASE, NL_NO_DEBUG
