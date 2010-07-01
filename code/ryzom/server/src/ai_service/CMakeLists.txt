@@ -10,10 +10,7 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_entity_id.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/gpms_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/gpms_interface.h
 			${CMAKE_CURRENT_SOURCE_DIR}/ios_interface.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_interface.h
-			${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ ai_profile_fauna.h
-			${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ profile.h
-			${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ stdpch.h)
+			${CMAKE_CURRENT_SOURCE_DIR}/ios_interface.h)
 
 ADD_EXECUTABLE(ai_service ${SRC})
 
