@@ -28,8 +28,6 @@
 #undef min
 #undef max
 
-#define USE_JPEG
-
 #include "nel/misc/system_info.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"

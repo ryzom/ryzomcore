@@ -16,11 +16,6 @@
 
 #include "std3d.h"
 
-// FIXME: shouldn't this be configured outside?
-#ifndef USE_JPEG
-#define USE_JPEG
-#endif
-
 #include "nel/3d/zone_lighter.h"
 #include "nel/3d/landscape.h"
 #include "nel/3d/patchuv_locator.h"
@@ -31,10 +26,6 @@
 #include "nel/3d/transform_shape.h"
 #include "nel/3d/water_shape.h"
 #include "nel/3d/texture_file.h"
-
-
-
-
 
 #include "nel/misc/common.h"
 #include "nel/misc/thread.h"

@@ -33,8 +33,6 @@
 #include <deque>
 #include <fstream>
 
-#define USE_JPEG
-
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
 
