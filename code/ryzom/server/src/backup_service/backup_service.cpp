@@ -377,7 +377,7 @@ static void	cbSaveCheckFile( CMessage& msgin, const std::string &serviceName, NL
 
 	try
 	{
-		NLMISC::CFile::copyFile( ( msg.FileName + string(".backup") ).c_str(), msg.FileName.c_str() );
+		NLMISC::CFile::copyFile( msg.FileName + string(".backup"), msg.FileName );
 	}
 	catch( Exception &e )
 	{

@@ -528,8 +528,8 @@ bool loadAndResaveCheckCharacters( const std::vector<string>& files, NLMISC::CLo
 			{
 				id.Chars[i].Backup = id.Chars[i].File + ".tmp";
 				CFile::copyFile(
-					id.Chars[i].Backup.c_str(),
-					id.Chars[i].File.c_str());
+					id.Chars[i].Backup,
+					id.Chars[i].File);
 			}
 		}
 
@@ -596,8 +596,8 @@ bool loadAndResaveCheckCharacters( const std::vector<string>& files, NLMISC::CLo
 			for (i=0; i<id.Chars.size(); ++i)
 			{
 				CFile::copyFile(
-					id.Chars[i].File.c_str(),
-					id.Chars[i].Backup.c_str());
+					id.Chars[i].File,
+					id.Chars[i].Backup);
 				CFile::deleteFile(id.Chars[i].Backup);
 			}
 		}

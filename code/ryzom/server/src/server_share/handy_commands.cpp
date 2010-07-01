@@ -390,7 +390,7 @@ NLMISC_CATEGORISED_COMMAND(utils,copyFile,"copy a file","<src> <dest>")
 	if (args.size()!=2)
 		return false;
 
-	NLMISC::CFile::copyFile(args[1].c_str(),args[0].c_str());
+	NLMISC::CFile::copyFile(args[1],args[0]);
 
 	return true;
 }

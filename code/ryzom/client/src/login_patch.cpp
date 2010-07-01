@@ -1307,7 +1307,7 @@ void CPatchManager::downloadFile (const string &source, const string &dest, NLMI
 	}
 	else
 	{
-		if (!NLMISC::CFile::copyFile(dest.c_str(), source.c_str(), false, progress))
+		if (!NLMISC::CFile::copyFile(dest, source, false, progress))
 		{
 			if (errno == 28)
 			{

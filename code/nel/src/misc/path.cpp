@@ -2099,10 +2099,9 @@ void CFile::checkFileChange (TTime frequency)
 	}
 }
 
-static bool CopyMoveFile(const char *dest, const char *src, bool copyFile, bool failIfExists = false, IProgressCallback *progress = NULL)
+static bool CopyMoveFile(const std::string &dest, const std::string &src, bool copyFile, bool failIfExists = false, IProgressCallback *progress = NULL)
 {
-	if (!dest || !src) return false;
-	if (!strlen(dest) || !strlen(src)) return false;
+	if (dest.empty() || src.empty()) return false;
 	std::string sdest = CPath::standardizePath(dest,false);
 	std::string ssrc = CPath::standardizePath(src,false);
 
@@ -2199,7 +2198,7 @@ static bool CopyMoveFile(const char *dest, const char *src, bool copyFile, bool 
 	return true;
 }
 
-bool CFile::copyFile(const char *dest, const char *src, bool failIfExists /*=false*/, IProgressCallback *progress)
+bool CFile::copyFile(const std::string &dest, const std::string &src, bool failIfExists /*=false*/, IProgressCallback *progress)
 {
 	return CopyMoveFile(dest, src, true, failIfExists, progress);
 }

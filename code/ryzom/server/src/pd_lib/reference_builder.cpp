@@ -122,7 +122,7 @@ bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
 	CTimestamp	maxstamp(maxtimestamp);
 
 	// copy xml description from previous directory to new
-	if (!CFile::copyFile((next+"description.xml").c_str(), (previous+"description.xml").c_str(), true))
+	if (!CFile::copyFile(next+"description.xml", previous+"description.xml", true))
 	{
 		nlwarning("CReferenceBuilder::build(): failed to copy 'description.xml' from '%s' to '%s'", previous.c_str(), next.c_str());
 		return false;
@@ -151,7 +151,7 @@ bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
 		string	file = CFile::getFilename(files[i]);
 
 		// copy from old to new directory
-		if (!CFile::copyFile((next+file).c_str(), (previous+file).c_str(), true))
+		if (!CFile::copyFile(next+file, previous+file, true))
 		{
 			nlwarning("CReferenceBuilder::build(): failed to copy '%s' from '%s' to '%s'", file.c_str(), previous.c_str(), next.c_str());
 			return false;

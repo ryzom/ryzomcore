@@ -412,7 +412,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	bool	fileBackuped = true;
 	if (fileExists && BackupFile)
 	{
-		if (!NLMISC::CFile::copyFile( (getBackupFileName(Filename)+".backup").c_str(), (getBackupFileName(Filename)).c_str()))
+		if (!NLMISC::CFile::copyFile( getBackupFileName(Filename)+".backup", getBackupFileName(Filename)))
 		{
 			fileBackuped = false;
 			if (checkFailureMode(MajorFailureIfFileUnbackupable))

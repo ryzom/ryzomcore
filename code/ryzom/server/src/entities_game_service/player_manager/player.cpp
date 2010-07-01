@@ -133,9 +133,9 @@ void CPlayer::checkCrashMarker()
 			//			if (CFile::isExists(fileName+".last_good"))
 			//			{
 			//				nlwarning("  Restoring last good version...");
-			//				CFile::copyFile(fileName.c_str(), (fileName+".last_good").c_str());
+			//				CFile::copyFile(fileName, fileName+".last_good");
 			//				nlwarning("  And copying the backup for comparison with bad file...");
-			//				CFile::copyFile((fileName+".before_wipe").c_str(), (fileName+".last_good").c_str());
+			//				CFile::copyFile(fileName+".before_wipe", fileName+".last_good");
 			//			}
 			//			else
 			//			{
@@ -174,9 +174,9 @@ bool wipeAndRestore(const std::string &fileName)
 	//if (CFile::isExists(fileName+".last_good"))
 	//{
 	//	nlwarning("  Restoring last good version...");
-	//	CFile::copyFile(fileName.c_str(), (fileName+".last_good").c_str());
+	//	CFile::copyFile(fileName, fileName+".last_good");
 	//	nlwarning("  And copying the backup for comparison with bad file...");
-	//	CFile::copyFile((fileName+".before_wipe").c_str(), (fileName+".last_good").c_str());
+	//	CFile::copyFile(fileName+".before_wipe", fileName+".last_good");
 	//
 	//	// restore success
 	//	return true;

@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 			// if fail to find a valid filter, just do a copy
 			if(j==LodFilters.size())
 			{
-				CFile::copyFile(pathNameOut.c_str(), pathNameIn.c_str());
+				CFile::copyFile(pathNameOut, pathNameIn);
 				NLMISC::InfoLog->displayRaw("Processing %s - Copied\n", fileNameIn.c_str());
 			}
 		}

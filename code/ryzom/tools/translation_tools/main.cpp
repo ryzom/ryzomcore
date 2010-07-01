@@ -2457,7 +2457,7 @@ int updatePhraseWork()
 		std::string newFile = saveDir + outputResult[firstFile].second;
 		std::string oldFile = outputResult[firstFile].second;
 		CFile::createDirectoryTree(CFile::getPath(newFile));
-		if (  CFile::copyFile(newFile.c_str(), oldFile.c_str()) )
+		if (  CFile::copyFile(newFile, oldFile) )
 		{
 			
 			patchWorkFile(updatedPhrases,  newFile);
