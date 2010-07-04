@@ -249,7 +249,7 @@ bool CBNPFile::addVersion(const std::string& bnpDirectory, const std::string& /*
 
 		// copy the file to create a new reference file...
 //		NLMISC::CSString refFileName= NLMISC::CSString(refDirectory+_FileName).replace(".",NLMISC::toString("_%05u.",version.getPackageVersionNumber()).c_str());
-//		NLMISC::CFile::copyFile(refFileName.c_str(),fullFileName.c_str());
+//		NLMISC::CFile::copyFile(refFileName, fullFileName);
 	}
 	else
 	{

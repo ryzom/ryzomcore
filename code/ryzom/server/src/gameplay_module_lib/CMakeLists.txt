@@ -1,8 +1,5 @@
 FILE(GLOB SRC *.cpp *.h)
 
-# Filter out the source files not actually compiled.
-#LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ admin_modules.cpp)
-
 IF(WIN32)
   ADD_LIBRARY(gameplay_module_lib STATIC ${SRC})
 ELSE(WIN32)

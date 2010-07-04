@@ -842,19 +842,19 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 			string textFile = CPath::standardizePath(serverPathText) + "phrase_rites_wk.txt";
 			includeText(textFile, string("#include \"") + src + string("\"\n"));
 			dst = CPath::standardizePath(serverPathText) + src;
-			NLMISC::CFile::copyFile(dst.c_str(), src.c_str());
+			NLMISC::CFile::copyFile(dst, src);
 
 			// local
 			textFile = CPath::standardizePath(localPathText) + "phrase_rites_wk.txt";
 			includeText(textFile, string("#include \"") + src + string("\"\n"));
 			dst = CPath::standardizePath(localPathText) + src;
-			NLMISC::CFile::copyFile(dst.c_str(), src.c_str());
+			NLMISC::CFile::copyFile(dst, src);
 		}
 		else
 		{
 			// primitive file : copy to server
 			dst = CPath::standardizePath(serverPathPrim) + string(src, n, src.size());
-			NLMISC::CFile::copyFile(dst.c_str(), src.c_str());
+			NLMISC::CFile::copyFile(dst, src);
 		}
 	}
 	return true;

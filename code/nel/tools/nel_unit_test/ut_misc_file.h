@@ -44,7 +44,7 @@ private:
 		fclose(fp);
 		fp = NULL;
 
-		NLMISC::CFile::copyFile(_DstFile.c_str(), _SrcFile.c_str(), false);
+		NLMISC::CFile::copyFile(_DstFile, _SrcFile, false);
 
 		// verify the resulting file
 		fp = fopen(_DstFile.c_str(), "rb");

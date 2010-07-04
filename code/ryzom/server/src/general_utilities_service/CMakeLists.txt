@@ -1,7 +1,6 @@
 FILE(GLOB SRC *.cpp *.h)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ stat_job_manager.h
-			${CMAKE_CURRENT_SOURCE_DIR}/ec_event_chat.cpp
+LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ec_event_chat.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/gus_mfc_popups.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/gus_mfc_popups.h
 			${CMAKE_CURRENT_SOURCE_DIR}/gus_mfc_select_with_text.cpp

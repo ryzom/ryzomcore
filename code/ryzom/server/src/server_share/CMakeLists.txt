@@ -1,8 +1,5 @@
 FILE(GLOB SRC *.cpp *.h)
 
-# Filter out the source files not actually compiled.
-#LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ admin_modules.cpp)
-
 ADD_LIBRARY(server_share STATIC ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})

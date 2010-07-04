@@ -1,7 +1,6 @@
 FILE(GLOB SRC *.cpp *.h)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/Backup\ 1\ of\ file_repository.h
-			${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.cpp
+LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.h)
 
 ADD_EXECUTABLE(patchman_service ${SRC})

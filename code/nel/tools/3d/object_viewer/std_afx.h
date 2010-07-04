@@ -53,8 +53,6 @@
 #include <map>
 #include <algorithm>
 
-#define USE_JPEG
-
 #include "nel/misc/common.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/vector.h"

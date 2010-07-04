@@ -126,7 +126,7 @@ void	filterRyzomBug(const char *dirSrc, const char *dirDst, uint patchVersionWan
 				CFile::createDirectory(dirDest);
 				
 				// copy near the dmp
-				CFile::copyFile((dirDest + "/" + fileNoDir).c_str(), fileFullPath.c_str());
+				CFile::copyFile(dirDest + "/" + fileNoDir, fileFullPath);
 
 
 				// copy all the .dmp in a new dir
@@ -136,7 +136,7 @@ void	filterRyzomBug(const char *dirSrc, const char *dirDst, uint patchVersionWan
 				for(uint j=0;j<dmpList.size();j++)
 				{
 					string	dmpNoDir= CFile::getFilename(dmpList[j]);
-					CFile::copyFile((dirDest+ "/" + dmpNoDir).c_str(), dmpList[j].c_str());
+					CFile::copyFile(dirDest+ "/" + dmpNoDir, dmpList[j]);
 				}
 			}
 		}

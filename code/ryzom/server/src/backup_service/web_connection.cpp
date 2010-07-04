@@ -338,7 +338,7 @@ void	cbRestoreSave(CMemStream &msgin, TSockId host)
 
 	bool	success;
 
-	success = CFile::copyFile(outputfile.c_str(), file.c_str(), false);
+	success = CFile::copyFile(outputfile, file, false);
 
 	CMemStream	msgout;
 	uint32		fake	= 0;
@@ -431,7 +431,7 @@ void	cbCopyOverSave(CMemStream &msgin, TSockId host)
 		strFindReplace(outputfile, string("$charid"), charid);
 		strFindReplace(outputfile, string("$ext"), extensions[i]);
 
-		success = CFile::copyFile(outputfile.c_str(), file.c_str(), false);
+		success = CFile::copyFile(outputfile, file, false);
 
 		if (!success)
 			result = "Failed to copy "+file+" over "+outputfile+".";

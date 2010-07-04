@@ -386,7 +386,7 @@ void CServerPatchBridge::requestFileData(NLNET::IModuleProxy *sender, const NLMI
 				CSString rootDirectory= getRepositoryDirectory()->getRootDirectory();
 				CSString fullFileName= rootDirectory+fileInfo.FileName;
 				NLMISC::CFile::createDirectoryTree(NLMISC::CFile::getPath(fullFileName));
-				bool ok= NLMISC::CFile::copyFile(fullFileName.c_str(),(rootDirectory+itInfo.FileName).c_str());
+				bool ok= NLMISC::CFile::copyFile(fullFileName,rootDirectory+itInfo.FileName);
 				WARN_IF(!ok,"Failed to copy file: '"+itInfo.FileName+" to '"+fileInfo.FileName+"'");
 
 				// force our repository to update it's info concerning the file that we just copied and rebuild our info vector

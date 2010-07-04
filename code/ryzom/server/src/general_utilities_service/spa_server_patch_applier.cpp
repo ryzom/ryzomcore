@@ -289,7 +289,7 @@ void CServerPatchApplier::_patchUpFromLive(uint32 liveVersion, uint32 installReq
 		if (patchIdx==it->second.size())
 		{
 			nlinfo("COPY: %s from %s",(_Directories.installDirectoryName()+it->first).c_str(),(_Directories.liveDirectoryName()+it->first).c_str());
-			NLMISC::CFile::copyFile((_Directories.installDirectoryName()+it->first).c_str(),(_Directories.liveDirectoryName()+it->first).c_str());
+			NLMISC::CFile::copyFile(_Directories.installDirectoryName()+it->first,_Directories.liveDirectoryName()+it->first);
 			untarIfNeeded(_Directories.installDirectoryName()+it->first);
 			continue;
 		}
@@ -381,7 +381,7 @@ void CServerPatchApplier::_patchDownFromLive(uint32 liveVersion, uint32 installR
 		if (needBackPatchSet.find(it->first)==needBackPatchSet.end())
 		{
 			nlinfo("COPY: %s => %s",(_Directories.installDirectoryName()+it->first).c_str(),(_Directories.liveDirectoryName()+it->first).c_str());
-			NLMISC::CFile::copyFile((_Directories.installDirectoryName()+it->first).c_str(),(_Directories.liveDirectoryName()+it->first).c_str());
+			NLMISC::CFile::copyFile(_Directories.installDirectoryName()+it->first,_Directories.liveDirectoryName()+it->first);
 			continue;
 		}
 

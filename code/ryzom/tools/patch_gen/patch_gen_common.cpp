@@ -249,7 +249,7 @@ void CPackageDescription::updateIndexFileList(CBNPFileSet& packageIndex) const
 			// if the ref file doesn't exist then create it by copying the original
 			if (NLMISC::CFile::fileExists(_BnpDirectory+fileName) && !NLMISC::CFile::fileExists(_BnpDirectory+refName))
 			{
-				NLMISC::CFile::copyFile((_BnpDirectory+refName).c_str(),(_BnpDirectory+fileName).c_str());
+				NLMISC::CFile::copyFile(_BnpDirectory+refName,_BnpDirectory+fileName);
 				nlassert(NLMISC::CFile::getFileSize(_BnpDirectory+refName)== NLMISC::CFile::getFileSize(_BnpDirectory+fileName));
 			}
 		}

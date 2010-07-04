@@ -827,7 +827,7 @@ void CServerPatchApplier::_requestDownload(const NLMISC::CSString& domainName,co
 		if (fileInfo.Checksum==liveFileInfo.Checksum)
 		{
 			// try copying the file and return if we succeeded (we don't need to send a download request)
-			bool ok=NLMISC::CFile::copyFile(fileNameInNext.c_str(),fileNameInLive.c_str());
+			bool ok=NLMISC::CFile::copyFile(fileNameInNext,fileNameInLive);
 			if (ok)
 				return;
 		}

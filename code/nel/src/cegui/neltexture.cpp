@@ -31,7 +31,6 @@
 
 	This file contains code that is specific to NeL (http://www.nevrax.org)
 *************************************************************************/
-#define USE_JPEG
 
 // NeL Renderer includes
 #include <nel/cegui/neltexture.h>

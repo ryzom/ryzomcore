@@ -651,7 +651,7 @@ struct CFile
 	  * \param failIfExists If the destination file exists, nothing is done, and it returns false.
 	  * \return true if the copy succeeded
 	  */
-	static bool copyFile(const char *dest, const char *src, bool failIfExists = false, class IProgressCallback *progress = NULL);
+	static bool copyFile(const std::string &dest, const std::string &src, bool failIfExists = false, class IProgressCallback *progress = NULL);
 
 	/** Compare 2 files
 	  * \return true if both files exist and the files have same timestamp and size

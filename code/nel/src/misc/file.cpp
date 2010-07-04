@@ -588,7 +588,7 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 	if (append && useTempFile && CFile::fileExists(_FileName))
 	{
 		// open fails if can't copy original content
-		if (!CFile::copyFile(_TempFileName.c_str(), _FileName.c_str()))
+		if (!CFile::copyFile(_TempFileName, _FileName))
 			return false;
 	}
 
