@@ -920,9 +920,11 @@ void submitEvents(NLMISC::CEventServer& server,
 			/*
 				TODO modifiers with mouse events
 			*/
-			server.postEvent(new NLMISC::CEventMouseWheel(
-				mouseX, mouseY, (NLMISC::TMouseButton)0 /* modifiers */,
-				(event.deltaY > 0), eventEmitter));
+			if(fabs(event.deltaY) > 0.1) 
+				server.postEvent(new NLMISC::CEventMouseWheel(
+					mouseX, mouseY, (NLMISC::TMouseButton)0 /* modifiers */,
+					(event.deltaY > 0), eventEmitter));
+
 			break;
 		}
 		case NSTabletPoint:break;
