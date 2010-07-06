@@ -79,7 +79,7 @@ class CAHDisplayInfos : public IActionHandler
 		if( ClientCfg.Local || hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeVG() )
 #endif
 		{
-			ShowInfos = (ShowInfos++)%6;
+			ShowInfos = (ShowInfos+1)%6;
 
 			CGraph::Display = (ShowInfos != 0);
 		}
