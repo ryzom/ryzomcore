@@ -24,7 +24,6 @@
 
 #include "cocoa_event_emitter.h"
 #include "cocoa_opengl_view.h"
-#include "cocoa_window.h"
 
 // Virtual key codes are only defined here. We still do not need to link carbon.
 // see: http://lists.apple.com/archives/Cocoa-dev/2009/May/msg01180.html
@@ -139,7 +138,7 @@ nlWindow createWindow(const GfxMode& mode)
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
 
 	// create a cocoa window with the size provided by the mode parameter
-	CocoaWindow* window = [[CocoaWindow alloc]
+	NSWindow* window = [[NSWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
 
