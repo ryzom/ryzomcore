@@ -70,7 +70,7 @@ UPlayListManager *PlayListManager = NULL;
 
 struct Anim
 {
-	char		*Name;
+	const char	*Name;
 	bool		 Loop;
 	uint		 Id;
 	UAnimation	*Animation;

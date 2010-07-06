@@ -211,7 +211,7 @@ SwitchNextGameState:
 #ifdef NL_OS_WINDOWS
 				MessageBox(NULL, e.what(), "NeL Exception", MB_OK | MB_ICONSTOP);
 #else
-				printf(e.what());
+				printf("%s\n", e.what());
 #endif
 				return; // exit if driver loading failed
 			}

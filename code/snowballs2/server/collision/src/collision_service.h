@@ -27,10 +27,10 @@ class CCollisionService : public NLNET::IService
 protected:
 	struct CEntity
 	{
-		CEntity() : NewClientPosition(), OldClientPosition(), MovePrimitive(NULL), Moving(false), Retry(false) { }
+		CEntity() : OldClientPosition(), NewClientPosition(), MovePrimitive(NULL), Distance(0.0f), Moving(false), Retry(false) { }
 		NLMISC::CVector OldClientPosition;
 		NLMISC::CVector NewClientPosition;
-		NLPACS::UMovePrimitive *MovePrimitive; // ServerPösition
+		NLPACS::UMovePrimitive *MovePrimitive; // ServerPosition
 		float Distance;
 		bool Moving;
 		bool Retry;
