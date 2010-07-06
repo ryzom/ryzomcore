@@ -98,6 +98,59 @@ static void setupApplicationMenu()
 	[[NSApp mainMenu] addItem:menuItem];
 }
 
+static void setupGLView(NSView* superview)
+{
+	/*
+		TODO use mode.Depth
+		TODO NSOpenGLPFAOffScreen
+	*/
+
+	// setup opengl settings
+	NSOpenGLPixelFormatAttribute att[] =
+	{
+		NSOpenGLPFADoubleBuffer,
+		NSOpenGLPFAColorSize,    24,
+		NSOpenGLPFADepthSize,    24,
+		NSOpenGLPFAAlphaSize,     8,
+		NSOpenGLPFAStencilSize,   8,
+		NSOpenGLPFANoRecovery,
+		NSOpenGLPFAAccelerated,
+		NSOpenGLPFABackingStore,
+		0
+	};
+
+	// put the settings into a format object
+	NSOpenGLPixelFormat* format =
+		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
+
+	if(!format)
+		nlerror("cannot create NSOpenGLPixelFormat");
+
+	// create a opengl view with the created format
+	NSOpenGLView* view = [[CocoaOpenGLView alloc]
+		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
+
+	if(!view)
+		nlerror("cannot create view");
+
+	// make the view automatically fit the super view
+	[view setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+
+	// put the view into the superview
+	[superview addSubview:view];
+
+	[view setFrame: [superview frame]];
+
+	// create a opengl context for the view
+	NSOpenGLContext* ctx = [view openGLContext];
+
+	if(!ctx)
+		nlerror("cannot create context");
+
+	// free the pixel format object
+	[format release];
+}
+
 void ctor()
 {
 	// create a pool, cocoa code would leak memory otherwise
@@ -160,81 +213,33 @@ nlWindow createWindow(const GfxMode& mode)
 	// this is our main window
 	[window makeMainWindow];
 
-	return window;
+	NSView* view = [[NSView alloc] init];
+
+	[window setContentView: view];
+
+	return view;
 }
 
 bool destroyWindow(nlWindow wnd)
 {
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLView*    view   = [window contentView];
+	NSView* view = (NSView*)wnd;
 
-	// release the view we alloced
-	[view release];
-
-	// release the window we alloced
-	[window release];
+	// release the window
+	[[view window] release];
 
 	return true;
 }
 
 nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
-	/*
-		TODO use show
-			call showWindow()
-	*/
+	NSView* view = (NSView*)wnd;
 
-	NSWindow* window = (NSWindow*)wnd;
+	if(view == EmptyWindow)
+		view = (NSView*)createWindow(mode);
 
-	if(wnd == EmptyWindow)
-		window = (NSWindow*)createWindow(mode);
+	setupGLView(view);
 
-	/*
-		TODO use mode.Depth
-		TODO NSOpenGLPFAOffScreen
-	*/
-
-	// setup opengl settings
-	NSOpenGLPixelFormatAttribute att[] =
-	{
-		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFAColorSize,    24,
-		NSOpenGLPFADepthSize,    24,
-		NSOpenGLPFAAlphaSize,     8,
-		NSOpenGLPFAStencilSize,   8,
-		NSOpenGLPFANoRecovery,
-		NSOpenGLPFAAccelerated,
-		NSOpenGLPFABackingStore,
-		0
-	};
-
-	// put the settings into a format object
-	NSOpenGLPixelFormat* format =
-		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
-
-	if(!format)
-		nlerror("cannot create NSOpenGLPixelFormat");
-
-	// create a opengl view with the created format
-	NSOpenGLView* view = [[CocoaOpenGLView alloc]
-		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
-
-	if(!view)
-		nlerror("cannot create view");
-
-	// put the view into the window
-	[window setContentView:view];
-
-	// create a opengl context for the view
-	NSOpenGLContext* ctx = [view openGLContext];
-
-	if(!ctx)
-		nlerror("cannot create context");
-
-	// free the pixel format object
-	[format release];
-
-	return window;
+	return view;
 }
 
 bool setWindowStyle(nlWindow wnd, bool fullscreen)
@@ -245,16 +250,16 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 		return false;		
 	}
 	
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLView*    view   = [window contentView];
-	NSOpenGLContext* ctx    = [view openGLContext];
+	NSView*          superview = (NSView*)wnd;
+	NSOpenGLView*    view      = [[superview subviews] lastObject];
 	
 	// leave fullscreen mode, enter windowed mode
-	if(!fullscreen && [view isInFullScreenMode])
+	if(!fullscreen && [superview isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
-		CGLError error = CGLDisable((CGLContextObj)[ctx CGLContextObj],
+		CGLError error = CGLDisable(
+			(CGLContextObj)[[view openGLContext] CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
 		if(error != kCGLNoError)
@@ -262,14 +267,15 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 				CGLErrorString(error));
 
 		// pull the view back from fullscreen restoring window options
-		[view exitFullScreenModeWithOptions:nil];
+		[superview exitFullScreenModeWithOptions:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(fullscreen && ![view isInFullScreenMode])
+	else if(fullscreen && ![superview isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
-		CGLError error = CGLEnable((CGLContextObj)[ctx CGLContextObj],
+		CGLError error = CGLEnable(
+			(CGLContextObj)[[view openGLContext] CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
 		if(error != kCGLNoError)
@@ -279,7 +285,7 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-		[view enterFullScreenMode:[NSScreen mainScreen] withOptions:
+		[superview enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
 					NSApplicationPresentationHideDock |
@@ -298,8 +304,8 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 
 void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 {
-	NSWindow*     window = (NSWindow*)wnd;
-	NSOpenGLView* view   = [window contentView];
+	NSView*       superview = (NSView*)wnd;
+	NSOpenGLView* view      = [[superview subviews] lastObject];
 	
 	// the sceen with the menu bar
 	NSScreen* screen = [[NSScreen screens] objectAtIndex:0];
@@ -309,7 +315,7 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
 
 	// in fullscreen mode
-	if([view isInFullScreenMode])
+	if([superview isInFullScreenMode])
 	{
 		// return the size of the back buffer (like having switched monitor mode)
 		mode.Windowed  = false;
@@ -329,9 +335,8 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 
 void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 {
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLView*    view   = [window contentView];
-	NSOpenGLContext* ctx    = [view openGLContext];
+	NSView*          superview = (NSView*)wnd;
+	NSOpenGLView*    view      = [[superview subviews] lastObject];
 	
 	// A cocoa fullscreen view stays at the native resolution of the display.
 	// When changing the rendering resolution, the size of the back buffer gets
@@ -342,7 +347,7 @@ void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 	// not the one from the window.
 
 	// in fullscreen mode
-	if([view isInFullScreenMode])
+	if([superview isInFullScreenMode])
 	{
 		// use the size stored in setWindowSize()
 		width = g_bufferSize[0];
@@ -361,16 +366,16 @@ void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 
 void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 {
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLView*    view   = [window contentView];
-	NSOpenGLContext* ctx    = [view openGLContext];
+	NSView*       superview = (NSView*)wnd;
+	NSOpenGLView* view      = [[superview subviews] lastObject];
 	
 	// for fullscreen mode, adjust the back buffer size to the desired resolution
-	if([view isInFullScreenMode])
+	if([superview isInFullScreenMode])
 	{
 		// set the back buffer manually to match the desired rendering resolution
 		GLint dim[2]   = { width, height };
-		CGLError error = CGLSetParameter((CGLContextObj)[ctx CGLContextObj],
+		CGLError error = CGLSetParameter(
+			(CGLContextObj)[[view openGLContext] CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);
 
 		if(error != kCGLNoError)
@@ -379,6 +384,8 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 	}
 	else
 	{
+		NSWindow* window = [view window];
+
 		// get the windows current frame
 		NSRect rect = [window frame];
 
@@ -398,11 +405,12 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 
 void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y)
 {
-	NSWindow* window = (NSWindow*)wnd;
-	NSOpenGLView* view = [window contentView];
+	NSView*       superview = (NSView*)wnd;
+	NSOpenGLView* view      = [[superview subviews] lastObject];
+	NSWindow*     window    = [view window];
 	
 	// for IDriver conformity
-	if([view isInFullScreenMode])
+	if([superview isInFullScreenMode])
 	{
 		x = y = 0;
 		return;
@@ -423,7 +431,8 @@ void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y)
 
 void setWindowPos(nlWindow wnd, sint32 x, sint32 y)
 {
-	NSWindow* window = (NSWindow*)wnd;
+	NSView*   superview = (NSView*)wnd;
+	NSWindow* window    = [superview window];
 	
 	// get the rect (position, size) of the screen with menu bar
 	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
@@ -440,7 +449,8 @@ void setWindowPos(nlWindow wnd, sint32 x, sint32 y)
 
 void setWindowTitle(nlWindow wnd, const ucstring& title)
 {
-	NSWindow* window = (NSWindow*)wnd;
+	NSView*   superview = (NSView*)wnd;
+	NSWindow* window    = [superview window];
 
 	// well... set the title of the window
 	[window setTitle:[NSString stringWithUTF8String:title.toUtf8().c_str()]];
@@ -453,8 +463,9 @@ void showWindow(bool show)
 
 bool activate(nlWindow wnd)
 {
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLContext* ctx    = [[window contentView] openGLContext];
+	NSView*          superview = (NSView*)wnd;
+	NSOpenGLView*    view      = [[superview subviews] lastObject];
+	NSOpenGLContext* ctx       = [view openGLContext];
 
 	// if our context is not the current one, make it the current
 	if([NSOpenGLContext currentContext] != ctx)
@@ -465,9 +476,9 @@ bool activate(nlWindow wnd)
 
 void swapBuffers(nlWindow wnd)
 {
-	NSWindow*        window = (NSWindow*)wnd;
-	NSOpenGLView*    view   = [window contentView];
-	NSOpenGLContext* ctx    = [view openGLContext];
+	NSView*          superview = (NSView*)wnd;
+	NSOpenGLView*    view      = [[superview subviews] lastObject];
+	NSOpenGLContext* ctx       = [view openGLContext];
 	
 	// make cocoa draw buffer contents to the view
 	[ctx flushBuffer];
@@ -507,8 +518,9 @@ void showCursor(bool show)
 
 void setMousePos(nlWindow wnd, float x, float y)
 {
-	NSWindow* window = (NSWindow*)wnd;
-	NSOpenGLView* view = [window contentView];
+	NSView*          superview = (NSView*)wnd;
+	NSOpenGLView*    view      = [[superview subviews] lastObject];
+	NSWindow*        window    = [view window];
 	
 	// CG wants absolute coordinates related to first screen's top left
 
@@ -517,7 +529,7 @@ void setMousePos(nlWindow wnd, float x, float y)
 
 	// get the rect (position, size) of the window
 	NSRect windowRect;
-	if([view isInFullScreenMode])
+	if([superview isInFullScreenMode])
 		windowRect = [[window screen] frame];
 	else
 		windowRect = [window frame];
@@ -757,7 +769,8 @@ void submitEvents(NLMISC::CEventServer& server,
 		if(!event)
 			break;
 
-		NSRect viewRect = [[[event window] contentView] frame];
+		NSRect viewRect = 
+			[[[[[event window] contentView] subviews] lastObject] frame];
 
 		// TODO this code assumes, that the view fills the window
 		// convert the mouse position to NeL style (relative)
