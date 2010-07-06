@@ -149,30 +149,17 @@ static void setupGLView(NSView* superview)
 
 	// free the pixel format object
 	[format release];
+
+	// let this view receive be target of events
+	[view becomeFirstResponder];
 }
 
 void ctor()
 {
-	// create a pool, cocoa code would leak memory otherwise
-	g_pool = [[NSAutoreleasePool alloc] init];
-
-	// init the application object
-	[NSApplication sharedApplication];
-	
-	// create the menu in the top screen bar
-	setupApplicationMenu();
-
-	// tell the application that we are running now
-	[NSApp finishLaunching];
 }
 
 void dtor()
 {
-	// shut down the application
-	[NSApp terminate:nil];
-
-	// release the pool
-	[g_pool release];
 }
 
 bool init(uint windowIcon, emptyProc exitFunc)
@@ -187,6 +174,19 @@ bool unInit()
 
 nlWindow createWindow(const GfxMode& mode)
 {
+	// create a pool, cocoa code would leak memory otherwise
+	g_pool = [[NSAutoreleasePool alloc] init];
+
+	// init the application object
+	[NSApplication sharedApplication];
+	
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// tell the application that we are running now
+	[NSApp finishLaunching];
+	
+	// describe how the window should look like and behave
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
 
@@ -226,6 +226,12 @@ bool destroyWindow(nlWindow wnd)
 
 	// release the window
 	[[view window] release];
+
+	// shut down the application
+	[NSApp terminate:nil];
+
+	// release the pool
+	[g_pool release];
 
 	return true;
 }
@@ -384,17 +390,22 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 	}
 	else
 	{
-		NSWindow* window = [view window];
+		// there is only a pool if nel created the window itself assuming that
+		// nel is also in charge of the main loop
+		if(g_pool)
+		{
+			NSWindow* window = [view window];
 
-		// get the windows current frame
-		NSRect rect = [window frame];
+			// get the windows current frame
+			NSRect rect = [window frame];
 
-		// convert the desired content size to window size
-		rect = [window frameRectForContentRect:
-			NSMakeRect(rect.origin.x, rect.origin.y, width, height)];
+			// convert the desired content size to window size
+			rect = [window frameRectForContentRect:
+				NSMakeRect(rect.origin.x, rect.origin.y, width, height)];
 
-		// update window dimensions
-		[window setFrame:rect display:YES];
+			// update window dimensions
+			[window setFrame:rect display:YES];
+		}
 	}
 	
 	// store the size
@@ -752,10 +763,15 @@ void emulateMouseRawMode(bool enable)
 void submitEvents(NLMISC::CEventServer& server,
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter)
 {
-	// cocoa style memory cleanup
-	[g_pool release];
-	g_pool = [[NSAutoreleasePool alloc] init];
-
+	// there is only a pool if nel created the window itself assuming that
+	// nel is also in charge of the main loop
+	if(g_pool)
+	{
+		// cocoa style memory cleanup
+		[g_pool release];
+		g_pool = [[NSAutoreleasePool alloc] init];
+	}
+	
 	// we break if there was no event to handle
 	/* TODO maximum number of events processed in one update? */
 	while(true)
@@ -959,7 +975,6 @@ void submitEvents(NLMISC::CEventServer& server,
 		}
 
 		[NSApp sendEvent:event];
-		[NSApp updateWindows];
 	}
 }
 
