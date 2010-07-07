@@ -20,7 +20,7 @@
 
 @implementation CocoaOpenGLView
 
-- (id)initWithFrame:(NSRect)frame 
+-(id)initWithFrame:(NSRect)frame 
 {
 	if(self = [super initWithFrame:frame]) 
 	{
@@ -30,20 +30,10 @@
 	return nil;
 }
 
-- (void)dealloc
+-(void)dealloc
 {
 	[characterStorage release];
 	[super dealloc];
-}
-
--(BOOL)acceptsFirstResponder
-{
-	return YES;
-}
-
--(BOOL)needsPanelToBecomeKey
-{
-	return NO;
 }
 
 -(void)keyDown:(NSEvent*)event

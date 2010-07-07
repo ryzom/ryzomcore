@@ -149,9 +149,6 @@ static void setupGLView(NSView* superview)
 
 	// free the pixel format object
 	[format release];
-
-	// let this view receive be target of events
-	[view becomeFirstResponder];
 }
 
 void ctor()
@@ -245,6 +242,8 @@ nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeabl
 
 	setupGLView(view);
 
+	[[view window] makeFirstResponder:[[view subviews] lastObject]];
+
 	return view;
 }
 
@@ -274,6 +273,12 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 
 		// pull the view back from fullscreen restoring window options
 		[superview exitFullScreenModeWithOptions:nil];
+		
+		// let the gl view receive key events
+		[[view window] makeFirstResponder:view];
+
+		// bring the window containing the gl view to the front
+		[[view window] makeKeyAndOrderFront:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
@@ -302,6 +307,9 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 			TODO check if simply using NSView enterFullScreenMode is a good idea.
 			 the context can be set to full screen as well, performance differences?
 		*/
+
+		// let the gl view receive key events
+		[[view window] makeFirstResponder:view];
 	}
 
 	return true;
@@ -785,8 +793,8 @@ void submitEvents(NLMISC::CEventServer& server,
 		if(!event)
 			break;
 
-		NSRect viewRect = 
-			[[[[[event window] contentView] subviews] lastObject] frame];
+		NSView* glView   = [[[[event window] contentView] subviews] lastObject];
+		NSRect  viewRect = [glView frame];
 
 		// TODO this code assumes, that the view fills the window
 		// convert the mouse position to NeL style (relative)
@@ -798,7 +806,6 @@ void submitEvents(NLMISC::CEventServer& server,
 				event.type != NSKeyDown && event.type != NSKeyUp)
 		{
 			[NSApp sendEvent:event];
-			[NSApp updateWindows];
 			continue;
 		}
 
@@ -856,7 +863,6 @@ void submitEvents(NLMISC::CEventServer& server,
 			else
 				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
 					(NLMISC::TMouseButton)0 /* modifiers */, eventEmitter);
-
 
 			server.postEvent(nelEvent);
 			break;

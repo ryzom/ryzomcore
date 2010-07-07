@@ -29,28 +29,6 @@
 
 -(id)initWithFrame:(NSRect)frame;
 -(void)dealloc;
-
--(BOOL)acceptsFirstResponder;
--(BOOL)needsPanelToBecomeKey;
 -(void)keyDown:(NSEvent*)event;
-
-/******************************************************************************/
-/* NSTextInputClient Protocol */
-
--(BOOL)hasMarkedText;
--(NSRange)markedRange;
--(NSRange)selectedRange;
--(void)setMarkedText:(id)aString 
-	selectedRange:(NSRange)newSelection 
-	replacementRange:(NSRange)replacementRange;
--(void)unmarkText;
--(NSArray*)validAttributesForMarkedText;
--(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange 
-	actualRange:(NSRangePointer)actualRange;
--(void)insertText:(id)aString replacementRange:(NSRange)replacementRange;
--(NSUInteger)characterIndexForPoint:(NSPoint)aPoint;
--(NSRect)firstRectForCharacterRange:(NSRange)aRange 
-	actualRange:(NSRangePointer)actualRange;
--(void)doCommandBySelector:(SEL)aSelector;
 
 @end
