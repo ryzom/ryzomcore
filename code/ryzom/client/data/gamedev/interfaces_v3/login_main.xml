@@ -30,57 +30,49 @@
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
 
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
-    <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-1" />
+    <instance template="log_box" id="window" y="-8" posref="MM MM" w="1024" h="768" color="0 0 0 0"/>
     
     <!--
     <view type="bitmap" id="jena" posparent="window" posref="MR MR" x="-64" texture="log_jena.tga" global_color="false" render_layer="-1" />
     -->
-    
-    <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
-    
-    
+           
     <!-- Login Edit_Boxes -->
-    <view type="text" id="txt_log" x="115" posref="TL TL" posparent="window" hardtext="uiLogin" fontsize="10" y="-48"  color="255 255 255 255" />
-    <view type="text" id="txt_pas" posparent="txt_log" posref="TL TL" hardtext="uiPassword" fontsize="10" x="246" color="255 255 255 255" />
+    <view type="text" id="txt_log" x="0" posref="TM TM" posparent="window" hardtext="uiLogin" fontsize="10" y="-200"  color="255 255 255 255" />
+    <view type="text" id="txt_pas" posparent="txt_log" posref="TM TM" hardtext="uiPassword" fontsize="10" y="-48" color="255 255 255 255" />
     
-    <instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BL TL" w="240" h="24" fontsize="12" x="0" y="-4"
+    <instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BM TM" w="240" h="24" fontsize="12" x="0" y="-4"
     text_ref="BM BM" text_y="-2"
     reset_focus_on_hide="false"  max_historic="0"
     onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
     
-    <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BL TL" w="240" h="24" fontsize="14" x="0" y="-4"
+    <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="24" fontsize="14" x="0" y="-4"
     text_ref="BM BM" text_y="-2"
     reset_focus_on_hide="false"  max_historic="0" entry_type="password"
     onenter="on_login" params=""
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
     
-    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TR TL" x="6" onclick_l="on_login" hardtext="uiOnConnect" />
+    <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
     
     
-    <!-- Boxes Web Shortcuts -->
-    <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" />
+    <!-- Boxes Web Shortcuts 
+    <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" /> -->
     
     <!-- Create Account -->
-    <ctrl style="log_spe_but" id="but_create_account" posparent="web_win" posref="TL TL" x="8" y="-8"
+    <ctrl style="log_std_but" id="but_create_account" posparent="but_log" posref="BM TM" y="-28" 
     onclick_l="on_create_account" hardtext="uiCreateAccount" />
 
 	<!-- Upgrade Account -->
-    <ctrl style="log_spe_but" id="but_upgrade_account" posparent="but_create_account" posref="BL TL" y="-8"
+    <ctrl style="log_std_but" id="but_upgrade_account" posparent="but_create_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" />
 
 	<!-- Forget Password -->
-    <ctrl style="log_spe_but" id="but_forget_pwd" posparent="but_upgrade_account" posref="BL TL" y="-8"
+    <ctrl style="log_std_but" id="but_forget_pwd" posparent="but_upgrade_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />
-
-	<!-- Game Configuration -->
-    <ctrl style="log_spe_but" id="but_game_configuration" posparent="but_forget_pwd" posref="BL TL" y="-8"
-    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" />
     
     <!-- Edit Account -->
-    <ctrl style="log_spe_but" id="but_edit_account" posparent="but_game_configuration" posref="BL TL" y="-8"
+    <ctrl style="log_std_but" id="but_edit_account" posparent="but_forget_pwd" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
     
     
@@ -90,7 +82,7 @@
 	-->
     
     <!-- Login Support -->
-    <ctrl style="log_spe_but" id="but_login_support" posparent="but_edit_account" posref="BL TL" y="-8"
+    <ctrl style="log_std_but" id="but_login_support" posparent="but_edit_account" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
     
     <!-- Scan Data -->
@@ -115,10 +107,10 @@
 																but_login_support:active" />
 																
     <!-- RESOLUTION ET LEVEL OF DETAILS -->
-    <instance template="server_box" id="res_win" posparent="web_win" posref="BL TL" w="276" h="24" y="-24" />
+    <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10"/>
     <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
-
-    <!-- Textes -->
+	<!-- Game Configuration -->    <ctrl style="log_std_but" id="but_game_configuration" posparent="lod_win" posref="TR TL" x="26"    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" />	<!-- EXIT BUTTON -->    <ctrl style="log_button" id="but_exit" posparent="windows" posref="BR BR" y="6" onclick_l="login_quit" hardtext="uiExitLogin" />
+	    <!-- Textes -->
     <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
     <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
 
@@ -188,7 +180,7 @@
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
   
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
     <view type="bitmap" id="kami" posparent="window" posref="TR TR" x="-50" y="-24" texture="log_kami.tga" global_color="false" render_layer="-1" />
     
@@ -293,7 +285,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
   
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
     
     <!-- EXIT BUTTON -->
@@ -348,7 +340,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
 
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
     <!-- EXIT BUTTON -->
@@ -405,7 +397,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
   
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
     
     <!-- EXIT BUTTON -->
@@ -513,7 +505,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 <group id="eula" w="1024" h="768" posref="MM MM" active="false" >
 
   <!-- BACKGROUND -->
-  <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+  <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
   <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
   
   <!-- EXIT BUTTON -->
@@ -558,7 +550,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
   
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
     
     <!-- EXIT BUTTON -->
@@ -638,7 +630,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <group id="content" x="0" y="0" w="1024" h="768" posref="TL TL" >
   
     <!-- BACKGROUND -->
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
     
     <!-- Window -->
@@ -774,7 +766,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 -->
     <!-- BACKGROUND -->
 <!--
-    <view type="bitmap" posref="TL TL" id="bl" texture="launcher_bg.tga" global_color="false" render_layer="-2" />
+    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
 	<instance template="html_text_button" id="back_to_login" text="BACK TO LOGIN" posparent="parent" posref="TL TL" y="-15" 

@@ -824,7 +824,7 @@
 <group type="modal" id="valid_message_box" exit_click_out="false" posref="MM MM" w="1024" h="768"
  on_enter="proc" on_enter_params="proc_valid_message_box_ok" options="no_bordure" mouse_pos="false"
 >
-	<view type="bitmap" posref="MM MM" id="log" texture="launcher_bg.tga" global_color="false" render_layer="-1" />
+	<view type="bitmap" posref="MM MM" id="log" texture="new_launcher_bg.tga" global_color="false" render_layer="-1" />
 	
 	<view type="text" id="text" posref="MM MM" line_maxw="412" w="412" x="0" y="0" color="135 243 28 255" fontsize="18" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
 	

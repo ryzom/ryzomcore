@@ -119,10 +119,30 @@ void drawLoadingBitmap (float progress)
 		LoadingMaterialFull.setAlphaTestThreshold (1.f-progress);
 
 		CQuadUV		quad;
-		quad.V0.set (0,0,0);
-		quad.V1.set (1,0,0);
-		quad.V2.set (1,1,0);
-		quad.V3.set (0,1,0);
+		uint wh =  Driver->getWindowHeight();
+		uint ww = Driver->getWindowWidth();
+		//nlinfo("%d x %d", ww, wh); 
+		float x1 = 0;
+		float y1 = 0;
+		float x2 = 1;
+		float y2 = 1;
+
+		if ((ww > 1024) || (wh > 768))
+			if ((ww - 1024) > (wh - 768))
+				x1 = ((ww - (wh * 1024.f) / 768.f) / 2.f) / ww;
+			else
+				y1 = ((wh - (ww * 768.f) / 1024.f) / 2.f) / wh;
+
+		if (x1 != 0)
+			x2 = 1 - x1;
+		if (y1 != 0)
+			y2 = 1 - y1;
+
+		quad.V0.set (x1,y1,0);
+		quad.V1.set (x2,y1,0);
+		quad.V2.set (x2,y2,0);
+		quad.V3.set (x1,y2,0);
+
 		quad.Uv0.U= 0;
 		quad.Uv0.V= 0.75f;
 		quad.Uv1.U= 1;
@@ -132,6 +152,7 @@ void drawLoadingBitmap (float progress)
 		quad.Uv3.U= 0;
 		quad.Uv3.V= 0;
 
+		Driver->drawQuad(0, 0, 1, 1, CRGBA(0, 0, 0, 255));
 		Driver->drawQuad(quad, LoadingMaterial);
 		Driver->drawQuad(quad, LoadingMaterialFull);
 	}
@@ -274,10 +295,10 @@ void CProgress::internalProgress (float value)
 
 
 		// Teleport help
-		fY = ClientCfg.TeleportInfoY;
-		if (LoadingContinent && !LoadingContinent->Indoor)
+		//fY = ClientCfg.TeleportInfoY;
+		if (!ApplyTextCommands && LoadingContinent && !LoadingContinent->Indoor)
 		{
-			TextContext->setFontSize((uint)(16.f * fontFactor));
+			TextContext->setFontSize((uint)(13.f * fontFactor));
 
 			// Print some more info
 			uint32 day = RT.getRyzomDay();
@@ -289,6 +310,9 @@ void CProgress::internalProgress (float value)
 				CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).toUtf8().c_str());
 			ucstring ucstr;
 			ucstr.fromUtf8 (str);
+			TextContext->setHotSpot(UTextContext::MiddleBottom);
+			TextContext->setColor(CRGBA(186, 179, 163, 255));
+			TextContext->printAt(0.5f, 25/768.f, ucstr);
 		}
 
 		// apply text commands
@@ -299,16 +323,15 @@ void CProgress::internalProgress (float value)
 
 			if( !printfCommands.empty() )
 			{
-				TextContext->setHotSpot(UTextContext::BottomLeft);
+				TextContext->setHotSpot(UTextContext::MiddleBottom);
 
 				vector<CClientConfig::SPrintfCommand>::iterator itpc;
 				for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
 				{
-					// Yoyo: the coordinates entered are though for 1024
-					float x = ((*itpc).X / 1024.f);
+					float x = 0.5f;//((*itpc).X / 1024.f);
 					float y = ((*itpc).Y / 768.f);
 					TextContext->setColor( (*itpc).Color );
-					TextContext->setFontSize( (*itpc).FontSize );
+					TextContext->setFontSize( (uint)(16.f * fontFactor));
 
 					// build the ucstr(s)
 					ucstring ucstr = CI18N::get((*itpc).Text);

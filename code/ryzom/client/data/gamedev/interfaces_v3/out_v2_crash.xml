@@ -10,7 +10,7 @@
 
 	<!-- JENA BACK -->
 	<view type="bitmap" id="jena" render_layer="-1" 
-		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="launcher_bg.tga" />
+		global_color="false" color="255 255 255 255" posref="TL TL" x="0" y="0" texture="new_launcher_bg.tga" />
 
 	
 	<!-- Quit Button -->
