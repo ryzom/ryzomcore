@@ -97,8 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="insert the hi res icon"
-				CommandLine="$(InputDir)\..\..\tools\scripts\windows\tools\replace_vista_icon.exe $(TargetPath) $(InputDir)\ryzom.ico 101"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -184,8 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="insert the hi res icon"
-				CommandLine="$(InputDir)\..\..\tools\scripts\windows\tools\replace_vista_icon.exe $(TargetPath) $(InputDir)\ryzom.ico 101"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
