@@ -138,22 +138,22 @@
   <key name="KeyF1" action="self_target"/>
   <key name="KeyF1" shift="1" action="toggle_help"/>
   <key name="KeyF1" shift="1" ctrl="1" action="copy_to_desktop" params="0"/>
-  <key name="KeyF2" action="target_teammate_shortcut" params="1"/>
-  <key name="KeyF2" shift="1" action="target_teammate_shortcut" params="5"/>
+  <key name="KeyF2" action="target_teammate_shortcut" params="indexInTeam=1"/>
+  <key name="KeyF2" shift="1" action="target_teammate_shortcut" params="indexInTeam=5"/>
   <key name="KeyF2" shift="1" ctrl="1" action="copy_to_desktop" params="1"/>
   <key name="KeyF2" menu="1" action="profile_texture"/>
   <key name="KeyF2" ctrl="1" menu="1" action="profile_vblock"/>
-  <key name="KeyF3" action="target_teammate_shortcut" params="2"/>
-  <key name="KeyF3" shift="1" action="target_teammate_shortcut" params="6"/>
-  <key name="KeyF3" shift="1" ctrl="1" action="copy_to_desktop" params="2"/>
-  <key name="KeyF4" action="target_teammate_shortcut" params="3"/>
-  <key name="KeyF4" shift="1" action="target_teammate_shortcut" params="7"/>
-  <key name="KeyF4" shift="1" ctrl="1" action="copy_to_desktop" params="3"/>
+  <key name="KeyF3" action="target_teammate_shortcut" params="indexInTeam=2"/>
+  <key name="KeyF3" shift="1" action="target_teammate_shortcut" params="indexInTeam=6"/>
+  <key name="KeyF3" shift="1" ctrl="1" action="copy_to_desktop" params="indexInTeam=2"/>
+  <key name="KeyF4" action="target_teammate_shortcut" params="indexInTeam=3"/>
+  <key name="KeyF4" shift="1" action="target_teammate_shortcut" params="indexInTeam=7"/>
+  <key name="KeyF4" shift="1" ctrl="1" action="copy_to_desktop" params="indexInTeam=3"/>
   <key name="KeyF4" menu="1" action="enter_modal" params="group=ui:interface:quit_dialog"/>
   <key name="KeyF4" ctrl="1" menu="1" action="profile_fillrate"/>
   <key name="KeyF4" shift="1" ctrl="1" menu="1" action="replay_movie"/>
-  <key name="KeyF5" action="target_teammate_shortcut" params="4"/>
-  <key name="KeyF5" shift="1" action="target_teammate_shortcut" params="8"/>
+  <key name="KeyF5" action="target_teammate_shortcut" params="indexInTeam=4"/>
+  <key name="KeyF5" shift="1" action="target_teammate_shortcut" params="indexInTeam=8"/>
   <key name="KeyF5" shift="1" ctrl="1" menu="1" action="save_movie"/>
   <key name="KeyF6" shift="1" action="switch_console_display"/>
   <key name="KeyF6" shift="1" ctrl="1" menu="1" action="memory_report"/>

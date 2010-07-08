@@ -425,7 +425,7 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 	{
 		// check player is sit, on a mektoub or swimming otherwise return false
 		const MBEHAV::EMode mode = player->getMode();
-		if (mode != MBEHAV::SIT && mode != MBEHAV::MOUNT_NORMAL && mode != MBEHAV::MOUNT_SWIM && mode != MBEHAV::SWIM)
+		if (mode != MBEHAV::SIT && mode != MBEHAV::MOUNT_NORMAL && mode != MBEHAV::MOUNT_SWIM && mode != MBEHAV::SWIM && !player->isInWater())
 		{
 			CCharacter::sendDynamicSystemMessage(player->getId(),"CONSUMABLE_NOT_STAND_UP");
 			return false;

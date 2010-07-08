@@ -1,11 +1,3 @@
-/**
- * \file music_channel_fader.cpp
- * \brief CMusicChannelFader
- * \date 2008-09-04 21:49GMT
- * \author Jan Boon (Kaetemi)
- * CMusicChannelFader roughly based on music_channel_fmod.cpp
- */
-
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //

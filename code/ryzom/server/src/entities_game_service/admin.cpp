@@ -5232,7 +5232,7 @@ NLMISC_COMMAND(setFamePlayer, "set the fame value of a player in the given facti
 
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m> [<spawnBots=true>]]")
+NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m> [<spawnBots=true> [<orientation=random|self|-360..360> [<name>]]]]")
 {
 	if (args.size () < 3) return false;
 	GET_ENTITY
@@ -5240,7 +5240,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	uint32 instanceNumber = e->getInstanceNumber();
 	sint32 x = e->getX();
 	sint32 y = e->getY();
-	sint32 z = e->getZ();
+	sint32 orientation = 6666; // used to specify a random orientation
 
 	uint32 nbBots = NLMISC::atoui(args[1].c_str());
 	if (nbBots<=0)
@@ -5275,17 +5275,34 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 		NLMISC::fromString(args[4], spawnBots);
 	}
 
+	if (args.size()>5)
+	{
+		if (args[5] == "self")
+		{
+			orientation = (sint32)(e->getHeading() * 1000.0);
+		}
+		else
+		{
+			NLMISC::fromString(args[5], orientation);
+			orientation = (sint32)((double)orientation / 360.0 * (NLMISC::Pi * 2.0) * 1000.0);
+		}
+	}
+
+	std::string botsName;
+	if (args.size()>6) botsName = args[6];
+
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
 	uint32 messageVersion = 1;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(x);
 	msgout.serial(y);
-	msgout.serial(z);
+	msgout.serial(orientation);
 	msgout.serial(nbBots);
 	msgout.serial(sheetId);
 	msgout.serial(dispersionRadius);
 	msgout.serial(spawnBots);
+	msgout.serial(botsName);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;

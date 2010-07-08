@@ -66,7 +66,7 @@ static string getWebAuthKey()
 
 void addWebIGParams (string &url)
 {
-	if(!UserEntity || (NetMngr.getConnectionState() < CNetworkConnection::Connected)) return;
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	url += ((url.find('?') != string::npos) ? "&" : "?") +

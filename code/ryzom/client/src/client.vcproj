@@ -102,88 +102,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="4"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../common/src"
-				PreprocessorDefinitions="_WINDOWS;WIN32;_DEBUG;CURL_STATICLIB"
-				StringPooling="true"
-				MinimalRebuild="true"
-				ExceptionHandling="2"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="true"
-				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdpch.h"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
-				OutputFile="..\..\bin64\client_ryzom_d.exe"
-				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="msvcrt.lib"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
 			IntermediateDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
@@ -268,6 +186,88 @@
 				Name="VCPostBuildEventTool"
 				Description="insert the hi res icon"
 				CommandLine="$(InputDir)\..\..\tools\scripts\windows\tools\replace_vista_icon.exe $(TargetPath) $(InputDir)\ryzom.ico 101"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="4"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="../../common/src"
+				PreprocessorDefinitions="_WINDOWS;WIN32;_DEBUG;CURL_STATICLIB"
+				StringPooling="true"
+				MinimalRebuild="true"
+				ExceptionHandling="2"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="3"
+				BufferSecurityCheck="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdpch.h"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind_d.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				OutputFile="..\..\bin64\client_ryzom_d.exe"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
@@ -2902,7 +2902,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -2910,7 +2910,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32"
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

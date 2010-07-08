@@ -41,14 +41,14 @@
   <key name="KeyF6" ctrl="0" action="toggle_combat" /> 
   <key name="KeySPACE" action="front_selection" params="ennemy" />
   <key name="KeySPACE" ctrl="1" action="front_selection" params="friend"/>
-  <key name="KeyF1" ctrl="1" action="target_teammate_shortcut" params="1"/>
-  <key name="KeyF2" ctrl="1" action="target_teammate_shortcut" params="2"/>
-  <key name="KeyF3" ctrl="1" action="target_teammate_shortcut" params="3"/>
-  <key name="KeyF4" ctrl="1" action="target_teammate_shortcut" params="4"/>
-  <key name="KeyF5" ctrl="1" action="target_teammate_shortcut" params="5"/>
-  <key name="KeyF6" ctrl="1" action="target_teammate_shortcut" params="6"/>
-  <key name="KeyF7" ctrl="1" action="target_teammate_shortcut" params="7"/>
-  <key name="KeyF8" ctrl="1" action="target_teammate_shortcut" params="8"/>
+  <key name="KeyF1" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=1"/>
+  <key name="KeyF2" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=2"/>
+  <key name="KeyF3" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=3"/>
+  <key name="KeyF4" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=4"/>
+  <key name="KeyF5" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=5"/>
+  <key name="KeyF6" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=6"/>
+  <key name="KeyF7" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=7"/>
+  <key name="KeyF8" ctrl="1" action="target_teammate_shortcut" params="indexInTeam=8"/>
  <!--  Desktop 
   --> 
   <key name="KeyF1" action="set_desktop" params="0" /> 

@@ -168,6 +168,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	AfxEnableControlContainer();
 	_PluginAccess = pluginAccess;
+	_PluginName="Player Plugin";
 //#undef new
 	LoadDlg = new CLoadDialog;
 //#define new NL_NEW
@@ -303,4 +304,42 @@ void CPlugin::onIdle()
 			StackPlayers.clear();
 		}
 	}
+}
+
+std::string& CPlugin::getName()
+{
+	return _PluginName;
+}
+
+bool CPlugin::isActive()
+{
+	return _PluginActive;
+}
+
+bool CPlugin::activatePlugin()
+{
+	if(!_PluginActive)
+	{
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
+		AfxEnableControlContainer();
+		
+		//_DialogFlag->Create(IDD_DIALOG_FLAGS, CWnd::FromHandle(_PluginAccess->getMainWindow()->m_hWnd));
+		_DialogFlag->ShowWindow(TRUE);
+		//_DialogFlag->init(this);
+		_PluginActive=true;
+		return true;
+	}
+	return false;
+}
+
+bool CPlugin::closePlugin()
+{
+	if (_PluginActive)
+	{
+		//_DialogFlag->CloseWindow();
+		_DialogFlag->ShowWindow(FALSE);
+		_PluginActive=false;
+		return true;
+	}
+	return false;
 }

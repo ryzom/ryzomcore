@@ -1807,8 +1807,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 		CInventoryManager	&invMngr= getInventory();
 
-		// If the item is an animal representation
-		if(pIS!=NULL && pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
+		// If the item is an animal representation or rpjob item
+		if (pIS!=NULL && ((pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET) || (pIS->Id.toString().substr(0, 6) == "rpjob_")))
 		{
 			// cannot move to other animals! :)
 			if(pMoveToBag)		pMoveToBag->setActive(false);

@@ -47,6 +47,7 @@ extern "C"
 #include "../time_client.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/md5.h"
+#include "nel/3d/texture_file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -173,7 +174,7 @@ void CGroupHTML::checkImageDownload()
 									// don't display image that are not power of 2
 									uint32 w, h;
 									CBitmap::loadSize (image, w, h);
-									if (w == 0 || h == 0 || !NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h))
+									if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
 										image.clear();
 
 									CCtrlButton *btn = dynamic_cast<CCtrlButton*>(it->imgs[i]);
@@ -2103,7 +2104,7 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 				// don't display image that are not power of 2
 				uint32 w, h;
 				CBitmap::loadSize (image, w, h);
-				if (w == 0 || h == 0 || !NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h))
+				if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
 					image.clear();
 
 				newImage->setTexture (image);
@@ -2475,12 +2476,13 @@ void CGroupHTML::setTitle (const ucstring &title)
 	CInterfaceElement *parent = getParent();
 	if (parent)
 	{
-		parent = parent->getParent();
-
-		CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
-		if (container)
+		if (parent = parent->getParent())
 		{
-			container->setUCTitle (title);
+			CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
+			if (container)
+			{
+				container->setUCTitle (title);
+			}
 		}
 	}
 }
