@@ -3052,9 +3052,14 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 
 					break;
 				}
+				// end of file chunk
+				else if (chunkName == NL_MAKEFOURCC('I', 'E', 'N', 'D'))
+				{
+					break;
+				}
 
-				// skip data of this chunk
-				f.seek(chunkLength, IStream::current);
+				// skip data of this chunk and CRC32
+				f.seek(chunkLength+4, IStream::current);
 			}
 			catch(...)
 			{
@@ -3065,7 +3070,8 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 	}
 	else if(fileType == JPG_HEADER)
 	{
-		uint16 blockMarker = 0;
+		uint8 blockMarker1 = 0;
+		uint8 blockMarker2 = 0;
 		uint16 blockSize = 0;
 		bool eof = false;
 
@@ -3073,39 +3079,67 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		{
 			try
 			{
-				// since we read the first marker
-				// we should skip this (blockSize should not be equal to zero)
-				if (blockSize > 1)
+				// marker of a block
+				f.serial(blockMarker1);
+
+				if (blockMarker1 == 0xff)
 				{
 					// marker of a block
-					f.serial(blockMarker);
-					NLMISC_BSWAP16(blockMarker);
+					f.serial(blockMarker2);
 
+					// 0xff00 is only found in image data
+					if (blockMarker2 == 0x00)
+					{
+						// image data 0xff
+					}
+					// 0xffda is image data
+					else if (blockMarker2 == 0xda)
+					{
+						// next data is image data which must end with 0xffd9
+					}
 					// 0xffd9 is the end of an image
-					if (blockMarker == 0xffd9) break;
+					else if (blockMarker2 == 0xd9)
+					{
+						// real end of file
+						break;
+					}
+					else if (blockMarker2 == 0xdd || blockMarker2 == 0xdc)
+					{
+						f.seek(4, IStream::current);
+					}
+					else if (blockMarker2 == 0xdf)
+					{
+						f.seek(3, IStream::current);
+					}
+					else if (blockMarker2 >= 0xd0 && blockMarker2 <= 0xd8)
+					{
+						// no content
+					}
+					else
+					{
+						// size of a block
+						f.serial(blockSize);
+						NLMISC_BSWAP16(blockSize);
+
+						// frame marker (which contains image width and height)
+						if (blockMarker2 >= 0xc0 && blockMarker2 <= 0xc3)
+						{
+							uint8 imagePrecision = 0; // sample precision
+							uint32 imageSize = 0; // width and height
+							f.serial(imagePrecision); 
+							f.serial(imageSize);
+							NLMISC_BSWAP32(imageSize);
+
+							retWidth = imageSize & 0xffff;
+							retHeight = (imageSize & 0xffff0000) >> 16;
+
+							break;
+						}
+
+						// skip the block
+						f.seek(blockSize - 2, IStream::current);
+					}
 				}
-
-				// size of a block
-				f.serial(blockSize);
-				NLMISC_BSWAP16(blockSize);
-
-				// frame marker (which contains image width and height)
-				if (blockMarker >= 0xffc0 && blockMarker <= 0xffc3)
-				{
-					uint8 imagePrecision = 0; // sample precision
-					uint32 imageSize = 0; // width and height
-					f.serial(imagePrecision); 
-					f.serial(imageSize);
-					NLMISC_BSWAP32(imageSize);
-
-					retWidth = imageSize & 0xffff;
-					retHeight = (imageSize & 0xffff0000) >> 16;
-
-					break;
-				}
-
-				// skip the block
-				f.seek(blockSize - 2, IStream::current);
 			}
 			catch(...)
 			{
