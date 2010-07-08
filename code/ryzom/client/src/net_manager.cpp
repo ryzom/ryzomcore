@@ -76,6 +76,7 @@
 #include "interface_v3/group_map.h"
 #include "sound_manager.h"
 #include "interface_v3/group_compas.h"
+#include "interface_v3/group_html_webig.h"
 #include "interface_v3/bar_manager.h"
 #include "permanent_ban.h"
 #include "global.h"
@@ -702,9 +703,6 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		colorizeSender(finalString, senderName, col);
 	}
 
-	// Log
-	pIM->log (finalString);
-
 	// play associated fx if any
 	if( !stringCategory.empty() )
 	{
@@ -764,7 +762,42 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		else
 		{
-			PeopleInterraction.ChatInput.AroundMe.displayMessage(finalString, col, 2, &windowVisible);
+			ucstring::size_type index = finalString.find(ucstring("<BPFX>"));
+			if (index != ucstring::npos) {
+				bubbleWanted = false;
+				finalString = finalString.substr(index+6,finalString.size());
+				ucstring::size_type index2 = finalString.find(ucstring(" "));
+				ucstring playerName;
+				if (index2 < (finalString.size()-3)) {
+					playerName = finalString.substr(0,index2);
+					finalString = finalString.substr(index2+1,finalString.size());
+				}
+				if (!senderName.empty())
+				{
+					CEntityCL *senderEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(senderName), true, true);
+					if (senderEntity) {
+						if (senderEntity->Type != CEntityCL::Player) {
+							if (playerName.empty()) {
+								senderEntity->removeStateFx();
+								senderEntity->setStateFx(finalString.toString());
+								nlinfo("empty");
+							} else {
+								CEntityCL *destEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(playerName), false, true);
+								if (destEntity) {
+									destEntity->removeStateFx();
+									destEntity->setStateFx(finalString.toString());
+									nlinfo("no empty");
+								}
+							}
+						}
+					}
+				}
+				finalString = "";
+			}
+			else 
+			{
+				PeopleInterraction.ChatInput.AroundMe.displayMessage(finalString, col, 2, &windowVisible);
+			}
 		}
 		// if tell, bkup sendername
 		if (mode == CChatGroup::tell && windowVisible && !senderName.empty())
@@ -786,6 +819,10 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	{
 		InSceneBubbleManager.chatOpen(compressedSenderIndex, finalRawMessage, bubbleTimer);
 	}
+
+	// Log
+	pIM->log (finalString);
+
 }
 
 
@@ -3101,6 +3138,8 @@ void impulseOutpostDeclareWarAck(NLMISC::CBitMemStream &impulse)
 		node->setValue32(timeStartAttack);
 }
 
+extern void addWebIGParams (string &url);
+
 //-----------------------------------------------
 //-----------------------------------------------
 class CServerMessageBoxOnReceiveTextId : public STRING_MANAGER::IStringWaitCallback
@@ -3122,8 +3161,37 @@ private:
 			return;
 
 		// if the string start with a @{Wxxxx} code, remove it and get the wanted window size
-		sint	w= 256;		// default size to 256 !!
-		if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
+		sint	w = 256;		// default size to 256 !!
+		bool	is_webig = false;
+
+		if(contentStr.size()>=6 && contentStr[0]=='W' && contentStr[1]=='E' && contentStr[2]=='B'
+			&& contentStr[3]==' ' && contentStr[4]==':' && contentStr[5]==' ' )
+		{
+			ucstring web_app;
+			uint i;
+			const uint digitStart= 6;
+			const uint digitMaxEnd= contentStr.size();
+
+			is_webig = true;
+
+			for(i = digitStart; i < digitMaxEnd; i++)
+			{
+				if(contentStr[i] == ' ')
+					break;
+			}
+			nlinfo("%d", i);
+			if(i != digitMaxEnd)
+				web_app = contentStr.substr(digitStart, i-digitStart);
+			else
+			{
+				web_app = ucstring("index");
+				i = digitStart;
+				nlinfo("no app");
+			}
+			contentStr = ucstring("http://atys.ryzom.com/start/")+web_app+ucstring(".php?")+contentStr.substr(i+1);
+			nlinfo("contentStr = %s", contentStr.toString().c_str());
+		} 
+		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
 			const	uint digitStart= 3;
@@ -3143,9 +3211,26 @@ private:
 			}
 		}
 
-		// open the message box window
+		// open the message box window or web ig
+		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+
+		if (is_webig)
 		{
-			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:webig:content:html"));
+			if (groupHtml)
+			{
+
+				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:webig"));
+				pGC->setActive(true);
+
+				string url = contentStr.toString();
+				addWebIGParams(url);
+				groupHtml->browse(url.c_str());
+				pIM->setTopWindow(pGC);
+			}
+		}
+		else
+		{
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:server_message_box"));
 			if (pGC)
 			{

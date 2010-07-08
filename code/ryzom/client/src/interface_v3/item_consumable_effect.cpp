@@ -60,20 +60,26 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 
 		if( name == "SP_CHG_CHARAC" )
 		{
-			ucstring result = CI18N::get("uiItemConsumableEffectChgCharac");
-
 			CHARACTERISTICS::TCharacteristics charac = CHARACTERISTICS::toCharacteristic(params[0]);
 			string characUIId = "uiCaracId" + toString((uint8)charac);
-			strFindReplace(result, "%charac", CI18N::get(characUIId));
 
 			double param1, param2;
 			fromString(params[1].c_str(), param1);
 			fromString(params[2].c_str(), param2);
-			uint32 bonus = (uint32)(param1 * itemQuality + param2);
-			strFindReplace(result, "%bonus", toString(bonus));
+			sint32 bonus = (uint32)(param1 * itemQuality + param2);
 
 			uint32 timeInSec;
 			fromString(params[3].c_str(), timeInSec);
+
+			ucstring result;
+
+			if (bonus >= 0)
+				result = CI18N::get("uiItemConsumableEffectUpCharac");
+			else
+				result = CI18N::get("uiItemConsumableEffectDownCharac");
+
+			strFindReplace(result, "%charac", CI18N::get(characUIId));
+			strFindReplace(result, "%bonus", toString(bonus));
 			strFindReplace(result, "%minutes", toString(timeInSec/60));
 			strFindReplace(result, "%secondes", toString(timeInSec%60));
 
@@ -81,7 +87,83 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			effects += "\n";
 		}
 
+		if ( name == "SP_LIFE_AURA" )
+		{
+			
+			uint16 regenMod;
+			fromString(params[0].c_str(), regenMod);
+			uint32 duration;
+			fromString(params[1].c_str(), duration);
+			uint32 radius;
+			fromString(params[2].c_str(), radius);
+			uint32 targetDisableTime;
+			fromString(params[3].c_str(), targetDisableTime);
+			uint32 userDisableTime;
+			fromString(params[4].c_str(), userDisableTime);
 
+			ucstring result = CI18N::get("uiItemConsumableEffectLifeAura");
+			strFindReplace(result, "%modifier", toString(regenMod));
+			strFindReplace(result, "%minutes", toString(duration/60));
+			strFindReplace(result, "%secondes", toString(duration%60));
+			strFindReplace(result, "%radius", toString(radius));
+			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
+			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+
+			effects += result;
+			effects += "\n";
+		}
+
+		if ( name == "SP_STAMINA_AURA" )
+		{
+			
+			uint16 regenMod;
+			fromString(params[0].c_str(), regenMod);
+			uint32 duration;
+			fromString(params[1].c_str(), duration);
+			uint32 radius;
+			fromString(params[2].c_str(), radius);
+			uint32 targetDisableTime;
+			fromString(params[3].c_str(), targetDisableTime);
+			uint32 userDisableTime;
+			fromString(params[4].c_str(), userDisableTime);
+
+			ucstring result = CI18N::get("uiItemConsumableEffectStaminaAura");
+			strFindReplace(result, "%modifier", toString(regenMod));
+			strFindReplace(result, "%minutes", toString(duration/60));
+			strFindReplace(result, "%secondes", toString(duration%60));
+			strFindReplace(result, "%radius", toString(radius));
+			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
+			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+
+			effects += result;
+			effects += "\n";
+		}
+
+		if ( name == "SP_SAP_AURA" )
+		{
+			
+			uint16 regenMod;
+			fromString(params[0].c_str(), regenMod);
+			uint32 duration;
+			fromString(params[1].c_str(), duration);
+			uint32 radius;
+			fromString(params[2].c_str(), radius);
+			uint32 targetDisableTime;
+			fromString(params[3].c_str(), targetDisableTime);
+			uint32 userDisableTime;
+			fromString(params[4].c_str(), userDisableTime);
+
+			ucstring result = CI18N::get("uiItemConsumableEffectSapAura");
+			strFindReplace(result, "%modifier", toString(regenMod));
+			strFindReplace(result, "%minutes", toString(duration/60));
+			strFindReplace(result, "%secondes", toString(duration%60));
+			strFindReplace(result, "%radius", toString(radius));
+			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
+			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+
+			effects += result;
+			effects += "\n";
+		}
 
 		// skill modifier consumables
 		//---------------------------

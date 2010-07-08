@@ -1953,6 +1953,10 @@ void initStructForItemSort(vector<SSortStruct>&vTemp, sint32 sheetId, sint32 qua
 
 			vTemp[indexInList].Pos += toString("%03d", quality);
 
+            // add sort by name
+            vTemp[indexInList].Pos += CSheetId(sheetId).toString();
+
+
 			// add at last the index in DB. to avoid resort for items that are exaclty the same
 			vTemp[indexInList].Pos += toString("%03d", indexInDB);
 		}
@@ -2079,6 +2083,10 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 		if ((pIS->Family == ITEMFAMILY::MISSION_ITEM) ||
 			((pIS->Family == ITEMFAMILY::RAW_MATERIAL) && !pIS->canBuildSomeItemPart()))
 			if (!bFilterMissMP) bDisplay = false;
+		
+		// Jobs Items
+		if (pIS->Id.toString().substr(0, 6) == "rpjob_")
+			bDisplay = false;
 	}
 	return bDisplay;
 }

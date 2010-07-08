@@ -635,6 +635,16 @@
               params_r=""
               onclick_l=""
               params_l="" />
+        <ctrl style="tab_button_new" 
+              id="tab2"
+ 			  posparent="tab1"
+              group="content:rpjobs"
+              hardtext="uiRpJobs" 
+              onclick_r=""
+			  params_r=""
+              onclick_l=""
+              params_l="" />
+
       </group>
       <view type="bitmap"
             id="sep"
@@ -722,8 +732,9 @@
                 posparent="guild_title"
                 posref="TR TL"
                 shadow="true"
-                color="255 255 255 255"
-                global_color="true"
+                color="255 200 55 255"
+                global_color="false"
+				x="2"
                 fontsize="12"
                 textid="SERVER:GUILD:NAME"
                 dynamic_string="false" />
@@ -1448,7 +1459,41 @@
                         <view type="text" id="ring_rating_title" posparent="ring_rating" posref="TL BL" x="0" y="0" hardtext="uiR2EDRingRatingTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
                         -->
       </group>
+	  <group h="0" id="rpjobs" posref="TL TL" sizeref="wh" w="0" y="0">
+		  <group h="48" child_resize_hmargin="16" id="rpjobs_advanced" posref="TL TL" sizeref="w" w="-4" x="2" y="-5">
+			<instance color="255 155 255 255" template="rpjob_title" rpjob_icon="rpjob_advanced.tga" margin_x="0" id="rpjob_advanced_title" text="uiRpJobsAdvanced" posparent="rpjobs_advanced" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_title" template="inner_thin_border"/>
+		  </group>
+
+		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_advanced_1" posparent="rpjobs_advanced" posref="BL TL" sizeref="w" y="-5">
+			<instance template="rpjob_infos" rpjob_icon="rpjob_advanced.tga" margin_x="20" id="rpjob_advanced_infos_1" w="-20" posparent="rpjobs_advanced_1" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_infos_1" template="frame_widget" h="48" w="48" />
+		  </group>
+		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_advanced_2" posparent="rpjob_advanced_1" posref="BL TL" sizeref="w" y="-5">
+			<instance template="rpjob_infos" rpjob_icon="rpjob_advanced.tga" margin_x="20" id="rpjob_advanced_infos_2" w="-20" posparent="rpjobs_advanced_2" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_infos_2" template="frame_widget" h="48" w="48" />
+		  </group>
+
+		  <group h="48" child_resize_hmargin="16" id="rpjobs_elementary" posparent="rpjob_advanced_2" posref="BL TL" sizeref="w" y="-5">
+			<instance color="155 255 155 255" template="rpjob_title" rpjob_icon="rpjob_elementary.tga" margin_x="0" id="rpjob_elementary_title" text="uiRpJobsElementary" posparent="rpjobs_elementary" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_title" template="inner_thin_border"/>
+		  </group>
+		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_1" posparent="rpjobs_elementary" posref="BL TL" sizeref="w" y="-5">
+			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_1" w="-20" posparent="rpjobs_elementary_1" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_1" template="frame_widget" h="48" w="48" />
+		  </group>
+		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_2" posparent="rpjob_elementary_1" posref="BL TL" sizeref="w" y="-5">
+			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_2" w="-20" posparent="rpjobs_elementary_2" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_2" template="frame_widget" h="48" w="48" />
+		  </group>
+		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_3" posparent="rpjob_elementary_2" posref="BL TL" sizeref="w" y="-5">
+			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_3" w="-20" posparent="rpjobs_elementary_3" posref="TL TL" />
+			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_3" template="frame_widget" h="48" w="48" />
+		  </group>
+		</group>
+	  <view color="166 166 166 255" h="1" id="sep" posparent="info_player_skills_tabs" posref="BR BL" scale="true" sizeparent="parent" sizeref="w" texture="blank.tga" type="bitmap" w="0"/>
     </group>
+	
   </group>
   <tree node="info_player_skills" />
   <!--***********-->
@@ -3232,6 +3277,7 @@
         action="lua:game:onMissionJournalOpened()" />
   <link expr="depends(@SERVER:USER:IS_TRIAL)"
         action="lua:game:onMissionJournalOpened()" />
+  <link expr="depends(@LOCAL:INVENTORY:BAG)" action="lua:game:getRPJobs()" />
   <!--***********************-->
   <!--*   POPUP  MESSAGES   *-->
   <!--***********************-->
@@ -3350,7 +3396,38 @@
             shadow="true"
             color="255 0 0 255" />
     </group>
+	
+	  
+  <!--***********************-->
+  <!--*    RPJOB TEMPLATES  *-->
+  <!--***********************-->
   </template>
+    <template h="48" id="" name="rpjob_title" posparent="parent" posref="TL TL" sizeref="w" suffix="" text="" tooltip="" val="" w="0" x="0" y="0">
+    <group h="#h" id="#id" posparent="#posparent" posref="#posref" sizeref="#sizeref" w="#w" x="#margin_x" y="#y">
+      <view global_color="false" id="icon" posref="TL TL" texture="#rpjob_icon" type="bitmap" x="4" y="-4"/>
+      <view color="#color" fontsize="16" hardtext="#text" id="t" posref="MR ML" posparent="icon" shadow="true" type="text" x="5"/>
+    </group>
+  </template>
+
+  <template h="48" id="" name="rpjob_infos" posparent="parent" posref="TL TL" sizeref="w" suffix="" text="" tooltip="" val="" w="0" x="0" y="0">
+    <group h="#h" id="#id" posparent="#posparent" posref="#posref" sizeref="#sizeref" w="#w" x="#margin_x" y="#y">
+	  <view color="0 0 0 255" h="48" w="48" scale="true" global_color="false" id="bg" posref="TL TL" parent="#id" texture="blank.tga" type="bitmap"/>
+      <view global_color="false" id="icon" posref="TL TL" texture="#rpjob_icon" type="bitmap" x="4" y="-4"/>
+      <view global_color="false" color="255 255 255 255" fontsize="13" id="t" posref="TR TL" posparent="icon" shadow="true" w="#w" type="text" x="10"/>
+      <group h="20" id="bar3d" posref="BR BL" posparent="icon" sizeref="w" w="340" x="8" y="0">
+		<instance inherit_gc_alpha="true" posref="BL BL" y="1" w="370" x="5" template="frame_widget" h="18"/>
+        <view color="0 0 0 255" h="16" id="bar" posparent="bar3d" posref="BL BL" scale="true" texture="blank.tga" type="bitmap" w="368" x="5" y="2"/>
+        <view h="16" id="level" posparent="bar3d" posref="BL BL" scale="true" texture="blank.tga" type="bitmap" w="368" x="5" y="2"/>
+        <view global_color="false" fontsize="12" hardtext="" id="t" posref="MM MM" posparent="bar" shadow="false" w="#w" type="text" y="-2"/>
+	  </group>
+      <view global_color="false" color="255 255 155 255" fontsize="11" hardtext="" id="echelon_value" posref="TR TR" posparent="bar3d" shadow="true" w="#w" type="text" x="-5" y="20"/>
+      <view fontsize="11" hardtext="Echelon : " id="echelon" posref="TL TR" posparent="echelon_value" shadow="true" w="#w" type="text" x="2"/>
+    </group>
+  </template>
+
+  
+  
+  
   <!--***********************-->
   <!--*     NPC WEB PAGE    *-->
   <!--***********************-->

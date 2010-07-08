@@ -1313,6 +1313,8 @@ end
 
 --------------------------------------------------------------------------------------------------------------
 function game:setCurrentMission(index)	
+	mw = getMissionWindow()
+	mw.active = game.InGameDbInitialized
 	if index < self:getGroupMissionFirstIndex() then
 		runAH(nil, "proc", "mission_proc_title|" .. tostring(index))
 	else
@@ -1435,24 +1437,27 @@ end
 --------------------------------------------------------------------------------------------------------------
 -- This is called when a new step is added to the current mission. If so, make sure that the step
 -- is visible in the listbox
-function game:onNewMissionStepAdded(stepIndex)				
+function game:onNewMissionStepAdded(stepIndex)
 	local missionWnd = getMissionWindow()
 	local missionIndex = getDbProp("UI:SAVE:MISSION_SELECTED")
 	local dbPath
+	-- debugInfo("New Step")
 	if missionIndex < 15 then		
 		dbPath = "SERVER:MISSIONS:" .. tostring(missionIndex) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
 	else		
 		dbPath = "SERVER:GROUP:MISSIONS:" .. tostring(missionIndex - 15) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
 	end	
 	local stringID = getDbProp(dbPath)
-	if stringID ~= 0 then		
+	if stringID ~= 0 then
+		-- debugInfo(tostring(stringID))
 		table.insert(remainingMissionTextIDs, stringID)
 		setOnDraw(missionWnd, "game:ensureLastMissionStepVisibility0()")	
 	else		
 	end
 end
 
-function game:ensureLastMissionStepVisibility0()	
+function game:ensureLastMissionStepVisibility0()
+	
 	local missing = false
 	for k, v in pairs(remainingMissionTextIDs) do
 		if not isDynStringAvailable(v) then
@@ -1492,7 +1497,7 @@ function game:ensureLastMissionStepVisibility1()
 			topStep = currStep
 		end
 	end
-	--debugInfo("Found step : " .. topStep.hardtext)	
+	-- debugInfo("Found step : " .. topStep.hardtext)
 	if topStep == nil then 		
 		return
 	end	
@@ -1517,6 +1522,95 @@ function game:onNewMissionAdded(missionIndex)
 	debugInfo("Mission " .. missionIndex .. " has been added")
 end
 
+--------------------------------------------------------------------------------------------------------------
+-- RPJOBS
+
+function game:addRpJob(jobtype, id, value, rpjobs)
+	local base_path = "ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id..":rpjob_"..jobtype.."_infos_"..id
+	
+	local group = getUI("ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id)
+	
+	if (value == nil) then
+		group.active = false
+	else
+		local name = "rpjob_" .. string.format("%03d", value)
+		local sitem = name..".sitem"
+		if (rpjobs[sitem] == nil) then
+			group.active = false
+		else
+			group.active = true
+		
+			local echelon_value = rpjobs[sitem][1]
+			local quantity = rpjobs[sitem][2]
+			
+			local maxlevel = (echelon_value*6)-30
+			
+			if (quantity > maxlevel) then
+				quantity = maxlevel
+			end
+				
+			local base = getUI(base_path..":t")
+			base.hardtext = i18n.get(name):toUtf8()
+			local ui = getUI(base_path..":icon")
+			ui.texture = name..".tga"
+			local bar = getUI(base_path..":bar3d:level")
+			bar.color = tostring(math.floor((105*quantity)/maxlevel)).." "..tostring(100+math.floor((155*quantity)/maxlevel)).." "..tostring(math.floor((105*quantity)/maxlevel)).." 255"
+			bar.w = tostring((368*quantity)/maxlevel)
+			local t = getUI(base_path..":bar3d:t")
+			t.hardtext = tostring(quantity).." / "..tostring(maxlevel)
+			t.color = tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." 255"
+			local echelon = getUI(base_path..":echelon_value")
+			echelon.hardtext = tostring(echelon_value/10)
+		end
+	end
+end
 
 
+function game:getRPJobs()
+	rpjobs_advanced = {}
+	rpjobs_elementary = {}
+	rpjobs_roleplay = {}
+	rpjobs = {}
+	
+	for i = 0, 499, 1 do
+		local sheet =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":SHEET")
+		if (sheet ~= 0) then
+			local name = getSheetName(sheet)
+			if (string.sub(name, 0, 6) == "rpjob_") then
+				local quality =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUALITY")
+				local quantity =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUANTITY")
+				
+				if (name == "rpjob_advanced.sitem") then
+					table.insert(rpjobs_advanced, quality)
+				else
+					if (name == "rpjob_elementary.sitem") then
+						table.insert(rpjobs_elementary, quality)
+					else
+						if (name == "rpjob_roleplay.sitem") then
+							table.insert(rpjobs_roleplay, quality)
+						else
+							if rpjobs[name] == nil then
+								rpjobs[name] = {quality, quantity}
+							else
+								if rpjobs[name][1] < quality then
+									rpjobs[name] = {quality, quantity}
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	for id=1,2,1 do
+		game:addRpJob("advanced", id, rpjobs_advanced[id], rpjobs)
+	end
+
+	for id=1,3,1 do
+		game:addRpJob("elementary", id, rpjobs_elementary[id], rpjobs)
+	end
+
+
+end
 
