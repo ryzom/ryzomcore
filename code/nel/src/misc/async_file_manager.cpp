@@ -67,7 +67,7 @@ void CAsyncFileManager::addLoadTask(IRunnable *ploadTask)
 
 bool CAsyncFileManager::cancelLoadTask(const CAsyncFileManager::ICancelCallback &callback)
 {
-	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	list<CWaitingTask> &rTaskQueue = acces.value ();
 	list<CWaitingTask>::iterator it = rTaskQueue.begin();
 
@@ -87,8 +87,8 @@ bool CAsyncFileManager::cancelLoadTask(const CAsyncFileManager::ICancelCallback 
 	}
 
 	// If not found, the current running task may be the one we want to cancel. Must wait it.
-	// Beware that this code works because of the CUnfairSynchronized access we made above (ensure that the
-	// taskmanager will end just the current task async (if any) and won't start another one.
+	// Beware that this code works because of the CSynchronized access we made above (ensure that the
+	// taskmanager will end just the current task async (if any) and won't start an other one.
 	waitCurrentTaskToComplete ();
 
 	return false;
@@ -105,7 +105,7 @@ void CAsyncFileManager::loadMesh(const std::string& meshName, IShape **ppShp, ID
 /*
 bool CAsyncFileManager::cancelLoadMesh(const std::string& sMeshName)
 {
-	CUnfairSynchronized<list<IRunnable *> >::CAccessor acces(&_TaskQueue);
+	CSynchronized<list<IRunnable *> >::CAccessor acces(&_TaskQueue);
 	list<IRunnable*> &rTaskQueue = acces.value ();
 	list<IRunnable*>::iterator it = rTaskQueue.begin();
 
@@ -167,7 +167,7 @@ void CAsyncFileManager::signal (bool *pSgn)
 
 void CAsyncFileManager::cancelSignal (bool *pSgn)
 {
-	CUnfairSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
+	CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	list<CWaitingTask> &rTaskQueue = acces.value ();
 	list<CWaitingTask>::iterator it = rTaskQueue.begin();
 

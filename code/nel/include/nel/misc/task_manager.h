@@ -140,7 +140,7 @@ protected:
 
 	/// queue of tasks, using list container instead of queue for DeleteTask methode
 	CSynchronized<std::string>				_RunningTask;
-	CUnfairSynchronized<std::list<CWaitingTask> >	_TaskQueue;
+	CSynchronized<std::list<CWaitingTask> >	_TaskQueue;
 	CSynchronized<std::deque<std::string> >	_DoneTaskQueue;
 
 	/// thread pointer

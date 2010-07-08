@@ -48,9 +48,16 @@ namespace NLMISC {
  */
 #define STORE_MUTEX_NAME
 
+#ifdef NL_OS_WINDOWS
+	// By default on Windows, all mutex/synchronization use the CFair* class to avoid freeze problem.
+#	define CMutex CFairMutex
+#	define CSynchronized CFairSynchronized
+#else
+	// On GNU/Linux and Mac, we use CUnfair* everwise it creates some strange deadlock during loading and after
+#	define CMutex CUnfairMutex
+#	define CSynchronized CUnfairSynchronized
+#endif
 
-// By default, all mutex use the CFairMutex class to avoid freeze problem.
-#define CMutex CFairMutex
 
 /**
  * Classic mutex implementation (not necessarly fair)
@@ -572,12 +579,6 @@ extern uint32 NbMutexes;
 #endif // MUTEX_DEBUG
 
 
-
-
-
-// By default, all synchronization use the CFairSynchronized class to avoid freeze problem.
-#define CSynchronized CFairSynchronized
-
 /**
  * This class ensure that the Value is accessed by only one thread. First you have to create a CSynchronized class with you type.
  * Then, if a thread want to modify or do anything on it, you create a CAccessor in a \b sub \b scope. You can modify the value
@@ -618,13 +619,13 @@ public:
 		CAccessor(CUnfairSynchronized<T> *cs)
 		{
 			Synchronized = cs;
-			const_cast<CUnfairMutex&>(Synchronized->_Mutex).enter();
+			const_cast<CMutex&>(Synchronized->_Mutex).enter();
 		}
 
 		/// release the mutex
 		~CAccessor()
 		{
-			const_cast<CUnfairMutex&>(Synchronized->_Mutex).leave();
+			const_cast<CMutex&>(Synchronized->_Mutex).leave();
 		}
 
 		/// access to the Value

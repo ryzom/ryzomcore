@@ -653,7 +653,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 
 		// insert or get the texture.
 		{
-			CUnfairSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 			TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
 
 			ItTexDrvInfoPtrMap	itTex;
