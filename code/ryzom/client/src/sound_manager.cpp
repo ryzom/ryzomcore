@@ -1289,7 +1289,7 @@ void CSoundManager::update ()
 		_BackgroundFlags.Flags[DUSK] = true;
 		break;
 	case CLightCycleManager::StateUnknown:
-		nlwarning("Unknown light cycle  state reached.");
+		//nlwarning("Unknown light cycle state reached.");
 		break;
 	}
 
@@ -1322,7 +1322,8 @@ void CSoundManager::update ()
 		_BackgroundFlags.Flags[WINTER] = true;
 		break;
 	default:
-		nlwarning("Updating unknown season.");
+		//nlwarning("Updating unknown season.");
+		break;
 	}
 	// TODO : update the filter state for weather effet
 	CWeatherState weatherState = WeatherManager.getCurrWeatherState();
