@@ -559,6 +559,8 @@ bool CDriverGL::setupDisplay()
 	// meaning that light direction is always (0,1,0) in eye-space
 	// use enableLighting(0....), to get normal behaviour
 	_DriverGLStates.enableLight(0, true);
+	_LightMode[0] = CLight::DirectionalLight;
+	_WorldLightDirection[0] = CVector::Null;
 
 	_Initialized = true;
 
