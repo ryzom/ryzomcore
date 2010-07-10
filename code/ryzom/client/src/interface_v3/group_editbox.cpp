@@ -21,8 +21,6 @@
 #include "group_editbox.h"
 #include "interface_manager.h"
 #include "input_handler_manager.h"
-#include "nel/misc/command.h"
-#include "nel/misc/system_utils.h"
 #include "view_text.h"
 #include "game_share/xml_auto_ptr.h"
 #include "interface_options.h"

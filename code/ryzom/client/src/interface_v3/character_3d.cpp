@@ -30,16 +30,6 @@
 #include "../player_r2_cl.h"
 #include "../entities.h"
 
-#include "nel/3d/u_scene.h"
-#include "nel/3d/u_instance.h"
-#include "nel/3d/u_camera.h"
-#include "nel/3d/u_play_list_manager.h"
-#include "nel/3d/u_play_list.h"
-#include "nel/3d/u_animation_set.h"
-#include "nel/3d/u_bone.h"
-//#include "nel/3d/u_track.h"
-//#include "nel/3d/u_instance_material.h"
-
 #include "../r2/editor.h"
 #include "../client_cfg.h"
 

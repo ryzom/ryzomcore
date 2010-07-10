@@ -22,8 +22,6 @@
 #include "game_share/xml_auto_ptr.h"
 #include "interface_manager.h"
 
-#include "nel/misc/i18n.h"
-
 using namespace NLMISC;
 
 // ***************************************************************************

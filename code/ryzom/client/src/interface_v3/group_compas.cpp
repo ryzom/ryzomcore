@@ -18,8 +18,6 @@
 
 #include "stdpch.h"
 //
-#include "nel/3d/u_instance_material.h"
-//
 #include "game_share/xml_auto_ptr.h"
 //
 #include "group_compas.h"

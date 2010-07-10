@@ -18,9 +18,6 @@
 #include "stdpch.h"
 #include "dbgroup_list_sheet_icon_phrase.h"
 #include "sphrase_manager.h"
-#include "nel/misc/i18n.h"
-#include "nel/misc/common.h"
-#include "nel/misc/algo.h"
 #include "interface_manager.h"
 
 using namespace	std;

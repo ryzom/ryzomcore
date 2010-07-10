@@ -20,7 +20,6 @@
 #include "chat_filter.h"
 #include "../client_chat_manager.h"
 #include "people_list.h"
-#include "nel/misc/i18n.h"
 #include "../client_cfg.h"
 #include "../net_manager.h"
 #include "interface_manager.h"

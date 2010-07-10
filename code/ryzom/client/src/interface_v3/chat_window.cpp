@@ -20,10 +20,6 @@
 // client
 #include "stdpch.h"
 
-// nel
-#include "nel/misc/command.h"
-#include "nel/misc/i18n.h"
-
 #include "game_share/shard_names.h"
 
 #include "../r2/editor.h"

@@ -46,7 +46,6 @@
 #include "../entities.h"
 #include "macrocmd_manager.h"
 #include "group_menu.h"
-#include "nel/misc/algo.h"
 #include "group_tree.h"
 
 extern CSheetManager SheetMngr;

@@ -27,7 +27,6 @@
 #include "group_container.h"
 #include "dbctrl_sheet.h"
 #include "view_text_id.h"
-#include "nel/misc/sheet_id.h"
 #include "../net_manager.h"
 
 using namespace std;

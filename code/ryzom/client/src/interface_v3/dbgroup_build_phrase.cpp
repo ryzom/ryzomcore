@@ -26,7 +26,6 @@
 #include "ctrl_button.h"
 #include "group_editbox.h"
 #include "../client_cfg.h"
-#include "nel/misc/algo.h"
 #include "view_text.h"
 #include "skill_manager.h"
 #include "../string_manager_client.h"

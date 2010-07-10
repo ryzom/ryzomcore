@@ -23,8 +23,6 @@
 #include "interface_manager.h"
 #include "game_share/xml_auto_ptr.h"
 
-#include "nel/misc/i18n.h"
-
 using namespace std;
 using namespace NL3D;
 using namespace NLMISC;

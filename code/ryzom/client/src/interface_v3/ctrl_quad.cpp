@@ -18,8 +18,6 @@
 #include "ctrl_quad.h"
 #include "interface_group.h"
 #include "interface_manager.h"
-//
-#include "nel/misc/polygon.h"
 
 using namespace NLMISC;
 

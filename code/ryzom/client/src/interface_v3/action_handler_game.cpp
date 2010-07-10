@@ -78,13 +78,8 @@
 #include "game_share/bot_chat_types.h"
 #include "game_share/constants.h"
 #include "game_share/scores.h"
-// Commands
-#include "nel/misc/command.h"
-#include "nel/misc/algo.h"
-#include "nel/misc/i18n.h"
 
 // Game Config
-#include "nel/3d/u_driver.h"
 #include "dbgroup_combo_box.h"
 #include "ctrl_button.h"
 #include "../global.h"

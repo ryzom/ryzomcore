@@ -24,7 +24,6 @@
 #include "ctrl_button.h"
 #include "action_handler.h"
 #include "lua_ihm.h"
-#include "nel/misc/i18n.h"
 
 #include "lua_ihm.h"
 

@@ -45,9 +45,6 @@ extern "C"
 #include "lua_ihm.h"
 
 #include "../time_client.h"
-#include "nel/misc/i18n.h"
-#include "nel/misc/md5.h"
-#include "nel/3d/texture_file.h"
 
 using namespace std;
 using namespace NLMISC;

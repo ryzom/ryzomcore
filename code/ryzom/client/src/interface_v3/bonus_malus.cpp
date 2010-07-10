@@ -16,8 +16,6 @@
 
 #include "stdpch.h"
 
-#include "nel/misc/string_conversion.h"
-
 #include "bonus_malus.h"
 
 using namespace std;

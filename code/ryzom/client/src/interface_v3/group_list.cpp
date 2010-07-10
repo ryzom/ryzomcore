@@ -18,10 +18,6 @@
 
 #include "stdpch.h"
 
-#include "nel/misc/factory.h"
-#include "nel/misc/i_xml.h"
-#include "nel/misc/i18n.h"
-
 #include "group_list.h"
 #include "interface_manager.h"
 #include "interface_element.h"

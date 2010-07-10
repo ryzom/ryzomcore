@@ -25,7 +25,6 @@
 #include "action_handler.h"
 #include "../client_cfg.h"
 #include "ctrl_base_button.h"
-#include "nel/misc/algo.h"
 #include "group_container.h"
 #include "../string_manager_client.h"
 #include "../net_manager.h"

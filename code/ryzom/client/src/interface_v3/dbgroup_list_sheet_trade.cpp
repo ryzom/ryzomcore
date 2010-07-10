@@ -26,7 +26,6 @@
 #include "view_text.h"
 #include "action_handler.h"
 #include "sphrase_manager.h"
-#include "nel/misc/algo.h"
 #include "game_share/time_weather_season/time_and_season.h"
 #include "game_share/pvp_clan.h"
 #include "../string_manager_client.h"

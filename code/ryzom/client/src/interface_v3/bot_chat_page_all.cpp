@@ -32,8 +32,6 @@
 #include "interface_manager.h"
 #include "../global.h"
 
-#include "nel/misc/i18n.h"
-
 
 CBotChatPageAll *BotChatPageAll = NULL;
 

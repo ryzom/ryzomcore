@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "custom_mouse.h"
 //
-#include "nel/misc/file.h"
 #include "../global.h"
 #include "../input.h"
 #include "input_handler_manager.h"

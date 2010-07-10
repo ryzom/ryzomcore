@@ -16,8 +16,6 @@
 
 #include "stdpch.h"
 #include "add_on_manager.h"
-#include "nel/misc/algo.h"
-#include "nel/misc/path.h"
 
 
 using namespace NLMISC;

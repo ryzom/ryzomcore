@@ -26,8 +26,6 @@
 using namespace std;
 using namespace NLMISC;
 
-#include "nel/misc/i_xml.h"
-
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupFrame, std::string, "frame");
 
 // ***************************************************************************

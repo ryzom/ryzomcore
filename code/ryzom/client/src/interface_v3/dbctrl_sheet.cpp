@@ -26,7 +26,6 @@
 #include "../client_sheets/pact_sheet.h"
 #include "../client_sheets/mission_icon_sheet.h"
 #include "../client_sheets/faction_sheet.h"
-#include "nel/misc/algo.h"
 #include "game_share/skills.h"
 #include "game_share/inventories.h"
 #include "list_sheet_base.h"

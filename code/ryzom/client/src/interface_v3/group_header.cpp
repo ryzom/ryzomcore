@@ -22,8 +22,6 @@
 #include "group_container.h"
 #include "group_header.h"
 #include "lua_ihm.h"
-//
-#include "nel/misc/smart_ptr.h"
 
 
 using namespace NLMISC;

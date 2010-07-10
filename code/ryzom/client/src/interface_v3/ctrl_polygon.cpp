@@ -18,8 +18,6 @@
 #include "ctrl_polygon.h"
 #include "view_renderer.h"
 #include "interface_manager.h"
-//
-#include "nel/misc/vector_2f.h"
 
 
 using namespace NLMISC;

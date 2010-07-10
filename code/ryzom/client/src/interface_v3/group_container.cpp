@@ -36,9 +36,6 @@
 #include "view_text.h"
 #include "view_bitmap.h"
 #include "../time_client.h"
-#include "nel/misc/i18n.h"
-#include "nel/3d/u_driver.h"
-#include "nel/misc/algo.h"
 
 
 // ***************************************************************************

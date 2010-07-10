@@ -21,8 +21,6 @@
 #include "chat_text_manager.h"
 #include "view_text.h"
 #include "interface_manager.h"
-// nel
-#include "nel/misc/ucstring.h"
 
 using namespace std;
 using namespace NLMISC;

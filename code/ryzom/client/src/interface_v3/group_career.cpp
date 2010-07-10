@@ -27,8 +27,6 @@
 
 using namespace std;
 
-#include "nel/misc/i_xml.h"
-
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupCareer, std::string, "career");
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupJob, std::string, "job");
 

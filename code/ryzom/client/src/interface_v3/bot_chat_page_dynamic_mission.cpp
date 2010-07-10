@@ -27,8 +27,6 @@
 #include "bot_chat_manager.h"
 #include "../client_cfg.h"
 #include "../net_manager.h"
-//
-#include "nel/misc/i18n.h"
 
 using namespace std;
 
