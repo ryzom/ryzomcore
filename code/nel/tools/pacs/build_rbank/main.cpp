@@ -299,13 +299,13 @@ void	moulineZones(vector<string> &zoneNames)
 /****************************************************************\
 							MAIN
 \****************************************************************/
-CFileDisplayer fd("evallog.log", true);
-
 int main(int argc, char **argv)
 {
 	// Filter addSearchPath
 	NLMISC::createDebug();
 	InfoLog->addNegativeFilter ("adding the path");
+
+	CFileDisplayer fd(getLogDirectory() + "evallog.log", true);
 
 #ifdef LOG_ALL_INFO_TO_FILE
 	createDebug();

@@ -120,8 +120,6 @@ void	init()
 }
 
 //
-CFileDisplayer fd("evallog.log", true);
-
 int main(int argc, char **argv)
 {
 	// Filter addSearchPath
@@ -129,6 +127,7 @@ int main(int argc, char **argv)
 	InfoLog->addNegativeFilter("adding the path");
 
 	createDebug();
+	CFileDisplayer fd(getLogDirectory() + "evallog.log", true);
 
 	try
 	{

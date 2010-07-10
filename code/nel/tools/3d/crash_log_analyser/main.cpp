@@ -194,7 +194,7 @@ void	statRyzomBug(const char *dirSrc)
 	CPath::getPathContent(dirSrc, false, false, true, fileList, NULL, true);
 
 	// delete the log.log
-	CFile::deleteFile("log.log");
+	CFile::deleteFile(getLogDirectory() + "log.log");
 
 	TStatStrMap				senderMap;
 	TStatMap				shardMap;

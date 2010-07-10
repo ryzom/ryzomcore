@@ -661,7 +661,7 @@ int		main(int argc, const char *argv[])
 
 	// Open log
 	FILE	*logStream;
-	logStream= fopen("C:/temp/file_info.log", "wt");
+	logStream= fopen(std::string(getLogDirectory() + "file_info.log").c_str(), "wt");
 
 
 	// parse dir or file ??

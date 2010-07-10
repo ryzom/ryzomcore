@@ -1233,8 +1233,8 @@ bool forageTestDoExtract(
 	}
 
 	// Request and output results
-	FILE *f = fopen( "forage_test.csv", "at" );
-	FILE *f2 = fopen( "forage_test.log", "at" );
+	FILE *f = fopen( std::string(getLogDirectory() + "forage_test.csv").c_str(), "at" );
+	FILE *f2 = fopen( std::string(getLogDirectory() + "forage_test.log").c_str(), "at" );
 	float reqS = 1.0f / (reqPeriod * 10.0f);
 	float req [CHarvestSource::NbPosRTProps];
 	float abs [CHarvestSource::NbPosRTProps];
