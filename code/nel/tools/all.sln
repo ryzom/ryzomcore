@@ -400,6 +400,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shapes_exporter", "3d\shape
 		{2B48BE83-108B-4E8E-8A55-6627CF09AC5A} = {2B48BE83-108B-4E8E-8A55-6627CF09AC5A}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "georges2csv", "georges\georges2csv\georges2csv.vcproj", "{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -944,6 +946,12 @@ Global
 		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|Win32.Build.0 = Release|Win32
 		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|x64.ActiveCfg = Release|x64
 		{F8607267-5BA2-4BE8-A674-26C3F7D0A9BB}.Release|x64.Build.0 = Release|x64
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Debug|Win32.Build.0 = Debug|Win32
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Debug|x64.ActiveCfg = Debug|Win32
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Release|Win32.ActiveCfg = Release|Win32
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Release|Win32.Build.0 = Release|Win32
+		{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

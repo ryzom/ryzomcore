@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="game_share"
 	ProjectGUID="{4B320F68-0B9B-4065-A2ED-AF5D4B163006}"
 	RootNamespace="game_share"
@@ -87,6 +87,75 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="4"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories=".."
+				PreprocessorDefinitions="WIN32;_DEBUG;LIBXML_STATIC"
+				StringPooling="true"
+				MinimalRebuild="true"
+				ExceptionHandling="2"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdpch.h"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="..\..\..\lib64\$(ProjectName)_d.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\..\obj\$(ConfigurationName)\$(ProjectName)"
 			IntermediateDirectory="..\..\..\obj\$(ConfigurationName)\$(ProjectName)"
@@ -140,75 +209,6 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="..\..\..\lib\$(ProjectName)_r.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="..\..\..\obj64\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\..\..\obj64\$(ConfigurationName)\$(ProjectName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="4"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".."
-				PreprocessorDefinitions="WIN32;_DEBUG;LIBXML_STATIC"
-				StringPooling="true"
-				MinimalRebuild="true"
-				ExceptionHandling="2"
-				BasicRuntimeChecks="3"
-				SmallerTypeCheck="true"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdpch.h"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="..\..\..\lib64\$(ProjectName)_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -975,10 +975,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\msg_ais_egs_gen.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\msg_ais_egs_gen.h"
 			>
 		</File>
@@ -1482,7 +1478,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32"
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -1490,7 +1486,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

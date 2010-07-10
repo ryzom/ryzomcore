@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="client"
 	ProjectGUID="{0B58874C-AFD1-4A30-9C43-135D36A0A8C7}"
 	RootNamespace="client"
@@ -221,7 +221,6 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdpch.h"
 				WarningLevel="3"
@@ -349,11 +348,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				Description="insert the hi res icon"
-				CommandLine="$(InputDir)\..\..\tools\scripts\windows\tools\replace_vista_icon.exe $(TargetPath) $(InputDir)\ryzom.ico 101"
 			/>
 		</Configuration>
 	</Configurations>
