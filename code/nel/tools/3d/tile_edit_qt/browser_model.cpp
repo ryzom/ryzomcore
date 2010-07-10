@@ -1,3 +1,18 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/types_nl.h>
 #include "browser_model.h"
@@ -130,7 +145,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		if ( !loadPixmapBuffer( path, Bits, Alpha, 0))
 		{
 			bRes=false;
-			QMessageBox::information( NULL, "Can't load Diffuse file",  QString( (path.c_str()) ));
+			QMessageBox::information( NULL, QObject::tr("Can't load Diffuse file"),  QString( (path.c_str()) ));
 
 		}
 		else
@@ -142,7 +157,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		if (!loadPixmapBuffer( nightPath, nightBits, Alpha, 0))
 		{
 			bRes=false;
-			QMessageBox::information( NULL, "Can't load Additive file",  QString( nightPath.c_str() ) );
+			QMessageBox::information( NULL, QObject::tr("Can't load Additive file"),  QString( nightPath.c_str() ) );
 		}
 		else
 			nightLoaded=1;
@@ -153,7 +168,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		if (!loadPixmapBuffer( alphaPath, alphaBits, NULL, tileBankBrowser.getTile (index)->getRotAlpha ()))
 		{
 			bRes=false;
-			QMessageBox::information( NULL, "Can't load Alpha file",  QString( alphaPath.c_str() ) );
+			QMessageBox::information( NULL, QObject::tr("Can't load Alpha file"),  QString( alphaPath.c_str() ) );
 
 		}
 		else
@@ -273,7 +288,7 @@ bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitm
 		uint Height;
 		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't load bitmap.",  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No));
+			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No));
 		}
 		else
 		{
@@ -290,8 +305,8 @@ bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitm
 
 			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
 			{
-				QString pixelMessage = QString("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
-				return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't set Bitmap",  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
+				QString pixelMessage = QObject::tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
+				return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
 			}
 			else
 			{
@@ -318,8 +333,8 @@ bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitm
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		QString notInAbsolutePathMessage = QString("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
-		return ( QMessageBox::Yes == QMessageBox::question( NULL, "Load error",  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No));
+		QString notInAbsolutePathMessage = tr("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
+		return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Load error"),  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No));
 	}
 
 	return true;
@@ -336,7 +351,7 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 		uint Height;
 		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't load bitmap.",  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
+			return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 
 		}
 		else
@@ -354,8 +369,8 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 				error=tileBankBrowser.getTileSet(_tileSet)->checkTile256 (type, border, pixel, composante);
 			if ((error!=CTileSet::ok)&&!zouille())
 			{
-				QString pixelMessage = QString("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
-				return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't set Bitmap",  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
+				QString pixelMessage = tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
+				return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
 			}
 			else
 			{
@@ -379,8 +394,8 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		QString notInAbsolutePathMessage = QString("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
-		return ( QMessageBox::Yes == QMessageBox::question( NULL, "Load error",  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No));
+		QString notInAbsolutePathMessage = tr("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
+		return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Load error"),  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No));
 	}
 
 	return true;
@@ -400,7 +415,7 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 		uint Height;
 		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't load bitmap.",  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
+			return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}
 		else
 		{
@@ -416,8 +431,8 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 				error=tileBankBrowser.getTileSet(_tileSet)->checkTile128 (type, border, pixel, composante);
 			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
 			{
-				QString pixelMessage = QString("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
-				return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't set Bitmap",  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
+				QString pixelMessage = tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
+				return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
 			}
 			else
 			{
@@ -443,8 +458,8 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		QString notInAbsolutePathMessage = QString("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
-		return ( QMessageBox::Yes == QMessageBox::question( NULL, "Load error",  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
+		QString notInAbsolutePathMessage = tr("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
+		return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Load error"),  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
 	}
 
 	return true;
@@ -462,7 +477,7 @@ bool TileList::setDisplacement (int tile, const std::string& name, NL3D::CTile::
 		uint Height;
 		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't load bitmap.",  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
+			return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't load bitmap"),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}
 		else
 		{
@@ -470,7 +485,7 @@ bool TileList::setDisplacement (int tile, const std::string& name, NL3D::CTile::
 			if ( (Width!=32) || (Height!=32) )
 			{
 				// Error message
-				return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't set Bitmap", QString( (troncated+"\nInvalid size: displacement map must be 32x32 8 bits.\nContinue ?").c_str()), QMessageBox::Yes | QMessageBox::No) );
+				return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't set Bitmap"), QString( (troncated+"\nInvalid size: displacement map must be 32x32 8 bits.\nContinue ?").c_str()), QMessageBox::Yes | QMessageBox::No) );
 			}
 			else
 			{
@@ -487,8 +502,8 @@ bool TileList::setDisplacement (int tile, const std::string& name, NL3D::CTile::
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		QString notInAbsolutePathMessage = QString("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
-		return ( QMessageBox::Yes == QMessageBox::question( NULL, "Load error",  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
+		QString notInAbsolutePathMessage = tr("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
+		return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Load error"),  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
 	}
 
 	return true;
@@ -505,7 +520,7 @@ bool TileList::setTileTransitionAlpha (int tile, const std::string& name, int ro
 		uint Height;
 		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't load bitmap",  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
+			return ( QMessageBox::Yes == QMessageBox::question( NULL, tr("Can't load bitmap"),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}
 		else
 		{
@@ -533,15 +548,15 @@ bool TileList::setTileTransitionAlpha (int tile, const std::string& name, int ro
 					||(error==CTileSet::topInterfaceProblem))
 				{
 					if (indexError!=-1)
-						pixelMessage = QString("%1.\nIncompatible with tile nb %4.\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]).arg(indexError);
+						pixelMessage = QObject::tr("%1.\nIncompatible with tile nb %4.\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]).arg(indexError);
 					else
-						pixelMessage = QString("%1.\nIncompatible with the 128x128 tile.\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
+						pixelMessage = QObject::tr("%1.\nIncompatible with the 128x128 tile.\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
 
 				}
 				else
-					pixelMessage = QString("%1.\nIncompatible filled tile.\nContinue ?").arg(CTileSet::getErrorMessage (error));
+					pixelMessage = QObject::tr("%1.\nIncompatible filled tile.\nContinue ?").arg(CTileSet::getErrorMessage (error));
 				
-				return ( QMessageBox::Yes == QMessageBox::question( NULL, "Can't set Bitmap",  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
+				return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
 			}
 			else
 			{
@@ -554,8 +569,8 @@ bool TileList::setTileTransitionAlpha (int tile, const std::string& name, int ro
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		QString notInAbsolutePathMessage = QString("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
-		return ( QMessageBox::Yes == QMessageBox::question( NULL, "Load error",  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
+		QString notInAbsolutePathMessage = QObject::tr("The bitmap %1 is not in the absolute path %2.\nContinue ?").arg(name.c_str()).arg(tileBankBrowser.getAbsPath ().c_str());
+		return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Load error"),  notInAbsolutePathMessage, QMessageBox::Yes | QMessageBox::No) );
 	}
 
 	return true;

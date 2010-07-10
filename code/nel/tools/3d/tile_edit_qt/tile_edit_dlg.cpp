@@ -1,3 +1,19 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <QtCore/QString>
 #include <QtGui/QListWidgetItem>
 #include <QtGui/QMessageBox>
@@ -78,12 +94,12 @@ void CTile_edit_dlg::on_landListWidget_itemSelectionChanged()
 void CTile_edit_dlg::on_addLandPushButton_clicked()
 {
     bool ok;
-    QString text = QInputDialog::getText(this, "Add Land", "Enter land name:", QLineEdit::Normal, "", &ok);
+    QString text = QInputDialog::getText(this, tr("Add Land"), tr("Enter land name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
 	{
 		if (ui.landListWidget->findItems(text, Qt::MatchExactly).count() > 0)
 		{
-			QMessageBox::information( this, "Error Adding Land", "This name already exists" );
+			QMessageBox::information( this, tr("Error Adding Land"), tr("This name already exists") );
 		}
 		else
 		{
@@ -110,7 +126,7 @@ void CTile_edit_dlg::on_editLandPushButton_clicked()
 		}
 
 		bool ok = false;
-		QStringList items = CItems_edit_dlg::getItems(this, "Edit Land", ui.landListWidget->item(nindex)->text(), availableTileSetList, landTileSetList, &ok);
+		QStringList items = CItems_edit_dlg::getItems(this, tr("Edit Land"), ui.landListWidget->item(nindex)->text(), availableTileSetList, landTileSetList, &ok);
 
 		if (ok)
 		{
@@ -128,7 +144,7 @@ void CTile_edit_dlg::on_editLandPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Land Selected", "Please, select the Land to edit first ..." );
+		QMessageBox::information( this, tr("No Land Selected"), tr("Please, select the Land to edit first ...") );
 	}
 }
 
@@ -144,19 +160,19 @@ void CTile_edit_dlg::on_deleteLandPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Land Selected", "Please, select the Land to delete first ..." );
+		QMessageBox::information( this, tr("No Land Selected"), tr("Please, select the Land to delete first ...") );
 	}
 }
 
 void CTile_edit_dlg::on_addTileSetPushButton_clicked()
 {
     bool ok;
-    QString text = QInputDialog::getText(this, "Add Tile Set", "Enter Tile Set name:", QLineEdit::Normal, "", &ok);
+    QString text = QInputDialog::getText(this, tr("Add Tile Set"), tr("Enter Tile Set name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
 	{
 		if (ui.tileSetListWidget->findItems(text, Qt::MatchExactly).count() > 0)
 		{
-			QMessageBox::information( this, "Error Adding Tile Set", "This name already exists" );
+			QMessageBox::information( this, tr("Error Adding Tile Set"), tr("This name already exists") );
 		}
 		else
 		{
@@ -182,7 +198,7 @@ void CTile_edit_dlg::on_editTileSetPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set to edit first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set to edit first ...") );
 	}
 }
 void CTile_edit_dlg::on_deleteTileSetPushButton_clicked()
@@ -208,7 +224,7 @@ void CTile_edit_dlg::on_deleteTileSetPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set to delete first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set to delete first ...") );
 	}
 }
 void CTile_edit_dlg::on_chooseVegetPushButton_clicked()
@@ -218,7 +234,7 @@ void CTile_edit_dlg::on_chooseVegetPushButton_clicked()
 	{
 		QFileDialog::Options options;
 		QString selectedFilter;
-		QString fileName = QFileDialog::getOpenFileName(this, "Choose Veget Set", ui.chooseVegetPushButton->text() , "NeL VegetSet Files (*.vegetset);;All Files (*.*);;", &selectedFilter, options);
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Veget Set"), ui.chooseVegetPushButton->text() , tr("NeL VegetSet Files (*.vegetset);;All Files (*.*);;"), &selectedFilter, options);
 		
 		if (!fileName.isEmpty())
 		{
@@ -229,7 +245,7 @@ void CTile_edit_dlg::on_chooseVegetPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 	}
 }
 void CTile_edit_dlg::on_resetVegetPushButton_clicked()
@@ -242,7 +258,7 @@ void CTile_edit_dlg::on_resetVegetPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 	}
 }
 
@@ -262,7 +278,7 @@ void CTile_edit_dlg::on_surfaceDataLineEdit_textChanged()
 		}
 		else
 		{
-			QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+			QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 		}
 	}
 }
@@ -278,7 +294,7 @@ void CTile_edit_dlg::on_orientedCheckBox_stateChanged ( int state )
 		}
 		else
 		{
-			QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+			QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 		}
 	}
 }
@@ -326,7 +342,7 @@ void CTile_edit_dlg::on_loadPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, "Open Bank", ui.absolutePathPushButton->text() , "NeL tile bank files (*.bank);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open Bank"), ui.absolutePathPushButton->text() , tr("NeL tile bank files (*.bank);;All Files (*.*);;"), &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
@@ -374,20 +390,20 @@ void CTile_edit_dlg::on_savePushButton_clicked()
 		if ( stream.open( fullPath.c_str() ) )
 		{
 			tileBank.serial (stream);
-			QString s = QString("Bank %1 saved").arg( QString( fullPath.c_str() ) );
-			QMessageBox::information(this, "Bank Saved", s);
+			QString s = tr("Bank %1 saved").arg( QString( fullPath.c_str() ) );
+			QMessageBox::information(this, tr("Bank Saved"), s);
 			return;
 		}
 	}
 
-	QMessageBox::information(this, "Error", "Can't Save Bank, check the path");
+	QMessageBox::information(this, tr("Error"), tr("Can't Save Bank, check the path"));
 }
 
 void CTile_edit_dlg::on_saveAsPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getSaveFileName(this, "Save Bank", this->mainFile.absoluteFilePath(), "NeL tile bank files (*.bank);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Bank"), this->mainFile.absoluteFilePath(), tr("NeL tile bank files (*.bank);;All Files (*.*);;"), &selectedFilter, options);
 	if (!fileName.isEmpty())
 	{
 		// Set MainFile
@@ -402,13 +418,13 @@ void CTile_edit_dlg::on_saveAsPushButton_clicked()
 			if ( stream.open( fullPath.c_str() ) )
 			{
 				tileBank.serial (stream);
-				QString s = QString("Bank %1 saved").arg( QString( fullPath.c_str() ) );
-				QMessageBox::information(this, "Bank Saved", s);
+				QString s = tr("Bank %1 saved").arg( QString( fullPath.c_str() ) );
+				QMessageBox::information(this, tr("Bank Saved"), s);
 				return;
 			}
 		}
 
-		QMessageBox::information(this, "Error", "Can't Save Bank, check the path");
+		QMessageBox::information(this, tr("Error"), tr("Can't Save Bank, check the path"));
 
 	}
 
@@ -419,7 +435,7 @@ void CTile_edit_dlg::on_exportPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getSaveFileName(this, "Export Bank", this->mainFile.absolutePath() + QDir::separator() + "*.smallbank", "NeL tile small bank files (*.smallbank);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export Bank"), this->mainFile.absolutePath() + QDir::separator() + tr("*.smallbank"), tr("NeL tile small bank files (*.smallbank);;All Files (*.*);;"), &selectedFilter, options);
 	if (!fileName.isEmpty())
 	{
 		// Copy the bank
@@ -436,13 +452,13 @@ void CTile_edit_dlg::on_exportPushButton_clicked()
 			if ( stream.open( fullPath.c_str() ) )
 			{
 				copy.serial (stream);
-				QString s = QString("Bank %1 exported").arg( QString( fullPath.c_str() ) );
-				QMessageBox::information(this, "Bank Saved", s);
+				QString s = tr("Bank %1 exported").arg( QString( fullPath.c_str() ) );
+				QMessageBox::information(this, tr("Bank Saved"), s);
 				return;
 			}
 		}
 
-		QMessageBox::information(this, "Error", "Can't Export the Bank, check the path");
+		QMessageBox::information(this, tr("Error"), tr("Can't Export the Bank, check the path"));
 	}
 }
 
@@ -450,7 +466,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 {
 	// Build the struct
     QFileDialog::Options options = QFileDialog::DontResolveSymlinks | QFileDialog::ShowDirsOnly;
-    QString directory = QFileDialog::getExistingDirectory(this, "Select the absolute base path of the bank", ui.absolutePathPushButton->text(), options);
+    QString directory = QFileDialog::getExistingDirectory(this, tr("Select the absolute base path of the bank"), ui.absolutePathPushButton->text(), options);
 
 	// Select the path
 	if (!directory.isEmpty())
@@ -467,8 +483,8 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 
 		//// Last check
 		QMessageBox::StandardButton reply;
-		QString confirmMessage = QString("Do you really want to set %1 as base path of the bank ?").arg(path);
-		reply = QMessageBox::question(this, "Confirm Path", confirmMessage, QMessageBox::Yes | QMessageBox::No);
+		QString confirmMessage = tr("Do you really want to set %1 as base path of the bank?").arg(path);
+		reply = QMessageBox::question(this, tr("Confirm Path"), confirmMessage, QMessageBox::Yes | QMessageBox::No);
 		if (reply == QMessageBox::Yes)
 		{
 			// Set as default path..
@@ -514,8 +530,8 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 									goodPath=false;
 
 									// Message
-									QString continueMessage = QString("Path '%1' can't be found in bitmap '%2'. Continue ?").arg(path).arg(QString(bitmapPath.c_str()));
-									reply = QMessageBox::question(this, "Continue", continueMessage, QMessageBox::Yes | QMessageBox::No);
+									QString continueMessage = tr("Path '%1' can't be found in bitmap '%2'. Continue ?").arg(path).arg(QString(bitmapPath.c_str()));
+									reply = QMessageBox::question(this, tr("Continue"), continueMessage, QMessageBox::Yes | QMessageBox::No);
 									if (reply  == QMessageBox::No)
 										break;
 								}
@@ -542,8 +558,8 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 							goodPath=false;
 
 							// Message
-							QString continueMessage = QString("Path '%1' can't be found in bitmap '%2'. Continue ?").arg(path).arg(QString(bitmapPath));
-							reply = QMessageBox::question(this, "Continue", continueMessage, QMessageBox::Yes | QMessageBox::No);
+							QString continueMessage = tr("Path '%1' can't be found in bitmap '%2'. Continue ?").arg(path).arg(QString(bitmapPath));
+							reply = QMessageBox::question(this, tr("Continue"), continueMessage, QMessageBox::Yes | QMessageBox::No);
 							if (reply  == QMessageBox::No)
 								break;
 						}
@@ -608,7 +624,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 				else
 				{
 					// Info message
-					QMessageBox::information(this, "Error", "Can't set the path.");
+					QMessageBox::information(this, tr("Error"), tr("Can't set the path."));
 				}
 			}
 
@@ -646,7 +662,7 @@ void CTile_edit_dlg::on_downPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 	}
 }
 
@@ -666,13 +682,13 @@ void CTile_edit_dlg::on_upPushButton_clicked()
 	}
 	else
 	{
-		QMessageBox::information( this, "No Tile Set Selected", "Please, select a Tile Set first ..." );
+		QMessageBox::information( this, tr("No Tile Set Selected"), tr("Please, select a Tile Set first ...") );
 	}
 }
 
  void CTile_edit_dlg::closeEvent(QCloseEvent *event)
  {
-	int reply = QMessageBox::question(this, "Quit", "Are you sure you want to quit?", QMessageBox::Yes | QMessageBox::No);
+	int reply = QMessageBox::question(this, tr("Quit"), tr("Are you sure you want to quit?"), QMessageBox::Yes | QMessageBox::No);
 	if (reply  == QMessageBox::Yes)
 	{
 		event->accept();

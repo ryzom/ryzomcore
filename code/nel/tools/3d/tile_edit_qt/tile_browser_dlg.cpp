@@ -1,3 +1,19 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtGui/QListWidgetItem>
@@ -390,7 +406,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , tr("Targa Bitmap (*.tga);;PNG Image (*.png);;All Files (*.*);;"), &selectedFilter, options);
 	QFileInfo fi(fileName);
 	QString baseName = fi.baseName() ;
 
@@ -402,7 +418,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 	
 		
 		//TODO titegus: What's the point in asking for rotation if Texture != Alpha ???
-		bool rotate = (QMessageBox::Yes == QMessageBox::question(this, "Import rotated tiles", "Do you want to use rotation to reuse alpha tiles ?", QMessageBox::Yes | QMessageBox::No ));
+		bool rotate = (QMessageBox::Yes == QMessageBox::question(this, tr("Import rotated tiles"), tr("Do you want to use rotation to reuse alpha tiles?"), QMessageBox::Yes | QMessageBox::No ));
 
 		for (int i=0; i<CTileSet::count; i++)
 		{
@@ -491,7 +507,7 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 	// Select a file
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getSaveFileName(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
@@ -547,8 +563,8 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 			if (error)
 			{
 				// Error message
-				QString s = QString ("Can't write bitmap %1").arg(fileName);
-				QMessageBox::information (this, "Export border", s);
+				QString s = tr("Can't write bitmap %1").arg(fileName);
+				QMessageBox::information (this, tr("Export border"), s);
 			}
 		}
 	}
@@ -562,7 +578,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
@@ -596,8 +612,8 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 		if (error)
 		{
 			// Error message
-			QString s = QString ("Can't read bitmap %1").arg(fileName);
-			QMessageBox::information (this, "Import border", s);
+			QString s = tr("Can't read bitmap %1").arg(fileName);
+			QMessageBox::information (this, tr("Import border"), s);
 		}
 
 		// Get pixel
@@ -620,8 +636,8 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 		else
 		{
 			// Error message
-			QString s = QString ("The bitmap must have a size of 128x128 (%1)").arg(fileName);
-			QMessageBox::information (this, "Import border", s);
+			QString s = tr("The bitmap must have a size of 128x128 (%1)").arg(fileName);
+			QMessageBox::information (this, tr("Import border"), s);
 		}
 
 		// 256 or 128 ?
@@ -630,7 +646,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 		tileBankBrowser.getTileSet (tileSetIndex)->setBorder ((CTile::TBitmap) tileTextureButtonGroup->checkedId(), border);
 
 		// Message
-		QMessageBox::information (this, "Import border", "The border has been changed.");
+		QMessageBox::information (this, tr("Import border"), tr("The border has been changed."));
 	}
 
 }
@@ -745,7 +761,7 @@ void CTile_browser_dlg::RefreshView()
 
 			image = image.scaled(tileZoomButtonGroup->checkedId() * (tileTypeButtonGroup->checkedId()==_256x256 ? 2 : 1), tileZoomButtonGroup->checkedId() * (tileTypeButtonGroup->checkedId()==_256x256 ? 2 : 1));
 
-			QString fileInfo = QString("%1").arg(p->getId());
+			QString fileInfo = QString::number(p->getId());
 			if (tileLabelButtonGroup->checkedId() == CTile_browser_dlg::FileName)
 			{
 				QFileInfo fi = QFileInfo(QString( tilePath.c_str()));
@@ -761,7 +777,7 @@ void CTile_browser_dlg::RefreshView()
 			QString fileInfo;
 			if (tileLabelButtonGroup->checkedId() == CTile_browser_dlg::Index)
 			{
-				fileInfo = QString("%1").arg(p->getId());
+				fileInfo = QString::number(p->getId());
 			}
 			TileModel tile = TileModel(tileZoomButtonGroup->checkedId() * (tileTypeButtonGroup->checkedId()==_256x256 ? 2 : 1), fileInfo, p->getId());
 			tileViewModel->addTile(tile);
@@ -785,7 +801,7 @@ void CTile_browser_dlg::LoadInThread(void)
 
 void CTile_browser_dlg::closeEvent(QCloseEvent *event)
  {
-	int reply = QMessageBox::question(this, "Quit", "Are you sure you want to Quit TileSet Edition without Saving?", QMessageBox::Yes | QMessageBox::No);
+	int reply = QMessageBox::question(this, tr("Quit"), tr("Are you sure you want to Quit TileSet Edition without Saving?"), QMessageBox::Yes | QMessageBox::No);
 	if (reply  == QMessageBox::Yes)
 	{
 		event->accept();
@@ -811,7 +827,7 @@ void CTile_browser_dlg::accept()
 
 void CTile_browser_dlg::reject()
 {
-	int reply = QMessageBox::question(this, "Quit", "Are you sure you want to Quit TileSet Edition without Saving?", QMessageBox::Yes | QMessageBox::No);
+	int reply = QMessageBox::question(this, tr("Quit"), tr("Are you sure you want to Quit TileSet Edition without Saving?"), QMessageBox::Yes | QMessageBox::No);
 	if (reply  == QMessageBox::Yes)
 	{
 		QDialog::reject();

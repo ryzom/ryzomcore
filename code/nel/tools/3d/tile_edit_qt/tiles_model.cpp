@@ -1,3 +1,19 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <QtGui/QtGui>
 #include "tiles_model.h"
 #include "tile_widget.h"
@@ -9,7 +25,7 @@ bool caseInsensitiveLessThan(const TileModel &t1, const TileModel &t2)
 }
 
 
-TileModel::TileModel():pixmapSide(128),tileLabel("Right-Click to select Bitmap"), index(-1)
+TileModel::TileModel():pixmapSide(128),tileLabel(QObject::tr("Right-Click to select Bitmap")), index(-1)
 {
 }
 
@@ -23,7 +39,7 @@ TileModel::TileModel(int pixmapSide, QString tileLabel, int index):pixmapSide(pi
 	if (!tileLabel.isEmpty())
 		this->tileLabel = tileLabel;
 	else
-		this->tileLabel = "Right-Click to select Bitmap";
+		this->tileLabel = QObject::tr("Right-Click to select Bitmap");
 }
 
 
