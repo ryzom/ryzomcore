@@ -16,7 +16,7 @@
 
 
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "srg_utilities.h"
 #include "game_share/protection_type.h"
 #include "nel/misc/string_conversion.h"
