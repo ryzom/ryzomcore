@@ -286,7 +286,12 @@ struct CModeSorter
 {
 	bool operator()(const UDriver::CMode &mode1, const UDriver::CMode &mode2) const
 	{
-		if (mode1.Width == mode2.Width) return mode1.Height < mode2.Height;
+		if (mode1.Width == mode2.Width)
+		{
+			if (mode1.Height == mode2.Height) return mode1.Frequency < mode2.Frequency;
+
+			return mode1.Height < mode2.Height;
+		}
 
 		return mode1.Width < mode2.Width;
 	}
