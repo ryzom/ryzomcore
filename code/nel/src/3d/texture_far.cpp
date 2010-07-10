@@ -1421,7 +1421,9 @@ extern "C" void NL3D_expandLightmap (const NL3D_CExpandLightmap* pLightmap)
 				// Compute current color
 				CRGBA color0;
 				CRGBA color1;
+				color0.A = 255;
 				color0.set565 (colorTilePtr[srcIndex].Color565);
+				color1.A = 255;
 				color1.set565 (colorTilePtr[srcIndex+1].Color565);
 				expandedUserColorLinePtr[u].blendFromui (color0, color1, srcIndexPixel&0xff);
 				// Compute current TLI color

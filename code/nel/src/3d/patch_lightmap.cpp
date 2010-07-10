@@ -1525,6 +1525,7 @@ void		CPatch::resetTileLightInfluences()
 	{
 		// Disable all light influence on this point.
 		TileLightInfluences[i].Light[0]= 0xFF;
+		TileLightInfluences[i].Light[1]= 0xFF;
 	}
 }
 

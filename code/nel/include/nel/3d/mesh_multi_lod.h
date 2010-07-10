@@ -56,12 +56,13 @@ public:
 	class CMeshMultiLodBuild
 	{
 	public:
+		CMeshMultiLodBuild() : StaticLod(false) { }
 
 		/// A slot of mesh for the build
 		class CBuildSlot
 		{
 		public:
-			CBuildSlot() : MeshGeom(NULL) { }
+			CBuildSlot() : MeshGeom(NULL), DistMax(0.0f), BlendLength(0.0f), Flags(0) { }
 			/**
 			  * Flags for the build of a slot
 			  *

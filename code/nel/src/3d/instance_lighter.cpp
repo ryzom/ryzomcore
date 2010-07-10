@@ -349,6 +349,7 @@ void CInstanceLighter::light (const CInstanceGroup &igIn, CInstanceGroup &igOut,
 					CSurfaceLightGrid::CCellCorner		defaultCellCorner;
 					defaultCellCorner.SunContribution= 0;
 					defaultCellCorner.Light[0]= 0xFF;
+					defaultCellCorner.Light[1]= 0xFF;
 					defaultCellCorner.LocalAmbientId= 0xFF;
 
 					// Init the grid.

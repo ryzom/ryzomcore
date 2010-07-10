@@ -373,7 +373,6 @@ bool			CLodCharacterManager::addRenderCharacterKey(CLodCharacterInstance &instan
 	float			a00, a01, a02;
 	float			a10, a11, a12;
 	float			a20, a21, a22;
-	sint			f8;
 	uint64			blank= 0;
 	CRGBA			ambient= paramAmbient;
 	CRGBA			diffuse= paramDiffuse;
@@ -502,6 +501,8 @@ bool			CLodCharacterManager::addRenderCharacterKey(CLodCharacterInstance &instan
 
 		if(numVertices)
 		{
+			sint f8;
+
 			/* NB: order is important for AGP filling optimisation in dstPtr
 
 				Pentium2+ optimisation notes:

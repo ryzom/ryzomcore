@@ -83,7 +83,7 @@ bool CPackedWorld::raytrace(const NLMISC::CVector &start, const NLMISC::CVector 
 	if (_ZoneGrid.empty()) return false;
 	++_RaytraceCounter;
 	float bestDist = FLT_MAX;
-	NLMISC::CVector bestNormal;
+	CVector bestNormal(CVector::Null);
 	CVector currEnd = end;
 	CVector currInter;
 	if (_RaytraceCounter == (uint32) ~0)
