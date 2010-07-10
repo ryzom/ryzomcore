@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="tile_edit_qt"
 	ProjectGUID="{5FE8CA04-92FB-4B43-A78E-26E283F587A1}"
 	RootNamespace="tile_edit_qt"
@@ -400,190 +400,6 @@
 			<Filter
 				Name="pic"
 				>
-				<File
-					RelativePath=".\pic\jcapimin.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcapistd.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jccoefct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jccolor.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcdctmgr.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jchuff.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcinit.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcmainct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcmarker.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcmaster.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcomapi.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcparam.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcphuff.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcprepct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jcsample.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jctrans.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdapimin.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdapistd.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdatadst.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdatasrc.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdcoefct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdcolor.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jddctmgr.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdhuff.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdinput.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdmainct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdmarker.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdmaster.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdmerge.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdphuff.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdpostct.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdsample.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jdtrans.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jerror.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jfdctflt.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jfdctfst.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jfdctint.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jidctflt.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jidctfst.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jidctint.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jidctred.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jmemansi.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jmemmgr.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jquant1.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jquant2.c"
-					>
-				</File>
-				<File
-					RelativePath=".\pic\jutils.c"
-					>
-				</File>
 				<File
 					RelativePath=".\pic\Pic_BMP.c"
 					>
@@ -1174,7 +990,7 @@
 						Description="RCC $(InputName).qrc"
 						CommandLine="rcc.exe -name $(InputName) $(InputName).qrc -o $(InputDir)\qrc_$(InputName).cpp&#x0D;&#x0A;"
 						AdditionalDependencies="rcc.exe;nel.png;$(InputName).qrc"
-						Outputs="Release\qrc_$(InputName).cpp"
+						Outputs="Debug\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1186,16 +1002,6 @@
 						CommandLine="rcc.exe -name $(InputName) $(InputName).qrc -o $(InputDir)\qrc_$(InputName).cpp&#x0D;&#x0A;"
 						AdditionalDependencies="rcc.exe;nel.png;$(InputName).qrc"
 						Outputs="Release\qrc_$(InputName).cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="rcc.exe -name $(InputName) $(InputName).qrc -o $(InputDir)\qrc_$(InputName).cpp"
-						AdditionalDependencies="rcc.exe;nel.png;$(InputName).qrc"
-						Outputs="Debug\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
 			</File>

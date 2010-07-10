@@ -80,14 +80,15 @@ unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 		{
 			type=1;
 		}
-		if ( !strcmp(ext,"TGA") )
+		else if ( !strcmp(ext,"TGA") )
 		{
 			type=2;
 		}
-		if ( !strcmp(ext,"BMP") )
+		else if ( !strcmp(ext,"BMP") )
 		{
 			type=3;
 		}
+
 		switch(type)
 		{
 		// - JPG
@@ -132,9 +133,7 @@ unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 			return(0);
 		}
 	}
-	else
-	{
-	}
+
 	// --- Create and place new pic struct
 	pic=Pic_calloc(1,sizeof(PIC_PICTURE));
 	if (!pic)
