@@ -25,7 +25,6 @@ include_HEADERS      =	aabbox.h			\
 			config_file.h			\
 			contiguous_block_allocator.h	\
 			co_task.h			\
-			cpu_info.h			\
 			cpu_time_stat.h			\
 			debug.h				\
 			di_event_emitter.h		\
