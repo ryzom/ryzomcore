@@ -15,13 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include <memory>
-//
-#include "nel/3d/u_driver.h"
-#include "nel/3d/u_scene.h"
-#include "nel/3d/u_animation_set.h"
-#include "nel/3d/u_play_list.h"
-#include "nel/3d/u_play_list_manager.h"
 //
 #include "sky.h"
 #include "client_sheets/sky_sheet.h"

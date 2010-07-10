@@ -20,9 +20,7 @@
 #include "nel/net/net_log.h"
 
 #ifdef NL_OS_WINDOWS
-#	if defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
-#		include <winsock2.h>
-#	endif
+#	include <winsock2.h>
 #	define NOMINMAX
 #	include <windows.h>
 #	define socklen_t int

@@ -20,7 +20,6 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "entities.h"
 #include "net_manager.h"
-#include <nel/misc/command.h>
 
 using namespace std;
 using namespace NLMISC;

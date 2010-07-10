@@ -22,11 +22,6 @@
 //////////////
 // Includes //
 //////////////
-// 3D Interface.
-#include "nel/3d/u_driver.h"
-#include "nel/3d/u_scene.h"
-#include "nel/3d/u_camera.h"
-#include "nel/3d/u_transform.h"
 // GAME SHARE
 #include "game_share/bot_chat_types.h"
 // Client.
@@ -39,10 +34,6 @@
 #include "../entities.h"
 #include "../view.h"
 #include "../input.h"
-// Misc
-#include "nel/misc/mouse_device.h"
-// Std
-#include <vector>
 //
 #include "../r2/editor.h"
 

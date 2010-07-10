@@ -19,7 +19,6 @@
 #include "stdpch.h"	// First include for pre-compiled headers.
 #include "forage_source_sheet.h"
 #include "nel/georges/u_form_elm.h"
-#include <string>
 
 using namespace std;
 using namespace NLGEORGES;

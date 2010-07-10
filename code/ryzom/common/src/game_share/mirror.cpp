@@ -19,12 +19,7 @@
 #include "stdpch.h"
 #include "mirror.h"
 #include "synchronised_message.h"
-#include <nel/georges/load_form.h>
-#include <nel/misc/command.h>
-#include <nel/misc/config_file.h>
-#include <nel/net/service.h>
 #include "tick_proxy_time_measure.h"
-#include <functional>
 
 using namespace NLMISC;
 using namespace NLNET;

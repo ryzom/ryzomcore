@@ -16,16 +16,6 @@
 
 #include "stdpch.h"
 
-#include <functional>
-
-#include "nel/georges/u_form_loader.h"
-#include "nel/georges/u_form.h"
-#include "nel/misc/smart_ptr.h"
-#include "nel/misc/matrix.h"
-#include "nel/misc/random.h"
-#include "nel/3d/u_scene.h"
-#include "nel/3d/u_landscape.h"
-#include "nel/3d/u_particle_system_instance.h"
 //
 #include "game_share/light_cycle.h"
 #include "game_share/time_weather_season/weather_predict.h"

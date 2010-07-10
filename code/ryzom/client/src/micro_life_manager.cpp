@@ -42,8 +42,6 @@
 //
 #include "nel/misc/check_fpu.h"
 
-#include <utility>
-
 using namespace std::rel_ops;
 
 extern NLLIGO::CLigoConfig	LigoConfig;

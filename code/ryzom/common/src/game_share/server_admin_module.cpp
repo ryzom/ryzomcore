@@ -48,8 +48,6 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 
-#include <string>
-
 
 using namespace std;
 using namespace NLMISC;

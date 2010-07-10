@@ -63,9 +63,6 @@
 #include "../../../test/network/sb5000/client/graph.h"
 #endif
 
-#include <set>
-#include <errno.h>
-
 
 // ***************************************************************************
 // Smooth ServerTick setup

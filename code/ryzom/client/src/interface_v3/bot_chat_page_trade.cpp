@@ -48,8 +48,6 @@
 #include "../sheet_manager.h"
 #include "../user_entity.h"
 #include "view_bitmap.h"
-//
-#include <utility>
 
 using namespace std::rel_ops;
 

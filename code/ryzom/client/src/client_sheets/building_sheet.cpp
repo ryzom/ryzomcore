@@ -25,8 +25,6 @@
 #include "building_sheet.h"
 // Georges
 #include "nel/georges/u_form_elm.h"
-// STD
-#include <string>
 
 
 

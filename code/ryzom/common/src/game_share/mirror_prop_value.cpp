@@ -18,7 +18,6 @@
 
 #include "stdpch.h"
 #include "mirror_prop_value.h"
-#include <nel/misc/variable.h>
 
 
 sint32 NbAllocdListCells = 0;

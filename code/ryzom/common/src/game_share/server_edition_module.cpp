@@ -23,8 +23,6 @@
 
 #include "server_edition_module.h"
 
-#include <memory>
-
 #include "dms.h"
 
 #include "nel/net/unified_network.h"

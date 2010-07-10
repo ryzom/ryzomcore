@@ -21,14 +21,6 @@
 //////////////
 // INCLUDES //
 //////////////
-// misc
-#include "nel/misc/path.h"
-#include "nel/misc/vector.h"
-// 3D
-#include "nel/3d/u_particle_system_sound.h"
-// pacs
-#include "nel/pacs/u_global_retriever.h"
-#include "nel/pacs/u_global_position.h"
 // client
 #include "sound_manager.h"
 #include "pacs_client.h"
@@ -41,8 +33,6 @@
 #include "global.h"
 // game share
 #include "game_share/cst_loader.h"
-// std.
-#include <fstream>
 
 // If you compile using the nel distrib and you don't have the source, you must undef this symbol
 #if !FINAL_VERSION

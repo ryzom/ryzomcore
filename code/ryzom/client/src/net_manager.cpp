@@ -21,10 +21,6 @@
 // INCLUDE //
 /////////////
 #include "stdpch.h"
-// Misc
-#include <nel/misc/command.h>
-#include <nel/misc/progress_callback.h>
-#include <nel/misc/bit_mem_stream.h>
 // Game Share
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/msg_client_server.h"

@@ -20,11 +20,9 @@
 // INCLUDE //
 /////////////
 #include "stdpch.h"	// First include for pre-compiled headers.
-// Misc
-#include "nel/misc/vectord.h"
 // Application
 #include "stage.h"
-#include <game_share/entity_types.h>
+#include "game_share/entity_types.h"
 
 
 ///////////

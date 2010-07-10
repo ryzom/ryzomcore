@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <errno.h>
 
 #include <string>
 #include <vector>
@@ -32,6 +33,8 @@
 #include <utility>
 #include <deque>
 #include <fstream>
+#include <functional>
+#include <memory>
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
@@ -53,9 +56,21 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/events.h>
 #include <nel/misc/file.h>
+#include <nel/misc/random.h>
 #include <nel/misc/string_mapper.h>
 #include <nel/misc/smart_ptr.h>
+#include <nel/misc/mouse_device.h>
+#include <nel/misc/vectord.h>
+#include <nel/misc/i_xml.h>
+#include <nel/misc/system_info.h>
+#include <nel/misc/progress_callback.h>
 
+#include <nel/georges/u_form_loader.h>
+#include <nel/georges/u_form.h>
+
+#include <nel/3d/u_landscape.h>
+#include <nel/3d/u_particle_system_instance.h>
+#include <nel/3d/u_particle_system_sound.h>
 #include <nel/3d/u_animation_set.h>
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_text_context.h>
@@ -66,6 +81,9 @@
 #include <nel/3d/u_instance_group.h>
 #include <nel/3d/u_instance.h>
 #include <nel/3d/u_texture.h>
+#include <nel/3d/u_transform.h>
+#include <nel/3d/u_play_list.h>
+#include <nel/3d/u_play_list_manager.h>
 
 #include <nel/net/callback_client.h>
 #include <nel/net/udp_sock.h>
@@ -74,6 +92,8 @@
 #include <nel/pacs/u_global_retriever.h>
 #include <nel/pacs/u_global_position.h>
 #include <nel/pacs/u_move_primitive.h>
+#include <nel/pacs/u_retriever_bank.h>
+#include <nel/pacs/u_primitive_block.h>
 
 #include <nel/sound/sound_anim_manager.h>
 

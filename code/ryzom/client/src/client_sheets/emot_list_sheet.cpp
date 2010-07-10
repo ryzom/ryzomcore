@@ -29,8 +29,6 @@
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_dfn.h"
 #include "nel/georges/u_form_loader.h"
-// STD
-#include <string>
 
 ///////////
 // USING //

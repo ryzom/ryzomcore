@@ -21,20 +21,11 @@
 // INCLUDE //
 /////////////
 #include "stdpch.h"
-#include <memory>
-// Misc.
-#include "nel/misc/vector.h"
-// Pacs Interface.
-#include "nel/pacs/u_retriever_bank.h"
-#include "nel/pacs/u_global_retriever.h"
-#include "nel/pacs/u_primitive_block.h"
 // Client.
 #include "pacs_client.h"
 #include "user_entity.h"
 #include "ig_callback.h"
 #include "ig_client.h"
-// std
-#include <map>
 
 ///////////
 // USING //

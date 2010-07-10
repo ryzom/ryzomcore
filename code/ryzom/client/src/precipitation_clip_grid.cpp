@@ -19,17 +19,7 @@
 
 #include "stdpch.h"
 
-// TMP TMP
-
-#include "nel/pacs/u_global_retriever.h"
-#include "nel/pacs/u_global_position.h"
-#include "nel/3d/u_driver.h"
-#include "nel/3d/u_visual_collision_manager.h"
-#include "nel/misc/matrix.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/system_info.h"
 #include "precipitation_clip_grid.h"
-#include <algorithm>
 
 
 using namespace NLMISC;

@@ -21,21 +21,9 @@
 #include "stdpch.h"
 
 #include "object.h"
-#include "nel/misc/debug.h"
-#include "nel/misc/singleton.h"
-#include "nel/misc/string_common.h"
-#include "game_share/utils.h"
+#include "utils.h"
 
 #include <zlib.h>
-#include "nel/misc/bit_mem_stream.h"
-
-#include <assert.h>
-#include <algorithm>
-
-#include <set>
-#include <vector>
-#include <map>
-#include <limits>
 
 namespace R2
 {

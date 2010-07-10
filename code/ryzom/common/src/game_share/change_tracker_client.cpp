@@ -19,8 +19,6 @@
 #include "stdpch.h"
 #include "change_tracker_client.h"
 
-#include <nel/misc/shared_memory.h>
-
 using namespace NLMISC;
 
 

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 
 #include <string>
 #include <vector>
@@ -27,10 +28,14 @@
 #include <map>
 #include <set>
 #include <algorithm>
-//#include <sstream>
+#include <sstream>
 #include <exception>
 #include <utility>
 #include <deque>
+#include <limits>
+#include <queue>
+#include <memory>
+#include <functional>
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
@@ -42,8 +47,20 @@
 #include <nel/misc/rgba.h>
 #include <nel/misc/sheet_id.h>
 #include <nel/misc/command.h>
+#include <nel/misc/config_file.h>
 #include <nel/misc/variable.h>
+#include <nel/misc/shared_memory.h>
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
+#include <nel/misc/singleton.h>
+#include <nel/misc/string_common.h>
+#include <nel/misc/sstring.h>
+#include <nel/misc/bit_mem_stream.h>
 
+#include <nel/net/udp_sock.h>
+#include <nel/net/unified_network.h>
 #include <nel/net/service.h>
+
+#include <nel/georges/load_form.h>
 
 #include "utils.h"

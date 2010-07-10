@@ -16,19 +16,6 @@
 
 
 #include "stdpch.h"
-
-//
-// Includes
-//
-
-#include <string>
-#include <queue>
-
-#include <nel/misc/types_nl.h>
-#include <nel/misc/debug.h>
-
-#include <nel/net/udp_sock.h>
-
 #include "action.h"
 
 //

@@ -20,8 +20,6 @@
 
 #include "game_share/r2_share_itf.h"
 
-#include <queue>
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;

@@ -31,8 +31,6 @@
 #include "fx_manager.h"
 #include "nel/misc/check_fpu.h"
 
-#include <utility>
-
 
 #if defined(NL_DEBUG) && defined(NL_OS_WINDOWS)
 	#include <crtdbg.h>

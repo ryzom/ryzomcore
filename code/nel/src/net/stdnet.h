@@ -41,6 +41,8 @@
 #include <exception>
 #include <cctype>
 
+#include <errno.h>
+
 #include "nel/misc/debug.h"
 
 #include "nel/misc/common.h"

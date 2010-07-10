@@ -21,10 +21,6 @@
 #include "stdpch.h"
 
 #include "scenario.h"
-
-#include <sstream>
-#include <assert.h>
-
 #include "object.h"
 
 

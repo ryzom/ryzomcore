@@ -21,8 +21,6 @@
 #include "slot_equipment.h"
 #include "nel/misc/string_conversion.h"
 
-#include <string>
-
 using namespace std;
 using namespace NLMISC;
 

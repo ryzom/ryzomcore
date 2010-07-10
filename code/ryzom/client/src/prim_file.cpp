@@ -22,17 +22,8 @@
 /////////////
 #include "stdpch.h"
 
-// Misc.
-#include "nel/misc/path.h"
-#include "nel/misc/i_xml.h"
-#include "nel/misc/file.h"
-// 3D Interface.
 // game share
 #include "game_share/brick_types.h"
-// PACS
-#include "nel/pacs/u_global_position.h"
-// std
-#include <string>
 // Client
 #include "prim_file.h"
 #include "client_cfg.h"

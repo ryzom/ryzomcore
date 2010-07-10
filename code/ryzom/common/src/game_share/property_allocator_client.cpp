@@ -18,8 +18,6 @@
 
 #include "stdpch.h"
 #include "property_allocator_client.h"
-#include <nel/misc/shared_memory.h>
-#include <nel/net/unified_network.h>
 #include "mirrored_data_set.h"
 
 using namespace NLMISC;

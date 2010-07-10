@@ -21,7 +21,6 @@
 #include "stdpch.h"
 #include "_backup_service_interface_singleton.h"
 #include "utils.h"
-#include "nel/net/service.h"
 
 
 //-------------------------------------------------------------------------------------------------

@@ -33,8 +33,6 @@
 #include "game_share/zc_shard_common.h"
 #include "weather.h"
 #include "game_share/light_cycle.h"
-// Std.
-#include <map>
 
 
 ///////////
