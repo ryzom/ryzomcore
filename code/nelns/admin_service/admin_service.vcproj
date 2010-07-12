@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="admin_service"
 	ProjectGUID="{AA03E539-FE77-4B63-BE0E-DE637635E5A9}"
 	RootNamespace="admin_service"
@@ -150,7 +150,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="mysqlclient.lib"
 				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="msvcrt"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
 				SubSystem="2"
