@@ -32,6 +32,9 @@
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
+# ifdef XRANDR
+#  include <X11/extensions/Xrandr.h>
+# endif
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
@@ -200,6 +203,30 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	{
 		nldebug("3D: XOpenDisplay on '%s' OK", getenv("DISPLAY"));
 	}
+
+	_xrandr_version = 0;
+
+#ifdef XRANDR
+	_OldSizeID = 0;
+	sint xrandr_major, xrandr_minor;
+	if (XRRQueryVersion(_dpy, &xrandr_major, &xrandr_minor))
+	{
+		_xrandr_version = xrandr_major * 100 + xrandr_minor;
+		nlinfo("3D: XRandR %d.%d found", xrandr_major, xrandr_minor);
+	}
+
+#endif
+
+	_xvidmode_version = 0;
+
+#ifdef XF86VIDMODE
+	sint event = 0, error = -1, vm_major = 0, vm_minor = 0;
+	if (XF86VidModeQueryExtension(_dpy, &event, &error) && XF86VidModeQueryVersion(_dpy, &vm_major, &vm_minor))
+	{
+		_xvidmode_version = vm_major * 100 + vm_minor;
+		nlinfo("3D: XF86VidMode %d.%d found", major, minor);
+	}
+#endif
 
 #endif
 	return true;
@@ -756,12 +783,41 @@ bool CDriverGL::saveScreenMode()
 
 #elif defined(NL_OS_UNIX)
 
+	int screen = DefaultScreen(_dpy);
+	res = false;
+
+#ifdef XRANDR
+
+	if (!res && _xrandr_version > 0)
+	{
+		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
+
+		if (screen_config)
+		{
+			Rotation saved_rotation;
+			_OldSizeID = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
+			nlinfo("3D: current XRandR mode %d", _OldSizeID);
+			XRRFreeScreenConfigInfo(screen_config);
+
+			res = true;
+		}
+		else
+		{
+			nlwarning("3D: XRRGetScreenInfo failed");
+		}
+	}
+
+#endif // XRANDR
+
 #if defined(XF86VIDMODE)
 
-	// Store old mode in order to restore it when leaving fullscreen
-	memset(&_OldScreenMode, 0, sizeof(XF86VidModeModeLine));
-	XF86VidModeGetModeLine(_dpy, DefaultScreen(_dpy), &_OldDotClock, &_OldScreenMode);
-	res = XF86VidModeGetViewPort(_dpy, DefaultScreen(_dpy), &_OldX, &_OldY);
+	if (!res && _xvidmode_version > 0)
+	{
+		// Store old mode in order to restore it when leaving fullscreen
+		memset(&_OldScreenMode, 0, sizeof(XF86VidModeModeLine));
+		XF86VidModeGetModeLine(_dpy, screen, &_OldDotClock, &_OldScreenMode);
+		res = XF86VidModeGetViewPort(_dpy, screen, &_OldX, &_OldY);
+	}
 
 #endif // XF86VIDMODE
 
@@ -788,29 +844,62 @@ bool CDriverGL::restoreScreenMode()
 
 #elif defined(NL_OS_UNIX)
 
+	int screen = DefaultScreen(_dpy);
+
+#ifdef XRANDR
+
+	if (!res && _xrandr_version > 0)
+	{
+		Window root = RootWindow(_dpy, screen);
+
+		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, root);
+
+		if (screen_config)
+		{
+			Rotation saved_rotation;
+			SizeID size = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
+			if (XRRSetScreenConfig(_dpy, screen_config, root, _OldSizeID, saved_rotation, CurrentTime) == RRSetConfigSuccess)
+			{
+				nlinfo("3D: Switching back to XRandR mode %d", _OldSizeID);
+				res = true;
+			}
+
+			XRRFreeScreenConfigInfo(screen_config);
+		}
+		else
+		{
+			nlwarning("3D: XRRGetScreenInfo failed");
+		}
+	}
+
+#endif // XRANDR
+
 #if defined(XF86VIDMODE)
 
-	XF86VidModeModeInfo info;
-	nlinfo("3D: Switching back to original mode");
+	if (!res && _xvidmode_version > 0)
+	{
+		XF86VidModeModeInfo info;
+		nlinfo("3D: Switching back to original mode");
 
-	// This is UGLY
-	info.dotclock = _OldDotClock;
-	info.hdisplay = _OldScreenMode.hdisplay;
-	info.hsyncstart = _OldScreenMode.hsyncstart;
-	info.hsyncend = _OldScreenMode.hsyncend;
-	info.htotal = _OldScreenMode.htotal;
-	info.vdisplay = _OldScreenMode.vdisplay;
-	info.vsyncstart = _OldScreenMode.vsyncstart;
-	info.vsyncend = _OldScreenMode.vsyncend;
-	info.vtotal = _OldScreenMode.vtotal;
-	info.flags = _OldScreenMode.flags;
-	info.privsize = _OldScreenMode.privsize;
-	info.c_private = _OldScreenMode.c_private;
+		// This is UGLY
+		info.dotclock = _OldDotClock;
+		info.hdisplay = _OldScreenMode.hdisplay;
+		info.hsyncstart = _OldScreenMode.hsyncstart;
+		info.hsyncend = _OldScreenMode.hsyncend;
+		info.htotal = _OldScreenMode.htotal;
+		info.vdisplay = _OldScreenMode.vdisplay;
+		info.vsyncstart = _OldScreenMode.vsyncstart;
+		info.vsyncend = _OldScreenMode.vsyncend;
+		info.vtotal = _OldScreenMode.vtotal;
+		info.flags = _OldScreenMode.flags;
+		info.privsize = _OldScreenMode.privsize;
+		info.c_private = _OldScreenMode.c_private;
 
-	nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
-	XF86VidModeSwitchToMode(_dpy, DefaultScreen(_dpy), &info);
-	nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
-	res = XF86VidModeSetViewPort(_dpy, DefaultScreen(_dpy), _OldX, _OldY);
+		nlinfo("3D: Switching back mode to %dx%d", info.hdisplay, info.vdisplay);
+		XF86VidModeSwitchToMode(_dpy, screen, &info);
+		nlinfo("3D: Switching back viewport to %d,%d",_OldX, _OldY);
+		res = XF86VidModeSetViewPort(_dpy, screen, _OldX, _OldY);
+	}
 
 #endif // XF86VIDMODE
 
@@ -818,6 +907,14 @@ bool CDriverGL::restoreScreenMode()
 
 	return res;
 }
+
+// --------------------------------------------------
+#ifdef XF86VIDMODE
+static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
+{
+	return (info->htotal && info->vtotal) ? (1000 * info->dotclock / (info->htotal * info->vtotal)) : 0;
+}
+#endif // XF86VIDMODE
 
 // --------------------------------------------------
 bool CDriverGL::setScreenMode(const GfxMode &mode)
@@ -880,36 +977,88 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 #elif defined(NL_OS_UNIX)
 
-#if defined(XF86VIDMODE)
-
 	bool found = false;
 
-	// Find the requested mode and use it
-	XF86VidModeModeInfo **modes;
-	int nmodes;
-	if (XF86VidModeGetAllModeLines(_dpy, DefaultScreen(_dpy), &nmodes, &modes))
+#ifdef XRANDR
+
+	if (!found && _xrandr_version > 0)
 	{
-		for (int i = 0; i < nmodes; i++)
+		int screen = DefaultScreen(_dpy);
+		Window root = RootWindow(_dpy, screen);
+
+		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, root);
+
+		if (screen_config)
 		{
-			nldebug("3D: Available mode - %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-			if (modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height)
+			Rotation saved_rotation;
+			SizeID size = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
+
+			sint nsizes;
+			XRRScreenSize *sizes = XRRConfigSizes(screen_config, &nsizes);
+			sint size = -1;
+
+			for (sint i = 0; i < nsizes; ++i)
 			{
-				if (XF86VidModeSwitchToMode(_dpy, DefaultScreen(_dpy), modes[i]))
+				if (sizes[i].width == mode.Width && sizes[i].height == mode.Height)
 				{
-					nlinfo("3D: Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
-					XF86VidModeSetViewPort(_dpy, DefaultScreen(_dpy), 0, 0);
-					found = true;
+					size = i;
+					break;
 				}
-				break;
 			}
+
+			if (size > -1 && XRRSetScreenConfig(_dpy, screen_config, root, size, saved_rotation, CurrentTime) == RRSetConfigSuccess)
+			{
+				nlinfo("3D: Switching to XRandR mode %d: %dx%d", size, sizes[size].width, sizes[size].height);
+				found = true;
+			}
+			else
+			{
+				nlwarning("3D: No corresponding screen mode or XRRSetScreenConfig failed");
+			}
+
+			XRRFreeScreenConfigInfo(screen_config);
 		}
-		XFree(modes);
+		else
+		{
+			nlwarning("3D: XRRGetScreenInfo failed");
+		}
 	}
+
+#endif
+
+#if defined(XF86VIDMODE)
+
+	if (!found && _xvidmode_version > 0)
+	{
+		// Find the requested mode and use it
+		XF86VidModeModeInfo **modes;
+		int nmodes;
+		if (XF86VidModeGetAllModeLines(_dpy, DefaultScreen(_dpy), &nmodes, &modes))
+		{
+			for (int i = 0; i < nmodes; i++)
+			{
+				const uint16 freq = modeInfoToFrequency(modes[i]);
+
+				nldebug("3D: Available mode - %dx%d %d Hz", modes[i]->hdisplay, modes[i]->vdisplay, (int)freq);
+				if (modes[i]->hdisplay == mode.Width && modes[i]->vdisplay == mode.Height /* && freq == mode.Frequency */)
+				{
+					if (XF86VidModeSwitchToMode(_dpy, DefaultScreen(_dpy), modes[i]))
+					{
+						nlinfo("3D: XF86VidMode Switching to mode %dx%d", modes[i]->hdisplay, modes[i]->vdisplay);
+						XF86VidModeSetViewPort(_dpy, DefaultScreen(_dpy), 0, 0);
+						found = true;
+					}
+					break;
+				}
+			}
+			XFree(modes);
+		}
+	}
+
+#endif // XF86VIDMODE
 
 	if (!found)
 		return false;
-
-#endif // XF86VIDMODE
 
 #endif // NL_OS_WINDOWS
 
@@ -1115,43 +1264,32 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_UNIX)
 
-	XSetWindowAttributes attr;
-
-#ifdef XF86VIDMODE
-	// If we're going to attempt fullscreen, we need to set redirect to True,
-	// This basically places the window with no borders in the top left
-	// corner of the screen.
-	if (windowStyle == EWSWindowed)
-	{
-		attr.override_redirect = False;
-	}
-	else
-	{
-		attr.override_redirect = True;
-	}
-#else
-	attr.override_redirect = False;
-#endif
-
-	int attr_flags = CWOverrideRedirect;
-
-	XChangeWindowAttributes(_dpy, _win, attr_flags, &attr);
-
 	// x11 fullscreen is not working on mac os x
+
 #if !defined(NL_OS_MAC)
+
 	// Toggle fullscreen
 	if (windowStyle != getWindowStyle())
 	{
 		XEvent xev;
 		memset(&xev, 0, sizeof(xev));
 		xev.type = ClientMessage;
+//		xev.xclient.serial = 0;
+//		xev.xclient.send_event = True;
+//		xev.xclient.display = _dpy;
 		xev.xclient.window = _win;
 		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
 		xev.xclient.format = 32;
 		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? 1:0;
 		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
 		xev.xclient.data.l[2] = 0;
-		XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureNotifyMask, &xev);
+		xev.xclient.data.l[3] = 0;
+		xev.xclient.data.l[4] = 0;
+		if (XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureNotifyMask, &xev) != Success)
+		{
+			nlwarning("3D: Failed to toggle to fullscreen");
+			return false;
+		}
 	}
 
 #endif
@@ -1222,32 +1360,84 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 #elif defined (NL_OS_UNIX)
 
-#	ifdef XF86VIDMODE
+	bool found = false;
+	int screen = DefaultScreen(_dpy);
+
+#if defined(XRANDR)
+	if (!found && _xrandr_version >= 100)
+	{
+		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
+
+		if (screen_config)
+		{
+			// retrieve the list of resolutions
+			int nsizes = 0;
+			XRRScreenSize *sizes = XRRConfigSizes(screen_config, &nsizes);
+
+			if (nsizes > 0)
+			{
+				nldebug("3D: %d available XRandR modes:", nsizes);
+
+				for (sint i = 0; i < nsizes; ++i)
+				{
+					// Add this mode
+					GfxMode mode;
+					mode.Width = sizes[i].width;
+					mode.Height = sizes[i].height;
+					mode.Frequency = 0;
+					modes.push_back(mode);
+
+					nldebug("3D:   Mode %d: %dx%d", i, mode.Width, mode.Height);
+				}
+
+				found = true;
+			}
+			else
+			{
+				nlwarning("3D: No XRandR modes available");
+			}
+
+			XRRFreeScreenConfigInfo(screen_config);
+		}
+		else
+		{
+			nlwarning("3D: XRRGetScreenInfo failed");
+		}
+	}
+#endif
+
+#ifdef XF86VIDMODE
 	int nmodes;
 	XF86VidModeModeInfo **ms;
-	Bool ok = XF86VidModeGetAllModeLines(_dpy, DefaultScreen(_dpy), &nmodes, &ms);
-	if(ok)
+	if (!found && XF86VidModeGetAllModeLines(_dpy, screen, &nmodes, &ms))
 	{
-		nldebug("3D: %d available modes:", nmodes);
+		nlinfo("3D: %d available XF86VidMode modes:", nmodes);
 		for (int j = 0; j < nmodes; j++)
 		{
 			// Add this mode
 			GfxMode mode;
 			mode.Width = (uint16)ms[j]->hdisplay;
 			mode.Height = (uint16)ms[j]->vdisplay;
-			const uint16 pixelsCount = ms[j]->htotal * ms[j]->vtotal;
-			mode.Frequency = pixelsCount ? 1000 * ms[j]->dotclock / pixelsCount:0;
-			nldebug("3D:   Mode %d: %dx%d, %d Hz", j, mode.Width, mode.Height, mode.Frequency);
+			mode.Frequency = modeInfoToFrequency(ms[j]);
+			nlinfo("3D:   Mode %d: %dx%d, %d Hz", j, mode.Width, mode.Height, mode.Frequency);
 			modes.push_back (mode);
 		}
 		XFree(ms);
 	}
-	else
+#endif // XF86VIDMODE
+
+	if (!found)
 	{
-		nlwarning("XF86VidModeGetAllModeLines returns 0, cannot get available video mode");
-		return false;
+		// Add current screen mode
+		GfxMode mode;
+		mode.Width = DisplayWidth(_dpy, screen);
+		mode.Height = DisplayHeight(_dpy, screen);
+		mode.Frequency = 0;
+		modes.push_back(mode);
+
+		nldebug("3D: X11 available mode:");
+		nldebug("3D:   %dx%d", mode.Width, mode.Height);
 	}
-#	endif
 
 #endif
 	return true;
@@ -1290,31 +1480,96 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 
 #elif defined(NL_OS_UNIX)
 
-#	ifdef XF86VIDMODE
-	sint pixelClock;
-	XF86VidModeModeLine xmode;
-
-	if (!XF86VidModeGetModeLine(_dpy, DefaultScreen(_dpy), &pixelClock, &xmode))
-	{
-		nlwarning("XF86VidModeGetModeLine returns 0, cannot get current video mode");
-		return false;
-	}
+	bool found = false;
+	int screen = DefaultScreen(_dpy);
 
 	// x11 fullscreen is not working on mac os x
-#if !defined(NL_OS_MAC)
-	mode.Windowed = !_FullScreen;
-#else
+#if defined(NL_OS_MAC)
 	mode.Windowed = true;
+	found = true;
 #endif
 
-	mode.OffScreen = false;
-	mode.Depth = (uint) DefaultDepth(_dpy, DefaultScreen(_dpy));
-	mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
-	mode.Width = xmode.hdisplay;
-	mode.Height = xmode.vdisplay;
+#ifdef XRANDR
 
-	nldebug("Current mode : %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
-#	endif
+	if (!found && _xrandr_version > 0)
+	{
+		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
+
+		if (screen_config)
+		{
+			int nsizes;
+			XRRScreenSize *sizes = XRRConfigSizes(screen_config, &nsizes);
+			if (nsizes > 0)
+			{
+				Rotation cur_rotation;
+				SizeID size = XRRConfigCurrentConfiguration(screen_config, &cur_rotation);
+
+				mode.Windowed = !_FullScreen;
+				mode.OffScreen = false;
+				mode.Depth = (uint) DefaultDepth(_dpy, screen);
+				mode.Frequency = 0;
+				mode.Width = sizes[size].width;
+				mode.Height = sizes[size].height;
+
+				found = true;
+
+				nlinfo("3D: Current XRandR mode %d: %dx%d, %dbit", size, mode.Width, mode.Height, mode.Depth);
+			}
+			else
+			{
+				nlwarning("3D: No XRandR modes available");
+			}
+
+			XRRFreeScreenConfigInfo(screen_config);
+		}
+		else
+		{
+			nlwarning("3D: XRRGetScreenInfo failed");
+		}
+	}
+
+#endif // XRANDR
+
+#ifdef XF86VIDMODE
+
+	if (!found && _xvidmode_version > 0)
+	{
+		sint pixelClock;
+		XF86VidModeModeLine xmode;
+
+		if (XF86VidModeGetModeLine(_dpy, screen, &pixelClock, &xmode))
+		{
+			mode.Windowed = !_FullScreen;
+			mode.OffScreen = false;
+			mode.Depth = (uint) DefaultDepth(_dpy, screen);
+			mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
+			mode.Width = xmode.hdisplay;
+			mode.Height = xmode.vdisplay;
+			nlinfo("3D: Current XF86VidMode mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
+
+			found = true;
+		}
+		else
+		{
+			nlwarning("3D: XF86VidModeGetModeLine failed, cannot get current video mode");
+		}
+	}
+
+#endif
+
+	if (!found)
+	{
+		mode.Windowed = !_FullScreen;
+		mode.OffScreen = _OffScreen;
+		mode.Depth = (uint) DefaultDepth(_dpy, screen);
+		mode.Frequency = 0;
+		mode.Width = DisplayWidth(_dpy, screen);
+		mode.Height = DisplayHeight(_dpy, screen);
+
+		found = true;
+
+		nldebug("Current mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
+	}
 
 #endif
 	return true;
@@ -1379,7 +1634,7 @@ void CDriverGL::showWindow(bool show)
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
 	MAC::showWindow(show);
-	
+
 #elif defined (NL_OS_UNIX)
 
 	if (show)
@@ -1649,19 +1904,8 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 	XSetWMNormalHints(_dpy, _win, &size_hints);
 
-	// set position to (0, 0) if fullscreen
-	if (_FullScreen)
-	{
-		// move and resize the window
-		XMoveResizeWindow(_dpy, _win, 0, 0, width, height);
-	}
-	else
-	{
-		// resize the window
-		XResizeWindow(_dpy, _win, width, height);
-	}
-
-//	XMapWindow(_dpy, _win);
+	// resize the window
+	XResizeWindow(_dpy, _win, width, height);
 
 	_WindowWidth = width;
 	_WindowHeight = height;

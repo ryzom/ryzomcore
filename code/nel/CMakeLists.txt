@@ -101,12 +101,13 @@ IF(WITH_3D)
       IF(NOT WITH_COCOA)
         FIND_PACKAGE(X11)
         FIND_PACKAGE(XF86VidMode)
+        FIND_PACKAGE(XRandR)
       ENDIF(NOT WITH_COCOA)
     ENDIF(NOT WIN32)
   ENDIF(WITH_DRIVER_OPENGL)
 
   IF(WITH_CEGUI)
-    FIND_PACKAGE(CEGUI) 
+    FIND_PACKAGE(CEGUI)
   ENDIF(WITH_CEGUI)
 
 ENDIF(WITH_3D)
@@ -119,7 +120,7 @@ IF(WITH_SOUND)
   IF(WITH_DRIVER_FMOD)
     FIND_PACKAGE(FMOD)
   ENDIF(WITH_DRIVER_FMOD)
-  
+
   IF(WITH_DRIVER_XAUDIO2)
     FIND_PACKAGE(Ogg)
     FIND_PACKAGE(Vorbis)
@@ -143,8 +144,8 @@ IF(WITH_TESTS)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
-    SET(SVNSOURCEDIR http://dev.ryzom.com/svn/trunk/nel) 
-    SET(GENERATELOGS svn2cl) 
+    SET(SVNSOURCEDIR http://dev.ryzom.com/svn/trunk/nel)
+    SET(GENERATELOGS svn2cl)
   ENDIF(BUILD_DASHBOARD)
 ENDIF(WITH_TESTS)
 
@@ -225,8 +226,8 @@ SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} NeL")
 SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
-SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")  
- 
+SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+
 ## Source Packages
 SET(CPACK_PACKAGE_FILE_NAME "nel-${NL_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "nel-${NL_VERSION}")
@@ -250,8 +251,8 @@ IF(WIN32)
     SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
     IF(WITH_QT)
       INCLUDE(${QT_USE_FILE})
-      INSTALL(FILES 
-        "${QT_LIBRARY_DIR}/QtGuid4.dll"        
+      INSTALL(FILES
+        "${QT_LIBRARY_DIR}/QtGuid4.dll"
         "${QT_LIBRARY_DIR}/QtXmld4.dll"
         "${QT_LIBRARY_DIR}/QtCored4.dll"
         DESTINATION bin)
@@ -259,8 +260,8 @@ IF(WIN32)
   ELSE(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     IF(WITH_QT)
       INCLUDE(${QT_USE_FILE})
-      INSTALL(FILES 
-        "${QT_LIBRARY_DIR}/QtGui4.dll"        
+      INSTALL(FILES
+        "${QT_LIBRARY_DIR}/QtGui4.dll"
         "${QT_LIBRARY_DIR}/QtXml4.dll"
         "${QT_LIBRARY_DIR}/QtCore4.dll"
         DESTINATION bin)
@@ -276,7 +277,7 @@ IF(WIN32)
     INSTALL(FILES "${CEGUI_LIB_DIR}/Devil.dll" DESTINATION bin)
     INSTALL(FILES "${CEGUI_LIB_DIR}/ILU.dll" DESTINATION bin)
   ENDIF(WITH_CEGUI)
-    
+
   # Only the tools require MFC.
   IF(WITH_TOOLS)
     SET(CMAKE_INSTALL_MFC_LIBRARIES TRUE)
