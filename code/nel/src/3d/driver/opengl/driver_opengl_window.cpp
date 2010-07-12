@@ -224,7 +224,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	if (XF86VidModeQueryExtension(_dpy, &event, &error) && XF86VidModeQueryVersion(_dpy, &vm_major, &vm_minor))
 	{
 		_xvidmode_version = vm_major * 100 + vm_minor;
-		nlinfo("3D: XF86VidMode %d.%d found", major, minor);
+		nlinfo("3D: XF86VidMode %d.%d found", vm_major, vm_minor);
 	}
 #endif
 
@@ -991,7 +991,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		if (screen_config)
 		{
 			Rotation saved_rotation;
-			SizeID size = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
+			SizeID cur_size = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
 
 			sint nsizes;
 			XRRScreenSize *sizes = XRRConfigSizes(screen_config, &nsizes);
