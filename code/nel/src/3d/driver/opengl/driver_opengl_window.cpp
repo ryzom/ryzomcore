@@ -35,11 +35,13 @@
 # ifdef XRANDR
 #  include <X11/extensions/Xrandr.h>
 # endif
+# include <X11/Xatom.h>
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
+#include "nel/misc/file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -294,6 +296,62 @@ bool CDriverGL::unInit()
 #endif // NL_OS_UNIX
 
 	return true;
+}
+
+void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
+{
+#if defined(NL_OS_WINDOWS)
+
+	// TODO
+
+#elif defined(NL_OS_MAC)
+
+	// TODO
+
+#elif defined(NL_OS_UNIX)
+
+	std::vector<long> icon_data;
+
+	if (!bitmaps.empty())
+	{
+		// process each bitmap
+		for(uint i = 0; i < bitmaps.size(); ++i)
+		{
+			// get bitmap width and height
+			uint width = bitmaps[i].getWidth();
+			uint height = bitmaps[i].getHeight();
+
+			// icon_data position for bitmap
+			uint pos = (uint)icon_data.size();
+
+			// extend icon_data size for bitmap
+			icon_data.resize(pos + 2 + width*height);
+
+			// set bitmap width and height
+			icon_data[pos++] = width;
+			icon_data[pos++] = height;
+
+			// convert RGBA to ARGB
+			CObjectVector<uint8> pixels = bitmaps[i].getPixels();
+			for(uint j = 0; j < pixels.size(); j+=4)
+				icon_data[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
+		}
+	}
+
+	Atom _NET_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
+
+	if (!icon_data.empty())
+	{
+		// change window icon
+		XChangeProperty(_dpy, _win, _NET_WM_ICON, XA_CARDINAL, 32, PropModeReplace, (const unsigned char *) &icon_data[0], icon_data.size());
+	}
+	else
+	{
+		// delete window icon if no bitmap is available
+		XDeleteProperty(_dpy, _win, _NET_WM_ICON);
+	}
+
+#endif // NL_OS_WINDOWS
 }
 
 // --------------------------------------------------
@@ -967,7 +1025,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 	{
-		nlwarning("Fullscreen mode switch failed");
+		nlwarning("3D: Fullscreen mode switch failed");
 		return false;
 	}
 

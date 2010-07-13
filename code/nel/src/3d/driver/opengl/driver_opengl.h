@@ -850,6 +850,8 @@ private:
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
 
+	void					setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
+
 	enum EWindowStyle { EWSWindowed, EWSFullscreen };
 
 	void					setWindowSize(uint32 width, uint32 height);
