@@ -8848,6 +8848,7 @@ void CCharacterCL::alignFX(UParticleSystemInstance instance, float scale /* = 1.
 {
 	// copy matrix from parent
 	CMatrix fxMatrix;
+	fxMatrix.identity();
 	buildAlignMatrix(fxMatrix);
 	alignFX(instance, fxMatrix, scale, localOffset);
 }
