@@ -25,13 +25,34 @@
 #include "cocoa_event_emitter.h"
 #include "cocoa_opengl_view.h"
 
-// Virtual key codes are only defined here. We still do not need to link carbon.
+// Virtual key codes are only defined here. Still do not need to link carbon.
 // see: http://lists.apple.com/archives/Cocoa-dev/2009/May/msg01180.html
 #include <Carbon/Carbon.h>
 
 #import <Cocoa/Cocoa.h>
 
 namespace NL3D { namespace MAC {
+
+// This cocoa adapter can be used in two environments:
+// First: There is no other code which creates the NSApplication object, so 
+//   NeL is completely in charge of starting and setting up the application.
+//   In this case, the NSAutoreleasePool needed to handle the cocoa style memory 
+//   management is created by this code.
+// Second: There is already a NSApplication set up. This could be the case if
+//   NeL is used for example in a Qt widget. So Qt already created all the 
+//   NSApplication infrastructure, so it is not set up by this code again!
+//
+// Thats why, the g_pool variable (containing a pointer to the NSAutoreleasePool 
+// created by this code) can be used to check whether NeL created the 
+// NSApplication infrastructure itself or not.
+//
+// WARNING:
+// Currently the NSApplication infrastructure is automatically created with the
+// call to createWindow(). So if for example Qt already created NSApplication,
+// createWindow() must not be called. Instead, setDisplay() can be provided with
+// a window handle (on Mac OS Cocoa Qt this is a NSView*). In this case, this 
+// cocoa adapter will skip the NSApplication setup and embed itself into the
+// provided view running in the already set up application.
 
 static NSAutoreleasePool* g_pool           = nil;
 /*
@@ -40,6 +61,7 @@ static NSAutoreleasePool* g_pool           = nil;
 static bool               g_emulateRawMode = false;
 static int                g_bufferSize[2]  = { 0, 0 };
 
+/// setup an apple style application menu (located at the top bar of the screen)
 static void setupApplicationMenu()
 {
 	NSMenu*     menu;
@@ -98,6 +120,29 @@ static void setupApplicationMenu()
 	[[NSApp mainMenu] addItem:menuItem];
 }
 
+/// set up the basic NSApplication and NSAutoreleasePool needed for Cocoa
+static bool setupNSApplication()
+{
+	// if the pool was already created, return an error
+	if(g_pool)
+		return false;
+
+	// create a pool, cocoa code would leak memory otherwise
+	g_pool = [[NSAutoreleasePool alloc] init];
+
+	// init the application object
+	[NSApplication sharedApplication];
+	
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// finish the application launching
+	[NSApp finishLaunching];
+	
+	return true;
+}
+
+/// setup an open gl view and embed it in the provided parent view
 static void setupGLView(NSView* superview)
 {
 	/*
@@ -169,20 +214,13 @@ bool unInit()
 	return true;
 }
 
+/// setup the basic cocoa app infrastructure and create a window
 nlWindow createWindow(const GfxMode& mode)
 {
-	// create a pool, cocoa code would leak memory otherwise
-	g_pool = [[NSAutoreleasePool alloc] init];
+	if(!setupNSApplication())
+		nlerror("createWindow must not be called before the old window was "
+			"destroyed using destroyWindow()!");
 
-	// init the application object
-	[NSApplication sharedApplication];
-	
-	// create the menu in the top screen bar
-	setupApplicationMenu();
-
-	// tell the application that we are running now
-	[NSApp finishLaunching];
-	
 	// describe how the window should look like and behave
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
@@ -201,7 +239,7 @@ nlWindow createWindow(const GfxMode& mode)
 	// enable mouse move events, NeL wants them
 	[window setAcceptsMouseMovedEvents:YES];
 
-	// there are no overlapping subviews, so we can use the magical optimization!
+	// there are no overlapping subviews, can use the magical optimization :)
 	[window useOptimizedDrawing:YES];
 
 	// put the window to the front and make it the key window
@@ -217,6 +255,7 @@ nlWindow createWindow(const GfxMode& mode)
 	return view;
 }
 
+/// destroy the given window and uninitialize the cocoa application
 bool destroyWindow(nlWindow wnd)
 {
 	NSView* view = (NSView*)wnd;
@@ -229,10 +268,12 @@ bool destroyWindow(nlWindow wnd)
 
 	// release the pool
 	[g_pool release];
+	g_pool = nil;
 
 	return true;
 }
 
+/// set the displays settings, if no win is provided, a new one will be created
 nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
 	NSView* view = (NSView*)wnd;
@@ -247,6 +288,7 @@ nlWindow setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeabl
 	return view;
 }
 
+/// switch between fullscreen and windowed mode
 bool setWindowStyle(nlWindow wnd, bool fullscreen)
 {
 	if(wnd == EmptyWindow)
@@ -315,7 +357,7 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 	return true;
 }
 
-
+/// get the current mode of the screen
 void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 {
 	NSView*       superview = (NSView*)wnd;
@@ -347,6 +389,7 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 	}
 }
 
+/// get the size of the window's content area
 void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 {
 	NSView*          superview = (NSView*)wnd;
@@ -378,6 +421,7 @@ void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 	}
 }
 
+/// set the size of the window's content area
 void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 {
 	NSView*       superview = (NSView*)wnd;
@@ -398,8 +442,8 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 	}
 	else
 	{
-		// there is only a pool if nel created the window itself assuming that
-		// nel is also in charge of the main loop
+		// there is only a pool if NeL created the window itself
+		// else, the window is not NeL's, so it must not be changed
 		if(g_pool)
 		{
 			NSWindow* window = [view window];
@@ -421,7 +465,7 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 	g_bufferSize[1] = height;
 }
 
-
+/// get the position of the window
 void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y)
 {
 	NSView*       superview = (NSView*)wnd;
@@ -448,6 +492,7 @@ void getWindowPos(nlWindow wnd, sint32 &x, sint32 &y)
 	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
+/// set the position of the window
 void setWindowPos(nlWindow wnd, sint32 x, sint32 y)
 {
 	NSView*   superview = (NSView*)wnd;
@@ -466,6 +511,7 @@ void setWindowPos(nlWindow wnd, sint32 x, sint32 y)
 	[window setFrameTopLeftPoint:NSMakePoint(x, y)];
 }
 
+/// set the windows title (not the title of the application)
 void setWindowTitle(nlWindow wnd, const ucstring& title)
 {
 	NSView*   superview = (NSView*)wnd;
@@ -480,6 +526,7 @@ void showWindow(bool show)
 	nldebug("show: %d - implement me!", show);
 }
 
+/// make the opengl context the current one
 bool activate(nlWindow wnd)
 {
 	NSView*          superview = (NSView*)wnd;
@@ -493,6 +540,7 @@ bool activate(nlWindow wnd)
 	return true;
 }
 
+/// flush current back buffer to screen
 void swapBuffers(nlWindow wnd)
 {
 	NSView*          superview = (NSView*)wnd;
@@ -509,6 +557,7 @@ void setCapture(bool capture)
 	// no need to capture
 }
 
+/// show or hide the mouse cursor
 void showCursor(bool show)
 {
 	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
@@ -535,6 +584,7 @@ void showCursor(bool show)
 		nlerror("cannot show / hide cursor");
 }
 
+/// set the mouse position
 void setMousePos(nlWindow wnd, float x, float y)
 {
 	NSView*          superview = (NSView*)wnd;
@@ -571,7 +621,8 @@ void setMousePos(nlWindow wnd, float x, float y)
   TODO: this function has to be moved to a more central place to handle key
         mapping on mac x11 as well
 */
-NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
+/// map from virtual key code to nel internal key code
+static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 {
 	switch(keycode)
 	{
@@ -702,7 +753,8 @@ NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
   TODO: this function has to be moved to a more central place to handle key
         mapping on mac x11 as well
 */
-NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
+/// convert modifier key state to nel internal modifier key state
+static NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
 {
 	unsigned int buttons = 0;
 	if (modifierFlags & NSControlKeyMask)   buttons |= NLMISC::ctrlKeyButton;
@@ -711,7 +763,8 @@ NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
 	return (NLMISC::TKeyButton)buttons;
 }
 
-bool isTextKeyEvent(NSEvent* event)
+/// check whether a given event represents input text
+static bool isTextKeyEvent(NSEvent* event)
 {
 	// if there are no characters provided with this event, it is not a text event
 	if([[event characters] length] == 0)
@@ -763,16 +816,18 @@ bool isTextKeyEvent(NSEvent* event)
 	return false;
 }
 
+/// switch between raw mode emulation, see IEventEmitter::emulateMouseRawMode()
 void emulateMouseRawMode(bool enable)
 {
 	g_emulateRawMode = enable;
 }
 
+/// submit events provided by the application to an event server 
 void submitEvents(NLMISC::CEventServer& server,
 	bool allWindows, NLMISC::CCocoaEventEmitter* eventEmitter)
 {
-	// there is only a pool if nel created the window itself assuming that
-	// nel is also in charge of the main loop
+	// if there is a pool, NeL needs to clean it up
+	// otherwise, other code must have created it (for example Qt)
 	if(g_pool)
 	{
 		// cocoa style memory cleanup
@@ -780,7 +835,7 @@ void submitEvents(NLMISC::CEventServer& server,
 		g_pool = [[NSAutoreleasePool alloc] init];
 	}
 	
-	// we break if there was no event to handle
+	// break if there was no event to handle
 	/* TODO maximum number of events processed in one update? */
 	while(true)
 	{
