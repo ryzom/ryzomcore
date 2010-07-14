@@ -370,7 +370,6 @@ HICON CCustomMouse::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot
 	uint mouseH = GetSystemMetrics(SM_CYCURSOR);
 	nlassert(src.getWidth() == mouseW);
 	nlassert(src.getHeight() == mouseH);
-	HICON result = 0;
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)
 	switch(rot)
@@ -380,62 +379,7 @@ HICON CCustomMouse::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot
 		case 2: rotSrc.rot90CW(); rotSrc.rot90CW(); break;
 		case 3: rotSrc.rot90CCW(); break;
 	}
-	CBitmap colorBm;
-	colorBm.resize(mouseW, mouseH, CBitmap::RGBA);
-	const CRGBA *srcColorPtr = (CRGBA *) &(rotSrc.getPixels()[0]);
-	const CRGBA *srcColorPtrLast = srcColorPtr + (mouseW * mouseH);
-	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
-	static volatile uint8 alphaThreshold = 127;
-	do
-	{
-			destColorPtr->modulateFromColor(*srcColorPtr, col);
-			std::swap(destColorPtr->R, destColorPtr->B);
-			++ srcColorPtr;
-			++ destColorPtr;
-	}
-	while (srcColorPtr != srcColorPtrLast);
-	//
-	HBITMAP colorHbm = 0;
-	HBITMAP maskHbm = 0;
-	//
-	if (_ColorDepth == ColorDepth16)
-	{
-		std::vector<uint16> colorBm16(colorBm.getWidth() * colorBm.getHeight());
-		const CRGBA *src32 = (const CRGBA *) &colorBm.getPixels(0)[0];
-		for (uint k = 0;k < colorBm16.size(); ++k)
-		{
-			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
-		}
-		colorHbm = CreateBitmap(mouseW, mouseH, 1, 16, &colorBm16[0]);
-		std::vector<uint8> bitMask((colorBm.getWidth() * colorBm.getHeight() + 7) / 8, 0);
-		for (uint k = 0;k < colorBm16.size(); ++k)
-		{
-			if (src32[k].A <= 120)
-			{
-				bitMask[k / 8] |= (0x80 >> (k & 7));
-			}
-		}
-		maskHbm = CreateBitmap(mouseW, mouseH, 1, 1, &bitMask[0]);
-	}
-	else
-	{
-		colorHbm = CreateBitmap(mouseW, mouseH, 1, 32, &colorBm.getPixels(0)[0]);
-		maskHbm = CreateBitmap(mouseW, mouseH, 1, 32, &colorBm.getPixels(0)[0]);
-	}
-	ICONINFO iconInfo;
-	iconInfo.fIcon = FALSE;
-	iconInfo.xHotspot = (DWORD) hotSpotX;
-	iconInfo.yHotspot = (DWORD) hotSpotY;
-	iconInfo.hbmMask = maskHbm;
-	iconInfo.hbmColor = colorHbm;
-	if (colorHbm && maskHbm)
-	{
-		result = CreateIconIndirect(&iconInfo);
-	}
-	//
-	if (colorHbm) DeleteObject(colorHbm);
-	if (maskHbm) DeleteObject(maskHbm);
-	return result;
+	return rotSrc.getHICON(mouseW, mouseH, _ColorDepth == ColorDepth16 ? 16:32, col, hotSpotX, hotSpotY, true);
 }
 
 

@@ -1500,7 +1500,7 @@ uint32 CBitmap::getHeight(uint32 mipMap) const
 
 
 /*-------------------------------------------------------------------*\
-							getHeight
+							getSize
 \*-------------------------------------------------------------------*/
 uint32 CBitmap::getSize(uint32 numMipMap) const
 {
@@ -4106,6 +4106,79 @@ void CBitmap::getDibData(uint8*& extractData)
 	delete []buf;
 
 }
+
+#ifdef NL_OS_WINDOWS
+
+HICON CBitmap::getHICON(sint iconWidth, sint iconHeight, sint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor) const
+{
+	HICON result = NULL;
+	CBitmap colorBm;
+	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
+	const CRGBA *srcColorPtr = (CRGBA *) &(getPixels()[0]);
+	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
+	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
+	static volatile uint8 alphaThreshold = 127;
+	do
+	{
+		destColorPtr->modulateFromColor(*srcColorPtr, col);
+		std::swap(destColorPtr->R, destColorPtr->B);
+		++ srcColorPtr;
+		++ destColorPtr;
+	}
+	while (srcColorPtr != srcColorPtrLast);
+	//
+	HBITMAP colorHbm = NULL;
+	HBITMAP maskHbm = NULL;
+	//
+	if (iconDepth == 16)
+	{
+		std::vector<uint16> colorBm16(iconWidth * iconHeight);
+		const CRGBA *src32 = (const CRGBA *) &colorBm.getPixels(0)[0];
+
+		for (uint k = 0; k < colorBm16.size(); ++k)
+		{
+			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
+		}
+
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 16, &colorBm16[0]);
+		std::vector<uint8> bitMask((iconWidth * iconHeight + 7) / 8, 0);
+
+		for (uint k = 0;k < colorBm16.size(); ++k)
+		{
+			if (src32[k].A <= 120)
+			{
+				bitMask[k / 8] |= (0x80 >> (k & 7));
+			}
+		}
+
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 1, &bitMask[0]);
+	}
+	else
+	{
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+	}
+
+	ICONINFO iconInfo;
+	iconInfo.fIcon = cursor ? FALSE:TRUE;
+	iconInfo.xHotspot = (DWORD) hotSpotX;
+	iconInfo.yHotspot = (DWORD) hotSpotY;
+	iconInfo.hbmMask = maskHbm;
+	iconInfo.hbmColor = colorHbm;
+
+	if (colorHbm && maskHbm)
+	{
+		result = CreateIconIndirect(&iconInfo);
+	}
+
+	//
+	if (colorHbm) DeleteObject(colorHbm);
+	if (maskHbm) DeleteObject(maskHbm);
+
+	return result;
+}
+
+#endif
 
 } // NLMISC
 
