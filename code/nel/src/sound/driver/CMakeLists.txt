@@ -1,22 +1,13 @@
 FILE(GLOB SRC *.cpp *.h)
 
-IF(NOT WIN32)
-  ADD_LIBRARY(nelsnd_lowlevel SHARED ${SRC})
-ELSE(NOT WIN32)
-  ADD_LIBRARY(nelsnd_lowlevel STATIC ${SRC})
-ENDIF(NOT WIN32) 
+nl_target_lib(nelsnd_lowlevel ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel ${LIBXML2_LIBRARIES} nelsound)
-SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES 
-  VERSION ${NL_VERSION}
-  SOVERSION ${NL_VERSION_MAJOR}
-  PROJECT_LABEL "Library: NeL Sound Lowlevel")
+nl_default_props(nelsnd_lowlevel "Library: NeL Sound Lowlevel")
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-IF(WIN32)
-  SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES DEBUG_POSTFIX "_d" RELEASE_POSTFIX "_r")
-ENDIF(WIN32)
+nl_add_lib_suffix(nelsnd_lowlevel)
 
 INSTALL(TARGETS nelsnd_lowlevel LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
 

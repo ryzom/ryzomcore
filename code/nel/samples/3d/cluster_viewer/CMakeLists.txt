@@ -1,18 +1,14 @@
 FILE(GLOB SRC *.cpp)
 
-ADD_EXECUTABLE(nl_sample_clusterview ${SRC})
+ADD_EXECUTABLE(nl_sample_clusterview WIN32 ${SRC})
 
 ADD_DEFINITIONS(-DCV_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_clusterview/\\"")
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nl_sample_clusterview ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nel3d)
-IF(WIN32)
-  SET_TARGET_PROPERTIES(nl_sample_clusterview PROPERTIES 
-    LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-    LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-    LINK_FLAGS "/SUBSYSTEM:WINDOWS"
-    PROJECT_LABEL "Samples, 3D: Cluster Viewer")
-ENDIF(WIN32)
+NL_ADD_RUNTIME_FLAGS(nl_sample_clusterview)
+NL_DEFAULT_PROPS(nl_sample_clusterview "Samples, 3D: Cluster Viewer")
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS nl_sample_clusterview RUNTIME DESTINATION bin COMPONENT samples3d)

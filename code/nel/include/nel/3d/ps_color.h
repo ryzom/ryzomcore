@@ -34,7 +34,7 @@ namespace NL3D {
 
 
 template <>
-const char *CPSAttribMaker<NLMISC::CRGBA>::getType() { return "CRGBA"; }
+inline const char *CPSAttribMaker<NLMISC::CRGBA>::getType() { return "CRGBA"; }
 
 
 // Depending on the driver, the format of colors in vertex buffer may change. We don't want to change the format for each data that is (dynamically) in vertex buffer, so
