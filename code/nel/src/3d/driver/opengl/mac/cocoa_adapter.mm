@@ -809,49 +809,46 @@ void submitEvents(NLMISC::CEventServer& server,
 			continue;
 		}
 
+		// convert the modifiers for nel to pass them with the events
+		NLMISC::TKeyButton modifiers = 
+			modifierFlagsToNelKeyButton([event modifierFlags]);
+
 		switch(event.type)
 		{
 		case NSLeftMouseDown:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
-				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
+				mouseX, mouseY, 
+				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), 
+				eventEmitter));
 		}
 		break;
 		case NSLeftMouseUp:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
-				mouseX, mouseY, NLMISC::leftButton /* modifiers */, eventEmitter));
+				mouseX, mouseY, 
+				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), 
+				eventEmitter));
 			break;
 		}
 		case NSRightMouseDown:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			server.postEvent(new NLMISC::CEventMouseDown(
-				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
+				mouseX, mouseY, 
+				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), 
+				eventEmitter));
 			break;
 		}
 		case NSRightMouseUp:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			server.postEvent(new NLMISC::CEventMouseUp(
-				mouseX, mouseY, NLMISC::rightButton /* modifiers */, eventEmitter));
+				mouseX, mouseY, 
+				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), 
+				eventEmitter));
 			break;
 		}
 		case NSMouseMoved:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			NLMISC::CEvent* nelEvent;
 
 			// when emulating raw mode, send the delta in a CGDMouseMove event
@@ -861,17 +858,14 @@ void submitEvents(NLMISC::CEventServer& server,
 
 			// normally send position in a CEventMouseMove
 			else
-				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
-					(NLMISC::TMouseButton)0 /* modifiers */, eventEmitter);
+				nelEvent = new NLMISC::CEventMouseMove(
+					mouseX, mouseY, (NLMISC::TMouseButton)modifiers, eventEmitter);
 
 			server.postEvent(nelEvent);
 			break;
 		}
 		case NSLeftMouseDragged:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			NLMISC::CEvent* nelEvent;
 
 			// when emulating raw mode, send the delta in a CGDMouseMove event
@@ -882,16 +876,14 @@ void submitEvents(NLMISC::CEventServer& server,
 			// normally send position in a CEventMouseMove
 			else
 				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
-					NLMISC::leftButton /* modifiers */, eventEmitter);
+					(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), 
+					eventEmitter);
 
 			server.postEvent(nelEvent);
 			break;
 		}
 		case NSRightMouseDragged:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			NLMISC::CEvent* nelEvent;
 
 			// when emulating raw mode, send the delta in a CGDMouseMove event
@@ -902,7 +894,8 @@ void submitEvents(NLMISC::CEventServer& server,
 			// normally send position in a CEventMouseMove
 			else
 				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
-					NLMISC::rightButton /* modifiers */, eventEmitter);
+					(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), 
+					eventEmitter);
 
 			server.postEvent(nelEvent);
 			break;
@@ -951,12 +944,9 @@ void submitEvents(NLMISC::CEventServer& server,
 		case NSCursorUpdate:break;
 		case NSScrollWheel:
 		{
-			/*
-				TODO modifiers with mouse events
-			*/
 			if(fabs(event.deltaY) > 0.1) 
 				server.postEvent(new NLMISC::CEventMouseWheel(
-					mouseX, mouseY, (NLMISC::TMouseButton)0 /* modifiers */,
+					mouseX, mouseY, (NLMISC::TMouseButton)modifiers, 
 					(event.deltaY > 0), eventEmitter));
 
 			break;

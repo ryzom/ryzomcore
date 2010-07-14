@@ -35,11 +35,13 @@
 # ifdef XRANDR
 #  include <X11/extensions/Xrandr.h>
 # endif
+# include <X11/Xatom.h>
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
+#include "nel/misc/file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -294,6 +296,123 @@ bool CDriverGL::unInit()
 #endif // NL_OS_UNIX
 
 	return true;
+}
+
+void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
+{
+	if (_win == EmptyWindow)
+		return;
+
+#if defined(NL_OS_WINDOWS)
+
+	static HICON winIconBig = NULL;
+	static HICON winIconSmall = NULL;
+
+	if (winIconBig)
+	{
+		DestroyIcon(winIconBig);
+		winIconBig = NULL;
+	}
+
+	if (winIconSmall)
+	{
+		DestroyIcon(winIconSmall);
+		winIconSmall = NULL;
+	}
+
+	sint smallIndex = -1;
+	uint smallWidth = GetSystemMetrics(SM_CXSMICON);
+	uint smallHeight = GetSystemMetrics(SM_CYSMICON);
+
+	sint bigIndex = -1;
+	uint bigWidth = GetSystemMetrics(SM_CXICON);
+	uint bigHeight = GetSystemMetrics(SM_CYICON);
+
+	// find icons with the exact size
+	for(uint i = 0; i < bitmaps.size(); ++i)
+	{
+		if (smallIndex == -1 &&	bitmaps[i].getWidth() == smallWidth &&	bitmaps[i].getHeight() == smallHeight)
+			smallIndex = i;
+
+		if (bigIndex == -1 && bitmaps[i].getWidth() == bigWidth && bitmaps[i].getHeight() == bigHeight)
+			bigIndex = i;
+	}
+
+	// find icons with taller size (we will resize them)
+	for(uint i = 0; i < bitmaps.size(); ++i)
+	{
+		if (smallIndex == -1 && bitmaps[i].getWidth() >= smallWidth && bitmaps[i].getHeight() >= smallHeight)
+			smallIndex = i;
+
+		if (bigIndex == -1 && bitmaps[i].getWidth() >= bigWidth && bitmaps[i].getHeight() >= bigHeight)
+			bigIndex = i;
+	}
+
+	if (smallIndex > -1)
+		winIconSmall = bitmaps[smallIndex].getHICON(smallWidth, smallHeight, 32);
+
+	if (bigIndex > -1)
+		winIconBig = bitmaps[bigIndex].getHICON(bigWidth, bigHeight, 32);
+
+	if (winIconBig)
+	{
+		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+	}
+	else
+	{
+		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+	}
+
+#elif defined(NL_OS_MAC)
+
+	// nothing to do
+
+#elif defined(NL_OS_UNIX)
+
+	std::vector<long> icon_data;
+
+	if (!bitmaps.empty())
+	{
+		// process each bitmap
+		for(uint i = 0; i < bitmaps.size(); ++i)
+		{
+			// get bitmap width and height
+			uint width = bitmaps[i].getWidth();
+			uint height = bitmaps[i].getHeight();
+
+			// icon_data position for bitmap
+			uint pos = (uint)icon_data.size();
+
+			// extend icon_data size for bitmap
+			icon_data.resize(pos + 2 + width*height);
+
+			// set bitmap width and height
+			icon_data[pos++] = width;
+			icon_data[pos++] = height;
+
+			// convert RGBA to ARGB
+			CObjectVector<uint8> pixels = bitmaps[i].getPixels();
+			for(uint j = 0; j < pixels.size(); j+=4)
+				icon_data[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
+		}
+	}
+
+	Atom _NET_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
+
+	if (!icon_data.empty())
+	{
+		// change window icon
+		XChangeProperty(_dpy, _win, _NET_WM_ICON, XA_CARDINAL, 32, PropModeReplace, (const unsigned char *) &icon_data[0], icon_data.size());
+	}
+	else
+	{
+		// delete window icon if no bitmap is available
+		XDeleteProperty(_dpy, _win, _NET_WM_ICON);
+	}
+
+#endif // NL_OS_WINDOWS
 }
 
 // --------------------------------------------------
@@ -967,7 +1086,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 	{
-		nlwarning("Fullscreen mode switch failed");
+		nlwarning("3D: Fullscreen mode switch failed");
 		return false;
 	}
 
@@ -1134,6 +1253,10 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
+
+	// make sure window icons are deleted
+	std::vector<NLMISC::CBitmap> bitmaps;
+	setWindowIcon(bitmaps);
 
 #ifdef NL_OS_WINDOWS
 

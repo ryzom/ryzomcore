@@ -28,7 +28,7 @@
 namespace NL3D {
 
 template <>
-const char *CPSAttribMaker<float>::getType() { return "float"; }
+inline const char *CPSAttribMaker<float>::getType() { return "float"; }
 
 /// these are some attribute makers for float
 /// This is a float blender class. It just blend between 2 values

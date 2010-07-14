@@ -621,6 +621,10 @@ public:
 
 	void getDibData(uint8*& extractData);
 
+#ifdef NL_OS_WINDOWS
+	HICON getHICON(sint iconWidth, sint iconHeight, sint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false) const;
+#endif
+
 	CBitmap& operator= (const CBitmap& from)
 	{
 		if (&from == this)
