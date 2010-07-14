@@ -302,7 +302,39 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 {
 #if defined(NL_OS_WINDOWS)
 
-	// TODO
+	static HICON winIconBig = NULL;
+	static HICON winIconSmall = NULL;
+
+	if (winIconBig)
+	{
+		DestroyIcon(winIconBig);
+		winIconBig = NULL;
+	}
+
+	if (winIconSmall)
+	{
+		DestroyIcon(winIconSmall);
+		winIconSmall = NULL;
+	}
+
+	// first bitmap is the small icon
+	if (bitmaps.size() > 0)
+		winIconSmall = bitmaps[0].getHICON(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 32);
+
+	// second bitmap is the big icon
+	if (bitmaps.size() > 1)
+		winIconBig = bitmaps[1].getHICON(GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 32);
+
+	if (winIconBig)
+	{
+		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+	}
+	else
+	{
+		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+	}
 
 #elif defined(NL_OS_MAC)
 
@@ -1192,6 +1224,10 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
+
+	// make sure window icons are deleted
+	std::vector<NLMISC::CBitmap> bitmaps;
+	setWindowIcon(bitmaps);
 
 #ifdef NL_OS_WINDOWS
 
