@@ -294,10 +294,13 @@ public:
 	virtual void			beginDialogMode();
 	virtual void			endDialogMode();
 
-	/// Set the title of the NeL window
+	/// Set title of the NeL window
 	virtual void			setWindowTitle(const ucstring &title);
 
-	/// Set the position of the NeL window
+	/// Set icon(s) of the NeL window
+	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
+
+	/// Set position of the NeL window
 	virtual void			setWindowPos(sint32 x, sint32 y);
 
 	/// Show or hide the NeL window
@@ -849,8 +852,6 @@ private:
 
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
-
-	void					setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
 
 	enum EWindowStyle { EWSWindowed, EWSFullscreen };
 
