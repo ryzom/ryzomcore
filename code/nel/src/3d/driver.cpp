@@ -34,7 +34,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x67; // changed window pos from uint32 to sint32
+const uint32 IDriver::InterfaceVersion = 0x68; // added setWindowIcon
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

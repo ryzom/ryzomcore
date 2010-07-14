@@ -333,6 +333,13 @@ void CDriverUser::setWindowTitle(const ucstring &title)
 }
 
 // ***************************************************************************
+void CDriverUser::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
+{
+	NL3D_HAUTO_UI_DRIVER;
+	_Driver->setWindowIcon(bitmaps);
+}
+
+// ***************************************************************************
 void CDriverUser::setWindowPos(sint32 x, sint32 y)
 {
 	NL3D_HAUTO_UI_DRIVER;

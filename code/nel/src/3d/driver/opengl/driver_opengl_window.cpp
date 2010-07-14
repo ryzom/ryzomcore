@@ -300,6 +300,9 @@ bool CDriverGL::unInit()
 
 void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 {
+	if (_win == EmptyWindow)
+		return;
+
 #if defined(NL_OS_WINDOWS)
 
 	static HICON winIconBig = NULL;
@@ -317,13 +320,39 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 		winIconSmall = NULL;
 	}
 
-	// first bitmap is the small icon
-	if (bitmaps.size() > 0)
-		winIconSmall = bitmaps[0].getHICON(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 32);
+	sint smallIndex = -1;
+	uint smallWidth = GetSystemMetrics(SM_CXSMICON);
+	uint smallHeight = GetSystemMetrics(SM_CYSMICON);
 
-	// second bitmap is the big icon
-	if (bitmaps.size() > 1)
-		winIconBig = bitmaps[1].getHICON(GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 32);
+	sint bigIndex = -1;
+	uint bigWidth = GetSystemMetrics(SM_CXICON);
+	uint bigHeight = GetSystemMetrics(SM_CYICON);
+
+	// find icons with the exact size
+	for(uint i = 0; i < bitmaps.size(); ++i)
+	{
+		if (smallIndex == -1 &&	bitmaps[i].getWidth() == smallWidth &&	bitmaps[i].getHeight() == smallHeight)
+			smallIndex = i;
+
+		if (bigIndex == -1 && bitmaps[i].getWidth() == bigWidth && bitmaps[i].getHeight() == bigHeight)
+			bigIndex = i;
+	}
+
+	// find icons with taller size (we will resize them)
+	for(uint i = 0; i < bitmaps.size(); ++i)
+	{
+		if (smallIndex == -1 && bitmaps[i].getWidth() >= smallWidth && bitmaps[i].getHeight() >= smallHeight)
+			smallIndex = i;
+
+		if (bigIndex == -1 && bitmaps[i].getWidth() >= bigWidth && bitmaps[i].getHeight() >= bigHeight)
+			bigIndex = i;
+	}
+
+	if (smallIndex > -1)
+		winIconSmall = bitmaps[smallIndex].getHICON(smallWidth, smallHeight, 32);
+
+	if (bigIndex > -1)
+		winIconBig = bitmaps[bigIndex].getHICON(bigWidth, bigHeight, 32);
 
 	if (winIconBig)
 	{
@@ -338,7 +367,7 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 #elif defined(NL_OS_MAC)
 
-	// TODO
+	// nothing to do
 
 #elif defined(NL_OS_UNIX)
 

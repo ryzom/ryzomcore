@@ -4112,9 +4112,15 @@ void CBitmap::getDibData(uint8*& extractData)
 HICON CBitmap::getHICON(sint iconWidth, sint iconHeight, sint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor) const
 {
 	HICON result = NULL;
+	CBitmap src = *this;
+	// resample bitmap if necessary
+	if (_Width != iconWidth || _Height != iconHeight)
+	{
+		src.resample(iconWidth, iconHeight);
+	}
 	CBitmap colorBm;
 	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
-	const CRGBA *srcColorPtr = (CRGBA *) &(getPixels()[0]);
+	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
 	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
 	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
 	static volatile uint8 alphaThreshold = 127;

@@ -148,6 +148,9 @@ public:
 	/// Set the title of the NeL window
 	virtual void			setWindowTitle(const ucstring &title);
 
+	/// Set icon(s) of the NeL window
+	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
+
 	/// Set the position of the NeL window
 	virtual void			setWindowPos(sint32 x, sint32 y);
 
