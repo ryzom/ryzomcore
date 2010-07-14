@@ -28,7 +28,7 @@
 namespace NL3D {
 
 template <>
-const char *CPSAttribMaker<CPlaneBasis>::getType() { return "CPlaneBasis";}
+inline const char *CPSAttribMaker<CPlaneBasis>::getType() { return "CPlaneBasis";}
 
 /** these are some attribute makers for plane_basis
  * This is a plane basis class. It just blend between 2 plane by linearly interpolating the normal

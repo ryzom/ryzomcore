@@ -26,7 +26,7 @@
 namespace NL3D {
 
 template <>
-const char *CPSAttribMaker<uint32>::getType() { return "int32"; }
+inline const char *CPSAttribMaker<uint32>::getType() { return "int32"; }
 
 /// these are some attribute makers for int
 
