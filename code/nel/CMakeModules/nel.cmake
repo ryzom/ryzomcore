@@ -1,27 +1,69 @@
 ###
-# Build Library Name
-#
-# Arguments: name - undecorated library name
-# Sets: LIBNAME - decorated library name
+# Helper macro that generates .pc and installs it.
+# Argument: name - the name of the .pc package, e.g. "nel-pacs.pc"
 ###
-MACRO(DECORATE_NEL_LIB name)
+MACRO(NL_GEN_PC name)
+  IF(NOT WIN32)
+    CONFIGURE_FILE(${name}.in ${name})
+    INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION lib/pkgconfig)
+  ENDIF(NOT WIN32)
+ENDMACRO(NL_GEN_PC)
 
+###
+#
+###
+MACRO(NL_TARGET_LIB name)
+  IF(WITH_STATIC)
+    ADD_LIBRARY(${name} STATIC ${ARGN})
+  ELSE(WITH_STATIC)
+    ADD_LIBRARY(${name} SHARED ${ARGN})
+  ENDIF(WITH_STATIC)
+ENDMACRO(NL_TARGET_LIB)
+
+###
+#
+###
+MACRO(NL_TARGET_DRIVER name)
+  IF(WITH_STATIC_DRIVERS)
+    ADD_LIBRARY(${name} STATIC ${ARGN})
+  ELSE(WITH_STATIC_DRIVERS)
+    ADD_LIBRARY(${name} SHARED ${ARGN})
+  ENDIF(WITH_STATIC_DRIVERS)
+ENDMACRO(NL_TARGET_DRIVER)
+
+###
+# Helper macro that sets the default library properties.
+# Argument: name - the target name whose properties are being set
+# Argument: 
+###
+MACRO(NL_DEFAULT_PROPS name label)
+  SET_TARGET_PROPERTIES(${name} PROPERTIES 
+    VERSION ${NL_VERSION}
+    SOVERSION ${NL_VERSION_MAJOR}
+    PROJECT_LABEL ${label})
+ENDMACRO(NL_DEFAULT_PROPS)
+
+###
+# Adds the target suffix on Windows.
+# Argument: name - the library's target name.
+###
+MACRO(NL_ADD_LIB_SUFFIX name)
   IF(WIN32)
-    IF(NL_BUILD_MODE MATCHES "NL_RELEASE_DEBUG")
-      SET(LIBNAME "${name}")
-    ELSE(NL_BUILD_MODE MATCHES "NL_RELEASE_DEBUG")
-      IF(NL_BUILD_MODE MATCHES "NL_DEBUG")
-        SET(LIBNAME "${name}")
-      ELSE(NL_BUILD_MODE MATCHES "NL_DEBUG")
-        SET(LIBNAME "${name}")
-      ENDIF(NL_BUILD_MODE MATCHES "NL_DEBUG")
-    ENDIF(NL_BUILD_MODE MATCHES "NL_RELEASE_DEBUG")
-  ELSE(WIN32)
-    SET(LIBNAME "${name}")
+    SET_TARGET_PROPERTIES(${name} PROPERTIES DEBUG_POSTFIX "_d" RELEASE_POSTFIX "_r")
   ENDIF(WIN32)
+ENDMACRO(NL_ADD_LIB_SUFFIX)
 
-ENDMACRO(DECORATE_NEL_LIB)
-
+###
+# Adds the runtime link flags for Win32 binaries.
+# Argument: name - the target to add the link flags to.
+###
+MACRO(NL_ADD_RUNTIME_FLAGS name)
+  IF(WIN32)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES 
+      LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
+      LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
+  ENDIF(WIN32)
+ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 ###
 # Checks build vs. source location. Prevents In-Source builds.
 ###
@@ -48,7 +90,15 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
-
+  
+  # Default to static building on Windows.
+  IF(WIN32)
+    OPTION(WITH_STATIC            "With static libraries."                        ON )
+  ELSE(WIN32)
+    OPTION(WITH_STATIC            "With static libraries."                        OFF)
+  ENDIF(WIN32)
+  OPTION(WITH_STATIC_DRIVERS      "With static drivers."                      OFF)
+  
   ###
   # Core libraries
   ###
