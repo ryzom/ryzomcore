@@ -4,7 +4,7 @@
 ###
 MACRO(NL_GEN_PC name)
   IF(NOT WIN32)
-    CONFIGURE_FILE(${name}.in ${name})
+    CONFIGURE_FILE(${name}.in "${CMAKE_CURRENT_BINARY_DIR}/${name}")
     INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION lib/pkgconfig)
   ENDIF(NOT WIN32)
 ENDMACRO(NL_GEN_PC)
