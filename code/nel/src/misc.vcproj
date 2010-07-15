@@ -442,7 +442,7 @@
 				>
 			</File>
 			<File
-				RelativePath="misc\config_file\cf_gramatical.yxx"
+				RelativePath="misc\config_file\cf_gramatical.ypp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -514,7 +514,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="misc\config_file\cf_lexical.lxx"
+				RelativePath="misc\config_file\cf_lexical.lpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
