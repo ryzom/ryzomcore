@@ -103,7 +103,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	{
 		string	sheetName= Id.toString();
 		std::string::size_type	end= sheetName.find(".sbrick")-2;
-		BrickFamily = BRICK_FAMILIES::toSBrickFamily ( strupr(sheetName.substr(0,end)) );
+		BrickFamily = BRICK_FAMILIES::toSBrickFamily ( NLMISC::toUpper(sheetName.substr(0,end)) );
 		if(BrickFamily==BRICK_FAMILIES::Unknown)
 			nlwarning("Unknown Family for SBrick: %s", sheetName.c_str());
 	}

@@ -396,10 +396,9 @@ CModalContainerEditCmd::CModalContainerEditCmd()
 void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool allowAllActions)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	string prefix = name;
+	string prefix = NLMISC::toUpper(name);
 	CanDefineKey = bDefKey;
 	_AllowAllActions = allowAllActions;
-	prefix = strupr(prefix);
 	prefix = string(DB_EDITCMD_PREFIX) + string(":") + prefix + string(":");
 	DbComboSelCat = prefix + DB_EDITCMD_COMBO_SELECT_CATEGORY;
 	DbComboSelAct = prefix + DB_EDITCMD_COMBO_SELECT_ACTION;

@@ -105,8 +105,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	_FaberPlanBrickFamilies.clear();
 	if(rootBrick->Properties.size()>0)
 	{
-		string prop= rootBrick->Properties[0].Text;
-		strupr(prop);
+		string prop= NLMISC::toUpper(rootBrick->Properties[0].Text);
 		vector<string>	strList;
 		splitString(prop, " ", strList);
 		// The prop Id should be 'FPLAN:'
