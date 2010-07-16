@@ -63,7 +63,7 @@ ENDIF(COMMAND cmake_policy)
 
 #-----------------------------------------------------------------------------
 # Set default config options
-#
+
 NL_SETUP_DEFAULT_OPTIONS()
 NL_SETUP_PREFIX_PATHS()
 

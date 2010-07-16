@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="nel_3dsmax_shared"
 	ProjectGUID="{CDFC60B0-9D01-4822-ACAD-B66F7130FCAD}"
 	RootNamespace="nel_3dsmax_shared"

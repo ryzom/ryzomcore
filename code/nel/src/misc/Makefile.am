@@ -26,7 +26,6 @@ libnelmisc_la_SOURCES = \
 	command.cpp \
 	common.cpp \
 	contiguous_block_allocator.cpp \
-	cpu_info.cpp \
 	cpu_time_stat.cpp \
 	debug.cpp \
 	di_event_emitter.cpp \
