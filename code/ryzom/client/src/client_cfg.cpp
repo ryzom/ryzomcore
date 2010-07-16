@@ -1966,7 +1966,23 @@ void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 void CClientConfig::init(const string &configFileName)
 {
 	if(!CFile::fileExists(configFileName))
+	{
+#if defined(NL_ETC_PREFIX) && defined(NL_SHARE_PREFIX)
+		nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
+
+		// create the basic .cfg that link the default one
+		FILE *fp = fopen(configFileName.c_str(), "w");
+		if (fp == NULL)
+		{
+			nlerror ("CFG::init: Can't create config file '%s'", configFileName.c_str());
+		}
+		fprintf(fp, "RootConfigFilename   = \"%s/client_default.cfg\";\n", NL_ETC_PREFIX);
+		fprintf(fp, "DataPath             = { \"%s/data\" };\n", NL_SHARE_PREFIX);
+		fclose(fp);
+#else
 		nlwarning("CFG::init: '%s' Not Found !!!", configFileName.c_str ());
+#endif
+	}
 
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
