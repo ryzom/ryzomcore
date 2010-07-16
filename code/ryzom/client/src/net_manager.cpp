@@ -3166,7 +3166,7 @@ private:
 			ucstring web_app;
 			uint i;
 			const uint digitStart= 6;
-			const uint digitMaxEnd= contentStr.size();
+			const uint digitMaxEnd= (uint)contentStr.size();
 
 			is_webig = true;
 

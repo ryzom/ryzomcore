@@ -611,7 +611,7 @@ void CViewRenderer::drawQuad(sint layerId, const NLMISC::CQuadUV &quadUV, sint32
 			std::swap(pUV0, pUV1);
 		}
 
-		nlassert(count <= maxNumCorners);
+		nlassert(count <= (sint)maxNumCorners);
 		if (count >= 3)
 		{
 			count -= 2;
@@ -1088,7 +1088,7 @@ CRGBA CViewRenderer::getTextureColor(sint32 id, sint32 x, sint32 y)
 sint32 CViewRenderer::getTypoTextureW(char c)
 {
 	if ((c>=0) && (c<NumTypoChar))
-		return _TypoCharWs[c];
+		return _TypoCharWs[(uint)c];
 	else
 		return 1;
 }
@@ -1103,7 +1103,7 @@ sint32 CViewRenderer::getTypoTextureH(char /* c */)
 sint32 CViewRenderer::getTypoTextureId(char c)
 {
 	if ((c>=0) && (c<NumTypoChar))
-		return _TypoCharToTextureIds[c];
+		return _TypoCharToTextureIds[(uint)c];
 	else
 		return -1;
 }

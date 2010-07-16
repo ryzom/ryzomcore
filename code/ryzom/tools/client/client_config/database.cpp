@@ -82,7 +82,7 @@ void CPage::init (uint id, const char *name, bool bold, uint icon, uint resid, C
 	Parent = parent;
 	Icon = icon;
 	ResId = resid;
-	ChildId = parent->Children.size ();
+	ChildId = (uint)parent->Children.size ();
 	if (parent)
 		parent->Children.push_back (this);
 	Name = name;
