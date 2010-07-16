@@ -833,7 +833,7 @@ void	CCtrlScroll::moveTargetX (sint32 dx)
 		_TrackPos = (sint32)factor;
 	}
 
-	// invlidate only position. 1 pass is sufficient
+	// invalidate only position. 1 pass is sufficient
 	invalidateCoords(1);
 }
 
@@ -873,7 +873,7 @@ void	CCtrlScroll::moveTargetY (sint32 dy)
 		_TrackPos = (sint32)factor;
 	}
 
-	// invlidate only position. 1 pass is sufficient
+	// invalidate only position. 1 pass is sufficient
 	invalidateCoords(1);
 }
 

@@ -3254,10 +3254,6 @@ void CServerEditionModule::hibernateSession(NLNET::IModuleProxy *sender, TSessio
 }
 
 
-static const std::string _SubRep = "r2/";
-//static const std::string _SubRep = "";
-
-
 std::string CServerEditionModule::getSessionFilename(TSessionId sessionId, TCharId charId) const
 {
 	return NLMISC::toString("r2_session_%.08u_%08u.dat",  sessionId.asInt(), charId );
@@ -3265,7 +3261,7 @@ std::string CServerEditionModule::getSessionFilename(TSessionId sessionId, TChar
 
 std::string CServerEditionModule::getOverrideRingAccessFilename() const
 {
-	return NLMISC::toString("r2/override_ring_access.txt", _SubRep.c_str());
+	return "r2/override_ring_access.txt";
 }
 
 //implementation of characterKicked and command
