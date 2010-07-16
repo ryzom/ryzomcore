@@ -728,7 +728,10 @@ void prelogInit()
 		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
 		// create the save dir.
-		CFile::createDirectory("save");
+		if (!CFile::isExists("data")) CFile::createDirectory("data");
+
+		// create the save dir.
+		if (!CFile::isExists("save")) CFile::createDirectory("save");
 
 #if !FINAL_VERSION
 		// if we're not in final version then start the file access logger to keep track of the files that we read as we play

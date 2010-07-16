@@ -700,6 +700,11 @@ struct CFile
 	*	Call this method to get a temporary output filename. If you have successfully saved your data, delete the old filename and move the new one.
 	*/
 	static void getTemporaryOutputFilename (const std::string &originalFilename, std::string &tempFilename);
+
+	/** Get application directory.
+	* \return directory where applications should write files.
+	*/
+	static std::string getApplicationDirectory(const std::string &appName = "");
 };
 
 } // NLMISC
