@@ -254,11 +254,7 @@ void cbDirectoryChanged (IVariable &var)
 	// Update the running directory if needed
 	if (var.getName() == "RunningDirectory")
 	{
-#ifdef NL_OS_WINDOWS
-		_chdir (vp.c_str());
-#else
-		chdir (vp.c_str());
-#endif
+		CPath::setCurrentPath(vp);
 	}
 
 	// Call the callback if provided
