@@ -324,7 +324,7 @@ void ExitClientError (const char *format, ...)
 		MessageBoxW (NULL, (WCHAR*)ucstr.c_str(), (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str (), MB_OK|MB_ICONERROR);
 	*/
 #else
-	fprintf (stderr, str);
+	fprintf (stderr, "%s\n", str);
 #endif
 	// Exit
 	extern void quitCrashReport ();
