@@ -2454,7 +2454,7 @@ std::string CFile::getApplicationDirectory(const std::string &appName)
 	if (!appName.empty())
 		path = CPath::standardizePath(path + appName);
 #else
-	if (!appName.empty))
+	if (!appName.empty())
 		path = CPath::standardizePath(path + "." + toLower(appName));
 #endif
 
