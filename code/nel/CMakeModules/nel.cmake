@@ -91,15 +91,16 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
-  
+  OPTION(FINAL_VERSION            "Build in Final Version mode"                   ON )
+
   # Default to static building on Windows.
   IF(WIN32)
     OPTION(WITH_STATIC            "With static libraries."                        ON )
   ELSE(WIN32)
     OPTION(WITH_STATIC            "With static libraries."                        OFF)
   ENDIF(WIN32)
-  OPTION(WITH_STATIC_DRIVERS      "With static drivers."                      OFF)
-  
+  OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
+
   ###
   # Core libraries
   ###
