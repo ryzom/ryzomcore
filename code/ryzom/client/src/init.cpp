@@ -168,7 +168,7 @@ uint					TipsOfTheDayIndex;
 
 
 // XML allocator functions
-// Due to Bug #906, we disable the stl xml allocation 
+// Due to Bug #906, we disable the stl xml allocation
 /*
 static volatile bool XmlAllocUsesSTL = true;
 
@@ -691,7 +691,7 @@ void prelogInit()
 	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF  );
 
 		// Init XML Lib allocator
-		// Due to Bug #906, we disable the stl xml allocation 
+		// Due to Bug #906, we disable the stl xml allocation
 		// nlverify (xmlMemSetup (XmlFree4NeL, XmlMalloc4NeL, XmlRealloc4NeL, XmlStrdup4NeL) == 0);
 
 		// Init the debug memory

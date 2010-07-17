@@ -10,8 +10,8 @@ ADD_SUBDIRECTORY(client_sheets)
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h motion/modes/*.cpp motion/modes/*.h r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp interface_v3/*.h interface_v3/*.cpp)
 
 # Filter out the source files not actually compiled.
-LIST(REMOVE_ITEM SRC 
-	${CMAKE_CURRENT_SOURCE_DIR}/animated_scene_object.cpp 
+LIST(REMOVE_ITEM SRC
+	${CMAKE_CURRENT_SOURCE_DIR}/animated_scene_object.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/animated_scene_object.h
 	${CMAKE_CURRENT_SOURCE_DIR}/animation_fx_sheet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/animation_fx_sheet.cpp
@@ -53,7 +53,7 @@ if(APPLE)
   #   COMMAND ${CMAKE_COMMAND} -E make_directory
   #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
   #   # copy framework into app bundle
-  #   COMMAND ${CMAKE_COMMAND} -E copy ${SOME_LIBRARY} 
+  #   COMMAND ${CMAKE_COMMAND} -E copy ${SOME_LIBRARY}
   #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
   #   # ...
   #   # install_name_tool the lib pathes
@@ -63,24 +63,24 @@ ELSE(APPLE)
 ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
-			${LIBXML2_INCLUDE_DIR} 
-			${NEL_INCLUDE_DIR} 
-			${LUA_INCLUDE_DIR} 
-			${LIBWWW_INCLUDE_DIR} 
-			${CURL_INCLUDE_DIRS} 
+			${LIBXML2_INCLUDE_DIR}
+			${NEL_INCLUDE_DIR}
+			${LUA_INCLUDE_DIR}
+			${LIBWWW_INCLUDE_DIR}
+			${CURL_INCLUDE_DIRS}
 			${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS} 
-				${LIBXML2_LIBRARIES} 
-				${NELMISC_LIBRARY} 
-				ryzom_gameshare 
-				${NELNET_LIBRARY} 
-				${NELLIGO_LIBRARY} 
-				${NELGEORGES_LIBRARY} 
-				${NEL3D_LIBRARY} 
-				${LUA_LIBRARIES} 
-				${CURL_LIBRARIES} 
-				${NELSOUND_LIBRARY} 
+TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
+				${LIBXML2_LIBRARIES}
+				${NELMISC_LIBRARY}
+				ryzom_gameshare
+				${NELNET_LIBRARY}
+				${NELLIGO_LIBRARY}
+				${NELGEORGES_LIBRARY}
+				${NEL3D_LIBRARY}
+				${LUA_LIBRARIES}
+				${CURL_LIBRARIES}
+				${NELSOUND_LIBRARY}
 				${NELSNDDRV_LIBRARY}
 				ryzom_clientsheets 
 				${NELPACS_LIBRARY} 
@@ -88,7 +88,7 @@ TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
 				ryzom_sevenzip
 				luabind # TODO: find luabind and expat cleanly using a find script
 				expat)
-				
+
 IF(NOT WITH_COCOA)
 	TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})
 ENDIF(NOT WITH_COCOA)
