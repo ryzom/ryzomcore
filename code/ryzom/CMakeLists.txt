@@ -65,7 +65,7 @@ ENDIF(COMMAND cmake_policy)
 # Set default config options
 
 NL_SETUP_DEFAULT_OPTIONS()
-NL_SETUP_PREFIX_PATHS()
+RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Override default options
@@ -113,6 +113,11 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
 ENDIF(FINAL_VERSION)
+
+# config.h configuration and use by projects
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+ADD_DEFINITIONS(-DHAVE_CONFIG_H=1)
 
 ADD_SUBDIRECTORY(common)
 

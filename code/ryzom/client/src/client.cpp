@@ -345,13 +345,15 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
-#ifdef CHANGE_CURRENT_PATH
-	std::string currentPath = CFile::getApplicationDirectory("Ryzom");
+	// if client_default.cfg is not in current directory, use application default directory
+	if (!CFile::isExists("client_default.cfg"))
+	{
+		std::string currentPath = CFile::getApplicationDirectory("Ryzom");
 
-	if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
+		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
-	CPath::setCurrentPath(currentPath);
-#endif // CHANGE_CURRENT_PATH
+		CPath::setCurrentPath(currentPath);
+	}
 
 	// temporary buffer to store Ryzom full path
 	char filename[1024];

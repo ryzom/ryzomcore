@@ -39,6 +39,10 @@
 #include "game_share/time_weather_season/time_and_season.h"
 #include "game_share/ryzom_version.h"
 
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif // HAVE_CONFIG_H
+
 ///////////
 // MACRO //
 ///////////
@@ -1967,21 +1971,41 @@ void CClientConfig::init(const string &configFileName)
 {
 	if(!CFile::fileExists(configFileName))
 	{
-#if defined(NL_ETC_PREFIX) && defined(NL_SHARE_PREFIX)
-		nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
+		std::string defaultConfigFileName = "client_default.cfg";
+		bool found = false;
+ 
+		if (CFile::isExists(defaultConfigFileName)) found = true;
 
-		// create the basic .cfg that link the default one
-		FILE *fp = fopen(configFileName.c_str(), "w");
-		if (fp == NULL)
+#ifdef RYZOM_ETC_PREFIX
+		if (!found)
+ 		{
+			defaultConfigFileName = std::string(RYZOM_ETC_PREFIX"/") + defaultConfigFileName;
+			if (CFile::isExists(defaultConfigFileName)) found = true;
+ 		}
+#endif // RYZOM_ETC_PREFIX
+
+		if (found)
 		{
-			nlerror ("CFG::init: Can't create config file '%s'", configFileName.c_str());
+			// create the basic .cfg that link the default one
+			FILE *fp = fopen(configFileName.c_str(), "w");
+			if (fp == NULL)
+			{
+				nlerror ("CFG::init: Can't create config file '%s'", configFileName.c_str());
+			}
+			else
+			{
+				nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
+			}
+			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
+#ifdef RYZOM_SHARE_PREFIX
+			fprintf(fp, "PreDataPath          = { \"%s/data\" };\n", RYZOM_SHARE_PREFIX);
+#endif // RYZOM_SHARE_PREFIX
+			fclose(fp);
 		}
-		fprintf(fp, "RootConfigFilename   = \"%s/client_default.cfg\";\n", NL_ETC_PREFIX);
-		fprintf(fp, "DataPath             = { \"%s/data\" };\n", NL_SHARE_PREFIX);
-		fclose(fp);
-#else
-		nlwarning("CFG::init: '%s' Not Found !!!", configFileName.c_str ());
-#endif
+		else
+		{
+			nlwarning("CFG::init: '%s' Not Found !!!", cfgFile.c_str());
+		}
 	}
 
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()

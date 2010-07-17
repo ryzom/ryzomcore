@@ -1,3 +1,6 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #cmakedefine HAVE_DL_H 1
 #cmakedefine HAVE_EXECINFO_H 1
 #cmakedefine HAVE_ICONV 1
@@ -30,3 +33,10 @@
 #cmakedefine HAVE_STRTOULL 1
 #cmakedefine HAVE_STATVFS 1
 #cmakedefine HAVE_STAT64 1
+
+#cmakedefine RYZOM_PREFIX "${RYZOM_PREFIX}"
+#cmakedefine RYZOM_BIN_PREFIX "${RYZOM_BIN_PREFIX}"
+#cmakedefine RYZOM_ETC_PREFIX "${RYZOM_ETC_PREFIX}"
+#cmakedefine RYZOM_SHARE_PREFIX "${RYZOM_SHARE_PREFIX}"
+
+#endif // CONFIG_H
