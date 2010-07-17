@@ -27,6 +27,8 @@
 // Initialize the application.
 bool init();
 
+// Release all.
+void release();
 
 #endif // TL_SHEETS_PACKER_INIT_H
 

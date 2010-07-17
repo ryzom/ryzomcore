@@ -30,8 +30,6 @@
 
 #include "nel/ligo/ligo_config.h"
 #include "nel/ligo/primitive.h"
-// 3D Interface.
-//#include "nel/3d/u_driver.h"
 // Application
 #include "sheets_packer_init.h"
 #include "sheets_packer_cfg.h"
@@ -50,8 +48,7 @@ using namespace std;
 /////////////
 // GLOBALS //
 /////////////
-//UDriver	*Driver = 0;
-CFileDisplayer  fd("sheets_packer.log", true, "SHEETS_PACKER.LOG");
+CFileDisplayer  *fd = NULL;
 
 NLLIGO::CLigoConfig LigoConfig;
 
@@ -68,14 +65,16 @@ bool init()
 	// Add a displayer for Debug Infos.
 	createDebug();
 
+	fd = new CFileDisplayer(getLogDirectory() + "sheets_packer.log", true, "SHEETS_PACKER.LOG");
+
 	// register ligo 'standard' class
 	NLLIGO::Register();
 
-	DebugLog->addDisplayer (&fd);
-	InfoLog->addDisplayer (&fd);
-	WarningLog->addDisplayer (&fd);
-	ErrorLog->addDisplayer (&fd);
-	AssertLog->addDisplayer (&fd);
+	DebugLog->addDisplayer (fd);
+	InfoLog->addDisplayer (fd);
+	WarningLog->addDisplayer (fd);
+	ErrorLog->addDisplayer (fd);
+	AssertLog->addDisplayer (fd);
 
 	// Load the application configuration.
 	nlinfo("Loading config file...");
@@ -104,6 +103,23 @@ bool init()
 	// The init is a success.
 	return true;
 }// init //
+
+//---------------------------------------------------
+// release :
+// Release all the memory.
+//---------------------------------------------------
+void release()
+{	
+	DebugLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	InfoLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	WarningLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	ErrorLog->removeDisplayer ("SHEETS_PACKER.LOG");
+	AssertLog->removeDisplayer ("SHEETS_PACKER.LOG");
+
+	delete fd;
+	fd = NULL;
+}// release //
+
 void outputSomeDebugInfoForPackedSheetCrash()
 {
 }

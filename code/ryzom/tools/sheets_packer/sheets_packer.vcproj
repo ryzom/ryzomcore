@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="sheets_packer"
 	ProjectGUID="{079E2366-3714-4B09-B553-41A44D290F04}"
 	TargetFrameworkVersion="0"
@@ -424,14 +424,6 @@
 		</File>
 		<File
 			RelativePath=".\sheets_packer_init.h"
-			>
-		</File>
-		<File
-			RelativePath=".\sheets_packer_release.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\sheets_packer_release.h"
 			>
 		</File>
 		<File
