@@ -1,8 +1,8 @@
-ADD_SUBDIRECTORY(seven_zip)
-
 # These are Windows/MFC apps
 IF(WIN32)
+  ADD_SUBDIRECTORY(seven_zip)
   ADD_SUBDIRECTORY(bug_report)
+  SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 ENDIF(WIN32)
 
 ADD_SUBDIRECTORY(client_sheets)
@@ -38,7 +38,7 @@ if(APPLE)
   SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core Client")
   SET(MACOSX_BUNDLE_ICON_FILE "")
   SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
-  SET(MACOSX_BUNDLE_LONG_VERSION_STRING "0.8.0")
+  SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${NL_VERSION})
   SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Core Client")
   SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "0.8")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
@@ -82,10 +82,10 @@ TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
 				${CURL_LIBRARIES}
 				${NELSOUND_LIBRARY}
 				${NELSNDDRV_LIBRARY}
-				ryzom_clientsheets 
-				${NELPACS_LIBRARY} 
-				${LIBWWW_LIBRARY} 
-				ryzom_sevenzip
+				ryzom_clientsheets
+				${NELPACS_LIBRARY}
+				${LIBWWW_LIBRARY}
+				${SEVENZIP_LIBRARY}
 				luabind # TODO: find luabind and expat cleanly using a find script
 				expat)
 
