@@ -595,12 +595,16 @@ void displayScreenShotSavedInfo(const string &filename)
 	pIM->displaySystemInfo(msg);
 }
 
+void initScreenshot()
+{
+	if (!CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
+}
+
 void screenShotTGA()
 {
 	CBitmap btm;
 	getBuffer (btm);
 
-	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.tga");
 	COFile fs(filename);
 	btm.writeTGA(fs, 24, false);
@@ -613,7 +617,6 @@ void screenShotPNG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.png");
 	COFile fs(filename);
 	if (!btm.writePNG(fs, 24))
@@ -634,7 +637,6 @@ void screenShotJPG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	if(!ScreenshotsDirectory.empty() && !CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.jpg");
 	COFile fs(filename);
 	btm.writeJPG(fs);

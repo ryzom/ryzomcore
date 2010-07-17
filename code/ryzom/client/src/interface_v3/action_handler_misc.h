@@ -174,6 +174,7 @@ public:
 /** Capture current content of framebuffer and save the result. If a custom size is asked in ClientCfg, then the scene is rendered again
   * instead (possibly multiple time)
   */
+void initScreenshot();
 void screenShotTGA();
 void screenShotPNG();
 void screenShotJPG();
