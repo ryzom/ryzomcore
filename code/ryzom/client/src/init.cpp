@@ -914,6 +914,23 @@ void prelogInit()
 		// Set the title
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		vector<CBitmap> bitmaps;
+
+		string fileName = "/usr/share/pixmaps/ryzom.png";
+
+		CIFile file;
+
+		if (file.open(fileName))
+		{
+			CBitmap bitmap;
+			if (bitmap.load(file))
+				bitmaps.push_back(bitmap);
+		}
+
+		Driver->setWindowIcon(bitmaps);
+#endif
+
 		sint32 posX = 0, posY = 0;
 
 		if (ClientCfg.Windowed)
