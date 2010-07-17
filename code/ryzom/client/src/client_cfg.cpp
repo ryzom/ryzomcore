@@ -2004,7 +2004,7 @@ void CClientConfig::init(const string &configFileName)
 		}
 		else
 		{
-			nlwarning("CFG::init: '%s' Not Found !!!", cfgFile.c_str());
+			nlwarning("CFG::init: '%s' Not Found !!!", defaultConfigFileName.c_str());
 		}
 	}
 
