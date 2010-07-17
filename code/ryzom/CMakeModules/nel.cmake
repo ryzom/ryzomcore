@@ -132,6 +132,15 @@ MACRO(NL_SETUP_BUILD_FLAGS)
 ENDMACRO(NL_SETUP_BUILD_FLAGS)
 
 MACRO(RYZOM_SETUP_PREFIX_PATHS)
+  ## Allow override of install_prefix path.
+  IF(NOT RYZOM_PREFIX)
+    IF(WIN32)
+      SET(RYZOM_PREFIX "." CACHE PATH "Installation path")
+    ELSE(WIN32)
+      SET(RYZOM_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation path")
+    ENDIF(WIN32)
+  ENDIF(NOT RYZOM_PREFIX)
+
   ## Allow override of install_prefix/etc path.
   IF(NOT RYZOM_ETC_PREFIX)
     IF(WIN32)
@@ -148,7 +157,7 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
 	ELSE(WIN32)
 	  SET(RYZOM_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
 	ENDIF(WIN32)
-  ENDIF(NOT NL_SHARE_PREFIX)
+  ENDIF(NOT RYZOM_SHARE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT RYZOM_SBIN_PREFIX)
