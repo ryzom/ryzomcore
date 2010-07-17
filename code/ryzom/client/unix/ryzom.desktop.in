@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Ryzom
+Type=Application
+GenericName=ryzom
+Comment=Ryzom MMORPG client
+Exec=${RYZOM_BIN_PREFIX}/ryzom_client
+Icon=ryzom
+Terminal=false
+Hidden=false
+Categories=Game;RolePlaying;

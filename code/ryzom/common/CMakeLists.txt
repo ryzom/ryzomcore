@@ -1,1 +1,10 @@
 ADD_SUBDIRECTORY(src)
+
+#ADD_CUSTOM_COMMAND(OUTPUT "${CMAKE_BINARY_DIR}/share/data_common.bnp"
+#  COMMAND bnp_make -p ${CMAKE_CURRENT_SOURCE_DIR}/data_common ${CMAKE_BINARY_DIR}/share > /dev/null)
+
+#ADD_CUSTOM_TARGET(data_common ALL
+#  DEPENDS "${CMAKE_BINARY_DIR}/share/data_common.bnp")
+
+#INSTALL(TARGETS data_common ARCHIVE DESTINATION ${RYZOM_SHARE_PREFIX}/data)
+#INSTALL(FILES "${CMAKE_BINARY_DIR}/share/data_common.bnp" DESTINATION "${RYZOM_SHARE_PREFIX}/data")
