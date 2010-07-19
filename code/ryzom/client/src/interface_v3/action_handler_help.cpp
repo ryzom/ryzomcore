@@ -1274,10 +1274,10 @@ void	getDamageText(CDBCtrlSheet *item, const CItemSheet*pIS, ucstring &itemText,
 
 	string	strMod;
 	if(displayAsMod)
-		strMod= itemInfo.CurrentDamage>=0?"+":"";
+		strMod= "+";
 	strFindReplace(itemText, "%dmg", strMod + toString(itemInfo.CurrentDamage));
 	if(displayAsMod)
-		strMod= itemInfo.MaxDamage>=0?"+":"";
+		strMod= "+";
 	strFindReplace(itemText, "%max_dmg", strMod + toString(itemInfo.MaxDamage));
 
 	if(pIS->Family!=ITEMFAMILY::AMMO)

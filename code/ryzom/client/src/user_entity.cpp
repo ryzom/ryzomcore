@@ -456,7 +456,7 @@ void CUserEntity::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &/* gam
 	bc.BehavTime = TimeInSec;
 	if(VerboseAnimUser)
 	{
-		nlinfo("UE::updateVPBeha: '%d(%s)'.", bc.Behav.Behaviour, MBEHAV::behaviourToString(bc.Behav.Behaviour).c_str());
+		nlinfo("UE::updateVPBeha: '%d(%s)'.", (int)bc.Behav.Behaviour, MBEHAV::behaviourToString(bc.Behav.Behaviour).c_str());
 	}
 	CCDBNodeLeaf *targetList0 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_0));
 	CCDBNodeLeaf *targetList1 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));

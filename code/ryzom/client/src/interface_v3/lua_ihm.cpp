@@ -617,7 +617,7 @@ int CLuaIHM::luaMethodCall(lua_State *ls)
 	//
 	state->remove(1); // remove 'self' reference from parameters stack
 	//
-	int numResults;
+	int numResults = 0;
 	int initialStackSize = state->getTop();
 	try
 	{

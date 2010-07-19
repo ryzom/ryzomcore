@@ -3391,7 +3391,7 @@ bool CInterfaceParser::parseActionCategory(xmlNodePtr cur)
 								nlwarning("<CInterfaceParser::parseActionCategory> cannot create instance from template");
 							}
 						}
-						while(instanceNode = CIXml::getNextChildNode(instanceNode, "instance"));
+						while((instanceNode = CIXml::getNextChildNode(instanceNode, "instance")));
 					}
 
 					parameter.Values.resize (CIXml::countChildren(paramNode, "value"));
@@ -3422,18 +3422,18 @@ bool CInterfaceParser::parseActionCategory(xmlNodePtr cur)
 
 							valueIndex++;
 						}
-						while(valueNode = CIXml::getNextChildNode(valueNode, "value"));
+						while((valueNode = CIXml::getNextChildNode(valueNode, "value")));
 					}
 
 					parameterIndex++;
 				}
-				while(paramNode = CIXml::getNextChildNode(paramNode, "parameter"));
+				while((paramNode = CIXml::getNextChildNode(paramNode, "parameter")));
 			}
 
 			// Next action
 			actionIndex++;
 		}
-		while(actionNode = CIXml::getNextChildNode(actionNode, "action"));
+		while((actionNode = CIXml::getNextChildNode(actionNode, "action")));
 	}
 
 	// Add this category to the action manager
