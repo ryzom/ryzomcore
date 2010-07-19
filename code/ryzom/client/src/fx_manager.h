@@ -96,7 +96,7 @@ protected:
 		float			TimeOut;
 	};
 
-	CHashMultiMap<sint64, CDeferredFX> _DeferredFXByDate;
+	CHashMultiMap<uint64, CDeferredFX> _DeferredFXByDate;
 };
 
 
