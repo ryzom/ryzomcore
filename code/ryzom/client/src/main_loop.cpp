@@ -3095,15 +3095,15 @@ void displayDebugFps()
 	line = 0.9f;
 	// Ms per frame
 	{
+		float spf = smoothFPS.getSmoothValue ();
 		// Ms per frame
-		TextContext->printfAt(0.1f, line, "%.1f ms", smoothFPS.getSmoothValue ()*1000);
+		TextContext->printfAt(0.1f, line, "FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
 		line-= lineStep;
 		// More Smoothed Ms per frame
-		TextContext->printfAt(0.1f, line, "%.1f ms", moreSmoothFPS.getSmoothValue ()*1000);
+		spf = moreSmoothFPS.getSmoothValue ();
+		TextContext->printfAt(0.1f, line, "Smoothed FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
 		line-= lineStep;
 	}
-
-
 }
 
 static NLMISC::CRefPtr<CInterfaceElement> HighlightedDebugUI;
