@@ -71,6 +71,7 @@ SCharacter3DSetup::SCharacter3DSetup ()
 	}
 	Tattoo = 0;
 	EyesColor = 0;
+	HairColor = 0;
 	CharHeight = 0.0f;
 	ChestWidth = 0.0f;
 	ArmsWidth = 0.0f;
