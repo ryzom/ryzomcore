@@ -2669,7 +2669,7 @@ KeyChosen:
 	}
 
 	// On Rotation/About Face
-	CVector dirEndA;
+	CVector dirEndA(0.0f, 0.0f, 0.0f);
 	switch(onRotation(curAnimState, dirEndA))
 	{
 	// On Rot Left

@@ -641,6 +641,15 @@ void CEntityCL::init()
 
 //	_Name = NULL;
 
+	// Bot Objects flags
+	_DisplayInRadar= true;
+	_DisplayOSDName= true;
+	_DisplayOSDBars= true;
+	_DisplayOSDForceOver= false;
+	_Traversable= true;
+	_CanTurn = true; // must be initialized beforce calling front()
+	_ForbidClipping = false;
+
 	// Entity Up.
 	up(CVector(0.f, 0.f, 1.f));
 	// Orientation of the entity.
@@ -754,15 +763,6 @@ void CEntityCL::init()
 	_TheoreticalPosition = CVectorD(0.f, 0.f, 0.f);
 	_TheoreticalOrientation = -10.0f;	// Init value to know if it has been changed.
 #endif // TMP_DEBUG_GUIGUI
-
-	// Bot Objects flags
-	_DisplayInRadar= true;
-	_DisplayOSDName= true;
-	_DisplayOSDBars= true;
-	_DisplayOSDForceOver= false;
-	_Traversable= true;
-	_CanTurn = true;
-	_ForbidClipping = false;
 
 	_VisualSelectionTime= 0;
 	_VisualSelectionBlinked= false;
@@ -1667,6 +1667,8 @@ void CEntityCL::snapToGround()
 								break;
 							case EGSPD::CPeople::Zorai :
 								waterOffset = ClientCfg.ZoraiWaterOffset;
+								break;
+							default:
 								break;
 						}
 
@@ -2747,12 +2749,13 @@ const char *CEntityCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide
 	BODY::TBodyPart hominPart = BODY::getMatchingHominBodyPart(part);
 	switch(hominPart)
 	{
-		case BODY::HHead:	 return "Bip01 Head";
+		case BODY::HHead:  return "Bip01 Head";
 		case BODY::HChest: return "Bip01 Spine2";
-		case BODY::HArms:	 return side == BODY::Left ? "Bip01 L UpperArm" : "Bip01 R UpperArm";
+		case BODY::HArms:  return side == BODY::Left ? "Bip01 L UpperArm" : "Bip01 R UpperArm";
 		case BODY::HHands: return side == BODY::Left ? "Bip01 L Hand" : "Bip01 R Hand";
 		case BODY::HLegs:  return side == BODY::Left ? "Bip01 L Calf" : "Bip01 R Calf";
 		case BODY::HFeet:  return side == BODY::Left ? "Bip01 L Foot" : "Bip01 R Foot";
+		default: break;
 	}
 	return NULL;
 }
