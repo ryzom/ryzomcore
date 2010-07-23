@@ -19,6 +19,18 @@
 #-----------------------------------------------------------------------------
 # Load some macros.
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+#-----------------------------------------------------------------------------
+# Set CMake 2.6 Policies.
+IF(COMMAND cmake_policy)
+  # Works around warnings libraries linked against that don't
+  # have absolute paths (e.g. -lpthreads)
+  cmake_policy(SET CMP0003 NEW)
+
+  # Works around warnings about escaped quotes in ADD_DEFINITIONS
+  # statements
+  cmake_policy(SET CMP0005 OLD)
+ENDIF(COMMAND cmake_policy)
+
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/nel.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
@@ -46,18 +58,6 @@ SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 # Redirect output files
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH  ${CMAKE_BINARY_DIR}/lib)
-
-#-----------------------------------------------------------------------------
-# Set CMake 2.6 Policies.
-IF(COMMAND cmake_policy)
-  # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthreads)
-  cmake_policy(SET CMP0003 NEW)
-
-  # Works around warnings about escaped quotes in ADD_DEFINITIONS
-  # statements
-  cmake_policy(SET CMP0005 OLD)
-ENDIF(COMMAND cmake_policy)
 
 #-----------------------------------------------------------------------------
 # Set default config options

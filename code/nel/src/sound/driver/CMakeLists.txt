@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel ${LIBXML2_LIBRARIES} nelsound)
 nl_default_props(nelsnd_lowlevel "Library: NeL Sound Lowlevel")
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
+NL_ADD_STATIC_VID_DRIVERS(nelsnd_lowlevel)
 nl_add_lib_suffix(nelsnd_lowlevel)
 
 INSTALL(TARGETS nelsnd_lowlevel LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
