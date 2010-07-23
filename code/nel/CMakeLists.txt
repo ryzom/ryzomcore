@@ -68,6 +68,11 @@ NL_SETUP_PREFIX_PATHS()
 #-----------------------------------------------------------------------------
 #Platform specifics
 
+IF(WITH_STLPORT)
+  FIND_PACKAGE(STLport REQUIRED)
+  INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
+ENDIF(WITH_STLPORT)
+
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)

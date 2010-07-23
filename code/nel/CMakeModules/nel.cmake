@@ -54,7 +54,7 @@ MACRO(NL_ADD_LIB_SUFFIX name)
 ENDMACRO(NL_ADD_LIB_SUFFIX)
 
 ###
-# Adds the runtime link flags for Win32 binaries.
+# Adds the runtime link flags for Win32 binaries and links STLport.
 # Argument: name - the target to add the link flags to.
 ###
 MACRO(NL_ADD_RUNTIME_FLAGS name)
@@ -63,6 +63,9 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
       LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
       LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
   ENDIF(WIN32)
+  IF(WITH_STLPORT)
+    TARGET_LINK_LIBRARIES(${name} ${STLPORT_LIBRARIES})
+  ENDIF(WITH_STLPORT)
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 
 ###
@@ -133,6 +136,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_GTK         "With GTK Support"                                      OFF)
   OPTION(WITH_QT          "With QT Support"                                       OFF)
   OPTION(WITH_COCOA       "Build with native Mac OS X Cocoa support"              OFF)
+  OPTION(WITH_STLPORT     "With STLport support."                                 OFF)
   OPTION(BUILD_DASHBOARD  "Build to the CDash dashboard"                          OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
