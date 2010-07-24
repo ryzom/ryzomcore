@@ -71,7 +71,7 @@ struct TMessageRecord
 		{
 			stream.serial( s_event );
 			Event = StringToEvent( s_event );
-			uint32 sockId = (uint32)SockId;
+			uint32 sockId = (uint32)(size_t)SockId;
 			stream.serialHex( sockId );
 			stream.serial( len );
 			stream.serialBuffer( Message.bufferToFill( len ), len );
