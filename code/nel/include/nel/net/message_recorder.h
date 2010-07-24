@@ -71,7 +71,8 @@ struct TMessageRecord
 		{
 			stream.serial( s_event );
 			Event = StringToEvent( s_event );
-			stream.serialHex( (uint32&)SockId );
+			uint32 sockId = (uint32)SockId;
+			stream.serialHex( sockId );
 			stream.serial( len );
 			stream.serialBuffer( Message.bufferToFill( len ), len );
 		}
@@ -79,7 +80,9 @@ struct TMessageRecord
 		{
 			s_event = EventToString( Event );
 			stream.serial( s_event );
-			stream.serialHex( (uint32&)SockId );
+			uint32 sockId;
+			stream.serialHex( sockId );
+			SockId = (NLNET::TSockId)sockId;
 			len = Message.length();
 			stream.serial( len );
 			stream.serialBuffer( const_cast<uint8*>(Message.buffer()), len ); // assumes the message contains plain text

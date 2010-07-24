@@ -346,7 +346,6 @@ bool CDriverGL::setupDisplay()
 	for(uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
-	//
 #ifdef NL_OS_WINDOWS
 	NL3D::registerWGlExtensions (_Extensions, _hDC);
 #endif // ifdef NL_OS_WINDOWS
@@ -358,6 +357,7 @@ bool CDriverGL::setupDisplay()
 		nlwarning("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
 		throw EBadDisplay("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
 	}
+
 	if(!_Extensions.EXTTextureEnvCombine)
 	{
 		nlwarning("Missing Important GL extension: GL_EXT_texture_env_combine => All envcombine are setup to GL_MODULATE!!!");
@@ -1017,7 +1017,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	// Setup gl viewport
 	sint ix=(sint)((float)clientWidth*x+0.5f);
 	clamp (ix, 0, clientWidth);
-	int iy=(int)((float)clientHeight*y+0.5f);
+	sint iy=(sint)((float)clientHeight*y+0.5f);
 	clamp (iy, 0, clientHeight);
 	sint iwidth=(sint)((float)clientWidth*width+0.5f);
 	clamp (iwidth, 0, clientWidth-ix);
@@ -1097,7 +1097,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 		// Setup gl scissor
 		sint ix0=(sint)floor((float)clientWidth * x + 0.5f);
 		clamp (ix0, 0, clientWidth);
-		int iy0=(int)floor((float)clientHeight* y + 0.5f);
+		sint iy0=(sint)floor((float)clientHeight* y + 0.5f);
 		clamp (iy0, 0, clientHeight);
 
 		sint ix1=(sint)floor((float)clientWidth * (x+width) + 0.5f );
@@ -1112,8 +1112,6 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 
 		glScissor (ix0, iy0, iwidth, iheight);
 		glEnable(GL_SCISSOR_TEST);
-
-
 	}
 }
 
