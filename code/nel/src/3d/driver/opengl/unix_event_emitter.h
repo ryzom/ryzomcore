@@ -93,10 +93,10 @@ private:
 
 	Display*			_dpy;
 	Window				_win;
-	TKey			    _PreviousKey;
+	TKey				_PreviousKey;
 	XIM					_im;
 	XIC					_ic;
-	bool			    _emulateRawMode;
+	bool				_emulateRawMode;
 	NL3D::IDriver*		_driver;
 	CUnixEventServer	_InternalServer;
 };

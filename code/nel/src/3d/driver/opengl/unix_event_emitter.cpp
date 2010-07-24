@@ -101,7 +101,7 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 			}
 			else
 			{
-				processMessage (Event, server);
+				processMessage (Event, &server);
 			}
 		}
 	}
@@ -382,7 +382,7 @@ TKey getKeyFromKeySym (KeySym keysym)
 	return KeyNOKEY;
 }
 
-void CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
+bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 {
 	if (!server)
 		server=&_InternalServer;
@@ -437,7 +437,7 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 		break;
 	}
-	Case(MotionNotify)
+	case MotionNotify:
 	{
 		TMouseButton button=getMouseButton (event.xbutton.state);
 

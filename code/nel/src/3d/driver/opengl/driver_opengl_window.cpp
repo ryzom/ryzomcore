@@ -36,6 +36,8 @@
 #  include <X11/extensions/Xrandr.h>
 # endif
 # include <X11/Xatom.h>
+# define _NET_WM_STATE_REMOVE	0
+# define _NET_WM_STATE_ADD		1
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
