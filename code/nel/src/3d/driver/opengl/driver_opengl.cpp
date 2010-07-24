@@ -971,8 +971,6 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	uint32 clientWidth, clientHeight;
 	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
 
-	getWindowSize(clientWidth, clientHeight);
-
 #else
 
 	// Setup gl viewport
