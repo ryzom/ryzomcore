@@ -160,7 +160,7 @@ protected:
 };
 
 
-};
+}
 
 #endif // NL_DISPLAYER_H
 

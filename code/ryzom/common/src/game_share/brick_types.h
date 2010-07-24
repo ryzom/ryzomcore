@@ -43,7 +43,7 @@ namespace BRICK_TYPE
 		TIMED_ACTION,
 		BRICK_TYPE_COUNT,
 		BONUS,
-		UNKNOWN,
+		UNKNOWN
 	};
 
 
@@ -61,7 +61,7 @@ namespace BRICK_TYPE
 	 */
 	const std::string &toString(EBrickType type);
 
-}; // BRICK_TYPE
+} // BRICK_TYPE
 
 #endif // RY_BRICK_TYPES_H
 /* End of brick_types.h */

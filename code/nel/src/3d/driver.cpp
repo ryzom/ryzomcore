@@ -29,7 +29,6 @@
 using namespace NLMISC;
 using namespace std;
 
-
 namespace NL3D
 {
 

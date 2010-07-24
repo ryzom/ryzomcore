@@ -680,6 +680,7 @@ private:
 	HPBUFFERARB					_PBuffer;
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
 	NLMISC::CCocoaEventEmitter	_EventEmitter;
 
 #elif defined (NL_OS_UNIX)
@@ -809,7 +810,7 @@ private:
 		TexEnvSpecialPPLStage0,
 		TexEnvSpecialPPLStage2,
 		TexEnvSpecialCloudStage0,
-		TexEnvSpecialCloudStage1,
+		TexEnvSpecialCloudStage1
 	};
 
 	// NB: CRefPtr are not used for mem/spped optimisation. setupMaterial() and setupTexture() reset those states.

@@ -799,7 +799,7 @@ namespace NPC_ICON
 	};
 
 	const NLMISC::TGameCycle DefaultClientNPCIconRefreshTimerDelayGC = 60*10; // 1 min
-};
+}
 
 
 #endif // RY_MSG_CLIENT_SERVER_H

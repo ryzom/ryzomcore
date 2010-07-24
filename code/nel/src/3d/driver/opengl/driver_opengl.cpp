@@ -162,20 +162,6 @@ extern "C"
 
 #endif
 
-/*
-static Bool WndProc(Display *d, XEvent *e, char *arg)
-{
-	nlinfo("3D: glop %d %d", e->type, e->xmap.window);
-	CDriverGL *pDriver = (CDriverGL*)arg;
-	if (pDriver != NULL)
-	{
-		// Process the message by the emitter
-		pDriver->_EventEmitter.processMessage();
-	}
-	// TODO i'don t know what to return exactly
-	return (e->type == MapNotify) && (e->xmap.window == (Window) arg);
-}
-*/
 #endif // NL_OS_UNIX
 
 GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
@@ -866,12 +852,15 @@ bool CDriverGL::swapBuffers()
 	}
 
 #ifdef NL_OS_WINDOWS
+
 	SwapBuffers(_hDC);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
 	NL3D::MAC::swapBuffers(_win);
 
 #elif defined (NL_OS_UNIX)
+
 	glXSwapBuffers(_dpy, _win);
 
 #endif // NL_OS_WINDOWS
@@ -1026,13 +1015,13 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 	}
 
 	// Setup gl viewport
-	int ix=(int)((float)clientWidth*x+0.5f);
+	sint ix=(sint)((float)clientWidth*x+0.5f);
 	clamp (ix, 0, clientWidth);
 	int iy=(int)((float)clientHeight*y+0.5f);
 	clamp (iy, 0, clientHeight);
-	int iwidth=(int)((float)clientWidth*width+0.5f);
+	sint iwidth=(sint)((float)clientWidth*width+0.5f);
 	clamp (iwidth, 0, clientWidth-ix);
-	int iheight=(int)((float)clientHeight*height+0.5f);
+	sint iheight=(sint)((float)clientHeight*height+0.5f);
 	clamp (iheight, 0, clientHeight-iy);
 	glViewport (ix, iy, iwidth, iheight);
 }
@@ -1102,25 +1091,23 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	if(x==0 && x==0 && width>=1 && height>=1)
 	{
 		glDisable(GL_SCISSOR_TEST);
-
 	}
 	else
 	{
 		// Setup gl scissor
-		int ix0=(int)floor((float)clientWidth * x + 0.5f);
+		sint ix0=(sint)floor((float)clientWidth * x + 0.5f);
 		clamp (ix0, 0, clientWidth);
 		int iy0=(int)floor((float)clientHeight* y + 0.5f);
 		clamp (iy0, 0, clientHeight);
 
-		int ix1=(int)floor((float)clientWidth * (x+width) + 0.5f );
+		sint ix1=(sint)floor((float)clientWidth * (x+width) + 0.5f );
 		clamp (ix1, 0, clientWidth);
-		int iy1=(int)floor((float)clientHeight* (y+height) + 0.5f );
+		sint iy1=(sint)floor((float)clientHeight* (y+height) + 0.5f );
 		clamp (iy1, 0, clientHeight);
 
-
-		int iwidth= ix1 - ix0;
+		sint iwidth= ix1 - ix0;
 		clamp (iwidth, 0, clientWidth);
-		int iheight= iy1 - iy0;
+		sint iheight= iy1 - iy0;
 		clamp (iheight, 0, clientHeight);
 
 		glScissor (ix0, iy0, iwidth, iheight);
@@ -1848,15 +1835,18 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
 	glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
 	nglGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative);
-	if (errorPos == -1) {
-		if (!isNative && forceNativePrograms) {
+	if (errorPos == -1)
+	{
+		if (!isNative && forceNativePrograms)
+		{
 			nlwarning("Fragment program isn't supported natively; purging program");
 			nglDeleteProgramsARB(1, &progID);
 			return 0;
 		}
 		return progID;
 	}
-	else {
+	else
+	{
 		nlwarning("init fragment program failed: errorPos: %d isNative: %d", errorPos, isNative);
 	}
 	return 0;

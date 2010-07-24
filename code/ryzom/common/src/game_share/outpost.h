@@ -50,14 +50,14 @@ namespace OUTPOSTENUMS
 		PVE,	// can only be attacked if the outpost is held by a tribe and if the attacking guild comes from the same continent as the outpost
 		PVP,	// can only be attacked if the attacking guild comes from the same continent as the outpost
 		RVR,	// can only be attacked if the attacking guild comes from another continent as the outpost
-		Full,	// same as RVR but cant be set by the high council
+		Full	// same as RVR but cant be set by the high council
 	};
 
 	enum TPVPSide
 	{
 		OutpostOwner = 0,
 		OutpostAttacker = 1,
-		UnknownPVPSide,
+		UnknownPVPSide
 	};
 
 	// :NOTE: The outpost state machine is defined by a list of possible
@@ -78,7 +78,7 @@ namespace OUTPOSTENUMS
 		AttackAfter,
 		DefenseBefore,	// the attack was successful. The attacker must now defend the outpost
 		DefenseRound,	// ...
-		DefenseAfter,
+		DefenseAfter
 	};
 
 	/// events that can affect outpost state
@@ -107,7 +107,7 @@ namespace OUTPOSTENUMS
 		UnknownSquadType,
 		Default,	// squad recruited automatically when the outpost is taken
 		Recruited,	// squad recruited by the guild
-		Mercenary,	// a special mercenary squad
+		Mercenary	// a special mercenary squad
 	};
 
 	/// current state of a building used for database
@@ -115,7 +115,7 @@ namespace OUTPOSTENUMS
 	{
 		UnknownOutpostBuildingState,
 		BuildingInPlace,		// In place (constructed)
-		BuildingConstructing,	// Constructing
+		BuildingConstructing	// Constructing
 	};
 
 	/// current state of a state
@@ -127,7 +127,7 @@ namespace OUTPOSTENUMS
 		NotSpawned,	// squad is ready and waiting to be spawned
 		Spawning,	// spawn order has been issued but not yet confirmed
 		Spawned,	// squad is spawned
-		Dead,		// squad is dead
+		Dead		// squad is dead
 	};
 
 	/// events that can affect outpost state
@@ -142,7 +142,7 @@ namespace OUTPOSTENUMS
 		GuildOwnershipEnd,		// Owner of the outpost is no more a guild
 		StateChanged,			// State of outpost changed
 		OwnerChanged,			// Owner of outpost changed
-		AttackerChanged,		// Attacker of outpost changed
+		AttackerChanged			// Attacker of outpost changed
 	};
 
 	std::string const& toString(TPVPType val);

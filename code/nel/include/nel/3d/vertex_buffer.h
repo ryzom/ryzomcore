@@ -104,7 +104,7 @@ public:
 		StaticPreferred,	// The buffer will not be modified. A block of driver AGP or VRAM memory is allocated for this buffer. The buffer is writeonly.
 		RAMVolatile,		// A block of temporary driver RAM memory will be returned by lock(). The buffer must be entirely filled after each swapBuffers(). The buffer is writeonly.
 		AGPVolatile,		// A block of temporary driver AGP memory will be returned by lock(). The buffer must be entirely filled after each swapBuffers(). The buffer is writeonly.
-		PreferredCount,
+		PreferredCount
 	};
 
 	/**
@@ -116,7 +116,7 @@ public:
 		AGPResident,
 		VRAMResident,
 		NotResident,
-		LocationCount,
+		LocationCount
 	};
 
 	/**
@@ -149,7 +149,7 @@ public:
 	enum
 	{
 		FirstTexCoordValue = TexCoord0,
-		LastTexCoordValue  = TexCoord7,
+		LastTexCoordValue  = TexCoord7
 	};
 
 	/**
@@ -172,7 +172,7 @@ public:
 		WeightFlag			=	1<<Weight,
 		PaletteSkinFlag		=	(1<<PaletteSkin)|(1<<Weight),
 		FogFlag				=	1<<Fog,
-		EmptyFlag			=	1<<Empty,
+		EmptyFlag			=	1<<Empty
 	};
 
 
@@ -207,7 +207,7 @@ public:
 		MaxStage = 8,
 
 		// Max count of skinning weight
-		MaxWeight = 4,
+		MaxWeight = 4
 	};
 
 	/**

@@ -24,7 +24,7 @@
 namespace NLMISC
 {
 	class IStream;
-};
+}
 
 namespace NL3D {
 

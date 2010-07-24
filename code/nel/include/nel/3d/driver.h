@@ -45,7 +45,7 @@ struct IKeyboardDevice;
 struct IInputDeviceManager;
 class CRect;
 class CLog;
-};
+}
 
 namespace NL3D
 {
