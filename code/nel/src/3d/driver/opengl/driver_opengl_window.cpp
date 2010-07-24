@@ -51,7 +51,7 @@ namespace NL3D
 
 #ifdef NL_OS_WINDOWS
 
-static bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_OGL(GlWndProc)
 	if(message == WM_SIZE)
@@ -137,7 +137,76 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	return trapMessage ? 0 : DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-#endif // NL_OS_WINDOWS
+#elif defined (NL_MAC_NATIVE)
+
+bool GlWndProc(CDriverGL *driver)
+{
+	return false;
+}
+
+#elif defined (NL_OS_UNIX)
+
+bool GlWndProc(CDriverGL *driver, XEvent &e)
+{
+	H_AUTO_OGL(GlWndProc)
+
+	if (!driver)
+		return false;
+
+	// nlinfo("3D: glop %d %d", e.type, e.xmap.window);
+
+	// disable menu (default ALT-F4 behavior is disabled)
+	switch(e.type)
+	{
+		case DestroyNotify:
+
+		if(driver && driver->ExitFunc)
+		{
+			driver->ExitFunc();
+		}
+		else
+		{
+#ifndef NL_DISABLE_MENU
+			// if we don't disable menu, alt F4 make a direct exit else we discard the message
+			exit(0);
+#endif // NL_DISABLE_MENU
+		}
+		break;
+
+		case ConfigureNotify:
+
+		driver->_WindowWidth = e.xconfigure.width;
+		driver->_WindowHeight = e.xconfigure.height;
+		driver->_WindowX = e.xconfigure.x;
+		driver->_WindowY = e.xconfigure.y;
+
+		break;
+
+		default:
+
+		// Process the message by the emitter
+		return driver->_EventEmitter.processMessage(e);
+	}
+
+	return true;
+
+/*
+	else if (message == WM_ACTIVATE)
+	{
+		WORD fActive = LOWORD(wParam);
+		if (fActive == WA_INACTIVE)
+		{
+			driver->_WndActive = false;
+		}
+		else
+		{
+			driver->_WndActive = true;
+		}
+	}
+*/
+}
+
+#endif // NL_OS_UNIX
 
 // ***************************************************************************
 bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
@@ -860,11 +929,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	glXMakeCurrent (_dpy, _win, _ctx);
 //	XMapRaised (_dpy, _win);
 
-	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask);
-
 //	XMapWindow(_dpy, _win);
 
-	_EventEmitter.init (_dpy, _win);
+	_EventEmitter.init (_dpy, _win, this);
 
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
@@ -1333,7 +1400,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	H_AUTO_OGL(CDriverGL_setWindowStyle)
 
 	// don't change window style, if we did not create the window
-	if (!_DestroyWindow)
+	if (_win == EmptyWindow || !_DestroyWindow)
 		return true;
 
 #if defined(NL_OS_WINDOWS)
@@ -1392,27 +1459,23 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 #if !defined(NL_OS_MAC)
 
 	// Toggle fullscreen
-	if (windowStyle != getWindowStyle())
+	XEvent xev;
+	xev.xclient.type = ClientMessage;
+	xev.xclient.serial = 0;
+	xev.xclient.send_event = True;
+	xev.xclient.display = _dpy;
+	xev.xclient.window = _win;
+	xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
+	xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	xev.xclient.data.l[2] = 0;
+	xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
+	xev.xclient.data.l[4] = 0;
+	if (XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev) != Success)
 	{
-		XEvent xev;
-		memset(&xev, 0, sizeof(xev));
-		xev.type = ClientMessage;
-//		xev.xclient.serial = 0;
-//		xev.xclient.send_event = True;
-//		xev.xclient.display = _dpy;
-		xev.xclient.window = _win;
-		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
-		xev.xclient.format = 32;
-		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? 1:0;
-		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
-		xev.xclient.data.l[2] = 0;
-		xev.xclient.data.l[3] = 0;
-		xev.xclient.data.l[4] = 0;
-		if (XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureNotifyMask, &xev) != Success)
-		{
-			nlwarning("3D: Failed to toggle to fullscreen");
-			return false;
-		}
+		nlwarning("3D: Failed to toggle to fullscreen");
+		return false;
 	}
 
 #endif
@@ -1431,7 +1494,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		return false;
 
 	// when changing window style, it's possible system change window size too
-	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
+	setWindowStyle(mode.Windowed ? EWSWindowed:EWSFullscreen);
 
 	_WindowWidth = mode.Width;
 	_WindowHeight = mode.Height;
@@ -1455,6 +1518,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 {
 	H_AUTO_OGL(CDriverGL_getModes)
+
 #ifdef NL_OS_WINDOWS
 	sint modeIndex = 0;
 	DEVMODE devMode;
@@ -1701,6 +1765,11 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 // --------------------------------------------------
 void CDriverGL::setWindowTitle(const ucstring &title)
 {
+	H_AUTO_OGL(CDriverGL_setWindowTitle)
+
+	if (_win == EmptyWindow)
+		return;
+
 #ifdef NL_OS_WINDOWS
 
 	SetWindowTextW(_win, (WCHAR*)title.c_str());
@@ -1725,6 +1794,8 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 // ***************************************************************************
 void CDriverGL::setWindowPos(sint32 x, sint32 y)
 {
+	H_AUTO_OGL(CDriverGL_setWindowPos)
+
 	_WindowX = x;
 	_WindowY = y;
 
@@ -1749,7 +1820,7 @@ void CDriverGL::showWindow(bool show)
 	H_AUTO_OGL(CDriverGL_showWindow)
 
 	// don't change window visibility, if we didn't create the window
-	if (!_DestroyWindow)
+	if (_win == EmptyWindow || !_DestroyWindow)
 		return;
 
 #ifdef NL_OS_WINDOWS
@@ -1778,11 +1849,7 @@ emptyProc CDriverGL::getWindowProc()
 {
 	H_AUTO_OGL(CDriverGL_getWindowProc)
 
-#ifdef NL_OS_WINDOWS
 	return (emptyProc)GlWndProc;
-#else // NL_OS_WINDOWS
-	return NULL;
-#endif // NL_OS_WINDOWS
 }
 
 // --------------------------------------------------
@@ -1932,10 +1999,8 @@ void CDriverGL::setMousePos(float x, float y)
 
 #elif defined (NL_OS_UNIX)
 
-	XWindowAttributes xwa;
-	XGetWindowAttributes (_dpy, _win, &xwa);
-	int x1 = (int)(x * (float) xwa.width);
-	int y1 = (int)((1.0f - y) * (float) xwa.height);
+	sint x1 = (sint)((float)_WindowWidth*x);
+	sint y1 = (sint)((float)_WindowHeight*(1.0f-y));
 	XWarpPointer (_dpy, None, _win, None, None, None, None, x1, y1);
 
 #endif // NL_OS_UNIX
@@ -1945,38 +2010,33 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_MAC_NATIVE
+
+	NL3D::MAC::getWindowSize(_win, width, height);
+
+#else
 
 	// Off-screen rendering ?
 	if (_OffScreen)
 	{
+#ifdef NL_OS_WINDOWS
 		if (_PBuffer)
 		{
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width );
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height );
 		}
+#endif
 	}
 	else
 	{
 		if (_win)
 		{
-			width = (uint32)_WindowWidth;
-			height = (uint32)_WindowHeight;
+			width = _WindowWidth;
+			height = _WindowHeight;
 		}
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-
-	NL3D::MAC::getWindowSize(_win, width, height);
-
-#elif defined (NL_OS_UNIX)
-
-	XWindowAttributes xwa;
-	XGetWindowAttributes (_dpy, _win, &xwa);
-	width = (uint32) xwa.width;
-	height = (uint32) xwa.height;
-
-#endif // NL_OS_UNIX
+#endif // NL_MAC_NATIVE
 }
 
 void CDriverGL::setWindowSize(uint32 width, uint32 height)
@@ -2040,15 +2100,16 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 {
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_MAC_NATIVE
+
+	NL3D::MAC::getWindowPos(_win, x, y);
+
+#else
 
 	// Off-screen rendering ?
 	if (_OffScreen)
 	{
-		if (_PBuffer)
-		{
-			x = y = 0;
-		}
+		x = y = 0;
 	}
 	else
 	{
@@ -2059,35 +2120,7 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 		}
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-
-	NL3D::MAC::getWindowPos(_win, x, y);
-
-#elif defined (NL_OS_UNIX)
-
-	int screen = DefaultScreen(_dpy);
-
-#if 0
-	// Display size is a member of display structure
-	int display_width = DisplayWidth(_dpy, screen);
-	int display_height = DisplayHeight(_dpy, screen);
-#endif
-
-	int xtmp = 0, ytmp = 0;
-	unsigned int width = 0, height = 0;
-	unsigned int border_width = 0;
-	unsigned int depth = 0;
-
-	// Get geometry information about root window
-	if (!XGetGeometry(_dpy, RootWindow(_dpy, screen), (Window*)&_win, &xtmp, &ytmp, &width, &height, &border_width, &depth))
-	{
-		nlwarning("can't get root window geometry");
-	}
-
-	x = xtmp;
-	y = ytmp;
-
-#endif // NL_OS_UNIX
+#endif // NL_MAC_NATIVE
 }
 
 // --------------------------------------------------

@@ -27,9 +27,11 @@
 #include "nel/misc/debug.h"
 #include "unix_event_emitter.h"
 
+typedef void (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
+
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY), _emulateRawMode(false)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY), _emulateRawMode(false), _driver(NULL)
 {
 	_im = 0;
 	_ic = 0;
@@ -41,10 +43,21 @@ CUnixEventEmitter::~CUnixEventEmitter()
 	if (_im) XCloseIM(_im);
 }
 
-void CUnixEventEmitter::init (Display *dpy, Window win)
+void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 {
 	_dpy = dpy;
 	_win = win;
+	_driver = driver;
+
+	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask);
+
+/*
+	TODO: implements all useful events processing
+	EnterWindowMask|LeaveWindowMask|ButtonMotionMask|Button1MotionMask|Button2MotionMask|
+	Button3MotionMask|Button4MotionMask|Button5MotionMask|KeymapStateMask|ExposureMask|
+	SubstructureNotifyMask|VisibilityChangeMask|FocusChangeMask|PropertyChangeMask|
+	ColormapChangeMask|OwnerGrabButtonMask
+*/
 
 	createIM();
 }
@@ -75,12 +88,27 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	{
 		XEvent	Event;
 		XNextEvent(_dpy, &Event);
-		if(Event.xany.window==_win)
+		if (allWindows || Event.xany.window == _win)
 		{
 			// nlinfo("event: %d", Event.type);
-			processMessage (Event, server);
+			if (_driver)
+			{
+				// forward X events to OpenGL driver
+				x11Proc proc = (x11Proc)_driver->getWindowProc();
+
+				if (proc)
+					proc(_driver, &Event);
+			}
+			else
+			{
+				processMessage (Event, server);
+			}
 		}
 	}
+
+	// Dispatch sent messages
+	_InternalServer.setServer (&server);
+	_InternalServer.pump (allWindows);
 }
 
 void CUnixEventEmitter::emulateMouseRawMode(bool enable)
@@ -91,7 +119,7 @@ void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 	{
 		XWindowAttributes xwa;
 		XGetWindowAttributes(_dpy, _win, &xwa);
-		XWarpPointer(_dpy, None, _win, None, None, None, None, 
+		XWarpPointer(_dpy, None, _win, None, None, None, None,
 			(xwa.width / 2), (xwa.height / 2));
 	}
 }
@@ -354,21 +382,17 @@ TKey getKeyFromKeySym (KeySym keysym)
 	return KeyNOKEY;
 }
 
-
-#define Case(a) case(a): // nlinfo("event: "#a);
-
-void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
+void CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 {
+	if (!server)
+		server=&_InternalServer;
+
 	XWindowAttributes xwa;
 	XGetWindowAttributes (_dpy, _win, &xwa);
 
 	switch (event.type)
 	{
-	Case(ReparentNotify)
-	Case(UnmapNotify)
-	Case(VisibilityNotify)
-		break;
-	Case(ButtonPress)
+	case ButtonPress:
 	{
 		//nlinfo("%d %d %d", event.xbutton.button, event.xbutton.x, event.xbutton.y);
 		float fX = (float) event.xbutton.x / (float) xwa.width;
@@ -377,24 +401,24 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		switch(event.xbutton.button)
 		{
 		case Button1:
-			server.postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(leftButton|(button&~(leftButton|middleButton|rightButton))), this));
+			server->postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(leftButton|(button&~(leftButton|middleButton|rightButton))), this));
 			break;
 		case Button2:
-			server.postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(middleButton|(button&~(leftButton|middleButton|rightButton))), this));
+			server->postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(middleButton|(button&~(leftButton|middleButton|rightButton))), this));
 			break;
 		case Button3:
-			server.postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(rightButton|(button&~(leftButton|middleButton|rightButton))), this));
+			server->postEvent(new CEventMouseDown(fX, fY, (TMouseButton)(rightButton|(button&~(leftButton|middleButton|rightButton))), this));
 			break;
 		case Button4:
-			server.postEvent(new CEventMouseWheel(fX, fY, button, true, this));
+			server->postEvent(new CEventMouseWheel(fX, fY, button, true, this));
 			break;
 		case Button5:
-			server.postEvent(new CEventMouseWheel(fX, fY, button, false, this));
+			server->postEvent(new CEventMouseWheel(fX, fY, button, false, this));
 			break;
 		}
 		break;
 	}
-	Case(ButtonRelease)
+	case ButtonRelease:
 	{
 		//nlinfo("%d %d %d", event.xbutton.button, event.xbutton.x, event.xbutton.y);
 		float fX = (float) event.xbutton.x / (float) xwa.width;
@@ -402,13 +426,13 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 		switch(event.xbutton.button)
 		{
 		case Button1:
-			server.postEvent(new CEventMouseUp(fX, fY, leftButton, this));
+			server->postEvent(new CEventMouseUp(fX, fY, leftButton, this));
 			break;
 		case Button2:
-			server.postEvent(new CEventMouseUp(fX, fY, middleButton, this));
+			server->postEvent(new CEventMouseUp(fX, fY, middleButton, this));
 			break;
 		case Button3:
-			server.postEvent(new CEventMouseUp(fX, fY, rightButton, this));
+			server->postEvent(new CEventMouseUp(fX, fY, rightButton, this));
 			break;
 		}
 		break;
@@ -425,16 +449,15 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 				break;
 
 			// post a CGDMouseMove with the movement delta to the event server
-			server.postEvent(
-				new CGDMouseMove(this, NULL /* no mouse device */, 
-					event.xbutton.x - (xwa.width / 2), 
+			server->postEvent(
+				new CGDMouseMove(this, NULL /* no mouse device */,
+					event.xbutton.x - (xwa.width / 2),
 					(xwa.height / 2) - event.xbutton.y));
-		
+
 			// move the pointer back to the center of the window
-			XWarpPointer(_dpy, None, _win, None, None, None, None, 
+			XWarpPointer(_dpy, None, _win, None, None, None, None,
 				(xwa.width / 2), (xwa.height / 2));
 		}
-		
 		// if in normal mouse mode
 		else
 		{
@@ -443,11 +466,11 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 			float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
 
 			// post a normal mouse move event to the event server
-			server.postEvent (new CEventMouseMove (fX, fY, button, this));
+			server->postEvent (new CEventMouseMove (fX, fY, button, this));
 		}
 		break;
 	}
-	Case(KeyPress)
+	case KeyPress:
 	{
 		// save keycode because XFilterEvent could set it to 0
 		uint keyCode = event.xkey.keycode;
@@ -483,7 +506,7 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 			if(key == KeyNOKEY)
 				key = getKeyFromKeycode(keyCode);
 
-			server.postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
+			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
 			_PreviousKey = key;
 
 			// don't send a control character when deleting
@@ -497,51 +520,44 @@ void CUnixEventEmitter::processMessage (XEvent &event, CEventServer &server)
 #ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;
 			ucstr.fromUtf8(Text);
-			server.postEvent (new CEventChar (ucstr[0], noKeyButton, this));
+			server->postEvent (new CEventChar (ucstr[0], noKeyButton, this));
 #else
 			for (int i = 0; i < c; i++)
-				server.postEvent (new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this));
+				server->postEvent (new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this));
 #endif
 		}
 		break;
 	}
-	Case (KeyRelease)
+	case KeyRelease:
 	{
 		TKey key = getKeyFromKeySym(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
 		if(key == KeyNOKEY)
 			key = getKeyFromKeycode(event.xkey.keycode);
 
-		server.postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
+		server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 		_PreviousKey = KeyNOKEY;
 		break;
 	}
-	Case(FocusIn)
+	case FocusIn:
 		if (_ic) XSetICFocus(_ic);
-		return;
-	Case(FocusOut)
-		if (_ic) XUnsetICFocus(_ic);
-		return;
-	Case(Expose)
 		break;
-	Case(MappingNotify)
+	case FocusOut:
+		if (_ic) XUnsetICFocus(_ic);
+		break;
+	case MappingNotify:
 		XRefreshKeyboardMapping((XMappingEvent *)&event);
 		break;
-	Case(DestroyNotify)
+	case DestroyNotify:
 		// XIM server has crashed
 		createIM();
 		break;
-	Case(ConfigureNotify)
-		/* if (event.xconfigure.width==gmaxx && event.xconfigure.height==gmaxy) {
-			UpdateGWin();
-		} else {
-			XResizeWindow(display, gwindow, gmaxx, gmaxy);
-		} */
-		break;
 	default:
-		nlinfo("UnknownEvent");
-		//    XtDispatchEvent(&event);
-		break;
+		//	nlinfo("UnknownEvent");
+		//	XtDispatchEvent(&event);
+		return false;
 	}
+
+	return true;
 }
 
 } // NLMISC

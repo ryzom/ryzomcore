@@ -107,6 +107,21 @@ class	IVertexArrayRange;
 class	IVertexBufferHardGL;
 class   COcclusionQueryGL;
 
+#ifdef NL_OS_WINDOWS
+
+bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+#elif defined (NL_MAC_NATIVE)
+
+// TODO: change that
+bool GlWndProc(CDriverGL *driver);
+
+#elif defined (NL_OS_UNIX)
+
+bool GlWndProc(CDriverGL *driver, XEvent &e);
+
+#endif
+
 typedef std::list<COcclusionQueryGL *> TOcclusionQueryList;
 
 // ***************************************************************************
@@ -660,14 +675,15 @@ private:
 	uint						_Interval;
 	sint8						_AntiAliasing;
 
-	sint32						_WindowWidth, _WindowHeight, _WindowX, _WindowY;
+	uint32						_WindowWidth, _WindowHeight;
+	sint32						_WindowX, _WindowY;
 
 	nlWindow					_win;
 	bool						_DestroyWindow;
 
 #ifdef NL_OS_WINDOWS
 
-	friend static bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	friend bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	HDC							_hDC;
 	PIXELFORMATDESCRIPTOR		_pfd;
@@ -684,6 +700,8 @@ private:
 	NLMISC::CCocoaEventEmitter	_EventEmitter;
 
 #elif defined (NL_OS_UNIX)
+
+	friend bool GlWndProc(CDriverGL *driver, XEvent &e);
 
 	Display*					_dpy;
 	GLXContext					_ctx;

@@ -966,28 +966,20 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 
 	if (_win == EmptyWindow) return;
 
-#ifdef NL_OS_WINDOWS
-
-	// Setup gl viewport
-	int clientWidth = _WindowWidth;
-	int clientHeight = _WindowHeight;
-
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#ifdef NL_MAC_NATIVE
 
 	uint32 clientWidth, clientHeight;
 	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
 
-#elif defined (NL_OS_UNIX)
+	getWindowSize(clientWidth, clientHeight);
 
-	XWindowAttributes win_attributes;
-	if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
-		throw EBadDisplay("Can't get window attributes.");
+#else
 
 	// Setup gl viewport
-	int clientWidth=win_attributes.width;
-	int clientHeight=win_attributes.height;
+	sint clientWidth = _WindowWidth;
+	sint clientHeight = _WindowHeight;
 
-#endif // NL_OS_WINDOWS
+#endif // NL_MAC_NATIVE
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -1037,31 +1029,21 @@ void CDriverGL::getViewport(CViewport &viewport)
 void CDriverGL::setupScissor (const class CScissor& scissor)
 {
 	H_AUTO_OGL(CDriverGL_setupScissor )
-#ifdef NL_OS_WINDOWS
+
 	if (_win == EmptyWindow) return;
 
-	// Setup gl viewport
-	int clientWidth = _WindowWidth;
-	int clientHeight = _WindowHeight;
+#ifdef NL_MAC_NATIVE
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+	uint32 clientWidth, clientHeight;
+	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
 
-	uint32 clientWidth  = 0;
-	uint32 clientHeight = 0;
-
-	getWindowSize(clientWidth, clientHeight);
-
-#elif defined (NL_OS_UNIX)
-
-	XWindowAttributes win_attributes;
-	if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
-		throw EBadDisplay("Can't get window attributes.");
+#else
 
 	// Setup gl viewport
-	int clientWidth=win_attributes.width;
-	int clientHeight=win_attributes.height;
+	sint clientWidth = _WindowWidth;
+	sint clientHeight = _WindowHeight;
 
-#endif // NL_OS_WINDOWS
+#endif // NL_MAC_NATIVE
 
 	// Backup the scissor
 	_CurrScissor= scissor;

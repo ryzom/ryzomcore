@@ -46,29 +46,59 @@ public:
 	CUnixEventEmitter();
 	virtual ~CUnixEventEmitter();
 
-	void init (Display *dpy, Window win);
+	/**
+	 * initialize CUnixEventEmitter
+	 */
+	void init(Display *dpy, Window win, NL3D::IDriver *driver = NULL);
 
 	/**
 	 * sends all events to server
 	 * (should call CEventServer method postEvent() )
-	 * \param server
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows);
 
-	virtual void emulateMouseRawMode(bool);
+	/**
+	 * enable or disable mouse raw mode
+	 */
+	virtual void emulateMouseRawMode(bool emulate);
 
-public:
-	void processMessage (XEvent &event, CEventServer &server);
+	/**
+	 * process input-related events (mouse and keyboard)
+	 */
+	bool processMessage(XEvent &event, CEventServer *server = NULL);
 
 private:
+
+	// Private internal server message
+	class CUnixEventServer : CEventServer
+	{
+		friend class CUnixEventEmitter;
+	public:
+		void setServer (CEventServer *server)
+		{
+			_Server=server;
+		}
+	private:
+		virtual bool pumpEvent(CEvent* event)
+		{
+			CEventServer::pumpEvent(event);
+			_Server->postEvent (event);
+			return false;
+		}
+	private:
+		CEventServer *_Server;
+	};
+
 	void createIM();
 
-	Display *_dpy;
-	Window   _win;
-	TKey     _PreviousKey;
-	XIM      _im;
-	XIC      _ic;
-	bool     _emulateRawMode;
+	Display*			_dpy;
+	Window				_win;
+	TKey			    _PreviousKey;
+	XIM					_im;
+	XIC					_ic;
+	bool			    _emulateRawMode;
+	NL3D::IDriver*		_driver;
+	CUnixEventServer	_InternalServer;
 };
 
 

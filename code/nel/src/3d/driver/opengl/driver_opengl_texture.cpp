@@ -1939,22 +1939,8 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 	}
 	else
 	{
-#ifdef NL_OS_WINDOWS
 		width = _WindowWidth;
 		height = _WindowHeight;
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-		nlwarning("OpenGL Driver: Missing Mac Implementation");
-
-#elif defined (NL_OS_UNIX)
-		XWindowAttributes win_attributes;
-		if (!XGetWindowAttributes(_dpy, _win, &win_attributes))
-			throw EBadDisplay("Can't get window attributes.");
-
-		// Setup gl viewport
-		width = win_attributes.width;
-		height = win_attributes.height;
-#endif // NL_OS_WINDOWS
 	}
 
 	return false;
