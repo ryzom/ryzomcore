@@ -149,7 +149,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 void CSheetId::loadSheetId ()
 {
 	H_AUTO(CSheetIdInit);
-	nldebug("Loading sheet_id.bin");
+	//nldebug("Loading sheet_id.bin");
 
 	// Open the sheet id to sheet file name association
 	CIFile file;

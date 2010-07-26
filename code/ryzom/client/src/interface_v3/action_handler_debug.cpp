@@ -71,9 +71,7 @@ class CAHDisplayInfos : public IActionHandler
 	{
 		// can only be used by devs and CSR or in local mode
 #if FINAL_VERSION
-#	ifdef NL_OS_WINDOWS
 		if( ClientCfg.Local || hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeVG() )
-#	endif
 #endif
 		{
 			ShowInfos = (ShowInfos+1)%6;

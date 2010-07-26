@@ -3889,7 +3889,7 @@ void CInterfaceParser::removeAllMasterGroups()
 	initStart = ryzomGetLocalTime ();
 	for (i = 0; i < _MasterGroups.size(); ++i)
 		unlinkAllContainers (_MasterGroups[i].Group);
-	nlinfo ("%d seconds for all unlinkAllContainers", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for all unlinkAllContainers", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	initStart = ryzomGetLocalTime ();
 	// Yoyo: important to not Leave NULL in the array, because of CGroupHTML and LibWWW callback
@@ -3899,7 +3899,7 @@ void CInterfaceParser::removeAllMasterGroups()
 		delete _MasterGroups.back().Group;
 		_MasterGroups.pop_back();
 	}
-	nlinfo ("%d seconds for all delete _MasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for all delete _MasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 }
 
 // ***************************************************************************
@@ -3908,25 +3908,25 @@ void CInterfaceParser::removeAll()
 	NLMISC::TTime initStart;
 	initStart = ryzomGetLocalTime ();
 	removeAllLinks();
-	nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllOptions();
-	nlinfo ("%d seconds for removeAllOptions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllOptions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllProcedures();
-	nlinfo ("%d seconds for removeAllProcedures", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllProcedures", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllDefines();
-	nlinfo ("%d seconds for removeAllDefines", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllDefines", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllTemplates();
-	nlinfo ("%d seconds for removeAllTemplates", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllTemplates", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllAnims();
-	nlinfo ("%d seconds for removeAllAnims", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllAnims", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllMasterGroups();
-	nlinfo ("%d seconds for removeAllMasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllMasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	_StyleMap.clear();
 	_CtrlSheetSelection.deleteGroups();
 }

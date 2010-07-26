@@ -1240,7 +1240,7 @@ class CAHOnLogin : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		nlinfo("CAHOnLogin called");
+		//nlinfo("CAHOnLogin called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1389,7 +1389,7 @@ REGISTER_ACTION_HANDLER (CAHShardSelect, "shard_select");
 // ***************************************************************************
 void ConnectToShard()
 {
-	nlinfo("ConnectToShard called");
+	//nlinfo("ConnectToShard called");
 
 	if (ClientCfg.R2Mode)
 	{
@@ -1745,8 +1745,9 @@ class CAHAcceptEula : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
 	{
-		nlinfo("CAHAcceptEula called");
-		CFile::deleteFile(getLogDirectory() + "show_eula");
+		//nlinfo("CAHAcceptEula called");
+		if(CFile::fileExists(getLogDirectory() + "show_eula"))
+			CFile::deleteFile(getLogDirectory() + "show_eula");
 		LoginSM.pushEvent(CLoginStateMachine::ev_accept_eula);
 
 //		if (ClientCfg.R2Mode)
@@ -1890,7 +1891,7 @@ class CAHInitResLod : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
 	{
-		nlinfo("CAHInitResLod called");
+		//nlinfo("CAHInitResLod called");
 		if (Driver == NULL) return;
 
 		// **** Init Video Modes
@@ -2110,7 +2111,7 @@ class CAHUninitResLod : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
 	{
-		nlinfo("CAHUninitResLod called");
+		//nlinfo("CAHUninitResLod called");
 
 		// If the mode requested is a windowed mode do nothnig
 		if (CurrentMode != 0)

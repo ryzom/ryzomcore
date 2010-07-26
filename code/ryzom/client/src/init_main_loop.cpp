@@ -460,7 +460,7 @@ void initMainLoop()
 
 	initLast = initCurrent;
 	initCurrent = ryzomGetLocalTime();
-	nlinfo ("PROFILE: %d seconds (%d total) for Uninitializing outgame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+	//nlinfo ("PROFILE: %d seconds (%d total) for Uninitializing outgame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
 	// Create the game interface database
 	{
@@ -481,7 +481,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing XML database", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing XML database", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	// Create interface database
@@ -500,7 +500,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing interface", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing interface", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -511,7 +511,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Awaiting start position", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Awaiting start position", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	FPU_CHECKER_ONCE
@@ -537,7 +537,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing sound", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing sound", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -548,7 +548,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Entities manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Entities manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -599,7 +599,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Creating scene", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Creating scene", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	FPU_CHECKER_ONCE
@@ -616,7 +616,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing animation", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing animation", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	UCamera cam2 = SceneRoot->getCam();
@@ -668,7 +668,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Entity Animation Manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Entity Animation Manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -676,14 +676,14 @@ void initMainLoop()
 		// Parse the interface InGame
 		nmsg = "Building Interface ...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-		nlinfo("****** InGame Interface Parsing and Init START ******");
+		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
-		nlinfo("****** InGame Interface Parsing and Init END ******");
+		//nlinfo("****** InGame Interface Parsing and Init END ******");
 	}
 
 	{
@@ -698,7 +698,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing User sheet", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing User sheet", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	FPU_CHECKER_ONCE
@@ -715,7 +715,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Weather", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Weather", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -759,7 +759,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Landscape", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Landscape", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	if (!ClientCfg.Light)
@@ -776,7 +776,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Cloudscape", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Cloudscape", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	FPU_CHECKER_ONCE
@@ -792,7 +792,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing season", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing season", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	{
@@ -809,7 +809,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Timed FX", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Timed FX", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 
@@ -824,7 +824,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Loading continent", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Loading continent", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 
@@ -839,7 +839,7 @@ void initMainLoop()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing collision manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing collision manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 	}
 
@@ -899,7 +899,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Creating LOD managers", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Creating LOD managers", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	FPU_CHECKER_ONCE
@@ -1032,7 +1032,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Loading characters shapes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Loading characters shapes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
 		{
 			bool preloadFXTextures = true;
@@ -1079,7 +1079,7 @@ void initMainLoop()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Loading FX", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Loading FX", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 		{
 			bool preloadObjectTextures = true;
@@ -1112,7 +1112,7 @@ void initMainLoop()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Loading object shapes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Loading object shapes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 	}
 	else
@@ -1135,7 +1135,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Contextual Cursor", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Contextual Cursor", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 	TextContext->setColor( CRGBA(255,255,255) );
@@ -1148,7 +1148,7 @@ void initMainLoop()
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
-		nlinfo ("PROFILE: %d seconds (%d total) for Initializing Instances group", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Instances group", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 	}
 
 
@@ -1196,7 +1196,7 @@ void initMainLoop()
 
 	initLast = initCurrent;
 	initCurrent = ryzomGetLocalTime();
-	nlinfo ("PROFILE: %d seconds (%d total) for Initializing other parameters", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+	//nlinfo ("PROFILE: %d seconds (%d total) for Initializing other parameters", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
 	// Display Launching Message.
 	nmsg = "Sending \"Ready\" ...";
@@ -1240,7 +1240,7 @@ void initMainLoop()
 
 	initLast = initCurrent;
 	initCurrent = ryzomGetLocalTime();
-	nlinfo ("PROFILE: %d seconds (%d total) for Sending \"Ready\"", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+	//nlinfo ("PROFILE: %d seconds (%d total) for Sending \"Ready\"", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
 	// Display Launching Message.
 	nmsg = "Launching ...";
@@ -1291,7 +1291,7 @@ void initMainLoop()
 
 	initLast = initCurrent;
 	initCurrent = ryzomGetLocalTime();
-	nlinfo ("PROFILE: %d seconds (%d total) for Launching", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+	//nlinfo ("PROFILE: %d seconds (%d total) for Launching", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
 	nlinfo ("PROFILE: %d seconds for init main loop", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 

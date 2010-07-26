@@ -578,33 +578,33 @@ void CInterfaceManager::uninitOutGame()
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
 		pMixer->unloadSampleBank("ui_outgame");
 	}
-	nlinfo ("%d seconds for uninitOutGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for uninitOutGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	initStart = ryzomGetLocalTime ();
 	activateMasterGroup ("ui:outgame", false);
-	nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAll();
-	nlinfo ("%d seconds for removeAll", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAll", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	reset();
-	nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	// reset the mouse pointer to avoid invalid pointer access
 	_Pointer = NULL;
 	initStart = ryzomGetLocalTime ();
 	CInterfaceLink::removeAllLinks();
-	nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
 	_DbRootNode->removeNode(textId);
-	nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	// Init the action manager
 	{
 
 		initStart = ryzomGetLocalTime ();
 		uninitActions();
-		nlinfo ("%d seconds for uninitActions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
+	//	nlinfo ("%d seconds for uninitActions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}
 
 	// Close LUA Scripting
@@ -1686,7 +1686,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 	}
 	quitVisitor.BadWindowFound = false;
 
-	nlwarning( "#### Saving interface config : %s", filename.c_str() );
+	nlinfo( "Saving interface config : %s", filename.c_str() );
 
 	COFile f;
 

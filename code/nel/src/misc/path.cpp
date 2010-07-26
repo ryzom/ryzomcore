@@ -1555,11 +1555,9 @@ void CFileContainer::memoryCompress()
 	SSMext.memoryCompress();
 	SSMpath.memoryCompress();
 	uint nDbg = (uint)_Files.size();
-	nlinfo ("PATH: Number of file : %d", nDbg);
-	nDbg = SSMext.getCount();
-	nlinfo ("PATH: Number of different extension : %d", nDbg);
-	nDbg = SSMpath.getCount();
-	nlinfo ("PATH: Number of different path : %d", nDbg);
+	uint nDbg2 = SSMext.getCount();
+	uint nDbg3 = SSMpath.getCount();
+	nlinfo ("PATH: Number of file: %d, extension: %d, path: %d", nDbg, nDbg2, nDbg3);
 
 	// Convert from _Files to _MCFiles
 	uint nSize = 0, nNb = 0;

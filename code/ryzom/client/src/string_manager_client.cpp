@@ -1117,11 +1117,11 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 	{
 		// get the correct path name of the ref file
 		std::string referenceFile= lookupReferenceFile(fileNames[i]);
-		fileChecks[i].ReferenceDate= CFile::getFileModificationDate(referenceFile);
+		fileChecks[i].ReferenceDate= CPath::exists(referenceFile)?CFile::getFileModificationDate(referenceFile):0;
 
 		// get then one of the working File (NB: 0 is a valid reponse for Final Client: no working file)
 		string workingFile("./translation/work/"+CFile::getFilename(fileNames[i]));
-		fileChecks[i].AdditionDate= CFile::getFileModificationDate(workingFile);
+		fileChecks[i].AdditionDate= CPath::exists(workingFile)?CFile::getFileModificationDate(workingFile):0;
 	}
 
 

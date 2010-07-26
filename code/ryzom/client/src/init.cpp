@@ -401,10 +401,7 @@ void setCPUMask ()
 
 void	displayCPUInfo()
 {
-	nlinfo("*** CPUMask Before change: %x", (uint32)Debug_OldCPUMask);
-	nlinfo("*** CPUMask After change: %x", (uint32)Debug_NewCPUMask);
-	nlinfo("*** CPU CPUID: %x", CSystemInfo::getCPUID());
-	nlinfo("*** CPU hasHyperThreading: %s", CSystemInfo::hasHyperThreading()?"YES":"NO");
+	nlinfo("CPUInfo: CPUMask before change: %x, after change: %x, CPUID: %x, hasHyperThreading: %s", (uint32)Debug_OldCPUMask, (uint32)Debug_NewCPUMask, CSystemInfo::getCPUID(), (CSystemInfo::hasHyperThreading()?"YES":"NO"));
 }
 
 string getVersionString (uint64 version)
@@ -624,7 +621,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 		progress.popCropedValues ();
 	}
-	nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
+	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
@@ -1080,7 +1077,7 @@ void prelogInit()
 			{
 				addPackedSheetUpdatePaths(ProgressBar);
 			}
-			nlinfo ("PROFILE: %d seconds for Add search paths Data", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
+			//nlinfo ("PROFILE: %d seconds for Add search paths Data", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
 		}
 
 		// Register the reflected classes
@@ -1197,7 +1194,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing network", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing network", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1211,7 +1208,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing chat manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing chat manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1228,7 +1225,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing primitive classes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing primitive classes", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		// set the primitive context
@@ -1288,7 +1285,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing sound manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing sound manager", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1308,7 +1305,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing sheets", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing sheets", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1320,7 +1317,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing bricks", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing bricks", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		if (!ClientCfg.Light)
@@ -1355,7 +1352,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing Color Slot etc.", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Color Slot etc.", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 		else
 		{
@@ -1380,7 +1377,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing Movie Shooter", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing Movie Shooter", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1395,7 +1392,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Initializing primitives", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Initializing primitives", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		{
@@ -1414,7 +1411,7 @@ void postlogInit()
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
-			nlinfo ("PROFILE: %d seconds (%d total) for Executing cfg file start commands", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
+			//nlinfo ("PROFILE: %d seconds (%d total) for Executing cfg file start commands", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 		}
 
 		// Next step will be the connection with the server.

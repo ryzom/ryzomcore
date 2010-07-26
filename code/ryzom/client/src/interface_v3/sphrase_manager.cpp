@@ -2384,7 +2384,7 @@ void CSPhraseManager::updateAllActionRegen()
 		updateAllMemoryCtrlRegenTickRange();		
 		_RegenTickRangeTouched = false;
 		TTicks endTime = CTime::getPerformanceTime();		
-		nldebug("***** %d ms for CSPhraseManager::updateAllActionRegen", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
+		//nldebug("***** %d ms for CSPhraseManager::updateAllActionRegen", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
 	}	
 }
 
@@ -3006,7 +3006,7 @@ void	CSPhraseManager::updateAllMemoryCtrlState()
 		}
 	}
 	TTicks endTime = CTime::getPerformanceTime();
-	nldebug("***** %d ms for CSPhraseManager::updateAllMemoryCtrlState", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
+	//nldebug("***** %d ms for CSPhraseManager::updateAllMemoryCtrlState", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
 }
 
 // ***************************************************************************

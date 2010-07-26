@@ -151,7 +151,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		}
 		// an exception will be launch if the file is not the good version or if the file is not found
 
-		nlinfo ("loadForm(): Loading packed file '%s'", packedFilename.c_str());
+		//nlinfo ("loadForm(): Loading packed file '%s'", packedFilename.c_str());
 
 		// read the header
 		ifile.serialCheck(PACKED_SHEET_HEADER);
@@ -223,7 +223,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 	// if we don't want to update packed sheet, we have nothing more to do
 	if (!updatePackedSheet)
 	{
-		nlinfo ("Don't update the packed sheet with real sheet");
+		//nlinfo ("Don't update the packed sheet with real sheet");
 		return;
 	}
 
