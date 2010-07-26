@@ -409,11 +409,11 @@ CClientConfig::CClientConfig()
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
 
-	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
+//	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
-	DataPath.push_back("data/");					// Default Path for the Data.
+//	DataPath.push_back("data/");					// Default Path for the Data.
 //	DataPath.push_back("data_leveldesign/");		// Default Path for the Level Design Directory.
-	DataPath.push_back("data_common/");				// Default Path for the Level Design Directory.
+//	DataPath.push_back("data_common/");				// Default Path for the Level Design Directory.
 
 	DataPathNoRecurse.push_back("data_leveldesign/leveldesign/Game_Elem");
 
