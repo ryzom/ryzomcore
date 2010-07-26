@@ -345,6 +345,12 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
+	createDebug();
+	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
+	INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
+	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
+
+
 	// if client_default.cfg is not in current directory, use application default directory
 	if (!CFile::isExists("client_default.cfg"))
 	{
