@@ -916,6 +916,9 @@ void prelogInit()
 
 		string fileName = "/usr/share/pixmaps/ryzom.png";
 
+		if(CPath::exists("ryzom.png"))
+		  fileName = CPath::lookup("ryzom.png");
+
 		CIFile file;
 
 		if (file.open(fileName))
