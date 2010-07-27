@@ -50,10 +50,14 @@
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/path.h"
 #include "nel/misc/dynloadlib.h"
+#include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/thread.h"
+
 #include "nel/sound/driver/sound_driver.h"
 #include "nel/sound/driver/buffer.h"
 #include "nel/sound/driver/source.h"
 #include "nel/sound/driver/listener.h"
 #include "nel/sound/driver/effect.h"
+#include "nel/sound/driver/music_buffer.h"
 
 /* end of file */

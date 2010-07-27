@@ -74,7 +74,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="OpenAL32.lib EFX-Util.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_openal_win_d.dll"
-				IgnoreDefaultLibraryNames="msvcrt.lib;libcmt.lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -159,7 +159,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="OpenAL32.lib EFX-Util.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_openal_win_d.dll"
-				IgnoreDefaultLibraryNames="msvcrt.lib;libcmt.lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -247,7 +247,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="OpenAL32.lib EFX-Util.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_openal_win_r.dll"
-				IgnoreDefaultLibraryNames="libcmt.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -336,7 +336,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="OpenAL32.lib EFX-Util.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_openal_win_r.dll"
-				IgnoreDefaultLibraryNames="libcmt.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -399,6 +399,14 @@
 			</File>
 			<File
 				RelativePath=".\listener_al.h"
+				>
+			</File>
+			<File
+				RelativePath=".\music_channel_al.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\music_channel_al.h"
 				>
 			</File>
 			<File

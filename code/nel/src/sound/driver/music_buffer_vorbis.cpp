@@ -158,7 +158,7 @@ uint32 CMusicBufferVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 ma
 	return bytes_read;
 }
 
-uint16 CMusicBufferVorbis::getChannels()
+uint8 CMusicBufferVorbis::getChannels()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
 	return (uint16)vi->channels;
@@ -170,7 +170,7 @@ uint32 CMusicBufferVorbis::getSamplesPerSec()
 	return vi->rate;
 }
 
-uint16 CMusicBufferVorbis::getBitsPerSample()
+uint8 CMusicBufferVorbis::getBitsPerSample()
 {
 	return 16;
 }
@@ -183,6 +183,11 @@ bool CMusicBufferVorbis::isMusicEnded()
 float CMusicBufferVorbis::getLength()
 {
 	return (float)ov_time_total(&_OggVorbisFile, -1);
+}
+
+uint CMusicBufferVorbis::getUncompressedSize()
+{
+	return (uint)ov_pcm_total(&_OggVorbisFile, -1) * (getBitsPerSample() / 2) * getChannels();
 }
 
 } /* namespace NLSOUND */

@@ -75,19 +75,22 @@ public:
 	virtual uint32 getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum);
 
 	/// Get the amount of channels (2 is stereo) in output.
-	virtual uint16 getChannels();
+	virtual uint8 getChannels();
 
 	/// Get the samples per second (often 44100) in output.
 	virtual uint32 getSamplesPerSec();
 
 	/// Get the bits per sample (often 16) in output.
-	virtual uint16 getBitsPerSample();
+	virtual uint8 getBitsPerSample();
 
 	/// Get if the music has ended playing (never true if loop).
 	virtual bool isMusicEnded();
 
 	/// Get the total time in seconds.
 	virtual float getLength();
+
+	/// Get the size of uncompressed data in bytes.
+	virtual uint getUncompressedSize();
 }; /* class CMusicBufferVorbis */
 
 } /* namespace NLSOUND */
