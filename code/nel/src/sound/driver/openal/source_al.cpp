@@ -28,8 +28,8 @@ using namespace NLMISC;
 namespace NLSOUND {
 
 CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
-_SoundDriver(NULL), _Buffer(NULL), _Source(AL_NONE),
-_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL), 
+_SoundDriver(NULL), _Buffer(NULL), _BuffersMax(0), _BufferSize(32768), _Source(AL_NONE),
+_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL),
 _IsPlaying(false), _IsPaused(false), 
 _Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
 _MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()), 
@@ -44,7 +44,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 	alTestError();
 	
 	// configure rolloff
-	if (soundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if (!soundDriver || soundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
 		alSourcef(_Source, AL_ROLLOFF_FACTOR, 0);
 		alTestError();
@@ -56,7 +56,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 	}
 	
 	// create filters
-	if (soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
+	if (soundDriver && soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
 	{
 		alGenFilters(1, &_DirectFilter);
 		alFilteri(_DirectFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
@@ -83,6 +83,8 @@ CSourceAL::~CSourceAL()
 
 void CSourceAL::release()
 {
+	unqueueBuffers();
+	removeBuffers();
 	if (_Source != AL_NONE) { alDeleteSources(1, &_Source); _Source = AL_NONE; }
 	if (_DirectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_DirectFilter); _DirectFilter = AL_FILTER_NULL; }
 	if (_EffectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_EffectFilter); _EffectFilter = AL_FILTER_NULL; }
@@ -153,10 +155,15 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	CBufferAL *bufferAL = static_cast<CBufferAL *>(buffer);
 	ALuint bufferName = bufferAL->bufferName();
 	nlassert(bufferName);
+
+	// search if it's in buffers vector
+	if (_Buffers.find(bufferName) == _Buffers.end())
+		return;
+
+	// queue the buffer
 	alSourceQueueBuffers(_Source, 1, &bufferName);
 	alTestError();
-	_QueuedBuffers.push(bufferAL);
-	
+
 	// Resume playback if the internal OpenAL source stopped due to buffer underrun.
 	ALint srcstate;
 	alGetSourcei(_Source, AL_SOURCE_STATE, &srcstate);
@@ -171,23 +178,11 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 /// Return the amount of buffers in the queue (playing and waiting). 3 buffers is optimal.
 uint CSourceAL::countStreamingBuffers() const
 {
-	// a bit ugly here, but makes a much easier/simpler implementation on both drivers
-	ALint buffersProcessed;
-	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
-	while (buffersProcessed)
-	{
-		ALuint bufferName = _QueuedBuffers.front()->bufferName();
-		alSourceUnqueueBuffers(_Source, 1, &bufferName);
-		alTestError();
-		const_cast<std::queue<CBufferAL *> &>(_QueuedBuffers).pop();
-		--buffersProcessed;
-	}
 	// return how many are left in the queue
-	//ALint buffersQueued;
-	//alGetSourcei(_SourceName, AL_BUFFERS_QUEUED, &buffersQueued);
-	//alTestError();
-	//return (uint)buffersQueued;
-	return (uint)_QueuedBuffers.size();
+	ALint buffersQueued;
+	alGetSourcei(_Source, AL_BUFFERS_QUEUED, &buffersQueued);
+	alTestError();
+	return (uint)buffersQueued;
 }
 
 /// Set looping on/off for future playbacks (default: off)
@@ -248,14 +243,8 @@ void CSourceAL::stop()
 		_IsPaused = false;
 		alSourceStop(_Source);
 		alTestError();
-		// unqueue buffers
-		while (_QueuedBuffers.size())
-		{
-			ALuint bufferName = _QueuedBuffers.front()->bufferName();
-			alSourceUnqueueBuffers(_Source, 1, &bufferName);
-			_QueuedBuffers.pop();
-			alTestError();
-		}
+
+		unqueueBuffers();
 		// Streaming mode
 		//nlwarning("AL: Cannot stop null buffer; streaming not implemented" );
 		//nlstop;
@@ -403,7 +392,7 @@ void CSourceAL::getDirection( NLMISC::CVector& dir ) const
 void CSourceAL::setGain(float gain)
 {
 	_Gain = std::min(std::max(gain, NLSOUND_MIN_GAIN), NLSOUND_MAX_GAIN);
-	if (!_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
 		alSourcef(_Source, AL_GAIN, _Gain);
 		alTestError();
@@ -458,7 +447,7 @@ void CSourceAL::setMinMaxDistances( float mindist, float maxdist, bool /* deferr
 	nlassert( (mindist >= 0.0f) && (maxdist >= 0.0f) );
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
-	if (!_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
 		alSourcef(_Source, AL_REFERENCE_DISTANCE, mindist);
 		alSourcef(_Source, AL_MAX_DISTANCE, maxdist);
@@ -758,6 +747,111 @@ void CSourceAL::setEffectFilterPassGain(float passGain)
 float CSourceAL::getEffectFilterPassGain() const
 {
 	return _EffectFilterPassGain;
+}
+
+/// Get already processed buffers and unqueue them
+void CSourceAL::getProcessedStreamingBuffers(std::vector<CBufferAL*> &buffers)
+{
+	// get the number of processed buffers
+	ALint buffersProcessed;
+	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
+	alTestError();
+
+	// exit if more processed buffer than allocated ones
+	if ((uint)buffersProcessed > _BuffersMax) return;
+
+	// unqueue all previously processed buffers and get their name
+	alSourceUnqueueBuffers(_Source, buffersProcessed, &(_BuffersName[0]));
+	alTestError();
+
+	// add each processed buffer to the array
+	for(uint i = 0; i < (uint)buffersProcessed; ++i)
+	{
+		// if buffer is found, return it
+		std::map<uint, CBufferAL*>::const_iterator it = _Buffers.find(_BuffersName[i]);
+		if (it != _Buffers.end())
+			buffers.push_back(it->second);
+	}
+}
+
+/// Get all existing buffers
+void CSourceAL::getStreamingBuffers(std::vector<CBufferAL*> &buffers)
+{
+	std::map<uint, CBufferAL*>::const_iterator it = _Buffers.begin(), iend = _Buffers.end();
+	while(it != iend)
+	{
+		buffers.push_back(it->second);
+		++it;
+	}
+}
+
+/// Unqueue all buffers
+void CSourceAL::unqueueBuffers()
+{
+	// get count of buffers in queue
+	uint count = countStreamingBuffers();
+
+	if (count > 0)
+	{
+		// unqueue all of them
+		alSourceUnqueueBuffers(_Source, count, &(_BuffersName[0]));
+		alTestError();
+	}
+}
+
+/// Delete all allocated buffers
+void CSourceAL::removeBuffers()
+{
+	// delete each buffer
+	std::map<uint, CBufferAL*>::const_iterator it = _Buffers.begin(), iend = _Buffers.end();
+	while(it != iend)
+	{
+		delete it->second;
+		++it;
+	}
+
+	_Buffers.clear();
+}
+
+/// Get available streaming buffers count
+uint CSourceAL::getStreamingBuffersMax() const
+{
+	return _BuffersMax;
+}
+
+/// Set available streaming buffers count and allocate them
+void CSourceAL::setStreamingBuffersMax(uint buffers)
+{
+	// remember previous value
+	uint oldBuffersMax = _BuffersMax;
+
+	_BuffersMax = buffers;
+
+	// resize the temporary buffer names array
+	_BuffersName.resize(buffers);
+
+	// remove all buffers
+	unqueueBuffers();
+	removeBuffers();
+
+	for(uint i = 0; i < _BuffersMax; ++i)
+	{
+		// create a new buffer
+		CBufferAL *buffer = static_cast<CBufferAL*>(_SoundDriver->createBuffer());
+		_Buffers[buffer->bufferName()] = buffer;
+	}
+}
+
+/// Set the default size for streaming buffers
+void CSourceAL::setStreamingBufferSize(uint size)
+{
+	_BufferSize = size;
+}
+
+/// Get the default size for streaming buffers
+uint CSourceAL::getStreamingBufferSize() const
+{
+	return _BufferSize;
 }
 
 } // NLSOUND

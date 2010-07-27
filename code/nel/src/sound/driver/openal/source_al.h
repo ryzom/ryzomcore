@@ -49,7 +49,15 @@ private:
 
 	/// Assigned buffer object
 	CBufferAL *_Buffer;
-	std::queue<CBufferAL *> _QueuedBuffers;
+	/// Queued buffers map (uint is buffer name)
+	std::map<uint, CBufferAL *> _Buffers;
+
+	/// Temporary queued buffers array
+	std::vector<ALuint>	_BuffersName;
+	/// Max count of queued buffers allowed
+	uint				_BuffersMax;
+	/// Default size of a buffer
+	uint				_BufferSize;
 	
 	/// AL Handles
 	ALuint _Source;
@@ -252,6 +260,22 @@ public:
 	virtual float getEffectFilterPassGain() const;
 	//@}
 	
+	/// Get already processed buffers and unqueue them
+	void getProcessedStreamingBuffers(std::vector<CBufferAL*> &buffers);
+	/// Get all existing buffers
+	void getStreamingBuffers(std::vector<CBufferAL*> &buffers);
+	/// Unqueue all buffers
+	void unqueueBuffers();
+	/// Delete all allocated buffers
+	void removeBuffers();
+	/// Get available streaming buffers count
+	uint getStreamingBuffersMax() const;
+	/// Set available streaming buffers count and allocate them
+	void setStreamingBuffersMax(uint max);
+	/// Set the default size for streaming buffers
+	void setStreamingBufferSize(uint size);
+	/// Get the default size for streaming buffers
+	uint getStreamingBufferSize() const;
 };
 
 } // NLSOUND
