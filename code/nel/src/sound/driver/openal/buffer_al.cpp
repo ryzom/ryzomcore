@@ -20,10 +20,11 @@
 
 using namespace NLMISC;
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 CBufferAL::CBufferAL(ALuint buffername) :
-	IBuffer(), _BufferName(buffername), _SampleFormat(AL_INVALID), _Frequency(0),
+	IBuffer(), _BufferName(buffername), _Name(NULL), _SampleFormat(AL_INVALID), _Frequency(0),
 	_DataAligned(NULL), _DataPtr(NULL), _Capacity(0), _Size(0), _StorageMode(IBuffer::StorageAuto), _IsLoaded(false)
 {
 	
@@ -176,7 +177,7 @@ void CBufferAL::getFormat(TBufferFormat &format, uint8 &channels, uint8 &bitsPer
 		case AL_FORMAT_MONO16: sampleFormat = Mono16; break;
 		case AL_FORMAT_STEREO8: sampleFormat = Stereo8; break;
 		case AL_FORMAT_STEREO16: sampleFormat = Stereo16; break;
-		default: sampleFormat = (TSampleFormat)~0; nlstop;
+		default: sampleFormat = SampleFormatUnknown;
 	}
 	sampleFormatToBufferFormat(sampleFormat, format, channels, bitsPerSample);
 	frequency = _Frequency;

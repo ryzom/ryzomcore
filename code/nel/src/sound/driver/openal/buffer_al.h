@@ -19,7 +19,8 @@
 
 #include <nel/sound/driver/buffer.h>
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /**
  * OpenAL buffer
