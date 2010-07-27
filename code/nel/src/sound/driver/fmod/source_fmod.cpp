@@ -38,7 +38,7 @@ CSourceFMod::CSourceFMod( uint sourcename )
 {
 	_Sample = NULL;
 	_NextSample = NULL;
-	_State = source_stoped;
+	_State = source_stopped;
 
 	_PosRelative= false;
 	_Loop = false;
@@ -202,7 +202,7 @@ void CSourceFMod::stop()
 		_NextSample= NULL;
 	}
 
-	_State= source_stoped;
+	_State= source_stopped;
 
 	// Stop the FMod channel
 	if(_FModChannel!=-1)
@@ -267,7 +267,7 @@ bool CSourceFMod::isPaused() const
 
 bool CSourceFMod::isStopped() const
 {
-	return _State == source_silencing || _State == source_stoped;
+	return _State == source_silencing || _State == source_stopped;
 }
 
 

@@ -267,7 +267,7 @@ private:
 	
 	enum TSourceState
 	{
-		source_stoped,
+		source_stopped,
 		source_playing,
 		source_silencing,
 		source_swap_pending

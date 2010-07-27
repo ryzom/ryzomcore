@@ -102,7 +102,7 @@ CSourceDSound::CSourceDSound( uint sourcename )
 	_Format = Mono8;
 	_SampleFreq = _DefaultSampleRate;
 	_FillOffset = 0;
-	_State = source_stoped;
+	_State = source_stopped;
 	_PlayOffset = 0;
 	_LastPlayPos = 0;
 	_PosRelative= false;
@@ -831,7 +831,7 @@ void CSourceDSound::stop()
 //	nldebug("Stop");
 	EnterCriticalSection(&_CriticalSection);
 
-	if (_State != source_stoped && _State != source_silencing)
+	if (_State != source_stopped && _State != source_silencing)
 	{
 		// retreive the cursors;
 		TCursors	cursors;
@@ -1042,7 +1042,7 @@ bool CSourceDSound::isPaused() const
 
 bool CSourceDSound::isStopped() const
 {
-	return _State == source_silencing || _State == source_stoped;
+	return _State == source_silencing || _State == source_stopped;
 //	return (_UserState == NL_DSOUND_STOPPED);
 }
 
@@ -1212,7 +1212,7 @@ bool CSourceDSound::update()
 				_SilenceWriten += updateSize;
 
 				if (_SilenceWriten == _SecondaryBufferSize)
-					_State = source_stoped;
+					_State = source_stopped;
 			}
 			else
 			{

@@ -207,7 +207,7 @@ void	CMusicSoundManager::startMusic(CMusicSound *newMs, CMusicSource *newSrc)
 	// start play the new music, xFade with the old
 	CAudioMixerUser::instance()->playMusic(CStringMapper::unmap(newMs->getFileName()), uint(xFade), true, newMs->getLooping());
 
-	// Mark the old one as stoped
+	// Mark the old one as stopped
 	if(_CurrentMusicPlaying)
 	{
 		_CurrentMusicPlaying->LastStopTime= CTime::getLocalTime();

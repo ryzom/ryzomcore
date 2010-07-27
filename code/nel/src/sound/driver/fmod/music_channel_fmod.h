@@ -21,7 +21,8 @@
 
 struct FSOUND_STREAM;
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 	class CSoundDriverFMod;
 
 /**
@@ -40,13 +41,13 @@ protected:
 	/// Volume set by user
 	float _Gain;
 	/// The FMod stream
-	FSOUND_STREAM *_MusicStream;	
+	FSOUND_STREAM *_MusicStream;
 	/// the RAM buffer (representation of a MP3 file, only for sync play)
-	uint8 *_MusicBuffer;	
+	uint8 *_MusicBuffer;
 	/// channel played for music. CAN BE -1 while _MusicStream!=NULL in case of Async Loading
 	sint _MusicChannel;
 	/// true if the fmod end callback said the stream is ended
-	bool _CallBackEnded;	
+	bool _CallBackEnded;
 	/// see stopMusicFader()
 	std::list<FSOUND_STREAM *> _WaitingForClose;
 	/// Sound driver that created this

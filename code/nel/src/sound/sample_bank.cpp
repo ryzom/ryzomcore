@@ -342,7 +342,7 @@ void CSampleBank::onUpdate()
 			_SampleBankManager->m_AudioMixer->unregisterUpdate(this);
 			_LoadingDone = true;
 
-			// Force an update in the background manager (can restar stoped sound).
+			// Force an update in the background manager (can restar stopped sound).
 			_SampleBankManager->m_AudioMixer->getBackgroundSoundManager()->updateBackgroundStatus();
 
 			nlinfo("Sample bank %s loaded.", CStringMapper::unmap(_Name).c_str());

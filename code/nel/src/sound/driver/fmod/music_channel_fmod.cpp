@@ -229,7 +229,7 @@ void CMusicChannelFMod::stop()
 	if (_MusicStream)
 	{
 		/* just append this channel for closing. We have to maintain such a list because in case of async playing,
-		   FMod FSOUND_Stream_Stop() and FSOUND_Stream_Close() calls fail if the file is not ready (hapens if music stoped
+		   FMod FSOUND_Stream_Stop() and FSOUND_Stream_Close() calls fail if the file is not ready (hapens if music stopped
 		   in the 50 ms after the play for instance)
 		*/
 		_WaitingForClose.push_back(_MusicStream);
