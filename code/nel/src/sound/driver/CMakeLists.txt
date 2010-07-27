@@ -9,6 +9,10 @@ ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 NL_ADD_STATIC_VID_DRIVERS(nelsnd_lowlevel)
 nl_add_lib_suffix(nelsnd_lowlevel)
 
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(nelsnd_lowlevel ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.cpp)
+ENDIF(WITH_PCH)
+
 INSTALL(TARGETS nelsnd_lowlevel LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
 
 IF(WITH_DRIVER_OPENAL)

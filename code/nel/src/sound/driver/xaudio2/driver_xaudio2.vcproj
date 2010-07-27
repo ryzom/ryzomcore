@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="driver_xaudio2"
 	ProjectGUID="{23DCF574-1CEB-4DF4-9C59-D614580AC0C0}"
 	RootNamespace="xaudio2"
@@ -67,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
+				AdditionalDependencies="x3daudio.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_d.dll"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
+				AdditionalDependencies="x3daudio.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_d.dll"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -231,7 +231,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
+				AdditionalDependencies="x3daudio.lib"
 				OutputFile="..\..\..\..\lib\nel_drv_$(RootNamespace)_win_r.dll"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -317,7 +317,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib x3daudio.lib"
+				AdditionalDependencies="x3daudio.lib"
 				OutputFile="..\..\..\..\lib64\nel_drv_$(RootNamespace)_win_r.dll"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -405,26 +405,6 @@
 				RelativePath=".\music_channel_xaudio2.h"
 				>
 			</File>
-			<Filter
-				Name="utility"
-				>
-				<File
-					RelativePath=".\music_buffer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\music_buffer.h"
-					>
-				</File>
-				<File
-					RelativePath=".\music_buffer_vorbis.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\music_buffer_vorbis.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="efx"

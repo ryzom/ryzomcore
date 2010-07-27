@@ -34,7 +34,8 @@
 // Project includes
 #include "music_buffer.h"
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /**
  * \brief CMusicBufferVorbis

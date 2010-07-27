@@ -16,13 +16,9 @@
 
 #include "stdsound_lowlevel.h"
 
+
 // leave not static else this workaround don't work
-void	dummyToAvoidStupidCompilerWarning_sound_listener_cpp()
+void	dummyToAvoidStupidCompilerWarning_std_sound_lowlevel_cpp()
 {
 }
 
-
-namespace NLSOUND {
-
-
-} // NLSOUND

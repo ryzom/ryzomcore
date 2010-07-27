@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="sound_lowlevel"
 	ProjectGUID="{89064E9B-14E9-4FB2-8536-A9151DF55C68}"
 	RootNamespace="sound_lowlevel"
@@ -54,6 +54,8 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdsound_lowlevel.h"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -71,6 +73,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=" libogg.lib libvorbis.lib libvorbisfile.lib"
 				OutputFile="..\..\..\lib\nl$(ProjectName)_d.lib"
 			/>
 			<Tool
@@ -126,6 +129,8 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdsound_lowlevel.h"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -143,6 +148,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=" libogg.lib libvorbis.lib libvorbisfile.lib"
 				OutputFile="..\..\..\lib64\nl$(ProjectName)_d.lib"
 			/>
 			<Tool
@@ -201,6 +207,8 @@
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdsound_lowlevel.h"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -218,6 +226,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=" libogg.lib libvorbis.lib libvorbisfile.lib"
 				OutputFile="..\..\..\lib\nl$(ProjectName)_r.lib"
 			/>
 			<Tool
@@ -277,6 +286,8 @@
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdsound_lowlevel.h"
 				WarningLevel="2"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -294,6 +305,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=" libogg.lib libvorbis.lib libvorbisfile.lib"
 				OutputFile="..\..\..\lib64\nl$(ProjectName)_r.lib"
 			/>
 			<Tool
@@ -332,6 +344,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\nel\sound\driver\music_buffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\nel\sound\driver\music_buffer_vorbis.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\nel\sound\driver\music_channel.h"
 				>
 			</File>
@@ -357,6 +377,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\music_buffer.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\music_buffer_vorbis.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\music_channel.cpp"
 			>
 		</File>
@@ -366,6 +394,46 @@
 		</File>
 		<File
 			RelativePath="source.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\stdsound_lowlevel.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\stdsound_lowlevel.h"
 			>
 		</File>
 	</Files>

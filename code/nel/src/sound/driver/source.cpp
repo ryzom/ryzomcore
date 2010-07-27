@@ -14,10 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/sound/driver/source.h"
-#include "nel/misc/common.h"
+#include "stdsound_lowlevel.h"
 
-#include <limits>
+#include "nel/sound/driver/source.h"
 
 using namespace NLMISC;
 

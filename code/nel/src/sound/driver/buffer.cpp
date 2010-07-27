@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdsound_lowlevel.h"
+
 #include "nel/sound/driver/buffer.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/stream.h"
@@ -117,7 +119,7 @@ void IBuffer::bufferFormatToSampleFormat(TBufferFormat bufferFormat, uint8 chann
 		break;
 	case FormatUnknown:
 	default:
-		sampleFormat = (TSampleFormat)~0;
+		sampleFormat = SampleFormatUnknown;
 		break;
 	}
 }

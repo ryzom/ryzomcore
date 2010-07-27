@@ -17,12 +17,14 @@
 #ifndef NLSOUND_MUSIC_BUFFER_H
 #define NLSOUND_MUSIC_BUFFER_H
 
-namespace NLMISC {
+namespace NLMISC
+{
 	class IStream;
 	class CIFile;
 }
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 	/*
 	 * TODO: Streaming

@@ -18,7 +18,6 @@
 
 // Project includes
 #include "sound_driver_xaudio2.h"
-#include "music_buffer.h"
 #include "music_channel_xaudio2.h"
 
 using namespace std;

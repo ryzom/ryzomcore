@@ -22,7 +22,6 @@
 #include "music_channel_xaudio2.h"
 #include "effect_xaudio2.h"
 #include "sound_driver_xaudio2.h"
-#include "music_buffer.h"
 
 using namespace std;
 using namespace NLMISC;

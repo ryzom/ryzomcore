@@ -14,15 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdxaudio2.h"
+#include "stdsound_lowlevel.h"
 
 // Project includes
-#include "music_buffer_vorbis.h"
+#include "nel/sound/driver/music_buffer_vorbis.h"
 
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 size_t vorbisReadFunc(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
