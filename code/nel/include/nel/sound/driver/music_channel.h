@@ -16,15 +16,11 @@
 
 #ifndef NLSOUND_MUSIC_CHANNEL_H
 #define NLSOUND_MUSIC_CHANNEL_H
-#include <nel/misc/types_nl.h>
 
-// STL includes
+#include "nel/misc/types_nl.h"
 
-// NeL includes
-
-// Project includes
-
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /**
  * \brief IMusicChannel

@@ -27,9 +27,10 @@
 
 #ifndef NL_SOURCE_H
 #define NL_SOURCE_H
-#include <nel/misc/types_nl.h>
 
-#include <nel/misc/vector.h>
+#include "nel/misc/types_nl.h"
+#include "nel/misc/vector.h"
+
 #include "sound_driver.h"
 
 /** 

@@ -20,7 +20,8 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/vector.h"
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /// Default environmental effect
 #define ENVFX_DEFAULT_NUM 2

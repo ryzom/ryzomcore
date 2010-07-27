@@ -21,11 +21,13 @@
 #include "nel/misc/string_mapper.h"
 #include "sound_driver.h"
 
-namespace NLMISC {
+namespace NLMISC
+{
 	class IStream;
 }
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /**
  * Sound buffer interface (implemented in sound driver dynamic library)

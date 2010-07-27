@@ -16,16 +16,14 @@
 
 #ifndef NLSOUND_EFFECT_H
 #define NLSOUND_EFFECT_H
-#include <nel/misc/types_nl.h>
+
+#include "nel/misc/types_nl.h"
 
 // STL includes
 #include <math.h>
 
-// NeL includes
-
-// Project includes
-
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 ////                                             in dB    ---
 //#define NLSOUND_MATERIAL_PRESET_SINGLEWINDOW  -28.00f, 0.71f
