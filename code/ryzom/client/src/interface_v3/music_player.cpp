@@ -103,6 +103,17 @@ void CMusicPlayer::pause ()
 
 // ***************************************************************************
 
+void CMusicPlayer::stop ()
+{
+	if(!SoundMngr)
+		return;
+	// stop the music only if we are really playing (else risk to stop a background music!)
+	SoundMngr->stopMusic(0);
+	_State = Stopped;
+}
+
+// ***************************************************************************
+
 void CMusicPlayer::previous ()
 {
 	if (!_Songs.empty())

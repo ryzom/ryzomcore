@@ -46,6 +46,7 @@ public:
 	void playSongs (const std::vector<CSongs> &songs);
 	void play ();											// Play the song at current position, if playing, restart. If paused, resume.
 	void pause ();
+	void stop ();
 	void previous ();
 	void next ();
 
