@@ -97,7 +97,7 @@ namespace OUTPOSTENUMS
 		OwnerGiveUp,		// the owner guild gave up the outpost
 		SquadKilled,		// a defending squad was killed
 		EventAisUp,			// the ais of the outpost started (or we did)
-		EventAisDown,		// the ais of the outpost stoped
+		EventAisDown,		// the ais of the outpost stopped
 //		AllSquadsKilled,	// all defending squads were killed
 	};
 

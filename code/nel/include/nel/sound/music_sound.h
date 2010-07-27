@@ -61,7 +61,7 @@ public:
 
 public:
 
-	// For CMusicSoundManager. Mark the last time (in ms) this music was stoped, after a play. INT_MIN by default
+	// For CMusicSoundManager. Mark the last time (in ms) this music was stopped, after a play. INT_MIN by default
 	NLMISC::TTime		LastStopTime;
 
 private:

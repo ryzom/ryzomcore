@@ -1838,7 +1838,7 @@ void CServerEditionModule::onMapConnectionAsked( NLNET::IModuleProxy * clientEdi
 		{
 			bool animationSessionExist = false;
 
-			// If player reconnect after test mode the test mode is stoped
+			// If player reconnect after test mode the test mode is stopped
 			// Add charId connected in animation Module
 			{
 				std::vector<TCharId> connectedChars;
@@ -5589,7 +5589,7 @@ void CServerEditionModule::getTpContext(TCharId charId, std::string& tpCancelTex
 	CEditionSession* session =getSession(sessionId);
 	if (!session) { return; }
 
-	// If player reconnect after test mode the test mode is stoped
+	// If player reconnect after test mode the test mode is stopped
 	// Add charId connected in animation Module
 	bool animationSessionExist = false;
 	{

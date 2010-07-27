@@ -98,7 +98,7 @@ void CMusicChannelFader::update()
 						fader.Fade = false;
 						fader.Playing = false;
 					}
-					else if (_MusicFader[i].XFadeVolume >= 1.f)
+					else if (fader.XFadeVolume >= 1.f)
 					{
 						// fadein complete
 						fader.Fade = false;

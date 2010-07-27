@@ -27,7 +27,7 @@
 #include "nel/misc/debug.h"
 #include "unix_event_emitter.h"
 
-typedef void (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
+typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
 namespace NLMISC {
 

@@ -41,7 +41,7 @@ CMusicPlayer MusicPlayer;
 CMusicPlayer::CMusicPlayer ()
 {
 	_CurrentSong = 0;
-	_State = Stoped;
+	_State = Stopped;
 }
 
 
@@ -54,7 +54,7 @@ void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 
 	// If pause, stop, else play will resume
 	if (_State == Paused)
-		_State = Stoped;
+		_State = Stopped;
 
 	play ();
 }
@@ -152,7 +152,7 @@ void CMusicPlayer::update ()
 			else
 			{
 				SoundMngr->stopMusic(0);
-				_State = Stoped;
+				_State = Stopped;
 			}
 		}
 	}

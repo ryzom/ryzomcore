@@ -60,7 +60,7 @@ private:
 	std::vector<CSongs>					_Songs;
 
 	// State
-	enum TState { Stoped, Playing, Paused }	_State;
+	enum TState { Stopped, Playing, Paused }	_State;
 };
 
 extern CMusicPlayer MusicPlayer;
