@@ -59,6 +59,9 @@ CView View;
 //-----------------------------------------------
 CView::CView()
 {
+	_ViewPos = CVector::Null;
+	_View = CVector::Null;
+	_RefinePos = CVector::Null;
 	_RearView=false;
 	_CurrentCameraDist = 0.0f;
 	_CurrentCameraSpeed = 0.0f;
