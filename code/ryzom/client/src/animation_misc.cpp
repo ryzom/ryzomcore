@@ -120,7 +120,7 @@ bool CAnimationMisc::interpolate(UAnimationSet *animationSet, uint idAnim, doubl
 	UTrack* Track = anim->getTrackByName("rotquat");
 	if(!Track)
 	{
-		nlwarning("CAnimationMisc::interpolate(CQuat) : track with the name 'PathRotQuat' or 'rotquat' does not exist.");
+		//nlwarning("CAnimationMisc::interpolate(CQuat) : track with the name 'PathRotQuat' or 'rotquat' does not exist.");
 		return false;
 	}
 

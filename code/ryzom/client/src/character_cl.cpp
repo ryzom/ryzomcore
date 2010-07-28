@@ -1427,10 +1427,10 @@ void CCharacterCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* gameCyc
 //	STRING_MANAGER::CStringManagerClient::instance()->waitString(nameId, this, &_Name);
 	STRING_MANAGER::CStringManagerClient::instance()->waitString(nameId, this);
 
-	if(!getEntityName().empty())
-		nlwarning("CH::updateVPName:%d: name Id '%d' received but no name allocated.", _Slot, nameId);
-	else if(verboseVP(this))
-		nlinfo("(%05d,%03d) CH::updateVPName:%d: name '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, getEntityName().toString().c_str(), nameId);
+	//if(!getEntityName().empty())
+	//	nlwarning("CH::updateVPName:%d: name Id '%d' received but no name allocated.", _Slot, nameId);
+	//else if(verboseVP(this))
+	//	nlinfo("(%05d,%03d) CH::updateVPName:%d: name '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, getEntityName().toString().c_str(), nameId);
 
 	updateMissionTarget();
 }// updateVisualPropertyName //
@@ -5429,8 +5429,8 @@ ADD_METHOD(void CCharacterCL::playToEndAnim(const double &startTimeOffset, doubl
 			}
 			return;
 		}
-		else
-			nlwarning("playToEndAnim:%d: animWalkSpeed > animRunSpeed", _Slot);
+		//else
+			//nlwarning("playToEndAnim:%d: animWalkSpeed > animRunSpeed", _Slot);
 	}
 	// No Mix between Walk and Run.
 	runFactor(0.0);

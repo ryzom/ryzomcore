@@ -3863,7 +3863,7 @@ void CNetManager::send(NLMISC::TGameCycle gameCycle)
 	// wait till next server is received
 	if (_LastSentCycle >= gameCycle)
 	{
-		nlinfo ("Try to CNetManager::send(%d) _LastSentCycle=%d more than one time with the same game cycle, so we wait new game cycle to send", gameCycle, _LastSentCycle);
+		//nlinfo ("Try to CNetManager::send(%d) _LastSentCycle=%d more than one time with the same game cycle, so we wait new game cycle to send", gameCycle, _LastSentCycle);
 		while (_LastSentCycle >= gameCycle)
 		{
 			// Update network.

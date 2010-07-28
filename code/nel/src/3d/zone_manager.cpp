@@ -255,7 +255,7 @@ void CZoneLoadingTask::run(void)
 	}
 	else
 	{
-		nldebug("CZoneLoadingTask::run(): File not found: %s", zonePathLookup.c_str ());
+		//nldebug("CZoneLoadingTask::run(): File not found: %s", zonePathLookup.c_str ());
 		delete ZoneTmp;
 		*_Zone = (CZone*)-1; // Return error
 	}

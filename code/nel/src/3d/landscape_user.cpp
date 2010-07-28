@@ -272,7 +272,7 @@ void	CLandscapeUser::refreshZonesAround(const CVector &pos, float radius, std::s
 		{
 			if (Work.Zone == (CZone*)-1)
 			{
-				nlwarning ("Can't load zone %s", Work.NameZoneAdded.c_str ());
+				//nlwarning ("Can't load zone %s", Work.NameZoneAdded.c_str ());
 			}
 			else
 			{

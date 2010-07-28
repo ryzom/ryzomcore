@@ -357,7 +357,7 @@ restartLoop4:
 					{
 						bms.serial( stringId );
 						NetMngr.push( bms );
-						nldebug("<CStringManagerClient::getString> sending 'STRING_MANAGER:STRING_RQ' message to server");
+						//nldebug("<CStringManagerClient::getString> sending 'STRING_MANAGER:STRING_RQ' message to server");
 					}
 					else
 					{
@@ -393,7 +393,7 @@ restartLoop4:
 	{
 		H_AUTO( CStringManagerClient_receiveString )
 
-		nlinfo("String %u available : [%s]", stringId, str.toString().c_str());
+		//nlinfo("String %u available : [%s]", stringId, str.toString().c_str());
 
 		CHashSet<uint>::iterator	it(_WaitingStrings.find(stringId));
 		if (it != _WaitingStrings.end())
@@ -476,7 +476,7 @@ restartLoop:
 				/// Warning: if getDynString() return true, 'first' is erased => don't use it after in this loop
 				if (getDynString(number, value))
 				{
-					nlinfo("DynString %u available : [%s]", number, value.toString().c_str());
+					//nlinfo("DynString %u available : [%s]", number, value.toString().c_str());
 					// this dyn string is now complete !
 					// update the waiting dyn strings
 					{
