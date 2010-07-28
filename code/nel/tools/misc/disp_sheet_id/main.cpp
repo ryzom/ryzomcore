@@ -95,4 +95,6 @@ int		main(int argc, const char *argv[])
 		}
 		fclose(out);
 	}
+
+	return 0;
 }
