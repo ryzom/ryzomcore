@@ -173,7 +173,7 @@ uint32 NLSOUND_interfaceVersion ()
  */
 CSoundDriverAL::CSoundDriverAL(ISoundDriver::IStringMapperProvider *stringMapper) 
 : _StringMapper(stringMapper), _AlDevice(NULL), _AlContext(NULL), 
-_NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f)
+_NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f), _MasterGain(1.f)
 {
 	alExtInit();
 }
@@ -696,6 +696,20 @@ void CSoundDriverAL::removeMusicChannel(CMusicChannelAL *musicChannel)
 {
 	if (_MusicChannels.find(musicChannel) != _MusicChannels.end()) _MusicChannels.erase(musicChannel);
 	else nlwarning("AL: removeMusicChannel already called");
+}
+
+/// Set the gain
+void CSoundDriverAL::setGain( float gain )
+{
+	clamp(gain, 0.f, 1.f);
+	_MasterGain= gain;
+	// TODO: update all sources in not using manual rollof ?
+}
+
+/// Get the gain
+float CSoundDriverAL::getGain()
+{
+	return _MasterGain;
 }
 
 /// Delete a buffer or a source

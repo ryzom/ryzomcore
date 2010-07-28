@@ -164,6 +164,17 @@ public:
 	/// (Internal) Remove music channel (should be called by the destructor of the music channel class).
 	void removeMusicChannel(CMusicChannelAL *musicChannel);	
 
+	/** Set the gain (volume value inside [0 , 1]). (default: 1)
+	 * 0.0 -> silence
+	 * 0.5 -> -6dB
+	 * 1.0 -> no attenuation
+	 * values > 1 (amplification) not supported by most drivers
+	 */
+	void setGain( float gain );
+
+	/// Get the gain
+	float getGain();
+
 protected:
 
 	/// Allocate nb new buffers or sources
@@ -182,6 +193,9 @@ protected:
 
 	/// Delete a buffer or a source
 	bool					deleteItem( ALuint name, TDeleteFunctionAL aldeletefunc, std::vector<ALuint>& names );
+
+	/// Master Volume [0,1]
+	float _MasterGain;
 };
 
 
