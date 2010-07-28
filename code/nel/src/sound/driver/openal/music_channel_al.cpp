@@ -279,13 +279,13 @@ bool CMusicChannelAL::isEnded()
 /// Return true if the song is still loading asynchronously and hasn't started playing yet (false if not async), used to delay fading
 bool CMusicChannelAL::isLoadingAsync()
 {
-	return _Async && _Playing;
+	return _Async && _Playing && !_Source->isPlaying();
 }
 
 /// Return the total length (in second) of the music currently played
 float CMusicChannelAL::getLength()
 {
-	if (_MusicBuffer) return _MusicBuffer->getLength(); 
+	if (_MusicBuffer) return _MusicBuffer->getLength();
 	else return .0f;
 }
 

@@ -17,13 +17,16 @@
 #ifndef NL_SOURCE_AL_H
 #define NL_SOURCE_AL_H
 
-#include <nel/sound/driver/source.h>
+#include "nel/sound/driver/source.h"
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 	class IBuffer;
 	class CBufferAL;
 	class CSoundDriverAL;
 	class CEffectAL;
+
+	enum TSourceType { SourceSound, SourceMusic };
 
 /**
  * OpenAL sound source
@@ -47,6 +50,10 @@ private:
 	/// Sound driver
 	CSoundDriverAL *_SoundDriver;
 
+	/// AL Handles
+	ALuint _Source;
+	ALuint _DirectFilter, _EffectFilter;
+
 	/// Assigned buffer object
 	CBufferAL *_Buffer;
 	/// Queued buffers map (uint is buffer name)
@@ -58,11 +65,10 @@ private:
 	uint				_BuffersMax;
 	/// Default size of a buffer
 	uint				_BufferSize;
-	
-	/// AL Handles
-	ALuint _Source;
-	ALuint _DirectFilter, _EffectFilter;
-	
+
+	/// Position is relative to listener
+	bool				_PosRelative;
+
 	/// Playing status
 	bool _IsPlaying;
 	bool _IsPaused;
@@ -83,6 +89,9 @@ private:
 	TFilter _DirectFilterType, _EffectFilterType;
 	bool _DirectFilterEnabled, _EffectFilterEnabled;
 	float _DirectFilterPassGain, _EffectFilterPassGain;
+
+	/// Source type can be SourceSound or SourceMusic
+	TSourceType		_Type;
 	
 public:	
 	/// Constructor
@@ -95,7 +104,12 @@ public:
 	
 	/// Return the OpenAL source name
 	inline ALuint getSource() const { return _Source; }
-	
+
+	/// Set type of the source
+	void setType(TSourceType type);
+	/// Get type of the source
+	TSourceType getType() const;
+
 	/// (Internal) Set the effect send for this source, NULL to disable.
 	void setEffect(CEffectAL *effect);
 	/// (Internal) Setup the direct send filter.

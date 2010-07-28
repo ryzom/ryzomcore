@@ -15,34 +15,52 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
+#include "source_al.h"
 #include "sound_driver_al.h"
 #include "listener_al.h"
 #include "effect_al.h"
 #include "buffer_al.h"
-#include "source_al.h"
 #include "ext_al.h"
 
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND {
-
-CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
-_SoundDriver(NULL), _Buffer(NULL), _BuffersMax(0), _BufferSize(32768), _Source(AL_NONE),
-_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL),
-_IsPlaying(false), _IsPaused(false), 
-_Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
-_MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()), 
-_Effect(NULL), _Direct(true), 
-_DirectGain(NLSOUND_DEFAULT_DIRECT_GAIN), _EffectGain(NLSOUND_DEFAULT_EFFECT_GAIN), 
-_DirectFilterType(ISource::FilterLowPass), _EffectFilterType(ISource::FilterLowPass), 
-_DirectFilterEnabled(false), _EffectFilterEnabled(false), 
-_DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN)
+namespace NLSOUND
 {
+
+CSourceAL::CSourceAL(CSoundDriverAL *soundDriver):ISource(), _SoundDriver(NULL), _Source(AL_NONE),
+	_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL)
+{
+	_IsPlaying = false;
+	_IsPaused = false;
+
+	_Type = SourceSound;
+	_Buffer = NULL;
+	_BuffersMax = 0;
+	_BufferSize = 32768;
+
+	_PosRelative = false;
+	_Gain = NLSOUND_DEFAULT_GAIN;
+	_Alpha = 0.0;
+	_Pos = CVector::Null;
+	_MinDistance = 1.0f;
+	_MaxDistance = numeric_limits<float>::max();
+
+	_Effect = NULL;
+	_Direct = true;
+	_DirectGain = NLSOUND_DEFAULT_DIRECT_GAIN;
+	_EffectGain = NLSOUND_DEFAULT_EFFECT_GAIN;
+	_DirectFilterType = ISource::FilterLowPass;
+	_EffectFilterType = ISource::FilterLowPass;
+	_DirectFilterEnabled = false;
+	_EffectFilterEnabled = false;
+	_DirectFilterPassGain = NLSOUND_DEFAULT_FILTER_PASS_GAIN;
+	_EffectFilterPassGain = NLSOUND_DEFAULT_FILTER_PASS_GAIN;
+
 	// create the al source
 	alGenSources(1, &_Source);
 	alTestError();
-	
+
 	// configure rolloff
 	if (!soundDriver || soundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
@@ -54,7 +72,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 		alSourcef(_Source, AL_ROLLOFF_FACTOR, soundDriver->getRolloffFactor());
 		alTestError();
 	}
-	
+
 	// create filters
 	if (soundDriver && soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
 	{
@@ -63,6 +81,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 		alFilterf(_DirectFilter, AL_LOWPASS_GAIN, NLSOUND_DEFAULT_DIRECT_GAIN);
 		alFilterf(_DirectFilter, AL_LOWPASS_GAINHF, NLSOUND_DEFAULT_FILTER_PASS_GAIN);
 		alTestError();
+
 		alGenFilters(1, &_EffectFilter);
 		alFilteri(_EffectFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 		alFilterf(_EffectFilter, AL_LOWPASS_GAIN, NLSOUND_DEFAULT_EFFECT_GAIN);
@@ -94,11 +113,35 @@ void CSourceAL::release()
 /// (Internal) Update the 3d changes.
 void CSourceAL::updateManualRolloff()
 {
-	CVector distanceVector = _Pos - CListenerAL::getInstance()->getPos();
-	float distanceSquare = distanceVector.sqrnorm();
-	float rolloff = ISource::computeManualRolloff(_Alpha, distanceSquare, _MinDistance, _MaxDistance);
-	alSourcef(_Source, AL_GAIN, _Gain * rolloff);
+	CVector pos = getPos();
+
+	// make relative to listener (if not already!)
+	if (!_PosRelative)
+		pos -= CListenerAL::getInstance()->getPos();
+
+	float sqrdist = pos.sqrnorm();
+	float rolloff = ISource::computeManualRolloff(_Alpha, sqrdist, _MinDistance, _MaxDistance);
+	float volume = _Gain * rolloff;
+
+	// apply SFX volume
+	if (_SoundDriver && _Type == SourceSound)
+		volume *= _SoundDriver->getGain();
+
+	// set the attenuated volume
+	alSourcef(_Source, AL_GAIN, volume);
 	alTestError();
+}
+
+/// Set type of the source
+void CSourceAL::setType(TSourceType type)
+{
+	_Type = type;
+}
+
+/// Get type of the source
+TSourceType CSourceAL::getType() const
+{
+	return _Type;
 }
 
 /// Enable or disable streaming mode. Source must be stopped to call this.
@@ -392,9 +435,16 @@ void CSourceAL::getDirection( NLMISC::CVector& dir ) const
 void CSourceAL::setGain(float gain)
 {
 	_Gain = std::min(std::max(gain, NLSOUND_MIN_GAIN), NLSOUND_MAX_GAIN);
+
 	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
-		alSourcef(_Source, AL_GAIN, _Gain);
+		float gain = _Gain;
+
+		// apply SFX volume
+		if (_SoundDriver && _Type == SourceSound)
+			gain *= _SoundDriver->getGain();
+
+		alSourcef(_Source, AL_GAIN, gain);
 		alTestError();
 	}
 }
@@ -428,6 +478,7 @@ float CSourceAL::getPitch() const
 /// Set the source relative mode. If true, positions are interpreted relative to the listener position.
 void CSourceAL::setSourceRelativeMode( bool mode )
 {
+	_PosRelative = mode;
 	alSourcei(_Source, AL_SOURCE_RELATIVE, mode?AL_TRUE:AL_FALSE );
 	alTestError();
 }
@@ -435,10 +486,11 @@ void CSourceAL::setSourceRelativeMode( bool mode )
 /// Get the source relative mode (3D mode only)
 bool CSourceAL::getSourceRelativeMode() const
 {
-	ALint b;
-	alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
-	alTestError();
-	return (b==AL_TRUE);
+	return _PosRelative;
+//	ALint b;
+//	alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
+//	alTestError();
+//	return (b==AL_TRUE);
 }
 
 /// Set the min and max distances (3D mode only)
@@ -447,12 +499,12 @@ void CSourceAL::setMinMaxDistances( float mindist, float maxdist, bool /* deferr
 	nlassert( (mindist >= 0.0f) && (maxdist >= 0.0f) );
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
-	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
-	{
+//	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+//	{
 		alSourcef(_Source, AL_REFERENCE_DISTANCE, mindist);
 		alSourcef(_Source, AL_MAX_DISTANCE, maxdist);
 		alTestError();
-	}
+//	}
 }
 
 /// Get the min and max distances
