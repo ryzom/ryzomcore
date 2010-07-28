@@ -2194,9 +2194,9 @@ void CUserEntity::setDead()	// virtual
 	// get player's kami fame
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	sint8 kamiFame = 0;
-	uint kamiFameIndex = CStaticFames::getInstance().getFactionIndex("kami");	
+	uint kamiFameIndex = CStaticFames::getInstance().getFactionIndex("kami");
 	if (pIM && kamiFameIndex != CStaticFames::INVALID_FACTION_INDEX)
-	{		
+	{
 		CCDBNodeLeaf *pLeafKamiFame = pIM->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
 		if (pLeafKamiFame != NULL)
 			kamiFame = pLeafKamiFame->getValue8();
@@ -2210,8 +2210,8 @@ void CUserEntity::setDead()	// virtual
 		CCDBNodeLeaf *pLeafKaravanFame = pIM->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
 		if (pLeafKaravanFame != NULL)
 			karavanFame = pLeafKaravanFame->getValue8();
-	}		
-	
+	}
+
 	// set loading background depending on player's faction fame
 	if (kamiFame > karavanFame)
 		LoadingBackground = ResurectKamiBackground;

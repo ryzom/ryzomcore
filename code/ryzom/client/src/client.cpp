@@ -370,7 +370,7 @@ int main(int argc, char **argv)
 		"document settings"..... Force the path to be the path of the exe
 	*/
 	{
-#ifdef NL_FINAL_VERSION
+#ifdef FINAL_VERSION
 		char	str[4096];
 		uint	len= GetModuleFileName(NULL, str, 4096);
 		if(len && len<4096)
@@ -380,7 +380,7 @@ int main(int argc, char **argv)
 //			if(!path.empty())
 //				CPath::setCurrentPath(path.c_str());
 		}
-#endif // NL_FINAL_VERSION
+#endif // FINAL_VERSION
 	}
 
 	string sCmdLine = cmdline;
@@ -389,7 +389,10 @@ int main(int argc, char **argv)
 	{
 		HANDLE mutex = CreateMutex (NULL, false, "RyzomClient");
 		if (mutex && GetLastError() == ERROR_ALREADY_EXISTS)
-			exit (0);
+		{
+			delete appContext;
+			return 0;
+		}
 	}
 
 	initCrashReport ();
