@@ -838,6 +838,9 @@ void CSourceAL::setStreamingBuffersMax(uint buffers)
 	{
 		// create a new buffer
 		CBufferAL *buffer = static_cast<CBufferAL*>(_SoundDriver->createBuffer());
+		// use StorageSoftware because buffers will be reused
+		// deleting and recreating them is a waste of time
+		buffer->setStorageMode(IBuffer::StorageSoftware);
 		_Buffers[buffer->bufferName()] = buffer;
 	}
 }
