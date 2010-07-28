@@ -111,7 +111,7 @@ CVector			CFrustum::projectZ(const CVector &vec) const
 		CVector		ret;
 	float		decalX, decalY;
 	float		w, h;
-	float		OOw, OOh;
+	float		OOw = 1.0f, OOh = 1.0f;
 
 	// Fast transform to openGL like axis.
 	CVector		pt;
@@ -123,8 +123,8 @@ CVector			CFrustum::projectZ(const CVector &vec) const
 	decalY= (Top+Bottom);
 	w= Right-Left;
 	h= Top-Bottom;
-	OOw= 1.0f/w;
-	OOh= 1.0f/h;
+	if (w) OOw /= w;
+	if (h) OOh /= h;
 
 	// project to -1..+1.
 	if(Perspective)
