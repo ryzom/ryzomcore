@@ -17,9 +17,11 @@
 #ifndef NL_LISTENER_FMOD_H
 #define NL_LISTENER_FMOD_H
 
-#include <nel/sound/driver/listener.h>
+#include "nel/sound/driver/listener.h"
+#include "nel/misc/singleton.h"
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 
 /**
@@ -32,7 +34,7 @@ namespace NLSOUND {
  * \author Nevrax France
  * \date 2002
  */
-class CListenerFMod : public IListener
+class CListenerFMod : public IListener, public NLMISC::CManualSingleton<CListenerFMod>
 {
 friend class CSoundDriverFMod;
 
@@ -43,9 +45,6 @@ public:
 
 	/// Deconstructor
 	virtual ~CListenerFMod();
-
-	/// Return the instance of the singleton
-	static CListenerFMod* instance() { return _Instance; }
 
 	/// \name Listener properties
 	//@{
@@ -108,9 +107,6 @@ private:
 
 	/// Release all DirectSound resources
 	void					release();
-
-	/// The instance of the singleton
-	static CListenerFMod	*_Instance;
 
 	// Nel Basis
 	NLMISC::CVector			_Pos;

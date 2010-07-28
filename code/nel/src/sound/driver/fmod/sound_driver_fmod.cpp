@@ -149,9 +149,9 @@ CSoundDriverFMod::~CSoundDriverFMod()
 
 
 	// Assure that the listener has released all resources before closing down FMod
-	if (CListenerFMod::instance() != 0)
+	if (CListenerFMod::getInstance() != 0)
 	{
-		CListenerFMod::instance()->release();
+		CListenerFMod::getInstance()->release();
 	}
 
 	// Close FMod
@@ -283,9 +283,9 @@ void CSoundDriverFMod::update()
 IListener *CSoundDriverFMod::createListener()
 {
 
-    if (CListenerFMod::instance() != NULL)
+    if (CListenerFMod::isInitialized())
     {
-        return CListenerFMod::instance();
+        return CListenerFMod::getInstance();
     }
 
     if ( !_FModOk )
@@ -353,7 +353,7 @@ void CSoundDriverFMod::commit3DChanges()
 		// We handle the volume of the source according to the distance
 		// ourselves. Call updateVolume() to, well..., update the volume
 		// according to, euh ..., the new distance!
-		CListenerFMod* listener = CListenerFMod::instance();
+		CListenerFMod* listener = CListenerFMod::getInstance();
 		if(listener)
 		{
 			const CVector &origin = listener->getPos();

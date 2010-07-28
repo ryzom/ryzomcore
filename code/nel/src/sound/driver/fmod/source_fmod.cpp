@@ -42,14 +42,13 @@ CSourceFMod::CSourceFMod( uint sourcename )
 
 	_PosRelative= false;
 	_Loop = false;
-	_Gain = 1.0f;
+	_Gain = NLSOUND_DEFAULT_GAIN;
 	_Alpha = 0.0;
 	_Pos= _Vel= CVector::Null;
 	_Front= CVector::J;
 	_MinDist= 1.f;
-	_MaxDist= FLT_MAX;
+	_MaxDist= numeric_limits<float>::max();
 	_Pitch= 1.0f;
-
 
 	_FModChannel= -1;
 }
@@ -180,7 +179,7 @@ bool CSourceFMod::play()
 			else
 			{
 				// manual rolloff => recompute according to position
-				CListenerFMod *listener = CListenerFMod::instance();
+				CListenerFMod *listener = CListenerFMod::getInstance();
 				if (listener) updateVolume(listener->getPos());
 			}
 
@@ -510,7 +509,7 @@ void CSourceFMod::updateFModPos()
 		// If relative, must transform to absolute
 		if(_PosRelative)
 		{
-			CListenerFMod	*lsr= CListenerFMod::instance();
+			CListenerFMod	*lsr= CListenerFMod::getInstance();
 			if(lsr)
 			{
 				wpos= lsr->getPosMatrix() * wpos;

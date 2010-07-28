@@ -27,34 +27,21 @@ namespace NLSOUND
 
 
 // ***************************************************************************
-// The instance of the singleton
-CListenerFMod	*CListenerFMod::_Instance = NULL;
-
-
-// ***************************************************************************
 CListenerFMod::CListenerFMod() //: IListener()
 :	_Pos(CVector::Null), _Vel(CVector::Null), _Front(CVector::J), _Up(CVector::K)
 {
-	if ( _Instance == NULL )
+	_RolloffFactor= 1.f;
+	_Pos= CVector::Null;
+	_Vel= CVector::Null;
+	_Front= CVector::J;
+	_Up= CVector::K;
+	if (CSoundDriverFMod::getInstance()->getOption(ISoundDriver::OptionManualRolloff))
 	{
-		_Instance = this;
-		_RolloffFactor= 1.f;
-		_Pos= CVector::Null;
-		_Vel= CVector::Null;
-		_Front= CVector::J;
-		_Up= CVector::K;
-		if (CSoundDriverFMod::getInstance()->getOption(ISoundDriver::OptionManualRolloff))
+		// Manual RollOff => disable API rollOff
+		if( CSoundDriverFMod::getInstance()->fmodOk() )
 		{
-			// Manual RollOff => disable API rollOff
-			if( CSoundDriverFMod::getInstance()->fmodOk() )
-			{
-				FSOUND_3D_SetRolloffFactor(0);
-			}
+			FSOUND_3D_SetRolloffFactor(0);
 		}
-	}
-	else
-	{
-		//nlerror( "Listener singleton instanciated twice" );
 	}
 }
 
@@ -65,7 +52,6 @@ CListenerFMod::~CListenerFMod()
 	//nldebug("Destroying FMod listener");
 
     release();
-	_Instance = NULL;
 }
 
 
