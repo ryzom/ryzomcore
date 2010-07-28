@@ -2516,7 +2516,7 @@ void	NLPACS::CGlobalRetriever::refreshLrAround(const CVector &position, float ra
 
 			//		NLMEMORY::CheckHeap (true);
 
-			nlinfo("Lr '%s' loading task complete", ite->LoadFile.c_str());
+			//nlinfo("Lr '%s' loading task complete", ite->LoadFile.c_str());
 
 			// Remove this entry
 			_LrLoaderList.erase (ite);
@@ -2553,7 +2553,7 @@ void	NLPACS::CGlobalRetriever::refreshLrAround(const CVector &position, float ra
 	for (it=out.begin(); it!=out.end(); ++it)
 	{
 		const_cast<CRetrieverBank*>(_RetrieverBank)->unloadRetriever(*it);
-		nlinfo("Freed Lr '%s'", (_RetrieverBank->getNamePrefix() + "_" + toString(*it) + ".lr").c_str());
+		//nlinfo("Freed Lr '%s'", (_RetrieverBank->getNamePrefix() + "_" + toString(*it) + ".lr").c_str());
 	}
 
 	// if load task idle and more lr to load, setup load task
@@ -2585,7 +2585,7 @@ void	NLPACS::CGlobalRetriever::refreshLrAround(const CVector &position, float ra
 
 			CAsyncFileManager::getInstance().addLoadTask(&loader);
 
-			nlinfo("Lr '%s' added to load", loader.LoadFile.c_str());
+			//nlinfo("Lr '%s' added to load", loader.LoadFile.c_str());
 		}
 
 		// Next lr to load
