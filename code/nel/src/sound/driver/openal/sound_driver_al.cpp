@@ -618,11 +618,16 @@ void CSoundDriverAL::commit3DChanges()
 	// Sync up sources & listener 3d position.
 	if (getOption(OptionManualRolloff))
 	{
-		for (std::set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
+		set<CSourceAL*>::iterator it = _Sources.begin(), iend = _Sources.end();
+		while(it != iend)
 		{
 			(*it)->updateManualRolloff();
+			++it;
 		}
 	}
+
+	// update the music (XFade etc...)
+	updateMusic();
 }
 
 /// Write information about the driver to the output stream.
@@ -659,6 +664,12 @@ bool CSoundDriverAL::getMusicInfo(const std::string &filepath, std::string &arti
 {
 	// add support for additional non-standard music file types info here
 	return IMusicBuffer::getInfo(filepath, artist, title);
+}
+
+void CSoundDriverAL::updateMusic()
+{
+	set<CMusicChannelAL *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
+	for (; it != end; ++it) (*it)->update();
 }
 
 /// Remove a buffer

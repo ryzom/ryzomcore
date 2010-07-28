@@ -33,13 +33,8 @@ CMusicChannelAL::CMusicChannelAL(CSoundDriverAL *soundDriver)
 {
 	// create a default source for music streaming
 	_Source = static_cast<CSourceAL*>(_SoundDriver->createSource());
-	_Source->setPos(CVector(0, 0, 0));
-	_Source->setVelocity(CVector(0, 0, 0));
-	_Source->setDirection(CVector(0, 0, 0));
-	_Source->setSourceRelativeMode(true);
-	_Source->setStreamingBuffersMax(4);
+	_Source->setType(SourceMusic);
 	_Source->setStreamingBufferSize(32768);
-//	_Source->setStreaming(true);
 }
 
 CMusicChannelAL::~CMusicChannelAL()
@@ -110,72 +105,47 @@ void CMusicChannelAL::setBufferFormat(IBuffer *buffer)
 
 void CMusicChannelAL::run()
 {
+	bool first = true;
 
-	if (_Async)
+	// use queued buffers
+	do
 	{
-		bool first = true;
+		// buffers to update
+		std::vector<CBufferAL*> buffers;
 
-		// use queued buffers
-		do
+		if (first)
 		{
-			// buffers to update
-			std::vector<CBufferAL*> buffers;
+			// get all buffers to queue
+			_Source->getStreamingBuffers(buffers);
 
-			if (first)
-			{
-				// get all buffers to queue
-				_Source->getStreamingBuffers(buffers);
-
-				// set format for each buffer
-				for(uint i = 0; i < buffers.size(); ++i)
-					setBufferFormat(buffers[i]);
-			}
-			else
-			{
-				// get unqueued buffers
-				_Source->getProcessedStreamingBuffers(buffers);
-			}
-
-			// fill buffers
+			// set format for each buffer
 			for(uint i = 0; i < buffers.size(); ++i)
-				fillBuffer(buffers[i], _Source->getStreamingBufferSize());
-
-			// play the source
-			if (first)
-			{
-				_Source->play();
-				first = false;
-			}
-
-			// wait 100ms before rechecking buffers
-			nlSleep(100);
+				setBufferFormat(buffers[i]);
 		}
-		while(!_MusicBuffer->isMusicEnded() && _Playing);
-	}
-	else
-	{
-		// use an unique buffer managed by CMusicChannelAL
-		_Buffer = _SoundDriver->createBuffer();
-
-		// set format
-		setBufferFormat(_Buffer);
-
-		// fill data
-		fillBuffer(_Buffer, _MusicBuffer->getUncompressedSize());
-
-		// we don't need _MusicBuffer anymore because all is loaded into memory
-		if (_MusicBuffer)
+		else
 		{
-			delete _MusicBuffer;
-			_MusicBuffer = NULL;
+			// get unqueued buffers
+			_Source->getProcessedStreamingBuffers(buffers);
 		}
 
-		// use this buffer as source
-		_Source->setStaticBuffer(_Buffer);
+		// fill buffers
+		for(uint i = 0; i < buffers.size(); ++i)
+			fillBuffer(buffers[i], _Source->getStreamingBufferSize());
+
+//		_Source->updateManualRolloff();
 
 		// play the source
-		_Source->play();
+		if (first)
+		{
+			_Source->play();
+			first = false;
+		}
+
+		// wait 100ms before rechecking buffers
+		nlSleep(100);
 	}
+	while(!_MusicBuffer->isMusicEnded() && _Playing);
+
 
 	// music finished without interruption
 	if (_Playing)
@@ -187,6 +157,35 @@ void CMusicChannelAL::run()
 
 		_Playing = false;
 	}
+}
+
+/// Play sync music
+bool CMusicChannelAL::playSync()
+{
+	// use an unique buffer managed by CMusicChannelAL
+	_Buffer = _SoundDriver->createBuffer();
+
+	// set format
+	setBufferFormat(_Buffer);
+
+	// fill data
+	fillBuffer(_Buffer, _MusicBuffer->getUncompressedSize());
+
+	// we don't need _MusicBuffer anymore because all is loaded into memory
+	if (_MusicBuffer)
+	{
+		delete _MusicBuffer;
+		_MusicBuffer = NULL;
+	}
+
+	// delete previous queued buffers
+	_Source->setStreamingBuffersMax(0);
+
+	// use this buffer as source
+	_Source->setStaticBuffer(_Buffer);
+
+	// play the source
+	return _Source->play();
 }
 
 /** Play some music (.ogg etc...)
@@ -205,23 +204,38 @@ bool CMusicChannelAL::play(const std::string &filepath, bool async, bool loop)
 
 	if (_MusicBuffer)
 	{
-		// create the thread if it's not yet created
-		if (!_Thread) _Thread = IThread::create(this);
-
-		if (!_Thread)
-		{
-			nlwarning("AL: Can't create a new thread");
-			return false;
-		}
-
 		_Async = async;
 		_Playing = true;
 
-		// we need to loop the source only if not async
-		_Source->setLooping(async ? false:loop);
+		_Source->setSourceRelativeMode(true);
 
-		// start the thread
-		_Thread->start();
+		if (_Async)
+		{
+			// create the thread if it's not yet created
+			if (!_Thread) _Thread = IThread::create(this);
+
+			if (!_Thread)
+			{
+				nlwarning("AL: Can't create a new thread");
+				return false;
+			}
+
+			// use 4 queued buffers
+			_Source->setStreamingBuffersMax(4);
+
+			// we need to loop the source only if not async
+			_Source->setLooping(false);
+
+			// start the thread
+			_Thread->start();
+		}
+		else
+		{
+			// we need to loop the source only if not async
+			_Source->setLooping(loop);
+
+			return playSync();
+		}
 	}
 	else
 	{
@@ -296,6 +310,16 @@ void CMusicChannelAL::setVolume(float gain)
 {
 	_Gain = gain;
 	_Source->setGain(gain);
+}
+
+/// Update music
+void CMusicChannelAL::update()
+{
+	// stop sync music once finished playing
+	if (_Playing && !_Async && !_Source->isPlaying())
+	{
+		stop();
+	}
 }
 
 } /* namespace NLSOUND */

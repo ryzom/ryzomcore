@@ -176,6 +176,7 @@ public:
 	float getGain();
 
 protected:
+	void updateMusic();
 
 	/// Allocate nb new buffers or sources
 	void					allocateNewItems( TGenFunctionAL algenfunc, TTestFunctionAL altestfunc,

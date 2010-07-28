@@ -533,7 +533,7 @@ void initMainLoop()
 		// During load of the game, fade completely out SFX, and leave outgame music
 		// When the game will begin, it will fade in slowly
 		if(SoundMngr)
-			SoundMngr->setupFadeSound(1.f, 1.f);
+			SoundMngr->setupFadeSound(0.f, 1.f);
 
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();

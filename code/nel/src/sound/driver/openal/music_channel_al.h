@@ -91,6 +91,12 @@ public:
 	 *	NB: in OpenAL driver, the volume of music IS affected by IListener::setGain()
 	 */
 	virtual void setVolume(float gain);
+
+	/// Play sync music
+	bool playSync();
+
+	/// Update music
+	void update();
 }; /* class CMusicChannelAL */
 
 } /* namespace NLSOUND */
