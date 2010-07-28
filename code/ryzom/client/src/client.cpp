@@ -483,13 +483,13 @@ int main(int argc, char **argv)
 
 	// TODO for Linux : splashscreen
 
-	if (argc >= 3)
+	if (argc >= 4)
 	{
 		LoginLogin = argv[1];
 		LoginPassword = argv[2];
 		if (!fromString(argv[3], LoginShardId)) LoginShardId = -1;
 	}
-	else if (argc >= 2)
+	else if (argc >= 3)
 	{
 		LoginLogin = argv[1];
 		LoginPassword = argv[2];
