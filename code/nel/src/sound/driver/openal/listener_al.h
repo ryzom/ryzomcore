@@ -17,10 +17,11 @@
 #ifndef NL_LISTENER_AL_H
 #define NL_LISTENER_AL_H
 
-#include <nel/sound/driver/listener.h>
-#include <nel/misc/singleton.h>
+#include "nel/sound/driver/listener.h"
+#include "nel/misc/singleton.h"
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 /**
  * OpenAL sound listener.
@@ -81,7 +82,6 @@ public:
 
 private:
 	NLMISC::CVector			_Pos;
-
 };
 
 } // NLSOUND

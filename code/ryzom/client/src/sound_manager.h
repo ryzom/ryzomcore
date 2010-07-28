@@ -287,7 +287,7 @@ public:
 	/// Draw the sounds/cluster/audio path for debugging purpose
 	void		drawSounds(float camHeight);
 
-	/// Play Music (see UAudioMixer for detail). NB: the background music system is disabled until the music is stoped
+	/// Play Music (see UAudioMixer for detail). NB: the background music system is disabled until the music is stopped
 	void		playMusic(const string &fileName, uint xFadeTime= 2000, bool async= true, bool loop=true, bool forceGameMusicVolume= false);
 	/// Stop Music. NB: the background music system is then reenabled
 	void		stopMusic(uint xFadeTime= 2000);
