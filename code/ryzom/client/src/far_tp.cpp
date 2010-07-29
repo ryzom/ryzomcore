@@ -1062,7 +1062,7 @@ void CFarTP::disconnectFromPreviousShard()
 		// Play music and fade out the Game Sound
 		if (SoundMngr)
 		{
-			SoundMngr->playEventMusic("Loading Music Loop.ogg", CSoundManager::LoadingMusicXFade, true);
+			SoundMngr->playEventMusic(ClientCfg.SoundOutGameMusic, CSoundManager::LoadingMusicXFade, true); // Loading Music Loop.ogg
 			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
 		}
 
