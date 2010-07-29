@@ -297,7 +297,7 @@ struct CClientConfig
 	/// SoundForceSoftwareBuffer
 	bool			SoundForceSoftwareBuffer;
 
-	/// The outgmae music file
+	/// The outgame music file
 	string			SoundOutGameMusic;
 
 	/// The Sound SFX Volume (0-1)  (ie all but music)

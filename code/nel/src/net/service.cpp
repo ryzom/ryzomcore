@@ -1492,7 +1492,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 				_ResetMeasures = false;
 			}
 
-			MyTAT.desactivate();
+			MyTAT.deactivate();
 		}
 	}
 	catch (EFatalError &)

@@ -577,7 +577,7 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 				}
 				if( _Instances[i] == NULL )
 				{
-					nlwarning("Not found '%s' file\n", shapeName.c_str());
+					nlwarning("Not found '%s' file", shapeName.c_str());
 				}
 			}
 		}

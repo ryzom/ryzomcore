@@ -25,7 +25,7 @@ class IBuffer;
 /**
  * CAsyncFileManagerSound is a class that manage sound file loading in a seperate thread
  * This class mostly depend on the CAsyncFileManager class for serializing async file
- * loas request.
+ * loading request.
  * \author Boris Boucher
  * \author Nevrax France
  * \date 2002

@@ -97,12 +97,12 @@ public:
 		//nldebug("activate");
 	}
 
-	void desactivate()
+	void deactivate()
 	{
 		if(_Control == QUIT) return;
 		nlassert(_Control == ACTIVE);
 		_Control = INACTIVE;
-		//nldebug("desactivate");
+		//nldebug("deactivate");
 	}
 
 	void quit()
