@@ -32,6 +32,8 @@
 #include "view.h"	// For the cameraDistance funtion
 #include "user_entity.h"
 #include "interface_v3/interface_element.h" //for convertColor function
+#include "misc.h"
+
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_scene.h"
@@ -2043,47 +2045,53 @@ void CClientConfig::release ()
 	// Do we have to save the cfg file ?
 	if (ClientCfg.SaveConfig)
 	{
-		// Are we in window mode ?
-		if (ClientCfg.Windowed)
+		// Driver still alive ?
+		if (Driver && Driver->isActive ())
 		{
-			// Driver still alive ?
-			if (Driver && Driver->isActive ())
+			sint32 x, y;
+			uint32 width, height;
+
+			Driver->getWindowPos(x, y);
+			Driver->getWindowSize(width, height);
+
+			// Save values
+			try
 			{
-				sint32 x, y;
-				uint32 width, height;
+				CConfigFile::CVar *varPtr = NULL;
 
-				Driver->getWindowPos(x, y);
-				Driver->getWindowSize(width, height);
-
-				// Save values
-				try
+				// Are we in window mode ?
+				if (ClientCfg.Windowed && !isWindowMaximized())
 				{
-					CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionX");
+					// Save windows position
+					varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionX");
 					if (varPtr)
 						varPtr->forceAsInt (x);
 					varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionY");
 					if (varPtr)
 						varPtr->forceAsInt (y);
+
+					// Save windows size
 					varPtr = ClientCfg.ConfigFile.getVarPtr ("Width");
 					if (varPtr)
 						varPtr->forceAsInt (std::max((int)width, 800));
 					varPtr = ClientCfg.ConfigFile.getVarPtr ("Height");
 					if (varPtr)
 						varPtr->forceAsInt (std::max((int)height, 600));
+				}
 
-					// Save if in FPV or TPV.
-					varPtr = ClientCfg.ConfigFile.getVarPtr("FPV");
-					if(varPtr)
-						varPtr->forceAsInt((sint)ClientCfg.FPV);
-					// Save the camera distance
-					varPtr = ClientCfg.ConfigFile.getVarPtr("CameraDistance");
-					if(varPtr)
-						varPtr->forceAsDouble(ClientCfg.CameraDistance);
-				}
-				catch (Exception &e)
-				{
-					nlwarning ("Error while set config file variables : %s", e.what ());
-				}
+				// Save if in FPV or TPV.
+				varPtr = ClientCfg.ConfigFile.getVarPtr("FPV");
+				if(varPtr)
+					varPtr->forceAsInt((sint)ClientCfg.FPV);
+
+				// Save the camera distance
+				varPtr = ClientCfg.ConfigFile.getVarPtr("CameraDistance");
+				if(varPtr)
+					varPtr->forceAsDouble(ClientCfg.CameraDistance);
+			}
+			catch (Exception &e)
+			{
+				nlwarning ("Error while set config file variables : %s", e.what ());
 			}
 		}
 
