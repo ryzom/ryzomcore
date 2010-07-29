@@ -1064,6 +1064,7 @@ void CFarTP::disconnectFromPreviousShard()
 		{
 			SoundMngr->playEventMusic(ClientCfg.SoundOutGameMusic, CSoundManager::LoadingMusicXFade, true); // Loading Music Loop.ogg
 			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
+			LoadingMusic = ClientCfg.SoundOutGameMusic;
 		}
 
 		// Change the tips
