@@ -22,7 +22,8 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 IMusicBuffer::IMusicBuffer() : _InternalStream(NULL)
 {
@@ -45,8 +46,7 @@ IMusicBuffer *IMusicBuffer::createMusicBuffer(const std::string &filepath, bool 
 	string type = CFile::getExtension(filepath);
 
 	CIFile *ifile = new CIFile();
-	ifile->setCacheFileOnOpen(!async);
-	ifile->allowBNPCacheFileOnOpen(!async);
+	ifile->setAsyncLoading(async);
 	ifile->open(lookup);
 
 	IMusicBuffer *mb = createMusicBuffer(type, ifile, loop);
@@ -80,17 +80,17 @@ bool IMusicBuffer::getInfo(const std::string &filepath, std::string &artist, std
 {
 	string lookup = CPath::lookup(filepath, false);
 	if (lookup.empty())
-	{ 
+	{
 		nlwarning("Music file %s does not exist!", filepath.c_str());
-		return false; 
+		return false;
 	}
 	string type = CFile::getExtension(filepath);
 	string type_lower = toLower(type);
 
 	if (type_lower == "ogg")
 	{
-		CIFile ifile; 
-		ifile.setCacheFileOnOpen(false); 
+		CIFile ifile;
+		ifile.setCacheFileOnOpen(false);
 		ifile.allowBNPCacheFileOnOpen(false);
 		ifile.open(lookup);
 		return CMusicBufferVorbis::getInfo(&ifile, artist, title);
