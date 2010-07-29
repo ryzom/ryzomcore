@@ -200,10 +200,6 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	ALuint bufferName = bufferAL->bufferName();
 	nlassert(bufferName);
 
-	// search if it's in buffers vector
-	if (_Buffers.find(bufferName) == _Buffers.end())
-		return;
-
 	// queue the buffer
 	alSourceQueueBuffers(_Source, 1, &bufferName);
 	alTestError();
@@ -506,12 +502,13 @@ void CSourceAL::setMinMaxDistances( float mindist, float maxdist, bool /* deferr
 	nlassert( (mindist >= 0.0f) && (maxdist >= 0.0f) );
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
-//	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
-//	{
+
+	if (!_SoundDriver || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	{
 		alSourcef(_Source, AL_REFERENCE_DISTANCE, mindist);
 		alSourcef(_Source, AL_MAX_DISTANCE, maxdist);
 		alTestError();
-//	}
+	}
 }
 
 /// Get the min and max distances
