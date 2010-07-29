@@ -72,6 +72,7 @@ private:
 	/// Playing status
 	bool _IsPlaying;
 	bool _IsPaused;
+	NLMISC::TTime	_StartTime;
 	NLMISC::CVector _Pos;
 	float _Gain;
 	double _Alpha;
@@ -103,7 +104,7 @@ public:
 	void release();
 	
 	/// Return the OpenAL source name
-	inline ALuint getSource() const { return _Source; }
+	ALuint getSource() const { return _Source; }
 
 	/// Set type of the source
 	void setType(TSourceType type);

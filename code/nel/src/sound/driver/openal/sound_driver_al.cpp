@@ -26,8 +26,8 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND {
-
+namespace NLSOUND
+{
 
 // Currently, the OpenAL headers are different between Windows and Linux versions !
 // AL_INVALID_XXXX are part of the spec, though.
@@ -80,7 +80,8 @@ void alTestWarning(const char *src)
 
 #ifndef NL_STATIC
 
-class CSoundDriverALNelLibrary : public NLMISC::INelLibrary {
+class CSoundDriverALNelLibrary : public NLMISC::INelLibrary
+{
 	void onLibraryLoaded(bool /* firstTime */) { }
 	void onLibraryUnloaded(bool /* lastTime */) { }
 };

@@ -19,7 +19,8 @@
 
 #include <nel/sound/driver/sound_driver.h>
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 	class CBufferAL;
 	class CListenerAL;
 	class CSourceAL;

@@ -33,6 +33,7 @@ CSourceAL::CSourceAL(CSoundDriverAL *soundDriver):ISource(), _SoundDriver(NULL),
 {
 	_IsPlaying = false;
 	_IsPaused = false;
+	_StartTime = 0;
 
 	_Type = SourceSound;
 	_Buffer = NULL;
@@ -253,6 +254,8 @@ bool CSourceAL::play()
 		_IsPaused = false;
 		alSourcePlay(_Source);
 		_IsPlaying = alGetError() == AL_NO_ERROR;
+		if (_IsPlaying)
+			_StartTime = CTime::getLocalTime();
 		return _IsPlaying;
 	}
 	else
@@ -261,6 +264,7 @@ bool CSourceAL::play()
 		_IsPaused = false;
 		alSourcePlay(_Source);
 		_IsPlaying = true;
+		_StartTime = CTime::getLocalTime();
 		return true;
 		// Streaming mode
 		//nlwarning("AL: Cannot play null buffer; streaming not implemented" );
@@ -271,6 +275,8 @@ bool CSourceAL::play()
 /// Stop playing
 void CSourceAL::stop()
 {
+	_StartTime = 0;
+
 	if ( _Buffer != NULL )
 	{
 		// Static playing mode
@@ -376,8 +382,9 @@ bool CSourceAL::isPaused() const
 /// Returns the number of milliseconds the source has been playing
 uint32 CSourceAL::getTime()
 {
-	// TODO
-	return 0;
+	if (!_StartTime) return 0;
+
+	return (uint32)(CTime::getLocalTime() - _StartTime);
 }
 
 /// Set the position vector.
