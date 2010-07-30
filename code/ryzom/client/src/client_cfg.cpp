@@ -2060,7 +2060,7 @@ void CClientConfig::release ()
 				CConfigFile::CVar *varPtr = NULL;
 
 				// Are we in window mode ?
-				if (ClientCfg.Windowed && !isWindowMaximized())
+				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
 					// Save windows position
 					varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionX");
