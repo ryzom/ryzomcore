@@ -865,7 +865,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if(_win != EmptyWindow)
 		_DestroyWindow = true;
 
-#elif defined (NL_OS_UNIX)
+#elif defined(NL_OS_UNIX)
 
 	static int sAttribList16bpp[] =
 	{
@@ -1474,7 +1474,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	xev.xclient.data.l[2] = 0;
 	xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
 	xev.xclient.data.l[4] = 0;
-	if (XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev) != Success)
+	if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
 	{
 		nlwarning("3D: Failed to toggle to fullscreen");
 		return false;
@@ -1801,6 +1801,9 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	_WindowX = x;
 	_WindowY = y;
 
+	if (_win == EmptyWindow)
+		return;
+
 #ifdef NL_OS_WINDOWS
 
 	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
@@ -1858,6 +1861,10 @@ emptyProc CDriverGL::getWindowProc()
 bool CDriverGL::activate()
 {
 	H_AUTO_OGL(CDriverGL_activate)
+
+	if (_win == EmptyWindow)
+		return false;
+
 #ifdef NL_OS_WINDOWS
 
 	HGLRC hglrc = wglGetCurrentContext();
@@ -1932,6 +1939,9 @@ void CDriverGL::showCursor(bool b)
 {
 	H_AUTO_OGL(CDriverGL_showCursor)
 
+	if (_win == EmptyWindow)
+		return;
+
 #ifdef NL_OS_WINDOWS
 
 	if (b)
@@ -1983,17 +1993,17 @@ void CDriverGL::setMousePos(float x, float y)
 {
 	H_AUTO_OGL(CDriverGL_setMousePos)
 
+	if (_win == EmptyWindow)
+		return;
+
 #ifdef NL_OS_WINDOWS
 
-	if (_win)
-	{
-		// NeL window coordinate to MSWindows coordinates
-		POINT pt;
-		pt.x = (sint)((float)(_WindowWidth)*x);
-		pt.y = (sint)((float)(_WindowHeight)*(1.0f-y));
-		ClientToScreen (_win, &pt);
-		SetCursorPos(pt.x, pt.y);
-	}
+	// NeL window coordinate to MSWindows coordinates
+	POINT pt;
+	pt.x = (sint)((float)(_WindowWidth)*x);
+	pt.y = (sint)((float)(_WindowHeight)*(1.0f-y));
+	ClientToScreen (_win, &pt);
+	SetCursorPos(pt.x, pt.y);
 
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
 
@@ -2045,6 +2055,12 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 {
 	H_AUTO_OGL(CDriverGL_setWindowSize)
 
+	_WindowWidth = width;
+	_WindowHeight = height;
+
+	if (_win == EmptyWindow)
+		return;
+
 #if defined(NL_OS_WINDOWS)
 
 	// resize the window
@@ -2092,9 +2108,6 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	// resize the window
 	XResizeWindow(_dpy, _win, width, height);
 
-	_WindowWidth = width;
-	_WindowHeight = height;
-
 #endif // NL_OS_WINDOWS
 }
 
@@ -2129,6 +2142,9 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 bool CDriverGL::isActive()
 {
 	H_AUTO_OGL(CDriverGL_isActive)
+
+	if (_win == EmptyWindow)
+		return false;
 
 	bool res = true;
 
