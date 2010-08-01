@@ -674,6 +674,7 @@ private:
 	bool						_Resizable;
 	uint						_Interval;
 	sint8						_AntiAliasing;
+	bool						_WindowVisible;
 
 	uint32						_WindowWidth, _WindowHeight;
 	sint32						_WindowX, _WindowY;

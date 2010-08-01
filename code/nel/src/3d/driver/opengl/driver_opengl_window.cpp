@@ -493,6 +493,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	_win = EmptyWindow;
 	_WindowWidth = _WindowHeight = _WindowX = _WindowY = 0;
+	_WindowVisible = false;
 	_FullScreen = false;
 	_Resizable = resizeable;
 	_OffScreen = mode.OffScreen;
@@ -1828,6 +1829,8 @@ void CDriverGL::showWindow(bool show)
 	if (_win == EmptyWindow || !_DestroyWindow)
 		return;
 
+	_WindowVisible = show;
+
 #ifdef NL_OS_WINDOWS
 	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 #elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
@@ -1838,8 +1841,11 @@ void CDriverGL::showWindow(bool show)
 
 	if (show)
 	{
-		XMapWindow(_dpy, _win);
-//		XMapRaised(_dpy, _win);
+//		XMapWindow(_dpy, _win);
+		XMapRaised(_dpy, _win);
+
+		// fix window position if windows manager want to impose them
+		setWindowPos(_WindowX, _WindowY);
 	}
 	else
 	{
