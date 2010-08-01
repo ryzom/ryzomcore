@@ -969,18 +969,9 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 
 	if (_win == EmptyWindow) return;
 
-#ifdef NL_MAC_NATIVE
-
-	uint32 clientWidth, clientHeight;
-	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
-
-#else
-
 	// Setup gl viewport
-	sint clientWidth = _WindowWidth;
-	sint clientHeight = _WindowHeight;
-
-#endif // NL_MAC_NATIVE
+	uint32 clientWidth, clientHeight;
+	getWindowSize(clientWidth, clientHeight);
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -1033,18 +1024,9 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 
 	if (_win == EmptyWindow) return;
 
-#ifdef NL_MAC_NATIVE
-
-	uint32 clientWidth, clientHeight;
-	NL3D::MAC::getWindowSize(_win, clientWidth, clientHeight);
-
-#else
-
 	// Setup gl viewport
-	sint clientWidth = _WindowWidth;
-	sint clientHeight = _WindowHeight;
-
-#endif // NL_MAC_NATIVE
+	uint32 clientWidth, clientHeight;
+	getWindowSize(clientWidth, clientHeight);
 
 	// Backup the scissor
 	_CurrScissor= scissor;
