@@ -681,6 +681,8 @@ private:
 
 	nlWindow					_win;
 	bool						_DestroyWindow;
+	sint32						_DecorationWidth;
+	sint32						_DecorationHeight;
 
 #ifdef NL_OS_WINDOWS
 

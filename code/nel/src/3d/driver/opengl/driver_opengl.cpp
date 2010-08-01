@@ -207,6 +207,9 @@ CDriverGL::CDriverGL()
 	_win = EmptyWindow;
 	_DestroyWindow = false;
 
+	_DecorationWidth = 0;
+	_DecorationHeight = 0;
+
 	_OffScreen = false;
 	_FullScreen = false;
 	_Resizable = false;

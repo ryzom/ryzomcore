@@ -175,12 +175,40 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		}
 		break;
 
+		case MapNotify:
+		driver->_WndActive = true;
+		break;
+
+		case UnmapNotify:
+		driver->_WndActive = false;
+		break;
+
+		case Expose:
+		nlwarning("Expose event");
+		break;
+
 		case ConfigureNotify:
 
-		driver->_WindowWidth = e.xconfigure.width;
-		driver->_WindowHeight = e.xconfigure.height;
-		driver->_WindowX = e.xconfigure.x;
-		driver->_WindowY = e.xconfigure.y;
+		if (!driver->_FullScreen && driver->_WndActive)
+		{
+			// first time setting decoration sizes
+			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
+			{
+				driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
+				driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
+
+				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
+			}
+
+			driver->_WindowWidth = e.xconfigure.width;
+			driver->_WindowHeight = e.xconfigure.height;
+			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
+			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
+
+			XConfigureEvent event = e.xconfigure;
+
+			nlwarning("Configure x = %d, y = %d, width = %d, height = %d, send event = %d", event.x, event.y, event.width, event.height, event.send_event);
+		}
 
 		break;
 
@@ -1802,7 +1830,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	_WindowX = x;
 	_WindowY = y;
 
-	if (_win == EmptyWindow)
+	if (_win == EmptyWindow || _FullScreen)
 		return;
 
 #ifdef NL_OS_WINDOWS
@@ -1814,6 +1842,13 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	NL3D::MAC::setWindowPos(_win, x, y);
 
 #elif defined (NL_OS_UNIX)
+
+	// first time requesting decoration sizes
+	if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
+	{
+		_DecorationWidth = -1;
+		_DecorationHeight = -1;
+	}
 
 	XMoveWindow(_dpy, _win, x, y);
 
