@@ -922,6 +922,7 @@ bool CDriverGL::swapBuffers()
 bool CDriverGL::release()
 {
 	H_AUTO_OGL(CDriverGL_release)
+
 	// release only if the driver was initialized
 	if (!_Initialized) return true;
 
@@ -1000,13 +1001,13 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 
 	// Setup gl viewport
 	sint ix=(sint)((float)clientWidth*x+0.5f);
-	clamp (ix, 0, clientWidth);
+	clamp (ix, 0, (sint)clientWidth);
 	sint iy=(sint)((float)clientHeight*y+0.5f);
-	clamp (iy, 0, clientHeight);
+	clamp (iy, 0, (sint)clientHeight);
 	sint iwidth=(sint)((float)clientWidth*width+0.5f);
-	clamp (iwidth, 0, clientWidth-ix);
+	clamp (iwidth, 0, (sint)clientWidth-ix);
 	sint iheight=(sint)((float)clientHeight*height+0.5f);
-	clamp (iheight, 0, clientHeight-iy);
+	clamp (iheight, 0, (sint)clientHeight-iy);
 	glViewport (ix, iy, iwidth, iheight);
 }
 
@@ -1061,19 +1062,19 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	{
 		// Setup gl scissor
 		sint ix0=(sint)floor((float)clientWidth * x + 0.5f);
-		clamp (ix0, 0, clientWidth);
+		clamp (ix0, 0, (sint)clientWidth);
 		sint iy0=(sint)floor((float)clientHeight* y + 0.5f);
-		clamp (iy0, 0, clientHeight);
+		clamp (iy0, 0, (sint)clientHeight);
 
 		sint ix1=(sint)floor((float)clientWidth * (x+width) + 0.5f );
-		clamp (ix1, 0, clientWidth);
+		clamp (ix1, 0, (sint)clientWidth);
 		sint iy1=(sint)floor((float)clientHeight* (y+height) + 0.5f );
-		clamp (iy1, 0, clientHeight);
+		clamp (iy1, 0, (sint)clientHeight);
 
 		sint iwidth= ix1 - ix0;
-		clamp (iwidth, 0, clientWidth);
+		clamp (iwidth, 0, (sint)clientWidth);
 		sint iheight= iy1 - iy0;
-		clamp (iheight, 0, clientHeight);
+		clamp (iheight, 0, (sint)clientHeight);
 
 		glScissor (ix0, iy0, iwidth, iheight);
 		glEnable(GL_SCISSOR_TEST);
