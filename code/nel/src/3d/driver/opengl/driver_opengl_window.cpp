@@ -1604,8 +1604,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 			if (nsizes > 0)
 			{
-				nldebug("3D: %d available XRandR modes:", nsizes);
-
+//				nldebug("3D: %d available XRandR modes:", nsizes);
 				for (sint i = 0; i < nsizes; ++i)
 				{
 					// Add this mode
@@ -1614,8 +1613,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 					mode.Height = sizes[i].height;
 					mode.Frequency = 0;
 					modes.push_back(mode);
-
-					nldebug("3D:   Mode %d: %dx%d", i, mode.Width, mode.Height);
+//					nldebug("3D:   Mode %d: %dx%d", i, mode.Width, mode.Height);
 				}
 
 				found = true;
@@ -1635,22 +1633,29 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 #endif
 
 #ifdef XF86VIDMODE
-	int nmodes;
-	XF86VidModeModeInfo **ms;
-	if (!found && XF86VidModeGetAllModeLines(_dpy, screen, &nmodes, &ms))
+	if (!found && _xvidmode_version > 0)
 	{
-		nlinfo("3D: %d available XF86VidMode modes:", nmodes);
-		for (int j = 0; j < nmodes; j++)
+		int nmodes;
+		XF86VidModeModeInfo **ms;
+		if (XF86VidModeGetAllModeLines(_dpy, screen, &nmodes, &ms))
 		{
-			// Add this mode
-			GfxMode mode;
-			mode.Width = (uint16)ms[j]->hdisplay;
-			mode.Height = (uint16)ms[j]->vdisplay;
-			mode.Frequency = modeInfoToFrequency(ms[j]);
-			nlinfo("3D:   Mode %d: %dx%d, %d Hz", j, mode.Width, mode.Height, mode.Frequency);
-			modes.push_back (mode);
+//			nlinfo("3D: %d available XF86VidMode modes:", nmodes);
+			for (int j = 0; j < nmodes; j++)
+			{
+				// Add this mode
+				GfxMode mode;
+				mode.Width = (uint16)ms[j]->hdisplay;
+				mode.Height = (uint16)ms[j]->vdisplay;
+				mode.Frequency = modeInfoToFrequency(ms[j]);
+//				nlinfo("3D:   Mode %d: %dx%d, %d Hz", j, mode.Width, mode.Height, mode.Frequency);
+				modes.push_back (mode);
+			}
+			XFree(ms);
 		}
-		XFree(ms);
+		else
+		{
+			nlwarning("3D: XF86VidModeGetAllModeLines failed");
+		}
 	}
 #endif // XF86VIDMODE
 
@@ -1662,9 +1667,6 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 		mode.Height = DisplayHeight(_dpy, screen);
 		mode.Frequency = 0;
 		modes.push_back(mode);
-
-		nldebug("3D: X11 available mode:");
-		nldebug("3D:   %dx%d", mode.Width, mode.Height);
 	}
 
 #endif
@@ -2144,11 +2146,9 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		_WindowHeight = height;
 	}
 
-	// Update WM hints (update size and allow resizing)
+	// Update WM hints (allow resizing)
 	XSizeHints size_hints;
-//	size_hints.width = width;
-//	size_hints.height = height;
-//	size_hints.flags = PSize;
+	size_hints.flags = 0;
 
 	if (!_Resizable || _FullScreen)
 	{
