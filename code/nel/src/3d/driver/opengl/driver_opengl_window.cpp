@@ -1000,6 +1000,10 @@ bool CDriverGL::saveScreenMode()
 
 #elif defined(NL_OS_UNIX)
 
+	// hide window (hack to avoid black window bug)
+	if (_win)
+		XUnmapWindow(_dpy, _win);
+
 	int screen = DefaultScreen(_dpy);
 	res = false;
 
@@ -1060,6 +1064,10 @@ bool CDriverGL::restoreScreenMode()
 	res = true;
 
 #elif defined(NL_OS_UNIX)
+
+	// hide window (hack to avoid black window bug)
+	if (_win)
+		XUnmapWindow(_dpy, _win);
 
 	int screen = DefaultScreen(_dpy);
 
@@ -1509,6 +1517,10 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 		return false;
 	}
 
+	// show window (hack to avoid black window bug)
+	if (_WindowVisible)
+		XMapRaised(_dpy, _win);
+
 #endif
 
 #endif // NL_OS_WINDOWS
@@ -1527,9 +1539,6 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	// when changing window style, it's possible system change window size too
 	setWindowStyle(mode.Windowed ? EWSWindowed:EWSFullscreen);
 
-	_WindowWidth = mode.Width;
-	_WindowHeight = mode.Height;
-
 	if (!mode.Windowed)
 		_Depth = mode.Depth;
 
@@ -1538,9 +1547,12 @@ bool CDriverGL::setMode(const GfxMode& mode)
 #if defined(NL_OS_MAC) && !defined(NL_MAC_NATIVE)
 	// X11 under Mac OS can't use fullscreen
 	_FullScreen = false;
+#else
+	_FullScreen = !mode.Windowed;
 #endif // NL_MAC_NATIVE
 
 	setWindowSize(mode.Width, mode.Height);
+	setWindowPos(_WindowX, _WindowY);
 
 	return true;
 }
@@ -1929,6 +1941,7 @@ bool CDriverGL::activate()
 		glXMakeCurrent(_dpy, _win, _ctx);
 
 #endif // NL_OS_WINDOWS
+
 	return true;
 }
 
@@ -2037,12 +2050,15 @@ void CDriverGL::setMousePos(float x, float y)
 	if (_win == EmptyWindow)
 		return;
 
+	sint x1 = (sint)((float)_WindowWidth*x);
+	sint y1 = (sint)((float)_WindowHeight*(1.0f-y));
+
 #ifdef NL_OS_WINDOWS
 
 	// NeL window coordinate to MSWindows coordinates
 	POINT pt;
-	pt.x = (sint)((float)(_WindowWidth)*x);
-	pt.y = (sint)((float)(_WindowHeight)*(1.0f-y));
+	pt.x = x1;
+	pt.y = y1;
 	ClientToScreen (_win, &pt);
 	SetCursorPos(pt.x, pt.y);
 
@@ -2052,8 +2068,6 @@ void CDriverGL::setMousePos(float x, float y)
 
 #elif defined (NL_OS_UNIX)
 
-	sint x1 = (sint)((float)_WindowWidth*x);
-	sint y1 = (sint)((float)_WindowHeight*(1.0f-y));
 	XWarpPointer (_dpy, None, _win, None, None, None, None, x1, y1);
 
 #endif // NL_OS_UNIX
@@ -2082,11 +2096,8 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	}
 	else
 	{
-		if (_win)
-		{
-			width = _WindowWidth;
-			height = _WindowHeight;
-		}
+		width = _WindowWidth;
+		height = _WindowHeight;
 	}
 
 #endif // NL_MAC_NATIVE
@@ -2095,9 +2106,6 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 void CDriverGL::setWindowSize(uint32 width, uint32 height)
 {
 	H_AUTO_OGL(CDriverGL_setWindowSize)
-
-	_WindowWidth = width;
-	_WindowHeight = height;
 
 	if (_win == EmptyWindow)
 		return;
@@ -2129,13 +2137,22 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_UNIX)
 
+	if (width != _WindowWidth || height != _WindowHeight)
+	{
+		// resize the window
+		XResizeWindow(_dpy, _win, width, height);
+
+		_WindowWidth = width;
+		_WindowHeight = height;
+	}
+
 	// Update WM hints (update size and allow resizing)
 	XSizeHints size_hints;
-	size_hints.width = width;
-	size_hints.height = height;
-	size_hints.flags = PSize;
+//	size_hints.width = width;
+//	size_hints.height = height;
+//	size_hints.flags = PSize;
 
-	if (!_Resizable)
+	if (!_Resizable || _FullScreen)
 	{
 		size_hints.flags |= PMinSize | PMaxSize;
 		size_hints.min_width = width;
@@ -2145,9 +2162,6 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	}
 
 	XSetWMNormalHints(_dpy, _win, &size_hints);
-
-	// resize the window
-	XResizeWindow(_dpy, _win, width, height);
 
 #endif // NL_OS_WINDOWS
 }
