@@ -440,7 +440,8 @@ void cbInvalidEntityNamesFilename(const std::string &invalidEntityNamesFilename)
 	for(;;)
 	{
 		char str[512];
-		fgets(str, 511, fp);
+		if (fgets(str, 511, fp) == NULL)
+			break;
 		if(feof(fp))
 			break;
 		if (strlen(str) > 0)

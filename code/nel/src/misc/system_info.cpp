@@ -1085,7 +1085,9 @@ string CSystemInfo::availableHDSpace (const string &filename)
 	else
 		cmd += filename;
 	cmd += " >/tmp/nelhdfs";
-	(void) system (cmd.c_str());
+	sint error = system (cmd.c_str());
+	if (error)
+		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
 
 	int fd = open("/tmp/nelhdfs", O_RDONLY);
 	if (fd == -1)

@@ -1384,6 +1384,7 @@ void			CSkeletonModel::renderCLod()
 		CRGBA	plDiffuse;
 		// get the diffuse of the pointLight, attenuated from distance and importance.
 		plDiffuse.modulateFromuiRGBOnly(mainPL->getDiffuse(), lightContrib->AttFactor[0]);
+		plDiffuse.A = 255;
 		// compare the 2 diffuse
 		uint	d0= mainDiffuse.R + mainDiffuse.G + mainDiffuse.B;
 		uint	d1= plDiffuse.R + plDiffuse.G + plDiffuse.B;

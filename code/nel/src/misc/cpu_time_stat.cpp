@@ -44,7 +44,8 @@ bool	CCPUTimeStat::getCPUTicks(uint64& user, uint64& nice, uint64& system, uint6
 
 	// /proc/stat
 			// cpu  [user]     [nice]    [system]    [idle]     [iowait]   [irq] [softirq]
-	fscanf(f, "cpu  %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &user, &nice, &system, &idle, &iowait);
+	if (fscanf(f, "cpu  %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &user, &nice, &system, &idle, &iowait) != 5)
+		nlwarning("Failed to parse /proc/stat");
 
 	fclose(f);
 
@@ -53,8 +54,6 @@ bool	CCPUTimeStat::getCPUTicks(uint64& user, uint64& nice, uint64& system, uint6
 	return false;
 #endif
 }
-
-
 
 // Get absolute ticks values for a specified pid
 bool	CCPUTimeStat::getPIDTicks(uint64& utime, uint64& stime, uint64& cutime, uint64& cstime, uint pid)
@@ -69,7 +68,8 @@ bool	CCPUTimeStat::getPIDTicks(uint64& utime, uint64& stime, uint64& cutime, uin
 
 	// /proc/<pid>/stat
 			// pid com sta ppi pgi ses tty tpg fla mif maf cmi cma [utime]    [stime]    [cutime]   [cstime] ...
-	fscanf(f, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &utime, &stime, &cutime, &cstime);
+	if (fscanf(f, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &utime, &stime, &cutime, &cstime) != 4)
+		nlwarning("Failed to parse /proc/<pid>/stat");
 
 	fclose(f);
 

@@ -875,8 +875,15 @@ NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system()
 
 	string cmd = args[0];
 	log.displayNL ("Executing '%s'", cmd.c_str());
-	system(cmd.c_str());
-	log.displayNL ("End of Execution of '%s'", cmd.c_str());
+	sint error = system(cmd.c_str());
+	if (error)
+	{
+		log.displayNL ("Execution of '%s' failed with error code %d", cmd.c_str(), error);
+	}
+	else
+	{
+		log.displayNL ("End of Execution of '%s'", cmd.c_str());
+	}
 	return true;
 }
 

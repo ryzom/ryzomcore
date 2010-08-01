@@ -1217,10 +1217,18 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 		//uint32 nFileSize = ftell (Handle);
 		nlfseek64 (Handle, nFileSize-4, SEEK_SET);
 		uint32 nOffsetFromBegining;
-		fread (&nOffsetFromBegining, sizeof(uint32), 1, Handle);
+		if (fread (&nOffsetFromBegining, sizeof(uint32), 1, Handle) != 1)
+		{
+			fclose(Handle);
+			return;
+		}
 		nlfseek64 (Handle, nOffsetFromBegining, SEEK_SET);
 		uint32 nNbFile;
-		fread (&nNbFile, sizeof(uint32), 1, Handle);
+		if (fread (&nNbFile, sizeof(uint32), 1, Handle) != 1)
+		{
+			fclose(Handle);
+			return;
+		}
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			// Progress bar
@@ -1232,13 +1240,29 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 
 			char FileName[256];
 			uint8 nStringSize;
-			fread (&nStringSize, 1, 1, Handle);
-			fread (FileName, 1, nStringSize, Handle);
+			if (fread (&nStringSize, 1, 1, Handle) != 1)
+			{
+				fclose(Handle);
+				return;
+			}
+			if (fread (FileName, 1, nStringSize, Handle) != nStringSize)
+			{
+				fclose(Handle);
+				return;
+			}
 			FileName[nStringSize] = 0;
 			uint32 nFileSize2;
-			fread (&nFileSize2, sizeof(uint32), 1, Handle);
+			if (fread (&nFileSize2, sizeof(uint32), 1, Handle) != 1)
+			{
+				fclose(Handle);
+				return;
+			}
 			uint32 nFilePos;
-			fread (&nFilePos, sizeof(uint32), 1, Handle);
+			if (fread (&nFilePos, sizeof(uint32), 1, Handle) != 1)
+			{
+				fclose(Handle);
+				return;
+			}
 			string sTmp = toLower(string(FileName));
 			if (sTmp.empty())
 			{
