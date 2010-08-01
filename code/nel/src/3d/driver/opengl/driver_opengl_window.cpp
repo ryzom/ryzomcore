@@ -1542,8 +1542,6 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!mode.Windowed)
 		_Depth = mode.Depth;
 
-	_FullScreen = !mode.Windowed;
-
 #if defined(NL_OS_MAC) && !defined(NL_MAC_NATIVE)
 	// X11 under Mac OS can't use fullscreen
 	_FullScreen = false;
