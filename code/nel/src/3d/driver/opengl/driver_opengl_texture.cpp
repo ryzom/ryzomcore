@@ -1939,8 +1939,7 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 	}
 	else
 	{
-		width = _WindowWidth;
-		height = _WindowHeight;
+		getWindowSize(width, height);
 	}
 
 	return false;

@@ -397,11 +397,11 @@ void			CDriverGLStates::alphaFunc(float threshold)
 
 
 // ***************************************************************************
-void			CDriverGLStates::stencilFunc(GLenum stencilFunc, GLint ref, GLuint mask)
+void			CDriverGLStates::stencilFunc(GLenum func, GLint ref, GLuint mask)
 {
 	H_AUTO_OGL(CDriverGLStates_stencilFunc)
 #ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if((stencilFunc!=_CurStencilFunc) || (ref!=_CurStencilRef) || (mask!=_CurStencilMask))
+	if((func!=_CurStencilFunc) || (ref!=_CurStencilRef) || (mask!=_CurStencilMask))
 #endif
 	{
 		// new state

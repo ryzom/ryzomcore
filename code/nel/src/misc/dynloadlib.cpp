@@ -208,11 +208,12 @@ bool CLibrary::loadLibrary(const std::string &libName, bool addNelDecoration, bo
 	_LibHandle = nlLoadLibrary(libPath);
 	_LibFileName = libPath;
 	// MTR: some new error handling. Just logs if it couldn't load the handle.
-	if(_LibHandle == NULL) {
+	if(_LibHandle == NULL)
+	{
 #ifdef NL_OS_UNIX
-		char *errormsg=dlerror();
+		const char *errormsg = dlerror();
 #else
-		const char *errormsg="Verify DLL existence";
+		const char *errormsg = "Verify DLL existence";
 #endif
 		nlwarning("Loading library %s failed: %s", libPath.c_str(), errormsg);
 	}
