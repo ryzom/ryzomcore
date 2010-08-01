@@ -405,7 +405,7 @@ void			CDriverGLStates::stencilFunc(GLenum func, GLint ref, GLuint mask)
 #endif
 	{
 		// new state
-		_CurStencilFunc = stencilFunc;
+		_CurStencilFunc = func;
 		_CurStencilRef = ref;
 		_CurStencilMask = mask;
 

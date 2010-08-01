@@ -260,7 +260,7 @@ void CAsyncFileManager::CMultipleFileLoad::run (void)
 			//fseek (f, 0, SEEK_SET);
 			ptr = new uint8[filesize];
 			if (fread (ptr, filesize, 1, f) != 1)
-				nlwarning("AFM: Couldn't read '%s'", _FileName[i].c_str());
+				nlwarning("AFM: Couldn't read '%s'", _FileNames[i].c_str());
 			fclose (f);
 
 			*_Ptrs[i] = ptr;
