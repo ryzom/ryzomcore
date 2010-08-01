@@ -360,16 +360,16 @@ public:
 	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
 
 	/// Setup texture env functions. Used by setupMaterial
-	void				setTextureEnvFunction(uint stage, CMaterial& mat);
+	void					setTextureEnvFunction(uint stage, CMaterial& mat);
 
 	/// setup the texture matrix for a given number of stages (starting from 0)
-	void      setupUserTextureMatrix(uint numStages, CMaterial& mat);
+	void					setupUserTextureMatrix(uint numStages, CMaterial& mat);
 
 	/// disable all texture matrix
-	void      disableUserTextureMatrix();
+	void					disableUserTextureMatrix();
 
 	/// For objects with caustics, setup the first texture (which actually is the one from the material)
-	/*static inline void		setupCausticsFirstTex(const CMaterial &mat);
+	/*static inline void	setupCausticsFirstTex(const CMaterial &mat);
 
 	/// For objects with caustics, setup the caustic texture itself
 	static inline void		setupCausticsSecondTex(uint stage);*/
@@ -575,23 +575,23 @@ public:
 
 	/// \name texture addressing modes
 	// @{
-	virtual bool supportTextureShaders() const;
+	virtual bool			supportTextureShaders() const;
 
-	virtual bool isWaterShaderSupported() const;
+	virtual bool			isWaterShaderSupported() const;
 
-	virtual bool isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
+	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
 
-	virtual void setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
+	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
 
 	/// \name EMBM support
 	// @{
-		virtual bool supportEMBM() const;
-		virtual bool isEMBMSupportedAtStage(uint stage) const;
-		virtual void setEMBMMatrix(const uint stage, const float mat[4]);
+		virtual bool		supportEMBM() const;
+		virtual bool		isEMBMSupportedAtStage(uint stage) const;
+		virtual void		setEMBMMatrix(const uint stage, const float mat[4]);
 	// @}
 
-	virtual bool supportPerPixelLighting(bool specular) const;
+	virtual bool			supportPerPixelLighting(bool specular) const;
 
 
 	/// \name Misc
