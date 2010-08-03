@@ -950,12 +950,12 @@ float CPatchManager::getCurrentFileProgress() const
 // ****************************************************************************
 void CPatchManager::setRWAccess (const string &filename)
 {
-	ucstring s = CI18N::get("uiSetAttrib") + filename;
+	ucstring s = CI18N::get("uiSetAttrib") + " " + filename;
 	setState(true, s);
 
 	if (!NLMISC::CFile::setRWAccess(filename))
 	{
-		s = CI18N::get("uiAttribErr") + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiAttribErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
 		throw Exception (s.toString());
 	}
@@ -964,7 +964,7 @@ void CPatchManager::setRWAccess (const string &filename)
 // ****************************************************************************
 string CPatchManager::deleteFile (const string &filename, bool bThrowException, bool bWarning)
 {
-	ucstring s = CI18N::get("uiDelFile") + filename;
+	ucstring s = CI18N::get("uiDelFile") + " " + filename;
 	setState(true, s);
 
 	if (!NLMISC::CFile::fileExists(filename))
@@ -976,7 +976,7 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 
 	if (!NLMISC::CFile::deleteFile(filename))
 	{
-		s = CI18N::get("uiDelErr") + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiDelErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
@@ -989,12 +989,12 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 // ****************************************************************************
 void CPatchManager::renameFile (const string &src, const string &dst)
 {
-	ucstring s = CI18N::get("uiRenameFile") + NLMISC::CFile::getFilename(src);
+	ucstring s = CI18N::get("uiRenameFile") + " " + NLMISC::CFile::getFilename(src);
 	setState(true, s);
 
 	if (!NLMISC::CFile::moveFile(dst.c_str(), src.c_str()))
 	{
-		s = CI18N::get("uiRenameErr") + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiRenameErr") + " " + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
 		throw Exception (s.toString());
 	}
@@ -1113,7 +1113,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 
 		try
 		{
-			ucstring s = CI18N::get("uiLoginGetFile") + NLMISC::CFile::getFilename(srcName);
+			ucstring s = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename(srcName);
 			setState(true, s);
 
 			// get the new file
@@ -1141,7 +1141,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 				throw Exception(e.what());
 			}
 
-			ucstring s = CI18N::get("uiDLURIFailed") + serverDisplayPath;
+			ucstring s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
 			setState(true, s);
 
 			// this server is unavailable
@@ -1180,7 +1180,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 	try
 	{
 	#ifdef USE_CURL
-		ucstring s = CI18N::get("uiDLWithCurl") + dest;
+		ucstring s = CI18N::get("uiDLWithCurl") + " " + dest;
 		setState(true, s);
 
 		// user agent = nel_launcher
@@ -1423,7 +1423,7 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 //		_utimbuf utb;
 //		utb.actime = utb.modtime = nDate;
 		setRWAccess(sFilename);
-		ucstring s = CI18N::get("uiChangeDate") + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
+		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
 						" -> " + toString(nDate);
 		setState(true,s);
 
@@ -1431,10 +1431,10 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 //		if (_utime (sFilename.c_str (), &utb) == -1)
 		{
 			int err = NLMISC::getLastError();
-			s = CI18N::get("uiChgDateErr") + sFilename + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
+			s = CI18N::get("uiChgDateErr") + " " + sFilename + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
 			setState(true,s);
 		}
-		s = CI18N::get("uiNowDate") + sFilename + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename));
+		s = CI18N::get("uiNowDate") + " " + sFilename + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename));
 		setState(true,s);
 	}
 }
@@ -1668,14 +1668,14 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 	else
 		DestPath = CPath::standardizePath (dstPath);
 
-	ucstring s = CI18N::get("uiUnpack") + NLMISC::CFile::getFilename(SourceName);
+	ucstring s = CI18N::get("uiUnpack") + " " + NLMISC::CFile::getFilename(SourceName);
 	setState(true,s);
 
 	// Read Header of the BNP File
 	vector<CPatchManager::SBNPFile> Files;
 	if (!readBNPHeader(SourceName, Files))
 	{
-		ucstring s = CI18N::get("uiUnpackErrHead") + SourceName;
+		ucstring s = CI18N::get("uiUnpackErrHead") + " " + SourceName;
 		setState(true,s);
 		return false;
 	}
@@ -1935,7 +1935,7 @@ void CPatchManager::clearDataScanLog()
 // ***************************************************************************
 void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate)
 {
-	sTranslate = CI18N::get("uiCorruptedFile") + ftp.FileName + " (" +
+	sTranslate = CI18N::get("uiCorruptedFile") + " " + ftp.FileName + " (" +
 		toString("%.1f ", (float)ftp.FinalFileSize/1000000.f) + CI18N::get("uiMb") + ")";
 }
 
