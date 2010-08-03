@@ -1,11 +1,11 @@
 # These are Windows/MFC apps
 IF(WIN32)
-  ADD_SUBDIRECTORY(seven_zip)
   ADD_SUBDIRECTORY(bug_report)
   SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 ENDIF(WIN32)
 
 ADD_SUBDIRECTORY(client_sheets)
+ADD_SUBDIRECTORY(seven_zip)
 
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h motion/modes/*.cpp motion/modes/*.h r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp interface_v3/*.h interface_v3/*.cpp)
 

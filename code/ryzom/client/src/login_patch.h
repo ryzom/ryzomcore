@@ -206,7 +206,7 @@ public:
 	void forceStopPatchThread();
 
 	bool mustLaunchBatFile() const { return MustLaunchBatFile; }
-	void createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart = true);
+	void createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart = true, bool useBatchFile = true);
 	void executeBatchFile();
 	void deleteBatchFile();
 	void reboot();
@@ -257,7 +257,11 @@ public:
 	// By default the name used is the name of the current executable.
 	// But for external torrent downloader we must set "client_ryzom_rd.exe"
 	void setRyzomFilename(const std::string& ryzomFilename) { RyzomFilename = ryzomFilename; }
-	// Use by installation software to download a file only if necessary
+
+	// Used when client data is not located in current directory
+	void setClientRootPath(const std::string& clientRootPath);
+
+	// Used by installation software to download a file only if necessary
 	static bool download(const std::string& patchPath, const std::string& sourcePath,
 									  const std::string& tmpDirectory, uint32 timestamp);
 	// Used by installation software to create install.bat file (not used)

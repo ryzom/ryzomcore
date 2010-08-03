@@ -1,0 +1,33 @@
+FILE(GLOB SRC *.cpp *.h
+	${CMAKE_SOURCE_DIR}/client/src/client_cfg.cpp
+	${CMAKE_SOURCE_DIR}/client/src/login_patch.cpp
+	${CMAKE_SOURCE_DIR}/client/src/login_xdelta.cpp
+)
+
+SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
+
+ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
+
+INCLUDE_DIRECTORIES(
+			${CMAKE_BINARY_DIR}
+			${LIBXML2_INCLUDE_DIR}
+			${NEL_INCLUDE_DIR}
+			${CURL_INCLUDE_DIRS}
+			${CMAKE_CURRENT_SOURCE_DIR}
+			${CMAKE_SOURCE_DIR}/client/src
+)
+
+TARGET_LINK_LIBRARIES(ryzom_client_patcher 	${PLATFORM_LINKFLAGS}
+				${NELMISC_LIBRARY}
+				ryzom_gameshare
+				${NELNET_LIBRARY}
+				${CURL_LIBRARIES}
+				${SEVENZIP_LIBRARY})
+
+ADD_DEFINITIONS(-DRZ_NO_CLIENT -DNL_USE_SEVENZIP)
+
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/client/src/stdpch.cpp)
+ENDIF(WITH_PCH)
+
+INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)

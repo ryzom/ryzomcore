@@ -23,6 +23,7 @@
 #include "client_sheets/fx_stick_mode.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/vector.h"
+#include "nel/3d/animation_time.h"
 
 namespace NL3D
 {

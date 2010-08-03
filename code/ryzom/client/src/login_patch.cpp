@@ -79,7 +79,6 @@ static std::vector<std::string> ForceRemovePatchCategories;
 // the actual file is updated
 void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf)
 {
-#ifdef NL_DEBUG
 	NLMISC::CConfigFile::CVar *catList = cf.getVarPtr("ForceMainlandPatchCategories");
 	if (catList)
 	{
@@ -88,14 +87,12 @@ void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf)
 			ForceMainlandPatchCategories.push_back(catList->asString(k));
 		}
 	}
-#endif
 }
 
 // TMP for debug : force some category in the patch to be flagged as 'mainland' until
 // the actual file is updated
 void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf)
 {
-#ifdef NL_DEBUG
 	NLMISC::CConfigFile::CVar *catList = cf.getVarPtr("RemovePatchCategories");
 	if (catList)
 	{
@@ -104,7 +101,6 @@ void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf)
 			ForceRemovePatchCategories.push_back(catList->asString(k));
 		}
 	}
-#endif
 }
 
 
@@ -191,6 +187,7 @@ public:
 };
 #endif
 
+static std::string ClientRootPath;
 
 // ****************************************************************************
 CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_state")
@@ -199,8 +196,8 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 
 	UpdateBatchFilename = "updt_nl.bat";
 
-	ClientPatchPath = "./unpack/";
-	ClientDataPath = "./data/";
+	// use current directory by default
+	setClientRootPath("./");
 
 	VerboseLog = true;
 
@@ -219,6 +216,14 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	_AsyncDownloader = NULL;
 	_StateListener = NULL;
 	_StartRyzomAtEnd = true;
+}
+
+// ****************************************************************************
+void CPatchManager::setClientRootPath(const std::string& clientRootPath)
+{
+	ClientRootPath = clientRootPath;
+	ClientPatchPath = ClientRootPath + "unpack/";
+	ClientDataPath = ClientRootPath + "data/";
 }
 
 // ****************************************************************************
@@ -734,17 +739,23 @@ void CPatchManager::deleteBatchFile()
 }
 
 // ****************************************************************************
-void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart)
+void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart, bool useBatchFile)
 {
 	uint nblab = 0;
-	deleteBatchFile();
-	FILE *fp = fopen (UpdateBatchFilename.c_str(), "wt");
-	if (fp == 0)
+
+	FILE *fp = NULL;
+
+	if (useBatchFile)
 	{
-		string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", UpdateBatchFilename.c_str(), errno, strerror(errno));
-		throw Exception (err);
+		deleteBatchFile();
+		fp = fopen (UpdateBatchFilename.c_str(), "wt");
+		if (fp == 0)
+		{
+			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", UpdateBatchFilename.c_str(), errno, strerror(errno));
+			throw Exception (err);
+		}
+		fprintf(fp, "@echo off\n");
 	}
-	fprintf(fp, "@echo off\n");
 
 	// Unpack files with category ExtractPath non empty
 	const CBNPCategorySet &rDescCats = descFile.getCategories();
@@ -768,32 +779,57 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			}
 			catch(...)
 			{
-				fclose(fp);
+				if (useBatchFile)
+				{
+					fclose(fp);
+				}
+
 				throw;
 			}
 			if (!result)
 			{
 //:TODO: handle exception?
 				string err = toString("Error unpacking %s", rFilename.c_str());
-				fclose(fp);
+
+				if (useBatchFile)
+				{
+					fclose(fp);
+				}
+
 				throw Exception (err);
 			}
 			else
 			{
 				for (uint32 fff = 0; fff < vFilenames.size (); fff++)
 				{
-					string SrcPath = CPath::standardizeDosPath(ClientPatchPath);
-					string SrcName = SrcPath + vFilenames[fff];
-					string DstPath = CPath::standardizeDosPath(rCat.getUnpackTo());
-					string DstName = DstPath + vFilenames[fff];
-					NLMISC::CFile::createDirectoryTree(rCat.getUnpackTo());
+					string SrcPath = ClientPatchPath;
+					string DstPath = rCat.getUnpackTo();
+					NLMISC::CFile::createDirectoryTree(DstPath);
 					// this file must be moved
 
-					fprintf(fp, ":loop%u\n", nblab);
-					fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
-					fprintf(fp, "del %s\n", DstName.c_str());
-					fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
-					fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+					if (useBatchFile)
+					{
+						SrcPath = CPath::standardizeDosPath(SrcPath);
+						DstPath = CPath::standardizeDosPath(DstPath);
+					}
+
+					std::string SrcName = SrcPath + vFilenames[fff];
+					std::string DstName = DstPath + vFilenames[fff];
+
+					if (useBatchFile)
+					{
+						fprintf(fp, ":loop%u\n", nblab);
+						fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
+						fprintf(fp, "del %s\n", DstName.c_str());
+						fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
+						fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+					}
+					else
+					{
+						deleteFile(DstName);
+						CFile::moveFile(DstName.c_str(), SrcName.c_str());
+					}
+
 					nblab++;
 				}
 			}
@@ -803,31 +839,54 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	// Finalize batch file
 	if (NLMISC::CFile::isExists("patch") && NLMISC::CFile::isDirectory("patch"))
 	{
-		fprintf(fp, ":looppatch\n");
+		if (useBatchFile)
+		{
+			fprintf(fp, ":looppatch\n");
+		}
 
 		vector<string> vFileList;
 		CPath::getPathContent ("patch", false, false, true, vFileList, NULL, false);
 		for(uint32 i = 0; i < vFileList.size(); ++i)
-			fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+		{
+			if (useBatchFile)
+			{
+				fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+			}
+			else
+			{
+				CFile::deleteFile(vFileList[i]);
+			}
+		}
 
-		fprintf(fp, "rd /Q /S patch\n");
-		fprintf(fp, "if exist patch goto looppatch\n");
+		if (useBatchFile)
+		{
+			fprintf(fp, "rd /Q /S patch\n");
+			fprintf(fp, "if exist patch goto looppatch\n");
+		}
+		else
+		{
+			CFile::deleteDirectory("patch");
+		}
 	}
 
-	if (wantRyzomRestart)
+	if (useBatchFile)
 	{
-		fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
-	}
-	bool writeError = ferror(fp) != 0;
-	bool diskFull = ferror(fp) && errno == 28 /* ENOSPC */;
-	fclose(fp);
-	if (diskFull)
-	{
-		throw NLMISC::EDiskFullError(UpdateBatchFilename.c_str());
-	}
-	if (writeError)
-	{
-		throw NLMISC::EWriteError(UpdateBatchFilename.c_str());
+		if (wantRyzomRestart)
+		{
+			fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
+		}
+
+		bool writeError = ferror(fp) != 0;
+		bool diskFull = ferror(fp) && errno == 28 /* ENOSPC */;
+		fclose(fp);
+		if (diskFull)
+		{
+			throw NLMISC::EDiskFullError(UpdateBatchFilename.c_str());
+		}
+		if (writeError)
+		{
+			throw NLMISC::EWriteError(UpdateBatchFilename.c_str());
+		}
 	}
 }
 
@@ -1046,6 +1105,24 @@ void CPatchManager::readDescFile(sint32 nVersion)
 		throw Exception ("Can't open file '%s'", srcName.c_str ());
 
 	uint cat;
+
+	if (ClientRootPath != "./")
+	{
+		// fix relative paths
+		for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
+		{
+			CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
+
+			std::string unpackTo = category.getUnpackTo();
+
+			if (unpackTo.substr(0, 2) == "./")
+			{
+				unpackTo = ClientRootPath + unpackTo.substr(2);
+				category.setUnpackTo(unpackTo);
+			}
+		}
+	}
+
 	// tmp for debug : flag some categories as 'Mainland'
 	for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
 	{
@@ -1664,7 +1741,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 //		SourceName = ClientPatchPath + srcBigfile;
 
 	if (dstPath.empty())
-		DestPath = "./";
+		DestPath = ClientRootPath;
 	else
 		DestPath = CPath::standardizePath (dstPath);
 
@@ -3315,7 +3392,7 @@ void CDownloadThread::run()
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 
-	std::string patchPath = CPath::standardizePath (std::string("./")+TheTmpInstallDirectory)+std::string("patch/");
+	std::string patchPath = CPath::standardizePath (ClientRootPath+TheTmpInstallDirectory)+"patch/";
 
 
 	static bool _FirstTime = true;
@@ -3418,7 +3495,7 @@ void CDownloadThread::run()
 
 void CInstallThread::run()
 {
-	std::string patchPath = CPath::standardizePath (std::string("./")+TheTmpInstallDirectory)+std::string("patch/");
+	std::string patchPath = CPath::standardizePath (ClientRootPath+TheTmpInstallDirectory)+"patch/";
 	CPatchManager *pPM = CPatchManager::getInstance();
 
 	std::set<std::string> allowed;
@@ -3535,7 +3612,7 @@ void CInstallThread::run()
 
 	{
 		// remove date from tmp directory (because install is finished)
-		std::string install = CPath::standardizePath (std::string("./")+TheTmpInstallDirectory);
+		std::string install = CPath::standardizePath (ClientRootPath+TheTmpInstallDirectory);
 
 		std::vector<std::string> vFiles;
 		// Delete all classic file from tmp directory
