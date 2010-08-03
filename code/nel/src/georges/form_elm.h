@@ -87,6 +87,7 @@ public:
 	virtual bool	setValueByName (bool value, const char *name, bool *created);
 	virtual bool	setValueByName (NLMISC::CRGBA value, const char *name, bool *created);
 	virtual UFormElm	*getParent () const;
+	virtual const CType *getType ();
 	virtual bool	isArray () const;
 	virtual bool	getArraySize (uint &size) const;
 	virtual bool	getArrayNode (const UFormElm **result, uint arrayIndex) const;
@@ -432,6 +433,7 @@ public:
 	bool						setParent (CFormElm *parent);
 	void						getFormName (std::string &result, const CFormElm *child) const;
 	void						getDependencies (std::set<std::string> &dependencies) const;
+	const CType*                      getType ();
 
 	// Call by CFormLoader
 	void						read (xmlNodePtr node, CFormLoader &loader, const CType *type, CForm *form);

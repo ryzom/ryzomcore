@@ -228,6 +228,13 @@ bool CFormElm::isAtom () const
 
 // ***************************************************************************
 
+const CType* CFormElm::getType ()
+{
+	warning (false, "getType", "This node is not an atom.");
+	return 0;
+}
+// ***************************************************************************
+
 bool CFormElm::getValue (string &/* result */, TEval /* evaluate */) const
 {
 	warning (false, "getValue", "This node is not an atom.");
@@ -2804,6 +2811,13 @@ CFormElmAtom::CFormElmAtom (CForm *form, CFormElm *parentNode, const CFormDfn *p
 bool CFormElmAtom::isAtom () const
 {
 	return true;
+}
+
+// ***************************************************************************
+
+const CType* CFormElmAtom::getType ()
+{
+	return Type;
 }
 
 // ***************************************************************************
