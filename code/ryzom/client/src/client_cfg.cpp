@@ -225,11 +225,13 @@ const string ConfigFileName = "client.cfg";
 ////////////
 // EXTERN //
 ////////////
+#ifndef RZ_NO_CLIENT
 extern NL3D::UScene		*Scene;
 extern NL3D::UDriver	*Driver;
 extern CRyzomTime		RT;
 extern string	Cookie;
 extern string	FSAddr;
+#endif
 
 /////////////
 // METHODS //
@@ -860,6 +862,7 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
 
+#ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
 	// by the nel_launcher, so it can't be local
 	if(!Cookie.empty())
@@ -871,6 +874,7 @@ void CClientConfig::setValues()
 	{
 		nlassert (FSAddr.empty());
 	}
+#endif
 
 	/////////////////
 	// USER ENTITY //
@@ -1392,6 +1396,7 @@ void CClientConfig::setValues()
 		}
 	}
 
+#ifndef RZ_NO_CLIENT
 	// printf commands in loading screens
 	ClientCfg.PrintfCommands.clear();
 	ClientCfg.PrintfCommandsFreeTrial.clear();
@@ -1424,6 +1429,7 @@ void CClientConfig::setValues()
 			}
 		}
 	}
+#endif
 
 	READ_INT_FV(LoadingStringCount)
 
@@ -1668,6 +1674,8 @@ void CClientConfig::setValues()
 		cfgWarning("No 'OffImpactFX'");
 #endif // !FINAL_VERSION
 
+#ifndef RZ_NO_CLIENT
+
 	//////////
 	// INIT //
 	// FPU
@@ -1773,6 +1781,7 @@ void CClientConfig::setValues()
 		RT.resetTickOffset();
 		RT.increaseTickOffset( tickOffset );
 	}
+#endif
 
 	// for reset effect of variable in mainLoop(), set true
 	ClientCfg.IsInvalidated= true;
@@ -2043,6 +2052,7 @@ void CClientConfig::init(const string &configFileName)
 //-----------------------------------------------
 void CClientConfig::release ()
 {
+#ifndef RZ_NO_CLIENT
 	// Do we have to save the cfg file ?
 	if (ClientCfg.SaveConfig)
 	{
@@ -2099,6 +2109,7 @@ void CClientConfig::release ()
 		// Save it
 		ClientCfg.ConfigFile.save ();
 	}
+#endif
 }
 
 bool CClientConfig::readBool (const std::string &varName)
