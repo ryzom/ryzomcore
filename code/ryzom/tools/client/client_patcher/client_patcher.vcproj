@@ -5,7 +5,6 @@
 	Name="client_patcher"
 	ProjectGUID="{B0323569-5F46-4E7D-A045-56697BEFBF03}"
 	RootNamespace="client_patcher"
-	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -43,11 +42,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="../../../common/src;../../../client/src"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;CURL_STATICLIB;RZ_NO_CLIENT;NL_USE_SEVENZIP"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -62,8 +62,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="bin\$(ProjectName)_d.exe"
 				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -111,19 +113,17 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="4"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".;../../../common/src;../../../client/src"
+				AdditionalIncludeDirectories="../../../common/src;../../../client/src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;CURL_STATICLIB;RZ_NO_CLIENT;NL_USE_SEVENZIP"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				PrecompiledHeaderThrough="stdpch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -140,7 +140,6 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="bin\$(ProjectName)_d.exe"
-				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -173,9 +172,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="2"
 			CharacterSet="2"
-			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -200,12 +197,10 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories="../../../client/src;../../../common/src;."
+				AdditionalIncludeDirectories="../../../common/src;../../../client/src"
 				PreprocessorDefinitions="WIN32;NDEBUG;CURL_STATICLIB"
 				StringPooling="true"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdpch.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -220,11 +215,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libcurl.lib ssleay32.lib libeay32.lib zlib.lib"
+				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="bin\$(ProjectName)_r.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -256,7 +251,6 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="2"
 			CharacterSet="2"
 			WholeProgramOptimization="0"
 			>
@@ -284,13 +278,11 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories="../../../client/src;../../../common/src;."
-				PreprocessorDefinitions="WIN32;NDEBUG;CURL_STATICLIB"
+				AdditionalIncludeDirectories="../../../common/src;../../../client/src"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;CURL_STATICLIB;RZ_NO_CLIENT;NL_USE_SEVENZIP"
 				StringPooling="true"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdpch.h"
-				WarningLevel="3"
+				WarningLevel="2"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -304,11 +296,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libcurl.lib ssleay32.lib libeay32.lib zlib.lib"
+				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="bin\$(ProjectName)_r.exe"
-				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
