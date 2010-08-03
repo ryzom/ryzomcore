@@ -31,7 +31,6 @@
 #include "debug_client.h"
 #include "view.h"	// For the cameraDistance funtion
 #include "user_entity.h"
-#include "interface_v3/interface_element.h" //for convertColor function
 #include "misc.h"
 
 // 3D Interface.
@@ -379,6 +378,7 @@ CClientConfig::CClientConfig()
 #endif
 	PatchUrl = "";
 	PatchVersion = "";
+	PatchServer = "";
 	RingReleaseNotePath = "http://atys.ryzom.com/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://atys.ryzom.com/releasenotes/index.php";
 
@@ -1021,6 +1021,7 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
+	READ_STRING_FV(PatchServer)
 
 	///////////////
 	// ANIMATION //
@@ -1409,7 +1410,7 @@ void CClientConfig::setValues()
 					SPrintfCommand pcom;
 					pcom.X = pc->asInt(i);
 					pcom.Y = pc->asInt(i+1);
-					pcom.Color = CInterfaceElement::convertColor( pc->asString(i+2).c_str() );
+					pcom.Color = stringToRGBA( pc->asString(i+2).c_str() );
 					pcom.FontSize = pc->asInt(i+3);
 					pcom.Text = pc->asString(i+4);
 

@@ -28,10 +28,15 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/config_file.h"
+
+#include "nel/sound/sound_anim_manager.h"
+
 // std.
 #include <string>
+
 // Game Share
 #include "game_share/gender.h"
+#include "game_share/character_title.h"
 
 
 ///////////
@@ -270,6 +275,7 @@ struct CClientConfig
 	bool			PatchWanted;
 	std::string		PatchUrl;
 	std::string		PatchVersion;
+	std::string		PatchServer;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
