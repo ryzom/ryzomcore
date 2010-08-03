@@ -26,7 +26,8 @@ using namespace std;
 using namespace NLMISC;
 
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 #ifndef NL_STATIC
 

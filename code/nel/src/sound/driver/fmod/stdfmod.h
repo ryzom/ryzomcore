@@ -22,6 +22,7 @@
 #include <fmod.h>
 
 #include <cmath>
+#include <limits>
 
 #include <nel/misc/common.h>
 #include <nel/misc/time_nl.h>

@@ -28,7 +28,8 @@
 using namespace NLMISC;
 using namespace std;
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 static const std::string	EmptyString;
 
