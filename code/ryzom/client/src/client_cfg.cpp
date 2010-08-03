@@ -2010,7 +2010,8 @@ void CClientConfig::init(const string &configFileName)
 			}
 			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
 #ifdef RYZOM_SHARE_PREFIX
-			fprintf(fp, "PreDataPath          = { \"%s/data\" };\n", RYZOM_SHARE_PREFIX);
+			fprintf(fp, "PreDataPath          = { \"user\", \"patch\", \"examples\", \"%s/data/fonts\", \"%s/data/gamedev.bnp\" };\n", RYZOM_SHARE_PREFIX, RYZOM_SHARE_PREFIX);
+			fprintf(fp, "DataPath             = { \"%s/data\" };\n", RYZOM_SHARE_PREFIX);
 #endif // RYZOM_SHARE_PREFIX
 			fclose(fp);
 		}
