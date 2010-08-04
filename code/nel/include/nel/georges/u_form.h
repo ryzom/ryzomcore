@@ -67,6 +67,9 @@ public:
 	/// Get a mutable pointer on the root element of the form. It is a struct node.
 	virtual UForm			*getParentForm (uint parent) const = 0;
 
+	// Get the form filename with extension
+	virtual const std::string &getFilename () const = 0;
+
 	/**
 	  * Get the comment
 	  */
