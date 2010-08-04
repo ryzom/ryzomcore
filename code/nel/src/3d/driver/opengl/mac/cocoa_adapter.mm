@@ -255,16 +255,13 @@ nlWindow createWindow(const GfxMode& mode)
 	return view;
 }
 
-/// destroy the given window and uninitialize the cocoa application
+/// destroy the given window
 bool destroyWindow(nlWindow wnd)
 {
 	NSView* view = (NSView*)wnd;
 
 	// release the window
 	[[view window] release];
-
-	// shut down the application
-	[NSApp terminate:nil];
 
 	// release the pool
 	[g_pool release];
