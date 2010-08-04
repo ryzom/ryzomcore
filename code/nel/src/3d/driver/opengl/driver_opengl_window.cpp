@@ -1580,7 +1580,9 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 		// Mode index
 		modeIndex++;
 	}
-#elif defined(NL_OS_MAC)
+
+#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
 	NL3D::MAC::getModes(modes);
 
 #elif defined (NL_OS_UNIX)
