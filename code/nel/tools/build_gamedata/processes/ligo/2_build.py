@@ -26,7 +26,7 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
-sys.path.append("../../configuration/project")
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -53,7 +53,7 @@ if LigoExportLand != "":
 	elif ExecTimeout == "":
 		toolLogfail(log, ExecTimeoutTool, ToolSuffix)
 	else:
-		subprocess.call([ ExecTimeout, str(LigoExportTimeout), LandExport, ScriptDirectory + "/configuration/project/generated/land_exporter.cfg" ])
+		subprocess.call([ ExecTimeout, str(LigoExportTimeout), LandExport, ActiveProjectDirectory + "/generated/land_exporter.cfg" ])
 
 	printLog(log, ">>> Copy to zone builder <<<")
 	dirSource = ExportBuildDirectory + "/" + LigoZoneBuildDirectory

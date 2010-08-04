@@ -26,6 +26,7 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("configuration")
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -139,11 +140,9 @@ printLog(log, "--- Run the setup projects")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
-mkPath(log, "configuration/project")
-removeFilesRecursive(log, "configuration/project")
 # For each project
 for projectName in ProjectsToProcess:
-	copyFilesRecursive(log, WorkspaceDirectory + "/" + projectName, "configuration/project")
+	os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
 	os.chdir("processes")
 	try:
 		subprocess.call([ "python", "0_setup.py" ])
@@ -157,9 +156,6 @@ for projectName in ProjectsToProcess:
 		log.write(projectLogData)
 	except Exception, e:
 		printLog(log, "<" + projectName + "> " + str(e))
-	removeFilesRecursive(log, WorkspaceDirectory + "/" + projectName)
-	copyFilesRecursive(log, "configuration/project", WorkspaceDirectory + "/" + projectName)
-	removeFilesRecursive(log, "configuration/project")
 printLog(log, "")
 
 log.close()

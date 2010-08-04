@@ -26,7 +26,7 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
-sys.path.append("../../configuration/project")
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -73,8 +73,8 @@ printLog(log, ">>> Setup client directories <<<")
 # Setup land exporter cfg
 if LigoExportLand != "":
 	printLog(log, ">>> Setup land exporter cfg <<<")
-	mkPath(log, ScriptDirectory + "/configuration/project/generated")
-	cf = open(ScriptDirectory + "/configuration/project/generated/land_exporter.cfg", "w")
+	mkPath(log, ActiveProjectDirectory + "/generated")
+	cf = open(ActiveProjectDirectory + "/generated/land_exporter.cfg", "w")
 	cf.write("\n")
 	cf.write("// Ligo settings\n")
 	cf.write("\n")

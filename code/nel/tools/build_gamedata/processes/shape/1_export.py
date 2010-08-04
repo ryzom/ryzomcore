@@ -26,7 +26,7 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
-sys.path.append("../../configuration/project")
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -35,6 +35,30 @@ from buildsite import *
 from process import *
 from tools import *
 from directories import *
+
+def hackBigTree():
+	# FO_S2_big_tree is corrupt on first export...
+	outDirTag = ExportBuildDirectory + "/" + ShapeTagExportDirectory
+	outDirWithCoarse = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
+	shapeName = "FO_S2_big_tree.shape"
+	tagName = "FO_S2_big_tree.max.tag"
+	hackName = "FO_S2_big_tree_hack.tag"
+	if os.path.exists(outDirWithCoarse + "/" + shapeName) and os.path.exists(outDirTag + "/" + tagName) and not os.path.exists(outDirTag + "/" + hackName):
+		printLog(log, "Removing bad export of FO_S2_big_tree")
+		printLog(log, "RM " + outDirWithCoarse + "/" + shapeName)
+		os.remove(outDirWithCoarse + "/" + shapeName)
+		printLog(log, "RM " + outDirTag + "/" + tagName)
+		os.remove(outDirTag + "/" + tagName)
+		printLog(log, "TAG " + outDirTag + "/" + hackName)
+		hackTagFile = open(outDirTag + "/" + hackName, "w")
+		hackTagFile.write("FO_S2_big_tree")
+		hackTagFile.close()
+		return 1
+	elif os.path.exists(outDirTag + "/" + hackName) and not os.path.exists(outDirWithCoarse + "/" + shapeName) and not os.path.exists(outDirTag + "/" + tagName):
+		printLog(log, "Missing export of FO_S2_big_tree")
+		return 0
+	else:
+		return 0
 
 printLog(log, "")
 printLog(log, "-------")
@@ -113,6 +137,7 @@ if MaxAvailable:
 			tagDiff = newTagLen - tagLen
 			tagLen = newTagLen
 			printLog(log, "Exported " + str(tagDiff) + " .max files!")
+			tagDiff += hackBigTree() # force rerun also when big tree deleted
 		os.remove(scriptDst)
 	
 	# Export clod 3dsmax

@@ -25,6 +25,9 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 
+ActiveProjectDirectory = os.getenv("NELBUILDACTIVEPROJECT", "configuration/project")
+sys.path.append(ActiveProjectDirectory)
+
 def printLog(log, text):
 	log.write(text + "\n")
 	print text

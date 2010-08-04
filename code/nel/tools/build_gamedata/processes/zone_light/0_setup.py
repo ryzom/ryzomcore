@@ -26,7 +26,7 @@
 
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
-sys.path.append("../../configuration/project")
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -43,9 +43,9 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-mkPath(log, ScriptDirectory + "/configuration/project/generated")
-zlp = open(ScriptDirectory + "/configuration/project/generated/zone_lighter.cfg", "w")
-ps = open(ScriptDirectory + "/configuration/project/zone_lighter_base.cfg", "r")
+mkPath(log, ActiveProjectDirectory + "/generated")
+zlp = open(ActiveProjectDirectory + "/generated/zone_lighter.cfg", "w")
+ps = open(ActiveProjectDirectory + "/zone_lighter_base.cfg", "r")
 for line in ps:
 	newline = line.replace("%ExportBuildDirectory%", ExportBuildDirectory)
 	newline = newline.replace("%SmallbankExportDirectory%", SmallbankExportDirectory)
@@ -61,9 +61,9 @@ for line in ps:
 	zlp.write(newline)
 ps.close()
 if (BuildQuality == 1):
-	ps = open(ScriptDirectory + "/configuration/project/zone_lighter_final.cfg", "r")
+	ps = open(ActiveProjectDirectory + "/zone_lighter_final.cfg", "r")
 else:
-	ps = open(ScriptDirectory + "/configuration/project/zone_lighter_draft.cfg", "r")
+	ps = open(ActiveProjectDirectory + "/zone_lighter_draft.cfg", "r")
 for line in ps:
 	zlp.write(line)
 zlp.close()
