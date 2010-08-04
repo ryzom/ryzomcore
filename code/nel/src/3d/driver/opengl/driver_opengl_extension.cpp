@@ -30,20 +30,28 @@ using namespace NLMISC;
 #ifdef NL_OS_WINDOWS
 #define	nglGetProcAddress wglGetProcAddress
 #elif defined(NL_OS_MAC)
-#include <mach-o/dyld.h>
+// #include <mach-o/dyld.h>
 // glXGetProcAddressARB doesn't work correctly on MAC
+// void *nglGetProcAddress(const char *name)
+// {
+// 	NSSymbol symbol;
+// 	char *symbolName;
+// 	symbolName = (char*)malloc (strlen (name) + 2);
+// 	strcpy(symbolName + 1, name);
+// 	symbolName[0] = '_';
+// 	symbol = NULL;
+// 	if (NSIsSymbolNameDefined (symbolName)) symbol = NSLookupAndBindSymbol (symbolName);
+// 	free (symbolName);
+// 	return symbol ? NSAddressOfSymbol (symbol) : NULL;
+// }
+
+// NSAddressOfSymbol, NSIsSymbolNameDefined, NSLookupAndBindSymbol are deprecated
+#include <dlfcn.h>
 void *nglGetProcAddress(const char *name)
 {
-	NSSymbol symbol;
-    char *symbolName;
-    symbolName = (char*)malloc (strlen (name) + 2);
-    strcpy(symbolName + 1, name);
-    symbolName[0] = '_';
-    symbol = NULL;
-    if (NSIsSymbolNameDefined (symbolName)) symbol = NSLookupAndBindSymbol (symbolName);
-    free (symbolName);
-    return symbol ? NSAddressOfSymbol (symbol) : NULL;
+	return dlsym(RTLD_DEFAULT, name);
 }
+
 #elif defined (NL_OS_UNIX)
 void (*nglGetProcAddress(const char *procName))()
 {
