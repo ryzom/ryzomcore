@@ -386,6 +386,81 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 	}
 }
 
+/// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
+static int bppFromDisplayMode(CGDisplayModeRef mode)
+{
+	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);
+	
+	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo) 
+		return 32;
+	
+	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+		return 16;
+	
+	return 0;
+}
+
+/// get the list of available screen modes
+bool getModes(std::vector<GfxMode> &modes)
+{
+	static const CGDisplayCount kMaxDisplays = 16;
+	CGDirectDisplayID display[kMaxDisplays];
+	CGDisplayCount numDisplays;
+
+	CGDisplayErr err = CGGetActiveDisplayList(kMaxDisplays, display, &numDisplays);
+	if(err != CGDisplayNoErr)
+	{
+		nlwarning("Cannot get displays (%d)", err);
+		return false;
+	}
+
+	nldebug("3D: %d displays found", (int)numDisplays);
+
+	for (CGDisplayCount i = 0; i < numDisplays; ++i)
+	{
+		CGDirectDisplayID dspy = display[i];
+		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
+		
+		if (modeList == NULL)
+		{
+			nlwarning("Display is invalid");
+			continue;
+		}
+
+		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
+		{
+			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
+			uint8 bpp = bppFromDisplayMode(mode);
+			
+			if (bpp >= 16)
+			{
+				uint16 w = CGDisplayModeGetWidth(mode);
+				uint16 h = CGDisplayModeGetHeight(mode);
+
+				// Add this mode
+				GfxMode mode;
+				mode.Width  = w;
+				mode.Height = h;
+				mode.Depth  = bpp;
+
+				// Frequency stays at 0 because on mac cocoa, display resolution
+				//   is never really changed. if rendering res < display res,
+				//   cocoa interpolates and keeps the display at it's original res.
+				// In case of x11 on mac, fullscreen is not supported, so again, no 
+				//   mode switching is done.
+				mode.Frequency = 0;
+				modes.push_back (mode);
+
+				nldebug(" Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
+			}
+		}
+	}
+	
+	return true;
+}
+
 /// get the size of the window's content area
 void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height)
 {

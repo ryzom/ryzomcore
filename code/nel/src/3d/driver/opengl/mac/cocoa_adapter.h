@@ -70,6 +70,9 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen);
 /// mac specific stuff while calling CDriverGL::getCurrentScreenMode()
 void getCurrentScreenMode(nlWindow wnd, GfxMode& mode);
 
+/// mac specific stuff while calling CDriverGL::getModes()
+bool getModes(std::vector<GfxMode> &modes);
+
 /// mac specific stuff while calling CDriverGL::getWindowSize()
 void getWindowSize(nlWindow wnd, uint32 &width, uint32 &height);
 

@@ -1581,10 +1581,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 		modeIndex++;
 	}
 #elif defined(NL_OS_MAC)
-	getMacModes(modes);
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	NL3D::MAC::getModes(modes);
 
 #elif defined (NL_OS_UNIX)
 
