@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 nl_target_lib(nelsnd_lowlevel ${SRC})
 
 INCLUDE_DIRECTORIES(${OGG_INCLUDE_DIR} ${VORBIS_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nelsnd_lowlevel ${VORBIS_LIBRARY} ${VORBISFILE_LIBRARY} ${OGG_LIBRARY})
+TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc ${VORBIS_LIBRARY} ${VORBISFILE_LIBRARY} ${OGG_LIBRARY})
 nl_default_props(nelsnd_lowlevel "Library: NeL Sound Lowlevel")
 NL_ADD_STATIC_VID_DRIVERS(nelsnd_lowlevel)
 nl_add_lib_suffix(nelsnd_lowlevel)

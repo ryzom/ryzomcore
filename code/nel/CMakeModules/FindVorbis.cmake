@@ -11,7 +11,7 @@ ENDIF(VORBIS_LIBRARY AND VORBIS_INCLUDE_DIR)
 
 
 FIND_PATH(VORBIS_INCLUDE_DIR
-  vorbisfile.h
+  vorbis/vorbisfile.h
   PATHS
   $ENV{VORBIS_DIR}/include
   /usr/local/include
@@ -20,7 +20,6 @@ FIND_PATH(VORBIS_INCLUDE_DIR
   /opt/local/include
   /opt/csw/include
   /opt/include
-  PATH_SUFFIXES vorbis
 )
 
 FIND_LIBRARY(VORBIS_LIBRARY

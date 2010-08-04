@@ -11,7 +11,7 @@ ENDIF(OGG_LIBRARY AND OGG_INCLUDE_DIR)
 
 
 FIND_PATH(OGG_INCLUDE_DIR
-  ogg.h
+  ogg/ogg.h
   PATHS
   $ENV{OGG_DIR}/include
   /usr/local/include
@@ -20,7 +20,6 @@ FIND_PATH(OGG_INCLUDE_DIR
   /opt/local/include
   /opt/csw/include
   /opt/include
-  PATH_SUFFIXES ogg
 )
 
 FIND_LIBRARY(OGG_LIBRARY
