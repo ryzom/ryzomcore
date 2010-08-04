@@ -1696,27 +1696,10 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 
 	NL3D::MAC::getCurrentScreenMode(_win, mode);
 
-#elif defined(NL_OS_MAC)
-	/*
-		TODO this is just a hack to get the ryzom client running on mac os x x11.
-			the implementation below relies on the vidmode extension which is not
-			available on mac os x's x11. for that reason the color depth value is
-			hard coded here.
-		FIXME replace this hack by native cocoa color depth retrieval
-	*/
-	nlwarning("FIXME: returning hardcoded color depth of 24bit");
-	mode.Depth= 24;
-
 #elif defined(NL_OS_UNIX)
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
-
-	// x11 fullscreen is not working on mac os x
-#if defined(NL_OS_MAC)
-	mode.Windowed = true;
-	found = true;
-#endif
 
 #ifdef XRANDR
 
@@ -1784,7 +1767,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		}
 	}
 
-#endif
+#endif // XF86VidMode
 
 	if (!found)
 	{
@@ -1800,7 +1783,13 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		nldebug("Current mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
 	}
 
-#endif
+#if defined(NL_OS_MAC)
+	// x11 fullscreen is not working on mac os x
+	mode.Windowed = true;
+#endif // NL_OS_MAC
+
+#endif // NL_OS_UNIX
+
 	return true;
 }
 
