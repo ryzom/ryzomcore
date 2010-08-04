@@ -16,15 +16,19 @@ using namespace NL3D;
 namespace NL3D
 {
 
-static int numberForKey( CFDictionaryRef desc, CFStringRef key )
+static int bppFromDisplayMode(CGDisplayModeRef mode)
 {
-    CFNumberRef value;
-    int num = 0;
-
-    if ( (value = (CFNumberRef)CFDictionaryGetValue(desc, key)) == NULL )
-        return 0;
-    CFNumberGetValue(value, kCFNumberIntType, &num);
-    return num;
+	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);
+	
+	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo) 
+		return 32;
+	
+	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+		return 16;
+	
+	return 0;
 }
 
 bool getMacModes(std::vector<GfxMode> &modes)
@@ -40,41 +44,43 @@ bool getMacModes(std::vector<GfxMode> &modes)
 		return false;
 	}
 
-	nldebug("3D: %d displays found\n", (int)numDisplays);
+	nldebug("3D: %d displays found", (int)numDisplays);
 
 	for (CGDisplayCount i = 0; i < numDisplays; ++i)
 	{
 		CGDirectDisplayID dspy = display[i];
-
-		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
+		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
+		
 		if (modeList == NULL)
 		{
 			nlwarning("Display is invalid");
 			continue;
 		}
-		CFIndex cnt = CFArrayGetCount(modeList);
-		nldebug("3D: Display 0x%x has %d modes:", (unsigned int)dspy, (int)cnt);
-		for (CFIndex j = 0; j < cnt; ++j)
+
+		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
 		{
-			CFDictionaryRef desc = (CFDictionaryRef)CFArrayGetValueAtIndex(modeList, j);
-
-			int w = numberForKey(desc, kCGDisplayWidth);
-			int h = numberForKey(desc, kCGDisplayHeight);
-			int bpp = numberForKey(desc, kCGDisplayBitsPerPixel);
-			int freq = numberForKey(desc, kCGDisplayRefreshRate);
-
+			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
+			int bpp = bppFromDisplayMode(mode);
+			
 			if (bpp >= 16)
 			{
+				int w = CGDisplayModeGetWidth(mode);
+				int h = CGDisplayModeGetHeight(mode);
+
 				// Add this mode
 				GfxMode mode;
 				mode.Width = (uint16)w;
 				mode.Height = (uint16)h;
 				mode.Depth = (uint8)bpp;
-				mode.Frequency = freq;
-				modes.push_back (mode);
-			}
 
-			nldebug( "  > Mode %d: %dx%d, %d BPP, %d Hz", j, w, h, bpp, freq);
+				// frequency stays at 0 because on mac cocoa, display resolution
+				// is never really changed. if rendering resolution < display resolution
+				// cocoa interpolates and keeps the display at it's original resolution
+				mode.Frequency = 0;
+				modes.push_back (mode);
+
+				nldebug( " Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
+			}
 		}
 	}
 	return true;
