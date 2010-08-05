@@ -3,6 +3,10 @@
 #include "client_cfg.h"
 #include <locale.h>
 
+#ifdef NL_OS_WINDOWS
+#include <windows.h>
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,6 +32,12 @@ uint32 LoginShardId = 0xFFFFFFFF;
 extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
 
 bool useUtf8 = false;
+bool useEsc = false;
+
+#ifdef NL_OS_WINDOWS
+HANDLE hStdout = NULL;
+sint attributes = 0;
+#endif
 
 std::string convert(const ucstring &str)
 {
@@ -39,14 +49,54 @@ std::string convert(const ucstring &str)
 
 void printError(const std::string &str)
 {
-	// display error in red
-	printf("\033[22;31mError: %s\033[0m\n", str.c_str());
+	// display error in red if possible
+	if (useEsc)
+	{
+		printf("\033[1;31mError: %s\033[0m\n", str.c_str());
+	}
+	else
+	{
+#ifdef NL_OS_WINDOWS
+		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
+			SetConsoleTextAttribute(hStdout, FOREGROUND_RED|FOREGROUND_INTENSITY);
+#endif
+
+		printf("Error: %s\n", str.c_str());
+
+#ifdef NL_OS_WINDOWS
+		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
+			SetConsoleTextAttribute(hStdout, attributes);
+#endif
+	}
 }
 
-void printProgress(const std::string &str)
+void printCheck(const std::string &str)
 {
-	// display progress in green
-	printf("\033[F\033[22;31mError: %d\033[0m\033[[1J\n", str.c_str());
+	// display check
+	printf("%s\n", str.c_str());
+}
+
+void printDownload(const std::string &str)
+{
+	// display download in purple
+	if (useEsc)
+	{
+		printf("\033[1;35m%s\033[0m\n", str.c_str());
+	}
+	else
+	{
+#ifdef NL_OS_WINDOWS
+		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
+			SetConsoleTextAttribute(hStdout, FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
+#endif
+
+		printf("%s\n", str.c_str());
+
+#ifdef NL_OS_WINDOWS
+		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
+			SetConsoleTextAttribute(hStdout, attributes);
+#endif
+	}
 }
 
 int main(int argc, char *argv[])
@@ -71,13 +121,27 @@ int main(int argc, char *argv[])
 		CPath::setCurrentPath(currentPath);
 	}
 
-	std::string lang;
-
-	char *locale = setlocale(LC_CTYPE, NULL);
-
-	if (locale)
-		lang = toLower(std::string(locale));
+	// check if console supports utf-8
+	std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
 	useUtf8 = (lang.find("utf8") != string::npos || lang.find("utf-8") != string::npos);
+ 
+	// check if console supports colors
+	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
+	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
+
+#ifdef NL_OS_WINDOWS
+	hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdout == INVALID_HANDLE_VALUE)
+	{
+		printError("Console error");
+		return 1;
+	}
+
+	CONSOLE_SCREEN_BUFFER_INFO consoleScreenBufferInfo;
+
+	if (GetConsoleScreenBufferInfo(hStdout, &consoleScreenBufferInfo))
+		attributes = consoleScreenBufferInfo.wAttributes;
+#endif
 
 	// create or load client.cfg
 	ClientCfg.init("client.cfg");
@@ -180,7 +244,7 @@ int main(int argc, char *argv[])
 		{
 			for(uint i = 0; i < log.size(); ++i)
 			{
-				printf("%s\n", convert(log[i]).c_str());
+				printCheck(convert(log[i]));
 			}
 		}
 	}
@@ -220,11 +284,11 @@ int main(int argc, char *argv[])
 
 		if (pPM->getThreadState(state, log))
 		{
-			printProgress(convert(state));
+			printDownload(convert(state));
 
 			for(uint i = 0; i < log.size(); ++i)
 			{
-				printf("%s\n", convert(log[i]).c_str());
+				printCheck(convert(log[i]));
 			}
 		}
 	}
