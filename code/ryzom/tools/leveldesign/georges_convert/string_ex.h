@@ -65,7 +65,7 @@ public:
 	void		purge();
 
 	void		format( const char*, ... ); 
-	int			reverse_find( const char _c ) const; 
+	std::string::size_type	reverse_find( const char _c ) const; 
 	
 	void	serial( NLMISC::IStream& s ) { s.serial( (std::string&)(*this) );}
 

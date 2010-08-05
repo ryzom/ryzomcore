@@ -312,18 +312,18 @@ bool  CStringEx::operator < ( const CStringEx& s ) const
 	return( is != s.end() );
 }
 
-int CStringEx::reverse_find( const char _c ) const
+std::string::size_type CStringEx::reverse_find( const char _c ) const
 {
-	unsigned int i = length();
+	size_type i = length();
 	const_iterator it = end();
 	while( it != begin() )
 	{
 		--it;
 		--i;
 		if( *it == _c )
-			return( i );
+			return i ;
 	}
-	return( npos );
+	return npos;
 }
 
 void CStringEx::format( const char* s, ... )
