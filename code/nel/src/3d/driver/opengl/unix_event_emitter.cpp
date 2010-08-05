@@ -393,6 +393,24 @@ TKey getKeyFromKeySym (KeySym keysym)
 	return KeyNOKEY;
 }
 
+// check if the next pressed key is the same
+static bool keyRepeat(Display *display, XEvent *event)
+{
+	XEvent peekevent;
+
+	if (XPending(display))
+	{
+		XPeekEvent(display, &peekevent);
+
+		if ((peekevent.type == KeyPress) &&
+			(peekevent.xkey.keycode == event->xkey.keycode) &&
+			((peekevent.xkey.time-event->xkey.time) < 2))
+			return true;
+	}
+
+	return false;
+}
+
 bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 {
 	if (!server)
@@ -541,21 +559,33 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case KeyRelease:
 	{
-		TKey key = getKeyFromKeySym(XKeycodeToKeysym(_dpy, event.xkey.keycode, 0));
-		if(key == KeyNOKEY)
-			key = getKeyFromKeycode(event.xkey.keycode);
+		if (!keyRepeat(_dpy, &event))
+		{
+			KeySym k;
+			// only need to get correct KeySym
+			int c = XLookupString(&event.xkey, NULL, 0, &k, NULL);
 
-		server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
-		_PreviousKey = KeyNOKEY;
+			TKey key = getKeyFromKeySym(k);
+			if(key == KeyNOKEY)
+				key = getKeyFromKeycode(event.xkey.keycode);
+
+			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
+			_PreviousKey = KeyNOKEY;
+		}
 		break;
 	}
 	case FocusIn:
+		// keyboard focus
 		if (_ic) XSetICFocus(_ic);
 		break;
 	case FocusOut:
+		// keyboard focus
 		if (_ic) XUnsetICFocus(_ic);
 		break;
+	case KeymapNotify:
+		break;
 	case MappingNotify:
+		// update keymap
 		XRefreshKeyboardMapping((XMappingEvent *)&event);
 		break;
 	case DestroyNotify:
