@@ -111,6 +111,11 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	_InternalServer.pump (allWindows);
 }
 
+static Bool isMouseMoveEvent(Display *display, XEvent *event, XPointer arg)
+{
+	return (event->type == MotionNotify); 
+}
+
 void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 {
 	_emulateRawMode = enable;
@@ -121,6 +126,12 @@ void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 		XGetWindowAttributes(_dpy, _win, &xwa);
 		XWarpPointer(_dpy, None, _win, None, None, None, None,
 			(xwa.width / 2), (xwa.height / 2));
+			
+		// remove all outstanding mouse move events, they happened before the mouse
+		// was pulled back to 0.5 / 0.5, so a wrong movement delta would be 
+		// reported otherwise
+		XEvent event;
+		while(XCheckIfEvent(_dpy, &event, &isMouseMoveEvent, NULL)) { };
 	}
 }
 
