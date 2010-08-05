@@ -191,7 +191,7 @@ BOOL CClientConfigApp::InitInstance()
 
 		DestroyWindow (SlashScreen);
 
-		int nResponse = dlg.DoModal();
+		sint nResponse = (sint)dlg.DoModal();
 		if (nResponse == IDOK)
 		{
 			//  dismissed with OK

@@ -320,7 +320,7 @@ void CClient_configDlg::translateTree ()
 	while (item)
 	{
 		// Set the item text
-		uint page = Tree.GetItemData (item);
+		uint page = (uint)Tree.GetItemData (item);
 		ucstring name = NLMISC::CI18N::get (Pages[page].Name);		
 		if (NLMISC::CSystemUtils::supportUnicode())		
 		{		
@@ -416,7 +416,7 @@ void CClient_configDlg::OnPaint()
 		dc.SetBkMode (TRANSPARENT);
 		dc.SelectObject (&BarFont);
 		CRect labelRect (LARGE_LABEL_START_X, LARGE_LABEL_START_Y, LARGE_LABEL_END_X, LARGE_LABEL_END_Y);
-		DrawTextW (&(*dc), (WCHAR*)TopLargeLabel.c_str (), TopLargeLabel.size (), &labelRect, DT_LEFT|DT_TOP);
+		DrawTextW (&(*dc), (WCHAR*)TopLargeLabel.c_str (), (sint)TopLargeLabel.size (), &labelRect, DT_LEFT|DT_TOP);
 
 		CDialog::OnPaint();
 	}
@@ -471,8 +471,8 @@ BOOL CClient_configDlg::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					if (item)
 					{
 						// Get the page
-						uint pageId = Tree.GetItemData (item);
-						setPage (pageId)					;
+						uint pageId = (uint)Tree.GetItemData (item);
+						setPage (pageId);
 					}
 				}
 				break;
