@@ -104,59 +104,68 @@ int main(int argc, char *argv[])
 	// init the Nel context
 	CApplicationContext appContext;
 
-	createDebug();
+	// create logs in TEMP directory
+	createDebug(getenv("TEMP"), true, true);
 
 	// disable log display on stdout
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 
+	std::string config = "client.cfg";
+
+	// if client.cfg is not in current directory, use client_default.cfg
+	if (!CFile::isExists(config))
+		config = "client_default.cfg";
+
+#ifdef RYZOM_ETC_PREFIX
 	// if client_default.cfg is not in current directory, use application default directory
-	if (!CFile::isExists("client_default.cfg"))
+	if (!CFile::isExists(config))
+		config = CPath::standardizePath(RYZOM_ETC_PREFIX) + config;
+#endif
+
+	if (!CFile::isExists(config))
 	{
-		std::string currentPath = CFile::getApplicationDirectory("Ryzom");
-
-		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
-
-		CPath::setCurrentPath(currentPath);
+		printError(config + " not found, aborting patch.");
+		return 1;
 	}
 
 	// check if console supports utf-8
 	std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
 	useUtf8 = (lang.find("utf8") != string::npos || lang.find("utf-8") != string::npos);
+	lang = lang.substr(0, 2);
  
 	// check if console supports colors
 	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
 
 #ifdef NL_OS_WINDOWS
+	// setup Windows console
 	hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (hStdout == INVALID_HANDLE_VALUE)
+
+	if (hStdout != INVALID_HANDLE_VALUE)
 	{
-		printError("Console error");
-		return 1;
+		CONSOLE_SCREEN_BUFFER_INFO consoleScreenBufferInfo;
+
+		if (GetConsoleScreenBufferInfo(hStdout, &consoleScreenBufferInfo))
+			attributes = consoleScreenBufferInfo.wAttributes;
 	}
-
-	CONSOLE_SCREEN_BUFFER_INFO consoleScreenBufferInfo;
-
-	if (GetConsoleScreenBufferInfo(hStdout, &consoleScreenBufferInfo))
-		attributes = consoleScreenBufferInfo.wAttributes;
 #endif
 
 	// create or load client.cfg
-	ClientCfg.init("client.cfg");
+	ClientCfg.init(config);
 
 	// check if PatchServer is defined
 	if (ClientCfg.PatchServer.empty())
 	{
-		printError("PatchServer not defined in client_default.cfg or client.cfg");
+		printError("PatchServer not defined in " + config);
 		return 1;
 	}
 
 	// set default paths
 	std::string dataPath = "./data/";
 	std::string rootPath = "./";
-	
+
 	// use custom data path if specified
 	if (!ClientCfg.DataPath.empty())
 	{
@@ -197,12 +206,19 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// load translation
-	CI18N::load(ClientCfg.LanguageCode);
+	// add more search paths if translation is not found
+	if (!CPath::exists(lang + ".uxt"))
+	{
+		CPath::addSearchPath("patcher", true, false);
+#ifdef RYZOM_SHARE_PREFIX
+		CPath::addSearchPath(RYZOM_SHARE_PREFIX"/patcher", true, false);
+#endif
+	}
+
+ 	// load translation
+	CI18N::load(lang);
 
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
-
-	printf("Using language: %s\n", convert(CI18N::get("LanguageName")).c_str());
 
 #ifdef NL_OS_UNIX
 	// don't use cfg, exe and dll from Windows version
