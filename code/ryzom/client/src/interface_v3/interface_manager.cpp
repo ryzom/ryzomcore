@@ -805,11 +805,10 @@ void CInterfaceManager::loadIngameInterfaceTextures()
 	loadTextures ("texture_interfaces_v3.tga", "texture_interfaces_v3.txt");
 
 	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	loadTextures ("texture_interfaces_dxtc.tga", "texture_interfaces_dxtc.txt");
+	loadTextures ("new_texture_interfaces_dxtc.tga", "new_texture_interfaces_dxtc.txt");
 
 	// Added icons by Yubo's Team 2009
 	loadTextures ("texture_extra.tga", "texture_extra.txt");
-
 }
 
 // ------------------------------------------------------------------------------------------------
