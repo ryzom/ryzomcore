@@ -34,14 +34,14 @@ ENDMACRO(NL_TARGET_DRIVER)
 ###
 # Helper macro that sets the default library properties.
 # Argument: name - the target name whose properties are being set
-# Argument: 
+# Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
   GET_TARGET_PROPERTY(type ${name} TYPE)
-  IF(${type} STREQUAL SHARED_LIBRARY)
-    # Set versions only if target is a shared library
+  IF((${type} STREQUAL SHARED_LIBRARY) OR (${type} STREQUAL MODULE_LIBRARY))
+    # Set versions only if target is a shared library or a module
     SET(versions VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR})
-  ENDIF(${type} STREQUAL SHARED_LIBRARY)
+  ENDIF((${type} STREQUAL SHARED_LIBRARY) OR (${type} STREQUAL MODULE_LIBRARY))
   SET_TARGET_PROPERTIES(${name} PROPERTIES
     ${versions}
     PROJECT_LABEL ${label})
@@ -63,7 +63,7 @@ ENDMACRO(NL_ADD_LIB_SUFFIX)
 ###
 MACRO(NL_ADD_RUNTIME_FLAGS name)
   IF(WIN32)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES 
+    SET_TARGET_PROPERTIES(${name} PROPERTIES
       LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
       LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
   ENDIF(WIN32)
@@ -87,15 +87,15 @@ MACRO(NL_ADD_STATIC_VID_DRIVERS name)
 	    TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
 	  ENDIF(WITH_DRIVER_XAUDIO2)
     ENDIF(WIN32)
-  
+
     IF(WITH_DRIVER_OPENAL)
       TARGET_LINK_LIBRARIES(${name} nel_drv_openal)
     ENDIF(WITH_DRIVER_OPENAL)
-  
+
     IF(WITH_DRIVER_FMOD)
       TARGET_LINK_LIBRARIES(${name} nel_drv_fmod)
     ENDIF(WITH_DRIVER_FMOD)
-  
+
     IF(WITH_DRIVER_OPENGL)
       IF(WIN32)
 	    TARGET_LINK_LIBRARIES(${name} nel_drv_opengl_win)
@@ -117,15 +117,15 @@ MACRO(NL_ADD_STATIC_SND_DRIVERS name)
 	    TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
 	  ENDIF(WITH_DRIVER_XAUDIO2)
     ENDIF(WIN32)
-  
+
     IF(WITH_DRIVER_OPENAL)
       TARGET_LINK_LIBRARIES(${name} nel_drv_openal)
     ENDIF(WITH_DRIVER_OPENAL)
-  
+
     IF(WITH_DRIVER_FMOD)
       TARGET_LINK_LIBRARIES(${name} nel_drv_fmod)
     ENDIF(WITH_DRIVER_FMOD)
-  
+
   ENDIF(WITH_STATIC_DRIVERS)
 ENDMACRO(NL_ADD_STATIC_SND_DRIVERS)
 
@@ -272,7 +272,7 @@ ENDMACRO(NL_SETUP_BUILD)
 MACRO(NL_SETUP_BUILD_FLAGS)
   #SET(CMAKE_DEBUG_POSTFIX "_d")
   #SET(CMAKE_RELEASE_POSTFIX "_r")
-  
+
   ## None
   #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${NL_NONE_CFLAGS} ${PLATFORM_CFLAGS} ")
   #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NL_NONE_CFLAGS} ${PLATFORM_CFLAGS} ")
