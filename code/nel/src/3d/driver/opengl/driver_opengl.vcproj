@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="driver_opengl"
 	ProjectGUID="{1D9576F6-3321-4036-8C86-B5361CCCD4FB}"
 	RootNamespace="driver_opengl"
@@ -425,10 +425,6 @@
 		</File>
 		<File
 			RelativePath="driver_opengl_light.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\driver_opengl_mac.cpp"
 			>
 		</File>
 		<File
