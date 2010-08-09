@@ -78,10 +78,21 @@ void printCheck(const std::string &str)
 
 void printDownload(const std::string &str)
 {
+	static uint previousLength = 0;
+
+	static const uint maxLength = 160;
+	static char spaces[maxLength];
+	
+	memset(spaces, ' ', previousLength);
+	spaces[previousLength] = '\0';
+
+	// "erase" previous line
+	printf("%s\r", spaces);
+
 	// display download in purple
 	if (useEsc)
 	{
-		printf("\033[1;35m%s\033[0m\n", str.c_str());
+		printf("\033[1;35m%s\033[0m\r", str.c_str());
 	}
 	else
 	{
@@ -90,13 +101,15 @@ void printDownload(const std::string &str)
 			SetConsoleTextAttribute(hStdout, FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
 #endif
 
-		printf("%s\n", str.c_str());
+		printf("%s\r", str.c_str());
 
 #ifdef NL_OS_WINDOWS
 		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
 			SetConsoleTextAttribute(hStdout, attributes);
 #endif
 	}
+
+	previousLength = (uint)str.length();
 }
 
 int main(int argc, char *argv[])
