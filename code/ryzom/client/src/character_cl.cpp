@@ -6468,7 +6468,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 	if(_LodCharacterAnimEnabled)
 	{
 		H_AUTO ( RZ_Client_Entity_CL_Update_Pos_Lod_Animation );
-		// \todo GUIGUI : remplacer 'getSpeedFactor' par le bon speed factor !!
+		// \todo GUIGUI : replace 'getSpeedFactor' by the correct speed factor !!
 		// update lod anim time. multiply by speed factor of the most important slot.
 		_LodCharacterAnimTimeOffset += DT * _PlayList->getSpeedFactor(_LodCharacterMasterAnimSlot);
 	}
@@ -6476,7 +6476,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 	if(_PlayList)
 	{
 		H_AUTO ( RZ_Client_Entity_CL_Update_Pos_Set_Play_List );
-		// \todo GUIGUI : Faire qq chose de mieux pour le blend (ici les montures).
+		// \todo GUIGUI : do something better for the blend (mounts there).
 		if(isRiding() || ClientCfg.BlendFrameNumber == 0 || _BlendRemaining <= 0)
 		{
 			_BlendRemaining = 0;
