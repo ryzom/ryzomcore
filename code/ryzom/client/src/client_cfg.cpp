@@ -1991,7 +1991,7 @@ void CClientConfig::init(const string &configFileName)
 #ifdef RYZOM_ETC_PREFIX
 		if (!found)
  		{
-			defaultConfigFileName = std::string(RYZOM_ETC_PREFIX"/") + defaultConfigFileName;
+			defaultConfigFileName = CPath::standardizePath(RYZOM_ETC_PREFIX) + defaultConfigFileName;
 			if (CFile::isExists(defaultConfigFileName)) found = true;
  		}
 #endif // RYZOM_ETC_PREFIX
@@ -2009,10 +2009,6 @@ void CClientConfig::init(const string &configFileName)
 				nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 			}
 			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
-#ifdef RYZOM_SHARE_PREFIX
-			fprintf(fp, "PreDataPath          = { \"user\", \"patch\", \"examples\", \"%s/data/fonts\", \"%s/data/gamedev.bnp\" };\n", RYZOM_SHARE_PREFIX, RYZOM_SHARE_PREFIX);
-			fprintf(fp, "DataPath             = { \"%s/data\" };\n", RYZOM_SHARE_PREFIX);
-#endif // RYZOM_SHARE_PREFIX
 			fclose(fp);
 		}
 		else
