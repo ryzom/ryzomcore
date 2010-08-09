@@ -136,7 +136,7 @@ float	CMRMBuilder::getDeltaFaceNormals(sint numvertex)
 	// return a positive value of Somme(|DeltaNormals|) / NNormals.
 	CMRMVertex	&vert= TmpVertices[numvertex];
 	float	delta=0;
-	CVector	refNormal;
+	CVector	refNormal(0.f, 0.f, 0.f);
 	sint	nfaces=(sint)vert.SharedFaces.size();
 	for(sint i=0;i<nfaces;i++)
 	{
@@ -448,7 +448,7 @@ CMesh::CSkinWeight	CMRMBuilder::collapseSkinWeight(const CMesh::CSkinWeight &sw1
 	sort(sws.begin(), sws.end());
 
 	// clamp the result to the wanted max matrix.
-	uint	nbMatsOut;
+	uint	nbMatsOut = 0;
 	switch(_SkinReduction)
 	{
 	case CMRMParameters::SkinReductionMin:

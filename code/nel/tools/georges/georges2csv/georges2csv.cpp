@@ -44,13 +44,14 @@
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/load_form.h"
 // Georges, bypassing interface
-#include "georges/stdgeorges.h"
-#include "georges/form.h"
+#include "../../../src/georges/stdgeorges.h"
+#include "../../../src/georges/form.h"
 
 // Basic C++
 #include <iostream>
 //#include <conio.h>
 #include <stdio.h>
+#include <limits>
 //#include <io.h>
 
 // stl
@@ -695,14 +696,18 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		return;
 	}
 
+	if (!fgets(lineBuffer, BUFFER_SIZE, s))
+	{
+		nlwarning("fgets() failed");
+		return;
+	}
+
 	loadSheetPath();
 
 	UFormLoader *formLoader = UFormLoader::createLoader ();
 	NLMISC::CSmartPtr<CForm> form;
 	NLMISC::CSmartPtr<UFormDfn> formDfn;
 
-
-	fgets(lineBuffer, BUFFER_SIZE, s);
 	explode(std::string(lineBuffer), std::string(SEPARATOR), fields);
 
 	vector<bool> activeFields( fields.size(), true );
@@ -728,7 +733,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			}
 			else if ( nlstricmp( fields[i], "parent" ) == 0 )
 			{
-				strlwr( fields[i] ); // non-const version
+				fields[i] = toLower( fields[i] );
 			}
 			else
 			{
@@ -748,7 +753,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 	}
 
 	string addExtension = "." + sheetType;
-	uint dirmapLetterIndex = ~0;
+	uint dirmapLetterIndex = std::numeric_limits<uint>::max();
 	bool dirmapLetterBackward = false;
 	vector<string> dirmapDirs;
 	string dirmapSheetCode;
@@ -812,7 +817,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			nlinfo( "Sheet code: %s", dirmapSheetCode.c_str() );
 
 			if ( ! dirmapLetterBackward )
-				dirmapLetterIndex += dirmapSheetCode.size();
+				dirmapLetterIndex += (uint)dirmapSheetCode.size();
 
 			CConfigFile::CVar *wep = dirmapcfg.getVarPtr( "WriteEmptyProperties" );
 			if ( wep )
@@ -849,7 +854,12 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 	while (!feof(s))
 	{
 		lineBuffer[0] = '\0';
-		fgets(lineBuffer, BUFFER_SIZE, s);
+		if (!fgets(lineBuffer, BUFFER_SIZE, s))
+		{
+			nlwarning("fgets() failed");
+			break;
+		}
+
 		explode(std::string(lineBuffer), std::string(SEPARATOR), args);
 
 		if (args.size() < 1)
@@ -868,7 +878,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		{
 			filebase += "." + sheetType;
 		}
-		strlwr	(filebase);
+		filebase = toLower(filebase);
 		string	filename, dirbase;
 		bool	isNewSheet=true;
 
@@ -890,7 +900,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			else
 			{
 				// Load template sheet
-				filename = strlwr( static_cast<const string&>(filebase) );
+				filename = toLower(filebase);
 				form = (CForm*)formLoader->loadForm( (string("_empty.") + sheetType).c_str() );
 				if (form == NULL)
 				{
@@ -898,14 +908,14 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 				}
 
 				// Deduce directory from sheet name
-				if ( dirmapLetterIndex != ~0 )
+				if ( dirmapLetterIndex != std::numeric_limits<uint>::max() )
 				{
 					if ( dirmapLetterIndex < filebase.size() )
 					{
 						uint letterIndex;
 						char c;
 						if ( dirmapLetterBackward )
-							letterIndex = filebase.size() - 1 - (CFile::getExtension( filebase ).size()+1) - dirmapLetterIndex;
+							letterIndex = (uint)(filebase.size() - 1 - (CFile::getExtension( filebase ).size()+1)) - dirmapLetterIndex;
 						else
 							letterIndex = dirmapLetterIndex;
 						c = tolower( filebase[letterIndex] );

@@ -39,7 +39,7 @@ bool keepFile (const char *fileName)
 	uint i;
 	bool ifPresent = false;
 	bool ifTrue = false;
-	string file = strlwr(CFile::getFilename (fileName));
+	string file = toLower(CFile::getFilename (fileName));
 	for (i=0; i<WildCards.size(); i++)
 	{
 		if (WildCards[i].Not)
@@ -252,7 +252,7 @@ uint readOptions (int nNbArg, char **ppArgs)
 		if ((strcmp (ppArgs[i], "-if") == 0) && ((i+1)<(uint)nNbArg))
 		{
 			CWildCard card;
-			card.Expression = strlwr(string(ppArgs[i+1]));
+			card.Expression = toLower(string(ppArgs[i+1]));
 			card.Not = false;
 			WildCards.push_back (card);
 			optionCount += 2;
@@ -261,7 +261,7 @@ uint readOptions (int nNbArg, char **ppArgs)
 		if ((strcmp (ppArgs[i], "-ifnot") == 0) && ((i+1)<(uint)nNbArg))
 		{
 			CWildCard card;
-			card.Expression = strlwr(string(ppArgs[i+1]));
+			card.Expression = toLower(string(ppArgs[i+1]));
 			card.Not = true;
 			WildCards.push_back (card);
 			optionCount += 2;

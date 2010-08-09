@@ -83,8 +83,7 @@ public:
 		for (i=(uint)strlen(msg); i<79; i++)
 			msg[i]=' ';
 		msg[i]=0;
-		printf (msg);
-		printf ("\r");
+		printf ("%s\r", msg);
 	}
 
 protected:

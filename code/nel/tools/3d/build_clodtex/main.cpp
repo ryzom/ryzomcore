@@ -212,10 +212,8 @@ int main(int argc, char *argv[])
 			for(j=0;j<LodFilters.size();j++)
 			{
 				// Make the test case-unsensitive
-				string	lwrFileName= fileNameIn;
-				string	lwrFilter= LodFilters[j];
-				strlwr(lwrFileName);
-				strlwr(lwrFilter);
+				string	lwrFileName= toLower(fileNameIn);
+				string	lwrFilter= toLower(LodFilters[j]);
 				if( testWildCard(lwrFileName.c_str(), lwrFilter.c_str()) )
 				{
 					string	clodFile= clod_dir_in+"/"+LodNames[j]+".clod";

@@ -52,6 +52,13 @@ public:
 				LongFormat : 1, // true if the message format is long (d'ho ? all message are long !?!, always true)
 				MessageType : 2; // type of the message (from TMessageType), classical message are 'OneWay'
 
+		TFormat()
+		{
+			StringMode = 0;
+			LongFormat = 0;
+			MessageType = 0;
+		}
+
 		void serial(NLMISC::IStream &s)
 		{
 			if (s.isReading())

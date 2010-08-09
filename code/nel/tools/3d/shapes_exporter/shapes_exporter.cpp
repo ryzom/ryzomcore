@@ -877,7 +877,8 @@ bool ShapesExporter::createThumbnail(const string &filename, const string &path)
 		if(fp)
 		{
 			char str[100];
-			fgets(str, 100, fp);
+			if (!fgets(str, 100, fp))
+				strcpy(str, "0");
 			fclose(fp);
 			selectedFrame = atoi(str)/2;
 		}

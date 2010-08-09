@@ -1220,7 +1220,7 @@ void VertexPaintData::SynchVerts(Mesh &m)
 
 			}
 			else
-				assert(0);
+				nlassert(0);
 		}
 	}
 }
@@ -1293,7 +1293,7 @@ void VertexPaintRestore::Restore(int isUndo)
 {
 	if(isUndo)
 	{
-		assert(pPaintData->colordata);
+		nlassert(pPaintData->colordata);
 
 		redoColordata = pPaintData->colordata;
 		redonumcolors = pPaintData->numColors;
@@ -1310,7 +1310,7 @@ void VertexPaintRestore::Restore(int isUndo)
 
 void VertexPaintRestore::Redo()
 {
-	assert(pPaintData->colordata);
+	nlassert(pPaintData->colordata);
 	
 	colordata = pPaintData->colordata;
 	numcolors = pPaintData->numColors;

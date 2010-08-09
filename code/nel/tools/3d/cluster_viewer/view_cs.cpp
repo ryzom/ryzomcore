@@ -109,22 +109,24 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 	
 	FILE *f = fopen (ScriptName,"rb");
 	fseek (f, 0, SEEK_END);
-	int file_size = ftell (f);
+	sint file_size = ftell (f);
 	fseek (f, 0, SEEK_SET);
 	char *file_buf = (char*)malloc(file_size+1);
-	fread (file_buf, 1, file_size, f);
+	if (fread (file_buf, 1, file_size, f) != file_size)
+		nlwarning("Can't read %d elements", file_size);
+
 	file_buf[file_size] = 0;
 	++file_size;
 	fclose (f);
 	char *buf_ptr = file_buf;
-	int nLastNbPlus = 0;
+	sint nLastNbPlus = 0;
 	vector<CInstanceGroup*> pile;
 	pile.clear ();
 
 	do 
 	{
 		char Line[256], *line_ptr;
-		int nNbPlus = 0;
+		sint nNbPlus = 0;
 		line_ptr = &Line[0];
 		buf_ptr = readLine (line_ptr, buf_ptr);
 

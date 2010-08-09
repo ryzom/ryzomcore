@@ -394,7 +394,9 @@ public:
 	void	floodFill(CSurfElement *first, sint32 surfId, const A &cmp, CZoneTessellation *zoneTessel)
 	{
 		if (Verbose)
+		{
 			nldebug("flood fill surface %d", surfId);
+		}
 
 		std::vector<CSurfElement *>	stack;
 		sint					i;
@@ -436,7 +438,9 @@ public:
 		}
 
 		if (Verbose)
+		{
 			nldebug("%d elements added", Elements.size());
+		}
 
 		Center = NLMISC::CVector::Null;
 		for (i=0; i<(sint)Elements.size(); ++i)

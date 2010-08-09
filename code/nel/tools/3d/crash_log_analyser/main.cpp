@@ -298,8 +298,7 @@ void	statRyzomBug(const char *dirSrc)
 				}
 				else if(str.compare(0, nel3dIdTok.size(), nel3dIdTok)==0)
 				{
-					string	tmp= str;
-					strlwr(tmp);
+					string	tmp= toLower(str);
 					if(tmp.find("opengl")!=string::npos)
 						precNel3DMode= 0;
 					else if(tmp.find("direct3d")!=string::npos)

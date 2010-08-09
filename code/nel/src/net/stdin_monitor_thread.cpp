@@ -79,7 +79,11 @@ namespace NLNET
 
 			// get the next command from the command line
 			char theCommand[1024] = "";
-			fgets(theCommand, sizeofarray(theCommand), stdin);
+			if (!fgets(theCommand, sizeofarray(theCommand), stdin))
+			{
+				nlwarning("fgets failed");
+				break;
+			}
 
 			// push the command to allow reader thread to deal with it
 			pushCommand(theCommand);

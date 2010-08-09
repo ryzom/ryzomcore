@@ -1523,13 +1523,13 @@ void CFileContainer::removeBigFiles(const std::vector<std::string> &bnpFilenames
 	TFiles::iterator fileIt, fileCurrIt;
 	for (uint k = 0; k < bnpFilenames.size(); ++k)
 	{
-		std::string completeBNPName = strlwr(bnpFilenames[k]) + "@";
+		std::string completeBNPName = toLower(bnpFilenames[k]) + "@";
 		if (SSMpath.isAdded(completeBNPName))
 		{
 			bnpStrIds.insert(SSMpath.add(completeBNPName));
 		}
 		CBigFile::getInstance().remove(bnpFilenames[k]);
-		fileIt = _Files.find(strlwr(bnpFilenames[k]));
+		fileIt = _Files.find(toLower(bnpFilenames[k]));
 		if (fileIt != _Files.end())
 		{
 			_Files.erase(fileIt);

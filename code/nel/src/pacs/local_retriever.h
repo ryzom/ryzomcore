@@ -208,6 +208,9 @@ public:
 			_Retriever = retriever;
 			_Chain = uint16(chain);
 			_OChainIndex = 0;
+			_IndexInOChain = 0;
+			_MaxIndexInOChain = 0;
+			_OChainForward = 0;
 			setupIndex();
 		}
 

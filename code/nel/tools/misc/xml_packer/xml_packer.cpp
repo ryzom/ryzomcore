@@ -326,31 +326,36 @@ int main(int argc, char *argv[])
 				
 				// read the first line
 				char buffer[MaxLineSize];
-				fgets(buffer, MaxLineSize, fp);
-				linecount++;
-				if (strcmp(buffer, "<nel:packed_xml>\n") != 0)
+				if (!fgets(buffer, MaxLineSize, fp) || strcmp(buffer, "<nel:packed_xml>\n") != 0)
 				{
 					printf ("Error : invalid pack file '%s'\n", filename.c_str());
-					exit(-1);
+					return -1;
 				}
-				
+
+				linecount++;
+
 				char *result = NULL;
 				do 
 				{
 					// read a file line
-					fgets(buffer, MaxLineSize, fp);
-					CSString parser(buffer);
 					linecount++;
+					if (!fgets(buffer, MaxLineSize, fp))
+					{
+						fclose(fp);
+						printf ("Error : invalid pack file '%s' at line %u", filename.c_str(), linecount);
+						return -1;
+					}
+					CSString parser(buffer);
 					if (parser.find("	<nel:xml_file name=") != 0)
 					{
+						fclose(fp);
+
+						// end of pack file
 						if (parser.find("</nel:packed_xml>") == 0)
-						{
-							// end of pack file
-							fclose(fp);
 							break;
-						}
+
 						printf ("Error : invalid pack file '%s' at line %u", filename.c_str(), linecount);
-						exit(-1);
+						return -1;
 					}
 					
 					CSString subFileName = parser.leftCrop(sizeof("	<nel:xml_file name=")-1);

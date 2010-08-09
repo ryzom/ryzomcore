@@ -447,12 +447,9 @@ void displayZones()
 		}
 		catch(Exception &e)
 		{
-			printf(e.what ());
+			printf("%s\n", e.what ());
 		}		
 	}
-	
-
-		
 
 	// Load instance group.
 	CNELU::clearBuffers(CRGBA(0,0,0));
@@ -472,7 +469,7 @@ void displayZones()
 		}
 		catch(Exception &e)
 		{
-			printf(e.what ());
+			printf("%s\n", e.what ());
 		}		
 	}
 	

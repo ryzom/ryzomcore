@@ -87,7 +87,7 @@ static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
 };
 
 CMusicBufferVorbis::CMusicBufferVorbis(NLMISC::IStream *stream, bool loop) 
-: _Stream(stream), _Loop(loop), _StreamSize(0), _IsMusicEnded(false)
+: _Stream(stream), _Loop(loop), _IsMusicEnded(false)
 {
 	_StreamOffset = stream->getPos();
 	stream->seek(0, NLMISC::IStream::end);

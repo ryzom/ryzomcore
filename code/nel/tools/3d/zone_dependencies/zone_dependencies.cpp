@@ -82,8 +82,7 @@ void progress (const char *message, float progress)
 	for (i=(uint)strlen(msg); i<79; i++)
 		msg[i]=' ';
 	msg[i]=0;
-	printf (msg);
-	printf ("\r");
+	printf ("%s\r", msg);
 }
 
 class CZoneDependencies
@@ -523,7 +522,7 @@ int main (int argc, char* argv[])
 
 							// Write the dependencies file
 							FILE *outputFile;
-							if ((outputFile=fopen (strlwr (outputFileName).c_str(), "w")))
+							if ((outputFile=fopen (toLower (outputFileName).c_str(), "w")))
 							{
 								// Add a dependency entry
 								fprintf (outputFile, "dependencies =\n{\n");
@@ -538,7 +537,7 @@ int main (int argc, char* argv[])
 
 									// Write it
 									string message="\t\""+zoneName+"\"";
-									fprintf (outputFile, strlwr (message).c_str());
+									fprintf (outputFile, "%s", toLower (message).c_str());
 
 									// Next ite;
 									ite++;
@@ -705,7 +704,7 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 static void computeZoneIGBBox(const char *zoneName, CLightingBBox &result, TShapeMap &shapeMap, const TString2LightingBBox &additionnalIG)
 {
 	result = CLightingBBox(); // starts with a void box	
-	std::string lcZoneName = NLMISC::strlwr(std::string(zoneName));
+	std::string lcZoneName = NLMISC::toLower(std::string(zoneName));
 	TString2LightingBBox::const_iterator zoneIt = additionnalIG.find(lcZoneName);
 	if (zoneIt != additionnalIG.end())
 	{		
@@ -895,7 +894,7 @@ static void computeIGBBoxFromContinent(NLMISC::CConfigFile &parameter,
 					nlwarning("Couldn't get zone name of village %d in continent %s", continentName.c_str(), k);
 					continue;
 				}
-				zoneName = NLMISC::strlwr(CFile::getFilenameWithoutExtension(zoneName));				
+				zoneName = NLMISC::toLower(CFile::getFilenameWithoutExtension(zoneName));				
 				CLightingBBox result;				
 				// ok, it is in the dependant zones
 				computeBBoxFromVillage(currVillage, continentName, k, shapeMap, result);

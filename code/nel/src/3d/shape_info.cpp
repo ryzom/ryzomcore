@@ -226,7 +226,7 @@ void CShapeInfo::build(const CMeshBase &meshBase, const CMeshMRMGeom &meshGeom)
 // ***************************************************************************
 std::string standardizeShapeName(const std::string &name)
 {
-	std::string result = NLMISC::strlwr(name);
+	std::string result = NLMISC::toLower(name);
 	if (CFile::getExtension(result).empty())
 	{
 		result += ".shape";

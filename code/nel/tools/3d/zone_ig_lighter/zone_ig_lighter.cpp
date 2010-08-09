@@ -75,11 +75,10 @@ class CMyIgZoneLighter : public CInstanceLighter
 		pgId= min(pgId, (uint)(BAR_LENGTH-1));
 		sprintf (msg, "\r%s: %s", message, progressbar[pgId]);
 		uint i;
-		for (i=strlen(msg); i<79; i++)
+		for (i=(uint)strlen(msg); i<79; i++)
 			msg[i]=' ';
 		msg[i]=0;
-		printf (msg);
-		printf ("\r");
+		printf ("%s\r", msg);
 	}
 };
 
@@ -114,7 +113,7 @@ int main(int argc, char* argv[])
 		if (inputFile.open (argv[1]))
 		{
 			// Zone name
-			string zoneName=strlwr (string ("zone_"+getName (argv[1])));
+			string zoneName=toLower (string ("zone_"+getName (argv[1])));
 
 			// Load the zone
 			try

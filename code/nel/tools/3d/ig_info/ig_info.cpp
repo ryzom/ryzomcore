@@ -66,8 +66,8 @@ int main(int argc, char **argv)
 		printf("---------\n");
 		// IGSurfaceLight info.
 		const CIGSurfaceLight::TRetrieverGridMap	&rgm= ig.getIGSurfaceLight().getRetrieverGridMap();
-		printf("IGSurfaceLighting: CellSize: %f. NumGridRetriever: %d\n", 
-			ig.getIGSurfaceLight().getCellSize(), rgm.size() );
+		printf("IGSurfaceLighting: CellSize: %f. NumGridRetriever: %u\n", 
+			ig.getIGSurfaceLight().getCellSize(), (uint)rgm.size() );
 		uint	rgmInst= 0;
 		uint	totalCells= 0;
 		CIGSurfaceLight::TRetrieverGridMap::const_iterator	it= rgm.begin();
@@ -85,6 +85,6 @@ int main(int argc, char **argv)
 	}
 	catch (std::exception &e)
 	{
-		printf(e.what());
+		printf("%s\n", e.what());
 	}
 }

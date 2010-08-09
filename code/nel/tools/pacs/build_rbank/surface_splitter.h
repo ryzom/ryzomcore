@@ -19,8 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
-#include "nel/../../src/pacs/local_retriever.h"
-#include "nel/../../src/pacs/quad_grid.h"
+#include "../../../src/pacs/local_retriever.h"
+#include "../../../src/pacs/quad_grid.h"
 
 #include <map>
 
@@ -394,6 +394,7 @@ public:
 			}
 			bool		operator != (const iterator &it)	{ return !(*this == it); }
 
+			// ++it
 			iterator	&operator ++ ()
 			{
 				ChainVertex += ChainDirection;
@@ -402,7 +403,23 @@ public:
 					Chain += Direction;
 					resetChain();
 				}
-				// FIXME add return value here!
+
+				return *this;
+			}
+
+			// it++
+			iterator	operator ++ (int)
+			{
+				iterator tmp(*this);
+
+				ChainVertex += ChainDirection;
+				if (ChainVertex == 0 || ChainVertex == (sint)pChain->Vertices.size()-1)
+				{
+					Chain += Direction;
+					resetChain();
+				}
+
+				return tmp;
 			}
 
 			void	resetChain()

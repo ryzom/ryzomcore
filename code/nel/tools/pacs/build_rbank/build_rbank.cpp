@@ -217,7 +217,7 @@ void processAllPasses(string &zoneName)
 	}
 	catch(Exception &e)
 	{
-		printf(e.what ());
+		printf("%s\n", e.what ());
 	}
 }
 
@@ -935,7 +935,7 @@ void	processGlobalRetriever()
 			}
 			catch (Exception &e)
 			{
-				printf(e.what ());
+				printf("%s\n", e.what ());
 			}
 		}
 	}

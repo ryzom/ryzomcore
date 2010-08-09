@@ -1,3 +1,19 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 // data_mirror.cpp : Defines the class behaviors for the application.
 //
 
@@ -89,21 +105,21 @@ BOOL CData_mirrorApp::InitInstance()
 
 		cf.load (path);
 		MainDirectory = cf.getVar ("MainDirectory").asString ();
-		MainDirectory = strlwr (CPath::standardizePath (MainDirectory));
+		MainDirectory = toLower (CPath::standardizePath (MainDirectory));
 		
 		MirrorDirectory = cf.getVar ("MirrorDirectory").asString ();
-		MirrorDirectory = strlwr (CPath::standardizePath (MirrorDirectory));
+		MirrorDirectory = toLower (CPath::standardizePath (MirrorDirectory));
 		
 		LogDirectory = cf.getVar ("LogDirectory").asString ();
-		LogDirectory = strlwr (CPath::standardizePath (LogDirectory));
+		LogDirectory = toLower (CPath::standardizePath (LogDirectory));
 		
 		IgnoreDirectory = cf.getVar ("IgnoreDirectory").asString ();
-		IgnoreDirectory = strlwr (CPath::standardizePath (IgnoreDirectory));
+		IgnoreDirectory = toLower (CPath::standardizePath (IgnoreDirectory));
 		if (IgnoreDirectory.empty())
 			IgnoreDirectory = MainDirectory;
 
 		string sBinaryCompare = cf.getVar ("BinaryCompare").asString ();
-		sBinaryCompare = strlwr (sBinaryCompare);
+		sBinaryCompare = toLower (sBinaryCompare);
 		BinaryCompare = false;
 		if ((sBinaryCompare == "true") || (sBinaryCompare=="1"))
 			BinaryCompare = true;
@@ -126,12 +142,12 @@ BOOL CData_mirrorApp::InitInstance()
 		if (NLMISC::CFile::isDirectory (CurrentDir))
 		{
 			directory = true;
-			CurrentDir = strlwr (CPath::standardizePath (CurrentDir));
+			CurrentDir = toLower(CPath::standardizePath (CurrentDir));
 		}
 		else if (NLMISC::CFile::fileExists (CurrentDir))
 		{
 			directory = false;
-			CurrentDir = strlwr (CPath::standardizePath (NLMISC::CFile::getPath (CurrentDir)));
+			CurrentDir = toLower(CPath::standardizePath (NLMISC::CFile::getPath (CurrentDir)));
 		}
 		else
 		{

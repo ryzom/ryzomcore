@@ -426,16 +426,18 @@ int main(int nNbArg, char **ppArgs)
 		while (!iFile.eof())
 		{
 			iFile.getline (bufTmp, 256);
-			sscanf (bufTmp, "%s %f %f %f %f", tgaName, &uvMinU, &uvMinV, &uvMaxU, &uvMaxV);
+			if (sscanf (bufTmp, "%s %f %f %f %f", tgaName, &uvMinU, &uvMinV, &uvMaxU, &uvMaxV) != 5)
+			{
+				nlwarning("Can't parse %s", bufTmp);
+				continue;
+			}
 			
-			sTGAname = tgaName;
-			sTGAname = strlwr(sTGAname);
+			sTGAname = toLower(string(tgaName));
 			string findTGAName;
 			for (i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				findTGAName = CFile::getFilename(AllMapNames[i]);
-				findTGAName = strlwr(findTGAName);
+				findTGAName = toLower(CFile::getFilename(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;
 			}

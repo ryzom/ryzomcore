@@ -558,9 +558,9 @@ void	NLPACS::CComputableSurface::followBorder(CZoneTessellation *zoneTessel, CSu
 
 		current->IsBorder = true;
 
-		if ((oppositeSurfId != UnaffectedSurfaceId && (next == NULL || (next->SurfaceId != oppositeSurfId && next->SurfaceId != currentSurfId))) ||
-			(oppositeSurfId == UnaffectedSurfaceId && (next != NULL && next->SurfaceId != currentSurfId || next == NULL && current->getZoneIdOnEdge(nextEdge) != oppositeZid)) ||
-			((current->EdgeFlag[nextEdge] || zoneTessel->VerticesFlags[current->Tri[pivot]]!=0) && !allowThis))
+		if (((oppositeSurfId != UnaffectedSurfaceId) && (next == NULL || (next->SurfaceId != oppositeSurfId && next->SurfaceId != currentSurfId))) ||
+			((oppositeSurfId == UnaffectedSurfaceId) && ((next != NULL && next->SurfaceId != currentSurfId) || (next == NULL && current->getZoneIdOnEdge(nextEdge) != oppositeZid))) ||
+			((current->EdgeFlag[nextEdge] || (zoneTessel->VerticesFlags[current->Tri[pivot]]!=0)) && !allowThis))
 		{
 			// if reaches the end of the border, then quits.
 			loop = (absoluteEquals(vstore.front(), vstore.back(), 1e-2f) && loopCount != 1);
@@ -1296,7 +1296,7 @@ void	NLPACS::CZoneTessellation::compile()
 
 			if ((bits0 & CPrimChecker::Water)!=0 || (bits1 & CPrimChecker::Water)!=0 || (bits2 & CPrimChecker::Water)!=0)
 			{
-				uint		ws;
+				uint		ws = 0;
 
 				uint16		ws0 = PrimChecker.index((uint)v0.x, (uint)v0.y);
 				uint16		ws1 = PrimChecker.index((uint)v1.x, (uint)v1.y);

@@ -26,6 +26,7 @@
 #	include <windows.h>
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
+#	include <cerrno>
 #	include <sys/types.h>
 #	include <sys/time.h>
 #endif
@@ -125,7 +126,10 @@ void CListenTask::init( uint16 port, sint32 maxExpectedBlockSize )
 CServerTask::CServerTask() : NbLoop (0), _ExitRequired(false)
 {
 #ifdef NL_OS_UNIX
-	pipe( _WakeUpPipeHandle );
+	if (pipe( _WakeUpPipeHandle ) == -1)
+	{
+		nlwarning("LNETL1: pipe() failed: code=%d '%s'", errno, strerror(errno));
+	}
 #endif
 }
 
@@ -981,7 +985,10 @@ void CServerReceiveTask::run()
 
 #if defined NL_OS_UNIX
 	// POLL7
-	nice( 2 ); // is this really useful as long as select() sleeps?
+	if (nice( 2 ) == -1) // is this really useful as long as select() sleeps?
+	{
+		nlwarning("LNETL1: nice() failed: code=%d '%s'", errno, strerror(errno));
+	}
 #endif // NL_OS_UNIX
 
 	// Copy of _Connections

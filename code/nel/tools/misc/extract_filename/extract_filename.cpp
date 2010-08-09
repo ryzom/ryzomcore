@@ -23,7 +23,11 @@ using namespace NLMISC;
 #ifdef NL_DEBUG
 #define INFO nlinfo
 #else // NL_DEBUG
-#define INFO ((void)0)
+#	if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
+#		define INFO __noop
+#	else
+#		define INFO 0&&
+#	endif
 #endif // NL_DEBUG
 
 bool readTheFile (const char *filename, vector<char> &fileArray)
@@ -207,7 +211,7 @@ void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filen
 				if (str != "")
 				{
 					// Lower case
-					str = strlwr (str);
+					str = toLower (str);
 
 					// Filter extensions
 					if (filterExtension (str.c_str(), extensions))
@@ -273,7 +277,7 @@ void extractStringsFromASCII (const vector<char> &fileArray, set<string> &filena
 						temp[c] = begin[c];
 
 					// Lower case
-					temp = strlwr (temp);
+					temp = toLower (temp);
 
 					// Filter extensions
 					if (filterExtension (temp.c_str(), extensions))
@@ -317,14 +321,11 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 		char name[512];
 		while (fgets (name, 512, file))
 		{
-			// To string
-			temp = name;
+			// To string and lower
+			temp = toLower (string(name));
 
 			// Remove return
 			removeChar (temp, '\n');
-
-			// Lower
-			strlwr (temp);
 
 			// Valid extension ?
 			if (temp.size() && temp[0] == '.')
@@ -369,12 +370,9 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 					char name[512];
 					while (fgets (name, 512, file))
 					{
-						temp = name;
-						temp2 = name;
-
 						// To lower
-						temp = strlwr (temp);
-						temp2 = strlwr (temp2);
+						temp = toLower (string(name));
+						temp2 = toLower (string(name));
 
 						// Remove space						
 						removeBeginEndSpaces (temp);
@@ -596,7 +594,7 @@ int main(int argc, char* argv[])
 				// It is used ?
 				if (usedFiles.find (available->first) == usedFiles.end())
 				{
-					string temp = strlwr (available->second.c_str());
+					string temp = toLower (available->second);
 					fprintf (stderr, "UNUSED: %s\n", temp.c_str());
 				}
 
@@ -610,7 +608,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		printf ("extract_filename.exe [extensions.txt] [inputFiles.txt] [availableFiles.txt]\n");
+		printf ("extract_filename [extensions.txt] [inputFiles.txt] [availableFiles.txt]\n");
 	}
 	return 0;
 }

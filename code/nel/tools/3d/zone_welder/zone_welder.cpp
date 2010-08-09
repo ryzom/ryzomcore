@@ -346,7 +346,7 @@ void weldZones(const char *center)
 			}
 		}
 
-		fprintf(fdbg,"(before) zone %d bordervertices size : %d\n",i,adjZoneBorderVertices.size());
+		fprintf(fdbg,"(before) zone %u bordervertices size : %u\n",i,(uint)adjZoneBorderVertices.size());
 
 		// delete border vertices of the adjacent zone if their neighbour zoneId
 		// is equal to current zone zoneId
@@ -360,7 +360,7 @@ void weldZones(const char *center)
 			else
 				itborder++;
 		}
-		fprintf(fdbg,"(after) zone %d bordervertices size : %d\n",i,adjZoneBorderVertices.size());
+		fprintf(fdbg,"(after) zone %u bordervertices size : %u\n",i,(uint)adjZoneBorderVertices.size());
 
 		// A set for storing base vertex index already added in the quad tree
 		std::set<uint16> adjBaseVertexIndexSet;

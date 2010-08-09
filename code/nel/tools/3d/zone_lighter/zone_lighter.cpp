@@ -85,8 +85,7 @@ class CMyZoneLighter : public CZoneLighter
 		for (i=strlen(msg); i<79; i++)
 			msg[i]=' ';
 		msg[i]=0;
-		printf (msg);
-		printf ("\r");
+		printf ("%s\r", msg);
 	}
 };
 
@@ -138,7 +137,7 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 		// verify that the ig is not already added (case of tr_water.ig in additional_igs)
 		for(uint igAdd= 0;igAdd<(uint)additionalIgNames.size();igAdd++)
 		{
-			if( strlwr(additionalIgNames.asString()) == strlwr(igName) )
+			if( toLower(additionalIgNames.asString()) == toLower(igName) )
 			{
 				nlwarning("Skipping Village Ig %s, cause already exist in additional ig", igName.c_str());
 				continue;
@@ -313,7 +312,7 @@ int main(int argc, char* argv[])
 		if (inputFile.open (argv[1]))
 		{
 			// Zone name
-			string zoneName=strlwr (string ("zone_"+getName (argv[1])));
+			string zoneName=toLower (string ("zone_"+getName (argv[1])));
 
 			// Load the zone
 			try
@@ -701,7 +700,7 @@ int main(int argc, char* argv[])
 									continue;
 
 								// PS ?
-								if (strlwr (CFile::getExtension (name)) == "ps")
+								if (toLower (CFile::getExtension (name)) == "ps")
 									continue;
 								
 								// Add a .shape at the end ?

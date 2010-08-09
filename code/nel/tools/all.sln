@@ -401,6 +401,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shapes_exporter", "3d\shape
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "georges2csv", "georges\georges2csv\georges2csv.vcproj", "{885542B1-BE3C-401A-A2A4-DA49E48DF0AB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{9D284C6B-BE12-4549-87E5-2337D64F31BE} = {9D284C6B-BE12-4549-87E5-2337D64F31BE}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

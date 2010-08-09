@@ -657,7 +657,7 @@ void CPackedZone32::build(std::vector<const CTessFace*> &leaves,
 		{
 			CMatrix instanceMatrix;
 			igs[k]->getInstanceMatrix(l, instanceMatrix);
-			if (NLMISC::strlwr(NLMISC::CFile::getExtension(igs[k]->getShapeName(l))) == "pacs_prim") continue;
+			if (NLMISC::toLower(NLMISC::CFile::getExtension(igs[k]->getShapeName(l))) == "pacs_prim") continue;
 			std::string stdShapeName = standardizeShapeName(igs[k]->getShapeName(l));
 			TShapeCache::const_iterator it = shapeCache.find(stdShapeName);
 			if (it != shapeCache.end())

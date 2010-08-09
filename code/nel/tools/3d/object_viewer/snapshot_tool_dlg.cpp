@@ -454,7 +454,7 @@ void CSnapshotToolDlg::OnGo()
 			CString wildCard;
 			m_Filters.GetText(l, wildCard);
 			wildCard.MakeLower();
-			if (testWildCard(strlwr(NLMISC::CFile::getFilename(files[k]).c_str()), (LPCTSTR) wildCard))
+			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), (LPCTSTR) wildCard))
 			{
 				_FilteredFiles.push_back(files[k]);
 				break;

@@ -558,25 +558,25 @@ void CBufFIFO::display ()
 			{
 				if (_Rewinder != NULL && _Rewinder >= pos && _Rewinder < pos + gran)
 				{
-					strncat (str, "*", 1024);
+					strncat (str, "*", 1);
 				}
 				else
 				{
-					strncat (str, "@", 1024);
+					strncat (str, "@", 1);
 				}
 			}
 			else
 			{
-				strncat (str, "T", 1024);
+				strncat (str, "T", 1);
 			}
 		}
 		else if (_Head >= pos && _Head < pos + gran)
 		{
-			strncat (str, "H", 1024);
+			strncat (str, "H", 1);
 		}
 		else if (_Rewinder != NULL && _Rewinder >= pos && _Rewinder < pos + gran)
 		{
-			strncat (str, "R", 1024);
+			strncat (str, "R", 1);
 		}
 		else
 		{
@@ -595,12 +595,12 @@ void CBufFIFO::display ()
 
 	for (; i < s; i+= gran)
 	{
-		strncat (str, " ", 1024);
+		strncat (str, " ", 1);
 	}
 #ifdef NL_DEBUG
-	strncat (str, "\n", 1024);
+	strncat (str, "\n", 1);
 #else
-	strncat (str, "\r", 1024);
+	strncat (str, "\r", 1);
 #endif
 	DebugLog->display (str);
 }
