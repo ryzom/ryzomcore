@@ -124,7 +124,7 @@ public:
 
 	/**
 	  * Get the thread user name.
-	  * Notimplemented under linux, under windows return the name of the logon user.
+	  * Not implemented under linux, under windows return the name of the logon user.
 	  */
 	virtual std::string getUserName()=0;
 };

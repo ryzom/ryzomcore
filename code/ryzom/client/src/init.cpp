@@ -374,7 +374,7 @@ void outOfMemory()
 	nlstopex (("OUT OF MEMORY"));
 }
 
-// For multi cpu, active only on CPU for the main thread
+// For multi cpu, active only one CPU for the main thread
 uint64		Debug_OldCPUMask= 0;
 uint64		Debug_NewCPUMask= 0;
 void setCPUMask ()
