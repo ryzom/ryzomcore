@@ -52,7 +52,6 @@
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdpch.h"
 				WarningLevel="3"
@@ -97,93 +96,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
-			ConfigurationType="1"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
-				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories="../../common/src"
-				PreprocessorDefinitions="_WINDOWS;WIN32;NDEBUG;CURL_STATICLIB;LIBXML_STATIC"
-				StringPooling="true"
-				ExceptionHandling="2"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdpch.h"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
-				OutputFile="..\..\bin\client_ryzom_r.exe"
-				LinkIncremental="1"
-				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -207,7 +119,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -268,6 +179,90 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="4"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				AdditionalIncludeDirectories="../../common/src"
+				PreprocessorDefinitions="_WINDOWS;WIN32;NDEBUG;CURL_STATICLIB;LIBXML_STATIC"
+				StringPooling="true"
+				ExceptionHandling="2"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdpch.h"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="gnu_regex.lib libcurl.lib libjpeg.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
+				OutputFile="..\..\bin\client_ryzom_r.exe"
+				LinkIncremental="1"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|x64"
 			OutputDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
 			IntermediateDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
@@ -293,7 +288,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="4"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -323,8 +318,6 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="gnu_regex.lib libcurl.lib lua.lib luabind.lib wwwapp.lib wwwcache.lib wwwcore.lib wwwfile.lib wwwhtml.lib wwwhttp.lib wwwmime.lib wwwmux.lib wwwstream.lib wwwtrans.lib wwwutils.lib libeay32.lib ssleay32.lib"
 				OutputFile="..\..\bin64\client_ryzom_r.exe"
-				LinkIncremental="1"
-				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -348,6 +341,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>
@@ -2894,7 +2890,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32"
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -2902,7 +2898,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

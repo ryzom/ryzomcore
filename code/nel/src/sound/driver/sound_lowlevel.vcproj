@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=" libogg.lib libvorbis.lib libvorbisfile.lib"
+				AdditionalDependencies="libogg.lib libvorbis.lib libvorbisfile.lib"
 				OutputFile="..\..\..\lib64\nl$(ProjectName)_d.lib"
 			/>
 			<Tool
@@ -194,7 +194,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="4"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -273,7 +273,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="4"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
