@@ -29,6 +29,7 @@ namespace NL3D
 {
 
 
+using NLMISC::CVector;
 using NLMISC::CVector2f;
 class	CVegetableManager;
 class	CVegetableShape;
