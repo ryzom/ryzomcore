@@ -9,21 +9,22 @@ SOURCE_GROUP(sfx FILES
         buffer_al.h
         listener_al.cpp
         listener_al.h
+        music_channel_al.cpp
+        music_channel_al.h
         source_al.cpp
         source_al.h)
 
 SOURCE_GROUP(util FILES
         ext_al.cpp
         ext_al.h)
-        
+
 NL_TARGET_DRIVER(nel_drv_openal ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${OPENAL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nel_drv_openal ${LIBXML2_LIBRARIES} ${OPENAL_LIBRARY} nelsnd_lowlevel)
+INCLUDE_DIRECTORIES(${OPENAL_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(nel_drv_openal ${OPENAL_LIBRARY} nelmisc nelsnd_lowlevel)
 NL_DEFAULT_PROPS(nel_drv_openal "Driver, Sound: OpenAL")
 NL_ADD_LIB_SUFFIX(nel_drv_openal)
 NL_ADD_RUNTIME_FLAGS(nel_drv_openal)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WIN32)
   # Find and include EFX-Util on Windows.

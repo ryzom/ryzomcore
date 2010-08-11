@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/noise_value.h"
+#include "nel/misc/vector.h"
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/matrix.h"
 #include "nel/3d/vegetable_uv8.h"
