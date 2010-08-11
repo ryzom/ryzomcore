@@ -22,7 +22,7 @@
 
 using namespace NLMISC;
 
-int main (int argc, char **argv)
+int main (int /* argc */, char ** /* argv */)
 {
 	// all debug functions have different behaviors in debug and in release mode.
 	// in general, in debug mode, all debug functions are active, they display

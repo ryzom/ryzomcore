@@ -380,13 +380,13 @@ int main( int argc, char **argv )
 				CMemStream msgin( true );
 				memcpy (msgin.bufferToFill (psize), packet, psize);
 
-				sint64 t;
+				sint64 t = 0;
 				msgin.serial (t);
 
-				uint32 p;
+				uint32 p = 0;
 				msgin.serial (p);
 
-				uint32 b;
+				uint32 b = 0;
 				msgin.serial (b);
 	
 				// I received a ping, send a pong

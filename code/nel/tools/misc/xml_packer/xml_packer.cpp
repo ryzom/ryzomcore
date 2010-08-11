@@ -297,7 +297,11 @@ int main(int argc, char *argv[])
 					}
 					fclose(fp);
 					// set the file 'hidden'n use the plain old system command...
-					system(toString("attrib +h %s", indexFileName.c_str()).c_str());
+					sint res = system(toString("attrib +h %s", indexFileName.c_str()).c_str());
+					if (res)
+					{
+						nlwarning("attrib failed with return code %d", res);
+					}
 				}
 				else
 				{

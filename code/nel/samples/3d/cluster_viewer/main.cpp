@@ -209,7 +209,6 @@ int main()
 	double rGlobalTime = 0;
 	double rOldGlobalTime = 0;
 	double rDeltaTime = 0;
-	double rMoveTime = 0;
 
 	vector<SDispCS> DispCS;
 
@@ -430,7 +429,7 @@ int main()
 			{
 				nSelected--;
 				if(nSelected == -1)
-					nSelected = DispCS.size()-1;
+					nSelected = (sint32)DispCS.size()-1;
 			}
 			if (CNELU::AsyncListener.isKeyPushed (KeyS))
 			{

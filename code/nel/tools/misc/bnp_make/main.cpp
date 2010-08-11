@@ -79,16 +79,44 @@ struct BNPHeader
 		if (f == NULL) return false;
 
 		uint32 nNbFile = (uint32)Files.size();
-		fwrite (&nNbFile, sizeof(uint32), 1, f);
+		if (fwrite (&nNbFile, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
+			return false;
+		}
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			uint8 nStringSize = (uint8)Files[i].Name.size();
-			fwrite (&nStringSize, 1, 1, f);
-			fwrite (Files[i].Name.c_str(), 1, nStringSize, f);
-			fwrite (&Files[i].Size, sizeof(uint32), 1, f);
-			fwrite (&Files[i].Pos, sizeof(uint32), 1, f);
+			if (fwrite (&nStringSize, 1, 1, f) != 1)
+			{
+				fclose(f);
+				return false;
+			}
+
+			if (fwrite (Files[i].Name.c_str(), 1, nStringSize, f) != nStringSize)
+			{
+				fclose(f);
+				return false;
+			}
+
+			if (fwrite (&Files[i].Size, sizeof(uint32), 1, f) != 1)
+			{
+				fclose(f);
+				return false;
+			}
+
+			if (fwrite (&Files[i].Pos, sizeof(uint32), 1, f) != 1)
+			{
+				fclose(f);
+				return false;
+			}
 		}
-		fwrite (&OffsetFromBeginning, sizeof(uint32), 1, f);
+
+		if (fwrite (&OffsetFromBeginning, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
+			return false;
+		}
 
 		fclose (f);
 		return true;
@@ -103,29 +131,54 @@ struct BNPHeader
 		nlfseek64 (f, 0, SEEK_END);
 		uint32 nFileSize=CFile::getFileSize (filename);
 		nlfseek64 (f, nFileSize-sizeof(uint32), SEEK_SET);
+
 		uint32 nOffsetFromBegining;
-		fread (&nOffsetFromBegining, sizeof(uint32), 1, f);
-		if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+		if (fread (&nOffsetFromBegining, sizeof(uint32), 1, f) != 1)
+		{
+			fclose (f);
 			return false;
+		}
+
+		if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+		{
+			fclose (f);
+			return false;
+		}
 		
 		uint32 nNbFile;
 		if (fread (&nNbFile, sizeof(uint32), 1, f) != 1)
+		{
+			fclose (f);
 			return false;
+		}
+
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			uint8 nStringSize;
 			char sName[256];
 			if (fread (&nStringSize, 1, 1, f) != 1)
+			{
+				fclose (f);
 				return false;
+			}
 			if (fread (sName, 1, nStringSize, f) != nStringSize)
+			{
+				fclose (f);
 				return false;
+			}
 			sName[nStringSize] = 0;
 			BNPFile tmpBNPFile;
 			tmpBNPFile.Name = sName;
 			if (fread (&tmpBNPFile.Size, sizeof(uint32), 1, f) != 1)
+			{
+				fclose (f);
 				return false;
+			}
 			if (fread (&tmpBNPFile.Pos, sizeof(uint32), 1, f) != 1)
+			{
+				fclose (f);
 				return false;
+			}
 			Files.push_back (tmpBNPFile);
 		}
 
@@ -146,9 +199,11 @@ void append(const string &filename1, const string &filename2, uint32 sizeToRead)
 	if (f2 == NULL) { fclose(f1); return; }
 	
 	uint8 *ptr = new uint8[sizeToRead];
-	fread (ptr, sizeToRead, 1, f2);
-	fwrite (ptr, sizeToRead, 1, f1);
-	delete ptr;
+	if (fread (ptr, sizeToRead, 1, f2) != 1)
+		nlwarning("%s read error", filename2.c_str());
+	if (fwrite (ptr, sizeToRead, 1, f1) != 1)
+		nlwarning("%s write error", filename1.c_str());
+	delete [] ptr;
 	
 	fclose(f2);
 	fclose(f1);
@@ -216,10 +271,12 @@ void unpack (const string &dirName)
 		{
 			nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
 			uint8 *ptr = new uint8[rBNPFile.Size];
-			fread (ptr, rBNPFile.Size, 1, bnp);
-			fwrite (ptr, rBNPFile.Size, 1, out);
+			if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
+				nlwarning("%s read error", filename.c_str());
+			if (fwrite (ptr, rBNPFile.Size, 1, out) != 1)
+				nlwarning("%s write error", filename.c_str());
 			fclose (out);
-			delete ptr;
+			delete [] ptr;
 		}
 	}
 	fclose (bnp);

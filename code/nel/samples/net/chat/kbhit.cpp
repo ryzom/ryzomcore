@@ -71,7 +71,8 @@ int getch()
 		peek_character = -1;
 		return ch;
 	}
-	read(STDIN_FILENO,&ch,1);
+	if (read(STDIN_FILENO,&ch,1) != 1)
+		nlwarning("Can't read keyboard");
 	return ch;
 }
 

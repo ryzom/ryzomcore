@@ -40,7 +40,7 @@ CFileDisplayer fd("main.log",true);
 // Windows, it does nothing on other systems.
 CMsgBoxDisplayer mbd;
 
-int main (int argc, char **argv)
+int main (int /* argc */, char ** /* argv */)
 {
 	// create a logger; it's an information logger.
 	CLog logger (CLog::LOG_INFO);

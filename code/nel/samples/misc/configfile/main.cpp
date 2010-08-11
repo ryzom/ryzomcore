@@ -58,7 +58,7 @@ void var12Callback (CConfigFile::CVar &var)
 // the configfile
 CConfigFile cf;
 
-int main (int argc, char **argv)
+int main (int /* argc */, char ** /* argv */)
 {
 
 	// look at the debug example
@@ -87,14 +87,17 @@ int main (int argc, char **argv)
 
 	// get the value of var1 as int
 	int var1 = cf.getVar ("var1").asInt();
+	nlinfo("var1 (int) = %d", var1);
 
 	// get the value of var1 as double, in this case, a conversion from int
 	// to double will be done
 	double var2 = cf.getVar ("var1").asDouble();
+	nlinfo("var1 (double) = %lf", var2);
 
 	// get the value of var2 as int, in this case, a conversion from string
 	// to int will be done
 	int var3 = cf.getVar ("var2").asInt();
+	nlinfo("var2 = %d", var3);
 
 	// if the variable is an array of values, you can access them putting the
 	// index of the variable you want. Example, get and print all value of var12:
@@ -111,6 +114,7 @@ int main (int argc, char **argv)
 	{
 		// try to access an unknown variable
 		int val = cf.getVar ("unknown_variable").asInt();
+		nlinfo("unknown_variable = %d", val);
 	}
 	catch (EConfigFile &e)
 	{

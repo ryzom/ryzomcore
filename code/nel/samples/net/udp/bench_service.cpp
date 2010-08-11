@@ -196,7 +196,7 @@ void cbInit (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	msgout.serial (session);
 	CallbackServer->send (msgout, from);
 
-	Clients.push_back(CClient(from, session, connectionName));
+	Clients.push_back(CClient(from, (uint32)session, connectionName));
 	nlinfo ("Added client TCP %s, session %x", from->asString().c_str(), session);
 }
 
@@ -517,7 +517,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 	memcpy (msgin.bufferToFill (currentsize), CurrentInMsg->userDataR(), currentsize);
 
 	// Read the header
-	uint8 mode;
+	uint8 mode = 0;
 	msgin.serial (mode);
 
 	if (mode == 0)

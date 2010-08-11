@@ -117,8 +117,11 @@ int main (int argc, char **argv)
 	sint32 sid = ConfigFile.getVar("ShardId").asInt();
 	if(sid == 0)
 	{
-		printf("Enter the SharId you want to connect to: ");
-		scanf("%d", sid);
+		printf("Enter the ShardId you want to connect to: ");
+		if (scanf("%d", &sid) != 1)
+		{
+			nlwarning("Can't parse ShardId");
+		}
 	}
 
 	/* Try to connect to the shard number 0 in the list.

@@ -376,7 +376,7 @@ int main ()
 #ifdef NL_OS_WINDOWS
 		::MessageBox (NULL, e.what(), "Test collision move", MB_OK|MB_ICONEXCLAMATION);
 #else // NL_OS_WINDOWS
-		printf (e.what());
+		printf ("%s\n", e.what());
 #endif // NL_OS_WINDOWS
 	}
 

@@ -92,7 +92,7 @@ void CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
 	nlassert(m_Driver);
 
 	// initialize the window with config file values
-	m_Driver->setDisplay((void *)winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	m_Driver->setDisplay(winId(), NL3D::UDriver::CMode(width(), height(), 32));
 
 	// register config callbacks
 	connect(m_GraphicsConfig, SIGNAL(onBackgroundColor(NLMISC::CRGBA)), 
