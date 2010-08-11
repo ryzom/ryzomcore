@@ -916,7 +916,7 @@ int main (int argc, char**argv)
 					catch(Exception &e)
 					{
 						// Error in the log
-						nlwarning ("Error loading zone file (%s) : %s", files[i].c_str (), e.what ());
+						nlwarning ("Error loading primitive file (%s) : %s", files[i].c_str (), e.what ());
 					}
 
 					// Progress bar

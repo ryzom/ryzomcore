@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
-# \file 3_install.py
-# \brief Install zone_light
-# \date 2009-03-11-13-45-GMT
+# \file 0_setup.py
+# \brief setup dummy
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install zone_light
+# Setup dummy
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -38,33 +38,28 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install zone_light")
+printLog(log, "--- Setup dummy")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-printLog(log, ">>> Install zone_light zones <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + ZoneClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+# Setup source directories
+printLog(log, ">>> Setup source directories <<<")
+#for dir in MapSourceDirectories:
+#	mkPath(log, DatabaseDirectory + "/" + dir)
 
-printLog(log, ">>> Install zone_light water maps <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + WaterMapsClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+# Setup export directories
+printLog(log, ">>> Setup export directories <<<")
+#mkPath(log, ExportBuildDirectory + "/" + DummyTagExportDirectory)
 
-printLog(log, ">>> Install zone_light igs <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + IgClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+# Setup build directories
+printLog(log, ">>> Setup build directories <<<")
+#mkPath(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory)
 
-printLog(log, "")
+# Setup client directories
+printLog(log, ">>> Setup client directories <<<")
+#mkPath(log, ClientDataDirectory + "/" + DummyClientDirectory)
+
 log.close()
 
 

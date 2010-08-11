@@ -45,6 +45,7 @@ printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
+mkPath(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory)
 mkPath(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory)
 mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory)
 

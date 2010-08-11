@@ -54,7 +54,7 @@ for line in ps:
 	newline = newline.replace("%EcosystemPath%", EcosystemPath)
 	newline = newline.replace("%BankTileBankName%", BankTileBankName)
 	newline = newline.replace("%IgLandBuildDirectory%", IgLandBuildDirectory)
-	newline = newline.replace("%IgVillageBuildDirectory%", IgVillageBuildDirectory)
+	newline = newline.replace("%IgOtherBuildDirectory%", IgOtherBuildDirectory)
 	newline = newline.replace("%RbankOutputBuildDirectory%", RbankOutputBuildDirectory)
 	newline = newline.replace("%RbankRbankName%", RbankRbankName)
 	newline = newline.replace("%BuildQuality%", str(BuildQuality))

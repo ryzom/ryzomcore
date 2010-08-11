@@ -53,6 +53,7 @@ mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory)
 
 # Setup client directories

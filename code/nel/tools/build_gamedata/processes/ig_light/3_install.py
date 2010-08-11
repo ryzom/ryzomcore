@@ -44,7 +44,7 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> Install ig_light <<<")
-srcDir = ExportBuildDirectory + "/" + IgLightVillageBuildDirectory
+srcDir = ExportBuildDirectory + "/" + IgOtherLightedBuildDirectory
 mkPath(log, srcDir)
 destDir = ClientDataDirectory + "/" + IgClientDirectory
 mkPath(log, destDir)

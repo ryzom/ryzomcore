@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
 # \file 3_install.py
-# \brief Install zone_light
-# \date 2009-03-11-13-45-GMT
+# \brief Install dummy
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install zone_light
+# Install dummy
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -38,31 +38,23 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install zone_light")
+printLog(log, "--- Install dummy")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-printLog(log, ">>> Install zone_light zones <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + ZoneClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+#clientPath = ClientDataDirectory + "/" + DummyClientDirectory
+#mkPath(log, clientPath)
 
-printLog(log, ">>> Install zone_light water maps <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + WaterMapsClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+printLog(log, ">>> Install dummy <<<")
+#mkPath(log, ExportBuildDirectory + "/" + DummyExportDirectory)
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyExportDirectory, clientPath, ".dummy")
+#mkPath(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory)
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, clientPath, ".dummy")
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, clientPath, ".dds")
 
-printLog(log, ">>> Install zone_light igs <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + IgClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+#mkPath(log, ExportBuildDirectory + "/" + DummyAnimExportDirectory)
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyAnimExportDirectory, clientPath, ".anim")
 
 printLog(log, "")
 log.close()

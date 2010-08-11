@@ -60,7 +60,7 @@ for dir in RbankShapePaths:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
 mkPath(log, ExportBuildDirectory + "/" + RbankBboxBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + IgLandBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + IgVillageBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgOtherBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankTessellationBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankRawBuildDirectory)

@@ -50,17 +50,33 @@ ExecTimeout = findTool(log, ToolDirectories, ExecTimeoutTool, ToolSuffix)
 printLog(log, "")
 
 # We are in BEST mode
-# TODO if (high quality) blahblahblah
-printLog(log, ">>> Build zone dependencies <<<")
-if ZoneDependencies == "":
-	toolLogFail(log, ZoneDependenciesTool, ToolSuffix)
-elif ExecTimeout == "":
-	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
-else:
-	printLog(log, "********************************")
-	printLog(log, "********      TODO      ********")
-	printLog(log, "********************************")
-printLog(log, "")
+if BuildQuality == 1:
+	printLog(log, ">>> Build zone dependencies <<<")
+	if ZoneDependencies == "":
+		toolLogFail(log, ZoneDependenciesTool, ToolSuffix)
+	elif ExecTimeout == "":
+		toolLogFail(log, ExecTimeoutTool, ToolSuffix)
+	else:
+		mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
+		mkPath(log, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
+		mkPath(log, ActiveProjectDirectory + "/generated")
+		configFile = ActiveProjectDirectory + "/generated/zone_dependencies.cfg"
+		templateCf = open(ActiveProjectDirectory + "/generated/zone_lighter.cfg", "r")
+		cf = open(configFile, "w")
+		for line in templateCf:
+			cf.write(line)
+		cf.write("\n");
+		cf.write("level_design_directory = \"" + LeveldesignDirectory + "\";\n");
+		cf.write("level_design_world_directory = \"" + LeveldesignWorldDirectory + "\";\n");
+		cf.write("level_design_dfn_directory = \"" + LeveldesignDfnDirectory + "\";\n");
+		cf.write("continent_name = \"" + ContinentName + "\";\n");
+		cf.write("\n");
+		cf.close()
+		
+		for zoneRegion in ZoneRegions:
+			subprocess.call([ ExecTimeout, str(ZoneBuildDependTimeout), ZoneDependencies, configFile, ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[0] + ".zone", ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[1] + ".zone", ExportBuildDirectory + "/" + ZoneDependBuildDirectory + "/doomy.depend" ])
+		
+	printLog(log, "")
 
 # For each zone directory
 printLog(log, ">>> Build zone weld <<<")

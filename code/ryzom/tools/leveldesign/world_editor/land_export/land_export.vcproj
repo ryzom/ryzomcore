@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="land_export"
 	ProjectGUID="{FECBB892-F33C-4195-AB69-9B708BFBCDEA}"
 	RootNamespace="land_export"
@@ -75,7 +75,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
 				OutputFile="land_export_r.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"

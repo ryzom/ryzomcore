@@ -108,9 +108,12 @@ TilesSourceDirectories += [ "landscape/_texture_tiles/" + EcosystemName + "_wi/T
 # Tiles root directory
 TileRootSourceDirectory = "landscape/_texture_tiles/" + EcosystemName
 
-# Displace directoriy
+# Displace directory
+DisplaceSourceDirectory = "landscape/_texture_tiles/" + EcosystemName + "/displace"
+
+# Do not use, needs to be removed and fixed in processes
 DisplaceSourceDirectories = [ ]
-DisplaceSourceDirectories += [ "landscape/_texture_tiles/" + EcosystemName + "/displace" ]
+DisplaceSourceDirectories += [ DisplaceSourceDirectory ]
 
 # Bank directory
 BankSourceDirectory = "landscape/_texture_tiles/" + EcosystemName
@@ -192,7 +195,7 @@ FarbankBuildDirectory = "ecosystems/" + EcosystemName + "/farbank"
 
 # Ig directories ************** TODO CONFIRM IN IG BUILD PROCESS ************ FIX RBANK IF NEEDED ***********
 IgLandBuildDirectory = "_invalid"
-IgVillageBuildDirectory = "_invalid"
+IgOtherBuildDirectory = "_invalid"
 
 # Rbank directories
 RbankOutputBuildDirectory = "_invalid"

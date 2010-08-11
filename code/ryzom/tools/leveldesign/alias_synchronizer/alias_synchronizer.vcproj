@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="alias_synchronizer"
 	ProjectGUID="{3ECD7F32-6603-45D2-91AB-5FBC278F6DC8}"
+	RootNamespace="alias_synchronizer"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -70,6 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
 				OutputFile="alias_synchronizer_r.exe"
 				SubSystem="1"
 				OptimizeReferences="2"

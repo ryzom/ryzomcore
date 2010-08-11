@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3d", "..\..\nel\src\3d.vcproj", "{2B48BE83-108B-4E8E-8A55-6627CF09AC5A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
@@ -211,12 +211,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "named_items_2_csv", "leveld
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "master", "leveldesign\master\master.vcproj", "{D53B297E-01B6-4E9A-9753-BBF18A6EB332}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{577230FF-399C-4C9D-9495-CEC106326441} = {577230FF-399C-4C9D-9495-CEC106326441}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "georges_plugin_test", "leveldesign\georges_plugin_test\georges_plugin_test.vcproj", "{36DE80C1-0519-4177-847C-17A8D846D365}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "georges_convert", "leveldesign\georges_convert\georges_convert.vcproj", "{3539CE53-2596-4BC4-A177-045BBAFF4A82}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "export", "leveldesign\export\export.vcproj", "{577230FF-399C-4C9D-9495-CEC106326441}"
+	ProjectSection(ProjectDependencies) = postProject
+		{44B21233-EFCC-4825-B5E5-3A3BD6CC5516} = {44B21233-EFCC-4825-B5E5-3A3BD6CC5516}
+		{9D284C6B-BE12-4549-87E5-2337D64F31BE} = {9D284C6B-BE12-4549-87E5-2337D64F31BE}
+		{2B48BE83-108B-4E8E-8A55-6627CF09AC5A} = {2B48BE83-108B-4E8E-8A55-6627CF09AC5A}
+		{1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C} = {1DDC11C7-AF79-40F3-A6D4-F84BA8644B5C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "patch_gen", "patch_gen\patch_gen.vcproj", "{E6D3EADB-D6E4-42FC-87A3-4A98A6AAA67A}"
 	ProjectSection(ProjectDependencies) = postProject

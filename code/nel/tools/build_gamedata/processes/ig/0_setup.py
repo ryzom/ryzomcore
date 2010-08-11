@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
 # \file 0_setup.py
-# \brief Setup ig_light
-# \date 2009-03-11-15-16-GMT
+# \brief setup ig
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Setup ig_light
+# Setup ig
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -38,25 +38,39 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Setup ig_light")
+printLog(log, "--- Setup ig")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
+for dir in IgLandSourceDirectories:
+	mkPath(log, DatabaseDirectory + "/" + dir)
+for dir in IgOtherSourceDirectories:
+	mkPath(log, DatabaseDirectory + "/" + dir)
+mkPath(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + IgStaticLandExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgStaticOtherExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgStaticTagExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + LigoIgLandBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoIgOtherBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgElevLandPrimBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgElevLandLigoBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgElevLandStaticBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgTempLandMergeBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + IgLandBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + IgOtherBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + IgOtherLightedBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + IgClientDirectory)
+#mkPath(log, ClientDataDirectory + "/" + IgClientDirectory)
 
 log.close()
 

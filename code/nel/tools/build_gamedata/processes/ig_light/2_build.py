@@ -52,11 +52,11 @@ printLog(log, ">>> Build ig_light <<<")
 if IgLighter == "":
 	toolLogFail(log, IgLighterTool, ToolSuffix)
 else:
-	srcDir = ExportBuildDirectory + "/" + IgVillageBuildDirectory
+	srcDir = ExportBuildDirectory + "/" + IgOtherBuildDirectory
 	mkPath(log, srcDir)
-	destDir = ExportBuildDirectory + "/" + IgLightVillageBuildDirectory
+	destDir = ExportBuildDirectory + "/" + IgOtherLightedBuildDirectory
 	mkPath(log, destDir)
-	subprocess.call([ IgLighter, srcDir, destDir, ScriptDirectory + "/configuration/zone_lighter_properties.cfg" ])
+	subprocess.call([ IgLighter, srcDir, destDir, ActiveProjectDirectory + "/generated/zone_lighter.cfg" ])
 printLog(log, "")
 
 log.close()

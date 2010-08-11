@@ -30,12 +30,12 @@
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
 ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process (not yet), but does not export max files
-ProcessToComplete += [ "zone" ]
-#ProcessToComplete += [ "ig" ] # not implemented
-ProcessToComplete += [ "zone_light" ]
-ProcessToComplete += [ "rbank" ]
-#ProcessToComplete += [ "ig_light" ]
-#ProcessToComplete += [ "ps" ]
+ProcessToComplete += [ "zone" ] # works, need to check completeness
+ProcessToComplete += [ "ig" ] # fully implemented
+ProcessToComplete += [ "zone_light" ] # works, need to check completeness
+ProcessToComplete += [ "rbank" ] # works, need to check completeness
+ProcessToComplete += [ "ig_light" ] # fully implemented
+#ProcessToComplete += [ "ps" ] # not implemented
 
 
 # *** ECOSYSTEM AND CONTINENT NAMES ***
@@ -52,6 +52,13 @@ ContinentFile = ContinentName + "/" + ContinentName + ".continent"
 
 # *** BANK EXPORT OPTIONS ***
 
+# *** POSTFIX USED BY THE MULTIPLE TILES SYSTEM ***
+MultipleTilesPostfix = [ ]
+MultipleTilesPostfix += [ "_sp" ]
+MultipleTilesPostfix += [ "_su" ]
+MultipleTilesPostfix += [ "_au" ]
+MultipleTilesPostfix += [ "_wi" ]
+
 # Name of the tilebank to use
 BankTileBankName = EcosystemName
 
@@ -67,7 +74,8 @@ LigoExportZFactor2 = "0.5"
 LigoTileBankFile = "landscape/_texture_tiles/" + EcosystemName + "/" + EcosystemName + ".bank"
 
 # *** ZONE REGIONS ( up-left, down-right ) ***
-ZoneRegion = [ "65_bz", "77_cs" ]
+ZoneRegions = [ ] 
+ZoneRegions += [ [ "65_bz" ] + [ "77_cs" ] ]
 
 # *** RBANK OPTIONS ***
 

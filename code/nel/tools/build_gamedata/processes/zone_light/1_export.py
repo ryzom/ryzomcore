@@ -47,7 +47,7 @@ printLog(log, "")
 #TgaToDds = findTool(log, ToolDirectories, TgaToDdsTool, ToolSuffix)
 printLog(log, "")
 
-# For each zone_light directory
+# Export zone_light water maps
 printLog(log, ">>> Export zone_light water maps <<<")
 srcDir = ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirectory
 mkPath(log, srcDir)
@@ -55,46 +55,7 @@ for dir in WaterMapSourceDirectories:
 	destDir = DatabaseDirectory + "/" + dir
 	mkPath(log, destDir)
 	copyFilesExtNoTreeIfNeeded(log, srcDir, destDir, ".tga")
-#mkPath(log, ExportBuildDirectory + "/" + zone_lightExportDirectory)
-#for dir in zone_lightSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	niouname = dir.replace("/", "_")
-#	newpath = ExportBuildDirectory + "/" + zone_lightExportDirectory + "/" + niouname
-#	mkPath(log, newpath)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
 printLog(log, "")
-
-# For each zone_light directory to compress in one DXTC
-#printLog(log, ">>> Export zone_light dxtc <<<")
-#mkPath(log, ExportBuildDirectory + "/" + zone_lightDxtcExportDirectory)
-#for dir in zone_lightDxtcSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + zone_lightDxtcExportDirectory, ".tga")
-#printLog(log, "")
-
-# For each zone_light fullscreen directory compress independently all in dds
-#printLog(log, ">>> Export zone_light fullscreen <<<")
-#if TgaToDds == "":
-#	toolLogFail(log, TgaToDdsTool, ToolSuffix)
-#else:
-#	mkPath(log, ExportBuildDirectory + "/" + zone_lightFullscreenExportDirectory)
-#	for dir in zone_lightFullscreenSourceDirectories:
-#		mkPath(log, DatabaseDirectory + "/" + dir)
-#		files = findFiles(log, DatabaseDirectory + "/" + dir, "", ".tga")
-#		for file in files:
-#			sourceFile = DatabaseDirectory + "/" + dir + "/" + file
-#			destFile = ExportBuildDirectory + "/" + zone_lightFullscreenExportDirectory + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
-#			if needUpdateLogRemoveDest(log, sourceFile, destFile):
-#				subprocess.call([ TgaToDds, sourceFile, "-o", destFile, "-a", "5" ])
-#printLog(log, "")
-
-# For each zone_light 3d directory
-#printLog(log, ">>> Export zone_light 3d <<<")
-#mkPath(log, ExportBuildDirectory + "/" + zone_light3DExportDirectory)
-#for dir in zone_light3DSourceDirectories:
-#	mkPath(log, DatabaseDirectory + "/" + dir)
-#	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + zone_light3DExportDirectory, ".tga")
-#printLog(log, "")
 
 log.close()
 

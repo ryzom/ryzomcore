@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
 # \file 3_install.py
-# \brief Install zone_light
-# \date 2009-03-11-13-45-GMT
+# \brief Install ig
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install zone_light
+# Install ig
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -38,31 +38,20 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install zone_light")
+printLog(log, "--- Install ig")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-printLog(log, ">>> Install zone_light zones <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + ZoneClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+clientPathIg = ClientDataDirectory + "/" + IgClientDirectory
+mkPath(log, clientPathIg)
 
-printLog(log, ">>> Install zone_light water maps <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + WaterMapsClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
-
-printLog(log, ">>> Install zone_light igs <<<")
-srcDir = ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory
-mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + IgClientDirectory
-mkPath(log, destDir)
-copyFilesNoTreeIfNeeded(log, srcDir, destDir)
+printLog(log, ">>> Install ig <<<")
+landBuildDir = ExportBuildDirectory + "/" + IgLandBuildDirectory
+mkPath(log, landBuildDir)
+copyFilesExtNoTreeIfNeeded(log, landBuildDir, clientPathIg, "_ig.txt") # Copy the *_ig.txt file
+# Do not copy *.ig in ig_land, because zone process will copy zone ig lighted versions into client directory.
+# Do not copy *.ig ig_other, because ig_light process will copy ig lighted versions into client directory.
 
 printLog(log, "")
 log.close()

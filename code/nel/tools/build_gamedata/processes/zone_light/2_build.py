@@ -88,11 +88,11 @@ else:
 	mkPath(log, dependDir)
 	files = findFiles(log, srcDir, "", ".zonel")
 	for file in files:
-		igsrcFile = igsrcDir + os.path.basename(file)[0:-len(".zonel")] + ".ig"
+		igsrcFile = igsrcDir + "/" + os.path.basename(file)[0:-len(".zonel")] + ".ig"
 		destFile = destDir + "/" + os.path.basename(file)[0:-len(".zonel")] + ".ig"
 		if (os.path.isfile(igsrcFile)):
 			if (needUpdateLogRemoveDest(log, igsrcFile, destFile)):
-				srcFile = srcDir + "/" + file # ************************* TODO CHECK IF THIS REALLY WORKS *************************************
+				srcFile = srcDir + "/" + file
 				dependFile = destDir + "/" + file[0:-len(".zonel")] + ".depend"
 				subprocess.call([ ExecTimeout, str(ZoneIgLightBuildTimeout), ZoneIgLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/zone_lighter.cfg", dependFile ])
 printLog(log, "")
