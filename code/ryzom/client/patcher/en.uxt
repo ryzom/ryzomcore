@@ -1,0 +1,191 @@
+﻿// HASH_VALUE 6B09AC86E0363C89
+// INDEX 0
+LanguageName	[English]
+
+// HASH_VALUE 3259CCA76B39A0A8
+// INDEX 1
+TheSagaOfRyzom	[Ryzom]
+
+// HASH_VALUE C7CC3BE0464ED819
+// INDEX 333
+uiOnChecking	[CHECKING FILES FOR PATCH...]
+
+// HASH_VALUE 3DDF0D8BBD1D3C7A
+// INDEX 348
+uiErrCantPatch	[Error: You cannot patch because the PatchURL isn't setup in database (error code 16).]
+
+// HASH_VALUE E1B933F053557A69
+// INDEX 349
+uiNeedToPatch	[Information: You need to patch to access to this shard.]
+
+// HASH_VALUE 1CFD71DE1856F357
+// INDEX 350
+uiErrServerLost	[Error: Lost server during patching.]
+
+// HASH_VALUE 0781700FFA41B8F9
+// INDEX 351
+uiPatching	[PATCHING PLEASE WAIT]
+
+// HASH_VALUE B11FE4024EE3A1CB
+// INDEX 352
+uiErrPatchApply	[Error: Patch process ended but the patch has not been successfully applied.]
+
+// HASH_VALUE 428B3D2BDA3B2CD2
+// INDEX 353
+uiErrChecking	[Error: Patch files failed - checking.]
+
+// HASH_VALUE 40D0242C40D0242C
+// INDEX 354
+uiKb	[KB]
+
+// HASH_VALUE 4050243440502434
+// INDEX 355
+uiMb	[MB]
+
+// HASH_VALUE 9FA5A06DD895B637
+// INDEX 356
+uiLoginGetFile	[Getting File:]
+
+// HASH_VALUE 373988CC56A4B9DB
+// INDEX 357
+uiDLFailed	[Download from emergency server failed, patching is aborted]
+
+// HASH_VALUE 0DD314AEEB0A6833
+// INDEX 358
+uiDLURIFailed	[Download from URI failed (will try again):]
+
+// HASH_VALUE 9FEF11F92FE58883
+// INDEX 359
+uiNoMoreURI	[No more patch URI, try emergency patch server]
+
+// HASH_VALUE D126843FEAF6BF89
+// INDEX 360
+uiDLWithCurl	[Downloading File With Curl:]
+
+// HASH_VALUE 5DF5B8902957A38B
+// INDEX 361
+uiDecompressing	[Decompressing File:]
+
+// HASH_VALUE 5C24504228490833
+// INDEX 362
+uiCheckInt	[Checking Integrity:]
+
+// HASH_VALUE 4C08EC7AE63A3CA8
+// INDEX 363
+uiNoVersionFound	[No Version Found]
+
+// HASH_VALUE EA9BF07087F0DE5C
+// INDEX 364
+uiVersionFound	[Version Found:]
+
+// HASH_VALUE 6CBAA4C2CED054DA
+// INDEX 365
+uiApplyingDelta	[Applying Delta:]
+
+// HASH_VALUE 6BA9B484A5229440
+// INDEX 366
+uiClientVersion	[Client Version]
+
+// HASH_VALUE 2EAADC9D27B47047
+// INDEX 367
+uiServerVersion	[Server Version]
+
+// HASH_VALUE A8B6FC32E686BF9C
+// INDEX 368
+uiCheckingFile	[Checking File]
+
+// HASH_VALUE 6618CC5E4408BC94
+// INDEX 369
+uiNeededPatches	[Required Patches:]
+
+// HASH_VALUE 57D72C08D558C375
+// INDEX 370
+uiCheckInBNP	[Checking inside BNP:]
+
+// HASH_VALUE 8810F72436CBB610
+// INDEX 371
+uiSHA1Diff	[Force BNP Unpacking: checksums do not correspond:]
+
+// HASH_VALUE 0328885969AA93AC
+// INDEX 372
+uiCheckEndNoErr	[Checking file ended with no errors]
+
+// HASH_VALUE 9759642196BA93B6
+// INDEX 373
+uiCheckEndWithErr	[Checking file ended with errors:]
+
+// HASH_VALUE 03196C6669AA93A9
+// INDEX 374
+uiPatchEndNoErr	[Patching file ended with no errors]
+
+// HASH_VALUE E2A45B80D6C8F35E
+// INDEX 375
+uiPatchEndWithErr	[Patch failed!]
+
+// HASH_VALUE 97987345E8D46F43
+// INDEX 376
+uiPatchDiskFull	[Disk full!]
+
+// HASH_VALUE 67818F3F0F656F1B
+// INDEX 377
+uiPatchWriteError	[Disk write error! (disk full?)]
+
+// HASH_VALUE 54956061978AB897
+// INDEX 378
+uiProcessing	[Processing file:]
+
+// HASH_VALUE D183CC5E53E4E24A
+// INDEX 379
+uiUnpack	[BNP Unpacking:]
+
+// HASH_VALUE 57282453CE0D24A5
+// INDEX 380
+uiUnpackErrHead	[Cannot read bnp header:]
+
+// HASH_VALUE 3EC17830B80D1B1D
+// INDEX 381
+uiRebootConfirm	[Ryzom will now relaunch. Please wait until Ryzom is fully restarted.]
+
+// HASH_VALUE 809F582A06023625
+// INDEX 382
+uiRebootBut	[CLICK HERE TO RELAUNCH]
+
+// HASH_VALUE EA9888EBCAF59355
+// INDEX 383
+uiChangeDate	[Changing the mod date:]
+
+// HASH_VALUE 4589434CDD042E75
+// INDEX 384
+uiChgDateErr	[Cannot change file time:]
+
+// HASH_VALUE 5BCA0C0C45A99719
+// INDEX 385
+uiNowDate	[Now the date is:]
+
+// HASH_VALUE 485B4807F0581777
+// INDEX 386
+uiSetAttrib	[Set file attributes:]
+
+// HASH_VALUE 5EB5789353166D5E
+// INDEX 387
+uiAttribErr	[Cannot have read/write access:]
+
+// HASH_VALUE C2B6FF326665E080
+// INDEX 388
+uiDelFile	[Delete file:]
+
+// HASH_VALUE 0D262B3499A4A35A
+// INDEX 389
+uiDelErr	[Cannot delete file:]
+
+// HASH_VALUE C238BC781514042B
+// INDEX 390
+uiDelNoFile	[Delete file (no file)]
+
+// HASH_VALUE C1B7E33CDEF4085B
+// INDEX 391
+uiRenameFile	[Rename File:]
+
+// HASH_VALUE 8DB5533699858756
+// INDEX 392
+uiRenameErr	[Cannot rename file:]

@@ -1,0 +1,191 @@
+﻿// HASH_VALUE 6B09AC86E0363C89
+// INDEX 0
+LanguageName	[Русский]
+
+// HASH_VALUE 3259CCA76B39A0A8
+// INDEX 1
+TheSagaOfRyzom	[Ризом]
+
+// HASH_VALUE C7CC3BE0464ED819
+// INDEX 333
+uiOnChecking	[ПРОВЕРКА ФАЙЛОВ ИГРЫ...]
+
+// HASH_VALUE 3DDF0D8BBD1D3C7A
+// INDEX 348
+uiErrCantPatch	[Ошибка : Патч невозможен, поскольку адрес получения патча не установлен (error code 16).]
+
+// HASH_VALUE E1B933F053557A69
+// INDEX 349
+uiNeedToPatch	[Информация : Для подключения к этому серверу необходим патч.]
+
+// HASH_VALUE 1CFD71DE1856F357
+// INDEX 350
+uiErrServerLost	[Ошибка : Потеря связи с сервером во время патча.]
+
+// HASH_VALUE 0781700FFA41B8F9
+// INDEX 351
+uiPatching	[ПАТЧ В ПРОЦЕССЕ... ПОДОЖДИТЕ]
+
+// HASH_VALUE B11FE4024EE3A1CB
+// INDEX 352
+uiErrPatchApply	[Ошибка : Процесс скачивания патча завершился, но патч невозможен.]
+
+// HASH_VALUE 428B3D2BDA3B2CD2
+// INDEX 353
+uiErrChecking	[Ошибка : Файлы патча не соответствуют необходимым - идет проверка...]
+
+// HASH_VALUE 40D0242C40D0242C
+// INDEX 354
+uiKb	[КБ]
+
+// HASH_VALUE 4050243440502434
+// INDEX 355
+uiMb	[МБ]
+
+// HASH_VALUE 9FA5A06DD895B637
+// INDEX 356
+uiLoginGetFile	[Получение файла :]
+
+// HASH_VALUE 373988CC56A4B9DB
+// INDEX 357
+uiDLFailed	[Скачивание с экстренного сервера невозможно, патч не может быть завершен]
+
+// HASH_VALUE 0DD314AEEB0A6833
+// INDEX 358
+uiDLURIFailed	[Скачивание по указанному адресу невозможно (попытки возобновятся позже) :]
+
+// HASH_VALUE 9FEF11F92FE58883
+// INDEX 359
+uiNoMoreURI	[Адрес для скачивания патча недействителен, подключитесь к экстренному серверу]
+
+// HASH_VALUE D126843FEAF6BF89
+// INDEX 360
+uiDLWithCurl	[Скачивание файла :]
+
+// HASH_VALUE 5DF5B8902957A38B
+// INDEX 361
+uiDecompressing	[Распаковка файла :]
+
+// HASH_VALUE 5C24504228490833
+// INDEX 362
+uiCheckInt	[Проверка файла :]
+
+// HASH_VALUE 4C08EC7AE63A3CA8
+// INDEX 363
+uiNoVersionFound	[Версия не обнаружена]
+
+// HASH_VALUE EA9BF07087F0DE5C
+// INDEX 364
+uiVersionFound	[Обнаружена версия :]
+
+// HASH_VALUE 6CBAA4C2CED054DA
+// INDEX 365
+uiApplyingDelta	[Применяется Дельта :]
+
+// HASH_VALUE 6BA9B484A5229440
+// INDEX 366
+uiClientVersion	[Версия клиента]
+
+// HASH_VALUE 2EAADC9D27B47047
+// INDEX 367
+uiServerVersion	[Версия сервера]
+
+// HASH_VALUE A8B6FC32E686BF9C
+// INDEX 368
+uiCheckingFile	[Проверка файла]
+
+// HASH_VALUE 6618CC5E4408BC94
+// INDEX 369
+uiNeededPatches	[Необходимые патчи :]
+
+// HASH_VALUE 57D72C08D558C375
+// INDEX 370
+uiCheckInBNP	[Проверка BNP :]
+
+// HASH_VALUE 8810F72436CBB610
+// INDEX 371
+uiSHA1Diff	[Форсировать распаковку BNP : контрольные суммы не совпадают :]
+
+// HASH_VALUE 0328885969AA93AC
+// INDEX 372
+uiCheckEndNoErr	[Проверка файла не выявила ошибок]
+
+// HASH_VALUE 9759642196BA93B6
+// INDEX 373
+uiCheckEndWithErr	[Проверка файла выявила ошибки :]
+
+// HASH_VALUE 03196C6669AA93A9
+// INDEX 374
+uiPatchEndNoErr	[Патч осуществлен без ошибок]
+
+// HASH_VALUE E2A45B80D6C8F35E
+// INDEX 375
+uiPatchEndWithErr	[Патч невозможен!]
+
+// HASH_VALUE 97987345E8D46F43
+// INDEX 376
+uiPatchDiskFull	[Диск переполнен!]
+
+// HASH_VALUE 67818F3F0F656F1B
+// INDEX 377
+uiPatchWriteError	[Ошибка записи! (диск переполнен ?)]
+
+// HASH_VALUE 54956061978AB897
+// INDEX 378
+uiProcessing	[Обработка файла :]
+
+// HASH_VALUE D183CC5E53E4E24A
+// INDEX 379
+uiUnpack	[Распаковка BNP :]
+
+// HASH_VALUE 57282453CE0D24A5
+// INDEX 380
+uiUnpackErrHead	[Невозможно прочесть заголовок BNP :]
+
+// HASH_VALUE 3EC17830B80D1B1D
+// INDEX 381
+uiRebootConfirm	[Ризом будет перезапущен. Пожалуйста, подождите...]
+
+// HASH_VALUE 809F582A06023625
+// INDEX 382
+uiRebootBut	[ПЕРЕЗАПУСТИТЬ ИГРУ]
+
+// HASH_VALUE EA9888EBCAF59355
+// INDEX 383
+uiChangeDate	[Перезапись даты изменений :]
+
+// HASH_VALUE 4589434CDD042E75
+// INDEX 384
+uiChgDateErr	[Невозможно изменить время файла :]
+
+// HASH_VALUE 5BCA0C0C45A99719
+// INDEX 385
+uiNowDate	[Новая дата :]
+
+// HASH_VALUE 485B4807F0581777
+// INDEX 386
+uiSetAttrib	[Установить свойства файла :]
+
+// HASH_VALUE 5EB5789353166D5E
+// INDEX 387
+uiAttribErr	[Невозможно получить доступ к чтению/записи :]
+
+// HASH_VALUE C2B6FF326665E080
+// INDEX 388
+uiDelFile	[Удалить файл :]
+
+// HASH_VALUE 0D262B3499A4A35A
+// INDEX 389
+uiDelErr	[Невозможно удалить файл :]
+
+// HASH_VALUE C238BC781514042B
+// INDEX 390
+uiDelNoFile	[Удалить файл (файл отсутствует)]
+
+// HASH_VALUE C1B7E33CDEF4085B
+// INDEX 391
+uiRenameFile	[Переименовать файл :]
+
+// HASH_VALUE 8DB5533699858756
+// INDEX 392
+uiRenameErr	[Невозможно переименовать файл :]

@@ -1,0 +1,191 @@
+﻿// HASH_VALUE 6B09AC86E0363C89
+// INDEX 0
+LanguageName	[Deutsch]
+
+// HASH_VALUE 3259CCA76B39A0A8
+// INDEX 1
+TheSagaOfRyzom	[Ryzom]
+
+// HASH_VALUE C7CC3BE0464ED819
+// INDEX 333
+uiOnChecking	[ÜBERPRÜFE DATEIEN FÜR DEN PATCH...]
+
+// HASH_VALUE 3DDF0D8BBD1D3C7A
+// INDEX 348
+uiErrCantPatch	[Fehler : Du kannst nicht patchen, da die PatchURL noch nicht in die Datenbank eingegeben wurde (Fehlercode 16).]
+
+// HASH_VALUE E1B933F053557A69
+// INDEX 349
+uiNeedToPatch	[Information : Du musst patchen, um Zugang zu diesem Shard zu erlangen.]
+
+// HASH_VALUE 1CFD71DE1856F357
+// INDEX 350
+uiErrServerLost	[Fehler : Die Verbindung zum Server wurde während des Patchens unterbrochen.]
+
+// HASH_VALUE 0781700FFA41B8F9
+// INDEX 351
+uiPatching	[PATCHE, BITTE WARTEN]
+
+// HASH_VALUE B11FE4024EE3A1CB
+// INDEX 352
+uiErrPatchApply	[Fehler : Patchprozess beendet, aber der Patch konnte nicht erfolgreich eingesetzt werden.]
+
+// HASH_VALUE 428B3D2BDA3B2CD2
+// INDEX 353
+uiErrChecking	[Fehler : Patchdateien versagen - Überprüfung.]
+
+// HASH_VALUE 40D0242C40D0242C
+// INDEX 354
+uiKb	[KB]
+
+// HASH_VALUE 4050243440502434
+// INDEX 355
+uiMb	[MB]
+
+// HASH_VALUE 9FA5A06DD895B637
+// INDEX 356
+uiLoginGetFile	[Lade Datei:]
+
+// HASH_VALUE 373988CC56A4B9DB
+// INDEX 357
+uiDLFailed	[Download vom Notfall-Server gescheitert, Login wurde abgebrochen]
+
+// HASH_VALUE 0DD314AEEB0A6833
+// INDEX 358
+uiDLURIFailed	[Download vom URI gescheitert (neuer Versuch):]
+
+// HASH_VALUE 9FEF11F92FE58883
+// INDEX 359
+uiNoMoreURI	[Keine Verbindung mehr zum URI, versuche den Notfall-Server]
+
+// HASH_VALUE D126843FEAF6BF89
+// INDEX 360
+uiDLWithCurl	[Datei laden mit Curl:]
+
+// HASH_VALUE 5DF5B8902957A38B
+// INDEX 361
+uiDecompressing	[Dekomprimiere Datei:]
+
+// HASH_VALUE 5C24504228490833
+// INDEX 362
+uiCheckInt	[Überprüfe Integrität:]
+
+// HASH_VALUE 4C08EC7AE63A3CA8
+// INDEX 363
+uiNoVersionFound	[Keine Version gefunden]
+
+// HASH_VALUE EA9BF07087F0DE5C
+// INDEX 364
+uiVersionFound	[Version gefunden:]
+
+// HASH_VALUE 6CBAA4C2CED054DA
+// INDEX 365
+uiApplyingDelta	[Delta anlegen:]
+
+// HASH_VALUE 6BA9B484A5229440
+// INDEX 366
+uiClientVersion	[Klientversion]
+
+// HASH_VALUE 2EAADC9D27B47047
+// INDEX 367
+uiServerVersion	[Serverversion]
+
+// HASH_VALUE A8B6FC32E686BF9C
+// INDEX 368
+uiCheckingFile	[Überprüfe Datei]
+
+// HASH_VALUE 6618CC5E4408BC94
+// INDEX 369
+uiNeededPatches	[Benötigte Patches :]
+
+// HASH_VALUE 57D72C08D558C375
+// INDEX 370
+uiCheckInBNP	[Überprüfe innerhalb BNP :]
+
+// HASH_VALUE 8810F72436CBB610
+// INDEX 371
+uiSHA1Diff	[BNP Zwangsentpackung : Checksumme stimmt nicht überein :]
+
+// HASH_VALUE 0328885969AA93AC
+// INDEX 372
+uiCheckEndNoErr	[Dateiüberprüfung ohne Fehler beendet]
+
+// HASH_VALUE 9759642196BA93B6
+// INDEX 373
+uiCheckEndWithErr	[Dateiüberprüfung mit Fehler beendet:]
+
+// HASH_VALUE 03196C6669AA93A9
+// INDEX 374
+uiPatchEndNoErr	[Dateipatch ohne Fehler beendet]
+
+// HASH_VALUE E2A45B80D6C8F35E
+// INDEX 375
+uiPatchEndWithErr	[Patch fehlgeschlagen!]
+
+// HASH_VALUE 97987345E8D46F43
+// INDEX 376
+uiPatchDiskFull	[Ungenügender Festplattenspeicher!]
+
+// HASH_VALUE 67818F3F0F656F1B
+// INDEX 377
+uiPatchWriteError	[Fehler beim Schreiben auf die Festplatte! (Festplatte voll?)]
+
+// HASH_VALUE 54956061978AB897
+// INDEX 378
+uiProcessing	[Bearbeite Datei:]
+
+// HASH_VALUE D183CC5E53E4E24A
+// INDEX 379
+uiUnpack	[BNP entpacken:]
+
+// HASH_VALUE 57282453CE0D24A5
+// INDEX 380
+uiUnpackErrHead	[Bnp-Header unlesbar:]
+
+// HASH_VALUE 3EC17830B80D1B1D
+// INDEX 381
+uiRebootConfirm	[Klicke, um neu zu starten. Bitte warten, Ryzom startet dann automatisch.]
+
+// HASH_VALUE 809F582A06023625
+// INDEX 382
+uiRebootBut	[HIER KLICKEN, UM NEU ZU STARTEN]
+
+// HASH_VALUE EA9888EBCAF59355
+// INDEX 383
+uiChangeDate	[Das Mod-Datum ändern :]
+
+// HASH_VALUE 4589434CDD042E75
+// INDEX 384
+uiChgDateErr	[File-Zeit unveränderbar :]
+
+// HASH_VALUE 5BCA0C0C45A99719
+// INDEX 385
+uiNowDate	[Wir haben den :]
+
+// HASH_VALUE 485B4807F0581777
+// INDEX 386
+uiSetAttrib	[File-Attribute einstellen :]
+
+// HASH_VALUE 5EB5789353166D5E
+// INDEX 387
+uiAttribErr	[Zugang unlesbar :]
+
+// HASH_VALUE C2B6FF326665E080
+// INDEX 388
+uiDelFile	[File löschen :]
+
+// HASH_VALUE 0D262B3499A4A35A
+// INDEX 389
+uiDelErr	[ File kann nicht gelöscht werden:]
+
+// HASH_VALUE C238BC781514042B
+// INDEX 390
+uiDelNoFile	[ File löschen (Keine File)]
+
+// HASH_VALUE C1B7E33CDEF4085B
+// INDEX 391
+uiRenameFile	[File umbenennen:]
+
+// HASH_VALUE 8DB5533699858756
+// INDEX 392
+uiRenameErr	[File kann nicht umbenannt werden :]
