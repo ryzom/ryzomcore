@@ -21,25 +21,30 @@
 
 
 #include "nel/misc/types_nl.h"
-#include "nel/misc/file.h"
-#include "nel/misc/bitmap.h"
 
+#include "nel/misc/file.h"
+#include "nel/misc/path.h"
+#include "nel/misc/bitmap.h"
+#include "nel/misc/events.h"
+#include "nel/misc/time_nl.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/event_listener.h"
-#include "nel/misc/events.h"
-#include "nel/misc/path.h"
-#include "nel/misc/time_nl.h"
-#include "nel/3d/driver.h"
+
 #include "nel/3d/nelu.h"
+#include "nel/3d/driver.h"
 #include "nel/3d/scene_group.h"
+#include "nel/3d/text_context.h"
 #include "nel/3d/transform_shape.h"
 #include "nel/3d/event_mouse_listener.h"
-#include "nel/3d/text_context.h"
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
+
+#ifndef CV_DIR
+#	define CV_DIR "."
+#endif
 
 using namespace std;
 using namespace NL3D;
@@ -109,7 +114,7 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 	
 	FILE *f = fopen (ScriptName,"rb");
 	fseek (f, 0, SEEK_END);
-	sint file_size = ftell (f);
+	uint file_size = ftell (f);
 	fseek (f, 0, SEEK_SET);
 	char *file_buf = (char*)malloc(file_size+1);
 	if (fread (file_buf, 1, file_size, f) != file_size)
@@ -152,7 +157,7 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 		}
 		else
 		{
-	 		if (nLastNbPlus >= nNbPlus)
+			if (nLastNbPlus >= nNbPlus)
 			for (int i = 0; i < ((nLastNbPlus-nNbPlus)+1); ++i)
 				if (pile.size() > 0)
 					pile.pop_back();
@@ -194,7 +199,6 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-
 #ifdef NL_OS_WINDOWS
 int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 #else // NL_OS_WINDOWS
@@ -204,7 +208,6 @@ int main(int argc, char **argv)
 	double rGlobalTime = 0;
 	double rOldGlobalTime = 0;
 	double rDeltaTime = 0;
-	double rMoveTime = 0;
 
 	vector<SDispCS> DispCS;
 
@@ -217,18 +220,19 @@ int main(int argc, char **argv)
 
 	CNELU::init (800, 600, CViewport(), 32, true);
 
-	CPath::addSearchPath("shapes/");
-	CPath::addSearchPath("groups/");
-	CPath::addSearchPath("maps/");
-	CPath::addSearchPath("lightmaps/");
-	CPath::addSearchPath("anims/");
-	///// CPath::addSearchPath("fonts/");
+	CNELU::Scene->enableLightingSystem(true);
+	CNELU::Scene->setAmbientGlobal(CRGBA(128,128,128));
+
+	CPath::addSearchPath(CV_DIR);
+	CPath::addSearchPath(CV_DIR"/shapes");
+	CPath::addSearchPath(CV_DIR"/groups");
+	CPath::addSearchPath(CV_DIR"/fonts");
 
 	CFontManager FontManager;
 	CTextContext TextContext;
 
 	TextContext.init (CNELU::Driver, &FontManager);	
-	TextContext.setFontGenerator ("fonts/n019003l.pfb");
+	TextContext.setFontGenerator (NLMISC::CPath::lookup("n019003l.pfb"));
 	TextContext.setHotSpot (CComputedString::TopLeft);
 	TextContext.setColor (CRGBA(255,255,255));
 	TextContext.setFontSize (20);
@@ -242,21 +246,18 @@ int main(int argc, char **argv)
 	// Force to automatically find the cluster system
 	CNELU::Camera->setClusterSystem ((CInstanceGroup*)-1); 
 
-
 	CClipTrav *pClipTrav = &CNELU::Scene->getClipTrav();
 	dcsTemp.Name = "Root";
 	dcsTemp.pIG = NULL;
 	DispCS.push_back (dcsTemp);
 
-	
 	// Add all instance that create the scene
 	// --------------------------------------	
-	// Begining of script reading
+	// Beginning of script reading
 	CVector CameraStart;
 
 	LoadSceneScript ("view_cs.txt", CNELU::Scene, DispCS, CameraStart);
 
-	CNELU::Scene->enableLightingSystem(true);
 	CMatrix m = MouseListener.getViewMatrix();
 	m.setPos (CameraStart);
 	MouseListener.setMatrix (m);
@@ -352,9 +353,7 @@ int main(int argc, char **argv)
 				if (j < (vCluster.size()-1))
 					sAllClusters += ",  ";
 			}
-			TextContext.printfAt (0, 1-0.028f, sAllClusters.c_str());				
-
-
+			TextContext.printfAt (0, 1-0.028f, sAllClusters.c_str());
 		}
 
 		// -----------------------------------------------------
@@ -362,14 +361,13 @@ int main(int argc, char **argv)
 
 		CNELU::Driver->swapBuffers ();
 
-		
 		// Keys management
 		// ---------------
 
 		if (CNELU::AsyncListener.isKeyDown (KeySHIFT))
-			MouseListener.setSpeed (10.0f);
+			MouseListener.setSpeed (50.0f);
 		else
-			MouseListener.setSpeed (2.0f);
+			MouseListener.setSpeed (10.0f);
 
 		CNELU::Camera->setMatrix (MouseListener.getViewMatrix());
 
@@ -419,6 +417,7 @@ int main(int argc, char **argv)
 		}
 
 	}
-	while (!CNELU::AsyncListener.isKeyPushed (KeyESCAPE));
-	return 0;
+	while ((!CNELU::AsyncListener.isKeyPushed(KeyESCAPE)) && CNELU::Driver->isActive());
+
+	return EXIT_SUCCESS;
 }

@@ -486,7 +486,7 @@ void		CLightingManager::computeModelLightContributions(NLMISC::CRGBA sunAmbient,
 			v= NLMISC::OptFastFloor(mergedAmbient.R);	fastClamp8(v);	amb.R= v;
 			v= NLMISC::OptFastFloor(mergedAmbient.G);	fastClamp8(v);	amb.G= v;
 			v= NLMISC::OptFastFloor(mergedAmbient.B);	fastClamp8(v);	amb.B= v;
-			amb.R = 255;
+			amb.A = 255;
 			lightContrib.MergedPointLight= amb;
 
 			// Indicate we use the merged pointLight => the model must recompute lighting each frame
