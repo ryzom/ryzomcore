@@ -104,7 +104,6 @@ void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf)
 }
 
 
-
 using namespace std;
 using namespace NLMISC;
 
@@ -772,7 +771,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			nlwarning("\tFileName = %s", rFilename.c_str());
 			// Extract to patch
 			vector<string> vFilenames;
-			bool result;
+			bool result = false;
 			try
 			{
 				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
