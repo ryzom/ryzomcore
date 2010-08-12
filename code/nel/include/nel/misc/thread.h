@@ -111,20 +111,18 @@ public:
 	/**
 	  * Set the CPU mask of this thread. Thread must have been started before.
 	  * The mask must be a subset of the CPU mask returned by IProcess::getCPUMask() thread process.
-	  * Not implemented under Linux.
 	  */
 	virtual bool setCPUMask(uint64 cpuMask)=0;
 
 	/**
 	  * Get the CPU mask of this thread. Thread must have been started before.
 	  * The mask should be a subset of the CPU mask returned by IProcess::getCPUMask() thread process.
-	  * Not implemented under Linux.
 	  */
 	virtual uint64 getCPUMask()=0;
 
 	/**
 	  * Get the thread user name.
-	  * Not implemented under linux, under windows return the name of the logon user.
+	  * Under Linux return thread owner, under windows return the name of the logon user.
 	  */
 	virtual std::string getUserName()=0;
 };
@@ -158,13 +156,11 @@ public:
 
 	/**
 	  * Return process CPU mask. Each bit stand for a CPU usable by the process threads.
-	  * Not implemented under Linux.
 	  */
 	virtual uint64 getCPUMask()=0;
 
 	/**
 	  * Set the process CPU mask. Each bit stand for a CPU usable by the process threads.
-	  * Not implemented under Linux.
 	  */
 	virtual bool setCPUMask(uint64 mask)=0;
 };

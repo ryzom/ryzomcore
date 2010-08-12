@@ -62,7 +62,6 @@ private:
 	uint8		_State; // 0=not created, 1=started, 2=finished
 	uint32		_StackSize;
 	pthread_t	_ThreadHandle;
-
 };
 
 /**
@@ -77,7 +76,6 @@ public:
 	virtual ~CPProcess() {}
 	virtual uint64 getCPUMask();
 	virtual bool setCPUMask(uint64 mask);
-
 };
 
 } // NLMISC

@@ -21,6 +21,8 @@
 
 #include "nel/misc/p_thread.h"
 
+#include <sched.h>
+#include <pwd.h>
 
 namespace NLMISC {
 
@@ -147,6 +149,16 @@ void CPThread::wait ()
  */
 bool CPThread::setCPUMask(uint64 cpuMask)
 {
+#ifdef __USE_GNU
+	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(uint64), (const cpu_set_t*)&cpuMask);
+
+	if (res)
+	{
+		nlwarning("pthread_setaffinity_np() returned %d", res);
+		return false;
+	}
+#endif // __USE_GNU
+
 	return true;
 }
 
@@ -155,7 +167,19 @@ bool CPThread::setCPUMask(uint64 cpuMask)
  */
 uint64 CPThread::getCPUMask()
 {
-	return 1;
+	uint64 cpuMask = 1;
+
+#ifdef __USE_GNU
+	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(uint64), (cpu_set_t*)&cpuMask);
+
+	if (res)
+	{
+		nlwarning("pthread_getaffinity_np() returned %d", res);
+		return 0;
+	}
+#endif // __USE_GNU
+
+	return cpuMask;
 }
 
 /*
@@ -163,7 +187,12 @@ uint64 CPThread::getCPUMask()
  */
 std::string CPThread::getUserName()
 {
-	return "Not implemented";
+	struct passwd *pw = getpwuid(getuid());
+
+	if (!pw)
+		return "";
+
+	return pw->pw_name;
 }
 
 
@@ -183,13 +212,35 @@ IProcess *IProcess::getCurrentProcess ()
  */
 uint64 CPProcess::getCPUMask()
 {
-	return 1;
+	uint64 cpuMask = 1;
+
+#ifdef __USE_GNU
+	sint res = sched_getaffinity(getpid(), sizeof(uint64), (cpu_set_t*)&cpuMask);
+
+	if (res)
+	{
+		nlwarning("sched_getaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
+		return 0;
+	}
+#endif // __USE_GNU
+
+	return cpuMask;
 }
 
 /// set the CPU mask
-bool CPProcess::setCPUMask(uint64 mask)
+bool CPProcess::setCPUMask(uint64 cpuMask)
 {
-	return 1;
+#ifdef __USE_GNU
+	sint res = sched_setaffinity(getpid(), sizeof(uint64), (const cpu_set_t*)&cpuMask);
+
+	if (res)
+	{
+		nlwarning("sched_setaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
+		return false;
+	}
+#endif // __USE_GNU
+
+	return true;
 }
 
 
