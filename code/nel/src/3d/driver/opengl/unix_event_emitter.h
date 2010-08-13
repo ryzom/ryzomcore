@@ -17,14 +17,12 @@
 #ifndef NL_UNIX_EVENT_EMITTER_H
 #define NL_UNIX_EVENT_EMITTER_H
 
-#ifndef NL_MAC_NATIVE
-
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/events.h"
 #include "nel/misc/game_device_events.h"
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -104,9 +102,7 @@ private:
 
 } // NLMISC
 
-#endif // NL_OS_UNIX
-
-#endif // NL_MAC_NATIVE
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #endif // NL_UNIX_EVENT_EMITTER_H
 

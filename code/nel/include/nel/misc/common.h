@@ -45,7 +45,7 @@
 #ifdef NL_OS_WINDOWS
 	typedef HWND nlWindow;
 	#define EmptyWindow NULL
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 	typedef void* nlWindow;
 	#define EmptyWindow NULL
 #elif defined(NL_OS_UNIX)

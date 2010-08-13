@@ -28,7 +28,7 @@
 #	include <windowsx.h>
 #	include <string>
 # include <GL/gl.h>
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # define GL_GLEXT_LEGACY
 # include <OpenGL/gl.h>
 # include "mac/glext.h"
@@ -187,7 +187,7 @@ CDriverGL::CDriverGL()
 	_NeedToRestaureGammaRamp = false;
 	_Interval = 1;
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::ctor();
 
@@ -330,7 +330,7 @@ CDriverGL::~CDriverGL()
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
 
-#if defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#if defined(NL_OS_MAC)
 	NL3D::MAC::dtor();
 #endif
 }
@@ -858,7 +858,7 @@ bool CDriverGL::swapBuffers()
 
 	SwapBuffers(_hDC);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::swapBuffers(_win);
 
@@ -2306,7 +2306,7 @@ void CDriverGL::retrieveATIDriverVersion()
 			}
 			RegCloseKey(parentKey);
 		}
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 

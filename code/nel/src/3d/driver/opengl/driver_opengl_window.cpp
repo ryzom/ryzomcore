@@ -24,7 +24,7 @@
 
 #ifdef NL_OS_WINDOWS
 # include <windowsx.h>
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # define GL_GLEXT_LEGACY
 # include <OpenGL/gl.h>
 # include "mac/glext.h"
@@ -139,7 +139,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	return trapMessage ? 0 : DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-#elif defined (NL_MAC_NATIVE)
+#elif defined (NL_OS_MAC)
 
 bool GlWndProc(CDriverGL *driver)
 {
@@ -284,7 +284,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	// ati specific : try to retrieve driver version
 	retrieveATIDriverVersion();
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	if(!NL3D::MAC::init(windowIcon, exitFunc))
 	{
@@ -379,7 +379,7 @@ bool CDriverGL::unInit()
 		}
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	if(!NL3D::MAC::unInit())
 	{
@@ -887,7 +887,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlinfo(e.what());
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	_win = NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
 
@@ -994,7 +994,7 @@ bool CDriverGL::saveScreenMode()
 
 	// don't need to save it because Windows will use default desktop resolution
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	// no need to store because the screen mode is never really changed
 
@@ -1058,7 +1058,7 @@ bool CDriverGL::restoreScreenMode()
 
 	res = (ChangeDisplaySettings(NULL, 0) == DISP_CHANGE_SUCCESSFUL);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	// no need to restore because the screen mode was never really changed
 	res = true;
@@ -1196,7 +1196,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		return false;
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	// no need to do anything here, on mac os, the screen mode is never changed
 
@@ -1310,7 +1310,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		return false;
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	window = NL3D::MAC::createWindow(mode);
 
@@ -1388,7 +1388,7 @@ bool CDriverGL::destroyWindow()
 			DestroyWindow(_win);
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	if(_DestroyWindow)
 	{
@@ -1483,7 +1483,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 //	else if (isMaximized && isVisible)
 //		ShowWindow(_hWnd, SW_RESTORE);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	if(!NL3D::MAC::setWindowStyle(_win, windowStyle == EWSFullscreen))
 	{
@@ -1492,10 +1492,6 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 
 #elif defined(NL_OS_UNIX)
-
-	// x11 fullscreen is not working on mac os x
-
-#if !defined(NL_OS_MAC)
 
 	// Toggle fullscreen
 	XEvent xev;
@@ -1521,8 +1517,6 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	if (_WindowVisible)
 		XMapRaised(_dpy, _win);
 
-#endif
-
 #endif // NL_OS_WINDOWS
 
 	return true;
@@ -1542,12 +1536,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!mode.Windowed)
 		_Depth = mode.Depth;
 
-#if defined(NL_OS_MAC) && !defined(NL_MAC_NATIVE)
-	// X11 under Mac OS can't use fullscreen
-	_FullScreen = false;
-#else
 	_FullScreen = !mode.Windowed;
-#endif // NL_MAC_NATIVE
 
 	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
@@ -1581,7 +1570,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 		modeIndex++;
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::getModes(modes);
 
@@ -1692,7 +1681,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Height = (uint16)devmode.dmPelsHeight;
 	mode.AntiAlias = _AntiAliasing;
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::getCurrentScreenMode(_win, mode);
 
@@ -1783,11 +1772,6 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		nldebug("Current mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
 	}
 
-#if defined(NL_OS_MAC)
-	// x11 fullscreen is not working on mac os x
-	mode.Windowed = true;
-#endif // NL_OS_MAC
-
 #endif // NL_OS_UNIX
 
 	return true;
@@ -1805,7 +1789,7 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 	SetWindowTextW(_win, (WCHAR*)title.c_str());
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::setWindowTitle(_win, title);
 
@@ -1837,7 +1821,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::setWindowPos(_win, x, y);
 
@@ -1867,8 +1851,10 @@ void CDriverGL::showWindow(bool show)
 	_WindowVisible = show;
 
 #ifdef NL_OS_WINDOWS
+
 	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+
+#elif defined(NL_OS_MAC)
 
 	MAC::showWindow(show);
 
@@ -1913,7 +1899,7 @@ bool CDriverGL::activate()
 	if (hglrc != _hRC)
 		wglMakeCurrent(_hDC, _hRC);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	if(!MAC::activate(_win))
 	{
@@ -1997,7 +1983,7 @@ void CDriverGL::showCursor(bool b)
 			;
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::showCursor(b);
 
@@ -2050,7 +2036,7 @@ void CDriverGL::setMousePos(float x, float y)
 	ClientToScreen (_win, &pt);
 	SetCursorPos(pt.x, pt.y);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::setMousePos(_win, x, y);
 
@@ -2065,11 +2051,11 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
-#ifdef NL_MAC_NATIVE
+#ifdef NL_OS_MAC
 
 	NL3D::MAC::getWindowSize(_win, width, height);
 
-#else
+#else // NL_OS_MAC
 
 	// Off-screen rendering ?
 	if (_OffScreen)
@@ -2088,7 +2074,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 		height = _WindowHeight;
 	}
 
-#endif // NL_MAC_NATIVE
+#endif // NL_OS_MAC
 }
 
 void CDriverGL::setWindowSize(uint32 width, uint32 height)
@@ -2119,7 +2105,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::setWindowSize(_win, width, height);
 
@@ -2156,11 +2142,11 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 {
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
-#ifdef NL_MAC_NATIVE
+#ifdef NL_OS_MAC
 
 	NL3D::MAC::getWindowPos(_win, x, y);
 
-#else
+#else // NL_OS_MAC
 
 	// Off-screen rendering ?
 	if (_OffScreen)
@@ -2176,7 +2162,7 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 		}
 	}
 
-#endif // NL_MAC_NATIVE
+#endif // NL_OS_MAC
 }
 
 // --------------------------------------------------
@@ -2193,7 +2179,7 @@ bool CDriverGL::isActive()
 
 	res = (IsWindow(_win) != FALSE);
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	// nlwarning("OpenGL Driver: Missing Mac Implementation");
 
@@ -2237,7 +2223,7 @@ void CDriverGL::setCapture (bool b)
 		ReleaseCapture ();
 	*/
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NL3D::MAC::setCapture(b);
 
@@ -2290,7 +2276,7 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 			diee->releaseMouse();
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
@@ -2332,7 +2318,7 @@ NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 			diee->releaseKeyboard();
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
@@ -2355,7 +2341,7 @@ NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 	if (_EventEmitter.getNumEmitters() > 1)
 		res = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
@@ -2403,7 +2389,7 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 		res = ::GetDoubleClickTime();
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 
@@ -2466,7 +2452,7 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 		nlwarning ("(CDriverGL::setMonitorColorProperties): can't create DC");
 	}
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation"
 	nlwarning("OpenGL Driver: Missing Mac Implementation");
 

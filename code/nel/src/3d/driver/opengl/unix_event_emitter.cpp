@@ -15,17 +15,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopengl.h"
+#include "unix_event_emitter.h"
 
-#ifdef NL_OS_UNIX
-
-#ifndef NL_MAC_NATIVE
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #include <X11/keysym.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
-
 #include "nel/misc/debug.h"
-#include "unix_event_emitter.h"
+
 
 typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
@@ -603,6 +601,4 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 } // NLMISC
 
-#endif // NL_MAC_NATIVE
-
-#endif // NL_OS_UNIX
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)

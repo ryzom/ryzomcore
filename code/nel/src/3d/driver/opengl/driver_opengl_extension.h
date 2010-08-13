@@ -26,7 +26,7 @@
 #	include <windows.h>
 #	include <GL/gl.h>
 #	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 #	define GL_GLEXT_LEGACY
 #	include <OpenGL/gl.h>
 #	include "mac/glext.h"

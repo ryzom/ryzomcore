@@ -20,7 +20,7 @@
 
 #include "nel/misc/types_nl.h"
 
-#ifdef NL_MAC_NATIVE
+#ifdef NL_OS_MAC
 # define GL_GLEXT_LEGACY
 # include <OpenGL/gl.h>
 # include "mac/glext.h"

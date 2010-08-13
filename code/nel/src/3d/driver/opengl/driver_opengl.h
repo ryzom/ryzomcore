@@ -31,7 +31,7 @@
 #	define NOMINMAX
 #	include <windows.h>
 #	include <GL/gl.h>
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 #	define GL_GLEXT_LEGACY
 #	include <OpenGL/gl.h>
 #elif defined (NL_OS_UNIX)
@@ -70,7 +70,7 @@
 
 #ifdef NL_OS_WINDOWS
 #include "nel/misc/win_event_emitter.h"
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 #include "mac/cocoa_event_emitter.h"
 #elif defined (NL_OS_UNIX)
 #include "unix_event_emitter.h"
@@ -111,7 +111,7 @@ class   COcclusionQueryGL;
 
 bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-#elif defined (NL_MAC_NATIVE)
+#elif defined (NL_OS_MAC)
 
 // TODO: change that
 bool GlWndProc(CDriverGL *driver);
@@ -698,7 +698,7 @@ private:
 	// Off-screen rendering in Dib section
 	HPBUFFERARB					_PBuffer;
 
-#elif defined(NL_OS_MAC) && defined(NL_MAC_NATIVE)
+#elif defined(NL_OS_MAC)
 
 	NLMISC::CCocoaEventEmitter	_EventEmitter;
 
