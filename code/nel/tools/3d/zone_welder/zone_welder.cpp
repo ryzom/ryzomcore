@@ -76,6 +76,13 @@ struct CWeldableVertexInfos
 	sint PatchIndex;	// patch
 	uint8 PatchVertex;	// 0,1,2,3
 
+	CWeldableVertexInfos()
+	{
+		IndexInZone = 0;
+		PatchIndex = 0;
+		PatchVertex = 0;
+	}
+
 	bool operator< (const CWeldableVertexInfos& wvinf) const
 	{
 		if(IndexInZone<wvinf.IndexInZone)

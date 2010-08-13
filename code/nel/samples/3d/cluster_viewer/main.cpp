@@ -15,19 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-//
+// ---------------------------------------------------------------------------
 // Includes
-//
+// ---------------------------------------------------------------------------
+
 
 #include "nel/misc/types_nl.h"
-
-#include <sstream>
-
-#ifdef NL_OS_WINDOWS
-#	include <windows.h>
-#	undef min
-#	undef max
-#endif
 
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
@@ -43,6 +36,11 @@
 #include "nel/3d/text_context.h"
 #include "nel/3d/transform_shape.h"
 #include "nel/3d/event_mouse_listener.h"
+
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
 
 #ifndef CV_DIR
 #	define CV_DIR "."
@@ -117,15 +115,17 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 	
 	FILE *f = fopen (CPath::lookup(ScriptName).c_str(),"rb");
 	fseek (f, 0, SEEK_END);
-	int file_size = ftell (f);
+	uint file_size = ftell (f);
 	fseek (f, 0, SEEK_SET);
 	char *file_buf = (char*)malloc(file_size+1);
-	fread (file_buf, 1, file_size, f);
+	if (fread (file_buf, 1, file_size, f) != file_size)
+		nlwarning("Can't read %d elements", file_size);
+
 	file_buf[file_size] = 0;
 	++file_size;
 	fclose (f);
 	char *buf_ptr = file_buf;
-	int nLastNbPlus = 0;
+	sint nLastNbPlus = 0;
 	vector<CInstanceGroup*> pile;
 	pile.clear ();
 	pile.push_back (pScene->getGlobalInstanceGroup());
@@ -134,7 +134,7 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 	do 
 	{
 		char Line[256], *line_ptr;
-		int nNbPlus = 0;
+		sint nNbPlus = 0;
 		line_ptr = &Line[0];
 		buf_ptr = readLine (line_ptr, buf_ptr);
 
@@ -383,7 +383,6 @@ int main()
 		// -----------------------------------------------------
 
 		CNELU::Driver->swapBuffers ();
-
 
 		// Keys management
 		// ---------------
