@@ -448,8 +448,6 @@ bool getModes(std::vector<GfxMode> &modes)
 				// Frequency stays at 0 because on mac cocoa, display resolution
 				//   is never really changed. if rendering res < display res,
 				//   cocoa interpolates and keeps the display at it's original res.
-				// In case of x11 on mac, fullscreen is not supported, so again, no 
-				//   mode switching is done.
 				mode.Frequency = 0;
 				modes.push_back (mode);
 
