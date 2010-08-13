@@ -500,6 +500,11 @@ void setWindowSize(nlWindow wnd, uint32 width, uint32 height)
 	// for fullscreen mode, adjust the back buffer size to the desired resolution
 	if([superview isInFullScreenMode])
 	{
+		// disable and re-enable fullscreen
+		// fixes #1062 (http://dev.ryzom.com/issues/1062)
+		setWindowStyle(wnd, false);
+		setWindowStyle(wnd, true);
+		
 		// set the back buffer manually to match the desired rendering resolution
 		GLint dim[2]   = { width, height };
 		CGLError error = CGLSetParameter(
