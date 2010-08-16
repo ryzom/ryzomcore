@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
-				OutputFile="bin\$(ProjectName)_d.exe"
+				OutputFile="bin64\$(ProjectName)_d.exe"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -198,9 +198,10 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="../../../common/src;../../../client/src"
-				PreprocessorDefinitions="WIN32;NDEBUG;CURL_STATICLIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;CURL_STATICLIB;RZ_NO_CLIENT;NL_USE_SEVENZIP"
 				StringPooling="true"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -282,6 +283,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;CURL_STATICLIB;RZ_NO_CLIENT;NL_USE_SEVENZIP"
 				StringPooling="true"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
 				WarningLevel="2"
 				DebugInformationFormat="3"
 			/>
@@ -297,7 +299,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libcurl.lib libeay32.lib ssleay32.lib"
-				OutputFile="bin\$(ProjectName)_r.exe"
+				OutputFile="bin64\$(ProjectName)_r.exe"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
