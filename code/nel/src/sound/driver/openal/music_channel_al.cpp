@@ -83,7 +83,7 @@ bool CMusicChannelAL::fillBuffer(IBuffer *buffer, uint length)
 	uint32 size = _MusicBuffer->getNextBytes(tmp, length, length);
 	buffer->unlock(size);
 
-	return true;
+	return size > 0;
 }
 
 /// Use buffer format from IMusicBuffer
@@ -128,7 +128,8 @@ void CMusicChannelAL::run()
 		// fill buffers
 		for(uint i = 0; i < buffers.size(); ++i)
 		{
-			fillBuffer(buffers[i], _Source->getStreamingBufferSize());
+			if (!fillBuffer(buffers[i], _Source->getStreamingBufferSize()))
+				break;
 
 			// add buffer to streaming buffers queue
 			_Source->submitStreamingBuffer(buffers[i]);
