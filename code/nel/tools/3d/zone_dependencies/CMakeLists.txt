@@ -2,14 +2,8 @@ FILE(GLOB SRC *.cpp *.h ../zone_lib/*.cpp ../zone_lib/*.h)
 
 ADD_EXECUTABLE(zone_dependencies ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(zone_dependencies ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nel3d nelgeorges)
-IF(WIN32)
-  SET_TARGET_PROPERTIES(zone_dependencies PROPERTIES 
-    LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-    LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-    PROJECT_LABEL "Tools, 3D: zone_dependencies")
-ENDIF(WIN32)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+TARGET_LINK_LIBRARIES(zone_dependencies ${PLATFORM_LINKFLAGS} nel3d nelgeorges nelmisc)
+NL_DEFAULT_PROPS(zone_dependencies "Tools, 3D: zone_dependencies")
+NL_ADD_RUNTIME_FLAGS(zone_dependencies)
 
 INSTALL(TARGETS zone_dependencies RUNTIME DESTINATION bin COMPONENT tools3d)

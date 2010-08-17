@@ -2,9 +2,8 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(animation_set_builder ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(animation_set_builder ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nel3d)
-SET_TARGET_PROPERTIES(animation_set_builder PROPERTIES PROJECT_LABEL "Tools, 3D: anim_set_builder")
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+TARGET_LINK_LIBRARIES(animation_set_builder ${PLATFORM_LINKFLAGS} nel3d nelmisc)
+NL_DEFAULT_PROPS(animation_set_builder "Tools, 3D: anim_set_builder")
+NL_ADD_RUNTIME_FLAGS(animation_set_builder)
 
 INSTALL(TARGETS animation_set_builder RUNTIME DESTINATION bin COMPONENT tools3d)
