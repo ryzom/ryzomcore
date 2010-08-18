@@ -46,7 +46,7 @@ int kbhit()
 	int nread;
 
 	if (peek_character != -1) return 1;
-	
+
 	new_settings.c_cc[VMIN]=0;
 	tcsetattr(STDIN_FILENO, TCSANOW, &new_settings);
 	nread = read(STDIN_FILENO,&ch,1);
@@ -71,8 +71,8 @@ int getch()
 		peek_character = -1;
 		return ch;
 	}
-	if (read(STDIN_FILENO,&ch,1) != 1)
-		nlwarning("Can't read keyboard");
+	if (read(STDIN_FILENO,&ch,1) != 1) return ' ';
+
 	return ch;
 }
 
