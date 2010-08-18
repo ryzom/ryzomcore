@@ -27,6 +27,8 @@
 #ifdef NL_OS_WINDOWS
 #	include <winsock2.h>
 #	include <ws2tcpip.h>
+// for Windows 2000 compatibility
+#	include <wspiapi.h>
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	include <sys/socket.h>
@@ -40,6 +42,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifndef NI_MAXHOST
+#	define NI_MAXHOST 1025
+#endif
 
 namespace NLNET
 {
@@ -74,17 +79,29 @@ CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 	}
 	else
 	{
-		hostent *phostent = gethostbyaddr( (char*)&ip->s_addr, 4,  AF_INET );
-		if ( phostent == NULL )
-		{
-			_HostName = ipAddress();
-		}
-		else
-		{
-			_HostName = string( phostent->h_name );
-		}
+		updateHostName();
 	}
 	_Valid = true;
+}
+
+
+/*
+ * Update _HostName from _SockAddr current value 
+ */
+void CInetAddress::updateHostName()
+{
+	char host[NI_MAXHOST];
+
+	sint status = getnameinfo((struct sockaddr *) _SockAddr, sizeof (struct sockaddr), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
+
+	if ( status )
+	{
+		_HostName = ipAddress();
+	}
+	else
+	{
+		_HostName = string( host );
+	}
 }
 
 
@@ -148,16 +165,6 @@ bool operator==( const CInetAddress& a1, const CInetAddress& a2 )
  */
 bool operator<( const CInetAddress& a1, const CInetAddress& a2 )
 {
-#ifdef NL_OS_WINDOWS
-	if ( a1._SockAddr->sin_addr.S_un.S_addr == a2._SockAddr->sin_addr.S_un.S_addr )
-	{
-		return ( a1.port() < a2.port() );
-	}
-	else
-	{
-		return ( a1._SockAddr->sin_addr.S_un.S_addr < a2._SockAddr->sin_addr.S_un.S_addr );
-	}
-#elif defined NL_OS_UNIX
 	if ( a1._SockAddr->sin_addr.s_addr == a2._SockAddr->sin_addr.s_addr )
 	{
 		return ( a1.port() < a2.port() );
@@ -166,7 +173,6 @@ bool operator<( const CInetAddress& a1, const CInetAddress& a2 )
 	{
 		return ( a1._SockAddr->sin_addr.s_addr < a2._SockAddr->sin_addr.s_addr );
 	}
-#endif
 }
 
 
@@ -223,26 +229,59 @@ CInetAddress& CInetAddress::setByName( const std::string& hostName )
 {
 	// Try to convert directly for addresses such as a.b.c.d
 	in_addr iaddr;
-#ifdef NL_OS_WINDOWS
-	iaddr.S_un.S_addr = inet_addr( hostName.c_str() );
-	if ( iaddr.S_un.S_addr == INADDR_NONE )
-#elif defined NL_OS_UNIX
 	iaddr.s_addr = inet_addr( hostName.c_str() );
 	if ( iaddr.s_addr == INADDR_NONE )
-#endif
 	{
-
 		// Otherwise use the traditional DNS look-up
-		hostent *phostent = gethostbyname( hostName.c_str() );
-		if ( phostent == NULL )
+		struct addrinfo hints;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+		hints.ai_socktype = SOCK_STREAM;
+
+		struct addrinfo *res = NULL;
+		sint status = getaddrinfo(hostName.c_str(), NULL, &hints, &res);
+
+		if (status)
 		{
 			_Valid = false;
-			LNETL0_DEBUG( "LNETL0: Network error: resolution of hostname '%s' failed", hostName.c_str() );
+			LNETL0_DEBUG( "LNETL0: Network error: resolution of hostname '%s' failed: %s", hostName.c_str(), gai_strerror(status) );
 			// return *this;
 			throw ESocket( (string("Hostname resolution failed for ")+hostName).c_str() );
 		}
-		_HostName = string( phostent->h_name );
-		memcpy( &_SockAddr->sin_addr, phostent->h_addr, sizeof(in_addr) );
+
+		struct addrinfo *p = res;
+
+		// process all addresses
+		while (p != NULL)
+		{
+			// check address family
+			if (p->ai_family == AF_INET)
+			{
+				// ipv4
+				struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+
+				// convert the IP to a string
+				_HostName = string(inet_ntoa(ipv4->sin_addr));
+				memcpy( &_SockAddr->sin_addr, &ipv4->sin_addr, sizeof(in_addr) );
+			}
+			else if (p->ai_family == AF_INET6)
+			{
+				// ipv6
+				// TODO: modify class to be able to handle IPv6
+
+				// struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+
+				// convert the IP to a string
+				// inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
+				// memcpy( &_SockAddr->sin_addr, &ipv6->sin_addr, sizeof(in_addr) );
+			}
+
+			// process next address
+			p = p->ai_next;
+		}
+ 
+		// free the linked list
+		freeaddrinfo(res);
 	}
 	else
 	{
@@ -275,15 +314,7 @@ void CInetAddress::setSockAddr( const sockaddr_in* saddr )
 	// Warning: when it can't find it, it take more than 4 seconds
 	if ( CInetAddress::RetrieveNames )
 	{
-		hostent *phostent = gethostbyaddr( (char*)&saddr->sin_addr.s_addr, 4,  AF_INET );
-		if ( phostent == NULL )
-		{
-			_HostName = ipAddress();
-		}
-		else
-		{
-			_HostName = string( phostent->h_name );
-		}
+		updateHostName();
 	}
 	_Valid = true;
 }
@@ -476,19 +507,51 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	// 2. Get address list
 	vector<CInetAddress> vect;
 
-	uint i = 0;
-	for(;;)
+	struct addrinfo hints;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+	hints.ai_socktype = SOCK_STREAM;
+
+	struct addrinfo *res = NULL;
+	sint status = getaddrinfo(localhost, NULL, &hints, &res);
+
+	if (status)
 	{
-		hostent *phostent = gethostbyname( localhost );
-		if ( phostent == NULL ) // will come here if the local hostname (/etc/hostname in Linux) is not the real name
-			throw ESocket( (string("Hostname resolution failed for ")+string(localhost)).c_str() );
-
-		if (phostent->h_addr_list[i] == 0)
-			break;
-
-		vect.push_back( CInetAddress( (const in_addr*)(phostent->h_addr_list[i]), localhost ) );
-		i++;
+		// will come here if the local hostname (/etc/hostname in Linux) is not the real name
+		throw ESocket( (string("Hostname resolution failed for ")+string(localhost)).c_str() );
 	}
+
+	struct addrinfo *p = res;
+
+	// process all addresses
+	while (p != NULL)
+	{
+		// check address family
+		if (p->ai_family == AF_INET)
+		{
+			// ipv4
+			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+
+			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
+		}
+		else if (p->ai_family == AF_INET6)
+		{
+			// ipv6
+			// TODO: modify class to be able to handle IPv6
+
+			// struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+
+			// convert the IP to a string
+			// inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
+			// memcpy( &_SockAddr->sin_addr, &ipv6->sin_addr, sizeof(in_addr) );
+		}
+
+		// process next address
+		p = p->ai_next;
+	}
+
+	// free the linked list
+	freeaddrinfo(res);
 
 	if(vect.empty())
 	{
