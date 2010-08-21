@@ -1671,14 +1671,19 @@ void		CPatch::getCurrentTileTLIColors(uint ts, uint tt, NLMISC::CRGBA corners[4]
 		CRGBA	tbMiddle;
 		// left.
 		tbEdges[0].avg2RGBOnly(tbCorners[0], tbCorners[2]);
+		tbEdges[0].A = 255;
 		// bottom
 		tbEdges[1].avg2RGBOnly(tbCorners[2], tbCorners[3]);
+		tbEdges[1].A = 255;
 		// right
 		tbEdges[2].avg2RGBOnly(tbCorners[1], tbCorners[3]);
+		tbEdges[2].A = 255;
 		// up
 		tbEdges[3].avg2RGBOnly(tbCorners[0], tbCorners[1]);
+		tbEdges[3].A = 255;
 		// middle.
 		tbMiddle.avg2RGBOnly(tbEdges[0], tbEdges[2]);
+		tbMiddle.A = 255;
 
 		// just copy result according to tile pos in tessBlock.
 		if(tlt==0)
