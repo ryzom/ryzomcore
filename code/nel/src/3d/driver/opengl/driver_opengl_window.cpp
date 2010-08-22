@@ -1442,6 +1442,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	if (_win == EmptyWindow || !_DestroyWindow)
 		return true;
 
+	if (getWindowStyle() == windowStyle)
+		return true;
+
 #if defined(NL_OS_WINDOWS)
 
 	// get current style
@@ -1493,24 +1496,48 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_UNIX)
 
-	// Toggle fullscreen
-	XEvent xev;
-	xev.xclient.type = ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event = True;
-	xev.xclient.display = _dpy;
-	xev.xclient.window = _win;
-	xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
-	xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	xev.xclient.data.l[2] = 0;
-	xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
-	xev.xclient.data.l[4] = 0;
-	if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+	XWindowAttributes attr;
+	XGetWindowAttributes(_dpy, _win, &attr);
+
+	// if window is mapped use events else properties
+	if (attr.map_state != IsUnmapped)
 	{
-		nlwarning("3D: Failed to toggle to fullscreen");
-		return false;
+		// Toggle fullscreen
+		XEvent xev;
+		xev.xclient.type = ClientMessage;
+		xev.xclient.serial = 0;
+		xev.xclient.send_event = True;
+		xev.xclient.display = _dpy;
+		xev.xclient.window = _win;
+		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
+		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+		xev.xclient.data.l[2] = 0;
+		xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
+		xev.xclient.data.l[4] = 0;
+		if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+		{
+			nlwarning("3D: Failed to toggle to fullscreen");
+			return false;
+		}
+	}
+	else
+	{
+		Atom _NET_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
+
+		if (windowStyle == EWSFullscreen)
+		{
+			Atom _NET_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+
+			// set state property to fullscreen
+			XChangeProperty(_dpy, _win, _NET_WM_STATE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&_NET_WM_STATE_FULLSCREEN, 1);
+		}
+		else
+		{
+			// delete state property
+			XDeleteProperty(_dpy, _win, _NET_WM_STATE);
+		}
 	}
 
 	// show window (hack to avoid black window bug)
