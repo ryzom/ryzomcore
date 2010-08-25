@@ -33,7 +33,8 @@ bool  CExportNel::buildVegetableShape (NL3D::CVegetableShape& skeletonShape, INo
 	bool res = false;
 
 	// Get a pointer on the object's node
-    Object *obj = node.EvalWorldState(time).obj;
+    ObjectState os = node.EvalWorldState(time);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (obj)
@@ -42,116 +43,119 @@ bool  CExportNel::buildVegetableShape (NL3D::CVegetableShape& skeletonShape, INo
 		{ 
 			// Get a triobject from the node
 			TriObject *tri = (TriObject *) obj->ConvertToType(time, Class_ID(TRIOBJ_CLASS_ID, 0));
-
-			// Note that the TriObject should only be deleted
-			// if the pointer to it is not equal to the object
-			// pointer that called ConvertToType()
-			bool deleteIt=false;
-			if (obj != tri) 
-				deleteIt = true;
-
-			// Build a mesh base structure
-			CMeshBase::CMeshBaseBuild buildBaseMesh;
-			CMaxMeshBaseBuild maxBaseBuild;
-
-			// Get the node matrix
-			Matrix3 nodeMatrixMax;
-			CMatrix nodeMatrix;
-			getLocalMatrix (nodeMatrixMax, node, time);
-			convertMatrix (nodeMatrix, nodeMatrixMax);
-
-			buildBaseMeshInterface (buildBaseMesh, maxBaseBuild, node, time, nodeMatrix);
-
-			// Build a mesh
-			CMesh::CMeshBuild buildMesh;
-			buildMeshInterface (*tri, buildMesh, buildBaseMesh, maxBaseBuild, node, time, NULL);
-
-			// Has UV 1
-			if ((buildMesh.VertexFlags & CVertexBuffer::TexCoord0Flag) == 0)
+			
+			if (tri)
 			{
-				// Error
-				outputErrorMessage ("Can't build vegetable mesh: need UV1 coordinates");
-			}
-			else
-			{
+				// Note that the TriObject should only be deleted
+				// if the pointer to it is not equal to the object
+				// pointer that called ConvertToType()
+				bool deleteIt=false;
+				if (obj != tri) 
+					deleteIt = true;
+
+				// Build a mesh base structure
+				CMeshBase::CMeshBaseBuild buildBaseMesh;
+				CMaxMeshBaseBuild maxBaseBuild;
+
+				// Get the node matrix
+				Matrix3 nodeMatrixMax;
+				CMatrix nodeMatrix;
+				getLocalMatrix (nodeMatrixMax, node, time);
+				convertMatrix (nodeMatrix, nodeMatrixMax);
+
+				buildBaseMeshInterface (buildBaseMesh, maxBaseBuild, node, time, nodeMatrix);
+
 				// Build a mesh
-				CMesh mesh;
-				mesh.build (buildBaseMesh, buildMesh);
+				CMesh::CMeshBuild buildMesh;
+				buildMeshInterface (*tri, buildMesh, buildBaseMesh, maxBaseBuild, node, time, NULL);
 
-				// Number of matrix block
-				if (mesh.getNbMatrixBlock () != 1)
+				// Has UV 1
+				if ((buildMesh.VertexFlags & CVertexBuffer::TexCoord0Flag) == 0)
 				{
 					// Error
-					outputErrorMessage ("The object can't be skinned");
+					outputErrorMessage ("Can't build vegetable mesh: need UV1 coordinates");
 				}
 				else
 				{
-					// Number of render pass
-					if (mesh.getNbRdrPass (0) != 1)
+					// Build a mesh
+					CMesh mesh;
+					mesh.build (buildBaseMesh, buildMesh);
+
+					// Number of matrix block
+					if (mesh.getNbMatrixBlock () != 1)
 					{
 						// Error
-						outputErrorMessage ("The object must have less than one material!");
+						outputErrorMessage ("The object can't be skinned");
 					}
 					else
 					{
-						// Build a vegetable mesh
-						CVegetableShapeBuild vegetableBuild;
-
-						// Copy the vertex buffer
-						vegetableBuild.VB = mesh.getVertexBuffer ();
-
-						// Copy the primitive block
-						vegetableBuild.PB = mesh.getRdrPassPrimitiveBlock (0, 0);
-
-						// Get the appdata
-						vegetableBuild.AlphaBlend = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND, 0) == 0;
-
-						// Alpha blend ?
-						if (vegetableBuild.AlphaBlend)
+						// Number of render pass
+						if (mesh.getNbRdrPass (0) != 1)
 						{
-							// Default options
-							vegetableBuild.PreComputeLighting = true;
-							vegetableBuild.DoubleSided = true;
-
-							// Lighted ?
-							vegetableBuild.Lighted = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_ON_LIGHTED, 0) == 0;
+							// Error
+							outputErrorMessage ("The object must have less than one material!");
 						}
 						else
 						{
-							// Lighted ?
-							vegetableBuild.Lighted = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED, 0) != 2;
+							// Build a vegetable mesh
+							CVegetableShapeBuild vegetableBuild;
 
-							// Precompute light ?
-							vegetableBuild.PreComputeLighting = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED, 0) == 0;
+							// Copy the vertex buffer
+							vegetableBuild.VB = mesh.getVertexBuffer ();
 
-							// Double sided ?
-							vegetableBuild.DoubleSided = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_DOUBLE_SIDED, 0) != BST_UNCHECKED;
+							// Copy the primitive block
+							vegetableBuild.PB = mesh.getRdrPassPrimitiveBlock (0, 0);
+
+							// Get the appdata
+							vegetableBuild.AlphaBlend = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND, 0) == 0;
+
+							// Alpha blend ?
+							if (vegetableBuild.AlphaBlend)
+							{
+								// Default options
+								vegetableBuild.PreComputeLighting = true;
+								vegetableBuild.DoubleSided = true;
+
+								// Lighted ?
+								vegetableBuild.Lighted = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_ON_LIGHTED, 0) == 0;
+							}
+							else
+							{
+								// Lighted ?
+								vegetableBuild.Lighted = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED, 0) != 2;
+
+								// Precompute light ?
+								vegetableBuild.PreComputeLighting = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED, 0) == 0;
+
+								// Double sided ?
+								vegetableBuild.DoubleSided = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_DOUBLE_SIDED, 0) != BST_UNCHECKED;
+							}
+
+							// PreComputeLighting?
+							if (vegetableBuild.PreComputeLighting)
+							{
+								// BestSidedPreComputeLighting?
+								vegetableBuild.BestSidedPreComputeLighting= CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_FORCE_BEST_SIDED_LIGHTING, 0) != BST_UNCHECKED;
+							}
+
+							// Max bend weight
+							vegetableBuild.MaxBendWeight = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_BEND_FACTOR, NEL3D_APPDATA_BEND_FACTOR_DEFAULT);
+
+							// BendMode
+							vegetableBuild.BendCenterMode = (CVegetableShapeBuild::TBendCenterMode)CExportNel::getScriptAppData (&node, NEL3D_APPDATA_BEND_CENTER, 0);
+
+							// Build it
+							skeletonShape.build (vegetableBuild);
+
+							// Ok
+							res = true;
 						}
-
-						// PreComputeLighting?
-						if (vegetableBuild.PreComputeLighting)
-						{
-							// BestSidedPreComputeLighting?
-							vegetableBuild.BestSidedPreComputeLighting= CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VEGETABLE_FORCE_BEST_SIDED_LIGHTING, 0) != BST_UNCHECKED;
-						}
-
-						// Max bend weight
-						vegetableBuild.MaxBendWeight = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_BEND_FACTOR, NEL3D_APPDATA_BEND_FACTOR_DEFAULT);
-
-						// BendMode
-						vegetableBuild.BendCenterMode = (CVegetableShapeBuild::TBendCenterMode)CExportNel::getScriptAppData (&node, NEL3D_APPDATA_BEND_CENTER, 0);
-
-						// Build it
-						skeletonShape.build (vegetableBuild);
-
-						// Ok
-						res = true;
 					}
 				}
-			}
 
-			if (deleteIt)
-				tri->DeleteMe();
+				if (deleteIt)
+					tri->MaybeAutoDelete();
+			}
 		}
 	}
 

@@ -60,7 +60,8 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 	for (node=0; node<nodes.size(); ++node)
 	{
 		// Get a pointer on the object's node
-		Object *obj = nodes[node]->EvalWorldState(tvTime).obj;
+		ObjectState os = nodes[node]->EvalWorldState(tvTime);
+		Object *obj = os.obj;
 
 		// Check if there is an object
 		if (obj)
@@ -70,72 +71,76 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 			{ 
 				// Get a triobject from the node
 				TriObject *tri = (TriObject*)obj->ConvertToType(tvTime, Class_ID(TRIOBJ_CLASS_ID, 0));
-
-				// get the mesh name
-				uint	meshId = rootMeshNames.size();
-				rootMeshNames.push_back(nodes[node]->GetName());
-				bool	collision = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION, 0) != 0;
-				bool	exterior = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION_EXTERIOR, 0) != 0;
-
-				bool deleteIt=false;
-				if (collision)
+				
+				if (tri)
 				{
-					// Note that the TriObject should only be deleted
-					// if the pointer to it is not equal to the object
-					// pointer that called ConvertToType()
-					if (obj != tri) 
-						deleteIt = true;
+					// get the mesh name
+					uint	meshId = rootMeshNames.size();
+					rootMeshNames.push_back(nodes[node]->GetName());
+					bool	collision = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION, 0) != 0;
+					bool	exterior = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION_EXTERIOR, 0) != 0;
 
-					uint	i;
-					Mesh	&mesh = tri->GetMesh();
-
-					// Get the object matrix
-					CMatrix ToWorldSpace;
-					Matrix3 verticesToWorld = nodes[node]->GetObjectTM(tvTime);
-					convertMatrix (ToWorldSpace, verticesToWorld);
-
-					// Convert the vertices
-					for (i=0; i<(uint)mesh.numVerts; ++i)
+					bool deleteIt=false;
+					if (collision)
 					{
-						Point3 v=mesh.verts[i];
-						CVector vv=ToWorldSpace*CVector (v.x, v.y, v.z);
-						pCollisionMeshBuild->Vertices.push_back(vv);
-						rootMeshVertices.push_back(node);
+						// Note that the TriObject should only be deleted
+						// if the pointer to it is not equal to the object
+						// pointer that called ConvertToType()
+						if (obj != tri) 
+							deleteIt = true;
+
+						uint	i;
+						Mesh	&mesh = tri->GetMesh();
+
+						// Get the object matrix
+						CMatrix ToWorldSpace;
+						Matrix3 verticesToWorld = nodes[node]->GetObjectTM(tvTime);
+						convertMatrix (ToWorldSpace, verticesToWorld);
+
+						// Convert the vertices
+						for (i=0; i<(uint)mesh.numVerts; ++i)
+						{
+							Point3 v=mesh.verts[i];
+							CVector vv=ToWorldSpace*CVector (v.x, v.y, v.z);
+							pCollisionMeshBuild->Vertices.push_back(vv);
+							rootMeshVertices.push_back(node);
+						}
+
+						uint	maxMatId = 0;
+
+						// Convert the faces
+						for (i=0; i<(uint)mesh.numFaces; ++i)
+						{
+							facesRootMeshesInfo.push_back(make_pair(meshId, i));
+
+							pCollisionMeshBuild->Faces.resize(pCollisionMeshBuild->Faces.size()+1);
+							pCollisionMeshBuild->Faces.back().V[0] = mesh.faces[i].v[0]+totalVertices;
+							pCollisionMeshBuild->Faces.back().V[1] = mesh.faces[i].v[1]+totalVertices;
+							pCollisionMeshBuild->Faces.back().V[2] = mesh.faces[i].v[2]+totalVertices;
+
+							pCollisionMeshBuild->Faces.back().Visibility[0] = ((mesh.faces[i].flags & EDGE_B) != 0);
+							pCollisionMeshBuild->Faces.back().Visibility[1] = ((mesh.faces[i].flags & EDGE_C) != 0);
+							pCollisionMeshBuild->Faces.back().Visibility[2] = ((mesh.faces[i].flags & EDGE_A) != 0);
+
+							uint32	maxMaterialId = mesh.faces[i].getMatID();
+							if (!exterior && maxMaterialId > maxMatId)
+								maxMatId = maxMaterialId;
+							sint32	sid = (exterior) ? -1 : totalSurfaces+maxMaterialId;
+
+							pCollisionMeshBuild->Faces.back().Surface = sid;
+							pCollisionMeshBuild->Faces.back().Material = maxMaterialId;
+						}
+
+						totalVertices = pCollisionMeshBuild->Vertices.size();
+						totalFaces = pCollisionMeshBuild->Faces.size();
+						totalSurfaces += maxMatId+1;
 					}
 
-					uint	maxMatId = 0;
+					// Delete the triObject if we should...
+					if (deleteIt)
+						tri->MaybeAutoDelete();
 
-					// Convert the faces
-					for (i=0; i<(uint)mesh.numFaces; ++i)
-					{
-						facesRootMeshesInfo.push_back(make_pair(meshId, i));
-
-						pCollisionMeshBuild->Faces.resize(pCollisionMeshBuild->Faces.size()+1);
-						pCollisionMeshBuild->Faces.back().V[0] = mesh.faces[i].v[0]+totalVertices;
-						pCollisionMeshBuild->Faces.back().V[1] = mesh.faces[i].v[1]+totalVertices;
-						pCollisionMeshBuild->Faces.back().V[2] = mesh.faces[i].v[2]+totalVertices;
-
-						pCollisionMeshBuild->Faces.back().Visibility[0] = ((mesh.faces[i].flags & EDGE_B) != 0);
-						pCollisionMeshBuild->Faces.back().Visibility[1] = ((mesh.faces[i].flags & EDGE_C) != 0);
-						pCollisionMeshBuild->Faces.back().Visibility[2] = ((mesh.faces[i].flags & EDGE_A) != 0);
-
-						uint32	maxMaterialId = mesh.faces[i].getMatID();
-						if (!exterior && maxMaterialId > maxMatId)
-							maxMatId = maxMaterialId;
-						sint32	sid = (exterior) ? -1 : totalSurfaces+maxMaterialId;
-
-						pCollisionMeshBuild->Faces.back().Surface = sid;
-						pCollisionMeshBuild->Faces.back().Material = maxMaterialId;
-					}
-
-					totalVertices = pCollisionMeshBuild->Vertices.size();
-					totalFaces = pCollisionMeshBuild->Faces.size();
-					totalSurfaces += maxMatId+1;
 				}
-
-				// Delete the triObject if we should...
-				if (deleteIt)
-					tri->DeleteMe();
 			}
 		}
 	}
@@ -436,6 +441,7 @@ void	CExportNel::computeCollisionRetrieverFromScene(TimeValue time,
 
 			// free the CCollisionMeshBuild.
 			delete pCmb;
+			pCmb = NULL;
 
 			// does igname match prefix/suffix???
 			if(igname.find(igNamePrefix)==0)

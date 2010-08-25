@@ -1386,7 +1386,8 @@ bool CExportNel::mirrorPhysiqueSelection(INode &node, TimeValue tvTime, const st
 	uint	vertCount;
 
 	// Get a pointer on the object's node.
-    Object *obj = node.EvalWorldState(tvTime).obj;
+    ObjectState os = node.EvalWorldState(tvTime);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	ok= false;
@@ -1398,35 +1399,39 @@ bool CExportNel::mirrorPhysiqueSelection(INode &node, TimeValue tvTime, const st
 		{ 
 			// Get a triobject from the node
 			TriObject *tri = (TriObject*)obj->ConvertToType(tvTime, Class_ID(TRIOBJ_CLASS_ID, 0));
-
-			// Note that the TriObject should only be deleted
-			// if the pointer to it is not equal to the object
-			// pointer that called ConvertToType()
-			bool deleteIt=false;
-			if (obj != tri) 
-				deleteIt = true;
-
-			// Get the node matrix. TODO: Matrix headhache?
-			/*Matrix3 nodeMatrixMax;
-			CMatrix nodeMatrix;
-			getLocalMatrix (nodeMatrixMax, node, tvTime);
-			convertMatrix (nodeMatrix, nodeMatrixMax);*/
-
-			// retrive Position geometry
-			vertCount= tri->NumPoints();
-			tempVertex.resize(vertCount);
-			for(uint i=0;i<vertCount;i++)
+			
+			if (tri)
 			{
-				Point3 v= tri->GetPoint(i);
-				tempVertex[i].Pos.set(v.x, v.y, v.z);
+				// Note that the TriObject should only be deleted
+				// if the pointer to it is not equal to the object
+				// pointer that called ConvertToType()
+				bool deleteIt=false;
+				if (obj != tri) 
+					deleteIt = true;
+
+				// Get the node matrix. TODO: Matrix headhache?
+				/*Matrix3 nodeMatrixMax;
+				CMatrix nodeMatrix;
+				getLocalMatrix (nodeMatrixMax, node, tvTime);
+				convertMatrix (nodeMatrix, nodeMatrixMax);*/
+
+				// retrive Position geometry
+				vertCount= tri->NumPoints();
+				tempVertex.resize(vertCount);
+				for(uint i=0;i<vertCount;i++)
+				{
+					Point3 v= tri->GetPoint(i);
+					tempVertex[i].Pos.set(v.x, v.y, v.z);
+				}
+
+				// Delete the triObject if we should...
+				if (deleteIt)
+					tri->MaybeAutoDelete();
+				tri = NULL;
+
+				// ok!
+				ok= true;
 			}
-
-			// Delete the triObject if we should...
-			if (deleteIt)
-				tri->DeleteMe();
-
-			// ok!
-			ok= true;
 		}
 	}
 	if(!ok)

@@ -17,6 +17,7 @@
 #include "std_afx.h"
 #include "nel_export.h"
 #include "nel/misc/file.h"
+#include "nel/misc/path.h"
 #include "nel/3d/shape.h"
 #include "nel/3d/animation.h"
 #include "nel/3d/skeleton_shape.h"
@@ -34,94 +35,133 @@ using namespace NLMISC;
 bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 {
 	// Result to return
-	bool bRet=false;
-
-	// Eval the object a time
-	ObjectState os = node.EvalWorldState(time);
-
-	// Object exist ?
-	if (os.obj)
+	bool bRet = false;
+	char tempName[L_tmpnam];
+	tmpnam(tempName);
+	
+	try
 	{
-		// Skeleton shape
-		CSkeletonShape *skeletonShape=NULL;
-		TInodePtrInt *mapIdPtr=NULL;
-		TInodePtrInt mapId;
+		// Eval the object a time
+		ObjectState os = node.EvalWorldState(time);
 
-		// If model skinned ?
-		if (CExportNel::isSkin (node))
+		// Object exist ?
+		if (os.obj)
 		{
-			// Create a skeleton
-			INode *skeletonRoot=CExportNel::getSkeletonRootBone (node);
+			// Skeleton shape
+			CSmartPtr<CSkeletonShape> skeletonShape = NULL;
+			TInodePtrInt *mapIdPtr=NULL;
+			TInodePtrInt mapId;
 
-			// Skeleton exist ?
-			if (skeletonRoot)
+			// If model skinned ?
+			if (CExportNel::isSkin (node))
 			{
-				// Build a skeleton
-				skeletonShape=new CSkeletonShape();
+				// Create a skeleton
+				INode *skeletonRoot = CExportNel::getSkeletonRootBone(node);
 
-				// Add skeleton bind pos info
-				CExportNel::mapBoneBindPos boneBindPos;
-				CExportNel::addSkeletonBindPos (node, boneBindPos);
+				// Skeleton exist ?
+				if (skeletonRoot)
+				{
+					// Build a skeleton
+					skeletonShape = new CSkeletonShape();
 
-				// Build the skeleton based on the bind pos information
-				_ExportNel->buildSkeletonShape (*skeletonShape, *skeletonRoot, &boneBindPos, mapId, time);
+					// Add skeleton bind pos info
+					CExportNel::mapBoneBindPos boneBindPos;
+					CExportNel::addSkeletonBindPos (node, boneBindPos);
 
-				// Set the pointer to not NULL
-				mapIdPtr=&mapId;
+					// Build the skeleton based on the bind pos information
+					_ExportNel->buildSkeletonShape(*skeletonShape.getPtr(), *skeletonRoot, &boneBindPos, mapId, time);
 
-				// Erase the skeleton
-				if (skeletonShape)
-					delete skeletonShape;
+					// Set the pointer to not NULL
+					mapIdPtr=&mapId;
+
+					// Erase the skeleton
+					skeletonShape = NULL;
+				}
 			}
-		}
-
-		DWORD t = timeGetTime();
-		if (InfoLog)
-			InfoLog->display("Beg buildShape %s \n", node.GetName());
-		// Export in mesh format
-		IShape*	pShape=_ExportNel->buildShape (node, time, mapIdPtr, true);
-		if (InfoLog)
-			InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
-
-		// Conversion success ?
-		if (pShape)
-		{
-			// Open a file
-			COFile file;
-			if (file.open (sPath))
+			
+			DWORD t = timeGetTime();
+			if (InfoLog)
+				InfoLog->display("Beg buildShape %s \n", node.GetName());
+			// Export in mesh format
+			CSmartPtr<IShape> pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
+			if (InfoLog)
+				InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
+			
+			// Conversion success ?
+			if (pShape.getPtr())
 			{
+				// Open a file
+				COFile file;
+				if (file.open(tempName))
+				{
+					try
+					{
+						// Create a streamable shape
+						CShapeStream shapeStream(pShape);
+						
+						// Serial the shape
+						shapeStream.serial(file);
+
+						// All is good
+						bRet = true;
+					}
+					catch (...)
+					{
+						nlwarning("Shape serialization failed!");
+						try
+						{
+							file.close();
+						}
+						catch (...)
+						{
+
+						}
+						remove(tempName);
+					}
+				}
+				else
+				{
+					nlwarning("Failed to create file %s", tempName);
+				}
+
+				// Delete the pointer
+				nldebug ("Delete the pointer");
 				try
 				{
-					// Create a streamable shape
-					CShapeStream shapeStream (pShape);
-					
-					// Serial the shape
-					shapeStream.serial (file);
-
-					// All is good
-					bRet=true;
+					bool tempBRet = bRet;
+					bRet = false;
+					pShape = NULL;
+					bRet = tempBRet;
 				}
 				catch (...)
 				{
-					nlwarning("Shape serialization failed!");
-					file.close();
-					remove(sPath);
+					nlwarning("Failed to delete pShape pointer! Something might be wrong.");
+					remove(tempName);
+					bRet = false;
 				}
-			}
-
-			// Delete the pointer
-			nldebug ("Delete the pointer");
-			try
-			{
-				// memory leak, fixme
-				// delete pShape;
-			}
-			catch (...)
-			{
-				nlwarning("Failed to delete pShape pointer! Something might be wrong.");
 			}
 		}
 	}
+	catch (...)
+	{
+		nlwarning("Fatal exception at CNelExport::exportMesh.");
+		bRet = false;
+	}
+
+	if (bRet)
+	{
+		try
+		{
+			remove(sPath);
+		}
+		catch (...)
+		{
+
+		}
+		CFile::moveFile(sPath, tempName);
+		nlinfo("MOVE %s -> %s", tempName, sPath);
+	}
+
 	return bRet;
 }
 

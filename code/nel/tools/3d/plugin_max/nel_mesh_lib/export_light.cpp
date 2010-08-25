@@ -200,7 +200,8 @@ void CExportNel::getLights (std::vector<CLight>& vectLight, TimeValue time, INod
 		node=_Ip->GetRootNode();
 
 	// Get a pointer on the object's node
-    Object *obj = node->EvalWorldState(time).obj;
+    ObjectState os = node->EvalWorldState(time);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (obj)
@@ -235,9 +236,9 @@ void CExportNel::getLights (std::vector<CLight>& vectLight, TimeValue time, INod
 				// Add the light in the list
 				vectLight.push_back (nelLight);
 
-			// Delete the triObject if we should...
+			// Delete the GenLight if we should...
 			if (deleteIt)
-				maxLight->DeleteMe();
+				maxLight->MaybeAutoDelete();
 		}
 	}
 

@@ -131,7 +131,8 @@ struct CMeshInterface
 bool CMeshInterface::buildFromMaxMesh(INode &node, TimeValue tvTime)
 {
 	// Get a pointer on the object's node
-	Object *obj = node.EvalWorldState(tvTime).obj;
+	ObjectState os = node.EvalWorldState(tvTime);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (!obj) return false;
@@ -140,6 +141,8 @@ bool CMeshInterface::buildFromMaxMesh(INode &node, TimeValue tvTime)
 	{ 
 		// Get a triobject from the node
 		TriObject *tri = (TriObject*)obj->ConvertToType(tvTime, Class_ID(TRIOBJ_CLASS_ID, 0));
+		
+		if (!tri) return false;
 
 		// Note that the TriObject should only be deleted
 		// if the pointer to it is not equal to the object
@@ -177,9 +180,8 @@ bool CMeshInterface::buildFromMaxMesh(INode &node, TimeValue tvTime)
 		}
 		//
 		if (deleteIt)
-		{
-			tri->DeleteMe();
-		}
+			tri->MaybeAutoDelete();
+		tri = NULL;
 		return true;						
 	}
 	return false;
@@ -316,50 +318,53 @@ static void AddNodeToQuadGrid(const NLMISC::CAABBox &delimiter, TNodeFaceQG &des
 		{
 			nldebug((std::string("Adding ") + node.GetName() + std::string(" to mesh interface quad grid")).c_str());
 			// add this node tris
-			Object *obj = node.EvalWorldState(time).obj;		
+			ObjectState os = node.EvalWorldState(time);
+			Object *obj = os.obj;	
 			if (obj)
 			{			
 				if (obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
 				{				
 					 // Get a triobject from the node
 					TriObject *tri = (TriObject*)obj->ConvertToType(time, Class_ID(TRIOBJ_CLASS_ID, 0));
-					// Note that the TriObject should only be deleted
-					// if the pointer to it is not equal to the object
-					// pointer that called ConvertToType()
-					bool deleteIt = false;
-					if (obj != tri) 
-						deleteIt = true;
-					Mesh &mesh = tri->GetMesh();
-
-					Matrix3   nodeMat = node.GetObjectTM(time);
-					CNodeFace nodeFace;
-
-					NLMISC::CAABBox faceBBox;
-
-					uint numFaceAdded = 0;
-					for(sint l = 0; l < mesh.getNumFaces(); ++l)
+					if (tri)
 					{
-						for(uint m = 0; m < 3; ++m)
+						// Note that the TriObject should only be deleted
+						// if the pointer to it is not equal to the object
+						// pointer that called ConvertToType()
+						bool deleteIt = false;
+						if (obj != tri) 
+							deleteIt = true;
+						Mesh &mesh = tri->GetMesh();
+
+						Matrix3   nodeMat = node.GetObjectTM(time);
+						CNodeFace nodeFace;
+
+						NLMISC::CAABBox faceBBox;
+
+						uint numFaceAdded = 0;
+						for(sint l = 0; l < mesh.getNumFaces(); ++l)
 						{
-							Point3 pos = nodeMat * mesh.getVert(mesh.faces[l].v[m]);
-							CExportNel::convertVector(nodeFace.P[m], pos);
-						}
-						// test if we must insert in quadgrid
-						nodeFace.buildBBox(faceBBox);
-						if (faceBBox.intersect(delimiter))
-						{
-							nodeFace.SmoothGroup = mesh.faces[l].smGroup;
-							destQuadGrid.insert(faceBBox.getMin(), faceBBox.getMax(), nodeFace);
-							++ numFaceAdded;
-						}
-						
-					}	
-					nldebug("%d faces where added", numFaceAdded);
-					//
-					if (deleteIt)
-					{
-						tri->DeleteMe();
-					}					
+							for(uint m = 0; m < 3; ++m)
+							{
+								Point3 pos = nodeMat * mesh.getVert(mesh.faces[l].v[m]);
+								CExportNel::convertVector(nodeFace.P[m], pos);
+							}
+							// test if we must insert in quadgrid
+							nodeFace.buildBBox(faceBBox);
+							if (faceBBox.intersect(delimiter))
+							{
+								nodeFace.SmoothGroup = mesh.faces[l].smGroup;
+								destQuadGrid.insert(faceBBox.getMin(), faceBBox.getMax(), nodeFace);
+								++ numFaceAdded;
+							}
+							
+						}	
+						nldebug("%d faces where added", numFaceAdded);
+						//
+						if (deleteIt)
+							tri->MaybeAutoDelete();
+						tri = NULL;
+					}
 				}
 			}
 		}
@@ -478,16 +483,20 @@ static void ApplyMeshInterfacesUsingSceneNormals(INode &sceneBaseNode, std::vect
   */
 static bool SelectVerticesInMeshFromInterfaces(const std::vector<CMeshInterface> &inters, float threshold, INode &node, TimeValue tvTime)
 {	
-	Object *obj = node.EvalWorldState(tvTime).obj;		
+	ObjectState os = node.EvalWorldState(tvTime);
+    Object *obj = os.obj;
 	// Check if there is an object
+	if (!obj) return false;
 	if (obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0))) 
 	{ 
 		// Get a triobject from the node
-		TriObject *tri = (TriObject*)obj->ConvertToType(tvTime, Class_ID(TRIOBJ_CLASS_ID, 0));					
+		TriObject *tri = (TriObject*)obj->ConvertToType(tvTime, Class_ID(TRIOBJ_CLASS_ID, 0));			
+		if (!tri) return false;
 		if (obj != tri) 
 		{
 			// not a mesh object, so do nothing
-			tri->DeleteMe();			
+			tri->MaybeAutoDelete();			
+			tri = NULL;
 			return false;
 		}
 		

@@ -249,8 +249,8 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 			clusterTemp.Name = pNode->GetName();
 
 			vClusters.push_back (clusterTemp);
-			delete pMB;
-			delete pMBB;
+			delete pMB; pMB = NULL;
+			delete pMBB; pMBB = NULL;
 		}
 	}
 
@@ -376,7 +376,9 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 
 			vPortals.push_back (portalTemp);
 			delete pMB;
+			pMB = NULL;
 			delete pMBB;
+			pMBB = NULL;
 		}
 	}
 
@@ -406,7 +408,8 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 				  * If it is a FX, we read its bbox from its shape
 				  * If we can't read it, we use the bbox of the fx helper in max
 				  */
-				Object *obj = pNode->EvalWorldState(tvTime).obj;
+				ObjectState os = pNode->EvalWorldState(tvTime);
+				Object *obj = os.obj;
 				// Check if there is an object
 				if (obj)
 				{
@@ -452,6 +455,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 										buildMeshBBox = false;
 									}
 									delete ss.getShapePointer();
+									ss.setShapePointer(NULL);
 								}
 								catch (NLMISC::Exception &e)
 								{
@@ -506,8 +510,8 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 				}
 				// debug purpose : to remove
 
-				delete pMB;
-				delete pMBB;
+				delete pMB; pMB = NULL;
+				delete pMBB; pMBB = NULL;
 			}
 			
 			++nNumIG;
@@ -911,7 +915,7 @@ void CExportNel::buildScene (NL3D::CScene &scene, NL3D::CShapeBank &shapeBank, I
 
 			// Swap pointer and release unlighted one.
 			swap(ig, igOut);
-			delete igOut;
+			delete igOut; igOut = NULL;
 		}
 	
 		// Add all models to the scene		

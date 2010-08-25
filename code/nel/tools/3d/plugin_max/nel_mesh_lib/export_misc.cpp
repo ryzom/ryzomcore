@@ -511,7 +511,8 @@ std::string		CExportNel::getNelObjectName (INode& node)
 {
 	// Workaround for FX (don't know why, but the AppData are not copied when FX are duplicated, so try to get the name in another way)
 	// If this is a particle system, try to get the name of the shape.from the param blocks
-	Object *obj = node.EvalWorldState(0).obj;
+	ObjectState os = node.EvalWorldState(0);
+    Object *obj = os.obj;
 	// Check if there is an object
 	if (obj)
 	{
@@ -542,7 +543,8 @@ std::string		CExportNel::getNelObjectName (INode& node)
 	}
 	else
 	{
-		Object *obj = node.EvalWorldState(0).obj;
+		ObjectState os = node.EvalWorldState(0);
+		Object *obj = os.obj;
 		if (obj)
 		{
 			ad = obj->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_INSTANCE_SHAPE);
@@ -906,7 +908,8 @@ void CExportNel::getObjectNodes (std::vector<INode*>& vectNode, TimeValue time, 
 		node=_Ip->GetRootNode();
 
 	// Get a pointer on the object's node
-    Object *obj = node->EvalWorldState(time).obj;
+    ObjectState os = node->EvalWorldState(time);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (obj)
@@ -1257,7 +1260,8 @@ void CExportNel::buildCamera(NL3D::CCameraInfo &cameraInfo, INode& node, TimeVal
 				cameraInfo.Fov = genCamera->GetFOV(time);
 
 				if (deleteIt)
-					genCamera->DeleteMe();
+					genCamera->MaybeAutoDelete();
+				genCamera = NULL;
 			}
 		}
 	}
