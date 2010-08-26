@@ -41,24 +41,18 @@ struct CClientConfig
 
 	void init (const std::string &configFileName);
 
-	/// Save the cfg file when exit the client ?
-	bool			SaveConfig;
-
 	/// Data Path.
 	std::vector<std::string>			DataPath;
-	/// True if we want the packed sheet to be updated if needed
-	bool			UpdatePackedSheet;
-	/// Name of the scene to play.
-	std::string			SceneName;
-	/// Path for the Id file.
-	std::string			IdFilePath;
-	// Enable/disable Floating Point Exceptions
-	bool			FPExceptions;
+
+	/// World sheet name
+	std::string			WorldSheet;
+	/// Path where to find .primitive files
+	std::string			PrimitivesPath;
+	/// Path where to create lmconts.packed
+	std::string			OutputDataPath;
 
 
 	std::string		LigoPrimitiveClass;
-// TODO
-	std::string		LanguageCode;
 
 public:
 	/// Constructor.

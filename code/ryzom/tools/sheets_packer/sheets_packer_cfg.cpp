@@ -147,12 +147,6 @@ const std::string ConfigFileName = "sheets_packer.cfg";
 //---------------------------------------------------
 CClientConfig::CClientConfig()
 {
-	SaveConfig			= false;
-	UpdatePackedSheet	= true;						// Update packed sheet if needed
-	SceneName			= "";
-	IdFilePath			= "";
-	LanguageCode		= "en";						// Default to english
-	FPExceptions		= false;				// Disable Floating Point Exceptions.
 }// CClientConfig //
 
 
@@ -178,13 +172,14 @@ void setValues()
 	}
 	catch(EUnknownVar &) {nlwarning("Default value used for 'DataPath' !!!");}
 
-	// UpdatePackedSheet
-	READ_BOOL(UpdatePackedSheet)
-
-	// SceneName
-	READ_STRING(SceneName)
-	// IdFile Path
-	READ_STRING(IdFilePath)
+	// World sheet name
+	READ_STRING(WorldSheet)
+	// Primitives path
+	READ_STRING(PrimitivesPath)
+	// Output data path
+	READ_STRING(OutputDataPath)
+	// Ligo primitive class
+	READ_STRING(LigoPrimitiveClass)
 
 	/////////////
 	// FILTERS //
@@ -216,13 +211,6 @@ void setValues()
 		}
 	}
 	catch(EUnknownVar &) {}
-	
-	READ_STRING(LigoPrimitiveClass)
-
-	// LanguageCode
-	READ_STRING(LanguageCode)
-
-	READ_BOOL(FPExceptions)
 }// load //
 
 
@@ -261,10 +249,4 @@ void CClientConfig::init(const std::string &configFileName)
 //-----------------------------------------------
 void CClientConfig::release ()
 {
-	// Do we have to save the cfg file ?
-	if (AppCfg.SaveConfig)
-	{
-		// Save it
-		AppCfg.ConfigFile.save ();
-	}
 }

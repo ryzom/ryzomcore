@@ -67,7 +67,7 @@ void primitiveToLM(CContLandMark &lm, IPrimitive *p)
 }
 
 // ***************************************************************************
-bool buildLMConts()
+bool buildLMConts(const std::string &worldSheet, const std::string &primitivesPath, const std::string &dataPath)
 {
 	bool bRebuild = false;
 
@@ -75,7 +75,7 @@ bool buildLMConts()
 
 	map<string, sTmpContinent*> AllContinents;	// Map with all continents.
 	{
-		CEntitySheet *sheet = SheetMngr.get(CSheetId("ryzom.world"));
+		CEntitySheet *sheet = SheetMngr.get(CSheetId(worldSheet));
 
 		if (!sheet || sheet->type() != CEntitySheet::WORLD)
 		{
@@ -100,7 +100,7 @@ bool buildLMConts()
 	vector<string> vRegionFiles;
 	{
 		vector<string> vTmp;
-		CPath::getPathContent("../../common/data_leveldesign/primitives", true, false, true, vTmp);
+		CPath::getPathContent(primitivesPath, true, false, true, vTmp);
 		for (uint32 i = 0; i < vTmp.size(); ++i)
 		{
 			string filename = CFile::getFilename(vTmp[i]);
@@ -115,7 +115,7 @@ bool buildLMConts()
 	string sPackedFileName = CPath::lookup(LM_PACKED_FILE, false);
 	if (sPackedFileName.empty())
 	{
-		sPackedFileName = LM_PACKED_FILE_SAVE;
+		sPackedFileName = NLMISC::CPath::standardizePath(dataPath) + LM_PACKED_FILE;
 		bRebuild = true;
 	}
 	else
@@ -253,7 +253,7 @@ bool buildLMConts()
 				}
 				else
 				{
-					nlwarning("cannot find continent %s in ryzom.world", contName.c_str());
+					nlwarning("cannot find continent %s in %s", contName.c_str(), worldSheet.c_str());
 				}
 			}
 		}

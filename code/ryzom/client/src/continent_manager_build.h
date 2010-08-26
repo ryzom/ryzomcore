@@ -83,10 +83,9 @@ public:
 	}
 };
 
-extern bool buildLMConts();
+extern bool buildLMConts(const std::string &worldSheet, const std::string &primitivesPath, const std::string &dataPath);
 
 #define LM_PACKED_FILE "lmconts.packed"
-#define LM_PACKED_FILE_SAVE "../../client/data/" LM_PACKED_FILE
 #define WORLD_MAP_FILE "global_world_map.primitive"
 
 #endif // CL_CONTINENT_MANAGER_BUILD_H

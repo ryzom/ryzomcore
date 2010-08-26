@@ -98,7 +98,7 @@ bool init()
 	if (!LigoConfig.readPrimitiveClass (AppCfg.LigoPrimitiveClass.c_str(), false))
 		nlwarning ("Can't load primitive class file %s", AppCfg.LigoPrimitiveClass.c_str());
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
-	buildLMConts();
+	buildLMConts(AppCfg.WorldSheet, AppCfg.PrimitivesPath, AppCfg.OutputDataPath);
 
 	// The init is a success.
 	return true;
