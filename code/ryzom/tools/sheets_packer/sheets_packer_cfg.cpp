@@ -148,9 +148,6 @@ const std::string ConfigFileName = "sheets_packer.cfg";
 CClientConfig::CClientConfig()
 {
 	SaveConfig			= false;
-	DataPath.push_back("../../client/data/");					// Default Path for the Data.
-	DataPath.push_back("../../common/data_leveldesign/");		// Default Path for the Level Design Directory.
-	DataPath.push_back("../../common/data_common/");				// Default Path for the Level Design Directory.
 	UpdatePackedSheet	= true;						// Update packed sheet if needed
 	SceneName			= "";
 	IdFilePath			= "";
