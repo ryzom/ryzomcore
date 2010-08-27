@@ -34,7 +34,6 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	dest.ddpf.dwSize = sizeof(CS3TCCompressor::DDS_PIXELFORMAT);
 	dest.ddpf.dwFlags = DDPF_FOURCC;
 	dest.dwCaps = DDSCAPS_TEXTURE;
-	dest.dwLinearSize = std::max(4, width) * std::max(4, height);
 
 	// Setting flags
 	int flags = squish::kColourIterativeClusterFit; // for best quality
@@ -44,7 +43,6 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 		case DXT1A:
 			flags |= squish::kDxt1;
 			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '1');
-			dest.dwLinearSize /= 2;
 			break;
 		case DXT3:
 			flags |= squish::kDxt3;
@@ -59,8 +57,8 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	// Encoding
 	//===========
 	// resize dest.
-	uint32 encodeSz = squish::GetStorageRequirements(width, height, flags);
-	compdata.resize(encodeSz);
+	dest.dwLinearSize = squish::GetStorageRequirements(width, height, flags);
+	compdata.resize(dest.dwLinearSize);
 	// Go!
 	float weight[3] = {0.3086f, 0.6094f, 0.0820f};
 	squish::CompressImage(pixSrc, width, height, &(*compdata.begin()), flags, weight);
