@@ -674,7 +674,7 @@ void CSheetManager::loadAllSheet(NLMISC::IProgressCallback &callBack, bool updat
 					path.clear();
 				}
 				if(path.empty())
-					path = "../../client/data/" + TypeVersion[i].Type + ".packed_sheets";
+					path = CPath::standardizePath(_OutputDataPath) + TypeVersion[i].Type + ".packed_sheets";
 				::loadForm(extensions, path, entitySheetContainer, updatePackedSheet);
 
 				TEntitySheetMap::iterator it = entitySheetContainer.begin();

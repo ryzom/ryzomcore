@@ -92,6 +92,7 @@ bool init()
 	// load packed sheets	
 	nlinfo("Loading sheets...");
 	IProgressCallback callback;
+	SheetMngr.setOutputDataPath(AppCfg.OutputDataPath);
 	SheetMngr.load (callback, true, true);
 
 	// Make the lmconts.packed file

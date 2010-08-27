@@ -203,10 +203,19 @@ public:
 	/// dump all visual slots indexes in a file
 	void dumpVisualSlotsIndex();
 
+	/// Set output data path
+	void setOutputDataPath(const std::string &dataPath) { _OutputDataPath = dataPath; }
+
+	/// Return output data path
+	const std::string& getOutputDataPath() const { return _OutputDataPath; }
+
 private:
 	typedef std::vector<CItemSheet *>	TItemVector;
 	typedef std::vector<TItemVector>	TSlots;
 	TSlots								_VisualSlots;
+
+	// directory where to create .packed_sheets
+	std::string							_OutputDataPath;
 
 
 protected:
