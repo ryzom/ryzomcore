@@ -367,7 +367,7 @@ int main(int nNbArg, char **ppArgs)
 	if (outTga.open(fmtName))
 	{
 		std::string ext;
-		if (toLower(fmtName.find(".png")) != string::npos)
+		if (toLower(fmtName).find(".png") != string::npos)
 		{
 			ext = "png";
 			GlobalTexture.writePNG (outTga, 32);
