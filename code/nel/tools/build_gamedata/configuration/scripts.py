@@ -181,6 +181,20 @@ def findFiles(log, dir_where, dir_sub, file_ext):
 				printLog(log, "findFiles: file not dir or file?!" + filePath)
 	return result
 
+def findFilesNoSubdir(log, dir_where, file_ext):
+	result = [ ]
+	files = os.listdir(dir_where)
+	len_file_ext = len(file_ext)
+	for fileName in files:
+		if fileName != ".svn" and fileName != "*.*":
+			fileFull = dir_where + "/" + fileName
+			if os.path.isfile(fileFull):
+				if fileName[-len_file_ext:].lower() == file_ext.lower():
+					result += [ fileName ]
+			elif not os.path.isdir(fileFull):
+				printLog(log, "findFilesNoSubdir: file not dir or file?!" + filePath)
+	return result
+
 def findFile(log, dir_where, file_name):
 	files = os.listdir(dir_where)
 	for fileName in files:

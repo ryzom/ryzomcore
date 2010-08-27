@@ -27,38 +27,46 @@
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
 
-if os.path.isfile("log.log"):
-	os.remove("log.log")
-log = open("log.log", "w")
+if os.path.isfile("temp_log.log"):
+	os.remove("temp_log.log")
+log = open("temp_log.log", "w")
 from scripts import *
 from buildsite import *
 from process import *
 from tools import *
 from directories import *
 
+# Todo: make a tool to verify the files :)
+
+def getTagFileName(filePath):
+	return os.path.split(filePath)[1] + ".tag"
+
 def hackBigTree():
-	# FO_S2_big_tree is corrupt on first export...
-	outDirTag = ExportBuildDirectory + "/" + ShapeTagExportDirectory
-	outDirWithCoarse = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
-	shapeName = "FO_S2_big_tree.shape"
-	tagName = "FO_S2_big_tree.max.tag"
-	hackName = "FO_S2_big_tree_hack.tag"
-	if os.path.exists(outDirWithCoarse + "/" + shapeName) and os.path.exists(outDirTag + "/" + tagName) and not os.path.exists(outDirTag + "/" + hackName):
-		printLog(log, "Removing bad export of FO_S2_big_tree")
-		printLog(log, "RM " + outDirWithCoarse + "/" + shapeName)
-		os.remove(outDirWithCoarse + "/" + shapeName)
-		printLog(log, "RM " + outDirTag + "/" + tagName)
-		os.remove(outDirTag + "/" + tagName)
-		printLog(log, "TAG " + outDirTag + "/" + hackName)
-		hackTagFile = open(outDirTag + "/" + hackName, "w")
-		hackTagFile.write("FO_S2_big_tree")
-		hackTagFile.close()
-		return 1
-	elif os.path.exists(outDirTag + "/" + hackName) and not os.path.exists(outDirWithCoarse + "/" + shapeName) and not os.path.exists(outDirTag + "/" + tagName):
-		printLog(log, "Missing export of FO_S2_big_tree")
-		return 0
-	else:
-		return 0
+	return 0
+	if EcosystemName == "jungle":
+		# FO_S2_big_tree is corrupt on first export...
+		outDirTag = ExportBuildDirectory + "/" + ShapeTagExportDirectory
+		outDirWithCoarse = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
+		shapeName = "FO_S2_big_tree.shape"
+		tagName = "FO_S2_big_tree.max.tag"
+		hackName = "FO_S2_big_tree_hack.tag"
+		if os.path.exists(outDirWithCoarse + "/" + shapeName) and os.path.exists(outDirTag + "/" + tagName) and not os.path.exists(outDirTag + "/" + hackName):
+			printLog(log, "Removing bad export of FO_S2_big_tree")
+			printLog(log, "RM " + outDirWithCoarse + "/" + shapeName)
+			os.remove(outDirWithCoarse + "/" + shapeName)
+			printLog(log, "RM " + outDirTag + "/" + tagName)
+			os.remove(outDirTag + "/" + tagName)
+			printLog(log, "TAG " + outDirTag + "/" + hackName)
+			hackTagFile = open(outDirTag + "/" + hackName, "w")
+			hackTagFile.write("FO_S2_big_tree")
+			hackTagFile.close()
+			return 1
+		elif os.path.exists(outDirTag + "/" + hackName) and not os.path.exists(outDirWithCoarse + "/" + shapeName) and not os.path.exists(outDirTag + "/" + tagName):
+			printLog(log, "Missing export of FO_S2_big_tree")
+			return 0
+		else:
+			return 0
+
 
 printLog(log, "")
 printLog(log, "-------")
@@ -78,7 +86,7 @@ if BuildQuality == 0:
 if MaxAvailable:
 	# Find tools
 	Max = findMax(log, MaxDirectory, MaxExecutable)
-	# ExecTimeout = findTool(log, ToolDirectories, ExecTimeoutTool, ToolSuffix)
+	ExecTimeout = findTool(log, ToolDirectories, ExecTimeoutTool, ToolSuffix)
 	printLog(log, "")
 	
 	# Export shape 3dsmax
@@ -108,37 +116,66 @@ if MaxAvailable:
 		os.remove(scriptDst)
 	for dir in ShapeSourceDirectories:
 		tagDiff = 1
+		secondTry = 1
 		shapeSourceDir = DatabaseDirectory + "/" + dir
 		mkPath(log, shapeSourceDir)
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("shape_source_directory", shapeSourceDir)
-			newline = newline.replace("output_directory_tag", outDirTag)
-			newline = newline.replace("output_directory_without_coarse_mesh", outDirWithoutCoarse)
-			newline = newline.replace("output_directory_with_coarse_mesh", outDirWithCoarse)
-			newline = newline.replace("shape_export_opt_export_lighting", ShapeExportOptExportLighting)
-			newline = newline.replace("shape_export_opt_shadow", ShapeExportOptShadow)
-			newline = newline.replace("shape_export_opt_lighting_limit", str(ShapeExportOptLightingLimit))
-			newline = newline.replace("shape_export_opt_lumel_size", ShapeExportOptLumelSize)
-			newline = newline.replace("shape_export_opt_oversampling", str(ShapeExportOptOversampling))
-			newline = newline.replace("shape_export_opt_lightmap_log", ShapeExportOptLightmapLog)
-			newline = newline.replace("shape_lightmap_path", outDirLightmap)
-			newline = newline.replace("output_directory_anim", outDirAnim)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		while tagDiff > 0:
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
-			tagList = findFiles(log, outDirTag, "", ".tag")
-			newTagLen = len(tagList)
-			tagDiff = newTagLen - tagLen
-			tagLen = newTagLen
-			printLog(log, "Exported " + str(tagDiff) + " .max files!")
-			tagDiff += hackBigTree() # force rerun also when big tree deleted
-		os.remove(scriptDst)
+		maxFiles = findFilesNoSubdir(log, shapeSourceDir, ".max")
+		for maxFile in maxFiles:
+			maxFilePath = shapeSourceDir + "/" + maxFile
+			tagFilePath = outDirTag + "/" + getTagFileName(maxFilePath)
+			if (needUpdate(log, maxFilePath, tagFilePath)):
+				sSrc = open(scriptSrc, "r")
+				sDst = open(scriptDst, "w")
+				for line in sSrc:
+					newline = line.replace("output_logfile", logFile)
+					# newline = newline.replace("shape_source_directory", shapeSourceDir)
+					newline = newline.replace("shape_max_file_path", maxFilePath)
+					newline = newline.replace("output_directory_tag", outDirTag)
+					newline = newline.replace("output_directory_without_coarse_mesh", outDirWithoutCoarse)
+					newline = newline.replace("output_directory_with_coarse_mesh", outDirWithCoarse)
+					newline = newline.replace("shape_export_opt_export_lighting", ShapeExportOptExportLighting)
+					newline = newline.replace("shape_export_opt_shadow", ShapeExportOptShadow)
+					newline = newline.replace("shape_export_opt_lighting_limit", str(ShapeExportOptLightingLimit))
+					newline = newline.replace("shape_export_opt_lumel_size", ShapeExportOptLumelSize)
+					newline = newline.replace("shape_export_opt_oversampling", str(ShapeExportOptOversampling))
+					newline = newline.replace("shape_export_opt_lightmap_log", ShapeExportOptLightmapLog)
+					newline = newline.replace("shape_lightmap_path", outDirLightmap)
+					newline = newline.replace("output_directory_anim", outDirAnim)
+					sDst.write(newline)
+				sSrc.close()
+				sDst.close()
+				retriesLeft = 5
+				while retriesLeft > 0:
+					printLog(log, "MAXSCRIPT " + scriptDst + "; " + maxFilePath)
+					subprocess.call([ ExecTimeout, str(MaxShapeExportTimeout), Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
+					lSrc = open(logFile, "r")
+					for line in lSrc:
+						if (len(line) > 0):
+							printLog(log, line.strip())
+					lSrc.close()
+					os.remove(logFile)
+					if (os.path.exists(tagFilePath)):
+						printLog(log, "OK " + maxFilePath)
+						retriesLeft = 0
+					else:
+						printLog(log, "FAIL " + maxFilePath)
+					retriesLeft = retriesLeft - 1
+				os.remove(scriptDst)
+			else:
+				printLog(log, "SKIP " + maxFilePath)
+#while tagDiff > 0:
+#	printLog(log, "MAXSCRIPT " + scriptDst)
+#	subprocess.call([ Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
+#	tagList = findFiles(log, outDirTag, "", ".tag")
+#	newTagLen = len(tagList)
+#	tagDiff = newTagLen - tagLen
+#	tagLen = newTagLen
+#	printLog(log, "Exported " + str(tagDiff) + " .max files!")
+#	if not tagDiff > 0:
+#		tagDiff += hackBigTree() # force rerun also when big tree deleted
+#		if not tagDiff > 0:
+#			tagDiff += secondTry
+#			secondTry = 0
 	
 	# Export clod 3dsmax
 	printLog(log, ">>> Export character lod shape files (.clod) from Max <<<")
@@ -156,6 +193,6 @@ if MaxAvailable:
 printLog(log, "")
 
 log.close()
-
+shutil.move("temp_log.log", "log.log")
 
 # end of file

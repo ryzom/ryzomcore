@@ -99,40 +99,40 @@ fn isToBeExported node =
 (
 	if (isAccelerator node) == true then
 		return false
-
+	
 	if ((classof node) == RklPatch) then
 		return false
-
+	
 	if ((classof node) == nel_ps) then
 		return false
-
+	
 	if ((classof node) == nel_pacs_cylinder) then
 		return false
-
+	
 	if ((classof node) == nel_pacs_box) then
 		return false
-
+	
 	doNotExport = getappdata node NEL3D_APPDATA_DONOTEXPORT
 	if (doNotExport != undefined) then
 	(
 		if (doNotExport == "1") then
 			return false
 	)
-
+	
 	doNotExport = getappdata node NEL3D_APPDATA_COLLISION
 	if (doNotExport != undefined) then
 	(
 		if (doNotExport == "1") then
 			return false
 	)
-
+	
 	doNotExport = getappdata node NEL3D_APPDATA_COLLISION_EXTERIOR
 	if (doNotExport != undefined) then
 	(
 		if (doNotExport == "1") then
 			return false
 	)
-
+	
 	return true
 )
 
@@ -144,16 +144,16 @@ fn isAnimToBeExported node =
 		return false
 	if (automaticAnimation == "0") then
 		return false
-
+	
 	if (isAccelerator node) == true then
 		return false
-
+	
 	if ((classof node) == nel_pacs_cylinder) then
 		return false
-
+	
 	if ((classof node) == nel_pacs_box) then
 		return false
-
+	
 	doNotExport = getappdata node NEL3D_APPDATA_DONOTEXPORT
 	if (doNotExport != undefined) then
 	(
@@ -221,13 +221,13 @@ fn haveCoarseMesh node =
 		(
 			-- Get the lod
 			lod = getappdata node (NEL3D_APPDATA_LOD_NAME+lod-1)
-
+			
 			-- Exist ?
 			if (lod != undefined) then
 			(
 				-- Select a node
 				nd = execute ("$'"+lod+"'")
-
+				
 				-- Node exist ?
 				if (nd != undefined) then
 				(
@@ -245,267 +245,271 @@ fn goShapeExport =
 (
 	try
 	(
-		-- Get files in the shape_source_directory
-		files = getFiles "shape_source_directory/*.max" 
-
-		-- Sort files
-		sort files
-
-		-- No file ?
-		if files.count != 0 then
+		-- Get filepath
+		filePath = "shape_max_file_path"
+		
+		try
 		(
-			-- For each files
-			for i = 1 to files.count do
+			-- Delete lod files
+			lod_array = #()
+			
+			-- Ok ?
+			ok = false
+			
+			-- Free memory and file handles
+			gc ()
+			
+			-- Reset 3dsmax
+			resetMAXFile #noprompt
+			
+			-- Get the tag file name
+			tag = ("output_directory_tag/" + (getFilenameFile filePath) + (getFilenameType filePath) + ".tag")
+			
+			-- Open the max project
+			nlerror ("Scanning file " + filePath + " ...")
+			if loadMaxFile filePath quiet:true == true then
 			(
-				try
+				-- Unhide category
+				unhidecategory()
+				
+				-- Unhide
+				max unhide all
+				
+				-- unselect
+				max select none
+				
+				-- Exported object count
+				exported = 0
+				
+				-- Add the lod
+				for node in geometry do
 				(
-					-- Delete lod files
-					lod_array = #()
-
-					-- Ok ?
-					ok = false
-
-					-- Free memory and file handles
-					gc ()
-
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
-
-					-- Get the tag file name
-					tag = ("output_directory_tag/"+(getFilenameFile files[i])+(getFilenameType files[i])+".tag")
-
-					-- Compare date with the tag file
-					if (NeLTestFileDate tag files[i]) == true then
+					-- Get lod count
+					nodeCount = getappdata node NEL3D_APPDATA_LOD_NAME_COUNT
+					if (nodeCount != undefined) then
 					(
-						-- Open the max project
-						nlerror ("Scanning file "+files[i]+" ...")
-						if loadMaxFile files[i] quiet:true == true then
+						-- For each lod
+						nodeCountNum = nodeCount as Integer
+						for lod = 1 to nodeCountNum do
 						(
-							-- Unhide category
-							unhidecategory()
-
-							-- Unhide
-							max unhide all
-
-							-- unselect
-							max select none
-
-							-- Exported object count
-							exported = 0
-
-							-- Add the lod
-							for node in geometry do
+							-- Get the lod
+							lod = getappdata node (NEL3D_APPDATA_LOD_NAME+lod-1)
+							
+							-- Exist ?
+							if (lod != undefined) then
 							(
-								-- Get lod count
-								nodeCount = getappdata node NEL3D_APPDATA_LOD_NAME_COUNT
-								if (nodeCount != undefined) then
+								-- Select a node
+								try
 								(
-									-- For each lod
-									nodeCountNum = nodeCount as Integer
-									for lod = 1 to nodeCountNum do
-									(
-										-- Get the lod
-										lod = getappdata node (NEL3D_APPDATA_LOD_NAME+lod-1)
-
-										-- Exist ?
-										if (lod != undefined) then
-										(
-											-- Select a node
-											try
-											(
-												nd = execute ("$'"+lod+"'")
-											)
-											catch
-											(
-												nlerror ("Error in Execute $'"+lod+"' from node "+node.name)
-												nd = undefined
-											)
-
-											-- Node exist ?
-											if (nd != undefined) then 
-											(
-												append lod_array nd
-											)
-										)
-									)
-								)							
-							)
-
-							-- Select objects for shadows
-							for node in geometry do
-							(
-								if (node.parent == undefined) then
+									nd = execute ("$'"+lod+"'")
+								)
+								catch
 								(
-									-- Cast shadow ?
-									if (isCastShadow node == true) then
-									(
-										-- Select this node
-										selectmore node
-									)
-								)							
-							)
-
-							-- Tag this file ?
-							tagThisFile = true
-
-							-- Array of node to export
-							array_node = #()
-
-							-- Add geometry
-							for node in geometry do
-								append array_node node
-
-							-- Add shapes
-							for node in shapes do
-								append array_node node
-
-							-- For each node
-							for node in array_node do
-							(
-								-- It is root ?
-								if (node.parent == undefined) then
+									nlerror ("Error in Execute $'"+lod+"' from node "+node.name)
+									nd = undefined
+								)
+								
+								-- Node exist ?
+								if (nd != undefined) then 
 								(
-									-- Is not a skeleton ?
-									if (node.name != "Bip01") then
-									(
-										-- Can be exported ?
-										if (isToBeExported node == true) then
-										(
-											-- Not a lod ?
-											if ((isLod node) == false) then
-											(
-												-- Output directory
-												if (haveCoarseMesh node) == true then
-													output = ("output_directory_with_coarse_mesh/"+(node.name)+".shape")
-												else
-													output = ("output_directory_without_coarse_mesh/"+(node.name)+".shape")
-
-												-- Compare file date
-												if (NeLTestFileDate output files[i]) == true then
-												(
-													try
-													(
-														-- Export the shape
-														if (NelExportShapeEx node output shape_export_opt_shadow shape_export_opt_export_lighting "shape_lightmap_path" shape_export_opt_lighting_limit shape_export_opt_lumel_size shape_export_opt_oversampling true false shape_export_opt_lightmap_log) == true then
-														(
-															nlerror ("OK "+output)
-															exported = exported+1
-														)
-														else
-														(
-															-- Error
-															nlerror ("ERROR exporting shape "+node.name+" in file "+files[i])
-															tagThisFile = false
-															return 0
-														)
-													)
-													catch 
-													(
-														-- Error
-														nlerror ("ERROR fatal error exporting shape "+node.name+" in file "+files[i])
-														tagThisFile = false
-														return 0
-													)
-												)
-												else
-												(
-													-- Error
-													nlerror ("SKIPPED "+output)
-													exported = exported+1
-												)
-											)
-										)
-									)
+									append lod_array nd
 								)
 							)
-
-							-- Export default animations
-
-							for node in objects do
+						)
+					)
+				)
+				
+				-- Select objects for shadows
+				for node in geometry do
+				(
+					if (node.parent == undefined) then
+					(
+						-- Cast shadow ?
+						if (isCastShadow node == true) then
+						(
+							-- Select this node
+							selectmore node
+						)
+					)
+				)
+				
+				-- Tag this file ?
+				tagThisFile = true
+				
+				-- Array of node to export
+				array_node = #()
+				
+				-- Add geometry
+				for node in geometry do
+					append array_node node
+				
+				-- Add shapes
+				for node in shapes do
+					append array_node node
+				
+				-- For each node
+				for node in array_node do
+				(
+					-- It is root ?
+					if (node.parent == undefined) then
+					(
+						-- Is not a skeleton ?
+						if (node.name != "Bip01") then
+						(
+							-- Can be exported ?
+							if (isToBeExported node == true) then
 							(
-								-- Can export it ?
-								if (isAnimToBeExported node) == true then
+								-- Not a lod ?
+								if ((isLod node) == false) then
 								(
-									-- Anim output directory
-									output = ("output_directory_anim/"+(node.name)+".anim")
-
-									-- Export the animation
-									if (NelExportAnimation #(node) output false) == false then
+									-- Output directory
+									if (haveCoarseMesh node) == true then
+										output = ("output_directory_with_coarse_mesh/"+(node.name)+".shape")
+									else
+										output = ("output_directory_without_coarse_mesh/"+(node.name)+".shape")
+									
+									-- Compare file date
+									if (NeLTestFileDate output filePath) == true then
 									(
-										nlerror ("ERROR exporting animation "+output)
-										return 0
+										try
+										(
+											-- Export the shape
+											if (NelExportShapeEx node output shape_export_opt_shadow shape_export_opt_export_lighting "shape_lightmap_path" shape_export_opt_lighting_limit shape_export_opt_lumel_size shape_export_opt_oversampling true false shape_export_opt_lightmap_log) == true then
+											(
+												nlerror ("OK "+output)
+												exported = exported+1
+											)
+											else
+											(
+												-- Error
+												nlerror ("ERROR exporting shape "+node.name+" in file "+filePath)
+												tagThisFile = false
+												return 0
+											)
+										)
+										catch 
+										(
+											-- Error
+											nlerror ("ERROR fatal error exporting shape "+node.name+" in file "+filePath)
+											tagThisFile = false
+											return 0
+										)
 									)
 									else
 									(
-										nlerror ("OK "+output)
+										-- Error
+										nlerror ("SKIPPED "+output)
+										exported = exported+1
 									)
 								)
 							)
-
-							-- Write a tag file
-							if tagThisFile == true then
-							(
-								tagFile = createFile tag
-								if tagFile == undefined then
-								(
-									nlerror ("WARNING can't create tag file "+tag)
-								)
-								else
-								(
-									print "toto" to: tagFile
-									close tagFile
-								)
-							)
-							
-							-- Something exported
-							if exported == 0 then
-							(
-								-- Error
-								nlerror ("WARNING no shape exported from the file "+files[i])
-							)
+						)
+					)
+				)
+				
+				-- Export default animations
+				
+				for node in objects do
+				(
+					-- Can export it ?
+					if (isAnimToBeExported node) == true then
+					(
+						-- Anim output directory
+						output = ("output_directory_anim/"+(node.name)+".anim")
+						
+						-- Export the animation
+						if (NelExportAnimation #(node) output false) == false then
+						(
+							nlerror ("ERROR exporting animation "+output)
+							return 0
 						)
 						else
 						(
-							-- Error
-							nlerror ("ERROR exporting shape: can't open the file "+files[i])
+							nlerror ("OK "+output)
 						)
+					)
+				)
+				
+				-- Write a tag file
+				if tagThisFile == true then
+				(
+					tagFile = createFile tag
+					if tagFile == undefined then
+					(
+						nlerror ("WARNING can't create tag file "+tag)
 					)
 					else
 					(
-						-- Error
-						nlerror ("SKIPPED BY TAG "+files[i])
+						print "toto" to: tagFile
+						close tagFile
 					)
-					
-					gc ()
-					
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
 				)
-				catch 
+				
+				-- Something exported
+				if exported == 0 then
 				(
 					-- Error
-					nlerror ("ERROR fatal error exporting shape in file " + files[i])
-					-- return 0
+					nlerror ("WARNING no shape exported from the file "+filePath)
 				)
 			)
+			else
+			(
+				-- Error
+				nlerror ("ERROR exporting shape: can't open the file "+filePath)
+			)
+			
+			try
+			(
+				gc ()
+			)
+			catch
+			(
+				nlerror ("ERROR gc " + getCurrentException())
+			)
+			
+			try
+			(
+				-- Reset 3dsmax
+				resetMAXFile #noprompt
+			)
+			catch
+			(
+				nlerror ("ERROR resetMAXFile " + getCurrentException())
+			)
+			
+			try
+			(
+				gc ()
+			)
+			catch
+			(
+				nlerror ("ERROR gc " + getCurrentException())
+			)
 		)
-		else
+		catch 
 		(
-			nlerror ("WARNING no max file in folder shape_source_directory")
+			-- Error
+			nlerror ("ERROR fatal error exporting shape in file " + filePath)
+			return 0
 		)
 	)
 	catch 
 	(
 		-- Error
-		nlerror ("ERROR fatal error exporting shape in folder shape_source_directory")
+		nlerror ("ERROR fatal error exporting shape in file")
 		return 0
 	)
 )
 
-goShapeExport()
+undo off
+(
+	goShapeExport()
+)
 
 nlerror ("BYE")
 
 quitMAX #noPrompt
 quitMAX () #noPrompt
 
+quitMAX #noPrompt
+quitMAX () #noPrompt
