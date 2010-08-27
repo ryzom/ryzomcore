@@ -78,13 +78,24 @@ struct CClientConfig
 	sint				SelectCharacter;
 	/// Selected slot in select char interface
 	uint8				SelectedSlot;
+	
+	/// Textures for interface login
+	std::vector<string> TexturesLoginInterface;
+	std::vector<string> TexturesLoginInterfaceDXTC;
+
+	/// Textures for interface outgame
+	std::vector<string> TexturesOutGameInterface;
+	std::vector<string> TexturesOutGameInterfaceDXTC;
+
+	/// Textures for ingame interface and r2 interface
+	std::vector<string> TexturesInterface;
+	std::vector<string> TexturesInterfaceDXTC;
 
 	/// vector of XML file names that describe the interfaces config for login
 	std::vector<string> XMLLoginInterfaceFiles;
 
 	/// vector of XML file names that describe the interfaces config for outgame menus
 	std::vector<string> XMLOutGameInterfaceFiles;
-
 
 	/// vector of XML file names that describe the interfaces config
 	std::vector<string> XMLInterfaceFiles;

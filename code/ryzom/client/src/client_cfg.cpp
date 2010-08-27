@@ -169,6 +169,24 @@
 	else																\
 		cfgWarning("CFG: Default value used for '"#variableName"' !!!");	\
 
+//-----------------------------------------------
+/// Macro to read a String Vector from the CFG.
+/// variableName : Variable Name to Read and Set.
+//-----------------------------------------------
+#define _READ_STRINGVECTOR(variableName)								\
+	/* Read the Variable Value From Script */							\
+	varPtr = ClientCfg.ConfigFile.getVarPtr(#variableName);				\
+	/* Value found, set the Variable */									\
+	if(varPtr)															\
+	{																	\
+		ClientCfg.variableName.clear ();								\
+		int iSz = varPtr->size();										\
+		for (int i = 0; i < iSz; i++)									\
+			ClientCfg.variableName.push_back(varPtr->asString(i));		\
+	}																	\
+	/* Use the Default Value */											\
+	else																\
+		cfgWarning("CFG: Default value used for '"#variableName"' !!!");	\
 
 //-----------------------------------------------
 // Macro for the dev version
@@ -183,6 +201,7 @@
 #define READ_STRING_DEV(variableName) _READ_STRING(variableName)
 #define READ_CVECTOR_DEV(variableName) _READ_CVECTOR(variableName)
 #define READ_ENUM_ASINT_DEV(type, variableName) _READ_ENUM_ASINT(type, variableName)
+#define READ_STRINGVECTOR_DEV(variableName) _READ_STRINGVECTOR(variableName)
 #else // !FINAL_VERSION
 #define READ_BOOL_DEV(variableName)
 #define READ_INT_DEV(variableName)
@@ -192,6 +211,7 @@
 #define READ_STRING_DEV(variableName)
 #define READ_CVECTOR_DEV(variableName)
 #define READ_ENUM_ASINT_DEV(type, variableName)
+#define READ_STRINGVECTOR_DEV(variableName)
 #endif // !FINAL_VERSION
 
 //-----------------------------------------------
@@ -206,6 +226,7 @@
 #define READ_STRING_FV(variableName) _READ_STRING(variableName)
 #define READ_CVECTOR_FV(variableName) _READ_CVECTOR(variableName)
 #define READ_ENUM_ASINT_FV(type, variableName) _READ_ENUM_ASINT(type, variableName)
+#define READ_STRINGVECTOR_FV(variableName) _READ_STRINGVECTOR(variableName)
 
 ///////////
 // USING //
@@ -277,7 +298,23 @@ CClientConfig::CClientConfig()
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
-
+	
+#if 1 // Yubo hack
+	// The order is important here, because in a layer, global texture are rendered through this order
+	TexturesInterface.push_back("texture_interfaces_v3");
+	// DXTC contain all items and bricks bitmaps, they must come after standard texture
+	TexturesInterface.push_back("new_texture_interfaces_dxtc");
+	// Added icons by Yubo's Team 2009
+	TexturesInterface.push_back("texture_extra");
+#else	
+	TexturesInterface.push_back("texture_interfaces_v3");
+	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
+#endif
+	
+	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
+	
+	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
+	
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
@@ -702,6 +739,18 @@ void CClientConfig::setValues()
 	{
 		ClientCfg.SelectedSlot = 0;
 	}
+
+	// interface textures login menus
+	READ_STRINGVECTOR_FV(TexturesLoginInterface);
+	READ_STRINGVECTOR_FV(TexturesLoginInterfaceDXTC);
+
+	// interface textures outgame menus
+	READ_STRINGVECTOR_FV(TexturesOutGameInterface);
+	READ_STRINGVECTOR_FV(TexturesOutGameInterfaceDXTC);
+
+	// interface textures ingame and r2
+	READ_STRINGVECTOR_FV(TexturesInterface);
+	READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
 
 	// interface files login menus
 	ClientCfg.XMLLoginInterfaceFiles.clear ();

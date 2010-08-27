@@ -456,7 +456,19 @@ void CInterfaceManager::initLogin()
 		return;
 	}
 
-	loadTextures ("texture_interfaces_v3_login.tga", "texture_interfaces_v3_login.txt");
+	nldebug("Textures Login Interface");
+	
+	for (vector<string>::iterator it = ClientCfg.TexturesLoginInterface.begin(), end = ClientCfg.TexturesLoginInterface.end(); it != end; ++it)
+	{
+		nldebug("Textures Login Interface: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", false);
+	}
+
+	for (vector<string>::iterator it = ClientCfg.TexturesLoginInterfaceDXTC.begin(), end = ClientCfg.TexturesLoginInterfaceDXTC.end(); it != end; ++it)
+	{
+		nldebug("Textures Login Interface DXTC: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", true);
+	}
 
 	parseInterface (ClientCfg.XMLLoginInterfaceFiles, false);
 
@@ -534,7 +546,19 @@ void CInterfaceManager::initOutGame()
 		return;
 	}
 
-	loadTextures ("texture_interfaces_v3_outgame_ui.tga", "texture_interfaces_v3_outgame_ui.txt");
+	nldebug("Textures OutGame Interface");
+	
+	for (vector<string>::iterator it = ClientCfg.TexturesOutGameInterface.begin(), end = ClientCfg.TexturesOutGameInterface.end(); it != end; ++it)
+	{
+		nldebug("Textures OutGame Interface: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", false);
+	}
+	
+	for (vector<string>::iterator it = ClientCfg.TexturesOutGameInterfaceDXTC.begin(), end = ClientCfg.TexturesOutGameInterfaceDXTC.end(); it != end; ++it)
+	{
+		nldebug("Textures OutGame Interface DXTC: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", true);
+	}
 
 	parseInterface (ClientCfg.XMLOutGameInterfaceFiles, false);
 
@@ -801,14 +825,19 @@ void CInterfaceManager::initInGame()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::loadIngameInterfaceTextures()
 {
-	// The order is important here, because in a layer, global texture are rendered through this order
-	loadTextures ("texture_interfaces_v3.tga", "texture_interfaces_v3.txt");
+	nldebug("Textures Ingame Interface");
 
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	loadTextures ("new_texture_interfaces_dxtc.tga", "new_texture_interfaces_dxtc.txt");
+	for (vector<string>::iterator it = ClientCfg.TexturesInterface.begin(), end = ClientCfg.TexturesInterface.end(); it != end; ++it)
+	{
+		nldebug("Textures Ingame Interface: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", false);
+	}
 
-	// Added icons by Yubo's Team 2009
-	loadTextures ("texture_extra.tga", "texture_extra.txt");
+	for (vector<string>::iterator it = ClientCfg.TexturesInterfaceDXTC.begin(), end = ClientCfg.TexturesInterfaceDXTC.end(); it != end; ++it)
+	{
+		nldebug("Textures Ingame Interface DXTC: %s", (*it).c_str());
+		loadTextures(*it + ".tga", *it + ".txt", true);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
