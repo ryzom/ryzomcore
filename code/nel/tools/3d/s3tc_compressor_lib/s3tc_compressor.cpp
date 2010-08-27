@@ -28,32 +28,33 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	//===========================================
 	memset(&dest, 0, sizeof(dest));
 	dest.dwSize = sizeof(dest);
-	dest.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
+	dest.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT | DDSD_LINEARSIZE;
 	dest.dwHeight = height;
 	dest.dwWidth = width;
 	dest.ddpf.dwSize = sizeof(CS3TCCompressor::DDS_PIXELFORMAT);
 	dest.ddpf.dwFlags = DDPF_FOURCC;
 	dest.dwCaps = DDSCAPS_TEXTURE;
+	dest.dwLinearSize = std::max(4, width) * std::max(4, height);
 
 	// Setting flags
 	int flags = squish::kColourIterativeClusterFit; // for best quality
 	switch(algo)
 	{
 		case DXT1:
-			flags |= squish::kDxt1;
-			break;
 		case DXT1A:
 			flags |= squish::kDxt1;
+			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '1');
+			dest.dwLinearSize /= 2;
 			break;
 		case DXT3:
 			flags |= squish::kDxt3;
+			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '3');
 			break;
 		case DXT5:
 			flags |= squish::kDxt5;
+			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '5');
 			break;
 	}
-
-	
 
 	// Encoding
 	//===========
@@ -63,20 +64,6 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	// Go!
 	float weight[3] = {0.3086f, 0.6094f, 0.0820f};
 	squish::CompressImage(pixSrc, width, height, &(*compdata.begin()), flags, weight);
-
-	switch(algo)
-	{
-		case DXT1:
-		case DXT1A:
-			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '1');
-			break;
-		case DXT3:
-			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '3');
-			break;
-		case DXT5:
-			dest.ddpf.dwFourCC = MAKEFOURCC('D','X', 'T', '5');
-			break;
-	}
 
 	/* S3TC is a very good compressor, but make BIG mistakes in some case with  DXTC5 and DXTC3
 	*/
