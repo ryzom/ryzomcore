@@ -40,11 +40,13 @@ IF(WITH_MAXPLUGIN)
   ENDIF(MAXSDK_FOUND)
 ENDIF(WITH_MAXPLUGIN)
 
+IF(SQUISH_FOUND)
+  ADD_SUBDIRECTORY(tga_2_dds)
+ENDIF(SQUISH_FOUND)
+
 # These use WIndows-specific things that need to be fixed.
 #ig_elevation
 #lightmap_optimizer
 #object_viewer_exe
 #hls_bank_maker
-#s3tc_compressor_lib
-#tga_2_dds
 #plugin_max
