@@ -27,7 +27,7 @@ MACRO(NL_TARGET_DRIVER name)
   IF(WITH_STATIC_DRIVERS)
     ADD_LIBRARY(${name} STATIC ${ARGN})
   ELSE(WITH_STATIC_DRIVERS)
-    ADD_LIBRARY(${name} SHARED ${ARGN})
+    ADD_LIBRARY(${name} MODULE ${ARGN})
   ENDIF(WITH_STATIC_DRIVERS)
 ENDMACRO(NL_TARGET_DRIVER)
 
@@ -38,13 +38,15 @@ ENDMACRO(NL_TARGET_DRIVER)
 ###
 MACRO(NL_DEFAULT_PROPS name label)
   GET_TARGET_PROPERTY(type ${name} TYPE)
-  IF((${type} STREQUAL SHARED_LIBRARY) OR (${type} STREQUAL MODULE_LIBRARY))
-    # Set versions only if target is a shared library or a module
-    SET(versions VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR})
-  ENDIF((${type} STREQUAL SHARED_LIBRARY) OR (${type} STREQUAL MODULE_LIBRARY))
-  SET_TARGET_PROPERTIES(${name} PROPERTIES
-    ${versions}
-    PROJECT_LABEL ${label})
+  IF(${type} STREQUAL SHARED_LIBRARY)
+    # Set versions only if target is a shared library
+    SET_TARGET_PROPERTIES(${name} PROPERTIES
+      VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR}
+      PROJECT_LABEL ${label})
+  ELSE(${type} STREQUAL SHARED_LIBRARY)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES
+      PROJECT_LABEL ${label})
+  ENDIF(${type} STREQUAL SHARED_LIBRARY)
 ENDMACRO(NL_DEFAULT_PROPS)
 
 ###
@@ -75,17 +77,17 @@ ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 MACRO(NL_ADD_STATIC_VID_DRIVERS name)
   IF(WITH_STATIC_DRIVERS)
     IF(WIN32)
-	  IF(WITH_DRIVER_DIRECT3D)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_direct3d_win)
+      IF(WITH_DRIVER_DIRECT3D)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_direct3d_win)
       ENDIF(WITH_DRIVER_DIRECT3D)
-	
-	  IF(WITH_DRIVER_DSOUND)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
-	  ENDIF(WITH_DRIVER_DSOUND)
-	
-	  IF(WITH_DRIVER_XAUDIO2)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
-	  ENDIF(WITH_DRIVER_XAUDIO2)
+
+      IF(WITH_DRIVER_DSOUND)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
+      ENDIF(WITH_DRIVER_DSOUND)
+
+      IF(WITH_DRIVER_XAUDIO2)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
+      ENDIF(WITH_DRIVER_XAUDIO2)
     ENDIF(WIN32)
 
     IF(WITH_DRIVER_OPENAL)
@@ -98,9 +100,9 @@ MACRO(NL_ADD_STATIC_VID_DRIVERS name)
 
     IF(WITH_DRIVER_OPENGL)
       IF(WIN32)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_opengl_win)
-	  ELSE(WIN32)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl_win)
+      ELSE(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
       ENDIF(WIN32)
     ENDIF(WITH_DRIVER_OPENGL)
   ENDIF(WITH_STATIC_DRIVERS)
@@ -109,13 +111,13 @@ ENDMACRO(NL_ADD_STATIC_VID_DRIVERS)
 MACRO(NL_ADD_STATIC_SND_DRIVERS name)
   IF(WITH_STATIC_DRIVERS)
     IF(WIN32)
-	  IF(WITH_DRIVER_DSOUND)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
-	  ENDIF(WITH_DRIVER_DSOUND)
-	
-	  IF(WITH_DRIVER_XAUDIO2)
-	    TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
-	  ENDIF(WITH_DRIVER_XAUDIO2)
+      IF(WITH_DRIVER_DSOUND)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
+      ENDIF(WITH_DRIVER_DSOUND)
+
+      IF(WITH_DRIVER_XAUDIO2)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
+      ENDIF(WITH_DRIVER_XAUDIO2)
     ENDIF(WIN32)
 
     IF(WITH_DRIVER_OPENAL)
@@ -307,28 +309,46 @@ MACRO(NL_SETUP_PREFIX_PATHS)
   ## Allow override of install_prefix/share path.
   IF(NOT NL_SHARE_PREFIX)
     IF(WIN32)
-	  SET(NL_SHARE_PREFIX "../share/nel" CACHE PATH "Installation path for data.")
-	ELSE(WIN32)
-	  SET(NL_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/nel" CACHE PATH "Installation path for data.")
-	ENDIF(WIN32)
+      SET(NL_SHARE_PREFIX "../share/nel" CACHE PATH "Installation path for data.")
+    ELSE(WIN32)
+      SET(NL_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/nel" CACHE PATH "Installation path for data.")
+    ENDIF(WIN32)
   ENDIF(NOT NL_SHARE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT NL_SBIN_PREFIX)
-	IF(WIN32)
-	  SET(NL_SBIN_PREFIX "../sbin" CACHE PATH "Installation path for admin tools and services.")
-	ELSE(WIN32)
-	  SET(NL_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
-	ENDIF(WIN32)
+    IF(WIN32)
+      SET(NL_SBIN_PREFIX "../sbin" CACHE PATH "Installation path for admin tools and services.")
+    ELSE(WIN32)
+      SET(NL_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+    ENDIF(WIN32)
   ENDIF(NOT NL_SBIN_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT NL_BIN_PREFIX)
     IF(WIN32)
-		SET(NL_BIN_PREFIX "../bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "../bin" CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-		SET(NL_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools and applications.")
     ENDIF(WIN32)
   ENDIF(NOT NL_BIN_PREFIX)
 
+  ## Allow override of install_prefix/lib path.
+  IF(NOT NL_LIB_PREFIX)
+    IF(WIN32)
+      SET(NL_LIB_PREFIX "../lib" CACHE PATH "Installation path for libraries.")
+    ELSE(WIN32)
+      SET(NL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation path for libraries.")
+    ENDIF(WIN32)
+  ENDIF(NOT NL_LIB_PREFIX)
+
+  ## Allow override of install_prefix/lib path.
+  IF(NOT NL_DRIVER_PREFIX)
+    IF(WIN32)
+      SET(NL_DRIVER_PREFIX "../lib" CACHE PATH "Installation path for drivers.")
+    ELSE(WIN32)
+      SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/nel" CACHE PATH "Installation path for drivers.")
+    ENDIF(WIN32)
+  ENDIF(NOT NL_DRIVER_PREFIX)
+  
 ENDMACRO(NL_SETUP_PREFIX_PATHS)
