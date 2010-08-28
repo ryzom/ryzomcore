@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 		Password = fgets(buf, 256, stdin);
 	}
 	// crypt with md5 the password
-	CHashKeyMD5 hk = getMD5((uint8*)Password.c_str(), Password.size());
+	CHashKeyMD5 hk = getMD5((uint8*)Password.c_str(), (uint32)Password.size());
 	string CPassword = hk.toString();
 	nlinfo("The crypted password is %s", CPassword.c_str());
 

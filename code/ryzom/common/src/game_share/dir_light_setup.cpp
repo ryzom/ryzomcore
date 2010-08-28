@@ -25,10 +25,11 @@
 
 
 //-----------------------------------------------
-CDirLightSetup::CDirLightSetup() : Ambiant(0, 0, 0),
-		                   Diffuse(255, 255, 255),
-                                   Specular(0, 0, 0),
-		                   Direction(1.f, 0.f, 0.f)
+CDirLightSetup::CDirLightSetup() :
+							Ambiant(0, 0, 0),
+							Diffuse(255, 255, 255),
+							Specular(0, 0, 0),
+							Direction(1.f, 0.f, 0.f)
 {
 }
 

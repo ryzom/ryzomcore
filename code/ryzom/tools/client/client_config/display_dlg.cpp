@@ -495,8 +495,7 @@ CDisplayDlg::TDriver CDisplayDlg::getActualDriver() const
 			std::string deviceName;
 			uint64 drvVersion;
 			CSystemInfo::getVideoInfo(deviceName, drvVersion);
-			strlwr(deviceName);
-			return strstr(deviceName.c_str(), "radeon") != NULL ? Direct3D : OpenGL;
+			return strstr(toLower(deviceName).c_str(), "radeon") != NULL ? Direct3D : OpenGL;
 		}		
 	}
 	return OpenGL;

@@ -264,7 +264,7 @@ int main ()
 			}
 
 			// Keyboard
-			if (arrayObj.size())
+			if (!arrayObj.empty())
 			{
 				// Manipulate selected primitive
 				keyboard (pDriver, deltaTime, *(arrayObj[selected]));
@@ -273,7 +273,8 @@ int main ()
 				if (pDriver->AsyncListener.isKeyDown (KeyDELETE))
 				{
 					// remove all but one
-					if (arrayObj.size() > 1) {
+					if (arrayObj.size() > 1)
+					{
 						arrayObj[arrayObj.size()-1]->remove (*container, *pScene);
 						arrayObj.resize (arrayObj.size()-1);
 					}
@@ -281,7 +282,7 @@ int main ()
 
 				// Check selected
 				if (selected>=arrayObj.size())
-					selected=arrayObj.size()-1;
+					selected=(uint)arrayObj.size()-1;
 				//if (selected<0)
 				//	selected=0;
 
@@ -312,8 +313,7 @@ int main ()
 			clearColor=CRGBA::Black;
 
 			// Setup view matrix
-			int size=arrayObj.size();
-			if (size)
+			if (!arrayObj.empty())
 			{
 				// Setup hotspot for the 3d listener
 				plistener->setHotSpot (arrayObj[selected]->getPos());

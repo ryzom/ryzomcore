@@ -1304,6 +1304,7 @@ void postlogInit()
 			nmsg = "Loading sheets...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
+			SheetMngr.setOutputDataPath("../../client/data");
 			SheetMngr.load (ProgressBar, ClientCfg.UpdatePackedSheet, ClientCfg.NeedComputeVS, ClientCfg.DumpVSIndex);
 
 			initLast = initCurrent;
