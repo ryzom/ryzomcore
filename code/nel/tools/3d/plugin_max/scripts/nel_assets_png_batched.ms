@@ -41,22 +41,32 @@ fn getAbsoluteDestination t =
 
 fn getFixedTexturePath t =
 (
-	if (doesFileExist (getAbsoluteSource t)) then
+	absoluteDestination = (getAbsoluteDestination t)
+	if (not (doesFileExist absoluteDestination)) and (((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Batiments") != undefined) or ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\Vv2\\") != undefined)) then
 	(
-		if not (doesFileExist (getAbsoluteDestination t)) then
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
 		(
-			makeDir (getFilenamePath (getAbsoluteDestination t)) all:true
-			renameFile (getAbsoluteSource t) (getAbsoluteDestination t)
-		)
-		if (doesFileExist (getAbsoluteDestination t)) then
-		(
-			if (getAbsoluteDestination t) != (getAbsoluteSource t) then
-			(
-				deleteFile (getAbsoluteSource t)
-			)
+			absoluteDestination = testDestination
 		)
 	)
-	return (getAbsoluteDestination t)
+	if (not (doesFileExist absoluteDestination)) and (((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Batiments") != undefined) or ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\") != undefined)) then
+	(
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\Vv2\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			absoluteDestination = testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\") != undefined) then
+	(
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			absoluteDestination = testDestination
+		)
+	)
+	return absoluteDestination
 )
 
 fn renameTexture t =
@@ -169,12 +179,14 @@ rollout assets_png_rollout "Properties"
 			m.delegate.ReflectionMap = undefined
 			m.delegate.RefractionMap = undefined
 		)
-
+		
 		actionMan.executeAction 0 "40021"  -- Selection: Select All
 		actionMan.executeAction 0 "311"  -- Tools: Zoom Extents All Selected
 		actionMan.executeAction 0 "63508"  -- Views: Standard Display with Maps
 		actionMan.executeAction 0 "40043"  -- Selection: Select None
-
+		
+		max views redraw
+		
 		return 1
 	)
 	

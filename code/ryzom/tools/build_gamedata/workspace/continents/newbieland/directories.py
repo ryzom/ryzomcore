@@ -33,6 +33,8 @@ EcosystemName = "jungle"
 EcosystemPath = "ecosystems/" + EcosystemName
 ContinentName = "newbieland"
 ContinentPath = "continents/" + ContinentName
+CommonName = ContinentName
+CommonPath = ContinentPath
 
 # *** SOURCE DIRECTORIES LEVELDESIGN/WORLD ***
 ContinentLeveldesignWorldDirectory = ContinentName

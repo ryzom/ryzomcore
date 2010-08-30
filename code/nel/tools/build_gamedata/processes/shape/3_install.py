@@ -43,25 +43,25 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+printLog(log, ">>> Install shape <<<")
 clientPath = ClientDataDirectory + "/" + ShapeClientDirectory
 mkPath(log, clientPath)
-
-printLog(log, ">>> Install shape <<<")
 mkPath(log, ExportBuildDirectory + "/" + ShapeExportDirectory)
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeExportDirectory, clientPath, ".shape")
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory)
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, clientPath, ".shape")
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, clientPath, ".dds")
 
-#if test "$lightmap_install_directory"; then
-#	mkdir $client_directory/$lightmap_install_directory 2>> log.log 2> /dev/null
-#	cp -u -p -R lightmap_16_bits/. $client_directory/$lightmap_install_directory  2>> log.log
-#fi
-
 mkPath(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory)
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory, clientPath, ".anim")
 
 # ls anim | grep ".anim" >> $client_directory/auto_animations_list.txt
+
+printLog(log, ">>> Install shape lightmaps <<<")
+clientPath = ClientDataDirectory + "/" + LightmapClientDirectory
+mkPath(log, clientPath)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory, clientPath, ".tga")
 
 printLog(log, "")
 log.close()

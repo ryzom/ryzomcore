@@ -36,37 +36,8 @@ from process import *
 from tools import *
 from directories import *
 
-# Todo: make a tool to verify the files :)
-
 def getTagFileName(filePath):
 	return os.path.split(filePath)[1] + ".tag"
-
-def hackBigTree():
-	return 0
-	if EcosystemName == "jungle":
-		# FO_S2_big_tree is corrupt on first export...
-		outDirTag = ExportBuildDirectory + "/" + ShapeTagExportDirectory
-		outDirWithCoarse = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
-		shapeName = "FO_S2_big_tree.shape"
-		tagName = "FO_S2_big_tree.max.tag"
-		hackName = "FO_S2_big_tree_hack.tag"
-		if os.path.exists(outDirWithCoarse + "/" + shapeName) and os.path.exists(outDirTag + "/" + tagName) and not os.path.exists(outDirTag + "/" + hackName):
-			printLog(log, "Removing bad export of FO_S2_big_tree")
-			printLog(log, "RM " + outDirWithCoarse + "/" + shapeName)
-			os.remove(outDirWithCoarse + "/" + shapeName)
-			printLog(log, "RM " + outDirTag + "/" + tagName)
-			os.remove(outDirTag + "/" + tagName)
-			printLog(log, "TAG " + outDirTag + "/" + hackName)
-			hackTagFile = open(outDirTag + "/" + hackName, "w")
-			hackTagFile.write("FO_S2_big_tree")
-			hackTagFile.close()
-			return 1
-		elif os.path.exists(outDirTag + "/" + hackName) and not os.path.exists(outDirWithCoarse + "/" + shapeName) and not os.path.exists(outDirTag + "/" + tagName):
-			printLog(log, "Missing export of FO_S2_big_tree")
-			return 0
-		else:
-			return 0
-
 
 printLog(log, "")
 printLog(log, "-------")
@@ -150,8 +121,9 @@ if MaxAvailable:
 					subprocess.call([ ExecTimeout, str(MaxShapeExportTimeout), Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
 					lSrc = open(logFile, "r")
 					for line in lSrc:
-						if (len(line) > 0):
-							printLog(log, line.strip())
+						lineStrip = line.strip()
+						if (len(lineStrip) > 0):
+							printLog(log, lineStrip)
 					lSrc.close()
 					os.remove(logFile)
 					if (os.path.exists(tagFilePath)):
@@ -163,19 +135,6 @@ if MaxAvailable:
 				os.remove(scriptDst)
 			else:
 				printLog(log, "SKIP " + maxFilePath)
-#while tagDiff > 0:
-#	printLog(log, "MAXSCRIPT " + scriptDst)
-#	subprocess.call([ Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
-#	tagList = findFiles(log, outDirTag, "", ".tag")
-#	newTagLen = len(tagList)
-#	tagDiff = newTagLen - tagLen
-#	tagLen = newTagLen
-#	printLog(log, "Exported " + str(tagDiff) + " .max files!")
-#	if not tagDiff > 0:
-#		tagDiff += hackBigTree() # force rerun also when big tree deleted
-#		if not tagDiff > 0:
-#			tagDiff += secondTry
-#			secondTry = 0
 	
 	# Export clod 3dsmax
 	printLog(log, ">>> Export character lod shape files (.clod) from Max <<<")
@@ -193,6 +152,8 @@ if MaxAvailable:
 printLog(log, "")
 
 log.close()
+if os.path.isfile("log.log"):
+	os.remove("log.log")
 shutil.move("temp_log.log", "log.log")
 
 # end of file

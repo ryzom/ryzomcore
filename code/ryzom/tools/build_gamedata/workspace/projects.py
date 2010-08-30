@@ -27,6 +27,8 @@
 
 ProjectsToProcess = [ ]
 ProjectsToProcess += [ "common/interface" ]
+ProjectsToProcess += [ "common/objects" ]
+ProjectsToProcess += [ "common/sky" ]
 ProjectsToProcess += [ "ecosystems/jungle" ]
 ProjectsToProcess += [ "continents/newbieland" ]
 

@@ -63,17 +63,35 @@ if ClodConfigFile != "":
 	printLog(log, "********      TODO      ********")
 	printLog(log, "********************************")
 
-printLog(log, ">>> LightmapOptimizer <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+printLog(log, ">>> Optimize lightmaps <<<")
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeTagExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeExportDirectory)
+removeFilesRecursive(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+copyFiles(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+subprocess.call([ LightmapOptimizer, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory, ExportBuildDirectory + "/" + ShapeExportDirectory, ExportBuildDirectory + "/" + ShapeTagExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt" ])
 
-printLog(log, ">>> TgaToDds <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+printLog(log, ">>> Convert lightmaps in 16 or 8 bits <<<")
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
+lightMapTgas = findFilesNoSubdir(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory, ".tga")
+listLm8Bit = [ ]
+listLm8BitFile = open(ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt", "r")
+for line in listLm8BitFile:
+	lineStrip = line.strip()
+	if (len(lineStrip) > 0):
+		listLm8Bit += [ lineStrip ]
+for lightMapTga in lightMapTgas:
+	srcTga = ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/" + lightMapTga
+	dstTga = ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory + "/" + lightMapTga
+	if needUpdateLogRemoveDest(log, srcTga, dstTga):
+		if lightMapTga in listLm8Bit: # THIS MAY NOT WORK, PLEASE VERIFY CONTENTS OF list_lm_8bit.txt!!!
+			subprocess.call([ TgaToDds, srcTga, "-o", dstTga, "-a", "tga8" ])
+		else:
+			subprocess.call([ TgaToDds, srcTga, "-o", dstTga, "-a", "tga16" ])
 
-if 1: # todo: CoarseMeshTextureNames length > 0 ...
+if len(CoarseMeshTextureNames) > 0:
 	printLog(log, ">>> Build coarse meshes <<<")
 	shapeWithCoarseMesh = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
 	mkPath(log, shapeWithCoarseMesh)
@@ -111,6 +129,8 @@ if 1: # todo: CoarseMeshTextureNames length > 0 ...
 	os.remove("config_generated.cfg")
 	for tn in CoarseMeshTextureNames:
 		subprocess.call([ TgaToDds, shapeWithCoarseMesh + "/" + tn + ".tga", "-o", shapeWithCoarseMeshBuilded + "/" + tn + ".dds", "-a", "5" ])
+else:
+	printLog(log, ">>> No coarse meshes <<<")
 
 log.close()
 

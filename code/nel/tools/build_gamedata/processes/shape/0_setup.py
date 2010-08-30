@@ -61,10 +61,13 @@ mkPath(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory)
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
 mkPath(log, ClientDataDirectory + "/" + ShapeClientDirectory)
+mkPath(log, ClientDataDirectory + "/" + LightmapClientDirectory)
 
 log.close()
 

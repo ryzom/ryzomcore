@@ -63,13 +63,13 @@ else:
 		mkPath(log, sourcePath)
 		destPath = ExportBuildDirectory + "/" + MapBuildDirectory
 		mkPath(log, destPath)
-		files = findFiles(log, sourcePath, "", ".tga")
+		files = findFilesNoSubdir(log, sourcePath, ".tga")
 		for file in files:
 			sourceFile = sourcePath + "/" + file
 			destFile = destPath + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
 			if needUpdateLogRemoveDest(log, sourceFile, destFile):
 				subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
-		files = findFiles(log, sourcePath, "", ".png")
+		files = findFilesNoSubdir(log, sourcePath, ".png")
 		for file in files:
 			sourceFile = sourcePath + "/" + file
 			destFile = destPath + "/" + os.path.basename(file)[0:-len(".png")] + ".dds"
@@ -78,14 +78,14 @@ else:
 printLog(log, "")
 
 printLog(log, ">>> Build map uncompressed: copy tga, png, dds <<<")
-for dir in MapSourceDirectories:
+for dir in MapUncompressedSourceDirectories:
 	sourcePath = DatabaseDirectory + "/" + dir
 	mkPath(log, sourcePath)
 	destPath = ExportBuildDirectory + "/" + MapBuildDirectory
 	mkPath(log, destPath)
-	copyFilesExtNoTreeIfNeeded(log, sourcePath, destPath, ".dds")
-	copyFilesExtNoTreeIfNeeded(log, sourcePath, destPath, ".png")
-	copyFilesExtNoTreeIfNeeded(log, sourcePath, destPath, ".tga")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".dds")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".png")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".tga")
 
 printLog(log, ">>> Build panoply <<<")
 printLog(log, "********************************")

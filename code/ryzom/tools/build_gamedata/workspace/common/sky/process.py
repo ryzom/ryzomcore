@@ -2,7 +2,7 @@
 # 
 # \file config.py
 # \brief Process configuration
-# \date 2010-05-24 06:30GMT
+# \date 2010-08-27 17:02GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Process configuration.
@@ -28,20 +28,12 @@
 
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
-ProcessToComplete += [ "shape" ] # not fully implemented, but works for this process
-ProcessToComplete += [ "map" ] # not fully implemented, but works for this process
-ProcessToComplete += [ "smallbank" ] # OK
-ProcessToComplete += [ "farbank" ] # OK
-ProcessToComplete += [ "tiles" ] # OK
-ProcessToComplete += [ "displace" ] # OK
-ProcessToComplete += [ "veget" ] # OK
-ProcessToComplete += [ "vegetset" ] # OK
-ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process, but does not export max files
-##ProcessToComplete += [ "pacs_prim" ]
+ProcessToComplete += [ "shape" ]
+ProcessToComplete += [ "map" ]
+#ProcessToComplete += [ "anim" ]
+#ProcessToComplete += [ "ig" ]
+#ProcessToComplete += [ "ig_light" ]
 
-# *** MAP EXPORT OPTIONS ***
-PanoplyFileList = [ ]
-HlsBankFileName = ""
 
 # *** SHAPE EXPORT OPTIONS ***
 
@@ -64,7 +56,7 @@ ShapeExportOptOversampling = 1
 ShapeExportOpt8BitsLightmap = "false"
 
 # Does the lightmaps export must generate logs ?
-ShapeExportOptLightmapLog = "false"
+ShapeExportOptLightmapLog = "true"
 
 # Coarse mesh texture mul size
 TextureMulSizeValue = "1.5"
@@ -75,10 +67,6 @@ ClodConfigFile = ""
 
 # *** COARSE MESH TEXTURE NAME ***
 CoarseMeshTextureNames = [ ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_sp" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_su" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_au" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_wi" ]
 
 # *** POSTFIX USED BY THE MULTIPLE TILES SYSTEM ***
 MultipleTilesPostfix = [ ]
@@ -87,26 +75,6 @@ MultipleTilesPostfix += [ "_su" ]
 MultipleTilesPostfix += [ "_au" ]
 MultipleTilesPostfix += [ "_wi" ]
 
-# *** BANK EXPORT OPTIONS ***
-
-# Name of the tilebank to use
-BankTileBankName = "jungle"
-
-# *** RBANK EXPORT OPTIONS ***
-
-# Output names
-RbankRbankName = "_invalid"
-
-# *** LIGO OPTIONS ***
-
-LigoExportLand = ""
-LigoExportOnePass = 0
-
 # *** MAPS OPTIONS ***
 
 ReduceBitmapFactor = 0
-
-# *** SHAPE BUILD OPTIONS *
-
-DoBuildShadowSkin = False
-ClodConfigFile = ""

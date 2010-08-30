@@ -26,12 +26,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-# *** SOURCE DIRECTORIES IN THE DATABASE ***
-
 
 # *** ECOSYSTEM NAME ***
 EcosystemName = "jungle"
 EcosystemPath = "ecosystems/" + EcosystemName
+CommonPath = EcosystemPath
+
+
+# *** SOURCE DIRECTORIES IN THE DATABASE ***
 
 # Shape directories
 ShapeSourceDirectories = [ ]
@@ -147,11 +149,11 @@ PacsPrimSourceDirectories += [ "stuff/" + EcosystemName + "/decors/vegetations" 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
 # Shape directories
-ShapeTagExportDirectory = "ecosystems/" + EcosystemName + "/shape_tag"
-ShapeExportDirectory = "ecosystems/" + EcosystemName + "/shape"
-ShapeWithCoarseMeshExportDirectory = "ecosystems/" + EcosystemName + "/shape_with_coarse_mesh"
-ShapeLightmapNotOptimizedExportDirectory = "ecosystems/" + EcosystemName + "/shape_lightmap_not_optimized"
-ShapeAnimExportDirectory = "ecosystems/" + EcosystemName + "/shape_anim"
+ShapeTagExportDirectory = CommonPath + "/shape_tag"
+ShapeExportDirectory = CommonPath + "/shape"
+ShapeWithCoarseMeshExportDirectory = CommonPath + "/shape_with_coarse_mesh"
+ShapeLightmapNotOptimizedExportDirectory = CommonPath + "/shape_lightmap_not_optimized"
+ShapeAnimExportDirectory = CommonPath + "/shape_anim"
 
 # Smallbank directories
 SmallbankExportDirectory = "ecosystems/" + EcosystemName + "/smallbank"
@@ -184,11 +186,13 @@ ZoneExportDirectory = "ecosystems/" + EcosystemName + "/zone"
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***
 
 # Map directories
-MapBuildDirectory = "ecosystems/" + EcosystemName + "/map"
-MapPanoplyBuildDirectory = "ecosystems/" + EcosystemName + "/map_panoply"
+MapBuildDirectory = CommonPath + "/map"
+MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
 
 # Shape directories
-ShapeWithCoarseMeshBuildDirectory = "ecosystems/" + EcosystemName + "/shape_with_coarse_mesh_builded"
+ShapeWithCoarseMeshBuildDirectory = CommonPath + "/shape_with_coarse_mesh_builded"
+ShapeLightmapBuildDirectory = CommonPath + "/shape_lightmap"
+ShapeLightmap16BitsBuildDirectory = CommonPath + "/shape_lightmap_16_bits"
 
 # Farbank directories
 FarbankBuildDirectory = "ecosystems/" + EcosystemName + "/farbank"
@@ -218,14 +222,14 @@ ClientSetupDirectories += [ "jungle_vegetable_sets" ]
 ClientSetupDirectories += [ "jungle_pacs_prim" ]
 ClientSetupDirectories += [ "jungle_lightmaps" ]
 
-# Shape directory
+# Map directory
 MapClientDirectory = "jungle_maps"
+
+# Map directory
+BitmapClientDirectory = MapClientDirectory
 
 # Shape directory
 ShapeClientDirectory = "jungle_shapes"
-
-# Map directory
-BitmapClientDirectory = "jungle_maps"
 
 # Lightmap directory
 LightmapClientDirectory = "jungle_lightmaps"

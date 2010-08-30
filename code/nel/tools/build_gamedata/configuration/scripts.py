@@ -135,6 +135,10 @@ def copyFilesExtNoTreeIfNeeded(log, dir_source, dir_target, file_ext):
 	files = findFiles(log, dir_source, "", file_ext)
 	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files)
 
+def copyFilesExtNoSubdirIfNeeded(log, dir_source, dir_target, file_ext):
+	files = findFilesNoSubdir(log, dir_source, file_ext)
+	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files)
+
 def copyFilesNoTreeIfNeeded(log, dir_source, dir_target):
 	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, os.listdir(dir_source))
 
@@ -192,7 +196,7 @@ def findFilesNoSubdir(log, dir_where, file_ext):
 				if fileName[-len_file_ext:].lower() == file_ext.lower():
 					result += [ fileName ]
 			elif not os.path.isdir(fileFull):
-				printLog(log, "findFilesNoSubdir: file not dir or file?!" + filePath)
+				printLog(log, "findFilesNoSubdir: file not dir or file?!" + fileFull)
 	return result
 
 def findFile(log, dir_where, file_name):
