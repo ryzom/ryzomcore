@@ -56,9 +56,13 @@ namespace NL3D
 bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_OGL(GlWndProc)
+
+	if (!driver)
+		return false;
+
 	if(message == WM_SIZE)
 	{
-		if (driver != NULL)
+		if (!driver->_FullScreen)
 		{
 			RECT rect;
 			GetClientRect (driver->_win, &rect);
@@ -70,7 +74,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	}
 	else if(message == WM_MOVE)
 	{
-		if (driver != NULL)
+		if (!driver->_FullScreen)
 		{
 			RECT rect;
 			GetWindowRect (hWnd, &rect);
@@ -113,14 +117,37 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		trapMessage = GlWndProc (pDriver, hWnd, message, wParam, lParam);
 	}
 
+	// we don't want Windows to erase background
+	if (message == WM_ERASEBKGND)
+	{
+		return TRUE;
+	}
+
+	if (message == WM_SYSCOMMAND)
+	{
+		switch (wParam)
+		{
 #ifdef NL_DISABLE_MENU
-	// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
-	if(message == WM_SYSCOMMAND && wParam == SC_KEYMENU)
-		return 0;
+			// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
+			case SC_KEYMENU:
 #endif // NL_DISABLE_MENU
 
+			// Screensaver Trying To Start?
+			case SC_SCREENSAVE:
+
+			// Monitor Trying To Enter Powersave?
+			case SC_MONITORPOWER:
+
+			// Prevent From Happening
+			return 0;												
+
+			default:
+			break;
+		}
+	}
+
 	// disable menu (default ALT-F4 behavior is disabled)
-	if(message == WM_CLOSE)
+	if (message == WM_CLOSE)
 	{
 		if(pDriver && pDriver->ExitFunc)
 		{
@@ -219,21 +246,6 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 	}
 
 	return true;
-
-/*
-	else if (message == WM_ACTIVATE)
-	{
-		WORD fActive = LOWORD(wParam);
-		if (fActive == WA_INACTIVE)
-		{
-			driver->_WndActive = false;
-		}
-		else
-		{
-			driver->_WndActive = true;
-		}
-	}
-*/
 }
 
 #endif // NL_OS_UNIX
