@@ -2,17 +2,8 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_shapeview WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nl_sample_shapeview ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nel3d)
-NL_DEFAULT_PROPS(nl_sample_shapeview "Samples, 3D: Font")
+TARGET_LINK_LIBRARIES(nl_sample_shapeview ${PLATFORM_LINKFLAGS} nelmisc nel3d)
+NL_DEFAULT_PROPS(nl_sample_shapeview "Samples, 3D: Shape Viewer")
 NL_ADD_RUNTIME_FLAGS(nl_sample_shapeview)
-
-IF(WIN32)
-  SET_TARGET_PROPERTIES(nl_sample_shapeview PROPERTIES 
-    LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-    LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-    PROJECT_LABEL "Samples, 3D: Shape Viewer")
-ENDIF(WIN32)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS nl_sample_shapeview RUNTIME DESTINATION bin COMPONENT samples3d)

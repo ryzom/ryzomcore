@@ -4,18 +4,12 @@ ADD_EXECUTABLE(nl_sample_sound_sources ${SRC})
 
 ADD_DEFINITIONS(-DNL_SOUND_DATA="\\"${NL_SHARE_PREFIX}/nl_sample_sound/\\"")
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nl_sample_sound_sources ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nelsound nelsnd_lowlevel)
-IF(WIN32)
-  SET_TARGET_PROPERTIES(nl_sample_sound_sources PROPERTIES 
-    LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-    LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-    PROJECT_LABEL "Samples: Sound System")
-ENDIF(WIN32)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+TARGET_LINK_LIBRARIES(nl_sample_sound_sources ${PLATFORM_LINKFLAGS} nelmisc nelsound)
+NL_DEFAULT_PROPS(nl_sample_sound_sources "Samples: Sound System")
+NL_ADD_RUNTIME_FLAGS(nl_sample_sound_sources)
 
 INSTALL(TARGETS nl_sample_sound_sources RUNTIME DESTINATION bin COMPONENT samplessound)
-INSTALL(DIRECTORY data/ 
+INSTALL(DIRECTORY data/
 	DESTINATION share/nel/nl_sample_sound/data
 	COMPONENT samplespacs
 	PATTERN "CVS" EXCLUDE
