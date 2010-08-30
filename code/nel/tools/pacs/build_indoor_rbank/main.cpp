@@ -122,11 +122,10 @@ void	initConfig()
 	try
 	{
 #ifdef NL_OS_UNIX
-	        std::string homeDir = getenv("HOME");
-        	NLMISC::CPath::addSearchPath( homeDir + "/.nel");
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getApplicationDirectory("NeL"));
 #endif // NL_OS_UNIX
 
-	        NLMISC::CPath::addSearchPath(NL_BIRB_CFG);
+		NLMISC::CPath::addSearchPath(NL_BIRB_CFG);
 
 		CConfigFile cf;
 	
