@@ -21,6 +21,10 @@ fn getAbsoluteDestination t =
 	(
 		return ((getFilenamePath t) + "\\" + (getFilenameFile (filenameFromPath t)) + ".png")
 	)
+	else if ((findString t "E:\\Ryzom\\tryker") != undefined) then
+	(
+		return "W:\\database\\Stuff\\Tryker\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png"
+	)
 	else if ((findString t "\\tronc.") != undefined) then
 	(
 		return "W:\\database\\database_proto\\stuff\\fyros\\objects\\tronc.png"
@@ -47,7 +51,7 @@ fn getFixedTexturePath t =
 		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\" + (getFilenameFile (filenameFromPath t)) + ".png")
 		if (doesFileExist testDestination) then
 		(
-			absoluteDestination = testDestination
+			return testDestination
 		)
 	)
 	if (not (doesFileExist absoluteDestination)) and (((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Batiments") != undefined) or ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\") != undefined)) then
@@ -55,15 +59,63 @@ fn getFixedTexturePath t =
 		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\Vv2\\" + (getFilenameFile (filenameFromPath t)) + ".png")
 		if (doesFileExist testDestination) then
 		(
-			absoluteDestination = testDestination
+			return testDestination
 		)
 	)
-	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\") != undefined) then
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories") != undefined) then
 	(
 		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
 		if (doesFileExist testDestination) then
 		(
-			absoluteDestination = testDestination
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\noutilise\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\vv2\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\tempautel\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Fyros\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
 		)
 	)
 	return absoluteDestination
