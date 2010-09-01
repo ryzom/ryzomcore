@@ -37,18 +37,18 @@ using namespace std;
 #define NOT_DEFINED 0xff
 
 
-bool sameType(const char *sFileNameDest, uint8 algo);
-bool dataCheck(const char *sFileNameSrc, const char *sFileNameDest, uint8 algo);
+bool sameType(const std::string &sFileNameDest, uint8 algo);
+bool dataCheck(const std::string &sFileNameSrc, const std::string &FileNameDest, uint8 algo);
 std::string getOutputFileName(const std::string &inputFileName);
 void writeInstructions();
 
 
 
 
-uint8 getType(const char *sFileNameDest)
+uint8 getType(const std::string &sFileNameDest)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest,"rb");
+	FILE *f = fopen(sFileNameDest.c_str(),"rb");
 	if(f==NULL)
 	{
 		return NOT_DEFINED;
@@ -97,10 +97,10 @@ uint8 getType(const char *sFileNameDest)
 	return NOT_DEFINED;
 }
 
-bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
+bool sameType(const std::string &sFileNameDest, uint8 &algo, bool wantMipMap)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest,"rb");
+	FILE *f = fopen(sFileNameDest.c_str(),"rb");
 	if(f==NULL)
 	{
 		return false;
@@ -163,23 +163,22 @@ bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
 
 
 
-bool dataCheck(const char *sFileNameSrc, const char *sFileNameDest, uint8& algo, bool wantMipMap)
+bool dataCheck(const std::string &sFileNameSrc, const std::string &sFileNameDest, uint8& algo, bool wantMipMap)
 {
-	uint32 lastWriteTime1 = CFile::getFileModificationDate(sFileNameSrc);
-
-	if (!lastWriteTime1)
+	if (!CFile::fileExists(sFileNameSrc))
 	{
-		cerr<<"Can't open file "<<sFileNameSrc<<endl;
+		cerr << "Can't open file " << sFileNameSrc << endl;
 		return false;
 	}
-	
-	uint32 lastWriteTime2 = CFile::getFileModificationDate(sFileNameDest);
 
-	if (!lastWriteTime2)
+	if (!CFile::fileExists(sFileNameDest))
 	{
 		return false; // destination file doesn't exist yet
 	}
-	
+
+	uint32 lastWriteTime1 = CFile::getFileModificationDate(sFileNameSrc);
+	uint32 lastWriteTime2 = CFile::getFileModificationDate(sFileNameDest);
+
 	if(lastWriteTime1 > lastWriteTime2)
 	{
 		return false;
@@ -430,7 +429,7 @@ int main(int argc, char **argv)
 
 	// Check dest algo
 	if (OptAlgo==NOT_DEFINED)
-		OptAlgo = getType (outputFileName.c_str());
+		OptAlgo = getType (outputFileName);
 
 	// Choose Algo.
 	if(OptAlgo!=NOT_DEFINED)
@@ -447,7 +446,7 @@ int main(int argc, char **argv)
 
 	// Data check
 	//===========
-	if(dataCheck(inputFileName.c_str(),outputFileName.c_str(), OptAlgo, OptMipMap))
+	if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
 	{
 		cout<<outputFileName<<" : a recent dds file already exists"<<endl;
 		return 0;
