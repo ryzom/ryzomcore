@@ -118,6 +118,19 @@ fn getFixedTexturePath t =
 			return testDestination
 		)
 	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\sky_V2\\textures\\textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\nodds\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\desert\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\forest\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\jungle\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\lacustre\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+	)
 	return absoluteDestination
 )
 
