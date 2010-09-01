@@ -2,9 +2,8 @@ FILE(GLOB SRC *.cpp *.h *.def)
 
 ADD_LIBRARY(nel_patch_converter SHARED ${SRC} nel_patch_converter.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MAXSDK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_patch_converter
-							${LIBXML2_LIBRARIES} 
 							nelmisc 
 							nel3d
 							nel_mesh_lib 
@@ -14,13 +13,9 @@ TARGET_LINK_LIBRARIES(nel_patch_converter
 							Version.lib
 							comctl32.lib)
 							
-SET_TARGET_PROPERTIES(nel_patch_converter PROPERTIES 
-  VERSION ${NL_VERSION}
-  DEBUG_POSTFIX "_d"
-  RELEASE_POSTFIX "_r"
-  SUFFIX ".dlm"
-  PROJECT_LABEL "MAX Plugin: NeL Patch Converter")
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+SET_TARGET_PROPERTIES(nel_patch_converter PROPERTIES SUFFIX ".dlm")
+NL_DEFAULT_PROPS(nel_patch_converter "MAX Plugin: NeL Patch Converter")
+NL_ADD_RUNTIME_FLAGS(nel_patch_converter)
+NL_ADD_LIB_SUFFIX(nel_patch_converter)
 
 INSTALL(TARGETS nel_patch_converter RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)

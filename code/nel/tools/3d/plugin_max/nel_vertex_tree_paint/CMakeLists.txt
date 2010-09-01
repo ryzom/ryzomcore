@@ -2,9 +2,9 @@ FILE(GLOB SRC *.cpp *.h *.def)
 
 ADD_LIBRARY(nel_vertex_tree_paint SHARED ${SRC} vertex_tree_paint.def vertex_tree_paint.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MAXSDK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(nel_vertex_tree_paint 
-							${LIBXML2_LIBRARIES} 
 							nelmisc
 							nel3d
 							nel_mesh_lib 
@@ -14,15 +14,9 @@ TARGET_LINK_LIBRARIES(nel_vertex_tree_paint
 							Version.lib
 							comctl32.lib)
 							
-SET_TARGET_PROPERTIES(nel_vertex_tree_paint PROPERTIES 
-  VERSION ${NL_VERSION}
-  LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-  LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-  DEBUG_POSTFIX "_d"
-  RELEASE_POSTFIX "_r"
-  SUFFIX ".dlm"
-  PROJECT_LABEL "MAX Plugin: NeL Vertex Tree Painter")
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+SET_TARGET_PROPERTIES(nel_vertex_tree_paint PROPERTIES SUFFIX ".dlm")
+NL_DEFAULT_PROPS(nel_vertex_tree_paint "MAX Plugin: NeL Vertex Tree Painter")
+NL_ADD_RUNTIME_FLAGS(nel_vertex_tree_paint)
+NL_ADD_LIB_SUFFIX(nel_vertex_tree_paint)
 
 INSTALL(TARGETS nel_vertex_tree_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)

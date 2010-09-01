@@ -2,9 +2,8 @@ FILE(GLOB SRC *.cpp *.h *.def)
 
 ADD_LIBRARY(tile_utility SHARED ${SRC} tile_utility.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MAXSDK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(tile_utility 
-							${LIBXML2_LIBRARIES} 
 							nelmisc
 							nel3d
 							nel_mesh_lib
@@ -14,15 +13,9 @@ TARGET_LINK_LIBRARIES(tile_utility
 							Version.lib
 							comctl32.lib)
 							
-SET_TARGET_PROPERTIES(tile_utility PROPERTIES 
-	VERSION ${NL_VERSION}
-	LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-	LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-	SUFFIX ".dlu"
-	DEBUG_POSTFIX "_d"
-	RELEASE_POSTFIX "_r"
-	PROJECT_LABEL "MAX Plugin: Tile Utility")
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+SET_TARGET_PROPERTIES(tile_utility PROPERTIES SUFFIX ".dlu")
+NL_DEFAULT_PROPS(tile_utility "MAX Plugin: Tile Utility")
+NL_ADD_RUNTIME_FLAGS(tile_utility)
+NL_ADD_LIB_SUFFIX(tile_utility)
 
 INSTALL(TARGETS tile_utility RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
