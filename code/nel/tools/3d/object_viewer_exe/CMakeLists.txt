@@ -5,21 +5,16 @@ ADD_DEFINITIONS(-D_AFXDLL)
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(object_viewer WIN32 ${SRC} object_viewer_exe.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(	object_viewer 
-						${LIBXML2_LIBRARIES}
 						${PLATFORM_LINKFLAGS} 
 						nelmisc 
 						nel3d
 						nelsound
 						nelsnd_lowlevel
 						object_viewer_dll)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-SET_TARGET_PROPERTIES(object_viewer PROPERTIES 
-  LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-  LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-  PROJECT_LABEL "Tools, 3D: Object Viewer")
+NL_DEFAULT_PROPS(object_viewer "Tools, 3D: Object Viewer")
+NL_ADD_RUNTIME_FLAGS(object_viewer)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)
