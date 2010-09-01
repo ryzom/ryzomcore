@@ -309,22 +309,22 @@ public:
 	HWND					SubVPDlg[VP_COUNT];
 };
 
-int CALLBACK MRMDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK AccelDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK InstanceDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK LightmapDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK Lightmap2DialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK VegetableDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK VertexProgramDialogCallBack (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK MiscDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int CALLBACK AnimationDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK MRMDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK AccelDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK InstanceDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK LightmapDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK Lightmap2DialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK VegetableDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK VertexProgramDialogCallBack (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK MiscDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK AnimationDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 const char				*SubText[TAB_COUNT]	= {"LOD & MRM", "Accelerator", "Instance", "Lighting", "LMC", "Vegetable", "VertexProgram", "Misc", "Animation"};
 const int				SubTab[TAB_COUNT]	= {IDD_LOD, IDD_ACCEL, IDD_INSTANCE, IDD_LIGHTMAP, IDD_LIGHTMAP2, IDD_VEGETABLE, IDD_VERTEX_PROGRAM, IDD_MISC, IDD_ANIM};
 DLGPROC					SubProc[TAB_COUNT]	= {MRMDialogCallback, AccelDialogCallback, InstanceDialogCallback, LightmapDialogCallback, Lightmap2DialogCallback, VegetableDialogCallback, VertexProgramDialogCallBack, MiscDialogCallback, AnimationDialogCallback};
 
 // VertexPrograms.
-int CALLBACK VPWindTreeCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK VPWindTreeCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 const int				SubVPTab[VP_COUNT]	= {IDD_VP_WINDTREE};
 DLGPROC					SubVPProc[VP_COUNT]	= {VPWindTreeCallback};
 
@@ -417,7 +417,7 @@ void VegetableStateChanged (HWND hwndDlg)
 
 void AccelStateChanged (HWND hwndDlg)
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	bool cluster = (currentParam->AcceleratorType&NEL3D_APPDATA_ACCEL_TYPE) == NEL3D_APPDATA_ACCEL_CLUSTER;
 	bool portal = (currentParam->AcceleratorType&NEL3D_APPDATA_ACCEL_TYPE) == NEL3D_APPDATA_ACCEL_PORTAL;
@@ -464,22 +464,22 @@ void exploreNode(INode *node)
 }
 
 
-int CALLBACK AccelDialogCallback (
+INT_PTR CALLBACK AccelDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Fill the known sound groups by parsing the max node tree.
 			{
@@ -635,22 +635,22 @@ int CALLBACK AccelDialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK MRMDialogCallback (
+INT_PTR CALLBACK MRMDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Window text
 			std::string winName=(*(currentParam->ListNode->begin()))->GetName();
@@ -903,22 +903,22 @@ int CALLBACK MRMDialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK InstanceDialogCallback (
+INT_PTR CALLBACK InstanceDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_SHAPE), currentParam->InstanceShape.c_str());
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_NAME), currentParam->InstanceName.c_str());
@@ -1019,22 +1019,22 @@ int CALLBACK InstanceDialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK LightmapDialogCallback (
+INT_PTR CALLBACK LightmapDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_LUMELSIZEMUL), currentParam->LumelSizeMul.c_str());
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_RADIUS), currentParam->SoftShadowRadius.c_str());
@@ -1298,14 +1298,14 @@ struct CLMCParamFrom
 };
 
 // ***************************************************************************
-int CALLBACK LMCCopyFromDialogCallback(
+INT_PTR CALLBACK LMCCopyFromDialogCallback(
 	HWND hwndDlg,  // handle to dialog box
 	UINT uMsg,     // message
 	WPARAM wParam, // first message parameter
 	LPARAM lParam  // second message parameter
 	)
 {
-	CLMCParamFrom *lmcParam=(CLMCParamFrom *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLMCParamFrom *lmcParam=(CLMCParamFrom *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	uint	i;
 	
 	switch (uMsg) 
@@ -1313,8 +1313,8 @@ int CALLBACK LMCCopyFromDialogCallback(
 	case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			lmcParam=(CLMCParamFrom *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			lmcParam=(CLMCParamFrom *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// init the colors
 			nlctassert(CLodDialogBoxParam::NumLightGroup==3);
@@ -1519,22 +1519,22 @@ void	lmcCopyFrom(CLodDialogBoxParam *currentParam, HWND parentDlg)
 }
 
 // ***************************************************************************
-int CALLBACK Lightmap2DialogCallback (
+INT_PTR CALLBACK Lightmap2DialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// retrieve the color choosing Ctrl 
 			nlctassert(CLodDialogBoxParam::NumLightGroup==3);
@@ -1642,22 +1642,22 @@ int CALLBACK Lightmap2DialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK VegetableDialogCallback (
+INT_PTR CALLBACK VegetableDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE), BM_SETCHECK, currentParam->Vegetable, 0);
 			
@@ -1762,22 +1762,22 @@ int CALLBACK VegetableDialogCallback (
 }
 
 // ***************************************************************************
-int CALLBACK VertexProgramDialogCallBack (
+INT_PTR CALLBACK VertexProgramDialogCallBack (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// test wether v.p are bypassed for that object (this may happen when a v.p is needed by a material of this mesh)
 			if (!currentParam->VertexProgramBypassed)
@@ -2028,22 +2028,22 @@ static	void updateVPWTStaticForControl(HWND hwndDlg, HWND ctrlWnd, CVPWindTreeAp
 }
 
 
-int CALLBACK VPWindTreeCallback (
+INT_PTR CALLBACK VPWindTreeCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{ 
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Init controls
 			CVPWindTreeAppData		&vpwt= currentParam->VertexProgramWindTree;
@@ -2266,22 +2266,22 @@ int CALLBACK VPWindTreeCallback (
 
 
 // ***************************************************************************
-int CALLBACK MiscDialogCallback (
+INT_PTR CALLBACK MiscDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{ 			
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 			SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_SETCHECK, currentParam->FloatingObject, 0);
 
 			// Ligoscape
@@ -2399,22 +2399,22 @@ int CALLBACK MiscDialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK AnimationDialogCallback (
+INT_PTR CALLBACK AnimationDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{ 			
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 			SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_NOTE_TRACK), BM_SETCHECK, currentParam->ExportNoteTrack, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_SSS_TRACK), BM_SETCHECK, currentParam->ExportSSSTrack, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_ANIMATED_MATERIALS), BM_SETCHECK, currentParam->ExportAnimatedMaterials, 0);
@@ -2468,22 +2468,22 @@ int CALLBACK AnimationDialogCallback (
 
 
 // ***************************************************************************
-int CALLBACK LodDialogCallback (
+INT_PTR CALLBACK LodDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
   LPARAM lParam  // second message parameter
 )
 {
-	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
 			// Param pointers
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			currentParam=(CLodDialogBoxParam *)GetWindowLong(hwndDlg, GWL_USERDATA);
+			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Window text
 			std::string winName=(*(currentParam->ListNode->begin()))->GetName();
@@ -2602,7 +2602,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 {
 
 	// Get 
-	uint nNumSelNode=listNode.size();
+	uint nNumSelNode=(uint)listNode.size();
 
 	if (nNumSelNode)
 	{
@@ -3220,7 +3220,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				if (param.ListActived)
 				{
 					// Write size of the list
-					uint sizeList=std::min (param.ListLodName.size(), (uint)NEL3D_APPDATA_LOD_NAME_COUNT_MAX);
+					uint sizeList=std::min ((uint)param.ListLodName.size(), (uint)NEL3D_APPDATA_LOD_NAME_COUNT_MAX);
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_LOD_NAME_COUNT, (int)sizeList);
 				
 					// Write the strings

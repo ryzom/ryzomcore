@@ -14,6 +14,7 @@
 #ifndef __VERTEXPAINT__H
 #define __VERTEXPAINT__H
 
+#include <assert.h>
 #include "Max.h"
 #include "resource.h"
 #include "istdplug.h"
@@ -101,7 +102,7 @@ public:
 class VertexPaint : public Modifier {
 	
 	friend class PaintMouseProc;
-	friend BOOL CALLBACK VertexPaintDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	friend INT_PTR CALLBACK VertexPaintDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 public:
 
 		static IObjParam*		ip;

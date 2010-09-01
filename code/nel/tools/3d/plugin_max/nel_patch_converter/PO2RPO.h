@@ -18,6 +18,7 @@
 #ifndef __PMESH2RKLPMESH__H
 #define __PMESH2RKLPMESH__H
 
+#include <assert.h>
 #include "Max.h"
 #include "resource.h"
 #include "istdplug.h"

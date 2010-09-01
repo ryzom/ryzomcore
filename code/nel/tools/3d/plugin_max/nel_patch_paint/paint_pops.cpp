@@ -23,7 +23,7 @@ EPTempData::EPTempData(PaintPatchMod *m,PaintPatchData *pd)
 	mod = m;
 	}
 
-void EPTempData::Invalidate(DWORD part,BOOL patchValid)
+void EPTempData::Invalidate(PartID part,BOOL patchValid)
 	{
 	if ( !patchValid ) 
 	{

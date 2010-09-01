@@ -50,7 +50,7 @@ EPTempData::EPTempData(EditPatchMod *m,EditPatchData *pd)
 	mod = m;
 	}
 
-void EPTempData::Invalidate(DWORD part,BOOL patchValid)
+void EPTempData::Invalidate(PartID part,BOOL patchValid)
 	{
 	if ( !patchValid ) 
 	{

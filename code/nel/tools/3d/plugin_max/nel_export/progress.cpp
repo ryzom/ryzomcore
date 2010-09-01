@@ -26,7 +26,7 @@ using namespace NLMISC;
 // -----------------------------------------------------------------------------------------------
 // Window dialog callback
 // -----------------------------------------------------------------------------------------------
-int CALLBACK CalculatingDialogCallback (
+INT_PTR CALLBACK CalculatingDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
@@ -34,14 +34,14 @@ int CALLBACK CalculatingDialogCallback (
 )
 {
 	double TimeCurrent = CTime::ticksToSecond( CTime::getPerformanceTime() );
-	CProgressBar *pClass = (CProgressBar*)GetWindowLong (hwndDlg, GWL_USERDATA);
+	CProgressBar *pClass = (CProgressBar*)GetWindowLongPtr (hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) 
 	{
 		case WM_INITDIALOG:
 		{
-			LONG res = SetWindowLong(hwndDlg, GWL_USERDATA, (LONG)lParam);
-			pClass = (CProgressBar*)GetWindowLong (hwndDlg, GWL_USERDATA);
+			LONG res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
+			pClass = (CProgressBar*)GetWindowLongPtr (hwndDlg, GWLP_USERDATA);
 
 			CenterWindow( hwndDlg, theCNelExport._Ip->GetMAXHWnd() );
 			ShowWindow( hwndDlg, SW_SHOWNORMAL );

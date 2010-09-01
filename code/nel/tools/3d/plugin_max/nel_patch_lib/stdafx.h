@@ -20,6 +20,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #pragma warning (disable : 4786)
+#include <assert.h>
 #include <Max.h>
 #include <istdplug.h>
 #include <meshadj.h>

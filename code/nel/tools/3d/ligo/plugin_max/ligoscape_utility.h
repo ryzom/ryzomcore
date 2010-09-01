@@ -14,6 +14,7 @@
 #ifndef __PLUGIN_MAX__H
 #define __PLUGIN_MAX__H
 
+#include <assert.h>
 #include "Max.h"
 #include <Max.h>
 #include <istdplug.h>

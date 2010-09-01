@@ -1,6 +1,7 @@
 #pragma warning (disable : 4786)
 
 // max.h include uses min/max in 3dsmax 2010 sdk
+#include <assert.h>
 #include "Max.h"
 #ifdef min
 #	undef min
