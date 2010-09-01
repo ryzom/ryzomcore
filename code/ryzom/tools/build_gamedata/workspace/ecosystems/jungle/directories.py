@@ -150,7 +150,7 @@ PacsPrimSourceDirectories += [ "stuff/" + EcosystemName + "/decors/vegetations" 
 
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
-ShapeExportDirectory = CommonPath + "/shape"
+ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"
 ShapeWithCoarseMeshExportDirectory = CommonPath + "/shape_with_coarse_mesh"
 ShapeLightmapNotOptimizedExportDirectory = CommonPath + "/shape_lightmap_not_optimized"
 ShapeAnimExportDirectory = CommonPath + "/shape_anim"
@@ -182,6 +182,9 @@ LigoTagExportDirectory = "ecosystems/" + EcosystemName + "/ligo_tag"
 # Zone directories
 ZoneExportDirectory = "ecosystems/" + EcosystemName + "/zone"
 
+# PACS primitives directories
+PacsPrimExportDirectory = "ecosystems/" + EcosystemName + "/pacs_prim"
+
 
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***
 
@@ -190,6 +193,7 @@ MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
 
 # Shape directories
+ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
 ShapeWithCoarseMeshBuildDirectory = CommonPath + "/shape_with_coarse_mesh_builded"
 ShapeLightmapBuildDirectory = CommonPath + "/shape_lightmap"
 ShapeLightmap16BitsBuildDirectory = CommonPath + "/shape_lightmap_16_bits"
@@ -250,4 +254,4 @@ VegetSetClientDirectory = "jungle_vegetable_sets"
 VegetClientDirectory = "jungle_vegetables"
 
 # PACS primitives directories
-PacsPrimitiveClientDirectory = "jungle_pacs_prim"
+PacsPrimClientDirectory = "jungle_pacs_prim"

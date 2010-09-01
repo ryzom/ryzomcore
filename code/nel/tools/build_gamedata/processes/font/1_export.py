@@ -43,6 +43,17 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+printLog(log, ">>> Export font <<<")
+fontExportDir = ExportBuildDirectory + "/" + FontExportDirectory
+mkPath(log, fontExportDir)
+for dir in FontSourceDirectories:
+	mkPath(log, DatabaseDirectory + "/" + dir)
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".ttf")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".afm")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfb")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfm")
+
+
 printLog(log, "")
 
 log.close()

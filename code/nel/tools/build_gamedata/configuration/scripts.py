@@ -215,6 +215,49 @@ def findFile(log, dir_where, file_name):
 				printLog(log, "findFile: file not dir or file?! " + filePath)
 	return ""
 
+def needUpdateDirNoSubdirLogExt(log, dir_source, ext_source, dir_dest, ext_dest):
+	latestSourceFile = 0
+	latestDestFile = 0
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		fileTime = os.stat(dir_source + "/" + file).st_mtime
+		if (fileTime > latestSourceFile):
+			latestSourceFile = fileTime
+	for file in destFiles:
+		fileTime = os.stat(dir_dest + "/" + file).st_mtime
+		if (fileTime > latestDestFile):
+			latestDestFile = fileTime
+	if latestSourceFile > latestDestFile or len(sourceFiles) > len(destFiles):
+		printLog(log, "UPDATE; Source: " + str(latestSourceFile) + ", " + str(len(sourceFiles)) + " files; Dest: " + str(latestDestFile) + ", " + str(len(destFiles)) + " files")
+		return 1
+	else:
+		printLog(log, "SKIP *")
+		return 0
+
+def needUpdateDirNoSubdirLogExtMultidir(log, all_dir_base, all_dir_source, dir_source, ext_source, dir_dest, ext_dest):
+	latestSourceFile = 0
+	latestDestFile = 0
+	sourceFilesAll = [ ]
+	for dir in all_dir_source:
+		sourceFilesAll += findFilesNoSubdir(log, all_dir_base + "/" + dir, ext_source)
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		fileTime = os.stat(dir_source + "/" + file).st_mtime
+		if (fileTime > latestSourceFile):
+			latestSourceFile = fileTime
+	for file in destFiles:
+		fileTime = os.stat(dir_dest + "/" + file).st_mtime
+		if (fileTime > latestDestFile):
+			latestDestFile = fileTime
+	if latestSourceFile > latestDestFile or len(sourceFilesAll) > len(destFiles):
+		printLog(log, "UPDATE; Source: " + str(latestSourceFile) + ", " + str(len(sourceFilesAll)) + " files; Dest: " + str(latestDestFile) + ", " + str(len(destFiles)) + " files")
+		return 1
+	else:
+		printLog(log, "SKIP *")
+		return 0
+
 def findTool(log, dirs_where, file_name, suffix):
 	try:
 		for dir in dirs_where:

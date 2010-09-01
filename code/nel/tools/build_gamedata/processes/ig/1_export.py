@@ -46,38 +46,39 @@ printLog(log, "")
 Max = "" #find later
 
 
-def igExport(sourceDir, targetDir):
+def igExport(all_source_base, all_source_dir, sourceDir, targetDir):
 	scriptSrc = "maxscript/ig_export.ms"
 	scriptDst = MaxUserDirectory + "/scripts/ig_export.ms"
 	logFile = ScriptDirectory + "/processes/ig/log.log"
 	outDirTag = ExportBuildDirectory + "/" + IgStaticTagExportDirectory
 	outDirIg =  ExportBuildDirectory + "/" + targetDir
 	igSourceDir = DatabaseDirectory + "/" + sourceDir
-	tagList = findFiles(log, outDirTag, "", ".tag")
-	tagLen = len(tagList)
-	if os.path.isfile(scriptDst):
-		os.remove(scriptDst)
-	tagDiff = 1
-	sSrc = open(scriptSrc, "r")
-	sDst = open(scriptDst, "w")
-	for line in sSrc:
-		newline = line.replace("output_logfile", logFile)
-		newline = newline.replace("ig_source_directory", igSourceDir)
-		newline = newline.replace("output_directory_tag", outDirTag)
-		newline = newline.replace("output_directory_ig", outDirIg)
-		sDst.write(newline)
-	sSrc.close()
-	sDst.close()
-	while tagDiff > 0:
-		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "ig_export.ms", "-q", "-mi", "-vn" ])
+	if (needUpdateDirNoSubdirLogExtMultidir(log, all_source_base, all_source_dir, igSourceDir, ".max", outDirTag, ".max.tag")):
 		tagList = findFiles(log, outDirTag, "", ".tag")
-		newTagLen = len(tagList)
-		tagDiff = newTagLen - tagLen
-		tagLen = newTagLen
-		printLog(log, "Exported " + str(tagDiff) + " .max files!")
-	os.remove(scriptDst)
-	return
+		tagLen = len(tagList)
+		if os.path.isfile(scriptDst):
+			os.remove(scriptDst)
+		tagDiff = 1
+		sSrc = open(scriptSrc, "r")
+		sDst = open(scriptDst, "w")
+		for line in sSrc:
+			newline = line.replace("output_logfile", logFile)
+			newline = newline.replace("ig_source_directory", igSourceDir)
+			newline = newline.replace("output_directory_tag", outDirTag)
+			newline = newline.replace("output_directory_ig", outDirIg)
+			sDst.write(newline)
+		sSrc.close()
+		sDst.close()
+		while tagDiff > 0:
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "ig_export.ms", "-q", "-mi", "-vn" ])
+			tagList = findFiles(log, outDirTag, "", ".tag")
+			newTagLen = len(tagList)
+			tagDiff = newTagLen - tagLen
+			tagLen = newTagLen
+			printLog(log, "Exported " + str(tagDiff) + " .max files!")
+		os.remove(scriptDst)
+		return
 
 
 if MaxAvailable:
@@ -93,14 +94,14 @@ if MaxAvailable:
 	mkPath(log, ExportBuildDirectory + "/" + IgStaticLandExportDirectory)
 	for dir in IgLandSourceDirectories:
 		mkPath(log, DatabaseDirectory + "/" + dir)
-		igExport(dir, IgStaticLandExportDirectory)
+		igExport(DatabaseDirectory, IgLandSourceDirectories, dir, IgStaticLandExportDirectory)
 	
 	# Export ig other 3dsmax
 	printLog(log, ">>> Export ig other 3dsmax <<<")
 	mkPath(log, ExportBuildDirectory + "/" + IgStaticOtherExportDirectory)
 	for dir in IgOtherSourceDirectories:
 		mkPath(log, DatabaseDirectory + "/" + dir)
-		igExport(dir, IgStaticOtherExportDirectory)
+		igExport(DatabaseDirectory, IgOtherSourceDirectories, dir, IgStaticOtherExportDirectory)
 
 
 printLog(log, "")

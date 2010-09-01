@@ -49,14 +49,46 @@ printLog(log, "")
 
 # For each skel directory
 printLog(log, ">>> Export skel 3dsmax <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
 mkPath(log, ExportBuildDirectory + "/" + SkelExportDirectory)
 for dir in SkelSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-printLog(log, "")
+	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, SkelSourceDirectories, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + SkelExportDirectory, ".skel")):
+		scriptSrc = "maxscript/skel_export.ms"
+		scriptDst = MaxUserDirectory + "/scripts/skel_export.ms"
+		logFile = ScriptDirectory + "/processes/skel/log.log"
+		outDirSkel =  ExportBuildDirectory + "/" + SkelExportDirectory
+		skelSourceDir = DatabaseDirectory + "/" + dir
+		tagList = findFiles(log, outDirSkel, "", ".skel")
+		tagLen = len(tagList)
+		if os.path.isfile(scriptDst):
+			os.remove(scriptDst)
+		tagDiff = 1
+		sSrc = open(scriptSrc, "r")
+		sDst = open(scriptDst, "w")
+		for line in sSrc:
+			newline = line.replace("output_logfile", logFile)
+			newline = newline.replace("skel_source_directory", skelSourceDir)
+			newline = newline.replace("output_directory", outDirSkel)
+			sDst.write(newline)
+		sSrc.close()
+		sDst.close()
+		while tagDiff > 0:
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "skel_export.ms", "-q", "-mi", "-vn" ])
+			tagList = findFiles(log, outDirSkel, "", ".skel")
+			newTagLen = len(tagList)
+			tagDiff = newTagLen - tagLen
+			tagLen = newTagLen
+			printLog(log, "Exported " + str(tagDiff) + " .skel files!")
+		os.remove(scriptDst)
 
+printLog(log, ">>> Export skel directly <<<")
+mkPath(log, ExportBuildDirectory + "/" + SkelExportDirectory)
+for dir in SkelSourceDirectories:
+	mkPath(log, DatabaseDirectory + "/" + dir)
+	copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + SkelExportDirectory, ".skel")
+
+printLog(log, "")
 log.close()
 
 

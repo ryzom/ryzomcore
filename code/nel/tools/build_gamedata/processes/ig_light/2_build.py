@@ -56,7 +56,7 @@ else:
 	mkPath(log, srcDir)
 	destDir = ExportBuildDirectory + "/" + IgOtherLightedBuildDirectory
 	mkPath(log, destDir)
-	subprocess.call([ IgLighter, srcDir, destDir, ActiveProjectDirectory + "/generated/zone_lighter.cfg" ])
+	subprocess.call([ IgLighter, srcDir, destDir, ActiveProjectDirectory + "/generated/properties.cfg" ])
 printLog(log, "")
 
 log.close()

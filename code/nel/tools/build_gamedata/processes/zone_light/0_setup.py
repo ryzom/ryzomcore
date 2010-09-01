@@ -43,32 +43,6 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-mkPath(log, ActiveProjectDirectory + "/generated")
-zlp = open(ActiveProjectDirectory + "/generated/zone_lighter.cfg", "w")
-ps = open(ActiveProjectDirectory + "/zone_lighter_base.cfg", "r")
-for line in ps:
-	newline = line.replace("%ExportBuildDirectory%", ExportBuildDirectory)
-	newline = newline.replace("%SmallbankExportDirectory%", SmallbankExportDirectory)
-	newline = newline.replace("%FarbankBuildDirectory%", FarbankBuildDirectory)
-	newline = newline.replace("%EcosystemName%", EcosystemName)
-	newline = newline.replace("%EcosystemPath%", EcosystemPath)
-	newline = newline.replace("%BankTileBankName%", BankTileBankName)
-	newline = newline.replace("%IgLandBuildDirectory%", IgLandBuildDirectory)
-	newline = newline.replace("%IgOtherBuildDirectory%", IgOtherBuildDirectory)
-	newline = newline.replace("%RbankOutputBuildDirectory%", RbankOutputBuildDirectory)
-	newline = newline.replace("%RbankRbankName%", RbankRbankName)
-	newline = newline.replace("%BuildQuality%", str(BuildQuality))
-	zlp.write(newline)
-ps.close()
-if (BuildQuality == 1):
-	ps = open(ActiveProjectDirectory + "/zone_lighter_final.cfg", "r")
-else:
-	ps = open(ActiveProjectDirectory + "/zone_lighter_draft.cfg", "r")
-for line in ps:
-	zlp.write(line)
-zlp.close()
-printLog(log, "")
-
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
 for dir in WaterMapSourceDirectories:

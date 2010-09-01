@@ -27,6 +27,8 @@
 import time, sys, os, shutil, subprocess, distutils.dir_util
 sys.path.append("../../configuration")
 
+if os.path.isfile("log.log"):
+	os.remove("log.log")
 if os.path.isfile("temp_log.log"):
 	os.remove("temp_log.log")
 log = open("temp_log.log", "w")
@@ -70,7 +72,7 @@ if MaxAvailable:
 	logFile = ScriptDirectory + "/processes/shape/log.log"
 	outDirTag = ExportBuildDirectory + "/" + ShapeTagExportDirectory
 	mkPath(log, outDirTag)
-	outDirWithoutCoarse = ExportBuildDirectory + "/" + ShapeExportDirectory
+	outDirWithoutCoarse = ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory
 	mkPath(log, outDirWithoutCoarse)
 	outDirWithCoarse = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
 	mkPath(log, outDirWithCoarse)
@@ -137,10 +139,11 @@ if MaxAvailable:
 				printLog(log, "SKIP " + maxFilePath)
 	
 	# Export clod 3dsmax
-	printLog(log, ">>> Export character lod shape files (.clod) from Max <<<")
-	printLog(log, "********************************")
-	printLog(log, "********      TODO      ********")
-	printLog(log, "********************************")
+	# this is historical garbage, just use the clodbank process.. :-)
+	#printLog(log, ">>> Export character lod shape files (.clod) from Max <<<")
+	#printLog(log, "********************************")
+	#printLog(log, "********      TODO      ********")
+	#printLog(log, "********************************")
 	
 	# cat ../clodbank/maxscript/clod_export.ms 
 	#| sed -e "s&shape_source_directory&$database_directory/$i&g" 

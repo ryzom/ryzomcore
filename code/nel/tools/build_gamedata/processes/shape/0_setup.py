@@ -53,13 +53,16 @@ for dir in MapSourceDirectories:
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + ShapeTagExportDirectory)
-mkPath(log, ExportBuildDirectory + "/" + ShapeExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory)
+if ClodConfigFile != "":
+	mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)

@@ -37,7 +37,7 @@ ProcessToComplete += [ "displace" ] # OK
 ProcessToComplete += [ "veget" ] # OK
 ProcessToComplete += [ "vegetset" ] # OK
 ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process, but does not export max files
-##ProcessToComplete += [ "pacs_prim" ]
+ProcessToComplete += [ "pacs_prim" ]
 
 # *** MAP EXPORT OPTIONS ***
 PanoplyFileList = [ ]
@@ -110,3 +110,6 @@ ReduceBitmapFactor = 0
 
 DoBuildShadowSkin = False
 ClodConfigFile = ""
+
+# *** PACS_PRIM OPTIONS ***
+WantLandscapeColPrimPacsList = True

@@ -56,7 +56,12 @@ else:
 	mkPath(log, srcDir)
 	destDir = ExportBuildDirectory + "/" + AnimBuildDirectory
 	mkPath(log, destDir)
-	subprocess.call([ AnimBuilder, srcDir, destDir, ScriptDirectory + "/configuration/zone_lighter_properties.cfg" ])
+	if DoOptimizeAnimations:
+		printLog(log, ">>> Optimizing animations <<<")
+		subprocess.call([ AnimBuilder, srcDir, destDir, ActiveProjectDirectory + "/anim_builder.cfg" ])
+	else:
+		printLog(log, ">>> Not optimizing animations <<<")
+		copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 printLog(log, "")
 
 log.close()

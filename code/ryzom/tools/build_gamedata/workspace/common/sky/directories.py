@@ -27,10 +27,17 @@
 # 
 
 
-# *** COMMON PATH ***
+# *** COMMON NAMES AND PATHS ***
+EcosystemName = "sky"
+EcosystemPath = "common/" + EcosystemName
+ContinentName = EcosystemName
+ContinentPath = EcosystemPath
+CommonName = ContinentName
+CommonPath = ContinentPath
 
-CommonName = "sky"
-CommonPath = "common/" + CommonName
+
+# *** SOURCE DIRECTORIES LEVELDESIGN/WORLD ***
+ContinentLeveldesignWorldDirectory = "" # DISABLED
 
 
 # *** SOURCE DIRECTORIES IN THE DATABASE ***
@@ -54,11 +61,20 @@ MapUncompressedSourceDirectories += [ "sky_v2/textures/setup/jungle" ]
 MapUncompressedSourceDirectories += [ "sky_v2/textures/setup/lacustre" ]
 MapUncompressedSourceDirectories += [ "sky_v2/textures/textures/nodds" ]
 
+# Ligo directories
+LigoBaseSourceDirectory = "landscape/ligo"
+
 # Ig directories
 IgLandSourceDirectories = [ ]
 IgOtherSourceDirectories = [ ]
 IgOtherSourceDirectories += [ "sky_v2/max" ]
 IgPrimitiveSourceDirectories = [ ]
+
+# Tiles root directory
+TileRootSourceDirectory = "landscape/_texture_tiles"
+
+# Displace directory
+DisplaceSourceDirectory = "landscape/_texture_tiles/displace"
 
 # Animation directories
 AnimSourceDirectories = [ ]
@@ -69,7 +85,7 @@ AnimSourceDirectories += [ "sky_v2/max" ]
 
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
-ShapeExportDirectory = CommonPath + "/shape"
+ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"
 ShapeWithCoarseMeshExportDirectory = CommonPath + "/shape_with_coarse_mesh"
 ShapeLightmapNotOptimizedExportDirectory = CommonPath + "/shape_lightmap_not_optimized"
 ShapeAnimExportDirectory = CommonPath + "/shape_anim"
@@ -79,6 +95,17 @@ IgStaticLandExportDirectory = CommonPath + "/ig_static_land" # Landscape IG epor
 IgStaticOtherExportDirectory = CommonPath + "/ig_static_other" # Village or construction IGs exported from 3dsmax
 IgStaticTagExportDirectory = CommonPath + "/ig_static_tag" # Tag for exported 3dsmax files
 
+# Zone directories
+ZoneWeldBuildDirectory = CommonPath + "/zone_weld"
+ZoneDependBuildDirectory = CommonPath + "/zone_depend"
+ZoneLightWaterShapesLightedExportDirectory = CommonPath + "/zone_lwsl_temp" #fixme
+ZoneLightBuildDirectory = CommonPath + "/zone_lighted" #fixme
+ZoneLightDependBuildDirectory = CommonPath + "/zone_lighted_depend" #fixme
+ZoneLightIgLandBuildDirectory = CommonPath + "/zone_lighted_ig_land" #fixme
+
+# Animation directories
+AnimExportDirectory = CommonPath + "/anim_export"
+
 
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***
 
@@ -87,6 +114,7 @@ MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
 
 # Shape directories
+ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
 ShapeWithCoarseMeshBuildDirectory = CommonPath + "/shape_with_coarse_mesh_builded"
 ShapeLightmapBuildDirectory = CommonPath + "/shape_lightmap"
 ShapeLightmap16BitsBuildDirectory = CommonPath + "/shape_lightmap_16_bits"
@@ -101,13 +129,22 @@ IgLandBuildDirectory = CommonPath + "/ig_land" # Final IG directory for landscap
 IgOtherBuildDirectory = CommonPath + "/ig_other" # Final IG directory for village or construction IGs
 IgOtherLightedBuildDirectory = CommonPath + "/ig_other_lighted"
 
+# Farbank directories
+FarbankBuildDirectory = CommonPath + "/farbank"
+
+# Ligo directories
+LigoZoneBuildDirectory = CommonPath + "/ligo_zones"
+LigoIgLandBuildDirectory = CommonPath + "/ligo_ig_land" # Landscape IG found in ligo bricks not elevated by the heightmap
+LigoIgOtherBuildDirectory = CommonPath + "/ligo_ig_other" # Village or construction IGs exported from ligo landscape
+
+# Animation directories
+AnimBuildDirectory = CommonPath + "/anim"
+
 
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Map directory
 MapClientDirectory = CommonName
-
-# Map directory
 BitmapClientDirectory = MapClientDirectory
 
 # Shape directory

@@ -30,6 +30,16 @@
 ProcessToComplete = [ ]
 ProcessToComplete += [ "interface" ]
 
+
+# *** COMMON NAMES AND PATHS ***
+EcosystemName = "interface"
+EcosystemPath = "common/" + EcosystemName
+ContinentName = EcosystemName
+ContinentPath = EcosystemPath
+CommonName = ContinentName
+CommonPath = ContinentPath
+
+
 # *** MAPS OPTIONS ***
 
 ReduceBitmapFactor = 0

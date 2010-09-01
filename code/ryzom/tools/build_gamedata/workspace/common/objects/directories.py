@@ -60,7 +60,7 @@ MapUncompressedSourceDirectories = [ ]
 
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
-ShapeExportDirectory = CommonPath + "/shape"
+ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"
 ShapeWithCoarseMeshExportDirectory = CommonPath + "/shape_with_coarse_mesh"
 ShapeLightmapNotOptimizedExportDirectory = CommonPath + "/shape_lightmap_not_optimized"
 ShapeAnimExportDirectory = CommonPath + "/shape_anim"
@@ -73,6 +73,7 @@ MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
 
 # Shape directories
+ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
 ShapeWithCoarseMeshBuildDirectory = CommonPath + "/shape_with_coarse_mesh_builded"
 ShapeLightmapBuildDirectory = CommonPath + "/shape_lightmap"
 ShapeLightmap16BitsBuildDirectory = CommonPath + "/shape_lightmap_16_bits"

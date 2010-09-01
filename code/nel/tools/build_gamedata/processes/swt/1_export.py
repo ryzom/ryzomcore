@@ -49,14 +49,40 @@ printLog(log, "")
 
 # For each swt directory
 printLog(log, ">>> Export skeleton weigths 3dsmax <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
 mkPath(log, ExportBuildDirectory + "/" + SwtExportDirectory)
 for dir in SwtSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-printLog(log, "")
+	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, SwtSourceDirectories, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + SwtExportDirectory, ".swt")):
+		scriptSrc = "maxscript/swt_export.ms"
+		scriptDst = MaxUserDirectory + "/scripts/swt_export.ms"
+		logFile = ScriptDirectory + "/processes/swt/log.log"
+		outDirSwt =  ExportBuildDirectory + "/" + SwtExportDirectory
+		swtSourceDir = DatabaseDirectory + "/" + dir
+		tagList = findFiles(log, outDirSwt, "", ".swt")
+		tagLen = len(tagList)
+		if os.path.isfile(scriptDst):
+			os.remove(scriptDst)
+		tagDiff = 1
+		sSrc = open(scriptSrc, "r")
+		sDst = open(scriptDst, "w")
+		for line in sSrc:
+			newline = line.replace("output_logfile", logFile)
+			newline = newline.replace("swt_source_directory", swtSourceDir)
+			newline = newline.replace("output_directory", outDirSwt)
+			sDst.write(newline)
+		sSrc.close()
+		sDst.close()
+		while tagDiff > 0:
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "swt_export.ms", "-q", "-mi", "-vn" ])
+			tagList = findFiles(log, outDirSwt, "", ".swt")
+			newTagLen = len(tagList)
+			tagDiff = newTagLen - tagLen
+			tagLen = newTagLen
+			printLog(log, "Exported " + str(tagDiff) + " .swt files!")
+		os.remove(scriptDst)
 
+printLog(log, "")
 log.close()
 
 

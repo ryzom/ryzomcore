@@ -26,11 +26,32 @@
 
 
 ProjectsToProcess = [ ]
+
+# Common projects
+ProjectsToProcess += [ "common/fonts" ]
 ProjectsToProcess += [ "common/interface" ]
 ProjectsToProcess += [ "common/objects" ]
-ProjectsToProcess += [ "common/sky" ]
+ProjectsToProcess += [ "common/sfx" ]
+ProjectsToProcess += [ "common/fauna" ]
+
+# Ecosystem projects
 ProjectsToProcess += [ "ecosystems/jungle" ]
+
+# Continent projects
 ProjectsToProcess += [ "continents/newbieland" ]
+
+# Common projects depending on continent projects
+ProjectsToProcess += [ "common/construction" ] # Depends on jungle/newbieland due to ig_light tool usage of properties.cfg...
+ProjectsToProcess += [ "common/outgame" ] # Depends on jungle/newbieland due to ig_light tool usage of properties.cfg...
+ProjectsToProcess += [ "common/sky" ] # Depends on jungle/newbieland due to ig_light tool usage of properties.cfg...
+
+# TODO
+#ProjectsToProcess += [ "common/characters" ] # TODO
+#ProjectsToProcess += [ "common/characters_maps_hr" ] # TODO
+#ProjectsToProcess += [ "common/characters_maps_lr" ] # TODO
+#ProjectsToProcess += [ "ecosystems/desert" ] # TODO
+#ProjectsToProcess += [ "ecosystems/lacustre" ] # TODO
+#ProjectsToProcess += [ "ecosystems/primes_racines" ] # TODO
 
 
 # end of file

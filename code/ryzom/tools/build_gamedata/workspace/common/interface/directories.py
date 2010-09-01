@@ -26,9 +26,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-# *** COMMON PATH ***
 
-CommonPath = "common/interface"
+# *** COMMON NAMES AND PATHS ***
+EcosystemName = "interface"
+EcosystemPath = "common/" + EcosystemName
+ContinentName = EcosystemName
+ContinentPath = EcosystemPath
+CommonName = ContinentName
+CommonPath = ContinentPath
+
 
 # *** SOURCE DIRECTORIES IN THE DATABASE ***
 

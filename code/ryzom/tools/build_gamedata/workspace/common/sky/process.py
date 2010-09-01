@@ -26,13 +26,24 @@
 
 # *** PROCESS CONFIGURATION ***
 
+
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
+ProcessToComplete += [ "properties" ]
 ProcessToComplete += [ "shape" ]
 ProcessToComplete += [ "map" ]
-#ProcessToComplete += [ "anim" ]
-#ProcessToComplete += [ "ig" ]
-#ProcessToComplete += [ "ig_light" ]
+ProcessToComplete += [ "anim" ]
+ProcessToComplete += [ "ig" ]
+ProcessToComplete += [ "ig_light" ]
+
+
+# *** COMMON NAMES AND PATHS ***
+EcosystemName = "sky"
+EcosystemPath = "common/" + EcosystemName
+ContinentName = EcosystemName
+ContinentPath = EcosystemPath
+CommonName = ContinentName
+CommonPath = ContinentPath
 
 
 # *** SHAPE EXPORT OPTIONS ***
@@ -65,8 +76,10 @@ DoBuildShadowSkin = 0
 
 ClodConfigFile = ""
 
+
 # *** COARSE MESH TEXTURE NAME ***
 CoarseMeshTextureNames = [ ]
+
 
 # *** POSTFIX USED BY THE MULTIPLE TILES SYSTEM ***
 MultipleTilesPostfix = [ ]
@@ -75,6 +88,30 @@ MultipleTilesPostfix += [ "_su" ]
 MultipleTilesPostfix += [ "_au" ]
 MultipleTilesPostfix += [ "_wi" ]
 
+# Name of the tilebank to use
+BankTileBankName = ""
+
+
+# *** LANDSCAPE NAME ***
+LandscapeName = ContinentName
+
+
+# *** LIGO OPTIONS ***
+LigoExportLand = ""
+LigoExportOnePass = 0
+LigoExportColormap = "colormap_invalid.png"
+LigoExportHeightmap1 = "big_invalid.png"
+LigoExportZFactor1 = "1.0"
+LigoExportHeightmap2 = "noise_invalid.png"
+LigoExportZFactor2 = "0.5"
+LigoTileBankFile = "landscape/_texture_tiles/jungle/jungle.bank"
+
+
 # *** MAPS OPTIONS ***
 
 ReduceBitmapFactor = 0
+
+
+# *** ANIMATIONS OPTIONS ***
+
+DoOptimizeAnimations = 0

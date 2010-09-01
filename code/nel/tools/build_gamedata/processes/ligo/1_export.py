@@ -62,40 +62,40 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory)
 	mkPath(log, ExportBuildDirectory + "/" + LigoTagExportDirectory)
-	printLog(log, "WRITE " + ligoIniPath)
-	ligoIni = open(ligoIniPath, "w")
-	ligoIni.write("[LigoConfig]\n")
-	ligoIni.write("LigoPath=" + DatabaseDirectory + "/" + LigoMaxSourceDirectory + "/\n")
-	ligoIni.write("LigoExportPath=" + DatabaseDirectory + "/" + LigoDatabaseExportDirectory + "/\n")
-	ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory + "/\n")
-	ligoIni.close()
-	
-	outDirTag = ExportBuildDirectory + "/" + LigoTagExportDirectory
-	logFile = ScriptDirectory + "/processes/ligo/log.log"
-	smallBank = ExportBuildDirectory + "/" + SmallbankExportDirectory + "/" + BankTileBankName + ".smallbank"
-	
-	scriptSrc = "maxscript/nel_ligo_export.ms"
-	scriptDst = MaxUserDirectory + "/scripts/nel_ligo_export.ms"
-	
-	if os.path.isfile(scriptDst):
+	if (needUpdateDirNoSubdirLogExt(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoTagExportDirectory, ".max.tag")):
+		printLog(log, "WRITE " + ligoIniPath)
+		ligoIni = open(ligoIniPath, "w")
+		ligoIni.write("[LigoConfig]\n")
+		ligoIni.write("LigoPath=" + DatabaseDirectory + "/" + LigoMaxSourceDirectory + "/\n")
+		ligoIni.write("LigoExportPath=" + DatabaseDirectory + "/" + LigoDatabaseExportDirectory + "/\n")
+		ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory + "/\n")
+		ligoIni.close()
+		
+		outDirTag = ExportBuildDirectory + "/" + LigoTagExportDirectory
+		logFile = ScriptDirectory + "/processes/ligo/log.log"
+		smallBank = ExportBuildDirectory + "/" + SmallbankExportDirectory + "/" + BankTileBankName + ".smallbank"
+		
+		scriptSrc = "maxscript/nel_ligo_export.ms"
+		scriptDst = MaxUserDirectory + "/scripts/nel_ligo_export.ms"
+		
+		if os.path.isfile(scriptDst):
+			os.remove(scriptDst)
+		
+		printLog(log, "WRITE " + scriptDst)
+		sSrc = open(scriptSrc, "r")
+		sDst = open(scriptDst, "w")
+		for line in sSrc:
+			newline = line.replace("output_logfile", logFile)
+			newline = newline.replace("output_directory_tag", outDirTag)
+			newline = newline.replace("bankFilename", smallBank)
+			sDst.write(newline)
+		sSrc.close()
+		sDst.close()
+		
+		printLog(log, "MAXSCRIPT " + scriptDst)
+		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-vn" ])
+		
 		os.remove(scriptDst)
-	
-	printLog(log, "WRITE " + scriptDst)
-	sSrc = open(scriptSrc, "r")
-	sDst = open(scriptDst, "w")
-	for line in sSrc:
-		newline = line.replace("output_logfile", logFile)
-		newline = newline.replace("output_directory_tag", outDirTag)
-		newline = newline.replace("bankFilename", smallBank)
-		sDst.write(newline)
-	sSrc.close()
-	sDst.close()
-	
-	printLog(log, "MAXSCRIPT " + scriptDst)
-	subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-vn" ])
-	
-	os.remove(scriptDst)
-	
 	printLog(log, "")
 
 log.close()

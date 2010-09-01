@@ -84,7 +84,7 @@ try
 
 					-- Open the max project
 					nlerror ("Scanning file "+files[i]+" ...")
-					if loadMaxFile files[i] == true then
+					if (loadMaxFile files[i] quiet:true) == true then
 					(
 						-- Unhide category
 						unhidecategory()

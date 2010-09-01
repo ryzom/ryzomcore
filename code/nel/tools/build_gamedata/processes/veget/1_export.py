@@ -69,19 +69,20 @@ if MaxAvailable:
 	for dir in VegetSourceDirectories:
 		vegetSourceDir = DatabaseDirectory + "/" + dir
 		mkPath(log, vegetSourceDir)
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("veget_source_directory", vegetSourceDir)
-			newline = newline.replace("output_directory_veget", outputDirVeget)
-			newline = newline.replace("output_directory_tag", outputDirTag)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "veget_export.ms", "-q", "-mi", "-vn" ])
-		os.remove(scriptDst)
+		if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, VegetSourceDirectories, vegetSourceDir, ".max", outputDirTag, ".max.tag")):
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("output_logfile", logFile)
+				newline = newline.replace("veget_source_directory", vegetSourceDir)
+				newline = newline.replace("output_directory_veget", outputDirVeget)
+				newline = newline.replace("output_directory_tag", outputDirTag)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "veget_export.ms", "-q", "-mi", "-vn" ])
+			os.remove(scriptDst)
 
 printLog(log, "")
 
