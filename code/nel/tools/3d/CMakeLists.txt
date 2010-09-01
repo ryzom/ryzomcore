@@ -25,7 +25,6 @@ SUBDIRS(	build_coarse_mesh
 IF(WIN32) 
   ADD_SUBDIRECTORY(object_viewer)
   ADD_SUBDIRECTORY(object_viewer_exe)
-  ADD_SUBDIRECTORY(panoply_maker)
   ADD_SUBDIRECTORY(tile_edit)
 ENDIF(WIN32)
 
@@ -41,6 +40,7 @@ IF(WITH_MAXPLUGIN)
 ENDIF(WITH_MAXPLUGIN)
 
 IF(SQUISH_FOUND)
+  ADD_SUBDIRECTORY(panoply_maker)
   ADD_SUBDIRECTORY(tga_2_dds)
 ENDIF(SQUISH_FOUND)
 

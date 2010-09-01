@@ -10,5 +10,7 @@ TARGET_LINK_LIBRARIES(build_rbank ${PLATFORM_LINKFLAGS} nelpacs nel3d nelligo ne
 NL_DEFAULT_PROPS(build_rbank "Tools, PACS: build_rbank")
 NL_ADD_RUNTIME_FLAGS(build_rbank)
 
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
 INSTALL(TARGETS build_rbank RUNTIME DESTINATION bin COMPONENT toolspacs)
 INSTALL(FILES build_rbank.cfg DESTINATION etc/nel COMPONENT toolspacs)
