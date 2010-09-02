@@ -305,6 +305,8 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_INPUTLANGCHANGE:
 		if ( _IMEEventsEnabled )
 		{
+			// wParam = Specifies the character set of the new locale. 
+			// lParam = Input locale identifier.
 			server->postEvent( new CEventIME( msg, (uint32)wParam, (uint32)lParam, this ) );
 			return true; // trap message
 		}

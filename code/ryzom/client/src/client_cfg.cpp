@@ -298,7 +298,7 @@ CClientConfig::CClientConfig()
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
-	
+
 #if 1 // Yubo hack
 	// The order is important here, because in a layer, global texture are rendered through this order
 	TexturesInterface.push_back("texture_interfaces_v3");
@@ -306,15 +306,15 @@ CClientConfig::CClientConfig()
 	TexturesInterface.push_back("new_texture_interfaces_dxtc");
 	// Added icons by Yubo's Team 2009
 	TexturesInterface.push_back("texture_extra");
-#else	
+#else
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
 #endif
-	
+
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
-	
+
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
-	
+
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
@@ -2034,7 +2034,7 @@ void CClientConfig::init(const string &configFileName)
 	{
 		std::string defaultConfigFileName = "client_default.cfg";
 		bool found = false;
- 
+
 		if (CFile::isExists(defaultConfigFileName)) found = true;
 
 #ifdef RYZOM_ETC_PREFIX
