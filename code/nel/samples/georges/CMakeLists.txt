@@ -6,7 +6,7 @@ ADD_DEFINITIONS(-DGF_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_georges/\\"")
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nl_sample_georges ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelgeorges nelmisc)
-NL_DEFAULT_PROPS(nl_sample_georges "Samples: Georges")
+NL_DEFAULT_PROPS(nl_sample_georges "NeL, Samples: Georges")
 NL_ADD_RUNTIME_FLAGS(nl_sample_georges)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})

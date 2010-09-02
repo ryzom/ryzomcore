@@ -1,6 +1,6 @@
 # These are Windows/MFC apps
 IF(WIN32)
-  ADD_SUBDIRECTORY(bug_report)
+#  ADD_SUBDIRECTORY(bug_report)
   SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 ENDIF(WIN32)
 
@@ -29,9 +29,9 @@ LIST(REMOVE_ITEM SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
 
 # On Unix we'll need to include config.h
-IF(UNIX)
-  INCLUDE(${CMAKE_BINARY_DIR})
-ENDIF(UNIX)
+#IF(UNIX)
+#  INCLUDE(${CMAKE_BINARY_DIR})
+#ENDIF(UNIX)
 
 # on Mac, create a .App Bundle
 if(APPLE)
@@ -64,28 +64,27 @@ ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
 			${LIBXML2_INCLUDE_DIR}
-			${NEL_INCLUDE_DIR}
 			${LUA_INCLUDE_DIR}
 			${LIBWWW_INCLUDE_DIR}
 			${CURL_INCLUDE_DIRS}
 			${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
-				${LIBXML2_LIBRARIES}
-				${NELMISC_LIBRARY}
+				nelmisc
+				nelnet
+				nelligo
+				nelgeorges
+				nel3d
+				nelsound
+				nelsnd_lowlevel
+				ryzom_clientsheets
 				ryzom_gameshare
-				${NELNET_LIBRARY}
-				${NELLIGO_LIBRARY}
-				${NELGEORGES_LIBRARY}
-				${NEL3D_LIBRARY}
+				nelpacs
 				${LUA_LIBRARIES}
 				${CURL_LIBRARIES}
-				${NELSOUND_LIBRARY}
-				${NELSNDDRV_LIBRARY}
-				ryzom_clientsheets
-				${NELPACS_LIBRARY}
 				${LIBWWW_LIBRARY}
 				${SEVENZIP_LIBRARY}
+				${LIBXML2_LIBRARIES}
 				luabind # TODO: find luabind and expat cleanly using a find script
 				expat)
 
@@ -95,8 +94,11 @@ ENDIF(NOT APPLE AND NOT WIN32)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
+NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Core Client")
+NL_ADD_RUNTIME_FLAGS(ryzom_client)
+
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
 ENDIF(WITH_PCH)
 
-INSTALL(TARGETS ryzom_client RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
+INSTALL(TARGETS ryzom_client RUNTIME DESTINATION games COMPONENT client BUNDLE DESTINATION /Applications)

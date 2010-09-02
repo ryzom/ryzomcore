@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_log ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nl_sample_log ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc)
-NL_DEFAULT_PROPS(nl_sample_log "Samples, Misc: Logging")
+NL_DEFAULT_PROPS(nl_sample_log "NeL, Samples, Misc: Logging")
 NL_ADD_RUNTIME_FLAGS(nl_sample_log)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})

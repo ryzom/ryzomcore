@@ -2,23 +2,11 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_LIBRARY(ai_share STATIC ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(ai_share	ryzom_gameshare
-				server_share
-				${NELMISC_LIBRARY} 
-				${NELNET_LIBRARY} 
-				${NELGEORGES_LIBRARY} 
-				${NELPACS_LIBRARY})
-SET_TARGET_PROPERTIES(ai_share PROPERTIES VERSION ${NL_VERSION})
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(ai_share ryzom_gameshare server_share nelmisc nelnet nelgeorges nelpacs)
 
-IF(WIN32)
-  SET_TARGET_PROPERTIES(ai_share 
-		PROJECT_LABEL "Library: AI Share"
-		DEBUG_POSTFIX "_d"
-		RELEASE_POSTFIX "_r"
-		LINK_FLAGS_DEBUG "/NODEFAULTLIB:libc;libcmt;libcmtd;msvcrt"
-		LINK_FLAGS_RELEASE "/NODEFAULTLIB:libc;libcmt;libcmtd;msvcrtd")
-ENDIF(WIN32)
+NL_DEFAULT_PROPS(ai_share "Ryzom, Library: AI Shared")
+NL_ADD_LIB_SUFFIX(ai_share)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 

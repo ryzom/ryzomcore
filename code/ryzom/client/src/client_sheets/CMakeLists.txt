@@ -3,26 +3,11 @@ FILE(GLOB PRIV_H *.h)
 
 SOURCE_GROUP(headers FILES ${PRIV_H} ${PUB_H})
 
+NL_TARGET_LIB(ryzom_clientsheets ${SRC} ${PRIV_H})
 
-IF(NOT WIN32)
-  ADD_LIBRARY(ryzom_clientsheets SHARED ${SRC})
-ELSE(NOT WIN32)
-  ADD_LIBRARY(ryzom_clientsheets STATIC ${SRC})
-ENDIF(NOT WIN32)
-
-INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(ryzom_clientsheets ryzom_gameshare ${NELMISC_LIBRARY})
-SET_TARGET_PROPERTIES(ryzom_clientsheets PROPERTIES
-  VERSION ${NL_VERSION}
-  SOVERSION ${NL_VERSION_MAJOR})
-
-IF(WIN32)
-  SET_TARGET_PROPERTIES(ryzom_clientsheets
-		PROJECT_LABEL "Library: Client Sheets"
-		DEBUG_POSTFIX "_d"
-		RELEASE_POSTFIX "_r"
-		LINK_FLAGS_DEBUG "/NODEFAULTLIB:msvcrt")
-ENDIF(WIN32)
+TARGET_LINK_LIBRARIES(ryzom_clientsheets ryzom_gameshare nelmisc)
+NL_DEFAULT_PROPS(ryzom_clientsheets "Ryzom, Library: Client Sheets")
+NL_ADD_LIB_SUFFIX(ryzom_clientsheets)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_clientsheets ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)

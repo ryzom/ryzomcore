@@ -1,4 +1,4 @@
-SUBDIRS(misc)
+ADD_SUBDIRECTORY(misc)
 
 IF(WITH_3D)
   SUBDIRS(3d)

@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_shapeview WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nl_sample_shapeview ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nel3d)
-NL_DEFAULT_PROPS(nl_sample_shapeview "Samples, 3D: Font")
+NL_DEFAULT_PROPS(nl_sample_shapeview "NeL, Samples, 3D: Font")
 NL_ADD_RUNTIME_FLAGS(nl_sample_shapeview)
 
 IF(WIN32)

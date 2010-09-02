@@ -1,15 +1,11 @@
 INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR}/tools/3d/tile_edit_qt/ )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/tools/3d/tile_edit_qt/ )
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/)
 INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB TILE_EDIT_SRC *.cpp pic/*.c pic/*.cpp)
 SET(TILE_EDIT_HDR items_edit_dlg.h tile_browser_dlg.h tile_edit_dlg.h tile_rotation_dlg.h tiles_model.h tile_widget.h)
 SET(TILE_EDIT_UIS tile_widget_qt.ui tile_rotation_qt.ui tile_edit_qt.ui tile_browser_qt.ui items_edit_qt.ui)
 SET(TILE_EDIT_RCS tile_edit_qt.qrc)
-
-
-SET( QT_USE_QT3SUPPORT TRUE)
-SET( QT_USE_QTXML TRUE)
 
 QT4_ADD_RESOURCES( TILE_EDIT_RC_SRCS ${TILE_EDIT_RCS} )
 QT4_WRAP_UI( TILE_EDIT_UI_HDRS ${TILE_EDIT_UIS} )
