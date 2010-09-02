@@ -493,6 +493,9 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 			CSoundTravContext &travContext = curClusters.back().second;
 
 			CClusterSoundStatus css;
+			css.DistFactor = 0.0f;
+			css.Position = CVector::Null;
+			css.PosAlpha = 0.0f;
 			css.Gain = travContext.Gain;
 			css.Dist = travContext.Dist;
 			css.Direction = travContext.Direction;
