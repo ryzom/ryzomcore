@@ -4,7 +4,7 @@ ADD_EXECUTABLE(ig_elevation ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(ig_elevation ${PLATFORM_LINKFLAGS} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(ig_elevation ${PLATFORM_LINKFLAGS} nelmisc nel3d nelligo)
 NL_DEFAULT_PROPS(ig_elevation "Tools, 3D: ig_elevation")
 NL_ADD_RUNTIME_FLAGS(ig_elevation)
 

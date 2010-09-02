@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ig_add ${SRC})
 
-TARGET_LINK_LIBRARIES(ig_add ${PLATFORM_LINKFLAGS} nel3d)
+TARGET_LINK_LIBRARIES(ig_add ${PLATFORM_LINKFLAGS} nel3d nelmisc)
 NL_DEFAULT_PROPS(ig_add "Tools, 3D: ig_add")
 NL_ADD_RUNTIME_FLAGS(ig_add)
 
