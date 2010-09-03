@@ -1,3 +1,5 @@
+SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Supporting modules and libraries.
 ADD_SUBDIRECTORY(admin_modules)
 ADD_SUBDIRECTORY(server_share)
