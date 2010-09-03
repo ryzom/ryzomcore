@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export veget
-# \date 2010-05-24 08:13GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export veget
@@ -43,49 +47,56 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+
+# Find tools
+# ...
+
+# Export veget 3dsmax
 if MaxAvailable:
 	# Find tools
 	Max = findMax(log, MaxDirectory, MaxExecutable)
-	ExecTimeout = findTool(log, ToolDirectories, ExecTimeoutTool, ToolSuffix)
 	printLog(log, "")
 	
-	# Export veget 3dsmax	
 	printLog(log, ">>> Export veget 3dsmax <<<")
-	
-	# Build paths
-	scriptSrc = "maxscript/veget_export.ms"
-	# scriptDst = MaxDirectory + "/scripts/veget_export.ms"
-	scriptDst = MaxUserDirectory + "/scripts/veget_export.ms"
-	logFile = ScriptDirectory + "/processes/veget/log.log"
-	outputDirVeget = ExportBuildDirectory + "/" + VegetExportDirectory
-	mkPath(log, outputDirVeget)
-	outputDirTag = ExportBuildDirectory + "/" + VegetTagExportDirectory
-	mkPath(log, outputDirTag)
-
-	# For each directoy
 	mkPath(log, ExportBuildDirectory + "/" + VegetExportDirectory)
-	if os.path.isfile(scriptDst):
-		os.remove(scriptDst)
+	mkPath(log, ExportBuildDirectory + "/" + VegetTagExportDirectory)
 	for dir in VegetSourceDirectories:
-		vegetSourceDir = DatabaseDirectory + "/" + dir
-		mkPath(log, vegetSourceDir)
-		if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, VegetSourceDirectories, vegetSourceDir, ".max", outputDirTag, ".max.tag")):
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + VegetTagExportDirectory, ".max.tag")):
+			scriptSrc = "maxscript/veget_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/veget_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/veget/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + VegetExportDirectory
+			tagDirectory =  ExportBuildDirectory + "/" + VegetTagExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, tagDirectory, "", ".max.tag")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
 			sSrc = open(scriptSrc, "r")
 			sDst = open(scriptDst, "w")
 			for line in sSrc:
-				newline = line.replace("output_logfile", logFile)
-				newline = newline.replace("veget_source_directory", vegetSourceDir)
-				newline = newline.replace("output_directory_veget", outputDirVeget)
-				newline = newline.replace("output_directory_tag", outputDirTag)
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				newline = newline.replace("%TagDirectory%", tagDirectory)
 				sDst.write(newline)
 			sSrc.close()
 			sDst.close()
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "veget_export.ms", "-q", "-mi", "-vn" ])
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "veget_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, tagDirectory, "", ".max.tag")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .max files!")
 			os.remove(scriptDst)
 
-printLog(log, "")
 
+
+printLog(log, "")
 log.close()
 
 

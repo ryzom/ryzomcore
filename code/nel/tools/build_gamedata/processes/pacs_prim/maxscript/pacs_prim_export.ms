@@ -1,8 +1,14 @@
 
+
+-- #################################################################
+-- ## WARNING : this is a generated file, don't change it !
+-- #################################################################
+
+
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
@@ -55,107 +61,124 @@ fn nlerror message =
 	print message
 )
 
+
+
+fn runNelMaxExport inputMaxFile = 
+(
+	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".pacs_prim")
+	tagThisFile = false
+	
+	-- Unhide category
+	unhidecategory()
+	
+	-- Select none
+	max select none
+	
+	-- Select all PACS primitives
+	for i in geometry do
+	(
+		if ((classof i) == nel_pacs_cylinder) or ((classof i) == nel_pacs_box) then
+			selectmore i
+	)
+	
+	-- Array of node
+	arrayNode = selection as array
+	
+	-- Something to export ?
+	if (arrayNode.count != 0) then
+	(
+		-- Export the collision
+		if (NelExportPACSPrimitives arrayNode outputNelFile) == false then
+		(
+			nlerror("ERROR exporting PACS primitives in file " + inputMaxFile)
+			tagThisFile = false
+		)
+		else
+		(
+			nlerror("OK PACS primitives in file " + inputMaxFile)
+			tagThisFile = true
+		)
+	)
+	else
+	(
+		nlerror("WARNING no PACS primitives in file " + inputMaxFile)
+		tagThisFile = true
+	)
+	
+	return tagThisFile
+)
+
+
+
 try
 (
-	-- Get files in the "pacs_prim_source_directory" directory
-	files = getFiles "pacs_prim_source_directory/*.max" 
-	gc ()
-
+	-- Get files in the %MaxSourceDirectory% directory
+	files = getFiles "%MaxSourceDirectory%/*.max" 
+	gc()
+	
 	-- Sort files
 	sort files
-	gc ()
-
+	gc()
+	
 	-- No file ?
 	if files.count != 0 then
 	(
 		-- For each files
 		for i = 1 to files.count do
 		(
+			inputMaxFile = files[i]
+			outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".pacs_prim")
+			
 			try
 			(
-				-- Output file
-				output = "output_directory/" + (getFilenameFile files[i]) + ".pacs_prim"
-
 				-- Compare file date
-				if (NeLTestFileDate output files[i]) == true then
+				if (NeLTestFileDate outputNelFile inputMaxFile) == true then
 				(
 					-- Free memory and file handles
-					gc ()
+					gc()
 					heapfree
-
+					
 					-- Reset 3dsmax
 					resetMAXFile #noprompt
-
+					
 					-- Open the max project
-					nlerror ("Scanning file "+files[i]+" ...")
-					if (loadMaxFile files[i] quiet:true) == true then
+					nlerror("Scanning file " + inputMaxFile + " ...")
+					if (loadMaxFile inputMaxFile quiet:true) == true then
 					(
-						-- Unhide category
-						unhidecategory()
-
-						-- Select none
-						max select none
-
-						-- Select all PACS primitives
-						for i in geometry do
-						(
-							if ((classof i) == nel_pacs_cylinder) or ((classof i) == nel_pacs_box) then
-								selectmore i
-						)
-
-						-- Array of node
-						arrayNode = selection as array
-
-						-- Something to export ?
-						if (arrayNode.count != 0) then
-						(
-							-- Export the collision
-							if (NelExportPACSPrimitives arrayNode output) == false then
-							(
-								nlerror ("ERROR exporting PACS primitives in file "+files[i])
-							)
-							else
-							(
-								nlerror ("OK PACS primitives in file "+files[i])
-							)
-						)
-						else
-						(
-							nlerror ("WARNING no PACS primitives in file "+files[i])
-						)
+						runNelMaxExport(inputMaxFile)
 					)
 					else
 					(
 						-- Error
-						nlerror ("ERROR exporting collision: can't open the file "+files[i])
+						nlerror("ERROR exporting 'pacs_prim': can't open the file " + inputMaxFile)
 					)
 				)
 				else
 				(
-					nlerror ("SKIPPED "+files[i])
+					nlerror("SKIPPED " + inputMaxFile)
 				)
 			)
 			catch 
 			(
 				-- Error
-				nlerror ("ERROR error exporting collision in files " + files[i])
+				nlerror("ERROR error exporting 'pacs_prim' in files " + inputMaxFile)
 			)
 		)
 	)
 	else
 	(
-		nlerror ("WARNING no collision file in folder pacs_prim_source_directory")
+		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
 	)
 )
 catch 
 (
 	-- Error
-	nlerror ("ERROR fatal error exporting collision in folder pacs_prim_source_directory")
+	nlerror("ERROR fatal error exporting 'pacs_prim' in folder %MaxSourceDirectory%")
 )
 
 -- Bye
 
 resetMAXFile #noprompt
 quitMAX #noPrompt
-quitMAX () #noPrompt
+quitMAX() #noPrompt
 

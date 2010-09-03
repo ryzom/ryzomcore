@@ -35,7 +35,10 @@ ProjectsToProcess += [ "common/sfx" ]
 ProjectsToProcess += [ "common/fauna" ]
 
 # Ecosystem projects
+ProjectsToProcess += [ "ecosystems/desert" ]
 ProjectsToProcess += [ "ecosystems/jungle" ]
+ProjectsToProcess += [ "ecosystems/primes_racines" ]
+ProjectsToProcess += [ "ecosystems/lacustre" ]
 
 # Continent projects
 ProjectsToProcess += [ "continents/newbieland" ]
@@ -49,9 +52,7 @@ ProjectsToProcess += [ "common/sky" ] # Depends on jungle/newbieland due to ig_l
 #ProjectsToProcess += [ "common/characters" ] # TODO
 #ProjectsToProcess += [ "common/characters_maps_hr" ] # TODO
 #ProjectsToProcess += [ "common/characters_maps_lr" ] # TODO
-#ProjectsToProcess += [ "ecosystems/desert" ] # TODO
-#ProjectsToProcess += [ "ecosystems/lacustre" ] # TODO
-#ProjectsToProcess += [ "ecosystems/primes_racines" ] # TODO
+#ProjectsToProcess += [ "continents/indoors" ] # TODO
 
 
 # end of file

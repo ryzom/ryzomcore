@@ -1,15 +1,14 @@
--- Some globals
 
-NEL3D_APPDATA_DONOTEXPORT = 1423062565		-- do not export me : "undefined" = export me
-											--							  "0" = export me
-											--							  "1" = DONT export me
-NEL3D_APPDATA_CHARACTER_LOD = 1423062618	-- "1": I am a character lod if "1". "0" or undefined: I am not.
+
+-- #################################################################
+-- ## WARNING : this is a generated file, don't change it !
+-- #################################################################
 
 
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
@@ -62,21 +61,31 @@ fn nlerror message =
 	print message
 )
 
+
+
+-- Some globals
+
+NEL3D_APPDATA_DONOTEXPORT = 1423062565		-- do not export me : "undefined" = export me
+											--							  "0" = export me
+											--							  "1" = DONT export me
+NEL3D_APPDATA_CHARACTER_LOD = 1423062618	-- "1": I am a character lod if "1". "0" or undefined: I am not.
+
+
 -- Must export this node ?
-fn isToBeExported node =
+fn isToBeExported node = 
 (
 	if ((classof node) == RklPatch) then
 		return false
-
+	
 	if ((classof node) == nel_ps) then
 		return false
-
+	
 	if ((classof node) == nel_pacs_cylinder) then
 		return false
-
+	
 	if ((classof node) == nel_pacs_box) then
 		return false
-
+	
 	doNotExport = getappdata node NEL3D_APPDATA_DONOTEXPORT
 	if (doNotExport != undefined) then
 	(
@@ -86,8 +95,9 @@ fn isToBeExported node =
 	return true
 )
 
+
 -- is this node flagged as a LodCharacter ??
-fn isLodCharacter node =
+fn isLodCharacter node = 
 (
 	isCLod = getappdata node NEL3D_APPDATA_CHARACTER_LOD
 	if (isCLod == undefined) then
@@ -97,173 +107,169 @@ fn isLodCharacter node =
 	return false
 )
 
-fn goClodExport =
+fn runNelMaxExport inputMaxFile = 
 (
-	try
+	tagThisFile = true
+	
+	-- Unhide category
+	unhidecategory()
+	
+	-- Unhide
+	max unhide all
+	
+	-- unselect
+	max select none
+	
+	-- Exported object count
+	exported = 0
+	
+	-- For each node
+	for node in geometry do
 	(
-		-- Get files in the shape_source_directory
-		files = getFiles "shape_source_directory/*.max" 
-
-		-- Sort files
-		sort files
-
-		-- No file ?
-		if files.count != 0 then
+		-- It is root ?
+		if (node.parent == undefined) then
 		(
-			-- For each files
-			for i = 1 to files.count do
+			-- Can be exported ?
+			if (isToBeExported node == true) then
 			(
-				try
+				-- Is a Lod character?
+				if ((isLodCharacter node) == true) then
 				(
-					-- Ok ?
-					ok = false
-
-					-- Free memory and file handles
-					gc ()
-
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
-
-					-- Get the tag file name
-					tag = ("output_directory_tag/"+(getFilenameFile files[i])+(getFilenameType files[i])+".tag")
-
-					-- Compare date with the tag file
-					if (NeLTestFileDate tag files[i]) == true then
+					-- Output directory
+					outputNelFile = ("%OutputDirectory%/" + (node.name) + ".clod")
+					
+					-- Compare file date
+					if (NeLTestFileDate outputNelFile inputMaxFile) == true then
 					(
-						-- Open the max project
-						nlerror ("Scanning file "+files[i]+" ...")
-						if (loadMaxFile files[i] quiet:true) == true then
+						try
 						(
-							-- Unhide category
-							unhidecategory()
-
-							tagThisFile = true
-
-							-- Unhide
-							max unhide all
-
-							-- unselect
-							max select none
-
-							-- Exported object count
-							exported = 0
-
-							-- For each node
-							for node in geometry do
+							-- Export the shape
+							if (NelExportLodCharacter node outputNelFile false) == true then
 							(
-								-- It is root ?
-								if (node.parent == undefined) then
-								(
-									-- Can be exported ?
-									if (isToBeExported node == true) then
-									(
-										-- Is a Lod character?
-										if ((isLodCharacter node) == true) then
-										(
-											-- Output directory
-											output = ("output_directory_clod/"+(node.name)+".clod")
-
-											-- Compare file date
-											if (NeLTestFileDate output files[i]) == true then
-											(
-												try
-												(
-													-- Export the shape
-													if (NelExportLodCharacter node output false) == true then
-													(
-														nlerror ("OK "+output)
-														exported = exported+1
-													)
-													else
-													(
-														-- Error
-														nlerror ("ERROR exporting .clod "+node.name+" in file "+files[i])
-														tagThisFile = false
-													)
-												)
-												catch 
-												(
-													-- Error
-													nlerror ("ERROR fatal error exporting .clod "+node.name+" in file "+files[i])
-													tagThisFile = false
-													return 0
-												)
-											)
-											else
-											(
-												-- Error
-												nlerror ("SKIPPED "+output)
-												exported = exported+1
-											)
-										)
-									)
-								)
+								nlerror("OK " + outputNelFile)
+								exported = exported+1
 							)
-
-							-- Something exported
-							if (exported == 0) then
+							else
 							(
 								-- Error
-								nlerror ("WARNING no .clod exported from the file "+files[i])
-							)
-
-							-- Write a tag file
-							if tagThisFile == true then
-							(
-								tagFile = createFile tag
-								if tagFile == undefined then
-								(
-									nlerror ("WARNING can't create tag file "+tag)
-								)
-								else
-								(
-									print "toto" to: tagFile
-									close tagFile
-								)
+								nlerror("ERROR exporting .clod " + node.name + " in file " + inputMaxFile)
+								tagThisFile = false
 							)
 						)
-						else
+						catch 
 						(
 							-- Error
-							nlerror ("ERROR exporting .clod: can't open the file "+files[i])
+							nlerror("ERROR fatal error exporting .clod " + node.name + " in file " + inputMaxFile)
+							tagThisFile = false
 						)
 					)
 					else
 					(
 						-- Error
-						nlerror ("SKIPPED BY TAG "+files[i])
+						nlerror("SKIPPED " + outputNelFile)
+						exported = exported + 1
 					)
-					
-					gc ()
-					
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
-				)
-				catch 
-				(
-					-- Error
-					nlerror ("ERROR fatal error exporting .clod in file " + files[i])
-					-- break
 				)
 			)
 		)
-		else
-		(
-			nlerror ("WARNING no max file in folder shape_source_directory")
-		)
 	)
-	catch 
+	
+	-- Something exported
+	if (exported == 0) then
 	(
 		-- Error
-		nlerror ("ERROR fatal error exporting .clod in folder shape_source_directory")
-		return 0
+		nlerror ("WARNING no .clod exported from the file " + inputMaxFile)
 	)
+	
+	return tagThisFile
 )
 
-goClodExport()
 
-nlerror ("BYE")
 
+try
+(
+	-- Get files in the %MaxSourceDirectory% directory
+	files = getFiles "%MaxSourceDirectory%/*.max" 
+	gc()
+	
+	-- Sort files
+	sort files
+	gc()
+	
+	-- No file ?
+	if files.count != 0 then
+	(
+		-- For each files
+		for i = 1 to files.count do
+		(
+			inputMaxFile = files[i]
+			outputTagFile = ("%TagDirectory%/" + (getFilenameFile inputMaxFile) + (getFilenameType inputMaxFile) + ".tag")
+			
+			try
+			(
+				-- Compare file date
+				if (NeLTestFileDate outputTagFile inputMaxFile) == true then
+				(
+					-- Free memory and file handles
+					gc()
+					heapfree
+					
+					-- Reset 3dsmax
+					resetMAXFile #noprompt
+					
+					-- Open the max project
+					nlerror("Scanning file " + inputMaxFile + " ...")
+					if (loadMaxFile inputMaxFile quiet:true) == true then
+					(
+						tagThisFile = runNelMaxExport(inputMaxFile)
+						
+						-- Write a tag file
+						if tagThisFile == true then
+						(
+							tagFile = createFile outputTagFile
+							if tagFile == undefined then
+							(
+								nlerror("WARNING can't create tag file " + outputTagFile)
+							)
+							else
+							(
+								print "mukyu" to: tagFile
+								close tagFile
+							)
+						)
+					)
+					else
+					(
+						-- Error
+						nlerror("ERROR exporting 'clod': can't open the file " + inputMaxFile)
+					)
+				)
+				else
+				(
+					nlerror("SKIPPED BY TAG " + inputMaxFile)
+				)
+			)
+			catch 
+			(
+				-- Error
+				nlerror("ERROR error exporting 'clod' in files " + inputMaxFile)
+			)
+		)
+	)
+	else
+	(
+		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
+	)
+)
+catch 
+(
+	-- Error
+	nlerror("ERROR fatal error exporting 'clod' in folder %MaxSourceDirectory%")
+)
+
+-- Bye
+
+resetMAXFile #noprompt
 quitMAX #noPrompt
-quitMAX () #noPrompt
+quitMAX() #noPrompt
 

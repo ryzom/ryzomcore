@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export pacs_prim
-# \date 2010-08-31 16:50GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export pacs_prim
@@ -44,43 +48,49 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-printLog(log, "")
+# ...
 
-# For each pacs_prim directory
-printLog(log, ">>> Export pacs_prim 3dsmax <<<")
-mkPath(log, ExportBuildDirectory + "/" + PacsPrimExportDirectory)
-for dir in PacsPrimSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, PacsPrimSourceDirectories,  DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + PacsPrimExportDirectory, ".pacs_prim")):
-		scriptSrc = "maxscript/pacs_prim_export.ms"
-		scriptDst = MaxUserDirectory + "/scripts/pacs_prim_export.ms"
-		logFile = ScriptDirectory + "/processes/pacs_prim/log.log"
-		outDirPacsPrim =  ExportBuildDirectory + "/" + PacsPrimExportDirectory
-		pacs_primSourceDir = DatabaseDirectory + "/" + dir
-		tagList = findFiles(log, outDirPacsPrim, "", ".pacs_prim")
-		tagLen = len(tagList)
-		if os.path.isfile(scriptDst):
+# Export pacs_prim 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export pacs_prim 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + PacsPrimExportDirectory)
+	for dir in PacsPrimSourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + PacsPrimExportDirectory, ".pacs_prim")):
+			scriptSrc = "maxscript/pacs_prim_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/pacs_prim_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/pacs_prim/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + PacsPrimExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, outputDirectory, "", ".pacs_prim")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "pacs_prim_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, outputDirectory, "", ".pacs_prim")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .pacs_prim files!")
 			os.remove(scriptDst)
-		tagDiff = 1
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("pacs_prim_source_directory", pacs_primSourceDir)
-			newline = newline.replace("output_directory", outDirPacsPrim)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		while tagDiff > 0:
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "pacs_prim_export.ms", "-q", "-mi", "-vn" ])
-			tagList = findFiles(log, outDirPacsPrim, "", ".pacs_prim")
-			newTagLen = len(tagList)
-			tagDiff = newTagLen - tagLen
-			tagLen = newTagLen
-			printLog(log, "Exported " + str(tagDiff) + " .pacs_prim files!")
-		os.remove(scriptDst)
+
+
 
 printLog(log, ">>> List pacs_prim <<<")
 outDirPacsPrim =  ExportBuildDirectory + "/" + PacsPrimExportDirectory
@@ -96,8 +106,9 @@ if WantLandscapeColPrimPacsList:
 		listFile.write(exported + "\n")
 	listFile.close()
 
-printLog(log, "")
 
+
+printLog(log, "")
 log.close()
 
 

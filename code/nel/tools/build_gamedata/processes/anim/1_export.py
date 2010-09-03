@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export anim
-# \date 2009-03-10 13:13GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export anim
@@ -44,46 +48,51 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-printLog(log, "")
+# ...
 
-# For each anim directory
-printLog(log, ">>> Export anim 3dsmax <<<")
-mkPath(log, ExportBuildDirectory + "/" + AnimExportDirectory)
-for dir in AnimSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, AnimSourceDirectories, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + AnimExportDirectory, ".anim")):
-		scriptSrc = "maxscript/anim_export.ms"
-		scriptDst = MaxUserDirectory + "/scripts/anim_export.ms"
-		logFile = ScriptDirectory + "/processes/anim/log.log"
-		outDirAnim =  ExportBuildDirectory + "/" + AnimExportDirectory
-		animSourceDir = DatabaseDirectory + "/" + dir
-		tagList = findFiles(log, outDirAnim, "", ".anim")
-		tagLen = len(tagList)
-		if os.path.isfile(scriptDst):
+# Export anim 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export anim 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + AnimExportDirectory)
+	for dir in AnimSourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + AnimExportDirectory, ".anim")):
+			scriptSrc = "maxscript/anim_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/anim_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/anim/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + AnimExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, outputDirectory, "", ".anim")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "anim_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, outputDirectory, "", ".anim")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .anim files!")
 			os.remove(scriptDst)
-		tagDiff = 1
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("anim_source_directory", animSourceDir)
-			newline = newline.replace("output_directory", outDirAnim)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		while tagDiff > 0:
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "anim_export.ms", "-q", "-mi", "-vn" ])
-			tagList = findFiles(log, outDirAnim, "", ".anim")
-			newTagLen = len(tagList)
-			tagDiff = newTagLen - tagLen
-			tagLen = newTagLen
-			printLog(log, "Exported " + str(tagDiff) + " .anim files!")
-		os.remove(scriptDst)
+
+
 
 printLog(log, "")
-
 log.close()
 
 

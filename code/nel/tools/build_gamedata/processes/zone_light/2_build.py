@@ -60,14 +60,14 @@ else:
 	mkPath(log, srcDir)
 	destDir = ExportBuildDirectory + "/" + ZoneLightBuildDirectory
 	mkPath(log, destDir)
-	dependDir = ExportBuildDirectory + "/" + ZoneLightDependBuildDirectory
+	dependDir = ExportBuildDirectory + "/" + ZoneDependBuildDirectory
 	mkPath(log, dependDir)
 	files = findFiles(log, srcDir, "", ".zonew")
 	for file in files:
 		srcFile = srcDir + "/" + file
 		destFile = destDir + "/" + file[0:-len(".zonew")] + ".zonel"
 		if (needUpdateLogRemoveDest(log, srcFile, destFile)):
-			dependFile = destDir + "/" + file[0:-len(".zonew")] + ".depend"
+			dependFile = dependDir + "/" + file[0:-len(".zonew")] + ".depend"
 			subprocess.call([ ExecTimeout, str(ZoneLightBuildTimeout), ZoneLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
 printLog(log, "")
 
@@ -84,7 +84,7 @@ else:
 	mkPath(log, igsrcDir)
 	destDir = ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory
 	mkPath(log, destDir)
-	dependDir = ExportBuildDirectory + "/" + ZoneLightDependBuildDirectory
+	dependDir = ExportBuildDirectory + "/" + ZoneDependBuildDirectory
 	mkPath(log, dependDir)
 	files = findFiles(log, srcDir, "", ".zonel")
 	for file in files:
@@ -93,7 +93,7 @@ else:
 		if (os.path.isfile(igsrcFile)):
 			if (needUpdateLogRemoveDest(log, igsrcFile, destFile)):
 				srcFile = srcDir + "/" + file
-				dependFile = destDir + "/" + file[0:-len(".zonel")] + ".depend"
+				dependFile = dependDir + "/" + file[0:-len(".zonel")] + ".depend"
 				subprocess.call([ ExecTimeout, str(ZoneIgLightBuildTimeout), ZoneIgLighter, srcFile, destFile, ActiveProjectDirectory + "/generated/properties.cfg", dependFile ])
 printLog(log, "")
 

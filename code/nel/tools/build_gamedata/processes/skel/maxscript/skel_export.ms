@@ -1,23 +1,17 @@
+
+
+-- #################################################################
+-- ## WARNING : this is a generated file, don't change it !
+-- #################################################################
+
+
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
-
--- Log a message
-fn nlerror message =
-(
-	if nlErrorStream != undefined then
-	(
-		format "%\n" message to:nlErrorStream
-		flush nlErrorStream
-	)
-
-	-- To the console
-	print message
-)
 
 -- Unhide category
 fn unhidecategory =
@@ -54,109 +48,143 @@ fn unhidecategory =
 	)
 )
 
+-- Log a message
+fn nlerror message =
+(
+	if nlErrorStream != undefined then
+	(
+		format "%\n" message to:nlErrorStream
+		flush nlErrorStream
+	)
+
+	-- To the console
+	print message
+)
+
+
+
+fn runNelMaxExport inputMaxFile = 
+(
+	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".skel")
+	tagThisFile = false
+	
+	-- Unhide category
+	unhidecategory()
+	
+	-- Select Bip01, not very smart
+	if $Bip01 != undefined then
+	(
+		-- Select Bip01
+		select $Bip01
+		
+		if ($ != undefined) then
+		(
+			-- Set figure mode on
+			if ((classof $) == Biped_Object) then
+			(
+				$.controller.figureMode = true
+			)
+			
+			-- Export the skeleton template
+			if (NelExportSkeleton $ outputNelFile) == false then
+			(
+				nlerror("ERROR exporting skeleton " + inputMaxFile)
+				tagThisFile = false
+			)
+			else
+			(
+				nlerror("OK " + outputNelFile)
+				tagThisFile = true
+			)
+		)
+		else
+		(
+			-- Error
+			nlerror("ERROR exporting skeleton: no Bip01 node in file " + inputMaxFile)
+			tagThisFile = false
+		)
+	)
+	else
+	(
+		-- Error
+		nlerror("ERROR exporting skeleton: no Bip01 node in file " + inputMaxFile)
+		tagThisFile = false
+	)
+	
+	return tagThisFile
+)
+
+
+
 try
 (
-	-- Get files in the skel_source_directory
-	files = getFiles "skel_source_directory/*.max" 
-
+	-- Get files in the %MaxSourceDirectory% directory
+	files = getFiles "%MaxSourceDirectory%/*.max" 
+	gc()
+	
 	-- Sort files
 	sort files
-
+	gc()
+	
 	-- No file ?
 	if files.count != 0 then
 	(
 		-- For each files
 		for i = 1 to files.count do
 		(
+			inputMaxFile = files[i]
+			outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".skel")
+			
 			try
 			(
-				-- Output file
-				output = ("output_directory/"+(getFilenameFile files[i])+".skel")
-
 				-- Compare file date
-				if (NeLTestFileDate output files[i]) == true then
+				if (NeLTestFileDate outputNelFile inputMaxFile) == true then
 				(
 					-- Free memory and file handles
-					gc ()
-
+					gc()
+					heapfree
+					
 					-- Reset 3dsmax
 					resetMAXFile #noprompt
-
+					
 					-- Open the max project
-					nlerror ("Scanning file "+files[i]+" ...")
-					if (loadMaxFile files[i] quiet:true) == true then
+					nlerror("Scanning file " + inputMaxFile + " ...")
+					if (loadMaxFile inputMaxFile quiet:true) == true then
 					(
-						-- Unhide category
-						unhidecategory()
-
-						-- Select Bip01, not very smart
-						if $Bip01 != undefined then
-						(
-							-- Select Bip01
-							select $Bip01
-
-							if ($ != undefined) then
-							(
-								-- Set figure mode on
-								if ((classof $) == Biped_Object) then
-								(
-									$.controller.figureMode = true
-								)
-
-								-- Export the skeleton template
-								if (NelExportSkeleton $ output) == false then
-								(
-									nlerror ("ERROR exporting skeleton "+files[i])
-								)
-								else
-								(
-									nlerror ("OK "+output)
-								)
-							)
-							else
-							(
-								-- Error
-								nlerror ("ERROR exporting skeleton: no Bip01 node in file "+files[i])
-							)
-						)
-						else
-						(
-							-- Error
-							nlerror ("ERROR exporting skeleton: no Bip01 node in file "+files[i])
-						)
+						runNelMaxExport(inputMaxFile)
 					)
 					else
 					(
 						-- Error
-						nlerror ("ERROR exporting skeleton: can't open the file "+files[i])
+						nlerror("ERROR exporting 'skel': can't open the file " + inputMaxFile)
 					)
 				)
 				else
 				(
-					nlerror ("SKIPPED "+files[i])
+					nlerror("SKIPPED " + inputMaxFile)
 				)
 			)
 			catch 
 			(
 				-- Error
-				nlerror ("ERROR error exporting skeleton in files " + files[i])
+				nlerror("ERROR error exporting 'skel' in files " + inputMaxFile)
 			)
 		)
 	)
 	else
 	(
-		nlerror ("WARNING no skeleton file in folder skel_source_directory")
+		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
 	)
 )
 catch 
 (
 	-- Error
-	nlerror ("ERROR fatal error exporting skeleton in folder skel_source_directory")
+	nlerror("ERROR fatal error exporting 'skel' in folder %MaxSourceDirectory%")
 )
 
 -- Bye
 
 resetMAXFile #noprompt
 quitMAX #noPrompt
-quitMAX () #noPrompt
+quitMAX() #noPrompt
 

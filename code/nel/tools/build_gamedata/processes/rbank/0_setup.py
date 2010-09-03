@@ -45,10 +45,14 @@ printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
+for dir in RBankCmbSourceDirectories:
+	mkPath(log, DatabaseDirectory + "/" + dir)
 mkPath(log, LeveldesignWorldDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + RBankCmbTagExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
 
 # Setup build directories

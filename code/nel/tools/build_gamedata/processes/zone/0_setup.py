@@ -45,7 +45,7 @@ printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
-mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory)
+mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")

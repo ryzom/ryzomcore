@@ -215,6 +215,31 @@ def findFile(log, dir_where, file_name):
 				printLog(log, "findFile: file not dir or file?! " + filePath)
 	return ""
 
+def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
+	updateCount = 0
+	skipCount = 0
+	lenSrcExt = len(ext_source)
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		sourceFile = dir_source + "/" + file
+		tagFile = dir_dest + "/" + file[0:-lenSrcExt] + ext_dest
+		if os.path.isfile(tagFile):
+			sourceTime = os.stat(sourceFile).st_mtime
+			tagTime = os.stat(tagFile).st_mtime
+			if (sourceTime > tagTime):
+				updateCount = updateCount + 1
+			else:
+				skipCount = skipCount + 1
+		else:
+			updateCount = updateCount + 1
+	if updateCount > 0:
+		printLog(log, "UPDATE " + str(updateCount) + " / " + str(len(sourceFiles)) + "; SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 1
+	else:
+		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 0
+
 def needUpdateDirNoSubdirLogExt(log, dir_source, ext_source, dir_dest, ext_dest):
 	latestSourceFile = 0
 	latestDestFile = 0

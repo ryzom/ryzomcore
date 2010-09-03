@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export clodbank
-# \date 2009-03-10 13:13GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export clodbank
@@ -43,50 +47,56 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-printLog(log, "")
+# ...
 
-# For each clodbank directory
-printLog(log, ">>> Export clodbank 3dsmax <<<")
-mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
-mkPath(log, ExportBuildDirectory + "/" + ClodTagExportDirectory)
-for dir in ClodSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, ClodSourceDirectories, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + ClodTagExportDirectory, ".tag")):
-		scriptSrc = "maxscript/clod_export.ms"
-		scriptDst = MaxUserDirectory + "/scripts/clod_export.ms"
-		logFile = ScriptDirectory + "/processes/clodbank/log.log"
-		outDirClod =  ExportBuildDirectory + "/" + ClodExportDirectory
-		outDirTag =  ExportBuildDirectory + "/" + ClodTagExportDirectory
-		maxSourceDir = DatabaseDirectory + "/" + dir
-		tagList = findFiles(log, outDirTag, "", ".tag")
-		tagLen = len(tagList)
-		if os.path.isfile(scriptDst):
+# Export clodbank 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export clodbank 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + ClodTagExportDirectory)
+	for dir in ClodSourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + ClodTagExportDirectory, ".max.tag")):
+			scriptSrc = "maxscript/clod_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/clod_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/clodbank/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + ClodExportDirectory
+			tagDirectory =  ExportBuildDirectory + "/" + ClodTagExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, tagDirectory, "", ".max.tag")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				newline = newline.replace("%TagDirectory%", tagDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "clod_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, tagDirectory, "", ".max.tag")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .max files!")
 			os.remove(scriptDst)
-		tagDiff = 1
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("shape_source_directory", maxSourceDir)
-			newline = newline.replace("output_directory_clod", outDirClod)
-			newline = newline.replace("output_directory_tag", outDirTag)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		while tagDiff > 0:
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "clod_export.ms", "-q", "-mi", "-vn" ])
-			tagList = findFiles(log, outDirTag, "", ".tag")
-			newTagLen = len(tagList)
-			tagDiff = newTagLen - tagLen
-			tagLen = newTagLen
-			printLog(log, "Exported " + str(tagDiff) + " .max files!")
-		os.remove(scriptDst)
+
+
 
 printLog(log, "")
-
 log.close()
 
 

@@ -32,18 +32,23 @@ ProcessToComplete = [ ]
 ProcessToComplete += [ "properties" ]
 ProcessToComplete += [ "map" ]
 ProcessToComplete += [ "shape" ]
-ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process (not yet), but does not export max files
-ProcessToComplete += [ "zone" ] # works, need to check completeness
+ProcessToComplete += [ "ligo" ]
+ProcessToComplete += [ "zone" ]
 ProcessToComplete += [ "ig" ] # fully implemented
 ProcessToComplete += [ "zone_light" ] # works, need to check completeness
-ProcessToComplete += [ "rbank" ] # works, need to check completeness
+ProcessToComplete += [ "rbank" ]
 ProcessToComplete += [ "ig_light" ] # fully implemented
 ProcessToComplete += [ "ps" ]
 
 
 # *** ECOSYSTEM AND CONTINENT NAMES ***
+
 EcosystemName = "jungle"
+EcosystemPath = "ecosystems/" + EcosystemName
 ContinentName = "newbieland"
+ContinentPath = "continents/" + ContinentName
+CommonName = ContinentName
+CommonPath = ContinentPath
 
 
 # *** LANDSCAPE NAME ***

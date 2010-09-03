@@ -121,13 +121,19 @@ if MaxAvailable:
 				while retriesLeft > 0:
 					printLog(log, "MAXSCRIPT " + scriptDst + "; " + maxFilePath)
 					subprocess.call([ ExecTimeout, str(MaxShapeExportTimeout), Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-vn" ])
-					lSrc = open(logFile, "r")
-					for line in lSrc:
-						lineStrip = line.strip()
-						if (len(lineStrip) > 0):
-							printLog(log, lineStrip)
-					lSrc.close()
-					os.remove(logFile)
+					if os.path.exists(logFile):
+						try:
+							lSrc = open(logFile, "r")
+							for line in lSrc:
+								lineStrip = line.strip()
+								if (len(lineStrip) > 0):
+									printLog(log, lineStrip)
+							lSrc.close()
+							os.remove(logFile)
+						except Exception:
+							printLog(log, "ERROR Failed to read 3dsmax log")
+					else:
+						printLog(log, "WARNING No 3dsmax log")
 					if (os.path.exists(tagFilePath)):
 						printLog(log, "OK " + maxFilePath)
 						retriesLeft = 0

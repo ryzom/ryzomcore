@@ -55,6 +55,7 @@ mkPath(log, ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirect
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ZoneLightBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ZoneLightDependBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory)

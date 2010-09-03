@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export swt
-# \date 2009-03-10-20-23-GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export swt
@@ -38,49 +42,55 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Export skeleton weigths")
+printLog(log, "--- Export swt")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-printLog(log, "")
+# ...
 
-# For each swt directory
-printLog(log, ">>> Export skeleton weigths 3dsmax <<<")
-mkPath(log, ExportBuildDirectory + "/" + SwtExportDirectory)
-for dir in SwtSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	if (needUpdateDirNoSubdirLogExtMultidir(log, DatabaseDirectory, SwtSourceDirectories, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + SwtExportDirectory, ".swt")):
-		scriptSrc = "maxscript/swt_export.ms"
-		scriptDst = MaxUserDirectory + "/scripts/swt_export.ms"
-		logFile = ScriptDirectory + "/processes/swt/log.log"
-		outDirSwt =  ExportBuildDirectory + "/" + SwtExportDirectory
-		swtSourceDir = DatabaseDirectory + "/" + dir
-		tagList = findFiles(log, outDirSwt, "", ".swt")
-		tagLen = len(tagList)
-		if os.path.isfile(scriptDst):
+# Export swt 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export swt 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + SwtExportDirectory)
+	for dir in SwtSourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + SwtExportDirectory, ".swt")):
+			scriptSrc = "maxscript/swt_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/swt_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/swt/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + SwtExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, outputDirectory, "", ".swt")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "swt_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, outputDirectory, "", ".swt")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .swt files!")
 			os.remove(scriptDst)
-		tagDiff = 1
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
-		for line in sSrc:
-			newline = line.replace("output_logfile", logFile)
-			newline = newline.replace("swt_source_directory", swtSourceDir)
-			newline = newline.replace("output_directory", outDirSwt)
-			sDst.write(newline)
-		sSrc.close()
-		sDst.close()
-		while tagDiff > 0:
-			printLog(log, "MAXSCRIPT " + scriptDst)
-			subprocess.call([ Max, "-U", "MAXScript", "swt_export.ms", "-q", "-mi", "-vn" ])
-			tagList = findFiles(log, outDirSwt, "", ".swt")
-			newTagLen = len(tagList)
-			tagDiff = newTagLen - tagLen
-			tagLen = newTagLen
-			printLog(log, "Exported " + str(tagDiff) + " .swt files!")
-		os.remove(scriptDst)
+
+
 
 printLog(log, "")
 log.close()

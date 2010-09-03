@@ -36,6 +36,7 @@ ContinentPath = "continents/" + ContinentName
 CommonName = ContinentName
 CommonPath = ContinentPath
 
+
 # *** SOURCE DIRECTORIES LEVELDESIGN/WORLD ***
 ContinentLeveldesignWorldDirectory = ContinentName
 
@@ -57,7 +58,10 @@ LigoBaseSourceDirectory = "landscape/ligo/" + EcosystemName
 LigoMaxSourceDirectory = LigoBaseSourceDirectory + "/max"
 
 # Zone directories
-ZoneSourceDirectory = "landscape/zones/" + EcosystemName
+ZoneSourceDirectory = [ "landscape/zones/" + ContinentName ] # For old snowballs style landscape when not using ligo
+
+# RBank directories
+RBankCmbSourceDirectories = [ ]
 
 # Ig directories
 IgLandSourceDirectories = [ ]
@@ -98,6 +102,10 @@ LigoTagExportDirectory = "ecosystems/" + EcosystemName + "/ligo_tag"
 # Zone directories
 ZoneExportDirectory = ContinentPath + "/zone"
 WaterMapSourceDirectories = [ ]
+
+# RBank directories
+RBankCmbExportDirectory = CommonPath + "/rbank_cmb_export"
+RBankCmbTagExportDirectory = CommonPath + "/rbank_cmb_tag_export"
 
 # Smallbank directories
 SmallbankExportDirectory = EcosystemPath + "/smallbank"

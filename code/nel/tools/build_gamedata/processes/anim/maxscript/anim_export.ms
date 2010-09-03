@@ -1,10 +1,14 @@
-NEL3D_APPDATA_EXPORT_NODE_ANIMATION	= 1423062800
+
+
+-- #################################################################
+-- ## WARNING : this is a generated file, don't change it !
+-- #################################################################
 
 
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
@@ -57,129 +61,146 @@ fn nlerror message =
 	print message
 )
 
+
+
+NEL3D_APPDATA_EXPORT_NODE_ANIMATION = 1423062800
+
+fn runNelMaxExport inputMaxFile = 
+(
+	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".anim")
+	tagThisFile = false
+	
+	-- Unhide category
+	unhidecategory()
+	
+	-- Select Bip01, not very smart
+	if $Bip01 != undefined then
+	(
+		select $Bip01
+		
+		-- Always uncheck triangle pelvis
+		if (classof $Bip01) == Biped_Object then
+		(
+			$Bip01.controller.figureMode = true
+			$Bip01.controller.trianglepelvis = false
+			$Bip01.controller.figureMode = false
+		)
+	)
+	
+	-- For each node
+	for node in objects do
+	(
+		exportNodeAnmation = getappdata node NEL3D_APPDATA_EXPORT_NODE_ANIMATION
+		if (exportNodeAnmation != undefined) then
+		(
+			if (exportNodeAnmation == "1") then
+			(
+				selectmore node
+				
+				-- Is it a biped ?
+				if (classof node.controller) == Vertical_Horizontal_Turn then
+				(
+					-- Always uncheck triangle pelvis
+					node.controller.trianglepelvis = false
+				)
+			)
+		)
+	)
+	
+	if ((selection as array).count != 0) then
+	(
+		-- Export the animation
+		if (NelExportAnimation (selection as array) outputNelFile false) == false then
+		(
+			nlerror("ERROR exporting animation " + inputMaxFile)
+			tagThisFile = false
+		)
+		else
+		(
+			nlerror("OK " + outputNelFile)
+			tagThisFile = true
+		)
+	)
+	else
+	(
+		-- Error
+		nlerror("ERROR exporting animation: no node animated to export in file " + inputMaxFile)
+	)
+	
+	return tagThisFile
+)
+
+
+
 try
 (
-	-- Get files in the anim_source_directory
-	files = getFiles "anim_source_directory/*.max" 
-	gc ()
-
+	-- Get files in the %MaxSourceDirectory% directory
+	files = getFiles "%MaxSourceDirectory%/*.max" 
+	gc()
+	
 	-- Sort files
 	sort files
-	gc ()
-
+	gc()
+	
 	-- No file ?
 	if files.count != 0 then
 	(
 		-- For each files
 		for i = 1 to files.count do
 		(
-			nlerror ("Scanning file "+files[i]+" ...")
-
+			inputMaxFile = files[i]
+			outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".anim")
+			
 			try
 			(
-				-- Output file
-				output = ("output_directory/"+(getFilenameFile files[i])+".anim")
-
 				-- Compare file date
-				if (NeLTestFileDate output files[i]) == true then
+				if (NeLTestFileDate outputNelFile inputMaxFile) == true then
 				(
 					-- Free memory and file handles
-					gc ()
+					gc()
 					heapfree
-
+					
 					-- Reset 3dsmax
 					resetMAXFile #noprompt
-
+					
 					-- Open the max project
-					if (loadMaxFile files[i] quiet:true) == true then
+					nlerror("Scanning file " + inputMaxFile + " ...")
+					if (loadMaxFile inputMaxFile quiet:true) == true then
 					(
-						-- Unhide category
-						unhidecategory()
-
-						-- Select Bip01, not very smart
-						if $Bip01 != undefined then
-						(
-							select $Bip01
-
-							-- Always uncheck triangle pelvis
-							if (classof $Bip01) == Biped_Object then
-							(
-								$Bip01.controller.figureMode = true
-								$Bip01.controller.trianglepelvis = false
-								$Bip01.controller.figureMode = false
-							)
-						)
-
-						-- For each node
-						for node in objects do
-						(
-							exportNodeAnmation = getappdata node NEL3D_APPDATA_EXPORT_NODE_ANIMATION
-							if (exportNodeAnmation != undefined) then
-							(
-								if (exportNodeAnmation == "1") then
-								(
-									selectmore node
-
-									-- Is it a biped ?
-									if (classof node.controller) == Vertical_Horizontal_Turn then
-									(
-										-- Always uncheck triangle pelvis
-										node.controller.trianglepelvis = false
-									)
-								)
-							)
-						)
-
-						if ((selection as array).count != 0) then
-						(
-							-- Export the animation
-							if (NelExportAnimation (selection as array) output false) == false then
-							(
-								nlerror ("ERROR exporting animation "+files[i])
-							)
-							else
-							(
-								nlerror ("OK "+output)
-							)
-						)
-						else
-						(
-							-- Error
-							nlerror ("ERROR exporting animation: no node animated to export in file "+files[i])
-						)
+						runNelMaxExport(inputMaxFile)
 					)
 					else
 					(
 						-- Error
-						nlerror ("ERROR exporting animation: can't open the file "+files[i])
+						nlerror("ERROR exporting 'anim': can't open the file " + inputMaxFile)
 					)
 				)
 				else
 				(
-					nlerror ("SKIPPED "+files[i])
+					nlerror("SKIPPED " + inputMaxFile)
 				)
 			)
 			catch 
 			(
 				-- Error
-				nlerror ("ERROR error exporting animation in files " + files[i])
+				nlerror("ERROR error exporting 'anim' in files " + inputMaxFile)
 			)
 		)
 	)
 	else
 	(
-		nlerror ("WARNING no animation file in folder anim_source_directory")
+		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
 	)
 )
 catch 
 (
 	-- Error
-	nlerror ("ERROR fatal error exporting animation in folder anim_source_directory")
+	nlerror("ERROR fatal error exporting 'anim' in folder %MaxSourceDirectory%")
 )
 
 -- Bye
 
 resetMAXFile #noprompt
 quitMAX #noPrompt
-quitMAX () #noPrompt
+quitMAX() #noPrompt
 

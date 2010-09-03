@@ -60,15 +60,15 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneLigoExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory)
-	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory)
+	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
 	mkPath(log, ExportBuildDirectory + "/" + LigoTagExportDirectory)
-	if (needUpdateDirNoSubdirLogExt(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoTagExportDirectory, ".max.tag")):
+	if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoTagExportDirectory, ".max.tag")):
 		printLog(log, "WRITE " + ligoIniPath)
 		ligoIni = open(ligoIniPath, "w")
 		ligoIni.write("[LigoConfig]\n")
 		ligoIni.write("LigoPath=" + DatabaseDirectory + "/" + LigoMaxSourceDirectory + "/\n")
 		ligoIni.write("LigoExportPath=" + DatabaseDirectory + "/" + LigoDatabaseExportDirectory + "/\n")
-		ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory + "/\n")
+		ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory[0] + "/\n")
 		ligoIni.close()
 		
 		outDirTag = ExportBuildDirectory + "/" + LigoTagExportDirectory

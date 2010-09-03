@@ -2,7 +2,7 @@
 # 
 # \file 0_setup.py
 # \brief setup veget
-# \date 2010-05-24 08:13GMT
+# \date 2010-09-02-08-40-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Setup veget
