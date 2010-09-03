@@ -58,11 +58,7 @@ static uint32 Version = 1;	// Client Version.
 // MAIN :
 // Entry for the Apllication.
 //---------------------------------------------------
-#if defined(_WINDOWS)
-int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline, int nCmdShow)
-#else
 int main(int argc, char **argv)
-#endif
 {
 	/////////////////////////////////
 	// Initialize the application. //
@@ -113,4 +109,4 @@ int main(int argc, char **argv)
 
 	// EXIT of the Application.
 	return EXIT_SUCCESS;
-}// main/WinMain //
+}// main //
