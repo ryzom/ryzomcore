@@ -44,8 +44,6 @@ if(APPLE)
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
   SET(MACOSX_BUNDLE_COPYRIGHT "Winchgate and The Ryzom Core Community")
 
-  ADD_EXECUTABLE(ryzom_client MACOSX_BUNDLE ${SRC})
-
   # TODO: in release mode, cmake could copy all the dylibs into the .app
   # bundle for redistribution... should some part of cpack handle that?
   # ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD
@@ -57,10 +55,9 @@ if(APPLE)
   #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
   #   # ...
   #   # install_name_tool the lib pathes
-
-ELSE(APPLE)
-  ADD_EXECUTABLE(ryzom_client ${SRC})
 ENDIF(APPLE)
+
+ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC})
 
 INCLUDE_DIRECTORIES(
 			${LIBXML2_INCLUDE_DIR}
