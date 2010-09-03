@@ -60,7 +60,7 @@ public:
 	template<typename T>
 	void		set(const std::string& name, const T& value)
 	{
-		uint			dotpos = name.find(EnvSeparator);
+		std::string::size_type dotpos = name.find(EnvSeparator);
 		std::string		child = name.substr(0, dotpos);
 
 		if (dotpos == std::string::npos)
@@ -98,7 +98,7 @@ public:
 	/// Does Sub Environment exist?
 	virtual bool		envExists(const std::string& name) const
 	{
-		uint			dotpos = name.find(EnvSeparator);
+		std::string::size_type dotpos = name.find(EnvSeparator);
 		std::string		child = name.substr(0, dotpos);
 
 		if (child.empty())
@@ -114,7 +114,7 @@ public:
 	/// Enter Sub Env, like getEnv() but it doesn't look in parent, and always goes in current env
 	virtual CTemplatizerEnv*	getSubEnv(const std::string& name)
 	{
-		uint			dotpos = name.find(EnvSeparator);
+		std::string::size_type dotpos = name.find(EnvSeparator);
 		std::string		child = name.substr(0, dotpos);
 
 		if (child.empty())
@@ -155,7 +155,7 @@ public:
 	/// Get Sub Env
 	virtual CTemplatizerEnv*	getEnv(const std::string& name)
 	{
-		uint			dotpos = name.find(EnvSeparator);
+		std::string::size_type dotpos = name.find(EnvSeparator);
 		std::string		child = name.substr(0, dotpos);
 
 		if (child.empty())
@@ -265,7 +265,7 @@ public:
 	/// Get Value Node
 	virtual bool		getValueNodeAndEnv(const std::string& name, ITemplatizerBloc*& node, CTemplatizerEnv*& env)
 	{
-		uint	pos = name.find_last_of(EnvSeparator);
+		std::string::size_type pos = name.find_last_of(EnvSeparator);
 		if (pos == std::string::npos)
 		{
 			node = getNode(name);
@@ -434,7 +434,7 @@ public:
 		if (RootEnv == NULL)
 			return;
 
-		uint	pos = var.find_last_of(EnvSeparator);
+		std::string::size_type pos = var.find_last_of(EnvSeparator);
 
 		if (pos == std::string::npos)
 		{

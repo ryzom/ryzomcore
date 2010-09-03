@@ -297,7 +297,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,listCharNames,"display the names of the charact
 
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(STAT_GLOBALS::getInputFilePath().c_str(),false,false,true,files);
-	for (uint32 i=files.size();i--;)
+	for (uint32 i=(uint32)files.size();i--;)
 	{
 		if (!NLMISC::testWildCard(NLMISC::CFile::getFilename(files[i]),wildcard))
 		{
@@ -913,7 +913,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptTestFilteredFileList,"list the se
 		return false;
 
 	// generating a new file list
-	if (args[0]==CSString("generate").left(args[0].size()))
+	if (args[0]==CSString("generate").left((uint)args[0].size()))
 	{
 		if (TheCharScanScriptFile==NULL)
 		{
@@ -948,7 +948,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptTestFilteredFileList,"list the se
 	}
 
 	// displaying the last generated file list
-	if (args[0]==CSString("display").left(args[0].size()))
+	if (args[0]==CSString("display").left((uint)args[0].size()))
 	{
 		nlinfo("Filtered file list for the current job");
 		fdc.display(&log);

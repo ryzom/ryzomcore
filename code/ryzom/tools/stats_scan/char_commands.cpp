@@ -129,7 +129,7 @@ NLMISC_COMMAND(listCharNames,"display the names of the characters int he listed 
 
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(SourceDirectory.get().c_str(),false,false,true,files);
-	for (uint32 i=files.size();i--;)
+	for (uint32 i=(uint32)files.size();i--;)
 	{
 		if (!NLMISC::testWildCard(NLMISC::CFile::getFilename(files[i]),wildcard))
 		{

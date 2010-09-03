@@ -33,7 +33,7 @@ using namespace NLMISC;
 #define outLine( s )\
 {\
 	out = string(s);\
-	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );\
+	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );\
 }\
 
 
@@ -135,15 +135,15 @@ struct CSkill
 	  */
 		string out;
 		out = string("        <STRUCT Name=\"")+ NormalizedSkillName + string("\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("          <ATOM Name=\"Skill\" Value=\"")+ SkillName + string("\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("          <ATOM Name=\"SkillCode\" Value=\"")+ Code + string("\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("          <ATOM Name=\"MaxSkillValue\" Value=\"")+ toString(MaxValue) + string("\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("          <ATOM Name=\"Type of Stage\" Value=\"")+ toString(StageType) + string("\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		
 		if (ParentSkillPtr != NULL)
 		{
@@ -153,22 +153,22 @@ struct CSkill
 		{
 			out = string("          <ATOM Name=\"ParentSkill\" Value=\"\"/>\n");
 		}
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 
 		if( !Children.empty())
 		{
 			out = string("          <ARRAY Name=\"ChildSkills\">\n");
-			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 			for (uint i = 0 ; i < Children.size() ; ++i)
 			{
 				out = string("            <ATOM Name=\"") + Children[i]->NormalizedSkillName + string("\" Value=\"")+ Children[i]->SkillName + string("\"/>\n");
-				fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+				fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 			}
 			out = string("          </ARRAY>\n");
-			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		}
 		out = string("        </STRUCT>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 
 		for (uint i = 0 ; i < Children.size() ; ++i)
 			Children[i]->writeInSheet(fo);
@@ -383,13 +383,13 @@ sint main( sint argc, char ** argv )
 		}
 		
 		string out("<?xml version=\"1.0\"?>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("<FORM Version=\"0.2\" State=\"modified\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("	<STRUCT>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("		<ARRAY Name=\"SkillData\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		
 		for ( vector<CSkill*>::const_iterator itTree = SkillTree.RootSkills.begin() ; itTree != SkillTree.RootSkills.end() ; ++itTree)
 		{
@@ -397,11 +397,11 @@ sint main( sint argc, char ** argv )
 		}
 
 		out = string("		</ARRAY>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("	</STRUCT>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("</FORM>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		fo.close();
 
 		// create the code .typ
@@ -412,19 +412,19 @@ sint main( sint argc, char ** argv )
 		}
 		
 		out = string("<TYPE Type=\"String\" UI=\"NonEditableCombo\" Default=\"None\" Version=\"0.1\" State=\"modified\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("  <DEFINITION Label=\"unknown\" Value=\"unknown\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		
 		set<string>::const_iterator itCode;
 		for ( itCode = Codes.begin() ; itCode != Codes.end() ; ++itCode )
 		{
 			out = string("  <DEFINITION Label=\"") +  (*itCode) + string("\" Value=\"") + (*itCode) + string("\"/>\n");
-			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		}
 
 		out = string("</TYPE>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		fo.close();
 	}
 
@@ -460,18 +460,18 @@ sint main( sint argc, char ** argv )
 
 	// output header of .typ or .dfn file
 	string out("<?xml version=\"1.0\"?>\n");
-	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 	if( string( argv[2] ).find(".typ") != string::npos )
 	{
 		out = string("<TYPE Type=\"String\" UI=\"NonEditableCombo\" Default=\"unknown\" Version=\"0.1\" State=\"modified\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		out = string("  <DEFINITION Label=\"unknown\" Value=\"unknown\"/>\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 	}
 	else
 	{
 		out = string("<DFN Version=\"0.0\" State=\"modified\">\n");
-		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 	}
 
 	// parse all skills to export selected ones
@@ -522,7 +522,7 @@ sint main( sint argc, char ** argv )
 			{
 				out = string("  <ELEMENT Name=\"") + skill.NormalizedSkillName + string("\" Type=\"Type\" Filename=\"creature_stat.typ\"/>\n");
 			}
-			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+			fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		}
 	}
 
@@ -534,7 +534,7 @@ sint main( sint argc, char ** argv )
 	{
 		out = string("</DFN>\n");
 	}
-	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), out.size() );
+	fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 	fo.close();
 
 	/////////////////////////////////////////////////////////////////////////////////////

@@ -142,7 +142,7 @@ void CFXManager::update()
 	while (!_DeferredFXByDate.empty())
 	{
 
-		if (T1 < _DeferredFXByDate.begin()->first) break;
+		if (T1 < (sint64)_DeferredFXByDate.begin()->first) break;
 		const CDeferredFX &fx = _DeferredFXByDate.begin()->second;
 		NL3D::UParticleSystemInstance fxInstance = instantFX(fx.FXName, fx.TimeOut);
 		if (!fxInstance.empty())

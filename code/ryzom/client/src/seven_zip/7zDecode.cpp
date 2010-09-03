@@ -106,7 +106,7 @@ SZ_RESULT SzDecode(const CFileSize *packSizes, const CFolder *folder,
     #endif
 
     if (LzmaDecodeProperties(&state.Properties, coder->Properties.Items, 
-        coder->Properties.Capacity) != LZMA_RESULT_OK)
+        (SizeT)coder->Properties.Capacity) != LZMA_RESULT_OK)
       return SZE_FAIL;
 
     state.Probs = (CProb *)allocMain->Alloc(LzmaGetNumProbs(&state.Properties) * sizeof(CProb));

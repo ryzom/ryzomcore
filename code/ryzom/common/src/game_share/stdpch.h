@@ -56,6 +56,8 @@
 #include <nel/misc/string_common.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/bit_mem_stream.h>
+#include <nel/misc/o_xml.h>
+#include <nel/misc/i_xml.h>
 
 #include <nel/net/udp_sock.h>
 #include <nel/net/unified_network.h>

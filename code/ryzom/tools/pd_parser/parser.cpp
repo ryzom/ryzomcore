@@ -77,7 +77,7 @@ string	formatDescription(const string &str)
 
 string	strReplace(string str, const string &search, const string &replace)
 {
-	uint	pos;
+	std::string::size_type	pos = 0;
 	while ((pos = str.find(search)) != string::npos)
 		str.replace(pos, search.size(), replace);
 	return str;
@@ -776,7 +776,7 @@ void	CDbNode::generateLogContent()
 	{
 		CLogMsgNode	*child = LogNodes[i];
 		child->Id = logid;
-		logid += child->Logs.size();
+		logid += (uint)child->Logs.size();
 
 		child->generateContent();
 	}
@@ -1805,7 +1805,7 @@ void	CClassNode::computeAttributesColumns()
 		Attributes = mother->Attributes;
 	}
 
-	uint	attribId = Attributes.size();
+	uint	attribId = (uint)Attributes.size();
 	uint	i;
 	for (i=0; i<Nodes.size(); ++i)
 	{

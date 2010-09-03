@@ -63,7 +63,7 @@ void CCharFilterFactory::displayFilterList(NLMISC::CLog* log)
 	{
 		std::string s= _Filters[i]->getName();
 		if (s.size()>longestName)
-			longestName=s.size();
+			longestName=(uint32)s.size();
 	}
 
 	// iterate over the filters displaying names and description
@@ -75,7 +75,7 @@ void CCharFilterFactory::displayFilterList(NLMISC::CLog* log)
 
 uint32 CCharFilterFactory::getFilterBuilderCount()
 {
-	return _Filters.size();
+	return (uint32)_Filters.size();
 }
 
 ICharFilterBuilder* CCharFilterFactory::getFilterBuilder(uint32 idx)

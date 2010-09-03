@@ -65,7 +65,7 @@ public:
 	void readGeorges (const CSmartPtr<NLGEORGES::UForm> &form, const CSheetId &sheetId);
 
 	/// Load/Save the values using the serial system
-	void serial (IStream &s);
+	void serial (NLMISC::IStream &s);
 
 	/** 
 	 * Event to implement any action when the sheet is no longer existent.
@@ -106,7 +106,7 @@ void CSheet::readGeorges (const CSmartPtr<NLGEORGES::UForm> &form, const CSheetI
 //	serial
 //
 //-----------------------------------------------
-void CSheet::serial (IStream &s)
+void CSheet::serial (NLMISC::IStream &s)
 {
 	s.serial( Alias );
 }
@@ -177,7 +177,7 @@ int main( int argc, char ** argv )
 	{
 		CConfigFile::CVar& cvSheetPaths = configFile.getVar("SheetPaths");
 		sint i;
-		for( i = 0; i< cvSheetPaths.size(); ++i)
+		for( i = 0; i< (sint)cvSheetPaths.size(); ++i)
 		{
 			sheetPaths.push_back( cvSheetPaths.asString(i) );
 		}
@@ -213,7 +213,7 @@ int main( int argc, char ** argv )
 	{
 		CConfigFile::CVar& cvExtensions = configFile.getVar("Extensions");
 		sint i;
-		for( i = 0; i< cvExtensions.size(); ++i)
+		for( i = 0; i< (sint)cvExtensions.size(); ++i)
 		{
 			extensions.push_back( cvExtensions.asString(i) );
 		}

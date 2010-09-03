@@ -18,9 +18,8 @@
 #include "formFlora.h"
 #include "formPlant.h"
 #ifdef NL_OS_WINDOWS
+#define NOMINMAX
 #include <windows.h>
-#undef max
-#undef min
 #endif // NL_OS_WINDOWS
 
 #include "nel/ligo/zone_region.h"

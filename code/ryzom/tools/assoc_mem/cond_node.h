@@ -76,6 +76,7 @@ template<class T> bool CEqualNode<T>::propagRecord(CRecord *record)
 		id_node++;
 		it_val++;
 	}
+	return false;
 }
 
 /*

@@ -73,7 +73,7 @@ bool CCharScanScript::addScriptFile(const std::string& fileName)
 void CCharScanScript::applyToJob(CCharacterScanJob& job)
 {
 	// iterate backwards over the script files in order to apply the most important files last
-	for (uint32 i=_ScriptFiles.size();i--;)
+	for (uint32 i=(uint32)_ScriptFiles.size();i--;)
 	{
 		_ScriptFiles[i].applyToJob(job);
 	}
@@ -230,7 +230,7 @@ void CCharScanScriptCommandRegistry::displayScriptCommands(NLMISC::CLog* log)
 	{
 		std::string s= _ScriptCommands[i]->getName();
 		if (s.size()>longestName)
-			longestName=s.size();
+			longestName=(uint32)s.size();
 	}
 
 	// iterate over the script commands displaying names and description

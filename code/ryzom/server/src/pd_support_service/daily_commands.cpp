@@ -68,7 +68,7 @@ public:
 
 		// setup the new lastTime and oldJobsRemaining values
 		uint32 oldJobsRemaining= CJobManager::getInstance()->getNumJobs();
-		lastTime= startTime;
+		lastTime= (uint32)startTime;
 
 		// execute daily tasks
 		NLMISC::CConfigFile::CVar *commandsVar = NLNET::IService::getInstance()->ConfigFile.getVarPtr("DailyCommands");

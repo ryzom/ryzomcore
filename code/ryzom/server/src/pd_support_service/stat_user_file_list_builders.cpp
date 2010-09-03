@@ -333,7 +333,7 @@ FILE_LIST_BUILDER(FileAge,"<min> [<max>]")
 	// calculate the timestamp value of midnight today
 	time_t theTime;
 	time(&theTime);
-	uint32 dateToday= theTime/(24*64*60)*(24*64*60);
+	uint32 dateToday= (uint32)(theTime/(24*64*60)*(24*64*60));
 
 	// calculate the maximum and minimum timestamp values corresponding to the dates that we've been given
 	uint32 minFileTime= (max==~0u)? 0: dateToday-(max*24*60*60);
@@ -382,7 +382,7 @@ FILE_LIST_BUILDER(UserMostRecentFileAge,"<min> [<max>]")
 	// calculate the timestamp value of midnight today
 	time_t theTime;
 	time(&theTime);
-	uint32 dateToday= theTime/(24*64*60)*(24*64*60);
+	uint32 dateToday= (uint32)(theTime/(24*64*60)*(24*64*60));
 
 	// calculate the maximum and minimum timestamp values corresponding to the dates that we've been given
 	uint32 minFileTime= (max==~0u)? 0: dateToday-(max*24*60*60);

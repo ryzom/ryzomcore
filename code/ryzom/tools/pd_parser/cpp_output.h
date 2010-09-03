@@ -184,7 +184,7 @@ public:
 		newSection.Name = name;
 		newSection.DisplayName = displayname;
 		newSection.Description = description;
-		CurrentSection = Sections.size();
+		CurrentSection = (sint)Sections.size();
 		Sections.push_back(newSection);
 	}
 
@@ -237,7 +237,7 @@ public:
 
 		_section.Methods.push_back(newMethod);
 
-		CurrentMethod = SMethodId(CurrentSection, _section.Methods.size()-1, this);
+		CurrentMethod = SMethodId(CurrentSection, (sint)_section.Methods.size()-1, this);
 
 		return CurrentMethod;
 	}
@@ -624,7 +624,7 @@ inline void	CCppOutput::clear()
 inline bool	searchForId(char* buffer, char** start, char** end)
 {
 	const char*	id = "$Id:";
-	uint	len = strlen(id);
+	uint	len = (uint)strlen(id);
 	for (; *buffer != '\0'; ++buffer)
 	{
 		if (strncmp(buffer, id, len) == 0)
@@ -679,7 +679,7 @@ inline void	CCppOutput::flush(const std::string &fileName)
 	{
 		if (f.open(fileName))
 		{
-			f.serialBuffer((uint8*)(_Buffer.c_str()), _Buffer.size());
+			f.serialBuffer((uint8*)(_Buffer.c_str()), (uint)_Buffer.size());
 			f.close();
 		}
 		else

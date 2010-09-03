@@ -147,11 +147,11 @@ void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSe
 					
 					// try to get the name
 					const string	tagStart= "name=\"";
-					uint	start= lineLwr.find(tagStart);
+					std::string::size_type	start= lineLwr.find(tagStart);
 					if(start!=string::npos)
 					{
 						start+= tagStart.size();
-						uint	end= lineLwr.find("\"", start);
+						std::string::size_type	end= lineLwr.find("\"", start);
 						if(end!=string::npos)
 							currentStateName= lineLwr.substr(start, end-start);
 					}
@@ -168,7 +168,7 @@ void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSe
 					static CAnimCombatState		key;
 					// must translate for instance "attack1" to "A1"
 					key.StateCode= StateNameToStateCode[currentStateName];
-					set<CAnimCombatState>::iterator		it= currentCombatAnimSet.States.find(key);
+					set<CAnimCombatState>::const_iterator		it= currentCombatAnimSet.States.find(key);
 					if(it!=currentCombatAnimSet.States.end())
 					{
 						// else take the mean anim time
@@ -215,7 +215,7 @@ void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSe
 		{
 			string	str= animSetText[i];
 			str+= "\n";
-			oFile.serialBuffer((uint8*)str.c_str(), str.size());
+			oFile.serialBuffer((uint8*)str.c_str(), (uint)str.size());
 		}
 	}
 }

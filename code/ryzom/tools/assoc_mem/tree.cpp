@@ -68,7 +68,7 @@ int CTree::getNbRecords(std::vector<CRecord *> &records,int key, IValue *value) 
 
 double CTree::log2(double val) const
 {
-	return (log(val) / log(2));
+	return (log(val) / log(2.0));
 }
 
 double CTree::entropy(double a, double b) const
@@ -107,8 +107,8 @@ double CTree::entropy(std::vector<double> &p) const
 
 double CTree::gain(std::vector<CRecord *> &records, int attrib, CField *field)
 {
-	int nb_values = field->getPossibleValues().size();
-	int nb_records = records.size();
+	int nb_values = (int)field->getPossibleValues().size();
+	int nb_records = (int)records.size();
 
 	CValue<bool> bool_true(true);
 
@@ -270,7 +270,7 @@ INode *CTree::ID3(std::vector<int> &attributes, std::vector<CRecord *> &records,
 
 
 		// Tests if all records have the same key value, if so returns a result node with this key value.
-		int nb_records = records.size();		
+		int nb_records = (int)records.size();		
 		int nb_key_true; 
 		int nb_key_false;
 
@@ -380,7 +380,7 @@ void CTree::splitRecords( std::vector<CRecord *> &records, int attrib, std::vect
 {
 	if ( result.size() < fields[attrib]->getPossibleValues().size() )
 	{
-		int nb_missing = fields[attrib]->getPossibleValues().size() - result.size();
+		int nb_missing = (int)(fields[attrib]->getPossibleValues().size() - result.size());
 		for (int i = 0; i  <=  nb_missing; i++ )
 		{
 			result.push_back( std::vector<CRecord *>() );

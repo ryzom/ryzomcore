@@ -1002,7 +1002,6 @@ void initPatchCheck()
 		// In previous code, the following was not set in R2Mode, possible bug ?...let as before anyway ...
 		// store the selected shard for restarting after patch
 		LoginShardId = Shards[ShardSelected].ShardId;
-
 	}
 
 	if (!isBGDownloadEnabled())

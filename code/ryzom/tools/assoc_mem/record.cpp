@@ -68,5 +68,5 @@ const IValue *CRecord::operator[](int index)
 
 int CRecord::size()
 {
-	return _Values.size();
+	return (int)_Values.size();
 }

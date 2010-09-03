@@ -162,7 +162,7 @@ public:
 	/// Init
 	void	init(const char* text, uint size = 0)
 	{
-		_Size = (size > 0 ? size : strlen(text));
+		_Size = (size > 0 ? size : (uint)strlen(text));
 		_Buffer = text;
 		nlassert(_Buffer != NULL);
 		_TempToken.Start = 0;
@@ -301,7 +301,7 @@ public:
 		std::string		str(_Buffer+token.Start, token.End-token.Start);
 		if (token.Token == TokenString)
 		{
-			uint	pos = 0;
+			std::string::size_type	pos = 0;
 			while ((pos = str.find('\\', pos)) != std::string::npos)
 			{
 				if (pos+1 == str.size())

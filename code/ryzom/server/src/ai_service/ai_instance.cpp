@@ -705,7 +705,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 			float angle = 0.f;
 			if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
-				angle = orientation;
+				angle = (float)orientation;
 			else
 				angle = randomAngle();
 
