@@ -91,7 +91,7 @@ void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSe
 	strlwr(shortName);
 	CAnimCombatSet	key;
 	key.Name= shortName;
-	set<CAnimCombatSet>::iterator	it= combatAnimSets.find(key);
+	set<CAnimCombatSet>::const_iterator	it= combatAnimSets.find(key);
 	if(it == combatAnimSets.end())
 		return;
 
