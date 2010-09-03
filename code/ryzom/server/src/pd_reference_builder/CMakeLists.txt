@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(reference_builder_service ${SRC})
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(reference_builder_service	
 						ryzom_gameshare
 						pd_lib
