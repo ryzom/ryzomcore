@@ -81,7 +81,7 @@ void CGraph::render (NL3D::UDriver *Driver, NL3D::UTextContext *TextContext)
 	
 	CVertexBuffer	vbuffer;
 	vbuffer.setVertexFormat (CVertexBuffer::PositionFlag);
-	vbuffer.setNumVertices (Values.size() * 2);
+	vbuffer.setNumVertices ((uint32)Values.size() * 2);
 
 	float pos = X+Width-1;
 	uint i = 0;

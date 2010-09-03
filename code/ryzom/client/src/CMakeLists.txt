@@ -65,6 +65,7 @@ ENDIF(APPLE)
 INCLUDE_DIRECTORIES(
 			${LIBXML2_INCLUDE_DIR}
 			${LUA_INCLUDE_DIR}
+			${LUABIND_INCLUDE_DIR}
 			${LIBWWW_INCLUDE_DIR}
 			${CURL_INCLUDE_DIRS}
 			${CMAKE_CURRENT_SOURCE_DIR})
@@ -81,12 +82,11 @@ TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
 				ryzom_gameshare
 				nelpacs
 				${LUA_LIBRARIES}
+				${LUABIND_LIBRARY}
 				${CURL_LIBRARIES}
 				${LIBWWW_LIBRARY}
 				${SEVENZIP_LIBRARY}
-				${LIBXML2_LIBRARIES}
-				luabind # TODO: find luabind and expat cleanly using a find script
-				expat)
+				expat) # TODO: find expat cleanly using a find script
 
 IF(NOT APPLE AND NOT WIN32)
 	TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})

@@ -18,6 +18,10 @@
 
 #include "nel/sound/driver/sound_driver.h"
 
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif // HAVE_CONFIG_H
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -201,6 +205,11 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	}
 
 	CLibrary driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+
 	// Load it (adding standard nel pre/suffix, looking in library path and not taking ownership)
 	if (!driverLib.loadLibrary(dllName, true, true, false))
 	{

@@ -10,21 +10,17 @@ SET(CMAKE_MFC_FLAG 2)
 ADD_LIBRARY(object_viewer_dll SHARED ${SRC} object_viewer.rc)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(object_viewer_dll 
-							${LIBXML2_LIBRARIES} 
 							nelmisc
 							nel3d
 							nelsound
 							nelsnd_lowlevel
 							Version.lib)
 							
-SET_TARGET_PROPERTIES(object_viewer_dll PROPERTIES 
-  VERSION ${NL_VERSION}
-  LINK_FLAGS_DEBUG "${CMAKE_LINK_FLAGS_DEBUG}"
-  LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}"
-  DEBUG_POSTFIX "_d"
-  RELEASE_POSTFIX "_r"
-  PROJECT_LABEL "NeL, Tools, 3D: Object Viewer DLL")
+NL_DEFAULT_PROPS(object_viewer_dll "NeL, Tools, 3D: Object Viewer DLL")
+NL_ADD_RUNTIME_FLAGS(object_viewer_dll)
+NL_ADD_LIB_SUFFIX(object_viewer_dll)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DOBJECT_VIEWER_LIB_EXPORTS)
 

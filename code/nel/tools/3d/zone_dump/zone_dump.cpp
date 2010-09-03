@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 									}
 
 									// Triangle count
-									triangles+=faces.size();
+									triangles+=(uint32)faces.size();
 								}
 							}
 							else

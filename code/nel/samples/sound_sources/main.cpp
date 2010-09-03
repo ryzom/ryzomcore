@@ -62,7 +62,7 @@ void Init()
 		AudioMixer->setSamplePath("data/samplebank");
 		// Packed sheet option, this mean we want packed sheet generated in 'data' folder
 		AudioMixer->setPackedSheetOption("data", true);
-		
+
 		printf("Select NLSOUND Driver:\n");
 		printf(" [1] FMod\n");
 		printf(" [2] OpenAl\n");
@@ -71,7 +71,7 @@ void Init()
 		printf("> ");
 		int selection = getchar();
 		printf("\n");
-		
+
 		// init with 32 tracks, EAX enabled, no ADPCM, and activate automatic sample bank loading
 		AudioMixer->init(32, true, false, NULL, true, (UAudioMixer::TDriver)(selection - '0')/*UAudioMixer::DriverFMod*/);
 
@@ -143,7 +143,7 @@ void OnMove( const CVector& listenerpos )
  * Note: The NeL vector coordinate system is described as follows:
  * \verbatim
  *     (top)
- *       z    
+ *       z
  *       |  y (front)
  *       | /
  *       -----x (right)
@@ -151,7 +151,7 @@ void OnMove( const CVector& listenerpos )
  */
 int main()
 {
-	new CApplicationContext(); // crash at end if on stack ...
+	CApplicationContext *appContext = new CApplicationContext(); // crash at end if on stack ...
 
 	// Initialization
 	Init();
@@ -208,4 +208,8 @@ int main()
 
 	delete src1; delete src2;
 	delete AudioMixer;
+
+	delete appContext;
+
+	return 0;
 }

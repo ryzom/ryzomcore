@@ -59,7 +59,7 @@ void *CNelExportClassDesc::Create(BOOL loading)
 }
 
 
-int CALLBACK OptionsDialogCallback (
+INT_PTR CALLBACK OptionsDialogCallback (
   HWND hwndDlg,  // handle to dialog box
   UINT uMsg,     // message
   WPARAM wParam, // first message parameter
@@ -217,7 +217,7 @@ int CALLBACK OptionsDialogCallback (
 }
 
 extern HINSTANCE hInstance;
-static BOOL CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// Set locale to english
 	setlocale (LC_NUMERIC, "English");

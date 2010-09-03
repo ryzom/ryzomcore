@@ -4,34 +4,31 @@ ADD_EXECUTABLE(nl_sample_clusterview WIN32 ${SRC})
 
 ADD_DEFINITIONS(-DCV_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_clusterview/\\"")
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nl_sample_clusterview ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(nl_sample_clusterview ${PLATFORM_LINKFLAGS} nelmisc nel3d)
 NL_ADD_RUNTIME_FLAGS(nl_sample_clusterview)
 NL_DEFAULT_PROPS(nl_sample_clusterview "NeL, Samples, 3D: Cluster Viewer")
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
 INSTALL(TARGETS nl_sample_clusterview RUNTIME DESTINATION bin COMPONENT samples3d)
 INSTALL(FILES main.cvs readme.txt DESTINATION share/nel/nl_sample_clusterview COMPONENT samples3d)
-INSTALL(DIRECTORY groups/ 
+INSTALL(DIRECTORY groups/
 	DESTINATION share/nel/nl_sample_clusterview/groups
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE
 	PATTERN ".svn" EXCLUDE
 	PATTERN "Makefile*" EXCLUDE)
-INSTALL(DIRECTORY fonts/ 
+INSTALL(DIRECTORY fonts/
 	DESTINATION share/nel/nl_sample_clusterview/fonts
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE
 	PATTERN ".svn" EXCLUDE
 	PATTERN "Makefile*" EXCLUDE)
-INSTALL(DIRECTORY max/ 
+INSTALL(DIRECTORY max/
 	DESTINATION share/nel/nl_sample_clusterview/max
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE
 	PATTERN ".svn" EXCLUDE
 	PATTERN "Makefile*" EXCLUDE)
-INSTALL(DIRECTORY shapes/ 
+INSTALL(DIRECTORY shapes/
 	DESTINATION share/nel/nl_sample_clusterview/shapes
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE

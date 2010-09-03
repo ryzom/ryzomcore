@@ -56,9 +56,13 @@ namespace NL3D
 bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_OGL(GlWndProc)
+
+	if (!driver)
+		return false;
+
 	if(message == WM_SIZE)
 	{
-		if (driver != NULL)
+		if (!driver->_FullScreen)
 		{
 			RECT rect;
 			GetClientRect (driver->_win, &rect);
@@ -70,7 +74,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	}
 	else if(message == WM_MOVE)
 	{
-		if (driver != NULL)
+		if (!driver->_FullScreen)
 		{
 			RECT rect;
 			GetWindowRect (hWnd, &rect);
@@ -113,14 +117,37 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		trapMessage = GlWndProc (pDriver, hWnd, message, wParam, lParam);
 	}
 
+	// we don't want Windows to erase background
+	if (message == WM_ERASEBKGND)
+	{
+		return TRUE;
+	}
+
+	if (message == WM_SYSCOMMAND)
+	{
+		switch (wParam)
+		{
 #ifdef NL_DISABLE_MENU
-	// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
-	if(message == WM_SYSCOMMAND && wParam == SC_KEYMENU)
-		return 0;
+			// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
+			case SC_KEYMENU:
 #endif // NL_DISABLE_MENU
 
+			// Screensaver Trying To Start?
+			case SC_SCREENSAVE:
+
+			// Monitor Trying To Enter Powersave?
+			case SC_MONITORPOWER:
+
+			// Prevent From Happening
+			return 0;												
+
+			default:
+			break;
+		}
+	}
+
 	// disable menu (default ALT-F4 behavior is disabled)
-	if(message == WM_CLOSE)
+	if (message == WM_CLOSE)
 	{
 		if(pDriver && pDriver->ExitFunc)
 		{
@@ -219,21 +246,6 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 	}
 
 	return true;
-
-/*
-	else if (message == WM_ACTIVATE)
-	{
-		WORD fActive = LOWORD(wParam);
-		if (fActive == WA_INACTIVE)
-		{
-			driver->_WndActive = false;
-		}
-		else
-		{
-			driver->_WndActive = true;
-		}
-	}
-*/
 }
 
 #endif // NL_OS_UNIX
@@ -1442,6 +1454,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	if (_win == EmptyWindow || !_DestroyWindow)
 		return true;
 
+	if (getWindowStyle() == windowStyle)
+		return true;
+
 #if defined(NL_OS_WINDOWS)
 
 	// get current style
@@ -1493,24 +1508,48 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_UNIX)
 
-	// Toggle fullscreen
-	XEvent xev;
-	xev.xclient.type = ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event = True;
-	xev.xclient.display = _dpy;
-	xev.xclient.window = _win;
-	xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
-	xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	xev.xclient.data.l[2] = 0;
-	xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
-	xev.xclient.data.l[4] = 0;
-	if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+	XWindowAttributes attr;
+	XGetWindowAttributes(_dpy, _win, &attr);
+
+	// if window is mapped use events else properties
+	if (attr.map_state != IsUnmapped)
 	{
-		nlwarning("3D: Failed to toggle to fullscreen");
-		return false;
+		// Toggle fullscreen
+		XEvent xev;
+		xev.xclient.type = ClientMessage;
+		xev.xclient.serial = 0;
+		xev.xclient.send_event = True;
+		xev.xclient.display = _dpy;
+		xev.xclient.window = _win;
+		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
+		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+		xev.xclient.data.l[2] = 0;
+		xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
+		xev.xclient.data.l[4] = 0;
+		if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+		{
+			nlwarning("3D: Failed to toggle to fullscreen");
+			return false;
+		}
+	}
+	else
+	{
+		Atom _NET_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
+
+		if (windowStyle == EWSFullscreen)
+		{
+			Atom _NET_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+
+			// set state property to fullscreen
+			XChangeProperty(_dpy, _win, _NET_WM_STATE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&_NET_WM_STATE_FULLSCREEN, 1);
+		}
+		else
+		{
+			// delete state property
+			XDeleteProperty(_dpy, _win, _NET_WM_STATE);
+		}
 	}
 
 	// show window (hack to avoid black window bug)

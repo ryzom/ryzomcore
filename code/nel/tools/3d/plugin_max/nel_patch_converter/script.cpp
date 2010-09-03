@@ -21,6 +21,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#include <assert.h>
 #include <MaxScrpt/maxscrpt.h>
 #include <MaxScrpt/3dmath.h>
 

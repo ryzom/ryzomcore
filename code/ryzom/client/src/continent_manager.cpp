@@ -697,26 +697,28 @@ void CContinentManager::reloadSky()
 // ***************************************************************************
 void CContinentManager::loadContinentLandMarks()
 {
+	std::string dataPath = "../../client/data";
+
 	if (ClientCfg.UpdatePackedSheet == false)
 	{
-		readLMConts();
+		readLMConts(dataPath);
 	}
 	else
 	{
-		buildLMConts();
-		readLMConts();
+		buildLMConts("ryzom.world", "../../common/data_leveldesign/primitives", dataPath);
+		readLMConts(dataPath);
 	}
 }
 
 // ***************************************************************************
 
-void CContinentManager::readLMConts()
+void CContinentManager::readLMConts(const std::string &dataPath)
 {
 	CIFile f;
 
 	string sPackedFileName = CPath::lookup(LM_PACKED_FILE, false);
 	if (sPackedFileName.empty())
-		sPackedFileName = LM_PACKED_FILE_SAVE;
+		sPackedFileName = CPath::standardizePath(dataPath) + LM_PACKED_FILE;
 
 	if (f.open(sPackedFileName))
 	{

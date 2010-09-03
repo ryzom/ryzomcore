@@ -25,6 +25,9 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
@@ -74,6 +77,10 @@ IDriver		*CDRU::createGlDriver() throw (EDru)
 
 //	hInst=LoadLibrary(NL3D_GL_DLL_NAME);
 	CLibrary	driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
 
 //	if (!hInst)
 	if (!driverLib.loadLibrary(NL3D_GL_DLL_NAME, true, true, false))

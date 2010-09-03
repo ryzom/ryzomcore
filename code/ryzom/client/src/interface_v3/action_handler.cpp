@@ -71,7 +71,7 @@ std::string IActionHandler::getParam (const string &Params, const string &ParamN
 {
 	string allparam = Params;
 	skipBlankAtStart (allparam);
-	string param = strlwr (ParamName);
+	string param = toLower (ParamName);
 	while (allparam.size() > 0)
 	{
 		std::string::size_type e = allparam.find('=');

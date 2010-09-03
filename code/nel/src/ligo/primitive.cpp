@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdligo.h"
 #include "nel/misc/types_nl.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/ligo/primitive.h"

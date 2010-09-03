@@ -106,8 +106,8 @@ void	CPatchUVLocator::build(const CPatch *patchCenter, sint edgeCenter, CPatch::
 		// Find the position.
 		//=============================
 		// Find the uv coord at start of the edge, for 2 patchs.
-		CVector2f		uvCenter;
-		CVector2f		uvNeighbor;
+		CVector2f		uvCenter(0.f, 0.f);
+		CVector2f		uvNeighbor(0.f, 0.f);
 		float	decal;
 
 		// find the uv at start of edgeCenter, + decal due to bind 1/X.

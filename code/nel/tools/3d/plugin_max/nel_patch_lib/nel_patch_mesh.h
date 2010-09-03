@@ -521,7 +521,7 @@ public:
 	// Get map hit size
 	uint getMapHitSize () const
 	{
-		return _Data._MapHitToTileIndex->size ();
+		return (uint)_Data._MapHitToTileIndex->size ();
 	}
 
 	// Remap a triangle
@@ -534,7 +534,7 @@ public:
 	// Get the patch user info size
 	uint getUIPatchSize () const
 	{
-		return _Data._UIPatch->size();
+		return (uint)_Data._UIPatch->size();
 	}
 
 	// Get a patch user info
@@ -558,7 +558,7 @@ public:
 	// Get vertex user info size
 	uint getUIVertexSize () const
 	{
-		return _Data._UIVertex->size();
+		return (uint)_Data._UIVertex->size();
 	}
 
 	// Get a vertex user info

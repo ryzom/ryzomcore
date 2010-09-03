@@ -1,11 +1,15 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file config.py
 # \brief Process configuration
-# \date 2010-05-24 06:30GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Process configuration.
+# Process configuration for 'jungle' ecosystem.
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -28,16 +32,25 @@
 
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
-ProcessToComplete += [ "shape" ] # not fully implemented, but works for this process
-ProcessToComplete += [ "map" ] # not fully implemented, but works for this process
-ProcessToComplete += [ "smallbank" ] # OK
-ProcessToComplete += [ "farbank" ] # OK
-ProcessToComplete += [ "tiles" ] # OK
-ProcessToComplete += [ "displace" ] # OK
-ProcessToComplete += [ "veget" ] # OK
-ProcessToComplete += [ "vegetset" ] # OK
-ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process, but does not export max files
-##ProcessToComplete += [ "pacs_prim" ]
+ProcessToComplete += [ "shape" ]
+ProcessToComplete += [ "map" ]
+ProcessToComplete += [ "smallbank" ]
+ProcessToComplete += [ "farbank" ]
+ProcessToComplete += [ "tiles" ]
+ProcessToComplete += [ "displace" ]
+ProcessToComplete += [ "veget" ]
+ProcessToComplete += [ "vegetset" ]
+ProcessToComplete += [ "ligo" ]
+ProcessToComplete += [ "pacs_prim" ]
+
+
+# *** ECOSYSTEM AND CONTINENT NAMES ***
+
+EcosystemName = "jungle"
+EcosystemPath = "ecosystems/" + EcosystemName
+CommonName = EcosystemName
+CommonPath = EcosystemPath
+
 
 # *** MAP EXPORT OPTIONS ***
 PanoplyFileList = [ ]
@@ -52,7 +65,7 @@ ShapeExportOptExportLighting = "true"
 ShapeExportOptShadow = "true"
 
 # Lighting limits. 0 : normal, 1 : soft shadows
-ShapeExportOptLightingLimit = 0
+ShapeExportOptLightingLimit = 1
 
 # Lightmap lumel size
 ShapeExportOptLumelSize = "0.25"
@@ -64,17 +77,21 @@ ShapeExportOptOversampling = 1
 ShapeExportOpt8BitsLightmap = "false"
 
 # Does the lightmaps export must generate logs ?
-ShapeExportOptLightmapLog = "false"
+ShapeExportOptLightmapLog = "true"
 
 # Coarse mesh texture mul size
 TextureMulSizeValue = "1.5"
 
+DoBuildShadowSkin = 0
+
+ClodConfigFile = ""
+
 # *** COARSE MESH TEXTURE NAME ***
 CoarseMeshTextureNames = [ ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_sp" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_su" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_au" ]
-CoarseMeshTextureNames += [ "nel_coarse_mesh_jungle_wi" ]
+CoarseMeshTextureNames += [ "nel_coarse_mesh_" + EcosystemName + "_sp" ]
+CoarseMeshTextureNames += [ "nel_coarse_mesh_" + EcosystemName + "_su" ]
+CoarseMeshTextureNames += [ "nel_coarse_mesh_" + EcosystemName + "_au" ]
+CoarseMeshTextureNames += [ "nel_coarse_mesh_" + EcosystemName + "_wi" ]
 
 # *** POSTFIX USED BY THE MULTIPLE TILES SYSTEM ***
 MultipleTilesPostfix = [ ]
@@ -86,7 +103,7 @@ MultipleTilesPostfix += [ "_wi" ]
 # *** BANK EXPORT OPTIONS ***
 
 # Name of the tilebank to use
-BankTileBankName = "jungle"
+BankTileBankName = EcosystemName
 
 # *** RBANK EXPORT OPTIONS ***
 
@@ -106,3 +123,6 @@ ReduceBitmapFactor = 0
 
 DoBuildShadowSkin = False
 ClodConfigFile = ""
+
+# *** PACS_PRIM OPTIONS ***
+WantLandscapeColPrimPacsList = True

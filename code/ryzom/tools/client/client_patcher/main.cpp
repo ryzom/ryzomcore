@@ -82,13 +82,32 @@ void printDownload(const std::string &str)
 
 	static const uint maxLength = 160;
 	static char spaces[maxLength];
+
+	uint length = 0;
+
+	if (useUtf8)
+	{
+		ucstring utf8Str;
+		utf8Str.fromUtf8(str);
+		length = (uint)utf8Str.length();
+	}
+	else
+	{
+		length = (uint)str.length();
+	}
+
+	sint diff = length - previousLength;
+
+	if (diff > 0 && length < maxLength)
+	{
+		memset(spaces, ' ', length);
+		spaces[length] = '\0';
+
+		// "erase" previous line
+		printf("%s\r", spaces);
+		fflush(stdout);
+	}
 	
-	memset(spaces, ' ', previousLength);
-	spaces[previousLength] = '\0';
-
-	// "erase" previous line
-	printf("%s\r", spaces);
-
 	// display download in purple
 	if (useEsc)
 	{
@@ -108,8 +127,10 @@ void printDownload(const std::string &str)
 			SetConsoleTextAttribute(hStdout, attributes);
 #endif
 	}
+	
+	fflush(stdout);
 
-	previousLength = (uint)str.length();
+	previousLength = length;
 }
 
 int main(int argc, char *argv[])

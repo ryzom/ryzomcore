@@ -45,14 +45,14 @@ printLog(log, "")
 
 clientPath = ClientDataDirectory + "/" + FontClientDirectory
 mkPath(log, clientPath)
+fontExportDir = ExportBuildDirectory + "/" + FontExportDirectory
+mkPath(log, fontExportDir)
 
 printLog(log, ">>> Install font <<<")
-for dir in FontSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, clientPath, ".ttf")
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, clientPath, ".afm")
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, clientPath, ".pfb")
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, clientPath, ".pfm")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".ttf")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".afm")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".pfb")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".pfm")
 
 printLog(log, "")
 log.close()

@@ -127,7 +127,7 @@ public:
 protected:
 
 	void loadContinentLandMarks();
-	void readLMConts();
+	void readLMConts(const std::string &dataPath);
 
 protected:
 

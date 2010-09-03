@@ -50,6 +50,7 @@ for dir in FontSourceDirectories:
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + FontExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")

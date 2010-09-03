@@ -16,6 +16,8 @@
 
 #define EXPORT_GET_ALLOCATOR
 
+#include <assert.h>
+
 // Various MAX and MXS includes
 #include <MaxScrpt/MAXScrpt.h>
 #include <MaxScrpt/3dmath.h>

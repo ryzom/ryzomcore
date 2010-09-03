@@ -57,23 +57,49 @@ if DoBuildShadowSkin:
 	printLog(log, "********      TODO      ********")
 	printLog(log, "********************************")
 
+mkPath(log, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
 if ClodConfigFile != "":
-	printLog(log, ">>> BuildClodtex <<<")
-	printLog(log, "********************************")
-	printLog(log, "********      TODO      ********")
-	printLog(log, "********************************")
+	mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
+	printLog(log, ">>> Build CLodTex <<<")
+	subprocess.call([ BuildClodtex, "-d", DatabaseDirectory + "/" + ClodConfigFile, ExportBuildDirectory + "/" + ClodExportDirectory, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory ])
+else:
+	printLog(log, ">>> Copy Shape <<<")
+	copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ".shape")
 
-printLog(log, ">>> LightmapOptimizer <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+# copy lightmap_not_optimized to lightmap
+printLog(log, ">>> Optimize lightmaps <<<")
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeTagExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
+removeFilesRecursive(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+copyFiles(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+# Optimize lightmaps if any. Additionnaly, output a file indicating which lightmaps are 8 bits
+subprocess.call([ LightmapOptimizer, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ExportBuildDirectory + "/" + ShapeTagExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt" ])
 
-printLog(log, ">>> TgaToDds <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+# Convert lightmap in 16 bits mode if they are not 8 bits lightmap
+printLog(log, ">>> Convert lightmaps in 16 or 8 bits <<<")
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
+lightMapTgas = findFilesNoSubdir(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory, ".tga")
+listLm8Bit = [ ]
+listLm8BitFile = open(ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt", "r")
+for line in listLm8BitFile:
+	lineStrip = line.strip()
+	if (len(lineStrip) > 0):
+		listLm8Bit += [ lineStrip ]
+for lightMapTga in lightMapTgas:
+	srcTga = ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/" + lightMapTga
+	dstTga = ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory + "/" + lightMapTga
+	if needUpdateLogRemoveDest(log, srcTga, dstTga):
+		if lightMapTga in listLm8Bit: # THIS MAY NOT WORK, PLEASE VERIFY CONTENTS OF list_lm_8bit.txt!!!
+			subprocess.call([ TgaToDds, srcTga, "-o", dstTga, "-a", "tga8" ])
+		else:
+			subprocess.call([ TgaToDds, srcTga, "-o", dstTga, "-a", "tga16" ])
 
-if 1: # todo: CoarseMeshTextureNames length > 0 ...
+# Corse meshes for this process ?
+if len(CoarseMeshTextureNames) > 0:
 	printLog(log, ">>> Build coarse meshes <<<")
 	shapeWithCoarseMesh = ExportBuildDirectory + "/" + ShapeWithCoarseMeshExportDirectory
 	mkPath(log, shapeWithCoarseMesh)
@@ -109,8 +135,11 @@ if 1: # todo: CoarseMeshTextureNames length > 0 ...
 	cf.close()
 	subprocess.call([ BuildCoarseMesh, "config_generated.cfg" ])
 	os.remove("config_generated.cfg")
+	# Convert the coarse texture to dds
 	for tn in CoarseMeshTextureNames:
 		subprocess.call([ TgaToDds, shapeWithCoarseMesh + "/" + tn + ".tga", "-o", shapeWithCoarseMeshBuilded + "/" + tn + ".dds", "-a", "5" ])
+else:
+	printLog(log, ">>> No coarse meshes <<<")
 
 log.close()
 

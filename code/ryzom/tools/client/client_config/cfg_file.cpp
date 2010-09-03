@@ -97,7 +97,7 @@ bool GetBool (const char *var)
 	// Available ?
 	if (variable)
 	{
-		string _bool = strlwr (variable->asString ());
+		string _bool = toLower (variable->asString ());
 		if (_bool == "true")
 			return true;
 		if (_bool == "false")

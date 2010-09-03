@@ -44,9 +44,9 @@ void PaintPatchMod::SetOpsDlgEnables()
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	PaintPatchMod *ep =(PaintPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	PaintPatchMod *ep =(PaintPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 
@@ -57,7 +57,7 @@ BOOL CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		 	ep =(PaintPatchMod *)lParam;
 		 	ep->hOpsPanel = hDlg;
 
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
 
 			CheckDlgButton(hDlg, IDC_INCLUDE_MESHES, ep->includeMeshes);
 			CheckDlgButton(hDlg, IDC_PRELOAD_TILES, ep->preloadTiles);

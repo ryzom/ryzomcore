@@ -143,6 +143,9 @@ protected:
 	/// Constructor with ip address, port=0
 	CInetAddress( const in_addr *ip, const char *hostname = 0);
 
+	/// Update _HostName from _SockAddr
+	void				updateHostName();
+
 private:
 
 	// Called in all constructors. Calls CBaseSocket::init().

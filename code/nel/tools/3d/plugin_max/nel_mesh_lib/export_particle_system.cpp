@@ -26,7 +26,8 @@ using namespace NL3D;
 
 IShape* CExportNel::buildParticleSystem(INode& node, TimeValue time)
 {
-	Object *obj = node.EvalWorldState(time).obj;
+	ObjectState os = node.EvalWorldState(time);
+    Object *obj = os.obj;
 	nlassert(obj);
 	std::string shapeName;
 	// try to get the complete path	

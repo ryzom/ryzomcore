@@ -264,6 +264,7 @@ void CExportNel::addParticleSystemTracks(CAnimation& animation, INode& node, con
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -281,6 +282,7 @@ void CExportNel::addParticleSystemTracks(CAnimation& animation, INode& node, con
 		if (animation.getTrackByName (name.c_str()))
 		{
 			delete pTrack;
+			pTrack = NULL;
 		}
 		else
 		{
@@ -325,6 +327,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -348,6 +351,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -371,6 +375,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -389,6 +394,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -413,6 +419,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 					if (animation.getTrackByName (name.c_str()))
 					{
 						delete pTrack;
+						pTrack = NULL;
 					}
 					else
 					{
@@ -443,6 +450,7 @@ void CExportNel::addNodeTracks (CAnimation& animation, INode& node, const char* 
 						if (animation.getTrackByName (name.c_str()))
 						{
 							delete pTrack;
+							pTrack = NULL;
 						}
 						else
 						{
@@ -541,7 +549,8 @@ void CExportNel::addLightTracks (NL3D::CAnimation& animation, INode& node, const
 {
 	CExportDesc desc;
 
-	Object *obj = node.EvalWorldState(0).obj;
+	ObjectState os = node.EvalWorldState(0);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (!obj)
@@ -567,6 +576,7 @@ void CExportNel::addLightTracks (NL3D::CAnimation& animation, INode& node, const
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -609,6 +619,7 @@ void CExportNel::addMorphTracks (NL3D::CAnimation& animation, INode& node, const
 				if (animation.getTrackByName (name.c_str()))
 				{
 					delete pTrack;
+					pTrack = NULL;
 				}
 				else
 				{
@@ -639,6 +650,7 @@ void CExportNel::addObjTracks (CAnimation& animation, Object& obj, const char* p
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -681,6 +693,7 @@ void CExportNel::addMtlTracks (CAnimation& animation, Mtl& mtl, const char* pare
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -705,6 +718,7 @@ void CExportNel::addMtlTracks (CAnimation& animation, Mtl& mtl, const char* pare
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -731,6 +745,7 @@ void CExportNel::addMtlTracks (CAnimation& animation, Mtl& mtl, const char* pare
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -755,6 +770,7 @@ void CExportNel::addMtlTracks (CAnimation& animation, Mtl& mtl, const char* pare
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -779,6 +795,7 @@ void CExportNel::addMtlTracks (CAnimation& animation, Mtl& mtl, const char* pare
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -862,6 +879,7 @@ void CExportNel::addTexTracks (CAnimation& animation, Texmap& tex, uint stage, c
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -884,6 +902,7 @@ void CExportNel::addTexTracks (CAnimation& animation, Texmap& tex, uint stage, c
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -906,6 +925,7 @@ void CExportNel::addTexTracks (CAnimation& animation, Texmap& tex, uint stage, c
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -928,6 +948,7 @@ void CExportNel::addTexTracks (CAnimation& animation, Texmap& tex, uint stage, c
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -950,6 +971,7 @@ void CExportNel::addTexTracks (CAnimation& animation, Texmap& tex, uint stage, c
 			if (animation.getTrackByName (name.c_str()))
 			{
 				delete pTrack;
+				pTrack = NULL;
 			}
 			else
 			{
@@ -2319,7 +2341,7 @@ void				CSSSBuild::compile(NL3D::CAnimation &dest, const char* sBaseName)
 	{
 		// no keys added
 		delete finalTrack;
-		finalTrack= NULL;
+		finalTrack = NULL;
 	}
 		
 

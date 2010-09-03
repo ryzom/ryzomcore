@@ -1121,6 +1121,8 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 	CVegetableLightEx	&vegetLex= ig->VegetableLightEx;
 	// Color of pointLights modulated by diffuse.
 	CRGBA	diffusePL[2];
+	diffusePL[0] = CRGBA::Black;
+	diffusePL[1] = CRGBA::Black;
 	if(vegetLex.NumLights>=1)
 	{
 		diffusePL[0].modulateFromColorRGBOnly(diffuseRGBA, vegetLex.Color[0]);
@@ -2491,6 +2493,8 @@ uint		CVegetableManager::updateInstanceLighting(CVegetableInstanceGroup *ig, uin
 	CVegetableLightEx	&vegetLex= ig->VegetableLightEx;
 	// Color of pointLights modulated by diffuse.
 	CRGBA	diffusePL[2];
+	diffusePL[0] = CRGBA::Black;
+	diffusePL[1] = CRGBA::Black;
 	if(vegetLex.NumLights>=1)
 	{
 		diffusePL[0].modulateFromColorRGBOnly(vegetLI.MatDiffuse, vegetLex.Color[0]);

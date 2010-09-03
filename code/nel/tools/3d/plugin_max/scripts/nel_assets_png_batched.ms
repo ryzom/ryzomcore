@@ -21,6 +21,10 @@ fn getAbsoluteDestination t =
 	(
 		return ((getFilenamePath t) + "\\" + (getFilenameFile (filenameFromPath t)) + ".png")
 	)
+	else if ((findString t "E:\\Ryzom\\tryker") != undefined) then
+	(
+		return "W:\\database\\Stuff\\Tryker\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png"
+	)
 	else if ((findString t "\\tronc.") != undefined) then
 	(
 		return "W:\\database\\database_proto\\stuff\\fyros\\objects\\tronc.png"
@@ -41,22 +45,93 @@ fn getAbsoluteDestination t =
 
 fn getFixedTexturePath t =
 (
-	if (doesFileExist (getAbsoluteSource t)) then
+	absoluteDestination = (getAbsoluteDestination t)
+	if (not (doesFileExist absoluteDestination)) and (((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Batiments") != undefined) or ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\Vv2\\") != undefined)) then
 	(
-		if not (doesFileExist (getAbsoluteDestination t)) then
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
 		(
-			makeDir (getFilenamePath (getAbsoluteDestination t)) all:true
-			renameFile (getAbsoluteSource t) (getAbsoluteDestination t)
-		)
-		if (doesFileExist (getAbsoluteDestination t)) then
-		(
-			if (getAbsoluteDestination t) != (getAbsoluteSource t) then
-			(
-				deleteFile (getAbsoluteSource t)
-			)
+			return testDestination
 		)
 	)
-	return (getAbsoluteDestination t)
+	if (not (doesFileExist absoluteDestination)) and (((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Batiments") != undefined) or ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories\\") != undefined)) then
+	(
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Accessories\\Vv2\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures\\Accessories") != undefined) then
+	(
+		testDestination = ("W:\\database\\stuff\\Fyros\\Agents\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\noutilise\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\vv2\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\tempautel\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Tryker\\Decors\\_textures\\batiments") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Fyros\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\Stuff\\Fyros\\Decors\\_textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\Stuff\\Tryker\\Decors\\_textures\\Batiments\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then
+		(
+			return testDestination
+		)
+	)
+	if (not (doesFileExist absoluteDestination)) and ((findString t "\\sky_V2\\textures\\textures") != undefined) then
+	(
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\nodds\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\desert\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\forest\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\jungle\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+		testDestination = ("W:\\database\\sky_V2\\textures\\textures\\lacustre\\" + (getFilenameFile (filenameFromPath t)) + ".png")
+		if (doesFileExist testDestination) then (return testDestination)
+	)
+	return absoluteDestination
 )
 
 fn renameTexture t =
@@ -169,9 +244,15 @@ rollout assets_png_rollout "Properties"
 			m.delegate.ReflectionMap = undefined
 			m.delegate.RefractionMap = undefined
 		)
-		actionMan.executeAction 0 "63508"  -- Views: Standard Display with Maps
+		
 		actionMan.executeAction 0 "40021"  -- Selection: Select All
 		actionMan.executeAction 0 "311"  -- Tools: Zoom Extents All Selected
+		actionMan.executeAction 0 "40807"  -- Views: Activate All Maps
+		actionMan.executeAction 0 "63508"  -- Views: Standard Display with Maps
+		actionMan.executeAction 0 "40043"  -- Selection: Select None
+		
+		max views redraw
+		
 		return 1
 	)
 	

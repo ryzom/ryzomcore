@@ -1,23 +1,17 @@
+
+
+-- #################################################################
+-- ## WARNING : this is a generated file, don't change it !
+-- #################################################################
+
+
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
-
--- Log a message
-fn nlerror message =
-(
-	if nlErrorStream != undefined then
-	(
-		format "%\n" message to:nlErrorStream
-		flush nlErrorStream
-	)
-
-	-- To the console
-	print message
-)
 
 -- Unhide category
 fn unhidecategory =
@@ -54,86 +48,118 @@ fn unhidecategory =
 	)
 )
 
+-- Log a message
+fn nlerror message =
+(
+	if nlErrorStream != undefined then
+	(
+		format "%\n" message to:nlErrorStream
+		flush nlErrorStream
+	)
+
+	-- To the console
+	print message
+)
+
+
+
+fn runNelMaxExport inputMaxFile = 
+(
+	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".swt")
+	tagThisFile = false
+	
+	-- Unhide category
+	unhidecategory()
+	
+	-- Select all the nodes
+	max select all
+	
+	-- Export the skeleton template
+	if NelExportSkeletonWeight ($selection as array) outputNelFile == false then
+	(
+		nlerror("ERROR exporting skeleton weight " + inputMaxFile)
+		tagThisFile = false
+	)
+	else
+	(
+		nlerror("OK " + outputNelFile)
+		tagThisFile = true
+	)
+	
+	return tagThisFile
+)
+
+
+
 try
 (
-	-- Get files in the swt_source_directory
-	files = getFiles "swt_source_directory/*.max" 
-
+	-- Get files in the %MaxSourceDirectory% directory
+	files = getFiles "%MaxSourceDirectory%/*.max" 
+	gc()
+	
 	-- Sort files
 	sort files
-
+	gc()
+	
 	-- No file ?
 	if files.count != 0 then
 	(
 		-- For each files
 		for i = 1 to files.count do
 		(
+			inputMaxFile = files[i]
+			outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".swt")
+			
 			try
 			(
-				-- Output file
-				output = ("output_directory/"+(getFilenameFile files[i])+".swt")
-
 				-- Compare file date
-				if (NeLTestFileDate output files[i]) == true then
+				if (NeLTestFileDate outputNelFile inputMaxFile) == true then
 				(
 					-- Free memory and file handles
-					gc ()
-
+					gc()
+					heapfree
+					
 					-- Reset 3dsmax
 					resetMAXFile #noprompt
-
+					
 					-- Open the max project
-					nlerror ("Scanning file "+files[i]+" ...")
-					if loadMaxFile files[i] == true then
+					nlerror("Scanning file " + inputMaxFile + " ...")
+					if (loadMaxFile inputMaxFile quiet:true) == true then
 					(
-						-- Unhide category
-						unhidecategory()
-
-						-- Select all the nodes
-						max select all
-
-						-- Export the skeleton template
-						if NelExportSkeletonWeight ($selection as array) output == false then
-						(
-							nlerror ("ERROR exporting skeleton weight "+files[i])
-						)
-						else
-						(
-							nlerror ("OK "+output)
-						)
+						runNelMaxExport(inputMaxFile)
 					)
 					else
 					(
 						-- Error
-						nlerror ("ERROR exporting skeleton weight: can't open the file "+files[i])
+						nlerror("ERROR exporting 'swt': can't open the file " + inputMaxFile)
 					)
 				)
 				else
 				(
-					nlerror ("SKIPPED "+files[i])
+					nlerror("SKIPPED " + inputMaxFile)
 				)
 			)
 			catch 
 			(
 				-- Error
-				nlerror ("ERROR error exporting skeleton weight in files " + files[i])
+				nlerror("ERROR error exporting 'swt' in files " + inputMaxFile)
 			)
 		)
 	)
 	else
 	(
-		nlerror ("WARNING no skeleton weight file in folder swt_source_directory")
+		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
 	)
 )
 catch 
 (
 	-- Error
-	nlerror ("ERROR error exporting skeleton weight in folder swt_source_directory")
+	nlerror("ERROR fatal error exporting 'swt' in folder %MaxSourceDirectory%")
 )
 
 -- Bye
 
 resetMAXFile #noprompt
 quitMAX #noPrompt
-quitMAX () #noPrompt
+quitMAX() #noPrompt
 

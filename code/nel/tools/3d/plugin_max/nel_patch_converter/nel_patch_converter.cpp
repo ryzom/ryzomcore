@@ -121,7 +121,7 @@ void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 extern HINSTANCE hInstance;
-BOOL CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
+INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
 	switch (message) 
 	{

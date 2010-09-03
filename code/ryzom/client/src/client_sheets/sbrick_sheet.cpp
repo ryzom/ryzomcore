@@ -404,8 +404,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	// **** Magic only: try to get a ResistType against this brick
 	for(i=0;i<Properties.size();i++)
 	{
-		string text= Properties[i].Text;
-		strlwr(text);
+		string text= toLower(Properties[i].Text);
 
 		// *** If the property is a DamageType
 		const string	dmgTypeProp= "ma_dmg_type:";

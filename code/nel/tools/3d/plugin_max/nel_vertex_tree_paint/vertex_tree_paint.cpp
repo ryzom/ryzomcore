@@ -49,11 +49,11 @@ class VertexPaintClassDesc:public ClassDesc {
 static VertexPaintClassDesc VertexPaintDesc;
 ClassDesc* GetVertexPaintDesc() {return &VertexPaintDesc;}
 
-static BOOL CALLBACK VertexPaintDlgProc(
+static INT_PTR CALLBACK VertexPaintDlgProc(
 		HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	int numPoints;
-	VertexPaint *mod = (VertexPaint*)GetWindowLong(hWnd,GWL_USERDATA);
+	VertexPaint *mod = (VertexPaint*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 	if (!mod && msg!=WM_INITDIALOG) return FALSE;
 	int		comboResult;
 
@@ -86,7 +86,7 @@ static BOOL CALLBACK VertexPaintDlgProc(
 		case WM_INITDIALOG:
 			LoadImages();
 			mod = (VertexPaint*)lParam;
-			SetWindowLong(hWnd,GWL_USERDATA,lParam);
+			SetWindowLongPtr(hWnd,GWLP_USERDATA,lParam);
 			mod->hParams = hWnd;
 			mod->iPaintButton = GetICustButton(GetDlgItem(hWnd, IDC_PAINT));
 			mod->iPaintButton->SetType(CBT_CHECK);
@@ -217,14 +217,14 @@ LRESULT APIENTRY colorSwatchSubclassWndProc(
 		case WM_LBUTTONUP:
 		case WM_LBUTTONDBLCLK: {
 			HWND hPanel = GetParent(hwnd);
-			LONG mod = GetWindowLong(hPanel,GWL_USERDATA);
+			LONG mod = GetWindowLongPtr(hPanel,GWLP_USERDATA);
 			if (mod) {
 				((VertexPaint*)mod)->PaletteButton(hwnd);
 				}
 			}
 			break;
 		case WM_DESTROY:
-			SetWindowLong(hwnd, GWL_WNDPROC, (LONG) colorSwatchOriginalWndProc); 
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR) colorSwatchOriginalWndProc); 
 			// Fallthrough...
 		default:
 			return CallWindowProc(colorSwatchOriginalWndProc, hwnd, uMsg, wParam, lParam); 
@@ -419,13 +419,13 @@ void VertexPaint::BeginEditParams( IObjParam *ip, ULONG flags,Animatable *prev )
 
 		int	i;
 		for (i=0; i<NUMPALETTES; i++) {
-			colorSwatchOriginalWndProc = (WNDPROC) SetWindowLong(hPaletteWnd[i], GWL_WNDPROC, (LONG) colorSwatchSubclassWndProc); 
+			colorSwatchOriginalWndProc = (WNDPROC) SetWindowLongPtr(hPaletteWnd[i], GWLP_WNDPROC, (LONG_PTR) colorSwatchSubclassWndProc); 
 			}
 
 		SendMessage(hParams, WM_POSTINIT, 0, 0);
 		}
 	else {
-		SetWindowLong(hParams,GWL_USERDATA,(LONG)this);
+		SetWindowLongPtr(hParams,GWLP_USERDATA,(LONG_PTR)this);
 		}
 
 	iTint = SetupIntSpinner (hParams, IDC_TINT_SPIN, IDC_TINT, 0, 100, (int) (fTint*100.0f));

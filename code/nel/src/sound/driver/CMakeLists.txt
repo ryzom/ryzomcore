@@ -1,12 +1,15 @@
 FILE(GLOB SRC *.cpp *.h)
 
-nl_target_lib(nelsnd_lowlevel ${SRC})
+NL_TARGET_LIB(nelsnd_lowlevel ${SRC})
 
 INCLUDE_DIRECTORIES(${OGG_INCLUDE_DIR} ${VORBIS_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc ${VORBIS_LIBRARY} ${VORBISFILE_LIBRARY} ${OGG_LIBRARY})
-nl_default_props(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
+SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES LINK_INTERFACE_LIBRARIES "")
+NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
 NL_ADD_STATIC_VID_DRIVERS(nelsnd_lowlevel)
-nl_add_lib_suffix(nelsnd_lowlevel)
+
+NL_ADD_LIB_SUFFIX(nelsnd_lowlevel)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nelsnd_lowlevel ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.cpp)

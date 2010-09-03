@@ -61,7 +61,7 @@ if BuildQuality == 1:
 		mkPath(log, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
 		mkPath(log, ActiveProjectDirectory + "/generated")
 		configFile = ActiveProjectDirectory + "/generated/zone_dependencies.cfg"
-		templateCf = open(ActiveProjectDirectory + "/generated/zone_lighter.cfg", "r")
+		templateCf = open(ActiveProjectDirectory + "/generated/properties.cfg", "r")
 		cf = open(configFile, "w")
 		for line in templateCf:
 			cf.write(line)

@@ -1732,8 +1732,8 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 						CVector v2=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3+2]));
 
 						// UV
-						float u[3];
-						float v[3];
+						float u[3] = { 0.f };
+						float v[3] = { 0.f };
 						for (uint i=0; i<3; i++)
 						{
 							// Get UV coordinates
@@ -1764,8 +1764,8 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 						CVector v2=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3+2]));
 
 						// UV
-						float u[3];
-						float v[3];
+						float u[3] = { 0.f };
+						float v[3] = { 0.f };
 						for (uint i=0; i<3; i++)
 						{
 							// Get UV coordinates
@@ -1898,8 +1898,8 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &
 				CVector v2=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3+2]));
 
 				// UV
-				float u[3];
-				float v[3];
+				float u[3] = { 0.f };
+				float v[3] = { 0.f };
 				for (uint i=0; i<3; i++)
 				{
 					// Get UV coordinates

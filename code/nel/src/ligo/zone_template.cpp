@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdligo.h"
 #include "zone_template.h"
 #include "ligo_error.h"
 #include "nel/ligo/ligo_config.h"

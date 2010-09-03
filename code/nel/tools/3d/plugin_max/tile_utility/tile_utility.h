@@ -22,6 +22,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#include <assert.h>
 #include <Max.h>
 #include <istdplug.h>
 #include <iparamb2.h>

@@ -49,35 +49,36 @@ Max = "" #find later
 def igExport(sourceDir, targetDir):
 	scriptSrc = "maxscript/ig_export.ms"
 	scriptDst = MaxUserDirectory + "/scripts/ig_export.ms"
-	logFile = ScriptDirectory + "/processes/ig/log.log"
-	outDirTag = ExportBuildDirectory + "/" + IgStaticTagExportDirectory
-	outDirIg =  ExportBuildDirectory + "/" + targetDir
-	igSourceDir = DatabaseDirectory + "/" + sourceDir
-	tagList = findFiles(log, outDirTag, "", ".tag")
-	tagLen = len(tagList)
-	if os.path.isfile(scriptDst):
+	outputLogfile = ScriptDirectory + "/processes/ig/log.log"
+	tagDirectory = ExportBuildDirectory + "/" + IgStaticTagExportDirectory
+	outputDirectory =  ExportBuildDirectory + "/" + targetDir
+	maxSourceDir = DatabaseDirectory + "/" + sourceDir
+	if (needUpdateDirByTagLog(log, maxSourceDir, ".max", tagDirectory, ".max.tag")):
+		tagList = findFiles(log, tagDirectory, "", ".tag")
+		tagLen = len(tagList)
+		if os.path.isfile(scriptDst):
+			os.remove(scriptDst)
+		tagDiff = 1
+		sSrc = open(scriptSrc, "r")
+		sDst = open(scriptDst, "w")
+		for line in sSrc:
+			newline = line.replace("%OutputLogfile%", outputLogfile)
+			newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+			newline = newline.replace("%OutputDirectory%", outputDirectory)
+			newline = newline.replace("%TagDirectory%", tagDirectory)
+			sDst.write(newline)
+		sSrc.close()
+		sDst.close()
+		while tagDiff > 0:
+			printLog(log, "MAXSCRIPT " + scriptDst)
+			subprocess.call([ Max, "-U", "MAXScript", "ig_export.ms", "-q", "-mi", "-vn" ])
+			tagList = findFiles(log, tagDirectory, "", ".tag")
+			newTagLen = len(tagList)
+			tagDiff = newTagLen - tagLen
+			tagLen = newTagLen
+			printLog(log, "Exported " + str(tagDiff) + " .max files!")
 		os.remove(scriptDst)
-	tagDiff = 1
-	sSrc = open(scriptSrc, "r")
-	sDst = open(scriptDst, "w")
-	for line in sSrc:
-		newline = line.replace("output_logfile", logFile)
-		newline = newline.replace("ig_source_directory", igSourceDir)
-		newline = newline.replace("output_directory_tag", outDirTag)
-		newline = newline.replace("output_directory_ig", outDirIg)
-		sDst.write(newline)
-	sSrc.close()
-	sDst.close()
-	while tagDiff > 0:
-		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "ig_export.ms", "-q", "-mi", "-vn" ])
-		tagList = findFiles(log, outDirTag, "", ".tag")
-		newTagLen = len(tagList)
-		tagDiff = newTagLen - tagLen
-		tagLen = newTagLen
-		printLog(log, "Exported " + str(tagDiff) + " .max files!")
-	os.remove(scriptDst)
-	return
+		return
 
 
 if MaxAvailable:

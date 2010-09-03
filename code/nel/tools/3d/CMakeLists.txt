@@ -1,4 +1,5 @@
-SUBDIRS(	build_coarse_mesh
+SUBDIRS(
+		build_coarse_mesh
 		build_far_bank
 		build_smallbank
 		ig_lighter
@@ -22,29 +23,35 @@ SUBDIRS(	build_coarse_mesh
 		zone_check_bind
 		zone_dump
 		zviewer)
-IF(WIN32) 
-  ADD_SUBDIRECTORY(object_viewer)
-  ADD_SUBDIRECTORY(object_viewer_exe)
-  ADD_SUBDIRECTORY(panoply_maker)
-  ADD_SUBDIRECTORY(tile_edit)
+
+IF(WIN32)
+  ADD_SUBDIRECTORY(ig_elevation)
+  ADD_SUBDIRECTORY(lightmap_optimizer)
+
+  IF(MFC_FOUND)
+    ADD_SUBDIRECTORY(object_viewer)
+    ADD_SUBDIRECTORY(object_viewer_exe)
+    ADD_SUBDIRECTORY(tile_edit)
+  ENDIF(MFC_FOUND)
+
+  IF(WITH_MAXPLUGIN)
+    IF(MAXSDK_FOUND)
+      ADD_SUBDIRECTORY(plugin_max)
+      ADD_SUBDIRECTORY(ligo)
+    ENDIF(MAXSDK_FOUND)
+  ENDIF(WITH_MAXPLUGIN)
+
 ENDIF(WIN32)
 
 IF(WITH_QT)
   ADD_SUBDIRECTORY(tile_edit_qt)
 ENDIF(WITH_QT)
 
-IF(WITH_MAXPLUGIN)
-  IF(MAXSDK_FOUND)
-    ADD_SUBDIRECTORY(plugin_max)
-    ADD_SUBDIRECTORY(ligo)
-  ENDIF(MAXSDK_FOUND)
-ENDIF(WITH_MAXPLUGIN)
+IF(SQUISH_FOUND)
+  ADD_SUBDIRECTORY(panoply_maker)
+  ADD_SUBDIRECTORY(tga_2_dds)
+  ADD_SUBDIRECTORY(hls_bank_maker)
+ENDIF(SQUISH_FOUND)
 
-# These use WIndows-specific things that need to be fixed.
-#ig_elevation
-#lightmap_optimizer
-#object_viewer_exe
-#hls_bank_maker
-#s3tc_compressor_lib
-#tga_2_dds
-#plugin_max
+#crash_log_analyser
+#shapes_exporter

@@ -92,13 +92,14 @@ bool init()
 	// load packed sheets	
 	nlinfo("Loading sheets...");
 	IProgressCallback callback;
+	SheetMngr.setOutputDataPath(AppCfg.OutputDataPath);
 	SheetMngr.load (callback, true, true);
 
 	// Make the lmconts.packed file
 	if (!LigoConfig.readPrimitiveClass (AppCfg.LigoPrimitiveClass.c_str(), false))
 		nlwarning ("Can't load primitive class file %s", AppCfg.LigoPrimitiveClass.c_str());
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
-	buildLMConts();
+	buildLMConts(AppCfg.WorldSheet, AppCfg.PrimitivesPath, AppCfg.OutputDataPath);
 
 	// The init is a success.
 	return true;

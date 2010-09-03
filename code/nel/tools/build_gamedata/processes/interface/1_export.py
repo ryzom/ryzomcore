@@ -50,12 +50,14 @@ printLog(log, "")
 # For each interface directory
 printLog(log, ">>> Export interface <<<")
 mkPath(log, ExportBuildDirectory + "/" + InterfaceExportDirectory)
-for dir in InterfaceSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
-	niouname = dir.replace("/", "_")
+for dirs in InterfaceSourceDirectories:
+	niouname = dirs[0].replace("/", "_")
 	newpath = ExportBuildDirectory + "/" + InterfaceExportDirectory + "/" + niouname
 	mkPath(log, newpath)
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
+	for dir in dirs:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
+		copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".png")
 printLog(log, "")
 
 # For each interface directory to compress in one DXTC
@@ -64,6 +66,7 @@ mkPath(log, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory)
 for dir in InterfaceDxtcSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".tga")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".png")
 printLog(log, "")
 
 # For each interface fullscreen directory compress independently all in dds
@@ -80,6 +83,12 @@ else:
 			destFile = ExportBuildDirectory + "/" + InterfaceFullscreenExportDirectory + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
 			if needUpdateLogRemoveDest(log, sourceFile, destFile):
 				subprocess.call([ TgaToDds, sourceFile, "-o", destFile, "-a", "5" ])
+		files = findFiles(log, DatabaseDirectory + "/" + dir, "", ".png")
+		for file in files:
+			sourceFile = DatabaseDirectory + "/" + dir + "/" + file
+			destFile = ExportBuildDirectory + "/" + InterfaceFullscreenExportDirectory + "/" + os.path.basename(file)[0:-len(".png")] + ".dds"
+			if needUpdateLogRemoveDest(log, sourceFile, destFile):
+				subprocess.call([ TgaToDds, sourceFile, "-o", destFile, "-a", "5" ])
 printLog(log, "")
 
 # For each interface 3d directory
@@ -88,6 +97,7 @@ mkPath(log, ExportBuildDirectory + "/" + Interface3DExportDirectory)
 for dir in Interface3DSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + Interface3DExportDirectory, ".tga")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + Interface3DExportDirectory, ".png")
 printLog(log, "")
 
 log.close()

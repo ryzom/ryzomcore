@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export zone
-# \date 2009-03-10-22-23-GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export zone
@@ -44,25 +48,59 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-ExecTimeout = findTool(log, ToolDirectories, ExecTimeoutTool, ToolSuffix)
-printLog(log, "")
+# ...
 
-# For each zone directory
-printLog(log, ">>> Export zone 3dsmax <<<")
+# Export zone 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export zone 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
+	for dir in ZoneSourceDirectory:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + ZoneExportDirectory, ".zone")):
+			scriptSrc = "maxscript/zone_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/zone_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/zone/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + ZoneExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, outputDirectory, "", ".zone")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "zone_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, outputDirectory, "", ".zone")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .zone files!")
+			os.remove(scriptDst)
+
+
+
+printLog(log, ">>> Try to copy ligo zone if any <<<")
 printLog(log, "********************************")
 printLog(log, "********      TODO      ********")
 printLog(log, "********************************")
-mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory)
 printLog(log, "")
 
-printLog(log, ">>> Export zone ligo <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
-printLog(log, "")
 
+
+printLog(log, "")
 log.close()
 
 

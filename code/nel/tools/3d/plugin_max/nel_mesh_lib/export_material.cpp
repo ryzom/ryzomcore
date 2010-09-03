@@ -1294,6 +1294,7 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 			// Ok, good texture
 			pTexture=pTextureCube;
 			delete srcTex;
+			srcTex = NULL;
 		}
 		else
 		{

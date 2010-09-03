@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdafx.h"
-#include "..\nel_patch_lib\rpo.h"
+#include "../nel_patch_lib/rpo.h"
 #include "nel_3dsmax_shared.h"
 #include "nel/misc/app_context.h"
 

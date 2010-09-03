@@ -49,6 +49,8 @@ LigoExportTimeout = 3600000
 LigoBuildTimeout = 1800000
 PacsPrimExportTimeout = 600000
 
+MaxShapeExportTimeout = 300000 # 5min
+
 # *** TOOLS CONFIGURATION ***
 
 TgaToDdsTool = "tga2dds"
@@ -82,3 +84,4 @@ LandExportTool = "land_export"
 PrimExportTool = "prim_export"
 IgElevationTool = "ig_elevation"
 IgAddTool = "ig_add"
+BuildClodBankTool = "build_clod_bank"

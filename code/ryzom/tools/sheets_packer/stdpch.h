@@ -1,4 +1,3 @@
-
 #include <nel/misc/types_nl.h>
 
 #include <stdlib.h>
@@ -35,7 +34,6 @@
 //#include <nel/3d/u_driver.h>
 
 #ifdef NL_OS_WINDOWS
+#define NOMINMAX
 #include	<windows.h>
-#undef min
-#undef max
 #endif // NL_OS_WINDOWS

@@ -32,6 +32,8 @@ FIND_LIBRARY(STLPORT_LIBRARY_DEBUG
   stlportstld_x
   stlportstld_x.5.2
   stlportd
+  stlportd_statix
+  stlportd_static
   PATHS
   /usr/local/lib
   /usr/lib
@@ -51,6 +53,8 @@ FIND_LIBRARY(STLPORT_LIBRARY_RELEASE
   stlport
   stlport_x
   stlport_x.5.2
+  stlport_statix
+  stlport_static
   PATHS
   /usr/local/lib
   /usr/lib

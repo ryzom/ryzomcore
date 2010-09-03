@@ -424,11 +424,10 @@ int main( int argc, char ** argv )
 	NLMISC::CApplicationContext appContext;
 
 #ifdef NL_OS_UNIX
-        std::string homeDir = getenv("HOME");
-        NLMISC::CPath::addSearchPath( homeDir + "/.nel");
+	NLMISC::CPath::addSearchPath(NLMISC::CFile::getApplicationDirectory("NeL"));
 #endif // NL_OS_UNIX
 
-        NLMISC::CPath::addSearchPath(NL_MK_SH_ID_CFG);
+	NLMISC::CPath::addSearchPath(NL_MK_SH_ID_CFG);
 
 	// read args
 	if( argc < 2 )

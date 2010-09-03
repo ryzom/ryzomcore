@@ -37,25 +37,36 @@ using namespace std;
 #define NOT_DEFINED 0xff
 
 
-bool sameType(const char *sFileNameDest, uint8 algo);
-bool dataCheck(const char *sFileNameSrc, const char *sFileNameDest, uint8 algo);
+bool sameType(const std::string &sFileNameDest, uint8 algo);
+bool dataCheck(const std::string &sFileNameSrc, const std::string &FileNameDest, uint8 algo);
 std::string getOutputFileName(const std::string &inputFileName);
 void writeInstructions();
 
 
 
 
-uint8 getType(const char *sFileNameDest)
+uint8 getType(const std::string &sFileNameDest)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest,"rb");
+	FILE *f = fopen(sFileNameDest.c_str(),"rb");
 	if(f==NULL)
 	{
 		return NOT_DEFINED;
 	}
 	CS3TCCompressor::DDS_HEADER h;
-	fread(&dds,1,4,f);
-	fread(&h,sizeof(CS3TCCompressor::DDS_HEADER),1,f);
+
+	if (fread(&dds,1,4,f) != 4)
+	{
+		fclose(f);
+		return NOT_DEFINED;
+	}
+
+	if (fread(&h,sizeof(CS3TCCompressor::DDS_HEADER),1,f) != 1)
+	{
+		fclose(f);
+		return NOT_DEFINED;
+	}
+
 	if(fclose(f))
 	{
 		cerr<<sFileNameDest<< "is not closed"<<endl;
@@ -66,13 +77,13 @@ uint8 getType(const char *sFileNameDest)
 	{
 		return DXT1;
 	}
-				
+
 	if(h.ddpf.dwFourCC==MAKEFOURCC('D','X', 'T', '1')
 		&& h.ddpf.dwRGBBitCount>0)
 	{
 		return DXT1A;
 	}
-	
+
 	if(h.ddpf.dwFourCC==MAKEFOURCC('D','X', 'T', '3'))
 	{
 		return DXT3;
@@ -86,17 +97,29 @@ uint8 getType(const char *sFileNameDest)
 	return NOT_DEFINED;
 }
 
-bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
+bool sameType(const std::string &sFileNameDest, uint8 &algo, bool wantMipMap)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest,"rb");
+	FILE *f = fopen(sFileNameDest.c_str(),"rb");
 	if(f==NULL)
 	{
 		return false;
 	}
+
 	CS3TCCompressor::DDS_HEADER h;
-	fread(&dds,1,4,f);
-	fread(&h,sizeof(::DDS_HEADER),1,f);
+
+	if (fread(&dds,1,4,f) != 4)
+	{
+		fclose(f);
+		return false;
+	}
+
+	if (fread(&h,sizeof(::DDS_HEADER),1,f) != 1)
+	{
+		fclose(f);
+		return false;
+	}
+
 	if(fclose(f))
 	{
 		cerr<<sFileNameDest<< "is not closed"<<endl;
@@ -110,13 +133,13 @@ bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
 				&& h.ddpf.dwRGBBitCount==0)
 				algoOk=true;
 			break;
-					
+
 		case DXT1A:
 			if(h.ddpf.dwFourCC==MAKEFOURCC('D','X', 'T', '1')
 				&& h.ddpf.dwRGBBitCount>0)
 				algoOk=true;
 			break;
-		
+
 		case DXT3:
 			if(h.ddpf.dwFourCC==MAKEFOURCC('D','X', 'T', '3'))
 				algoOk=true;
@@ -129,7 +152,7 @@ bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
 	}
 	if(!algoOk)
 		return false;
-	
+
 	// Test Mipmap.
 	bool	fileHasMipMap= (h.dwFlags&DDSD_MIPMAPCOUNT) && (h.dwMipMapCount>1);
 	if(fileHasMipMap==wantMipMap)
@@ -140,52 +163,35 @@ bool sameType(const char *sFileNameDest, uint8 &algo, bool wantMipMap)
 
 
 
-bool dataCheck(const char *sFileNameSrc, const char *sFileNameDest, uint8& algo, bool wantMipMap)
+bool dataCheck(const std::string &sFileNameSrc, const std::string &sFileNameDest, uint8& algo, bool wantMipMap)
 {
-	HANDLE h1 = CreateFile( sFileNameSrc, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(h1 == INVALID_HANDLE_VALUE)
+	if (!CFile::fileExists(sFileNameSrc))
 	{
-		cerr<<"Can't open file "<<sFileNameSrc<<endl;
-		return 1;
+		cerr << "Can't open file " << sFileNameSrc << endl;
+		return false;
 	}
-	
-	HANDLE h2 = CreateFile( sFileNameDest, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (h2==INVALID_HANDLE_VALUE)
+
+	if (!CFile::fileExists(sFileNameDest))
 	{
 		return false; // destination file doesn't exist yet
 	}
-	
-	uint8 res;
-	FILETIME Tmp;
-	FILETIME lpLastWriteTime1;
-	FILETIME lpLastWriteTime2;
-	
-	res = GetFileTime(h1, &Tmp, &Tmp, &lpLastWriteTime1);
-	nlassert(res);
-	
-	res = GetFileTime(h2, &Tmp, &Tmp, &lpLastWriteTime2);
-	nlassert(res);
-	
-	uint32 nComp = CompareFileTime(&lpLastWriteTime1, &lpLastWriteTime2);
 
-	CloseHandle(h1);
-	CloseHandle(h2);
-	
-	if(nComp==+1)
+	uint32 lastWriteTime1 = CFile::getFileModificationDate(sFileNameSrc);
+	uint32 lastWriteTime2 = CFile::getFileModificationDate(sFileNameDest);
+
+	if(lastWriteTime1 > lastWriteTime2)
 	{
 		return false;
 	}
-	if(nComp==-1)
+	if (lastWriteTime1 < lastWriteTime2)
 	{
 		if(!sameType(sFileNameDest, algo, wantMipMap))
 		{
 			return false; // file exists but a new compression type is required
 		}
-		return true;
 	}
 	return true;
 }
-
 
 void writeInstructions()
 {
@@ -196,7 +202,7 @@ void writeInstructions()
 	cout<<"  The program looks for possible user color files and load them automatically,"<<endl;
 	cout<<"a user color file must have the same name that the original tga file, plus the"<<endl;
 	cout<<"extension \"_usercolor\""<<endl;
-	cout<<"ex : pic.tga, the associated user color file must be : pic_usercolor.tga"<<endl; 
+	cout<<"ex : pic.tga, the associated user color file must be : pic_usercolor.tga"<<endl;
 	cout<<endl;
 	cout<<"syntax : tga2dds <input> [-o <output.dds>] [-a <algo>] [-m]"<<endl;
 	cout<<endl;
@@ -216,7 +222,7 @@ void writeInstructions()
 	cout<<"default   : DXTC1 if 24b, DXTC5 if 32b."<<endl;
 	cout<<endl;
 	cout<<"/? for this help"<<endl;
-	cout<<endl; 
+	cout<<endl;
 }
 
 
@@ -343,7 +349,7 @@ void dividSize (CBitmap &bitmap)
 		uint i;
 		for (i=0; i<4; i++)
 		{
-			pixelDest[offsetDest+i] = ((uint)pixelSrc[offsetSrc+i] + (uint)pixelSrc[offsetSrc+4+i] + 
+			pixelDest[offsetDest+i] = ((uint)pixelSrc[offsetSrc+i] + (uint)pixelSrc[offsetSrc+4+i] +
 				(uint)pixelSrc[offsetSrc+4*width+i] + (uint)pixelSrc[offsetSrc+4*width+4+i])>>2;
 		}
 	}
@@ -379,14 +385,12 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-
 	// Reading TGA or PNG and converting to RGBA
 	//====================================
 	CBitmap picTga;
 	CBitmap picTga2;
 	CBitmap picSrc;
 
-	
 	std::string inputFileName(argv[1]);
 	if(inputFileName.find("_usercolor")<inputFileName.length())
 	{
@@ -425,8 +429,8 @@ int main(int argc, char **argv)
 
 	// Check dest algo
 	if (OptAlgo==NOT_DEFINED)
-		OptAlgo = getType (outputFileName.c_str());
-	
+		OptAlgo = getType (outputFileName);
+
 	// Choose Algo.
 	if(OptAlgo!=NOT_DEFINED)
 	{
@@ -442,7 +446,7 @@ int main(int argc, char **argv)
 
 	// Data check
 	//===========
-	if(dataCheck(inputFileName.c_str(),outputFileName.c_str(), OptAlgo, OptMipMap))
+	if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
 	{
 		cout<<outputFileName<<" : a recent dds file already exists"<<endl;
 		return 0;
@@ -455,9 +459,6 @@ int main(int argc, char **argv)
 	CObjectVector<uint8> RGBADest;
 	RGBADest.resize(height*width*4);
 	uint	dstRGBADestId= 0;
-	
-
-
 
 	// UserColor
 	//===========
@@ -488,15 +489,14 @@ int main(int argc, char **argv)
 	if (pos == std::string::npos)
 	{
 		// name whithout extension
-		userColorFileName = inputFileName + "_usercolor"; 
+		userColorFileName = inputFileName + "_usercolor";
 	}
 	else
 	{
 		// append input filename extension
 		userColorFileName = inputFileName.substr(0,pos) + "_usercolor" + inputFileName.substr(pos);
 	}
-	
-	
+
 	// Reading second Tga for user color, don't complain if _usercolor is missing
 	NLMISC::CIFile input2;
 	if (CPath::exists(userColorFileName) && input2.open(userColorFileName))
@@ -508,8 +508,6 @@ int main(int argc, char **argv)
 		nlassert(height2==height);
 		picTga2.convertToType (CBitmap::RGBA);
 
-
-
 		RGBASrc2 = picTga2.getPixels();
 
 		NLMISC::CRGBA *pRGBASrc = (NLMISC::CRGBA*)&RGBASrc[0];
@@ -519,7 +517,7 @@ int main(int argc, char **argv)
 		{
 			// If no UserColor, must take same RGB, and keep same Alpha from src1 !!! So texture can have both alpha
 			// userColor and other alpha usage.
-			if(pRGBASrc2[i].A==255) 
+			if(pRGBASrc2[i].A==255)
 			{
 				RGBADest[dstRGBADestId++]= pRGBASrc[i].R;
 				RGBADest[dstRGBADestId++]= pRGBASrc[i].G;
@@ -610,12 +608,12 @@ int main(int argc, char **argv)
 			cerr<<"Can't open output file "<<outputFileName<<endl;
 			return 1;
 		}
-		try 
+		try
 		{
 			if (algo == TGA16)
 			{
 				picSrc.writeTGA (output, 16);
-			} 
+			}
 			else if (algo == TGA8)
 			{
 				picSrc.convertToType(CBitmap::Luminance);
@@ -624,7 +622,7 @@ int main(int argc, char **argv)
 			else if (algo == PNG16)
 			{
 				picSrc.writePNG (output, 16);
-			} 
+			}
 			else if (algo == PNG8)
 			{
 				picSrc.convertToType(CBitmap::Luminance);
@@ -636,9 +634,8 @@ int main(int argc, char **argv)
 			cerr<<e.what()<<endl;
 			return 1;
 		}
-	
-		output.close();
 
+		output.close();
 	}
 	else
 	{
@@ -683,7 +680,7 @@ int main(int argc, char **argv)
 			cerr<<e.what()<<endl;
 			return 1;
 		}
-		
+
 		output.close();
 	}
 

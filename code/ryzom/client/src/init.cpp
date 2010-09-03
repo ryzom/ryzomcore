@@ -763,6 +763,7 @@ void prelogInit()
 		// Remap tga files on dds files.
 		CPath::remapExtension ("dds", "tga", true);
 		CPath::remapExtension ("dds", "png", true);
+		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
 		uint i;
@@ -1304,6 +1305,7 @@ void postlogInit()
 			nmsg = "Loading sheets...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
+			SheetMngr.setOutputDataPath("../../client/data");
 			SheetMngr.load (ProgressBar, ClientCfg.UpdatePackedSheet, ClientCfg.NeedComputeVS, ClientCfg.DumpVSIndex);
 
 			initLast = initCurrent;

@@ -83,7 +83,7 @@ class Tile_utilityClassDesc:public ClassDesc2
 static Tile_utilityClassDesc Tile_utilityDesc;
 ClassDesc2* GetTile_utilityDesc() {return &Tile_utilityDesc;}
 
-static BOOL CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) 
 	{

@@ -45,6 +45,7 @@ default_c
 *_debug
 core
 *.pc
+*.gch
 
 # Mac OS X compile
 *.dylib
@@ -133,12 +134,14 @@ moc_*.cpp
 *.moc
 
 # Misc garbage
+*.rej
 *.orig
 *.cachefile
 *.cache
 *.patch
 *.7z
 external
+.svn
 
 # build
 code/nel/build/*

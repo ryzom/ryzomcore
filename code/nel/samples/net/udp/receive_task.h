@@ -53,7 +53,7 @@ struct TReceivedMessage
 	void				vectorToAddress();
 
 	/// Set "disconnection" message for the current AddrFrom
-	void				setTypeEvent( TEventType t )	{ *_Data.begin() = t; }
+	void				setTypeEvent( TEventType t )	{ *_Data.begin() = (uint8)t; }
 
 	void				setDate()	{ *(sint64*)&(*(_Data.begin()+1)) = NLMISC::CTime::getLocalTime(); }
 
@@ -69,7 +69,7 @@ struct TReceivedMessage
 	const uint8			*userDataR() const				{ return &*_Data.begin() + MsgHeaderSize; }
 
 	/// Return the size of user data
-	uint32				userSize()						{ return _Data.size() - MsgHeaderSize; }
+	uint32				userSize()						{ return (uint32)_Data.size() - MsgHeaderSize; }
 
 	/// Return the data vector (event type header byte + user data)
 	vector<uint8>&		data()							{ return _Data; }

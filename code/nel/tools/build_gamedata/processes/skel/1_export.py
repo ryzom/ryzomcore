@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # 
+# #################################################################
+# ## WARNING : this is a generated file, don't change it !
+# #################################################################
+# 
 # \file 1_export.py
 # \brief Export skel
-# \date 2009-03-10-20-23-GMT
+# \date 2010-09-03-10-06-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export skel
@@ -44,19 +48,59 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-Max = findMax(log, MaxDirectory, MaxExecutable)
-printLog(log, "")
+# ...
 
-# For each skel directory
-printLog(log, ">>> Export skel 3dsmax <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+# Export skel 3dsmax
+if MaxAvailable:
+	# Find tools
+	Max = findMax(log, MaxDirectory, MaxExecutable)
+	printLog(log, "")
+	
+	printLog(log, ">>> Export skel 3dsmax <<<")
+	mkPath(log, ExportBuildDirectory + "/" + SkelExportDirectory)
+	for dir in SkelSourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + dir)
+		if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + dir, ".max", ExportBuildDirectory + "/" + SkelExportDirectory, ".skel")):
+			scriptSrc = "maxscript/skel_export.ms"
+			scriptDst = MaxUserDirectory + "/scripts/skel_export.ms"
+			outputLogfile = ScriptDirectory + "/processes/skel/log.log"
+			outputDirectory =  ExportBuildDirectory + "/" + SkelExportDirectory
+			maxSourceDir = DatabaseDirectory + "/" + dir
+			tagList = findFiles(log, outputDirectory, "", ".skel")
+			tagLen = len(tagList)
+			if os.path.isfile(scriptDst):
+				os.remove(scriptDst)
+			tagDiff = 1
+			sSrc = open(scriptSrc, "r")
+			sDst = open(scriptDst, "w")
+			for line in sSrc:
+				newline = line.replace("%OutputLogfile%", outputLogfile)
+				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
+				newline = newline.replace("%OutputDirectory%", outputDirectory)
+				sDst.write(newline)
+			sSrc.close()
+			sDst.close()
+			while tagDiff > 0:
+				printLog(log, "MAXSCRIPT " + scriptDst)
+				subprocess.call([ Max, "-U", "MAXScript", "skel_export.ms", "-q", "-mi", "-vn" ])
+				tagList = findFiles(log, outputDirectory, "", ".skel")
+				newTagLen = len(tagList)
+				tagDiff = newTagLen - tagLen
+				tagLen = newTagLen
+				printLog(log, "Exported " + str(tagDiff) + " .skel files!")
+			os.remove(scriptDst)
+
+
+
+printLog(log, ">>> Export skel directly <<<")
 mkPath(log, ExportBuildDirectory + "/" + SkelExportDirectory)
 for dir in SkelSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-printLog(log, "")
+	copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + SkelExportDirectory, ".skel")
 
+
+
+printLog(log, "")
 log.close()
 
 

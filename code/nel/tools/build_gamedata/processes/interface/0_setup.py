@@ -45,8 +45,9 @@ printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
-for dir in InterfaceSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
+for dirs in InterfaceSourceDirectories:
+	for dir in dirs:
+		mkPath(log, DatabaseDirectory + "/" + dir)
 for dir in InterfaceDxtcSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 for dir in InterfaceFullscreenSourceDirectories:

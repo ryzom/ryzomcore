@@ -2,7 +2,7 @@
 # 
 # \file 3_install.py
 # \brief Install veget
-# \date 2010-05-24 08:13GMT
+# \date 2010-09-02-08-40-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Install veget
@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+printLog(log, ">>> Install veget <<<")
+exportPath = ExportBuildDirectory + "/" + VegetExportDirectory
+mkPath(log, exportPath)
 clientPath = ClientDataDirectory + "/" + VegetClientDirectory
 mkPath(log, clientPath)
-
-printLog(log, ">>> Install veget <<<")
-mkPath(log, ExportBuildDirectory + "/" + VegetExportDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + VegetExportDirectory, clientPath, ".veget")
+copyFilesNoTreeIfNeeded(log, exportPath, clientPath)
 
 printLog(log, "")
 log.close()

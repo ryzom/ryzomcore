@@ -366,9 +366,20 @@ int main(int nNbArg, char **ppArgs)
 		fmtName += ".tga";
 	if (outTga.open(fmtName))
 	{
-		GlobalTexture.writeTGA (outTga, 32);
+		std::string ext;
+		if (toLower(fmtName).find(".png") != string::npos)
+		{
+			ext = "png";
+			GlobalTexture.writePNG (outTga, 32);
+		}
+		else
+		{
+			ext = "tga";
+			GlobalTexture.writeTGA (outTga, 32);
+		}
+
 		outTga.close();
-		outString (string("Writing tga file : ") + fmtName + "\n");
+		outString (toString("Writing %s file : %s\n", ext.c_str(), fmtName.c_str()));
 	}
 	else
 	{

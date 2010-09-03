@@ -29,18 +29,26 @@
 
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
-ProcessToComplete += [ "ligo" ] # not fully implemented, works for this process (not yet), but does not export max files
-ProcessToComplete += [ "zone" ] # works, need to check completeness
+ProcessToComplete += [ "properties" ]
+ProcessToComplete += [ "map" ]
+ProcessToComplete += [ "shape" ]
+ProcessToComplete += [ "ligo" ]
+ProcessToComplete += [ "zone" ]
 ProcessToComplete += [ "ig" ] # fully implemented
 ProcessToComplete += [ "zone_light" ] # works, need to check completeness
-ProcessToComplete += [ "rbank" ] # works, need to check completeness
+ProcessToComplete += [ "rbank" ]
 ProcessToComplete += [ "ig_light" ] # fully implemented
-#ProcessToComplete += [ "ps" ] # not implemented
+ProcessToComplete += [ "ps" ]
 
 
 # *** ECOSYSTEM AND CONTINENT NAMES ***
+
 EcosystemName = "jungle"
+EcosystemPath = "ecosystems/" + EcosystemName
 ContinentName = "newbieland"
+ContinentPath = "continents/" + ContinentName
+CommonName = ContinentName
+CommonPath = ContinentPath
 
 
 # *** LANDSCAPE NAME ***
@@ -49,6 +57,40 @@ LandscapeName = ContinentName
 # *** CONTINENT FILE ***
 ContinentFile = ContinentName + "/" + ContinentName + ".continent"
 
+
+
+# *** SHAPE EXPORT OPTIONS ***
+
+# Compute lightmaps ?
+ShapeExportOptExportLighting = "true"
+
+# Cast shadow in lightmap ?
+ShapeExportOptShadow = "true"
+
+# Lighting limits. 0 : normal, 1 : soft shadows
+ShapeExportOptLightingLimit = 0
+
+# Lightmap lumel size
+ShapeExportOptLumelSize = "0.25"
+
+# Oversampling value. Can be 1, 2, 4 or 8
+ShapeExportOptOversampling = 1
+
+# Does the lightmap must be generated in 8 bits format ?
+ShapeExportOpt8BitsLightmap = "false"
+
+# Does the lightmaps export must generate logs ?
+ShapeExportOptLightmapLog = "true"
+
+# Coarse mesh texture mul size
+TextureMulSizeValue = "1.5"
+
+DoBuildShadowSkin = 0
+
+ClodConfigFile = ""
+
+# *** COARSE MESH TEXTURE NAME ***
+CoarseMeshTextureNames = [ ]
 
 # *** BANK EXPORT OPTIONS ***
 
@@ -110,4 +152,8 @@ RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape" ]
 RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape_with_coarse_mesh_builded" ]
 RbankShapePaths += [ "common/sfx/ps" ]
 # RbankShapePaths += [ "l:/leveldesign/world_edit_files" ]
+
+# *** MAPS OPTIONS ***
+
+ReduceBitmapFactor = 0
 

@@ -2,10 +2,8 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_types_check ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nl_sample_types_check ${LIBXML2_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(nl_sample_types_check ${PLATFORM_LINKFLAGS} nelmisc)
+NL_DEFAULT_PROPS(nl_sample_types_check "Samples, MISC: Types check sample")
 NL_ADD_RUNTIME_FLAGS(nl_sample_types_check)
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS nl_sample_types_check RUNTIME DESTINATION bin COMPONENT samplesmisc)

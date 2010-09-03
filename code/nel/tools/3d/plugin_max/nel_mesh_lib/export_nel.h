@@ -292,7 +292,7 @@ public:
 	  *
 	  * skeletonShape must be NULL if no bones.
 	  */
-	NL3D::IShape*					buildShape (INode& node, TimeValue time, const TInodePtrInt *nodeMap, 
+	NLMISC::CSmartPtr<NL3D::IShape>					buildShape (INode& node, TimeValue time, const TInodePtrInt *nodeMap, 
 												bool buildLods);
 
 	/**

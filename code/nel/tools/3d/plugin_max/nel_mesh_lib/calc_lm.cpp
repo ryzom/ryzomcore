@@ -77,7 +77,8 @@ SLightBuild::SLightBuild()
 bool SLightBuild::canConvertFromMaxLight (INode *node, TimeValue tvTime)
 {
 	// Get a pointer on the object's node
-	Object *obj = node->EvalWorldState(tvTime).obj;
+	ObjectState os = node->EvalWorldState(tvTime);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (!obj)
@@ -98,7 +99,7 @@ bool SLightBuild::canConvertFromMaxLight (INode *node, TimeValue tvTime)
 		return false;
 
 	if( deleteIt )
-		maxLight->DeleteMe();
+		maxLight->MaybeAutoDelete();
 
 	return true;
 }
@@ -107,7 +108,8 @@ bool SLightBuild::canConvertFromMaxLight (INode *node, TimeValue tvTime)
 void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 {
 	// Get a pointer on the object's node
-	Object *obj = node->EvalWorldState(tvTime).obj;
+	ObjectState os = node->EvalWorldState(tvTime);
+    Object *obj = os.obj;
 
 	// Check if there is an object
 	if (!obj) return;
@@ -295,7 +297,7 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	this->rSoftShadowConeLength = (float)atof(sTmp.c_str());
 
 	if( deleteIt )
-		maxLight->DeleteMe();
+		maxLight->MaybeAutoDelete();
 }
 
 // ***********************************************************************************************
@@ -2401,7 +2403,10 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 						TempPlanes[nPlaneNb]->copyFirstLayerTo(*AllPlanes[AllPlanesPrevSize+nPlaneNb],(uint8)nLight);
 
 					for( nPlaneNb = 0; nPlaneNb < (sint)FaceGroupByPlane.size(); ++nPlaneNb )
+					{
 						delete TempPlanes[nPlaneNb];
+						TempPlanes[nPlaneNb] = NULL;
+					}
 				}
 
 				// Next group of face with the same smooth group and the same material
@@ -2497,6 +2502,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 			MoveFaceUV1( AllPlanes[i]->faces.begin(), AllPlanes[i]->faces.size(), 
 						AllPlanes[i]->x, AllPlanes[i]->y );
 			delete AllPlanes[i];
+			AllPlanes[i] = NULL;
 		}
 		
 		// Save the lightmap				

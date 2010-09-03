@@ -135,6 +135,10 @@ def copyFilesExtNoTreeIfNeeded(log, dir_source, dir_target, file_ext):
 	files = findFiles(log, dir_source, "", file_ext)
 	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files)
 
+def copyFilesExtNoSubdirIfNeeded(log, dir_source, dir_target, file_ext):
+	files = findFilesNoSubdir(log, dir_source, file_ext)
+	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files)
+
 def copyFilesNoTreeIfNeeded(log, dir_source, dir_target):
 	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, os.listdir(dir_source))
 
@@ -181,6 +185,20 @@ def findFiles(log, dir_where, dir_sub, file_ext):
 				printLog(log, "findFiles: file not dir or file?!" + filePath)
 	return result
 
+def findFilesNoSubdir(log, dir_where, file_ext):
+	result = [ ]
+	files = os.listdir(dir_where)
+	len_file_ext = len(file_ext)
+	for fileName in files:
+		if fileName != ".svn" and fileName != "*.*":
+			fileFull = dir_where + "/" + fileName
+			if os.path.isfile(fileFull):
+				if fileName[-len_file_ext:].lower() == file_ext.lower():
+					result += [ fileName ]
+			elif not os.path.isdir(fileFull):
+				printLog(log, "findFilesNoSubdir: file not dir or file?!" + fileFull)
+	return result
+
 def findFile(log, dir_where, file_name):
 	files = os.listdir(dir_where)
 	for fileName in files:
@@ -196,6 +214,74 @@ def findFile(log, dir_where, file_name):
 			else:
 				printLog(log, "findFile: file not dir or file?! " + filePath)
 	return ""
+
+def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
+	updateCount = 0
+	skipCount = 0
+	lenSrcExt = len(ext_source)
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		sourceFile = dir_source + "/" + file
+		tagFile = dir_dest + "/" + file[0:-lenSrcExt] + ext_dest
+		if os.path.isfile(tagFile):
+			sourceTime = os.stat(sourceFile).st_mtime
+			tagTime = os.stat(tagFile).st_mtime
+			if (sourceTime > tagTime):
+				updateCount = updateCount + 1
+			else:
+				skipCount = skipCount + 1
+		else:
+			updateCount = updateCount + 1
+	if updateCount > 0:
+		printLog(log, "UPDATE " + str(updateCount) + " / " + str(len(sourceFiles)) + "; SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 1
+	else:
+		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 0
+
+def needUpdateDirNoSubdirLogExt(log, dir_source, ext_source, dir_dest, ext_dest):
+	latestSourceFile = 0
+	latestDestFile = 0
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		fileTime = os.stat(dir_source + "/" + file).st_mtime
+		if (fileTime > latestSourceFile):
+			latestSourceFile = fileTime
+	for file in destFiles:
+		fileTime = os.stat(dir_dest + "/" + file).st_mtime
+		if (fileTime > latestDestFile):
+			latestDestFile = fileTime
+	if latestSourceFile > latestDestFile or len(sourceFiles) > len(destFiles):
+		printLog(log, "UPDATE; Source: " + str(latestSourceFile) + ", " + str(len(sourceFiles)) + " files; Dest: " + str(latestDestFile) + ", " + str(len(destFiles)) + " files")
+		return 1
+	else:
+		printLog(log, "SKIP *")
+		return 0
+
+def needUpdateDirNoSubdirLogExtMultidir(log, all_dir_base, all_dir_source, dir_source, ext_source, dir_dest, ext_dest):
+	latestSourceFile = 0
+	latestDestFile = 0
+	sourceFilesAll = [ ]
+	for dir in all_dir_source:
+		sourceFilesAll += findFilesNoSubdir(log, all_dir_base + "/" + dir, ext_source)
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		fileTime = os.stat(dir_source + "/" + file).st_mtime
+		if (fileTime > latestSourceFile):
+			latestSourceFile = fileTime
+	for file in destFiles:
+		fileTime = os.stat(dir_dest + "/" + file).st_mtime
+		if (fileTime > latestDestFile):
+			latestDestFile = fileTime
+	if latestSourceFile > latestDestFile or len(sourceFilesAll) > len(destFiles):
+		printLog(log, "UPDATE; Source: " + str(latestSourceFile) + ", " + str(len(sourceFilesAll)) + " files; Dest: " + str(latestDestFile) + ", " + str(len(destFiles)) + " files")
+		return 1
+	else:
+		printLog(log, "SKIP *")
+		return 0
 
 def findTool(log, dirs_where, file_name, suffix):
 	try:

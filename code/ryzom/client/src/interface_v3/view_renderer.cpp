@@ -744,6 +744,13 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 		image.UVMax.V = uvMaxV;
 		sTGAname = tgaName;
 		sTGAname = strlwr(sTGAname);
+		string::size_type stripPng = sTGAname.find(".png");
+		if (stripPng != string::npos)
+		{
+			sTGAname[stripPng + 1] = 't';
+			sTGAname[stripPng + 2] = 'g';
+			sTGAname[stripPng + 3] = 'a';
+		}
 		image.Name = sTGAname;
 		image.GlobalTexturePtr = &(_GlobalTextures.back());
 		if (getTextureIdFromName(sTGAname) != -1)
@@ -1025,7 +1032,14 @@ sint32 CViewRenderer::getTextureIdFromName (const string &sName) const
 	static string	nameLwr;
 	nameLwr= sName;
 	strlwr(nameLwr);
-
+	string::size_type stripPng = nameLwr.find(".png");
+	if (stripPng != string::npos)
+	{
+		nameLwr[stripPng + 1] = 't';
+		nameLwr[stripPng + 2] = 'g';
+		nameLwr[stripPng + 3] = 'a';
+	}
+	
 	// Search in map
 	TTextureMap::const_iterator		it= _TextureMap.find(nameLwr);
 	if( it==_TextureMap.end() )

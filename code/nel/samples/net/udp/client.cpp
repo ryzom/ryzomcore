@@ -213,8 +213,8 @@ void cbInfo (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 
 #ifdef USE_3D
 	string token = "MeanPongTime ";
-	uint pos=line.find (token);
-	uint pos2=line.find (" ", pos+token.size());
+	string::size_type pos=line.find (token);
+	string::size_type pos2=line.find (" ", pos+token.size());
 	uint32 val = atoi(line.substr (pos+token.size(), pos2-pos-token.size()).c_str());	
 	LagGraph.addOneValue ((float)val);
 #endif
@@ -309,7 +309,7 @@ int main( int argc, char **argv )
 	UTextContext *TextContext= Driver->createTextContext(CPath::lookup("n019003l.pfb"));
 	TextContext->setFontSize(18);
 
-	Camera.setPerspective(80*Pi/180, 1.33, 0.15, 1000);
+	Camera.setPerspective(80*(float)Pi/180, 1.33f, 0.15f, 1000);
 
 	CEvent3dMouseListener MouseListener;
 	MouseListener.addToServer(Driver->EventServer);

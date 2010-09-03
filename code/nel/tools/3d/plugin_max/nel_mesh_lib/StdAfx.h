@@ -26,6 +26,7 @@
 //#include "nel/misc/types_nl.h"
 // Max SDK includes
 //#define NOMINMAX
+#include <assert.h>
 #include <algorithm>
 #include <max.h>
 #include <stdmat.h>
