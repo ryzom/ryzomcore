@@ -247,6 +247,7 @@ rollout assets_png_rollout "Properties"
 		
 		actionMan.executeAction 0 "40021"  -- Selection: Select All
 		actionMan.executeAction 0 "311"  -- Tools: Zoom Extents All Selected
+		actionMan.executeAction 0 "40807"  -- Views: Activate All Maps
 		actionMan.executeAction 0 "63508"  -- Views: Standard Display with Maps
 		actionMan.executeAction 0 "40043"  -- Selection: Select None
 		
