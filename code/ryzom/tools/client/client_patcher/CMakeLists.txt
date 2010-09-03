@@ -25,8 +25,8 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher 	${PLATFORM_LINKFLAGS}
 
 ADD_DEFINITIONS(-DRZ_NO_CLIENT -DNL_USE_SEVENZIP)
 
-NL_DEFAULT_PROPS(ryzom_client "Ryzom, Tools: Ryzom Client Patcher")
-NL_ADD_RUNTIME_FLAGS(ryzom_client)
+NL_DEFAULT_PROPS(ryzom_client_patcher "Ryzom, Tools: Ryzom Client Patcher")
+NL_ADD_RUNTIME_FLAGS(ryzom_client_patcher)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/client/src/stdpch.cpp)

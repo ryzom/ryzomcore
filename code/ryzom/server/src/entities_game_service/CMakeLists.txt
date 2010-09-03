@@ -40,9 +40,9 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.h)
 
-ADD_EXECUTABLE(entities_game_service ${SRC})
+ADD_EXECUTABLE(entities_game_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(entities_game_service	admin_modules 
 						ryzom_gameshare 
 						server_share 
@@ -53,16 +53,14 @@ TARGET_LINK_LIBRARIES(entities_game_service	admin_modules
 						${LIBXML2_LIBRARIES} 
 						${MYSQL_LIBRARIES} 
 						${ZLIB_LIBRARIES} 
-						${NELMISC_LIBRARY} 
-						${NELNET_LIBRARY} 
-						${NELGEORGES_LIBRARY} 
-						${NELLIGO_LIBRARY})
+						nelmisc
+						nelnet
+						nelgeorges
+						nelligo)
 
-IF(WIN32)
-  SET_TARGET_PROPERTIES(entities_game_service PROPERTIES 
-	LINK_FLAGS "/NODEFAULTLIB:libcmt /SUBSYSTEM:WINDOWS"
-	PROJECT_LABEL "Services: Entities Game Service (EGS)")
-ENDIF(WIN32)
+NL_DEFAULT_PROPS(entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
+NL_ADD_RUNTIME_FLAGS(entities_game_service)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)

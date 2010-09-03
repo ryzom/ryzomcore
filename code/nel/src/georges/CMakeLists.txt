@@ -8,7 +8,7 @@ NL_TARGET_LIB(nelgeorges ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nelgeorges nelmisc)
-NL_DEFAULT_PROPS(nelgeorges "Library: NeL Georges")
+NL_DEFAULT_PROPS(nelgeorges "NeL, Library: Georges")
 
 NL_ADD_LIB_SUFFIX(nelgeorges)
 

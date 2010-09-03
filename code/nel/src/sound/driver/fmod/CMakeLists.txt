@@ -5,7 +5,7 @@ NL_TARGET_DRIVER(nel_drv_fmod ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FMOD_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_fmod ${LIBXML2_LIBRARIES} ${FMOD_LIBRARY} nelsnd_lowlevel)
 
-NL_DEFAULT_PROPS(nel_drv_fmod "Driver, Sound: FMOD")
+NL_DEFAULT_PROPS(nel_drv_fmod "NeL, Driver, Sound: FMOD")
 NL_ADD_LIB_SUFFIX(nel_drv_fmod)
 NL_ADD_RUNTIME_FLAGS(nel_drv_fmod)
 

@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(build_clod_bank ${SRC})
 
 TARGET_LINK_LIBRARIES(build_clod_bank ${PLATFORM_LINKFLAGS} nel3d nelmisc)
-NL_DEFAULT_PROPS(build_clod_bank "Tools, 3D: build_clod_bank")
+NL_DEFAULT_PROPS(build_clod_bank "NeL, Tools, 3D: build_clod_bank")
 NL_ADD_RUNTIME_FLAGS(build_clod_bank)
 
 INSTALL(TARGETS build_clod_bank RUNTIME DESTINATION bin COMPONENT tools3d)

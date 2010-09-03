@@ -5,7 +5,7 @@ NL_TARGET_DRIVER(nel_drv_dsound ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${DXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_dsound ${LIBXML2_LIBRARIES} nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY} ${DXSDK_GUID_LIBRARY})
 
-NL_DEFAULT_PROPS(nel_drv_dsound "Driver, Sound: DirectSound")
+NL_DEFAULT_PROPS(nel_drv_dsound "NeL, Driver, Sound: DirectSound")
 NL_ADD_LIB_SUFFIX(nel_drv_dsound)
 NL_ADD_RUNTIME_FLAGS(nel_drv_dsound)
 

@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h ../zone_lib/*.cpp ../zone_lib/*.h)
 ADD_EXECUTABLE(zone_dependencies ${SRC})
 
 TARGET_LINK_LIBRARIES(zone_dependencies ${PLATFORM_LINKFLAGS} nel3d nelgeorges nelmisc)
-NL_DEFAULT_PROPS(zone_dependencies "Tools, 3D: zone_dependencies")
+NL_DEFAULT_PROPS(zone_dependencies "NeL, Tools, 3D: zone_dependencies")
 NL_ADD_RUNTIME_FLAGS(zone_dependencies)
 
 INSTALL(TARGETS zone_dependencies RUNTIME DESTINATION bin COMPONENT tools3d)

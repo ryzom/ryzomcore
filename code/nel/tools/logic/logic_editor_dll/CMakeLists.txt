@@ -13,7 +13,7 @@ SET_TARGET_PROPERTIES(logic_editor_dll PROPERTIES
   SOVERSION ${NL_VERSION_MAJOR}
   DEBUG_POSTFIX "_d"
   RELEASE_POSTFIX "_r"
-  PROJECT_LABEL "Tools, Logic: Logic Editor DLL")
+  PROJECT_LABEL "NeL, Tools, Logic: Logic Editor DLL")
 
 IF(WIN32)
   SET_TARGET_PROPERTIES(logic_editor_dll PROPERTIES

@@ -4,7 +4,7 @@ NL_TARGET_LIB(nellogic ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nellogic ${LIBXML2_LIBRARIES} nelmisc nelnet)
-NL_DEFAULT_PROPS(nellogic "Library: NeL Logic")
+NL_DEFAULT_PROPS(nellogic "NeL, Library: Logic")
 
 NL_ADD_LIB_SUFFIX(nellogic)
 

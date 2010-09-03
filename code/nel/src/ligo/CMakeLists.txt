@@ -4,7 +4,7 @@ NL_TARGET_LIB(nelligo ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nelligo ${LIBXML2_LIBRARIES} nelmisc)
-NL_DEFAULT_PROPS(nelligo "Library: NeL Ligo")
+NL_DEFAULT_PROPS(nelligo "NeL, Library: Ligo")
 
 NL_ADD_LIB_SUFFIX(nelligo)
 

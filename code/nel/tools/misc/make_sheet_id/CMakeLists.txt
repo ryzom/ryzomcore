@@ -5,7 +5,7 @@ ADD_EXECUTABLE(make_sheet_id ${SRC})
 ADD_DEFINITIONS(-DNL_MK_SH_ID_CFG="\\"${NL_ETC_PREFIX}/\\"")
 
 TARGET_LINK_LIBRARIES(make_sheet_id ${PLATFORM_LINKFLAGS} nelmisc)
-NL_DEFAULT_PROPS(make_sheet_id "Tools, Misc: make_sheet_id")
+NL_DEFAULT_PROPS(make_sheet_id "NeL, Tools, Misc: make_sheet_id")
 NL_ADD_RUNTIME_FLAGS(make_sheet_id)
 
 INSTALL(TARGETS make_sheet_id RUNTIME DESTINATION bin COMPONENT toolsmisc)

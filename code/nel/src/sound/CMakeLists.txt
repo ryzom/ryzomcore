@@ -4,7 +4,7 @@ NL_TARGET_LIB(nelsound ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nelsound ${LIBXML2_LIBRARIES} nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
-NL_DEFAULT_PROPS(nelsound "Library: NeL Sound")
+NL_DEFAULT_PROPS(nelsound "NeL, Library: Sound")
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
