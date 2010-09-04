@@ -34,6 +34,7 @@ IF(COMMAND cmake_policy)
 ENDIF(COMMAND cmake_policy)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/nel.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/ConfigureChecks.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
@@ -112,8 +113,6 @@ ENDIF(FINAL_VERSION)
 IF(WITH_QT)  
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml REQUIRED)
 ENDIF(WITH_QT)
-ADD_DEFINITIONS(-DHAVE_CONFIG_H)
-
 
 IF(WITH_NEL)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)

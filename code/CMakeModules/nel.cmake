@@ -49,7 +49,6 @@ MACRO(NL_DEFAULT_PROPS name label)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
 ENDMACRO(NL_DEFAULT_PROPS)
 
-
 ###
 # Adds the target suffix on Windows.
 # Argument: name - the library's target name.
@@ -212,7 +211,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN   "Build NeL 3dsMax Plugin"                               OFF)
   OPTION(WITH_NEL_SAMPLES     "Build NeL Samples"                                     ON )
   OPTION(WITH_NEL_TESTS       "Build NeL Unit Tests"                                  ON )
-  OPTION(WITH_MFC         "With MFC Support"                                      ON )
+  OPTION(WITH_MFC             "With MFC Support"                                      ON )
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
