@@ -49,3 +49,8 @@
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
 #include "nel/misc/string_common.h"
+
+#ifdef NL_OS_WINDOWS
+	#define NOMINMAX
+	#include <windows.h>
+#endif

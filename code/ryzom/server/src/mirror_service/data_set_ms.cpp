@@ -24,6 +24,7 @@
 #include "mirror_service.h"
 
 using namespace NLMISC;
+using namespace NLNET;
 using namespace NLGEORGES;
 using namespace std;
 

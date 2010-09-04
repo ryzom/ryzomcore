@@ -33,7 +33,6 @@
 #ifdef NL_OS_WINDOWS
 #	include <process.h>
 #	include <intrin.h>
-#	include <windows.h>
 #else
 #	include <cmath>
 #	include <unistd.h>
@@ -43,6 +42,10 @@
 #include "string_common.h"
 
 #ifdef NL_OS_WINDOWS
+	struct nameHICON__;
+	typedef struct HICON__ *HICON;
+	struct nameHWND__;
+	typedef struct HWND__ *HWND;
 	typedef HWND nlWindow;
 	#define EmptyWindow NULL
 #elif defined(NL_OS_MAC)

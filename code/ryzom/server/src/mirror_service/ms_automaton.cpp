@@ -72,6 +72,9 @@
 #include "mirror_service.h"
 #include "tick_proxy.h"
 
+using namespace NLMISC;
+using namespace NLNET;
+using namespace std;
 
 extern NLMISC::CLog				_QuickLog;
 

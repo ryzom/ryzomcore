@@ -61,3 +61,8 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/file.h"
+
+#ifdef NL_OS_WINDOWS
+	#define NOMINMAX
+	#include <windows.h>
+#endif

@@ -28,8 +28,6 @@
 #include <unistd.h>
 #define __forceinline
 #elif defined(NL_OS_WINDOWS)
-#	define NOMINMAX
-#	include <windows.h>
 #	ifdef NL_NO_ASM
 #		include <intrin.h>
 #	endif

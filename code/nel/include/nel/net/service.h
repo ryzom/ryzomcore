@@ -24,11 +24,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#if defined(NL_OS_WINDOWS) && defined(_WINDOWS)
-#	define NOMINMAX
-#	include <windows.h>
-#endif
-
 #include "nel/misc/config_file.h"
 #include "nel/misc/entity_id.h"
 #include "nel/misc/variable.h"

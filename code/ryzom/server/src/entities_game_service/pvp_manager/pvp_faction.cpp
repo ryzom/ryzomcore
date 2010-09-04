@@ -27,6 +27,7 @@
 #include "nel/misc/variable.h"
 
 using namespace std;
+using namespace NLMISC;
 using namespace	PHRASE_UTILITIES;
 
 CVariable<bool> ResPawnPVPInSameRegionForbiden("egs","ResPawnPVPInSameRegionForbiden", "When character dead in PvP Faction, it can't respawn in same same region of it's death", true, 0, true );

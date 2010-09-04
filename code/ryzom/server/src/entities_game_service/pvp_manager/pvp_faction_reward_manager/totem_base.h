@@ -21,15 +21,12 @@
 #include "game_share/effect_families.h"
 #include "creature_manager/creature.h"
 
-using namespace std;
-using namespace NLMISC;
-
 class CSEffect;
 class CCharacter;
 class CTotemEffect;
 class CFileDescription;
 
-extern CVariable<uint32> TotemBuildTime;
+extern NLMISC::CVariable<uint32> TotemBuildTime;
 
 /**
  * A Totem Base with its effects on faction PVP
@@ -46,7 +43,7 @@ public :
 	CTotemBase( std::string const& name );
 	
 	/// Return all effects a given character gets on this totem
-	void	getTotemEffect( CCharacter* user, vector<CSEffect*>& outEffects ) const;
+	void	getTotemEffect( CCharacter* user, std::vector<CSEffect*>& outEffects ) const;
 	
 	/// Start building this totem
 	void	startBuilding( CCharacter* builder );
@@ -127,13 +124,13 @@ private :
 	PVP_CLAN::TPVPClan	_OwnerFaction;
 	
 	/// Neighbor regions
-	vector<TAIAlias>	_Neighbours;
+	std::vector<TAIAlias>	_Neighbours;
 
 	/// Effect of the totem base
 	EFFECT_FAMILIES::TEffectFamily	_TotemEffect;
 
 	/// Used BotObject
-	CRefPtr<CCreature>	_BotObject;
+	NLMISC::CRefPtr<CCreature>	_BotObject;
 
 	/// Is the building finished ? True if no totem
 	bool				_IsBuildingFinished;

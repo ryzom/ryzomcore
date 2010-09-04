@@ -18,13 +18,8 @@
 
 
 #ifdef NL_OS_WINDOWS
-
-#if !defined(NL_COMP_VC9)
-#   if !defined(NL_COMP_VC8)
-#	    include <winsock2.h>
-#   endif
-#endif
-
+#	define NOMINMAX
+#	include <windows.h>
 #elif defined NL_OS_UNIX
 
 #include <unistd.h>
