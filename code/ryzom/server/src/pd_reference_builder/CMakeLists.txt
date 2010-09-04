@@ -1,6 +1,6 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(reference_builder_service ${SRC})
+ADD_EXECUTABLE(reference_builder_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(reference_builder_service	
