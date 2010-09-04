@@ -42,6 +42,11 @@
 
 #include "receive_task.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #ifndef UDP_DIR
 #define UDP_DIR ""
 #endif // UDP_DIR

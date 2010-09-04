@@ -27,6 +27,11 @@
 #include "mirrors.h"
 #include "messages.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #include <mysql.h>
 
 using namespace NLMISC;

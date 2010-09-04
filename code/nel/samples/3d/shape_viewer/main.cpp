@@ -28,6 +28,11 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_instance.h>
 
+#ifdef NL_OS_WINDOWS
+	#define NOMINMAX
+	#include <windows.h>
+#endif // NL_OS_WINDOWS
+
 using namespace NLMISC;
 using namespace NL3D;
 

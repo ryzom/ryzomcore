@@ -126,6 +126,11 @@
 #include "server_share/logger_service_client.h"
 #include "server_share/stl_allocator_checker.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 ///////////
 // USING //
 ///////////

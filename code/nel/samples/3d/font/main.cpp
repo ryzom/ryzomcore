@@ -29,6 +29,11 @@
 #include "nel/3d/text_context.h"
 #include "nel/3d/driver_user.h"
 
+#ifdef NL_OS_WINDOWS
+	#define NOMINMAX
+	#include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #ifndef FONT_DIR
 #	define FONT_DIR "."
 #endif

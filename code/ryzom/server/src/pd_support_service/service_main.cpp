@@ -33,6 +33,10 @@
 // local
 #include "service_main.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
 
 //-----------------------------------------------------------------------------
 // force admin module to link in

@@ -18,6 +18,11 @@
 
 #include "db_manager.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;

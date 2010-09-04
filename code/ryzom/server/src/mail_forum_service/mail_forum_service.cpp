@@ -24,6 +24,10 @@
 #include "shard_stat_db_manager.h"
 #include "hof_generator.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
 
 using namespace NLNET;
 using namespace NLMISC;

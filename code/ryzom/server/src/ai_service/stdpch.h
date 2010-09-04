@@ -187,4 +187,9 @@ namespace MULTI_LINE_FORMATER {
 #include "ai_share/angle.h"
 #include "ai_share/world_map.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #endif /*STDPCH_H*/

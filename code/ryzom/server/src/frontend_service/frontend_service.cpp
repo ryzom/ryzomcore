@@ -56,6 +56,11 @@
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 using namespace NLNET;
 using namespace NLMISC;
 using namespace CLFECOMMON;

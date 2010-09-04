@@ -36,6 +36,11 @@
 
 #include "nel/net/transport_class.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 #ifndef NL_CT_CFG
 #define NL_CT_CFG ""
 #endif // NL_CT_CFG
