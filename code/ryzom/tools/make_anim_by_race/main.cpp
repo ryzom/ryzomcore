@@ -52,7 +52,7 @@ void	buildRaceAnimNames(std::vector<string> &raceAnimNames, const std::string &a
 }
 
 // ***************************************************************************
-uint	findAnimName(const string &lineLwr, const std::vector<string> &raceAnimNames)
+string::size_type	findAnimName(const string &lineLwr, const std::vector<string> &raceAnimNames)
 {
 	// line Must contains Name="filename", else CAN BE A LOAD CHAR ANIMATION!!!!
 	if(lineLwr.find("name=\"filename\"")==string::npos)
@@ -61,11 +61,11 @@ uint	findAnimName(const string &lineLwr, const std::vector<string> &raceAnimName
 	// in the animset, the original file can be a "tr_" ... Not necessarily a "fy_"
 	for(uint i=0;i<raceAnimNames.size();i++)
 	{
-		uint	pos= lineLwr.find(raceAnimNames[i]);
+		string::size_type	pos= lineLwr.find(raceAnimNames[i]);
 		if(pos!=string::npos)
 			return pos;
 	}
-	return -1;
+	return string::npos;
 }
 
 // ***************************************************************************
@@ -160,8 +160,8 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 				raceRestrictionFound= true;
 
 			// Find the anim name?
-			uint	nameIndexInLine= findAnimName(lineLwr, raceAnimNames);
-			if(nameIndexInLine!=-1)
+			string::size_type	nameIndexInLine= findAnimName(lineLwr, raceAnimNames);
+			if(nameIndexInLine!=string::npos)
 			{
 				// Find the enclosing struct
 				nlassert(lastStructLine!=0);
@@ -220,9 +220,9 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 					// Append for each race
 					for(uint k=0;k<raceAnimNames.size();k++)
 					{
-						appendRaceAnim(animSetText, nextBlock, copyText, nameLineInBlock, nameIndexInLine, raceAnimNames[k]);
+						appendRaceAnim(animSetText, nextBlock, copyText, nameLineInBlock, (uint)nameIndexInLine, raceAnimNames[k]);
 						// nextBlock is then shifted
-						nextBlock+= copyText.size();
+						nextBlock+= (uint)copyText.size();
 					}
 
 					someChangeDone= true;
@@ -248,7 +248,7 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 		{
 			string	str= animSetText[i];
 			str+= "\n";
-			oFile.serialBuffer((uint8*)str.c_str(), str.size());
+			oFile.serialBuffer((uint8*)str.c_str(), (uint)str.size());
 		}
 	}
 }

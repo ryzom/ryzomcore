@@ -53,7 +53,7 @@ std::string	decodeDbPathId(const std::string& pathid)
 	std::string	shard("");
 	uint		id;
 
-	uint		p = pathid.find(':');
+	string::size_type		p = pathid.find(':');
 
 	if (p == std::string::npos)
 	{

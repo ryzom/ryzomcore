@@ -247,7 +247,7 @@ bool	CLogAnalyserService::getQueryResult(uint32 queryId, std::string& result, si
 
 			if (filter.empty())
 			{
-				numpage = (_Finished[i]->Result.size()+linePerPage-1) / linePerPage;
+				numpage = ((uint)_Finished[i]->Result.size()+linePerPage-1) / linePerPage;
 				if (page >= (sint)numpage)
 					page = numpage-1;
 
@@ -329,7 +329,7 @@ bool	CLogAnalyserService::getQueryResult(uint32 queryId, std::string& result, si
 				}
 
 				// refresh numpage
-				numpage = (matchingLines.size()+linePerPage-1) / linePerPage;
+				numpage = ((uint)matchingLines.size()+linePerPage-1) / linePerPage;
 				if (page >= (sint)numpage)
 					page = numpage-1;
 
@@ -374,7 +374,7 @@ void	CLogAnalyserService::getQueryList(std::vector<CQuery*>& queries)
 {
 	_Mutex.enter();
 	sint	i;
-	for (i=_Requests.size()-1; i>=0; --i)
+	for (i=(sint)_Requests.size()-1; i>=0; --i)
 	{
 		CQuery*	q = _Requests[i];
 		q->State = QueryAwaiting;
@@ -387,7 +387,7 @@ void	CLogAnalyserService::getQueryList(std::vector<CQuery*>& queries)
 		queries.push_back(_Current);
 	}
 
-	for (i=_Finished.size()-1; i>=0; --i)
+	for (i=(sint)_Finished.size()-1; i>=0; --i)
 	{
 		CQuery*	q = _Finished[i];
 		q->State = QueryTreated;
@@ -455,7 +455,7 @@ void	cbResult(CMemStream &msgin, TSockId host)
 
 	//nlinfo("received query '%s'", idStr.c_str());
 
-	uint		pos = idStr.find("%!");
+	string::size_type		pos = idStr.find("%!");
 	if (pos != std::string::npos)
 	{
 		// parse input
