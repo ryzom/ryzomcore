@@ -26,7 +26,6 @@
 #include "nel/net/udp_sock.h"
 
 #include <vector>
-using namespace std;
 
 
 const uint32 MsgHeaderSize = 1+8;	// 8 for the date
@@ -72,12 +71,12 @@ struct TReceivedMessage
 	uint32				userSize()						{ return (uint32)_Data.size() - MsgHeaderSize; }
 
 	/// Return the data vector (event type header byte + user data)
-	vector<uint8>&		data()							{ return _Data; }
+	std::vector<uint8>&		data()						{ return _Data; }
 
 private:
 
 	/// One byte for event type (header), followed by user data
-	vector<uint8>		_Data;
+	std::vector<uint8>		_Data;
 
 public:
 	
@@ -85,7 +84,7 @@ public:
 	NLNET::CInetAddress	AddrFrom;
 
 	/// Placeholder vector for address info
-	vector<uint8>		VAddrFrom;
+	std::vector<uint8>		VAddrFrom;
 };
 
 
