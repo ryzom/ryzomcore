@@ -24,6 +24,15 @@
 #include <nel/net/transport_class.h>
 #include <nel/georges/load_form.h>
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
+using namespace NLMISC;
+using namespace NLNET;
+using namespace std;
+
 // force admin module to link in
 extern void admin_modules_forceLink();
 void foo()
