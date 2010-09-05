@@ -1,6 +1,6 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_LIBRARY(ai_share STATIC ${SRC})
+NL_TARGET_LIB(ai_share ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(ai_share ryzom_gameshare server_share nelmisc nelnet nelgeorges nelpacs)

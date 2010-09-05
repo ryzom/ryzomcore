@@ -375,7 +375,7 @@ public:
 			}
 			++_NbChangesPushed;
 		}
-		catch ( EReallocationFailed& )
+		catch ( NLMISC::EReallocationFailed& )
 		{
 			nlwarning( "ERROR: Can't reallocate DeltaBuffer (E%u propIndex %hd %s NbChangesPushed %d oldpos %d bufpos %d bufsize %u StoredNbChangesPushedProps %d NbChangesPushedInTickProps %d StoredNbChangesPushedRowMgt %d NbChangesPushedInTickRowMgt %d)",
 				datasetrow.getIndex(), propIndex, _DataSet->propIsList(propIndex) ? "list" : "normal",
@@ -948,7 +948,7 @@ protected:
 		while ( datasetRow.isValid() )
 		{
 			// Read timestamp
-			TGameCycle timestamp;
+			NLMISC::TGameCycle timestamp;
 			msgin.fastRead( timestamp );
 			
 			// Check remCounter

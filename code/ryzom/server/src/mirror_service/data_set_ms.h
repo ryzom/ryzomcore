@@ -27,7 +27,7 @@
 #include <nel/net/service.h>
 
 //#include <slist>
-#define slist list
+#define slist std::list
 
 #undef DISPLAY_DELTAS
 
