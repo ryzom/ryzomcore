@@ -61,7 +61,7 @@ void usage()
 	exit(1);
 }
 
-QMap<QString, QSize> parseCustomSizeHints(int argc, const char **argv)
+QMap<QString, QSize> parseCustomSizeHints(int argc, char **argv)
 {
 	/* from Qt sample */
 
@@ -100,10 +100,9 @@ QMap<QString, QSize> parseCustomSizeHints(int argc, const char **argv)
 #	else
 #		define tstring string
 #	endif
-sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR lpCmdLine, int /* nCmdShow */)
-#else
-sint main(int argc, char **argv)
 #endif
+
+sint main(int argc, char **argv)
 {
 #if defined(NL_OS_WINDOWS) && !FINAL_VERSION
 	// ensure paths are ok before powering up nel
@@ -171,17 +170,6 @@ sint main(int argc, char **argv)
 	{
 		nlwarning("HeapSetInformation FAIL! (%d)\n", GetLastError());
 	}
-#endif
-
-#ifdef NL_OS_WINDOWS
-	std::vector<std::string> argvstd;
-	NLMISC::explode<std::string>(std::string(lpCmdLine), " ", argvstd, true);
-	std::vector<const char *> argvp(argvstd.size() + 1);
-	for (std::vector<std::string>::size_type i = 0; i < argvstd.size(); ++i)
-		argvp[i] = argvstd[i].c_str();
-	argvp[argvstd.size()] = NULL;
-	int argc = argvstd.size();
-	const char **argv = &argvp[0];
 #endif
 
 #ifdef NL_OS_WINDOWS
