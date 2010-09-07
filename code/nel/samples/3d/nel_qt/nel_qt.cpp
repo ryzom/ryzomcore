@@ -20,6 +20,7 @@
 // STL includes
 #include <stdio.h>
 #ifdef NL_OS_WINDOWS
+#	include <windows.h>
 #	include <direct.h>
 #	include <tchar.h>
 #endif

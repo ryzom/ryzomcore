@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="sound_sources"
-	ProjectGUID="{496E2996-1706-4AC0-815B-237F566FBD4D}"
-	RootNamespace="sound_sources"
+	Name="chat_client"
+	ProjectGUID="{4A9B36D5-BD03-4599-82A1-9C79D3FD2B3E}"
+	RootNamespace="chat_client"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -20,10 +20,11 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -45,15 +46,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="4"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="LIBXML_STATIC;WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="_DEBUG;WIN32"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
-				BufferSecurityCheck="true"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -67,15 +66,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
-				OutputFile="$(RootNamespace)_d.exe"
-				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
-				SubSystem="1"
-				ImportLibrary="$(RootNamespace)_d.lib"
-				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -101,10 +93,11 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -127,14 +120,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="4"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="LIBXML_STATIC;WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="_DEBUG;WIN32"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -148,14 +140,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
-				OutputFile="$(RootNamespace)_d.exe"
-				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
-				SubSystem="1"
-				ImportLibrary="$(RootNamespace)_d.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -182,10 +168,11 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -211,14 +198,12 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				PreprocessorDefinitions="LIBXML_STATIC;WIN32;NDEBUG;ASSERT_THROW_EXCEPTION;_WINDOWS"
+				PreprocessorDefinitions="NDEBUG;WIN32"
 				StringPooling="true"
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				DisableLanguageExtensions="false"
 				WarningLevel="2"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -232,17 +217,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
-				OutputFile="$(RootNamespace)_r.exe"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrtd"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
-				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(RootNamespace)_r.lib"
-				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -268,10 +245,11 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -298,14 +276,12 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				PreprocessorDefinitions="LIBXML_STATIC;WIN32;NDEBUG;ASSERT_THROW_EXCEPTION;_WINDOWS"
+				PreprocessorDefinitions="NDEBUG;WIN32"
 				StringPooling="true"
 				ExceptionHandling="2"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				DisableLanguageExtensions="false"
 				WarningLevel="2"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -319,16 +295,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib odbc32.lib odbccp32.lib ws2_32.lib libxml2.lib zlib.lib freetype.lib"
-				OutputFile="$(RootNamespace)_r.exe"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc;libcmt;libcmtd;msvcrtd"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
-				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(RootNamespace)_r.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -358,7 +327,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="main.cpp"
+			RelativePath=".\client.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\kbhit.cpp"
 			>
 		</File>
 	</Files>
