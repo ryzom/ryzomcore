@@ -388,3 +388,60 @@ MACRO(NL_SETUP_PREFIX_PATHS)
   ENDIF(NOT NL_DRIVER_PREFIX)
   
 ENDMACRO(NL_SETUP_PREFIX_PATHS)
+
+MACRO(RYZOM_SETUP_PREFIX_PATHS)
+  ## Allow override of install_prefix path.
+  IF(NOT RYZOM_PREFIX)
+    IF(WIN32)
+      SET(RYZOM_PREFIX "." CACHE PATH "Installation path")
+    ELSE(WIN32)
+      SET(RYZOM_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation path")
+    ENDIF(WIN32)
+  ENDIF(NOT RYZOM_PREFIX)
+
+  ## Allow override of install_prefix/etc path.
+  IF(NOT RYZOM_ETC_PREFIX)
+    IF(WIN32)
+      SET(RYZOM_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
+    ELSE(WIN32)
+      SET(RYZOM_ETC_PREFIX "${CMAKE_INSTALL_PREFIX}/etc/ryzom" CACHE PATH "Installation path for configurations")
+    ENDIF(WIN32)
+  ENDIF(NOT RYZOM_ETC_PREFIX)
+
+  ## Allow override of install_prefix/share path.
+  IF(NOT RYZOM_SHARE_PREFIX)
+    IF(WIN32)
+	  SET(RYZOM_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
+	ELSE(WIN32)
+	  SET(RYZOM_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
+	ENDIF(WIN32)
+  ENDIF(NOT RYZOM_SHARE_PREFIX)
+
+  ## Allow override of install_prefix/sbin path.
+  IF(NOT RYZOM_SBIN_PREFIX)
+	IF(WIN32)
+	  SET(RYZOM_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
+	ELSE(WIN32)
+	  SET(RYZOM_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+	ENDIF(WIN32)
+  ENDIF(NOT RYZOM_SBIN_PREFIX)
+
+  ## Allow override of install_prefix/bin path.
+  IF(NOT RYZOM_BIN_PREFIX)
+    IF(WIN32)
+		SET(RYZOM_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
+    ELSE(WIN32)
+		SET(RYZOM_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools.")
+    ENDIF(WIN32)
+  ENDIF(NOT RYZOM_BIN_PREFIX)
+
+  ## Allow override of install_prefix/games path.
+  IF(NOT RYZOM_GAMES_PREFIX)
+    IF(WIN32)
+		SET(RYZOM_GAMES_PREFIX "." CACHE PATH "Installation path for tools and applications.")
+    ELSE(WIN32)
+		SET(RYZOM_GAMES_PREFIX "${CMAKE_INSTALL_PREFIX}/games" CACHE PATH "Installation path for client.")
+    ENDIF(WIN32)
+  ENDIF(NOT RYZOM_GAMES_PREFIX)
+
+ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
