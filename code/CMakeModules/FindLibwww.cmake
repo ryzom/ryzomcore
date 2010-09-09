@@ -63,6 +63,7 @@ MACRO(FIND_WWW_LIBRARY MYLIBRARY)
   ELSE(${MYLIBRARY})
     MESSAGE(STATUS "Warning: Libwww: Library not found: ${MYLIBRARY}")
   ENDIF(${MYLIBRARY})
+  
 ENDMACRO(FIND_WWW_LIBRARY MYLIBRARY)
 
 # on eg. mac os x and arch linux, libwww sub libraries are not "inter-linked"
