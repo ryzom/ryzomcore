@@ -50,8 +50,11 @@ CMailForumValidator::TMailNotification	CMailForumValidator::_Notification = NULL
 // Use Mail/Forum
 CVariable<bool>		UseMailForum("web", "UseMailForum", "Allow mail/forum validation", true, 0, true);
 
-// For shard names
-extern NLMISC::CVariable<uint32> FixedSessionId;
+// For a mainland shard (non ring), we need the session id to initialize the normal position stack with
+// the current far position after loading an old character file with no stored session id.
+// (Alternatively, the ServerAnimationModule could sent it to any mainland shard, looking up in the DB
+// ring:sessions).
+NLMISC::CVariable<uint32> FixedSessionId( "egs", "FixedSessionId", "For a mainland shard, the session id", 0, 0, true );
 
 /*
  * Constructor

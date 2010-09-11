@@ -45,7 +45,7 @@ using namespace NLMISC;
 
 namespace R2
 {
-	extern NLLIGO::CLigoConfig * LigoConfigPtr;
+	NLLIGO::CLigoConfig * LigoConfigPtr;
 }
 
 void CAiWrapperServer::init(NLLIGO::CLigoConfig *  ligoConfig)

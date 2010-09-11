@@ -108,17 +108,14 @@ extern vector<CMainlandSummary>		Mainlands;
 
 extern CVariable<bool> DontUseSU;
 
+// For shard names
+extern NLMISC::CVariable<uint32> FixedSessionId;
+
 // Send to client if name is valide (true for valide)
 void sendIfNameIsValide( uint32 userId, bool nameValide );
 
 // finish create char
 void cbCreateChar_part2(uint32 userId, const CCreateCharMsg &createCharMsg, bool ok);
-
-// For a mainland shard (non ring), we need the session id to initialize the normal position stack with
-// the current far position after loading an old character file with no stored session id.
-// (Alternatively, the ServerAnimationModule could sent it to any mainland shard, looking up in the DB
-// ring:sessions).
-NLMISC::CVariable<uint32> FixedSessionId( "egs", "FixedSessionId", "For a mainland shard, the session id", 0, 0, true );
 
 // (!IsRingShard only) (For mainland shard)
 // This parameter controls what we do we characters coming from another mainland shard.
