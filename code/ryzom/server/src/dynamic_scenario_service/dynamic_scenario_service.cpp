@@ -51,17 +51,12 @@ void foo()
 	admin_modules_forceLink();
 }
 
-
 namespace R2
 {
-// The ligo config
-NLLIGO::CLigoConfig* LigoConfigPtr;
-CR2LigoConfig R2LigoConfig;
-
-
+	// The ligo config
+	extern NLLIGO::CLigoConfig * LigoConfigPtr;
+	CR2LigoConfig R2LigoConfig;
 }
-
-
 
 void CDynamicScenarioService::forwardToStringManagerModule (CMessage &msgin)
 {
