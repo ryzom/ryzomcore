@@ -43,6 +43,28 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+printLog(log, ">>> Export maps that will be compressed to DDS <<<")
+for dir in MapSourceDirectories:
+	sourcePath = DatabaseDirectory + "/" + dir
+	mkPath(log, sourcePath)
+	destPath = ExportBuildDirectory + "/" + MapExportDirectory
+	mkPath(log, destPath)
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".dds")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".png")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".tga")
+printLog(log, "")
+
+printLog(log, ">>> Export maps that will not be compressed <<<")
+for dir in MapUncompressedSourceDirectories:
+	sourcePath = DatabaseDirectory + "/" + dir
+	mkPath(log, sourcePath)
+	destPath = ExportBuildDirectory + "/" + MapUncompressedExportDirectory
+	mkPath(log, destPath)
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".dds")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".png")
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".tga")
+printLog(log, "")
+
 log.close()
 
 

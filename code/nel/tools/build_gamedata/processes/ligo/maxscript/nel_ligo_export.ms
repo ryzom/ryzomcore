@@ -200,20 +200,48 @@ fn getIg node =
 )
 
 
+NEL3D_APPDATA_COLLISION					= 1423062613
+NEL3D_APPDATA_COLLISION_EXTERIOR		= 1423062614
 
+-- Must export this node ?
+fn isToBeExportedCollision node = 
+(
+	doNotExport = getappdata node NEL3D_APPDATA_COLLISION
+	if (doNotExport != undefined) then
+	(
+		if (doNotExport == "1") then
+			return true
+	)
+
+	doNotExport = getappdata node NEL3D_APPDATA_COLLISION_EXTERIOR
+	if (doNotExport != undefined) then
+	(
+		if (doNotExport == "1") then
+			return true
+	)
+
+	return false
+)
 
 -- Export collisions from the current loaded zone
-fn exportCollisionsFromZone outputPath filename =
+fn exportCollisionsFromZone outputNelDir filename =
 (
-	max select all
-	-- Export the collision
-	if (NelExportCollision ($selection as array) outputPath) == false then
+	-- Select all collision mesh
+	max select none
+	for m in geometry do
 	(
-		-- nlerror ("WARNING No collision exported from file "+filename)
+		if (isToBeExportedCollision m) == true then
+			selectmore m
+	)
+	
+	-- Export the collision
+	if (NelExportCollision ($selection as array) outputNelDir) == false then
+	(
+		nlerror("ERROR exporting collision " + filename + " in folder " + outputNelDir)
 	)
 	else
 	(
-		nlerror ("OK collision in folder "+outputPath)
+		nlerror("OK collision in folder " + outputNelDir)
 	)
 )
 
@@ -282,11 +310,15 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 	ig_array = #()
 
 	-- Scan all the ig in this project
+	nlerror("Scan all the ig in this project")
 	for node in geometry do
 	(
 		ig = getIg node
+		nlerror("geometry node")
 		if ( (ig != undefined) and (ig != "") and ( (igName == "") or (ig == igName) ) ) then
 		(
+			nlerror("Found something with an IG name")
+			
 			-- Transition ?
 			if ( ig == IgName) then
 			(
@@ -310,6 +342,7 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 			if (found == false) then
 			(
 				append ig_array ig
+				nlerror("New IG")
 			)
 		)
 	)
@@ -504,7 +537,8 @@ try
 				-- nlerror ("EXPORT "+ (getFilenameFile curFileName))
 
 				props = #( #("zone", (tokenArray[2] + "-" + tokenArray[3])), #("material", tokenArray[2]) ) 
-
+				
+				nlerror("NeLLigoExportZone " + curFileName)
 				if (selection as array).count > 1 then
 				(
 					nlerror ("ERROR In file "+(getFilenameFile curFileName)+", multiple NelPatchMesh. Can't export.");
@@ -550,6 +584,7 @@ try
 				-- export matching igs
 				try
 				(
+					nlerror("exportInstanceGroupFromZone " + curFileName)
 					exportInstanceGroupFromZone curFileName (ligo_export_path + "igs\\") "" 0 cellSize
 				)
 				catch
@@ -561,6 +596,7 @@ try
 				-- export collisions
 				try
 				(
+					nlerror("exportCollisionsFromZone " + curFileName)
 					exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
 				)
 				catch
@@ -572,6 +608,7 @@ try
 				-- Write a tag file
 				if tagThisFile == true then
 				(
+					nlerror("tagThisFile " + curFileName)
 					tagFile = createFile tag
 					if tagFile == undefined then
 					(

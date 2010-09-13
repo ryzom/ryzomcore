@@ -134,7 +134,7 @@ if MaxAvailable:
 							printLog(log, "ERROR Failed to read 3dsmax log")
 					else:
 						printLog(log, "WARNING No 3dsmax log")
-					if (os.path.exists(tagFilePath)):
+					if (not needUpdate(log, maxFilePath, tagFilePath)):
 						printLog(log, "OK " + maxFilePath)
 						retriesLeft = 0
 					else:

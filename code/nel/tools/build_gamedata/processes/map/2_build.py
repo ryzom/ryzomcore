@@ -50,54 +50,42 @@ PanoplyMaker = findTool(log, ToolDirectories, PanoplyMakerTool, ToolSuffix)
 HlsBankMaker = findTool(log, ToolDirectories, HlsBankMakerTool, ToolSuffix)
 printLog(log, "")
 
-# For each map directory
-printLog(log, ">>> Build map compressed: compress tga and png to dds <<<")
+printLog(log, ">>> Panoply <<<")
+printLog(log, "********************************")
+printLog(log, "********      TODO      ********")
+printLog(log, "********************************")
+
+printLog(log, ">>> Compress TGA and PNG maps to DDS <<<")
 if TgaToDds == "":
 	toolLogFail(log, TgaToDdsTool, ToolSuffix)
 elif ExecTimeout == "":
 	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
 else:
-	mkPath(log, ExportBuildDirectory + "/" + MapBuildDirectory)
-	for dir in MapSourceDirectories:
-		sourcePath = DatabaseDirectory + "/" + dir
-		mkPath(log, sourcePath)
-		destPath = ExportBuildDirectory + "/" + MapBuildDirectory
-		mkPath(log, destPath)
-		files = findFilesNoSubdir(log, sourcePath, ".tga")
-		for file in files:
-			sourceFile = sourcePath + "/" + file
-			destFile = destPath + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
-			if needUpdateLogRemoveDest(log, sourceFile, destFile):
-				subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
-		files = findFilesNoSubdir(log, sourcePath, ".png")
-		for file in files:
-			sourceFile = sourcePath + "/" + file
-			destFile = destPath + "/" + os.path.basename(file)[0:-len(".png")] + ".dds"
-			if needUpdateLogRemoveDest(log, sourceFile, destFile):
-				subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
-printLog(log, "")
-
-printLog(log, ">>> Build map uncompressed: copy tga, png, dds <<<")
-for dir in MapUncompressedSourceDirectories:
-	sourcePath = DatabaseDirectory + "/" + dir
+	sourcePath = ExportBuildDirectory + "/" + MapExportDirectory
 	mkPath(log, sourcePath)
 	destPath = ExportBuildDirectory + "/" + MapBuildDirectory
 	mkPath(log, destPath)
+	files = findFilesNoSubdir(log, sourcePath, ".tga")
+	for file in files:
+		sourceFile = sourcePath + "/" + file
+		destFile = destPath + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
+		if needUpdateLogRemoveDest(log, sourceFile, destFile):
+			subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
+	files = findFilesNoSubdir(log, sourcePath, ".png")
+	for file in files:
+		sourceFile = sourcePath + "/" + file
+		destFile = destPath + "/" + os.path.basename(file)[0:-len(".png")] + ".dds"
+		if needUpdateLogRemoveDest(log, sourceFile, destFile):
+			subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
 	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".dds")
-	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".png")
-	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".tga")
+printLog(log, "")
 
-printLog(log, ">>> Build panoply <<<")
+printLog(log, ">>> Compress panoply maps to DDS <<<")
 printLog(log, "********************************")
 printLog(log, "********      TODO      ********")
 printLog(log, "********************************")
 
-printLog(log, ">>> Build panoply dds <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
-
-printLog(log, ">>> Build hls map <<<")
+printLog(log, ">>> Build the HLSBank (if hlsInfo present, and if build wanted) <<<")
 printLog(log, "********************************")
 printLog(log, "********      TODO      ********")
 printLog(log, "********************************")

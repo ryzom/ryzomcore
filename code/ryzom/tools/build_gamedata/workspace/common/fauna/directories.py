@@ -217,6 +217,10 @@ ClodSourceDirectories += [ "stuff/lod_actors/lod_fauna" ]
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
+# Map directories
+MapExportDirectory = CommonPath + "/map_export"
+MapUncompressedExportDirectory = CommonPath + "/map_uncompressed"
+
 # Skeleton directories
 SkelExportDirectory = CommonPath + "/skel"
 

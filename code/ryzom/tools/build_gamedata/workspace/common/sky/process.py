@@ -93,7 +93,7 @@ BankTileBankName = ""
 
 
 # *** LANDSCAPE NAME ***
-LandscapeName = ContinentName
+LandscapeName = ""
 
 
 # *** LIGO OPTIONS ***
@@ -104,7 +104,7 @@ LigoExportHeightmap1 = "big_invalid.png"
 LigoExportZFactor1 = "1.0"
 LigoExportHeightmap2 = "noise_invalid.png"
 LigoExportZFactor2 = "0.5"
-LigoTileBankFile = "landscape/_texture_tiles/jungle/jungle.bank"
+LigoTileBankFile = ""
 
 
 # *** MAPS OPTIONS ***

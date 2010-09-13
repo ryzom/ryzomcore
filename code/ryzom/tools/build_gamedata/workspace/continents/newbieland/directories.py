@@ -82,7 +82,44 @@ PsSourceDirectories = [ ]
 PsSourceDirectories += [ "primitive_microlife/" + ContinentName ]
 
 
+# *** LOOKUP DIRECTORIES WITHIN THE BUILD PIPELINE *** (TODO: use these instead of search_pathes in properties(_base).cfg)
+
+# Ig lookup directories used by rbank
+IgLookupDirectories = [ ]
+IgLookupDirectories += [ ContinentPath + "/ig_land" ]
+IgLookupDirectories += [ ContinentPath + "/ig_other" ]
+
+# Shape lookup directories used by rbank
+ShapeLookupDirectories = [ ]
+ShapeLookupDirectories += [ "common/sfx/ps" ]
+ShapeLookupDirectories += [ "common/sfx/shape_clodtex_build" ]
+ShapeLookupDirectories += [ "common/sfx/shape_with_coarse_mesh" ]
+ShapeLookupDirectories += [ "common/construction/shape_clodtex_build" ]
+ShapeLookupDirectories += [ "common/construction/shape_with_coarse_mesh" ]
+ShapeLookupDirectories += [ EcosystemPath + "/shape_clodtex_build" ]
+ShapeLookupDirectories += [ EcosystemPath + "/shape_with_coarse_mesh" ]
+ShapeLookupDirectories += [ ContinentPath + "/shape_clodtex_build" ]
+ShapeLookupDirectories += [ ContinentPath + "/shape_with_coarse_mesh" ]
+# ShapeLookupDirectories += [ ContinentName + "/zone_light/water_shapes_lighted" ] huh?
+
+# Map lookup directories not yet used
+MapLookupDirectories = [ ]
+ShapeLookupDirectories += [ "common/sfx/map_export" ]
+ShapeLookupDirectories += [ "common/sfx/map_uncompressed" ]
+ShapeLookupDirectories += [ "common/construction/map_export" ]
+ShapeLookupDirectories += [ "common/construction/map_uncompressed" ]
+ShapeLookupDirectories += [ EcosystemPath + "/map_export" ]
+ShapeLookupDirectories += [ EcosystemPath + "/map_uncompressed" ]
+ShapeLookupDirectories += [ ContinentPath + "/map_export" ]
+ShapeLookupDirectories += [ ContinentPath + "/map_uncompressed" ]
+
+
+
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
+
+# Map directories
+MapExportDirectory = CommonPath + "/map_export"
+MapUncompressedExportDirectory = CommonPath + "/map_uncompressed"
 
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
@@ -166,7 +203,6 @@ RbankTessellationBuildDirectory = CommonPath + "/rbank_tessellation"
 RbankSmoothBuildDirectory = CommonPath + "/rbank_smooth"
 RbankRawBuildDirectory = CommonPath + "/rbank_raw"
 RbankPreprocBuildDirectory = CommonPath + "/rbank_preproc"
-RbankMeshBuildDirectory = CommonPath + "/rbank_cmb"
 RbankRetrieversBuildDirectory = CommonPath + "/rbank_retrievers"
 RbankOutputBuildDirectory = CommonPath + "/rbank_output"
 

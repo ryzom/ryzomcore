@@ -101,6 +101,10 @@ PacsPrimSourceDirectories += [ DatabaseRootPath + "/decors/vegetations" ]
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
+# Map directories
+MapExportDirectory = CommonPath + "/map_export"
+MapUncompressedExportDirectory = CommonPath + "/map_uncompressed"
+
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
 ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"
@@ -160,7 +164,6 @@ IgOtherBuildDirectory = "_invalid"
 
 # Rbank directories
 RbankOutputBuildDirectory = "_invalid"
-RbankMeshBuildDirectory = "_invalid"
 
 # Ligo directories
 

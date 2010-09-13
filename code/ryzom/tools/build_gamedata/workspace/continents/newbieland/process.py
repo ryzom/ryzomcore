@@ -140,17 +140,17 @@ RbankZoneDr = "77_CS"
 RbankRbankName = LandscapeName
 
 # Import ig pathes
-RbankIgPaths = [ ] # ExportBuildDirectory/...
-RbankIgPaths += [ "continents/" + ContinentName + "/ig_other" ]
-RbankIgPaths += [ "continents/" + ContinentName + "/ig_land" ]
+#RbankIgPaths = [ ] # ExportBuildDirectory/...
+#RbankIgPaths += [ "continents/" + ContinentName + "/ig_other" ]
+#RbankIgPaths += [ "continents/" + ContinentName + "/ig_land" ]
 
 # Import shape pathes
-RbankShapePaths = [ ] # ExportBuildDirectory/...
-RbankShapePaths += [ "continents/" + ContinentName + "/shape" ]
-RbankShapePaths += [ "continents/" + ContinentName + "/shape_with_coarse_mesh_builded" ]
-RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape" ]
-RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape_with_coarse_mesh_builded" ]
-RbankShapePaths += [ "common/sfx/ps" ]
+#RbankShapePaths = [ ] # ExportBuildDirectory/...
+#RbankShapePaths += [ "continents/" + ContinentName + "/shape" ]
+#RbankShapePaths += [ "continents/" + ContinentName + "/shape_with_coarse_mesh_builded" ]
+#RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape" ]
+#RbankShapePaths += [ "ecosystems/" + EcosystemName + "/shape_with_coarse_mesh_builded" ]
+#RbankShapePaths += [ "common/sfx/ps" ]
 # RbankShapePaths += [ "l:/leveldesign/world_edit_files" ]
 
 # *** MAPS OPTIONS ***

@@ -83,6 +83,10 @@ AnimSourceDirectories += [ "sky_v2/max" ]
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
+# Map directories
+MapExportDirectory = CommonPath + "/map_export"
+MapUncompressedExportDirectory = CommonPath + "/map_uncompressed"
+
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
 ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"

@@ -6,7 +6,7 @@
 # 
 # \file config.py
 # \brief Process configuration
-# \date 2010-09-03-10-06-GMT
+# \date 2010-09-03-14-50-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Process configuration for 'jungle' ecosystem.

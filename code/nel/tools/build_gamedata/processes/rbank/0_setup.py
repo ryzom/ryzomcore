@@ -58,9 +58,9 @@ mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory)
-for dir in RbankIgPaths:
+for dir in IgLookupDirectories:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
-for dir in RbankShapePaths:
+for dir in ShapeLookupDirectories:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
 mkPath(log, ExportBuildDirectory + "/" + RbankBboxBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + IgLandBuildDirectory)
@@ -69,7 +69,6 @@ mkPath(log, ExportBuildDirectory + "/" + RbankTessellationBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankRawBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankPreprocBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + RbankMeshBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
 

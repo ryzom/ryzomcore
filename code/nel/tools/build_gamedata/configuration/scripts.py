@@ -105,6 +105,17 @@ def removeFilesRecursive(log, dir_files):
 				printLog(log, "RM " + dir_files + "/" + fileName)
 				os.remove(dir_files + "/" + fileName)
 
+def removeFilesRecursiveExt(log, dir_files, file_ext):
+	files = os.listdir(dir_files)
+	len_file_ext = len(file_ext)
+	for fileName in files:
+		if (fileName != ".svn"):
+			if os.path.isdir(dir_files + "/" + fileName):
+				removeFilesRecursiveExt(log, dir_files + "/" + fileName, file_ext)
+			elif (fileName[-len_file_ext:].lower() == file_ext.lower()):
+				printLog(log, "RM " + dir_files + "/" + fileName)
+				os.remove(dir_files + "/" + fileName)
+
 def copyFilesRecursive(log, dir_source, dir_target):
 	files = os.listdir(dir_source)
 	mkPath(log, dir_target)
@@ -126,6 +137,19 @@ def copyFilesExt(log, dir_source, dir_target, file_ext):
 		if (fileName != ".svn") and (fileName[-len_file_ext:].lower() == file_ext.lower()):
 			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + fileName)
 			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
+
+def copyFilesRenamePrefixExt(log, dir_source, dir_target, old_prefix, new_prefix, file_ext):
+	files = os.listdir(dir_source)
+	len_file_ext = len(file_ext)
+	len_prefix = len(old_prefix)
+	for fileName in files:
+		if (fileName != ".svn") and (fileName[-len_file_ext:].lower() == file_ext.lower()) and ((fileName[:len_prefix].lower() == old_prefix.lower())):
+			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
+			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
+
+def copyFilesExtNoSubdir(log, dir_source, dir_target, file_ext):
+	files = findFilesNoSubdir(log, dir_source, file_ext)
+	copyFileListNoTree(log, dir_source, dir_target, files)
 
 def copyFilesExtNoTree(log, dir_source, dir_target, file_ext):
 	files = findFiles(log, dir_source, "", file_ext)
@@ -238,6 +262,28 @@ def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
 		return 1
 	else:
 		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 0
+
+def needUpdateDirNoSubdir(log, dir_source, dir_dest):
+	latestSourceFile = 0
+	oldestDestFile = 0
+	sourceFiles = os.listdir(dir_source)
+	destFiles = os.listdir(dir_dest)
+	for file in sourceFiles:
+		filePath = dir_source + "/" + file
+		if os.path.isfile(filePath):
+			fileTime = os.stat(filePath).st_mtime
+			if fileTime > latestSourceFile:
+				latestSourceFile = fileTime
+	for file in destFiles:
+		filePath = dir_dest + "/" + file
+		if os.path.isfile(filePath):
+			fileTime = os.stat(filePath).st_mtime
+			if oldestDestFile == 0 or fileTime < oldestDestFile:
+				oldestDestFile = fileTime
+	if latestSourceFile > oldestDestFile:
+		return 1
+	else:
 		return 0
 
 def needUpdateDirNoSubdirLogExt(log, dir_source, ext_source, dir_dest, ext_dest):

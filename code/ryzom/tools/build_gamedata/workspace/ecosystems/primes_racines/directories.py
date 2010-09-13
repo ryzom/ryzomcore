@@ -6,7 +6,7 @@
 # 
 # \file directories.py
 # \brief Directories configuration
-# \date 2010-09-03-10-06-GMT
+# \date 2010-09-03-14-50-GMT
 # \author Jan Boon (Kaetemi)
 # \date 2001-2005
 # \author Nevrax
@@ -147,6 +147,10 @@ PacsPrimSourceDirectories += [ DatabaseRootPath + "/decors/vegetations" ]
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
+# Map directories
+MapExportDirectory = CommonPath + "/map_export"
+MapUncompressedExportDirectory = CommonPath + "/map_uncompressed"
+
 # Shape directories
 ShapeTagExportDirectory = CommonPath + "/shape_tag"
 ShapeNotOptimizedExportDirectory = CommonPath + "/shape_not_optimized"
@@ -206,7 +210,6 @@ IgOtherBuildDirectory = "_invalid"
 
 # Rbank directories
 RbankOutputBuildDirectory = "_invalid"
-RbankMeshBuildDirectory = "_invalid"
 
 # Ligo directories
 

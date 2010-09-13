@@ -61,16 +61,16 @@ else:
 	cf = open("build_ig_boxes.cfg", "w")
 	cf.write("\n")
 	cf.write("Pathes = {\n")
-	for dir in RbankIgPaths:
+	for dir in IgLookupDirectories:
 		mkPath(log, ExportBuildDirectory + "/" + dir)
 		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
-	for dir in RbankShapePaths:
+	for dir in ShapeLookupDirectories:
 		mkPath(log, ExportBuildDirectory + "/" + dir)
 		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
 	cf.write("};\n")
 	cf.write("\n")
 	cf.write("IGs = {\n")
-	for dir in RbankIgPaths:
+	for dir in IgLookupDirectories:
 		files = findFiles(log, ExportBuildDirectory + "/" + dir, "", ".ig")
 		for file in files:
 			cf.write("\t\"" + os.path.basename(file)[0:-len(".ig")] + "\", \n")
@@ -157,10 +157,10 @@ for file in files:
 cf.write("};\n")
 cf.write("\n")
 cf.write("Pathes = {\n")
-for dir in RbankIgPaths:
+for dir in IgLookupDirectories:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
 	cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
-for dir in RbankShapePaths:
+for dir in ShapeLookupDirectories:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
 	cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
 cf.write("};\n")
@@ -221,28 +221,54 @@ if BuildIndoorRbank == "":
 elif ExecTimeout == "":
 	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
 else:
+	retrieversDir = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
+	mkPath(log, retrieversDir)
+	removeFilesRecursiveExt(log, retrieversDir, ".rbank")
+	removeFilesRecursiveExt(log, retrieversDir, ".gr")
+	removeFilesRecursiveExt(log, retrieversDir, ".lr")
 	cf = open("build_indoor_rbank.cfg", "w")
 	cf.write("\n")
-	mkPath(log, ExportBuildDirectory + "/" + RbankMeshBuildDirectory)
-	cf.write("MeshPath = \"" + ExportBuildDirectory + "/" + RbankMeshBuildDirectory + "/\";\n")
-	cf.write("Meshes = { };\n") # *********************** TODO export CMB ********************************************
-	# mkPath(log, ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory)
-	# cf.write("OutputPath = \"" + ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory + "/\";\n")
-	mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
-	cf.write("OutputPath = \"" + ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/\";\n")
+	mkPath(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory)
+	cf.write("MeshPath = \"" + ExportBuildDirectory + "/" + RBankCmbExportDirectory + "/\";\n")
+	# cf.write("Meshes = { };\n")
+	cf.write("Meshes = \n")
+	cf.write("{\n")
+	meshFiles = findFilesNoSubdir(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory, ".cmb")
+	lenCmbExt = len(".cmb")
+	for file in meshFiles:
+		cf.write("\t\"" + file[0:-lenCmbExt] + "\", \n")
+	cf.write("};\n")
+	cf.write("OutputPath = \"" + retrieversDir + "/\";\n")
+	# mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
+	# cf.write("OutputPath = \"" + ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/\";\n")
 	cf.write("OutputPrefix = \"unused\";\n")
 	cf.write("Merge = 1;\n")
 	mkPath(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory)
 	cf.write("MergePath = \"" + ExportBuildDirectory + "/" + RbankSmoothBuildDirectory + "/\";\n")
 	cf.write("MergeInputPrefix = \"temp\";\n")
-	# cf.write("MergeOutputPrefix = \"tempMerged\";\n")
-	cf.write("MergeOutputPrefix = \"" + RbankRbankName + "\";\n")
+	cf.write("MergeOutputPrefix = \"tempMerged\";\n")
+	# cf.write("MergeOutputPrefix = \"" + RbankRbankName + "\";\n")
 	cf.write("AddToRetriever = 1;\n")
 	cf.write("\n")
 	cf.close()
 	subprocess.call([ ExecTimeout, str(RbankBuildIndoorTimeout), BuildIndoorRbank ])
 	os.remove("build_indoor_rbank.cfg")
 printLog(log, "")
+
+retrieversDir = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
+mkPath(log, retrieversDir)
+outputDir = ExportBuildDirectory + "/" + RbankOutputBuildDirectory
+mkPath(log, outputDir)
+printLog(log, ">>> Move gr, rbank and lr <<<")
+if needUpdateDirNoSubdir(log, retrieversDir, outputDir):
+	removeFilesRecursiveExt(log, outputDir, ".rbank")
+	removeFilesRecursiveExt(log, outputDir, ".gr")
+	removeFilesRecursiveExt(log, outputDir, ".lr")
+	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".rbank")
+	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".gr")
+	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged_", RbankRbankName + "_", ".lr")
+else:
+	printLog(log, "SKIP *")
 
 log.close()
 

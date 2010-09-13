@@ -94,6 +94,9 @@ for line in ps:
 	except NameError:
 		RbankRbankName = "_invalid"
 	newline = line.replace("%ExportBuildDirectory%", ExportBuildDirectory)
+	newline = newline.replace("%LeveldesignDirectory%", LeveldesignDirectory)
+	newline = newline.replace("%LeveldesignWorldDirectory%", LeveldesignWorldDirectory)
+	newline = newline.replace("%LeveldesignDfnDirectory%", LeveldesignDfnDirectory)
 	newline = newline.replace("%SmallbankExportDirectory%", SmallbankExportDirectory)
 	newline = newline.replace("%FarbankBuildDirectory%", FarbankBuildDirectory)
 	newline = newline.replace("%EcosystemName%", EcosystemName)

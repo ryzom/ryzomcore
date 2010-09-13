@@ -49,7 +49,7 @@ LigoExportTimeout = 3600000
 LigoBuildTimeout = 1800000
 PacsPrimExportTimeout = 600000
 
-MaxShapeExportTimeout = 300000 # 5min
+MaxShapeExportTimeout = 600000 # 10min
 
 # *** TOOLS CONFIGURATION ***
 

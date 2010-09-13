@@ -52,6 +52,8 @@ for dir in MapUncompressedSourceDirectories:
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + MapExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + MapUncompressedExportDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
