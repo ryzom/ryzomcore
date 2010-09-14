@@ -6,8 +6,8 @@ INCLUDE_DIRECTORIES(${FMOD_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_fmod ${FMOD_LIBRARY} nelmisc nelsnd_lowlevel)
 
 NL_DEFAULT_PROPS(nel_drv_fmod "NeL, Driver, Sound: FMOD")
-NL_ADD_LIB_SUFFIX(nel_drv_fmod)
 NL_ADD_RUNTIME_FLAGS(nel_drv_fmod)
+NL_ADD_LIB_SUFFIX(nel_drv_fmod)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_fmod ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.h ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.cpp)

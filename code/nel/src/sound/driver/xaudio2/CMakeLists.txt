@@ -29,11 +29,12 @@ SOURCE_GROUP(efx FILES
 NL_TARGET_DRIVER(nel_drv_xaudio2 ${SRC})
 
 INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(nel_drv_xaudio2 nelmisc nelsnd_lowlevel ${DXSDK_XAUDIO_LIBRARY} ${DXSDK_GUID_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_xaudio2 "NeL, Driver, Sound: XAudio2")
-NL_ADD_LIB_SUFFIX(nel_drv_xaudio2)
 NL_ADD_RUNTIME_FLAGS(nel_drv_xaudio2)
+NL_ADD_LIB_SUFFIX(nel_drv_xaudio2)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_xaudio2 ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.h ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.cpp)

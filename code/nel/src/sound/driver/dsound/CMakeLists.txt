@@ -6,8 +6,8 @@ INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_dsound nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY} ${DXSDK_GUID_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_dsound "NeL, Driver, Sound: DirectSound")
-NL_ADD_LIB_SUFFIX(nel_drv_dsound)
 NL_ADD_RUNTIME_FLAGS(nel_drv_dsound)
+NL_ADD_LIB_SUFFIX(nel_drv_dsound)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_dsound ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.h ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.cpp)

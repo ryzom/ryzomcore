@@ -21,10 +21,11 @@ SOURCE_GROUP(util FILES
 NL_TARGET_DRIVER(nel_drv_openal ${SRC})
 
 INCLUDE_DIRECTORIES(${OPENAL_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(nel_drv_openal ${OPENAL_LIBRARY} nelmisc nelsnd_lowlevel)
 NL_DEFAULT_PROPS(nel_drv_openal "NeL, Driver, Sound: OpenAL")
-NL_ADD_LIB_SUFFIX(nel_drv_openal)
 NL_ADD_RUNTIME_FLAGS(nel_drv_openal)
+NL_ADD_LIB_SUFFIX(nel_drv_openal)
 
 IF(WIN32)
   # Find and include EFX-Util on Windows.
