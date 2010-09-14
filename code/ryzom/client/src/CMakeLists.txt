@@ -7,7 +7,7 @@ ENDIF(WIN32)
 ADD_SUBDIRECTORY(client_sheets)
 ADD_SUBDIRECTORY(seven_zip)
 
-FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h motion/modes/*.cpp motion/modes/*.h r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp interface_v3/*.h interface_v3/*.cpp)
+FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h motion/modes/*.cpp motion/modes/*.h r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp interface_v3/*.h interface_v3/*.cpp client.rc)
 
 # Filter out the source files not actually compiled.
 LIST(REMOVE_ITEM SRC
@@ -27,11 +27,6 @@ LIST(REMOVE_ITEM SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/lua_dll.h
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
-
-# On Unix we'll need to include config.h
-#IF(UNIX)
-#  INCLUDE(${CMAKE_BINARY_DIR})
-#ENDIF(UNIX)
 
 # on Mac, create a .App Bundle
 if(APPLE)
@@ -69,22 +64,21 @@ INCLUDE_DIRECTORIES(
 )
 
 TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
-				nelmisc
-				nelnet
-				nelligo
-				nelgeorges
-				nel3d
-				nelsound
-				nelsnd_lowlevel
-				ryzom_clientsheets
-				ryzom_gameshare
-				nelpacs
-				${LIBXML2_LIBRARIES}
-				${LUA_LIBRARIES}
-				${LUABIND_LIBRARIES}
-				${CURL_LIBRARIES}
-				${LIBWWW_LIBRARIES}
-				${SEVENZIP_LIBRARY})
+						nelmisc
+						nelnet
+						nelligo
+						nelgeorges
+						nel3d
+						nelsound
+						ryzom_clientsheets
+						ryzom_gameshare
+						nelpacs
+						${LIBXML2_LIBRARIES}
+						${LUA_LIBRARIES}
+						${LUABIND_LIBRARIES}
+						${CURL_LIBRARIES}
+						${LIBWWW_LIBRARIES}
+						${SEVENZIP_LIBRARY})
 
 IF(NOT APPLE AND NOT WIN32)
 	TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})
@@ -94,6 +88,8 @@ ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS})
 
 NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Core Client")
 NL_ADD_RUNTIME_FLAGS(ryzom_client)
+
+NL_ADD_LIB_SUFFIX(ryzom_client)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
