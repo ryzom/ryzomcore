@@ -29,7 +29,7 @@ namespace NLSOUND
 {
 
 CMusicChannelAL::CMusicChannelAL(CSoundDriverAL *soundDriver) 
-: _MusicBuffer(NULL), _SoundDriver(soundDriver), _Gain(1.0), _Source(NULL), _Thread(NULL), _Async(false), _Playing(false), _Buffer(NULL)
+: _SoundDriver(soundDriver), _MusicBuffer(NULL), _Thread(NULL), _Buffer(NULL), _Source(NULL), _Playing(false), _Async(false), _Gain(1.0)
 {
 	// create a default source for music streaming
 	_Source = static_cast<CSourceAL*>(_SoundDriver->createSource());

@@ -80,11 +80,11 @@ bool CWindowDisplayer::update ()
 
 uint CWindowDisplayer::createLabel (const char *value)
 {
-	int pos;
+	uint pos;
 	{
 		CSynchronized<std::vector<CLabelEntry> >::CAccessor access (&_Labels);
 		access.value().push_back (CLabelEntry(value));
-		pos = (int)access.value().size()-1;
+		pos = (uint)access.value().size()-1;
 	}
 	return pos;
 }

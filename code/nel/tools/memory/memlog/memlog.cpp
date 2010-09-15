@@ -33,7 +33,7 @@ public:
 bool readString (string &str, FILE *file)
 {
 	int c;
-	while (c = fgetc (file))
+	while ((c = fgetc (file)))
 	{
 		if (c == EOF)
 			return false;
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 	if (argc>1)
 	{
 		char buffer[512];
-		while (gets (buffer))
+		while (fgets(buffer, 512, stdin))
 		{
 			uint32 address;
 			if (strcmp (buffer, "help") == 0)

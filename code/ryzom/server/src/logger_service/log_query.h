@@ -788,6 +788,8 @@ struct TPredicateNode : public TQueryNode
 					ts.EndDate = ~0;
 					tl.push_back(ts);
 					break;
+				default:
+					break;
 				}
 
 				return tl;
@@ -1163,8 +1165,8 @@ public:
 		/// The iterator in the string where the error is detected
 		iterator	It;
 		/// The error string
-		char		*ErrorStr;
-		EInvalidQuery(iterator it, char *erroStr)
+		const char		*ErrorStr;
+		EInvalidQuery(iterator it, const char *erroStr)
 			:	It(it),
 				ErrorStr(erroStr)
 		{}

@@ -174,7 +174,7 @@ class CContextSoundContainer : public IContextSoundContainer
 			return;
 		nlassertex(i==NbJoker, ("Error while adding sound '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
 
-		int randomValue;
+		sint randomValue = 0;
 		if (UseRandom)
 		{
 			bool ok = false;
