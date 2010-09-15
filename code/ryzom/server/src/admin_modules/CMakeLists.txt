@@ -1,14 +1,14 @@
 FILE(GLOB SRC *.cpp *.h)
 
-NL_TARGET_LIB(admin_modules ${SRC})
+NL_TARGET_LIB(ryzom_adminmodules ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-TARGET_LINK_LIBRARIES(admin_modules nelmisc)
-SET_TARGET_PROPERTIES(admin_modules PROPERTIES VERSION ${NL_VERSION})
 
-NL_DEFAULT_PROPS(admin_modules "Ryzom, Library: Service Admin Modules")
-NL_ADD_LIB_SUFFIX(admin_modules)
+TARGET_LINK_LIBRARIES(ryzom_adminmodules nelmisc nelnet)
+NL_DEFAULT_PROPS(ryzom_adminmodules "Ryzom, Library: Service Admin Modules")
+NL_ADD_RUNTIME_FLAGS(ryzom_adminmodules)
+NL_ADD_LIB_SUFFIX(ryzom_adminmodules)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS admin_modules LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS ryzom_adminmodules LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)

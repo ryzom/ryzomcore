@@ -1,30 +1,30 @@
 FILE(GLOB SRC *.cpp *.h)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.cpp
+LIST(REMOVE_ITEM SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/rr_module_itf.h)
 
-ADD_EXECUTABLE(patchman_service ${SRC})
+ADD_EXECUTABLE(ryzom_patchman_service ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/src ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(patchman_service	admin_modules 
+
+TARGET_LINK_LIBRARIES(ryzom_patchman_service
+					ryzom_adminmodules
 					ryzom_gameshare 
-					server_share
+					ryzom_servershare
 					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
 					${MYSQL_LIBRARIES} 
 					${ZLIB_LIBRARIES}
-					${NELMISC_LIBRARY} 
-					${NELNET_LIBRARY} 
-					${NELPACS_LIBRARY}
-					${NELGEORGES_LIBRARY} 
-					${NELLIGO_LIBRARY})
-IF(WIN32)
-  SET_TARGET_PROPERTIES(patchman_service PROPERTIES 
-	LINK_FLAGS "/NODEFAULTLIB:libcmt /SUBSYSTEM:WINDOWS"
-	PROJECT_LABEL "Services: Patch Manager (PMS)")
-ENDIF(WIN32)
+					nelmisc
+					nelnet
+					nelpacs
+					nelgeorges
+					nelligo)
+
+NL_DEFAULT_PROPS(ryzom_patchman_service "Ryzom, Services: Patch Manager Service (PMS)")
+NL_ADD_RUNTIME_FLAGS(ryzom_patchman_service)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS patchman_service RUNTIME DESTINATION sbin COMPONENT services)
-
-
+INSTALL(TARGETS ryzom_patchman_service RUNTIME DESTINATION sbin COMPONENT services)

@@ -1,17 +1,19 @@
 FILE(GLOB SRC *.cpp *.h)
 
 # Filter out the source files not actually compiled.
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/pd_string_manager.cpp
+LIST(REMOVE_ITEM SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/pd_string_manager.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/pd_string_manager.h)
 
-NL_TARGET_LIB(pd_lib ${SRC})
+NL_TARGET_LIB(ryzom_pd ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(pd_lib nelmisc)
-  
-NL_DEFAULT_PROPS(pd_lib "Ryzom, Library: PD Lib")
-NL_ADD_LIB_SUFFIX(pd_lib)
+
+TARGET_LINK_LIBRARIES(ryzom_pd nelmisc nelnet)
+NL_DEFAULT_PROPS(ryzom_pd "Ryzom, Library: PD Lib")
+NL_ADD_RUNTIME_FLAGS(ryzom_pd)
+NL_ADD_LIB_SUFFIX(ryzom_pd)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS pd_lib LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS ryzom_pd LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)

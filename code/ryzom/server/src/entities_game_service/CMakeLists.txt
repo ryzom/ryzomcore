@@ -20,7 +20,8 @@ FILE(GLOB SRC	*.cpp *.h
 		stables/*.h stables/*.cpp
 		team_manager/*.h team_manager/*.cpp)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
+LIST(REMOVE_ITEM SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.h
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h
@@ -40,15 +41,17 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/ai_pet_interface.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shop_type/solded_items.h)
 
-ADD_EXECUTABLE(entities_game_service WIN32 ${SRC})
+ADD_EXECUTABLE(ryzom_entities_game_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(entities_game_service	admin_modules 
-						ryzom_gameshare 
-						server_share 
-						ai_share 
-						pd_lib 
-						gameplay_module_lib
+
+TARGET_LINK_LIBRARIES(ryzom_entities_game_service
+						ryzom_adminmodules
+						ryzom_gameshare
+						ryzom_servershare
+						ryzom_aishare
+						ryzom_pd
+						ryzom_gameplaymodule
 						${PLATFORM_LINKFLAGS} 
 						${LIBXML2_LIBRARIES} 
 						${MYSQL_LIBRARIES} 
@@ -58,14 +61,13 @@ TARGET_LINK_LIBRARIES(entities_game_service	admin_modules
 						nelgeorges
 						nelligo)
 
-NL_DEFAULT_PROPS(entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
-NL_ADD_RUNTIME_FLAGS(entities_game_service)
+NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
+NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(entities_game_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_entities_game_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
 ENDIF(WITH_PCH)
 
-INSTALL(TARGETS entities_game_service RUNTIME DESTINATION sbin COMPONENT services)
-
+INSTALL(TARGETS ryzom_entities_game_service RUNTIME DESTINATION sbin COMPONENT services)

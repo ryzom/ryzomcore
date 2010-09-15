@@ -1,11 +1,13 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(session_browser_service WIN32 ${SRC})
+ADD_EXECUTABLE(ryzom_session_browser_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(session_browser_service	admin_modules 
+
+TARGET_LINK_LIBRARIES(ryzom_session_browser_service
+						ryzom_adminmodules
 						ryzom_gameshare
-						server_share
+						ryzom_servershare
 						${PLATFORM_LINKFLAGS} 
 						${LIBXML2_LIBRARIES} 
 						${MYSQL_LIBRARIES}
@@ -14,11 +16,9 @@ TARGET_LINK_LIBRARIES(session_browser_service	admin_modules
 						nelnet
 						nelgeorges)
 
-NL_DEFAULT_PROPS(session_browser_service "Ryzom, Services: Session Browser Service (SBS)")
-NL_ADD_RUNTIME_FLAGS(session_browser_service)
+NL_DEFAULT_PROPS(ryzom_session_browser_service "Ryzom, Services: Session Browser Service (SBS)")
+NL_ADD_RUNTIME_FLAGS(ryzom_session_browser_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS session_browser_service RUNTIME DESTINATION sbin COMPONENT services)
-
-
+INSTALL(TARGETS ryzom_session_browser_service RUNTIME DESTINATION sbin COMPONENT services)
