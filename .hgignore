@@ -141,6 +141,7 @@ moc_*.cpp
 *.patch
 *.7z
 external
+3rdParty
 .svn
 
 # build
@@ -148,6 +149,7 @@ code/nel/build/*
 code/nelns/build/*
 code/snowballs/build/*
 code/ryzom/build/*
+code/build/*
 
 # Linux nel compile
 code/nel/build/nel-config
