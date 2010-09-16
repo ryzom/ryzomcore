@@ -19,6 +19,11 @@
 #include <nel/misc/file.h>
 #include "shapes_exporter.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 using namespace NLMISC;
 using namespace NL3D;
 

@@ -18,6 +18,7 @@ SUBDIRS(
 		get_neighbors
 		ig_add
 		ig_info
+		shapes_exporter
 		tga_cut
 		tga_resize
 		zone_check_bind
