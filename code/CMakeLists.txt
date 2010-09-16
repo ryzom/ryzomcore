@@ -110,7 +110,7 @@ IF(WITH_STLPORT)
   IF(WIN32)
     FIND_PACKAGE(WindowsSDK REQUIRED)
 	# convert IDE fullpath to include path
-    STRING(REGEX REPLACE "Common7/IDE/[A-Za-z]+\\.exe" "VC/include" VCINCLUDE_DIR ${CMAKE_MAKE_PROGRAM})
+    STRING(REGEX REPLACE "Common7/IDE/.+" "VC/include" VCINCLUDE_DIR ${CMAKE_MAKE_PROGRAM})
 	# use VC++ and Windows SDK include paths
     INCLUDE_DIRECTORIES(${VCINCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
 	# deactivate all global include paths
