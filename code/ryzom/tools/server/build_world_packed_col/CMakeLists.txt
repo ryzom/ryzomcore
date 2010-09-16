@@ -5,7 +5,7 @@ ADD_EXECUTABLE(build_world_packed_col ${SRC})
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(build_world_packed_col	
 					ryzom_gameshare
-					server_share 
+					ryzom_servershare 
 					ai_share 
 					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
