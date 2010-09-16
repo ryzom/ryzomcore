@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
 
 	if (!res && !pPM->getLastErrorMessage().empty())
 	{
-		printError(convert(CI18N::get("uiErrPatching") + " " + pPM->getLastErrorMessage()));
+		printError(convert(CI18N::get("uiErrPatchApply") + " " + pPM->getLastErrorMessage()));
 		return 1;
 	}
 
