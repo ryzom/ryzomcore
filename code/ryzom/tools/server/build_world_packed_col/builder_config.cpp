@@ -60,7 +60,7 @@ void CBuilderConfig::build(NLMISC::CConfigFile &cf)
 	if (searchPathsVar)
 	{
 		SearchPaths.resize(searchPathsVar->size());
-		for(sint k = 0; k < searchPathsVar->size(); ++k)
+		for(sint k = 0; k < (sint)searchPathsVar->size(); ++k)
 		{
 			SearchPaths[k] = searchPathsVar->asString(k);
 		}
@@ -70,7 +70,7 @@ void CBuilderConfig::build(NLMISC::CConfigFile &cf)
 	if (cwMapListVar)
 	{
 		CWMapList.resize(cwMapListVar->size());
-		for(sint k = 0; k < cwMapListVar->size(); ++k)
+		for(sint k = 0; k < (sint)cwMapListVar->size(); ++k)
 		{
 			CWMapList[k] = cwMapListVar->asString(k);
 		}

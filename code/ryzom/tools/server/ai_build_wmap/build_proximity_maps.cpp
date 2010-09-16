@@ -193,7 +193,7 @@ static void processProximityBuffer(const TBuffer& inputBuffer, uint32 lineLength
 	const uint32 bigValue= 15*5;
 
 	// determine numer of lines in the buffer...
-	uint32 numLines= inputBuffer.size()/ lineLength;
+	uint32 numLines= (uint32)inputBuffer.size()/ lineLength;
 
 	// clear out the result buffer and reset all values to 5*255, remembering that this is the correct value for the image edges
 	resultBuffer.clear();
@@ -561,7 +561,7 @@ void CProximityMapBuffer::generateZoneProximityMap(const CProximityZone& zone,TB
 
 	// setup the buffer's accessible points and prime vects[0] with the set of accessible points in the zone buffer
 	_prepareBufferForZoneProximityMap(zone,zoneBuffer,vects[0]);
-	entriesToTreat= vects[0].size();
+	entriesToTreat= (uint32)vects[0].size();
 
 	// lookup the buffer dimentions
 	uint32 zoneWidth= zone.getZoneWidth();
@@ -631,7 +631,7 @@ void CProximityMapBuffer::generateZoneProximityMap(const CProximityZone& zone,TB
 		}
 
 		// clear out the vector
-		entriesToTreat-= vect.size();
+		entriesToTreat-= (uint32)vect.size();
 		vect.clear();
 	}
 }

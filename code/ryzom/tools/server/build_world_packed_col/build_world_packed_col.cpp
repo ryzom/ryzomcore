@@ -53,7 +53,7 @@ static void getIslandsInside(sint32 xmin, sint32 xmax, sint32 ymin, sint32 ymax,
 {
 	dest.clear();	
 	R2::CScenarioEntryPoints &sep = R2::CScenarioEntryPoints::getInstance();	
-	uint numIslands = sep.getCompleteIslands().size();	
+	uint numIslands = (uint)sep.getCompleteIslands().size();	
 	for(uint l = 0; l < numIslands; ++l)
 	{				
 		const R2::CScenarioEntryPoints::CCompleteIsland &ci = sep.getCompleteIslands()[l];
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 	CPackedWorldBuilder builder;
 	std::vector<CPackedWorldSmartPtr> islands;
 	std::vector<CVector>              startPositions;
-	uint numIslands = sep.getCompleteIslands().size();		
+	uint numIslands = (uint)sep.getCompleteIslands().size();		
 	//	
 	for(uint k = 0; k < numIslands; ++k)
 	{
@@ -168,13 +168,13 @@ int main(int argc, char* argv[])
 		// now, see which zones really should be found in that island
 		std::vector<std::string> presentZoneNames;
 		std::vector<std::string> presentZonePathes;
-		for(uint k = 0; k < zoneNames.size(); ++k)
+		for(uint l = 0; l < zoneNames.size(); ++l)
 		{
-			std::string zonePath = CPath::lookup(zoneNames[k], false, false);
+			std::string zonePath = CPath::lookup(zoneNames[l], false, false);
 			if (!zonePath.empty())
 			{
 				presentZonePathes.push_back(zonePath);
-				presentZoneNames.push_back(toLower(zoneNames[k]));
+				presentZoneNames.push_back(toLower(zoneNames[l]));
 			}
 		}
 		//
@@ -187,9 +187,9 @@ int main(int argc, char* argv[])
 			// the same zones were found -> now check their dates against the island one
 			uint32 packedIslandDate = CFile::getFileModificationDate(islandPath);
 			mustRebuild = false;
-			for(uint k = 0; k < presentZonePathes.size(); ++k)
+			for(uint l = 0; l < presentZonePathes.size(); ++l)
 			{				
-				if (CFile::getFileModificationDate(presentZonePathes[k]) > packedIslandDate)
+				if (CFile::getFileModificationDate(presentZonePathes[l]) > packedIslandDate)
 				{
 					mustRebuild = true;
 				}

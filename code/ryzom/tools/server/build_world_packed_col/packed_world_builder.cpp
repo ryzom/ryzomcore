@@ -563,14 +563,14 @@ void CPackedWorldBuilder::fly(std::vector<CIslandInfo>  &islands, float camSpeed
 		bool interFound = islands[currWorldIndex].PW->raytrace(camMat.getPos(), lookAtPos, inter, &triList);
 		if (!triList.empty())
 		{
-			vb.setNumVertices(3 * triList.size());
+			vb.setNumVertices(3 * (uint32)triList.size());
 			CVertexBufferReadWrite vba;
 			vb.lock(vba);
 			CVector *dest = vba.getVertexCoordPointer(0);
 			memcpy(dest, &triList[0], sizeof(CTriangle) * triList.size());
 			vba.unlock();
 			driver->activeVertexBuffer(vb);
-			driver->renderRawTriangles(material, 0, triList.size());
+			driver->renderRawTriangles(material, 0, (uint32)triList.size());
 		}				
 		if (interFound)
 		{
