@@ -28,10 +28,10 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/array_2d.h"
 //
-#include "3d/packed_world.h"
-#include "3d/register_3d.h"
+#include "nel/3d/packed_world.h"
+#include "nel/3d/register_3d.h"
 //
-#include "r2_share/scenario_entry_points.h"
+#include "game_share/scenario_entry_points.h"
 
 
 using namespace NL3D;
