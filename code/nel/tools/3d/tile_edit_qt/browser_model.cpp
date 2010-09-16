@@ -691,7 +691,7 @@ tilelist::iterator TileList::Get(int i, int n)
 
 int TileList::GetSize(int n)
 {
-	return theList[n].size();
+	return (int)theList[n].size();
 }
 
 
