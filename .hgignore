@@ -150,6 +150,7 @@ code/nelns/build/*
 code/snowballs/build/*
 code/ryzom/build/*
 code/build/*
+build/*
 
 # Linux nel compile
 code/nel/build/nel-config
