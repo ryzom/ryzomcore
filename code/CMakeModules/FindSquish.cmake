@@ -24,7 +24,7 @@ FIND_PATH(SQUISH_INCLUDE_DIR
   PATH_SUFFIXES cppunit
 )
 
-FIND_LIBRARY(SQUISH_LIBRARY 
+FIND_LIBRARY(SQUISH_LIBRARY_RELEASE 
   squish
   PATHS
   /usr/local/lib
@@ -37,6 +37,29 @@ FIND_LIBRARY(SQUISH_LIBRARY
   /opt/lib
   /usr/freeware/lib64
 )
+
+FIND_LIBRARY(SQUISH_LIBRARY_DEBUG
+  squishd
+  PATHS
+  /usr/local/lib
+  /usr/lib
+  /usr/local/X11R6/lib
+  /usr/X11R6/lib
+  /sw/lib
+  /opt/local/lib
+  /opt/csw/lib
+  /opt/lib
+  /usr/freeware/lib64
+)
+
+IF(SQUISH_LIBRARY_RELEASE)
+  SET(STLPORT_FOUND "YES")
+
+  SET(SQUISH_LIBRARY "optimized;${SQUISH_LIBRARY_RELEASE}")
+  IF(SQUISH_LIBRARY_DEBUG)
+    SET(SQUISH_LIBRARY ";debug;${SQUISH_LIBRARY_DEBUG}")
+  ENDIF(SQUISH_LIBRARY_DEBUG)
+ENDIF(SQUISH_LIBRARY_RELEASE)
 
 IF(SQUISH_LIBRARY AND SQUISH_INCLUDE_DIR)
   SET(SQUISH_FOUND "YES")
