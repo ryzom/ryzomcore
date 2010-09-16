@@ -1415,10 +1415,10 @@ public:
 									
 									static const CDirection::TDirection	dirs[] =
 									{
-										{CDirection::W},
-										{CDirection::E},
-										{CDirection::S},
-										{CDirection::N}
+										CDirection::W,
+										CDirection::E,
+										CDirection::S,
+										CDirection::N
 									};
 
 
