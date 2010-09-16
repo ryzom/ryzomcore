@@ -868,6 +868,8 @@ void CTimedFXManager::displayFXBoxes(TDebugDisplayMode displayMode) const
 						case CManagedFX::InRemoveList:
 							textToDisplay = NLMISC::toString("day:%d, hour:%d:%d", (int) mf.SetHandle->Date.Day, (int) mf.SetHandle->Date.Hour, (int) (60.f * fmodf(mf.SetHandle->Date.Hour, 1.f)));
 						break;
+						default:
+						break;
 					}
 				break;
 				default:

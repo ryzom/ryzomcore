@@ -78,8 +78,13 @@ bool CHttpClient::send(const std::string& buffer, bool verbose)
 {
 	nlassert(_Sock.connected());
 
-	if(verbose) nldebug("Sending '%s' to '%s'", buffer.c_str(), _Sock.remoteAddr().asString().c_str());
+	if(verbose)
+	{
+		nldebug("Sending '%s' to '%s'", buffer.c_str(), _Sock.remoteAddr().asString().c_str());
+	}
+
 	uint32 size = (uint32)buffer.size();
+	
 	if(!buffer.empty())
 	{
 		if(_Sock.send((uint8 *)buffer.c_str(), size, false) != CSock::Ok)

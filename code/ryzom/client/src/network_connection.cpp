@@ -1025,7 +1025,7 @@ bool	CNetworkConnection::stateLogin()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -1232,7 +1232,7 @@ bool	CNetworkConnection::stateSynchronize()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -1774,7 +1774,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 				CCDBNodeLeaf *nodeProp = NULL;
 
 				uint	i;
-				uint64	value;
+				uint64	value = 0;
 				for (i=0; i<listSize; ++i)
 				{
 					if (place == 0)
@@ -2132,7 +2132,7 @@ bool	CNetworkConnection::stateConnected()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -2257,7 +2257,7 @@ bool	CNetworkConnection::stateProbe()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -2345,7 +2345,7 @@ bool	CNetworkConnection::stateStalled()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -2615,6 +2615,8 @@ void	CNetworkConnection::pushTarget(TCLEntityId slot, LHSTATE::TLHState targetOr
 		case LHSTATE::NONE: ats->TargetOrPickup = 0; break;
 		case LHSTATE::LOOTABLE: ats->TargetOrPickup = 1; break;
 		case LHSTATE::HARVESTABLE: ats->TargetOrPickup = 2; break;
+		default:
+		break;
 	}
 
 	ats->TargetOrPickup = (uint32)targetOrPickup;
@@ -2816,7 +2818,7 @@ bool	CNetworkConnection::stateQuit()
 		{
 			if (_SystemMode)
 			{
-				uint8	message;
+				uint8	message = 0;
 				msgin.serial(message);
 
 				switch (message)
@@ -2988,7 +2990,7 @@ void	CNetworkConnection::displayAllocationStats()
 string	CNetworkConnection::getAllocationStats()
 {
 	char	buf[128];
-	sprintf(buf, "CNET[%p]: %d queued blocks, %d changes", this, _Actions.size(), _Changes.size());
+	sprintf(buf, "CNET[%p]: %u queued blocks, %u changes", this, (uint)_Actions.size(), (uint)_Changes.size());
 	return string(buf);
 }
 

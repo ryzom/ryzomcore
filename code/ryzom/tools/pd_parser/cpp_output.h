@@ -88,7 +88,7 @@ public:
 
 	struct SMethod
 	{
-		SMethod() : IsConst(false), IsInline(false), IsStatic(false), IsAttribute(false), IsVirtual(false), IsSeparator(false)	{}
+		SMethod() : IsConst(false), IsInline(false), IsStatic(false), IsVirtual(false), IsAttribute(false), IsSeparator(false)	{}
 		std::string	Type;
 		std::string	Name;
 		std::string	Proto;
@@ -387,8 +387,8 @@ public:
 
 	/// Constructor
 	CCppOutput(bool cppmode = true) :	_CppMode(cppmode), 
-										_XmlMode(false), _XmlInNode(false), _XmlLastSlash(false), _XmlGetNodeName(false), _XmlCloseNode(false),
-										_DescriptionMode(false), _Indent(0), _NewLine(true), _Clean(true)	{}
+										_XmlMode(false), _NewLine(true), _Indent(0), _DescriptionMode(false), _Clean(true),
+										_XmlInNode(false), _XmlLastSlash(false), _XmlGetNodeName(false), _XmlCloseNode(false), _XmlRootNode(false) {}
 
 	/// Clear
 	void	clear();

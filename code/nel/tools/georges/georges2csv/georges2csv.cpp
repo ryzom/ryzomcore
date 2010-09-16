@@ -274,7 +274,7 @@ void buildFileVector(std::vector<std::string> &filenames, const std::string &fil
 			filenames.push_back(files[i]);
 		}
 	}
-	printf("Found: %zu matching files (from %zu)\n",filenames.size(),files.size());
+	printf("Found: %u matching files (from %u)\n",(uint)filenames.size(),(uint)files.size());
 
 }
 

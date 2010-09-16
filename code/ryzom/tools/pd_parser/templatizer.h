@@ -305,7 +305,7 @@ class CTemplatizerRefEnv : public CTemplatizerEnv
 public:
 
 	/// Constructor
-	CTemplatizerRefEnv(CTemplatizerEnv* ref) : Reference(ref), CTemplatizerEnv(NULL)	{ }
+	CTemplatizerRefEnv(CTemplatizerEnv* ref) : CTemplatizerEnv(NULL), Reference(ref)	{ }
 
 	/// Clear Env
 	virtual void		clear()

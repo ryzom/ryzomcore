@@ -44,9 +44,9 @@ extern NL3D::ULandscape *Landscape;
 CWeatherManagerClient::CWeatherManagerClient() : _WindDir(0, 0, 0),
 												 _WeatherValue(0),
 												 _ThunderLevel(0),
+												 _ThunderStrike(false),
 												 _LastEvalHour(0),
 												 _LastEvalDay(0),
-												 _ThunderStrike(false),
 												 _LocalPrecipitationFactor(0.f)
 {
 }

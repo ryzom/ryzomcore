@@ -1467,7 +1467,7 @@ void	CClassNode::fillAttributes()
 			CClassNode	*classNd = NULL;
 			CTypeNode	*typeNd = NULL;
 
-			if (classNd = decl->getClassNode(decl->Type, false))
+			if ( (classNd = decl->getClassNode(decl->Type, false)) )
 			{
 				if (classNd->IsBackReferenced || classNd->ForceReference)
 				{
@@ -1493,7 +1493,7 @@ void	CClassNode::fillAttributes()
 					decl->DeclarationType = ArrayClass;
 				}
 			}
-			else if (typeNd = decl->getTypeNode(decl->Type, false))
+			else if ( (typeNd = decl->getTypeNode(decl->Type, false)) )
 			{
 				decl->DeclarationType = ArrayType;
 			}
@@ -1512,7 +1512,7 @@ void	CClassNode::fillAttributes()
 			CClassNode	*classNd = NULL;
 			CTypeNode	*typeNd = NULL;
 
-			if (classNd = decl->getClassNode(decl->Type, false))
+			if ( (classNd = decl->getClassNode(decl->Type, false)) )
 			{
 				if (classNd->IsBackReferenced || classNd->ForceReference)
 				{
@@ -1535,7 +1535,7 @@ void	CClassNode::fillAttributes()
 					decl->DeclarationType = SimpleClass;
 				}
 			}
-			else if (typeNd = decl->getTypeNode(decl->Type, false))
+			else if ( (typeNd = decl->getTypeNode(decl->Type, false)) )
 			{
 				decl->IsType = true;
 
@@ -4707,7 +4707,7 @@ void	CLogMsgNode::generateContent()
 
 		CTypeNode	*tnd;
 		CClassNode	*cnd;
-		if (tnd = getTypeNode(type, false))
+		if ( (tnd = getTypeNode(type, false)) )
 		{
 			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, tnd));
 			if (!res.second)
@@ -4721,7 +4721,7 @@ void	CLogMsgNode::generateContent()
 			logfunc.Proto += tnd->getName()+" "+name;
 			argcall += name;
 		}
-		else if (cnd = getClassNode(type, false))
+		else if ( (cnd = getClassNode(type, false)) )
 		{
 			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, cnd));
 			if (!res.second)
