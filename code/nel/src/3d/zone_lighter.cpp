@@ -943,10 +943,10 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		_ProcessCount=MAX_CPU_PROCESS;
 
 	// Number of obstacle polygones
-	nlinfo ("Obstacle polygones : %zu", obstacles.size ());
+	nlinfo ("Obstacle polygones : %u", (uint)obstacles.size ());
 
 	// Number of CPUS used
-	nlinfo ("Number of CPU used: %d", _ProcessCount);
+	nlinfo ("Number of CPU used: %u", _ProcessCount);
 
 	// Zone pointer
 	CZone *pZone=landscape.getZone (_ZoneToLight);

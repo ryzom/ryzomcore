@@ -241,7 +241,7 @@ class CFileNode : public CParseNode
 {
 public:
 
-	CFileNode() : IncludePDSLib(false), IncludeStandard(false), IncludeDbFile(false), Generate(true), SeparatedFlag(false)	{ }
+	CFileNode() : SeparatedFlag(false), IncludeStandard(false), IncludePDSLib(false), IncludeDbFile(false), Generate(true)	{ }
 
 	std::string		IncludeAs;
 
@@ -547,11 +547,11 @@ public:
 		IsInArray(false),
 		IsInArrayRef(false),
 		MappedFlag(false),
-		PDSMapped(false),
 		DerivatedFlag(false),
 		HasParent(false),
 		ParentIsHidden(false),
 		ForceReference(false),
+		PDSMapped(false),
 		MapClass(NULL),
 		Columns(-1),
 		Id(0),

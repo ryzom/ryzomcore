@@ -640,8 +640,8 @@ namespace RM_FABER_STAT_TYPE
 	bool	isMagicResistStat(TRMStatType fs)
 	{
 		// should have 5 magic resistances. Desert should be the 1st, and PrimRoot the last
-		const uint	startMResist= DesertResistance;
-		const uint	endMResist= PrimaryRootResistance+1;
+		const sint	startMResist= DesertResistance;
+		const sint	endMResist= PrimaryRootResistance+1;
 		nlctassert(endMResist - startMResist == 5);
 
 		return fs>=startMResist && fs<endMResist;
@@ -651,8 +651,8 @@ namespace RM_FABER_STAT_TYPE
 	bool	isMagicProtectStat(TRMStatType fs)
 	{
 		// should have 7 magic protection. Acid should be the 1st, and Electricity the last
-		const uint	startMProt= AcidProtection;
-		const uint	endMProt= ElectricityProtection+1;
+		const sint	startMProt= AcidProtection;
+		const sint	endMProt= ElectricityProtection+1;
 		nlctassert(endMProt - startMProt == 7);
 
 		return fs>=startMProt && fs<endMProt;

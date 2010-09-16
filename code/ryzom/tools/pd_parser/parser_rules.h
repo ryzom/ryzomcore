@@ -232,7 +232,7 @@ CParseNode	*parse##nodename(CTokenizer &tokenizer)	\
  * PARSE_FAIL					// parsing fails if neither Include can be parsed nor Type nor Class
  */
 #define PARSE_ALTERNATIVE(nodename) \
-	if (parsed = parse##nodename(tokenizer))	\
+	if ( (parsed = parse##nodename(tokenizer)) )	\
 	{	\
 		parsed->Parent = main;	\
 		main->Nodes.push_back(parsed);	\
@@ -250,7 +250,7 @@ CParseNode	*parse##nodename(CTokenizer &tokenizer)	\
  * PARSE_NODE(Include)
  */
 #define PARSE_NODE(nodename, savein) \
-	if (main->savein = parse##nodename(tokenizer))	\
+	if ( (main->savein = parse##nodename(tokenizer)) )	\
 	{	\
 		main->savein->Parent = main;	\
 	}	\

@@ -233,7 +233,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 
 			// display Info on the zone:
 			fprintf(logStream, "  Num Patchs: %d\n", zone.getNumPatchs() );
-			fprintf(logStream, "  Num PointLights: %zu\n", zoneInfo.PointLights.size() );
+			fprintf(logStream, "  Num PointLights: %u\n", (uint)zoneInfo.PointLights.size() );
 			if (vl)
 			{
 				fprintf(logStream, "  Lights\n");
@@ -299,7 +299,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 			CVector gpos = ig.getGlobalPos();
 			fprintf(logStream, "  Global pos : x = %.1f, y = %.1f, z =%.1f\n", gpos.x, gpos.y, gpos.z);
 			fprintf(logStream, "  Num Instances: %d\n", ig.getNumInstance() );
-			fprintf(logStream, "  Num PointLights: %zu\n", ig.getPointLightList().size() );
+			fprintf(logStream, "  Num PointLights: %u\n", (uint)ig.getPointLightList().size() );
 			fprintf(logStream, "  Realtime sun contribution = %s\n", ig.getRealTimeSunContribution() ? "on" : "off");
 			if (vi)
 			{
@@ -387,7 +387,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 				vector<CBoneBase>	bones;
 				skel->retrieve(bones);
 				// Display Bone Infos.
-				fprintf(logStream, "Num Bones: %zu\n", bones.size());
+				fprintf(logStream, "Num Bones: %u\n", (uint)bones.size());
 				for(uint i=0; i<bones.size(); i++)
 				{
 
