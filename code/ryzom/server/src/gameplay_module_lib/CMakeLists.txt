@@ -1,13 +1,13 @@
 FILE(GLOB SRC *.cpp *.h)
 
-NL_TARGET_LIB(gameplay_module_lib ${SRC})
+NL_TARGET_LIB(ryzom_gameplaymodule ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(gameplay_module_lib nelmisc)
+TARGET_LINK_LIBRARIES(ryzom_gameplaymodule nelmisc)
 
-NL_DEFAULT_PROPS(gameplay_module_lib "Ryzom, Library: Gameplay Module")
-NL_ADD_LIB_SUFFIX(gameplay_module_lib)
+NL_DEFAULT_PROPS(ryzom_gameplaymodule "Ryzom, Library: Gameplay Module")
+NL_ADD_LIB_SUFFIX(ryzom_gameplaymodule)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS gameplay_module_lib LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS ryzom_gameplaymodule LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
