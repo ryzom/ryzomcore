@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/pacs/*.h)
 
-NL_TARGET_LIB(nelpacs ${SRC})
+NL_TARGET_LIB(nelpacs ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 

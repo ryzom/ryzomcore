@@ -1,6 +1,7 @@
-FILE(GLOB SRC *.cpp ../../include/nel/cegui/*.h)
+FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/cegui/*.h)
 
-ADD_LIBRARY(nelceguirenderer SHARED ${SRC} nelceguirenderer.def)
+ADD_LIBRARY(nelceguirenderer SHARED ${HEADERS} ${SRC} nelceguirenderer.def)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INC} ${CEGUI_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(nelceguirenderer nelmisc nel3d ${CEGUI_LIBRARY})

@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h config_file/*.cpp config_file/*.h)
+FILE(GLOB HEADERS ../../include/nel/misc/*.h)
 
-NL_TARGET_LIB(nelmisc ${SRC})
+NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
 
 IF(WITH_GTK)
   IF(GTK2_FOUND)

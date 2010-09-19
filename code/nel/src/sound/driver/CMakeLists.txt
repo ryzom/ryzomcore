@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
-NL_TARGET_LIB(nelsnd_lowlevel ${SRC})
+NL_TARGET_LIB(nelsnd_lowlevel ${HEADERS} ${SRC})
 
 IF(WITH_STATIC)
   # Add libogg dependency only if target is static because to libvorbisfile

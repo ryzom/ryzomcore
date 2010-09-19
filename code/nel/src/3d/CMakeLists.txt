@@ -1,4 +1,5 @@
-FILE(GLOB SRC *.cpp *.h ../../include/nel/3d/*.h)
+FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/3d/*.h)
 
 SOURCE_GROUP(Traversals FILES
         anim_detail_trav.cpp
@@ -662,7 +663,7 @@ SOURCE_GROUP(Shadows FILES
         shadow_poly_receiver.cpp
         ../../include/nel/3d/shadow_poly_receiver.h)
 
-NL_TARGET_LIB(nel3d ${SRC})
+NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
 

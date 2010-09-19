@@ -1,8 +1,9 @@
-FILE(GLOB SRC "*.cpp")
+FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/net/*.h)
 FILE(GLOB NET_MANAGER "net_manager.*")
 LIST(REMOVE_ITEM SRC ${NET_MANAGER})
 
-NL_TARGET_LIB(nelnet ${SRC})
+NL_TARGET_LIB(nelnet ${HEADERS} ${SRC})
 
 IF(WITH_GTK)
   IF(GTK2_FOUND)

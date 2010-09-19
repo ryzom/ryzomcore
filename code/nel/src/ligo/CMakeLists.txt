@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/ligo/*.h)
 
-NL_TARGET_LIB(nelligo ${SRC})
+NL_TARGET_LIB(nelligo ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
