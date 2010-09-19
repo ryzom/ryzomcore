@@ -56,7 +56,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + BankClientDirectory)
+mkPath(log, InstallDirectory + "/" + BankInstallDirectory)
 
 log.close()
 

@@ -58,7 +58,7 @@ mkPath(log, ExportBuildDirectory + "/" + AnimBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + AnimClientDirectory)
+mkPath(log, InstallDirectory + "/" + AnimInstallDirectory)
 
 log.close()
 

@@ -47,8 +47,11 @@ printLog(log, "")
 printLog(log, ">>> Setup source directories <<<")
 for dir in ShapeSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-for dir in MapSourceDirectories:
-	mkPath(log, DatabaseDirectory + "/" + dir)
+
+# Setup pipeline lookup directories
+printLog(log, ">>> Setup pipeline lookup directories <<<")
+for dir in MapLookupDirectories:
+	mkPath(log, ExportBuildDirectory + "/" + dir)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
@@ -69,8 +72,8 @@ mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + ShapeClientDirectory)
-mkPath(log, ClientDataDirectory + "/" + LightmapClientDirectory)
+mkPath(log, InstallDirectory + "/" + ShapeInstallDirectory)
+mkPath(log, InstallDirectory + "/" + LightmapInstallDirectory)
 
 log.close()
 

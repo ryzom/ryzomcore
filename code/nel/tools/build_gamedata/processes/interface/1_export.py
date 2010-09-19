@@ -56,8 +56,8 @@ for dirs in InterfaceSourceDirectories:
 	mkPath(log, newpath)
 	for dir in dirs:
 		mkPath(log, DatabaseDirectory + "/" + dir)
-		copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
-		copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".png")
+		copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".tga")
+		copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, newpath, ".png")
 printLog(log, "")
 
 # For each interface directory to compress in one DXTC
@@ -65,8 +65,8 @@ printLog(log, ">>> Export interface dxtc <<<")
 mkPath(log, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory)
 for dir in InterfaceDxtcSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".tga")
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".png")
+	copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".tga")
+	copyFilesExtNoSubdirIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory, ".png")
 printLog(log, "")
 
 # For each interface fullscreen directory compress independently all in dds
@@ -96,8 +96,7 @@ printLog(log, ">>> Export interface 3d <<<")
 mkPath(log, ExportBuildDirectory + "/" + Interface3DExportDirectory)
 for dir in Interface3DSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + Interface3DExportDirectory, ".tga")
-	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + Interface3DExportDirectory, ".png")
+	copyFiles(log, DatabaseDirectory + "/" + dir, ExportBuildDirectory + "/" + Interface3DExportDirectory)
 printLog(log, "")
 
 log.close()

@@ -45,7 +45,7 @@ printLog(log, "")
 printLog(log, ">>> Install cegui imagesets <<<")
 srcDir = ExportBuildDirectory + "/" + CeguiImagesetBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + CeguiImagesetClientDirectory
+destDir = InstallDirectory + "/" + CeguiImagesetInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

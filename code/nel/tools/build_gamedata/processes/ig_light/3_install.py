@@ -46,7 +46,7 @@ printLog(log, "")
 printLog(log, ">>> Install ig_light <<<")
 srcDir = ExportBuildDirectory + "/" + IgOtherLightedBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + IgClientDirectory
+destDir = InstallDirectory + "/" + IgInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

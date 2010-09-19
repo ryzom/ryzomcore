@@ -53,9 +53,8 @@ if MakeSheetId == "":
 	toolLogFail(log, MakeSheetIdTool, ToolSuffix)
 else:
 	mkPath(log, LeveldesignDirectory)
-	mkPath(log, LeveldesignDfnDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + SheetIdBuildDirectory)
-	subprocess.call([ MakeSheetId, "-c" + ScriptDirectory + "/configuration/make_sheet_id.cfg", "-o" + ExportBuildDirectory + "/" + SheetIdBuildDirectory + "/" + "sheet_id.bin", LeveldesignDirectory ])
+	mkPath(log, LeveldesignWorldDirectory)
+	subprocess.call([ MakeSheetId, "-o" + LeveldesignDirectory + "/game_elem/sheet_id.bin", LeveldesignDirectory + "/game_elem", LeveldesignDirectory + "/game_element", LeveldesignWorldDirectory ])
 printLog(log, "")
 
 log.close()

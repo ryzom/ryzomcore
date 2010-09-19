@@ -39,6 +39,7 @@ ProcessToComplete += [ "zone_light" ] # works, need to check completeness
 ProcessToComplete += [ "rbank" ]
 ProcessToComplete += [ "ig_light" ] # fully implemented
 ProcessToComplete += [ "ps" ]
+ProcessToComplete += [ "ai_wmap" ]
 
 
 # *** ECOSYSTEM AND CONTINENT NAMES ***
@@ -154,6 +155,15 @@ RbankRbankName = LandscapeName
 # RbankShapePaths += [ "l:/leveldesign/world_edit_files" ]
 
 # *** MAPS OPTIONS ***
-
 ReduceBitmapFactor = 0
+# list all panoply files
+MapPanoplyFileList = None
+# name of the .hlsbank to build.
+MapHlsBankFileName = None
 
+# *** AI WMAP OPTIONS ***
+AiWmapContinentName = ContinentName
+AiWmapVerbose = 0
+AiWmapStartPoints = [ ]
+AiWmapStartPoints += [ ContinentName + " 8523 -10846" ]
+AiWmapStartPoints += [ ContinentName + " 10314 -11743" ]

@@ -43,24 +43,24 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + InterfaceClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + InterfaceInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install interface <<<")
 mkPath(log, ExportBuildDirectory + "/" + InterfaceBuildDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceBuildDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceBuildDirectory, installPath)
 
 printLog(log, ">>> Install interface dxtc <<<")
 mkPath(log, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory, installPath)
 
 printLog(log, ">>> Install interface fullscreen <<<")
 mkPath(log, ExportBuildDirectory + "/" + InterfaceFullscreenExportDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceFullscreenExportDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + InterfaceFullscreenExportDirectory, installPath)
 
 printLog(log, ">>> Install interface 3d <<<")
 mkPath(log, ExportBuildDirectory + "/" + Interface3DExportDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + Interface3DExportDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + Interface3DExportDirectory, installPath)
 
 printLog(log, "")
 log.close()

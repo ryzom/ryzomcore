@@ -44,21 +44,21 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> Install rbank <<<")
-clientPath = ClientDataDirectory + "/" + PacsClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + PacsInstallDirectory
+mkPath(log, installPath)
 srcPath = ExportBuildDirectory + "/" + RbankOutputBuildDirectory
 mkPath(log, srcPath)
-copyFilesNoTreeIfNeeded(log, srcPath, clientPath)
-#clientPath = ClientDataDirectory + "/" + PacsClientDirectory
-#mkPath(log, clientPath)
+copyFilesNoTreeIfNeeded(log, srcPath, installPath)
+#installPath = InstallDirectory + "/" + PacsInstallDirectory
+#mkPath(log, installPath)
 #srcPath = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
 #mkPath(log, srcPath)
-#copyFileIfNeeded(log, srcPath + "/tempMerged.rbank", clientPath + "/" + RbankRbankName + ".rbank")
-#copyFileIfNeeded(log, srcPath + "/tempMerged.gr", clientPath + "/" + RbankRbankName + ".gr")
+#copyFileIfNeeded(log, srcPath + "/tempMerged.rbank", installPath + "/" + RbankRbankName + ".rbank")
+#copyFileIfNeeded(log, srcPath + "/tempMerged.gr", installPath + "/" + RbankRbankName + ".gr")
 #for file in findFiles(log, srcPath, "", ".lr"):
-#	copyFileIfNeeded(log, srcPath + "/" + file, clientPath + "/" +  file.replace("tempMerged", RbankRbankName))
+#	copyFileIfNeeded(log, srcPath + "/" + file, installPath + "/" +  file.replace("tempMerged", RbankRbankName))
 # mkPath(log, ExportBuildDirectory + "/" + rbankBuildDirectory)
-# copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + rbankBuildDirectory, clientPath)
+# copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + rbankBuildDirectory, installPath)
 #copyFileIfNeeded
 printLog(log, "")
 

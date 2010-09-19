@@ -46,7 +46,7 @@ printLog(log, "")
 printLog(log, ">>> Install anim <<<")
 srcDir = ExportBuildDirectory + "/" + AnimBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + AnimClientDirectory
+destDir = InstallDirectory + "/" + AnimInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

@@ -46,18 +46,16 @@ printLog(log, "")
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
 mkPath(log, LeveldesignDirectory)
-mkPath(log, LeveldesignDfnDirectory)
+mkPath(log, LeveldesignWorldDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
-mkPath(log, ExportBuildDirectory + "/" + SheetIdBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + SheetIdClientDirectory)
 
 log.close()
 

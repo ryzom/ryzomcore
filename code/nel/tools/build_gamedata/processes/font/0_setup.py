@@ -57,7 +57,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + FontClientDirectory)
+mkPath(log, InstallDirectory + "/" + FontInstallDirectory)
 
 log.close()
 

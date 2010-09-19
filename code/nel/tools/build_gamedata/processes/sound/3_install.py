@@ -45,13 +45,13 @@ printLog(log, "")
 
 printLog(log, ">>> Install sound packed_sheets <<<")
 mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
-mkPath(log, ClientDataDirectory + "/" + SoundSheetsClientDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory, ClientDataDirectory + "/" + SoundSheetsClientDirectory, ".packed_sheets")
+mkPath(log, InstallDirectory + "/" + SoundSheetsInstallDirectory)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory, InstallDirectory + "/" + SoundSheetsInstallDirectory, ".packed_sheets")
 
 printLog(log, ">>> Install sound samplebanks <<<")
 mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
-mkPath(log, ClientDataDirectory + "/" + SoundSamplebanksClientDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, ClientDataDirectory + "/" + SoundSamplebanksClientDirectory, ".sample_bank")
+mkPath(log, InstallDirectory + "/" + SoundSamplebanksInstallDirectory)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, InstallDirectory + "/" + SoundSamplebanksInstallDirectory, ".sample_bank")
 
 printLog(log, "")
 log.close()

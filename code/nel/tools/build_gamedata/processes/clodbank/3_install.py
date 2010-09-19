@@ -46,7 +46,7 @@ printLog(log, "")
 printLog(log, ">>> Install clodbank <<<")
 srcDir = ExportBuildDirectory + "/" + ClodBankBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + ShapeClientDirectory
+destDir = InstallDirectory + "/" + ShapeInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

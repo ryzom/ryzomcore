@@ -49,6 +49,10 @@ for dir in MapSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 for dir in MapUncompressedSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
+if MapHlsBankFileName != None or MapPanoplyFileList != None:
+	for panoplyCfg in MapPanoplySourceDirectories:
+		mkPath(log, DatabaseDirectory + "/" + panoplyCfg[2])
+		mkPath(log, DatabaseDirectory + "/" + panoplyCfg[3])
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
@@ -58,11 +62,16 @@ mkPath(log, ExportBuildDirectory + "/" + MapUncompressedExportDirectory)
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + MapBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + MapTagBuildDirectory)
+if MapHlsBankFileName != None or MapPanoplyFileList != None:
+	mkPath(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + MapPanoplyHlsBankBuildDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + MapClientDirectory)
+mkPath(log, InstallDirectory + "/" + MapInstallDirectory)
 
 log.close()
 

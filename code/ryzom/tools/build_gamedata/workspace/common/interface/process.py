@@ -43,3 +43,7 @@ CommonPath = ContinentPath
 # *** MAPS OPTIONS ***
 
 ReduceBitmapFactor = 0
+# list all panoply files
+MapPanoplyFileList = None
+# name of the .hlsbank to build.
+MapHlsBankFileName = None

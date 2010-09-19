@@ -53,7 +53,7 @@ def processLine(line, processName, fileExtension, sourceDirectoriesVariable, exp
 	newline = newline.replace("%PreGenSourceDirectoriesVariable%", sourceDirectoriesVariable)
 	newline = newline.replace("%PreGenExportDirectoryVariable%", exportDirectoryVariable)
 	newline = newline.replace("%PreGenTagExportDirectoryVariable%", tagExportDirectoryVariable)
-	newline = newline.replace("%PreGenClientDirectoryVariable%", clientDirectoryVariable)
+	newline = newline.replace("%PreGenInstallDirectoryVariable%", clientDirectoryVariable)
 	return newline
 
 def generateTaggedMaxExporterFile(sourceFile, destFile, writeMode, processName, fileExtension, sourceDirectoriesVariable, exportDirectoryVariable, tagExportDirectoryVariable, clientDirectoryVariable, dateTimeStamp):
@@ -100,13 +100,13 @@ def generateTaggedMaxExporter(processName, fileExtension, sourceDirectoriesVaria
 
 
 
-generateTaggedMaxExporter("clodbank", "clod", "ClodSourceDirectories", "ClodExportDirectory", "ClodTagExportDirectory", "ClodClientDirectory")
+generateTaggedMaxExporter("clodbank", "clod", "ClodSourceDirectories", "ClodExportDirectory", "ClodTagExportDirectory", "ClodInstallDirectory")
 
 generateTaggedMaxScript("ig", "ig")
 
-generateTaggedMaxExporter("rbank", "cmb", "RBankCmbSourceDirectories", "RBankCmbExportDirectory", "RBankCmbTagExportDirectory", "PacsClientDirectory")
+generateTaggedMaxExporter("rbank", "cmb", "RBankCmbSourceDirectories", "RBankCmbExportDirectory", "RBankCmbTagExportDirectory", "PacsInstallDirectory")
 
-generateTaggedMaxExporter("veget", "veget", "VegetSourceDirectories", "VegetExportDirectory", "VegetTagExportDirectory", "VegetClientDirectory")
+generateTaggedMaxExporter("veget", "veget", "VegetSourceDirectories", "VegetExportDirectory", "VegetTagExportDirectory", "VegetInstallDirectory")
 
 
 

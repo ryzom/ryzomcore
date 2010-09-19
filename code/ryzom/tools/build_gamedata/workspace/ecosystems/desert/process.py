@@ -6,7 +6,7 @@
 # 
 # \file config.py
 # \brief Process configuration
-# \date 2010-09-03-14-50-GMT
+# \date 2010-09-19-14-19-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Process configuration for 'desert' ecosystem.
@@ -118,6 +118,10 @@ LigoExportOnePass = 0
 # *** MAPS OPTIONS ***
 
 ReduceBitmapFactor = 0
+# list all panoply files
+MapPanoplyFileList = None
+# name of the .hlsbank to build.
+MapHlsBankFileName = None
 
 # *** SHAPE BUILD OPTIONS *
 

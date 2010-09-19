@@ -43,32 +43,46 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + MapClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + MapInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install map <<<")
-sourcePath = ExportBuildDirectory + "/" + MapBuildDirectory
-mkPath(log, sourcePath)
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".dds")
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".png")
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".tga")
-sourcePath = ExportBuildDirectory + "/" + MapUncompressedExportDirectory
-mkPath(log, sourcePath)
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".dds")
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".png")
-copyFilesExtNoSubdirIfNeeded(log, sourcePath, clientPath, ".tga")
+sourcePaths = [ ExportBuildDirectory + "/" + MapBuildDirectory ] + [ ExportBuildDirectory + "/" + MapUncompressedExportDirectory ]
+for sourcePath in sourcePaths:
+	mkPath(log, sourcePath)
+	files = os.listdir(sourcePath)
+	len_ext = 4
+	for fileName in files:
+		if isLegalFileName(fileName):
+			sourceFile = sourcePath + "/" + fileName
+			if os.path.isfile(sourceFile):
+				if (fileName[-len_ext:].lower() == ".tga") or (fileName[-len_ext:].lower() == ".png") or (fileName[-len_ext:].lower() == ".dds"):
+					copyFileIfNeeded(log, sourceFile, installPath + "/" + os.path.basename(fileName))
+			elif not os.path.isdir(sourceFile):
+				printLog(log, "FAIL ?! file not dir or file ?! " + sourceFile)
 
-printLog(log, ">>> Install map panoply <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
-mkPath(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory)
-copyFilesExtNoSubdirIfNeeded(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory, clientPath, ".dds")
+if MapPanoplyFileList != None:
+	printLog(log, ">>> Install panoply file list <<<")
+	buildPanoplyTagPath = ExportBuildDirectory + "/" + MapTagBuildDirectory + "/build_panoply.tag"
+	mkPath(log, ExportBuildDirectory + "/" + MapTagBuildDirectory)
+	if needUpdate(log, buildPanoplyTagPath, installPath + "/" + MapPanoplyFileList):
+		sourcePath = ExportBuildDirectory + "/" + MapPanoplyBuildDirectory
+		mkPath(log, sourcePath)
+		printLog(log, "WRITE " + installPath + "/" + MapPanoplyFileList)
+		lf = open(installPath + "/" + MapPanoplyFileList, "w")
+		files = os.listdir(sourcePath)
+		for file in files:
+			if isLegalFileName(file):
+				lf.write(file + "\n")
+		lf.close()
+	else:
+		printLog(log, "SKIP " + installPath + "/" + MapPanoplyBuildDirectory)
 
-printLog(log, ">>> Install map hlsbank <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+if MapHlsBankFileName != None:
+	printLog(log, ">>> Install map hlsbank <<<")
+	sourcePath = ExportBuildDirectory + "/" + MapPanoplyHlsBankBuildDirectory
+	mkPath(log, sourcePath)
+	copyFilesExtNoSubdirIfNeeded(log, sourcePath, installPath, ".hlsbank")
 
 printLog(log, "")
 log.close()

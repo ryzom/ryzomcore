@@ -57,7 +57,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + TilesClientDirectory)
+mkPath(log, InstallDirectory + "/" + TilesInstallDirectory)
 
 log.close()
 

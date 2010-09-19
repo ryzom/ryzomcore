@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + PacsPrimClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + PacsPrimInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install pacs_prim <<<")
 mkPath(log, ExportBuildDirectory + "/" + PacsPrimExportDirectory)
-copyFilesExtNoSubdirIfNeeded(log, ExportBuildDirectory + "/" + PacsPrimExportDirectory, clientPath, ".pacs_prim")
+copyFilesExtNoSubdirIfNeeded(log, ExportBuildDirectory + "/" + PacsPrimExportDirectory, installPath, ".pacs_prim")
 
 printLog(log, "")
 log.close()

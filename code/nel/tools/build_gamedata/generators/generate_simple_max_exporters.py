@@ -47,7 +47,7 @@ def processLine(line, processName, fileExtension, sourceDirectoriesVariable, exp
 	newline = newline.replace("%PreGenFileExtension%", fileExtension)
 	newline = newline.replace("%PreGenSourceDirectoriesVariable%", sourceDirectoriesVariable)
 	newline = newline.replace("%PreGenExportDirectoryVariable%", exportDirectoryVariable)
-	newline = newline.replace("%PreGenClientDirectoryVariable%", clientDirectoryVariable)
+	newline = newline.replace("%PreGenInstallDirectoryVariable%", clientDirectoryVariable)
 	return newline
 
 def generateSimpleMaxExporterFile(sourceFile, destFile, writeMode, processName, fileExtension, sourceDirectoriesVariable, exportDirectoryVariable, clientDirectoryVariable, dateTimeStamp):
@@ -88,15 +88,15 @@ def generateSimpleMaxExporter(processName, fileExtension, sourceDirectoriesVaria
 
 
 
-generateSimpleMaxExporter("pacs_prim", "pacs_prim", "PacsPrimSourceDirectories", "PacsPrimExportDirectory", "PacsPrimClientDirectory")
+generateSimpleMaxExporter("pacs_prim", "pacs_prim", "PacsPrimSourceDirectories", "PacsPrimExportDirectory", "PacsPrimInstallDirectory")
 
-generateSimpleMaxExporter("anim", "anim", "AnimSourceDirectories", "AnimExportDirectory", "AnimClientDirectory")
+generateSimpleMaxExporter("anim", "anim", "AnimSourceDirectories", "AnimExportDirectory", "AnimInstallDirectory")
 
-generateSimpleMaxExporter("skel", "skel", "SkelSourceDirectories", "SkelExportDirectory", "SkelClientDirectory")
+generateSimpleMaxExporter("skel", "skel", "SkelSourceDirectories", "SkelExportDirectory", "SkelInstallDirectory")
 
-generateSimpleMaxExporter("swt", "swt", "SwtSourceDirectories", "SwtExportDirectory", "SwtClientDirectory")
+generateSimpleMaxExporter("swt", "swt", "SwtSourceDirectories", "SwtExportDirectory", "SwtInstallDirectory")
 
-generateSimpleMaxExporter("zone", "zone", "ZoneSourceDirectory", "ZoneExportDirectory", "ZoneClientDirectory")
+generateSimpleMaxExporter("zone", "zone", "ZoneSourceDirectory", "ZoneExportDirectory", "ZoneInstallDirectory")
 
 
 

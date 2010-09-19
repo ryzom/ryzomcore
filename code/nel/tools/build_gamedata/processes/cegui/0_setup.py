@@ -57,7 +57,7 @@ mkPath(log, ExportBuildDirectory + "/" + CeguiImagesetBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + CeguiImagesetClientDirectory)
+mkPath(log, InstallDirectory + "/" + CeguiImagesetInstallDirectory)
 
 log.close()
 

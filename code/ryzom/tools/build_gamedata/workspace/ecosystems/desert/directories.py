@@ -6,7 +6,7 @@
 # 
 # \file directories.py
 # \brief Directories configuration
-# \date 2010-09-03-14-50-GMT
+# \date 2010-09-19-14-19-GMT
 # \author Jan Boon (Kaetemi)
 # \date 2001-2005
 # \author Nevrax
@@ -148,6 +148,22 @@ PacsPrimSourceDirectories = [ ]
 PacsPrimSourceDirectories += [ DatabaseRootPath + "/decors/vegetations" ]
 
 
+# *** LOOKUP DIRECTORIES WITHIN THE BUILD PIPELINE *** (TODO: use these instead of search_pathes in properties(_base).cfg)
+
+# Ig lookup directories used by rbank
+IgLookupDirectories = [ ]
+
+# Shape lookup directories used by rbank
+ShapeLookupDirectories = [ ]
+ShapeLookupDirectories += [ EcosystemPath + "/shape_clodtex_build" ]
+ShapeLookupDirectories += [ EcosystemPath + "/shape_with_coarse_mesh" ]
+
+# Map lookup directories not yet used
+MapLookupDirectories = [ ]
+MapLookupDirectories += [ EcosystemPath + "/map_export" ]
+MapLookupDirectories += [ EcosystemPath + "/map_uncompressed" ]
+
+
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
 # Map directories
@@ -197,6 +213,10 @@ PacsPrimExportDirectory = CommonPath + "/pacs_prim"
 # Map directories
 MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
+MapPanoplyHlsInfoBuildDirectory = CommonPath + "/map_panoply_hls_info"
+MapPanoplyHlsBankBuildDirectory = CommonPath + "/map_panoply_hls_bank"
+MapPanoplyCacheBuildDirectory = CommonPath + "/map_panoply_cache"
+MapTagBuildDirectory = CommonPath + "/map_tag"
 
 # Shape directories
 ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
@@ -220,29 +240,29 @@ RbankOutputBuildDirectory = "_invalid"
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Map directory
-MapClientDirectory = CommonName + "_maps"
-BitmapClientDirectory = MapClientDirectory
+MapInstallDirectory = CommonName + "_maps"
+BitmapInstallDirectory = MapInstallDirectory
 
 # Shape directory
-ShapeClientDirectory = CommonName + "_shapes"
+ShapeInstallDirectory = CommonName + "_shapes"
 
 # Lightmap directory
-LightmapClientDirectory = CommonName + "_lightmaps"
+LightmapInstallDirectory = CommonName + "_lightmaps"
 
 # Tile directory
-TilesClientDirectory = CommonName + "_tiles"
+TilesInstallDirectory = CommonName + "_tiles"
 
 # Displace directory
-DisplaceClientDirectory = CommonName + "_displaces"
+DisplaceInstallDirectory = CommonName + "_displaces"
 
 # Bank directory
-BankClientDirectory = CommonName + "_bank"
+BankInstallDirectory = CommonName + "_bank"
 
 # Vegetable set directory
-VegetSetClientDirectory = CommonName + "_vegetable_sets"
+VegetSetInstallDirectory = CommonName + "_vegetable_sets"
 
 # Vegetable shape directory
-VegetClientDirectory = CommonName + "_vegetables"
+VegetInstallDirectory = CommonName + "_vegetables"
 
 # PACS primitives directories
-PacsPrimClientDirectory = CommonName + "_pacs_prim"
+PacsPrimInstallDirectory = CommonName + "_pacs_prim"

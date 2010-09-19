@@ -40,7 +40,7 @@ CommonPath = ContinentPath
 
 #Interface directories
 InterfaceSourceDirectories = [ ]
-InterfaceSourceDirectories += [ [ "interfaces/v3" ] + [ "interfaces/ring_interface" ] ]
+InterfaceSourceDirectories += [ [ "interfaces/v3" ] + [ "interfaces/r2_interface" ] ]
 InterfaceSourceDirectories += [ [ "interfaces/v3_outgame/ui" ] ]
 InterfaceSourceDirectories += [ [ "interfaces/v3_login" ] ]
 
@@ -62,12 +62,14 @@ InterfaceFullscreenSourceDirectories += [ "interfaces/v3_doc/graph/spell" ]
 InterfaceFullscreenSourceDirectories += [ "interfaces/v3_doc/graph/talk_bot" ]
 InterfaceFullscreenSourceDirectories += [ "interfaces/v3_doc/graph/abilities_items" ]
 InterfaceFullscreenSourceDirectories += [ "interfaces/v3_quick_help/graph" ]
+InterfaceFullscreenSourceDirectories += [ "interfaces/r2_decals" ]
 
 Interface3DSourceDirectories = [ ]
 Interface3DSourceDirectories += [ "interfaces/v3_outgame/3d" ]
 Interface3DSourceDirectories += [ "interfaces/v3_doc/htm" ]
 Interface3DSourceDirectories += [ "interfaces/v3_doc" ]
 Interface3DSourceDirectories += [ "interfaces/v3_quick_help" ]
+Interface3DSourceDirectories += [ "interfaces/r2_3d" ]
 
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
@@ -89,4 +91,4 @@ InterfaceDxtcBuildDirectory = CommonPath + "/interface_dxtc_build"
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Lightmap directory
-InterfaceClientDirectory = "interfaces"
+InterfaceInstallDirectory = "interfaces"

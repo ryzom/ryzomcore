@@ -43,7 +43,7 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPathIg = ClientDataDirectory + "/" + IgClientDirectory
+clientPathIg = InstallDirectory + "/" + IgInstallDirectory
 mkPath(log, clientPathIg)
 
 printLog(log, ">>> Install ig <<<")

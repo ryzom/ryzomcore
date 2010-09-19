@@ -43,16 +43,16 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + FontClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + FontInstallDirectory
+mkPath(log, installPath)
 fontExportDir = ExportBuildDirectory + "/" + FontExportDirectory
 mkPath(log, fontExportDir)
 
 printLog(log, ">>> Install font <<<")
-copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".ttf")
-copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".afm")
-copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".pfb")
-copyFilesExtNoTreeIfNeeded(log, fontExportDir, clientPath, ".pfm")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".ttf")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".afm")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfb")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfm")
 
 printLog(log, "")
 log.close()

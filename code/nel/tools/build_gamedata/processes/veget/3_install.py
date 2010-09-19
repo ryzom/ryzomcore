@@ -46,9 +46,9 @@ printLog(log, "")
 printLog(log, ">>> Install veget <<<")
 exportPath = ExportBuildDirectory + "/" + VegetExportDirectory
 mkPath(log, exportPath)
-clientPath = ClientDataDirectory + "/" + VegetClientDirectory
-mkPath(log, clientPath)
-copyFilesNoTreeIfNeeded(log, exportPath, clientPath)
+installPath = InstallDirectory + "/" + VegetInstallDirectory
+mkPath(log, installPath)
+copyFilesNoTreeIfNeeded(log, exportPath, installPath)
 
 printLog(log, "")
 log.close()

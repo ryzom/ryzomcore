@@ -58,7 +58,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + %PreGenClientDirectoryVariable%)
+mkPath(log, InstallDirectory + "/" + %PreGenInstallDirectoryVariable%)
 
 log.close()
 

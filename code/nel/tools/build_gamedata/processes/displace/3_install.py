@@ -44,11 +44,11 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> Install displace <<<")
-clientPath = ClientDataDirectory + "/" + DisplaceClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + DisplaceInstallDirectory
+mkPath(log, installPath)
 mkPath(log, ExportBuildDirectory + "/" + DisplaceExportDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DisplaceExportDirectory, clientPath, ".tga")
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DisplaceExportDirectory, clientPath, ".png")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DisplaceExportDirectory, installPath, ".tga")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DisplaceExportDirectory, installPath, ".png")
 
 printLog(log, "")
 log.close()

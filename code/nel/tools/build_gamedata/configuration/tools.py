@@ -37,7 +37,6 @@ SmallbankBuildTimeout = 60000
 FarbankBuildTimeout = 180000
 AnimExportTimeout = 1800000
 IgExportTimeout = 600000
-MapsBuildTimeout = 10000
 CmbExportTimeout = 60000
 RbankBuildTesselTimeout = 6000000
 RbankBuildSmoothTimeout = 6000000
@@ -49,6 +48,7 @@ LigoExportTimeout = 3600000
 LigoBuildTimeout = 1800000
 PacsPrimExportTimeout = 600000
 
+MapsBuildTimeout = 60000 # 1min
 MaxShapeExportTimeout = 600000 # 10min
 
 # *** TOOLS CONFIGURATION ***
@@ -63,7 +63,6 @@ ZoneWelderTool = "zone_welder"
 BuildRbankTool = "build_rbank"
 BuildIndoorRbankTool = "build_indoor_rbank"
 BuildIgBoxesTool = "build_ig_boxes"
-AiBuildWmapTool = "ai_build_wmap"
 GetNeighborsTool = "get_neighbors"
 ZoneLighterTool = "zone_lighter"
 ZoneIgLighterTool = "zone_ig_lighter"
@@ -85,3 +84,8 @@ PrimExportTool = "prim_export"
 IgElevationTool = "ig_elevation"
 IgAddTool = "ig_add"
 BuildClodBankTool = "build_clod_bank"
+SheetsPackerTool = "sheets_packer"
+BnpMakeTool = "bnp_make"
+AiBuildWmapTool = "ai_build_wmap"
+TgaCutTool = "tga_cut"
+PatchGenTool = "patch_gen"

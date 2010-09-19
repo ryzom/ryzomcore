@@ -69,7 +69,7 @@ mkPath(log, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + InterfaceClientDirectory)
+mkPath(log, InstallDirectory + "/" + InterfaceInstallDirectory)
 
 log.close()
 
