@@ -40,8 +40,10 @@
 #	define FINAL_VERSION 0
 #endif // FINAL_VERSION
 
-// Operating systems definition
+// This way we know about _HAS_TR1 and _STLPORT_VERSION
+#include <string>
 
+// Operating systems definition
 #ifdef _WIN32
 #	define NL_OS_WINDOWS
 #	define NL_LITTLE_ENDIAN
@@ -51,7 +53,6 @@
 #   endif
 #	if _MSC_VER >= 1500
 #		define NL_COMP_VC9
-#		include <string> // This way we know about _HAS_TR1 :O
 #		ifndef _STLPORT_VERSION // STLport doesn't depend on MS STL features
 #			if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack
 #				define NL_ISO_STDTR1_AVAILABLE
@@ -88,7 +89,7 @@
 #	ifdef _WIN64
 #		define NL_OS_WIN64
 #		ifndef NL_NO_ASM
-			// Windows 64bits platform SDK compilers doesn't support inline assemblers
+			// Windows 64bits platform SDK compilers doesn't support inline assembler
 #			define NL_NO_ASM
 #		endif
 #	endif
@@ -131,9 +132,12 @@
 #endif
 
 // gcc 4.1+ provides std::tr1
-#if defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ > 1))
-#	define NL_ISO_STDTR1_AVAILABLE
-#	define NL_ISO_STDTR1_HEADER(header) <tr1/header>
+#ifdef NL_COMP_GCC
+#	define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#	if GCC_VERSION > 40100
+#		define NL_ISO_STDTR1_AVAILABLE
+#		define NL_ISO_STDTR1_HEADER(header) <tr1/header>
+#	endif
 #endif
 
 // Remove stupid Visual C++ warnings
@@ -261,22 +265,6 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #define	NL_I64 "I64"
 
-#ifndef NL_ISO_STDTR1_AVAILABLE
-#	include <hash_map>
-#	include <hash_set>
-#	ifdef _STLP_HASH_MAP
-#		define CHashMap ::std::hash_map
-#		define CHashSet ::std::hash_set
-#		define CHashMultiMap ::std::hash_multimap
-#	elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
-#		define CHashMap stdext::hash_map
-#		define CHashSet stdext::hash_set
-#		define CHashMultiMap stdext::hash_multimap
-#	else
-#		pragma error("You need to update your compiler")
-#	endif
-#endif // NL_ISO_STDTR1_AVAILABLE
-
 #elif defined (NL_OS_UNIX)
 
 #include <sys/types.h>
@@ -284,20 +272,41 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #include <climits>
 
 typedef	int8_t		sint8;
-typedef	u_int8_t	uint8;
+typedef	uint8_t		uint8;
 typedef	int16_t		sint16;
-typedef	u_int16_t	uint16;
+typedef	uint16_t	uint16;
 typedef	int32_t		sint32;
-typedef	u_int32_t	uint32;
-typedef	long long int		sint64;
-typedef	unsigned long long int	uint64;
+typedef	uint32_t	uint32;
+typedef	int64_t		sint64;
+typedef	uint64_t	uint64;
 
 typedef				int			sint;			// at least 32bits (depend of processor)
 typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #define	NL_I64 "ll"
 
-#if defined(NL_COMP_GCC) && !defined(NL_ISO_STDTR1_AVAILABLE) // GCC4
+#endif // NL_OS_UNIX
+
+// CHashMap, CHashSet and CHashMultiMap definitions
+#if defined(_STLPORT_VERSION) // STLport detected
+#	include <hash_map>
+#	include <hash_set>
+#	ifdef _STLP_HASH_MAP
+#		define CHashMap ::std::hash_map
+#		define CHashSet ::std::hash_set
+#		define CHashMultiMap ::std::hash_multimap
+#	endif // _STLP_HASH_MAP
+#elif defined(NL_ISO_STDTR1_AVAILABLE) // use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
+#	include NL_ISO_STDTR1_HEADER(unordered_map)
+#	include NL_ISO_STDTR1_HEADER(unordered_set)
+#	define CHashMap std::tr1::unordered_map
+#	define CHashSet std::tr1::unordered_set
+#	define CHashMultiMap std::tr1::unordered_multimap
+#elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
+#	define CHashMap stdext::hash_map
+#	define CHashSet stdext::hash_set
+#	define CHashMultiMap stdext::hash_multimap
+#elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
 #	define CHashMap ::__gnu_cxx::hash_map
@@ -324,18 +333,9 @@ template<> struct hash<uint64>
 
 } // END NAMESPACE __GNU_CXX
 
-#endif // NL_COMP_GCC && !NL_ISO_STDTR1_AVAILABLE
-
-#endif // NL_OS_UNIX
-
-// use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
-#ifdef NL_ISO_STDTR1_AVAILABLE
-#	include NL_ISO_STDTR1_HEADER(unordered_map)
-#	include NL_ISO_STDTR1_HEADER(unordered_set)
-#	define CHashMap std::tr1::unordered_map
-#	define CHashSet std::tr1::unordered_set
-#	define CHashMultiMap std::tr1::unordered_multimap
-#endif
+#else
+#	pragma error("You need to update your compiler")
+#endif // _STLPORT_VERSION
 
 /**
  * \typedef ucchar

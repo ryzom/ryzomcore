@@ -206,7 +206,7 @@ inline double	isValidDouble (double v)
 #ifdef NL_OS_WINDOWS
 	return _finite(v) && !_isnan(v);
 #else
-	return !std::isnan(v) && !std::isinf(v);
+	return !isnan(v) && !isinf(v);
 #endif
 }
 

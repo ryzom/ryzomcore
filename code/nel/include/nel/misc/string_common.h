@@ -187,6 +187,10 @@ inline std::string toString(const uint32 &val) { return toString("%u", val); }
 inline std::string toString(const sint32 &val) { return toString("%d", val); }
 inline std::string toString(const uint64 &val) { return toString("%"NL_I64"u", val); }
 inline std::string toString(const sint64 &val) { return toString("%"NL_I64"d", val); }
+
+#ifdef NL_COMP_GCC
+#	if GCC_VERSION == 40102
+
 // error fix for size_t? gcc 4.1.2 requested this type instead of size_t ...
 inline std::string toString(const long unsigned int &val)
 {
@@ -194,6 +198,10 @@ inline std::string toString(const long unsigned int &val)
 		return toString((uint64)val);
 	return toString((uint32)val);
 }
+
+#	endif
+#endif
+
 #if (SIZEOF_SIZE_T) == 8
 inline std::string toString(const size_t &val) { return toString("%"NL_I64"u", val); }
 //#else
