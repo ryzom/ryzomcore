@@ -72,9 +72,9 @@ void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 color
 	uint32	colSize= (uint32)cols.size()*sizeof(CHLSColorDelta);
 	_TextureInstanceData.resize(_TextureInstanceData.size() + nameSize + colSize);
 	// copy name
-	memcpy(&_TextureInstanceData[textInst._DataIndex], nameLwr.c_str(), nameSize);
+	if (nameSize != 0) memcpy(&_TextureInstanceData[textInst._DataIndex], nameLwr.c_str(), nameSize);
 	// copy cols
-	memcpy(&_TextureInstanceData[textInst._DataIndex+nameSize], &cols[0], colSize);
+	if (colSize != 0) memcpy(&_TextureInstanceData[textInst._DataIndex+nameSize], &cols[0], colSize);
 
 	// add the instance.
 	_TextureInstances.push_back(textInst);
