@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include "time_nl.h"
+#include "common.h"
 #include <map>
 
 #ifdef NL_OS_UNIX
@@ -280,7 +281,7 @@ public:
 					break;
 
 #ifdef NL_OS_WINDOWS
-				Sleep (wait_time);
+				nlSleep (wait_time);
 #else
 				//std::cout <<  "Sleeping i=" << i << std::endl;
 				usleep( wait_time*1000 );
@@ -390,7 +391,7 @@ public:
 					break;
 
 #ifdef NL_OS_WINDOWS
-				Sleep (wait_time);
+				nlSleep (wait_time);
 #else
 				//std::cout <<  "Sleeping i=" << i << std::endl;
 				usleep( wait_time*1000 );
