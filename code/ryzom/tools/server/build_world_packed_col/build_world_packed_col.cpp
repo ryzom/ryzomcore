@@ -69,6 +69,7 @@ static void getIslandsInside(sint32 xmin, sint32 xmax, sint32 ymin, sint32 ymax,
 int main(int argc, char* argv[])
 {	
 	//////////////////
+	createDebug();
 	registerSerial3d();	
 	
 	if (argc != 2)
@@ -187,7 +188,7 @@ int main(int argc, char* argv[])
 			// the same zones were found -> now check their dates against the island one
 			uint32 packedIslandDate = CFile::getFileModificationDate(islandPath);
 			mustRebuild = false;
-			for(uint l = 0; l < presentZonePathes.size(); ++l)
+			for(uint k = 0; k < presentZonePathes.size(); ++k)
 			{				
 				if (CFile::getFileModificationDate(presentZonePathes[l]) > packedIslandDate)
 				{
