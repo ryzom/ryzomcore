@@ -1,14 +1,18 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(sno_frontend ${SRC})
+ADD_EXECUTABLE(snowballs_frontend_service ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${NELMISC_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(sno_frontend ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} ${NELMISC_LIBRARY} ${NELNET_LIBRARY})
-IF(WIN32)
-  SET_TARGET_PROPERTIES(sno_frontend PROPERTIES 
-	LINK_FLAGS "/NODEFAULTLIB:libcmt /SUBSYSTEM:WINDOWS"
-	PROJECT_LABEL "Services: Snowballs Frontend")
-ENDIF(WIN32)
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+
+TARGET_LINK_LIBRARIES(snowballs_frontend_service
+						${PLATFORM_LINKFLAGS}
+						${LIBXML2_LIBRARIES}
+						nelmisc
+						nelnet)
+
+NL_DEFAULT_PROPS(snowballs_frontend_service "Snowballs, Services: Frontend Service")
+NL_ADD_RUNTIME_FLAGS(snowballs_frontend_service)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-INSTALL(TARGETS sno_frontend RUNTIME DESTINATION sbin COMPONENT services)
+INSTALL(TARGETS snowballs_frontend_service RUNTIME DESTINATION sbin COMPONENT services)
