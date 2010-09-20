@@ -283,7 +283,11 @@ typedef	uint64_t	uint64;
 typedef				int			sint;			// at least 32bits (depend of processor)
 typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
-#define	NL_I64 "ll"
+#if __SIZEOF_LONG__ == 8
+#	define	NL_I64 "l"
+#else
+#	define	NL_I64 "ll"
+#endif // __SIZEOF_LONG__ == 8
 
 #endif // NL_OS_UNIX
 
