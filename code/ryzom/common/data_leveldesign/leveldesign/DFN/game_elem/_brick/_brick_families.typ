@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TYPE Type="Color" UI="NonEditableCombo" Default="undefined" Min="-1" Max="20" Increment="1" Revision="$Revision: 1.23 $" State="modified">
+<TYPE Type="String" UI="NonEditableCombo" Default="undefined" Min="-1" Max="20" Increment="1" Revision="$Revision: 1.23 $" State="modified">
   <DEFINITION Label="undefined" Value="UNDEFINED"/>
   <DEFINITION Label="root magic" Value="ROOT_MAGIC"/>
   <DEFINITION Label="root combat" Value="ROOT_COMBAT"/>
@@ -540,5 +540,6 @@
   <LOG>Fri Jan 03 17:49:53 2003 (fleury) Type Predef = 
 Tue Jan 07 16:49:54 2003 (fleury) Type Predef = 
 Fri Apr 25 17:55:48 2003 (fleury) Type Predef = 
-Fri Apr 25 17:55:48 2003 (fleury) Type Type = Color</LOG>
+Fri Apr 25 17:55:48 2003 (fleury) Type Type = Color
+Mon Sep 20 08:54:23 2010 (kervala) Type Type = String</LOG>
 </TYPE>

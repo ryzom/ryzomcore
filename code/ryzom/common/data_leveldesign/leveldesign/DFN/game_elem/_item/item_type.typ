@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TYPE Type="Color" UI="NonEditableCombo" Default="undefined" Min="0" Max="10" Revision="$Revision: 1.14 $" State="modified">
+<TYPE Type="String" UI="NonEditableCombo" Default="undefined" Min="0" Max="10" Revision="$Revision: 1.14 $" State="modified">
   <DEFINITION Label="undefined" Value="UNDEFINED"/>
   <DEFINITION Label="Dagger" Value="DAGGER"/>
   <DEFINITION Label="Sword" Value="SWORD"/>
