@@ -1935,7 +1935,7 @@ void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
 // ***************************************************************************
 void CViewText::removeEndSpaces()
 {
-	int i = (int)_Text.size()-1;
+	sint i = (sint)_Text.size()-1;
 	while ((i>=0) && ((_Text[i] < 0x20) || (_Text[i] == ' ')))
 	{
 		i--;

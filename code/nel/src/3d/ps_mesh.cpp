@@ -1973,7 +1973,7 @@ void CPSConstraintMesh::newElement(const CPSEmitterInfo &info)
 	NL_PS_FUNC(CPSConstraintMesh_newElement)
 	newSizeElement(info);
 	newPlaneBasisElement(info);
-	// TODO : avoid code cuplication with CPSFace ...
+	// TODO : avoid code duplication with CPSFace ...
 	const uint32 nbConf = (uint32)_PrecompBasis.size();
 	if (nbConf) // do we use precomputed basis ?
 	{

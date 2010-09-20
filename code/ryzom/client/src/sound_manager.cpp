@@ -1508,7 +1508,6 @@ void		CSoundManager::stopEventMusic(const string &fileName, uint xFadeTime)
 	if(_AudioMixer)
 	{
 		// if the event music is the one currently played, or if empty fileName
-
 		if(fileName.empty() || nlstricmp(_EventMusicPlayed,fileName)==0)
 		{
 			// stop the music
@@ -1851,4 +1850,3 @@ bool CMaterialStepSounds::getSounds( TMoveType moveType, bool soft, vector<strin
 	return true;
 
 } // getSounds //*/
-
