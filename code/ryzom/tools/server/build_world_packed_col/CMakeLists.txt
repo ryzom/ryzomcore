@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(build_world_packed_col	
 					ryzom_gameshare
 					ryzom_servershare 
-					ai_share 
+					ryzom_aishare 
 					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
 					nelmisc

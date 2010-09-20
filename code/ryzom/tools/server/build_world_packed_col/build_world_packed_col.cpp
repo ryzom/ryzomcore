@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 			// the same zones were found -> now check their dates against the island one
 			uint32 packedIslandDate = CFile::getFileModificationDate(islandPath);
 			mustRebuild = false;
-			for(uint k = 0; k < presentZonePathes.size(); ++k)
+			for(uint l = 0; l < presentZonePathes.size(); ++l)
 			{				
 				if (CFile::getFileModificationDate(presentZonePathes[l]) > packedIslandDate)
 				{
