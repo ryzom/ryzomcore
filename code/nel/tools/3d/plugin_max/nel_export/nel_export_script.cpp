@@ -55,6 +55,9 @@ def_visible_primitive ( mirror_physique, 	"NelMirrorPhysique" );
 def_visible_primitive ( get_file_modification_date, 	"NeLGetFileModificationDate" );
 def_visible_primitive ( set_file_modification_date, 	"NeLSetFileModificationDate" );
 
+def_visible_primitive ( force_quit_on_msg_displayer,		"NelForceQuitOnMsgDisplayer");
+def_visible_primitive ( force_quit_right_now,		"NelForceQuitRightNow");
+
 char *sExportShapeErrorMsg = "NeLExportShape [Object] [Filename.shape]";
 char *sExportShapeExErrorMsg = "NeLExportShapeEx [Object] [Filename.shape] [bShadow] [bExportLighting] [sLightmapPath] [nLightingLimit] [fLumelSize] [nOverSampling] [bExcludeNonSelected] [bShowLumel]";
 char *sExportAnimationErrorMsg = "NelExportAnimation [node array] [Filename.anim] [bool_scene_animation]";
@@ -931,6 +934,55 @@ Value* set_file_modification_date_cf (Value** arg_list, int count)
 	}
 	
 	return &false_value;
+}
+
+class CSuicideMsgBoxDisplayer : public CMsgBoxDisplayer
+{
+public:
+	CSuicideMsgBoxDisplayer (const char *displayerName = "") : CMsgBoxDisplayer(displayerName) { }
+
+protected:
+	/// Put the string into the file.
+    virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message )
+	{
+		DWORD ec = 0;
+		HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, 0, GetCurrentProcessId());
+		GetExitCodeProcess(h, &ec);
+		TerminateProcess(h, ec);
+	}
+};
+
+Value* force_quit_on_msg_displayer_cf(Value** arg_list, int count)
+{
+	nlwarning("Enable force quit on NeL report msg displayer");
+	// disable the Windows popup telling that the application aborted and disable the dr watson report.
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+	putenv("NEL_IGNORE_ASSERT=1");
+	if (NLMISC::DefaultMsgBoxDisplayer || INelContext::getInstance().getDefaultMsgBoxDisplayer())
+	{
+		if (!NLMISC::DefaultMsgBoxDisplayer)
+			NLMISC::DefaultMsgBoxDisplayer = INelContext::getInstance().getDefaultMsgBoxDisplayer();
+		nldebug("Disable NeL report msg displayer");
+		INelContext::getInstance().getAssertLog()->removeDisplayer(NLMISC::DefaultMsgBoxDisplayer);
+		INelContext::getInstance().getErrorLog()->removeDisplayer(NLMISC::DefaultMsgBoxDisplayer);
+		// TODO: Delete original NLMISC::DefaultMsgBoxDisplayer?
+	}
+	NLMISC::DefaultMsgBoxDisplayer = new CSuicideMsgBoxDisplayer("FORCEQUIT_MDB");
+	INelContext::getInstance().setDefaultMsgBoxDisplayer(NLMISC::DefaultMsgBoxDisplayer);
+	INelContext::getInstance().getAssertLog()->addDisplayer(NLMISC::DefaultMsgBoxDisplayer);
+	INelContext::getInstance().getErrorLog()->addDisplayer(NLMISC::DefaultMsgBoxDisplayer);
+	return &true_value;
+}
+
+Value* force_quit_right_now_cf(Value** arg_list, int count)
+{
+	// because quitMAX can fail
+	nlwarning("Force quit");
+	DWORD ec = 0;
+	HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, 0, GetCurrentProcessId());
+	GetExitCodeProcess(h, &ec);
+	TerminateProcess(h, ec);
+	return &true_value;
 }
 
 /*===========================================================================*\

@@ -36,11 +36,18 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet = false;
-	char tempName[L_tmpnam];
-	tmpnam(tempName);
+	char tempFileName[MAX_PATH] = { 0 };  
+	char tempPathBuffer[MAX_PATH] = { 0 };
 	
 	try
-	{
+	{		
+		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
+		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
+			nlerror("GetTempPath failed");
+		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
+		if (uRetVal == 0)
+			nlerror("GetTempFileName failed");
+
 		// Eval the object a time
 		ObjectState os = node.EvalWorldState(time);
 
@@ -48,7 +55,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 		if (os.obj)
 		{
 			// Skeleton shape
-			CSmartPtr<CSkeletonShape> skeletonShape = NULL;
+			CSkeletonShape * skeletonShape = NULL;
 			TInodePtrInt *mapIdPtr=NULL;
 			TInodePtrInt mapId;
 
@@ -69,7 +76,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					CExportNel::addSkeletonBindPos (node, boneBindPos);
 
 					// Build the skeleton based on the bind pos information
-					_ExportNel->buildSkeletonShape(*skeletonShape.getPtr(), *skeletonRoot, &boneBindPos, mapId, time);
+					_ExportNel->buildSkeletonShape(*skeletonShape, *skeletonRoot, &boneBindPos, mapId, time);
 
 					// Set the pointer to not NULL
 					mapIdPtr=&mapId;
@@ -83,16 +90,16 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 			if (InfoLog)
 				InfoLog->display("Beg buildShape %s \n", node.GetName());
 			// Export in mesh format
-			CSmartPtr<IShape> pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
+			IShape *pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
 			if (InfoLog)
 				InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
 			
 			// Conversion success ?
-			if (pShape.getPtr())
+			if (pShape)
 			{
 				// Open a file
 				COFile file;
-				if (file.open(tempName))
+				if (file.open(tempFileName))
 				{
 					try
 					{
@@ -101,6 +108,9 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 						
 						// Serial the shape
 						shapeStream.serial(file);
+
+						// Close the file
+						file.close();
 
 						// All is good
 						bRet = true;
@@ -116,29 +126,61 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 						{
 
 						}
-						remove(tempName);
+						remove(tempFileName);
 					}
 				}
 				else
 				{
-					nlwarning("Failed to create file %s", tempName);
+					nlwarning("Failed to create file %s", tempFileName);
 				}
 
 				// Delete the pointer
-				nldebug ("Delete the pointer");
+				nldebug("Delete the pointer");
 				try
 				{
 					bool tempBRet = bRet;
 					bRet = false;
-					pShape = NULL;
+					// delete pShape; // FIXME: there is a delete bug with CMeshMultiLod exported from max!!!
 					bRet = tempBRet;
 				}
 				catch (...)
 				{
 					nlwarning("Failed to delete pShape pointer! Something might be wrong.");
-					remove(tempName);
+					remove(tempFileName);
 					bRet = false;
 				}
+
+				// Verify the file
+				nldebug("Verify exported shape file");
+				try
+				{
+					bool tempBRet = bRet;
+					bRet = false;
+					CIFile vf;
+					if (vf.open(tempFileName))
+					{
+						nldebug("File opened, size: %u", vf.getFileSize());
+						CShapeStream s;
+						s.serial(vf);
+						nldebug("Shape serialized");
+						vf.close();
+						nldebug("File closed");
+						delete s.getShapePointer();
+						nldebug("Shape deleted");
+						bRet = tempBRet;
+					}
+					else
+					{
+						nlwarning("Failed to open file: %s", tempFileName);
+					}
+				}
+				catch (...)
+				{
+					nlwarning("Failed to verify shape. Must crash now.");
+					remove(tempFileName);
+					bRet = false;
+				}
+
 			}
 		}
 	}
@@ -158,8 +200,8 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 		{
 
 		}
-		CFile::moveFile(sPath, tempName);
-		nlinfo("MOVE %s -> %s", tempName, sPath);
+		CFile::moveFile(sPath, tempFileName);
+		nlinfo("MOVE %s -> %s", tempFileName, sPath);
 	}
 
 	return bRet;
