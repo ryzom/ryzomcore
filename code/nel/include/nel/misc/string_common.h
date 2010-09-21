@@ -204,8 +204,8 @@ inline std::string toString(const long unsigned int &val)
 
 #if (SIZEOF_SIZE_T) == 8
 inline std::string toString(const size_t &val) { return toString("%"NL_I64"u", val); }
-//#else
-//inline std::string toString(const size_t &val) { return toString("%u", val); }
+#else
+inline std::string toString(const size_t &val) { return toString("%u", val); }
 #endif
 inline std::string toString(const float &val) { return toString("%f", val); }
 inline std::string toString(const double &val) { return toString("%lf", val); }
