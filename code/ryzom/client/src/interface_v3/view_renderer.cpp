@@ -1029,7 +1029,7 @@ sint32 CViewRenderer::getTextureIdFromName (const string &sName) const
 		return -1;
 
 	// convert to lowCase
-	static string	nameLwr = toLower(sName);
+	string nameLwr = toLower(sName);
 	string::size_type stripPng = nameLwr.find(".png");
 	if (stripPng != string::npos)
 	{
