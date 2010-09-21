@@ -45,8 +45,8 @@ printLog(log, "")
 
 printLog(log, ">>> Install farbank <<<")
 mkPath(log, ExportBuildDirectory + "/" + FarbankBuildDirectory)
-mkPath(log, ClientDataDirectory + "/" + BankClientDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + FarbankBuildDirectory, ClientDataDirectory + "/" + BankClientDirectory, ".farbank")
+mkPath(log, InstallDirectory + "/" + BankInstallDirectory)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + FarbankBuildDirectory, InstallDirectory + "/" + BankInstallDirectory, ".farbank")
 
 printLog(log, "")
 log.close()

@@ -52,7 +52,7 @@ FontExportDirectory = CommonPath + "/font"
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Font directory
-FontClientDirectory = CommonName
+FontInstallDirectory = CommonName
 
 
 # end of file

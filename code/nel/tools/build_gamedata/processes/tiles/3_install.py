@@ -44,9 +44,9 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> Install tiles <<<")
-mkPath(log, ClientDataDirectory + "/" + TilesClientDirectory)
+mkPath(log, InstallDirectory + "/" + TilesInstallDirectory)
 mkPath(log, ExportBuildDirectory + "/" + TilesExportDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + TilesExportDirectory, ClientDataDirectory + "/" + TilesClientDirectory)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + TilesExportDirectory, InstallDirectory + "/" + TilesInstallDirectory)
 
 printLog(log, "")
 log.close()

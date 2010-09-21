@@ -49,7 +49,7 @@ from directories import *
 #printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 #printLog(log, "")
 #for dir in ClientSetupDirectories:
-#	mkPath(log, ClientDataDirectory + "/" + dir)
+#	mkPath(log, InstallDirectory + "/" + dir)
 #printLog(log, "")
 
 printLog(log, "")

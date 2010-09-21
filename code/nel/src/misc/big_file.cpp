@@ -403,6 +403,8 @@ FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 	{
 		handle.File = fopen (bnp->BigFileName.c_str(), "rb");
 		if (handle.File == NULL)
+		  nlwarning ("bnp: can't fopen big file '%s' error %d '%s'", bnp->BigFileName.c_str(), errno, strerror(errno));
+		if (handle.File == NULL)
 			return NULL;
 	}
 

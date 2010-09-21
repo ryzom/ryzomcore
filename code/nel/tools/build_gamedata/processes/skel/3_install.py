@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + SkelClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + SkelInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install skel <<<")
 mkPath(log, ExportBuildDirectory + "/" + SkelExportDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SkelExportDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SkelExportDirectory, installPath)
 
 printLog(log, "")
 log.close()

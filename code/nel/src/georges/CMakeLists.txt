@@ -1,10 +1,9 @@
-FILE(GLOB SRC *.cpp)
-FILE(GLOB PRIV_H *.h)
-FILE(GLOB PUB_H ../../include/nel/georges/*.h)
+FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/georges/*.h)
 
-SOURCE_GROUP(headers FILES ${PRIV_H} ${PUB_H})
+# SOURCE_GROUP(headers FILES ${HEADERS})
 
-NL_TARGET_LIB(nelgeorges ${SRC})
+NL_TARGET_LIB(nelgeorges ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 

@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h config_file/*.cpp config_file/*.h)
+FILE(GLOB HEADERS ../../include/nel/misc/*.h)
 
-NL_TARGET_LIB(nelmisc ${SRC})
+NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
 
 IF(WITH_GTK)
   IF(GTK2_FOUND)
@@ -41,6 +42,7 @@ INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${PNG_INCLUDE_DIR} config_file)
 TARGET_LINK_LIBRARIES(nelmisc ${CMAKE_THREAD_LIBS_INIT} ${LIBXML2_LIBRARIES})
 SET_TARGET_PROPERTIES(nelmisc PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
+NL_ADD_RUNTIME_FLAGS(nelmisc)
 
 NL_ADD_LIB_SUFFIX(nelmisc)
 

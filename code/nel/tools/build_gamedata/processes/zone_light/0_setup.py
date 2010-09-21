@@ -63,9 +63,9 @@ mkPath(log, ExportBuildDirectory + "/" + IgLandBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + ZoneClientDirectory)
-mkPath(log, ClientDataDirectory + "/" + IgClientDirectory)
-mkPath(log, ClientDataDirectory + "/" + WaterMapsClientDirectory)
+mkPath(log, InstallDirectory + "/" + ZoneInstallDirectory)
+mkPath(log, InstallDirectory + "/" + IgInstallDirectory)
+mkPath(log, InstallDirectory + "/" + WaterMapsInstallDirectory)
 
 log.close()
 

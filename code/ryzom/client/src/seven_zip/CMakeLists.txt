@@ -14,6 +14,7 @@ NL_ADD_RUNTIME_FLAGS(7zDec)
 NL_TARGET_LIB(ryzom_sevenzip ${LIB_SRC})
 TARGET_LINK_LIBRARIES(ryzom_sevenzip ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(ryzom_sevenzip "Ryzom, Library: Seven Zip")
+NL_ADD_RUNTIME_FLAGS(ryzom_sevenzip)
 NL_ADD_LIB_SUFFIX(ryzom_sevenzip)
 
 ADD_DEFINITIONS(-D_SZ_ONE_DIRECTORY)

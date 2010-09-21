@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + VegetSetClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + VegetSetInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install vegetset <<<")
 mkPath(log, ExportBuildDirectory + "/" + VegetSetExportDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + VegetSetExportDirectory, clientPath, ".vegetset")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + VegetSetExportDirectory, installPath, ".vegetset")
 
 printLog(log, "")
 log.close()

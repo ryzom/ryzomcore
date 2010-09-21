@@ -2326,9 +2326,9 @@ namespace NLNET
 			// recall the dump for the module class
 			NLMISC_CLASS_COMMAND_CALL_BASE(CModuleBase, dump);
 
-			log.displayNL("------------------------------");
+			log.displayNL("-----------------------------");
 			log.displayNL("Dumping gateway information :");
-			log.displayNL("------------------------------");
+			log.displayNL("-----------------------------");
 
 			log.displayNL("The gateway has %u locally plugged module :", _PluggedModules.getAToBMap().size());
 			{

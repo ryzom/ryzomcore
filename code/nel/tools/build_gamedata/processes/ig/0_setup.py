@@ -70,7 +70,7 @@ mkPath(log, ExportBuildDirectory + "/" + IgOtherBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-#mkPath(log, ClientDataDirectory + "/" + IgClientDirectory)
+#mkPath(log, InstallDirectory + "/" + IgInstallDirectory)
 
 log.close()
 

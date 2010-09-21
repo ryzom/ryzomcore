@@ -6,7 +6,7 @@
 # 
 # \file 1_export.py
 # \brief Export clodbank
-# \date 2010-09-03-12-46-GMT
+# \date 2010-09-19-14-19-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export clodbank

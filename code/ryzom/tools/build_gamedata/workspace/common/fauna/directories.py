@@ -215,6 +215,23 @@ ClodSourceDirectories = [ ]
 ClodSourceDirectories += [ "stuff/lod_actors/lod_fauna" ]
 
 
+# *** LOOKUP DIRECTORIES WITHIN THE BUILD PIPELINE *** (TODO: use these instead of search_pathes in properties(_base).cfg)
+
+# Ig lookup directories used by rbank
+IgLookupDirectories = [ ]
+
+# Shape lookup directories used by rbank
+ShapeLookupDirectories = [ ]
+# ShapeLookupDirectories += [ CommonPath + "/ps" ]
+ShapeLookupDirectories += [ CommonPath + "/shape_clodtex_build" ]
+ShapeLookupDirectories += [ CommonPath + "/shape_with_coarse_mesh" ]
+
+# Map lookup directories not yet used
+MapLookupDirectories = [ ]
+MapLookupDirectories += [ CommonPath + "/map_export" ]
+MapLookupDirectories += [ CommonPath + "/map_uncompressed" ]
+
+
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
 # Map directories
@@ -247,6 +264,10 @@ ClodTagExportDirectory = CommonPath + "/clod_tag_export"
 # Map directories
 MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
+MapPanoplyHlsInfoBuildDirectory = CommonPath + "/map_panoply_hls_info"
+MapPanoplyHlsBankBuildDirectory = CommonPath + "/map_panoply_hls_bank"
+MapPanoplyCacheBuildDirectory = CommonPath + "/map_panoply_cache"
+MapTagBuildDirectory = CommonPath + "/map_tag"
 
 # Shape directories
 ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
@@ -264,18 +285,18 @@ ClodBankBuildDirectory = CommonPath + "/clod_bank"
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Map directory
-MapClientDirectory = CommonName + "_maps"
-BitmapClientDirectory = MapClientDirectory
+MapInstallDirectory = CommonName + "_maps"
+BitmapInstallDirectory = MapInstallDirectory
 
 # Shape directory
-ShapeClientDirectory = CommonName + "_shapes"
-LightmapClientDirectory = ShapeClientDirectory
+ShapeInstallDirectory = CommonName + "_shapes"
+LightmapInstallDirectory = ShapeInstallDirectory
 
 # Animation directory
-AnimClientDirectory = CommonName + "_animations"
+AnimInstallDirectory = CommonName + "_animations"
 
 # Skeleton directory
-SkelClientDirectory = CommonName + "_skeletons"
+SkelInstallDirectory = CommonName + "_skeletons"
 
 # Skeleton directory
-SwtClientDirectory = CommonName + "_swt"
+SwtInstallDirectory = CommonName + "_swt"

@@ -46,7 +46,7 @@ printLog(log, "")
 printLog(log, ">>> Install ps <<<")
 srcDir = ExportBuildDirectory + "/" + PsExportDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + PsClientDirectory
+destDir = InstallDirectory + "/" + PsInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

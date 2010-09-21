@@ -58,7 +58,7 @@ mkPath(log, ExportBuildDirectory + "/" + ZoneWeldBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + ZoneClientDirectory)
+mkPath(log, InstallDirectory + "/" + ZoneInstallDirectory)
 
 log.close()
 

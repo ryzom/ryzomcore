@@ -43,18 +43,18 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-#clientPath = ClientDataDirectory + "/" + DummyClientDirectory
-#mkPath(log, clientPath)
+#installPath = InstallDirectory + "/" + DummyInstallDirectory
+#mkPath(log, installPath)
 
 printLog(log, ">>> Install dummy <<<")
 #mkPath(log, ExportBuildDirectory + "/" + DummyExportDirectory)
-#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyExportDirectory, clientPath, ".dummy")
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyExportDirectory, installPath, ".dummy")
 #mkPath(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory)
-#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, clientPath, ".dummy")
-#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, clientPath, ".dds")
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, installPath, ".dummy")
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyWithCoarseMeshBuildDirectory, installPath, ".dds")
 
 #mkPath(log, ExportBuildDirectory + "/" + DummyAnimExportDirectory)
-#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyAnimExportDirectory, clientPath, ".anim")
+#copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + DummyAnimExportDirectory, installPath, ".anim")
 
 printLog(log, "")
 log.close()

@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB HEADERS ../../include/nel/sound/*.h)
 
-NL_TARGET_LIB(nelsound ${SRC})
+NL_TARGET_LIB(nelsound ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 

@@ -59,8 +59,8 @@ mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + SoundSheetsClientDirectory)
-mkPath(log, ClientDataDirectory + "/" + SoundSamplebanksClientDirectory)
+mkPath(log, InstallDirectory + "/" + SoundSheetsInstallDirectory)
+mkPath(log, InstallDirectory + "/" + SoundSamplebanksInstallDirectory)
 
 log.close()
 

@@ -44,7 +44,7 @@ def needUpdate(log, source, dest):
 			else:
 				return 0
 		return 1
-	printLog(log, "needUpdate: source doest not exist?! " + source)
+	printLog(log, "MISSING " + source)
 	return 0
 
 def needUpdateRemoveDest(log, source, dest):
@@ -56,7 +56,7 @@ def needUpdateRemoveDest(log, source, dest):
 			else:
 				return 0
 		return 1
-	printLog(log, "needUpdate: source doest not exist?! " + source)
+	printLog(log, "MISSING " + source)
 	return 0
 
 def needUpdateLogRemoveDest(log, source, dest):
@@ -71,45 +71,60 @@ def needUpdateLogRemoveDest(log, source, dest):
 				return 0
 		printLog(log, source + " -> " + dest)
 		return 1
-	printLog(log, "needUpdate: source doest not exist?! " + source)
+	printLog(log, "MISSING " + source)
 	printLog(log, "SKIP " + dest)
 	return 0
 
 def copyFileList(log, dir_source, dir_target, files):
 	for fileName in files:
-		if fileName != ".svn":
-			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + fileName)
-			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				if needUpdateLogRemoveDest(log, dir_source + "/" + fileName, dir_target + "/" + fileName):
+					shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
 
 def copyFileListNoTree(log, dir_source, dir_target, files):
 	for fileName in files:
-		if fileName != ".svn":
-			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + os.path.basename(fileName))
-			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + os.path.basename(fileName))
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + os.path.basename(fileName))
+				shutil.copy(dir_source + "/" + fileName, dir_target + "/" + os.path.basename(fileName))
 
 def copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files):
 	for fileName in files:
-		if fileName != ".svn" and fileName != "*.*":
-			srcFile = dir_source + "/" + fileName
-			destFile = dir_target + "/" + os.path.basename(fileName)
-			if needUpdateLogRemoveDest(log, srcFile, destFile):
-				shutil.copy(srcFile, destFile)
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				srcFile = dir_source + "/" + fileName
+				destFile = dir_target + "/" + os.path.basename(fileName)
+				if needUpdateLogRemoveDest(log, srcFile, destFile):
+					shutil.copy(srcFile, destFile)
 
 def removeFilesRecursive(log, dir_files):
 	files = os.listdir(dir_files)
 	for fileName in files:
-		if (fileName != ".svn"):
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
 			if os.path.isdir(dir_files + "/" + fileName):
 				removeFilesRecursive(log, dir_files + "/" + fileName)
 			else:
 				printLog(log, "RM " + dir_files + "/" + fileName)
 				os.remove(dir_files + "/" + fileName)
 
+def removeFilesDirsRecursive(log, dir_files):
+	files = os.listdir(dir_files)
+	for fileName in files:
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
+			if os.path.isdir(dir_files + "/" + fileName):
+				removeFilesRecursive(log, dir_files + "/" + fileName)
+			else:
+				printLog(log, "RM " + dir_files + "/" + fileName)
+				os.remove(dir_files + "/" + fileName)
+	printLog(log, "RMDIR " + dir_files)
+	os.rmdir(dir_files)
+
 def removeFilesRecursiveExt(log, dir_files, file_ext):
 	files = os.listdir(dir_files)
 	len_file_ext = len(file_ext)
 	for fileName in files:
-		if (fileName != ".svn"):
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
 			if os.path.isdir(dir_files + "/" + fileName):
 				removeFilesRecursiveExt(log, dir_files + "/" + fileName, file_ext)
 			elif (fileName[-len_file_ext:].lower() == file_ext.lower()):
@@ -120,7 +135,7 @@ def copyFilesRecursive(log, dir_source, dir_target):
 	files = os.listdir(dir_source)
 	mkPath(log, dir_target)
 	for fileName in files:
-		if (fileName != ".svn"):
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
 			if os.path.isdir(dir_source + "/" + fileName):
 				copyFilesRecursive(log, dir_source + "/" + fileName, dir_target + "/" + fileName)
 			else:
@@ -134,18 +149,20 @@ def copyFilesExt(log, dir_source, dir_target, file_ext):
 	files = os.listdir(dir_source)
 	len_file_ext = len(file_ext)
 	for fileName in files:
-		if (fileName != ".svn") and (fileName[-len_file_ext:].lower() == file_ext.lower()):
-			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + fileName)
-			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*") and (fileName[-len_file_ext:].lower() == file_ext.lower()):
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + fileName)
+				shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
 
 def copyFilesRenamePrefixExt(log, dir_source, dir_target, old_prefix, new_prefix, file_ext):
 	files = os.listdir(dir_source)
 	len_file_ext = len(file_ext)
 	len_prefix = len(old_prefix)
 	for fileName in files:
-		if (fileName != ".svn") and (fileName[-len_file_ext:].lower() == file_ext.lower()) and ((fileName[:len_prefix].lower() == old_prefix.lower())):
-			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
-			shutil.copy(dir_source + "/" + fileName, dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
+		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*") and (fileName[-len_file_ext:].lower() == file_ext.lower()) and ((fileName[:len_prefix].lower() == old_prefix.lower())):
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
+				shutil.copy(dir_source + "/" + fileName, dir_target + "/" + new_prefix + fileName[-(len(fileName) - len_prefix):])
 
 def copyFilesExtNoSubdir(log, dir_source, dir_target, file_ext):
 	files = findFilesNoSubdir(log, dir_source, file_ext)
@@ -166,13 +183,18 @@ def copyFilesExtNoSubdirIfNeeded(log, dir_source, dir_target, file_ext):
 def copyFilesNoTreeIfNeeded(log, dir_source, dir_target):
 	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, os.listdir(dir_source))
 
+def copyFilesRecursiveNoTreeIfNeeded(log, dir_source, dir_target):
+	files = findFilesRecursive(log, dir_source, "")
+	copyFileListNoTreeIfNeeded(log, dir_source, dir_target, files)
+
 def copyFileListExtReplaceNoTreeIfNeeded(log, dir_source, dir_target, files, file_ext, target_ext):
 	for fileName in files:
-		if fileName != ".svn" and fileName != "*.*":
-			srcFile = dir_source + "/" + fileName
-			destFile = dir_target + "/" + os.path.basename(fileName)[0:-len(file_ext)] + target_ext
-			if needUpdateLogRemoveDest(log, srcFile, destFile):
-				shutil.copy(srcFile, destFile)
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				srcFile = dir_source + "/" + fileName
+				destFile = dir_target + "/" + os.path.basename(fileName)[0:-len(file_ext)] + target_ext
+				if needUpdateLogRemoveDest(log, srcFile, destFile):
+					shutil.copy(srcFile, destFile)
 	
 def copyFilesExtReplaceNoTreeIfNeeded(log, dir_source, dir_target, file_ext, target_ext):
 	files = findFiles(log, dir_source, "", file_ext)
@@ -184,20 +206,44 @@ def copyFileIfNeeded(log, srcFile, destFile):
 
 def moveFileListNoTree(log, dir_source, dir_target, files):
 	for fileName in files:
-		if fileName != ".svn":
-			printLog(log, dir_source + "/" + fileName + " -> " + dir_target + "/" + os.path.basename(fileName))
-			shutil.move(dir_source + "/" + fileName, dir_target + "/" + os.path.basename(fileName))
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				printLog(log, "MOVE " + dir_source + "/" + fileName + " -> " + dir_target + "/" + os.path.basename(fileName))
+				shutil.move(dir_source + "/" + fileName, dir_target + "/" + os.path.basename(fileName))
 
 def moveFilesExtNoTree(log, dir_source, dir_target, file_ext):
 	files = findFiles(log, dir_source, "", file_ext)
 	moveFileListNoTree(log, dir_source, dir_target, files)
+
+def moveFilesNoSubdir(log, dir_source, dir_target):
+	files = os.listdir(dir_source)
+	moveFileListNoTree(log, dir_source, dir_target, files)
+
+def moveDir(log, dir_source, dir_target):
+	printLog(log, "MOVE " + dir_source + " -> " + dir_target)
+	shutil.move(dir_source, dir_target)
+
+def findFilesRecursive(log, dir_where, dir_sub):
+	result = [ ]
+	files = os.listdir(dir_where + "/" + dir_sub)
+	for fileName in files:
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			filePath = dir_sub + fileName
+			fileFull = dir_where + "/" + dir_sub + fileName
+			if os.path.isfile(fileFull):
+				result += [ filePath ]
+			elif os.path.isdir(fileFull):
+				result += findFilesRecursive(log, dir_where, filePath + "/")
+			else:
+				printLog(log, "findFilesRecursive: file not dir or file?!" + filePath)
+	return result
 
 def findFiles(log, dir_where, dir_sub, file_ext):
 	result = [ ]
 	files = os.listdir(dir_where + "/" + dir_sub)
 	len_file_ext = len(file_ext)
 	for fileName in files:
-		if fileName != ".svn" and fileName != "*.*":
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
 			filePath = dir_sub + fileName
 			fileFull = dir_where + "/" + dir_sub + fileName
 			if os.path.isfile(fileFull):
@@ -209,12 +255,15 @@ def findFiles(log, dir_where, dir_sub, file_ext):
 				printLog(log, "findFiles: file not dir or file?!" + filePath)
 	return result
 
+def isLegalFileName(fileName):
+	return fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"
+
 def findFilesNoSubdir(log, dir_where, file_ext):
 	result = [ ]
 	files = os.listdir(dir_where)
 	len_file_ext = len(file_ext)
 	for fileName in files:
-		if fileName != ".svn" and fileName != "*.*":
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
 			fileFull = dir_where + "/" + fileName
 			if os.path.isfile(fileFull):
 				if fileName[-len_file_ext:].lower() == file_ext.lower():
@@ -226,7 +275,7 @@ def findFilesNoSubdir(log, dir_where, file_ext):
 def findFile(log, dir_where, file_name):
 	files = os.listdir(dir_where)
 	for fileName in files:
-		if fileName != ".svn" and fileName != "*.*":
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
 			filePath = dir_where + "/" + fileName
 			if os.path.isfile(filePath):
 				if fileName == file_name:
@@ -263,6 +312,26 @@ def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
 	else:
 		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
 		return 0
+
+def needUpdateDirNoSubdirFile(log, dir_source, file_dest):
+	if not os.path.isfile(file_dest):
+		return 1
+	destTime = os.stat(file_dest).st_mtime
+	sourceFiles = os.listdir(dir_source)
+	for file in sourceFiles:
+		filePath = dir_source + "/" + file
+		if os.path.isfile(filePath):
+			fileTime = os.stat(filePath).st_mtime
+			if fileTime > destTime:
+				return 1
+	else:
+		return 0
+
+def needUpdateMultiDirNoSubdirFile(log, root_dir, dirs_source, file_dest):
+	for dir_source in dirs_source:
+		if needUpdateDirNoSubdirFile(log, root_dir + "/" + dir_source, file_dest):
+			return 1
+	return 0
 
 def needUpdateDirNoSubdir(log, dir_source, dir_dest):
 	latestSourceFile = 0
@@ -328,6 +397,17 @@ def needUpdateDirNoSubdirLogExtMultidir(log, all_dir_base, all_dir_source, dir_s
 	else:
 		printLog(log, "SKIP *")
 		return 0
+
+def findFileMultiDir(log, dirs_where, file_name):
+	try:
+		for dir in dirs_where:
+			file = findFile(log, dir, file_name)
+			if file != "":
+				return file
+	except Exception, e:
+		printLog(log, "EXCEPTION " + str(e))
+	printLog(log, "FILE NOT FOUND " + file_name)
+	return ""
 
 def findTool(log, dirs_where, file_name, suffix):
 	try:

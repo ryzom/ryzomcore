@@ -47,18 +47,20 @@ printLog(log, "")
 printLog(log, ">>> Setup source directories <<<")
 mkPath(log, LeveldesignDirectory)
 mkPath(log, LeveldesignDfnDirectory)
+mkPath(log, DataCommonDirectory)
+mkPath(log, GamedevDirectory)
+mkPath(log, PrimitivesDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
-mkPath(log, ExportBuildDirectory + "/" + SheetIdBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + SheetsBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + SheetsClientDirectory)
+mkPath(log, InstallDirectory + "/" + SheetsInstallDirectory)
 
 log.close()
 

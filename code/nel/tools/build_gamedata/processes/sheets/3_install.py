@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + SheetsClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + SheetsInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install sheets <<<")
 mkPath(log, ExportBuildDirectory + "/" + SheetsBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SheetsBuildDirectory, clientPath, ".packed_sheets")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SheetsBuildDirectory, installPath, ".packed_sheets")
 
 printLog(log, "")
 log.close()

@@ -74,7 +74,7 @@ mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + PacsClientDirectory)
+mkPath(log, InstallDirectory + "/" + PacsInstallDirectory)
 
 log.close()
 

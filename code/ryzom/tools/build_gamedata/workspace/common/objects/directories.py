@@ -56,6 +56,23 @@ MapSourceDirectories += [ "stuff/caravan/agents/_textures/accessories" ]
 MapUncompressedSourceDirectories = [ ]
 
 
+# *** LOOKUP DIRECTORIES WITHIN THE BUILD PIPELINE *** (TODO: use these instead of search_pathes in properties(_base).cfg)
+
+# Ig lookup directories used by rbank
+IgLookupDirectories = [ ]
+
+# Shape lookup directories used by rbank
+ShapeLookupDirectories = [ ]
+# ShapeLookupDirectories += [ CommonPath + "/ps" ]
+ShapeLookupDirectories += [ CommonPath + "/shape_clodtex_build" ]
+ShapeLookupDirectories += [ CommonPath + "/shape_with_coarse_mesh" ]
+
+# Map lookup directories not yet used
+MapLookupDirectories = [ ]
+MapLookupDirectories += [ CommonPath + "/map_export" ]
+MapLookupDirectories += [ CommonPath + "/map_uncompressed" ]
+
+
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
 
 # Map directories
@@ -75,6 +92,10 @@ ShapeAnimExportDirectory = CommonPath + "/shape_anim"
 # Map directories
 MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
+MapPanoplyHlsInfoBuildDirectory = CommonPath + "/map_panoply_hls_info"
+MapPanoplyHlsBankBuildDirectory = CommonPath + "/map_panoply_hls_bank"
+MapPanoplyCacheBuildDirectory = CommonPath + "/map_panoply_cache"
+MapTagBuildDirectory = CommonPath + "/map_tag"
 
 # Shape directories
 ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
@@ -86,13 +107,13 @@ ShapeLightmap16BitsBuildDirectory = CommonPath + "/shape_lightmap_16_bits"
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Map directory
-MapClientDirectory = "objects"
+MapInstallDirectory = "objects"
 
 # Map directory
-BitmapClientDirectory = MapClientDirectory
+BitmapInstallDirectory = MapInstallDirectory
 
 # Shape directory
-ShapeClientDirectory = "objects"
+ShapeInstallDirectory = "objects"
 
 # Lightmap directory
-LightmapClientDirectory = "objects"
+LightmapInstallDirectory = "objects"

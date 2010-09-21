@@ -1153,25 +1153,3 @@ NLMISC_COMMAND(setMaxNumTimedFXs, "set the max number of timed fx that are visib
 	CTimedFXManager::getInstance().setMaxNumFXInstances(maxNumInstances);
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

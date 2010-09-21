@@ -111,8 +111,8 @@ if len(CoarseMeshTextureNames) > 0:
 	cf.write("search_path = \n")
 	cf.write("{\n")
 	cf.write("\t\"" + shapeWithCoarseMesh + "\", \n")
-	for dir in MapSourceDirectories:
-		cf.write("\t\"" + DatabaseDirectory + "/" + dir + "\", \n")
+	for dir in MapLookupDirectories:
+		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
 	cf.write("};\n")
 	cf.write("\n")
 	cf.write("list_mesh = \n")

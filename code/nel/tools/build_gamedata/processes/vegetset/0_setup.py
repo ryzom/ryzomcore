@@ -57,7 +57,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + VegetSetClientDirectory)
+mkPath(log, InstallDirectory + "/" + VegetSetInstallDirectory)
 
 log.close()
 

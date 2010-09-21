@@ -69,6 +69,7 @@ static void getIslandsInside(sint32 xmin, sint32 xmax, sint32 ymin, sint32 ymax,
 int main(int argc, char* argv[])
 {	
 	//////////////////
+	createDebug();
 	registerSerial3d();	
 	
 	if (argc != 2)

@@ -31,8 +31,104 @@ if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
 from scripts import *
-from buildsite import *
+try:
+	from buildsite import *
+except ImportError:
+	printLog(log, "*** FIRST RUN ***")
 from tools import *
+
+try:
+	BuildQuality
+except NameError:
+	BuildQuality = 1
+try:
+	ToolDirectories
+except NameError:
+	ToolDirectories = [ 'R:/code/nel', 'R:/code/ryzom/tools' ]
+try:
+	ToolSuffix
+except NameError:
+	ToolSuffix = "_r.exe"
+try:
+	ScriptDirectory
+except NameError:
+	ScriptDirectory = "R:/code/nel/tools/build_gamedata"
+try:
+	WorkspaceDirectory
+except NameError:
+	WorkspaceDirectory = "R:/code/ryzom/tools/build_gamedata/workspace"
+try:
+	DatabaseDirectory
+except NameError:
+	DatabaseDirectory = "W:/database"
+try:
+	ExportBuildDirectory
+except NameError:
+	ExportBuildDirectory = "W:/export"
+try:
+	InstallDirectory
+except NameError:
+	InstallDirectory = "W:/install"
+try:
+	DataShardDirectory
+except NameError:
+	DataShardDirectory = "R:/code/ryzom/server/data_shard"
+try:
+	ClientDevDirectory
+except NameError:
+	ClientDevDirectory = "W:/client_dev"
+try:
+	ClientPatchDirectory
+except NameError:
+	ClientPatchDirectory = "W:/client_patch"
+try:
+	ClientInstallDirectory
+except NameError:
+	ClientInstallDirectory = "W:/client_install"
+try:
+	LeveldesignDirectory
+except NameError:
+	LeveldesignDirectory = "L:/leveldesign"
+try:
+	LeveldesignDfnDirectory
+except NameError:
+	LeveldesignDfnDirectory = "L:/leveldesign/dfn"
+try:
+	LeveldesignWorldDirectory
+except NameError:
+	LeveldesignWorldDirectory = "L:/leveldesign/world"
+try:
+	PrimitivesDirectory
+except NameError:
+	PrimitivesDirectory = "L:/primitives"
+try:
+	GamedevDirectory
+except NameError:
+	GamedevDirectory = "R:/code/ryzom/client/data/gamedev"
+try:
+	DataCommonDirectory
+except NameError:
+	DataCommonDirectory = "R:/code/ryzom/common/data_common"
+try:
+	WindowsExeDllCfgDirectories
+except NameError:
+	WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/source/external_local/bin/x86', 'D:/source/external_shared/bin/x86', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/client', 'R:/code/ryzom/tools/client/client_config/bin' ]
+try:
+	MaxAvailable
+except NameError:
+	MaxAvailable = 1
+try:
+	MaxDirectory
+except NameError:
+	MaxDirectory = "C:/Program Files (x86)/Autodesk/3ds Max 2010"
+try:
+	MaxUserDirectory
+except NameError:
+	MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
+try:
+	MaxExecutable
+except NameError:
+	MaxExecutable = "3dsmax.exe"
 
 printLog(log, "")
 printLog(log, "-------")
@@ -52,10 +148,24 @@ ScriptDirectory = askVar(log, "Script Directory", os.getcwd().replace("\\", "/")
 WorkspaceDirectory = askVar(log, "Workspace Directory", WorkspaceDirectory).replace("\\", "/")
 DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
 ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
-ClientDataDirectory = askVar(log, "Client Data Directory", ClientDataDirectory).replace("\\", "/")
+InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
+DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
+ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
+ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
+ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
 LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
 LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
+PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
+GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
+DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
+WindowsExeDllCfgDirectories[0] = askVar(log, "Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
+WindowsExeDllCfgDirectories[1] = askVar(log, "Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
+WindowsExeDllCfgDirectories[2] = askVar(log, "Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
+WindowsExeDllCfgDirectories[3] = askVar(log, "Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
+WindowsExeDllCfgDirectories[4] = askVar(log, "Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
+WindowsExeDllCfgDirectories[5] = askVar(log, "Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
+WindowsExeDllCfgDirectories[6] = askVar(log, "Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
 MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
 if MaxAvailable:
 	MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
@@ -111,8 +221,12 @@ sf.write("# Data build directories\n")
 sf.write("DatabaseDirectory = \"" + str(DatabaseDirectory) + "\"\n")
 sf.write("ExportBuildDirectory = \"" + str(ExportBuildDirectory) + "\"\n")
 sf.write("\n")
-sf.write("# Client data install directory (client/data)\n")
-sf.write("ClientDataDirectory = \"" + str(ClientDataDirectory) + "\"\n")
+sf.write("# Install directories\n")
+sf.write("InstallDirectory = \"" + str(InstallDirectory) + "\"\n")
+sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
+sf.write("ClientDevDirectory = \"" + str(ClientDevDirectory) + "\"\n")
+sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
+sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
 sf.write("\n")
 sf.write("# TODO: NETWORK RECONNECT NOT IMPLEMENTED :)\n")
 sf.write("\n")
@@ -120,6 +234,12 @@ sf.write("# Leveldesign directories\n")
 sf.write("LeveldesignDirectory = \"" + str(LeveldesignDirectory) + "\"\n")
 sf.write("LeveldesignDfnDirectory = \"" + str(LeveldesignDfnDirectory) + "\"\n")
 sf.write("LeveldesignWorldDirectory = \"" + str(LeveldesignWorldDirectory) + "\"\n")
+sf.write("PrimitivesDirectory = \"" + str(PrimitivesDirectory) + "\"\n")
+sf.write("\n")
+sf.write("# Misc data directories\n")
+sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
+sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
+sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
 sf.write("\n")
 sf.write("# 3dsMax directives\n")
 sf.write("MaxAvailable = " + str(MaxAvailable) + "\n")

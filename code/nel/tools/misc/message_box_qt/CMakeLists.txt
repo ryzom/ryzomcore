@@ -10,6 +10,7 @@ ADD_EXECUTABLE(message_box_qt ${MESSAGE_BOX_SRC})
 
 TARGET_LINK_LIBRARIES(message_box_qt ${QT_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc)
 NL_DEFAULT_PROPS(message_box_qt "Tools, Misc: Qt Message Box")
+NL_ADD_RUNTIME_FLAGS(message_box_qt)
 
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 

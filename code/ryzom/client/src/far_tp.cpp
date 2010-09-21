@@ -1454,5 +1454,3 @@ void CFarTP::farTPmainLoop()
 	if(welcomeWindow)
 		initWelcomeWindow();
 }
-
-

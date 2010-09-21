@@ -46,21 +46,21 @@ printLog(log, "")
 printLog(log, ">>> Install zone_light zones <<<")
 srcDir = ExportBuildDirectory + "/" + ZoneLightBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + ZoneClientDirectory
+destDir = InstallDirectory + "/" + ZoneInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 
 printLog(log, ">>> Install zone_light water maps <<<")
 srcDir = ExportBuildDirectory + "/" + ZoneLightWaterShapesLightedExportDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + WaterMapsClientDirectory
+destDir = InstallDirectory + "/" + WaterMapsInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 
 printLog(log, ">>> Install zone_light igs <<<")
 srcDir = ExportBuildDirectory + "/" + ZoneLightIgLandBuildDirectory
 mkPath(log, srcDir)
-destDir = ClientDataDirectory + "/" + IgClientDirectory
+destDir = InstallDirectory + "/" + IgInstallDirectory
 mkPath(log, destDir)
 copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 

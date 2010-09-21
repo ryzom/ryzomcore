@@ -17,6 +17,7 @@
 
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/command.h"
 #include "nel/misc/config_file.h"
@@ -33,6 +34,8 @@ extern vector<string>		LookupNoRecursePath;
 
 sint	main(sint argc, char **argv)
 {
+	createDebug();
+
 	CConfigFile			cf;
 	CConfigFile::CVar	*var;
 

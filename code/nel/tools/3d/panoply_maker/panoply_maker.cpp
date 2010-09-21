@@ -38,7 +38,7 @@ using namespace std;
 
 
 string	DivideBy2Dir= "/d4/";
-string	HlsInfoDir= "hlsInfo/";
+//string	HlsInfoDir= "hlsInfo/";
 
 
 // ========================================================================================================
@@ -57,6 +57,7 @@ struct CBuildInfo
 {
 	std::string					 InputPath;
 	std::string					 OutputPath;
+	std::string					 HlsInfoPath;
 	std::string					 CachePath;
 	std::vector<std::string>     BitmapExtensions; // the supported extension for bitmaps
 	std::string					 OutputFormat; // png or tga
@@ -275,6 +276,16 @@ int main(int argc, char* argv[])
 				}
 				catch (NLMISC::EUnknownVar &)
 				{
+				}
+
+				/// hls info path
+				try
+				{
+					bi.HlsInfoPath = NLMISC::CPath::standardizePath(cf.getVar("hls_info_path").asString());
+				}
+				catch (NLMISC::EUnknownVar &)
+				{
+					bi.HlsInfoPath = "hlsInfo/";
 				}
 
 				/// output
@@ -533,7 +544,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 	}
 
 	// get hls info version that is in the cache. if not possible, must rebuild
-	std::string outputHLSInfo = HlsInfoDir + fileName + ".hlsinfo";
+	std::string outputHLSInfo = bi.HlsInfoPath + fileName + ".hlsinfo";
 	std::string cacheHLSInfo = bi.CachePath + fileName + ".hlsinfo";
 	if (!NLMISC::CFile::fileExists(cacheHLSInfo.c_str()) )
 		return true;
@@ -843,13 +854,13 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 
 	// **** save the TMP hlsInfo
 	NLMISC::COFile os;
-	if (os.open(HlsInfoDir + fileName + ".hlsinfo"))
+	if (os.open(bi.HlsInfoPath + fileName + ".hlsinfo"))
 	{
 		os.serial(hlsInfo);
 	}
 	else
 	{
-		nlwarning(("Couldn't write " + HlsInfoDir + fileName + ".hlsinfo").c_str());
+		nlwarning(("Couldn't write " + bi.HlsInfoPath + fileName + ".hlsinfo").c_str());
 	}
 
 }

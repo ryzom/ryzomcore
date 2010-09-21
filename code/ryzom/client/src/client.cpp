@@ -25,9 +25,14 @@
 // Misc.
 #include "nel/misc/types_nl.h"
 
-#if defined(NL_OS_WINDOWS)
+#ifdef NL_OS_WINDOWS
 #include <windows.h>
 #include <shellapi.h>
+#endif
+
+#ifdef NL_OS_MAC
+#include <stdio.h>
+#include <sys/resource.h>
 #endif
 
 #include "nel/misc/debug.h"
@@ -363,6 +368,20 @@ int main(int argc, char **argv)
 
 	// temporary buffer to store Ryzom full path
 	char filename[1024];
+
+#ifdef NL_OS_MAC
+	struct rlimit rlp, rlp2, rlp3;
+
+	getrlimit(RLIMIT_NOFILE, &rlp);
+
+	rlp2.rlim_cur = 1024;
+	rlp2.rlim_max = rlp.rlim_max;
+	setrlimit(RLIMIT_NOFILE, &rlp2);
+
+	getrlimit(RLIMIT_NOFILE, &rlp3);
+	nlinfo("rlimit before %d %d\n", rlp.rlim_cur, rlp.rlim_max);
+	nlinfo("rlimit after %d %d\n", rlp3.rlim_cur, rlp3.rlim_max);
+#endif
 
 #if defined(NL_OS_WINDOWS)
 

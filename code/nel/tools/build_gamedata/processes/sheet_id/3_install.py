@@ -43,13 +43,6 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + SheetIdClientDirectory
-mkPath(log, clientPath)
-
-printLog(log, ">>> Install sheet_id <<<")
-mkPath(log, ExportBuildDirectory + "/" + SheetIdBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SheetIdBuildDirectory, clientPath, ".bin")
-
 printLog(log, "")
 log.close()
 

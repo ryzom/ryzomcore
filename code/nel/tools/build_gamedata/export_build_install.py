@@ -26,7 +26,7 @@
 
 import shutil, subprocess
 
-# subprocess.call([ "python", "0_setup.py" ])
 subprocess.call([ "python", "1_export.py" ])
 subprocess.call([ "python", "2_build.py" ])
 subprocess.call([ "python", "3_install.py" ])
+

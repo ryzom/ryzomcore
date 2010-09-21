@@ -61,7 +61,7 @@ mkPath(log, ExportBuildDirectory + "/" + AnimBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + ShapeClientDirectory)
+mkPath(log, InstallDirectory + "/" + ShapeInstallDirectory)
 
 # Setup configuration files
 printLog(log, ">>> Setup configuration files <<<")

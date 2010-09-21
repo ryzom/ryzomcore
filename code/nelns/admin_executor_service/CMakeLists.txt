@@ -1,14 +1,17 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(admin_executor_service ${SRC})
+ADD_EXECUTABLE(admin_executor_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${NELMISC_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(admin_executor_service ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} ${NELMISC_LIBRARY} ${NELNET_LIBRARY})
-IF(WIN32)
-  SET_TARGET_PROPERTIES(admin_executor_service PROPERTIES 
-	LINK_FLAGS "/NODEFAULTLIB:libcmt /SUBSYSTEM:WINDOWS"
-	PROJECT_LABEL "Services: Admin Executor Service")
-ENDIF(WIN32)
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+
+TARGET_LINK_LIBRARIES(admin_executor_service
+						${PLATFORM_LINKFLAGS}
+						nelmisc
+						nelnet)
+
+NL_DEFAULT_PROPS(admin_executor_service "NelNS, Services: Admin Executor Service")
+NL_ADD_RUNTIME_FLAGS(admin_executor_service)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS admin_executor_service RUNTIME DESTINATION sbin COMPONENT aes)

@@ -34,7 +34,6 @@
 #	include <process.h>
 #	include <intrin.h>
 #else
-#	include <cmath>
 #	include <unistd.h>
 #	include <sys/types.h>
 #endif
@@ -206,7 +205,11 @@ inline double	isValidDouble (double v)
 #ifdef NL_OS_WINDOWS
 	return _finite(v) && !_isnan(v);
 #else
+#ifdef _STLPORT_VERSION
+	return !isnan(v) && !isinf(v);
+#else
 	return !std::isnan(v) && !std::isinf(v);
+#endif
 #endif
 }
 

@@ -131,7 +131,7 @@ static void	copyMultiLodMeshBaseLod0Infos(CMeshBase::CMeshBaseBuild &dst, const 
 
 // ***************************************************************************
 // Export a mesh
-NLMISC::CSmartPtr<NL3D::IShape> CExportNel::buildShape (INode& node, TimeValue time, const TInodePtrInt *nodeMap, bool buildLods)
+NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodePtrInt *nodeMap, bool buildLods)
 {
 
 	// Is this a multi lod object ?
@@ -139,7 +139,7 @@ NLMISC::CSmartPtr<NL3D::IShape> CExportNel::buildShape (INode& node, TimeValue t
 
 	// Here, we must check what kind of node we can build with this mesh.
 	// For the time, just Triobj is supported.
-	CSmartPtr<IShape> retShape = NULL;
+	NL3D::IShape *retShape = NULL;
 
 	// If skinning, disable skin modifier
 	if (nodeMap)
@@ -206,7 +206,7 @@ NLMISC::CSmartPtr<NL3D::IShape> CExportNel::buildShape (INode& node, TimeValue t
 				else			
 				{
 					// Mesh base ?
-					CSmartPtr<CMeshBase> meshBase = NULL;
+					CMeshBase *meshBase = NULL;
 
 					// Get the node matrix
 					Matrix3 nodeMatrixMax;
@@ -317,8 +317,7 @@ NLMISC::CSmartPtr<NL3D::IShape> CExportNel::buildShape (INode& node, TimeValue t
 
 
 						// Make a CMeshMultiLod mesh object
-						CMeshMultiLod *multiMesh = new CMeshMultiLod;
-						++multiMesh->crefs; // hack
+						CMeshMultiLod *multiMesh = new CMeshMultiLod; // FIXME: there is a delete bug with CMeshMultiLod exported from max!!!
 
 						// Build it
 						multiMesh->build(multiLodBuild);
@@ -461,7 +460,7 @@ NLMISC::CSmartPtr<NL3D::IShape> CExportNel::buildShape (INode& node, TimeValue t
 		enableSkinModifier (node, true);
 
 	// Set the dist max for this shape
-	if (retShape.getPtr() && !multiLodObject && buildLods)
+	if (retShape && !multiLodObject && buildLods)
 	{
 		// Get the dist max for this node
 		float distmax = getScriptAppData (&node, NEL3D_APPDATA_LOD_DIST_MAX, NEL3D_APPDATA_LOD_DIST_MAX_DEFAULT);

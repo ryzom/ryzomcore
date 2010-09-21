@@ -101,18 +101,25 @@ ShapeLookupDirectories += [ EcosystemPath + "/shape_with_coarse_mesh" ]
 ShapeLookupDirectories += [ ContinentPath + "/shape_clodtex_build" ]
 ShapeLookupDirectories += [ ContinentPath + "/shape_with_coarse_mesh" ]
 # ShapeLookupDirectories += [ ContinentName + "/zone_light/water_shapes_lighted" ] huh?
+ShapeLookupDirectories += [ "ecosystems/lacustre/shape_clodtex_build" ] # additional
+ShapeLookupDirectories += [ "ecosystems/lacustre/shape_with_coarse_mesh" ] # additional
 
-# Map lookup directories not yet used
+# Map lookup directories used by shape
 MapLookupDirectories = [ ]
-ShapeLookupDirectories += [ "common/sfx/map_export" ]
-ShapeLookupDirectories += [ "common/sfx/map_uncompressed" ]
-ShapeLookupDirectories += [ "common/construction/map_export" ]
-ShapeLookupDirectories += [ "common/construction/map_uncompressed" ]
-ShapeLookupDirectories += [ EcosystemPath + "/map_export" ]
-ShapeLookupDirectories += [ EcosystemPath + "/map_uncompressed" ]
-ShapeLookupDirectories += [ ContinentPath + "/map_export" ]
-ShapeLookupDirectories += [ ContinentPath + "/map_uncompressed" ]
+MapLookupDirectories += [ "common/sfx/map_export" ]
+MapLookupDirectories += [ "common/sfx/map_uncompressed" ]
+MapLookupDirectories += [ "common/construction/map_export" ]
+MapLookupDirectories += [ "common/construction/map_uncompressed" ]
+MapLookupDirectories += [ EcosystemPath + "/map_export" ]
+MapLookupDirectories += [ EcosystemPath + "/map_uncompressed" ]
+MapLookupDirectories += [ ContinentPath + "/map_export" ]
+MapLookupDirectories += [ ContinentPath + "/map_uncompressed" ]
+MapLookupDirectories += [ "ecosystems/lacustre/map_export" ] # additional
+MapLookupDirectories += [ "ecosystems/lacustre/map_uncompressed" ] # additional
 
+# PacsPrim lookup directories used by ai_wmap
+PacsPrimLookupDirectories = [ ]
+PacsPrimLookupDirectories += [ EcosystemPath + "/pacs_prim" ]
 
 
 # *** EXPORT DIRECTORIES FOR THE BUILD PIPELINE ***
@@ -164,6 +171,10 @@ PsExportDirectory = CommonPath + "/ps"
 # Map directories
 MapBuildDirectory = CommonPath + "/map"
 MapPanoplyBuildDirectory = CommonPath + "/map_panoply"
+MapPanoplyHlsInfoBuildDirectory = CommonPath + "/map_panoply_hls_info"
+MapPanoplyHlsBankBuildDirectory = CommonPath + "/map_panoply_hls_bank"
+MapPanoplyCacheBuildDirectory = CommonPath + "/map_panoply_cache"
+MapTagBuildDirectory = CommonPath + "/map_tag"
 
 # Shape directories
 ShapeClodtexBuildDirectory = CommonPath + "/shape_clodtex_build"
@@ -206,28 +217,35 @@ RbankPreprocBuildDirectory = CommonPath + "/rbank_preproc"
 RbankRetrieversBuildDirectory = CommonPath + "/rbank_retrievers"
 RbankOutputBuildDirectory = CommonPath + "/rbank_output"
 
+# AI Wmap directories
+AiWmapBuildDirectory = CommonPath + "/ai_wmap"
+AiWmapBuildTagDirectory = CommonPath + "/ai_wmap_tag"
+
 
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
 # Map directory
-MapClientDirectory = CommonName + "_maps"
-BitmapClientDirectory = MapClientDirectory
+MapInstallDirectory = CommonName + "_maps"
+BitmapInstallDirectory = MapInstallDirectory
 
 # Shape directory
-ShapeClientDirectory = CommonName + "_shapes"
+ShapeInstallDirectory = CommonName + "_shapes"
 
 # Shape lightmaps directory
-LightmapClientDirectory = ShapeClientDirectory
+LightmapInstallDirectory = ShapeInstallDirectory
 
 # Ig directory
-IgClientDirectory = CommonName + "_ig"
+IgInstallDirectory = CommonName + "_ig"
 
 # Zone directory
-ZoneClientDirectory = CommonName + "_zones"
-WaterMapsClientDirectory = ZoneClientDirectory
+ZoneInstallDirectory = CommonName + "_zones"
+WaterMapsInstallDirectory = ZoneInstallDirectory
 
 # PACS directory
-PacsClientDirectory = CommonName + "_pacs"
+PacsInstallDirectory = CommonName + "_pacs"
 
 # PS directory
-PsClientDirectory = CommonName + "_ig"
+PsInstallDirectory = CommonName + "_ig"
+
+# AI Wmap directory
+AiWmapInstallDirectory = CommonName + "_ai"

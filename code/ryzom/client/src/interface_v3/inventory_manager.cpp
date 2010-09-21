@@ -2088,6 +2088,7 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 		if (pIS->Id.toString().substr(0, 6) == "rpjob_")
 			bDisplay = false;
 	}
+
 	return bDisplay;
 }
 

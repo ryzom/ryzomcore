@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TYPE Type="Color" UI="NonEditableCombo" Revision="$Revision: 1.6 $" State="modified">
+<TYPE Type="String" UI="NonEditableCombo" Revision="$Revision: 1.6 $" State="modified">
   <DEFINITION Label="Raw Material for Blade" Value="MpL"/>
   <DEFINITION Label="Raw Material for Hammer" Value="MpH"/>
   <DEFINITION Label="Raw Material for Point" Value="MpP"/>
@@ -28,5 +28,6 @@
   <DEFINITION Label="Raw Material for Magic Focus" Value="MpMF"/>
   <LOG>Tue Aug 27 10:46:07 2002 (fleury) Type Predef = 
 Tue Aug 27 10:46:07 2002 (fleury) Type Type = String
-Mon Oct 28 11:51:02 2002 (fleury) Type Predef = </LOG>
+Mon Oct 28 11:51:02 2002 (fleury) Type Predef = 
+Mon Sep 20 08:56:01 2010 (kervala) Type Type = String</LOG>
 </TYPE>

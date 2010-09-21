@@ -44,24 +44,24 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> Install shape <<<")
-clientPath = ClientDataDirectory + "/" + ShapeClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + ShapeInstallDirectory
+mkPath(log, installPath)
 mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, clientPath, ".shape")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, installPath, ".shape")
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, clientPath, ".shape")
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, clientPath, ".dds")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, installPath, ".shape")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory, installPath, ".dds")
 
 mkPath(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory, clientPath, ".anim")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory, installPath, ".anim")
 
 # ls anim | grep ".anim" >> $client_directory/auto_animations_list.txt
 
 printLog(log, ">>> Install shape lightmaps <<<")
-clientPath = ClientDataDirectory + "/" + LightmapClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + LightmapInstallDirectory
+mkPath(log, installPath)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory, clientPath, ".tga")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory, installPath, ".tga")
 
 printLog(log, "")
 log.close()

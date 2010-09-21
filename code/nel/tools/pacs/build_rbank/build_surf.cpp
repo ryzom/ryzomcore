@@ -271,13 +271,6 @@ public:
 /*
  * CSurfElement methods
  *
- *
- *
- *
- *
- *
- *
- *
  */
 
 
@@ -401,20 +394,8 @@ CAABBox	NLPACS::CSurfElement::getBBox() const
 	return box;
 }
 
-
-
-
-
-
 /*
  * CComputableSurfaceBorder methods implementation
- *
- *
- *
- *
- *
- *
- *
  *
  */
 
@@ -502,33 +483,8 @@ void	NLPACS::CComputableSurfaceBorder::smooth(float val)
 		nlinfo("smoothed border %d-%d: %d -> %d", Left, Right, before, after);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  * CComputableSurface methods implementation
- *
- *
- *
- *
- *
- *
- *
  *
  */
 void	NLPACS::CComputableSurface::followBorder(CZoneTessellation *zoneTessel, CSurfElement *first, uint edge, uint sens, vector<CVector> &vstore, bool &loop)

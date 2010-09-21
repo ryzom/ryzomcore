@@ -157,4 +157,3 @@ EGSPD::CPeople::TPeople CHairSet::getPeopleFromHairItemID(uint id) const
 	}
 	return EGSPD::CPeople::EndPeople;
 }
-

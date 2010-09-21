@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + SwtClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + SwtInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install skeleton weigths <<<")
 mkPath(log, ExportBuildDirectory + "/" + SwtExportDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SwtExportDirectory, clientPath)
+copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SwtExportDirectory, installPath)
 
 printLog(log, "")
 log.close()

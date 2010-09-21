@@ -50,10 +50,61 @@ PanoplyMaker = findTool(log, ToolDirectories, PanoplyMakerTool, ToolSuffix)
 HlsBankMaker = findTool(log, ToolDirectories, HlsBankMakerTool, ToolSuffix)
 printLog(log, "")
 
-printLog(log, ">>> Panoply <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+buildPanoplyTagPath = ExportBuildDirectory + "/" + MapTagBuildDirectory + "/build_panoply.tag"
+buildCompressTagPath = ExportBuildDirectory + "/" + MapTagBuildDirectory + "/build_compress.tag"
+
+if MapPanoplyFileList != None:
+	printLog(log, ">>> Panoply build <<<")
+	mkPath(log, ExportBuildDirectory + "/" + MapTagBuildDirectory)
+	directoriesCheck = [ ]
+	for panoplyCfg in MapPanoplySourceDirectories:
+		directoriesCheck += [ panoplyCfg[2] ]
+		directoriesCheck += [ panoplyCfg[3] ]
+	if (needUpdateMultiDirNoSubdirFile(log, DatabaseDirectory, directoriesCheck, buildPanoplyTagPath)):
+		mkPath(log, ActiveProjectDirectory + "/generated")
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory)
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory)
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory)
+		printLog(log, "")
+		printLog(log, ">>> Move panoply and hls to cache <<<")
+		removeFilesDirsRecursive(log, ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory)
+		moveDir(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory, ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory)
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyBuildDirectory)
+		moveFilesNoSubdir(log, ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory, ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory)
+		printLog(log, "")
+		for panoplyCfg in MapPanoplySourceDirectories:
+			printLog(log, ">>> Panoply " + panoplyCfg[1] + " <<<")
+			mkPath(log, DatabaseDirectory + "/" + panoplyCfg[2])
+			mkPath(log, DatabaseDirectory + "/" + panoplyCfg[3])
+			cfg = open(ActiveProjectDirectory + "/generated/current_panoply.cfg", "w")
+			cfgCommon = open(ActiveProjectDirectory + "/" + panoplyCfg[0], "r")
+			cfgRace = open(ActiveProjectDirectory + "/" + panoplyCfg[1], "r")
+			cfg.write("\n")
+			cfg.write("// CURRENT PANOPLY CONFIGURATION\n")
+			cfg.write("\n")
+			cfg.write("input_path = \"" + DatabaseDirectory + "/" + panoplyCfg[2] + "\";\n")
+			cfg.write("additionnal_paths = \"" + DatabaseDirectory + "/" + panoplyCfg[3] + "\";\n")
+			cfg.write("output_path = \"" + ExportBuildDirectory + "/" + MapPanoplyBuildDirectory + "\";\n")
+			cfg.write("hls_info_path = \"" + ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory + "\";\n")
+			cfg.write("cache_path = \"" + ExportBuildDirectory + "/" + MapPanoplyCacheBuildDirectory + "\";\n")
+			cfg.write("\n")
+			cfg.write("/////////////////////////////////////////////\n")
+			cfg.write("\n")
+			for line in cfgCommon:
+				cfg.write(line)
+			for line in cfgRace:
+				cfg.write(line)
+			cfg.close()
+			cfgCommon.close()
+			cfgRace.close()
+			subprocess.call([ PanoplyMaker, ActiveProjectDirectory + "/generated/current_panoply.cfg" ])
+			printLog(log, "")
+		tagFile = open(buildPanoplyTagPath, "w")
+		tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
+		tagFile.close()
+	else:
+		printLog(log, "SKIP *.*")
+		printLog(log, "")
 
 printLog(log, ">>> Compress TGA and PNG maps to DDS <<<")
 if TgaToDds == "":
@@ -61,34 +112,55 @@ if TgaToDds == "":
 elif ExecTimeout == "":
 	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
 else:
-	sourcePath = ExportBuildDirectory + "/" + MapExportDirectory
-	mkPath(log, sourcePath)
 	destPath = ExportBuildDirectory + "/" + MapBuildDirectory
 	mkPath(log, destPath)
-	files = findFilesNoSubdir(log, sourcePath, ".tga")
-	for file in files:
-		sourceFile = sourcePath + "/" + file
-		destFile = destPath + "/" + os.path.basename(file)[0:-len(".tga")] + ".dds"
-		if needUpdateLogRemoveDest(log, sourceFile, destFile):
-			subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
-	files = findFilesNoSubdir(log, sourcePath, ".png")
-	for file in files:
-		sourceFile = sourcePath + "/" + file
-		destFile = destPath + "/" + os.path.basename(file)[0:-len(".png")] + ".dds"
-		if needUpdateLogRemoveDest(log, sourceFile, destFile):
-			subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
-	copyFilesExtNoSubdirIfNeeded(log, sourcePath, destPath, ".dds")
+	sourcePaths = [ ExportBuildDirectory + "/" + MapExportDirectory ]
+	writeTag = 0
+	if MapPanoplyFileList != None:
+		if needUpdate(log, buildPanoplyTagPath, buildCompressTagPath):
+			sourcePaths += [ ExportBuildDirectory + "/" + MapPanoplyBuildDirectory ]
+		else:
+			printLog(log, "SKIP " + ExportBuildDirectory + "/" + MapPanoplyBuildDirectory + "/*.*")
+	for sourcePath in sourcePaths:
+		mkPath(log, sourcePath)
+		files = os.listdir(sourcePath)
+		len_tga_png = len(".tga")
+		len_dds = len(".dds")
+		for fileName in files:
+			if isLegalFileName(fileName):
+				sourceFile = sourcePath + "/" + fileName
+				if os.path.isfile(sourceFile):
+					if (fileName[-len_tga_png:].lower() == ".tga") or (fileName[-len_tga_png:].lower() == ".png"):
+						destFile = destPath + "/" + os.path.basename(fileName)[0:-len_tga_png] + ".dds"
+						if needUpdateLogRemoveDest(log, sourceFile, destFile):
+							subprocess.call([ ExecTimeout, str(MapsBuildTimeout), TgaToDds, sourceFile, "-o", destFile, "-m", "-r" + str(ReduceBitmapFactor) ])
+							writeTag = 1
+					elif fileName[-len_dds:].lower() == ".dds":
+						copyFileIfNeeded(log, sourceFile, destPath + "/" + os.path.basename(fileName))
+						writeTag = 1
+				elif not os.path.isdir(sourceFile):
+					printLog(log, "FAIL ?! file not dir or file ?! " + sourceFile)
+	if writeTag:
+		tagFile = open(buildCompressTagPath, "w")
+		tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
+		tagFile.close()
 printLog(log, "")
 
-printLog(log, ">>> Compress panoply maps to DDS <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
-
-printLog(log, ">>> Build the HLSBank (if hlsInfo present, and if build wanted) <<<")
-printLog(log, "********************************")
-printLog(log, "********      TODO      ********")
-printLog(log, "********************************")
+if MapHlsBankFileName != None:
+	printLog(log, ">>> Build the HLSBank <<<")
+	if HlsBankMaker == "":
+		toolLogFail(log, HlsBankMakerTool, ToolSuffix)
+	else:
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory)
+		mkPath(log, ExportBuildDirectory + "/" + MapPanoplyHlsBankBuildDirectory)
+		hlsBankPath = ExportBuildDirectory + "/" + MapPanoplyHlsBankBuildDirectory + "/" + MapHlsBankFileName
+		if (needUpdate(log, buildPanoplyTagPath, hlsBankPath) or needUpdate(log, buildCompressTagPath, hlsBankPath)):
+			if os.path.isfile(hlsBankPath):
+				os.remove(hlsBankPath)
+			subprocess.call([ HlsBankMaker, ExportBuildDirectory + "/" + MapPanoplyHlsInfoBuildDirectory, hlsBankPath ])
+		else:
+			printLog(log,"SKIP " + hlsBankPath)
+	printLog(log, "")
 
 log.close()
 

@@ -46,9 +46,9 @@ printLog(log, "")
 printLog(log, ">>> Install %PreGenProcessName% <<<")
 exportPath = ExportBuildDirectory + "/" + %PreGenExportDirectoryVariable%
 mkPath(log, exportPath)
-clientPath = ClientDataDirectory + "/" + %PreGenClientDirectoryVariable%
-mkPath(log, clientPath)
-copyFilesExtNoSubdirIfNeeded(log, exportPath, clientPath, ".%PreGenFileExtension%")
+installPath = InstallDirectory + "/" + %PreGenInstallDirectoryVariable%
+mkPath(log, installPath)
+copyFilesExtNoSubdirIfNeeded(log, exportPath, installPath, ".%PreGenFileExtension%")
 
 printLog(log, "")
 log.close()

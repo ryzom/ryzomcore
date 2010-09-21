@@ -1,11 +1,13 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(sno_position WIN32 ${SRC})
+ADD_EXECUTABLE(snowballs_position_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${NELMISC_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(snowballs_position_service
+						${PLATFORM_LINKFLAGS}
+						nelmisc
+						nelnet)
 
-TARGET_LINK_LIBRARIES(sno_position ${PLATFORM_LINKFLAGS} ${NELMISC_LIBRARY} ${NELNET_LIBRARY})
-NL_DEFAULT_PROPS(sno_position "Services: Snowballs Position")
-NL_ADD_RUNTIME_FLAGS(sno_position)
+NL_DEFAULT_PROPS(snowballs_position_service "Snowballs, Services: Position Service")
+NL_ADD_RUNTIME_FLAGS(snowballs_position_service)
 
-INSTALL(TARGETS sno_position RUNTIME DESTINATION sbin COMPONENT services)
+INSTALL(TARGETS snowballs_position_service RUNTIME DESTINATION sbin COMPONENT services)

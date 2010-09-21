@@ -43,12 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-clientPath = ClientDataDirectory + "/" + BankClientDirectory
-mkPath(log, clientPath)
+installPath = InstallDirectory + "/" + BankInstallDirectory
+mkPath(log, installPath)
 
 printLog(log, ">>> Install smallbank <<<")
 mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SmallbankExportDirectory, clientPath, ".smallbank")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SmallbankExportDirectory, installPath, ".smallbank")
 
 printLog(log, "")
 log.close()

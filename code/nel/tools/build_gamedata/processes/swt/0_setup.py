@@ -57,7 +57,7 @@ printLog(log, ">>> Setup build directories <<<")
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, ClientDataDirectory + "/" + SwtClientDirectory)
+mkPath(log, InstallDirectory + "/" + SwtInstallDirectory)
 
 log.close()
 
