@@ -65,7 +65,8 @@ void alExtInitDevice(ALCdevice *device)
 			AlExtXRam = false;
 		}
 	}
-	
+
+#ifndef NL_STATIC
 	// EFX
 	if ((AlExtEfx = (alcIsExtensionPresent(device, "ALC_EXT_EFX") == ALC_TRUE)) == true)
 	{
@@ -111,6 +112,7 @@ void alExtInitDevice(ALCdevice *device)
 			AlExtEfx = false;
 		}
 	}
+#endif
 }
 
 #if EAX_AVAILABLE
@@ -134,6 +136,7 @@ EAXGetBufferMode eaxGetBufferMode = NULL;
 // ALC_EXT_EFX
 bool AlExtEfx = false;
 // effect objects
+#ifndef NL_STATIC
 LPALGENEFXOBJECTS alGenEffects = NULL;
 LPALDELETEEFXOBJECTS alDeleteEffects = NULL;
 LPALISEFXOBJECT alIsEffect = NULL;
@@ -169,7 +172,7 @@ LPALGETEFXOBJECTI alGetAuxiliaryEffectSloti = NULL;
 LPALGETEFXOBJECTIV alGetAuxiliaryEffectSlotiv = NULL;
 LPALGETEFXOBJECTF alGetAuxiliaryEffectSlotf = NULL;
 LPALGETEFXOBJECTFV alGetAuxiliaryEffectSlotfv = NULL;
-
+#endif
 }
 
 /* end of file */
