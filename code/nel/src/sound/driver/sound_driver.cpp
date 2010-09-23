@@ -41,7 +41,11 @@ using namespace NLMISC;
 #	define NL_DSOUND_AVAILABLE 0
 #	define NL_XAUDIO2_AVAILABLE 0
 #elif defined( NL_OS_UNIX )
+#ifdef NL_STATIC
+#	define NL_FMOD_AVAILABLE 0
+#else
 #	define NL_FMOD_AVAILABLE 1
+#endif
 #	define NL_OPENAL_AVAILABLE 1
 #	define NL_DSOUND_AVAILABLE 0
 #	define NL_XAUDIO2_AVAILABLE 0
