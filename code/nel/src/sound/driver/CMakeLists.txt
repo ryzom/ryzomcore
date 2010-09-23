@@ -14,7 +14,7 @@ TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc ${VORBIS_LIBRARY} ${VORBISFILE_LIB
 SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
 NL_ADD_RUNTIME_FLAGS(nelsnd_lowlevel)
-NL_ADD_STATIC_VID_DRIVERS(nelsnd_lowlevel)
+NL_ADD_STATIC_SND_DRIVERS(nelsnd_lowlevel)
 
 NL_ADD_LIB_SUFFIX(nelsnd_lowlevel)
 
