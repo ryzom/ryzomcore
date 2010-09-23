@@ -104,6 +104,8 @@ std::string	CDbMessage::buildLogString(const CDBDescriptionParser& description) 
 						else if (typenode.ByteSize == 4)	result += NLMISC::toString(*(uint32*)dataptr);
 					}
 					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -165,6 +167,8 @@ void	CDbMessage::getHRContent(const CDBDescriptionParser& description, std::stri
 					else if (column.ByteSize == 2)	strValue = NLMISC::toString(asUint16());
 					else if (column.ByteSize == 4)	strValue = NLMISC::toString(asUint32());
 				}
+				break;
+			default:
 				break;
 			}
 

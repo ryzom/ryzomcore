@@ -556,10 +556,10 @@ inline
 CStringSeparator::CStringSeparator(const std::string &str, const std::string &motif)
 	:_Index(0)
 	,_NewIndex(0)
-	,_Str(str)
-	,_Motif(motif)
 	,_Delta(0)
 	,_StartIndex(0)			
+	,_Str(str)
+	,_Motif(motif)
 {
 }
 inline

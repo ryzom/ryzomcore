@@ -418,6 +418,8 @@ bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
 			return false;
 		}
 		break;
+	default:
+		break;
 	}
 
 	return true;
@@ -726,6 +728,8 @@ bool	CDBDescriptionParser::buildColumns(uint tableIndex)
 				column.ByteSize = 4;	/// \todo remove hardcoded value
 				table.Columns.push_back(column);
 			}
+			break;
+		default:
 			break;
 		}
 	}

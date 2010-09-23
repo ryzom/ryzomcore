@@ -143,9 +143,9 @@ bool CAliasTreeOwner::CAliasDiff::operator()(CAliasTreeOwner const* other) const
 
 inline
 CAliasTreeOwner::CAliasTreeOwner(CAIAliasDescriptionNode* aliasTree)
-: _AliasTree(aliasTree)
-, _Alias(0)
+: _Alias(0)
 , _Name(std::string())
+, _AliasTree(aliasTree)
 {
 	if (aliasTree)
 	{
@@ -159,9 +159,9 @@ CAliasTreeOwner::CAliasTreeOwner(CAIAliasDescriptionNode* aliasTree)
 
 inline
 CAliasTreeOwner::CAliasTreeOwner(uint32	alias, std::string const& name)
-: _AliasTree(NULL)
-, _Alias(alias)
+: _Alias(alias)
 , _Name(name)
+, _AliasTree(NULL)
 {
 	CAliasTreeOwnerLocator::getInstance()->addEntity(_Alias, _Name, this);
 }

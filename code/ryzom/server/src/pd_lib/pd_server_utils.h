@@ -267,7 +267,7 @@ class CMixedStreamFile : public NLMISC::IStream
 public:
 
 	/// Constructor
-	CMixedStreamFile() : _File(NULL), NLMISC::IStream(false)
+	CMixedStreamFile() : NLMISC::IStream(false), _File(NULL)
 	{
 	}
 

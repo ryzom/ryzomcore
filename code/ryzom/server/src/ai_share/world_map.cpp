@@ -125,8 +125,8 @@ private:
 
 inline
 CAStarHeapNode::CAStarHeapNode(CTopology::TTopologyRef Ref, uint Father, float Distance, bool Open)
-: _Ref(Ref)
-, CABaseStarNode(Father, Distance, Open)
+: CABaseStarNode(Father, Distance, Open)
+, _Ref(Ref)
 {
 }
 
@@ -197,7 +197,7 @@ class	CInsideAStarHeapNode	:	public	CABaseStarNode
 public:
 	friend	class	CAStarNode;
 
-	explicit	CInsideAStarHeapNode(const	CAStarNode	&node, uint Father, CDirection Direction, float Distance, bool Open) : _Node(node),	_Direction(Direction), CABaseStarNode(Father,Distance,Open)
+	explicit	CInsideAStarHeapNode(const	CAStarNode	&node, uint Father, CDirection Direction, float Distance, bool Open) : CABaseStarNode(Father,Distance,Open), _Direction(Direction), _Node(node)
 	{
 	}
 
@@ -924,6 +924,9 @@ void	CWorldMap::countCells(uint &compute, uint &white, uint &simple, uint &multi
 				}
 				return	true;
 			}
+			break;
+		default:
+			break;
 
 		}
 		return	false;
@@ -1126,6 +1129,8 @@ void	CWorldMap::countCells(uint &compute, uint &white, uint &simple, uint &multi
 				}
 				return	false;
 			}
+		default:
+			break;
 
 		}
 		return	false;
@@ -1205,7 +1210,8 @@ void	CWorldMap::countCells(uint &compute, uint &white, uint &simple, uint &multi
 				}
 				break;
 			}
-
+		default:
+			break;
 		}
 		return	false;
 	}
@@ -1319,7 +1325,8 @@ void	CWorldMap::countCells(uint &compute, uint &white, uint &simple, uint &multi
 				temp.setPosS(pos);
 				return	true;
 			}
-
+		default:
+			break;
 		}
 		return	false;
 	}

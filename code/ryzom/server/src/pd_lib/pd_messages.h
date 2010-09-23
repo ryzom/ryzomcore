@@ -1016,7 +1016,7 @@ class CUpdateLog
 {
 public:
 
-	CUpdateLog() : UpdateId(0xffffffff), _Updates(NULL), _OwnUpdates(false)		{ }
+	CUpdateLog() : UpdateId(0xffffffff), _OwnUpdates(false), _Updates(NULL)		{ }
 
 	~CUpdateLog();
 
@@ -1373,12 +1373,6 @@ inline uint32	CDbMessage::getMessageHeaderSize()
 		size += sizeof(_Value3[0]);
 		break;
 
-	case AddString:
-		break;
-
-	case UnmapString:
-		break;
-
 	case ReleaseRow:
 		size += sizeof(_ObjectIndex.Table)+sizeof(_ObjectIndex.Row);
 		break;
@@ -1388,10 +1382,7 @@ inline uint32	CDbMessage::getMessageHeaderSize()
 		size += 2;
 		break;
 
-	case PushContext:
-		break;
-
-	case PopContext:
+	default:
 		break;
 	}
 

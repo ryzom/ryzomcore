@@ -241,12 +241,12 @@ public:
 	{
 	public:
 		inline CCellTblIteratorLinear():
-		_matrix(NULL), _tbl(NULL), _x(0), _y(0), _runLengthRemaining(0) 
+		_x(0), _y(0), _matrix(NULL), _tbl(NULL), _runLengthRemaining(0) 
 		{
 		}
 		
 		inline CCellTblIteratorLinear(const CAIEntityMatrix<T> *matrix,const CAIEntityMatrixIteratorTblLinear *tbl,const	CAIVector	&pos):
-		_matrix(matrix), _tbl(tbl), _x((uint16)pos.x().asInt16Meters()), _y((uint16)pos.y().asInt16Meters()) 
+		_x((uint16)pos.x().asInt16Meters()), _y((uint16)pos.y().asInt16Meters()), _matrix(matrix), _tbl(tbl) 
 		{
 #ifdef NL_DEBUG
 			nlassert(_tbl!=NULL);

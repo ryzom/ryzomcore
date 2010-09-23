@@ -26,7 +26,7 @@ CBrain::CBrain(CMood &personality) : CMood(personality)
 	_UpdateEvery = 0;
 }
 
-CBrain::CBrain(const CBrain &c)
+CBrain::CBrain(const CBrain &c) : CMood()
 {
 	_Personality = c._Personality;
 	_RealTime = c._RealTime;

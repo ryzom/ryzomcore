@@ -676,7 +676,8 @@ void CGrpProfileBandit::beginProfile()
 	else
 	{
 		// look for aggro range parameter or set a default value
-		float aggroRangeFloat;
+		float aggroRangeFloat = 0.f;
+
 		if (!_Grp->getProfileParameter("aggro range", aggroRangeFloat))
 			_AggroRange =static_cast<uint32>( CGrpProfileBanditFactory::getDefaultBanditAggroRange() );
 		else
@@ -991,7 +992,7 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 	}
 	
 	string s;
-	float f;
+	float f = 0.f;
 	if (_Grp->getProfileParameter("faction", s) && !s.empty())
 	{
 		factionIndex = CStaticFames::getInstance().getFactionIndex(s);
@@ -1703,10 +1704,10 @@ CGrpProfileFollowRoute::CGrpProfileFollowRoute(CProfileOwner *owner)
 
 CGrpProfileFollowRoute::CGrpProfileFollowRoute(CProfileOwner *owner,const std::vector<CShape::TPosition>	&geometry,const	TVerticalPos	&verticalPos, bool dontSendEvent)
 : CMoveProfile(owner)
-, _Geometry(&geometry)
-, _GeometryComeFromState(false)
-, _VerticalPos(verticalPos)
 , _PathCont(NLMISC::safe_cast<CSpawnGroup*>(owner)->getPersistent().getAStarFlag())
+, _GeometryComeFromState(false)
+, _Geometry(&geometry)
+, _VerticalPos(verticalPos)
 , _DontSendEvent(dontSendEvent)
 {
 	PROFILE_LOG("group", "follow_route", "ctor2", "");
@@ -2402,8 +2403,8 @@ std::string CGrpProfileIdle::getOneLineInfoString() const
 
 CGrpProfileWander::CGrpProfileWander(CProfileOwner* owner, CNpcZone const* npcZone)
 : CMoveProfile(owner)
-, _NpcZone(npcZone)
 , _Social(false)
+, _NpcZone(npcZone)
 {
 	PROFILE_LOG("group", "wander", "ctor", "");
 	_BotStandProfileType = BOT_STAND_AT_POS;
@@ -2748,8 +2749,8 @@ std::string CGrpProfileWander::getOneLineInfoString() const
 
 CGrpProfileWanderNoPrim::CGrpProfileWanderNoPrim(CProfileOwner* owner, NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> const& npcZone)
 : CMoveProfile(owner)
-, _NpcZone(npcZone)
 , _Social(false)
+, _NpcZone(npcZone)
 {
 	PROFILE_LOG("group", "wander", "ctor", "");
 	_BotStandProfileType = BOT_STAND_AT_POS;
@@ -3043,10 +3044,10 @@ CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(RYAI_MAP_CRUNCH::
 }
 
 CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos verticalPos, CAIPos position, RYAI_MAP_CRUNCH::TAStarFlag	flag) 
-: _BotAtDest(false)
+: _PathCont(flag)
 , _Position(position)
 , _VerticalPos(verticalPos)
-, _PathCont(flag)
+, _BotAtDest(false)
 {
 	_PathCont.setDestination(verticalPos, position);
 }
@@ -4019,9 +4020,9 @@ CBotProfileMoveTo::CBotProfileMoveTo(AITYPES::TVerticalPos verticalPos, RYAI_MAP
 : CAIBaseProfile()
 , _VerticalPos(verticalPos)
 , _Dest(dest)
-, _Bot(NLMISC::safe_cast<CSpawnBotNpc*>(owner))
-, _PathPos(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->theta())
 , _PathCont(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->getAStarFlag())
+, _PathPos(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->theta())
+, _Bot(NLMISC::safe_cast<CSpawnBotNpc*>(owner))
 {
 	PROFILE_LOG("bot", "move_to", "ctor", "");
 #ifdef NL_DEBUG_PTR
@@ -4095,11 +4096,11 @@ std::string CBotProfileMoveTo::getOneLineInfoString() const
 
 CBotProfileFollowPos::CBotProfileFollowPos(CBotProfileFollowPos const& other)
 : CAIBaseProfile()
-, _PathCont(const_cast<CBotProfileFollowPos&>(other)._PathCont)
+, _PathPos(const_cast<CBotProfileFollowPos&>(other)._PathPos._Angle) // Just to debug...
 , _Bot(const_cast<CBotProfileFollowPos&>(other)._Bot)
+, _PathCont(const_cast<CBotProfileFollowPos&>(other)._PathCont)
 , _MaxWalkSpeed(FLT_MAX)
 , _MaxRunSpeed(FLT_MAX)
-, _PathPos(const_cast<CBotProfileFollowPos&>(other)._PathPos._Angle) // Just to debug...
 , _Stop(false)
 {
 	PROFILE_LOG("bot", "follow_pos", "ctor", "");
@@ -4110,11 +4111,11 @@ CBotProfileFollowPos::CBotProfileFollowPos(CBotProfileFollowPos const& other)
 
 CBotProfileFollowPos::CBotProfileFollowPos(CPathCont* pathCont, CProfileOwner* owner)
 : CAIBaseProfile()
-, _PathCont(pathCont)
+, _PathPos(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->theta())
 , _Bot(NLMISC::safe_cast<CSpawnBotNpc*>(owner))
+, _PathCont(pathCont)
 , _MaxWalkSpeed(FLT_MAX)
 , _MaxRunSpeed(FLT_MAX)
-, _PathPos(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->theta())
 , _Stop(false)
 {
 	PROFILE_LOG("bot", "follow_pos", "ctor", "");
@@ -4530,9 +4531,9 @@ CGrpProfileStandOnVertices::CBotPositionner::CBotPositionner(RYAI_MAP_CRUNCH::TA
 }
 
 CGrpProfileStandOnVertices::CBotPositionner::CBotPositionner(uint32 geomIndex, RYAI_MAP_CRUNCH::TAStarFlag flags)
-: _BotAtDest(false)
+: _PathCont(flags)
 , _GeomIndex(geomIndex)
-, _PathCont(flags)
+, _BotAtDest(false)
 {
 }
 

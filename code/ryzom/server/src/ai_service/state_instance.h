@@ -583,9 +583,9 @@ void CStateInstance::setNextPunctualState(CAIState* state)
 inline
 CPersistentStateInstance::CPersistentStateInstance(CStateMachine& reactionContainer)
 : CKeyWordOwner()
+, CStateInstance(NULL)
 , _StartState()
 , _Container(reactionContainer)
-, CStateInstance(NULL)
 {
 }
 

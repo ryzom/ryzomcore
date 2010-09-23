@@ -23,8 +23,8 @@
 #include "module_core.h"
 #include "module_utils.h"
 
-class ::IModuleCore;
-class ::IModule;
+class IModuleCore;
+class IModule;
 
 /**
  * A module parent is a class encapsulating the modules contained in a module core

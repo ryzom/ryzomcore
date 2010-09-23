@@ -194,7 +194,7 @@ bool buildLMConts(const std::string &worldSheet, const std::string &primitivesPa
 
 
 						// get alias and region name
-						uint32 alias;
+						uint32 alias = 0;
 						string primName, primAlias;
 						vGenRes[i]->getPropertyByName("name", primName);
 

@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 
 	CSheetId::init(false);
 
-	for(int f = 0; f < filenames.size(); f++)
+	for(uint f = 0; f < filenames.size(); f++)
 	{
 		fileName = filenames[f];
 
@@ -277,6 +277,8 @@ int main(int argc, char *argv[])
 				goto failureRead;
 			if (!pdr.writeToTxtFile(outputFileName.c_str(), CPersistentDataRecord::LINES_STRING))
 				goto failureWrite;
+			break;
+		default:
 			break;
 		}
 
