@@ -32,6 +32,7 @@
 #include <nel/misc/variable.h>
 #endif
 
+using namespace std;
 using namespace CLFECOMMON;
 using namespace NLMISC;
 using namespace NLNET;

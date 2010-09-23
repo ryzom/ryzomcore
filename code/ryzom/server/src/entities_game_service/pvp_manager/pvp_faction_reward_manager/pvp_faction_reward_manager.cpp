@@ -30,7 +30,7 @@
 #include "phrase_manager/phrase_utilities_functions.h"
 //#include "creature_manager/creature_manager.h"
 
-
+using namespace std;
 using namespace EFFECT_FAMILIES;
 using namespace NLLIGO;
 using namespace NLMISC;
@@ -66,7 +66,7 @@ CPVPFactionRewardManager::CPVPFactionRewardManager()
 //----------------------------------------------------------------------------
 
 void CPVPFactionRewardManager::_BuildTotemBasesRec( const IPrimitive* prim,
-												   map<CTotemBase*, set<string> >& neighboursNames,
+												   std::map<CTotemBase*, set<string> >& neighboursNames,
 													map<std::string, CTotemBase*>& totemBasesPerName )
 {
 	if ( !prim )

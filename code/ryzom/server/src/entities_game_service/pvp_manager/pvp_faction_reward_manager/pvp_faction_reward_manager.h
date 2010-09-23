@@ -22,9 +22,6 @@
 #include "nel/ligo/primitive.h"
 #include "game_share/effect_families.h"
 
-using namespace std;
-using namespace EFFECT_FAMILIES;
-
 class CCharacter;
 class CSEffect;
 class CTotemBase;
@@ -52,7 +49,7 @@ class CPVPFactionRewardManager
 {
 	DECLARE_PERSISTENCE_METHODS
 public :
-	typedef vector<int> TPossessionsPerEffect;
+	typedef std::vector<int> TPossessionsPerEffect;
 	
 	/// Totems levels with the number of totems needed to reach them
 	enum TotemLevel
@@ -65,7 +62,7 @@ public :
 	};
 
 	/// Values of each effects
-	static sint32 EffectValues[ EndTotemEffects+1 ];
+	static sint32 EffectValues[ EFFECT_FAMILIES::EndTotemEffects+1 ];
 
 	/// Returns the totem base for a given region using its ID
 	const CTotemBase* getTotemBaseFromId( uint16 regionId ) { return _GetTotemBaseFromId( regionId ); }
@@ -91,12 +88,12 @@ private :
 
 	/// Get the effects a character would get on a totem
 	void	_GetTotemsEffectsRec( CCharacter* user, CTotemBase* pTotem, 
-		                          vector<CSEffect*>& outEffects, vector<CTotemBase*>& processed );
+		                          std::vector<CSEffect*>& outEffects, std::vector<CTotemBase*>& processed );
 	/// Remove all totem effects from a given player
 	void	_removeTotemsEffects( CCharacter* user );
 
 	/// Totem bases sorted by region
-	map<TAIAlias, CTotemBase*>	_TotemBasesPerRegion;
+	std::map<TAIAlias, CTotemBase*>	_TotemBasesPerRegion;
 
 	/// Number of totems
 	uint32						_NbTotems;
@@ -106,8 +103,8 @@ private :
 
 	/// Build the totem bases using the a LIGO primitive
 	void	_BuildTotemBasesRec( const NLLIGO::IPrimitive* prim,
-		                         map<CTotemBase*, std::set<std::string> >& neighboursNames,
-							     map<std::string, CTotemBase*>& totemBasesPerName );
+		                         std::map<CTotemBase*, std::set<std::string> >& neighboursNames,
+							     std::map<std::string, CTotemBase*>& totemBasesPerName );
 
 	/// Have the totem bases been setup ?
 	bool				_InitDone;
@@ -146,7 +143,7 @@ public :
 	bool destroyTotem( uint16 regionIndex, TDataSetRow killerRowId );
 
 	/// Get the list of reward effects for a character depending on its coordinates
-	vector<CSEffect*> getTotemsEffects( CCharacter* user, std::vector<CTotemBase*>& processed );
+	std::vector<CSEffect*> getTotemsEffects( CCharacter* user, std::vector<CTotemBase*>& processed );
 
 	/// Give totem rewards to a player
 	void giveTotemsEffects( CCharacter* user );
@@ -176,7 +173,7 @@ public :
 	PVP_CLAN::TPVPClan getRegionOwner( uint16 regionId );
 
 	/// send event message to ai
-	void sendEventToAI( const CTotemBase * totem, const string& event );
+	void sendEventToAI( const CTotemBase * totem, const std::string& event );
 
 	/// send message when spire is attacked
 	void spireAttacked( CCharacter * actor, CCreature * spire );

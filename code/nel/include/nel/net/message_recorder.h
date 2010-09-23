@@ -28,9 +28,6 @@
 #include <queue>
 #include <string>
 
-using namespace std;
-
-
 namespace NLNET {
 
 
@@ -41,10 +38,10 @@ enum TNetworkEvent { Sending, Receiving, Connecting, ConnFailing, Accepting, Dis
 
 
 /// TNetworkEvent -> string
-string EventToString( TNetworkEvent e );
+std::string EventToString( TNetworkEvent e );
 
 /// string -> TNetworkEvent
-TNetworkEvent StringToEvent( string& s );
+TNetworkEvent StringToEvent( std::string& s );
 
 
 /*
@@ -65,7 +62,7 @@ struct TMessageRecord
 		nlassert( stream.stringMode() );
 
 		uint32 len;
-		string s_event;
+		std::string s_event;
 		stream.serial( UpdateCounter );
 		if ( stream.isReading() )
 		{
