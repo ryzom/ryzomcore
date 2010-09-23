@@ -198,7 +198,8 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 		return;
 	}
 	// get the key column index
-	uint	keyColIndex;
+	uint	keyColIndex = 0;
+	
 	if(!workSheet.findCol(columnId, keyColIndex))
 	{
 		nlwarning("Error: Don't find the column '%s'. '%s' Aborted", columnId.c_str(), workSheetFileName.c_str());

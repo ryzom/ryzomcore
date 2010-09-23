@@ -689,9 +689,9 @@ public:
 		IsRef(false),
 		IsType(false),
 		IsKey(false),
+		Id(0),
 		Column(-1),
-		Columns(-1),
-		Id(0)
+		Columns(-1)
 	{
 	}
 
