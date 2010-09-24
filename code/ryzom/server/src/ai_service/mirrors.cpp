@@ -494,7 +494,7 @@ TDataSetRow CMirrors::getDataSetRow( const NLMISC::CEntityId& entityId )
 	return DataSet->getDataSetRow( entityId );
 }
 
-const uint16	CMirrors::getTeamId(const TDataSetRow& entityIndex)
+uint16	CMirrors::getTeamId(const TDataSetRow& entityIndex)
 {
 	CMirrorPropValueRO<TYPE_TEAM_ID> value( *DataSet, entityIndex, DSPropertyTEAM_ID );
 //	if ( value()==0 )
