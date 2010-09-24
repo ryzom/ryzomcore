@@ -48,8 +48,16 @@ NL_ADD_LIB_SUFFIX(nelmisc)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
-IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelmisc ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.cpp)
+IF(WITH_STATIC)
+# acemtp: it's because my gcc is too old and cannot optimize this file
+# on old gcc used to compile static ryzom, if you compile rgba with full optim, there's a visual bug (blue people)
+SET_SOURCE_FILES_PROPERTIES(rgba.cpp PROPERTIES COMPILE_FLAGS "-O0")
+ENDIF(WITH_STATIC)
+
+IF(WITH_PCH AND NOT WITH_STATIC)
+# acemtp: it's because my gcc is too old and cannot optimize this file
+# removed the pch or we cannot define -O0 for the rgba specificaly
+ADD_NATIVE_PRECOMPILED_HEADER(nelmisc ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.cpp)
 ENDIF(WITH_PCH)
 
 NL_GEN_PC(nel-misc.pc)
