@@ -2592,6 +2592,34 @@ struct CButtonFreezer : public CInterfaceElementVisitor
 	}
 };
 
+static int timer_called = 0;
+
+static int 
+timer_callback(HTTimer *   const timer     ,
+               void *      const user_data ,
+               HTEventType const event     ) {
+/*----------------------------------------------------------------------------
+  A handy timer callback which cancels the running event loop. 
+-----------------------------------------------------------------------------*/
+    nlassert(event == HTEvent_TIMEOUT);
+    timer_called = 1;
+    HTEventList_stopLoop();
+    
+    /* XXX - The meaning of this return value is undocumented, but close
+    ** inspection of libwww's source suggests that we want to return HT_OK. */
+    return HT_OK;
+}
+
+static void handleLibwwwEvents() {
+  HTTimer *timer;
+  timer_called = 0;
+  timer = HTTimer_new(NULL, &timer_callback, NULL,
+		      1, YES, NO);
+  if (!timer_called)
+    HTEventList_newLoop();
+  HTTimer_delete(timer);
+}
+
 // ***************************************************************************
 
 void CGroupHTML::handle ()
@@ -2871,6 +2899,10 @@ void CGroupHTML::handle ()
 			}
 		}
 	}
+#ifndef NL_OS_WINDOWS
+	if(isBrowsing())
+	  handleLibwwwEvents();
+#endif
 }
 
 // ***************************************************************************
