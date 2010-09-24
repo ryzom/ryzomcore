@@ -13,7 +13,7 @@ static unsigned long	PIC_Sys_MEM_NbAllocs;
 #define _msize malloc_usable_size
 #endif /* __GNUC__ */
 
-// ----------------------------------------------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------------------------------------------- */
 
 void *Pic_malloc(unsigned long size)
 {
@@ -26,7 +26,7 @@ void *Pic_malloc(unsigned long size)
 	}
 	return(mem);
 }
-// -----
+/* ----- */
 void *Pic_calloc(unsigned long count, unsigned long size)
 {
 	void	*mem;
@@ -38,7 +38,7 @@ void *Pic_calloc(unsigned long count, unsigned long size)
 	}
 	return(mem);
 }
-// -----
+/* ----- */
 void Pic_free(void *memblock)
 {
 	unsigned long	size;
@@ -47,23 +47,23 @@ void Pic_free(void *memblock)
 	PIC_Sys_MEM_NbAllocs--;
 	free(memblock);
 }
-// -----
+/* ----- */
 unsigned long Pic__msize(void *memblock)
 {
 	return(_msize(memblock));
 }
-// -----
+/* ----- */
 unsigned long PIC_GetMemNbAllocs(void)
 {
 	return(PIC_Sys_MEM_NbAllocs);
 }
-// -----
+/* ----- */
 unsigned long PIC_GetMemAllocated(void)
 {
 	return(PIC_Sys_MEM_Allocated);
 }
 
-// ----------------------------------------------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------------------------------------------- */
 
 static unsigned char	PIC_ErrorFlag;
 static unsigned char	PIC_ErrorString[PIC_ERRSIZE];
@@ -95,23 +95,23 @@ void Pic_SetError(unsigned char *msg, ...)
 	if (PIC_Sys_FnctActive) PIC_Sys_Fnct();
 	return;
 }
-// -----
+/* ----- */
 char* PIC_GetError(void)
 {
 	return(PIC_ErrorString);
 }
-// -----
+/* ----- */
 unsigned char PIC_Error(void)
 {
 	return(PIC_ErrorFlag);
 }
-// -----
+/* ----- */
 void PIC_ResetError(void)
 {
 	strcpy(PIC_ErrorString,"");
 	PIC_ErrorFlag=0;
 }
-// -----
+/* ----- */
 unsigned char PIC_OnErrorCall( void pFnct(void) )
 {
 	if (pFnct != NULL)
@@ -126,5 +126,5 @@ unsigned char PIC_OnErrorCall( void pFnct(void) )
 	return(1);
 }
 
-// ----------------------------------------------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------------------------------------------- */
 
