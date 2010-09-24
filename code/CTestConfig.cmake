@@ -6,7 +6,7 @@
 ##   INCLUDE(Dart)
 set(CTEST_PROJECT_NAME "RyzomCore")
 set(CTEST_NIGHTLY_START_TIME "00:00:00 CST")
-
+set(CTEST_UPDATE_TYPE "hg")
 set(CTEST_DROP_METHOD "http")
 set(CTEST_DROP_SITE "www.opennel.org")
 set(CTEST_DROP_LOCATION "/cdash/submit.php?project=RyzomCore")

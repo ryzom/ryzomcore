@@ -58,7 +58,7 @@ IF(WITH_PCH AND NOT WITH_STATIC)
 # acemtp: it's because my gcc is too old and cannot optimize this file
 # removed the pch or we cannot define -O0 for the rgba specificaly
 ADD_NATIVE_PRECOMPILED_HEADER(nelmisc ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.cpp)
-ENDIF(WITH_PCH)
+ENDIF(WITH_PCH AND NOT WITH_STATIC)
 
 NL_GEN_PC(nel-misc.pc)
 INSTALL(TARGETS nelmisc LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
