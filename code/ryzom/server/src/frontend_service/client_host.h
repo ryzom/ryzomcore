@@ -317,7 +317,7 @@ public:
 	/// Return the current maximum number of bits that can fit in the outbox
 	sint32				getCurrentThrottle() const
 	{
-		return min( (sint32)(_MaxOutboxSizeInBit*2-_BitBandwidthUsageAvg), (sint32)(_MaxOutboxSizeInBit*3/2) );
+		return std::min( (sint32)(_MaxOutboxSizeInBit*2-_BitBandwidthUsageAvg), (sint32)(_MaxOutboxSizeInBit*3/2) );
 	}
 
 	/// Update the average bits filled that determine the throttle
@@ -364,7 +364,7 @@ public:
 			if ( _BitImpulsionUsageAvg < nominalBitSize )
 				availBitsize = nominalBitSize;
 			else
-				availBitsize = max( (sint32)0, nominalBitSize*2 - _BitImpulsionUsageAvg );
+				availBitsize = std::max( (sint32)0, nominalBitSize*2 - _BitImpulsionUsageAvg );
 			
 			CMirrorPropValue<uint16> availableImpulseBitsize( TheDataset, _EntityIndex, DSFirstPropertyAvailableImpulseBitSize );
 #ifdef NL_DEBUG
@@ -402,16 +402,16 @@ public:
 	TUid				Uid;
 
 	/// User name (put on the NeL Launcher, transmitted by the login system)
-	string				UserName;
+	std::string			UserName;
 
 	/// User privilege (put on the NeL Launcher, transmitted by the login system)
-	string				UserPriv;
+	std::string			UserPriv;
 
 	/// User extended data (put on the NeL Launcher, transmitted by the login system)
-	string				UserExtended;
+	std::string			UserExtended;
 
 	/// Language Id
-	string				LanguageId;
+	std::string			LanguageId;
 
 	/// Login cookie
 	NLNET::CLoginCookie	LoginCookie;

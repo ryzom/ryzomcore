@@ -1313,7 +1313,7 @@ static void parsePrimGrpFaunaSpawn(const CAIAliasDescriptionNode *treeNode,const
 	
 	// deal with the weight
 	std::string s;
-	uint32 weight;
+	uint32 weight = 0;
 	if (prim->getPropertyByName("weight",s))
 	{
 		weight=atoi(s.c_str());
@@ -2409,7 +2409,9 @@ static void parsePrimDynNpcZoneShape(const CAIAliasDescriptionNode *aliasNode, c
 static void parsePrimRoadTrigger(const CAIAliasDescriptionNode *aliasNode, const IPrimitive *prim)
 {
 	CPrimVector t1, t2, sp;
-	float t1r, t2r, spr;
+	float t1r = 0.f;
+	float t2r = 0.f;
+	float spr = 0.f;
 	string s;
 
 	for (uint i=0; i<prim->getNumChildren(); ++i)
@@ -2494,6 +2496,8 @@ static void parsePrimDynRoad(const CAIAliasDescriptionNode *aliasNode, const IPr
 			case AITypeRoadTrigger:
 				parsePrimRoadTrigger(nextTreeNode(aliasNode,child),child);
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -2526,6 +2530,8 @@ static void parsePrimGeomItems(const CAIAliasDescriptionNode *aliasNode, const I
 				break;
 			case AITypeDynRoad:
 				parsePrimDynRoad(nextTreeNode(aliasNode,child),child);
+				break;
+			default:
 				break;
 			}
 		}
@@ -2642,6 +2648,8 @@ static void parsePrimCellZones(const CAIAliasDescriptionNode *aliasNode, const I
 			{
 			case AITypeCellZone:
 				parsePrimCellZone(nextTreeNode(aliasNode,child),child);
+				break;
+			default:
 				break;
 			}
 		}
@@ -2847,6 +2855,8 @@ static void parsePrimGroupTemplate(const CAIAliasDescriptionNode *aliasNode, con
 					
 				}
 				break;
+			default:
+				break;
 			}
 
 		}
@@ -2895,6 +2905,8 @@ static	void	parsePrimGroupFamilyProfileFaunaContent(const CAIAliasDescriptionNod
 			case AITypeGroupTemplateFauna:
 				parsePrimGroupTemplate(nextTreeNode(aliasNode,child),child,"C");
 				break;
+			default:
+				break;
 			}
 			
 		}
@@ -2942,6 +2954,8 @@ static	void	parsePrimGroupFamilyProfileTribeContent(const CAIAliasDescriptionNod
 			case AITypeGroupTemplateMultiLevel:
 				parsePrimGroupTemplate(nextTreeNode(aliasNode,child),child,"C");
 				break;
+			default:
+				break;
 			}
 			
 		}
@@ -2979,6 +2993,8 @@ static	void	parsePrimGroupFamilyProfileNpcContent(const CAIAliasDescriptionNode 
 			case AITypeGroupTemplate:
 			case AITypeGroupTemplateMultiLevel:
 				parsePrimGroupTemplate(nextTreeNode(aliasNode,child),child,"C");
+				break;
+			default:
 				break;
 			}
 			
@@ -3047,6 +3063,8 @@ static void parsePrimGroupDescriptions(const CAIAliasDescriptionNode *aliasNode,
 //			case AITypeGroupFamilyProfileGeneric:
 //				parsePrimGroupFamilyProfileGeneric(nextTreeNode(aliasNode,child),child, GroupFamilyTribe);
 //				break;			
+			default:
+				break;
 			}
 		}
 	}
@@ -3354,6 +3372,8 @@ static void parsePrimDynSystem(const IPrimitive *prim, const std::string &mapNam
 			case AITypeOutpost:
 				parsePrimOutpost(child, mapName, filename);
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -3387,6 +3407,8 @@ static void parsePrimNogoPointList(const IPrimitive *prim, const std::string &ma
 					float y=(float)(child->getPrimVector()->y);
 					CAIActions::exec("SETNOGO", x, y);
 				}
+				break;
+			default:
 				break;
 			}
 
@@ -4049,7 +4071,7 @@ NLMISC_COMMAND(loadMapsFromCommon,"load all primitive defined in usedPrimitives 
 
 		const vector<string>	&basePrim = CPrimitiveCfg::getMap(args[0]);
 		set<string> filter(basePrim.begin(), basePrim.end());
-		for ( uint i = 0; (sint)i<usedPrimitives.size(); ++i)
+		for ( uint i = 0; i < usedPrimitives.size(); ++i)
 		{
 			const vector<string> &prims = CPrimitiveCfg::getMap(usedPrimitives.asString(i));
 			for (uint j=0; j<prims.size(); ++j)

@@ -313,7 +313,8 @@ int readLanguages()
 		LOG("Error : the file languages.txt is empty !\n");
 		return 1;
 	}
-	LOG("Found %u language code\n", Languages.size());
+
+	LOG("Found %u language code\n", (uint) Languages.size());
 
 	return 0;
 }
@@ -1378,7 +1379,7 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 			return false;
 		makeHashCode(diff, false);
 
-		uint cmdCol;
+		uint cmdCol = 0;
 		if (!diff.findCol(ucstring("DIFF_CMD"), cmdCol))
 		{
 			LOG("Can't find DIFF_CMD column in %s ! Invalid diff file.\n", CFile::getFilename(fileList[i]).c_str());
@@ -1490,7 +1491,7 @@ public:
 		TWorksheet::TRow row(context.Reference.ColCount+1);
 		for (uint j=0; j<context.Addition.ColCount; ++j)
 		{
-			uint colIndex;
+			uint colIndex = 0;
 			if (context.Reference.findCol(context.Addition.Data[0][j], colIndex))
 			{
 				row[colIndex+1] = context.Addition.Data[addIndex][j];
@@ -1508,7 +1509,7 @@ public:
 		TWorksheet::TRow row(context.Reference.ColCount+1);
 		for (uint j=0; j<context.Reference.ColCount; ++j)
 		{
-			uint colIndex;
+			uint colIndex = 0;
 			if (context.Reference.findCol(context.Reference.Data[0][j], colIndex))
 			{
 				row[colIndex+1] = context.Reference.Data[refIndex][j];
@@ -1527,15 +1528,17 @@ public:
 		// copy the old content (this fill data in column that don't exist in addition worksheet)
 		row = context.Reference.Data[refIndex];
 		row.insert(row.begin(), ucstring());
+
 		// changed element
 		for (uint j=0; j<context.Addition.ColCount; ++j)
 		{
-			uint colIndex;
+			uint colIndex = 0;
 			if (context.Reference.findCol(context.Addition.Data[0][j], colIndex))
 			{
 				row[colIndex+1] = context.Addition.Data[addIndex][j];
 			}
 		}
+
 		char temp[1024];
 		sprintf(temp, "DIFF CHANGED %u ", addIndex);
 		row[0] = temp;
@@ -3144,7 +3147,7 @@ int main(int argc, char *argv[])
 	
 	// create the diff version.
 	char temp[1024];
-	sprintf(temp, "%8.8X", ::time(NULL));
+	sprintf(temp, "%8.8X", (uint) ::time(NULL));
 	diffVersion = temp;
 
 	if (strcmp(argv[1], "make_work") == 0)

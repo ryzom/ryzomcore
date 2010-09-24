@@ -50,7 +50,7 @@ public:
 	static bool					exists( const TDataSetRow& entityIndex );
 	static const NLMISC::CEntityId&	getEntityId( const TDataSetRow& entityIndex );
 	static TDataSetRow			getDataSetRow( const NLMISC::CEntityId& entityId );
-	static const uint16			getTeamId(const TDataSetRow& entityIndex);
+	static uint16				getTeamId(const TDataSetRow& entityIndex);
 
 	static CAICoord				x( const TDataSetRow& entityIndex );
 	static CAICoord				y( const TDataSetRow& entityIndex );

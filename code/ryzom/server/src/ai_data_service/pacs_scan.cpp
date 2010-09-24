@@ -2130,8 +2130,8 @@ public:
 		{
 			uint8			*linePtr = lineBuffer;
 			uint8			*linePtrHM = lineBufferHM;
-			uint8			pointBuffer;
-			uint8			pointBufferHM;
+			uint8			pointBuffer = 0;
+			uint8			pointBufferHM = 0;
 
 			CMapPosition	pos(scanpos);
 

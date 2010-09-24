@@ -83,7 +83,7 @@ void CProcessingSpreader::getProcessingBounds( THostMap::iterator& firstit, sint
 	}
 
 	sint maxNbClientsProcessedPerTick = MaxNbClients / ExecutionPeriod;
-	outerboundindex = firstindex + min( maxNbClientsProcessedPerTick, nbClients - firstindex );
+	outerboundindex = firstindex + std::min( maxNbClientsProcessedPerTick, nbClients - firstindex );
 	_ClientMapIndex = outerboundindex;
 }
 

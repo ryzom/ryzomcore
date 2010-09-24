@@ -95,7 +95,7 @@ private:
 	enum { DEFAULT, PARA, HEADER, FOOTER, FILE_HEADER, FILE_FOOTER, TBL, TABTBL, TEXT } mode;
 
 public:
-	CCruncher(): mode(DEFAULT), firstTblLine(true)
+	CCruncher(): firstTblLine(true), readColumnName(false), mode(DEFAULT)
 	{
 	}
 

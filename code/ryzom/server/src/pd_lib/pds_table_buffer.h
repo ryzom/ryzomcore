@@ -81,7 +81,7 @@ public:
 		TRowData			data()					{ return (*_MapIt).second + (_Mapped ? sizeof(CMappedHeader) : sizeof(CHeader)); }
 
 		/// Get row data
-		const TRowData		data() const			{ return (*_MapIt).second + (_Mapped ? sizeof(CMappedHeader) : sizeof(CHeader)); }
+		TRowData			data() const			{ return (*_MapIt).second + (_Mapped ? sizeof(CMappedHeader) : sizeof(CHeader)); }
 
 		/// Default Constructor, should never be used
 		explicit CAccessor()						{ }
@@ -104,7 +104,7 @@ public:
 		uint64				key() const				{ return mapped() ? ((CMappedHeader*)fullRow())->getKey() : 0; }
 
 		/// Get Full Row Data
-		const TRowData		fullRow() const			{ return (*_MapIt).second; }
+		TRowData			fullRow() const			{ return (*_MapIt).second; }
 
 
 		/// Equals

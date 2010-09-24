@@ -100,6 +100,7 @@ public:
 			case TypeFloat:		return NLMISC::toString(_f);
 //			case TypeAliasTree:	return _a->treeToString();
 //			case TypeEventTree: return _e->toString();
+			default:			break;
 			}
 			return "<Invalid Argument Type>";
 		}
@@ -115,6 +116,7 @@ public:
 				case TypeFloat:		f.serial(_f);	break;
 //				case TypeAliasTree:	f.serial(_a);	break;
 //				case TypeEventTree: f.serial(_e);	break;
+				default:			break;
 			}
 		}
 

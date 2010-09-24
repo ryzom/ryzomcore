@@ -25,6 +25,7 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include <limits>
 #include <vector>
 #include <string>
 
@@ -151,7 +152,7 @@ public:
 		_CurrentPrim(startPrim)
 	{
 		// mark the root node as non checked
-		_IndexStack.push_back(~0);
+		_IndexStack.push_back(std::numeric_limits<uint>::max());
 	}
 
 	/** Each call to this method will return a primitive pointer that match
@@ -162,7 +163,7 @@ public:
 	{
 		while (!_IndexStack.empty())
 		{
-			if (_IndexStack.back() == ~0)
+			if (_IndexStack.back() == std::numeric_limits<uint>::max())
 			{
 				_IndexStack.back() = 0;
 				// we need to check the current node.
@@ -178,7 +179,7 @@ public:
 				if (_CurrentPrim->getChild(child, _IndexStack.back()++))
 				{
 					// go down into this node
-					_IndexStack.push_back(~0);
+					_IndexStack.push_back(std::numeric_limits<uint>::max());
 					_CurrentPrim = child;
 				}
 			}

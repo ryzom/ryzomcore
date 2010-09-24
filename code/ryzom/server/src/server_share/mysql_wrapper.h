@@ -121,9 +121,9 @@ namespace MSW
 
 
 		CResultBase(MYSQL_RES	*result)
-			: _Result(result),
-			_CurrentRow(NULL),
-			_FieldLength(NULL)
+			: _CurrentRow(NULL),
+			_FieldLength(NULL),
+			_Result(result)
 		{
 
 		}

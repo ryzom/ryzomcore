@@ -101,8 +101,10 @@ void CPackedWorldBuilder::build(const std::vector<std::string> &zoneNames, const
 {	
 	std::vector<CSmartPtr<CZoneRefCount> >   zones;
 	zones.reserve(zoneNames.size());	
-	sint zoneMinX, zoneMaxX;
-	sint zoneMinY, zoneMaxY;
+	sint zoneMinX = 0;
+	sint zoneMaxX = 0;
+	sint zoneMinY = 0;
+	sint zoneMaxY = 0;
 	bool firstZoneCorner = true;
 	for(uint k = 0; k < zoneNames.size(); ++k)
 	{
@@ -252,7 +254,7 @@ void CPackedWorldBuilder::build(const std::vector<std::string> &zoneNames, const
 							CIFile f;
 							if (f.open(cacheFilename))
 							{
-								CPackedZoneBase *pb;
+								CPackedZoneBase *pb = NULL;
 								f.serialPolyPtr(pb);	
 								packedZoneGrid(x, y) = pb;
 								mustRebuild = false;

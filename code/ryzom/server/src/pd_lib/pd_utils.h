@@ -157,7 +157,7 @@ class CObjectIndex
 public:
 
 	/// Constructor of invalid index
-	explicit CObjectIndex(bool validateChecksum = false) : _Table(INVALID_TABLE_INDEX), _Row(INVALID_ROW_INDEX), _Checksum((TIndexChecksum)~VALID_INDEX_CHECKSUM)
+	explicit CObjectIndex(bool validateChecksum = false) : _Row(INVALID_ROW_INDEX), _Table(INVALID_TABLE_INDEX), _Checksum((TIndexChecksum)~VALID_INDEX_CHECKSUM)
 	{
 		if (validateChecksum)
 			validate();
@@ -166,7 +166,7 @@ public:
 	}
 
 	/// Constructor
-	CObjectIndex(TTableIndex table, TRowIndex row) : _Table(table), _Row(row)		{ validate(); }
+	CObjectIndex(TTableIndex table, TRowIndex row) : _Row(row), _Table(table)		{ validate(); }
 
 	/// Constructor
 	CObjectIndex(const CObjectIndex &index)											{ *this = index; }
@@ -397,13 +397,13 @@ public:
 
 	/// Constructor
 	explicit CColumnIndex(TTableIndex table = INVALID_TABLE_INDEX, TRowIndex row = INVALID_ROW_INDEX, TColumnIndex column = INVALID_COLUMN_INDEX)
-		: _Table(table), _Row(row), _Column(column)
+		: _Table(table), _Column(column), _Row(row)
 	{
 	}
 
 	/// Constructor
 	explicit CColumnIndex(const CObjectIndex& object, TColumnIndex column)
-		: _Table(INVALID_TABLE_INDEX), _Row(INVALID_ROW_INDEX), _Column(INVALID_COLUMN_INDEX)
+		: _Table(INVALID_TABLE_INDEX), _Column(INVALID_COLUMN_INDEX), _Row(INVALID_ROW_INDEX)
 	{
 		if (!object.isValid())
 			return;

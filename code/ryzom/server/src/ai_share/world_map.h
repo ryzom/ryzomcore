@@ -1487,8 +1487,8 @@ uint32 CTopology::TTopologyId::getVal() const
 
 inline
 CTopology::TTopologyRef::TTopologyRef()
-: _RootCell(NULL)
-, TTopologyId()
+: TTopologyId()
+, _RootCell(NULL)
 {
 }
 
@@ -2238,7 +2238,7 @@ private:
 
 inline
 CWhiteCell::CWhiteCell(CWorldMap const& worldMapPtr)
-: _HeightMap(NULL), CRootCell(worldMapPtr)
+: CRootCell(worldMapPtr), _HeightMap(NULL)
 {
 }
 
@@ -3236,13 +3236,13 @@ public:
 };
 
 inline
-CWorldPosition::CWorldPosition(const CRootCell *cell, const CMapPosition &pos, const CSlot &slot) : _RootCell(cell),	CMapPosition(pos), CSlot(slot)
+CWorldPosition::CWorldPosition(const CRootCell *cell, const CMapPosition &pos, const CSlot &slot) : CMapPosition(pos), CSlot(slot), _RootCell(cell)
 {
 	_cellLinkage=_RootCell->getCellLink(*this);
 }
 
 inline
-CWorldPosition::CWorldPosition(const CRootCell *cell, const CMapPosition &pos, const CSlot &slot,bool generationOnly) : _RootCell(cell),	CMapPosition(pos), CSlot(slot)
+CWorldPosition::CWorldPosition(const CRootCell *cell, const CMapPosition &pos, const CSlot &slot,bool generationOnly) : CMapPosition(pos), CSlot(slot), _RootCell(cell)
 {
 }
 

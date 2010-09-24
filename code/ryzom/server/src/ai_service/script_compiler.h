@@ -344,14 +344,14 @@ CTokenTestResult::CTokenTestResult()
 }
 inline
 CTokenTestResult::CTokenTestResult(const NLMISC::CSmartPtr<CCodeNode> &codeNode)
-: _codeNode(codeNode)
-, _res(BRULE_VALID)
+: _res(BRULE_VALID)
+, _codeNode(codeNode)
 {
 }
 inline
 CTokenTestResult::CTokenTestResult(const NLMISC::CSmartPtr<CCodeNode> &codeNode, TBasicTokenTestRes res)
-: _codeNode(codeNode)
-, _res(res)
+: _res(BRULE_VALID)
+, _codeNode(codeNode)
 {
 }
 inline

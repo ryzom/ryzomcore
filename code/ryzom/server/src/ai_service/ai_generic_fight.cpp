@@ -67,12 +67,12 @@ void CBotProfileFight::resumeProfile()
 
 CBotProfileFight::CBotProfileFight(CProfileOwner* owner, CAIEntityPhysical* ennemy)
 : CBotProfileFightHeal()
-, _Ennemy(ennemy)
 , _Bot(NLMISC::safe_cast<CSpawnBot*>(owner))
+, _Ennemy(ennemy)
 , _PathPos(NLMISC::safe_cast<CSpawnBot*>(owner)->theta())
+, _PathCont(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
 , _RangeCalculated(false)
 , _SearchAlternativePath(false)
-, _PathCont(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
 {
 #ifdef NL_DEBUG_PTR
 	_Bot.setData(this);
@@ -226,12 +226,12 @@ void CBotProfileHeal::resumeProfile()
 
 CBotProfileHeal::CBotProfileHeal(const TDataSetRow	&row, CProfileOwner *owner)
 : CBotProfileFightHeal()
-, _Row(row)
 , _Bot(NLMISC::safe_cast<CSpawnBot*>(owner))
 , _PathPos(NLMISC::safe_cast<CSpawnBot*>(owner)->theta())
+, _PathCont(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
+, _Row(row)
 , _RangeCalculated(false)
 , _SearchAlternativePath(false)
-, _PathCont(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
 {
 }
 
@@ -252,10 +252,10 @@ CBotProfileHeal::~CBotProfileHeal()
 
 CBotProfileFlee::CBotProfileFlee(CProfileOwner *owner)
 : CAIBaseProfile()
-, _Bot(NLMISC::safe_cast<CSpawnBot*>(owner))
-, _PathPos(NLMISC::safe_cast<CSpawnBot*>(owner)->theta())
 , _DenyFlags(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
+, _PathPos(NLMISC::safe_cast<CSpawnBot*>(owner)->theta())
 , _fightFleePathContainer(NLMISC::safe_cast<CSpawnBot*>(owner)->getAStarFlag())
+, _Bot(NLMISC::safe_cast<CSpawnBot*>(owner))
 {
 }
 
@@ -521,14 +521,20 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 		if (!entity->isAlive())
 		{
 			if (ai_profile_npc_VerboseLog)
+			{
 				nldebug("<FIGHT>Entity %s have aggro for dead entity %s, forgetting it.", spawnBot->getEntityId().toString().c_str(), entity->getEntityId().toString().c_str());
+			}
+
 			spawnBot->forgetAggroFor(entity->dataSetRow());
 			continue;
 		}
 		if (!entity->isBotAttackable())
 		{
 			if (ai_profile_npc_VerboseLog)
+			{
 				nldebug("<FIGHT>Entity %s have aggro for non bot attackable entity %s, forgetting it.", spawnBot->getEntityId().toString().c_str(), entity->getEntityId().toString().c_str());
+			}
+
 			spawnBot->forgetAggroFor(entity->dataSetRow());
 			continue;
 		}

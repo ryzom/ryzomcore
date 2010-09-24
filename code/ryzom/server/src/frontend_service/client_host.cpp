@@ -26,6 +26,7 @@
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
 
+using namespace std;
 using namespace NLMISC;
 using namespace CLFECOMMON;
 

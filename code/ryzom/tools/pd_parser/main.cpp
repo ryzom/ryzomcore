@@ -32,14 +32,16 @@ int main(int argc, char **argv)
 	uint	arg;
 	for (arg=1; (sint)arg<argc; ++arg)
 	{
-		if (argv[arg] == "-hauto")
+		if (strcmp(argv[arg], "-hauto") == 0)
+		{
 			GenerateHAuto = true;
-		else if (argv[arg] == "-dbgmsg")
+		}
+		else if (strcmp(argv[arg], "-dbgmsg") == 0)
 		{
 			VerboseMode = true;
 			GenerateDebugMessages = true;
 		}
-		else if (argv[arg] == "-onlylogs")
+		else if (strcmp(argv[arg], "-onlylogs") == 0)
 		{
 			GenerateOnlyLogs = true;
 		}

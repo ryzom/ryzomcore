@@ -119,7 +119,7 @@ public:
 
 	uint8							Index; // index of the phrase in the player memorized phrase interface if != 0xff
 
-	CEGSExecuteMsg() : Index(0xff), Cyclic(false)
+	CEGSExecuteMsg() : Cyclic(false), Index(0xff)
 	{}
 
 	virtual void description ()

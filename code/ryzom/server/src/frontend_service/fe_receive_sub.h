@@ -30,7 +30,6 @@
 #include "client_id_lookup.h"
 
 #include <list>
-using namespace std;
 
 
 extern bool verbosePacketLost;
@@ -55,7 +54,7 @@ typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
 enum TBadMessageFormatType { InsufficientSize=1, NotSystemLoginCode=2, BadCookie=4, BadSystemCode=8, HackedSizeInBuffer=16, AccessClosed=32, IrrelevantSystemMessage=64, MalformedAction=128, UnknownExceptionType=256, UnknownFormatType=512, UnauthorizedCharacterSlot=1024 };
 
 /// Return the string for the message invalidity reasons
-string getBadMessageString( uint32 reasons );
+std::string getBadMessageString( uint32 reasons );
 
 /// Hacking description
 struct THackingDesc
@@ -121,7 +120,7 @@ public:
 	void				release();
 
 	/// Add client
-	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
+	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
 
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }

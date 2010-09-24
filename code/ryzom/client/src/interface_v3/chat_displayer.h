@@ -25,9 +25,6 @@
 
 #include "nel/misc/mutex.h"
 
-using namespace std;
-using namespace NLMISC;
-
 /**
  * class used to display console text commands in the chat window
  * \author Nicolas Brigand
@@ -57,8 +54,8 @@ public:
 	/// Display the string to the chat window
 	virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message )
 	{
-		string temp = message;
-		string str;
+		std::string temp = message;
+		std::string str;
 		CInterfaceManager::TSystemInfoMode mode;
 		if (args.LogType == NLMISC::CLog::LOG_ERROR)
 		{

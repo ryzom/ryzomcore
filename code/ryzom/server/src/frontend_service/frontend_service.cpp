@@ -61,6 +61,7 @@
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
+using namespace std;
 using namespace NLNET;
 using namespace NLMISC;
 using namespace CLFECOMMON;

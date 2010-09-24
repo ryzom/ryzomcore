@@ -220,7 +220,7 @@ void ProcessDirectory( const CSString& dir, const StringVector& extensions )
 
 	sixieme = (int)files.size() / 6;
 
-	printf( "%d files are processed", files.size() );
+	printf( "%u files are processed", (uint) files.size() );
 
 	for (uint32 i=0; i<files.size(); ++i)
 	{

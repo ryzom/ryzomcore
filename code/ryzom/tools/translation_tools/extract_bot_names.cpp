@@ -272,8 +272,9 @@ int extractBotNames(int argc, char *argv[])
 	//-------------------------------------------------------------------
 	// init the sheets
 	CSheetId::init(false);
-	char *PACKED_SHEETS_NAME = "bin/translation_tools_creature.packed_sheets";
+	const string PACKED_SHEETS_NAME = "bin/translation_tools_creature.packed_sheets";
 	loadForm("creature", PACKED_SHEETS_NAME, Creatures, false, false);
+
 	if (Creatures.empty())
 	{
 		for (uint i=0;i<georgesPaths.size();++i)

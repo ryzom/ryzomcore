@@ -45,24 +45,21 @@ sint	main(sint argc, char **argv)
 	var = cf.getVarPtr("Paths");
 	if (var != NULL)
 	{
-		uint	i;
-		for (i=0; (sint)i<var->size(); ++i)
+		for (uint i=0; i < var->size(); ++i)
 			LookupPath.push_back(var->asString(i));
 	}
 
 	var = cf.getVarPtr("NoRecursePaths");
 	if (var != NULL)
 	{
-		uint	i;
-		for (i=0; (sint)i<var->size(); ++i)
+		for (uint i=0; i < var->size(); ++i)
 			LookupNoRecursePath.push_back(var->asString(i));
 	}
 
 	var = cf.getVarPtr("PacsPrimPaths");
 	if (var != NULL)
 	{
-		uint	i;
-		for (i=0; (sint)i<var->size(); ++i)
+		for (uint i=0; i < var->size(); ++i)
 			PacsPrimPath.push_back(var->asString(i));
 	}
 
@@ -77,14 +74,12 @@ sint	main(sint argc, char **argv)
 	var = cf.getVarPtr("Commands");
 	if (var != NULL)
 	{
-		uint	i;
-		for (i=0; (sint)i<var->size(); ++i)
+		for (uint i=0; i < var->size(); ++i)
 			commands.push_back(var->asString(i));
 	}
 
-	uint	i;
 	string	cmd;
-	for (i=1; (sint)i<argc; ++i)
+	for (sint i=1; i < argc; ++i)
 	{
 		if (string(argv[i]) == string("-"))
 		{
@@ -108,7 +103,7 @@ sint	main(sint argc, char **argv)
 	NLMISC::createDebug ();
 	nlinfo("Running commands:");
 
-	for (i=0; i<commands.size(); ++i)
+	for (uint i=0; i<commands.size(); ++i)
 		ICommand::execute(commands[i], *InfoLog);
 
 	return 0;
