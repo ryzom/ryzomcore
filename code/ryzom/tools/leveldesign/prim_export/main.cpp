@@ -77,7 +77,7 @@ using namespace NLLIGO;
 
 #define BAR_LENGTH 21
 
-char *progressbar[BAR_LENGTH]=
+const char *progressbar[BAR_LENGTH]=
 {
 	"[                    ]",
 	"[.                   ]",

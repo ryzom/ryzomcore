@@ -66,7 +66,6 @@ template <class T> bool check (T value)
 
 void checkInts ()
 {
-
 	checkInt (uint8, 0, 255, 1);
 	checkInt (sint8, -128, 127, 1);
 

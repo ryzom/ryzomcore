@@ -553,7 +553,7 @@ void CViewRenderer::drawQuad(sint layerId, const NLMISC::CQuadUV &quadUV, sint32
 	{
 		// Partially clipped (slowest case)
 		// Must do the clip manually
-		const uint maxNumCorners = 8;
+		static const uint maxNumCorners = 8;
 		//
 		static CVector	outPos0[maxNumCorners];
 		static CUV		outUV0[maxNumCorners];

@@ -35,7 +35,7 @@ class CBasicEffect
 public:
 	/// Constructor
 	CBasicEffect(EFFECT_FAMILIES::TEffectFamily family, const TDataSetRow & creatorId, const TDataSetRow & targetRowId) 
-	: _CreatorRowId(creatorId), _TargetRowId(targetRowId), _Family(family)
+	: _CreatorRowId(creatorId), _TargetRowId(targetRowId), _Family(family), _EffectId(0)
 	{
 		_EffectId = ++_EffectCounter;
 	}
