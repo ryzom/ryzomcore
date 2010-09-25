@@ -65,7 +65,9 @@ ENDIF(WIN32)
 #
 NL_SETUP_DEFAULT_OPTIONS()
 NL_SETUP_NEL_DEFAULT_OPTIONS()
+NL_SETUP_NELNS_DEFAULT_OPTIONS()
 NL_SETUP_RYZOM_DEFAULT_OPTIONS()
+NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS()
 NL_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
@@ -131,6 +133,18 @@ ENDIF(WITH_NEL)
 IF(WITH_RYZOM)
   ADD_SUBDIRECTORY(ryzom)
 ENDIF(WITH_RYZOM)
+
+IF(WITH_NELNS)
+#  ADD_SUBDIRECTORY(nelns)
+ENDIF(WITH_NELNS)
+
+IF(WITH_SNOWBALLS)
+#  ADD_SUBDIRECTORY(snowballs2)
+ENDIF(WITH_SNOWBALLS)
+
+IF(WITH_TOOLS)
+  ADD_SUBDIRECTORY(tool)
+ENDIF(WITH_TOOLS)
 
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
