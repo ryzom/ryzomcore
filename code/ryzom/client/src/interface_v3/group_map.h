@@ -522,7 +522,7 @@ private:
 
 	void updateSelectionAxisSize();
 	CViewBitmap *newSelectionAxis(NLMISC::CRGBA color);
-	void computeFrustumQuad(CQuad &fruQuad) const;
+	void computeFrustumQuad(NLMISC::CQuad &fruQuad) const;
 };
 
 #endif

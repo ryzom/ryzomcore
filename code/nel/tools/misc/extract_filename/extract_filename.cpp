@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/file.h>
-#include <nel/misc/config_file.h>
+#include "nel/misc/file.h"
+#include "nel/misc/config_file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -134,7 +134,10 @@ void removeDirectory (string &str)
 	// Remove begin space
 	string::size_type pos = str.rfind ('\\');
 	string::size_type pos2 = str.rfind ('/');
-	pos = std::max (pos, pos2);
+
+	if (pos == string::npos)
+		pos = pos2;
+
 	if (pos != string::npos)
 		str = str.substr (pos+1, str.size());
 }
@@ -269,7 +272,7 @@ void extractStringsFromASCII (const vector<char> &fileArray, set<string> &filena
 				if (end != begin)
 				{
 					// String size
-					uint size = (uint)end-(uint)begin;
+					uint size = (uint)(end-begin);
 					temp.resize (size);
 
 					// Copy the string

@@ -998,7 +998,7 @@ T *createObjectFromClassName(const std::string &className)
 	if (className.empty()) return NULL;
 	try
 	{
-		IClassable	*obj = NLMISC::CClassRegistry::create(className);
+		NLMISC::IClassable *obj = NLMISC::CClassRegistry::create(className);
 		if (!obj)
 		{
 			nlwarning("Couldn't create object of class %s", className.c_str());

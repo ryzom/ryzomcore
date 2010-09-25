@@ -14,10 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdafx.h"
-#include <nel/misc/types_nl.h>
-#include <nel/misc/time_nl.h>
-#include <nel/misc/common.h>
+#include "nel/misc/types_nl.h"
+#include "nel/misc/time_nl.h"
+#include "nel/misc/common.h"
 #include <stdio.h>
 
 using namespace NLMISC;
