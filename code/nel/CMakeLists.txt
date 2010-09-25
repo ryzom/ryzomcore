@@ -7,7 +7,7 @@ ENDIF(WITH_STATIC_DRIVERS)
 # On Windows we need to find DirectInput for NLMISC.
 # This is how we get events.
 IF(WIN32)
-  FIND_PACKAGE(DirectXSDK)
+  FIND_PACKAGE(DirectXSDK REQUIRED)
 
   # On Win32 we can also build the MAX plugins.
   IF(WITH_MAXPLUGIN)
@@ -50,10 +50,6 @@ IF(WITH_SOUND)
     FIND_PACKAGE(FMOD)
   ENDIF(WITH_DRIVER_FMOD)
 ENDIF(WITH_SOUND)
-
-IF(WITH_MFC)
-  FIND_PACKAGE(MFC)
-ENDIF(WITH_MFC)
 
 IF(WITH_GTK)
   FIND_PACKAGE(GTK2)

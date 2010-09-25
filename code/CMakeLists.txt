@@ -40,14 +40,6 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
-IF(WIN32)
-  FIND_PACKAGE(External REQUIRED)
-
-  IF(NOT DEFINED ENV{QTDIR})
-    SET(ENV{QTDIR} "c:/qt/4.5.0")
-  ENDIF(NOT DEFINED ENV{QTDIR})
-ENDIF(WIN32)
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
@@ -59,6 +51,14 @@ SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 # Redirect output files
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH  ${CMAKE_BINARY_DIR}/lib)
+
+IF(WIN32)
+  FIND_PACKAGE(External REQUIRED)
+
+  IF(NOT DEFINED ENV{QTDIR})
+    SET(ENV{QTDIR} "c:/qt/4.5.0")
+  ENDIF(NOT DEFINED ENV{QTDIR})
+ENDIF(WIN32)
 
 #-----------------------------------------------------------------------------
 # Set default config options
