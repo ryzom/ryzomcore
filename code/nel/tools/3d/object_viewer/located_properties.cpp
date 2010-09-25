@@ -292,7 +292,7 @@ void CLocatedProperties::OnEditTriggerOnDeath()
 {
 	UpdateData();
 	CLBExternIDDlg 	dlg(_Located->getTriggerEmitterID());
-	int res = dlg.DoModal();
+	INT_PTR res = dlg.DoModal();
 	if ( res == IDOK )
 	{
 		if (dlg.getNewID() != _Located->getTriggerEmitterID())

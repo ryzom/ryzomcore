@@ -55,7 +55,7 @@ void CSchemeManager::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serialVersion(1);
 	if (!f.isReading())
 	{		
-		sint32 size = _SchemeMap.size();		
+		sint32 size = (sint32)_SchemeMap.size();		
 		f.serial(size);					
 		for (TSchemeMap::iterator smIt = _SchemeMap.begin(); smIt != _SchemeMap.end(); ++smIt)
 		{

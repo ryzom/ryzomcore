@@ -71,7 +71,7 @@ BOOL CBinOpDlg::OnInitDialog()
 void CBinOpDlg::OnSelchangeBinOp() 
 {
 	UpdateData() ;
-	newOp(m_BinOp.GetItemData(m_BinOp.GetCurSel())) ;	
+	newOp((uint32)m_BinOp.GetItemData(m_BinOp.GetCurSel())) ;	
 }
 
 void CBinOpDlg::OnClose() 

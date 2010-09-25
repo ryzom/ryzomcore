@@ -50,7 +50,7 @@ static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
 	std::copy(ms.buffer(), ms.buffer() + ms.length(), datas.begin());		
 	ms.resetPtrTable();
 	ms.invert();
-	ms.fill(&datas[0], datas.size());
+	ms.fill(&datas[0], (uint32)datas.size());
 	nlassert(ms.isReading());	
 	T *newObj = NULL;
 	TSerializePolicy::serial(newObj, ms);

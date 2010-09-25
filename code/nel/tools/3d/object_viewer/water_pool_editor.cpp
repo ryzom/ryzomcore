@@ -200,7 +200,7 @@ uint32 CWaterPoolEditor::getCurrentPoolID()
 {
 	UpdateData();
 	nlassert(m_PoolList.GetCurSel() != LB_ERR); // must always have something selected
-	return m_PoolList.GetItemData(m_PoolList.GetCurSel());
+	return (uint32)m_PoolList.GetItemData(m_PoolList.GetCurSel());
 }
 
 //===================================================================

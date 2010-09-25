@@ -424,7 +424,7 @@ void CAnimationSetDlg::OnListUp()
 		// Backup the string
 		CString text;
 		PlayList.GetText (sel, text);
-		DWORD data = PlayList.GetItemData (sel);
+		DWORD_PTR data = PlayList.GetItemData (sel);
 
 		// Remove the node
 		PlayList.DeleteString (sel);
@@ -450,7 +450,7 @@ void CAnimationSetDlg::OnListDown()
 		// Backup the string
 		CString text;
 		PlayList.GetText (sel, text);
-		DWORD data = PlayList.GetItemData (sel);
+		DWORD_PTR data = PlayList.GetItemData (sel);
 
 		// Remove the node
 		PlayList.DeleteString (sel);

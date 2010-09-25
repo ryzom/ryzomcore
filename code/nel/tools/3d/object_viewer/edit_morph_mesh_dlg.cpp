@@ -130,9 +130,9 @@ void CEditMorphMeshDlg::OnAdd()
 		std::vector<std::string> shapeNames;
 		shapeNames.resize(_CM->getNumShapes() + 1);
 		_CM->getShapesNames(&shapeNames[0]);
-		uint index = shapeNames.size() - 1;
+		uint index = (uint)shapeNames.size() - 1;
 		shapeNames[index] = shapeName;
-		_CM->setShapes(&shapeNames[0], shapeNames.size());
+		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		std::vector<sint> numVerts;
 		_CM->getShapeNumVerts(numVerts);		
 		m_MeshList.AddString(getShapeDescStr(index, numVerts[index]).c_str());
@@ -151,7 +151,7 @@ void CEditMorphMeshDlg::OnRemove()
 	shapeNames.resize(_CM->getNumShapes());
 	_CM->getShapesNames(&shapeNames[0]);
 	shapeNames.erase(shapeNames.begin() + selItem);
-	_CM->setShapes(&shapeNames[0], shapeNames.size());
+	_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 	if (_CM->getNumShapes() == 2)
 	{
 		GetDlgItem(IDC_REMOVE)->EnableWindow(FALSE);
@@ -172,7 +172,7 @@ void CEditMorphMeshDlg::OnInsert()
 		shapeNames.resize(_CM->getNumShapes());
 		_CM->getShapesNames(&shapeNames[0]);
 		shapeNames.insert(shapeNames.begin() + selItem, shapeName);
-		_CM->setShapes(&shapeNames[0], shapeNames.size());		
+		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());		
 		GetDlgItem(IDC_REMOVE)->EnableWindow(TRUE);
 		touchPSState();
 		updateMeshList();
@@ -190,7 +190,7 @@ void CEditMorphMeshDlg::OnUp()
 	shapeNames.resize(_CM->getNumShapes());
 	_CM->getShapesNames(&shapeNames[0]);
 	std::swap(shapeNames[selItem - 1], shapeNames[selItem]);
-	_CM->setShapes(&shapeNames[0], shapeNames.size());		
+	_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());		
 	GetDlgItem(IDC_REMOVE)->EnableWindow(TRUE);		
 	updateMeshList();
 	m_MeshList.SetCurSel(selItem - 1);
@@ -206,7 +206,7 @@ void CEditMorphMeshDlg::OnDown()
 	shapeNames.resize(_CM->getNumShapes());
 	_CM->getShapesNames(&shapeNames[0]);
 	std::swap(shapeNames[selItem + 1], shapeNames[selItem]);
-	_CM->setShapes(&shapeNames[0], shapeNames.size());		
+	_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());		
 	GetDlgItem(IDC_REMOVE)->EnableWindow(TRUE);		
 	updateMeshList();
 	m_MeshList.SetCurSel(selItem + 1);	

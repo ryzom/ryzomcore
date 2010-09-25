@@ -1056,7 +1056,7 @@ void		CSkeletonScaleDlg::refreshSaveButton()
 sint CSkeletonScaleDlg::getBoneForMirror(uint boneId, std::string &mirrorName)
 {
 	sint	side= 0;
-	sint	pos;
+	std::string::size_type pos;
 	nlassert(_SkeletonModel && boneId<_SkeletonModel->Bones.size());
 	mirrorName= _SkeletonModel->Bones[boneId].getBoneName();
 
