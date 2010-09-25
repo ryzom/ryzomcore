@@ -65,6 +65,7 @@ extern NL3D::UDriver *Driver;
 extern NL3D::UScene *Scene;
 extern CEntityManager EntitiesMngr;
 
+using namespace NLMISC;
 using NLMISC::CUV;
 using NLMISC::CI18N;
 using NLMISC::CRGBA;

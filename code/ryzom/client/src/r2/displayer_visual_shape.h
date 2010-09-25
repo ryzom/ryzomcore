@@ -86,7 +86,7 @@ private:
 	CInstanceMapDeco			_MapDeco;
 	bool						_VisualSnapToGroundDone;
 	float						_LastCamDist;
-	CMatrix						_BBoxMatrix;
+	NLMISC::CMatrix				_BBoxMatrix;
 	NL3D::UVisualCollisionEntity   *_VisualCollisionEntity;
 private:
 	void					drawBBox(NLMISC::CRGBA color) const;

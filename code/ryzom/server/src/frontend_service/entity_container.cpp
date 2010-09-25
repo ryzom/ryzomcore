@@ -23,6 +23,7 @@
 
 using namespace std;
 using namespace NLMISC;
+using namespace CLFECOMMON;
 
 const	TDataSetIndex LAST_VISION_CHANGE = LAST_CHANGED;
 

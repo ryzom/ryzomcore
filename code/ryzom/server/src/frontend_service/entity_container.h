@@ -41,8 +41,6 @@ inline	uint32	asUInt32<TDataSetRow>	(const	TDataSetRow&	obj)
 	return	obj.getIndex();
 }
 
-using namespace CLFECOMMON;
-
 extern bool verboseVision;
 
 extern NLMISC::CLog		  *TmpDebugLogger;
@@ -89,13 +87,13 @@ typedef std::set< CLFECOMMON::TCLEntityId > TSetOfRemovedEntities;
 struct CEntity
 {
 	/// Cache for property initialized
-	bool										PropInitialized[NB_VISUAL_PROPERTIES];
+	bool										PropInitialized[CLFECOMMON::NB_VISUAL_PROPERTIES];
 
 	/// Property X direct access + previous value
-	CMirrorPropValueROCF<TCoord>				X;
+	CMirrorPropValueROCF<CLFECOMMON::TCoord>	X;
 
 	/// Property Y direct access + previous value
-	CMirrorPropValueROCF<TCoord>				Y;
+	CMirrorPropValueROCF<CLFECOMMON::TCoord>	Y;
 
 #ifdef STORE_MIRROR_VP_IN_CLASS
 	CMirrorPropValueRO<TYPE_SHEET>				VP_SHEET;
@@ -192,7 +190,7 @@ struct CEntity
 	}
 
 	/// Return the current cached state without checking the value
-	bool propIsInitializedState( TPropIndex propIndex ) const
+	bool propIsInitializedState( CLFECOMMON::TPropIndex propIndex ) const
 	{
 		return PropInitialized[propIndex];
 	}
@@ -201,7 +199,7 @@ struct CEntity
 	 * For positions, use positionIsInitialized() instead.
 	 */
 	template <class T>
-	bool propertyIsInitialized( TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, T* pt )
+	bool propertyIsInitialized( CLFECOMMON::TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, T* pt )
 	{
 		return PropInitialized[propIndex] || checkPropertyInitialized( propIndex, dsPropertyIndex, entityIndex, pt );
 	}
@@ -209,18 +207,18 @@ struct CEntity
 	/// Return if the position of the current processed entity is initialized
 	bool positionIsInitialized( const TEntityIndex& entityIndex )
 	{
-		return PropInitialized[PROPERTY_POSITION] || checkPositionInitialized( entityIndex );
+		return PropInitialized[CLFECOMMON::PROPERTY_POSITION] || checkPositionInitialized( entityIndex );
 	}
 	
 	/// Return if the position of the current processed entity is initialized
 	bool positionIsInitialized()
 	{
-		return PropInitialized[PROPERTY_POSITION] || checkPositionInitialized();
+		return PropInitialized[CLFECOMMON::PROPERTY_POSITION] || checkPositionInitialized();
 	}
 	
 	/// Helper for propertyIsInitialized()
 	template <class T>
-	bool checkPropertyInitialized( TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, T* )
+	bool checkPropertyInitialized( CLFECOMMON::TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, T* )
 	{
 		CMirrorPropValueRO<T> value( *DataSet, entityIndex, dsPropertyIndex );
 		return PropInitialized[propIndex] = ( value() != 0 );
@@ -236,7 +234,7 @@ struct CEntity
 	}
 
 	/// Helper for propertyIsInitialized(): overload for row properties (specialization syntax is too much different among compilers)
-	bool checkPropertyInitialized( TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, TDataSetRow* )
+	bool checkPropertyInitialized( CLFECOMMON::TPropIndex propIndex, TPropertyIndex dsPropertyIndex, const TEntityIndex& entityIndex, TDataSetRow* )
 	{
 		CMirrorPropValueRO<TDataSetRow> value( *DataSet, entityIndex, dsPropertyIndex );
 		return PropInitialized[propIndex] = ( asUInt32<TDataSetRow>(value()) != 0 );
@@ -254,7 +252,7 @@ struct CEntity
 	/// Helper for positionIsInitialized()
 	bool checkPositionInitialized( const TEntityIndex& entityIndex )
 	{
-		return PropInitialized[PROPERTY_POSITION] = (X() != 0 || Y() != 0);
+		return PropInitialized[CLFECOMMON::PROPERTY_POSITION] = (X() != 0 || Y() != 0);
 /*
 		if ( ! ((X() == 0) && (Y() == 0)) ) // not local pos because can be 0 0
 		{
@@ -272,7 +270,7 @@ struct CEntity
 	/// Helper for positionIsInitialized()
 	bool checkPositionInitialized()
 	{
-		return PropInitialized[PROPERTY_POSITION] = (X() != 0 || Y() != 0);
+		return PropInitialized[CLFECOMMON::PROPERTY_POSITION] = (X() != 0 || Y() != 0);
 	}
 
 
@@ -355,7 +353,7 @@ struct CEntity
 		//H_AFTER(YMileage)
 	}
 
-	void				displayProperties( const TEntityIndex& entityIndex, NLMISC::CLog *log=NLMISC::InfoLog, TClientId optClientId=INVALID_CLIENT, CLFECOMMON::TCLEntityId optSlot=INVALID_SLOT ) const;
+	void				displayProperties( const TEntityIndex& entityIndex, NLMISC::CLog *log=NLMISC::InfoLog, TClientId optClientId=INVALID_CLIENT, CLFECOMMON::TCLEntityId optSlot=CLFECOMMON::INVALID_SLOT ) const;
 
 	static void			fillVisualPropertiesFromMirror( uint64 properties[], const TEntityIndex& entityIndex );
 };
@@ -404,7 +402,7 @@ public:
 	}
 
 	/// Convert a visual property index into a dataset property index (access to a static array)
-	static TPropertyIndex			propertyIndexInDataSetToVisualPropIndex( TPropIndex vPropIndex )
+	static TPropertyIndex			propertyIndexInDataSetToVisualPropIndex( CLFECOMMON::TPropIndex vPropIndex )
 	{
 		return _VisualPropIndexToDataSet[vPropIndex];
 	}
@@ -430,7 +428,7 @@ public:
 protected:
 
 	/// Set the mapping and return the dataset property index
-	TPropertyIndex					mapVisualPropIndex( const std::string& propName, TPropIndex vPropIndex );
+	TPropertyIndex					mapVisualPropIndex( const std::string& propName, CLFECOMMON::TPropIndex vPropIndex );
 
 	/// Return the property index at startup
 	TPropertyIndex					getPropertyIndex( const std::string& propName ) const;

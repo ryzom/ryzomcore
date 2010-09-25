@@ -30,6 +30,8 @@
 #include "displayer_visual_entity.h"
 
 
+using namespace NLMISC;
+
 namespace R2
 {
 

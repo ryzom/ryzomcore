@@ -95,7 +95,7 @@ private:
 	bool checkRoomLeft();
 	void displayNoMoreRoomLeftMsg();
 	// for closed polygon only : test if the current shape is valid (e.g not intersecting, with at least 3 points)
-	bool isValidPolyShape(bool ignoreLast, std::list<CPolygon> &splitPoly) const;
+	bool isValidPolyShape(bool ignoreLast, std::list<NLMISC::CPolygon> &splitPoly) const;
 	bool testAccessibleEdges(bool ignoreLast);
 	void doUpdateBeforeRender();
 };

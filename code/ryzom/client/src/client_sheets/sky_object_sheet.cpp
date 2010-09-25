@@ -17,6 +17,8 @@
 #include "stdpch.h"
 #include "sky_object_sheet.h"
 
+using namespace NLMISC;
+
 /////////////////////////////////
 // CSkyObjectSheet::CColorInfo //
 /////////////////////////////////

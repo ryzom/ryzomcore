@@ -26,6 +26,7 @@
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
+using namespace CLFECOMMON;
 
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 

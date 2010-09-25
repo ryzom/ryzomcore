@@ -67,28 +67,28 @@ class CClientHost;
 class CVisionProvider;
 
 
-void		fillSHEET( TOutBox& outbox, TPropIndex );
-void		fillBEHAVIOUR( TOutBox& outbox, TPropIndex );
-void		fillNAME_STRING_ID( TOutBox& outbox, TPropIndex );
-void		fillTARGET_LIST( TOutBox& outbox, TPropIndex );
-void		fillVISUAL_FX( TOutBox& outbox, TPropIndex );
-void		fillBARS( TOutBox& outbox, TPropIndex );
-void		fillVisualPropertyABC( TOutBox& outbox, TPropIndex );
-void		fillCONTEXTUAL( TOutBox& outbox, TPropIndex propIndex );
-void		fillMODE( TOutBox& outbox, TPropIndex );
-void		fillGUILD_SYMBOL( TOutBox& outbox, TPropIndex );
-void		fillGUILD_NAME_ID( TOutBox& outbox, TPropIndex );
-void		fillEVENT_FACTION_ID( TOutBox& outbox, TPropIndex );
-void		fillPVP_MODE( TOutBox& outbox, TPropIndex );
-void		fillPVP_CLAN( TOutBox& outbox, TPropIndex );
-void		fillOWNER_PEOPLE( TOutBox& outbox, TPropIndex );
-void		fillOUTPOST_INFOS( TOutBox& outbox, TPropIndex );
-void		fillRowProperty( TOutBox& outbox, TPropIndex propIndex );
+void		fillSHEET( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillBEHAVIOUR( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillNAME_STRING_ID( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillTARGET_LIST( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillVISUAL_FX( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillBARS( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillVisualPropertyABC( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillCONTEXTUAL( TOutBox& outbox, CLFECOMMON::TPropIndex propIndex );
+void		fillMODE( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillGUILD_SYMBOL( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillGUILD_NAME_ID( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillEVENT_FACTION_ID( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillPVP_MODE( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillPVP_CLAN( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillOWNER_PEOPLE( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillOUTPOST_INFOS( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillRowProperty( TOutBox& outbox, CLFECOMMON::TPropIndex propIndex );
 
 
 class CDistancePrioritizer;
 
-typedef void (*TFillFunc) (TOutBox&, TPropIndex);
+typedef void (*TFillFunc) (TOutBox&, CLFECOMMON::TPropIndex);
 
 /*
  * Visual property tree node
@@ -236,7 +236,7 @@ public:
 		}
 	}
 
-#define INIT_FLAT_VP_TREE( vpname )				FlatVPTree[ PROPERTY_##vpname ] = (TVPNodeServer*)(discreetRoot->get##vpname##node())
+#define INIT_FLAT_VP_TREE( vpname )				FlatVPTree[ CLFECOMMON::PROPERTY_##vpname ] = (TVPNodeServer*)(discreetRoot->get##vpname##node())
 #define SET_FILLFUNC( name )					INIT_FLAT_VP_TREE(name);		((TVPNodeServer*)(discreetRoot->get##name##node()))->FillFunc = fill##name
 #define SET_FILLFUNC2( nameProp, nameFunc )		INIT_FLAT_VP_TREE(nameProp);	((TVPNodeServer*)(discreetRoot->get##nameProp##node()))->FillFunc = fill##nameFunc
 
@@ -247,20 +247,20 @@ public:
 		TVPNodeBase *discreetRoot = VPB->VPB;
 
 		// setup position a orientation manually
-		FlatVPTree[ PROPERTY_POSITION ] = (TVPNodeServer*)VPA;
-		FlatVPTree[ PROPERTY_POSX ] = FlatVPTree[ PROPERTY_POSITION ];
-		FlatVPTree[ PROPERTY_POSY ] = FlatVPTree[ PROPERTY_POSITION ];
-		FlatVPTree[ PROPERTY_POSZ ] = FlatVPTree[ PROPERTY_POSITION ];
-		FlatVPTree[ PROPERTY_ORIENTATION ] = (TVPNodeServer*)(VPB->VPA);
+		FlatVPTree[ CLFECOMMON::PROPERTY_POSITION ] = (TVPNodeServer*)VPA;
+		FlatVPTree[ CLFECOMMON::PROPERTY_POSX ] = FlatVPTree[ CLFECOMMON::PROPERTY_POSITION ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_POSY ] = FlatVPTree[ CLFECOMMON::PROPERTY_POSITION ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_POSZ ] = FlatVPTree[ CLFECOMMON::PROPERTY_POSITION ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_ORIENTATION ] = (TVPNodeServer*)(VPB->VPA);
 
 		SET_FILLFUNC( SHEET );
 		SET_FILLFUNC( BEHAVIOUR );
 		SET_FILLFUNC( NAME_STRING_ID );
 		SET_FILLFUNC( TARGET_LIST );
-		FlatVPTree[ PROPERTY_TARGET_LIST_0 ] = FlatVPTree[ PROPERTY_TARGET_LIST ];
-		FlatVPTree[ PROPERTY_TARGET_LIST_1 ] = FlatVPTree[ PROPERTY_TARGET_LIST ];
-		FlatVPTree[ PROPERTY_TARGET_LIST_2 ] = FlatVPTree[ PROPERTY_TARGET_LIST ];
-		FlatVPTree[ PROPERTY_TARGET_LIST_3 ] = FlatVPTree[ PROPERTY_TARGET_LIST ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST_0 ] = FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST_1 ] = FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST_2 ] = FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST ];
+		FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST_3 ] = FlatVPTree[ CLFECOMMON::PROPERTY_TARGET_LIST ];
 		SET_FILLFUNC( VISUAL_FX );
 		SET_FILLFUNC( CONTEXTUAL );
 		SET_FILLFUNC( MODE );
@@ -546,7 +546,7 @@ public:
 	 * Test the criterion for discreet properties + initialized
 	 */
 	template <class T>
-	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, const CMirrorPropValueRO<T>& currentValue, TPropIndex propIndex, T* ) const
+	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, const CMirrorPropValueRO<T>& currentValue, CLFECOMMON::TPropIndex propIndex, T* ) const
 	{
 		// Although the client should already know the sheet id of the controlled player, let's send it
 		//if ( (propIndex==PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
@@ -585,7 +585,7 @@ public:
 	/*
 	 * Test the criterion + initialized: overload for row properties (specialization syntax is too much different among compilers)
 	 */
-	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, const CMirrorPropValueRO<TEntityIndex>& currentValue, TPropIndex propIndex, TDataSetRow* ) const
+	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, const CMirrorPropValueRO<TEntityIndex>& currentValue, CLFECOMMON::TPropIndex propIndex, TDataSetRow* ) const
 	{
 		if (entry.HasValue)
 		{
@@ -678,7 +678,7 @@ public:
 	 * Test the criterion for target list + initialized
 	 */
 	template <class T>
-	bool		targetListHasChanged(const CPropertyHistory::CPropertyEntry& entry, TPropIndex propIndex, T* ) const
+	bool		targetListHasChanged(const CPropertyHistory::CPropertyEntry& entry, CLFECOMMON::TPropIndex propIndex, T* ) const
 	{
 		// Although the client should already know the sheet id of the controlled player, let's send it
 		//if ( (propIndex==PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
@@ -731,7 +731,7 @@ private:
 	CHistory					*_History;
 
 	/// Distance threshold
-	CLFECOMMON::TCoord			_DistThresholdTable [NB_VISUAL_PROPERTIES];
+	CLFECOMMON::TCoord			_DistThresholdTable [CLFECOMMON::NB_VISUAL_PROPERTIES];
 
 	uint32						_DistanceDeltaRatio;
 };

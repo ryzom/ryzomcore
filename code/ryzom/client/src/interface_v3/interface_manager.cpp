@@ -119,6 +119,8 @@
 
 #include "../bg_downloader_access.h"
 
+using namespace NLMISC;
+
 extern CClientChatManager   ChatMngr;
 extern CContinentManager ContinentMngr;
 extern CStringMapper *_UIStringMapper;

@@ -53,6 +53,7 @@
 
 #include "../../entities.h"
 
+using namespace NLMISC;
 using namespace R2;
 
 

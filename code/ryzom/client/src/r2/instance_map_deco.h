@@ -44,7 +44,7 @@ public:
 	void setDisplayedInstance(CInstance *instance, bool orientable);
 	bool isAddedToMap() const { return _AddedToMap; }
 
-	CVector2f getWorldPos() const;
+	NLMISC::CVector2f getWorldPos() const;
 
 	/** Set the texture to use when the view in the world map is zoomed-in enough
 	  * When empty, no close view display is done

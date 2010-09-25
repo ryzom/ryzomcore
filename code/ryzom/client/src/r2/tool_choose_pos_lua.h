@@ -42,7 +42,7 @@ public:
 					  const std::string &toolName,
 					  const std::string &cursValid = "curs_create.tga",
 					  const std::string &cursInvalid = "curs_stop.tga",
-					  const std::vector<CPolygon2D> &polyList = std::vector<CPolygon2D>(),
+					  const std::vector<NLMISC::CPolygon2D> &polyList = std::vector<NLMISC::CPolygon2D>(),
 					  const CPrimLook &polyValidLook = CPrimLook(),
 					  const CPrimLook &polyInvalidLook = CPrimLook()
 					 );

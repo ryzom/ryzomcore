@@ -37,6 +37,7 @@ extern NLLIGO::CLigoConfig LigoConfig;
 // ***************************************************************************
 
 using namespace std;
+using namespace NLMISC;
 using namespace NLLIGO;
 
 // ***************************************************************************

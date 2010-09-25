@@ -27,6 +27,8 @@
 //
 #include "game_share/scenario_entry_points.h"
 
+using namespace NLMISC;
+
 namespace R2
 {
 

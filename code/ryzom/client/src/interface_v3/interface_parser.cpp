@@ -112,6 +112,7 @@
 #endif
 const uint32 UI_CACHE_SERIAL_CHECK = (uint32) 'IUG_';
 
+using namespace NLMISC;
 
 void saveXMLTree(COFile &f, xmlNodePtr node)
 {

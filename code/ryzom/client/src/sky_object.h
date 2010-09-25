@@ -43,7 +43,7 @@ public:
 	class CColorInfo
 	{
 	public:
-		CBitmap			*Map;			// color computed from a map depending on hour & weather (NULL if color is unseted)
+		NLMISC::CBitmap	*Map;			// color computed from a map depending on hour & weather (NULL if color is unseted)
 		TSkyColorMode	Mode;  // how the color is to be used
 	public:
 		CColorInfo() : Map(NULL) {}
@@ -52,10 +52,10 @@ public:
 		  * \param buildBitmap list of used bitmap (to be completed if required bitmap id not in "bitmapByName")
 		  */
 		void init(const CSkyObjectSheet::CColorInfoSheet &ci,
-				  std::map<std::string, CBitmap *> &bitmapByName,
-				  std::vector<CBitmap *> &buildBitmap);
+				  std::map<std::string, NLMISC::CBitmap *> &bitmapByName,
+				  std::vector<NLMISC::CBitmap *> &buildBitmap);
 		// compute color depending on hour & weather & fog color
-		CRGBA computeColor(float dayPart, float weatherLevel, CRGBA fogColor);
+		NLMISC::CRGBA computeColor(float dayPart, float weatherLevel, NLMISC::CRGBA fogColor);
 	};
 	////////////////////////////////////////////////////////////////////////////////
 	// tells how a color gradient is computed in the shape (-> sky dome gradient) //
@@ -69,10 +69,10 @@ public:
 		  * for intermediary weather values, the two nearest bitmap are blended to get the value of the gradient
 		  */
 
-		std::vector<CBitmap *> WeatherToGradient;
-		CBitmap Slice0[2]; // 2 column for slice 0
-		CBitmap Slice1[2]; // 2 columns for slice 1
-		CBitmap Final;
+		std::vector<NLMISC::CBitmap *> WeatherToGradient;
+		NLMISC::CBitmap Slice0[2]; // 2 column for slice 0
+		NLMISC::CBitmap Slice1[2]; // 2 columns for slice 1
+		NLMISC::CBitmap Final;
 	public:
 		// ctor
 		CColorGradientInfo() : TargetTextureStage(0) {}
@@ -82,9 +82,9 @@ public:
 		  * \param buildBitmap list of used bitmap (to be completed if required bitmaps are not in "bitmapByName")
 		  */
 		void init(const CSkyObjectSheet::CColorGradientInfoSheet &cgi,
-				  std::map<std::string, CBitmap *> &bitmapByName,
-				  std::vector<CBitmap *> &buildBitmap);
-		void setup(NL3D::UInstance instance, float dayPart, float weatherLevel, CBitmap &gradientCache, CBitmap &gradientCacheBlurred);
+				  std::map<std::string, NLMISC::CBitmap *> &bitmapByName,
+				  std::vector<NLMISC::CBitmap *> &buildBitmap);
+		void setup(NL3D::UInstance instance, float dayPart, float weatherLevel, NLMISC::CBitmap &gradientCache, NLMISC::CBitmap &gradientCacheBlurred);
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,19 +97,19 @@ public:
 	CColorGradientInfo	ColorGradient;
 	TSkyRefColor		RefColor;	// tells which color info is used to test if object is visible (when alpha is 0, the object must be hidden)
 	// cache last colors
-	CRGBA				LastDiffuseColor;
-	CRGBA				LastParticleEmittersColor;
-	CRGBA				LastConstantColor[SKY_MAX_NUM_STAGE];
+	NLMISC::CRGBA		LastDiffuseColor;
+	NLMISC::CRGBA		LastParticleEmittersColor;
+	NLMISC::CRGBA		LastConstantColor[SKY_MAX_NUM_STAGE];
 	// cache last gradient
-	CBitmap				GradientCache;
-	CBitmap				GradientCacheBlurred;
-	CUV					TexPanner[SKY_MAX_NUM_STAGE];
-	CUV					OffsetFactor[SKY_MAX_NUM_STAGE];
-	CBitmap				*FXUserParams[SKY_MAX_NUM_FX_USER_PARAMS];
+	NLMISC::CBitmap		GradientCache;
+	NLMISC::CBitmap		GradientCacheBlurred;
+	NLMISC::CUV			TexPanner[SKY_MAX_NUM_STAGE];
+	NLMISC::CUV			OffsetFactor[SKY_MAX_NUM_STAGE];
+	NLMISC::CBitmap		*FXUserParams[SKY_MAX_NUM_FX_USER_PARAMS];
 
 	// texture scaling depending on weather and time
-	CBitmap				*OffsetUBitmap[SKY_MAX_NUM_STAGE];
-	CBitmap				*OffsetVBitmap[SKY_MAX_NUM_STAGE];
+	NLMISC::CBitmap		*OffsetUBitmap[SKY_MAX_NUM_STAGE];
+	NLMISC::CBitmap		*OffsetVBitmap[SKY_MAX_NUM_STAGE];
 
 	std::string			Name;
 	bool				Active;
@@ -149,8 +149,8 @@ public:
 	  */
 	void init(const CSkyObjectSheet::CVersionSheet &sheet,
 		      NL3D::UInstance instance,
-			  std::map<std::string, CBitmap *> &bitmapByName,
-			  std::vector<CBitmap *> &builtBitmaps,
+			  std::map<std::string, NLMISC::CBitmap *> &bitmapByName,
+			  std::vector<NLMISC::CBitmap *> &builtBitmaps,
 			  bool	visibleInMainScene,
 			  bool	visibleInEnvMap
 			 );
@@ -158,7 +158,7 @@ public:
 	  * \param duskSetup true if the setup os for the dusk (dawn otherwise)
 	  * \return true if the object is visible
       */
-	bool setup(const CClientDate &date, const CClientDate &animationDate, float numHoursInDay, float weatherLevel, CRGBA fogColor, bool envMapScene);
+	bool setup(const CClientDate &date, const CClientDate &animationDate, float numHoursInDay, float weatherLevel, NLMISC::CRGBA fogColor, bool envMapScene);
 };
 
 

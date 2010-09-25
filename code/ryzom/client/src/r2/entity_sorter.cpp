@@ -20,6 +20,8 @@
 #include "../user_entity.h"
 #include "../time_client.h"
 
+using namespace NLMISC;
+
 namespace R2
 {
 

@@ -27,8 +27,6 @@
 #include <string>
 
 
-using namespace NLMISC;
-
 const uint SKY_MAX_NUM_STAGE = 4;
 const uint SKY_MAX_NUM_FX_USER_PARAMS = 4;
 
@@ -88,8 +86,8 @@ public:
 		CColorInfoSheet			ParticleEmitters;
 		CColorInfoSheet			ConstantColor[SKY_MAX_NUM_STAGE];
 		CColorGradientInfoSheet	ColorGradient;
-		CUV						TexPanner[SKY_MAX_NUM_STAGE];
-		CUV						OffsetFactor[SKY_MAX_NUM_STAGE];
+		NLMISC::CUV				TexPanner[SKY_MAX_NUM_STAGE];
+		NLMISC::CUV				OffsetFactor[SKY_MAX_NUM_STAGE];
 		std::string				FXUserParamBitmap[SKY_MAX_NUM_FX_USER_PARAMS];
 		// texture scaling : each bitmap gives a scaling factor depending on weather and the hour of the day
 		std::string				OffsetUBitmap[SKY_MAX_NUM_STAGE];

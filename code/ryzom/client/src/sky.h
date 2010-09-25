@@ -85,8 +85,8 @@ private:
 
 // retrieve a bitmap from its name, find it in the map if it has already been built, or load it and add it otherwise
 NLMISC::CBitmap *buildSharedBitmap(const std::string &filename,
-						   std::map<std::string, CBitmap *> &bitmapByName,
-						   std::vector<CBitmap *> &builtBitmaps,
+						   std::map<std::string, NLMISC::CBitmap *> &bitmapByName,
+						   std::vector<NLMISC::CBitmap *> &builtBitmaps,
 						   bool &alreadyBuilt
 						  );
 

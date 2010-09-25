@@ -394,9 +394,9 @@ public:
 	}
 
 	// get Pair state
-	TPairState&			getPairState(TCLEntityId e);
+	TPairState&			getPairState(CLFECOMMON::TCLEntityId e);
 	// get Pair state
-	const TPairState&	getPairState(TCLEntityId e) const;
+	const TPairState&	getPairState(CLFECOMMON::TCLEntityId e) const;
 
 	/// User identifier
 	TUid				Uid;
