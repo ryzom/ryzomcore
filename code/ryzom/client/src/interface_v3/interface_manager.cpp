@@ -101,7 +101,6 @@
 #include "../entity_animation_manager.h"	// for emotes
 #include "../net_manager.h"				// for emotes
 #include "../client_chat_manager.h"		// for emotes
-#include "../entities.h"
 
 #include "chat_text_manager.h"
 #include "../npc_icon.h"
@@ -1289,18 +1288,6 @@ void CInterfaceManager::updateFrameEvents()
 			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:map:content:map_content:time"));
 			if (pVT != NULL)
 				pVT->setText(str);
-
-			str.clear();
-			// Update the clock in the compass if enabled.
-			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:compass:clock:time"));
-			if (pVT != NULL)
-			{
-				if (pVT->getActive())
-				{
-					str = getTimestampHuman("%H:%M");
-					pVT->setText(str);
-				}
-			}
 		}
 	}
 
@@ -5584,99 +5571,6 @@ public:
 				{
 					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr;
 				}
-
-				uint targetSlot = UserEntity->targetSlot();
-				CEntityCL *pE = EntitiesMngr.entity(targetSlot);
-
-				// Replace $t$ token with target name
-				ucstring token = "$t$";
-				ucstring::size_type pos = ucstr.find(token);
-				if (pos != ucstring::npos && pE != NULL)
-				{
-					ucstring name = pE->getDisplayName();
-
-					// special case where there is only a title, very rare case for some NPC
-					if (name.empty())
-					{
-						name = pE->getTitle();
-					}
-
-					while ((pos = ucstr.find(token)) != ucstring::npos)
-					{
-						ucstr = ucstr.replace(pos, token.length(), name);
-					}
-				}
-
-				// Replace $g()$ token with gender specific string
-				// Format: $g(male/female[/neuter])$
-				GSGENDER::EGender gender = GSGENDER::neutral;
-				CCharacterCL *pC = dynamic_cast<CCharacterCL*>(pE);
-				if (pC != NULL)
-				{
-					// Only care about gender if it's a hominid.
-					if (pC->isUser() || pC->isPlayer() || pC->isNPC())
-					{
-						gender = pC->getGender();
-					}
-				}
-				ucstring start_token = "$g(";
-				ucstring end_token = ")$";
-				ucstring::size_type start_pos = 0;
-				ucstring::size_type end_pos = 0;
-				sint endless_loop_protector = 0;
-				while (((start_pos = ucstr.find(start_token, start_pos)) != ucstring::npos) &&
-					   ((end_pos = ucstr.find(end_token, start_pos)) != ucstring::npos))
-				{
-					// Get the whole substring first
-					end_pos += end_token.length();
-					
-					if (end_pos <= start_pos)
-					{
-						// Wrong formatting; give up on this one.
-						start_pos = end_pos;
-						continue;
-					}
-
-					ucstring::size_type token_length = end_pos - start_pos;
-
-					// Get everything between the "$g(" and ")$"
-					ucstring::size_type gender_start_pos = start_pos + start_token.length();
-					ucstring::size_type gender_end_pos = token_length - start_token.length() - end_token.length();
-
-					if ((gender_start_pos == string::npos) || 
-						(gender_end_pos   == string::npos) || 
-						((start_pos + gender_end_pos) <= gender_start_pos))
-					{
-						// Wrong formatting; give up on this one.
-						start_pos = end_pos;
-						continue;
-					}
-
-					ucstring gender_string = ucstr.substr(gender_start_pos, gender_end_pos);
-					vector<ucstring> strList;
-					splitUCString(gender_string, ucstring("/"), strList);
-
-					if (strList.size() <= 1)
-					{
-						// Wrong formatting; give up on this one.
-						start_pos = end_pos;
-						continue;
-					}
-
-					// Neuter part is optional.
-					// Fallback to male if something is wrong.
-					GSGENDER::EGender g = ((uint)gender >= strList.size()) ? GSGENDER::male : gender;
-					gender_string = strList[g];
-
-					ucstr = ucstr.replace(start_pos, token_length, gender_string);
-
-					endless_loop_protector++;
-					if (endless_loop_protector > 50)
-					{
-						break; 
-					}
-				}
-
 				out.serialEnum(behavToSend);
 				out.serial(ucstr);
 				NetMngr.push(out);
@@ -6380,21 +6274,3 @@ void CInterfaceManager::CServerToLocalAutoCopy::onLocalChange(ICDBNode *localNod
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
-char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " */)
-{
-	static char cstime[25];
-	time_t date;
-	time (&date);
-	struct tm *tms = localtime(&date);
-	if (tms)
-	{
-		strftime(cstime, 25, format, tms);
-	}
-	else
-	{
-		strcpy(cstime, "");
-	}
-
-	return cstime;
-}
