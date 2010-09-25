@@ -549,7 +549,7 @@ namespace NLNET
 	// a special macro for easy module task startup
 #define	NLNET_START_MODULE_TASK(className, methodName) \
 	{ \
-		TModuleTask<className> *task = new TModuleTask<className>(this, &className::methodName); \
+		NLNET::TModuleTask<className> *task = new NLNET::TModuleTask<className>(this, &className::methodName); \
 		queueModuleTask(task); \
 	} \
 

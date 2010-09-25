@@ -258,7 +258,7 @@ public:
 
 #define nlReadSerial(_stream, _obj) 		\
 	if (!(_stream).isReading())			\
-		throw ENotInputStream();	\
+		throw NLMISC::ENotInputStream();	\
 	NLMISC::IStream::unconst(_stream).serial(_obj);
 
 #define nlRead(_stream, _serialType, _obj)	\
