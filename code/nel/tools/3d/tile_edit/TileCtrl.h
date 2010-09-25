@@ -59,9 +59,7 @@ public:
 	int h,b,g,d; //index dans la liste des bordures pour le haut, le bas, la gauche et la droite du tile
 };
 
-using namespace std;
-
-typedef list<TileInfo*> tilelist;
+typedef std::list<TileInfo*> tilelist;
 
 class TileList
 {

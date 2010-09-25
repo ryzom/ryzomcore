@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdafx.h"
-#include "tile_edit.h"
+#include "tile_edit_exe.h"
 #include "TileView.h"
 
 #ifdef _DEBUG
@@ -50,8 +50,8 @@ END_MESSAGE_MAP()
 void TileView::OnDropFiles(HDROP hDropInfo) 
 {
 	// TODO: Add your message handler code here and/or call default
-	 *parent=this->GetParent();
-	if (parent) parent->
+//	*parent=this->GetParent();
+//	if (parent) parent->
 	
 	CListCtrl::OnDropFiles(hDropInfo);
 }

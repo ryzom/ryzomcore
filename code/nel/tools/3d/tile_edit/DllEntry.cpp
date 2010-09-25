@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdafx.h"
-#include "tile_edit.h"
 
 extern ClassDesc2* GetTile_editDesc();
 

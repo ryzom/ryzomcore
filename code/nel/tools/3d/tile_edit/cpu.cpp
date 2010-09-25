@@ -46,7 +46,6 @@ typedef struct ROUT
 	unsigned long	time;
 } ROUT;
 */
-#include "..\tile_edit\tile_edit.h"
 
 ROUT Routines[20];
 
