@@ -751,9 +751,7 @@ retryJoinEdit:
 					throw "Protocol error";
 				if (sb._LastJoinSessionResult == 16)
 				{
-#ifdef NL_OS_WINDOWS
-	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
-#endif // NL_OS_WINDOWS
+//	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
 					throw "User ban from the ring";
 				}
 				if (sb._LastJoinSessionResult != 0)

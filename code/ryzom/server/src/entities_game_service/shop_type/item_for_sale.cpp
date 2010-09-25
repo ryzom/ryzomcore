@@ -180,7 +180,7 @@ void CTradeBase::copy( IItemTrade * itt )
 		CGameItem::CPersistentApplyArg applyArgs;\
 		_ItemPtr->apply(pdr, applyArgs))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 

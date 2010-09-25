@@ -59,7 +59,7 @@ using namespace NLNET;
 		}	\
 	}	\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -82,7 +82,7 @@ using namespace NLNET;
 		nldebug("Var '%s' = '%s'", first->first.c_str(), first->second.c_str());	\
 	}	\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 

@@ -219,9 +219,7 @@ inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
 
 #ifdef PERSISTENT_TOKEN_FAMILY
 
-#ifdef NL_OS_WINDOWS
-#pragma message( "Using token family "NL_MACRO_TO_STR(PERSISTENT_TOKEN_FAMILY)" for persistent data class " NL_MACRO_TO_STR(PERSISTENT_CLASS) )
-#endif // NL_OS_WINDOWS
+//#pragma message( "Using token family "NL_MACRO_TO_STR(PERSISTENT_TOKEN_FAMILY)" for persistent data class " NL_MACRO_TO_STR(PERSISTENT_CLASS) )
 
 // setup some macros for constructing the classname and object name that we need for
 // the 'persistent token family' constants class

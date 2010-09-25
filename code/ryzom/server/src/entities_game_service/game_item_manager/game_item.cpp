@@ -4878,7 +4878,8 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 //-----------------------------------------------
 std::string CGameItem::showItemsStats()
 {
-#pragma message(NL_LOC_MSG "Implement me")
+//#pragma message(NL_LOC_MSG "Implement me")
+	// TODO: implement this
 
 	return "";
 //	NLMISC::CSheetId stackSheet=NLMISC::CSheetId("stack.sitem");

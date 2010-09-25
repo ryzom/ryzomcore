@@ -341,6 +341,6 @@ void COutpostBuilding::postLoad()
 	PROP(float, _MPLeft)\
 	PROP(uint32, _MPLastTime)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

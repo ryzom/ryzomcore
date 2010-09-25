@@ -35,7 +35,7 @@ using namespace NLMISC;
 	PROP(string,Path)\
 	PROP(sint32,Value)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 // ****************************************************************************
@@ -46,7 +46,7 @@ using namespace NLMISC;
 	PROP_MAP(CEntityId,sint32,PlayerValues)\
 	PROP_MAP(EGSPD::TGuildId,sint32,GuildValues)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 // ****************************************************************************
@@ -55,5 +55,5 @@ using namespace NLMISC;
 #define PERSISTENT_DATA\
 	STRUCT_VECT(ValueLeavesPD)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

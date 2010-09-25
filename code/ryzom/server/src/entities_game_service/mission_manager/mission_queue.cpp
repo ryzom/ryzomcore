@@ -848,7 +848,7 @@ void CMissionQueue::dump()
 	PROP(uint32, LastConnectionDate)\
 	PROP(bool, Awake)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -876,5 +876,5 @@ void CMissionQueue::dump()
 	STRUCT_LIST(CWaitingEntity,_Entities)\
 	PROP_VECT(CEntityId, _PlayersToRollBackInSteps)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

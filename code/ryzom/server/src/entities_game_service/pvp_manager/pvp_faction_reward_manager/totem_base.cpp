@@ -415,5 +415,5 @@ bool CTotemBase::canStartBuilding( CCharacter* actor )
 	PROP(float,			_TotemMaxHP)\
 	PROP(float,			_TotemCurrentHP)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

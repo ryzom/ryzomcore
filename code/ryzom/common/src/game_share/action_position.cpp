@@ -71,7 +71,7 @@ void CActionPosition::unpack (NLMISC::CBitMemStream &message)
 	Interior	=	(Position16[2] & (uint16)0x2)!=0;
 
 #ifdef TEST_POSITION_CORRECTNESS
-#pragma message (NL_LOC_MSG "TEST_POSITION_CORRECTNESS")
+//#pragma message (NL_LOC_MSG "TEST_POSITION_CORRECTNESS")
 	TCoord px, py;
 	message.serialAndLog1( px );
 	message.serialAndLog1( py );
@@ -138,7 +138,7 @@ void CActionPosition::pack (NLMISC::CBitMemStream &message)
 	message.serialAndLog1( posz16 );
 
 #ifdef TEST_POSITION_CORRECTNESS
-#pragma message (NL_LOC_MSG "TEST_POSITION_CORRECTNESS")
+//#pragma message (NL_LOC_MSG "TEST_POSITION_CORRECTNESS")
 		TCoord px = Position[0];
 		TCoord py = Position[1];
 		message.serialAndLog1( px );

@@ -589,7 +589,7 @@ std::string COutpostSquadData::toString() const
 	PROP(CSheetId,_Sheet)\
 	PROP(TAIAlias,_Alias)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -605,6 +605,6 @@ std::string COutpostSquadData::toString() const
 	STRUCT2(_Desc,_Desc.store(pdr),_Desc.apply(pdr))\
 	PROP(TAIAlias,_SpawnZone)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

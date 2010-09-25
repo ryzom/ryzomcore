@@ -130,7 +130,7 @@ public:
 	PROP2(FameMemory,sint32,target.getFameMemory(),target.setFameMemory(val))\
 	PROP2(LastFameChangeTrend,string,CFameTrend::toString(target.getLastFameChangeTrend()),target.setLastFameChangeTrend(CFameTrend::fromString(val)))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -163,7 +163,7 @@ public:
 		CFameContainerEntryProxy().store(pdr,(*it).second),\
 		CFameContainerEntryProxy().apply(pdr,*target.addToEntries(key)))\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -257,7 +257,7 @@ private:
 		_Inventory->getItem(i)->store(pdr),\
 		loadItem(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -568,7 +568,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(GodMode, bool, getGodModeSave(), setGodModeSave(val)) \
 
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -626,7 +626,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	NPROP(WeaponQualityModifier,sint32,_SpecialModifiers.WeaponQualityModifier)\
 	NPROP(ArmorAbsorbtionMultiplier,sint32,_SpecialModifiers.ArmorAbsorbtionMultiplier)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -689,7 +689,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -705,7 +705,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint8,PactNature)\
 	PROP(uint8,PactType)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -724,7 +724,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	FLAG0(CLEAR,clear())\
 	STRUCT_VECT(_AuraActivationDates)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -741,7 +741,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint16, ConsumableFamilyId)\
 	PROP2(PowerType,string,POWERS::toString(PowerType),PowerType=POWERS::toPowerType(val))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -759,7 +759,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	FLAG0(CLEAR,clear())\
 	STRUCT_VECT(PowerActivationDates)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -772,7 +772,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP2(ActivationDate, NLMISC::TGameCycle, if(ActivationDate >= CTickEventHandler::getGameCycle()), ActivationDate - CTickEventHandler::getGameCycle(), ActivationDate = val)\
 	PROP2(Family,string,  CConsumable::getFamilyName(Family), Family=CConsumable::getFamilyIndex(val))\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -788,7 +788,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	FLAG0(CLEAR,clear())\
 	STRUCT_VECT(Dates)
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -812,7 +812,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 		 _MemSets[i]->store(pdr),\
 		 if (key<_MemSets.size()) getMemSet(key)->apply(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -836,7 +836,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 			Phrases[key]->apply(pdr);\
 		})\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -852,7 +852,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP_VECT(CSheetId,Bricks)\
 	PROP(uint16,PhraseId)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -868,7 +868,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	STRUCT(PhraseDesc)\
 	PROP(CSheetId,PhraseSheetId)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -884,7 +884,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(bool, Successfull)\
 	PROP_GAME_CYCLE_COMP(LastSuccessDate)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -899,7 +899,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(TAIAlias, MissionAlias)\
 	PROP(TAIAlias, BotAlias)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -917,7 +917,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(double,_DeathXPToGain)\
 	PROP(uint32,_BonusUpdateTime)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -935,7 +935,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(sint32,Z)\
 	PROP(float,Heading)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -953,7 +953,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(sint32,Z)\
 	PROP(float,Heading)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -967,7 +967,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(SessionId,uint32,SessionId.asInt(),SessionId=TSessionId(val))\
 	STRUCT(PosState)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -980,7 +980,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_DATA\
 	STRUCT_VECT(_Vec)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1017,7 +1017,7 @@ static void displayWarning(const std::string& s)
 		if (k!=CHARACTERISTICS::Unknown) { _PhysicalCharacteristics[k].Base=val; _PhysicalCharacteristics[k].Current=val; _PhysicalCharacteristics[k].Max=val; displayInfo(string()+"Setting "+key+": "+toString(val)); }\
 		else displayWarning(string()+"Failed to set "+key+": "+toString(val)) )
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1046,7 +1046,7 @@ static void displayWarning(const std::string& s)
 		 _PhysicalScores[i].store(pdr),\
 		 SCORES::TScores k=SCORES::toScore(key); if (k!=SCORES::unknown) _PhysicalScores[k].apply(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1066,7 +1066,7 @@ static void displayWarning(const std::string& s)
 	LPROP(float,BaseRegenerateAction,if (BaseRegenerateRepos!=0.0f))\
 	LPROP(float,CurrentRegenerate,if (BaseRegenerateRepos!=0.0f))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1092,7 +1092,7 @@ static void displayWarning(const std::string& s)
 		_Skills[i].store(pdr),\
 		SKILLS::ESkills k=SKILLS::toSkill(key); if (k!=SKILLS::unknown) _Skills[k].apply(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1112,7 +1112,7 @@ static void displayWarning(const std::string& s)
 	PROP(double,Xp)\
 	PROP(double,XpNextLvl)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1128,7 +1128,7 @@ static void displayWarning(const std::string& s)
 	PROP2(Name,string,Name.toUtf8(),Name.fromUtf8(val))\
 	PROP_VECT(CSheetId,Bricks)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1155,7 +1155,7 @@ static void displayWarning(const std::string& s)
 		Malus[i].store(pdr),\
 		if (key<Malus.size()) Malus[key].apply(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1172,7 +1172,7 @@ static void displayWarning(const std::string& s)
 	PROP_GAME_CYCLE_COMP(ActivationDate)\
 	PROP(bool,Disabled)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1245,7 +1245,7 @@ private:
 	FLAG0(CLEAR, clear())\
 	LSTRUCT_VECT(Child, if (0), ;/* do not store in old format anymore */, loadItem(pdr))
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -1270,7 +1270,7 @@ private:
 	STRUCT2(Inventory, ;/* do not store in old format anymore */, COldPlayerRoomInventoryLoader(Inventory).apply(pdr))\
 	STRUCT2(RoomInventory, Inventory->store(pdr), Inventory->apply(pdr, NULL))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1346,7 +1346,7 @@ private:
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1406,7 +1406,7 @@ private:
 	LPROP(float,JungleResistanceFactor,if (Protection3Factor!=0.0f))\
 	LPROP(float,PrimaryRootResistanceFactor,if (Protection3Factor!=0.0f))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1462,7 +1462,7 @@ private:
 		)\
 
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -1497,7 +1497,7 @@ private:
 		)\
 	PROP(bool, _HideOthers)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1525,7 +1525,7 @@ private:
 #define PERSISTENT_DATA\
 	STRUCT_VECT(_EncyCharAlbums)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -1538,7 +1538,7 @@ private:
 	PROP(uint8,AlbumState)\
 	STRUCT_VECT(Themas)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -1552,7 +1552,7 @@ private:
 	PROP(uint8,ThemaState)\
 	PROP(uint16,RiteTaskStatePacked)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -1566,7 +1566,7 @@ private:
 	PROP(uint32,Duration)\
 	PROP(uint32,LogoffTime)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 
@@ -1590,7 +1590,7 @@ private:
 	PROP_GAME_CYCLE_COMP(_Date)\
 	LPROP2(_EventFaction, string, if (!_EventFaction.empty()), _EventFaction, setEventFaction(val))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 

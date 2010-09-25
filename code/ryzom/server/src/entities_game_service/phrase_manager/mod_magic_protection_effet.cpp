@@ -106,5 +106,5 @@ void CModMagicProtectionEffect::activate()
 	PROP(sint32,_Modifier1)\
 	PROP(sint32,_Modifier2)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

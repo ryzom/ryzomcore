@@ -32,9 +32,9 @@ using namespace CLFECOMMON;
 
 
 #ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
-#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
+//#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
 #else
-#pragma message ("FULL_FREQUENCY_SENDING_TO_CLIENT")
+//#pragma message ("FULL_FREQUENCY_SENDING_TO_CLIENT")
 #endif
 
 

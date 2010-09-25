@@ -64,7 +64,7 @@ static void	impulsionSelectChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::
 	}
 
 	// TODO : ring : add character/role checking
-#pragma message (NL_LOC_MSG "Ring TODO : add R2 character/role checking")
+//#pragma message (NL_LOC_MSG "Ring TODO : add R2 character/role checking")
 
 	// Check authorized character slot
 	if (((ch->AuthorizedCharSlot != 0xF) && (selectCharMsg.c != ch->AuthorizedCharSlot)) &&

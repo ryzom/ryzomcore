@@ -332,6 +332,6 @@ void CGameEventManager::saveGameEventFile()
 	PROP(string, _EventFaction1ChannelName)\
 	PROP(string, _EventFaction2ChannelName)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

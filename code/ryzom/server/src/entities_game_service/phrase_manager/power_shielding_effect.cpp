@@ -137,5 +137,5 @@ void CShieldingEffect::activate()
 	PROP(uint16,_BucklerMaxProtection)\
 	PROP(uint16,_ShieldMaxProtection)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

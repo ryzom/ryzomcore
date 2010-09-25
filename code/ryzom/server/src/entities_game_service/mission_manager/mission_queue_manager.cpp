@@ -378,7 +378,7 @@ void CMissionQueueManager::dump()
 #define PERSISTENT_DATA\
 	PROP_VECT(uint32, QueueIds)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -399,6 +399,6 @@ void CMissionQueueManager::dump()
 	STRUCT_MAP(CEntityId, CQueueVect, _PlayerQueues)\
 	
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

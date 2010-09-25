@@ -50,7 +50,7 @@ void	CPropertyDecoder::receive(TPacketNumber /* packetNumber */, CAction *action
 		CPropertyEntry			&pz = _Entities[act->Slot].Properties[PROPERTY_POSZ];
 */
 #ifdef TEST_POSITION_CORRECTNESS
-#pragma message ("TEST_POSITION_CORRECTNESS")
+//#pragma message ("TEST_POSITION_CORRECTNESS")
 		TCoord posx = (TCoord)(act->Position[0]);
 		TCoord posy = (TCoord)(act->Position[1]);
 #endif
@@ -87,7 +87,7 @@ void	CPropertyDecoder::receive(TPacketNumber /* packetNumber */, CAction *action
 		//nldebug("CLPROPD: Received position (Id=%d) %d,%d (Pck=%d)", act->CLEntityId, act->Position[0], act->Position[1], packetNumber);
 */
 #ifdef TEST_POSITION_CORRECTNESS
-#pragma message ("TEST_POSITION_CORRECTNESS")
+//#pragma message ("TEST_POSITION_CORRECTNESS")
 		if ( ! (act->IsRelative) )
 		{
 			// Check if the compression algo for positions worked

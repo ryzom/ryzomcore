@@ -305,7 +305,7 @@ void CSEffect::sendEffectEndMessages()
 	PROP(bool,_IsStackable)\
 	PROP(bool,_IsRemoved)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -318,5 +318,5 @@ void CSEffect::sendEffectEndMessages()
 	STRUCT2(SEffect,	CSEffect::store(pdr), CSEffect::apply(pdr))\
 	PROP2(_EndDate,		TGameCycle,	_EndDate>CTickEventHandler::getGameCycle()?_EndDate-CTickEventHandler::getGameCycle():(TGameCycle)0,	_EndDate=val)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

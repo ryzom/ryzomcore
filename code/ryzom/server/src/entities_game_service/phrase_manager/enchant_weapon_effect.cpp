@@ -162,5 +162,5 @@ void CEnchantWeaponEffect::activate()
 	PROP2(_DamageType,			string,		DMGTYPE::toString(_DamageType),					_DamageType = DMGTYPE::stringToDamageType(val))\
 	PROP(bool,_EndsAtCasterDeath)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

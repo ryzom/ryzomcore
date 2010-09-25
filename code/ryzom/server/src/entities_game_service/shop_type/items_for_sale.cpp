@@ -349,6 +349,6 @@ NLMISC_COMMAND(deleteItemsForSale, "delete items for sale of a player on the giv
 		}\
 	)\
 	
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

@@ -489,9 +489,7 @@ uint32 CPackageDescription::getPackageVersionNumber()
 	PROP(std::string,_RefDirectory)\
 	PROP(std::string,_NextVersionFile)\
 
-#ifdef NL_OS_WINDOWS
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
-#endif // NL_OS_WINDOWS
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 #undef PERSISTENT_CLASS

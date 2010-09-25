@@ -151,5 +151,5 @@ void CModDefenseEffect::activate()
 	PROP(float,_Modifier1)\
 	PROP(float,_Modifier2)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

@@ -211,5 +211,5 @@ void CPersistentEffect::readPdr(CPersistentDataRecord& pdr)
 #define PERSISTENT_DATA\
 	LSTRUCT_VECT(_PersistentEffects, VECT_LOGIC(_PersistentEffects), writePdr(_PersistentEffects[i], pdr), readPdr(pdr))\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

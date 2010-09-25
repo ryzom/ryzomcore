@@ -30,7 +30,7 @@ using namespace NLMISC;
 #define PERSISTENT_DATA\
 	PROP(string,Name)\
 
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
@@ -42,7 +42,7 @@ using namespace NLMISC;
 
 #define PERSISTENT_DATA\
  
-#pragma message( PERSISTENT_GENERATION_MESSAGE )
+//#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 #undef PERSISTENT_CLASS
