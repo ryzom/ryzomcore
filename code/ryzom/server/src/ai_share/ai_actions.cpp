@@ -17,9 +17,6 @@
 
 #include "stdpch.h"
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/debug.h"
 #include "ai_actions.h"
 
 // singleton data

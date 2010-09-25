@@ -16,9 +16,6 @@
 
 
 #include "stdpch.h"
-// Nel Misc
-#include "nel/misc/command.h"
-
 
 #include "ai_actions.h"
 

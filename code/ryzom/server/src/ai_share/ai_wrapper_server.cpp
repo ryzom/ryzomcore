@@ -22,16 +22,6 @@
 
 #include "game_share/ai_wrapper.h"
 
-
-
-#include "nel/misc/singleton.h"
-#include "nel/misc/stream.h"
-#include "nel/misc/string_common.h"
-#include "nel/ligo/primitive.h"
-#include "nel/ligo/ligo_config.h"
-#include "nel/net/unified_network.h"
-
-
 #include "../ai_share/ai_share.h"
 
 #include "game_share/persistent_data.h"

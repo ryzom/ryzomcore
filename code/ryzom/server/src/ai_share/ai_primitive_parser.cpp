@@ -20,15 +20,7 @@
 
 #include "stdpch.h"
 
-//std
-#include <string>
-
 #include "ai_primitive_parser.h"
-
-// nel
-#include "nel/ligo/primitive.h"
-#include "nel/ligo/ligo_config.h"
-
 
 // game share
 #include "game_share/utils.h"

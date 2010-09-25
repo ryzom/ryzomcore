@@ -17,10 +17,6 @@
 #include "stdpch.h"
 
 #include	"ai_types.h"
-#include "nel/misc/string_conversion.h"
-#include "nel/misc/config_file.h"
-#include "nel/misc/path.h"
-#include "nel/net/service.h"
 
 
 using namespace std;

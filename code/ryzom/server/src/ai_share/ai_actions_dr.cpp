@@ -5,16 +5,6 @@
 
 #include "stdpch.h"
 
-//std
-#include <string>
-
-
-// nel
-#include "nel/ligo/primitive.h"
-#include "nel/ligo/ligo_config.h"
-#include "nel/misc/command.h"
-
-
 // game share
 #include "game_share/utils.h"
 #include "game_share/persistent_data.h"

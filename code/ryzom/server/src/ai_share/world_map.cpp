@@ -16,11 +16,6 @@
 
 
 #include "stdpch.h"
-#include "nel/misc/algo.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/random.h"
-#include "nel/misc/string_conversion.h"
-#include "nel/misc/command.h"
 #include "game_share/utils.h"
 #include "world_map.h"
 

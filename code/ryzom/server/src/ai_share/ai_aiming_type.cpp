@@ -18,9 +18,6 @@
 
 #include "stdpch.h"
 //
-#include "nel/misc/debug.h"
-#include "nel/misc/string_conversion.h"
-//
 #include "ai_aiming_type.h"
 
 using namespace std;

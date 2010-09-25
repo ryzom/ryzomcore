@@ -18,8 +18,6 @@
 
 #include "stdpch.h"
 #include "ai_event_report.h"
-// nel
-#include "nel/misc/string_conversion.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -21,9 +21,6 @@
 
 #include "ai_alias_description_node.h"
 
-#include "nel/misc/common.h"
-#include "nel/misc/command.h"
-
 using namespace NLMISC;
 //using namespace NLNET;
 using namespace std;
