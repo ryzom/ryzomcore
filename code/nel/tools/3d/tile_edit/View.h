@@ -67,9 +67,7 @@ public:
 	int id;									//numero du tile
 };
 
-using namespace std;
-
-typedef vector<TileInfo> tilelist;
+typedef std::vector<TileInfo> tilelist;
 
 
 

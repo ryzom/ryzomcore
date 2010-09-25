@@ -6,6 +6,7 @@
 #include "pic.h"
 #include <nel/misc/rgba.h>
 
+using namespace std;
 
 //============================================================
 // Image API.
@@ -15,7 +16,7 @@
 bool	PIC_LoadPic(string path, vector<NLMISC::CBGRA> &tampon, uint &Width, uint &Height)
 {
 	uint32			id;
-	unsigned char	*pal, *data;
+	char			*pal, *data;
 	unsigned long	w,h,depth;
 	uint			i;
 

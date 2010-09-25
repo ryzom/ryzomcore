@@ -25,12 +25,12 @@ static PIC_PICTURE *GetPic(unsigned long id)
 
 unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 {
-	unsigned char	ext[4];
+	char	ext[4];
 	unsigned long	type;
 	unsigned long	i,taken,id;
 	PIC_PICTURE		*pic;
-	unsigned char	*pDatas;
-	unsigned char	*pPal;
+	char			*pDatas;
+	char			*pPal;
 	unsigned long	w,h,Depth;
 	unsigned long	ret;
 
@@ -135,7 +135,7 @@ unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 	}
 
 	// --- Create and place new pic struct
-	pic=Pic_calloc(1,sizeof(PIC_PICTURE));
+	pic=(PIC_PICTURE *)Pic_calloc(1,sizeof(PIC_PICTURE));
 	if (!pic)
 	{
 		Pic_SetError("Load, not enough memory for internal structure");
@@ -155,7 +155,7 @@ unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned long w, unsigned long h, unsigned long d)
+unsigned long PIC_Create(char* pPal, char* pDatas, unsigned long w, unsigned long h, unsigned long d)
 {
 	unsigned long	i,taken,id;
 	PIC_PICTURE		*pic;
@@ -190,7 +190,7 @@ unsigned long PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned lo
 	// --- Create pic
 	if (!pDatas)
 	{
-		pDatas=Pic_calloc(1,w*h*d/8);
+		pDatas=(char *)Pic_calloc(1,w*h*d/8);
 		if (!pDatas)
 		{
 			Pic_SetError("Create, not enough memory for datas");
@@ -201,7 +201,7 @@ unsigned long PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned lo
 	{
 		if (!pPal)
 		{
-			pPal=Pic_calloc(1,256*3);
+			pPal=(char *)Pic_calloc(1,256*3);
 			if (!pPal)
 			{
 				Pic_SetError("Create, not enough memory for palette");
@@ -214,7 +214,7 @@ unsigned long PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned lo
 		pPal=NULL;
 	}
 	// --- Create and place new pic struct
-	pic=Pic_calloc(1,sizeof(PIC_PICTURE));
+	pic=(PIC_PICTURE *)Pic_calloc(1,sizeof(PIC_PICTURE));
 	if (!pic)
 	{
 		Pic_SetError("Create, not enough memory for internal structure");
@@ -236,7 +236,7 @@ unsigned long PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned lo
 // ----------------------------------------------------------------------------------------------------------------------------------
 
 unsigned long PIC_GetInfos(	unsigned long id, 
-							unsigned char* *ppPal, unsigned char* *ppDatas, 
+							char **ppPal, char **ppDatas, 
 							unsigned long *pW, unsigned long *pH, unsigned long *pD)
 {
 	PIC_PICTURE	*pic;
@@ -275,7 +275,7 @@ unsigned long PIC_GetInfos(	unsigned long id,
 static char* Conv8To24(unsigned long id)
 {
 	PIC_PICTURE		*pic;
-	unsigned char	*buf;
+	char	*buf;
 	unsigned long	i;
 
 	pic=GetPic(id);
@@ -284,7 +284,7 @@ static char* Conv8To24(unsigned long id)
 		Pic_SetError("Conv8To24, picture internal structure not found");
 		return(NULL);
 	}
-	buf=Pic_malloc(pic->Width*pic->Height*3);
+	buf=(char *)Pic_malloc(pic->Width*pic->Height*3);
 	if (!buf)
 	{
 		Pic_SetError("Conv8To24, not enough memory for temporary buffer");
@@ -330,7 +330,7 @@ static char* Conv8To16(unsigned long id)
 		pix16=(r<<10)+(g<<5)+b;
 		buf[i]=pix16;
 	}
-	return((unsigned char*)buf);
+	return (char*)buf;
 }
 
 // ----------------------------------------
@@ -349,7 +349,7 @@ static char* Conv16To24(unsigned long id)
 		Pic_SetError("Conv16To24, picture internal structure not found");
 		return(NULL);
 	}
-	buf=Pic_malloc(pic->Width*pic->Height*3);
+	buf=(unsigned char *)Pic_malloc(pic->Width*pic->Height*3);
 	if (!buf)
 	{
 		Pic_SetError("Conv16To24, not enough memory for temporary buffer");
@@ -365,7 +365,7 @@ static char* Conv16To24(unsigned long id)
 		buf[i*3+1]=(unsigned char)g;
 		buf[i*3+2]=(unsigned char)b;
 	}
-	return(buf);
+	return (char*)buf;
 }
 
 // ----------------------------------------
@@ -404,14 +404,14 @@ static char* Conv24To16(unsigned long id)
 		pix16=(r<<10)+(g<<5)+b;
 		buf[i]=pix16;
 	}
-	return((unsigned char*)buf);
+	return (char*)buf;
 }
 
 // ----------------------------------------
 
 static char* ConvPic(PIC_PICTURE *pic, unsigned long type, char* pErr)
 {
-	unsigned char	*buf;
+	char	*buf;
 	unsigned long	src,dst;
 
 	*pErr=0;
@@ -471,7 +471,7 @@ static char* ConvPic(PIC_PICTURE *pic, unsigned long type, char* pErr)
 		{
 			*pErr=1;
 		}
-		return(buf);
+		return buf;
 	}
 	// ---
 	if (src==24 && dst==8)
@@ -490,9 +490,9 @@ static char* ConvPic(PIC_PICTURE *pic, unsigned long type, char* pErr)
 unsigned long PIC_Save(unsigned long id, char* FileName, unsigned long type, unsigned long qual)
 {
 	PIC_PICTURE		*pic;
-	unsigned char	err;
-	unsigned char	*buf;
-	unsigned char	*freeit;
+	char	err;
+	char	*buf;
+	char	*freeit;
 	unsigned long	depth;
 
 	freeit=NULL;
@@ -502,7 +502,7 @@ unsigned long PIC_Save(unsigned long id, char* FileName, unsigned long type, uns
 		Pic_SetError("Save %s, picture internal structure not found",FileName);
 		return(0);
 	}
-	freeit=ConvPic(pic,type,&err);
+	freeit = ConvPic(pic,type,&err);
 	if (err)
 	{
 		Pic_SetError("Save %s, error while converting picture",FileName);

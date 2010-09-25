@@ -9,11 +9,6 @@
 #include "custom.h"
 #include "getval.h"
 
-#include "nel/3d/tile_bank.h"
-
-#include "nel/misc/bitmap.h"
-#include "nel/misc/file.h"
-
 using namespace NL3D;
 using namespace NLMISC;
 
@@ -178,7 +173,7 @@ LRESULT Browse::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			CDC *pDC = GetDC();
 			m_ctrl.DrawDragRect(pDC,NULL,size,&last_sel,size);			//on efface l'ancien carre
 			
-			m_ctrl.UpdateSelection(&current, wParam, m_128x128);						//on affiche les modifes
+			m_ctrl.UpdateSelection(&current, (int)wParam, m_128x128);						//on affiche les modifes
 			
 			m_ctrl.DrawDragRect(pDC,&current,size,NULL,size);			//on affiche le nouveau carre
 			::ReleaseDC(*this,*pDC);			
@@ -239,7 +234,7 @@ LRESULT Browse::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			CDC *pDC = GetDC();
 			m_ctrl.DrawDragRect(pDC,NULL,size,&last_sel,size);			//on efface l'ancien carre
 			
-			m_ctrl.UpdateSelection(&current,wParam, m_128x128);						//on affiche les modifes
+			m_ctrl.UpdateSelection(&current,(int)wParam, m_128x128);						//on affiche les modifes
 			
 			::ReleaseDC(*this,*pDC);			
 			
@@ -362,8 +357,8 @@ LRESULT Browse::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		int x = LOWORD(lParam);
 		int y = HIWORD(lParam);
 		
-		int i = max (1, m_ctrl.GetNbTileLine()); 
-		int j = max (1, m_ctrl.GetNbTileColumn());
+		int i = std::max (1, m_ctrl.GetNbTileLine()); 
+		int j = std::max (1, m_ctrl.GetNbTileColumn());
 		int pos = m_ctrl.GetScrollPos(SB_VERT);
 		int hview = (m_ctrl.InfoList.GetSize(m_128x128)/i + 1)*(m_ctrl.sizeicon_y + m_ctrl.spacing_y) + m_ctrl.spacing_y;
 		m_ctrl.scrollpos = (pos*hview)/SCROLL_MAX;
@@ -372,7 +367,7 @@ LRESULT Browse::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		m_ctrl.GetWindowRect(&clientrect);
 		InvalidateRect(NULL,false);
 		GetWindowRect(&rect);
-		m_ctrl.SetWindowPos(NULL, 0, 0, max (100, x - 120), y - 20, SWP_NOMOVE);
+		m_ctrl.SetWindowPos(NULL, 0, 0, std::max (100, x - 120), y - 20, SWP_NOMOVE);
 		int iFirst,iLast; 
 		m_ctrl.GetVisibility(iFirst, iLast, m_128x128);
 		m_ctrl.UpdateBar(iFirst, iLast, m_128x128);
@@ -800,8 +795,8 @@ void Browse::OnDestroy()
 	if (RegCreateKey(HKEY_CURRENT_USER,REGKEY_TILEDIT,&regkey)==ERROR_SUCCESS)
 	{	
 		//int sel = ((CComboBox*)GetDlgItem(IDC_LISTTYPE))->GetCurSel();
-		RegSetValueEx(regkey,REGKEY_WNDPL,0,REG_SZ,(const unsigned char*)sWindowpl,strlen(sWindowpl));
-		RegSetValueEx(regkey,REGKEY_LASTPATH,0,REG_SZ,(const unsigned char*)m_ctrl.LastPath.c_str(),strlen(m_ctrl.LastPath.c_str()));
+		RegSetValueEx(regkey,REGKEY_WNDPL,0,REG_SZ,(const unsigned char*)sWindowpl,(DWORD)strlen(sWindowpl));
+		RegSetValueEx(regkey,REGKEY_LASTPATH,0,REG_SZ,(const unsigned char*)m_ctrl.LastPath.c_str(),(DWORD)strlen(m_ctrl.LastPath.c_str()));
 		RegSetValueEx(regkey,REGKEY_BUTTONZOOM,0,REG_DWORD,(const unsigned char*)&m_ctrl.Zoom,4);
 		RegSetValueEx(regkey,REGKEY_BUTTONVARIETY,0,REG_DWORD,(const unsigned char*)&m_128x128,4);
 		RegSetValueEx(regkey,REGKEY_BUTTONTEXTURE,0,REG_DWORD,(const unsigned char*)&m_ctrl.Texture,4);

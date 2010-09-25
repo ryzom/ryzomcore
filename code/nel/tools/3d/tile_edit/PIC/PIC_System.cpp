@@ -38,7 +38,7 @@ void *Pic_calloc(unsigned long count, unsigned long size)
 void Pic_free(void *memblock)
 {
 	unsigned long	size;
-	size=_msize(memblock);
+	size=(unsigned long)_msize(memblock);
 	PIC_Sys_MEM_Allocated-=size;
 	PIC_Sys_MEM_NbAllocs--;
 	free(memblock);
@@ -46,7 +46,7 @@ void Pic_free(void *memblock)
 // -----
 unsigned long Pic__msize(void *memblock)
 {
-	return(_msize(memblock));
+	return(unsigned long)(_msize(memblock));
 }
 // -----
 unsigned long PIC_GetMemNbAllocs(void)
@@ -61,14 +61,14 @@ unsigned long PIC_GetMemAllocated(void)
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-static unsigned char	PIC_ErrorFlag;
-static unsigned char	PIC_ErrorString[PIC_ERRSIZE];
+static char	PIC_ErrorFlag;
+static char	PIC_ErrorString[PIC_ERRSIZE];
 static unsigned char	PIC_Sys_FnctActive=0;
 static void				(*PIC_Sys_Fnct)(void);
 
-void Pic_SetError(unsigned char *msg, ...)
+void Pic_SetError(const char *msg, ...)
 {
-	unsigned char	curerr[PIC_ERRSIZE],olderr[PIC_ERRSIZE];
+	char	curerr[PIC_ERRSIZE],olderr[PIC_ERRSIZE];
 	va_list			args;
 
 	va_start(args,msg);

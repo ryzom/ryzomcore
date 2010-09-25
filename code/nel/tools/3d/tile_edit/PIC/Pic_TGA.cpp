@@ -27,8 +27,8 @@ typedef struct TGA_HEADER
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_TGA_Read(	unsigned char *FileName,
-							unsigned char **ppPal, unsigned char **ppDatas,
+unsigned long Pic_TGA_Read(	const char *FileName,
+							char **ppPal, char **ppDatas,
 							unsigned long *pWidth, unsigned long *pHeight, 
 							unsigned long *pDepth)
 {
@@ -36,8 +36,8 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 	TGA_HEADER		tgah;
 	long			w,h,d;
 	unsigned long	size;
-	unsigned char	*pDatas;
-	unsigned char	*pPal;
+	char			*pDatas;
+	char			*pPal;
 	long			x,y;
 	long			slsize;
 	unsigned char	*scanline;
@@ -65,7 +65,7 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 	upSideDown = ((tgah.Desc & (1 << 5))==0);
 
 	size=tgah.Width*tgah.Height*(tgah.ImageDepth/8);
-	pDatas=Pic_malloc(size);
+	pDatas=(char*)Pic_malloc(size);
 	if (!pDatas)
 	{
 		Pic_SetError("TGA_Read, not enough memory");
@@ -79,7 +79,7 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 			Pic_SetError("TGA_Read, need a pointer to palette");
 			return(0);
 		}
-		pPal=Pic_calloc(1,256*3);
+		pPal=(char*)Pic_calloc(1,256*3);
 		if (!pPal)
 		{
 			Pic_SetError("TGA_Read, not enough memory for palette");
@@ -98,7 +98,7 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 	}
 
 	slsize=w*d/8;
-	scanline=Pic_calloc(1,slsize);
+	scanline=(unsigned char*)Pic_calloc(1,slsize);
 	if (!scanline)
 	{
 		if (pPal)
@@ -140,8 +140,8 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_TGA_Write(	unsigned char *FileName, 
-								unsigned char *pPal,unsigned char *pDatas, 
+unsigned long Pic_TGA_Write(	const char *FileName, 
+								char *pPal, char *pDatas, 
 								unsigned long w, unsigned long h, unsigned long d)
 {
 	FILE			*file;
@@ -186,7 +186,7 @@ unsigned long Pic_TGA_Write(	unsigned char *FileName,
 		fwrite(pPal,1,256*3,file);
 	}
 	slsize=w*d/8;
-	scanline=Pic_calloc(1,slsize);
+	scanline=(unsigned char*)Pic_calloc(1,slsize);
 	if (!scanline)
 	{
 		Pic_SetError("TGA_Write, not enough memory for scanline");

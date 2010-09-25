@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-using namespace std;
+
 #include <nel/misc/types_nl.h>
 #include <nel/misc/rgba.h>
 
@@ -19,7 +19,7 @@ using namespace std;
 //============================================================
 
 
-bool	PIC_LoadPic(string Path, vector<NLMISC::CBGRA> &Tampon, uint &Width, uint &Height);
+bool	PIC_LoadPic(std::string Path, std::vector<NLMISC::CBGRA> &Tampon, uint &Width, uint &Height);
 
 
 

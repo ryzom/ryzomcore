@@ -1,8 +1,5 @@
 #ifndef _PIC_H_
 #define _PIC_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -20,12 +17,12 @@ extern "C" {
 //
 extern unsigned long	PIC_Load(char* FileName, unsigned char Quantize);
 
-extern unsigned long	PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned long w, unsigned long h, unsigned long d);
+extern unsigned long	PIC_Create(char* pPal, char* pDatas, unsigned long w, unsigned long h, unsigned long d);
 
 extern unsigned long	PIC_Save(unsigned long id, char* FileName, unsigned long type, unsigned long qual);
 
 extern unsigned long	PIC_GetInfos(	unsigned long id, 
-										unsigned char* *ppPal, unsigned char* *ppDatas, 
+										char **ppPal, char **ppDatas, 
 										unsigned long *pW, unsigned long *pH, unsigned long *pD);
 
 
@@ -42,7 +39,4 @@ extern unsigned char	PIC_OnErrorCall( void pFnct(void) );
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-}
-#endif
 #endif

@@ -9,9 +9,6 @@
 #include "GetVal.h"
 #include "Browse.h"
 #include "choose_veget_set.h"
-#include "nel/3d/tile_bank.h"
-#include "nel/misc/stream.h"
-#include "nel/misc/file.h"
 #include <shlobj.h>
 
 using namespace NL3D;
@@ -657,7 +654,7 @@ void SelectionTerritoire::OnPath()
 					for (uint noise=1; noise<tileBank.getDisplacementMapCount (); noise++)
 					{
 						// Bitmap string
-						string bitmapPath=tileBank.getDisplacementMap (noise);
+						std::string bitmapPath=tileBank.getDisplacementMap (noise);
 
 						// not empty ?
 						if (bitmapPath!="")

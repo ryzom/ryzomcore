@@ -452,7 +452,7 @@
 				Name="pic"
 				>
 				<File
-					RelativePath=".\Pic\Pic_BMP.c"
+					RelativePath=".\Pic\Pic_BMP.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -488,7 +488,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Pic\Pic_JPG.c"
+					RelativePath=".\Pic\Pic_JPG.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -524,7 +524,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Pic\Pic_Manage.c"
+					RelativePath=".\Pic\Pic_Manage.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -560,7 +560,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Pic\PIC_System.c"
+					RelativePath=".\Pic\PIC_System.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -596,7 +596,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Pic\Pic_TGA.c"
+					RelativePath=".\Pic\Pic_TGA.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"

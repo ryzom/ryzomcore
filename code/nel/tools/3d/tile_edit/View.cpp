@@ -10,10 +10,10 @@
 #include "popup.h"
 #include <direct.h>
 //#include "ListGroup.h"
-#include "nel/3d/tile_bank.h"
 //#include "ViewPopup.h"
-#include "pic\readpic.h"
+#include "pic/readpic.h"
 
+using namespace std;
 using namespace NL3D;
 
 extern CTileBank tileBank2;
@@ -602,7 +602,7 @@ tilelist::iterator TileList::GetLast(int n)
 int TileList::GetSize(int n)
 {
 	//UpdateLF();
-	return theList[n].size();
+	return (int)theList[n].size();
 }
 
 void TileInfo::Delete ()
@@ -1257,7 +1257,7 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 	rect_txt.top = pt.y + sizetile_y + spacing_tile_text;
 	rect_txt.bottom += rect_txt.top + sizetext_y;
 	rect_txt.left -= spacing_x;
-	pDC->DrawText(Name,strlen(Name),&rect_txt,DT_CENTER | DT_SINGLELINE);
+	pDC->DrawText(Name,(int)strlen(Name),&rect_txt,DT_CENTER | DT_SINGLELINE);
 
 	// Restore the device context
 	pDC->SetBkColor( clrBk );

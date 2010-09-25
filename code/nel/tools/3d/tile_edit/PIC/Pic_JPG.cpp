@@ -31,14 +31,14 @@ void my_error_exit(j_common_ptr cinfo)
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_JPG_Read(unsigned char *FileName, unsigned char **ppPal, unsigned char **ppDatas, unsigned long *w, unsigned long *h)
+unsigned long Pic_JPG_Read(const char *FileName, char **ppPal, char **ppDatas, unsigned long *w, unsigned long *h)
 {
 	struct jpeg_decompress_struct	cinfo;
 	struct my_error_mgr				jerr;
 	FILE							*file;
 	JSAMPARRAY						buffer;		
 	int								row_stride,i;		
-	unsigned char					*pDatas,*pPal;
+	char							*pDatas,*pPal;
 	unsigned long					ptr;
 	
 	error=0;
@@ -65,12 +65,12 @@ unsigned long Pic_JPG_Read(unsigned char *FileName, unsigned char **ppPal, unsig
 	*h=cinfo.image_height;
 	if (!ppPal)
 	{
-		pDatas=Pic_calloc(1,(*w)*(*h)*3);
+		pDatas=(char*)Pic_calloc(1,(*w)*(*h)*3);
 	}
 	else
 	{
-		pDatas=Pic_calloc(1,(*w)*(*h));
-		pPal=Pic_calloc(1,256*3);
+		pDatas=(char*)Pic_calloc(1,(*w)*(*h));
+		pPal=(char*)Pic_calloc(1,256*3);
 		if (!pPal)
 		{
 			Pic_SetError("JPG_Read, not enough memory for palette");
@@ -114,7 +114,7 @@ unsigned long Pic_JPG_Read(unsigned char *FileName, unsigned char **ppPal, unsig
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_JPG_Write(unsigned char *FileName, unsigned long Qual, unsigned char *pDatas, unsigned long w, unsigned long h)
+unsigned long Pic_JPG_Write(const char *FileName, unsigned long Qual, char *pDatas, unsigned long w, unsigned long h)
 {
 	struct jpeg_compress_struct	cinfo;
 	struct my_error_mgr			jerr;
@@ -150,7 +150,7 @@ unsigned long Pic_JPG_Write(unsigned char *FileName, unsigned long Qual, unsigne
 	row_stride = w * 3;
 	while(cinfo.next_scanline<cinfo.image_height) 
 	{
-		row_pointer[0] = & pDatas[cinfo.next_scanline * row_stride];
+		row_pointer[0] = (JSAMPROW)& pDatas[cinfo.next_scanline * row_stride];
 		(void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
 	jpeg_finish_compress(&cinfo);

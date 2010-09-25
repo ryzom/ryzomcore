@@ -31,8 +31,8 @@ typedef struct BMP_HEADER
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_BMP_Write(	unsigned char *FileName, 
-								unsigned char *pPal,unsigned char *pDatas, 
+unsigned long Pic_BMP_Write(	const char *FileName, 
+								char *pPal, char *pDatas, 
 								unsigned long w, unsigned long h, unsigned long d)
 
 {
@@ -82,7 +82,7 @@ unsigned long Pic_BMP_Write(	unsigned char *FileName,
 		}
 	}
 	slsize=w*d/8;
-	scanline=Pic_calloc(1,slsize);
+	scanline=(unsigned char*)Pic_calloc(1,slsize);
 	if (!scanline)
 	{
 		Pic_SetError("BMP_Write, not enough memory for scanline");
@@ -117,15 +117,15 @@ unsigned long Pic_BMP_Write(	unsigned char *FileName,
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 
-unsigned long Pic_BMP_Read(	unsigned char *FileName,
-							unsigned char **ppPal, unsigned char **ppDatas,
+unsigned long Pic_BMP_Read(	const char *FileName,
+							char **ppPal, char **ppDatas,
 							unsigned long *pWidth, unsigned long *pHeight, 
 							unsigned long *pDepth)
 {
 	FILE			*file;
 	BMP_HEADER		bmph;
-	unsigned char	*pPal;
-	unsigned char	*pDatas;
+	char			*pPal;
+	char			*pDatas;
 	unsigned char	*scanline;
 	long			w,h,d;	
 	long			i,x,y,rest;
@@ -151,7 +151,7 @@ unsigned long Pic_BMP_Read(	unsigned char *FileName,
 	}
 	if (*pDepth==8)
 	{
-		pPal=Pic_calloc(1,256*3);
+		pPal=(char*)Pic_calloc(1,256*3);
 		if (!pPal)
 		{
 			Pic_SetError("BMP_Read, not enough memory for palette");
@@ -165,7 +165,7 @@ unsigned long Pic_BMP_Read(	unsigned char *FileName,
 			fread(&pad[0],1,1,file);
 		}		
 	}
-	pDatas=Pic_calloc(1,w*h*d/8);
+	pDatas=(char*)Pic_calloc(1,w*h*d/8);
 	if (!pDatas)
 	{
 		if (pPal)
@@ -175,7 +175,7 @@ unsigned long Pic_BMP_Read(	unsigned char *FileName,
 		Pic_SetError("BMP_Read, not enough memory for datas");
 		return(0);
 	}
-	scanline=Pic_calloc(1,w*h*d/8);
+	scanline=(unsigned char*)Pic_calloc(1,w*h*d/8);
 	if (!scanline)
 	{
 		if (pPal)
