@@ -55,31 +55,31 @@ public:
 
 	void setup()
 	{
-		_OldPath = CPath::getCurrentPath();
-		CPath::setCurrentPath(_WorkingPath.c_str());
-		string pathAfter = CPath::getCurrentPath();
+		_OldPath = NLMISC::CPath::getCurrentPath();
+		NLMISC::CPath::setCurrentPath(_WorkingPath.c_str());
+		string pathAfter = NLMISC::CPath::getCurrentPath();
 	}
 
 	void tear_down()
 	{
-		CPath::setCurrentPath(_OldPath.c_str());
+		NLMISC::CPath::setCurrentPath(_OldPath.c_str());
 	}
 
 	void addBnp()
 	{
 		// add bnp file in the path and access to file inside
-		CPath::addSearchBigFile(NEL_UNIT_BASE "ut_misc_files/files.bnp", false, false);
+		NLMISC::CPath::addSearchBigFile(NEL_UNIT_BASE "ut_misc_files/files.bnp", false, false);
 	}
 
 	void loadFromBnp()
 	{
 		// lookup for the file
-		string filename = CPath::lookup("file1_in_bnp.txt", true, true, false);
+		string filename = NLMISC::CPath::lookup("file1_in_bnp.txt", true, true, false);
 		TEST_ASSERT(filename == "files.bnp@file1_in_bnp.txt");
 
 		// read the first file content
 		{
-			CIFile file1(filename);
+			NLMISC::CIFile file1(filename);
 			string content1;
 			content1.resize(file1.getFileSize());
 			file1.serialBuffer((uint8*)content1.data(), file1.getFileSize());
@@ -89,12 +89,12 @@ public:
 		}
 
 		// lookup for the 2nd file
-		filename = CPath::lookup("file2_in_bnp.txt", true, true, false);
+		filename = NLMISC::CPath::lookup("file2_in_bnp.txt", true, true, false);
 		TEST_ASSERT(filename == "files.bnp@file2_in_bnp.txt");
 
 		{
 			// read the second file content
-			CIFile file2(filename);
+			NLMISC::CIFile file2(filename);
 			string content2;
 			content2.resize(file2.getFileSize());
 			file2.serialBuffer((uint8*)content2.data(), file2.getFileSize());
@@ -107,18 +107,18 @@ public:
 	void addXmlpack()
 	{
 		// add xml_pack file in the path and access to file inside
-		CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/xml_files.xml_pack", false, false);
+		NLMISC::CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/xml_files.xml_pack", false, false);
 	}
 
 	void loadFromXmlpack()
 	{
 		// lookup for the file
-		string filename = CPath::lookup("file1_in_xml_pack.xml", true, true, false);
+		string filename = NLMISC::CPath::lookup("file1_in_xml_pack.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/xml_files.xml_pack@@file1_in_xml_pack.xml");
 
 		// read the first file content
 		{
-			CIFile file1(filename);
+			NLMISC::CIFile file1(filename);
 			string content1;
 			content1.resize(file1.getFileSize());
 			file1.serialBuffer((uint8*)content1.data(), file1.getFileSize());
@@ -129,12 +129,12 @@ public:
 		}
 
 		// lookup for the 2nd file
-		filename = CPath::lookup("file2_in_xml_pack.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file2_in_xml_pack.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/xml_files.xml_pack@@file2_in_xml_pack.xml");
 
 		{
 			// read the second file content
-			CIFile file2(filename);
+			NLMISC::CIFile file2(filename);
 			string content2;
 			content2.resize(file2.getFileSize());
 			file2.serialBuffer((uint8*)content2.data(), file2.getFileSize());
@@ -150,7 +150,7 @@ public:
 //#ifdef WIN32
 //_CrtCheckMemory();
 //#endif
-		CPath::memoryCompress();
+		NLMISC::CPath::memoryCompress();
 //#ifdef WIN32
 //_CrtCheckMemory();
 //#endif
@@ -170,7 +170,7 @@ public:
 
 	void decompressMemory()
 	{
-		CPath::memoryUncompress();
+		NLMISC::CPath::memoryUncompress();
 	}
 
 	void loadFromBnpUncompressed()
@@ -191,30 +191,30 @@ public:
 		// but the 'addSearchPath' or add xml pack must be done
 		// at a higher discriminant directory
 
-//		CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_1/samename/samename.xml_pack", true, false, NULL);
-//		CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_2/samename/samename.xml_pack", true, false, NULL);
-		CPath::addSearchPath(NEL_UNIT_BASE "ut_misc_files/xml_files", true, false);
+//		NLMISC::CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_1/samename/samename.xml_pack", true, false, NULL);
+//		NLMISC::CPath::addSearchXmlpackFile(NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_2/samename/samename.xml_pack", true, false, NULL);
+		NLMISC::CPath::addSearchPath(NEL_UNIT_BASE "ut_misc_files/xml_files", true, false);
 
 		// lookup for the files in first subdirectory
-		string filename = CPath::lookup("file1_in_sub_1.xml", true, true, false);
+		string filename = NLMISC::CPath::lookup("file1_in_sub_1.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_1/samename/samename.xml_pack@@file1_in_sub_1.xml");
-		filename = CPath::lookup("file2_in_sub_1.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file2_in_sub_1.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_1/samename/samename.xml_pack@@file2_in_sub_1.xml");
 
 		// lookup for the files in the second subdirectory
-		filename = CPath::lookup("file1_in_sub_2.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file1_in_sub_2.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_2/samename/samename.xml_pack@@file1_in_sub_2.xml");
-		filename = CPath::lookup("file2_in_sub_2.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file2_in_sub_2.xml", true, true, false);
 		TEST_ASSERT(filename == NEL_UNIT_BASE "ut_misc_files/xml_files/same_subfolder_2/samename/samename.xml_pack@@file2_in_sub_2.xml");
 
 		// read the file content of the first file in first pack
-		filename = CPath::lookup("file1_in_sub_1.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file1_in_sub_1.xml", true, true, false);
 
 		// check that we can read the file modif date
 		uint32 d = NLMISC::CFile::getFileModificationDate(filename);
 		TEST_ASSERT(d != 0);
 		{
-			CIFile file1(filename);
+			NLMISC::CIFile file1(filename);
 			string content1;
 			content1.resize(file1.getFileSize());
 			file1.serialBuffer((uint8*)content1.data(), file1.getFileSize());
@@ -225,10 +225,10 @@ public:
 		}
 
 		// read the file content of the second file in the second pack
-		filename = CPath::lookup("file2_in_sub_2.xml", true, true, false);
+		filename = NLMISC::CPath::lookup("file2_in_sub_2.xml", true, true, false);
 		{
 			// read the second file content
-			CIFile file2(filename);
+			NLMISC::CIFile file2(filename);
 			string content2;
 			content2.resize(file2.getFileSize());
 			file2.serialBuffer((uint8*)content2.data(), file2.getFileSize());

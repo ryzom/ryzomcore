@@ -19,8 +19,6 @@
 
 #include <nel/ligo/primitive.h>
 
-using namespace NLLIGO;
-
 #include "ut_ligo_primitive.h"
 // Add a line here when adding a new test CLASS
 

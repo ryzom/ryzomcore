@@ -21,7 +21,7 @@
 #include <nel/misc/bit_mem_stream.h>
 
 // The following line is known to crash in a Ryzom service
-CBitMemStream globalBms( false, 2048 ); // global to avoid reallocation
+NLMISC::CBitMemStream globalBms( false, 2048 ); // global to avoid reallocation
 
 // Test suite for stream based classes
 // ! not complete at all at time of writing !
@@ -38,21 +38,21 @@ public:
 
 	void preallocatedBitStream()
 	{
-		CBitMemStream localBms( false, 2048 ); // global to avoid reallocation
+		NLMISC::CBitMemStream localBms( false, 2048 ); // global to avoid reallocation
 	}
 
 
 	void copyOnWrite()
 	{
 		// test the copy on write strategy in the mem stream (and derived) class.
-		// The point is to be able to copy a mem stream (e.g a CMessage) 
+		// The point is to be able to copy a mem stream (e.g a NLNET::CMessage) 
 		// but to do not copy the stream buffer.
 		// If more than one stream use the same buffer, any attempt to 
 		// modifye the buffer content while lead to a buffer duplication
 
-		CMemStream s1;
-		CMemStream s2;
-		CMemStream s3;
+		NLMISC::CMemStream s1;
+		NLMISC::CMemStream s2;
+		NLMISC::CMemStream s3;
 
 
 		uint32 i = 1;
@@ -94,7 +94,7 @@ public:
 		// check that we can serialize with const stream or const object
 
 
-		CMemStream s1;
+		NLMISC::CMemStream s1;
 		NLMISC::IStream &is1 = s1;
 
 		const string str("toto");
@@ -120,7 +120,7 @@ public:
 		is1.serial(i2);
 		is1.serialEnum(e2);
 
-		const CMemStream &s2 = s1;
+		const NLMISC::CMemStream &s2 = s1;
 		const NLMISC::IStream &is2 = s2;
 
 		string str3;
@@ -157,11 +157,11 @@ public:
 	
 	void memStreamSwap()
 	{
-		CMemStream ms2;
+		NLMISC::CMemStream ms2;
 			
 		string s;
 		{
-			CMemStream ms1;
+			NLMISC::CMemStream ms1;
 
 			s = "foo1";
 			ms1.serial(s);

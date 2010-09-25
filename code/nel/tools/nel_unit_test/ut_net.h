@@ -19,8 +19,6 @@
 
 #include <nel/net/message.h>
 
-using namespace NLNET;
-
 #include "ut_net_layer3.h"
 #include "ut_net_message.h"
 #include "ut_net_module.h"

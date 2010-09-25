@@ -35,8 +35,8 @@ private:
 	string	_RefPrimFileName;
 	void setup()
 	{
-		_RestorePath = CPath::getCurrentPath();
-		CPath::setCurrentPath(_WorkingPath.c_str());
+		_RestorePath = NLMISC::CPath::getCurrentPath();
+		NLMISC::CPath::setCurrentPath(_WorkingPath.c_str());
 
 		_RefPrimFileName = "__test_prim.primitive";
 
@@ -79,30 +79,30 @@ private:
 		fclose(fp);
 
 		// init ligo
-		CPrimitiveContext::instance().CurrentLigoConfig = &_LigoConfig;
+		NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &_LigoConfig;
 		_LigoConfig.readPrimitiveClass(CLASS_FILE_NAME, false);
 
 		// create a reference primitive
-		if (CFile::isExists(_RefPrimFileName))
+		if (NLMISC::CFile::isExists(_RefPrimFileName))
 		{
-			CFile::deleteFile(_RefPrimFileName);
+			NLMISC::CFile::deleteFile(_RefPrimFileName);
 		}
-		CPrimitives primDoc;
+		NLLIGO::CPrimitives primDoc;
 		nlassert(primDoc.RootNode != NULL);
 
-		CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 
-		IPrimitive *p = dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimNode"));
-		p->addPropertyByName("class", new CPropertyString("test"));
-		p->addPropertyByName("name", new CPropertyString("test_root"));
+		NLLIGO::IPrimitive *p = dynamic_cast<NLLIGO::IPrimitive *> (NLMISC::CClassRegistry::create ("CPrimNode"));
+		p->addPropertyByName("class", new NLLIGO::CPropertyString("test"));
+		p->addPropertyByName("name", new NLLIGO::CPropertyString("test_root"));
 		primDoc.RootNode->insertChild(p);
 
-		CPrimAlias *pa = dynamic_cast<CPrimAlias *> (CClassRegistry::create ("CPrimAlias"));
-		pa->addPropertyByName("class", new CPropertyString("alias"));
-		pa->addPropertyByName("name", new CPropertyString("alias"));
+		NLLIGO::CPrimAlias *pa = dynamic_cast<NLLIGO::CPrimAlias *> (NLMISC::CClassRegistry::create ("CPrimAlias"));
+		pa->addPropertyByName("class", new NLLIGO::CPropertyString("alias"));
+		pa->addPropertyByName("name", new NLLIGO::CPropertyString("alias"));
 		p->insertChild(pa);
 		
-		CPrimitiveContext::instance().CurrentPrimitive = NULL;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 		// save the file
 		saveXmlPrimitiveFile(primDoc, _RefPrimFileName);
@@ -110,7 +110,7 @@ private:
 	
 	void tear_down()
 	{
-		CPath::setCurrentPath(_RestorePath.c_str());
+		NLMISC::CPath::setCurrentPath(_RestorePath.c_str());
 	}
 
 	void testAliasGenerator()
@@ -121,17 +121,17 @@ private:
 
 		// First, load then save the doc
 		{
-			CPrimitives primDoc;
+			NLLIGO::CPrimitives primDoc;
 
-			CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 			loadXmlPrimitiveFile(primDoc, _RefPrimFileName, _LigoConfig);
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 			lastGeneratedAlias = primDoc.getLastGeneratedAlias();
 
 			// get a copy of the primitive
-			IPrimitive *prim = NULL;
-			IPrimitive *primCopy = NULL;
+			NLLIGO::IPrimitive *prim = NULL;
+			NLLIGO::IPrimitive *primCopy = NULL;
 			TEST_ASSERT(primDoc.RootNode->getChild(prim, 0));
 			if (prim)
 			{
@@ -143,9 +143,9 @@ private:
 					primDoc.RootNode->removeChild(prim);
 
 					// insert the copy
-					CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+					NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 					primDoc.RootNode->insertChild(primCopy);
-					CPrimitiveContext::instance().CurrentPrimitive = NULL;
+					NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 				}
 			}
 
@@ -155,17 +155,17 @@ private:
 
 		// second, reload the file and check the last generated alias
 		{
-			CPrimitives primDoc;
+			NLLIGO::CPrimitives primDoc;
 
-			CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 			loadXmlPrimitiveFile(primDoc, _RefPrimFileName, _LigoConfig);
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 			TEST_ASSERT(lastGeneratedAlias == primDoc.getLastGeneratedAlias());
 		}
 	}
 
-	CLigoConfig		_LigoConfig;
+	NLLIGO::CLigoConfig		_LigoConfig;
 };
 
 #endif

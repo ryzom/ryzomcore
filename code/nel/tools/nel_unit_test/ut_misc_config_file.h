@@ -41,18 +41,18 @@ public:
 
 	void setup()
 	{
-		_OldPath = CPath::getCurrentPath();
-		CPath::setCurrentPath(_WorkingPath.c_str());
+		_OldPath = NLMISC::CPath::getCurrentPath();
+		NLMISC::CPath::setCurrentPath(_WorkingPath.c_str());
 	}
 
 	void tear_down()
 	{
-		CPath::setCurrentPath(_OldPath.c_str());
+		NLMISC::CPath::setCurrentPath(_OldPath.c_str());
 	}
 	
 	void configWithInclude()
 	{
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		TEST_THROWS_NOTHING(configFile.load(NEL_UNIT_BASE "ut_misc_files/cfg_with_include.cfg"));
 
@@ -65,7 +65,7 @@ public:
 
 	void configWithOptional()
 	{
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		TEST_THROWS_NOTHING(configFile.load(NEL_UNIT_BASE "ut_misc_files/cfg_with_optional.cfg"));
 
@@ -79,7 +79,7 @@ public:
 
 	void configWithDefine()
 	{
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		TEST_THROWS_NOTHING(configFile.load(NEL_UNIT_BASE "ut_misc_files/cfg_with_define.cfg"));
 
@@ -90,12 +90,12 @@ public:
 		TEST_ASSERT(configFile.getVarPtr("CfgMustExist") != NULL);
 	}
 
-	class  CMyDisplayer : public IDisplayer
+	class  CMyDisplayer : public NLMISC::IDisplayer
 	{
 	public:
 		vector<string>	Lines;
 	
-		virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+		virtual void doDisplay( const NLMISC::CLog::TDisplayInfo& args, const char *message)
 		{
 			Lines.push_back(message);
 		}
@@ -105,11 +105,11 @@ public:
 	{
 		// override the warning channel to get the error on unclosed if
 		CMyDisplayer warnings;
-		CLog logger;
+		NLMISC::CLog logger;
 		logger.addDisplayer(&warnings);
-		CNLWarningOverride	override(&logger);
+		NLMISC::CNLWarningOverride	override(&logger);
 
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		string fullName = NLMISC::CPath::getFullPath(NEL_UNIT_BASE "ut_misc_files/cfg_with_bad_test.cfg", false);
 
@@ -139,11 +139,11 @@ public:
 	void configIncludeAndOptional()
 	{
 		CMyDisplayer warnings;
-		CLog logger;
+		NLMISC::CLog logger;
 		logger.addDisplayer(&warnings);
-		CNLWarningOverride	override(&logger);
+		NLMISC::CNLWarningOverride	override(&logger);
 
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		string fullName = NLMISC::CPath::getFullPath(NEL_UNIT_BASE "ut_misc_files/cfg_with_include_and_optional.cfg", false);
 
@@ -158,17 +158,17 @@ public:
 	void reportErrorInSubFiles()
 	{
 		CMyDisplayer warnings;
-		CLog logger;
+		NLMISC::CLog logger;
 		logger.addDisplayer(&warnings);
-		CNLWarningOverride	override(&logger);
+		NLMISC::CNLWarningOverride	override(&logger);
 
-		CConfigFile configFile;
+		NLMISC::CConfigFile configFile;
 
 		string fullName = NLMISC::CPath::getFullPath(NEL_UNIT_BASE "ut_misc_files/cfg_with_error_main.cfg", false);
 		string subfullName = NLMISC::CPath::getFullPath(NEL_UNIT_BASE "ut_misc_files/cfg_with_error.cfg", false);
 
 
-		TEST_THROWS(configFile.load(NEL_UNIT_BASE "ut_misc_files/cfg_with_error_main.cfg"), EParseError);
+		TEST_THROWS(configFile.load(NEL_UNIT_BASE "ut_misc_files/cfg_with_error_main.cfg"), NLMISC::EParseError);
 
 		// check that we have error report with correct filename and line number
 		TEST_ASSERT(warnings.Lines.size() == 1);

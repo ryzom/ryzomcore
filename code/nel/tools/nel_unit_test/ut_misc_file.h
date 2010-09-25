@@ -20,7 +20,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 
-// Test suite for CFile behavior
+// Test suite for NLMISC::CFile behavior
 struct CUTMiscFile : public Test::Suite
 {
 	CUTMiscFile()

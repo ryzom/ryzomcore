@@ -29,9 +29,9 @@ struct CUTMiscSString : public Test::Suite
 
 	void testStrtok()
 	{
-		CSString testLine("  a=b  c   (a=e b=c) \t\t  c(a=e b=c) toto(bimbo(foo(bar(a=b))))");
+		NLMISC::CSString testLine("  a=b  c   (a=e b=c) \t\t  c(a=e b=c) toto(bimbo(foo(bar(a=b))))");
 
-		CSString part;
+		NLMISC::CSString part;
 		part = testLine.strtok(" \t", true, false);
 		TEST_ASSERT(part == "a=b");
 		part = testLine.strtok(" \t", true, false);
@@ -47,7 +47,7 @@ struct CUTMiscSString : public Test::Suite
 		part = testLine.strtok(" \t=", true, false);
 		TEST_ASSERT(part == "(bimbo(foo(bar(a=b))))");
 		part = part.stripBlockDelimiters();
-		CSString part2 = part.strtok(" \t=", true, false);
+		NLMISC::CSString part2 = part.strtok(" \t=", true, false);
 		TEST_ASSERT(part2 == "bimbo");
 		part2 = part.strtok(" \t=", true, false);
 		TEST_ASSERT(part2 == "(foo(bar(a=b)))");

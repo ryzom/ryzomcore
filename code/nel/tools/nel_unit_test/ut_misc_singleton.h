@@ -80,7 +80,7 @@ public:
 	
 	void createSingleton()
 	{
-		TEST_ASSERT(CInstanceCounterManager::getInstance().getInstanceCounter("CSafeSingleton") == 0);
+		TEST_ASSERT(NLMISC::CInstanceCounterManager::getInstance().getInstanceCounter("CSafeSingleton") == 0);
 		CSafeSingleton &ss = CSafeSingleton::getInstance();
 	
 		TEST_ASSERT(NL_GET_INSTANCE_COUNTER(CSafeSingleton) == 1);
@@ -106,7 +106,7 @@ public:
 
 	/*void multiDllSingleton()
 	{
-		TEST_ASSERT(CCommandRegistry::getInstance().exists("aDynLibCommand") == false);
+		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().exists("aDynLibCommand") == false);
 
 		CLibrary lib;
 		if (lib.loadLibrary("dyn_lib_test", true, true, true) != true)
@@ -115,7 +115,7 @@ public:
 			return;
 		}
 
-		TEST_ASSERT(CCommandRegistry::getInstance().isCommand("aDynLibCommand") == true);
+		TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().isCommand("aDynLibCommand") == true);
 
 		IDynLibTest *libTest = dynamic_cast<IDynLibTest*>(lib.getNelLibraryInterface());
 		TEST_ASSERT(libTest != NULL);

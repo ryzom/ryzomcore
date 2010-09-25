@@ -30,7 +30,7 @@ public:
 
 	void lockSubMEssageWithLongName()
 	{
-		CMessage master("BIG");
+		NLNET::CMessage master("BIG");
 
 		// serial some stuff
 		for (uint8 i=0; i<10; ++i)
@@ -43,7 +43,7 @@ public:
 		// serial 4 sub messages
 		for (uint i=0; i<4; ++i)
 		{
-			CMessage sub(toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
+			NLNET::CMessage sub(NLMISC::toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
 
 			for (uint8 j=0; j<i*4; ++j)
 			{
@@ -81,7 +81,7 @@ public:
 			master.lockSubMessage(subSize);
 			TEST_ASSERT(subSize == sizes[i]);
 
-			TEST_ASSERT(master.getName() == toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
+			TEST_ASSERT(master.getName() == NLMISC::toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
 			TEST_ASSERT(master.length() == sizes[i]);
 
 			for (uint8 j=0; j<i*4; ++j)
@@ -122,10 +122,10 @@ public:
 
 			TEST_ASSERT(subSize == sizes[i]);
 
-			TEST_ASSERT(master.getName() == toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
+			TEST_ASSERT(master.getName() == NLMISC::toString("A_VERY_LONG_SUB_MESSAGE_NAME_%u", i));
 			TEST_ASSERT(master.length() == sizes[i]);
 
-			CMessage sub;
+			NLNET::CMessage sub;
 			sub.assignFromSubMessage(master);
 
 			for (uint8 j=0; j<i*4; ++j)
@@ -148,7 +148,7 @@ public:
 
 	void lockSubMEssage()
 	{
-		CMessage master("BIG");
+		NLNET::CMessage master("BIG");
 
 		// serial some stuff
 		for (uint8 i=0; i<10; ++i)
@@ -161,7 +161,7 @@ public:
 		// serial 4 sub messages
 		for (uint i=0; i<4; ++i)
 		{
-			CMessage sub(toString("SUB_%u", i));
+			NLNET::CMessage sub(NLMISC::toString("SUB_%u", i));
 
 			for (uint8 j=0; j<i*4; ++j)
 			{
@@ -199,7 +199,7 @@ public:
 			master.lockSubMessage(subSize);
 			TEST_ASSERT(subSize == sizes[i]);
 
-			TEST_ASSERT(master.getName() == toString("SUB_%u", i));
+			TEST_ASSERT(master.getName() == NLMISC::toString("SUB_%u", i));
 			TEST_ASSERT(master.length() == sizes[i]);
 
 			for (uint8 j=0; j<i*4; ++j)
@@ -240,10 +240,10 @@ public:
 
 			TEST_ASSERT(subSize == sizes[i]);
 
-			TEST_ASSERT(master.getName() == toString("SUB_%u", i));
+			TEST_ASSERT(master.getName() == NLMISC::toString("SUB_%u", i));
 			TEST_ASSERT(master.length() == sizes[i]);
 
-			CMessage sub;
+			NLNET::CMessage sub;
 			sub.assignFromSubMessage(master);
 
 			for (uint8 j=0; j<i*4; ++j)
@@ -266,12 +266,12 @@ public:
 	
 	void messageSwap()
 	{
-		CMessage msg2;
+		NLNET::CMessage msg2;
 			
 		string s;
 		{
-			CMessage msg1;
-			msg1.setType("NAME", CMessage::Request);
+			NLNET::CMessage msg1;
+			msg1.setType("NAME", NLNET::CMessage::Request);
 
 			s = "foo1";
 			msg1.serial(s);
@@ -290,7 +290,7 @@ public:
 		msg2.invert();
 		TEST_ASSERT(msg2.typeIsSet());
 		TEST_ASSERT(msg2.getName() == "NAME");
-		TEST_ASSERT(msg2.getType() == CMessage::Request);
+		TEST_ASSERT(msg2.getType() == NLNET::CMessage::Request);
 		msg2.serial(s);
 		TEST_ASSERT(s == "foo1");
 		msg2.serial(s);

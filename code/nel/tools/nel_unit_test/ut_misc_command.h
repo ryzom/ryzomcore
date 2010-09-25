@@ -21,7 +21,7 @@
 
 vector<string>	callList;
 
-class TTest : public ICommandsHandler
+class TTest : public NLMISC::ICommandsHandler
 {
 protected:
 	std::string _Name;
@@ -151,11 +151,11 @@ public:
 
 		callList.clear();
 
-		ICommand::execute("T4.derivedCommand4", *InfoLog);
+		NLMISC::ICommand::execute("T4.derivedCommand4", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 1);
 		TEST_ASSERT(callList[0] == "T4.derivedCommand4");
 
-		ICommand::execute("T4.theCommand1", *InfoLog);
+		NLMISC::ICommand::execute("T4.theCommand1", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 3);
 		TEST_ASSERT(callList[1] == "T4.recallBase");
 		TEST_ASSERT(callList[2] == "T4.theCommand1");
@@ -170,28 +170,28 @@ public:
 
 		callList.clear();
 
-		ICommand::execute("T1.theCommand1", *InfoLog);
+		NLMISC::ICommand::execute("T1.theCommand1", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 1);
 		TEST_ASSERT(callList[0] == "T1.theCommand1");
 
-		ICommand::execute("T1.derivedCommand", *InfoLog);
+		NLMISC::ICommand::execute("T1.derivedCommand", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 2);
 		TEST_ASSERT(callList[1] == "T1.derivedCommand");
 
-		ICommand::execute("T1.commandToOverride", *InfoLog);
+		NLMISC::ICommand::execute("T1.commandToOverride", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 3);
 		TEST_ASSERT(callList[2] == "T1.commandToOverride");
 		
 
-		ICommand::execute("T2.theCommand1", *InfoLog);
+		NLMISC::ICommand::execute("T2.theCommand1", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 4);
 		TEST_ASSERT(callList[3] == "T2.theCommand1");
 
-		ICommand::execute("T2.derivedCommand", *InfoLog);
+		NLMISC::ICommand::execute("T2.derivedCommand", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 5);
 		TEST_ASSERT(callList[4] == "T2.derivedCommand");
 
-		ICommand::execute("T2.commandToOverride", *InfoLog);
+		NLMISC::ICommand::execute("T2.commandToOverride", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 6);
 		TEST_ASSERT(callList[5] == "T2.command Overidden");
 	}
@@ -204,11 +204,11 @@ public:
 
 		TEST_ASSERT(callList.empty());
 
-		ICommand::execute("inst1.theCommand1", *InfoLog);
+		NLMISC::ICommand::execute("inst1.theCommand1", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 1);
 		TEST_ASSERT(callList[0] == "inst1.theCommand1");
 
-		ICommand::execute("inst1.theCommand2", *InfoLog);
+		NLMISC::ICommand::execute("inst1.theCommand2", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 2);
 		TEST_ASSERT(callList[0] == "inst1.theCommand1");
 		TEST_ASSERT(callList[1] == "inst1.theCommand2");
@@ -221,13 +221,13 @@ public:
 
 		TEST_ASSERT(callList.size() == 2);
 
-		ICommand::execute("inst2.theCommand1", *InfoLog);
+		NLMISC::ICommand::execute("inst2.theCommand1", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 3);
 		TEST_ASSERT(callList[0] == "inst1.theCommand1");
 		TEST_ASSERT(callList[1] == "inst1.theCommand2");
 		TEST_ASSERT(callList[2] == "inst2.theCommand1");
 
-		ICommand::execute("inst2.theCommand2", *InfoLog);
+		NLMISC::ICommand::execute("inst2.theCommand2", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 4);
 		TEST_ASSERT(callList[0] == "inst1.theCommand1");
 		TEST_ASSERT(callList[1] == "inst1.theCommand2");
@@ -239,7 +239,7 @@ public:
 	{
 		delete t1;
 
-		ICommand::execute("inst1.theCommand2", *InfoLog);
+		NLMISC::ICommand::execute("inst1.theCommand2", *NLMISC::InfoLog);
 		TEST_ASSERT(callList.size() == 4);
 		TEST_ASSERT(callList[0] == "inst1.theCommand1");
 		TEST_ASSERT(callList[1] == "inst1.theCommand2");

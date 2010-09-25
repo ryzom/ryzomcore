@@ -24,7 +24,7 @@ uint16 TestPort1 = 56000;
 
 uint NbTestReceived = 0;
 
-CMessage msgoutExpectingAnswer0, msgoutSimple0, msgoutSimple50;
+NLNET::CMessage msgoutExpectingAnswer0, msgoutSimple0, msgoutSimple50;
 
 // Data structure for messages
 struct TData
@@ -44,9 +44,9 @@ struct TData
 };
 
 // This callback must not take more than 10 ms
-void cbTest( CMessage &msgin, TSockId from, CCallbackNetBase &netbase )
+void cbTest( NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase )
 {
-	TTime before = CTime::getLocalTime();
+	NLMISC::TTime before = NLMISC::CTime::getLocalTime();
 
 	// Read data from the message
 	TData data;
@@ -59,21 +59,21 @@ void cbTest( CMessage &msgin, TSockId from, CCallbackNetBase &netbase )
 		netbase.send( msgoutSimple0, from );
 
 	// Check that the duration is compatible with our timeout tests
-	TTime maxDuration;
+	NLMISC::TTime maxDuration;
 	if ( msgin.getName() == "TEST_50" )
 	{
-		while ( CTime::getLocalTime() - before < 49 ); // wait
+		while ( NLMISC::CTime::getLocalTime() - before < 49 ); // wait
 		maxDuration = 70;
 	}
 	else
 		maxDuration = 10;
-	TTime actualDuration = CTime::getLocalTime() - before;
+	NLMISC::TTime actualDuration = NLMISC::CTime::getLocalTime() - before;
 	if ( actualDuration > maxDuration )
 		nlerror( "The callback cbTest takes too long (%u) for %s, please fix the test", (uint)actualDuration, msgin.getName().c_str() );
 }
 
 
-static TCallbackItem CallbackArray[] =
+static NLNET::TCallbackItem CallbackArray[] =
 {
 	{ "TEST_0", cbTest },
 	{ "TEST_50", cbTest }
@@ -124,12 +124,12 @@ public:
 		msgoutSimple50.serial( data );
 
 		// Init connections
-		_Server = new CCallbackServer();
+		_Server = new NLNET::CCallbackServer();
 		_Server->init( TestPort1 );
-		_Server->addCallbackArray( CallbackArray, sizeof(CallbackArray)/sizeof(TCallbackItem) );
-		_Client = new CCallbackClient();
-		_Client->connect( CInetAddress( "localhost", TestPort1 ) );
-		_Client->addCallbackArray( CallbackArray, sizeof(CallbackArray)/sizeof(TCallbackItem) );
+		_Server->addCallbackArray( CallbackArray, sizeof(CallbackArray)/sizeof(NLNET::TCallbackItem) );
+		_Client = new NLNET::CCallbackClient();
+		_Client->connect( NLNET::CInetAddress( "localhost", TestPort1 ) );
+		_Client->addCallbackArray( CallbackArray, sizeof(CallbackArray)/sizeof(NLNET::TCallbackItem) );
 
 		// TEST: Simple message transmission
 		NbTestReceived = 0;
@@ -138,7 +138,7 @@ public:
 		{
 			_Client->update();
 			_Server->update(); // legacy version
-			nlSleep( 50 );
+			NLMISC::nlSleep( 50 );
 		}
 		TEST_ASSERT( NbTestReceived == 2 ); // answer and reply
 
@@ -153,7 +153,7 @@ public:
 			_Server->update2( 0 ); // shortest time-out = ONE-SHOT mode
 			TEST_ASSERT( (NbTestReceived == prevNbTestReceived) ||
 						 (NbTestReceived == prevNbTestReceived + 1) );
-			nlSleep( 10 );
+			NLMISC::nlSleep( 10 );
 		}
 		
 		// TEST: GREEDY update mode on the receiver
@@ -163,7 +163,7 @@ public:
 		for ( uint i=0; i!=10; ++i ) // make sure all messages are flushed
 		{
 			_Client->update2();
-			nlSleep( 10 );
+			NLMISC::nlSleep( 10 );
 		}
 		_Server->update2( -1 ); // receive all
 		TEST_ASSERT( NbTestReceived == 20 );
@@ -175,7 +175,7 @@ public:
 		for ( uint i=0; i!=10; ++i ) // make sure all messages are flushed
 		{
 			_Client->update2();
-			nlSleep( 10 );
+			NLMISC::nlSleep( 10 );
 		}
 		while ( NbTestReceived < 20 )
 		{
@@ -191,16 +191,16 @@ public:
 			_Client->send( msgoutSimple0 );
 			_Client->send( msgoutSimple0 ); // send 2 messages at a time
 			_Client->update2();
-			TTime before = CTime::getLocalTime();
+			NLMISC::TTime before = NLMISC::CTime::getLocalTime();
 			_Server->update2( -1, 30 );
-			TTime duration = CTime::getLocalTime() - before;
+			NLMISC::TTime duration = NLMISC::CTime::getLocalTime() - before;
 			TEST_ASSERT( duration >= 30 );
 		}
 	}
 
 private:
-	CCallbackServer *_Server;
-	CCallbackClient *_Client;
+	NLNET::CCallbackServer *_Server;
+	NLNET::CCallbackClient *_Client;
 
 };
 

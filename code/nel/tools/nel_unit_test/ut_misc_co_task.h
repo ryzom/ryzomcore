@@ -81,7 +81,7 @@ vector<string>	result;
 vector<string>	result2;
 
 // a simple task
-class CTask1 : public CCoTask
+class CTask1 : public NLMISC::CCoTask
 {
 	vector<string>	&Output;
 public:
@@ -93,7 +93,7 @@ public:
 	{
 		for (uint i=0; i<5; ++i)
 		{
-			string s = toString("Task1 : %u", i);
+			string s = NLMISC::toString("Task1 : %u", i);
 			Output.push_back(s);
 			yield();
 		}
@@ -101,7 +101,7 @@ public:
 };
 
 // another simple task
-class CTask2 : public CCoTask
+class CTask2 : public NLMISC::CCoTask
 {
 	vector<string>	&Output;
 
@@ -122,7 +122,7 @@ public:
 };
 
 // a thread runnable class
-class CTaskThread : public IRunnable
+class CTaskThread : public NLMISC::IRunnable
 {
 	void run()
 	{
@@ -133,7 +133,7 @@ class CTaskThread : public IRunnable
 			t1.resume();
 			string s = NLMISC::toString("Thread : %u", i);
 			result2.push_back(s);
-			nlSleep(0);
+			NLMISC::nlSleep(0);
 		}
 	}
 };
@@ -159,7 +159,7 @@ public:
 		result2.clear();
 
 		CTaskThread	tt;
-		IThread *th = IThread::create(&tt);
+		NLMISC::IThread *th = NLMISC::IThread::create(&tt);
 
 		CTask2	t2;
 
@@ -171,7 +171,7 @@ public:
 			t2.resume();
 			string s = NLMISC::toString("Main : %u", i);
 			result.push_back(s);
-			nlSleep(0);
+			NLMISC::nlSleep(0);
 		}
 
 		// wait task completion
@@ -213,7 +213,7 @@ public:
 		// loop and run the main task and the two sub task
 		for (uint i=0; i<2; ++i)
 		{
-			string s = toString("Main : %u", i);
+			string s = NLMISC::toString("Main : %u", i);
 			result.push_back(s);
 			t1.resume();
 			t2.resume();

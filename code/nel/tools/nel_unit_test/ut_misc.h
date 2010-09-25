@@ -17,8 +17,6 @@
 #ifndef UT_MISC
 #define UT_MISC
 
-using namespace NLMISC;
-
 #include "ut_misc_co_task.h"
 #include "ut_misc_command.h"
 #include "ut_misc_config_file.h"
