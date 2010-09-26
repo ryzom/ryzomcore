@@ -43,6 +43,7 @@
 #include "nel/misc/check_fpu.h"
 
 using namespace std::rel_ops;
+using namespace NLMISC;
 
 extern NLLIGO::CLigoConfig	LigoConfig;
 extern CContinentManager	ContinentMngr;
