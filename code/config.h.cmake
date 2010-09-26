@@ -40,4 +40,9 @@
 #cmakedefine NL_LIB_PREFIX "${NL_LIB_PREFIX}"
 #cmakedefine NL_DRIVER_PREFIX "${NL_DRIVER_PREFIX}"
 
+#cmakedefine RYZOM_PREFIX "${RYZOM_PREFIX}"
+#cmakedefine RYZOM_BIN_PREFIX "${RYZOM_BIN_PREFIX}"
+#cmakedefine RYZOM_ETC_PREFIX "${RYZOM_ETC_PREFIX}"
+#cmakedefine RYZOM_SHARE_PREFIX "${RYZOM_SHARE_PREFIX}"
+
 #endif // CONFIG_H
