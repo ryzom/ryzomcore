@@ -22,6 +22,10 @@ NL_TARGET_DRIVER(nel_drv_openal ${SRC})
 
 INCLUDE_DIRECTORIES(${OPENAL_INCLUDE_DIR})
 
+IF(WITH_STLPORT)
+  TARGET_LINK_LIBRARIES(nel_drv_openal ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(WITH_STLPORT)
+
 TARGET_LINK_LIBRARIES(nel_drv_openal ${OPENAL_LIBRARY} nelmisc nelsnd_lowlevel)
 NL_DEFAULT_PROPS(nel_drv_openal "NeL, Driver, Sound: OpenAL")
 NL_ADD_RUNTIME_FLAGS(nel_drv_openal)

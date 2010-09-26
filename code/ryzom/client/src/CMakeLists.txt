@@ -63,7 +63,7 @@ INCLUDE_DIRECTORIES(
 			${CURL_INCLUDE_DIRS}
 )
 
-TARGET_LINK_LIBRARIES(ryzom_client 	${PLATFORM_LINKFLAGS}
+TARGET_LINK_LIBRARIES(ryzom_client
 						nelmisc
 						nelnet
 						nelligo

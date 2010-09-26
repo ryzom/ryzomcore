@@ -16,7 +16,7 @@ SOURCE_GROUP(Traversals FILES
         ../../include/nel/3d/render_trav.h
         trav_scene.cpp
         ../../include/nel/3d/trav_scene.h)
-        
+
 SOURCE_GROUP(Models FILES
         camera.cpp
         ../../include/nel/3d/camera.h
@@ -50,7 +50,7 @@ SOURCE_GROUP(Models FILES
         ../../include/nel/3d/transform_shape.h
         water_model.cpp
         ../../include/nel/3d/water_model.h)
-        
+
 SOURCE_GROUP(Landscape FILES
         bezier_patch.cpp
         ../../include/nel/3d/bezier_patch.h
@@ -104,7 +104,7 @@ SOURCE_GROUP(Landscape FILES
         ../../include/nel/3d/tile_lumel.h
         zone.cpp
         ../../include/nel/3d/zone.h)
-        
+
 SOURCE_GROUP(Landscape\\ZoneManager FILES
         zone_manager.cpp
         ../../include/nel/3d/zone_manager.h
@@ -147,7 +147,7 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/vertex_program.h
         vertex_program_parse.cpp
         ../../include/nel/3d/vertex_program_parse.h)
-        
+
 SOURCE_GROUP(Font FILES
         computed_string.cpp
         ../../include/nel/3d/computed_string.h
@@ -238,8 +238,8 @@ SOURCE_GROUP(Shapes FILES
         vertex_stream_manager.cpp
         ../../include/nel/3d/vertex_stream_manager.h
         water_shape.cpp
-        ../../include/nel/3d/water_shape.h)  
-            
+        ../../include/nel/3d/water_shape.h)
+
 SOURCE_GROUP(Textures FILES
         async_texture_block.cpp
         ../../include/nel/3d/async_texture_block.h
@@ -275,7 +275,7 @@ SOURCE_GROUP(Textures FILES
         ../../include/nel/3d/texture_mem.h
         texture_multi_file.cpp
         ../../include/nel/3d/texture_multi_file.h)
-        
+
 SOURCE_GROUP(Mrm FILES
         mrm_builder.cpp
         ../../include/nel/3d/mrm_builder.h
@@ -285,7 +285,7 @@ SOURCE_GROUP(Mrm FILES
         ../../include/nel/3d/mrm_mesh.h
         mrm_parameters.cpp
         ../../include/nel/3d/mrm_parameters.h)
-        
+
 SOURCE_GROUP(Animation FILES
         anim_ctrl.cpp
         ../../include/nel/3d/anim_detail_trav.h
@@ -337,7 +337,7 @@ SOURCE_GROUP(Animation FILES
         ../../include/nel/3d/track_tcb.h
         transformable.cpp
         ../../include/nel/3d/transformable.h)
-        
+
 SOURCE_GROUP(UserImp FILES
         animation_set_user.cpp
         ../../include/nel/3d/animation_set_user.h
@@ -438,7 +438,7 @@ SOURCE_GROUP(User FILES
         ../../include/nel/3d/u_water.h
         ../../include/nel/3d/u_water_env_map.h
         ../../include/nel/3d/viewport.h)
-        
+
 SOURCE_GROUP(Fx\\Particles FILES
         particle_system.cpp
         ../../include/nel/3d/particle_system.h
@@ -457,7 +457,7 @@ SOURCE_GROUP(Fx\\Particles FILES
         ../../include/nel/3d/ps_spawn_info.h
         ps_util.cpp
         ../../include/nel/3d/ps_util.h)
-        
+
 SOURCE_GROUP("Fx\\Particles\\particles render" FILES
         ps_dot.cpp
         ../../include/nel/3d/ps_dot.h
@@ -543,7 +543,7 @@ SOURCE_GROUP(Fx\\2d FILES
         motion_blur.cpp
         ../../include/nel/3d/motion_blur.h
         quad_effect.cpp
-        ../../include/nel/3d/quad_effect.h)        
+        ../../include/nel/3d/quad_effect.h)
 SOURCE_GROUP(Collisions FILES
         camera_col.cpp
         ../../include/nel/3d/camera_col.h
@@ -666,6 +666,10 @@ SOURCE_GROUP(Shadows FILES
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
+
+IF(WITH_STLPORT)
+  TARGET_LINK_LIBRARIES(nel3d ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(WITH_STLPORT)
 
 TARGET_LINK_LIBRARIES(nel3d nelmisc ${FREETYPE_LIBRARY})
 SET_TARGET_PROPERTIES(nel3d PROPERTIES LINK_INTERFACE_LIBRARIES "")
