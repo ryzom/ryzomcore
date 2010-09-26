@@ -190,9 +190,9 @@ void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filen
 		// if we're pointing at a string the first 4 bytes ar the string length
 		uint len=*(uint *)(arrayPointer+i);
 
-		// if the stringlength could be valid 
+		// if the stringlength could be valid
 		if (len>0 && len+i<=size)
-		{		
+		{
 			uint k;
 			for (k=j; k<len+j && isASCII (arrayPointer[k]);k++);
 			if (k==len+j)
@@ -342,7 +342,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 			}
 		}
 
-		// Close 
+		// Close
 		fclose (file);
 		if (cont)
 		{
@@ -363,7 +363,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 					inputFiles.insert (temp);
 				}
 
-				// Close 
+				// Close
 				fclose (file);
 
 				// Available files
@@ -377,7 +377,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 						temp = toLower (string(name));
 						temp2 = toLower (string(name));
 
-						// Remove space						
+						// Remove space
 						removeBeginEndSpaces (temp);
 						removeBeginEndSpaces (temp2);
 
@@ -387,7 +387,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 
 						// Remove directory
 						removeDirectory (temp);
-						
+
 						// Good extension
 						if (filterExtension (temp.c_str (), extensions))
 						{
@@ -410,7 +410,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 						}
 					}
 
-					// Close 
+					// Close
 					fclose (file);
 
 					// Ok
@@ -438,7 +438,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 
 #define BAR_LENGTH 21
 
-char *progressbar[BAR_LENGTH]=
+const char *progressbar[BAR_LENGTH]=
 {
 	"[                    ]",
 	"[.                   ]",
@@ -474,7 +474,7 @@ void progress (const char *message, float progress)
 	for (i=(uint)strlen(msg); i<79; i++)
 		msg[i]=' ';
 	msg[i]=0;
-	printf (msg);
+	printf ("%s", msg);
 	printf ("\r");
 }
 
@@ -491,13 +491,13 @@ int main(int argc, char* argv[])
 		// Extensions
 		map<string, string> alternateExtensions;
 		alternateExtensions.insert (map<string, string>::value_type (".tga", ".dds"));
-	
+
 		// String array
 		set<string> inputFiles;
-	
+
 		// String array
 		set<string> usedFiles;
-		
+
 		// String array
 		map<string, string> availableFiles;
 

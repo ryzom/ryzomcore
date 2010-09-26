@@ -3146,7 +3146,7 @@ int main(int argc, char *argv[])
 	std::string argv1(argv[1]);
 	
 	// create the diff version.
-	char temp[1024];
+	char temp[16];
 	sprintf(temp, "%8.8X", (uint) ::time(NULL));
 	diffVersion = temp;
 

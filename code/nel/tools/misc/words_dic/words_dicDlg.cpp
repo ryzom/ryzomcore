@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "words_dic.h"
 #include "words_dicDlg.h"
 #include "DicSplashScreen.h"
@@ -25,7 +25,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include <nel/misc/words_dictionary.h>
+#include "nel/misc/words_dictionary.h"
 
 using namespace std;
 using namespace NLMISC;

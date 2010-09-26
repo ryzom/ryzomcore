@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdafx.h"
+#include <windows.h>
+#include <stdio.h>
 #include "resource.h"
 
 INT_PTR CALLBACK MyDialogProc(
@@ -105,7 +106,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		RegCreateKey (HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Runonce", &hKey);
 		char batFileReg[1024];
 		sprintf (batFileReg, "\"%s\"", batFile);
-		RegSetValueEx(hKey, "RyzomSetupClean", 0, REG_SZ, (const unsigned char*)batFileReg, strlen (batFileReg)+1);
+		RegSetValueEx(hKey, "RyzomSetupClean", 0, REG_SZ, (const unsigned char*)batFileReg, (DWORD)strlen (batFileReg)+1);
 
 		pump ();
 		// Get the current path

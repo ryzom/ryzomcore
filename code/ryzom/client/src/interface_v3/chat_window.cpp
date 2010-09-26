@@ -626,7 +626,6 @@ void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col
 	gcChat->requireAttention();
 
 	CInterfaceManager::getInstance()->setTopWindow(gcChat);
-	
 
 	// add the text to this window
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
@@ -1253,7 +1252,7 @@ public:
 			if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
-			} 
+			}
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();

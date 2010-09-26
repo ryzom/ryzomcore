@@ -52,7 +52,7 @@ class CGroupHTML : public CGroupScrollText
 {
 public:
 	friend void TextAdd (struct _HText *me, const char * buf, int len);
-	friend void	TextBeginElement (_HText *me, int element_number, const BOOL *present, const char **	value);
+	friend void TextBeginElement (_HText *me, int element_number, const BOOL *present, const char **	value);
 	friend void TextEndElement (_HText *me, int element_number);
 	friend void TextLink (struct _HText *me, int element_number, int attribute_number, struct _HTChildAnchor *anchor, const BOOL *present, const char **value);
 	friend void TextBuild (HText * me, HTextStatus status);

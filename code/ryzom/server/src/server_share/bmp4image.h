@@ -43,7 +43,7 @@ public:
 		for (int j=0;j<H;j++)
 			for (int i=0;i<W;i++)
 			{
-				double pi=atan2(1,0)*2;
+				double pi=atan2(1.0,0.0)*2;
 				double angle=atan2(double(i)-double(W-1)/2,double(j)-double(H-1)/2);
 				double angle01=7.5*angle/pi;
 				if (angle01<0) angle01-=0.5;
@@ -256,7 +256,7 @@ public:
 	NLMISC::COFile	File;
 
 
-	CTGAImage() :	IdLength(0), ColourMapType(0), DataTypeCode(2), 
+	CTGAImage() :	IdLength(0), ColourMapType(0), DataTypeCode(2),
 					ColourMapOrigin(0), ColourMapLength(0), ColourMapDepth(0),
 					XOrigin(0), YOrigin(0), BitsPerPixel(16),
 					ImageDescriptor(0)

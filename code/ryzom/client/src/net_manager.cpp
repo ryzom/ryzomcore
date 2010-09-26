@@ -790,7 +790,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 				}
 				finalString = "";
 			}
-			else 
+			else
 			{
 				PeopleInterraction.ChatInput.AroundMe.displayMessage(finalString, col, 2, &windowVisible);
 			}
@@ -1129,7 +1129,7 @@ static void setupBotChatBotGift(CInterfaceGroup *botChatGroup)
 //-----------------------------------------------
 // impulseBotChatSetInterface :
 //-----------------------------------------------
-/*
+#if 0
 void impulseBotChatSetInterface(NLMISC::CBitMemStream &impulse)
 {
 	// received ADD_DYN_STR
@@ -1174,10 +1174,10 @@ void impulseBotChatSetInterface(NLMISC::CBitMemStream &impulse)
 		inter2->NetworkTextId.Args.push_back(20);
 		inter2->NetworkTextId.Args.push_back(1);
 		inter2->NetworkTextId.Args.push_back(2);
-*/	/*}
+*/	}
 
 	// FOR THE DEMO, find and set a fake news:
-/*	setFakeNews ();
+//	setFakeNews ();
 
 	string interfaceName = getInterfaceNameFromId (botType, interfaceId);
 
@@ -1206,7 +1206,8 @@ void impulseBotChatSetInterface(NLMISC::CBitMemStream &impulse)
 			}
 		}
 	}
-}*/
+}
+#endif
 
 
 
@@ -1824,7 +1825,7 @@ void impulseTeamContactRemove(NLMISC::CBitMemStream &impulse)
 	}
 
 	CGuildManager::getInstance()->init(AllMembers);
-}/*
+}*/
 
 
 //-----------------------------------------------
@@ -3186,7 +3187,7 @@ private:
 			}
 			contentStr = ucstring("http://atys.ryzom.com/start/")+web_app+ucstring(".php?")+contentStr.substr(i+1);
 			nlinfo("contentStr = %s", contentStr.toString().c_str());
-		} 
+		}
 		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
@@ -3604,7 +3605,7 @@ void initializeNetwork()
 
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_DESC",			impulseSetNpcIconDesc );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SVR_EVENT_MIS_AVL",	impulseServerEventForMissionAvailability );
-	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );	
+	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );
 }
 
 

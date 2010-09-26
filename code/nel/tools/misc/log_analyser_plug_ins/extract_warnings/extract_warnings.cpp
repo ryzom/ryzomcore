@@ -25,15 +25,13 @@
 // be enabled in the DLL, and vice versa.
 //
 
-#include "stdafx.h"
-
 #define LOG_ANALYSER_PLUGIN_EXPORTS
 #include "extract_warnings.h"
 #include <stdio.h>
 #include <string>
 using namespace std;
 
-#include <nel/misc/mem_displayer.h>
+#include "nel/misc/mem_displayer.h"
 #include "nel/misc/app_context.h"
 
 // Using directly the log report class from nelns

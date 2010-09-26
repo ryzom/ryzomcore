@@ -18,7 +18,7 @@
 #ifndef EXTRACT_WARNINGS_H
 #define EXTRACT_WARNINGS_H
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 #include <vector>
 #include <string>
 

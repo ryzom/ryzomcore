@@ -191,7 +191,7 @@ BOOL CData_mirrorApp::InitInstance()
 			while (fgets (line, 512, file))
 			{
 				// Remove last back
-				int n = strlen (line);
+				int n = (int)strlen (line);
 				if (n && (line[n-1] == '\n'))
 					line[n-1] = 0;
 				IgnoreFiles.insert (line);
@@ -203,15 +203,9 @@ BOOL CData_mirrorApp::InitInstance()
 		MessageBox (NULL, e.what (), "NeL Data Mirror", MB_OK|MB_ICONEXCLAMATION);
 	}
 
-#ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
-#else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
-#endif
-
 	CData_mirrorDlg dlg;
 	m_pMainWnd = &dlg;
-	int nResponse = dlg.DoModal();
+	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is
@@ -241,11 +235,11 @@ bool RegisterDirectoryAppCommand (const char *appName, const char *command, cons
 		if (RegCreateKey (hKey, tmp, &hKey) == ERROR_SUCCESS)
 		{
 			// Set the description
-			RegSetValue (hKey, "", REG_SZ, command, strlen (command));
+			RegSetValue (hKey, "", REG_SZ, command, (DWORD)strlen (command));
 			if (RegCreateKey (hKey, "command", &hKey) == ERROR_SUCCESS)
 			{
 				// Set the description
-				RegSetValue (hKey, "", REG_SZ, app, strlen (app));
+				RegSetValue (hKey, "", REG_SZ, app, (DWORD)strlen (app));
 				return true;
 			}
 		}

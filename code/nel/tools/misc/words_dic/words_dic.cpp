@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "words_dic.h"
 #include "words_dicDlg.h"
 #include "nel/misc/app_context.h"
@@ -61,15 +61,10 @@ BOOL CWords_dicApp::InitInstance()
 	//  the specific initialization routines you do not need.
 
 	NLMISC::CApplicationContext myApplicationContext;
-#ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
-#else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
-#endif
 
 	CWords_dicDlg dlg;
 	m_pMainWnd = &dlg;
-	int nResponse = dlg.DoModal();
+	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is

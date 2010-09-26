@@ -640,7 +640,7 @@ bool CDBGroupListSheetTrade::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup
 	prop= (char*) xmlGetProp( cur, (xmlChar*)"filter_seller_type" );
 	if(prop)
 	{
-		string	lwrFilter= toLower((const char *)prop);
+		string	lwrFilter= toLower(std::string((const char *)prop));
 		if(lwrFilter=="npc")
 			_SellerTypeFilter= NPC;
 		else if(lwrFilter=="resale")

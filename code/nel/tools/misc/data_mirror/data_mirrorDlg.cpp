@@ -432,7 +432,7 @@ void CData_mirrorDlg::OnOK()
 	progress.ShowWindow (SW_SHOW);
 	progress.progress (0);
 
-	const uint totalCount = FilesToUpdate[Modified].size () + FilesToUpdate[Added].size () + FilesToUpdate[Removed].size ();
+	uint totalCount = (uint)FilesToUpdate[Modified].size () + (uint)FilesToUpdate[Added].size () + (uint)FilesToUpdate[Removed].size ();
 	uint currentFile = 0;
 
 	// System time
@@ -443,7 +443,7 @@ void CData_mirrorDlg::OnOK()
 
 	// Update files
 	std::vector<string> &modifiedList = FilesToUpdate[Modified];
-	uint count = modifiedList.size ();
+	uint count = (uint)modifiedList.size ();
 	uint i;
 	for (i=0; i<count; i++)
 	{
@@ -479,7 +479,7 @@ void CData_mirrorDlg::OnOK()
 	}
 
 	std::vector<string> &addedList = FilesToUpdate[Added];
-	count = addedList.size ();
+	count = (uint)addedList.size ();
 	for (i=0; i<count; i++)
 	{
 		// Copy it
@@ -514,7 +514,7 @@ void CData_mirrorDlg::OnOK()
 	}
 
 	std::vector<string> &removedList = FilesToUpdate[Removed];
-	count = removedList.size ();
+	count = (uint)removedList.size ();
 	for (i=0; i<count; i++)
 	{
 		// Copy it
@@ -608,7 +608,7 @@ void CData_mirrorDlg::buildSourceFiles ()
 	vector<string> fileSource;
 	CPath::getPathContent (MainDirectory+CurrentDir, true, false, true, fileSource);
 	uint i;
-	const uint count = fileSource.size ();
+	uint count = (uint)fileSource.size ();
 	for (i=0; i<count; i++)
 	{
 		// Get the filename
@@ -696,7 +696,7 @@ void CData_mirrorDlg::buildSourceFiles ()
 	// List all files in mirror
 	fileSource.clear ();
 	CPath::getPathContent (MirrorDirectory+CurrentDir, true, false, true, fileSource);
-	const uint count2 = fileSource.size ();
+	uint count2 = (uint)fileSource.size ();
 	for (i=0; i<count2; i++)
 	{
 		// Get the filename
