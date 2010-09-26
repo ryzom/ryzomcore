@@ -108,6 +108,10 @@ generateTaggedMaxExporter("rbank", "cmb", "RBankCmbSourceDirectories", "RBankCmb
 
 generateTaggedMaxExporter("veget", "veget", "VegetSourceDirectories", "VegetExportDirectory", "VegetTagExportDirectory", "VegetInstallDirectory")
 
+generateTaggedMaxScript("shape", "shape")
+
+generateTaggedMaxExporter("anim", "anim", "AnimSourceDirectories", "AnimExportDirectory", "AnimTagExportDirectory", "AnimInstallDirectory")
+
 
 
 printLog(log, "")

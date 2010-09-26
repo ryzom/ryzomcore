@@ -128,6 +128,7 @@ ZoneLightIgLandBuildDirectory = CommonPath + "/zone_lighted_ig_land" #fixme
 
 # Animation directories
 AnimExportDirectory = CommonPath + "/anim_export"
+AnimTagExportDirectory = CommonPath + "/anim_tag"
 
 
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***

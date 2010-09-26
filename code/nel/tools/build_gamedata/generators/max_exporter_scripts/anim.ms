@@ -5,7 +5,7 @@ NEL3D_APPDATA_EXPORT_NODE_ANIMATION = 1423062800
 fn runNelMaxExport inputMaxFile = 
 (
 	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".%PreGenFileExtension%")
-	tagThisFile = false
+	tagThisFile = true
 	
 	-- Unhide category
 	unhidecategory()
@@ -55,13 +55,12 @@ fn runNelMaxExport inputMaxFile =
 		else
 		(
 			nlerror("OK " + outputNelFile)
-			tagThisFile = true
 		)
 	)
 	else
 	(
 		-- Error
-		nlerror("ERROR exporting animation: no node animated to export in file " + inputMaxFile)
+		nlerror("WARNING exporting animation: no node animated to export in file " + inputMaxFile)
 	)
 	
 	return tagThisFile

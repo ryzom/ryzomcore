@@ -1,89 +1,125 @@
 
 
+removeRunningTag = true
+
 try
 (
-	-- Get files in the %MaxSourceDirectory% directory
-	files = getFiles "%MaxSourceDirectory%/*.max" 
-	gc()
-	
-	-- Sort files
-	sort files
-	gc()
-	
-	-- No file ?
-	if files.count != 0 then
+	undo off
 	(
-		-- For each files
-		for i = 1 to files.count do
+		-- Get files in the %MaxSourceDirectory% directory
+		files = getFiles "%MaxSourceDirectory%/*.max" 
+		gc()
+		
+		-- Sort files
+		sort files
+		gc()
+		
+		-- No file ?
+		if files.count != 0 then
 		(
-			inputMaxFile = files[i]
-			outputTagFile = ("%TagDirectory%/" + (getFilenameFile inputMaxFile) + (getFilenameType inputMaxFile) + ".tag")
-			
-			try
+			-- For each files
+			for i = 1 to files.count do
 			(
-				-- Compare file date
-				if (NeLTestFileDate outputTagFile inputMaxFile) == true then
-				(
-					-- Free memory and file handles
-					gc()
-					heapfree
-					
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
-					
-					-- Open the max project
-					nlerror("Scanning file " + inputMaxFile + " ...")
-					if (loadMaxFile inputMaxFile quiet:true) == true then
+				inputMaxFile = files[i]
+				outputTagFile = ("%TagDirectory%/" + (getFilenameFile inputMaxFile) + (getFilenameType inputMaxFile) + ".tag")
+				
+				--try
+				--(
+					-- Compare file date
+					if (NeLTestFileDate outputTagFile inputMaxFile) == true then
 					(
-						tagThisFile = runNelMaxExport(inputMaxFile)
+						-- Free memory and file handles
+						gc()
+						heapfree
 						
-						-- Write a tag file
-						if tagThisFile == true then
+						-- Reset 3dsmax
+						resetMAXFile #noprompt
+						
+						-- Open the max project
+						nlerror("Scanning file " + inputMaxFile + " ...")
+						if (loadMaxFile inputMaxFile quiet:true) == true then
 						(
-							tagFile = createFile outputTagFile
-							if tagFile == undefined then
+							tagThisFile = runNelMaxExport(inputMaxFile)
+							
+							-- Write a tag file
+							if tagThisFile == true then
 							(
-								nlerror("WARNING can't create tag file " + outputTagFile)
+								tagFile = createFile outputTagFile
+								if tagFile == undefined then
+								(
+									nlerror("WARNING can't create tag file " + outputTagFile)
+									removeRunningTag = false
+								)
+								else
+								(
+									print "mukyu" to: tagFile
+									close tagFile
+								)
 							)
 							else
 							(
-								print "mukyu" to: tagFile
-								close tagFile
+								removeRunningTag = false
 							)
+						)
+						else
+						(
+							-- Error
+							nlerror("ERROR exporting '%PreGenFileExtension%': can't open the file " + inputMaxFile)
+							removeRunningTag = false
 						)
 					)
 					else
 					(
-						-- Error
-						nlerror("ERROR exporting '%PreGenFileExtension%': can't open the file " + inputMaxFile)
+						nlerror("SKIPPED BY TAG " + inputMaxFile)
 					)
-				)
-				else
-				(
-					nlerror("SKIPPED BY TAG " + inputMaxFile)
-				)
-			)
-			catch 
-			(
-				-- Error
-				nlerror("ERROR error exporting '%PreGenFileExtension%' in files " + inputMaxFile)
+				--)
+				--catch 
+				--(
+				--	-- Error
+				--	nlerror("ERROR error exporting '%PreGenFileExtension%' in file " + inputMaxFile)
+				--	removeRunningTag = false
+				--)
 			)
 		)
-	)
-	else
-	(
-		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
+		else
+		(
+			nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
+		)
 	)
 )
 catch 
 (
 	-- Error
 	nlerror("ERROR fatal error exporting '%PreGenFileExtension%' in folder %MaxSourceDirectory%")
+	removeRunningTag = false
+)
+
+try
+(
+	if (removeRunningTag) then
+	(
+		resetMAXFile #noPrompt
+	)
+)
+catch 
+(
+	nlerror("FAIL Last reset fails")
+	removeRunningTag = false
+)
+
+if (removeRunningTag) then
+(
+	nlerror("SUCCESS All .max files have been successfully exported")
+	deleteFile("%TagDirectory%/max_running.tag")
+)
+else
+(
+	nlerror("FAIL One or more issues occured")
+	NelForceQuitRightNow()
 )
 
 -- Bye
-
-resetMAXFile #noprompt
+nlerror("BYE")
 quitMAX #noPrompt
 quitMAX() #noPrompt
 

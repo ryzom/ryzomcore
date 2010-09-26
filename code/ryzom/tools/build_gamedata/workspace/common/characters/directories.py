@@ -143,6 +143,7 @@ ShapeAnimExportDirectory = CommonPath + "/shape_anim"
 
 # Animation directories
 AnimExportDirectory = CommonPath + "/anim_export"
+AnimTagExportDirectory = CommonPath + "/anim_tag"
 
 # cLoD directories
 ClodExportDirectory = CommonPath + "/clod_export"

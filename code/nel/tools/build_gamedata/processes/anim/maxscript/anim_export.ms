@@ -8,6 +8,9 @@
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
+-- In case of error just abort the app and don't show nel report window
+NelForceQuitOnMsgDisplayer()
+
 nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
@@ -68,7 +71,7 @@ NEL3D_APPDATA_EXPORT_NODE_ANIMATION = 1423062800
 fn runNelMaxExport inputMaxFile = 
 (
 	outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".anim")
-	tagThisFile = false
+	tagThisFile = true
 	
 	-- Unhide category
 	unhidecategory()
@@ -118,13 +121,12 @@ fn runNelMaxExport inputMaxFile =
 		else
 		(
 			nlerror("OK " + outputNelFile)
-			tagThisFile = true
 		)
 	)
 	else
 	(
 		-- Error
-		nlerror("ERROR exporting animation: no node animated to export in file " + inputMaxFile)
+		nlerror("WARNING exporting animation: no node animated to export in file " + inputMaxFile)
 	)
 	
 	return tagThisFile
@@ -132,75 +134,126 @@ fn runNelMaxExport inputMaxFile =
 
 
 
+removeRunningTag = true
+
 try
 (
-	-- Get files in the %MaxSourceDirectory% directory
-	files = getFiles "%MaxSourceDirectory%/*.max" 
-	gc()
-	
-	-- Sort files
-	sort files
-	gc()
-	
-	-- No file ?
-	if files.count != 0 then
+	undo off
 	(
-		-- For each files
-		for i = 1 to files.count do
+		-- Get files in the %MaxSourceDirectory% directory
+		files = getFiles "%MaxSourceDirectory%/*.max" 
+		gc()
+		
+		-- Sort files
+		sort files
+		gc()
+		
+		-- No file ?
+		if files.count != 0 then
 		(
-			inputMaxFile = files[i]
-			outputNelFile = ("%OutputDirectory%/" + (getFilenameFile inputMaxFile) + ".anim")
-			
-			try
+			-- For each files
+			for i = 1 to files.count do
 			(
-				-- Compare file date
-				if (NeLTestFileDate outputNelFile inputMaxFile) == true then
-				(
-					-- Free memory and file handles
-					gc()
-					heapfree
-					
-					-- Reset 3dsmax
-					resetMAXFile #noprompt
-					
-					-- Open the max project
-					nlerror("Scanning file " + inputMaxFile + " ...")
-					if (loadMaxFile inputMaxFile quiet:true) == true then
+				inputMaxFile = files[i]
+				outputTagFile = ("%TagDirectory%/" + (getFilenameFile inputMaxFile) + (getFilenameType inputMaxFile) + ".tag")
+				
+				--try
+				--(
+					-- Compare file date
+					if (NeLTestFileDate outputTagFile inputMaxFile) == true then
 					(
-						runNelMaxExport(inputMaxFile)
+						-- Free memory and file handles
+						gc()
+						heapfree
+						
+						-- Reset 3dsmax
+						resetMAXFile #noprompt
+						
+						-- Open the max project
+						nlerror("Scanning file " + inputMaxFile + " ...")
+						if (loadMaxFile inputMaxFile quiet:true) == true then
+						(
+							tagThisFile = runNelMaxExport(inputMaxFile)
+							
+							-- Write a tag file
+							if tagThisFile == true then
+							(
+								tagFile = createFile outputTagFile
+								if tagFile == undefined then
+								(
+									nlerror("WARNING can't create tag file " + outputTagFile)
+									removeRunningTag = false
+								)
+								else
+								(
+									print "mukyu" to: tagFile
+									close tagFile
+								)
+							)
+							else
+							(
+								removeRunningTag = false
+							)
+						)
+						else
+						(
+							-- Error
+							nlerror("ERROR exporting 'anim': can't open the file " + inputMaxFile)
+							removeRunningTag = false
+						)
 					)
 					else
 					(
-						-- Error
-						nlerror("ERROR exporting 'anim': can't open the file " + inputMaxFile)
+						nlerror("SKIPPED BY TAG " + inputMaxFile)
 					)
-				)
-				else
-				(
-					nlerror("SKIPPED " + inputMaxFile)
-				)
-			)
-			catch 
-			(
-				-- Error
-				nlerror("ERROR error exporting 'anim' in files " + inputMaxFile)
+				--)
+				--catch 
+				--(
+				--	-- Error
+				--	nlerror("ERROR error exporting 'anim' in file " + inputMaxFile)
+				--	removeRunningTag = false
+				--)
 			)
 		)
-	)
-	else
-	(
-		nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
+		else
+		(
+			nlerror("WARNING no *.max file in folder %MaxSourceDirectory%")
+		)
 	)
 )
 catch 
 (
 	-- Error
 	nlerror("ERROR fatal error exporting 'anim' in folder %MaxSourceDirectory%")
+	removeRunningTag = false
+)
+
+try
+(
+	if (removeRunningTag) then
+	(
+		resetMAXFile #noPrompt
+	)
+)
+catch 
+(
+	nlerror("FAIL Last reset fails")
+	removeRunningTag = false
+)
+
+if (removeRunningTag) then
+(
+	nlerror("SUCCESS All .max files have been successfully exported")
+	deleteFile("%TagDirectory%/max_running.tag")
+)
+else
+(
+	nlerror("FAIL One or more issues occured")
+	NelForceQuitRightNow()
 )
 
 -- Bye
-
-resetMAXFile #noprompt
+nlerror("BYE")
 quitMAX #noPrompt
 quitMAX() #noPrompt
 
