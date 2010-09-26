@@ -167,19 +167,28 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ENDIF(WIN32)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
 
+  ###
+  # GUI toolkits
+  ###
+  OPTION(WITH_GTK                 "With GTK Support"                              OFF)
+  OPTION(WITH_QT                  "With QT Support"                               OFF)
 
+  IF(WIN32)
+    OPTION(WITH_MFC               "With MFC Support"                              ON )
+  ELSE(WIN32)
+    OPTION(WITH_MFC               "With MFC Support"                              OFF)
+  ENDIF(WIN32)
+  
   ###
   # Optional support
   ###
-  OPTION(WITH_GTK         "With GTK Support"                                      OFF)
-  OPTION(WITH_QT          "With QT Support"                                       OFF)
-  OPTION(WITH_STLPORT     "With STLport support."                                 OFF)
-  OPTION(BUILD_DASHBOARD  "Build to the CDash dashboard"                          OFF)
+  OPTION(WITH_STLPORT             "With STLport support."                         OFF)
+  OPTION(BUILD_DASHBOARD          "Build to the CDash dashboard"                  OFF)
 
-  OPTION(WITH_NEL	      "Build NeL (nearly always required)."					  ON )
-  OPTION(WITH_NELNS	      "Build NeL Network Services."							  OFF)
-  OPTION(WITH_RYZOM	      "Build Ryzom Core."									  ON )
-  OPTION(WITH_SNOWBALLS	  "Build Snowballs."									  OFF)
+  OPTION(WITH_NEL	              "Build NeL (nearly always required)."           ON )
+  OPTION(WITH_NELNS	              "Build NeL Network Services."                   OFF)
+  OPTION(WITH_RYZOM	              "Build Ryzom Core."                             ON )
+  OPTION(WITH_SNOWBALLS	          "Build Snowballs."                              OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
@@ -212,7 +221,6 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
   OPTION(WITH_NEL_SAMPLES         "Build NeL Samples"                             ON )
   OPTION(WITH_NEL_TESTS           "Build NeL Unit Tests"                          ON )
-  OPTION(WITH_MFC                 "With MFC Support"                              ON )
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
