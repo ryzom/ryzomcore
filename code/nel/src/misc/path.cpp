@@ -2393,7 +2393,10 @@ bool CFile::setRWAccess(const std::string &filename)
 		// try to set the read/write access
 		if (_chmod (filename.c_str(), _S_IREAD | _S_IWRITE) == -1)
 		{
-			nlwarning ("PATH: Can't set RW access to file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+			{
+				nlwarning ("PATH: Can't set RW access to file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+			}
 			return false;
 		}
 	}
@@ -2404,13 +2407,20 @@ bool CFile::setRWAccess(const std::string &filename)
 		// try to set the read/write access
 		if (chmod (filename.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == -1)
 		{
-			nlwarning ("PATH: Can't set RW access to file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+			{
+				nlwarning ("PATH: Can't set RW access to file '%s': %d %s", filename.c_str(), errno, strerror(errno));
+			}
 			return false;
 		}
 	}
 	else
 	{
-		nlwarning("PATH: Can't access to file '%s'", filename.c_str());
+		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+		{
+			nlwarning("PATH: Can't access to file '%s'", filename.c_str());
+		}
+//		return false;
 	}
 #endif
 	return true;
@@ -2427,7 +2437,10 @@ bool CFile::deleteFile(const std::string &filename)
 	int res = unlink (filename.c_str());
 	if (res == -1)
 	{
-		nlwarning ("PATH: Can't delete file '%s': (errno %d) %s", filename.c_str(), errno, strerror(errno));
+		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
+		{
+			nlwarning ("PATH: Can't delete file '%s': (errno %d) %s", filename.c_str(), errno, strerror(errno));
+		}
 		return false;
 	}
 	return true;
