@@ -969,6 +969,20 @@ plugin material NelMaterial
 				cbTexGen_7.enabled = bNormalShader and bEnableSlot_7 and (not bLightmap) and (not bSpecular) and (not bUserColor) and (not bNormalShader) and (not bPerPixelLightingShader)
 				cbTexGen_8.enabled = bNormalShader and bEnableSlot_8 and (not bLightmap) and (not bSpecular) and (not bUserColor) and (not bNormalShader) and (not bPerPixelLightingShader)
 
+				delegate.DiffuseMapEnable = bEnableSlot_1
+				delegate.DiffuseMap = tTexture_1
+				delegate.AmbientMapEnable = bEnableSlot_1
+				delegate.AmbientMap = tTexture_1
+				delegate.SpecularMapEnable = bEnableSlot_2
+				delegate.SpecularMap = tTexture_2
+				delegate.SelfIllumMap = undefined
+				delegate.OpacityMap = undefined
+				delegate.FilterMap = undefined
+				delegate.BumpMap = undefined
+				delegate.DisplacementMap = undefined
+				delegate.ReflectionMap = undefined
+				delegate.RefractionMap = undefined
+
 				btLoadShader.enabled = bNormalShader
 				dlShader.enabled = bNormalShader
 
@@ -1058,6 +1072,17 @@ plugin material NelMaterial
 
 		on NelTexture close do 
 		(
+		)
+		
+		on tTexture_1 changed newState do
+		(
+			delegate.DiffuseMap = tTexture_1
+			delegate.AmbientMap = tTexture_1
+		)
+		
+		on tTexture_2 changed newState do
+		(
+			delegate.SpecularMap = tTexture_2
 		)
 
 		on cbEnableSlot_1 changed newState do
