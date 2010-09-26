@@ -40,6 +40,10 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
+# Variables which must be set before PROJECT
+NL_SETUP_BUILD()
+NL_SETUP_BUILD_FLAGS()
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
@@ -108,13 +112,8 @@ IF(WITH_STLPORT)
     STRING(REGEX REPLACE "Common7/IDE/.+" "VC/include" VC_INCLUDE_DIR ${CMAKE_MAKE_PROGRAM})
     # use VC++ and Windows SDK include paths
     INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
-    # deactivate all global include paths
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /X")
   ENDIF(WIN32)
 ENDIF(WITH_STLPORT)
-
-NL_SETUP_BUILD()
-NL_SETUP_BUILD_FLAGS()
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
