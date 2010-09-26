@@ -23,7 +23,7 @@ FIND_PATH(LUABIND_INCLUDE_DIR
 
 IF(WITH_STLPORT)
   FIND_LIBRARY(LUABIND_LIBRARY_RELEASE
-    NAMES libluabind_stlport luabind libluabind
+    NAMES luabind_stlport luabind libluabind
     PATHS
     $ENV{LUABIND_DIR}/lib
     /usr/local/lib
@@ -38,7 +38,7 @@ IF(WITH_STLPORT)
   )
 
   FIND_LIBRARY(LUABIND_LIBRARY_DEBUG
-    NAMES libluabind_stlportd luabind_d libluabind_d libluabindd
+    NAMES luabind_stlportd luabind_d libluabind_d libluabindd
     PATHS
     $ENV{LUABIND_DIR}/lib
     /usr/local/lib
