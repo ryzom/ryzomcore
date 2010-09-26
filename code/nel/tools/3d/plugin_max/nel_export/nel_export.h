@@ -99,10 +99,13 @@ public:
 	Interface		*_Ip;
 
 	// View
-	bool			_View;
+	// bool			_View;
 
 	// View
 	bool			_ErrorInDialog;
+
+	// Handle problematic file handles with max.
+	bool			_TerminateOnFileOpenIssues;
 };
 
 class CNelExportClassDesc:public ClassDesc2 
@@ -121,6 +124,8 @@ class CNelExportClassDesc:public ClassDesc2
 extern CNelExportClassDesc CNelExportDesc;
 
 extern CNelExport theCNelExport;
+
+void nelExportTerminateProcess();
 
 
 #endif // __NEL_EXPORT__H

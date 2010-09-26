@@ -132,6 +132,8 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				else
 				{
 					nlwarning("Failed to create file %s", tempFileName);
+					if (_TerminateOnFileOpenIssues)
+						nelExportTerminateProcess();
 				}
 
 				// Delete the pointer
@@ -172,6 +174,8 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					else
 					{
 						nlwarning("Failed to open file: %s", tempFileName);
+						if (_TerminateOnFileOpenIssues)
+							nelExportTerminateProcess();
 					}
 				}
 				catch (...)
@@ -246,67 +250,133 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 {
 	// Result to return
 	bool bRet=false;
-
-	// Create an animation file
-	CAnimation animFile;
-
-	// For each node to export
-	for (uint n=0; n<vectNode.size(); n++)
-	{				
-		// Get name
-		std::string nodeName="";
-
-		// Get NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME
-		int prefixe = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME, 0);
+	char tempFileName[MAX_PATH] = { 0 };  
+	char tempPathBuffer[MAX_PATH] = { 0 };
+	
+	try
+	{
+		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
+		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
+			nlerror("GetTempPath failed");
+		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
+		if (uRetVal == 0)
+			nlerror("GetTempFileName failed");
 		
-		// Set the name only if it is a scene animation
-		if (scene || prefixe)
-		{
-			// try to get the prefix from the appData if present. If not, takes it from the node name
-			nodeName = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_INSTANCE_NAME, "");
-			if (nodeName == "") // not found ?
+		// Create an animation file
+		CAnimation animFile;
+
+		// For each node to export
+		for (uint n=0; n<vectNode.size(); n++)
+		{				
+			// Get name
+			std::string nodeName="";
+
+			// Get NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME
+			int prefixe = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME, 0);
+			
+			// Set the name only if it is a scene animation
+			if (scene || prefixe)
 			{
-				nodeName=CExportNel::getName (*vectNode[n]);
+				// try to get the prefix from the appData if present. If not, takes it from the node name
+				nodeName = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_INSTANCE_NAME, "");
+				if (nodeName == "") // not found ?
+				{
+					nodeName=CExportNel::getName (*vectNode[n]);
+				}
+				nodeName+=".";
 			}
-			nodeName+=".";
+
+			// Is a root ?
+			bool root = vectNode[n]->GetParentNode () == _Ip->GetRootNode();
+
+			// Add animation
+			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);		
 		}
 
-		// Is a root ?
-		bool root = vectNode[n]->GetParentNode () == _Ip->GetRootNode();
-
-		// Add animation
-		_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);		
-	}
-
-	if (vectNode.size())
-	{
-		// Open a file
-		COFile file;
-		if (file.open (sPath))
+		if (vectNode.size())
 		{
-			try
+			// Open a file
+			COFile file;
+			if (file.open (tempFileName))
 			{
-				// Serial the animation
-				animFile.serial (file);
-
-				// All is good
-				bRet=true;
+				try
+				{
+					nldebug("Serialize the animation");
+					// Serial the animation
+					animFile.serial (file);
+					// Close the file
+					file.close();
+					// All is good
+					bRet=true;
+					// Verify the file
+					nldebug("Verify exported anim file");
+					try
+					{
+						bool tempBRet = bRet;
+						bRet = false;
+						CIFile vf;
+						if (vf.open(tempFileName))
+						{
+							nldebug("File opened, size: %u", vf.getFileSize());
+							CAnimation a;
+							a.serial(vf);
+							nldebug("Anim serialized");
+							vf.close();
+							nldebug("File closed");
+							bRet = tempBRet;
+						}
+						else
+						{
+							nlwarning("Failed to open file: %s", tempFileName);
+							bRet = false;
+							if (_TerminateOnFileOpenIssues)
+								nelExportTerminateProcess();
+						}
+					}
+					catch (...)
+					{
+						nlwarning("Failed to verify shape. Must crash now.");
+						remove(tempFileName);
+						bRet = false;
+					}
+				}
+				catch (Exception& e)
+				{
+					if (_ErrorInDialog)
+						MessageBox (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+					else
+						nlwarning ("ERROR : %s", e.what ());
+				}
 			}
-			catch (Exception& e)
+			else
 			{
 				if (_ErrorInDialog)
-					MessageBox (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, "Can't open the file for writing.", "NeL export", MB_OK|MB_ICONEXCLAMATION);
 				else
-					nlwarning ("ERROR : %s", e.what ());
+					nlwarning ("ERROR : Can't open the file (%s) for writing", tempFileName);
+				if (_TerminateOnFileOpenIssues)
+					nelExportTerminateProcess();
 			}
 		}
-		else
+	}
+	catch (...)
+	{
+		nlwarning("Fatal exception at CNelExport::exportAnim.");
+		bRet = false;
+	}
+
+	if (bRet)
+	{
+		try
 		{
-			if (_ErrorInDialog)
-				MessageBox (NULL, "Can't open the file for writing.", "NeL export", MB_OK|MB_ICONEXCLAMATION);
-			else
-				nlwarning ("ERROR : Can't open the file (%s) for writing", sPath);
+			remove(sPath);
 		}
+		catch (...)
+		{
+
+		}
+		CFile::moveFile(sPath, tempFileName);
+		nlinfo("MOVE %s -> %s", tempFileName, sPath);
 	}
 	return bRet;
 }

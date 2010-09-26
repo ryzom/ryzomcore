@@ -766,7 +766,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 
 //--- CNelExport -------------------------------------------------------
-CNelExport::CNelExport()
+CNelExport::CNelExport() : _ErrorInDialog(true), _TerminateOnFileOpenIssues(false)
 {
 	_Ip = NULL;	
 	theHPanel = NULL;
@@ -868,4 +868,12 @@ void CNelExport::init (bool view, bool errorInDialog, Interface *ip, bool loadSt
 
 	// Create the CExportNel class
 	_ExportNel = new CExportNel (errorInDialog, view, view, ip, "NeL Export", &theExportSceneStruct);
+}
+
+void nelExportTerminateProcess()
+{
+	DWORD ec = 0;
+	HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, 0, GetCurrentProcessId());
+	GetExitCodeProcess(h, &ec);
+	TerminateProcess(h, ec);
 }

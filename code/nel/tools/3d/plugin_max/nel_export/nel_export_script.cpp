@@ -945,10 +945,7 @@ protected:
 	/// Put the string into the file.
     virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message )
 	{
-		DWORD ec = 0;
-		HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, 0, GetCurrentProcessId());
-		GetExitCodeProcess(h, &ec);
-		TerminateProcess(h, ec);
+		nelExportTerminateProcess();
 	}
 };
 
@@ -958,6 +955,8 @@ Value* force_quit_on_msg_displayer_cf(Value** arg_list, int count)
 	// disable the Windows popup telling that the application aborted and disable the dr watson report.
 	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 	putenv("NEL_IGNORE_ASSERT=1");
+	theCNelExport._ErrorInDialog = false;
+	theCNelExport._TerminateOnFileOpenIssues = true;
 	if (NLMISC::DefaultMsgBoxDisplayer || INelContext::getInstance().getDefaultMsgBoxDisplayer())
 	{
 		if (!NLMISC::DefaultMsgBoxDisplayer)
@@ -978,10 +977,7 @@ Value* force_quit_right_now_cf(Value** arg_list, int count)
 {
 	// because quitMAX can fail
 	nlwarning("Force quit");
-	DWORD ec = 0;
-	HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, 0, GetCurrentProcessId());
-	GetExitCodeProcess(h, &ec);
-	TerminateProcess(h, ec);
+	nelExportTerminateProcess();
 	return &true_value;
 }
 
