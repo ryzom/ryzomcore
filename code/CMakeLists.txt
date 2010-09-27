@@ -92,6 +92,15 @@ IF(WIN32)
   INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
   SET(WINSOCK2_LIB ws2_32.lib)
 
+  IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+    # convert IDE fullpath to VC++ path
+    STRING(REGEX REPLACE "Common7/IDE/.+" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
+  ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+    # convert compiler fullpath to VC++ path
+    STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+  ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+  SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+
   IF(WITH_MFC)
     FIND_PACKAGE(CustomMFC REQUIRED)
   ENDIF(WITH_MFC)
@@ -108,8 +117,6 @@ IF(WITH_STLPORT)
   INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
   IF(WIN32)
     FIND_PACKAGE(WindowsSDK REQUIRED)
-    # convert IDE fullpath to include path
-    STRING(REGEX REPLACE "VC/bin/.+" "VC/include" VC_INCLUDE_DIR ${CMAKE_CXX_COMPILER})
     # use VC++ and Windows SDK include paths
     INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
   ENDIF(WIN32)
