@@ -1811,7 +1811,7 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 	}
 	else
 	{
-		nlwarning("init fragment program failed: errorPos: %d isNative: %d", errorPos, isNative);
+		nlwarning("init fragment program failed: errorPos: %d isNative: %d: %s", errorPos, isNative, (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 	}
 	return 0;
 }
