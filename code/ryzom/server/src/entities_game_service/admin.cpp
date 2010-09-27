@@ -51,6 +51,8 @@
 #include "game_share/shard_names.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
+#include "server_share/log_item_gen.h"
+#include "server_share/log_character_gen.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "egs_sheets/egs_static_rolemaster_phrase.h"
@@ -100,9 +102,6 @@
 #include "modules/shard_unifier_client.h"
 #include "modules/client_command_forwarder.h"
 #include "modules/guild_unifier.h"
-#include "server_share/log_command_gen.h"
-#include "server_share/log_item_gen.h"
-#include "server_share/log_character_gen.h"
 
 //
 // Externs

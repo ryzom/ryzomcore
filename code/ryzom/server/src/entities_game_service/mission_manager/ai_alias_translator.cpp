@@ -19,10 +19,10 @@
 #include "mission_manager/ai_alias_translator.h"
 #include "nel/net/service.h"
 #include "nel/ligo/primitive_utils.h"
-#include "mission_log.h"
-#include "primitives_parser.h"
 #include "nel/misc/command.h"
 #include "nel/net/message.h"
+#include "mission_log.h"
+#include "primitives_parser.h"
 
 using namespace NLMISC;
 using namespace NLNET;

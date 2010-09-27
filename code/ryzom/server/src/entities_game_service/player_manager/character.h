@@ -21,7 +21,6 @@
 // Game Share
 #include "game_share/bot_chat_types.h"
 #include "game_share/brick_flags.h"
-#include "server_share/pet_interface_msg.h"
 #include "game_share/power_types.h"
 #include "game_share/roles.h"
 #include "game_share/temp_inventory_mode.h"
@@ -31,7 +30,10 @@
 #include "game_share/people.h"
 #include "game_share/pvp_clan.h"
 #include "game_share/string_manager_sender.h"
+#include "game_share/r2_types.h"
 
+#include "server_share/pet_interface_msg.h"
+#include "server_share/r2_vision.h"
 
 // Misc
 #include "nel/misc/string_conversion.h"
@@ -55,10 +57,6 @@
 #include "mission_manager/ai_alias_translator.h"
 #include "ring_reward_points.h"
 #include "persistent_effect.h"
-
-#include "game_share/r2_types.h"
-#include "server_share/r2_vision.h"
-
 #include "character_interface.h"
 #include "database_plr.h"
 

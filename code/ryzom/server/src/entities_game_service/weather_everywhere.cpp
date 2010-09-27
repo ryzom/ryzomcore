@@ -18,9 +18,9 @@
 
 #include "stdpch.h"
 #include "weather_everywhere.h"
-#include <nel/misc/sheet_id.h>
-#include <nel/georges/load_form.h>
-#include <nel/georges/u_form_elm.h>
+#include "nel/misc/sheet_id.h"
+#include "nel/georges/load_form.h"
+#include "nel/georges/u_form_elm.h"
 #include "zone_manager.h"
 #include "egs_sheets/egs_sheets.h"
 #include "game_share/time_weather_season/weather_manager.h"
