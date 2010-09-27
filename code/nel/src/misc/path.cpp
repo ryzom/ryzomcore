@@ -1747,7 +1747,7 @@ bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
 	DWORD res = GetFileAttributes(filename.c_str());
-	if (res == ~0U)
+	if (res == INVALID_FILE_ATTRIBUTES)
 	{
 		// nlwarning ("PATH: '%s' is not a valid file or directory name", filename.c_str ());
 		return false;
@@ -1769,7 +1769,7 @@ bool CFile::isDirectory (const string &filename)
 bool CFile::isExists (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return (GetFileAttributes(filename.c_str()) != ~0U);
+	return (GetFileAttributes(filename.c_str()) != INVALID_FILE_ATTRIBUTES);
 #else // NL_OS_WINDOWS
 	struct stat buf;
 	return stat (filename.c_str (), &buf) == 0;

@@ -136,7 +136,8 @@ void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 	hFind = FindFirstFile (sFilter.c_str(), &findData);	
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
-		if (!(GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY))
+		DWORD res = GetFileAttributes(findData.cFileName);
+		if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
 		{
 			if (bFullPath)
 				sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
