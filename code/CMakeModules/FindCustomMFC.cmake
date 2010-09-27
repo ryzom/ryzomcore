@@ -11,7 +11,7 @@ SET(CUSTOM_MFC_DIR FALSE)
 
 # If using STLport and MFC have been found, remember its directory
 IF(WITH_STLPORT AND MFC_FOUND)
-  STRING(REGEX REPLACE "Common7/IDE/.+" "VC/atlmfc" MFC_STANDARD_DIR ${CMAKE_MAKE_PROGRAM})
+  STRING(REGEX REPLACE "VC/bin/.+" "VC/atlmfc" VC_INCLUDE_DIR ${CMAKE_CXX_COMPILER})
 ENDIF(WITH_STLPORT AND MFC_FOUND)
 
 # If using STLport or MFC haven't been found, search for afxwin.h
