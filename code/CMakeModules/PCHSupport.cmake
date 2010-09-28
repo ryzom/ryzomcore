@@ -116,15 +116,13 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
 	IF(CMAKE_COMPILER_IS_GNUCXX)
 		# to do: test whether compiler flags match between target  _targetName
 		# and _pch_output_to_use
-		GET_FILENAME_COMPONENT(_name ${_input} NAME)
-	
 		FILE(TO_NATIVE_PATH ${_pch_output_to_use} _native_pch_path)
 
 		# for use with distcc and gcc >4.0.1 if preprocessed files are accessible
 		# on all remote machines set
 		# PCH_ADDITIONAL_COMPILER_FLAGS to -fpch-preprocess
-		SET(_target_cflags "${PCH_ADDITIONAL_COMPILER_FLAGS} -include ${CMAKE_CURRENT_BINARY_DIR}/${_input} -Winvalid-pch")
-	ELSE(MSVCCMAKE_COMPILER_IS_GNUCXX)
+		SET(_target_cflags "${PCH_ADDITIONAL_COMPILER_FLAGS}-include ${_input} -Winvalid-pch")
+	ELSE(CMAKE_COMPILER_IS_GNUCXX)
 		IF(MSVC)
 			GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
 			IF(${oldProps} MATCHES NOTFOUND)
