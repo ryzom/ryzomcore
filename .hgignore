@@ -141,6 +141,7 @@ moc_*.cpp
 *.patch
 *.7z
 external
+external_stlport
 3rdParty
 .svn
 
