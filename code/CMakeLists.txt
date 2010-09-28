@@ -223,18 +223,18 @@ IF(WIN32)
     IF(WITH_QT)
       INCLUDE(${QT_USE_FILE})
       INSTALL(FILES
-        "${QT_LIBRARY_DIR}/QtGuid4.dll"
-        "${QT_LIBRARY_DIR}/QtXmld4.dll"
-        "${QT_LIBRARY_DIR}/QtCored4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtGuid4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtXmld4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtCored4.dll"
         DESTINATION bin)
     ENDIF(WITH_QT)
   ELSE(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     IF(WITH_QT)
       INCLUDE(${QT_USE_FILE})
       INSTALL(FILES
-        "${QT_LIBRARY_DIR}/QtGui4.dll"
-        "${QT_LIBRARY_DIR}/QtXml4.dll"
-        "${QT_LIBRARY_DIR}/QtCore4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtGui4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtXml4.dll"
+        "${QT_LIBRARY_DIR}/../bin/QtCore4.dll"
         DESTINATION bin)
     ENDIF(WITH_QT)
   ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
