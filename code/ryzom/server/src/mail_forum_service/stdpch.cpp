@@ -15,7 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-
-
-// remove stupid VC 6 warnings
-void foo_mail_forum_service() {}

@@ -15,6 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-
-// correct the warning disabling bug in visual
-void game_share_foo() {}

@@ -32,6 +32,7 @@
 #include <utility>
 #include <deque>
 #include <memory>
+#include <limits>
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>

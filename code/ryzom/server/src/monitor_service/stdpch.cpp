@@ -15,7 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-
-
-// Function to corret silly warning in Visual 6 
-void foo_monitor_service() {};

@@ -15,9 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stddsound.h"
-
-
-// Foo function to remove disabled warning
-void foo_stddsound() {}
-
-/* end of file */
