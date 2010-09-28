@@ -28,6 +28,9 @@
   The NLMISC variable 'EnableStlAllocatorChecker' can be used to enable and dissable the tests provided by the above macros
 */
 
+#ifndef RY_STL_ALLOCATOR_CHECKER_H
+#define RY_STL_ALLOCATOR_CHECKER_H
+
 extern bool EnableStlAllocatorChecker;
 
 void testStlMemoryAllocator(const char* context);
@@ -62,3 +65,5 @@ inline CStlAllocatorChecker::~CStlAllocatorChecker()
 #define STL_ALLOC_TEST _STL_ALLOC_TEST1(__FILE__,__LINE__)
 #define _STL_ALLOC_TEST1(file,line) _STL_ALLOC_TEST2(file,line)
 #define _STL_ALLOC_TEST2(file,line) if (!EnableStlAllocatorChecker) {} else testStlMemoryAllocator(file ":" #line);
+
+#endif
