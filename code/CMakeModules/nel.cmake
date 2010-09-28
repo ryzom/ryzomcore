@@ -182,7 +182,12 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
-  OPTION(WITH_STLPORT             "With STLport support."                         OFF)
+  IF(WIN32)
+    OPTION(WITH_STLPORT           "With STLport support."                         ON )
+  ELSE(WIN32)
+    OPTION(WITH_STLPORT           "With STLport support."                         OFF)
+  ENDIF(WIN32)
+  
   OPTION(BUILD_DASHBOARD          "Build to the CDash dashboard"                  OFF)
 
   OPTION(WITH_NEL	              "Build NeL (nearly always required)."           ON )
