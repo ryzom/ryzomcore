@@ -6,6 +6,8 @@
 # LIBWWW_LIBRARY, where to find the LibWWW library.
 # LIBWWW_FOUND, If false, do not try to use LibWWW.
 
+SET(LIBWWW_FIND_QUIETLY ${Libwww_FIND_QUIETLY})
+
 # also defined, but not for general use are
 IF(LIBWWW_LIBRARY AND LIBWWW_INCLUDE_DIR)
   # in cache already
@@ -61,9 +63,12 @@ MACRO(FIND_WWW_LIBRARY MYLIBRARY)
   IF(${MYLIBRARY})
     SET(LIBWWW_LIBRARIES ${LIBWWW_LIBRARIES} ${${MYLIBRARY}})
   ELSE(${MYLIBRARY})
-    MESSAGE(STATUS "Warning: Libwww: Library not found: ${MYLIBRARY}")
+    IF(NOT LIBWWW_FIND_QUIETLY)
+      MESSAGE(STATUS "Warning: Libwww: Library not found: ${MYLIBRARY}")
+    ENDIF(NOT LIBWWW_FIND_QUIETLY)
   ENDIF(${MYLIBRARY})
-  
+
+  MARK_AS_ADVANCED(${MYLIBRARY})  
 ENDMACRO(FIND_WWW_LIBRARY MYLIBRARY)
 
 # on eg. mac os x and arch linux, libwww sub libraries are not "inter-linked"

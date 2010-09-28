@@ -173,11 +173,11 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
   OPTION(WITH_QT                  "With QT Support"                               OFF)
 
-  IF(WIN32)
+  IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )
-  ELSE(WIN32)
+  ELSE(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              OFF)
-  ENDIF(WIN32)
+  ENDIF(WIN32 AND MFC_FOUND)
   
   ###
   # Optional support

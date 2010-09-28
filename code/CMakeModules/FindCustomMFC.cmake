@@ -40,7 +40,8 @@ ENDIF(WITH_STLPORT OR NOT MFC_FOUND)
 # Only if using a custom path
 IF(CUSTOM_MFC_DIR)
   IF(NOT CMAKE_SIZEOF_VOID_P)
-    MESSAGE(FATAL_ERROR "Size of void* is not set, you should call PROJECT(...) before")
+    INCLUDE (CheckTypeSize)
+    CHECK_TYPE_SIZE("void*"  CMAKE_SIZEOF_VOID_P)
   ENDIF(NOT CMAKE_SIZEOF_VOID_P)
 
   # Using 32 or 64 bits libraries
