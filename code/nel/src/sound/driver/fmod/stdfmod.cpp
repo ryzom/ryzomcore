@@ -15,15 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdfmod.h"
-
-
-namespace NLSOUND
-{
-
-void	dummyToAvoidStupidVCWarning_stdfmod_cpp()
-{
-}
-
-} // NLSOUND
-
-/* end of file */

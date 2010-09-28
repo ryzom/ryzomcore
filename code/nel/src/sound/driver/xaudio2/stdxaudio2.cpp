@@ -15,10 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdxaudio2.h"
-
-void dummyToAvoidStupidCompilerWarning_stdxaudio2_cpp()
-{
-	
-}
-
-/* end of file */

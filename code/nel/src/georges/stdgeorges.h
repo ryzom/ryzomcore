@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <ctime>
+#include <limits>
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"
 

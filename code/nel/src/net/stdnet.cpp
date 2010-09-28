@@ -15,10 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdnet.h"
-
-
-// leave not static else this workaround don't work
-void	dummyToAvoidStupidCompilerWarning_stdnet_cpp()
-{
-}
-

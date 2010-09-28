@@ -15,10 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
-
-
-// leave not static else this workaround don't work
-void	dummyToAvoidStupidCompilerWarning_std_misc_cpp()
-{
-}
-

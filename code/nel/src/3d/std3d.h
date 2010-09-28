@@ -32,6 +32,8 @@
 #include <exception>
 #include <memory>
 #include <functional>
+#include <iostream>
+#include <limits>
 
 #include "nel/misc/rgba.h"
 #include "nel/misc/debug.h"

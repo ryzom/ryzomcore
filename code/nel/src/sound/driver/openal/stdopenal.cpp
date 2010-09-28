@@ -15,10 +15,3 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
-
-void dummyToAvoidStupidCompilerWarning_stdopenal_cpp()
-{
-	
-}
-
-/* end of file */
