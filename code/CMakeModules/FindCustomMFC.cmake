@@ -28,6 +28,7 @@ IF(WITH_STLPORT OR NOT MFC_FOUND)
 
   # Display an error message if MFC are not found, MFC_FOUND is updated
   # User will be able to update MFC_DIR to the correct directory
+  INCLUDE(FindPackageHandleStandardArgs)
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(MFC DEFAULT_MSG MFC_DIR)
 
   IF(MFC_FOUND)
