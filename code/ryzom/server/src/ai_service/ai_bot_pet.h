@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifdef NL_OS_WINDOWS
 #pragma warning (disable : 4355) // warning C4355: 'this' : used in base member initializer list
+#endif // NL_OS_WINDOWS
 
 #ifndef RYAI_BOT_PET_H
 #define RYAI_BOT_PET_H

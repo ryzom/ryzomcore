@@ -29,7 +29,9 @@ class CFauna;
 
 
 
+#ifdef NL_OS_WINDOWS
 #pragma warning (disable : 4355)
+#endif // NL_OS_WINDOWS
 
 //////////////////////////////////////////////////////////////////////////////
 // CBotPlayer                                                               //

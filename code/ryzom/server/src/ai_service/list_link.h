@@ -26,7 +26,9 @@
 // The only valid constructor requires a pointer to the parent class that the
 // list link represents
 
+#ifdef NL_OS_WINDOWS
 #pragma warning (disable : 4355)
+#endif // NL_OS_WINDOWS
 
 template <class C>
 class CListLink
