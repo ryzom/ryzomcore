@@ -5,7 +5,6 @@ ADD_EXECUTABLE(snowballs_collision_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(snowballs_collision_service
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES}
 						nelmisc
 						nelnet

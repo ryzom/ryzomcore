@@ -14,7 +14,7 @@ INCLUDE_DIRECTORIES(
 			${CMAKE_SOURCE_DIR}/ryzom/client/src
 )
 
-TARGET_LINK_LIBRARIES(ryzom_client_patcher 	${PLATFORM_LINKFLAGS}
+TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				nelmisc
 				nelnet
 				ryzom_gameshare

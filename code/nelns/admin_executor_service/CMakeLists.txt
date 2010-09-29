@@ -5,7 +5,6 @@ ADD_EXECUTABLE(admin_executor_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(admin_executor_service
-						${PLATFORM_LINKFLAGS}
 						nelmisc
 						nelnet)
 

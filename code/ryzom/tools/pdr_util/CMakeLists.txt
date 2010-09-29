@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(pdr_util ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(pdr_util ryzom_gameshare ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} nelmisc nelnet nelligo nelgeorges)
+TARGET_LINK_LIBRARIES(pdr_util ryzom_gameshare ${LIBXML2_LIBRARIES} nelmisc nelnet nelligo nelgeorges)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(pdr_util "Ryzom, Tools: PDR Utility")

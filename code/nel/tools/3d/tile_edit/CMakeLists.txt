@@ -7,7 +7,7 @@ LIST(REMOVE_ITEM SRC ${SRC2})
 
 ADD_EXECUTABLE(tile_edit WIN32 ${SRC} tile_edit_exe.rc)
 
-TARGET_LINK_LIBRARIES(tile_edit ${PLATFORM_LINKFLAGS} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(tile_edit nelmisc nel3d)
 NL_DEFAULT_PROPS(tile_edit "NeL, Tools, 3D: Tile Editor")
 NL_ADD_RUNTIME_FLAGS(tile_edit)
 

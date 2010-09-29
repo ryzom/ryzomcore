@@ -9,7 +9,6 @@ TARGET_LINK_LIBRARIES(ai_data_service 	admin_modules
 					ryzom_gameshare 
 					server_share
 					ai_share
-					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
 					${MYSQL_LIBRARIES} 
 					${ZLIB_LIBRARIES} 

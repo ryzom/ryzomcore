@@ -4,7 +4,7 @@ ADD_EXECUTABLE(csv_transform ${SRC})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(csv_transform ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(csv_transform nelmisc)
 NL_DEFAULT_PROPS(csv_transform "Ryzom, Tools, Misc: CSV Transform")
 NL_ADD_RUNTIME_FLAGS(csv_transform)
 

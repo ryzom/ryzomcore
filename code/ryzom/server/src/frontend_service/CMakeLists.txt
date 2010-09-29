@@ -15,7 +15,6 @@ INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_D
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						ryzom_adminmodules
 						ryzom_gameshare
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES}
 						${MYSQL_LIBRARIES}
 						${ZLIB_LIBRARIES}

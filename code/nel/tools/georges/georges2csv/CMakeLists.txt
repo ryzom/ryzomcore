@@ -4,7 +4,7 @@ ADD_EXECUTABLE(georges2csv ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(georges2csv ${PLATFORM_LINKFLAGS} nelmisc nelgeorges)
+TARGET_LINK_LIBRARIES(georges2csv nelmisc nelgeorges)
 NL_DEFAULT_PROPS(georges2csv "NeL, Tools, Georges: georges2csv")
 NL_ADD_RUNTIME_FLAGS(georges2csv)
 

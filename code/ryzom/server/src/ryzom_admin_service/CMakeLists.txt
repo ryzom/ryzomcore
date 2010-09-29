@@ -6,7 +6,6 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_
 
 TARGET_LINK_LIBRARIES(ryzom_admin_service
 						ryzom_adminmodules
-						${PLATFORM_LINKFLAGS} 
 						${LIBXML2_LIBRARIES} 
 						nelmisc 
 						nelnet)

@@ -7,7 +7,6 @@ TARGET_LINK_LIBRARIES(ryzom_pd_support_service
 						ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_servershare
-						${PLATFORM_LINKFLAGS} 
 						${LIBXML2_LIBRARIES} 
 						nelmisc 
 						nelnet)

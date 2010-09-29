@@ -4,11 +4,11 @@ ADD_EXECUTABLE(nl_sample_chatserver WIN32 server.cpp)
 
 ADD_DEFINITIONS(-DCHAT_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_chat/\\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_chatclient ${PLATFORM_LINKFLAGS} nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_chatclient nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_chatclient "NeL, Samples, Net, Chat: Chat Client")
 NL_ADD_RUNTIME_FLAGS(nl_sample_chatclient)
 
-TARGET_LINK_LIBRARIES(nl_sample_chatserver ${PLATFORM_LINKFLAGS} nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_chatserver nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_chatserver "NeL, Samples, Net, Chat: Chat Server")
 NL_ADD_RUNTIME_FLAGS(nl_sample_chatserver)
 

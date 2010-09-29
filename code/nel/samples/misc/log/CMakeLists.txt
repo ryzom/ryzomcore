@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_log ${SRC})
 
-TARGET_LINK_LIBRARIES(nl_sample_log ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(nl_sample_log nelmisc)
 NL_DEFAULT_PROPS(nl_sample_log "NeL, Samples, Misc: Logging")
 NL_ADD_RUNTIME_FLAGS(nl_sample_log)
 

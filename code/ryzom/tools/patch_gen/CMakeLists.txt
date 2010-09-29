@@ -4,12 +4,12 @@ SET(SERVICE_SRC patch_gen_common.cpp patch_gen_service.cpp patch_gen_service.h)
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 ADD_EXECUTABLE(patch_gen ${MAIN_SRC})
-TARGET_LINK_LIBRARIES(patch_gen ryzom_gameshare ${PLATFORM_LINKFLAGS} nelmisc nelnet nelligo nelgeorges)
+TARGET_LINK_LIBRARIES(patch_gen ryzom_gameshare nelmisc nelnet nelligo nelgeorges)
 NL_DEFAULT_PROPS(patch_gen "Ryzom, Tools: Patch Generator")
 NL_ADD_RUNTIME_FLAGS(patch_gen)
 
 ADD_EXECUTABLE(patch_gen_service WIN32 ${SERVICE_SRC})
-TARGET_LINK_LIBRARIES(patch_gen_service ryzom_gameshare ${PLATFORM_LINKFLAGS} nelmisc nelnet nelligo nelgeorges)
+TARGET_LINK_LIBRARIES(patch_gen_service ryzom_gameshare nelmisc nelnet nelligo nelgeorges)
 NL_DEFAULT_PROPS(patch_gen_service "Ryzom, Tools: Patch Generator Service")
 NL_ADD_RUNTIME_FLAGS(patch_gen_service)
 

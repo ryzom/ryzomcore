@@ -8,7 +8,6 @@ TARGET_LINK_LIBRARIES(ryzom_shard_unifier_service
 						ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_servershare
-						${PLATFORM_LINKFLAGS} 
 						${LIBXML2_LIBRARIES} 
 						${MYSQL_LIBRARIES}
 						${ZLIB_LIBRARY}

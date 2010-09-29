@@ -11,7 +11,6 @@ TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
 						ryzom_gameshare
 						ryzom_servershare
 						ryzom_aishare
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES}
 						${ZLIB_LIBRARIES}
 						nelmisc

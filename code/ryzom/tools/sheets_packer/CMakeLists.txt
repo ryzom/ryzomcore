@@ -14,8 +14,8 @@ TARGET_LINK_LIBRARIES(sheets_packer
 					nelgeorges
 					nelnet
 					nelligo
-					${PLATFORM_LINKFLAGS}
-					${LIBXML2_LIBRARIES} )
+					${LIBXML2_LIBRARIES})
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(sheets_packer "Ryzom, Tools: Sheets Packer")

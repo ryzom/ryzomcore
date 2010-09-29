@@ -9,7 +9,6 @@ TARGET_LINK_LIBRARIES(ryzom_reference_builder_service
 						nelmisc
 						nelnet
 						nelgeorges
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES})
 						
 						

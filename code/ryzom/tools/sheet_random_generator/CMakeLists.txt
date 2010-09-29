@@ -5,7 +5,6 @@ ADD_EXECUTABLE(sheet_random_generator ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(sheet_random_generator
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES}
 						nelmisc
 						nelgeorges)

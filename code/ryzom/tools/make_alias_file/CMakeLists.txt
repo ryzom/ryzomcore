@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(make_alias_file ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(make_alias_file ${PLATFORM_LINKFLAGS} ${LIBXML2_LIBRARIES} nelmisc nelgeorges)
+TARGET_LINK_LIBRARIES(make_alias_file ${LIBXML2_LIBRARIES} nelmisc nelgeorges)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(make_alias_file "Ryzom, Tools, Misc: Make Alias File")

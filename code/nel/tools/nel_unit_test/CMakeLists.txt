@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nel_unit_test ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CPPTEST_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nel_unit_test ${CPPTEST_LIBRARIES} ${PLATFORM_LINKFLAGS} nelmisc nelnet nelligo)
+TARGET_LINK_LIBRARIES(nel_unit_test ${CPPTEST_LIBRARIES} nelmisc nelnet nelligo)
 NL_DEFAULT_PROPS(nel_unit_test "Unit Tests")
 NL_ADD_RUNTIME_FLAGS(nel_unit_test)
 

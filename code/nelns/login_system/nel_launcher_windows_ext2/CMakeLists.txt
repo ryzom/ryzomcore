@@ -7,7 +7,6 @@ ENDIF(CURL_FOUND)
 ADD_DEFINITIONS(-DNL_LAUNCHER_CFG="\\"${NL_ETC_PREFIX}/\\"")
 
 TARGET_LINK_LIBRARIES(nel_launcher_ext2
-						${PLATFORM_LINKFLAGS}
 						nelnet
 						nelmisc
 						${ZLIB_LIBRARY}
@@ -15,6 +14,10 @@ TARGET_LINK_LIBRARIES(nel_launcher_ext2
 
 NL_DEFAULT_PROPS(nel_launcher_ext2 "NeLNS, Launcher: NeL Launcher Ext2")
 NL_ADD_RUNTIME_FLAGS(nel_launcher_ext2)
+
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(nel_launcher_ext2 ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)
+ENDIF(WITH_PCH)
 
 INSTALL(TARGETS nel_launcher_ext2 RUNTIME DESTINATION bin COMPONENT launcher)
 INSTALL(FILES nel_launcher.cfg DESTINATION etc/nel COMPONENT launcher)

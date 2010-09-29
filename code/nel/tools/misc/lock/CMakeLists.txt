@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(lock ${SRC})
 
-TARGET_LINK_LIBRARIES(lock ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(lock nelmisc)
 NL_DEFAULT_PROPS(lock "NeL, Tools, Misc: lock")
 NL_ADD_RUNTIME_FLAGS(lock)
 

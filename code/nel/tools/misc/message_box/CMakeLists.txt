@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(message_box WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(message_box ${PLATFORM_LINKFLAGS})
+#TARGET_LINK_LIBRARIES(message_box ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(message_box "NeL, Tools, Misc: message_box")
 NL_ADD_RUNTIME_FLAGS(message_box)
 

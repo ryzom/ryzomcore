@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(words_dic WIN32 ${SRC} words_dic.rc)
 
-TARGET_LINK_LIBRARIES(words_dic ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(words_dic nelmisc)
 NL_DEFAULT_PROPS(words_dic "NeL, Tools, Misc: words_dic")
 NL_ADD_RUNTIME_FLAGS(words_dic)
 

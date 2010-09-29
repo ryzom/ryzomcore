@@ -4,7 +4,7 @@ ADD_EXECUTABLE(hls_bank_maker ${SRC})
 
 INCLUDE_DIRECTORIES(${SQUISH_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(hls_bank_maker ${PLATFORM_LINKFLAGS} ${SQUISH_LIBRARIES} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(hls_bank_maker ${SQUISH_LIBRARIES} nelmisc nel3d)
 NL_DEFAULT_PROPS(hls_bank_maker "NeL, Tools, 3D: hls_bank_maker")
 NL_ADD_RUNTIME_FLAGS(hls_bank_maker)
 

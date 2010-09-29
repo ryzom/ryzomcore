@@ -8,7 +8,6 @@ TARGET_LINK_LIBRARIES(prim_export
 					nelligo
 					nel3d
 					nelgeorges
-					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES})
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 

@@ -3,7 +3,6 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(snowballs_position_service WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(snowballs_position_service
-						${PLATFORM_LINKFLAGS}
 						nelmisc
 						nelnet)
 

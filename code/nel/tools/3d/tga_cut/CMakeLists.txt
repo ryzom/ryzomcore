@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(tga_cut ${SRC})
 
-TARGET_LINK_LIBRARIES(tga_cut ${PLATFORM_LINKFLAGS} nelmisc)
+TARGET_LINK_LIBRARIES(tga_cut nelmisc)
 NL_DEFAULT_PROPS(tga_cut "NeL, Tools, 3D: tga_cut")
 NL_ADD_RUNTIME_FLAGS(tga_cut)
 

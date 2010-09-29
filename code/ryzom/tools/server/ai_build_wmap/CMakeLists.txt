@@ -6,7 +6,6 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(ai_build_wmap	
 					ryzom_gameshare
 					ryzom_aishare
-					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
 					nelmisc)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})

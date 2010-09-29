@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(branch_patcher WIN32 ${SRC} branch_patcher.rc)
 
-TARGET_LINK_LIBRARIES(branch_patcher ${PLATFORM_LINKFLAGS})
+#TARGET_LINK_LIBRARIES(branch_patcher ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(branch_patcher "NeL, Tools, Misc: branch_patcher")
 NL_ADD_RUNTIME_FLAGS(branch_patcher)
 

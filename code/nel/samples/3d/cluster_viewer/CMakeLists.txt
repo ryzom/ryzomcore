@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_clusterview WIN32 ${SRC})
 
 ADD_DEFINITIONS(-DCV_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_clusterview/\\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_clusterview ${PLATFORM_LINKFLAGS} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(nl_sample_clusterview nelmisc nel3d)
 NL_ADD_RUNTIME_FLAGS(nl_sample_clusterview)
 NL_DEFAULT_PROPS(nl_sample_clusterview "NeL, Samples, 3D: Cluster Viewer")
 

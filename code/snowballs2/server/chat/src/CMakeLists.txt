@@ -5,7 +5,6 @@ ADD_EXECUTABLE(snowballs_chat_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(snowballs_chat_service
-						${PLATFORM_LINKFLAGS}
 						${LIBXML2_LIBRARIES}
 						nelmisc
 						nelnet)

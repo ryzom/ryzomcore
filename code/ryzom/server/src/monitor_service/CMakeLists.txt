@@ -3,8 +3,8 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(monitor_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(monitor_service	ryzom_gameshare
-						${PLATFORM_LINKFLAGS} 
+TARGET_LINK_LIBRARIES(monitor_service
+						ryzom_gameshare
 						${LIBXML2_LIBRARIES}
 						${ZLIB_LIBRARY}
 						${MYSQL_LIBRARIES}

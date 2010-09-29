@@ -7,7 +7,6 @@ TARGET_LINK_LIBRARIES(build_world_packed_col
 					ryzom_gameshare
 					ryzom_servershare 
 					ryzom_aishare 
-					${PLATFORM_LINKFLAGS} 
 					${LIBXML2_LIBRARIES} 
 					nelmisc
 					nel3d)

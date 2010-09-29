@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(lightmap_optimizer ${SRC})
 
-TARGET_LINK_LIBRARIES(lightmap_optimizer ${PLATFORM_LINKFLAGS} nel3d nelmisc)
+TARGET_LINK_LIBRARIES(lightmap_optimizer nel3d nelmisc)
 NL_DEFAULT_PROPS(lightmap_optimizer "NeL, Tools, 3D: lightmap_optimizer")
 NL_ADD_RUNTIME_FLAGS(lightmap_optimizer)
 
