@@ -7,7 +7,11 @@ ENDIF(WIN32)
 ADD_SUBDIRECTORY(client_sheets)
 ADD_SUBDIRECTORY(seven_zip)
 
-FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h motion/modes/*.cpp motion/modes/*.h r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp interface_v3/*.h interface_v3/*.cpp client.rc)
+FILE(GLOB CFG ../*.cfg ../*.cfg.in)
+FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
+FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
+FILE(GLOB SRC_MODE motion/modes/*.cpp motion/modes/*.h)
+FILE(GLOB SRC_R2 r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp)
 
 # Filter out the source files not actually compiled.
 LIST(REMOVE_ITEM SRC
@@ -20,13 +24,21 @@ LIST(REMOVE_ITEM SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/rosace_functions.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rosace_functions.h
 	${CMAKE_CURRENT_SOURCE_DIR}/scene_parser.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/scene_parser.h
+	${CMAKE_CURRENT_SOURCE_DIR}/scene_parser.h)
+LIST(REMOVE_ITEM SRC_MODE
 	${CMAKE_CURRENT_SOURCE_DIR}/motion/modes/free_head.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/motion/modes/free_head.h
+	${CMAKE_CURRENT_SOURCE_DIR}/motion/modes/free_head.h)
+LIST(REMOVE_ITEM SRC_INTERFACE
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/lua_dll.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/lua_dll.h
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/interface_v3/view_bitmap_progress.h)
+
+SOURCE_GROUP("" FILES ${SRC})
+SOURCE_GROUP("cfg" FILES ${CFG})
+SOURCE_GROUP("interface_v3" FILES ${SRC_INTERFACE})
+SOURCE_GROUP("mode" FILES ${SRC_MODE})
+SOURCE_GROUP("r2" FILES ${SRC_R2})
 
 # on Mac, create a .App Bundle
 if(APPLE)
@@ -52,7 +64,7 @@ if(APPLE)
   #   # install_name_tool the lib pathes
 ENDIF(APPLE)
 
-ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC})
+ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_MODE} ${SRC_R2})
 
 INCLUDE_DIRECTORIES(
 			${CMAKE_CURRENT_SOURCE_DIR}
