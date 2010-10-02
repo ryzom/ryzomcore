@@ -158,7 +158,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 
 	_MaxSkeletonsInNotCLodForm= 20;
 
-	_FilterRenderFlags= ~0;
+	_FilterRenderFlags= std::numeric_limits<uint32>::max();
 
 	_NextRenderProfile= false;
 

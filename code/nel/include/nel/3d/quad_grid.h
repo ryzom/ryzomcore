@@ -28,6 +28,7 @@
 #include "nel/misc/polygon.h"
 #include "nel/misc/grid_traversal.h"
 
+#include <limits>
 #include <vector>
 #include <map>
 
@@ -308,7 +309,7 @@ private:// Methods.
 		++ _SelectStamp;
 		if (_SelectStamp == 0)
 		{
-			std::fill(_AlreadySelected.begin(), _AlreadySelected.end(), (uint) ~0);
+			std::fill(_AlreadySelected.begin(), _AlreadySelected.end(), std::numeric_limits<uint>::max());
 		}
 	}
 

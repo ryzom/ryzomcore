@@ -566,7 +566,7 @@ void CSheetId::buildIdVector(std::vector <CSheetId> &result, std::vector <std::s
 void CSheetId::buildIdVector(std::vector <CSheetId> &result,const std::string &fileExtension)
 {
 	uint32 type=typeFromFileExtension(fileExtension);
-	if (type!=(uint32)~0)
+	if (type != std::numeric_limits<uint32>::max())
 		buildIdVector(result, type);
 
 } // buildIdVector //
@@ -578,7 +578,7 @@ void CSheetId::buildIdVector(std::vector <CSheetId> &result,const std::string &f
 void CSheetId::buildIdVector(std::vector <CSheetId> &result, std::vector <std::string> &resultFilenames,const std::string &fileExtension)
 {
 	uint32 type=typeFromFileExtension(fileExtension);
-	if (type != (uint32)~0)
+	if (type != std::numeric_limits<uint32>::max())
 		buildIdVector(result,resultFilenames, type);
 
 } // buildIdVector //
@@ -597,7 +597,7 @@ uint32 CSheetId::typeFromFileExtension(const std::string &fileExtension)
 		if (toLower(fileExtension)==_FileExtensions[i])
 			return i;
 
-	return ~0;
+	return std::numeric_limits<uint32>::max();
 } // typeFromFileExtension //
 
 

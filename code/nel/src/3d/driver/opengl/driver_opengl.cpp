@@ -462,7 +462,7 @@ bool CDriverGL::setupDisplay()
 		_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
 		_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
 		_SupportVBHard= true;
-		_MaxVerticesByVBHard = ~0; // cant' know the value..
+		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
 	}
 
 	// Reset VertexArrayRange.

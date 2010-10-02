@@ -62,7 +62,7 @@ CVariablePtr<uint32> DefaultMaxSentBlockSize("nel", "DefaultMaxSentBlockSize", "
 #define AUTOCHECK_DISPLAY nlwarning
 //#define AUTOCHECK_DISPLAY CUnifiedNetwork::getInstance()->displayInternalTables (), nlerror
 
-const TServiceId	TServiceId::InvalidId = TServiceId(uint16(~0));
+const TServiceId	TServiceId::InvalidId = TServiceId(std::numeric_limits<uint16>::max());
 
 //
 // Callbacks from NAMING SERVICE

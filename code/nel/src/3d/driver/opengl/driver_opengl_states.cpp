@@ -102,11 +102,11 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurDepthFunc= GL_LEQUAL;
 	_CurStencilFunc = GL_ALWAYS;
 	_CurStencilRef = 0;
-	_CurStencilMask = ~0;
+	_CurStencilMask = std::numeric_limits<GLuint>::max();
 	_CurStencilOpFail = GL_KEEP;
 	_CurStencilOpZFail = GL_KEEP;
 	_CurStencilOpZPass = GL_KEEP;
-	_CurStencilWriteMask = ~0;
+	_CurStencilWriteMask = std::numeric_limits<GLuint>::max();
 	_CurAlphaTestThreshold= 0.5f;
 	// setup GLStates.
 	glBlendFunc(_CurBlendSrc, _CurBlendDst);

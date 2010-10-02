@@ -244,11 +244,11 @@ CDriverD3D::CDriverD3D()
 	_CurStencilTest = false;
 	_CurStencilFunc = D3DCMP_ALWAYS;
 	_CurStencilRef = 0;
-	_CurStencilMask = ~0;
+	_CurStencilMask = std::numeric_limits<DWORD>::max();
 	_CurStencilOpFail = D3DSTENCILOP_KEEP;
 	_CurStencilOpZFail = D3DSTENCILOP_KEEP;
 	_CurStencilOpZPass = D3DSTENCILOP_KEEP;
-	_CurStencilWriteMask = ~0;
+	_CurStencilWriteMask = std::numeric_limits<DWORD>::max();
 
 
 	for(uint k = 0; k < MaxTexture; ++k)

@@ -228,7 +228,7 @@ public:
 			Vertices.setName("CComputedString");
 		}
 		SelectStart= 0;
-		SelectSize= ~0;
+		SelectSize= std::numeric_limits<uint32>::max();
 	}
 
 	/**

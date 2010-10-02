@@ -16,8 +16,6 @@
 
 #include "std3d.h"
 
-#include <iostream>
-
 #include "nel/3d/zone_manager.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
@@ -40,7 +38,7 @@ CZoneManager::CZoneManager()
 	_ZoneTileColorMono = true;
 	_ZoneTileColorFactor = 1.0f;
 	_LastArea= 0;
-	_LastX= _LastY= (uint32) ~0;
+	_LastX= _LastY= std::numeric_limits<uint32>::max();
 }
 
 // ------------------------------------------------------------------------------------------------

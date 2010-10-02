@@ -825,7 +825,7 @@ void CPackedZone32::build(std::vector<const CTessFace*> &leaves,
 	// remap tri lists
 	for(uint k = 0; k < TriLists.size(); ++k)
 	{
-		if (TriLists[k] != ~0)
+		if (TriLists[k] != std::numeric_limits<uint32>::max())
 		{
 			TriLists[k] = triListRemapping[TriLists[k]];
 		}

@@ -124,7 +124,7 @@ public:
 	static uint32				UndefIndex; // used as value for undefined index
 	std::vector<CPackedVertex>  Verts;
 	std::vector<CPackedTri>		Tris;
-	std::vector<uint32>			TriLists; // lists of tri for each grid cell, all list are packed in a single vector. ~0 marks the end of a list
+	std::vector<uint32>			TriLists; // lists of tri for each grid cell, all list are packed in a single vector. std::numeric_limits<uint32>::max() marks the end of a list
 	NLMISC::CArray2D<uint32>	Grid;     // grid of entries into TriLists (one list for each cell)
 	float						CellSize;
 public:
@@ -176,7 +176,7 @@ public:
 	friend class CPackedZone32;
 	std::vector<CPackedVertex>  Verts;
 	std::vector<CPackedTri16>	Tris;
-	std::vector<uint16>			TriLists; // lists of tri for each grid cell, all lists are packed in a single vector. ~0 marks the end of a list
+	std::vector<uint16>			TriLists; // lists of tri for each grid cell, all lists are packed in a single vector. std::numeric_limits<uint16>::max() marks the end of a list
 	NLMISC::CArray2D<uint16>	Grid;     // grid of entries into TriLists (one list for each cell)
 	float						CellSize;
 public:

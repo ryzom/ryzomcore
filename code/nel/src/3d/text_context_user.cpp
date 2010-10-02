@@ -218,7 +218,7 @@ void CTextContextUser::resetStringSelection(uint32 i)
 	if(str)
 	{
 		str->SelectStart= 0;
-		str->SelectSize= ~0;
+		str->SelectSize= std::numeric_limits<uint32>::max();
 	}
 }
 void CTextContextUser::erase(uint32 i)

@@ -343,7 +343,7 @@ void CWaterEnvMap::invalidate()
 	_StartRenderTime = -1;
 	if (_UpdateTime == 0)
 	{
-		_LastRenderTick = UINT64_CONSTANT(~0);
+		_LastRenderTick = std::numeric_limits<uint64>::max();
 	}
 	else
 	{

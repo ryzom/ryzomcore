@@ -175,7 +175,7 @@ void CResizablePage::ArrangeLayout()
 	Layout *pl;
 	POSITION pos = m_plLayoutList.GetHeadPosition();
 
-	HDWP hdwp = BeginDeferWindowPos(m_plLayoutList.GetCount());
+	HDWP hdwp = BeginDeferWindowPos((int)m_plLayoutList.GetCount());
 
 	while (pos != NULL)
 	{

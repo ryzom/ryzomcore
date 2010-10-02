@@ -175,7 +175,7 @@ bool isOfLogDotLogFamily( const std::string& filename )
 
 
 enum TVersionTargetMode { TTMAll, TTMMatchAllV, TTMMatchExactV, TTMMatchGreaterV, TTMMatchLowerV } targetMode;
-const uint CurrentVersion = ~0;
+const uint CurrentVersion = std::numeric_limits<uint>::max();
 
 // Return true and logVersion, or false if not a log with version
 bool getLogVersion( const std::string& filename, uint& logVersion )

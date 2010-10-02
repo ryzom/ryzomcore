@@ -74,7 +74,7 @@ void CPackedWorld::build(std::vector<TPackedZoneBaseSPtr> &packedZones)
 			}
 		}
 	}
-	_RaytraceCounter = ~0;
+	_RaytraceCounter = std::numeric_limits<uint32>::max();
 }
 
 // *************************************************************************************************
@@ -86,7 +86,7 @@ bool CPackedWorld::raytrace(const NLMISC::CVector &start, const NLMISC::CVector 
 	CVector bestNormal(CVector::Null);
 	CVector currEnd = end;
 	CVector currInter;
-	if (_RaytraceCounter == (uint32) ~0)
+	if (_RaytraceCounter == std::numeric_limits<uint32>::max())
 	{
 		for(uint k = 0; k < _Zones.size(); ++k)
 		{

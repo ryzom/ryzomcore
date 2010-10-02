@@ -687,7 +687,7 @@ bool CFormDfn::getEntryIndexByName (uint &entry, const	std::string &name) const
 		}
 		entryIndex++;
 	}
-	entry=~0;
+	entry=std::numeric_limits<uint>::max();
 	return	false;
 }
 
