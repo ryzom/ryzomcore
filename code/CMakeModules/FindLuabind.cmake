@@ -21,78 +21,56 @@ FIND_PATH(LUABIND_INCLUDE_DIR
   /opt/include
 )
 
+SET(LIBRARY_NAME_RELEASE luabind libluabind)
+SET(LIBRARY_NAME_DEBUG luabind_d libluabind_d libluabindd)
+
 IF(WITH_STLPORT)
-  FIND_LIBRARY(LUABIND_LIBRARY_RELEASE
-    NAMES luabind_stlport luabind libluabind
-    PATHS
-    $ENV{LUABIND_DIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /usr/local/X11R6/lib
-    /usr/X11R6/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
-    /usr/freeware/lib64
-  )
-
-  FIND_LIBRARY(LUABIND_LIBRARY_DEBUG
-    NAMES luabind_stlportd luabind_d libluabind_d libluabindd
-    PATHS
-    $ENV{LUABIND_DIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /usr/local/X11R6/lib
-    /usr/X11R6/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
-    /usr/freeware/lib64
-  )
-ELSE(WITH_STLPORT)
-  FIND_LIBRARY(LUABIND_LIBRARY_RELEASE
-    NAMES luabind libluabind
-    PATHS
-    $ENV{LUABIND_DIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /usr/local/X11R6/lib
-    /usr/X11R6/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
-    /usr/freeware/lib64
-  )
-
-  FIND_LIBRARY(LUABIND_LIBRARY_DEBUG
-    NAMES luabind_d libluabind_d libluabindd
-    PATHS
-    $ENV{LUABIND_DIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /usr/local/X11R6/lib
-    /usr/X11R6/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
-    /usr/freeware/lib64
-  )
+  SET(LIBRARY_NAME_RELEASE luabind_stlport ${LIBRARY_NAME_RELEASE})
+  SET(LIBRARY_NAME_DEBUG luabind_stlportd ${LIBRARY_NAME_DEBUG})
 ENDIF(WITH_STLPORT)
 
-IF(LUABIND_INCLUDE_DIR)
+FIND_LIBRARY(LUABIND_LIBRARY_RELEASE
+  NAMES ${LIBRARY_NAME_RELEASE}
+  PATHS
+  $ENV{LUABIND_DIR}/lib
+  /usr/local/lib
+  /usr/lib
+  /usr/local/X11R6/lib
+  /usr/X11R6/lib
+  /sw/lib
+  /opt/local/lib
+  /opt/csw/lib
+  /opt/lib
+  /usr/freeware/lib64
+)
+
+FIND_LIBRARY(LUABIND_LIBRARY_DEBUG
+  NAMES ${LIBRARY_NAME_DEBUG}
+  PATHS
+  $ENV{LUABIND_DIR}/lib
+  /usr/local/lib
+  /usr/lib
+  /usr/local/X11R6/lib
+  /usr/X11R6/lib
+  /sw/lib
+  /opt/local/lib
+  /opt/csw/lib
+  /opt/lib
+  /usr/freeware/lib64
+)
+
+FIND_PACKAGE(Boost REQUIRED)
+
+IF(LUABIND_INCLUDE_DIR AND Boost_INCLUDE_DIR)
   IF(LUABIND_LIBRARY_RELEASE)
     SET(LUABIND_FOUND TRUE)
-
+    SET(LUABIND_INCLUDE_DIR ${LUABIND_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 	SET(LUABIND_LIBRARIES "optimized;${LUABIND_LIBRARY_RELEASE}")
     IF(LUABIND_LIBRARY_DEBUG)
       SET(LUABIND_LIBRARIES "${LUABIND_LIBRARIES};debug;${LUABIND_LIBRARY_DEBUG}")
     ENDIF(LUABIND_LIBRARY_DEBUG)
   ENDIF(LUABIND_LIBRARY_RELEASE)
-ENDIF(LUABIND_INCLUDE_DIR)
+ENDIF(LUABIND_INCLUDE_DIR AND Boost_INCLUDE_DIR)
 
 IF(LUABIND_FOUND)
   IF(NOT LUABIND_FIND_QUIETLY)
@@ -104,4 +82,4 @@ ELSE(LUABIND_FOUND)
   ENDIF(NOT LUABIND_FIND_QUIETLY)
 ENDIF(LUABIND_FOUND)
 
-MARK_AS_ADVANCED(LUABIND_LIBRARY_RELEASE LUABIND_LIBRARY_DEBUG)
+MARK_AS_ADVANCED(LUABIND_LIBRARY_RELEASE LUABIND_LIBRARY_DEBUG Boost_LIB_DIAGNOSTIC_DEFINITIONS)
