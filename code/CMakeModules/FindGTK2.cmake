@@ -1,7 +1,7 @@
 # - Try to find GTK2
 # Once done this will define
 #
-#  GTK2_FOUND - System has Boost
+#  GTK2_FOUND - System has GTK2
 #  GTK2_INCLUDE_DIRS - GTK2 include directory
 #  GTK2_LIBRARIES - Link these to use GTK2
 #  GTK2_LIBRARY_DIRS - The path to where the GTK2 library files are.
