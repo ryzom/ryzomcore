@@ -5849,7 +5849,7 @@
                       force_keep="#index"
                       itemdb="UI:glob_var:help:#index:BUILD_ITEMS"
                       posparent="text" />
-            <!-- For Comsetic only 3D preview -->
+            <!-- For Cosmetic only 3D preview -->
             <group id="char3d"
                    posref="TL TL"
                    sizeref="w"

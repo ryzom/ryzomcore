@@ -351,7 +351,7 @@ void CChatWindow::setCommand(const std::string &command, bool execute)
 void CChatWindow::setCommand(const ucstring &command,bool execute)
 {
 	if (!_EB) return;
-	_EB->setCommand(ucstring(command), execute);
+	_EB->setCommand(command, execute);
 }
 
 
