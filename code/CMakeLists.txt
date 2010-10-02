@@ -35,6 +35,7 @@ ENDIF(COMMAND cmake_policy)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/nel.cmake)
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/ConfigureChecks.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/CheckDepends.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
