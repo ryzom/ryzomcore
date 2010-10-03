@@ -378,7 +378,7 @@ class ICallStackEntry
 {
 public:
 	ICallStackEntry();
-	~ICallStackEntry();
+	virtual ~ICallStackEntry();
 	void displayStack(NLMISC::CLog& log) const;
 
 	virtual void displayEntry(NLMISC::CLog& log) const=0;

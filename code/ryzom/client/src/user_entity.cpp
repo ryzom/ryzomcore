@@ -456,7 +456,7 @@ void CUserEntity::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &/* gam
 	bc.BehavTime = TimeInSec;
 	if(VerboseAnimUser)
 	{
-		nlinfo("UE::updateVPBeha: '%d(%s)'.", (int)bc.Behav.Behaviour, MBEHAV::behaviourToString(bc.Behav.Behaviour).c_str());
+		nlinfo("UE::updateVPBeha: '%d(%s)'.", (sint)bc.Behav.Behaviour, MBEHAV::behaviourToString(bc.Behav.Behaviour).c_str());
 	}
 	CCDBNodeLeaf *targetList0 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_0));
 	CCDBNodeLeaf *targetList1 = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_TARGET_LIST_1));
@@ -1192,7 +1192,10 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	if(UserControls.isInternalView())
 	{
 		// If the server is slow, the client move slower too (only needed in FPV).
-		speed *= (100.0f/(float)NetMngr.getMsPerTick());
+		double modif = (100.0f/(float)NetMngr.getMsPerTick());
+		// don't increase speed
+		clamp(modif, 0.0, 1.0);
+		speed *= modif;
 		// Move
 		_HasMoved = true;
 		_Primitive->move(speed, dynamicWI);

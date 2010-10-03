@@ -1477,7 +1477,7 @@ void	displayValueLine( const std::string& propName, const char *valueFormat, con
 
 // This specialisation is necessary to compile it with gcc because of toString( valueFormat, value() )
 template <>
-void	displayValueLine<struct CEntityId>( const std::string& propName, const char * /* valueFormat */, const char *typeString, CEntityId*, const CMirroredDataSet *dataset, const TDataSetRow& entityIndex, TPropertyIndex propIndex, const char *flagsString, NLMISC::CLog& log, bool /* typeIsBool */, bool typeIsEntityId )
+inline void displayValueLine<struct CEntityId>( const std::string& propName, const char * /* valueFormat */, const char *typeString, CEntityId*, const CMirroredDataSet *dataset, const TDataSetRow& entityIndex, TPropertyIndex propIndex, const char *flagsString, NLMISC::CLog& log, bool /* typeIsBool */, bool typeIsEntityId )
 {
 	CMirrorPropValue<CEntityId> value( const_cast<CMirroredDataSet&>(*dataset), entityIndex, propIndex );
 	TValueToStringFunc valueToString;

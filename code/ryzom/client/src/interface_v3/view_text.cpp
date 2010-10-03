@@ -77,7 +77,7 @@ void CViewText::setupDefault ()
 
 	_TextSelection= false;
 	_TextSelectionStart= 0;
-	_TextSelectionEnd= ~0;
+	_TextSelectionEnd= std::numeric_limits<uint>::max();
 
 	_InvalidTextContext= true;
 	_FirstLineX = 0;
@@ -1795,7 +1795,7 @@ void CViewText::disableStringSelection()
 {
 	_TextSelection= false;
 	_TextSelectionStart= 0;
-	_TextSelectionEnd= ~0;
+	_TextSelectionEnd= std::numeric_limits<uint>::max();
 }
 
 // ***************************************************************************

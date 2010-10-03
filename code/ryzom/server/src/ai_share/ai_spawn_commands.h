@@ -16,6 +16,9 @@
 
 
 
+#ifndef RYAI_SPAWN_COMMANDS_H
+#define RYAI_SPAWN_COMMANDS_H
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
 
@@ -52,3 +55,5 @@
 //
 //	static CAISpawnCtrl *_instance;
 //};
+
+#endif

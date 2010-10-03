@@ -27,12 +27,11 @@
 #include "game_share/backup_service_interface.h"
 
 #include "server_share/r2_variables.h"
+#include "server_share/log_chat_gen.h"
 
 #include "chat_manager.h"
 #include "input_output_service.h"
 #include "chat_unifier_client.h"
-
-#include "server_share/log_chat_gen.h"
 
 //#include "ios_pd.h"
 

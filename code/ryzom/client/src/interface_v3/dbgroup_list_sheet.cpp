@@ -70,7 +70,7 @@ CDBGroupListSheet::CDBGroupListSheet(const TCtorParam &param)
 	_TopMargin= 0;
 	_BottomMargin= 0;
 	_StartDbIdx= 0;
-	_ColumnMax= ~0;
+	_ColumnMax= std::numeric_limits<uint>::max();
 	_ColumnFactor= 1;
 	_ColumnCenter= false;
 	_NeedToSort = true;
