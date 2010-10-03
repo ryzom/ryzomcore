@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <exception>
 #include <cctype>
+#include <limits>
 
 #include <errno.h>
 
