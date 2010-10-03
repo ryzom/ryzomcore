@@ -181,6 +181,7 @@
 	{																	\
 		ClientCfg.variableName.clear ();								\
 		int iSz = varPtr->size();										\
+		ClientCfg.variableName.reserve(iSz);							\
 		for (int i = 0; i < iSz; i++)									\
 			ClientCfg.variableName.push_back(varPtr->asString(i));		\
 	}																	\
@@ -272,7 +273,6 @@ static void	cfgWarning(const char *s)
 //---------------------------------------------------
 CClientConfig::CClientConfig()
 {
-
 	IsInvalidated		= false;
 
 	TestBrowser			= false;
@@ -753,64 +753,19 @@ void CClientConfig::setValues()
 	READ_STRINGVECTOR_FV(TexturesInterfaceDXTC);
 
 	// interface files login menus
-	ClientCfg.XMLLoginInterfaceFiles.clear ();
-	CConfigFile::CVar *pcvXMLLoginInterface = ClientCfg.ConfigFile.getVarPtr("XMLLoginInterfaceFiles");
-	if( pcvXMLLoginInterface )
-	{
-		int iSz = pcvXMLLoginInterface->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.XMLLoginInterfaceFiles.push_back(pcvXMLLoginInterface->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'XMLLoginInterfaceFiles'");
+	READ_STRINGVECTOR_FV(XMLLoginInterfaceFiles);
 
 	// interface files outgame menus
-	ClientCfg.XMLOutGameInterfaceFiles.clear ();
-	CConfigFile::CVar *pcvXMLOutGameInterface = ClientCfg.ConfigFile.getVarPtr("XMLOutGameInterfaceFiles");
-	if( pcvXMLOutGameInterface )
-	{
-		int iSz = pcvXMLOutGameInterface->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.XMLOutGameInterfaceFiles.push_back(pcvXMLOutGameInterface->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'XMLOutGameInterfaceFiles'");
-
+	READ_STRINGVECTOR_FV(XMLOutGameInterfaceFiles);
 
 	// interface files
-	ClientCfg.XMLInterfaceFiles.clear ();
-	CConfigFile::CVar *pcvXMLInterface = ClientCfg.ConfigFile.getVarPtr("XMLInterfaceFiles");
-	if( pcvXMLInterface )
-	{
-		int iSz = pcvXMLInterface->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.XMLInterfaceFiles.push_back(pcvXMLInterface->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'XMLInterfaceFiles'");
+	READ_STRINGVECTOR_FV(XMLInterfaceFiles);
 
 	// r2ed interfaces
-	ClientCfg.XMLR2EDInterfaceFiles.clear ();
-	CConfigFile::CVar *pcvXMLR2EDInterfaceFiles = ClientCfg.ConfigFile.getVarPtr("XMLR2EDInterfaceFiles");
-	if( pcvXMLR2EDInterfaceFiles )
-	{
-		int iSz = pcvXMLR2EDInterfaceFiles->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.XMLR2EDInterfaceFiles.push_back(pcvXMLR2EDInterfaceFiles->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'XMLR2EDInterfaceFiles'");
+	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
 
 	// logos
-	ClientCfg.Logos.clear ();
-	CConfigFile::CVar *cvLogos = ClientCfg.ConfigFile.getVarPtr("Logos");
-	if(cvLogos)
-	{
-		for (uint i = 0; i < cvLogos->size (); i++)
-			ClientCfg.Logos.push_back(cvLogos->asString(i));
-	}
-	else
-		cfgWarning("Logos not found in client.cfg");
+	READ_STRINGVECTOR_FV(Logos);
 
 	// browser test mode
 	READ_BOOL_DEV(TestBrowser);
@@ -1247,64 +1202,19 @@ void CClientConfig::setValues()
 	//////////
 	// MISC //
 	// Pre Data Path.
-	CConfigFile::CVar *pcvPreDataPath = ClientCfg.ConfigFile.getVarPtr("PreDataPath");
-	if( pcvPreDataPath )
-	{
-		ClientCfg.PreDataPath.clear ();
-		int iSz = pcvPreDataPath->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.PreDataPath.push_back(pcvPreDataPath->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'PreDataPath'");
+	READ_STRINGVECTOR_FV(PreDataPath);
 
 	// Data Path.
-	CConfigFile::CVar *pcvDataPath = ClientCfg.ConfigFile.getVarPtr("DataPath");
-	if( pcvDataPath )
-	{
-		ClientCfg.DataPath.clear ();
-		int iSz = pcvDataPath->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.DataPath.push_back(pcvDataPath->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'DataPath'");
+	READ_STRINGVECTOR_FV(DataPath);
 
 	// List of files that trigger R2ED reload when touched
-	CConfigFile::CVar *pcvR2EDReloadFiles = ClientCfg.ConfigFile.getVarPtr("R2EDReloadFiles");
-	if( pcvR2EDReloadFiles )
-	{
-		ClientCfg.R2EDReloadFiles.clear ();
-		int iSz = pcvR2EDReloadFiles->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.R2EDReloadFiles.push_back(pcvR2EDReloadFiles->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'R2EDReloadFiles'");
+	READ_STRINGVECTOR_FV(R2EDReloadFiles);
 
 	// Data Path no recurse.
-	CConfigFile::CVar *pcvDataPathNoRecurse = ClientCfg.ConfigFile.getVarPtr("DataPathNoRecurse");
-	if( pcvDataPathNoRecurse )
-	{
-		ClientCfg.DataPathNoRecurse.clear ();
-		int iSz = pcvDataPathNoRecurse->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.DataPathNoRecurse.push_back(pcvDataPathNoRecurse->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'DataPathNoRecurse'");
+	READ_STRINGVECTOR_FV(DataPathNoRecurse);
 
 	// Update packed sheet Path
-	CConfigFile::CVar *pcvUpdatePackedSheetPath = ClientCfg.ConfigFile.getVarPtr("UpdatePackedSheetPath");
-	if( pcvUpdatePackedSheetPath )
-	{
-		ClientCfg.UpdatePackedSheetPath.clear ();
-		int iSz = pcvUpdatePackedSheetPath->size();
-		for (int i = 0; i < iSz; i++)
-			ClientCfg.UpdatePackedSheetPath.push_back(pcvUpdatePackedSheetPath->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'UpdatePackedSheetPath'");
+	READ_STRINGVECTOR_FV(UpdatePackedSheetPath);
 
 	// UpdatePackedSheet
 	READ_BOOL_DEV(UpdatePackedSheet)
@@ -1332,22 +1242,7 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(IdFilePath)
 
 	// PacsPrimDir
-#if !FINAL_VERSION
-	CConfigFile::CVar *pcvPacsPrimDir = ClientCfg.ConfigFile.getVarPtr("PacsPrimDir");
-	if( pcvPacsPrimDir )
-	{
-		ClientCfg.PacsPrimDir.clear();
-		int iSz = pcvPacsPrimDir->size();
-		ClientCfg.PacsPrimDir.reserve(iSz);
-		for(int k = 0; k < iSz; ++k)
-		{
-			ClientCfg.PacsPrimDir.push_back(pcvPacsPrimDir->asString(k));
-		}
-	}
-	else
-		cfgWarning("Default value used for 'PacsPrimDir'");
-#endif // !FINAL_VERSION
-
+	READ_STRINGVECTOR_DEV(PacsPrimDir);
 
 	/////////////
 	// FILTERS //
@@ -1389,17 +1284,7 @@ void CClientConfig::setValues()
 		cfgWarning("Default value used for 'NegFiltersWarning'");
 
 	// Script Files
-
-	ClientCfg.StartCommands.clear ();
-	CConfigFile::CVar *cvTmp = ClientCfg.ConfigFile.getVarPtr("StartCommands");
-	if(cvTmp)
-	{
-		for (uint i = 0; i < cvTmp->size (); i++)
-			ClientCfg.StartCommands.push_back(cvTmp->asString(i));
-	}
-	else
-		cfgWarning("Default value used for 'StartCommands' !!!");
-
+	READ_STRINGVECTOR_FV(StartCommands);
 
 	/////////////
 	// OPTIONS //
@@ -1440,7 +1325,7 @@ void CClientConfig::setValues()
 				else if (stricmp(mode, "center") == 0)	p.Mode = SSysInfoParam::Center;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
-				ClientCfg.SystemInfoParams[strlwr(sic->asString(2 * k))] = p;
+				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;
 			}
 		}
 	}
@@ -1710,18 +1595,7 @@ void CClientConfig::setValues()
 	//////////
 	// TEMP //
 	// Array with the name of all offensive impact FXs.
-#if !FINAL_VERSION
-	ClientCfg.OffImpactFX.clear();
-	CConfigFile::CVar *pcvOffImpactFX = ClientCfg.ConfigFile.getVarPtr("OffImpactFX");
-	if( pcvOffImpactFX )
-	{
-		int iSz = pcvOffImpactFX->size();
-		for(int i = 0; i < iSz; i++)
-			ClientCfg.OffImpactFX.push_back(pcvOffImpactFX->asString(i));
-	}
-	else
-		cfgWarning("No 'OffImpactFX'");
-#endif // !FINAL_VERSION
+	READ_STRINGVECTOR_DEV(OffImpactFX);
 
 #ifndef RZ_NO_CLIENT
 
@@ -1765,18 +1639,7 @@ void CClientConfig::setValues()
 	}
 
 	// Prim files
-#if !FINAL_VERSION
-	CConfigFile::CVar *cvPrimFiles = ClientCfg.ConfigFile.getVarPtr ("PrimFiles");
-	ClientCfg.PrimFiles.clear ();
-	if (cvPrimFiles)
-	{
-		ClientCfg.PrimFiles.clear ();
-		ClientCfg.PrimFiles.reserve (cvPrimFiles->size());
-		// Load all the prim files
-		for (uint i = 0; i < cvPrimFiles->size(); i++)
-			ClientCfg.PrimFiles.push_back(cvPrimFiles->asString(i));
-	}
-#endif // FINAL_VERSION
+	READ_STRINGVECTOR_DEV(PrimFiles);
 
 	// Reset GlobalWind Setup
 	if(Scene)
@@ -1877,7 +1740,7 @@ void CClientConfig::setValues()
 		ClientCfg.HardwareCursors.clear ();
 		int iSz = pcvHardwareCursors->size();
 		for (int i = 0; i < iSz; i++)
-			ClientCfg.HardwareCursors.insert(strlwr(pcvHardwareCursors->asString(i)));
+			ClientCfg.HardwareCursors.insert(toLower(pcvHardwareCursors->asString(i)));
 	}
 	else
 	{
@@ -1915,25 +1778,8 @@ void CClientConfig::setValues()
 	}
 
 	// languages and types of Ring Scenarii
-	ClientCfg.ScenarioLanguages.clear ();
-	CConfigFile::CVar *scenarioLanguages = ClientCfg.ConfigFile.getVarPtr("ScenarioLanguages");
-	if( scenarioLanguages )
-	{
-		for (uint i = 0; i < scenarioLanguages->size(); i++)
-			ClientCfg.ScenarioLanguages.push_back(scenarioLanguages->asString(i));
-	}
-	else
-		cfgWarning("No values for 'ScenarioLanguages'");
-
-	ClientCfg.ScenarioTypes.clear ();
-	CConfigFile::CVar *scenarioTypes = ClientCfg.ConfigFile.getVarPtr("ScenarioTypes");
-	if( scenarioTypes )
-	{
-		for (uint i = 0; i < scenarioTypes->size(); i++)
-			ClientCfg.ScenarioTypes.push_back(scenarioTypes->asString(i));
-	}
-	else
-		cfgWarning("No values for 'ScenarioTypes'");
+	READ_STRINGVECTOR_FV(ScenarioLanguages);
+	READ_STRINGVECTOR_FV(ScenarioTypes);
 
 	// build name
 	READ_STRING_FV(BuildName)
