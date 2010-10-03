@@ -1,13 +1,13 @@
-FILE(GLOB SRC *.cpp time_weather_season/*.cpp time_weather_season/*.h)
-FILE(GLOB PRIV_H *.h)
+FILE(GLOB SRC *.cpp time_weather_season/*.cpp)
+FILE(GLOB PRIV_H *.h time_weather_season/*.h)
 
-SOURCE_GROUP(headers FILES ${PRIV_H} ${PUB_H})
+SOURCE_GROUP(headers FILES ${PRIV_H})
 
 # Filter out the source files not actually compiled.
 LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.cpp)
 LIST(REMOVE_ITEM PRIV_H ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.h)
 
-NL_TARGET_LIB(ryzom_gameshare ${SRC})
+NL_TARGET_LIB(ryzom_gameshare ${PRIV_H} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
