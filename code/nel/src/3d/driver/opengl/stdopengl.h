@@ -30,6 +30,7 @@
 #include <exception>
 #include <utility>
 #include <deque>
+#include <limits>
 
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"
