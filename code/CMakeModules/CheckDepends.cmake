@@ -16,7 +16,14 @@ MACRO(CHECK_UNDEFINED_SYMBOL MYLIBRARY SYMBOL SYMBOL_FOUND)
   IF(WIN32)
     # Always TRUE under Windows because we are using static libraries
   ELSEIF(APPLE)
-    # TODO: use otool to detect if a library is using a symbol
+    SET(CMAKE_OTOOL otool)
+    IF(CMAKE_OTOOL)
+      # Use otool to check if a library is using an external symbol
+      EXEC_PROGRAM(${CMAKE_OTOOL} ARGS "-Rv ${${MYLIBRARY}} | grep ${SYMBOL}" OUTPUT_VARIABLE OTOOL_SYMBOL)
+      IF(NOT OTOOL_SYMBOL MATCHES "undefined")
+        SET(${SYMBOL_FOUND} FALSE)
+      ENDIF(NOT OTOOL_SYMBOL MATCHES "undefined")
+    ENDIF(CMAKE_OTOOL)
   ELSEIF(UNIX)
     IF(CMAKE_OBJDUMP)
       # Use objdump to check if a library is using an external symbol
@@ -43,10 +50,19 @@ MACRO(CHECK_LINKED_LIBRARY MYLIBRARY OTHERLIBRARY LIBRARY_FOUND)
   IF(WIN32)
     # Always FALSE under Windows because we are using static libraries
   ELSEIF(APPLE)
-    # TODO: use otool to detect if a library is using a symbol
+    SET(CMAKE_OTOOL otool)
+    IF(CMAKE_OTOOL)
+      # Use otool to check if a library is linked to another library
+      GET_FILENAME_COMPONENT(LIBNAME ${${OTHERLIBRARY}} NAME)
+      EXEC_PROGRAM(${CMAKE_OTOOL} ARGS "-L ${${MYLIBRARY}} | grep ${${OTHERLIBRARY}}" OUTPUT_VARIABLE OTOOL_LIBRARY)
+      IF(NOT OTOOL_LIBRARY MATCHES "${LIBNAME}")
+        SET(${LIBRARY_FOUND} FALSE)
+      ENDIF(NOT OTOOL_LIBRARY MATCHES "${LIBNAME}")
+    ENDIF(CMAKE_OTOOL)
   ELSEIF(UNIX)
     IF(CMAKE_OBJDUMP)
       GET_FILENAME_COMPONENT(LIBNAME ${${OTHERLIBRARY}} NAME)
+      # TODO: under Solaris use dump -Lv <lib>
       # Use objdump to check if a library is linked to another library
       EXEC_PROGRAM(${CMAKE_OBJDUMP} ARGS "-p ${${MYLIBRARY}} | grep ${LIBNAME}" OUTPUT_VARIABLE OBJDUMP_LIBRARY)
       IF(OBJDUMP_LIBRARY MATCHES "NEEDED")
