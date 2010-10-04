@@ -35,6 +35,7 @@
 #include <fstream>
 #include <functional>
 #include <memory>
+#include <limits>
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
