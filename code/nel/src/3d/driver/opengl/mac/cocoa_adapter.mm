@@ -30,27 +30,28 @@
 #include <Carbon/Carbon.h>
 
 #import <Cocoa/Cocoa.h>
+#import <OpenGL/OpenGL.h>
 
 namespace NL3D { namespace MAC {
 
 // This cocoa adapter can be used in two environments:
-// First: There is no other code which creates the NSApplication object, so 
+// First: There is no other code which creates the NSApplication object, so
 //   NeL is completely in charge of starting and setting up the application.
-//   In this case, the NSAutoreleasePool needed to handle the cocoa style memory 
+//   In this case, the NSAutoreleasePool needed to handle the cocoa style memory
 //   management is created by this code.
 // Second: There is already a NSApplication set up. This could be the case if
-//   NeL is used for example in a Qt widget. So Qt already created all the 
+//   NeL is used for example in a Qt widget. So Qt already created all the
 //   NSApplication infrastructure, so it is not set up by this code again!
 //
-// Thats why, the g_pool variable (containing a pointer to the NSAutoreleasePool 
-// created by this code) can be used to check whether NeL created the 
+// Thats why, the g_pool variable (containing a pointer to the NSAutoreleasePool
+// created by this code) can be used to check whether NeL created the
 // NSApplication infrastructure itself or not.
 //
 // WARNING:
 // Currently the NSApplication infrastructure is automatically created with the
 // call to createWindow(). So if for example Qt already created NSApplication,
 // createWindow() must not be called. Instead, setDisplay() can be provided with
-// a window handle (on Mac OS Cocoa Qt this is a NSView*). In this case, this 
+// a window handle (on Mac OS Cocoa Qt this is a NSView*). In this case, this
 // cocoa adapter will skip the NSApplication setup and embed itself into the
 // provided view running in the already set up application.
 
@@ -77,7 +78,7 @@ static void setupApplicationMenu()
 
 	// add the about menu item
 	title = [@"About " stringByAppendingString:appName];
-	[menu addItemWithTitle:title 
+	[menu addItemWithTitle:title
 		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
 
 	// separator
@@ -85,16 +86,16 @@ static void setupApplicationMenu()
 
 	// add the hide application menu item
 	title = [@"Hide " stringByAppendingString:appName];
-	[menu addItemWithTitle:title 
+	[menu addItemWithTitle:title
 		action:@selector(hide:) keyEquivalent:@"h"];
 
 	// add the hide others menu item
-	menuItem = [menu addItemWithTitle:@"Hide Others" 
+	menuItem = [menu addItemWithTitle:@"Hide Others"
 		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
 	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
 
 	// add the show all menu item
-	[menu addItemWithTitle:@"Show All" 
+	[menu addItemWithTitle:@"Show All"
 		action:@selector(unhideAllApplications:) keyEquivalent:@""];
 
 	// separator
@@ -105,11 +106,11 @@ static void setupApplicationMenu()
 	*/
 	// add the quit menu item
 	title = [@"Quit " stringByAppendingString:appName];
-	[menu addItemWithTitle:title 
+	[menu addItemWithTitle:title
 		action:@selector(terminate:) keyEquivalent:@"q"];
 
 	// create an empty menu item and put the new menu into it as a subitem
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"" 
+	menuItem = [[NSMenuItem alloc] initWithTitle:@""
 		action:nil keyEquivalent:@""];
 	[menuItem setSubmenu:menu];
 
@@ -132,13 +133,13 @@ static bool setupNSApplication()
 
 	// init the application object
 	[NSApplication sharedApplication];
-	
+
 	// create the menu in the top screen bar
 	setupApplicationMenu();
 
 	// finish the application launching
 	[NSApp finishLaunching];
-	
+
 	return true;
 }
 
@@ -335,13 +336,14 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
+#ifdef MAC_OS_X_VERSION_10_6
 		[superview enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
 					NSApplicationPresentationHideDock |
 					NSApplicationPresentationAutoHideMenuBar],
 				NSFullScreenModeApplicationPresentationOptions, nil]];
-
+#endif // MAC_OS_X_VERSION_10_6
 		/*
 			TODO check if simply using NSView enterFullScreenMode is a good idea.
 			 the context can be set to full screen as well, performance differences?
@@ -386,6 +388,7 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 	}
 }
 
+#ifdef MAC_OS_X_VERSION_10_6
 /// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
 static int bppFromDisplayMode(CGDisplayModeRef mode)
 {
@@ -401,6 +404,7 @@ static int bppFromDisplayMode(CGDisplayModeRef mode)
 	
 	return 0;
 }
+#endif // MAC_OS_X_VERSION_10_6
 
 /// get the list of available screen modes
 bool getModes(std::vector<GfxMode> &modes)
@@ -418,6 +422,7 @@ bool getModes(std::vector<GfxMode> &modes)
 
 	nldebug("3D: %d displays found", (int)numDisplays);
 
+#ifdef MAC_OS_X_VERSION_10_6
 	for (CGDisplayCount i = 0; i < numDisplays; ++i)
 	{
 		CGDirectDisplayID dspy = display[i];
@@ -455,6 +460,7 @@ bool getModes(std::vector<GfxMode> &modes)
 			}
 		}
 	}
+#endif // MAC_OS_X_VERSION_10_6
 	
 	return true;
 }
@@ -1076,7 +1082,7 @@ void submitEvents(NLMISC::CEventServer& server,
 		{
 			if(fabs(event.deltaY) > 0.1) 
 				server.postEvent(new NLMISC::CEventMouseWheel(
-					mouseX, mouseY, (NLMISC::TMouseButton)modifiers, 
+					mouseX, mouseY, (NLMISC::TMouseButton)modifiers,
 					(event.deltaY > 0), eventEmitter));
 
 			break;
@@ -1086,12 +1092,14 @@ void submitEvents(NLMISC::CEventServer& server,
 		case NSOtherMouseDown:break;
 		case NSOtherMouseUp:break;
 		case NSOtherMouseDragged:break;
+#ifdef MAC_OS_X_VERSION_10_6
 		case NSEventTypeGesture:break;
 		case NSEventTypeMagnify:break;
 		case NSEventTypeSwipe:break;
 		case NSEventTypeRotate:break;
 		case NSEventTypeBeginGesture:break;
 		case NSEventTypeEndGesture:break;
+#endif // MAC_OS_X_VERSION_10_6
 		default:
 		{
 			nlwarning("Unknown event type. dropping.");
