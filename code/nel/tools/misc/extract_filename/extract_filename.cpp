@@ -396,7 +396,7 @@ bool loadConfigFiles (const char *ext, const char *input_files, const char *avai
 								// Add the extension
 								if (!availableFiles.insert (map<string, string>::value_type (temp, temp2)).second)
 								{
-									fprintf (stderr, "DUBLING: %s %s\n", temp.c_str (), temp2);
+									fprintf (stderr, "DUBLING: %s %s\n", temp.c_str (), temp2.c_str());
 								}
 							}
 							else
