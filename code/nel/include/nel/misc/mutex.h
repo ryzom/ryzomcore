@@ -121,38 +121,38 @@ private:
 // Tested: works on multi-processor
 #ifdef HAVE_X86_64
 #	define ASM_ASWAP_FOR_GCC_XCHG __asm__ volatile( \
-		    "mov %1, %%rcx;" \
-		    "mov $1, %%eax;" \
-		    "xchg %%eax, (%%rcx);" \
-		    "mov %%eax, %0" \
-	        : "=m" (result) \
-		    : "m" (lockPtr) \
-		    : "eax", "rcx", "memory" ); // force to use registers and memory
+			"mov %1, %%rcx;" \
+			"mov $1, %%eax;" \
+			"xchg %%eax, (%%rcx);" \
+			"mov %%eax, %0" \
+			: "=m" (result) \
+			: "m" (lockPtr) \
+			: "eax", "rcx", "memory" ); // force to use registers and memory
 #else
 #	define ASM_ASWAP_FOR_GCC_XCHG __asm__ volatile( \
-		    "mov %1, %%ecx;" \
-		    "mov $1, %%eax;" \
-		    "xchg %%eax, (%%ecx);" \
-		    "mov %%eax, %0" \
-	        : "=m" (result) \
-		    : "m" (lockPtr) \
-		    : "eax", "ecx", "memory" ); // force to use registers and memory
+			"mov %1, %%ecx;" \
+			"mov $1, %%eax;" \
+			"xchg %%eax, (%%ecx);" \
+			"mov %%eax, %0" \
+			: "=m" (result) \
+			: "m" (lockPtr) \
+			: "eax", "ecx", "memory" ); // force to use registers and memory
 #endif
 */
 
 /*
 // Tested: does not work (at least on multi-processor)! (with or without 'lock' prefix)
 #define ASM_ASWAP_FOR_GCC_CMPXCHG __asm__ volatile( \
-		    "mov $1, %%edx;" \
-		    "mov %1, %%ecx;" \
-		    "mov (%%ecx), %%eax;" \
-		    "1:nop;" \
-		    "lock cmpxchgl %%edx, (%%ecx);" \
-		    "jne 1b;" \
-		    "mov %%eax, %0" \
-	        : "=m" (result) \
-		    : "m" (lockPtr) \
-		    : "eax", "ecx", "edx", "memory" ); // force to use registers and memory
+			"mov $1, %%edx;" \
+			"mov %1, %%ecx;" \
+			"mov (%%ecx), %%eax;" \
+			"1:nop;" \
+			"lock cmpxchgl %%edx, (%%ecx);" \
+			"jne 1b;" \
+			"mov %%eax, %0" \
+			: "=m" (result) \
+			: "m" (lockPtr) \
+			: "eax", "ecx", "edx", "memory" ); // force to use registers and memory
 */
 
 // Tested: does not work on hyper-threading processors!
@@ -206,6 +206,7 @@ test_again:
 #ifdef NL_OS_WINDOWS
 #pragma managed(push, off)
 #endif
+
 class CFastMutex
 {
 public:
@@ -565,7 +566,7 @@ struct TMutexLocks
 	uint32		TimeInMutex;			// cumulated time between enter and leave
 	uint32		Nb;						// number of calls of enter
 	uint32		WaitingMutex;			// number of thread that waiting this mutex
-    sint32		MutexNum;				// identifying a mutex
+	sint32		MutexNum;				// identifying a mutex
 	uint		ThreadHavingTheMutex;	// thread id of the thread that is in this mutex (0xFFFFFFFF if no thread)
 	bool		Dead;					// True if the mutex is dead (deleted)
 	std::string	MutexName;				// Name of the mutex
