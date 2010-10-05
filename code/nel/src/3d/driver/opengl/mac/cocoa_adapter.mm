@@ -32,6 +32,25 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 
+#ifndef MAC_OS_X_VERSION_10_6
+
+long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
+{
+	long value = 0;
+	CFNumberRef numRef;
+	numRef = (CFNumberRef)CFDictionaryGetValue(theDict, key);
+	if (numRef != NULL)
+		CFNumberGetValue(numRef, kCFNumberLongType, &value);
+	return value;
+}
+
+// some macros to make code more readable.
+#define GetModeWidth(mode) GetDictionaryLong((mode), kCGDisplayWidth)
+#define GetModeHeight(mode) GetDictionaryLong((mode), kCGDisplayHeight)
+#define GetModeBitsPerPixel(mode) GetDictionaryLong((mode), kCGDisplayBitsPerPixel)
+
+#endif // MAC_OS_X_VERSION_10_6
+
 namespace NL3D { namespace MAC {
 
 // This cocoa adapter can be used in two environments:
@@ -422,11 +441,15 @@ bool getModes(std::vector<GfxMode> &modes)
 
 	nldebug("3D: %d displays found", (int)numDisplays);
 
-#ifdef MAC_OS_X_VERSION_10_6
 	for (CGDisplayCount i = 0; i < numDisplays; ++i)
 	{
 		CGDirectDisplayID dspy = display[i];
+
+#ifdef MAC_OS_X_VERSION_10_6
 		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
+#else
+		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
+#endif
 		
 		if (modeList == NULL)
 		{
@@ -436,13 +459,24 @@ bool getModes(std::vector<GfxMode> &modes)
 
 		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
 		{
+#ifdef MAC_OS_X_VERSION_10_6
 			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
 			uint8 bpp = bppFromDisplayMode(mode);
-			
+#else
+			CFDictionaryRef mode = (CFDictionaryRef)CFArrayGetValueAtIndex(modeList, j);
+			uint8 bpp = (uint8)GetModeBitsPerPixel(mode);
+#endif // MAC_OS_X_VERSION_10_6
+	
 			if (bpp >= 16)
 			{
+#ifdef MAX_OS_X_VERSION_10_6
 				uint16 w = CGDisplayModeGetWidth(mode);
 				uint16 h = CGDisplayModeGetHeight(mode);
+#else
+				uint16 w = (uint16)GetModeWidth(mode); 
+				uint16 h = (uint16)GetModeHeight(mode); 
+#endif // MAC_OS_X_VERSION_10_6
+
 
 				// Add this mode
 				GfxMode mode;
@@ -460,7 +494,6 @@ bool getModes(std::vector<GfxMode> &modes)
 			}
 		}
 	}
-#endif // MAC_OS_X_VERSION_10_6
 	
 	return true;
 }
