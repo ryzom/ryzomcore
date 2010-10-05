@@ -38,7 +38,9 @@
 
 -(void)keyDown:(NSEvent*)event
 {
+#ifdef MAC_OS_X_VERSION_10_6
 	[[self inputContext] handleEvent:event];
+#endif // MAC_OS_X_VERSION_10_6
 }
 
 /******************************************************************************/
