@@ -22,17 +22,19 @@
 #include "common.h"
 #include <map>
 
-#ifdef NL_OS_UNIX
-//#include <iostream>
-#include <pthread.h> // PThread
-#include <semaphore.h> // PThread POSIX semaphores
-#include <unistd.h>
-#define __forceinline
-#elif defined(NL_OS_WINDOWS)
+#ifdef NL_OS_WINDOWS
 #	ifdef NL_NO_ASM
 #		include <intrin.h>
 #	endif
-#endif
+#elif defined(NL_OS_UNIX)
+#	include <pthread.h> // PThread
+#	include <semaphore.h> // PThread POSIX semaphores
+#	include <unistd.h>
+#	define __forceinline
+#	ifdef NL_OS_MAC
+#		include <libkern/OSAtomic.h>
+#	endif
+#endif // NL_OS_WINDOWS
 
 #undef MUTEX_DEBUG
 
@@ -245,12 +247,18 @@ public:
 		}
 #	endif // NL_DEBUG
 #	endif // NL_NO_ASM
-#else
-	// GCC implements the same functionality using a builtin function
-	// http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
-	// the macro below crashed on Mac OS X 10.6 in a 64bit build
-	//ASM_ASWAP_FOR_GCC_XCHG
-    result = __sync_bool_compare_and_swap(lockPtr, 0, 1);
+#elif defined(NL_OS_MAC)
+		return OSAtomicCompareAndSwap32(0, 1, reinterpret_cast<volatile sint32 *>(lockPtr));
+#elif defined(NL_OS_UNIX)
+		// GCC implements the same functionality using a builtin function
+		// http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
+		// the macro below crashed on Mac OS X 10.6 in a 64bit build
+#	if (GCC_VERSION > 40100)
+		// return __sync_bool_compare_and_swap(lockPtr, 0, 1);
+		result = __sync_val_compare_and_swap(lockPtr, 0, 1);
+#	else
+		ASM_ASWAP_FOR_GCC_XCHG
+#	endif
 #endif // NL_OS_WINDOWS
 		return result != 0;
 	}
