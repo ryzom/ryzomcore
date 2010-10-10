@@ -188,7 +188,7 @@ ENDIF(BUILD_DOCUMENTATION)
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(nel_unit_test ${EXECUTABLE_OUTPUT_PATH}/nel_unit_test --html)
+  ADD_TEST(nel_unit_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nel_unit_test --html)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
