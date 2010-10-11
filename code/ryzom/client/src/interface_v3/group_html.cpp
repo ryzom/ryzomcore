@@ -138,8 +138,10 @@ void CGroupHTML::checkImageDownload()
 		// check msg
 		CURLMsg *msg;
 		int msgs_left;
-		while ((msg = curl_multi_info_read(MultiCurl, &msgs_left))) {
-			if (msg->msg == CURLMSG_DONE) {
+		while ((msg = curl_multi_info_read(MultiCurl, &msgs_left)))
+		{
+			if (msg->msg == CURLMSG_DONE)
+			{
 				for (vector<CImageDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 				{
 					if(msg->easy_handle == it->curl)
@@ -2597,9 +2599,10 @@ static int timer_called = 0;
 static int 
 timer_callback(HTTimer *   const timer     ,
                void *      const user_data ,
-               HTEventType const event     ) {
+               HTEventType const event     )
+{
 /*----------------------------------------------------------------------------
-  A handy timer callback which cancels the running event loop. 
+  A handy timer callback which cancels the running event loop.
 -----------------------------------------------------------------------------*/
     nlassert(event == HTEvent_TIMEOUT);
     timer_called = 1;
@@ -2610,7 +2613,8 @@ timer_callback(HTTimer *   const timer     ,
     return HT_OK;
 }
 
-static void handleLibwwwEvents() {
+static void handleLibwwwEvents()
+{
   HTTimer *timer;
   timer_called = 0;
   timer = HTTimer_new(NULL, &timer_callback, NULL,

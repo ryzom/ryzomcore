@@ -2633,7 +2633,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		// Hide menu (or popup menu) is ESCAPE pressed
 		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
 		{
-			if(_ModalStack.size() > 0) {
+			if(_ModalStack.size() > 0)
+			{
 				CModalWndInfo mwi = _ModalStack.back();
 				if (mwi.ModalExitKeyPushed)
 					disableModalWindow();
@@ -5571,6 +5572,7 @@ public:
 				{
 					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr;
 				}
+
 				out.serialEnum(behavToSend);
 				out.serial(ucstr);
 				NetMngr.push(out);

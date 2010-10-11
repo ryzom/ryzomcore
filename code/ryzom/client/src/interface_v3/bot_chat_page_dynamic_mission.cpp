@@ -287,7 +287,7 @@ class CAHChangeDMOption : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
 	{
 		//get id of choice
-		int id;
+		sint id;
 		if (!NLMISC::fromString(getParam(params, "id"), id))
 		{
 			nlwarning("Bad choice list id");

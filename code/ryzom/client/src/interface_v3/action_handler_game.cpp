@@ -489,7 +489,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		std::string id = getParam(sParams, "id");
-		int intId;
+		sint intId;
 		if (!fromString(id, intId)) return;
 		//nlinfo("intId = %d", intId);
 		CBotChatManager::getInstance()->incrementSessionID();
@@ -1089,7 +1089,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		std::string id = getParam(sParams, "id");
-		int idInDb;
+		sint idInDb;
 		if (!fromString(id, idInDb)) return;
 
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();

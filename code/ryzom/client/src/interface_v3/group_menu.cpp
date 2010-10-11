@@ -733,8 +733,8 @@ void CGroupSubMenu::updateCoords ()
 
 				sint32 limY = refElmYReal + refElmHReal/2 - _GroupList->getYReal();
 				// Setup the arrow at the right pos
-				if(_GroupList->getMaxH()>=limY && limY>=0){
-
+				if(_GroupList->getMaxH()>=limY && limY>=0)
+				{
 					pVB->setY(refElmYReal + (refElmHReal - pVB->getHReal()) / 2 - _GroupList->getYReal());
 					pVB->setActive(_Lines[CBLineNb].ViewText->getActive());
 				}
