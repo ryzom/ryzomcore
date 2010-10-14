@@ -32,8 +32,11 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 
-#ifndef MAC_OS_X_VERSION_10_6
+#if defined(MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+	#define NL_USE_MAC_10_6_API 1
+#endif
 
+#ifndef NL_USE_MAC_10_6_API
 long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 {
 	long value = 0;
@@ -49,7 +52,7 @@ long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 #define GetModeHeight(mode) GetDictionaryLong((mode), kCGDisplayHeight)
 #define GetModeBitsPerPixel(mode) GetDictionaryLong((mode), kCGDisplayBitsPerPixel)
 
-#endif // MAC_OS_X_VERSION_10_6
+#endif // NL_USE_MAC_10_6_API
 
 namespace NL3D { namespace MAC {
 
@@ -355,14 +358,14 @@ bool setWindowStyle(nlWindow wnd, bool fullscreen)
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 		[superview enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
 					NSApplicationPresentationHideDock |
 					NSApplicationPresentationAutoHideMenuBar],
 				NSFullScreenModeApplicationPresentationOptions, nil]];
-#endif // MAC_OS_X_VERSION_10_6
+#endif // NL_USE_MAC_10_6_API
 		/*
 			TODO check if simply using NSView enterFullScreenMode is a good idea.
 			 the context can be set to full screen as well, performance differences?
@@ -407,7 +410,7 @@ void getCurrentScreenMode(nlWindow wnd, GfxMode& mode)
 	}
 }
 
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 /// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
 static int bppFromDisplayMode(CGDisplayModeRef mode)
 {
@@ -423,7 +426,7 @@ static int bppFromDisplayMode(CGDisplayModeRef mode)
 	
 	return 0;
 }
-#endif // MAC_OS_X_VERSION_10_6
+#endif // NL_USE_MAC_10_6_API
 
 /// get the list of available screen modes
 bool getModes(std::vector<GfxMode> &modes)
@@ -445,11 +448,11 @@ bool getModes(std::vector<GfxMode> &modes)
 	{
 		CGDirectDisplayID dspy = display[i];
 
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
 #else
 		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
-#endif
+#endif // NL_USE_MAC_10_6_API
 		
 		if (modeList == NULL)
 		{
@@ -459,24 +462,23 @@ bool getModes(std::vector<GfxMode> &modes)
 
 		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
 		{
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
 			uint8 bpp = bppFromDisplayMode(mode);
 #else
 			CFDictionaryRef mode = (CFDictionaryRef)CFArrayGetValueAtIndex(modeList, j);
 			uint8 bpp = (uint8)GetModeBitsPerPixel(mode);
-#endif // MAC_OS_X_VERSION_10_6
+#endif // NL_USE_MAC_10_6_API
 	
 			if (bpp >= 16)
 			{
-#ifdef MAX_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 				uint16 w = CGDisplayModeGetWidth(mode);
 				uint16 h = CGDisplayModeGetHeight(mode);
 #else
 				uint16 w = (uint16)GetModeWidth(mode); 
 				uint16 h = (uint16)GetModeHeight(mode); 
-#endif // MAC_OS_X_VERSION_10_6
-
+#endif // NL_USE_MAC_10_6_API
 
 				// Add this mode
 				GfxMode mode;

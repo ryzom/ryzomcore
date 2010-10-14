@@ -18,6 +18,10 @@
 
 #import "cocoa_opengl_view.h"
 
+#if defined(MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+	#define NL_USE_MAC_10_6_API 1
+#endif
+
 @implementation CocoaOpenGLView
 
 -(id)initWithFrame:(NSRect)frame 
@@ -38,9 +42,9 @@
 
 -(void)keyDown:(NSEvent*)event
 {
-#ifdef MAC_OS_X_VERSION_10_6
+#ifdef NL_USE_MAC_10_6_API
 	[[self inputContext] handleEvent:event];
-#endif // MAC_OS_X_VERSION_10_6
+#endif // NL_USE_MAC_10_6_API
 }
 
 /******************************************************************************/
