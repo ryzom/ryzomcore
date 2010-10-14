@@ -229,7 +229,7 @@ public:
 	 *	for the HighestPri source.
 	 *	By default, reserve are set for each channel to the number of available tracks.
 	 */
-	virtual void		setPriorityReserve(TSoundPriority priorityChannel, size_t reserve) = 0;
+	virtual void		setPriorityReserve(TSoundPriority priorityChannel, uint reserve) = 0;
 	/** Set the Low water mark.
 	 *	This value is use to mute sound source that try to play when their priority
 	 *	channel is full (see setPriorityReserve).
@@ -242,7 +242,7 @@ public:
 	 *	available tracks (which is almost always the case). But this value will help
 	 *	the mixer make its best.
 	 */
-	virtual void		setLowWaterMark(size_t value) = 0;
+	virtual void		setLowWaterMark(uint value) = 0;
 	/** Change the number of tracks in RealTime. If the number is lowered, random tracks are deleted.
 	 *	Any playing sources of such deleted track will be stopped
 	 */

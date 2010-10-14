@@ -177,14 +177,14 @@ void CAudioMixerUser::initClusteredSound(NL3D::CScene *scene, float minGain, flo
 }
 
 
-void CAudioMixerUser::setPriorityReserve(TSoundPriority priorityChannel, size_t reserve)
+void CAudioMixerUser::setPriorityReserve(TSoundPriority priorityChannel, uint reserve)
 {
-	_PriorityReserve[priorityChannel] = (uint32)min(_Tracks.size(), reserve);
+	_PriorityReserve[priorityChannel] = (uint32)min((uint)_Tracks.size(), reserve);
 }
 
-void CAudioMixerUser::setLowWaterMark(size_t value)
+void CAudioMixerUser::setLowWaterMark(uint value)
 {
-	_LowWaterMark = (uint32)min(_Tracks.size(), value);
+	_LowWaterMark = (uint32)min((uint)_Tracks.size(), value);
 }
 
 
