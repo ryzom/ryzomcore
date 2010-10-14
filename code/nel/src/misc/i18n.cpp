@@ -31,11 +31,50 @@ const ucstring			CI18N::_NotTranslatedValue("<Not Translated>");
 bool					CI18N::_LanguagesNamesLoaded = false;
 string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
-
+vector<string>			CI18N::_LanguageCodes;
+vector<ucstring>		CI18N::_LanguageNames;
 
 void CI18N::setLoadProxy(ILoadProxy *loadProxy)
 {
 	_LoadProxy = loadProxy;
+}
+
+const std::vector<ucstring> &CI18N::getLanguageNames()
+{
+	return _LanguageNames;
+}
+
+const std::vector<std::string> &CI18N::getLanguageCodes()
+{
+	if (!_LanguagesNamesLoaded)
+	{
+		std::vector<std::string> files;
+
+		// search all .uxt files
+		CPath::getFileList("uxt", files);
+
+		// if not uxt found, use default languages
+		if (files.empty())
+		{
+			_LanguageCodes.clear();
+			_LanguageCodes.push_back("en");
+			_LanguageCodes.push_back("fr");
+			_LanguageCodes.push_back("de");
+			_LanguageCodes.push_back("ru");
+		}
+		else
+		{
+			// add all languages found
+			for(uint i = 0; i < files.size(); ++i)
+			{
+				_LanguageCodes.push_back(toLower(CFile::getFilenameWithoutExtension(files[i])));
+			}
+
+			_LanguagesNamesLoaded = true;
+		}
+	}
+
+	return _LanguageCodes;
 }
 
 void CI18N::load (const string &languageCode, const string &fallbackLanguageCode)

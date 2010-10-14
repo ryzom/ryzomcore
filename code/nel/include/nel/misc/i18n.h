@@ -218,10 +218,10 @@ private:
 	// the alternative language that will be used if the sentence is not found in the original language
 	static StrMapContainer										_StrMapFallback;
 
-	static const std::string									_LanguageCodes[];
-	static const uint											_NbLanguages;
+	static std::vector<std::string>								_LanguageCodes;
+	static std::vector<ucstring>								_LanguageNames;
 
-	static bool													 _LanguagesNamesLoaded;
+	static bool													_LanguagesNamesLoaded;
 
 	static std::string											_SelectedLanguageCode;
 	static const ucstring										_NotTranslatedValue;
