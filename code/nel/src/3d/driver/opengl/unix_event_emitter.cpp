@@ -29,7 +29,7 @@ typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _PreviousKey(KeyNOKEY), _emulateRawMode(false), _driver(NULL)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _emulateRawMode(false), _driver(NULL)
 {
 	_im = 0;
 	_ic = 0;
@@ -111,7 +111,7 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 
 static Bool isMouseMoveEvent(Display *display, XEvent *event, XPointer arg)
 {
-	return (event->type == MotionNotify); 
+	return (event->type == MotionNotify);
 }
 
 void CUnixEventEmitter::emulateMouseRawMode(bool enable)
@@ -124,9 +124,9 @@ void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 		XGetWindowAttributes(_dpy, _win, &xwa);
 		XWarpPointer(_dpy, None, _win, None, None, None, None,
 			(xwa.width / 2), (xwa.height / 2));
-			
+
 		// remove all outstanding mouse move events, they happened before the mouse
-		// was pulled back to 0.5 / 0.5, so a wrong movement delta would be 
+		// was pulled back to 0.5 / 0.5, so a wrong movement delta would be
 		// reported otherwise
 		XEvent event;
 		while(XCheckIfEvent(_dpy, &event, &isMouseMoveEvent, NULL)) { };
@@ -533,8 +533,14 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			if(key == KeyNOKEY)
 				key = getKeyFromKeycode(keyCode);
 
-			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), _PreviousKey != key, this));
-			_PreviousKey = key;
+			// search for key in map
+			std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
+
+			// if key is not found or value is false, that's the first time
+			bool firstTime = (it == _PressedKeys.end()) || !it->second;
+
+			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), firstTime, this));
+			_PressedKeys[key] = true;
 
 			// don't send a control character when deleting
 			if (key == KeyDELETE)
@@ -568,7 +574,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 				key = getKeyFromKeycode(event.xkey.keycode);
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
-			_PreviousKey = KeyNOKEY;
+			_PressedKeys[key] = false;
 		}
 		break;
 	}

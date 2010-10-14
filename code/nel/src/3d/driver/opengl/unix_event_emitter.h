@@ -89,14 +89,14 @@ private:
 
 	void createIM();
 
-	Display*			_dpy;
-	Window				_win;
-	TKey				_PreviousKey;
-	XIM					_im;
-	XIC					_ic;
-	bool				_emulateRawMode;
-	NL3D::IDriver*		_driver;
-	CUnixEventServer	_InternalServer;
+	Display*				_dpy;
+	Window					_win;
+	std::map<TKey, bool>	_PressedKeys;
+	XIM						_im;
+	XIC						_ic;
+	bool					_emulateRawMode;
+	NL3D::IDriver*			_driver;
+	CUnixEventServer		_InternalServer;
 };
 
 
