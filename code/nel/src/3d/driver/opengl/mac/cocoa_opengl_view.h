@@ -18,9 +18,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-/**
- * derived to configure the NSOpenGLView
- */
 @interface CocoaOpenGLView : NSOpenGLView<NSTextInputClient>
 {
   NSMutableAttributedString* characterStorage;

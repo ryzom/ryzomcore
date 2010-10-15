@@ -18,15 +18,11 @@
 
 #import "cocoa_opengl_view.h"
 
-#if defined(MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
-	#define NL_USE_MAC_10_6_API 1
-#endif
-
 @implementation CocoaOpenGLView
 
 -(id)initWithFrame:(NSRect)frame 
 {
-	if(self = [super initWithFrame:frame]) 
+	if((self = [super initWithFrame:frame])) 
 	{
 		characterStorage = [[NSMutableAttributedString alloc] initWithString:@""];
 		return self;
@@ -42,9 +38,9 @@
 
 -(void)keyDown:(NSEvent*)event
 {
-#ifdef NL_USE_MAC_10_6_API
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
 	[[self inputContext] handleEvent:event];
-#endif // NL_USE_MAC_10_6_API
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
 }
 
 /******************************************************************************/
@@ -80,7 +76,8 @@
 	else 
 	{
 		markedRange = NSMakeRange(replacementRange.location, [aString length]);
-		[characterStorage replaceCharactersInRange:replacementRange withString:aString];
+		[characterStorage replaceCharactersInRange:replacementRange 
+			withString:aString];
 	}
 }
 
@@ -108,7 +105,8 @@
 	if(replacementRange.location == NSNotFound)
 		replacementRange = markedRange;
 
-	[characterStorage replaceCharactersInRange:replacementRange withString:aString];
+	[characterStorage replaceCharactersInRange:replacementRange 
+		withString:aString];
 }
 
 -(NSUInteger)characterIndexForPoint:(NSPoint)aPoint
