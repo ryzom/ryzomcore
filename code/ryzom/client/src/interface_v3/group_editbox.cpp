@@ -332,7 +332,7 @@ void CGroupEditBox::copy()
 	stopParentBlink();
 
 	// get the selection and copy it
-	if (CSystemUtils::copyTextToClipboard(getSelection()))
+	if (Driver->copyTextToClipboard(getSelection()))
 		nlinfo ("Chat input was copied in the clipboard");
 }
 
@@ -352,7 +352,7 @@ void CGroupEditBox::paste()
 
 	ucstring sString;
 
-	if (CSystemUtils::pasteTextFromClipboard(sString))
+	if (Driver->pasteTextFromClipboard(sString))
 	{
 		sint length = (sint)sString.length();
 
