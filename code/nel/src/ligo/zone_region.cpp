@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "zone_region.h"
+#include "nel/ligo/zone_region.h"
 
 using namespace NLMISC;
 using namespace std;
