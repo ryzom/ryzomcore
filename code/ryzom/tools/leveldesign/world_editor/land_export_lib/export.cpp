@@ -34,7 +34,6 @@
 #include "nel/ligo/zone_region.h"
 #include "nel/ligo/zone_bank.h"
 
-
 #include "nel/../../src/pacs/collision_mesh_build.h"
 
 
@@ -81,7 +80,7 @@ void SExportOptions::serial (NLMISC::IStream& s)
 
 	s.serial (OutZoneDir);
 	s.serial (RefZoneDir);
-	
+
 	if (version > 0)
 		s.serial (LigoBankDir);
 
@@ -117,7 +116,7 @@ void SExportOptions::serial (NLMISC::IStream& s)
 	{
 		s.serial(ExportCollisions);
 		s.serial(RefCMBDir, OutCMBDir);
-		s.serial(AdditionnalIGInDir, AdditionnalIGOutDir);		
+		s.serial(AdditionnalIGInDir, AdditionnalIGOutDir);
 		s.serial(ContinentFile);
 		s.serial(DFNDir);
 	}
@@ -144,14 +143,14 @@ void SExportOptions::serial (NLMISC::IStream& s)
 
 // ---------------------------------------------------------------------------
 CExport::CExport ()
-{	
-	_ZeZoneBank = NULL;	
+{
+	_ZeZoneBank = NULL;
 	_FormLoader = UFormLoader::createLoader ();
 }
 
 // ---------------------------------------------------------------------------
 CExport::~CExport ()
-{	
+{
 	UFormLoader::releaseLoader (_FormLoader);
 }
 
@@ -171,12 +170,12 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	}
 
 	// LOADING
-	// --- continent form	
+	// --- continent form
 	CPath::addSearchPath(_Options->DFNDir, true, false);
 	CPath::addSearchPath(_Options->RefCMBDir, true, false);
 	CPath::addSearchPath(_Options->ContinentsDir, true, false);
 	CPath::addSearchPath(_Options->AdditionnalIGInDir, true, false);
-	
+
 	// --- ligozone
 	if (_ExportCB != NULL)
 		_ExportCB->dispPass ("Loading ligozone bank");
@@ -188,7 +187,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_ExportCB != NULL)
 		_ExportCB->dispPass ("Loading tile bank");
 	_ZeTileBank = new CTileBank;
-	try 
+	try
 	{
 		CIFile inFile (_Options->TileBankFile);
 		_ZeTileBank->serial (inFile);
@@ -207,7 +206,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_Options->HeightMapFile != "")
 	{
 		_HeightMap = new CBitmap;
-		try 
+		try
 		{
 			CIFile inFile;
 			if (inFile.open (_Options->HeightMapFile))
@@ -238,7 +237,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_Options->HeightMapFile2 != "")
 	{
 		_HeightMap2 = new CBitmap;
-		try 
+		try
 		{
 			CIFile inFile;
 			if (inFile.open (_Options->HeightMapFile2))
@@ -269,7 +268,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_Options->ColorMapFile != "")
 	{
 		_ColorMap = new CBitmap;
-		try 
+		try
 		{
 			CIFile inFile;
 			if (inFile.open (_Options->ColorMapFile))
@@ -329,9 +328,9 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 		return false;
 	}
 
-	// zones	
-	
-	
+	// zones
+
+
 
 	for (uint32 nFile = 0; nFile < allFiles.size(); ++nFile)
 	{
@@ -364,18 +363,18 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 				if (!DeleteFile (allFiles[nFile].c_str()))
 				{					
 					if (_ExportCB != NULL)
-						_ExportCB->dispWarning (string("Can't delete ") + fileName);					
+						_ExportCB->dispWarning (string("Can't delete ") + fileName);
 				}
 				else
-				{					
+				{
 					if (_ExportCB != NULL)
-						_ExportCB->dispInfo (string("Deleted ") + fileName);					
+						_ExportCB->dispInfo (string("Deleted ") + fileName);
 				}
-			}					
+			}
 		}
 	}
 
-	
+
 
 	CTools::chdir (sCurDir);
 
@@ -394,9 +393,9 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 		sint32 nNewMaxX = getXFromZoneName (_Options->ZoneMax);
 		sint32 nNewMaxY = getYFromZoneName (_Options->ZoneMax);
 
-		if (nNewMinX > nNewMaxX) 
+		if (nNewMinX > nNewMaxX)
 			swap (nNewMinX, nNewMaxX);
-		if (nNewMinY > nNewMaxY) 
+		if (nNewMinY > nNewMaxY)
 			swap (nNewMinY, nNewMaxY);
 
 		if (nNewMinX > nMinX)
@@ -448,19 +447,19 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 		_ExportCB->dispPass ("Finished");
 	delete _ZeZoneBank;
 	delete _ZeTileBank;
-	
+
 	return true;
 }
 
 // ---------------------------------------------------------------------------
-void CExport::treatPattern (sint32 x, sint32 y, 
+void CExport::treatPattern (sint32 x, sint32 y,
 							vector<bool> &ZoneTreated, sint32 nMinX, sint32 nMinY, sint32 nStride)
 {
 
 	CZoneRegion *pZR = _Options->ZoneRegion;
 	const string &rSZone = pZR->getName (x, y);
 	CZoneBankElement *pZBE = _ZeZoneBank->getElementByZoneName (rSZone);
-	
+
 	if (pZBE == NULL)
 		return;
 
@@ -514,7 +513,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			if (!CTools::fileExist(finalZoneName))
 			{
 				bHaveToExportZone = true; // A file do not exist -> export it
-				
+
 				if (_ExportCB != NULL)
 					_ExportCB->dispInfo (string("finalZone do not exist"));
 
@@ -552,7 +551,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				_ExportCB->dispInfo (string("Cell date newer"));
 
 			break;
-		}		
+		}
 	}
 
 	// Check if we have to export the igs
@@ -569,7 +568,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			if (!CTools::fileExist(finalIGName))
 			{
 				bHaveToExportIG = true; // A file do not exist -> export it
-				
+
 				if (_ExportCB != NULL)
 					_ExportCB->dispInfo (string("final instance group do not exist"));
 
@@ -607,7 +606,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				_ExportCB->dispInfo (string("Cell date newer"));
 
 			break;
-		}		
+		}
 	}
 
 
@@ -616,7 +615,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 
 	// Put the big zone at the right position
 	CZone BigZone;
-	
+
 
 	// 1 - Load the zone and IG
 	string BigZoneFileName;
@@ -628,7 +627,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			BigZoneFileName = _Options->RefZoneDir + string("\\") + rSZone + string(".zone");
 			CIFile inFile ;
 			if (inFile.open(BigZoneFileName))
-			{			
+			{
 				BigZone.serial (inFile);
 			}
 			else
@@ -658,7 +657,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			bigIGFileName = _Options->RefIGDir + string("\\") + rSZone + string(".ig");
 			CIFile inFile;
 			if (inFile.open(bigIGFileName))
-			{			
+			{
 				bigIG.serial (inFile);
 			}
 			else
@@ -689,21 +688,21 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			{
 				switch (rot)
 				{
-					case 0: 
-						transformZone (BigZone, x+deltaX, y+deltaY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY, rot, flip, false); 
+					case 0:
+						transformZone (BigZone, x+deltaX, y+deltaY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY, rot, flip, false);
 					break;
-					case 1: 
-						transformZone (BigZone, x+deltaX+sizeY, y+deltaY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX+sizeY, y+deltaY, rot, flip, false); 
+					case 1:
+						transformZone (BigZone, x+deltaX+sizeY, y+deltaY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX+sizeY, y+deltaY, rot, flip, false);
 					break;
-					case 2: 
-						transformZone (BigZone, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip, false); 
+					case 2:
+						transformZone (BigZone, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip, false);
 					break;
-					case 3: 
-						transformZone (BigZone, x+deltaX, y+deltaY+sizeX, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY+sizeX, rot, flip, false); 
+					case 3:
+						transformZone (BigZone, x+deltaX, y+deltaY+sizeX, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY+sizeX, rot, flip, false);
 					break;
 				}
 			}
@@ -711,21 +710,21 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			{
 				switch (rot)
 				{
-					case 0: 
-						transformZone (BigZone, x+deltaX+sizeX, y+deltaY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX+sizeX, y+deltaY, rot, flip, false); 
+					case 0:
+						transformZone (BigZone, x+deltaX+sizeX, y+deltaY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX+sizeX, y+deltaY, rot, flip, false);
 					break;
-					case 1: 
-						transformZone (BigZone, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip, false); 
+					case 1:
+						transformZone (BigZone, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip, false);
 					break;
 					case 2:
-						transformZone (BigZone, x+deltaX, y+deltaY+sizeY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY+sizeY, rot, flip, false); 
+						transformZone (BigZone, x+deltaX, y+deltaY+sizeY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY+sizeY, rot, flip, false);
 					break;
-					case 3: 
-						transformZone (BigZone, x+deltaX, y+deltaY, rot, flip, true); 
-						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY, rot, flip, false); 
+					case 3:
+						transformZone (BigZone, x+deltaX, y+deltaY, rot, flip, true);
+						transformZone (BigZoneNoHeightmap, x+deltaX, y+deltaY, rot, flip, false);
 					break;
 				}
 			}
@@ -737,17 +736,17 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			{
 				switch (rot)
 				{
-					case 0: 
+					case 0:
 						transformIG (bigIG, x+deltaX, y+deltaY, rot, flip);
 					break;
-					case 1: 
-						transformIG (bigIG, x+deltaX+sizeY, y+deltaY, rot, flip); 
+					case 1:
+						transformIG (bigIG, x+deltaX+sizeY, y+deltaY, rot, flip);
 					break;
-					case 2: 
-						transformIG (bigIG, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip); 
+					case 2:
+						transformIG (bigIG, x+deltaX+sizeX, y+deltaY+sizeY, rot, flip);
 					break;
-					case 3: 
-						transformIG (bigIG, x+deltaX, y+deltaY+sizeX, rot, flip); 
+					case 3:
+						transformIG (bigIG, x+deltaX, y+deltaY+sizeX, rot, flip);
 					break;
 				}
 			}
@@ -755,17 +754,17 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			{
 				switch (rot)
 				{
-					case 0: 
-						transformIG (bigIG, x+deltaX+sizeX, y+deltaY, rot, flip); 
+					case 0:
+						transformIG (bigIG, x+deltaX+sizeX, y+deltaY, rot, flip);
 					break;
-					case 1: 
-						transformIG (bigIG, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip); 
+					case 1:
+						transformIG (bigIG, x+deltaX+sizeY, y+deltaY+sizeX, rot, flip);
 					break;
 					case 2:
-						transformIG (bigIG, x+deltaX, y+deltaY+sizeY, rot, flip); 
+						transformIG (bigIG, x+deltaX, y+deltaY+sizeY, rot, flip);
 					break;
-					case 3: 
-						transformIG (bigIG, x+deltaX, y+deltaY, rot, flip); 
+					case 3:
+						transformIG (bigIG, x+deltaX, y+deltaY, rot, flip);
 					break;
 				}
 			}
@@ -823,7 +822,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 		if (bHaveToExportZone)
 		{
 			// Put all the patches contained in the square ... in the unit zone
-			cutZone (BigZone, BigZoneNoHeightmap, UnitZone, UnitZoneNoHeightmap, x+deltaX+i, y+deltaY+j, PatchTransfered, bb, SrcPI, SrcPINoHeightmap, 
+			cutZone (BigZone, BigZoneNoHeightmap, UnitZone, UnitZoneNoHeightmap, x+deltaX+i, y+deltaY+j, PatchTransfered, bb, SrcPI, SrcPINoHeightmap,
 				sMask,  BorderVertices, BorderVerticesNoHeightmap, x+deltaX, y+deltaY);
 			if (_Options->Light > 0)
 				light (UnitZoneLighted, UnitZone);
@@ -890,7 +889,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 					_ExportCB->dispWarning (string("Cant write ") + dstIGFileName);
 			}
 		}
-		
+
 		// Set the zone as unused to not treat it the next time
 		ZoneTreated[(x+deltaX+i)-nMinX + ((y+deltaY+j)-nMinY) * nStride] = true;
 
@@ -899,11 +898,11 @@ void CExport::treatPattern (sint32 x, sint32 y,
 
 		first = false;
 	}
-	
+
 }
 
 // ---------------------------------------------------------------------------
-// Tile conversion 
+// Tile conversion
 int TransitionFlipLR[48] =
 {
 	0,	// 0
@@ -1089,8 +1088,8 @@ bool transformTile (const CTileBank &bank, uint &tile, uint &tileRotation, bool 
 				const CTileSet *pTileSet = bank.getTileSet (tileSet);
 
 				// Get border desc
-				CTileSet::TFlagBorder oriented[4] = 
-				{	
+				CTileSet::TFlagBorder oriented[4] =
+				{
 					pTileSet->getOrientedBorder (CTileSet::left, CTileSet::getEdgeType ((CTileSet::TTransition)number, CTileSet::left)),
 					pTileSet->getOrientedBorder (CTileSet::bottom, CTileSet::getEdgeType ((CTileSet::TTransition)number, CTileSet::bottom)),
 					pTileSet->getOrientedBorder (CTileSet::right, CTileSet::getEdgeType ((CTileSet::TTransition)number, CTileSet::right)),
@@ -1214,7 +1213,7 @@ void CExport::addColorMap (CZone &zeZone)
 				dest = tmp.get565 ();
 			}
 		}
-		
+
 		zeZone.build (zeZone.getZoneId (), PatchInfos, BorderVertices);
 	}
 }
@@ -1307,7 +1306,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 				angleAxis.Angle= (float)asin(angleAxis.Axis.norm());
 				angleAxis.Axis.normalize();
 
-				// build the matrix which transform the old tgt/interior to his newValue: 
+				// build the matrix which transform the old tgt/interior to his newValue:
 				// newVertexPos+ rotate*(oldTgPos-oldVertexPos)
 				tgMatrix[j].identity();
 				tgMatrix[j].translate(rPI.Patch.Vertices[j]);
@@ -1317,7 +1316,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 
 			// For all interior.
 			for (j = 0; j < 4; ++j)
-				rPI.Patch.Interiors[j]= tgMatrix[j] * rPI.Patch.Interiors[j]; 
+				rPI.Patch.Interiors[j]= tgMatrix[j] * rPI.Patch.Interiors[j];
 
 			// when j == 7 or 0 use vertex 0 for delta Z to ensure continuity of normals
 			// when j == 1 or 2 use vertex 1
@@ -1409,7 +1408,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 						bindedTangent= subTangents[vb*2+1];
 						// get the patch id.
 						ngbId= rPI.BindEdges[j].Next[vb];
-						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify, 
+						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify,
 							true, oldTgSpace, newTgSpace, bindedPos, bindedTangent);
 
 						// The second patch (CCW) must change the vertex which ends on the edge (CCW)
@@ -1418,7 +1417,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 						bindedTangent= subTangents[vb*2+2];
 						// get the patch id.
 						ngbId= rPI.BindEdges[j].Next[vb+1];
-						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify, 
+						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify,
 							false, oldTgSpace, newTgSpace, bindedPos, bindedTangent);
 					}
 				}
@@ -1493,7 +1492,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 			angleAxis.Angle= (float)asin(angleAxis.Axis.norm());
 			angleAxis.Axis.normalize();
 
-			// build the matrix which transform the old tgt/interior to his newValue: 
+			// build the matrix which transform the old tgt/interior to his newValue:
 			// newVertexPos+ rotate*(oldTgPos-oldVertexPos)
 			tgMatrix[j].identity();
 			tgMatrix[j].translate(rPI.Patch.Vertices[j]);
@@ -1595,7 +1594,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 						bindedTangent= subTangents[vb*2+1];
 						// get the patch id.
 						ngbId= rPI.BindEdges[j].Next[vb];
-						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify, 
+						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify,
 							true, oldTgSpace, newTgSpace, bindedPos, bindedTangent);
 
 						// The second patch (CCW) must change the vertex which ends on the edge (CCW)
@@ -1604,7 +1603,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 						bindedTangent= subTangents[vb*2+2];
 						// get the patch id.
 						ngbId= rPI.BindEdges[j].Next[vb+1];
-						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify, 
+						bindVertexModified|= applyVertexBind(PatchInfos[ ngbId ], oldPatchInfos[ ngbId ], edgeToModify,
 							false, oldTgSpace, newTgSpace, bindedPos, bindedTangent);
 					}
 				}
@@ -1679,7 +1678,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 				swap(rPI.Tiles[j+k*rPI.OrderS], rPI.Tiles[(rPI.OrderS-1-j)+k*rPI.OrderS]);
 			}
 		}
-		
+
 		for (j = 0; j < (uint32)((rPI.OrderS+1)/2); ++j)
 		{
 			for (k = 0; k < (uint32)(rPI.OrderT+1); ++k)
@@ -1698,7 +1697,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 	for (i = 0; i < PatchInfos.size(); ++i)
 	{
 		CPatchInfo &rPI = PatchInfos[i];
-		
+
 		for (j = 0; j < rPI.Tiles.size(); ++j)
 		{
 
@@ -1711,7 +1710,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 			// Is the tile is painted ?
 			if (rPI.Tiles[j].Tile[0] == 65535)
 				continue;
-			
+
 			// Rotate Tiles
 			// Invert rotation effect on transition
 			for (pass = 0; pass < 3; ++pass)
@@ -1749,7 +1748,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 			}
 		}
 	}
-	
+
 	zeZone.build (nZoneId, PatchInfos, BorderVertices);
 }*/
 
@@ -1768,7 +1767,7 @@ void CExport::buildTransfo(sint32 nPosX, sint32 nPosY, uint8 nRot, uint8 nFlip, 
 	posTransfo.setRot(rotTransfo);
 	posTransfo.setPos(CVector(nPosX * _Options->CellSize, (nPosY) * _Options->CellSize, 0.0f));
 	if (nFlip == 1)
-		posTransfo.scale(CVector(-1.0f, 1.0f, 1.0f));	
+		posTransfo.scale(CVector(-1.0f, 1.0f, 1.0f));
 }
 
 // ---------------------------------------------------------------------------
@@ -1777,8 +1776,8 @@ void CExport::transformIG (CInstanceGroup &ig, sint32 nPosX, sint32 nPosY, uint8
 	uint k;
 	CQuat	rotTransfo;
 	CMatrix transformation;
-	
-	buildTransfo(nPosX, nPosY, nRot, nFlip, transformation, rotTransfo);			
+
+	buildTransfo(nPosX, nPosY, nRot, nFlip, transformation, rotTransfo);
 
 	///////////////
 	// instances //
@@ -1792,7 +1791,7 @@ void CExport::transformIG (CInstanceGroup &ig, sint32 nPosX, sint32 nPosY, uint8
 
 		// add height map influence
 		//igi.Pos.z += getHeight(igi.Pos.x, igi.Pos.y);
-		
+
 		// Instance
 		CInstanceGroup::CInstance &igi = ig.getInstance(k);
 
@@ -1829,7 +1828,7 @@ void CExport::transformIG (CInstanceGroup &ig, sint32 nPosX, sint32 nPosY, uint8
 		plm.setPosition(transformation * plm.getPosition());
 
 		// add height map influence
-	//	plm.setPosition(plm.getPosition() + CVector::K * getHeight(plm.getPosition().x, plm.getPosition().y));		
+	//	plm.setPosition(plm.getPosition() + CVector::K * getHeight(plm.getPosition().x, plm.getPosition().y));
 	}
 
 }
@@ -1848,13 +1847,13 @@ void CExport::transformCMB (NLPACS::CCollisionMeshBuild &cmb,sint32 nPosX,sint32
 }
 
 // ---------------------------------------------------------------------------
-void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL3D::CZone &unitZone, NL3D::CZone &unitZoneNoHeightmap, 
-					   sint32 nPosX, sint32 nPosY, vector<bool> &PatchTransfered, const vector<CAABBox> &bb, vector<CPatchInfo> &SrcPI, 
-					   vector<CPatchInfo> &SrcPINoHeightmap, SPiece &sMask, vector<CBorderVertex> &BorderVertices, 
+void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL3D::CZone &unitZone, NL3D::CZone &unitZoneNoHeightmap,
+					   sint32 nPosX, sint32 nPosY, vector<bool> &PatchTransfered, const vector<CAABBox> &bb, vector<CPatchInfo> &SrcPI,
+					   vector<CPatchInfo> &SrcPINoHeightmap, SPiece &sMask, vector<CBorderVertex> &BorderVertices,
 					   vector<CBorderVertex> &BorderVerticesNoHeightmap, sint32 baseX, sint32 baseY)
 {
 	string DstZoneFileName = getZoneNameFromXY (nPosX, nPosY);
-	
+
 	uint32 i, j, k, l, m;
 	vector<CPatchInfo>		DstPI;
 	vector<CPatchInfo>		DstPINoHeightmap;
@@ -1955,7 +1954,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 	}
 	while (foundOne);
 
-	// Add all patch that are binded to one of those of the DstPI list 
+	// Add all patch that are binded to one of those of the DstPI list
 	uint32 nPreviousDstPISize = (uint32)DstPI.size();
 	for (;;)
 	{
@@ -1989,8 +1988,8 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 						uint next = DstPI[i].BindEdges[j].Next[k];
 						if (!PatchTransfered[next])
 						{
-							CPatchInfo &rPITmp = SrcPI[next];	
-							CPatchInfo &rPITmpNoHeightmap = SrcPINoHeightmap[next];	
+							CPatchInfo &rPITmp = SrcPI[next];
+							CPatchInfo &rPITmpNoHeightmap = SrcPINoHeightmap[next];
 							for (m = 0; m < 4; ++m)
 							{
 								rPITmp.BindEdges[m].ZoneId = nZoneId;
@@ -2069,7 +2068,7 @@ void CExport::cutZone (NL3D::CZone &bigZone, NL3D::CZone &bigZoneNoHeightmap, NL
 			gLand.init();
 			gLandInited = true;
 		}
-		
+
 		gLand.addZone(unitZone);
 		gLand.checkBinds();
 	}*/
@@ -2126,14 +2125,14 @@ void CExport::cutIG(CInstanceGroup &bigIG, CInstanceGroup &unitIG, sint32 nPosX,
 	// lights //
 	////////////
 
-	const std::vector<CPointLightNamed> &lights = bigIG.getPointLightList();	
+	const std::vector<CPointLightNamed> &lights = bigIG.getPointLightList();
 	for (k = 0; k < lights.size(); ++k)
 	{
 		const CVector &pos = lights[k].getPosition();
 		if (pos.x >= rMinX && pos.x < rMaxX && pos.y >= rMinY && pos.y < rMaxY)
 		{
 			pointLightList.push_back(lights[k]);
-		}				
+		}
 
 		// First zone ?
 		if (first)
@@ -2165,13 +2164,13 @@ float CExport::getHeight (float x, float y)
 	CRGBAF color;
 	sint32 SizeX = _ZoneMaxX - _ZoneMinX + 1;
 	sint32 SizeY = _ZoneMaxY - _ZoneMinY + 1;
-	
+
 	clamp (x, _Options->CellSize*_ZoneMinX, _Options->CellSize*(_ZoneMaxX+1));
 	clamp (y, _Options->CellSize*_ZoneMinY, _Options->CellSize*(_ZoneMaxY+1));
 
 	if (_HeightMap != NULL)
 	{
-		color = _HeightMap->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX), 
+		color = _HeightMap->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX),
 										1.0f - ((y-_Options->CellSize*_ZoneMinY)/(_Options->CellSize*SizeY)));
 		color *= 255;
 		deltaZ = color.A;
@@ -2181,7 +2180,7 @@ float CExport::getHeight (float x, float y)
 
 	if (_HeightMap2 != NULL)
 	{
-		color = _HeightMap2->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX), 
+		color = _HeightMap2->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX),
 										1.0f - ((y-_Options->CellSize*_ZoneMinY)/(_Options->CellSize*SizeY)));
 		color *= 255;
 		deltaZ2 = color.A;
@@ -2198,13 +2197,13 @@ CRGBAF CExport::getColor (float x, float y)
 	CRGBAF color = CRGBA::Black;
 	sint32 SizeX = _ZoneMaxX - _ZoneMinX + 1;
 	sint32 SizeY = _ZoneMaxY - _ZoneMinY + 1;
-	
+
 	clamp (x, _Options->CellSize*_ZoneMinX, _Options->CellSize*(_ZoneMaxX+1));
 	clamp (y, _Options->CellSize*_ZoneMinY, _Options->CellSize*(_ZoneMaxY+1));
 
 	if (_ColorMap != NULL)
 	{
-		color = _ColorMap->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX), 
+		color = _ColorMap->getColor (	(x-_Options->CellSize*_ZoneMinX)/(_Options->CellSize*SizeX),
 										1.0f - ((y-_Options->CellSize*_ZoneMinY)/(_Options->CellSize*SizeY)));
 		color *= 255;
 	}
@@ -2257,7 +2256,7 @@ void CExport::light (NL3D::CZone &zoneOut, NL3D::CZone &zoneIn)
 	land.TileBank = *_ZeTileBank;
 	land.initTileBanks();
 	land.addZone (zoneIn);
-	
+
 
 	vector<CPatchInfo> vPI;
 	vector<CBorderVertex> vBV;
@@ -2383,7 +2382,7 @@ sint32 CExport::getYFromZoneName (const string &ZoneName)
 	}
 	return -atoi(yStr.c_str());
 }
-	
+
 // ---------------------------------------------------------------------------
 void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &transfo, bool verbose) const
 {
@@ -2405,9 +2404,9 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 	if (inStream.open(cmbName))
 	{
 		try
-		{			
+		{
 			CCollisionMeshBuild cmb;
-			cmb.serial(inStream);				
+			cmb.serial(inStream);
 			// translate and save
 			cmb.transform (transfo);
 			COFile outStream;
@@ -2418,7 +2417,7 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 					_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
 			}
 			else
-			{						
+			{
 				try
 				{
 					cmb.serial(outStream);
@@ -2428,23 +2427,23 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 				{
 					outStream.close();
 					if (_ExportCB != NULL)
-					{								
+					{
 						_ExportCB->dispWarning("Error while writing " + outFileName);
 						_ExportCB->dispWarning(e.what());
 					}
 				}
-			}						
+			}
 			inStream.close();
 		}
 		catch (EStream &e)
 		{
 			inStream.close();
 			if (_ExportCB != NULL)
-			{				
+			{
 					_ExportCB->dispWarning("Error while reading " + cmbName);
 				    _ExportCB->dispWarning(e.what());
 			}
-		}					
+		}
 	}
 	else
 	{
@@ -2474,7 +2473,7 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 	if (inStream.open(igName))
 	{
 		try
-		{				
+		{
 			CInstanceGroup ig, igOut;
 			ig.serial(inStream);
 
@@ -2483,22 +2482,22 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 			std::vector<CCluster> Clusters;
 			std::vector<CPortal>  Portals;
 			std::vector<CPointLightNamed> PLN;
-			
+
 			ig.retrieve(globalPos, IA, Clusters, Portals, PLN);
 			bool realTimeSuncontribution = ig.getRealTimeSunContribution();
-			
+
 			uint k;
 			// elevate instance
 			for(k = 0; k < IA.size(); ++k)
-			{				
+			{
 				IA[k].Pos = transfo * IA[k].Pos;
 				IA[k].Rot = rotTransfo * IA[k].Rot;
 			}
 			// lights
 			for(k = 0; k < PLN.size(); ++k)
-			{				
+			{
 				PLN[k].setPosition(transfo * PLN[k].getPosition());
-			}		
+			}
 			// portals
 			std::vector<CVector> portal;
 			for(k = 0; k < Portals.size(); ++k)
@@ -2507,13 +2506,13 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 				for(uint l = 0; l < portal.size(); ++l)
 				{
 					portal[l] = transfo * portal[l];
-				}				
+				}
 				Portals[k].setPoly(portal);
 			}
 
-			// clusters			
+			// clusters
 			for(k = 0; k < Clusters.size(); ++k)
-			{								
+			{
 				Clusters[k].applyMatrix (transfo);
 			}
 
@@ -2530,7 +2529,7 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 					_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
 			}
 			else
-			{						
+			{
 				try
 				{
 					igOut.serial(outStream);
@@ -2540,23 +2539,23 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 				{
 					outStream.close();
 					if (_ExportCB != NULL)
-					{								
+					{
 						_ExportCB->dispWarning("Error while writing " + outFileName);
 						_ExportCB->dispWarning(e.what());
 					}
 				}
-			}						
+			}
 			inStream.close();
 		}
 		catch (EStream &e)
 		{
 			inStream.close();
 			if (_ExportCB != NULL)
-			{				
+			{
 					_ExportCB->dispWarning("Error while reading " + igName);
 				    _ExportCB->dispWarning(e.what());
 			}
-		}					
+		}
 	}
 	else
 	{
@@ -2567,7 +2566,7 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 
 // ---------------------------------------------------------------------------
 void CExport::exportCMBAndAdditionnalIGs()
-{	
+{
 	if (!_Options->ExportCollisions && !_Options->ExportCollisions) return;
 	CSmartPtr<UForm> continent = loadContinent(_Options->ContinentFile);
 	if (!continent) return;
@@ -2575,7 +2574,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 	NLGEORGES::UFormElm  *villages;
 	if (!continent->getRootNode ().getNodeByName (&villages, "Villages") || !villages)
 	{
-		if (_ExportCB != NULL)		
+		if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant find villages in a continent form");
 		return;
 	}
@@ -2588,7 +2587,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		NLGEORGES::UFormElm  *village;
 		if (!villages->getArrayNode (&village, k) || !village)
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village ");
 			continue;
 		}
@@ -2597,7 +2596,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		float altitude;
 		if (!village->getValueByName (altitude, "Altitude"))
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village position");
 			continue;
 		}
@@ -2606,7 +2605,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		sint32 rotation;
 		if (!village->getValueByName (rotation, "Rotation"))
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village rotation");
 			continue;
 		}
@@ -2615,7 +2614,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		uint32 width;
 		if (!village->getValueByName (width, "Width"))
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village width");
 			continue;
 		}
@@ -2624,7 +2623,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		uint32 height;
 		if (!village->getValueByName (height, "Height"))
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village height");
 			continue;
 		}
@@ -2633,7 +2632,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		std::string zoneName;
 		if (!village->getValueByName (zoneName, "Zone"))
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get a village name");
 			continue;
 		}
@@ -2675,7 +2674,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 		NLGEORGES::UFormElm  *igNamesItem;
 		if (!village->getNodeByName (&igNamesItem, "IgList") || !igNamesItem)
 		{
-			if (_ExportCB != NULL)		
+			if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Cant get village ig list");
 			continue;
 		}
@@ -2693,14 +2692,14 @@ void CExport::exportCMBAndAdditionnalIGs()
 			if (igNamesItem->getArrayNode (&currIg, k) && currIg)
 			{
 				const NLGEORGES::UFormElm *igNameItem;
-				if (!currIg->getNodeByName (&igNameItem, "IgName") || !igNameItem) 
+				if (!currIg->getNodeByName (&igNameItem, "IgName") || !igNameItem)
 				{
 					nlwarning("Unable to get village name from a form");
 					continue;
-				}					
-								
+				}
+
 				if (igNameItem->getValue (igName))
-				{	
+				{
 					if (_Options->ExportCollisions)
 					{
 						transformCMB (igName, transfo, true);
@@ -2719,7 +2718,7 @@ void CExport::exportCMBAndAdditionnalIGs()
 				}
 			}
 		}
-	
+
 	}
 	return;
 }
@@ -2730,7 +2729,7 @@ NLGEORGES::UForm* CExport::loadContinent(const std::string &name) const
 {
 	if (!NLMISC::CFile::fileExists(name))
 	{
-		if (_ExportCB != NULL)		
+		if (_ExportCB != NULL)
 			_ExportCB->dispWarning("Can't find " + name);
 		return NULL;
 	}
@@ -2739,13 +2738,13 @@ NLGEORGES::UForm* CExport::loadContinent(const std::string &name) const
 	if (!(form = _FormLoader->loadForm (name.c_str ())))
 	{
 		if (_ExportCB != NULL)
-		{		
+		{
 			_ExportCB->dispWarning("Unable to load continent form : " +  name);
 		}
 		return NULL;
 	}
 
-	return form;	
+	return form;
 }
 
 
@@ -2817,8 +2816,8 @@ void CExport::computeSubdividedTangents(uint numBinds, const NL3D::CBezierPatch 
 
 
 // ***************************************************************************
-bool CExport::applyVertexBind(NL3D::CPatchInfo &pa, NL3D::CPatchInfo &oldPa, uint edgeToModify, bool startEdge, 
-	const NLMISC::CMatrix &oldTgSpace, const NLMISC::CMatrix &newTgSpace, 
+bool CExport::applyVertexBind(NL3D::CPatchInfo &pa, NL3D::CPatchInfo &oldPa, uint edgeToModify, bool startEdge,
+	const NLMISC::CMatrix &oldTgSpace, const NLMISC::CMatrix &newTgSpace,
 	const NLMISC::CVector &bindedPos, const NLMISC::CVector &bindedTangent )
 {
 	// Get the vertex to modify according to edge/startEdge
@@ -2836,7 +2835,7 @@ bool CExport::applyVertexBind(NL3D::CPatchInfo &pa, NL3D::CPatchInfo &oldPa, uin
 		// change the tangent, according to startEdge
 		pa.Patch.Tangents[edgeToModify*2 + (startEdge?0:1) ]= bindedTangent;
 
-		// Must change the tangent which is on the other side of the vertex: 
+		// Must change the tangent which is on the other side of the vertex:
 		uint	tgToModify= 8 + edgeToModify*2 + (startEdge?-1:+2);
 		tgToModify&=7;
 		/* To keep the same continuity aspect around the vertex, we compute the original tangent in a
@@ -2862,7 +2861,7 @@ NLMISC::CVector	CExport::getHeightNormal (float x, float y)
 	sint32 SizeX = _ZoneMaxX - _ZoneMinX + 1;
 	sint32 SizeY = _ZoneMaxY - _ZoneMinY + 1;
 	sint32 bmpW, bmpH;
-	
+
 
 	// get width/height of the bitmap
 	if (_HeightMap != NULL)

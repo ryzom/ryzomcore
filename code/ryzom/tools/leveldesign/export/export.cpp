@@ -154,7 +154,7 @@ void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const st
 		vSquare[3].x = x * fCellSize;
 		vSquare[3].y = (y+1) * fCellSize;
 		vSquare[3].z = 0.0f;
-		
+
 		// Is a vertex of the path inside the zone ?
 		for (i = 0; i < pPath->VPoints.size(); ++i)
 		{
@@ -167,7 +167,7 @@ void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const st
 				CTools::chdir (sIGOutputDir);
 			}
 		}
-		
+
 		// Is an segment of the path cut an edge of the patat ?
 		for (i = 0; i < pPath->VPoints.size()-1; ++i)
 		for (j = 0; j < 4; ++j)
@@ -249,7 +249,7 @@ void CExport::delAllIGZoneUnderPatat (float fCellSize, CPrimZone *pPatat, const 
 				CTools::chdir (sIGOutputDir);
 			}
 		}
-		
+
 		// Is a vertex of the patat inside the zone ?
 		for (i = 0; i < pPatat->VPoints.size(); ++i)
 		{
@@ -262,7 +262,7 @@ void CExport::delAllIGZoneUnderPatat (float fCellSize, CPrimZone *pPatat, const 
 				CTools::chdir (sIGOutputDir);
 			}
 		}
-		
+
 		// Is an edge of the zone cut an edge of the patat ?
 		for (i = 0; i < pPatat->VPoints.size(); ++i)
 		for (j = 0; j < 4; ++j)
@@ -342,11 +342,11 @@ bool CExport::isPatatNeedUpdate (float fCellSize, CPrimZone *pPatat, const strin
 			if (pPatat->contains(vSquare[i]))
 			{
 				string sTmp = CExport::getZoneNameFromXY(x,y) + ".ig";
-				if (!CTools::fileExist(sTmp)) // If the file does not exist 
+				if (!CTools::fileExist(sTmp)) // If the file does not exist
 					return true; // need update
 			}
 		}
-		
+
 		// Is a vertex of the patat inside the zone ?
 		for (i = 0; i < pPatat->VPoints.size(); ++i)
 		{
@@ -356,11 +356,11 @@ bool CExport::isPatatNeedUpdate (float fCellSize, CPrimZone *pPatat, const strin
 				(pPatat->VPoints[i].y <= ((y+1)*fCellSize)))
 			{
 				string sTmp = CExport::getZoneNameFromXY(x,y) + ".ig";
-				if (!CTools::fileExist(sTmp)) // If the file does not exist 
+				if (!CTools::fileExist(sTmp)) // If the file does not exist
 					return true; // need update
 			}
 		}
-		
+
 		// Is an edge of the zone cut an edge of the patat ?
 		for (i = 0; i < pPatat->VPoints.size(); ++i)
 		for (j = 0; j < 4; ++j)
@@ -378,7 +378,7 @@ bool CExport::isPatatNeedUpdate (float fCellSize, CPrimZone *pPatat, const strin
 			if (segmentIntersection(x1, y1, x2, y2, x3, y3, x4, y4))
 			{
 				string sTmp = CExport::getZoneNameFromXY (x, y) + ".ig";
-				if (!CTools::fileExist(sTmp)) // If the file does not exist 
+				if (!CTools::fileExist(sTmp)) // If the file does not exist
 					return true; // need update
 			}
 		}
@@ -446,11 +446,11 @@ bool CExport::isPathNeedUpdate (float fCellSize, CPrimPath *pPath, const string 
 				(pPath->VPoints[i].y <= ((y+1)*fCellSize)))
 			{
 				string sTmp = CExport::getZoneNameFromXY(x,y) + ".ig";
-				if (!CTools::fileExist(sTmp)) // If the file does not exist 
+				if (!CTools::fileExist(sTmp)) // If the file does not exist
 					return true; // need update
 			}
 		}
-		
+
 		// Is an edge of the zone cut an edge of the patat ?
 		for (i = 0; i < (pPath->VPoints.size()-1); ++i)
 		for (j = 0; j < 4; ++j)
@@ -468,7 +468,7 @@ bool CExport::isPathNeedUpdate (float fCellSize, CPrimPath *pPath, const string 
 			if (segmentIntersection(x1, y1, x2, y2, x3, y3, x4, y4))
 			{
 				string sTmp = CExport::getZoneNameFromXY (x, y) + ".ig";
-				if (!CTools::fileExist(sTmp)) // If the file does not exist 
+				if (!CTools::fileExist(sTmp)) // If the file does not exist
 					return true; // need update
 			}
 		}
@@ -481,7 +481,7 @@ bool CExport::isPathNeedUpdate (float fCellSize, CPrimPath *pPath, const string 
 bool CExport::isPointNeedUpdate (float fCellSize, CPrimPoint *pPoint, const string &sIGOutputDir)
 {
 	CTools::chdir (sIGOutputDir);
-	
+
 	sint32 x, y;
 	x = (sint32) floor (pPoint->Point.x / fCellSize);
 	y = (sint32) floor (pPoint->Point.y / fCellSize);
@@ -513,7 +513,7 @@ bool CExport::isPointNeedUpdate (float fCellSize, CPrimPoint *pPoint, const stri
 		(pPoint->Point.y <= ((y+1)*fCellSize)))
 	{
 		string sTmp = CExport::getZoneNameFromXY(x,y) + ".ig";
-		if (!CTools::fileExist(sTmp)) // If the file does not exist 
+		if (!CTools::fileExist(sTmp)) // If the file does not exist
 			return true; // need update
 	}
 
@@ -608,7 +608,7 @@ CExport::~CExport()
 		_VCM->deleteEntity (_VCE);
 		delete _VCM;
 	}
-}	
+}
 
 
 
@@ -702,7 +702,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 	HANDLE hFind;
 
 	CTools::chdir (sContinentDir);
-	hFind = FindFirstFile ("*.*", &findData);	
+	hFind = FindFirstFile ("*.*", &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY)
@@ -725,7 +725,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 	}
 	FindClose (hFind);
 
-	
+
 	// Process all regions
 	uint32 nRegion;
 	for (nRegion = 0; nRegion < vRegions.size(); ++nRegion)
@@ -828,7 +828,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 		{
 			// Get all patats referenced by the flora and suppress zones under
 
-			// Load the .flora file 
+			// Load the .flora file
 			SFormFlora FormFlora;
 			{
 				// Get a loader
@@ -860,7 +860,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			}
 
 			// Delete zones under the old prims referenced by the old zone
-						
+
 			for (i = 0; i < FormFlora.IncludePatats.size(); ++i)
 			{
 				// Get the patat
@@ -1020,13 +1020,13 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 		// Interpretation of structure for update
 		for (i = 0; i < vPrimToUpdate.size(); ++i)
 		{
-			// Load all the .flora file 
+			// Load all the .flora file
 			vector<SFormFlora> vFormFloras;
 			for (j = 0; j < vPrimToUpdate[i].FloraFile.size(); ++j)
 			{
 				// Create the loader
 				UFormLoader *loader = UFormLoader::createLoader ();
-				
+
 				// Load the form
 				CSmartPtr<UForm> form = loader->loadForm (vPrimToUpdate[i].FloraFile[j].c_str ());
 				if (form)
@@ -1051,7 +1051,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			}
 
 			// Delete zones under the prims that has been referenced by a flora
-						
+
 			for (j = 0; j < PrimRegion.VZones.size(); ++j)
 			{
 				// Get the patat
@@ -1098,7 +1098,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 
 	}
 	// End of process all regions
-	
+
 	// Check all patat to export (a patat that has no zone under itself (deleted or not present))
 	vector<SExportPrimitive> vExportPrimitives;
 	vector<string> vAllPrimFiles; // All prim files of a continent
@@ -1115,7 +1115,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			CIXml input;
 			input.init (fileIn);
 			PrimRegion.serial (input);
-		}							
+		}
 
 		for (j = 0; j < PrimRegion.VZones.size(); ++j)
 		{
@@ -1160,7 +1160,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 	_Options->PrimFloraDir = sContinentDir;
 	sTmp = "Exporting";
 	if (_ExportCB != NULL) _ExportCB->dispInfo (sTmp);
-	export (*_Options, _ExportCB, &vExportPrimitives);
+	doExport (*_Options, _ExportCB, &vExportPrimitives);
 
 	// Copy new files for incremental purpose
 	CTools::chdir (_ExeDir);
@@ -1193,7 +1193,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 		}
 
 		// -------------------------------------------------------------------
-		// If the new file do not exists anymore but the old file exists -> delete old file	
+		// If the new file do not exists anymore but the old file exists -> delete old file
 		CTools::chdir (_OutIGDir);
 		CTools::dir (vRegions[nRegion] + "-*.prim", vFiles, false);
 		for (i = 0; i < vFiles.size(); ++i)
@@ -1212,7 +1212,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			}
 		}
 
-		// If the new file do not exists anymore but the old file exists -> delete old file	
+		// If the new file do not exists anymore but the old file exists -> delete old file
 		CTools::dir (vRegions[nRegion] + "-*.flora", vFiles, false);
 		for (i = 0; i < vFiles.size(); ++i)
 		{
@@ -1230,13 +1230,13 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			}
 		}
 	}
-		
+
 	CTools::chdir (_ExeDir);
 	return true;
 }
 
 // ---------------------------------------------------------------------------
-bool CExport::export (SExportOptions &opt, IExportCB *expCB, vector<SExportPrimitive> *selection)
+bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPrimitive> *selection)
 {
 	char sTmp[MAX_PATH];
 	GetCurrentDirectory (MAX_PATH, sTmp);
@@ -1251,7 +1251,7 @@ bool CExport::export (SExportOptions &opt, IExportCB *expCB, vector<SExportPrimi
 			_ExportCB->dispInfo ("Nothing to export");
 		return true;
 	}
-	
+
 	// If we want to generate flora then we have to load the landscape
 	uint32 i;
 
@@ -1265,7 +1265,7 @@ bool CExport::export (SExportOptions &opt, IExportCB *expCB, vector<SExportPrimi
 		_VCE = _VCM->createEntity ();
 		_VCM->setLandscape (_Landscape);
 		_VCE->setSnapToRenderedTesselation (false);
-		try 
+		try
 		{
 			CIFile bankFile (_LandBankFile);
 			_Landscape->TileBank.serial (bankFile);
@@ -1313,7 +1313,7 @@ void CExport::getAllFiles (const string &ext, vector<string> &files)
 	GetCurrentDirectory (MAX_PATH, sCurDir);
 
 	WIN32_FIND_DATA findData;
-	HANDLE hFind = FindFirstFile ("*.*", &findData);	
+	HANDLE hFind = FindFirstFile ("*.*", &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (!((strcmp (findData.cFileName, ".") == 0) || (strcmp (findData.cFileName, "..") == 0)))
@@ -1355,7 +1355,7 @@ bool CExport::searchFile (const std::string &plantName, std::string &dir)
 	GetCurrentDirectory (MAX_PATH, sCurDir);
 
 	WIN32_FIND_DATA findData;
-	HANDLE hFind = FindFirstFile ("*.*", &findData);	
+	HANDLE hFind = FindFirstFile ("*.*", &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		string filename = findData.cFileName;
@@ -1412,7 +1412,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 		SetCurrentDirectory (sCurDir);
 		for (i = 0; i < allPrimFiles.size(); ++i)
 		{
-			try 
+			try
 			{
 				CPrimRegion tmpPrimRegion;
 				CIFile fileIn;
@@ -1441,7 +1441,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 //		CPath::addSearchPath (_Options->DfnDir, true, true);
 //		CPath::addSearchPath (_Options->GameElemDir, true, true);
 //		CPath::addSearchPath (_Options->LandTileNoiseDir, true, true);
-		
+
 		// Load the form
 		CSmartPtr<UForm> form = loader->loadForm (SrcFile.c_str ());
 		if (form == NULL)
@@ -1454,7 +1454,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 			// Read .Flora
 			formFlora.build (form->getRootNode ());
 
-			// Load the .plant associated	
+			// Load the .plant associated
 			for (i = 0; i < formFlora.PlantInstances.size(); ++i)
 			{
 				const string &plantName = formFlora.PlantInstances[i].Name;
@@ -1464,7 +1464,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 
 				char sCurDir[MAX_PATH];
 				GetCurrentDirectory (MAX_PATH, sCurDir);
-				
+
 				try
 				{
 					SetCurrentDirectory (_GameElemDir.c_str());
@@ -1473,7 +1473,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 					if (searchFile (plantName, dir))
 					{
 						string tmpName = dir + string("\\") + plantName;
-						
+
 						CSmartPtr<UForm> form2 = loader->loadForm (tmpName.c_str());
 						if (form2)
 						{
@@ -1631,21 +1631,21 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 		{
 			if (selection == NULL)
 				if (_ExportCB)
-					_ExportCB->dispWarning ("Cannot find " + formFlora.IncludePatats[i]);	
+					_ExportCB->dispWarning ("Cannot find " + formFlora.IncludePatats[i]);
 			continue;
 		}
 
 		if ((pPatat != NULL) && (pPatat->VPoints.size() <= 2))
 		{
 			if (_ExportCB)
-				_ExportCB->dispWarning ("Patat " + pPatat->getName() + " has less than 3 points");	
+				_ExportCB->dispWarning ("Patat " + pPatat->getName() + " has less than 3 points");
 			continue;
 		}
 
 		if ((pPath != NULL) && (pPath->VPoints.size() <= 1))
 		{
 			if (_ExportCB)
-				_ExportCB->dispWarning ("Path " + pPath->getName() + " has less than 2 points");	
+				_ExportCB->dispWarning ("Path " + pPath->getName() + " has less than 2 points");
 			continue;
 		}
 
@@ -1733,7 +1733,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 					vi.Scale = scaleTmp;
 					vi.Radius = rFormPlant.BoundingRadius * vi.Scale;
 					vi.Rot = (float)Pi * frand (1.0);
-					
+
 					if (formFlora.PutOnWater)
 					{
 						if (pos.z < formFlora.WaterHeight)
@@ -1761,7 +1761,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 				total += formFlora.PlantInstances[j].Density;
 				if (posf < total) break;
 			}
-			if (j == formFlora.PlantInstances.size()) 
+			if (j == formFlora.PlantInstances.size())
 				j = formFlora.PlantInstances.size()-1;
 
 			SPlantInstance &rPlant = formFlora.PlantInstances[j];
@@ -1793,7 +1793,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 			vi.Pos = pos;
 			if (pos.z > -90000.0f)
 				_FloraInsts.push_back (vi);
-			
+
 		} // End of Generate for a point
 
 		// Generate for a path
@@ -1891,7 +1891,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 					vi.Scale = scaleTmp;
 					vi.Radius = rFormPlant.BoundingRadius * vi.Scale;
 					vi.Rot = (float)Pi * frand (1.0);
-					
+
 					if (formFlora.PutOnWater)
 					{
 						if (pos.z < formFlora.WaterHeight)
@@ -2015,7 +2015,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 		// Take all Flora instances in the zone (i,j)
 		for (k = 0; k < (sint32)_FloraInsts.size(); ++k)
 		{
-			if (((i*_Options->CellSize) < _FloraInsts[k].Pos.x) && (_FloraInsts[k].Pos.x < ((i+1)*_Options->CellSize)) && 
+			if (((i*_Options->CellSize) < _FloraInsts[k].Pos.x) && (_FloraInsts[k].Pos.x < ((i+1)*_Options->CellSize)) &&
 				((j*_Options->CellSize) < _FloraInsts[k].Pos.y) && (_FloraInsts[k].Pos.y < ((j+1)*_Options->CellSize)))
 			{
 				vegZone.push_back (k);
@@ -2071,7 +2071,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 				continue;
 			}
 
-		try 
+		try
 		{
 			COFile outFile (ZoneName);
 			IG.serial (outFile);
@@ -2090,9 +2090,9 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 void CExport::loadLandscape (const string &LandFile)
 {
 	CZoneRegion zoneRegion;
-	
+
 	CIFile inFile;
-	try 
+	try
 	{
 		if (inFile.open (LandFile))
 		{
