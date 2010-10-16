@@ -48,6 +48,10 @@ public:
 	/// From IEventEmitter. This call submitEvents on all the emitters
 	virtual void submitEvents(CEventServer &server, bool allWindows);
 	virtual void emulateMouseRawMode(bool enable);
+
+	virtual bool copyTextToClipboard(const ucstring &text);
+	virtual bool pasteTextFromClipboard(ucstring &text);
+
 private:
 	typedef std::vector<std::pair<IEventEmitter *, bool> > TEmitterCont;
 	TEmitterCont	_Emitters;

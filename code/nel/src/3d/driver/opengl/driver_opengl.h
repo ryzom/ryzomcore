@@ -329,6 +329,9 @@ public:
 		return _win;
 	}
 
+	virtual bool			copyTextToClipboard(const ucstring &text);
+	virtual bool			pasteTextFromClipboard(ucstring &text);
+
 	virtual uint32			getAvailableVertexAGPMemory ();
 	virtual uint32			getAvailableVertexVRAMMemory ();
 

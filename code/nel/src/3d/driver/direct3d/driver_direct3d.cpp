@@ -3831,5 +3831,13 @@ void CDriverD3D::findNearestFullscreenVideoMode()
 		}
 	}
 }
+bool CDriverD3D::copyTextToClipboard(const ucstring &text)
+{
+	return _EventEmitter.copyTextToClipboard(text);
+}
 
+bool CDriverD3D::pasteTextFromClipboard(ucstring &text)
+{
+	return _EventEmitter.pasteTextFromClipboard(text);
+}
 } // NL3D

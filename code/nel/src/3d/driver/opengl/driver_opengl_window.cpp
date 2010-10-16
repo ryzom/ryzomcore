@@ -2932,4 +2932,14 @@ void CDriverGL::setupApplicationMenu()
 }
 #endif
 
+bool CDriverGL::copyTextToClipboard(const ucstring &text)
+{
+	return _EventEmitter.copyTextToClipboard(text);
+}
+
+bool CDriverGL::pasteTextFromClipboard(ucstring &text)
+{
+	return _EventEmitter.pasteTextFromClipboard(text);
+}
+
 } // NL3D

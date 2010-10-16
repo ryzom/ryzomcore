@@ -154,6 +154,16 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 	return NLMISC::KeyNOKEY;
 }
 
+bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
+{
+	return false;
+}
+
+bool CCocoaEventEmitter::copyTextToClipboard(const ucstring &text)
+{
+	return false;
+}
+
 /// convert modifier key state to nel internal modifier key state
 static NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags)
 {

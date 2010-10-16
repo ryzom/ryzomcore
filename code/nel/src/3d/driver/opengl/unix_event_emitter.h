@@ -65,6 +65,16 @@ public:
 	 */
 	bool processMessage(XEvent &event, CEventServer *server = NULL);
 
+	/**
+	 * Copy a string to system clipboard.
+	 */
+        virtual bool copyTextToClipboard(const ucstring &text);
+
+	/*
+	 * Paste a string from system clipboard.
+	 */
+	virtual bool pasteTextFromClipboard(ucstring &text);
+
 private:
 
 	// Private internal server message
@@ -88,6 +98,7 @@ private:
 	};
 
 	void createIM();
+	bool prepareSelectionContent (Atom selection, Atom requestedFormat, Atom propertyName);
 
 	Display*				_dpy;
 	Window					_win;
@@ -97,6 +108,9 @@ private:
 	bool					_emulateRawMode;
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
+	ucstring				_CopiedString;
+	Atom					_PrecomputedAtom[6];
+	bool					_SelectionOwned;
 };
 
 

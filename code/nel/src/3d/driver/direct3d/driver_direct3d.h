@@ -2392,6 +2392,10 @@ public:
 	void deleteIndexBuffer(CIBDrvInfosD3D *ib);
 	// Build 16 bit index buffer for quad
 	bool buildQuadIndexBuffer();
+
+	virtual bool copyTextToClipboard(const ucstring &text);
+	virtual bool pasteTextFromClipboard(ucstring &text);
+
 public:
 	#ifdef 	NL_DEBUG
 		std::set<CVBDrvInfosD3D *> _LockedBuffers;
