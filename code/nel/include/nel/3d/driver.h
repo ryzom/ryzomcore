@@ -558,6 +558,12 @@ public:
 	/// Swap the back and front buffers.
 	virtual bool			swapBuffers(void)=0;
 
+	/// Copy a string to system clipboard.
+	virtual bool			copyTextToClipboard(const ucstring &text) =0;
+
+	/// Paste a string from system clipboard.
+	virtual bool			pasteTextFromClipboard(ucstring &text) =0;
+
 	/** set the number of VBL wait when a swapBuffers() is issued. 0 means no synchronisation to the VBL
 	 *	Default is 1. Values >1 may be clamped to 1 by the driver.
 	 */
