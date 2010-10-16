@@ -41,7 +41,9 @@
 
 #include <memory>
 
-#include <windows.h>
+#ifdef NL_OS_WINDOWS
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
 
 using namespace NL3D;
 using namespace NLMISC;
@@ -360,8 +362,8 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 
 			if (bMustDelete)
 			{
-				if (!DeleteFile (allFiles[nFile].c_str()))
-				{					
+				if (!CFile::deleteFile (allFiles[nFile]))
+				{
 					if (_ExportCB != NULL)
 						_ExportCB->dispWarning (string("Can't delete ") + fileName);
 				}
@@ -844,15 +846,15 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			{
 				// Delete the .zone and .zonel file
 				DstZoneFileName = getZoneNameFromXY(x+deltaX+i, y+deltaY+j);
-				DstZoneFileName = _Options->OutZoneDir + string("\\") + DstZoneFileName;
+				DstZoneFileName = _Options->OutZoneDir + string("/") + DstZoneFileName;
 				string sTmp = DstZoneFileName + string(".zone");
-				DeleteFile (sTmp.c_str());
+				CFile::deleteFile (sTmp);
 				DstZoneFileName = DstZoneFileName + string(".zonel");
-				DeleteFile (DstZoneFileName.c_str());
+				CFile::deleteFile (DstZoneFileName);
 
 				// Delete the .zonenh file
-				string DstZoneNoHeightmapFileName = _Options->OutZoneDir + string("\\") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zonenh");
-				DeleteFile (DstZoneNoHeightmapFileName.c_str());
+				string DstZoneNoHeightmapFileName = _Options->OutZoneDir + string("/") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zonenh");
+				CFile::deleteFile (DstZoneNoHeightmapFileName);
 
 				COFile outFile (DstZoneFileName);
 				UnitZoneLighted.serial (outFile);
@@ -876,9 +878,9 @@ void CExport::treatPattern (sint32 x, sint32 y,
 			try
 			{
 				dstIGFileName = getZoneNameFromXY(x+deltaX+i, y+deltaY+j);
-				dstIGFileName = _Options->OutIGDir + string("\\") + dstIGFileName + string(".ig");			
-				DeleteFile (dstIGFileName.c_str());			
-				COFile outFile (dstIGFileName);			
+				dstIGFileName = _Options->OutIGDir + string("/") + dstIGFileName + string(".ig");
+				CFile::deleteFile (dstIGFileName);
+				COFile outFile (dstIGFileName);
 				unitIG.serial(outFile);
 				if (_ExportCB != NULL)
 					_ExportCB->dispInfo (string("Writing ") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + ".ig");

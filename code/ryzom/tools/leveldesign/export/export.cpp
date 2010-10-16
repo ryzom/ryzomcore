@@ -39,9 +39,10 @@
 #include "nel/misc/i_xml.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+#include "nel/misc/path.h"
 
 #include "tools.h"
-#include "../master/continentcfg.h"
+#include "../master/ContinentCfg.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -50,7 +51,7 @@ using namespace NLLIGO;
 using namespace NLGEORGES;
 
 #define MAX_SYS_DIR 6
-char *gExportSysDir[MAX_SYS_DIR] = 
+const char *gExportSysDir[MAX_SYS_DIR] =
 {
 	".",
 	"..",
@@ -85,7 +86,7 @@ void CExport::delIGZone (sint32 x, sint32 y)
 {
 	string sZoneName = CExport::getZoneNameFromXY (x, y);
 	sZoneName += ".ig";
-	if (DeleteFile(sZoneName.c_str()))
+	if (CFile::deleteFile(deleteFile(sZoneName))
 	{
 		CTools::chdir (_ExeDir);
 		string sTmp = string("  zone ") + sZoneName + " deleted";
@@ -1208,7 +1209,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			if (!CTools::fileExist(sNewName))
 			{
 				// Delete the oldest file
-				DeleteFile(vFiles[i].c_str());
+				CFile::deleteFile(vFiles[i]);
 			}
 		}
 
@@ -1226,7 +1227,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			if (!CTools::fileExist(sNewName))
 			{
 				// Delete the oldest file
-				DeleteFile(vFiles[i].c_str());
+				CFile::deleteFile(vFiles[i]);
 			}
 		}
 	}
