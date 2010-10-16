@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FORM Version="0.0" State="modified">
+  <STRUCT>
+    <ATOM Name="Plant Name" Value="S3 tree"/>
+    <ATOM Name="Comment"/>
+    <STRUCT Name="3D">
+      <ATOM Name="Shape" Value="JU_S3_tree.shape"/>
+      <ATOM Name="Shadow Shape" Value="Ju_S3_tree.shape"/>
+      <ATOM Name="Bounding Radius" Value="10.0"/>
+      <ATOM Name="Collision Radius" Value="2.0"/>
+    </STRUCT>
+  </STRUCT>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:41 2002 (corvazier) File converted from old format</LOG>
+</FORM>
