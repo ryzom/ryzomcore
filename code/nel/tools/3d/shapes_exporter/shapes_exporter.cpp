@@ -880,7 +880,8 @@ bool ShapesExporter::createThumbnail(const string &filename, const string &path)
 			if (!fgets(str, 100, fp))
 				strcpy(str, "0");
 			fclose(fp);
-			selectedFrame = atoi(str)/2;
+			NLMISC::fromString(std::string(str), selectedFrame);
+			selectedFrame /= 2;
 		}
 	}
 

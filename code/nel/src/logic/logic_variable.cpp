@@ -381,7 +381,7 @@ void CLogicCounter::read (xmlNodePtr node)
 
 	_Name = getXMLProp (node, "Name");
 	_Value = atoiInt64 (getXMLProp (node, "Value").c_str());
-	_Verbose = atoi(getXMLProp (node, "Verbose").c_str()) == 1;
+	NLMISC::fromString(getXMLProp (node, "Verbose"), _Verbose);
 	Period.setValue(atoiInt64(getXMLProp (node, "Period").c_str()));
 	Phase.setValue(atoiInt64(getXMLProp (node, "Phase").c_str()));
 	Step.setValue(atoiInt64(getXMLProp (node, "Step").c_str()));

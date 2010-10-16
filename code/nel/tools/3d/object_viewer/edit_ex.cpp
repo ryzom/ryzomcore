@@ -52,13 +52,17 @@ void CEditEx::OnSetFocus(CWnd* pOldWnd)
 sint		CEditEx::getSInt() const
 {
 	nlassert(_Type == SIntType);
-	return (sint) ::atoi(getString().c_str());
+	sint ret = 0;
+	NLMISC::fromString(getString(), ret);
+	return ret;
 }
 
 uint		CEditEx::getUInt() const
 {
 	nlassert(_Type == UIntType);
-	return (uint) ::atoi(getString().c_str());
+	uint ret = 0;
+	NLMISC::fromString(getString(), ret);
+	return ret;
 }
 float		CEditEx::getFloat() const
 {

@@ -56,7 +56,8 @@ NLMISC_COMMAND(square,"display the square of the parameter","<value>")
 	// check args, if there is not the right number of parameters, return bad status.
 	if (args.size() != 1) return false;
 
-	uint32 val = atoi(args[0].c_str());
+	uint32 val;
+	NLMISC::fromString(args[0], val);
 
 	// display the result.
 	log.displayNL("The square of %d is %d", val, val*val);

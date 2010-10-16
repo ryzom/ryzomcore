@@ -116,7 +116,8 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 			return false;
 		}
 	}
-	y = atoi(ystr.c_str());
+
+	NLMISC::fromString(ystr, y);
 
 	// x
 	x = 0;
