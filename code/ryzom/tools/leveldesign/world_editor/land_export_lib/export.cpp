@@ -31,8 +31,8 @@
 #include "nel/3d/landscape.h"
 #include "nel/3d/scene_group.h"
 
-#include "nel/../../src/ligo/zone_region.h"
-#include "nel/../../src/ligo/zone_bank.h"
+#include "nel/ligo/zone_region.h"
+#include "nel/ligo/zone_bank.h"
 
 
 #include "nel/../../src/pacs/collision_mesh_build.h"
