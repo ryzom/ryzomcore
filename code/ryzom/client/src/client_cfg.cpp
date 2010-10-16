@@ -24,6 +24,7 @@
 // Misc.
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/i18n.h"
 // Client.
 #include "client_cfg.h"
 #include "entities.h"
@@ -43,6 +44,8 @@
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
 #endif // HAVE_CONFIG_H
+
+#include <locale.h>
 
 ///////////
 // MACRO //
@@ -1895,15 +1898,34 @@ void CClientConfig::init(const string &configFileName)
 		{
 			// create the basic .cfg that link the default one
 			FILE *fp = fopen(configFileName.c_str(), "w");
-			if (fp == NULL)
+
+ 			if (fp == NULL)
+ 			{
+				nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
+ 			}
+ 			else
+ 			{
+ 				nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
+ 			}
+
+ 			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
+
+			// get current locale
+			std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
+			lang = lang.substr(0, 2);
+
+			const std::vector<std::string> &languages = CI18N::getLanguageCodes();
+
+			// search if current locale is defined in language codes
+			for(uint i = 0; i < languages.size(); ++i)
 			{
-				nlerror ("CFG::init: Can't create config file '%s'", configFileName.c_str());
+				if (lang == languages[i])
+				{
+					fprintf(fp, "LanguageCode         = \"%s\";\n", lang.c_str());
+					break;
+				}
 			}
-			else
-			{
-				nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
-			}
-			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
+
 			fclose(fp);
 		}
 		else
