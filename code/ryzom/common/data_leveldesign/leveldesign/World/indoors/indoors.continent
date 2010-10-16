@@ -1,0 +1,362 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.11 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Name" Value="indoors"/>
+    <STRUCT Name="LightLandscapeDay">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="70"/>
+        <ATOM Name="G" Value="30"/>
+        <ATOM Name="B" Value="35"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LightLandscapeNight">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="20"/>
+        <ATOM Name="G" Value="50"/>
+        <ATOM Name="B" Value="120"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="20"/>
+        <ATOM Name="B" Value="80"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="0"/>
+        <ATOM Name="B" Value="0"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LightEntityDay">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="70"/>
+        <ATOM Name="G" Value="30"/>
+        <ATOM Name="B" Value="35"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LightEntityNight">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="20"/>
+        <ATOM Name="G" Value="25"/>
+        <ATOM Name="B" Value="120"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="20"/>
+        <ATOM Name="B" Value="80"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="0"/>
+        <ATOM Name="B" Value="0"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LightRootDay">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="70"/>
+        <ATOM Name="G" Value="30"/>
+        <ATOM Name="B" Value="35"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="255"/>
+        <ATOM Name="G" Value="255"/>
+        <ATOM Name="B" Value="255"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LightRootNight">
+      <STRUCT Name="Direction">
+        <ATOM Name="X" Value="-0.5"/>
+        <ATOM Name="Y" Value="0.0"/>
+        <ATOM Name="Z" Value="-0.85"/>
+      </STRUCT>
+      <STRUCT Name="Ambiant">
+        <ATOM Name="R" Value="20"/>
+        <ATOM Name="G" Value="25"/>
+        <ATOM Name="B" Value="120"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Diffuse">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="20"/>
+        <ATOM Name="B" Value="80"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+      <STRUCT Name="Specular">
+        <ATOM Name="R" Value="0"/>
+        <ATOM Name="G" Value="0"/>
+        <ATOM Name="B" Value="0"/>
+        <ATOM Name="A" Value="255"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="LandscapePointLightMaterial">
+      <ATOM Name="R" Value="255"/>
+      <ATOM Name="G" Value="255"/>
+      <ATOM Name="B" Value="255"/>
+      <ATOM Name="A" Value="255"/>
+    </STRUCT>
+    <ATOM Name="PacsRBank" Value="indoors.rbank"/>
+    <ATOM Name="PacsGR" Value="indoors.gr"/>
+    <ATOM Name="Ecosystem" Value="desert.ecosystem"/>
+    <ATOM Name="LandscapeIG" Value="indoors_ig.txt"/>
+    <ARRAY Name="Villages">
+      <STRUCT>
+        <ATOM Name="Zone" Value="4_ev"/>
+        <ATOM Name="ForceLoadDist" Value="640"/>
+        <ATOM Name="LoadDist" Value="650"/>
+        <ATOM Name="UnloadDist" Value="660"/>
+        <ATOM Name="CenterX" Value="640"/>
+        <ATOM Name="CenterY" Value="160"/>
+        <ARRAY Name="IgList">
+          <STRUCT Name="MA_Hall_vitrine_Hall_reunion.ig">
+            <ATOM Name="IgName" Value="MA_Hall_vitrine_Hall_reunion.ig"/>
+          </STRUCT>
+          <STRUCT Name="MA_appart_joueur.ig">
+            <ATOM Name="IgName" Value="MA_appart_joueur.ig"/>
+          </STRUCT>
+          <STRUCT Name="MA_Hall_conseil.ig">
+            <ATOM Name="IgName" Value="MA_Hall_conseil.ig"/>
+          </STRUCT>
+          <STRUCT Name="MA_salle_NPC.ig">
+            <ATOM Name="IgName" Value="MA_salle_NPC.ig"/>
+          </STRUCT>
+          <STRUCT Name="Zo_bt_hall_Reunion_vitrine.ig">
+            <ATOM Name="IgName" Value="Zo_bt_hall_Reunion_vitrine.ig"/>
+          </STRUCT>
+          <STRUCT Name="Zo_bt_Hall_Conseil.ig">
+            <ATOM Name="IgName" Value="Zo_bt_Hall_Conseil.ig"/>
+          </STRUCT>
+          <STRUCT Name="ZO_bt_Appart.ig">
+            <ATOM Name="IgName" Value="ZO_bt_Appart.ig"/>
+          </STRUCT>
+          <STRUCT Name="Zo_bt_Piece_NPC.ig">
+            <ATOM Name="IgName" Value="Zo_bt_Piece_NPC.ig"/>
+          </STRUCT>
+          <STRUCT Name="FY_hall_reunion.ig">
+            <ATOM Name="IgName" Value="FY_hall_reunion.ig"/>
+          </STRUCT>
+          <STRUCT Name="FY_appart_joueur.ig">
+            <ATOM Name="IgName" Value="FY_appart_joueur.ig"/>
+          </STRUCT>
+          <STRUCT Name="FY_Hall_conseil.ig">
+            <ATOM Name="IgName" Value="FY_Hall_conseil.ig"/>
+          </STRUCT>
+          <STRUCT Name="fy_cn_Salle_NPC.ig">
+            <ATOM Name="IgName" Value="fy_cn_Salle_NPC.ig"/>
+          </STRUCT>
+          <STRUCT Name="TR_Hall_vitrine_reunion.ig">
+            <ATOM Name="IgName" Value="TR_Hall_vitrine_reunion.ig"/>
+          </STRUCT>
+          <STRUCT Name="TR_Hall_conseil.ig">
+            <ATOM Name="IgName" Value="TR_Hall_conseil.ig"/>
+          </STRUCT>
+          <STRUCT Name="TR_appart.ig">
+            <ATOM Name="IgName" Value="TR_appart.ig"/>
+          </STRUCT>
+          <STRUCT Name="TR_Piece_NPC.ig">
+            <ATOM Name="IgName" Value="TR_Piece_NPC.ig"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="ZoneMin" Value="3_ev"/>
+    <ATOM Name="ZoneMax" Value="4_FC"/>
+    <ATOM Name="Indoor" Value="true"/>
+    <ATOM Name="LocalizedName" Value="uiContinentIndoors"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:14 2002 (corvazier) File converted from old format
+Fri Oct 18 11:23:56 2002 (corvazier) formName Pasted = 
+Wed May 21 14:23:26 2003 (nevrax) .HibernatePreviousContinent = true
+Wed May 21 17:05:40 2003 (nevrax) .Indoor = true
+Wed May 21 17:05:53 2003 (nevrax) .Indoor = false
+Wed May 21 17:05:54 2003 (nevrax) .Indoor = true
+Fri Oct 18 11:23:56 2002 (corvazier) formName Pasted = 
+Thu May 15 17:52:26 2003 (corvazier) .ZoneMax = 2_ae
+Thu May 15 17:52:26 2003 (corvazier) .ZoneMin = 1_aa
+Thu May 22 14:14:50 2003 (nevrax) .Villages[0].CenterX = 200
+Thu May 22 14:14:50 2003 (nevrax) .Villages[0].CenterY = -60
+Thu May 22 14:14:50 2003 (nevrax) .Villages[0].Zone = 1_ab
+Thu May 22 14:14:50 2003 (nevrax) formName Resized = 1
+Thu May 22 14:15:03 2003 (nevrax) .Villages[0].ForceLoadDist = 20
+Thu May 22 14:15:03 2003 (nevrax) .Villages[0].LoadDist = 100
+Thu May 22 14:15:03 2003 (nevrax) .Villages[0].UnloadDist = 50
+Thu May 22 14:15:30 2003 (nevrax) .Villages[0].IgList[0].IgName = MA_Hall_vitrine_Hall_reunion.ig
+Thu May 22 14:15:30 2003 (nevrax) formName Resized = 1
+Thu May 22 14:30:40 2003 (nevrax) .Villages[0].LoadDist = 1000
+Thu May 22 14:40:13 2003 (nevrax) .Villages[0].UnloadDist = 500
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[0] Renamed = MA_Hall_vitrine_Hall_reunion.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[10] Renamed = FY_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[10].IgName = FY_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[11] Renamed = fy_cn_Salle_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[11].IgName = fy_cn_Salle_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[12] Renamed = TR_Hall_vitrine_reunion.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[12].IgName = TR_Hall_vitrine_reunion.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[13] Renamed = TR_appart.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[13].IgName = TR_appart.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[14] Renamed = TR_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[14].IgName = TR_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[15] Renamed = TR_Piece_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[15].IgName = TR_Piece_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[1] Renamed = MA_appart_joueur.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[1].IgName = MA_appart_joueur.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[2] Renamed = MA_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[2].IgName = MA_Hall_conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[3] Renamed = MA_salle_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[3].IgName = MA_salle_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[4] Renamed = Zo_bt_hall_Reunion_vitrine.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[4].IgName = Zo_bt_hall_Reunion_vitrine.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[5] Renamed = Zo_bt_Hall_Conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[5].IgName = Zo_bt_Hall_Conseil.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[6] Renamed = ZO_bt_Appart.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[6].IgName = ZO_bt_Appart.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[7] Renamed = Zo_bt_Piece_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[7].IgName = Zo_bt_Piece_NPC.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[8] Renamed = FY_hall_reunion.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[8].IgName = FY_hall_reunion.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[9] Renamed = FY_appart_joueur.ig
+Mon Jun 23 18:30:33 2003 (tran) .Villages[0].IgList[9].IgName = FY_appart_joueur.ig
+Mon Jun 23 18:30:33 2003 (tran) formName Resized = 16
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].CenterX = 1080
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].CenterY = -40
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].ForceLoadDist = 50
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].LoadDist = 1000
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].UnloadDist = 500
+Fri Jul 11 11:48:29 2003 (tran) .Villages[1].Zone = 1_af
+Fri Jul 11 11:48:29 2003 (tran) formName Pasted = 
+Fri Jul 11 11:48:29 2003 (tran) formName Resized = 8
+Fri Jul 11 11:49:43 2003 (tran) .Villages[0].ForceLoadDist = 200
+Fri Jul 11 11:49:43 2003 (tran) .Villages[0].LoadDist = 300
+Fri Jul 11 11:49:43 2003 (tran) .Villages[1].ForceLoadDist = 200
+Fri Jul 11 11:49:43 2003 (tran) .Villages[1].LoadDist = 300
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[0] Renamed = FY_hall_reunion.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[1] Renamed = FY_hall_reunion.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[2] Renamed = FY_Hall_conseil.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[3] Renamed = fy_cn_Salle_NPC.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[4] Renamed = TR_Hall_vitrine_reunion.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[5] Renamed = TR_Hall_conseil.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[6] Renamed = TR_appart.ig
+Fri Jul 11 11:50:53 2003 (tran) .Villages[1].IgList[7] Renamed = TR_Piece_NPC.ig
+Tue Jul 15 16:43:21 2003 (tran) .ZoneMax = 2_ai
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].CenterX = 320
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].CenterY = -80
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].ForceLoadDist = 320
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].Height = 2
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].LoadDist = 330
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].UnloadDist = 340
+Tue Jul 15 17:30:20 2003 (tran) .Villages[0].Zone = 1_aa
+Tue Jul 15 17:30:30 2003 (tran) .Villages[0].Width = 4
+Tue Jul 15 17:30:37 2003 (tran) .Villages[0].CenterY = -160
+Tue Jul 15 17:31:01 2003 (tran) .Villages[0].Zone = 2_aa
+Tue Jul 15 17:32:32 2003 (tran) .Villages[0].Height = 
+Tue Jul 15 17:32:32 2003 (tran) .Villages[0].Width = 
+Tue Jul 15 17:32:47 2003 (tran) .Villages[1].Zone = 2_ae
+Tue Jul 15 17:32:54 2003 (tran) .Villages[1].ForceLoadDist = 320
+Tue Jul 15 17:32:54 2003 (tran) .Villages[1].LoadDist = 330
+Tue Jul 15 17:32:54 2003 (tran) .Villages[1].UnloadDist = 340
+Tue Jul 15 17:33:17 2003 (tran) .Villages[1].CenterX = 960
+Tue Jul 15 17:33:46 2003 (tran) .Villages[1].CenterY = -160
+Tue Jul 15 17:35:36 2003 (tran) .ZoneMax = 2_ah
+Tue Jul 15 17:38:25 2003 (tran) .ZoneMax = 1_ah
+Tue Jul 15 17:38:53 2003 (tran) .Villages[0].CenterY = -80
+Tue Jul 15 17:38:53 2003 (tran) .Villages[0].Zone = 1_aa
+Tue Jul 15 17:39:04 2003 (tran) .Villages[1].Zone = 1_ae
+Tue Jul 15 17:39:09 2003 (tran) .Villages[1].CenterY = -80
+Tue Jul 15 18:10:29 2003 (tran) .Villages[1].IgList[1] Renamed = FY_appart_joueur.ig
+Tue Jul 15 18:32:59 2003 (tran) .Villages[0].IgList[8] Renamed = FY_hall_reunion.ig
+Tue Jul 15 18:32:59 2003 (tran) formName Pasted = 
+Tue Jul 15 18:32:59 2003 (tran) formName Resized = 9
+Tue Jul 15 18:33:22 2003 (tran) .Villages[0].ForceLoadDist = 2000
+Tue Jul 15 18:33:22 2003 (tran) .Villages[0].LoadDist = 2010
+Tue Jul 15 18:33:22 2003 (tran) .Villages[0].UnloadDist = 2020
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[10] Renamed = FY_Hall_conseil.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[11] Renamed = fy_cn_Salle_NPC.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[12] Renamed = TR_Hall_vitrine_reunion.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[13] Renamed = TR_Hall_conseil.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[14] Renamed = TR_appart.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[15] Renamed = TR_Piece_NPC.ig
+Tue Jul 15 18:47:42 2003 (tran) .Villages[0].IgList[9] Renamed = FY_appart_joueur.ig
+Tue Jul 15 18:47:42 2003 (tran) formName Deleted = 
+Tue Jul 15 18:47:42 2003 (tran) formName Pasted = 
+Tue Jul 15 18:47:42 2003 (tran) formName Resized = 1
+Tue Jul 15 18:48:03 2003 (tran) .Villages[0].ForceLoadDist = 1280
+Tue Jul 15 18:48:03 2003 (tran) .Villages[0].LoadDist = 1290
+Tue Jul 15 18:48:03 2003 (tran) .Villages[0].UnloadDist = 1300
+Tue Jul 15 18:48:10 2003 (tran) .Villages[0].CenterX = 640
+Tue Jul 15 18:48:22 2003 (tran) .Villages[0].ForceLoadDist = 640
+Tue Jul 15 18:48:22 2003 (tran) .Villages[0].LoadDist = 650
+Tue Jul 15 18:48:22 2003 (tran) .Villages[0].UnloadDist = 660
+Wed Nov 12 15:13:05 2003 (corvazier) .LocalizedName = uiContinentIndoors
+Wed Mar 17 14:12:11 2004 (tran) .ZoneMax = 5_fd
+Wed Mar 17 14:12:11 2004 (tran) .ZoneMin = 3_ev
+Wed Mar 17 16:59:12 2004 (tran) .Villages[0].CenterY = 160
+Wed Mar 17 16:59:12 2004 (tran) .Villages[0].Zone = 4_ev
+Mon Jun 21 16:55:48 2004 (besson) .Name = indoors</LOG>
+</FORM>
