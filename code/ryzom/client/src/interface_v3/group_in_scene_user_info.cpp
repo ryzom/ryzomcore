@@ -111,7 +111,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	// NB: fauna can be friend too (kami!!!)
 	bool npcFriendAndNeutral = (entity->canHaveMissionIcon() || entity->isFauna()) && entity->isFriend ();
 	// if the npc is an ally (outpost squad for instance) still display its bar
-	if(npcFriendAndNeutral)
+	if (npcFriendAndNeutral)
 		npcFriendAndNeutral= npcFriendAndNeutral && !entity->isAlly();
 
 	// Window id

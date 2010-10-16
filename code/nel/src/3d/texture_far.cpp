@@ -545,6 +545,10 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 
 	// ** Fill the struct for the tile fill method for each layers
 	NL3D_CComputeTileFar TileFar;
+	TileFar.SrcDiffusePixels = NULL;
+	TileFar.SrcAdditivePixels = NULL;
+	TileFar.SrcDeltaX = 0;
+	TileFar.SrcDeltaY = 0;
 	TileFar.AsmMMX= false;
 #if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	TileFar.AsmMMX= NLMISC::CSystemInfo::hasMMX();

@@ -29,10 +29,6 @@
 #	include <string>
 # include <GL/gl.h>
 #elif defined(NL_OS_MAC)
-# define GL_GLEXT_LEGACY
-# include <OpenGL/gl.h>
-# include "mac/glext.h"
-# include "mac/cocoa_adapter.h"
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
@@ -189,8 +185,24 @@ CDriverGL::CDriverGL()
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::ctor();
+	_ctx    = nil;
+	_glView = nil;
 
+	_backBufferHeight = 0;
+	_backBufferWidth  = 0;
+
+	// autorelease pool for memory management
+	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	
+	// init the application object
+	[NSApplication sharedApplication];
+
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// finish the application launching
+	[NSApp finishLaunching];
+	
 #elif defined (NL_OS_UNIX)
 
 	_cursor = None;
@@ -329,9 +341,9 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
-
+	
 #if defined(NL_OS_MAC)
-	NL3D::MAC::dtor();
+	[_autoreleasePool release];
 #endif
 }
 
@@ -860,7 +872,12 @@ bool CDriverGL::swapBuffers()
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::swapBuffers(_win);
+	// TODO: maybe do this somewhere else?
+	[_autoreleasePool release];
+	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	
+	[_ctx flushBuffer];
+	[containerView() display];
 
 #elif defined (NL_OS_UNIX)
 
@@ -2213,102 +2230,102 @@ void CDriverGL::retrieveATIDriverVersion()
 	H_AUTO_OGL(CDriverGL_retrieveATIDriverVersion)
 	_ATIDriverVersion = 0;
 	// we may need this driver version to fix flaws of previous ati drivers version (fog issue with V.P)
-	#ifdef NL_OS_WINDOWS
-		// get from the registry
-		HKEY parentKey;
-		// open key about current video card
-		LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
-		if (result == ERROR_SUCCESS)
+#ifdef NL_OS_WINDOWS
+	// get from the registry
+	HKEY parentKey;
+	// open key about current video card
+	LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
+	if (result == ERROR_SUCCESS)
+	{
+		// find last config
+		DWORD keyIndex = 0;
+		uint latestConfigVersion = 0;
+		char subKeyName[256];
+		char latestSubKeyName[256] = "";
+		DWORD nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
+		FILETIME lastWriteTime;
+		bool configFound = false;
+		for(;;)
 		{
-			// find last config
-			DWORD keyIndex = 0;
-			uint latestConfigVersion = 0;
-			char subKeyName[256];
-			char latestSubKeyName[256] = "";
-			DWORD nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-			FILETIME lastWriteTime;
-			bool configFound = false;
-			for(;;)
+			nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
+			result = RegEnumKeyEx(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
+			if (result == ERROR_NO_MORE_ITEMS) break;
+			if (result == ERROR_SUCCESS)
 			{
-				nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-				result = RegEnumKeyEx(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
-				if (result == ERROR_NO_MORE_ITEMS) break;
-				if (result == ERROR_SUCCESS)
+				// see if the name is numerical.
+				bool isNumerical = true;
+				for(uint k = 0; k < nameBufferSize; ++k)
 				{
-					// see if the name is numerical.
-					bool isNumerical = true;
-					for(uint k = 0; k < nameBufferSize; ++k)
+					if (!isdigit(subKeyName[k]))
 					{
-						if (!isdigit(subKeyName[k]))
-						{
-							isNumerical = false;
-							break;
-						}
+						isNumerical = false;
+						break;
 					}
-					if (isNumerical)
-					{
-						uint configVersion;
-						fromString((const char*)subKeyName, configVersion);
-						if (configVersion >= latestConfigVersion)
-						{
-							configFound = true;
-							latestConfigVersion = configVersion;
-							strcpy(latestSubKeyName, subKeyName);
-						}
-					}
-					++ keyIndex;
 				}
-				else
+				if (isNumerical)
 				{
-					RegCloseKey(parentKey);
-					return;
+					uint configVersion;
+					fromString((const char*)subKeyName, configVersion);
+					if (configVersion >= latestConfigVersion)
+					{
+						configFound = true;
+						latestConfigVersion = configVersion;
+						strcpy(latestSubKeyName, subKeyName);
+					}
 				}
+				++ keyIndex;
 			}
-			if (configFound)
+			else
 			{
-				HKEY subKey;
-				result = RegOpenKeyEx(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
-				if (result == ERROR_SUCCESS)
+				RegCloseKey(parentKey);
+				return;
+			}
+		}
+		if (configFound)
+		{
+			HKEY subKey;
+			result = RegOpenKeyEx(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
+			if (result == ERROR_SUCCESS)
+			{
+				// see if it is a radeon card
+				DWORD valueType;
+				char driverDesc[256];
+				DWORD driverDescBufSize = sizeof(driverDesc) / sizeof(driverDesc[0]);
+				result = RegQueryValueEx(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
+				if (result == ERROR_SUCCESS && valueType == REG_SZ)
 				{
-					// see if it is a radeon card
-					DWORD valueType;
-					char driverDesc[256];
-					DWORD driverDescBufSize = sizeof(driverDesc) / sizeof(driverDesc[0]);
-					result = RegQueryValueEx(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
-					if (result == ERROR_SUCCESS && valueType == REG_SZ)
+					toLower(driverDesc);
+					if (strstr(driverDesc, "radeon")) // is it a radeon card ?
 					{
-						toLower(driverDesc);
-						if (strstr(driverDesc, "radeon")) // is it a radeon card ?
+						char driverVersion[256];
+						DWORD driverVersionBufSize = sizeof(driverVersion) / sizeof(driverVersion[0]);
+						result = RegQueryValueEx(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
+						if (result == ERROR_SUCCESS && valueType == REG_SZ)
 						{
-							char driverVersion[256];
-							DWORD driverVersionBufSize = sizeof(driverVersion) / sizeof(driverVersion[0]);
-							result = RegQueryValueEx(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
-							if (result == ERROR_SUCCESS && valueType == REG_SZ)
+							int subVersionNumber[4];
+							if (sscanf(driverVersion, "%d.%d.%d.%d", &subVersionNumber[0], &subVersionNumber[1], &subVersionNumber[2], &subVersionNumber[3]) == 4)
 							{
-								int subVersionNumber[4];
-								if (sscanf(driverVersion, "%d.%d.%d.%d", &subVersionNumber[0], &subVersionNumber[1], &subVersionNumber[2], &subVersionNumber[3]) == 4)
+								_ATIDriverVersion = (uint) subVersionNumber[3];
+								/** see if fog range for V.P is bad in that driver version (is so, do a fix during vertex program conversion to EXT_vertex_shader
+								  * In earlier versions of the driver, fog coordinates had to be output in the [0, 1] range
+								  * From the 6.14.10.6343 driver, fog output must be in world units
+								  */
+								if (_ATIDriverVersion < 6343)
 								{
-									_ATIDriverVersion = (uint) subVersionNumber[3];
-									/** see if fog range for V.P is bad in that driver version (is so, do a fix during vertex program conversion to EXT_vertex_shader
-									  * In earlier versions of the driver, fog coordinates had to be output in the [0, 1] range
-									  * From the 6.14.10.6343 driver, fog output must be in world units
-									  */
-									if (_ATIDriverVersion < 6343)
-									{
-										_ATIFogRangeFixed = false;
-									}
+									_ATIFogRangeFixed = false;
 								}
 							}
 						}
 					}
 				}
-				RegCloseKey(subKey);
 			}
-			RegCloseKey(parentKey);
+			RegCloseKey(subKey);
 		}
+		RegCloseKey(parentKey);
+	}
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+# warning "OpenGL Driver: Missing Mac Implementation for ATI version retrieval"
+	nlwarning("OpenGL Driver: Missing Mac Implementation for ATI version retrieval");
 
 #elif defined (NL_OS_UNIX)
 	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different

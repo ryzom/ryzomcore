@@ -1411,7 +1411,7 @@ void CZone::setTileColor(bool monochrome, float factor)
 void			CZone::debugBinds(FILE *f)
 {
 	fprintf(f, "*****************************\n");
-	fprintf(f, "ZoneId: %d. NPatchs:%zu\n", ZoneId, PatchConnects.size());
+	fprintf(f, "ZoneId: %d. NPatchs:%u\n", ZoneId, (uint)PatchConnects.size());
 	sint i;
 	for(i=0;i<(sint)PatchConnects.size();i++)
 	{
@@ -1420,10 +1420,10 @@ void			CZone::debugBinds(FILE *f)
 		for(sint j=0;j<4;j++)
 		{
 			CPatchInfo::CBindInfo	&bd= pc.BindEdges[j];
-			fprintf(f, "    edge%d: Zone:%d. NPatchs:%d. ", j, bd.ZoneId, bd.NPatchs);
+			fprintf(f, "    edge%d: Zone:%u. NPatchs:%u. ", j, (uint)bd.ZoneId, (uint)bd.NPatchs);
 			for(sint k=0;k<bd.NPatchs;k++)
 			{
-				fprintf(f, "p%de%d - ", bd.Next[k], bd.Edge[k]);
+				fprintf(f, "p%ue%u - ", (uint)bd.Next[k], (uint)bd.Edge[k]);
 			}
 			fprintf(f, "\n");
 		}
@@ -1432,9 +1432,9 @@ void			CZone::debugBinds(FILE *f)
 	fprintf(f,"Vertices :\n");
 	for(i=0;i<(sint)BorderVertices.size();i++)
 	{
-		fprintf(f,"current : %d -> (zone %d) vertex %d\n",BorderVertices[i].CurrentVertex,
-											BorderVertices[i].NeighborZoneId,
-											BorderVertices[i].NeighborVertex);
+		fprintf(f,"current : %u -> (zone %u) vertex %u\n", (uint)BorderVertices[i].CurrentVertex,
+											(uint)BorderVertices[i].NeighborZoneId,
+											(uint)BorderVertices[i].NeighborVertex);
 	}
 }
 

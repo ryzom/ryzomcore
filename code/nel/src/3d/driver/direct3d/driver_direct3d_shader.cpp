@@ -2964,7 +2964,7 @@ pixelshader water_diffuse_2_0 = asm									\n\
 	//bias result (include scaling)									\n\
 	mad    r0.xy, r0, c1.z, c1;										\n\
 	//add envmap coord												\n\
-	add	   r0.xy, r0, t2;										\n\
+	add	   r0.xy, r0, t2;											\n\
 	// read envmap													\n\
 	texld  r0, r0, s2;												\n\
 	// read diffuse													\n\
@@ -3073,7 +3073,7 @@ pixelshader water_no_diffuse_2_0 = asm								\n\
 	//bias result (include scaling)									\n\
 	mad    r0.xy, r0, c1.z, c1;										\n\
 	//add envmap coord												\n\
-	add	   r0.xy, r0, t2;										\n\
+	add	   r0.xy, r0, t2;											\n\
 	//read envmap													\n\
 	texld  r0, r0, s2;												\n\
 	mov oC0, r0;													\n\

@@ -48,6 +48,8 @@
 	typedef HWND nlWindow;
 	#define EmptyWindow NULL
 #elif defined(NL_OS_MAC)
+	// TODO This should be NSView*, but then we would need to include Cocoa.h
+	//   and compile with "-x objective-c++" ... everything including this file.
 	typedef void* nlWindow;
 	#define EmptyWindow NULL
 #elif defined(NL_OS_UNIX)

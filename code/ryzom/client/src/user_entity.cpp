@@ -1994,7 +1994,7 @@ void CUserEntity::updatePos(const TTime &t, CEntityCL *target)
 	// Compute the Time Step.
 	double frameTimeRemaining = computeTimeStep(((double)t)*0.001);
 	// Do not update animation if Client Light
-	if(ClientCfg.Light == false)
+	if (!ClientCfg.Light)
 	{
 		// Attack Animation.
 		if(_AnimAttackOn)

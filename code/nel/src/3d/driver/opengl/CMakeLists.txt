@@ -2,6 +2,8 @@ FILE(GLOB SRC *.cpp *.h *.def)
 IF(APPLE)
   FILE(GLOB MAC_SRC mac/*.h mac/*.m mac/*.mm mac/*.cpp)
   SET(SRC ${SRC} ${MAC_SRC})
+  SET_SOURCE_FILES_PROPERTIES(${SRC} 
+    PROPERTIES COMPILE_FLAGS "-x objective-c++")
 ENDIF(APPLE)
 
 IF(WIN32)

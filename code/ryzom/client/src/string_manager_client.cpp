@@ -115,12 +115,11 @@ namespace STRING_MANAGER
 		{
 			try
 			{
-				std::string filename(_ShardId.substr(0, _ShardId.find(":")) + ".string_cache");
+				_CacheFilename = std::string("save/") + _ShardId.substr(0, _ShardId.find(":")) + ".string_cache";
 
-				nlinfo("SM : Try to open the string cache : %s", filename.c_str());
+				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
-				_CacheFilename = NLMISC::CPath::lookup(filename, false, false);
-				if (!_CacheFilename .empty())
+				if (CFile::fileExists(_CacheFilename))
 				{
 					// there is a cache file, check date reset it if needed
 					{
@@ -143,7 +142,6 @@ namespace STRING_MANAGER
 				else
 				{
 					nlinfo("SM: Creating string cache");
-					_CacheFilename = std::string("data/")+filename;
 					// cache file don't exist, create it with the timestamp
 					NLMISC::COFile file(_CacheFilename);
 					file.serial(timestamp);

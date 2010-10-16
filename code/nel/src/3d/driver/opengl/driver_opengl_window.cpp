@@ -25,10 +25,6 @@
 #ifdef NL_OS_WINDOWS
 # include <windowsx.h>
 #elif defined(NL_OS_MAC)
-# define GL_GLEXT_LEGACY
-# include <OpenGL/gl.h>
-# include "mac/glext.h"
-# include "mac/cocoa_adapter.h"
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
@@ -298,11 +294,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC)
 
-	if(!NL3D::MAC::init(windowIcon, exitFunc))
-	{
-		nldebug("cannot init");
-		return false;
-	}
+	// nothing to do
 
 #elif defined (NL_OS_UNIX)
 
@@ -393,11 +385,7 @@ bool CDriverGL::unInit()
 
 #elif defined(NL_OS_MAC)
 
-	if(!NL3D::MAC::unInit())
-	{
-		nldebug("cannot uninit");
-		return false;
-	}
+	// nothing to do
 
 #elif defined (NL_OS_UNIX)
 
@@ -478,7 +466,7 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
+	// nothing to do, on Mac OS X, only windows representing a file have icons
 
 #elif defined(NL_OS_UNIX)
 
@@ -901,10 +889,67 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 #elif defined(NL_OS_MAC)
 
-	_win = NL3D::MAC::setDisplay(wnd, mode, show, resizeable);
+	if (wnd == EmptyWindow)
+	{
+		if (!createWindow(mode))
+			return false;
+	}
+	else
+	{
+		_win = wnd;
+	}
 
-	if(_win != EmptyWindow)
-		_DestroyWindow = true;
+	// setup opengl settings
+	NSOpenGLPixelFormatAttribute att[] =
+	{
+		NSOpenGLPFADoubleBuffer,
+		NSOpenGLPFAColorSize,    24,
+		NSOpenGLPFADepthSize,    24,
+		NSOpenGLPFAAlphaSize,     8,
+		NSOpenGLPFAStencilSize,   8,
+		NSOpenGLPFANoRecovery,
+		NSOpenGLPFAAccelerated,
+		NSOpenGLPFABackingStore,
+		0
+	};
+
+	// put the settings into a format object
+	NSOpenGLPixelFormat* format =
+		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
+
+	if(!format)
+		nlerror("cannot create NSOpenGLPixelFormat");
+
+	// create a opengl view with the created format
+	_glView = [[CocoaOpenGLView alloc]
+		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
+
+	if(!_glView)
+		nlerror("cannot create view");
+
+	// make the view automatically fit the super view
+	[_glView setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+
+	// put the open gl view into the dummy view contained in the window
+	[containerView() addSubview:_glView];
+
+	// adjust size
+	[_glView setFrame: [containerView() frame]];
+
+	// create a opengl context for the view
+	_ctx = [_glView openGLContext];
+
+	if(!_ctx)
+		nlerror("cannot create context");
+
+	// free the pixel format object
+	[format release];
+
+	// let the open gl view handle the input
+	[[containerView() window] makeFirstResponder:_glView];
+	
+	[_ctx flushBuffer];
+	[containerView() display]; 
 
 #elif defined(NL_OS_UNIX)
 
@@ -1145,7 +1190,8 @@ bool CDriverGL::restoreScreenMode()
 	return res;
 }
 
-// --------------------------------------------------
+// ***************************************************************************
+
 #ifdef XF86VIDMODE
 static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 {
@@ -1153,7 +1199,8 @@ static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 }
 #endif // XF86VIDMODE
 
-// --------------------------------------------------
+// ***************************************************************************
+
 bool CDriverGL::setScreenMode(const GfxMode &mode)
 {
 	H_AUTO_OGL(CDriverGL_setScreenMode)
@@ -1324,11 +1371,45 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC)
 
-	window = NL3D::MAC::createWindow(mode);
+	// describe how the window should look like and behave
+	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
+		NSMiniaturizableWindowMask | NSResizableWindowMask;
+
+	// create a cocoa window with the size provided by the mode parameter
+	NSWindow* cocoa_window = [[NSWindow alloc]
+		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
+		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
+
+	if(!cocoa_window) 
+	{
+		nlerror("cannot create cocoa window");
+		return false;
+	}
+
+	// set the window to non transparent
+	[cocoa_window setOpaque:YES];
+
+	// enable mouse move events, NeL wants them
+	[cocoa_window setAcceptsMouseMovedEvents:YES];
+
+	// there are no overlapping subviews, can use the magical optimization :)
+	[cocoa_window useOptimizedDrawing:YES];
+
+	// put the window to the front and make it the key window
+	[cocoa_window makeKeyAndOrderFront:nil];
+
+	// this is our main window
+	[cocoa_window makeMainWindow];
+
+	// create a dummy view which works like the window on other platforms
+	// the open gl view will be created as subview of this one.
+	window = [[NSView alloc] init];
+
+	[cocoa_window setContentView: (NSView*)window];
 
 	if(window == EmptyWindow)
 	{
-		nldebug("cannot create window");
+		nldebug("cannot create cocoa view for cocoa window");
 		return false;
 	}
 
@@ -1368,6 +1449,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 }
 
 // ***************************************************************************
+
 bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
@@ -1404,12 +1486,11 @@ bool CDriverGL::destroyWindow()
 
 	if(_DestroyWindow)
 	{
-		if(!NL3D::MAC::destroyWindow(_win))
-		{
-			nldebug("cannot destroy window");
-			return false;
-		}
+		[containerView() release];
+		[[containerView() window] release];
 	}
+	
+	_ctx = nil;
 
 #elif defined (NL_OS_UNIX)
 
@@ -1436,6 +1517,8 @@ bool CDriverGL::destroyWindow()
 	return true;
 }
 
+// ***************************************************************************
+
 CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
 {
 	H_AUTO_OGL(CDriverGL_getWindowStyle)
@@ -1445,6 +1528,8 @@ CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
 
 	return EWSWindowed;
 }
+
+// ***************************************************************************
 
 bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 {
@@ -1500,10 +1585,57 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_MAC)
 
-	if(!NL3D::MAC::setWindowStyle(_win, windowStyle == EWSFullscreen))
+	// leave fullscreen mode, enter windowed mode
+	if(windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
 	{
-		nldebug("cannot set window style");
-		return false;
+		// disable manual setting of back buffer size, cocoa handles this
+		// automatically as soon as the view gets resized
+		CGLError error = CGLDisable((CGLContextObj)[_ctx CGLContextObj],
+			kCGLCESurfaceBackingSize);
+
+		if(error != kCGLNoError)
+			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
+				CGLErrorString(error));
+
+		// pull the view back from fullscreen restoring window options
+		[containerView() exitFullScreenModeWithOptions:nil];
+
+		// let the gl view receive key events
+		[[containerView() window] makeFirstResponder:_glView];
+
+		// bring the window containing the gl view to the front
+		[[containerView() window] makeKeyAndOrderFront:nil];
+	}
+
+	// enter fullscreen, leave windowed mode
+	else if(windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	{
+		// enable manual back buffer size for mode setting in fullscreen
+		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
+			kCGLCESurfaceBackingSize);
+
+		if(error != kCGLNoError)
+			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
+				CGLErrorString(error));
+
+		// put the view in fullscreen mode, hiding the dock but enabling the menubar
+		// to pop up if the mouse hits the top screen border.
+		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+		[containerView() enterFullScreenMode:[NSScreen mainScreen] withOptions:
+			[NSDictionary dictionaryWithObjectsAndKeys:
+				[NSNumber numberWithInt:
+					NSApplicationPresentationHideDock |
+					NSApplicationPresentationAutoHideMenuBar],
+				NSFullScreenModeApplicationPresentationOptions, nil]];
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+		/*
+			TODO check if simply using NSView enterFullScreenMode is a good idea.
+			 the context can be set to full screen as well, performance differences?
+		*/
+
+		// let the gl view receive key events
+		[[containerView() window] makeFirstResponder:_glView];
 	}
 
 #elif defined(NL_OS_UNIX)
@@ -1558,6 +1690,8 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #endif // NL_OS_WINDOWS
 
+	_FullScreen = (windowStyle == EWSFullscreen);
+
 	return true;
 }
 
@@ -1570,18 +1704,53 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		return false;
 
 	// when changing window style, it's possible system change window size too
-	setWindowStyle(mode.Windowed ? EWSWindowed:EWSFullscreen);
+	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
 
 	if (!mode.Windowed)
 		_Depth = mode.Depth;
-
-	_FullScreen = !mode.Windowed;
 
 	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
 
 	return true;
 }
+
+#if defined(NL_OS_MAC) && defined(AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER)
+
+/// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
+static int bppFromDisplayMode(CGDisplayModeRef mode)
+{
+	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);
+	
+	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo) 
+		return 32;
+	
+	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels), 
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+		return 16;
+	
+	return 0;
+}
+
+#elif defined(NL_OS_MAC) && !defined(AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER)
+
+long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
+{
+	long value = 0;
+	CFNumberRef numRef;
+	numRef = (CFNumberRef)CFDictionaryGetValue(theDict, key);
+	if (numRef != NULL)
+		CFNumberGetValue(numRef, kCFNumberLongType, &value);
+	return value;
+}
+
+// some macros to make code more readable.
+#define GetModeWidth(mode) GetDictionaryLong((mode), kCGDisplayWidth)
+#define GetModeHeight(mode) GetDictionaryLong((mode), kCGDisplayHeight)
+#define GetModeBitsPerPixel(mode) GetDictionaryLong((mode), kCGDisplayBitsPerPixel)
+
+#endif // defined(NL_OS_MAC)
 
 // --------------------------------------------------
 bool CDriverGL::getModes(std::vector<GfxMode> &modes)
@@ -1611,7 +1780,71 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::getModes(modes);
+	static const CGDisplayCount kMaxDisplays = 16;
+	CGDirectDisplayID display[kMaxDisplays];
+	CGDisplayCount numDisplays;
+
+	CGDisplayErr err = CGGetActiveDisplayList(kMaxDisplays, display, &numDisplays);
+	if(err != CGDisplayNoErr)
+	{
+		nlwarning("Cannot get displays (%d)", err);
+		return false;
+	}
+
+	// nldebug("3D: %d displays found", (int)numDisplays);
+
+	for (CGDisplayCount i = 0; i < numDisplays; ++i)
+	{
+		CGDirectDisplayID dspy = display[i];
+
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
+#else
+		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+
+		if (modeList == NULL)
+		{
+			nlwarning("Display is invalid");
+			continue;
+		}
+
+		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
+		{
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
+			uint8 bpp = bppFromDisplayMode(mode);
+#else
+			CFDictionaryRef mode = (CFDictionaryRef)CFArrayGetValueAtIndex(modeList, j);
+			uint8 bpp = (uint8)GetModeBitsPerPixel(mode);
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+
+			if (bpp >= 16)
+			{
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+				uint16 w = CGDisplayModeGetWidth(mode);
+				uint16 h = CGDisplayModeGetHeight(mode);
+#else
+				uint16 w = (uint16)GetModeWidth(mode); 
+				uint16 h = (uint16)GetModeHeight(mode); 
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+
+				// Add this mode
+				GfxMode mode;
+				mode.Width  = w;
+				mode.Height = h;
+				mode.Depth  = bpp;
+
+				// Frequency stays at 0 because on mac cocoa, display resolution
+				//   is never really changed. if rendering res < display res,
+				//   cocoa interpolates and keeps the display at it's original res.
+				mode.Frequency = 0;
+				modes.push_back (mode);
+
+				// nldebug(" Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
+			}
+		}
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -1722,7 +1955,30 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::getCurrentScreenMode(_win, mode);
+	// the sceen with the menu bar
+	NSScreen* screen = [[NSScreen screens] objectAtIndex:0];
+
+	mode.OffScreen = false;
+	mode.Frequency = 0;
+	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
+
+	// in fullscreen mode
+	if([containerView() isInFullScreenMode])
+	{
+		// return the size of the back buffer (like having switched monitor mode)
+		mode.Windowed  = false;
+		mode.Width     = _backBufferWidth;
+		mode.Height    = _backBufferHeight;
+	}
+	
+	// in windowed mode
+	else
+	{
+		// return the size of the screen with menu bar
+		mode.Windowed  = true;
+		mode.Width     = (uint16)[screen frame].size.width;
+		mode.Height    = (uint16)[screen frame].size.height;
+	}
 
 #elif defined(NL_OS_UNIX)
 
@@ -1830,7 +2086,8 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::setWindowTitle(_win, title);
+	[[containerView() window] setTitle:
+		[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 
 #elif defined (NL_OS_UNIX)
 
@@ -1862,7 +2119,19 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::setWindowPos(_win, x, y);
+	nldebug("setting window pos to %d %d", x, y);
+
+	// get the rect (position, size) of the screen with menu bar
+	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+
+	// get the rect (position, size) of the window
+	NSRect windowRect = [[containerView() window] frame];
+
+	// convert y from NeL coordinates to cocoa coordinates
+	y = screenRect.size.height - y;
+
+	// tell cocoa to move the window
+	[[containerView() window] setFrameTopLeftPoint:NSMakePoint(x, y)];
 
 #elif defined (NL_OS_UNIX)
 
@@ -1895,7 +2164,7 @@ void CDriverGL::showWindow(bool show)
 
 #elif defined(NL_OS_MAC)
 
-	MAC::showWindow(show);
+	// TODO implement me
 
 #elif defined (NL_OS_UNIX)
 
@@ -1940,11 +2209,8 @@ bool CDriverGL::activate()
 
 #elif defined(NL_OS_MAC)
 
-	if(!MAC::activate(_win))
-	{
-		nlwarning("cannot activate");
-		return false;
-	}
+	if([NSOpenGLContext currentContext] != _ctx)
+		[_ctx makeCurrentContext];
 
 #elif defined (NL_OS_UNIX)
 
@@ -2024,7 +2290,28 @@ void CDriverGL::showCursor(bool b)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::showCursor(b);
+	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
+	// twice requires two calls to "show" to make the cursor visible again.
+	// Since other platforms seem to not do this, the functionality is masked here
+	// by only calling hide if the cursor is visible and only calling show if
+	// the cursor was hidden.
+
+	CGDisplayErr error  = kCGErrorSuccess;
+	static bool visible = true;
+
+	if(b && !visible)
+	{
+		error = CGDisplayShowCursor(kCGDirectMainDisplay);
+		visible = true;
+	}
+	else if(!b && visible)
+	{
+		error = CGDisplayHideCursor(kCGDirectMainDisplay);
+		visible = false;
+	}
+
+	if(error != kCGErrorSuccess)
+		nlerror("cannot show / hide cursor");
 
 #elif defined (NL_OS_UNIX)
 
@@ -2077,7 +2364,30 @@ void CDriverGL::setMousePos(float x, float y)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::setMousePos(_win, x, y);
+	// CG wants absolute coordinates related to first screen's top left
+
+	// get the first screen's (conaints menubar) rect (this is not mainScreen)
+	NSRect firstScreenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+
+	// get the rect (position, size) of the window
+	NSRect windowRect;
+	if([containerView() isInFullScreenMode])
+		windowRect = [[[containerView() window] screen] frame];
+	else
+		windowRect = [[containerView() window] frame];
+
+	// get the view's rect for height and width
+	NSRect viewRect = [containerView() frame];
+
+	// set the cursor position
+	CGDisplayErr error = CGDisplayMoveCursorToPoint(
+		kCGDirectMainDisplay, CGPointMake(
+			windowRect.origin.x + (viewRect.size.width * x), 
+			firstScreenRect.size.height - windowRect.origin.y - 
+				viewRect.size.height + ((1.0 - y) * viewRect.size.height)));
+
+	if(error != kCGErrorSuccess)
+		nlerror("cannot set mouse position");
 
 #elif defined (NL_OS_UNIX)
 
@@ -2092,7 +2402,32 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 
 #ifdef NL_OS_MAC
 
-	NL3D::MAC::getWindowSize(_win, width, height);
+	// TODO set them in windowproc, so no special impl is needed here 
+	
+	// A cocoa fullscreen view stays at the native resolution of the display.
+	// When changing the rendering resolution, the size of the back buffer gets
+	// changed, but the view still stays at full resolution. So the scaling of
+	// the image from the rendered resolution to the view's resolution is done
+	// by cocoa automatically while flushing buffers.
+	// That's why, in fullscreen mode, return the resolution of the back buffer,
+	// not the one from the window.
+
+	// in fullscreen mode
+	if([containerView() isInFullScreenMode])
+	{
+		// use the size stored in setWindowSize()
+		width = _backBufferWidth;
+		height = _backBufferHeight;
+	}
+
+	// in windowed mode
+	else
+	{
+		// use the size of the view
+		NSRect rect = [containerView() frame];
+		width = rect.size.width;
+		height = rect.size.height;
+	}
 
 #else // NL_OS_MAC
 
@@ -2146,8 +2481,44 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::setWindowSize(_win, width, height);
+	// for fullscreen mode, adjust the back buffer size to the desired resolution
+	if([containerView() isInFullScreenMode])
+	{
+		// disable and re-enable fullscreen
+		// fixes #1062 (http://dev.ryzom.com/issues/1062)
+		setWindowStyle(EWSWindowed);
+		setWindowStyle(EWSFullscreen);
+		
+		// set the back buffer manually to match the desired rendering resolution
+		GLint dim[2]   = { width, height };
+		CGLError error = CGLSetParameter(
+			(CGLContextObj)[_ctx CGLContextObj],
+			kCGLCPSurfaceBackingSize, dim);
 
+		if(error != kCGLNoError)
+			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)",
+				CGLErrorString(error));
+
+		_backBufferWidth = width;
+		_backBufferHeight = height;
+	}
+	else
+	{
+		// only change the window size if the driver created the window itself
+		if(_DestroyWindow)
+		{
+			// get the windows current frame
+			NSRect rect = [[containerView() window] frame];
+
+			// convert the desired content size to window size
+			rect = [[containerView() window] frameRectForContentRect:
+				NSMakeRect(rect.origin.x, rect.origin.y, width, height)];
+
+			// update window dimensions
+			[[containerView() window] setFrame:rect display:YES];
+		}
+	}
+	
 #elif defined(NL_OS_UNIX)
 
 	if (width != _WindowWidth || height != _WindowHeight)
@@ -2182,8 +2553,19 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
 #ifdef NL_OS_MAC
+	// TODO set them in window proc so no special impl is needed here
 
-	NL3D::MAC::getWindowPos(_win, x, y);
+	// get the rect (position, size) of the screen with menu bar
+	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+
+	// get the rect (position, size) of the window
+	NSRect windowRect = [[containerView() window] frame];
+
+	// simply return x
+	x = windowRect.origin.x;
+
+	// map y from cocoa to NeL coordinates before returning
+	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 
 #else // NL_OS_MAC
 
@@ -2219,9 +2601,7 @@ bool CDriverGL::isActive()
 	res = (IsWindow(_win) != FALSE);
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	// nlwarning("OpenGL Driver: Missing Mac Implementation");
-
+# warning "OpenGL Driver: Missing Mac Implementation for isActive"
 #elif defined (NL_OS_UNIX)
 
 #endif // NL_OS_UNIX
@@ -2264,7 +2644,7 @@ void CDriverGL::setCapture (bool b)
 
 #elif defined(NL_OS_MAC)
 
-	NL3D::MAC::setCapture(b);
+	// no need to capture
 
 #elif defined (NL_OS_UNIX)
 
@@ -2316,11 +2696,7 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 	}
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
-
 #elif defined (NL_OS_UNIX)
-
 #endif
 
 	return res;
@@ -2358,11 +2734,7 @@ NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 	}
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
-
 #elif defined (NL_OS_UNIX)
-
 #endif
 
 	return res;
@@ -2381,11 +2753,7 @@ NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 		res = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
-
 #elif defined (NL_OS_UNIX)
-
 #endif
 
 	return res;
@@ -2429,8 +2797,8 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 	}
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+# warning "OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay"
+	nlwarning("OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay");
 
 #elif defined (NL_OS_UNIX)
 
@@ -2492,11 +2860,10 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 	}
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation"
-	nlwarning("OpenGL Driver: Missing Mac Implementation");
+	// TODO for Mac: implement CDriverGL::setMonitorColorProperties
+	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
 
 #elif defined (NL_OS_UNIX)
-
 	// TODO for Linux: implement CDriverGL::setMonitorColorProperties
 	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
 
@@ -2504,5 +2871,65 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 
 	return false;
 }
+
+#ifdef NL_OS_MAC
+void CDriverGL::setupApplicationMenu() 
+{
+ 	NSMenu*     menu;
+ 	NSMenuItem* menuItem;
+ 	NSString*   title;
+ 	NSString*   appName;
+ 
+ 	// get the applications name from it's process info
+ 	appName = [[NSProcessInfo processInfo] processName];
+ 
+ 	// create an empty menu object
+ 	menu    = [[NSMenu alloc] initWithTitle:@""];
+ 
+ 	// add the about menu item
+ 	title = [@"About " stringByAppendingString:appName];
+ 	[menu addItemWithTitle:title
+ 		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
+ 
+ 	// separator
+ 	[menu addItem:[NSMenuItem separatorItem]];
+ 
+ 	// add the hide application menu item
+ 	title = [@"Hide " stringByAppendingString:appName];
+ 	[menu addItemWithTitle:title
+ 		action:@selector(hide:) keyEquivalent:@"h"];
+ 
+ 	// add the hide others menu item
+ 	menuItem = [menu addItemWithTitle:@"Hide Others"
+ 		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+ 	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+ 
+ 	// add the show all menu item
+ 	[menu addItemWithTitle:@"Show All"
+ 		action:@selector(unhideAllApplications:) keyEquivalent:@""];
+ 
+ 	// separator
+ 	[menu addItem:[NSMenuItem separatorItem]];
+ 
+ 	/*
+ 		TODO on quit send EventDestroyWindowId
+ 	*/
+ 	// add the quit menu item
+ 	title = [@"Quit " stringByAppendingString:appName];
+ 	[menu addItemWithTitle:title
+ 		action:@selector(terminate:) keyEquivalent:@"q"];
+ 
+ 	// create an empty menu item and put the new menu into it as a subitem
+ 	menuItem = [[NSMenuItem alloc] initWithTitle:@""
+ 		action:nil keyEquivalent:@""];
+ 	[menuItem setSubmenu:menu];
+ 
+ 	// create a menu for the application
+ 	[NSApp setMainMenu:[[NSMenu alloc] initWithTitle:@""]];
+ 
+ 	// attach the new menu to the applications menu
+ 	[[NSApp mainMenu] addItem:menuItem];	
+}
+#endif
 
 } // NL3D

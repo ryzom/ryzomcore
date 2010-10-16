@@ -78,40 +78,54 @@ void printCheck(const std::string &str)
 
 void printDownload(const std::string &str)
 {
-	static uint previousLength = 0;
+	static char spaces[80];
 
-	static const uint maxLength = 160;
-	static char spaces[maxLength];
+	uint maxLength = 80;
+
+	// if "COLUMNS" environnement variable is defined, use it
+	if (getenv("COLUMNS"))
+	{
+		NLMISC::fromString(std::string(getenv("COLUMNS")), maxLength);
+	}
+
+	// only use 79 columns to not wrap
+	--maxLength;
+
+	// temporary modified string
+	std::string nstr = str;
 
 	uint length = 0;
 
 	if (useUtf8)
 	{
-		ucstring utf8Str;
-		utf8Str.fromUtf8(str);
-		length = (uint)utf8Str.length();
+		ucstring ucstr;
+		ucstr.fromUtf8(nstr);
+		length = (uint)ucstr.length();
+		if (length > maxLength)
+		{
+			ucstr = ucstr.luabind_substr(length - maxLength - 3);
+			nstr = std::string("...") + ucstr.toUtf8();
+			length = maxLength;
+		}
 	}
 	else
 	{
-		length = (uint)str.length();
+		length = (uint)nstr.length();
+		if (length > maxLength)
+		{
+			nstr = std::string("...") + nstr.substr(length - maxLength - 3);
+			length = maxLength;
+		}
 	}
 
-	sint diff = length - previousLength;
-
-	if (diff > 0 && length < maxLength)
-	{
-		memset(spaces, ' ', length);
-		spaces[length] = '\0';
-
-		// "erase" previous line
-		printf("%s\r", spaces);
-		fflush(stdout);
-	}
+	// add padding with spaces
+	memset(spaces, ' ', maxLength);
+	spaces[maxLength - length] = '\0';
 	
 	// display download in purple
 	if (useEsc)
 	{
-		printf("\033[1;35m%s\033[0m\r", str.c_str());
+		printf("\033[1;35m%s%s\033[0m\r", nstr.c_str(), spaces);
 	}
 	else
 	{
@@ -120,17 +134,15 @@ void printDownload(const std::string &str)
 			SetConsoleTextAttribute(hStdout, FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
 #endif
 
-		printf("%s\r", str.c_str());
+		printf("%s%s\r", nstr.c_str(), spaces);
 
 #ifdef NL_OS_WINDOWS
 		if (hStdout != INVALID_HANDLE_VALUE && hStdout)
 			SetConsoleTextAttribute(hStdout, attributes);
 #endif
 	}
-	
-	fflush(stdout);
 
-	previousLength = length;
+	fflush(stdout);
 }
 
 int main(int argc, char *argv[])
@@ -168,7 +180,7 @@ int main(int argc, char *argv[])
 	std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
 	useUtf8 = (lang.find("utf8") != string::npos || lang.find("utf-8") != string::npos);
 	lang = lang.substr(0, 2);
- 
+
 	// check if console supports colors
 	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);

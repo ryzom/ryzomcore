@@ -89,7 +89,8 @@ PRIVATE int FileCleanup (HTRequest *req, int status)
     HTStream * input = HTRequest_inputStream(req);
 
     /* Free stream with data TO Local file system */
-    if (input) {
+    if (input)
+	{
         if (status == HT_INTERRUPTED)
             (*input->isa->abort)(input, NULL);
         else
@@ -100,16 +101,19 @@ PRIVATE int FileCleanup (HTRequest *req, int status)
     /*
     **  Remove if we have registered a timer function as a callback
     */
-    if (file->timer) {
-	HTTimer_delete(file->timer);
-	file->timer = NULL;
+    if (file->timer)
+	{
+		HTTimer_delete(file->timer);
+		file->timer = NULL;
     }
 
-    if (file) {
-	HT_FREE(file->local);
-	HT_FREE(file);
+    if (file)
+	{
+		HT_FREE(file->local);
+		HT_FREE(file);
     }
-    HTNet_delete(net, status);
+
+	HTNet_delete(net, status);
     return YES;
 }
 
@@ -181,32 +185,37 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
     HTRequest * request = HTNet_request(net);
     HTParentAnchor * anchor = HTRequest_anchor(request);
 
-    if (type == HTEvent_CLOSE) {				      /* Interrupted */
-	HTRequest_addError(request, ERR_FATAL, NO, HTERR_INTERRUPTED,
-			   NULL, 0, "HTLoadFile");
-	FileCleanup(request, HT_INTERRUPTED);
-	return HT_OK;
+    if (type == HTEvent_CLOSE)
+	{
+		/* Interrupted */
+		HTRequest_addError(request, ERR_FATAL, NO, HTERR_INTERRUPTED,
+			NULL, 0, "HTLoadFile");
+		FileCleanup(request, HT_INTERRUPTED);
+		return HT_OK;
     }
 
 
     /* Now jump into the machine. We know the state from the previous run */
-    for(;;) {
-	switch (file->state) {
+    for(;;)
+	{
+	switch (file->state)
+	{
 	case FS_BEGIN:
 
 	    /* We only support safe (GET, HEAD, etc) methods for the moment */
 	    if (!HTMethod_isSafe(HTRequest_method(request))) {
 		HTRequest_addError(request, ERR_FATAL, NO, HTERR_NOT_ALLOWED,
-				   NULL, 0, "HTLoadFile");
+				   NULL, 0, (char*)"HTLoadFile");
 		file->state = FS_ERROR;
 		break;
 	    }
 
 	    /* Check whether we have access to local disk at all */
-	    if (HTLib_secure()) {
-		HTTRACE(PROT_TRACE, "LoadFile.... No access to local file system\n");
-		file->state = FS_TRY_FTP;
-		break;
+	    if (HTLib_secure())
+		{
+			HTTRACE(PROT_TRACE, "LoadFile.... No access to local file system\n");
+			file->state = FS_TRY_FTP;
+			break;
 	    }
 
 		/*file->local = HTWWWToLocal(HTAnchor_physical(anchor), "",
@@ -220,15 +229,16 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 			StrAllocCopy(file->local, tmp.c_str());
 		}
 
-	    if (!file->local) {
-		file->state = FS_TRY_FTP;
-		break;
+	    if (!file->local)
+		{
+			file->state = FS_TRY_FTP;
+			break;
 	    }
 
 	    /* Create a new host object and link it to the net object */
 	    {
 		HTHost * host = NULL;
-		if ((host = HTHost_new("localhost", 0)) == NULL) return HT_ERROR;
+		if ((host = HTHost_new((char*)"localhost", 0)) == NULL) return HT_ERROR;
 		HTNet_setHost(net, host);
 		if (HTHost_addNet(host, net) == HT_PENDING) {
 		    HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
@@ -243,7 +253,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 	case FS_PENDING:
 	    {
 		HTHost * host = NULL;
-		if ((host = HTHost_new("localhost", 0)) == NULL) return HT_ERROR;
+		if ((host = HTHost_new((char*)"localhost", 0)) == NULL) return HT_ERROR;
 		HTNet_setHost(net, host);
 		if (HTHost_addNet(host, net) == HT_PENDING) {
 		    HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
@@ -265,7 +275,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		if (HT_STAT(file->local, &file->stat_info) == -1) {
 		    HTTRACE(PROT_TRACE, "Load File... Not found `%s\'\n" _ file->local);
 		    HTRequest_addError(request, ERR_FATAL, NO, HTERR_NOT_FOUND,
-				       NULL, 0, "HTLoadFile");
+				       NULL, 0, (char*)"HTLoadFile");
 		    file->state = FS_ERROR;
 		    break;
 		}
@@ -276,7 +286,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		    file->state = FS_PARSE_DIR;
 		else {
 		    HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT,
-				       NULL, 0, "HTLoadFile");
+				       NULL, 0, (char*)"HTLoadFile");
 		    file->state = FS_NO_DATA;
 		}
 		break;
@@ -305,7 +315,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		/* Check to see if we can edit it */
 		if (!editable && !file->stat_info.st_size) {
 		    HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT,
-				       NULL, 0, "HTLoadFile");
+				       NULL, 0, (char*)"HTLoadFile");
 		    file->state = FS_NO_DATA;
 		} else {
 		    file->state = (HTRequest_method(request)==METHOD_GET) ?
@@ -334,7 +344,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		if (HTRequest_isSource(request) && !HTRequest_destinationsReady(request))
 		    return HT_OK;
 		HTRequest_addError(request, ERR_INFO, NO, HTERR_OK, NULL, 0,
-				   "HTLoadFile");
+				   (char*)"HTLoadFile");
 		file->state = FS_NEED_BODY;
 
 		if (HTEvent_isCallbacksRegistered()) {
@@ -354,7 +364,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		return HT_OK;
 	    else {
 		HTRequest_addError(request, ERR_INFO, NO, HTERR_INTERNAL,
-				   NULL, 0, "HTLoadFile");
+				   NULL, 0, (char*)"HTLoadFile");
 		file->state = FS_ERROR;		       /* Error or interrupt */
 	    }
 	    break;
@@ -367,7 +377,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		file->state = FS_GOT_DATA;
 	    } else {
 		HTRequest_addError(request, ERR_INFO, NO, HTERR_FORBIDDEN,
-				   NULL, 0, "HTLoadFile");
+				   NULL, 0, (char*)"HTLoadFile");
 		file->state = FS_ERROR;
 	    }
 	    break;
@@ -550,7 +560,7 @@ PRIVATE int HTNeLReader_abort (HTInputStream * me, HTList * /* e */)
 
 PRIVATE const HTInputStreamClass HTNeLReader =
 {
-    "SocketReader",
+    (char*)"SocketReader",
     HTNeLReader_flush,
     HTNeLReader_free,
     HTNeLReader_abort,

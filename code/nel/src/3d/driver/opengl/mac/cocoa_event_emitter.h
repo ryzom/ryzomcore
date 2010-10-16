@@ -24,7 +24,11 @@ namespace NLMISC
 
 class CCocoaEventEmitter : public IEventEmitter
 {
+	bool _emulateRawMode;
+
 public:
+	CCocoaEventEmitter() : _emulateRawMode(false) { }
+
 	virtual void submitEvents(CEventServer & server, bool allWindows);
 	virtual void emulateMouseRawMode(bool enable);
 };

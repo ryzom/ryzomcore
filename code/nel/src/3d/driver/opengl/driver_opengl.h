@@ -32,8 +32,11 @@
 #	include <windows.h>
 #	include <GL/gl.h>
 #elif defined(NL_OS_MAC)
-#	define GL_GLEXT_LEGACY
+#	define  GL_GLEXT_LEGACY
+#	import  <Cocoa/Cocoa.h>
 #	include <OpenGL/gl.h>
+#	include "mac/glext.h"
+#	import  "mac/cocoa_opengl_view.h"
 #elif defined (NL_OS_UNIX)
 #	define GLX_GLXEXT_PROTOTYPES
 #	include <GL/gl.h>
@@ -700,7 +703,15 @@ private:
 
 #elif defined(NL_OS_MAC)
 
-	NLMISC::CCocoaEventEmitter	_EventEmitter;
+	NLMISC::CCocoaEventEmitter _EventEmitter;
+	NSOpenGLContext*           _ctx;
+	NSOpenGLView*              _glView;
+	NSAutoreleasePool*         _autoreleasePool;
+	uint16                     _backBufferHeight;
+	uint16                     _backBufferWidth;
+
+	NSView* containerView() { return (NSView*)_win; }
+	void setupApplicationMenu();
 
 #elif defined (NL_OS_UNIX)
 
@@ -1387,11 +1398,6 @@ public:
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
 };
-
-#ifdef NL_OS_MAC
-	// Specific mac functions
-	extern bool getMacModes(std::vector<GfxMode> &modes);
-#endif
 
 } // NL3D
 

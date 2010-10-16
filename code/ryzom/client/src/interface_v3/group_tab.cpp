@@ -392,7 +392,8 @@ int	CGroupTab::luaGetTabButton(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 	CCtrlTabButton* tab = getTabButton((uint) ls.toNumber(1));
-	if(tab != NULL){
+	if(tab != NULL)
+	{
 		CLuaIHM::pushUIOnStack(ls, tab);
 		return 1;
 	}
@@ -722,7 +723,8 @@ int	CGroupTab::luaGetGroup(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 	CInterfaceGroup* group = getGroup((uint) ls.toNumber(1));
-	if(group != NULL){
+	if(group != NULL)
+	{
 		CLuaIHM::pushUIOnStack(ls, group);
 		return 1;
 	}
