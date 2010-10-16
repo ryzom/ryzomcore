@@ -39,7 +39,6 @@
 #include "nel/misc/i_xml.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
-#include "nel/misc/path.h"
 
 #include "tools.h"
 #include "../master/ContinentCfg.h"
@@ -86,7 +85,7 @@ void CExport::delIGZone (sint32 x, sint32 y)
 {
 	string sZoneName = CExport::getZoneNameFromXY (x, y);
 	sZoneName += ".ig";
-	if (CFile::deleteFile(deleteFile(sZoneName))
+	if (CFile::deleteFile(sZoneName))
 	{
 		CTools::chdir (_ExeDir);
 		string sTmp = string("  zone ") + sZoneName + " deleted";
