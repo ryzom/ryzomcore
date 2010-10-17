@@ -135,7 +135,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			case SC_MONITORPOWER:
 
 			// Prevent From Happening
-			return 0;												
+			return 0;
 
 			default:
 			break;

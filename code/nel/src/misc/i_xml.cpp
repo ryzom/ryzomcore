@@ -1083,7 +1083,7 @@ int CIXml::getIntProperty(xmlNodePtr node, const char *property, int defaultValu
 		return defaultValue;
 
 	s=s.strip();
-	int val=s.atoi();
+	sint val=s.atoi();
 	if (val==0 && s!="0")
 	{
 		nlwarning("bad integer value: %s",s.c_str());

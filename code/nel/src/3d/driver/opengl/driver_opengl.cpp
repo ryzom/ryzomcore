@@ -341,7 +341,7 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
-	
+
 #if defined(NL_OS_MAC)
 	[_autoreleasePool release];
 #endif
@@ -362,8 +362,8 @@ bool CDriverGL::setupDisplay()
 		nlinfo("3D: %s", lines[i].c_str());
 
 #ifdef NL_OS_WINDOWS
-	NL3D::registerWGlExtensions (_Extensions, _hDC);
-#endif // ifdef NL_OS_WINDOWS
+	NL3D::registerWGlExtensions(_Extensions, _hDC);
+#endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
@@ -850,7 +850,6 @@ bool CDriverGL::swapBuffers()
 			itVBHard++;
 		}
 	}
-
 
 #ifdef NL_OS_WINDOWS
 	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
