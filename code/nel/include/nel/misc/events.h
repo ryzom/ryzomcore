@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include "class_id.h"
+#include "ucstring.h"
 #include <map>
 #include <list>
 
@@ -58,6 +59,7 @@ protected:
 const CClassId EventKeyDownId (0x3c2643da, 0x43f802a1);
 const CClassId EventKeyUpId (0x1e62e85, 0x68a35d46);
 const CClassId EventCharId (0x552255fe, 0x75a2373f);
+const CClassId EventStringId (0x49b5af8f, 0x7f52cd26);
 
 // Window events
 const CClassId EventActivateId (0x7da66b0a, 0x1ef74519);
@@ -327,6 +329,20 @@ private:
 
 };
 
+/**
+ * CEventString
+ */
+class CEventString : public CEventKey
+{
+public:
+	CEventString (const ucstring &str, IEventEmitter* emitter) : CEventKey (noKeyButton, emitter, EventStringId)
+	{
+		String = str;
+	}
+	ucstring String;
+
+	virtual	CEvent			*clone() const {return new CEventString(*this);}
+};
 
 /**
  * CEventMouse.

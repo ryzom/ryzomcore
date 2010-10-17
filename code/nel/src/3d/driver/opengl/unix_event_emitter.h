@@ -98,7 +98,6 @@ private:
 	};
 
 	void createIM();
-	bool prepareSelectionContent (Atom selection, Atom requestedFormat, Atom propertyName);
 
 	Display*				_dpy;
 	Window					_win;
@@ -109,7 +108,6 @@ private:
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
 	ucstring				_CopiedString;
-	Atom					_PrecomputedAtom[6];
 	bool					_SelectionOwned;
 };
 

@@ -29,6 +29,11 @@
 
 typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
+static Atom XA_CLIPBOARD = 0;
+static Atom XA_UTF8_STRING = 0;
+static Atom XA_TARGETS = 0;
+static Atom XA_NEL_SEL = 0;
+
 namespace NLMISC {
 
 CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _emulateRawMode(false), _driver(NULL)
@@ -51,18 +56,12 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	_driver = driver;
 
 	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask);
-	_PrecomputedAtom[0] = XInternAtom(dpy, "CLIPBOARD", False);
-	#define XA_CLIPBOARD _PrecomputedAtom[0]
-	_PrecomputedAtom[1] = XInternAtom(dpy, "UTF8_STRING", False);
-	#define XA_UTF8_STRING _PrecomputedAtom[1]
-	_PrecomputedAtom[2] = XInternAtom(dpy, "TARGETS", False);
-	#define XA_TARGETS _PrecomputedAtom[2]
-	_PrecomputedAtom[3] = XInternAtom(dpy, "ATOM", False);
-	//#define XA_ATOM _PrecomputedAtom[3]
-	_PrecomputedAtom[4] = XInternAtom(dpy, "NeL_SEL", False);
-	#define XA_NEL_SEL _PrecomputedAtom[4]
-	_PrecomputedAtom[5] = XInternAtom(dpy, "TEXT", False);
-	#define XA_TEXT _PrecomputedAtom[5]
+
+	// define Atoms used by clipboard
+	XA_CLIPBOARD = XInternAtom(dpy, "CLIPBOARD", False);
+	XA_UTF8_STRING = XInternAtom(dpy, "UTF8_STRING", False);
+	XA_TARGETS = XInternAtom(dpy, "TARGETS", False);
+	XA_NEL_SEL = XInternAtom(dpy, "NeL_SEL", False);
 
 /*
 	TODO: implements all useful events processing
@@ -568,10 +567,23 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 #ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;
 			ucstr.fromUtf8(Text);
-			server->postEvent (new CEventChar (ucstr[0], noKeyButton, this));
+
+			CEventChar *charEvent = new CEventChar (ucstr[0], noKeyButton, this);
+
+			// raw if not processed by IME
+			charEvent->setRaw(keyCode != 0);
+
+			server->postEvent (charEvent);
 #else
 			for (int i = 0; i < c; i++)
-				server->postEvent (new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this));
+			{
+				CEventChar *charEvent = new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this);
+
+				// raw if not processed by IME
+				charEvent->setRaw(keyCode != 0);
+
+				server->postEvent (charEvent);
+			}
 #endif
 		}
 		break;
@@ -612,12 +624,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 		if (req.target == XA_TARGETS)
 		{
-			nlwarning("Client is asking for TARGETS");
-
 			Atom targets[] =
 			{
 				XA_TARGETS,
-				XA_TEXT,
+				XA_STRING,
 				XA_UTF8_STRING
 			};
 
@@ -625,23 +635,21 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 			XChangeProperty(req.display, req.requestor, req.property, XA_ATOM, 32, PropModeReplace, (unsigned char *)targets, 3 /* number of element */);
 		}
-		else if (req.target == XA_TEXT || req.target == XA_STRING )
+		else if (req.target == XA_STRING)
 		{
-			nlwarning("client want TEXT");
 			respond.xselection.property = req.property;
 			std::string str = _CopiedString.toString();
 			XChangeProperty(req.display, req.requestor, req.property, XA_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
 		}
 		else if (req.target == XA_UTF8_STRING)
 		{
-			nlwarning("Client want UTF8 STRING");
-			respond.xselection.property=req.property;
+			respond.xselection.property = req.property;
 			std::string str = _CopiedString.toUtf8();
-			XChangeProperty(req.display, req.requestor, respond.xselection.property, XInternAtom(_dpy, "UTF8_STRING", False), 8, PropModeReplace, (const unsigned char*)str.c_str(), strlen((char*)str.c_str()));
+			XChangeProperty(req.display, req.requestor, respond.xselection.property, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
 		}
 		else
 		{
-			nlwarning("Target doesn't want a string %u", (uint)req.target); // Note: Calling XGetAtomName with arbitrary value crash the client, maybe req.target have been sanitized by X11 server
+			// Note: Calling XGetAtomName with arbitrary value crash the client, maybe req.target have been sanitized by X11 server
 			respond.xselection.property = None;
 		}
 
@@ -650,16 +658,111 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		break;
 	}
 	case SelectionClear:
-		nlwarning("SelectionClear:");
 		_SelectionOwned = false;
 		_CopiedString = "";
 		break;
+	case SelectionNotify:
+	{
+		Atom target = event.xselection.target;
+ 
+		Atom actualType = 0;
+		int actualFormat = 0;
+		unsigned long nitems = 0, bytesLeft = 0;
+
+		// some applications are sending ATOM and other TARGETS
+		if (target == XA_TARGETS || target == XA_ATOM)
+		{
+			Atom *supportedTargets = NULL;
+ 
+			// list NeL selection properties
+			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&supportedTargets) != Success)
+				return false;
+ 
+			if (bytesLeft > 0)
+			{
+				nlwarning("Paste: Supported TARGETS list too long.");
+			}
+ 
+			Atom bestTarget = 0;
+			sint bestTargetElect = 0;
+ 
+			// Elect best type
+			for (uint i=0; i < nitems; i++)
+			{
+				// nlwarning(" - Type=%s (%u)", XGetAtomName(_dpy, supportedTargets[i]), (uint)supportedTargets[i]);
+				if (supportedTargets[i] == XA_UTF8_STRING )
+				{
+					if (bestTargetElect < 2)
+					{
+						bestTarget = XA_UTF8_STRING;
+						bestTargetElect = 2;
+					}
+				}
+				else if (supportedTargets[i] == XA_STRING )
+				{
+					if (bestTargetElect < 1)
+					{
+						bestTarget = XA_STRING;
+						bestTargetElect = 1;
+					}
+				}
+			}
+
+			XFree(supportedTargets);
+
+			if (!bestTargetElect)
+			{
+				nlwarning("Paste buffer is not a text buffer.");
+				return false;
+			}
+ 
+			// request string conversion
+			XConvertSelection(_dpy, XA_CLIPBOARD, bestTarget, XA_NEL_SEL, _win, CurrentTime);
+		}
+		else if (target == XA_UTF8_STRING || target == XA_STRING)
+		{
+			uint8 *data = NULL;
+ 
+			// get selection
+			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&data) != Success)
+				return false;
+ 
+			ucstring text;
+			std::string tmpData = (const char*)data;
+			XFree(data);
+ 
+			// convert buffer to ucstring
+			if (target == XA_UTF8_STRING)
+			{
+				text = ucstring::makeFromUtf8(tmpData);
+			}
+			else if (target == XA_STRING)
+			{
+				text = tmpData;
+			}
+			else
+			{
+				nlwarning("Unknow format %u", (uint)target);
+			}
+
+			// sent string event to event server
+			server->postEvent (new CEventString (text, this));
+		}
+		else
+		{
+			nlwarning("Unknow target %u", (uint)target);
+		}
+ 
+		break;
+	}
 	case FocusIn:
 		// keyboard focus
+		server->postEvent (new CEventSetFocus (true, this));
 		if (_ic) XSetICFocus(_ic);
 		break;
 	case FocusOut:
 		// keyboard focus
+		server->postEvent (new CEventSetFocus (false, this));
 		if (_ic) XUnsetICFocus(_ic);
 		break;
 	case KeymapNotify:
@@ -672,6 +775,12 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		// XIM server has crashed
 		createIM();
 		break;
+	case ClientMessage:
+		if ((xevent.xclient.format == 32) && (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW))
+		{
+			server->postEvent (new CEventDestroyWindow (this));
+		}
+		break;
 	default:
 		//	nlinfo("UnknownEvent");
 		//	XtDispatchEvent(&event);
@@ -681,65 +790,23 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	return true;
 }
 
-/**
- * This function copy a selection into propertyName.
- * It is subject to timeout.
- *
- * @param selection: A Selection Atom
- * @param requestedFormat: Target format Atom
- * @param propertyName: Target property Atom
- * @return true if successfull, false if timeout occured or X11 call failed
- */
-bool CUnixEventEmitter::prepareSelectionContent (Atom selection, Atom requestedFormat, Atom propertyName)
-{
-	XConvertSelection(_dpy, selection, requestedFormat, propertyName, _win, CurrentTime);
-
-	XSync(_dpy, False);
-
-	int i = 0;
-
-	bool gotReply = false;
-
-	do
-	{
-		XEvent event;
-		usleep(500);
-		gotReply = XCheckTypedWindowEvent(_dpy, _win, SelectionNotify, &event);
-		if (gotReply)
-		{
-			return true;
-		}
-		i++;
-	}
-	while (i<20);
-
-	return false;
-}
-
 bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
 {
 	_CopiedString = text;
 
-	XSetSelectionOwner (_dpy,  XA_CLIPBOARD, _win, CurrentTime);
+	// NeL window is the owner of clipboard
+	XSetSelectionOwner(_dpy,  XA_CLIPBOARD, _win, CurrentTime);
+
+	// check we are owning the clipboard
+	if (XGetSelectionOwner(_dpy, XA_CLIPBOARD) != _win)
 	{
-		Window selectionOwner = XGetSelectionOwner (_dpy, XA_CLIPBOARD);
-
-		if ( selectionOwner != _win )
-		{
-			nlwarning("Can't aquire selection");
-			return false;
-		}
-
-		_SelectionOwned = true;
-
-		nlwarning("Owning selection");
-
-		return true;
+		nlwarning("Can't aquire selection");
+		return false;
 	}
 
-	nlwarning("Paste: Can't acquire selection.");
+	_SelectionOwned = true;
 
-	return false;
+	return true;
 }
 
 bool CUnixEventEmitter::pasteTextFromClipboard(ucstring &text)
@@ -751,109 +818,16 @@ bool CUnixEventEmitter::pasteTextFromClipboard(ucstring &text)
 		return true;
 	}
 
-	Window selectionOwner = XGetSelectionOwner (_dpy, XA_CLIPBOARD);
+	// check if there is a data in clipboard
+	if (XGetSelectionOwner(_dpy, XA_CLIPBOARD) == None)
+		return false;
 
-	if (selectionOwner != None)
-	{
-		Atom *supportedTargets;
-		uint8 *data;
-		sint result;
-		unsigned long nitems, bytesLeft;
-		Atom actualType;
-		sint actualFormat;
-		sint bestTargetElect=0, bestTarget=0;
+	// request supported methods
+	XConvertSelection(_dpy, XA_CLIPBOARD, XA_TARGETS, XA_NEL_SEL, _win, CurrentTime);
 
-		nlwarning("Selection owner is %u", (uint)selectionOwner);
-
-		// Find supported methods
-		bool bres = prepareSelectionContent(XA_CLIPBOARD, XA_TARGETS, XA_NEL_SEL);
-
-		if (!bres)
-		{
-			nlwarning("Paste: Cannot ennumerate TARGETS");
-			return false;
-		}
-
-		result = XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft,(unsigned char**) &supportedTargets);
-
-		if (result != Success)
-		{
-			return false;
-		}
-
-		if ( bytesLeft>0 )
-		{
-			nlwarning("Paste: Supported TARGETS list too long."); // We hope we find what we need in the first packet.
-		}
-
-		// Elect best type
-		for (uint i=0; i < nitems; i++)
-		{
-			nldebug(" - Type=%s", XGetAtomName(_dpy, supportedTargets[i]));
-
-			if (supportedTargets[i] == XA_STRING )
-			{
-				if (bestTargetElect < 1)
-				{
-					bestTarget = XA_STRING;
-					bestTargetElect = 1;
-				}
-			}
-
-			if (supportedTargets[i] == XA_UTF8_STRING )
-			{
-				if (bestTargetElect < 2)
-				{
-					bestTarget = XA_UTF8_STRING;
-					bestTargetElect = 2;
-				}
-			}
-		}
-
-		XFree(supportedTargets);
-
-		if (!bestTargetElect)
-		{
-			nlwarning("Paste buffer is not a text buffer.");
-			return false;
-		}
-
-		// Ask for selection lenght && copy to buffer
-		bres = prepareSelectionContent(XA_CLIPBOARD, bestTarget, XA_NEL_SEL);
-
-		if (!bres)
-		{
-			nlwarning ("Paste: cannot obtain data. Aborting.");
-			return false;
-		}
-
-		XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft,(unsigned char**) &data);
-
-		std::string tmpData = (const char*)data;
-		XFree(data);
-
-		switch (bestTargetElect)
-		{
-			case 1: // XA_STRING
-				text = tmpData;
-				return true;
-
-			case 2: // XA_UTF8_STRING
-				text = ucstring::makeFromUtf8(tmpData);
-				return true;
-
-			default:
-				break;
-		}
-
-		nlwarning("Paste: buffer is not a text buffer.");
-	}
-
-	nlwarning("Paste: error !");
-
+	// don't return result now
 	return false;
 }
-
 
 } // NLMISC
 
