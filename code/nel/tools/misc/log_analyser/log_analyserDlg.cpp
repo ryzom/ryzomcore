@@ -59,8 +59,7 @@ afx_msg void CLAEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
 				int start, end;
 				GetSel( start, end );
 				str = str.Mid( start, end-start );
-				sint lineNum;
-				NLMISC::fromString(str, lineNum);
+				int lineNum = atoi(str);
 				if ( ! ((lineNum != 0) || (str == "0")) )
 					break;
 
@@ -714,8 +713,7 @@ void CLog_analyserDlg::insertTraceLine( int index, char *traceLine )
 	char *line = strchr( traceLine, ':' );
 	char scycle [10];
 	strncpy( scycle, traceLine, line-traceLine );
-	sint cycle;
-	NLMISC::fromString(scycle, cycle);
+	int cycle = atoi(scycle);
 	TStampedLine stampedLine;
 	stampedLine.Index = index;
 	stampedLine.Line = CString(traceLine);
