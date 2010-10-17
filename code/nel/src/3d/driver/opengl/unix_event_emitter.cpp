@@ -664,7 +664,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	case SelectionNotify:
 	{
 		Atom target = event.xselection.target;
- 
+
 		Atom actualType = 0;
 		int actualFormat = 0;
 		unsigned long nitems = 0, bytesLeft = 0;
@@ -673,19 +673,19 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (target == XA_TARGETS || target == XA_ATOM)
 		{
 			Atom *supportedTargets = NULL;
- 
+
 			// list NeL selection properties
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&supportedTargets) != Success)
 				return false;
- 
+
 			if (bytesLeft > 0)
 			{
 				nlwarning("Paste: Supported TARGETS list too long.");
 			}
- 
+
 			Atom bestTarget = 0;
 			sint bestTargetElect = 0;
- 
+
 			// Elect best type
 			for (uint i=0; i < nitems; i++)
 			{
@@ -715,22 +715,22 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 				nlwarning("Paste buffer is not a text buffer.");
 				return false;
 			}
- 
+
 			// request string conversion
 			XConvertSelection(_dpy, XA_CLIPBOARD, bestTarget, XA_NEL_SEL, _win, CurrentTime);
 		}
 		else if (target == XA_UTF8_STRING || target == XA_STRING)
 		{
 			uint8 *data = NULL;
- 
+
 			// get selection
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&data) != Success)
 				return false;
- 
+
 			ucstring text;
 			std::string tmpData = (const char*)data;
 			XFree(data);
- 
+
 			// convert buffer to ucstring
 			if (target == XA_UTF8_STRING)
 			{
@@ -752,17 +752,17 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		{
 			nlwarning("Unknow target %u", (uint)target);
 		}
- 
+
 		break;
 	}
 	case FocusIn:
 		// keyboard focus
-		server->postEvent (new CEventSetFocus (true, this));
+//		server->postEvent (new CEventSetFocus (true, this));
 		if (_ic) XSetICFocus(_ic);
 		break;
 	case FocusOut:
 		// keyboard focus
-		server->postEvent (new CEventSetFocus (false, this));
+//		server->postEvent (new CEventSetFocus (false, this));
 		if (_ic) XUnsetICFocus(_ic);
 		break;
 	case KeymapNotify:
@@ -776,10 +776,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		createIM();
 		break;
 	case ClientMessage:
-		if ((xevent.xclient.format == 32) && (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW))
-		{
-			server->postEvent (new CEventDestroyWindow (this));
-		}
+//		if ((xevent.xclient.format == 32) && (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW))
+//		{
+//			server->postEvent (new CEventDestroyWindow (this));
+//		}
 		break;
 	default:
 		//	nlinfo("UnknownEvent");
