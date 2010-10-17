@@ -40,6 +40,11 @@ void CEventDescriptorKey::init(const NLMISC::CEventKey &ev)
 		_KeyEvent = keydown;
 		_Key = ((const NLMISC::CEventKeyDown &) ev).Key;
 	}
+	else if (ev == NLMISC::EventStringId)
+	{
+		_KeyEvent = keystring;
+		_String = ((const NLMISC::CEventString &) ev).String;
+	}
 	else
 	{
 		_KeyEvent = unknown;

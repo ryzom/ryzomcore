@@ -288,8 +288,10 @@ private:
 	void setupDisplayText();
 	void makeTopWindow();
 	void handleEventChar(const CEventDescriptorKey &event);
+	void handleEventString(const CEventDescriptorKey &event);
 	void setup();
 	void triggerOnChangeAH();
+	void appendString(const ucstring &str);
 
 	ucstring	getSelection();
 

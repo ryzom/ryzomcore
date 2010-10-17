@@ -104,6 +104,7 @@ void CInputHandlerManager::addToServer(NLMISC::CEventServer * server)
 	server->addListener(EventMouseDblClkId,	this);
 
 	// Keyboard
+	server->addListener(EventStringId,		this);
 	server->addListener(EventCharId,		this);
 	server->addListener(EventKeyDownId,		this);
 	server->addListener(EventKeyUpId,		this);
@@ -127,6 +128,7 @@ void CInputHandlerManager::release()
 	_EventServer->removeListener(EventMouseDblClkId,	this);
 
 	// Keyboard
+	_EventServer->removeListener(EventStringId,		this);
 	_EventServer->removeListener(EventCharId,		this);
 	_EventServer->removeListener(EventKeyDownId,	this);
 	_EventServer->removeListener(EventKeyUpId,		this);
@@ -230,7 +232,8 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	// **** Event Keyboard
 	if( event == EventKeyDownId ||
 			 event == EventKeyUpId ||
-			 event == EventCharId)
+			 event == EventCharId ||
+			 event == EventStringId)
 	{
 		// if not handled, post to Action Manager
 		if( !pIM->handleEvent( CEventDescriptorKey((const CEventKey &) event) ) )
