@@ -164,8 +164,22 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 #elif defined (NL_OS_MAC)
 
-bool GlWndProc(CDriverGL *driver)
+bool GlWndProc(CDriverGL *driver, NSEvent* e)
 {
+	H_AUTO_OGL(GlWndProc)
+
+	if(!driver)
+		return false;
+	
+	// NSLog(@"NSEvent in GlWndProc %@", e);
+
+	switch([e type])
+	{
+		/* TODO handle window move, resize, activate, close, etc. */
+		default:
+			return driver->_EventEmitter.processMessage(e);
+	}
+
 	return false;
 }
 
@@ -950,6 +964,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	
 	[_ctx flushBuffer];
 	[containerView() display]; 
+
+	_EventEmitter.init(this, _glView);
 
 #elif defined(NL_OS_UNIX)
 
@@ -2164,7 +2180,7 @@ void CDriverGL::showWindow(bool show)
 
 #elif defined(NL_OS_MAC)
 
-	// TODO implement me
+# warning "OpenGL Driver: Missing Mac Implementation for showWindow"
 
 #elif defined (NL_OS_UNIX)
 
@@ -2601,7 +2617,7 @@ bool CDriverGL::isActive()
 	res = (IsWindow(_win) != FALSE);
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for isActive"
+# warning "OpenGL Driver: Missing Mac Implementation for isActive (always true if a window is set)"
 #elif defined (NL_OS_UNIX)
 
 #endif // NL_OS_UNIX

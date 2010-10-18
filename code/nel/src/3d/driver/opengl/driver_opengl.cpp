@@ -873,8 +873,11 @@ bool CDriverGL::swapBuffers()
 #elif defined(NL_OS_MAC)
 
 	// TODO: maybe do this somewhere else?
-	[_autoreleasePool release];
-	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	if(_DestroyWindow) 
+	{
+		[_autoreleasePool release];
+		_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	}
 	
 	[_ctx flushBuffer];
 	[containerView() display];

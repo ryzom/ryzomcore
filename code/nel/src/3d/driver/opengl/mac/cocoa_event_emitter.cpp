@@ -16,13 +16,6 @@
 
 #include "cocoa_event_emitter.h"
 
-#include "nel/misc/event_server.h"
-#include "nel/misc/events.h"
-#include "nel/misc/game_device_events.h"
-
-#include <Carbon/Carbon.h>
-#import  <Cocoa/Cocoa.h>
-
 namespace NLMISC
 {
 
@@ -217,6 +210,194 @@ static bool isTextKeyEvent(NSEvent* event)
 	return false;
 }
 
+void CCocoaEventEmitter::init(NL3D::IDriver* driver, CocoaOpenGLView* glView)
+{
+	_driver = driver;
+	_glView = glView;
+}
+
+bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
+{
+	if(!server && !_server)
+		nlerror("no server to post events to");
+
+	if(!server)
+		server = _server;
+
+	NSRect  viewRect = [_glView frame];
+
+	// TODO this code assumes, that the view fills the window
+	// convert the mouse position to NeL style (relative)
+	float mouseX = event.locationInWindow.x / (float)viewRect.size.width;
+	float mouseY = event.locationInWindow.y / (float)viewRect.size.height;
+
+	// if the mouse event was placed outside the view, don't tell NeL :)
+	if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
+			event.type != NSKeyDown && event.type != NSKeyUp)
+	{
+		[NSApp sendEvent:event];
+		return false;
+	}
+
+	// convert the modifiers for nel to pass them with the events
+	NLMISC::TKeyButton modifiers = 
+		modifierFlagsToNelKeyButton([event modifierFlags]);
+
+	switch(event.type)
+	{
+	case NSLeftMouseDown:
+	{
+		server->postEvent(new NLMISC::CEventMouseDown(
+			mouseX, mouseY, 
+			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
+	}
+	break;
+	case NSLeftMouseUp:
+	{
+		server->postEvent(new NLMISC::CEventMouseUp(
+			mouseX, mouseY, 
+			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
+		break;
+	}
+	case NSRightMouseDown:
+	{
+		server->postEvent(new NLMISC::CEventMouseDown(
+			mouseX, mouseY, 
+			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
+		break;
+	}
+	case NSRightMouseUp:
+	{
+		server->postEvent(new NLMISC::CEventMouseUp(
+			mouseX, mouseY, 
+			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
+		break;
+	}
+	case NSMouseMoved:
+	{
+		NLMISC::CEvent* nelEvent;
+
+		// when emulating raw mode, send the delta in a CGDMouseMove event
+		if(_emulateRawMode)
+			nelEvent = new NLMISC::CGDMouseMove(
+				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
+
+		// normally send position in a CEventMouseMove
+		else
+			nelEvent = new NLMISC::CEventMouseMove(
+				mouseX, mouseY, (NLMISC::TMouseButton)modifiers, this);
+
+		server->postEvent(nelEvent);
+		break;
+	}
+	case NSLeftMouseDragged:
+	{
+		NLMISC::CEvent* nelEvent;
+
+		// when emulating raw mode, send the delta in a CGDMouseMove event
+		if(_emulateRawMode)
+			nelEvent = new NLMISC::CGDMouseMove(
+				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
+
+		// normally send position in a CEventMouseMove
+		else
+			nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
+				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this);
+
+		server->postEvent(nelEvent);
+		break;
+	}
+	case NSRightMouseDragged:
+	{
+		NLMISC::CEvent* nelEvent;
+
+		// when emulating raw mode, send the delta in a CGDMouseMove event
+		if(_emulateRawMode)
+			nelEvent = new NLMISC::CGDMouseMove(
+				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
+
+		// normally send position in a CEventMouseMove
+		else
+			nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
+				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this);
+
+		server->postEvent(nelEvent);
+		break;
+	}
+	case NSMouseEntered:break;
+	case NSMouseExited:break;
+	case NSKeyDown:
+	{
+		// push the key press event to the event server
+		server->postEvent(new NLMISC::CEventKeyDown(
+			virtualKeycodeToNelKey([event keyCode]),
+			modifierFlagsToNelKeyButton([event modifierFlags]),
+			[event isARepeat] == NO, this));
+
+		// if this was a text event
+		if(isTextKeyEvent(event))
+		{
+			ucstring ucstr;
+
+			// get the string associated with the key press event
+			ucstr.fromUtf8([[event characters] UTF8String]);
+
+			// push the text event to event server as well
+			server->postEvent(new NLMISC::CEventChar(
+				ucstr[0], NLMISC::noKeyButton, this));
+		}
+		break;
+	}
+	case NSKeyUp:
+	{
+		// push the key release event to the event server
+		server->postEvent(new NLMISC::CEventKeyUp(
+			virtualKeycodeToNelKey([event keyCode]),
+			modifierFlagsToNelKeyButton([event modifierFlags]), this));
+		break;
+	}
+	case NSFlagsChanged:break;
+	case NSAppKitDefined:break;
+	case NSSystemDefined:break;
+	case NSApplicationDefined:break;
+	case NSPeriodic:break;
+	case NSCursorUpdate:break;
+	case NSScrollWheel:
+	{
+		if(fabs(event.deltaY) > 0.1) 
+			server->postEvent(new NLMISC::CEventMouseWheel(
+				mouseX, mouseY, (NLMISC::TMouseButton)modifiers,
+				(event.deltaY > 0), this));
+
+		break;
+	}
+	case NSTabletPoint:break;
+	case NSTabletProximity:break;
+	case NSOtherMouseDown:break;
+	case NSOtherMouseUp:break;
+	case NSOtherMouseDragged:break;
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+	case NSEventTypeGesture:break;
+	case NSEventTypeMagnify:break;
+	case NSEventTypeSwipe:break;
+	case NSEventTypeRotate:break;
+	case NSEventTypeBeginGesture:break;
+	case NSEventTypeEndGesture:break;
+#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+	default:
+	{
+		nlwarning("Unknown event type. dropping.");
+		// NSLog(@"%@", event);
+		break;
+	}
+	}
+
+	[NSApp sendEvent:event];
+	return true;
+}
+
+typedef bool (*cocoaProc)(NL3D::IDriver*, void* e);
+
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
 	// break if there was no event to handle
@@ -231,177 +412,22 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 		if(!event)
 			break;
 
-		NSView* glView   = [[[[event window] contentView] subviews] lastObject];
-		NSRect  viewRect = [glView frame];
-
-		// TODO this code assumes, that the view fills the window
-		// convert the mouse position to NeL style (relative)
-		float mouseX = event.locationInWindow.x / (float)viewRect.size.width;
-		float mouseY = event.locationInWindow.y / (float)viewRect.size.height;
-
-		// if the mouse event was placed outside the view, don't tell NeL :)
-		if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
-				event.type != NSKeyDown && event.type != NSKeyUp)
+		if(_driver)
 		{
-			[NSApp sendEvent:event];
-			continue;
+			cocoaProc proc = (cocoaProc)_driver->getWindowProc();
+
+			if(proc)
+				proc(_driver, event);
 		}
-
-		// convert the modifiers for nel to pass them with the events
-		NLMISC::TKeyButton modifiers = 
-			modifierFlagsToNelKeyButton([event modifierFlags]);
-
-		switch(event.type)
+		else
 		{
-		case NSLeftMouseDown:
-		{
-			server.postEvent(new NLMISC::CEventMouseDown(
-				mouseX, mouseY, 
-				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
+			processMessage(event, &server);
 		}
-		break;
-		case NSLeftMouseUp:
-		{
-			server.postEvent(new NLMISC::CEventMouseUp(
-				mouseX, mouseY, 
-				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
-			break;
-		}
-		case NSRightMouseDown:
-		{
-			server.postEvent(new NLMISC::CEventMouseDown(
-				mouseX, mouseY, 
-				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
-			break;
-		}
-		case NSRightMouseUp:
-		{
-			server.postEvent(new NLMISC::CEventMouseUp(
-				mouseX, mouseY, 
-				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
-			break;
-		}
-		case NSMouseMoved:
-		{
-			NLMISC::CEvent* nelEvent;
-
-			// when emulating raw mode, send the delta in a CGDMouseMove event
-			if(_emulateRawMode)
-				nelEvent = new NLMISC::CGDMouseMove(
-					this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-			// normally send position in a CEventMouseMove
-			else
-				nelEvent = new NLMISC::CEventMouseMove(
-					mouseX, mouseY, (NLMISC::TMouseButton)modifiers, this);
-
-			server.postEvent(nelEvent);
-			break;
-		}
-		case NSLeftMouseDragged:
-		{
-			NLMISC::CEvent* nelEvent;
-
-			// when emulating raw mode, send the delta in a CGDMouseMove event
-			if(_emulateRawMode)
-				nelEvent = new NLMISC::CGDMouseMove(
-					this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-			// normally send position in a CEventMouseMove
-			else
-				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
-					(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this);
-
-			server.postEvent(nelEvent);
-			break;
-		}
-		case NSRightMouseDragged:
-		{
-			NLMISC::CEvent* nelEvent;
-
-			// when emulating raw mode, send the delta in a CGDMouseMove event
-			if(_emulateRawMode)
-				nelEvent = new NLMISC::CGDMouseMove(
-					this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-			// normally send position in a CEventMouseMove
-			else
-				nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
-					(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this);
-
-			server.postEvent(nelEvent);
-			break;
-		}
-		case NSMouseEntered:break;
-		case NSMouseExited:break;
-		case NSKeyDown:
-		{
-			// push the key press event to the event server
-			server.postEvent(new NLMISC::CEventKeyDown(
-				virtualKeycodeToNelKey([event keyCode]),
-				modifierFlagsToNelKeyButton([event modifierFlags]),
-				[event isARepeat] == NO, this));
-
-			// if this was a text event
-			if(isTextKeyEvent(event))
-			{
-				ucstring ucstr;
-
-				// get the string associated with the key press event
-				ucstr.fromUtf8([[event characters] UTF8String]);
-
-				// push the text event to event server as well
-				server.postEvent(new NLMISC::CEventChar(
-					ucstr[0], NLMISC::noKeyButton, this));
-			}
-			break;
-		}
-		case NSKeyUp:
-		{
-			// push the key release event to the event server
-			server.postEvent(new NLMISC::CEventKeyUp(
-				virtualKeycodeToNelKey([event keyCode]),
-				modifierFlagsToNelKeyButton([event modifierFlags]), this));
-			break;
-		}
-		case NSFlagsChanged:break;
-		case NSAppKitDefined:break;
-		case NSSystemDefined:break;
-		case NSApplicationDefined:break;
-		case NSPeriodic:break;
-		case NSCursorUpdate:break;
-		case NSScrollWheel:
-		{
-			if(fabs(event.deltaY) > 0.1) 
-				server.postEvent(new NLMISC::CEventMouseWheel(
-					mouseX, mouseY, (NLMISC::TMouseButton)modifiers,
-					(event.deltaY > 0), this));
-
-			break;
-		}
-		case NSTabletPoint:break;
-		case NSTabletProximity:break;
-		case NSOtherMouseDown:break;
-		case NSOtherMouseUp:break;
-		case NSOtherMouseDragged:break;
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
-		case NSEventTypeGesture:break;
-		case NSEventTypeMagnify:break;
-		case NSEventTypeSwipe:break;
-		case NSEventTypeRotate:break;
-		case NSEventTypeBeginGesture:break;
-		case NSEventTypeEndGesture:break;
-#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
-		default:
-		{
-			nlwarning("Unknown event type. dropping.");
-			// NSLog(@"%@", event);
-			break;
-		}
-		}
-
-		[NSApp sendEvent:event];
 	}
+	
+	// TODO like internal server in unix event emitter... review!
+	_server = &server;
+	// _server->pump();
 }
 
 void CCocoaEventEmitter::emulateMouseRawMode(bool enable)

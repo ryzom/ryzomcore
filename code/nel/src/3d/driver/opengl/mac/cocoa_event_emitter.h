@@ -17,19 +17,38 @@
 #ifndef NL_COCOA_EVENT_EMITTER_H
 #define NL_COCOA_EVENT_EMITTER_H
 
-#include <nel/misc/event_emitter.h>
+#include "nel/misc/event_emitter.h"
+#include "nel/misc/event_server.h"
+#include "nel/misc/events.h"
+#include "nel/misc/game_device_events.h"
+#include "nel/3d/driver.h"
+#import  "cocoa_opengl_view.h"
+
+#include <Carbon/Carbon.h>
+#import  <Cocoa/Cocoa.h>
 
 namespace NLMISC 
 {
 
 class CCocoaEventEmitter : public IEventEmitter
 {
-	bool _emulateRawMode;
+	bool             _emulateRawMode;
+	NL3D::IDriver*   _driver;
+	CocoaOpenGLView* _glView;
+
+	// TODO like internal server in unix event emitter... review!
+	CEventServer*    _server;
 
 public:
-	CCocoaEventEmitter() : _emulateRawMode(false) { }
+	CCocoaEventEmitter() : 
+		_emulateRawMode(false), 
+		_driver(NULL),
+		_glView(nil),
+		_server(NULL) { }
 
-	virtual void submitEvents(CEventServer & server, bool allWindows);
+	void         init(NL3D::IDriver* driver, CocoaOpenGLView* glView);
+	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
+	virtual void submitEvents(CEventServer& server, bool allWindows);
 	virtual void emulateMouseRawMode(bool enable);
 };
 	
