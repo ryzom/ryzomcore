@@ -1638,7 +1638,7 @@ float	NLPACS::CLocalRetriever::getInteriorHeightAround(const ULocalPosition &pos
 
 // ***************************************************************************
 #ifdef NL_OS_WINDOWS
-#pragma optimize( "", off )
+//#pragma optimize( "", off )
 #endif // NL_OS_WINDOWS
 
 void	NLPACS::CLocalRetriever::findPath(const NLPACS::CLocalRetriever::CLocalPosition &A,
@@ -1853,7 +1853,7 @@ void	NLPACS::CLocalRetriever::findPath(const NLPACS::CLocalRetriever::CLocalPosi
 	path.push_back(CVector2s(B.Estimation));
 }
 #ifdef NL_OS_WINDOWS
-#pragma optimize( "", on )
+//#pragma optimize( "", on )
 #endif // NL_OS_WINDOWS
 
 // ***************************************************************************
