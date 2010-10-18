@@ -214,10 +214,10 @@ enum ECharacterTitle
 	Title00028, // Tryker Taliar
 	Title00029, // Zorai Awakened
 	Title00030, // Marauder
-	Title00031,
-	Title00032,
-	Title00033,
-	Title00034,
+	Title00031, // Fyros Ambassador
+	Title00032, // Matis Ambassador
+	Title00033, // Tryker Ambassador
+	Title00034, // Zorai Ambassador
 	Title00035,
 	Title00036,
 	Title00037,
@@ -233,22 +233,22 @@ enum ECharacterTitle
 	Title00047, // Machinegunner
 	Title00048, // Assault Machinegunner
 	Title00049,
-	Title00050,
-	Title00051,
-	Title00052,
-	Title00053,
-	Title00054,
-	Title00055,
-	Title00056,
-	Title00057,
-	Title00058,
-	Title00059,
-	Title00060,
-	Title00061,
-	Title00062,
-	Title00063,
-	Title00064,
-	Title00065,
+	Title00050, // Apprentice Butcher
+	Title00051, // Butcher
+	Title00052, // Apprentice Florist
+	Title00053, // Florist
+	Title00054, // Apprentice Water-Carrier
+	Title00055, // Water-Carrier
+	Title00056, // Apprentice Magnetic
+	Title00057, // Magnetic Cartographe
+	Title00058, // Apprentice Toolmaker
+	Title00059, // Toolmaker
+	Title00060, // Apprentice Rescuer
+	Title00061, // Rescuer
+	Title00062, // Apprentice Larvester
+	Title00063, // Larvester
+	Title00064, // Apprentice Scrollmaker
+	Title00065, // Scrollmaker
 	Title00066,
 	Title00067,
 	Title00068,
@@ -299,6 +299,15 @@ inline ECharacterTitle getGMTitleFromPriv (const std::string& priv)
 	return toCharacterTitle( buf );
 }
 
+
+//----------------------------------------------------------------------
+inline bool isCsrTitle(const ucstring& title)
+{
+	ECharacterTitle titleEnum = toCharacterTitle( title.toUtf8() );
+	bool bIsCsrTitle = (titleEnum >= SGM && titleEnum <= CM);
+
+	return bIsCsrTitle;
+}
 
 } // CHARACTER_TITLE
 
