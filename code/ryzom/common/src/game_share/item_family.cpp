@@ -107,6 +107,7 @@ namespace ITEMFAMILY
 			fam == SHIELD ||
 			fam == JEWELRY ||
 			fam == CRYSTALLIZED_SPELL ||
+			fam == CONSUMABLE ||
 			fam == ITEM_SAP_RECHARGE;
 	}
 
