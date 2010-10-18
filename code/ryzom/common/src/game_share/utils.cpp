@@ -62,7 +62,7 @@ CSString cleanPath(const CSString& path,bool addTrailingSlash)
 					break;
 			}
 			// if we found an element then remove it and the '..' as well
-			if (j!=~0u)
+			if (j!=std::numeric_limits<uint32>::max())
 			{
 				pathComponents[j].clear();
 				pathComponents[i].clear();

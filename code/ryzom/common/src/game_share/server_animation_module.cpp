@@ -402,10 +402,10 @@ public:
 	CAnimationSession()
 	{
 		WeatherValue = 0; // auto weather
-		CurrSeason = ~0;
+		CurrSeason = std::numeric_limits<uint8>::max();
 		StartingAct = false;
 		InitialAct = 1;
-		AiInstance = ~0;//wrong value
+		AiInstance = std::numeric_limits<uint32>::max(); //wrong value
 		DateOfLastNewLocation = 0;
 
 		InitialX = 0;
@@ -3578,7 +3578,7 @@ TSessionId CServerAnimationModule::getScenarioId(uint32 charId)
 	{
 		return found->second;
 	}
-	return TSessionId(~0u);
+	return TSessionId(std::numeric_limits<uint16>::max());
 }
 
 void CServerAnimationModule::disconnectChar(TCharId charId)
@@ -3651,7 +3651,7 @@ void CServerAnimationModule::scheduleStartSessionImpl(const CAnimationMessageAni
 			nlinfo("R2An: Char %u is connected as animator", *first);
 		}
 	}
-	session->CurrSeason = ~0;
+	session->CurrSeason = std::numeric_limits<uint8>::max();
 }
 
 

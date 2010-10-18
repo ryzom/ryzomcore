@@ -44,7 +44,7 @@ void		CPropertyAllocatorClient::allocProperty(
 		if ( ! (propinfo.allocated() || propinfo.Pending) )
 		{
 			// Send alloc request to the local Mirror Service
-			if ( _LocalMSId != TServiceId(~0) )
+			if ( _LocalMSId != TServiceId(std::numeric_limits<uint16>::max()) )
 			{
 				// Check options
 				if ( (options & PSOReadOnly) && (options & PSOWriteOnly) )
