@@ -2514,7 +2514,7 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 				if (getPvpMode()&PVP_MODE::PvpFactionFlagged || getPvpMode()&PVP_MODE::PvpChallenge)
 					return _PvpEnemyColor;
 				else
-					return CRGBA::CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
+					return CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
 			}
 		}
 		// neutral pvp
@@ -2538,7 +2538,7 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 			if (getPvpMode()&PVP_MODE::PvpFactionFlagged)
 				return _PvpAllyColor;
 			else
-				return CRGBA::CRGBA(min(255, _PvpAllyColor.R+150), min(255, _PvpAllyColor.G+150), min(255, _PvpAllyColor.B+150),_PvpAllyColor.A);
+				return CRGBA(min(255, _PvpAllyColor.R+150), min(255, _PvpAllyColor.G+150), min(255, _PvpAllyColor.B+150),_PvpAllyColor.A);
 		}
 		// neutral
 		if (isInTeam())
