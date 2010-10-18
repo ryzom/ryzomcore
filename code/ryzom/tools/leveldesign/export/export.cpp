@@ -1762,7 +1762,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 				if (posf < total) break;
 			}
 			if (j == formFlora.PlantInstances.size())
-				j = formFlora.PlantInstances.size()-1;
+				j = (uint32)formFlora.PlantInstances.size()-1;
 
 			SPlantInstance &rPlant = formFlora.PlantInstances[j];
 			map<string, SFormPlant>::iterator it = Plants.find (rPlant.Name);
@@ -1846,7 +1846,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 						}
 						if (l == (pPath->VPoints.size()-1))
 						{
-							l = pPath->VPoints.size()-2;
+							l = (uint32)pPath->VPoints.size()-2;
 							curvAbs = (pPath->VPoints[l]-pPath->VPoints[l+1]).norm();
 						}
 						// Calculate the coord

@@ -311,10 +311,10 @@ sint main( sint argc, char ** argv )
 				}
 				break;
 			case 1: // code
-				skill.Code = strupr(string( ptr ));
+				skill.Code = toUpper(string( ptr ));
 				break;		
 			case 2: // parent skill
-				skill.ParentSkill = strupr(string( ptr ));
+				skill.ParentSkill = toUpper(string( ptr ));
 				break;
 			case 3: // max skill value
 				skill.MaxValue = (uint16)atoi(ptr);
