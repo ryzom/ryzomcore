@@ -41,7 +41,7 @@ public:
 			:	EntityNameStringId(0),
 				EntitySlot(-1),
 				ShardId(0),
-				UId(~0),
+				UId(std::numeric_limits<uint32>::max()),
 				Online(false)
 		{ }
 
