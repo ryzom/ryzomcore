@@ -288,7 +288,7 @@ MACRO(NL_SETUP_BUILD)
     # without inlining it's unusable, use custom optimizations again
     SET(MIN_OPTIMIZATIONS "/Ob1")
 
-    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi")
+    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000")
 
     IF(WITH_STLPORT)
       # deactivate all global include paths
