@@ -311,16 +311,16 @@ sint main( sint argc, char ** argv )
 				}
 				break;
 			case 1: // code
-				skill.Code = strupr(string( ptr ));
+				skill.Code = toUpper(string( ptr ));
 				break;		
 			case 2: // parent skill
-				skill.ParentSkill = strupr(string( ptr ));
+				skill.ParentSkill = toUpper(string( ptr ));
 				break;
 			case 3: // max skill value
-				skill.MaxValue = (uint16)atoi(ptr);
+				NLMISC::fromString(std::string(ptr), skill.MaxValue);
 				break;
 			case 4: // stage type
-				skill.StageType = (uint8)atoi(ptr);
+				NLMISC::fromString(std::string(ptr), skill.StageType);
 				break;
 			case 5: // main category
 				skill.MainCategory = string( ptr );

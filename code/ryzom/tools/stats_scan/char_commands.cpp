@@ -196,7 +196,9 @@ NLMISC_COMMAND(jobsPromote,"pause execution of jobs","<jobId>")
 	if (args.size()!=1)
 		return false;
 
-	uint32 idx= atoi(args[0].c_str());
+	uint32 idx;
+	NLMISC::fromString(args[0], idx);
+
 	if ( (idx==0 && args[0]!="0") )
 	{
 		nlwarning("Argument is not a valid job id - should be a number");
@@ -216,7 +218,9 @@ NLMISC_COMMAND(JobUpdatesPerUpdate,"set or display the number of job updates per
 
 	if (args.size()==1)
 	{
-		uint32 count= atoi(args[0].c_str());
+		uint32 count;
+		NLMISC::fromString(args[0], count);
+
 		if ( (count==0 && args[0]!="0") )
 		{
 			nlwarning("Argument is not a valid number");
@@ -270,7 +274,9 @@ NLMISC_COMMAND(jobsDisplayDetails,"display detailed info for the current job (or
 
 	case 1:
 		{
-			uint32 idx= atoi(args[0].c_str());
+			uint32 idx;
+			NLMISC::fromString(args[0], idx);
+
 			if ( (idx==0 && args[0]!="0") )
 			{
 				nlwarning("Argument is not a valid job id - should be a number");

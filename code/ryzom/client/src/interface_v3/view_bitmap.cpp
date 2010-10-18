@@ -224,7 +224,7 @@ void CViewBitmap::setTexture(const std::string & TxName)
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //	CViewRenderer &rVR = pIM->getViewRenderer();
 
-	_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight);
+	_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 }
 
 // ----------------------------------------------------------------------------

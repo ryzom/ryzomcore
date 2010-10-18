@@ -22,7 +22,7 @@
 #include "nel/misc/i_xml.h"
 
 #include "../land_export_lib/export.h"
-#include "nel/../../src/ligo/zone_region.h"
+#include "nel/ligo/zone_region.h"
 
 using namespace std;
 using namespace NLMISC;

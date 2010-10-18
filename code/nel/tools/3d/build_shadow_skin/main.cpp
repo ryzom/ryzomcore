@@ -314,9 +314,9 @@ int		main(int argc, char *argv[])
 	sint	percentageFace= 100;
 	sint	maxFace= INT_MAX;
 	if(argc>=4)
-		percentageFace= atoi(argv[3]);
+		NLMISC::fromString(argv[3], percentageFace);
 	if(argc>=5)
-		maxFace= atoi(argv[4]);
+		NLMISC::fromString(argv[4], maxFace);
 
 	// **** Load the Mesh In.
 	IShape *pResult = NULL;

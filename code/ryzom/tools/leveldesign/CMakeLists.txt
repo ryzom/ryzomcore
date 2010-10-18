@@ -3,9 +3,11 @@ ADD_SUBDIRECTORY(prim_export)
 ADD_SUBDIRECTORY(uni_conv)
 ADD_SUBDIRECTORY(csv_transform)
 ADD_SUBDIRECTORY(icon_search)
-ADD_SUBDIRECTORY(export)
 ADD_SUBDIRECTORY(world_editor)
 
+IF(WIN32)
+  ADD_SUBDIRECTORY(export)
+ENDIF(WIN32)
 # Legacy folders, do not build
 #ADD_SUBDIRECTORY(export)
 

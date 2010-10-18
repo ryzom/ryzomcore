@@ -332,7 +332,7 @@ void CGroupEditBox::copy()
 	stopParentBlink();
 
 	// get the selection and copy it
-	if (CSystemUtils::copyTextToClipboard(getSelection()))
+	if (Driver->copyTextToClipboard(getSelection()))
 		nlinfo ("Chat input was copied in the clipboard");
 }
 
@@ -347,155 +347,163 @@ void CGroupEditBox::paste()
 		}
 		cutSelection();
 	}
-	stopParentBlink();
-	makeTopWindow();
 
 	ucstring sString;
 
-	if (CSystemUtils::pasteTextFromClipboard(sString))
+	if (Driver->pasteTextFromClipboard(sString))
 	{
-		sint length = (sint)sString.length();
-
-		ucstring toAppend;
-		// filter character depending on the netry type
-		switch (_EntryType)
-		{
-			case Text:
-			case Password:
-			{
-				if (_NegativeFilter.empty())
-				{
-					toAppend = sString;
-				}
-				else
-				{
-					for (sint k = 0; k < length; ++k)
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-				// remove '\r' characters
-				toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (ucchar) '\r'), toAppend.end());
-
-			}
-			break;
-			case PositiveInteger:
-			case PositiveFloat:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isdigit(sString[k]) || sString[k]== ' ' ||
-						(_EntryType==PositiveFloat && sString[k]=='.') )
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case Integer:
-			case Float:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isdigit(sString[k]) || sString[k]== ' ' || sString[k]== '-' ||
-						(_EntryType==Float && sString[k]=='.') )
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case AlphaNumSpace:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isValidAlphaNumSpace(sString[k]))
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case AlphaNum:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isValidAlphaNum(sString[k]))
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case Alpha:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isValidAlpha(sString[k]))
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case Filename:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isValidFilenameChar(sString[k]))
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-			break;
-			case PlayerName:
-			{
-				for (sint k = 0; k < length; ++k)
-				{
-					if (isValidPlayerNameChar(sString[k]))
-					{
-						if (!isFiltered(sString[k]))
-						{
-							toAppend += sString[k];
-						}
-					}
-				}
-			}
-		}
-		length = (sint)toAppend.size();
-		if ((uint) (_InputString.length() + length) > _MaxNumChar)
-		{
-			length = _MaxNumChar - (sint)_InputString.length();
-		}
-		ucstring toAdd = toAppend.substr(0, length);
-		_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
-		_CursorPos += (sint32)toAdd.length();
-		nlinfo ("Chat input was pasted from the clipboard");
-
-		triggerOnChangeAH();
+		// append string now
+		appendString(sString);
 	}
+}
+
+// ----------------------------------------------------------------------------
+void CGroupEditBox::appendString(const ucstring &str)
+{
+	stopParentBlink();
+	makeTopWindow();
+
+	sint length = (sint)str.length();
+
+	ucstring toAppend;
+	// filter character depending on the entry type
+	switch (_EntryType)
+	{
+		case Text:
+		case Password:
+		{
+			if (_NegativeFilter.empty())
+			{
+				toAppend = str;
+			}
+			else
+			{
+				for (sint k = 0; k < length; ++k)
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+			// remove '\r' characters
+			toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (ucchar) '\r'), toAppend.end());
+
+		}
+		break;
+		case PositiveInteger:
+		case PositiveFloat:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isdigit(str[k]) || str[k]== ' ' ||
+					(_EntryType==PositiveFloat && str[k]=='.') )
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case Integer:
+		case Float:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isdigit(str[k]) || str[k]== ' ' || str[k]== '-' ||
+					(_EntryType==Float && str[k]=='.') )
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case AlphaNumSpace:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isValidAlphaNumSpace(str[k]))
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case AlphaNum:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isValidAlphaNum(str[k]))
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case Alpha:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isValidAlpha(str[k]))
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case Filename:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isValidFilenameChar(str[k]))
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+		break;
+		case PlayerName:
+		{
+			for (sint k = 0; k < length; ++k)
+			{
+				if (isValidPlayerNameChar(str[k]))
+				{
+					if (!isFiltered(str[k]))
+					{
+						toAppend += str[k];
+					}
+				}
+			}
+		}
+	}
+	length = (sint)toAppend.size();
+	if ((uint) (_InputString.length() + length) > _MaxNumChar)
+	{
+		length = _MaxNumChar - (sint)_InputString.length();
+	}
+	ucstring toAdd = toAppend.substr(0, length);
+	_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
+	_CursorPos += (sint32)toAdd.length();
+	nlinfo ("Chat input was pasted from the clipboard");
+
+	triggerOnChangeAH();
 
 	_CursorAtPreviousLineEnd = false;
 }
@@ -610,6 +618,8 @@ void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
 							if (!isValidPlayerNameChar(c))
 								return;
 						break;
+						default:
+							break;
 					}
 					// verify integer bounds
 					if(_EntryType==Integer && (_IntegerMinValue!=INT_MIN || _IntegerMaxValue!=INT_MAX))
@@ -658,6 +668,11 @@ void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
 	}
 }
 
+// ----------------------------------------------------------------------------
+void CGroupEditBox::handleEventString(const CEventDescriptorKey &rEDK)
+{
+	appendString(rEDK.getString());
+}
 
 // ----------------------------------------------------------------------------
 bool CGroupEditBox::undo()
@@ -720,7 +735,7 @@ bool CGroupEditBox::expand()
 		if (_InputString[0] == '/')
 		{
 			makeTopWindow();
-			// for french or deutch, be aware of unicode
+			// for french, deutsch and russian, be aware of unicode
 			std::string command = ucstring(_InputString.substr(1)).toUtf8();
 			ICommand::expand(command);
 			// then back to ucstring
@@ -788,12 +803,14 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		switch(rEDK.getKeyEventType())
 		{
 			case CEventDescriptorKey::keychar: handleEventChar(rEDK); break;
+			case CEventDescriptorKey::keystring: handleEventString(rEDK); break;
+			default: break;
 		}
 		// update the text
 		setInputString(_InputString);
 
-		// if event of type char, consider handle all of them
-		if( rEDK.getKeyEventType()==CEventDescriptorKey::keychar )
+		// if event of type char or string, consider handle all of them
+		if( rEDK.getKeyEventType()==CEventDescriptorKey::keychar || rEDK.getKeyEventType()==CEventDescriptorKey::keystring )
 			return true;
 		// Else filter the EventKeyDown AND EventKeyUp.
 		else
@@ -1089,16 +1106,16 @@ void		CGroupEditBox::setInputStringAsInt(sint32 val)
 
 // ***************************************************************************
 sint64		CGroupEditBox::getInputStringAsInt64() const
-{ 
-	sint32 value;
+{
+	sint64 value;
 	fromString(_InputString.toString(), value);
 	return value;
 }
 
 // ***************************************************************************
 void		CGroupEditBox::setInputStringAsInt64(sint64 val)
-{ 
-	setInputString(NLMISC::toString(val)); 
+{
+	setInputString(NLMISC::toString(val));
 }
 
 // ***************************************************************************

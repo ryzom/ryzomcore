@@ -22,14 +22,6 @@
 /////////////
 #include "stdpch.h"	// First include for pre-compiled headers.
 
-#include <limits>
-
-// OS.
-#ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#	include <windows.h>
-#endif
-
 // Misc
 #include "nel/misc/file.h"
 #include "nel/misc/async_file_manager.h"
@@ -689,6 +681,3 @@ bool verboseVPAdvanceTest(CEntityCL *en, uint32 form)
 		return false;
 	}
 }
-
-
-

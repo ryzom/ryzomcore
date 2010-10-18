@@ -29,6 +29,7 @@
 #include "nel/misc/quat.h"
 #include "nel/misc/rgba.h"
 #include "nel/3d/u_instance.h"
+#include "nel/3d/u_driver.h"
 #include "game_share/slot_types.h"
 #include "game_share/mode_and_behaviour.h"
 
@@ -241,6 +242,11 @@ void setVideoMode(const NL3D::UDriver::CMode &mode);
 
 // Get the current color depth (8, 16, or 32). In windowed mode, this will be the desktop color depth, in fullscreen mode, the color depth of the framebuffer.
 uint getCurrentColorDepth();
+
+// get maximized
+bool isWindowMaximized();
+
+sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList);
 
 #endif // CL_MISC_H
 

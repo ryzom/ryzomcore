@@ -59,7 +59,7 @@ afx_msg void CLAEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
 				int start, end;
 				GetSel( start, end );
 				str = str.Mid( start, end-start );
-				int lineNum = atoi( str );
+				int lineNum = atoi(str);
 				if ( ! ((lineNum != 0) || (str == "0")) )
 					break;
 

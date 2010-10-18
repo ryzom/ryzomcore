@@ -133,7 +133,7 @@ CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CP
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent)
 {
-	return attachToParent(parent,parent==NULL?~0u:(uint32)parent->_Children.size());
+	return attachToParent(parent,parent==NULL?std::numeric_limits<uint32>::max():(uint32)parent->_Children.size());
 }
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uint32 idx)
@@ -216,8 +216,8 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 
 bool CPersistentDataTreeNode::readFromPdr(CPersistentDataRecord& pdr)
 {
-	static uint16 mapKeyToken= (uint16)~0u; pdr.addString("__Key__",mapKeyToken);
-	static uint16 mapValToken= (uint16)~0u; pdr.addString("__Val__",mapValToken);
+	static uint16 mapKeyToken= std::numeric_limits<uint16>::max(); pdr.addString("__Key__",mapKeyToken);
+	static uint16 mapValToken= std::numeric_limits<uint16>::max(); pdr.addString("__Val__",mapValToken);
 
 	while (!pdr.isEndOfData())
 	{
@@ -378,8 +378,8 @@ bool CPersistentDataTreeNode::writeToPdr(CPersistentDataRecord& pdr) const
 	// if this is a map entry then split into map key and value
 	if (isMapEntry())
 	{
-		static uint16 mapKeyToken= (uint16)~0u; pdr.addString("__Key__",mapKeyToken);
-		static uint16 mapValToken= (uint16)~0u; pdr.addString("__Val__",mapValToken);
+		static uint16 mapKeyToken= std::numeric_limits<uint16>::max(); pdr.addString("__Key__",mapKeyToken);
+		static uint16 mapValToken= std::numeric_limits<uint16>::max(); pdr.addString("__Val__",mapValToken);
 
 		// write a value - try to match a reasonably compact format if one exists
 		pdrPushCompactValue(pdr,mapKeyToken,name);

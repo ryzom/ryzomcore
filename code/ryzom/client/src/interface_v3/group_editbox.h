@@ -20,6 +20,7 @@
 #define RZ_CTRL_EDITBOX_H
 
 #include "interface_group.h"
+#include "nel/3d/u_texture.h"
 
 
 class CEventDescriptor;
@@ -288,8 +289,10 @@ private:
 	void setupDisplayText();
 	void makeTopWindow();
 	void handleEventChar(const CEventDescriptorKey &event);
+	void handleEventString(const CEventDescriptorKey &event);
 	void setup();
 	void triggerOnChangeAH();
+	void appendString(const ucstring &str);
 
 	ucstring	getSelection();
 

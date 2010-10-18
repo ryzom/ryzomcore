@@ -215,8 +215,9 @@ void cbInfo (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	string token = "MeanPongTime ";
 	string::size_type pos=line.find (token);
 	string::size_type pos2=line.find (" ", pos+token.size());
-	uint32 val = atoi(line.substr (pos+token.size(), pos2-pos-token.size()).c_str());	
-	LagGraph.addOneValue ((float)val);
+	float val;
+	NLMISC::fromString(line.substr (pos+token.size(), pos2-pos-token.size()), val);	
+	LagGraph.addOneValue (val);
 #endif
 }
 

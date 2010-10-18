@@ -41,10 +41,13 @@
 #include "game_share/lift_icons.h"
 
 #include "../r2/editor.h"
+#include "chat_window.h"
+#include "people_interraction.h"
 
 using namespace std;
 using namespace NLMISC;
 
+extern CPeopleInterraction PeopleInterraction;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet_guild");
 
@@ -52,26 +55,27 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet
 // Interface part
 // ***************************************************************************
 
-#define WIN_GUILD						"ui:interface:guild"
-#define WIN_GUILD_CHAT					"ui:interface:guild_chat"
-#define WIN_GUILD_FORUM					"ui:interface:guild_forum"
-#define VIEW_TEXT_GUILD_QUIT			"ui:interface:guild:content:tab_guild:quit_guild"
-#define CTRL_SHEET_GUILD_BLASON			"ui:interface:guild:content:tab_guild:blason"
-#define VIEW_TEXT_GUILD_MEMBER_COUNT	"ui:interface:guild:content:tab_guild:member_count"
+#define WIN_GUILD							"ui:interface:guild"
+#define WIN_GUILD_CHAT						"ui:interface:guild_chat"
+#define WIN_GUILD_FORUM						"ui:interface:guild_forum"
+#define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild:quit_guild"
+#define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild:blason"
+#define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild:member_count"
 
 
-#define LIST_GUILD_MEMBERS				"ui:interface:guild:content:tab_guild:list_member:guild_members"
-#define CTRL_QUIT_GUILD					"ui:interface:guild:content:tab_guild:quit_guild"
-#define TEMPLATE_GUILD_MEMBER			"member_template"
-#define TEMPLATE_GUILD_MEMBER_NAME		"name"
-#define TEMPLATE_GUILD_MEMBER_GRADE		"grade"
-#define TEMPLATE_GUILD_MEMBER_SCORE		"score"
-#define MENU_GUILD_MEMBER				"ui:interface:menu_member"
+#define LIST_GUILD_MEMBERS					"ui:interface:guild:content:tab_guild:list_member:guild_members"
+#define CTRL_QUIT_GUILD						"ui:interface:guild:content:tab_guild:quit_guild"
+#define TEMPLATE_GUILD_MEMBER				"member_template"
+#define TEMPLATE_GUILD_MEMBER_NAME			"name"
+#define TEMPLATE_GUILD_MEMBER_GRADE			"grade"
+#define TEMPLATE_GUILD_MEMBER_SCORE			"score"
+#define TEMPLATE_GUILD_MEMBER_ENTER_DATE	"enter_date"
+#define MENU_GUILD_MEMBER					"ui:interface:menu_member"
 
-#define WIN_ASCENSOR					"ui:interface:ascensor_teleport_list"
+#define WIN_ASCENSOR						"ui:interface:ascensor_teleport_list"
 
-#define WIN_JOIN_PROPOSAL				"ui:interface:join_guild_proposal"
-#define VIEW_JOIN_PROPOSAL_PHRASE		"ui:interface:join_guild_proposal:content:inside:phrase"
+#define WIN_JOIN_PROPOSAL					"ui:interface:join_guild_proposal"
+#define VIEW_JOIN_PROPOSAL_PHRASE			"ui:interface:join_guild_proposal:content:inside:phrase"
 
 CGuildManager* CGuildManager::_Instance = NULL;
 
@@ -107,16 +111,53 @@ static inline bool lt_member_grade(const SGuildMember &m1, const SGuildMember &m
 	return m1.Grade < m2.Grade;
 }
 
+static inline bool lt_member_online(const SGuildMember &m1, const SGuildMember &m2)
+{
+	if (m1.Online == m2.Online)
+	{
+		return lt_member_grade(m1, m2);
+	}
+
+	// Compare online status
+	switch (m1.Online)
+	{
+		case ccs_online:
+			// m1 is < if m1 is online
+			return true;
+			break;
+		case ccs_online_abroad:
+			// m1 is < if m2 is offline
+			return (m2.Online == ccs_offline);
+			break;
+		case ccs_offline:
+		default:
+			// m2 is always < if m1 is offline
+			return false;
+			break;
+	}
+}
+
+
 // ***************************************************************************
-void CGuildManager::sortGuildMembers()
+void CGuildManager::sortGuildMembers(TSortOrder order)
 {
 	if (_GuildMembers.size() < 2) return;
 
-	// First sort by name
-	sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_name);
-
-	// Second sort by grade
-	stable_sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_grade);
+	switch (order)
+	{
+		default:
+		case sort_grade:
+			sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_name);
+			stable_sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_grade);
+			break;
+		case sort_name:
+			sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_name);
+			break;
+		case sort_online:
+			sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_name);
+			stable_sort(_GuildMembers.begin(), _GuildMembers.end(), lt_member_online);
+			break;
+	}
 }
 
 bool CGuildManager::isProxy()
@@ -713,8 +754,9 @@ class CAHGuildSheetOpen : public IActionHandler
 		// *** Update Members, if necessary
 		if(updateMembers)
 		{
+			CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
 			// Sort the members in Guild Manager
-			pGM->sortGuildMembers();
+			pGM->sortGuildMembers(order);
 
 			// update member count view
 			const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
@@ -780,6 +822,21 @@ class CAHGuildSheetOpen : public IActionHandler
 							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOffline"));
 						break;
 					}
+				}
+
+				// Enter Date
+				CViewText *pViewEnterDate = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_ENTER_DATE));
+				if (pViewEnterDate != NULL)
+				{
+					CRyzomTime rt;
+					rt.updateRyzomClock(rGuildMembers[i].EnterDate);
+					ucstring str = toString("%04d", rt.getRyzomYear()) + " ";
+					str += CI18N::get("uiJenaYear") + " : ";
+					str += CI18N::get("uiAtysianCycle") + " ";
+					str += toString("%01d", rt.getRyzomCycle()+1) +", ";
+					str += CI18N::get("ui"+MONTH::toString( (MONTH::EMonth)rt.getRyzomMonthInCurrentCycle() )) + ", ";
+					str += toString("%02d", rt.getRyzomDayOfMonth()+1);
+					pViewEnterDate->setText(str);
 				}
 
 				// Add to the list
@@ -850,15 +907,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 			return;
 		}
 
-
 		// *** Check with the grade of the local player wich types of actions we can do on the player selected
-		// Grade less or equal cant do anything
-		if (pGM->getGrade() >= rGuildMembers[nLineNb].Grade)
-		{
-			// Close
-			pIM->disableModalWindow();
-			return;
-		}
 
 		// enable or disable menu entries
 		if (pGM->isProxy())
@@ -869,7 +918,11 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		else
 		{
 			// Depending on the grade we can do things or other
-			if (pGM->getGrade() == EGSPD::CGuildGrade::Leader)
+
+			// Grade less or equal can't do anything
+			if (pGM->getGrade() >= rGuildMembers[nLineNb].Grade)
+				setRights(false, false, false, false, false, false, false);
+			else if (pGM->getGrade() == EGSPD::CGuildGrade::Leader)
 				setRights(true, true, true, true, true, true, true);
 			else if (pGM->getGrade() == EGSPD::CGuildGrade::HighOfficer)
 				setRights(false, false, true, true, true, true, true);
@@ -925,6 +978,70 @@ static void sendMsgSetGrade(EGSPD::CGuildGrade::TGuildGrade Grade)
 		nlwarning("<CHandlerAcceptExchange::execute> unknown message name '%s'", message.c_str());
 	}
 }
+
+// ***************************************************************************
+// Sort the guild member list
+class CAHGuildSheetSortGuildList : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CInterfaceManager* pIM= CInterfaceManager::getInstance();
+		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
+
+		order = (CGuildManager::TSortOrder)(order + 1);
+		if (order == CGuildManager::END_SORT_ORDER)
+		{
+			order = CGuildManager::START_SORT_ORDER;
+		}
+
+		pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
+		pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
+
+// ***************************************************************************
+// Invoke the 'tell' command on a contact from its menu
+// The tell command is displayed in the 'around me' window
+class CAHGuildSheetTellMember : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * pCaller, const std::string &/* sParams */)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CGuildManager *pGM = CGuildManager::getInstance();
+		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
+		// *** Check and retrieve the current member index (index in the member list)
+		CCtrlBase	*ctrlLaunchingModal= pIM->getCtrlLaunchingModal();
+		if (pCaller == NULL)
+		{
+			// Error -> Close
+			return;
+		}
+		string sId = pCaller->getId();
+		sId = sId.substr(sId.rfind('m')+1,sId.size());
+		sint32 nLineNb;
+		fromString(sId, nLineNb);
+		if ((nLineNb < 0) || (nLineNb >= (sint32)rGuildMembers.size()))
+		{
+			// Error -> Close
+			return;
+		}
+		MemberIndexSelected= nLineNb;
+		MemberNameSelected = rGuildMembers[nLineNb].Name;
+
+		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);	
+	}
+
+	// Current selection
+	static sint32	MemberIndexSelected;		// Index of the member selected when left clicked
+	static ucstring	MemberNameSelected;			// Name of the member selected when lef clicked
+};
+REGISTER_ACTION_HANDLER(CAHGuildSheetTellMember, "guild_tell_member");
+
+sint32		CAHGuildSheetTellMember::MemberIndexSelected= -1;
+ucstring	CAHGuildSheetTellMember::MemberNameSelected;
 
 // ***************************************************************************
 class CAHGuildSheetSetLeader : public IActionHandler

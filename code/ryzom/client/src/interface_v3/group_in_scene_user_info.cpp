@@ -514,6 +514,13 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 
 			if (!isForageSource)
 			{
+				CViewBase * invisibleLogo = info->getView("invisible_logo");
+				if (entity->isUser() && invisibleLogo)
+				{
+					bool invisible = pIM->getDbProp("SERVER:USER:IS_INVISIBLE")->getValueBool();
+					invisibleLogo->setActive(invisible);
+				}
+
 				// Get the target bitmap
 				CViewBase *target = leftGroup->getView ("target");
 				if (target)
@@ -532,25 +539,91 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						info->_MissionTarget = bitmap;
 				}
 
-				// set or inactive pvp logos
+				CViewBase * pvpCivLogo = info->getView ("pvp_faction_civ_logo");
+				CViewBase * pvpCultLogo = info->getView ("pvp_faction_cult_logo");
+
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
-				if (pPlayer != NULL && needPvPLogo)
+				if (pPlayer == NULL)
+					needPvPLogo = false;
+
+				// set or inactive pvp logos
+				bool needCivPvpLogo = needPvPLogo;
+				bool needCultPvpLogo = needPvPLogo;
+
+				if (pPlayer != NULL && needPvPLogo && pvpCivLogo && pvpCultLogo)
 				{
-					CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
-					if (pvpFactionLogo)
+					uint8 civToDisplay = (uint8)(pPlayer->getClanCivMaxFame() & 0xFF);
+					uint8 cultToDisplay = (uint8)(pPlayer->getClanCultMaxFame() & 0xFF);
+
+					if (!entity->isUser())
 					{
-						if( pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
-						{
-							CViewBitmap * pvpFactionLogoBmp = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
-							if( pvpFactionLogoBmp )
-								pvpFactionLogoBmp->setTexture( pIM->getDefine(PVP_CLAN::toIconDefineString(pPlayer->getPvpClan())) );
-						}
-						else
-						{
-							pvpFactionLogo->setActive(false);
-						}
+						// Check if are Civ Allies
+						for (uint8 i = 0; i < 4; i++)
+							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
+								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								civToDisplay = i;
+
+						// Check if are Civ Ennemies
+						for (uint8 i = 0; i < 4; i++)
+							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
+								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
+								civToDisplay = i;
+						
+						// Check if are Cult Allies
+						for (uint8 i = 4; i < 7; i++)
+							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
+								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								cultToDisplay = i;
+
+						// Check if are Cult Ennemies
+						for (uint8 i = 4; i < 7; i++)
+							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
+								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
+								cultToDisplay = i;
 					}
 
+					if ((pPlayer->getPvpMode() & PVP_MODE::PvpFaction) || (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
+					{
+						CViewBitmap * pvpCivLogoBmp = dynamic_cast<CViewBitmap *>(pvpCivLogo);
+						if( pvpCivLogoBmp )
+						{
+							if (pPlayer->isPvpAlly(civToDisplay))
+								if (pPlayer->isPvpRanger())
+									pvpCivLogoBmp->setTexture("pvp_ally_ranger.tga");
+								else
+									pvpCivLogoBmp->setTexture("pvp_ally_"+toString(civToDisplay)+".tga");
+							else if (pPlayer->isPvpEnnemy(civToDisplay))
+								if (pPlayer->isPvpMarauder())
+									pvpCivLogoBmp->setTexture("pvp_enemy_marauder.tga");
+								else
+									pvpCivLogoBmp->setTexture("pvp_enemy_"+toString(civToDisplay)+".tga");
+							else
+								needCivPvpLogo = false;
+						}
+
+						CViewBitmap * pvpCultLogoBmp = dynamic_cast<CViewBitmap *>(pvpCultLogo);
+						if( pvpCultLogoBmp )
+						{
+							if (pPlayer->isPvpAlly(cultToDisplay))
+								if (pPlayer->isPvpPrimas())
+									pvpCultLogoBmp->setTexture("pvp_ally_primas.tga");
+								else
+									pvpCultLogoBmp->setTexture("pvp_ally_"+toString(cultToDisplay)+".tga");
+							else if (pPlayer->isPvpEnnemy(cultToDisplay))
+								if (pPlayer->isPvpTrytonist())
+									pvpCultLogoBmp->setTexture("pvp_enemy_trytonist.tga");
+								else
+									pvpCultLogoBmp->setTexture("pvp_enemy_"+toString(cultToDisplay)+".tga");
+							else
+								needCultPvpLogo = false;
+						}
+					}
+					else 
+					{
+						needCivPvpLogo = false;
+						needCultPvpLogo = false;
+					}
+				
 					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
 					if (pvpOutpostLogo)
 					{
@@ -563,7 +636,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 					if (pvpDuelLogo)
 					{
-						if( !(pPlayer->getPvpMode()&PVP_MODE::PvpDuel) )
+						if( !(pPlayer->getPvpMode()&PVP_MODE::PvpDuel || pPlayer->getPvpMode()&PVP_MODE::PvpChallenge) )
 						{
 							pvpDuelLogo->setActive(false);
 						}
@@ -571,11 +644,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 				}
 				else
 				{
-					// unactive pvp logos
-					CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
-					if (pvpFactionLogo)
-						pvpFactionLogo->setActive(false);
-
 					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
 					if (pvpOutpostLogo)
 						pvpOutpostLogo->setActive(false);
@@ -584,6 +652,13 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 					if (pvpDuelLogo)
 					pvpDuelLogo->setActive(false);
 				}
+
+				if (pvpCivLogo)
+					pvpCivLogo->setActive(needCivPvpLogo);
+
+				if (pvpCultLogo)
+					pvpCultLogo->setActive(needCultPvpLogo);
+
 			}
 
 			// No bar and no string ?

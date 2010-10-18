@@ -40,6 +40,7 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/chat_group.h"
+#include "interface_v3/skill_manager.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -948,19 +949,29 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 	else
 	{
 		ucstring name = CEntityCL::removeTitleAndShardFromName(sender);
+		ucstring csr;
 
 		// special case where there is only a title, very rare case for some NPC
 		if (name.empty())
 		{
 			// we need the gender to display the correct title
 			CCharacterCL *entity = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByName(sender, true, true));
-
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
 			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
+		} 
+		else
+		{
+			// Does the char have a CSR title?
+			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
 		}
 
-		result = name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
+		ucstring cur_time;
+		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		{
+			cur_time = CInterfaceManager::getTimestampHuman();
+		}
+		result = cur_time + csr + name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
 	}
 }
 
@@ -992,27 +1003,41 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 
 	// Format the sentence with the provided sender name
 	ucstring senderName = CEntityCL::removeTitleAndShardFromName(sender);
+
+	// Add time if not a &bbl&
+	ucstring cur_time;
+	if (cat.toString() != "&bbl&")
+	{
+		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		{
+			cur_time = CInterfaceManager::getTimestampHuman();
+		}
+	}
+
+	ucstring csr;
+	// Does the char have a CSR title?
+	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+
 	if (UserEntity && senderName == UserEntity->getDisplayName())
 	{
-		// the player talks
+		// The player talks
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + CI18N::get("youShout") + ucstring(" : ") + finalMsg;
+				result = cat + cur_time + csr + CI18N::get("youShout") + ucstring(": ") + finalMsg;
 			break;
 			default:
-				result = cat + CI18N::get("youSay") + ucstring(" : ") + finalMsg;
+				result = cat + cur_time + csr + CI18N::get("youSay") + ucstring(": ") + finalMsg;
 			break;
 		}
 	}
 	else
 	{
-		// special case where there is only a title, very rare case for some NPC
+		// Special case where there is only a title, very rare case for some NPC
 		if (senderName.empty())
 		{
-			// we need the gender to display the correct title
 			CCharacterCL *entity = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByName(sender, true, true));
-
+			// We need the gender to display the correct title
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
 			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
@@ -1021,10 +1046,10 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + senderName + ucstring(" ") + CI18N::get("heShout") + ucstring(" : ") + finalMsg;
+				result = cat + cur_time + csr + senderName + ucstring(" ") + CI18N::get("heShout") + ucstring(": ") + finalMsg;
 			break;
 			default:
-				result = cat + senderName + ucstring(" ") + CI18N::get("heSays") + ucstring(" : ") + finalMsg;
+				result = cat + cur_time + csr + senderName + ucstring(" ") + CI18N::get("heSays") + ucstring(": ") + finalMsg;
 			break;
 		}
 	}
@@ -1157,7 +1182,13 @@ class CHandlerTell : public IActionHandler
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 		ucstring finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
-		finalMsg += CI18N::get("youTell") + ": ";
+		ucstring cur_time;
+		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		{
+			cur_time = CInterfaceManager::getTimestampHuman();
+		}
+		ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+		finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, true);
 		finalMsg += message;
@@ -1238,6 +1269,14 @@ void CClientChatManager::updateChatModeAndButton(uint mode)
 					case CChatGroup::universe:	pUserBut->setHardText("uiFilterUniverse");	break;
 					case CChatGroup::team:		if (teamActive) pUserBut->setHardText("uiFilterTeam");		break;
 					case CChatGroup::guild:		if (guildActive) pUserBut->setHardText("uiFilterGuild");	break;
+					case CChatGroup::dyn_chat:
+						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
+						uint32 textId = pIM->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						pUserBut->setHardText(title.toUtf8());
+						break;
+					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);
@@ -1276,6 +1315,12 @@ class CHandlerTalk : public IActionHandler
 		text.fromUtf8 (getParam (sParams, "text"));
 //		text = getParam (sParams, "text");
 
+		// Parse any tokens in the text
+		if ( ! CInterfaceManager::parseTokens(text))
+		{
+			return;
+		}
+
 		// Find the base group
 		if ((mode<CChatGroup::nbChatMode) && !text.empty())
 		{
@@ -1292,7 +1337,7 @@ class CHandlerTalk : public IActionHandler
 				else
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->displaySystemInfo (ucstring(cmd+" : ")+CI18N::get ("uiCommandNotExists"));
+					im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
 				}
 			}
 			else

@@ -1,6 +1,18 @@
-/** file backup_service_interface.cpp
- * $Id: backup_service_interface.cpp,v 1.23 2007/02/01 16:25:12 boucher Exp $
- */
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //-------------------------------------------------------------------------------------------------
 // includes
@@ -35,10 +47,10 @@ public:
 		for (uint32 i='A'; i<='Z';++i) _Data[i]= true;
 		for (uint32 i='a'; i<='z';++i) _Data[i]= true;
 		for (uint32 i='0'; i<='9';++i) _Data[i]= true;
-		_Data['/']= true;
-		_Data['.']= true;
-		_Data['_']= true;
-		_Data[' ']= true;
+		_Data[(uint32)'/']= true;
+		_Data[(uint32)'.']= true;
+		_Data[(uint32)'_']= true;
+		_Data[(uint32)' ']= true;
 	}
 
 	// lookup a character to determine whether it's valid or not

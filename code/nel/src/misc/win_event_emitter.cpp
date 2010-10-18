@@ -128,11 +128,11 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 		if (_KeyboardEventsEnabled)
 		{
 			// Ctrl, shit or alt ?
-			if ((int)wParam==VK_MENU)
+			if ((sint)wParam==VK_MENU)
 				_AltButton=true;
-			if ((int)wParam==VK_CONTROL)
+			if ((sint)wParam==VK_CONTROL)
 				_CtrlButton=true;
-			if ((int)wParam==VK_SHIFT)
+			if ((sint)wParam==VK_SHIFT)
 				_ShiftButton=true;
 
 			// Post the message

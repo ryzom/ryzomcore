@@ -535,6 +535,11 @@ public:
 	virtual void		  deleteWaterEnvMap(UWaterEnvMap *map);
 	// @}
 
+	// Copy a string to system clipboard.
+	virtual bool copyTextToClipboard(const ucstring &text);
+
+	// Paste a string from system clipboard.
+	virtual bool pasteTextFromClipboard(ucstring &text);
 
 	virtual uint64	getSwapBufferCounter();
 

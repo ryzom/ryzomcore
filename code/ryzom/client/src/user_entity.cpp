@@ -198,6 +198,16 @@ CUserEntity::~CUserEntity()
 	_MountSpeeds.release();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	
+	{
+		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->removeObserver(&_InvisibleObs, textId);
+		}
+	}
+
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
 		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
@@ -347,8 +357,17 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 	// Rebuild interface
 	buildInSceneInterface ();
 
-	// Add an observer on skill points
+	// Add observer on invisible property
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	{
+		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		if (node) {
+			ICDBNode::CTextId textId;
+			node->addObserver(&_InvisibleObs, textId);
+		}
+	}
+
+	// Add an observer on skill points
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
 		_SkillPointObs[i].SpType= i;
@@ -1329,7 +1348,7 @@ void CUserEntity::resetAnyMoveTo()
 	if(_MoveToAction==CUserEntity::CombatPhrase || _MoveToAction==CUserEntity::ExtractRM)
 	{
 		// the clientExecute has not been called in case of "ExtractRM autoFind"
-		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == (uint)~0;
+		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == std::numeric_limits<uint>::max();
 		if(!autoFindExtractRM)
 		{
 			CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -3664,6 +3683,11 @@ void CUserEntity::load()	// virtual
 
 
 //---------------------------------------------------
+void CUserEntity::CInvisibleObserver::update(ICDBNode* node)
+{
+	UserEntity->buildInSceneInterface();
+}
+
 //---------------------------------------------------
 void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 {
@@ -3758,7 +3782,7 @@ void CUserEntity::extractRM()
 	CSPhraseManager *pm = CSPhraseManager::getInstance();
 	uint index;
 	uint memoryLine;
-	bool autoFindPhrase = (_MoveToPhraseMemoryLine == (uint)~0);
+	bool autoFindPhrase = (_MoveToPhraseMemoryLine == std::numeric_limits<uint>::max());
 	if ( ! autoFindPhrase )
 	{
 		// Use clicked phrase
@@ -3773,7 +3797,7 @@ void CUserEntity::extractRM()
 		if ( ! findExtractionActionInMemory( pm, bm, memoryLine, index ) )
 		{
 			// Search in other memory bar lines (because the auto-equip does not set the current line at once)
-			memoryLine = ~0;
+			memoryLine = std::numeric_limits<uint>::max();
 			uint nbLines = pm->getNbMemoryLines();
 			for ( uint j=0; j!=nbLines; ++j )
 			{
@@ -3788,7 +3812,7 @@ void CUserEntity::extractRM()
 		}
 	}
 
-	if ( memoryLine != (uint)~0 )
+	if ( memoryLine != std::numeric_limits<uint>::max() )
 	{
 		// Open the forage (but not for care actions). Necessary for the case of redoing an extraction after a Drop All on the same source.
 		uint32 phraseId = pm->getMemorizedPhrase( memoryLine, index );

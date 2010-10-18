@@ -327,10 +327,10 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			// TODO: edit box in faction points?
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
 			if (!ed) return ~0;
-			int intQuantity;
+			uint32 intQuantity;
 			if (fromString(ed->getInputString().toString(), intQuantity))
 			{
-				return (uint32) intQuantity;
+				return intQuantity;
 			}
 			else
 			{
@@ -375,7 +375,7 @@ uint32 CBotChatPageTrade::getCurrItemPriceResale() const
 // ***************************************************************************************
 uint64 CBotChatPageTrade::getCurrItemPrice(bool mulByFame) const
 {
-	if (!_CurrItemSheet) return ~0;
+	if (!_CurrItemSheet) return std::numeric_limits<uint64>::max();
 	if (_BuyDlgOn && (_BuyMean == MoneyGuildXP || _BuyMean == GuildMoneyGuildXP || _BuyMean == GuildMoney) )
 	{
 		if (_BuyMean == MoneyGuildXP)
@@ -419,7 +419,7 @@ uint64 CBotChatPageTrade::getCurrItemPrice(bool mulByFame) const
 			}
 		}
 	}
-	return ~0;
+	return std::numeric_limits<uint64>::max();
 }
 
 // ***************************************************************************************
@@ -440,7 +440,7 @@ uint64 CBotChatPageTrade::getCurrItemXP() const
 		return 0; // By now no need for XP even if xp guild required
 	}
 
-	return ~0;
+	return std::numeric_limits<uint64>::max();
 }
 
 
@@ -809,11 +809,11 @@ void CBotChatPageTrade::updateTradeModal()
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiWontBuyThis"));
 					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittWontBuyThis"));
 				}
-				else if (_SellDlgOn && priceWithoutFame == ~0)
+				else if (_SellDlgOn && priceWithoutFame == std::numeric_limits<uint64>::max())
 				{
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiPriceNotReceived"));
 				}
-				else if (quantity == 0 || quantity == ~0)
+				else if (quantity == 0 || quantity == std::numeric_limits<uint32>::max())
 				{
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiBadQuantity"));
 					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadQuantity"));
@@ -1100,7 +1100,7 @@ bool CBotChatPageTrade::isTradeValid( bool enableResale ) const
 	getCurrItemFactionTypePoints(fpType, fpCost);
 
 	// if price/quantity is valid
-	bool	validSetup= priceWithoutFame != ~0 && quantity != ~0 && quantity != 0;
+	bool	validSetup= priceWithoutFame != std::numeric_limits<uint64>::max() && quantity != std::numeric_limits<uint32>::max() && quantity != 0;
 	if(validSetup && _BuyMean==MoneyFactionPoints)
 	{
 		// valid if at least one price type is not 0
@@ -1179,7 +1179,7 @@ void CBotChatPageTrade::confirmTrade( bool enableResale )
 	{
 		uint32	quantity = getCurrItemQuantity();
 		sint32	resalePrice = resaleEnabled ? getCurrItemPriceResale() : 0; // getCurrItemPriceResale() returns 0 is !_ResaleEdit
-		if (quantity != ~0)
+		if (quantity != std::numeric_limits<uint32>::max())
 		{
 			uint16 u16Quantity = (uint16) quantity;
 			// The Item bought is a SPhrase ?
@@ -2120,7 +2120,7 @@ void		CBotChatPageTrade::startDestroyItemDialog()
 
 	// setup the quantity to destroy (if edited correctly)
 	uint32	quantity= getCurrItemQuantity();
-	if(quantity==0 || quantity==~0)
+	if(quantity==0 || quantity==std::numeric_limits<uint32>::max())
 		return;
 	// if quantity check, maximize with it (if user entered to big value...)
 	if(_QuantityCheck)
@@ -2144,7 +2144,7 @@ void		CBotChatPageTrade::confirmDestroyItemDialog()
 	// get the quantity destroyed
 	uint32	quantity= getCurrItemQuantity();
 	// if correct quantity
-	if(quantity!=0 && quantity!=~0)
+	if(quantity!=0 && quantity!=std::numeric_limits<uint32>::max())
 	{
 		// if quantity check, maximize with it (if user entered too big value...)
 		if(_QuantityCheck)
@@ -2190,7 +2190,7 @@ void		CBotChatPageTrade::confirmDestroyItemDialog()
 	pIM->disableModalWindow();
 
 	// if the quantity entered was correct
-	if(quantity!=0 && quantity!=~0)
+	if(quantity!=0 && quantity!=std::numeric_limits<uint32>::max())
 	{
 		// close also the container modal
 		endTradeModal();

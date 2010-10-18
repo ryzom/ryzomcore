@@ -1686,6 +1686,66 @@ std::string CFileContainer::getWindowsDirectory()
 #endif
 }
 
+std::string CPath::getApplicationDirectory(const std::string &appName)
+{
+	return getInstance()->_FileContainer.getApplicationDirectory(appName);
+}
+
+std::string CFileContainer::getApplicationDirectory(const std::string &appName)
+{
+	static std::string appPath;
+	if (appPath.empty())
+	{
+#ifdef NL_OS_WINDOWS
+		wchar_t buffer[MAX_PATH];
+		SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
+		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
+#else
+		appPath = CPath::standardizePath(getenv("HOME"));
+#endif
+	}
+
+	std::string path = appPath;
+#ifdef NL_OS_WINDOWS
+	if (!appName.empty())
+		path = CPath::standardizePath(path + appName);
+#else
+	if (!appName.empty())
+		path = CPath::standardizePath(path + "." + toLower(appName));
+#endif
+
+	return path;
+}
+
+std::string CPath::getTemporaryDirectory()
+{
+	return getInstance()->_FileContainer.getTemporaryDirectory();
+}
+
+std::string CFileContainer::getTemporaryDirectory()
+{
+	static std::string path;
+	if (path.empty())
+	{
+		char *tempDir = getenv("TEMP");
+
+		if (tempDir == NULL)
+			tempDir = getenv("TMP");
+
+#ifdef NL_OS_UNIX
+		if (tempDir == NULL)
+			tempDir = "/tmp";
+#else
+		if (tempDir == NULL)
+			tempDir = ".";
+#endif
+
+		path = CPath::standardizePath(tempDir);
+	}
+
+	return path;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2468,32 +2528,6 @@ void CFile::getTemporaryOutputFilename (const std::string &originalFilename, std
 	do
 		tempFilename = originalFilename+".tmp"+toString (i++);
 	while (CFile::isExists(tempFilename));
-}
-
-std::string CFile::getApplicationDirectory(const std::string &appName)
-{
-	static std::string appPath;
-	if (appPath.empty())
-	{
-#ifdef NL_OS_WINDOWS
-		wchar_t buffer[MAX_PATH];
-		SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
-		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
-#else
-		appPath = CPath::standardizePath(getenv("HOME"));
-#endif
-	}
-
-	std::string path = appPath;
-#ifdef NL_OS_WINDOWS
-	if (!appName.empty())
-		path = CPath::standardizePath(path + appName);
-#else
-	if (!appName.empty())
-		path = CPath::standardizePath(path + "." + toLower(appName));
-#endif
-
-	return path;
 }
 
 } // NLMISC

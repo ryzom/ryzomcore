@@ -65,6 +65,16 @@ public:
 	 */
 	bool processMessage(XEvent &event, CEventServer *server = NULL);
 
+	/**
+	 * Copy a string to system clipboard.
+	 */
+        virtual bool copyTextToClipboard(const ucstring &text);
+
+	/*
+	 * Paste a string from system clipboard.
+	 */
+	virtual bool pasteTextFromClipboard(ucstring &text);
+
 private:
 
 	// Private internal server message
@@ -97,6 +107,8 @@ private:
 	bool					_emulateRawMode;
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
+	ucstring				_CopiedString;
+	bool					_SelectionOwned;
 };
 
 

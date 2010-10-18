@@ -184,6 +184,11 @@ public:
 		return res;
 	}
 
+	ucstring substr(size_type pos = 0, size_type n = npos) const
+	{
+		return ucstringbase::substr(pos, n);
+	}
+
 	// for luabind (can't bind to 'substr' else ...)
 	ucstring luabind_substr(size_type pos = 0, size_type n = npos) const
 	{

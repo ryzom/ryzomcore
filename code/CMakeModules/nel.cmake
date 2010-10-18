@@ -42,6 +42,7 @@ MACRO(NL_DEFAULT_PROPS name label)
     # Set versions only if target is a shared library
     SET_TARGET_PROPERTIES(${name} PROPERTIES
       VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR}
+      INSTALL_NAME_DIR ${NL_LIB_PREFIX}
       PROJECT_LABEL ${label})
   ELSE(${type} STREQUAL SHARED_LIBRARY)
     SET_TARGET_PROPERTIES(${name} PROPERTIES
@@ -288,7 +289,7 @@ MACRO(NL_SETUP_BUILD)
     # without inlining it's unusable, use custom optimizations again
     SET(MIN_OPTIMIZATIONS "/Ob1")
 
-    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi")
+    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000")
 
     IF(WITH_STLPORT)
       # deactivate all global include paths

@@ -85,13 +85,6 @@ typedef struct SHA1Context
     int Corrupted;             /* Is the message digest corrupted? */
 } SHA1Context;
 
-
-// Because the code does some tricky stuff, VC>6 would cry at runtime
-#ifdef _MFC_VER
-	#pragma runtime_checks( "", off )
-#endif
-
-
 //
 //  Function Prototypes
 //
@@ -193,10 +186,6 @@ CHashKey getSHA1(const string &filename, bool forcePath)
 	CHashKey hk (Message_Digest);
 	return hk;
 }
-
-#ifdef _MFC_VER
-	#pragma runtime_checks( "", off )
-#endif
 
 /*
  *  Define the SHA1 circular left shift macro
@@ -554,7 +543,3 @@ void SHA1PadMessage(SHA1Context *context)
 
 	SHA1ProcessMessageBlock(context);
 }
-
-#ifdef _MFC_VER
-	#pragma runtime_checks( "", restore )
-#endif

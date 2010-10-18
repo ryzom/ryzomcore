@@ -58,7 +58,10 @@ public:
 	void remove (const std::string &sBigFileName);
 
 	// true if a bigFile is added
-	bool isBigFileAdded(const std::string &sBigFileName);
+	bool isBigFileAdded(const std::string &sBigFileName) const;
+
+	// return name of Big File
+	std::string getBigFileName(const std::string &sBigFileName) const;
 
 	// List all files in a bigfile
 	void list (const std::string &sBigFileName, std::vector<std::string> &vAllFiles);

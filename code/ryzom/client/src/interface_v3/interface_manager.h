@@ -712,6 +712,14 @@ public:
 
 	void updateTooltipCoords();
 
+	/** Returns a human readable timestamp with the given format.
+	 */
+	static char* getTimestampHuman(const char* format = "[%H:%M:%S] ");
+
+	/** Parses any tokens in the ucstring like $t$ or $g()$
+	 */
+	static bool parseTokens(ucstring& ucstr);
+
 // ------------------------------------------------------------------------------------------------
 private:
 

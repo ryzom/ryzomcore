@@ -1208,15 +1208,15 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 			// Get the women name index if possible.
 			uint	womenNameColIndex;
 			if( !ws.findCol(womenNameColIdent, womenNameColIndex) )
-				womenNameColIndex= ~0;
+				womenNameColIndex= std::numeric_limits<uint>::max();
 
 			// Get the description index if possible.
 			uint	descColIndex;
 			if( !ws.findCol(descColIdent, descColIndex) )
-				descColIndex= ~0;
+				descColIndex= std::numeric_limits<uint>::max();
 			uint	descColIndex2;
 			if( !ws.findCol(descColIdent2, descColIndex2) )
-				descColIndex2= ~0;
+				descColIndex2= std::numeric_limits<uint>::max();
 
 			// For all rows minus the first header one.
 			for(uint j=1;j<ws.size();j++)
@@ -1246,7 +1246,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					while(strFindReplace(_SpecItem_TempMap[keyStr].Name, "\\n", "\n"));
 
 					// insert in map of Women Name if OK.
-					if(womenNameColIndex!=((uint)~0))
+					if(womenNameColIndex!=std::numeric_limits<uint>::max())
 					{
 						const ucstring &womenName= ws.getData(j, womenNameColIndex);
 						_SpecItem_TempMap[keyStr].WomenName= womenName;
@@ -1255,7 +1255,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					}
 
 					// insert in map of Description if OK.
-					if(descColIndex!=((uint)~0))
+					if(descColIndex!=std::numeric_limits<uint>::max())
 					{
 						const ucstring &desc= ws.getData(j, descColIndex);
 						_SpecItem_TempMap[keyStr].Desc= desc;
@@ -1264,7 +1264,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 					}
 
 					// insert in map of Description2 if OK.
-					if(descColIndex2!=((uint)~0))
+					if(descColIndex2!=std::numeric_limits<uint>::max())
 					{
 						const ucstring &desc= ws.getData(j, descColIndex2);
 						_SpecItem_TempMap[keyStr].Desc2= desc;

@@ -486,7 +486,8 @@ NLMISC_COMMAND(queryMissionGiverData, "Query mission giver data for the specifie
 {
 	if (args.size() == 0)
 		return false;
-	uint32 alias = atoi(args[0].c_str());
+	uint32 alias;
+	NLMISC::fromString(args[0], alias);
 
 	CNPCIconCache::getInstance().queryMissionGiverData(alias);
 	//giver.setDescTransient();

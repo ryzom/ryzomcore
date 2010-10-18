@@ -54,6 +54,7 @@ public:
 		keydown = 0, // a key has been press down. The key value is stored as a TKey
 		keyup,   // a key has been released. The key value is stored as a TKey
 		keychar,  // a key has been stroke. The key is a ucchar
+		keystring, // a string has been sent. The string is a ucstring
 		unknown, // uninitialized event
 	};
 	CEventDescriptorKey() : _KeyEvent(unknown)
@@ -80,6 +81,12 @@ public:
 		nlassert(_KeyEvent == keychar);
 		return _Char;
 	}
+	// return the string that has been sent. The key event type MUST be 'keystring', else => assert
+	ucstring getString() const
+	{
+		nlassert(_KeyEvent == keystring);
+		return _String;
+	}
 	bool getKeyCtrl() const // is CTRL pressed ?
 	{
 		return _CtrlState;
@@ -102,9 +109,10 @@ private:
 	bool			_AltState;
 	union
 	{
-		NLMISC::TKey    _Key;
-		ucchar  _Char;
+		NLMISC::TKey	_Key;
+		ucchar			_Char;
 	};
+	ucstring		_String;
 };
 
 // ----------------------------------------------------------------------------

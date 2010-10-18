@@ -18,6 +18,7 @@
 
 #include "stdpch.h"
 // client
+#include "../string_manager_client.h"
 #include "people_interraction.h"
 #include "interface_expr.h"
 #include "interface_manager.h"
@@ -756,6 +757,7 @@ void CPeopleInterraction::createGuildChat()
 	chatDesc.Title = "uiGuildChat";
 	chatDesc.Listener = &GuildChatEntryHandler;
 	chatDesc.Localize = true;
+	chatDesc.Savable = true;
 	chatDesc.Id = "guild_chat";
 	chatDesc.AHOnCloseButton = "proc";
 	chatDesc.AHOnCloseButtonParams = "guild_chat_proc_close";
@@ -774,6 +776,7 @@ void CPeopleInterraction::createYuboChat()
 	chatDesc.Title = "uiYuboChat";
 	chatDesc.Listener = &YuboChatEntryHandler;
 	chatDesc.Localize = true;
+	chatDesc.Savable = true;
 	chatDesc.Id = "yubo_chat";
 	chatDesc.AHOnCloseButton = "proc";
 	chatDesc.AHOnCloseButtonParams = "yubo_chat_proc_close";
@@ -781,6 +784,7 @@ void CPeopleInterraction::createYuboChat()
 
 	YuboChat = getChatWndMgr().createChatWindow(chatDesc);
 	if (!YuboChat) return;
+	YuboChat->setMenu(STD_CHAT_SOURCE_MENU);
 }
 
 
@@ -795,6 +799,7 @@ void CPeopleInterraction::createDynamicChats()
 		DynamicChatEntryHandler[i].DbIndex= i;
 		chatDesc.Listener = &DynamicChatEntryHandler[i];
 		chatDesc.Localize = false;
+		chatDesc.Savable = true;
 		chatDesc.ChatTemplate ="dynamic_chat_id";
 		chatDesc.ChatTemplateParams.push_back(make_pair(string("dyn_chat_nb"),toString(i)));
 		chatDesc.Id = string("dynamic_chat") + toString(i);
@@ -804,6 +809,8 @@ void CPeopleInterraction::createDynamicChats()
 		chatDesc.HeaderColor = "UI:SAVE:WIN:COLORS:MEM";
 
 		DynamicChat[i] = getChatWndMgr().createChatWindow(chatDesc);
+		if (!DynamicChat[i]) continue;
+		DynamicChat[i]->setMenu(STD_CHAT_SOURCE_MENU);
 	}
 }
 
@@ -956,7 +963,23 @@ class CHandlerChatGroupFilter : public IActionHandler
 					case CChatGroup::team:		pUserBut->setHardText("uiFilterTeam");		break;
 					case CChatGroup::guild:		pUserBut->setHardText("uiFilterGuild");		break;
 					case CChatGroup::universe:	pUserBut->setHardText("uiFilterUniverse");	break;
-					// NB: user chat cannot have yubo_chat or dyn_chat target
+					case CChatGroup::dyn_chat:
+						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
+						uint32 textId = pIM->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						if (title.empty())
+						{
+							// Dyn channel not available yet, so set to around
+							PeopleInterraction.TheUserChat.Filter.setTargetGroup(CChatGroup::arround);
+							pUserBut->setHardText("uiFilterAround");
+						}
+						else
+						{
+							pUserBut->setHardText(title.toUtf8());
+						}
+						break;
+					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);
@@ -1276,6 +1299,10 @@ void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendLi
 	for (uint i = 0; i < vIgnoreListName.size(); ++i)
 		addContactInList(contactIdPool++, vIgnoreListName[i], ccs_offline, 1);
 	updateAllFreeTellerHeaders();
+
+	CInterfaceManager* pIM= CInterfaceManager::getInstance();
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+	FriendList.sortEx(order);
 }
 
 //=================================================================================================================
@@ -1758,6 +1785,20 @@ void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentenc
 	}
 }
 
+//=================================================================================================================
+void CPeopleInterraction::displayTellInMainChat(const ucstring &playerName)
+{
+	//CChatWindow *chat = PeopleInterraction.MainChat.Window;
+	CChatWindow *chat = PeopleInterraction.ChatGroup.Window;
+	if (!chat) return;
+	chat->getContainer()->setActive (true);
+	// make the container blink
+	chat->getContainer()->enableBlink(2);
+	// TODO : center the view on the newly created container ?
+	// display a new command '/name' in the chat. The player must enter a new unique name for the party chat.
+	chat->setCommand("tell " + playerName + " ", false);
+	chat->setKeyboardFocus();
+}
 
 /////////////////////////////////////
 // ACTION HANDLERS FOR PEOPLE LIST //
@@ -1945,22 +1986,6 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerRemoveContact, "remove_contact");
 
-
-//=================================================================================================================
-static void displayTellInMainChat(const ucstring &playerName)
-{
-	//CChatWindow *chat = PeopleInterraction.MainChat.Window;
-	CChatWindow *chat = PeopleInterraction.ChatGroup.Window;
-	if (!chat) return;
-	chat->getContainer()->setActive (true);
-	// make the container blink
-	chat->getContainer()->enableBlink(2);
-	// TODO : center the view on the newly created container ?
-	// display a new command '/name' in the chat. The player must enter a new unique name for the party chat.
-	chat->setCommand("tell " + playerName + " ", false);
-	chat->setKeyboardFocus();
-}
-
 //=================================================================================================================
 // Invoke the 'tell' command on a contact from its menu
 // The tell command is displayed in the 'around me' window
@@ -1974,7 +1999,7 @@ public:
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromCurrentMenu(list, peopleIndex))
 		{
-			displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
 		}
 	}
 };
@@ -1996,7 +2021,7 @@ class CHandlerTellContact : public IActionHandler
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromContainerID(gc->getId(), list, peopleIndex))
 		{
-			displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
 		}
 
 	}
@@ -2150,9 +2175,20 @@ class CHandlerSortContacts : public IActionHandler
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
+		CInterfaceManager* pIM= CInterfaceManager::getInstance();
+		nlinfo("Load Order : %d", pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+
+		order = (CPeopleList::TSortOrder)(order + 1);
+		if (order == CPeopleList::END_SORT_ORDER) {
+			order = CPeopleList::START_SORT_ORDER;
+		}
+
+		nlinfo("Save Order : %d", order);
+		pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
 		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu();
 		if (pl)
-			pl->sort();
+			pl->sortEx(order);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSortContacts, "sort_contacts");
@@ -2441,6 +2477,30 @@ public:
 			if (pMenuUniverse)	pMenuUniverse->setGrayed	(false);
 			if (pMenuTeam)		pMenuTeam->setGrayed	(!teamActive);
 			if (pMenuGuild)		pMenuGuild->setGrayed	(!guildActive);
+
+			// Remove existing dynamic chats
+			while (pMenu->getNumLine() > 5)
+				pMenu->deleteLine(pMenu->getNumLine()-1);
+
+			// Add dynamic chats
+			uint insertion_index = 0;
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				string s = toString(i);
+				uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
+				bool active = (textId != 0);
+				if (active)
+				{
+					uint32 canWrite = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
+					if (canWrite != 0)
+					{
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						pMenu->addLineAtIndex(5 + insertion_index, title+" @{T8}/"+s, "chat_target_selected", "dyn"+s, "dyn"+s);
+						insertion_index++;
+					}
+				}
+			}
 		}
 
 		// activate the menu
@@ -2465,28 +2525,42 @@ class CHandlerChatTargetSelected : public IActionHandler
 		CChatTargetFilter &cf = fc->Filter;
 		// Team
 		if (nlstricmp(sParams, "team") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::team);
-
+		}
 		// Guild
-		if (nlstricmp(sParams, "guild") == 0)
+		else if (nlstricmp(sParams, "guild") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::guild);
-
+		}
 		// Say
-		if (nlstricmp(sParams, "say") == 0)
+		else if (nlstricmp(sParams, "say") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::say);
-
+		}
 		// Shout
-		if (nlstricmp(sParams, "shout") == 0)
+		else if (nlstricmp(sParams, "shout") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::shout);
-
+		}
 		// Region
-		if (nlstricmp(sParams, "region") == 0)
+		else if (nlstricmp(sParams, "region") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::region);
-
+		}
 		// Universe
-		if (nlstricmp(sParams, "universe") == 0)
+		else if (nlstricmp(sParams, "universe") == 0)
+		{
 			cf.setTargetGroup(CChatGroup::universe);
-
+		}
+		else
+		{
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++) {
+				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0) {
+					cf.setTargetGroup(CChatGroup::dyn_chat, i);
+				}
+			}
+		}
 
 		// Case of user chat in grouped chat window
 		if (cw == PeopleInterraction.ChatGroup.Window)
@@ -2592,6 +2666,25 @@ class CHandlerSelectChatSource : public IActionHandler
 		{
 			// select main chat menu
 			menu = dynamic_cast<CGroupMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU));
+
+			// Remove all unused dynamic channels and set the names
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				string s = toString(i);
+				CViewTextMenu *pVTM = dynamic_cast<CViewTextMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU+":tab:dyn"+s));
+				if (pVTM)
+				{
+					uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
+					bool active = (textId != 0);
+					pVTM->setActive(active);
+					if (active)
+					{
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						pVTM->setText("["+s+"] " + title);
+					}
+				}
+			}
 
 			// Menu with Filters
 			CChatGroupWindow *pWin = pi.getChatGroupWindow();

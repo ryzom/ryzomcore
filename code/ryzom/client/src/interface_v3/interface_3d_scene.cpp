@@ -506,7 +506,10 @@ void CInterface3DScene::draw ()
 		for (i = 0; i < _Characters.size(); ++i)
 			_Characters[i]->setClusterSystem ((UInstanceGroup*)-1);
 		for (i = 0; i < _Shapes.size(); ++i)
-			_Shapes[i]->getShape().setClusterSystem ((UInstanceGroup*)-1);
+		{
+			if (!_Shapes[i]->getShape().empty())
+				_Shapes[i]->getShape().setClusterSystem ((UInstanceGroup*)-1);
+		}
 		for (i = 0; i < _FXs.size(); ++i)
 			if (!_FXs[i]->getPS().empty())
 				_FXs[i]->getPS().setClusterSystem ((UInstanceGroup*)-1);
@@ -1344,7 +1347,20 @@ std::string CInterface3DShape::getName() const
 // ----------------------------------------------------------------------------
 void CInterface3DShape::setName (const std::string &ht)
 {
-	string lwrname = strlwr(ht);
+	if (ht.empty())
+	{
+		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
+		nlassert(pI3DS != NULL);
+
+		if (!_Instance.empty())
+		{
+			pI3DS->getScene()->deleteInstance(_Instance);
+		}
+		return;
+		_Name.clear();
+	}
+
+	string lwrname = toLower(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);

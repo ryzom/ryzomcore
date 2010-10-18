@@ -142,7 +142,7 @@ void CFXManager::update()
 	while (!_DeferredFXByDate.empty())
 	{
 
-		if (T1 < (sint64)_DeferredFXByDate.begin()->first) break;
+		if (T1 < (uint)_DeferredFXByDate.begin()->first) break;
 		const CDeferredFX &fx = _DeferredFXByDate.begin()->second;
 		NL3D::UParticleSystemInstance fxInstance = instantFX(fx.FXName, fx.TimeOut);
 		if (!fxInstance.empty())
@@ -231,7 +231,7 @@ void CFXManager::deferFX(const std::string &fxName, const NLMISC::CMatrix &matri
 	fx.FXName  = fxName;
 	fx.Matrix  = matrix;
 	fx.TimeOut = timeOut;
-	_DeferredFXByDate.insert(std::make_pair(T1 + sint64(1000.f * delayInSeconds), fx));
+	_DeferredFXByDate.insert(std::make_pair(T1 + uint64(1000.f * delayInSeconds), fx));
 }
 
 

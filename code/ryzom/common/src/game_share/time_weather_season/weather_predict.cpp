@@ -268,7 +268,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 	static const CFctCtrlPoint	 *lastFct;
 	static uint				     lastNumPoints;
 	static CWeatherFunctionParamsSheetBase lastDesc;
-	static uint64                lastCycle = ~0;
+	static uint64                lastCycle = std::numeric_limits<uint64>::max();
 	static EWeatherCycleType     weatherCycle = HighPressure;
 	static const CWeatherFunction *lastWf = NULL;
 

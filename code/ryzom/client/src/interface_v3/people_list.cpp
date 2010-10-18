@@ -186,6 +186,85 @@ sint CPeopleList::getIndexFromContainerID(const std::string &id) const
 }
 
 //==================================================================
+bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
+{
+	return (a.ContactId < b.ContactId);
+}
+
+//==================================================================
+bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
+{
+	ucstring name_a = toUpper(a.getName());
+	ucstring name_b = toUpper(b.getName());
+	
+	return (name_a < name_b);
+}
+
+//==================================================================
+bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
+{
+	ucstring name_a = toUpper(a.getName());
+	ucstring name_b = toUpper(b.getName());
+	
+	// We want order: online/alpha, offworld/alpha, offline/alpha
+	if (a.Online == b.Online) {
+		return (name_a < name_b);
+	}
+	else {
+		// Compare online status
+		switch (a.Online) {
+			case ccs_online:
+				// a is > if a is online
+				return true;
+				break;
+			case ccs_online_abroad:
+				// a is > if b is offline
+				return (b.Online == ccs_offline);
+				break;
+			case ccs_offline:
+			default:
+				// b is always > if a is offline
+				return false;
+				break;
+		}
+	}
+
+	// Should not get here so just return something
+	return true;
+}
+
+//==================================================================
+void CPeopleList::sortEx(TSortOrder order)
+{
+	// remove all people from the father container
+	if (!_BaseContainer) return;
+	uint k;
+	for(k = 0; k < _Peoples.size(); ++k)
+	{
+		_BaseContainer->detachContainer(_Peoples[k].Container);
+	}
+	
+	switch (order) {
+		default:
+		case sort_index:
+			std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByContactId);
+			break;
+		case sort_name:
+			std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByName);
+			break;
+
+		case sort_online:
+			std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByOnline);
+			break;
+	}
+
+	for(k = 0; k < _Peoples.size(); ++k)
+	{
+		_BaseContainer->attachContainer(_Peoples[k].Container);
+	}
+}
+
+//==================================================================
 void CPeopleList::sort()
 {
 	// remove all people from the father container
@@ -384,7 +463,15 @@ void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint num
 		nlwarning("<CPeopleList::displayLocalPlayerTell> can't get group list.");
 		return;
 	}
-	ucstring finalMsg = /*UserEntity->getName() + " " +*/ CI18N::get("youTell") + ": " + msg;
+
+	ucstring cur_time;
+	if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+	{
+		cur_time = CInterfaceManager::getTimestampHuman();
+	}
+ 	ucstring csr;
+	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
+	ucstring finalMsg = cur_time + csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
@@ -788,12 +875,19 @@ class CHandlerContactEntry : public IActionHandler
 		if(text.size() == 0)
 			return;
 
+		// Parse any tokens in the text
+		if ( ! CInterfaceManager::parseTokens(text))
+		{
+			pEB->setInputString (string(""));
+			return;
+		}
+
 		// is it a command ?
 		if(text[0] == '/')
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
 			// TODO : have NLMISC::ICommand accept unicode strings
-			std::string str = text.toString().substr(1);
+			std::string str = text.toUtf8().substr(1);
 			NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (string(""));
 			return;
@@ -804,6 +898,7 @@ class CHandlerContactEntry : public IActionHandler
 		CGroupContainer *gc = pCaller->getParent()->getEnclosingContainer();
 		// title gives the name of the player
 		ucstring playerName = gc->getUCTitle();
+
 		// Simply do a tell on the player
 		ChatMngr.tell(playerName.toString(), text);
 		pEB->setInputString (string(""));
@@ -816,8 +911,9 @@ class CHandlerContactEntry : public IActionHandler
 			}
 
 			// Retrieve name of the container in the list
-			string str = gc->getId().substr(0,gc->getId().rfind('_'));
-			if (str != "ui:interface:free_chat")
+			string ui_interface_free_chat = "ui:interface:free_chat";
+			string str = gc->getId().substr(0, ui_interface_free_chat.length());
+			if (str != ui_interface_free_chat)
 			{
 				string str2 = gc->getId().substr(gc->getId().rfind('_')+1,gc->getId().size());
 				str = str.substr(0,str.rfind('_'));
@@ -839,7 +935,14 @@ class CHandlerContactEntry : public IActionHandler
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 				ucstring final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
-				final += CI18N::get("youTell")+": ";
+				ucstring cur_time;
+				if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+				{
+					cur_time = CInterfaceManager::getTimestampHuman();
+				}
+				ucstring csr;
+				if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
+				final += cur_time + csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;

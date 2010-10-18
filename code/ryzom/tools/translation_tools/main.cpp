@@ -263,14 +263,16 @@ bool parseDiffCommandFromComment(const ucstring &comments, TDiffInfo &diffInfo)
 	string indexStr;
 	if (!CI18N::parseLabel(it, last, indexStr))
 		return false;
-	diffInfo.Index1 = atoi(indexStr.c_str());
+
+	NLMISC::fromString(indexStr, diffInfo.Index1);
 
 	if (diffInfo.Command == diff_swap)
 	{
 		CI18N::skipWhiteSpace(it, last);
 		if (!CI18N::parseLabel(it, last, indexStr))
 			return false;
-		diffInfo.Index2 = atoi(indexStr.c_str());
+
+		NLMISC::fromString(indexStr, diffInfo.Index2);
 	}
 	return true;
 }
@@ -3183,7 +3185,9 @@ int main(int argc, char *argv[])
 			showUsage(argv[0]);
 			return 1;
 		}
-		uint nbLines = atoi(argv[3]);
+
+		uint nbLines;
+		NLMISC::fromString(argv[3], nbLines);
 
 		cropLines(argv[2], nbLines);
 

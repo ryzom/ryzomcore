@@ -17,7 +17,7 @@
 
 #include "stdligo.h"
 
-#include "zone_bank.h"
+#include "nel/ligo/zone_bank.h"
 
 #ifdef NL_OS_WINDOWS
 

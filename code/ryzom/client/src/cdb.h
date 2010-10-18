@@ -19,6 +19,11 @@
 #ifndef CDB_H
 #define CDB_H
 
+// misc
+#include "nel/misc/types_nl.h"
+#include "nel/misc/smart_ptr.h"
+#include "nel/misc/string_mapper.h"
+
 #include <libxml/parser.h>
 
 namespace NLMISC

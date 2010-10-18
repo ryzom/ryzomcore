@@ -63,7 +63,7 @@ CBNPFileVersion::CBNPFileVersion()
 	_FileSize= 0;
 	_7ZFileSize=0;
 	_PatchSize= 0;
-	_VersionNumber= ~0u;
+	_VersionNumber= std::numeric_limits<uint32>::max();
 }
 
 // setup record contents from a file name and version number

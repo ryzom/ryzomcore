@@ -2440,6 +2440,174 @@ class CAHTarget : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CAHTarget, "target");
 
+
+
+class CAHAddShape : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string sShape = getParam(Params, "shape");
+		if(sShape.empty())
+		{
+			nlwarning("Command 'add_shape': need at least the parameter shape.");
+			return;
+		}
+		if (!Scene)
+		{
+			nlwarning("No scene available");
+			return;
+		}
+
+		double x = UserEntity->pos().x;
+		double y = UserEntity->pos().y;
+		double z = UserEntity->pos().z;
+		CVector userDir = UserEntity->dir();
+		float s = 1.0f;
+		string skeleton = getParam(Params, "skeleton");
+		string c = getParam(Params, "text");
+		string u = getParam(Params, "url");
+		string texture_name = getParam(Params, "texture");
+		string highlight = getParam(Params, "texture");
+		string transparency = getParam(Params, "transparency");
+
+		if (!getParam(Params, "x").empty())
+			fromString(getParam(Params, "x"), x);
+		if (!getParam(Params, "y").empty())
+			fromString(getParam(Params, "y"), y);
+		if (!getParam(Params, "z").empty())
+			fromString(getParam(Params, "z"), z);
+		if (!getParam(Params, "scale").empty())
+			fromString(getParam(Params, "scale"), s);
+		if (!getParam(Params, "angle").empty())
+		{
+			float a;
+			fromString(getParam(Params, "angle"), a);
+			userDir = CVector(sin(a), cos(a), 0.f);
+		}
+		
+		bool have_shapes = true;
+		bool first_shape = true;
+		while(have_shapes)
+		{
+			string shape;
+			string::size_type index = sShape.find(string(" "));
+			// multiple shapes/fx
+			if (index != string::npos)
+			{
+				shape = sShape.substr(0, index);
+				sShape = sShape.substr(index+1);
+			} else {
+				shape = sShape;
+				have_shapes = false;
+			}
+
+
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, first_shape);
+			UInstance instance = instref.Instance;
+
+			if(!instance.empty())
+			{
+				for(uint j=0;j<instance.getNumMaterials();j++)
+				{
+					if (highlight.empty())
+					{
+						instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
+						instance.getMaterial(j).setShininess( 10.0f );
+						instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+					}
+					else
+					{
+						instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
+						instance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
+						instance.getMaterial(j).setShininess( 1000.0f );
+					}
+
+					if (!texture_name.empty() && first_shape)
+					{
+						sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
+						for(sint l = 0; l < numStages; l++)
+						{
+							if (instance.getMaterial(j).isTextureFile((uint) l))
+							{
+								instance.getMaterial(j).setTextureFileName(texture_name, (uint) l);
+							}
+						}
+					}
+				}
+
+				first_shape = false;
+
+				if (transparency.empty())
+					::makeInstanceTransparent(instance, 255, false);
+				else
+					::makeInstanceTransparent(instance, 100, true);
+
+				instance.setClusterSystem(UserEntity->getClusterSystem()); // for simplicity, assume it is in the same
+																		   // cluster system than the user
+				// Compute the direction Matrix
+				CMatrix dir;
+				dir.identity();
+				CVector vi = userDir^CVector(0.f, 0.f, 1.f);
+				CVector vk = vi^userDir;
+				dir.setRot(vi, userDir, vk, true);
+				// Set Orientation : User Direction should be normalized.
+				if (!skeleton.empty())
+				{
+					USkeleton skel = Scene->createSkeleton(skeleton);
+					if (!skel.empty()) 
+					{
+						skel.bindSkin(instance);
+						skel.setClusterSystem(UserEntity->getClusterSystem());
+						skel.setScale(skel.getScale()*s);
+						skel.setPos(CVector((float)x, (float)y, (float)z));
+						skel.setRotQuat(dir.getRot());
+					}
+				} else {
+					instance.setScale(instance.getScale()*s);
+					instance.setPos(CVector((float)x, (float)y, (float)z));
+					instance.setRotQuat(dir.getRot());
+				}
+				// if the shape is a particle system, additionnal parameters are user params
+				UParticleSystemInstance psi;
+				psi.cast (instance);
+				/*if (!psi.empty())
+				{
+					// set each user param that is present
+					for(uint k = 0; k < 4; ++k)
+					{
+						if (args.size() >= (k + 2))
+						{
+							float uparam;
+							if (fromString(args[k + 1], uparam))
+							{
+								psi.setUserParam(k, uparam);
+							}
+							else
+							{
+								nlwarning("Cant read param %d", k);
+							}
+						}
+					}
+				}*/
+			}
+			else
+				nlwarning("Command 'add_shape': cannot find the shape %s.", sShape.c_str());
+		}
+
+		return;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHAddShape, "add_shape");
+
+class CAHRemoveShapes : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		EntitiesMngr.removeInstances();
+	}
+};
+REGISTER_ACTION_HANDLER (CAHRemoveShapes, "remove_shapes");
+
 // ***************************************************************************
 // See also CHandlerTeamTarget
 class CAHTargetTeammateShortcut : public IActionHandler

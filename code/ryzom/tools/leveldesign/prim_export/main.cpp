@@ -179,7 +179,9 @@ bool getZoneCoordByName(const char * name, uint16& x, uint16& y)
 			return false;
 		}
 	}
-	y = -atoi(ystr.c_str());
+
+	NLMISC::fromString(ystr, y);
+	y = -y;
 
 	// x
 	x = 0;
@@ -223,7 +225,11 @@ sint getYFromZoneName (const string &ZoneName)
 	{
 		xStr += ZoneName[i]; ++i;
 	}
-	return -atoi(yStr.c_str());
+
+	sint y = 0;
+	NLMISC::fromString(yStr, y);
+
+	return -y;
 }
 
 // ***************************************************************************

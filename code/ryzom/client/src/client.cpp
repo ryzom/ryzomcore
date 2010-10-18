@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 	// if client_default.cfg is not in current directory, use application default directory
 	if (!CFile::isExists("client_default.cfg"))
 	{
-		std::string currentPath = CFile::getApplicationDirectory("Ryzom");
+		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 

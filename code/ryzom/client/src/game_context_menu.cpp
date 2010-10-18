@@ -847,7 +847,7 @@ void CGameContextMenu::updateContextMenuTalkEntries(uint options)
 {
 	if (ClientCfg.Local)
 	{
-		options = ~0; // in local mode, force all options to be shown (for debug)
+		options = std::numeric_limits<uint>::max(); // in local mode, force all options to be shown (for debug)
 	}
 	// news
 	_OkTextNews= ((options & (1 << BOTCHATTYPE::NewsFlag)));

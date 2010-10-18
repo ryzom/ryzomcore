@@ -56,8 +56,12 @@ int CConfigFile::CVar::asInt (int index) const
 	switch (Type)
 	{
 	case T_STRING:
+	{
 		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
-		return atoi(StrValues[index].c_str());
+		int ret = 0;
+		NLMISC::fromString(StrValues[index], ret);
+		return ret;
+	}
 	case T_REAL:
 		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		return (int)RealValues[index];

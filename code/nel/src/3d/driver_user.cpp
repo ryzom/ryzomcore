@@ -1938,5 +1938,14 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 
 	return result;
 }
+bool CDriverUser::copyTextToClipboard(const ucstring &text)
+{
+	return _Driver->copyTextToClipboard(text);
+}
+
+bool CDriverUser::pasteTextFromClipboard(ucstring &text)
+{
+	return _Driver->pasteTextFromClipboard(text);
+}
 
 } // NL3D

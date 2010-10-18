@@ -66,7 +66,7 @@ struct SExportOptions
 	std::string GameElemDir;		// Directory to get georges file (pipoti.plant)
 
 	// =======================================================================
-	
+
 	SExportOptions ();
 	bool loadcf (NLMISC::CConfigFile &cf);
 	bool save (FILE *f);
@@ -122,21 +122,21 @@ public:
 
 	CExport ();
 	~CExport ();
-	
+
 	// EXPORT one region :
 	// Parse the SourceDir find the .land and .prim
 	// newExport is the incremental export
 	bool newExport (SExportOptions &options, IExportCB *expCB = NULL);
-	bool export (SExportOptions &options, IExportCB *expCB = NULL, std::vector<SExportPrimitive> *selection = NULL);
+	bool doExport (SExportOptions &options, IExportCB *expCB = NULL, std::vector<SExportPrimitive> *selection = NULL);
 
 	// HELPERS
 	// Get All files with the extension ext in the current directory and subdirectory
 	static void getAllFiles (const std::string &ext, std::vector<std::string> &files);
 	// Search a file through all subdirectories of the current one (and in the current too)
 	static bool searchFile (const std::string &plantName, std::string &dir);
-	
+
 private:
-	
+
 	SExportOptions		*_Options;
 	IExportCB			*_ExportCB;
 
@@ -160,7 +160,7 @@ private:
 
 private:
 
-	struct SFloraToUpdate 
+	struct SFloraToUpdate
 	{
 		std::string					FloraFile;
 		std::vector<std::string>	PrimFile;
@@ -186,7 +186,7 @@ private:
 
 	// Write zone by zone the instance group of the flora generated in the specific land
 	void writeFloraIG (const std::string &LandFile, bool bTestForWriting = false);
-	
+
 	// Helpers
 	// *******
 
@@ -204,7 +204,7 @@ private:
 
 
 public:
-	
+
 	static std::string getZoneNameFromXY (sint32 x, sint32 y);
 	static sint32 getXFromZoneName (const std::string &ZoneName);
 	static sint32 getYFromZoneName (const std::string &ZoneName);

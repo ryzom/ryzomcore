@@ -33,6 +33,7 @@ typedef NLMISC::CEntityId	TChanID;
 
 // tag for invalid channel
 const TChanID DYN_CHAT_INVALID_CHAN = NLMISC::CEntityId::Unknown;
+const std::string DYN_CHAT_INVALID_NAME;
 
 
 /// Message payload for player input forward to channel service owner

@@ -86,7 +86,7 @@ void	init()
 	try
 	{
 #ifdef NL_OS_UNIX
-		NLMISC::CPath::addSearchPath(NLMISC::CFile::getApplicationDirectory("NeL"));
+		NLMISC::CPath::addSearchPath(NLMISC::CPath::getApplicationDirectory("NeL"));
 #endif // NL_OS_UNIX
 
 		NLMISC::CPath::addSearchPath(NL_BIB_CFG);

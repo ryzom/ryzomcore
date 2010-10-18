@@ -574,7 +574,7 @@ void CEntityIdTranslator::getEntityIdInfo (const CEntityId &eid, ucstring &entit
 		nlwarning ("EIT: %s is not registered in CEntityIdTranslator", reid.toString().c_str());
 		entityName = "";
 		entitySlot = -1;
-		uid = ~0;
+		uid = std::numeric_limits<uint32>::max();
 		userName = "";
 		online = false;
 	}

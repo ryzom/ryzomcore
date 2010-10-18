@@ -486,7 +486,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 	uint tryCounter = 1;
 	for (;;)
 	{
-		nlwarning("Launching downloader: try number %d", (int) tryCounter++);
+		nlwarning("Launching downloader: try number %u", tryCounter++);
 		// now we can create the message queue because we are sure that it will reach the good app
 		Parent->_DownloaderMsgQueue.init(HInstance, BGDownloader::ClientWndID, BGDownloader::DownloaderWndID);
 		sleep(200);

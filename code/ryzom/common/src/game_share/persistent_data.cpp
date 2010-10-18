@@ -277,7 +277,7 @@ uint16 CPersistentDataRecord::addString(const string& name)
 
 		uint16 result= (uint16)_StringTable.size();
 		_StringTable.push_back(name);
-		BOMB_IF(result==(uint16)~0u,"No more room in string table!!!",_StringTable.pop_back());
+		BOMB_IF(result==std::numeric_limits<uint16>::max(),"No more room in string table!!!",_StringTable.pop_back());
 		return result;
 	}
 }

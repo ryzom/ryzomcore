@@ -203,7 +203,7 @@ CParseNode	*parse##nodename(CTokenizer &tokenizer)	\
 	{	\
 		if (tokenizer.end() || tokenizer.current() != TokenNumber)	\
 			PARSE_FAIL	\
-		main->savein = atoi(tokenizer.get(tokenizer.currentToken()).c_str());	\
+		NLMISC::fromString(tokenizer.get(tokenizer.currentToken()), main->savein);	\
 		tokenizer.next();	\
 	}
 

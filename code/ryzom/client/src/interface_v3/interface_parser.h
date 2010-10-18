@@ -103,7 +103,7 @@ public:
       * \param isFilename true if xmlFileNames array contains the names of the xml file, false, if each
 	  *                   array is a script itself
 	  */
-	bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true);
+	bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true, bool checkInData = false);
 
 	bool parseXMLDocument (xmlNodePtr root, bool reload);
 

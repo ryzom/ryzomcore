@@ -224,6 +224,16 @@ public:
 	*/
 	std::string getWindowsDirectory();
 
+	/** Get application directory.
+	* \return directory where applications should write files.
+	*/
+	std::string getApplicationDirectory(const std::string &appName = "");
+
+	/** Get a temporary directory.
+	* \return temporary directory where applications should write files.
+	*/
+	std::string getTemporaryDirectory();
+
 private:
 
 	// All path in this vector must have a terminated '/'
@@ -506,6 +516,16 @@ public:
 	*/
 	static std::string getWindowsDirectory();
 
+	/** Get application directory.
+	* \return directory where applications should write files.
+	*/
+	static std::string getApplicationDirectory(const std::string &appName = "");
+
+	/** Get a temporary directory.
+	* \return temporary directory where applications should write files.
+	*/
+	static std::string getTemporaryDirectory();
+
 	// release singleton
 	static void releaseInstance();
 
@@ -700,11 +720,6 @@ struct CFile
 	*	Call this method to get a temporary output filename. If you have successfully saved your data, delete the old filename and move the new one.
 	*/
 	static void getTemporaryOutputFilename (const std::string &originalFilename, std::string &tempFilename);
-
-	/** Get application directory.
-	* \return directory where applications should write files.
-	*/
-	static std::string getApplicationDirectory(const std::string &appName = "");
 };
 
 } // NLMISC

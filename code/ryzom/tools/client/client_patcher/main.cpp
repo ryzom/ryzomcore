@@ -121,7 +121,7 @@ void printDownload(const std::string &str)
 	// add padding with spaces
 	memset(spaces, ' ', maxLength);
 	spaces[maxLength - length] = '\0';
-	
+
 	// display download in purple
 	if (useEsc)
 	{
@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
 	// init the Nel context
 	CApplicationContext appContext;
 
-	// create logs in TEMP directory
-	createDebug(getenv("TEMP"), true, true);
+	// create logs in temporary directory
+	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
 
 	// disable log display on stdout
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	// create or load client.cfg
+	// load client.cfg or client_default.cfg
 	ClientCfg.init(config);
 
 	// check if PatchServer is defined

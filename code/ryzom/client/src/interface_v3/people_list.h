@@ -81,6 +81,18 @@ public:
 	ucstring getName(uint index) const;
 	// Sort people alphabetically
 	void sort();
+
+	enum TSortOrder
+	{
+		sort_index = 0,
+		START_SORT_ORDER = sort_index,
+		sort_name,
+		sort_online,
+		END_SORT_ORDER
+	};
+
+	void sortEx(TSortOrder order);
+
 	/** Add a people to the list, and returns its index or -1 if the creation failed
 	  * If this is a team mate, tells its index so that ic can be bound to the database in the right location
 	  */
@@ -165,6 +177,10 @@ private:
 	void			  updatePeopleMenu(uint index);
 	// from CGroupContainer::IChildrenObs
 	virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children);
+
+	static bool sortExByContactId(const CPeople& a, const CPeople& b);
+	static bool sortExByName(const CPeople& a, const CPeople& b);
+	static bool sortExByOnline(const CPeople& a, const CPeople& b);
 };
 
 #endif

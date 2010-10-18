@@ -73,7 +73,7 @@ void CActionSint64::registerNumericPropertiesRyzom()
 	CActionSint64::registerNumericProperty( PROPERTY_GUILD_NAME_ID, 32 );
 	CActionSint64::registerNumericProperty( PROPERTY_EVENT_FACTION_ID, 32 );
 	CActionSint64::registerNumericProperty( PROPERTY_PVP_MODE, PVP_MODE::NbBits );
-	CActionSint64::registerNumericProperty( PROPERTY_PVP_CLAN, PVP_CLAN::NbBits );
+	CActionSint64::registerNumericProperty( PROPERTY_PVP_CLAN, 32 );
 	CActionSint64::registerNumericProperty( PROPERTY_OWNER_PEOPLE, 3 ); // 4 races and unknow
 	CActionSint64::registerNumericProperty( PROPERTY_OUTPOST_INFOS, 16 ); // 15+1
 }

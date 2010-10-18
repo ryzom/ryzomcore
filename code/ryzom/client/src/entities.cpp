@@ -494,6 +494,90 @@ void CEntityManager::reinit()
 	initialize(_NbMaxEntity);
 }
 
+CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool bbox_active)
+{
+	CShapeInstanceReference nullinstref(UInstance(), string(""), string(""));
+	if (!Scene) return nullinstref;
+
+	UInstance instance = Scene->createInstance(shape);
+	if (text.empty())
+		bbox_active = false;
+	CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, bbox_active);
+	if(!instance.empty())
+	{
+		_ShapeInstances.push_back(instref);
+	}
+	return instref;
+}
+
+bool CEntityManager::removeInstances()
+{
+	if (!Scene) return false;
+	// Remove all instances.
+	for(uint i=0; i<_ShapeInstances.size(); ++i)
+	{
+		if (!_ShapeInstances[i].Instance.empty())
+			Scene->deleteInstance(_ShapeInstances[i].Instance);
+	}
+	_ShapeInstances.clear();
+	return true;
+}
+
+CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y)
+{
+	CShapeInstanceReference selectedInstance(UInstance(), string(""), string(""));
+	_LastInstanceUnderPos= NULL;
+
+	// If not initialised, return
+	if (_ShapeInstances.empty())
+		return selectedInstance;
+
+	// build the ray
+	CMatrix camMatrix = MainCam.getMatrix();
+	CFrustum camFrust = MainCam.getFrustum();
+	CViewport viewport = Driver->getViewport();
+
+	// Get the Ray made by the mouse.
+	CVector pos, dir;
+	viewport.getRayWithPoint(x, y, pos, dir, camMatrix, camFrust);
+	// Normalize the direction.
+	dir.normalize();
+
+	// **** Get instances with box intersecting the ray.
+	float bestDist = 255;
+	for(uint i=0; i<_ShapeInstances.size(); i++)
+	{
+		if (_ShapeInstances[i].BboxActive)
+		{
+			H_AUTO(RZ_Client_GEUP_box_intersect)
+
+			// if intersect the bbox
+			NLMISC::CAABBox bbox;
+			//= _ShapeInstances[i].SelectionBox;
+			_ShapeInstances[i].Instance.getShapeAABBox(bbox);
+			if (bbox.getCenter() == CVector::Null)
+			{
+				bbox.setMinMax(CVector(-0.3f, -0.3f, -0.3f)+_ShapeInstances[i].Instance.getPos(), CVector(0.3f, 0.3f, 0.3f)+_ShapeInstances[i].Instance.getPos());
+			}
+			else
+			{
+				bbox.setMinMax((bbox.getMin()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox.getMax()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
+			}
+			if(bbox.intersect(pos, pos+dir*15.0f))
+			{
+				float dist = (bbox.getCenter()-pos).norm();
+				if (dist < bestDist)
+				{
+					selectedInstance = _ShapeInstances[i];
+					bestDist = dist;
+				}
+			}
+		}
+	}
+	return	selectedInstance;
+}
+
+
 //-----------------------------------------------
 // Create an entity according to the slot and the form.
 // \param uint slot : slot for the entity.

@@ -51,7 +51,8 @@ bool getZonePos(const std::string &name, sint &destX, sint &destY)
 	if (xStr.size() != 2) return false;
 	// compute min corner
 	destX = ((xStr[0] - 'A') * 26 + (xStr[1] - 'A'));
-	destY = -atoi(yStr.c_str());
+	NLMISC::fromString(yStr, destY);
+	destY = -destY;
 	return true;
 }
 

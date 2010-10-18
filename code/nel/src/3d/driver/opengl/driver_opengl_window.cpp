@@ -135,7 +135,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			case SC_MONITORPOWER:
 
 			// Prevent From Happening
-			return 0;												
+			return 0;
 
 			default:
 			break;
@@ -2947,5 +2947,15 @@ void CDriverGL::setupApplicationMenu()
  	[[NSApp mainMenu] addItem:menuItem];	
 }
 #endif
+
+bool CDriverGL::copyTextToClipboard(const ucstring &text)
+{
+	return _EventEmitter.copyTextToClipboard(text);
+}
+
+bool CDriverGL::pasteTextFromClipboard(ucstring &text)
+{
+	return _EventEmitter.pasteTextFromClipboard(text);
+}
 
 } // NL3D

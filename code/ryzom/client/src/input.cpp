@@ -445,7 +445,6 @@ void HandleSystemCursorCapture(const CEvent &event)
 	}
 }
 
-
 // *********************************************************************************
 bool IsSystemCursorInClientArea()
 {
@@ -505,8 +504,6 @@ bool IsSystemCursorInClientArea()
 #endif
 	return true;
 }
-
-
 
 sint CNiceInputAuto::_Count = 0;
 
