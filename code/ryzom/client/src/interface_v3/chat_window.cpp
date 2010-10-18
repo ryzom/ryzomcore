@@ -477,7 +477,8 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &msg, uint numBlinks /*=
 	{
 		cur_time = CInterfaceManager::getTimestampHuman();
 	}
-	ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+	ucstring csr;
+	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 	finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);

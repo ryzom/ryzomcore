@@ -469,7 +469,8 @@ void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint num
 	{
 		cur_time = CInterfaceManager::getTimestampHuman();
 	}
- 	ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+ 	ucstring csr;
+	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 	ucstring finalMsg = cur_time + csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
@@ -939,7 +940,8 @@ class CHandlerContactEntry : public IActionHandler
 				{
 					cur_time = CInterfaceManager::getTimestampHuman();
 				}
-				ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+				ucstring csr;
+				if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 				final += cur_time + csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);

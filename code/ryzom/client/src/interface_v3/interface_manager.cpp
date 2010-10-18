@@ -6331,8 +6331,8 @@ char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " *
 bool CInterfaceManager::parseTokens(ucstring& ucstr)
 {
 	ucstring str = ucstr;
-	ucstring start_token = "$";
-	ucstring end_token = "$";
+	ucstring start_token("$");
+	ucstring end_token("$");
 	size_t start_pos = 0;
 	size_t end_pos = 1;
 
