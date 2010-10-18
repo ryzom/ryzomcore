@@ -295,12 +295,24 @@ void CBigFile::remove (const std::string &sBigFileName)
 }
 
 // ***************************************************************************
-bool CBigFile::isBigFileAdded(const std::string &sBigFileName)
+bool CBigFile::isBigFileAdded(const std::string &sBigFileName) const
 {
 	// Is already the same bigfile name ?
 	string bigfilenamealone = CFile::getFilename (sBigFileName);
 	return _BNPs.find(bigfilenamealone) != _BNPs.end();
 }
+
+// ***************************************************************************
+std::string CBigFile::getBigFileName(const std::string &sBigFileName) const
+{
+	string bigfilenamealone = CFile::getFilename (sBigFileName);
+	map<string, BNP>::const_iterator it = _BNPs.find(bigfilenamealone);
+	if (it != _BNPs.end())
+		return it->second.BigFileName;
+	else
+		return "";
+}
+
 
 // ***************************************************************************
 void CBigFile::list (const std::string &sBigFileName, std::vector<std::string> &vAllFiles)
@@ -403,9 +415,10 @@ FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 	{
 		handle.File = fopen (bnp->BigFileName.c_str(), "rb");
 		if (handle.File == NULL)
-		  nlwarning ("bnp: can't fopen big file '%s' error %d '%s'", bnp->BigFileName.c_str(), errno, strerror(errno));
-		if (handle.File == NULL)
+		{
+			nlwarning ("bnp: can't fopen big file '%s' error %d '%s'", bnp->BigFileName.c_str(), errno, strerror(errno));
 			return NULL;
+		}
 	}
 
 	rCacheFileOnOpen = bnp->CacheFileOnOpen;
