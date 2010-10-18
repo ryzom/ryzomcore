@@ -1863,8 +1863,8 @@ void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* game
 	// get fames signs from prop
 	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
 	{
-		_PvpAllies[fameIdx] = prop & (1 << 2*fameIdx);
-		_PvpEnemies[fameIdx] = prop & (1 << ((2*fameIdx)+1));
+		_PvpAllies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx))) != 0;
+		_PvpEnemies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx+1))) != 0;
 	}
 
 	_ClanCivMaxFame = PVP_CLAN::TPVPClan((prop & (0x03 << 2*7)) >> 2*7);
