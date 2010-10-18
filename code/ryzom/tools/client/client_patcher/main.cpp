@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	CApplicationContext appContext;
 
 	// create logs in temporary directory
-	createDebug(CPath::getTemporaryDirectory(), true, true);
+	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
 
 	// disable log display on stdout
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
