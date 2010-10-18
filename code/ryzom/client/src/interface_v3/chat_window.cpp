@@ -473,7 +473,8 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &msg, uint numBlinks /*=
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
 	ucstring cur_time;
-	if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+	if (pNL && pNL->getValueBool())
 	{
 		cur_time = CInterfaceManager::getTimestampHuman();
 	}
