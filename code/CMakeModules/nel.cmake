@@ -42,6 +42,7 @@ MACRO(NL_DEFAULT_PROPS name label)
     # Set versions only if target is a shared library
     SET_TARGET_PROPERTIES(${name} PROPERTIES
       VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR}
+      INSTALL_NAME_DIR ${NL_LIB_PREFIX}
       PROJECT_LABEL ${label})
   ELSE(${type} STREQUAL SHARED_LIBRARY)
     SET_TARGET_PROPERTIES(${name} PROPERTIES
