@@ -3932,14 +3932,15 @@ void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* ai
 
 		DROP_IF( itemAndQt.size() != 2, "Syntax error in activateEasterEgg", return );
 
-		char* ok = 0;
-		uint32 item = static_cast<uint32>(strtol(itemAndQt[0].c_str(), &ok, 10));
+		uint32 item;
+		bool ok = NLMISC::fromString(itemAndQt[0], item);
 
-		DROP_IF( *ok != '\0', "Error  activateEasterEgg", return);
+		DROP_IF( !ok, "Error  activateEasterEgg", return);
 
-		uint32 qt = static_cast<uint32>(strtol(itemAndQt[1].c_str(), &ok, 10));
+		uint32 qt;
+		ok = NLMISC::fromString(itemAndQt[1], qt);
 
-		DROP_IF( *ok != '\0', "Error in activateEasterEgg", return);
+		DROP_IF( !ok, "Error in activateEasterEgg", return);
 		DROP_IF( qt > 255, "Error in activateEasterEgg", return);
 		DROP_IF( item >= 	session->MissionItems.size(), "Error  activateEasterEgg", return);
 

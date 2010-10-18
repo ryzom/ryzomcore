@@ -1897,16 +1897,18 @@ uint32 CObject::instanceIdToUint32(const std::string& instanceId)
 
 	std::string clientIdStr = instanceId.substr(6,  clientIdIt-6);
 	std::string componentIdStr = instanceId.substr(clientIdIt+1,  size - clientIdIt);
-	char* ko=NULL;
-	uint32 clientId = static_cast<uint32>(strtol(clientIdStr.c_str(), &ko, 10));
-	if (*ko != '\0')
+	bool ko;
+	uint32 clientId;
+	ko = NLMISC::fromString(clientIdStr, clientId);
+	if (!ko)
 	{
 		nlwarning("R2Share: Wrong InstanceId(%s)", instanceId.c_str());
 		return 0;
 	}
 
-	uint32 componentId = static_cast<uint32>(strtol(componentIdStr.c_str(), &ko, 10));
-	if (*ko != '\0')
+	uint32 componentId;
+	ko = NLMISC::fromString(componentIdStr, componentId);
+	if (!ko)
 	{
 		nlwarning("R2Share: Wrong InstanceId(%s)", instanceId.c_str());
 		return 0;
