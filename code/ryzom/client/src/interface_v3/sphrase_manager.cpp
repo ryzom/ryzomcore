@@ -4686,12 +4686,14 @@ NLMISC_COMMAND(regenTickRange, "Emulate regen tick range locally for a memory sl
 {
 	if (args.size() != 1 && args.size() != 2) return false;
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
-	const CSPhraseCom	&phrase = pPM->getPhrase(atoi(args[0].c_str()));
+	uint32 phraseId;
+	NLMISC::fromString(args[0], phraseId);
+	const CSPhraseCom	&phrase = pPM->getPhrase(phraseId);
 	uint64 powerBitField = CSPhraseManager::getPhraseRequiredFlags(phrase);
 	TGameCycle duration;
 	if (args.size() >= 2)
 	{
-		duration = (TGameCycle) atoi(args[1].c_str());
+		NLMISC::fromString(args[1], duration);
 	}
 	else
 	{
