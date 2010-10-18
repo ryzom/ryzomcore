@@ -1329,7 +1329,7 @@ void CUserEntity::resetAnyMoveTo()
 	if(_MoveToAction==CUserEntity::CombatPhrase || _MoveToAction==CUserEntity::ExtractRM)
 	{
 		// the clientExecute has not been called in case of "ExtractRM autoFind"
-		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == (uint)~0;
+		bool	autoFindExtractRM= _MoveToAction==CUserEntity::ExtractRM && _MoveToPhraseMemoryLine == std::numeric_limits<uint>::max();
 		if(!autoFindExtractRM)
 		{
 			CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -3758,7 +3758,7 @@ void CUserEntity::extractRM()
 	CSPhraseManager *pm = CSPhraseManager::getInstance();
 	uint index;
 	uint memoryLine;
-	bool autoFindPhrase = (_MoveToPhraseMemoryLine == (uint)~0);
+	bool autoFindPhrase = (_MoveToPhraseMemoryLine == std::numeric_limits<uint>::max());
 	if ( ! autoFindPhrase )
 	{
 		// Use clicked phrase
@@ -3773,7 +3773,7 @@ void CUserEntity::extractRM()
 		if ( ! findExtractionActionInMemory( pm, bm, memoryLine, index ) )
 		{
 			// Search in other memory bar lines (because the auto-equip does not set the current line at once)
-			memoryLine = ~0;
+			memoryLine = std::numeric_limits<uint>::max();
 			uint nbLines = pm->getNbMemoryLines();
 			for ( uint j=0; j!=nbLines; ++j )
 			{
@@ -3788,7 +3788,7 @@ void CUserEntity::extractRM()
 		}
 	}
 
-	if ( memoryLine != (uint)~0 )
+	if ( memoryLine != std::numeric_limits<uint>::max() )
 	{
 		// Open the forage (but not for care actions). Necessary for the case of redoing an extraction after a Drop All on the same source.
 		uint32 phraseId = pm->getMemorizedPhrase( memoryLine, index );

@@ -2872,7 +2872,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					}
 				}
 
-
 				// following lines added by Sadge to ensure that the correct file gets patched
 				//			string SourceNameXDFull;
 				//			if (NLMISC::CFile::fileExists(pPM->ClientDataPath + SourceNameXD))	SourceNameXDFull = pPM->ClientDataPath + SourceNameXD;
@@ -2897,9 +2896,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			if (rFTP.LocalFileExists)
 				pPM->deleteFile(SourceName);
 			pPM->deleteFile(PatchName);
-
-
-
 
 			if (j > 0)
 			{
@@ -3210,9 +3206,11 @@ bool CPatchManager::download(const std::string& patchFullname, const std::string
 	NLMISC::CFile::createDirectoryTree( NLMISC::CFile::getPath(sourceFullname) );
 
 	// try to download
-	try {
+	try
+	{
 		pPM->getServerFile(patchFullname, false, patchName);
-	} catch ( const std::exception& e)
+	}
+	catch ( const std::exception& e)
 	{
 		nlwarning("%s", e.what());
 		pPM->setState(true, ucstring(e.what()) );
@@ -3468,12 +3466,14 @@ void CDownloadThread::run()
 				// create directory tree
 				NLMISC::CFile::createDirectoryTree(path);
 				// Try to download, rename, applyDate and send error msg to gui in case of error
-				try {
+				try
+				{
 					pPM->getServerFile(patchName, false, tmpFile);
 					NLMISC::CFile::moveFile(finalFile.c_str(), tmpFile.c_str());
 
 					pPM->applyDate(finalFile, _Entries[first].Timestamp);
-				} catch ( const std::exception& e)
+				}
+				catch ( const std::exception& e)
 				{
 					nlwarning("%s", e.what());
 					pPM->setState(true, ucstring(e.what()) );

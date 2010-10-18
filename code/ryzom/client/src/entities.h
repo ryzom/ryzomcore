@@ -35,6 +35,9 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/file.h"
+#include "nel/misc/aabbox.h"
+// 3D
+#include "nel/3d/u_instance.h"
 // Std.
 #include <vector>
 

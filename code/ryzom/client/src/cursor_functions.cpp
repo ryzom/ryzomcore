@@ -510,7 +510,6 @@ void checkUnderCursor()
 				}
 			}
 		}
-
 		else
 			SlotUnderCursor = CLFECOMMON::INVALID_SLOT;
 	}
@@ -839,5 +838,5 @@ void contextBuildTotem(bool rightClick, bool dblClick)
 		return;
 	if( ClientCfg.DblClickMode && !dblClick)
 		return;
-	UserEntity->moveToTotemBuildingPhrase(SlotUnderCursor,MaxExtractionDistance, ~0, ~0, true );
+	UserEntity->moveToTotemBuildingPhrase(SlotUnderCursor,MaxExtractionDistance, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true );
 }// contextBuildTotem //

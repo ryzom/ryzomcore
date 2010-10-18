@@ -20,6 +20,7 @@
 #define RZ_CTRL_EDITBOX_H
 
 #include "interface_group.h"
+#include "nel/3d/u_texture.h"
 
 
 class CEventDescriptor;

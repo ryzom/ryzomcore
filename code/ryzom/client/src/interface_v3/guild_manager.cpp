@@ -41,6 +41,8 @@
 #include "game_share/lift_icons.h"
 
 #include "../r2/editor.h"
+#include "chat_window.h"
+#include "people_interraction.h"
 
 using namespace std;
 using namespace NLMISC;

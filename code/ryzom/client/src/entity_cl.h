@@ -910,6 +910,7 @@ protected:
 	std::string						_PermanentStatutIcon;
 	// Has reserved title?
 	bool							_HasReservedTitle;
+
 	// Extended Name
 	ucstring						_NameEx;
 	// String ID
