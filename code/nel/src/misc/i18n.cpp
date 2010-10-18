@@ -39,40 +39,34 @@ void CI18N::setLoadProxy(ILoadProxy *loadProxy)
 	_LoadProxy = loadProxy;
 }
 
+void CI18N::initLanguages()
+{
+	if (!_LanguagesNamesLoaded)
+	{
+		_LanguageCodes.push_back("en");
+		_LanguageCodes.push_back("fr");
+		_LanguageCodes.push_back("de");
+		_LanguageCodes.push_back("ru");
+
+		_LanguageNames.push_back("English");
+		_LanguageNames.push_back("French");
+		_LanguageNames.push_back("German");
+		_LanguageNames.push_back("Russian");
+
+		_LanguagesNamesLoaded = true;
+	}
+}
+
 const std::vector<ucstring> &CI18N::getLanguageNames()
 {
+	initLanguages();
+
 	return _LanguageNames;
 }
 
 const std::vector<std::string> &CI18N::getLanguageCodes()
 {
-	if (!_LanguagesNamesLoaded)
-	{
-		std::vector<std::string> files;
-
-		// search all .uxt files
-		CPath::getFileList("uxt", files);
-
-		// if not uxt found, use default languages
-		if (files.empty())
-		{
-			_LanguageCodes.clear();
-			_LanguageCodes.push_back("en");
-			_LanguageCodes.push_back("fr");
-			_LanguageCodes.push_back("de");
-			_LanguageCodes.push_back("ru");
-		}
-		else
-		{
-			// add all languages found
-			for(uint i = 0; i < files.size(); ++i)
-			{
-				_LanguageCodes.push_back(toLower(CFile::getFilenameWithoutExtension(files[i])));
-			}
-
-			_LanguagesNamesLoaded = true;
-		}
-	}
+	initLanguages();
 
 	return _LanguageCodes;
 }

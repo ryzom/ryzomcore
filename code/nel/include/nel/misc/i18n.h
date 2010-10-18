@@ -241,6 +241,9 @@ private:
 
 private:
 
+	/// Init _LanguageCodes and _LanguageNames
+	static void initLanguages();
+
 	static bool loadFileIntoMap(const std::string &filename, StrMapContainer &dest);
 
 	/// The internal read function, it does the real job of readTextFile
