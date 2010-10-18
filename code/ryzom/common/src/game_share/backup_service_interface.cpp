@@ -47,10 +47,10 @@ public:
 		for (uint32 i='A'; i<='Z';++i) _Data[i]= true;
 		for (uint32 i='a'; i<='z';++i) _Data[i]= true;
 		for (uint32 i='0'; i<='9';++i) _Data[i]= true;
-		_Data['/']= true;
-		_Data['.']= true;
-		_Data['_']= true;
-		_Data[' ']= true;
+		_Data[(uint32)'/']= true;
+		_Data[(uint32)'.']= true;
+		_Data[(uint32)'_']= true;
+		_Data[(uint32)' ']= true;
 	}
 
 	// lookup a character to determine whether it's valid or not

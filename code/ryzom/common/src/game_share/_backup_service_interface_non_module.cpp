@@ -85,7 +85,7 @@ private:
 void CGenericRequestIdRegister::pushRequestId(uint32 requestId,const std::string& fileName)
 {
 	// check for out of order entries in the request list
-	BOMB_IF(!_RequestIds.empty() && ((sint32)requestId-(sint32)_RequestIds.back().RequestId)<0,"Ignoring out of order request id in generic callback registration for file "+CSString(fileName).quote(),return);
+	BOMB_IF(!_RequestIds.empty() && (requestId<_RequestIds.back().RequestId),"Ignoring out of order request id in generic callback registration for file "+CSString(fileName).quote(),return);
 
 	// setup a new record for this request id / file name pair
 	SRequestId theNewRequestId;
