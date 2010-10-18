@@ -31,7 +31,7 @@
 #include "nel/misc/i_xml.h"
 #include "nel/misc/app_context.h"
 
-#include "nel/../../src/ligo/zone_region.h"
+#include "nel/ligo/zone_region.h"
 
 #include "nel/3d/scene_group.h"
 
