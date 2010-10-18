@@ -865,7 +865,9 @@ public:
 
 		if (env->envExists(subname))
 		{
-			CTemplatizerEnv*	subenv = (atoi(evalinsub.c_str()) ? env->getEnv(subname) : env);
+			sint eval;
+			NLMISC::fromString(evalinsub, eval);
+			CTemplatizerEnv*	subenv = (eval ? env->getEnv(subname) : env);
 			return ITemplatizerBloc::eval(subenv);
 		}
 

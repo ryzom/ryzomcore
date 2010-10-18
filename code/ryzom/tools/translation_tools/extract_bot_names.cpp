@@ -339,7 +339,8 @@ int extractBotNames(int argc, char *argv[])
 				result[i]->getPropertyByName("count", countStr);
 				result[i]->getPropertyByName("bot_sheet_look", sheetStr);
 
-				uint32 count = atoi(countStr.c_str());
+				uint32 count;
+				NLMISC::fromString(countStr, count);
 
 				if (count != 0)
 				{
@@ -402,7 +403,8 @@ int extractBotNames(int argc, char *argv[])
 				result[i]->getPropertyByName("count", countStr);
 				result[i]->getPropertyByName("bot_sheet_client", sheetStr);
 
-				uint32 count = atoi(countStr.c_str());
+				uint32 count;
+				NLMISC::fromString(countStr, count);
 
 				if (count > 0 && sheetStr.empty())
 				{
