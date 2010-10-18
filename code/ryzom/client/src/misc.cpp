@@ -1440,12 +1440,30 @@ void setVideoMode(const UDriver::CMode &mode)
 	UDriver::CMode oldMode;
 	oldMode.Windowed = true; // getCurrentScreenMode may fail if first init ...
 	Driver->getCurrentScreenMode(oldMode);
+	bool wasMaximized = isWindowMaximized();
 	Driver->setMode(mode);
+	bool isMaximized = isWindowMaximized();
 	if (oldMode.Windowed && !mode.Windowed) // going to fullscreen ?
 	{
 		/*CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		pIM->movePointerAbs((sint32) mode.Width / 2, (sint32) mode.Height / 2);
 		Driver->setMousePos(0.5f, 0.5f);*/
+	}
+	else if ((!oldMode.Windowed || wasMaximized) && (mode.Windowed && !isMaximized)) // leaving fullscreen ?
+	{
+		UDriver::CMode screenMode;
+
+		uint32 posX = 0;
+		uint32 posY = 0;
+			
+		if (Driver->getCurrentScreenMode(screenMode))
+		{
+			// position is not saved in config so center the window
+			posX = (screenMode.Width - Driver->getWindowWidth())/2;
+			posY = (screenMode.Height - Driver->getWindowHeight())/2;
+		}
+
+		Driver->setWindowPos(posX, posY);
 	}
 }
 
@@ -1464,3 +1482,72 @@ uint getCurrentColorDepth()
 	return CSystemUtils::getCurrentColorDepth();
 }
 
+bool isWindowMaximized()
+{
+	UDriver::CMode screenMode;
+	uint32 width, height;
+
+	Driver->getWindowSize(width, height);
+
+	return (Driver->getCurrentScreenMode(screenMode) && screenMode.Windowed &&
+		screenMode.Width == width && screenMode.Height == height);
+}
+
+sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList)
+{
+	// **** Init Video Modes
+	Driver->getModes(videoModes);
+	// Remove modes under 800x600 and get the unique strings
+	sint i, j, nFoundMode = -1;
+	for (i=0; i < (sint)videoModes.size(); ++i)
+	{
+		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
+		{
+			videoModes.erase(videoModes.begin()+i);
+			--i;
+		}
+		else
+		{
+			bool bFound = false;
+			string tmp = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+			for (j = 0; j < (sint)stringModeList.size(); ++j)
+			{
+				if (stringModeList[j] == tmp)
+				{
+					bFound = true;
+					break;
+				}
+			}
+			if (!bFound)
+			{
+				stringModeList.push_back(tmp);
+				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
+				{
+					if (nFoundMode == -1)
+					{
+						nFoundMode = j;
+					}
+					else
+					{
+						if ((videoModes[i].Width >= videoModes[nFoundMode].Width) &&
+							(videoModes[i].Height >= videoModes[nFoundMode].Height))
+							nFoundMode = j;
+					}
+				}
+			}
+		}
+	}
+	
+	// If no modes are available, display a message and exit
+	if (!ClientCfg.Windowed && (nFoundMode == -1 || stringModeList.empty()))
+	{
+		Driver->systemMessageBox("No Video Modes available!\n"
+															"Minimum Video mode to play Ryzom is 800x600.\n",
+															"No Video Mode!",
+															NL3D::UDriver::okType,
+															NL3D::UDriver::exclamationIcon);
+		exit(EXIT_SUCCESS);
+	}
+
+	return nFoundMode;
+}
