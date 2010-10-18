@@ -965,7 +965,7 @@ void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
 void CFarTP::requestReconnection()
 {
 	_ReselectingChar = true;
-	requestFarTPToSession(TSessionId(~0u), ~0, CFarTP::JoinMainland, false);
+	requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false);
 }
 
 
@@ -1060,9 +1060,10 @@ void CFarTP::disconnectFromPreviousShard()
 		// Play music and fade out the Game Sound
 		if (SoundMngr)
 		{
-			SoundMngr->playEventMusic(ClientCfg.SoundOutGameMusic, CSoundManager::LoadingMusicXFade, true); // Loading Music Loop.ogg
-			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
+			// Loading Music Loop.ogg
 			LoadingMusic = ClientCfg.SoundOutGameMusic;
+			SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
 		}
 
 		// Change the tips

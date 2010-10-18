@@ -121,7 +121,6 @@ void drawLoadingBitmap (float progress)
 		CQuadUV		quad;
 		uint wh =  Driver->getWindowHeight();
 		uint ww = Driver->getWindowWidth();
-		//nlinfo("%d x %d", ww, wh); 
 		float x1 = 0;
 		float y1 = 0;
 		float x2 = 1;
@@ -441,3 +440,4 @@ void CProgress::finish()
 	// stop system dependent progress bar
 	CSystemUtils::updateProgressBar(1, 0);
 }
+

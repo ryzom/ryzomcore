@@ -223,23 +223,3 @@ void CAttackListManager::buildLinkFXs()
 {
 	_Links.init("links.id_to_string_array", _AnimationSet, false /* must not delete animset, owned by this object */);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -714,7 +714,7 @@ void	CNetworkConnection::setMsPerTick(sint32 msPerTick)
 bool	CNetworkConnection::update()
 {
 #ifdef ENABLE_INCOMING_MSG_RECORDER
-	if ( _NextClientTickToReplay == ~0 )
+	if ( _NextClientTickToReplay == std::numeric_limits<uint32>::max() )
 	{
 		setReplayingMode( false );
 		return false;
@@ -881,7 +881,7 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 		if ( _RecordedMessagesIn.eof() )
 		{
 			// Nothing more to load
-			_NextClientTickToReplay = ~0;
+			_NextClientTickToReplay = std::numeric_limits<uint32>::max();
 			nlinfo( "Nothing more to replay, end of replaying" );
 		}
 		else
@@ -1147,10 +1147,10 @@ void	CNetworkConnection::receiveSystemSync(CBitMemStream &msgin)
 	//_MsPerTick = 100;			// initial values
 
 #ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
-#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
+//#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
 	_CurrentServerTick = _Synchronize+_CurrentReceivedNumber*2;
 #else
-#pragma message ("FULL_FREQUENCY_SENDING_TO_CLIENT")
+//#pragma message ("FULL_FREQUENCY_SENDING_TO_CLIENT")
 	_CurrentServerTick = _Synchronize+_CurrentReceivedNumber;
 #endif
 	_CurrentClientTick = uint32(_CurrentServerTick - (_LCT+_MsPerTick)/_MsPerTick);

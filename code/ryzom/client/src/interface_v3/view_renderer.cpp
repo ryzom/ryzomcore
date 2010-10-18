@@ -743,7 +743,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 		image.UVMax.U = uvMaxU;
 		image.UVMax.V = uvMaxV;
 		sTGAname = tgaName;
-		sTGAname = strlwr(sTGAname);
+		sTGAname = toLower(sTGAname);
 		string::size_type stripPng = sTGAname.find(".png");
 		if (stripPng != string::npos)
 		{

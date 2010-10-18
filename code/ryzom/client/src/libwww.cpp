@@ -531,9 +531,6 @@ void initLibWWW()
 	static bool initialized = false;
 	if (!initialized)
 	{
-		// log all libwww
-		//WWW_TraceFlag = SHOW_ALL_TRACE;
-
         //HTProfile_newNoCacheClient("Ryzom", "1.1");
 
 		/* Need our own trace and print functions */

@@ -134,7 +134,7 @@ uint CColorSlotManager::addSlot(const TStringVect &slotDescs)
 	_Slots.push_back(slotDescs);
 	for(uint k = 0; k < slotDescs.size(); ++k)
 	{
-		NLMISC::strupr(_Slots.back()[k]);
+		_Slots.back()[k] = NLMISC::toUpper(_Slots.back()[k]);
 	}
 	return (uint)_Slots.size() - 1;
 }
@@ -327,9 +327,8 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 	{
 		return false;
 	}
+
 	uint startSlot = (uint)_Slots.size();
-
-
 
 	_Slots.resize(_Slots.size() + mask_extensions->size());
 	/// For each kind of mask, build a slot
