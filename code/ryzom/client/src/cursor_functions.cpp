@@ -27,9 +27,12 @@
 #include "entities.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
+#include "interface_v3/interface_3d_scene.h"
+#include "interface_v3/group_container.h"
 #include "sheet_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/guild_manager.h"
+#include "nel/3d/u_instance.h"
 #include "main_loop.h"
 // GAME SHARE
 #include "game_share/bot_chat_types.h"
@@ -41,6 +44,7 @@
 // USING //
 ///////////
 using namespace NLMISC;
+using namespace NL3D;
 
 
 ////////////
@@ -51,6 +55,9 @@ CContextualCursor		ContextCur;
 CLFECOMMON::TCLEntityId	SlotUnderCursor;
 uint32 MissionId = 0;
 uint32 MissionRingId = 0;
+UInstance selectedInstance;
+const UInstance noSelectedInstance;
+string selectedInstanceURL;
 
 
 ///////////////
@@ -76,6 +83,7 @@ void contextTalk			(bool rightClick, bool dblClick);
 void contextExtractRM		(bool rightClick, bool dblClick);
 void contextMission			(bool rightClick, bool dblClick);
 void contextWebPage			(bool rightClick, bool dblClick);
+void contextWebIG			(bool rightClick, bool dblClick);
 void contextRingMission		(bool rightClick, bool dblClick);
 void contextOutpost			(bool rightClick, bool dblClick);
 void contextBuildTotem		(bool rightClick, bool dblClick);
@@ -113,6 +121,7 @@ void initContextualCursor()
 	ContextCur.add(true,	"EXTRACT_RM",		string("uimGcmExtractRM"),			0.0f,	checkUnderCursor,	contextExtractRM);
 	ContextCur.add(true,	"MISSION",			string(""),							0.0f,	checkUnderCursor,	contextMission);
 	ContextCur.add(true,	"WEB PAGE",			string(""),							0.0f,	checkUnderCursor,	contextWebPage);
+	ContextCur.add(true,	"WEBIG",			string(""),							0.0f,	checkUnderCursor,	contextWebIG);
 	ContextCur.add(true,	"OUTPOST",			string(""),							0.0f,	checkUnderCursor,	contextOutpost);
 	ContextCur.add(true,	"RING MISSION",		string(""),							0.0f,	checkUnderCursor,	contextRingMission);
 	ContextCur.add(true,	"BUILD_TOTEM",		string("uimGcmChooseBuilding"),		0.0f,	checkUnderCursor,	contextBuildTotem);
@@ -511,7 +520,51 @@ void checkUnderCursor()
 			}
 		}
 		else
+		{
+			CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY);
+			UInstance instance = instref.Instance;
+			if (!instance.empty())
+			{
+				if (instance.getObjectPtr() != selectedInstance.getObjectPtr())
+				{
+					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
+					{
+						// unhighlight
+						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+						selectedInstance.getMaterial(j).setShininess( 10.0f );
+					}
+					selectedInstance = instance;
+					// For all materials
+					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
+					{
+						// highlight
+						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
+						selectedInstance.getMaterial(j).setShininess( 1000.0f );
+					}
+				}
+				if (!instref.ContextText.empty())
+				{
+					selectedInstanceURL = instref.ContextURL;
+					if(ContextCur.context("WEBIG", 0.f, ucstring(instref.ContextText)))
+						return;
+				}
+			}
+			else
+			{
+				if (!selectedInstance.empty())
+				{
+					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
+					{
+						//unhighlight
+						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+						selectedInstance.getMaterial(j).setShininess( 10.0f );
+					}
+					selectedInstance = noSelectedInstance;
+					selectedInstanceURL = string("");
+				}
+			}
 			SlotUnderCursor = CLFECOMMON::INVALID_SLOT;
+		}
 	}
 	else
 	{
@@ -804,6 +857,29 @@ void contextWebPage(bool rightClick, bool dblClick)
 		return;
 	UserEntity->moveTo(SlotUnderCursor, 3.0, CUserEntity::WebPage);
 }// contextWebPage //
+
+//-----------------------------------------------
+// contextWebIG :
+//-----------------------------------------------
+void contextWebIG(bool rightClick, bool dblClick)
+{
+	CInterfaceManager *IM = CInterfaceManager::getInstance();
+	CInterfaceElement *pGC = IM->getElementFromId("ui:interface:bot_chat_object");
+	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object"));
+	if (el != NULL)
+		el->setName(selectedInstance.getShapeName());
+	if (selectedInstanceURL.empty())
+	{
+		if (pGC != NULL)
+			pGC->setActive(true);
+	}
+	else
+	{
+		if (pGC != NULL)
+			pGC->setActive(false);
+		IM->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+	}
+}// contextWebIG //
 
 //-----------------------------------------------
 // contextOutpost
