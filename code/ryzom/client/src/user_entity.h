@@ -589,7 +589,12 @@ protected:
 	};
 	CSkillPointsObserver		_SkillPointObs[EGSPD::CSPType::EndSPType];
 
-
+	class CInvisibleObserver : public ICDBNode::IPropertyObserver
+	{
+	public :
+		virtual void update(ICDBNode* node);
+	};
+	CInvisibleObserver			_InvisibleObs;
 
 	/// Fame observer
 	class CFameObserver : public ICDBNode::IPropertyObserver

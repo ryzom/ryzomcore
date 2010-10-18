@@ -101,6 +101,7 @@
 #include "../entity_animation_manager.h"	// for emotes
 #include "../net_manager.h"				// for emotes
 #include "../client_chat_manager.h"		// for emotes
+#include "../entities.h"
 
 #include "chat_text_manager.h"
 #include "../npc_icon.h"
@@ -1288,6 +1289,18 @@ void CInterfaceManager::updateFrameEvents()
 			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:map:content:map_content:time"));
 			if (pVT != NULL)
 				pVT->setText(str);
+
+			str.clear();
+			// Update the clock in the compass if enabled.
+			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:compass:clock:time"));
+			if (pVT != NULL)
+			{
+				if (pVT->getActive())
+				{
+					str = getTimestampHuman("%H:%M");
+					pVT->setText(str);
+				}
+			}
 		}
 	}
 
@@ -6274,3 +6287,300 @@ void CInterfaceManager::CServerToLocalAutoCopy::onLocalChange(ICDBNode *localNod
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " */)
+{
+	static char cstime[25];
+	time_t date;
+	time (&date);
+	struct tm *tms = localtime(&date);
+	if (tms)
+	{
+		strftime(cstime, 25, format, tms);
+	}
+	else
+	{
+		strcpy(cstime, "");
+	}
+
+	return cstime;
+}
+
+
+/*
+ * Parse tokens in a chatmessage or emote
+ * 
+ * Valid subjects:
+ * $me$
+ * $t$
+ * $tt$
+ * $tm1$..$tm8$
+ * 
+ * Valid parameters:
+ * $<subject>.name$
+ * $<subject>.title$
+ * $<subject>.race$ 
+ * $<subject>.guild$ 
+ * $<subject>.gs(m/f/n)$
+ *
+ * Default parameter if parameter result is empty:
+ * $<subject>.<parameter>/<default>$
+ * 
+ * All \d's in default parameter remove a following character.
+ */
+bool CInterfaceManager::parseTokens(ucstring& ucstr)
+{
+	ucstring str = ucstr;
+	ucstring start_token = "$";
+	ucstring end_token = "$";
+	size_t start_pos = 0;
+	size_t end_pos = 1;
+
+	sint endless_loop_protector = 0;
+	while ((start_pos < str.length() - 1) &&
+		((start_pos = str.find(start_token, start_pos)) != string::npos))
+	{
+		endless_loop_protector++;
+		if (endless_loop_protector > 100)
+		{
+			break; 
+		}
+
+		// Get the whole token substring first
+		end_pos = str.find(end_token, start_pos + 1);
+
+		if ((start_pos == string::npos) || 
+			(end_pos   == string::npos) || 
+			(end_pos   <= start_pos + 1))
+		{
+			// Wrong formatting; give up on this one.
+			start_pos = max(start_pos, end_pos);
+			continue;
+		}
+
+		// Get everything between the two "$"
+		size_t token_start_pos = start_pos + start_token.length();
+		size_t token_end_pos   = end_pos - end_token.length();
+		if ((token_start_pos - token_end_pos) < 0)
+		{
+			// Wrong formatting; give up on this one.
+			start_pos = end_pos;
+			continue;
+		}
+
+		ucstring token_whole = str.luabind_substr(start_pos, end_pos - start_pos + 1);
+		ucstring token_string = token_whole.luabind_substr(1, token_whole.length() - 2);
+		ucstring token_replacement = token_whole;
+		ucstring token_default = token_whole;
+
+		ucstring token_subject;
+		ucstring token_param;
+
+		// Does the token have a parameter?
+		// If not it is 'name' by default
+		vector<ucstring> token_vector;
+		vector<ucstring> param_vector;
+		splitUCString(token_string, ucstring("."), token_vector);
+		token_subject = token_vector[0];
+		if (token_vector.size() == 1)
+		{
+			splitUCString(token_subject, ucstring("/"), param_vector);
+			token_subject = param_vector[0];
+			token_param = ucstring("name");
+		}
+		else
+		{
+			token_param = token_vector[1];
+			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+			{
+				splitUCString(token_vector[1], ucstring("/"), param_vector);
+				token_param = param_vector[0];
+			}
+		}
+
+		// Get any default value, if not gs
+		sint extra_replacement = 0;
+		if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+		{
+			if (param_vector.size() == 2)
+			{
+				// Set default value
+				token_replacement = param_vector[1];
+				// Delete following chars for every '\d' in default
+				string::size_type token_replacement_pos;
+				while ((token_replacement_pos = token_replacement.find(ucstring("\\d"))) != string::npos)
+				{
+					token_replacement.replace(token_replacement_pos, 2, ucstring(""));
+					extra_replacement++;
+				}
+				token_default = token_replacement;
+			}
+		}
+
+		CEntityCL *pTokenSubjectEntity = NULL;
+
+		if (token_subject == ucstring("me"))
+		{
+			pTokenSubjectEntity = static_cast<CEntityCL*>(UserEntity);
+		}
+		else if (token_subject == ucstring("t"))
+		{
+			// Target
+			uint targetSlot = UserEntity->targetSlot();
+			pTokenSubjectEntity = EntitiesMngr.entity(targetSlot);
+		}
+		else if (token_subject == ucstring("tt"))
+		{
+			// Target's target
+			uint targetSlot = UserEntity->targetSlot();
+			CEntityCL *target = EntitiesMngr.entity(targetSlot);
+
+			if (target)
+			{
+				// Check the new slot.
+				CLFECOMMON::TCLEntityId newSlot = target->targetSlot();
+				CEntityCL* pE = EntitiesMngr.entity(newSlot);
+				if (pE)
+				{
+					pTokenSubjectEntity = pE;
+				}
+			}
+		}
+		else if ((token_subject.length() == 3) &&
+			     (token_subject.luabind_substr(0, 2) == ucstring("tm")))
+		{
+			// Teammate
+			uint indexInTeam = 0;
+			fromString(token_subject.luabind_substr(2, 1).toString(), indexInTeam);
+
+			// Make 0-based
+			--indexInTeam;
+			if (indexInTeam < PeopleInterraction.TeamList.getNumPeople() )
+			{
+				// Index is the database index (serverIndex() not used for team list)
+				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString(TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false);
+				if (pNL && pNL->getValueBool() )
+				{	
+					// There is a character corresponding to this index
+					pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
+					if (pNL)
+					{
+						CLFECOMMON::TClientDataSetIndex compressedIndex = pNL->getValue32();
+
+						// Search entity in vision
+						CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex( compressedIndex );
+						if (entity)
+						{
+							pTokenSubjectEntity = entity;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			// Unknown token subject, skip it
+			start_pos = end_pos;
+			continue;
+		}
+
+		if (pTokenSubjectEntity != NULL)
+		{
+			// Parse the parameter
+			if (token_param == ucstring("name"))
+			{
+				ucstring name = pTokenSubjectEntity->getDisplayName();
+				// special case where there is only a title, very rare case for some NPC
+				if (name.empty())
+				{
+					name = pTokenSubjectEntity->getTitle();
+				}
+				token_replacement = name.empty() ? token_replacement : name;
+			}
+			else if (token_param == ucstring("title"))
+			{
+				ucstring title = pTokenSubjectEntity->getTitle();
+				token_replacement = title.empty() ? token_replacement : title;
+			}
+			else if (token_param == ucstring("race"))
+			{
+				CCharacterCL *pC = (CCharacterCL*)(pTokenSubjectEntity);
+				if (pC)
+				{
+					EGSPD::CPeople::TPeople race = pC->people();
+					if (race >= EGSPD::CPeople::Playable && race <= EGSPD::CPeople::EndPlayable)
+					{
+						ucstring srace = NLMISC::CI18N::get("io" + EGSPD::CPeople::toString(race));
+						token_replacement = srace.empty() ? token_replacement : srace;
+					}
+				}
+			}
+			else if (token_param == ucstring("guild"))
+			{
+				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+				ucstring ucGuildName;
+				if (pSMC->getString(pTokenSubjectEntity->getGuildNameID(), ucGuildName))
+				{
+					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName;
+				}
+			}
+			else if (token_param.luabind_substr(0, 3) == ucstring("gs(") &&
+				token_param.luabind_substr(token_param.length() - 1 , 1) == ucstring(")"))
+			{
+				// Gender string
+				vector<ucstring> strList;
+				ucstring gender_string = token_param.luabind_substr(3, token_param.length() - 4);
+				splitUCString(gender_string, ucstring("/"), strList);
+
+				if (strList.size() <= 1)
+				{
+					start_pos = end_pos;
+					continue;
+				}
+
+				// Only care about gender if it's a humanoid.
+				GSGENDER::EGender gender = GSGENDER::neutral;
+				if (pTokenSubjectEntity->isUser() || pTokenSubjectEntity->isPlayer() || pTokenSubjectEntity->isNPC())
+				{
+					CCharacterCL *pC = (CCharacterCL*)(pTokenSubjectEntity);
+					if (pC)
+					{
+						gender = pC->getGender();
+					}
+				}
+
+				// Neuter part is optional.
+				// Fallback to male if something is wrong.
+				GSGENDER::EGender g = ((uint)gender >= strList.size()) ? GSGENDER::male : gender;
+				token_replacement = strList[g];
+			}
+		}
+
+		if (token_whole == token_replacement)
+		{
+			// Nothing to replace; show message and exit
+			CInterfaceManager *im = CInterfaceManager::getInstance();
+			ucstring message = ucstring(CI18N::get("uiUntranslatedToken"));
+			message.replace(message.find(ucstring("%s")), 2, token_whole);
+			im->displaySystemInfo(message);
+			return false;
+		}
+
+
+		// Replace all occurances of token with the replacement
+		size_t token_whole_pos = str.find(token_whole);
+		start_pos = 0;
+
+		// Only do extra replacement if using default
+		extra_replacement = (token_replacement == token_default) ? extra_replacement : 0;
+		while (str.find(token_whole, start_pos) != string::npos)
+		{
+			str = str.replace(token_whole_pos, token_whole.length() + extra_replacement, token_replacement);
+			start_pos = token_whole_pos + token_replacement.length();
+            token_whole_pos = str.find(token_whole, start_pos);
+		}
+	}
+
+	ucstr = str;
+	return true;;
+}

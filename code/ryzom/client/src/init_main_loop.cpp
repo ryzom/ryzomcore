@@ -1364,6 +1364,10 @@ void loadBackgroundBitmap (TBackground background)
 	string ext = CFile::getExtension (ClientCfg.Launch_BG);
 	string filename;
 
+	if (frand(2.0) < 1)
+		filename = name+"_0."+ext;
+	else
+		filename = name+"_1."+ext;
 	switch (background)
 	{
 	case ElevatorBackground:
@@ -1397,13 +1401,6 @@ void loadBackgroundBitmap (TBackground background)
 			filename = ClientCfg.Loading_BG;
 		break;
 	default:
-		/*
-		if (frand(2.0) < 1)
-			filename = name+"_0."+ext;
-		else
-			filename = name+"_1."+ext;
-		*/
-		filename = name+"."+ext;
 		break;
 	}
 

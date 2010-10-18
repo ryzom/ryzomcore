@@ -45,6 +45,10 @@ extern "C"
 #include "lua_ihm.h"
 
 #include "../time_client.h"
+#include "nel/misc/i18n.h"
+#include "nel/misc/md5.h"
+#include "nel/3d/texture_file.h"
+#include "nel/misc/big_file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -107,15 +111,106 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 	curl_multi_add_handle(MultiCurl, curl);
-	Curls.push_back(CImageDownload(curl, url, fp, img));
+	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img));
 #ifdef LOG_DL
 	nlwarning("adding handle %x, %d curls", curl, Curls.size());
 #endif
 	RunningCurls++;
 }
 
-// Call this evenly to check if an image in downloaded and then display it
-void CGroupHTML::checkImageDownload()
+void CGroupHTML::initImageDownload()
+{
+#ifdef LOG_DL
+	nlwarning("Init Image Download");
+#endif
+/*
+// Get current flag
+int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
+// Turn on leak-checking bit
+tmpFlag |= _CRTDBG_CHECK_ALWAYS_DF;
+// Set flag to the new value
+_CrtSetDbgFlag( tmpFlag );
+*/
+	string pathName = "cache";
+	if ( ! CFile::isExists( pathName ) )
+		CFile::createDirectory( pathName );
+}
+
+
+// Get an url and return the local filename with the path where the bnp should be
+string CGroupHTML::localBnpName(const string &url)
+{
+	size_t lastIndex = url.find_last_of("/");
+	string dest = "user/"+url.substr(lastIndex+1);
+	return dest;
+}
+
+// Add a bnp download request in the multi_curl
+void CGroupHTML::addBnpDownload(const string &url, const string &action)
+{
+	// Search if we are not already downloading this url.
+	for(uint i = 0; i < Curls.size(); i++)
+	{
+		if(Curls[i].url == url)
+		{
+#ifdef LOG_DL
+			nlwarning("already downloading '%s'", url.c_str());
+#endif
+			return;
+		}
+	}
+
+	CURL *curl = curl_easy_init();
+	if (!MultiCurl || !curl)
+		return;
+
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+	string dest = localBnpName(url);
+#ifdef LOG_DL
+	nlwarning("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
+#endif
+	// create the local file
+	if (NLMISC::CFile::fileExists(dest))
+	{
+		if (action == "override" || action == "delete")
+		{
+			CFile::setRWAccess(dest);
+			NLMISC::CFile::deleteFile(dest.c_str());
+		}
+	}
+	if (action != "delete")
+	{
+		FILE *fp = fopen (dest.c_str(), "wb");
+		if (fp == NULL)
+		{
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", dest.c_str (), errno, strerror(errno));
+			return;
+		}
+		curl_easy_setopt(curl, CURLOPT_FILE, fp);
+
+		curl_multi_add_handle(MultiCurl, curl);
+		Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL));
+#ifdef LOG_DL
+		nlwarning("adding handle %x, %d curls", curl, Curls.size());
+#endif
+		RunningCurls++;
+	}
+}
+
+void CGroupHTML::initBnpDownload()
+{
+#ifdef LOG_DL
+	nlwarning("Init Bnp Download");
+#endif
+	string pathName = "user";
+	if ( ! CFile::isExists( pathName ) )
+		CFile::createDirectory( pathName );
+}
+
+// Call this evenly to check if an element is downloaded and then manage it
+void CGroupHTML::checkDownloads()
 {
 	//nlassert(_CrtCheckMemory());
 
@@ -142,7 +237,7 @@ void CGroupHTML::checkImageDownload()
 		{
 			if (msg->msg == CURLMSG_DONE)
 			{
-				for (vector<CImageDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
+				for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 				{
 					if(msg->easy_handle == it->curl)
 					{
@@ -156,56 +251,85 @@ void CGroupHTML::checkImageDownload()
 #endif
 						curl_easy_cleanup(it->curl);
 
-						string image = localImageName(it->url);
+						string file;
 
-						if(CURLE_OK != res || r < 200 || r >= 300)
+						if (it->type == ImgType)
+							file = localImageName(it->url)+".tmp";
+						else
+							file = localBnpName(it->url);
+
+						if(res != CURLE_OK || r < 200 || r >= 300)
 						{
-							NLMISC::CFile::deleteFile((image+".tmp").c_str());
+							NLMISC::CFile::deleteFile(file.c_str());
 						}
 						else
 						{
 							string finalUrl;
-							CFile::moveFile(image.c_str(), (image+".tmp").c_str());
-							if (lookupLocalFile (finalUrl, image.c_str(), false))
+							if (it->type == ImgType)
 							{
-								for(uint i = 0; i < it->imgs.size(); i++)
+								string image = localImageName(it->url);
+								CFile::moveFile(image.c_str(), (image+".tmp").c_str());
+								if (lookupLocalFile (finalUrl, image.c_str(), false))
 								{
-									// don't display image that are not power of 2
-									uint32 w, h;
-									CBitmap::loadSize (image, w, h);
-									if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-										image.clear();
+									for(uint i = 0; i < it->imgs.size(); i++)
+									{
+										// don't display image that are not power of 2
+										uint32 w, h;
+										CBitmap::loadSize (image, w, h);
+										if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+											image.clear();
 
-									CCtrlButton *btn = dynamic_cast<CCtrlButton*>(it->imgs[i]);
-									if(btn)
-									{
-#ifdef LOG_DL
-										nlwarning("refresh new downloading image %d button %p", i, it->imgs[i]);
-#endif
-										btn->setTexture (image);
-										btn->setTexturePushed(image);
-										btn->invalidateCoords();
-										btn->invalidateContent();
-										btn->resetInvalidCoords();
-										btn->updateCoords();
-										paragraphChange();
-									}
-									else
-									{
-										CViewBitmap *btm = dynamic_cast<CViewBitmap*>(it->imgs[i]);
-										if(btm)
+										CCtrlButton *btn = dynamic_cast<CCtrlButton*>(it->imgs[i]);
+										if(btn)
 										{
-#ifdef LOG_DL
-											nlwarning("refresh new downloading image %d image %p", i, it->imgs[i]);
-#endif
-											btm->setTexture (image);
-											btm->invalidateCoords();
-											btm->invalidateContent();
-											btm->resetInvalidCoords();
-											btm->updateCoords();
+	#ifdef LOG_DL
+											nlwarning("refresh new downloading image %d button %p", i, it->imgs[i]);
+	#endif
+											btn->setTexture (image);
+											btn->setTexturePushed(image);
+											btn->invalidateCoords();
+											btn->invalidateContent();
+											btn->resetInvalidCoords();
+											btn->updateCoords();
 											paragraphChange();
 										}
+										else
+										{
+											CViewBitmap *btm = dynamic_cast<CViewBitmap*>(it->imgs[i]);
+											if(btm)
+											{
+	#ifdef LOG_DL
+												nlwarning("refresh new downloading image %d image %p", i, it->imgs[i]);
+	#endif
+												btm->setTexture (image);
+												btm->invalidateCoords();
+												btm->invalidateContent();
+												btm->resetInvalidCoords();
+												btm->updateCoords();
+												paragraphChange();
+											}
+										}
 									}
+								}
+							}
+							else
+							{
+								if (lookupLocalFile (finalUrl, file.c_str(), false))
+								{
+									nlinfo("BNPCHECK : downloaded");
+
+									bool memoryCompressed = CPath::isMemoryCompressed();
+									if (memoryCompressed)
+									{
+										CPath::memoryUncompress();
+									}
+									CPath::addSearchPath("user/", true, false, NULL);
+									if (memoryCompressed)
+									{
+										CPath::memoryCompress();
+									}
+									CInterfaceManager *pIM = CInterfaceManager::getInstance();
+									pIM->executeLuaScript("game:onBnpDownloadFinish()", true);
 								}
 							}
 						}
@@ -220,32 +344,11 @@ void CGroupHTML::checkImageDownload()
 	RunningCurls = NewRunningCurls;
 }
 
-void CGroupHTML::initImageDownload()
+
+void CGroupHTML::releaseDownloads()
 {
 #ifdef LOG_DL
-	nlwarning("Init Image Download");
-#endif
-	MultiCurl = curl_multi_init();
-	RunningCurls = 0;
-/*
-// Get current flag
-int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
-// Turn on leak-checking bit
-tmpFlag |= _CRTDBG_CHECK_ALWAYS_DF;
-// Set flag to the new value
-_CrtSetDbgFlag( tmpFlag );
-*/
-
-
-	string pathName = "cache";
-	if ( ! CFile::isExists( pathName ) )
-		CFile::createDirectory( pathName );
-}
-
-void CGroupHTML::releaseImageDownload()
-{
-#ifdef LOG_DL
-	nlwarning("Release Image Download");
+	nlwarning("Release Downloads");
 #endif
 	if(MultiCurl)
 		curl_multi_cleanup(MultiCurl);
@@ -1251,6 +1354,21 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			endParagraph();
 			_UL.push_back(true);
 			break;
+		case HTML_OBJECT:
+			_ObjectType = "";
+			_ObjectData = "";
+			_ObjectMD5Sum = "";
+			_ObjectAction = "";
+			if (present[HTML_OBJECT_TYPE] && value[HTML_OBJECT_TYPE])
+				_ObjectType = value[HTML_OBJECT_TYPE];
+			if (present[HTML_OBJECT_DATA] && value[HTML_OBJECT_DATA])
+				_ObjectData = value[HTML_OBJECT_DATA];
+			if (present[HTML_OBJECT_ID] && value[HTML_OBJECT_ID])
+				_ObjectMD5Sum = value[HTML_OBJECT_ID];
+			if (present[HTML_OBJECT_STANDBY] && value[HTML_OBJECT_STANDBY])
+				_ObjectAction = value[HTML_OBJECT_STANDBY];
+
+			break;
 		}
 	}
 }
@@ -1371,6 +1489,14 @@ void CGroupHTML::endElement (uint element_number)
 				popIfNotEmpty (_UL);
 			}
 			break;
+		case HTML_OBJECT:
+			if (_ObjectType=="application/ryzom-data")
+			{
+				if (!_ObjectData.empty())
+				{
+					addBnpDownload(_ObjectData, _ObjectAction);
+				}
+			}
 		}
 	}
 }
@@ -1483,7 +1609,11 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 	DefaultBackgroundBitmapView =	"bg";
 	clearContext();
 
+	MultiCurl = curl_multi_init();
+	RunningCurls = 0;
+
 	initImageDownload();
+	initBnpDownload();
 }
 
 // ***************************************************************************
@@ -2313,9 +2443,14 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	ctrlButton->setActionOnLeftClick (actionHandler);
 	ctrlButton->setParamsOnLeftClick (actionHandlerParams);
 
-	// Translate the tooltip
+	// Translate the tooltip or display raw text (tooltip from webig)
 	if (tooltip)
-		ctrlButton->setDefaultContextHelp (CI18N::get (tooltip));
+	{
+		if (CI18N::hasTranslation(tooltip))
+			ctrlButton->setDefaultContextHelp (CI18N::get(tooltip));
+		else
+			ctrlButton->setDefaultContextHelp (ucstring(tooltip));
+	}
 
 	getParagraph()->addChild (ctrlButton);
 	paragraphChange ();
@@ -2913,7 +3048,7 @@ void CGroupHTML::handle ()
 
 void CGroupHTML::draw ()
 {
-	checkImageDownload();
+	checkDownloads();
 	CGroupScrollText::draw ();
 }
 

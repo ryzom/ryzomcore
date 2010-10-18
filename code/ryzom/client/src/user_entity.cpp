@@ -198,6 +198,16 @@ CUserEntity::~CUserEntity()
 	_MountSpeeds.release();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	
+	{
+		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->removeObserver(&_InvisibleObs, textId);
+		}
+	}
+
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
 		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
@@ -347,8 +357,17 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 	// Rebuild interface
 	buildInSceneInterface ();
 
-	// Add an observer on skill points
+	// Add observer on invisible property
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	{
+		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		if (node) {
+			ICDBNode::CTextId textId;
+			node->addObserver(&_InvisibleObs, textId);
+		}
+	}
+
+	// Add an observer on skill points
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
 		_SkillPointObs[i].SpType= i;
@@ -3664,6 +3683,11 @@ void CUserEntity::load()	// virtual
 
 
 //---------------------------------------------------
+void CUserEntity::CInvisibleObserver::update(ICDBNode* node)
+{
+	UserEntity->buildInSceneInterface();
+}
+
 //---------------------------------------------------
 void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 {

@@ -312,8 +312,7 @@ void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
 	else if (!_TargetPlayer.empty())
 	{
 		// the target must be a player, make a tell on him
-		// TODO: adapt this to unicode when this is OK on server side
-		ChatMngr.tell(_TargetPlayer.toString(), msg.toString());
+		ChatMngr.tell(_TargetPlayer.toString(), msg);
 		// direct output in the chat
 		chatWindow->displayLocalPlayerTell(msg);
 	}

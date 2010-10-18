@@ -98,7 +98,16 @@ public:
 	const SGuild &getGuild() { return _Guild; }
 	const std::vector<SGuildMember> &getGuildMembers() { return _GuildMembers; }
 
-	void sortGuildMembers();
+	enum TSortOrder
+	{
+		sort_grade,
+		START_SORT_ORDER = sort_grade,
+		sort_name,
+		sort_online,
+		END_SORT_ORDER
+	};
+
+	void sortGuildMembers(TSortOrder order = sort_grade);
 
 	/// Check if the guild is a proxified guild (not managed on the actual shard)
 	bool isProxy();

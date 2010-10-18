@@ -104,7 +104,9 @@ static void setupMissionHelp(CSheetHelpSetup &setup);
 #define INFO_LIST_BRICK_REQUIREMENT		"list_brick_requirement"
 #define INFO_GROUP_MP_STAT				"mp_stats"
 #define INFO_GROUP_CHAR_3D				"char3d"
-
+#define INFO_ITEM_PREVIEW				"item_preview"
+#define INFO_ITEM_PREVIEW_SCENE_3D		"scene_item_preview"
+#define ITEM_PREVIEW_WIDTH				200
 
 // ***************************************************************************
 std::deque<uint>							CInterfaceHelp::_ActiveWindows;
@@ -2178,6 +2180,14 @@ void resetSheetHelp(CSheetHelpSetup &setup)
 	{
 		listItem->setActive(false);
 	}
+
+	// Hide the item preview by default
+	CInterfaceElement	*elt= group->getElement(group->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
+	if(elt)
+	{
+		elt->setActive(false);
+	}
+
 	// Hide the list of brick by default
 	IListSheetBase	*listBrick= dynamic_cast<IListSheetBase*>(group->getElement(group->getId()+setup.PrefixForExtra+INFO_LIST_BRICK));
 	if(listBrick)
@@ -2269,6 +2279,151 @@ void setupCosmetic(CSheetHelpSetup &setup, CItemSheet *pIS)
 }
 
 // ***************************************************************************
+void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
+{
+	nlassert(pIS);
+	
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeBranch *dbBranch = pIM->getDbBranch( setup.SrcSheet->getSheet() );
+	
+	
+	CInterfaceElement *elt = setup.HelpWindow->getElement(setup.HelpWindow->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
+	if (elt == NULL)
+		return;
+
+	CInterfaceGroup	*ig = dynamic_cast<CInterfaceGroup*>(elt);
+
+	if ( ! ig)
+	{
+		return;
+	}
+
+	static sint32 helpWidth = setup.HelpWindow->getW();
+	bool scene_inactive = ! pIM->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
+	if (scene_inactive || 
+		(pIS->Family != ITEMFAMILY::ARMOR && 
+		 pIS->Family != ITEMFAMILY::MELEE_WEAPON && 
+		 pIS->Family != ITEMFAMILY::RANGE_WEAPON && 
+		 pIS->Family != ITEMFAMILY::SHIELD))
+	{			
+		setup.HelpWindow->setW(helpWidth);
+		ig->setActive(false);
+		return;
+	}
+	else
+	{
+		setup.HelpWindow->setW(helpWidth + ITEM_PREVIEW_WIDTH);
+		ig->setActive(true);
+	}
+	
+	CInterface3DScene *sceneI = dynamic_cast<CInterface3DScene *>(ig->getGroup("scene_item_preview"));
+	if (!sceneI)
+	{
+		nlwarning("Can't retrieve character 3d view, or bad type");
+		ig->setActive(false);
+		return;
+	}
+
+	CInterface3DCharacter *char3DI = NULL;
+	if (sceneI->getCharacter3DCount() != 0)
+		char3DI = sceneI->getCharacter3D(0);
+
+	if (char3DI == NULL)
+	{
+		nlwarning("Can't retrieve char 3D Interface");
+		ig->setActive(false);
+		return;
+	}
+
+	CInterface3DCamera *camera = sceneI->getCamera(0);
+	if (camera == NULL)
+	{
+		nlwarning("Can't retrieve camera");
+		ig->setActive(false);
+		return;
+	}
+
+
+	SCharacter3DSetup c3Ds;
+
+	CCharacterSummary cs;
+	SCharacter3DSetup::setupCharacterSummaryFromSERVERDB( cs );
+
+	float camHeight = -0.85f;
+
+	if (pIS->Family == ITEMFAMILY::ARMOR)
+	{
+		if (pIS->ItemType == ITEM_TYPE::LIGHT_BOOTS || pIS->ItemType == ITEM_TYPE::MEDIUM_BOOTS || pIS->ItemType == ITEM_TYPE::HEAVY_BOOTS)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropB.PropertySubData.FeetModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::FEET_SLOT );
+			cs.VisualPropB.PropertySubData.FeetColor = color->getValue32();
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			camHeight = -1.15f;
+		}
+		else if (pIS->ItemType == ITEM_TYPE::LIGHT_GLOVES || pIS->ItemType == ITEM_TYPE::MEDIUM_GLOVES || pIS->ItemType == ITEM_TYPE::HEAVY_GLOVES)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropB.PropertySubData.HandsModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::HANDS_SLOT );
+			cs.VisualPropB.PropertySubData.HandsColor = color->getValue32();
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			//cs.VisualPropB.PropertySubData.HandsColor = pIS->Color;
+		}
+		else if (pIS->ItemType == ITEM_TYPE::LIGHT_SLEEVES || pIS->ItemType == ITEM_TYPE::MEDIUM_SLEEVES || pIS->ItemType == ITEM_TYPE::HEAVY_SLEEVES)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropA.PropertySubData.ArmModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::ARMS_SLOT );
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setDB("UI:TEMP:CHAR3D:VPA:ARMCOLOR", pIS->Color);
+			//cs.VisualPropA.PropertySubData.ArmColor = pIS->Color;
+			camHeight = -0.55f;
+		}
+		else if (pIS->ItemType == ITEM_TYPE::LIGHT_PANTS || pIS->ItemType == ITEM_TYPE::MEDIUM_PANTS || pIS->ItemType == ITEM_TYPE::HEAVY_PANTS)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropA.PropertySubData.TrouserModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::LEGS_SLOT );
+			cs.VisualPropA.PropertySubData.TrouserColor = color->getValue32();
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			camHeight = -1.00f;
+		}
+		else if (pIS->ItemType == ITEM_TYPE::LIGHT_VEST || pIS->ItemType == ITEM_TYPE::MEDIUM_VEST || pIS->ItemType == ITEM_TYPE::HEAVY_VEST)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropA.PropertySubData.JacketModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::CHEST_SLOT );
+			cs.VisualPropA.PropertySubData.JacketColor = color->getValue32();
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			camHeight = -0.55f;
+		}
+		else if (pIS->ItemType == ITEM_TYPE::HEAVY_HELMET)
+		{
+			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
+			cs.VisualPropA.PropertySubData.HatModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::HEAD_SLOT );
+			cs.VisualPropA.PropertySubData.HatColor = color->getValue32();
+			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			camHeight = -0.35f;
+		}	
+	}
+	else if (pIS->Family == ITEMFAMILY::SHIELD)
+	{
+		cs.VisualPropA.PropertySubData.WeaponLeftHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::LEFT_HAND_SLOT );
+		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+	}
+	else if (pIS->Family == ITEMFAMILY::MELEE_WEAPON || pIS->Family == ITEMFAMILY::RANGE_WEAPON)
+	{
+		cs.VisualPropA.PropertySubData.WeaponRightHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::RIGHT_HAND_SLOT );
+		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+	}
+	else
+		nlwarning("<setupItemPreview> Invalid armour or weapon item type '%s'", ITEM_TYPE::toString( pIS->ItemType ).c_str() );
+
+	if (camera == NULL)
+		return;
+
+	camera->setTgtZ(camHeight);
+	char3DI->setAnim(CAnimationStateSheet::Idle);
+}
+
+// ***************************************************************************
 void refreshItemHelp(CSheetHelpSetup &setup)
 {
 	// Setup creator name view
@@ -2291,6 +2446,9 @@ void refreshItemHelp(CSheetHelpSetup &setup)
 
 		// ---- Cosmetic only
 		setupCosmetic (setup, pIS);
+
+		// ---- item preview
+		setupItemPreview(setup, pIS);
 	}
 
 	// if this is a R2 plot item, Add comment and description

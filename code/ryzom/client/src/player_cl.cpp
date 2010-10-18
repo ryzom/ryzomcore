@@ -227,15 +227,21 @@ bool CPlayerCL::isEnemy () const
 	}
 
 	// Faction
-	if( getPvpMode()&PVP_MODE::PvpFactionFlagged &&
-		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged) )
+	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
+		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
 	{
-		if( CFactionWarManager::getInstance()->areFactionsInWar(getPvpClan(),UserEntity->getPvpClan()) )
+		// Check if is not ally
+		if (!isInTeam() && !isInGuild())
 		{
-			return true;
+			// Check for each Clan if is in opposition
+			for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
+			{
+				if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) || (isPvpAlly(i) && UserEntity->isPvpEnnemy(i)))
+					return true;
+			}
 		}
+			
 	}
-
 	return false;
 
 } // isEnemy //
@@ -293,15 +299,24 @@ bool CPlayerCL::isAlly() const
 	}
 
 	// Faction
-	if( getPvpMode()&PVP_MODE::PvpFactionFlagged &&
+	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
 		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
 	{
-		if( getPvpClan()!=PVP_CLAN::Neutral && UserEntity->getPvpClan()!=PVP_CLAN::Neutral )
+		if (isInTeam() && isInGuild())
+			return true;
+	
+		// Check for each Clan if is in opposition
+		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
 		{
-			if( getPvpClan()==UserEntity->getPvpClan() )
-			{
+			if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) || (isPvpAlly(i) && UserEntity->isPvpEnnemy(i)))
+				return false;
+		}
+
+		// Check for each Clan if is in same clan
+		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
+		{
+			if ((isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) || (isPvpAlly(i) && UserEntity->isPvpAlly(i)))
 				return true;
-			}
 		}
 	}
 
@@ -365,19 +380,19 @@ bool CPlayerCL::isNeutralPVP() const
 		return true;
 	}
 
-	// Faction
-	if( getPvpMode()&PVP_MODE::PvpFactionFlagged )
+	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
+		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
 	{
-		// if only target is in faction pvp
-		if( !(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged) )
+		// Check for each Clan if is in opposition or same
+		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
 		{
-			return true;
+			if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) ||
+				(isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
+				(isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) ||
+				(isPvpAlly(i) && UserEntity->isPvpAlly(i)))
+				return false;
 		}
-		// else if factions not in war
-		if( CFactionWarManager::getInstance()->areFactionsInWar(getPvpClan(),UserEntity->getPvpClan())==false )
-		{
-			return true;
-		}
+		return true;
 	}
 
 	return false;

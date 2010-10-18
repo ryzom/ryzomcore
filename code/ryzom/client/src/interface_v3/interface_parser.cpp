@@ -25,6 +25,7 @@
 #include "nel/misc/algo.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/factory.h"
+#include "nel/misc/big_file.h"
 
 #include "game_share/xml_auto_ptr.h"
 
@@ -106,6 +107,7 @@
 #include "../commands.h"
 #include "lua_helper.h"
 #include "lua_ihm.h"
+#include "../r2/editor.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -113,6 +115,23 @@
 const uint32 UI_CACHE_SERIAL_CHECK = (uint32) 'IUG_';
 
 using namespace NLMISC;
+
+void badLuaParseMessageBox()
+{
+	NL3D::UDriver::TMessageBoxId	ret = Driver->systemMessageBox(	"LUA files reading failed!\n"
+																		"Some LUA files are corrupted, moved or may have been removed.\n"
+																		"Ryzom may need to be restarted to run properly.\n"
+																		"Would you like to quit now?",
+																		"LUA reading failed!",
+																		NL3D::UDriver::yesNoType,
+																		NL3D::UDriver::exclamationIcon);
+	if (ret == NL3D::UDriver::yesId)
+	{
+		extern void quitCrashReport ();
+		quitCrashReport ();
+		exit (EXIT_FAILURE);
+	}
+}
 
 void saveXMLTree(COFile &f, xmlNodePtr node)
 {
@@ -494,9 +513,15 @@ static void interfaceScriptAsMemStream(const std::string &script, CMemStream &de
 }
 
 // ----------------------------------------------------------------------------
-bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings, bool reload, bool isFilename)
+bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings, bool reload, bool isFilename, bool checkInData)
 {
 	bool	ok;
+
+	bool needCheck = checkInData;
+
+#if !FINAL_VERSION
+	needCheck = false;
+#endif
 
 	// TestYoyo. UnHide For Parsing Profile
 	/*
@@ -524,7 +549,19 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 		{
 			//get the first file document pointer
 			firstFileName = *it;
-			if (!file.open (CPath::lookup(firstFileName)))
+			string filename = CPath::lookup(firstFileName);
+			bool isInData = false;
+			if (filename.find ("@") != string::npos)
+			{
+				vector<string> bigFilePaths;
+				CBigFile::getInstance().getBigFilePaths(bigFilePaths);
+				if (CBigFile::getInstance().getBigFileName(filename.substr(0, filename.find ("@"))) != "data/"+filename.substr(0, filename.find ("@")))
+					isInData = false;
+				else
+					isInData = true;
+			}
+
+			if ((needCheck && !isInData) || !file.open (CPath::lookup(firstFileName)))
 			{
 				// todo hulud interface syntax error
 				nlwarning ("could not open file %s, skipping xml parsing",firstFileName.c_str());
@@ -929,7 +966,10 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 		else if ( !strcmp((char*)root->name,"lua") )
 		{
 			if(!parseLUAScript(root))
+			{
+				badLuaParseMessageBox();
 				nlwarning ("could not parse 'lua'");
+			}
 		}
 
 		root = root->next;
@@ -4648,10 +4688,31 @@ void	CInterfaceParser::uninitLUA()
 bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 {
 	// get file
+
+	bool needCheck = true;
+
+	#if !FINAL_VERSION
+		needCheck = false;
+	#endif
+
 	string	pathName= CPath::lookup(fileName, false);
 	if(pathName.empty())
 	{
 		nlwarning("LUA Script '%s' not found", fileName.c_str());
+		return false;
+	}
+
+	bool isInData = false;
+	if (pathName.find ("@") != string::npos)
+	{
+		if (CBigFile::getInstance().getBigFileName(pathName.substr(0, pathName.find ("@"))) != "data/"+pathName.substr(0, pathName.find ("@")))
+			isInData = false;
+		else
+			isInData = true;
+	}
+
+	if (needCheck && !isInData)
+	{
 		return false;
 	}
 

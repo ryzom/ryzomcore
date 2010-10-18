@@ -256,6 +256,8 @@ public:
 
 	void updateAllFreeTellerHeaders();
 	void removeAllFreeTellers();
+
+	static void displayTellInMainChat(const ucstring &playerName);
 private:
 	// create various chat & people lists
 	void createTeamChat();

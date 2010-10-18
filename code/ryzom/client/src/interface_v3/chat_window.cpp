@@ -472,7 +472,13 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &msg, uint numBlinks /*=
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
-	finalMsg += CI18N::get("youTell") + ": ";
+	ucstring cur_time;
+	if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+	{
+		cur_time = CInterfaceManager::getTimestampHuman();
+	}
+	ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+	finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
 	finalMsg += msg;
@@ -1241,6 +1247,13 @@ public:
 			return;
 		}
 
+		// Parse any tokens in the text
+		if ( ! CInterfaceManager::parseTokens(text))
+		{
+			pEB->setInputString (string(""));
+			return;
+		}
+
 		// if, it s a command, execute it and don't send the command to the server
 		if(text[0] == '/')
 		{
@@ -1256,7 +1269,7 @@ public:
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				im->displaySystemInfo (ucstring(cmd+" : ")+CI18N::get ("uiCommandNotExists"));
+				im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
 			}
 		}
 		else

@@ -777,7 +777,7 @@ void contextExtractRM(bool rightClick, bool dblClick)
 		return;
 	if( ClientCfg.DblClickMode && !dblClick)
 		return;
-	UserEntity->moveToExtractionPhrase(SlotUnderCursor, MaxExtractionDistance, ~0, ~0, true );
+	UserEntity->moveToExtractionPhrase(SlotUnderCursor, MaxExtractionDistance, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true );
 }
 
 //-----------------------------------------------

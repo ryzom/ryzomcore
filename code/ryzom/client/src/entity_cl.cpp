@@ -2511,12 +2511,20 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 		{
 			if (isEnemy())
 			{
-				return _PvpEnemyColor;
+				if (getPvpMode()&PVP_MODE::PvpFactionFlagged || getPvpMode()&PVP_MODE::PvpChallenge)
+					return _PvpEnemyColor;
+				else
+					return CRGBA::CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
 			}
 		}
 		// neutral pvp
 		if (isNeutralPVP())
 		{
+			if (isInTeam())
+				return _PvpAllyInTeamColor;
+			if (isInGuild())
+				return _PvpAllyInGuildColor;
+
 			return _PvpNeutralColor;
 		}
 		// ally
@@ -2526,7 +2534,11 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 				return _PvpAllyInTeamColor;
 			if(isInGuild())
 				return _PvpAllyInGuildColor;
-			return _PvpAllyColor;
+
+			if (getPvpMode()&PVP_MODE::PvpFactionFlagged)
+				return _PvpAllyColor;
+			else
+				return CRGBA::CRGBA(min(255, _PvpAllyColor.R+150), min(255, _PvpAllyColor.G+150), min(255, _PvpAllyColor.B+150),_PvpAllyColor.A);
 		}
 		// neutral
 		if (isInTeam())
@@ -2795,9 +2807,11 @@ void CEntityCL::updateIsInTeam ()
 			presentProp && presentProp->getValueBool() )
 		{
 			_IsInTeam= true;
+			buildInSceneInterface();
 			return;
 		}
 	}
+	buildInSceneInterface();
 }
 
 //-----------------------------------------------
@@ -3051,13 +3065,15 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 		position = pos().asVector();
 		position.z= _SelectBox.getMin().z;
 		mat.setPos(position);
+		mat.setRot(dirMatrix());
 
 		_StateFX.setTransformMode(NL3D::UTransformable::DirectMatrix);
 		_StateFX.setMatrix(mat);
 		if (skeleton())
 			_StateFX.setClusterSystem(skeleton()->getClusterSystem());
 	}
-	else if (!_SelectionFX.empty() || !_MouseOverFX.empty())
+	
+	if (!_SelectionFX.empty() || !_MouseOverFX.empty())
 	{
 		// Build a matrix for the fx
 		NLMISC::CMatrix mat;

@@ -293,6 +293,8 @@ protected :
 	// the script to execute
 	std::string		_LuaScript;
 
+	bool			_ParsingBnpUrl;
+	std::string		_BnpUrl;
 
 	// Someone is conecting. We got problem with libwww : 2 connection requests can deadlock the client.
 	static CGroupHTML *_ConnectingLock;
@@ -481,6 +483,12 @@ protected :
 	bool			_SelectOption;
 	ucstring		_SelectOptionStr;
 
+	// Current node is a object
+	std::string		_ObjectType;
+	std::string		_ObjectData;
+	std::string		_ObjectMD5Sum;
+	std::string		_ObjectAction;
+
 	// Get last char
 	ucchar getLastChar() const;
 
@@ -527,25 +535,38 @@ private:
 	static ucstring decodeHTMLEntities(const ucstring &str);
 
 	// ImageDownload system
+	enum TDataType {ImgType= 0, BnpType};
 
-	struct CImageDownload
+	struct CDataDownload
 	{
-		CImageDownload(CURL *c, const std::string &u, FILE *f, CViewBase *i) : curl(c), url(u), fp(f) { imgs.push_back(i); }
+		CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i) : curl(c), url(u), fp(f), type(t) { imgs.push_back(i); }
 		CURL *curl;
 		std::string url;
+		TDataType type;
 		FILE *fp;
 		std::vector<CViewBase *> imgs;
 	};
 
-	std::vector<CImageDownload> Curls;
+	std::vector<CDataDownload> Curls;
 	CURLM *MultiCurl;
 	int RunningCurls;
 
 	void initImageDownload();
-	void releaseImageDownload();
 	void checkImageDownload();
 	void addImageDownload(const std::string &url, CViewBase *img);
 	std::string localImageName(const std::string &url);
+
+
+
+	// BnpDownload system
+	void initBnpDownload();
+	void checkBnpDownload();
+	void addBnpDownload(const std::string &url, const std::string &action);
+	std::string localBnpName(const std::string &url);
+
+	void releaseDownloads();
+	void checkDownloads();
+
 };
 
 // adapter group that store y offset for inputs inside an html form

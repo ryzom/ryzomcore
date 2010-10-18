@@ -359,6 +359,13 @@ CCharacterCL::CCharacterCL()
 	_EventFactionId = 0;
 	_PvpMode = PVP_MODE::None;
 	_PvpClan = PVP_CLAN::None;
+
+	for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
+	{
+		_PvpAllies[i] = false;
+		_PvpEnemies[i] = false;
+	}
+
 	_OutpostId = 0;
 	_OutpostSide = OUTPOSTENUMS::UnknownPVPSide;
 
@@ -1853,12 +1860,16 @@ void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* game
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	_PvpClan = PVP_CLAN::TPVPClan(prop);
-	if (_PvpClan >= PVP_CLAN::NbClans)
+	// get fames signs from prop
+	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
 	{
-		//nlwarning("updateVisualPropertyPvpClan: received invalid PvP clan: %"NL_I64"u", prop);
-		_PvpClan = PVP_CLAN::None;
+		_PvpAllies[fameIdx] = prop & (1 << 2*fameIdx);
+		_PvpEnemies[fameIdx] = prop & (1 << ((2*fameIdx)+1));
 	}
+
+	_ClanCivMaxFame = PVP_CLAN::TPVPClan((prop & (0x03 << 2*7)) >> 2*7);
+	_ClanCultMaxFame = PVP_CLAN::TPVPClan(4 + ((prop & (0x03 << 2*8)) >> 2*8));
+
 	buildInSceneInterface();
 
 } // updateVisualPropertyPvpClan //

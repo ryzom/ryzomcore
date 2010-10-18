@@ -85,8 +85,28 @@ public:
 	uint		Slot;
 };
 
+/*
+ *	Class to make cache shape instances
+ */
+class CShapeInstanceReference
+{
+public:
+	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true)
+	{
+		Instance = instance;
+		ContextText = text;
+		ContextURL = url;
+		BboxActive = bbox_active;
+	}
+
+	NL3D::UInstance Instance;
+	string ContextText;
+	string ContextURL;
+	bool BboxActive;
+};
+
 /**
- * Class to manage entities.
+ * Class to manage entities and shapes instances.
  * \author Guillaume PUZIN
  * \author Nevrax France
  * \date 2001
@@ -106,6 +126,9 @@ private:
 	std::vector<CEntityReference>	_ActiveEntities;
 	std::vector<CEntityReference>	_VisibleEntities;
 
+	/// Shapes Instances caches
+	std::vector<CShapeInstanceReference>	_ShapeInstances;
+
 	typedef struct
 	{
 		NLMISC::TGameCycle	GC;
@@ -122,6 +145,8 @@ private:
 
 	// For selection. NB: the pointer is just a cache. Must not be accessed
 	CEntityCL				*_LastEntityUnderPos;
+
+	NL3D::UInstance _LastInstanceUnderPos;
 
 	//////////////
 	//// DEBUG ///
@@ -173,6 +198,11 @@ public:
 
 	/// Release + initialize
 	void reinit();
+
+
+	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool active=true);
+	bool removeInstances();
+	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y);
 
 	/**
 	 * Create an entity according to the slot and the form.

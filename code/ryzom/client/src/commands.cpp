@@ -125,7 +125,7 @@ extern CClientChatManager			 ChatMngr;
 extern ULandscape					*Landscape;
 extern UScene						*Scene;
 extern CLog							 g_log;
-
+extern CEntityManager				EntitiesMngr;
 
 ///////////////
 // Variables //
@@ -339,6 +339,317 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max>")
 	if (UserEntity != NULL)
 		UserEntity->rollDice(min, max);
 
+	return true;
+}
+
+//-----------------------------------------------
+// 'dumpShapePos' : Dump Last Added Shape Pos
+//-----------------------------------------------
+NLMISC_COMMAND(dumpShapePos, "Dump Last Added Shape Pos.", "")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+
+	CInterfaceManager *IM = CInterfaceManager::getInstance();
+	CVector pos = ShapeAddedByCommand.back().getPos();
+	IM->displaySystemInfo(ucstring(toString("Shape Pos = %f, %f, %f", pos.x, pos.y, pos.z)));
+	return true;
+}
+//-----------------------------------------------
+// 'clearShape' : Remove all shapes added with the 'shape' command
+//-----------------------------------------------
+NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", "")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+	
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+
+	if (!Scene) return false;
+	for(uint k = 0; k < ShapeAddedByCommand.size(); ++k)
+	{
+		Scene->deleteInstance(ShapeAddedByCommand[k]);
+	}
+	ShapeAddedByCommand.clear();
+	return true;
+}
+
+//-----------------------------------------------------
+// 'setShapeX' : Set X position for last created shape
+//-----------------------------------------------------
+NLMISC_COMMAND(setShapeX, "Set X position for last created shape.", "<x coordinate>")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if (args.size() != 1) return false;
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+	float coord;
+	bool valid_coord;
+	if (args[0][0] == '+')
+		valid_coord = fromString(args[0].substr(1), coord);
+	else
+		valid_coord = fromString(args[0], coord);
+
+	if (!valid_coord)
+	{
+		nlwarning("Can't get position");
+		return false;
+	}
+	CVector pos = ShapeAddedByCommand.back().getPos();
+	if (args[0][0] == '+')
+		pos.x += coord;
+	else
+		pos.x = coord;
+	ShapeAddedByCommand.back().setPos(pos);
+	return true;
+}
+
+//-----------------------------------------------------
+// 'setShapeY' : Set Y position for last created shape
+//-----------------------------------------------------
+NLMISC_COMMAND(setShapeY, "Set Y position for last created shape.", "<y coordinate>")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if (args.size() != 1) return false;
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+	float coord;
+	bool valid_coord;
+	if (args[0][0] == '+')
+		valid_coord = fromString(args[0].substr(1), coord);
+	else
+		valid_coord = fromString(args[0], coord);
+
+	if (!valid_coord)
+	{
+		nlwarning("Can't get position");
+		return false;
+	}
+	CVector pos = ShapeAddedByCommand.back().getPos();
+	if (args[0][0] == '+')
+		pos.y += coord;
+	else
+		pos.y = coord;
+	ShapeAddedByCommand.back().setPos(pos);
+	return true;
+}
+
+//-----------------------------------------------------
+// 'setShapeZ' : Set Z position for last created shape
+//-----------------------------------------------------
+NLMISC_COMMAND(setShapeZ, "Set Z position for last created shape.", "<z coordinate>")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if (args.size() != 1) return false;
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+	float coord;
+	bool valid_coord;
+	if (args[0][0] == '+')
+		valid_coord = fromString(args[0].substr(1), coord);
+	else
+		valid_coord = fromString(args[0], coord);
+
+	if (!valid_coord)
+	{
+		nlwarning("Can't get position");
+		return false;
+	}
+	CVector pos = ShapeAddedByCommand.back().getPos();
+	if (args[0][0] == '+')
+		pos.z += coord;
+	else
+		pos.z = coord;
+	ShapeAddedByCommand.back().setPos(pos);
+	return true;
+}
+
+
+//-----------------------------------------------------
+// 'setShapeDir' : Set direction angle for last created shape
+//-----------------------------------------------------
+NLMISC_COMMAND(setShapeDir, "Set direction angle for last created shape.", "<angle>")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if (args.size() != 1) return false;
+	if (ShapeAddedByCommand.empty())
+	{
+		nlwarning("No shape created yet");
+		return false;
+	}
+	float angle;
+	if (!fromString(args[0], angle))
+	{
+		nlwarning("Can't get angle");
+		return false;
+	}
+
+	CMatrix dir;
+	dir.identity();
+	CVector vangle = CVector(sin(angle), cos(angle), 0.f);
+	CVector vi = vangle^CVector(0.f, 0.f, 1.f);
+	CVector vk = vi^vangle;
+	dir.setRot(vi, vangle, vk, true);
+	// Set Orientation : User Direction should be normalized.
+	ShapeAddedByCommand.back().setRotQuat(dir.getRot());
+
+	return true;
+}
+
+
+//-----------------------------------------------
+// 'shape' : Add a shape in the scene.
+//-----------------------------------------------
+NLMISC_COMMAND(shape, "Add a shape in the scene.", "<shape file>")
+{
+	#if FINAL_VERSION
+	if (!hasPrivilegeDEV() &&
+		!hasPrivilegeSGM() &&
+		!hasPrivilegeGM() &&
+		!hasPrivilegeVG() &&
+		!hasPrivilegeSG() &&
+		!hasPrivilegeG() &&
+		!hasPrivilegeEM() &&
+		!hasPrivilegeEG())
+		return true;
+	#endif // FINAL_VERSION
+
+	if(args.size() < 1)
+	{
+		nlwarning("Command 'shape': need at least 1 parameter, try '/help shape' for more details.");
+		return false;
+	}
+	if (!Scene)
+	{
+		nlwarning("No scene available");
+		return false;
+	}
+	UInstance instance = Scene->createInstance(args[0]);
+	if(!instance.empty())
+	{
+		ShapeAddedByCommand.push_back(instance);
+		// Set the position
+		instance.setPos(UserEntity->pos());
+		instance.setClusterSystem(UserEntity->getClusterSystem()); // for simplicity, assume it is in the same
+																   // cluster system than the user
+		// Compute the direction Matrix
+		CMatrix dir;
+		dir.identity();
+		CVector vi = UserEntity->dir()^CVector(0.f, 0.f, 1.f);
+		CVector vk = vi^UserEntity->dir();
+		dir.setRot(vi, UserEntity->dir(), vk, true);
+		// Set Orientation : User Direction should be normalized.
+		instance.setRotQuat(dir.getRot());
+		// if the shape is a particle system, additionnal parameters are user params
+		UParticleSystemInstance psi;
+		psi.cast (instance);
+		if (!psi.empty())
+		{
+			// set each user param that is present
+			for(uint k = 0; k < 4; ++k)
+			{
+				if (args.size() >= (k + 2))
+				{
+					float uparam;
+					if (fromString(args[k + 1], uparam))
+					{
+						psi.setUserParam(k, uparam);
+					}
+					else
+					{
+						nlwarning("Cant read param %d", k);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		nlwarning("Command 'shape': cannot find the shape %s.", args[0].c_str());
+	}
+
+	// Command Well Done
 	return true;
 }
 
@@ -907,6 +1218,10 @@ static bool talkInChan(uint32 nb,std::vector<std::string>args)
 
 		PeopleInterraction.talkInDynamicChannel(nb,ucstring(tmp));
 		return true;
+	}
+	else
+	{
+		ChatMngr.updateChatModeAndButton(CChatGroup::dyn_chat);
 	}
 	return false;
 }
@@ -3465,156 +3780,6 @@ NLMISC_COMMAND(dist2side, "Change the distance to the side for a given sheet.", 
 	DIST_TO_COMMAND(dist2side, DistToSide);
 }
 
-
-
-
-
-
-//-----------------------------------------------
-// 'clearShape' : Remove all shapes added with the 'shape' command
-//-----------------------------------------------
-NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", "")
-{
-	if (!Scene) return false;
-	for(uint k = 0; k < ShapeAddedByCommand.size(); ++k)
-	{
-		Scene->deleteInstance(ShapeAddedByCommand[k]);
-	}
-	ShapeAddedByCommand.clear();
-	return true;
-}
-
-
-//-----------------------------------------------------
-// 'setShapeX' : Set X position for last created shape
-//-----------------------------------------------------
-NLMISC_COMMAND(setShapeX, "Set X position for last created shape.", "<x coordinate>")
-{
-	if (args.size() != 1) return false;
-	if (ShapeAddedByCommand.empty())
-	{
-		nlwarning("No shape created yet");
-		return false;
-	}
-	float coord;
-	if (!fromString(args[0], coord))
-	{
-		nlwarning("Can't get position");
-		return false;
-	}
-	CVector pos = ShapeAddedByCommand.back().getPos();
-	pos.x = coord;
-	ShapeAddedByCommand.back().setPos(pos);
-	return true;
-}
-
-//-----------------------------------------------------
-// 'setShapeY' : Set Y position for last created shape
-//-----------------------------------------------------
-NLMISC_COMMAND(setShapeY, "Set Y position for last created shape.", "<y coordinate>")
-{
-	if (args.size() != 1) return false;
-	if (ShapeAddedByCommand.empty())
-	{
-		nlwarning("No shape created yet");
-		return false;
-	}
-	float coord;
-	if (!fromString(args[0], coord))
-	{
-		nlwarning("Can't get position");
-		return false;
-	}
-	CVector pos = ShapeAddedByCommand.back().getPos();
-	pos.y = coord;
-	ShapeAddedByCommand.back().setPos(pos);
-	return true;
-}
-
-//-----------------------------------------------------
-// 'setShapeZ' : Set Z position for last created shape
-//-----------------------------------------------------
-NLMISC_COMMAND(setShapeZ, "Set Z position for last created shape.", "<z coordinate>")
-{
-	if (args.size() != 1) return false;
-	if (ShapeAddedByCommand.empty())
-	{
-		nlwarning("No shape created yet");
-		return false;
-	}
-	float coord;
-	if (!fromString(args[0], coord))
-	{
-		nlwarning("Can't get position");
-		return false;
-	}
-	CVector pos = ShapeAddedByCommand.back().getPos();
-	pos.z = coord;
-	ShapeAddedByCommand.back().setPos(pos);
-	return true;
-}
-
-
-//-----------------------------------------------
-// 'shape' : Add a shape in the scene.
-//-----------------------------------------------
-NLMISC_COMMAND(shape, "Add a shape in the scene.", "<shape file>")
-{
-	if(args.size() < 1)
-	{
-		nlwarning("Command 'shape': need at least 1 parameter, try '/help shape' for more details.");
-		return false;
-	}
-	if (!Scene)
-	{
-		nlwarning("No scene available");
-		return false;
-	}
-	UInstance instance = Scene->createInstance(args[0]);
-	if(!instance.empty())
-	{
-		ShapeAddedByCommand.push_back(instance);
-		// Set the position
-		instance.setPos(UserEntity->pos());
-		instance.setClusterSystem(UserEntity->getClusterSystem()); // for simplicity, assume it is in the same
-																   // cluster system than the user
-		// Compute the direction Matrix
-		CMatrix dir;
-		dir.identity();
-		CVector vi = UserEntity->dir()^CVector(0.f, 0.f, 1.f);
-		CVector vk = vi^UserEntity->dir();
-		dir.setRot(vi, UserEntity->dir(), vk, true);
-		// Set Orientation : User Direction should be normalized.
-		instance.setRotQuat(dir.getRot());
-		// if the shape is a particle system, additionnal parameters are user params
-		UParticleSystemInstance psi;
-		psi.cast (instance);
-		if (!psi.empty())
-		{
-			// set each user param that is present
-			for(uint k = 0; k < 4; ++k)
-			{
-				if (args.size() >= (k + 2))
-				{
-					float uparam;
-					if (fromString(args[k + 1], uparam))
-					{
-						psi.setUserParam(k, uparam);
-					}
-					else
-					{
-						nlwarning("Cant read param %d", k);
-					}
-				}
-			}
-		}
-	}
-	else
-		nlwarning("Command 'shape': cannot find the shape %s.", args[0].c_str());
-
-	// Command Well Done
-	return true;
-}
 
 
 // Change the parent of an entity. 'parent slot' not defined remove the current parent.

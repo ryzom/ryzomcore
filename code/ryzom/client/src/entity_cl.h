@@ -686,7 +686,7 @@ public:
 	virtual bool isNeutralPVP() const { return false; }
 
 	/// Return true if this player has the viewing properties of a friend (inscene bars...)
-	virtual bool isViewedAsFriend() const { return isNeutral() || isFriend(); }
+	virtual bool isViewedAsFriend() const { return isNeutral() || isFriend() || isInTeam() || isInGuild(); }
 
 	/// Return the People for the entity (unknown by default)
 	virtual EGSPD::CPeople::TPeople people() const;
@@ -758,6 +758,12 @@ public:
 	const ucstring &getTitle() const
 	{
 		return _Title;
+	}
+
+	/// Return the raw unparsed entity title
+	const ucstring getTitleRaw() const
+	{
+		return ucstring(_TitleRaw);
 	}
 
 	/// Return true if this entity has a reserved title

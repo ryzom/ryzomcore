@@ -606,7 +606,7 @@ static CInterfaceChatDisplayer	InterfaceChatDisplayer;
 void CInterfaceChatDisplayer::colorizeSender(ucstring &text, const ucstring &senderName, CRGBA baseColor)
 {
 	// find the sender/text separator to put color tags
-	ucstring::size_type pos = text.find(ucchar(':'));
+	ucstring::size_type pos = senderName.length() - 1;
 	if (pos != ucstring::npos)
 	{
 		ucstring str;
@@ -635,14 +635,17 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 	bool bubbleWanted = true;
 
+	// Subtract rawMessage from ucstr so that the 'sender' part remains.
+	ucstring senderPart = ucstr.luabind_substr(0, ucstr.length() - rawMessage.length());
+
 	// search a "{no_bubble}" tag
 	{
-		ucstring::size_type index = finalString.find (ucstring("{no_bubble}"));
-		const size_t tokenSize= 11; // strlen de "{no_bubble}"
+		ucstring::size_type index = finalString.find(ucstring("{no_bubble}"));
+		const size_t tokenSize= 11; // length of "{no_bubble}"
 		if (index != ucstring::npos)
 		{
 			bubbleWanted = false;
-			finalString = finalString.substr (0, index) + finalString.substr(index+tokenSize,finalString.size());
+			finalString = finalString.luabind_substr(0, index) + finalString.substr(index+tokenSize,finalString.size());
 		}
 	}
 
@@ -654,9 +657,9 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		// Remove all {break}
 		for(;;)
 		{
-			ucstring::size_type index = finalString.find (ucstring("{break}"));
+			ucstring::size_type index = finalString.find(ucstring("{break}"));
 			if (index == ucstring::npos) break;
-			finalString = finalString.substr (0, index) + finalString.substr(index+7,finalString.size());
+			finalString = finalString.luabind_substr(0, index) + finalString.luabind_substr(index+7,finalString.size());
 		}
 
 		// select DB
@@ -696,7 +699,15 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	if (mode != CChatGroup::system)
 	{
 		// find the sender/text separator to put color tags
-		colorizeSender(finalString, senderName, col);
+		if (senderPart.empty() && stringCategory == "emt")
+		{
+			size_t pos = finalString.find(ucstring(": "), 0);
+			if (pos != ucstring::npos)
+			{
+				senderPart = finalString.luabind_substr(0, pos + 2);
+			}
+		}
+		colorizeSender(finalString, senderPart, col);
 	}
 
 	// play associated fx if any
@@ -839,10 +850,15 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	bool windowVisible;
 
-
-	colorizeSender(finalString, senderName, prop.getRGBA());
-
 	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
+ 
+	// The sender part is up to and including the first ":" after the goodSenderName
+	ucstring::size_type pos = finalString.find(goodSenderName);
+	pos = finalString.find(':', pos);
+	pos = finalString.find(' ', pos);
+	ucstring senderPart = finalString.substr(0, pos+1);
+ 	colorizeSender(finalString, senderPart, prop.getRGBA());
+
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */finalString, goodSenderName, prop.getRGBA(), 2, &windowVisible);
 
 	// Open the free teller window
@@ -1764,6 +1780,14 @@ void impulseTeamContactStatus(NLMISC::CBitMemStream &impulse)
 	// 0<=FriendList (actually ignore list does not show online state)
 	PeopleInterraction.updateContactInList(contactId, online, 0);
 
+	// Resort the contact list if needed
+	CInterfaceManager* pIM= CInterfaceManager::getInstance();
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+
+	if (order == CPeopleList::sort_online)
+	{
+		PeopleInterraction.FriendList.sortEx(order);
+	}
 }// impulseTeamContactStatus //
 
 
@@ -3069,7 +3093,7 @@ void impulseItemCloseRoomInventory(NLMISC::CBitMemStream &impulse)
 void impulseUserBars(NLMISC::CBitMemStream &impulse)
 {
 	uint8	msgNumber;
-	sint16	hp, sap, sta, focus;
+	sint32	hp, sap, sta, focus;
 	impulse.serial(msgNumber);
 	impulse.serial(hp);
 	impulse.serial(sap);
@@ -3164,7 +3188,6 @@ private:
 		if(contentStr.size()>=6 && contentStr[0]=='W' && contentStr[1]=='E' && contentStr[2]=='B'
 			&& contentStr[3]==' ' && contentStr[4]==':' && contentStr[5]==' ' )
 		{
-			ucstring web_app;
 			uint i;
 			const uint digitStart= 6;
 			const uint digitMaxEnd= (uint)contentStr.size();
@@ -3176,18 +3199,17 @@ private:
 				if(contentStr[i] == ' ')
 					break;
 			}
-			nlinfo("%d", i);
 			if(i != digitMaxEnd)
-				web_app = contentStr.substr(digitStart, i-digitStart);
+			{
+				ucstring web_app = contentStr.substr(digitStart, i-digitStart);
+				contentStr = ucstring("http://atys.ryzom.com/start/")+web_app+ucstring(".php?")+contentStr.substr(i+1);
+			}
 			else
 			{
-				web_app = ucstring("index");
+				contentStr = "";
 				i = digitStart;
-				nlinfo("no app");
 			}
-			contentStr = ucstring("http://atys.ryzom.com/start/")+web_app+ucstring(".php?")+contentStr.substr(i+1);
-			nlinfo("contentStr = %s", contentStr.toString().c_str());
-		}
+		} 
 		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
@@ -3218,12 +3240,19 @@ private:
 			{
 
 				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:webig"));
-				pGC->setActive(true);
 
-				string url = contentStr.toString();
-				addWebIGParams(url);
-				groupHtml->browse(url.c_str());
-				pIM->setTopWindow(pGC);
+				if (contentStr.empty())
+				{
+					pGC->setActive(false);
+				}
+				else
+				{
+					pGC->setActive(true);
+					string url = contentStr.toString();
+					addWebIGParams(url);
+					groupHtml->browse(url.c_str());
+					pIM->setTopWindow(pGC);
+				}
 			}
 		}
 		else

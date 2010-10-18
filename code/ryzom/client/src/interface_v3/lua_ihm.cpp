@@ -4287,7 +4287,14 @@ void CLuaIHM::tell(const ucstring &player, const ucstring &msg)
 	{
 		if (!msg.empty())
 		{
-			ChatMngr.tell(player.toUtf8(), msg);
+			// Parse any tokens in the message.
+			ucstring msg_modified = msg;
+			// Parse any tokens in the text
+			if ( ! CInterfaceManager::parseTokens(msg_modified))
+			{
+				return;
+			}
+			ChatMngr.tell(player.toUtf8(), msg_modified);
 		}
 		else
 		{
