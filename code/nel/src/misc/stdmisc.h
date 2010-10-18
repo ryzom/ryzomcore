@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NL_STDMISC_H
+#define NL_STDMISC_H
+
 #include "nel/misc/types_nl.h"
 
 #include <algorithm>
@@ -54,3 +57,5 @@
 	#define NOMINMAX
 	#include <windows.h>
 #endif
+
+#endif // NL_STDMISC_H
