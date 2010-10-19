@@ -103,7 +103,7 @@ void printDownload(const std::string &str)
 		length = (uint)ucstr.length();
 		if (length > maxLength)
 		{
-			ucstr = ucstr.luabind_substr(length - maxLength - 3);
+			ucstr = ucstr.luabind_substr(length - maxLength + 3);
 			nstr = std::string("...") + ucstr.toUtf8();
 			length = maxLength;
 		}
@@ -113,7 +113,7 @@ void printDownload(const std::string &str)
 		length = (uint)nstr.length();
 		if (length > maxLength)
 		{
-			nstr = std::string("...") + nstr.substr(length - maxLength - 3);
+			nstr = std::string("...") + nstr.substr(length - maxLength + 3);
 			length = maxLength;
 		}
 	}
