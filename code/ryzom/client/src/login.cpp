@@ -31,6 +31,7 @@
 
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
+#include "nel/misc/big_file.h"
 
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/input_handler_manager.h"
@@ -1893,61 +1894,11 @@ class CAHInitResLod : public IActionHandler
 		//nlinfo("CAHInitResLod called");
 		if (Driver == NULL) return;
 
-		// **** Init Video Modes
 		VideoModes.clear();
-		Driver->getModes(VideoModes);
+		StringModeList.clear();
 		StringModeList.push_back("uiConfigWindowed");
-		// Remove modes under 800x600 and get the unique strings
-		sint i, j;
-		for (i=0; i < (sint)VideoModes.size(); ++i)
-		{
-			if ((VideoModes[i].Width < 800) || (VideoModes[i].Height < 600))
-			{
-				VideoModes.erase(VideoModes.begin()+i);
-				--i;
-			}
-			else
-			{
-				bool bFound = false;
-				string tmp = toString(VideoModes[i].Width)+" x "+toString(VideoModes[i].Height);
-				for (j = 0; j < (sint)StringModeList.size(); ++j)
-				{
-					if (StringModeList[j] == tmp)
-					{
-						bFound = true;
-						break;
-					}
-				}
-				if (!bFound)
-				{
-					StringModeList.push_back(tmp);
-					if ((VideoModes[i].Width <= ClientCfg.Width) && (VideoModes[i].Height <= ClientCfg.Height))
-					{
-						if (CurrentMode == -1)
-						{
-							CurrentMode = j;
-						}
-						else
-						{
-							if ((VideoModes[i].Width >= VideoModes[CurrentMode].Width) &&
-								(VideoModes[i].Height >= VideoModes[CurrentMode].Height))
-								CurrentMode = j;
-						}
-					}
-				}
-			}
-		}
-		
-		// If no modes are available, display a message and exit
-		if (VideoModes.empty())
-		{
-			Driver->systemMessageBox("No Video Modes available!\n"
-																"Minimum Video mode to play Ryzom is 800x600.\n",
-																"No Video Mode!",
-																NL3D::UDriver::okType,
-																NL3D::UDriver::exclamationIcon);
-			exit(EXIT_SUCCESS);
-		}
+
+		CurrentMode = getRyzomModes(VideoModes, StringModeList);
 
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
