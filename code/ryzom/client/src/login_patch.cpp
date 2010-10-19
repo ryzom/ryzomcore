@@ -1132,14 +1132,20 @@ void CPatchManager::readDescFile(sint32 nVersion)
 		}
 	}
 
+	CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
+
 	for(cat = 0; cat < DescFile.getCategories().categoryCount();)
 	{
+		const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
+
 		if (std::find(ForceRemovePatchCategories.begin(), ForceRemovePatchCategories.end(),
-			DescFile.getCategories().getCategory(cat).getName()) != ForceRemovePatchCategories.end())
+			bnpCat.getName()) != ForceRemovePatchCategories.end())
 		{
-			std::string fileName = DescFile.getCategories().getFile(cat);
-			CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
-			bnpFS.removeFile(fileName);
+			for(uint file = 0; file < bnpCat.fileCount(); ++file)
+			{
+				std::string fileName = bnpCat.getFile(file);
+				bnpFS.removeFile(fileName);
+			}
 			const_cast<CBNPCategorySet &>(DescFile.getCategories()).deleteCategory(cat);
 		}
 		else
