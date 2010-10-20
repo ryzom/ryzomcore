@@ -2914,11 +2914,11 @@ private:
 
 	/// temp values used to test if Players bars need an update or not
 	uint8								_BarSentToPlayerMsgNumber;
-	/// NB: 16 bits because guigui ensure me cannot goes beyond something like 6000
-	sint16								_OldHpBarSentToPlayer;
-	sint16								_OldSapBarSentToPlayer;
-	sint16								_OldStaBarSentToPlayer;
-	sint16								_OldFocusBarSentToPlayer;
+
+	sint32								_OldHpBarSentToPlayer;
+	sint32								_OldSapBarSentToPlayer;
+	sint32								_OldStaBarSentToPlayer;
+	sint32								_OldFocusBarSentToPlayer;
 	
 	NLMISC::TGameCycle					_LastTickSaved;
 	NLMISC::TGameCycle					_LastTickCompassUpdated;

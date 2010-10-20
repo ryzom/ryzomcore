@@ -17662,10 +17662,10 @@ void	CCharacter::barUpdate()
 		_PhysScores._PhysicalScores[ SCORES::focus].Current() != _OldFocusBarSentToPlayer )
 	{
 		// bkup cache
-		_OldHpBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::hit_points ].Current();
-		_OldSapBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::sap].Current();
-		_OldStaBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::stamina].Current();
-		_OldFocusBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::focus].Current();
+		_OldHpBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::hit_points ].Current();
+		_OldSapBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::sap].Current();
+		_OldStaBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::stamina].Current();
+		_OldFocusBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::focus].Current();
 
 		// Since client must listen only the last message (no delta like DB here...), use a small counter
 		_BarSentToPlayerMsgNumber++;
