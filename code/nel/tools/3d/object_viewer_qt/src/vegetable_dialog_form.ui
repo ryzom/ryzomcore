@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CVegetableDialog</class>
+ <widget class="QDockWidget" name="CVegetableDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>618</width>
+    <height>679</height>
+   </rect>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="object_viewer_qt.qrc">
+    <normaloff>:/images/veget.png</normaloff>:/images/veget.png</iconset>
+  </property>
+  <property name="windowTitle">
+   <string>Vegetable editor</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>598</width>
+         <height>640</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetFixedSize</enum>
+          </property>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Vegetables:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="listWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string>List edition</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="addtPushButton">
+               <property name="toolTip">
+                <string>Add vegetable</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="object_viewer_qt.qrc">
+                 <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="insPushButton">
+               <property name="toolTip">
+                <string>Insert vegetable</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="object_viewer_qt.qrc">
+                 <normaloff>:/images/insert-horizontal.png</normaloff>:/images/insert-horizontal.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="delPushButton">
+               <property name="toolTip">
+                <string>Remove vegetable</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="object_viewer_qt.qrc">
+                 <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="clearPushButton">
+               <property name="toolTip">
+                <string>Clear all vegetables</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="object_viewer_qt.qrc">
+                 <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QPushButton" name="copyVegetPushButton">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Copy Vegetable</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="2">
+              <widget class="QPushButton" name="loadVegetdescPushButton">
+               <property name="text">
+                <string>Load .vegetdesc</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <widget class="QPushButton" name="saveVegetdescPushButton">
+               <property name="text">
+                <string>Save .vegetdesc</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string>List Save/Load</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="loadVegetsetPushButton">
+               <property name="text">
+                <string>Load .vegetset</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="appendVegetsetPushButton">
+               <property name="text">
+                <string>Append .vegetset</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="saveVegetsetPushButton">
+               <property name="text">
+                <string>Save .vegetset</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="showVegetCheckBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Display Vegetables</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="NLQT::CVegetableLandscapePage" name="landscapePage">
+           <attribute name="title">
+            <string>Landscape</string>
+           </attribute>
+          </widget>
+          <widget class="NLQT::CVegetableDensityPage" name="densityPage">
+           <attribute name="title">
+            <string>General/Density</string>
+           </attribute>
+          </widget>
+          <widget class="NLQT::CVegetableApperancePage" name="appearancePage">
+           <attribute name="title">
+            <string>Appearance</string>
+           </attribute>
+          </widget>
+          <widget class="NLQT::CVegetableScalePage" name="scalePage">
+           <attribute name="title">
+            <string>Scale</string>
+           </attribute>
+          </widget>
+          <widget class="NLQT::CVegetableRotatePage" name="rotatePage">
+           <attribute name="title">
+            <string>Rotation</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CVegetableDensityPage</class>
+   <extends>QWidget</extends>
+   <header>vegetable_density_page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CVegetableLandscapePage</class>
+   <extends>QWidget</extends>
+   <header>vegetable_landscape_page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CVegetableScalePage</class>
+   <extends>QWidget</extends>
+   <header>vegetable_scale_page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CVegetableRotatePage</class>
+   <extends>QWidget</extends>
+   <header>vegetable_rotate_page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CVegetableApperancePage</class>
+   <extends>QWidget</extends>
+   <header>vegetable_appearance_page.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="object_viewer_qt.qrc"/>
+ </resources>
+ <connections/>
+</ui>

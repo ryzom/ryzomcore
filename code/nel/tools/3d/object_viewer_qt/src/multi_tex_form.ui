@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CMultiTexDialog</class>
+ <widget class="QDialog" name="CMultiTexDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>360</width>
+    <height>269</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Multitexturing</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0" colspan="3">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="mainTab">
+      <attribute name="title">
+       <string>Main tex</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="uSpeed1Label">
+         <property name="text">
+          <string>U speed 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="uSpeed1DoubleSpinBox"/>
+       </item>
+       <item row="0" column="2" rowspan="4">
+        <widget class="NLQT::CParticleTextureWidget" name="texWidget" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="vSpeed1Label">
+         <property name="text">
+          <string>V speed 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="vSpeed1DoubleSpinBox"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="uSpeed2Label">
+         <property name="text">
+          <string>U speed 2:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="uSpeed2DoubleSpinBox"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="vSpeed2Label">
+         <property name="text">
+          <string>V speed 2:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="vSpeed2DoubleSpinBox"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="bumpFactorLabel">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Bump factor:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="bumpFactorDoubleSpinBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QCheckBox" name="useParticleDataCheckBox">
+         <property name="text">
+          <string>Use particle data</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="texOpLabel">
+         <property name="text">
+          <string>Tex op:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="texOpComboBox">
+         <item>
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Modulate</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Decal</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>EnvBumpMap</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="alternateTab">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <attribute name="title">
+       <string>Alternate tex</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>U speed 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="uSpeed1DoubleSpinBox_2"/>
+       </item>
+       <item row="0" column="2" rowspan="4">
+        <widget class="NLQT::CParticleTextureWidget" name="texWidget_2" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_26">
+         <property name="text">
+          <string>V speed 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="vSpeed1DoubleSpinBox_2"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>U speed 2:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="uSpeed2DoubleSpinBox_2"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_28">
+         <property name="text">
+          <string>V speed 2:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="vSpeed2DoubleSpinBox_2"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_30">
+         <property name="text">
+          <string>Tex op:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QComboBox" name="texOpComboBox_2">
+         <item>
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Modulate</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Decal</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QCheckBox" name="useParticleDataCheckBox_2">
+         <property name="text">
+          <string>Use particle data all</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="basicCapsCheckBox">
+     <property name="text">
+      <string>Force basic caps</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="enableAlternateCheckBox">
+     <property name="text">
+      <string>Enable alternate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CParticleTextureWidget</class>
+   <extends>QWidget</extends>
+   <header>particle_texture_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>CMultiTexDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>250</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>CMultiTexDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
