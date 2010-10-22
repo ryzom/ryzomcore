@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CVegetableRotatePage</class>
+ <widget class="QWidget" name="CVegetableRotatePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>204</width>
+    <height>223</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="NLQT::CVegetNoiseValueWidget" name="rotateXGroupBox">
+     <property name="title">
+      <string>Rotate X</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="NLQT::CVegetNoiseValueWidget" name="rotateYGroupBox">
+     <property name="title">
+      <string>Rotate Y</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="NLQT::CVegetNoiseValueWidget" name="rotateZGroupBox">
+     <property name="title">
+      <string>Rotate Z</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>158</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CVegetNoiseValueWidget</class>
+   <extends>QGroupBox</extends>
+   <header>vegetable_noise_value_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

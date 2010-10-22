@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CBasicEditWidget</class>
+ <widget class="QWidget" name="CBasicEditWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>283</width>
+    <height>99</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Psi</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QSlider" name="psiHorizontalSlider">
+     <property name="maximum">
+      <number>359</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QSpinBox" name="psiSpinBox">
+     <property name="maximum">
+      <number>359</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3" rowspan="3">
+    <widget class="NLQT::CGraphicsInfoWidget" name="graphicsWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>75</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Theta</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSlider" name="thetaHorizontalSlider">
+     <property name="maximum">
+      <number>360</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QSpinBox" name="thetaSpinBox">
+     <property name="maximum">
+      <number>359</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Phi</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QSlider" name="phiHorizontalSlider">
+     <property name="maximum">
+      <number>360</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QSpinBox" name="phiSpinBox">
+     <property name="maximum">
+      <number>359</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CGraphicsInfoWidget</class>
+   <extends>QWidget</extends>
+   <header>graphics_info_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>psiHorizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>psiSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>173</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>thetaHorizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>thetaSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>135</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>192</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>phiHorizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>phiSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>170</x>
+     <y>65</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>phiSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>phiHorizontalSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>77</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>138</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>thetaSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>thetaHorizontalSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>179</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>154</x>
+     <y>50</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>psiSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>psiHorizontalSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>9</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

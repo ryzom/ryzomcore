@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CEmitterPage</class>
+ <widget class="QWidget" name="CEmitterPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>382</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="tabPosition">
+      <enum>QTabWidget::East</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <property name="movable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="tabWidgetPage1">
+      <attribute name="title">
+       <string>General</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0" colspan="3">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Emitted type:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="emittedTypeComboBox"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Type of emission:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="typeEmissionComboBox">
+           <item>
+            <property name="text">
+             <string>Regular</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>On death</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Once</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>On bounce</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>External only</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Direction:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QComboBox" name="directionComboBox">
+         <item>
+          <property name="text">
+           <string>Default</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Direction is aligned on the emitter direction</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Direction is in world</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Direction is local to the system</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>User</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QCheckBox" name="forceConsistentCheckBox">
+         <property name="text">
+          <string>Force consistent emission</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QCheckBox" name="bypassAutoLODCheckBox">
+         <property name="text">
+          <string>Bypass Auto-LOD</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Speed inheritance factor:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="speedInherFactorWidget" native="true"/>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QLabel" name="delayedEmissionLabel">
+         <property name="text">
+          <string>Delayed emission:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="delayedEmissionWidget" native="true"/>
+       </item>
+       <item row="8" column="0" colspan="2">
+        <widget class="QLabel" name="maxEmissinCountLabel">
+         <property name="text">
+          <string>Max Emission Count:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeUIntWidget" name="maxEmissionCountWidget" native="true"/>
+       </item>
+       <item row="10" column="0" colspan="3">
+        <widget class="NLQT::CDirectionWidget" name="directionWidget" native="true"/>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="radiusLabel">
+         <property name="text">
+          <string>Radius:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0" rowspan="2" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="radiusWidget" native="true"/>
+       </item>
+       <item row="14" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>17</width>
+           <height>143</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWidgetPage2">
+      <attribute name="title">
+       <string>Emission period</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>291</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="NLQT::CAttribFloatWidget" name="periodWidget">
+         <property name="title">
+          <string>Emmision period</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWidgetPage3">
+      <attribute name="title">
+       <string>Emmision quantity/Speed</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="NLQT::CAttribUIntWidget" name="genNbWidget">
+         <property name="title">
+          <string>Emmision quantity</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="NLQT::CAttribFloatWidget" name="strenghtModulateWidget">
+         <property name="title">
+          <string>Strenght modulation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>275</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CEditRangeUIntWidget</class>
+   <extends>QWidget</extends>
+   <header>edit_range_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CEditRangeFloatWidget</class>
+   <extends>QWidget</extends>
+   <header>edit_range_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CDirectionWidget</class>
+   <extends>QWidget</extends>
+   <header>direction_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CAttribFloatWidget</class>
+   <extends>QGroupBox</extends>
+   <header>attrib_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CAttribUIntWidget</class>
+   <extends>QGroupBox</extends>
+   <header>attrib_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,52 @@
+<RCC>
+<qresource>
+    <file>images/nel.png</file>
+    <file>images/open-file.png</file>
+    <file>images/go-down.png</file>
+    <file>images/go-up.png</file>
+    <file>images/list-add.png</file>
+    <file>images/list-remove.png</file>
+    <file>images/play.png</file>
+    <file>images/pause.png</file>
+    <file>images/stop.png</file>
+    <file>images/seek-backward.png</file>
+    <file>images/seek-forward.png</file>
+    <file>images/skip-backward.png</file>
+    <file>images/skip-forward.png</file>
+    <file>images/preferences.png</file>
+    <file>images/time.png</file>
+    <file>images/anim.png</file>
+    <file>images/animset.png</file>
+    <file>images/dqynight.png</file>
+    <file>images/mixer.png</file>
+    <file>images/pqrticles.png</file>
+    <file>images/sound.png</file>
+    <file>images/veget.png</file>
+    <file>images/water.png</file>
+    <file>images/wind.png</file>
+    <file>images/ico_bgcolor.png</file>
+    <file>images/ico_framedelay.png</file>
+    <file>images/ico_skelscale.png</file>
+    <file>images/clear.png</file>
+    <file>images/insert.png</file>
+    <file>images/new.png</file>
+    <file>images/refresh.png</file>
+    <file>images/save-as.png</file>
+    <file>images/save.png</file>
+    <file>images/insert-horizontal.png</file>
+    
+    <file>images/Workspace.bmp</file>
+    <file>images/ParticleSystem.bmp</file>
+    <file>images/Emitter.bmp</file>
+    <file>images/Sound.bmp</file>
+    <file>images/Light.bmp</file>
+    <file>images/Force.bmp</file>
+    <file>images/Particle.bmp</file>
+    <file>images/Located.bmp</file>
+    <file>images/LocatedInstance.bmp</file>
+    <file>images/CollisionZone.bmp</file>
+    <file>images/ParticleSystemNotLoaded.bmp</file>
+
+    <file>images/nel_ide_load.png</file>
+</qresource>
+</RCC>

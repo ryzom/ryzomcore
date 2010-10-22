@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CForcePage</class>
+ <widget class="QWidget" name="CForcePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>298</width>
+    <height>458</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabPosition">
+      <enum>QTabWidget::East</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabWidgetPage1">
+      <attribute name="title">
+       <string>Target</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Targets:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Avaible targets:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" rowspan="4">
+        <widget class="QListWidget" name="targetsListWidget"/>
+       </item>
+       <item row="1" column="1">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>57</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="2" rowspan="4">
+        <widget class="QListWidget" name="avaibleTargetsListWidget"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="toTargetsPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="toAvaibleTargetsPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>56</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0" colspan="3">
+        <widget class="NLQT::CDirectionWidget" name="directionWidget" native="true"/>
+       </item>
+       <item row="6" column="0" colspan="3">
+        <widget class="QLabel" name="parametricFactorLabel">
+         <property name="text">
+          <string>Parametric factor:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="parametricFactorWidget" native="true"/>
+       </item>
+       <item row="8" column="0" colspan="2">
+        <widget class="QLabel" name="radialViscosityLabel">
+         <property name="text">
+          <string>Radial viscosity:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="radialViscosityWidget" native="true"/>
+       </item>
+       <item row="10" column="0" colspan="2">
+        <widget class="QLabel" name="tangentialViscosityLabel">
+         <property name="text">
+          <string>Tangential viscosity:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="0" colspan="3">
+        <widget class="NLQT::CEditRangeFloatWidget" name="tangentialViscosityWidget" native="true"/>
+       </item>
+       <item row="12" column="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>36</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWidgetPage2">
+      <attribute name="title">
+       <string>Force intensity</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="NLQT::CAttribFloatWidget" name="forceIntensityWidget"/>
+       </item>
+       <item row="1" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>349</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CEditRangeFloatWidget</class>
+   <extends>QWidget</extends>
+   <header>edit_range_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CDirectionWidget</class>
+   <extends>QWidget</extends>
+   <header>direction_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CAttribFloatWidget</class>
+   <extends>QGroupBox</extends>
+   <header>attrib_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

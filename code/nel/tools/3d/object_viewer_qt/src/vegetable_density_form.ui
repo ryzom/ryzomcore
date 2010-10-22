@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CVegetableDensityPage</class>
+ <widget class="QWidget" name="CVegetableDensityPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>314</width>
+    <height>568</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Vegetable mesh selection</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="meshLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="browseShapePushButton">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Distance of creation</string>
+       </property>
+       <property name="buddy">
+        <cstring>distanceSpinBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="distanceSpinBox">
+       <property name="suffix">
+        <string>0 m</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0">
+    <widget class="NLQT::CVegetNoiseValueWidget" name="densityGroupBox">
+     <property name="title">
+      <string>Density</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>MaxDensity</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="maxDensityCheckBox">
+        <property name="text">
+         <string>MaxDensity enabled</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="NLQT::CEditRangeFloatWidget" name="maxDensityWidget" native="true">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Angle setup</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Angle Mode:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="floorRadioButton">
+        <property name="text">
+         <string>Floor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QRadioButton" name="wallRadioButton">
+        <property name="text">
+         <string>Wall</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QRadioButton" name="ceilingRadioButton">
+        <property name="text">
+         <string>Ceiling</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>AngleMin</string>
+        </property>
+        <property name="buddy">
+         <cstring>angleMinHorizontalSlider</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3">
+       <widget class="QSlider" name="angleMinHorizontalSlider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimum">
+         <number>-1000</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="angleMinDoubleSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>AngleMax</string>
+        </property>
+        <property name="buddy">
+         <cstring>angleMaxHorizontalSlider</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="3">
+       <widget class="QSlider" name="angleMaxHorizontalSlider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimum">
+         <number>-1000</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QDoubleSpinBox" name="angleMaxDoubleSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>239</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CEditRangeFloatWidget</class>
+   <extends>QWidget</extends>
+   <header>edit_range_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CVegetNoiseValueWidget</class>
+   <extends>QGroupBox</extends>
+   <header>vegetable_noise_value_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>maxDensityCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxDensityWidget</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>99</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>110</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wallRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMinHorizontalSlider</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>272</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>270</x>
+     <y>353</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wallRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMinDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>294</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>361</x>
+     <y>355</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wallRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMaxHorizontalSlider</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>307</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>301</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wallRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMaxDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>312</x>
+     <y>333</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>355</x>
+     <y>378</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>floorRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMinHorizontalSlider</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>174</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ceilingRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMaxHorizontalSlider</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>floorRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMinDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>381</x>
+     <y>358</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ceilingRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>angleMaxDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
