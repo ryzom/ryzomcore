@@ -2894,8 +2894,8 @@ NLMISC_COMMAND(unloadPrimitiveFile,"unload a primitive file","<file name>")
 static int const MULTI_LINE_FORMATER_maxn = 78;
 void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string>& container, std::string const& text)
 {
-	int const maxn = MULTI_LINE_FORMATER_maxn;
-	int n = maxn - (int)text.length() - 4;
+	const sint maxn = MULTI_LINE_FORMATER_maxn;
+	sint n = maxn - (sint)text.length() - 4;
 	container.push_back(" _/");
 	container.back() += text;
 	container.back() += "\\" + std::string(n, '_');
@@ -3030,7 +3030,7 @@ NLMISC_COMMAND(simulateBug, "simulate an old AIS bug; command is one of 'list', 
 				initBugSimulations();
 				if (args[1]=="all")
 				{
-					for (int i=0; i<bugSimulationCount; ++i)
+					for (sint i=0; i<bugSimulationCount; ++i)
 						simulateBugs[i] = false;
 				}
 				else

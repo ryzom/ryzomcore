@@ -1418,16 +1418,7 @@ retry_pending_command_loop:
 			}
 
 			// add redirection
-#ifdef NL_OS_UNIX
-			string logFile = "/tmp/aes_command_output.log";
-#else 
-			char *tempDir = getenv("TEMP");
-			if (tempDir == NULL)
-				tempDir = getenv("TMP");
-			if (tempDir == NULL)
-				tempDir = ".";
-			string logFile = string(tempDir)+"\\aes_command_output.log";
-#endif
+			string logFile = CPath::getTemporaryDirectory() + "aes_command_output.log";
 
 			cmdLine += " > "+logFile;
 

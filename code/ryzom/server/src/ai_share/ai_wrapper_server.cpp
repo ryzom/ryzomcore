@@ -184,8 +184,6 @@ void CAiWrapperServer::startAct(TSessionId sessionId, uint32 aiInstanceId, CPers
 	}
 }
 
-
-
 void CAiWrapperServer::setAggroRange(NLMISC::CEntityId entityId, float range)
 {
 	CMessage msgout("EXEC_COMMAND");
@@ -210,9 +208,7 @@ void CAiWrapperServer::despawnEntity(NLMISC::CEntityId entityId, uint32 alias)
 	uint32 nbString=2;
 	std::string eid  =  entityId.toString();
 
-
 	std::string str = NLMISC::toString("()despawnBotByAlias(\"%s\");", aliasToString(alias).c_str());
-
 
 	CMessage msgout("R2_NPC_BOT_SCRIPT_BY_ID");
 	msgout.serial(messageVersion);
@@ -229,9 +225,7 @@ void CAiWrapperServer::setGrpHPLevel(NLMISC::CEntityId entityId, uint32 alias,  
 	uint32 nbString=2;
 	std::string eid  =  entityId.toString();
 
-
 	std::string hpstr = NLMISC::toString("()setHPScale(%f);", hp);
-
 
 	//CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 	CMessage msgout("R2_NPC_BOT_SCRIPT_BY_ID");
@@ -241,8 +235,6 @@ void CAiWrapperServer::setGrpHPLevel(NLMISC::CEntityId entityId, uint32 alias,  
 	msgout.serial(hpstr);
 
 	CUnifiedNetwork::getInstance()->send("AIS",msgout);
-
-
 }
 
 void CAiWrapperServer::setHPLevel(NLMISC::CEntityId entityId, uint32 alias, float hp)
@@ -252,9 +244,7 @@ void CAiWrapperServer::setHPLevel(NLMISC::CEntityId entityId, uint32 alias, floa
 	uint32 nbString=2;
 	std::string eid  =  entityId.toString();
 
-
 	std::string hpstr = NLMISC::toString("()setBotHPScaleByAlias(%f, \"%s\");", hp, aliasToString(alias).c_str());
-
 
 	//CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 	CMessage msgout("R2_NPC_BOT_SCRIPT_BY_ID");
@@ -264,9 +254,6 @@ void CAiWrapperServer::setHPLevel(NLMISC::CEntityId entityId, uint32 alias, floa
 	msgout.serial(hpstr);
 
 	CUnifiedNetwork::getInstance()->send("AIS",msgout);
-
-
-
 }
 
 
@@ -378,7 +365,6 @@ void CAiWrapperServer::setPioneerRight(NLMISC::CEntityId entityId, const R2::TPi
 			msgout.serial(command);
 			CUnifiedNetwork::getInstance()->send("EGS",msgout);
 		}
-
 	}
 	else  if (right == R2::TPioneerRight::Tester)
 	{
@@ -400,7 +386,6 @@ void CAiWrapperServer::setPioneerRight(NLMISC::CEntityId entityId, const R2::TPi
 			msgout.serial(command);
 			CUnifiedNetwork::getInstance()->send("EGS",msgout);
 		}
-
 	}
 	else
 	{

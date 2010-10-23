@@ -1243,8 +1243,8 @@ bool CCharacter::checkItemValidityWithEquipmentSlot( const CSheetId& sheet, uint
 //----------------------------------------------------------------------------
 bool CCharacter::checkRightLeftHandCompatibility( const std::vector<std::string> itemRight, const std::vector<std::string> itemLeft )
 {
-	const int itemRightSlotSize = (int)itemRight.size();
-	const int itemLeftSlotSize = (int)itemLeft.size();
+	const sint itemRightSlotSize = (sint)itemRight.size();
+	const sint itemLeftSlotSize = (sint)itemLeft.size();
 	
 	for( int i = 0; i < itemRightSlotSize; ++i )
 	{
@@ -1265,8 +1265,8 @@ bool CCharacter::checkRightLeftHandCompatibility( const std::vector<std::string>
 //----------------------------------------------------------------------------
 bool CCharacter::checkIfItemCompatibleWithSlots( const std::vector<std::string> itemSlot, std::vector< uint16 > slots )
 {
-	const int itemSlotSize = (int)itemSlot.size();
-	const int typeSlotSize = (int)slots.size();
+	const sint itemSlotSize = (sint)itemSlot.size();
+	const sint typeSlotSize = (sint)slots.size();
 	for( int i = 0; i < itemSlotSize; ++i )
 	{
 		for( int j = 0; j < typeSlotSize; ++j )

@@ -167,7 +167,6 @@ void CGuildManager::release()
 #ifndef USE_PDS
 		if(_Instance->_Container)
 		{
-
 			for ( map<EGSPD::TGuildId, EGSPD::CGuildPD*>::iterator it = _Instance->_Container->getGuildsBegin(); it != _Instance->_Container->getGuildsEnd();++it )
 			{
 				CGuild * guild = EGS_PD_CAST<CGuild*>( (*it).second );
@@ -333,7 +332,6 @@ void CGuildManager::saveGuild( CGuild* guild )
 	}
 	else
 	{
-
 		string fileName = NLMISC::toString("guilds/guild_%05u.bin", id & 0x000fffff);
 		if( UseBS )
 		{
@@ -935,7 +933,6 @@ void CGuildManager::deleteGuild(uint32 id)
 //	}
 //	else
 //		_FreeGuildIds.insert(id);
-
 }
 
 //----------------------------------------------------------------------------
@@ -991,7 +988,6 @@ void CGuildManager::characterDeleted( CCharacter & user )
 				successor = member;
 			}
 		}
-
 
 		// if the guild is still valid, set the successor as leader
 		if ( successor )
@@ -1669,7 +1665,6 @@ restartMemberLoop:
 // A character connect/disconnect on another shard, update the online tags
 void	CGuildManager::characterConnectionEvent(const NLMISC::CEntityId &eid, bool online)
 {
-
 	// iterate over all guild, for each look the member list and update online state if it is the concerned character
 
 	if (_Container == NULL)

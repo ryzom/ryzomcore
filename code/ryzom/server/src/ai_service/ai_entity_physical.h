@@ -305,7 +305,7 @@ public:
 	//@{
 	virtual void addHealer(IAIEntityPhysicalHealer* healer) { _Healers.insert(healer); if (healer) healer->healerAdded(this); }
 	virtual void delHealer(IAIEntityPhysicalHealer* healer) { _Healers.erase(healer); if (healer) healer->healerRemoved(this); }
-	virtual int getHealerCount() { return (int)_Healers.size(); }
+	virtual sint getHealerCount() { return (sint)_Healers.size(); }
 	//@}
 	
 	static int _PlayerVisibilityDistance;

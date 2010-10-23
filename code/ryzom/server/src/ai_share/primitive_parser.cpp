@@ -3333,6 +3333,8 @@ static void parsePrimOutpost(const IPrimitive *prim, const std::string &mapName,
 			case AITypeManager:
 				parsePrimMgr(child, mapName, filename);
 				break;
+			default:
+				break;
 			}
 		}
 	}
