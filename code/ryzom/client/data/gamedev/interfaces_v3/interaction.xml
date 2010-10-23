@@ -888,11 +888,11 @@
           textid="SERVER:DYN_CHAT:CHANNEL#nb:NAME"
           dynamic_string="true"
           onclick_r="set"
-          params_r="dblink=UI:VARIABLES:DYNAMIC_CHAT#nb:WANT_POPUP|value=1"
+          params_r="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT#nb|value=1"
           onclick_l="chat_group_filter"
           params_l="dyn_chat#nb" />
-    <link expr="and(ne(@SERVER:DYN_CHAT:CHANNEL#nb:NAME,0),
-                                        not(@UI:VARIABLES:DYNAMIC_CHAT#nb:WANT_POPUP))"
+    <link expr="and(and(ne(@SERVER:DYN_CHAT:CHANNEL#nb:NAME,0), @UI:SAVE:ISENABLED:DYNAMIC_CHAT#nb),
+                    not(@UI:SAVE:ISDETACHED:DYNAMIC_CHAT#nb))"
           target="#id:active" />
   </template>
   <!-- To know if a dynamic chat has been selected and which -->
@@ -1852,44 +1852,70 @@
          id="main_chat_source_menu"
          extends="base_menu_with_color">
     <separator />
-    <action id="tab"
-            name="uimChatTab">
-      <action id="around"
-              name="uiAroundMe"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=AROUND_ME"
-              handler="lua:game:switchChatTab('AROUND_ME')" />
-      <action id="region"
-              name="uiREGION"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=REGION_CHAT"
-              handler="lua:game:switchChatTab('REGION_CHAT')" />
-      <action id="team"
-              name="uiTeam"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=TEAM_CHAT"
-              handler="lua:game:switchChatTab('TEAM_CHAT')" />
-      <action id="guild"
-              name="uimGuild"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=GUILD_CHAT"
-              handler="lua:game:switchChatTab('GUILD_CHAT')" />
-      <action id="universe"
-              name="uiUNIVERSE"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=UNIVERSE_CHAT"
-              handler="lua:game:switchChatTab('UNIVERSE_CHAT')" />
-      <action id="system"
-              name="uiSystemInfo"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=SYSTEM_INFO"
-              handler="lua:game:switchChatTab('SYSTEM_INFO')" />
-      <action id="yubo_chat"
-              name="uitabChatYuboChat"
-              usergroup_l="chat_menu_button"
-              usergroup_params_l="chat_db=YUBO_CHAT"
-              handler="lua:game:switchChatTab('YUBO_CHAT')" />
-    </action>
+      <action id="tab"
+              name="uimChatTab">
+        <action id="around"
+                name="uiAroundMe"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=AROUND_ME" />
+        <action id="region"
+                name="uiREGION"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=REGION_CHAT" />
+        <action id="team"
+                name="uiTeam"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=TEAM_CHAT" />
+        <action id="guild"
+                name="uimGuild"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=GUILD_CHAT" />
+        <action id="universe"
+                name="uiUNIVERSE"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=UNIVERSE_CHAT" />
+        <action id="system"
+                name="uiSystemInfo"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=SYSTEM_INFO" />
+        <action id="yubo_chat"
+                name="uitabChatYuboChat"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=YUBO_CHAT" />
+        <!-- Bit of a hack as vector is not supported inside a submenu -->
+        <action id="dyn0"
+                name="0"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT0" />
+        <action id="dyn1"
+                name="1"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT1" />
+        <action id="dyn2"
+                name="2"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT2" />
+        <action id="dyn3"
+                name="3"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT3" />
+        <action id="dyn4"
+                name="4"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT4" />
+        <action id="dyn5"
+                name="5"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT5" />
+        <action id="dyn6"
+                name="6"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT6" />
+        <action id="dyn7"
+                name="7"
+                usergroup_l="chat_menu_button"
+                usergroup_params_l="chat_db=DYNAMIC_CHAT7" />
+      </action>
     <separator />
   </group>
   <!-- User Chat menu. Code append entries for selecting chat source -->
@@ -3046,8 +3072,8 @@
               target="cant_write_ebw:active" />
       </group>
       <!-- Show this window if popuped and present -->
-      <link expr="and(ne(@SERVER:DYN_CHAT:CHANNEL#dyn_chat_nb:NAME,0),
-                                                @UI:VARIABLES:DYNAMIC_CHAT#dyn_chat_nb:WANT_POPUP)"
+      <link expr="and(and(@UI:SAVE:ISENABLED:DYNAMIC_CHAT#dyn_chat_nb, ne(@SERVER:DYN_CHAT:CHANNEL#dyn_chat_nb:NAME,0)),
+                      @UI:SAVE:ISDETACHED:DYNAMIC_CHAT#dyn_chat_nb)"
             target="active" />
     </group>
   </template>
@@ -3055,6 +3081,6 @@
   <proc id="dynamic_chat_proc_deactive">
     <!-- The window is closed by the user, change the associated DB flag -->
     <action handler="set"
-            params="dblink=UI:VARIABLES:DYNAMIC_CHAT@0:WANT_POPUP|value=0" />
+            params="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT@0|value=0" />
   </proc>
 </interface_config>

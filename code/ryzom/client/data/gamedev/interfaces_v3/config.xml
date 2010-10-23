@@ -2747,6 +2747,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <!-- ****************************** -->
   <!-- *             MISC           * -->
   <!-- ****************************** -->
+  <variable entry="UI:SAVE:SHOW_CLOCK"
+             type="bool"
+             value="false" />
   <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION"
             type="sint32"
             value="-1" />
@@ -2784,6 +2787,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
             value="0" />
   <variable entry="%player_act_end"
             type="sint64"
+            value="0" />
+  <variable entry="UI:SAVE:CONTACT_LIST:SORT_ORDER"
+            type="sint32"
+			value="0" />
+  <variable entry="UI:SAVE:GUILD_LIST:SORT_ORDER"
+            type="sint32"
             value="0" />
   <!-- Auto Convert ACT_TSTART end TEND from server to smoothServerTick -->
   <link expr="@SERVER:USER:ACT_TSTART"
@@ -2848,6 +2857,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:VARIABLES:FPS"
             type="sint64"
             value="30" />
+  <variable entry="UI:SAVE:SHOW_3D_ITEM_PREVIEW"
+            type="bool"
+            value="true" />
   <!-- Blend between day and night (lightLevel = 0 day) (lightLevel = 1 night) -->
   <link expr="depends(@UI:VARIABLES:CURRENT_TIME)"
         action="set"
@@ -2951,6 +2963,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
+             type="bool"
+             value="false" />
   <!-- ***************************** -->
   <!-- *    SYSTEM INFO COLORS     * -->
   <!-- ***************************** -->
@@ -3608,6 +3623,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
           value="iapd.sitem" />
   <define id="item_type_to_item_sheet_MEKTOUB_MOUNT_TICKET"
           value="iasd.sitem" />
+  <define id="item_type_to_item_sheet_JOB_ELEMENT"
+          value="rpjob_elementary.sitem" />
   <!-- ************************ -->
   <!-- *          YUBO CHAT               * -->
   <!-- ************************ -->
@@ -3627,9 +3644,13 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <!-- ************************ -->
   <define id="max_dyn_chan_per_player"
           value_from_code="getMaxDynChanPerPlayer()" />
-  <variable entry="UI:VARIABLES:DYNAMIC_CHAT$i:WANT_POPUP"
+  <variable entry="UI:SAVE:ISDETACHED:DYNAMIC_CHAT$i"
             type="sint32"
-            value="0"
+            value="1"
+            size="%max_dyn_chan_per_player" />
+  <variable entry="UI:SAVE:ISENABLED:DYNAMIC_CHAT$i"
+            type="sint32"
+            value="1"
             size="%max_dyn_chan_per_player" />
   <!-- ************************ -->
   <!-- *          MUSIC from DB   * -->

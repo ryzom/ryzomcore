@@ -1341,6 +1341,14 @@
                   posparent="opamin"
                   x="-20"
                   y="-12" />
+        <instance template="tgcw_checkbox"
+                  id="show_clock"
+                  text="uiShowClock"
+                  tooltip="uittShowClock"
+                  posref="BL TL"
+                  posparent="cao"
+                  x="0"
+                  y="-12" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_hud"
@@ -1497,6 +1505,14 @@
                   posparent="moa_con"
                   x="0"
                   y="-2" />
+        <instance template="tgcw_checkbox"
+                  id="show_3d_item_preview"
+                  text="uiShow3dItemPreview"
+                  tooltip="uittShow3dItemPreview"
+                  posref="BL TL"
+                  posparent="moa_speed"
+                  x="-20"
+                  y="-12" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_alpha_colors"
@@ -1597,15 +1613,25 @@
                   posref="BL TL"
                   x="0"
                   y="-25" />
+        <instance template="tgcw_checkbox"
+                  id="show_times_in_chat_cb"
+                  text="uiShowTimesInChatCB"
+                  tooltip="uittShowTimesInChat"
+                  posparent="enter_dontquit_cb"
+                  posref="BL TL"
+                  x="0"
+                  y="-8" />
         <instance template="tgcw_scrollbarint"
                   id="font_size"
                   text="uiFontSize"
                   posref="BL TL"
-                  posparent="enter_dontquit_cb"
+                  posparent="show_times_in_chat_cb"
                   x="0"
                   y="-8" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
+        <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
+              target="show_times_in_chat_cb:c:pushed" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_chat_colors"
@@ -2946,6 +2972,11 @@
                widget="boolbut"
                link="UI:SAVE:ACT_BAR_OUT"
                realtime="true" />
+        <param ui="hud:show_clock:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:SHOW_CLOCK"
+               realtime="true" />
         <param ui="alpha_colors:col_day:c"
                type="db"
                widget="colbut"
@@ -2991,6 +3022,11 @@
                min="0"
                max="100"
                realtime="true" />
+        <param ui="alpha_colors:show_3d_item_preview:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:SHOW_3D_ITEM_PREVIEW"
+               realtime="true" />
         <param ui="chat_colors:cc_say:c"
                type="db"
                widget="colbut"
@@ -3035,6 +3071,11 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
+               realtime="true" />
+        <param ui="chat_colors:show_times_in_chat_cb:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
                realtime="true" />
         <param ui="chat_colors:font_size:c"
                type="db"

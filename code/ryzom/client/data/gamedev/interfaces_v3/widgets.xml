@@ -330,6 +330,18 @@
               y=""
               texture="target.tga"
               global_color="false" />
+      <view type="bitmap"
+            id="invisible_logo"
+            posref="TR TL"
+            posparent="target"
+            x="2"
+            y="6"
+            scale="true"
+            w="20"
+            h="20"
+            texture="ico_fear.tga"
+            active="false"
+            global_color="false" />
         <view type="bitmap"
               id="mission_target"
               posref="TR TL"
@@ -399,35 +411,7 @@
               color="128 128 128 255"
               global_color="false" />
       </group>
-      <view type="bitmap"
-            id="pvp_faction_logo"
-            posref="MR ML"
-            posparent="right"
-            x="4"
-            scale="true"
-            w="20"
-            h="20"
-            global_color="false" />
-      <view type="bitmap"
-            id="pvp_outpost_logo"
-            posref="MR ML"
-            posparent="pvp_faction_logo"
-            x="2"
-            scale="true"
-            w="20"
-            h="20"
-            texture="Building_state2.tga"
-            global_color="false" />
-      <view type="bitmap"
-            id="pvp_duel_logo"
-            posref="MR ML"
-            posparent="pvp_outpost_logo"
-            x="2"
-            scale="true"
-            w="20"
-            h="20"
-            texture="ICO_Multi_Fight.tga"
-            global_color="false" />
+      
       <ctrl type="sheet"
             id="guild_logo"
             posref="ML MR"
@@ -458,6 +442,68 @@
             render_layer="2"
             texture=""
             global_color="false" />
+
+        <group id="right_pvp"
+               posref="TR TL"
+               posparent="right"
+               x="4"
+               y="-4"
+               h="0"
+               child_resize_w="true"
+               child_resize_h="true"
+               child_resize_wmargin="4" >
+          <group id="top_pvp"
+                 posref="TL TL"
+                 h="0"
+                 child_resize_w="true"
+                 child_resize_h="true"
+                 child_resize_wmargin="4" >
+            <view type="bitmap"
+                  id="pvp_faction_civ_logo"
+                  posref="TL TL"
+                  texture="mp_pearl.tga"
+                  x="2"
+                  w="24"
+                  h="24"
+                  global_color="false" />
+            <view type="bitmap"
+                  id="pvp_faction_cult_logo"
+                  posref="TR TL"
+                  posparent="pvp_faction_civ_logo"
+                  texture="mp_pearl.tga"
+                  x="2"
+                  w="24"
+                  h="24"
+                  global_color="false" />
+          </group>
+          <group id="bottom_pvp"
+                 posref="BL TL"
+                 posparent="top_pvp"
+                 h="0"
+                 child_resize_w="true"
+                 child_resize_h="true"
+                 child_resize_wmargin="4" >
+            <view type="bitmap"
+                  id="pvp_outpost_logo"
+                  active="true"
+                  posref="TL TL"
+                  w="24"
+                  h="24"
+                  texture="building_state_24x24.tga"
+                  global_color="false" />
+            <view type="bitmap"
+                  id="pvp_duel_logo"
+                  posref="TR TL"
+                  posparent="pvp_outpost_logo"
+                  active="true"
+                  x="2"
+                  w="24"
+                  h="24"
+                  texture="ICO_Multi_Fight.tga"
+                  global_color="false" />
+          </group>
+        </group>
+
     </group>
   </template>
   <!-- prototype for fast cloning -->
@@ -3573,11 +3619,11 @@
           value="140 140 240 255" />
   <define id="help_bg_color"
           value="100 120 120 255" />
-		  
-	 <!-- Define varaibles for the list sheet of the root brick selection modal-->
-	<!--<define id="phrase_brick_selection_max" value_from_code="getPhraseBrickSelectionMax()" />-->
-	<variable entry="UI:VARIABLES:CRYSTALBRICKS:$i:SHEET" type="sint32" value="0" size="64" />
-		  
+
+     <!-- Define varaibles for the list sheet of the root brick selection modal-->
+    <!--<define id="phrase_brick_selection_max" value_from_code="getPhraseBrickSelectionMax()" />-->
+    <variable entry="UI:VARIABLES:CRYSTALBRICKS:$i:SHEET" type="sint32" value="0" size="64" />
+
   <!-- Over Text used for buttons or controls -->
   <group id="context_help"
          posref="BL BL"
@@ -3809,7 +3855,7 @@
           posref="BL TL"
           hardtext="success_rate"
           active="false"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="bitmap"
           id="hp_cost"
           texture="ico_heal.tga"
@@ -3856,37 +3902,37 @@
           posparent="hp_cost"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="sta_cost_text"
           posparent="sta_cost"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="sap_cost_text"
           posparent="sap_cost"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="focus_cost_text"
           posparent="focus_cost"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="cast_time_text"
           posparent="cast_time"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="cast_range_text"
           posparent="cast_range"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="disable_time"
           y="0"
@@ -3894,7 +3940,7 @@
           posref="BL TL"
           hardtext="uittDisableTime"
           active="false"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="regen_time"
           y="0"
@@ -3902,7 +3948,7 @@
           posref="BL TL"
           hardtext="regen_time"
           active="false"
-		  global_color="false"/>
+          global_color="false"/>
   </group>
     <!-- Over Text used for Buff Items : this include additionnal icons -->
   <group id="buff_item_context_help"
@@ -3911,8 +3957,8 @@
          child_resize_wmargin="12"
          child_resize_h="true"
          child_resize_hmargin="9"
-		 global_color="false">		   
-		     <!--Decoration-->
+         global_color="false">
+             <!--Decoration-->
     <view type="bitmap"
           id="midcolor"
           sizeref="wh"
@@ -4019,13 +4065,13 @@
           multi_line_maxw_only="true" />
     <view type="bitmap"
           id="hp_buff"
-		  h="15"
-		  y="0"
+          h="15"
+          y="0"
           texture="ico_heal.tga"
           global_color="false"
           posref="BL TL"
           posparent="text" 
-		  active="true"/>
+          active="true"/>
     <view type="bitmap"
           id="sta_buff"
           y="0"
@@ -4052,7 +4098,7 @@
           posparent="hp_buff"
           posref="MR ML"
           hardtext="0"
-		  global_color="false"/>
+          global_color="false"/>
     <view type="text"
           id="sta_buff_text"
           posparent="sta_buff"
@@ -4073,15 +4119,15 @@
           global_color="false"/>
   </group>
       <!-- Over Text used for Crystallized Spells: this include additionnal icons -->
-  <define id="crystallized_spell_list_brick" value="ui:interface:crystallized_spell_context_help:list_brick" />	  
+  <define id="crystallized_spell_list_brick" value="ui:interface:crystallized_spell_context_help:list_brick" />
   <group id="crystallized_spell_context_help"
          posref="BL BL"
          child_resize_w="true"
          child_resize_wmargin="12"
          child_resize_h="true"
          child_resize_hmargin="9"
-		 global_color="false">		   
-		     <!--Decoration-->
+         global_color="false">
+             <!--Decoration-->
     <view type="bitmap"
           id="midcolor"
           sizeref="wh"
@@ -4186,20 +4232,20 @@
           multi_line_space="1"
           line_maxw="300"
           multi_line_maxw_only="true" />
-	<!-- For Cristallized Phrase -->
-	<instance template="template_info_list_brick"
-		  type="list_sheet_compo_brick"
-		  id="list_brick"
-		  brickdb="UI:VARIABLES:CRYSTALBRICKS"
-		  posparent="text"
-		  xcost="230"
-		  line_maxw="185"
-		  multi_line_maxw_only="true" 
-		  param_deltax="13"
-		  sizeref="none"
-		  child_resize_w="true"
-		  child_resize_wmargin="13"
-		  global_color="false"/>
+    <!-- For Cristallized Phrase -->
+    <instance template="template_info_list_brick"
+          type="list_sheet_compo_brick"
+          id="list_brick"
+          brickdb="UI:VARIABLES:CRYSTALBRICKS"
+          posparent="text"
+          xcost="230"
+          line_maxw="185"
+          multi_line_maxw_only="true" 
+          param_deltax="13"
+          sizeref="none"
+          child_resize_w="true"
+          child_resize_wmargin="13"
+          global_color="false"/>
 
   </group>
   
@@ -5534,21 +5580,21 @@
             param_deltax=""
             force_keep=""
             brickdb=""
-			sizeref="w"
-			child_resize_w="false"
-			child_resize_wmargin="0"
-			line_maxw="170"
-			multi_line_maxw_only="false" 
-			xcost="215"
+            sizeref="w"
+            child_resize_w="false"
+            child_resize_wmargin="0"
+            line_maxw="170"
+            multi_line_maxw_only="false" 
+            xcost="215"
             auto_grayed="false"
-			global_color="true">
+            global_color="true">
     <group type="#type"
            id="#id"
            sizeparent="parent"
-		   sizeref="#sizeref"
-		   w="-12"
-		   child_resize_w="#child_resize_w"
-		   child_resize_wmargin="#child_resize_wmargin"
+           sizeref="#sizeref"
+           w="-12"
+           child_resize_w="#child_resize_w"
+           child_resize_wmargin="#child_resize_wmargin"
            child_resize_h="true"
            child_resize_hmargin="8"
            posparent="#posparent"
@@ -5577,11 +5623,11 @@
            over_col_pushed="%bot_chat_sheet_selection_pushed"
            over_col_over="%bot_chat_sheet_selection_over"
            color="255 255 255 255"
-		   global_color="#global_color"
+           global_color="#global_color"
            fontsize="8"
            shadow="true"
            multi_line="true"
-		   multi_line_maxw_only="#multi_line_maxw_only"
+           multi_line_maxw_only="#multi_line_maxw_only"
            multi_line_space="0"
            line_maxw="#line_maxw">
       <!-- the scroll -->
@@ -5592,14 +5638,14 @@
       <!-- the group to scroll NO SCROLL (caller scroll) -->
       <group id="list"
              sizeref="#sizeref"
-			 child_resize_w="#child_resize_w"
+             child_resize_w="#child_resize_w"
              posref="TL TL"
              max_h="10000"
              x="8"
              y="0"
              w="-8"
              h="0"
-			 global_color="#global_color" />
+             global_color="#global_color" />
     </group>
   </template>
   <!-- There can be 1 list of items: items built by a buuilding  -->
@@ -5922,7 +5968,57 @@
                        far="4.0" />
               </scene3d>
             </group>
-          </group>
+            
+            <!-- Item preview 3D window -->
+            
+            <group id="item_preview"
+                   posref="TL TL"
+                   sizeref="w"
+                   posparent="text_list"
+                   w="200"
+                   h="300"
+                   x="0"
+                   y="-60">
+              
+              <scene3d id="scene_item_preview" 
+                       sizeref="wh"
+                       w="-2"
+                       h="-2"
+                       posref="TL TL" 
+                       x="1"
+                       curcam="cam_item_preview"
+                       user_interaction="true"
+                       ambient="128 96 64"
+                       sun_ambient="70 70 70"
+                       sun_diffuse="255 255 196"
+                       sun_specular="0 0 0"
+                       sun_direction="-1.0 1.0 -1.0"
+                       rotz_factor="0.017"
+                       roty_factor="0.005"
+                       dist_factor="0.2"
+                       camz="10"
+                       dist_limit_min="20.0"
+                       dist_limit_max="80.0" >
+
+                <character3d id="char"
+                             dblink="UI:TEMP:CHAR3D"
+                             pos="0.0 0.0 -1.8"
+                             rot="0.0 0.0 -60.0"
+                             anim="1" />
+                <camera id="cam_item_preview"
+                        fov="5" 
+                        pos="0.0 -40.0 0.0"
+                        target="0.0 0.0 -0.85" 
+                        roll="0" />
+
+                <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
+                <light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />
+
+              </scene3d>
+              
+            </group>
+            
+          </group>          
           <ctrl style="skin_scroll"
                 id="sv"
                 posref="TL TL"
@@ -6289,7 +6385,7 @@
              oncandrop="inv_can_drop"
              ondrop="inv_drop"
              menu_r="ui:interface:item_menu_in_bag"
-			 instant_help="false"
+             instant_help="false"
              lmargin="10"
              rmargin="0"
              tmargin="1"
@@ -6348,7 +6444,7 @@
              oncandrop="inv_can_drop"
              ondrop="inv_drop"
              menu_r="ui:interface:item_menu_in_bag"
-			 instant_help="false"
+             instant_help="false"
              over_color="%bot_chat_sheet_selection_normal"
              over_col_pushed="%bot_chat_sheet_selection_pushed"
              over_col_over="%bot_chat_sheet_selection_over"

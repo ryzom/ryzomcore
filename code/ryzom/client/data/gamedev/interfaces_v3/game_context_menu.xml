@@ -85,6 +85,7 @@
 	<action id="disengage"				name="uimGcmDisengage"			handler="context_disengage"				params="" />
 	<!-- friendly -->
 	<action id="assist"					name="uimAssist"				handler="assist_target"					params="" />
+	<action id="follow"					name="uimFollow"				handler="command"						params="follow" />
 	<action id="exchange"				name="uimGcmExchange"			handler="context_exchange"				params="" />
 	<action id="invit"					name="uimGcmInvit"				handler="context_invit"					params="" />
 	<action id="guild_invit"			name="uimGcmGuildInvit"			handler="context_guild_invit"			params="" />
@@ -96,7 +97,6 @@
 	<action id="pa_free"				name="uimGcmFree"				handler="beast_order"	params="order=free|beast_index=@UI:GCM_BEAST_SELECTED"/>
 	<action id="pa_enter_stable"		name="uimGcmEnterStable"		handler="beast_order"	params="order=enter_stable|beast_index=@UI:GCM_BEAST_SELECTED"/>
 	<action id="extract_rm"				name="uimGcmExtractRM"			handler="context_extract_rm"			params="" />
-	<action id="follow"					name="uimFollow"				handler="command"						params="follow" />
 	<action id="quit_team"				name="uimGcmQuitTeam"			handler="context_quit_team"				params="" />
 	<action id="info"					name="uimGcmInfo"				handler="open_title_help"				params="from=target" />
 	<action id="build_totem"			name="uimGcmChooseBuilding"		handler="build_totem"					params="" />

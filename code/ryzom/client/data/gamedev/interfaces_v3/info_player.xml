@@ -3421,7 +3421,7 @@
         <view global_color="false" fontsize="12" hardtext="" id="t" posref="MM MM" posparent="bar" shadow="false" w="#w" type="text" y="-2"/>
 	  </group>
       <view global_color="false" color="255 255 155 255" fontsize="11" hardtext="" id="echelon_value" posref="TR TR" posparent="bar3d" shadow="true" w="#w" type="text" x="-5" y="20"/>
-      <view fontsize="11" hardtext="Echelon : " id="echelon" posref="TL TR" posparent="echelon_value" shadow="true" w="#w" type="text" x="2"/>
+      <view fontsize="11" hardtext="uiEchelon" id="echelon" posref="TL TR" posparent="echelon_value" shadow="true" w="#w" type="text" x="2"/>
     </group>
   </template>
 
@@ -3433,23 +3433,28 @@
   <!--***********************-->
   <group type="container"
          id="npc_web_browser"
-         w="800"
-         h="600"
+         w="480"
+         h="400"
          title="???"
          global_color="false"
+		 open_button="false"
+		 force_open_out="true"
          header_color="UI:SAVE:WIN:COLORS:HELP"
          resizer="true"
-         pop_min_w="500"
-         pop_min_h="400"
+         pop_min_w="220"
+         pop_min_h="96"
          pop_max_w="2000"
          pop_max_h="1600"
          title_bar_open="false"
-         open_button="false"
          lockable="true"
-         openable="false"
+         openable="true"
          opened="true"
          movable="true"
          active="false"
+         on_active="proc"
+         on_active_params="npc_web_browser_proc_active"
+         on_deactive="proc"
+         on_deactive_params="npc_web_browser_proc_deactive"		 
          localize="false"
          active_savable="false">
     <group id="header_closed"
@@ -3458,16 +3463,18 @@
            h="12"
            posref="TL TL"
            group_onclick_r="active_menu"
-           group_params_r="menu=ui:interface:base_menu_with_color">
-           </group>
+           group_params_r="menu=ui:interface:base_menu_with_color"
+		   on_active="lua" on_active_params="game:closeNpcWebBrowserHeader()">
+    </group>
     <group id="header_opened"
            x="0"
            y="0"
-           w="0"
+           w="480"
            h="16"
            posref="TL TL"
            group_onclick_r="active_menu"
-           group_params_r="menu=ui:interface:base_menu_with_color">
+           group_params_r="menu=ui:interface:base_menu_with_color"
+		   on_active="lua" on_active_params="game:openNpcWebBrowserHeader()">
       <!-- must be frozen by default cause no undo/redo at start -->
       <ctrl style="text_button_header"
             button_type="push_button"

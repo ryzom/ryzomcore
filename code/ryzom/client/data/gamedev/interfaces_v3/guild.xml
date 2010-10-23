@@ -33,6 +33,10 @@
     <action handler="set"
             params="dblink=UI:VARIABLES:ISACTIVE:GUILD|value=0" />
   </proc>
+  <proc id="guild_tell_member_proc">
+    <action handler="guild_tell_member"
+            params="" />
+  </proc>
   <!-- ******************* -->
   <!-- * TEMPLATE MEMBER * -->
   <!-- ******************* -->
@@ -40,6 +44,8 @@
          id="menu_member"
          extends="base_menu"
          on_active="guild_member_menu_open">
+    <action id="sort" name="uimSort" handler="sort_guild_list" params="" />
+	<separator />
     <action id="lead"
             name="uimGuildLeader"
             handler="guild_member_chg_to_leader" />
@@ -71,6 +77,8 @@
            h="#h"
            posparent="#posparent"
            posref="#posref"
+		   group_onclick_l="proc"
+           group_params_l="guild_tell_member_proc"
            group_onclick_r="active_menu"
            group_params_r="menu=ui:interface:menu_member">
       <view type="text"

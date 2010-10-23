@@ -564,13 +564,36 @@
             posref="BR BR"
             texture="Compas_R.tga" />
     </group>
+    <!-- compass clock -->
+    <group id="clock"
+           posref="TL TL"
+           w="50"
+           h="16"
+           x="4"
+           y="-4">
+      <view type="text"
+            id="time"
+            posref="TL TL"
+            x="0"
+            y="0"
+            color="255 255 255 255"
+            shadow="true"
+            global_color="true"
+            fontsize="11"
+            hardtext="" />
+    </group>
+    <link expr="@UI:SAVE:SHOW_CLOCK"
+          target="clock:active" />
     <!-- new mail message notifier -->
     <group id="mail"
-           posref="TR TR"
+           posref="BR BR"
+           group_onclick_l="show_hide"
+           group_params_l="mailbox"
+           tooltip="uiMk_interaction5"
            w="32"
            h="24"
            x="-4"
-           y="-4">
+           y="42">
       <view id="envelop"
             type="bitmap"
             texture="mail.tga"
@@ -591,11 +614,14 @@
           target="mail:active" />
     <!-- new guild forum message notifier -->
     <group id="forum"
-           posref="TR TR"
+           posref="BR BR"
+           group_onclick_l="show_hide"
+           group_params_l="guild_forum"
+           tooltip="uiMk_interaction3" 
            w="32"
            h="24"
-           x="-36"
-           y="-4">
+           x="-20"
+           y="22">
       <view id="envelop"
             type="bitmap"
             w="24"
