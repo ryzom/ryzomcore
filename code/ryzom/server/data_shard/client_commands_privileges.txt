@@ -40,6 +40,8 @@ forceTargetToDie			:DEV:SGM:GM:		// Force entity target to die
 getEventFaction				:DEV:SGM:GM:		// Get the event faction of player: <player name>
 giveRespawnPoint			:DEV:SGM:GM:		// Give a respawn point to a player: <respawn point name>
 guildInvite							// Send a guild invite to a player character without distance constrainte
+roomInvite							// Send a room invite
+roomKick							// Remove a room invite
 guildMOTD							// Set the guild message of the day, command effective only for officer and more graded guild members
 ignoreTells					:DEV:SGM:GM:VG:SG:EM:EG:		// Ignore incoming tell: <0/false/1/true>
 infos						:DEV:SGM:GM:VG:SG:G:EM:EG:	// Give info on character (GodMode, Invisible...)
@@ -94,6 +96,7 @@ stopMonitorMissions			:DEV:SGM:GM:		// Stop monitoring missions of the given pla
 summon						:DEV:SGM:GM:VG:SG:EM:		// Summon a player in front of the CSR: <player name>
 targetInfos					:DEV:SGM:GM:EM:		// Give infos on the target
 teamInvite										// Send a team invite to a player character
+connectUserChannel								// Connect to User Channel Chat
 teleport					:DEV:SGM:GM:VG:SG:G:OBSERVER:EM:EG:	// Teleport the CSR in front of a player: <player name>
 tpPosFlag					:DEV:SGM:GM:VG:SG:G:EM:EG:	// Teleport a player to a position flag: <flag name>
 universe					:DEV:SGM:GM:EM:		// Chat in universe mode: <boolean>
@@ -141,6 +144,7 @@ eventNpcGroupScript			:DEV:SGM:GM:EM:		// Execute a script on an event npc group
 eventSetBotName				:DEV:SGM:GM:EM:		// Set the name of a bot
 eventSetBotScale			:DEV:SGM:GM:EM:		// Set the scale of a bot
 eventSetNpcGroupAggroRange		:DEV:SGM:GM:EM:		// Set the aggro range of a NPC group
+eventSetNpcGroupEmote		:DEV:SGM:GM:EM:		// Set the emote for the NPC group to execute 
 eventSetFaunaBotAggroRange		:DEV:SGM:GM:EM:		// Set the aggro ranges (not hungry, hungry and hunting) of a fauna creature
 eventResetFaunaBotAggroRange		:DEV:SGM:GM:EM:		// Reset the aggro range of a fauna creature to sheet values
 eventSetBotCanAggro			:DEV:SGM:GM:EM:		// Define if a creature can take aggro for another entity
