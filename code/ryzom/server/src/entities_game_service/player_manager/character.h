@@ -3160,7 +3160,10 @@ private:
 
 	/// nb of auras affecting this player
 	uint8						_NbAuras;
-	
+
+	/// nb of users channels
+	uint8						_NbUserChannels;
+
 	// for a power/combat event, stores start and end ticks
 	struct CFlagTickRange {
 

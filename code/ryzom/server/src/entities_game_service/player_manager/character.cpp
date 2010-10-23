@@ -2893,8 +2893,8 @@ void CCharacter::postLoadTreatment()
 	}
 
 	{
-	H_AUTO(LockTicketInInventory);
-	lockTicketInInventory();
+		H_AUTO(LockTicketInInventory);
+		lockTicketInInventory();
 	}
 
 	// if EId translator has been initialized by SU, check contact list
