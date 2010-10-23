@@ -3892,8 +3892,9 @@ NLMISC_COMMAND( changeWeightOfProperty, "Change the weight of a property", "<pro
 {
 	if ( args.size() == 2 )
 	{
-		sint32 weight = atoi( args[1].c_str() );
-		MSInstance->changeWeightOfProperty( args[0], weight );
+		sint32 weight;
+		NLMISC::fromString(args[1], weight);
+		MSInstance->changeWeightOfProperty(args[0], weight);
 		return true;
 	}
 	else return false;

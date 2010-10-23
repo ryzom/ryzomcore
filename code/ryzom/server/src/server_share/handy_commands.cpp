@@ -326,7 +326,8 @@ NLMISC_CATEGORISED_COMMAND(utils,thoroughFileCompare,"compare 2 files (by compar
 
 	if (args.size()==3)
 	{
-		uint32 size=atoi(args[2].c_str());
+		uint32 size;
+		NLMISC::fromString(args[2], size);
 		if (size<2)
 		{
 			nlwarning("The third parameter must be a value >= 2 : The following value is not valid: %s",args[2].c_str());
@@ -487,12 +488,12 @@ NLMISC_CATEGORISED_COMMAND(utils,viewTxtFile,"view a text file segment","<file_n
 	switch (args.size())
 	{
 	case 3:
-		count= atoi(args[2].c_str());
+		NLMISC::fromString(args[2], count);
 		if (count<1||args[2]!=NLMISC::toString("%u",count))
 			return false;
 
 	case 2:
-		firstLine= atoi(args[1].c_str());
+		NLMISC::fromString(args[1], firstLine);
 		if (firstLine<1||args[1]!=NLMISC::toString("%u",firstLine))
 			return false;
 
@@ -543,12 +544,12 @@ NLMISC_CATEGORISED_COMMAND(utils,viewBinFile,"view a binary file segment","<file
 	switch (args.size())
 	{
 	case 3:
-		count= atoi(args[2].c_str());
+		NLMISC::fromString(args[2], count);
 		if (count<1||args[2]!=NLMISC::toString("%u",count))
 			return false;
 
 	case 2:
-		start= atoi(args[1].c_str());
+		NLMISC::fromString(args[1], start);
 		if (args[1]!=NLMISC::toString("%u",start))
 			return false;
 
@@ -698,7 +699,9 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditMergeFile,"load a text file into ram","<
 	}
 
 	// get the insert location and make sure it's valid
-	uint32 insertPosition=	atoi(args[0].c_str());	if (insertPosition<1||	args[0]!=NLMISC::toString("%u",insertPosition))	return false;
+	uint32 insertPosition;
+	NLMISC::fromString(args[0], insertPosition);
+	if (insertPosition<1||	args[0]!=NLMISC::toString("%u",insertPosition))	return false;
 	if (insertPosition>TxtEditLines.size()+1) { nlwarning("Invalid insert position"); return false; }
 
 	// read the new file and convert to lines
@@ -719,8 +722,11 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditMergeFile,"load a text file into ram","<
 		// we only want part of the new file
 
 		// determine the first and last lines to extract from the new file
-		uint32 firstLine=	atoi(args[2].c_str());	if (firstLine<1||	args[2]!=NLMISC::toString("%u",firstLine))	return false;
-		uint32 lastLine=	atoi(args[3].c_str());	if (lastLine<1||	args[3]!=NLMISC::toString("%u",lastLine))	return false;
+		uint32 firstLine, lastLine;
+		NLMISC::fromString(args[2], firstLine);
+		if (firstLine<1||	args[2]!=NLMISC::toString("%u",firstLine))	return false;
+		NLMISC::fromString(args[3], lastLine);
+		if (lastLine<1||	args[3]!=NLMISC::toString("%u",lastLine))	return false;
 
 		// make sure the line numbers are valid
 		if (firstLine==0||firstLine>lastLine||lastLine>newLines.size())
@@ -841,12 +847,12 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditList,"list the lines in a loaded textfil
 	switch (args.size())
 	{
 	case 2:
-		count= atoi(args[1].c_str());
+		NLMISC::fromString(args[1], count);
 		if (count<1||args[1]!=NLMISC::toString("%u",count))
 			return false;
 
 	case 1:
-		firstLine= atoi(args[0].c_str());
+		NLMISC::fromString(args[0], firstLine);
 		if (firstLine<1||args[0]!=NLMISC::toString("%u",firstLine))
 			return false;
 
@@ -881,12 +887,12 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditDeleteLines,"delete one or more lines in
 	switch (args.size())
 	{
 	case 2:
-		lastLine= atoi(args[1].c_str());
+		NLMISC::fromString(args[1], lastLine);
 		if (lastLine<1||args[1]!=NLMISC::toString("%u",lastLine))
 			return false;
 
 	case 1:
-		firstLine= atoi(args[0].c_str());
+		NLMISC::fromString(args[0], firstLine);
 		if (firstLine<1||args[0]!=NLMISC::toString("%u",firstLine))
 			return false;
 		break;
@@ -972,9 +978,13 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditCopy,"duplicate a segment of the text fi
 	}
 
 	// extract numeric values for args and verify theri validity
-	uint32 firstLine=		atoi(args[0].c_str());	if (firstLine<1||		args[0]!=NLMISC::toString("%u",firstLine))		return false;
-	uint32 lastLine=		atoi(args[1].c_str());	if (lastLine<1||		args[1]!=NLMISC::toString("%u",lastLine))		return false;
-	uint32 insertPosition=	atoi(args[2].c_str());	if (insertPosition<1||	args[2]!=NLMISC::toString("%u",insertPosition))	return false;
+	uint32 firstLine, lastLine, insertPosition;
+	NLMISC::fromString(args[0], firstLine);
+	if (firstLine<1||		args[0]!=NLMISC::toString("%u",firstLine))		return false;
+	NLMISC::fromString(args[1], lastLine);
+	if (lastLine<1||		args[1]!=NLMISC::toString("%u",lastLine))		return false;
+	NLMISC::fromString(args[2], insertPosition);
+	if (insertPosition<1||	args[2]!=NLMISC::toString("%u",insertPosition))	return false;
 
 	// make sure the line numbers are valid
 	if (firstLine>lastLine||lastLine>TxtEditLines.size()||insertPosition>TxtEditLines.size()+1)
@@ -1005,7 +1015,8 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditInsert,"insert a line into a loaded text
 	}
 
 	// extract the line number
-	uint32 lineNumber= atoi(args[0].c_str());
+	uint32 lineNumber;
+	NLMISC::fromString(args[0], lineNumber);
 	if (lineNumber<1||args[0]!=NLMISC::toString("%u",lineNumber))
 		return false;
 
@@ -1042,7 +1053,8 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditSet,"change a line in a loaded text file
 	}
 
 	// extract the line number
-	uint32 lineNumber= atoi(args[0].c_str());
+	uint32 lineNumber;
+	NLMISC::fromString(args[0], lineNumber);
 	if (lineNumber<1||args[0]!=NLMISC::toString("%u",lineNumber))
 		return false;
 

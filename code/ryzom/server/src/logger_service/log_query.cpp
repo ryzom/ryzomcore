@@ -302,7 +302,10 @@ sint32 CQueryParser::parseSint(CQueryParser::iterator &it, CQueryParser::iterato
 	if (tok.TokenType != tt_INT)
 		throw EInvalidQuery(rew, "Invalid content for sint, must be an int value");
 
-	return atoi(string(start, it).c_str());
+	sint32 val;
+	NLMISC::fromString(string(start, it), val);
+
+	return val;
 }
 
 
@@ -427,7 +430,8 @@ LGS::TParamValue CQueryParser::parseConstant(CQueryParser::iterator &it, CQueryP
 	{
 	case tt_INT:
 		{
-			uint32 num = uint32(atoi(constantTok.Text.c_str()));
+			uint32 num;
+			NLMISC::fromString(constantTok.Text, num);
 			rew = it;
 			TToken dateTag = getNextToken(it, end);
 			switch (dateTag.TokenType)

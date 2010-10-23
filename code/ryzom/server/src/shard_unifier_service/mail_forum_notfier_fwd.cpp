@@ -122,7 +122,8 @@ namespace MFS
 			}
 
 			// open the web interface
-			uint16 port = atoi(portParam->ParamValue.c_str());
+			uint16 port;
+			NLMISC::fromString(portParam->ParamValue, port);
 
 			openItf(port);
 
@@ -347,7 +348,8 @@ namespace MFS
 			if (args.size() != 1)
 				return false;
 
-			uint32 charId = atoi(args[0].c_str());
+			uint32 charId;
+			NLMISC::fromString(args[0], charId);
 
 			log.displayNL("Simulating new mail notification for character %u", charId);
 

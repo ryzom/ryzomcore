@@ -473,7 +473,7 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 			}
 			else
 			{
-				log.Parameters[id].TypeId = atoi(logType.c_str());
+				NLMISC::fromString(logType, log.Parameters[id].TypeId);
 			}
 		}
 		else

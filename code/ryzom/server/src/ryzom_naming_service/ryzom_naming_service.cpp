@@ -1104,7 +1104,10 @@ NLMISC_COMMAND (kill, "kill a service and send an unregister broadcast to other 
 
 	// try with number
 
-	TServiceId sid(atoi(args[0].c_str()));
+	uint16 serviceId;
+	NLMISC::fromString(args[0], serviceId);
+
+	TServiceId sid(serviceId);
 
 	if(sid.get() == 0)
 	{

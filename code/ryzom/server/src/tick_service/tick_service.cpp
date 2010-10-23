@@ -1176,7 +1176,14 @@ NLMISC_COMMAND( deleteFileBS, "delete file via BS", "<file name to be deleted> [
 	if (args.size() < 1 || args.size() > 2)
 		return false;
 
-	Bsi.deleteFile(args[0], (args.size() == 2 ? atoi(args[1].c_str()) == 1 : false));
+	bool backupFile = false;
+
+	if (args.size() == 2)
+	{
+		NLMISC::fromString(args[1], backupFile);
+	}
+
+	Bsi.deleteFile(args[0], backupFile);
 
 	return true;
 }

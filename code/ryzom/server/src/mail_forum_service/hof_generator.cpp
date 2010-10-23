@@ -405,7 +405,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 			if (sMaxRows == "*")
 				tableVar.MaxRows = 0xffffFFFF;
 			else
-				tableVar.MaxRows = uint32(atoi(sMaxRows.c_str()));
+				NLMISC::fromString(sMaxRows, tableVar.MaxRows);
 
 			parsedData.TableVars.push_back(tableVar);
 			i += nbParams;
@@ -449,7 +449,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 			if (sMaxRows == "*")
 				wTableVar.MaxRows = 0xffffFFFF;
 			else
-				wTableVar.MaxRows = uint32(atoi(sMaxRows.c_str()));
+				NLMISC::fromString(sMaxRows, wTableVar.MaxRows);
 
 			string sOp = cfgVar->asString(i+4);
 			wTableVar.Op = toWildcardOp(sOp);

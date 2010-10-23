@@ -1201,8 +1201,9 @@ endQuery:
 			return true;
 		}
 		
-		uint32 nbLogs = atoi(args[0].c_str());
-		uint32 nbFiles = atoi(args[1].c_str());
+		uint32 nbLogs, nbFiles;
+		NLMISC::fromString(args[0], nbLogs);
+		NLMISC::fromString(args[1], nbFiles);
 
 		if (nbLogs == 0 || nbFiles == 0)
 		{
@@ -1563,7 +1564,7 @@ endQuery:
 		uint32 now = CTime::getSecondsSince1970();
 		uint32 nbSec = 10;
 		if (args.size() > 0)
-			nbSec = atoi(args[0].c_str());
+			NLMISC::fromString(args[0], nbSec);
 
 		std::string tabs;
 

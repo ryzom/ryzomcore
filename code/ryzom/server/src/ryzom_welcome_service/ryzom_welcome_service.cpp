@@ -825,7 +825,7 @@ void cbServiceUp (const std::string &serviceName, TServiceId  sid, void *arg)
 	if (IService::getInstance()->haveArg('S'))
 	{
 		// use the command line param if set
-		shardId = atoi(IService::getInstance()->getArg('S').c_str());
+		NLMISC::fromString(IService::getInstance()->getArg('S'), shardId);
 	}
 	else if (IService::getInstance()->ConfigFile.exists ("ShardId"))
 	{
@@ -1076,7 +1076,7 @@ void cbLSConnection (const std::string &serviceName, TServiceId  sid, void *arg)
 	if (IService::getInstance()->haveArg('S'))
 	{
 		// use the command line param if set
-		shardId = atoi(IService::getInstance()->getArg('S').c_str());
+		NLMISC::fromString(IService::getInstance()->getArg('S'), shardId);
 	}
 	else if (IService::getInstance()->ConfigFile.exists ("ShardId"))
 	{
@@ -1146,7 +1146,10 @@ void	updateShardOpenFromFile(const std::string& filename)
 	{
 		char	readBuffer[256];
 		f.getline(readBuffer, 256);
-		setShardOpenState((TShardOpenState)atoi(readBuffer));
+		sint state;
+		NLMISC::fromString(std::string(readBuffer), state);
+
+		setShardOpenState((TShardOpenState)state);
 
 		nlinfo("Updated ShardOpen state to '%u' from file '%s'", ShardOpen.get(), filename.c_str());
 	}
@@ -1261,7 +1264,8 @@ public:
 		if (haveArg('S'))
 		{
 			// use the command line param if set
-			uint shardId = atoi(IService::getInstance()->getArg('S').c_str());
+			uint shardId;
+			NLMISC::fromString(IService::getInstance()->getArg('S'), shardId);
 
 			nlinfo("Using shard id %u from command line '%s'", shardId, IService::getInstance()->getArg('S').c_str());
 			anticipateShardId(shardId);

@@ -865,7 +865,8 @@ NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<shard_id> <path> [<re
 	if (args.size() < 2 || args.size() > 5)
 		return false;
 
-	uint32 shardId = atoi(args[0].c_str());
+	uint32 shardId;
+	NLMISC::fromString(args[0], shardId);
 
 	CShardStatDB * statDB = CShardStatDBManager::getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)

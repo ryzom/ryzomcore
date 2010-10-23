@@ -120,7 +120,8 @@ namespace CHATUNI
 			}
 
 			// ok, we have a valid client, add it to the list
-			uint32 shardId = atoi(shardIdParam->ParamValue.c_str());
+			uint32 shardId;
+			NLMISC::fromString(shardIdParam->ParamValue, shardId);
 
 			// check that we don't have conflict
 			const TModuleProxyPtr *pproxy = _ChatClients.getA(shardId);

@@ -608,7 +608,10 @@ NLMISC_COMMAND( releaseRangesForService, "RMM: Release range owned by a specifie
 {
 	if ( args.size() < 1 )
 		return false;
-	RMMInstance->releaseRangesByService( NLNET::TServiceId(atoi( args[0].c_str() )) );
+	uint16 serviceId;
+	NLMISC::fromString(args[0], serviceId);
+
+	RMMInstance->releaseRangesByService( NLNET::TServiceId(serviceId) );
 	return true;
 }
 
