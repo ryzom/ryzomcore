@@ -483,8 +483,8 @@ void	cbResult(CMemStream &msgin, TSockId host)
 
 			//nlinfo("param=%s value=%s", param.c_str(), value.c_str());
 
-			if (param == "id")				queryId = atoi(value.c_str());
-			else if (param == "page")		page = atoi(value.c_str());
+			if (param == "id")				NLMISC::fromString(value, queryId);
+			else if (param == "page")		NLMISC::fromString(value, page);
 			else if (param == "filter")		filter = value;
 			else if (param == "fmode")		filter_exclusive = (value == "exclusive");
 		}
@@ -497,8 +497,12 @@ void	cbResult(CMemStream &msgin, TSockId host)
 
 		if (res.size() >= 1)
 		{
-			page = (res.size() >= 2 ? atoi(res[1].c_str()) : 0);
-			queryId = atoi(res[0].c_str());
+			if (res.size() >= 2)
+				NLMISC::fromString(res[1], page);
+			else
+				page = 0;
+
+			NLMISC::fromString(res[0], queryId);
 		}
 	}
 
@@ -548,7 +552,8 @@ void	cbCancelQuery(CMemStream &msgin, TSockId host)
 	std::string	idStr;
 	msgin.serial(idStr);
 
-	uint32	queryId = atoi(idStr.c_str());
+	uint32	queryId;
+	NLMISC::fromString(idStr, queryId);
 
 	CLogAnalyserService::getInstance()->cancelQuery(queryId);
 

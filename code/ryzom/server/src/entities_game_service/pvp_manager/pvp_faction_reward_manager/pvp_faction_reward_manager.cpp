@@ -1221,7 +1221,7 @@ NLMISC_COMMAND(setSpireEffectValue, "change base value of a spire effect","<effe
 			return false;
 		}
 
-		CPVPFactionRewardManager::EffectValues[ family ] = atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], CPVPFactionRewardManager::EffectValues[ family ]);
 	}
 
 	// update effects for everyone
@@ -1340,7 +1340,8 @@ NLMISC_COMMAND(addFactionPoint, "add (or substract) faction point in faction poo
 		return false;
 	else
 	{
-		sint32 deltaFactionPoint = atoi(args[0].c_str());
+		sint32 deltaFactionPoint;
+		NLMISC::fromString(args[0], deltaFactionPoint);
 		PVP_CLAN::TPVPClan faction = PVP_CLAN::fromString(args[1].c_str());
 
 		if(faction == PVP_CLAN::Unknown)

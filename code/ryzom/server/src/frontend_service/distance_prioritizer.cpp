@@ -1589,7 +1589,7 @@ NLMISC_COMMAND(verbosePropertiesSent,"Turn on or off or check the state of verbo
 		else if ( args[0] == string("off") )
 			verbosePropertiesSent = INVALID_CLIENT;
 		else
-			verbosePropertiesSent = atoi(args[0].c_str());
+			NLMISC::fromString(args[0], verbosePropertiesSent);
 	}
 
 	log.displayNL( "verbosePropertiesSent is %s", (verbosePropertiesSent==INVALID_CLIENT)?"off":((verbosePropertiesSent==0)?"all":toString("C%hu", verbosePropertiesSent).c_str()) );

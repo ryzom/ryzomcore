@@ -256,7 +256,7 @@ bool CPlace::build(const NLLIGO::CPrimPath * path, uint16 id)
 		_MainPlace = false;
 
 	nlverify (CPrimitivesParser::getAlias(path, _Alias));
-//	_Alias = atoi( val.c_str() );
+//	_Alias = NLMISC::fromString( val.c_str() );
 	nlassert( _Alias != CAIAliasTranslator::Invalid );
 
 	// get the bounding box
@@ -314,7 +314,7 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 			buildPrimPath(zone).c_str());
 		nlstop;
 	}
-//	_Alias = atoi( val.c_str() );
+//	_Alias = NLMISC::fromString( val.c_str() );
 	nlassert( _Alias != CAIAliasTranslator::Invalid );
 
 	 

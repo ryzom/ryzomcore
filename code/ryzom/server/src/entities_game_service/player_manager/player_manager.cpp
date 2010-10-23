@@ -2516,7 +2516,8 @@ NLMISC_COMMAND(actionReport,"report action for progression testing","<character 
 		CEntityId id;
 		id.fromString( args[0].c_str() );
 		
-		sint32 deltaLevel = atoi( args[1].c_str() );
+		sint32 deltaLevel;
+		NLMISC::fromString(args[1], deltaLevel);
 		string Skill = args[2];
 		SKILLS::ESkills s = SKILLS::toSkill( Skill );
 		if( s == SKILLS::unknown )
@@ -2557,7 +2558,8 @@ NLMISC_COMMAND(setPriv,"set a privilege to a user using his user id, must be in 
 		return true;
 	}
 
-	uint32 uid = atoi(args[0].c_str());
+	uint32 uid;
+	NLMISC::fromString(args[0], uid);
 	CPlayer *p = PlayerManager.getPlayer(uid);
 	if (p == NULL)
 	{
@@ -2610,7 +2612,8 @@ NLMISC_COMMAND(setPvPTag,"set player character PvP TAG to true or false","<eid> 
 
 	CEntityId id;
 	id.fromString(args[0].c_str());
-	uint tagValue = atoi(args[1].c_str());
+	uint tagValue;
+	NLMISC::fromString(args[1], tagValue);
 	CCharacter *c = PlayerManager.getChar(id);
 	if (c == NULL)
 	{

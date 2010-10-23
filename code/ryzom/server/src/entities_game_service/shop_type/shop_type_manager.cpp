@@ -644,7 +644,9 @@ uint32 CShopTypeManager::convertQualityToQualityIndex( uint32 quality )
 {
 	for( uint32 index = _QualityStart + 1; index < _QualityEnd; ++index )
 	{
-		if( quality <= (uint32) atoi( _CategoryName[ index ].substr( 1 ).c_str() ) )
+		uint32 qualityIndex;
+		NLMISC::fromString(_CategoryName[ index ].substr( 1 ), qualityIndex);
+		if( quality <= qualityIndex )
 		{
 			return index - _QualityStart - 1;
 		}
@@ -660,7 +662,10 @@ uint32 CShopTypeManager::convertLevelToLevelIndex( uint32 level )
 {
 	for( uint32 index = _LevelStart + 1; index < _LevelEnd; ++index )
 	{
-		if( level <= (uint32) atoi( _CategoryName[ index ].substr( 1 ).c_str() ) )
+		uint32 levelIndex;
+		NLMISC::fromString(_CategoryName[ index ].substr( 1 ), levelIndex);
+
+		if( level <= levelIndex )
 		{
 			return index - _LevelStart - 1;
 		}
@@ -697,13 +702,15 @@ void CShopTypeManager::mountItemShopBase( const std::string& type )
 					{
 						for( uint quality = 0; quality < min( (uint)NUM_QUALITY, (uint)(_QualityEnd - _QualityStart - 1)); ++quality )
 						{
-							uint16 q = atoi(_CategoryName[ _QualityStart + quality + 1 ].substr(1).c_str());
+							uint16 q;
+							NLMISC::fromString(_CategoryName[ _QualityStart + quality + 1 ].substr(1), q);
 
 
 							uint maxLevel = min( (uint)NUM_LEVEL, (uint)(_LevelEnd - _LevelStart - 1) );
 							for( uint level = 0; level < maxLevel; ++level )
 							{
-								uint16 l = atoi(_CategoryName[ _LevelStart + level + 1 ].substr(1).c_str());
+								uint16 l;
+								NLMISC::fromString(_CategoryName[ _LevelStart + level + 1 ].substr(1), l);
 								if( l > MaxLevelNpcItemInStore )
 									continue;
 
@@ -761,13 +768,15 @@ void CShopTypeManager::mountItemShopBase( const std::string& type )
 						{
 //							if( ( (*it2).second.Family != ITEMFAMILY::CRAFTING_TOOL && (*it2).second.Family != ITEMFAMILY::HARVEST_TOOL && (*it2).second.Family != ITEMFAMILY::PET_ANIMAL_TICKET ) || quality == 0 )
 							{
-								uint16 q = atoi(_CategoryName[ _QualityStart + quality + 1 ].substr(1).c_str());
+								uint16 q;
+								NLMISC::fromString(_CategoryName[ _QualityStart + quality + 1 ].substr(1), q);
 								uint maxLevel = min( (uint)NUM_LEVEL, (uint)(_LevelEnd - _LevelStart - 1) );
 								for( uint level = 0; level < maxLevel; ++level )
 								{
 //									if( ( (*it2).second.Family != ITEMFAMILY::CRAFTING_TOOL && (*it2).second.Family != ITEMFAMILY::HARVEST_TOOL && (*it2).second.Family != ITEMFAMILY::PET_ANIMAL_TICKET ) || level == 2 ) // remove this filter when tool merchant are setted
 									{
-										uint16 l = atoi(_CategoryName[ _LevelStart + level + 1 ].substr(1).c_str());
+										uint16 l;
+										NLMISC::fromString(_CategoryName[ _LevelStart + level + 1 ].substr(1), l);
 										if( l > MaxLevelNpcItemInStore )
 											continue;
 
@@ -838,14 +847,16 @@ void CShopTypeManager::mountRmShopBase( const std::string& family )
 				{
 					for( uint quality = 0; quality < min((uint)NUM_QUALITY, (uint)(_QualityEnd - _QualityStart - 1)); ++quality )
 					{
-						uint16 q = atoi(_CategoryName[ _QualityStart + quality + 1 ].substr(1).c_str());
+						uint16 q;
+						NLMISC::fromString(_CategoryName[ _QualityStart + quality + 1 ].substr(1), q);
 
 						if( (*it).second.Mp->StatEnergy == q )
 						{
 							uint maxLevel = min( (uint)NUM_LEVEL, (uint)(_LevelEnd - _LevelStart - 1) );
 							for( uint level = 0; level < maxLevel; ++level )
 							{
-								uint16 l = atoi(_CategoryName[ _LevelStart + level + 1 ].substr(1).c_str());
+								uint16 l;
+								NLMISC::fromString(_CategoryName[ _LevelStart + level + 1 ].substr(1), l);
 								// npc not sell Raw Material of level higher than MaxNPCRawMaterialQualityInSell
 								if( l <= MaxNPCRawMaterialQualityInSell )
 								{

@@ -3557,7 +3557,7 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 		
 		case STRING_MANAGER::money:
 		{
-			param.Money = static_cast<uint64>(atoi( s.c_str() ));
+			NLMISC::fromString(s, param.Money);
 			break;
 		}
 	
@@ -3593,13 +3593,13 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 				
 		case STRING_MANAGER::integer:
 		{
-			param.Int = atoi( s.c_str());
+			NLMISC::fromString(s, param.Int);
 			break;
 		}
 
 		case STRING_MANAGER::time:
 		{
-			param.Time = atoi( s.c_str());
+			NLMISC::fromString(s, param.Time);
 			break;
 		}
 		
@@ -3642,7 +3642,7 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 		case STRING_MANAGER::score:
 		case STRING_MANAGER::body_part:	
 		{		
-			param.Enum = static_cast<uint32>( atoi( s.c_str()) );	
+			NLMISC::fromString(s, param.Enum);
 			break;
 		}
 
@@ -3651,8 +3651,8 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 			break;
 
 		case STRING_MANAGER::dyn_string_id:
-		case STRING_MANAGER::string_id:			
-			param.StringId = static_cast<uint32>( atoi( s.c_str()) );	
+		case STRING_MANAGER::string_id:
+			NLMISC::fromString(s, param.StringId);
 			break;
 
 		case STRING_MANAGER::self:

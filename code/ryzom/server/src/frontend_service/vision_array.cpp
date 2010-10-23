@@ -124,8 +124,10 @@ CClientHost				*CVisionArray::clientHost( TClientId clientid )
 	if(args.size() != 2) return false;
 	
 	// get the values
-	TClientId clientid = atoi(args[0].c_str());
-	TCLEntityId slot = atoi(args[1].c_str());
+	TClientId clientid;
+	NLMISC::fromString(args[0], clientid);
+	TCLEntityId slot;
+	NLMISC::fromString(args[1], slot);
 
 	if ( (clientid <= MaxNbClients) && (slot < MAX_SEEN_ENTITIES_PER_CLIENT) )
 	{

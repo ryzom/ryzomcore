@@ -1386,7 +1386,9 @@ NLMISC_COMMAND(simulateMsgAskBotDespawnNotification, "", "<service_id> <bot_alia
 	if (args.size() != 3)
 		return false;
 
-	NLNET::TServiceId serviceId(atoi(args[0].c_str()));
+	uint16 id;
+	NLMISC::fromString(args[0], id);
+	NLNET::TServiceId serviceId(id);
 	uint32 botAlias = LigoConfig.aliasFromString(args[1]);
 	CEntityId botId(args[2].c_str());
 
@@ -1413,13 +1415,19 @@ NLMISC_COMMAND(simulateMsgSpawnEasterEgg, "", "<service_id> <ai_instance> <easte
 	if (args.size() != 7)
 		return false;
 
-	NLNET::TServiceId serviceId(atoi(args[0].c_str()));
-	uint32 instanceNumber = atoi(args[1].c_str());
-	uint32 easterEggId = atoi(args[2].c_str());
+	uint16 id;
+	NLMISC::fromString(args[0], id);
+	NLNET::TServiceId serviceId(id);
+	uint32 instanceNumber;
+	NLMISC::fromString(args[1], instanceNumber);
+	uint32 easterEggId;
+	NLMISC::fromString(args[2], easterEggId);
 	CSheetId sheetId(args[3]);
 	string botName = args[4];
-	sint32 x = atoi(args[5].c_str());
-	sint32 y = atoi(args[6].c_str());
+	sint32 x;
+	NLMISC::fromString(args[5], x);
+	sint32 y;
+	NLMISC::fromString(args[6], y);
 	sint32 z = 0;
 	sint32 heading = 0;
 	std::string look = "";
@@ -1445,9 +1453,13 @@ NLMISC_COMMAND(simulateMsgDespawnEasterEgg, "", "<service_id> <ai_instance> <eas
 	if (args.size() != 3)
 		return false;
 
-	NLNET::TServiceId serviceId(atoi(args[0].c_str()));
-	uint32 instanceNumber = atoi(args[1].c_str());
-	uint32 easterEggId = atoi(args[2].c_str());
+	uint16 id;
+	NLMISC::fromString(args[0], id);
+	NLNET::TServiceId serviceId(id);
+	uint32 instanceNumber;
+	NLMISC::fromString(args[1], instanceNumber);
+	uint32 easterEggId;
+	NLMISC::fromString(args[2], easterEggId);
 
 	NLNET::CMessage msg("DESPAWN_EASTER_EGG");
 	uint32 messageVersion = 1;

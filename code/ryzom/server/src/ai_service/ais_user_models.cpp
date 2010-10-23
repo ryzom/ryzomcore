@@ -235,7 +235,8 @@ DEFINE_ACTION(ContextGlobal,CUSTOMLT)
 				if (noComment != "")
 					lootSetContent.push_back(noComment);
 			}		
-			uint16 proba = static_cast<uint16>(atoi(dropProba.c_str()));
+			uint16 proba;
+			NLMISC::fromString(dropProba, proba);
 			// FIXME: test on proba value...
 			if (proba == 0 || proba > 100)
 			{

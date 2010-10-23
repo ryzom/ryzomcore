@@ -42,7 +42,8 @@ NLMISC_COMMAND(setPlayerSpeedCheck, "set player speed check (0=disable)", "entit
 
 	CEntityId	id;
 	id.fromString(args[0].c_str());
-	bool		enable = (atoi(args[1].c_str()) != 0);
+	bool		enable;
+	NLMISC::fromString(args[1], enable);
 
 	CWorldEntity	*entity = CWorldPositionManager::getEntityPtr( CWorldPositionManager::getEntityIndex(id) );
 	if (entity == NULL || entity->PlayerInfos == NULL)
@@ -64,7 +65,8 @@ NLMISC_COMMAND(loadContinent, "load a continent in the gpms","index name filenam
 	if (args.size() < 3)
 		return false;
 
-	uint8	continent = (uint8)atoi(args[0].c_str());
+	uint8	continent;
+	NLMISC::fromString(args[0], continent);
 	string	name = args[1];
 	string	file = args[2];
 
@@ -79,7 +81,8 @@ NLMISC_COMMAND(removeContinent, "remove a continent from the gpms","index")
 	if (args.size() < 1)
 		return false;
 
-	uint8	continent = (uint8)atoi(args[0].c_str());
+	uint8	continent;
+	NLMISC::fromString(args[0], continent);
 
 	CWorldPositionManager::removeContinent(continent);
 
@@ -201,11 +204,13 @@ NLMISC_COMMAND(addEntity,"Add entity to GPMS","entity Id, entity PosX(meters), e
 	// get the values
 	CEntityId id;
 	id.fromString(args[0].c_str());
-	sint32 PosX = atoi(args[1].c_str());
-	sint32 PosY = atoi(args[2].c_str());
-	sint32 PosZ = atoi(args[3].c_str());
+	sint32 PosX, PosY, PosZ;
+	NLMISC::fromString(args[1], PosX);
+	NLMISC::fromString(args[2], PosY);
+	NLMISC::fromString(args[3], PosZ);
 
-	uint16 FeId = atoi(args[4].c_str());
+	uint16 FeId;
+	NLMISC::fromString(args[4], FeId);
 
 	// display the result on the displayer
 	log.displayNL("Add entity Id %s to GPMS", id.toString().c_str() );
@@ -228,7 +233,8 @@ NLMISC_COMMAND(addEntity,"Add entity to GPMS","entity Id, entity PosX(meters), e
 	if(args.size() != 1) return false;
 	
 	// get the values
-	uint32 num = atoi(args[0].c_str());
+	uint32 num;
+	NLMISC::fromString(args[0], num);
 
 	// Init Entity
 	CEntityId id;
@@ -259,7 +265,8 @@ NLMISC_COMMAND(addEntity,"Add entity to GPMS","entity Id, entity PosX(meters), e
 	if(args.size() != 1) return false;
 	
 	// get the values
-	uint32 num = atoi(args[0].c_str());
+	uint32 num;
+	NLMISC::fromString(args[0], num);
 
 
 	// Init Entity
@@ -306,8 +313,10 @@ NLMISC_COMMAND(removeAllEntities,"remove AiVision entities for the specified ser
 {
 	if(args.size() >= 1) 
 	{
+		uint16 serviceId;
+		NLMISC::fromString(args[0], serviceId);
 		// get the values
-		NLNET::TServiceId ServiceId(atoi(args[0].c_str()));
+		NLNET::TServiceId ServiceId(serviceId);
 
 		//CWorldPositionManager::removeAiVisionEntitiesForService( ServiceId );
 	}
@@ -333,10 +342,14 @@ NLMISC_COMMAND(moveEntity,"move an entity in the GPMS","entity Id, newPos X (met
 	if(args.size() != 4) return false;
 	
 	// get the values
-	uint32 Id = atoi(args[0].c_str());
-	uint32 PosX = atoi(args[1].c_str());
-	uint32 PosY = atoi(args[2].c_str());
-	sint32 PosZ = atoi(args[3].c_str());
+	uint32 Id;
+	NLMISC::fromString(args[0], Id);
+	uint32 PosX;
+	NLMISC::fromString(args[1], PosX);
+	uint32 PosY;
+	NLMISC::fromString(args[2], PosY);
+	sint32 PosZ;
+	NLMISC::fromString(args[3], PosZ);
 	
 	// Init Entity
 	CEntityId id;
@@ -361,10 +374,14 @@ NLMISC_COMMAND(teleportEntity,"teleport an entity", "entity Id, newPos X (meters
 	id.fromString(args[0].c_str());
 
 	// get the values
-	uint32		PosX = atoi(args[1].c_str());
-	uint32		PosY = atoi(args[2].c_str());
-	sint32		PosZ = atoi(args[3].c_str());
-	sint32		Cell = atoi(args[4].c_str());
+	uint32		PosX;
+	NLMISC::fromString(args[1], PosX);
+	uint32		PosY;
+	NLMISC::fromString(args[2], PosY);
+	sint32		PosZ;
+	NLMISC::fromString(args[3], PosZ);
+	sint32		Cell;
+	NLMISC::fromString(args[4], Cell);
 	
 	// display the result on the displayer
 	log.displayNL("teleport entity %s", id.toString().c_str());
@@ -398,7 +415,9 @@ NLMISC_COMMAND(setEntityContent,"set an entity content", "CEntityId entityId, [C
 	{
 		CEntityId	id;
 		id.fromString(args[arg].c_str());
-		CSheetId	sheet(atoi(args[arg+1].c_str()));
+		uint32 sheetId;
+		NLMISC::fromString(args[arg+1], sheetId);
+		CSheetId	sheet(sheetId);
 		content.push_back(CEntitySheetId(id, sheet));
 	}
 
@@ -421,8 +440,11 @@ NLMISC_COMMAND(mirrorAroundEntity,"Ask a local mirror arround an entity","servic
 	}
 
 	// get the values
-	NLNET::TServiceId ServiceId(atoi(args[0].c_str()));
-	uint32 Id = atoi(args[1].c_str());
+	uint16 serviceId;
+	NLMISC::fromString(args[0], serviceId);
+	NLNET::TServiceId ServiceId(serviceId);
+	uint32 Id;
+	NLMISC::fromString(args[1], Id);
 
 	list< string > properties;
 	properties.push_back( "X" );
@@ -558,7 +580,10 @@ NLMISC_COMMAND(displayTriggerSubscriberInfo, "display subscriber info", "trigger
 {
 	if (args.size() != 1)
 		return false;
-	CWorldPositionManager::displaySubscriberInfo(TServiceId(atoi(args[0].c_str())), &log);
+	uint16 serviceId;
+	NLMISC::fromString(args[0], serviceId);
+
+	CWorldPositionManager::displaySubscriberInfo(TServiceId(serviceId), &log);
 	return true;
 }
 

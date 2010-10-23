@@ -74,7 +74,8 @@ void selectEntities (const string &entityName, vector <uint32> &entities)
 	else if (entityName.find ("-") != string::npos)
 	{
 		// it's a range
-		uint ent2 = atoi(entityName.substr(entityName.find("-")+1).c_str());
+		uint ent2;
+		NLMISC::fromString(entityName.substr(entityName.find("-")+1), ent2);
 		for (uint i = entity; i <= ent2; i++)
 			entities.push_back (i);
 	}
@@ -132,7 +133,7 @@ ENTITY_VARIABLE(test, "test")
 		if(entity >= Entities.size())
 			Entities.resize(entity+1);
 
-		Entities[entity].first = atoi(value.c_str());
+		NLMISC::fromString(value, Entities[entity].first);
 	}
 }
 
@@ -150,7 +151,7 @@ ENTITY_VARIABLE(test2, "test2")
 		if(entity >= Entities.size())
 			Entities.resize(entity+1);
 		
-		Entities[entity].second = atoi(value.c_str());
+		NLMISC::fromString(value, Entities[entity].second);
 	}
 }
 

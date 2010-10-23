@@ -619,7 +619,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			// the bots are bad guys! they will attack players in their aggro range.
 			if (!tail.empty())
 			{
-				_AggroDist = atoi(tail.c_str());
+				NLMISC::fromString(tail, _AggroDist);
 				// bad guy imply attackable!
 				_PlayerAttackable = true;
 				// bad guy imply vulnerable!
@@ -636,7 +636,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 		{
 			if (!tail.empty())
 			{
-				_AggroDist = atoi(tail.c_str());
+				NLMISC::fromString(tail, _AggroDist);
 
 			}
 			else
@@ -1177,7 +1177,8 @@ NLMISC_COMMAND(NpcGroupSlowUpdatePeriod, "Slow update period of the NPC groups",
 	{
 		if (args.size()==1)
 		{
-			uint32 ticks = (uint32)atoi(args[0].c_str());
+			uint32 ticks;
+			NLMISC::fromString(args[0], ticks);
 			if (ticks>0)
 				CSpawnGroupNpc::setSlowUpdatePeriod(ticks);
 			else

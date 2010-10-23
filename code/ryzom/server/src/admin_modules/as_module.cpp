@@ -187,7 +187,8 @@ namespace ADMIN
 			// read the command line
 			const TParsedCommandLine *webPort = pcl.getParam("webPort");
 			nlassert(webPort != NULL);
-			uint16 port = atoi(webPort->ParamValue.c_str());
+			uint16 port;
+			NLMISC::fromString(webPort->ParamValue, port);
 			// open the web interface
 			CAdminServiceWebItf::openItf(port);
 
@@ -987,7 +988,8 @@ retry_pending_command:
 				return false;
 
 			string shardName = args[0];
-			uint32 delay = atoi(args[1].c_str());
+			uint32 delay;
+			NLMISC::fromString(args[1], delay);
 
 			if (_ShardOrders.find(shardName) == _ShardOrders.end())
 			{

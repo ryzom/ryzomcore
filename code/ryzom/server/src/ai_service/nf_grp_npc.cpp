@@ -1546,7 +1546,8 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 
 		}
 
-		const uint32 quantity = (uint32)atoi(itemAndQty[1].c_str());
+		uint32 quantity;
+		NLMISC::fromString(itemAndQty[1], quantity);
 		if (quantity == 0)
 		{
 			nlwarning("receiveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str());
@@ -1711,7 +1712,8 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 
 		}
 
-		const uint32 quantity = (uint32)atoi(itemAndQty[1].c_str());
+		uint32 quantity;
+		NLMISC::fromString(itemAndQty[1], quantity);
 		if (quantity == 0)
 		{
 			nlwarning("giveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str());
@@ -2126,16 +2128,17 @@ void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 	if(prefix=="DSS_")
 	{
 		
-		NLMISC::CSString phrase = NLMISC::CSString (text).right((unsigned int)text.length()-4);
+		NLMISC::CSString phrase = NLMISC::CSString (text).right((uint)text.length()-4);
 		NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
-		uint32 scenarioId = atoi(idStr.c_str());
+		uint32 scenarioId;
+		NLMISC::fromString(idStr, scenarioId);
 		forwardToDss(spawnBot->dataSetRow(), CChatGroup::say, phrase, scenarioId);
 		return;
 	}
 	
 	if (prefix=="RAW ")
 	{
-		NLMISC::CSString phrase = NLMISC::CSString (text).right((unsigned int)text.length()-4);
+		NLMISC::CSString phrase = NLMISC::CSString (text).right((uint)text.length()-4);
 		npcChatToChannelSentence(spawnBot->dataSetRow(),CChatGroup::say, phrase);
 		return;
 	}

@@ -2566,11 +2566,11 @@ NLMISC_COMMAND(pacsCrunchLoop,"Run a serie of tests of pacs crunch","<file name 
 
 	startx = (float)atof(args[1].c_str());
 	starty = (float)atof(args[2].c_str());
-	loopx = (uint)atoi(args[3].c_str());
-	loopy = (uint)atoi(args[4].c_str());
+	NLMISC::fromString(args[3], loopx);
+	NLMISC::fromString(args[4], loopy);
 
 	if (args.size() >= 6)
-		size = (float)atoi(args[5].c_str());
+		NLMISC::fromString(args[5], size);
 
 	pc.init(args[0]);
 
@@ -2801,12 +2801,12 @@ NLMISC_COMMAND(findPath, "Find path between 2 world positions", "startx starty s
 	sint32	startx, starty, startslot;
 	sint32	endx, endy, endslot;
 
-	startx = atoi(args[0].c_str());
-	starty = atoi(args[1].c_str());
-	startslot = atoi(args[2].c_str());
-	endx = atoi(args[3].c_str());
-	endy = atoi(args[4].c_str());
-	endslot = atoi(args[5].c_str());
+	NLMISC::fromString(args[0], startx);
+	NLMISC::fromString(args[1], starty);
+	NLMISC::fromString(args[2], startslot);
+	NLMISC::fromString(args[3], endx);
+	NLMISC::fromString(args[4], endy);
+	NLMISC::fromString(args[5], endslot);
 
 	CWorldPosition	start = StaticWorldMap.getWorldPosition(CMapPosition(startx, starty), CSlot(startslot));
 	CWorldPosition	end = StaticWorldMap.getWorldPosition(CMapPosition(endx, endy), CSlot(endslot));
@@ -2848,7 +2848,14 @@ NLMISC_COMMAND(testLinks, "test links at a position", "x y slot")
 	CWorldPosition	pos, mv, back;
 	CDirection		dir(CDirection::E);
 
-	pos = StaticWorldMap.getWorldPosition(CMapPosition(atoi(args[0].c_str()), atoi(args[1].c_str())), CSlot(atoi(args[2].c_str())));
+	sint posx, posy;
+	uint slot;
+
+	NLMISC::fromString(args[0], posx); 
+	NLMISC::fromString(args[1], posy);
+	NLMISC::fromString(args[2], slot);
+
+	pos = StaticWorldMap.getWorldPosition(CMapPosition(posx, posy), CSlot(slot));
 
 	uint	i;
 	for (i=0; i<8; ++i)
@@ -2888,9 +2895,9 @@ NLMISC_COMMAND(getH, "get H", "")
 
 	sint32	startx, starty, startslot;
 
-	startx = atoi(args[0].c_str());
-	starty = atoi(args[1].c_str());
-	startslot = atoi(args[2].c_str());
+	NLMISC::fromString(args[0], startx);
+	NLMISC::fromString(args[1], starty);
+	NLMISC::fromString(args[2], startslot);
 
 	CWorldPosition	start = StaticWorldMap.getWorldPosition(CMapPosition(startx, starty), CSlot(startslot));
 

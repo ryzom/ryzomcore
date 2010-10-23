@@ -237,13 +237,13 @@ CSoldItem::CSoldItem( const std::string& command )
 		extract = c.strtok(",");
 		_ItemSheet = CSheetId( extract );
 		extract = c.strtok(",");
-		_Quantity = atoi( extract.c_str() );
+		NLMISC::fromString(extract, _Quantity);
 		extract = c.strtok(",");
-		_Price = atoi( extract.c_str() );
+		NLMISC::fromString(extract, _Price);
 		extract = c.strtok(",");
-		_BasePrice = atoi( extract.c_str() );
+		NLMISC::fromString(extract, _BasePrice);
 		extract = c.strtok(",");
-		_Identifier = atoi( extract.c_str() );
+		NLMISC::fromString(extract, _Identifier);
 		_Buyer.fromString( c.c_str() );
 	}
 }
@@ -279,8 +279,8 @@ CMaximumShopStoreTimeReached::CMaximumShopStoreTimeReached( const std::string& c
 		extract = c.strtok(",");
 		_ItemSheet = CSheetId( extract );
 		extract = c.strtok(",");
-		_Quantity = atoi( extract.c_str() );
-		_Identifier = atoi( c.c_str() );
+		NLMISC::fromString(extract, _Quantity);
+		NLMISC::fromString(c, _Identifier);
 	}
 }
 
