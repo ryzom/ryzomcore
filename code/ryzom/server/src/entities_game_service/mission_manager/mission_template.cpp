@@ -1555,15 +1555,18 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 						logOnFail = false;
 					}
 				}
-
-				uint k = 0;
-				for ( ; k < team->getMissions().size(); k++ )
+				else
 				{
-					if  ( team->getMissions()[k]->getTemplateId() == templ->Alias )
+
+					uint k = 0;
+					for ( ; k < team->getMissions().size(); k++ )
+					{
+						if  ( team->getMissions()[k]->getTemplateId() == templ->Alias )
+							break;
+					}
+					if (k != team->getMissions().size())
 						break;
 				}
-				if (k != team->getMissions().size())
-					break;
 			}
 		}
 		if ( j == Prerequisits.RunningMissions[i].Missions.size() )

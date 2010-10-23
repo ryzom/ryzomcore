@@ -359,6 +359,10 @@ void CBankAccessor_PLR::TUSER::init(ICDBStructNode *parent)
 	nlassert(node != NULL);
 	_DEFAULT_WEIGHT_HANDS = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("IS_INVISIBLE"), false );
+	nlassert(node != NULL);
+	_IS_INVISIBLE = node;
+
 	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
 	nlassert(node != NULL);
 	_COUNTER = node;

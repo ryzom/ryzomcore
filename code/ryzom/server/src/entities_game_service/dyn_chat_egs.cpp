@@ -197,8 +197,7 @@ bool CDynChatEGS::addSession(TChanID chan, const TDataSetRow &client, bool write
 	CEntityBase *eb = CEntityBaseManager::getEntityBasePtr(client);
 	if (!eb) 
 	{
-		nlwarning("no client %s",client.toString().c_str());
-		addClient(client);
+		return false;
 	}
 	CDynChatSession *session = _DynChat.addSession(chan, client);
 	if (!session)

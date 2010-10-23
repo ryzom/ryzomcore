@@ -1280,18 +1280,30 @@ void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
 	{
 		CGroup* grp = NULL;
 		CSpawnBotNpc* bot = NULL;
-		if ((bot = dynamic_cast<CSpawnBotNpc*>(CAIEntityPhysicalLocator::getInstance()->getEntity(botId)))
-			&& (&bot->getPersistent().getGroup())==entity->getGroup())
+		CAIEntityPhysicalLocator *inst = CAIEntityPhysicalLocator::getInstance();
+		if (inst)
 		{
-			CBotPlayer* player = NULL;
-			if (playerId!=NLMISC::CEntityId::Unknown
-				&& (player = dynamic_cast<CBotPlayer*>(CAIEntityPhysicalLocator::getInstance()->getEntity(playerId))))
+			CAIEntityPhysical *botEntity = inst->getEntity(botId);
+			if (botEntity)
 			{
-				bot->setPlayerController(player);
+				if ((bot = dynamic_cast<CSpawnBotNpc*>(botEntity))
+					&& (&bot->getPersistent().getGroup())==entity->getGroup())
+				{
+					CBotPlayer* player = NULL;
+					if (playerId!=NLMISC::CEntityId::Unknown
+						&& (player = dynamic_cast<CBotPlayer*>(CAIEntityPhysicalLocator::getInstance()->getEntity(playerId))))
+					{
+						bot->setPlayerController(player);
+					}
+					else
+						bot->setPlayerController(NULL);
+				}
 			}
 			else
-				bot->setPlayerController(NULL);
+				nlwarning("Bot entity not found");
 		}
+		else
+			nlwarning("Instance not found");
 	}
 }
 
@@ -2002,7 +2014,12 @@ static CSpawnBot* getSpawnBotFromGroupByName(CGroupNpc* const group, const std::
 		
 		CSpawnBot* spawnBot=0;
 		CAliasCont<CBot> const& bots = group->bots();
-		CBot* child=bots.getChildByName(botname);
+		CCont<CBot> & cc_bots = group->bots();
+		CBot* child;
+		if (botname == "")
+			child = bots.getFirstChild();
+		else
+			child = bots.getChildByName(botname);
 		if (!child)	{  return 0; }			
 		
 		spawnBot = child->getSpawnObj();
@@ -2291,6 +2308,37 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 	NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
 }
 
+
+void emote_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	string emoteName = (string)stack.top(); stack.pop();	
+	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
+
+	if (botId == NLMISC::CEntityId::Unknown)
+	{
+		return;
+	}
+
+	// Is the emote valid
+	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
+	if (emoteId == ~0)
+	{
+		return;
+	}
+
+	// Get the behaviour Id
+	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
+	
+	// Change the behaviour
+	NLNET::CMessage msgout("SET_BEHAVIOUR");
+	msgout.serial(botId);
+	MBEHAV::CBehaviour bh(behaviourId);
+	bh.Data = (uint16)(CTimeInterface::gameCycle());
+	msgout.serial(bh);
+
+	NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+}
+
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -2429,6 +2477,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, talkTo_sc_);
 	REGISTER_NATIVE_FUNC(functions, facing_cscs_);
 	REGISTER_NATIVE_FUNC(functions, emote_css_);
+	REGISTER_NATIVE_FUNC(functions, emote_ss_);
 	REGISTER_NATIVE_FUNC(functions, npcSay_css_);
 	REGISTER_NATIVE_FUNC(functions, dssMessage_fsss_);
 	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);	

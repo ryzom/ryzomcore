@@ -336,7 +336,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
-		params[1].Enum = invitedAllegiance.first;
+		params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.first);
 		invitor.sendSystemMessage("GUILD_ICOMPATIBLE_ALLEGIANCE",params);
 		return;
 	}
@@ -344,7 +344,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
-		params[1].Enum = invitedAllegiance.second;
+		params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.second);
 		invitor.sendSystemMessage("GUILD_ICOMPATIBLE_ALLEGIANCE",params);
 		return;
 	}

@@ -174,7 +174,7 @@ bool CMissionStepAIMsg::buildStep( uint32 line, const std::vector< std::string >
 		MISLOGSYNTAXERROR("<msg name>");
 		return false;
 	}
-	Msg = CMissionParser::getNoBlankString(script[1]);
+	_Msg = CMissionParser::getNoBlankString(script[1]);
 	return true;
 }
 
@@ -185,8 +185,8 @@ uint CMissionStepAIMsg::processEvent( const TDataSetRow & userRow, const CMissio
 	if( event.Type == CMissionEvent::AIMsg )
 	{
 		CMissionEventAIMsg & eventSpe = (CMissionEventAIMsg &) event;
-		nlwarning("CMissionStepAIMsg : Message from event = '%s', message of mission = '%s'",  eventSpe.Msg.c_str(), Msg.c_str());
-		if ( eventSpe.Msg == Msg )
+		nlwarning("CMissionStepAIMsg : Message from event = '%s', message of mission = '%s'",  eventSpe.Msg.c_str(), _Msg.c_str());
+		if ( eventSpe.Msg == _Msg )
 		{
 			LOGMISSIONSTEPSUCCESS("wait_msg");
 			return 1;

@@ -389,6 +389,7 @@ CVariable<float> ForageExplosionDamage( "egs","ForageExplosionDamage", "Max HP h
 
 CVariable<sint32> FameByKill( "egs","FameByKill", "Number of fame point lost for a kill", -5000, true );
 
+CVariable<sint32> PVPFameRequired ("egs","PVPFameRequired", "Minimum of positive or negative fame for PVP", 25, 0, true );
 NLMISC::CVariable<NLMISC::TGameCycle>DuelQueryDuration ("egs","DuelQueryDuration", "duration in ticks of a duel requests", 600, 0, true );
 NLMISC::CVariable<NLMISC::TGameCycle> PVPZoneEnterBufferTime ("egs","PVPZoneEnterBufferTime", "duration in ticks of the time buffer triggered when someone enters a PVP zone", 300, 0, true );
 NLMISC::CVariable<NLMISC::TGameCycle> PVPZoneLeaveBufferTime ("egs","PVPZoneLeaveBufferTime", "duration in ticks of the time buffer triggered when someone leaves a PVP zone", 9000, 0, true );

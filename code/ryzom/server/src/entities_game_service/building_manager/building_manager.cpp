@@ -753,8 +753,13 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 	IDestination * dest = entry.Destination;
 	uint16 ownerIdx = entry.OwnerIndex;
 
-	// remove the request
-	_TriggerRequests.erase( it );
+	// remove the requests
+	while ( it != _TriggerRequests.end() )
+	{
+		_TriggerRequests.erase( it );
+		it = _TriggerRequests.find( user->getEntityRowId() );
+	}
+
 	if ( !dest->isUserAllowed(user,ownerIdx) )
 	{
 		return;

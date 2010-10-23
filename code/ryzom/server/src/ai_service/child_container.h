@@ -311,6 +311,7 @@ public:
 	uint32 getChildIndexByAlias(uint32 alias) const;
 	TChld* getChildByAlias(uint32 alias) const;
 	TChld* getChildByName(std::string const& name) const;
+	TChld* getFirstChild() const;
 	
 	CAliasTreeOwner* getAliasChildByAlias(uint32 alias) const;
 	CAliasTreeOwner* addAliasChild(CAliasTreeOwner* child);
@@ -518,6 +519,19 @@ TChld* CAliasCont<TChld>::getChildByName(std::string const& name) const
 	{
 		TChld* child = this->_Childs[i];
 		if (child!=NULL && child->getName()==name)
+			return child;
+	}
+	return NULL;
+}
+
+template <class TChld>
+TChld* CAliasCont<TChld>::getFirstChild() const
+{
+	size_t size = this->_Childs.size();
+	for	(size_t	i=0; i<size; ++i)
+	{
+		TChld* child = this->_Childs[i];
+		if (child!=NULL)
 			return child;
 	}
 	return NULL;

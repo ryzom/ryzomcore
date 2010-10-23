@@ -30,6 +30,8 @@
 
 #include "nf_helpers.h"
 
+#include "nel/misc/md5.h"
+
 using std::string;
 using std::vector;
 using namespace NLMISC;
@@ -649,6 +651,31 @@ void pow_ff_f(CStateInstance* entity, CScriptStack& stack)
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	float const value = powf(base,exponent);
 	// Set rets
+	stack.top() = value;
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection md5sum_s_s
+Returns the md5 sum of a string.
+
+Arguments: s(string) -> s(string)
+@param[in] string is a string
+@param[out] md5sum is a string
+
+@code
+($sum)strlen($str);
+@endcode
+
+*/
+// none
+void md5sum_s_s(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string str = (std::string)stack.top();
+
+	std::string value = NLMISC::getMD5((uint8*)&str[0], str.size() ).toString();
+	nlinfo(value.c_str());
 	stack.top() = value;
 }
 
@@ -1291,6 +1318,7 @@ std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, sqrt_f_f);
 	REGISTER_NATIVE_FUNC(functions, exp_f_f);
 	REGISTER_NATIVE_FUNC(functions, pow_ff_f);
+	REGISTER_NATIVE_FUNC(functions, md5sum_s_s);
 	REGISTER_NATIVE_FUNC(functions, strlen_s_f);
 	REGISTER_NATIVE_FUNC(functions, substr_sff_s);
 	REGISTER_NATIVE_FUNC(functions, strtof_s_f);

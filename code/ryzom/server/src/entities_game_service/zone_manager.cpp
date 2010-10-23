@@ -90,6 +90,14 @@ void cbSetZoneState( NLNET::CMessage& msgin, const std::string &serviceName, NLN
 	
 	CZoneManager *pZM = &CZoneManager::getInstance();
 
+	// get the places
+	CPlace *place = pZM->getPlaceFromName(sZoneName);
+	if (place != NULL)
+		if (place->isGooPath())
+			place->setGooActive(nState != 0);
+
+
+
 	// get the deposit zone (linear search)
 	const vector<CDeposit*> &rDeps = pZM->getDeposits();
 	for (uint32 i = 0; i < rDeps.size(); ++i)
@@ -267,6 +275,7 @@ bool CPlace::build(const NLLIGO::CPrimPath * path, uint16 id)
 	_CenterX = sint32 ( ( minX + maxX ) *1000.0f / 2.0f );
 	_CenterY = sint32 ( ( minY + maxY ) *1000.0f / 2.0f );
 	_GooPath = true;
+	_GooActive = true;
 	_Reported = false;
 
 	return true;
@@ -331,6 +340,7 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 	_CenterX = sint32 ( ( minX + maxX ) *1000.0f / 2.0f );
 	_CenterY = sint32 ( ( minY + maxY ) *1000.0f / 2.0f );
 	_GooPath = false;
+	_GooActive = false;
 
 	// get place_type of re-spawn point
 	PLACE_TYPE::TPlaceType placeType;

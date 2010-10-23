@@ -580,6 +580,7 @@ IShopUnit * CShopTypeManager::getDynamicShopUnit( const TItemTradePtr& item, uin
 			case ITEMFAMILY::JEWELRY:
 			case ITEMFAMILY::CRYSTALLIZED_SPELL:
 			case ITEMFAMILY::ITEM_SAP_RECHARGE:
+			case ITEMFAMILY::CONSUMABLE:
 				{
 					uint32 itemType = itemForm->Type;
 					uint32 itemOrigin = itemForm->Origin;

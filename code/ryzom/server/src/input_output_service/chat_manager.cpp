@@ -1417,8 +1417,15 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 			{
 				if (itCl->second->getId().getType() == RYZOMID::player)
 				{
-					if (itCl->second->isInIgnoreList(sender))
+					bool havePriv = false;
+					if (charInfos && charInfos->HavePrivilege)
+					{
+						havePriv = true;
+					}
+					if ( ! havePriv && itCl->second->isInIgnoreList(sender))
+					{
 						return;
+					}
 
 					uint32 senderNameIndex;
 					// if the sender exists 
@@ -1605,8 +1612,15 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 		{
 			if (itCl->second->getId().getType() == RYZOMID::player)
 			{
-				if (itCl->second->isInIgnoreList(sender))
+				bool havePriv = false;
+				if (charInfos && charInfos->HavePrivilege)
+				{
+					havePriv = true;
+				}
+				if ( ! havePriv && itCl->second->isInIgnoreList(sender))
+				{
 					return;
+				}
 
 				// send the chat phrase to the client
 				// send the string to FE
@@ -1655,6 +1669,7 @@ void CChatManager::sendChatCustomEmote( const TDataSetRow &sender, const TDataSe
 	TDataSetRow senderFake = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
 		
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( TheDataset.getEntityId(receiver) );
+	CCharacterInfos * senderInfos = IOS->getCharInfos( TheDataset.getEntityId(sender) );
 	if( receiverInfos )
 	{
 		TClientInfoCont::iterator itCl = _Clients.find( receiver );
@@ -1662,8 +1677,15 @@ void CChatManager::sendChatCustomEmote( const TDataSetRow &sender, const TDataSe
 		{
 			if (itCl->second->getId().getType() == RYZOMID::player)
 			{
-				if (itCl->second->isInIgnoreList(sender))
+				bool havePriv = false;
+				if (senderInfos && senderInfos->HavePrivilege)
+				{
+					havePriv = true;
+				}
+				if ( ! havePriv && itCl->second->isInIgnoreList(sender))
+				{
 					return;
+				}
 				
 				// send the string to FE
 				CMessage msgout( "IMPULS_CH_ID" );
@@ -1752,8 +1774,8 @@ void CChatManager::tell2( const TDataSetRow& sender, const TDataSetRow& receiver
 				return;
 			}
 			
-			// check if the sender is not in the ignore list of the receiver
-			if(	!itCl->second->isInIgnoreList(sender) )
+			// check if the sender is CSR or is not in the ignore list of the receiver
+			if(senderInfos->HavePrivilege || !itCl->second->isInIgnoreList(sender) )
 			{
 				// send the chat phrase to the client
 				TVectorParamCheck params;
@@ -1850,7 +1872,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 			}
 
 			// check if the sender is not in the ignore list of the receiver
-			if(	!itCl->second->isInIgnoreList(sender) )
+			if(senderInfos->HavePrivilege || !itCl->second->isInIgnoreList(sender) )
 			{
 				// check if user is afk
 				if ( receiverInfos->DataSetIndex.isValid() && TheDataset.isDataSetRowStillValid( receiverInfos->DataSetIndex ) )
@@ -2018,8 +2040,9 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 				return;
 			}
 
-			// check if the sender is not in the ignore list of the receiver
-			if(	!itCl->second->isInIgnoreList(senderCharId) )
+			CCharacterInfos * senderInfos = IOS->getCharInfos(senderName);
+			// check if the sender is CSR is not in the ignore list of the receiver
+			if((senderInfos && senderInfos->HavePrivilege) || !itCl->second->isInIgnoreList(senderCharId) )
 			{
 				// check if user is afk
 //				if ( receiverInfos->DataSetIndex.isValid() && TheDataset.isDataSetRowStillValid( receiverInfos->DataSetIndex ) )
@@ -2311,8 +2334,25 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 			// any double white skipped
 			if (text[pos] == '&')
 			{
-				// filter out '&' to remove system color code (like '&SYS&' )
-				result += '.';
+				// Special case if there is <NEW> or <CHG> at the beginning
+				bool hasBrackets = false;
+				if (pos >= 5)
+				{
+					hasBrackets = (text[pos-1] == '>') &&
+						(text[pos-5] == '<');
+				}
+				// Filter out '&' at the first non-whitespace position to remove 
+				// system color code (like '&SYS&' )
+				bool disallowAmpersand = (result.size() == 0) || hasBrackets;
+				if (disallowAmpersand)
+				{
+					result += '.';
+				}
+				else
+				{
+					// authorized ampersand
+					result += '&';
+				}
 			}
 			else if (text[pos] == '@' && pos < text.size()-1 && text[pos+1] == '{')
 			{
