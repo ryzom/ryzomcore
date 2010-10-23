@@ -1915,7 +1915,9 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				case CScriptVM::JUMP:
 					byteCode.push_back(op); // + Jump offset.
 
-					jumpTable.add(CJumpRememberer(atoi(param.c_str())));
+					size_t index;
+					NLMISC::fromString(param, index);
+					jumpTable.add(CJumpRememberer(index));
 					byteCode.push_back(0); // Invalid
 					break;
 				default:
@@ -1930,7 +1932,9 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 			{
 				if (str.find("Atof")!=string::npos)
 				{
-					const size_t index=atoi(param.c_str())-1;
+					size_t index;
+					NLMISC::fromString(param, index);
+					--index;
 					string &strRef=_childTracers[index]->_TextValue;
 					const float f=(float)atof(strRef.c_str());
 					byteCode.push_back(*((size_t*)&f));
@@ -1940,7 +1944,9 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				
 				if (str.find("String")!=string::npos)
 				{
-					const size_t index=atoi(param.c_str())-1;
+					size_t index;
+					NLMISC::fromString(param, index);
+					--index;
 					string &strRef=_childTracers[index]->_TextValue;
 					TStringId strId;
 					if ( strRef.at(0)=='"'
@@ -1997,7 +2003,9 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				
 				if (str.find("Code")!=string::npos)
 				{
-					const size_t index=atoi(param.c_str())-1;
+					size_t index;
+					NLMISC::fromString(param, index);
+					--index;
 					if (byteCode.size()==0)
 						byteCode=codePieces[index]->_opcodes;
 					else

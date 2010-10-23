@@ -328,7 +328,7 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 		// parse optional item price
 		if(AI_SHARE::stringToWordAndTail(tail, sTmp, tail))
 		{
-			price= atoi(sTmp.c_str());
+			NLMISC::fromString(sTmp, price);
 		}
 				
 		// parse optional Faction type and point
@@ -564,13 +564,17 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 							// money is RRP
 							priceInfo.setCurrency(RYMSG::TTradeCurrency::tc_rrps);
 							priceInfo.setRRPLevel((R2::TSessionLevel::TValues)(money[3]-'0'));
-							priceInfo.setAmount(atoi(param2.c_str()));
+							sint32 amount;
+							NLMISC::fromString(param2, amount);
+							priceInfo.setAmount(amount);
 						}
 						else if (money == "dappers")
 						{
 							// money is dappers
 							priceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers);
-							priceInfo.setAmount(atoi(param2.c_str()));
+							sint32 amount;
+							NLMISC::fromString(param2, amount);
+							priceInfo.setAmount(amount);
 						}
 						else if (money == "item")
 						{
@@ -596,7 +600,9 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 							// money is an item sheet
 							priceInfo.setCurrency(RYMSG::TTradeCurrency::tc_faction_points);
 							priceInfo.setFaction(PVP_CLAN::fromString(param2));
-							priceInfo.setAmount(atoi(param3.c_str()));
+							sint32 amount;
+							NLMISC::fromString(param3, amount);
+							priceInfo.setAmount(amount);
 							if (priceInfo.getFaction() == PVP_CLAN::Unknown)
 								return false;
 						}
@@ -606,7 +612,9 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 							// money is an item sheet
 							priceInfo.setCurrency(RYMSG::TTradeCurrency::tc_skill_points);
 							priceInfo.setSkillType(EGSPD::CSPType::fromString(param2));
-							priceInfo.setAmount(atoi(param3.c_str()));
+							sint32 amount;
+							NLMISC::fromString(param3, amount);
+							priceInfo.setAmount(amount);
 							if (priceInfo.getSkillType() == EGSPD::CSPType::Unknown)
 								return false;
 						}
@@ -644,7 +652,7 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 	// deal with 'phrase_race_filter' keywords
 	if (NLMISC::nlstricmp(keyword, "phrase_race_filter") == 0 )
 	{
-		_FilterExplicitActionTradeByPlayerRace= atoi(tail.c_str())!=0;
+		NLMISC::fromString(tail, _FilterExplicitActionTradeByPlayerRace);
 	}
 
 	// deal with 'phrase_type' keywords
@@ -656,7 +664,7 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 	// deal with 'phrase_bot_race_filter' keywords
 	if (NLMISC::nlstricmp(keyword, "phrase_bot_race_filter") == 0 )
 	{
-		_FilterExplicitActionTradeByBotRace = atoi(tail.c_str())!=0;
+		NLMISC::fromString(tail, _FilterExplicitActionTradeByBotRace);
 	}
 	
 	// deal with '+mission' and '-mission' keywords

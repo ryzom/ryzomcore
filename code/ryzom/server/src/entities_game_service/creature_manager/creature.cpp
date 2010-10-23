@@ -1382,7 +1382,8 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 			else
 			{
 				const string &factionName = result[1];
-				const sint32 fameLevel = sint32( atoi(result[2].c_str()) );
+				sint32 fameLevel;
+				NLMISC::fromString(result[2], fameLevel);
 				// get faction index
 				const uint32 index = CStaticFames::getInstance().getFactionIndex(factionName);
 				if (index == CStaticFames::INVALID_FACTION_INDEX)
@@ -1398,7 +1399,8 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 			else
 			{
 				const string &factionName = result[1];
-				const sint32 fameLevel = sint32( atoi(result[2].c_str()) );
+				sint32 fameLevel;
+				NLMISC::fromString(result[2], fameLevel);
 				// get faction index
 				const uint32 index = CStaticFames::getInstance().getFactionIndex(factionName);
 				if (index == CStaticFames::INVALID_FACTION_INDEX)
@@ -1435,20 +1437,25 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 					string res = NLMISC::strlwr(result[i]);
 					_TicketFameRestriction = CStaticFames::getInstance().getFactionIndex(NLMISC::strlwr(result[i]));
 				}
-				else if( ( atoi(result[i].c_str()) * FameAbsoluteMax / 100 ) != 0 )
+				else
 				{
-					_TicketFameRestrictionValue = atoi(result[i].c_str()) * FameAbsoluteMax / 100;
-					if( _TicketFameRestriction == CStaticFames::INVALID_FACTION_INDEX )
+					uint32 fame;
+					NLMISC::fromString(result[i], fame);
+					if( ( fame * FameAbsoluteMax / 100 ) != 0 )
 					{
-						if( _TicketClanRestriction != PVP_CLAN::None && _TicketFameRestriction == CStaticFames::INVALID_FACTION_INDEX )
+						_TicketFameRestrictionValue = fame * FameAbsoluteMax / 100;
+						if( _TicketFameRestriction == CStaticFames::INVALID_FACTION_INDEX )
 						{
-							_TicketFameRestriction = PVP_CLAN::getFactionIndex(_TicketClanRestriction);
-							_TicketClanRestriction = PVP_CLAN::None;
+							if( _TicketClanRestriction != PVP_CLAN::None && _TicketFameRestriction == CStaticFames::INVALID_FACTION_INDEX )
+							{
+								_TicketFameRestriction = PVP_CLAN::getFactionIndex(_TicketClanRestriction);
+								_TicketClanRestriction = PVP_CLAN::None;
+							}
 						}
 					}
+					else
+						nlwarning("parseBotOption -> invalid parameter '%s' for 'altar' command in bot %u", result[i].c_str(), _AIAlias );
 				}
-				else
-					nlwarning("parseBotOption -> invalid parameter '%s' for 'altar' command in bot %u", result[i].c_str(), _AIAlias );
 			}
 		}
 		else

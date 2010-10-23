@@ -290,7 +290,7 @@ NLMISC_COMMAND(dumpRoadCon, "dump road/cell connectivity graph","<continentName>
 	uint instanceIndex = 0;
 
 	if (args.size() == 2)
-		instanceIndex = atoi(args[1].c_str());
+		NLMISC::fromString(args[1], instanceIndex);
 
 	if (instanceIndex >= CAIS::instance().AIList().size())
 	{
@@ -399,7 +399,7 @@ NLMISC_COMMAND(dumpContinent, "dump the structure of a continent","<continentNam
 	uint instanceIndex = 0;
 
 	if (args.size() == 2)
-		instanceIndex = atoi(args[1].c_str());
+		NLMISC::fromString(args[1], instanceIndex);
 
 	if (instanceIndex >= CAIS::instance().AIList().size())
 	{
@@ -552,7 +552,8 @@ NLMISC_COMMAND(createDynamicAIInstance, "Create a new dynamic AIInstance","")
 		return false;
 
 	// find an unused continent id
-	uint32 in=atoi(args[0].c_str());
+	uint32 in;
+	NLMISC::fromString(args[0], in);
 	if( !CAIS::instance().getAIInstance(in) )
 	{	
 		std::string name= NLMISC::toString("ring_%d",in);
@@ -813,7 +814,7 @@ public:
 			const	std::string	&str=args[i];
 			string	res;			
 			if (getParameter(str,"index-",res))
-				_index=uint32(atoi(res.c_str()));
+				NLMISC::fromString(res, _index);
 			if (getParameter(str,"value-",res))
 				_value=float(atof(res.c_str()));
 			_detailled|=getParameter(str,"detailled",res);
@@ -2039,7 +2040,7 @@ NLMISC_COMMAND(displayVisionRadius,"display roughly 'radius' cell vision centred
 	x=atof(args[1].c_str());
 	y=atof(args[2].c_str());
 	if (args.size()==4)
-		dist=atoi(args[3].c_str());
+		NLMISC::fromString(args[3], dist);
 	log.displayNL("%dm Vision around (%.3f,%.3f)", dist, x.asDouble(), y.asDouble());
 
 	uint32 botCount=0;
@@ -2230,7 +2231,8 @@ NLMISC_COMMAND(setWatch,"setup one of the watch variables","<watch id> <mgr, grp
 	if (args.size()!=2 && args.size()!=3)
 		return false;
 
-	uint	idx=atoi(args[0].c_str());
+	uint	idx;
+	NLMISC::fromString(args[0], idx);
 	if	(	toString(idx)!=args[0]
 		||	idx>=sizeof(watchStrings)/sizeof(watchStrings[0]))
 		return false;
@@ -2243,7 +2245,7 @@ NLMISC_COMMAND(setWatch,"setup one of the watch variables","<watch id> <mgr, grp
 	watchEntity[idx]=CAIEntityPtr;
 	
 	if	(args.size()==3)
-		watchIdx[idx]=atoi(args[2].c_str());
+		NLMISC::fromString(args[2], watchIdx[idx]);
 	else
 		watchIdx[idx]=0;
 	return	true;
@@ -2414,14 +2416,18 @@ NLMISC_COMMAND(setGrpTimers,"set the timer values for a given group","<grp id> <
 		return true;
 	}
 
-	if (atoi(args[1].c_str())<1 || atoi(args[2].c_str())<1)
+	uint32 eatTime, restTime;
+	NLMISC::fromString(args[1], eatTime);
+	NLMISC::fromString(args[2], restTime);
+
+	if (eatTime<1 || restTime<1)
 	{
 		log.displayNL("Invalid time parameters");
 		return true;
 	}
 
-	grp->setTimer(CGrpFauna::EAT_TIME,(uint32)atoi(args[1].c_str())*10);
-	grp->setTimer(CGrpFauna::REST_TIME,(uint32)atoi(args[2].c_str())*10);
+	grp->setTimer(CGrpFauna::EAT_TIME, eatTime*10);
+	grp->setTimer(CGrpFauna::REST_TIME, restTime*10);
 	return true;
 }
 
@@ -2437,13 +2443,18 @@ NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","")
 		return false;
 
 	// if there's an argument make sure its a positive integer
-	if (args.size()==1 && (atoi(args[0].c_str())<1 || toString(atoi(args[0].c_str()))!=args[0]))
-		return false;
+	if (args.size()==1)
+	{
+		uint tick;
+		NLMISC::fromString(args[0], tick);
+		if ((tick < 1) || (toString(tick)!=args[0]))
+			return false;
 
-	if (args.size()==0)
-		cbTick();
-	else
-		ForceTicks=atoi(args[0].c_str());
+		ForceTicks = tick;
+		return true;
+	}
+
+	cbTick();
 
 	return true;
 }
@@ -2720,7 +2731,7 @@ NLMISC_COMMAND(botSetPosition,"set the position of one or several bots","<eid> [
 		x = (float)atof(args[1].c_str());
 		y = (float)atof(args[2].c_str());
 		if (args.size()==4)
-			z = (uint)atoi(args[3].c_str());
+			NLMISC::fromString(args[3], z);
 	}
 	
 	// For each bot
@@ -3002,7 +3013,8 @@ NLMISC_COMMAND(simulateBug, "simulate an old AIS bug; command is one of 'list', 
 				}
 				else
 				{
-					int i = atoi(args[1].c_str());
+					sint i;
+					NLMISC::fromString(args[1], i);
 					if (i>=0 && i<bugSimulationCount)
 						simulateBugs[i] = true;
 					else
@@ -3023,7 +3035,8 @@ NLMISC_COMMAND(simulateBug, "simulate an old AIS bug; command is one of 'list', 
 				}
 				else
 				{
-					int i = atoi(args[1].c_str());
+					sint i;
+					NLMISC::fromString(args[1], i);
 					if (i>=0 && i<bugSimulationCount)
 						simulateBugs[i] = false;
 					else
