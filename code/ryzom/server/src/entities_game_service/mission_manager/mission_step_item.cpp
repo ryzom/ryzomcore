@@ -68,14 +68,14 @@ bool	IMissionStepItem::buildStep( uint32 line, const std::vector< std::string > 
 			subStep.Sheet = CSheetId( args[0] + ".sitem" );
 			missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::item ) );
 			if ( args.size() > 1 )
-				subStep.Quantity = atoi( args[1].c_str() );
+				NLMISC::fromString(args[1], subStep.Quantity);
 			else
 				subStep.Quantity = 1;
 
 			if ( args.size() == 3 )
 			{
-				subStep.Quality = atoi( args[2].c_str() );
-				qualityFound = true;;
+				NLMISC::fromString(args[2], subStep.Quality);
+				qualityFound = true;
 			}
 			else
 			{

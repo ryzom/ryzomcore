@@ -1067,7 +1067,8 @@ void CGuildManager::callback(const CFileDescriptionContainer& fileList)
 		BOMB_IF(pos == string::npos, "Invalid guild file "<<fd.FileName<<" returned by BS : can't find 'guild_' inside", continue);
 		BOMB_IF(pos+6+5 >= fd.FileName.size(), "Invalid guild file "<<fd.FileName<<" returned by BS : not enough character after 'guild_'", continue);
 
-		TGuildId guildId = atoi(fd.FileName.substr(pos+6, 5).c_str());
+		TGuildId guildId;
+		NLMISC::fromString(fd.FileName.substr(pos+6, 5), guildId);
 
 		if (_GuildToLoad.find(guildId) != _GuildToLoad.end())
 		{
@@ -1133,7 +1134,8 @@ void CGuildManager::callback(const CFileDescription& fileDescription, NLMISC::IS
 	BOMB_IF(pos == string::npos, "Invalid guild file "<<fileDescription.FileName<<" send by BS : can't find 'guild_' inside", return);
 	BOMB_IF(pos+6+5 >= fileDescription.FileName.size(), "Invalid guild file "<<fileDescription.FileName<<" send by BS : not enough character after 'guild_'", return);
 
-	TGuildId guildId = atoi(fileDescription.FileName.substr(pos+6, 5).c_str());
+	TGuildId guildId;
+	NLMISC::fromString(fileDescription.FileName.substr(pos+6, 5), guildId);
 
 	BOMB_IF(guildId == 0, "Invalid guild file name '"<<fileDescription.FileName<<"' : can't found a valid guild id", return);
 
@@ -1859,7 +1861,9 @@ NLMISC_CLASS_COMMAND_IMPL(CGuildManager, loadGuild)
 		return true;
 	}
 
-	TGuildId guildId = (atoi(args[0].substr(pos+6, 5).c_str())) & 0xfffff;
+	TGuildId guildId;
+	NLMISC::fromString(args[0].substr(pos+6, 5), guildId);
+	guildId = guildId & 0xfffff;
 	if (guildId == 0)
 	{
 		log.displayNL("Invalid guild ID in '%s'", args[0].c_str());
@@ -1928,7 +1932,8 @@ NLMISC_CLASS_COMMAND_IMPL(CGuildManager, addGuildMember)
 //	if (args.size() > 3)
 //		return false;
 //
-//	TGuildId guildId = atoi(args[0].c_str());
+//	TGuildId guildId;
+//	NLMISC::fromString(args[0], guildId);
 //
 //	CGuild *guild = getGuildFromId(guildId);
 //	if (guild == NULL)

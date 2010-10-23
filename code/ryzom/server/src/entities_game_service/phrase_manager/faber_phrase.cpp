@@ -705,9 +705,10 @@ NLMISC_COMMAND(simuCraft, "Simulation de craft pour verifier les probabilités de
 	if (args.size() != 3)
 		return false;
 	
-	uint32 nbSimu = (uint32)atoi(args[0].c_str());
-	uint32 skillLevel = (uint32)atoi(args[1].c_str());
-	uint32 itemQuality = (uint32)atoi(args[2].c_str());
+	uint32 nbSimu, skillLevel, itemQuality;
+	NLMISC::fromString(args[0], nbSimu);
+	NLMISC::fromString(args[1], skillLevel);
+	NLMISC::fromString(args[2], itemQuality);
 
 	sint32 deltaLvl = skillLevel - itemQuality;
 

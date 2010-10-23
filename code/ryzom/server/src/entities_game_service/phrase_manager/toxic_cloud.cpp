@@ -156,15 +156,15 @@ NLMISC_COMMAND( spawnToxicCloud, "Spawn a toxic cloud", "<posXm> <posYm> <iRadiu
 	TGameCycle lifetime = CToxicCloud::ToxicCloudDefaultLifetime;
 	if ( args.size() > 2 )
 	{
-		iRadius = atoi( args[2].c_str() );
+		NLMISC::fromString(args[2], iRadius);
 		if ( args.size() > 3 )
 		{
-			dmgPerHit = atoi( args[3].c_str() );
+			NLMISC::fromString(args[3], dmgPerHit);
 			if ( args.size() > 4 )
 			{
-				updateFrequency = atoi( args[4].c_str() );
+				NLMISC::fromString(args[4], updateFrequency);
 				if ( args.size() > 5 )
-					lifetime = atoi( args[4].c_str() );
+					NLMISC::fromString(args[4], lifetime);
 			}
 		}
 	}

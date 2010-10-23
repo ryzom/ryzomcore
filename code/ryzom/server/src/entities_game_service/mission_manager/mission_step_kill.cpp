@@ -81,7 +81,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 					ret = false;
 					MISLOGERROR1("invalid sheet '%s'", args[0].c_str());
 				}
-				subStep.Quantity = atoi( args[1].c_str() );
+				NLMISC::fromString(args[1], subStep.Quantity);
 				_SubSteps.push_back(subStep);
 			}
 			if ( script.size() == 3 )
@@ -245,7 +245,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 					ret = false;
 					MISLOGERROR1("invalid race '%s'", args[0].c_str());
 				}
-				subStep.Quantity = atoi( args[1].c_str() );
+				NLMISC::fromString(args[1], subStep.Quantity);
 				_SubSteps.push_back( subStep );
 			}
 			if ( script.size() == 3 )
@@ -608,7 +608,7 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 			ret = false;
 			MISLOGERROR1("invalid faction '%s'", args[0].c_str());
 		}
-		_Quantity = atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], _Quantity);
 
 		if ( script.size() == 3 )
 		{
@@ -768,7 +768,7 @@ class CMissionStepKillByName : public IMissionStepTemplate
 
 			Aliases.insert(va.begin(), va.end());
 		}
-		Quantity = (uint16) atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], Quantity);
 		if ( Quantity == 0 )
 		{
 			MISLOGERROR("invalid quantity 0");

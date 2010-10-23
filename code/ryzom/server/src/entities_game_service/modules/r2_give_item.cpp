@@ -324,10 +324,12 @@ NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Chara
 	if(c) msg.CreatureRowId = c->getEntityRowId();
 	else return false;
 
-	msg.GroupAlias = (uint32)atoi(args[2].c_str());
-	msg.InstanceId = (uint32)atoi(args[3].c_str());
+	NLMISC::fromString(args[2], msg.GroupAlias);
+	NLMISC::fromString(args[3], msg.InstanceId);
 	msg.Items.push_back( CSheetId(args[4]));
-	msg.Quantities.push_back( (uint32)atoi(args[5].c_str()) );
+	uint32 quantity;
+	NLMISC::fromString(args[5], quantity);
+	msg.Quantities.push_back(quantity);
 	msg.MissionText = args[6];
 	CR2GiveItem::getInstance().giveItemRequest( msg );
 	return true;
@@ -345,7 +347,8 @@ NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<Crea
 	CCreature *c = CreatureManager.getCreature(eid);
 	if(c) creatureRowId = c->getEntityRowId();
 	else return false;
-	uint32 actionId = (uint32)atoi(args[1].c_str());
+	uint32 actionId;
+	NLMISC::fromString(args[1], actionId);
 	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, actionId );
 	return true;
 }

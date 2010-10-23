@@ -161,7 +161,8 @@ NLMISC_COMMAND(addSuccessfulMission,"add a successful mission to the player","<p
 	CCharacter * user = PlayerManager.getChar( id );
 	if (user)
 	{
-		TAIAlias alias = atoi( args[1].c_str() );
+		TAIAlias alias;
+		NLMISC::fromString(args[1], alias);
 		const CHashMap< uint,CMissionTemplate* > &mts = CMissionManager::getInstance()->getMissionTemplates();
 		if (mts.find(alias) == mts.end())
 		{
@@ -196,7 +197,8 @@ NLMISC_COMMAND(createMissionItem,"","")
 		return true;
 	}
 
-	uint16 quantity = (uint16) atoi(args[1].c_str() );
+	uint16 quantity;
+	NLMISC::fromString(args[1], quantity);
 
 	std::vector< std::string > script;
 	vector< pair<string, STRING_MANAGER::TParamType > > chatParams;
@@ -498,7 +500,8 @@ NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <miss
 
 	GET_CHARACTER
 
-	TAIAlias missionAlias = (TAIAlias)atoi(args[1].c_str());
+	TAIAlias missionAlias;
+	NLMISC::fromString(args[1], missionAlias);
 	c->removeMission(missionAlias, 0);
 	c->removeMissionFromHistories(missionAlias);
 
@@ -520,9 +523,11 @@ NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission gi
 
 	GET_CHARACTER
 	
-	TAIAlias giverAlias = (TAIAlias)atoi(args[1].c_str());	
+	TAIAlias giverAlias;
+	NLMISC::fromString(args[1], giverAlias);	
 
-	TAIAlias missionAlias = (TAIAlias)atoi(args[2].c_str());	
+	TAIAlias missionAlias;
+	NLMISC::fromString(args[2], missionAlias);	
 
 	c->endBotChat();
 	c->setAfkState(false);

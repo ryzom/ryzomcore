@@ -1844,7 +1844,8 @@ void CMP::loadGroups( const char *definitionFile )
 	for ( uint i=0; i!=nb; ++i )
 	{
 		formType->getDefinition( i, label, value );
-		uint groupId = atoi( value.c_str() );
+		uint groupId;
+		NLMISC::fromString(value, groupId);
 
 		// Set group -> name
 		if ( groupId > 100000 )

@@ -56,7 +56,8 @@ bool CChgCharacEffect::update(CTimerEvent * event, bool applyEffect)
 	
 	string currentValueStr;
 	player->getValue(var,currentValueStr);
-	sint32 currentValue = atoi( currentValueStr.c_str() );
+	sint32 currentValue;
+	NLMISC::fromString(currentValueStr, currentValue);
 	string newValueStr = toString(currentValue + _Modifier1 + _Modifier2);
 	player->setValue(var,newValueStr);
 	
@@ -85,7 +86,8 @@ void CChgCharacEffect::removed()
 
 	string currentValueStr;
 	player->getValue(var,currentValueStr);
-	sint32 currentValue = atoi( currentValueStr.c_str() );
+	sint32 currentValue;
+	NLMISC::fromString(currentValueStr, currentValue);
 	string newValueStr = toString(currentValue - _Modifier1 - _Modifier2);
 	player->setValue(var,newValueStr);
 }

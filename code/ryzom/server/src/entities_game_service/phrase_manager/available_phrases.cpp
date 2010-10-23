@@ -323,7 +323,7 @@ NLMISC_COMMAND( testRolemaster, "Test rolemaster phrases selection (list separat
 
 			if ( args.size() > 2 )
 			{
-				skillValueLimit = atoi( args[2].c_str() );
+				NLMISC::fromString(args[2], skillValueLimit);
 			}
 		}
 	}

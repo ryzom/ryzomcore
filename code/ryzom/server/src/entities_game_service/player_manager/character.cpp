@@ -926,7 +926,7 @@ bool CCharacter::setValue( string var, string value )
 		try
 		{
 			sint32 &temp = lookupStat(var);
-			temp = atoi( value.c_str() );
+			NLMISC::fromString(value, temp);
 		}
 		catch( CCharacter::EInvalidStat &e)
 		{
@@ -949,7 +949,9 @@ bool CCharacter::modifyValue( string var, string value )
 		try
 		{
 			sint32 &temp = lookupStat(var);
-			temp = temp + atoi( value.c_str() );
+			sint32 valueInt;
+			NLMISC::fromString(value, valueInt);
+			temp = temp + valueInt;
 		}
 		catch( CCharacter::EInvalidStat &e)
 		{
@@ -7882,7 +7884,8 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 			if( valueString.size() > 0 )
 			{
 				SKILLS::ESkills skillEnum = SKILLS::toSkill(skillString);
-				sint32 skillPoint = (sint32) atoi(valueString.c_str());
+				sint32 skillPoint;
+				NLMISC::fromString(valueString, skillPoint);
 				if( skillEnum != SKILLS::unknown )
 				{
 					_Skills._Skills[ skillEnum ].Base = min( skillPoint, (sint32)SkillsTree->SkillsTree[ skillEnum ].MaxSkillValue );
@@ -16174,7 +16177,7 @@ void CCharacter::checkCharacAndScoresValues()
 			// phrase = abppXZZ.sphrase with X = characteristic code and ZZ = brick level (CharacteristicBrickStep*ZZ)
 			code = phraseStr.substr(4,1); //string( text[4] );
 			txt = phraseStr.substr(5,2);
-			lvl = atoi( txt.c_str() );
+			NLMISC::fromString(txt, lvl);
 
 			CHARACTERISTICS::TCharacteristics charac = CHARACTERISTICS::getCharacteristicFromCode(code);
 			if (charac < CHARACTERISTICS::NUM_CHARACTERISTICS)

@@ -757,7 +757,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 					CSubStep subStep;
 					subStep.Skill = SKILLS::toSkill( args[0] );
 					missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::skill ) );
-					subStep.Level = atoi( args[1].c_str() );
+					NLMISC::fromString(args[1], subStep.Level);
 					if ( subStep.Skill == SKILLS::unknown )
 					{
 						ret = false;
@@ -1289,7 +1289,7 @@ bool CMissionStepHandleCreate::buildStep( uint32 line, const std::vector< std::s
 	GroupAlias = aliases[0];
 	DespawnTime = 0;
 	if (script.size() == 3)
-		DespawnTime = atoi(CMissionParser::getNoBlankString( script[2] ).c_str());
+		NLMISC::fromString(CMissionParser::getNoBlankString( script[2] ), DespawnTime);
 	
 	return true;
 }

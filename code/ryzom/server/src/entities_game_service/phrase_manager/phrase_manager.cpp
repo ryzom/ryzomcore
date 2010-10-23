@@ -2182,7 +2182,7 @@ NLMISC_COMMAND(useDebugBrick,"use debug Brick or not","<0/1>")
 		return true;
 	}
 	
-	//	UseDebugBrick = ( atoi(args[0].c_str()) != 0);
+	//	NLMISC::fromString(args[0], UseDebugBrick);
 	return true;
 }
 

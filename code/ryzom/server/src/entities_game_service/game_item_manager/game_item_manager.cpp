@@ -852,11 +852,15 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 		return false;
 	}
 
-	CSheetId sheetId = CSheetId( atoi( args[0].c_str() ) );
+	uint32 itemId;
+	NLMISC::fromString(args[0], itemId);
+	CSheetId sheetId(itemId);
 
-	uint16 quality = (uint16)atoi( args[1].c_str() );
+	uint16 quality;
+	NLMISC::fromString(args[1], quality);
 
-	uint32 ownerIdTmp = atoi( args[2].c_str() );
+	uint32 ownerIdTmp;
+	NLMISC::fromString(args[2], ownerIdTmp);
 	CEntityId ownerId(RYZOMID::object,ownerIdTmp);	
 
 //	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, ownerId, -1, true,true );
@@ -886,7 +890,10 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 //		return false;
 //	}
 //
-//	CEntityId itemId( RYZOMID::object, atoi(args[0].c_str()) );
+//	uint32 itemId;
+//	NLMISC::fromString(args[0], itemId)
+//
+//	CEntityId itemId(RYZOMID::object, itemId);
 //	
 //	CGameItemPtr item = GameItemManager.getItem(itemId);
 //	if (item != NULL)
@@ -911,12 +918,18 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 //		return false;
 //	}
 //
-//	CEntityId itemId( RYZOMID::object, atoi(args[0].c_str()) );
-//	//uint16 quality = (uint16)atoi(args[1].c_str());
+//	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
+//	//uint16 quality = (uint16)NLMISC::fromString(args[1].c_str());
 //	
-//	sint32 x = (sint32)atoi(args[2].c_str()) * 1000;
-//	sint32 y = (sint32)atoi(args[3].c_str()) * 1000;
-//	sint32 z = (sint32)atoi(args[4].c_str()) * 1000;
+//	sint32 x;
+//	NLMISC::fromString(args[2], x);
+//	x *= 1000;
+//	sint32 y;
+//	NLMISC::fromString(args[3], y);
+//	y *= 1000;
+//	sint32 z;
+//	NLMISC::fromString(args[4], z);
+//	z *= 1000;
 //
 //	GameItemManager.dropOnTheGround( itemId, x, y, z );
 //
@@ -936,20 +949,20 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 //	if( args.size() < 6 )
 //	{
 //		CSheetId sheetId(args[0]);
-//		uint16 quality = (uint16)atoi(args[1].c_str());
-//		sint32 x = (sint32)atoi(args[2].c_str()) * 1000;
-//		sint32 y = (sint32)atoi(args[3].c_str()) * 1000;
-//		sint32 z = (sint32)atoi(args[4].c_str()) * 1000;
+//		uint16 quality = (uint16)NLMISC::fromString(args[1].c_str());
+//		sint32 x = (sint32)NLMISC::fromString(args[2].c_str()) * 1000;
+//		sint32 y = (sint32)NLMISC::fromString(args[3].c_str()) * 1000;
+//		sint32 z = (sint32)NLMISC::fromString(args[4].c_str()) * 1000;
 //		GameItemManager.createItem( sheetId, quality, x, y, z, true , true);
 //	}
 //	else
 //	{
-//		CEntityId itemId( RYZOMID::object, atoi(args[0].c_str()) );
+//		CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
 //		CSheetId sheetId(args[1]);
-//		uint16 quality = (uint16)atoi(args[2].c_str());
-//		sint32 x = (sint32)atoi(args[3].c_str()) * 1000;
-//		sint32 y = (sint32)atoi(args[4].c_str()) * 1000;
-//		sint32 z = (sint32)atoi(args[5].c_str()) * 1000;
+//		uint16 quality = (uint16)NLMISC::fromString(args[2].c_str());
+//		sint32 x = (sint32)NLMISC::fromString(args[3].c_str()) * 1000;
+//		sint32 y = (sint32)NLMISC::fromString(args[4].c_str()) * 1000;
+//		sint32 z = (sint32)NLMISC::fromString(args[5].c_str()) * 1000;
 //		GameItemManager.createItem( itemId, sheetId, quality, x, y, z, true, true );
 //	}
 //
@@ -967,7 +980,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 //		return false;
 //	}
 //	
-//	CEntityId itemId( RYZOMID::object, atoi(args[0].c_str()) );
+//	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
 //	CGameItemPtr ptr = GameItemManager.getItem(itemId);
 //	GameItemManager.destroyItem( ptr );
 //	

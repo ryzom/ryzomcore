@@ -1652,7 +1652,9 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	else if ( (p = args[0].find( '_' )) == 0 )
 	{
 		// Get player position (if rowId given)
-		playerRowId = TDataSetRow::createFromRawIndex( atoi( args[0].substr( 1 ).c_str() ) );
+		TDataSetIndex entityIndex;
+		NLMISC::fromString(args[0].substr( 1 ), entityIndex);
+		playerRowId = TDataSetRow::createFromRawIndex(entityIndex);
 		if ( TheDataset.isAccessible(playerRowId) )
 		{
 			CVector centerPos;

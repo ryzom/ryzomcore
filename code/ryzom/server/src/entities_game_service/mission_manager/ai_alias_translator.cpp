@@ -195,7 +195,8 @@ void CAIAliasTranslator::buildMissionTree(const NLLIGO::IPrimitive* prim)
 				nlwarning("<CAIAliasTranslator buildMissionTree> no alias property in a mission node");
 				error = true;
 			}
-//			TAIAlias id = atoi( value.c_str() );
+//			TAIAlias id;
+//			NLMISC::fromString(value, id);
 			if ( !prim->getPropertyByName("name",name) )
 			{
 				nlwarning("<CAIAliasTranslator buildMissionTree> no name property in a mission node");

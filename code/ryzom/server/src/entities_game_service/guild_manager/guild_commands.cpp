@@ -412,8 +412,10 @@ NLMISC_COMMAND(testGuildSetLeader,"set the leader of a guild","<userId> <index> 
 		return true;
 	CEntityId eId;
 	eId.fromString(args[0].c_str());
-	uint16 index = (uint16)atoi(args[1].c_str() );
-	uint8 session = (uint8)atoi(args[2].c_str() );
+	uint16 index;
+	NLMISC::fromString(args[1], index);
+	uint8 session;
+	NLMISC::fromString(args[2], session);
 	GET_GUILD_MODULE(eId);
 	module->setLeader( index,session );
 	log.displayNL("Command Executed");
@@ -427,8 +429,10 @@ NLMISC_COMMAND(testGuildSetGrade,"set the grade of a member","<userId> <index> <
 		return false;
 	CEntityId eId;
 	eId.fromString(args[0].c_str());
-	uint16 index = (uint16)atoi(args[1].c_str() );
-	uint8 session = (uint8)atoi(args[2].c_str() );
+	uint16 index;
+	NLMISC::fromString(args[1], index);
+	uint8 session;
+	NLMISC::fromString(args[2], session);
 	EGSPD::CGuildGrade::TGuildGrade grade = EGSPD::CGuildGrade::fromString( args[4] );
 	GET_GUILD_MODULE(eId);
 	module->setGrade(index,session, (EGSPD::CGuildGrade::TGuildGrade) grade);
@@ -471,7 +475,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 			guildId = CGuildManager::getInstance()->getFreeGuildId();
 		else
 		{
-			guildId = atoi(args[1].c_str());
+			NLMISC::fromString(args[1], guildId);
 			if (guildId == 0)
 			{
 				log.displayNL("Invalid specific guildId, must be a number or 'highest', found '%s'", args[1].c_str());
@@ -495,7 +499,8 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 	{
 		// load a binary file
 		string idStr = file.substr(6,5);
-		uint32 id = atoi( idStr.c_str() );
+		uint32 id;
+		NLMISC::fromString(idStr, id);
 
 		if (guildId != 0)
 			id = guildId;
@@ -524,7 +529,8 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 		{
 			// Load a text file
 			string idStr = file.substr(6,5);
-			uint32 id = atoi( idStr.c_str() );
+			uint32 id;
+			NLMISC::fromString(idStr, id);
 
 			if (guildId != 0)
 				id = guildId;

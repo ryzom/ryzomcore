@@ -235,7 +235,8 @@ bool CBuildingManager::parsePhysicalBuildings( const NLLIGO::IPrimitive* prim, C
 		{
 			TAIAlias alias;
 			nlverify( CPrimitivesParser::getAlias(prim, alias));
-//*			TAIAlias alias = atoi( value.c_str() );
+//			TAIAlias alias;
+//			NLMISC::fromString(value, alias);
 			if ( _BuildingPhysicals.find( alias ) != _BuildingPhysicals.end() )
 			{
 				nlwarning("<BUILDING>building instance %s exists more than once", CPrimitivesParser::aliasToString(alias).c_str());
@@ -294,7 +295,8 @@ bool CBuildingManager::parseTriggers( const NLLIGO::IPrimitive* prim, CBuildingP
 			std::string name;
 			nlverify( prim->getPropertyByName("name",name) );
 			nlverify( prim->getPropertyByName("pacs_trigger_id",value) );
-			uint32 triggerId =  (uint32) atoi( value.c_str() );
+			uint32 triggerId;
+			NLMISC::fromString(value, triggerId);
 
 			if ( triggerId == 0 && CMissionParser::getNoBlankString( value ) != "0" )
 			{

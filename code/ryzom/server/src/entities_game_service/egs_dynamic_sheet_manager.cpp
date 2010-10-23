@@ -116,7 +116,8 @@ void CDynamicSheetManager::addCustomLootTable(CCustomElementId id, CCustomLootTa
 	{
 		CStaticLootSet tmplootSet;
 		string probaStr = it->first.Id;
-		uint16 proba = static_cast<uint16>(atoi(probaStr.c_str()));
+		uint16 proba;
+		NLMISC::fromString(probaStr, proba);
 		TScriptContent script = it->second;
 
 		uint32 lineNb = 0;
@@ -135,8 +136,8 @@ void CDynamicSheetManager::addCustomLootTable(CCustomElementId id, CCustomLootTa
 
 			CStaticLootSet::SItemLoot item;
 			item.Item = tmpVector[0];
-			item.Level = static_cast<uint16>(atoi(tmpVector[1].c_str()));
-			item.Quantity = static_cast<uint16>(atoi(tmpVector[2].c_str()));
+			NLMISC::fromString(tmpVector[1], item.Level);
+			NLMISC::fromString(tmpVector[2], item.Quantity);
 			nldebug("New Item: name='%s' quality=%d quantity=%d", item.Item.c_str(), item.Level, item.Quantity);
 
 			tmplootSet.ItemLoot.push_back(item);

@@ -49,7 +49,7 @@ class CMissionStepGainChargePoint : public IMissionStepTemplate
 			MISLOGSYNTAXERROR("<points>");
 			return false;
 		}
-		_ChargePoints = uint32(atoi( script[1].c_str() ));
+		NLMISC::fromString(script[1], _ChargePoints);
 		if ( _ChargePoints == 0 )
 		{
 			MISLOGERROR("charge points = 0");

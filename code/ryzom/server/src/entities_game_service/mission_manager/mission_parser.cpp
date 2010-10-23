@@ -72,7 +72,7 @@ bool CMissionParser::solveTextsParams(uint32 lineNum, TVectorParamCheck & txtPar
 			if ( j == paramTypes.size() )
 			{
 				txtParams[i].Type = STRING_MANAGER::integer;
-				txtParams[i].Int = atoi( txtParams[i].Identifier.c_str() );
+				NLMISC::fromString( txtParams[i].Identifier, txtParams[i].Int);
 				if ( txtParams[i].Int == 0 && txtParams[i].Identifier != "0" )
 				{
 					MISLOG("<MISSIONS> at line %u: param '%s' has an unknown type", lineNum, txtParams[i].Identifier.c_str());
@@ -382,7 +382,8 @@ bool CMissionParser::addItemPrice(uint32 line, const vector<string>& args, uint 
 		MISLOG("<MISSIONS> line %u: syntax error sheetId '%s' is unknon", line, sheetName.c_str() ) ;
 		ret = false;
 	}
-	uint16 quality = (uint16) atoi( args[1].c_str() );
+	uint16 quality;
+	NLMISC::fromString(args[1], quality);
 	if ( quality == 0 )
 	{
 		MISLOG("<MISSIONS> line %u: syntax error quality is 0 ('%s')", line, args[1].c_str() ) ;

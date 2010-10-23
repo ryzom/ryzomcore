@@ -4824,7 +4824,9 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 //	if (args.size()!=1)
 //		return false;
 //
-//	switch (atoi(args[0].c_str()))
+//	sint test;
+//	NLMISC::fromString(args[0], test);
+//	switch (test)
 //	{
 //	case 0:
 //		{

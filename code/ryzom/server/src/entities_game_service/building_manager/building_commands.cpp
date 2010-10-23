@@ -46,7 +46,8 @@ NLMISC_COMMAND(simGpmsTriggerIn,"simulate the buying of a guild building","<user
 	CEntityId id;
 	id.fromString( args[0].c_str() );
 	TDataSetRow rowId = TheDataset.getDataSetRow( id );
-	uint32 liftId = atoi( args[1].c_str() );
+	uint32 liftId;
+	NLMISC::fromString(args[1], liftId);
 	CBuildingManager::getInstance()->addTriggerRequest( rowId, (uint32)liftId );
 	return true;
 }
@@ -94,7 +95,8 @@ NLMISC_COMMAND(dumpBuilding, "dump building infos", "<building_name = building_i
 	const string & buildingId = args[0];
 	if (buildingId.size() > 0 && isdigit(buildingId[0]))
 	{
-		TAIAlias alias = atoi(buildingId.c_str());
+		TAIAlias alias;
+		NLMISC::fromString(buildingId, alias);
 		building = CBuildingManager::getInstance()->getBuildingPhysicalsByAlias(alias);
 	}
 	else
@@ -113,7 +115,9 @@ NLMISC_COMMAND(removeGuildBuilding, "(DEBUG) remove guild building", "<guild id>
 	if (args.size() != 1)
 		return false;
 
-	CBuildingManager::getInstance()->removeGuildBuilding( atoi(args[0].c_str()) );
+	uint32 guildId;
+	NLMISC::fromString(args[0], guildId);
+	CBuildingManager::getInstance()->removeGuildBuilding(guildId);
 
 	return true;
 }

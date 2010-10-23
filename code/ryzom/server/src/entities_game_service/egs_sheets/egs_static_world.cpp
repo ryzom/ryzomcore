@@ -88,7 +88,8 @@ void CStaticContinent::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			const UFormElm *zc;
 			if(elm->getArrayNode(&zc, i) && zc)
 				nlverify(zc->getValueByName(value, "outpost_number"));
-			uint index = (uint) atoi(value.c_str());
+			uint index;
+			NLMISC::fromString(value, index);
 			Outposts.push_back( index );
 		}
 	}

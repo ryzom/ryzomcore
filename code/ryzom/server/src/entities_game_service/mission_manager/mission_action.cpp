@@ -521,7 +521,7 @@ class CMissionActionRecvItem : public IMissionAction
 
 		_Quantity = 1;
 		if ( args.size() >= 2)
-			_Quantity = atoi( args[1].c_str() );
+			NLMISC::fromString(args[1], _Quantity);
 
 		uint i = 0;
 		for (; i < missionData.Items.size(); i++ )
@@ -552,7 +552,7 @@ class CMissionActionRecvItem : public IMissionAction
 			_Quality = 1;
 			if ( args.size() == 3 )
 			{
-				_Quality = atoi(args[2].c_str());
+				NLMISC::fromString(args[2], _Quality);
 				if ( _Quality == 0 )
 				{
 					MISLOGERROR("quality = 0");
@@ -802,7 +802,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 		// read quantity
 		_Quantity = 1;
 		if ( args.size() >= 2)
-			_Quantity = atoi( args[1].c_str() );
+			NLMISC::fromString(args[1], _Quantity);
 		
 		// read group
 		_Group = false;
@@ -972,7 +972,7 @@ public:
 		// read the quantity, or 1 by default
 		_Quantity = 1;
 		if ( args.size() >= 2)
-			_Quantity = atoi( args[1].c_str() );
+			NLMISC::fromString(args[1], _Quantity);
 		
 		// If the name of the item macthes one of the special defined mission items for this mission
 		uint i = 0;
@@ -1008,7 +1008,7 @@ public:
 			_Quality = 1;
 			if ( args.size() == 3 )
 			{
-				_Quality = atoi(args[2].c_str());
+				NLMISC::fromString(args[2], _Quality);
 				if ( _Quality == 0 )
 				{
 					MISLOGERROR("quality = 0");
@@ -1622,7 +1622,7 @@ class CMissionActionRecvMoney : public IMissionAction
 			CMissionParser::tokenizeString( multiArgs[0]," \t",args );
 			if ( args.size() == 1 )
 			{
-				_Amount = (uint)atoi( script[1].c_str() );
+				NLMISC::fromString(script[1], _Amount);
 			}
 			else if ( !CMissionParser::addItemPrice( _SourceLine, args,_Amount ) )
 				ret = false;
@@ -1694,7 +1694,7 @@ class CMissionActionRecvFame : public IMissionAction
 			MISLOGERROR1("invalid faction '%s'", args[0].c_str());
 			return false;
 		}
-		_Value =  atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], _Value);
 		if ( _Value == 0 )
 		{
 			MISLOGERROR("fame = 0");
@@ -1757,7 +1757,7 @@ class CMissionActionRecvXp : public IMissionAction
 		}
 
 		// parse gain
-		_Value = atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], _Value);
 		if (_Value <= 0)
 		{
 			MISLOGERROR("XP amount <= 0");
@@ -1827,7 +1827,7 @@ class CMissionActionRecvFactionPoint : public IMissionAction
 			MISLOGERROR1("invalid faction '%s'", args[0].c_str());
 			return false;
 		}
-		_Value =  atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], _Value);
 		if (_Value == 0)
 		{
 			MISLOGERROR("faction points = 0");
@@ -2195,7 +2195,7 @@ class CMissionActionCondJumpSkill : public CMissionActionJump
 				MISLOGERROR2("invalid skill name (%uth skill) '%s'", i, parts[0].c_str());
 				return false;
 			}
-			level = atoi(parts[1].c_str());
+			NLMISC::fromString(parts[1], level);
 			if (level == 0)
 			{
 				MISLOGERROR2("invalid skill value (%uth skill) '%s'", i, sn[i].c_str());
@@ -2599,7 +2599,7 @@ class CMissionActionAIEvent : public IMissionAction
 			MISLOGERROR1("invalid group '%s'", sGroup.c_str() );
 			ret = false;
 		}
-		EventId	 = (uint8) atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], EventId);
 		if( EventId > 9)
 		{
 			MISLOGERROR1("invalid event '%s' ( [0-9] )", args[1].c_str() );
@@ -2656,7 +2656,7 @@ class CMissionActionTimer : public IMissionAction
 			MISLOGSYNTAXERROR("<delay>");
 			return false;
 		}
-		Delay = ( NLMISC::TGameCycle ) atoi( script[1].c_str() );
+		NLMISC::fromString(script[1], Delay);
 		return true;
 	}
 	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
@@ -2699,8 +2699,10 @@ class CMissionActionDayPeriod : public IMissionAction
 			MISLOGSYNTAXERROR("<hour> <min>; <hour> <min>");
 			return false;
 		}
-		uint hour = (uint)atoi(params[0].c_str());
-		uint min = (uint)atoi(params[1].c_str());
+		uint hour;
+		NLMISC::fromString(params[0], hour);
+		uint min;
+		NLMISC::fromString(params[1], min);
 		if ( hour < 0 || hour >23 )
 		{
 			MISLOGERROR("hour must be between 0 and 23");
@@ -2721,8 +2723,8 @@ class CMissionActionDayPeriod : public IMissionAction
 			MISLOGSYNTAXERROR("<hour> <min>; <hour> <min>");
 			return false;
 		}
-		hour = (uint) atoi(params[0].c_str());
-		min = (uint)atoi(params[1].c_str());
+		NLMISC::fromString(params[0], hour);
+		NLMISC::fromString(params[1], min);
 		if ( hour < 0 || hour >23 )
 		{
 			MISLOGERROR("hour must be between 0 and 23");
@@ -2857,7 +2859,7 @@ public:
 			
 			uint16 quantity = 1;
 			if ( args.size() >= 2)
-				quantity = atoi( args[1].c_str() );
+				NLMISC::fromString(args[1], quantity);
 			
 			for (uint i = 0; i < items.size(); i++ )
 			{
@@ -2883,7 +2885,7 @@ public:
 			uint16 quality = 1;
 			if ( args.size() == 3 )
 			{
-				quality = atoi(args[2].c_str());
+				NLMISC::fromString(args[2], quality);
 				if ( quality == 0 )
 				{
 					MISLOG("sline:%u  syntax error quality = 0", line);
@@ -3285,7 +3287,7 @@ class CMissionActionRecvChargePoint : public IMissionAction
 			MISLOGSYNTAXERROR("<_ChargesPoints>");
 			return false;
 		}
-		_ChargesPoints = (uint32)atoi( script[1].c_str() );
+		NLMISC::fromString(script[1], _ChargesPoints);
 		if (_ChargesPoints == 0)
 		{
 			MISLOGERROR("_ChargesPoints = 0");
@@ -3500,7 +3502,7 @@ class CMissionActionRecvGuildXp : public IMissionAction
 			MISLOGSYNTAXERROR("<amount>");
 			return false;
 		}
-		Amount = atoi( script[1].c_str() );
+		NLMISC::fromString(script[1], Amount);
 		return true;
 	}
 	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
@@ -3550,7 +3552,7 @@ class CMissionActionInside : public IMissionAction
 		}
 		Place = place->getId();
 		if ( script.size() == 3 )
-			Delay = (NLMISC::TGameCycle)atoi( script[2].c_str() );
+			NLMISC::fromString(script[2], Delay);
 		else
 			Delay = 300;
 		return true;
@@ -3592,7 +3594,7 @@ class CMissionActionOutside: public IMissionAction
 		}
 		Place = place->getId();
 		if ( script.size() == 3 )
-			Delay = (NLMISC::TGameCycle)atoi( script[2].c_str() );
+			NLMISC::fromString(script[2], Delay);
 		else
 			Delay = 300;
 		return true;
@@ -3828,8 +3830,8 @@ class CMissionActionEncycloUnlock : public IMissionAction
 			return false;
 		}
 		
-		AlbumNb = atoi( vars[0].c_str() );
-		ThemaNb = atoi( vars[1].c_str() );
+		NLMISC::fromString(vars[0], AlbumNb);
+		NLMISC::fromString(vars[1], ThemaNb);
 
 		return true;
 	}
@@ -4088,7 +4090,7 @@ class CMissionActionSDBSet : public IMissionAction
 		_SDBPath = CMissionParser::getNoBlankString(script[1]);
 		nlassert(!_SDBPath.empty());
 
-		_SDBValue = atoi(CMissionParser::getNoBlankString(script[2]).c_str());
+		NLMISC::fromString(CMissionParser::getNoBlankString(script[2]), _SDBValue);
 
 		return true;
 	}
@@ -4126,7 +4128,7 @@ class CMissionActionSDBAdd : public IMissionAction
 		_SDBPath = CMissionParser::getNoBlankString(script[1]);
 		nlassert(!_SDBPath.empty());
 
-		_SDBDelta = atoi(CMissionParser::getNoBlankString(script[2]).c_str());
+		NLMISC::fromString(CMissionParser::getNoBlankString(script[2]), _SDBDelta);
 
 		return true;
 	}
@@ -4164,7 +4166,7 @@ class CMissionActionSDBPlayerAdd : public IMissionAction
 		_SDBPath = CMissionParser::getNoBlankString(script[1]);
 		nlassert(!_SDBPath.empty());
 
-		_SDBDelta = atoi(CMissionParser::getNoBlankString(script[2]).c_str());
+		NLMISC::fromString(CMissionParser::getNoBlankString(script[2]), _SDBDelta);
 
 		return true;
 	}
@@ -4568,7 +4570,7 @@ public:
 		}
 
 		factionIndex = CStaticFames::getInstance().getFactionIndex( CMissionParser::getNoBlankString(script[1]));
-		fameValue = atoi( CMissionParser::getNoBlankString(script[2]).c_str() );
+		NLMISC::fromString( CMissionParser::getNoBlankString(script[2]), fameValue);
 
 		if( factionIndex == CStaticFames::INVALID_FACTION_INDEX )
 		{
@@ -4701,7 +4703,9 @@ public:
 				return false;
 			}
 			Items.push_back( retList[0] );
-			ItemQty.push_back( atoi(retList[1].c_str()) );
+			sint16 quantity;
+			NLMISC::fromString(retList[1], quantity);
+			ItemQty.push_back(quantity);
 		}
 
 		Label = CMissionParser::getNoBlankString(script[script.size()-1]);

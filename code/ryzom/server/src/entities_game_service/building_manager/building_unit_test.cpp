@@ -643,11 +643,11 @@ NLMISC_COMMAND (testBuildingManager, "(debug) Unit test for building manager",
 	}
 	else if (args.size() == 5)
 	{
-		nbChars			= atoi( args[0].c_str() );
-		nbOps			= atoi( args[1].c_str() );
-		nbSimultaneous	= atoi( args[2].c_str() );
-		opDelay			= atoi( args[3].c_str() );
-		Verbose			= (atoi( args[4].c_str() ) == 1);
+		NLMISC::fromString(args[0], nbChars);
+		NLMISC::fromString(args[1], nbOps);
+		NLMISC::fromString(args[2], nbSimultaneous);
+		NLMISC::fromString(args[3], opDelay);
+		NLMISC::fromString(args[4], Verbose);
 	}
 	else
 		return false;

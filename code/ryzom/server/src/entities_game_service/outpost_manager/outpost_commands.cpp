@@ -120,10 +120,9 @@ NLMISC_COMMAND(outpostSimulateTimer0End, "", "<outpost_id> [<absolute end time> 
 	uint32 endTime = 1;
 	if (args.size()>1)
 	{
+		NLMISC::fromString(args[1], endTime);
 		if (args[1][0]=='+')
-			endTime = CTime::getSecondsSince1970() + atoi(args[1].c_str());
-		else
-			endTime = atoi(args[1].c_str());
+			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;
 	
@@ -144,10 +143,9 @@ NLMISC_COMMAND(outpostSimulateTimer1End, "", "<outpost_id> [<absolute end time> 
 	uint32 endTime = 1;
 	if (args.size()>1)
 	{
+		NLMISC::fromString(args[1], endTime);
 		if (args[1][0]=='+')
-			endTime = CTime::getSecondsSince1970() + atoi(args[1].c_str());
-		else
-			endTime = atoi(args[1].c_str());
+			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;
 	
@@ -168,10 +166,9 @@ NLMISC_COMMAND(outpostSimulateTimer2End, "", "<outpost_id> [<absolute end time> 
 	uint32 endTime = 1;
 	if (args.size()>1)
 	{
+		NLMISC::fromString(args[1], endTime);
 		if (args[1][0]=='+')
-			endTime = CTime::getSecondsSince1970() + atoi(args[1].c_str());
-		else
-			endTime = atoi(args[1].c_str());
+			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;
 	
@@ -191,7 +188,8 @@ NLMISC_COMMAND(outpostSetFightData, "", "<outpost_id> <current_round> [<current_
 
 	if (args.size() > 1)
 	{
-		uint32 currentRound = uint32( atoi(args[1].c_str()) );
+		uint32 currentRound;
+		NLMISC::fromString(args[1], currentRound);
 		if (currentRound > 0 && currentRound <= outpost->computeRoundCount())
 		{
 			outpost->_FightData._CurrentCombatRound = currentRound - 1;
@@ -202,7 +200,8 @@ NLMISC_COMMAND(outpostSetFightData, "", "<outpost_id> <current_round> [<current_
 
 	if (args.size() > 2)
 	{
-		uint32 currentLevel = uint32( atoi(args[2].c_str()) );
+		uint32 currentLevel;
+		NLMISC::fromString(args[2], currentLevel);
 		if (currentLevel > 0 && currentLevel <= outpost->computeRoundCount())
 		{
 			outpost->_FightData._CurrentCombatLevel = currentLevel - 1;
@@ -213,7 +212,8 @@ NLMISC_COMMAND(outpostSetFightData, "", "<outpost_id> <current_round> [<current_
 
 	if (args.size() > 3)
 	{
-		uint32 maxAttackLevel = uint32( atoi(args[3].c_str()) );
+		uint32 maxAttackLevel;
+		NLMISC::fromString(args[3], maxAttackLevel);
 		if (maxAttackLevel <= outpost->computeRoundCount())
 		{
 			outpost->_FightData._MaxAttackLevel = maxAttackLevel;
@@ -224,7 +224,8 @@ NLMISC_COMMAND(outpostSetFightData, "", "<outpost_id> <current_round> [<current_
 
 	if (args.size() > 4)
 	{
-		uint32 maxDefenseLevel = uint32( atoi(args[4].c_str()) );
+		uint32 maxDefenseLevel;
+		NLMISC::fromString(args[4], maxDefenseLevel);
 		if (maxDefenseLevel <= outpost->computeRoundCount())
 		{
 			outpost->_FightData._MaxDefenseLevel = maxDefenseLevel;
@@ -247,7 +248,8 @@ NLMISC_COMMAND(setOutpostLevel, "Set the outpost level", "<outpost id><level>" )
 	if (outpost == NULL)
 		return true;
 
-	uint32 level = atoi(args[1].c_str());
+	uint32 level;
+	NLMISC::fromString(args[1], level);
 	outpost->setOutpostCurrentLevel(level);
 	return true;
 }
@@ -284,7 +286,7 @@ NLMISC_COMMAND(outpostAccelerateConstruction, "set all current construction to a
 
 	uint nNbSecondLeft = 30;
 	if (args.size() == 1)
-		nNbSecondLeft = atoi(args[0].c_str());
+		NLMISC::fromString(args[0], nNbSecondLeft);
 
 	COutpostManager::getInstance().setConstructionTime(nNbSecondLeft);
 	
@@ -607,8 +609,10 @@ NLMISC_COMMAND(outpostSetAttackDefenseHour, "Set attack and defense time of an o
 	if (outpost == NULL)
 		return true;
 
-	uint32 attackHour = (uint32)atoi(args[1].c_str());
-	uint32 defenseHour = (uint32)atoi(args[2].c_str());
+	uint32 attackHour;
+	NLMISC::fromString(args[1], attackHour);
+	uint32 defenseHour;
+	NLMISC::fromString(args[2], defenseHour);
 
 	if(attackHour > 23)
 	{
@@ -638,7 +642,8 @@ NLMISC_COMMAND(outpostSetAttackDefenseDate, "Set attack and defense date of an o
 	if (outpost == NULL)
 		return true;
 
-	uint32 nbDaysAdd = (uint32)atoi(args[1].c_str());
+	uint32 nbDaysAdd;
+	NLMISC::fromString(args[1], nbDaysAdd);
 
 	outpost->setRealChallengeTime( outpost->getRealChallengeTime() + nbDaysAdd*days );
 	outpost->setChallengeTime( (outpost->getRealChallengeTime()/hours + 1)*hours );
@@ -675,7 +680,8 @@ NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryC
 	
 	GET_CHARACTER
 
-	uint32 cycleEntryDate = uint32(atoi(args[1].c_str()));
+	uint32 cycleEntryDate;
+	NLMISC::fromString(args[1], cycleEntryDate);
 
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( c->getGuildId() );
 	if (guild == NULL)

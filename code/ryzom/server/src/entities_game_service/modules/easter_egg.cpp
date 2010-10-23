@@ -485,15 +485,19 @@ NLMISC_COMMAND(activateEasterEgg, "activate an easter egg","<EasterEggId><Scenar
 	if( args.size() != 6 )
 		return false;
 
-	uint32 easterEggId = (uint32)atoi(args[0].c_str());
-	TSessionId scenarioId =  (TSessionId)(uint32)atoi(args[1].c_str());
-	uint32 aiInstanceId =  (uint32)atoi(args[2].c_str());
-	NLMISC::CSheetId itemSheet = CSheetId(args[3]);
+	uint32 easterEggId;
+	NLMISC::fromString(args[0], easterEggId);
+	uint32 scId;
+	NLMISC::fromString(args[1], scId);
+	TSessionId scenarioId(scId);
+	uint32 aiInstanceId;
+	NLMISC::fromString(args[2], aiInstanceId);
+	NLMISC::CSheetId itemSheet(args[3]);
 
 	CFarPosition fPos;
 	fPos.SessionId = scenarioId;
-	fPos.PosState.X = (sint32)atoi(args[4].c_str());;
-	fPos.PosState.Y = (sint32)atoi(args[5].c_str());;
+	NLMISC::fromString(args[4], fPos.PosState.X);;
+	NLMISC::fromString(args[5], fPos.PosState.Y);;
 
 	R2::TItemAndQuantity item;
 	item.Quantity = 1;
@@ -511,8 +515,10 @@ NLMISC_COMMAND(deactivateEasterEgg, "unactive an easter egg spwaned by scenario"
 	if( args.size() != 2 )
 		return false;
 
-	uint32 easterEggId = (uint32)atoi(args[0].c_str());
-	TSessionId scenarioId = (TSessionId)(uint32)atoi(args[1].c_str());
+	uint32 easterEggId, scId;
+	NLMISC::fromString(args[0], easterEggId);
+	NLMISC::fromString(args[1], scId);
+	TSessionId scenarioId(scId);
 
 	CR2EasterEgg::getInstance().deactivateEasterEgg(easterEggId, scenarioId);
 	return true;
@@ -527,8 +533,8 @@ NLMISC_COMMAND(easterEggTPActChange, "simulate an act change", "<CharacterId><x>
 	eid.fromString(args[0].c_str());
 
 	CFarPosition fPos;
-	fPos.PosState.X = (sint32)atoi(args[1].c_str());
-	fPos.PosState.Y = (sint32)atoi(args[2].c_str());
+	NLMISC::fromString(args[1], fPos.PosState.X);
+	NLMISC::fromString(args[2], fPos.PosState.Y);
 
 	CR2EasterEgg::getInstance().easterEggTPActChange(eid, fPos);
 	return true;

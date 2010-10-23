@@ -747,7 +747,8 @@ NLMISC_CLASS_COMMAND_IMPL(CCharacterControl, disconnectChar)
 		return false;
 	}
 
-	uint32 charId = atoi(args[0].c_str());
+	uint32 charId;
+	NLMISC::fromString(args[0], charId);
 	log.displayNL("Try to disconnect char %u", charId);
 	this->disconnectChar(0, charId);
 			
@@ -763,7 +764,8 @@ NLMISC_CLASS_COMMAND_IMPL(CCharacterControl, returnToPreviousSession)
 		return false;
 	}
 
-	uint32 charId = atoi(args[0].c_str());
+	uint32 charId;
+	NLMISC::fromString(args[0], charId);
 	log.displayNL("Try to returnToMainLand char %u", charId);
 	this->returnToPreviousSession(0, charId);
 			
@@ -779,8 +781,10 @@ NLMISC_CLASS_COMMAND_IMPL(CCharacterControl, setPioneerRight)
 		return false;
 	}
 
-	uint32 charId = atoi(args[0].c_str());
-	bool isDm = atoi(args[1].c_str())  != 0;
+	uint32 charId;
+	NLMISC::fromString(args[0], charId);
+	bool isDm;
+	NLMISC::fromString(args[1], isDm);
 	log.displayNL("Try to setPioneerRight char %u", charId);
 	this->setPioneerRight(0, charId, isDm);
 			
