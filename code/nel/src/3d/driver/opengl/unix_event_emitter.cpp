@@ -568,7 +568,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			ucstring ucstr;
 			ucstr.fromUtf8(Text);
 
-			CEventChar *charEvent = new CEventChar (ucstr[0], noKeyButton, this);
+			CEventChar *charEvent = new CEventChar (ucstr[0], getKeyButton(event.xbutton.state), this);
 
 			// raw if not processed by IME
 			charEvent->setRaw(keyCode != 0);
@@ -577,7 +577,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 #else
 			for (int i = 0; i < c; i++)
 			{
-				CEventChar *charEvent = new CEventChar ((ucchar)(unsigned char)Text[i], noKeyButton, this);
+				CEventChar *charEvent = new CEventChar ((ucchar)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
 
 				// raw if not processed by IME
 				charEvent->setRaw(keyCode != 0);
