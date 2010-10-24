@@ -843,7 +843,7 @@ bool ShapesExporter::renderPS(UInstance &entity, const string &output_path, doub
 			if(!saveOneImage(filename))
 				return false;
 		}
-		if(time >= 30.0 || nbparticle == 0 && startTime > 0.0f || duration != 0.0f && time > duration)
+		if(time >= 30.0 || (nbparticle == 0 && startTime > 0.0f) || (duration != 0.0f && time > duration))
 			break;
 	}
 

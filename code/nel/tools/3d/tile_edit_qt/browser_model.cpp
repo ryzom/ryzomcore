@@ -208,7 +208,7 @@ const std::string TileInfo::getRelativeFileName (TileTexture texture, int index)
 {
 	nlassert(this->tileType != UnSet);
 
-	std::string currentPath = "";
+	std::string currentPath;
 	if (tileType != Displace)
 	{
 		currentPath = tileBankBrowser.getTile(index)->getRelativeFileName ((CTile::TBitmap)texture);
