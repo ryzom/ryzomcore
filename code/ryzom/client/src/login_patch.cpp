@@ -254,7 +254,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	}
 
 	srand(NLMISC::CTime::getSecondsSince1970());
-	UsedServer = rand() * (sint)PatchServers.size() / (RAND_MAX+1);
+	UsedServer = (sint)((float)(rand() / (RAND_MAX+1)) * (sint)PatchServers.size());
 
 	ServerPath = CPath::standardizePath (sServerPath);
 	ServerVersion = sServerVersion;
@@ -1700,29 +1700,58 @@ bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Fi
 	nlfseek64 (f, 0, SEEK_END);
 	uint32 nFileSize = NLMISC::CFile::getFileSize (SourceName);
 	nlfseek64 (f, nFileSize-sizeof(uint32), SEEK_SET);
+
 	uint32 nOffsetFromBegining;
-	fread (&nOffsetFromBegining, sizeof(uint32), 1, f);
-	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+	if (fread (&nOffsetFromBegining, sizeof(uint32), 1, f) != 1)
+	{
+		fclose(f);
 		return false;
+	}
+
+	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+	{
+		fclose(f);
+		return false;
+	}
 
 	uint32 nNbFile;
 	if (fread (&nNbFile, sizeof(uint32), 1, f) != 1)
+	{
+		fclose(f);
 		return false;
+	}
+
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
 		uint8 nStringSize;
-		char sName[256];
 		if (fread (&nStringSize, 1, 1, f) != 1)
+		{
+			fclose(f);
 			return false;
+		}
+
+		char sName[256];
 		if (fread (sName, 1, nStringSize, f) != nStringSize)
+		{
+			fclose(f);
 			return false;
+		}
 		sName[nStringSize] = 0;
+
 		SBNPFile tmpBNPFile;
 		tmpBNPFile.Name = sName;
 		if (fread (&tmpBNPFile.Size, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
 			return false;
+		}
+
 		if (fread (&tmpBNPFile.Pos, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
 			return false;
+		}
+
 		Files.push_back (tmpBNPFile);
 	}
 	fclose (f);
@@ -1778,7 +1807,13 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 			{
 				nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
 				uint8 *ptr = new uint8[rBNPFile.Size];
-				fread (ptr, rBNPFile.Size, 1, bnp);
+
+				if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
+				{
+					fclose(out);
+					return false;
+				}
+
 				bool writeError = fwrite (ptr, rBNPFile.Size, 1, out) != 1;
 				if (writeError)
 				{
@@ -2399,7 +2434,12 @@ void CCheckThread::run ()
 									CHashKey sha1BNPFile;
 									nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
 									uint8 *pPtr = new uint8[rBNPFile.Size];
-									fread (pPtr, rBNPFile.Size, 1, bnp);
+									if (fread (pPtr, rBNPFile.Size, 1, bnp) != 1)
+									{
+										delete [] pPtr;
+										break;
+									}
+
 									sha1BNPFile = getSHA1(pPtr, rBNPFile.Size);
 									delete [] pPtr;
 									CHashKey sha1RealFile = getSHA1(sRealFilename, true);
@@ -3196,7 +3236,7 @@ bool CPatchManager::download(const std::string& patchFullname, const std::string
 		pPM->deleteFile(sourceFullname);
 	}
 	// file will be save to a .tmp file
-	std::string extension = "";
+	std::string extension;
 	if (patchFullname.size() >= zsStrLength	&& patchFullname.substr(patchFullname.size() - zsStrLength) == zsStr)
 	{
 		extension = zsStr;

@@ -655,7 +655,7 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 // ****************************************************************************
 
-inline double ecoRingPoints(const std::string & ecoPoints, char * c)
+inline double ecoRingPoints(const std::string & ecoPoints, const char * c)
 {
 	std::string::size_type cPlace = ecoPoints.find(c);
 	if(cPlace==string::npos)

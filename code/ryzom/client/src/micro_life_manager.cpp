@@ -602,7 +602,7 @@ void CMicroLifeManager::tileAdded(const NL3D::CTileAddedInfo &infos)
 			// K ^ Normal resolves to [-y x 0]
 			// if z is near from 1.f or -1.f then no rotation is performed (because [-y x 0] tends to 0 and can't be normalized)
 			CVector rotAxis; // rotation axis to match Z of model with normal
-			float   angle; // angle of rotation to match Z of model with normal
+			float   angle = 0.f; // angle of rotation to match Z of model with normal
 			// see if want rotation
 			if (!sfs.DontRotate)
 			{
@@ -623,7 +623,7 @@ void CMicroLifeManager::tileAdded(const NL3D::CTileAddedInfo &infos)
 				}
 			}
 
-			float angleAroundNormal;
+			float angleAroundNormal = 0.f;
 			// see if want rotation around normal
 			if (!sfs.DontRotateAroundLocalZ)
 			{

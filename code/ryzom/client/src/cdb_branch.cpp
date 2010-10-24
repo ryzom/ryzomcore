@@ -518,7 +518,10 @@ void CCDBNodeBranch::readDelta( NLMISC::TGameCycle gc, CBitMemStream & f )
 			if ( bitfield[i] )
 			{
 				if(VerboseDatabase)
+				{
 					nldebug( "CDB/ATOM: Reading prop[%u] of atom", i );
+				}
+
 				atomIndex = i;
 				CCDBNodeLeaf *leaf = findLeafAtCount( atomIndex );
 				if ( leaf )

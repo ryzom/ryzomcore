@@ -89,7 +89,9 @@ void	CImpulseDecoder::decode(CBitMemStream &inbox, TPacketNumber receivedPacket,
 		}
 
 		if (checkOnce)
+		{
 			nldebug("CLIMPD: at level %d (channel %d), %d actions%s (ReceivedAck=%d/lastAck=%d/nextSentPacket=%d)", level, channel, num, (keep) ? "" : " (discarded)", receivedAck, lastAck, nextSentPacket);
+		}
 	}
 }
 

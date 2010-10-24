@@ -1199,7 +1199,7 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 			STRING_MANAGER::readExcelSheet(ucs, ws);
 
 			// Get the Key and Data ColIndex.
-			uint	nameColIndex, keyColIndex;
+			uint	nameColIndex = 0, keyColIndex = 0;
 			if( !ws.findCol(ucstring("name"), nameColIndex) )
 				continue;
 			if( !ws.findCol(ucstring(specialWords[i*3+1]), keyColIndex) )

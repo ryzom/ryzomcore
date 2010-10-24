@@ -34,7 +34,7 @@ using namespace NLMISC;
 static std::string uint64ToHex(uint64 size)
 {
 	char data[256];
-	sprintf(data, "%llX", size);
+	sprintf(data, "%"NL_I64"X", size);
 	return std::string(data);
 }
 

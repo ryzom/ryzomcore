@@ -1814,7 +1814,7 @@ class CAHOpenURL : public IActionHandler
 			LocalFree( lpMsgBuf );
 		}
 #else
-# pragma message(Install tag not supported)
+		// TODO: for Linux and Mac OS
 #endif
 
 		/*
@@ -2823,7 +2823,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(pPM->isVerboseLog())
 			{
-				nlinfo ("Exploded, with nl, %zu res", lines.size());
+				nlinfo ("Exploded, with nl, %u res", (uint)lines.size());
 	/*			for (uint i = 0; i < lines.size(); i++)
 				{
 					nlinfo (" > '%s'", lines[i].c_str());
@@ -2832,7 +2832,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(lines.size() != nbs+1)
 			{
-				nlwarning("bad shard lines number %zu != %d", lines.size(), nbs+1);
+				nlwarning("bad shard lines number %u != %d", (uint)lines.size(), nbs+1);
 				nlwarning("'%s'", res.c_str());
 				return "bad lines numbers (error code 5)";
 			}
@@ -2844,7 +2844,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if(pPM->isVerboseLog())
 				{
-					nlinfo ("Exploded with '%s', %zu res", "|", res.size());
+					nlinfo ("Exploded with '%s', %u res", "|", (uint)res.size());
 	/*				for (uint i = 0; i < res.size(); i++)
 					{
 						nlinfo (" > '%s'", res[i].c_str());
@@ -2853,7 +2853,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if (res.size() < 7 && res.size() > 8)
 				{
-					nlwarning("bad | numbers %zu != %d", res.size(), 8);
+					nlwarning("bad | numbers %u != %d", (uint)res.size(), 8);
 					nlwarning("'%s'", lines[i].c_str());
 					return "bad pipe numbers (error code 6)";
 				}
