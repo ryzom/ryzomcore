@@ -161,7 +161,7 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 // ***************************************************************************
 string getBaseName (const string &fullname)
 {
-	string sTmp2 = "";
+	string sTmp2;
 	string::size_type pos = fullname.rfind('_');
 	if (pos != string::npos)
 		sTmp2 = fullname.substr(0, pos+1);
