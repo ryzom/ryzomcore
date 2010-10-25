@@ -1727,16 +1727,16 @@ std::string CFileContainer::getTemporaryDirectory()
 	static std::string path;
 	if (path.empty())
 	{
-		char *tempDir = getenv("TEMP");
+		std::string tempDir = getenv("TEMP");
 
-		if (tempDir == NULL)
+		if (tempDir.empty())
 			tempDir = getenv("TMP");
 
 #ifdef NL_OS_UNIX
-		if (tempDir == NULL)
+		if (tempDir.empty())
 			tempDir = "/tmp";
 #else
-		if (tempDir == NULL)
+		if (tempDir.empty())
 			tempDir = ".";
 #endif
 
