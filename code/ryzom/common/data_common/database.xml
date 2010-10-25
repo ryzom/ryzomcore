@@ -116,6 +116,8 @@
     </branch>
     <leaf name="DEFAULT_WEIGHT_HANDS"
           type="I32" />
+    <leaf name="IS_INVISIBLE"
+          type="I1" />
     <!-- Syncrhonisation COUNTER. must be at END of an atomic branch -->
     <leaf name="COUNTER"
           type="I4" />
