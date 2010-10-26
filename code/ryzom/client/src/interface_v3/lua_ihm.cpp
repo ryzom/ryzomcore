@@ -1990,7 +1990,7 @@ bool CLuaIHM::isTargetUser()
 bool CLuaIHM::isPlayerInPVPMode()
 {
 	if (!UserEntity) return false;
-	return (UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
+	return (UserEntity->getPvpMode() & PVP_MODE::PvpFaction || UserEntity->getPvpMode() & PVP_MODE::PvpFactionFlagged || UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction);
 }
 
 // ***************************************************************************
@@ -1998,7 +1998,7 @@ bool CLuaIHM::isTargetInPVPMode()
 {
 	CEntityCL *target = getTargetSlot();
 	if (!target) return false;
-	return (target->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
+	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction);
 }
 
 // ***************************************************************************

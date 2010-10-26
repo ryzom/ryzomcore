@@ -520,7 +520,15 @@ bool CEntityManager::removeInstances()
 			Scene->deleteInstance(_ShapeInstances[i].Instance);
 	}
 	_ShapeInstances.clear();
+	_InstancesRemoved = true;
 	return true;
+}
+
+bool CEntityManager::instancesRemoved()
+{
+	bool instRemoved = _InstancesRemoved;
+	_InstancesRemoved = false;
+	return instRemoved;
 }
 
 CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y)

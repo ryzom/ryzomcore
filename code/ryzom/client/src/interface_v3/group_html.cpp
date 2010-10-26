@@ -100,7 +100,7 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	if (NLMISC::CFile::fileExists(dest))
 	{
 		CFile::setRWAccess(dest);
-		NLMISC::CFile::deleteFile(dest.c_str());
+		NLMISC::CFile::deleteFile(dest);
 	}
 	FILE *fp = fopen (dest.c_str(), "wb");
 	if (fp == NULL)
@@ -111,7 +111,7 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 	curl_multi_add_handle(MultiCurl, curl);
-	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img));
+	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, ""));
 #ifdef LOG_DL
 	nlwarning("adding handle %x, %d curls", curl, Curls.size());
 #endif
@@ -145,8 +145,8 @@ string CGroupHTML::localBnpName(const string &url)
 	return dest;
 }
 
-// Add a bnp download request in the multi_curl
-void CGroupHTML::addBnpDownload(const string &url, const string &action)
+// Add a bnp download request in the multi_curl, return true if already downloaded
+bool CGroupHTML::addBnpDownload(const string &url, const string &action, const string &script)
 {
 	// Search if we are not already downloading this url.
 	for(uint i = 0; i < Curls.size(); i++)
@@ -156,13 +156,13 @@ void CGroupHTML::addBnpDownload(const string &url, const string &action)
 #ifdef LOG_DL
 			nlwarning("already downloading '%s'", url.c_str());
 #endif
-			return;
+			return false;
 		}
 	}
 
 	CURL *curl = curl_easy_init();
 	if (!MultiCurl || !curl)
-		return;
+		return false;
 
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -177,7 +177,11 @@ void CGroupHTML::addBnpDownload(const string &url, const string &action)
 		if (action == "override" || action == "delete")
 		{
 			CFile::setRWAccess(dest);
-			NLMISC::CFile::deleteFile(dest.c_str());
+			NLMISC::CFile::deleteFile(dest);
+		}
+		else
+		{
+			return true;	
 		}
 	}
 	if (action != "delete")
@@ -186,17 +190,18 @@ void CGroupHTML::addBnpDownload(const string &url, const string &action)
 		if (fp == NULL)
 		{
 			nlwarning("Can't open file '%s' for writing: code=%d '%s'", dest.c_str (), errno, strerror(errno));
-			return;
+			return false;
 		}
 		curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 		curl_multi_add_handle(MultiCurl, curl);
-		Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL));
+		Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL, script));
 #ifdef LOG_DL
 		nlwarning("adding handle %x, %d curls", curl, Curls.size());
 #endif
 		RunningCurls++;
 	}
+	return false;
 }
 
 void CGroupHTML::initBnpDownload()
@@ -316,8 +321,6 @@ void CGroupHTML::checkDownloads()
 							{
 								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
-									nlinfo("BNPCHECK : downloaded");
-
 									bool memoryCompressed = CPath::isMemoryCompressed();
 									if (memoryCompressed)
 									{
@@ -329,7 +332,8 @@ void CGroupHTML::checkDownloads()
 										CPath::memoryCompress();
 									}
 									CInterfaceManager *pIM = CInterfaceManager::getInstance();
-									pIM->executeLuaScript("game:onBnpDownloadFinish()", true);
+									pIM->executeLuaScript(_ObjectScript, true);
+									_ObjectScript = "";
 								}
 							}
 						}
@@ -1367,6 +1371,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 				_ObjectMD5Sum = value[HTML_OBJECT_ID];
 			if (present[HTML_OBJECT_STANDBY] && value[HTML_OBJECT_STANDBY])
 				_ObjectAction = value[HTML_OBJECT_STANDBY];
+			_Object = true;
 
 			break;
 		}
@@ -1494,9 +1499,14 @@ void CGroupHTML::endElement (uint element_number)
 			{
 				if (!_ObjectData.empty())
 				{
-					addBnpDownload(_ObjectData, _ObjectAction);
+					if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript))
+					{
+						CInterfaceManager *pIM = CInterfaceManager::getInstance();
+						pIM->executeLuaScript(_ObjectScript, true);
+					}
 				}
 			}
+			_Object = false;
 		}
 	}
 }
@@ -2101,6 +2111,10 @@ void CGroupHTML::addString(const ucstring &str)
 	{
 		_TextAreaContent += tmpStr;
 	}
+	else if (_Object)
+	{
+		_ObjectScript += tmpStr.toString();
+	}
 	else if (_SelectOption)
 	{
 		if (!(_Forms.empty()))
@@ -2447,9 +2461,18 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	if (tooltip)
 	{
 		if (CI18N::hasTranslation(tooltip))
-			ctrlButton->setDefaultContextHelp (CI18N::get(tooltip));
+		{
+			ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+			//ctrlButton->setOnContextHelp(CI18N::get(tooltip).toString());
+		}
 		else
-			ctrlButton->setDefaultContextHelp (ucstring(tooltip));
+		{
+			ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+			//ctrlButton->setOnContextHelp(string(tooltip));
+		}
+
+		ctrlButton->setInstantContextHelp(true);
+		ctrlButton->setToolTipParent(TTMouse);
 	}
 
 	getParagraph()->addChild (ctrlButton);
@@ -2486,6 +2509,7 @@ void CGroupHTML::clearContext()
 	_CellParams.clear();
 	_Title = false;
 	_TextArea = false;
+	_Object = false;
 	_Localize = false;
 
 	// TR

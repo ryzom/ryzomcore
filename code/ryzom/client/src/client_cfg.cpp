@@ -584,7 +584,7 @@ CClientConfig::CClientConfig()
 	CameraDistance		= 3.0f;
 	CameraDistStep		= 1.0f;
 	CameraDistMin		= 1.0f;
-	CameraDistMax		= 5.0f;
+	CameraDistMax		= 100.0f;
 	DmCameraDistMax		= 25.0f;
 	CameraAccel			= 0.2f;
 	CameraSpeedMin		= 0.2f;

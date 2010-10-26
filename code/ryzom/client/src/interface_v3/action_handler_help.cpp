@@ -2373,8 +2373,8 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 		{
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropA.PropertySubData.ArmModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::ARMS_SLOT );
+			cs.VisualPropA.PropertySubData.ArmColor = color->getValue32();
 			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
-			SCharacter3DSetup::setDB("UI:TEMP:CHAR3D:VPA:ARMCOLOR", pIS->Color);
 			//cs.VisualPropA.PropertySubData.ArmColor = pIS->Color;
 			camHeight = -0.55f;
 		}
@@ -2406,11 +2406,17 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	else if (pIS->Family == ITEMFAMILY::SHIELD)
 	{
 		cs.VisualPropA.PropertySubData.WeaponLeftHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::LEFT_HAND_SLOT );
+		CItemSheet *pES = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, cs.VisualPropA.PropertySubData.WeaponRightHand);
+		if (pES->ItemType == ITEM_TYPE::TWO_HAND_AXE || pES->ItemType == ITEM_TYPE::TWO_HAND_MACE || pES->ItemType == ITEM_TYPE::TWO_HAND_SWORD ||
+			pES->ItemType == ITEM_TYPE::MAGICIAN_STAFF || pES->ItemType == ITEM_TYPE::AUTOLAUCH || pES->ItemType == ITEM_TYPE::LAUNCHER || pES->ItemType == ITEM_TYPE::RIFLE)
+			cs.VisualPropA.PropertySubData.WeaponRightHand = 0;
 		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+
 	}
 	else if (pIS->Family == ITEMFAMILY::MELEE_WEAPON || pIS->Family == ITEMFAMILY::RANGE_WEAPON)
 	{
 		cs.VisualPropA.PropertySubData.WeaponRightHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::RIGHT_HAND_SLOT );
+		cs.VisualPropA.PropertySubData.WeaponLeftHand = 0;
 		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
 	}
 	else

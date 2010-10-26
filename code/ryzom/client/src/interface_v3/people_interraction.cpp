@@ -1299,10 +1299,6 @@ void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendLi
 	for (uint i = 0; i < vIgnoreListName.size(); ++i)
 		addContactInList(contactIdPool++, vIgnoreListName[i], ccs_offline, 1);
 	updateAllFreeTellerHeaders();
-
-	CInterfaceManager* pIM= CInterfaceManager::getInstance();
-	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
-	FriendList.sortEx(order);
 }
 
 //=================================================================================================================
@@ -1325,6 +1321,10 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 		pl.setOnline(index, online);
 		pl.setContactId(index, contactId);
 	}
+
+	CInterfaceManager* pIM= CInterfaceManager::getInstance();
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+	FriendList.sortEx(order);
 }
 
 //=================================================================================================================
@@ -1346,6 +1346,10 @@ void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCha
 		w.List = nList; // Friend list == 0 // Ignore list == 1
 		w.Online = online;
 		WaitingContacts.push_back(w);
+
+		CInterfaceManager* pIM= CInterfaceManager::getInstance();
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		FriendList.sortEx(order);
 	}
 }
 

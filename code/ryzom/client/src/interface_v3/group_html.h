@@ -293,8 +293,8 @@ protected :
 	// the script to execute
 	std::string		_LuaScript;
 
-	bool			_ParsingBnpUrl;
-	std::string		_BnpUrl;
+	bool			_Object;
+	std::string		_ObjectScript;
 
 	// Someone is conecting. We got problem with libwww : 2 connection requests can deadlock the client.
 	static CGroupHTML *_ConnectingLock;
@@ -488,6 +488,7 @@ protected :
 	std::string		_ObjectData;
 	std::string		_ObjectMD5Sum;
 	std::string		_ObjectAction;
+	std::string		_TextAreaScript;
 
 	// Get last char
 	ucchar getLastChar() const;
@@ -539,9 +540,14 @@ private:
 
 	struct CDataDownload
 	{
-		CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i) : curl(c), url(u), fp(f), type(t) { imgs.push_back(i); }
+		CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i, const std::string &s) : curl(c), url(u), luaScript(s), type(t), fp(f)
+		{
+			if (t == ImgType) imgs.push_back(i);
+		}
+
 		CURL *curl;
 		std::string url;
+		std::string luaScript;
 		TDataType type;
 		FILE *fp;
 		std::vector<CViewBase *> imgs;
@@ -561,7 +567,7 @@ private:
 	// BnpDownload system
 	void initBnpDownload();
 	void checkBnpDownload();
-	void addBnpDownload(const std::string &url, const std::string &action);
+	bool addBnpDownload(const std::string &url, const std::string &action, const std::string &script);
 	std::string localBnpName(const std::string &url);
 
 	void releaseDownloads();

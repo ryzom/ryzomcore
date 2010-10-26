@@ -227,6 +227,9 @@ function game:updateTargetConsiderUI()
 	local wgImpossible  = targetWindow:find("impossible")
 	local wgSlotRing    = targetWindow:find("slot_ring")
 	local wgToolTip     = targetWindow:find("target_tooltip")
+	local wgPvPTag     = targetWindow:find("pvp_tags")
+	local wgHeader     = targetWindow:find("header_opened")
+		
 	wgTargetSlotForce.active = true
 	wgImpossible.active = true
 
@@ -236,27 +239,37 @@ function game:updateTargetConsiderUI()
 		wgTargetLevel.active = false
 		wgImpossible.active = false
 		wgSlotRing.active  = false	
-		if (isTargetUser()) then
+		if (isTargetUser() and twIsPlayerInPVPMode()) then
 			wgToolTip.tooltip = ""
+			wgPvPTag.active = true
+			wgHeader.h = 56;
 		else
+			wgPvPTag.active = false
+			wgHeader.h = 34;
 			wgToolTip.tooltip = i18n.get("uittConsiderTargetNoSelection")
 		end
 		return
 	end
 
 	local pvpMode = false
+	wgPvPTag.active = false
+	wgHeader.h = 34;
 
 	-- if the selection is a player, then both the local & targeted player must be in PVP mode for the level to be displayed
-	if twIsTargetPlayer() then		
+	if (twIsTargetPlayer()) then
 		-- don't display anything ...
+		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
 		wgImpossible.active = false
 		wgSlotRing.active  = false
 		wgToolTip.tooltip = ""
-		wgTargetSlotForce.color = "128 128 128 255"
-		return			
+		if twIsTargetInPVPMode() then
+			debugInfo("target in pvp")
+			wgPvPTag.active = true
+			wgHeader.h = 56;
+		end
+		return
 	end
-	
 
 	-- depending on the number of people in the group, set the max diff for visibility between player level
 	-- & creature level (x 10 per member)
@@ -326,7 +339,7 @@ function game:updateTargetConsiderUI()
 			wgToolTip.tooltip = i18n.get("uittConsiderBoss")
 		end
 	end
-	
+
 	if impossible then
 		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
 	end

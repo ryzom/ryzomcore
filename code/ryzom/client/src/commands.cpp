@@ -376,7 +376,7 @@ NLMISC_COMMAND(dumpShapePos, "Dump Last Added Shape Pos.", "")
 NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", "")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+	/*if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -384,7 +384,7 @@ NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", 
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 	
 	if (ShapeAddedByCommand.empty())
@@ -408,7 +408,7 @@ NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", 
 NLMISC_COMMAND(setShapeX, "Set X position for last created shape.", "<x coordinate>")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+	/*if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -416,7 +416,7 @@ NLMISC_COMMAND(setShapeX, "Set X position for last created shape.", "<x coordina
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 
 	if (args.size() != 1) return false;
@@ -452,7 +452,7 @@ NLMISC_COMMAND(setShapeX, "Set X position for last created shape.", "<x coordina
 NLMISC_COMMAND(setShapeY, "Set Y position for last created shape.", "<y coordinate>")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+	/*if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -460,7 +460,7 @@ NLMISC_COMMAND(setShapeY, "Set Y position for last created shape.", "<y coordina
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 
 	if (args.size() != 1) return false;
@@ -496,7 +496,7 @@ NLMISC_COMMAND(setShapeY, "Set Y position for last created shape.", "<y coordina
 NLMISC_COMMAND(setShapeZ, "Set Z position for last created shape.", "<z coordinate>")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+	/*if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -504,7 +504,7 @@ NLMISC_COMMAND(setShapeZ, "Set Z position for last created shape.", "<z coordina
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 
 	if (args.size() != 1) return false;
@@ -541,7 +541,7 @@ NLMISC_COMMAND(setShapeZ, "Set Z position for last created shape.", "<z coordina
 NLMISC_COMMAND(setShapeDir, "Set direction angle for last created shape.", "<angle>")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+	/*if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -549,7 +549,7 @@ NLMISC_COMMAND(setShapeDir, "Set direction angle for last created shape.", "<ang
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 
 	if (args.size() != 1) return false;
@@ -584,7 +584,7 @@ NLMISC_COMMAND(setShapeDir, "Set direction angle for last created shape.", "<ang
 NLMISC_COMMAND(shape, "Add a shape in the scene.", "<shape file>")
 {
 	#if FINAL_VERSION
-	if (!hasPrivilegeDEV() &&
+/*	if (!hasPrivilegeDEV() &&
 		!hasPrivilegeSGM() &&
 		!hasPrivilegeGM() &&
 		!hasPrivilegeVG() &&
@@ -592,7 +592,7 @@ NLMISC_COMMAND(shape, "Add a shape in the scene.", "<shape file>")
 		!hasPrivilegeG() &&
 		!hasPrivilegeEM() &&
 		!hasPrivilegeEG())
-		return true;
+		return true;*/
 	#endif // FINAL_VERSION
 
 	if(args.size() < 1)

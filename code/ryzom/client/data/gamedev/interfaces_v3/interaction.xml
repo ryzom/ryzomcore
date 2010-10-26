@@ -181,7 +181,7 @@
          min_w="182"
          max_w="182"
          min_h="56"
-         max_h="56"
+         max_h="82"
          resizer="false"
          global_color="false"
          global_color_over="true"
@@ -209,15 +209,15 @@
     <group id="header_opened"
            x="0"
            y="0"
-           h="32"
+           h="56"
            posref="TL TL"
            group_onclick_r="active_menu"
            group_params_r="menu=ui:interface:base_menu_with_color">
       <view type="text"
             id="target_title"
-            posref="BL BL"
+            posref="TL TL"
             x="0"
-            y="0"
+            y="-20"
             color="255 255 255 255"
             global_color="true"
             fontsize="11"
@@ -290,9 +290,73 @@
             h="0"
             tooltip_parent="win" />
     </group>
+	
+	<group id="pvp_tags"
+           x="10"
+           y="-42"
+           w="164"
+           h="24"
+           posref="TL TL">
+      <!-- new Jauges -->
+      <view type="bitmap"
+            id="tag_1"
+            posref="TL TL"
+			posparent="pvp_tags"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />
+      <view type="bitmap"
+            id="tag_0"
+            posref="TR TL"
+			posparent="tag_1"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />
+     <view type="bitmap"
+            id="tag_2"
+            posref="TR TL"
+			posparent="tag_0"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />
+     <view type="bitmap"
+            id="tag_3"
+            posref="TR TL"
+			posparent="tag_2"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />
+     <view type="bitmap"
+            id="tag_4"
+            posref="TR TL"
+			posparent="tag_3"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />
+     <view type="bitmap"
+            id="tag_6"
+            posref="TR TL"
+			posparent="tag_4"
+            x="2"
+            y="0"
+            texture="alpha_10.tga"
+			global_color="false"
+            inherit_gc_alpha="false" />			
+    </group>
+	
     <group id="content"
            x="0"
-           y="-2"
+           y="-26"
            w="164"
            h="20"
            posref="TL TL">
@@ -316,7 +380,8 @@
                 tooltip="uittTargetHp"
                 tooltip_parent="win" />
     </group>
-    <!-- when the level of the player change, we should update the consider widget, so add an observer to each of its skills -->
+
+     <!-- when the level of the player change, we should update the consider widget, so add an observer to each of its skills -->
     <link expr="depends(@SERVER:USER:SKILL_POINTS_0:VALUE)"
           action="lua"
           params="game:updateTargetConsiderUI()" />
