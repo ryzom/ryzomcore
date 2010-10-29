@@ -221,8 +221,8 @@ void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
 	
-	if ((_currentItem->itemType() == ItemType::Workspace) ||
-	    (_currentItem->itemType() == ItemType::ParticleSystemNotLoaded)) 
+	if (_currentItem && ((_currentItem->itemType() == ItemType::Workspace) ||
+	    (_currentItem->itemType() == ItemType::ParticleSystemNotLoaded)))
 		_currentItem = NULL;
 }
 
