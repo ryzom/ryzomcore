@@ -49,7 +49,6 @@ public:
 	
 private Q_SLOTS:
 	void setTailFading(bool state);
-	void setPersistAfterDeath(bool state);
 	void setTailShape(int index);
 	void setRibbonOrientation(int index);
 

@@ -60,6 +60,9 @@ public:
 	
 	virtual QWidget *createDialog(QWidget *parent) = 0;
   
+	/// Return the title of dialog in client
+	virtual QString getTitleDialog() const = 0;
+
 	/// This enumerate the action that we can apply on a gradient
 	enum TAction { Add, Insert, Delete, Up, Down };
 
@@ -180,6 +183,8 @@ public:
 		return newDialog(this, parent);
 	}
 
+	virtual QString getTitleDialog() const = 0;
+
 	/// create a new dialog with given id and wrapper
 	virtual  QWidget *newDialog(IPSWrapper<T> *wrapper, QWidget *parent) = 0;
 
@@ -259,6 +264,11 @@ public:
 		return editWidget;
 	}
 
+	virtual QString getTitleDialog() const
+	{
+		return tr("Float values gradient dialog");
+	}
+
 	virtual void setCurrentIndex(uint index)
 	{
 		_CurrentEditedIndex = index;
@@ -267,7 +277,7 @@ public:
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
-		item->setText(QString("%1").arg(Scheme->getValue(index)));
+		item->setText(QString("%1").arg(Scheme->getValue(index),0,'f',2));
 	}
 
 	CEditRangeFloatWidget *editWidget;
@@ -288,6 +298,11 @@ public:
 		editWidget->setWrapper(wrapper);
 		connect(editWidget, SIGNAL(valueChanged(uint32)), this, SIGNAL(itemChanged()));
 		return editWidget;
+	}
+
+	virtual QString getTitleDialog() const
+	{
+		return tr("UInt values gradient dialog");
 	}
 
 	virtual void setCurrentIndex(uint index)
@@ -321,6 +336,11 @@ public:
 		return editWidget;
 	}
 
+	virtual QString getTitleDialog() const
+	{
+		return tr("Int values gradient dialog");
+	}
+
 	virtual void setCurrentIndex(uint index)
 	{
 		_CurrentEditedIndex = index;
@@ -351,6 +371,11 @@ public:
 		return editWidget;
 	}
 
+	virtual QString getTitleDialog() const
+	{
+		return tr("Color gradient dialog");
+	}
+
 	virtual void setCurrentIndex(uint index)
 	{
 		_CurrentEditedIndex = index;
@@ -360,7 +385,7 @@ public:
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
 		NLMISC::CRGBA color = Scheme->getValue(index);
-		item->setText(QString("RGBA(%1,%2,%3)").arg(color.R).arg(color.G).arg(color.B));
+		item->setText(QString("RGBA(%1,%2,%3,%4)").arg(color.R).arg(color.G).arg(color.B).arg(color.A));
 		QPixmap pixmap(QSize(16, 16));
 		QPainter painter(&pixmap);
 		painter.setRenderHint(QPainter::Antialiasing, true);
@@ -386,7 +411,10 @@ public:
 		editWidget->setWrapper(wrapper);
 		return editWidget;
 	}
-
+	virtual QString getTitleDialog() const
+	{
+		return tr("Plane basis gradient dialog");
+	}
 	virtual void setCurrentIndex(uint index)
 	{
 		_CurrentEditedIndex = index;
@@ -418,6 +446,10 @@ public:
 	
 	// all method inherited from IValueGradientClient
 	virtual QWidget *createDialog(QWidget *parent);
+	virtual QString getTitleDialog() const
+	{
+		return tr("Texture grouped dialog");
+	}
 	virtual bool modifyGradient(TAction, uint index);
 	virtual void displayValue(uint index, QListWidgetItem *item);
 	virtual void setCurrentIndex(uint index);

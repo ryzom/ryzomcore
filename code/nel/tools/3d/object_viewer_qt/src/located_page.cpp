@@ -54,6 +54,7 @@ CLocatedPage::CLocatedPage(QWidget *parent)
 	_ui.massWidget->init();
 	
 	_ui.maxNumParticleWidget->setRange(1, 501);
+	_ui.maxNumParticleWidget->enableUpperBound(1 << 16, true);
 	_ui.maxNumParticleWidget->setWrapper(&_MaxNbParticlesWrapper);
 	
 	connect(_ui.coordSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMatrixMode(int)));

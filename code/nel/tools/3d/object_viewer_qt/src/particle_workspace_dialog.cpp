@@ -221,8 +221,8 @@ void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
 	
-	if (_currentItem && ((_currentItem->itemType() == ItemType::Workspace) ||
-	    (_currentItem->itemType() == ItemType::ParticleSystemNotLoaded)))
+	if ((_currentItem->itemType() == ItemType::Workspace) ||
+	    (_currentItem->itemType() == ItemType::ParticleSystemNotLoaded)) 
 		_currentItem = NULL;
 }
 
@@ -285,6 +285,15 @@ void CParticleWorkspaceDialog::customContextMenu()
 			popurMenu->addAction(_deleteAction);
 			break;
 	}
+
+	bool stopped = Modules::psEdit().getState() == CParticleEditor::State::Stopped ? true : false;
+	_copyLocatedAction->setEnabled(stopped);
+	_copyBindableAction->setEnabled(stopped);
+	_pasteLocatedAction->setEnabled(stopped);
+	_instanciateAction->setEnabled(stopped);
+	_savePSAction->setEnabled(stopped);
+	_saveAsPSAction->setEnabled(stopped);
+
 	popurMenu->exec(QCursor::pos());
 	delete popurMenu;
 }

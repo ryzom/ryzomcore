@@ -34,7 +34,6 @@ CTailParticleWidget::CTailParticleWidget(QWidget *parent)
 	
 	_ui.pathWidget->setMode(Mode::RibbonShape);
 	connect(_ui.tailFadingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTailFading(bool)));
-	connect(_ui.tailPersistAfterDeathCheckBox, SIGNAL(toggled(bool)), this, SLOT(setPersistAfterDeath(bool)));
 	connect(_ui.ribbonOrientationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setRibbonOrientation(int)));
 	connect(_ui.tailShapeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setTailShape(int)));
 }
@@ -55,17 +54,14 @@ void CTailParticleWidget::setCurrentTailParticle(CWorkspaceNode *ownerNode, NL3D
 	{
 		_ui.pathWidget->hide();
 		_ui.ribbonOrientationComboBox->hide();
-		_ui.tailPersistAfterDeathCheckBox->hide();
 		_ui.tailShapeComboBox->hide();
 	}
 	else
 	{
 		_ui.pathWidget->show();
 		_ui.ribbonOrientationComboBox->show();
-		_ui.tailPersistAfterDeathCheckBox->show();
 		_ui.tailShapeComboBox->show();
 		NL3D::CPSRibbon *r = dynamic_cast<NL3D::CPSRibbon *>(_TailParticle);
-//		_ui.tailPersistAfterDeathCheckBox = (r->getPersistAfterDeath();
 		_ui.ribbonOrientationComboBox->setCurrentIndex(r->getOrientation());
 		
 		// Update graphics widget
@@ -83,12 +79,6 @@ void CTailParticleWidget::setTailFading(bool state)
 		_TailParticle->setColorFading(state);
 		_Node->setModified(true);
 	}
-}
-
-void CTailParticleWidget::setPersistAfterDeath(bool state)
-{
-	nlassert(dynamic_cast<NL3D::CPSRibbon *>(_TailParticle));
-//	(dynamic_cast<NL3D::CPSRibbon *>(_TailParticle))->setPersistAfterDeath(state);
 }
 
 void CTailParticleWidget::setTailShape(int index)

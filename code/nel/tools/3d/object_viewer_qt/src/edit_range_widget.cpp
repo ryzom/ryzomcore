@@ -127,13 +127,12 @@ void CEditRangeUIntWidget::setMinimum(int value)
 
 void CEditRangeUIntWidget::changeSlider(int value)
 {
+	// NeL wrapper
+	if ((_Wrapper != NULL) && (_Wrapper->get() != uint32(value)))
+		_Wrapper->setAndUpdateModifiedFlag(value);
+
 	if (_emit)
 		Q_EMIT valueChanged(value);
-
-	// NeL wrapper
-	if (_Wrapper == NULL) return;
-	if (_Wrapper->get() == uint32(value)) return;
-	_Wrapper->setAndUpdateModifiedFlag(value);
 }
 
 void CEditRangeUIntWidget::updateUi()
@@ -232,13 +231,12 @@ void CEditRangeIntWidget::setMinimum(int value)
 
 void CEditRangeIntWidget::changeSlider(int value)
 {
+	// NeL wrapper
+	if ((_Wrapper != NULL) && (_Wrapper->get() != sint32(value)))
+		_Wrapper->setAndUpdateModifiedFlag(value);
+
 	if (_emit)
 		Q_EMIT valueChanged(value);
-
-	// NeL wrapper
-	if (_Wrapper == NULL) return;
-	if (_Wrapper->get() == sint32(value)) return;
-	_Wrapper->setAndUpdateModifiedFlag(value);
 }
 
 void CEditRangeIntWidget::updateUi()
@@ -341,13 +339,13 @@ void CEditRangeFloatWidget::changeSlider(int value)
 	int deltaSlider = _ui.horizontalSlider->maximum() - _ui.horizontalSlider->minimum();
 	float newValue = _ui.startSpinBox->value() + ((delta / deltaSlider) * value);
 	_ui.currentSpinBox->setValue(newValue);
-	if (_emit)
-		Q_EMIT valueChanged(newValue);
 	
 	// NeL wrapper
-	if (_Wrapper == NULL) return;
-	if (fabs(newValue - _Wrapper->get()) < 0.0001) return;
-	_Wrapper->setAndUpdateModifiedFlag(newValue);
+	if ((_Wrapper != NULL) && (fabs(newValue - _Wrapper->get()) > 0.0001)) 
+		_Wrapper->setAndUpdateModifiedFlag(newValue);
+
+	if (_emit)
+		Q_EMIT valueChanged(newValue);
 }
 
 void CEditRangeFloatWidget::updateUi()

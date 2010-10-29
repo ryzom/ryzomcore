@@ -121,7 +121,7 @@ CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
 	editWidget = _ClientInterface->createDialog(this);
 	_gridLayout->addWidget(editWidget, 4, 1, 1, 2);
 
-	setWindowTitle(tr("Dialog"));
+	setWindowTitle(_ClientInterface->getTitleDialog());
         _label->setText(tr("Num samples:"));
 	
 	if (canTuneNbStages)

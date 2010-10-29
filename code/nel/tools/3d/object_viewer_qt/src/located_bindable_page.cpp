@@ -137,7 +137,7 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 	connect(_ui.independantSizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setIndependantSize(bool)));
 	connect(_ui.alignCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAlignOnMotion(bool)));
 	connect(_ui.ztestCheckBox, SIGNAL(toggled(bool)), this, SLOT(setZTest(bool)));
-	connect(_ui.alignCheckBox, SIGNAL(toggled(bool)), this, SLOT(setZAlign(bool)));
+	connect(_ui.zalignCheckBox, SIGNAL(toggled(bool)), this, SLOT(setZAlign(bool)));
 	connect(_ui.rotationPCCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHint(bool)));
 	connect(_ui.blendModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setBlendMode(int)));
 	connect(_ui.zbiasDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZBias(double)));

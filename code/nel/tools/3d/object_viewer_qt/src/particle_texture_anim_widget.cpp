@@ -61,7 +61,7 @@ void CParticleTextureAnimWidget::setCurrentTextureAnim(NL3D::CPSTexturedParticle
 	_EditedParticle = tp;
 	_MTP = mtp;
 	
-	_ui.texAnimCheckBox->blockSignals(true);
+	disconnect(_ui.texAnimCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledTexAnim(bool)));
 	
 	bool isAnimTex = _EditedParticle->getTextureGroup() ? true : false;
 	_ui.texAnimCheckBox->setChecked(isAnimTex);
@@ -75,13 +75,16 @@ void CParticleTextureAnimWidget::setCurrentTextureAnim(NL3D::CPSTexturedParticle
 	else
 		_ui.multitexturingGroupBox->hide();
 		
-	_ui.texAnimCheckBox->blockSignals(false);
+	connect(_ui.texAnimCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledTexAnim(bool)));
 }
 
 void CParticleTextureAnimWidget::setEnabledTexAnim(bool state)
 {
   	if (state)
 	{
+		if (_MTP)
+			_ui.multitexturingCheckBox->setChecked(false);
+
 		// When you try to load a dummy texture, remove alternative paths, an assertion is thrown otherwise
 		NLMISC::CPath::removeAllAlternativeSearchPath();
 		
@@ -144,7 +147,6 @@ void CParticleTextureAnimWidget::updateTexAnimState(bool state)
 		_ui.texWidget->updateUi();
 	}
 	_ui.texWidget->setVisible(!state);
-	_ui.textureGroupedPushButton->setVisible(state);
 	_ui.texIndexWidget->setVisible(state);
 }
 

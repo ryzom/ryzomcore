@@ -167,7 +167,7 @@ void CParticleControlDialog::updateCount()
 	_ui.numWantedFacesLabel->setText(tr("Num wanted faces: %1").arg(numWantedFaces));
 	
 	// display system date
-	_ui.systemTimesLabel->setText(tr("System time: %1").arg(ps->getSystemDate()));
+	_ui.systemTimesLabel->setText(tr("System time: %1").arg(ps->getSystemDate(),0,'f',2));
 
 	Q_EMIT changeCount();
 }

@@ -557,14 +557,7 @@
           <string/>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="0" column="0" colspan="2">
-           <widget class="QCheckBox" name="useHermitteCheckBox">
-            <property name="text">
-             <string>Use hermitte interpolation</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
+          <item row="0" column="0">
            <widget class="QCheckBox" name="constantLengthCheckBox">
             <property name="toolTip">
              <string>Non parametric anim only</string>
@@ -574,14 +567,21 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="useHermitteCheckBox">
+            <property name="text">
+             <string>Use hermitte interpolation</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
            <widget class="QLabel" name="label_15">
             <property name="text">
              <string>Trail coord. system:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="QComboBox" name="coordSystemComboBox">
             <item>
              <property name="text">
@@ -605,28 +605,28 @@
             </item>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="ribbonLengthLabel">
             <property name="text">
              <string>Length(m):</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="3" column="0" colspan="2">
            <widget class="NLQT::CEditRangeFloatWidget" name="ribbonLengthWidget" native="true">
             <property name="enabled">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="lodDegradationLabel">
             <property name="text">
              <string>LOD degradation:</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0" colspan="2">
+          <item row="5" column="0" colspan="2">
            <widget class="NLQT::CEditRangeFloatWidget" name="lodDegradationWidget" native="true"/>
           </item>
          </layout>
@@ -711,6 +711,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>NLQT::CParticleTextureWidget</class>
+   <extends>QWidget</extends>
+   <header>particle_texture_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>NLQT::CEditRangeUIntWidget</class>
    <extends>QWidget</extends>
    <header>edit_range_widget.h</header>
@@ -726,12 +732,6 @@
    <class>NLQT::CAttribFloatWidget</class>
    <extends>QGroupBox</extends>
    <header>attrib_widget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>NLQT::CParticleTextureWidget</class>
-   <extends>QWidget</extends>
-   <header>particle_texture_widget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

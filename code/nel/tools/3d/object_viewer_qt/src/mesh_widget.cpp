@@ -69,6 +69,8 @@ void CMeshWidget::setCurrentShape(CWorkspaceNode *ownerNode, NL3D::CPSShapeParti
 		NL3D::CPSConstraintMesh *cm = NLMISC::safe_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 		if (cm->getNumShapes() > 1)
 			_ui.morphCheckBox->setChecked(true);
+		else 
+			_ui.morphCheckBox->setChecked(false);
 
 		updateForMorph();
 	}
@@ -142,7 +144,6 @@ void CMeshWidget::updateForMorph()
 		_ui.browsePushButton->setEnabled(!enable);  
 		_ui.meshLineEdit->setEnabled(!enable);
 		_ui.label->setEnabled(!enable);
-		_ui.editPushButton->setEnabled(enable);
 		if (!enable)
 			_ui.meshLineEdit->setText(cm->getShape().c_str());
 		else

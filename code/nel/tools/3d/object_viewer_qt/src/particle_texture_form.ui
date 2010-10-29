@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>191</width>
-    <height>162</height>
+    <height>176</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,8 @@
     <widget class="QScrollArea" name="scrollArea">
      <property name="minimumSize">
       <size>
-       <width>100</width>
-       <height>100</height>
+       <width>105</width>
+       <height>105</height>
       </size>
      </property>
      <property name="maximumSize">
@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>94</width>
-        <height>94</height>
+        <width>103</width>
+        <height>103</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">

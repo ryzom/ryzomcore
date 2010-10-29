@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>195</width>
-    <height>114</height>
+    <height>118</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,5 +83,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>morphCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>editPushButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>60</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>135</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

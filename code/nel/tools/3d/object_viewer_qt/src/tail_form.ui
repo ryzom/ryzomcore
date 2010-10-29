@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>243</width>
-    <height>107</height>
+    <width>206</width>
+    <height>90</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,23 +15,6 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QCheckBox" name="tailFadingCheckBox">
-     <property name="text">
-      <string>Tail fading</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QCheckBox" name="tailPersistAfterDeathCheckBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Tail persist after death</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
     <widget class="QComboBox" name="ribbonOrientationComboBox">
      <property name="toolTip">
       <string>Ribbon orientation</string>
@@ -53,7 +36,7 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="2" rowspan="2">
+   <item row="0" column="1" rowspan="3">
     <widget class="NLQT::CGraphicsInfoWidget" name="pathWidget" native="true">
      <property name="minimumSize">
       <size>
@@ -69,7 +52,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="1" column="0">
     <widget class="QComboBox" name="tailShapeComboBox">
      <property name="toolTip">
       <string>Tail shape</string>
@@ -114,6 +97,13 @@
        <string>Simple brace</string>
       </property>
      </item>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="tailFadingCheckBox">
+     <property name="text">
+      <string>Tail fading</string>
+     </property>
     </widget>
    </item>
   </layout>
