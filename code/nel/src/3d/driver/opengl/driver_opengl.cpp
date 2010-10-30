@@ -365,7 +365,7 @@ bool CDriverGL::setupDisplay()
 	registerWGlExtensions(_Extensions, _hDC);
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
-	registerGLXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
+	registerGlXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
