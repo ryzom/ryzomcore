@@ -733,9 +733,7 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	CSystemUtils::setRootKey("Software\\Nevrax\\Ryzom");
-
-	string l = CSystemUtils::getRegKey("Login");
+	string l = ClientCfg.LastLogin;
 
 	if(!l.empty())
 	{
@@ -1106,7 +1104,10 @@ void onlogin(bool vanishScreen = true)
 	removeSpace(LoginPassword);
 
 	if(!LoginLogin.empty())
-		CSystemUtils::setRegKey("Login", LoginLogin);
+	{
+		ClientCfg.LastLogin = LoginLogin;
+		ClientCfg.writeString("LastLogin", ClientCfg.LastLogin, true);
+	}
 
 	if(vanishScreen)
 		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);

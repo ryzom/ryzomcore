@@ -622,6 +622,8 @@ struct CClientConfig
 	bool			PreCacheShapes;
 	bool			ResetShapeBankOnRetCharSelect;
 
+	std::string		LastLogin;
+
 	uint32			SimulatePacketLossRatio;
 
 	// Parameters for colors of messages in system info
@@ -810,12 +812,12 @@ public:
 	void release ();
 
 	bool readBool (const std::string &varName);
-	void writeBool (const std::string &varName, bool val);
+	void writeBool (const std::string &varName, bool val, bool bForce = false);
 	sint32 readInt (const std::string &varName);
-	void writeInt (const std::string &varName, sint32 val);
+	void writeInt (const std::string &varName, sint32 val, bool bForce = false);
 	double readDouble (const std::string &varName);
-	void writeDouble (const std::string &varName, double val);
-	void writeString (const std::string &varName, const std::string &bVal);
+	void writeDouble (const std::string &varName, double val, bool bForce = false);
+	void writeString (const std::string &varName, const std::string &bVal, bool bForce = false);
 
 	// return 0 / false if not succeed
 	bool readBoolNoWarning (const std::string &varName);
