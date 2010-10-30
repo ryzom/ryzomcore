@@ -1428,7 +1428,7 @@ static bool	setupGLXEXTSwapControl(const char	*glext)
 	H_AUTO_OGL(setupGLXEXTSwapControl);
 	CHECK_EXT("GLX_EXT_swap_control");
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	CHECK_ADDRESS(PFNGLXSWAPINTERVALEXTPROC, glXSwapIntervalEXT);
 #endif
 
@@ -1441,7 +1441,7 @@ static bool	setupGLXSGISwapControl(const char	*glext)
 	H_AUTO_OGL(setupGLXSGISwapControl);
 	CHECK_EXT("GLX_SGI_swap_control");
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	CHECK_ADDRESS(PFNGLXSWAPINTERVALSGIPROC, glXSwapIntervalSGI);
 #endif
 
@@ -1454,7 +1454,7 @@ static bool	setupGLXMESASwapControl(const char	*glext)
 	H_AUTO_OGL(setupGLXMESASwapControl);
 	CHECK_EXT("GLX_MESA_swap_control");
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	CHECK_ADDRESS(PFNGLXSWAPINTERVALMESAPROC, glXSwapIntervalMESA);
 	CHECK_ADDRESS(PFNGLXGETSWAPINTERVALMESAPROC, glXGetSwapIntervalMESA);
 #endif
