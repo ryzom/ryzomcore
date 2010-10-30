@@ -19,6 +19,7 @@
 
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/string_common.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN

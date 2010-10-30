@@ -16,7 +16,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../driver_opengl.h"
+
 #import "cocoa_opengl_view.h"
+
+#include <stdio.h>
+
+namespace NL3D {
+	void viewDidResize(NSView* view, CDriverGL* driver) 
+	{
+		NSRect rect = [[view superview] frame];
+		driver->_WindowWidth = rect.size.width;
+		driver->_WindowHeight = rect.size.height;
+	}
+}
+
 
 @implementation CocoaOpenGLView
 
@@ -24,7 +38,8 @@
 {
 	if((self = [super initWithFrame:frame])) 
 	{
-		characterStorage = [[NSMutableAttributedString alloc] initWithString:@""];
+		_characterStorage = [[NSMutableAttributedString alloc] initWithString:@""];
+		_driver           = nil;
 		return self;
 	}
 	return nil;
@@ -32,7 +47,7 @@
 
 -(void)dealloc
 {
-	[characterStorage release];
+	[_characterStorage release];
 	[super dealloc];
 }
 
@@ -43,17 +58,32 @@
 #endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
 }
 
+-(void)setDriver:(NL3D::CDriverGL*)driver
+{
+	_driver = driver;
+}
+
+-(void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize 
+{
+	[super resizeWithOldSuperviewSize:oldBoundsSize];
+
+	if(!_driver)
+		return;
+
+	NL3D::viewDidResize(self, _driver);
+}
+
 /******************************************************************************/
 /* NSTextInputClient Protocol */
 
 -(BOOL)hasMarkedText 
 {
-	return (markedRange.location == NSNotFound ? NO : YES);
+	return (_markedRange.location == NSNotFound ? NO : YES);
 }
 
 -(NSRange)markedRange 
 {
-	return markedRange;
+	return _markedRange;
 }
 
 -(NSRange)selectedRange 
@@ -66,24 +96,24 @@
 	replacementRange:(NSRange)replacementRange
 {
 	if(replacementRange.location == NSNotFound)
-		replacementRange = markedRange;
+		replacementRange = _markedRange;
 
 	if([aString length] == 0) 
 	{
-		[characterStorage deleteCharactersInRange:replacementRange];
+		[_characterStorage deleteCharactersInRange:replacementRange];
 		[self unmarkText];
 	} 
 	else 
 	{
-		markedRange = NSMakeRange(replacementRange.location, [aString length]);
-		[characterStorage replaceCharactersInRange:replacementRange 
+		_markedRange = NSMakeRange(replacementRange.location, [aString length]);
+		[_characterStorage replaceCharactersInRange:replacementRange 
 			withString:aString];
 	}
 }
 
 -(void)unmarkText
 {
-	markedRange = NSMakeRange(NSNotFound, 0);
+	_markedRange = NSMakeRange(NSNotFound, 0);
 	[[self inputContext] discardMarkedText];
 }
 
@@ -96,16 +126,16 @@
 -(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange 
 	actualRange:(NSRangePointer)actualRange
 {
-	return [characterStorage attributedSubstringFromRange:aRange];
+	return [_characterStorage attributedSubstringFromRange:aRange];
 }
 
 -(void)insertText:(id)aString 
 	replacementRange:(NSRange)replacementRange
 {
 	if(replacementRange.location == NSNotFound)
-		replacementRange = markedRange;
+		replacementRange = _markedRange;
 
-	[characterStorage replaceCharactersInRange:replacementRange 
+	[_characterStorage replaceCharactersInRange:replacementRange 
 		withString:aString];
 }
 

@@ -25,6 +25,7 @@
 #ifdef NL_OS_WINDOWS
 # include <windowsx.h>
 #elif defined(NL_OS_MAC)
+#	import "mac/cocoa_window_delegate.h"
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
@@ -168,14 +169,14 @@ bool GlWndProc(CDriverGL *driver, NSEvent* e)
 {
 	H_AUTO_OGL(GlWndProc)
 
+	// NSLog(@"NSEvent in GlWndProc %@", e);
+
 	if(!driver)
 		return false;
-	
-	// NSLog(@"NSEvent in GlWndProc %@", e);
 
 	switch([e type])
 	{
-		/* TODO handle window move, resize, activate, close, etc. */
+		/* TODO handle window activate, close, etc. */
 		default:
 			return driver->_EventEmitter.processMessage(e);
 	}
@@ -941,6 +942,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if(!_glView)
 		nlerror("cannot create view");
 
+	// tell the view about the driver so the view is able to update "window" size
+	[_glView setDriver:this];
+
 	// make the view automatically fit the super view
 	[_glView setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
 
@@ -1401,6 +1405,9 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		nlerror("cannot create cocoa window");
 		return false;
 	}
+	
+	// set the delegate which will handle window move events
+	[cocoa_window setDelegate:[[CocoaWindowDelegate alloc] initWithDriver:this]];
 
 	// set the window to non transparent
 	[cocoa_window setOpaque:YES];
@@ -1502,8 +1509,9 @@ bool CDriverGL::destroyWindow()
 
 	if(_DestroyWindow)
 	{
-		[containerView() release];
 		[[containerView() window] release];
+		[containerView() release];
+		[_glView release];
 	}
 	
 	_ctx = nil;
@@ -2134,9 +2142,6 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 
 #elif defined(NL_OS_MAC)
-
-	nldebug("setting window pos to %d %d", x, y);
-
 	// get the rect (position, size) of the screen with menu bar
 	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
@@ -2416,38 +2421,6 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
-#ifdef NL_OS_MAC
-
-	// TODO set them in windowproc, so no special impl is needed here 
-	
-	// A cocoa fullscreen view stays at the native resolution of the display.
-	// When changing the rendering resolution, the size of the back buffer gets
-	// changed, but the view still stays at full resolution. So the scaling of
-	// the image from the rendered resolution to the view's resolution is done
-	// by cocoa automatically while flushing buffers.
-	// That's why, in fullscreen mode, return the resolution of the back buffer,
-	// not the one from the window.
-
-	// in fullscreen mode
-	if([containerView() isInFullScreenMode])
-	{
-		// use the size stored in setWindowSize()
-		width = _backBufferWidth;
-		height = _backBufferHeight;
-	}
-
-	// in windowed mode
-	else
-	{
-		// use the size of the view
-		NSRect rect = [containerView() frame];
-		width = rect.size.width;
-		height = rect.size.height;
-	}
-
-#else // NL_OS_MAC
-
-	// Off-screen rendering ?
 	if (_OffScreen)
 	{
 #ifdef NL_OS_WINDOWS
@@ -2460,11 +2433,17 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	}
 	else
 	{
+#ifdef NL_OS_MAC
+		if([containerView() isInFullScreenMode])
+		{
+			width = _backBufferWidth;
+			height = _backBufferHeight;
+			return;
+		}
+#endif
 		width = _WindowWidth;
 		height = _WindowHeight;
 	}
-
-#endif // NL_OS_MAC
 }
 
 void CDriverGL::setWindowSize(uint32 width, uint32 height)
@@ -2497,14 +2476,14 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_MAC)
 
-	// for fullscreen mode, adjust the back buffer size to the desired resolution
+	// for fullscreen mode, adjust the back buffer size to desired resolution
 	if([containerView() isInFullScreenMode])
 	{
 		// disable and re-enable fullscreen
 		// fixes #1062 (http://dev.ryzom.com/issues/1062)
 		setWindowStyle(EWSWindowed);
 		setWindowStyle(EWSFullscreen);
-		
+
 		// set the back buffer manually to match the desired rendering resolution
 		GLint dim[2]   = { width, height };
 		CGLError error = CGLSetParameter(
@@ -2515,8 +2494,8 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)",
 				CGLErrorString(error));
 
-		_backBufferWidth = width;
 		_backBufferHeight = height;
+		_backBufferWidth  = width;
 	}
 	else
 	{
@@ -2568,23 +2547,6 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 {
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
-#ifdef NL_OS_MAC
-	// TODO set them in window proc so no special impl is needed here
-
-	// get the rect (position, size) of the screen with menu bar
-	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
-
-	// get the rect (position, size) of the window
-	NSRect windowRect = [[containerView() window] frame];
-
-	// simply return x
-	x = windowRect.origin.x;
-
-	// map y from cocoa to NeL coordinates before returning
-	y = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
-
-#else // NL_OS_MAC
-
 	// Off-screen rendering ?
 	if (_OffScreen)
 	{
@@ -2598,8 +2560,6 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 			y = _WindowY;
 		}
 	}
-
-#endif // NL_OS_MAC
 }
 
 // --------------------------------------------------

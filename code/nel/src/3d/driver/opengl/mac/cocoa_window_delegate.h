@@ -20,20 +20,16 @@
 
 namespace NL3D {
 	class CDriverGL;
-	void viewDidResize(NSView*, CDriverGL*);
+	void windowDidMove(NSWindow*, NL3D::CDriverGL*);
 }
 
-@interface CocoaOpenGLView : NSOpenGLView<NSTextInputClient>
+
+@interface CocoaWindowDelegate : NSObject<NSWindowDelegate>
 {
-	NSMutableAttributedString* _characterStorage;
-	NSRange _markedRange;
 	NL3D::CDriverGL* _driver;
 }
 
--(id)initWithFrame:(NSRect)frame;
--(void)dealloc;
--(void)keyDown:(NSEvent*)event;
--(void)setDriver:(NL3D::CDriverGL*)driver;
--(void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize;
+- (id)initWithDriver:(NL3D::CDriverGL*)driver;
+- (void)windowDidMove:(NSNotification*)notification;
 
 @end

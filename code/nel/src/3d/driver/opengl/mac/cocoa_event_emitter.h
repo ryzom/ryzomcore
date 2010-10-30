@@ -52,7 +52,9 @@ public:
 	virtual void emulateMouseRawMode(bool enable);
 
 	virtual bool copyTextToClipboard(const ucstring &text);
-	virtual bool pasteTextFromClipboard(ucstring &text);};
+	virtual bool pasteTextFromClipboard(ucstring &text);
+};
+
 }
 
 #endif

@@ -149,11 +149,13 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 
 bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 {
+#warning "OpenGL Driver: Missing Mac Implementation for pasteTextFromClipboard"
 	return false;
 }
 
 bool CCocoaEventEmitter::copyTextToClipboard(const ucstring &text)
 {
+#warning "OpenGL Driver: Missing Mac Implementation for copyTextToClipboard"
 	return false;
 }
 
@@ -406,7 +408,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	return true;
 }
 
-typedef bool (*cocoaProc)(NL3D::IDriver*, void* e);
+typedef bool (*cocoaProc)(NL3D::IDriver*, NSEvent* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
