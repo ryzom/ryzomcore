@@ -180,8 +180,6 @@ CDriverGL::CDriverGL()
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
-	_NeedToRestaureGammaRamp = false;
-	_Interval = 1;
 
 #elif defined(NL_OS_MAC)
 
@@ -215,6 +213,9 @@ CDriverGL::CDriverGL()
 #	endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+	_NeedToRestaureGammaRamp = false;
+	_Interval = 1;
 
 	_win = EmptyWindow;
 	_DestroyWindow = false;
@@ -313,7 +314,6 @@ CDriverGL::CDriverGL()
 	_VBHardProfiling= false;
 	_CurVBHardLockCount= 0;
 	_NumVBHardProfileFrame= 0;
-	_Interval = 1;
 
 	_TexEnvReplace.setDefault();
 	_TexEnvReplace.Env.OpAlpha = CMaterial::Previous;
@@ -355,14 +355,17 @@ bool CDriverGL::setupDisplay()
 	// Driver caps.
 	//=============
 	// Retrieve the extensions for the current context.
-	NL3D::registerGlExtensions (_Extensions);
+	registerGlExtensions (_Extensions);
 	vector<string> lines;
 	explode(_Extensions.toString(), string("\n"), lines);
 	for(uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
 #ifdef NL_OS_WINDOWS
-	NL3D::registerWGlExtensions(_Extensions, _hDC);
+	registerWGlExtensions(_Extensions, _hDC);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	registerGLXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
@@ -616,10 +619,8 @@ bool CDriverGL::setupDisplay()
 			}
 	}
 
-#ifdef NL_OS_WINDOWS
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
-#endif
 
 	return true;
 }
@@ -2036,13 +2037,40 @@ void CDriverGL::flush()
 void	CDriverGL::setSwapVBLInterval(uint interval)
 {
 	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
-#ifdef NL_OS_WINDOWS
+
+	if (!_Initialized)
+		return;
+
 	_Interval = interval;
-	if(_Extensions.WGLEXTSwapControl && _Initialized)
+
+#ifdef NL_OS_WINDOWS
+	if(_Extensions.WGLEXTSwapControl)
 	{
 		nwglSwapIntervalEXT(_Interval);
 	}
-#endif
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+    if (_win && _Extensions.GLXEXTSwapControl)
+	{
+		if (nglXSwapIntervalEXT(_dpy, _win, interval))
+		{
+			nlwarning("Could not set swap interval");
+        }
+    }
+	else if (_Extensions.GLXSGISwapControl)
+	{
+		if (nglXSwapIntervalSGI(interval))
+		{
+			nlwarning("Could not set swap interval");
+        }
+    }
+	else if (_Extensions.GLXMESASwapControl)
+	{
+		if (nglXSwapIntervalMESA(interval))
+		{
+			nlwarning("Could not set swap interval");
+        }
+    }
 }
 
 // ***************************************************************************
@@ -2059,6 +2087,8 @@ uint	CDriverGL::getSwapVBLInterval()
 #else
 	return 1;
 #endif
+
+	return _Interval;
 }
 
 // ***************************************************************************
