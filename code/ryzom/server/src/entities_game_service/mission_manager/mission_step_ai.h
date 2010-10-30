@@ -56,7 +56,7 @@ class CMissionStepEscort : public IMissionStepTemplate
 
 class CMissionStepAIMsg : public IMissionStepTemplate
 {
-	std::string Msg;
+	std::string _Msg;
 
 	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
 

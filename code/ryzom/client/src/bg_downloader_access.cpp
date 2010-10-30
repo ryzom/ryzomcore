@@ -868,6 +868,7 @@ CBGDownloaderAccess::~CBGDownloaderAccess()
 bool CBGDownloaderAccess::getPatchCompletionFlag(bool clearFlag)
 {
 	// TODO for Linux
+	return false;
 }
 
 //=====================================================
@@ -880,6 +881,7 @@ void CBGDownloaderAccess::startTask(const BGDownloader::CTaskDesc &taskDesc, con
 bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const
 {
 	// TODO for Linux
+	return false;
 }
 
 //=====================================================

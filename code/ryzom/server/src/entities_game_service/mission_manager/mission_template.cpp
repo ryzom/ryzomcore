@@ -421,7 +421,7 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 			else if ( script[0] == "mono" )
 			{
 				if ( script.size() > 1)
-					MonoTimer = (NLMISC::TGameCycle)atoi(script[1].c_str());
+					NLMISC::fromString(script[1], MonoTimer);
 				else
 					MonoTimer = MonoMissionTimout;
 			}
@@ -515,8 +515,8 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 							Prerequisits.EncycloReqTaskDone = true;
 						else
 							Prerequisits.EncycloReqTaskDone = false;
-						Prerequisits.EncycloReqAlbum = atoi(vars[0].c_str());
-						Prerequisits.EncycloReqThema = atoi(vars[1].c_str());
+						NLMISC::fromString(vars[0], Prerequisits.EncycloReqAlbum);
+						NLMISC::fromString(vars[1], Prerequisits.EncycloReqThema);
 					}
 				}
 			}
@@ -1555,15 +1555,18 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 						logOnFail = false;
 					}
 				}
-
-				uint k = 0;
-				for ( ; k < team->getMissions().size(); k++ )
+				else
 				{
-					if  ( team->getMissions()[k]->getTemplateId() == templ->Alias )
+
+					uint k = 0;
+					for ( ; k < team->getMissions().size(); k++ )
+					{
+						if  ( team->getMissions()[k]->getTemplateId() == templ->Alias )
+							break;
+					}
+					if (k != team->getMissions().size())
 						break;
 				}
-				if (k != team->getMissions().size())
-					break;
 			}
 		}
 		if ( j == Prerequisits.RunningMissions[i].Missions.size() )
@@ -2428,9 +2431,9 @@ bool CMissionTemplate::addSkillToList( uint32 line, const std::vector< std::stri
 		skill.Min = 1;
 		skill.Max = 0x7FFFFFFF;
 		if ( args.size() > 1 )
-			skill.Min = atoi( args[1].c_str() );
+			NLMISC::fromString(args[1], skill.Min);
 		if ( args.size() == 3 )
-			skill.Max = atoi( args[2].c_str() );
+			NLMISC::fromString(args[2], skill.Max);
 		if ( args.size() >= 4 )
 		{
 			MISLOGSYNTAXERROR( "<skill_name> [<min_level> [<max_level>]] *[;<skill_name> [<min_level> [<max_level>]]  ]");
@@ -2513,7 +2516,7 @@ bool CMissionTemplate::parseFamePrereq(uint32 line, const std::vector< std::stri
 			return false;
 		}
 		Prerequisits.FameId = CStringMapper::map( vars[0] );
-		Prerequisits.FameMin = atoi( vars[1].c_str() );
+		NLMISC::fromString(vars[1], Prerequisits.FameMin);
 		return true;
 	}
 }// CMissionTemplate parseFamePrereq
@@ -2547,7 +2550,7 @@ bool CMissionTemplate::parseInt(uint32 line, const std::vector< std::string > & 
 	}
 	else
 	{
-		ret = atoi( script[1].c_str() );
+		NLMISC::fromString(script[1], ret);
 		return true;
 	}
 }// CMissionTemplate parseInt

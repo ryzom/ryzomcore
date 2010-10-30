@@ -67,7 +67,7 @@ bool CMissionStepQueueStart::buildStep( uint32 line, const vector< string > & sc
 			pos = QueueName.find_first_of(" ");
 		}
 		
-		Timer = (uint32)atoi(script[2].c_str());
+		NLMISC::fromString(script[2], Timer);
 		
 		return true;
 	}

@@ -1954,7 +1954,8 @@ NLMISC_COMMAND(setFameMemory, "set a value in the fame history, reset the fame i
 		return false;
 	}
 
-	sint32 fame = atoi(args[2].c_str());
+	sint32 fame;
+	NLMISC::fromString(args[2], fame);
 
 	CFameManager &fm = CFameManager::getInstance();
 
@@ -2088,7 +2089,8 @@ NLMISC_COMMAND (adjustCharacterFame, "For a character, adjust a specific clan by
 	}
 
 	// Third argument is the value
-	sint32 fameAdjustment = atoi(args[2].c_str());
+	sint32 fameAdjustment;
+	NLMISC::fromString(args[2], fameAdjustment);
 
 	CFameInterface::getInstance().addFameIndexed(id, factionIndex, fameAdjustment);
 	log.displayNL("Character's new fame value: %d",CFameInterface::getInstance().getFameIndexed(id,factionIndex));
@@ -2203,7 +2205,8 @@ NLMISC_COMMAND (adjustGuildFame, "For a guild, adjust a specific clan by indicat
 	}
 
 	// Third argument is the value
-	sint32 fameAdjustment = atoi(args[2].c_str());
+	sint32 fameAdjustment;
+	NLMISC::fromString(args[2], fameAdjustment);
 
 	CFameInterface::getInstance().addFameIndexed(id, PVP_CLAN::getFactionIndex(theClan), fameAdjustment);
 	log.displayNL("Guild's new fame value: %d",CFameInterface::getInstance().getFameIndexed(id,PVP_CLAN::getFactionIndex(theClan)));

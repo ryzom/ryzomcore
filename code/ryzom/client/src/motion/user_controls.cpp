@@ -247,6 +247,9 @@ void CUserControls::update()
 		case ThirdMode:
 			thirdMode();
 			break;
+
+		default:
+			break;
 		}
 
 		_LastFrameForward  = Actions.valide("forward") && !_NeedReleaseForward;
@@ -1094,6 +1097,9 @@ void CUserControls::mode(const TMoveMode mode)
 	case ThirdMode:
 		thirdModeStop();
 		break;
+
+	default:
+		break;
 	}
 
 	// Backup the last Mode.
@@ -1126,6 +1132,9 @@ void CUserControls::mode(const TMoveMode mode)
 	// Third Person View Mode
 	case ThirdMode:
 		thirdModeStart();
+		break;
+
+	default:
 		break;
 	}
 }// mode //

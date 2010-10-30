@@ -881,7 +881,7 @@ void CInterfaceChatDisplayer::clearChannel(CChatGroup::TGroupType mode, uint32 d
 	else if (mode == CChatGroup::dyn_chat)
 	{
 		// if correct dbIndex, clear
-		if(dynChatDbIndex>=0 && dynChatDbIndex<CChatGroup::MaxDynChanPerPlayer)
+		if(dynChatDbIndex<CChatGroup::MaxDynChanPerPlayer)
 			PeopleInterraction.ChatInput.DynamicChat[dynChatDbIndex].clearMessages();
 		else
 			nlwarning("Dynamic chat %d not found for clearing", dynChatDbIndex);
@@ -925,7 +925,7 @@ void impulseDynString(NLMISC::CBitMemStream &impulse)
 
 void inpulseDynStringInChatGroup(NLMISC::CBitMemStream &impulse)
 {
-	CChatGroup::TGroupType type;
+	CChatGroup::TGroupType type = CChatGroup::say;
 	impulse.serialEnum(type);
 	ChatMngr.processChatStringWithNoSender(impulse, type, InterfaceChatDisplayer);
 }
@@ -1566,6 +1566,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 			case R2::TPContext_Mainland:	 tpIcon = "cancel_tp_main_land.tga";		break;
 			case R2::TPContext_Edit:		 tpIcon = "cancel_tp_edit.tga";			break;
 			case R2::TPContext_IslandOwner:  tpIcon = "cancel_tp_island_owner.tga"; break;
+			default: break;
 		}
 		ProgressBar.setTPMessages(tpReason, tpCancelText, tpIcon);
 	}
@@ -1619,6 +1620,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 			break;
 			case R2::TPContext_IslandOwner:
 				CInterfaceManager::getInstance()->runActionHandler("r2_stop_live", NULL);
+			break;
+			default:
 			break;
 		}
 	}

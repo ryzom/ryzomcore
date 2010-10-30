@@ -1102,7 +1102,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 		return;
 
 	// check if victim and final blower are in PvP Faction (by tag or by a pvp versus zone)
-	if(!CPVPManager2::getInstance()->factionWarOccurs(victimFaction, finalBlowerFaction))
+	/* if(!CPVPManager2::getInstance()->factionWarOccurs(victimFaction, finalBlowerFaction))
 	{
 		CPVPVersusZone * zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(victimChar->getPVPInterface()).getPVPSession());
 		if( zone == 0 )
@@ -1110,7 +1110,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 		PVP_RELATION::TPVPRelation pvpRelation = zone->getPVPRelation(victimChar, const_cast<CCharacter*>(finalBlower));
 		if( pvpRelation != PVP_RELATION::Ennemy )
 			return;
-	}
+	}*/
 
 	// a dead player loses his damage points
 	clearDamages(victimChar, true);
@@ -1684,7 +1684,7 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 	else if( playerChar->getPVPFlag() )
 	{ 
 		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = playerChar->getAllegiance();
-		if( CPVPManager2::getInstance()->isFactionInWar( allegiance.first ) )
+		if( (allegiance.first != PVP_CLAN::Neutral) && (allegiance.first != PVP_CLAN::None) )
 		{
 			if (faction)
 				*faction = allegiance.first;
@@ -1692,14 +1692,14 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 				*withFactionPoints = true;
 			return true;
 		}
-		if ( CPVPManager2::getInstance()->isFactionInWar( allegiance.second ) )
+		/*if ( allegiance.second != PVP_CLAN::Neutral)
 		{
 			if (faction)
 				*faction = allegiance.second;
 			if (withFactionPoints)
 				*withFactionPoints = true;
 			return true;
-		}
+		}*/
 	}
 	return false;
 }

@@ -38,6 +38,7 @@
 #include <exception>
 #include <utility>
 #include <deque>
+#include <limits>
 
 
 #ifdef NL_DEBUG

@@ -524,7 +524,7 @@ std::string CKeysHolder::getSignature(const std::string& md5, const std::string&
 bool CKeysHolder::verifyKey(const std::string& md5, const std::string& signature)
 {
 
-	std::string key = "";
+	std::string key;
 
 	if ( !signature.empty() )
 	{
@@ -2787,7 +2787,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 			TScenarioHeaderSerializer::TValueType::const_iterator first(values.begin()), last(values.end());
 			bool nevraxScenario = false;
 			bool trialAllowed = false;
-			std::string missionTag = "";
+			std::string missionTag;
 
 
 			for ( ; first != last; ++first)
@@ -3834,7 +3834,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			getAnimationModule()->scheduleStartSession(body);
 			bool trialAllowed = false;
 			bool nevraxScenario = false;
-			std::string missionTag = "";
+			std::string missionTag;
 
 			/*Informs EGS that the animation has started*/
 			if ( getLinkedSessionId(body.SessionId) == TSessionId(0) && session->getSessionType() == RSMGR::TSessionType::st_anim )

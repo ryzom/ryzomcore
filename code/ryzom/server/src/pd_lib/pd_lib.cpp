@@ -1108,7 +1108,8 @@ NLMISC_DYNVARIABLE(uint, EnqueuedPDMessages, "Tells number of messages enqueued 
 //	if (args.size() != 2)
 //		return false;
 //
-//	uint	databaseId = atoi(args[0].c_str());
+//	uint	databaseId;
+//	NLMISC::fromString(args[0], databaseId);
 //	string	filename = args[1];
 //
 //	CPDSLib*	lib = (databaseId < CPDSLib::_Libs.size() ? CPDSLib::_Libs[databaseId] : NULL);

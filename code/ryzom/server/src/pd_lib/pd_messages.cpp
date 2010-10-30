@@ -49,7 +49,8 @@ std::string	CDbMessage::buildLogString(const CDBDescriptionParser& description) 
 		if (logmsg[i] == '$')
 		{
 			++i;
-			uint	param = atoi(logmsg.c_str()+i);
+			uint	param;
+			NLMISC::fromString(logmsg.substr(i), param);
 			while (i<logmsg.size() && logmsg[i]>='0' && logmsg[i]<='9')
 				++i;
 

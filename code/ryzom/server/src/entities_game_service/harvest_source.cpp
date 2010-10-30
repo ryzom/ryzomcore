@@ -1191,10 +1191,6 @@ NLMISC_VARIABLE( sint32, ForageSourceDisplay, "Row index of source to verbose" )
 
 TDataSetRow TestSourceRow;
 
-
-#define astof(i) ((float)(atoi( args[i].c_str() )))
-
-
 void forageTestDoBegin()
 {
 	CHarvestSource templateSource, *testSource;
@@ -1323,21 +1319,25 @@ NLMISC_COMMAND( forageTestExtract, "Make a test extraction (floats in percent)",
 	float successFactor = 1.0f;
 	if ( n > 0 )
 	{
-		nbIterations = atoi( args[0].c_str() );
+		NLMISC::fromString(args[0], nbIterations);
 		if ( n > 1 )
 		{
-			reqPeriod = astof( 1 );
+			NLMISC::fromString(args[1], reqPeriod);
 			if ( n > 2)
 			{
-				reqA = astof( 2 );
+				NLMISC::fromString(args[2], reqA);
 				if ( n > 3 )
 				{
-					reqQ = astof( 3 );
-					if ( n > 34)
+					NLMISC::fromString(args[3], reqQ);
+					if ( n > 4)
 					{
-						absorption = astof( 4 ) / 100.0f;
+						NLMISC::fromString(args[4], absorption);
+						absorption /= 100.0f;
 						if ( n > 5 )
-							successFactor = astof( 5 ) / 100.0f;
+						{
+							NLMISC::fromString(args[5], successFactor);
+							successFactor /= 100.0f;
+						}
 					}
 				}
 			}

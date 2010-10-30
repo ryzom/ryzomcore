@@ -724,9 +724,6 @@ void prelogInit()
 		setReportEmailFunction ((void*)sendEmail);
 		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
-		// create the data dir.
-		if (!CFile::isExists("data")) CFile::createDirectory("data");
-
 		// create the save dir.
 		if (!CFile::isExists("save")) CFile::createDirectory("save");
 

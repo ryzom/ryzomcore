@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CParticleTextureAnimWidget</class>
+ <widget class="QWidget" name="CParticleTextureAnimWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>306</width>
+    <height>186</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="texAnimCheckBox">
+     <property name="text">
+      <string>Enable texture animation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="multitexturingGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="multitexturingCheckBox">
+        <property name="text">
+         <string>Multitexturing</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="editPushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Edit</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="NLQT::CAttribIntWidget" name="texIndexWidget" native="true"/>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="NLQT::CParticleTextureWidget" name="texWidget" native="true"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="textureGroupedPushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Texture grouped</string>
+     </property>
+     <property name="autoDefault">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CParticleTextureWidget</class>
+   <extends>QWidget</extends>
+   <header>particle_texture_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CAttribIntWidget</class>
+   <extends>QWidget</extends>
+   <header>attrib_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>multitexturingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>editPushButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>285</x>
+     <y>70</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>texAnimCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>multitexturingGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>77</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>86</x>
+     <y>72</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>texAnimCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>textureGroupedPushButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>174</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

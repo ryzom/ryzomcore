@@ -357,7 +357,8 @@ void COutpostManager::outpostFileCallback(const CFileDescription& fileDescriptio
 	aliasStr.resize( aliasStr.length() - 4 );
 	aliasStr = aliasStr.substr( 8);
 
-	TAIAlias alias = (TAIAlias) atoi( aliasStr.c_str() );
+	TAIAlias alias;
+	NLMISC::fromString(aliasStr, alias);
 	COutpost * outpost = getOutpostFromAlias( alias );
 	if ( !outpost )
 		OUTPOST_WRN("Invalid outpost file '%s' %s : not found in the primitive", fileDescription.FileName.c_str(), CPrimitivesParser::aliasToString(alias).c_str());
@@ -419,7 +420,8 @@ void COutpostManager::loadOutpostSaveFiles()
 //			aliasStr.resize( file.length() - 4 );
 //			aliasStr = aliasStr.substr( 8, file.length() - 8 );
 //
-//			TAIAlias alias = (TAIAlias) atoi( aliasStr.c_str() );
+//			TAIAlias alias;
+//			NLMISC::fromString(aliasStr, alias);
 //			COutpost * outpost = getOutpostFromAlias( alias );
 //			if ( !outpost )
 //				OUTPOST_WRN("Invalid outpost file '%s' ('%u') : not found in the primitive", file.c_str(), alias);

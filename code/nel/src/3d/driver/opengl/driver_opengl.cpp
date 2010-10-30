@@ -180,8 +180,6 @@ CDriverGL::CDriverGL()
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
-	_NeedToRestaureGammaRamp = false;
-	_Interval = 1;
 
 #elif defined(NL_OS_MAC)
 
@@ -192,7 +190,7 @@ CDriverGL::CDriverGL()
 
 	// autorelease pool for memory management
 	_autoreleasePool = [[NSAutoreleasePool alloc] init];
-	
+
 	// init the application object
 	[NSApplication sharedApplication];
 
@@ -201,7 +199,7 @@ CDriverGL::CDriverGL()
 
 	// finish the application launching
 	[NSApp finishLaunching];
-	
+
 #elif defined (NL_OS_UNIX)
 
 	_cursor = None;
@@ -214,6 +212,9 @@ CDriverGL::CDriverGL()
 #	endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+	_NeedToRestaureGammaRamp = false;
+	_Interval = 1;
 
 	_win = EmptyWindow;
 	_DestroyWindow = false;
@@ -312,7 +313,6 @@ CDriverGL::CDriverGL()
 	_VBHardProfiling= false;
 	_CurVBHardLockCount= 0;
 	_NumVBHardProfileFrame= 0;
-	_Interval = 1;
 
 	_TexEnvReplace.setDefault();
 	_TexEnvReplace.Env.OpAlpha = CMaterial::Previous;
@@ -354,14 +354,17 @@ bool CDriverGL::setupDisplay()
 	// Driver caps.
 	//=============
 	// Retrieve the extensions for the current context.
-	NL3D::registerGlExtensions (_Extensions);
+	registerGlExtensions (_Extensions);
 	vector<string> lines;
 	explode(_Extensions.toString(), string("\n"), lines);
 	for(uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
 #ifdef NL_OS_WINDOWS
-	NL3D::registerWGlExtensions(_Extensions, _hDC);
+	registerWGlExtensions(_Extensions, _hDC);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	registerGlXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
@@ -615,10 +618,8 @@ bool CDriverGL::setupDisplay()
 			}
 	}
 
-#ifdef NL_OS_WINDOWS
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
-#endif
 
 	return true;
 }
@@ -876,7 +877,7 @@ bool CDriverGL::swapBuffers()
 		[_autoreleasePool release];
 		_autoreleasePool = [[NSAutoreleasePool alloc] init];
 	}
-	
+
 	[_ctx flushBuffer];
 	[containerView() display];
 
@@ -1673,12 +1674,12 @@ ATTRIB bump0TexCoord  = fragment.texcoord[0];										\n\
 ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
 ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
 OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;                                                                     \n\
+TEMP   bmValue;																		\n\
 #read bump map 0																	\n\
 TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
 #bias result (include scaling)														\n\
 MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;                                             \n\
+ADD    bmValue, bmValue, bump1TexCoord;												\n\
 #read bump map 1																	\n\
 TEX    bmValue, bmValue, texture[1], 2D;											\n\
 #bias result (include scaling)														\n\
@@ -1701,14 +1702,14 @@ ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
 ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
 ATTRIB fogValue		  = fragment.fogcoord;											\n\
 OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;                                                                     \n\
+TEMP   bmValue;																		\n\
 TEMP   envMap;																		\n\
 TEMP   tmpFog;																		\n\
 #read bump map 0																	\n\
 TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
 #bias result (include scaling)														\n\
 MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;                                             \n\
+ADD    bmValue, bmValue, bump1TexCoord;												\n\
 #read bump map 1																	\n\
 TEX    bmValue, bmValue, texture[1], 2D;											\n\
 #bias result (include scaling)														\n\
@@ -1735,14 +1736,14 @@ ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
 ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
 ATTRIB diffuseTexCoord = fragment.texcoord[3];										\n\
 OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;                                                                     \n\
+TEMP   bmValue;																		\n\
 TEMP   diffuse;																		\n\
 TEMP   envMap;																		\n\
 #read bump map 0																	\n\
 TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
 #bias result (include scaling)														\n\
 MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;                                             \n\
+ADD    bmValue, bmValue, bump1TexCoord;												\n\
 #read bump map 1																	\n\
 TEX    bmValue, bmValue, texture[1], 2D;											\n\
 #bias result (include scaling)														\n\
@@ -1770,7 +1771,7 @@ ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
 ATTRIB diffuseTexCoord = fragment.texcoord[3];										\n\
 ATTRIB fogValue		   = fragment.fogcoord;											\n\
 OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;                                                                     \n\
+TEMP   bmValue;																		\n\
 TEMP   diffuse;																		\n\
 TEMP   envMap;																		\n\
 TEMP   tmpFog;																		\n\
@@ -1778,7 +1779,7 @@ TEMP   tmpFog;																		\n\
 TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
 #bias result (include scaling)														\n\
 MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;                                             \n\
+ADD    bmValue, bmValue, bump1TexCoord;												\n\
 #read bump map 1																	\n\
 TEX    bmValue, bmValue, texture[1], 2D;											\n\
 #bias result (include scaling)														\n\
@@ -2038,29 +2039,70 @@ void CDriverGL::flush()
 void	CDriverGL::setSwapVBLInterval(uint interval)
 {
 	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
+
+	if (!_Initialized)
+		return;
+
+	bool res = true;
+
 #ifdef NL_OS_WINDOWS
-	_Interval = interval;
-	if(_Extensions.WGLEXTSwapControl && _Initialized)
+	if(_Extensions.WGLEXTSwapControl)
 	{
-		nwglSwapIntervalEXT(_Interval);
+		res = nwglSwapIntervalEXT(_Interval) == TRUE;
+	}
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	if (_win && _Extensions.GLXEXTSwapControl)
+	{
+		res = nglXSwapIntervalEXT(_dpy, _win, interval) == 0;
+	}
+	else if (_Extensions.GLXSGISwapControl)
+	{
+		res = nglXSwapIntervalSGI(interval) == 0;
+	}
+	else if (_Extensions.GLXMESASwapControl)
+	{
+		res = nglXSwapIntervalMESA(interval) == 0;
 	}
 #endif
+
+	if (res)
+	{
+		_Interval = interval;
+	}
+	else
+	{
+		nlwarning("Could not set swap interval");
+	}
 }
 
 // ***************************************************************************
 uint	CDriverGL::getSwapVBLInterval()
 {
 	H_AUTO_OGL(CDriverGL_getSwapVBLInterval)
+
 #ifdef NL_OS_WINDOWS
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		return _Interval;
+		return nwglGetSwapIntervalEXT();
 	}
-	else
-		return 1;
-#else
-	return 1;
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	if (_win && _Extensions.GLXEXTSwapControl)
+	{
+		uint swap, maxSwap;
+		glXQueryDrawable(_dpy, _win, GLX_SWAP_INTERVAL_EXT, &swap);
+		glXQueryDrawable(_dpy, _win, GLX_MAX_SWAP_INTERVAL_EXT, &maxSwap);
+		nlwarning("The swap interval is %u and the max swap interval is %u", swap, maxSwap);
+		return swap;
+	}
+	else if (_Extensions.GLXMESASwapControl)
+	{
+		return nglXGetSwapIntervalMESA();
+	}
 #endif
+
+	return _Interval;
 }
 
 // ***************************************************************************
@@ -2419,10 +2461,10 @@ void CDriverGL::displayBench (class NLMISC::CLog *log)
 }
 
 #ifdef NL_DEBUG
-	void CDriverGL::dumpMappedBuffers()
-	{
-		_AGPVertexArrayRange->dumpMappedBuffers();
-	}
+void CDriverGL::dumpMappedBuffers()
+{
+	_AGPVertexArrayRange->dumpMappedBuffers();
+}
 #endif
 
 // ***************************************************************************

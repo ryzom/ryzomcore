@@ -395,7 +395,7 @@ void CFaberPhrase::apply()
 
 	uint32 nbMpNeedeInPlan = 0;
 	uint32 neededMp = (uint32)_RootFaberPlan->Faber->NeededMps.size();
-	for( uint mp = 0; mp < _RootFaberPlan->Faber->NeededMps.size(); ++mp )
+	for( uint mp = 0; mp < neededMp; ++mp )
 	{
 		//for each type of Mp needed
 		nbMpNeedeInPlan += _RootFaberPlan->Faber->NeededMps[ mp ].Quantity;
@@ -411,15 +411,15 @@ void CFaberPhrase::apply()
 
 	nbMp = (sint32)_MpsFormula.size();
 	
-	nbMpNeedeInPlan = 0;
+	uint32 nbMpForumulaNeedeInPlan = 0;
 	neededMp = (uint32)_RootFaberPlan->Faber->NeededMpsFormula.size();
-	for( uint mp = 0; mp < _RootFaberPlan->Faber->NeededMpsFormula.size(); ++mp )
+	for( uint mp = 0; mp < neededMp; ++mp )
 	{
 		//for each type of Mp needed
-		nbMpNeedeInPlan += _RootFaberPlan->Faber->NeededMpsFormula[ mp ].Quantity;
+		nbMpForumulaNeedeInPlan += _RootFaberPlan->Faber->NeededMpsFormula[ mp ].Quantity;
 	}
 	
-	if( nbMpNeedeInPlan != _MpsFormula.size() )
+	if( nbMpForumulaNeedeInPlan != _MpsFormula.size() )
 	{
 		nlwarning("<CFaberPhrase::apply> Craft plan %s need %d Raw Material Formula and client send %d Raw Material Formula", c->getCraftPlan().toString().c_str(), _RootFaberPlan->Faber->NeededMpsFormula.size(), _MpsFormula.size() );
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "RAW_MATERIAL_MISSING");
@@ -454,6 +454,105 @@ void CFaberPhrase::apply()
 		return;
 	}
 	
+	neededMp = _RootFaberPlan->Faber->NeededMps.size();
+    EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
+	uint32 usedMp=0;
+	vector< const CStaticItem * > usedMps = _Mps;
+
+	for( uint mp = 0; mp < neededMp; ++mp )
+	{
+		nlinfo("MP #%d\n", mp);
+		//for each type of Mp needed
+		for( uint k = 0; k < _RootFaberPlan->Faber->NeededMps[ mp ].Quantity; ++k )
+		{
+		   nlinfo(" usedmps : %d", usedMps.size());
+		   bool found_mp = false;
+		   for(uint u_mp = 0; u_mp < usedMps.size(); ++u_mp)
+		   {
+			   // for each Mp of one type (we have Quantity by type)
+			   uint32 NumMpParameters = (uint32)usedMps[u_mp]->Mp->MpFaberParameters.size();
+				
+			   // for each Faber parameters in Mp
+			   for( uint j = 0; j < NumMpParameters; ++j )
+			   {
+					// check if Mp Type match with Faber waiting Type
+					if( _RootFaberPlan->Faber->NeededMps[mp].MpType == usedMps[u_mp]->Mp->MpFaberParameters[j].MpFaberType )
+					{
+						found_mp = true;
+						usedMp++;
+						break;
+					}
+			   }
+
+			   if (found_mp)
+			   {
+
+				   // Bypass if : Plan is common
+					if ( civRestriction != EGSPD::CPeople::Common )
+					{
+						   switch (usedMps[u_mp]->Mp->Ecosystem)
+						   {
+							   // I can't found some thing to do this ugly translation.
+							   case ECOSYSTEM::desert:
+								   if (civRestriction != EGSPD::CPeople::Fyros)
+								   {
+			   							nlwarning( "<CFaberPhrase build> bad civilisation mp for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+										stop();
+										return;
+								   }
+								   break;
+							   case ECOSYSTEM::forest:
+								   if (civRestriction != EGSPD::CPeople::Matis)
+								   {
+			   							nlwarning( "<CFaberPhrase build> bad civilisation mp for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+										stop();
+										return;
+								   }
+								   break;
+							   case ECOSYSTEM::lacustre:
+								   if (civRestriction != EGSPD::CPeople::Tryker)
+								   {
+			   							nlwarning( "<CFaberPhrase build> bad civilisation mp for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+										stop();
+										return;
+								   }
+								   break;
+							   case ECOSYSTEM::jungle:
+								   if (civRestriction != EGSPD::CPeople::Zorai)
+								   {
+			   							nlwarning( "<CFaberPhrase build> bad civilisation mp for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+										stop();
+										return;
+								   }
+								   break;
+						   }
+					}
+				   usedMps.erase(usedMps.begin()+u_mp);
+				   break;
+			   }
+		   }
+
+		   if (!found_mp)
+		   {
+				nlinfo("NOT FOUND : wanted %d\n", _RootFaberPlan->Faber->NeededMps[ mp ].MpType);
+		   }
+		}
+	}
+	if (!usedMps.empty())
+	{
+		nlinfo("final usedmps : %d", usedMps.size());
+		nlwarning( "<CFaberPhrase build> could not build action for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+		stop();
+		return;
+	}
+
+	if (usedMp != nbMpNeedeInPlan)
+	{
+		nlwarning( "<CFaberPhrase build> could not build action for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
+		stop();
+		return;
+	}
+
 	// spend energies
 	SCharacteristicsAndScores &focus = c->getScores()._PhysicalScores[SCORES::focus];
 	if ( focus.Current != 0)
@@ -606,9 +705,10 @@ NLMISC_COMMAND(simuCraft, "Simulation de craft pour verifier les probabilités de
 	if (args.size() != 3)
 		return false;
 	
-	uint32 nbSimu = (uint32)atoi(args[0].c_str());
-	uint32 skillLevel = (uint32)atoi(args[1].c_str());
-	uint32 itemQuality = (uint32)atoi(args[2].c_str());
+	uint32 nbSimu, skillLevel, itemQuality;
+	NLMISC::fromString(args[0], nbSimu);
+	NLMISC::fromString(args[1], skillLevel);
+	NLMISC::fromString(args[2], itemQuality);
 
 	sint32 deltaLvl = skillLevel - itemQuality;
 

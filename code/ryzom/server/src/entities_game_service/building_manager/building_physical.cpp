@@ -75,7 +75,7 @@ bool IBuildingPhysical::build( const NLLIGO::IPrimitive* prim, CBuildingParseDat
 }
 
 //----------------------------------------------------------------------------
-bool IBuildingPhysical::addUser(CCharacter * user,uint16 roomIdx,uint16 ownerIdx, sint32 & cellId)
+bool IBuildingPhysical::addUser(CCharacter * user, uint16 roomIdx, uint16 ownerIdx, sint32 & cellId)
 {
 	/// simply get the cell matching the parameters
 	if ( roomIdx >= _Rooms.size() )
@@ -88,6 +88,18 @@ bool IBuildingPhysical::addUser(CCharacter * user,uint16 roomIdx,uint16 ownerIdx
 		nlwarning("<BUILDING>Invalid owner idx %u count is %u",ownerIdx,_Rooms[roomIdx].Cells.size());
 		return false;
 	}
+
+	CCharacter *owner;
+	if (ownerIdx < _Players.size())
+	{
+		owner = PlayerManager.getChar(_Players[ownerIdx] );
+	}
+	else
+	{
+		owner = user;
+	}
+
+
 	// if the room is not already instanciated, we have to do it
 	if ( _Rooms[roomIdx].Cells[ownerIdx] == 0 )
 	{
@@ -101,7 +113,7 @@ bool IBuildingPhysical::addUser(CCharacter * user,uint16 roomIdx,uint16 ownerIdx
 		// init the room
 		if( !roomInstance->create(this,roomIdx,ownerIdx, _Rooms[roomIdx].Cells[ownerIdx]) )
 			return false;
-		roomInstance->addUser(user);
+		roomInstance->addUser(user, owner);
 	}
 	else
 	{
@@ -111,7 +123,7 @@ bool IBuildingPhysical::addUser(CCharacter * user,uint16 roomIdx,uint16 ownerIdx
 			nlwarning("<BUILDING>%s invalid room cell %d.",user->getId().toString().c_str(),_Rooms[roomIdx].Cells[ownerIdx]);
 			return false;
 		}
-		roomInstance->addUser(user);
+		roomInstance->addUser(user, owner);
 	}
 
 	user->setBuildingExitZone( _DefaultExitSpawn );
@@ -517,7 +529,12 @@ bool CBuildingPhysicalPlayer::isUserAllowed(CCharacter * user, uint16 ownerId, u
 {
 	nlassert(user);
 	nlassert(ownerId < _Players.size() );
-	return ( user->getId() == _Players[ownerId] );
+
+	CCharacter * owner = PlayerManager.getChar( _Players[ownerId] );
+	if (owner)
+		return ( (user->getId() == _Players[ownerId]) || owner->playerHaveRoomAccess(user->getId()) );
+	else
+		return false;
 }
 
 //----------------------------------------------------------------------------

@@ -2755,7 +2755,6 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 	}
 	else if (event.getType() == CEventDescriptor::mouse && _MouseHandlingEnabled )
 	{
-
 		CEventDescriptorMouse &eventDesc = (CEventDescriptorMouse&)event;
 
 		// First thing to do : Capture handling
@@ -6504,7 +6503,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			}
 			else if (token_param == ucstring("race"))
 			{
-				CCharacterCL *pC = (CCharacterCL*)(pTokenSubjectEntity);
+				CCharacterCL *pC = dynamic_cast<CCharacterCL*>(pTokenSubjectEntity);
 				if (pC)
 				{
 					EGSPD::CPeople::TPeople race = pC->people();
@@ -6542,7 +6541,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 				GSGENDER::EGender gender = GSGENDER::neutral;
 				if (pTokenSubjectEntity->isUser() || pTokenSubjectEntity->isPlayer() || pTokenSubjectEntity->isNPC())
 				{
-					CCharacterCL *pC = (CCharacterCL*)(pTokenSubjectEntity);
+					CCharacterCL *pC = dynamic_cast<CCharacterCL*>(pTokenSubjectEntity);
 					if (pC)
 					{
 						gender = pC->getGender();

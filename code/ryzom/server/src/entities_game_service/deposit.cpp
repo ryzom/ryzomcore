@@ -126,7 +126,8 @@ void convertItemPartsNames( const string& name, const vector<string>& src, vecto
 			string::size_type p = src[i].find_last_of( '_' );
 			if ( p != string::npos )
 			{
-				uint itemPart = atoi( src[i].substr( p + 1 ).c_str() );
+				uint itemPart;
+				NLMISC::fromString(src[i].substr( p + 1 ), itemPart);
 				if ( find( dest.begin(), dest.end(), itemPart ) == dest.end() )
 					dest.push_back( itemPart );
 				else
@@ -323,17 +324,19 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 	if ( ! zone->getPropertyByName( "deposit_statquality_max", maxEnergyS ) )		return malformed( "deposit_statquality_max", name );
 	if ( ! zone->getPropertyByName( "deposit_min_quality_250", minQualityS ) )		return malformed( "deposit_min_quality_250", name );
 	if ( ! zone->getPropertyByName( "deposit_max_quality_250", maxQualityS ) )		return malformed( "deposit_max_quality_250", name );
-	_MinQuality = atoi( minQualityS.c_str() );
-	_MaxQuality = atoi( maxQualityS.c_str() );
+	NLMISC::fromString(minQualityS, _MinQuality);
+	NLMISC::fromString(maxQualityS, _MaxQuality);
 
 	// Read quantity constraints
 	string qttyLimitS, qttyRespawnTimeS;
 	if ( ! zone->getPropertyByName( "deposit_quantity_limit", qttyLimitS ) )		return malformed( "deposit_quantity_limit", name );
 	if ( ! zone->getPropertyByName( "deposit_quantity_respawn_time_ryzomdays", qttyRespawnTimeS ) ) return malformed( "deposit_quantity_respawn_time_ryzomdays", name );
-	sint qttyLimit = atoi( qttyLimitS.c_str() );
+	sint qttyLimit;
+	NLMISC::fromString(qttyLimitS, qttyLimit);
 	if ( qttyLimit > -1 )
 	{
-		sint qttyRespawnTime = atoi( qttyRespawnTimeS.c_str() );
+		sint qttyRespawnTime;
+		NLMISC::fromString(qttyRespawnTimeS, qttyRespawnTime);
 		if ( (qttyLimit == 0) || (qttyLimit > 0xFFFF) || (qttyRespawnTime < 1) || (qttyRespawnTime > 0xFFFF) )
 			nlwarning( "Invalid limit or respawn time too high in %s", name.c_str() );
 		else
@@ -416,10 +419,13 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 		if ( ! zone->getPropertyByName( "auto_spawn_extraction_time_s", asetS ) )	return malformed( "auto_spawn_sources", name );
 		if ( ! zone->getPropertyByName( "auto_spawn_min_source", amin ) )	return malformed( "auto_spawn_min_source", name );
 		_AutoSpawnSourcePt = new CAutoSpawnProperties;
-		_AutoSpawnSourcePt->SpawnPeriodGc = atoi( aspS.c_str() ) * 10;
-		_AutoSpawnSourcePt->LifeTimeGc = atoi( asltS.c_str() ) * 10;
-		_AutoSpawnSourcePt->ExtractionTimeGc = atoi( asetS.c_str() ) * 10;
-		_AutoSpawnSourcePt->MinimumSpawnedSources = atoi( amin.c_str() );
+		NLMISC::fromString(aspS, _AutoSpawnSourcePt->SpawnPeriodGc);
+		_AutoSpawnSourcePt->SpawnPeriodGc *= 10;
+		NLMISC::fromString(asltS, _AutoSpawnSourcePt->LifeTimeGc);
+		_AutoSpawnSourcePt->LifeTimeGc *= 10;
+		NLMISC::fromString(asetS, _AutoSpawnSourcePt->ExtractionTimeGc);
+		_AutoSpawnSourcePt->ExtractionTimeGc *= 10;
+		NLMISC::fromString(amin, _AutoSpawnSourcePt->MinimumSpawnedSources);
 		// security!
 		_AutoSpawnSourcePt->MinimumSpawnedSources = min(uint32(100), _AutoSpawnSourcePt->MinimumSpawnedSources);
 	}
@@ -431,7 +437,7 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 	// Read source FX index
 	string srcFXIndexS;
 	if ( ! zone->getPropertyByName( "source_fx", srcFXIndexS ) )			return malformed( "source_fx", name );
-	_SourceFXIndex = (uint16)atoi( srcFXIndexS.c_str() );
+	NLMISC::fromString(srcFXIndexS, _SourceFXIndex);
 
 	// Read other initial properties
 	string cpS, eS, ikaS, adpR;
@@ -447,8 +453,9 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 		nlwarning( "Invalid initial_kami_anger %.1f in %s", _KamiAnger, name.c_str() );
 
 	// Apply filters
-	uint32 minEnergy = atoi( minEnergyS.c_str() );
-	uint32 maxEnergy = atoi( maxEnergyS.c_str() );
+	uint32 minEnergy, maxEnergy;
+	NLMISC::fromString(minEnergyS, minEnergy);
+	NLMISC::fromString(maxEnergyS, maxEnergy);
 	if ( exactRMCodesS->empty() && rmFamilyFilterS->empty() && itemPartsFilterS->empty() )
 	{
 		nlwarning( "FG: Deposit %s: No RM, exactRms or item parts specified!", name.c_str() );
@@ -1558,7 +1565,7 @@ NLMISC_COMMAND( forageDisplayKamiAngerLevels, "Display the N deposits with the h
 {
 	uint nb = 10;
 	if ( args.size() > 0 )
-		nb = atoi( args[0].c_str() );
+		NLMISC::fromString(args[0], nb);
 
 	std::vector<CDeposit*> newDepositList = CZoneManager::getInstance().getDeposits();
 	std::sort( newDepositList.begin(), newDepositList.end(), TCompareDepositsByHighestKamiAnger() );

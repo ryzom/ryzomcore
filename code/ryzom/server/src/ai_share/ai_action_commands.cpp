@@ -44,7 +44,9 @@ NLMISC_COMMAND(setMgr,"set the active manager within a map","<name>|<slot>")
 	if (args.size() !=1) return false;
 
 	// see if we have a number or a name
-	uint slot=atoi(args[0].c_str());
+	uint slot;
+	NLMISC::fromString(args[0], slot);
+
 	if (toString(slot)!=args[0])
 		CAIActions::exec("SET_MGR",slot);
 	else
@@ -58,7 +60,9 @@ NLMISC_COMMAND(setGrp,"set the active group within a manager","<name>|<slot>")
 	if (args.size() !=1) return false;
 
 	// see if we have a number or a name
-	uint slot=atoi(args[0].c_str());
+	uint slot;
+	NLMISC::fromString(args[0], slot);
+
 	if (toString(slot)!=args[0])
 		CAIActions::exec("SET_GRP",slot);
 	else
@@ -82,7 +86,7 @@ NLMISC_COMMAND(newFaunaManager,"create the fauna manager for a region","<name> [
 	case 2:	// <name> <slot>
 		{
 			// the slot id is explicit so make sure its a number
-			slot=atoi(args[1].c_str());
+			NLMISC::fromString(args[1], slot);
 			if (toString(slot)!=args[1])
 				return false;
 			break;
@@ -102,13 +106,14 @@ NLMISC_COMMAND(newPlaceXYR,"","<place name> <x> <y> <r> <verticalPos>")
 	if(args.size() !=5)
 		return false;
 
-	sint x=atoi(args[1].c_str());
-	sint y=atoi(args[2].c_str());
+	sint x, y;
+	NLMISC::fromString(args[1], x);
+	NLMISC::fromString(args[2], y);
 	sint r=10; // default value.
 	uint32 vp = AITYPES::vp_auto;
 	if (!args[3].empty())
 	{
-		r=atoi(args[3].c_str());
+		NLMISC::fromString(args[3], r);
 	}
 	vp = AITYPES::verticalPosFromString(args[4]);
 
@@ -181,7 +186,8 @@ NLMISC_COMMAND(addHerbivorePopulation,"add a population version to the current g
 	// check that every second argument is a number
 	for (uint i=0;i<args.size();i+=2)
 	{
-		uint32 count=atoi(args[i+1].c_str());
+		uint32 count;
+		NLMISC::fromString(args[i+1], count);
 		if (toString(count)!=args[i+1])
 			return false;
 		executeArgs.push_back(CAIActions::CArg(args[i]));
@@ -208,7 +214,7 @@ NLMISC_COMMAND(newUrbanManager,"create the urban npc manager for a sttlement","<
 	case 2:	// <name> <slot>
 		{
 			// the slot id is explicit so make sure its a number
-			slot=atoi(args[1].c_str());
+			NLMISC::fromString(args[1], slot);
 			if (toString(slot)!=args[1])
 				return false;
 			break;

@@ -1035,7 +1035,7 @@ bool CStringManager::parseCondition(const CPhrase &phrase, const ucstring &str, 
 		NLMISC::strlwr(cond.ReferenceStr);
 
 		// try to eval value as an integer value
-		cond.ReferenceInt = atoi(cond.ReferenceStr.c_str());
+		NLMISC::fromString(cond.ReferenceStr, cond.ReferenceInt);
 
 		if (paramName != "self")
 		{

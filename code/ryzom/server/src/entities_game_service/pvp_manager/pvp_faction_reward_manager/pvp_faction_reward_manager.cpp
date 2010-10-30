@@ -66,8 +66,8 @@ CPVPFactionRewardManager::CPVPFactionRewardManager()
 //----------------------------------------------------------------------------
 
 void CPVPFactionRewardManager::_BuildTotemBasesRec( const IPrimitive* prim,
-												   std::map<CTotemBase*, set<string> >& neighboursNames,
-													map<std::string, CTotemBase*>& totemBasesPerName )
+													std::map<CTotemBase*, set<string> >& neighboursNames,
+													std::map<std::string, CTotemBase*>& totemBasesPerName )
 {
 	if ( !prim )
 		return;
@@ -441,11 +441,11 @@ bool CPVPFactionRewardManager::destroyTotem( uint16 regionIndex, TDataSetRow kil
 
 		// Send message to faction channel
 		params[2].Int = 1;
-		TChanID channelId = CPVPManager2::getInstance()->getFactionDynChannel(pTotemBase->getOwnerFaction());
-		if( channelId != DYN_CHAT_INVALID_CHAN )
-		{
+		// TODO TChanID channelId = CPVPManager2::getInstance()->getFactionDynChannel(pTotemBase->getOwnerFaction());
+//		if( channelId != DYN_CHAT_INVALID_CHAN )
+//		{
 			// TODO Send message PVP_SPIRE_DESTROYED to faction channel and enemies factions
-		}
+//		}
 	}
 
 	
@@ -665,11 +665,11 @@ void CPVPFactionRewardManager::tickUpdate()
 
 					// Send it in faction channel too
 					params[2].Int = 1;
-					TChanID channelId = CPVPManager2::getInstance()->getFactionDynChannel(pTotem->getOwnerFaction());
-					if( channelId != DYN_CHAT_INVALID_CHAN )
-					{
+					//TODO TChanID channelId = CPVPManager2::getInstance()->getFactionDynChannel(pTotem->getOwnerFaction());
+					//if( channelId != DYN_CHAT_INVALID_CHAN )
+					//{
 						// TODO Send message PVP_SPIRE_BUILD_FINISHED to faction channel
-					}
+					//}
 				}
 			}
 		}
@@ -1221,7 +1221,7 @@ NLMISC_COMMAND(setSpireEffectValue, "change base value of a spire effect","<effe
 			return false;
 		}
 
-		CPVPFactionRewardManager::EffectValues[ family ] = atoi( args[1].c_str() );
+		NLMISC::fromString(args[1], CPVPFactionRewardManager::EffectValues[ family ]);
 	}
 
 	// update effects for everyone
@@ -1340,7 +1340,8 @@ NLMISC_COMMAND(addFactionPoint, "add (or substract) faction point in faction poo
 		return false;
 	else
 	{
-		sint32 deltaFactionPoint = atoi(args[0].c_str());
+		sint32 deltaFactionPoint;
+		NLMISC::fromString(args[0], deltaFactionPoint);
 		PVP_CLAN::TPVPClan faction = PVP_CLAN::fromString(args[1].c_str());
 
 		if(faction == PVP_CLAN::Unknown)

@@ -315,7 +315,7 @@ private:
 		if (table == INVALID_TABLE_INDEX)
 			return false;
 
-		row = atoi(str);
+		NLMISC::fromString(std::string(str), row);
 
 		while (*str >= '0' && *str <= '9')
 			++str;

@@ -128,6 +128,7 @@ private:
 
 	/// Shapes Instances caches
 	std::vector<CShapeInstanceReference>	_ShapeInstances;
+	bool									_InstancesRemoved;
 
 	typedef struct
 	{
@@ -202,6 +203,7 @@ public:
 
 	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool active=true);
 	bool removeInstances();
+	bool instancesRemoved();
 	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y);
 
 	/**

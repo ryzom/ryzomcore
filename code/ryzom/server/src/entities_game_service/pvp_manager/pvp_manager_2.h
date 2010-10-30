@@ -41,6 +41,8 @@ class CPVPManager2
 	NL_INSTANCE_COUNTER_DECL(CPVPManager2);
 public:
 	typedef std::map< PVP_CLAN::TPVPClan, TChanID > TMAPFactionChannel;
+	typedef std::map< std::string, TChanID > TMAPExtraFactionChannel;
+	typedef std::map< TChanID, std::string > TMAPPassChannel;
 
 	///\name LOW LEVEL MANAGEMENT
 	//@{
@@ -55,21 +57,27 @@ public:
 	/// callback called at each tick
 	void tickUpdate();
 	/// return dynamic channel TChanID attribued to a faction
-	TChanID getFactionDynChannel( PVP_CLAN::TPVPClan faction);
+	TChanID getFactionDynChannel( const std::string& channelName );
+	/// return dynamic channel TChanID attribued to an user
+	TChanID getUserDynChannel( const std::string& channelName);
+	/// return dynamic channel TChanID attribued to a faction
+	const std::string &getPassUserChannel( TChanID channelId);
 	/// return dynamic channel TChanID character must have, DYN_CHAT_INVALID_CHAN if he must don't have faction channel
-	TChanID getCharacterChannel(CCharacter * user);
+	std::vector<TChanID> getCharacterChannels(CCharacter * user);
 	/// return dynamic channel TChanId subscribed by character, DYN_CHAT_INVALID_CHAN if character have no faction channel
-	TChanID getCharacterRegisteredChannel(CCharacter * user);
+	std::vector<TChanID> getCharacterRegisteredChannels(CCharacter * user);
+	/// return dynamic user channel TChanId subscribed by character, DYN_CHAT_INVALID_CHAN if character have no user channel
+	std::vector<TChanID> getCharacterUserChannels(CCharacter * user);
 	// add faction channel to character if needed
-	void addFactionChannelToCharacter(CCharacter * user);
+	void addFactionChannelToCharacter(TChanID channel, CCharacter * user, bool writeRight = true, bool userChannel = false);
 	// remove faction channel for character
-	void removeFactionChannelForCharacter(CCharacter * user);
+	void removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel = false);
 	// add/remove faction channel to this character with privilege
-	void addRemoveFactionChannelToUserWithPriviledge(CCharacter * user );
+	void addRemoveFactionChannelToUserWithPriviledge(TChanID channel, CCharacter * user, bool s = true );
 	/// handle player disconnection
 	void playerDisconnects(CCharacter * user);
 	/// handle to add or remove faction channel to player of needed
-	void addOrRemoveFactionChannel(CCharacter * user, bool b = true );
+	void updateFactionChannel(CCharacter * user, bool b = true );
 	/// handle player death
 	void playerDies(CCharacter * user);
 	/// handle player teleportation
@@ -113,6 +121,12 @@ public:
 	bool stopFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2 );
 	// create a faction channel if not already exist
 	void createFactionChannel(PVP_CLAN::TPVPClan clan);
+	// create an extra faction channel if not already exist (for marauders, agnos, urasiens and hominits)
+	void createExtraFactionChannel(const std::string & channelName);
+	// create an user channel if not already exist
+	TChanID createUserChannel(const std::string & channelName, const std::string & pass);
+	// remove a user channel
+	void deleteUserChannel(const std::string & channelName);
 	// remove a fation channel if faction is no more involved in a war
 	void removeFactionChannel(PVP_CLAN::TPVPClan clan);
 	// return true if faction war occurs between the 2 factions
@@ -165,8 +179,13 @@ private:
 	TFactionWars		_FactionWarOccurs;
 	/// channel for faction in war
 	TMAPFactionChannel	_FactionChannel;
+	TMAPExtraFactionChannel	_ExtraFactionChannel;
+	TMAPExtraFactionChannel	_UserChannel;
+	TMAPPassChannel _PassChannels;
 	/// character registered channel
-	std::map< NLMISC::CEntityId, TChanID > _CharacterChannel;
+	typedef std::map< NLMISC::CEntityId, std::vector<TChanID> > TCharacterChannels;
+	TCharacterChannels	_CharacterChannels;
+	TCharacterChannels	_CharacterUserChannels;
 	/// if a player does an offensive(curative) action on a faction pvp enemy(ally) we must update flag
 	bool _PVPFactionAllyReminder;
 	bool _PVPFactionEnemyReminder;

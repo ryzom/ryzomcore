@@ -17,9 +17,12 @@
 #ifndef LUA_LOADLIB_H
 #define LUA_LOADLIB_H
 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 // load the lua dll, return 1 on success
 //int loadLuaDLL();

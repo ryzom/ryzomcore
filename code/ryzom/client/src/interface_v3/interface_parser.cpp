@@ -4703,12 +4703,13 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 	}
 
 	bool isInData = false;
-	if (pathName.find ("@") != string::npos)
+	std::string::size_type pos = pathName.find("@");
+	if (pos != string::npos)
 	{
-		if (CBigFile::getInstance().getBigFileName(pathName.substr(0, pathName.find ("@"))) != "data/"+pathName.substr(0, pathName.find ("@")))
-			isInData = false;
-		else
-			isInData = true;
+		std::string bigFilename = CBigFile::getInstance().getBigFileName(pathName.substr(0, pos));
+		std::string path = "data/"+pathName.substr(0, pos);
+
+		isInData = bigFilename.find(path) != std::string::npos;
 	}
 
 	if (needCheck && !isInData)

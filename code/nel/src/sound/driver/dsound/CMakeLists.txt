@@ -1,19 +1,19 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.def)
 
-NL_TARGET_DRIVER(nel_drv_dsound ${SRC})
+NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 
 INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nel_drv_dsound nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY} ${DXSDK_GUID_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_dsound_win nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY} ${DXSDK_GUID_LIBRARY})
 
-NL_DEFAULT_PROPS(nel_drv_dsound "NeL, Driver, Sound: DirectSound")
-NL_ADD_RUNTIME_FLAGS(nel_drv_dsound)
-NL_ADD_LIB_SUFFIX(nel_drv_dsound)
+NL_DEFAULT_PROPS(nel_drv_dsound_win "NeL, Driver, Sound: DirectSound")
+NL_ADD_RUNTIME_FLAGS(nel_drv_dsound_win)
+NL_ADD_LIB_SUFFIX(nel_drv_dsound_win)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_dsound ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.h ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.cpp)
+  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_dsound_win ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.h ${CMAKE_CURRENT_SOURCE_DIR}/stddsound.cpp)
 ENDIF(WITH_PCH)
 
-INSTALL(TARGETS nel_drv_dsound RUNTIME DESTINATION bin LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION lib COMPONENT driverssound)
+INSTALL(TARGETS nel_drv_dsound_win RUNTIME DESTINATION bin LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION lib COMPONENT driverssound)
 IF(WITH_MAXPLUGIN)
-  INSTALL(TARGETS nel_drv_dsound RUNTIME DESTINATION maxplugin COMPONENT driverssound)
+  INSTALL(TARGETS nel_drv_dsound_win RUNTIME DESTINATION maxplugin COMPONENT driverssound)
 ENDIF(WITH_MAXPLUGIN)

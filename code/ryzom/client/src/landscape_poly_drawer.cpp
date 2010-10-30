@@ -609,12 +609,11 @@ void CLandscapePolyDrawer::computeBBoxFromPolygon(const NLMISC::CPolygon2D &poly
 	}
 
 	// search for min and max dimensions of polygon on x and y axes.
-	CVector2f rectMax, rectMin;
-	for(uint i=0; i<poly2D.Vertices.size(); i++)
+	CVector2f point = poly2D.Vertices[0];
+	CVector2f rectMax(point), rectMin(point);
+	for(uint i=1; i<poly2D.Vertices.size(); i++)
 	{
-		const CVector2f & point = poly2D.Vertices[i];
-		if(i==0)
-			rectMin = rectMax = point;
+		point = poly2D.Vertices[i];
 
 		rectMax.x = std::max(rectMax.x, point.x);
 		rectMax.y = std::max(rectMax.y, point.y);

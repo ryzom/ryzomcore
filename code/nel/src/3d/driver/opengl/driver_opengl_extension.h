@@ -35,6 +35,7 @@
 #	include <GL/gl.h>
 #	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
 #	include <GL/glx.h>
+#	include <GL/glxext.h>
 #endif // NL_OS_UNIX
 
 #ifndef GL_GLEXT_VERSION
@@ -94,6 +95,11 @@ struct	CGlExtensions
 	bool	WGLARBPixelFormat;
 	bool	WGLEXTSwapControl;
 
+	// GLX extensions, true if supported
+	bool	GLXEXTSwapControl;
+	bool	GLXSGISwapControl;
+	bool	GLXMESASwapControl;
+
 	// ATI Extensions.
 	bool	ATIVertexArrayObject;
 	bool    ATIMapObjectBuffer;
@@ -148,6 +154,9 @@ public:
 		WGLARBPBuffer= false;
 		WGLARBPixelFormat= false;
 		WGLEXTSwapControl= false;
+		GLXEXTSwapControl= false;
+		GLXSGISwapControl= false;
+		GLXMESASwapControl= false;
 		EXTBlendColor= false;
 		ATIVertexArrayObject= false;
 		ATIEnvMapBumpMap = false;
@@ -226,6 +235,11 @@ public:
 		result += WGLARBPBuffer ? "WGLARBPBuffer " : "";
 		result += WGLARBPixelFormat ? "WGLARBPixelFormat " : "";
 		result += WGLEXTSwapControl ? "WGLEXTSwapControl " : "";
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+		result += GLXEXTSwapControl ? "GLXEXTSwapControl " : "";
+		result += GLXSGISwapControl ? "GLXSGISwapControl " : "";
+		result += GLXMESASwapControl ? "GLXMESASwapControl " : "";
 #endif
 
 		result += "\n  Array/VBO: ";
@@ -250,6 +264,10 @@ public:
 #ifdef NL_OS_WINDOWS
 /// This function will test and register WGL functions before than the gl context is created
 bool registerWGlExtensions(CGlExtensions &ext, HDC hDC);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+/// This function will test and register GLX functions before than the gl context is created
+bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 #endif // NL_OS_WINDOWS
 
 /// This function test and register the extensions for the current GL context.
@@ -674,6 +692,18 @@ extern PFNWGLGETSWAPINTERVALEXTPROC			nwglGetSwapIntervalEXT;
 
 // WGL_ARB_extensions_string
 extern PFNWGLGETEXTENSIONSSTRINGARBPROC			nwglGetExtensionsStringARB;
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+// Swap control extensions
+//===========================
+extern PFNGLXSWAPINTERVALEXTPROC				nglXSwapIntervalEXT;
+
+extern PFNGLXSWAPINTERVALSGIPROC				nglXSwapIntervalSGI;
+
+extern PFNGLXSWAPINTERVALMESAPROC				nglXSwapIntervalMESA;
+extern PFNGLXGETSWAPINTERVALMESAPROC			nglXGetSwapIntervalMESA;
 
 #endif
 

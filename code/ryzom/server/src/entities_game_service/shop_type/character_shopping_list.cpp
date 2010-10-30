@@ -253,6 +253,7 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 			case ITEMFAMILY::HARVEST_TOOL:
 			case ITEMFAMILY::CRAFTING_TOOL:
 			case ITEMFAMILY::COSMETIC:
+			case ITEMFAMILY::CONSUMABLE:
 				if( form->Type != _Character->getItemTypeFilter() )
 					return false;
 				break;
@@ -269,7 +270,8 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 			form->Family != ITEMFAMILY::COSMETIC &&
 			form->Family != ITEMFAMILY::TELEPORT &&
 			form->Family != ITEMFAMILY::SERVICE && 
-			form->Family != ITEMFAMILY::GENERIC_ITEM
+			form->Family != ITEMFAMILY::GENERIC_ITEM &&
+			form->Family != ITEMFAMILY::CONSUMABLE
 			)
 		{
 			if( _Character->getMinClassItemFilter() != RM_CLASS_TYPE::Unknown && itemEnergy != ~0u )
@@ -387,6 +389,7 @@ uint32 CCharacterShoppingList::getSellPrice( const TItemTradePtr itemTrade, bool
 			case ITEMFAMILY::SHIELD:
 			case ITEMFAMILY::JEWELRY:
 			case ITEMFAMILY::RAW_MATERIAL:
+			case ITEMFAMILY::CONSUMABLE:
 				priceFactor *= 4.0f;
 				break;
 			case ITEMFAMILY::COSMETIC:

@@ -730,7 +730,8 @@ NLMISC_COMMAND( displayEntityInfo, "Display the properties of an entity", "<enti
 	if(args.size() != 1) return false;
 	
 	// get the values
-	TDataSetIndex entityIndex = atoi(args[0].c_str());
+	TDataSetIndex entityIndex;
+	NLMISC::fromString(args[0], entityIndex);
 	if ( entityIndex < (uint32)TheDataset.maxNbRows() )
 	{
 		TDataSetRow datasetrow = TheDataset.getCurrentDataSetRow( entityIndex );
@@ -783,8 +784,10 @@ NLMISC_COMMAND( displaySlotInfo, "Display info for a particular slot of a client
 	if ( args.size() < 2 )
 		return false;
 	
-	TClientId clientid = atoi(args[0].c_str());
-	CLFECOMMON::TCLEntityId slot = atoi(args[1].c_str());
+	TClientId clientid;
+	NLMISC::fromString(args[0], clientid);
+	CLFECOMMON::TCLEntityId slot;
+	NLMISC::fromString(args[1], slot);
 	CClientHost *clienthost;
 	if ( (clientid <= MaxNbClients) && ((clienthost = CFrontEndService::instance()->sendSub()->clientIdCont()[clientid]) != NULL) )
 	{

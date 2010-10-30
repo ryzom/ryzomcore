@@ -238,7 +238,8 @@ NLMISC_COMMAND(displayBombRange,"display the affected entities ( all entities in
 			log.displayNL( "invalid entity %s", args[1].c_str() );
 			return true;
 		}
-		uint16 radius = (uint16) atoi(args[2].c_str());
+		uint16 radius;
+		NLMISC::fromString(args[2], radius);
 		
 		CRangeSelector selector;
 		selector.buildDisc( source,target->getX(),target->getY(), radius,EntityMatrix, false );
@@ -313,8 +314,11 @@ NLMISC_COMMAND(displayChainRange,"display the affected entities ( all entities i
 			return true;
 		}
 
-		uint16 range = (uint16) atoi(args[2].c_str());
-		uint max = (uint) atoi(args[3].c_str());
+		uint16 range;
+		NLMISC::fromString(args[2], range);
+
+		uint max;
+		NLMISC::fromString(args[3], max);
 		
 		CRangeSelector selector;
 		selector.buildChain(source , target, range, max, EntityMatrix,ACTNATURE::NEUTRAL);

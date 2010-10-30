@@ -137,7 +137,7 @@ uint32 nodeAlias(const IPrimitive *prim, bool canFail = false)
 //	// for legacy reasons the field may be called 'unique_id' instead of 'alias'
 //	if (s.empty())
 //		prim->getPropertyByName("unique_id",s);
-//	alias=atoi(s.c_str());
+//	alias=NLMISC::fromString(s.c_str());
 
 //	// if we haven't found a sensible alias value use the prim node address
 //	if (alias==0 && s!="0")
@@ -518,7 +518,7 @@ static CAIEventActionNode::TSmartPtr parsePrimEventAction(const CAIAliasDescript
 	prim->getPropertyByName("action",result->Action);
 	prim->getPropertyByName("weight",weightStr);
 	prim->getPropertyByName("parameters",parameters);
-	result->Weight=atoi(weightStr.c_str());
+	NLMISC::fromString(weightStr, result->Weight);
 	result->Args=*parameters;
 	
 	for (uint i=0;i<prim->getNumChildren();++i)	
@@ -1134,7 +1134,8 @@ static void parsePrimPlaces(const CAIAliasDescriptionNode *treeNode,const IPrimi
 					// read the radius
 					std::string radiusString;
 					child->getPropertyByName("radius",radiusString);
-					uint radius=atoi(radiusString.c_str());
+					uint radius;
+					NLMISC::fromString(radiusString, radius);
 					if (radius == 0)
 					{
 						nlwarning("Ignoring place '%s' because bad radius: '%s' (converted to int as %u)",
@@ -1180,15 +1181,15 @@ static void parsePrimPlaces(const CAIAliasDescriptionNode *treeNode,const IPrimi
 						//
 						if (child->getPropertyByName("visit_time_min", tmpStr))
 						{
-							stayTimeMin = atoi(tmpStr.c_str());
+							NLMISC::fromString(tmpStr, stayTimeMin);
 						}
 						if (child->getPropertyByName("visit_time_max", tmpStr))
 						{
-							stayTimeMax = atoi(tmpStr.c_str());
+							NLMISC::fromString(tmpStr, stayTimeMax);
 						}
 						if (child->getPropertyByName("index", tmpStr))
 						{
-							index = atoi(tmpStr.c_str());
+							NLMISC::fromString(tmpStr, index);
 						}
 						child->getPropertyByName("index_next", indexNext);
 						if (child->getPropertyByName("flag_spawn", tmpStr))
@@ -1283,7 +1284,7 @@ static void	parsePopulation(const IPrimitive *prim, std::string &sheet, uint &co
 			sheet = s+".creature";
 	}
 		
-	count=atoi(countStr.c_str());
+	NLMISC::fromString(countStr, count);
 	if (count<=0)
 	{
 		throw	parsePopException(std::string("FAUNA_SPAWN_ATOM property 'count' invalid: ")+countStr);
@@ -1316,7 +1317,7 @@ static void parsePrimGrpFaunaSpawn(const CAIAliasDescriptionNode *treeNode,const
 	uint32 weight = 0;
 	if (prim->getPropertyByName("weight",s))
 	{
-		weight=atoi(s.c_str());
+		NLMISC::fromString(s, weight);
 		if	(toString(weight)!=s)
 		{
 		nlwarning("weight invalid value: %s");
@@ -1886,7 +1887,8 @@ static void parsePrimGrpNpc(const CAIAliasDescriptionNode *treeNode,const IPrimi
 	}
 
 	prim->getPropertyByName("count",s);
-	uint botCount=atoi(s.c_str());
+	uint botCount;
+	NLMISC::fromString(s, botCount);
 
 	if (foundBots && botCount != 0)
 	{
@@ -2679,7 +2681,7 @@ static void parsePrimBotTemplate(const CAIAliasDescriptionNode *aliasNode, const
 		prim->getPropertyByName("sheet_look", lookSheet);
 		multiLevel = true;
 		prim->getPropertyByName("level_delta", s);
-		levelDelta = atoi(s.c_str());
+		NLMISC::fromString(s, levelDelta);
 	}
 	else
 	{
@@ -2729,7 +2731,7 @@ static void parsePrimGroupTemplate(const CAIAliasDescriptionNode *aliasNode, con
 	sint32			levelDelta = 0;
 
 	prim->getPropertyByName("count", s);
-	botCount = atoi(s.c_str());
+	NLMISC::fromString(s, botCount);
 
 	prim->getPropertyByName("count_multiplied_by_sheet", s);
 	countMultipliedBySheet = (s == "true");
@@ -2748,7 +2750,7 @@ static void parsePrimGroupTemplate(const CAIAliasDescriptionNode *aliasNode, con
 		prim->getPropertyByName("bot_sheet_look", lookSheet);
 		multiLevel = true;
 		prim->getPropertyByName("level_delta", s);
-		levelDelta = atoi(s.c_str());
+		NLMISC::fromString(s, levelDelta);
 	}
 	else
 	{
@@ -2773,13 +2775,13 @@ static void parsePrimGroupTemplate(const CAIAliasDescriptionNode *aliasNode, con
 	seasons[3] = (s == "true");
 	
 	prim->getPropertyByName("weight_0_25", s);
-	weights[0] = atoi(s.c_str());
+	NLMISC::fromString(s, weights[0]);
 	prim->getPropertyByName("weight_25_50", s);
-	weights[1] = atoi(s.c_str());
+	NLMISC::fromString(s, weights[1]);
 	prim->getPropertyByName("weight_50_75", s);
-	weights[2] = atoi(s.c_str());
+	NLMISC::fromString(s, weights[2]);
 	prim->getPropertyByName("weight_75_100", s);
-	weights[3] = atoi(s.c_str());
+	NLMISC::fromString(s, weights[3]);
 
 	vector<string>	*actParams = &EmptyStringVector;
 	
@@ -3330,6 +3332,8 @@ static void parsePrimOutpost(const IPrimitive *prim, const std::string &mapName,
 				break;
 			case AITypeManager:
 				parsePrimMgr(child, mapName, filename);
+				break;
+			default:
 				break;
 			}
 		}

@@ -966,7 +966,8 @@ inline CTable::CDataAccessor	CTable::getAccessor(CLocatePath &path)
 	if (path.end())
 		return CDataAccessor();
 
-	RY_PDS::TRowIndex	row = atoi(path.node().Name.c_str());
+	RY_PDS::TRowIndex	row;
+	NLMISC::fromString(path.node().Name, row);
 	path.next();
 
 	const CColumn*	column = getColumn(path);

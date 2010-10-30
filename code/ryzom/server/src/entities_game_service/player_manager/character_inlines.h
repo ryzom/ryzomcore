@@ -896,9 +896,13 @@ inline bool CCharacter::isChannelAdded()
 
 //------------------------------------------------------------------------------
 
-inline bool CCharacter::showFactionChannelsMode()
+inline bool CCharacter::showFactionChannelsMode(TChanID channel) const
 {
-	return _FactionChannelMode; 
+	std::map<TChanID, bool>::const_iterator it = _FactionChannelsMode.find(channel);
+	if (it != _FactionChannelsMode.end())
+		return (*it).second;
+	else
+		return false;
 }
 
 //------------------------------------------------------------------------------

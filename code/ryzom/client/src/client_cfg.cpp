@@ -584,7 +584,7 @@ CClientConfig::CClientConfig()
 	CameraDistance		= 3.0f;
 	CameraDistStep		= 1.0f;
 	CameraDistMin		= 1.0f;
-	CameraDistMax		= 5.0f;
+	CameraDistMax		= 100.0f;
 	DmCameraDistMax		= 25.0f;
 	CameraAccel			= 0.2f;
 	CameraSpeedMin		= 0.2f;
@@ -1480,6 +1480,8 @@ void CClientConfig::setValues()
 	// DebugStringManager
 	READ_BOOL_DEV(DebugStringManager)
 
+	// LastLogin
+	READ_STRING_FV(LastLogin)
 
 	//////////////
 	// VERBOSES //
@@ -2037,11 +2039,11 @@ bool CClientConfig::readBool (const std::string &varName)
 	return bVal;
 }
 
-void CClientConfig::writeBool (const std::string &varName, bool bVal)
+void CClientConfig::writeBool (const std::string &varName, bool bVal, bool bForce)
 {
-	CConfigFile::CVar *varPtr = ConfigFile.getVarPtr(varName);
+	CConfigFile::CVar *varPtr = bForce ? ConfigFile.insertVar(varName, CConfigFile::CVar()):ConfigFile.getVarPtr(varName);
 	if(varPtr)
-		varPtr->forceAsInt(bVal);
+		varPtr->forceAsInt(bVal ? 1:0);
 	else
 		nlwarning("CFG: Default value used for '%s' !!!",varName.c_str());
 }
@@ -2057,9 +2059,9 @@ sint32 CClientConfig::readInt (const std::string &varName)
 	return bVal;
 }
 
-void CClientConfig::writeInt (const std::string &varName, sint32 bVal)
+void CClientConfig::writeInt (const std::string &varName, sint32 bVal, bool bForce)
 {
-	CConfigFile::CVar *varPtr = ConfigFile.getVarPtr(varName);
+	CConfigFile::CVar *varPtr = bForce ? ConfigFile.insertVar(varName, CConfigFile::CVar()):ConfigFile.getVarPtr(varName);
 	if(varPtr)
 		varPtr->forceAsInt(bVal);
 	else
@@ -2077,11 +2079,11 @@ double CClientConfig::readDouble (const std::string &varName)
 	return bVal;
 }
 
-void CClientConfig::writeDouble (const std::string &varName, double bVal)
+void CClientConfig::writeDouble (const std::string &varName, double dVal, bool bForce)
 {
-	CConfigFile::CVar *varPtr = ConfigFile.getVarPtr(varName);
+	CConfigFile::CVar *varPtr = bForce ? ConfigFile.insertVar(varName, CConfigFile::CVar()):ConfigFile.getVarPtr(varName);
 	if(varPtr)
-		varPtr->forceAsDouble(bVal);
+		varPtr->forceAsDouble(dVal);
 	else
 		nlwarning("CFG: Default value used for '%s' !!!",varName.c_str());
 }
@@ -2097,11 +2099,11 @@ string CClientConfig::readString (const std::string &varName)
 	return sVal;
 }
 
-void CClientConfig::writeString (const std::string &varName, const std::string &bVal)
+void CClientConfig::writeString (const std::string &varName, const std::string &strVal, bool bForce)
 {
-	CConfigFile::CVar *varPtr = ConfigFile.getVarPtr(varName);
+	CConfigFile::CVar *varPtr = bForce ? ConfigFile.insertVar(varName, CConfigFile::CVar()):ConfigFile.getVarPtr(varName);
 	if(varPtr)
-		varPtr->forceAsString(bVal);
+		varPtr->forceAsString(strVal);
 	else
 		nlwarning("CFG: Default value used for '%s' !!!",varName.c_str());
 }

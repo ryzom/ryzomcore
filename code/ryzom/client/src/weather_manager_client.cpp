@@ -604,7 +604,7 @@ void CWeatherManagerClient::updateThunder(uint64 day, float hour, const CWeather
 	CThunderTime t1;
 
 
-	float manualThunderThreshold;
+	float manualThunderThreshold = 0.f;
 	if (manual)
 	{
 		if (wc.WF)

@@ -863,7 +863,12 @@ void CTeam::removeMission( uint idx, TMissionResult result)
 			result = mr_fail;
 	}
 
-	const CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(_Missions[idx]->getTemplateId());
+	CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(_Missions[idx]->getTemplateId());
+
+	if ( tpl && !tpl->Tags.NoList )
+	{
+		_Missions[idx]->clearUsersJournalEntry();
+	}
 
 	/*Bsi.append( StatPath, NLMISC::toString("[MIT%s] %u %s",
 		MissionResultStatLogTag[result],
@@ -877,7 +882,6 @@ void CTeam::removeMission( uint idx, TMissionResult result)
 		tpl->getMissionName().c_str());
 	*/
 //	EGSPD::missionTeamLog(MissionResultStatLogTag[result], this->_TeamId, tpl->getMissionName());
-	_Missions[idx]->clearUsersJournalEntry();
 	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
 	delete _Missions[idx];
 	_Missions.erase(_Missions.begin() + idx) ;

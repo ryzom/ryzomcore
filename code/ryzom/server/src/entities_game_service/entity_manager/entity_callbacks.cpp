@@ -497,7 +497,6 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 		{
 			c->setWhoSeesMe(UINT64_CONSTANT(0xffffffffffffffff));
 		}
-
 	}
 
 	if (!IsRingShard && player->havePriv(AlwaysInvisiblePriv))
@@ -529,10 +528,6 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 		}
 	}
 	c->onConnection();
-
-	CPVPManager2::getInstance()->sendFactionWarsToClient( c );
-	CPVPManager2::getInstance()->addOrRemoveFactionChannel( c );
-
 } // cbClientReady //
 
 
@@ -681,10 +676,15 @@ void finalizeClientReady( uint32 userId, uint32 index )
 		}
 	}
 
+	CPVPManager2::getInstance()->updateFactionChannel( c );
+	CPVPManager2::getInstance()->setPVPModeInMirror( c );
+	c->updatePVPClanVP();
 
 	// for GM player, trigger a 'infos' command to remember their persistent state
 	if (!PlayerManager.getPlayer(uint32(c->getId().getShortId())>>4)->getUserPriv().empty())
 		CCommandRegistry::getInstance().execute(toString("infos %s", c->getId().toString().c_str()).c_str(), InfoLog(), true);
+	
+	c->setFinalized(true);
 
 } // finalizeClientReady //
 
@@ -1029,7 +1029,6 @@ CreationFailed:
 	return;
 }
 
-
 void cbCreateChar_part2(uint32 userId, const CCreateCharMsg &createCharMsg, bool ok)
 {
 	TLogNoContext_Character noContextCharacter;
@@ -1252,7 +1251,6 @@ void sendCharactersSummary( CPlayer *player, bool AllAutorized, uint32 bitfieldO
 			chars[i].HasEditSession = ((bitfieldOwnerOfEditSession & (1 << i)) != 0);
 		}
 	}
-
 
 	// Build the message
 	CBitMemStream bms;
@@ -1525,8 +1523,6 @@ void cbClientTpAck( NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 					ch->setWhoSeesMe( IsRingShard? R2_VISION::buildWhoSeesMe(R2_VISION::WHOSEESME_VISIBLE_PLAYER,true): UINT64_CONSTANT(0xffffffffffffffff) );
 				}
 			}
-
-
 		}
 
 
@@ -2518,7 +2514,6 @@ void cbItemClosePickup( NLNET::CMessage& msgin, const std::string &serviceName, 
 void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbItemSwap);
-
 
 	CEntityId charId;
 	uint16 slotSrc, slotDst, quantity;

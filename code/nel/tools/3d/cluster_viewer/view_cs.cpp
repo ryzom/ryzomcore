@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 
 			TextContext.setColor (CRGBA(255,255,255,255));
 
-			string sAllClusters = "";
+			string sAllClusters;
 			for( uint32 j = 0; j < vCluster.size(); ++j)
 			{
 				sAllClusters += vCluster[j]->Name;

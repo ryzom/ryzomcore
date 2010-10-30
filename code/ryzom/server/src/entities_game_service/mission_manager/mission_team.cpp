@@ -52,7 +52,11 @@ void CMissionTeam::updateUsersJournalEntry()
 void CMissionTeam::clearUsersJournalEntry()
 {
 	CTeam * team = TeamManager.getRealTeam( _TeamId );
-	nlassert(team);
+	if ( !team )
+	{
+		nlwarning( "<MISSIONS>cant find team ID : %d", _TeamId );
+		return;
+	}
 	
 	for ( list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end();++it )
 	{

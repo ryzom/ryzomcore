@@ -110,6 +110,9 @@ protected:
 
 	/// the players in the building
 	std::vector<TDataSetRow>		_UsersInside;
+
+	// list of players
+	std::vector<NLMISC::CEntityId> _Players;
 };
 
 
@@ -191,7 +194,7 @@ public:
 	
 private:
 	virtual void initRooms();
-	std::vector<NLMISC::CEntityId> _Players;
+
 };
 
 #include "building_physical_inline.h"

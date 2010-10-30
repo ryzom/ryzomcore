@@ -78,7 +78,8 @@ public:
 		{
 			std::string weightStr, stateStr;
 			AI_SHARE::stringToWordAndTail(args[i],weightStr, stateStr);
-			sint16 weight=atoi(weightStr.c_str());
+			sint16 weight;
+			NLMISC::fromString(weightStr, weight);
 			if	(	weight<=0
 				||	NLMISC::toString(weight)!=weightStr)
 			{
@@ -2206,7 +2207,8 @@ public:
 					}
 					else
 					{
-						sint32 value =  atoi(label.c_str());
+						sint32 value;
+						NLMISC::fromString(label, value);
 						_Labels[i] = value ; // the other case eg "case 4:" -> _Label[?] = 4;
 					}
 				}

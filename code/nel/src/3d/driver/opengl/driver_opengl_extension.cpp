@@ -440,6 +440,18 @@ PFNWGLGETSWAPINTERVALEXTPROC					nwglGetSwapIntervalEXT;
 
 // WGL_ARB_extensions_string
 PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+// Swap control extensions
+PFNGLXSWAPINTERVALEXTPROC						nglXSwapIntervalEXT;
+
+PFNGLXSWAPINTERVALSGIPROC						nglXSwapIntervalSGI;
+
+PFNGLXSWAPINTERVALMESAPROC						nglXSwapIntervalMESA;
+PFNGLXGETSWAPINTERVALMESAPROC					nglXGetSwapIntervalMESA;
+
 #endif
 
 // ***************************************************************************
@@ -1410,6 +1422,46 @@ static bool	setupWGLEXTSwapControl(const char	*glext)
 	return true;
 }
 
+// *********************************
+static bool	setupGLXEXTSwapControl(const char	*glext)
+{
+	H_AUTO_OGL(setupGLXEXTSwapControl);
+	CHECK_EXT("GLX_EXT_swap_control");
+
+#ifdef NL_OS_UNIX
+	CHECK_ADDRESS(PFNGLXSWAPINTERVALEXTPROC, glXSwapIntervalEXT);
+#endif
+
+	return true;
+}
+
+// *********************************
+static bool	setupGLXSGISwapControl(const char	*glext)
+{
+	H_AUTO_OGL(setupGLXSGISwapControl);
+	CHECK_EXT("GLX_SGI_swap_control");
+
+#ifdef NL_OS_UNIX
+	CHECK_ADDRESS(PFNGLXSWAPINTERVALSGIPROC, glXSwapIntervalSGI);
+#endif
+
+	return true;
+}
+
+// *********************************
+static bool	setupGLXMESASwapControl(const char	*glext)
+{
+	H_AUTO_OGL(setupGLXMESASwapControl);
+	CHECK_EXT("GLX_MESA_swap_control");
+
+#ifdef NL_OS_UNIX
+	CHECK_ADDRESS(PFNGLXSWAPINTERVALMESAPROC, glXSwapIntervalMESA);
+	CHECK_ADDRESS(PFNGLXGETSWAPINTERVALMESAPROC, glXGetSwapIntervalMESA);
+#endif
+
+	return true;
+}
+
 #ifdef NL_OS_WINDOWS
 // ***************************************************************************
 bool	registerWGlExtensions(CGlExtensions &ext, HDC hDC)
@@ -1449,6 +1501,49 @@ bool	registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 
 	// Check for swap control
 	ext.WGLEXTSwapControl= setupWGLEXTSwapControl(glext);
+
+	return true;
+}
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+// ***************************************************************************
+bool	registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
+{
+	H_AUTO_OGL(registerGlXExtensions);
+
+	// Get extension string
+	const char *glext = glXQueryExtensionsString(dpy, screen);
+	if (glext == NULL)
+	{
+		nlwarning ("glXQueryExtensionsString failed");
+		return false;
+	}
+
+	nldebug("3D: Available GLX Extensions:");
+
+	if (DebugLog)
+	{
+		vector<string> exts;
+		explode(string(glext), string(" "), exts);
+		for(uint i = 0; i < exts.size(); i++)
+		{
+			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			if(i%5==4) DebugLog->displayRaw("\n");
+		}
+		DebugLog->displayRaw("\n");
+	}
+
+	// Check for pbuffer
+//	ext.WGLARBPBuffer= setupWGLARBPBuffer(glext);
+
+	// Check for pixel format
+//	ext.WGLARBPixelFormat= setupWGLARBPixelFormat(glext);
+
+	// Check for swap control
+	ext.GLXEXTSwapControl= setupGLXEXTSwapControl(glext);
+	ext.GLXSGISwapControl= setupGLXSGISwapControl(glext);
+	ext.GLXMESASwapControl= setupGLXMESASwapControl(glext);
 
 	return true;
 }

@@ -411,7 +411,8 @@ NLMISC_COMMAND(entityPlayerVisibilityDistance,"Set distance (0 to 255) at which 
 	
 	if(args.size()==1)
 	{
-		int n = atoi(args[0].c_str());
+		sint n;
+		NLMISC::fromString(args[0], n);
 		if (n>=0 && n<=255)
 			CAIEntityPhysical::_PlayerVisibilityDistance = n;
 	}

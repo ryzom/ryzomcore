@@ -52,7 +52,7 @@ bool CMissionItem::buildFromScript( const std::vector<std::string> & script, std
 		MISLOG("Invalid sitem sheet '%s'", (CMissionParser::getNoBlankString( script[1] ) + ".sitem").c_str());
 		ret = false;
 	}
-	_Quality = (uint16) atoi( script[3].c_str() );
+	NLMISC::fromString(script[3], _Quality);
 
 	for ( uint i = 4; i < script.size(); i++)
 	{
@@ -101,16 +101,17 @@ bool CMissionItem::buildFromScript( const std::vector<std::string> & script, std
 						_Params.MaxPiercingProtection = (float)atof(args[1].c_str());
 					
 					else if( !nlstricmp(args[0],"HpBuff" ) )
-						_Params.HpBuff = atoi(args[1].c_str());
+						NLMISC::fromString(args[1], _Params.HpBuff);
 					else if( !nlstricmp(args[0],"SapBuff" ) )
-						_Params.SapBuff = atoi(args[1].c_str());
+						NLMISC::fromString(args[1], _Params.SapBuff);
 					else if( !nlstricmp(args[0],"StaBuff" ) )
-						_Params.StaBuff = atoi(args[1].c_str());
+						NLMISC::fromString(args[1], _Params.StaBuff);
 					else if( !nlstricmp(args[0],"FocusBuff" ) )
-						_Params.FocusBuff = atoi(args[1].c_str());
+						NLMISC::fromString(args[1], _Params.FocusBuff);
 					else if( !nlstricmp(args[0],"Color" ) )
 					{
-						uint8 color = (uint8)atoi(args[1].c_str());
+						uint8 color;
+						NLMISC::fromString(args[1], color);
 						if( color <= 7 )
 						{
 							_Params.Color[color] = 1;

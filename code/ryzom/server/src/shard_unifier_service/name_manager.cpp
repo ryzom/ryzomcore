@@ -905,13 +905,17 @@ bool CNameManager::loadCharacterNamesFromTxt()
 //		BOMB_IF (line.countWords()!=3,"Invalid line found in character names file: "+line,continue);
 		BOMB_IF (words.size()!=3 && words.size()!=4,"Invalid line found in character names file: "+line,continue);
 
-		int i1 = atoi(words[1].c_str());
-		int i2 = atoi(words[2].c_str());
+		sint i1, i2;
+		NLMISC::fromString(words[1], i1);
+		NLMISC::fromString(words[2], i2);
+
 		BOMB_IF (i1==0,"Invalid user id in character names file line: "+line,continue);
 		BOMB_IF (i2>15 || (i2==0 && words[2] != "0"),"Invalid slot id in character names file line: "+line,continue);
-		int sessionId =0;
+
+		sint sessionId =0;
 		if (words.size() > 3)
-			sessionId = atoi(words[3].c_str());
+			NLMISC::fromString(words[3], sessionId);
+
 		const TName name = words[0];
 		const TCharSlot charSlot = TCharSlot(i1, i2);
 		TFullName fullname(name, sessionId);
@@ -1139,8 +1143,10 @@ bool CNameManager::loadGuildsNamesFromTxt()
 		}
 		BOMB_IF (words.size()!=3,"Invalid line "<<i+1<<" found in guild names file : '"<<line<<"'", continue);
 
-		int i1 = atoi(words[1].c_str());
-		int i2 = atoi(words[2].c_str());
+		sint i1, i2;
+		NLMISC::fromString(words[1], i1);
+		NLMISC::fromString(words[2], i2);
+
 		BOMB_IF (i1==0, "Invalid shardId in guild names file line "<<i+1<<" : '"<<line<<"'", continue);
 		BOMB_IF (i2==0, "Invalid guildId in guild names file line "<<i+1<<" : '"<<line<<"'", continue);
 		TName name = words[0];

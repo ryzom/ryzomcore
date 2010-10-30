@@ -493,7 +493,9 @@ NLMISC_COMMAND(itemR2Description, "set definition of a R2 item", "<ScenarioId> <
 	if( args.size() != 5 )
 		return false;
 
-	TSessionId scenarioId( (uint32)atoi(args[0].c_str()) );
+	uint32 sessionId;
+	NLMISC::fromString(args[0], sessionId);
+	TSessionId scenarioId(sessionId);
 
 	R2::TMissionItem itemDesc;
 	itemDesc.SheetId = CSheetId(args[1]);
@@ -515,10 +517,12 @@ NLMISC_COMMAND(giveItemR2ToCharacter, "Give an item R2 to a character", "<Charac
 
 	CEntityId eid;
 	eid.fromString(args[0].c_str());
-	TSessionId scenarioId( (uint32)atoi(args[1].c_str()) );
+	uint32 sessionId;
+	NLMISC::fromString(args[1], sessionId);
+	TSessionId scenarioId(sessionId);
 	R2::TItemAndQuantity item;
 	item.SheetId = CSheetId(args[2]);
-	item.Quantity = (uint32)atoi(args[3].c_str());
+	NLMISC::fromString(args[3], item.Quantity);
 
 	std::vector< R2::TItemAndQuantity > items;
 	items.push_back(item);
@@ -544,7 +548,9 @@ NLMISC_COMMAND(endScenario, "Simulate the end of a R2 scenario", "<ScenarioId>")
 	if( args.size() != 1)
 		return false;
 
-	TSessionId scenarioId( (uint32)atoi(args[0].c_str()) );
+	uint32 sessionId;
+	NLMISC::fromString(args[0], sessionId);
+	TSessionId scenarioId(sessionId);
 	CR2MissionItem::getInstance().endScenario( scenarioId );
 	return true;
 }
@@ -558,7 +564,7 @@ NLMISC_COMMAND(destroyMissionR2Item, "Destroy an R2 itme mission owned by a play
 	eid.fromString(args[0].c_str());
 	R2::TItemAndQuantity item;
 	item.SheetId = CSheetId(args[1]);
-	item.Quantity = (uint32)atoi(args[2].c_str());
+	NLMISC::fromString(args[2], item.Quantity);
 	std::vector<R2::TItemAndQuantity> items;
 	items.push_back(item);
 

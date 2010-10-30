@@ -146,7 +146,8 @@ void CCDBSynchronised::read( const string& fileName )
 		// value
 		token = strtok(buffer," \t");
 		if( token == NULL ) continue;
-		sint64 value = atoi(token);
+		sint64 value;
+		NLMISC::fromString(token, value);
 		
 		// property name
 		token = strtok(NULL," \n");

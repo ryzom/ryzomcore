@@ -1,19 +1,19 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.def)
 
-NL_TARGET_DRIVER(nel_drv_fmod ${SRC})
+NL_TARGET_DRIVER(nel_drv_fmod_win ${SRC})
 
 INCLUDE_DIRECTORIES(${FMOD_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nel_drv_fmod ${FMOD_LIBRARY} nelmisc nelsnd_lowlevel)
+TARGET_LINK_LIBRARIES(nel_drv_fmod_win ${FMOD_LIBRARY} nelmisc nelsnd_lowlevel)
 
-NL_DEFAULT_PROPS(nel_drv_fmod "NeL, Driver, Sound: FMOD")
-NL_ADD_RUNTIME_FLAGS(nel_drv_fmod)
-NL_ADD_LIB_SUFFIX(nel_drv_fmod)
+NL_DEFAULT_PROPS(nel_drv_fmod_win "NeL, Driver, Sound: FMOD")
+NL_ADD_RUNTIME_FLAGS(nel_drv_fmod_win)
+NL_ADD_LIB_SUFFIX(nel_drv_fmod_win)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_fmod ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.h ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.cpp)
+  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_fmod_win ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.h ${CMAKE_CURRENT_SOURCE_DIR}/stdfmod.cpp)
 ENDIF(WITH_PCH)
 
-INSTALL(TARGETS nel_drv_fmod RUNTIME DESTINATION bin LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION lib COMPONENT driverssound)
+INSTALL(TARGETS nel_drv_fmod_win RUNTIME DESTINATION bin LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION lib COMPONENT driverssound)
 IF(WITH_MAXPLUGIN)
-  INSTALL(TARGETS nel_drv_fmod RUNTIME DESTINATION maxplugin COMPONENT driverssound)
+  INSTALL(TARGETS nel_drv_fmod_win RUNTIME DESTINATION maxplugin COMPONENT driverssound)
 ENDIF(WITH_MAXPLUGIN)

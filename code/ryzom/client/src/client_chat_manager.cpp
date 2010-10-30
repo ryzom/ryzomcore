@@ -959,7 +959,7 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
 			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
-		} 
+		}
 		else
 		{
 			// Does the char have a CSR title?
@@ -967,7 +967,8 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 		}
 
 		ucstring cur_time;
-		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+		if (pNL && pNL->getValueBool())
 		{
 			cur_time = CInterfaceManager::getTimestampHuman();
 		}
@@ -1008,7 +1009,8 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 	ucstring cur_time;
 	if (cat.toString() != "&bbl&")
 	{
-		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+		if (pNL && pNL->getValueBool())
 		{
 			cur_time = CInterfaceManager::getTimestampHuman();
 		}
@@ -1183,11 +1185,13 @@ class CHandlerTell : public IActionHandler
 		ucstring finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
 		ucstring cur_time;
-		if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+		if (pNL && pNL->getValueBool())
 		{
 			cur_time = CInterfaceManager::getTimestampHuman();
 		}
-		ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+		ucstring csr;
+		if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 		finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, true);

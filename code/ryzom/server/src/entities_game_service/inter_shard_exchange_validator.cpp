@@ -215,8 +215,10 @@ NLMISC_COMMAND(setShardExchangeLimit, "set the level limit for items exchanged b
 		return false;
 
 	// get numeric values for the 2 arguments
-	IInterShardExchangeValidator::TShardId shardId= (IInterShardExchangeValidator::TShardId)atoi(args[0].c_str());
-	IInterShardExchangeValidator::TLevelCap levelCap= (IInterShardExchangeValidator::TLevelCap)atoi(args[1].c_str());
+	IInterShardExchangeValidator::TShardId shardId;
+	NLMISC::fromString(args[0], shardId);
+	IInterShardExchangeValidator::TLevelCap levelCap;
+	NLMISC::fromString(args[1], levelCap);
 
 	// make sure the numeric conversion was successfule for the 2 arguments
 	if (NLMISC::toString(shardId)!=args[0] || NLMISC::toString(levelCap)!=args[1])
@@ -238,7 +240,8 @@ NLMISC_COMMAND(resetShardExchangeLimit, "reset the level limit for items exchang
 		return false;
 
 	// get numeric values for the 2 arguments
-	IInterShardExchangeValidator::TShardId shardId= (IInterShardExchangeValidator::TShardId)atoi(args[0].c_str());
+	IInterShardExchangeValidator::TShardId shardId;
+	NLMISC::fromString(args[0], shardId);
 
 	// make sure the numeric conversion was successfule for the 2 arguments
 	if (NLMISC::toString(shardId)!=args[0])

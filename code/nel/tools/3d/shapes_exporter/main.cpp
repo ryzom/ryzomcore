@@ -174,9 +174,9 @@ sint main(int argc, char **argv)
 			std::string output_path = exporter.settings.output_path + md5.substr(0, 2) + "/" + md5;
 
 			// file is an animation
-			std::string animation = ""; // CPath::lookup(baseFilename + ".anim", false, false, false);
+			std::string animation; // CPath::lookup(baseFilename + ".anim", false, false, false);
 			// file is a skeleton
-			std::string skeleton = ""; // CPath::lookup(baseFilename + ".skel", false, false, false);
+			std::string skeleton; // CPath::lookup(baseFilename + ".skel", false, false, false);
 			// file is a shape
 			std::string shape = CPath::lookup(baseFilename + ".shape", false, false, false);
 

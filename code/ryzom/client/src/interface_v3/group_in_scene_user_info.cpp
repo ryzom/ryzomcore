@@ -557,29 +557,47 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 
 					if (!entity->isUser())
 					{
-						// Check if are Civ Allies
+						bool civEnnemies = false;
 						for (uint8 i = 0; i < 4; i++)
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
-								civToDisplay = i;
-
-						// Check if are Civ Ennemies
-						for (uint8 i = 0; i < 4; i++)
+						{
 							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
 								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
-								civToDisplay = i;
-						
-						// Check if are Cult Allies
-						for (uint8 i = 4; i < 7; i++)
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
-								cultToDisplay = i;
+							{
+								civEnnemies = true;
+								if ( civToDisplay == i)
+									break;
+								else
+									 civToDisplay = i;
+							}
+							
+							if (!civEnnemies)
+							{
+								if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
+									 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+									if ( civToDisplay == i)
+										break;
+									else
+										 civToDisplay = i;
+							}
+						}
 
-						// Check if are Cult Ennemies
+
 						for (uint8 i = 4; i < 7; i++)
+						{
 							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
 								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
-								cultToDisplay = i;
+								if ( cultToDisplay == i)
+									break;
+								else
+									 cultToDisplay = i;
+
+							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
+								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								if ( cultToDisplay == i)
+									break;
+								else
+									 cultToDisplay = i;
+						}
 					}
 
 					if ((pPlayer->getPvpMode() & PVP_MODE::PvpFaction) || (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))

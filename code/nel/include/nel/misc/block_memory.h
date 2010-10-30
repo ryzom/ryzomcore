@@ -174,7 +174,9 @@ public:
 		_Mutex.enter();
 
 		if(NL3D_BlockMemoryAssertOnPurge)
+		{
 			nlassert(_NAllocatedElts==0);
+		}
 
 		while(_Blocks.begin()!=_Blocks.end())
 		{

@@ -338,8 +338,38 @@ function game:startNpcWebPage()
 	ui:find("browse_refresh").active = false
 end
 
+------------------------------------------------------------------------------------------------------------
+-- 
+function game:closeNpcWebBrowserHeader()
+	local ui = getUI('ui:interface:npc_web_browser');
+	
+	-- save size
+	ui_npc_web_browser_h = ui.h;
+	ui_npc_web_browser_w = ui.w;
+	
+	-- reduce window size
+	ui.pop_min_h = 32;
+	ui.h = 0;
+	ui.w = 150;
+end
 
 ------------------------------------------------------------------------------------------------------------
+-- 
+function game:openNpcWebBrowserHeader()
+	local ui = getUI('ui:interface:npc_web_browser');
+	ui.pop_min_h = 96;
+
+	-- set size from saved values
+	if (ui_npc_web_browser_h ~= nil) then
+		ui.h = ui_npc_web_browser_h;
+	end
+	
+	 if (ui_npc_web_browser_w ~= nil) then
+		ui.w = ui_npc_web_browser_w;
+	end
+end
+
+
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
 -- FAME
@@ -1553,14 +1583,21 @@ function game:addRpJob(jobtype, id, value, rpjobs)
 			base.hardtext = i18n.get(name):toUtf8()
 			local ui = getUI(base_path..":icon")
 			ui.texture = name..".tga"
-			local bar = getUI(base_path..":bar3d:level")
-			bar.color = tostring(math.floor((105*quantity)/maxlevel)).." "..tostring(100+math.floor((155*quantity)/maxlevel)).." "..tostring(math.floor((105*quantity)/maxlevel)).." 255"
-			bar.w = tostring((368*quantity)/maxlevel)
-			local t = getUI(base_path..":bar3d:t")
-			t.hardtext = tostring(quantity).." / "..tostring(maxlevel)
-			t.color = tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." 255"
 			local echelon = getUI(base_path..":echelon_value")
 			echelon.hardtext = tostring(echelon_value/10)
+			local bar = getUI(base_path..":bar3d:level")
+			local t = getUI(base_path..":bar3d:t")
+			if (echelon_value >= 60) then
+				bar.color = "255 0 0 255"
+				bar.w = "368"
+				t.hardtext = i18n.get("uiRpjobMaxLevel"):toUtf8()
+				t.color = "255 255 0 255"
+			else
+				bar.color = tostring(math.floor((105*quantity)/maxlevel)).." "..tostring(100+math.floor((155*quantity)/maxlevel)).." "..tostring(math.floor((105*quantity)/maxlevel)).." 255"
+				bar.w = tostring((368*quantity)/maxlevel)
+				t.hardtext = tostring(quantity).." / "..tostring(maxlevel)
+				t.color = tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." 255"
+			end
 		end
 	end
 end

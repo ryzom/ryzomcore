@@ -24,8 +24,7 @@
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
-#include <GL/gl.h>
-#include <GL/glx.h>
+#include <X11/Xlib.h>
 
 namespace NLMISC {
 

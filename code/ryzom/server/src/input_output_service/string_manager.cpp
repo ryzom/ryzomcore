@@ -264,7 +264,9 @@ void CStringManager::TSheetInfo::readGeorges (const NLMISC::CSmartPtr<NLGEORGES:
 		if (sheetId.getSheetType() == NLMISC::CSheetId::typeFromFileExtension("creature"))
 		{
 			form->getRootNode ().getValueByName (gender, "Basics.Gender");
-			Gender = GSGENDER::EGender(atoi(gender.c_str()));
+			sint genderId;
+			NLMISC::fromString(gender, genderId);
+			Gender = GSGENDER::EGender(genderId);
 
 			form->getRootNode ().getValueByName (Race, "Basics.Race");
 
@@ -1351,7 +1353,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, loadBotNames, "load a bot names file",
 		filename = args[0];
 
 	if (args.size() > 1)
-		resetBotnames = (atoi(args[1].c_str()) != 0);
+		NLMISC::fromString(args[1], resetBotnames);
 
 	SM->loadBotNames(filename, resetBotnames, &log);
 	return true;

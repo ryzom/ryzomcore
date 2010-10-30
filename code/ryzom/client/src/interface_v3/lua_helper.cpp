@@ -26,15 +26,20 @@
 #endif
 
 
-extern "C"
-{
-#include "lualib.h"
-}
+#include "lua_loadlib.h"
 
 // to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
 #include <cassert>
-#undef assert
-#define assert nlassert
+#ifdef assert
+	#undef assert
+#endif
+
+#ifdef NL_DEBUG
+	#define assert(x) nlassert(x)
+#else
+	#define assert(x)
+#endif
+
 #include <luabind/luabind.hpp>
 
 using namespace std;

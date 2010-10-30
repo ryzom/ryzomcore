@@ -384,7 +384,8 @@ bool CExitDestination::build( const NLLIGO::IPrimitive* prim,const NLLIGO::IPrim
 	string value;
 	// get properties
 	nlverify( prim->getPropertyByName("exit_index_in_instance",value) );
-	_ExitIndex = uint8(atoi( value.c_str() )) - (uint8)1;
+	NLMISC::fromString(value, _ExitIndex);
+	--_ExitIndex;
 	if ( _ExitIndex == 0xFF )
 	{
 		nlwarning("<BUILDING> in destination '%s' invalid building '%s' starts at 1", _Name.c_str(), value.c_str() );

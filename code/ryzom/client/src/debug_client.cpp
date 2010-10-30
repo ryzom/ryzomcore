@@ -490,7 +490,7 @@ string getDebugInformation()
 	if (IsInRingSession)
 	{
 		if (getEditor().isInitialized())
-			str += toString("SessionId: %u\n", getEditor().getDMC().getEditionModule().getCurrentAdventureId());
+			str += toString("SessionId: %u\n", getEditor().getDMC().getEditionModule().getCurrentAdventureId().asInt());
 		extern R2::TUserRole UserRoleInSession;
 		str += toString("Role: %s\n", UserRoleInSession.toString().c_str());
 	}

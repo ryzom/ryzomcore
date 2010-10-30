@@ -28,8 +28,16 @@
 
 // to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
 #include <cassert>
-#undef assert
-#define assert nlassert
+#ifdef assert
+	#undef assert
+#endif
+
+#ifdef NL_DEBUG
+	#define assert(x) nlassert(x)
+#else
+	#define assert(x)
+#endif
+
 #include <luabind/luabind.hpp>
 // in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
 #if LUABIND_MAX_ARITY == 10
@@ -1982,7 +1990,7 @@ bool CLuaIHM::isTargetUser()
 bool CLuaIHM::isPlayerInPVPMode()
 {
 	if (!UserEntity) return false;
-	return (UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
+	return (UserEntity->getPvpMode() & PVP_MODE::PvpFaction || UserEntity->getPvpMode() & PVP_MODE::PvpFactionFlagged || UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction);
 }
 
 // ***************************************************************************
@@ -1990,7 +1998,7 @@ bool CLuaIHM::isTargetInPVPMode()
 {
 	CEntityCL *target = getTargetSlot();
 	if (!target) return false;
-	return (target->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
+	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction);
 }
 
 // ***************************************************************************

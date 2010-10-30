@@ -127,10 +127,12 @@ void drawLoadingBitmap (float progress)
 		float y2 = 1;
 
 		if ((ww > 1024) || (wh > 768))
+		{
 			if ((ww - 1024) > (wh - 768))
 				x1 = ((ww - (wh * 1024.f) / 768.f) / 2.f) / ww;
 			else
 				y1 = ((wh - (ww * 768.f) / 1024.f) / 2.f) / wh;
+		}
 
 		if (x1 != 0)
 			x2 = 1 - x1;

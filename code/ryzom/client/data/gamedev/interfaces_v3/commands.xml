@@ -78,6 +78,8 @@
 	<command name="guildinvite" action="command" params="a guildInvite $" />
 	<command name="invite" action="command" params="a teamInvite $" />
 
+	<command name="channel" action="command" params="a connectUserChannel +" />
+
 	<!-- WebIG -->
 	<command name="go" action="browse" params="name=ui:interface:webig:content:html|url=home"/>
 

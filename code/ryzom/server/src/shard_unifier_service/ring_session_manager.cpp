@@ -319,7 +319,8 @@ namespace RSMGR
 				session->update(_RingDb);
 			}
 
-			uint16 port = atoi(portParam->ParamValue.c_str());
+			uint16 port;
+			NLMISC::fromString(portParam->ParamValue, port);
 
 			openItf(port);
 
@@ -4224,8 +4225,11 @@ endOfWelcomeUserResult:
 			if (args.size() != 2)
 				return false;
 
-			uint32 charId = atoi(args[0].c_str());
-			uint32 sessionId = atoi(args[1].c_str());
+			uint32 charId;
+			NLMISC::fromString(args[0], charId);
+
+			uint32 sessionId;
+			NLMISC::fromString(args[1], sessionId);
 
 			log.displayNL("Banning char %u from session %u", charId, sessionId);
 
@@ -4300,7 +4304,9 @@ endOfWelcomeUserResult:
 			if (args.size() > 3 || args.size() < 2)
 				return false;
 
-			uint32 shardId = atoi(args[0].c_str());
+			uint32 shardId;
+			NLMISC::fromString(args[0], shardId);
+
 			if (shardId == 0)
 			{
 				// try with the shard name

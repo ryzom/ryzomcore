@@ -124,7 +124,7 @@ public:
 	{
 	public:
 
-		CVar () : Type(T_UNKNOWN), Root(false), FromLocalFile(true), SaveWrap(6) {}
+		CVar () : Type(T_UNKNOWN), Root(false), Comp(false), FromLocalFile(true), SaveWrap(6) {}
 
 		/// \name Access to the variable content.
 		//@{

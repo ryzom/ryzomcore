@@ -1305,17 +1305,20 @@ NLMISC_CATEGORISED_COMMAND(egs, convertToPdr, "Load all possible characters from
 			return false;
 		std::string	param = args[op++];
 
+		bool val = false;
+		NLMISC::fromString(param, val);
+
 		if (opt == "-recurse")
 		{
-			recurse = (param == "true" || atoi(param.c_str()) != 0);
+			recurse = (param == "true" || val);
 		}
 		else if (opt == "-xml")
 		{
-			xml = (param == "true" || atoi(param.c_str()) != 0);
+			xml = (param == "true" || val);
 		}
 		else if (opt == "-overwrite")
 		{
-			overwrite = (param == "true" || atoi(param.c_str()) != 0);
+			overwrite = (param == "true" || val);
 		}
 		else if (opt == "-wcbin")
 		{

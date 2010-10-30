@@ -235,7 +235,8 @@ bool CBuildingManager::parsePhysicalBuildings( const NLLIGO::IPrimitive* prim, C
 		{
 			TAIAlias alias;
 			nlverify( CPrimitivesParser::getAlias(prim, alias));
-//*			TAIAlias alias = atoi( value.c_str() );
+//			TAIAlias alias;
+//			NLMISC::fromString(value, alias);
 			if ( _BuildingPhysicals.find( alias ) != _BuildingPhysicals.end() )
 			{
 				nlwarning("<BUILDING>building instance %s exists more than once", CPrimitivesParser::aliasToString(alias).c_str());
@@ -294,7 +295,8 @@ bool CBuildingManager::parseTriggers( const NLLIGO::IPrimitive* prim, CBuildingP
 			std::string name;
 			nlverify( prim->getPropertyByName("name",name) );
 			nlverify( prim->getPropertyByName("pacs_trigger_id",value) );
-			uint32 triggerId =  (uint32) atoi( value.c_str() );
+			uint32 triggerId;
+			NLMISC::fromString(value, triggerId);
 
 			if ( triggerId == 0 && CMissionParser::getNoBlankString( value ) != "0" )
 			{
@@ -753,8 +755,13 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 	IDestination * dest = entry.Destination;
 	uint16 ownerIdx = entry.OwnerIndex;
 
-	// remove the request
-	_TriggerRequests.erase( it );
+	// remove the requests
+	while ( it != _TriggerRequests.end() )
+	{
+		_TriggerRequests.erase( it );
+		it = _TriggerRequests.find( user->getEntityRowId() );
+	}
+
 	if ( !dest->isUserAllowed(user,ownerIdx) )
 	{
 		return;

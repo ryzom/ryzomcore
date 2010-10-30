@@ -274,11 +274,19 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		switch (type.getValue())
 		{
 		case LGS::TSupportedParamType::spt_uint32:
-			return LGS::TParamValue((uint32)atoi(value.get_string().c_str()));
+		{
+			uint32 tmp;
+			NLMISC::fromString(value.get_string(), tmp);
+			return LGS::TParamValue(tmp);
+		}
 		case LGS::TSupportedParamType::spt_uint64:
 			return LGS::TParamValue((uint64)atol(value.get_string().c_str()));
 		case LGS::TSupportedParamType::spt_sint32:
-			return LGS::TParamValue((sint32)atoi(value.get_string().c_str()));
+		{
+			sint32 tmp;
+			NLMISC::fromString(value.get_string(), tmp);
+			return LGS::TParamValue(tmp);
+		}
 		case LGS::TSupportedParamType::spt_float:
 			return LGS::TParamValue((float)atof(value.get_string().c_str()));
 		case LGS::TSupportedParamType::spt_string:

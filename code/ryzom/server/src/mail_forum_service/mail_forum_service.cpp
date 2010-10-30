@@ -421,7 +421,10 @@ NLMISC_COMMAND(openSession,"open a mail/forum session for a player", "shardid us
 	if (args.size() != 3)
 		return false;
 
-	CMailForumService::openSession( atoi(args[0].c_str()), args[1], args[2] );
+	uint32 shardId;
+	NLMISC::fromString(args[0], shardId);
+
+	CMailForumService::openSession(shardId, args[1], args[2]);
 
 	return true;
 }
@@ -431,7 +434,10 @@ NLMISC_COMMAND(closeSession, "close a mail/forum session for a player", "shardid
 	if (args.size() != 2)
 		return false;
 
-	CMailForumService::closeSession( atoi(args[0].c_str()), args[1] );
+	uint32 shardId;
+	NLMISC::fromString(args[0], shardId);
+
+	CMailForumService::closeSession(shardId, args[1]);
 
 	return true;
 }
@@ -441,7 +447,10 @@ NLMISC_COMMAND(changeUserName, "change a user's name (guild or player)", "shardi
 	if (args.size() != 3)
 		return false;
 
-	CMailForumService::changeUserName( atoi(args[0].c_str()), args[1], args[2] );
+	uint32 shardId;
+	NLMISC::fromString(args[0], shardId);
+
+	CMailForumService::changeUserName( shardId, args[1], args[2] );
 
 	return true;
 }

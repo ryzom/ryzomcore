@@ -734,7 +734,7 @@ void CEntityCL::init()
 	}
 	_NameId = 0;
 
-	_PermanentStatutIcon = string("");
+	_PermanentStatutIcon.clear();
 
 	// Not a mission target by default
 	_MissionTarget = false;
@@ -2530,15 +2530,22 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 		// ally
 		if (isAlly())
 		{
-			if (isInTeam())
-				return _PvpAllyInTeamColor;
-			if(isInGuild())
-				return _PvpAllyInGuildColor;
-
-			if (getPvpMode()&PVP_MODE::PvpFactionFlagged)
+			if (getPvpMode() & PVP_MODE::PvpFactionFlagged)
+			{
+				if (isInTeam())
+					return _PvpAllyInTeamColor;
+				if(isInGuild())
+					return _PvpAllyInGuildColor;
 				return _PvpAllyColor;
+			}
 			else
+			{
+				if (isInTeam())
+					return CRGBA(min(255, _PvpAllyInTeamColor.R+150), min(255, _PvpAllyInTeamColor.G+150), min(255, _PvpAllyInTeamColor.B+150),_PvpAllyInTeamColor.A);
+				if(isInGuild())
+					return CRGBA(min(255, _PvpAllyInGuildColor.R+150), min(255, _PvpAllyInGuildColor.G+150), min(255, _PvpAllyInGuildColor.B+150),_PvpAllyInGuildColor.A);
 				return CRGBA(min(255, _PvpAllyColor.R+150), min(255, _PvpAllyColor.G+150), min(255, _PvpAllyColor.B+150),_PvpAllyColor.A);
+			}
 		}
 		// neutral
 		if (isInTeam())

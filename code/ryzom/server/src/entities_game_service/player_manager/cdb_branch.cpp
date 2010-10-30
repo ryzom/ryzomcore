@@ -283,10 +283,11 @@ void CCDBStructNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &pro
 		if ((const char *) count != NULL)
 		{
 			// dealing with an array of entries
-			unsigned countAsInt=(unsigned)atoi(count);
+			uint countAsInt;
+			NLMISC::fromString(count, countAsInt);
 			nlassert((const char *) count != NULL);
 
-			for (unsigned i=0;i<countAsInt;i++)
+			for (uint i=0;i<countAsInt;i++)
 			{
 				// Progress bar
 				progressCallBack.progress ((float)i/(float)countAsInt);
@@ -345,10 +346,11 @@ void CCDBStructNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &pro
 		if ((const char *) count != NULL)
 		{
 			// dealing with an array of entries
-			unsigned countAsInt=(unsigned)atoi(count);
+			uint countAsInt;
+			NLMISC::fromString(count, countAsInt);
 			nlassert((const char *) count != NULL);
 
-			for (unsigned i=0;i<countAsInt;i++)
+			for (uint i=0;i<countAsInt;i++)
 			{
 				// Progress bar
 				progressCallBack.progress ((float)i/(float)countAsInt);

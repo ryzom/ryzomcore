@@ -1108,7 +1108,8 @@ bool CStaticCreatures::applyProtectModification(uint index, const std::string &a
 	//Set protection max
 	if (attr == "max")
 	{
-		uint16 max = static_cast<uint16>(atoi(newValue.c_str()));
+		uint16 max;
+		NLMISC::fromString(newValue, max);
 		_Protections[index].Max = max;
 		return false;
 	}
@@ -1164,7 +1165,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			}
 			case at_gender :
 			{
-				_Gender = static_cast<uint8>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _Gender);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting Gender to %u", modelId.c_str(), _Gender);
 				break;
 			}
@@ -1185,7 +1186,8 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 
 			case at_nb_players :
 			{	
-				int n = atoi(scriptLine[1].c_str());
+				sint n;
+				NLMISC::fromString(scriptLine[1], n);
 				if (n > 255 || n < 0)
 				{
 					nlwarning("<CStaticCreatures::applyUserModel>Error while applying user model '%s': invalid value for attribute 'NbPlayers', setting 'NbPlayers' to 1.", modelId.c_str());
@@ -1200,7 +1202,7 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			case at_player_hp_level:
 			{
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s': setting playerHpLevel to '%s'", modelId.c_str(), scriptLine[1].c_str());
-				_PlayerHpLevel = atoi(scriptLine[1].c_str());
+				NLMISC::fromString(scriptLine[1], _PlayerHpLevel);
 				_CreatureDamagePerHitWithoutAverageDodge = uint32( (100*_PlayerHpLevel) / _NbHitToKillPlayer );
 				compileCreatureDamagePerHit();
 				break;
@@ -1258,7 +1260,8 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 
 			case at_life:
 			{
-				sint32 hp = static_cast<sint32>(atoi(scriptLine[1].c_str()));
+				sint32 hp;
+				NLMISC::fromString(scriptLine[1], hp);
 				
 				if (hp == 0)
 				{
@@ -1318,35 +1321,35 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 
 			case at_attack_level:
 			{
-				_AttackLevel = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _AttackLevel);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting attackLevel to '%u'", modelId.c_str(), _AttackLevel);
 				break;
 			}
 
 			case at_defense_level:
 			{
-				_DefenseLevel = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _DefenseLevel);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting defenseLevel to %u", modelId.c_str(), _DefenseLevel);
 				break;
 			}
 
 			case at_xp_level:
 			{
-				_XPLevel = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _XPLevel);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting XpLevel to %u", modelId.c_str(), _XPLevel);
 				break;
 			}
 
 			case at_taunt_level:
 			{
-				_TauntLevel = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _TauntLevel);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting TauntLevel to %u", modelId.c_str(), _TauntLevel);
 				break;
 			}
 
 			case at_melee_reach_value:
 			{
-				_MeleeReachValue = static_cast<uint8>(atoi(scriptLine[1].c_str()));
+				NLMISC::fromString(scriptLine[1], _MeleeReachValue);
 				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting MeleeReachValue to %u", modelId.c_str(), _MeleeReachValue);
 				break;
 			}
@@ -1571,91 +1574,106 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 			
 			case at_resists_fear :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Fear = value;
 				break; 
 			}
 			case at_resists_sleep :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Sleep = value;
 				break; 
 			}
 			case at_resists_stun :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Stun = value;
 				break; 
 			}
 			case at_resists_root :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Root = value;
 				break; 
 			}
 			case at_resists_snare :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Snare = value;
 				break; 
 			}
 			case at_resists_slow :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Slow = value;
 				break; 
 			}
 			case at_resists_madness :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Madness = value;
 				break; 
 			}
 			case at_resists_blind :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Blind = value;
 				break; 
 			}
 			case at_resists_acid :
 			{
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Acid = value;
 				break; 
 			}
 			case at_resists_cold :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Cold = value;
 				break; 
 			}
 			case at_resists_electricity :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Electricity = value;
 				break; 
 			}
 			case at_resists_fire :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Fire = value;
 				break; 
 			}
 			case at_resists_poison :
 			{
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Poison = value;
 				break; 
 			}
 			case at_resists_rot :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Rot = value;
 				break; 
 			}
 			case at_resists_shockwave :
 			{ 
-				uint16 value = static_cast<uint16>(atoi(scriptLine[1].c_str()));
+				uint16 value;
+				NLMISC::fromString(scriptLine[1], value);
 				_Resists.Shockwave = value;
 				break; 
 			}

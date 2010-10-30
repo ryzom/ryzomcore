@@ -283,11 +283,11 @@ typedef	uint64_t	uint64;
 typedef				int			sint;			// at least 32bits (depend of processor)
 typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
-#if __SIZEOF_LONG__ == 8
+#ifdef _LP64
 #	define	NL_I64 "l"
 #else
 #	define	NL_I64 "ll"
-#endif // __SIZEOF_LONG__ == 8
+#endif // _LP64
 
 #endif // NL_OS_UNIX
 
@@ -307,6 +307,8 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #	define CHashSet std::tr1::unordered_set
 #	define CHashMultiMap std::tr1::unordered_multimap
 #elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
+#	include <hash_map>
+#	include <hash_set>
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap

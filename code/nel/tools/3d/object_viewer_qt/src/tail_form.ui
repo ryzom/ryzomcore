@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CTailParticleWidget</class>
+ <widget class="QWidget" name="CTailParticleWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>206</width>
+    <height>90</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QComboBox" name="ribbonOrientationComboBox">
+     <property name="toolTip">
+      <string>Ribbon orientation</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Follow Path</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Follow Path XY</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Identity</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="0" column="1" rowspan="3">
+    <widget class="NLQT::CGraphicsInfoWidget" name="pathWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>72</width>
+       <height>72</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>72</width>
+       <height>72</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QComboBox" name="tailShapeComboBox">
+     <property name="toolTip">
+      <string>Tail shape</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Triangle</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Quad</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Octogon</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Pentagram</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Simple segment X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Simple segment Y</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Simple segment Z</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Simple brace</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="tailFadingCheckBox">
+     <property name="text">
+      <string>Tail fading</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NLQT::CGraphicsInfoWidget</class>
+   <extends>QWidget</extends>
+   <header>graphics_info_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

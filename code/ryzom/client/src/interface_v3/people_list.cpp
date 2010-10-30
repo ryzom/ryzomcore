@@ -465,7 +465,8 @@ void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint num
 	}
 
 	ucstring cur_time;
-	if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+	if (pNL && pNL->getValueBool())
 	{
 		cur_time = CInterfaceManager::getTimestampHuman();
 	}
@@ -936,7 +937,8 @@ class CHandlerContactEntry : public IActionHandler
 				ucstring final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
 				ucstring cur_time;
-				if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false)->getValueBool())
+				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+				if (pNL && pNL->getValueBool())
 				{
 					cur_time = CInterfaceManager::getTimestampHuman();
 				}

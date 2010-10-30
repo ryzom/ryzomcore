@@ -364,6 +364,13 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_NbStaticActiveEffects  = 0;
 	_StaticActionInProgress = false;
 
+	_NbUserChannels = 0;
+
+	_LoadingFinish = false;
+
+	_PVPFlagAlly = 0;
+	_PVPFlagEnemy = 0;
+
 	// init faber plans
 //	_KnownFaberPlans.resize(64,(uint64)0); //64*64 bits
 
@@ -630,11 +637,12 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_HaveToUpdatePVPMode = false;
 	_SessionId = TSessionId(0);
 	_CurrentSessionId = _SessionId;
-	_FactionChannelMode = true;
 	_PvPSafeZoneActive = false;
 
 	// For client/server contact list communication
 	_ContactIdPool= 0;
+
+	_inRoomOfPlayer = CEntityId::Unknown;
 
 	for(uint i = 0; i < BRICK_FAMILIES::NbFamilies; ++i )
 		_BrickFamilyBitField[i] = 0;
@@ -762,17 +770,77 @@ void	CCharacter::initPDStructs()
 //-----------------------------------------------
 void CCharacter::updatePVPClanVP() const
 {
+	TYPE_PVP_CLAN propPvpClanTemp = 0;
+	uint32 maxFameCiv = 0;
+	uint8 civOfMaxFame = 255;
+	uint32 maxFameCult = 0;
+	uint8 cultOfMaxFame = 255;
+
+	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+	{
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
+		if (fameIdx < 4)
+		{
+			if ((uint32)abs(fame) >= maxFameCiv)
+			{
+				civOfMaxFame = fameIdx;
+				maxFameCiv = abs(fame);
+			}
+		}
+		else
+		{ 
+			if ((uint32)abs(fame) >= maxFameCult)
+			{
+				cultOfMaxFame = fameIdx - 4;
+				maxFameCult = abs(fame);
+			}
+		}
+
+		if (fame >= PVPFameRequired*6000)
+		{
+			propPvpClanTemp |= (TYPE_PVP_CLAN(1) << (2*TYPE_PVP_CLAN(fameIdx)));
+		}
+		else if (fame <= -PVPFameRequired*6000)
+		{
+			propPvpClanTemp |= (TYPE_PVP_CLAN(1) << ((2*TYPE_PVP_CLAN(fameIdx))+1));
+		}
+		if (getPvPRecentActionFlag())
+		{
+			uint8 flagAlly = (_PVPFlagAlly & (1 << TYPE_PVP_CLAN(fameIdx))) >> TYPE_PVP_CLAN(fameIdx);
+			uint8 flagEnemy = (_PVPFlagEnemy & (1 << TYPE_PVP_CLAN(fameIdx))) >> TYPE_PVP_CLAN(fameIdx);
+			propPvpClanTemp |= flagAlly << (2*TYPE_PVP_CLAN(fameIdx));
+			propPvpClanTemp |= flagEnemy << ((2*TYPE_PVP_CLAN(fameIdx))+1);
+		}
+
+	}
+	propPvpClanTemp |= TYPE_PVP_CLAN(civOfMaxFame) << (2*TYPE_PVP_CLAN(7));
+	propPvpClanTemp |= TYPE_PVP_CLAN(cultOfMaxFame) << (2*TYPE_PVP_CLAN(8));
 	CMirrorPropValue<TYPE_PVP_CLAN> propPvpClan( TheDataset, TheDataset.getDataSetRow(_Id), DSPropertyPVP_CLAN );
-	if( getAllegiance().first >= PVP_CLAN::BeginCults && getAllegiance().first <= PVP_CLAN::EndCults )
-	{
-		propPvpClan = (uint8) getAllegiance().first;
-	}
-	else
-	{
-		propPvpClan = (uint8) getAllegiance().second;
-	}
+
+	propPvpClan = (uint32)propPvpClanTemp;
 }
 
+TYPE_PVP_CLAN CCharacter::getPVPFamesAllies()
+{
+	TYPE_PVP_CLAN propPvpClanTemp = 0;
+	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+		if (CFameInterface::getInstance().getFameIndexed(_Id, fameIdx) >= PVPFameRequired*6000)
+			propPvpClanTemp |= TYPE_PVP_CLAN(1) << TYPE_PVP_CLAN(fameIdx);
+	if (getPvPRecentActionFlag())
+		return propPvpClanTemp | _PVPFlagAlly;
+	return propPvpClanTemp;
+}
+
+TYPE_PVP_CLAN CCharacter::getPVPFamesEnemies()
+{
+	TYPE_PVP_CLAN propPvpClanTemp = 0;
+	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+		if (CFameInterface::getInstance().getFameIndexed(_Id, fameIdx) <= -PVPFameRequired*6000)
+			propPvpClanTemp |= TYPE_PVP_CLAN(1) << TYPE_PVP_CLAN(fameIdx);
+	if (getPvPRecentActionFlag())
+		return propPvpClanTemp | _PVPFlagEnemy;
+	return propPvpClanTemp;
+}
 
 
 //-----------------------------------------------
@@ -858,7 +926,7 @@ bool CCharacter::setValue( string var, string value )
 		try
 		{
 			sint32 &temp = lookupStat(var);
-			temp = atoi( value.c_str() );
+			NLMISC::fromString(value, temp);
 		}
 		catch( CCharacter::EInvalidStat &e)
 		{
@@ -881,7 +949,9 @@ bool CCharacter::modifyValue( string var, string value )
 		try
 		{
 			sint32 &temp = lookupStat(var);
-			temp = temp + atoi( value.c_str() );
+			sint32 valueInt;
+			NLMISC::fromString(value, valueInt);
+			temp = temp + valueInt;
 		}
 		catch( CCharacter::EInvalidStat &e)
 		{
@@ -1382,7 +1452,8 @@ uint32 CCharacter::tickUpdate()
 			if (_PVPFlagLastTimeChange + waitTime < CTickEventHandler::getGameCycle())
 			{
 				CPVPManager2::getInstance()->setPVPModeInMirror(this);
-				CPVPManager2::getInstance()->addOrRemoveFactionChannel(this);
+				CPVPManager2::getInstance()->updateFactionChannel(this);
+				updatePVPClanVP();
 				_HaveToUpdatePVPMode = false;
 			}
 		}
@@ -1393,6 +1464,7 @@ uint32 CCharacter::tickUpdate()
 			if( propPvpMode.getValue()&PVP_MODE::PvpFactionFlagged )
 			{
 				CPVPManager2::getInstance()->setPVPModeInMirror(this);
+				updatePVPClanVP();
 			}
 		}
 	}
@@ -2823,123 +2895,94 @@ void CCharacter::postLoadTreatment()
 	}
 
 	{
-	H_AUTO(LockTicketInInventory);
-	lockTicketInInventory();
+		H_AUTO(LockTicketInInventory);
+		lockTicketInInventory();
 	}
 
 	// if EId translator has been initialized by SU, check contact list
 	{
-	H_AUTO(ValidateContactList);
-	validateContactList();
+		H_AUTO(ValidateContactList);
+		validateContactList();
 	}
 
 	{
-	H_AUTO(UpdateFlagForActiveEffect);
-	/* update flags for active effects */
-	if( _ForbidAuraUseEndDate>0 && _ForbidAuraUseStartDate==0 )
-	{
-		// thus timer won't look like infinte on client(can happen due to old save file where startDate didn't exist)
-		_ForbidAuraUseStartDate = CTickEventHandler::getGameCycle();
-	}
-	setPowerFlagDates();
-	setAuraFlagDates();
-	updateBrickFlagsDBEntry();
-	_ModifiersInDB.writeInDatabase(_PropertyDatabase);
-	}
-
-	{
-	H_AUTO(AddCreationBricks);
-	/* add starting bricks if any modification has been done */
-	addCreationBricks();
+		H_AUTO(UpdateFlagForActiveEffect);
+		/* update flags for active effects */
+		if( _ForbidAuraUseEndDate>0 && _ForbidAuraUseStartDate==0 )
+		{
+			// thus timer won't look like infinte on client(can happen due to old save file where startDate didn't exist)
+			_ForbidAuraUseStartDate = CTickEventHandler::getGameCycle();
+		}
+		setPowerFlagDates();
+		setAuraFlagDates();
+		updateBrickFlagsDBEntry();
+		_ModifiersInDB.writeInDatabase(_PropertyDatabase);
 	}
 
 	{
-	H_AUTO(CheckCharacterAndScoresValues);
-	/* check character and scores are as they are supposed to be according to bricks possessed */
-	checkCharacAndScoresValues();
+		H_AUTO(AddCreationBricks);
+		/* add starting bricks if any modification has been done */
+		addCreationBricks();
 	}
 
 	{
-	H_AUTO(ComputeBestSkill);
-	/* compute player best skill */
-	computeBestSkill();
+		H_AUTO(CheckCharacterAndScoresValues);
+		/* check character and scores are as they are supposed to be according to bricks possessed */
+		checkCharacAndScoresValues();
 	}
 
 	{
-	H_AUTO(ComputeSkillUsedForDodge);
-	/* compute player best skill to use for dodge */
-	computeSkillUsedForDodge();
+		H_AUTO(ComputeBestSkill);
+		/* compute player best skill */
+		computeBestSkill();
 	}
 
 	{
-	H_AUTO(UpdateMagicProtectionAndResistance);
-	/* compute resists scores*/
-	updateMagicProtectionAndResistance();
+		H_AUTO(ComputeSkillUsedForDodge);
+		/* compute player best skill to use for dodge */
+		computeSkillUsedForDodge();
 	}
 
 	{
-	H_AUTO(LoadedMissionPostLoad);
-	/* Call the postLoad methods for the loaded missions */
-	for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
-	{
-		BOMB_IF( (*it).second == NULL, "Mission is NULL after load", continue );
-		(*it).second->onLoad();
+		H_AUTO(UpdateMagicProtectionAndResistance);
+		/* compute resists scores*/
+		updateMagicProtectionAndResistance();
 	}
+
+	{
+		H_AUTO(LoadedMissionPostLoad);
+		/* Call the postLoad methods for the loaded missions */
+		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
+		{
+			BOMB_IF( (*it).second == NULL, "Mission is NULL after load", continue );
+			(*it).second->onLoad();
+		}
 	}
 
 	/* setup the implicit visual property fields */
 	SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.Sex,getGender());
 
 	{
-	H_AUTO(ComputeForageBonus);
-	/* compute the forage bonuses */
-	computeForageBonus();
+		H_AUTO(ComputeForageBonus);
+		/* compute the forage bonuses */
+		computeForageBonus();
 	}
 
 	{
-	H_AUTO(ComputeMiscBonus);
-	/* compute misc bonuses */
-	computeMiscBonus();
+		H_AUTO(ComputeMiscBonus);
+		/* compute misc bonuses */
+		computeMiscBonus();
 	}
 
 	{
-	H_AUTO(CItemServiceManager);
-	CItemServiceManager::getInstance()->initPersistentServices(this);
+		H_AUTO(CItemServiceManager);
+		CItemServiceManager::getInstance()->initPersistentServices(this);
 	}
 
 	{
-	H_AUTO(CheckPvPTagValidity);
-	if( _DeclaredCult == PVP_CLAN::Neutral || _DeclaredCult == PVP_CLAN::None )
-	{
-		if( _PVPFlag )
-		{
-			// if no cult declared and civ is not in war we remove pvp tag
-			if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCiv ) == false )
-			{
-				_PVPFlag = false;
-				_PVPFlagLastTimeChange = 0;
-				_PVPFlagTimeSettedOn = 0;
-				setPVPFlagDatabase();
-				_HaveToUpdatePVPMode = true;
-			}
-		}
-	}
+		H_AUTO(CheckPvPTagValidity);
 
-	if( _DeclaredCiv == PVP_CLAN::Neutral || _DeclaredCiv == PVP_CLAN::None )
-	{
-		if( _PVPFlag )
-		{
-			// if no civ declared and cult is not in war we remove pvp tag
-			if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCult ) == false )
-			{
-				_PVPFlag = false;
-				_PVPFlagLastTimeChange = 0;
-				_PVPFlagTimeSettedOn = 0;
-				setPVPFlagDatabase();
-				_HaveToUpdatePVPMode = true;
-			}
-		}
-	}
+		_HaveToUpdatePVPMode = true;
 	}
 
 }
@@ -7841,7 +7884,8 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 			if( valueString.size() > 0 )
 			{
 				SKILLS::ESkills skillEnum = SKILLS::toSkill(skillString);
-				sint32 skillPoint = (sint32) atoi(valueString.c_str());
+				sint32 skillPoint;
+				NLMISC::fromString(valueString, skillPoint);
 				if( skillEnum != SKILLS::unknown )
 				{
 					_Skills._Skills[ skillEnum ].Base = min( skillPoint, (sint32)SkillsTree->SkillsTree[ skillEnum ].MaxSkillValue );
@@ -13666,6 +13710,36 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 //		_PropertyDatabase.setProp( toString("FAME:PLAYER%d:THRESHOLD", fameIndexInDatabase), sint64(float(fameMax)/FameAbsoluteMax*100) );
 		CBankAccessor_PLR::getFAME().getPLAYER(fameIndexInDatabase).setTHRESHOLD(_PropertyDatabase, checkedCast<sint8>(float(fameMax)/FameAbsoluteMax*100) );
 	}
+
+	bool canPvp = false;
+	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+	{
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
+
+		if (fame >= PVPFameRequired*6000) {
+			canPvp = true;
+		} else if (fame <= -PVPFameRequired*6000) {
+			canPvp = true;
+		}
+	}
+
+	if (_LoadingFinish)
+	{
+		if(!canPvp && (_PVPFlag || getPvPRecentActionFlag()) )
+		{
+			_PVPFlag = false;
+			_PVPFlagLastTimeChange = 0;
+			_PVPFlagTimeSettedOn = 0;
+			_PVPRecentActionTime = 0;
+			_HaveToUpdatePVPMode = true;
+		}
+		updatePVPClanVP();
+		setPVPFlagDatabase();
+		
+		// handle with faction channel
+		CPVPManager2::getInstance()->updateFactionChannel(this);
+	}
+
 }
 
 //-----------------------------------------------
@@ -14288,6 +14362,63 @@ void CCharacter::syncContactListWithCharNameChanges(const std::vector<NLMISC::CE
 		sendContactListInit();
 }
 
+
+void CCharacter::setInRoomOfPlayer(const NLMISC::CEntityId &id)
+{
+	_inRoomOfPlayer = id;
+}
+
+const NLMISC::CEntityId& CCharacter::getInRoomOfPlayer()
+{
+	return _inRoomOfPlayer;
+}
+
+//--------------------------------------------------------------
+// CCharacter::havePlayerRoomAccess
+//--------------------------------------------------------------
+
+bool CCharacter::playerHaveRoomAccess(const NLMISC::CEntityId &id)
+{	
+	const uint size = (uint)_RoomersList.size();
+	for ( uint i =0 ; i < size ; ++i)
+	{
+		if ( _RoomersList[i].getShortId() == id.getShortId())
+			return true;
+	}
+	return false;
+}
+
+//--------------------------------------------------------------
+// CCharacter::addRoomAccessToPlayer
+//--------------------------------------------------------------
+
+void CCharacter::addRoomAccessToPlayer(const NLMISC::CEntityId &id)
+{
+	// if player not found
+	if (id == CEntityId::Unknown || PlayerManager.getChar(id)==NULL)
+	{
+		if ( ! (IShardUnifierEvent::getInstance() && IShardUnifierEvent::getInstance()->isCharacterOnlineAbroad(id)))
+		{
+			// player not found => message
+			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
+			return;
+		}
+	}
+
+	// check not already in list
+	const uint size = (uint)_RoomersList.size();
+	for ( uint i =0 ; i < size ; ++i)
+	{
+		if ( _RoomersList[i].getShortId() == id.getShortId())
+		{
+			return;
+		}
+	}
+
+	uint32 playerId = PlayerManager.getPlayerId(id);
+	_RoomersList.push_back(id);
+}
+
 //--------------------------------------------------------------
 //	CCharacter::addPlayerToFriendList()
 //--------------------------------------------------------------
@@ -14296,9 +14427,12 @@ void CCharacter::addPlayerToFriendList(const NLMISC::CEntityId &id)
 	// if player not found
 	if (id == CEntityId::Unknown || PlayerManager.getChar(id)==NULL)
 	{
-		// player not found => message
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
-		return;
+		if ( ! (IShardUnifierEvent::getInstance() && IShardUnifierEvent::getInstance()->isCharacterOnlineAbroad(id)))
+		{
+			// player not found => message
+			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
+			return;
+		}
 	}
 
 	// check not already in list
@@ -14485,6 +14619,42 @@ void CCharacter::removePlayerFromIgnoreListByIndex(uint16 index)
 	msgName.serial(senderId);
 	msgName.serial(ignoredId);
 	sendMessageViaMirror ("IOS", msgName);
+}
+
+//--------------------------------------------------------------
+//	CCharacter::removeRoomAccesToPlayer()
+//--------------------------------------------------------------
+void CCharacter::removeRoomAccesToPlayer(const NLMISC::CEntityId &id, bool kick)
+{
+	if (id == NLMISC::CEntityId::Unknown)
+		return;
+
+	CCharacter *target = PlayerManager.getChar(id);
+
+	for ( uint i = 0 ; i < _RoomersList.size() ; ++i)
+	{
+		if ( _RoomersList[i].getShortId() == id.getShortId() )
+		{
+			_RoomersList.erase(_RoomersList.begin() + i);
+			return;
+		}
+	}
+
+	if (kick & (target->getInRoomOfPlayer().getShortId() == getId().getShortId()))
+	{
+		target->setInRoomOfPlayer(CEntityId::Unknown);
+		if (!TheDataset.isAccessible(getEntityRowId()))
+			return;
+
+		const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(target->getBuildingExitZone());
+		if (zone)
+		{
+			sint32 x,y,z;
+			float heading;
+			zone->getRandomPoint(x,y,z,heading);
+			target->tpWanted(x,y,z,true,heading);
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -16007,7 +16177,7 @@ void CCharacter::checkCharacAndScoresValues()
 			// phrase = abppXZZ.sphrase with X = characteristic code and ZZ = brick level (CharacteristicBrickStep*ZZ)
 			code = phraseStr.substr(4,1); //string( text[4] );
 			txt = phraseStr.substr(5,2);
-			lvl = atoi( txt.c_str() );
+			NLMISC::fromString(txt, lvl);
 
 			CHARACTERISTICS::TCharacteristics charac = CHARACTERISTICS::getCharacteristicFromCode(code);
 			if (charac < CHARACTERISTICS::NUM_CHARACTERISTICS)
@@ -16568,7 +16738,21 @@ void CCharacter::setPVPFlag( bool pvpFlag )
 
 	if( pvpFlag == true )
 	{
-		if( (_DeclaredCult == PVP_CLAN::Neutral || _DeclaredCult == PVP_CLAN::None ) && (_DeclaredCiv == PVP_CLAN::Neutral || _DeclaredCiv == PVP_CLAN::None ) )
+
+
+// NEW PVP : Check fames
+		bool havePvpFame = false;
+		for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+		{
+			sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
+			if ((fame >= PVPFameRequired*6000) || (fame <= -PVPFameRequired*6000))
+				havePvpFame = true;
+		}
+
+
+//-		if( (_DeclaredCult == PVP_CLAN::Neutral || _DeclaredCult == PVP_CLAN::None ) && (_DeclaredCiv == PVP_CLAN::Neutral || _DeclaredCiv == PVP_CLAN::None ) )
+
+		if (!havePvpFame)
 		{
 			// character can set it's tag pvp on if he have no allegiance.
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
@@ -16578,7 +16762,8 @@ void CCharacter::setPVPFlag( bool pvpFlag )
 			return;
 		}
 
-		if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCult ) == false &&
+// OLD PVP
+/*		if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCult ) == false &&
 			CPVPManager2::getInstance()->isFactionInWar( _DeclaredCiv ) == false)
 		{
 			// character can set it's tag pvp on if none of his clan is in war
@@ -16588,7 +16773,9 @@ void CCharacter::setPVPFlag( bool pvpFlag )
 			CBankAccessor_PLR::getCHARACTER_INFO().getPVP_FACTION_TAG().setCOUNTER(_PropertyDatabase, uint8(++_PvPDatabaseCounter));
 			return;
 		}
+		*/	
 	}
+
 
 	// if player changed it's decision before timer if finished
 	if( pvpFlag != _PVPFlag && actualPvpFlag == pvpFlag )
@@ -16711,12 +16898,28 @@ void CCharacter::setPVPFlagDatabase()
 	CBankAccessor_PLR::getCHARACTER_INFO().getPVP_FACTION_TAG().setACTIVATION_TIME(_PropertyDatabase, activationTime );
 //	_PropertyDatabase.setProp("CHARACTER_INFO:PVP_FACTION_TAG:COUNTER", ++_PvPDatabaseCounter );
 	CBankAccessor_PLR::getCHARACTER_INFO().getPVP_FACTION_TAG().setCOUNTER(_PropertyDatabase, uint8(++_PvPDatabaseCounter) );
+
+	CBankAccessor_PLR::getCHARACTER_INFO().getPVP_FACTION_TAG().setFLAG_PVP_TIME_LEFT(_PropertyDatabase, _PVPRecentActionTime + PVPActionTimer );
 }
 
 //-----------------------------------------------------------------------------
-void CCharacter::setPVPRecentActionFlag()
+void CCharacter::setPVPRecentActionFlag(CCharacter *target)
 {
+	if (!getPvPRecentActionFlag())
+	{
+		_PVPFlagAlly = 0;
+		_PVPFlagEnemy = 0;
+	}
+
 	_PVPRecentActionTime = CTickEventHandler::getGameCycle();
+
+	if (target != NULL)
+	{
+		_PVPFlagAlly |= target->getPVPFamesAllies();
+		_PVPFlagEnemy |= target->getPVPFamesEnemies();
+		updatePVPClanVP();
+	}
+
 //	_PropertyDatabase.setProp("CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT", _PVPRecentActionTime + PVPActionTimer );
 	CBankAccessor_PLR::getCHARACTER_INFO().getPVP_FACTION_TAG().setFLAG_PVP_TIME_LEFT(_PropertyDatabase, _PVPRecentActionTime + PVPActionTimer );
 
@@ -16750,7 +16953,7 @@ bool CCharacter::setDeclaredCult(PVP_CLAN::TPVPClan newClan)
 			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getAllegiance());
 
 			// handle with faction channel
-			CPVPManager2::getInstance()->addOrRemoveFactionChannel(this);
+			CPVPManager2::getInstance()->updateFactionChannel(this);
 
 			// write new allegiance in database
 //			_PropertyDatabase.setProp("FAME:CULT_ALLEGIANCE", newClan);
@@ -16758,21 +16961,22 @@ bool CCharacter::setDeclaredCult(PVP_CLAN::TPVPClan newClan)
 
 			_LastCultPointWriteDB = ~0;
 
-			if( _DeclaredCult == PVP_CLAN::Neutral || _DeclaredCult == PVP_CLAN::None )
-			{
-				if( _PVPFlag )
+//			if( _DeclaredCult == PVP_CLAN::Neutral || _DeclaredCult == PVP_CLAN::None )
+//			{
+				if( _PVPFlag || getPvPRecentActionFlag() )
 				{
 					// if no cult declared and civ is not in war we remove pvp tag
-					if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCiv ) == false )
-					{
+//					if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCiv ) == false )
+//					{
 						_PVPFlag = false;
 						_PVPFlagLastTimeChange = 0;
 						_PVPFlagTimeSettedOn = 0;
+						_PVPRecentActionTime = 0;
 						setPVPFlagDatabase();
 						_HaveToUpdatePVPMode = true;
-					}
+//					}
 				}
-			}
+//			}
 
 			// Update PvP clan in mirror for faction PvP
 			updatePVPClanVP();
@@ -16811,27 +17015,31 @@ bool CCharacter::setDeclaredCiv(PVP_CLAN::TPVPClan newClan)
 			// set tribe fame threshold and clamp fame if necessary
 			CFameManager::getInstance().setAndEnforceTribeFameCap(this->getId(), this->getAllegiance());
 
+			// handle with faction channel
+			CPVPManager2::getInstance()->updateFactionChannel(this);
+
 			// write new allegiance in database
 //			_PropertyDatabase.setProp("FAME:CIV_ALLEGIANCE", newClan);
 			CBankAccessor_PLR::getFAME().setCIV_ALLEGIANCE(_PropertyDatabase, newClan);
 
 			_LastCivPointWriteDB = ~0;
 
-			if( _DeclaredCiv == PVP_CLAN::Neutral || _DeclaredCiv == PVP_CLAN::None )
-			{
-				if( _PVPFlag )
+//			if( _DeclaredCiv == PVP_CLAN::Neutral || _DeclaredCiv == PVP_CLAN::None )
+//			{
+				if( _PVPFlag || getPvPRecentActionFlag() )
 				{
 					// if no civ declared and cult is not in war we remove pvp tag
-					if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCult ) == false )
-					{
+//					if( CPVPManager2::getInstance()->isFactionInWar( _DeclaredCult ) == false )
+//					{
 						_PVPFlag = false;
 						_PVPFlagLastTimeChange = 0;
 						_PVPFlagTimeSettedOn = 0;
+						_PVPRecentActionTime = 0;
 						setPVPFlagDatabase();
 						_HaveToUpdatePVPMode = true;
-					}
+//					}
 				}
-			}
+//			}
 
 			// Update PvP clan in mirror for faction PvP
 			updatePVPClanVP();
@@ -17662,10 +17870,10 @@ void	CCharacter::barUpdate()
 		_PhysScores._PhysicalScores[ SCORES::focus].Current() != _OldFocusBarSentToPlayer )
 	{
 		// bkup cache
-		_OldHpBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::hit_points ].Current();
-		_OldSapBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::sap].Current();
-		_OldStaBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::stamina].Current();
-		_OldFocusBarSentToPlayer= (sint16)_PhysScores._PhysicalScores[ SCORES::focus].Current();
+		_OldHpBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::hit_points ].Current();
+		_OldSapBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::sap].Current();
+		_OldStaBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::stamina].Current();
+		_OldFocusBarSentToPlayer= _PhysScores._PhysicalScores[ SCORES::focus].Current();
 
 		// Since client must listen only the last message (no delta like DB here...), use a small counter
 		_BarSentToPlayerMsgNumber++;
@@ -19505,9 +19713,10 @@ void CCharacter::channelAdded( bool b )
 
 //------------------------------------------------------------------------------
 
-void CCharacter::setShowFactionChannelsMode(bool s)
+void CCharacter::setShowFactionChannelsMode(TChanID channel, bool s)
 {
-	_FactionChannelMode = s; CPVPManager2::getInstance()->addRemoveFactionChannelToUserWithPriviledge(this);
+	_FactionChannelsMode[channel] = s;
+	CPVPManager2::getInstance()->addRemoveFactionChannelToUserWithPriviledge(channel, this, s);
 }
 
 

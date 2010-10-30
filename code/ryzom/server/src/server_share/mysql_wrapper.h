@@ -180,16 +180,17 @@ namespace MSW
 		}
 		void getField(uint32 fieldIndex, sint8 &value)
 		{
-			value = sint8(atoi(getRawField(fieldIndex)));
+			NLMISC::fromString(std::string(getRawField(fieldIndex)), value);
 		}
 		void getField(uint32 fieldIndex, sint32 &value)
 		{
-			value = sint32(atoi(getRawField(fieldIndex)));
+			NLMISC::fromString(std::string(getRawField(fieldIndex)), value);
 		}
 		
 		void getField(uint32 fieldIndex, TSessionId &value)
 		{
-			sint32 val = sint32(atoi(getRawField(fieldIndex)));
+			sint32 val;
+			NLMISC::fromString(std::string(getRawField(fieldIndex)), val);
 			value =TSessionId(val);
 		}
 

@@ -2904,59 +2904,10 @@ public:
 	{
 		if (Driver == NULL) return;
 
-		// **** Init Video Modes
 		VideoModes.clear();
-		Driver->getModes(VideoModes);
-		// Remove modes under 800x600 and get the unique string
 		vector<string> stringModeList;
-		sint i, j, nFoundMode = -1;
-		for (i=0; i < (sint)VideoModes.size(); ++i)
-		{
-			if ((VideoModes[i].Width < 800) || (VideoModes[i].Height < 600))
-			{
-				VideoModes.erase(VideoModes.begin()+i);
-				--i;
-			}
-			else
-			{
-				bool bFound = false;
-				string tmp = toString(VideoModes[i].Width)+" x "+toString(VideoModes[i].Height);
-				for (j = 0; j < (sint)stringModeList.size(); ++j)
-					if (stringModeList[j] == tmp)
-					{
-						bFound = true;
-						break;
-					}
-				if (!bFound)
-				{
-					stringModeList.push_back(tmp);
-					if ((VideoModes[i].Width <= ClientCfg.Width) && (VideoModes[i].Height <= ClientCfg.Height))
-					{
-						if (nFoundMode == -1)
-						{
-							nFoundMode = j;
-						}
-						else
-						{
-							if ((VideoModes[i].Width >= VideoModes[nFoundMode].Width) &&
-								(VideoModes[i].Height >= VideoModes[nFoundMode].Height))
-								nFoundMode = j;
-						}
-					}
-				}
-			}
-		}
 
-		// If no modes are available, display a message and exit
-		if (!ClientCfg.Windowed && nFoundMode == -1)
-		{
-			Driver->systemMessageBox("No Video Modes available!\n"
-																"Minimum Video mode to play Ryzom is 800x600.\n",
-																"No Video Mode!",
-																NL3D::UDriver::okType,
-																NL3D::UDriver::exclamationIcon);
-			exit(EXIT_SUCCESS);
-		}
+		sint nFoundMode = getRyzomModes(VideoModes, stringModeList);
 
 		// Initialize interface combo box
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2964,7 +2915,7 @@ public:
 		if( pCB )
 		{
 			pCB->resetTexts();
-			for (j = 0; j < (sint)stringModeList.size(); j++)
+			for (sint j = 0; j < (sint)stringModeList.size(); j++)
 				pCB->addText(ucstring(stringModeList[j]));
 		}
 		// -1 is important to indicate we set this value in edit mode

@@ -179,7 +179,9 @@ TEnumValue	CType::getIndexValue(const string &name, bool verbose) const
 	}
 	else
 	{
-		return atoi(name.c_str());
+		uint32 ret;
+		NLMISC::fromString(name, ret);
+		return (TEnumValue)ret;
 	}
 }
 

@@ -1147,10 +1147,8 @@ void destroyDebug()
 
 void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 {
-
 	// Do some basic compiler time check on type size
 	nlctassert(sizeof(char) == 1);
-
 
 //	static bool alreadyCreateSharedAmongThreads = false;
 //	if ( !alreadyCreateSharedAmongThreads )

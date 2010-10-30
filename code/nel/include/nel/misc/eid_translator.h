@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <limits>
 
 #include "types_nl.h"
 #include "entity_id.h"

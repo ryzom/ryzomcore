@@ -786,6 +786,15 @@
             <node name="uiQH_2"
                   handler="launch_help"
                   params="url=qh_windows.html" />
+            <node name="uiQH_3"
+                  handler="launch_help"
+                  params="url=qh_fight.html" />
+            <node name="uiQH_4"
+                  handler="launch_help"
+                  params="url=qh_magic.html" />
+            <node name="uiQH_5"
+                  handler="launch_help"
+                  params="url=qh_orientation.html" />
           </node>
           <node name="uihHowTo"
                 handler="launch_help"

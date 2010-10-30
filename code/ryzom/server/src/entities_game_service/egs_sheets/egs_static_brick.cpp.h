@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef RY_EGS_STATIC_BRICK_CPP_H
+#define RY_EGS_STATIC_BRICK_CPP_H
+
 #include "nel/misc/smart_ptr.h"
 
 class TBrickParam
@@ -394,7 +397,7 @@ struct CSBrickParamSap : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Sap=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Sap);
 
 		return *this;
 	}
@@ -427,7 +430,7 @@ struct CSBrickParamHp : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Hp=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Hp);
 
 		return *this;
 	}
@@ -460,7 +463,7 @@ struct CSBrickParamSta : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Sta=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Sta);
 
 		return *this;
 	}
@@ -498,7 +501,7 @@ struct CSBrickParamStaWeightFactor : public TBrickParam::IId
 		
 		ParsedOk=true;
 		StaFactor=(float)atof(args[0].c_str());
-		StaConst=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], StaConst);
 		
 		return *this;
 	}
@@ -531,7 +534,7 @@ struct CSBrickParamFocus : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Focus=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Focus);
 
 		return *this;
 	}
@@ -859,8 +862,8 @@ struct CSBrickParamAttackSkillModifier : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		MinModifier=atoi(args[0].c_str());
-		MaxModifier=atoi(args[1].c_str());
+		NLMISC::fromString(args[0], MinModifier);
+		NLMISC::fromString(args[1], MaxModifier);
 
 		return *this;
 	}
@@ -896,8 +899,8 @@ struct CSBrickParamDefenseModifier : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		MinModifier=atoi(args[0].c_str());
-		MaxModifier=atoi(args[1].c_str());
+		NLMISC::fromString(args[0], MinModifier);
+		NLMISC::fromString(args[1], MaxModifier);
 
 		return *this;
 	}
@@ -1393,8 +1396,8 @@ struct CSBrickParamCombatSlowAttack : public TBrickParam::IId
 
 		ParsedOk=true;
 		Duration=(float)atof(args[0].c_str());
-		MinFactor=atoi(args[1].c_str());
-		MaxFactor=atoi(args[2].c_str());
+		NLMISC::fromString(args[1], MinFactor);
+		NLMISC::fromString(args[2], MaxFactor);
 
 		return *this;
 	}
@@ -1434,8 +1437,8 @@ struct CSBrickParamCombatSlow : public TBrickParam::IId
 
 		ParsedOk=true;
 		Duration=(float)atof(args[0].c_str());
-		MinFactor=atoi(args[1].c_str());
-		MaxFactor=atoi(args[2].c_str());
+		NLMISC::fromString(args[1], MinFactor);
+		NLMISC::fromString(args[2], MaxFactor);
 
 		return *this;
 	}
@@ -1615,8 +1618,8 @@ struct CSBrickParamCriticalHitMod : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		MinModifier=atoi(args[0].c_str());
-		MaxModifier=atoi(args[1].c_str());
+		NLMISC::fromString(args[0], MinModifier);
+		NLMISC::fromString(args[1], MaxModifier);
 
 		return *this;
 	}
@@ -1781,7 +1784,7 @@ struct CSBrickParamMagicEffectMod : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		EffectMod=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], EffectMod);
 
 		return *this;
 	}
@@ -1919,9 +1922,9 @@ struct CSBrickParamMagicDmg : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Hp=atoi(args[0].c_str());
-		Sap=atoi(args[1].c_str());
-		Sta=atoi(args[2].c_str());
+		NLMISC::fromString(args[0], Hp);
+		NLMISC::fromString(args[1], Sap);
+		NLMISC::fromString(args[2], Sta);
 
 		return *this;
 	}
@@ -1960,9 +1963,9 @@ struct CSBrickParamMagicHeal : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Hp=atoi(args[0].c_str());
-		Sap=atoi(args[1].c_str());
-		Sta=atoi(args[2].c_str());
+		NLMISC::fromString(args[0], Hp);
+		NLMISC::fromString(args[1], Sap);
+		NLMISC::fromString(args[2], Sta);
 
 		return *this;
 	}
@@ -1995,7 +1998,7 @@ struct CSBrickParamMagicRanges : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		RangeIndex=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], RangeIndex);
 
 		return *this;
 	}
@@ -2028,7 +2031,7 @@ struct CSBrickParamMagicLinkCost : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Cost=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Cost);
 
 		return *this;
 	}
@@ -2061,7 +2064,7 @@ struct CSBrickParamMagicLinkPeriod : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Period=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Period);
 
 		return *this;
 	}
@@ -2127,7 +2130,7 @@ struct CSBrickParamMagicLinkPower : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Power=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Power);
 
 		return *this;
 	}
@@ -2163,8 +2166,8 @@ struct CSBrickParamMagicBreakResist : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		BreakResist=atoi(args[0].c_str());
-		BreakResistPower=atoi(args[1].c_str());
+		NLMISC::fromString(args[0], BreakResist);
+		NLMISC::fromString(args[1], BreakResistPower);
 
 		return *this;
 	}
@@ -2197,7 +2200,7 @@ struct CSBrickParamMagicArmorComp : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		ArmorComp=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], ArmorComp);
 
 		return *this;
 	}
@@ -2230,7 +2233,7 @@ struct CSBrickParamMagicVampirise : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Vampirise=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Vampirise);
 
 		return *this;
 	}
@@ -2296,7 +2299,7 @@ struct CSBrickParamCraftRecommended : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Recommended=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Recommended);
 
 		return *this;
 	}
@@ -2329,7 +2332,7 @@ struct CSBrickParamCraftHP : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		HitPoint=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], HitPoint);
 
 		return *this;
 	}
@@ -2362,7 +2365,7 @@ struct CSBrickParamCraftSap : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Sap=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Sap);
 
 		return *this;
 	}
@@ -2395,7 +2398,7 @@ struct CSBrickParamCraftSta : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Stamina=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Stamina);
 
 		return *this;
 	}
@@ -2428,7 +2431,7 @@ struct CSBrickParamCraftFocus : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Focus=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Focus);
 
 		return *this;
 	}
@@ -2461,7 +2464,7 @@ struct CSBrickParamCraftQuality : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Quality=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Quality);
 
 		return *this;
 	}
@@ -2791,7 +2794,7 @@ struct CSBrickParamForageAngle : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Angle=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Angle);
 
 		return *this;
 	}
@@ -2824,7 +2827,7 @@ struct CSBrickParamForageMulti : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Limit=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Limit);
 
 		return *this;
 	}
@@ -2857,7 +2860,7 @@ struct CSBrickParamForageKnowledge : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Know=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Know);
 
 		return *this;
 	}
@@ -2989,7 +2992,7 @@ struct CSBrickParamStatEnergyOnly : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		StatEnergyExact=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], StatEnergyExact);
 
 		return *this;
 	}
@@ -3055,7 +3058,7 @@ struct CSBrickParamForageVisStealth : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Mode=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Mode);
 
 		return *this;
 	}
@@ -3088,7 +3091,7 @@ struct CSBrickParamForageSourceLocator : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Flag=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Flag);
 
 		return *this;
 	}
@@ -3121,7 +3124,7 @@ struct CSBrickParamForageAttempts : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Nb=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Nb);
 
 		return *this;
 	}
@@ -3451,7 +3454,7 @@ struct CSBrickParamForageAbsorbSourceDmg : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Percent=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Percent);
 
 		return *this;
 	}
@@ -3484,7 +3487,7 @@ struct CSBrickParamKamiOffering : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Num=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Num);
 
 		return *this;
 	}
@@ -3616,7 +3619,7 @@ struct CSBrickParamForageRMGroupFilter : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Value=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Value);
 
 		return *this;
 	}
@@ -3649,7 +3652,7 @@ struct CSBrickParamForageRMFamilyFilter : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Value=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Value);
 
 		return *this;
 	}
@@ -3682,7 +3685,7 @@ struct CSBrickParamForageItemPartFilter : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		ItemPartIndex=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], ItemPartIndex);
 
 		return *this;
 	}
@@ -3721,7 +3724,7 @@ struct CSBrickParamPowerTaunt : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		TauntPower=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], TauntPower);
 		Range=(float)atof(args[1].c_str());
 		DisableTime=(float)atof(args[2].c_str());
 
@@ -3777,12 +3780,12 @@ struct CSBrickParamShielding : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		NoShieldProtectionFactor=atoi(args[0].c_str());
-		NoShieldProtectionMax=atoi(args[1].c_str());
-		BucklerProtectionFactor=atoi(args[2].c_str());
-		BucklerProtectionMax=atoi(args[3].c_str());
-		ShieldProtectionFactor=atoi(args[4].c_str());
-		ShieldProtectionMax=atoi(args[5].c_str());
+		NLMISC::fromString(args[0], NoShieldProtectionFactor);
+		NLMISC::fromString(args[1], NoShieldProtectionMax);
+		NLMISC::fromString(args[2], BucklerProtectionFactor);
+		NLMISC::fromString(args[3], BucklerProtectionMax);
+		NLMISC::fromString(args[4], ShieldProtectionFactor);
+		NLMISC::fromString(args[5], ShieldProtectionMax);
 		Duration=(float)atof(args[6].c_str());
 		DisableTime=(float)atof(args[7].c_str());
 
@@ -3829,7 +3832,7 @@ struct CSBrickParamLifeAura : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		RegenMod=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], RegenMod);
 		Duration=(float)atof(args[1].c_str());
 		Radius=(float)atof(args[2].c_str());
 		TargetDisableTime=(float)atof(args[3].c_str());
@@ -3878,7 +3881,7 @@ struct CSBrickParamStaminaAura : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		RegenMod=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], RegenMod);
 		Duration=(float)atof(args[1].c_str());
 		Radius=(float)atof(args[2].c_str());
 		TargetDisableTime=(float)atof(args[3].c_str());
@@ -3927,7 +3930,7 @@ struct CSBrickParamSapAura : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		RegenMod=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], RegenMod);
 		Duration=(float)atof(args[1].c_str());
 		Radius=(float)atof(args[2].c_str());
 		TargetDisableTime=(float)atof(args[3].c_str());
@@ -3970,7 +3973,7 @@ struct CSBrickParamSpeedingUp : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		SpeedMod=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], SpeedMod);
 		Duration=(float)atof(args[1].c_str());
 		DisableTime=(float)atof(args[2].c_str());
 
@@ -4193,7 +4196,7 @@ struct CSBrickParamWarCry : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		TargetDisableTime=(float)atof(args[2].c_str());
 		UserDisableTime=(float)atof(args[3].c_str());
-		DamageBonus=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], DamageBonus);
 
 		return *this;
 	}
@@ -4242,7 +4245,7 @@ struct CSBrickParamFireWall : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		TargetDisableTime=(float)atof(args[2].c_str());
 		UserDisableTime=(float)atof(args[3].c_str());
-		Damage=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], Damage);
 
 		return *this;
 	}
@@ -4291,7 +4294,7 @@ struct CSBrickParamThornWall : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		TargetDisableTime=(float)atof(args[2].c_str());
 		UserDisableTime=(float)atof(args[3].c_str());
-		Damage=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], Damage);
 
 		return *this;
 	}
@@ -4340,7 +4343,7 @@ struct CSBrickParamWaterWall : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		TargetDisableTime=(float)atof(args[2].c_str());
 		UserDisableTime=(float)atof(args[3].c_str());
-		Damage=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], Damage);
 
 		return *this;
 	}
@@ -4389,7 +4392,7 @@ struct CSBrickParamLightningWall : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		TargetDisableTime=(float)atof(args[2].c_str());
 		UserDisableTime=(float)atof(args[3].c_str());
-		Damage=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], Damage);
 
 		return *this;
 	}
@@ -4438,7 +4441,7 @@ struct CSBrickParamBerserk : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		DamagePerUpdate=(float)atof(args[2].c_str());
 		UpdateFrequency=(float)atof(args[3].c_str());
-		DamageBonus=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], DamageBonus);
 
 		return *this;
 	}
@@ -4487,7 +4490,7 @@ struct CSBrickParamEnchantWeapon : public TBrickParam::IId
 		Duration=(float)atof(args[1].c_str());
 		DamageType=args[2].c_str();
 		DpsBonus=(float)atof(args[3].c_str());
-		DamageBonus=atoi(args[4].c_str());
+		NLMISC::fromString(args[4], DamageBonus);
 
 		return *this;
 	}
@@ -4652,7 +4655,7 @@ struct CSBrickParamHeal : public TBrickParam::IId
 
 		ParsedOk=true;
 		AffectedScore=args[0].c_str();
-		HealValue=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], HealValue);
 		HealFactorValue=(float)atof(args[2].c_str());
 		DisableTime=(float)atof(args[3].c_str());
 		PowerType=args[4].c_str();
@@ -4824,9 +4827,9 @@ struct CSBrickParamAreaBomb : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Radius=(float)atof(args[0].c_str());
-		MinFactor=(float)atof(args[1].c_str());
-		MaxTarget=(uint8)atoi(args[2].c_str());
+		NLMISC::fromString(args[0], Radius);
+		NLMISC::fromString(args[1], MinFactor);
+		NLMISC::fromString(args[2], MaxTarget);
 
 		return *this;
 	}
@@ -4868,10 +4871,10 @@ struct CSBrickParamAreaSpray : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		Angle=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], Angle);
 		Height=(float)atof(args[1].c_str());
 		Base=(float)atof(args[2].c_str());
-		MaxTarget=(uint8)atoi(args[3].c_str());
+		NLMISC::fromString(args[3], MaxTarget);
 
 		return *this;
 	}
@@ -4911,7 +4914,7 @@ struct CSBrickParamAreaChain : public TBrickParam::IId
 
 		ParsedOk=true;
 		Range=(float)atof(args[0].c_str());
-		MaxTargets=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], MaxTargets);
 		Factor=(float)atof(args[2].c_str());
 
 		return *this;
@@ -4949,7 +4952,7 @@ struct CSBrickParamAreaTargets : public TBrickParam::IId
 
 		ParsedOk=true;
 		TargetFactor=(float)atof(args[0].c_str());
-		MaxTargets=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], MaxTargets);
 
 		return *this;
 	}
@@ -4982,7 +4985,7 @@ struct CSBrickParamMagicRecharge : public TBrickParam::IId
 			return *this;
 
 		ParsedOk=true;
-		SapLoad=atoi(args[0].c_str());
+		NLMISC::fromString(args[0], SapLoad);
 
 		return *this;
 	}
@@ -5019,7 +5022,7 @@ struct CSBrickParamCharacUpgrade : public TBrickParam::IId
 
 		ParsedOk=true;
 		Characteristic=args[0].c_str();
-		Modifier=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], Modifier);
 
 		return *this;
 	}
@@ -5056,7 +5059,7 @@ struct CSBrickParamScoreUpgrade : public TBrickParam::IId
 
 		ParsedOk=true;
 		Score=args[0].c_str();
-		Modifier=atoi(args[1].c_str());
+		NLMISC::fromString(args[1], Modifier);
 
 		return *this;
 	}
@@ -5553,6 +5556,4 @@ struct CSBrickParamModMagicProtection : public TBrickParam::IId
 	}
 };
 
-
-
-
+#endif // RY_EGS_STATIC_BRICK_CPP_H

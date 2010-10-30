@@ -1071,7 +1071,7 @@ void renderAll(bool forceFullDetail)
 	uint maxFullDetailChar = Scene->getMaxSkeletonsInNotCLodForm();
 	UScene *skyScene = getSkyScene();
 	UScene::TPolygonBalancingMode oldBalancingMode = Scene->getPolygonBalancingMode();
-	UScene::TPolygonBalancingMode oldSkyBalancingMode;
+	UScene::TPolygonBalancingMode oldSkyBalancingMode = UScene::PolygonBalancingOff;
 	if (skyScene)
 	{
 		oldSkyBalancingMode = skyScene->getPolygonBalancingMode();

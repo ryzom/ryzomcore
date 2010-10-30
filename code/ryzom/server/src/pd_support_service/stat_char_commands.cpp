@@ -396,7 +396,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,jobsPromote,"pause execution of jobs","<jobId>"
 	if (args.size()!=1)
 		return false;
 
-	uint32 idx= atoi(args[0].c_str());
+	uint32 idx;
+	NLMISC::fromString(args[0], idx);
 	if ( (idx==0 && args[0]!="0") )
 	{
 		nlwarning("Argument is not a valid job id - should be a number");
@@ -418,7 +419,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,JobUpdatesPerUpdate,"set or display the number 
 
 	if (args.size()==1)
 	{
-		uint32 count= atoi(args[0].c_str());
+		uint32 count;
+		NLMISC::fromString(args[0], count);
 		if ( (count==0 && args[0]!="0") )
 		{
 			nlwarning("Argument is not a valid number");
@@ -480,7 +482,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,jobsDisplayDetails,"display detailed info for t
 
 	case 1:
 		{
-			uint32 idx= atoi(args[0].c_str());
+			uint32 idx;
+			NLMISC::fromString(args[0], idx);
 			if ( (idx==0 && args[0]!="0") )
 			{
 				nlwarning("Argument is not a valid job id - should be a number");
@@ -679,8 +682,11 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptDeleteLine,"","<line_number>")
 		return false;
 	}
 
+	uint32 line;
+	NLMISC::fromString(args[0], line);
+
 	// line numbering starts at 1 so an invalid number will be inored anyway
-	return TheCharScanScriptFile->deleteLine(atoi(args[0].c_str()));
+	return TheCharScanScriptFile->deleteLine(line);
 }
 
 NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptAddInfoExtractor,"","<infoExtractorName> [<args>]")

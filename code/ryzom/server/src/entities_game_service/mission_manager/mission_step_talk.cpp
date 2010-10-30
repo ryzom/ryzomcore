@@ -184,7 +184,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 			MISLOGSYNTAXERROR("<amount><npc_name>");
 			return false;
 		}
-		_Amount = (uint)atoi(script[1].c_str());
+		NLMISC::fromString(script[1], _Amount);
 		
 		if ( !CMissionParser::parseBotName(script[2],_Bot,missionData) )
 		{
@@ -322,7 +322,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 			CSubStep subStep;
 			subStep.Sheet = CSheetId( CMissionParser::getNoBlankString(args[0]) + ".sitem" );
 			missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::item ) );
-			subStep.Quantity = atoi( args[1].c_str() );
+			NLMISC::fromString(args[1], subStep.Quantity);
 			if ( subStep.Sheet == CSheetId::Unknown )
 			{
 				ret = false;
@@ -332,7 +332,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 			{
 				if( args.size() == 3 )
 				{
-					subStep.Quality = atoi( args[2].c_str() );
+					NLMISC::fromString(args[2], subStep.Quality);
 					Quality = true;
 				}
 				else

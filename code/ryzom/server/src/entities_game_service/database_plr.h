@@ -490,6 +490,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_IS_NEWBIE;
 		ICDBStructNode	*_IS_TRIAL;
 		ICDBStructNode	*_DEFAULT_WEIGHT_HANDS;
+		ICDBStructNode  *_IS_INVISIBLE;
 		ICDBStructNode	*_COUNTER;
 		TSKILL_POINTS_ _SKILL_POINTS_[4];
 		TFACTION_POINTS_ _FACTION_POINTS_[6];
@@ -975,6 +976,20 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			return _COUNTER;
 		}
+
+		void setIS_INVISIBLE(CCDBSynchronised &dbGroup, bool value, bool forceSending = false)
+		{
+			_setProp(dbGroup, _IS_INVISIBLE, value, forceSending);
+		}
+
+		bool getIS_INVISIBLE(const CCDBSynchronised &dbGroup)
+		{
+			bool value;
+			_getProp(dbGroup, _IS_INVISIBLE, value);
+
+			return value;
+		}
+
 	TSKILL_POINTS_ &getSKILL_POINTS_(uint32 index)
 		{
 			nlassert(index < 4);

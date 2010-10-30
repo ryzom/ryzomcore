@@ -275,7 +275,7 @@ CAnimation::TAnimId CAnimationState::chooseAnim(uint32 jobSpecialisation, EGSPD:
 	else
 	{
 		uint i;
-		uint best;
+		uint best = 0;
 		const uint count = (uint)_Animations.size ();
 		double bestAng = 1000.0;	// Big value to be > to the first element.
 		for (i=0; i<count; i++)

@@ -119,7 +119,9 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	long r;
 	curl_easy_getinfo(_Curl, CURLINFO_RESPONSE_CODE, &r);
 	if (verbose)
+	{
 		nldebug("%u", r);
+	}
 
 	return true;
 }
@@ -157,7 +159,10 @@ bool CCurlHttpClient::sendPostWithCookie(const string &url, const string &name, 
 bool CCurlHttpClient::receive(string &res, bool verbose)
 {
 	if (verbose)
+	{
 		nldebug("Receiving %u bytes", _ReceiveBuffer.size());
+	}
+
 	res.clear();
 	if (_ReceiveBuffer.size())
 		res.assign((const char*)&(*(_ReceiveBuffer.begin())), _ReceiveBuffer.size());

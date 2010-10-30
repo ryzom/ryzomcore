@@ -96,7 +96,8 @@ bool CTimestamp::fromString(const char* str)
 		if (_Time == 0)
 			setToCurrent();
 
-		sint	dt = atoi(str);
+		sint	dt;
+		NLMISC::fromString(std::string(str), dt);
 
 		++str;
 		while (*str >= '0' && *str <= '9')

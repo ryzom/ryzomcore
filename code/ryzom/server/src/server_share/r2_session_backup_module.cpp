@@ -295,7 +295,11 @@ public:
 			{
 				firstLoop = false;
 
-				if (tokens.size() != 2 || tokens[0] != "Version" || atoi(tokens[1].c_str()) != FileVersion)
+				uint32 version = 0;
+				if (tokens.size() > 1)
+					NLMISC::fromString(tokens[1], version)
+
+				if (tokens.size() != 2 || tokens[0] != "Version" || version != FileVersion)
 				{
 					nlwarning("R2SBM: Obsolete File Discard '%s'", fileDescription.FileName.c_str());	
 					return;
@@ -311,7 +315,8 @@ public:
 				}	
 				else if (tokens.size() == 2)
 				{
-					TCharId charId = atoi(tokens[0].c_str());
+					TCharId charId;
+					NLMISC::fromString(tokens[0], charId);
 					std::string overrideAccess = tokens[1];
 					
 					access[charId] = overrideAccess;
@@ -370,7 +375,11 @@ public:
 			{
 				firstLoop = false;
 
-				if (tokens.size() != 2 || tokens[0] != "Version" || atoi(tokens[1].c_str()) != FileVersion)
+				uint version = 0;
+				if (tokens.size() > 1)
+					NLMISC::fromString(tokens[1], version);
+
+				if (tokens.size() != 2 || tokens[0] != "Version" || version != FileVersion)
 				{
 					nlwarning("Obsolete File Discard '%s'", fileDescription.FileName.c_str());	
 					return;
@@ -386,13 +395,20 @@ public:
 				}	
 				else if (tokens.size() == 7)
 				{
-					TSessionId sessionId = (TSessionId)(uint32)atoi(tokens[0].c_str());
+					uint32 sessionIdTmp;
+					NLMISC::fromString(tokens[0], sessionIdTmp);
+					TSessionId sessionId = (TSessionId)sessionIdTmp;
 					std::string sessionType = tokens[1];
-					uint32 timestamp = atoi(tokens[2].c_str());
-					double positionX = atof(tokens[3].c_str());
-					double positionY = atof(tokens[4].c_str());				
-					double orient = atof(tokens[5].c_str());				
-					uint8 season = atoi(tokens[6].c_str());
+					uint32 timestamp;
+					NLMISC::fromString(tokens[2], timestamp);
+					double positionX;
+					NLMISC::fromString(tokens[3], positionX);
+					double positionY;
+					NLMISC::fromString(tokens[4], positionY);
+					double orient;
+					NLMISC::fromString(tokens[5], orient);
+					uint8 season;
+					NLMISC::fromString(tokens[6], season);
 
 					sessions[sessionId] = TSessionInfos(timestamp, RSMGR::TSessionType(sessionType)
 						,positionX, positionY, orient, season);

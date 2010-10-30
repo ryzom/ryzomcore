@@ -1859,6 +1859,19 @@ public:
 		void removePlayerFromFriendListByContactId(uint32 contactId);
 		void removePlayerFromFriendListByEntityId(const NLMISC::CEntityId &id);
 
+		void setInRoomOfPlayer(const NLMISC::CEntityId &id);
+		const NLMISC::CEntityId& getInRoomOfPlayer();
+
+		/// get if player have acces to room
+		bool playerHaveRoomAccess(const NLMISC::CEntityId &id);
+
+		/// add room acces to player
+		void addRoomAccessToPlayer(const NLMISC::CEntityId &id);
+		
+		/// remove room acces to player
+		void removeRoomAccesToPlayer(const NLMISC::CEntityId &id, bool kick);
+
+
 		/// remove player from ignore list
 		void removePlayerFromIgnoreListByContactId(uint32 contactId);
 		void removePlayerFromIgnoreListByEntityId(const NLMISC::CEntityId &id);
@@ -2217,6 +2230,8 @@ public:
 	void enterPVPZone(uint32 pvpZoneType) const;
 	/// character enter in versus pvp zone, player must choose a clan
 	void openPVPVersusDialog() const;
+	/// get priviledgePvp
+	bool getPriviledgePVP() const {return _PriviledgePvp;};
 	/// get character pvp flag
 	bool getPVPFlag( bool updatePVPModeInMirror = true ) const;
 	/// change pvp flag
@@ -2228,7 +2243,7 @@ public:
 	/// set database pvp flag
 	void setPVPFlagDatabase();
 	/// set PVP recent action flag
-	void setPVPRecentActionFlag();
+	void setPVPRecentActionFlag(CCharacter *target = NULL);
 	/// get PvP recent action flag (true if player involved in PVP action recently)
 	bool getPvPRecentActionFlag() const;
 	/// character are killed in PvP situation
@@ -2250,6 +2265,10 @@ public:
 	void setPvPSafeZoneActive();
 	/// clear pvp zone safe flag
 	void clearSafeInPvPSafeZone();
+	/// get pvp fames allies
+	TYPE_PVP_CLAN getPVPFamesAllies();
+	/// get pvp fames ennemys
+	TYPE_PVP_CLAN getPVPFamesEnemies();
 	/// update the clan in visuale property
 	void updatePVPClanVP() const;
 	//@}
@@ -2296,13 +2315,17 @@ public:
 	void channelAdded( bool b );
 	bool isChannelAdded();
 
+	uint8 getNbUserChannels() { return _NbUserChannels; };
+	void addUserChannel() { _NbUserChannels++; };
+	void removeUserChannel() { _NbUserChannels--; };
+
 	std::vector<SItemSpecialEffect> lookForSpecialItemEffects(ITEM_SPECIAL_EFFECT::TItemSpecialEffect effectType) const;
 
 	/// return true if the given item is an xp catalyser which has been activated
 	bool isAnActiveXpCatalyser( CGameItemPtr item );
 	
-	void setShowFactionChannelsMode(bool s);
-	bool showFactionChannelsMode();
+	void setShowFactionChannelsMode(TChanID channel, bool s);
+	bool showFactionChannelsMode(TChanID channel) const;
 
 	// from offline command
 	void contactListRefChangeFromCommand(const NLMISC::CEntityId &id, const std::string &operation);
@@ -2840,7 +2863,10 @@ public:
 
 	bool TestProgression;
 
-	bool isShopingListInProgress() const { return _ShoppingList != 0; }
+	bool isShopingListInProgress() const { return _ShoppingList != 0; };
+
+	void setFinalized(bool isFinalized) { _LoadingFinish = isFinalized; };
+	bool isFinalized() const { return _LoadingFinish; };
 
 	//////////////////
 	// Private members
@@ -2914,11 +2940,11 @@ private:
 
 	/// temp values used to test if Players bars need an update or not
 	uint8								_BarSentToPlayerMsgNumber;
-	/// NB: 16 bits because guigui ensure me cannot goes beyond something like 6000
-	sint16								_OldHpBarSentToPlayer;
-	sint16								_OldSapBarSentToPlayer;
-	sint16								_OldStaBarSentToPlayer;
-	sint16								_OldFocusBarSentToPlayer;
+
+	sint32								_OldHpBarSentToPlayer;
+	sint32								_OldSapBarSentToPlayer;
+	sint32								_OldStaBarSentToPlayer;
+	sint32								_OldFocusBarSentToPlayer;
 	
 	NLMISC::TGameCycle					_LastTickSaved;
 	NLMISC::TGameCycle					_LastTickCompassUpdated;
@@ -3134,7 +3160,10 @@ private:
 
 	/// nb of auras affecting this player
 	uint8						_NbAuras;
-	
+
+	/// nb of users channels
+	uint8						_NbUserChannels;
+
 	// for a power/combat event, stores start and end ticks
 	struct CFlagTickRange {
 
@@ -3193,8 +3222,11 @@ private:
 		NLMISC::CEntityId			EntityId;		// Id used for server/storage
 		uint32						ContactId;		// Id used for client/server communication
 	};
-	uint32					_ContactIdPool;
-		
+	uint32							_ContactIdPool;
+
+	std::vector<NLMISC::CEntityId>	_RoomersList; // Players who have acces to player's room
+	NLMISC::CEntityId				_inRoomOfPlayer;
+
 	// friends list
 	std::vector<CContactId>	_FriendsList;
 	// ignore list
@@ -3342,6 +3374,9 @@ private:
 	NLMISC::TGameCycle				_PVPFlagTimeSettedOn;
 	// time of the last PVP action made (for prevent PVE / PVP exploits)
 	NLMISC::TGameCycle				_PVPRecentActionTime;
+	// all pvp flags (ally and enemy) when players do a pvp curative action
+	uint32							_PVPFlagAlly;
+	uint32							_PVPFlagEnemy;
 	// character safe if is in pvp safe zone
 	bool							_PvPSafeZoneActive;
 	// player changed his faction tag, we have to update pvp mode
@@ -3362,8 +3397,10 @@ private:
 
 	bool							_ChannelAdded;
 
+	bool							_LoadingFinish;
+
 	/// if true, enable display of channel faction for users with priviledge
-	bool							_FactionChannelMode;
+	std::map<TChanID, bool>	_FactionChannelsMode;
 
 	/// time when user left outpost zone (0 means not valid)
 	NLMISC::TGameCycle				_OutpostLeavingTime;
@@ -3574,7 +3611,11 @@ private:
 public:
 	bool			getInvisibility() const	{ return _Invisibility;}
 	/// Set the invisibility flag, NB : just for persistence, do not change nothing.
-	void			setInvisibility(bool invisible)		{ _Invisibility = invisible;}
+	void			setInvisibility(bool invisible)
+	{ 
+		_Invisibility = invisible;
+		CBankAccessor_PLR::getUSER().setIS_INVISIBLE(_PropertyDatabase, _Invisibility);
+	}
 
 	sint8			getAggroableSave() const	{ return _AggroableSave;}
 	/// Set the aggroable save flag, NB : just for persistence, do not change nothing.

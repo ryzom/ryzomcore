@@ -318,6 +318,7 @@ extern NLMISC::CVariable<float>					CristalMoneyFactor;
 
 /// PVP
 extern NLMISC::CVariable<bool>					AllowPVP;
+extern NLMISC::CVariable<sint32>				PVPFameRequired;
 extern NLMISC::CVariable<NLMISC::TGameCycle>	DuelQueryDuration ;
 extern NLMISC::CVariable<NLMISC::TGameCycle>	PVPZoneEnterBufferTime;
 extern NLMISC::CVariable<NLMISC::TGameCycle>	PVPZoneLeaveBufferTime;

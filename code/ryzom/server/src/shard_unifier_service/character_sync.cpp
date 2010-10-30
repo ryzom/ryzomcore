@@ -1370,12 +1370,14 @@ namespace CHARSYNC
 //			}
 //			else
 //			{
-//				charId = atoi(args[0].c_str());
+//				NLMISC::fromString(args[0], charId);
 //			}
 //
 //			srcUserId = charId >> 4;
 //
-//			uint32 dstUserId = atoi(args[1].c_str());
+//			uint32 dstUserId;
+//			NLMISC::fromString(args[1], dstUserId);
+//
 //			if (dstUserId == 0)
 //			{
 //				// try to retrieve the user by name
@@ -1476,12 +1478,14 @@ namespace CHARSYNC
 			}
 			else
 			{
-				charId = atoi(args[0].c_str());
+				NLMISC::fromString(args[0], charId);
 			}
 
 			userId = charId >> 4;
 
-			uint32 shardId = atoi(args[1].c_str());
+			uint32 shardId;
+			NLMISC::fromString(args[1], shardId);
+
 			if (shardId == 0)
 			{
 				// try to retrieve the shard by name

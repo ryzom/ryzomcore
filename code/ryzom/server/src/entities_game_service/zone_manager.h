@@ -148,9 +148,11 @@ public:
 	///\return center coords
 	inline sint32 getCenterX(){ return _CenterX;}
 	inline sint32 getCenterY(){ return _CenterY;}
+	inline void setGooActive(bool state) { _GooActive = state; }
 
 	bool getReported() const	{ return _Reported; }
 	bool isGooPath() const { return _GooPath; }
+	bool isGooActive() const { return _GooActive; }
 	bool isMainPlace() const { return _MainPlace; }
 	TAIAlias getAlias()const{ return _Alias; }
 
@@ -169,6 +171,7 @@ private:
 	bool		_Reported;
 	/// Flag indicate this place is a goo path
 	bool		_GooPath;
+	bool		_GooActive;
 	/// true if the place is the main place where a user can be
 	bool		_MainPlace;
 	/// respawn points validated when a user enters the place

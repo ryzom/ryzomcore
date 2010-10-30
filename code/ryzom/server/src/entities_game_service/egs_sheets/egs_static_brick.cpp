@@ -618,7 +618,7 @@ bool	CPlayerSkill::initFromString( const string& skillAndValue )
 			codeS = "S" + codeS;
 		}
 		Code = SKILLS::toSkill( codeS );
-		Value = atoi( skillAndValue.substr( p+1 ).c_str() );
+		NLMISC::fromString( skillAndValue.substr( p+1 ), Value );
 		return (Code != SKILLS::unknown);
 	}
 }

@@ -912,7 +912,8 @@ void CBotNpc::setColours(std::string input)
 				{
 					// split succeeded so verify that idxStr contains anumber in range 0..7 and add
 					// the name to the list of valid names for the given slot
-					uint32 idx=(uint32)atoi(idxStr.c_str());
+					uint32 idx;
+					NLMISC::fromString(idxStr, idx);
 					if (NLMISC::toString(idx)==idxStr && idx<numColours)
 						colourNames[idx].push_back(name);
 				}
@@ -948,10 +949,11 @@ void CBotNpc::setColours(std::string input)
 			// extract the next word from the tail
 			AI_SHARE::stringToWordAndTail(tail,colour,tail);
 			// if the colour string is a number then treat it directly
-			if (NLMISC::toString(atoi(colour.c_str()))==colour)
+			uint32 idx;
+			NLMISC::fromString(colour, idx);
+			if (NLMISC::toString(idx)==colour)
 			{
 				// we've got a number so make sue it's in valid range and add to results vector
-				uint32 idx = atoi(colour.c_str());
 				if (idx<numColours)
 					results.push_back(idx);
 				else

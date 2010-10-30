@@ -610,7 +610,8 @@ CTable::CDataAccessor	CDbManager::locate(CLocatePath &path)
 	if (path.end())
 		return CTable::CDataAccessor();
 
-	TDatabaseId		id = atoi(path.node().Name.c_str());
+	TDatabaseId		id;
+	NLMISC::fromString(path.node().Name, id);
 	if (!path.next())
 		return CTable::CDataAccessor();
 
@@ -853,7 +854,9 @@ NLMISC_COMMAND(createDatabase, "create a database using a given id", "<databaseI
 	if (args.size() != 1)
 		return false;
 
-	return CDbManager::createDatabase(atoi(args[0].c_str()), &log) != NULL;
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+	return CDbManager::createDatabase(databaseId, &log) != NULL;
 }
 
 //
@@ -862,7 +865,9 @@ NLMISC_COMMAND(deleteDatabase, "delete a database using a given id", "<databaseI
 	if (args.size() != 1)
 		return false;
 
-	return CDbManager::deleteDatabase(atoi(args[0].c_str()), &log);
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+	return CDbManager::deleteDatabase(databaseId, &log);
 }
 
 //
@@ -871,7 +876,9 @@ NLMISC_COMMAND(loadDatabase, "load a database using a given id", "<databaseId>")
 	if (args.size() != 1)
 		return false;
 
-	return CDbManager::loadDatabase(atoi(args[0].c_str()), &log);
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+	return CDbManager::loadDatabase(databaseId, &log);
 }
 
 //
@@ -880,9 +887,10 @@ NLMISC_COMMAND(displayDatabase, "display database info", "<databaseId>")
 	if (args.size() != 1)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
 
@@ -897,7 +905,9 @@ NLMISC_COMMAND(displayTable, "display table info", "<databaseId> <tableName>")
 	if (args.size() != 2)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&	tableName = args[1];
 
 	CDatabase*			database = CDbManager::getDatabase(databaseId);
@@ -919,7 +929,9 @@ NLMISC_COMMAND(dumpDeltaFileContent, "duump the content of a delta file", "<data
 	if (args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&	tableName = args[1];
 
 	CDatabase*			database = CDbManager::getDatabase(databaseId);
@@ -941,7 +953,9 @@ NLMISC_COMMAND(displayRow, "display row values", "<databaseId> [<tableName> <row
 	if (args.size() != 2 && args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	CDatabase*			database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
@@ -956,7 +970,7 @@ NLMISC_COMMAND(displayRow, "display row values", "<databaseId> [<tableName> <row
 		{
 			RY_PDS::TTableIndex	tableIndex = (RY_PDS::TTableIndex)ctable->getId();
 			table = database->getNonConstTable(tableIndex);
-			rowId = atoi(args[2].c_str());
+			NLMISC::fromString(args[2], rowId);
 		}
 	}
 	else
@@ -976,18 +990,18 @@ NLMISC_COMMAND(displayRow, "display row values", "<databaseId> [<tableName> <row
 	return true;
 }
 
-
-
-
 //
 NLMISC_COMMAND(allocRow, "allocate a row in a table of a given database", "<databaseId> <tableName> <rowId>")
 {
 	if (args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId = atoi(args[2].c_str());
+	RY_PDS::TRowIndex	rowId;
+	NLMISC::fromString(args[2], rowId);
 
 	CDatabase*			database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
@@ -1006,9 +1020,12 @@ NLMISC_COMMAND(deallocRow, "deallocate a row in a table of a given database", "<
 	if (args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId = atoi(args[2].c_str());
+	RY_PDS::TRowIndex	rowId;
+	NLMISC::fromString(args[2], rowId);
 
 	CDatabase*			database = CDbManager::getDatabase(databaseId);
 
@@ -1030,9 +1047,12 @@ NLMISC_COMMAND(mapRow, "map a row in a table of a given database with a 64bits k
 	if (args.size() != 4)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId = atoi(args[2].c_str());
+	RY_PDS::TRowIndex	rowId;
+	NLMISC::fromString(args[2], rowId);
 	uint64				key;
 	sscanf(args[3].c_str(), "%"NL_I64"X", &key);
 
@@ -1055,7 +1075,8 @@ NLMISC_COMMAND(unmapRow, "unmap a row in a table of a given database with a 64bi
 	if (args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId = atoi(args[0].c_str());
+	TDatabaseId			databaseId;
+	NLMISC::fromString(args[0], databaseId);
 	const std::string&	tableName = args[1];
 	uint64				key;
 	sscanf(args[2].c_str(), "%"NL_I64"X", &key);
@@ -1079,10 +1100,17 @@ NLMISC_COMMAND(setValue, "set a value in table", "<databaseId> <tableName> <rowI
 	if (args.size() != 6)
 		return false;
 
-	TDatabaseId				databaseId = atoi(args[0].c_str());
+	TDatabaseId				databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	const std::string&		tableName = args[1];
-	RY_PDS::TRowIndex		rowId = (RY_PDS::TRowIndex)atoi(args[2].c_str());
-	RY_PDS::TColumnIndex	colId = (RY_PDS::TColumnIndex)atoi(args[3].c_str());
+
+	RY_PDS::TRowIndex		rowId;
+	NLMISC::fromString(args[2], rowId);
+
+	RY_PDS::TColumnIndex	colId;
+	NLMISC::fromString(args[3], colId);
+
 	const std::string&		type = args[4];
 	const std::string&		value = args[5];
 
@@ -1151,7 +1179,8 @@ NLMISC_COMMAND(get, "get a value in table", "<locatepath>")
 //	if (args.size() != 1)
 //		return false;
 //
-//	TDatabaseId				databaseId = atoi(args[0].c_str());
+//	TDatabaseId				databaseId;
+//	NLMISC::fromString(args[0], databaseId);
 //	CDatabase*				database = CDbManager::getDatabase(databaseId);
 //
 //	if (database == NULL)
@@ -1169,7 +1198,9 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 	if (args.size() < 3 || args.size() > 4)
 		return false;
 
-	TDatabaseId				databaseId = atoi(args[0].c_str());
+	TDatabaseId				databaseId;
+	NLMISC::fromString(args[0], databaseId);
+
 	CDatabase*				database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
@@ -1228,7 +1259,7 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 	sint	expandDepth = -1;
 	if (args.size() == 4)
 	{
-		expandDepth = atoi(args[3].c_str());
+		NLMISC::fromString(args[3], expandDepth);
 	}
 
 	database->dumpToXml(index, oxml, expandDepth);

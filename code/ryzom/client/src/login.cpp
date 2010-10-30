@@ -31,6 +31,7 @@
 
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
+#include "nel/misc/big_file.h"
 
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/input_handler_manager.h"
@@ -732,9 +733,7 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	CSystemUtils::setRootKey("Software\\Nevrax\\Ryzom");
-
-	string l = CSystemUtils::getRegKey("Login");
+	string l = ClientCfg.LastLogin;
 
 	if(!l.empty())
 	{
@@ -1105,7 +1104,10 @@ void onlogin(bool vanishScreen = true)
 	removeSpace(LoginPassword);
 
 	if(!LoginLogin.empty())
-		CSystemUtils::setRegKey("Login", LoginLogin);
+	{
+		ClientCfg.LastLogin = LoginLogin;
+		ClientCfg.writeString("LastLogin", ClientCfg.LastLogin, true);
+	}
 
 	if(vanishScreen)
 		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
@@ -1813,7 +1815,7 @@ class CAHOpenURL : public IActionHandler
 			LocalFree( lpMsgBuf );
 		}
 #else
-# pragma message(Install tag not supported)
+		// TODO: for Linux and Mac OS
 #endif
 
 		/*
@@ -1893,61 +1895,11 @@ class CAHInitResLod : public IActionHandler
 		//nlinfo("CAHInitResLod called");
 		if (Driver == NULL) return;
 
-		// **** Init Video Modes
 		VideoModes.clear();
-		Driver->getModes(VideoModes);
+		StringModeList.clear();
 		StringModeList.push_back("uiConfigWindowed");
-		// Remove modes under 800x600 and get the unique strings
-		sint i, j;
-		for (i=0; i < (sint)VideoModes.size(); ++i)
-		{
-			if ((VideoModes[i].Width < 800) || (VideoModes[i].Height < 600))
-			{
-				VideoModes.erase(VideoModes.begin()+i);
-				--i;
-			}
-			else
-			{
-				bool bFound = false;
-				string tmp = toString(VideoModes[i].Width)+" x "+toString(VideoModes[i].Height);
-				for (j = 0; j < (sint)StringModeList.size(); ++j)
-				{
-					if (StringModeList[j] == tmp)
-					{
-						bFound = true;
-						break;
-					}
-				}
-				if (!bFound)
-				{
-					StringModeList.push_back(tmp);
-					if ((VideoModes[i].Width <= ClientCfg.Width) && (VideoModes[i].Height <= ClientCfg.Height))
-					{
-						if (CurrentMode == -1)
-						{
-							CurrentMode = j;
-						}
-						else
-						{
-							if ((VideoModes[i].Width >= VideoModes[CurrentMode].Width) &&
-								(VideoModes[i].Height >= VideoModes[CurrentMode].Height))
-								CurrentMode = j;
-						}
-					}
-				}
-			}
-		}
-		
-		// If no modes are available, display a message and exit
-		if (VideoModes.empty())
-		{
-			Driver->systemMessageBox("No Video Modes available!\n"
-																"Minimum Video mode to play Ryzom is 800x600.\n",
-																"No Video Mode!",
-																NL3D::UDriver::okType,
-																NL3D::UDriver::exclamationIcon);
-			exit(EXIT_SUCCESS);
-		}
+
+		CurrentMode = getRyzomModes(VideoModes, StringModeList);
 
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
@@ -2872,7 +2824,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(pPM->isVerboseLog())
 			{
-				nlinfo ("Exploded, with nl, %zu res", lines.size());
+				nlinfo ("Exploded, with nl, %u res", (uint)lines.size());
 	/*			for (uint i = 0; i < lines.size(); i++)
 				{
 					nlinfo (" > '%s'", lines[i].c_str());
@@ -2881,7 +2833,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 			if(lines.size() != nbs+1)
 			{
-				nlwarning("bad shard lines number %zu != %d", lines.size(), nbs+1);
+				nlwarning("bad shard lines number %u != %d", (uint)lines.size(), nbs+1);
 				nlwarning("'%s'", res.c_str());
 				return "bad lines numbers (error code 5)";
 			}
@@ -2893,7 +2845,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if(pPM->isVerboseLog())
 				{
-					nlinfo ("Exploded with '%s', %zu res", "|", res.size());
+					nlinfo ("Exploded with '%s', %u res", "|", (uint)res.size());
 	/*				for (uint i = 0; i < res.size(); i++)
 					{
 						nlinfo (" > '%s'", res[i].c_str());
@@ -2902,7 +2854,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 				if (res.size() < 7 && res.size() > 8)
 				{
-					nlwarning("bad | numbers %zu != %d", res.size(), 8);
+					nlwarning("bad | numbers %u != %d", (uint)res.size(), 8);
 					nlwarning("'%s'", lines[i].c_str());
 					return "bad pipe numbers (error code 6)";
 				}

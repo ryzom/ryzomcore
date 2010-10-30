@@ -2614,10 +2614,11 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	// Get the new target UID, and set in Database
 	uint	tgtSlot= _Selection;
 	uint32	tgtEntityId= CLFECOMMON::INVALID_CLIENT_DATASET_INDEX;
-	if(tgtSlot!=CLFECOMMON::INVALID_SLOT)
+	CEntityCL *entity = NULL;
+	if (tgtSlot!=CLFECOMMON::INVALID_SLOT)
 	{
-		CEntityCL	*entity= EntitiesMngr.entity(tgtSlot);
-		if(entity)
+		entity = EntitiesMngr.entity(tgtSlot);
+		if (entity)
 			tgtEntityId= entity->dataSetId();
 	}
 
@@ -2653,6 +2654,38 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 		if (playerGiftNeeded)
 		{
 			playerGiftNeeded->setValue32(0);
+		}
+	}
+
+	// update pvp tags
+	CViewBase * tagView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:pvp_tags"));
+	CViewBase * contentView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:content"));
+
+	if ((tgtSlot!=CLFECOMMON::INVALID_SLOT) && entity)
+	{
+		CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(entity);
+
+		if (pPlayer)
+		{
+			for (uint8 i = 0; i < 7; i++)
+			{
+				CViewBitmap * tag = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:tag_"+toString(i)));
+				if (tag)
+				{
+					if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpAlly(i))
+					{
+						tag->setTexture("pvp_ally_"+toString(i)+".tga");
+					}
+					else if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpEnnemy(i))
+					{
+						tag->setTexture("pvp_enemy_"+toString(i)+".tga");
+					}
+					else
+					{
+						tag->setTexture("alpha_10.tga");
+					}
+				}
+			}
 		}
 	}
 
@@ -3871,7 +3904,7 @@ bool	CUserEntity::canCastShadowMap() const
 void	CUserEntity::forceLookEntity(const NLMISC::CVectorD &dir2targIn, bool updateHeadPitch, bool /* start */)
 {
 	CVectorD	dir2targ= dir2targIn;
-	float		frontYawBefore;
+	float		frontYawBefore = 0.f;
 	float		frontYawAfter;
 
 	// Third person: bkup current yaw

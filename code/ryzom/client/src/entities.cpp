@@ -520,7 +520,15 @@ bool CEntityManager::removeInstances()
 			Scene->deleteInstance(_ShapeInstances[i].Instance);
 	}
 	_ShapeInstances.clear();
+	_InstancesRemoved = true;
 	return true;
+}
+
+bool CEntityManager::instancesRemoved()
+{
+	bool instRemoved = _InstancesRemoved;
+	_InstancesRemoved = false;
+	return instRemoved;
 }
 
 CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y)
@@ -1567,6 +1575,7 @@ void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, c
 		string propName = toString("SERVER:Entities:E%d:P%d", slot, prop);
 		TProperty propty;
 		propty.GC    = gameCycle;
+		propty.Value = 0;
 //		propty.Value = IngameDbMngr.getProp(propName);
 
 
@@ -1841,7 +1850,7 @@ CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensi
 
 	uint i;
 	const uint count = (uint)_Entities.size();
-	uint selectedEntityId;
+	uint selectedEntityId = 0;
 	float selectedEntityDist = FLT_MAX; // No selected Entity
 
 	for (i=0; i<count; i++)
