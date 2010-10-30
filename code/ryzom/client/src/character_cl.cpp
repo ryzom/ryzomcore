@@ -366,6 +366,9 @@ CCharacterCL::CCharacterCL()
 		_PvpEnemies[i] = false;
 	}
 
+	_ClanCivMaxFame  = PVP_CLAN::None;
+	_ClanCultMaxFame = PVP_CLAN::None;
+
 	_OutpostId = 0;
 	_OutpostSide = OUTPOSTENUMS::UnknownPVPSide;
 

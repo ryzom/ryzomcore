@@ -20,6 +20,8 @@
 #include "nel/misc/smart_ptr.h"
 //#include "ai_grp.h"
 
+#include <limits>
+
 namespace AIVM
 {
 
@@ -71,7 +73,7 @@ public:
 class CByteCodeEntry {
 public:
 	CByteCodeEntry()
-	: _Index(~0)
+	: _Index(std::numeric_limits<size_t>::max())
 	{
 	}
 	CByteCodeEntry(NLMISC::CSmartPtr<CByteCode const> code, size_t index)
@@ -81,7 +83,7 @@ public:
 	}
 	bool isValid()const
 	{
-		return _Index!=~0;
+		return _Index != std::numeric_limits<size_t>::max();
 	}
 	NLMISC::CSmartPtr<CByteCode const>& code() { return _Code; }
 	size_t& index() { return _Index; }

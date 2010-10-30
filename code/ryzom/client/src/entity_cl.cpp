@@ -734,7 +734,7 @@ void CEntityCL::init()
 	}
 	_NameId = 0;
 
-	_PermanentStatutIcon = string("");
+	_PermanentStatutIcon.clear();
 
 	// Not a mission target by default
 	_MissionTarget = false;

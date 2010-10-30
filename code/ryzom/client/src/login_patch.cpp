@@ -2568,8 +2568,8 @@ void CPatchThread::run()
 		for (i = 0; i < AllFilesToPatch.size(); ++i)
 		{
 			CPatchManager::SFileToPatch &rFTP = AllFilesToPatch[i];
-			string ext = rFTP.FileName.substr(rFTP.FileName.rfind('.'), rFTP.FileName.size());
-			if (ext == ".ref")
+			string ext = NLMISC::CFile::getExtension(rFTP.FileName);
+			if (ext == "ref")
 			{
 				float oldCurrentFilePatched = CurrentFilePatched;
 				processFile (rFTP);
@@ -2589,8 +2589,9 @@ void CPatchThread::run()
 		for (i = 0; i < AllFilesToPatch.size(); ++i)
 		{
 			CPatchManager::SFileToPatch &rFTP = AllFilesToPatch[i];
-			string ext = rFTP.FileName.substr(rFTP.FileName.rfind('.'), rFTP.FileName.size());
-			if (ext == ".bnp")
+			
+			string ext = NLMISC::CFile::getExtension(rFTP.FileName);
+			if (ext == "bnp")
 			{
 				float oldCurrentFilePatched = CurrentFilePatched;
 				processFile (rFTP);

@@ -1575,6 +1575,7 @@ void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, c
 		string propName = toString("SERVER:Entities:E%d:P%d", slot, prop);
 		TProperty propty;
 		propty.GC    = gameCycle;
+		propty.Value = 0;
 //		propty.Value = IngameDbMngr.getProp(propName);
 
 
@@ -1849,7 +1850,7 @@ CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensi
 
 	uint i;
 	const uint count = (uint)_Entities.size();
-	uint selectedEntityId;
+	uint selectedEntityId = 0;
 	float selectedEntityDist = FLT_MAX; // No selected Entity
 
 	for (i=0; i<count; i++)

@@ -106,7 +106,7 @@ struct SOptions : public SExportOptions
 
 	string getStr (const string &var)
 	{
-		string ret = "";
+		string ret;
 		try
 		{
 			CConfigFile::CVar &cvString = cf.getVar (var);

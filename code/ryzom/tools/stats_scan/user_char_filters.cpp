@@ -41,7 +41,7 @@ FILTER(Money,"<min> [<max>]")
 	CSString s0= s.firstWord(true);
 	CSString s1= s.firstWord(true);
 	uint32 min= s0.atoi();
-	uint32 max= (s1.empty()? ~0u: s1.atoi());
+	uint32 max= (s1.empty()? std::numeric_limits<uint32>::max(): s1.atoi());
 	if ( (min==0 && s0!="0") ||  (max==0 && s1!="0") || !s.strip().empty() )
 	{
 		nlwarning("Bad arguments in filter: should be <min> [<max>]");

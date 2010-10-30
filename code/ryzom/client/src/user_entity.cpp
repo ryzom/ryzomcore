@@ -3904,7 +3904,7 @@ bool	CUserEntity::canCastShadowMap() const
 void	CUserEntity::forceLookEntity(const NLMISC::CVectorD &dir2targIn, bool updateHeadPitch, bool /* start */)
 {
 	CVectorD	dir2targ= dir2targIn;
-	float		frontYawBefore;
+	float		frontYawBefore = 0.f;
 	float		frontYawAfter;
 
 	// Third person: bkup current yaw

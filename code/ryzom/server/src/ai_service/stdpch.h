@@ -50,6 +50,7 @@
 #include <exception>
 #include <utility>
 #include <deque>
+#include <limits>
 
 
 //----------------------------------------------------------------
