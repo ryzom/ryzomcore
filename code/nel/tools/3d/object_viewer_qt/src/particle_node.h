@@ -274,7 +274,7 @@ private:
 	TNodeVect		_Nodes;
 	// path + name of workspace
 	std::string		_Filename;  
-	bool			 _Modified;
+	bool			_Modified;
 	IModificationCallback	*_ModificationCallback;
 	// workspace user name
 	std::string		_Name;

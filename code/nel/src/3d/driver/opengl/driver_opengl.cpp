@@ -191,7 +191,7 @@ CDriverGL::CDriverGL()
 
 	// autorelease pool for memory management
 	_autoreleasePool = [[NSAutoreleasePool alloc] init];
-	
+
 	// init the application object
 	[NSApplication sharedApplication];
 
@@ -200,7 +200,7 @@ CDriverGL::CDriverGL()
 
 	// finish the application launching
 	[NSApp finishLaunching];
-	
+
 #elif defined (NL_OS_UNIX)
 
 	_cursor = None;
@@ -875,7 +875,7 @@ bool CDriverGL::swapBuffers()
 	// TODO: maybe do this somewhere else?
 	[_autoreleasePool release];
 	_autoreleasePool = [[NSAutoreleasePool alloc] init];
-	
+
 	[_ctx flushBuffer];
 	[containerView() display];
 
@@ -2077,6 +2077,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 uint	CDriverGL::getSwapVBLInterval()
 {
 	H_AUTO_OGL(CDriverGL_getSwapVBLInterval)
+
 #ifdef NL_OS_WINDOWS
 	if(_Extensions.WGLEXTSwapControl)
 	{
