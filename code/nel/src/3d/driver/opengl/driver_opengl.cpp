@@ -2071,6 +2071,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 			nlwarning("Could not set swap interval");
         }
     }
+#endif
 }
 
 // ***************************************************************************
