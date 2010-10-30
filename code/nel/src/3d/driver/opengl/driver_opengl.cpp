@@ -2041,37 +2041,37 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 	if (!_Initialized)
 		return;
 
-	_Interval = interval;
+	bool res = true;
 
 #ifdef NL_OS_WINDOWS
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		nwglSwapIntervalEXT(_Interval);
+		res = nwglSwapIntervalEXT(_Interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
     if (_win && _Extensions.GLXEXTSwapControl)
 	{
-		if (nglXSwapIntervalEXT(_dpy, _win, interval))
-		{
-			nlwarning("Could not set swap interval");
-        }
+		res = nglXSwapIntervalEXT(_dpy, _win, interval) == 0;
     }
 	else if (_Extensions.GLXSGISwapControl)
 	{
-		if (nglXSwapIntervalSGI(interval))
-		{
-			nlwarning("Could not set swap interval");
-        }
+		res = nglXSwapIntervalSGI(interval) == 0;
     }
 	else if (_Extensions.GLXMESASwapControl)
 	{
-		if (nglXSwapIntervalMESA(interval))
-		{
-			nlwarning("Could not set swap interval");
-        }
+		res = nglXSwapIntervalMESA(interval) == 0;
     }
 #endif
+
+	if (res)
+	{
+		_Interval = interval;
+	}
+	else
+	{
+		nlwarning("Could not set swap interval");
+	}
 }
 
 // ***************************************************************************
@@ -2082,12 +2082,22 @@ uint	CDriverGL::getSwapVBLInterval()
 #ifdef NL_OS_WINDOWS
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		return _Interval;
+		return nwglGetSwapIntervalEXT();
 	}
-	else
-		return 1;
-#else
-	return 1;
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	if (_win && _Extensions.GLXEXTSwapControl)
+	{
+		uint swap, maxSwap;
+		glXQueryDrawable(_dpy, _win, GLX_SWAP_INTERVAL_EXT, &swap);
+		glXQueryDrawable(_dpy, _win, GLX_MAX_SWAP_INTERVAL_EXT, &maxSwap);
+		nlwarning("The swap interval is %u and the max swap interval is %u", swap, maxSwap);
+		return swap;
+    }
+	else if (_Extensions.GLXMESASwapControl)
+	{
+		return nglXGetSwapIntervalMESA();
+    }
 #endif
 
 	return _Interval;
