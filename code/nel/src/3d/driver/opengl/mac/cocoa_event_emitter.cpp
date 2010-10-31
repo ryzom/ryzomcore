@@ -233,6 +233,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	if(!server && !_server)
 		nlerror("no server to post events to");
 
+	// TODO like internal server in unix event emitter... review!
 	if(!server)
 		server = _server;
 
@@ -247,7 +248,6 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
 			event.type != NSKeyDown && event.type != NSKeyUp)
 	{
-		[NSApp sendEvent:event];
 		return false;
 	}
 
@@ -399,16 +399,15 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	default:
 	{
 		nlwarning("Unknown event type. dropping.");
-		// NSLog(@"%@", event);
+		NSLog(@"%@", event);
 		break;
 	}
 	}
 
-	[NSApp sendEvent:event];
 	return true;
 }
 
-typedef bool (*cocoaProc)(NL3D::IDriver*, NSEvent* e);
+typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
@@ -429,17 +428,18 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 			cocoaProc proc = (cocoaProc)_driver->getWindowProc();
 
 			if(proc)
-				proc(_driver, event);
+				proc(_driver, [event eventRef]);
 		}
 		else
 		{
 			processMessage(event, &server);
 		}
+
+		[NSApp sendEvent:event];
 	}
 	
 	// TODO like internal server in unix event emitter... review!
 	_server = &server;
-	// _server->pump();
 }
 
 void CCocoaEventEmitter::emulateMouseRawMode(bool enable)

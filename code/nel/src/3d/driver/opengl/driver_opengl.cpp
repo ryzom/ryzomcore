@@ -879,7 +879,6 @@ bool CDriverGL::swapBuffers()
 	}
 
 	[_ctx flushBuffer];
-	[containerView() display];
 
 #elif defined (NL_OS_UNIX)
 

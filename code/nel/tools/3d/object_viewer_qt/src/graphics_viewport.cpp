@@ -60,11 +60,11 @@ void CGraphicsViewport::init()
 	//H_AUTO2
 	nldebug("CGraphicsViewport::init");
 	
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	makeCurrent();
-#endif // NL_OS_UNIX
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	
-	Modules::objView().init(winId(), width(), height());
+	Modules::objView().init((nlWindow)winId(), width(), height());
 	Modules::psEdit().init();
 
 	setMouseTracking(true);
@@ -115,7 +115,7 @@ void CGraphicsViewport::resizeEvent(QResizeEvent *resizeEvent)
 		Modules::objView().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
 }
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS)
 
 typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -133,7 +133,30 @@ bool CGraphicsViewport::winEvent(MSG * message, long * result)
 
 	return false;
 }
-#else // NL_OS_UNIX
+
+#elif defined(NL_OS_MAC)
+
+typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
+
+bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
+{
+	if(caller)
+		nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
+
+	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
+	{
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver())->getDriver();
+		if (driver)
+		{
+			cocoaProc proc = (cocoaProc)driver->getWindowProc();
+			return proc(driver, event);
+		}
+	}
+
+	return false;
+}
+
+#elif defined(NL_OS_UNIX)
 
 typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 

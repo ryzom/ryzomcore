@@ -116,7 +116,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 #elif defined (NL_OS_MAC)
 
-bool GlWndProc(CDriverGL *driver, NSEvent* e);
+bool GlWndProc(CDriverGL *driver, const void* e);
 
 #elif defined (NL_OS_UNIX)
 
@@ -705,7 +705,7 @@ private:
 
 #elif defined(NL_OS_MAC)
 
-	friend bool GlWndProc(CDriverGL*, NSEvent*);
+	friend bool GlWndProc(CDriverGL*, const void*);
 	friend void windowDidMove(NSWindow*, CDriverGL*);
 	friend void viewDidResize(NSView*, CDriverGL*);
 

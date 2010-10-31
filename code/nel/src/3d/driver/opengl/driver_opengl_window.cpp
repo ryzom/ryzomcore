@@ -165,20 +165,21 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 #elif defined (NL_OS_MAC)
 
-bool GlWndProc(CDriverGL *driver, NSEvent* e)
+bool GlWndProc(CDriverGL *driver, const void* e)
 {
 	H_AUTO_OGL(GlWndProc)
-
-	// NSLog(@"NSEvent in GlWndProc %@", e);
 
 	if(!driver)
 		return false;
 
-	switch([e type])
+	NSEvent* event = [NSEvent eventWithEventRef:e];
+	// NSLog(@"NSEvent in GlWndProc %@", event);
+
+	switch([event type])
 	{
 		/* TODO handle window activate, close, etc. */
 		default:
-			return driver->_EventEmitter.processMessage(e);
+			return driver->_EventEmitter.processMessage(event);
 	}
 
 	return false;
@@ -967,7 +968,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	[[containerView() window] makeFirstResponder:_glView];
 	
 	[_ctx flushBuffer];
-	[containerView() display]; 
 
 	_EventEmitter.init(this, _glView);
 

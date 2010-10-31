@@ -33,9 +33,12 @@
 
 // Project includes
 
-#ifdef NL_OS_WINDOWS
+/* TODO every platform should use QWidget */
+#if defined(NL_OS_WINDOWS)
 typedef QWidget QNLWidget;
-#else // NL_OS_UNIX
+#elif defined(NL_OS_MAC)
+typedef QWidget QNLWidget;
+#elif defined(NL_OS_UNIX)
 typedef QGLWidget QNLWidget;
 #endif // NL_OS_UNIX
 
@@ -73,9 +76,11 @@ private Q_SLOTS:
 protected:
 	virtual void resizeEvent(QResizeEvent *resizeEvent);
 	
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS)
 	virtual bool winEvent(MSG * message, long * result);
-#else // NL_OS_UNIX
+#elif defined(NL_OS_MAC)
+	virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
+#elif defined(NL_OS_UNIX)
 	virtual bool x11Event(XEvent *event);
 #endif
 	
