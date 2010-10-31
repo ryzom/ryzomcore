@@ -16,7 +16,8 @@ MACRO(CHECK_UNDEFINED_SYMBOL MYLIBRARY SYMBOL SYMBOL_FOUND)
   IF(WIN32)
     # Always TRUE under Windows because we are using static libraries
   ELSEIF(APPLE)
-    SET(CMAKE_OTOOL otool)
+    # SET(CMAKE_OTOOL otool)
+    SET(CMAKE_NM nm)
     IF(CMAKE_OTOOL)
       # Use otool to check if a library is using an external symbol
       EXEC_PROGRAM(${CMAKE_OTOOL} ARGS "-Rv ${${MYLIBRARY}} | grep ${SYMBOL}" OUTPUT_VARIABLE OTOOL_SYMBOL)
@@ -24,6 +25,13 @@ MACRO(CHECK_UNDEFINED_SYMBOL MYLIBRARY SYMBOL SYMBOL_FOUND)
         SET(${SYMBOL_FOUND} FALSE)
       ENDIF(NOT OTOOL_SYMBOL MATCHES "undefined")
     ENDIF(CMAKE_OTOOL)
+    IF(CMAKE_NM)
+      # Use nm to check if a library is using an external symbol
+      EXEC_PROGRAM(${CMAKE_NM} ARGS "-gu ${${MYLIBRARY}} | grep ${SYMBOL}" OUTPUT_VARIABLE NM_SYMBOL)
+      IF(NOT NM_SYMBOL MATCHES ${SYMBOL})
+        SET(${SYMBOL_FOUND} FALSE)
+      ENDIF(NOT NM_SYMBOL MATCHES ${SYMBOL})
+    ENDIF(CMAKE_NM)
   ELSEIF(UNIX)
     IF(CMAKE_OBJDUMP)
       # Use objdump to check if a library is using an external symbol
