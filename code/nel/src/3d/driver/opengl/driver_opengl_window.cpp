@@ -913,6 +913,22 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	else
 	{
 		_win = wnd;
+
+		/* The NSView* extracted from a QWidget using winId() has bounds set to 
+		 * (QWidget::x(), QWidget::y(), QWidget::width(), QWidget::height()).
+		 * This causes cocoa to draw at an offset of x(), y() leaving an unhandled
+		 * border in the NSView. The code below fixes this by translating the 
+		 * coordinate system of the NSView back to 0,0.
+		 * In my opinion this is an error in Qt since QWidget::x/y() are relative to 
+		 * parent and [NSView bounds.origin] is relative to it's own coordinate 
+		 * system. This are incompatible notations. Qt should handle the conversion. 
+		 * Fixes: #1013 Viewport size when embedding NeL Cocoa view in Qt
+		 *   (http://dev.ryzom.com/issues/1013)
+		 */
+		NSView* view = (NSView*)wnd;
+		if(view.frame.origin.x != 0 || view.frame.origin.y != 0) {
+			[view setBoundsOrigin:view.frame.origin];
+		}
 	}
 
 	// setup opengl settings
