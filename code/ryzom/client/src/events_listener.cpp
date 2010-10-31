@@ -29,7 +29,6 @@
 #include "time_client.h"
 #include "input.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/custom_mouse.h"
 
 
 using namespace NLMISC;

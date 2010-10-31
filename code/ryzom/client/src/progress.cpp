@@ -30,7 +30,6 @@
 #include "release.h"
 #include "net_manager.h"
 #include "client_cfg.h"
-#include "interface_v3/custom_mouse.h"
 #include "bg_downloader_access.h"
 #include "nel/misc/system_utils.h"
 
@@ -161,7 +160,6 @@ void drawLoadingBitmap (float progress)
 
 void CProgress::internalProgress (float value)
 {
-	//CustomMouse.updateCursor();
 	// Get croped value
 	value = getCropedValue (value);
 
@@ -396,7 +394,6 @@ void CProgress::internalProgress (float value)
 	// \todo GUIGUI : Remove this when possible.
 	NetMngr.update();
 	CCDBNodeBranch::flushObserversCalls();
-	//CustomMouse.updateCursor();
 
 	// update system dependent progress bar
 	static uint previousValue = 0;
