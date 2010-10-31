@@ -138,7 +138,7 @@ void CEditRangeUIntWidget::changeSlider(int value)
 void CEditRangeUIntWidget::updateUi()
 {
 	if (_Wrapper == NULL) return;
-	_ui.horizontalSlider->setSliderPosition(_Wrapper->get());
+	setValue(_Wrapper->get());
 }
 
 CEditRangeIntWidget::CEditRangeIntWidget(QWidget *parent)
@@ -242,7 +242,7 @@ void CEditRangeIntWidget::changeSlider(int value)
 void CEditRangeIntWidget::updateUi()
 {
 	if (_Wrapper == NULL) return;
-	_ui.horizontalSlider->setSliderPosition(_Wrapper->get());
+	setValue(_Wrapper->get());
 }
 
 
@@ -254,6 +254,7 @@ CEditRangeFloatWidget::CEditRangeFloatWidget(QWidget *parent )
 	connect(_ui.startSpinBox, SIGNAL(valueChanged(double)), this, SLOT(changeRange()));
 	connect(_ui.endSpinBox, SIGNAL(valueChanged(double)), this, SLOT(changeRange()));
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSlider(int)));
+	connect(_ui.currentSpinBox, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 
 	setValue(0.0, false);
 }
@@ -304,6 +305,7 @@ void CEditRangeFloatWidget::enableUpperBound(float upperBound, bool upperBoundEx
 		upperBound -= 0.001f;
 	_ui.endSpinBox->setMaximum(upperBound);
 	_ui.startSpinBox->setMaximum(upperBound);
+	_ui.currentSpinBox->setMaximum(upperBound);
 }
 
 void CEditRangeFloatWidget::enableLowerBound(float lowerBound, bool lowerBoundExcluded)
@@ -312,6 +314,7 @@ void CEditRangeFloatWidget::enableLowerBound(float lowerBound, bool lowerBoundEx
 		lowerBound += 0.01f;
 	_ui.endSpinBox->setMinimum(lowerBound);
 	_ui.startSpinBox->setMinimum(lowerBound);
+	_ui.currentSpinBox->setMinimum(lowerBound);
 }
 
 void CEditRangeFloatWidget::disableUpperBound(void)
@@ -338,8 +341,11 @@ void CEditRangeFloatWidget::changeSlider(int value)
 	float delta = _ui.endSpinBox->value() - _ui.startSpinBox->value();
 	int deltaSlider = _ui.horizontalSlider->maximum() - _ui.horizontalSlider->minimum();
 	float newValue = _ui.startSpinBox->value() + ((delta / deltaSlider) * value);
-	_ui.currentSpinBox->setValue(newValue);
 	
+	_ui.currentSpinBox->blockSignals(true);
+	_ui.currentSpinBox->setValue(newValue);
+	_ui.currentSpinBox->blockSignals(false);
+
 	// NeL wrapper
 	if ((_Wrapper != NULL) && (fabs(newValue - _Wrapper->get()) > 0.0001)) 
 		_Wrapper->setAndUpdateModifiedFlag(newValue);
@@ -348,14 +354,15 @@ void CEditRangeFloatWidget::changeSlider(int value)
 		Q_EMIT valueChanged(newValue);
 }
 
+void CEditRangeFloatWidget::changeValue(double value)
+{
+	setValue(value);
+}
+
 void CEditRangeFloatWidget::updateUi()
 {
 	if (_Wrapper == NULL) return;
-	_ui.currentSpinBox->setValue(_Wrapper->get());
-	float delta = _ui.endSpinBox->value() - _ui.startSpinBox->value();
-	int deltaSlider = _ui.horizontalSlider->maximum() - _ui.horizontalSlider->minimum();
-	int newValue = floor((deltaSlider / delta) * (_Wrapper->get() - _ui.startSpinBox->value()));
-	_ui.horizontalSlider->setSliderPosition(newValue);
+	setValue(_Wrapper->get());
 }
 
 } /* namespace NLQT */
