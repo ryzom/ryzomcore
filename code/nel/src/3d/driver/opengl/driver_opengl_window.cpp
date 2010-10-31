@@ -938,7 +938,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// create a opengl view with the created format
 	_glView = [[CocoaOpenGLView alloc]
-		initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat: format];
+		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height) 
+		pixelFormat:format];
 
 	if(!_glView)
 		nlerror("cannot create view");
@@ -967,7 +968,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// let the open gl view handle the input
 	[[containerView() window] makeFirstResponder:_glView];
 	
+	// prevents scrambled content in the view before first swap
 	[_ctx flushBuffer];
+	[_glView display];
 
 	_EventEmitter.init(this, _glView);
 
@@ -1426,7 +1429,8 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	// create a dummy view which works like the window on other platforms
 	// the open gl view will be created as subview of this one.
-	window = [[NSView alloc] init];
+	window = [[NSView alloc] 
+		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)];
 
 	[cocoa_window setContentView: (NSView*)window];
 
@@ -2513,6 +2517,9 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 			[[containerView() window] setFrame:rect display:YES];
 		}
 	}
+	
+	_WindowWidth = width;
+	_WindowHeight = height;
 	
 #elif defined(NL_OS_UNIX)
 
