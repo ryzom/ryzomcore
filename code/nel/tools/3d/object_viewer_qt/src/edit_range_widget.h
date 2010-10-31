@@ -277,6 +277,7 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void changeRange();
 	void changeSlider(int value);
+	void changeValue(double value);
 
 private:
 

@@ -48,7 +48,6 @@
 #include "interface_v3/action_handler.h"
 #include "sound_manager.h"
 #include "input.h"
-#include "interface_v3/custom_mouse.h"
 #include "login.h"
 #include "login_progress_post_thread.h"
 
@@ -287,12 +286,10 @@ void	setOutGameFullScreen()
 		/*
 		InitMouseWithCursor (true);
 		Driver->showCursor(false);
-		CustomMouse.updateCursor(true); // force a rebuild (may be due to fullscreen, but hotspot broken else ...)
 		Driver->showCursor(true);
 		Driver->clearBuffers(CRGBA::Black);
 		Driver->swapBuffers();
 		Driver->showCursor(false);
-		CustomMouse.updateCursor(true); // force a rebuild (may be due to fullscreen, but hotspot broken else ...)
 		Driver->showCursor(true);
 		*/
 	}
