@@ -34,48 +34,6 @@
 #include "edit_range_widget.h"
 
 namespace NLQT {
-
-class CUserParamWrapper : public IPSWrapperFloat
-{
-public:
-	NL3D::CParticleSystem *PS;
-	uint32 Index;
-	float get(void) const;
-	void set(const float &v);
-};
-
-class CTimeThresholdWrapper : public IPSWrapperFloat
-{
-public:
-	NL3D::CParticleSystem *PS;
-	float get(void) const;
-	void set(const float &);
-};
-
-class CMaxNbIntegrationWrapper : public IPSWrapperUInt
-{
-public:
-	NL3D::CParticleSystem *PS;
-	uint32 get(void) const;
-	void set(const uint32 &);
-};
-
-class CMaxViewDistWrapper : public IPSWrapperFloat
-{
-public:
-	NL3D::CParticleSystem *PS;
-	float get(void) const;
-	void set(const float &);
-};
-
-class CLODRatioWrapper : public IPSWrapperFloat
-{
-public:
-	NL3D::CParticleSystem *PS;
-	float get(void) const;
-	void set(const float &);
-};
-
 /**
 @class CParticleSystemPage
 @brief Page for QStackWidget, to edit workspace node in a particle system
@@ -92,15 +50,27 @@ public:
 	void setEditedParticleSystem(CWorkspaceNode *node);
 
 private Q_SLOTS:
-	void setGlobalLight(bool state);
+	// Integration tab
 	void setLoadBalancing(bool state);
 	void setIntegration(bool state);
 	void setMotionSlowDown(bool state);
 	void setLock(bool checked);
+	
+	void setTimeThreshold(float value);
+	void setMaxSteps(uint32 value);
+
+	// User param tab
 	void setGloabal1();
 	void setGloabal2();
 	void setGloabal3();
 	void setGloabal4();
+
+	void setUserParam1(float value);
+	void setUserParam2(float value);
+	void setUserParam3(float value);
+	void setUserParam4(float value);
+
+	// BBox tab
 	void setEnableBbox(bool state);
 	void setAutoBbox(bool state);
 	void resetBbox();
@@ -109,11 +79,21 @@ private Q_SLOTS:
 	void setXBbox(double value);
 	void setYBbox(double value);
 	void setZBbox(double value);
-	void setEditGlobalColor(bool state);
-	void setPresetBehaviour(int index);
+	
+	// LOD Param
 	void setSharable(bool state);
 	void setAutoLOD(bool state);
 	void settings();
+	
+	void setMaxViewDist(float value);
+	void setLodRatio(float value);
+
+	// Global color tab
+	void setGlobalLight(bool state);
+	void setEditGlobalColor(bool state);
+	
+	// Life mgt param
+	void setPresetBehaviour(int index);
 	void setModelRemoved(bool state);
 	void setPSResource(bool state);
 	void setLifeTimeUpdate(bool state);
@@ -128,17 +108,12 @@ private:
 	void updateDieOnEventParams();
 	void updateLifeMgtPresets();
 	
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+	bool enabledModifiedFlag;
+
+	void updateModifiedFlag() { if ((_Node) && (enabledModifiedFlag)) _Node->setModified(true); }
 	
 	CWorkspaceNode 		  *_Node;
-	CTimeThresholdWrapper	  _TimeThresholdWrapper;
-	CMaxViewDistWrapper	  _MaxViewDistWrapper;
-	CMaxNbIntegrationWrapper  _MaxNbIntegrationWrapper;
-	CLODRatioWrapper	  _LODRatioWrapper;
 
-	/// wrapper to tune user parameters
-	CUserParamWrapper	  _UserParamWrapper[NL3D::MaxPSUserParam];
-	
 	struct CGlobalColorWrapper : public IPSSchemeWrapperRGBA
 	{
 		NL3D::CParticleSystem *PS;

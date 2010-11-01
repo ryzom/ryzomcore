@@ -905,5 +905,118 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>autoLODCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>settingsPushButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>166</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>283</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enablePBBCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>bboxGroupBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>99</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>97</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>xDoubleSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>66</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>yDoubleSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>60</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>162</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>zDoubleSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>57</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>254</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>incBboxPushButton</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>65</x>
+     <y>123</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>decBboxPushButton</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
