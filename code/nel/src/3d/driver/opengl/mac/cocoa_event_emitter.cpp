@@ -233,19 +233,18 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	if(!server && !_server)
 		nlerror("no server to post events to");
 
-	// TODO like internal server in unix event emitter... review!
 	if(!server)
 		server = _server;
 
 	NSRect  viewRect = [_glView frame];
+	CGPoint mousePos = [_glView convertPoint:event.locationInWindow fromView:nil];
 
-	// TODO this code assumes, that the view fills the window
-	// convert the mouse position to NeL style (relative)
-	float mouseX = event.locationInWindow.x / (float)viewRect.size.width;
-	float mouseY = event.locationInWindow.y / (float)viewRect.size.height;
+	mousePos.x /= (float)viewRect.size.width;
+	mousePos.y /= (float)viewRect.size.height;
 
 	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mouseX < 0.0 || mouseX > 1.0 || mouseY < 0.0 || mouseY > 1.0) && 
+	if((mousePos.x < 0.0 || mousePos.x > 1.0 || 
+			mousePos.y < 0.0 || mousePos.y > 1.0) && 
 			event.type != NSKeyDown && event.type != NSKeyUp)
 	{
 		return false;
@@ -260,28 +259,28 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSLeftMouseDown:
 	{
 		server->postEvent(new NLMISC::CEventMouseDown(
-			mouseX, mouseY, 
+			mousePos.x, mousePos.y, 
 			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 	}
 	break;
 	case NSLeftMouseUp:
 	{
 		server->postEvent(new NLMISC::CEventMouseUp(
-			mouseX, mouseY, 
+			mousePos.x, mousePos.y, 
 			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 		break;
 	}
 	case NSRightMouseDown:
 	{
 		server->postEvent(new NLMISC::CEventMouseDown(
-			mouseX, mouseY, 
+			mousePos.x, mousePos.y, 
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
 		break;
 	}
 	case NSRightMouseUp:
 	{
 		server->postEvent(new NLMISC::CEventMouseUp(
-			mouseX, mouseY, 
+			mousePos.x, mousePos.y, 
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
 		break;
 	}
@@ -297,7 +296,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 		// normally send position in a CEventMouseMove
 		else
 			nelEvent = new NLMISC::CEventMouseMove(
-				mouseX, mouseY, (NLMISC::TMouseButton)modifiers, this);
+				mousePos.x, mousePos.y, (NLMISC::TMouseButton)modifiers, this);
 
 		server->postEvent(nelEvent);
 		break;
@@ -313,7 +312,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 
 		// normally send position in a CEventMouseMove
 		else
-			nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
+			nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y,
 				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this);
 
 		server->postEvent(nelEvent);
@@ -330,7 +329,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 
 		// normally send position in a CEventMouseMove
 		else
-			nelEvent = new NLMISC::CEventMouseMove(mouseX, mouseY,
+			nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y,
 				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this);
 
 		server->postEvent(nelEvent);
@@ -378,7 +377,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	{
 		if(fabs(event.deltaY) > 0.1) 
 			server->postEvent(new NLMISC::CEventMouseWheel(
-				mouseX, mouseY, (NLMISC::TMouseButton)modifiers,
+				mousePos.x, mousePos.y, (NLMISC::TMouseButton)modifiers,
 				(event.deltaY > 0), this));
 
 		break;
@@ -423,6 +422,7 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 		if(!event)
 			break;
 
+		// if there is a driver set up, forward event to it's windowProc
 		if(_driver)
 		{
 			cocoaProc proc = (cocoaProc)_driver->getWindowProc();
@@ -430,15 +430,16 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 			if(proc)
 				proc(_driver, [event eventRef]);
 		}
+		// without driver, just process the event
 		else
 		{
 			processMessage(event, &server);
 		}
 
+		// forward the event to the cocoa application
 		[NSApp sendEvent:event];
 	}
 	
-	// TODO like internal server in unix event emitter... review!
 	_server = &server;
 }
 
