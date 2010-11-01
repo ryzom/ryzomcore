@@ -40,78 +40,6 @@ using namespace NLMISC;
 
 namespace NLQT {
 
-// WRAPPERS IMPLEMENTATION 
-
-float CTimeThresholdWrapper::get(void) const
-{
-	NL3D::TAnimationTime t;
-	uint32 max;
-	bool csd;
-	bool klt;
-	PS->getAccurateIntegrationParams(t, max, csd, klt);
-	return t;
-}
-
-void CTimeThresholdWrapper::set(const float &tt)
-{
-	NL3D::TAnimationTime t;
-	uint32 max;
-	bool csd;
-	bool klt;
-	PS->getAccurateIntegrationParams(t, max, csd, klt);
-	PS->setAccurateIntegrationParams(tt, max, csd, klt);	
-}
-
-uint32 CMaxNbIntegrationWrapper::get(void) const
-{
-	NL3D::TAnimationTime t;
-	uint32 max;
-	bool csd;
-	bool klt;
-	PS->getAccurateIntegrationParams(t, max, csd, klt);
-	return max;
-}
-
-void CMaxNbIntegrationWrapper::set(const uint32 &nmax)
-{
-	NL3D::TAnimationTime t;
-	uint32 max;
-	bool csd;
-	bool klt;
-	PS->getAccurateIntegrationParams(t, max, csd, klt);
-	PS->setAccurateIntegrationParams(t, nmax, csd, klt);	
-}
-	
-float CUserParamWrapper::get(void) const 
-{ 
-	return PS->getUserParam(Index); 
-}
-
-void CUserParamWrapper::set(const float &v)
-{
-	PS->setUserParam(Index, v); 
-}
-
-float CMaxViewDistWrapper::get(void) const
-{
-	return PS->getMaxViewDist();
-}
-
-void CMaxViewDistWrapper::set(const float &d)
-{
-	PS->setMaxViewDist(d);
-}
-
-float CLODRatioWrapper::get(void) const
-{
-	return PS->getLODRatio();
-}
-
-void CLODRatioWrapper::set(const float &v)
-{
-	PS->setLODRatio(v);
-}
-
 static void chooseGlobalUserParam(uint userParam, NL3D::CParticleSystem *ps, QWidget *parent)
 {
 	nlassert(ps);
@@ -131,40 +59,32 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	
 	_ui.timeThresholdWidget->setRange(0.005f, 0.3f);
 	_ui.timeThresholdWidget->enableLowerBound(0, true);
-	_ui.timeThresholdWidget->setWrapper(&_TimeThresholdWrapper);
 
 	_ui.maxStepsWidget->setRange(0, 4);
 	_ui.maxStepsWidget->enableLowerBound(0, true);
-	_ui.maxStepsWidget->setWrapper(&_MaxNbIntegrationWrapper);
 
 	_ui.userParamWidget_1->setRange(0, 1.0f);
 	_ui.userParamWidget_1->enableLowerBound(0, false);
 	_ui.userParamWidget_1->enableUpperBound(1, false);
-	_ui.userParamWidget_1->setWrapper(&_UserParamWrapper[0]);
 
 	_ui.userParamWidget_2->setRange(0, 1.0f);
 	_ui.userParamWidget_2->enableLowerBound(0, false);
 	_ui.userParamWidget_2->enableUpperBound(1, false);
-	_ui.userParamWidget_2->setWrapper(&_UserParamWrapper[1]);
 
 	_ui.userParamWidget_3->setRange(0, 1.0f);
 	_ui.userParamWidget_3->enableLowerBound(0, false);
 	_ui.userParamWidget_3->enableUpperBound(1, false);
-	_ui.userParamWidget_3->setWrapper(&_UserParamWrapper[2]);
 
 	_ui.userParamWidget_4->setRange(0, 1.0f);
 	_ui.userParamWidget_4->enableLowerBound(0, false);
 	_ui.userParamWidget_4->enableUpperBound(1, false);
-	_ui.userParamWidget_4->setWrapper(&_UserParamWrapper[3]);
 
 	_ui.maxViewDistWidget->setRange(0, 400.f);
 	_ui.maxViewDistWidget->enableLowerBound(0, true);
-	_ui.maxViewDistWidget->setWrapper(&_MaxViewDistWrapper);
 	
 	_ui.lodRatioWidget->setRange(0, 1.f);
 	_ui.lodRatioWidget->enableLowerBound(0, true);
 	_ui.lodRatioWidget->enableUpperBound(1, true);
-	_ui.lodRatioWidget->setWrapper(&_LODRatioWrapper);
 	
 	_ui.colorWidget->setSchemeWrapper(&_GlobalColorWrapper);
 	_ui.colorWidget->enableMemoryScheme(false);
@@ -173,19 +93,28 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	_ui.colorWidget->setEnabledConstantValue(false);
 	_ui.colorWidget->init();
 	_ui.colorWidget->hide();
-
-	for (uint k = 0; k < NL3D::MaxPSUserParam; ++k)
-		_UserParamWrapper[k].Index = k;
 	
-	connect(_ui.globalLightCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setGlobalLight(bool)));
+	// Integration tab
 	connect(_ui.loadBalancingCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setLoadBalancing(bool)));
 	connect(_ui.integrationCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setIntegration(bool)));
 	connect(_ui.motionSlowDownCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setMotionSlowDown(bool)));
 	connect(_ui.lockPushButton ,SIGNAL(toggled(bool)), this, SLOT(setLock(bool)));
+	
+	connect(_ui.timeThresholdWidget ,SIGNAL(valueChanged(float)), this, SLOT(setTimeThreshold(float)));
+	connect(_ui.maxStepsWidget ,SIGNAL(valueChanged(uint32)), this, SLOT(setMaxSteps(uint32)));
+	
+	// User param tab
 	connect(_ui.globalPushButton_1 ,SIGNAL(clicked()), this, SLOT(setGloabal1()));
 	connect(_ui.globalPushButton_2 ,SIGNAL(clicked()), this, SLOT(setGloabal2()));
 	connect(_ui.globalPushButton_3 ,SIGNAL(clicked()), this, SLOT(setGloabal3()));
 	connect(_ui.globalPushButton_4 ,SIGNAL(clicked()), this, SLOT(setGloabal4()));
+	
+	connect(_ui.userParamWidget_1 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam1(float)));
+	connect(_ui.userParamWidget_2 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam2(float)));
+	connect(_ui.userParamWidget_3 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam3(float)));
+	connect(_ui.userParamWidget_4 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam4(float)));
+	
+	// BBox tab
 	connect(_ui.enablePBBCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setEnableBbox(bool)));
 	connect(_ui.autoCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setAutoBbox(bool)));
 	connect(_ui.resetPushButton ,SIGNAL(clicked()), this, SLOT(resetBbox()));
@@ -194,11 +123,21 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	connect(_ui.xDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setXBbox(double)));
 	connect(_ui.yDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setYBbox(double)));
 	connect(_ui.zDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setZBbox(double)));
-	connect(_ui.editGlobalColorCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setEditGlobalColor(bool)));
-	connect(_ui.presetBehaviourComboBox ,SIGNAL(currentIndexChanged(int)), this, SLOT(setPresetBehaviour(int)));
+	
+	// LOD param tab
 	connect(_ui.sharableCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setSharable(bool)));
 	connect(_ui.autoLODCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setAutoLOD(bool)));
 	connect(_ui.settingsPushButton ,SIGNAL(clicked()), this, SLOT(settings()));
+
+	connect(_ui.maxViewDistWidget ,SIGNAL(valueChanged(float)), this, SLOT(setMaxViewDist(float)));
+	connect(_ui.lodRatioWidget ,SIGNAL(valueChanged(float)), this, SLOT(setLodRatio(float)));
+	
+	// Global color tab
+	connect(_ui.editGlobalColorCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setEditGlobalColor(bool)));
+	connect(_ui.globalLightCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setGlobalLight(bool)));
+	
+	// Life mgt param tab
+	connect(_ui.presetBehaviourComboBox ,SIGNAL(currentIndexChanged(int)), this, SLOT(setPresetBehaviour(int)));
 	connect(_ui.modelRemovedCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setModelRemoved(bool)));
 	connect(_ui.psResourceCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setPSResource(bool)));
 	connect(_ui.lifeTimeUpdateCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setLifeTimeUpdate(bool)));
@@ -207,6 +146,8 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	connect(_ui.animTypeComboBox ,SIGNAL(currentIndexChanged(int)), this, SLOT(setAnimType(int)));
 	connect(_ui.dieComboBox ,SIGNAL(currentIndexChanged(int)), this, SLOT(setDie(int)));
 	connect(_ui.afterDelaySpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setAfterDelay(double)));
+
+	enabledModifiedFlag = true;
 }
 
 CParticleSystemPage::~CParticleSystemPage()
@@ -216,54 +157,43 @@ CParticleSystemPage::~CParticleSystemPage()
 void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 {
 	_Node = node;
-	// load settings Time threshold.
-	_TimeThresholdWrapper.OwnerNode = _Node;
-	_TimeThresholdWrapper.PS = _Node->getPSPointer();
-	_ui.timeThresholdWidget->updateUi();
-
-	// load settings Max steps.
-	_MaxNbIntegrationWrapper.OwnerNode = _Node;
-	_MaxNbIntegrationWrapper.PS = _Node->getPSPointer();
-	_ui.maxStepsWidget->updateUi();
-
-	// load settings User Param
-	for (uint k = 0; k < NL3D::MaxPSUserParam; ++k)
-	{		
-		_UserParamWrapper[k].OwnerNode = _Node;
-		_UserParamWrapper[k].PS = _Node->getPSPointer();
-	}
-
-	_ui.userParamWidget_1->updateUi();
-	_ui.userParamWidget_2->updateUi();
-	_ui.userParamWidget_3->updateUi();
-	_ui.userParamWidget_4->updateUi();
-
-	// load settings Max view dist.
-	_MaxViewDistWrapper.OwnerNode = _Node;
-	_MaxViewDistWrapper.PS = _Node->getPSPointer();
-	_ui.maxViewDistWidget->updateUi();
-
-	// load settings LOD Ratio.
-	_LODRatioWrapper.OwnerNode = _Node;
-	_LODRatioWrapper.PS = _Node->getPSPointer();
-	_ui.lodRatioWidget->updateUi();
-
-	// Integration
-	_ui.integrationCheckBox->setChecked(_Node->getPSPointer()->isAccurateIntegrationEnabled());
-	_ui.loadBalancingCheckBox->setChecked(_Node->getPSPointer()->isLoadBalancingEnabled());
-	_ui.globalLightCheckBox->setChecked(_Node->getPSPointer()->getForceGlobalColorLightingFlag());
-
+	enabledModifiedFlag = false;
+	
 	NL3D::TAnimationTime t;
 	uint32 max;
 	bool csd;
 	bool klt;
 	_Node->getPSPointer()->getAccurateIntegrationParams(t, max, csd, klt);
+
+	// Update param Time threshold.
+	_ui.timeThresholdWidget->setValue(t, false);
+	
+	// Update param Max steps.
+	_ui.maxStepsWidget->setValue(max, false);
+	
+	// Update param User Param
+	_ui.userParamWidget_1->setValue(_Node->getPSPointer()->getUserParam(0) , false);
+	_ui.userParamWidget_2->setValue(_Node->getPSPointer()->getUserParam(1) , false);
+	_ui.userParamWidget_3->setValue(_Node->getPSPointer()->getUserParam(2) , false);
+	_ui.userParamWidget_4->setValue(_Node->getPSPointer()->getUserParam(3) , false);
+	
+	// Update param Max view dist.
+	_ui.maxViewDistWidget->setValue(_Node->getPSPointer()->getMaxViewDist(), false);
+
+	// Update param LOD Ratio.
+	_ui.lodRatioWidget->setValue(_Node->getPSPointer()->getLODRatio(), false);
+
+	// Integration
+	_ui.integrationCheckBox->setChecked(_Node->getPSPointer()->isAccurateIntegrationEnabled());
+	_ui.loadBalancingCheckBox->setChecked(_Node->getPSPointer()->isLoadBalancingEnabled());
 	_ui.motionSlowDownCheckBox->setChecked(csd);
 	
 	// Precomputed Bbox
 	_ui.enablePBBCheckBox->setChecked(!_Node->getPSPointer()->getAutoComputeBBox());
 
 	// global color
+	_ui.globalLightCheckBox->setChecked(_Node->getPSPointer()->getForceGlobalColorLightingFlag());
+
 	_GlobalColorWrapper.PS = _Node->getPSPointer();
 	_ui.colorWidget->setWorkspaceNode(_Node);
 	int bGlobalColor = _Node->getPSPointer()->getColorAttenuationScheme() != NULL ?  1 : 0;
@@ -284,6 +214,8 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 	_ui.dieComboBox->setCurrentIndex(_Node->getPSPointer()->getDestroyCondition()); 
 	_ui.animTypeComboBox->setCurrentIndex(_Node->getPSPointer()->getAnimType());
 	_ui.autoDelayCheckBox->setChecked(_Node->getPSPointer()->getAutoComputeDelayBeforeDeathConditionTest());
+	
+	enabledModifiedFlag = true;
 }
 
 void CParticleSystemPage::updatePrecomputedBBoxParams()
@@ -418,17 +350,11 @@ void CParticleSystemPage::setEnableBbox(bool state)
 		updatePrecomputedBBoxParams();
 	else
 		Modules::psEdit().setAutoBBox(false);
-	_ui.bboxGroupBox->setEnabled(state);
 }
 
 void CParticleSystemPage::setAutoBbox(bool state)
 {
 	Modules::psEdit().setAutoBBox(state);
-	_ui.xDoubleSpinBox->setEnabled(!state);
-	_ui.yDoubleSpinBox->setEnabled(!state);
-	_ui.zDoubleSpinBox->setEnabled(!state);
-	_ui.incBboxPushButton->setEnabled(!state);
-	_ui.decBboxPushButton->setEnabled(!state);
 	updateModifiedFlag();
 }
 
@@ -556,7 +482,6 @@ void CParticleSystemPage::setSharable(bool state)
 
 void CParticleSystemPage::setAutoLOD(bool state)
 {
-	_ui.settingsPushButton->setEnabled(state);
 	// performance warning
 	if (state == _Node->getPSPointer()->isAutoLODEnabled()) return;
 	_Node->getPSPointer()->enableAutoLOD(state);
@@ -653,6 +578,65 @@ void CParticleSystemPage::setAfterDelay(double value)
 	}
 }
 
+	
+void CParticleSystemPage::setTimeThreshold(float value)
+{
+	NL3D::TAnimationTime t;
+	uint32 max;
+	bool csd;
+	bool klt;
+	_Node->getPSPointer()->getAccurateIntegrationParams(t, max, csd, klt);
+	_Node->getPSPointer()->setAccurateIntegrationParams(value, max, csd, klt);	
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setMaxSteps(uint32 value)
+{
+	NL3D::TAnimationTime t;
+	uint32 max;
+	bool csd;
+	bool klt;
+	_Node->getPSPointer()->getAccurateIntegrationParams(t, max, csd, klt);
+	_Node->getPSPointer()->setAccurateIntegrationParams(t, value, csd, klt);	
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setUserParam1(float value)
+{
+	_Node->getPSPointer()->setUserParam(0, value); 
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setUserParam2(float value)
+{
+	_Node->getPSPointer()->setUserParam(1, value); 
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setUserParam3(float value)
+{
+	_Node->getPSPointer()->setUserParam(2, value); 
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setUserParam4(float value)
+{
+	_Node->getPSPointer()->setUserParam(3, value);
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setMaxViewDist(float value)
+{
+	_Node->getPSPointer()->setMaxViewDist(value);
+	updateModifiedFlag();
+}
+
+void CParticleSystemPage::setLodRatio(float value)
+{
+	_Node->getPSPointer()->setLODRatio(value);
+	updateModifiedFlag();
+}
+
 CParticleSystemPage::CGlobalColorWrapper::scheme_type *CParticleSystemPage::CGlobalColorWrapper::getScheme(void) const
 {
 	nlassert(PS);
@@ -661,6 +645,7 @@ CParticleSystemPage::CGlobalColorWrapper::scheme_type *CParticleSystemPage::CGlo
 
 void CParticleSystemPage::CGlobalColorWrapper::setScheme(CParticleSystemPage::CGlobalColorWrapper::scheme_type *s)
 {
+	nlassert(PS);
 	PS->setColorAttenuationScheme(s);
 }
 
