@@ -32,6 +32,7 @@ static Atom XA_CLIPBOARD = 0;
 static Atom XA_UTF8_STRING = 0;
 static Atom XA_TARGETS = 0;
 static Atom XA_NEL_SEL = 0;
+static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
@@ -61,6 +62,10 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	XA_UTF8_STRING = XInternAtom(dpy, "UTF8_STRING", False);
 	XA_TARGETS = XInternAtom(dpy, "TARGETS", False);
 	XA_NEL_SEL = XInternAtom(dpy, "NeL_SEL", False);
+
+	// define Atom used by delete window
+	XA_WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
 
 /*
 	TODO: implements all useful events processing
@@ -775,10 +780,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		createIM();
 		break;
 	case ClientMessage:
-//		if ((xevent.xclient.format == 32) && (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW))
-//		{
-//			server->postEvent (new CEventDestroyWindow (this));
-//		}
+		if ((event.xclient.format == 32) && (event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
+		{
+			server->postEvent(new CEventDestroyWindow(this));
+		}
 		break;
 	default:
 		//	nlinfo("UnknownEvent");
