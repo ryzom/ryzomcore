@@ -25,7 +25,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_P
 # Set CMake 2.6 Policies.
 IF(COMMAND cmake_policy)
   # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthreads)
+  # have absolute paths (e.g. -lpthread)
   cmake_policy(SET CMP0003 NEW)
 
   # Works around warnings about escaped quotes in ADD_DEFINITIONS
@@ -98,7 +98,7 @@ IF(WIN32)
   SET(WINSOCK2_LIB ws2_32.lib)
 
   FIND_PACKAGE(External REQUIRED)
-  
+
   IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
     # convert IDE fullpath to VC++ path
     STRING(REGEX REPLACE "Common7/IDE/.+" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
