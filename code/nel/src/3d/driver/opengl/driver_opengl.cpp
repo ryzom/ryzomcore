@@ -597,9 +597,9 @@ bool CDriverGL::setupDisplay()
 	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
 	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
-			_EVSPositionHandle = nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
-			_EVSNormalHandle   = nglBindParameterEXT(GL_CURRENT_NORMAL);
-			_EVSColorHandle    = nglBindParameterEXT(GL_CURRENT_COLOR);
+			_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
+			_EVSNormalHandle	= nglBindParameterEXT(GL_CURRENT_NORMAL);
+			_EVSColorHandle		= nglBindParameterEXT(GL_CURRENT_COLOR);
 
 			if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
 			{
@@ -885,7 +885,7 @@ bool CDriverGL::swapBuffers()
 #elif defined(NL_OS_MAC)
 
 	// TODO: maybe do this somewhere else?
-	if(_DestroyWindow) 
+	if(_DestroyWindow)
 	{
 		[_autoreleasePool release];
 		_autoreleasePool = [[NSAutoreleasePool alloc] init];
@@ -1478,7 +1478,7 @@ void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const floa
 
 
 // ***************************************************************************
-void      CDriverGL::enableNVTextureShader(bool enabled)
+void CDriverGL::enableNVTextureShader(bool enabled)
 {
 	H_AUTO_OGL(CDriverGL_enableNVTextureShader)
 

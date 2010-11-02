@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 namespace NL3D {
-	void viewDidResize(NSView* view, CDriverGL* driver) 
+	void viewDidResize(NSView* view, CDriverGL* driver)
 	{
 		NSRect rect = [[view superview] frame];
 		driver->_WindowWidth = rect.size.width;
@@ -34,9 +34,9 @@ namespace NL3D {
 
 @implementation CocoaOpenGLView
 
--(id)initWithFrame:(NSRect)frame 
+-(id)initWithFrame:(NSRect)frame
 {
-	if((self = [super initWithFrame:frame])) 
+	if((self = [super initWithFrame:frame]))
 	{
 		_characterStorage = [[NSMutableAttributedString alloc] initWithString:@""];
 		_driver           = nil;
@@ -63,7 +63,7 @@ namespace NL3D {
 	_driver = driver;
 }
 
--(void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize 
+-(void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize
 {
 	[super resizeWithOldSuperviewSize:oldBoundsSize];
 
@@ -76,37 +76,37 @@ namespace NL3D {
 /******************************************************************************/
 /* NSTextInputClient Protocol */
 
--(BOOL)hasMarkedText 
+-(BOOL)hasMarkedText
 {
 	return (_markedRange.location == NSNotFound ? NO : YES);
 }
 
--(NSRange)markedRange 
+-(NSRange)markedRange
 {
 	return _markedRange;
 }
 
--(NSRange)selectedRange 
+-(NSRange)selectedRange
 {
 	return NSMakeRange(NSNotFound, 0);
 }
 
--(void)setMarkedText:(id)aString 
-	selectedRange:(NSRange)newSelection 
+-(void)setMarkedText:(id)aString
+	selectedRange:(NSRange)newSelection
 	replacementRange:(NSRange)replacementRange
 {
 	if(replacementRange.location == NSNotFound)
 		replacementRange = _markedRange;
 
-	if([aString length] == 0) 
+	if([aString length] == 0)
 	{
 		[_characterStorage deleteCharactersInRange:replacementRange];
 		[self unmarkText];
-	} 
-	else 
+	}
+	else
 	{
 		_markedRange = NSMakeRange(replacementRange.location, [aString length]);
-		[_characterStorage replaceCharactersInRange:replacementRange 
+		[_characterStorage replaceCharactersInRange:replacementRange
 			withString:aString];
 	}
 }
@@ -123,19 +123,19 @@ namespace NL3D {
 		NSMarkedClauseSegmentAttributeName, NSGlyphInfoAttributeName, nil];
 }
 
--(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange 
+-(NSAttributedString*)attributedSubstringForProposedRange:(NSRange)aRange
 	actualRange:(NSRangePointer)actualRange
 {
 	return [_characterStorage attributedSubstringFromRange:aRange];
 }
 
--(void)insertText:(id)aString 
+-(void)insertText:(id)aString
 	replacementRange:(NSRange)replacementRange
 {
 	if(replacementRange.location == NSNotFound)
 		replacementRange = _markedRange;
 
-	[_characterStorage replaceCharactersInRange:replacementRange 
+	[_characterStorage replaceCharactersInRange:replacementRange
 		withString:aString];
 }
 
@@ -144,7 +144,7 @@ namespace NL3D {
 	return 0;
 }
 
--(NSRect)firstRectForCharacterRange:(NSRange)aRange 
+-(NSRect)firstRectForCharacterRange:(NSRange)aRange
 	actualRange:(NSRangePointer)actualRange
 {
 	return NSMakeRect(0, 0, 0, 0);

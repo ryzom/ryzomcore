@@ -2562,60 +2562,60 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 #ifdef NL_OS_MAC
 void CDriverGL::setupApplicationMenu()
 {
- 	NSMenu*     menu;
- 	NSMenuItem* menuItem;
- 	NSString*   title;
- 	NSString*   appName;
+	NSMenu*     menu;
+	NSMenuItem* menuItem;
+	NSString*   title;
+	NSString*   appName;
 
- 	// get the applications name from it's process info
- 	appName = [[NSProcessInfo processInfo] processName];
+	// get the applications name from it's process info
+	appName = [[NSProcessInfo processInfo] processName];
 
- 	// create an empty menu object
- 	menu    = [[NSMenu alloc] initWithTitle:@""];
+	// create an empty menu object
+	menu    = [[NSMenu alloc] initWithTitle:@""];
 
- 	// add the about menu item
- 	title = [@"About " stringByAppendingString:appName];
- 	[menu addItemWithTitle:title
- 		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
+	// add the about menu item
+	title = [@"About " stringByAppendingString:appName];
+	[menu addItemWithTitle:title
+		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
 
- 	// separator
- 	[menu addItem:[NSMenuItem separatorItem]];
+	// separator
+	[menu addItem:[NSMenuItem separatorItem]];
 
- 	// add the hide application menu item
- 	title = [@"Hide " stringByAppendingString:appName];
- 	[menu addItemWithTitle:title
- 		action:@selector(hide:) keyEquivalent:@"h"];
+	// add the hide application menu item
+	title = [@"Hide " stringByAppendingString:appName];
+	[menu addItemWithTitle:title
+		action:@selector(hide:) keyEquivalent:@"h"];
 
- 	// add the hide others menu item
- 	menuItem = [menu addItemWithTitle:@"Hide Others"
- 		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
- 	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+	// add the hide others menu item
+	menuItem = [menu addItemWithTitle:@"Hide Others"
+		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
 
- 	// add the show all menu item
- 	[menu addItemWithTitle:@"Show All"
- 		action:@selector(unhideAllApplications:) keyEquivalent:@""];
+	// add the show all menu item
+	[menu addItemWithTitle:@"Show All"
+		action:@selector(unhideAllApplications:) keyEquivalent:@""];
 
- 	// separator
- 	[menu addItem:[NSMenuItem separatorItem]];
+	// separator
+	[menu addItem:[NSMenuItem separatorItem]];
 
- 	/*
- 		TODO on quit send EventDestroyWindowId
- 	*/
- 	// add the quit menu item
- 	title = [@"Quit " stringByAppendingString:appName];
- 	[menu addItemWithTitle:title
- 		action:@selector(terminate:) keyEquivalent:@"q"];
+	/*
+		TODO on quit send EventDestroyWindowId
+	*/
+	// add the quit menu item
+	title = [@"Quit " stringByAppendingString:appName];
+	[menu addItemWithTitle:title
+		action:@selector(terminate:) keyEquivalent:@"q"];
 
- 	// create an empty menu item and put the new menu into it as a subitem
- 	menuItem = [[NSMenuItem alloc] initWithTitle:@""
- 		action:nil keyEquivalent:@""];
- 	[menuItem setSubmenu:menu];
+	// create an empty menu item and put the new menu into it as a subitem
+	menuItem = [[NSMenuItem alloc] initWithTitle:@""
+		action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:menu];
 
- 	// create a menu for the application
- 	[NSApp setMainMenu:[[NSMenu alloc] initWithTitle:@""]];
+	// create a menu for the application
+	[NSApp setMainMenu:[[NSMenu alloc] initWithTitle:@""]];
 
- 	// attach the new menu to the applications menu
- 	[[NSApp mainMenu] addItem:menuItem];
+	// attach the new menu to the applications menu
+	[[NSApp mainMenu] addItem:menuItem];
 }
 #endif
 
@@ -2834,12 +2834,12 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, Cursor &cur
 */
 
 	XRenderPictFormat *format = XRenderFindStandardFormat (_dpy, PictStandardARGB32);
-    Picture picture = XRenderCreatePicture (_dpy, iconPixmap, format, 0, 0);
+	Picture picture = XRenderCreatePicture (_dpy, iconPixmap, format, 0, 0);
 
-    cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
+	cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
 
-    XRenderFreePicture(_dpy, picture);
-    XFreePixmap(_dpy, iconPixmap);
+	XRenderFreePicture(_dpy, picture);
+	XFreePixmap(_dpy, iconPixmap);
 
 	return true;
 

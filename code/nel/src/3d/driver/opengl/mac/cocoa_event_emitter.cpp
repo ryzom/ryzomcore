@@ -243,15 +243,15 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.y /= (float)viewRect.size.height;
 
 	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mousePos.x < 0.0 || mousePos.x > 1.0 || 
-			mousePos.y < 0.0 || mousePos.y > 1.0) && 
+	if((mousePos.x < 0.0 || mousePos.x > 1.0 ||
+			mousePos.y < 0.0 || mousePos.y > 1.0) &&
 			event.type != NSKeyDown && event.type != NSKeyUp)
 	{
 		return false;
 	}
 
 	// convert the modifiers for nel to pass them with the events
-	NLMISC::TKeyButton modifiers = 
+	NLMISC::TKeyButton modifiers =
 		modifierFlagsToNelKeyButton([event modifierFlags]);
 
 	switch(event.type)
@@ -259,28 +259,28 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSLeftMouseDown:
 	{
 		server->postEvent(new NLMISC::CEventMouseDown(
-			mousePos.x, mousePos.y, 
+			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 	}
 	break;
 	case NSLeftMouseUp:
 	{
 		server->postEvent(new NLMISC::CEventMouseUp(
-			mousePos.x, mousePos.y, 
+			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 		break;
 	}
 	case NSRightMouseDown:
 	{
 		server->postEvent(new NLMISC::CEventMouseDown(
-			mousePos.x, mousePos.y, 
+			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
 		break;
 	}
 	case NSRightMouseUp:
 	{
 		server->postEvent(new NLMISC::CEventMouseUp(
-			mousePos.x, mousePos.y, 
+			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
 		break;
 	}
@@ -375,7 +375,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSCursorUpdate:break;
 	case NSScrollWheel:
 	{
-		if(fabs(event.deltaY) > 0.1) 
+		if(fabs(event.deltaY) > 0.1)
 			server->postEvent(new NLMISC::CEventMouseWheel(
 				mousePos.x, mousePos.y, (NLMISC::TMouseButton)modifiers,
 				(event.deltaY > 0), this));
@@ -439,7 +439,7 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 		// forward the event to the cocoa application
 		[NSApp sendEvent:event];
 	}
-	
+
 	_server = &server;
 }
 
