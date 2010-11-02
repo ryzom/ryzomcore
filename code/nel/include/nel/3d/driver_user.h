@@ -430,6 +430,16 @@ public:
 	virtual void			setMousePos (float x, float y);
 	/// If true, capture the mouse to force it to stay under the window.
 	virtual void			setCapture (bool b);
+
+	// see if system cursor is currently captured
+	virtual bool			isSystemCursorCaptured();
+
+	// Add a new cursor (name is case unsensitive)
+	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
+
+	// Display a cursor from its name (case unsensitive)
+	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+
 	// @}
 
 

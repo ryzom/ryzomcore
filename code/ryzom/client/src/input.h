@@ -62,21 +62,8 @@ void	SetMouseSpeed (float speed);
 // Use this method to set the cursor acceleration
 void	SetMouseAcceleration (uint accel);
 
-// capture the system cursor
-void	CaptureSystemCursor();
-
-// release the system cursor
-void	ReleaseSystemCursor();
-
-// see if system cursor is currently captured
-bool	IsSystemCursorCaptured();
-
 // handle capturing of mouse on button up / button down
 void HandleSystemCursorCapture(const NLMISC::CEvent &event);
-
-// Test if cursor is in the client area. always true when software cursor is used and window visible
-// (displayed in software when DirectInput is used)
-bool IsSystemCursorInClientArea();
 
 // get state of mouse button, as a bitfield formatted like NLMISC::TMouseButton (modifier keys are not included)
 uint GetMouseButtonsState();

@@ -14,11 +14,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stddirect3d.h"
-#include "driver_direct3d.h"
+#include "stdopengl.h"
+#include "driver_opengl.h"
 
-#include "nel/misc/di_event_emitter.h"
+#ifdef NL_OS_WINDOWS
+# include <windowsx.h>
+#elif defined(NL_OS_MAC)
+#elif defined (NL_OS_UNIX)
+# include <GL/gl.h>
+# include <GL/glx.h>
+# include <X11/Xatom.h>
+#endif // NL_OS_UNIX
+
 #include "nel/misc/mouse_device.h"
+#include "nel/misc/di_event_emitter.h"
+#include "nel/3d/u_driver.h"
+#include "nel/misc/file.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -27,7 +38,7 @@ namespace NL3D
 {
 
 // *************************************************************************************
-CDriverD3D::CCursor::CCursor() : ColorDepth(CDriverD3D::ColorDepth32),
+CDriverGL::CCursor::CCursor() : ColorDepth(CDriverGL::ColorDepth32),
 								OrigHeight(32),
 								HotspotScale(1.f),
 								HotspotOffsetX(0),
@@ -38,25 +49,34 @@ CDriverD3D::CCursor::CCursor() : ColorDepth(CDriverD3D::ColorDepth32),
 								Col(CRGBA::White),
 								Rot(0)
 {
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	Dpy = NULL;
+#endif
 }
 
 // *************************************************************************************
-CDriverD3D::CCursor::~CCursor()
+CDriverGL::CCursor::~CCursor()
 {
 	reset();
 }
 
 // *************************************************************************************
-void CDriverD3D::CCursor::reset()
+void CDriverGL::CCursor::reset()
 {
 	if (Cursor != EmptyCursor)
 	{
+#ifdef NL_OS_WINDOWS
 		DestroyIcon(Cursor);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+		XFreeCursor(Dpy, Cursor);
+		XSync(Dpy, False);
+#endif
 	}
 }
 
 // *************************************************************************************
-CDriverD3D::CCursor& CDriverD3D::CCursor::operator= (const CDriverD3D::CCursor& from)
+CDriverGL::CCursor& CDriverGL::CCursor::operator= (const CDriverGL::CCursor& from)
 {
 	if (&from == this)
 		return *this;
@@ -70,14 +90,18 @@ CDriverD3D::CCursor& CDriverD3D::CCursor::operator= (const CDriverD3D::CCursor& 
 	Cursor = from.Cursor;
 	Col = from.Col;
 	Rot = from.Rot;
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	Dpy = from.Dpy;
+#endif
 	return *this;
 }
 
 // *************************************************************************************
-bool CDriverD3D::isAlphaBlendedCursorSupported()
+bool CDriverGL::isAlphaBlendedCursorSupported()
 {
 	if (!_AlphaBlendedCursorSupportRetrieved)
 	{
+#ifdef NL_OS_WINDOWS
 		// Support starts with windows 2000 (not only from XP as seen in most docs)
 		// NB : Additionnaly, could query D3D caps to know if
 		// color hardware cursor is supported, not only emulated,
@@ -89,6 +113,10 @@ bool CDriverD3D::isAlphaBlendedCursorSupported()
 		{
 			_AlphaBlendedCursorSupported = (osvi.dwMajorVersion	>= 5);
 		}
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+		_AlphaBlendedCursorSupported = _xrender_version > 0;
+#endif
 
 		_AlphaBlendedCursorSupportRetrieved = true;
 	}
@@ -97,7 +125,7 @@ bool CDriverD3D::isAlphaBlendedCursorSupported()
 }
 
 // *************************************************************************************
-void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &cursorBitmap)
+void CDriverGL::addCursor(const std::string &name, const NLMISC::CBitmap &cursorBitmap)
 {
 	if (!isAlphaBlendedCursorSupported()) return;
 
@@ -180,8 +208,17 @@ void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 	uint destWidth;
 	uint destHeight;
 
+#ifdef NL_OS_WINDOWS
+
 	destWidth = GetSystemMetrics(SM_CXCURSOR);
 	destHeight = GetSystemMetrics(SM_CYCURSOR);
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+	Status res = XQueryBestCursor(_dpy, _win, width, height, &destWidth, &destHeight);
+
+#endif
 
 	// build a square bitmap
 	uint tmpSize = std::max(maxX - minX + 1, maxY - minY + 1);
@@ -223,27 +260,48 @@ void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 }
 
 // *************************************************************************************
-void CDriverD3D::createCursors()
+void CDriverGL::createCursors()
 {
+#ifdef NL_OS_WINDOWS
 	_DefaultCursor = LoadCursor(NULL, IDC_ARROW);
+	_BlankCursor = NULL;
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	_DefaultCursor = None;
+
+	// create blank cursor
+	char bm_no_data[] = { 0,0,0,0,0,0,0,0 };
+	Pixmap pixmap_no_data = XCreateBitmapFromData (_dpy, _win, bm_no_data, 8, 8);
+	XColor black;
+	memset(&black, 0, sizeof (XColor));
+	black.flags = DoRed | DoGreen | DoBlue;
+	_BlankCursor = XCreatePixmapCursor (_dpy, pixmap_no_data, pixmap_no_data, &black, &black, 0, 0);
+	XFreePixmap(_dpy, pixmap_no_data);
+#endif
 }
 
 // *************************************************************************************
-void CDriverD3D::releaseCursors()
+void CDriverGL::releaseCursors()
 {
-	SetClassLongPtr(_HWnd, GCLP_HCURSOR, 0);
+#ifdef NL_OS_WINDOWS
+	SetClassLongPtr(_win, GCLP_HCURSOR, 0);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	XUndefineCursor(_dpy, _win);
+	XFreeCursor(_dpy, _BlankCursor);
+#endif
 
 	_Cursors.clear();
 }
 
 // *************************************************************************************
-void CDriverD3D::updateCursor(bool forceRebuild)
+void CDriverGL::updateCursor(bool forceRebuild)
 {
 	setCursor(_CurrName, _CurrCol, _CurrRot, _CurrHotSpotX, _CurrHotSpotY, forceRebuild);
 }
 
 // *************************************************************************************
-void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
+void CDriverGL::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
 {
 	// don't update cursor if it's hidden or if custom cursors are not suppported
 	if (!isAlphaBlendedCursorSupported() || _CurrName == "none") return;
@@ -285,6 +343,9 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 			curs.HotSpotX = hotSpotX;
 			curs.HotSpotY = hotSpotY;
 			curs.ColorDepth = _ColorDepth;
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+			curs.Dpy = _dpy;
+#endif
 		}
 		cursorHandle = curs.Cursor ? curs.Cursor : _DefaultCursor;
 	}
@@ -292,25 +353,47 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 	if (isSystemCursorInClientArea() || isSystemCursorCaptured() || forceRebuild)
 	{
 //		if (CInputHandlerManager::getInstance()->hasFocus())
+#ifdef NL_OS_WINDOWS
 		{
 			::SetCursor(cursorHandle);
-			SetClassLongPtr(_HWnd, GCLP_HCURSOR, (LONG_PTR) cursorHandle); // set default mouse icon to the last one
+			SetClassLongPtr(_win, GCLP_HCURSOR, (LONG_PTR) cursorHandle); // set default mouse icon to the last one
 		}
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+		if (cursorHandle == _DefaultCursor)
+		{
+			XUndefineCursor(_dpy, _win);
+		}
+		else
+		{
+			XDefineCursor(_dpy, _win, cursorHandle);
+		}
+#endif
 	}
 
 }
 
 // *************************************************************************************
-nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
+nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
 	uint mouseW;
 	uint mouseH;
 
+#ifdef NL_OS_WINDOWS
+
 	// use cursor size from system
 	mouseW = GetSystemMetrics(SM_CXCURSOR);
 	mouseH = GetSystemMetrics(SM_CYCURSOR);
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+	// use best cursor size for bitmap
+	Status res = XQueryBestCursor(_dpy, _win, src.getWidth(), src.getHeight(), &mouseW, &mouseH);
+
+#endif
 
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)
@@ -330,26 +413,33 @@ nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 ro
 
 
 // *************************************************************************************
-void CDriverD3D::setSystemArrow()
+void CDriverGL::setSystemArrow()
 {
-	H_AUTO_D3D(CDriverD3D_setSystemArrow);
+	H_AUTO_OGL(CDriverGL_setSystemArrow);
 
+#ifdef NL_OS_WINDOWS
 	if (isSystemCursorInClientArea() || isSystemCursorCaptured())
 	{
 		SetCursor(_DefaultCursor);
 	}
 
 	// set default mouse icon to the default one
-	SetClassLongPtr(_HWnd, GCLP_HCURSOR, (LONG_PTR) _DefaultCursor);
+	SetClassLongPtr(_win, GCLP_HCURSOR, (LONG_PTR) _DefaultCursor);
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	XUndefineCursor(_dpy, _win);
+#endif
 }
 
-// ***************************************************************************
-void CDriverD3D::showCursor(bool b)
+// --------------------------------------------------
+void CDriverGL::showCursor(bool b)
 {
-	H_AUTO_D3D(CDriverD3D_showCursor);
+	H_AUTO_OGL(CDriverGL_showCursor);
 
-	if (_HWnd == EmptyWindow)
+	if (_win == EmptyWindow)
 		return;
+
+#ifdef NL_OS_WINDOWS
 
 	if (b)
 	{
@@ -364,83 +454,113 @@ void CDriverD3D::showCursor(bool b)
 		while (ShowCursor(b) >= 0)
 			;
 	}
+
+#elif defined(NL_OS_MAC)
+
+	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
+	// twice requires two calls to "show" to make the cursor visible again.
+	// Since other platforms seem to not do this, the functionality is masked here
+	// by only calling hide if the cursor is visible and only calling show if
+	// the cursor was hidden.
+
+	CGDisplayErr error  = kCGErrorSuccess;
+	static bool visible = true;
+
+	if(b && !visible)
+	{
+		error = CGDisplayShowCursor(kCGDirectMainDisplay);
+		visible = true;
+	}
+	else if(!b && visible)
+	{
+		error = CGDisplayHideCursor(kCGDirectMainDisplay);
+		visible = false;
+	}
+
+	if(error != kCGErrorSuccess)
+		nlerror("cannot show / hide cursor");
+
+#elif defined (NL_OS_UNIX)
+
+	if (!b)
+	{
+		XDefineCursor(_dpy, _win, _BlankCursor);
+		_CurrName = "none";
+	}
+	else
+	{
+		_CurrName = "";
+	}
+
+	// update current hardware icon to avoid to have the plain arrow
+	updateCursor(true);
+
+#endif // NL_OS_UNIX
 }
 
-// ***************************************************************************
-void CDriverD3D::setMousePos(float x, float y)
+// --------------------------------------------------
+void CDriverGL::setMousePos(float x, float y)
 {
-	H_AUTO_D3D(CDriverD3D_setMousePos);
+	H_AUTO_OGL(CDriverGL_setMousePos)
 
-	if (_HWnd == EmptyWindow)
+	if (_win == EmptyWindow)
 		return;
 
 	sint x1 = (sint)((float)_CurrentMode.Width*x);
 	sint y1 = (sint)((float)_CurrentMode.Height*(1.0f-y));
 
+#ifdef NL_OS_WINDOWS
+
 	// NeL window coordinate to MSWindows coordinates
 	POINT pt;
 	pt.x = x1;
 	pt.y = y1;
-	ClientToScreen (_HWnd, &pt);
+	ClientToScreen (_win, &pt);
 	SetCursorPos(pt.x, pt.y);
-}
 
-// ***************************************************************************
-bool CDriverD3D::isSystemCursorInClientArea()
-{
-	if (_FullScreen /* || !IsMouseCursorHardware() */)
-	{
-		return IsWindowVisible(_HWnd) != FALSE;
-	}
+#elif defined(NL_OS_MAC)
+
+	// CG wants absolute coordinates related to first screen's top left
+
+	// get the first screen's (conaints menubar) rect (this is not mainScreen)
+	NSRect firstScreenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+
+	// get the rect (position, size) of the window
+	NSRect windowRect;
+	if([containerView() isInFullScreenMode])
+		windowRect = [[[containerView() window] screen] frame];
 	else
-	{
-		POINT cursPos;
-		// the mouse should be in the client area of the window
-		if (!GetCursorPos(&cursPos))
-		{
-			return false;
-		}
-		HWND wnd = WindowFromPoint(cursPos);
-		if (wnd != _HWnd)
-		{
-			return false; // not the same window
-		}
-		// want that the mouse be in the client area
-		RECT clientRect;
-		if (!GetClientRect(_HWnd, &clientRect))
-		{
-			return false;
-		}
-		POINT tl, br;
-		tl.x = clientRect.left;
-		tl.y = clientRect.top;
-		br.x = clientRect.right;
-		br.y = clientRect.bottom;
-		if (!ClientToScreen(_HWnd, &tl))
-		{
-			return false;
-		}
-		if (!ClientToScreen(_HWnd, &br))
-		{
-			return false;
-		}
-		if ((cursPos.x < tl.x) || (cursPos.x >= br.x) || (cursPos.y < tl.y) || (cursPos.y >= br.y))
-		{
-			return false;
-		}
-	}
+		windowRect = [[containerView() window] frame];
 
-	return true;
+	// get the view's rect for height and width
+	NSRect viewRect = [containerView() frame];
+
+	// set the cursor position
+	CGDisplayErr error = CGDisplayMoveCursorToPoint(
+		kCGDirectMainDisplay, CGPointMake(
+			windowRect.origin.x + (viewRect.size.width * x),
+			firstScreenRect.size.height - windowRect.origin.y -
+				viewRect.size.height + ((1.0 - y) * viewRect.size.height)));
+
+	if(error != kCGErrorSuccess)
+		nlerror("cannot set mouse position");
+
+#elif defined (NL_OS_UNIX)
+
+	XWarpPointer (_dpy, None, _win, None, None, None, None, x1, y1);
+
+#endif // NL_OS_UNIX
 }
 
-// ***************************************************************************
-void CDriverD3D::setCapture (bool b)
+void CDriverGL::setCapture (bool b)
 {
-	H_AUTO_D3D(CDriverD3D_setCapture);
+	H_AUTO_OGL(CDriverGL_setCapture )
+
+#ifdef NL_OS_WINDOWS
 
 	if (b && isSystemCursorInClientArea() && !isSystemCursorCaptured())
 	{
-		SetCapture(_HWnd);
+		SetCapture(_win);
 	}
 	else if (!b && isSystemCursorCaptured())
 	{
@@ -453,22 +573,101 @@ void CDriverD3D::setCapture (bool b)
 
 		ReleaseCapture();
 	}
+
+#elif defined(NL_OS_MAC)
+
+	// no need to capture
+	_MouseCaptured = b;
+
+#elif defined (NL_OS_UNIX)
+
+	if(b /* && isSystemCursorInClientArea() && !isSystemCursorCaptured()*/) // capture the cursor.
+	{
+		// capture the cursor
+		XGrabPointer(_dpy, _win, True, 0, GrabModeAsync, GrabModeAsync, _win, None, CurrentTime);
+		_MouseCaptured = true;
+	}
+	else if (!b/* && isSystemCursorCaptured()*/)
+	{
+		// release the cursor
+		XUngrabPointer(_dpy, CurrentTime);
+		_MouseCaptured = false;
+	}
+
+#endif // NL_OS_UNIX
+}
+
+bool CDriverGL::isSystemCursorInClientArea()
+{
+	if (_FullScreen /* || !IsMouseCursorHardware() */)
+	{
+#ifdef NL_OS_WINDOWS
+		return IsWindowVisible(_win) != FALSE;
+#endif
+	}
+	else
+	{
+#ifdef NL_OS_WINDOWS
+		POINT cursPos;
+		// the mouse should be in the client area of the window
+		if (!GetCursorPos(&cursPos))
+		{
+			return false;
+		}
+		HWND wnd = WindowFromPoint(cursPos);
+		if (wnd != _win)
+		{
+			return false; // not the same window
+		}
+		// want that the mouse be in the client area
+		RECT clientRect;
+		if (!GetClientRect(_win, &clientRect))
+		{
+			return false;
+		}
+		POINT tl, br;
+		tl.x = clientRect.left;
+		tl.y = clientRect.top;
+		br.x = clientRect.right;
+		br.y = clientRect.bottom;
+		if (!ClientToScreen(_win, &tl))
+		{
+			return false;
+		}
+		if (!ClientToScreen(_win, &br))
+		{
+			return false;
+		}
+		if ((cursPos.x < tl.x) || (cursPos.x >= br.x) || (cursPos.y < tl.y) || (cursPos.y >= br.y))
+		{
+			return false;
+		}
+#endif
+	}
+
+	return true;
 }
 
 // ***************************************************************************
-bool CDriverD3D::isSystemCursorCaptured()
+bool CDriverGL::isSystemCursorCaptured()
 {
-	H_AUTO_D3D(CDriverD3D_isSystemCursorCaptured);
+	H_AUTO_OGL(CDriverGL_isSystemCursorCaptured);
 
-	return GetCapture() == _HWnd;
+#ifdef NL_OS_WINDOWS
+	return GetCapture() == _win;
+#else
+	return _MouseCaptured;
+#endif
 }
 
 // ***************************************************************************
-NLMISC::IMouseDevice* CDriverD3D::enableLowLevelMouse(bool enable, bool exclusive)
+NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive)
 {
-	H_AUTO_D3D(CDriverD3D_enableLowLevelMouse);
+	H_AUTO_OGL(CDriverGL_enableLowLevelMouse);
 
 	NLMISC::IMouseDevice *res = NULL;
+
+#ifdef NL_OS_WINDOWS
 
 	NLMISC::CDIEventEmitter *diee = NULL;
 
@@ -492,15 +691,21 @@ NLMISC::IMouseDevice* CDriverD3D::enableLowLevelMouse(bool enable, bool exclusiv
 			diee->releaseMouse();
 	}
 
+#elif defined(NL_OS_MAC)
+#elif defined (NL_OS_UNIX)
+#endif
+
 	return res;
 }
 
 // ***************************************************************************
-NLMISC::IKeyboardDevice* CDriverD3D::enableLowLevelKeyboard(bool enable)
+NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 {
-	H_AUTO_D3D(CDriverD3D_enableLowLevelKeyboard);
+	H_AUTO_OGL(CDriverGL_enableLowLevelKeyboard);
 
 	NLMISC::IKeyboardDevice *res = NULL;
+
+#ifdef NL_OS_WINDOWS
 
 	NLMISC::CDIEventEmitter *diee = NULL;
 
@@ -524,28 +729,40 @@ NLMISC::IKeyboardDevice* CDriverD3D::enableLowLevelKeyboard(bool enable)
 			diee->releaseKeyboard();
 	}
 
+#elif defined(NL_OS_MAC)
+#elif defined (NL_OS_UNIX)
+#endif
+
 	return res;
 }
 
 // ***************************************************************************
-NLMISC::IInputDeviceManager* CDriverD3D::getLowLevelInputDeviceManager()
+NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 {
-	H_AUTO_D3D(CDriverD3D_getLowLevelInputDeviceManager);
+	H_AUTO_OGL(CDriverGL_getLowLevelInputDeviceManager);
 
 	NLMISC::IInputDeviceManager *res = NULL;
+
+#ifdef NL_OS_WINDOWS
 
 	if (_EventEmitter.getNumEmitters() > 1)
 		res = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
 
+#elif defined(NL_OS_MAC)
+#elif defined (NL_OS_UNIX)
+#endif
+
 	return res;
 }
 
 // ***************************************************************************
-uint CDriverD3D::getDoubleClickDelay(bool hardwareMouse)
+uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 {
-	H_AUTO_D3D(CDriverD3D_getDoubleClickDelay);
+	H_AUTO_OGL(CDriverGL_getDoubleClickDelay);
 
 	uint res = 250;
+
+#ifdef NL_OS_WINDOWS
 
 	NLMISC::IMouseDevice *md = NULL;
 
@@ -574,6 +791,16 @@ uint CDriverD3D::getDoubleClickDelay(bool hardwareMouse)
 		// try to read the good value from windows
 		res = ::GetDoubleClickTime();
 	}
+
+#elif defined(NL_OS_MAC)
+# warning "OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay"
+	nlwarning("OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay");
+
+#elif defined (NL_OS_UNIX)
+
+	// TODO for Linux
+
+#endif
 
 	return res;
 }

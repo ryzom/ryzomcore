@@ -19,7 +19,6 @@
 #include "stdpch.h"
 
 #include "../input.h"
-#include "custom_mouse.h"
 //
 #include "view_pointer.h"
 #include "interface_manager.h"
@@ -692,17 +691,17 @@ void CViewPointer::drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = pIM->getViewRenderer();
+	sint32 xPos = _XReal + _OffsetX;
+	sint32 yPos = _YReal + _OffsetY;
 	if (!IsMouseCursorHardware())
 	{
-		sint32 xPos = _XReal + _OffsetX;
-		sint32 yPos = _YReal + _OffsetY;
 		rVR.draw11RotFlipBitmap (_RenderLayer, xPos, yPos, rot, false, texId, col);
 	}
 	else
 	{
 		// set new cursor for the hardware mouse
 		std::string name = rVR.getTextureNameFromId(texId);
-		CustomMouse.setCursor(name, col, rot, (uint32) std::max(getX() - (_XReal + _OffsetX), (sint32) 0), (uint32) std::max(getY() - (_YReal + _OffsetY), (sint32) 0));
+		Driver->setCursor(name, col, rot, (uint32) std::max(getX() - xPos, (sint32) 0), (uint32) std::max(getY() - yPos, (sint32) 0));
 	}
 }
 

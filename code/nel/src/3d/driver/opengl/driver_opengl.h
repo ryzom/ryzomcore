@@ -116,14 +116,20 @@ class   COcclusionQueryGL;
 #ifdef NL_OS_WINDOWS
 
 bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+typedef HCURSOR nlCursor;
+#define EmptyCursor NULL
 
 #elif defined (NL_OS_MAC)
 
 bool GlWndProc(CDriverGL *driver, const void* e);
+typedef void* nlCursor;
+#define EmptyCursor NULL
 
 #elif defined (NL_OS_UNIX)
 
 bool GlWndProc(CDriverGL *driver, XEvent &e);
+typedef Cursor nlCursor;
+#define EmptyCursor None
 
 #endif
 
@@ -514,6 +520,17 @@ public:
 
 	virtual void			setCapture (bool b);
 
+	// see if system cursor is currently captured
+	virtual bool			isSystemCursorCaptured();
+
+	virtual void			setHardwareCursorScale(float scale) { _CursorScale = scale; }
+
+	// Add a new cursor (name is case unsensitive)
+	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
+
+	// Display a cursor from its name (case unsensitive)
+	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+
 	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
 
 	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
@@ -692,7 +709,64 @@ private:
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;
 
+	// cursors
+	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
+
+	TColorDepth					_ColorDepth;
+	std::string					_CurrName;
+	NLMISC::CRGBA				_CurrCol;
+	uint8						_CurrRot;
+	uint						_CurrHotSpotX;
+	uint						_CurrHotSpotY;
+	float						_CursorScale;
+	bool						_MouseCaptured;
+
+	nlCursor					_DefaultCursor;
+	nlCursor					_BlankCursor;
+
+	bool						_AlphaBlendedCursorSupported;
+	bool						_AlphaBlendedCursorSupportRetrieved;
+
+	class CCursor
+	{
+	public:
+		NLMISC::CBitmap Src;
+		TColorDepth		ColorDepth;
+		uint			OrigHeight;
+		float			HotspotScale;
+		uint			HotspotOffsetX;
+		uint			HotspotOffsetY;
+		sint			HotSpotX;
+		sint			HotSpotY;
+		nlCursor		Cursor;
+		NLMISC::CRGBA	Col;
+		uint8			Rot;
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		Display			*Dpy;
+#endif
+	public:
+		CCursor();
+		~CCursor();
+		CCursor& operator= (const CCursor& from);
+
+		void reset();
+	};
+
+	struct CStrCaseUnsensitiveCmp
+	{
+		bool operator()(const std::string &lhs, const std::string &rhs) const
+		{
+			return NLMISC::nlstricmp(lhs, rhs) < 0;
+		}
+	};
+
+	typedef std::map<std::string, CCursor, CStrCaseUnsensitiveCmp> TCursorMap;
+
+	TCursorMap					_Cursors;
+
 #ifdef NL_OS_WINDOWS
+
+	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
 
 	friend bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -724,11 +798,12 @@ private:
 
 #elif defined (NL_OS_UNIX)
 
+	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon);
+
 	friend bool GlWndProc(CDriverGL *driver, XEvent &e);
 
 	Display*					_dpy;
 	GLXContext					_ctx;
-	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 	XVisualInfo*				_visual_info;
 	uint32						_xrandr_version;
@@ -907,6 +982,32 @@ private:
 	bool					restoreScreenMode();
 	bool					saveScreenMode();
 	bool					setScreenMode(const GfxMode &mode);
+
+	// Test if cursor is in the client area. always true when software cursor is used and window visible
+	// (displayed in software when DirectInput is used)
+	bool					isSystemCursorInClientArea();
+
+	// Check if RGBA cursors are supported
+	bool					isAlphaBlendedCursorSupported();
+
+	// Update cursor appearance
+	void					updateCursor(bool forceRebuild = false);
+
+	// Create default cursors
+	void					createCursors();
+
+	// Release all cursors
+	void					releaseCursors();
+
+	// Convert a NLMISC::CBitmap to nlCursor
+	bool					convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY);
+
+	// build a cursor from src, src should have the same size that the hardware cursor
+	// or a assertion is thrown
+	nlCursor				buildCursor(const NLMISC::CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY);
+
+	// reset the cursor shape to the system arrow
+	void					setSystemArrow();
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();

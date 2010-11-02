@@ -202,7 +202,6 @@ CDriverGL::CDriverGL()
 
 #elif defined (NL_OS_UNIX)
 
-	_cursor = None;
 	_dpy = 0;
 	_visual_info = NULL;
 
@@ -212,6 +211,20 @@ CDriverGL::CDriverGL()
 #	endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+	_ColorDepth = ColorDepth32;
+
+	_DefaultCursor = EmptyCursor;
+	_BlankCursor = EmptyCursor;
+
+	_AlphaBlendedCursorSupported = false;
+	_AlphaBlendedCursorSupportRetrieved = false;
+	_CurrCol = CRGBA::White;
+	_CurrRot = 0;
+	_CurrHotSpotX = 0;
+	_CurrHotSpotY = 0;
+	_CursorScale = 0.85f;
+	_MouseCaptured = false;
 
 	_NeedToRestaureGammaRamp = false;
 	_Interval = 1;

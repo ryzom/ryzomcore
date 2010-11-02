@@ -272,6 +272,8 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	ExitFunc = exitFunc;
 
+	createCursors();
+
 #ifdef NL_OS_WINDOWS
 	WNDCLASSW		wc;
 
@@ -284,7 +286,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 		wc.cbWndExtra		= 0;
 		wc.hInstance		= GetModuleHandle(NULL);
 		wc.hIcon			= (HICON)windowIcon;
-		wc.hCursor			= LoadCursorA(NULL, IDC_ARROW);
+		wc.hCursor			= _DefaultCursor;
 		wc.hbrBackground	= WHITE_BRUSH;
 		wc.lpszClassName	= L"NLClass";
 		wc.lpszMenuName		= NULL;
@@ -478,10 +480,10 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 	}
 
 	if (smallIndex > -1)
-		winIconSmall = bitmaps[smallIndex].getHICON(smallWidth, smallHeight, 32);
+		convertBitmapToIcon(bitmaps[smallIndex], winIconSmall, smallWidth, smallHeight, 32);
 
 	if (bigIndex > -1)
-		winIconBig = bitmaps[bigIndex].getHICON(bigWidth, bigHeight, 32);
+		convertBitmapToIcon(bitmaps[bigIndex], winIconBig, bigWidth, bigHeight, 32);
 
 	if (winIconBig)
 	{
@@ -507,24 +509,7 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 		// process each bitmap
 		for(uint i = 0; i < bitmaps.size(); ++i)
 		{
-			// get bitmap width and height
-			uint width = bitmaps[i].getWidth();
-			uint height = bitmaps[i].getHeight();
-
-			// icon_data position for bitmap
-			uint pos = (uint)icon_data.size();
-
-			// extend icon_data size for bitmap
-			icon_data.resize(pos + 2 + width*height);
-
-			// set bitmap width and height
-			icon_data[pos++] = width;
-			icon_data[pos++] = height;
-
-			// convert RGBA to ARGB
-			CObjectVector<uint8> pixels = bitmaps[i].getPixels();
-			for(uint j = 0; j < pixels.size(); j+=4)
-				icon_data[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
+			convertBitmapToIcon(bitmaps[i], icon_data);
 		}
 	}
 
@@ -1502,6 +1487,8 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	setWindowTitle(ucstring("NeL window"));
 
+	createCursors();
+
 	return true;
 }
 
@@ -1510,6 +1497,8 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
+
+	releaseCursors();
 
 	// make sure window icons are deleted
 	std::vector<NLMISC::CBitmap> bitmaps;
@@ -1769,6 +1758,16 @@ bool CDriverGL::setMode(const GfxMode& mode)
 
 	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
+
+	switch (_Depth)
+	{
+		case 16: _ColorDepth = ColorDepth16; break;
+		case 24:
+		case 32: _ColorDepth = ColorDepth32; break;
+	}
+
+	// set color depth for custom cursor
+	updateCursor(true);
 
 	return true;
 }
@@ -2322,135 +2321,6 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 	return okId;
 }
 
-// --------------------------------------------------
-void CDriverGL::showCursor(bool b)
-{
-	H_AUTO_OGL(CDriverGL_showCursor)
-
-	if (_win == EmptyWindow)
-		return;
-
-#ifdef NL_OS_WINDOWS
-
-	if (b)
-	{
-		while (ShowCursor(b) < 0)
-			;
-	}
-	else
-	{
-		while (ShowCursor(b) >= 0)
-			;
-	}
-
-#elif defined(NL_OS_MAC)
-
-	// Mac OS manages a show/hide counter for the cursor, so hiding the cursor
-	// twice requires two calls to "show" to make the cursor visible again.
-	// Since other platforms seem to not do this, the functionality is masked here
-	// by only calling hide if the cursor is visible and only calling show if
-	// the cursor was hidden.
-
-	CGDisplayErr error  = kCGErrorSuccess;
-	static bool visible = true;
-
-	if(b && !visible)
-	{
-		error = CGDisplayShowCursor(kCGDirectMainDisplay);
-		visible = true;
-	}
-	else if(!b && visible)
-	{
-		error = CGDisplayHideCursor(kCGDirectMainDisplay);
-		visible = false;
-	}
-
-	if(error != kCGErrorSuccess)
-		nlerror("cannot show / hide cursor");
-
-#elif defined (NL_OS_UNIX)
-
-	if (b)
-	{
-		if (_cursor != None)
-		{
-			XFreeCursor(_dpy, _cursor);
-			_cursor = None;
-		}
-		XUndefineCursor(_dpy, _win);
-	}
-	else
-	{
-		if (_cursor == None)
-		{
-			char bm_no_data[] = { 0,0,0,0, 0,0,0,0 };
-			Pixmap pixmap_no_data = XCreateBitmapFromData (_dpy, _win, bm_no_data, 8, 8);
-			XColor black;
-			memset(&black, 0, sizeof (XColor));
-			black.flags = DoRed | DoGreen | DoBlue;
-			_cursor = XCreatePixmapCursor (_dpy, pixmap_no_data, pixmap_no_data, &black, &black, 0, 0);
-			XFreePixmap(_dpy, pixmap_no_data);
-		}
-		XDefineCursor(_dpy, _win, _cursor);
-	}
-
-#endif // NL_OS_UNIX
-}
-
-// --------------------------------------------------
-void CDriverGL::setMousePos(float x, float y)
-{
-	H_AUTO_OGL(CDriverGL_setMousePos)
-
-	if (_win == EmptyWindow)
-		return;
-
-	sint x1 = (sint)((float)_WindowWidth*x);
-	sint y1 = (sint)((float)_WindowHeight*(1.0f-y));
-
-#ifdef NL_OS_WINDOWS
-
-	// NeL window coordinate to MSWindows coordinates
-	POINT pt;
-	pt.x = x1;
-	pt.y = y1;
-	ClientToScreen (_win, &pt);
-	SetCursorPos(pt.x, pt.y);
-
-#elif defined(NL_OS_MAC)
-
-	// CG wants absolute coordinates related to first screen's top left
-
-	// get the first screen's (conaints menubar) rect (this is not mainScreen)
-	NSRect firstScreenRect = [[[NSScreen screens] objectAtIndex:0] frame];
-
-	// get the rect (position, size) of the window
-	NSRect windowRect;
-	if([containerView() isInFullScreenMode])
-		windowRect = [[[containerView() window] screen] frame];
-	else
-		windowRect = [[containerView() window] frame];
-
-	// get the view's rect for height and width
-	NSRect viewRect = [containerView() frame];
-
-	// set the cursor position
-	CGDisplayErr error = CGDisplayMoveCursorToPoint(
-		kCGDirectMainDisplay, CGPointMake(
-			windowRect.origin.x + (viewRect.size.width * x), 
-			firstScreenRect.size.height - windowRect.origin.y - 
-				viewRect.size.height + ((1.0 - y) * viewRect.size.height)));
-
-	if(error != kCGErrorSuccess)
-		nlerror("cannot set mouse position");
-
-#elif defined (NL_OS_UNIX)
-
-	XWarpPointer (_dpy, None, _win, None, None, None, None, x1, y1);
-
-#endif // NL_OS_UNIX
-}
-
 void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
@@ -2622,206 +2492,6 @@ bool CDriverGL::isActive()
 	return res;
 }
 
-void CDriverGL::setCapture (bool b)
-{
-	H_AUTO_OGL(CDriverGL_setCapture )
-
-#ifdef NL_OS_WINDOWS
-
-	if (b)
-	{
-		RECT client;
-		GetClientRect (_win, &client);
-		POINT pt1,pt2;
-		pt1.x = client.left;
-		pt1.y = client.top;
-		ClientToScreen (_win, &pt1);
-		pt2.x = client.right;
-		pt2.y = client.bottom;
-		ClientToScreen (_win, &pt2);
-		client.bottom = pt2.y;
-		client.top = pt1.y;
-		client.left = pt1.x;
-		client.right = pt2.x;
-		ClipCursor (&client);
-	}
-	else
-		ClipCursor (NULL);
-
-	/*
-	if (b)
-		SetCapture (_hWnd);
-	else
-		ReleaseCapture ();
-	*/
-
-#elif defined(NL_OS_MAC)
-
-	// no need to capture
-
-#elif defined (NL_OS_UNIX)
-
-	/*
-		TODO x11 funtion: setCapture
-	*/
-
-	if(b) // capture the cursor.
-	{
-		XGrabPointer(_dpy, _win, True, 0, GrabModeAsync, GrabModeAsync, _win, None, CurrentTime);
-	}
-	else // release the cursor.
-	{
-		XUngrabPointer(_dpy, CurrentTime);
-	}
-
-#endif // NL_OS_UNIX
-}
-
-// ***************************************************************************
-NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive)
-{
-	H_AUTO_OGL(CDriverGL_enableLowLevelMouse)
-
-	NLMISC::IMouseDevice *res = NULL;
-
-#ifdef NL_OS_WINDOWS
-
-	NLMISC::CDIEventEmitter *diee = NULL;
-
-	if (_EventEmitter.getNumEmitters() > 1)
-		diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-
-	if (enable)
-	{
-		try
-		{
-			if (diee)
-				res = diee->getMouseDevice(exclusive);
-		}
-		catch (EDirectInput &)
-		{
-		}
-	}
-	else
-	{
-		if (diee)
-			diee->releaseMouse();
-	}
-
-#elif defined(NL_OS_MAC)
-#elif defined (NL_OS_UNIX)
-#endif
-
-	return res;
-}
-
-// ***************************************************************************
-NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
-{
-	H_AUTO_OGL(CDriverGL_enableLowLevelKeyboard)
-
-	NLMISC::IKeyboardDevice *res = NULL;
-
-#ifdef NL_OS_WINDOWS
-
-	NLMISC::CDIEventEmitter *diee = NULL;
-
-	if (_EventEmitter.getNumEmitters() > 1)
-		diee = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-
-	if (enable)
-	{
-		try
-		{
-			if (diee)
-				res = diee->getKeyboardDevice();
-		}
-		catch (EDirectInput &)
-		{
-		}
-	}
-	else
-	{
-		if (diee)
-			diee->releaseKeyboard();
-	}
-
-#elif defined(NL_OS_MAC)
-#elif defined (NL_OS_UNIX)
-#endif
-
-	return res;
-}
-
-// ***************************************************************************
-NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
-{
-	H_AUTO_OGL(CDriverGL_getLowLevelInputDeviceManager)
-
-	NLMISC::IInputDeviceManager *res = NULL;
-
-#ifdef NL_OS_WINDOWS
-
-	if (_EventEmitter.getNumEmitters() > 1)
-		res = NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-
-#elif defined(NL_OS_MAC)
-#elif defined (NL_OS_UNIX)
-#endif
-
-	return res;
-}
-
-// ***************************************************************************
-uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
-{
-	H_AUTO_OGL(CDriverGL_getDoubleClickDelay)
-
-	uint res = 250;
-
-#ifdef NL_OS_WINDOWS
-
-	NLMISC::IMouseDevice *md = NULL;
-
-	if (_EventEmitter.getNumEmitters() >= 2)
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::safe_cast<CDIEventEmitter *>(_EventEmitter.getEmitter(1));
-		if (diee->isMouseCreated())
-		{
-			try
-			{
-				md = diee->getMouseDevice(hardwareMouse);
-			}
-			catch (EDirectInput &)
-			{
-				// could not get device ..
-			}
-		}
-	}
-
-	if (md)
-	{
-		res = md->getDoubleClickDelay();
-	}
-	else
-	{
-		// try to read the good value from windows
-		res = ::GetDoubleClickTime();
-	}
-
-#elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay"
-	nlwarning("OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay");
-
-#elif defined (NL_OS_UNIX)
-
-	// TODO for Linux
-
-#endif
-
-	return res;
-}
-
 // ***************************************************************************
 bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &properties)
 {
@@ -2954,5 +2624,282 @@ bool CDriverGL::pasteTextFromClipboard(ucstring &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }
+
+#ifdef NL_OS_WINDOWS
+
+bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
+{
+	CBitmap src = bitmap;
+	// resample bitmap if necessary
+	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
+	{
+		src.resample(iconWidth, iconHeight);
+	}
+	CBitmap colorBm;
+	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
+	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
+	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
+	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
+	static volatile uint8 alphaThreshold = 127;
+	do
+	{
+		destColorPtr->modulateFromColor(*srcColorPtr, col);
+		std::swap(destColorPtr->R, destColorPtr->B);
+		++ srcColorPtr;
+		++ destColorPtr;
+	}
+	while (srcColorPtr != srcColorPtrLast);
+	//
+	HBITMAP colorHbm = NULL;
+	HBITMAP maskHbm = NULL;
+	//
+	if (iconDepth == 16)
+	{
+		std::vector<uint16> colorBm16(iconWidth * iconHeight);
+		const CRGBA *src32 = (const CRGBA *) &colorBm.getPixels(0)[0];
+
+		for (uint k = 0; k < colorBm16.size(); ++k)
+		{
+			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
+		}
+
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 16, &colorBm16[0]);
+		std::vector<uint8> bitMask((iconWidth * iconHeight + 7) / 8, 0);
+
+		for (uint k = 0;k < colorBm16.size(); ++k)
+		{
+			if (src32[k].A <= 120)
+			{
+				bitMask[k / 8] |= (0x80 >> (k & 7));
+			}
+		}
+
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 1, &bitMask[0]);
+	}
+	else
+	{
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+	}
+
+	ICONINFO iconInfo;
+	iconInfo.fIcon = cursor ? FALSE:TRUE;
+	iconInfo.xHotspot = (DWORD) hotSpotX;
+	iconInfo.yHotspot = (DWORD) hotSpotY;
+	iconInfo.hbmMask = maskHbm;
+	iconInfo.hbmColor = colorHbm;
+
+	if (colorHbm && maskHbm)
+	{
+		icon = CreateIconIndirect(&iconInfo);
+	}
+
+	//
+	if (colorHbm) DeleteObject(colorHbm);
+	if (maskHbm) DeleteObject(maskHbm);
+
+	return true;
+}
+
+bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
+}
+
+#elif defined(NL_OS_MAC)
+
+#elif defined(NL_OS_UNIX)
+
+bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon)
+{
+	// get bitmap width and height
+	uint width = bitmap.getWidth();
+	uint height = bitmap.getHeight();
+
+	// icon position for bitmap
+	uint pos = (uint)icon.size();
+
+	// extend icon_data size for bitmap
+	icon.resize(pos + 2 + width*height);
+
+	// set bitmap width and height
+	icon[pos++] = width;
+	icon[pos++] = height;
+
+	// convert RGBA to ARGB
+	CObjectVector<uint8> pixels = bitmap.getPixels();
+	for(uint j = 0; j < pixels.size(); j+=4)
+		icon[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
+
+	return true;
+}
+
+bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, Cursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+#ifdef HAVE_XRENDER
+
+	CBitmap src = bitmap;
+	// resample bitmap if necessary
+	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
+	{
+		src.resample(iconWidth, iconHeight);
+	}
+
+	CBitmap colorBm;
+	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
+	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
+	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
+	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
+
+	do
+	{
+		// colorize icon
+		destColorPtr->modulateFromColor(*srcColorPtr, col);
+
+		// X11 wants BGRA pixels : swap red and blue channels
+		std::swap(destColorPtr->R, destColorPtr->B);
+
+		// premultiplied alpha
+		if (destColorPtr->A < 255)
+		{
+			destColorPtr->R = (destColorPtr->R * destColorPtr->A) / 255;
+			destColorPtr->G = (destColorPtr->G * destColorPtr->A) / 255;
+			destColorPtr->B = (destColorPtr->B * destColorPtr->A) / 255;
+		}
+
+		++ srcColorPtr;
+		++ destColorPtr;
+	}
+	while (srcColorPtr != srcColorPtrLast);
+
+	// use malloc() because X will free() data itself
+	CRGBA *src32 = (CRGBA*)malloc(colorBm.getSize()*4);
+	memcpy(src32, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
+
+	uint size = iconWidth * iconHeight;
+
+	// Create the icon pixmap
+	sint screen = DefaultScreen(_dpy);
+	Visual* defVisual = DefaultVisual(_dpy, screen);
+	XImage* image = NULL;
+
+	// create the icon pixmap
+	if (iconDepth == 16)
+	{
+		std::vector<uint16> colorBm16(iconWidth * iconHeight);
+
+		for (uint k = 0; k < colorBm16.size(); ++k)
+		{
+			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
+		}
+
+		image = XCreateImage(_dpy, defVisual, 16, ZPixmap, 0, (char*)colorBm16[0], iconWidth, iconHeight, 16, 0);
+	}
+	else
+	{
+		image = XCreateImage(_dpy, defVisual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
+	}
+
+	if (!image)
+	{
+		nlwarning("Failed to set the window's icon");
+		return false;
+	}
+
+	Pixmap iconPixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
+	GC gc = XCreateGC(_dpy, iconPixmap, 0, NULL);
+	XPutImage(_dpy, iconPixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
+	XFreeGC(_dpy, gc);
+
+	if (image->data)
+	{
+		free(image->data);
+		image->data = NULL;
+	}
+
+	XDestroyImage(image);
+
+/*
+	// Send our new icon to the window through the WMHints
+	XWMHints* Hints = XAllocWMHints();
+	Hints->flags       = IconPixmapHint | IconMaskHint;
+	Hints->icon_pixmap = iconPixmap;
+	Hints->icon_mask   = maskPixmap;
+	XSetWMHints(ourDisplay, myWindow, Hints);
+	XFree(Hints);
+*/
+
+	XRenderPictFormat *format = XRenderFindStandardFormat (_dpy, PictStandardARGB32);
+    Picture picture = XRenderCreatePicture (_dpy, iconPixmap, format, 0, 0);
+
+    cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
+
+    XRenderFreePicture(_dpy, picture);
+    XFreePixmap(_dpy, iconPixmap);
+
+	return true;
+
+#else
+
+	return false;
+
+#endif
+}
+
+/*
+XRenderPictFormat* format = None;
+
+    {
+        XRenderPictFormat alpha_format;
+        unsigned long mask = PictFormatType|PictFormatDepth|PictFormatAlpha|PictFormatAlphaMask;
+        alpha_format.type = PictTypeDirect;
+        alpha_format.depth = 8;
+        alpha_format.direct.alpha = 0;
+        alpha_format.direct.alphaMask = 0xff;
+
+        format = XRenderFindFormat(dpy, mask, &alpha_format, 0);
+    }
+
+    if (!format) {
+        printf("%s", "error, couldnt find valid format for alpha.\n");
+        XFreePixmap(dpy, dst_pm);
+        XFreePixmap(dpy, src_pm);
+        return 0;
+    }
+
+    { /* fill the alpha-picture */
+        Pixmap alpha_pm = None;
+
+        XRenderColor alpha_color;
+        XRenderPictureAttributes alpha_attr;
+
+        alpha_color.alpha = 0xffff * (shade)/100;
+
+        alpha_attr.repeat = True;
+
+        alpha_pm = XCreatePixmap(dpy, src_pm, 1, 1, 8);
+        alpha_pic = XRenderCreatePicture(dpy, alpha_pm, format, CPRepeat, &alpha_attr);
+        XRenderFillRectangle(dpy, PictOpSrc, alpha_pic, &alpha_color, 0, 0, 1, 1);
+        XFreePixmap(dpy, alpha_pm);
+    }
+
+    { /* blend all together */
+        Picture src_pic;
+        Picture dst_pic;
+
+        format = XRenderFindVisualFormat(dpy, vis);
+
+        src_pic = XRenderCreatePicture(dpy, src_pm, format, 0, 0);
+        dst_pic = XRenderCreatePicture(dpy, dst_pm, format, 0, 0);
+
+        XRenderComposite(dpy, PictOpOver,
+                         src_pic, alpha_pic, dst_pic,
+                         src_x, src_y, 0, 0, dst_x, dst_y, width, height);
+        XRenderFreePicture(dpy, src_pic);
+        XRenderFreePicture(dpy, dst_pic);
+    }
+*/
+
+#endif
 
 } // NL3D

@@ -27,7 +27,6 @@
 #include "interface_v3/input_handler_manager.h"
 #include "client_cfg.h"
 #include "time_client.h"
-#include "interface_v3/custom_mouse.h"
 // 3D
 #include "nel/3d/u_driver.h"
 // Misc
@@ -65,11 +64,6 @@ bool							SetMousePosFirstTime = true;
 
 // mask for mouse buttons that are known to be down
 uint							DownMouseButtons = 0;
-
-#ifdef NL_OS_UNIX
-// on X11 and cocoa, store whether the mouse was captured or not
-bool							MouseCapture = false;
-#endif
 
 //////////////
 // FUNCTION //
@@ -128,12 +122,14 @@ bool	InitMouseWithCursor (bool hardware)
 				// Get the current mouse position
 				if (hardware)
 				{
-					if (CInterfaceManager::getInstance()->getPointer())
+					Driver->showCursor(true);
+
+					CViewPointer *pointer = CInterfaceManager::getInstance()->getPointer();
+					if (pointer)
 					{
-						float x = (float)CInterfaceManager::getInstance()->getPointer()->getX()/(float)Driver->getWindowWidth();
-						float y = (float)CInterfaceManager::getInstance()->getPointer()->getY()/(float)Driver->getWindowHeight();
-						CustomMouse.updateCursor(); // update current hardware icon to avoid to have the plain arrow
-						Driver->showCursor(true);
+						float x = (float)pointer->getX()/(float)Driver->getWindowWidth();
+						float y = (float)pointer->getY()/(float)Driver->getWindowHeight();
+
 						if (SetMousePosFirstTime)
 						{
 							SetMousePosFirstTime = false;
@@ -141,12 +137,9 @@ bool	InitMouseWithCursor (bool hardware)
 						else
 						{
 							Driver->setMousePos(x, y);
+							nlwarning("mouse pos %f,%f", x, y);
 						}
-					}
-					else
-					{
-						CustomMouse.updateCursor(); // update current hardware icon to avoid to have the plain arrow
-						Driver->showCursor(true);
+
 					}
 				}
 				else
@@ -232,7 +225,7 @@ void	UpdateMouse ()
 			Driver->emulateMouseRawMode(false);
 		}
 	}
-	if (!IsSystemCursorCaptured())
+	if (!Driver->isSystemCursorCaptured())
 	{
 		DownMouseButtons = 0;
 	}
@@ -246,7 +239,9 @@ void	SetMouseFreeLook ()
 	{
 		MouseFreeLook = true;
 		if (MouseHardware)
+		{
 			Driver->showCursor(false);
+		}
 		else
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -306,9 +301,13 @@ void	SetMouseCursor (bool updatePos)
 		if (updatePos)
 		{
 			if (MouseDevice)
+			{
 				MouseDevice->setMousePos((float)ix, (float)iy);
+			}
 			else
+			{
 				Driver->setMousePos(x, y);
+			}
 
 			if (MouseHardware)
 			{
@@ -368,63 +367,13 @@ void	SetMouseAcceleration (uint accel)
 }
 
 // *********************************************************************************
-void CaptureSystemCursor()
-{
-	if (IsSystemCursorCaptured()) return;
-#ifdef NL_OS_WINDOWS
-	HWND drvWnd = Driver->getDisplay();
-	if (!drvWnd) return;
-	SetCapture(drvWnd);
-#else
-	// on X11 and cocoa, set driver mouse capture on and store it locally as well
-	Driver->setCapture(MouseCapture = true);
-#endif
-}
-
-// *********************************************************************************
-void ReleaseSystemCursor()
-{
-	if (!IsSystemCursorCaptured()) return;
-#ifdef NL_OS_WINDOWS
-	// if hardware mouse and not in client area, then force to update its aspect by updating its pos
-	if (!IsSystemCursorInClientArea())
-	{
-		// force update
-		ShowCursor(FALSE);
-		ShowCursor(TRUE);
-	}
-	ReleaseCapture();
-#else
-	// on X11 and cocoa, set driver mouse capture off and store it locally as well
-	Driver->setCapture(MouseCapture = false);
-#endif
-}
-
-// *********************************************************************************
-bool IsSystemCursorCaptured()
-{
-	if (!Driver) return false;
-#ifdef NL_OS_WINDOWS
-	return GetCapture() == Driver->getDisplay();
-#else
-	/*
-		TODO there should be a way to ask the driver if capturing is on or off
-	*/
-	return MouseCapture;
-#endif
-}
-
-// *********************************************************************************
 void HandleSystemCursorCapture(const CEvent &event)
 {
 	if (event == EventMouseDownId)
 	{
 		CEventMouseDown &em = (CEventMouseDown &) event;
 		DownMouseButtons |= em.Button & (leftButton | middleButton | rightButton);
-		if (IsSystemCursorInClientArea())
-		{
-			CaptureSystemCursor();
-		}
+		Driver->setCapture(true);
 	}
 
 	if (event == EventMouseUpId)
@@ -434,7 +383,7 @@ void HandleSystemCursorCapture(const CEvent &event)
 		DownMouseButtons &= ~(em.Button & (leftButton | middleButton | rightButton));
 		if (DownMouseButtons == 0)
 		{
-			ReleaseSystemCursor();
+			Driver->setCapture(false);
 		}
 	}
 
@@ -443,66 +392,6 @@ void HandleSystemCursorCapture(const CEvent &event)
 	{
 		DownMouseButtons = 0;
 	}
-}
-
-// *********************************************************************************
-bool IsSystemCursorInClientArea()
-{
-	if (!Driver) return false;
-#ifdef NL_OS_WINDOWS
-	HWND drvWnd = Driver->getDisplay();
-	if (!drvWnd) return false;
-	UDriver::CMode videoMode;
-	Driver->getCurrentScreenMode(videoMode);
-	if (!videoMode.Windowed || !IsMouseCursorHardware())
-	{
-		// just test visibility
-		return IsWindowVisible(drvWnd) != FALSE;
-	}
-	else
-	{
-		POINT cursPos;
-		// the mouse should be in the client area of the window
-		if (!GetCursorPos(&cursPos))
-		{
-			return false;
-		}
-		HWND wnd = WindowFromPoint(cursPos);
-		if (wnd != drvWnd)
-		{
-			return false; // not the same window
-		}
-		// want that the mouse be in the client area
-		RECT clientRect;
-		if (!GetClientRect(drvWnd, &clientRect))
-		{
-			return false;
-		}
-		POINT tl, br;
-		tl.x = clientRect.left;
-		tl.y = clientRect.top;
-		br.x = clientRect.right;
-		br.y = clientRect.bottom;
-		if (!ClientToScreen(drvWnd, &tl))
-		{
-			return false;
-		}
-		if (!ClientToScreen(drvWnd, &br))
-		{
-			return false;
-		}
-		if (cursPos.x < tl.x ||
-			cursPos.x >= br.x ||
-			cursPos.y < tl.y ||
-			cursPos.y >= br.y)
-		{
-			return false;
-		}
-	}
-#else
-	// TODO for Linux and Mac OS
-#endif
-	return true;
 }
 
 sint CNiceInputAuto::_Count = 0;
@@ -516,7 +405,7 @@ CNiceInputAuto::CNiceInputAuto()
 		Driver->enableLowLevelMouse(false, false); // but ignore direct input (win 32 msg only)
 
 
-		CustomMouse.setCursor("curs_default.tga", CRGBA::White, 0, 0x15, 0x18);
+		Driver->setCursor("curs_default.tga", CRGBA::White, 0, 0x15, 0x18);
 		Driver->showCursor(true); // keep cursor visible in windowed mode
 		MouseDevice = NULL;
 		Driver->enableLowLevelKeyboard (false);

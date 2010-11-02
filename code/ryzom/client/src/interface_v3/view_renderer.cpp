@@ -24,7 +24,6 @@
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "interface_manager.h"
-#include "custom_mouse.h"
 #include "../client_cfg.h"
 
 using namespace NLMISC;
@@ -730,6 +729,8 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 
 	_GlobalTextures.push_back (gt);
 
+//	Driver->setHardwareCursorScale(ClientCfg.HardwareCursorScale);
+
 	char bufTmp[256], tgaName[256];
 	string sTGAname;
 	float uvMinU, uvMinV, uvMaxU, uvMaxV;
@@ -767,23 +768,20 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 		}
 
 		// if this is a cursor texture, extract it now (supported for rgba only now, because of the blit)
-		if (CustomMouse.isAlphaBlendedCursorSupported())
+		if (texDatas && texDatas->getPixelFormat() == CBitmap::RGBA)
 		{
-			if (texDatas && texDatas->getPixelFormat() == CBitmap::RGBA)
+			if (ClientCfg.HardwareCursors.count(image.Name))
 			{
-				if (ClientCfg.HardwareCursors.count(image.Name))
+				uint x0 = (uint) (image.UVMin.U * gt.Width);
+				uint y0 = (uint) (image.UVMin.V * gt.Height);
+				uint x1 = (uint) (image.UVMax.U * gt.Width);
+				uint y1 = (uint) (image.UVMax.V * gt.Height);
+				if (x1 != x0 && y1 != y0)
 				{
-					uint x0 = (uint) (image.UVMin.U * gt.Width);
-					uint y0 = (uint) (image.UVMin.V * gt.Height);
-					uint x1 = (uint) (image.UVMax.U * gt.Width);
-					uint y1 = (uint) (image.UVMax.V * gt.Height);
-					if (x1 != x0 && y1 != y0)
-					{
-						CBitmap curs;
-						curs.resize(x1 - x0, y1 - y0);
-						curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
-						CustomMouse.addCursor(image.Name, curs);
-					}
+					CBitmap curs;
+					curs.resize(x1 - x0, y1 - y0);
+					curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
+					Driver->addCursor(image.Name, curs);
 				}
 			}
 		}

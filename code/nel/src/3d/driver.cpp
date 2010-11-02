@@ -33,7 +33,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x69; // added clipboard methods
+const uint32 IDriver::InterfaceVersion = 0x6a; // added cursors methods
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

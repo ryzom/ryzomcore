@@ -29,7 +29,6 @@
 #include "../actions.h"
 #include "../input.h"
 #include "../client_cfg.h"
-#include "custom_mouse.h"
 #include "../motion/user_controls.h"
 #include "../init.h"
 #include "../release.h"
@@ -65,6 +64,7 @@ CInputHandlerManager::CInputHandlerManager()
 	_MouseButtonsState = noButton;
 	_MouseX = _MouseY = _MouseLastX = _MouseLastY = 0;
 	_Focus = true;
+	// Driver->setFocus(true);
 	_MouseWheel = 0;
 	_SkipInterfaceManager=false;
 	_RecoverFocusLost = false;
@@ -143,16 +143,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 
 	if (event == EventDisplayChangeId)
 	{
-		switch (getCurrentColorDepth())
-		{
-			case 16: CustomMouse.setColorDepth(CCustomMouse::ColorDepth16); break;
-			case 24:
-			case 32: CustomMouse.setColorDepth(CCustomMouse::ColorDepth32); break;
-			default:
-				release();
-				ExitClientError(CI18N::get("uiUnsupportedNewColorDepth").toUtf8().c_str());
-			break;
-		}
 	}
 
 	// Process message to InterfaceManager
@@ -168,6 +158,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			_MouseButtonsReleased = noButton;
 			_MouseButtonsState = noButton;
 			_Focus = false;
+			// Driver->setFocus(false);
 
 			if (!_SkipInterfaceManager)
 			{
@@ -186,13 +177,14 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			}
 			// be nice with other app : let the mouse reappear (useful in direct 3D mode with no hardware cursor)
 			Driver->showCursor(true);
-			CustomMouse.setSystemArrow();
+//			Driver->setSystemArrow();
 		}
 		else
 		{
 			_RecoverFocusLost = true; // force to update mouse pos on next click or move
 			Driver->showCursor(IsMouseCursorHardware());
 			_Focus = true;
+			// Driver->setFocus(true);
 		}
 
 		if(!_SkipInterfaceManager)

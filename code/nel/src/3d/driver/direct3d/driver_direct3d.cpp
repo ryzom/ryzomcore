@@ -162,6 +162,19 @@ CDriverD3D::CDriverD3D()
 	_WindowX = 0;
 	_WindowY = 0;
 	_FullScreen = false;
+
+	_ColorDepth = ColorDepth32;
+
+	_DefaultCursor = EmptyCursor;
+
+	_AlphaBlendedCursorSupported = false;
+	_AlphaBlendedCursorSupportRetrieved = false;
+	_CurrCol = CRGBA::White;
+	_CurrRot = 0;
+	_CurrHotSpotX = 0;
+	_CurrHotSpotY = 0;
+	_CursorScale = 0.85f;
+
 	_UserViewMtx.identity();
 	_UserModelMtx.identity();
 	_PZBCameraPos = CVector::Null;
@@ -1214,6 +1227,8 @@ bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
 
 	ExitFunc = exitFunc;
 
+	createCursors();
+	
 	// Register a window class
 	WNDCLASSW		wc;
 
@@ -1224,7 +1239,7 @@ bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
 	wc.cbWndExtra		= 0;
 	wc.hInstance		= GetModuleHandleW(NULL);
 	wc.hIcon			= (HICON)windowIcon;
-	wc.hCursor			= LoadCursorW(NULL,(LPCWSTR)IDC_ARROW);
+	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
 	_WindowClass = "NLD3D" + toString(windowIcon);
 	ucstring us = _WindowClass;
@@ -1712,6 +1727,8 @@ bool CDriverD3D::release()
 
 	if (_HWnd)
 	{
+		releaseCursors();
+
 		// make sure window icons are deleted
 		std::vector<NLMISC::CBitmap> bitmaps;
 		setWindowIcon(bitmaps);
@@ -2231,10 +2248,10 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 	}
 
 	if (smallIndex > -1)
-		winIconSmall = bitmaps[smallIndex].getHICON(smallWidth, smallHeight, 32);
+		convertBitmapToIcon(bitmaps[smallIndex], winIconSmall, smallWidth, smallHeight, 32);
 
 	if (bigIndex > -1)
-		winIconBig = bitmaps[bigIndex].getHICON(bigWidth, bigHeight, 32);
+		convertBitmapToIcon(bitmaps[bigIndex], winIconBig, bigWidth, bigHeight, 32);
 
 	if (winIconBig)
 	{
@@ -3840,4 +3857,84 @@ bool CDriverD3D::pasteTextFromClipboard(ucstring &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }
+
+bool CDriverD3D::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
+{
+	CBitmap src = bitmap;
+	// resample bitmap if necessary
+	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
+	{
+		src.resample(iconWidth, iconHeight);
+	}
+	CBitmap colorBm;
+	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
+	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
+	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
+	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
+	static volatile uint8 alphaThreshold = 127;
+	do
+	{
+		destColorPtr->modulateFromColor(*srcColorPtr, col);
+		std::swap(destColorPtr->R, destColorPtr->B);
+		++ srcColorPtr;
+		++ destColorPtr;
+	}
+	while (srcColorPtr != srcColorPtrLast);
+	//
+	HBITMAP colorHbm = NULL;
+	HBITMAP maskHbm = NULL;
+	//
+	if (iconDepth == 16)
+	{
+		std::vector<uint16> colorBm16(iconWidth * iconHeight);
+		const CRGBA *src32 = (const CRGBA *) &colorBm.getPixels(0)[0];
+
+		for (uint k = 0; k < colorBm16.size(); ++k)
+		{
+			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
+		}
+
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 16, &colorBm16[0]);
+		std::vector<uint8> bitMask((iconWidth * iconHeight + 7) / 8, 0);
+
+		for (uint k = 0;k < colorBm16.size(); ++k)
+		{
+			if (src32[k].A <= 120)
+			{
+				bitMask[k / 8] |= (0x80 >> (k & 7));
+			}
+		}
+
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 1, &bitMask[0]);
+	}
+	else
+	{
+		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
+	}
+
+	ICONINFO iconInfo;
+	iconInfo.fIcon = cursor ? FALSE:TRUE;
+	iconInfo.xHotspot = (DWORD) hotSpotX;
+	iconInfo.yHotspot = (DWORD) hotSpotY;
+	iconInfo.hbmMask = maskHbm;
+	iconInfo.hbmColor = colorHbm;
+
+	if (colorHbm && maskHbm)
+	{
+		icon = CreateIconIndirect(&iconInfo);
+	}
+
+	//
+	if (colorHbm) DeleteObject(colorHbm);
+	if (maskHbm) DeleteObject(maskHbm);
+
+	return true;
+}
+
+bool CDriverD3D::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
+}
+
 } // NL3D

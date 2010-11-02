@@ -90,8 +90,6 @@
 
 #include "login_progress_post_thread.h"
 
-#include "interface_v3/custom_mouse.h"
-
 #include "browse_faq.h"
 
 
@@ -788,16 +786,6 @@ void prelogInit()
 		}
 
 		FPU_CHECKER_ONCE
-
-		switch (getCurrentColorDepth())
-		{
-			case 16: CustomMouse.setColorDepth(CCustomMouse::ColorDepth16); break;
-			case 24:
-			case 32: CustomMouse.setColorDepth(CCustomMouse::ColorDepth32); break;
-			default:
-				ExitClientError(CI18N::get("uiUnsupportedColorDepth").toUtf8().c_str());
-			break;
-		}
 
 		// Check driver version
 		checkDriverVersion();
