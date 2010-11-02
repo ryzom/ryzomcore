@@ -325,7 +325,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				_MouseButtonsState = (TMouseButton)  (_MouseButtonsState | pEvent->Button);
 
 				rIP.setButtonState(_MouseButtonsState);
-				updateMousePos((CEventMouse&)event, eventDesc);
 
 				// handle Event
 				if(pEvent->Button & leftButton)
@@ -350,7 +349,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				_MouseButtonsState = (TMouseButton) (_MouseButtonsState & ~(pEvent->Button));
 
 				rIP.setButtonState(_MouseButtonsState);
-				updateMousePos((CEventMouse&)event, eventDesc);
 
 				// handle Event
 				if(pEvent->Button & leftButton)
@@ -370,7 +368,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// TODO: yoyo make it work if needed (for now, seems preferable to manage in each ActionHandler)
 
 				CEventMouseDblClk* pEvent=(CEventMouseDblClk*)&event;
-				updateMousePos((CEventMouse&)event, eventDesc);
 
 				// handle Event
 				if(pEvent->Button & leftButton)
@@ -397,8 +394,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 					_MouseWheel += 1;
 				else
 					_MouseWheel -= 1;
-
-				updateMousePos((CEventMouse&)event, eventDesc);
 
 				// handle Event now.
 				if (_MouseWheel != 0)
