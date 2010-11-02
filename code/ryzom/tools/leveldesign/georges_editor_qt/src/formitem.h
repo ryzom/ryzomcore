@@ -48,12 +48,12 @@ namespace NLQT
 		int row() const;
 		CFormItem *parent();
 		bool setData(int column, const QVariant &value);
-		NLGEORGES::UFormElm* getFormElm() {return formElm;};
-		NLGEORGES::UFormElm::TWhereIsValue CFormItem::valueFrom() 
+		NLGEORGES::UFormElm* getFormElm() {return formElm;}
+		NLGEORGES::UFormElm::TWhereIsValue valueFrom() 
 		{
 			return whereV;
 		}
-		NLGEORGES::UFormElm::TWhereIsNode CFormItem::nodeFrom() 
+		NLGEORGES::UFormElm::TWhereIsNode nodeFrom() 
 		{
 			return whereN;
 		}

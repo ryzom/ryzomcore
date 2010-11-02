@@ -24,7 +24,13 @@
 // STL includes
 
 // NeL includes
-#include <nel/misc/debug.h>
+#ifdef NL_COMP_GCC
+// temporary fix for GCC 4.4 segmentation fault
+#	undef nlassert
+#	define nlassert(x)
+#else
+#	include <nel/misc/debug.h>
+#endif // NL_COMP_GCC
 
 // Project includes
 
