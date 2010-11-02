@@ -698,7 +698,7 @@ extern PFNWGLGETEXTENSIONSSTRINGARBPROC			nwglGetExtensionsStringARB;
 
 // Swap control extensions
 //===========================
-extern PFNGLXSWAPINTERVALEXTPROC				nglXSwapIntervalEXT;
+extern NEL_PFNGLXSWAPINTERVALEXTPROC			nglXSwapIntervalEXT;
 
 extern PFNGLXSWAPINTERVALSGIPROC				nglXSwapIntervalSGI;
 
