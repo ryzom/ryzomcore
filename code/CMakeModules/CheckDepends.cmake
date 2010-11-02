@@ -64,6 +64,7 @@ MACRO(CHECK_LINKED_LIBRARY MYLIBRARY OTHERLIBRARY LIBRARY_FOUND)
       # Use otool to check if a library is linked to another library
       GET_FILENAME_COMPONENT(LIBNAME ${${OTHERLIBRARY}} NAME_WE)
       EXEC_PROGRAM(${CMAKE_OTOOL} ARGS "-L ${${MYLIBRARY}} | grep ${LIBNAME}" OUTPUT_VARIABLE OTOOL_LIBRARY)
+      MESSAGE(STATUS "Checking if ${LIBNAME} is linked to ${${MYLIBRARY}}")
       IF(NOT OTOOL_LIBRARY MATCHES "${LIBNAME}")
         SET(${LIBRARY_FOUND} TRUE)
         MESSAGE(STATUS "Library ${LIBNAME} already linked to ${${MYLIBRARY}}")
