@@ -357,10 +357,13 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 #ifdef HAVE_XRENDER
 	sint render_major, render_event, render_error;
-	if (XQueryExtension(_dpy, "RENDER", &render_major, &render_event, &render_error))
+	if (XQueryExtension(_dpy, "RENDER", &render_major, &render_event, &render_error) &&
+		XRenderQueryExtension(_dpy, &render_event, &render_error))
 	{
-		_xrender_version = render_major * 100;
-		nlinfo("3D: XRender %d.%d found", render_major, 0);
+		sint render_minor = 0;
+		XRenderQueryVersion(_dpy, &render_major, &render_minor);
+		_xrender_version = render_major * 100 + render_minor;
+		nlinfo("3D: XRender %d.%d found", render_major, render_minor);
 	}
 #endif // HAVE_XRENDER
 
@@ -2845,60 +2848,6 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, Cursor &cur
 
 #endif
 }
-
-/*
-XRenderPictFormat* format = None;
-
-    {
-        XRenderPictFormat alpha_format;
-        unsigned long mask = PictFormatType|PictFormatDepth|PictFormatAlpha|PictFormatAlphaMask;
-        alpha_format.type = PictTypeDirect;
-        alpha_format.depth = 8;
-        alpha_format.direct.alpha = 0;
-        alpha_format.direct.alphaMask = 0xff;
-
-        format = XRenderFindFormat(dpy, mask, &alpha_format, 0);
-    }
-
-    if (!format) {
-        printf("%s", "error, couldnt find valid format for alpha.\n");
-        XFreePixmap(dpy, dst_pm);
-        XFreePixmap(dpy, src_pm);
-        return 0;
-    }
-
-    { /* fill the alpha-picture */
-        Pixmap alpha_pm = None;
-
-        XRenderColor alpha_color;
-        XRenderPictureAttributes alpha_attr;
-
-        alpha_color.alpha = 0xffff * (shade)/100;
-
-        alpha_attr.repeat = True;
-
-        alpha_pm = XCreatePixmap(dpy, src_pm, 1, 1, 8);
-        alpha_pic = XRenderCreatePicture(dpy, alpha_pm, format, CPRepeat, &alpha_attr);
-        XRenderFillRectangle(dpy, PictOpSrc, alpha_pic, &alpha_color, 0, 0, 1, 1);
-        XFreePixmap(dpy, alpha_pm);
-    }
-
-    { /* blend all together */
-        Picture src_pic;
-        Picture dst_pic;
-
-        format = XRenderFindVisualFormat(dpy, vis);
-
-        src_pic = XRenderCreatePicture(dpy, src_pm, format, 0, 0);
-        dst_pic = XRenderCreatePicture(dpy, dst_pm, format, 0, 0);
-
-        XRenderComposite(dpy, PictOpOver,
-                         src_pic, alpha_pic, dst_pic,
-                         src_x, src_y, 0, 0, dst_x, dst_y, width, height);
-        XRenderFreePicture(dpy, src_pic);
-        XRenderFreePicture(dpy, dst_pic);
-    }
-*/
 
 #endif
 

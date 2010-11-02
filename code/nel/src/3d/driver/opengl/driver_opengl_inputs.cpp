@@ -506,8 +506,8 @@ void CDriverGL::setMousePos(float x, float y)
 	if (_win == EmptyWindow)
 		return;
 
-	sint x1 = (sint)((float)_CurrentMode.Width*x);
-	sint y1 = (sint)((float)_CurrentMode.Height*(1.0f-y));
+	sint x1 = (sint)((float)_WindowWidth*x);
+	sint y1 = (sint)((float)_WindowHeight*(1.0f-y));
 
 #ifdef NL_OS_WINDOWS
 
