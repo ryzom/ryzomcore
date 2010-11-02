@@ -6,7 +6,7 @@
 #
 # Syntax:
 # CHECK_UNDEFINED_SYMBOL(MYLIBRARY SYMBOL SYMBOL_FOUND)
-# SYMBOL_FOUND will be set to TRUE or FALSE
+# SYMBOL_FOUND will be set to TRUE if UNDEFINED
 #
 # Example:
 # CHECK_UNDEFINED_SYMBOL(PNG_LIBRARY inflate INFLATE_FOUND)
@@ -16,21 +16,14 @@ MACRO(CHECK_UNDEFINED_SYMBOL MYLIBRARY SYMBOL SYMBOL_FOUND)
   IF(WIN32)
     # Always TRUE under Windows because we are using static libraries
   ELSEIF(APPLE)
-    # SET(CMAKE_OTOOL otool)
     SET(CMAKE_NM nm)
-    IF(CMAKE_OTOOL)
-      # Use otool to check if a library is using an external symbol
-      EXEC_PROGRAM(${CMAKE_OTOOL} ARGS "-Rv ${${MYLIBRARY}} | grep ${SYMBOL}" OUTPUT_VARIABLE OTOOL_SYMBOL)
-      IF(NOT OTOOL_SYMBOL MATCHES "undefined")
-        SET(${SYMBOL_FOUND} FALSE)
-      ENDIF(NOT OTOOL_SYMBOL MATCHES "undefined")
-    ENDIF(CMAKE_OTOOL)
     IF(CMAKE_NM)
       # Use nm to check if a library is using an external symbol
       EXEC_PROGRAM(${CMAKE_NM} ARGS "-gu ${${MYLIBRARY}} | grep ${SYMBOL}" OUTPUT_VARIABLE NM_SYMBOL)
+      MESSAGE(STATUS "Checking for undefined symbol ${SYMBOL} in ${${MYLIBRARY}}")
       IF(NOT NM_SYMBOL MATCHES ${SYMBOL})
         SET(${SYMBOL_FOUND} FALSE)
-        MESSAGE(STATUS "Undefined symbol ${SYMBOL} detected in ${${MYLIBRARY}}")
+        MESSAGE(STATUS "Defined symbol ${SYMBOL} detected in ${${MYLIBRARY}}")
       ENDIF(NOT NM_SYMBOL MATCHES ${SYMBOL})
     ENDIF(CMAKE_NM)
   ELSEIF(UNIX)
@@ -49,7 +42,7 @@ ENDMACRO(CHECK_UNDEFINED_SYMBOL)
 #
 # Syntax:
 # CHECK_LINKED_LIBRARY(MYLIBRARY OTHERLIBRARY LIBRARY_FOUND)
-# LIBRARY_FOUND will be set to TRUE or FALSE
+# LIBRARY_FOUND will be set to TRUE if LINKED
 #
 # Example:
 # CHECK_LINKED_LIBRARY(PNG_LIBRARY ZLIB_LIBRARY ZLIB_FOUND)
