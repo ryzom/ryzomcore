@@ -2712,6 +2712,11 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 
 #elif defined(NL_OS_MAC)
 
+bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+	return false;
+}
+
 #elif defined(NL_OS_UNIX)
 
 bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon)
@@ -2738,7 +2743,7 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<l
 	return true;
 }
 
-bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, Cursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
 {
 #ifdef HAVE_XRENDER
 
