@@ -376,6 +376,27 @@ typedef GLvoid    (APIENTRY * NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC) (GLuint id, G
 typedef GLvoid    (APIENTRY * NEL_PFNGLSAMPLECOVERAGEARBPROC) (GLclampf value, GLboolean invert);
 #endif
 
+#if defined(NL_OS_MAC)
+
+// Mac GL extensions
+
+#elif defined(NL_OS_UNIX)
+
+// GLX extensions
+#ifndef NL_GLX_EXT_swap_control
+#define NL_GLX_EXT_swap_control 1
+
+#ifndef GLX_EXT_swap_control
+#define GLX_SWAP_INTERVAL_EXT              0x20F1
+#define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
+#endif
+
+typedef GLint (APIENTRY * NEL_PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawable drawable, GLint interval);
+
+#endif // NL_GLX_EXT_swap_control
+
+#endif // NL_OS_MAC
+
 #ifdef __cplusplus
 }
 #endif
