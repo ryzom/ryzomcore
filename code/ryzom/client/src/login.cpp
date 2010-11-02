@@ -1095,8 +1095,6 @@ void initShardDisplay()
 
 void onlogin(bool vanishScreen = true)
 {
-
-
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// Remove space before and after each string login & password

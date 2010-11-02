@@ -2078,7 +2078,7 @@ private:
 
 	// Directx
 	uint32					_Adapter;
-	D3DDEVTYPE			_Rasterizer;
+	D3DDEVTYPE				_Rasterizer;
 	LPDIRECT3D9				_D3D;
 public:
 	IDirect3DDevice9		*_DeviceInterface;

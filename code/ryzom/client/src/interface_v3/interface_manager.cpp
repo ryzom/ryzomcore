@@ -5718,7 +5718,7 @@ void	CInterfaceManager::connectYuboChat()
 	if(KlientChatPort != 0 && !_YuboChat.connected())
 	{
 		// NB: hard code url, to avoid "client.cfg trojan"
-		// (a client.cfg with an url pointing to a hackcer site, to grab login/password)
+		// (a client.cfg with an url pointing to a hacker site, to grab login/password)
 		extern std::string LoginLogin, LoginPassword;
 		_YuboChat.connect(string("chat.ryzom.com:")+toString(KlientChatPort), LoginLogin, LoginPassword);
 

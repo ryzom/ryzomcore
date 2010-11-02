@@ -928,14 +928,14 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	{
 		_win = wnd;
 
-		/* The NSView* extracted from a QWidget using winId() has bounds set to 
+		/* The NSView* extracted from a QWidget using winId() has bounds set to
 		 * (QWidget::x(), QWidget::y(), QWidget::width(), QWidget::height()).
 		 * This causes cocoa to draw at an offset of x(), y() leaving an unhandled
-		 * border in the NSView. The code below fixes this by translating the 
+		 * border in the NSView. The code below fixes this by translating the
 		 * coordinate system of the NSView back to 0,0.
-		 * In my opinion this is an error in Qt since QWidget::x/y() are relative to 
-		 * parent and [NSView bounds.origin] is relative to it's own coordinate 
-		 * system. This are incompatible notations. Qt should handle the conversion. 
+		 * In my opinion this is an error in Qt since QWidget::x/y() are relative to
+		 * parent and [NSView bounds.origin] is relative to it's own coordinate
+		 * system. This are incompatible notations. Qt should handle the conversion.
 		 * Fixes: #1013 Viewport size when embedding NeL Cocoa view in Qt
 		 *   (http://dev.ryzom.com/issues/1013)
 		 */
@@ -968,7 +968,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// create a opengl view with the created format
 	_glView = [[CocoaOpenGLView alloc]
-		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height) 
+		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)
 		pixelFormat:format];
 
 	if(!_glView)
@@ -997,7 +997,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// let the open gl view handle the input
 	[[containerView() window] makeFirstResponder:_glView];
-	
+
 	// prevents scrambled content in the view before first swap
 	[_ctx flushBuffer];
 	[_glView display];
@@ -1433,12 +1433,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
 
-	if(!cocoa_window) 
+	if(!cocoa_window)
 	{
 		nlerror("cannot create cocoa window");
 		return false;
 	}
-	
+
 	// set the delegate which will handle window move events
 	[cocoa_window setDelegate:[[CocoaWindowDelegate alloc] initWithDriver:this]];
 
@@ -1459,7 +1459,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	// create a dummy view which works like the window on other platforms
 	// the open gl view will be created as subview of this one.
-	window = [[NSView alloc] 
+	window = [[NSView alloc]
 		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)];
 
 	[cocoa_window setContentView: (NSView*)window];
@@ -1547,7 +1547,7 @@ bool CDriverGL::destroyWindow()
 		[containerView() release];
 		[_glView release];
 	}
-	
+
 	_ctx = nil;
 
 #elif defined (NL_OS_UNIX)
@@ -1779,15 +1779,15 @@ bool CDriverGL::setMode(const GfxMode& mode)
 static int bppFromDisplayMode(CGDisplayModeRef mode)
 {
 	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);
-	
-	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels), 
-			kCFCompareCaseInsensitive) == kCFCompareEqualTo) 
+
+	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels),
+			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		return 32;
-	
-	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels), 
+
+	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels),
 			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		return 16;
-	
+
 	return 0;
 }
 
@@ -1883,8 +1883,8 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 				uint16 w = CGDisplayModeGetWidth(mode);
 				uint16 h = CGDisplayModeGetHeight(mode);
 #else
-				uint16 w = (uint16)GetModeWidth(mode); 
-				uint16 h = (uint16)GetModeHeight(mode); 
+				uint16 w = (uint16)GetModeWidth(mode);
+				uint16 h = (uint16)GetModeHeight(mode);
 #endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
 
 				// Add this mode
@@ -2028,7 +2028,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		mode.Width     = _backBufferWidth;
 		mode.Height    = _backBufferHeight;
 	}
-	
+
 	// in windowed mode
 	else
 	{
@@ -2886,44 +2886,44 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 }
 
 #ifdef NL_OS_MAC
-void CDriverGL::setupApplicationMenu() 
+void CDriverGL::setupApplicationMenu()
 {
  	NSMenu*     menu;
  	NSMenuItem* menuItem;
  	NSString*   title;
  	NSString*   appName;
- 
+
  	// get the applications name from it's process info
  	appName = [[NSProcessInfo processInfo] processName];
- 
+
  	// create an empty menu object
  	menu    = [[NSMenu alloc] initWithTitle:@""];
- 
+
  	// add the about menu item
  	title = [@"About " stringByAppendingString:appName];
  	[menu addItemWithTitle:title
  		action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
- 
+
  	// separator
  	[menu addItem:[NSMenuItem separatorItem]];
- 
+
  	// add the hide application menu item
  	title = [@"Hide " stringByAppendingString:appName];
  	[menu addItemWithTitle:title
  		action:@selector(hide:) keyEquivalent:@"h"];
- 
+
  	// add the hide others menu item
  	menuItem = [menu addItemWithTitle:@"Hide Others"
  		action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
  	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
- 
+
  	// add the show all menu item
  	[menu addItemWithTitle:@"Show All"
  		action:@selector(unhideAllApplications:) keyEquivalent:@""];
- 
+
  	// separator
  	[menu addItem:[NSMenuItem separatorItem]];
- 
+
  	/*
  		TODO on quit send EventDestroyWindowId
  	*/
@@ -2931,17 +2931,17 @@ void CDriverGL::setupApplicationMenu()
  	title = [@"Quit " stringByAppendingString:appName];
  	[menu addItemWithTitle:title
  		action:@selector(terminate:) keyEquivalent:@"q"];
- 
+
  	// create an empty menu item and put the new menu into it as a subitem
  	menuItem = [[NSMenuItem alloc] initWithTitle:@""
  		action:nil keyEquivalent:@""];
  	[menuItem setSubmenu:menu];
- 
+
  	// create a menu for the application
  	[NSApp setMainMenu:[[NSMenu alloc] initWithTitle:@""]];
- 
+
  	// attach the new menu to the applications menu
- 	[[NSApp mainMenu] addItem:menuItem];	
+ 	[[NSApp mainMenu] addItem:menuItem];
 }
 #endif
 

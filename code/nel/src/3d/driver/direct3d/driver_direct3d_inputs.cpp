@@ -15,11 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stddirect3d.h"
+#include "driver_direct3d.h"
 
 #include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
-
-#include "driver_direct3d.h"
 
 using namespace std;
 using namespace NLMISC;

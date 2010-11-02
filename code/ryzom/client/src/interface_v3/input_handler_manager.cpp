@@ -141,7 +141,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 {
 	HandleSystemCursorCapture(event);
 
-
 	if (event == EventDisplayChangeId)
 	{
 		switch (getCurrentColorDepth())

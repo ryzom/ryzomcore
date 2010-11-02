@@ -765,6 +765,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 			// Insert in map.
 			_TextureMap.insert( make_pair(image.Name, textureId) );
 		}
+
 		// if this is a cursor texture, extract it now (supported for rgba only now, because of the blit)
 		if (CustomMouse.isAlphaBlendedCursorSupported())
 		{

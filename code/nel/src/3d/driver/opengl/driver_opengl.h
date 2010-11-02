@@ -46,29 +46,32 @@
 #	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
-#include "driver_opengl_extension.h"
-
-#include "nel/3d/driver.h"
-#include "nel/3d/material.h"
-#include "nel/3d/shader.h"
-#include "nel/3d/vertex_buffer.h"
 #include "nel/misc/matrix.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/bit_set.h"
 #include "nel/misc/hierarchical_timer.h"
-#include "nel/3d/ptr_set.h"
+#include "nel/misc/bitmap.h"
+#include "nel/misc/common.h"
 #include "nel/misc/heap_memory.h"
 #include "nel/misc/event_emitter_multi.h"
-#include "driver_opengl_states.h"
+#include "nel/misc/time_nl.h"
+
+#include "nel/3d/driver.h"
+#include "nel/3d/material.h"
+#include "nel/3d/shader.h"
+#include "nel/3d/vertex_buffer.h"
+#include "nel/3d/ptr_set.h"
 #include "nel/3d/texture_cube.h"
 #include "nel/3d/vertex_program_parse.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/light.h"
-#include "nel/misc/time_nl.h"
 #include "nel/3d/occlusion_query.h"
+
+#include "driver_opengl_states.h"
+#include "driver_opengl_extension.h"
 
 
 #ifdef NL_OS_WINDOWS

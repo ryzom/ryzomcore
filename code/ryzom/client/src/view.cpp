@@ -271,7 +271,7 @@ void CView::cameraDistance(float dist)
 void CView::changeCameraHeight(bool up, bool down)
 {
 	// If the user is not inside a building.
-	if(UserEntity->forceIndoorFPV() == false)
+	if(!UserEntity->forceIndoorFPV())
 	{
 		if(up)
 		{
@@ -293,7 +293,7 @@ void CView::changeCameraHeight(bool up, bool down)
 void CView::changeCameraDist(bool forward, bool backward)
 {
 	// If the user is not inside a building.
-	if(UserEntity->forceIndoorFPV() == false)
+	if(!UserEntity->forceIndoorFPV())
 	{
 		if(forward)
 			decreaseCameraDist();
