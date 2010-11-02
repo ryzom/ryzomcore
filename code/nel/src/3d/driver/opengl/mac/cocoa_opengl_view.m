@@ -53,9 +53,9 @@ namespace NL3D {
 
 -(void)keyDown:(NSEvent*)event
 {
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+#if MAC_OS_X_VERSION_10_6 > MAC_OS_X_VERSION_MAX_ALLOWED
 	[[self inputContext] handleEvent:event];
-#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+#endif
 }
 
 -(void)setDriver:(NL3D::CDriverGL*)driver

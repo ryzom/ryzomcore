@@ -237,7 +237,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 		server = _server;
 
 	NSRect  viewRect = [_glView frame];
-	CGPoint mousePos = [_glView convertPoint:event.locationInWindow fromView:nil];
+	NSPoint mousePos = [_glView convertPoint:event.locationInWindow fromView:nil];
 
 	mousePos.x /= (float)viewRect.size.width;
 	mousePos.y /= (float)viewRect.size.height;
@@ -387,14 +387,14 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSOtherMouseDown:break;
 	case NSOtherMouseUp:break;
 	case NSOtherMouseDragged:break;
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+#if MAC_OS_X_VERSION_10_6 > MAC_OS_X_VERSION_MAX_ALLOWED
 	case NSEventTypeGesture:break;
 	case NSEventTypeMagnify:break;
 	case NSEventTypeSwipe:break;
 	case NSEventTypeRotate:break;
 	case NSEventTypeBeginGesture:break;
 	case NSEventTypeEndGesture:break;
-#endif // AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
+#endif
 	default:
 	{
 		nlwarning("Unknown event type. dropping.");

@@ -23,8 +23,10 @@ namespace NL3D {
 	void windowDidMove(NSWindow*, NL3D::CDriverGL*);
 }
 
-
-@interface CocoaWindowDelegate : NSObject<NSWindowDelegate>
+@interface CocoaWindowDelegate : NSObject
+#if MAC_OS_X_VERSION_10_6 > MAC_OS_X_VERSION_MAX_ALLOWED
+<NSWindowDelegate>
+#endif
 {
 	NL3D::CDriverGL* _driver;
 }
