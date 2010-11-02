@@ -269,14 +269,17 @@ void CDriverGL::createCursors()
 #elif defined(NL_OS_UNIX)
 	_DefaultCursor = None;
 
-	// create blank cursor
-	char bm_no_data[] = { 0,0,0,0,0,0,0,0 };
-	Pixmap pixmap_no_data = XCreateBitmapFromData (_dpy, _win, bm_no_data, 8, 8);
-	XColor black;
-	memset(&black, 0, sizeof (XColor));
-	black.flags = DoRed | DoGreen | DoBlue;
-	_BlankCursor = XCreatePixmapCursor (_dpy, pixmap_no_data, pixmap_no_data, &black, &black, 0, 0);
-	XFreePixmap(_dpy, pixmap_no_data);
+	if (_dpy && _win && _BlankCursor == EmptyCursor)
+	{
+		// create blank cursor
+		char bm_no_data[] = { 0,0,0,0,0,0,0,0 };
+		Pixmap pixmap_no_data = XCreateBitmapFromData (_dpy, _win, bm_no_data, 8, 8);
+		XColor black;
+		memset(&black, 0, sizeof (XColor));
+		black.flags = DoRed | DoGreen | DoBlue;
+		_BlankCursor = XCreatePixmapCursor (_dpy, pixmap_no_data, pixmap_no_data, &black, &black, 0, 0);
+		XFreePixmap(_dpy, pixmap_no_data);
+	}
 #endif
 }
 
