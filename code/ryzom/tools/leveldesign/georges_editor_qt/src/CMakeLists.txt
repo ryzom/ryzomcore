@@ -1,0 +1,35 @@
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR} ${QT_INCLUDES})
+INCLUDE( ${QT_USE_FILE} )
+
+FILE(GLOB GEORGES_EDITOR_SRC *.cpp)
+SET(GEORGES_EDITOR_HDR georges_dirtree_dialog.h georges_treeview_dialog.h georgesform_model.h main_window.h
+	log_dialog.h objectviewer_dialog.h settings_dialog.h)
+SET(GEORGES_EDITOR_UIS settings_form.ui objectviewer_form.ui log_form.ui georges_treeview_form.ui georges_dirtree_form.ui)
+SET(GEORGES_EDITOR_RCS georges_editor_qt.qrc)
+
+SET(QT_USE_QTGUI TRUE)
+SET(QT_USE_QTOPENGL TRUE)
+
+QT4_ADD_RESOURCES( GEORGES_EDITOR_RC_SRCS ${GEORGES_EDITOR_RCS} )
+QT4_WRAP_CPP( GEORGES_EDITOR_MOC_SRCS ${GEORGES_EDITOR_HDR} )
+QT4_WRAP_UI( GEORGES_EDITOR_UI_HDRS ${GEORGES_EDITOR_UIS} )
+
+ADD_EXECUTABLE(georges_editor_qt WIN32 ${GEORGES_EDITOR_SRC} ${GEORGES_EDITOR_MOC_SRCS} ${GEORGES_EDITOR_RC_SRCS} ${GEORGES_EDITOR_UI_HDRS})
+
+TARGET_LINK_LIBRARIES(georges_editor_qt
+		nelmisc 
+		nel3d
+		nelgeorges
+		${QT_LIBRARIES}
+		${QT_QTOPENGL_LIBRARY}
+		${QT_QTMAIN_LIBRARY})
+
+ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${LIBXML2_DEFINITIONS} ${QT_DEFINITIONS})
+NL_DEFAULT_PROPS(georges_editor_qt "Ryzom, Tools, World: Georges Editor Qt")
+NL_ADD_RUNTIME_FLAGS(georges_editor_qt)
+
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(georges_editor_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+ENDIF(WITH_PCH)
+
+INSTALL(TARGETS georges_editor_qt RUNTIME DESTINATION bin COMPONENT runtime)

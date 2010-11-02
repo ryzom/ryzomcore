@@ -1,0 +1,13 @@
+<RCC>
+<qresource>
+    <file>images/nel.png</file>
+    <file>images/open-file.png</file>
+    <file>images/go-down.png</file>
+    <file>images/go-up.png</file>
+    <file>images/list-add.png</file>
+    <file>images/list-remove.png</file>
+    <file>images/preferences.png</file>
+    <file>images/pqrticles.png</file>
+    <file>images/khead.png</file>
+</qresource>
+</RCC>
