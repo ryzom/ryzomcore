@@ -29,9 +29,12 @@
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
-# ifdef XRANDR
+# ifdef HAVE_XRANDR
 #  include <X11/extensions/Xrandr.h>
-# endif
+# endif // HAVE_XRANDR
+# ifdef HAVE_XRENDER
+#  include <X11/extensions/Xrender.h>
+# endif // HAVE_XRENDER
 # include <X11/Xatom.h>
 # define _NET_WM_STATE_REMOVE	0
 # define _NET_WM_STATE_ADD		1
@@ -327,7 +330,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	_xrandr_version = 0;
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 	_OldSizeID = 0;
 	sint xrandr_major, xrandr_minor;
 	if (XRRQueryVersion(_dpy, &xrandr_major, &xrandr_minor))
@@ -335,8 +338,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 		_xrandr_version = xrandr_major * 100 + xrandr_minor;
 		nlinfo("3D: XRandR %d.%d found", xrandr_major, xrandr_minor);
 	}
-
-#endif
+#endif // HAVE_XRANDR
 
 	_xvidmode_version = 0;
 
@@ -349,7 +351,19 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	}
 #endif
 
+	_xrender_version = 0;
+
+#ifdef HAVE_XRENDER
+	sint render_major, render_event, render_error;
+	if (XQueryExtension(_dpy, "RENDER", &render_major, &render_event, &render_error))
+	{
+		_xrender_version = render_major * 100;
+		nlinfo("3D: XRender %d.%d found", render_major, 0);
+	}
+#endif // HAVE_XRENDER
+
 #endif
+
 	return true;
 }
 
@@ -1103,7 +1117,7 @@ bool CDriverGL::saveScreenMode()
 	int screen = DefaultScreen(_dpy);
 	res = false;
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 
 	if (!res && _xrandr_version > 0)
 	{
@@ -1124,7 +1138,7 @@ bool CDriverGL::saveScreenMode()
 		}
 	}
 
-#endif // XRANDR
+#endif // HAVE_XRANDR
 
 #if defined(XF86VIDMODE)
 
@@ -1167,7 +1181,7 @@ bool CDriverGL::restoreScreenMode()
 
 	int screen = DefaultScreen(_dpy);
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 
 	if (!res && _xrandr_version > 0)
 	{
@@ -1193,7 +1207,7 @@ bool CDriverGL::restoreScreenMode()
 		}
 	}
 
-#endif // XRANDR
+#endif // HAVE_XRANDR
 
 #if defined(XF86VIDMODE)
 
@@ -1302,7 +1316,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 	bool found = false;
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 
 	if (!found && _xrandr_version > 0)
 	{
@@ -1347,7 +1361,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		}
 	}
 
-#endif
+#endif // HAVE_XRANDR
 
 #if defined(XF86VIDMODE)
 
@@ -1895,7 +1909,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
 
-#if defined(XRANDR)
+#if defined(HAVE_XRANDR)
 	if (!found && _xrandr_version >= 100)
 	{
 		XRRScreenConfiguration *screen_config = XRRGetScreenInfo(_dpy, RootWindow(_dpy, screen));
@@ -2029,7 +2043,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 
 	if (!found && _xrandr_version > 0)
 	{
@@ -2068,7 +2082,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 		}
 	}
 
-#endif // XRANDR
+#endif // HAVE_XRANDR
 
 #ifdef XF86VIDMODE
 

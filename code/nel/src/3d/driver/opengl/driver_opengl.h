@@ -730,10 +730,11 @@ private:
 	XVisualInfo*				_visual_info;
 	uint32						_xrandr_version;
 	uint32						_xvidmode_version;
+	uint32						_xrender_version;
 
-#ifdef XRANDR
+#ifdef HAVE_XRANDR
 	sint						_OldSizeID;
-#endif // XRANDR
+#endif // HAVE_XRANDR
 
 #ifdef XF86VIDMODE
 	sint						_OldDotClock;   // old dotclock
