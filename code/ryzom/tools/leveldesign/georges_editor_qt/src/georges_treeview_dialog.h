@@ -37,7 +37,8 @@ namespace NLGEORGES
 
 using namespace NLGEORGES;
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	class CGeorgesTreeViewDialog: public QDockWidget
 	{

@@ -21,7 +21,8 @@
 // NeL includes
 #include <nel/misc/debug.h>
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	bool CGeorgesFormProxyModel::filterAcceptsRow(int sourceRow,
          const QModelIndex &sourceParent) const

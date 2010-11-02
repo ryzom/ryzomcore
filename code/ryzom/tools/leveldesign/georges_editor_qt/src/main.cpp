@@ -33,33 +33,37 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT 
+{
 
-namespace {
+	namespace
+	{
 
-CFileDisplayer *s_FileDisplayer = NULL;
+		CFileDisplayer *s_FileDisplayer = NULL;
 
-} /* anonymous namespace */
+	} /* anonymous namespace */
 
 } /* namespace NLQT */
 
-void messageHandler(QtMsgType p_type, const char* p_msg) {
+void messageHandler(QtMsgType p_type, const char* p_msg) 
+{
 
-    fprintf(stderr, "%s\n", p_msg);
+	fprintf(stderr, "%s\n", p_msg);
 
-    QFile file("qt.log");
-    file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+	QFile file("qt.log");
+	file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
-    QChar code;
-    switch (p_type) {
-        case QtDebugMsg:    code = 'D';  break;
-        case QtWarningMsg:  code = 'W';  break;
-        case QtCriticalMsg: code = 'C';  break;
-        case QtFatalMsg:    code = 'F';  break;
-    }
-    QString dt = QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss");
+	QChar code;
+	switch (p_type)
+	{
+	case QtDebugMsg:    code = 'D';  break;
+	case QtWarningMsg:  code = 'W';  break;
+	case QtCriticalMsg: code = 'C';  break;
+	case QtFatalMsg:    code = 'F';  break;
+	}
+	QString dt = QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss");
 
-    QTextStream(&file) << QString("%1 [%2]  %3\n").arg(dt).arg(code).arg(QString(p_msg));
+	QTextStream(&file) << QString("%1 [%2]  %3\n").arg(dt).arg(code).arg(QString(p_msg));
 }
 
 #ifndef DATA_DIR
@@ -77,12 +81,12 @@ void messageHandler(QtMsgType p_type, const char* p_msg) {
 
 sint main(int argc, char **argv)
 {
-  	// go nel!
+	// go nel!
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
 		createDebug(NULL, NLQT_USE_LOG_LOG, false);
 		if (QFile::exists("qt.log"))
-        QFile::remove("qt.log");
+			QFile::remove("qt.log");
 
 		qInstallMsgHandler(messageHandler);
 #if NLQT_USE_LOG
@@ -101,12 +105,12 @@ sint main(int argc, char **argv)
 #endif	
 
 		nlinfo("Welcome to NeL!");
-		
+
 		NLMISC::CPath::remapExtension("tga", "png", true);
 	}
-	
-    QApplication app(argc, argv);
-	
+
+	QApplication app(argc, argv);
+
 	Modules::init();
 	//Modules::mainWin().resize(800,600);
 	Modules::mainWin().show();

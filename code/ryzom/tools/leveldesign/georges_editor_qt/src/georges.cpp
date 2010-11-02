@@ -29,15 +29,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace NLGEORGES;
 
-namespace NLQT {
+namespace NLQT 
+{
 
-	CGeorges::CGeorges(): FormLoader(0) {
+	CGeorges::CGeorges(): FormLoader(0) 
+	{
 		FormLoader = UFormLoader::createLoader();
 	}
 
-	CGeorges::~CGeorges() {}
+	CGeorges::~CGeorges() 
+	{
+	}
 
-	UForm *CGeorges::loadForm(std::string formName) {
+	UForm *CGeorges::loadForm(std::string formName) 
+	{
 		UForm *form = FormLoader->loadForm(formName.c_str());
 
 		return form;

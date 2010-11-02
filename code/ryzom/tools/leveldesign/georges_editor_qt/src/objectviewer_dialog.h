@@ -1,19 +1,19 @@
 /*
-    Georges Editor Qt
-	Copyright (C) 2010 Adrian Jaekel <aj at elane2k dot com>
+Georges Editor Qt
+Copyright (C) 2010 Adrian Jaekel <aj at elane2k dot com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef OBJECTVIEWER_DIALOG_H
@@ -45,63 +45,64 @@ typedef QGLWidget QNLWidget;
 
 class QAction;
 
-namespace NLQT {
-  
-class CObjectViewerDialog: public QDockWidget, public NLMISC::IEventEmitter
+namespace NLQT 
 {
-     Q_OBJECT
 
-public:
-	CObjectViewerDialog(QWidget *parent = 0);
-	~CObjectViewerDialog();
+	class CObjectViewerDialog: public QDockWidget, public NLMISC::IEventEmitter
+	{
+		Q_OBJECT
 
-	virtual void setVisible(bool visible);
-	// virtual QPaintEngine* paintEngine() const { return NULL; }
+	public:
+		CObjectViewerDialog(QWidget *parent = 0);
+		~CObjectViewerDialog();
 
-	void init();
-	void release();
-	void reinit();
+		virtual void setVisible(bool visible);
+		// virtual QPaintEngine* paintEngine() const { return NULL; }
 
-	QAction *createSaveScreenshotAction(QObject *parent);
-	QAction *createSetBackgroundColor(QObject *parent);
+		void init();
+		void release();
+		void reinit();
 
-private Q_SLOTS:
-	void updateRender();
+		QAction *createSaveScreenshotAction(QObject *parent);
+		QAction *createSetBackgroundColor(QObject *parent);
 
-	void saveScreenshot();
-	void setBackgroundColor();
+	private Q_SLOTS:
+		void updateRender();
 
-	void submitEvents(NLMISC::CEventServer &server, bool allWindows) { };
-	void emulateMouseRawMode(bool) { };
+		void saveScreenshot();
+		void setBackgroundColor();
 
-	void topLevelChanged(bool topLevel); 
+		void submitEvents(NLMISC::CEventServer &server, bool allWindows) { };
+		void emulateMouseRawMode(bool) { };
 
-protected:
-	virtual void resizeEvent(QResizeEvent *resizeEvent);
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseReleaseEvent(QMouseEvent *event);
-	virtual void wheelEvent(QWheelEvent *event);
-	virtual void mouseMoveEvent(QMouseEvent *event);
-	
-	uint32 getNelButtons(QMouseEvent *event);
-	uint32 getNelButtons(QWheelEvent *event);
-	
-private:
-	CObjectViewerDialog(const CObjectViewerDialog &);
-	CObjectViewerDialog &operator=(const CObjectViewerDialog &);
+		void topLevelChanged(bool topLevel); 
 
-	void updateInitialization(bool visible);
+	protected:
+		virtual void resizeEvent(QResizeEvent *resizeEvent);
+		virtual void mousePressEvent(QMouseEvent *event);
+		virtual void mouseReleaseEvent(QMouseEvent *event);
+		virtual void wheelEvent(QWheelEvent *event);
+		virtual void mouseMoveEvent(QMouseEvent *event);
 
-	Ui::CObjectViewerDialog _ui;
-	
-	// render stuff
-	QTimer *_mainTimer;
-	bool _isGraphicsInitialized, _isGraphicsEnabled;
+		uint32 getNelButtons(QMouseEvent *event);
+		uint32 getNelButtons(QWheelEvent *event);
 
-	QNLWidget * _nlw;
+	private:
+		CObjectViewerDialog(const CObjectViewerDialog &);
+		CObjectViewerDialog &operator=(const CObjectViewerDialog &);
 
-	friend class CMainWindow;
-}; /* CObjectViewerDialog */
+		void updateInitialization(bool visible);
+
+		Ui::CObjectViewerDialog _ui;
+
+		// render stuff
+		QTimer *_mainTimer;
+		bool _isGraphicsInitialized, _isGraphicsEnabled;
+
+		QNLWidget * _nlw;
+
+		friend class CMainWindow;
+	}; /* CObjectViewerDialog */
 
 } /* namespace NLQT */
 

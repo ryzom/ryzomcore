@@ -23,13 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt includes
 #include <QSortFilterProxyModel>
 
-namespace NLQT {
+namespace NLQT 
+{
 
-	class CGeorgesFormProxyModel : public QSortFilterProxyModel {
-		
+	class CGeorgesFormProxyModel : public QSortFilterProxyModel 
+	{
+
 	public:
-		CGeorgesFormProxyModel(QObject *parent = 0): QSortFilterProxyModel(parent){}
-		~CGeorgesFormProxyModel() {}
+		CGeorgesFormProxyModel(QObject *parent = 0): QSortFilterProxyModel(parent)
+		{
+		}
+		~CGeorgesFormProxyModel() 
+		{
+		}
 
 	protected:
 		virtual bool  filterAcceptsColumn ( int source_column, const QModelIndex & source_parent ) const ;

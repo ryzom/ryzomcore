@@ -32,12 +32,13 @@ namespace NLGEORGES {
 	class UFormElm;
 }
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	class CFormItem;
 
-	class CGeorgesFormModel : public QAbstractItemModel {
-		Q_OBJECT
+	class CGeorgesFormModel : public QAbstractItemModel 
+	{
 		
 	public:
 		CGeorgesFormModel(NLGEORGES::UFormElm *root, QMap< QString, QStringList> deps,

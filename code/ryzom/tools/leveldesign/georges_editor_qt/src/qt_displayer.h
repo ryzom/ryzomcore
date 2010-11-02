@@ -28,10 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt includes
 #include <QPlainTextEdit>
 
-namespace NLQT {
+namespace NLQT
+{
 
 	class CQtDisplayer : virtual public NLMISC::IDisplayer
 	{
+
 	public:
 		CQtDisplayer(QPlainTextEdit *dlgDebug, bool eraseLastLog = false, const char *displayerName = "", bool raw = false);
 		CQtDisplayer();
@@ -42,7 +44,7 @@ namespace NLQT {
 		virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message );
 
 	private:
-		QPlainTextEdit        *m_DlgDebug;
+		QPlainTextEdit  *m_DlgDebug;
 		bool            _NeedHeader;
 		uint            _LastLogSizeChecked;
 		bool            _Raw;

@@ -31,7 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	CSettingsDialog::CSettingsDialog(QWidget *parent)
 		: QDialog(parent)
@@ -72,7 +73,8 @@ namespace NLQT {
 		QFileDialog dialog(this);
 		dialog.setOption(QFileDialog::ShowDirsOnly, true);
 		dialog.setFileMode(QFileDialog::Directory);
-		if (dialog.exec()) {
+		if (dialog.exec())
+		{
 			QString newPath = dialog.selectedFiles().first();
 			if (!newPath.isEmpty()) 
 			{
@@ -137,9 +139,12 @@ namespace NLQT {
 				list.push_back(str);
 		}
 
-		if (list.empty()) {
+		if (list.empty()) 
+		{
 			Modules::config().getConfigFile().getVar("SearchPaths").forceAsString("");
-		} else {
+		} 
+		else 
+		{
 			Modules::config().getConfigFile().getVar("SearchPaths").forceAsString("");
 			Modules::config().getConfigFile().getVar("SearchPaths").setAsString(list);
 		}
@@ -197,4 +202,5 @@ namespace NLQT {
 		ui.leveldesignPath->setText(QFileDialog::getExistingDirectory(this, tr("Open Directory"),
 			QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
 	}
+
 } /* namespace NLQT */

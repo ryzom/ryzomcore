@@ -34,12 +34,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "georgesform_model.h"
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
-#include "spindelegate.h"
+#include "formdelegate.h"
 
 using namespace NLMISC;
 using namespace NLGEORGES;
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/, bool emptyView /*= false*/)
 		: QDockWidget(parent)
@@ -50,7 +51,8 @@ namespace NLQT {
 		_ui.setupUi(this);
 		_ui.treeViewTabWidget->setTabEnabled (2,false);
 
-		if (emptyView) {
+		if (emptyView) 
+		{
 			_ui.treeViewTabWidget->clear();
 			setWindowTitle("Form Area");
 		}
@@ -59,9 +61,9 @@ namespace NLQT {
 		_ui.checkBoxDefaults->setStyleSheet("background-color: rgba(255,0,0,30)");
 		_form = 0;
 
-		SpinBoxDelegate *spindelegate = new SpinBoxDelegate(this);
-		_ui.treeView->setItemDelegateForColumn(1, spindelegate);
-		
+		FormDelegate *formdelegate = new FormDelegate(this);
+		_ui.treeView->setItemDelegateForColumn(1, formdelegate);
+
 
 		connect(_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
@@ -77,15 +79,18 @@ namespace NLQT {
 		//settings.setValue("dirViewGeometry", saveGeometry());
 	}
 
-	void CGeorgesTreeViewDialog::selectedForm(QString formName) {
+	void CGeorgesTreeViewDialog::selectedForm(QString formName) 
+	{
 		_form = Modules::georges().loadForm(formName.toStdString());
-		
-		if (_form) {
+
+		if (_form) 
+		{
 			UFormElm *root = 0;
 			root = &_form->getRootNode();
 
 			QStringList parents;
-			for (uint i = 0; i < _form->getNumParent(); i++) {
+			for (uint i = 0; i < _form->getNumParent(); i++) 
+			{
 				UForm *u = _form->getParentForm(i);
 				parents << u->getFilename().c_str();
 			}
@@ -93,7 +98,8 @@ namespace NLQT {
 			QString comments;
 			comments = _form->getComment().c_str();
 
-			if (!comments.isEmpty()) {
+			if (!comments.isEmpty()) 
+			{
 				_ui.treeViewTabWidget->setTabEnabled (1,true);
 				_ui.commentEdit->setPlainText(comments);
 			}
@@ -103,16 +109,18 @@ namespace NLQT {
 			_form->getDependencies(dependencies);
 
 			QMap< QString, QStringList> deps;
-			Q_FOREACH(std::string str, dependencies) {
+			Q_FOREACH(std::string str, dependencies) 
+			{
 				QString file = str.c_str();
 				if (file == formName) continue;
 				deps[file.remove(0,file.indexOf(".")+1)] << str.c_str();
 			}
 			nlinfo("typ's %d",deps["typ"].count());
 			nlinfo("dfn's %d",deps["dfn"].count());
-			
+
 			//nlwarning(strList.join(";").toStdString().c_str());
-			if (root) {
+			if (root) 
+			{
 				loadedForm = formName;
 
 				CGeorgesFormModel *model = new CGeorgesFormModel(root,deps,comments,parents);
@@ -137,8 +145,10 @@ namespace NLQT {
 		}
 	}
 
-	void CGeorgesTreeViewDialog::modifiedFile( ) {
-	if (!_modified) {
+	void CGeorgesTreeViewDialog::modifiedFile( ) 
+	{
+		if (!_modified) 
+		{
 			_modified = true;
 			setWindowTitle(windowTitle()+"*");
 			Modules::mainWin().setWindowTitle(Modules::mainWin().windowTitle()+"*");
@@ -146,13 +156,17 @@ namespace NLQT {
 		}
 	}
 
-	void CGeorgesTreeViewDialog::write( ) {
+	void CGeorgesTreeViewDialog::write( ) 
+	{
 
 		COFile file;
 		std::string s = CPath::lookup(loadedForm.toStdString());
-		if (file.open (s)) {
-			try	{
-				if (loadedForm.contains(".typ")) {
+		if (file.open (s)) 
+		{
+			try	
+			{
+				if (loadedForm.contains(".typ")) 
+				{
 					//nlassert (Type != NULL);
 
 					//// Write the file
@@ -167,7 +181,9 @@ namespace NLQT {
 					//flushValueChange ();
 					//UpdateAllViews (NULL);
 					//return TRUE;
-				} else if (loadedForm.contains(".dfn"))	{
+				} 
+				else if (loadedForm.contains(".dfn"))	
+				{
 					//nlassert (Dfn != NULL);
 
 					//// Write the file
@@ -180,13 +196,15 @@ namespace NLQT {
 					//modify (NULL, NULL, false);
 					//UpdateAllViews (NULL);
 					//return TRUE;
-				} else {
+				} 
+				else 
+				{
 					nlassert (_form != NULL);
 
 					// Write the file
 					/*if (IsModified ())
 					{
-						((CForm*)(UForm*)Form)->Header.MinorVersion++;
+					((CForm*)(UForm*)Form)->Header.MinorVersion++;
 					}*/
 					//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
 					_form->write(file, false);
@@ -196,7 +214,7 @@ namespace NLQT {
 					//{
 					//	char message[512];
 					//	smprintf (message, 512, "Error while saving file: %s", xmlStream.getErrorString ());
-						//theApp.outputError (message);
+					//theApp.outputError (message);
 					//}
 					//modify (NULL, NULL, false);
 					//flushValueChange ();
@@ -205,16 +223,23 @@ namespace NLQT {
 					// Get the left view
 					//CView* pView = getLeftView ();
 				}
-			} catch (Exception &e) {
+			} 
+			catch (Exception &e) 
+			{
 				nlerror("Error while loading file: %s", e.what());
 			}
-		} else { //if (!file.open())
+		} 
+		else 
+		{ //if (!file.open())
 			nlerror("Can't open the file %s for writing.", s);
 		}
 	}
 
-	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) {
-		if (index.column() == 1) return;
+	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
+	{
+		if (index.column() == 1) 
+			return;
+
 		CFormItem *item = static_cast<CFormItem*>(index.internalPointer());
 
 		QString value = item->data(1).toString();
@@ -222,7 +247,8 @@ namespace NLQT {
 
 		if (!path.isEmpty() && !path.contains(".shape"))
 			Q_EMIT changeFile(path);
-		if (path.contains(".shape")) {
+		if (path.contains(".shape")) 
+		{
 			Modules::objView().resetScene();
 			Modules::config().configRemapExtensions();
 			Modules::objView().loadMesh(path.toStdString(),"");
@@ -230,37 +256,55 @@ namespace NLQT {
 		int i = 0;
 	}
 
-	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) {
-		if (Modules::mainWin().getEmptyView() == this) {
+	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
+	{
+		if (Modules::mainWin().getEmptyView() == this) 
+		{
 			event->ignore();
-		} else {
+		} 
+		else 
+		{
 			Modules::mainWin().getTreeViewList().removeOne(this);
-			if(!Modules::mainWin().getTreeViewList().size()) {
+			if(!Modules::mainWin().getTreeViewList().size()) 
+			{
 				Modules::mainWin().createEmptyView();
 			}
 			deleteLater();
 		} 
 	}
 
-	void CGeorgesTreeViewDialog::showParentRows(int newState) {
+	void CGeorgesTreeViewDialog::showParentRows(int newState) 
+	{
 		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
-		CGeorgesFormModel *m = qobject_cast<CGeorgesFormModel *>(mp->sourceModel());
+		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
 
-		for (int i = 0; i < m->rowCount(); i++) {
+		for (int i = 0; i < m->rowCount(); i++) 
+		{
 			const QModelIndex in = m->index(i,0);
-			if (m->getItem(in)->nodeFrom() == UFormElm::NodeParentForm) {
-				if (newState == Qt::Checked) {
+			if (m->getItem(in)->nodeFrom() == UFormElm::NodeParentForm) 
+			{
+				if (newState == Qt::Checked) 
+				{
 					_ui.treeView->setRowHidden(in.row(),in.parent(),false);
-				} else {
+				} 
+				else
+				{
 					_ui.treeView->setRowHidden(in.row(),in.parent(),true);
 				}
-			} else { // search childs // recursive?
-				for (int j = 0; j < m->rowCount(in); j++) {
+			} 
+			else 
+			{ // search childs // recursive?
+				for (int j = 0; j < m->rowCount(in); j++) 
+				{
 					const QModelIndex in2 = m->index(j,0,in);
-					if (m->getItem(in2)->nodeFrom() == UFormElm::NodeParentForm) {
-						if (newState == Qt::Checked) {
+					if (m->getItem(in2)->nodeFrom() == UFormElm::NodeParentForm) 
+					{
+						if (newState == Qt::Checked) 
+						{
 							_ui.treeView->setRowHidden(in2.row(),in,false);
-						} else {
+						} 
+						else 
+						{
 							_ui.treeView->setRowHidden(in2.row(),in,true);
 						}
 					}
@@ -268,4 +312,5 @@ namespace NLQT {
 			} // end of search childs
 		}
 	}
+
 } /* namespace NLQT */

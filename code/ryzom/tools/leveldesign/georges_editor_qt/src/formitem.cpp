@@ -24,10 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // NeL includes
 #include <nel/georges/u_type.h>
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	CFormItem::CFormItem(NLGEORGES::UFormElm* elm, const QList<QVariant> &data, CFormItem *parent,
-		NLGEORGES::UFormElm::TWhereIsValue wV, NLGEORGES::UFormElm::TWhereIsNode wN) {
+		NLGEORGES::UFormElm::TWhereIsValue wV, NLGEORGES::UFormElm::TWhereIsNode wN) 
+	{
 		parentItem = parent;
 		itemData = data;
 		formElm = elm;
@@ -35,27 +37,33 @@ namespace NLQT {
 		whereN = wN;
 	}
 
-	CFormItem::~CFormItem() {
+	CFormItem::~CFormItem() 
+	{
 		qDeleteAll(childItems);
 	}
 
-	void CFormItem::appendChild(CFormItem *item) {
+	void CFormItem::appendChild(CFormItem *item) 
+	{
 		childItems.append(item);
 	}
 
-	CFormItem *CFormItem::child(int row) {
+	CFormItem *CFormItem::child(int row) 
+	{
 		return childItems.value(row);
 	}
 
-	int CFormItem::childCount() const {
+	int CFormItem::childCount() const 
+	{
 		return childItems.count();
 	}
 
-	int CFormItem::columnCount() const {
+	int CFormItem::columnCount() const 
+	{
 		return itemData.count();
 	}
 
-	QVariant CFormItem::data(int column) const {
+	QVariant CFormItem::data(int column) const 
+	{
 		return itemData.value(column);
 	}
 
@@ -64,36 +72,41 @@ namespace NLQT {
 		return parentItem;
 	}
 
-	int CFormItem::row() const {
+	int CFormItem::row() const 
+	{
 		if (parentItem)
 			return parentItem->childItems.indexOf(const_cast<CFormItem*>(this));
 
 		return 0;
 	}
 
-	bool CFormItem::setData(int column, const QVariant &value) {
+	bool CFormItem::setData(int column, const QVariant &value) 
+	{
 		if (column < 0 || column >= itemData.size())
 			return false;
 
 		itemData[column] = value;
-		if (formElm->isAtom()) {
+		if (formElm->isAtom()) 
+		{
 			const NLGEORGES::UType *type = formElm->getType();
-			if (type) {
-				switch (type->getType()) {
-					case NLGEORGES::UType::UnsignedInt:
-					case NLGEORGES::UType::SignedInt:
-					case NLGEORGES::UType::Double:
-					case NLGEORGES::UType::String:
-						nldebug(QString("string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
-						parentItem->formElm->setValueByName(
-							value.toString().toStdString().c_str(),itemData[0].toString().toStdString().c_str());
-						break;
-					case NLGEORGES::UType::Color:
-						break;
-					default:
-						break;
+			if (type) 
+			{
+				switch (type->getType()) 
+				{
+				case NLGEORGES::UType::UnsignedInt:
+				case NLGEORGES::UType::SignedInt:
+				case NLGEORGES::UType::Double:
+				case NLGEORGES::UType::String:
+					nldebug(QString("string %1 %2")
+						.arg(itemData[0].toString()).arg(value.toString())
+						.toStdString().c_str());
+					parentItem->formElm->setValueByName(
+						value.toString().toStdString().c_str(),itemData[0].toString().toStdString().c_str());
+					break;
+				case NLGEORGES::UType::Color:
+					break;
+				default:
+					break;
 				}
 			}
 		}

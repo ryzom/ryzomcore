@@ -24,14 +24,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/misc/debug.h>
 #include <nel/misc/file.h>
 
-namespace NLQT {
+namespace NLQT 
+{
 
 	CQtDisplayer::CQtDisplayer(QPlainTextEdit *dlgDebug, bool eraseLastLog, const char *displayerName, bool raw)
-		: NLMISC::IDisplayer (displayerName), _NeedHeader(true), _LastLogSizeChecked(0), _Raw(raw) {
-			setParam(dlgDebug,eraseLastLog);
+		: NLMISC::IDisplayer (displayerName), _NeedHeader(true), _LastLogSizeChecked(0), _Raw(raw) 
+	{
+		setParam(dlgDebug,eraseLastLog);
 	}
 
-	CQtDisplayer::CQtDisplayer() : IDisplayer (""), _NeedHeader(true), _LastLogSizeChecked(0), _Raw(false) {
+	CQtDisplayer::CQtDisplayer() 
+		: IDisplayer (""), _NeedHeader(true), _LastLogSizeChecked(0), _Raw(false) 
+	{
 		;
 	}
 
@@ -39,12 +43,14 @@ namespace NLQT {
 		;
 	}
 
-	void CQtDisplayer::setParam (QPlainTextEdit *dlgDebug, bool eraseLastLog) {
+	void CQtDisplayer::setParam (QPlainTextEdit *dlgDebug, bool eraseLastLog)
+	{
 		m_DlgDebug=dlgDebug;
 		//dlgDebug->dlgDbgText->WriteText("test");
 	}
 
-	void CQtDisplayer::doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message ) {
+	void CQtDisplayer::doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message )
+	{
 		bool needSpace = false;
 		std::string str;
 
@@ -58,7 +64,8 @@ namespace NLQT {
 			needSpace = true;
 		}
 
-		if (args.LogType != NLMISC::CLog::LOG_NO && !_Raw) {
+		if (args.LogType != NLMISC::CLog::LOG_NO && !_Raw) 
+		{
 			if (needSpace) { str += " "; needSpace = false; }
 			str += logTypeToString(args.LogType);
 			if (args.LogType == NLMISC::CLog::LOG_WARNING)
@@ -70,14 +77,14 @@ namespace NLQT {
 
 		// Write thread identifier
 		/*if ( args.ThreadId != 0 && !_Raw) {
-			if (needSpace) { str += " "; needSpace = false; }
-			str += NLMISC::toString(args.ThreadId);
-			needSpace = true;
+		if (needSpace) { str += " "; needSpace = false; }
+		str += NLMISC::toString(args.ThreadId);
+		needSpace = true;
 		}*/
 		/*if (!args.ProcessName.empty() && !_Raw) {
-			if (needSpace) { str += " "; needSpace = false; }
-			str += args.ProcessName;
-			needSpace = true;
+		if (needSpace) { str += " "; needSpace = false; }
+		str += args.ProcessName;
+		needSpace = true;
 		}*/
 
 		//if (args.FileName != NULL && !_Raw) {
@@ -87,22 +94,29 @@ namespace NLQT {
 		//}
 
 		/*if (args.Line != -1 && !_Raw) {
-			if (needSpace) { str += " "; needSpace = false; }
-			str += NLMISC::toString(args.Line);
-			needSpace = true;
+		if (needSpace) { str += " "; needSpace = false; }
+		str += NLMISC::toString(args.Line);
+		needSpace = true;
 		}*/
 
-		if (args.FuncName != NULL && !_Raw) {
-			if (needSpace) { str += " "; needSpace = false; }
+		if (args.FuncName != NULL && !_Raw) 
+		{
+			if (needSpace) 
+			{ 
+				str += " "; needSpace = false; 
+			}
 			str += args.FuncName;
 			needSpace = true;
 		}
 
-		if (needSpace) { str += " : "; needSpace = false; }
+		if (needSpace)
+		{ 
+			str += " : "; needSpace = false; 
+		}
 		str += message;
 
-		
-		
+
+
 		m_DlgDebug->textCursor().insertText(str.c_str(), format);
 		//m_DlgDebug->setCenterOnScroll(true);
 		m_DlgDebug->centerCursor();

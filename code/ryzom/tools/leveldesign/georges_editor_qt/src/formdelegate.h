@@ -16,39 +16,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOG_DIALOG_H
-#define LOG_DIALOG_H
+#ifndef FORMDELEGATE_H
+#define FORMDELEGATE_H
 
-// Qt includes
-#include <QtGui/QWidget>
-
-// STL includes
-
-// NeL includes
-#include <nel/misc/types_nl.h>
-
-// Project includes
-#include "ui_log_form.h"
+#include <QStyledItemDelegate>
 
 namespace NLQT 
 {
-	class CQtDisplayer;
 
-	class CGeorgesLogDialog: public QDockWidget
+	class FormDelegate : public QStyledItemDelegate
 	{
 
 	public:
-		CGeorgesLogDialog(QWidget *parent = 0);
-		~CGeorgesLogDialog();
+		FormDelegate(QObject *parent = 0);
 
-	private:
-		Ui::CGeorgesLogDialog _ui;
+		QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+			const QModelIndex &index) const;
+		void setEditorData(QWidget *editor, const QModelIndex &index) const;
+		void setModelData(QWidget *editor, QAbstractItemModel *model,
+			const QModelIndex &index) const;
+		void updateEditorGeometry(QWidget *editor,
+			const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		void paint ( QPainter * painter, const QStyleOptionViewItem & option, 
+			const QModelIndex & index ) const;  
+	};
 
-		CQtDisplayer *_displayer;
-
-		friend class CMainWindow;
-	}; /* CGeorgesLogDialog */
-
-} /* namespace NLQT */
-
-#endif // LOG_DIALOG_H
+}
+#endif // FORMDELEGATE_H

@@ -30,10 +30,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Project includes
 #include "qt_displayer.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 	CGeorgesLogDialog::CGeorgesLogDialog(QWidget *parent): 
-		QDockWidget(parent){
+		QDockWidget(parent)
+		{
 
 	_ui.setupUi(this);
 
@@ -46,7 +48,8 @@ namespace NLQT {
 
 }
 
-CGeorgesLogDialog::~CGeorgesLogDialog() {
+CGeorgesLogDialog::~CGeorgesLogDialog() 
+{
 	NLMISC::ErrorLog->removeDisplayer(_displayer);
     NLMISC::WarningLog->removeDisplayer(_displayer);
     NLMISC::DebugLog->removeDisplayer(_displayer);
