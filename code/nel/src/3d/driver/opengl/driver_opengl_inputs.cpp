@@ -235,9 +235,12 @@ void CDriverGL::addCursor(const std::string &name, const NLMISC::CBitmap &cursor
 	// first resampling, same for all cursors
 	tmpSize = (uint) (tmpSize * curs.HotspotScale);
 	if (tmpSize == 0) tmpSize = 1;
-/*
-	curs.Src.resample(tmpSize, tmpSize);
-*/
+
+	if (curs.HotspotScale < 1.f)
+	{
+		curs.Src.resample(tmpSize, tmpSize);
+	}
+
 	// shrink if necessary
 	if (tmpSize > destWidth || tmpSize > destHeight) // need to shrink ?
 	{

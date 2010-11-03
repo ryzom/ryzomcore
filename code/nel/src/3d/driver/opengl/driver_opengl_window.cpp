@@ -2748,6 +2748,7 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 #ifdef HAVE_XRENDER
 
 	CBitmap src = bitmap;
+
 	// resample bitmap if necessary
 	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
 	{
@@ -2789,25 +2790,16 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 
 	// Create the icon pixmap
 	sint screen = DefaultScreen(_dpy);
-	Visual* defVisual = DefaultVisual(_dpy, screen);
-	XImage* image = NULL;
+	Visual *visual = DefaultVisual(_dpy, screen);
+
+	if (!visual)
+	{
+		nlwarning("Failed to get a default visual for screen %d", screen);
+		return false;
+	}
 
 	// create the icon pixmap
-	if (iconDepth == 16)
-	{
-		std::vector<uint16> colorBm16(iconWidth * iconHeight);
-
-		for (uint k = 0; k < colorBm16.size(); ++k)
-		{
-			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
-		}
-
-		image = XCreateImage(_dpy, defVisual, 16, ZPixmap, 0, (char*)colorBm16[0], iconWidth, iconHeight, 16, 0);
-	}
-	else
-	{
-		image = XCreateImage(_dpy, defVisual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
-	}
+	XImage* image = XCreateImage(_dpy, visual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
 
 	if (!image)
 	{
@@ -2815,10 +2807,29 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 		return false;
 	}
 
-	Pixmap iconPixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
-	GC gc = XCreateGC(_dpy, iconPixmap, 0, NULL);
-	XPutImage(_dpy, iconPixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
-	XFreeGC(_dpy, gc);
+	Pixmap pixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
+
+	if (!pixmap)
+	{
+		nlwarning("Failed to create a pixmap %ux%ux%d", iconWidth, iconHeight, 32);
+		return false;
+	}
+
+	GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
+
+	if (!gc)
+	{
+		nlwarning("Failed to create a GC");
+		return false;
+	}
+
+	sint res = XPutImage(_dpy, pixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
+	// should return 0
+	nlwarning("XPutImage returned %d", res);
+
+	res = XFreeGC(_dpy, gc);
+	// should return 1
+	nlwarning("XFreeGC returned %d", res);
 
 	if (image->data)
 	{
@@ -2828,23 +2839,34 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 
 	XDestroyImage(image);
 
-/*
-	// Send our new icon to the window through the WMHints
-	XWMHints* Hints = XAllocWMHints();
-	Hints->flags       = IconPixmapHint | IconMaskHint;
-	Hints->icon_pixmap = iconPixmap;
-	Hints->icon_mask   = maskPixmap;
-	XSetWMHints(ourDisplay, myWindow, Hints);
-	XFree(Hints);
-*/
+	XRenderPictFormat *format = XRenderFindStandardFormat(_dpy, PictStandardARGB32);
 
-	XRenderPictFormat *format = XRenderFindStandardFormat (_dpy, PictStandardARGB32);
-	Picture picture = XRenderCreatePicture (_dpy, iconPixmap, format, 0, 0);
+	if (!format)
+	{
+		nlwarning("Failed to find a standard format");
+		return false;
+	}
+
+	Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
+
+	if (!picture)
+	{
+		nlwarning("Failed to create picture");
+		return false;
+	}
 
 	cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
 
+	if (!cursor)
+	{
+		nlwarning("Failed to create cursor");
+		return false;
+	}
+
 	XRenderFreePicture(_dpy, picture);
-	XFreePixmap(_dpy, iconPixmap);
+	res = XFreePixmap(_dpy, pixmap);
+	// should return 1
+	nlwarning("XFreePixmap returned %d", res);
 
 	return true;
 
