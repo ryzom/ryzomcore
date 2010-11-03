@@ -223,13 +223,13 @@ namespace NLQT
 					// Get the left view
 					//CView* pView = getLeftView ();
 				}
-			} 
-			catch (Exception &e) 
+			}
+			catch (Exception &e)
 			{
 				nlerror("Error while loading file: %s", e.what());
 			}
-		} 
-		else 
+		}
+		else
 		{ //if (!file.open())
 			nlerror("Can't open the file %s for writing.", s);
 		}
@@ -237,7 +237,7 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
-		if (index.column() == 1) 
+		if (index.column() == 1)
 			return;
 
 		CFormItem *item = static_cast<CFormItem*>(index.internalPointer());
@@ -247,7 +247,7 @@ namespace NLQT
 
 		if (!path.isEmpty() && !path.contains(".shape"))
 			Q_EMIT changeFile(path);
-		if (path.contains(".shape")) 
+		if (path.contains(".shape"))
 		{
 			Modules::objView().resetScene();
 			Modules::config().configRemapExtensions();
@@ -258,22 +258,22 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
 	{
-		if (Modules::mainWin().getEmptyView() == this) 
+		if (Modules::mainWin().getEmptyView() == this)
 		{
 			event->ignore();
-		} 
-		else 
+		}
+		else
 		{
 			Modules::mainWin().getTreeViewList().removeOne(this);
-			if(!Modules::mainWin().getTreeViewList().size()) 
+			if(!Modules::mainWin().getTreeViewList().size())
 			{
 				Modules::mainWin().createEmptyView();
 			}
 			deleteLater();
-		} 
+		}
 	}
 
-	void CGeorgesTreeViewDialog::showParentRows(int newState) 
+	void CGeorgesTreeViewDialog::showParentRows(int newState)
 	{
 		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
 		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());

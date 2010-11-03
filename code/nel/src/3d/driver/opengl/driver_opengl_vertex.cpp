@@ -1016,7 +1016,6 @@ void		CDriverGL::toggleGlArraysForNVVertexProgram()
 			_DriverGLStates.enableTexCoordArray(false);
 		}
 
-
 		// now, vertex program setup.
 		_LastSetupGLArrayVertexProgram= true;
 	}
@@ -1080,6 +1079,7 @@ void		CDriverGL::toggleGlArraysForARBVertexProgram()
 			_DriverGLStates.clientActiveTextureARB(i);
 			_DriverGLStates.enableTexCoordArray(false);
 		}
+
 		// now, vertex program setup.
 		_LastSetupGLArrayVertexProgram= true;
 	}
@@ -1128,7 +1128,6 @@ void		CDriverGL::toggleGlArraysForEXTVertexShader()
 			_DriverGLStates.clientActiveTextureARB(i);
 			_DriverGLStates.enableTexCoordArray(false);
 		}
-
 
 		// now, vertex program setup.
 		_LastSetupGLArrayVertexProgram= true;
