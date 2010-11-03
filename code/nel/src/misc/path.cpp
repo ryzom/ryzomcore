@@ -1702,7 +1702,7 @@ std::string CFileContainer::getApplicationDirectory(const std::string &appName)
 		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
 #elif defined(NL_OS_MAC)
 		appPath = CPath::standardizePath(getenv("HOME"));
-		appPath += "/Library/Preferences/";
+		appPath += "/Library/Application Support/";
 #else
 		appPath = CPath::standardizePath(getenv("HOME"));
 #endif

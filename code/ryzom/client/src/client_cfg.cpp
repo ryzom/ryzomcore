@@ -45,6 +45,10 @@
 #	include "config.h"
 #endif // HAVE_CONFIG_H
 
+#ifdef NL_OS_MAC
+#include "app_bundle_utils.h"
+#endif // NL_OS_MAC
+
 #include <locale.h>
 
 ///////////
@@ -1888,7 +1892,14 @@ void CClientConfig::init(const string &configFileName)
 
 		if (CFile::isExists(defaultConfigFileName)) found = true;
 
-#ifdef RYZOM_ETC_PREFIX
+#ifdef NL_OS_MAC
+		if (!found)
+		{
+			defaultConfigFileName = 
+				getAppBundlePath() + "/Contents/Resources/" + defaultConfigFileName;
+			if(CFile::isExists(defaultConfigFileName)) found = true;
+		}
+#elif defined(RYZOM_ETC_PREFIX)
 		if (!found)
  		{
 			defaultConfigFileName = CPath::standardizePath(RYZOM_ETC_PREFIX) + defaultConfigFileName;

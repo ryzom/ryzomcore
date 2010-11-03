@@ -105,6 +105,10 @@ extern HINSTANCE HInstance;
 extern HWND SlashScreen;
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_OS_MAC
+#include "app_bundle_utils.h"
+#endif // NL_OS_MAC
+
 #include <new>
 
 ///////////
@@ -617,7 +621,11 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
 
-		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
+		std::string preDataPath = ClientCfg.PreDataPath[i];
+#if defined(NL_OS_MAC)
+		preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
+#endif // defined(NL_OS_MAC)
+		CPath::addSearchPath(preDataPath, true, false, &progress);
 
 		progress.popCropedValues ();
 	}

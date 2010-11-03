@@ -33,8 +33,8 @@
 #ifdef NL_OS_MAC
 #include <stdio.h>
 #include <sys/resource.h>
-#include <CoreFoundation/CoreFoundation.h>
 #include "nel/misc/dynloadlib.h"
+#include "app_bundle_utils.h"
 #endif
 
 #include "nel/misc/debug.h"
@@ -352,47 +352,6 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
-#if defined(NL_OS_MAC)
-	// get the bundle
-	CFBundleRef bundle = CFBundleGetMainBundle();
-	if(bundle)
-	{
-		// get the url to the bundles root
-		CFURLRef url = CFBundleCopyBundleURL(bundle);
-		if(url)
-		{
-			// get the file system path
-			CFStringRef str;
-			str = CFURLCopyFileSystemPath(
-				CFURLCopyAbsoluteURL(url), kCFURLPOSIXPathStyle);
-			CFRelease(url);
-	
-			if(str)
-			{
-				std::string pathToBundle = CFStringGetCStringPtr(
-					str, CFStringGetSmallestEncoding(str));
-				CFRelease(str);
-
-				// change the working directory
-				nldebug("Bundle Path is %s", pathToBundle.c_str());
-				nldebug("setCurrentPath %s", (pathToBundle + "/Contents/Resources/").c_str());
-				CPath::setCurrentPath(pathToBundle + "/Contents/Resources/");
-
-				// add the search path for plugins (nel drivers)
-				nldebug("addLibPath %s", (pathToBundle + "/Contents/PlugIns/nel/").c_str());
-				CLibrary::addLibPath(pathToBundle + "/Contents/PlugIns/nel/");
-			}
-			else
-				nlerror("CFStringGetCStringPtr");
-		
-		}
-		else
-			nlerror("CFBundleCopyBundleURL");
-	}
-	else
-		nlerror("CFBundleGetMainBundle");
-#endif
-
 	createDebug();
 
 #ifndef NL_DEBUG
@@ -426,6 +385,9 @@ int main(int argc, char **argv)
 	getrlimit(RLIMIT_NOFILE, &rlp3);
 	nlinfo("rlimit before %d %d\n", rlp.rlim_cur, rlp.rlim_max);
 	nlinfo("rlimit after %d %d\n", rlp3.rlim_cur, rlp3.rlim_max);
+
+	// add the bundle's plugins path as library search path (for nel drivers)
+	CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
 #endif
 
 #if defined(NL_OS_WINDOWS)
