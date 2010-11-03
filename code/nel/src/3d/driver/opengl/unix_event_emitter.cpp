@@ -780,7 +780,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		createIM();
 		break;
 	case ClientMessage:
-		if ((event.xclient.format == 32) && (event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
+		if ((event.xclient.format == 32) && ((Atom)event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
 		{
 			server->postEvent(new CEventDestroyWindow(this));
 		}

@@ -231,7 +231,7 @@ namespace NLQT
 		}
 		else
 		{ //if (!file.open())
-			nlerror("Can't open the file %s for writing.", s);
+			nlerror("Can't open the file %s for writing.", s.c_str());
 		}
 	}
 
