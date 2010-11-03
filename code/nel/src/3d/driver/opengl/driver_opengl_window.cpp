@@ -955,6 +955,10 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if(!format)
 		nlerror("cannot create NSOpenGLPixelFormat");
 
+	// intially set height/width, further updates through CocoaOpenGLView
+	_WindowHeight = mode.Height;
+	_WindowWidth = mode.Width;
+
 	// create a opengl view with the created format
 	_glView = [[CocoaOpenGLView alloc]
 		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)
@@ -2422,9 +2426,6 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 			[[containerView() window] setFrame:rect display:YES];
 		}
 	}
-	
-	_WindowWidth = width;
-	_WindowHeight = height;
 	
 #elif defined(NL_OS_UNIX)
 
