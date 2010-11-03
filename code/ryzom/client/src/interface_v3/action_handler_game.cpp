@@ -3874,7 +3874,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		bool loop = getParam(sParams, "loop")=="1";
-		
+
 		uint xFade;
 		fromString(getParam(sParams, "xfade"), xFade);
 

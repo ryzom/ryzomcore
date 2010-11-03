@@ -22,6 +22,8 @@
 #include "nel/misc/events.h"
 #include "nel/misc/game_device_events.h"
 
+#include "nel/3d/driver.h"
+
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #include <X11/Xlib.h>

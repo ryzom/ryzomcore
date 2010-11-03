@@ -594,6 +594,16 @@ public:
 		  * NB : If a low level mouse is used, it does nothing
 		  */
 		virtual void			setCapture (bool b) = 0;
+
+		// see if system cursor is currently captured
+		virtual bool			isSystemCursorCaptured() = 0;
+
+		// Add a new cursor (name is case unsensitive)
+		virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap) = 0;
+
+		// Display a cursor from its name (case unsensitive)
+		virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false) = 0;
+
 	// @}
 
 	/// \name Misc.

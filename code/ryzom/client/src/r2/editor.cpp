@@ -7366,7 +7366,7 @@ class CAHR2StopLive : public IActionHandler
 				{
 					// Now we expect to receive an impulsion FAR_TP to mainland, triggered
 					// by the DSS. We'll disobey it by FarTPing to the Edition session instead!
-					nldebug( "Will return to editing session %u", R2::getEditor().getDMC().getEditionModule().getEditSessionLink() );
+					nldebug( "Will return to editing session %u", R2::getEditor().getDMC().getEditionModule().getEditSessionLink().asInt() );
 					FarTP.hookNextFarTPForEditor();
 				}
 				// otherwise, let accomplish the FAR_TP to mainland (returnToPreviousSession)

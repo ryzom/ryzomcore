@@ -469,12 +469,12 @@ private:
 	volatile uint								_ProcessExited;
 
 	// *** Bitmap sharing
-	std::map<std::string, NLMISC::CBitmap>			_Bitmaps;
+	std::map<std::string, NLMISC::CBitmap>		_Bitmaps;
 
 	// *** The zbuffer
 
 	// ZBuffer mutex
-	NLMISC::CFastMutex						_Mutex;
+	NLMISC::CFastMutex							_Mutex;
 
 public:
 	// Zbuffer pixels in meters

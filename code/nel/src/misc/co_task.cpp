@@ -78,7 +78,7 @@ namespace NLMISC
 		// the thread of the task
 		IThread				*_TaskThread;
 		/// The mutex of the task task
-		CFastMutex	_TaskMutex;
+		CFastMutex			_TaskMutex;
 
 		CCoTask				*_CoTask;
 
@@ -371,7 +371,7 @@ namespace NLMISC
 		nlverify(getcontext(&_PImpl->_Ctx) == 0);
 
 		// change the task context
- 		_PImpl->_Ctx.uc_stack.ss_sp = _PImpl->_Stack;
+		_PImpl->_Ctx.uc_stack.ss_sp = _PImpl->_Stack;
 		_PImpl->_Ctx.uc_stack.ss_size = NL_TASK_STACK_SIZE;
 
 		_PImpl->_Ctx.uc_link = NULL;

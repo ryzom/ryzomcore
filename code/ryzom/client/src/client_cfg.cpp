@@ -1983,54 +1983,42 @@ void CClientConfig::release ()
 	// Do we have to save the cfg file ?
 	if (ClientCfg.SaveConfig)
 	{
-		// Driver still alive ?
-		if (Driver && Driver->isActive ())
+		// Save values
+		try
 		{
-			sint32 x, y;
-			uint32 width, height;
+			CConfigFile::CVar *varPtr = NULL;
 
-			Driver->getWindowPos(x, y);
-			Driver->getWindowSize(width, height);
-
-			// Save values
-			try
+			// Driver still alive ?
+			if (Driver && Driver->isActive ())
 			{
-				CConfigFile::CVar *varPtr = NULL;
+				sint32 x, y;
+				uint32 width, height;
+
+				Driver->getWindowPos(x, y);
+				Driver->getWindowSize(width, height);
 
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
 					// Save windows position
-					varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionX");
-					if (varPtr)
-						varPtr->forceAsInt (x);
-					varPtr = ClientCfg.ConfigFile.getVarPtr ("PositionY");
-					if (varPtr)
-						varPtr->forceAsInt (y);
+					writeInt("PositionX", x);
+					writeInt("PositionY", y);
 
 					// Save windows size
-					varPtr = ClientCfg.ConfigFile.getVarPtr ("Width");
-					if (varPtr)
-						varPtr->forceAsInt (std::max((int)width, 800));
-					varPtr = ClientCfg.ConfigFile.getVarPtr ("Height");
-					if (varPtr)
-						varPtr->forceAsInt (std::max((int)height, 600));
+					writeInt("Width", std::max((sint)width, 800));
+					writeInt("Height", std::max((sint)height, 600));
 				}
-
-				// Save if in FPV or TPV.
-				varPtr = ClientCfg.ConfigFile.getVarPtr("FPV");
-				if(varPtr)
-					varPtr->forceAsInt((sint)ClientCfg.FPV);
-
-				// Save the camera distance
-				varPtr = ClientCfg.ConfigFile.getVarPtr("CameraDistance");
-				if(varPtr)
-					varPtr->forceAsDouble(ClientCfg.CameraDistance);
 			}
-			catch (Exception &e)
-			{
-				nlwarning ("Error while set config file variables : %s", e.what ());
-			}
+
+			// Save if in FPV or TPV.
+			writeBool("FPV", ClientCfg.FPV);
+
+			// Save the camera distance
+			writeDouble("CameraDistance", ClientCfg.CameraDistance);
+		}
+		catch (Exception &e)
+		{
+			nlwarning ("Error while set config file variables : %s", e.what ());
 		}
 
 		// Save it

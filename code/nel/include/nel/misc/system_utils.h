@@ -77,9 +77,6 @@ public:
 
 	/// Get desktop current color depth without using UDriver.
 	static uint getCurrentColorDepth();
-
-	/// Check if mouse cursor is in client area.
-	static bool isSystemCursorInClientArea();
 };
 
 } // NLMISC

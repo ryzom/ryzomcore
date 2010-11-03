@@ -32,6 +32,7 @@ static Atom XA_CLIPBOARD = 0;
 static Atom XA_UTF8_STRING = 0;
 static Atom XA_TARGETS = 0;
 static Atom XA_NEL_SEL = 0;
+static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
@@ -54,7 +55,7 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	_win = win;
 	_driver = driver;
 
-	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask);
+	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask);
 
 	// define Atoms used by clipboard
 	XA_CLIPBOARD = XInternAtom(dpy, "CLIPBOARD", False);
@@ -62,9 +63,13 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	XA_TARGETS = XInternAtom(dpy, "TARGETS", False);
 	XA_NEL_SEL = XInternAtom(dpy, "NeL_SEL", False);
 
+	// define Atom used by delete window
+	XA_WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
+
 /*
 	TODO: implements all useful events processing
-	EnterWindowMask|LeaveWindowMask|ButtonMotionMask|Button1MotionMask|Button2MotionMask|
+	ButtonMotionMask|Button1MotionMask|Button2MotionMask|
 	Button3MotionMask|Button4MotionMask|Button5MotionMask|KeymapStateMask|
 	SubstructureNotifyMask|VisibilityChangeMask|FocusChangeMask|PropertyChangeMask|
 	ColormapChangeMask|OwnerGrabButtonMask
@@ -775,10 +780,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		createIM();
 		break;
 	case ClientMessage:
-//		if ((xevent.xclient.format == 32) && (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW))
-//		{
-//			server->postEvent (new CEventDestroyWindow (this));
-//		}
+		if ((event.xclient.format == 32) && ((Atom)event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
+		{
+			server->postEvent(new CEventDestroyWindow(this));
+		}
 		break;
 	default:
 		//	nlinfo("UnknownEvent");

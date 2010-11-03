@@ -9,6 +9,10 @@ IF(WIN32)
   ADD_SUBDIRECTORY(world_editor)
 ENDIF(WIN32)
 
+IF(WITH_QT)
+  ADD_SUBDIRECTORY(georges_editor_qt)
+ENDIF(WITH_QT)
+
 # folders not handled yet.
 #georges_convert
 #georges_dll

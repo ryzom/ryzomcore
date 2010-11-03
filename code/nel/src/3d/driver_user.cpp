@@ -1643,6 +1643,26 @@ void			CDriverUser::setCapture (bool b)
 	_Driver->setCapture (b);
 }
 
+bool			CDriverUser::isSystemCursorCaptured()
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isSystemCursorCaptured();
+}
+
+void			CDriverUser::addCursor(const std::string &name, const NLMISC::CBitmap &bitmap)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->addCursor(name, bitmap);
+}
+
+void			CDriverUser::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setCursor(name, col, rot, hotSpotX, hotSpotY, forceRebuild);
+}
 
 // ***************************************************************************
 // ***************************************************************************

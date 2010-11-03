@@ -41,8 +41,6 @@
 #include "string_common.h"
 
 #ifdef NL_OS_WINDOWS
-	struct nameHICON__;
-	typedef struct HICON__ *HICON;
 	struct nameHWND__;
 	typedef struct HWND__ *HWND;
 	typedef HWND nlWindow;

@@ -1406,7 +1406,7 @@ void CCharacterCL::updateVisualPropertyBehaviour(const NLMISC::TGameCycle &gameC
 	// New Behaviour Received.
 	CBehaviour beh(prop);
 	if(verboseVP(this))
-		nlinfo("(%05d,%03d) CH::updateVPBeha:%d: '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, behaviourToString((EBehaviour)beh.Behaviour).c_str(), beh.Behaviour);
+		nlinfo("(%05d,%03d) CH::updateVPBeha:%d: '%s(%d)' received.", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot, behaviourToString((EBehaviour)beh.Behaviour).c_str(), (sint)beh.Behaviour);
 
 	// Add in right stage.
 	_Stages.addStage(gameCycle, PROPERTY_BEHAVIOUR, prop);
@@ -4691,7 +4691,7 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 
 	// INFO : display some debug information.
 	if((VerboseAnimUser && _Slot==0) || (VerboseAnimSelection && _Slot == UserEntity->selection()))
-		nlinfo("CH:applyBeh:%d: '%d(%s)'", _Slot, behaviour.Behaviour, behaviourToString((EBehaviour)behaviour.Behaviour).c_str());
+		nlinfo("CH:applyBeh:%d: '%d(%s)'", _Slot, (sint)behaviour.Behaviour, behaviourToString((EBehaviour)behaviour.Behaviour).c_str());
 
 
 	// ***** Apply the behaviour according to type
@@ -8330,7 +8330,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		y += lineStep;
 	}
 	// Skeleton Ptr
-	TextContext->printfAt(x, y, "Skel Ptr: %p", _Skeleton);
+	TextContext->printfAt(x, y, "Skel Ptr: %p", &_Skeleton);
 	y += lineStep;
 	// Animset Ptr
 	TextContext->printfAt(x, y, "AnimSet Ptr: %p", _CurrentAnimSet[MOVE]);

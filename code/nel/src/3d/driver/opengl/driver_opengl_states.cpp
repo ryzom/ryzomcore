@@ -743,9 +743,8 @@ void			CDriverGLStates::enableVertexArray(bool enable)
 			glEnableClientState(GL_VERTEX_ARRAY);
 		else
 			glDisableClientState(GL_VERTEX_ARRAY);
+
 		_VertexArrayEnabled= enable;
-
-
 	}
 }
 // ***************************************************************************

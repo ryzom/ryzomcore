@@ -445,7 +445,7 @@ PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
 #elif defined(NL_OS_UNIX)
 
 // Swap control extensions
-PFNGLXSWAPINTERVALEXTPROC						nglXSwapIntervalEXT;
+NEL_PFNGLXSWAPINTERVALEXTPROC					nglXSwapIntervalEXT;
 
 PFNGLXSWAPINTERVALSGIPROC						nglXSwapIntervalSGI;
 
@@ -1429,7 +1429,7 @@ static bool	setupGLXEXTSwapControl(const char	*glext)
 	CHECK_EXT("GLX_EXT_swap_control");
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	CHECK_ADDRESS(PFNGLXSWAPINTERVALEXTPROC, glXSwapIntervalEXT);
+	CHECK_ADDRESS(NEL_PFNGLXSWAPINTERVALEXTPROC, glXSwapIntervalEXT);
 #endif
 
 	return true;

@@ -71,7 +71,6 @@
 #include "interface_v3/music_player.h"
 #include "http_client.h"
 #include "actions_client.h"
-#include "interface_v3/custom_mouse.h"
 #include "login_progress_post_thread.h"
 //
 #include "r2/editor.h"
@@ -502,8 +501,6 @@ void releaseOutGame()
 		// Remove the Actions listener from the Events Server.
 		EventsListener.removeFromServer(CInputHandlerManager::getInstance()->FilteredEventServer);
 
-		CustomMouse.release();
-
 		// Release Bloom
 		CBloomEffect::releaseInstance();
 
@@ -573,8 +570,6 @@ void release()
 		if (TextContext != NULL)
 			Driver->deleteTextContext(TextContext);
 		TextContext = NULL;
-
-		CustomMouse.release();
 
 		// Release Bloom
 		CBloomEffect::releaseInstance();
