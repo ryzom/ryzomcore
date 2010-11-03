@@ -1700,6 +1700,9 @@ std::string CFileContainer::getApplicationDirectory(const std::string &appName)
 		wchar_t buffer[MAX_PATH];
 		SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
 		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
+#elif defined(NL_OS_MAC)
+		appPath = CPath::standardizePath(getenv("HOME"));
+		appPath += "/Library/Preferences/";
 #else
 		appPath = CPath::standardizePath(getenv("HOME"));
 #endif
@@ -1709,6 +1712,8 @@ std::string CFileContainer::getApplicationDirectory(const std::string &appName)
 #ifdef NL_OS_WINDOWS
 	if (!appName.empty())
 		path = CPath::standardizePath(path + appName);
+#elif defined(NL_OS_MAC)
+	path = CPath::standardizePath(path + appName);
 #else
 	if (!appName.empty())
 		path = CPath::standardizePath(path + "." + toLower(appName));

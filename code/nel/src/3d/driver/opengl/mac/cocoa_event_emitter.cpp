@@ -231,7 +231,11 @@ void CCocoaEventEmitter::init(NL3D::IDriver* driver, CocoaOpenGLView* glView)
 bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 {
 	if(!server && !_server)
-		nlerror("no server to post events to");
+	{
+		// nlerror("no server to post events to");
+		nldebug("no server to post events to");
+		return true;
+	}
 
 	if(!server)
 		server = _server;
