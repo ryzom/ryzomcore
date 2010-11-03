@@ -1,4 +1,3 @@
-/*
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -14,17 +13,18 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 #import <Cocoa/Cocoa.h>
+#include "AvailabilityMacros.h"
 
-namespace NL3D {
+namespace NL3D 
+{
 	class CDriverGL;
 	void windowDidMove(NSWindow*, NL3D::CDriverGL*);
 }
 
 @interface CocoaWindowDelegate : NSObject
-#if MAC_OS_X_VERSION_10_6 > MAC_OS_X_VERSION_MAX_ALLOWED
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 <NSWindowDelegate>
 #endif
 {

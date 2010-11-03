@@ -1,4 +1,3 @@
-/*
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -14,13 +13,13 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 #include "../driver_opengl.h"
 
 #import "cocoa_window_delegate.h"
 
-namespace NL3D {
+namespace NL3D 
+{
 	void windowDidMove(NSWindow* window, NL3D::CDriverGL* driver)
 	{
 		// get the rect (position, size) of the screen with menu bar

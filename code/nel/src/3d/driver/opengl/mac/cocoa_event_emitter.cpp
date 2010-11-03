@@ -391,7 +391,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSOtherMouseDown:break;
 	case NSOtherMouseUp:break;
 	case NSOtherMouseDragged:break;
-#if MAC_OS_X_VERSION_10_6 > MAC_OS_X_VERSION_MAX_ALLOWED
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 	case NSEventTypeGesture:break;
 	case NSEventTypeMagnify:break;
 	case NSEventTypeSwipe:break;

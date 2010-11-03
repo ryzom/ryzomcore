@@ -1,4 +1,3 @@
-/*
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -14,11 +13,11 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 #import <Cocoa/Cocoa.h>
 
-namespace NL3D {
+namespace NL3D 
+{
 	class CDriverGL;
 	void viewDidResize(NSView*, CDriverGL*);
 }
