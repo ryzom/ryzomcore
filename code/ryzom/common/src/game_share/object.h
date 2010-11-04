@@ -44,6 +44,8 @@ class CSerializeContext;
 // vistor triggered at traversal of object tree. see CObject::visit
 struct IObjectVisitor
 {
+	virtual ~IObjectVisitor() { }
+
 	virtual void visit(CObjectRefId &/* obj */) {}
 	virtual void visit(CObjectString &/* obj */) {}
 	virtual void visit(CObjectNumber &/* obj */) {}

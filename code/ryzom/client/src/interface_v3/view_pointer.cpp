@@ -48,7 +48,7 @@ CViewPointer::CViewPointer (const TCtorParam &param)
 	: CViewBase(param),
 	_Buttons(NLMISC::noButton)
 {
-	_PointerX = _PointerY = _PointerOldX = _PointerOldY = 0;
+	_PointerX = _PointerY = _PointerOldX = _PointerOldY = _PointerDownX = _PointerDownY = 0;
 	_PointerDown = false;
 	_PointerVisible = true;
 	_TxIdDefault = -2;
