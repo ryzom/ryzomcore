@@ -822,9 +822,8 @@ public:
 	virtual void			setDepthRange(float znear, float zfar);
 	virtual	void			getDepthRange(float &znear, float &zfar) const;
 
-	// todo hulud d3d buffers
-	virtual void			getZBuffer (std::vector<float>  &/* zbuffer */) {}
-	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect);	// Only 32 bits back buffer supported
+	virtual void			getZBuffer (std::vector<float> &zbuffer);
+	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect);
 
 	// return true if driver support Bloom effect.
 	virtual	bool			supportBloomEffect() const;
