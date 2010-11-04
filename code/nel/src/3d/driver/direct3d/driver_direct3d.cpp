@@ -173,7 +173,7 @@ CDriverD3D::CDriverD3D()
 	_CurrRot = 0;
 	_CurrHotSpotX = 0;
 	_CurrHotSpotY = 0;
-	_CursorScale = 0.85f;
+	_CursorScale = 1.f;
 
 	_UserViewMtx.identity();
 	_UserModelMtx.identity();

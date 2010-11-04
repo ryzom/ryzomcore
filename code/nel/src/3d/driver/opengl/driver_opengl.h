@@ -523,13 +523,14 @@ public:
 	// see if system cursor is currently captured
 	virtual bool			isSystemCursorCaptured();
 
-	virtual void			setHardwareCursorScale(float scale) { _CursorScale = scale; }
-
 	// Add a new cursor (name is case unsensitive)
 	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
 
 	// Display a cursor from its name (case unsensitive)
 	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+
+	// Change default scale for all cursors
+	virtual void			setCursorScale(float scale);
 
 	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
 

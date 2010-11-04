@@ -157,7 +157,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			_MouseButtonsReleased = noButton;
 			_MouseButtonsState = noButton;
 			_Focus = false;
-			// Driver->setFocus(false);
 
 			if (!_SkipInterfaceManager)
 			{

@@ -368,6 +368,12 @@ void CDriverGL::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot,
 }
 
 // *************************************************************************************
+void CDriverGL::setCursorScale(float scale)
+{
+	_CursorScale = scale;
+}
+
+// *************************************************************************************
 nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
