@@ -440,6 +440,8 @@ public:
 	// Display a cursor from its name (case unsensitive)
 	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
 
+	// Change default scale for all cursors
+	virtual void			setCursorScale(float scale);
 	// @}
 
 

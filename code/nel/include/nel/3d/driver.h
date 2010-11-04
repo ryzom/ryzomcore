@@ -755,6 +755,9 @@ public:
 		// Display a cursor from its name (case unsensitive)
 		virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false) = 0;
 
+		// Change default scale for all cursors
+		virtual void			setCursorScale(float scale) = 0;
+
 		/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available
 		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game device (joysticks, joypads ...)
 		  */
