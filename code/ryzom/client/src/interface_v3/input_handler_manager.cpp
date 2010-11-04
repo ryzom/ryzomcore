@@ -152,7 +152,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		CEventSetFocus *pEvent=(CEventSetFocus *)&event;
 		if (!pEvent->Get)
 		{
-			// Disactive all keys
+			// Deactivate all keys
 			_MouseButtonsDown = noButton;
 			_MouseButtonsReleased = noButton;
 			_MouseButtonsState = noButton;

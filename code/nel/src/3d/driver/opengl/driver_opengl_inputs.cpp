@@ -417,7 +417,7 @@ void CDriverGL::setSystemArrow()
 #endif
 }
 
-// --------------------------------------------------
+// ***************************************************************************
 void CDriverGL::showCursor(bool b)
 {
 	H_AUTO_OGL(CDriverGL_showCursor);
@@ -484,7 +484,7 @@ void CDriverGL::showCursor(bool b)
 #endif // NL_OS_UNIX
 }
 
-// --------------------------------------------------
+// ***************************************************************************
 void CDriverGL::setMousePos(float x, float y)
 {
 	H_AUTO_OGL(CDriverGL_setMousePos)
@@ -538,9 +538,10 @@ void CDriverGL::setMousePos(float x, float y)
 #endif // NL_OS_UNIX
 }
 
+// ***************************************************************************
 void CDriverGL::setCapture (bool b)
 {
-	H_AUTO_OGL(CDriverGL_setCapture )
+	H_AUTO_OGL(CDriverGL_setCapture);
 
 #ifdef NL_OS_WINDOWS
 
@@ -583,6 +584,7 @@ void CDriverGL::setCapture (bool b)
 #endif // NL_OS_UNIX
 }
 
+// ***************************************************************************
 bool CDriverGL::isSystemCursorInClientArea()
 {
 	if (_FullScreen /* || !IsMouseCursorHardware() */)

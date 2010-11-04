@@ -621,8 +621,6 @@ void screenShotPNG()
 	COFile fs(filename);
 	if (!btm.writePNG(fs, 24))
 	{
-		// PNG file has been incorrectly written (mainly because libpng1x.dll was not found)
-		// so close and delete it
 		fs.close();
 		CFile::deleteFile(filename);
 		return;

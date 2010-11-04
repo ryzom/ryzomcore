@@ -2722,6 +2722,7 @@ bool CDriverD3D::fillPresentParameter (D3DPRESENT_PARAMETERS &parameters, D3DFOR
 		D3DFMT_D24FS8,
 		//D3DFMT_D16,
 	};
+
 	const uint zbufferFormatCount = sizeof(zbufferFormats)/sizeof(D3DFORMAT);
 	uint i;
 	for (i=0; i<zbufferFormatCount; i++)

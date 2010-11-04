@@ -762,7 +762,6 @@ public:
 		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game device (joysticks, joypads ...)
 		  */
 		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
-
 	// @}
 
 	/// Get the width and the height of the window
