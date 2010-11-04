@@ -3932,9 +3932,4 @@ bool CDriverD3D::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon,
 	return true;
 }
 
-bool CDriverD3D::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
-{
-	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
-}
-
 } // NL3D

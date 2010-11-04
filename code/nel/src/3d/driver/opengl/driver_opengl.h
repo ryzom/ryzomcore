@@ -1002,6 +1002,9 @@ private:
 	// Convert a NLMISC::CBitmap to nlCursor
 	bool					convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY);
 
+	// Return the best cursor size depending on specified width and height
+	bool					getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight);
+
 	// build a cursor from src, src should have the same size that the hardware cursor
 	// or a assertion is thrown
 	nlCursor				buildCursor(const NLMISC::CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY);

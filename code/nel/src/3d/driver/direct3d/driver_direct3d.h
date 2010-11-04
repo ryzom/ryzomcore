@@ -2093,18 +2093,18 @@ private:
 	// cursors
 	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
 
-	TColorDepth					_ColorDepth;
-	std::string					_CurrName;
-	NLMISC::CRGBA				_CurrCol;
-	uint8						_CurrRot;
-	uint						_CurrHotSpotX;
-	uint						_CurrHotSpotY;
-	float						_CursorScale;
+	TColorDepth				_ColorDepth;
+	std::string				_CurrName;
+	NLMISC::CRGBA			_CurrCol;
+	uint8					_CurrRot;
+	uint					_CurrHotSpotX;
+	uint					_CurrHotSpotY;
+	float					_CursorScale;
 
-	nlCursor					_DefaultCursor;
+	nlCursor				_DefaultCursor;
 
-	bool						_AlphaBlendedCursorSupported;
-	bool						_AlphaBlendedCursorSupportRetrieved;
+	bool					_AlphaBlendedCursorSupported;
+	bool					_AlphaBlendedCursorSupportRetrieved;
 
 	class CCursor
 	{
