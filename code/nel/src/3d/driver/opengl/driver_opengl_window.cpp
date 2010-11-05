@@ -180,14 +180,7 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 	NSEvent* event = [NSEvent eventWithEventRef:e];
 	// NSLog(@"NSEvent in GlWndProc %@", event);
 
-	switch([event type])
-	{
-		/* TODO handle window activate, close, etc. */
-		default:
-			return driver->_EventEmitter.processMessage(event);
-	}
-
-	return false;
+	return driver->_EventEmitter.processMessage(event);
 }
 
 #elif defined (NL_OS_UNIX)
