@@ -782,9 +782,10 @@ private:
 
 #elif defined(NL_OS_MAC)
 
-	friend bool GlWndProc(CDriverGL*, const void*);
-	friend void windowDidMove(NSWindow*, CDriverGL*);
-	friend void viewDidResize(NSView*, CDriverGL*);
+	friend bool                        GlWndProc(CDriverGL*, const void*);
+	friend void                        windowDidMove(NSWindow*, CDriverGL*);
+	friend void                        viewDidResize(NSView*, CDriverGL*);
+	friend NSApplicationTerminateReply applicationShouldTerminate(CDriverGL*);
 
 	NLMISC::CCocoaEventEmitter _EventEmitter;
 	NSOpenGLContext*           _ctx;

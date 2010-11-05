@@ -410,6 +410,17 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	return true;
 }
 
+bool CCocoaEventEmitter::handleQuitRequest()
+{
+	if(_server)
+	{
+		_server->postEvent(new CEventDestroyWindow(this));
+		return true;
+	}
+
+	return false;
+}
+
 typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)

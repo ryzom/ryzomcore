@@ -18,8 +18,6 @@
 
 #import "cocoa_opengl_view.h"
 
-#include <stdio.h>
-
 namespace NL3D 
 {
 	void viewDidResize(NSView* view, CDriverGL* driver)

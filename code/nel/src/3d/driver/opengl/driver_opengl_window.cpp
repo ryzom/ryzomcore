@@ -26,7 +26,8 @@
 # include <windowsx.h>
 #elif defined(NL_OS_MAC)
 #	import "mac/cocoa_window_delegate.h"
-#   import <OpenGL/OpenGL.h>
+#	import "mac/cocoa_application_delegate.h"
+#	import <OpenGL/OpenGL.h>
 #elif defined (NL_OS_UNIX)
 # include <GL/gl.h>
 # include <GL/glx.h>
@@ -1431,6 +1432,18 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		nlerror("cannot create cocoa window");
 		return false;
 	}
+
+	// create an application delegate
+	CocoaApplicationDelegate* appDelegate = 
+		[[CocoaApplicationDelegate alloc] initWithDriver:this];
+
+	// set the application delegate, this will handle window/app close events
+	[NSApp setDelegate:appDelegate];
+
+	// bind the close button of the window to applicationShouldTerminate
+	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];
+	[closeButton setAction:@selector(applicationShouldTerminate:)];
+	[closeButton setTarget:appDelegate];
 
 	// set the delegate which will handle window move events
 	[cocoa_window setDelegate:[[CocoaWindowDelegate alloc] initWithDriver:this]];

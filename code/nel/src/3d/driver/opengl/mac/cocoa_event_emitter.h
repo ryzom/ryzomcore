@@ -50,6 +50,7 @@ public:
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
 	virtual void submitEvents(CEventServer& server, bool allWindows);
 	virtual void emulateMouseRawMode(bool enable);
+	bool         handleQuitRequest();
 
 	virtual bool copyTextToClipboard(const ucstring &text);
 	virtual bool pasteTextFromClipboard(ucstring &text);
