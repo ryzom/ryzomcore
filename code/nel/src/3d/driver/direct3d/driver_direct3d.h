@@ -822,9 +822,8 @@ public:
 	virtual void			setDepthRange(float znear, float zfar);
 	virtual	void			getDepthRange(float &znear, float &zfar) const;
 
-	// todo hulud d3d buffers
-	virtual void			getZBuffer (std::vector<float>  &/* zbuffer */) {}
-	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect);	// Only 32 bits back buffer supported
+	virtual void			getZBuffer (std::vector<float> &zbuffer);
+	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect);
 
 	// return true if driver support Bloom effect.
 	virtual	bool			supportBloomEffect() const;
@@ -923,13 +922,14 @@ public:
 	// see if system cursor is currently captured
 	virtual bool			isSystemCursorCaptured();
 
-	virtual void			setHardwareCursorScale(float scale) { _CursorScale = scale; }
-
 	// Add a new cursor (name is case unsensitive)
 	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
 
 	// Display a cursor from its name (case unsensitive)
 	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+
+	// Change default scale for all cursors
+	virtual void			setCursorScale(float scale);
 
 	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
 	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
@@ -2093,18 +2093,18 @@ private:
 	// cursors
 	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
 
-	TColorDepth					_ColorDepth;
-	std::string					_CurrName;
-	NLMISC::CRGBA				_CurrCol;
-	uint8						_CurrRot;
-	uint						_CurrHotSpotX;
-	uint						_CurrHotSpotY;
-	float						_CursorScale;
+	TColorDepth				_ColorDepth;
+	std::string				_CurrName;
+	NLMISC::CRGBA			_CurrCol;
+	uint8					_CurrRot;
+	uint					_CurrHotSpotX;
+	uint					_CurrHotSpotY;
+	float					_CursorScale;
 
-	nlCursor					_DefaultCursor;
+	nlCursor				_DefaultCursor;
 
-	bool						_AlphaBlendedCursorSupported;
-	bool						_AlphaBlendedCursorSupportRetrieved;
+	bool					_AlphaBlendedCursorSupported;
+	bool					_AlphaBlendedCursorSupportRetrieved;
 
 	class CCursor
 	{

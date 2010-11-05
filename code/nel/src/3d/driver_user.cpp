@@ -1664,6 +1664,13 @@ void			CDriverUser::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 
 	_Driver->setCursor(name, col, rot, hotSpotX, hotSpotY, forceRebuild);
 }
 
+void			CDriverUser::setCursorScale(float scale)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setCursorScale(scale);
+}
+
 // ***************************************************************************
 // ***************************************************************************
 // Async Texture loading mgt

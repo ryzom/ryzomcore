@@ -127,6 +127,8 @@ namespace NLNET
 	class IModuleTrackerCb
 	{
 	public:
+		virtual ~IModuleTrackerCb() { }
+
 		virtual void onTrackedModuleUp(IModuleProxy *moduleProxy) =0;
 		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy) =0;
 	};

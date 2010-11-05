@@ -556,6 +556,10 @@ void CDynamicMapClient::requestSetNode(const std::string& instanceId, const std:
 class CNotifySonDeletion : public CEditor::IObserverAction
 {
 public:
+	virtual ~CNotifySonDeletion()
+	{
+	}
+
 	CInstance &ErasedInstance;
 	CNotifySonDeletion(CInstance &erasedInstance) : ErasedInstance(erasedInstance) {}
 	virtual void doAction(CEditor::IInstanceObserver &obs)
@@ -568,6 +572,10 @@ public:
 class CTraverseEraseRequestedSons : public IInstanceVisitor
 {
 public:
+	virtual ~CTraverseEraseRequestedSons()
+	{
+	}
+
 	virtual void visit(CInstance &inst)
 	{
 		CNotifySonDeletion notifySonDeletion(inst);

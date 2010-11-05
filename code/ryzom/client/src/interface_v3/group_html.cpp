@@ -111,7 +111,7 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 	curl_multi_add_handle(MultiCurl, curl);
-	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, ""));
+	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, "", ""));
 #ifdef LOG_DL
 	nlwarning("adding handle %x, %d curls", curl, Curls.size());
 #endif
@@ -146,7 +146,7 @@ string CGroupHTML::localBnpName(const string &url)
 }
 
 // Add a bnp download request in the multi_curl, return true if already downloaded
-bool CGroupHTML::addBnpDownload(const string &url, const string &action, const string &script)
+bool CGroupHTML::addBnpDownload(const string &url, const string &action, const string &script, const string &md5sum)
 {
 	// Search if we are not already downloading this url.
 	for(uint i = 0; i < Curls.size(); i++)
@@ -160,18 +160,17 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 		}
 	}
 
-	CURL *curl = curl_easy_init();
-	if (!MultiCurl || !curl)
-		return false;
-
-	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
 	string dest = localBnpName(url);
+	string tmpdest = localBnpName(url)+".tmp";
 #ifdef LOG_DL
 	nlwarning("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 #endif
-	// create the local file
+	
+	// erase the tmp file if exists
+	if (NLMISC::CFile::fileExists(tmpdest))
+		NLMISC::CFile::deleteFile(tmpdest);
+
+	// create/delete the local file
 	if (NLMISC::CFile::fileExists(dest))
 	{
 		if (action == "override" || action == "delete")
@@ -186,21 +185,31 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 	}
 	if (action != "delete")
 	{
-		FILE *fp = fopen (dest.c_str(), "wb");
+		CURL *curl = curl_easy_init();
+		if (!MultiCurl || !curl)
+			return false;
+
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+		FILE *fp = fopen (tmpdest.c_str(), "wb");
 		if (fp == NULL)
 		{
-			nlwarning("Can't open file '%s' for writing: code=%d '%s'", dest.c_str (), errno, strerror(errno));
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
 			return false;
 		}
 		curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 		curl_multi_add_handle(MultiCurl, curl);
-		Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL, script));
+		Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL, script, md5sum));
 #ifdef LOG_DL
 		nlwarning("adding handle %x, %d curls", curl, Curls.size());
 #endif
 		RunningCurls++;
 	}
+	else
+		return true;
+
 	return false;
 }
 
@@ -259,30 +268,29 @@ void CGroupHTML::checkDownloads()
 						string file;
 
 						if (it->type == ImgType)
-							file = localImageName(it->url)+".tmp";
+							file = localImageName(it->url);
 						else
 							file = localBnpName(it->url);
 
-						if(res != CURLE_OK || r < 200 || r >= 300)
+						if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(file+".tmp").toString())))
 						{
-							NLMISC::CFile::deleteFile(file.c_str());
+							NLMISC::CFile::deleteFile((file+".tmp").c_str());
 						}
 						else
 						{
 							string finalUrl;
 							if (it->type == ImgType)
 							{
-								string image = localImageName(it->url);
-								CFile::moveFile(image.c_str(), (image+".tmp").c_str());
-								if (lookupLocalFile (finalUrl, image.c_str(), false))
+								CFile::moveFile(file.c_str(), (file+".tmp").c_str());
+								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
 									for(uint i = 0; i < it->imgs.size(); i++)
 									{
 										// don't display image that are not power of 2
 										uint32 w, h;
-										CBitmap::loadSize (image, w, h);
+										CBitmap::loadSize (file, w, h);
 										if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-											image.clear();
+											file.clear();
 
 										CCtrlButton *btn = dynamic_cast<CCtrlButton*>(it->imgs[i]);
 										if(btn)
@@ -290,8 +298,8 @@ void CGroupHTML::checkDownloads()
 	#ifdef LOG_DL
 											nlwarning("refresh new downloading image %d button %p", i, it->imgs[i]);
 	#endif
-											btn->setTexture (image);
-											btn->setTexturePushed(image);
+											btn->setTexture (file);
+											btn->setTexturePushed(file);
 											btn->invalidateCoords();
 											btn->invalidateContent();
 											btn->resetInvalidCoords();
@@ -306,7 +314,7 @@ void CGroupHTML::checkDownloads()
 	#ifdef LOG_DL
 												nlwarning("refresh new downloading image %d image %p", i, it->imgs[i]);
 	#endif
-												btm->setTexture (image);
+												btm->setTexture (file);
 												btm->invalidateCoords();
 												btm->invalidateContent();
 												btm->resetInvalidCoords();
@@ -319,25 +327,15 @@ void CGroupHTML::checkDownloads()
 							}
 							else
 							{
+								CFile::moveFile(file.c_str(), (file+".tmp").c_str());
 								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
-									bool memoryCompressed = CPath::isMemoryCompressed();
-									if (memoryCompressed)
-									{
-										CPath::memoryUncompress();
-									}
-									CPath::addSearchPath("user/", true, false, NULL);
-									if (memoryCompressed)
-									{
-										CPath::memoryCompress();
-									}
+									
 									CInterfaceManager *pIM = CInterfaceManager::getInstance();
-									pIM->executeLuaScript(_ObjectScript, true);
-									_ObjectScript = "";
+									pIM->executeLuaScript(it->luaScript, true);
 								}
 							}
 						}
-
 						Curls.erase(it);
 						break;
 					}
@@ -1499,11 +1497,12 @@ void CGroupHTML::endElement (uint element_number)
 			{
 				if (!_ObjectData.empty())
 				{
-					if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript))
+					if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
 					{
 						CInterfaceManager *pIM = CInterfaceManager::getInstance();
 						pIM->executeLuaScript(_ObjectScript, true);
 					}
+					_ObjectScript = "";
 				}
 			}
 			_Object = false;

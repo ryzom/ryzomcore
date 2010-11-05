@@ -1235,7 +1235,7 @@ REGISTER_ACTION_HANDLER( CHandlerEnterTell, "enter_tell");
 //	updateChatModeAndButton
 //
 //-----------------------------------------------
-void CClientChatManager::updateChatModeAndButton(uint mode)
+void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChannelDbIndex)
 {
 	// Check if USER chat is active
 	bool userActive = false;
@@ -1274,11 +1274,19 @@ void CClientChatManager::updateChatModeAndButton(uint mode)
 					case CChatGroup::team:		if (teamActive) pUserBut->setHardText("uiFilterTeam");		break;
 					case CChatGroup::guild:		if (guildActive) pUserBut->setHardText("uiFilterGuild");	break;
 					case CChatGroup::dyn_chat:
-						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
-						uint32 textId = pIM->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
+						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChannelDbIndex);
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pUserBut->setHardText(title.toUtf8());
+						if (title.empty())
+						{
+							// Dyn channel does not exist, don't change
+							m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
+							dynamicChannelDbIndex = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
+						}
+						else
+						{
+							pUserBut->setHardText(title.toUtf8());
+						}
 						break;
 					// NB: user chat cannot have yubo_chat target
 				}
@@ -1300,8 +1308,8 @@ void CClientChatManager::updateChatModeAndButton(uint mode)
 				pEditBox->setX(pUserBut->getWReal()+4);
 			}
 
-			PeopleInterraction.TheUserChat.Filter.setTargetGroup(m);
-			PeopleInterraction.ChatGroup.Filter.setTargetGroup(m);
+			PeopleInterraction.TheUserChat.Filter.setTargetGroup(m, dynamicChannelDbIndex);
+			PeopleInterraction.ChatGroup.Filter.setTargetGroup(m, dynamicChannelDbIndex);
 		}
 	}
 }

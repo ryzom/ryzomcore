@@ -2659,7 +2659,7 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, 
 	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
 	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
 	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
-	static volatile uint8 alphaThreshold = 127;
+	static uint8 alphaThreshold = 127;
 	do
 	{
 		destColorPtr->modulateFromColor(*srcColorPtr, col);
@@ -2687,7 +2687,7 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, 
 
 		for (uint k = 0;k < colorBm16.size(); ++k)
 		{
-			if (src32[k].A <= 120)
+			if (src32[k].A <= alphaThreshold)
 			{
 				bitMask[k / 8] |= (0x80 >> (k & 7));
 			}
@@ -2720,17 +2720,7 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, 
 	return true;
 }
 
-bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
-{
-	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
-}
-
 #elif defined(NL_OS_MAC)
-
-bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
-{
-	return false;
-}
 
 #elif defined(NL_OS_UNIX)
 
@@ -2756,140 +2746,6 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<l
 		icon[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
 
 	return true;
-}
-
-bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
-{
-#ifdef HAVE_XRENDER
-
-	CBitmap src = bitmap;
-
-	// resample bitmap if necessary
-	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
-	{
-		src.resample(iconWidth, iconHeight);
-	}
-
-	CBitmap colorBm;
-	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
-	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
-	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
-	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
-
-	do
-	{
-		// colorize icon
-		destColorPtr->modulateFromColor(*srcColorPtr, col);
-
-		// X11 wants BGRA pixels : swap red and blue channels
-		std::swap(destColorPtr->R, destColorPtr->B);
-
-		// premultiplied alpha
-		if (destColorPtr->A < 255)
-		{
-			destColorPtr->R = (destColorPtr->R * destColorPtr->A) / 255;
-			destColorPtr->G = (destColorPtr->G * destColorPtr->A) / 255;
-			destColorPtr->B = (destColorPtr->B * destColorPtr->A) / 255;
-		}
-
-		++ srcColorPtr;
-		++ destColorPtr;
-	}
-	while (srcColorPtr != srcColorPtrLast);
-
-	// use malloc() because X will free() data itself
-	CRGBA *src32 = (CRGBA*)malloc(colorBm.getSize()*4);
-	memcpy(src32, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
-
-	uint size = iconWidth * iconHeight;
-
-	// Create the icon pixmap
-	sint screen = DefaultScreen(_dpy);
-	Visual *visual = DefaultVisual(_dpy, screen);
-
-	if (!visual)
-	{
-		nlwarning("Failed to get a default visual for screen %d", screen);
-		return false;
-	}
-
-	// create the icon pixmap
-	XImage* image = XCreateImage(_dpy, visual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
-
-	if (!image)
-	{
-		nlwarning("Failed to set the window's icon");
-		return false;
-	}
-
-	Pixmap pixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
-
-	if (!pixmap)
-	{
-		nlwarning("Failed to create a pixmap %ux%ux%d", iconWidth, iconHeight, 32);
-		return false;
-	}
-
-	GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
-
-	if (!gc)
-	{
-		nlwarning("Failed to create a GC");
-		return false;
-	}
-
-	sint res = XPutImage(_dpy, pixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
-	// should return 0
-	nlwarning("XPutImage returned %d", res);
-
-	res = XFreeGC(_dpy, gc);
-	// should return 1
-	nlwarning("XFreeGC returned %d", res);
-
-	if (image->data)
-	{
-		free(image->data);
-		image->data = NULL;
-	}
-
-	XDestroyImage(image);
-
-	XRenderPictFormat *format = XRenderFindStandardFormat(_dpy, PictStandardARGB32);
-
-	if (!format)
-	{
-		nlwarning("Failed to find a standard format");
-		return false;
-	}
-
-	Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
-
-	if (!picture)
-	{
-		nlwarning("Failed to create picture");
-		return false;
-	}
-
-	cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
-
-	if (!cursor)
-	{
-		nlwarning("Failed to create cursor");
-		return false;
-	}
-
-	XRenderFreePicture(_dpy, picture);
-	res = XFreePixmap(_dpy, pixmap);
-	// should return 1
-	nlwarning("XFreePixmap returned %d", res);
-
-	return true;
-
-#else
-
-	return false;
-
-#endif
 }
 
 #endif

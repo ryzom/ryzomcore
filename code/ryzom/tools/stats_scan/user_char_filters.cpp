@@ -22,6 +22,7 @@
 #include "char_filter_factory.h"
 #include "character.h"
 
+#include <limits>
 
 //-------------------------------------------------------------------------------------------------
 // namespaces

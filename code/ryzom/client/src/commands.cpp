@@ -1126,7 +1126,11 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 					if(strncmp(line, "/*", 2)==0)
 						inComment++;
 					if(inComment<=0)
-						ICommand::execute(line, g_log);
+					{
+						ucstring ucline(line);
+						CInterfaceManager::parseTokens(ucline);
+						ICommand::execute(ucline.toUtf8(), g_log);
+					}
 					if(strncmp(line, "*/", 2)==0)
 						inComment--;
 				}
@@ -1216,12 +1220,14 @@ static bool talkInChan(uint32 nb,std::vector<std::string>args)
 			tmp = tmp+" ";
 		}
 
-		PeopleInterraction.talkInDynamicChannel(nb,ucstring(tmp));
+		ucstring uctmp;
+		uctmp.fromUtf8(tmp);
+		PeopleInterraction.talkInDynamicChannel(nb, uctmp);
 		return true;
 	}
 	else
 	{
-		ChatMngr.updateChatModeAndButton(CChatGroup::dyn_chat);
+		ChatMngr.updateChatModeAndButton(CChatGroup::dyn_chat, nb);
 	}
 	return false;
 }

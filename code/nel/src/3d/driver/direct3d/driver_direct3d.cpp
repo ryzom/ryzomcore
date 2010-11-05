@@ -173,7 +173,7 @@ CDriverD3D::CDriverD3D()
 	_CurrRot = 0;
 	_CurrHotSpotX = 0;
 	_CurrHotSpotY = 0;
-	_CursorScale = 0.85f;
+	_CursorScale = 1.f;
 
 	_UserViewMtx.identity();
 	_UserModelMtx.identity();
@@ -2722,6 +2722,7 @@ bool CDriverD3D::fillPresentParameter (D3DPRESENT_PARAMETERS &parameters, D3DFOR
 		D3DFMT_D24FS8,
 		//D3DFMT_D16,
 	};
+
 	const uint zbufferFormatCount = sizeof(zbufferFormats)/sizeof(D3DFORMAT);
 	uint i;
 	for (i=0; i<zbufferFormatCount; i++)
@@ -3763,51 +3764,81 @@ bool CDriverD3D::clipRect(NLMISC::CRect &rect)
 	return rect.Width>0 && rect.Height>0;
 }
 
-void CDriverD3D::getZBufferPart (std::vector<float>  &/* zbuffer */, NLMISC::CRect &/* rect */)
+void CDriverD3D::getZBuffer(std::vector<float>  &zbuffer)
 {
-/* ace: currently not working
+	H_AUTO_D3D(CDriverD3D_getZBuffer);
+
+	CRect rect(0, 0);
+	getWindowSize(rect.Width, rect.Height);
+	getZBufferPart(zbuffer, rect);
+}
+
+void CDriverD3D::getZBufferPart (std::vector<float> &zbuffer, NLMISC::CRect &rect)
+{
 	zbuffer.clear();
 
-	if(clipRect(rect))
+	IDirect3DSurface9 *surface;
+	if (SUCCEEDED(_DeviceInterface->GetDepthStencilSurface(&surface)))
 	{
-		IDirect3DSurface9 *surface;
-		if(_DeviceInterface->GetDepthStencilSurface(&surface)== D3D_OK)
+		if (clipRect(rect))
 		{
-			// Surface desc
-			D3DSURFACE_DESC desc;
-			if (surface->GetDesc(&desc) == D3D_OK)
+			RECT winRect;
+			winRect.left = rect.left();
+			winRect.right = rect.right();
+			winRect.top = rect.top();
+			winRect.bottom = rect.bottom();
+
+			// Lock the surface
+			D3DLOCKED_RECT lock;
+			if (SUCCEEDED(surface->LockRect (&lock, &winRect, D3DLOCK_READONLY)))
 			{
-				// 32 bits format supported
-				if (desc.Format == D3DFMT_D24S8)
+				zbuffer.resize(rect.Width*rect.Height);
+
+				// Surface desc
+				D3DSURFACE_DESC desc;
+				if (SUCCEEDED(surface->GetDesc(&desc)))
 				{
-					// Lock the surface
-					D3DLOCKED_RECT lock;
-					::RECT winRect;
-					winRect.left = rect.left();
-					winRect.right = rect.right();
-					winRect.top = rect.top();
-					winRect.bottom = rect.bottom();
-					const uint lineCount = rect.Height;
-					const uint width = rect.Width;
-					HRESULT hr = surface->LockRect (&lock, &winRect, D3DLOCK_READONLY);
-					if (hr == D3D_OK)
+					const uint8* pBits = (uint8*)lock.pBits;
+
+					for(uint y=0; y<rect.Height; ++y)
 					{
-						zbuffer.resize(rect.Width*rect.Height);
-						// Line count
-						float *dest = &(zbuffer[0]);
-						uint i;
-						for (i=0; i<lineCount; i++)
+						uint offset = y*rect.Width;
+						uint end = offset + rect.Width;
+
+						// 32 bits format supported
+						if (desc.Format == D3DFMT_D32F_LOCKABLE)
 						{
-							memcpy (dest+(4*i*width), ((uint8*)lock.pBits)+(i*lock.Pitch), width*4);
+							const float *src = (float*)(pBits + lock.Pitch * y);
+							float *dst = &zbuffer[offset];
+							memcpy(dst, src, rect.Width * sizeof(float));
 						}
-						surface->UnlockRect ();
+						else if (desc.Format == D3DFMT_D24S8)
+						{
+							uint32* pRow = (uint32*)(pBits + lock.Pitch * y);
+							while(offset != end)
+							{
+								uint32 value = *pRow++;
+								zbuffer[offset++] = (float)value / (float)std::numeric_limits<uint32>::max();
+							}
+						}
+						else if (desc.Format == D3DFMT_D16_LOCKABLE)
+						{
+							uint16* pRow = (uint16*)(pBits + lock.Pitch * y);
+							while(offset != end)
+							{
+								uint16 value = *pRow++;
+								zbuffer[offset++] = (float)value / (float)std::numeric_limits<uint16>::max();
+							}
+						}
 					}
 				}
+
+				surface->UnlockRect ();
 			}
-			surface->Release();
 		}
+
+		surface->Release();
 	}
-*/
 }
 
 
@@ -3930,11 +3961,6 @@ bool CDriverD3D::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon,
 	if (maskHbm) DeleteObject(maskHbm);
 
 	return true;
-}
-
-bool CDriverD3D::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
-{
-	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
 }
 
 } // NL3D

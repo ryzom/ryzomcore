@@ -801,6 +801,7 @@ struct CClientConfig
 public:
 	/// Constructor.
 	CClientConfig();
+	virtual ~CClientConfig() {}
 
 	static void setValues ();				// Set the values of the ClientCfg instance
 	static void setValuesOnFileChange ();	// called when cfg modified

@@ -107,7 +107,7 @@ public:
 	};
 public:
 	CGroupMap(const TCtorParam &param);
-	~CGroupMap();
+	virtual ~CGroupMap();
 	// Add a decoration to the map. The map will call the 'onAdd' method. When this object is destroyed, it will call the 'onRemove' method
 	void addDeco(IDeco *deco);
 	// Remove a decoration from the map. This will also call the 'onRemove' method. It is up to the owner to delete it.

@@ -376,6 +376,8 @@ public:
 
 	struct IInstanceObserver : public NLMISC::CRefCount // refptr'ed observers
 	{
+		virtual ~IInstanceObserver() {}
+
 		typedef NLMISC::CRefPtr<IInstanceObserver> TRefPtr;
 		// called when the watched instance has been created
 		virtual void onInstanceCreated(CInstance &/* instance */) {}
@@ -970,6 +972,7 @@ public:
 	// allowing for safe removal of observer when they are triggered
 	struct IObserverAction
 	{
+		virtual ~IObserverAction() { }
 		virtual void doAction(IInstanceObserver &obs) = 0;
 	};
 	void				triggerInstanceObserver(const TInstanceId &id, IObserverAction &action);

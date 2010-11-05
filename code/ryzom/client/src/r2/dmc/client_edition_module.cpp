@@ -1381,10 +1381,9 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	}
 
 	CHashKeyMD5 md5Id;
-	uint32 timeStamp;
+	uint32 timeStamp = 0;
 	if (! compressed)
 	{
-
 		FILE* file = fopen(filename.c_str(),"rb");
 		if (!file)
 		{
@@ -1488,9 +1487,6 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		uncompressedFile = new uint8[ data.size() ];
 		memcpy(uncompressedFile, data.c_str(), data.size());
 		uncompressedFileLength = (uint32)data.size();
-
-
-
 	}
 	else
 	{
@@ -1572,6 +1568,9 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 
 		uncompressedFile[uncompressedFileLength] = '\0';
 	}
+
+	// TODO: compute md5Id and timeStamp
+
 	_UserComponents[filename] = new CUserComponent(filename, uncompressedFile, uncompressedFileLength, compressedFile, compressedFileLength);
 	_UserComponents[filename]->Md5Id = md5Id;
 	_UserComponents[filename]->TimeStamp = timeStamp;

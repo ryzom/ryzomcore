@@ -24,6 +24,9 @@
 # include <GL/gl.h>
 # include <GL/glx.h>
 # include <X11/Xatom.h>
+# ifdef HAVE_XRENDER
+#  include <X11/extensions/Xrender.h>
+# endif // HAVE_XRENDER
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
@@ -205,20 +208,8 @@ void CDriverGL::addCursor(const std::string &name, const NLMISC::CBitmap &cursor
 	CCursor &curs = _Cursors[name];
 	curs = CCursor(); // erase possible previous cursor
 
-	uint destWidth;
-	uint destHeight;
-
-#ifdef NL_OS_WINDOWS
-
-	destWidth = GetSystemMetrics(SM_CXCURSOR);
-	destHeight = GetSystemMetrics(SM_CYCURSOR);
-
-#elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
-
-	Status res = XQueryBestCursor(_dpy, _win, width, height, &destWidth, &destHeight);
-
-#endif
+	uint destWidth = 32, destHeight = 32;
+	getBestCursorSize(width, height, destWidth, destHeight);
 
 	// build a square bitmap
 	uint tmpSize = std::max(maxX - minX + 1, maxY - minY + 1);
@@ -380,26 +371,18 @@ void CDriverGL::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot,
 }
 
 // *************************************************************************************
+void CDriverGL::setCursorScale(float scale)
+{
+	_CursorScale = scale;
+}
+
+// *************************************************************************************
 nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
-	uint mouseW;
-	uint mouseH;
-
-#ifdef NL_OS_WINDOWS
-
-	// use cursor size from system
-	mouseW = GetSystemMetrics(SM_CXCURSOR);
-	mouseH = GetSystemMetrics(SM_CYCURSOR);
-
-#elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
-
-	// use best cursor size for bitmap
-	Status res = XQueryBestCursor(_dpy, _win, src.getWidth(), src.getHeight(), &mouseW, &mouseH);
-
-#endif
+	uint mouseW = 32, mouseH = 32;
+	getBestCursorSize(src.getWidth(), src.getHeight(), mouseW, mouseH);
 
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)
@@ -437,7 +420,7 @@ void CDriverGL::setSystemArrow()
 #endif
 }
 
-// --------------------------------------------------
+// ***************************************************************************
 void CDriverGL::showCursor(bool b)
 {
 	H_AUTO_OGL(CDriverGL_showCursor);
@@ -504,7 +487,7 @@ void CDriverGL::showCursor(bool b)
 #endif // NL_OS_UNIX
 }
 
-// --------------------------------------------------
+// ***************************************************************************
 void CDriverGL::setMousePos(float x, float y)
 {
 	H_AUTO_OGL(CDriverGL_setMousePos)
@@ -558,9 +541,10 @@ void CDriverGL::setMousePos(float x, float y)
 #endif // NL_OS_UNIX
 }
 
+// ***************************************************************************
 void CDriverGL::setCapture (bool b)
 {
-	H_AUTO_OGL(CDriverGL_setCapture )
+	H_AUTO_OGL(CDriverGL_setCapture);
 
 #ifdef NL_OS_WINDOWS
 
@@ -603,6 +587,7 @@ void CDriverGL::setCapture (bool b)
 #endif // NL_OS_UNIX
 }
 
+// ***************************************************************************
 bool CDriverGL::isSystemCursorInClientArea()
 {
 	if (_FullScreen /* || !IsMouseCursorHardware() */)
@@ -809,6 +794,163 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 #endif
 
 	return res;
+}
+
+bool CDriverGL::getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight)
+{
+#ifdef NL_OS_WINDOWS
+
+	// Windows provides default size for cursors
+	dstWidth = (uint)GetSystemMetrics(SM_CXCURSOR);
+	dstHeight = (uint)GetSystemMetrics(SM_CYCURSOR);
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+	Status res = XQueryBestCursor(_dpy, _win, srcWidth, srcHeight, &dstWidth, &dstHeight);
+	nlwarning("XQueryBestCursor returned %d", (sint)res);
+
+#endif
+
+	return true;
+}
+
+bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+#if defined(NL_OS_WINDOWS)
+
+	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
+
+#elif defined(NL_OS_UNIX) && defined(HAVE_XRENDER) && !defined(NL_OS_MAC)
+
+	CBitmap src = bitmap;
+
+	// resample bitmap if necessary
+	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
+	{
+		src.resample(iconWidth, iconHeight);
+	}
+
+	CBitmap colorBm;
+	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
+	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
+	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
+	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
+
+	do
+	{
+		// colorize icon
+		destColorPtr->modulateFromColor(*srcColorPtr, col);
+
+		// X11 wants BGRA pixels : swap red and blue channels
+		std::swap(destColorPtr->R, destColorPtr->B);
+
+		// premultiplied alpha
+		if (destColorPtr->A < 255)
+		{
+			destColorPtr->R = (destColorPtr->R * destColorPtr->A) / 255;
+			destColorPtr->G = (destColorPtr->G * destColorPtr->A) / 255;
+			destColorPtr->B = (destColorPtr->B * destColorPtr->A) / 255;
+		}
+
+		++ srcColorPtr;
+		++ destColorPtr;
+	}
+	while (srcColorPtr != srcColorPtrLast);
+
+	// use malloc() because X will free() data itself
+	CRGBA *src32 = (CRGBA*)malloc(colorBm.getSize()*4);
+	memcpy(src32, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
+
+	uint size = iconWidth * iconHeight;
+
+	// Create the icon pixmap
+	sint screen = DefaultScreen(_dpy);
+	Visual *visual = DefaultVisual(_dpy, screen);
+
+	if (!visual)
+	{
+		nlwarning("Failed to get a default visual for screen %d", screen);
+		return false;
+	}
+
+	// create the icon pixmap
+	XImage* image = XCreateImage(_dpy, visual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
+
+	if (!image)
+	{
+		nlwarning("Failed to set the window's icon");
+		return false;
+	}
+
+	Pixmap pixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
+
+	if (!pixmap)
+	{
+		nlwarning("Failed to create a pixmap %ux%ux%d", iconWidth, iconHeight, 32);
+		return false;
+	}
+
+	GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
+
+	if (!gc)
+	{
+		nlwarning("Failed to create a GC");
+		return false;
+	}
+
+	sint res = XPutImage(_dpy, pixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
+	// should return 0
+	nlwarning("XPutImage returned %d", res);
+
+	res = XFreeGC(_dpy, gc);
+	// should return 1
+	nlwarning("XFreeGC returned %d", res);
+
+	if (image->data)
+	{
+		free(image->data);
+		image->data = NULL;
+	}
+
+	XDestroyImage(image);
+
+	XRenderPictFormat *format = XRenderFindStandardFormat(_dpy, PictStandardARGB32);
+
+	if (!format)
+	{
+		nlwarning("Failed to find a standard format");
+		return false;
+	}
+
+	Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
+
+	if (!picture)
+	{
+		nlwarning("Failed to create picture");
+		return false;
+	}
+
+	cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
+
+	if (!cursor)
+	{
+		nlwarning("Failed to create cursor");
+		return false;
+	}
+
+	XRenderFreePicture(_dpy, picture);
+	res = XFreePixmap(_dpy, pixmap);
+	// should return 1
+	nlwarning("XFreePixmap returned %d", res);
+
+	return true;
+
+#else
+
+	return false;
+
+#endif
 }
 
 } // NL3D

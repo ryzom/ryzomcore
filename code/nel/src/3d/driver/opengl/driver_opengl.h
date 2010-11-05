@@ -523,13 +523,14 @@ public:
 	// see if system cursor is currently captured
 	virtual bool			isSystemCursorCaptured();
 
-	virtual void			setHardwareCursorScale(float scale) { _CursorScale = scale; }
-
 	// Add a new cursor (name is case unsensitive)
 	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
 
 	// Display a cursor from its name (case unsensitive)
 	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+
+	// Change default scale for all cursors
+	virtual void			setCursorScale(float scale);
 
 	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
 
@@ -1002,6 +1003,9 @@ private:
 
 	// Convert a NLMISC::CBitmap to nlCursor
 	bool					convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY);
+
+	// Return the best cursor size depending on specified width and height
+	bool					getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight);
 
 	// build a cursor from src, src should have the same size that the hardware cursor
 	// or a assertion is thrown

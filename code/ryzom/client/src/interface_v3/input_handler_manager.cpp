@@ -64,7 +64,6 @@ CInputHandlerManager::CInputHandlerManager()
 	_MouseButtonsState = noButton;
 	_MouseX = _MouseY = _MouseLastX = _MouseLastY = 0;
 	_Focus = true;
-	// Driver->setFocus(true);
 	_MouseWheel = 0;
 	_SkipInterfaceManager=false;
 	_RecoverFocusLost = false;
@@ -153,12 +152,11 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		CEventSetFocus *pEvent=(CEventSetFocus *)&event;
 		if (!pEvent->Get)
 		{
-			// Disactive all keys
+			// Deactivate all keys
 			_MouseButtonsDown = noButton;
 			_MouseButtonsReleased = noButton;
 			_MouseButtonsState = noButton;
 			_Focus = false;
-			// Driver->setFocus(false);
 
 			if (!_SkipInterfaceManager)
 			{
@@ -184,7 +182,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			_RecoverFocusLost = true; // force to update mouse pos on next click or move
 			Driver->showCursor(IsMouseCursorHardware());
 			_Focus = true;
-			// Driver->setFocus(true);
 		}
 
 		if(!_SkipInterfaceManager)

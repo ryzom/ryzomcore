@@ -1351,6 +1351,7 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("enableModalWindow", enableModalWindow);
 	ls.registerFunc("disableModalWindow", disableModalWindow);
 	ls.registerFunc("getPlayerPos", getPlayerPos);
+	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
 	ls.registerFunc("disableContextHelp", disableContextHelp);
@@ -4242,6 +4243,23 @@ int CLuaIHM::getPlayerPos(CLuaState &ls)
 	ls.push(UserEntity->pos().y);
 	ls.push(UserEntity->pos().z);
 	return 3;
+}
+
+// ***************************************************************************
+int CLuaIHM::addSearchPathUser(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_addSearchPathUser)
+	bool memoryCompressed = CPath::isMemoryCompressed();
+	if (memoryCompressed)
+	{
+		CPath::memoryUncompress();
+	}
+	CPath::addSearchPath("user/", true, false, NULL);
+	if (memoryCompressed)
+	{
+		CPath::memoryCompress();
+	}
+	return 0;
 }
 
 // ***************************************************************************

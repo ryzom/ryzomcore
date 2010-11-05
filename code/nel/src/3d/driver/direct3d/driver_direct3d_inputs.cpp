@@ -177,11 +177,8 @@ void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 	CCursor &curs = _Cursors[name];
 	curs = CCursor(); // erase possible previous cursor
 
-	uint destWidth;
-	uint destHeight;
-
-	destWidth = GetSystemMetrics(SM_CXCURSOR);
-	destHeight = GetSystemMetrics(SM_CYCURSOR);
+	uint destWidth = GetSystemMetrics(SM_CXCURSOR);
+	uint destHeight = GetSystemMetrics(SM_CYCURSOR);
 
 	// build a square bitmap
 	uint tmpSize = std::max(maxX - minX + 1, maxY - minY + 1);
@@ -198,9 +195,12 @@ void CDriverD3D::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 	// first resampling, same for all cursors
 	tmpSize = (uint) (tmpSize * curs.HotspotScale);
 	if (tmpSize == 0) tmpSize = 1;
-/*
-	curs.Src.resample(tmpSize, tmpSize);
-*/
+
+	if (curs.HotspotScale < 1.f)
+	{
+		curs.Src.resample(tmpSize, tmpSize);
+	}
+
 	// shrink if necessary
 	if (tmpSize > destWidth || tmpSize > destHeight) // need to shrink ?
 	{
@@ -301,16 +301,18 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 }
 
 // *************************************************************************************
+void CDriverD3D::setCursorScale(float scale)
+{
+	_CursorScale = scale;
+}
+
+// *************************************************************************************
 nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
-	uint mouseW;
-	uint mouseH;
-
-	// use cursor size from system
-	mouseW = GetSystemMetrics(SM_CXCURSOR);
-	mouseH = GetSystemMetrics(SM_CYCURSOR);
+	uint mouseW = GetSystemMetrics(SM_CXCURSOR);
+	uint mouseH = GetSystemMetrics(SM_CYCURSOR);
 
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)
@@ -374,6 +376,7 @@ void CDriverD3D::setMousePos(float x, float y)
 	if (_HWnd == EmptyWindow)
 		return;
 
+	// convert position size from float to pixels
 	sint x1 = (sint)((float)_CurrentMode.Width*x);
 	sint y1 = (sint)((float)_CurrentMode.Height*(1.0f-y));
 
@@ -383,6 +386,28 @@ void CDriverD3D::setMousePos(float x, float y)
 	pt.y = y1;
 	ClientToScreen (_HWnd, &pt);
 	SetCursorPos(pt.x, pt.y);
+}
+
+// ***************************************************************************
+void CDriverD3D::setCapture (bool b)
+{
+	H_AUTO_D3D(CDriverD3D_setCapture);
+
+	if (b && isSystemCursorInClientArea() && !isSystemCursorCaptured())
+	{
+		SetCapture(_HWnd);
+	}
+	else if (!b && isSystemCursorCaptured())
+	{
+		// if hardware mouse and not in client area, then force to update its aspect by updating its pos
+		if (!isSystemCursorInClientArea())
+		{
+			// force update
+			showCursor(true);
+		}
+
+		ReleaseCapture();
+	}
 }
 
 // ***************************************************************************
@@ -431,28 +456,6 @@ bool CDriverD3D::isSystemCursorInClientArea()
 	}
 
 	return true;
-}
-
-// ***************************************************************************
-void CDriverD3D::setCapture (bool b)
-{
-	H_AUTO_D3D(CDriverD3D_setCapture);
-
-	if (b && isSystemCursorInClientArea() && !isSystemCursorCaptured())
-	{
-		SetCapture(_HWnd);
-	}
-	else if (!b && isSystemCursorCaptured())
-	{
-		// if hardware mouse and not in client area, then force to update its aspect by updating its pos
-		if (!isSystemCursorInClientArea())
-		{
-			// force update
-			showCursor(true);
-		}
-
-		ReleaseCapture();
-	}
 }
 
 // ***************************************************************************
@@ -576,6 +579,11 @@ uint CDriverD3D::getDoubleClickDelay(bool hardwareMouse)
 	}
 
 	return res;
+}
+
+bool CDriverD3D::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+{
+	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
 }
 
 } // NL3D

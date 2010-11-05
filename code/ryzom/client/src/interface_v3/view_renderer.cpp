@@ -729,7 +729,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 
 	_GlobalTextures.push_back (gt);
 
-//	Driver->setHardwareCursorScale(ClientCfg.HardwareCursorScale);
+	Driver->setCursorScale(ClientCfg.HardwareCursorScale);
 
 	char bufTmp[256], tgaName[256];
 	string sTGAname;
