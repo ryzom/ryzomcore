@@ -24,6 +24,9 @@
 # include <GL/gl.h>
 # include <GL/glx.h>
 # include <X11/Xatom.h>
+# ifdef HAVE_XRENDER
+#  include <X11/extensions/Xrender.h>
+# endif // HAVE_XRENDER
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
