@@ -540,7 +540,7 @@ private:
 
 	struct CDataDownload
 	{
-		CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i, const std::string &s) : curl(c), url(u), luaScript(s), type(t), fp(f)
+		CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), luaScript(s), md5sum(m), type(t), fp(f)
 		{
 			if (t == ImgType) imgs.push_back(i);
 		}
@@ -548,6 +548,7 @@ private:
 		CURL *curl;
 		std::string url;
 		std::string luaScript;
+		std::string md5sum;
 		TDataType type;
 		FILE *fp;
 		std::vector<CViewBase *> imgs;
@@ -567,7 +568,7 @@ private:
 	// BnpDownload system
 	void initBnpDownload();
 	void checkBnpDownload();
-	bool addBnpDownload(const std::string &url, const std::string &action, const std::string &script);
+	bool addBnpDownload(const std::string &url, const std::string &action, const std::string &script, const std::string &md5sum);
 	std::string localBnpName(const std::string &url);
 
 	void releaseDownloads();

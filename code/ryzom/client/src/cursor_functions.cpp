@@ -522,6 +522,11 @@ void checkUnderCursor()
 		else
 		{
 			CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY);
+			
+			bool cleanSelectedInstance = EntitiesMngr.instancesRemoved();
+			if (cleanSelectedInstance)
+				selectedInstance = noSelectedInstance;
+
 			UInstance instance = instref.Instance;
 			if (!instance.empty())
 			{
@@ -865,9 +870,12 @@ void contextWebIG(bool rightClick, bool dblClick)
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	CInterfaceElement *pGC = IM->getElementFromId("ui:interface:bot_chat_object");
-	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object"));
+	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
 	if (el != NULL)
+	{
 		el->setName(selectedInstance.getShapeName());
+		el->setPosX(0.0f);
+	}
 	if (selectedInstanceURL.empty())
 	{
 		if (pGC != NULL)

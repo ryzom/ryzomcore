@@ -346,6 +346,7 @@ private:
 	static int	enableModalWindow(CLuaState &ls);
 	static int	disableModalWindow(CLuaState &ls);
 	static int	getPlayerPos(CLuaState &ls);
+	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
 	static int	isPlayerFreeTrial(CLuaState &ls);
 	static int	isPlayerNewbie(CLuaState &ls);

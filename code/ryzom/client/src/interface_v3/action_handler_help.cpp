@@ -948,6 +948,9 @@ class CHandlerBrowse : public IActionHandler
 					}
 				}
 
+				ucstring ucparams(params);
+				CInterfaceManager::parseTokens(ucparams);
+				params = ucparams.toUtf8();
 				// go. NB: the action handler himself may translate params from utf8
 				CInterfaceManager::getInstance()->runActionHandler(action, elementGroup, params);
 
@@ -2406,10 +2409,13 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	else if (pIS->Family == ITEMFAMILY::SHIELD)
 	{
 		cs.VisualPropA.PropertySubData.WeaponLeftHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::LEFT_HAND_SLOT );
-		CItemSheet *pES = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, cs.VisualPropA.PropertySubData.WeaponRightHand);
-		if (pES->ItemType == ITEM_TYPE::TWO_HAND_AXE || pES->ItemType == ITEM_TYPE::TWO_HAND_MACE || pES->ItemType == ITEM_TYPE::TWO_HAND_SWORD ||
-			pES->ItemType == ITEM_TYPE::MAGICIAN_STAFF || pES->ItemType == ITEM_TYPE::AUTOLAUCH || pES->ItemType == ITEM_TYPE::LAUNCHER || pES->ItemType == ITEM_TYPE::RIFLE)
-			cs.VisualPropA.PropertySubData.WeaponRightHand = 0;
+		if (cs.VisualPropA.PropertySubData.WeaponRightHand != 0)
+		{
+			CItemSheet *pES = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, cs.VisualPropA.PropertySubData.WeaponRightHand);
+			if (pES->ItemType == ITEM_TYPE::TWO_HAND_AXE || pES->ItemType == ITEM_TYPE::TWO_HAND_MACE || pES->ItemType == ITEM_TYPE::TWO_HAND_SWORD ||
+				pES->ItemType == ITEM_TYPE::MAGICIAN_STAFF || pES->ItemType == ITEM_TYPE::AUTOLAUCH || pES->ItemType == ITEM_TYPE::LAUNCHER || pES->ItemType == ITEM_TYPE::RIFLE)
+				cs.VisualPropA.PropertySubData.WeaponRightHand = 0;
+		}
 		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
 
 	}

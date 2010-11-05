@@ -666,7 +666,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		string entry="UI:SAVE:CHAT:COLORS:";
 		switch(mode)
 		{
-		case CChatGroup::dyn_chat:	// dyn_chat takes the color of say
+		case CChatGroup::dyn_chat:	entry+="DYN";	break;
 		case CChatGroup::say:	entry+="SAY";	break;
 		case CChatGroup::shout:	entry+="SHOUT";	break;
 		case CChatGroup::team:	entry+="GROUP";	break;
@@ -762,10 +762,14 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			// retrieve the DBIndex from the dynamic chat id
 			sint32	dbIndex= ChatMngr.getDynamicChannelDbIndexFromId(dynChatId);
 			// if found, display, else discarded
-			if(dbIndex>=0 && dbIndex<CChatGroup::MaxDynChanPerPlayer)
+			if(dbIndex >= 0 && dbIndex < CChatGroup::MaxDynChanPerPlayer)
+			{
 				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(finalString, col, 2, &windowVisible);
+			}
 			else
+			{
 				nlwarning("Dynamic chat %s not found for message: %s", dynChatId.toString().c_str(), finalString.toString().c_str());
+			}
 		}
 		else
 		{

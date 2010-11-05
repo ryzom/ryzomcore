@@ -208,7 +208,7 @@ public :
 	/**
 	 * update chat mode button
      */
-	void updateChatModeAndButton(uint mode);
+	void updateChatModeAndButton(uint mode, uint32 dynamicChannelDbIndex = 0);
 
 	/**
 	 * Get the string for a tell. display now if ready or delay in flushBuffer()

@@ -6348,8 +6348,8 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get the whole token substring first
 		end_pos = str.find(end_token, start_pos + 1);
 
-		if ((start_pos == string::npos) || 
-			(end_pos   == string::npos) || 
+		if ((start_pos == ucstring::npos) || 
+			(end_pos   == ucstring::npos) || 
 			(end_pos   <= start_pos + 1))
 		{
 			// Wrong formatting; give up on this one.
@@ -6566,17 +6566,15 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		}
 
 
-		// Replace all occurances of token with the replacement
+		// Replace token
 		size_t token_whole_pos = str.find(token_whole);
-		start_pos = 0;
 
 		// Only do extra replacement if using default
 		extra_replacement = (token_replacement == token_default) ? extra_replacement : 0;
-		while (str.find(token_whole, start_pos) != string::npos)
+		if (str.find(token_whole, start_pos) != string::npos)
 		{
 			str = str.replace(token_whole_pos, token_whole.length() + extra_replacement, token_replacement);
 			start_pos = token_whole_pos + token_replacement.length();
-            token_whole_pos = str.find(token_whole, start_pos);
 		}
 	}
 

@@ -33,6 +33,7 @@ public:
 	bool SrcSystemInfo;
 	bool SrcRegion;
 	bool SrcUniverse;
+	bool SrcDynChat[CChatGroup::MaxDynChanPerPlayer];
 	// output
 	CChatGroup::TGroupType Target;
 public:
