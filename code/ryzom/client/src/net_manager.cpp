@@ -666,7 +666,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		string entry="UI:SAVE:CHAT:COLORS:";
 		switch(mode)
 		{
-		case CChatGroup::dyn_chat:	entry+="DYN";	break;
+		case CChatGroup::dyn_chat:	// dyn_chat takes the color of say
 		case CChatGroup::say:	entry+="SAY";	break;
 		case CChatGroup::shout:	entry+="SHOUT";	break;
 		case CChatGroup::team:	entry+="GROUP";	break;

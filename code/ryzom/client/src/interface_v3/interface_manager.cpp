@@ -6380,20 +6380,26 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		vector<ucstring> token_vector;
 		vector<ucstring> param_vector;
 		splitUCString(token_string, ucstring("."), token_vector);
+		if (token_vector.size() == 0)
+		{
+			// Wrong formatting; give up on this one.
+			start_pos = end_pos;
+			continue;
+		}
 		token_subject = token_vector[0];
 		if (token_vector.size() == 1)
 		{
 			splitUCString(token_subject, ucstring("/"), param_vector);
-			token_subject = param_vector[0];
+			token_subject = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
 			token_param = ucstring("name");
 		}
-		else
+		else if (token_vector.size() > 1)
 		{
 			token_param = token_vector[1];
 			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
 			{
 				splitUCString(token_vector[1], ucstring("/"), param_vector);
-				token_param = param_vector[0];
+				token_param = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
 			}
 		}
 
@@ -6537,7 +6543,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 					continue;
 				}
 
-				// Only care about gender if it's a humanoid.
+				// We only care about the gender if the subject is humanoid.
 				GSGENDER::EGender gender = GSGENDER::neutral;
 				if (pTokenSubjectEntity->isUser() || pTokenSubjectEntity->isPlayer() || pTokenSubjectEntity->isNPC())
 				{
@@ -6548,8 +6554,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 					}
 				}
 
-				// Neuter part is optional.
-				// Fallback to male if something is wrong.
+				// The neuter part is optional. Fallback to male if something is wrong.
 				GSGENDER::EGender g = ((uint)gender >= strList.size()) ? GSGENDER::male : gender;
 				token_replacement = strList[g];
 			}
@@ -6565,11 +6570,10 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			return false;
 		}
 
-
 		// Replace token
 		size_t token_whole_pos = str.find(token_whole);
 
-		// Only do extra replacement if using default
+		// Only do extra replacement spaces if using default
 		extra_replacement = (token_replacement == token_default) ? extra_replacement : 0;
 		if (str.find(token_whole, start_pos) != string::npos)
 		{

@@ -1605,23 +1605,14 @@
                   posparent="cc_univ"
                   x="0"
                   y="-4" />
-        <instance template="tgcw_color"
-                  id="cc_dyn"
-                  text="uiDynColor"
-                  title="uiCCDDyn"
-                  tooltip="uittChooseDynColor"
-                  posref="BL TL"
-                  posparent="cc_shout"
-                  x="0"
-                  y="-4" />
         <instance template="tgcw_checkbox"
                   id="enter_dontquit_cb"
                   text="uiEnterDontQuitCB"
                   tooltip="uittChatEnter"
-                  posparent="cc_dyn"
+                  posparent="cc_univ"
                   posref="BL TL"
                   x="0"
-                  y="-8" />
+                  y="-25" />
         <instance template="tgcw_checkbox"
                   id="show_times_in_chat_cb"
                   text="uiShowTimesInChatCB"
@@ -1630,27 +1621,17 @@
                   posref="BL TL"
                   x="0"
                   y="-8" />
-        <instance template="tgcw_checkbox"
-                  id="show_dyn_channel_name_in_chat_cb"
-                  text="uiShowDynChannelNameInChatCB"
-                  tooltip="uittShowDynChannelNameInChat"
-                  posparent="show_times_in_chat_cb"
-                  posref="BL TL"
-                  x="0"
-                  y="-8" />
         <instance template="tgcw_scrollbarint"
                   id="font_size"
                   text="uiFontSize"
                   posref="BL TL"
-                  posparent="show_dyn_channel_name_in_chat_cb"
+                  posparent="show_times_in_chat_cb"
                   x="0"
                   y="-8" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
               target="show_times_in_chat_cb:c:pushed" />
-        <link expr="@UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
-              target="show_dyn_channel_name_in_chat_cb:c:pushed" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_chat_colors"
@@ -3081,11 +3062,6 @@
                widget="colbut"
                link="UI:SAVE:CHAT:COLORS:SHOUT"
                realtime="true" />
-        <param ui="chat_colors:cc_dyn:c"
-               type="db"
-               widget="colbut"
-               link="UI:SAVE:CHAT:COLORS:DYN"
-               realtime="true" />
         <!--
                         <param ui="chat_colors:cc_shout:c"              type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:SHOUT" realtime="true" />
                         <param ui="chat_colors:cc_civi:c"               type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
@@ -3100,11 +3076,6 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
-               realtime="true" />
-        <param ui="chat_colors:show_dyn_channel_name_in_chat_cb:c"
-               type="db"
-               widget="boolbut"
-               link="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
                realtime="true" />
         <param ui="chat_colors:font_size:c"
                type="db"

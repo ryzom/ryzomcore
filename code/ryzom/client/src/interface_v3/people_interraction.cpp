@@ -487,6 +487,9 @@ void CPeopleInterraction::initStdInputs()
 	if (YuboChat)
 		ChatInput.YuboChat.addListeningWindow(YuboChat);
 
+	// NB: The universe channel can only be seen from the user chat (and hence chat group)
+	// There is no Special universe window
+
 	if (TheUserChat.Window)
 	{
 		ChatInput.AroundMe.addListeningWindow(TheUserChat.Window);
@@ -495,11 +498,6 @@ void CPeopleInterraction::initStdInputs()
 		ChatInput.Guild.addListeningWindow(TheUserChat.Window);
 		ChatInput.Universe.addListeningWindow	(TheUserChat.Window);
 		// Don't add the system info by default
-		// Dynamic chats
-		for(i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
-		{
-			ChatInput.DynamicChat[i].addListeningWindow(TheUserChat.Window);
-		}
 	}
 
 	ChatInput.Tell.addListeningPeopleList(&FriendList);
@@ -1584,11 +1582,6 @@ void CPeopleInterraction::buildFilteredChatSummary(const CFilteredChat &src, CFi
 	{
 		fcs.Target = src.Filter.getTargetGroup();
 	}
-
-	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
-	{
-		fcs.SrcDynChat[i] = ChatInput.DynamicChat[i].isListeningWindow(src.Window);
-	}
 }
 
 //=================================================================================================================
@@ -1733,11 +1726,6 @@ void CPeopleInterraction::setupUserChatFromSummary(const CFilteredChatSummary &s
 	ChatInput.Tell.setWindowState(dest.Window, summary.SrcTell);
 	ChatInput.Region.setWindowState(dest.Window, summary.SrcRegion);
 	ChatInput.Universe.setWindowState(dest.Window, summary.SrcUniverse);
-
-	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
-	{
-		ChatInput.DynamicChat[i].setWindowState(dest.Window, summary.SrcDynChat[i]);
-	}
 }
 
 //=================================================================================================================
@@ -2504,7 +2492,7 @@ public:
 			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
 			{
 				string s = toString(i);
-				uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
+				uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
 				bool active = (textId != 0);
 				if (active)
 				{
@@ -2691,7 +2679,7 @@ class CHandlerSelectChatSource : public IActionHandler
 				CViewTextMenu *pVTM = dynamic_cast<CViewTextMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU+":tab:dyn"+s));
 				if (pVTM)
 				{
-					uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
+					uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
 					bool active = (textId != 0);
 					pVTM->setActive(active);
 					if (active)
@@ -2812,22 +2800,6 @@ class CHandlerSelectChatSource : public IActionHandler
 					++ insertionIndex;
 				}
 			}
-
-			// Add all existing dynamic channels and set the names
-			for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
-			{
-				string s = toString(i);
-				uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
-				bool active = (textId != 0);
-				if (active)
-				{
-					ucstring title;
-					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
-					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
-					++insertionIndex;
-				}
-			}
 		}
 
 
@@ -2935,14 +2907,6 @@ class CHandlerChatSourceSelected : public IActionHandler
 					}
 				}
 			}
-		}
-		else 
-		if (nlstricmp(sParams.substr(0, 3), "dyn") == 0)
-		{
-			uint8 i = 0;
-			fromString(sParams.substr(3), i);
-			if (ci.DynamicChat[i].isListeningWindow(cw)) ci.DynamicChat[i].removeListeningWindow(cw);
-			else ci.DynamicChat[i].addListeningWindow(cw);
 		}
 	}
 };

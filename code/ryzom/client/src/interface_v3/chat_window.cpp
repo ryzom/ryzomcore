@@ -199,7 +199,7 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType /* gt */, uint32 /* dynamicChatDbIndex */, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
 {
 	if (!_Chat)
 	{
@@ -210,26 +210,8 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 
 	CChatTextManager &ctm = getChatTextMngr();
 
-	ucstring newmsg = msg;
-	ucstring prefix;
-	if (gt == CChatGroup::dyn_chat)
-	{
-		prefix = "[" + NLMISC::toString(dynamicChatDbIndex) + "]";
-		// Find position to put the new string
-		// After timestamp?
-		size_t pos = msg.find(ucstring("]"));
-		if (pos == ucstring::npos)
-		{
-			// No timestamp, so put it right after the color and add a space
-			pos = msg.find(ucstring("}"));
-			prefix += " ";
-		}
-		newmsg = msg.substr(0, pos + 1) + prefix + msg.substr(pos + 1);
-		prefix.clear();
-	}
-
 	gl = dynamic_cast<CGroupList *>(_Chat->getGroup("cb:text_list"));
-	if (gl)	gl->addChild(ctm.createMsgText(newmsg, col));
+	if (gl)	gl->addChild(ctm.createMsgText(msg, col));
 
 	// if the group is closed, make it blink
 	if (!_Chat->isOpen())
@@ -575,27 +557,9 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CRGBA	newMsgColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_newmsg").c_str());
 
-	ucstring newmsg = msg;
-	ucstring prefix;
-	if (gt == CChatGroup::dyn_chat)
-	{
-		prefix = "[" + NLMISC::toString(dynamicChatDbIndex) + "]";
-		// Find position to put the new string
-		// After timestamp?
-		size_t pos = msg.find(ucstring("]"));
-		if (pos == ucstring::npos)
-		{
-			// No timestamp, so put it right after the color and add a space
-			pos = msg.find(ucstring("}"));
-			prefix += " ";
-		}
-		newmsg = msg.substr(0, pos + 1) + prefix + msg.substr(pos + 1);
-		prefix.clear();
-	}
-
 	if (gl != NULL)
 	{
-		gl->addChild(ctm.createMsgText(newmsg, col));
+		gl->addChild(ctm.createMsgText(msg, col));
 		if (!gl->getParent()->getActive())
 			if (tab != NULL)
 				tab->setTextColorNormal(newMsgColor);
@@ -620,36 +584,14 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 			case CChatGroup::guild:		if (ci.Guild.isListeningWindow(cw))			gl = gl2;	break;
 			case CChatGroup::system:	if (ci.SystemInfo.isListeningWindow(cw))	gl = gl2;	break;
 			case CChatGroup::universe:	if (ci.Universe.isListeningWindow(cw))		gl = gl2;	break;
-			case CChatGroup::dyn_chat:	
-				if (ci.DynamicChat[dynamicChatDbIndex].isListeningWindow(cw))
-				{
-					gl = gl2;
-
-					// Add dynchannel number and optionally name before text if user channel
-					if (CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false)->getValueBool())
-					{
-						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
-						ucstring title;
-						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						if ( ! title.empty())
-						{
-							prefix = " " + title;
-						}
-					}
-					
-					// Put the new prefix in the correct position
-					size_t pos = newmsg.find(ucstring("] "));
-					newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
-				}
-				break;
-
-				// NB: the yubo chat cannot be in a user chat
+				// NB: the yubo chat and dyn_chat cannot be in a user chat
 			case CChatGroup::yubo_chat:	gl = NULL;	break;
+			case CChatGroup::dyn_chat:	gl = NULL;	break;
 		}
 
 		if (gl != NULL)
 		{
-			gl->addChild(ctm.createMsgText(newmsg, col));
+			gl->addChild(ctm.createMsgText(msg, col));
 			if (!gl->getParent()->getActive())
 				if (tab != NULL)
 					tab->setTextColorNormal(newMsgColor);

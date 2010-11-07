@@ -22,7 +22,7 @@
 //===================================================================================
 void CFilteredChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
-	sint ver = f.serialVersion(3);
+	sint ver= f.serialVersion(2);
 	f.serialCheck((uint32) 'USHC');
 	f.serial(SrcGuild);
 	f.serial(SrcTeam);
@@ -36,12 +36,4 @@ void CFilteredChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 	if(ver>=2)
 		f.serial(SrcRegion);
-
-	if (ver >= 3)
-	{
-		for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++) {
-			f.serial(SrcDynChat[i]);
-		}
-	}
-
 }
