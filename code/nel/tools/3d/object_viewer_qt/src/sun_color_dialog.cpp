@@ -45,7 +45,7 @@ CSunColorDialog::~CSunColorDialog()
 
 void CSunColorDialog::updateSunColor(bool visible)
 {
-	if (!visible)
+	if (!visible || !Modules::objView().getScene())
 		return;
 
 	_ui.ambientWidget->setColor(Modules::objView().getScene()->getSunAmbient());

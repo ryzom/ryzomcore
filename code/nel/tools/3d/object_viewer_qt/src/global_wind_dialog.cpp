@@ -30,9 +30,9 @@ CGlobalWindDialog::CGlobalWindDialog(QWidget *parent)
     : QDockWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	//_ui.directionWidget->setWrapper(&_DirectionWrapper);
-	
+
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setWndPower(int)));
 	connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(updateWnd(bool)));
 }
@@ -50,7 +50,7 @@ void CGlobalWindDialog::setWndPower(int value)
 
 void CGlobalWindDialog::updateWnd(bool visible)
 {
-	if (!visible)
+	if (!visible || !Modules::objView().getScene())
 		return;
 
 	_ui.horizontalSlider->setValue(int(Modules::objView().getScene()->getGlobalWindPower() * _ui.horizontalSlider->maximum()));

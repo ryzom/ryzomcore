@@ -57,7 +57,7 @@ CObjectViewer::CObjectViewer()
 	_phi(0), _psi(0),_dist(20),
 	_CameraFocal(75),
 	_CurrentInstance(""),
-	_BloomEffect(false)
+	_BloomEffect(false), _Scene(0)
 {
 	
 }
