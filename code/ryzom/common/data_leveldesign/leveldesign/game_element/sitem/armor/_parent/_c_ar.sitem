@@ -13,7 +13,7 @@
       <ATOM Name="Armor category" Value="light"/>
     </STRUCT>
     <STRUCT Name="crafting tool">
-      <ATOM Name="type" Value="Needle"/>
+      <ATOM Name="type" Value="ArmorTool"/>
     </STRUCT>
     <STRUCT Name="3d">
       <ATOM Name="map_variant" Value="Default"/>
