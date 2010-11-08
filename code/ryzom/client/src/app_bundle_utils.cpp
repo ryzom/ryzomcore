@@ -18,6 +18,7 @@
 
 #if defined(NL_OS_MAC)
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 
 std::string getAppBundlePath() 
 {
@@ -26,6 +27,7 @@ std::string getAppBundlePath()
 	if(cachedPathToBundle.size())
 		return cachedPathToBundle;
 
+#if defined(NL_OS_MAC)
 	// get the bundle
 	CFBundleRef bundle = CFBundleGetMainBundle();
 
@@ -47,8 +49,6 @@ std::string getAppBundlePath()
 				cachedPathToBundle = CFStringGetCStringPtr(
 					str, CFStringGetSmallestEncoding(str));
 				CFRelease(str);
-
-				return cachedPathToBundle;
 			}
 			else
 				nlerror("CFStringGetCStringPtr");
@@ -58,8 +58,11 @@ std::string getAppBundlePath()
 	}
 	else
 		nlerror("CFBundleGetMainBundle");
-	
-	return std::string();
-}
-
+#elif defined(NL_OS_WINDOWS)
+	char buffer[MAX_PATH+1];
+	if (GetModuleFileNameA(NULL, buffer, MAX_PATH))
+		cachedPathToBundle = NLMISC::CPath::standardizePath(NLMISC::CFile::getPath(buffer), false);
 #endif // defined(NL_OS_MAC)
+	
+	return cachedPathToBundle;
+}

@@ -19,7 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#if defined(NL_OS_MAC)
 #include <string>
 
 /** 
@@ -28,5 +27,4 @@
  */
 std::string getAppBundlePath();
 
-#endif // defined(NL_OS_MAC)
-#endif // CL_APP_BUNDLE_UTILS_H
+#endif

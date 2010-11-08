@@ -103,9 +103,7 @@ extern HINSTANCE HInstance;
 extern HWND SlashScreen;
 #endif // NL_OS_WINDOWS
 
-#ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
-#endif // NL_OS_MAC
 
 #include <new>
 
@@ -577,6 +575,20 @@ void checkDriverDepth ()
 	}
 }
 
+static std::string replaceApplicationDirToken(const std::string &dir)
+{
+	static const std::string token = "<ApplicationDir>";
+
+	std::string::size_type pos = dir.find(token);
+
+	if (pos != std::string::npos)
+		return dir.substr(0, pos) + getAppBundlePath() + dir.substr(pos + token.length());
+
+//	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
+
+	return dir;
+}
+
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -591,7 +603,7 @@ void addSearchPaths(IProgressCallback &progress)
 			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
 			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
+			CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPath[i]), true, false, &progress);
 
 			progress.popCropedValues ();
 		}
@@ -603,7 +615,7 @@ void addSearchPaths(IProgressCallback &progress)
 		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
 
-		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
+		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPathNoRecurse[i]), false, false, &progress);
 
 		progress.popCropedValues ();
 	}
@@ -619,11 +631,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
 
-		std::string preDataPath = ClientCfg.PreDataPath[i];
-#if defined(NL_OS_MAC)
-		preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
-#endif // defined(NL_OS_MAC)
-		CPath::addSearchPath(preDataPath, true, false, &progress);
+		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.PreDataPath[i]), true, false, &progress);
 
 		progress.popCropedValues ();
 	}
@@ -636,7 +644,7 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
+		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
 		progress.popCropedValues();
 	}
 }
