@@ -79,9 +79,7 @@ namespace NLQT
 
 		// create NeL viewport dock widget
 		_ObjectViewerDialog = new CObjectViewerDialog(this);
-		//_ObjectViewerDialog->setAllowedAreas(Qt::LeftDockWidgetArea );
-		//_ObjectViewerDialog->hide();
-		addDockWidget(Qt::LeftDockWidgetArea, _ObjectViewerDialog);	
+		addDockWidget(Qt::LeftDockWidgetArea, _ObjectViewerDialog);
 
 		createActions();
 		createMenus();
@@ -94,11 +92,6 @@ namespace NLQT
 		restoreState(settings.value("QtWindowState").toByteArray());
 		restoreGeometry(settings.value("QtWindowGeometry").toByteArray());
 		settings.endGroup();
-
-		// setup Qt style and palette from config file
-		//_originalPalette = QApplication::palette();
-		//Modules::config().setAndCallback("QtStyle", CConfigCallback(this, &CMainWindow::cfcbQtStyle));
-		//Modules::config().setAndCallback("QtPalette", CConfigCallback(this, &CMainWindow::cfcbQtPalette));
 
 		setWindowIcon(QIcon(":/images/khead.png"));
 
@@ -118,9 +111,6 @@ namespace NLQT
 		settings.setValue("QtWindowState", saveState());
 		settings.setValue("QtWindowGeometry", saveGeometry());
 		settings.endGroup();
-
-		//Modules::config().dropCallback("QtPalette");
-		//Modules::config().dropCallback("QtStyle");
 
 		_statusBarTimer->stop();
 
@@ -151,11 +141,11 @@ namespace NLQT
 			if (_treeViewList.isEmpty()) 
 			{
 				_emptyView->deleteLater();
-				addDockWidget(Qt::TopDockWidgetArea, newView);
+				tabifyDockWidget(_emptyView, newView);
 			} 
 			else 
 			{
-				tabifyDockWidget(_treeViewList.first(),newView);
+				tabifyDockWidget(_currentView,newView);
 				QTabBar* tb = Modules::mainWin().getTabBar();
 				if (tb)
 				{
@@ -175,6 +165,7 @@ namespace NLQT
 			connect(newView, SIGNAL(modified(bool)), 
 				_saveAction, SLOT(setEnabled(bool)));
 		}
+		QApplication::processEvents();
 		newView->raise();
 	}
 
@@ -251,11 +242,17 @@ namespace NLQT
 	{
 	}
 
-	void CMainWindow::createEmptyView()
+	void CMainWindow::createEmptyView(QDockWidget* w)
 	{
 		_emptyView = new CGeorgesTreeViewDialog(this, true);
-		//_emptyView->setAllowedAreas(Qt::TopDockWidgetArea);
-		addDockWidget(Qt::TopDockWidgetArea,_emptyView);
+		if(w)
+		{
+			tabifyDockWidget(w, _emptyView);
+		}
+		else
+		{
+			addDockWidget(Qt::TopDockWidgetArea, _emptyView);
+		}
 	}
 
 	void CMainWindow::createActions()

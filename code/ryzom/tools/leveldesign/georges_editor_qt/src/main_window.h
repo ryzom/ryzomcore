@@ -57,7 +57,7 @@ namespace NLQT
 		CGeorgesTreeViewDialog* getEmptyView() { return _emptyView;}
 		QList<CGeorgesTreeViewDialog*>& getTreeViewList() { return _treeViewList; }
 		QTabBar* getTabBar();
-		void createEmptyView();
+		void createEmptyView(QDockWidget* w = 0);
 
 	private Q_SLOTS:
 		void open();

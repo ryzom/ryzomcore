@@ -47,10 +47,6 @@ namespace NLQT
 	{
 		_ui.setupUi(this);
 
-		//widget = new QWidget(dockWidgetContents);
-		//widget->setObjectName(QString::fromUtf8("widget"));
-
-
 		_nlw = new QNLWidget(_ui.dockWidgetContents);
 		_nlw->setObjectName(QString::fromUtf8("nlwidget"));
 		_ui.gridLayout->addWidget(_nlw, 0, 0, 1, 1);
@@ -93,18 +89,15 @@ namespace NLQT
 	{
 		// called by show()
 		// code assuming visible window needed to init the 3d driver
-		if (visible != isVisible())
+		if (visible)
 		{
-			if (visible)
-			{
-				QDockWidget::setVisible(true);
-				updateInitialization(true);
-			}
-			else
-			{
-				updateInitialization(false);
-				QDockWidget::setVisible(false);
-			}
+			QDockWidget::setVisible(true);
+			updateInitialization(true);
+		}
+		else
+		{
+			updateInitialization(false);
+			QDockWidget::setVisible(false);
 		}
 	}
 
