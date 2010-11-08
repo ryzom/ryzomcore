@@ -65,10 +65,12 @@ namespace NLQT
 		_ui.treeView->setItemDelegateForColumn(1, formdelegate);
 
 
-		connect(_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
-			this, SLOT(doubleClicked (QModelIndex)));
-		connect(_ui.checkBoxParent, SIGNAL(stateChanged(int)),
-			this, SLOT(showParentRows (int)));
+		//connect(_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
+		//	this, SLOT(doubleClicked (QModelIndex)));
+		connect(_ui.checkBoxParent, SIGNAL(toggled(bool)),
+			this, SLOT(filterRows()));
+		connect(_ui.checkBoxDefaults, SIGNAL(toggled(bool)),
+			this, SLOT(filterRows()));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
@@ -131,9 +133,9 @@ namespace NLQT
 				_ui.treeView->resizeColumnToContents(0);
 				_ui.treeView->resizeColumnToContents(1);
 				_ui.treeView->resizeColumnToContents(2);
-				_ui.treeView->hideColumn(3);
+				//_ui.treeView->hideColumn(3);
 
-				showParentRows(_ui.checkBoxParent->isChecked());
+				filterRows();
 
 				//_ui.treeView->setRowHidden(0,QModelIndex(),true);
 				connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
@@ -237,8 +239,10 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
-		if (index.column() == 1)
+		if (index.column() == 1) {
+			//QTreeView::doubleClicked(index);
 			return;
+		}
 
 		CFormItem *item = static_cast<CFormItem*>(index.internalPointer());
 
@@ -264,53 +268,61 @@ namespace NLQT
 		}
 		else
 		{
-			Modules::mainWin().getTreeViewList().removeOne(this);
-			if(!Modules::mainWin().getTreeViewList().size())
+			if(Modules::mainWin().getTreeViewList().size() == 1)
 			{
-				Modules::mainWin().createEmptyView();
+				Modules::mainWin().createEmptyView(
+					Modules::mainWin().getTreeViewList().takeFirst());
 			}
 			deleteLater();
 		}
 	}
 
-	void CGeorgesTreeViewDialog::showParentRows(int newState)
+	void CGeorgesTreeViewDialog::filterRows()
 	{
+		nlinfo("CGeorgesTreeViewDialog::filterRows");
 		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
 		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-
-		for (int i = 0; i < m->rowCount(); i++) 
-		{
-			const QModelIndex in = m->index(i,0);
-			if (m->getItem(in)->nodeFrom() == UFormElm::NodeParentForm) 
-			{
-				if (newState == Qt::Checked) 
-				{
-					_ui.treeView->setRowHidden(in.row(),in.parent(),false);
-				} 
-				else
-				{
-					_ui.treeView->setRowHidden(in.row(),in.parent(),true);
-				}
-			} 
-			else 
-			{ // search childs // recursive?
-				for (int j = 0; j < m->rowCount(in); j++) 
-				{
-					const QModelIndex in2 = m->index(j,0,in);
-					if (m->getItem(in2)->nodeFrom() == UFormElm::NodeParentForm) 
-					{
-						if (newState == Qt::Checked) 
-						{
-							_ui.treeView->setRowHidden(in2.row(),in,false);
-						} 
-						else 
-						{
-							_ui.treeView->setRowHidden(in2.row(),in,true);
-						}
-					}
-				}
-			} // end of search childs
+		if (m) {
+			m->setShowParents(_ui.checkBoxParent->isChecked());
+			m->setShowDefaults(_ui.checkBoxDefaults->isChecked());
 		}
+
+		//CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
+		//CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+
+		//for (int i = 0; i < m->rowCount(); i++) 
+		//{
+		//	const QModelIndex in = m->index(i,0);
+		//	if (m->getItem(in)->nodeFrom() == UFormElm::NodeParentForm) 
+		//	{
+		//		if (newState == Qt::Checked) 
+		//		{
+		//			_ui.treeView->setRowHidden(in.row(),in.parent(),false);
+		//		} 
+		//		else
+		//		{
+		//			_ui.treeView->setRowHidden(in.row(),in.parent(),true);
+		//		}
+		//	} 
+		//	else 
+		//	{ // search childs // recursive?
+		//		for (int j = 0; j < m->rowCount(in); j++) 
+		//		{
+		//			const QModelIndex in2 = m->index(j,0,in);
+		//			if (m->getItem(in2)->nodeFrom() == UFormElm::NodeParentForm) 
+		//			{
+		//				if (newState == Qt::Checked) 
+		//				{
+		//					_ui.treeView->setRowHidden(in2.row(),in,false);
+		//				} 
+		//				else 
+		//				{
+		//					_ui.treeView->setRowHidden(in2.row(),in,true);
+		//				}
+		//			}
+		//		}
+		//	} // end of search childs
+		//}
 	}
 
 } /* namespace NLQT */

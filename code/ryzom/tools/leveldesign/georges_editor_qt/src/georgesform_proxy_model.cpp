@@ -17,9 +17,16 @@
 */
 
 #include "georgesform_proxy_model.h"
+#include "georgesform_model.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/georges/u_form_elm.h>
+
+// project includes
+#include "formitem.h"
+
+#include <QDebug>
 
 namespace NLQT 
 {
@@ -27,21 +34,58 @@ namespace NLQT
 	bool CGeorgesFormProxyModel::filterAcceptsRow(int sourceRow,
          const QModelIndex &sourceParent) const
 	{
-		nlinfo("CGeorgesFormProxyModel::filterAcceptsRow");
-     //QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-     //QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent);
-     //QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent);
+		//nlinfo("CGeorgesFormProxyModel::filterAcceptsRow");
 
-     //return (sourceModel()->data(index0).toString().contains(filterRegExp())
-     //        || sourceModel()->data(index1).toString().contains(filterRegExp()))
-     //       && dateInRange(sourceModel()->data(index2).toDate());
-			
-		//	if (getItem(p_index)->valueFrom() == UFormElm::ValueDefaultDfn)
-		//				return QBrush(QColor(255,0,0,30));
-		//			if (getItem(p_index)->nodeFrom() == UFormElm::NodeParentForm)
-		//				return QBrush(QColor(0,255,0,30));
-		//			return QVariant();
-		return true;
+		// column doesnt matter for item
+		CGeorgesFormModel *smodel = dynamic_cast<CGeorgesFormModel *>(sourceModel());
+		QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+		CFormItem *item   = smodel->getItem(index);
+
+		//qDebug() << smodel->showParents() << (item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm);
+		//nlinfo("%s %d %d %d %d", item->data(index.column()).toString().toStdString().c_str(), 
+		//	item->valueFrom(),
+		//	item->nodeFrom(),
+		//	smodel->showParents(), 
+		//	(item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm));
+		switch (item->nodeFrom())
+		{
+		case NLGEORGES::UFormElm::NodeParentForm:
+			{
+				switch (item->valueFrom())
+				{
+				case NLGEORGES::UFormElm::ValueDefaultDfn:
+					{
+						return smodel->showDefaults();
+					}
+					default:
+					{
+						return smodel->showParents();;
+					}
+				}
+			}
+		case NLGEORGES::UFormElm::NodeForm:
+			{
+				switch (item->valueFrom())
+				{
+				case NLGEORGES::UFormElm::ValueParentForm:
+					{
+						return smodel->showParents();
+					}
+				case NLGEORGES::UFormElm::ValueDefaultDfn:
+					{
+						return smodel->showDefaults();
+					}
+				default:
+					{
+						return true;
+					}
+				}
+			}
+		default:
+			{
+				return true;
+			}
+		}
 	}
 	
 /******************************************************************************/
@@ -49,7 +93,7 @@ namespace NLQT
 	bool CGeorgesFormProxyModel::filterAcceptsColumn(int sourceRow,
          const QModelIndex &sourceParent) const
 	{
-		nlinfo("CGeorgesFormProxyModel::filterAcceptsColumn");
+		//nlinfo("CGeorgesFormProxyModel::filterAcceptsColumn");
 		return QSortFilterProxyModel::filterAcceptsColumn(sourceRow, sourceParent);
 	}
 } /* namespace NLQT */

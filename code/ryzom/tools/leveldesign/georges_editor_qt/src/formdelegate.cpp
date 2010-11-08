@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPainter>
 // Project includes
 #include "georgesform_model.h"
+#include "georgesform_proxy_model.h"
 #include "formitem.h"
 
 namespace NLQT 
@@ -49,14 +50,15 @@ namespace NLQT
 		const QStyleOptionViewItem & option ,
 		const QModelIndex &index) const
 	{
-		CFormItem *item = static_cast<CFormItem*>(index.internalPointer());
+		const CGeorgesFormProxyModel * mp = dynamic_cast<const CGeorgesFormProxyModel *>(index.model());
+		const CGeorgesFormModel * m = dynamic_cast<const CGeorgesFormModel *>(mp->sourceModel());
+		CFormItem *item = static_cast<CFormItem*>(mp->mapToSource(index).internalPointer());
 		QString value = item->data(1).toString();
 
-		if (value.isEmpty())
+		if (value.isEmpty() || !mp || !m)
 			return 0;
 
-		const NLGEORGES::UType *type = dynamic_cast<const CGeorgesFormModel *>(index.model())->
-			getItem(index)->getFormElm()->getType();
+		const NLGEORGES::UType *type = m->getItem(mp->mapToSource(index))->getFormElm()->getType();
 		if(type) 
 		{
 			int numDefinitions = type->getNumDefinition();
@@ -130,8 +132,10 @@ namespace NLQT
 	void FormDelegate::setEditorData(QWidget *editor,
 		const QModelIndex &index) const
 	{
-		const NLGEORGES::UType *type = dynamic_cast<const CGeorgesFormModel *>(index.model())->
-			getItem(index)->getFormElm()->getType();
+		const CGeorgesFormProxyModel * mp = dynamic_cast<const CGeorgesFormProxyModel *>(index.model());
+		const CGeorgesFormModel * m = dynamic_cast<const CGeorgesFormModel *>(mp->sourceModel());
+
+		const NLGEORGES::UType *type = m->getItem(mp->mapToSource(index))->getFormElm()->getType();
 		int numDefinitions = type->getNumDefinition();
 		QString value = index.model()->data(index, Qt::DisplayRole).toString();
 
@@ -175,8 +179,10 @@ namespace NLQT
 	void FormDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 		const QModelIndex &index) const
 	{
-		const NLGEORGES::UType *type = dynamic_cast<const CGeorgesFormModel *>(index.model())->
-			getItem(index)->getFormElm()->getType();
+		const CGeorgesFormProxyModel * mp = dynamic_cast<const CGeorgesFormProxyModel *>(index.model());
+		const CGeorgesFormModel * m = dynamic_cast<const CGeorgesFormModel *>(mp->sourceModel());
+
+		const NLGEORGES::UType *type = m->getItem(mp->mapToSource(index))->getFormElm()->getType();
 		int numDefinitions = type->getNumDefinition();
 
 		if (numDefinitions) 

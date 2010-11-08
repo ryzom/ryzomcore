@@ -85,6 +85,10 @@ namespace NLQT
 		if (column < 0 || column >= itemData.size())
 			return false;
 
+		// TODO: default values
+		if (!formElm)
+			return false;
+
 		itemData[column] = value;
 		if (formElm->isAtom()) 
 		{

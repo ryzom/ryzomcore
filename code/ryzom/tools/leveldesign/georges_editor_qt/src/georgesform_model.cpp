@@ -76,11 +76,48 @@ namespace NLQT
 			}
 		case Qt::BackgroundRole:
 			{
-				if (getItem(p_index)->valueFrom() == UFormElm::ValueDefaultDfn)
-					return QBrush(QColor(255,0,0,30));
-				if (getItem(p_index)->nodeFrom() == UFormElm::NodeParentForm)
-					return QBrush(QColor(0,255,0,30));
-				return QVariant();
+				QBrush defaultBrush = QBrush(QColor(255,0,0,30));
+				QBrush parentBrush  = QBrush(QColor(0,255,0,30));
+
+				switch (getItem(p_index)->nodeFrom())
+				{
+				case NLGEORGES::UFormElm::NodeParentForm:
+					{
+						switch (getItem(p_index)->valueFrom())
+						{
+						case NLGEORGES::UFormElm::ValueDefaultDfn:
+							{
+								return defaultBrush;
+							}
+						default:
+							{
+								return parentBrush;
+							}
+						}
+					}
+				case NLGEORGES::UFormElm::NodeForm:
+					{
+						switch (getItem(p_index)->valueFrom())
+						{
+						case NLGEORGES::UFormElm::ValueParentForm:
+							{
+								return parentBrush;
+							}
+						case NLGEORGES::UFormElm::ValueDefaultDfn:
+							{
+								return defaultBrush;
+							}
+						default:
+							{
+								return QVariant();
+							}
+						}
+					}
+				default:
+					{
+						return QVariant();
+					}
+				}
 			}
 		case Qt::DecorationRole:
 			{
@@ -363,21 +400,57 @@ namespace NLQT
 								elmtType.append("_noValue");
 							}
 							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
+							qDebug() << columnData;
 							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
 							//if (parents.last()->childCount() > 0) {
 							//	parents << parents.last()->child(parents.last()->childCount()-1);
 							//}
 							loadFormData(elmt, parent->child(parent->childCount()-1));
-						} 
+						}
 						else
 						{
 							// add Defaults
+							// TODO: spams warnings for non ATOM values but i dont get type of non existing nodes
+							bool success = root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
+							switch (*whereN) 
+							{
+							case UFormElm::NodeForm:
+								elmtType.append("_fromForm");       break;
+							case UFormElm::NodeParentForm:
+								elmtType.append("_fromParentForm"); break;
+							case UFormElm::NodeDfn:
+								elmtType.append("_isDFN");          break;
+							case UFormElm::NodeType:
+								elmtType.append("_isType");         break;
+							default:
+								elmtType.append("_noNode");
+							}
+							switch (*whereV) 
+							{
+							case UFormElm::ValueForm:
+								elmtType.append("_formValue");   break;
+							case UFormElm::ValueParentForm:
+								elmtType.append("_parentValue"); break;
+							case UFormElm::ValueDefaultDfn:
+								elmtType.append("_dfnValue");    break;
+							case UFormElm::ValueDefaultType:
+								elmtType.append("_typeValue");   break;
+							default:
+								elmtType.append("_noValue");
+							}
+
+							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
+							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
+							
 							//columnData << QString(elmName.c_str()) << QString("default") << QString("default");
 							//parent->appendChild(new CFormItem(elmt, columnData, parent, UFormElm::ValueDefaultDfn, UFormElm::NodeDfn));
 						} 
+					} 
+					else 
+					{
+						nlinfo("getNodeByName returned false");
 					}
 				}
-
 				num++;
 			}
 		}
@@ -473,6 +546,20 @@ namespace NLQT
 	{
 		loadFormHeader();
 		loadFormData(_rootElm, _rootItem);
+	}
+
+	/******************************************************************************/
+
+	void CGeorgesFormModel::setShowParents( bool show ) { 
+		_showParents = show;
+		Q_EMIT layoutAboutToBeChanged();
+		Q_EMIT layoutChanged();
+	}
+	void CGeorgesFormModel::setShowDefaults( bool show ) 
+	{ 
+		_showDefaults = show;
+		Q_EMIT layoutAboutToBeChanged();
+		Q_EMIT layoutChanged();
 	}
 } /* namespace NLQT */
 

@@ -55,6 +55,10 @@ namespace NLQT
 		int columnCount(const QModelIndex &parent = QModelIndex()) const;
 		CFormItem *getItem(const QModelIndex &index) const;
 		CGeorgesFormModel *model() { return this; }
+		bool showParents() { return _showParents;}
+		bool showDefaults() { return _showDefaults;}
+		void setShowParents( bool show );
+		void setShowDefaults( bool show );
 
 	private:
 		void setupModelData();	
@@ -67,6 +71,9 @@ namespace NLQT
 		QString                     _comments;
 		QStringList                 _parents;
 		QList<const QModelIndex*>*	_parentRows;
+
+		bool						_showParents;
+		bool						_showDefaults;
 
 	};/* class CGeorgesFormModel */
 

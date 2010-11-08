@@ -66,7 +66,7 @@ namespace NLQT
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
 		void modifiedFile( );
-		void showParentRows(int);
+		void filterRows();
 
 	private:
 		Ui::CGeorgesTreeViewDialog _ui;
