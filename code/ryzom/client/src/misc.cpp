@@ -1437,19 +1437,23 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 
 void setVideoMode(const UDriver::CMode &mode)
 {
-	UDriver::CMode oldMode;
+	UDriver::CMode oldMode, newMode = mode;
 	oldMode.Windowed = true; // getCurrentScreenMode may fail if first init ...
 	Driver->getCurrentScreenMode(oldMode);
 	bool wasMaximized = isWindowMaximized();
-	Driver->setMode(mode);
+	if (!Driver->setMode(newMode) && !newMode.Windowed)
+	{
+		// failed to switch to mode, fall back to windowed
+		newMode.Windowed = true;
+	}
 	bool isMaximized = isWindowMaximized();
-	if (oldMode.Windowed && !mode.Windowed) // going to fullscreen ?
+	if (oldMode.Windowed && !newMode.Windowed) // going to fullscreen ?
 	{
 		/*CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		pIM->movePointerAbs((sint32) mode.Width / 2, (sint32) mode.Height / 2);
 		Driver->setMousePos(0.5f, 0.5f);*/
 	}
-	else if ((!oldMode.Windowed || wasMaximized) && (mode.Windowed && !isMaximized)) // leaving fullscreen ?
+	else if ((!oldMode.Windowed || wasMaximized) && (newMode.Windowed && !isMaximized)) // leaving fullscreen ?
 	{
 		UDriver::CMode screenMode;
 
@@ -1538,15 +1542,11 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 		}
 	}
 	
-	// If no modes are available, display a message and exit
-	if (!ClientCfg.Windowed && (nFoundMode == -1 || stringModeList.empty()))
+	// If no modes are available, fallback to windowed mode
+	if (nFoundMode == -1)
 	{
-		Driver->systemMessageBox("No Video Modes available!\n"
-															"Minimum Video mode to play Ryzom is 800x600.\n",
-															"No Video Mode!",
-															NL3D::UDriver::okType,
-															NL3D::UDriver::exclamationIcon);
-		exit(EXIT_SUCCESS);
+		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
+		ClientCfg.Windowed = true;
 	}
 
 	return nFoundMode;
