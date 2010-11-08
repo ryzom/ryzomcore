@@ -893,6 +893,8 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 			progressCallBack->popCropedValues ();
 		}
 	}
+
+	sort(result.begin(), result.end());
 }
 
 void CPath::removeAllAlternativeSearchPath ()
