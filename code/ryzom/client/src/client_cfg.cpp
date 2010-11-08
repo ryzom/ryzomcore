@@ -1885,67 +1885,66 @@ void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 //-----------------------------------------------
 void CClientConfig::init(const string &configFileName)
 {
+	// if the users client config does not exist
 	if(!CFile::fileExists(configFileName))
 	{
-		std::string defaultConfigFileName = "client_default.cfg";
-		bool found = false;
+		// create the basic .cfg
+		FILE *fp = fopen(configFileName.c_str(), "w");
 
-		if (CFile::isExists(defaultConfigFileName)) found = true;
-
-#ifdef NL_OS_MAC
-		if (!found)
-		{
-			defaultConfigFileName = 
-				getAppBundlePath() + "/Contents/Resources/" + defaultConfigFileName;
-			if(CFile::isExists(defaultConfigFileName)) found = true;
-		}
-#elif defined(RYZOM_ETC_PREFIX)
-		if (!found)
- 		{
-			defaultConfigFileName = CPath::standardizePath(RYZOM_ETC_PREFIX) + defaultConfigFileName;
-			if (CFile::isExists(defaultConfigFileName)) found = true;
- 		}
-#endif // RYZOM_ETC_PREFIX
-
-		if (found)
-		{
-			// create the basic .cfg that link the default one
-			FILE *fp = fopen(configFileName.c_str(), "w");
-
- 			if (fp == NULL)
- 			{
-				nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
- 			}
- 			else
- 			{
- 				nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
- 			}
-
- 			fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultConfigFileName.c_str());
-
-			// get current locale
-			std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
-			lang = lang.substr(0, 2);
-
-			const std::vector<std::string> &languages = CI18N::getLanguageCodes();
-
-			// search if current locale is defined in language codes
-			for(uint i = 0; i < languages.size(); ++i)
-			{
-				if (lang == languages[i])
-				{
-					fprintf(fp, "LanguageCode         = \"%s\";\n", lang.c_str());
-					break;
-				}
-			}
-
-			fclose(fp);
-		}
+		if (fp == NULL)
+			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
 		else
+			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
+
+		// get current locale
+		std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
+		lang = lang.substr(0, 2);
+
+		const std::vector<std::string> &languages = CI18N::getLanguageCodes();
+
+		// search if current locale is defined in language codes
+		for(uint i = 0; i < languages.size(); ++i)
 		{
-			nlwarning("CFG::init: '%s' Not Found !!!", defaultConfigFileName.c_str());
+			if (lang == languages[i])
+			{
+				// store the language code in the config file
+				fprintf(fp, "LanguageCode         = \"%s\";\n", lang.c_str());
+				break;
+			}
 		}
+
+		fclose(fp);
 	}
+
+	// read the exising config file (don't parse it yet!)
+	ucstring content;
+	NLMISC::CI18N::readTextFile(configFileName, content);
+	std::string contentUtf8 = content.toUtf8();
+
+	// while there are "RootConfigFilename" values, remove them
+	size_t pos = 0;
+	while((pos = contentUtf8.find("RootConfigFilename")) != configFileName.npos)
+	{
+		size_t endOfLine = contentUtf8.find("\n", pos);
+		contentUtf8.erase(pos, (endOfLine - pos) + 1);
+	}
+	
+	// get current location of the root config file (client_default.cfg)
+	std::string defaultConfigLocation;
+	if(!getDefaultConfigLocation(defaultConfigLocation))
+		nlerror("cannot find client_default.cfg");
+	
+	// and store it in the RootConfigFilename value in the very first line
+	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") + 
+		defaultConfigLocation + "\";\n");
+	
+	// save the updated config file
+	NLMISC::COFile configFile(configFileName, false, true, false);
+	configFile.serialBuffer((uint8*)contentUtf8.c_str(), contentUtf8.size());
+	configFile.close();
+
+	// now we can continue loading and parsing the config file
+
 
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
@@ -2163,4 +2162,33 @@ ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
 	}
 	else
 		return ucstr;
+}
+
+// ***************************************************************************
+bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const 
+{
+	std::string defaultConfigFileName = "client_default.cfg";
+	
+#ifdef NL_OS_MAC
+	// on mac, client_default.cfg is located in the .app/Contents/Resources/
+	defaultConfigFileName = 
+		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/") + 
+		defaultConfigFileName;
+
+#elif defined(RYZOM_ETC_PREFIX)
+	// if RYZOM_ETC_PREFIX is defined, look for client_default.cfg over there
+	defaultConfigFileName = CPath::standardizePath(RYZOM_ETC_PREFIX) + 
+		defaultConfigFileName;
+
+#endif // RYZOM_ETC_PREFIX
+
+	// else, client_default.cfg has to be in the working path
+
+	if (CFile::isExists(defaultConfigFileName))
+	{
+		p_name = defaultConfigFileName;
+		return true;
+	}
+
+	return false;
 }

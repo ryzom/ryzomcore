@@ -836,6 +836,9 @@ public:
 	// return a random loading tip or, if there are not, return the string in argument
 	ucstring buildLoadingString( const ucstring& ucstr ) const;
 
+	/// get the path to client_default.cfg including the filename itself.
+	bool getDefaultConfigLocation(std::string& fileLocation) const;
+
 };// CClientConfig //
 
 
