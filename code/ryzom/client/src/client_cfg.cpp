@@ -2168,27 +2168,33 @@ ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
 bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const 
 {
 	std::string defaultConfigFileName = "client_default.cfg";
+	std::string defaultConfigPath;
 	
 #ifdef NL_OS_MAC
-	// on mac, client_default.cfg is located in the .app/Contents/Resources/
-	defaultConfigFileName = 
-		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/") + 
-		defaultConfigFileName;
+	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
+	defaultConfigPath = 
+		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
 
 #elif defined(RYZOM_ETC_PREFIX)
-	// if RYZOM_ETC_PREFIX is defined, look for client_default.cfg over there
-	defaultConfigFileName = CPath::standardizePath(RYZOM_ETC_PREFIX) + 
-		defaultConfigFileName;
+	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
+	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
+
+#else
+	// some other prefix here :)
 
 #endif // RYZOM_ETC_PREFIX
 
-	// else, client_default.cfg has to be in the working path
-
-	if (CFile::isExists(defaultConfigFileName))
-	{
+	// look in the current working directory first
+	if(CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
+
+	// if not in working directory, check using prefix path
+	else if(CFile::isExists(defaultConfigPath + defaultConfigFileName))
+		p_name = defaultConfigPath + defaultConfigFileName;
+
+	// if some client_default.cfg was found return true
+	if(p_name.size())
 		return true;
-	}
 
 	return false;
 }
