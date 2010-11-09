@@ -2170,6 +2170,8 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
 	
+	p_name = std::string();
+	
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
 	defaultConfigPath = 
