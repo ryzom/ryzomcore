@@ -1148,7 +1148,7 @@ void computeCurrentFovAspectRatio(float &fov, float &ar)
 
 	// get the screen aspect ratio from CFG
 	ar = ClientCfg.ScreenAspectRatio;
-
+	//nlinfo("AR: clientcfg ar %f", ar);
 	// if Driver is not created, we can't get current screen mode
 	if (!Driver) return;
 
@@ -1167,18 +1167,21 @@ void computeCurrentFovAspectRatio(float &fov, float &ar)
 			{
 				// auto mode, we are using window aspect ratio
 				ar = arWnd;
+				//nlinfo("AR: windowed auto => use window size %d %d => %f", wndW, wndH, arWnd);
 			}
 			else if (mode.Width && mode.Height)
 			{
 				// compute screen aspect ratio
 				float	arScreen= float(mode.Width) / float(mode.Height);
 				ar *= arWnd / arScreen;
+				//nlinfo("AR: windowed not auto => monitor size %d %d window size %d %d => arsc %f arwnd %f, ar finale %f", mode.Width, mode.Height, wndW, wndH, arScreen, arWnd, ar);
 			}
 		}
 	}
 	// if fullscreen, must modulate aspect ratio by ScreenResolution
 	else
 	{
+	  //nlinfo("AR: fullscreen ratio");
 		if (ar == 0.f)
 		{
 			UDriver::CMode	mode;
@@ -1445,6 +1448,11 @@ void setVideoMode(const UDriver::CMode &mode)
 	{
 		// failed to switch to mode, fall back to windowed
 		newMode.Windowed = true;
+		ClientCfg.Windowed = true;
+		ClientCfg.writeInt("FullScreen", 0);
+
+		// set the window mode
+		Driver->setMode(newMode);
 	}
 	bool isMaximized = isWindowMaximized();
 	if (oldMode.Windowed && !newMode.Windowed) // going to fullscreen ?
@@ -1547,6 +1555,7 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	{
 		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
 		ClientCfg.Windowed = true;
+		ClientCfg.writeInt("FullScreen", 0);
 	}
 
 	return nFoundMode;
