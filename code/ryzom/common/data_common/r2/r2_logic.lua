@@ -2107,7 +2107,11 @@ Logic.translateActivityStep = function(context,  hlComponent, activitySequence, 
 	if Logic.isWanderActivity(activityStep.Activity) and activityStep.TimeLimit == "Few Sec" then
 		local event = r2.Translator.createEvent("destination_reached_all", aiState.Name, groupsByName)
 		table.insert(context.RtAct.Events, event)
-		local action =  r2.Translator.createAction("wander_destination_reached",  groupsByName, aiState.Name,activityStepIndex , tonumber(activityStep.TimeLimitValue))
+		local number = tonumber(activityStep.TimeLimitValue)
+		if number == nil then
+			number = 0
+		end
+		local action =  r2.Translator.createAction("wander_destination_reached",  groupsByName, aiState.Name, activityStepIndex, number)
 		table.insert(context.RtAct.Actions, action)
 		table.insert(event.ActionsId, action.Id)
 	end
@@ -2414,6 +2418,9 @@ Logic.getTimeLimit = function(step)
 
 	if step.TimeLimit == "Few Sec" then
 		local limit = tonumber(step.TimeLimitValue)
+		if limit == nil then
+			limit = 0
+		end
 		limit = 1 + limit * 10
 		param = tostring( limit )
 		return param
