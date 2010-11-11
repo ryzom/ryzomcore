@@ -156,6 +156,8 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 		_ui.radiusLabel->hide();
 	}
 	
+	_ui.forceConsistentCheckBox->setChecked(_Emitter->isConsistentEmissionEnabled());
+
 	_ui.directionComboBox->blockSignals(true);
 	if (_Emitter->isSpeedBasisEmissionEnabled())
 	{
@@ -196,7 +198,7 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 		_ui.bypassAutoLODCheckBox->setChecked(_Emitter->getBypassAutoLOD());
 	}
 	else
-		_ui.bypassAutoLODCheckBox->setEnabled(true);
+		_ui.bypassAutoLODCheckBox->setEnabled(false);
 }
 
 void CEmitterPage::setEmittedType(int index)
@@ -245,7 +247,7 @@ void CEmitterPage::setTypeOfEmission(int index)
 
 void CEmitterPage::setConsistentEmission(bool state)
 {
-	if (_Emitter-> isConsistentEmissionEnabled() == state) return;
+	if (_Emitter->isConsistentEmissionEnabled() == state) return;
 	_Emitter->enableConsistenEmission(state);
 	updateModifiedFlag();
 }
