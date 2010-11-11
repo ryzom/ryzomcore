@@ -39,13 +39,7 @@ CBinOpDialog::CBinOpDialog(QWidget *widget1, QWidget *widget2, QWidget *parent)
 	
 	setWindowTitle(tr("Bin operator"));
 	_comboBox->clear();
-	_comboBox->insertItems(0, QStringList()
-	 << tr("SelectArg1")
-	 << tr("SelectArg2")
-	 << tr("Modulate")
-	 << tr("Add")
-	 << tr("Subtract"));
-	 
+
 	qobject_cast<QGroupBox*>(widget1)->setTitle(tr("Arg1"));
 	qobject_cast<QGroupBox*>(widget2)->setTitle(tr("Arg2"));
 	connect(_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setNewOp(int)));
