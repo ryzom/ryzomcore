@@ -432,7 +432,7 @@ public:
 	 *	of this mesh that are bound to this bone
 	 *	NB: the instance must be skinned to the skeleton instance, BUT the result is not modified
 	 *	by current bone world matrix (eg: no current scale influence)
-	 *	\param boneId: the id of the skeleton's bone (wich the instance is skinned to)
+	 *	\param boneId: the id of the skeleton's bone (which the instance is skinned to)
 	 *	\param bbox: the bbox (in bone basis) filled if return is true
 	 *	\return false if no vertices are bound to
 	 */
@@ -640,7 +640,7 @@ protected:
 	 */
 	virtual const std::vector<sint32>			*getSkinBoneUsage() const {return NULL;}
 	/** Deriver must change this method if isSkinnable(). It return a list of sphere relative to each bone
-	 *	of the father skeleton. Use with getSkinBoneUsage() to know to wich bone this sphere apply
+	 *	of the father skeleton. Use with getSkinBoneUsage() to know to which bone this sphere apply
 	 *	NB: if a sphere radius is -1, it means that the bone is not used (for any reason...)
 	 *	default is to return NULL.
 	 */

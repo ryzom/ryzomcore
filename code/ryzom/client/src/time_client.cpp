@@ -68,7 +68,7 @@ NLMISC::TGameCycle LastGameCycle = 0;
 CRyzomTime			RT;
 CClientDate			SmoothedClientDate;
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Update_Time )
 
 

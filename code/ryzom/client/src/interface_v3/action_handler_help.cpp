@@ -281,7 +281,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	// if an active window is not in KeepMode, get it.
 	for(i=0;i<_ActiveWindows.size();i++)
 	{
-		// must also test forceKeep for special Action Help wich open Brick Help
+		// must also test forceKeep for special Action Help which open Brick Help
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
 		{
 			newIndexWindow= _ActiveWindows[i];

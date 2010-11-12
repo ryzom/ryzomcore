@@ -469,7 +469,7 @@ public:
 	/** This is called before the config loading begins. This is the place to restore default state for config info.
       */
 	virtual void onLoadConfig() {}
-	/** Tells wether that element wants to save info in a config stream. If this returns true, then serialConfig
+	/** Tells whether that element wants to save info in a config stream. If this returns true, then serialConfig
 	  * is called.
 	  */
 	virtual bool wantSerialConfig() const { return false; }

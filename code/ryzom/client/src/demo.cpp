@@ -42,7 +42,7 @@ using namespace std;
 // GLOBAL //
 ////////////
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Update_Demo )
 
 ///////////////

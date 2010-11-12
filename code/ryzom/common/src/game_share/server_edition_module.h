@@ -499,7 +499,7 @@ namespace R2
 		// implementation of kick ( send a warning message to client to disconnect himself otherwise he will be kicked 30 seconds later)
 		bool kickPioneerImpl(TSessionId sessionId, TCharId charId,  std::string& outMsg);
 		bool unkickPioneerImpl(TSessionId sessionId, TCharId charId,  std::string& outMsg);
-		// implementaion of teleport (teleport a character to another character if they are in the same session (current wether is correctly set)
+		// implementaion of teleport (teleport a character to another character if they are in the same session (current whether is correctly set)
 		bool teleportOneCharacterToAnotherImpl(TSessionId sessionId, TCharId source, TCharId target, std::string& outMsg);
 		// hibernate a session (save to files)
 		bool hibernateSessionImpl(TSessionId sessionId, std::string& msg);

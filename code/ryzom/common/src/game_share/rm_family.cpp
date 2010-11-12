@@ -290,7 +290,7 @@ namespace RM_FABER_STAT_TYPE
 		return CI18N::get("mpstat" + NLMISC::toString((uint)stats));
 	}
 
-	// Array saying for wich item part built, what stat is usefull
+	// Array saying for which item part built, what stat is usefull
 	class CItemPartToStat
 	{
 	public:

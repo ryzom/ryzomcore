@@ -722,7 +722,7 @@ private:
 	bool										_WaitScenarioScreenActive;	// the 'wait scenario' screen is being displayed
 	bool										_EditionModeDisconnectedFlag;
 	CObject										*_NewScenario; // new scenario that will be updated just after the wait screen is over
-	uint32										_NewScenarioInitialAct;// the start at wich the user start an edition session (can be ~= from 1 after a test session)
+	uint32										_NewScenarioInitialAct;// the start at which the user start an edition session (can be ~= from 1 after a test session)
 	bool										_PostponeScenarioUpdated;
 
 	// Contextual selection

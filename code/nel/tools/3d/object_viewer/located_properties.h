@@ -104,7 +104,7 @@ protected:
 			void set(const uint32 &v) 
 			{ 
 				// if the max new size is lower than the current number of instance, we must suppress item
-				// in the the CParticleTreeCtrl
+				// in the CParticleTreeCtrl
 
 				if (v < Located->getSize())
 				{

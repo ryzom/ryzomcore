@@ -151,7 +151,7 @@ void bind_1_4 (std::vector<CPatchInfo> &zoneInfos, uint patch, uint edge, uint p
 
 // ***************************************************************************
 
-/**  Test wether 2 vertices could be welded */
+/**  Test whether 2 vertices could be welded */
 
 static inline bool CanWeld(const CVector &v1, const CVector &v2, float weldThreshold)
 {
@@ -306,7 +306,7 @@ void CleanZone ( std::vector<CPatchInfo> &zoneInfos, uint zoneId, const CAABBoxE
 	}
 
 	////////////////////////////////////////////////
-	// check wether each patch is correctly bound //
+	// check whether each patch is correctly bound //
 	////////////////////////////////////////////////
 	uint pass = 0;
 	while (1)

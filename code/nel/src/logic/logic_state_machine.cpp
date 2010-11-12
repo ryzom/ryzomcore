@@ -279,14 +279,14 @@ void CLogicStateMachine::modifyVariable( string varName, string modifOperator, s
 
 	if( f.isReading() )
 	{
-		// set the the logic state machine addr in each state
+		// set the logic state machine addr in each state
 		map<string,CLogicState>::iterator itStates;
 		for( itStates = _States.begin(); itStates != _States.end(); ++itStates )
 		{
 			(*itStates).second.setLogicStateMachine( this );
 		}
 
-		// set the the logic state machine addr in each conditions
+		// set the logic state machine addr in each conditions
 		map<string,CLogicCondition>::iterator itCond;
 		for( itCond = _Conditions.begin(); itCond != _Conditions.end(); ++itCond )
 		{

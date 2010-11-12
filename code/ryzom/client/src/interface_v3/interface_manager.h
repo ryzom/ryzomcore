@@ -444,7 +444,7 @@ public:
 	/**
 	 * add an observer to a database entry
 	 * \param observer : pointer on the observer
-	 * \param id :  the thext id of the element to observe
+	 * \param id :  the text id of the element to observe
 	 * \return true if success
 	 */
 	bool addDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id);
@@ -452,7 +452,7 @@ public:
 	/**
 	 * add an observer to a database entry
 	 * \param observer : pointer on the observer
-	 * \param id :  the thext id of the element to observe
+	 * \param id :  the text id of the element to observe
 	 * \return true if success
 	 */
 	bool addDBObserver (ICDBNode::IPropertyObserver* observer, const std::string& id)

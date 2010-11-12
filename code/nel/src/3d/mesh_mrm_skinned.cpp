@@ -1850,7 +1850,7 @@ void		CMeshMRMSkinnedGeom::updateRawSkinNormal(bool enabled, CMeshMRMSkinnedInst
 			skinLod.Geomorphs.resize( numGeoms );
 			for(i=0;i<numGeoms;i++)
 			{
-				// NB: don't add "numGeoms" to the index because RawSkin look in a TempArray in RAM, wich start at 0...
+				// NB: don't add "numGeoms" to the index because RawSkin look in a TempArray in RAM, which start at 0...
 				skinLod.Geomorphs[i].Start= vertexRemap[lod.Geomorphs[i].Start];
 				skinLod.Geomorphs[i].End= vertexRemap[lod.Geomorphs[i].End];
 			}

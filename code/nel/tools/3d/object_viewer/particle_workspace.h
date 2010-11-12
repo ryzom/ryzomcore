@@ -201,9 +201,9 @@ public:
 	  * All nodes are in the 'unloaded" state, so it is to the caller to load them by calling load() on their node
 	  */
 	void		load() throw(NLMISC::EStream);
-	// Test wether the structure of the workspace has been modified (does not test if ps inside the workspace have been modified)
+	// Test whether the structure of the workspace has been modified (does not test if ps inside the workspace have been modified)
 	bool		isModified() const { return _Modified; }
-	// Test wether the content of the workspace has ben modified
+	// Test whether the content of the workspace has ben modified
 	bool		isContentModified() const;
 	void		touch() { setModifiedFlag(true); }
 	void		clearModifiedFlag() { setModifiedFlag(false); }

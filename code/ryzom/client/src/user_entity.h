@@ -709,7 +709,7 @@ private:
 	/// For executeCombatWithPhrase
 	CLFECOMMON::TCLEntityId		_LastExecuteCombatSlot;
 
-	/// R2: to know in wich mode is the current entity (affect camera view and run speed)
+	/// R2: to know in which mode is the current entity (affect camera view and run speed)
 	R2::TCharMode		_R2CharMode;
 
 	/// snapshot of a CItemImage

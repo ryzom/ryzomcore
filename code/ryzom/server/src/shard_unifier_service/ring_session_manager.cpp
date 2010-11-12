@@ -4117,7 +4117,7 @@ endOfWelcomeUserResult:
 
 			// load the scenario data
 			CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-			BOMB_IF(sessionLog == NULL, "Failed to load the the scenario "<<sessionLog->getScenarioId(), invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
+			BOMB_IF(sessionLog == NULL, "Failed to load the scenario "<<sessionLog->getScenarioId(), invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
 
 			// lookup for an existing rating to update
 			CPlayerRatingPtr playerRating;

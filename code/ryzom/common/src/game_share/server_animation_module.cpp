@@ -375,7 +375,7 @@ public:
 	                   // weather value can come from the scenario description, or may have been changed by an animator
 	uint8	CurrSeason; // current season or ~0 for no season set yet
 	bool StartingAct; // 1 if a player/ia has schedule a startAct
-	uint32 InitialAct; //act at wich begin the scenario (1) for animation currentAct for test
+	uint32 InitialAct; //act at which begin the scenario (1) for animation currentAct for test
 
 	uint32			ScenarioScore;
 	NLMISC::TTime	ScenarioTime;

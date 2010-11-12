@@ -260,7 +260,7 @@ Update the dm commands that are enable on the current target.
 Tbe bitfield returned let us know if the selected target is a botobject, if it is grouped, if we can incarnate him and so.
 - dssTarget: without parameter ask the server to update the list of command that are enable on the selected target
 - onProcessModuleMessage with "NPC_APROP" message: return a bitfield that let know animation property of the selected entity
-- CDynamicMapClient::onNpcAnimationTargeted: translate the bitfield given by the "NPC_APROP" message to known wich are the allowed action
+- CDynamicMapClient::onNpcAnimationTargeted: translate the bitfield given by the "NPC_APROP" message to known which are the allowed action
 - r2:updateAnimBarActions: called by  CDynamicMapClient::onNpcAnimationTargeted, update the anim bar that contains action that can be done on the selecte npc
 
 The DM can push button on the anim bar to do some DM functions like kill an npc, kill a group, despawn, heal, control, speak as
@@ -635,7 +635,7 @@ public:
 	//// Test Mode to edition mode
 	/////////////////////////////////////////////////////
 
-	//! Ask the the stop of the Animation / Test. Send a message to AIS to unload data.
+	//! Ask the stop of the Animation / Test. Send a message to AIS to unload data.
 	void requestStopTest();
 
 	/*! Ask the connection to an edition session.

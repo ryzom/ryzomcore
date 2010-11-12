@@ -31,7 +31,7 @@ extern CEventsListener EventsListener;
 // GLOBAL //
 ////////////
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Actions_Context_Mngr_Update )
 
 static bool getParam (CBaseAction::CParameter::TType type, ucstring &paramName, ucstring &paramValue, const std::string &argu, uint paramId);

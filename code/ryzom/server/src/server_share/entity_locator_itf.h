@@ -269,14 +269,14 @@ namespace ENTITYLOC
 	class TCharConnectionEvent
 	{
 	protected:
-		// The character id the the character
+		// The character id of the character
 		uint32	_CharId;
 		// Type of the event : true for a connection, false otherwise
 		bool	_Connection;
 		// The privilege of the character (e.g :GM:)
 		std::string	_Privilege;
 	public:
-		// The character id the the character
+		// The character id of the character
 		uint32 getCharId() const
 		{
 			return _CharId;

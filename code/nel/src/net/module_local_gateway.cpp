@@ -380,7 +380,7 @@ namespace NLNET
 
 		void onModulePlugged(IModule *pluggedModule)
 		{
-			// A module has just been plugged here, we need to disclose it the the
+			// A module has just been plugged here, we need to disclose it to the
 			// other module, and disclose other module to it.
 
 			// create a proxy for this module

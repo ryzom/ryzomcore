@@ -93,7 +93,7 @@ public:
 
 	static void displayArrow(NL3D::IDriver *driver, const NLMISC::CVector &start, const NLMISC::CVector &v, float size, NLMISC::CRGBA col1, NLMISC::CRGBA col2);
 
-	/// display a string at the given world position. The The model matrix must be restored after this call
+	/// display a string at the given world position. The model matrix must be restored after this call
 
 	static void print(NL3D::IDriver *driver, const std::string &text, CFontGenerator &fg, CFontManager &fm, const NLMISC::CVector &pos, float size, NLMISC::CRGBA col = NLMISC::CRGBA::White);
 

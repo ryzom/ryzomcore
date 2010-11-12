@@ -301,7 +301,7 @@ void	setCrashAlreadyReported(bool state);
  * Example:
  *\code
 	// Load a file and assert if the load failed. This example will work \b only in debug mode because in release mode,
-	// nlassert do nothing, the the load function will not be called...
+	// nlassert do nothing, the load function will not be called...
 	nlassert(load("test.tga"));
 
 	// If you want to do that anyway, you could call nlverify. In release mode, the assertion will not be tested but

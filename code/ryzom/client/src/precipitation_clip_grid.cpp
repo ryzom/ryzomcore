@@ -492,7 +492,7 @@ void CPrecipitationClipGrid::updateGrid(const NLMISC::CVector &/* userPos */, NL
 	{
 		// the width to update
 		uint width = std::min((uint) offsetX, _Size + 1);
-		// the the grid moved top or bottom, exclude this part
+		// the grid moved top or bottom, exclude this part
 		sint height = _Size + 1 - abs(offsetY);
 		if (height > 0)
 		{
@@ -504,7 +504,7 @@ void CPrecipitationClipGrid::updateGrid(const NLMISC::CVector &/* userPos */, NL
 	{
 		// the width to update
 		uint width = std::min((uint) (- offsetX), _Size + 1);
-		// the the grid moved top or bottom, exclude
+		// the grid moved top or bottom, exclude
 		sint height = _Size + 1 - abs(offsetY);
 		if (height > 0)
 		{

@@ -732,7 +732,7 @@ public:
 	// teleport character with or without his mount, check if tp is regular and send a server tp command
 	void teleportCharacter( sint32 x, sint32 y, sint32 z, bool teleportWithMount, bool useHeading = false, float heading = 0.0f, uint8 continent = 0xFF, sint32 cell = 0, uint8 season = 0xff, const  R2::TR2TpInfos& tpInfos= R2::TR2TpInfos());
 
-	// return the season in wich is the current character
+	// return the season in which is the current character
 	uint8 getRingSeason() const { return _RingSeason;}
 	
 	
@@ -1900,10 +1900,10 @@ public:
 		/// get ignored player by index
 		const NLMISC::CEntityId &getIgnoredPlayer(uint16 index) const;
 
-		/// does the the entity friend(ify) this player?
+		/// does the entity friend(ify) this player?
 		bool hasInFriendList(const NLMISC::CEntityId &player) const;
 
-		/// does the the entity ignore this player?
+		/// does the entity ignore this player?
 		bool hasInIgnoreList(const NLMISC::CEntityId &player) const;
 		
 		/// player is going online or offline

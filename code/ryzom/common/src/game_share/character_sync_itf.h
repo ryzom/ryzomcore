@@ -477,11 +477,11 @@ namespace CHARSYNC
 	class TCharInfo
 	{
 	protected:
-		// The entity id the the character
+		// The entity id of the character
 		NLMISC::CEntityId	_CharEId;
 		// The name of the character
 		std::string	_CharName;
-		// The session id the the character home mainland
+		// The session id of the character home mainland
 		uint32	_HomeSessionId;
 		// The best combat level of the character
 		sint32	_BestCombatLevel;
@@ -498,7 +498,7 @@ namespace CHARSYNC
 		//
 		bool	_Newcomer;
 	public:
-		// The entity id the the character
+		// The entity id of the character
 		const NLMISC::CEntityId &getCharEId() const
 		{
 			return _CharEId;
@@ -538,7 +538,7 @@ namespace CHARSYNC
 
 
 		}
-			// The session id the the character home mainland
+			// The session id of the character home mainland
 		uint32 getHomeSessionId() const
 		{
 			return _HomeSessionId;
@@ -693,12 +693,12 @@ namespace CHARSYNC
 	class TCharBestLevelInfo
 	{
 	protected:
-		// The entity id the the character
+		// The entity id of the character
 		NLMISC::CEntityId	_CharEId;
 		// The best combat level of the character
 		sint32	_BestCombatLevel;
 	public:
-		// The entity id the the character
+		// The entity id of the character
 		const NLMISC::CEntityId &getCharEId() const
 		{
 			return _CharEId;

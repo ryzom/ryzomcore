@@ -521,7 +521,7 @@ public:
 	static CGatewayFEClientTransport *getCurrentTransport()
 	{
 #if defined(RZ_CLIENT_DRONE)
-		// the current transport is set the the current context of the client drone
+		// the current transport is set to the current context of the client drone
 		if (CSimulatedClient::currentContext() == NULL)
 			return NULL;
 		if (CSimulatedClient::currentContext()->getGatewayTransport() == NULL)

@@ -293,7 +293,7 @@ int extractBotNames(int argc, char *argv[])
 	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 	//-------------------------------------------------------------------
-	// ok, ready the the real work,
+	// ok, ready for the real work,
 	// first, read the primitives files and parse the primitives
 	vector<string>	files;
 	CPath::getFileList("primitive", files);

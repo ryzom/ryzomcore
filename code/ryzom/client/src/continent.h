@@ -242,7 +242,7 @@ public:
 	/// This will remove extra rsc used by the continent (fog maps ..)
 	void unselect();
 
-	/** Test wether the next call to updateStreamable will be blocking.
+	/** Test whether the next call to updateStreamable will be blocking.
 	  * This happen for example when the player is too near of a village and when asynchronous loading is not sufficient.
 	  * \param pos player position
 	  */

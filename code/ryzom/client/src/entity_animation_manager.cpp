@@ -61,7 +61,7 @@ extern NL3D::UScene * Scene;
 // GLOBAL //
 ////////////
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Entity_Animation_Mngr )
 
 ////////////////////

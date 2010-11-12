@@ -69,7 +69,7 @@ public:
 		bool			isListeningPeopleList(CPeopleList *pl) const;
 	//@}
 
-	// For ChatGroup, usefull to know for wich chat it is destinated
+	// For ChatGroup, usefull to know for which chat it is destinated
 	CChatGroup::TGroupType	FilterType;
 	// If FilterType==CChatGroup::dyn_chat, gives the index of dynchat
 	uint32					DynamicChatDbIndex;

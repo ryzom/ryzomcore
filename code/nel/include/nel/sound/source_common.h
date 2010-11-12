@@ -45,7 +45,7 @@ public:
 	~CSourceCommon();
 
 
-	/// Get the type the the source.
+	/// Get the type of the source.
 	virtual TSOURCE_TYPE	getType() const = 0;
 
 	void					setPriority( TSoundPriority pr);

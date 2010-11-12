@@ -217,7 +217,7 @@ public:
 	 * instances have been built.
 	 */
 	void								initEdgeQuad(CGlobalRetriever &gr);
-	/// link the edge quad of the interior with the the landscape instances
+	/// link the edge quad of the interior with the landscape instances
 	void								linkEdgeQuad(CGlobalRetriever &gr);
 
 	/// Builds the instance.

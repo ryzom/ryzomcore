@@ -751,7 +751,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_WindowHeight = height;
 
 		/* The next step is to create a device context for the newly created pbuffer. To do this,
-			call the the function: */
+			call to the function: */
 		_hDC = nwglGetPbufferDCARB( _PBuffer );
 		if (_hDC == NULL)
 		{

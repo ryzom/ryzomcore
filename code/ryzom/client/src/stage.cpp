@@ -184,7 +184,7 @@ CStage *CStageSet::addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 
 		// New Stage and before the first one.
 		if(gameCycle < gcFirst)	// Could be egal if we do not replace the property in the case the property already exist too.
 		{
-			// Game Cycle to early -> put the property in the first one instead (but do not replace the the property in the first 1 if already exist).
+			// Game Cycle to early -> put the property in the first one instead (but do not replace the property in the first 1 if already exist).
 			it = _StageSet.begin();
 			replace = false;
 		}

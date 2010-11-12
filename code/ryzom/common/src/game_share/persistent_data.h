@@ -16,7 +16,7 @@
 
 /**
   This file contains a system for loading and saving persistent data in a robust manor
-  The system is hierachical and all data elements are tagged.
+  The system is hierarchical and all data elements are tagged.
 
   The system supports saving to text files and to binary files
 

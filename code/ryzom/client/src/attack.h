@@ -41,9 +41,9 @@ public:
 	const CCreatureAttackSheet *Sheet;
 	// anim fx set for attack part
 	CAnimationFXSet AttackFXSet;
-	// anim fx set for custom projectile part (wether custom projectile is used is told in 'Sheet');
+	// anim fx set for custom projectile part (whether custom projectile is used is told in 'Sheet');
 	CAnimationFXSet ProjectileFXSet;
-	// anim fx set for custom impact part (wether custom impact is used is told in 'Sheet');
+	// anim fx set for custom impact part (whether custom impact is used is told in 'Sheet');
 	CAnimationFXSet ImpactFXSet;
 public:
 	// ctor

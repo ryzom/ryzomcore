@@ -188,7 +188,7 @@ public:
 		std::string					Name;
 		TVarType					Type;
 		bool						Root;		// true if this var comes from the root document. false else.
-		bool						Comp;		// true if the the parser found a 'complex' var (ie an array)
+		bool						Comp;		// true if the parser found a 'complex' var (ie an array)
 		bool						FromLocalFile;	// Used during cfg parsing. True if the var has been created from the currently parsed cfg
 		std::vector<int>			IntValues;
 		std::vector<double>			RealValues;

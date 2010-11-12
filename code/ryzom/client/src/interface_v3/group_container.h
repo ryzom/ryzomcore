@@ -585,7 +585,7 @@ protected:
 	IActionHandler		*_AHOnBeginMove;
 	CStringShared		_AHOnBeginMoveParams;
 
-	// action handler to test wether the windows can be deactivated (when the close button is pressed)
+	// action handler to test whether the windows can be deactivated (when the close button is pressed)
 	IActionHandler		*_AHOnDeactiveCheck;
 	CStringShared		_AHOnDeactiveCheckParams;
 

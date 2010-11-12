@@ -109,7 +109,7 @@ static CZone *LoadZone(uint16 xPos, uint16 yPos, std::string zoneExt)
 }
 
 //===========================================================================================================================
-/**  Test wether 2 vertices could be welded
+/**  Test whether 2 vertices could be welded
   */
 static inline bool CanWeld(const CVector &v1, const CVector &v2, float weldThreshold)
 {
@@ -242,7 +242,7 @@ static uint CheckZone(std::string middleZoneFile, float weldThreshold, float mid
 		}
 
 	////////////////////////////////////////////////
-	// check wether each patch is correctly bound //
+	// check whether each patch is correctly bound //
 	////////////////////////////////////////////////
 
 	for (l = 0; l < zoneInfos[0].Patchs.size(); ++l)

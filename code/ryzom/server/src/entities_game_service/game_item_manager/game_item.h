@@ -840,7 +840,7 @@ private:
 	// Compute required level (skills and charac) for wearing item
 	void computeRequiredLevel();
 
-	// Compute wether item has a skill/charac prerequisit
+	// Compute whether item has a skill/charac prerequisit
 	void computeHasPrerequisit();
 
 	// has item prerequisit

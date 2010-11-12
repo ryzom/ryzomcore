@@ -992,7 +992,7 @@ namespace R2
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
 	}
-		// Update the the ring access of a scenario.
+		// Update the ring access of a scenario.
 	void CShareServerEditionItfProxy::onScenarioRingAccessUpdated(NLNET::IModule *sender, bool ok, const std::string &ringAccess, const std::string &errMsg)
 	{
 		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())

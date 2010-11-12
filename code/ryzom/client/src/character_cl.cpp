@@ -5493,7 +5493,7 @@ void CCharacterCL::updateStages()
 		if(it->second.isPresent(PROPERTY_POSITION))
 		{
 			somePosFoundEarly= true;
-			// then it's cool we can set the new accurate interval to the prec stage wich has a pos
+			// then it's cool we can set the new accurate interval to the prec stage which has a pos
 			if(itPosPrec!=_Stages._StageSet.end())
 			{
 				uint dgc= it->first - itPosPrec->first;
@@ -5713,7 +5713,7 @@ void CCharacterCL::updateStages()
 			float	maxSpeed= (float)getMaxSpeed();
 			if(maxSpeed>0)
 			{
-				// compute at wich time the first move should begin so it doesn't have to accelerate
+				// compute at which time the first move should begin so it doesn't have to accelerate
 				_RunStartTimeNoPop= fpTime - d2fp/maxSpeed;
 			}
 		}

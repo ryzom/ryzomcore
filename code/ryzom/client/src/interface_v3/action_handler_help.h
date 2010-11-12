@@ -30,7 +30,7 @@ class CSheetHelpSetup
 public:
 	CInterfaceGroup *HelpWindow;
 	CDBCtrlSheet	 *SrcSheet;			// the sheet for which info should be displayed (outside of the help window)
-	CDBCtrlSheet	 *DestSheet;		// copy of the the sheet for which info are asked (this sheet is in the help window, the source sheet is copied in it)
+	CDBCtrlSheet	 *DestSheet;		// copy of the sheet for which info are asked (this sheet is in the help window, the source sheet is copied in it)
 	std::string      ViewText;			// id of the text inside the help window that receive infos about the sheet
 	std::string      ViewTextID;		// id of the text_id inside the help window that receive infos about the sheet (for dynamic infos -> missions)
 	std::string		 ScrollTextGroup;   // name of the group that contains the description text

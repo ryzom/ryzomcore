@@ -71,7 +71,7 @@ private:
 	{
 		// Pos/Normal
 		CPixelInfo		P;
-		// From wich texture (materialId) does this sample come from?
+		// From which texture (materialId) does this sample come from?
 		uint			MaterialId;
 		// The UV of this sample
 		NLMISC::CUV		UV;

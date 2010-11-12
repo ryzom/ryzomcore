@@ -59,7 +59,7 @@ public:
 	// Init the UI
 	virtual bool initUI (HWND parent=NULL) = 0;
 
-	// Test wether an instance of the viewer is running
+	// Test whether an instance of the viewer is running
 	virtual bool isInstanceRunning() = 0;
 
 	// Go. It shouldn't be called if there's an instance of the viewer that is running.
