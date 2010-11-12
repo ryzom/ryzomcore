@@ -3052,7 +3052,7 @@ void CEditor::reset()
 	TAccessMode oldAccessMode = _AccessMode;
 	if (_Mode == EditionMode)
 	{
-		R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"data/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	}
 	release();
 	clearDebugWindow();
@@ -4726,12 +4726,12 @@ void CEditor::autoSave()
 		}
 	}
 
-	if (CFile::fileExists("data/r2_buffer.dat"))
+	if (CFile::fileExists("save/r2_buffer.dat"))
 	{
-		CFile::copyFile("autosave_01.r2", "data/r2_buffer.dat");
+		CFile::copyFile("autosave_01.r2", "save/r2_buffer.dat");
 	}
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"data/r2_buffer.dat\")");
+	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 
 
 }
@@ -5261,7 +5261,7 @@ void  CEditor::onEditionModeDisconnected()
 	// Because avec using the button the currentScenario = 0
 	try
 	{
-		R2::getEditor().getLua().executeScript("r2.Version.save(\"data/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScript("r2.Version.save(\"save/r2_buffer.dat\")");
 	}
 	catch (const std::exception& e)
 	{

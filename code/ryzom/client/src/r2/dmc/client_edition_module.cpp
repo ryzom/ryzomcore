@@ -575,11 +575,11 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 				CScenarioValidator::TValues values;
 				std::string md5, signature;
 
-				if ( sv.setScenarioToLoad("data/r2_buffer.dat", values, md5, signature, true)
+				if ( sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true)
 					&& !md5.empty()
 					&& CScenarioValidator::AutoSaveSignature == signature)
 				{
-					data = _Client->getComLuaModule().loadLocal("data/r2_buffer.dat", values);
+					data = _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", values);
 				}
 				else
 				{
@@ -1099,10 +1099,10 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			std::string md5, signature;
 			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
 
-			sv.setScenarioToLoad("data/r2_buffer.dat", values, md5, signature, true);
+			sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true);
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
-			CObject* hlScenario2 =  _Client->getComLuaModule().loadLocal("data/r2_buffer.dat", _LastReadHeader);
+			CObject* hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
 			_StartingActIndex  = lastActIndex;
 			if (hlScenario2)
 			{
@@ -1206,7 +1206,7 @@ bool CClientEditionModule::requestStartScenario()
 
 	CEditor::connexionMsg("uimR2EDGoToDMMode");
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"data/r2_buffer.dat\")");
+	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.startingScenario(this);
 	return true;
@@ -2472,7 +2472,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	}
 	if (CFile::fileExists(filename))
 	{
-		CFile::copyFile("data/r2_buffer.dat", filename.c_str());
+		CFile::copyFile("save/r2_buffer.dat", filename.c_str());
 	}
 }
 
