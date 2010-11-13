@@ -1692,7 +1692,7 @@ void	CMeshGeom::bkupOriginalSkinVertices()
 	// Copy VBuffer content into Original vertices normals.
 	if(_VBuffer.getVertexFormat() & CVertexBuffer::PositionFlag)
 	{
-		// copy vertices from VBuffer. (NB: unuseful geomorphed vertices are still copied, but doesn't matter).
+		// copy vertices from VBuffer. (NB: useless geomorphed vertices are still copied, but doesn't matter).
 		_OriginalSkinVertices.resize(numVertices);
 		for(uint i=0; i<numVertices;i++)
 		{
@@ -1701,7 +1701,7 @@ void	CMeshGeom::bkupOriginalSkinVertices()
 	}
 	if(_VBuffer.getVertexFormat() & CVertexBuffer::NormalFlag)
 	{
-		// copy normals from VBuffer. (NB: unuseful geomorphed normals are still copied, but doesn't matter).
+		// copy normals from VBuffer. (NB: useless geomorphed normals are still copied, but doesn't matter).
 		_OriginalSkinNormals.resize(numVertices);
 		for(uint i=0; i<numVertices;i++)
 		{
@@ -1738,7 +1738,7 @@ void	CMeshGeom::restoreOriginalSkinVertices()
 	// Copy VBuffer content into Original vertices normals.
 	if(_VBuffer.getVertexFormat() & CVertexBuffer::PositionFlag)
 	{
-		// copy vertices from VBuffer. (NB: unuseful geomorphed vertices are still copied, but doesn't matter).
+		// copy vertices from VBuffer. (NB: useless geomorphed vertices are still copied, but doesn't matter).
 		for(uint i=0; i<numVertices;i++)
 		{
 			*vba.getVertexCoordPointer(i)= _OriginalSkinVertices[i];
@@ -1746,7 +1746,7 @@ void	CMeshGeom::restoreOriginalSkinVertices()
 	}
 	if(_VBuffer.getVertexFormat() & CVertexBuffer::NormalFlag)
 	{
-		// copy normals from VBuffer. (NB: unuseful geomorphed normals are still copied, but doesn't matter).
+		// copy normals from VBuffer. (NB: useless geomorphed normals are still copied, but doesn't matter).
 		for(uint i=0; i<numVertices;i++)
 		{
 			*vba.getNormalCoordPointer(i)= _OriginalSkinNormals[i];

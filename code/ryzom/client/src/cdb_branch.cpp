@@ -956,7 +956,7 @@ void CCDBNodeBranch::removeBranchInfoIt(TObsList::iterator it)
 
 
 //-----------------------------------------------
-// Usefull for find
+// Useful for find
 //-----------------------------------------------
 class CCDBNodeBranchComp : public std::binary_function<ICDBNode *, ICDBNode *, bool>
 {

@@ -192,7 +192,7 @@ void CSheetId::loadSheetId ()
 					removednbfiles++;
 				}
 			}
-			nlinfo ("SHEETID: Removed %d files on %d from CSheetId because these files doesn't exists", removednbfiles, nbfiles);
+			nlinfo ("SHEETID: Removed %d files on %d from CSheetId because these files don't exist", removednbfiles, nbfiles);
 		}
 
 		// Convert the map to one big string and 1 static map (id to name)

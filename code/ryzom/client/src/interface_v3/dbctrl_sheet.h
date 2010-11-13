@@ -667,7 +667,7 @@ protected:
 	uint32				_PackedArmourColor;
 
 
-	// For an Item only. Usefull for LeftHand Filtering: must have a pointer to the right hand
+	// For an Item only. Useful for LeftHand Filtering: must have a pointer to the right hand
 	CDBCtrlSheet		*_OtherHandItemFilter;
 
 	// This String is optional and usage dependent for Item, Macro, or Sentence

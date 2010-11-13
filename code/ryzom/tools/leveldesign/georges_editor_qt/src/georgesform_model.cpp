@@ -133,7 +133,7 @@ namespace NLQT
 					if (value.contains(".shape")) 
 					{
 						return QIcon(":/images/pqrticles.png");
-					} 
+					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
 						qDebug() << p_index << p_role;
@@ -444,8 +444,8 @@ namespace NLQT
 							
 							//columnData << QString(elmName.c_str()) << QString("default") << QString("default");
 							//parent->appendChild(new CFormItem(elmt, columnData, parent, UFormElm::ValueDefaultDfn, UFormElm::NodeDfn));
-						} 
-					} 
+						}
+					}
 					else 
 					{
 						nlinfo("getNodeByName returned false");

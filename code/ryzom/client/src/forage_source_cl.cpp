@@ -359,7 +359,7 @@ NLMISC_VARIABLE( float, ForageSourceUP3, "" );
  */
 void CForageSourceCL::updateVisualPropertyBars(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	// NB: forage don't use CBarManager for 2 reasons: unusefull (forage bars exist only through VP),
+	// NB: forage don't use CBarManager for 2 reasons: useless (forage bars exist only through VP),
 	// and complicated since updated at each frame on client (because of smooth transition code below)
 
 	bool setBarsNow = (_BarDestValues[0] == BarNotInit);

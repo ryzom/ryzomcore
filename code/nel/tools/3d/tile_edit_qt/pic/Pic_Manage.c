@@ -96,7 +96,7 @@ unsigned long PIC_Load(char* FileName, unsigned char Quantize)
 		if ( !strcmp(ext,"JPG") )
 		{
 			type=1;
-		} 
+		}
 		else if ( !strcmp(ext,"TGA") )
 		{
 			type=2;

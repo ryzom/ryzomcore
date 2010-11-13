@@ -39,13 +39,13 @@ private:
 	uint32 _Id;
 };
 
-// Usefull because if not defined the compiler do not chose between
+// Useful because if not defined the compiler do not chose between
 // lh.operator uint32() < rh or  lh < CSessionId(rh)
 
 inline bool operator<(const CSessionId& lh, uint32 rh)  { return lh.asInt() < rh; }
 inline bool operator==(const CSessionId& lh, uint32 rh)  { return lh.asInt() == rh; }
 inline bool operator!=(const CSessionId& lh, uint32 rh)  { return lh.asInt() != rh; }
-// usefull for lh != 0
+// useful for lh != 0
 inline bool operator!=(const CSessionId& lh, int rh)  { return lh.asInt() != uint32(rh); }
 
 typedef CSessionId TSessionId;

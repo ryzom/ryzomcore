@@ -192,7 +192,7 @@ public:
 	sint nbHairColor() {return _NbHairColor;}
 
 
-	/// Get all sheets (usefull for other managers (skill, brick, ...))
+	/// Get all sheets (useful for other managers (skill, brick, ...))
 	// @{
 	const TEntitySheetMap & getSheets() { return _EntitySheetContainer; }
 	// @}

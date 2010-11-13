@@ -242,7 +242,7 @@ void			CLandscapeVegetableBlock::createVegetableIGForDistType(uint i, CVegetable
 			// generate
 			_Patch->generateTileVegetable(vegetIg, i, tms, tmt, vbCreateCtx);
 
-			// If the ig is empty, delete him. This optimize rendering because no unuseful ig are
+			// If the ig is empty, delete him. This optimize rendering because no useless ig are
 			// tested for rendering. This speed up some 1/10 of ms...
 			if(vegetIg->isEmpty())
 			{

@@ -107,7 +107,7 @@ public:
 	 *	Return ~0 if the instance number is already in use.
 	 */
 	uint32	createAIInstance(const std::string &continentName, uint32 instanceNumber);
-	/** destroy an AI Instance (usefull for ring creation / destruction of session)
+	/** destroy an AI Instance (useful for ring creation / destruction of session)
 	@param instanceNumber is the AiInstance Id
 	@param displayWarningIfInstanceNotExist If false nothing happends when the specified instance do not exist
 	*/

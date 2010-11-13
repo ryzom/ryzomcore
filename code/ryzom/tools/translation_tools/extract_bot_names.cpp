@@ -615,8 +615,7 @@ int extractBotNames(int argc, char *argv[])
 						if (transName.find(ucstring("$")) != ucstring::npos)
 						{
 							transName = fctsTitleId;
-						} 
-						
+						}
 					}
 					else
 					{

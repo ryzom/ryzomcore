@@ -588,7 +588,7 @@ struct CFile
 	static bool createEmptyFile (const std::string& filename);
 
 	/**
-	 * Return a new filename that doesn't exists. It's used for screenshot filename for example.
+	 * Return a new filename that doesn't exist. It's used for screenshot filename for example.
 	 * example: findNewFile("foobar.tga");
 	 * will try foobar001.tga, if the file exists, try foobar002.tga and so on until it finds an unexistant file.
 	 */
@@ -700,7 +700,7 @@ struct CFile
 	static bool	createDirectoryTree(const std::string &dirname);
 
 	/** Try to set the file access to read/write if not already set.
-	 * return true if the file doesn't exists or if the file already have RW access.
+	 * return true if the file doesn't exist or if the file already have RW access.
 	 * Work actually only on Windows and returns always true on other platforms.
 	 * \return true if RW access is granted
 	 */

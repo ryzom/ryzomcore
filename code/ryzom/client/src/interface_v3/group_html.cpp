@@ -367,7 +367,8 @@ void dolibcurltest()
 	addImageDownload("http://www.ryzom.com/fr/");
 	addImageDownload("http://www.ryzom.com/de/");
 
-	do {
+	do
+	{
 		checkImageDownload();
 		nlwarning("continue to sleep");
 		nlSleep(300);

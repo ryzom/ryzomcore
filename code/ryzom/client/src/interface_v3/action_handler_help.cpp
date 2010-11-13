@@ -2056,7 +2056,7 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 // ***************************************************************************
 static void	setupEnchantedItem(CSheetHelpSetup &setup, ucstring &itemText)
 {
-	// if don't find the tag in the text (eg: if not usefull), no-op
+	// if don't find the tag in the text (eg: if not useful), no-op
 	static const	ucstring	enchantTag("%enchantment");
 	if( itemText.find(enchantTag) == ucstring::npos )
 		return;
@@ -2147,7 +2147,7 @@ static void	setupRawMaterialStats(CSheetHelpSetup &setup)
 				}
 
 				// force reset, but try to keep the precedent selection
-				// (usefull to test same item-part from different MPs)
+				// (useful to test same item-part from different MPs)
 				sint32	precSel= pCB->getSelection();
 				pCB->setSelection(1);
 				pCB->setSelection(0);
@@ -3126,7 +3126,7 @@ void setupSabrinaPhraseHelp(CSheetHelpSetup &setup, const CSPhraseCom &phrase, u
 	// get the phraseText
 	ucstring	phraseText;
 	// if required, add the .sphrase requirements.
-	// NB: don't add if from bot chat validation (unsusefull cause already filtered by server)
+	// NB: don't add if from bot chat validation (useless cause already filtered by server)
 	pPM->buildPhraseDesc(phraseText, phrase, phraseSheetId, !setup.FromBotChat);
 
 

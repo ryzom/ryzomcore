@@ -2578,7 +2578,7 @@ public:
 	// End of methods from "character_inventory_manipulation.h"
 	////////////////////////////////////////////////////////////////
 	
-	/// Ring stuff <=> useful to update the player DB to indicateds the current speed of the incarnated creature
+	/// Ring stuff <=> useful to update the player DB to indicate the current speed of the incarnated creature
 	void setNpcControl(const NLMISC::CEntityId& eid);
 	void setStopNpcControl();
 

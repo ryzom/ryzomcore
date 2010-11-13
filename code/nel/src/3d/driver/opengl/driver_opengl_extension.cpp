@@ -1341,7 +1341,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 		// VBHard swap without flush of the VAR.
 		ext.NVStateVARWithoutFlush= GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV;
 	else
-		// VBHard with unuseful flush of the VAR.
+		// VBHard with useless flush of the VAR.
 		ext.NVStateVARWithoutFlush= GL_VERTEX_ARRAY_RANGE_NV;
 
 	// Check NV_occlusion_query

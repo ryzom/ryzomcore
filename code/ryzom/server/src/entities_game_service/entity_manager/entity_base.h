@@ -260,7 +260,7 @@ public:
 
 	/**
 	 * Add the properties to the mirror (except the entity state)
-	 * If keepSheetId is false, the sheet id in the object will not be used (usefull to take the value in the mirror instead)
+	 * If keepSheetId is false, the sheet id in the object will not be used (useful to take the value in the mirror instead)
 	 */
 	void addPropertiesToMirror( const TDataSetRow& entityIndex, bool keepSheetId=true );
 

@@ -2075,13 +2075,13 @@ double CCharacterCL::computeSpeed()
 // Compute and return the speed factor to apply to the animation.
 // \param speedToDest : evaluted speed to destination.
 // \return double : the speed factor to use for the current animation.
-// \todo GUIGUI : revoir les histoire de scale, faire ca mieux.
+// \todo GUIGUI : review this scale problem and optimize it.
 //-----------------------------------------------
 double CCharacterCL::computeSpeedFactor(double speedToDest)
 {
 	double speedFactor = 1.0;
 
-	// \todo GUIGUI : faire cette histoire de emote beaucoup mieux, C NULL.
+	// \todo GUIGUI : optimize emotes, currently it's badly designed.
 	const CAnimationState *animStatePtr;
 	// If the current animation is an emote, get the right animation state.
 	if(animState(MOVE) == CAnimationStateSheet::Emote)

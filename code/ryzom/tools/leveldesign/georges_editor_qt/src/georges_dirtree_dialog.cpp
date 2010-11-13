@@ -129,7 +129,7 @@ namespace NLQT
 			_ui.dirTree->setModel(_dirModel);
 			_dirModel->setRootPath(_ldPath);
 			_ui.dirTree->setRootIndex(_dirModel->index(_ldPath));
-		} 
+		}
 		else 
 		{
 			_dirModel = new CFileSystemModel("");

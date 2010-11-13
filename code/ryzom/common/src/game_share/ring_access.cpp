@@ -117,7 +117,7 @@ void CRingAccess::init()
 		_R2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
 	}
 
-	_SheetIdToAccess.clear();//only usefull when manualy re init file
+	_SheetIdToAccess.clear();//only useful when manualy re init file
 	// File stream
 	CIFile file;
 

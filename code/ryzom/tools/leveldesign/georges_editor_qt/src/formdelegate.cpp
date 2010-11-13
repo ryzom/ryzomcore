@@ -77,7 +77,7 @@ namespace NLQT
 					editor->addItem(label);
 				}
 				return editor;
-			} 
+			}
 			else 
 			{
 				switch (type->getType()) 
@@ -144,7 +144,7 @@ namespace NLQT
 			QComboBox *cb = static_cast<QComboBox*>(editor);
 			cb->setCurrentIndex(cb->findText(value));
 			//cb->setIconSize()
-		} 
+		}
 		else 
 		{
 			switch (type->getType()) 
@@ -193,14 +193,14 @@ namespace NLQT
 			if (value == oldValue) 
 			{
 				// nothing's changed
-			} 
+			}
 			else 
 			{
 				nldebug(QString("setModelData from %1 to %2")
 					.arg(oldValue).arg(value).toStdString().c_str());
 				model->setData(index, value, Qt::EditRole);
 			}
-		} 
+		}
 		else 
 		{
 			switch (type->getType()) 
@@ -214,7 +214,7 @@ namespace NLQT
 					if (QString("%1").arg(value) == oldValue) 
 					{
 						// nothing's changed
-					} 
+					}
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
@@ -231,7 +231,7 @@ namespace NLQT
 					if (QString("%1").arg(value) == oldValue) 
 					{
 						// nothing's changed
-					} 
+					}
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
@@ -252,7 +252,7 @@ namespace NLQT
 					if (value == oldValue) 
 					{
 						// nothing's changed
-					} 
+					}
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")

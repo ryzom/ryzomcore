@@ -501,7 +501,7 @@ private:
 // class CPersistentDataRecordRyzomStore
 //-----------------------------------------------------------------------------
 // This is just a specialisation of the class that register it into the "RyzomTokenFamily"
-// Use it only to store (else unusefull copy of default string table at clear())
+// Use it only to store (else useless copy of default string table at clear())
 
 class CPersistentDataRecordRyzomStore : public CPersistentDataRecord
 {

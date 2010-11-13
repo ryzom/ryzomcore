@@ -775,11 +775,13 @@ CGroupNpc* CGroupDesc<FamilyT>::createNpcGroup(CMgrNpc* mgr, CAIVector const& po
 					RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
 					RYAI_MAP_CRUNCH::CWorldPosition	wp;
 					uint32 maxTries = 100;
-					do {
+					do
+					{
 						rpos = pos;
 						rpos += randomPos(dispersionRadius);
 						--maxTries;
-					} while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
+					}
+					while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
 					if (maxTries<=0)
 						rpos = pos;
 				}
@@ -804,11 +806,13 @@ CGroupNpc* CGroupDesc<FamilyT>::createNpcGroup(CMgrNpc* mgr, CAIVector const& po
 				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
 				RYAI_MAP_CRUNCH::CWorldPosition	wp;
 				uint32 maxTries = 100;
-				do {
+				do
+				{
 					rpos = pos;
 					rpos += randomPos(dispersionRadius);
 					--maxTries;
-				} while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
+				}
+				while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
 				if (maxTries<=0)
 					rpos = pos;
 			}

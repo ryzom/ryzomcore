@@ -142,7 +142,7 @@ namespace NLQT
 			{
 				_emptyView->deleteLater();
 				tabifyDockWidget(_emptyView, newView);
-			} 
+			}
 			else 
 			{
 				tabifyDockWidget(_currentView,newView);
@@ -216,7 +216,7 @@ namespace NLQT
 		{
 		loadFile(*it, skelFileName);
 		++it;
-		}  
+		}
 		_AnimationSetDialog->updateListObject();
 		_AnimationSetDialog->updateListAnim();
 		_SlotManagerDialog->updateUiSlots();

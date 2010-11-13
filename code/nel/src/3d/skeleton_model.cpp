@@ -1849,7 +1849,7 @@ void		CSkeletonModel::getLightHotSpotInWorld(CVector &modelPos, float &modelRadi
 	}
 	else
 	{
-		/* Else return the skeleton pos. NB: this seems unuseful since bone 0 not computed means no Skins.
+		/* Else return the skeleton pos. NB: this seems useless since bone 0 not computed means no Skins.
 			But lighting computation is still done and may use a VisualCollisionEntity.
 			This system cache some infos according to position. This is why we must return a position
 			near the skeleton (else cache crash each frame => slowdown...)

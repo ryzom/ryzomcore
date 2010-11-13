@@ -238,7 +238,7 @@ void makeId( list<string>& dirs )
 		if( hFind == INVALID_HANDLE_VALUE ) 
 		{
     		nlwarning ("Invalid File Handle");
-		} 
+		}
 		else 
 		{
 			do

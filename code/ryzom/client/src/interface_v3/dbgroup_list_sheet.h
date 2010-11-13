@@ -74,7 +74,7 @@ public:
 	virtual void			sort() { }
 	void					needToSort() { _NeedToSort = true; invalidateCoords(); }
 
-	/** (usefull for list only) Force the validity of an element, even if its sheetId==0
+	/** (useful for list only) Force the validity of an element, even if its sheetId==0
 	 *	(empty slot displayed instead)
 	 *	NB: invalidateCoords() called if state is changed
 	 */

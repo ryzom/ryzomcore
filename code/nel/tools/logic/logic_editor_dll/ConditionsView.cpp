@@ -351,7 +351,8 @@ void CConditionsView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 								break;
 						}
 
-					} while (subPos == NULL);
+					}
+					while (subPos == NULL);
 					
 					if (pNode == NULL)
 						break;

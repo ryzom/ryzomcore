@@ -5257,7 +5257,7 @@ void  CEditor::onEditionModeDisconnected()
 	delete _NewScenario;
 	_NewScenario = NULL;
 	CHECK_EDITOR
-	// Usefull only for the pionner that does not do requestTranslateFeatures()
+	// Useful only for the pionner that does not do requestTranslateFeatures()
 	// Because avec using the button the currentScenario = 0
 	try
 	{

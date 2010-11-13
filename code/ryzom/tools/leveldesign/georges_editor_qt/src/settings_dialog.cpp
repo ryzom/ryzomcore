@@ -142,7 +142,7 @@ namespace NLQT
 		if (list.empty()) 
 		{
 			Modules::config().getConfigFile().getVar("SearchPaths").forceAsString("");
-		} 
+		}
 		else 
 		{
 			Modules::config().getConfigFile().getVar("SearchPaths").forceAsString("");

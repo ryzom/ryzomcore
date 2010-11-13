@@ -2040,7 +2040,7 @@ void	CMeshMRMGeom::bkupOriginalSkinVerticesSubset(uint wedgeStart, uint wedgeEnd
 	// Copy VBuffer content into Original vertices normals.
 	if(_VBufferFinal.getVertexFormat() & CVertexBuffer::PositionFlag)
 	{
-		// copy vertices from VBuffer. (NB: unuseful geomorphed vertices are still copied, but doesn't matter).
+		// copy vertices from VBuffer. (NB: useless geomorphed vertices are still copied, but doesn't matter).
 		_OriginalSkinVertices.resize(_VBufferFinal.getNumVertices());
 		for(uint i=wedgeStart; i<wedgeEnd;i++)
 		{
@@ -2049,7 +2049,7 @@ void	CMeshMRMGeom::bkupOriginalSkinVerticesSubset(uint wedgeStart, uint wedgeEnd
 	}
 	if(_VBufferFinal.getVertexFormat() & CVertexBuffer::NormalFlag)
 	{
-		// copy normals from VBuffer. (NB: unuseful geomorphed normals are still copied, but doesn't matter).
+		// copy normals from VBuffer. (NB: useless geomorphed normals are still copied, but doesn't matter).
 		_OriginalSkinNormals.resize(_VBufferFinal.getNumVertices());
 		for(uint i=wedgeStart; i<wedgeEnd;i++)
 		{
@@ -2083,7 +2083,7 @@ void	CMeshMRMGeom::restoreOriginalSkinVertices()
 	// Copy VBuffer content into Original vertices normals.
 	if(_VBufferFinal.getVertexFormat() & CVertexBuffer::PositionFlag)
 	{
-		// copy vertices from VBuffer. (NB: unuseful geomorphed vertices are still copied, but doesn't matter).
+		// copy vertices from VBuffer. (NB: useless geomorphed vertices are still copied, but doesn't matter).
 		for(uint i=0; i<_VBufferFinal.getNumVertices();i++)
 		{
 			*vba.getVertexCoordPointer(i)= _OriginalSkinVertices[i];
@@ -2091,7 +2091,7 @@ void	CMeshMRMGeom::restoreOriginalSkinVertices()
 	}
 	if(_VBufferFinal.getVertexFormat() & CVertexBuffer::NormalFlag)
 	{
-		// copy normals from VBuffer. (NB: unuseful geomorphed normals are still copied, but doesn't matter).
+		// copy normals from VBuffer. (NB: useless geomorphed normals are still copied, but doesn't matter).
 		for(uint i=0; i<_VBufferFinal.getNumVertices();i++)
 		{
 			*vba.getNormalCoordPointer(i)= _OriginalSkinNormals[i];

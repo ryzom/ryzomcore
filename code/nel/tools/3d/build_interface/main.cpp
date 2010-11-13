@@ -319,7 +319,7 @@ int main(int nNbArg, char **ppArgs)
 		UVMax[i].U = (float)x+AllMaps[i]->getWidth();
 		UVMax[i].V = (float)y+AllMaps[i]->getHeight();
 
-		/* // Do not remove this is usefull for debugging
+		/* // Do not remove this is useful for debugging
 		{
 			NLMISC::COFile outTga;
 			string fmtName = ppArgs[1];

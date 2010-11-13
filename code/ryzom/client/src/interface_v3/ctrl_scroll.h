@@ -51,7 +51,7 @@ public:
 	sint32	moveTrackY (sint32 dy);
 
 	/** Move the Target Ofs with a Delta, and recompute TrackPos from this Ofs.
-	 *	Usefull for finer controled group scrolling when the list is very big (with mouseWheel or scroll buttons)
+	 *	Useful for finer controled group scrolling when the list is very big (with mouseWheel or scroll buttons)
 	 */
 	void	moveTargetX (sint32 dx);
 	void	moveTargetY (sint32 dy);

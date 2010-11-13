@@ -1184,7 +1184,7 @@ void	CScene::deleteModel(CTransform *model)
 		// add ot list of object to delete
 		_ToDelete.push_back (model);
 		// remove this object from the RenderTrav, hence it won't be displayed
-		// still animDetail/Light/LoadBalance it. This is unuseful, but very rare
+		// still animDetail/Light/LoadBalance it. This is useless, but very rare
 		// and I prefer doing like this than to add a NULL ptr Test in each Traversal (which I then must do in CRenderTrav)
 		RenderTrav.removeRenderModel(model);
 	}

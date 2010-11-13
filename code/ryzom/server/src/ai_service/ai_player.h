@@ -175,7 +175,7 @@ public:
 	}
 	
 private:
-	TPlayerMap _spawnedPlayers; // hum .. still usefull ?
+	TPlayerMap _spawnedPlayers; // hum .. still useful ?
 	/// Team composition.
 	typedef CHashMap<int, std::set<TDataSetRow> > TTeamMap;
 	TTeamMap _teams;
