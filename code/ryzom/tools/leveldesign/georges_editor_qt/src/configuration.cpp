@@ -73,7 +73,7 @@ void CConfiguration::init()
 	}
 	
 	// setup config file callback
-	Modules::config().setCallback("SearchPaths", CConfigCallback(this, &CConfiguration::cfcbSearchPaths));
+	Modules::config().setAndCallback("SearchPaths", CConfigCallback(this, &CConfiguration::cfcbSearchPaths));
 
 }
 

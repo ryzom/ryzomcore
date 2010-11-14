@@ -79,21 +79,18 @@ namespace NLQT
 				QBrush defaultBrush = QBrush(QColor(255,0,0,30));
 				QBrush parentBrush  = QBrush(QColor(0,255,0,30));
 
+				// if elm not existing it must be some kind of default or type value
+				if(!getItem(p_index)->getFormElm())
+				{
+					return defaultBrush;
+				}
+
+				// else it might be some parent elm
 				switch (getItem(p_index)->nodeFrom())
 				{
 				case NLGEORGES::UFormElm::NodeParentForm:
 					{
-						switch (getItem(p_index)->valueFrom())
-						{
-						case NLGEORGES::UFormElm::ValueDefaultDfn:
-							{
-								return defaultBrush;
-							}
-						default:
-							{
-								return parentBrush;
-							}
-						}
+						return parentBrush;
 					}
 				case NLGEORGES::UFormElm::NodeForm:
 					{
@@ -103,21 +100,33 @@ namespace NLQT
 							{
 								return parentBrush;
 							}
-						case NLGEORGES::UFormElm::ValueDefaultDfn:
-							{
-								return defaultBrush;
-							}
 						default:
 							{
-								return QVariant();
-							}
-						}
-					}
-				default:
-					{
-						return QVariant();
-					}
-				}
+								// parent status test kindof ugly, testing only 2 steps deep
+								// only needed for colorization as treeview default hides childs
+								// when parent is hidden
+								CFormItem *parent = getItem(p_index)->parent();
+								if (parent)
+								{
+									if (parent->nodeFrom() == NLGEORGES::UFormElm::NodeParentForm)
+									{
+										return parentBrush;
+									}
+
+									CFormItem *parentParent = parent->parent();
+									if (parentParent)
+									{
+										if (parentParent->nodeFrom() == NLGEORGES::UFormElm::NodeParentForm)
+										{
+											return parentBrush;
+										}
+									} // endif parentParent
+								} // endif parent
+							} // end default
+						} // end switch valueFrom
+					} // end case nodeForm
+				} // end switch nodeFrom
+				return QVariant();
 			}
 		case Qt::DecorationRole:
 			{
@@ -136,7 +145,6 @@ namespace NLQT
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
-						qDebug() << p_index << p_role;
 						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
 						return QIcon(":/images/pqrticles.png");
 					}
@@ -282,8 +290,7 @@ namespace NLQT
 			return;
 
 		uint num = 0;
-		UFormElm::TWhereIsNode *whereN = new UFormElm::TWhereIsNode;
-		UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
+		
 
 		if (root->isStruct()) 
 		{
@@ -292,6 +299,8 @@ namespace NLQT
 			root->getStructSize(structSize);
 			while (num < structSize) 
 			{
+				UFormElm::TWhereIsNode *whereN = new UFormElm::TWhereIsNode;
+		UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
 				// Append a new item to the current parent's list of children.
 				std::string elmName;
 				if(root->getStructNodeName(num, elmName)) 
@@ -400,7 +409,6 @@ namespace NLQT
 								elmtType.append("_noValue");
 							}
 							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
-							qDebug() << columnData;
 							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
 							//if (parents.last()->childCount() > 0) {
 							//	parents << parents.last()->child(parents.last()->childCount()-1);
@@ -441,7 +449,7 @@ namespace NLQT
 
 							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
 							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
-							
+
 							//columnData << QString(elmName.c_str()) << QString("default") << QString("default");
 							//parent->appendChild(new CFormItem(elmt, columnData, parent, UFormElm::ValueDefaultDfn, UFormElm::NodeDfn));
 						}

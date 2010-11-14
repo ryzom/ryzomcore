@@ -32,7 +32,7 @@ namespace NLQT
 {
 
 	bool CGeorgesFormProxyModel::filterAcceptsRow(int sourceRow,
-         const QModelIndex &sourceParent) const
+		const QModelIndex &sourceParent) const
 	{
 		//nlinfo("CGeorgesFormProxyModel::filterAcceptsRow");
 
@@ -47,21 +47,19 @@ namespace NLQT
 		//	item->nodeFrom(),
 		//	smodel->showParents(), 
 		//	(item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm));
+
+		// if elm not existing it must be some kind of default or type value
+		if(!item->getFormElm())
+		{
+			return smodel->showDefaults();
+		}
+
+		// else it might be some parent elm
 		switch (item->nodeFrom())
 		{
 		case NLGEORGES::UFormElm::NodeParentForm:
 			{
-				switch (item->valueFrom())
-				{
-				case NLGEORGES::UFormElm::ValueDefaultDfn:
-					{
-						return smodel->showDefaults();
-					}
-					default:
-					{
-						return smodel->showParents();;
-					}
-				}
+				return smodel->showParents();
 			}
 		case NLGEORGES::UFormElm::NodeForm:
 			{
@@ -71,21 +69,18 @@ namespace NLQT
 					{
 						return smodel->showParents();
 					}
-				case NLGEORGES::UFormElm::ValueDefaultDfn:
-					{
-						return smodel->showDefaults();
-					}
 				default:
 					{
-						return true;
+						CFormItem *parent = item->parent();
+						if (parent && (parent->nodeFrom() == NLGEORGES::UFormElm::NodeParentForm))
+						{
+							return smodel->showParents();
+						}
 					}
 				}
 			}
-		default:
-			{
-				return true;
-			}
 		}
+		return true;
 	}
 	
 /******************************************************************************/
