@@ -39,6 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef NL_OS_WINDOWS
 //typedef QDockWidget QNLWidget;
 typedef QWidget QNLWidget;
+#elif defined(NL_OS_MAC)
+typedef QWidget QNLWidget;
 #else // NL_OS_UNIX
 typedef QGLWidget QNLWidget;
 #endif // NL_OS_UNIX

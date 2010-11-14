@@ -77,9 +77,9 @@ namespace NLQT
 		//H_AUTO2
 		nldebug("CObjectViewerDialog::init %d",_nlw->winId());
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		dynamic_cast<QNLWidget*>(widget())->makeCurrent();
-#endif // NL_OS_UNIX
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 		Modules::objView().init((nlWindow)_nlw->winId(), 20, 20);
 		setMouseTracking(true);
