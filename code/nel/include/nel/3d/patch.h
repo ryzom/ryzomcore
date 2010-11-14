@@ -1201,7 +1201,7 @@ private:
 	 */
 	CPatchDLMContext	*_DLMContext;
 
-	/** The reference count for DLMContext. Each TileMaterial created add a reference. Each pointLight wich
+	/** The reference count for DLMContext. Each TileMaterial created add a reference. Each pointLight which
 	 *	touch the patch too.
 	 */
 	sint				_DLMContextRefCount;

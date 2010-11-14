@@ -925,7 +925,7 @@ void CGameItem::computeRequiredLevel()
 
 
 //-----------------------------------------------
-// Compute wether item has a skill/charac prerequisit
+// Compute whether item has a skill/charac prerequisit
 //-----------------------------------------------
 void CGameItem::computeHasPrerequisit()
 {

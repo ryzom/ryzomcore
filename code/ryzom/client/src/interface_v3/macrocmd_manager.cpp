@@ -217,7 +217,8 @@ void CMacroCmdManager::initInGame()
 		for (nOpt = 0; nOpt < 3; nOpt++)
 		{
 			i = 0;
-			do {
+			do
+			{
 				sTmp = pIO->getValStr(prefix[nOpt]+NLMISC::toString(i));
 				if (!sTmp.empty())
 				{
@@ -225,7 +226,8 @@ void CMacroCmdManager::initInGame()
 					wheretostock[nOpt]->push_back(nTexId);
 				}
 				++i;
-			} while (!sTmp.empty());
+			}
+			while (!sTmp.empty());
 		}
 	}
 

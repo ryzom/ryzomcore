@@ -312,7 +312,7 @@ private:
 
 private:
 
-	/// Flag indicating wether this guild is local or proxyfied
+	/// Flag indicating whether this guild is local or proxyfied
 	bool								_Proxy;
 
 	/// member session : incremented each time member data changes. Used to ensure that client

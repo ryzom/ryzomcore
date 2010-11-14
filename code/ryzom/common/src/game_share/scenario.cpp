@@ -1041,7 +1041,7 @@ bool CScenarioValidator::applySave(const std::string& signature)
 		out2 += _ScenarioBody;
 
 		out.serialBuffer((uint8*)out2.c_str(), (uint)out2.size());
-		if (_Filename != std::string("data/r2_buffer.dat") )
+		if (_Filename != std::string("save/r2_buffer.dat") )
 		{
 			nlinfo("Scenario %s saved", _Filename.c_str());
 		}
@@ -1308,7 +1308,7 @@ bool CUserComponentValidator::applySave(const std::string& signature)
 
 
 		out.serialBuffer((uint8*)out2.c_str(),(uint)out2.size());
-		if (_Filename != std::string("data/r2_buffer.dat") )
+		if (_Filename != std::string("save/r2_buffer.dat") )
 		{
 			nlinfo("UserComponent %s saved", _Filename.c_str());
 		}

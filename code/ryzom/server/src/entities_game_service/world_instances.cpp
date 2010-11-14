@@ -217,7 +217,7 @@ void CWorldInstances::msgToAIInstance(uint32 instanceNumber, CMirrorTransportCla
 		return;
 	}
 
-	// send the message the the convenient AIS.
+	// send the message to the convenient AIS.
 	msg.send(it->second.AISId);
 }
 
@@ -239,7 +239,7 @@ void CWorldInstances::msgToAIInstance2(uint32 instanceNumber, NLNET::CMessage &m
 		return;
 	}
 	
-	// send the message the the convenient AIS.
+	// send the message to the convenient AIS.
 //	msg.send(it->second.AISId);
 	NLNET::CUnifiedNetwork::getInstance()->send( it->second.AISId, msg );
 }

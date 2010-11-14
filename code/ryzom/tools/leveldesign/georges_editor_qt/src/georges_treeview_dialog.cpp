@@ -183,7 +183,7 @@ namespace NLQT
 					//flushValueChange ();
 					//UpdateAllViews (NULL);
 					//return TRUE;
-				} 
+				}
 				else if (loadedForm.contains(".dfn"))	
 				{
 					//nlassert (Dfn != NULL);
@@ -198,7 +198,7 @@ namespace NLQT
 					//modify (NULL, NULL, false);
 					//UpdateAllViews (NULL);
 					//return TRUE;
-				} 
+				}
 				else 
 				{
 					nlassert (_form != NULL);
@@ -239,7 +239,8 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
-		if (index.column() == 1) {
+		if (index.column() == 1)
+		{
 			//QTreeView::doubleClicked(index);
 			return;
 		}
@@ -298,7 +299,7 @@ namespace NLQT
 		//		if (newState == Qt::Checked) 
 		//		{
 		//			_ui.treeView->setRowHidden(in.row(),in.parent(),false);
-		//		} 
+		//		}
 		//		else
 		//		{
 		//			_ui.treeView->setRowHidden(in.row(),in.parent(),true);
@@ -314,7 +315,7 @@ namespace NLQT
 		//				if (newState == Qt::Checked) 
 		//				{
 		//					_ui.treeView->setRowHidden(in2.row(),in,false);
-		//				} 
+		//				}
 		//				else 
 		//				{
 		//					_ui.treeView->setRowHidden(in2.row(),in,true);

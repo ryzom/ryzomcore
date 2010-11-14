@@ -43,7 +43,7 @@ public:
 	IStreamableEntity *getEntity(uint index) const { return _Entities[index]; }
 	//\name from IStreamableEntity
 	//@{
-		/** Given a pos, test wether one entity needs to be loaded now.
+		/** Given a pos, test whether one entity needs to be loaded now.
 		  * It it returns true, the next call to update will return only when the loading of an entity is completed.
 		  */
 		virtual bool		needCompleteLoading(const NLMISC::CVector &pos) const;

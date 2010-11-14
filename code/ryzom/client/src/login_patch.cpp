@@ -3636,7 +3636,8 @@ void CInstallThread::run()
 					pPM->renameFile(patchName, sourceName);
 					pPM->applyDate(sourceName, lastFileDate);
 				}
-			} catch ( const std::exception& e)
+			}
+			catch ( const std::exception& e)
 			{
 				nlwarning("%s", e.what());
 				pPM->setState(true, ucstring(e.what()) );
@@ -3668,27 +3669,31 @@ void CInstallThread::run()
 			NLMISC::CFile::deleteFile(vFiles[i]);
 		}
 		// Delete all directory from tmp directory
-		do {
+		do
+		{
 			vFiles.clear();
 			CPath::getPathContent(install, true, true, false, vFiles);
 			for (uint32 i = 0; i < vFiles.size(); ++i)
 			{
 				NLMISC::CFile::deleteDirectory(vFiles[i]);
 			}
-		} while ( !vFiles.empty() );
+		}
+		while ( !vFiles.empty() );
 		// delete tmp directory
 		NLMISC::CFile::deleteDirectory(install);
 		// delete libtorrent_logs directory if exist (not activate)
 		if (NLMISC::CFile::fileExists("libtorrent_logs"))
 		{
-			do {
+			do
+			{
 				vFiles.clear();
 				CPath::getPathContent("libtorrent_logs", true, true, false, vFiles);
 				for (uint32 i = 0; i < vFiles.size(); ++i)
 				{
 					NLMISC::CFile::deleteDirectory(vFiles[i]);
 				}
-			} while ( !vFiles.empty() );
+			}
+			while ( !vFiles.empty() );
 			NLMISC::CFile::deleteDirectory("libtorrent_logs");
 		}
 

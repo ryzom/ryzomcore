@@ -142,7 +142,7 @@ private:
 private:
 	// Use the curr weather state to update the thunder.
 	void    updateThunder(uint64 day, float hour, const CWeatherContext &wc, bool manual = false, float manualWeatherValue = 0.f, EGSPD::CSeason::TSeason manualSeason = EGSPD::CSeason::Spring);
-	// The the thunder intensity at the given day and hour (value of the 'ThunderIntensity' field in the weather setups)
+	// The thunder intensity at the given day and hour (value of the 'ThunderIntensity' field in the weather setups)
 	float   getThunderIntensity(uint64 day, float hour, const CWeatherContext &wc);
 	// Compute the minimum threshold that must be reached to create a thunder strike
 	float   getThunderThreshold(uint64 thunderCycle, const CWeatherContext &wc);

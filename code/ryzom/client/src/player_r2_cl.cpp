@@ -425,7 +425,7 @@ void CPlayerR2CL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 //-----------------------------------------------
 // updateVisualPropertyVpa :
 // Update the Visual Property A.
-// \todo GUIGUI : utiliser l'enum gender.
+// \todo GUIGUI : use gender enum.
 //-----------------------------------------------
 void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {

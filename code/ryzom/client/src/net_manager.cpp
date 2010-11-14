@@ -120,7 +120,7 @@ bool serverReceivedReady = false;
 
 static const std::string PLAYER_EXCHANGE_INVITATION_DIALOG = "ui:interface:accept_trade_invitation";
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Net_Mngr_Update )
 
 ////////////

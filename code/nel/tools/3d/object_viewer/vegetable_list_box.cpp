@@ -56,7 +56,7 @@ void CVegetableListBox::OnRButtonDown(UINT nFlags, CPoint point)
 	CMenu* subMenu;
 	menu.LoadMenu(IDR_VEGETABLE_MENU);
 
-	// test wether there is an item under that point
+	// test whether there is an item under that point
 	BOOL	bout;
 	uint	item  = this->ItemFromPoint(point, bout);
 	if (!bout)

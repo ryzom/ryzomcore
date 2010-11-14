@@ -1561,7 +1561,7 @@ public:
 		static volatile bool isMainlandCharacter = false; // TMP until we can get this info
 		if (isMainlandCharacter)
 		{
-			nlassert(0); // utiliser id="message_box" !!!
+			nlassert(0); // use id="message_box" !!!
 			if (AvailablePatchs != 0)
 			{
 				im->messageBoxWithHelp(CI18N::get("uiBGD_MainlandCharFullPatchNeeded"), "ui:outgame");

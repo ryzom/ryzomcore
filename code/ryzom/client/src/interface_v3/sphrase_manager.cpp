@@ -1723,7 +1723,7 @@ sint	CSPhraseManager::getPhraseSuccessRate(TSuccessTable st, const CSPhraseCom &
 	CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
 	if(rootBrick && rootBrick->isCombat())
 	{
-		// this to avoid problem with the default attack wich has a 0 cost...
+		// this to avoid problem with the default attack which has a 0 cost...
 		costSum= max(costSum, getRightHandEffectiveLevel());
 	}
 

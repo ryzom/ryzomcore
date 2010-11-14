@@ -1551,7 +1551,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 
 	if (_DisableHardwarePixelShader && _NbNeLTextureStages > 3) // yes, 3 is not a bug
 	{
-		// If pixel shader are disabled, then can't emulate the texEnvColor feature with more than 2 stages. (only 2 constant available by using material emissive in addition to the the texture factor)
+		// If pixel shader are disabled, then can't emulate the texEnvColor feature with more than 2 stages. (only 2 constant available by using material emissive in addition to the texture factor)
 		// Radeon with 3 stages cases : let the third stage to ensure availability of the EMBM feature
 		// There is a special fix in CMaterial::isSupportedByDriver to force the number of stages to 2 for the radeons
 		_NbNeLTextureStages = 2;

@@ -491,7 +491,7 @@ namespace AITYPES
 //			if	(FamilyTag < other.FamilyTag)
 //				return	true;
 //			if	(	FamilyTag==other.FamilyTag
-//				&&	FamilyTag==family_tribe	)	//	usefull ?
+//				&&	FamilyTag==family_tribe	)	//	useful ?
 //				return	TribeName < other.TribeName;			
 //			return	false;
 //		}

@@ -138,10 +138,8 @@ namespace NLQT
 					done = false;
 				}
 			}
-
-
-
-		} while (!done);
+		}
+		while (!done);
 	}
 
 	void CObjectViewerDialog::updateRender()

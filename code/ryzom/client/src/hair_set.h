@@ -50,7 +50,7 @@ public:
 	  */
 	sint getHairItemId(EGSPD::CPeople::TPeople people, uint index) const;
 
-	// Tells wether this id in the sheet manager  is the id of a hair item
+	// Tells whether this id in the sheet manager  is the id of a hair item
 	bool isHairItemId(uint id) const;
 
 	// Gives the people for this hair id in the sheet manager, or unknown if not found

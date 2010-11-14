@@ -16,7 +16,7 @@
 
 /**
   This file contains a system for loading and saving persistent data in a robust manor
-  The system is hierachical and all data elements are tagged.
+  The system is hierarchical and all data elements are tagged.
 
   The system supports saving to text files and to binary files
 
@@ -501,7 +501,7 @@ private:
 // class CPersistentDataRecordRyzomStore
 //-----------------------------------------------------------------------------
 // This is just a specialisation of the class that register it into the "RyzomTokenFamily"
-// Use it only to store (else unusefull copy of default string table at clear())
+// Use it only to store (else useless copy of default string table at clear())
 
 class CPersistentDataRecordRyzomStore : public CPersistentDataRecord
 {

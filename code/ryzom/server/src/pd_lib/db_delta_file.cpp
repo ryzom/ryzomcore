@@ -221,7 +221,7 @@ bool	CDBDeltaFile::preload()
 	// check file exists
 	if (!CFile::fileExists(filepath))
 	{
-		nlwarning("CDBDeltaFile::read(): failed, file '%s' doesn't exists", filepath.c_str());
+		nlwarning("CDBDeltaFile::read(): failed, file '%s' doesn't exist", filepath.c_str());
 		return false;
 	}
 

@@ -142,7 +142,7 @@ bool getPatchAndEdge(const std::vector<CPatchInfo>& patchs,
 			if(patchs[ptch].BaseVertices[i] == baseVertex1)
 			{
 #if WELD_LOG
-				fprintf(fdbg,"patch %d contient bv %d : %d %d %d %d\n",
+				fprintf(fdbg,"patch %d continent bv %d : %d %d %d %d\n",
 					ptch,
 					baseVertex1,
 					patchs[ptch].BaseVertices[0],

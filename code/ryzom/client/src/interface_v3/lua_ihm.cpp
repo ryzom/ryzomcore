@@ -2678,7 +2678,7 @@ int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
 		case CInterfaceExprValue::String:
 			{
 				ucstring	ucstr= value.getUCString();
-				// Yoyo: dynamically decide wether must return a string or a ucstring
+				// Yoyo: dynamically decide whether must return a string or a ucstring
 				bool	mustUseUCString= false;
 				for (uint i = 0; i < ucstr.size (); i++)
 				{

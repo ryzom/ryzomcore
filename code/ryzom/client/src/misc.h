@@ -135,7 +135,7 @@ sint getColorIndex(const CGenderInfo &genderInfo, SLOTTYPE::EVisualSlot slot);
 SPropVisualA buildPropVisualA(const CGenderInfo &genderInfo);
 SPropVisualB buildPropVisualB(const CGenderInfo &genderInfo);
 
-// Test wether user color is supported for a given visual slot
+// Test whether user color is supported for a given visual slot
 bool isUserColorSupported(const CPlayerSheet &playerSheet, SLOTTYPE::EVisualSlot vs);
 SPropVisualA buildPropVisualA(const CPlayerSheet &playerSheet);
 SPropVisualB buildPropVisualB(const CPlayerSheet &playerSheet);

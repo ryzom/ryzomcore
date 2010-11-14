@@ -863,7 +863,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	nlassert( (DynStrs.size() >= 1) && (DynStrs.size() <= 9));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-	// If the character doesn't exists in view field -> do not display the bubble
+	// If the character doesn't exist in view field -> do not display the bubble
 
 	CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(nBotUID);
 	if (ClientCfg.Local) pEntity = EntitiesMngr.entity(1);

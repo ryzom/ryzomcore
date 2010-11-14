@@ -1026,7 +1026,7 @@ CSmartPtr<CSubRuleTracer> CCompiler::buildCodeTree (const string &code) const
 	CSmartPtr<CSubRuleTracer> lastInsertedTracer;
 	CSmartPtr<CSubRuleTracer> firstInsertedTracer;
 	
-	// For each token the the code.
+	// For each token of the code.
 	while (index<code.size())
 	{
 		std::string tokenName;

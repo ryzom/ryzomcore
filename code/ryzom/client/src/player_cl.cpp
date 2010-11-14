@@ -689,7 +689,7 @@ void CPlayerCL::computeAnimSet()
 //-----------------------------------------------
 // updateVisualPropertyVpa :
 // Update the Visual Property A.
-// \todo GUIGUI : utiliser l'enum gender.
+// \todo GUIGUI : use gender enum
 //-----------------------------------------------
 void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {

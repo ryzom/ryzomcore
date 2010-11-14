@@ -52,7 +52,7 @@ COutpost::COutpost(const COutpost &other)
 // ***************************************************************************
 bool COutpost::setupOutpost(const CContinentParameters::CZC &zone, sint32 outpostId, CVillage *village)
 {
-	// Yoyo. legacy code. should no more be needed now. Still let for check (usefull?)
+	// Yoyo. legacy code. should no more be needed now. Still let for check (useful?)
 	NLMISC::CVector2f zonePos;
 	if (!getPosFromZoneName(zone.Name, zonePos))
 	{

@@ -246,7 +246,7 @@ void CContinentManager::load ()
 //-----------------------------------------------
 // select :
 // Select continent from a name.
-// \param const string &name : name of the contient to select.
+// \param const string &name : name of the continent to select.
 //-----------------------------------------------
 void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::IProgressCallback &progress)
 {

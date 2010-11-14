@@ -201,7 +201,7 @@ public:
 	/** Setup a correction matrix for Lighting. Normals are multiplied with this matrix before lighting.
 	 *	This is important in Ryzom because models (and so Lods) are building with eye looking in Y<0.
 	 *	But they are animated with eye looking in X>0.
-	 *	The default setup is hence a matrix wich do a RotZ+=90.
+	 *	The default setup is hence a matrix which do a RotZ+=90.
 	 *	\see addRenderCharacterKey
 	 */
 	void			setupNormalCorrectionMatrix(const CMatrix &normalMatrix);

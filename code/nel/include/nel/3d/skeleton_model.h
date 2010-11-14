@@ -145,7 +145,7 @@ public:
 	 */
 	void		detachSkeletonSon(CTransform *mi);
 
-	/** Force the skeletonModel to recompute at next render which skins to render, at wich pass.
+	/** Force the skeletonModel to recompute at next render which skins to render, at which pass.
 	 *	If you call setOpacity()/setTransparency() on one of the skins binded to the skeleton, you should call this
 	 *	method, else strange result may occurs.
 	 *	NB: this is automatically called by bindSkin()/detachSkeletonSon()

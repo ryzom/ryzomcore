@@ -71,7 +71,7 @@ public:
 
 	//\name From IStreamableEntity
 	//@{
-		/** Given a pos, test wether the village needs to be loaded now.
+		/** Given a pos, test whether the village needs to be loaded now.
 		 * It it returns false, it means that the village is too far or that asynchronous loading suffice.
 		 * It it returns true, the next call to update will return only when the loading is completed.
 		 */

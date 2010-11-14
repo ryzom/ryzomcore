@@ -859,7 +859,7 @@ namespace R2
 		virtual void tpToEntryPoint(NLNET::IModuleProxy *sender, uint32 actIndex) =0;
 		// Set the starting act of the scenario
 		virtual void setStartingAct(NLNET::IModuleProxy *sender, uint32 actIndex) =0;
-		// Update the the ring access of a scenario.
+		// Update the ring access of a scenario.
 		virtual void onScenarioRingAccessUpdated(NLNET::IModuleProxy *sender, bool ok, const std::string &ringAccess, const std::string &errMsg) =0;
 		// a message to validate a file waiting to be saved
 		virtual void saveScenarioFile(NLNET::IModuleProxy *sender, const std::string &md5, const R2::TScenarioHeaderSerializer &header) =0;
@@ -959,7 +959,7 @@ namespace R2
 		void tpToEntryPoint(NLNET::IModule *sender, uint32 actIndex);
 		// Set the starting act of the scenario
 		void setStartingAct(NLNET::IModule *sender, uint32 actIndex);
-		// Update the the ring access of a scenario.
+		// Update the ring access of a scenario.
 		void onScenarioRingAccessUpdated(NLNET::IModule *sender, bool ok, const std::string &ringAccess, const std::string &errMsg);
 		// a message to validate a file waiting to be saved
 		void saveScenarioFile(NLNET::IModule *sender, const std::string &md5, const R2::TScenarioHeaderSerializer &header);

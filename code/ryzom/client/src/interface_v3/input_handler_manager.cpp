@@ -49,7 +49,7 @@ using namespace NLMISC;
 extern CActionsManager	Actions;
 extern CActionsManager	EditActions;
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Pump_Events )
 
 CInputHandlerManager* CInputHandlerManager::_Instance = NULL;

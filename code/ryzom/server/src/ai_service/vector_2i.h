@@ -35,7 +35,7 @@ public:		// Attributes.
 
 public:		// Methods.
 	// Object.
-	/// Constructor wich do nothing.
+	/// Constructor which do nothing.
 	CVector2i() {}
 	/// Constructor .
 	CVector2i(sint32 _x, sint32 _y) : x(_x), y(_y) {}

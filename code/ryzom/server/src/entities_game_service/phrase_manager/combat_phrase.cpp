@@ -2154,7 +2154,7 @@ bool CCombatPhrase::launch()
 	{
 		// If it is a melee attack, Consider an average of 0.4 second of delay (time for the weapon to rich the target body)
 		/* To do better, we should rely on the animation played, which rely on lot of parameters
-			- wether the weapon used is in right or left hand (???)
+			- whether the weapon used is in right or left hand (???)
 			- the type of hit (default, power, area)
 			- the client-side VISUAL localisation (a player hitting a yubo's head still does a Low-Attack)
 		*/

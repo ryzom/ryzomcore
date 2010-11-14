@@ -459,7 +459,7 @@ public:
 		void enableAccurateIntegration(bool enable = true) { _AccurateIntegration = enable; }
 		bool isAccurateIntegrationEnabled(void) const { return _AccurateIntegration; }
 
-		/** the the time threshold and the max number of integration to perform, when accurate integration is activated.
+		/** the time threshold and the max number of integration to perform, when accurate integration is activated.
 		  * The default is 0.15 for time threshold and 2 for max NbIntegrations
 		  * \param canSlowDown : Allow the system to slow down in speed but to keep accuracy in its movement.
 		  *  It is useful for critical situations where the framerate is very low. The default is true.

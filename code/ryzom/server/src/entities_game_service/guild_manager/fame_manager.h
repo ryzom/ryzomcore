@@ -204,7 +204,7 @@ private:
 		/** Fame memory. Used for player to remember guild fame status when they change/join/quit guild	
 		 *	The reason for this is to reduce the resulting fame variation when the player change/join/quit a guild.
 		 *	The table will receive the current evaluated player guild fame when the player guild status change.
-		 *	Then, a progressive interpolation will slop the evaluated player guild fame the the new player guild fame 
+		 *	Then, a progressive interpolation will slop the evaluated player guild fame from the new player guild fame 
 		 *	value.
 		 */
 		sint32		LastGuildFame[MAX_FACTION];

@@ -440,7 +440,7 @@ private:
 	std::string CurrentFile;
 
 
-	// Usefull pathes and names
+	// Useful pathes and names
 
 	/// Now deprecated : the launcher is the client ryzom
 	std::string RyzomFilename;
@@ -450,7 +450,7 @@ private:
 	std::string ClientPatchPath;
 	std::string ClientDataPath;
 
-	/// Output usefull information for debugging in the log file
+	/// Output useful information for debugging in the log file
 	bool VerboseLog;
 
 	bool MustLaunchBatFile; // And then relaunch ryzom

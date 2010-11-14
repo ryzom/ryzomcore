@@ -104,7 +104,7 @@ public:
 	// Clean local db if botchat que the botchat session id
 	void start();
 
-	// Check wether download has finished
+	// Check whether download has finished
 	bool isDownloadComplete() const { return _DownloadComplete; }
 
 	uint16 getSessionID () { nlassert((uint) _Category < ListTypeCount); return _CurrentSessionNb; }

@@ -711,7 +711,7 @@ public:
 	// Remove an alias from the list of alias in use (dynamic part only)
 	void			releaseAlias(IPrimitive *prim, uint32 dynamicAlias);
 
-	// Force the assignation of the specified alias the the primitive. If another primitive
+	// Force the assignation of the specified alias to the primitive. If another primitive
 	// already hold the alias, this other primitive is assigned a new alias.
 	void			forceAlias(CPrimAlias *prim, uint32 alias);
 

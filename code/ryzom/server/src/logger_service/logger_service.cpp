@@ -507,7 +507,7 @@ public:
 			// counter is used to track the state of the current result writing
 			// between module update.
 
-			// the query thread has posted a result, send it the the BS
+			// the query thread has posted a result, send it to the BS
 			const TThreadResult &threadResult = _QueryResult.peek();
 
 			uint32 nbLog = (uint32)threadResult.Lines->size();

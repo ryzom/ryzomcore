@@ -96,14 +96,28 @@ public:
 			_AttrbDlg[k]->setSchemeWrapper(&_SchemeWrapper[k]) ;
 			_AttrbDlg[k]->init();
 		}
+		
+		static const char * const operators[] = 
+		{
+			QT_TR_NOOP("Select Arg1"),
+			QT_TR_NOOP("Select Arg2"),
+			QT_TR_NOOP("Modulate"),
+			QT_TR_NOOP("Add"),
+			QT_TR_NOOP("Subtract"),
+			0
+		};
+		_comboBox->blockSignals(true);
 		for (k = 0 ; k < (uint) NL3D::CPSBinOp::last ; ++k)
 		{
 			if (_EditedScheme->supportOp( (NL3D::CPSBinOp::BinOp) k))
 			{
+				_comboBox->insertItem(_comboBox->count(), operators[k]);
+
 				if ((uint) _EditedScheme->getOp() == k)
 					_comboBox->setCurrentIndex(k);
 			}
 		}
+		_comboBox->blockSignals(false);
 	}
 
 	~CBinOpDialogT()

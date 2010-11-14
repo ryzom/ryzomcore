@@ -172,7 +172,7 @@ namespace NLMISC
 	 *	safe to use with NeL DLL.
 	 *	For windows platform, this singleton also hold the
 	 *	fiber pointer of the current thread. This is needed because
-	 *	of the bad design the the fiber API before Windows XP.
+	 *	of the bad design of the fiber API before Windows XP.
 	 */
 	class CCurrentCoTask
 	{

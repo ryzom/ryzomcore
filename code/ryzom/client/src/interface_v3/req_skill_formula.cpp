@@ -41,7 +41,7 @@ bool		CSkillValue::andWith(const CSkillValue &sv)
 	// else if the skills are one same branch
 	else if(pSM->areSkillOnSameBranch(Skill, sv.Skill))
 	{
-		// The skillvalue are compatible if the the ancestor skill has a lesser value than the son
+		// The skillvalue are compatible if the ancestor skill has a lesser value than the son
 		if(pSM->isSkillAncestor(Skill, sv.Skill))
 		{
 			if(Value<=sv.Value)
@@ -80,7 +80,7 @@ bool		CSkillValue::orWith(const CSkillValue &sv)
 	// else if the skills are one same branch
 	else if(pSM->areSkillOnSameBranch(Skill, sv.Skill))
 	{
-		// The skillvalue are compatible if the the ancestor skill has a lesser value than the son
+		// The skillvalue are compatible if the ancestor skill has a lesser value than the son
 		if(pSM->isSkillAncestor(Skill, sv.Skill))
 		{
 			if(Value<=sv.Value)

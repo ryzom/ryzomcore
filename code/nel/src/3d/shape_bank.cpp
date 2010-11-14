@@ -677,7 +677,7 @@ void CShapeBank::removeShapeCache(const std::string &shapeCacheName)
 
 void CShapeBank::reset()
 {
-	// Parse la map ShapeCacheNameToShapeCache pour supprimer tout les caches
+	// Parse map ShapeCacheNameToShapeCache to delete all caches
 	TShapeCacheMap::iterator scmIt = ShapeCacheNameToShapeCache.begin();
 	while( scmIt != ShapeCacheNameToShapeCache.end() )
 	{

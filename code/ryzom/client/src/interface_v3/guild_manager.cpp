@@ -907,7 +907,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 			return;
 		}
 
-		// *** Check with the grade of the local player wich types of actions we can do on the player selected
+		// *** Check with the grade of the local player which types of actions we can do on the player selected
 
 		// enable or disable menu entries
 		if (pGM->isProxy())

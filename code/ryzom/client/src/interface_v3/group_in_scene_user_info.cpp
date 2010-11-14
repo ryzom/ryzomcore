@@ -999,7 +999,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		// or directly from the forage source
 		else
 		{
-			// NB: forage don't use CBarManager for 2 reasons: unusefull (forage bars exist only through VP),
+			// NB: forage don't use CBarManager for 2 reasons: useless (forage bars exist only through VP),
 			// and complicated since updated at each frame on client (because of smooth transition code)
 			CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
 			barInfo.Score[SCORES::hit_points]=	forageSource->getTimeBar();		// Map TimeBar to HP

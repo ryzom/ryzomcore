@@ -59,7 +59,7 @@ extern CEventsListener		EventsListener;				// Inputs Manager
 // User Controls (mouse, keyboard, interfaces, ...)
 CUserControls UserControls;
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_User_Controls_Update )
 
 

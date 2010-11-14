@@ -426,7 +426,7 @@ void CParticleTreeCtrl::OnRButtonDown(UINT nFlags,  CPoint point)
 	{
 		_LastClickedPS->setCurrentEditedElement(NULL);
 	}
-	// test wether there is an item under that point
+	// test whether there is an item under that point
 	UINT flags;
 	HTREEITEM item  = this->HitTest(point,  &flags);
 	if (item)

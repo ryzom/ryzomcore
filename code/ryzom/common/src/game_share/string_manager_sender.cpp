@@ -165,7 +165,7 @@ namespace STRING_MANAGER
 
 
 	/*
-	 * Generic method used to send localised texts to clients ( wether they are ingame or in the character creation process )
+	 * Generic method used to send localised texts to clients ( whether they are ingame or in the character creation process )
 	 * this method is inline and declared there so that it cannot be accessed from elsewhere.
 	 * Use sendStringToClient or sendStringToUser
 	 */

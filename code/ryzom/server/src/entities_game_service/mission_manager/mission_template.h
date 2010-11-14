@@ -134,7 +134,7 @@ public:
 	/// send the mission auto text
 	uint32				sendAutoText( const TDataSetRow & userRow,const NLMISC::CEntityId & giver) const;
 
-	/// send the the mission description ( param text and addParams are used for text overloasding )
+	/// send the mission description ( param text and addParams are used for text overloasding )
 	uint32				sendDescText( const TDataSetRow & userRow, const TDataSetRow & giver, uint32 descIndex = 0xFFFFFFFF ) const;
 
 	/// fill a vector with all the escort groups.

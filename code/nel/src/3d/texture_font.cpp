@@ -217,7 +217,7 @@ void CTextureFont::doGenerate(bool async)
 			sint x = ite->left();
 			sint y = ite->bottom();
 
-			// Look in wich category is the rectangle
+			// Look in which category is the rectangle
 			sint cat = 0;
 			sint catTopY = 0;
 			sint catBotY = NbLine[cat] * Categories[cat];

@@ -45,7 +45,7 @@ public:		// Attributes.
 public:		// Methods.
 	/// @name Object.
 	//@{
-	/// Constructor wich do nothing.
+	/// Constructor which do nothing.
 	CVector2f() {}
 	/// Constructor.
 	CVector2f(float	_x, float _y) : x(_x), y(_y) {}

@@ -3042,7 +3042,7 @@ void setManagerAggroListTarget_ss_(CStateInstance* entity, CScriptStack& stack)
 
 @subsection getBotIndexByName_s_f
 
-Get the index of a bot of a group by its name (or return -1). Mainly usefull for scripted boss.
+Get the index of a bot of a group by its name (or return -1). Mainly useful for scripted boss.
 
 botIndex begins at zero for the first member of the group, -1 if the bot is not found.
 
@@ -3228,7 +3228,7 @@ void isPlayerAlived_s_f(CStateInstance* entity, CScriptStack& stack)
 @subsection getServerTimeStr__s
 
 Gets the server time as string "eg 21:17:14 the x"
-This function is usefull for stat purpose or debug (to know when a boss is down)
+This function is useful for stat purpose or debug (to know when a boss is down)
 
 Arguments: > s(serverTime) 
 
@@ -4284,7 +4284,7 @@ void getBotEid_f_s(CStateInstance* entity, CScriptStack& stack)
 @subsection getBotIndex_s_f
 Get the bot Index by its entityId.
 Entity Id of a bot can be given via getCurrentSpeackerEid().
-It can be usefull to Known the index of the bot in the group with the EntityId.
+It can be useful to Known the index of the bot in the group with the EntityId.
 
 Arguments:  s(botEid) -> f(botIndex),
 

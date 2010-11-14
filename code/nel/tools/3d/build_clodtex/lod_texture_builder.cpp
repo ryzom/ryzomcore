@@ -24,7 +24,7 @@ using namespace NL3D;
 
 
 // ***************************************************************************
-// Quality factor. Usefull to get maximum of interseting values in the range 0..255.
+// Quality factor. Useful to get maximum of interseting values in the range 0..255.
 #define	NL_LTB_MAX_DISTANCE_QUALITY_FACTOR	0.05f
 // The bigger, the lower the influence of the normal is. must be >=0
 #define	NL_LTB_NORMAL_BIAS					1.f

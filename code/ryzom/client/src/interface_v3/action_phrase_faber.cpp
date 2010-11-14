@@ -689,7 +689,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 			}
 		}
 
-		// Filter the selection wether it is an itemPart or specificItem reqiurement
+		// Filter the selection whether it is an itemPart or specificItem reqiurement
 		if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 		{
 			CItemSheet	*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt));

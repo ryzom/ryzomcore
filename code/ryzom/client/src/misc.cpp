@@ -622,7 +622,7 @@ SPropVisualB buildPropVisualB(const CGenderInfo &genderInfo)
 
 //-----------------------------------------------
 // isUserColorSupported :
-// Test wether user color is supported for this equipment
+// Test whether user color is supported for this equipment
 //-----------------------------------------------
 bool isUserColorSupported(const CPlayerSheet::CEquipment &equip)
 {
@@ -639,7 +639,7 @@ bool isUserColorSupported(const CPlayerSheet::CEquipment &equip)
 
 //-----------------------------------------------
 // isUserColorSupported :
-// Test wether user color is supported for a given visual slot
+// Test whether user color is supported for a given visual slot
 //-----------------------------------------------
 bool isUserColorSupported(const CPlayerSheet &playerSheet, SLOTTYPE::EVisualSlot vs)
 {
@@ -807,14 +807,14 @@ void getSeedsFromDB(CSeeds &dest)
 {
 	CInterfaceManager *im =CInterfaceManager::getInstance();
 	nlctassert(sizeof(CSeeds::TUInt) == 4); // excpect that the number of each seed type is encoded on 32 bits
-	                                        // if this assert at compile, change the following code
+											// if this assert at compile, change the following code
 	string ls = im->getDefine("money_1");
 	string ms = im->getDefine("money_2");
 	string bs = im->getDefine("money_3");
 	string vbs = im->getDefine("money_4");
 
 	dest = CSeeds(im->getDbProp(ls)->getValue32(),
-		          im->getDbProp(ms)->getValue32(),
+				  im->getDbProp(ms)->getValue32(),
 				  im->getDbProp(bs)->getValue32(),
 				  im->getDbProp(vbs)->getValue32());
 } // getSeedsFromDB //
@@ -1434,7 +1434,6 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 		}
 
 		matInst.setAlphaTestThreshold(matShape.getAlphaTestThreshold()*((float)opacity)/255.0f);
-
 	}
 }
 
@@ -1467,7 +1466,7 @@ void setVideoMode(const UDriver::CMode &mode)
 
 		uint32 posX = 0;
 		uint32 posY = 0;
-			
+
 		if (Driver->getCurrentScreenMode(screenMode))
 		{
 			// position is not saved in config so center the window

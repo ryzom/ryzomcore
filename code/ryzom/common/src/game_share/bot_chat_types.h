@@ -64,7 +64,7 @@ namespace BOTCHATTYPE
 		// Same than user and item can be retired
 		UserRetirable,
 		// this item was created and sold by the player who whatch the list. appears only in the "Resale list".
-		// but usefull to know that it belongs to the player and therefore PRICE_RETIRE and RESALE_TIME_LEFT are relevant
+		// but useful to know that it belongs to the player and therefore PRICE_RETIRE and RESALE_TIME_LEFT are relevant
 		ResaleAndUser,
 		// same then ResaleAndUser and item can be retired
 		ResaleAndUserRetirable,

@@ -260,7 +260,7 @@ Update the dm commands that are enable on the current target.
 Tbe bitfield returned let us know if the selected target is a botobject, if it is grouped, if we can incarnate him and so.
 - dssTarget: without parameter ask the server to update the list of command that are enable on the selected target
 - onProcessModuleMessage with "NPC_APROP" message: return a bitfield that let know animation property of the selected entity
-- CDynamicMapClient::onNpcAnimationTargeted: translate the bitfield given by the "NPC_APROP" message to known wich are the allowed action
+- CDynamicMapClient::onNpcAnimationTargeted: translate the bitfield given by the "NPC_APROP" message to known which are the allowed action
 - r2:updateAnimBarActions: called by  CDynamicMapClient::onNpcAnimationTargeted, update the anim bar that contains action that can be done on the selecte npc
 
 The DM can push button on the anim bar to do some DM functions like kill an npc, kill a group, despawn, heal, control, speak as
@@ -571,7 +571,7 @@ public:
 	//! For some messages, data are cut in small message then send to DSS via SBS.
 	//! Fragmentation enable to implement a progression bar.
 	//! Communication via SBS disable bandwith limitation  caused by FS
-	//! Using sendMsgToDss is usefull only for big message like uploading Scenario or uploading runtime scenario
+	//! Using sendMsgToDss is useful only for big message like uploading Scenario or uploading runtime scenario
 	//! {
 	/*! Cut a messag in small chunk then send it to DSS via SBS.
 	\param msg The message that will be cut in small chunk an send via sbs.
@@ -635,7 +635,7 @@ public:
 	//// Test Mode to edition mode
 	/////////////////////////////////////////////////////
 
-	//! Ask the the stop of the Animation / Test. Send a message to AIS to unload data.
+	//! Ask the stop of the Animation / Test. Send a message to AIS to unload data.
 	void requestStopTest();
 
 	/*! Ask the connection to an edition session.
@@ -743,7 +743,7 @@ public:
 		Called withou param this function update the DM action bar.
 		Called with as parameter DESPAWN_NPC, ADD_HP, KILL_NPC, ADD_HP, GRP_KILL, GRP_HEAL, CONTROL, STOP_CONTROL, TALK_AS, STOP_TALK it launch DM function
 		\see CClientEditionModule for more info
-		\parm args a list of optional argument may be empty or one of "DESPAWN_NPC" "ADD_HP" "KILL_NPC" "ADD_HP" "GRP_KILL" "GRP_HEAL" "CONTROL" "STOP_CONTROL" "TALK_AS" "STOP_TALK". Multi param could be usefull for setting the aggro distance (NIY).
+		\parm args a list of optional argument may be empty or one of "DESPAWN_NPC" "ADD_HP" "KILL_NPC" "ADD_HP" "GRP_KILL" "GRP_HEAL" "CONTROL" "STOP_CONTROL" "TALK_AS" "STOP_TALK". Multi param could be useful for setting the aggro distance (NIY).
 	*/
 	void dssTarget( std::vector<std::string>& args);
 
@@ -896,7 +896,7 @@ public:
 	This system enables to register class definition by registerGenerator.
 	Then the call to newComponent generates a CObjectTable using the template that have been save by registerGenerator.
 	The method getPropertyValue on a CObjectTable first look in the table of the object. Then in the palette. Then in its default value of the property then an thoses of his parents.
-	The function getPropertyList enables to know all properties of an object (usefull for debug)
+	The function getPropertyList enables to know all properties of an object (useful for debug)
 
 	You can add an palette Element to the editor by addPaletteElement. A palette element is like a template that you clone and put in the scene.
 	Palette element are mainly defined in r2_palette.lua (binding is done via CComLuaModule

@@ -298,7 +298,7 @@ void CToolDrawPrim::doUpdateBeforeRender()
 			nlassert(0);
 		break;
 	}
-	// If there are at least 3 vertices and the primitive is a region, then see wether mouse
+	// If there are at least 3 vertices and the primitive is a region, then see whether mouse
 	// is near the first vertex -> in this case, propose to the user to close the primitive
 	// If landscape is intersected too, then the vertex must be nearer then the first vertex
 	if (_PrimType == Region && _NumPoints >= 3)

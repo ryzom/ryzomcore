@@ -530,7 +530,7 @@ public:
 	// A client says to others clients that it is ready to send/receive guild data
 	virtual void guildReady(NLNET::IModuleProxy *sender)
 	{
-		// this peer is ready, insert him the the broadcast list
+		// this peer is ready, insert him to the broadcast list
 		_Broadcast.insert(sender);
 
 		// if we are ready ourself, send it the guild data

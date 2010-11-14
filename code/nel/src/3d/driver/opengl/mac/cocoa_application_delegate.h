@@ -16,13 +16,16 @@
 
 #import <Cocoa/Cocoa.h>
 
-namespace NL3D 
+namespace NL3D
 {
 	class CDriverGL;
 	NSApplicationTerminateReply applicationShouldTerminate(CDriverGL*);
 }
 
-@interface CocoaApplicationDelegate : NSObject<NSApplicationDelegate>
+@interface CocoaApplicationDelegate : NSObject
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+<NSApplicationDelegate>
+#endif
 {
 	NL3D::CDriverGL* _driver;
 }

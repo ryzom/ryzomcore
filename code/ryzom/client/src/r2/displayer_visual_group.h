@@ -101,7 +101,7 @@ public:
 	  */
 	void setContextualVisibilityActive(bool active);
 	bool getContextualVisibilityActive() const { return _ContextualVisibilityActive; }
-	/** If contextual is enabled, tells wether this object is visible with current context
+	/** If contextual is enabled, tells whether this object is visible with current context
       * Actually when one entity uses that road / region
 	  */
 	bool isContextuallyVisible();

@@ -139,7 +139,7 @@ void CArray2D<T>::getUpdateRects(sint moveOffsetX, sint moveOffsetY, std::vector
 	{
 		// the width to update
 		uint width = std::min((uint) moveOffsetX, _Width);
-		// the the grid moved top or bottom, exclude this part
+		// the grid moved top or bottom, exclude this part
 		sint height = _Height - abs(moveOffsetY);
 		if (height > 0)
 		{
@@ -155,7 +155,7 @@ void CArray2D<T>::getUpdateRects(sint moveOffsetX, sint moveOffsetY, std::vector
 	{
 		// the width to update
 		uint width = std::min((uint) (- moveOffsetX), _Width);
-		// the the grid moved top or bottom.
+		// the grid moved top or bottom.
 		sint height = _Height - abs(moveOffsetY);
 		if (height > 0)
 		{

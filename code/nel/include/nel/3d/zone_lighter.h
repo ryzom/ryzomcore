@@ -278,7 +278,7 @@ public:
 		NLMISC::CVector							BoundingBoxVectors[8];
 	};
 
-	// A hierachical heightfield
+	// A hierarchical heightfield
 	class CHeightField
 	{
 	public:

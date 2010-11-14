@@ -316,7 +316,7 @@ public:
 		/// Set the type of texture animation to use. None is the default. Setting a new value discard the previous change.
 		void	setTexAnimType(TTexAnimType type);
 
-		/// Get the the type of texture animation
+		/// Get the type of texture animation
 		TTexAnimType getTexAnimType() const;
 	//@}
 

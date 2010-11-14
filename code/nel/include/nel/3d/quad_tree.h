@@ -288,7 +288,7 @@ private:// Classes.
 		bool			BBoxNeverRescale;
 		CQuadNode		*Sons[4];
 		CBaseNode		RootNode;		// First element of the element list in this quad.
-		uint			ListIndex;		// [0,3]. index of wich list to follow in "Node.QuadNexts[]".
+		uint			ListIndex;		// [0,3]. index of which list to follow in "Node.QuadNexts[]".
 		/* Topology of sons (top view: axe x/z):
 			0--1
 			|  |

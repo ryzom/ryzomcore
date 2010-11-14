@@ -3231,11 +3231,11 @@ void CEntityCL::updateCastShadowMap()
 void CEntityCL::updateShadowMapProperties()
 {
 	/*
-		Choose the z clamp direction wether or not the player is on "interior" stuff.
+		Choose the z clamp direction whether or not the player is on "interior" stuff.
 		In "interior" stuff, the ZClamp direction is lesser, to avoid some problems of
 		"cast shadow behind the walls"
 
-		Also choose the MaxDepth of shadow map  wether or not the player is on "interior" stuff.
+		Also choose the MaxDepth of shadow map  whether or not the player is on "interior" stuff.
 		In "interior" stuff, the MaxDepth is lesser to, to avoid some problems with the "bud":
 			when the player go up stairs and when in the "bud", the shadow still appears on landscape
 	*/

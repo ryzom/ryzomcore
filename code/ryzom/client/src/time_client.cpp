@@ -68,7 +68,7 @@ NLMISC::TGameCycle LastGameCycle = 0;
 CRyzomTime			RT;
 CClientDate			SmoothedClientDate;
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Update_Time )
 
 
@@ -312,13 +312,13 @@ void updateClientTime()
 	if (ClientCfg.ForceDeltaTime == 0)
 	{
 		T1 = ryzomGetLocalTime();
-		if (T1 == T0)
+		if (T1 <= T0)
 		{
 			// This case is known to occurs if the framerate is very fast (e.g. during the
 			// loading stage) or if the machine has got a heavy load (e.g. lots of AGP data)
 			// delaying the timer updates.
 			//nlwarning ("getLocalTime has returned the same time! START");
-			while (T1 == T0)
+			while (T1 <= T0)
 			{
 				T1 = ryzomGetLocalTime();
 				// give up the time slice to let time to other process

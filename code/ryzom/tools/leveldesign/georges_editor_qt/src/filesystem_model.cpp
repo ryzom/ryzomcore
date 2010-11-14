@@ -65,7 +65,7 @@ namespace NLQT
 			if(parent.isValid()) 
 			{
 				return 0;
-			} 
+			}
 			else 
 			{
 				return qMin(QFileSystemModel::rowCount(parent),1);

@@ -535,7 +535,7 @@ void			CShadowMapManager::renderProject(CScene *scene)
 	driver->setupFog(driver->getFogStart(), driver->getFogEnd(), CRGBA::Black);
 
 	/* Light case: CVisualCollisionManager use a fakeLight to avoid ShadowMapping on backFaces of meshs
-		Hence must clean all lights, and enalbe only the Light0 in driver
+		Hence must clean all lights, and enable only the Light0 in driver
 	*/
 	// Use CRenderTrav::resetLightSetup() to do so, to reset its Cache information
 	scene->getRenderTrav().resetLightSetup();

@@ -1,4 +1,3 @@
-
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -114,9 +113,9 @@ void quitCrashReport ()
 #ifndef NL_OS_WINDOWS
 static void sigHandler(int Sig)
 {
-  // redirect the signal for the next time
-  signal(Sig, sigHandler);
-  nlwarning("Ignoring signal SIGPIPE");
+	// redirect the signal for the next time
+	signal(Sig, sigHandler);
+	nlwarning("Ignoring signal SIGPIPE");
 }
 #endif
 

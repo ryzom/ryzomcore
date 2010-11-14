@@ -34,7 +34,7 @@ namespace NLMISC {
  *	with list<>/set<> etc... node allocations.
  *
  * NB: if used with a vector<> or a deque<> (ie if allocate(..,n) is called with n>1), it's still work,
- *	but it's use malloc()/free() instead, so it is fully unuseful in this case :)
+ *	but it's use malloc()/free() instead, so it is fully useless in this case :)
  *
  * CSTLBlockAllocator use a pointer on a CBlockMemory, so multiple containers can share the same
  *	blockMemory, for maximum space/speed efficiency.

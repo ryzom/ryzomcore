@@ -248,7 +248,7 @@ void		CDistancePrioritizer::fillOutBox( CClientHost& client, TOutBox& outbox )
 			}
 		}
 
-		// Get the entity corresponding to the the client/slot pair
+		// Get the entity corresponding to the client/slot pair
 		TPairState&	pairState = _VisionArray->getPairState( clientId, slot );
 		CEntity*	sentity = NULL;
 

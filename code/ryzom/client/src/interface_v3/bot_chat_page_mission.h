@@ -48,7 +48,7 @@ public:
 	void	setMissionClientType(MISSION_DESC::TClientMissionType mType) {_MType= mType;}
 
 private:
-	// an observer to update big mission list from littles pages in serveur database
+	// an observer to update big mission list from littles pages in server database
 	CHugeListObs _MissionPagesObs;
 	CDBCtrlSheet *_CurrSel;
 	MISSION_DESC::TClientMissionType _MType;

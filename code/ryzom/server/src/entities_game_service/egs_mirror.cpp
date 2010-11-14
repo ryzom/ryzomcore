@@ -62,7 +62,7 @@ void	initMirror( void (*cbUpdate)(), void (*cbSync)() )
 void	cbMirrorIsReadyForInit( CMirror *mirror )
 {
 //	Mirror.declareEntityTypeOwner( RYZOMID::day_cycle, 1 ); // One time for server, DayCycle must be have index 0+NB_RESERVED_ROWS in dataset, do not change order of init
-//	Mirror.declareEntityTypeOwner( RYZOMID::weather, 5 ); // TEMP max number of contients
+//	Mirror.declareEntityTypeOwner( RYZOMID::weather, 5 ); // TEMP max number of continents
 	Mirror.declareEntityTypeOwner( RYZOMID::player, MaxNbPlayers );
 	Mirror.declareEntityTypeOwner( RYZOMID::object, MaxNbObjects );
 	Mirror.declareEntityTypeOwner( RYZOMID::npc, MaxNbNpcSpawnedByEGS );

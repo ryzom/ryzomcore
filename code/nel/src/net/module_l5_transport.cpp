@@ -457,7 +457,7 @@ namespace NLNET
 			TRouteMap::iterator it(_Routes.find(sid));
 			if (it == _Routes.end())
 			{
-				nlwarning("onRemoveTransport : can't find a route the the transport %hu on service %u",
+				nlwarning("onRemoveTransport : can't find a route to the transport %hu on service %u",
 					desc.TransportId,
 					sid.get());
 				return;

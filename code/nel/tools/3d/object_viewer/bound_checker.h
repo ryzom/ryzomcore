@@ -46,7 +46,7 @@ public:
 	// get the upper bound
 	T getUpperBound(void) const { return _UpperBound; }
 
-	// test wether the upper bound is excluded of the test
+	// test whether the upper bound is excluded of the test
 	bool isUpperBoundExcluded(void) const
 	{
 		return _UpperBoundExcluded;
@@ -68,7 +68,7 @@ public:
 	// get the lower bound
 	T getLowerBound(void) const { return _LowerBound; }
 
-	// test wether the lower bound is excluded of the test
+	// test whether the lower bound is excluded of the test
 	bool isLowerBoundExcluded(void) const
 	{
 		return _LowerBoundExcluded;

@@ -64,7 +64,7 @@ public:
 	};
 
 	/**
-	 * The global position in the the global retriever.
+	 * The global position in the global retriever.
 	 * Contains an instance id and a local position within the instance.
 	 * \author Benjamin Legros
 	 * \author Nevrax France

@@ -1094,7 +1094,7 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 	{
 		Browse *parent = (Browse*)this->GetParent();
 		char FileName[256];
-		int count=DragQueryFile(hDropInfo,0xffffffff,FileName,256); //count = nombre de fichiers dans le drop
+		int count=DragQueryFile(hDropInfo,0xffffffff,FileName,256); //count = files number in drop queue
 		
 
 		POINT pos;
@@ -1491,9 +1491,10 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			_chdir (LastPath.c_str());
 			CFileDialog load(true, NULL, LastPath.c_str(), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT,
 				"Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
-			load.m_ofn.lpstrFile = new char[10000]; //le buffer contient la list de tous les noms de fichier
+			load.m_ofn.lpstrFile = new char[10000]; // buffer contains filenames list
 			load.m_ofn.lpstrFile[0] = 0;
-			//avec 10ko on devrait tranquille ... si l'ensemble des noms des fichiers depassent 10000 cara, l'insertion n'a pas lieu
+			// with 10 KB we should be large enough...
+			// if all files are exceeding 10000 characters, insert would be skipped
 			load.m_ofn.nMaxFile = 10000-1;
 			if (load.DoModal()==IDOK)
 			{

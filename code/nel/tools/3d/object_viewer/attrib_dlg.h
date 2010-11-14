@@ -106,7 +106,7 @@ public:
 	  */
 	void enableMemoryScheme(bool enabled = true) { _DisableMemoryScheme = !enabled; }
 
-	/** tells wether memory schemes are enables
+	/** tells whether memory schemes are enables
 	  * \see enableMemoryScheme()
 	  */
 	bool isMemorySchemeEnabled() const { return !_DisableMemoryScheme; }
@@ -177,14 +177,14 @@ protected:
 	virtual CEditAttribDlg *createConstantValueDlg() = 0;
 
 
-	// tells wether the scheme supports custom input
+	// tells whether the scheme supports custom input
 	virtual bool hasSchemeCustomInput(void) const = 0;
 	// retrieve the scheme input id
 	virtual NL3D::CPSInputType getSchemeInput(void) const = 0;
 	// set the scheme input id
 	virtual void setSchemeInput(const NL3D::CPSInputType &input) = 0;
 
-	// tells wether the scheme input value is clamped or not
+	// tells whether the scheme input value is clamped or not
 	virtual bool isSchemeClamped(void) const = 0;
 	// clamp / unclamp the scheme
 	virtual void clampScheme(bool clamped = true) = 0;

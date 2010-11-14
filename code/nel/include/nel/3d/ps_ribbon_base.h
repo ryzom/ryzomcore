@@ -62,7 +62,7 @@ public:
 		TRibbonMode				getRibbonMode() const { return _RibbonMode; }
 		void					setInterpolationMode(TInterpolationMode mode);
 		TInterpolationMode		getInterpolationMode() const { return _InterpolationMode; }
-		// Set the the coordinate system in which the trail will be created
+		// Set the coordinate system in which the trail will be created
 		void					setMatrixMode(TMatrixMode matrixMode);
 		TMatrixMode				getMatrixMode() const { return _MatrixMode; }
 	///@}
@@ -79,7 +79,7 @@ public:
 		void				setSegDuration(TAnimationTime ellapsedTime);
 		TAnimationTime		getSegDuration(void) const { return _SegDuration; }
 
-		/** The the length in meter of the ribbon. This is used only if the ribbon mode is set to FixedSize.
+		/** The length in meter of the ribbon. This is used only if the ribbon mode is set to FixedSize.
 		* These kind of ribbon are usually slower than variable size ribbons.
 		* The default is one metter.
 		*/

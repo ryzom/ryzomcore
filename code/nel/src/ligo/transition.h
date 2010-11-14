@@ -180,7 +180,7 @@ public:
 	  * \param config is the current lingo config file
 	  * \param errors is an error handler filled with error code and message if the method return false.
 	  *
-	  * \return true if check success false if problem detected. Errors are reported in the the error[0].
+	  * \return true if check success false if problem detected. Errors are reported in the error[0].
 	  */
 	bool check (const CZoneTemplate &zoneTemplate, uint transitionNumber, const CLigoConfig &config, CLigoError &errors) const;
 

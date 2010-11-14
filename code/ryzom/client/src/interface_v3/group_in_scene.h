@@ -50,7 +50,7 @@ public:
 
 	// Position of the group in world space
 	NLMISC::CVector	Position;
-	// usefull only if getUserScale()==true
+	// useful only if getUserScale()==true
 	float			Scale;
 
 	void		setUserScale(bool us);
