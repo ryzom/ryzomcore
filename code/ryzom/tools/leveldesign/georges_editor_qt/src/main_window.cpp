@@ -41,7 +41,7 @@ namespace NLQT
 
 	CMainWindow::CMainWindow(QWidget *parent)
 		: QMainWindow(parent), _GeorgesLogDialog(0), _ObjectViewerDialog(0), 
-		_GeorgesDirTreeDialog(0)
+		_GeorgesDirTreeDialog(0),_emptyView(0)
 	{
 		setWindowTitle("Qt Georges Editor");
 
@@ -106,17 +106,31 @@ namespace NLQT
 	CMainWindow::~CMainWindow()
 	{
 		// save state & geometry of window and widgets
-		QSettings settings("georges_editor_qt.ini", QSettings::IniFormat);
-		settings.beginGroup("WindowSettings");
-		settings.setValue("QtWindowState", saveState());
-		settings.setValue("QtWindowGeometry", saveGeometry());
-		settings.endGroup();
+		
 
 		_statusBarTimer->stop();
 
 		delete _ObjectViewerDialog;
 		delete _GeorgesDirTreeDialog;
 		delete _GeorgesLogDialog;
+		delete _emptyView;
+	}
+
+	void CMainWindow::closeEvent(QCloseEvent *event)
+ {
+	 // TODO: dirty hack to have qt recognize possible state/geometry changes
+	 // of new emptyView
+	 CGeorgesTreeViewDialog *bla = new CGeorgesTreeViewDialog(this, true);
+	 tabifyDockWidget(_emptyView, bla);
+	 removeDockWidget(bla);
+	 bla->deleteLater();
+
+	 QSettings settings("georges_editor_qt.ini", QSettings::IniFormat);
+	 settings.beginGroup("WindowSettings");
+	 settings.setValue("QtWindowState", saveState());
+	 settings.setValue("QtWindowGeometry", saveGeometry());
+	 settings.endGroup();
+	 event->accept();
 	}
 
 	void CMainWindow::openTreeView(QString file) 
@@ -135,13 +149,12 @@ namespace NLQT
 		if (!newView) 
 		{
 			newView	= new CGeorgesTreeViewDialog(this);
-			//newView->setAllowedAreas(Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 			newView->setWindowTitle(file);
 
 			if (_treeViewList.isEmpty()) 
 			{
-				_emptyView->deleteLater();
 				tabifyDockWidget(_emptyView, newView);
+				_emptyView->deleteLater();
 			}
 			else 
 			{
@@ -245,8 +258,10 @@ namespace NLQT
 	void CMainWindow::createEmptyView(QDockWidget* w)
 	{
 		_emptyView = new CGeorgesTreeViewDialog(this, true);
+
 		if(w)
 		{
+			addDockWidget(Qt::TopDockWidgetArea, _emptyView);
 			tabifyDockWidget(w, _emptyView);
 		}
 		else
@@ -401,6 +416,7 @@ namespace NLQT
 
 	void CMainWindow::tabChanged(int index)
 	{
+		nlinfo(QString("%1").arg(index).toStdString().c_str());
 		if (index == -1) 
 		{
 			setWindowTitle("Qt Georges Editor");

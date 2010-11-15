@@ -274,6 +274,7 @@ namespace NLQT
 				Modules::mainWin().createEmptyView(
 					Modules::mainWin().getTreeViewList().takeFirst());
 			}
+			Modules::mainWin().getTreeViewList().removeOne(this);
 			deleteLater();
 		}
 	}
