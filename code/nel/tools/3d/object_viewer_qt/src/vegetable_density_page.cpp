@@ -225,7 +225,7 @@ void CVegetableDensityPage::updateAngleMode()
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableDensityPage::setDensity(NLMISC::CNoiseValue value)
+void CVegetableDensityPage::setDensity(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Density = value;
 

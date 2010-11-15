@@ -57,31 +57,30 @@ CEmitterPage::CEmitterPage(QWidget *parent)
 
 	// SPEED_INHERITANCE_FACTOR
 	_ui.speedInherFactorWidget->setRange(-1.f, 1.f);
-	_ui.speedInherFactorWidget->setWrapper(&_SpeedInheritanceFactorWrapper);
+	//_ui.speedInherFactorWidget->setWrapper(&_SpeedInheritanceFactorWrapper);
 	
 	// DELAYED_EMISSION
 	_ui.delayedEmissionWidget->setRange(0.f, 10.f);
 	_ui.delayedEmissionWidget->enableLowerBound(0.f, false);
-	_ui.delayedEmissionWidget->setWrapper(&_DelayedEmissionWrapper);
 
 	// MAX_EMISSION_COUNT
 	_ui.maxEmissionCountWidget->setRange(0, 100);
 	_ui.maxEmissionCountWidget->enableUpperBound(256, false);
-	_ui.maxEmissionCountWidget->setWrapper(&_MaxEmissionCountWrapper);
-	_MaxEmissionCountWrapper.widget = _ui.maxEmissionCountWidget;
-	_MaxEmissionCountWrapper.parent = this;
 	
 	// radius  for conic emitter
 	_ui.radiusWidget->setRange(0.1f, 2.1f);
-	_ui.radiusWidget->setWrapper(&_ConicEmitterRadiusWrapper);
-	
-	_ui.directionWidget->setWrapper(&_DirectionWrapper);
 	
 	connect(_ui.emittedTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setEmittedType(int)));
 	connect(_ui.typeEmissionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfEmission(int)));
 	connect(_ui.directionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDirectionMode(int)));
 	connect(_ui.bypassAutoLODCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBypassAutoLOD(bool)));
 	connect(_ui.forceConsistentCheckBox, SIGNAL(toggled(bool)), this, SLOT(setConsistentEmission(bool)));
+
+	connect(_ui.speedInherFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setSpeedInheritanceFactor(float)));
+	connect(_ui.delayedEmissionWidget, SIGNAL(valueChanged(float)), this, SLOT(setEmitDelay(float)));
+	connect(_ui.radiusWidget, SIGNAL(valueChanged(float)), this, SLOT(setConicEmitterRadius(float)));
+	connect(_ui.maxEmissionCountWidget, SIGNAL(valueChanged(uint32)), this, SLOT(setMaxEmissionCount(uint32)));
+	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
 }
 
 CEmitterPage::~CEmitterPage()
@@ -95,19 +94,9 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 
 	updateEmittedType();
 
-	_SpeedInheritanceFactorWrapper.OwnerNode = _Node;
-	_SpeedInheritanceFactorWrapper.E = _Emitter;
-	_ui.speedInherFactorWidget->updateUi();
-
-	_DelayedEmissionWrapper.Node = _Node;
-	_DelayedEmissionWrapper.OwnerNode = _Node;
-	_DelayedEmissionWrapper.E = _Emitter;
-	_ui.delayedEmissionWidget->updateUi();
-	
-	_MaxEmissionCountWrapper.Node = _Node;
-	_MaxEmissionCountWrapper.OwnerNode = _Node;
-	_MaxEmissionCountWrapper.E = _Emitter;
-	_ui.maxEmissionCountWidget->updateUi();
+	_ui.speedInherFactorWidget->setValue(_Emitter->getSpeedInheritanceFactor(), false);
+	_ui.delayedEmissionWidget->setValue(_Emitter->getEmitDelay(), false);
+	_ui.maxEmissionCountWidget->setValue(_Emitter->getMaxEmissionCount(), false);
 
 	_PeriodWrapper.Node = _Node;
 	_PeriodWrapper.E = _Emitter;
@@ -133,10 +122,8 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 	// deals with emitters that have a direction
 	if (dynamic_cast<NL3D::CPSDirection *>(_Emitter))
 	{
-		_DirectionWrapper.E = dynamic_cast<NL3D::CPSDirection *>(_Emitter);
-		_ui.directionWidget->setDirectionWrapper(dynamic_cast<NL3D::CPSDirection *>(_Emitter));
-		_ui.directionWidget->updateUi();
 		_ui.directionWidget->show();
+		_ui.directionWidget->setValue(dynamic_cast<NL3D::CPSDirection *>(_Emitter)->getDir(), false);
 	}
 	else
 		_ui.directionWidget->hide();
@@ -145,8 +132,7 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 	// radius  for conic emitter
 	if (dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter))
 	{
-		_ConicEmitterRadiusWrapper.E = dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter);
-		_ui.radiusWidget->updateUi();
+		_ui.radiusWidget->setValue(dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter)->getRadius(),false);
 		_ui.radiusWidget->show();
 		_ui.radiusLabel->show();
 	}
@@ -291,6 +277,42 @@ void CEmitterPage::setDirectionMode(int index)
 	updateModifiedFlag();
 }
 
+void CEmitterPage::setSpeedInheritanceFactor(float value)
+{
+	_Emitter->setSpeedInheritanceFactor(value);
+}
+
+void CEmitterPage::setConicEmitterRadius(float value)
+{
+	dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter)->setRadius(value);
+}
+
+void CEmitterPage::setEmitDelay(float value)
+{
+	_Emitter->setEmitDelay(value); 
+	Modules::psEdit().resetAutoCount(_Node);
+}
+
+void CEmitterPage::setMaxEmissionCount(uint32 value)
+{
+	if (!_Emitter->setMaxEmissionCount((uint8)value))
+	{
+     
+		QMessageBox::critical(this, tr("NeL Particle Editor"), 
+					tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+					"and thus, should have a finite duration. Please remove that flag first."),
+					QMessageBox::Ok);
+
+		_ui.maxEmissionCountWidget->setValue((uint32)_Emitter->getMaxEmissionCount(), false);
+	}
+	Modules::psEdit().resetAutoCount(_Node);
+}
+
+void CEmitterPage::setDir(const NLMISC::CVector &value)
+{
+	dynamic_cast<NL3D::CPSDirection *>(_Emitter)->setDir(value);
+}
+
 void CEmitterPage::updatePeriodWidget()
 {
 	bool bEnable = _Emitter->getEmissionType() == NL3D::CPSEmitter::regular;
@@ -346,28 +368,6 @@ void CEmitterPage::CGenNbWrapper::set(const uint32 &v)
 void CEmitterPage::CGenNbWrapper::setScheme(scheme_type *s) 
 { 
 	E->setGenNbScheme(s);
-	Modules::psEdit().resetAutoCount(Node);
-}
-
-
-void CEmitterPage::CDelayedEmissionWrapper::set(const float &f) 
-{ 
-	E->setEmitDelay(f); 
-	Modules::psEdit().resetAutoCount(Node);
-}
-
-void CEmitterPage::CMaxEmissionCountWrapper::set(const uint32 &count)
-{
-	if (!E->setMaxEmissionCount((uint8) count))
-	{
-     
-		QMessageBox::critical(parent, tr("NeL Particle Editor"), 
-					tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-					"and thus, should have a finite duration. Please remove that flag first."),
-					QMessageBox::Ok);
-
-		widget->updateUi();
-	}
 	Modules::psEdit().resetAutoCount(Node);
 }
 

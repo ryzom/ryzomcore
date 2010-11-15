@@ -45,13 +45,22 @@ public:
 	CDirectionWidget(QWidget *parent = 0);
 	~CDirectionWidget();
 	
+	void enableGlobalVariable();
 	void setWrapper(IPSWrapper<NLMISC::CVector> *wrapper);
 
 	/// The CPSDirection object is used to see if a global variable can be bound to the direction.
 	/// When set to NULL it has no effect (the default)
 	void setDirectionWrapper(NL3D::CPSDirection *wrapper);
 	void updateUi();
-	
+
+Q_SIGNALS:
+	void valueChanged(const NLMISC::CVector &value);
+	void globalNameChanged(const QString &globalName);
+
+public Q_SLOTS:
+	void setValue(const NLMISC::CVector &value, bool emit = true);
+	void setGlobalName(const QString &globalName, bool emit = true);
+
 private Q_SLOTS:
 	void setGlobalDirection();
 	void incVecI();
@@ -67,7 +76,9 @@ private:
 	void checkEnabledGlobalDirection();
   
 	IPSWrapper<NLMISC::CVector> *_Wrapper ;
-	NL3D::CPSDirection	    *_DirectionWrapper;
+	NL3D::CPSDirection *_DirectionWrapper;
+	NLMISC::CVector _value;
+	QString _globalName;
 
 	Ui::CDirectionWidget _ui;
 	

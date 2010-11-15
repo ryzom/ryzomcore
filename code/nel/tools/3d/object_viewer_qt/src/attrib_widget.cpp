@@ -166,7 +166,7 @@ void CAttribWidget::changeUseScheme(int index)
 {
 	if (index == 0)
 	{
-		if (!useScheme())
+		if (useScheme())
 			resetCstValue(); // change constant
 		cstValueUpdate(); // update ui
 	}

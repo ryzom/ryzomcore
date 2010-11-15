@@ -47,9 +47,9 @@ public:
 	void setVegetableToEdit(NL3D::CVegetable *vegetable);
 
 private Q_SLOTS:
-	void setNoiseValueRotateX(NLMISC::CNoiseValue value);
-	void setNoiseValueRotateY(NLMISC::CNoiseValue value);
-	void setNoiseValueRotateZ(NLMISC::CNoiseValue value);
+	void setNoiseValueRotateX(const NLMISC::CNoiseValue &value);
+	void setNoiseValueRotateY(const NLMISC::CNoiseValue &value);
+	void setNoiseValueRotateZ(const NLMISC::CNoiseValue &value);
 	
 private:
 

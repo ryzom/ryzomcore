@@ -67,11 +67,6 @@ public:
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperUInt *wrapper);
 
-	/// Set current value
-	/// @param value - current value
-	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
-	void setValue(uint32 value, bool emit = true);
-
 	/// Convenience function to set the minimum, and maximum values with a single function call 
 	void setRange(uint32 minValue, uint32 maxValue);
 
@@ -102,7 +97,13 @@ public:
 	
 Q_SIGNALS:
 	void valueChanged(uint32 value);
-  
+
+public Q_SLOTS:
+  	/// Set current value
+	/// @param value - current value
+	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
+	void setValue(uint32 value, bool emit = true);
+
 private Q_SLOTS:
 	void setMaximum(int value);
 	void setMinimum(int value);
@@ -153,11 +154,6 @@ public:
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperInt *wrapper);
 	
-	/// Set current value
-	/// @param value - current value
-	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
-	void setValue(sint32 value, bool emit = true);
-
 	/// Convenience function to set the minimum, and maximum values with a single function call 
 	void setRange(sint32 minValue, sint32 maxValue);
 
@@ -188,7 +184,13 @@ public:
 	
 Q_SIGNALS:
 	void valueChanged(sint32 value);
-  
+
+public Q_SLOTS:  
+	/// Set current value
+	/// @param value - current value
+	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
+	void setValue(sint32 value, bool emit = true);
+
 private Q_SLOTS:
 	void setMaximum(int value);
 	void setMinimum(int value);
@@ -238,11 +240,6 @@ public:
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperFloat *wrapper);
 
-	/// Set current value
-	/// @param value - current value
-	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
-	void setValue(float value, bool emit = true);
-
 	/// Convenience function to set the minimum, and maximum values with a single function call 
 	void setRange(float minValue, float maxValue);
 
@@ -273,6 +270,12 @@ public:
 
 Q_SIGNALS:
 	void valueChanged(float value);
+
+public Q_SLOTS: 
+	/// Set current value
+	/// @param value - current value
+	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
+	void setValue(float value, bool emit = true);
 
 private Q_SLOTS:
 	void changeRange();

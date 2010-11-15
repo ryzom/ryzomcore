@@ -46,7 +46,7 @@ public:
 	void setDefaultRangeFreq(float defRangeMin, float defRangeMax);
 	
 Q_SIGNALS:
-	void noiseValueChanged(NLMISC::CNoiseValue value);
+	void noiseValueChanged(const NLMISC::CNoiseValue &value);
 
 private Q_SLOTS:
 	void setSlider(int value);

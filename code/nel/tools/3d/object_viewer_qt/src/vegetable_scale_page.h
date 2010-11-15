@@ -47,8 +47,8 @@ public:
 	void setVegetableToEdit(NL3D::CVegetable *vegetable);
 	
 private Q_SLOTS:
-	void setNoiseValueXYSize(NLMISC::CNoiseValue value);
-	void setNoiseValueZSize(NLMISC::CNoiseValue value);
+	void setNoiseValueXYSize(const NLMISC::CNoiseValue &value);
+	void setNoiseValueZSize(const NLMISC::CNoiseValue &value);
 	void setFreqFactor(float value);
 
 private:

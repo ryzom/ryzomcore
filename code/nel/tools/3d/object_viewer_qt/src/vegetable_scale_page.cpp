@@ -71,13 +71,13 @@ void CVegetableScalePage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 		setEnabled(false);
 }
 
-void CVegetableScalePage::setNoiseValueXYSize(NLMISC::CNoiseValue value)
+void CVegetableScalePage::setNoiseValueXYSize(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Sxy = value;
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableScalePage::setNoiseValueZSize(NLMISC::CNoiseValue value)
+void CVegetableScalePage::setNoiseValueZSize(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Sz = value;
 	Modules::veget().refreshVegetableDisplay();

@@ -47,9 +47,9 @@ public:
 	void setVegetableToEdit(NL3D::CVegetable *vegetable);
 
 private Q_SLOTS:
-	void setNoiseValueBendPhase(NLMISC::CNoiseValue value);
-	void setNoiseValueBendFactor(NLMISC::CNoiseValue value);
-	void setNoiseValueColor(NLMISC::CNoiseValue value);
+	void setNoiseValueBendPhase(const NLMISC::CNoiseValue &value);
+	void setNoiseValueBendFactor(const NLMISC::CNoiseValue &value);
+	void setNoiseValueColor(const NLMISC::CNoiseValue &value);
 	void browseColor(QListWidgetItem * item);
 	void addNewColor();
 	void insNewColor();

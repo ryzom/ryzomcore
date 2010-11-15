@@ -66,6 +66,12 @@ private Q_SLOTS:
 	void setConsistentEmission(bool state);
 	void setBypassAutoLOD(bool state);
 	void setDirectionMode(int index);
+
+	void setSpeedInheritanceFactor(float value);
+	void setConicEmitterRadius(float value);
+	void setEmitDelay(float value);
+	void setMaxEmissionCount(uint32 value);
+	void setDir(const NLMISC::CVector &value);
 	
 private:
 
@@ -100,51 +106,6 @@ private:
 		scheme_type *getScheme(void) const { return E->getEmitteeSpeedScheme(); }
 		void setScheme(scheme_type *s) { E->setEmitteeSpeedScheme(s); }
 	} _ModulatedStrenghtWrapper;
-
-	/// wrappers to set the speed inheritance factor
-	struct CSpeedInheritanceFactorWrapper : public IPSWrapperFloat
-	{
-		NL3D::CPSEmitter *E;
-		float get(void) const { return E->getSpeedInheritanceFactor(); }
-		void set(const float &f) { E->setSpeedInheritanceFactor(f); }
-	} _SpeedInheritanceFactorWrapper;
-
-	/// wrappers to tune the direction of emitters
-	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
-	{
-		NL3D::CPSDirection *E;
-		NLMISC::CVector get(void) const { return E->getDir(); }
-		void set(const NLMISC::CVector &d){ E->setDir(d); }
-	} _DirectionWrapper;
-
-	/// wrapper to tune the radius of an emitter
-	struct CConicEmitterRadiusWrapper : public IPSWrapperFloat
-	{
-		NL3D::CPSEmitterConic *E;
-		float get(void) const { return E->getRadius(); }
-		void set(const float &f) { E->setRadius(f); }
-	} _ConicEmitterRadiusWrapper;
-
-	/// wrapper to tune delayed emission
-	struct CDelayedEmissionWrapper : public IPSWrapperFloat
-	{
-		CWorkspaceNode *Node;
-		NL3D::CPSEmitter *E;
-		float get(void) const { return E->getEmitDelay(); }
-		void set(const float &f);
-	} _DelayedEmissionWrapper;
-
-	/// wrapper to tune max number of emissions
-	struct CMaxEmissionCountWrapper : public IPSWrapperUInt
-	{
-		CWorkspaceNode *Node;
-		CEditRangeUIntWidget   *widget;
-		QWidget 		*parent;
-		NL3D::CPSEmitter *E;
-		uint32 get(void) const { return E->getMaxEmissionCount(); }
-		void set(const uint32 &count);
-	} _MaxEmissionCountWrapper;
-
 
 	// the emitter being edited
 	NL3D::CPSEmitter	 *_Emitter;

@@ -72,19 +72,19 @@ void CVegetableRotatePage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 		setEnabled(false);
 }
 
-void CVegetableRotatePage::setNoiseValueRotateX(NLMISC::CNoiseValue value)
+void CVegetableRotatePage::setNoiseValueRotateX(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Rx = value;
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableRotatePage::setNoiseValueRotateY(NLMISC::CNoiseValue value)
+void CVegetableRotatePage::setNoiseValueRotateY(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Ry = value;
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableRotatePage::setNoiseValueRotateZ(NLMISC::CNoiseValue value)
+void CVegetableRotatePage::setNoiseValueRotateZ(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Rz = value;
 	Modules::veget().refreshVegetableDisplay();

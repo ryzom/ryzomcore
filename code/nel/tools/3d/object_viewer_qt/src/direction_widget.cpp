@@ -30,7 +30,7 @@
 namespace NLQT {
 
 CDirectionWidget::CDirectionWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL), _DirectionWrapper(NULL)
+    : QWidget(parent), _Wrapper(NULL), _DirectionWrapper(NULL), _globalName("")
 {
 	_ui.setupUi(this);
 	
@@ -50,12 +50,20 @@ CDirectionWidget::CDirectionWidget(QWidget *parent)
 	
 	connect(_ui.xzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecXZ(float,float)));
 	connect(_ui.yzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecYZ(float,float)));
+	
+	// Set default value +K
+	setValue(NLMISC::CVector::K);
 }
 
 CDirectionWidget::~CDirectionWidget()
 {
 }
 
+void CDirectionWidget::enableGlobalVariable()
+{
+	_ui.globalPushButton->setVisible(true);
+	_globalName = "";
+}
 
 void CDirectionWidget::setWrapper(IPSWrapper<NLMISC::CVector> *wrapper) 
 { 
@@ -74,12 +82,42 @@ void CDirectionWidget::setDirectionWrapper(NL3D::CPSDirection *wrapper)
 
 void CDirectionWidget::updateUi()
 {
-	_ui.xzWidget->setVector(_Wrapper->get().x, _Wrapper->get().z);
-	_ui.yzWidget->setVector(_Wrapper->get().y, _Wrapper->get().z);
+	setValue(_Wrapper->get(), false);
+	checkEnabledGlobalDirection();
+}
+
+void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
+{
+	_value = value;
+	_ui.xzWidget->setVector(_value.x, _value.z);
+	_ui.yzWidget->setVector(_value.y, _value.z);
 	_ui.xzWidget->repaint();
 	_ui.yzWidget->repaint();
+
+	if (emit) 
+	{
+		Q_EMIT valueChanged(_value);
+		if (_Wrapper)
+			_Wrapper->setAndUpdateModifiedFlag(_value);
+	}
+}
+
+void CDirectionWidget::setGlobalName(const QString &globalName, bool emit)
+{
+	_globalName = globalName;
 	
-	checkEnabledGlobalDirection();
+	_ui.xzWidget->setVisible(_globalName.isEmpty());
+	_ui.yzWidget->setVisible(_globalName.isEmpty());
+	
+	_ui.incVecIPushButton->setEnabled(_globalName.isEmpty());
+	_ui.incVecJPushButton->setEnabled(_globalName.isEmpty());
+	_ui.incVecKPushButton->setEnabled(_globalName.isEmpty());
+	_ui.decVecIPushButton->setEnabled(_globalName.isEmpty());
+	_ui.decVecJPushButton->setEnabled(_globalName.isEmpty());
+	_ui.decVecKPushButton->setEnabled(_globalName.isEmpty());
+
+	if (emit)
+		globalNameChanged(_globalName);
 }
 
 void CDirectionWidget::setGlobalDirection()
@@ -93,62 +131,55 @@ void CDirectionWidget::setGlobalDirection()
      
 	if (ok)   
 	{
+		setGlobalName(text);
+
 		_DirectionWrapper->enableGlobalVectorValue(text.toStdString());
-		if (!text.isEmpty())
+		if (!_globalName.isEmpty())
 		{
 			// take a non NULL value for the direction
 			NL3D::CParticleSystem::setGlobalVectorValue(text.toStdString(), NLMISC::CVector::I);
 		}
-		checkEnabledGlobalDirection();
 	}
 }
 
 void CDirectionWidget::incVecI()
 {
-	_Wrapper->setAndUpdateModifiedFlag(NLMISC::CVector::I);
-	_ui.xzWidget->setVector(NLMISC::CVector::I.x, NLMISC::CVector::I.z);
-	_ui.yzWidget->setVector(NLMISC::CVector::I.y, NLMISC::CVector::I.z);
+	setValue(NLMISC::CVector::I);
 }
 
 void CDirectionWidget::incVecJ()
 {
-	_Wrapper->setAndUpdateModifiedFlag(NLMISC::CVector::J);
-	_ui.xzWidget->setVector(NLMISC::CVector::J.x, NLMISC::CVector::J.z);
-	_ui.yzWidget->setVector(NLMISC::CVector::J.y, NLMISC::CVector::J.z);
+	setValue(NLMISC::CVector::J);
 }
 
 void CDirectionWidget::incVecK()
 {
-	_Wrapper->setAndUpdateModifiedFlag(NLMISC::CVector::K);
-	_ui.xzWidget->setVector(NLMISC::CVector::K.x, NLMISC::CVector::K.z);
-	_ui.yzWidget->setVector(NLMISC::CVector::K.y, NLMISC::CVector::K.z);
+	setValue(NLMISC::CVector::K);
 }
 
 void CDirectionWidget::decVecI()
 {
-	_Wrapper->setAndUpdateModifiedFlag( - NLMISC::CVector::I);
-	_ui.xzWidget->setVector((-NLMISC::CVector::I).x, (-NLMISC::CVector::I).z);
-	_ui.yzWidget->setVector((-NLMISC::CVector::I).y, (-NLMISC::CVector::I).z);
+	setValue( - NLMISC::CVector::I);
 }
 
 void CDirectionWidget::decVecJ()
 {
-	_Wrapper->setAndUpdateModifiedFlag( - NLMISC::CVector::J);
-	_ui.xzWidget->setVector((-NLMISC::CVector::J).x, (-NLMISC::CVector::J).z);
-	_ui.yzWidget->setVector((-NLMISC::CVector::J).y, (-NLMISC::CVector::J).z);
+	setValue( - NLMISC::CVector::J);
 }
 
 void CDirectionWidget::decVecK()
 {
-	_Wrapper->setAndUpdateModifiedFlag( - NLMISC::CVector::K);
-	_ui.xzWidget->setVector((-NLMISC::CVector::K).x, (-NLMISC::CVector::K).z);
-	_ui.yzWidget->setVector((-NLMISC::CVector::K).y, (-NLMISC::CVector::K).z);
+	setValue( - NLMISC::CVector::K);
 }
 
 void CDirectionWidget::setNewVecXZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
-	NLMISC::CVector v = _Wrapper->get();
+	NLMISC::CVector v;
+	if (_Wrapper)
+		v = _Wrapper->get();
+	else
+		v = _value;
 	
 	v.x = x;
 	v.z = y;
@@ -165,15 +196,17 @@ void CDirectionWidget::setNewVecXZ(float x, float y)
 	
 	v.normalize();
 
-	_Wrapper->setAndUpdateModifiedFlag(v);
-	_ui.xzWidget->setVector(_Wrapper->get().x, _Wrapper->get().z);
-	_ui.yzWidget->setVector(_Wrapper->get().y, _Wrapper->get().z);
+	setValue(v);
 }
 
 void CDirectionWidget::setNewVecYZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
-	NLMISC::CVector v = _Wrapper->get();
+	NLMISC::CVector v;
+	if (_Wrapper)
+		v = _Wrapper->get();
+	else
+		v = _value;
 	
 	v.y = x;
 	v.z = y;
@@ -190,9 +223,7 @@ void CDirectionWidget::setNewVecYZ(float x, float y)
 	
 	v.normalize();
 
-	_Wrapper->setAndUpdateModifiedFlag(v);
-	_ui.xzWidget->setVector(_Wrapper->get().x, _Wrapper->get().z);
-	_ui.yzWidget->setVector(_Wrapper->get().y, _Wrapper->get().z);
+	setValue(v);
 }
 
 void CDirectionWidget::checkEnabledGlobalDirection()

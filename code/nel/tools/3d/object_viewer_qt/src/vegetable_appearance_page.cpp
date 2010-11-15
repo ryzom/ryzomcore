@@ -95,19 +95,19 @@ void CVegetableApperancePage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 		setEnabled(false);
 }
 
-void CVegetableApperancePage::setNoiseValueBendPhase(NLMISC::CNoiseValue value)
+void CVegetableApperancePage::setNoiseValueBendPhase(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->BendPhase = value;
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableApperancePage::setNoiseValueBendFactor(NLMISC::CNoiseValue value)
+void CVegetableApperancePage::setNoiseValueBendFactor(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->BendFactor = value;
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableApperancePage::setNoiseValueColor(NLMISC::CNoiseValue value)
+void CVegetableApperancePage::setNoiseValueColor(const NLMISC::CNoiseValue &value)
 {
 	_Vegetable->Color.NoiseValue = value;
 	Modules::veget().refreshVegetableDisplay();

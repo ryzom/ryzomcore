@@ -54,7 +54,7 @@ private Q_SLOTS:
 	void setDistanceOfCreat(int value);
 	void setEnabledMaxDensity(bool state);
 	void updateAngleMode();
-	void setDensity(NLMISC::CNoiseValue value);
+	void setDensity(const NLMISC::CNoiseValue &value);
 	void setMaxDensity(float value);
 	void setAngleMinSlider(int pos);
 	void setAngleMaxSlider(int pos);
