@@ -246,14 +246,6 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.x /= (float)viewRect.size.width;
 	mousePos.y /= (float)viewRect.size.height;
 
-	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mousePos.x < 0.0 || mousePos.x > 1.0 ||
-			mousePos.y < 0.0 || mousePos.y > 1.0) &&
-			event.type != NSKeyDown && event.type != NSKeyUp)
-	{
-		return false;
-	}
-
 	// convert the modifiers for nel to pass them with the events
 	NLMISC::TKeyButton modifiers =
 		modifierFlagsToNelKeyButton([event modifierFlags]);
