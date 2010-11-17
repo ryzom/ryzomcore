@@ -600,6 +600,67 @@ void initScreenshot()
 	if (!CFile::isExists(ScreenshotsDirectory)) CFile::createDirectory(ScreenshotsDirectory);
 }
 
+bool screenshotZBuffer(const std::string &filename)
+{
+	std::string::size_type pos = filename.find(".");
+
+	if (pos == std::string::npos)
+		return false;
+
+	std::string filename_z = filename.substr(0, pos) + "_z" + filename.substr(pos);
+	std::string ext = filename.substr(pos+1);
+
+	std::vector<float> z;
+	Driver->getZBuffer(z);
+
+	float min = std::numeric_limits<float>::max();
+	float max = std::numeric_limits<float>::min();
+
+	// get min and max values
+	for(uint i = 0; i < z.size(); ++i)
+	{
+		float value = z[i];
+		if (value > max)
+		{
+			max = value;
+		}
+		else if (value < min)
+		{
+			min = value;
+		}
+	}
+
+	max = max - min;
+
+	CBitmap zi;
+	zi.resize(Driver->getWindowWidth(), Driver->getWindowHeight());
+	CRGBA *dest = (CRGBA *) &zi.getPixels()[0];
+
+	for(uint k = 0; k < z.size(); ++k)
+	{
+		// normalize values
+		uint8 i = (uint8) ((z[k] - min) * 255.f / max);
+		dest->set(i, i, i, i);
+		++ dest;
+	}
+
+	try
+	{
+		COFile f;
+		f.open(filename_z);
+		if (ext == "png")
+			zi.writePNG(f, 32);
+		else
+			zi.writeTGA(f, 32);
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void screenShotTGA()
 {
 	CBitmap btm;
@@ -607,10 +668,20 @@ void screenShotTGA()
 
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.tga");
 	COFile fs(filename);
-	btm.writeTGA(fs, 24, false);
-	nlinfo("Screenshot '%s' saved in tga format (%dx%d)", filename.c_str(), (int) ClientCfg.ScreenShotWidth, (int) ClientCfg.ScreenShotHeight);
+
+	if (!btm.writeTGA(fs, 24, false))
+	{
+		fs.close();
+		CFile::deleteFile(filename);
+		return;
+	}
+
+	if (ClientCfg.ScreenShotZBuffer)
+		screenshotZBuffer(filename);
+
+	nlinfo("Screenshot '%s' saved in tga format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);
-};
+}
 
 void screenShotPNG()
 {
@@ -619,6 +690,7 @@ void screenShotPNG()
 
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.png");
 	COFile fs(filename);
+
 	if (!btm.writePNG(fs, 24))
 	{
 		fs.close();
@@ -626,9 +698,12 @@ void screenShotPNG()
 		return;
 	}
 
-	nlinfo("Screenshot '%s' saved in png format (%dx%d)", filename.c_str(), (int) ClientCfg.ScreenShotWidth, (int) ClientCfg.ScreenShotHeight);
+	if (ClientCfg.ScreenShotZBuffer)
+		screenshotZBuffer(filename);
+
+	nlinfo("Screenshot '%s' saved in png format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);
-};
+}
 
 void screenShotJPG()
 {
@@ -637,10 +712,20 @@ void screenShotJPG()
 
 	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.jpg");
 	COFile fs(filename);
-	btm.writeJPG(fs);
-	nlinfo("Screenshot '%s' saved in jpg format (%dx%d)", filename.c_str(), (int) ClientCfg.ScreenShotWidth, (int) ClientCfg.ScreenShotHeight);
+
+	if (!btm.writeJPG(fs))
+	{
+		fs.close();
+		CFile::deleteFile(filename);
+		return;
+	}
+
+	if (ClientCfg.ScreenShotZBuffer)
+		screenshotZBuffer(filename);
+
+	nlinfo("Screenshot '%s' saved in jpg format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);
-};
+}
 
 // ***************************************************************************
 

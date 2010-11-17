@@ -280,6 +280,7 @@ struct CClientConfig
 	uint			ScreenShotWidth;	// If 0 : normal screen shot, else custom screen shot without interface
 	uint			ScreenShotHeight;
 	bool			ScreenShotFullDetail; // If set to true, then load balancing will be disabled for the duration of the screenshot
+	bool			ScreenShotZBuffer; // If set to true, save also the ZBuffer in a file
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //

@@ -410,6 +410,7 @@ CClientConfig::CClientConfig()
 	ScreenShotWidth		= 0;
 	ScreenShotHeight	= 0;
 	ScreenShotFullDetail = true;
+	ScreenShotZBuffer	= false;
 
 	MaxNumberOfTimedFXInstances = 20;
 	SelectionFX = "sfx_selection_mouseover.ps";
@@ -1028,6 +1029,7 @@ void CClientConfig::setValues()
 	READ_INT_FV(ScreenShotWidth)
 	READ_INT_FV(ScreenShotHeight)
 	READ_BOOL_FV(ScreenShotFullDetail)
+	READ_BOOL_FV(ScreenShotZBuffer)
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //

@@ -2739,44 +2739,6 @@ bool mainLoop()
 				R2::getEditor().updateBeforeSwapBuffer();
 			}
 
-			static volatile bool captureBuffers = false;
-			if (captureBuffers)
-			{
-				CBitmap color;
-				Driver->getBuffer(color);
-				try
-				{
-					COFile f;
-					f.open("color.tga");
-					color.writeTGA(f);
-				}
-				catch(...)
-				{
-				}
-				std::vector<float> z;
-				Driver->getZBuffer(z);
-				CBitmap zi;
-				zi.resize(color.getWidth(), color.getHeight());
-				CRGBA *dest = (CRGBA *) &zi.getPixels()[0];
-				for(uint k = 0; k < z.size(); ++k)
-				{
-					uint8 i = (uint8) (z[k] * 255.f);
-					dest->set(i, i, i, i);
-					++ dest;
-				}
-				try
-				{
-					COFile f;
-					f.open("z.tga");
-					zi.writeTGA(f);
-				}
-				catch(...)
-				{
-				}
-			}
-
-
-
 			Driver->swapBuffers();
 
 			if(Profiling)
