@@ -22,7 +22,7 @@
 #define AFX_WORLD_EDITOR_DOC_H__79C92BF7_274F_4B2C_A546_91B7E5218C49__INCLUDED_
 
 #include <nel/ligo/primitive_class.h>
-#include <nel/../../src/ligo/zone_region.h>
+#include <nel/ligo/zone_region.h>
 #include <hash_set>
 
 #if _MSC_VER > 1000

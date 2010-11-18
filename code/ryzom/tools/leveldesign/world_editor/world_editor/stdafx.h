@@ -105,8 +105,8 @@
 #include <nel/pacs/u_global_retriever.h>
 #include <nel/ligo/ligo_config.h>
 
-#include <ligo/zone_bank.h>
-#include <ligo/zone_region.h>
+#include <nel/ligo/zone_bank.h>
+#include <nel/ligo/zone_region.h>
 
 extern bool	DontUse3D;
 

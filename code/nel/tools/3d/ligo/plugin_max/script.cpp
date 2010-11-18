@@ -64,7 +64,7 @@
 #include "nel/../../src/ligo/ligo_error.h"
 #include "nel/../../src/ligo/ligo_material.h"
 #include "nel/../../src/ligo/transition.h"
-#include "nel/../../src/ligo/zone_bank.h"
+#include "nel/ligo/zone_bank.h"
 
 #include "max_to_ligo.h"
 

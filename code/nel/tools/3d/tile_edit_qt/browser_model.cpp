@@ -36,14 +36,6 @@ static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
 
 bool RemovePath (std::string& path, const char* absolutePathToRemplace);
 
-
-//TODO titegus: Get rid of that .... F2 Key not cross-platform ?? What the point in not performing Border Check ??
-bool zouille ()
-{
-	//return (GetAsyncKeyState(VK_F2)&(1<<15)) != 0;
-	return false;
-};
-
 // Rotate a buffer
 void rotateBuffer (std::vector<NLMISC::CBGRA> &Buffer, uint &Width, uint &Height)
 {
@@ -303,7 +295,7 @@ bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitm
 			else
 				error=tileBankBrowser.getTileSet(_tileSet)->checkTile128 (type, border, pixel, composante);
 
-			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
+			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128))
 			{
 				QString pixelMessage = QObject::tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
 				return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
@@ -367,7 +359,7 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 				error=CTileSet::ok;
 			else
 				error=tileBankBrowser.getTileSet(_tileSet)->checkTile256 (type, border, pixel, composante);
-			if ((error!=CTileSet::ok)&&!zouille())
+			if ((error!=CTileSet::ok))
 			{
 				QString pixelMessage = QObject::tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
 				return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
@@ -429,7 +421,7 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 				error=CTileSet::ok;
 			else
 				error=tileBankBrowser.getTileSet(_tileSet)->checkTile128 (type, border, pixel, composante);
-			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
+			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128))
 			{
 				QString pixelMessage = QObject::tr("%1\nPixel: %2(%3).\nContinue ?").arg(CTileSet::getErrorMessage (error)).arg(pixel).arg(comp[composante]);
 				return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't set Bitmap"),  pixelMessage, QMessageBox::Yes | QMessageBox::No) );
@@ -540,7 +532,7 @@ bool TileList::setTileTransitionAlpha (int tile, const std::string& name, int ro
 			int pixel=-1;
 			int composante=4;
 			if (((error=tileBankBrowser.getTileSet(_tileSet)->checkTileTransition ((CTileSet::TTransition)tile, CTile::alpha, border, indexError,
-				pixel, composante))!=CTileSet::ok)&&!zouille ())
+				pixel, composante))!=CTileSet::ok))
 			{
 				QString pixelMessage;
 				if ((error==CTileSet::topInterfaceProblem)||(error==CTileSet::bottomInterfaceProblem)||(error==CTileSet::leftInterfaceProblem)
