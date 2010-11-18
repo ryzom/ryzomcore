@@ -3217,18 +3217,46 @@ class CHandlerGameConfigApply : public IActionHandler
 				}
 
 				ClientCfg.Windowed = !bFullscreen;
-				// Write the modified client.cfg
-				ClientCfg.writeInt("FullScreen", bFullscreen?1:0);
+
+				UDriver::CMode screenMode;
+				Driver->getCurrentScreenMode(screenMode);
 
 				if (bFullscreen)
 				{
-					ClientCfg.Width = w;
-					ClientCfg.Height = h;
-					ClientCfg.Depth = GAME_CONFIG_VIDEO_DEPTH_REQ;
+					ClientCfg.Depth = screenMode.Depth;
 					ClientCfg.Frequency = freq;
-					ClientCfg.writeInt("Width", w);
-					ClientCfg.writeInt("Height", h);
-					ClientCfg.writeInt("Depth", GAME_CONFIG_VIDEO_DEPTH_REQ);
+				}
+				else
+				{
+					uint32 width, height;
+					Driver->getWindowSize(width, height);
+
+					// window is too large
+					if (width >= screenMode.Width || height >= screenMode.Height)
+					{
+						// choose a smaller size
+						w = 1024;
+						h = 768;
+					}
+					else
+					{
+						// take previous mode
+						w = width;
+						h = height;
+					}
+				}
+
+				ClientCfg.Width = w;
+				ClientCfg.Height = h;
+
+				// Write the modified client.cfg
+				ClientCfg.writeBool("FullScreen", bFullscreen);
+				ClientCfg.writeInt("Width", w);
+				ClientCfg.writeInt("Height", h);
+
+				if (bFullscreen)
+				{
+					ClientCfg.writeInt("Depth", screenMode.Depth);
 					ClientCfg.writeInt("Frequency", freq);
 				}
 			}
