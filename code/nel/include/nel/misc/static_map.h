@@ -174,7 +174,7 @@ public:
 		typename std::map<Key,Typ,Comp>::const_iterator itEnd = m.end();
 		typename std::map<Key,Typ,Comp>::const_iterator it = m.begin();
 		for (; it != itEnd; it++)
-			_Data.push_back (std::pair<Key, Typ>::pair(it->first, it->second));
+			_Data.push_back (std::pair<Key, Typ>(it->first, it->second));
 	}
 
 	void endAdd()
