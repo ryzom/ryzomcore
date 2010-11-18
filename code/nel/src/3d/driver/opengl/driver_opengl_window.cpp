@@ -362,6 +362,19 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	}
 #endif // HAVE_XRENDER
 
+	// list all supported extensions
+	sint nextensions = 0;
+	char **extensions = XListExtensions(_dpy, &nextensions);
+
+	std::string exts;
+
+	for(sint i = 0; i < nextensions; ++i)
+		exts += NLMISC::toString(" %s", extensions[i]);
+
+	XFreeExtensionList(extensions);
+
+	nlinfo("X Extensions:%s", exts.c_str());
+
 #endif
 
 	return true;
