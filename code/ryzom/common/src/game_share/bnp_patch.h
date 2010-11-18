@@ -14,17 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef RY_BNP_PATCH_H
-#define RY_BNP_PATCH_H
-
-/** bnp_patch.h
-
-	$id$
-
-	The set of classes used by patch systems (both generation and application)
-
-*/
-
 #ifndef BNP_PATCH_H
 #define BNP_PATCH_H
 
@@ -468,9 +457,5 @@ private:
 //};
 //
 //#endif
-
-
-
-#endif
 
 #endif

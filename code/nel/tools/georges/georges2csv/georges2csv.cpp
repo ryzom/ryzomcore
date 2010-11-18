@@ -327,7 +327,7 @@ void scanFiles(const CSString &filespec)
 
 	buildFileVector(filenames, filespec);
 
-	// if there s no file, nothing to do
+	// if there's no file, nothing to do
 	if (filenames.empty())
 		return;
 

@@ -130,7 +130,7 @@ void	uNetUnregistrationBroadcast(const string &name, TServiceId sid, const vecto
 		}
 
 		//
-		// It's the first connection that added the _NamedCnx so if there s no connection, no need to
+		// It's the first connection that added the _NamedCnx so if there's no connection, no need to
 		// remove entry in _NamedCnx
 		//
 

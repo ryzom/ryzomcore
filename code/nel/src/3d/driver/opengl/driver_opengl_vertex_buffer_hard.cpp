@@ -185,7 +185,7 @@ void			CVertexArrayRangeNVidia::enable()
 			_Driver->_NVCurrentVARSize= _VertexArraySize;
 			_Driver->_NVCurrentVARPtr= _VertexArrayPtr;
 		}
-		// enable VAR. NB: flush is unesufull, so don't flush if extension is OK
+		// enable VAR. NB: flush is useless, so don't flush if extension is OK
 		glEnableClientState(_Driver->_Extensions.NVStateVARWithoutFlush);
 		_Driver->_CurrentVertexArrayRange= this;
 	}
@@ -200,7 +200,7 @@ void			CVertexArrayRangeNVidia::disable()
 	if(_Driver->_CurrentVertexArrayRange!=NULL)
 	{
 		// just disable the state, don't change VAR ptr setup.
-		// NB: flush is unesufull, so don't flush if extension is OK
+		// NB: flush is useless, so don't flush if extension is OK
 		glDisableClientState(_Driver->_Extensions.NVStateVARWithoutFlush);
 		_Driver->_CurrentVertexArrayRange= NULL;
 	}

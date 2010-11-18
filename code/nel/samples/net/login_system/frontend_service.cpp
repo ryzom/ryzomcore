@@ -206,6 +206,6 @@ public:
 
 /*
  * Declare a service with the class CFrontEndService, the names "FS" (short) and "frontend_service" (long).
- * The port is dynamically find and there s no callback array.
+ * The port is dynamically find and there's no callback array.
  */
 NLNET_SERVICE_MAIN (CFrontEndService, "FS", "frontend_service", 0, EmptyCallbackArray, NL_LS_CFG, "")

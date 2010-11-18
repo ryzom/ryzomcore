@@ -1066,9 +1066,9 @@ void				CMirroredDataSet::serialOutMirrorInfo( NLNET::CMessage& msgout )
 inline bool			CMirroredDataSet::entityMatchesFilter ( const NLMISC::CEntityId& entityId, TDataSetIndex entityIndex, uint8 onlyEntityType, uint8 onlyCreatorId, uint8 onlyDynamicId, bool hideUndeclared ) const
 {
 	return (((onlyEntityType == 0xFF) || (entityId.getType() == onlyEntityType)) &&
- 		    ((onlyCreatorId == 0xFF)  || (entityId.getCreatorId() == onlyCreatorId)) &&
-		    ((onlyDynamicId == 0xFF) || (entityId.getDynamicId() == onlyDynamicId)) &&
-		    ((!hideUndeclared) || _PropertyContainer.EntityIdArray.isOnline( entityIndex )));
+ 			((onlyCreatorId == 0xFF)  || (entityId.getCreatorId() == onlyCreatorId)) &&
+			((onlyDynamicId == 0xFF) || (entityId.getDynamicId() == onlyDynamicId)) &&
+			((!hideUndeclared) || _PropertyContainer.EntityIdArray.isOnline( entityIndex )));
 }
 
 

@@ -356,7 +356,7 @@ uint32 humanReadableToBytes (const string &str)
 		if (str.size()<3)
 			return res;
 
-		// there s no break and it's **normal**
+		// there's no break and it's **normal**
 		switch (str[str.size()-2])
 		{
 		case 'G': res *= 1024;

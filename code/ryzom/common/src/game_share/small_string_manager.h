@@ -16,11 +16,6 @@
 
 #ifndef SMALL_STRING_MANAGER_H
 #define SMALL_STRING_MANAGER_H
-/** \file small_string_manager.h
- *
- * $id$
- *
- */
 
 #include "nel/misc/types_nl.h"
 

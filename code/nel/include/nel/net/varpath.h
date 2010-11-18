@@ -34,7 +34,7 @@ public:
 
 	void display ();
 
-	/// returns true if there s no more . in the path
+	/// returns true if there's no more . in the path
 	bool isFinal ();
 
 	bool empty ()

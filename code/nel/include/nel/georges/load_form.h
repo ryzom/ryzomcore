@@ -1245,7 +1245,7 @@ void loadFormNoPackedSheet (const std::vector<std::string> &sheetFilters, std::m
 		NLMISC::CSheetId::buildIdVector(sheetIds, filenames, sheetFilters[i]);
 
 
-	// if there s no file, nothing to do
+	// if there's no file, nothing to do
 	if (sheetIds.empty())
 		return;
 
