@@ -3137,23 +3137,29 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 		bool bFullscreen;
 		{
 			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
-			if (pBut == NULL) return;
-			bFullscreen = pBut->getPushed();
+			if (pBut) bFullscreen = pBut->getPushed();
 		}
 		CDBGroupComboBox *pCB;
 		if (bFullscreen)
 		{
+			// show modes combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-			pCB->setActive(true);
+			if (pCB) pCB->setActive(true);
+
+			// show frequencies combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
-			pCB->setActive(true);
+			if (pCB) pCB->setActive(true);
 		}
 		else
 		{
+			// hide modes combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-			pCB->setActive(false);
+			if (pCB) pCB->setActive(false);
+
+			// hide frequencies combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
-			pCB->setActive(false);
+			if (pCB) pCB->setActive(false);
+
 		}
 
 		// **** dirt the apply button of the DDX
