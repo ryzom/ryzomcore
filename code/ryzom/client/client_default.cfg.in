@@ -261,7 +261,7 @@ EnableRacialAnimation	= 1;
 
 // *** MISC
 // This is the actual aspect ratio of your screen (no relation with the resolution!!). Set 1.7777 if you got a 16/9 screen for instance
-ScreenAspectRatio	= 1.33333;
+ScreenAspectRatio	= 0.0;
 ForceDXTC           = 1;	// Enable/Disable DXTC.
 DivideTextureSizeBy2= 0;	// Divide texture size
 DisableVtxProgram   = 0;	// Disable Hardware Vertex Program.
@@ -269,7 +269,7 @@ DisableVtxAGP       = 0;	// Disable Hardware Vertex AGP.
 DisableTextureShdr  = 0;	// Disable Hardware Texture Shader.
 HDEntityTexture     = 0;
 HDTextureInstalled  = 1;
-WaitVBL		    = 0;	// 0 or 1 to wait Vertical Sync.
+WaitVBL             = 0;	// 0 or 1 to wait Vertical Sync.
 
 //////////////////
 // GAME OPTIONS //
