@@ -248,7 +248,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	// Append first the type of the sheet to select
 	switch ( Ctrl->getSheetCategory() )
 	{
-		case CDBCtrlSheet::Item:		break;		// none for item. consider unusefull
+		case CDBCtrlSheet::Item:		break;		// none for item. consider useless
 		case CDBCtrlSheet::Pact:		text= CI18N::get("uiBotChatPact") + text; break;
 		case CDBCtrlSheet::Skill:		text= CI18N::get("uiBotChatSkill") + text; break;
 		case CDBCtrlSheet::GuildFlag:	text= CI18N::get("uiBotChatSkill") + text; break;
