@@ -1440,7 +1440,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	}
 
 	// create an application delegate
-	CocoaApplicationDelegate* appDelegate = 
+	CocoaApplicationDelegate* appDelegate =
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
@@ -2445,7 +2445,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 			[[containerView() window] setFrame:rect display:YES];
 		}
 	}
-	
+
 #elif defined(NL_OS_UNIX)
 
 	if (width != _WindowWidth || height != _WindowHeight)
@@ -2655,6 +2655,7 @@ bool CDriverGL::pasteTextFromClipboard(ucstring &text)
 bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
 {
 	CBitmap src = bitmap;
+
 	// resample bitmap if necessary
 	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
 	{
