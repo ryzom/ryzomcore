@@ -351,14 +351,14 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	_xrender_version = 0;
 
 #ifdef HAVE_XRENDER
-	sint render_major, render_event, render_error;
-	if (XQueryExtension(_dpy, "RENDER", &render_major, &render_event, &render_error) &&
-		XRenderQueryExtension(_dpy, &render_event, &render_error))
+	sint xrender_major, xrender_event, xrender_error;
+	if (XQueryExtension(_dpy, "RENDER", &xrender_major, &xrender_event, &xrender_error) &&
+		XRenderQueryExtension(_dpy, &xrender_event, &xrender_error))
 	{
-		sint render_minor = 0;
-		XRenderQueryVersion(_dpy, &render_major, &render_minor);
-		_xrender_version = render_major * 100 + render_minor;
-		nlinfo("3D: XRender %d.%d found", render_major, render_minor);
+		sint xrender_minor = 0;
+		XRenderQueryVersion(_dpy, &xrender_major, &xrender_minor);
+		_xrender_version = xrender_major * 100 + xrender_minor;
+		nlinfo("3D: XRender %d.%d found", xrender_major, xrender_minor);
 	}
 #endif // HAVE_XRENDER
 

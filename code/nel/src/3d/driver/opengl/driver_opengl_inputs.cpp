@@ -27,6 +27,9 @@
 # ifdef HAVE_XRENDER
 #  include <X11/extensions/Xrender.h>
 # endif // HAVE_XRENDER
+# ifdef HAVE_XCURSOR
+#  include <X11/Xcursor/Xcursor.h>
+# endif // HAVE_XCURSOR
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
@@ -118,7 +121,17 @@ bool CDriverGL::isAlphaBlendedCursorSupported()
 		}
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
-		_AlphaBlendedCursorSupported = _xrender_version > 0;
+
+		_AlphaBlendedCursorSupported = false;
+
+#ifdef HAVE_XCURSOR
+		if (!_AlphaBlendedCursorSupported && XcursorSupportsARGB(_dpy))
+			_AlphaBlendedCursorSupported = true;
+#endif // HAVE_XCURSOR
+
+		if (!_AlphaBlendedCursorSupported && _xrender_version > 0)
+			_AlphaBlendedCursorSupported = true;
+
 #endif
 
 		_AlphaBlendedCursorSupportRetrieved = true;
@@ -807,8 +820,12 @@ bool CDriverGL::getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth,
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 
-	Status res = XQueryBestCursor(_dpy, _win, srcWidth, srcHeight, &dstWidth, &dstHeight);
-	nlwarning("XQueryBestCursor returned %d", (sint)res);
+	Status status = XQueryBestCursor(_dpy, _win, srcWidth, srcHeight, &dstWidth, &dstHeight);
+
+	if (!status)
+	{
+		nlwarning("XQueryBestCursor failed");
+	}
 
 #endif
 
@@ -821,7 +838,7 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 
 	return convertBitmapToIcon(bitmap, cursor, iconWidth, iconHeight, iconDepth, col, hotSpotX, hotSpotY, true);
 
-#elif defined(NL_OS_UNIX) && defined(HAVE_XRENDER) && !defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 	CBitmap src = bitmap;
 
@@ -858,93 +875,132 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 	}
 	while (srcColorPtr != srcColorPtrLast);
 
-	// use malloc() because X will free() data itself
-	CRGBA *src32 = (CRGBA*)malloc(colorBm.getSize()*4);
-	memcpy(src32, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
+#ifdef HAVE_XCURSOR
 
-	uint size = iconWidth * iconHeight;
-
-	// Create the icon pixmap
-	sint screen = DefaultScreen(_dpy);
-	Visual *visual = DefaultVisual(_dpy, screen);
-
-	if (!visual)
+	if (XcursorSupportsARGB(_dpy))
 	{
-		nlwarning("Failed to get a default visual for screen %d", screen);
-		return false;
+		XcursorImage *image = XcursorImageCreate(iconWidth, iconHeight);
+
+		if (!image)
+		{
+			nlwarning("Failed to create a XcusorImage with size %ux%u", iconWidth, iconHeight);
+		}
+		else
+		{
+			image->xhot = (uint)hotSpotX;
+			image->yhot = (uint)hotSpotY;
+
+			memcpy(image->pixels, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
+
+			cursor = XcursorImageLoadCursor(_dpy, image);
+
+			XcursorImageDestroy(image);
+		}
 	}
 
-	// create the icon pixmap
-	XImage* image = XCreateImage(_dpy, visual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
+#endif // HAVE_XCURSOR
 
-	if (!image)
+#ifdef HAVE_XRENDER
+
+	if (_xrender_version > 0)
 	{
-		nlwarning("Failed to set the window's icon");
-		return false;
+		// use malloc() because X will free() data itself
+		CRGBA *src32 = (CRGBA*)malloc(colorBm.getSize()*4);
+		memcpy(src32, &colorBm.getPixels(0)[0], colorBm.getSize()*4);
+
+		uint size = iconWidth * iconHeight;
+
+		sint screen = DefaultScreen(_dpy);
+		Visual *visual = DefaultVisual(_dpy, screen);
+
+		if (!visual)
+		{
+			nlwarning("Failed to get a default visual for screen %d", screen);
+			return false;
+		}
+
+		// Create the icon image
+		XImage* image = XCreateImage(_dpy, visual, 32, ZPixmap, 0, (char*)src32, iconWidth, iconHeight, 32, 0);
+
+		if (!image)
+		{
+			nlwarning("Failed to set the window's icon");
+			return false;
+		}
+
+		// Create the icon pixmap
+		Pixmap pixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
+
+		if (!pixmap)
+		{
+			nlwarning("Failed to create a pixmap %ux%ux%d", iconWidth, iconHeight, 32);
+			return false;
+		}
+
+		// Create the icon graphic contest
+		GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
+
+		if (!gc)
+		{
+			nlwarning("Failed to create a GC");
+			return false;
+		}
+
+		sint res = XPutImage(_dpy, pixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
+
+		if (res)
+		{
+			nlwarning("XPutImage failed with code %d", res);
+		}
+
+		if (!XFreeGC(_dpy, gc))
+		{
+			nlwarning("XFreeGC failed");
+		}
+
+		if (image->data)
+		{
+			free(image->data);
+			image->data = NULL;
+		}
+
+		XDestroyImage(image);
+
+		XRenderPictFormat *format = XRenderFindStandardFormat(_dpy, PictStandardARGB32);
+
+		if (!format)
+		{
+			nlwarning("Failed to find a standard format");
+			return false;
+		}
+
+		Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
+
+		if (!picture)
+		{
+			nlwarning("Failed to create picture");
+			return false;
+		}
+
+		cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
+
+		if (!cursor)
+		{
+			nlwarning("Failed to create cursor");
+			return false;
+		}
+
+		XRenderFreePicture(_dpy, picture);
+
+		if (!XFreePixmap(_dpy, pixmap))
+		{
+			nlwarning("XFreePixmap failed");
+		}
+
+		return true;
 	}
 
-	Pixmap pixmap = XCreatePixmap(_dpy, _win, iconWidth, iconHeight, 32 /* defDepth */);
-
-	if (!pixmap)
-	{
-		nlwarning("Failed to create a pixmap %ux%ux%d", iconWidth, iconHeight, 32);
-		return false;
-	}
-
-	GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
-
-	if (!gc)
-	{
-		nlwarning("Failed to create a GC");
-		return false;
-	}
-
-	sint res = XPutImage(_dpy, pixmap, gc, image, 0, 0, 0, 0, iconWidth, iconHeight);
-	// should return 0
-	nlwarning("XPutImage returned %d", res);
-
-	res = XFreeGC(_dpy, gc);
-	// should return 1
-	nlwarning("XFreeGC returned %d", res);
-
-	if (image->data)
-	{
-		free(image->data);
-		image->data = NULL;
-	}
-
-	XDestroyImage(image);
-
-	XRenderPictFormat *format = XRenderFindStandardFormat(_dpy, PictStandardARGB32);
-
-	if (!format)
-	{
-		nlwarning("Failed to find a standard format");
-		return false;
-	}
-
-	Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
-
-	if (!picture)
-	{
-		nlwarning("Failed to create picture");
-		return false;
-	}
-
-	cursor = XRenderCreateCursor(_dpy, picture, (uint)hotSpotX, (uint)hotSpotY);
-
-	if (!cursor)
-	{
-		nlwarning("Failed to create cursor");
-		return false;
-	}
-
-	XRenderFreePicture(_dpy, picture);
-	res = XFreePixmap(_dpy, pixmap);
-	// should return 1
-	nlwarning("XFreePixmap returned %d", res);
-
-	return true;
+#endif // HAVE_XRENDER
 
 #else
 
