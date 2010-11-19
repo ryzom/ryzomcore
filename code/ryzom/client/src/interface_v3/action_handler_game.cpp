@@ -3134,7 +3134,7 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		bool bFullscreen;
+		bool bFullscreen = false;
 		{
 			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 			if (pBut) bFullscreen = pBut->getPushed();
