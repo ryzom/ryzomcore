@@ -2484,7 +2484,7 @@ class CAHAddShape : public IActionHandler
 			fromString(getParam(Params, "angle"), a);
 			userDir = CVector(sin(a), cos(a), 0.f);
 		}
-		
+
 		bool have_shapes = true;
 		bool first_shape = true;
 		while(have_shapes)
@@ -2554,7 +2554,7 @@ class CAHAddShape : public IActionHandler
 				if (!skeleton.empty())
 				{
 					USkeleton skel = Scene->createSkeleton(skeleton);
-					if (!skel.empty()) 
+					if (!skel.empty())
 					{
 						skel.bindSkin(instance);
 						skel.setClusterSystem(UserEntity->getClusterSystem());
