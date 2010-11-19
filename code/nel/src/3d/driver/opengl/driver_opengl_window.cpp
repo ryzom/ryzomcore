@@ -1777,12 +1777,16 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!setScreenMode(mode))
 		return false;
 
+	// change window size before changing style for some cases
+	setWindowSize(mode.Width, mode.Height);
+
 	// when changing window style, it's possible system change window size too
 	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
 
 	if (!mode.Windowed)
 		_Depth = mode.Depth;
 
+	// to be sure window size is correct after changing style
 	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
 
