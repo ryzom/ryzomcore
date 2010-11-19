@@ -1002,6 +1002,8 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 
 #endif // HAVE_XRENDER
 
+	return false;
+
 #else
 
 	return false;
