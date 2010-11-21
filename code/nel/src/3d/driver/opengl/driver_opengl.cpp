@@ -965,6 +965,9 @@ bool CDriverGL::release()
 	// release only if the driver was initialized
 	if (!_Initialized) return true;
 
+	// hide window
+	showWindow(false);
+
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
