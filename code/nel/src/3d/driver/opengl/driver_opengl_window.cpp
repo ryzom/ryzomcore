@@ -2229,14 +2229,17 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #elif defined (NL_OS_UNIX)
 
-	// first time requesting decoration sizes
-	if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
+	if (!_FullScreen)
 	{
-		_DecorationWidth = -1;
-		_DecorationHeight = -1;
-	}
+		// first time requesting decoration sizes
+		if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
+		{
+			_DecorationWidth = -1;
+			_DecorationHeight = -1;
+		}
 
-	XMoveWindow(_dpy, _win, x, y);
+		XMoveWindow(_dpy, _win, x, y);
+	}
 
 #endif // NL_OS_WINDOWS
 }
@@ -2459,7 +2462,26 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 
 #elif defined(NL_OS_UNIX)
 
-	if (width != _WindowWidth || height != _WindowHeight)
+	if (!_Resizable)
+	{
+		// Update WM hints (disallow resizing)
+		XSizeHints *size_hints = XAllocSizeHints();
+
+		size_hints->flags = PMinSize | PMaxSize;
+		size_hints->min_width = width;
+		size_hints->min_height = height;
+		size_hints->max_width = width;
+		size_hints->max_height = height;
+
+		XSetWMNormalHints(_dpy, _win, size_hints);
+		XFree(size_hints);
+	}
+	else
+	{
+		XSetWMNormalHints(_dpy, _win, StdHints);
+	}
+
+	if (width != _CurrentMode.Width || height != _CurrentMode.Height)
 	{
 		// resize the window
 		XResizeWindow(_dpy, _win, width, height);
@@ -2467,21 +2489,6 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		_CurrentMode.Width = width;
 		_CurrentMode.Height = height;
 	}
-
-	// Update WM hints (allow resizing)
-	XSizeHints size_hints;
-	size_hints.flags = 0;
-
-	if (!_Resizable || _FullScreen)
-	{
-		size_hints.flags |= PMinSize | PMaxSize;
-		size_hints.min_width = width;
-		size_hints.min_height = height;
-		size_hints.max_width = width;
-		size_hints.max_height = height;
-	}
-
-	XSetWMNormalHints(_dpy, _win, &size_hints);
 
 #endif // NL_OS_WINDOWS
 }
@@ -2497,11 +2504,8 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 	}
 	else
 	{
-		if (_win)
-		{
-			x = _WindowX;
-			y = _WindowY;
-		}
+		x = _WindowX;
+		y = _WindowY;
 	}
 }
 
