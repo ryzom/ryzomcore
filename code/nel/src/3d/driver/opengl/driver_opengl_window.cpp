@@ -1131,10 +1131,6 @@ bool CDriverGL::saveScreenMode()
 
 #elif defined(NL_OS_UNIX)
 
-	// hide window (hack to avoid black window bug)
-	if (_win)
-		XUnmapWindow(_dpy, _win);
-
 	int screen = DefaultScreen(_dpy);
 	res = false;
 
@@ -1195,10 +1191,6 @@ bool CDriverGL::restoreScreenMode()
 	res = true;
 
 #elif defined(NL_OS_UNIX)
-
-	// hide window (hack to avoid black window bug)
-	if (_win)
-		XUnmapWindow(_dpy, _win);
 
 	int screen = DefaultScreen(_dpy);
 
@@ -1775,10 +1767,6 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 		}
 	}
 
-	// show window (hack to avoid black window bug)
-	if (_WindowVisible)
-		XMapRaised(_dpy, _win);
-
 #endif // NL_OS_WINDOWS
 
 	_CurrentMode.Windowed = (windowStyle == EWSWindowed);
@@ -1793,9 +1781,6 @@ bool CDriverGL::setMode(const GfxMode& mode)
 
 	if (!setScreenMode(mode))
 		return false;
-
-	// change window size before changing style for some cases
-	setWindowSize(mode.Width, mode.Height);
 
 	// when changing window style, it's possible system change window size too
 	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
