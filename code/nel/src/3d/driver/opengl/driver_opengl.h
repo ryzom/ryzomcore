@@ -695,18 +695,17 @@ private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 	static const uint32			ReleaseVersion;
 
-	bool						_FullScreen;
-	bool						_OffScreen;
-	bool						_Resizable;
-	uint						_Interval;
-	sint8						_AntiAliasing;
-	bool						_WindowVisible;
-
-	uint32						_WindowWidth, _WindowHeight;
-	sint32						_WindowX, _WindowY;
-
+	// Windows
 	nlWindow					_win;
+	sint32						_WindowX;
+	sint32						_WindowY;
+	bool						_WindowVisible;
 	bool						_DestroyWindow;
+	bool						_Maximized;
+	GfxMode						_CurrentMode;
+	uint						_Interval;
+	bool						_Resizable;
+
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;
 
@@ -783,10 +782,10 @@ private:
 
 #elif defined(NL_OS_MAC)
 
-	friend bool                        GlWndProc(CDriverGL*, const void*);
-	friend void                        windowDidMove(NSWindow*, CDriverGL*);
-	friend void                        viewDidResize(NSView*, CDriverGL*);
-	friend NSApplicationTerminateReply applicationShouldTerminate(CDriverGL*);
+	friend bool							GlWndProc(CDriverGL*, const void*);
+	friend void							windowDidMove(NSWindow*, CDriverGL*);
+	friend void							viewDidResize(NSView*, CDriverGL*);
+	friend NSApplicationTerminateReply	applicationShouldTerminate(CDriverGL*);
 
 	NLMISC::CCocoaEventEmitter _EventEmitter;
 	NSOpenGLContext*           _ctx;
@@ -832,9 +831,6 @@ private:
 	CGlExtensions			_Extensions;
 	// @}
 
-
-	// Depth of the driver in Bit Per Pixel
-	uint8					_Depth;
 
 	// The forceNormalize() state.
 	bool					_ForceNormalize;

@@ -227,18 +227,26 @@ CDriverGL::CDriverGL()
 	_MouseCaptured = false;
 
 	_NeedToRestaureGammaRamp = false;
-	_Interval = 1;
 
 	_win = EmptyWindow;
+	_WindowX = 0;
+	_WindowY = 0;
+	_WindowVisible = true;
 	_DestroyWindow = false;
+	_Maximized = false;
+
+	_CurrentMode.Width = 0;
+	_CurrentMode.Height = 0;
+	_CurrentMode.Depth = 0;
+	_CurrentMode.OffScreen = false;
+	_CurrentMode.Windowed = true;
+	_CurrentMode.AntiAlias = -1;
+
+	_Interval = 1;
+	_Resizable = false;
 
 	_DecorationWidth = 0;
 	_DecorationHeight = 0;
-
-	_OffScreen = false;
-	_FullScreen = false;
-	_Resizable = false;
-	_AntiAliasing = -1;
 
 	_CurrentMaterial=NULL;
 	_Initialized = false;
@@ -410,10 +418,10 @@ bool CDriverGL::setupDisplay()
 
 	// Init OpenGL/Driver defaults.
 	//=============================
-	glViewport(0,0,_WindowWidth,_WindowHeight);
+	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0,_WindowWidth,_WindowHeight,0,-1.0f,1.0f);
+	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glDisable(GL_AUTO_NORMAL);
@@ -1115,7 +1123,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 uint8 CDriverGL::getBitPerPixel ()
 {
 	H_AUTO_OGL(CDriverGL_getBitPerPixel )
-	return _Depth;
+	return _CurrentMode.Depth;
 }
 
 const char *CDriverGL::getVideocardInformation ()

@@ -64,19 +64,19 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 	if(message == WM_SIZE)
 	{
-		if (!driver->_FullScreen)
+		if (driver->_CurrentMode.Windowed)
 		{
 			RECT rect;
 			GetClientRect (driver->_win, &rect);
 
 			// Setup gl viewport
-			driver->_WindowWidth = rect.right-rect.left;
-			driver->_WindowHeight = rect.bottom-rect.top;
+			driver->_CurrentMode.Width = (uint16)(rect.right-rect.left);
+			driver->_CurrentMode.Height = (uint16)(rect.bottom-rect.top);
 		}
 	}
 	else if(message == WM_MOVE)
 	{
-		if (!driver->_FullScreen)
+		if (driver->_CurrentMode.Windowed)
 		{
 			RECT rect;
 			GetWindowRect (hWnd, &rect);
@@ -226,7 +226,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 
 		case ConfigureNotify:
 
-		if (!driver->_FullScreen && driver->_WndActive)
+		if (driver->_CurrentMode.Windowed && driver->_WndActive)
 		{
 			// first time setting decoration sizes
 			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
@@ -237,8 +237,8 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
 			}
 
-			driver->_WindowWidth = e.xconfigure.width;
-			driver->_WindowHeight = e.xconfigure.height;
+			driver->_CurrentMode.Width = e.xconfigure.width;
+			driver->_CurrentMode.Height = e.xconfigure.height;
 			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
 			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
 
@@ -385,12 +385,12 @@ bool CDriverGL::unInit()
 {
 	H_AUTO_OGL(CDriverGL_unInit)
 
-	if (_FullScreen)
+	if (!_CurrentMode.Windowed)
 	{
 		restoreScreenMode();
 		showCursor(true);
 
-		_FullScreen = false;
+		_CurrentMode.Windowed = true;
 	}
 
 #ifdef NL_OS_WINDOWS
@@ -546,11 +546,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
 	_win = EmptyWindow;
-	_WindowWidth = _WindowHeight = _WindowX = _WindowY = 0;
+
+	_CurrentMode = mode;
+
 	_WindowVisible = false;
-	_FullScreen = false;
 	_Resizable = resizeable;
-	_OffScreen = mode.OffScreen;
 	_DestroyWindow = false;
 
 #ifdef NL_OS_WINDOWS
@@ -566,7 +566,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	int						pf;
 
 	// Offscreen mode ?
-	if (_OffScreen)
+	if (_CurrentMode.OffScreen)
 	{
 #if 0
 		if (!createWindow(mode))
@@ -581,7 +581,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		// Get the
 		HDC tempHDC = GetDC(tmpHWND);
 
-		_Depth=uint8(GetDeviceCaps(tempHDC,BITSPIXEL));
+		_CurrentMode.Depth = uint8(GetDeviceCaps(tempHDC,BITSPIXEL));
 
 		// ---
 		memset(&_pfd,0,sizeof(_pfd));
@@ -589,10 +589,10 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_pfd.nVersion     = 1;
 		_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		_pfd.iPixelType   = PFD_TYPE_RGBA;
-		_pfd.cColorBits   = (char)_Depth;
+		_pfd.cColorBits   = (char)_CurrentMode.Depth;
 
 		// Choose best suited Depth Buffer.
-		if(_Depth<=16)
+		if(_CurrentMode.Depth<=16)
 		{
 			_pfd.cDepthBits   = 16;
 		}
@@ -760,8 +760,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			return false;
 		}
 
-		_WindowWidth = width;
-		_WindowHeight = height;
+		_CurrentMode.Width = width;
+		_CurrentMode.Height = height;
 
 		/* The next step is to create a device context for the newly created pbuffer. To do this,
 			call to the function: */
@@ -801,7 +801,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		}
 
 		// Get the depth
-		_Depth = uint8(GetDeviceCaps (_hDC, BITSPIXEL));
+		_CurrentMode.Depth = uint8(GetDeviceCaps (_hDC, BITSPIXEL));
 
 		// Destroy the temp gl context
 		if (!wglDeleteContext (tempGLRC))
@@ -852,16 +852,16 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_hDC=GetDC(_win);
 		wglMakeCurrent(_hDC,NULL);
 
-		_Depth=uint8(GetDeviceCaps(_hDC,BITSPIXEL));
+		_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
 		// ---
 		memset(&_pfd,0,sizeof(_pfd));
 		_pfd.nSize        = sizeof(_pfd);
 		_pfd.nVersion     = 1;
 		_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		_pfd.iPixelType   = PFD_TYPE_RGBA;
-		_pfd.cColorBits   = (char)_Depth;
+		_pfd.cColorBits   = _CurrentMode.Depth;
 		// Choose best suited Depth Buffer.
-		if(_Depth<=16)
+		if(_CurrentMode.Depth <= 16)
 		{
 			_pfd.cDepthBits   = 16;
 		}
@@ -963,8 +963,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		nlerror("cannot create NSOpenGLPixelFormat");
 
 	// intially set height/width, further updates through CocoaOpenGLView
-	_WindowHeight = mode.Height;
-	_WindowWidth = mode.Width;
+	_CurrentMode.Height = mode.Height;
+	_CurrentMode.Width = mode.Width;
 
 	// create a opengl view with the created format
 	_glView = [[CocoaOpenGLView alloc]
@@ -1087,7 +1087,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	if (!setMode(mode))
 		return false;
 
-	if (show || _FullScreen)
+	if (show || !_CurrentMode.Windowed)
 		showWindow(true);
 
 	return true;
@@ -1261,14 +1261,14 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 	if (mode.Windowed)
 	{
 		// if fullscreen, switch back to desktop screen mode
-		if (_FullScreen)
+		if (!_CurrentMode.Windowed)
 			restoreScreenMode();
 
 		return true;
 	}
 
 	// save previous screen mode only if switching from windowed to fullscreen
-	if (!_FullScreen)
+	if (_CurrentMode.Windowed)
 		saveScreenMode();
 
 	// if switching exactly to the same screen mode, doesn't change it
@@ -1506,8 +1506,8 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	_win = window;
 
-	_WindowWidth = mode.Width;
-	_WindowHeight = mode.Height;
+	_CurrentMode.Width = mode.Width;
+	_CurrentMode.Height = mode.Height;
 
 	// Must destroy this window
 	_DestroyWindow = true;
@@ -1597,7 +1597,7 @@ CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
 {
 	H_AUTO_OGL(CDriverGL_getWindowStyle)
 
-	if (_FullScreen)
+	if (!_CurrentMode.Windowed)
 		return EWSFullscreen;
 
 	return EWSWindowed;
@@ -1631,7 +1631,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	bool isMaximized = GetWindowPlacement(_win, &wndpl) && (wndpl.showCmd == SW_SHOWMAXIMIZED);
 	bool isVisible = false;
 
-	if (windowStyle == EWSWindowed && !_OffScreen)
+	if (windowStyle == EWSWindowed && !_CurrentMode.OffScreen)
 	{
 		dwNewStyle |= WS_OVERLAPPEDWINDOW;
 
@@ -1764,7 +1764,7 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #endif // NL_OS_WINDOWS
 
-	_FullScreen = (windowStyle == EWSFullscreen);
+	_CurrentMode.Windowed = (windowStyle == EWSWindowed);
 
 	return true;
 }
@@ -1784,13 +1784,12 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
 
 	if (!mode.Windowed)
-		_Depth = mode.Depth;
+		_CurrentMode.Depth = mode.Depth;
 
-	// to be sure window size is correct after changing style
 	setWindowSize(mode.Width, mode.Height);
 	setWindowPos(_WindowX, _WindowY);
 
-	switch (_Depth)
+	switch (_CurrentMode.Depth)
 	{
 		case 16: _ColorDepth = ColorDepth16; break;
 		case 24:
@@ -2034,13 +2033,13 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	devmode.dmDriverExtra = 0;
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devmode);
 
-	mode.Windowed = !_FullScreen;
-	mode.OffScreen = false;
+	mode.Windowed = _CurrentMode.Windowed;
+	mode.OffScreen = _CurrentMode.OffScreen;
 	mode.Depth = (uint8)devmode.dmBitsPerPel;
-	mode.Frequency = devmode.dmDisplayFrequency,
+	mode.Frequency = devmode.dmDisplayFrequency;
 	mode.Width = (uint16)devmode.dmPelsWidth;
 	mode.Height = (uint16)devmode.dmPelsHeight;
-	mode.AntiAlias = _AntiAliasing;
+	mode.AntiAlias = _CurrentMode.AntiAlias;
 
 #elif defined(NL_OS_MAC)
 
@@ -2145,7 +2144,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	if (!found)
 	{
 		mode.Windowed = !_FullScreen;
-		mode.OffScreen = _OffScreen;
+		mode.OffScreen = _CurrentMode.OffScreen;
 		mode.Depth = (uint) DefaultDepth(_dpy, screen);
 		mode.Frequency = 0;
 		mode.Width = DisplayWidth(_dpy, screen);
@@ -2199,7 +2198,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	_WindowX = x;
 	_WindowY = y;
 
-	if (_win == EmptyWindow || _FullScreen)
+	if (_win == EmptyWindow || !_CurrentMode.Windowed)
 		return;
 
 #ifdef NL_OS_WINDOWS
@@ -2357,7 +2356,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
-	if (_OffScreen)
+	if (_CurrentMode.OffScreen)
 	{
 #ifdef NL_OS_WINDOWS
 		if (_PBuffer)
@@ -2377,8 +2376,8 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 			return;
 		}
 #endif
-		width = _WindowWidth;
-		height = _WindowHeight;
+		width = _CurrentMode.Width;
+		height = _CurrentMode.Height;
 	}
 }
 
@@ -2397,15 +2396,15 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	AdjustWindowRectEx(&rc, GetWindowStyle(_win), GetMenu(_win) != NULL, GetWindowExStyle(_win));
 	UINT flags = SWP_NOZORDER | SWP_NOACTIVATE;
 	// set position to (0, 0) if fullscreen
-	if (!_FullScreen)
+	if (_CurrentMode.Windowed)
 		flags |= SWP_NOMOVE;
 	SetWindowPos(_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
 
 	// init window width and height
 	RECT clientRect;
 	GetClientRect(_win, &clientRect);
-	_WindowWidth = clientRect.right-clientRect.left;
-	_WindowHeight = clientRect.bottom-clientRect.top;
+	_CurrentMode.Width = uint16(clientRect.right-clientRect.left);
+	_CurrentMode.Height = uint16(clientRect.bottom-clientRect.top);
 	GetWindowRect(_win, &clientRect);
 	_WindowX = clientRect.left;
 	_WindowY = clientRect.top;
@@ -2457,8 +2456,8 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		// resize the window
 		XResizeWindow(_dpy, _win, width, height);
 
-		_WindowWidth = width;
-		_WindowHeight = height;
+		_CurrentMode.Width = width;
+		_CurrentMode.Height = height;
 	}
 
 	// Update WM hints (allow resizing)
@@ -2484,7 +2483,7 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 	H_AUTO_OGL(CDriverGL_getWindowPos)
 
 	// Off-screen rendering ?
-	if (_OffScreen)
+	if (_CurrentMode.OffScreen)
 	{
 		x = y = 0;
 	}
