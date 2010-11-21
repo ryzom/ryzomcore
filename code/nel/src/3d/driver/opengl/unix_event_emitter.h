@@ -76,6 +76,9 @@ public:
 	 */
 	virtual bool pasteTextFromClipboard(ucstring &text);
 
+	void createIM();
+	void closeIM();
+
 private:
 
 	// Private internal server message
@@ -97,8 +100,6 @@ private:
 	private:
 		CEventServer *_Server;
 	};
-
-	void createIM();
 
 	Display*				_dpy;
 	Window					_win;

@@ -1588,6 +1588,8 @@ bool CDriverGL::destroyWindow()
 
 #elif defined (NL_OS_UNIX)
 
+	_EventEmitter.closeIM();
+
 	if (_DestroyWindow)
 	{
 		if (_ctx)

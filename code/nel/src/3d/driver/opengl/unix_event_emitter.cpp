@@ -45,8 +45,7 @@ CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _emulateRawMode(fal
 
 CUnixEventEmitter::~CUnixEventEmitter()
 {
-	if (_ic) XDestroyIC(_ic);
-	if (_im) XCloseIM(_im);
+	closeIM();
 }
 
 void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
@@ -55,7 +54,7 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	_win = win;
 	_driver = driver;
 
-	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask);
+	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask|FocusChangeMask)
 
 	// define Atoms used by clipboard
 	XA_CLIPBOARD = XInternAtom(dpy, "CLIPBOARD", False);
@@ -71,7 +70,7 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	TODO: implements all useful events processing
 	ButtonMotionMask|Button1MotionMask|Button2MotionMask|
 	Button3MotionMask|Button4MotionMask|Button5MotionMask|KeymapStateMask|
-	SubstructureNotifyMask|VisibilityChangeMask|FocusChangeMask|PropertyChangeMask|
+	SubstructureNotifyMask|VisibilityChangeMask|PropertyChangeMask|
 	ColormapChangeMask|OwnerGrabButtonMask
 */
 
@@ -80,7 +79,14 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 
 void CUnixEventEmitter::createIM()
 {
+#ifdef X_HAVE_UTF8_STRING
+
+	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
+
+	char *modifiers = XSetLocaleModifiers(getenv("XMODIFIERS"));
+
 	_im = XOpenIM(_dpy, NULL, NULL, NULL);
+
 	if (_im)
 	{
 		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
@@ -96,6 +102,25 @@ void CUnixEventEmitter::createIM()
 	{
 		nlwarning("XCreateIC failed");
 	}
+
+#endif
+}
+
+void CUnixEventEmitter::closeIM()
+{
+#ifdef X_HAVE_UTF8_STRING
+	if (_ic)
+	{
+		XDestroyIC(_ic);
+		_ic = 0;
+	}
+
+	if (_im)
+	{
+		XCloseIM(_im);
+		_im = 0;
+	}
+#endif
 }
 
 void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
@@ -761,13 +786,19 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case FocusIn:
 		// keyboard focus
-//		server->postEvent (new CEventSetFocus (true, this));
+#ifdef X_HAVE_UTF8_STRING
 		if (_ic) XSetICFocus(_ic);
+#endif
+		server->postEvent (new CEventSetFocus (true, this));
+		// server->postEvent(new CEventActivate(true, this));
 		break;
 	case FocusOut:
 		// keyboard focus
-//		server->postEvent (new CEventSetFocus (false, this));
+#ifdef X_HAVE_UTF8_STRING
 		if (_ic) XUnsetICFocus(_ic);
+#endif
+		server->postEvent (new CEventSetFocus (false, this));
+		// server->postEvent(new CEventActivate(false, this));
 		break;
 	case KeymapNotify:
 		break;
