@@ -146,7 +146,39 @@ namespace NLQT
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
 						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						if(path.isEmpty())
+						{
+							path = ":/images/pqrticles.png";
+						}
+						return QIcon(path);
+					}
+				}
+				return QVariant();
+				break;
+			}
+		case Qt::ToolTipRole:
+			{
+				if (p_index.column() == 2) 
+				{
+					QModelIndex in = index(p_index.row(),p_index.column()-1,p_index.parent());
+					CFormItem *item = getItem(in);
+					QString value = item->data(1).toString();
+					
+					if (value.contains(".shape")) 
+					{
 						return QIcon(":/images/pqrticles.png");
+					}
+					else if(value.contains(".tga") || value.contains(".png")) 
+					{
+						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						if(path.isEmpty())
+						{
+							path = ":/images/pqrticles.png";
+						}
+
+						QString imageTooltip = QString("<img src='%1'>").arg(path);
+						
+						return imageTooltip;
 					}
 				}
 				return QVariant();
@@ -182,8 +214,9 @@ namespace NLQT
 		CFormItem *item = getItem(index);
 		bool result = item->setData(index.column(), value);
 
+		// TODO: ugly hack for updating icon too
 		if (result)
-			Q_EMIT dataChanged(index, index);
+			Q_EMIT dataChanged(index, this->index(index.row(),index.column()+1,index.parent()));
 
 		return result;
 	}
@@ -199,6 +232,9 @@ namespace NLQT
 
 		if(index.column() == 1)
 			returnValue |= Qt::ItemIsEditable;
+		// TODO?
+		// col 2 should go here too but i dont want to do another delegate
+		// so for now i just connected the dblClick in the dialog
 
 		return returnValue;
 

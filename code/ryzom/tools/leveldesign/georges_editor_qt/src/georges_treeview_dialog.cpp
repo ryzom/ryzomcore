@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Qt includes
 #include <QtGui/QWidget>
 #include <QSettings>
+#include <QFileDialog>
 
 // NeL includes
 #include <nel/georges/u_form.h>
@@ -65,8 +66,8 @@ namespace NLQT
 		_ui.treeView->setItemDelegateForColumn(1, formdelegate);
 
 
-		//connect(_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
-		//	this, SLOT(doubleClicked (QModelIndex)));
+		connect(_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
+			this, SLOT(doubleClicked (QModelIndex)));
 		connect(_ui.checkBoxParent, SIGNAL(toggled(bool)),
 			this, SLOT(filterRows()));
 		connect(_ui.checkBoxDefaults, SIGNAL(toggled(bool)),
@@ -239,26 +240,60 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
-		if (index.column() == 1)
+		// TODO: this is messy :( perhaps this can be done better
+		CGeorgesFormProxyModel * mp = 
+			dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
+		CGeorgesFormModel *m = 
+			dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+		QModelIndex in = mp->mapToSource(index);
+	
+		// col containing additional stuff like icons
+		if (index.column() == 2) 
 		{
-			//QTreeView::doubleClicked(index);
+			QModelIndex in2 = m->index(in.row(),in.column()-1,in.parent());
+			CFormItem *item = m->getItem(in2);
+			QString value = item->data(1).toString();
+
+			QString path = CPath::lookup(value.toStdString(),false).c_str();
+
+			if(value.contains(".tga") || value.contains(".png")) 
+			{
+			QString file = QFileDialog::getOpenFileName(
+                         this,
+                         "Select a new image",
+                         path,
+                         "Images (*.png *.tga)"
+						 );
+			QFileInfo info = QFileInfo(file);
+
+			// TODO?
+		    // right way would be another delegate but im too lazy :)
+		    // so for now i just call it directly
+			m->setData(in2, info.fileName());
+			}
 			return;
 		}
 
-		CFormItem *item = static_cast<CFormItem*>(index.internalPointer());
+		// col containing the display values
+		if (index.column() == 1) 
+		{
+		//TODO rework this
+		CFormItem *item = m->getItem(in);
 
 		QString value = item->data(1).toString();
 		QString path = CPath::lookup(value.toStdString(),false).c_str();
 
+		// open eg parent files
 		if (!path.isEmpty() && !path.contains(".shape"))
 			Q_EMIT changeFile(path);
 		if (path.contains(".shape"))
 		{
 			Modules::objView().resetScene();
-			Modules::config().configRemapExtensions();
+			//Modules::config().configRemapExtensions();
 			Modules::objView().loadMesh(path.toStdString(),"");
 		}
 		int i = 0;
+		}
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
