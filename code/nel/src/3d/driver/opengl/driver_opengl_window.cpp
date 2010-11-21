@@ -185,6 +185,18 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 
 #elif defined (NL_OS_UNIX)
 
+static Atom XA_WM_STATE = 0;
+static Atom XA_WM_STATE_FULLSCREEN = 0;
+static Atom XA_WM_ICON = 0;
+
+sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
+{
+	char buf[80];
+	XGetErrorText(dpy, e->error_code, buf, sizeof(buf));
+	nlwarning("3D: XError: %s", buf);
+	return 1;
+}
+
 bool GlWndProc(CDriverGL *driver, XEvent &e)
 {
 	H_AUTO_OGL(GlWndProc)
@@ -375,6 +387,14 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 
 	nlinfo("X Extensions:%s", exts.c_str());
 
+	// set default X errors handler
+	XSetErrorHandler(nelXErrorsHandler);
+
+	// define Atoms
+	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
+	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
+
 #endif
 
 	return true;
@@ -431,6 +451,9 @@ bool CDriverGL::unInit()
 	// nothing to do
 
 #elif defined (NL_OS_UNIX)
+
+	// restore default X errors handler
+	XSetErrorHandler(NULL);
 
 	XCloseDisplay(_dpy);
 	_dpy = NULL;
@@ -524,17 +547,15 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 		}
 	}
 
-	Atom _NET_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
-
 	if (!icon_data.empty())
 	{
 		// change window icon
-		XChangeProperty(_dpy, _win, _NET_WM_ICON, XA_CARDINAL, 32, PropModeReplace, (const unsigned char *) &icon_data[0], icon_data.size());
+		XChangeProperty(_dpy, _win, XA_WM_ICON, XA_CARDINAL, 32, PropModeReplace, (const unsigned char *) &icon_data[0], icon_data.size());
 	}
 	else
 	{
 		// delete window icon if no bitmap is available
-		XDeleteProperty(_dpy, _win, _NET_WM_ICON);
+		XDeleteProperty(_dpy, _win, XA_WM_ICON);
 	}
 
 #endif // NL_OS_WINDOWS
@@ -1727,14 +1748,14 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 		xev.xclient.send_event = True;
 		xev.xclient.display = _dpy;
 		xev.xclient.window = _win;
-		xev.xclient.message_type = XInternAtom(_dpy, "_NET_WM_STATE", False);
+		xev.xclient.message_type = XA_WM_STATE;
 		xev.xclient.format = 32;
 		xev.xclient.data.l[0] = windowStyle == EWSFullscreen ? _NET_WM_STATE_ADD:_NET_WM_STATE_REMOVE;
-		xev.xclient.data.l[1] = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+		xev.xclient.data.l[1] = XA_WM_STATE_FULLSCREEN;
 		xev.xclient.data.l[2] = 0;
 		xev.xclient.data.l[3] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
 		xev.xclient.data.l[4] = 0;
-		if (!XSendEvent(_dpy, DefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+		if (!XSendEvent(_dpy, XDefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
 		{
 			nlwarning("3D: Failed to toggle to fullscreen");
 			return false;
@@ -1742,19 +1763,15 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 	else
 	{
-		Atom _NET_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
-
 		if (windowStyle == EWSFullscreen)
 		{
-			Atom _NET_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
-
 			// set state property to fullscreen
-			XChangeProperty(_dpy, _win, _NET_WM_STATE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&_NET_WM_STATE_FULLSCREEN, 1);
+			XChangeProperty(_dpy, _win, XA_WM_STATE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&XA_WM_STATE_FULLSCREEN, 1);
 		}
 		else
 		{
 			// delete state property
-			XDeleteProperty(_dpy, _win, _NET_WM_STATE);
+			XDeleteProperty(_dpy, _win, XA_WM_STATE);
 		}
 	}
 
