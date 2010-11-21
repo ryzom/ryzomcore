@@ -2516,6 +2516,12 @@ bool CDriverGL::isActive()
 # warning "OpenGL Driver: Missing Mac Implementation for isActive (always true if a window is set)"
 #elif defined (NL_OS_UNIX)
 
+	// check if our window is still active
+	XWindowAttributes attr;
+	Status status = XGetWindowAttributes(_dpy, _win, &attr);
+
+	nlwarning("XGetWindowAttributes returned %d", status);
+
 #endif // NL_OS_UNIX
 
 	return res;
