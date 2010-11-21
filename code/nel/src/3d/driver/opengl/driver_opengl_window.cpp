@@ -610,7 +610,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_pfd.nVersion     = 1;
 		_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		_pfd.iPixelType   = PFD_TYPE_RGBA;
-		_pfd.cColorBits   = (char)_CurrentMode.Depth;
+		_pfd.cColorBits   = _CurrentMode.Depth;
 
 		// Choose best suited Depth Buffer.
 		if(_CurrentMode.Depth<=16)
@@ -2257,7 +2257,6 @@ void CDriverGL::showWindow(bool show)
 
 	if (show)
 	{
-//		XMapWindow(_dpy, _win);
 		XMapRaised(_dpy, _win);
 
 		// fix window position if windows manager want to impose them
