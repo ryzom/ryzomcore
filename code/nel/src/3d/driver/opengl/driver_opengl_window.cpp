@@ -1358,7 +1358,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 			if (size > -1)
 			{
-				if (XRRSetScreenConfig(_dpy, screen_config, root, size, saved_rotation, CurrentTime) == RRSetConfigSuccess))
+				if (XRRSetScreenConfig(_dpy, screen_config, root, size, saved_rotation, CurrentTime) == RRSetConfigSuccess)
 				{
 					nlinfo("3D: Switching to XRandR mode %d: %dx%d", size, sizes[size].width, sizes[size].height);
 					found = true;
@@ -2045,7 +2045,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devmode);
 
 	mode.Windowed = _CurrentMode.Windowed;
-	mode.OffScreen = _CurrentMode.OffScreen;
+	mode.OffScreen = false;
 	mode.Depth = (uint8)devmode.dmBitsPerPel;
 	mode.Frequency = devmode.dmDisplayFrequency;
 	mode.Width = (uint16)devmode.dmPelsWidth;
@@ -2099,7 +2099,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 				Rotation cur_rotation;
 				SizeID size = XRRConfigCurrentConfiguration(screen_config, &cur_rotation);
 
-				mode.Windowed = !_FullScreen;
+				mode.Windowed = _CurrentMode.Windowed;
 				mode.OffScreen = false;
 				mode.Depth = (uint) DefaultDepth(_dpy, screen);
 				mode.Frequency = 0;
@@ -2134,7 +2134,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 
 		if (XF86VidModeGetModeLine(_dpy, screen, &pixelClock, &xmode))
 		{
-			mode.Windowed = !_FullScreen;
+			mode.Windowed = _CurrentMode.Windowed;
 			mode.OffScreen = false;
 			mode.Depth = (uint) DefaultDepth(_dpy, screen);
 			mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
@@ -2154,7 +2154,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 
 	if (!found)
 	{
-		mode.Windowed = !_FullScreen;
+		mode.Windowed = _CurrentMode.Windowed;
 		mode.OffScreen = _CurrentMode.OffScreen;
 		mode.Depth = (uint) DefaultDepth(_dpy, screen);
 		mode.Frequency = 0;
@@ -2231,7 +2231,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #elif defined (NL_OS_UNIX)
 
-	if (!_FullScreen)
+	if (_CurrentMode.Windowed)
 	{
 		// first time requesting decoration sizes
 		if (_WindowX && _WindowY && !_DecorationWidth && !_DecorationHeight && _WndActive)
@@ -2480,7 +2480,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	}
 	else
 	{
-		XSetWMNormalHints(_dpy, _win, StdHints);
+//		XSetWMNormalHints(_dpy, _win, StdHints);
 	}
 
 	if (width != _CurrentMode.Width || height != _CurrentMode.Height)
