@@ -689,10 +689,10 @@ void CDisplayerVisualGroup::onPreRender()
 				baseColor = CV_UnselectedRegionColor.get();
 			break;
 			case DisplayModeFrozen:
-				baseColor = baseColor = CV_FrozenRegionColor.get();
+				baseColor = CV_FrozenRegionColor.get();
 			break;
 			case DisplayModeLocked:
-				baseColor = baseColor = CV_LockedRegionColor.get();
+				baseColor = CV_LockedRegionColor.get();
 			break;
 			default:
 				baseColor = CV_UnselectedRegionColor.get();

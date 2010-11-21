@@ -102,7 +102,7 @@ void CViewPolygon::draw()
 		for(uint k = 0; k < numTris; ++k)
 		{
 			winTris[k].getMinCorner(minCorner);
-			winTris[k].getMaxCorner(minCorner);
+			winTris[k].getMaxCorner(maxCorner);
 			if (totallyOutside(minCorner, maxCorner, cx, cy, cw, ch)) continue;
 			if (totallyInside(minCorner, maxCorner, cx, cy, cw, ch))
 			{

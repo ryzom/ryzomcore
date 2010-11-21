@@ -82,7 +82,7 @@ private:
 		float BlendValue; // current transparency (0.f hidden -> 1.f visible)
 		CDisplayerVisualEntity *Displayer;
 	public:
-		CVisibleEntity(CDisplayerVisualEntity *displayer = NULL) : Displayer(displayer), State(Appear), BlendValue(0.f) {}
+		CVisibleEntity(CDisplayerVisualEntity *displayer = NULL) : State(Appear), BlendValue(0.f), Displayer(displayer) {}
 	};
 	//
 	std::vector<CSortedEntity>			_SortTable;			// *Table temporarily used for the sort	(avoid reallocation of a new vector each time)

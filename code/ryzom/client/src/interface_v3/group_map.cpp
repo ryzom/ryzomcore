@@ -1563,7 +1563,7 @@ void CGroupMap::draw()
 	CQuad fruQuad;
 	CTriangle fruTri;
 
-	CRGBA fruColor;
+	CRGBA fruColor(0, 0, 0);
 
 	if (_FrustumView)
 	{
@@ -2674,9 +2674,9 @@ void CGroupMap::fitWindow()
 	{
 		//sint32 diffHReal = parentCont->getHReal() - _HReal;
 		float mapHeightOnScreen = floorf(_MapTexH * _Scale);
-		/*parentCont->setPopupMaxH((sint32) mapHeightOnScreen + diffHReal);
-		parentCont->setPopupMinH((sint32) std::min(_MinH, (sint32) mapHeightOnScreen) + diffHReal);*/
-	/*
+		// parentCont->setPopupMaxH((sint32) mapHeightOnScreen + diffHReal);
+		// parentCont->setPopupMinH((sint32) std::min(_MinH, (sint32) mapHeightOnScreen) + diffHReal);
+
 		if ((float)_HReal >= mapHeightOnScreen)
 		{
 			_Offset.y = - _PlayerPos.y;
@@ -3204,7 +3204,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 		ig->setActive(false);
 
 
-		CUserLandMark::EUserLandMarkType landMarkType;
+		CUserLandMark::EUserLandMarkType landMarkType = CUserLandMark::Misc;
 		sint8 nLandMarkType = im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8();
 		if (nLandMarkType>=0 && nLandMarkType<=CUserLandMark::UserLandMarkTypeCount)
 		{

@@ -48,44 +48,45 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupEditBox, std::string, "edit_box");
 
 CGroupEditBox::CGroupEditBox(const TCtorParam &param) :
 								CInterfaceGroup(param),
+								_BlinkTime(0.f),
 								_CursorPos(0),
-                               _BlinkTime(0.f),
-                               _BlinkState(false),
-							   _ViewText(NULL),
-							   _Setupped(false),
-							   _EntryType(Text),
-							   _MaxNumChar(std::numeric_limits<uint32>::max()),
-							   _MaxNumReturn(std::numeric_limits<uint32>::max()),
-							   _MaxFloatPrec(20),
-							   _MaxCharsSize(32768),
-							   _CursorAtPreviousLineEnd(false),
-							   _BackupFatherContainerPos(false),
-							   _WantReturn(false),
-							   _CanRedo(false),
-							   _CanUndo(false)
+								_MaxNumChar(std::numeric_limits<uint32>::max()),
+								_MaxNumReturn(std::numeric_limits<uint32>::max()),
+								_MaxFloatPrec(20),
+								_MaxCharsSize(32768),
+								_FirstVisibleChar(0),
+								_LastVisibleChar(0),
+								_ViewText(NULL),
+								_MaxHistoric(0),
+								_CurrentHistoricIndex(-1),
+								_PrevNumLine(1),
+								_EntryType(Text),
+								_Setupped(false),
+								_BypassNextKey(false),
+								_BlinkState(false),
+								_CursorAtPreviousLineEnd(false),
+								_LooseFocusOnEnter(true),
+								_RecoverFocusOnEnter(true),
+								_ResetFocusOnHide(false),
+								_BackupFatherContainerPos(false),
+								_WantReturn(false),
+								_Savable(true),
+								_DefaultInputString(false),
+								_Frozen(false),
+								_CanRedo(false),
+								_CanUndo(false),
+								_CursorTexID(-1),
+								_CursorWidth(0),
+								_IntegerMinValue(INT_MIN),
+								_IntegerMaxValue(INT_MAX),
+								_PositiveIntegerMinValue(0),
+								_PositiveIntegerMaxValue(UINT_MAX),
+								_ViewTextDeltaX(0)
+
 {
-	_FirstVisibleChar = 0;
-	_LastVisibleChar = 0;
 	_Prompt = ">";
-	_LooseFocusOnEnter= true;
-	_RecoverFocusOnEnter= true;
-	_ResetFocusOnHide = false;
 	_BackSelectColor= CRGBA::White;
 	_TextSelectColor= CRGBA::Black;
-	_MaxHistoric= 0;
-	_CurrentHistoricIndex= -1;
-	_BypassNextKey = false;
-	_PrevNumLine = 1;
-	_Savable = true;
-	_CursorTexID = -1;
-	_CursorWidth = 0;
-	_IntegerMinValue= INT_MIN;
-	_IntegerMaxValue= INT_MAX;
-	_PositiveIntegerMinValue= 0;
-	_PositiveIntegerMaxValue= UINT_MAX;
-	_ViewTextDeltaX= 0;
-	_DefaultInputString= false;
-	_Frozen= false;
 }
 
 // ----------------------------------------------------------------------------

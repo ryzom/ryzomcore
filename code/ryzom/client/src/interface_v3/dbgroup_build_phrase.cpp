@@ -808,7 +808,7 @@ public:
 	std::vector<CParamTreeNode*>	Sons;
 
 public:
-	CParamTreeNode(CParamTreeNode *parent) : Brick(NULL), Parent(parent), Valid(true)	{}
+	CParamTreeNode(CParamTreeNode *parent) : Brick(NULL), Valid(true), Parent(parent) {}
 	~CParamTreeNode()
 	{
 		Parent= NULL;

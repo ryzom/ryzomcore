@@ -665,7 +665,7 @@ static void grayItem (const std::string &listname, sint32 bagEntryIndex, bool gr
 	{
 		pList->invalidateCoords();
 
-		for(sint32 i = 0; i < MAX_BAGINV_ENTRIES; ++i)
+		for(uint i = 0; i < MAX_BAGINV_ENTRIES; ++i)
 		{
 			CDBCtrlSheet *pCS = pList->getSheet(i);
 			string sTmp = pCS->getSheet();
@@ -681,7 +681,7 @@ static void grayItem (const std::string &listname, sint32 bagEntryIndex, bool gr
 // ***************************************************************************
 void CInventoryManager::wearBagItem(sint32 bagEntryIndex)
 {
-	if(bagEntryIndex>=0 && bagEntryIndex<MAX_BAGINV_ENTRIES)
+	if(bagEntryIndex>=0 && bagEntryIndex<(sint32)MAX_BAGINV_ENTRIES)
 	{
 		BagItemEquipped[bagEntryIndex]= true;
 		grayItem (LIST_BAG_TEXT, bagEntryIndex, true);
@@ -693,7 +693,7 @@ void CInventoryManager::wearBagItem(sint32 bagEntryIndex)
 // ***************************************************************************
 void CInventoryManager::unwearBagItem(sint32 bagEntryIndex)
 {
-	if(bagEntryIndex>=0 && bagEntryIndex<MAX_BAGINV_ENTRIES)
+	if(bagEntryIndex>=0 && bagEntryIndex<(sint32)MAX_BAGINV_ENTRIES)
 	{
 		BagItemEquipped[bagEntryIndex]= false;
 		grayItem (LIST_BAG_TEXT, bagEntryIndex, false);
@@ -705,7 +705,7 @@ void CInventoryManager::unwearBagItem(sint32 bagEntryIndex)
 // ***************************************************************************
 bool CInventoryManager::isBagItemWeared(sint32 bagEntryIndex)
 {
-	if(bagEntryIndex>=0 && bagEntryIndex<MAX_BAGINV_ENTRIES)
+	if(bagEntryIndex>=0 && bagEntryIndex<(sint32)MAX_BAGINV_ENTRIES)
 	{
 		return BagItemEquipped[bagEntryIndex];
 	}
@@ -1808,7 +1808,7 @@ void CTempInvManager::updateForageQQ( uint whichOne )
 	bool disableTake = (pIM->getDbProp("LOCAL:INVENTORY:TEMP:ENABLE_TAKE")->getValue32() == 0);
 	if ( disableTake )
 	{
-		float qt, ql;
+		float qt = 0.f, ql = 0.f;
 		switch ( whichOne )
 		{
 		case 0:

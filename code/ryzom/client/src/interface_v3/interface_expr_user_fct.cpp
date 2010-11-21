@@ -95,6 +95,7 @@ static DECLARE_INTERFACE_USER_FCT(userFctAdd)
 	{
 		case CIEV::Integer: result.setInteger(args[0].getInteger() + args[1].getInteger()); return true;
 		case CIEV::Double: result.setDouble(args[0].getDouble() + args[1].getDouble()); return true;
+		default: break;
 	}
 	return false;
 }
@@ -115,6 +116,7 @@ static DECLARE_INTERFACE_USER_FCT(userFctSub)
 	{
 		case CIEV::Integer: result.setInteger(args[0].getInteger() - args[1].getInteger()); return true;
 		case CIEV::Double: result.setDouble(args[0].getDouble() - args[1].getDouble()); return true;
+		default: break;
 	}
 	return false;
 }
@@ -135,6 +137,7 @@ static DECLARE_INTERFACE_USER_FCT(userFctMul)
 	{
 		case CIEV::Integer: result.setInteger(args[0].getInteger() * args[1].getInteger()); return true;
 		case CIEV::Double: result.setDouble(args[0].getDouble() * args[1].getDouble()); return true;
+		default: break;
 	}
 	return false;
 }

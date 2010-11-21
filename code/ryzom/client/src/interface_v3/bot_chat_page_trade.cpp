@@ -313,7 +313,7 @@ void CBotChatPageTrade::update()
 // ***************************************************************************************
 uint32 CBotChatPageTrade::getCurrItemQuantity() const
 {
-	if (!_CurrItemSheet) return ~0;
+	if (!_CurrItemSheet) return std::numeric_limits<uint32>::max();
 	if(!_QuantityEdit) return 1;
 	if (_CurrItemSheet->getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -323,10 +323,10 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
-			if (!ig) return ~0;
+			if (!ig) return std::numeric_limits<uint32>::max();
 			// TODO: edit box in faction points?
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
-			if (!ed) return ~0;
+			if (!ed) return std::numeric_limits<uint32>::max();
 			uint32 intQuantity;
 			if (fromString(ed->getInputString().toString(), intQuantity))
 			{
@@ -334,14 +334,14 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			}
 			else
 			{
-				return ~0;
+				return std::numeric_limits<uint32>::max();
 			}
 		}
 		else
 		{
 			return 1;
 		}
-		return ~0;
+		return std::numeric_limits<uint32>::max();
 	}
 	return 1;
 }
@@ -571,7 +571,7 @@ void CBotChatPageTrade::updateTradeModal()
 			// get price (with fame)
 			uint64 priceWithFame = getCurrItemPrice(true);
 			// update resale price from quantity
-			sint32	resalePrice = getCurrItemPriceResale();
+			uint32	resalePrice = getCurrItemPriceResale();
 
 			// get faction points and type from current item
 			PVP_CLAN::TPVPClan	fpType;
@@ -624,7 +624,7 @@ void CBotChatPageTrade::updateTradeModal()
 
 
 			// if price/quantity is valid
-			bool	validSetup= priceWithoutFame != ~0 && quantity != ~0 && quantity != 0;
+			bool	validSetup= priceWithoutFame != std::numeric_limits<uint64>::max() && quantity != std::numeric_limits<uint32>::max() && quantity != 0;
 			if(validSetup && _BuyMean==MoneyFactionPoints)
 			{
 				// valid if at least one price type is not 0

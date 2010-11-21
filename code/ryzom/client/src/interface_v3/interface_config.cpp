@@ -628,7 +628,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 	{
 		std::string elemID;
 		f.serial(elemID);
-		uint32 chunkSize;
+		uint32 chunkSize = 0;
 		f.serial(chunkSize);
 		uint startPos = f.getPos();
 		CInterfaceManager *im = CInterfaceManager::getInstance();

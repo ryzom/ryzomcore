@@ -524,6 +524,7 @@ bool CInterfaceExprValue::toBool()
 		case Integer: setBool(_IntegerValue != 0); return true;
 		case Double:  setBool(_DoubleValue != 0); return true;
 		case String:  return evalBoolean(_StringValue.toString().c_str()) != NULL;
+		default: break;
 	}
 	return false;
 
@@ -541,8 +542,7 @@ bool CInterfaceExprValue::toInteger()
 			if (evalNumber(_StringValue.toString().c_str())) return toInteger();
 			return false;
 		case RGBA:	setInteger((sint64) _RGBAValue); return true;
-
-		break;
+		default: break;
 	}
 	return false;
 }
@@ -559,7 +559,7 @@ bool CInterfaceExprValue::toDouble()
 			if (evalNumber(_StringValue.toString().c_str())) return toBool();
 			return false;
 		case RGBA:	setDouble((double) _RGBAValue); return true;
-		break;
+		default: break;
 	}
 	return false;
 }
@@ -583,6 +583,7 @@ bool CInterfaceExprValue::toString()
 			setString(NLMISC::toString("%d %d %d %d", r, g, b, a));
 			return true;
 		}
+		default: break;
 	}
 	return false;
 }
@@ -597,7 +598,7 @@ bool CInterfaceExprValue::toRGBA()
 											(uint8)((_IntegerValue>>16)&0xff), (uint8)((_IntegerValue>>24)&0xff))); return true;
 		case String:
 			setRGBA(stringToRGBA(_StringValue.toString().c_str())); return true;
-		break;
+		default: break;
 	}
 	return false;
 }
@@ -788,6 +789,7 @@ void CInterfaceExprValue::clean()
 	{
 		case String:   _StringValue.clear(); break;
 		case UserType: delete _UserTypeValue; break;
+		default: break;
 	}
 }
 

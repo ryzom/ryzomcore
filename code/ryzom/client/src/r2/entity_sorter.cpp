@@ -235,7 +235,7 @@ void CEntitySorter::updateVisibleList()
 void CEntitySorter::clipEntitiesByDist()
 {
 	CHECK_INTEGRITY
-	sint64 startTime;
+	sint64 startTime = 0;
 	static volatile bool bench = false;
 	if (bench)
 	{

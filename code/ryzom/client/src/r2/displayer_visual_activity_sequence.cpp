@@ -182,7 +182,7 @@ void CDisplayerVisualActivitySequence::update()
 					nextDV->getSonsWorldPos2f(r1);
 					if (!r0.empty() && !r1.empty())
 					{
-						CVector2f p0, p1;
+						CVector2f p0(0.f, 0.f), p1(0.f, 0.f);
 						float bestDist = FLT_MAX;
 						for(uint k = 0; k < r0.size(); ++k)
 						{
@@ -415,6 +415,8 @@ void CDisplayerVisualActivitySequence::onPostRender()
 		case HasFocus:
 			_DecalColor = CV_FootStepDecalFocusedColor.get();
 			mapColor = CV_FootStepMapFocusedColor.get();
+		break;
+		default:
 		break;
 	}
 	for(uint k = 0; k < _WPCache.size(); ++k)

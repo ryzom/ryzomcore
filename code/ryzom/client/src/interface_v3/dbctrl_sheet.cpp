@@ -912,6 +912,8 @@ void CDBCtrlSheet::initSheetSize()
 				_DispSlotBmpId = rVR.getTextureIdFromName ("w_slot_blason.tga");
 				_DispSelSlotId = rVR.getTextureIdFromName ("w_slot_blason_over.tga");
 			break;
+			default:
+			break;
 		}
 	}
 	rVR.getTextureSizeFromId (_DispSlotBmpId, _W, _H);
@@ -1855,7 +1857,7 @@ void CDBCtrlSheet::draw()
 		else
 		{
 			float animProgress = 1.f - float(_NotifyAnimEndTime - T1) / float(NOTIFY_ANIM_MS_DURATION);
-			uint32 texId = rVR.getSystemTextureId(CViewRenderer::GlowStarTexture);
+			sint32 texId = rVR.getSystemTextureId(CViewRenderer::GlowStarTexture);
 			if (texId != -1)
 			{
 				sint32 texWidth, texHeight;
@@ -1865,8 +1867,8 @@ void CDBCtrlSheet::draw()
 				const float freq1 = -1.f;
 				const float phase1 = 0.f;
 				float scale = sqrtf(1.f - animProgress);
-				drawRotatedQuad(rVR, float(NLMISC::Pi) * animProgress * freq0 + phase0, scale, _RenderLayer + 3, texId, texWidth, texHeight);
-				drawRotatedQuad(rVR, float(NLMISC::Pi) * animProgress * freq1 + phase1, scale, _RenderLayer + 3, texId, texWidth, texHeight);
+				drawRotatedQuad(rVR, float(NLMISC::Pi) * animProgress * freq0 + phase0, scale, _RenderLayer + 3, (uint32)texId, texWidth, texHeight);
+				drawRotatedQuad(rVR, float(NLMISC::Pi) * animProgress * freq1 + phase1, scale, _RenderLayer + 3, (uint32)texId, texWidth, texHeight);
 			}
 		}
 	}
@@ -2416,6 +2418,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 			if (_DispOverBmpId != -1)
 				rVR.draw11RotFlipBitmap (_RenderLayer, x, y, 0, false, _DispOverBmpId, curSheetColor);
 			displayCharBitmaps(_RenderLayer+2, x, y, curSheetColor);
+			break;
+		default:
 			break;
 	}
 

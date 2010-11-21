@@ -138,7 +138,7 @@ void SCharacter3DSetup::setupDefault (EGSPD::CPeople::TPeople eRace, bool bMale)
 				sint32 cpIndex = convert_VisualSlot_To_Char3DPart ((SLOTTYPE::EVisualSlot)i);
 				if (cpIndex != Char3DPart_INVALID)
 				{
-					Parts[i].Quality = pIS->MapVariant;
+					Parts[cpIndex].Quality = pIS->MapVariant;
 					if (Male)
 						Parts[cpIndex].Name = pIS->getShape();
 					else
@@ -498,7 +498,7 @@ void DEBUG_DumpClothes()
 		SLOTTYPE::EVisualSlot vs = SCharacter3DSetup::convert_Char3DPart_To_VisualSlot((TChar3DPart)cp);
 		string sTmp = SCharacter3DSetup::convert_VisualSlot_To_String(vs);
 		nlinfo("*** PART *** : %s", sTmp.c_str());
-		uint nNbItems;
+		uint nNbItems = 0;
 		if (cp == Char3DPart_HandRightItem)
 			nNbItems = 1<<11;
 		if ((cp == Char3DPart_Chest) || (cp == Char3DPart_Hands) || (cp == Char3DPart_Feet))
@@ -699,7 +699,7 @@ void CCharacter3D::disableFaceMorphAndBlinks()
 	if(_FacePlayList && _AnimationSet)
 	{
 		// disable eye blink animation (handled by ourselves)
-		sint	id= _AnimationSet->getChannelIdByName("visage_100MorphFactor");
+		uint	id= _AnimationSet->getChannelIdByName("visage_100MorphFactor");
 		if(id!=UAnimationSet::NotFound)
 			_FacePlayList->enableChannel(id, false);
 		// disable morph target (handled by ourselves)
@@ -729,7 +729,7 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 		{
 			_PlayList->registerTransform (_Skeleton);
 			// disable pos animation
-			sint	id= _AnimationSet->getChannelIdByName("pos");
+			uint	id= _AnimationSet->getChannelIdByName("pos");
 			if(id!=UAnimationSet::NotFound)
 				_PlayList->enableChannel(id, false);
 		}

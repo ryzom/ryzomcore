@@ -2485,7 +2485,7 @@ sint CComLuaModule::luaGetCharIdMd5(lua_State* state)
 		uint32 v = value  % 16;
 		value /= 16;
 		char & c = ret[7-i];
-		if (0 <= v && v <= 9)
+		if (v <= 9)
 		{
 			c = '0' + static_cast<char>(v);
 		}

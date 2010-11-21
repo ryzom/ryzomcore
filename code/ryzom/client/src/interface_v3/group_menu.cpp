@@ -1805,7 +1805,7 @@ int CGroupSubMenu::luaSetUserGroupRight(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 	if (!(CLuaIHM::isUIOnStack(ls, 2) || ls.isNil(2)))
 	{
-		CLuaIHM::fails(ls, toString("%s :  Group required as argument 2", funcName));
+		CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 	}
 	CInterfaceElement *el = CLuaIHM::getUIOnStack(ls, 2);
 	CInterfaceGroup *group = dynamic_cast<CInterfaceGroup *>(el);

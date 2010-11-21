@@ -142,7 +142,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// get item size.
 	CViewRenderer &rVR = pIM->getViewRenderer();
-	sint32	dispSlotBmpId;
+	sint32	dispSlotBmpId = 0;
 	switch(_CtrlInfo._Type)
 	{
 		case CCtrlSheetInfo::SheetType_Auto:
@@ -157,6 +157,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 				dispSlotBmpId = rVR.getTextureIdFromName ("w_slot_brick.tga");
 			break;
 		case CCtrlSheetInfo::SheetType_Macro: dispSlotBmpId = rVR.getTextureIdFromName ("w_slot_brick.tga"); break;
+		default: break;
 	}
 	rVR.getTextureSizeFromId (dispSlotBmpId, _WSlot, _HSlot);
 

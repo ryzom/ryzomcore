@@ -3029,16 +3029,6 @@ void CLuaIHM::fails(CLuaState &ls, const char *format, ...)
 }
 
 // ***************************************************************************
-void CLuaIHM::fails(CLuaState &ls, const std::string &format,...)
-{
-	//H_AUTO(Lua_CLuaIHM_fails)
-	std::string	reason;
-	const char *formatPtr = format.c_str();
-	NLMISC_CONVERT_VARGS (reason, formatPtr, NLMISC::MaxCStringSize);
-	fails(ls, reason.c_str());
-}
-
-// ***************************************************************************
 void	CLuaIHM::checkArgCount(CLuaState &ls,    const char* funcName,    uint nArgs)
 {
 	//H_AUTO(Lua_CLuaIHM_checkArgCount)
@@ -3074,7 +3064,7 @@ void	CLuaIHM::check(CLuaState &ls,   bool ok,    const std::string &failReason)
 	//H_AUTO(Lua_CLuaIHM_check)
 	if(!ok)
 	{
-		fails(ls, failReason);
+		fails(ls, failReason.c_str());
 	}
 }
 
@@ -3085,11 +3075,11 @@ void CLuaIHM::checkArgType(CLuaState &ls,   const char *funcName,   uint index, 
 	nlassert(index > 0);
 	if (ls.getTop() < (int) index)
 	{
-		fails(ls, toString("%s : argument %d of expected type %s was not defined",   funcName,   index,   ls.getTypename(argType)));
+		fails(ls, "%s : argument %d of expected type %s was not defined",   funcName,   index,   ls.getTypename(argType));
 	}
 	if (ls.type(index) != argType)
 	{
-		fails(ls, toString("%s : argument %d of expected type %s has bad type : %s",   funcName,   index,   ls.getTypename(argType),   ls.getTypename(ls.type(index)),   ls.type(index)));
+		fails(ls, "%s : argument %d of expected type %s has bad type : %s",   funcName,   index,   ls.getTypename(argType),   ls.getTypename(ls.type(index)),   ls.type(index));
 	}
 }
 
@@ -3100,13 +3090,13 @@ void CLuaIHM::checkArgTypeRGBA(CLuaState &ls, const char *funcName, uint index)
 	nlassert(index > 0);
 	if (ls.getTop() < (int) index)
 	{
-		fails(ls, toString("%s : argument %d of expected type RGBA was not defined",   funcName,   index));
+		fails(ls, "%s : argument %d of expected type RGBA was not defined",   funcName,   index);
 	}
 	ls.pushValue(index);
 	CRGBA dummy;
 	if (!pop(ls, dummy))
 	{
-		fails(ls, toString("%s : argument %d of expected type RGBA has bad type : %s",   funcName,   index, ls.getTypename(ls.type(index)),   ls.type(index)));
+		fails(ls, "%s : argument %d of expected type RGBA has bad type : %s",   funcName,   index, ls.getTypename(ls.type(index)),   ls.type(index));
 	}
 }
 
@@ -3117,11 +3107,11 @@ void CLuaIHM::checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint in
 	nlassert(index > 0);
 	if (ls.getTop() < (int) index)
 	{
-		fails(ls, toString("%s : argument %d of expected type ui element was not defined",   funcName,   index));
+		fails(ls, "%s : argument %d of expected type ui element was not defined",   funcName,   index);
 	}
 	if (!isUIOnStack(ls, index))
 	{
-		fails(ls, toString("%s : argument %d of expected type ui element has bad type : %s",   funcName,   index, ls.getTypename(ls.type(index)),   ls.type(index)));
+		fails(ls, "%s : argument %d of expected type ui element has bad type : %s",   funcName,   index, ls.getTypename(ls.type(index)),   ls.type(index));
 	}
 }
 
@@ -3132,13 +3122,13 @@ void CLuaIHM::checkArgTypeUCString(CLuaState &ls, const char *funcName, uint ind
 	nlassert(index > 0);
 	if (ls.getTop() < (int) index)
 	{
-		fails(ls, toString("%s : argument %d of expected type ucstring was not defined",   funcName,   index));
+		fails(ls, "%s : argument %d of expected type ucstring was not defined",   funcName,   index);
 	}
 	ls.pushValue(index);
 	ucstring dummy;
 	if (!pop(ls, dummy))
 	{
-		fails(ls, toString("%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(ls.type(index)),   ls.type(index)));
+		fails(ls, "%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(ls.type(index)),   ls.type(index));
 	}
 }
 

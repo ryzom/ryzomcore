@@ -974,13 +974,13 @@ void CSkillManager::tryToUnblockTitleFromItems()
 				// check items present in bag
 				for (uint itemSlot = 0; itemSlot < numItems; ++itemSlot)
 				{
-					sint32 sheetItem = 0;
+					uint32 sheetItem = 0;
 					sint32 qualityItem = 0;
 
 					// get sheetid
 					CCDBNodeLeaf *node = pIM->getDbProp(branch + ":" + toString(itemSlot) + ":SHEET", false);
 					if (node)
-						sheetItem = node->getValue32();
+						sheetItem = (uint32)node->getValue32();
 
 					// slot empty
 					if (!sheetItem)

@@ -239,8 +239,7 @@ void CChatInputFilter::clearMessages()
 
 
 //=============================================================================================================
-CChatTargetFilter::CChatTargetFilter() : _TargetPartyChat(NULL),
-							 _Chat(NULL)
+CChatTargetFilter::CChatTargetFilter() : _Chat(NULL), _TargetPartyChat(NULL)
 {
 	_TargetGroup= CChatGroup::say;
 	_TargetDynamicChannelDbIndex= 0;

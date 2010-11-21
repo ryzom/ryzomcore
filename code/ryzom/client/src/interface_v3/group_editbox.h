@@ -205,7 +205,6 @@ public:
 protected:
 
 	// Cursor infos
-	float	_BlinkSpeed;
 	float	_BlinkTime;
 	sint32	_CursorPos;
 	uint32  _MaxNumChar;

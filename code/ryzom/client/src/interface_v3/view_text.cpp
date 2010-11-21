@@ -529,7 +529,7 @@ void CViewText::draw ()
 
 				// skip spaces before current word
 				float firstSpace = currWord.NumSpaces * currLine.getSpaceWidth();
-				sint line_width;
+				sint line_width = 0;
 				if (_Underlined)
 				{
 					line_width = (sint)floorf(currLine.getWidthWithoutSpaces() + currLine.getSpaceWidth());
@@ -1452,7 +1452,7 @@ sint CViewText::getLineFromIndex(uint index, bool cursorDisplayedAtEndOfPrevious
 		{
 			CLine &currLine = *_Lines[i];
 			uint newCharIndex = charIndex + currLine.getNumChars() + currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
-			if ((sint) newCharIndex > index)
+			if (newCharIndex > index)
 			{
 				if (i != 0 && cursorDisplayedAtEndOfPreviousLine && charIndex == index)
 				{
@@ -1611,7 +1611,7 @@ void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousL
 					{
 						// character is in currWord or the in spaces preceding it
 						// check if the character is in the word
-						if ((sint) (index - charIndex) > currWord.NumSpaces)
+						if ((uint) (index - charIndex) > currWord.NumSpaces)
 						{
 							// get the x position
 							ucstring subStr = currWord.Text.substr(0, index - charIndex - currWord.NumSpaces);
@@ -2255,6 +2255,7 @@ void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, s
 	uint	textSize= (uint)text.size();
 	// Must herit all the props from old tags.
 	CViewText::CFormatTag	precTag;	// set default.
+	precTag.Index = 0;
 	for (uint i = 0; i < textSize;)
 	{
 		if(isColorTag(text, i, textSize))

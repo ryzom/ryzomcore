@@ -37,16 +37,15 @@ CGroupScrollText::CGroupScrollText(const TCtorParam &param) :
 										CInterfaceGroup(param),
 										_List(NULL),
 										_ScrollBar(NULL),
+										_ButtonAdd(NULL),
+										_ButtonSub(NULL),
 										_Settuped(false),
 										_InvertScrollBar(true),
 										_ListHeight(0),
-										_ButtonAdd(NULL),
-										_ButtonSub(NULL),
 										_StartHeight(0),
 										_EllapsedTime(0)
 {
 }
-
 
 //========================================================================
 CGroupScrollText::~CGroupScrollText()

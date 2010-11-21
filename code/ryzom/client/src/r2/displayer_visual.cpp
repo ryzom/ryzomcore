@@ -211,13 +211,11 @@ void CDisplayerVisual::onAttrModified(const std::string &attrName,  sint32 /* at
 		TDisplayMode newDisplayMode = (TDisplayMode) value;
 		if (newDisplayMode != _DisplayMode)
 		{
-			/*
-			if (newDisplayMode == DisplayModeFrozen && getEditor().getSelectedInstance() == getDisplayedInstance())
-			{
-				getEditor().setSelectedInstance(NULL);
-			}
-			*/
-/*			_DisplayMode = newDisplayMode;
+			//if (newDisplayMode == DisplayModeFrozen && getEditor().getSelectedInstance() == getDisplayedInstance())
+			//{
+			//	getEditor().setSelectedInstance(NULL);
+			//}
+			//_DisplayMode = newDisplayMode;
 		}
 	}
 	else

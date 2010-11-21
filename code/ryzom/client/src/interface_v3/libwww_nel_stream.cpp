@@ -129,7 +129,7 @@ PUBLIC int HTLoadNeLFile (SOCKET soc, HTRequest * request)
     HTTRACE(PROT_TRACE, "HTLoadFile.. Looking for `%s\'\n" _
 			    HTAnchor_physical(anchor));
     if ((file = (file_info *) HT_CALLOC(1, sizeof(file_info))) == NULL)
-	HT_OUTOFMEM("HTLoadFILE");
+	HT_OUTOFMEM((char*)"HTLoadFILE");
     file->state = FS_BEGIN;
     file->net = net;
     HTNet_setContext(net, file);
@@ -143,7 +143,7 @@ PRIVATE int ReturnEvent (HTTimer * timer, void * param, HTEventType /* type */)
 {
     file_info * file = (file_info *) param;
     if (timer != file->timer)
-	HTDEBUGBREAK("File timer %p not in sync\n" _ timer);
+	HTDEBUGBREAK((char*)"File timer %p not in sync\n" _ timer);
     HTTRACE(PROT_TRACE, "HTLoadFile.. Continuing %p with timer %p\n" _ file _ timer);
 
     /*
@@ -166,7 +166,7 @@ PUBLIC int HTNeLFileOpen (HTNet * net, char * local, HTLocalMode /* mode */)
 
     if (!fp->open (local))
 	{
-        HTRequest_addSystemError(request, ERR_FATAL, errno, NO, "CIFile::open");
+        HTRequest_addSystemError(request, ERR_FATAL, errno, NO, (char*)"CIFile::open");
         return HT_ERROR;
     }
 
@@ -189,7 +189,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 	{
 		/* Interrupted */
 		HTRequest_addError(request, ERR_FATAL, NO, HTERR_INTERRUPTED,
-			NULL, 0, "HTLoadFile");
+			NULL, 0, (char*)"HTLoadFile");
 		FileCleanup(request, HT_INTERRUPTED);
 		return HT_OK;
     }
@@ -419,6 +419,9 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 	    FileCleanup(request, HT_ERROR);
 	    return HT_OK;
 	    break;
+
+	  default:
+	    break;
 	}
     } /* End of while(1) */
 }
@@ -576,7 +579,7 @@ PUBLIC HTInputStream * HTNeLReader_new (HTHost * host, HTChannel * ch,
 	HTInputStream * me = HTChannel_input(ch);
 	if (me == NULL) {
 	    if ((me=(HTInputStream *) HT_CALLOC(1, sizeof(HTInputStream))) == NULL)
-	    HT_OUTOFMEM("HTNeLReader_new");
+	    HT_OUTOFMEM((char*)"HTNeLReader_new");
 	    me->isa = &HTNeLReader;
 	    me->ch = ch;
 	    me->host = host;

@@ -548,6 +548,8 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 			case TrainerCarac:
 				return isCaracPhrase(*phraseSheet);
 			break;
+			default:
+			break;
 		}
 	}
 		

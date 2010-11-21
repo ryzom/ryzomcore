@@ -6360,7 +6360,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get everything between the two "$"
 		size_t token_start_pos = start_pos + start_token.length();
 		size_t token_end_pos   = end_pos - end_token.length();
-		if ((token_start_pos - token_end_pos) < 0)
+		if (token_start_pos < token_end_pos)
 		{
 			// Wrong formatting; give up on this one.
 			start_pos = end_pos;

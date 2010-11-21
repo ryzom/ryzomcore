@@ -1348,13 +1348,17 @@ bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 
 	ptr = xmlGetProp (cur, (xmlChar*)"title_opened");
 	if (ptr)
+	{
 		if (_Localize)	_TitleTextOpened = CI18N::get(string((const char*)ptr));
 		else			_TitleTextOpened = string((const char*)ptr);
+	}
 
 	ptr = xmlGetProp (cur, (xmlChar*)"title_closed");
 	if (ptr)
+	{
 		if (_Localize)	_TitleTextClosed = CI18N::get(string((const char*)ptr));
 		else			_TitleTextClosed = string((const char*)ptr);
+	}
 
 	ptr = xmlGetProp (cur, (xmlChar*)"header_active");
 	if (ptr)

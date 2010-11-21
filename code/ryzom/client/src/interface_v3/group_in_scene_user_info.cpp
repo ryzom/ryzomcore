@@ -574,10 +574,12 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 							{
 								if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
 									 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								{
 									if ( civToDisplay == i)
 										break;
 									else
 										 civToDisplay = i;
+								}
 							}
 						}
 
@@ -586,17 +588,21 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						{
 							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
 								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
+							{
 								if ( cultToDisplay == i)
 									break;
 								else
 									 cultToDisplay = i;
+							}
 
 							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
 								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+							{
 								if ( cultToDisplay == i)
 									break;
 								else
 									 cultToDisplay = i;
+							}
 						}
 					}
 
@@ -606,34 +612,46 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						if( pvpCivLogoBmp )
 						{
 							if (pPlayer->isPvpAlly(civToDisplay))
+							{
 								if (pPlayer->isPvpRanger())
 									pvpCivLogoBmp->setTexture("pvp_ally_ranger.tga");
 								else
 									pvpCivLogoBmp->setTexture("pvp_ally_"+toString(civToDisplay)+".tga");
+							}
 							else if (pPlayer->isPvpEnnemy(civToDisplay))
+							{
 								if (pPlayer->isPvpMarauder())
 									pvpCivLogoBmp->setTexture("pvp_enemy_marauder.tga");
 								else
 									pvpCivLogoBmp->setTexture("pvp_enemy_"+toString(civToDisplay)+".tga");
+							}
 							else
+							{
 								needCivPvpLogo = false;
+							}
 						}
 
 						CViewBitmap * pvpCultLogoBmp = dynamic_cast<CViewBitmap *>(pvpCultLogo);
 						if( pvpCultLogoBmp )
 						{
 							if (pPlayer->isPvpAlly(cultToDisplay))
+							{
 								if (pPlayer->isPvpPrimas())
 									pvpCultLogoBmp->setTexture("pvp_ally_primas.tga");
 								else
 									pvpCultLogoBmp->setTexture("pvp_ally_"+toString(cultToDisplay)+".tga");
+							}
 							else if (pPlayer->isPvpEnnemy(cultToDisplay))
+							{
 								if (pPlayer->isPvpTrytonist())
 									pvpCultLogoBmp->setTexture("pvp_enemy_trytonist.tga");
 								else
 									pvpCultLogoBmp->setTexture("pvp_enemy_"+toString(cultToDisplay)+".tga");
+							}
 							else
+							{
 								needCultPvpLogo = false;
+							}
 						}
 					}
 					else 
@@ -892,10 +910,12 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	// Set state fx
 	CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(_Entity);
 	if (pPlayer != NULL)
+	{
 		if (pPlayer->isAFK())
 			pPlayer->setStateFx("sp_medit.ps");
 		else if (pPlayer->getStateFx() == "sp_medit.ps")
 			pPlayer->removeStateFx();
+	}
 	
 	if (_Entity->isDead())
 			_Entity->setStateFx("misc_dead.ps");

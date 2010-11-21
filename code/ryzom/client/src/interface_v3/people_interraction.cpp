@@ -1784,7 +1784,7 @@ void CPeopleInterraction::refreshActiveUserChats()
 //=================================================================================================================
 void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentence)
 {
-	if(channelNb>=0&& channelNb<CChatGroup::MaxDynChanPerPlayer)
+	if(channelNb<CChatGroup::MaxDynChanPerPlayer)
 	{
 		DynamicChatEntryHandler[channelNb].msgEntered(sentence,DynamicChat[channelNb]);
 	}
@@ -2485,7 +2485,9 @@ public:
 
 			// Remove existing dynamic chats
 			while (pMenu->getNumLine() > 5)
+			{
 				pMenu->deleteLine(pMenu->getNumLine()-1);
+			}
 
 			// Add dynamic chats
 			uint insertion_index = 0;

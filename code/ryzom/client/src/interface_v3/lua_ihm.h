@@ -140,7 +140,6 @@ public:
 	  * The various check... function call this function when their test fails
 	  */
 	static void fails(CLuaState &ls, const char *format, ...);
-	static void fails(CLuaState &ls, const std::string &format, ...);
 
 	/** execute function that is currently on the stack, possibly outputing error messages to the log
 	  * \return true if execution succeeded

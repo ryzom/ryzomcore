@@ -1506,7 +1506,10 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 			return false;
 		}
 
-		fread((void*)&uncompressedFileLength,  sizeof(uncompressedFileLength),  1, file);
+		if (fread((void*)&uncompressedFileLength,  sizeof(uncompressedFileLength),  1, file) != 1)
+		{
+			nlwarning("Error while reading %s", filename.c_str());
+		}
 
 		fclose(file);
 

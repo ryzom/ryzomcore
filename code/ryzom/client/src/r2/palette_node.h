@@ -18,7 +18,7 @@
 #define R2_PALETTE_NODE_H
 
 
-/*
+#if 0
 //#include "interface_user_data.h"
 #include "group_tree.h"
 #include "lua_object.h"
@@ -32,7 +32,7 @@ namespace R2
 /**
   * A palette node, to be attached to a CInterfaceElement. Makes a reference to a lua table describing the instance to be copied
   */
-/*
+
 class CPaletteNode : public NLMISC::CRefCount
 {
 public:
@@ -52,6 +52,6 @@ private:
 
 
 } // R2
-*/
+#endif
 
 #endif

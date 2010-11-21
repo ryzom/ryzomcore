@@ -221,7 +221,7 @@ CLuaState::CLuaState()
 
 
 // ***************************************************************************
-CLuaStackRestorer::CLuaStackRestorer(CLuaState *state, int finalSize) : _State(state), _FinalSize(finalSize)
+CLuaStackRestorer::CLuaStackRestorer(CLuaState *state, int finalSize) : _FinalSize(finalSize), _State(state)
 {
 }
 
@@ -509,7 +509,7 @@ void CLuaState::push(TLuaWrappedFunction function)
 			nlassert(func);
 			nlassert(state);
 			// get real function pointer from the values in the closure
-			int numResults;
+			int numResults = 0;
 			int initialStackSize = state->getTop();
 			try
 			{

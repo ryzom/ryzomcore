@@ -46,8 +46,8 @@ extern CClientChatManager   ChatMngr;
 
 //==================================================================
 CPeopleList::CPeopleList() : _ChatWindow(NULL),
-	 						 _CurrPeopleID(0),
 							 _ContactType(CPeopleListDesc::Unknown),
+	 						 _CurrPeopleID(0),
 							 _Savable(false)
 
 {

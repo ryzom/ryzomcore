@@ -366,7 +366,7 @@ void CActionHistoric::requestMoveNode(const std::string& instanceId, const std::
 
 
 //====================================================================================
-CActionHistoric::CAction::CAction(const ucstring &name)  : _Name(name), _Completed(false), _FlushedCount(0), _Flushing(false)
+CActionHistoric::CAction::CAction(const ucstring &name)  : _Name(name), _FlushedCount(0), _Completed(false), _Flushing(false)
 {
 }
 
