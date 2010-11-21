@@ -1356,14 +1356,21 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 				}
 			}
 
-			if (size > -1 && XRRSetScreenConfig(_dpy, screen_config, root, size, saved_rotation, CurrentTime) == RRSetConfigSuccess)
+			if (size > -1)
 			{
-				nlinfo("3D: Switching to XRandR mode %d: %dx%d", size, sizes[size].width, sizes[size].height);
-				found = true;
+				if (XRRSetScreenConfig(_dpy, screen_config, root, size, saved_rotation, CurrentTime) == RRSetConfigSuccess))
+				{
+					nlinfo("3D: Switching to XRandR mode %d: %dx%d", size, sizes[size].width, sizes[size].height);
+					found = true;
+				}
+				else
+				{
+					nlwarning("3D: XRRSetScreenConfig failed for mode %d: %dx%d", size, sizes[size].width, sizes[size].height);
+				}
 			}
 			else
 			{
-				nlwarning("3D: No corresponding screen mode or XRRSetScreenConfig failed");
+				nlwarning("3D: No corresponding screen mode");
 			}
 
 			XRRFreeScreenConfigInfo(screen_config);
