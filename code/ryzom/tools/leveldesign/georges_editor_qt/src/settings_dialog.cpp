@@ -39,12 +39,38 @@ namespace NLQT
 	{
 		ui.setupUi(this);
 
-		// setup config file callbacks and initialize values
-		Modules::config().setAndCallback("GraphicsDrivers", CConfigCallback(this, &CSettingsDialog::cfcbGraphicsDrivers));
-		Modules::config().setAndCallback("SearchPaths", CConfigCallback(this, &CSettingsDialog::cfcbSearchPaths));
-		Modules::config().setAndCallback("LeveldesignPath", CConfigCallback(this, &CSettingsDialog::cfcbLeveldesignPath));
+		while (ui.driverGraphComboBox->count())
+			ui.driverGraphComboBox->removeItem(0);
 
-		// load settings from the config file
+		// load types graphics driver from the config file
+		NLMISC::CConfigFile::CVar v = Modules::config().getConfigFile().getVar("GraphicsDrivers");
+		for (uint i = 0; i < v.size(); ++i)
+			ui.driverGraphComboBox->addItem(v.asString(i).c_str());
+
+		// set graphics driver from the config file
+		QString value = Modules::config().getValue("GraphicsDriver",std::string("OpenGL")).c_str();
+		QString dn = value.toLower();
+		for (sint i = 0; i < ui.driverGraphComboBox->count(); ++i)
+		{
+			if (dn == ui.driverGraphComboBox->itemText(i).toLower())
+			{
+				ui.driverGraphComboBox->setCurrentIndex(i);
+			}
+		}
+
+		// load leveldesign path from the config file
+		NLMISC::CConfigFile::CVar v2 = Modules::config().getConfigFile().getVar("LeveldesignPath");
+		ui.leveldesignPath->setText(v2.asString().c_str());
+
+		// load search paths from the config file
+		NLMISC::CConfigFile::CVar v3 = Modules::config().getConfigFile().getVar("SearchPaths");
+		ui.pathsListWidget->clear();
+
+		for (uint i = 0; i < v3.size(); ++i)
+		{
+			ui.pathsListWidget->addItem(v3.asString(i).c_str());
+			ui.pathsListWidget->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		}
 
 		connect(ui.addToolButton, SIGNAL(clicked()), this, SLOT(addPath()));
 		connect(ui.removeToolButton, SIGNAL(clicked()), this, SLOT(removePath()));
@@ -62,9 +88,6 @@ namespace NLQT
 
 	CSettingsDialog::~CSettingsDialog()
 	{
-		Modules::config().dropCallback("GraphicsDrivers");
-		Modules::config().dropCallback("SearchPaths");
-		Modules::config().dropCallback("LeveldesignPath");
 	}
 
 	void CSettingsDialog::addPath()
@@ -126,17 +149,37 @@ namespace NLQT
 		Modules::config().getConfigFile().getVar("GraphicsDriver").setAsString(ui.driverGraphComboBox->currentText().toStdString());
 
 		// save leveldesign path to config file
-		std::string ldPath = ui.leveldesignPath->text().toStdString();
-		Modules::config().getConfigFile().getVar("LeveldesignPath").forceAsString(ldPath);
-		Q_EMIT ldPathChanged(ldPath.c_str());
+		QString oldLdPath = Modules::config().getValue("LeveldesignPath", std::string("")).c_str();
+		if (oldLdPath != ui.leveldesignPath->text())
+		{
+			std::string ldPath = ui.leveldesignPath->text().toStdString();
+			Modules::config().getConfigFile().getVar("LeveldesignPath").forceAsString(ldPath);
+			Q_EMIT ldPathChanged(ldPath.c_str());
+			// TODO: remove old Path from CPath
+			Modules::config().addLeveldesignPath();
+		}
 
 		// save search paths to config file
+		NLMISC::CConfigFile::CVar v = Modules::config().getConfigFile().getVar("SearchPaths");
+		QStringList sl;
+		for (uint i = 0; i < v.size(); ++i)
+		{
+			sl.append(v.asString(i).c_str());
+		}
+
 		std::vector<std::string> list;
+		std::vector<std::string> addList;
 		for (sint i = 0; i < ui.pathsListWidget->count(); ++i)
 		{
 			std::string str = ui.pathsListWidget->item(i)->text().toStdString();
 			if (str != "")
+			{
 				list.push_back(str);
+				if (!sl.contains(str.c_str()))
+				{
+					addList.push_back(str);
+				}
+			}
 		}
 
 		if (list.empty()) 
@@ -153,48 +196,7 @@ namespace NLQT
 		Modules::config().getConfigFile().save();
 
 		// reload search paths
-		Modules::config().configSearchPaths();
-		Modules::config().configLeveldesignPath();
-	}
-
-	void CSettingsDialog::cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var)
-	{
-		while (ui.driverGraphComboBox->count())
-			ui.driverGraphComboBox->removeItem(0);
-
-		// load types graphics driver from the config file
-		for (uint i = 0; i < var.size(); ++i)
-			ui.driverGraphComboBox->addItem(var.asString(i).c_str());
-
-		// set graphics driver from the config file
-		QString value = Modules::config().getValue("GraphicsDriver",std::string("OpenGL")).c_str();
-		QString dn = value.toLower();
-		for (sint i = 0; i < ui.driverGraphComboBox->count(); ++i)
-		{
-			if (dn == ui.driverGraphComboBox->itemText(i).toLower())
-			{
-				ui.driverGraphComboBox->setCurrentIndex(i);
-				return;
-			}
-		}
-	}
-
-	void CSettingsDialog::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
-	{
-		ui.pathsListWidget->clear();
-
-		// load search paths from the config file
-		for (uint i = 0; i < var.size(); ++i)
-		{
-			ui.pathsListWidget->addItem(var.asString(i).c_str());
-			ui.pathsListWidget->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-		}
-	}
-
-	void CSettingsDialog::cfcbLeveldesignPath(NLMISC::CConfigFile::CVar &var)
-	{
-		// load leveldesign path from the config file	
-		ui.leveldesignPath->setText(var.asString().c_str());
+		Modules::config().addSearchPaths(&addList);
 	}
 
 	void CSettingsDialog::browseLeveldesignPath()

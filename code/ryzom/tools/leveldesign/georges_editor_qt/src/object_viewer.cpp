@@ -86,10 +86,20 @@ namespace NLQT
 		//Modules::config().configSearchPaths();
 
 		// set background color from config
-		Modules::config().setAndCallback("BackgroundColor", CConfigCallback(this, &CObjectViewer::cfcbBackgroundColor));	
+		NLMISC::CConfigFile::CVar v = Modules::config().getConfigFile().getVar("BackgroundColor");
+		_BackgroundColor = CRGBA(v.asInt(0), v.asInt(1), v.asInt(2));
 
 		// set graphics driver from config
-		Modules::config().setAndCallback("GraphicsDriver",CConfigCallback(this,&CObjectViewer::cfcbGraphicsDriver));
+		NLMISC::CConfigFile::CVar v2 = Modules::config().getConfigFile().getVar("GraphicsDriver");
+		// Choose driver opengl to work correctly under Linux example
+		_Direct3D = false; //_Driver = OpenGL;
+
+#ifdef NL_OS_WINDOWS
+		std::string driver = v2.asString();
+		if (driver == "Direct3D") _Direct3D = true; //m_Driver = Direct3D;
+		else if (driver == "OpenGL") _Direct3D = false; //m_Driver = OpenGL;
+		else nlwarning("Invalid driver specified, defaulting to OpenGL");
+#endif
 
 		// create the driver
 		nlassert(!_Driver);
@@ -145,9 +155,6 @@ namespace NLQT
 	{
 		//H_AUTO2
 		nldebug("CObjectViewer::release");
-
-		Modules::config().dropCallback("BackgroundColor");
-		Modules::config().dropCallback("GraphicsDriver");
 
 		_Driver->delete3dMouseListener(_MouseListener);
 
@@ -388,25 +395,6 @@ namespace NLQT
 			deleteEntity(entity);
 		}
 		_Entities.clear();
-	}
-
-	void CObjectViewer::cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var)
-	{
-		// read variable from config file
-		_BackgroundColor = CRGBA(var.asInt(0), var.asInt(1), var.asInt(2));
-	}
-
-	void CObjectViewer::cfcbGraphicsDriver(NLMISC::CConfigFile::CVar &var)
-	{
-		// Choose driver opengl to work correctly under Linux example
-		_Direct3D = false; //_Driver = OpenGL;
-
-#ifdef NL_OS_WINDOWS
-		std::string driver = var.asString();
-		if (driver == "Direct3D") _Direct3D = true; //m_Driver = Direct3D;
-		else if (driver == "OpenGL") _Direct3D = false; //m_Driver = OpenGL;
-		else nlwarning("Invalid driver specified, defaulting to OpenGL");
-#endif
 	}
 
 } /* namespace NLQT */

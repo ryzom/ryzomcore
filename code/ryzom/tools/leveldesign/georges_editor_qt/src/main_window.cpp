@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "objectviewer_dialog.h"
 #include "georges_dirtree_dialog.h"
 #include "georges_treeview_dialog.h"
+#include "progress_dialog.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -59,7 +60,8 @@ namespace NLQT
 		_currentView = 0;
 
 		// load and set leveldesign path from config
-		QString ldPath = Modules::config().configLeveldesignPath().c_str();
+		QString ldPath = Modules::config().
+			getValue("LeveldesignPath", QString("").toStdString()).c_str();
 		QFileInfo info(ldPath);
 		if (!info.isDir()) 
 			ldPath = "";
@@ -113,7 +115,7 @@ namespace NLQT
 		delete _ObjectViewerDialog;
 		delete _GeorgesDirTreeDialog;
 		delete _GeorgesLogDialog;
-		delete _emptyView;
+		//delete _emptyView;
 	}
 
 	void CMainWindow::closeEvent(QCloseEvent *event)

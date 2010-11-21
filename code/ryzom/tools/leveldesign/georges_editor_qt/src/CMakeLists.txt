@@ -3,7 +3,7 @@ INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB GEORGES_EDITOR_SRC *.cpp *.h)
 SET(GEORGES_EDITOR_HDR georges_dirtree_dialog.h georges_treeview_dialog.h main_window.h
-	objectviewer_dialog.h settings_dialog.h)
+	objectviewer_dialog.h settings_dialog.h progress_dialog.h)
 SET(GEORGES_EDITOR_UIS settings_form.ui objectviewer_form.ui log_form.ui georges_treeview_form.ui georges_dirtree_form.ui)
 SET(GEORGES_EDITOR_RCS georges_editor_qt.qrc)
 

@@ -30,9 +30,9 @@
 #include <nel/misc/config_file.h>
 #include <nel/misc/path.h>
 
+// Project includes
 #include "modules.h"
-
-#include <QFile>
+#include "progress_dialog.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -51,9 +51,6 @@ CConfiguration::~CConfiguration()
 
 void CConfiguration::init()
 {	
-	// verify data
-	nlassert(!ConfigCallbacks.size());
-	
 	// load config
 	QFile file(NLQT_CONFIG_FILE);
 	if (!file.exists()) {
@@ -62,8 +59,8 @@ void CConfiguration::init()
 		file.write("\nSearchPaths = {\"\"};");
 		file.write("\nRemapExtensions = { \"png\", \"tga\" };");
 		file.write("\nBackgroundColor = { 0, 0, 0 };");
-		file.write("\nQtStyle = \"\";");
-		file.write("\nQtPalette = \"\";");
+		//file.write("\nQtStyle = \"\";");
+		//file.write("\nQtPalette = \"\";");
 		file.close();
 	}
 
@@ -72,14 +69,14 @@ void CConfiguration::init()
 	} catch(...) {
 	}
 	
-	// setup config file callback
-	Modules::config().setAndCallback("SearchPaths", CConfigCallback(this, &CConfiguration::cfcbSearchPaths));
-
+	addLeveldesignPath();
+	addSearchPaths();
+	configRemapExtensions();
 }
 
 void CConfiguration::release()
 {
-	Modules::config().dropCallback("SearchPaths");
+	//Modules::config().dropCallback("SearchPaths");
 	
 	 // save and release the config file
 	if (ConfigFile.exists("SaveConfig") && ConfigFile.getVarPtr("SaveConfig")->asBool()) 
@@ -90,9 +87,6 @@ void CConfiguration::release()
 		
 	// release the search paths etc
 	CPath::releaseInstance();
-	
-	// verify data
-	nlassert(!ConfigCallbacks.size());
 }
  
 void CConfiguration::updateUtilities()
@@ -101,17 +95,11 @@ void CConfiguration::updateUtilities()
 	CConfigFile::checkConfigFiles();
 }
 
-void CConfiguration::configSearchPaths()
+void CConfiguration::addLeveldesignPath()
 {
-	cfcbSearchPaths(Modules::config().getConfigFile().getVar("SearchPaths"));
-}
-
-std::string CConfiguration::configLeveldesignPath()
-{
-	std::string path = Modules::config().getValue("LeveldesignPath", QString("").toStdString());
-	cfcbSearchPaths(Modules::config().getConfigFile().getVar("LeveldesignPath"));
-
-	return path;
+	std::vector<std::string> list;
+	list.push_back(Modules::config().getValue("LeveldesignPath", QString("").toStdString()));
+	addSearchPaths(&list);
 }
 
 void CConfiguration::configRemapExtensions()
@@ -121,25 +109,6 @@ void CConfiguration::configRemapExtensions()
 	uint varsize = var->size();
 	for (uint i = 0; i < varsize; i += 2)
 	CPath::remapExtension(var->asString(i), var->asString(i + 1), true);
-}
-
-void CConfiguration::setAndCallback(const std::string &varName, CConfigCallback configCallback)
-{
-	ConfigCallbacks[varName] = configCallback;
-	ConfigFile.setCallback(varName, cbConfigCallback);
-	configCallback(*ConfigFile.getVarPtr(varName));
-}
-
-void CConfiguration::setCallback(const std::string &varName, CConfigCallback configCallback)
-{
-	ConfigCallbacks[varName] = configCallback;
-	ConfigFile.setCallback(varName, cbConfigCallback);
-}
-
-void CConfiguration::dropCallback(const std::string &varName)
-{
-	ConfigFile.setCallback(varName, NULL);
-	ConfigCallbacks.erase(varName);
 }
 
 float CConfiguration::getValue(const string &varName, float defaultValue)
@@ -226,17 +195,31 @@ CRGBA CConfiguration::getValue(const CConfigFile::CVar &var, const CRGBA &defaul
 	return defaultValue;
 }
 
-void CConfiguration::cbConfigCallback(NLMISC::CConfigFile::CVar &var)
+void CConfiguration::addSearchPaths(std::vector<std::string>* list)
 {
-	Modules::config().ConfigCallbacks[var.Name](var);
-}
+	//Modules::config().getConfigFile().getVar("SearchPaths");
 
-void CConfiguration::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
-{
-	uint varsize = var.size();
-	//CPath::clearMap();
-	for (uint i = 0; i < varsize; ++i)
-		CPath::addSearchPath(var.asString(i), true, false);
+	std::vector<std::string> *tmpList = list;
+	if (!tmpList)
+	{
+		NLMISC::CConfigFile::CVar v = getConfigFile().getVar("SearchPaths");
+		tmpList = new std::vector<std::string>();
+		for (uint i = 0; i < v.size(); ++i)
+		{
+			tmpList->push_back(v.asString(i));
+		}
+	}
+
+	uint listsize = tmpList->size();
+	for (uint i = 0; i < listsize; ++i) 
+	{
+		CProgressDialog pcb;
+		pcb.DisplayString = tmpList->at(i);
+		pcb.show();
+		CPath::addSearchPath(tmpList->at(i), true, false, &pcb);
+	}
+	if (!list)
+		delete tmpList;
 }
 
 } /* namespace NLQT */

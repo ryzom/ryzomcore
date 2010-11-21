@@ -31,13 +31,10 @@
 #include <nel/misc/ucstring.h>
 
 // Project includes
-#include "callback.h"
 
 #define NLQT_CONFIG_FILE "georges_editor.cfg"
 
 namespace NLQT {
-
-typedef CCallback<void, NLMISC::CConfigFile::CVar &> CConfigCallback;
 
 /**
  * CConfiguration
@@ -55,14 +52,10 @@ public:
 	void release();
 	
 	void updateUtilities();
-	void configSearchPaths();
-	std::string configLeveldesignPath();
 	void configRemapExtensions();
+	void addSearchPaths(std::vector<std::string>* list = 0);
+	void addLeveldesignPath();
 
-	void setAndCallback(const std::string &varName, CConfigCallback configCallback);
-	void setCallback(const std::string &varName, CConfigCallback configCallback);
-	void dropCallback(const std::string &varName);
-	
 	float getValue(const std::string &varName, float defaultValue);
 	double getValue(const std::string &varName, double defaultValue);
 	int getValue(const std::string &varName, int defaultValue);
@@ -75,15 +68,10 @@ public:
 	inline NLMISC::CConfigFile &getConfigFile() { return ConfigFile; }
 
 private:
-	static void cbConfigCallback(NLMISC::CConfigFile::CVar &var);
-
-	void cfcbSearchPaths(NLMISC::CConfigFile::CVar &var);
-
 	CConfiguration(const CConfiguration &);
 	CConfiguration &operator=(const CConfiguration &);
 
 	NLMISC::CConfigFile ConfigFile;
-	std::map<std::string, CConfigCallback> ConfigCallbacks;
 	
 };/* class CConfiguration */
 

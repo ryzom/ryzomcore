@@ -161,10 +161,6 @@ namespace NLQT
 		/// Delete all entities
 		void deleteEntities();
 
-		/// Load background color from config file, intended for CConfiguration.
-		void cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var);
-		void cfcbGraphicsDriver(NLMISC::CConfigFile::CVar &var);
-
 		NLMISC::CRGBA 			_BackgroundColor;
 
 		NL3D::UDriver 			*_Driver;

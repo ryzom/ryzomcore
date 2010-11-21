@@ -52,10 +52,6 @@ namespace NLQT
 		void browseLeveldesignPath();
 
 	private:
-		void cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var);
-		void cfcbSoundDrivers(NLMISC::CConfigFile::CVar &var);
-		void cfcbSearchPaths(NLMISC::CConfigFile::CVar &var);
-		void cfcbLeveldesignPath(NLMISC::CConfigFile::CVar &var);
 
 		Ui::CSettingsDialog ui;
 
