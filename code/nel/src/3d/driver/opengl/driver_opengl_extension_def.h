@@ -396,8 +396,11 @@ typedef GLint (APIENTRY * NEL_PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawa
 #endif // NL_GLX_EXT_swap_control
 
 #ifndef NL_GLX_MESA_swap_control
+#define NL_GLX_MESA_swap_control 1
+
 typedef GLint (APIENTRY * NEL_PFNGLXSWAPINTERVALMESAPROC) (GLuint interval);
-typedef GLint (APIENTRY * NEL_PFNGLXGETSWAPINTERVALMESAPROC) (GLvoid);
+typedef GLint (APIENTRY * NEL_PFNGLXGETSWAPINTERVALMESAPROC) ();
+
 #endif // NL_GLX_MESA_swap_control
 
 #endif // NL_OS_MAC
