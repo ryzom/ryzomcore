@@ -92,6 +92,8 @@ private Q_SLOTS:
 	void setZPosition(double value);
 	void changeSubComponent();
 	
+	void setDir(const NLMISC::CVector &value);
+
 private:
   
 	/// wrappers to scale objects
@@ -142,19 +144,10 @@ private:
 		}
 	} _ZScaleWrapper ;
 
-	/// wrapper for direction
-	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
-	{
-		uint32 Index ;
-		NL3D::IPSMover *M ;
-		NLMISC::CVector get(void) const { return M->getNormal(Index) ; }
-		void set(const NLMISC::CVector &v) { M->setNormal(Index, v) ; }
-
-
-	} _DirectionWrapper ;
-	 
-	void hideWrappersWidget();
+	void hideAdditionalWidget();
 	
+	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+
 	/// update the mouse listener position when the user entered a value with the keyboard
 	void updateListener(void) ;
 	

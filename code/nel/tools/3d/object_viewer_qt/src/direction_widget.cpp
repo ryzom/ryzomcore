@@ -25,12 +25,11 @@
 
 // NeL includes
 #include <nel/misc/vector.h>
-#include <nel/3d/particle_system.h>
 
 namespace NLQT {
 
 CDirectionWidget::CDirectionWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL), _DirectionWrapper(NULL), _globalName("")
+    : QWidget(parent), _globalName("")
 {
 	_ui.setupUi(this);
 	
@@ -59,31 +58,10 @@ CDirectionWidget::~CDirectionWidget()
 {
 }
 
-void CDirectionWidget::enableGlobalVariable()
+void CDirectionWidget::enabledGlobalVariable(bool enabled)
 {
-	_ui.globalPushButton->setVisible(true);
-	_globalName = "";
-}
-
-void CDirectionWidget::setWrapper(IPSWrapper<NLMISC::CVector> *wrapper) 
-{ 
-	_Wrapper = wrapper;
-	_ui.globalPushButton->hide();
-}
-
-void CDirectionWidget::setDirectionWrapper(NL3D::CPSDirection *wrapper) 
-{ 
-	_DirectionWrapper = wrapper;
-	if (_DirectionWrapper && _DirectionWrapper->supportGlobalVectorValue())
-		_ui.globalPushButton->show();
-	else 
-		_ui.globalPushButton->hide();
-}
-
-void CDirectionWidget::updateUi()
-{
-	setValue(_Wrapper->get(), false);
-	checkEnabledGlobalDirection();
+	_ui.globalPushButton->setVisible(enabled);
+	setGlobalName("", false);
 }
 
 void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
@@ -97,8 +75,6 @@ void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
 	if (emit) 
 	{
 		Q_EMIT valueChanged(_value);
-		if (_Wrapper)
-			_Wrapper->setAndUpdateModifiedFlag(_value);
 	}
 }
 
@@ -122,24 +98,13 @@ void CDirectionWidget::setGlobalName(const QString &globalName, bool emit)
 
 void CDirectionWidget::setGlobalDirection()
 {
-	nlassert(_DirectionWrapper);
-	
 	bool ok;
 	QString text = QInputDialog::getText(this, tr("Enter Name"),
 					      "", QLineEdit::Normal,
-					      QString(_DirectionWrapper->getGlobalVectorValueName().c_str()), &ok);
+					      QString(_globalName), &ok);
      
 	if (ok)   
-	{
 		setGlobalName(text);
-
-		_DirectionWrapper->enableGlobalVectorValue(text.toStdString());
-		if (!_globalName.isEmpty())
-		{
-			// take a non NULL value for the direction
-			NL3D::CParticleSystem::setGlobalVectorValue(text.toStdString(), NLMISC::CVector::I);
-		}
-	}
 }
 
 void CDirectionWidget::incVecI()
@@ -175,11 +140,7 @@ void CDirectionWidget::decVecK()
 void CDirectionWidget::setNewVecXZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
-	NLMISC::CVector v;
-	if (_Wrapper)
-		v = _Wrapper->get();
-	else
-		v = _value;
+	NLMISC::CVector v = _value;
 	
 	v.x = x;
 	v.z = y;
@@ -202,11 +163,7 @@ void CDirectionWidget::setNewVecXZ(float x, float y)
 void CDirectionWidget::setNewVecYZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
-	NLMISC::CVector v;
-	if (_Wrapper)
-		v = _Wrapper->get();
-	else
-		v = _value;
+	NLMISC::CVector v = _value;
 	
 	v.y = x;
 	v.z = y;
@@ -224,25 +181,6 @@ void CDirectionWidget::setNewVecYZ(float x, float y)
 	v.normalize();
 
 	setValue(v);
-}
-
-void CDirectionWidget::checkEnabledGlobalDirection()
-{
-	bool enableUserDirection = true;
-	_ui.xzWidget->show();
-	_ui.yzWidget->show();
-	if (_DirectionWrapper && _DirectionWrapper->supportGlobalVectorValue() && !_DirectionWrapper->getGlobalVectorValueName().empty())
-	{
-		enableUserDirection = false;
-		_ui.xzWidget->hide();
-		_ui.yzWidget->hide();
-	}
-	_ui.incVecIPushButton->setEnabled(enableUserDirection);
-	_ui.incVecJPushButton->setEnabled(enableUserDirection);
-	_ui.incVecKPushButton->setEnabled(enableUserDirection);
-	_ui.decVecIPushButton->setEnabled(enableUserDirection);
-	_ui.decVecJPushButton->setEnabled(enableUserDirection);
-	_ui.decVecKPushButton->setEnabled(enableUserDirection);
 }
 
 } /* namespace NLQT */
