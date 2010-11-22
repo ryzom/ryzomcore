@@ -258,41 +258,35 @@ namespace NLQT
 
 			if(value.contains(".tga") || value.contains(".png")) 
 			{
-			QString file = QFileDialog::getOpenFileName(
-                         this,
-                         "Select a new image",
-                         path,
-                         "Images (*.png *.tga)"
-						 );
-			QFileInfo info = QFileInfo(file);
+				QString file = QFileDialog::getOpenFileName(
+					this,
+					"Select a new image",
+					path,
+					"Images (*.png *.tga)"
+					);
+				QFileInfo info = QFileInfo(file);
 
-			// TODO?
-		    // right way would be another delegate but im too lazy :)
-		    // so for now i just call it directly
-			m->setData(in2, info.fileName());
+				// TODO?
+				// right way would be another delegate but im too lazy :)
+				// so for now i just call it directly
+				m->setData(in2, info.fileName());
+				return;
 			}
-			return;
-		}
+			else 
+			{
+				if (path.contains(".shape"))
+				{
+					Modules::objView().resetScene();
+					//Modules::config().configRemapExtensions();
+					Modules::objView().loadMesh(path.toStdString(),"");
+					return;
+				}
+			} 
 
-		// col containing the display values
-		if (index.column() == 1) 
-		{
-		//TODO rework this
-		CFormItem *item = m->getItem(in);
-
-		QString value = item->data(1).toString();
-		QString path = CPath::lookup(value.toStdString(),false).c_str();
-
-		// open eg parent files
-		if (!path.isEmpty() && !path.contains(".shape"))
-			Q_EMIT changeFile(path);
-		if (path.contains(".shape"))
-		{
-			Modules::objView().resetScene();
-			//Modules::config().configRemapExtensions();
-			Modules::objView().loadMesh(path.toStdString(),"");
-		}
-		int i = 0;
+			// open eg parent files
+			if (!path.isEmpty())
+				Q_EMIT changeFile(path);
+			
 		}
 	}
 

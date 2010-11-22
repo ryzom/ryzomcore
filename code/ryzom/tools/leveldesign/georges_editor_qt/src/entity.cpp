@@ -1,6 +1,6 @@
 /*
-    Georges Editor Qt
-	Copyright (C) 2010 Adrian Jaekel <aj at elane2k dot com>
+    Object Viewer Qt
+    Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,19 +14,19 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 */
 
+#include "stdpch.h"
 #include "entity.h"
+
+#include <QtCore/QString>
 
 // NeL includes
 #include <nel/misc/path.h>
-#include <nel/3d/u_camera.h>
 #include <nel/3d/u_driver.h>
-#include <nel/3d/u_text_context.h>
 #include <nel/3d/u_instance.h>
 #include <nel/3d/u_scene.h>
-#include <nel/3d/u_material.h>
-#include <nel/3d/u_landscape.h>
 #include <nel/3d/u_skeleton.h>
 #include <nel/3d/u_animation_set.h>
 #include <nel/3d/u_animation.h>
@@ -63,14 +63,38 @@ CSlotInfo& CSlotInfo::operator=(const CSlotInfo & slotInfo)
 }
   
 CEntity::CEntity(void):
-		_Name("<Unknown>"),
+		_Name("<Unknown>"), _FileNameShape(""),
+		_FileNameSkeleton(""), _inPlace(false), _incPos(false),
 		_Instance(NULL), _Skeleton(NULL), 
 		_PlayList(NULL), _AnimationSet(NULL)
 {
+	_CharacterScalePos = 1;
 }
 
 CEntity::~CEntity(void)
 {
+	if (_PlayList != NULL)
+	{
+		_PlayList->resetAllChannels();
+		Modules::objView().getPlayListManager()->deletePlayList (_PlayList);
+		_PlayList = NULL;
+	}
+	if (_AnimationSet != NULL)
+	{
+		Modules::objView().getDriver()->deleteAnimationSet(_AnimationSet);
+		_AnimationSet = NULL;
+	}
+	if (!_Skeleton.empty())
+	{
+		_Skeleton.detachSkeletonSon(_Instance);
+		Modules::objView().getScene()->deleteSkeleton(_Skeleton);
+		_Skeleton = NULL;
+	}
+	if (!_Instance.empty())
+	{
+		Modules::objView().getScene()->deleteInstance(_Instance);
+		_Instance = NULL;
+	}
 }
 
 void CEntity::loadAnimation(std::string &fileName)
@@ -93,6 +117,8 @@ void CEntity::addAnimToPlayList(std::string &name)
 	_PlayListAnimation.push_back(name);
 	
 	_AnimationStatus.EndAnim = this->getPlayListLength();
+	
+	_Instance.start();
 }
 
 void CEntity::removeAnimToPlayList(uint row)
@@ -112,6 +138,11 @@ void CEntity::swapAnimToPlayList(uint row1, uint row2)
 void CEntity::playbackAnim(bool play)
 {
 	_AnimationStatus.PlayAnim = play;
+	
+	if (play)
+		_Instance.start();
+	else
+		_Instance.freezeHRC();
 }
 
 void CEntity::reset()
@@ -144,20 +175,95 @@ void CEntity::update(NL3D::TAnimationTime time)
 	this->resetChannel();
 	switch (_AnimationStatus.Mode) 
 	{
-	case Mode::PlayList:  
-		animatePlayList(time);
-		break;
-	case Mode::Mixer:
-		animateChannelMixer();
-		break;
+		case Mode::PlayList:  
+			animatePlayList(time);
+			break;
+		case Mode::Mixer:
+			animateChannelMixer();
+			break;
 	}
 }
 
 
 void CEntity::resetChannel()
 {
-	for(size_t i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
+	for(uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
 	 _PlayList->setAnimation(i, UPlayList::empty);
+}
+
+void CEntity::addTransformation (CMatrix &current, UAnimation *anim, float begin, float end, UTrack *posTrack, UTrack *rotquatTrack, 
+									   UTrack *nextPosTrack, UTrack *nextRotquatTrack, bool removeLast)
+{
+	// In place ?
+	if (_inPlace)
+	{
+		// Just identity
+		current.identity();
+	}
+	else
+	{
+		// Remove the start of the animation
+		CQuat rotEnd (0,0,0,1);
+		CVector posEnd (0,0,0);
+		if (rotquatTrack)
+		{
+			// Interpolate the rotation
+			rotquatTrack->interpolate (end, rotEnd);
+		}
+		if (posTrack)
+		{
+			// Interpolate the position
+			posTrack->interpolate (end, posEnd);
+		}
+
+		// Add the final rotation and position
+		CMatrix tmp;
+		tmp.identity ();
+		tmp.setRot (rotEnd);
+		tmp.setPos (posEnd);
+
+		// Incremental ?
+		if (_incPos)
+			current *= tmp;
+		else
+			current = tmp;
+
+		if (removeLast)
+		{
+			CQuat rotStart (0,0,0,1);
+			CVector posStart (0,0,0);
+			if (nextRotquatTrack)
+			{
+				// Interpolate the rotation
+				nextRotquatTrack->interpolate (begin, rotStart);
+			}
+			if (nextPosTrack)
+			{
+				// Interpolate the position
+				nextPosTrack->interpolate (begin, posStart);
+			}
+			// Remove the init rotation and position of the next animation
+			tmp.identity ();
+			tmp.setRot (rotStart);
+			tmp.setPos (posStart);
+			tmp.invert ();
+			current *= tmp;
+
+			// Normalize the mt
+			CVector I = current.getI ();
+			CVector J = current.getJ ();
+			I.z = 0;
+			J.z = 0;
+			J.normalize ();
+			CVector K = I^J;
+			K.normalize ();
+			I = J^K;
+			I.normalize ();
+			tmp.setRot (I, J, K);
+			tmp.setPos (current.getPos ());
+			current = tmp;
+		}
+	}
 }
 
 void CEntity::animatePlayList(NL3D::TAnimationTime time)
@@ -170,6 +276,21 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 		// Try channel AnimationSet
 		NL3D::UAnimation *anim = _AnimationSet->getAnimation(id);
 		
+		bool there = false;
+
+		UTrack *posTrack = NULL;
+		UTrack *rotQuatTrack = NULL;
+
+		// Current matrix
+		CMatrix current;
+		current.identity();
+
+		// read an animation for init matrix
+		rotQuatTrack = anim->getTrackByName("rotquat");
+		posTrack = anim->getTrackByName("pos");
+
+		there = posTrack || rotQuatTrack;
+
 		// Accumul time
 		float startTime = 0;
 		float endTime = anim->getEndTime() - anim->getBeginTime();
@@ -181,14 +302,29 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 			if (index < _PlayListAnimation.size())
 			{
 				id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[index].c_str());
-				anim = _AnimationSet->getAnimation(id);
-			
+				NL3D::UAnimation *newAnim = _AnimationSet->getAnimation(id);
+				
+				UTrack *newPosTrack = newAnim->getTrackByName ("pos");
+				UTrack *newRotquatTrack = newAnim->getTrackByName ("rotquat");
+
+				// Add the transformation
+				addTransformation (current, anim, newAnim->getBeginTime(), anim->getEndTime(), posTrack, rotQuatTrack, newPosTrack, newRotquatTrack, true);
+
+
+				anim = newAnim;
+				posTrack = newPosTrack;
+				rotQuatTrack = newRotquatTrack;
+
 				// Add start time
 				startTime = endTime;
 				endTime = startTime + (anim->getEndTime() - anim->getBeginTime());
 			}
 			else 
-			  break;
+			{
+				// Add the transformation
+				addTransformation (current, anim, 0, anim->getEndTime(), posTrack, rotQuatTrack, NULL, NULL, false);
+				break;
+			}
 		}
 		
 		// Time cropped ?
@@ -205,6 +341,10 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 		else
 		{
 			// No 
+
+			// Add the transformation
+			addTransformation (current, anim, 0, anim->getBeginTime() + time - startTime, posTrack, rotQuatTrack, NULL, NULL, false);
+
 			id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[index].c_str());
 			anim = _AnimationSet->getAnimation(id);
 			
@@ -215,10 +355,31 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 		// Set the slot
 		_PlayList->setAnimation(0, id);
 		_PlayList->setTimeOrigin(0, startTime);
+		_PlayList->setSpeedFactor(0, 1.0f);
 		_PlayList->setWeightSmoothness(0, 1.0f);
 		_PlayList->setStartWeight(0, 1, 0);
 		_PlayList->setEndWeight(0, 1, 1);
 		_PlayList->setWrapMode(0, UPlayList::Clamp);
+		
+		// Setup the pos and rot for this shape
+		if (there)
+		{
+			CVector pos = current.getPos();
+
+			// If a  skeleton model
+			if(!_Skeleton.empty())
+			{
+				// scale animated pos value with the CFG scale
+				pos *= _CharacterScalePos;
+				_Skeleton.setPos(pos);
+				_Skeleton.setRotQuat(current.getRot());
+			}
+			else
+			{
+				_Instance.setPos(pos);
+				_Instance.setRotQuat(current.getRot());
+			}
+		}
 	}
 }
 
@@ -252,15 +413,15 @@ void CEntity::animateChannelMixer()
 			// Switch between wrap modes
 			switch (_SlotInfo[i].ClampMode)
 			{
-			case 0:
-				_PlayList->setWrapMode (i, UPlayList::Clamp);
-				break;
-			case 1:
-				_PlayList->setWrapMode (i, UPlayList::Repeat);
-				break;
-			case 2:
-				_PlayList->setWrapMode (i, UPlayList::Disable);
-				break;
+				case 0:
+					_PlayList->setWrapMode (i, UPlayList::Clamp);
+					break;
+				case 1:
+					_PlayList->setWrapMode (i, UPlayList::Repeat);
+					break;
+				case 2:
+					_PlayList->setWrapMode (i, UPlayList::Disable);
+					break;
 			}
 		}
 	}
