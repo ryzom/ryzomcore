@@ -36,11 +36,12 @@ CZonePage::CZonePage(QWidget *parent)
 	_ui.setupUi(this);
 	
 	_ui.bounceFactorWidget->setRange(0.f, 1.f);
-	_ui.bounceFactorWidget->setWrapper(&_BounceFactorWrapper);
-
+	
 	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
 	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 	connect(_ui.bounceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setBounce(int)));
+
+	connect(_ui.bounceFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setBounceFactor(float)));
 }
 
 CZonePage::~CZonePage()
@@ -54,12 +55,7 @@ void CZonePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindabl
 	_Zone = dynamic_cast<NL3D::CPSZone *>(_LBTarget);
 	
 	updateTargets();
-	
-	_BounceFactorWrapper.OwnerNode = _Node;
-	_BounceFactorWrapper.Z = _Zone;
-	
-	_ui.bounceFactorWidget->updateUi();
-	
+	_ui.bounceFactorWidget->setValue(_Zone->getBounceFactor() ,false);
 	_ui.bounceComboBox->setCurrentIndex( _Zone->getCollisionBehaviour());
 }
 
@@ -106,6 +102,12 @@ void CZonePage::setBounce(int index)
 	
 	_ui.bounceFactorWidget->setEnabled(_Zone->getCollisionBehaviour() == NL3D::CPSZone::bounce ? true : false);
 	Modules::psEdit().resetAutoCount(_Node);
+}
+
+void CZonePage::setBounceFactor(float value)
+{
+	_Zone->setBounceFactor(value);
+	 updateModifiedFlag();
 }
 
 void CZonePage::updateTargets()

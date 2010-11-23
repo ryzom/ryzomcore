@@ -48,17 +48,9 @@ private Q_SLOTS:
 	void removeTarget();
 	void setBounce(int index);
 
-private:
-  
-	/// wrapper to set the bounce factor of a collision zone
-	struct CBounceFactorWrapper : public IPSWrapperFloat
-	{
-		// the zone being wrapped
-		NL3D::CPSZone *Z ;
-		float get(void) const { return Z->getBounceFactor() ; }
-		void set(const float &v) { Z->setBounceFactor(v) ; }
-	} _BounceFactorWrapper ;
+	void setBounceFactor(float value);
 
+private:
 	void updateTargets();
 
 	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
