@@ -23,8 +23,8 @@ namespace NL3D
 	void viewDidResize(NSView* view, CDriverGL* driver)
 	{
 		NSRect rect = [[view superview] frame];
-		driver->_WindowWidth = rect.size.width;
-		driver->_WindowHeight = rect.size.height;
+		driver->_CurrentMode.Height = rect.size.height;
+		driver->_CurrentMode.Width  = rect.size.width;
 	}
 }
 
