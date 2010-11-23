@@ -71,7 +71,13 @@ public:
 private Q_SLOTS:
 	void addTarget();
 	void removeTarget();
-  
+  	
+	void setRadialViscosity(float value);
+	void setTangentialViscosity(float value);
+	void setDir(const NLMISC::CVector &value);
+	void setGlobalName(const QString &globalName);
+	void setFactorBrownianForce(float value);
+
 private:
 	
 	/// wrapper to tune the intensity of a force
@@ -84,40 +90,7 @@ private:
 		void setScheme(scheme_type *s) {F->setIntensityScheme(s); }
 	} _ForceIntensityWrapper;
 
-	/// wrapper to tune the radial viscosity for vortices 
-	struct CRadialViscosityWrapper : public IPSWrapperFloat
-	{
-		NL3D::CPSCylindricVortex *V;
-		float get(void) const { return V->getRadialViscosity(); }
-		void set(const float &value) { V->setRadialViscosity(value); }
-	} _RadialViscosityWrapper;
-
-	/// wrapper to tune the tangential viscosity for vortices
-	struct CTangentialViscosityWrapper : public IPSWrapperFloat
-	{
-		NL3D::CPSCylindricVortex *V;
-		float get(void) const { return V->getTangentialViscosity(); }
-		void set(const float &value) { V->setTangentialViscosity(value); }
-	} _TangentialViscosityWrapper;
-
-	/// wrappers to tune the direction
-	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
-	{
-	   NL3D::CPSDirection *E;
-	   NLMISC::CVector get(void) const { return E->getDir(); }
-	   void set(const NLMISC::CVector &d){ E->setDir(d); }
-	} _DirectionWrapper;
-
-	/// wrappers to tune the parametric factor of brownian force
-	struct CParamFactorWrapper : public IPSWrapperFloat
-	{
-	   NL3D::CPSBrownianForce *F;
-	   float get(void) const { return F->getParametricFactor(); }
-	   void set(const float &f){ F->setParametricFactor(f); }
-	} _ParamFactorWrapper;
-
-
-	void hideWrappersWidget();
+	void hideAdditionalWidget();
 
 	void updateTargets();
 

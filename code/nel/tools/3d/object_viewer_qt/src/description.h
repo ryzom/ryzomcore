@@ -84,7 +84,6 @@ Using this widget you can set the color(RGBA) using the four sliders or through 
 CDirectionWidget 
 </b><br>
 This widget helps to choose from several preset directions, or to choose a custom one. 
-To use it you have to create a wrapper.
 <br><br>
 <img src="cdirection_widget.png" alt="CDirectionWidget">
 @see

@@ -45,7 +45,7 @@ namespace NLQT
 		QString comment, QStringList parents, QObject *parent) : QAbstractItemModel(parent) 
 	{
 		QList<QVariant> rootData;
-		rootData << "Value" << "Data" << "Extra" << "Type";
+		rootData << "Value" << "Data" << "Extra";// << "Type";
 		_rootElm = rootElm;
 		_rootItem = new CFormItem(_rootElm, rootData);
 		_dependencies = deps;

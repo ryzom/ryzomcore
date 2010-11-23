@@ -30,8 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/misc/events.h>
 
 #include <nel/3d/u_driver.h>
-#include <nel/3d/u_camera.h>
-#include <nel/3d/u_scene.h>
+#include <nel/3d/driver_user.h>
 
 // Project includes
 #include "modules.h"
@@ -47,9 +46,11 @@ namespace NLQT
 	{
 		_ui.setupUi(this);
 
-		_nlw = new QNLWidget(_ui.dockWidgetContents);
-		_nlw->setObjectName(QString::fromUtf8("nlwidget"));
-		_ui.gridLayout->addWidget(_nlw, 0, 0, 1, 1);
+//		_nlw = new QNLWidget(_ui.dockWidgetContents);
+		_nlw = &Modules::objViewWid();
+		//_nlw->setObjectName(QString::fromUtf8("nlwidget"));
+		_ui.gridLayout->addWidget(_nlw, 0, 0);
+
 		//nlw->setLayout(new QGridLayout(nlw));
 		//_ui.widget = nlw;
 		//QWidget * w = widget();
@@ -62,7 +63,7 @@ namespace NLQT
 		connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 		// timer->start(); // <- timeout 0
 		// it's heavy on cpu, though, when no 3d driver initialized :)
-		_mainTimer->start(5); // 25fps
+		_mainTimer->start(25); // 25fps
 	}
 
 	CObjectViewerDialog::~CObjectViewerDialog() 
@@ -75,28 +76,38 @@ namespace NLQT
 		connect(this, SIGNAL(topLevelChanged(bool)),
 			this, SLOT(topLevelChanged(bool)));
 		//H_AUTO2
-		nldebug("CObjectViewerDialog::init %d",_nlw->winId());
+		//nldebug("%d %d %d",_nlw->winId(), width(), height());
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		dynamic_cast<QNLWidget*>(widget())->makeCurrent();
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
-		Modules::objView().init((nlWindow)_nlw->winId(), 20, 20);
+		Modules::objView().init((nlWindow)_nlw->winId(), width(), height());
 		setMouseTracking(true);
+	}
+
+	void CObjectViewerDialog::release()
+	{
+		nldebug("");
+
+		Modules::objView().release();
 	}
 
 	void CObjectViewerDialog::setVisible(bool visible)
 	{
 		// called by show()
 		// code assuming visible window needed to init the 3d driver
+		nldebug("%d", visible);
 		if (visible)
 		{
 			QDockWidget::setVisible(true);
-			updateInitialization(true);
+			_mainTimer->start(25);
+			//updateInitialization(true);
+			//_nlw->show();
 		}
 		else
 		{
-			updateInitialization(false);
+			//updateInitialization(false);
 			QDockWidget::setVisible(false);
 		}
 	}
@@ -121,12 +132,11 @@ namespace NLQT
 			{
 				if (!wantGraphics)
 				{
-					_isGraphicsInitialized = false;
-					release();
+					//_isGraphicsInitialized = false;
+					//release();
 					_mainTimer->stop();
-					done = false;
+					//done = false;
 				}
-
 			}
 			else
 			{
@@ -134,8 +144,8 @@ namespace NLQT
 				{
 					init();
 					_isGraphicsInitialized = true;
-					_mainTimer->start(5);
-					done = false;
+					_mainTimer->start(25);
+					//done = false;
 				}
 			}
 		}
@@ -237,23 +247,6 @@ namespace NLQT
 		}
 	}
 
-	void CObjectViewerDialog::release()
-	{
-		//H_AUTO2
-		nldebug("CObjectViewerDialog::release");
-
-		Modules::objView().release();
-	}
-
-	void CObjectViewerDialog::reinit()
-	{
-		//H_AUTO2
-		nldebug("CObjectViewerDialog::reinit");
-
-		Modules::objView().release();
-		//Modules::objView().reinit(_ui.frame->winId(), width(), height());
-	}
-
 	QAction *CObjectViewerDialog::createSaveScreenshotAction(QObject *parent)
 	{
 		QAction *action = new QAction(parent);
@@ -283,124 +276,23 @@ namespace NLQT
 
 	void CObjectViewerDialog::topLevelChanged ( bool topLevel ) {
 		//nldebug("CObjectViewerDialog::topLevelChanged topLevel:%d",topLevel);
-		nldebug("CObjectViewerDialog::topLevelChanged winId:%d",winId());
+		//nldebug("%d %d",winId(), _nlw->winId());
 		// winId changing when re/docking
 		//Modules::georges().init();
-		Modules::objView().reinit((nlWindow)_nlw->winId(), _nlw->width(), _nlw->height());
+		//Modules::objView().reinit((nlWindow)_nlw->winId(), _nlw->width(), _nlw->height());
 	}
 
 	void CObjectViewerDialog::resizeEvent(QResizeEvent *resizeEvent)
 	{
+		//nldebug("%d %d",_nlw->width(), _nlw->height());
 		QDockWidget::resizeEvent(resizeEvent);
 		if (Modules::objView().getDriver())
 			Modules::objView().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
-
 		// The OpenGL driver does not resize automatically.
 		// The Direct3D driver breaks the window mode to include window borders when calling setMode windowed.
 
 		// Resizing the window after switching drivers a few times becomes slow.
 		// There is probably something inside the drivers not being released properly.
-	}
-
-	void CObjectViewerDialog::wheelEvent(QWheelEvent *event)
-	{
-		//nldebug("CObjectViewerDialog::wheelEvent");
-		// Get relative positions.
-		float fX = 1.0f - (float)event->pos().x() / this->width();
-		float fY = 1.0f - (float)event->pos().y() / this->height();
-
-		// Set the buttons currently pressed.
-		NLMISC::TMouseButton buttons = (NLMISC::TMouseButton)getNelButtons(event);
-		if(event->delta() > 0)
-			Modules::objView().getDriver()->EventServer.postEvent(new NLMISC::CEventMouseWheel(-fX, fY, buttons, true, this));
-		else
-			Modules::objView().getDriver()->EventServer.postEvent(new NLMISC::CEventMouseWheel(-fX, fY, buttons, false, this));
-
-	}
-
-	uint32  CObjectViewerDialog::getNelButtons(QMouseEvent *event) 
-	{
-		//nldebug("CObjectViewerDialog::getNelButtons");
-		uint32 buttons = NLMISC::noButton;
-		if(event->buttons() & Qt::LeftButton)	buttons |= NLMISC::leftButton;
-		if(event->buttons() & Qt::RightButton)	buttons |= NLMISC::rightButton;
-		if(event->buttons() & Qt::MidButton)	buttons |= NLMISC::middleButton;
-		if(event->modifiers() & Qt::ControlModifier)	buttons |= NLMISC::ctrlButton;
-		if(event->modifiers() & Qt::ShiftModifier)	buttons |= NLMISC::shiftButton;
-		if(event->modifiers() & Qt::AltModifier)	buttons |= NLMISC::altButton;
-
-		return buttons;
-	}
-
-	uint32  CObjectViewerDialog::getNelButtons(QWheelEvent *event) 
-	{
-		//nldebug("CObjectViewerDialog::getNelButtons");
-		uint32 buttons = NLMISC::noButton;
-		if(event->buttons() & Qt::LeftButton)	buttons |= NLMISC::leftButton;
-		if(event->buttons() & Qt::RightButton)	buttons |= NLMISC::rightButton;
-		if(event->buttons() & Qt::MidButton)	buttons |= NLMISC::middleButton;
-		if(event->modifiers() & Qt::ControlModifier)	buttons |= NLMISC::ctrlButton;
-		if(event->modifiers() & Qt::ShiftModifier)	buttons |= NLMISC::shiftButton;
-		if(event->modifiers() & Qt::AltModifier)	buttons |= NLMISC::altButton;
-
-		return buttons;
-	}
-
-	void CObjectViewerDialog::mousePressEvent(QMouseEvent *event)
-	{
-		//nldebug("CObjectViewerDialog::mousePressEvent");
-		// Get relative positions.
-		float fX = 1.0f - (float)event->pos().x() / this->width();
-		float fY = 1.0f - (float)event->pos().y() / this->height();
-
-		// Set the buttons currently pressed.
-		NLMISC::TMouseButton buttons = (NLMISC::TMouseButton)getNelButtons(event);
-
-		if(event->button() == Qt::LeftButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseDown( -fX, fY,
-			(NLMISC::TMouseButton)(NLMISC::leftButton|(buttons&~(NLMISC::leftButton|NLMISC::middleButton|NLMISC::rightButton))), this));
-		if(event->button() == Qt::MidButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseDown( -fX, fY,
-			(NLMISC::TMouseButton)(NLMISC::middleButton|(buttons&~(NLMISC::middleButton|NLMISC::leftButton|NLMISC::rightButton))), this));
-		if(event->button() == Qt::RightButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseDown( -fX, fY,
-			(NLMISC::TMouseButton)(NLMISC::rightButton|(buttons&~(NLMISC::rightButton|NLMISC::leftButton|NLMISC::middleButton))), this));	
-	}
-
-	void CObjectViewerDialog::mouseReleaseEvent(QMouseEvent *event)
-	{
-		//nldebug("CObjectViewerDialog::mouseReleaseEvent");
-		// Get relative positions.
-		float fX = 1.0f - (float)event->pos().x() / this->width();
-		float fY = 1.0f - (float)event->pos().y() / this->height();
-
-		// Set the buttons currently pressed.
-		NLMISC::TMouseButton buttons = (NLMISC::TMouseButton)getNelButtons(event);
-
-		if(event->button() == Qt::LeftButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseUp( -fX, fY, NLMISC::leftButton, this));
-		if(event->button() == Qt::MidButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseUp( -fX, fY, NLMISC::middleButton, this));
-		if(event->button() == Qt::RightButton)
-			Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseUp( -fX, fY, NLMISC::rightButton, this));	
-	}
-
-	void CObjectViewerDialog::mouseMoveEvent(QMouseEvent *event) 
-	{
-		//nldebug("CObjectViewerDialog::mouseMoveEvent");
-		// Get relative positions.
-		float fX = 1.0f - (float)event->pos().x() / this->width();
-		float fY = 1.0f - (float)event->pos().y() / this->height();
-
-		if ((fX == 0.5f) && (fY == 0.5f)) return;
-		NLMISC::TMouseButton buttons = (NLMISC::TMouseButton)getNelButtons(event);
-		Modules::objView().getDriver()->EventServer.postEvent(new NLMISC::CEventMouseMove(-fX, fY, buttons, this));
 	}
 
 } /* namespace NLQT */

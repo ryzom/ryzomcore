@@ -1,6 +1,6 @@
 /*
-    Georges Editor Qt
-	Copyright (C) 2010 Adrian Jaekel <aj at elane2k dot com>
+    Object Viewer Qt
+    Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,10 +14,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 */
 
 #ifndef ENTITY_H
 #define ENTITY_H
+
+#include <nel/misc/types_nl.h>
 
 // STL includes
 #include <map>
@@ -25,10 +28,13 @@
 #include <vector>
 
 // NeL includes
-#include "nel/3d/animation_time.h"
+#include <nel/misc/vector.h>
+#include <nel/misc/vectord.h>
+#include <nel/misc/quat.h>
+#include <nel/3d/animation_time.h>
 #include <nel/3d/u_instance.h>
 #include <nel/3d/u_skeleton.h>
-#include "nel/3d/channel_mixer.h"
+#include <nel/3d/channel_mixer.h>
 
 namespace NL3D {
 	class UPlayList;
@@ -40,7 +46,7 @@ namespace NLQT {
 class CSlotInfo
 {
 public:
-	CSlotInfo (): 	
+	CSlotInfo ():
 		Animation("empty"), Skeleton("empty"),
 		Offset(0), StartTime(0), EndTime(0),
 		StartBlend(1),	EndBlend (1), Smoothness(1),
@@ -68,13 +74,15 @@ public:
 	
 /**
 @class CEntity
-Animated object. Allows you to upload animations for the shape. 
+@brief Class manage animated shape.
+@details
+Allows you to load animations for shape and skeleton weight. 
 Contains a built-in playlist. Has management and playback Playlists or Mixer.
 */
 class CEntity
 {
 public:
-  	struct Mode
+	struct Mode
 	{
 		enum List
 		{
@@ -83,7 +91,7 @@ public:
 		};
 	};
 
-	// will need for a single or multiple reproduction
+	/// Will need for a single or multiple animation shape
 	struct SAnimationStatus
 	{
 		bool	LoopAnim;
@@ -99,10 +107,7 @@ public:
 			CurrentTimeAnim(0), StartAnim(0),
 			EndAnim(0), SpeedAnim(1), Mode(Mode::PlayList) {}
 	};
-  
-	/// Constructor
-	CEntity(void);
-
+ 
 	/// Destructor
 	~CEntity(void);
 
@@ -143,18 +148,38 @@ public:
 	void setSlotInfo(uint num, CSlotInfo& slotInfo) { _SlotInfo[num] = slotInfo; }
 
 	/// Set use mode playlist or mixer
-	void setMode(int mode)	{ _AnimationStatus.Mode = mode; }
+	void setMode(int mode) { _AnimationStatus.Mode = mode; }
+
+	/// Set in place mode animation
+	void setInPlace(bool enabled) { _inPlace = enabled; }
+
+	/// Get in place mode
+	bool getInPlace() { return _inPlace; }
+
+	/// Set inc position
+	void setIncPos(bool enabled) { _incPos = enabled; }
+
+	/// Get inc position
+	bool getIncPos() { return _incPos; }
 
 	/// Get information about the current status of playing a playlist
 	/// @return struct containing current information playback
-	SAnimationStatus& getStatus() { return _AnimationStatus; }
-	
+	SAnimationStatus getStatus() { return _AnimationStatus; }
+
 	/// Get name entity
 	/// @return name entity
-	std::string &getName() { return _Name; }
+	std::string getName() { return _Name; }
+	
+	/// Get file name shape
+	/// @return file name shape
+	std::string getFileNameShape() { return _FileNameShape; }
+	
+	/// Get file name skeleton
+	/// @return file name skeleton
+	std::string getFileNameSkeleton() { return _FileNameSkeleton; }
 	
 	/// Get slot information
-	CSlotInfo& getSlotInfo(uint num) { return _SlotInfo[num]; }
+	CSlotInfo getSlotInfo(uint num) { return _SlotInfo[num]; }
 
 	/// Get list loaded animations files
 	std::vector<std::string>& getAnimationList() { return _AnimationList; }
@@ -164,9 +189,14 @@ public:
 
 	/// Get list loaded skeleton weight template files
 	std::vector<std::string>& getSWTList() { return _SWTList; }
-
+	
+	/// Get game interface for manipulating Skeleton.
+	NL3D::USkeleton getSkeleton() const { return _Skeleton; }
+	
 private:
-  
+  	/// Constructor
+	CEntity(void);
+
 	/// Update the animate from the playlist or channel mixer
 	/// @param time - current time in second
 	void update(NL3D::TAnimationTime time);
@@ -178,11 +208,23 @@ private:
 
 	/// Update the animate from the mixer
 	void animateChannelMixer();
+	void addTransformation (NLMISC::CMatrix &current, NL3D::UAnimation *anim, 
+				float begin, float end, 
+				NL3D::UTrack *posTrack, NL3D::UTrack *rotquatTrack, 
+				NL3D::UTrack *nextPosTrack, NL3D::UTrack *nextRotquatTrack, 
+				bool removeLast);
 
 	// The name of the entity
 	std::string			_Name;
+	std::string			_FileNameShape;
+	std::string			_FileNameSkeleton;
 	
 	SAnimationStatus		_AnimationStatus;
+
+	bool 				_inPlace;
+	bool 				_incPos;
+	
+	float 				_CharacterScalePos;
 	
 	// The mesh instance associated to this entity
 	NL3D::UInstance			_Instance;
@@ -207,6 +249,7 @@ private:
 	CSlotInfo			_SlotInfo[NL3D::CChannelMixer::NumAnimationSlot];
 
 	friend class CObjectViewer;
+	friend class CObjectViewerWidget;
 }; /* class CEntity */
 
 typedef std::map<std::string, CEntity>	CEntities;

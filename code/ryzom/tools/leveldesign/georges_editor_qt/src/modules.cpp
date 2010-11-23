@@ -20,6 +20,7 @@
 
 NLQT::CConfiguration *Modules::_configuration = NULL;
 NLQT::CObjectViewer *Modules::_objectViewer = NULL;
+NLQT::CObjectViewerWidget *Modules::_objectViewerWidget = NULL;
 NLQT::CGeorges *Modules::_georges = NULL;
 NLQT::CMainWindow *Modules::_mainWindow = NULL;
 	
@@ -29,6 +30,7 @@ void Modules::init()
 	config().init();
 	
 	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
+	if (_objectViewerWidget == NULL) _objectViewerWidget = new NLQT::CObjectViewerWidget;
 	if (_georges == NULL) _georges = new NLQT::CGeorges;
 	if (_mainWindow == NULL) _mainWindow = new NLQT::CMainWindow;
 }
@@ -37,6 +39,7 @@ void Modules::release()
 {
 	delete _mainWindow; _mainWindow = NULL;
 	delete _objectViewer; _objectViewer = NULL;
+	//delete _objectViewerWidget; _objectViewerWidget = NULL;
 	delete _georges; _georges = NULL;
 	
 	config().release();

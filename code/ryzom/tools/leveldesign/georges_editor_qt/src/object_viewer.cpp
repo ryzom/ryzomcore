@@ -38,8 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/3d/u_animation.h>
 #include <nel/3d/u_play_list_manager.h>
 #include <nel/3d/u_3d_mouse_listener.h>
+#include <nel/3d/bloom_effect.h>
 
-#include <nel/3d/event_mouse_listener.h>
+//#include <nel/3d/event_mouse_listener.h>
 
 // Project includes
 #include "modules.h"
@@ -53,9 +54,11 @@ namespace NLQT
 {
 
 	CObjectViewer::CObjectViewer() 
-		: _Driver(NULL),
-		_phi(0), _psi(0),_dist(20),
-		_CurrentInstance("")
+	: _Driver(NULL), _Light(0),
+	_phi(0), _psi(0),_dist(2),
+	_CameraFocal(75),
+	_CurrentInstance(""),
+	_BloomEffect(false), _Scene(0)
 	{
 
 	}
@@ -71,19 +74,12 @@ namespace NLQT
 
 		//release();
 		//init(wnd, w, h);
-		_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
+		//_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
 	}
 
 	void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	{
-		//H_AUTO2
 		nldebug("CObjectViewer::init");
-
-		// load and set remap extensions from config
-		//Modules::config().configRemapExtensions();
-
-		// load and set search paths from config
-		//Modules::config().configSearchPaths();
 
 		// set background color from config
 		NLMISC::CConfigFile::CVar v = Modules::config().getConfigFile().getVar("BackgroundColor");
@@ -101,36 +97,39 @@ namespace NLQT
 		else nlwarning("Invalid driver specified, defaulting to OpenGL");
 #endif
 
+		//Modules::config().setAndCallback("CameraFocal",CConfigCallback(this,&CObjectViewer::cfcbCameraFocal));
+		//Modules::config().setAndCallback("BloomEffect",CConfigCallback(this,&CObjectViewer::cfcbBloomEffect));
+
 		// create the driver
 		nlassert(!_Driver);
 
-		_Driver = UDriver::createDriver(NULL, _Direct3D, NULL);
+		_Driver = UDriver::createDriver(0, _Direct3D, 0);
 		nlassert(_Driver);
 
 		// initialize the window with config file values
 		_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
 
-		_Light = ULight::createLight();
+		//_Light = ULight::createLight();
 
-		// set mode of the light
-		_Light->setMode(ULight::DirectionalLight);
+		//// set mode of the light
+		//_Light->setMode(ULight::DirectionalLight);
 
-		// set position of the light
-		_Light->setPosition(CVector(-20.f, 30.f, 10.f));
+		//// set position of the light
+		//_Light->setPosition(CVector(-20.f, 30.f, 10.f));
 
-		// white light
-		_Light->setAmbiant(CRGBA(255, 255, 255));
+		//// white light
+		//_Light->setAmbiant(CRGBA(255, 255, 255));
 
-		// set and enable the light
-		_Driver->setLight(0, *_Light);
-		_Driver->enableLight(0);
+		//// set and enable the light
+		//_Driver->setLight(0, *_Light);
+		//_Driver->enableLight(0);
 
 		// Create a scene
 		_Scene = _Driver->createScene(true);
 
 		_PlayListManager = _Scene->createPlayListManager();
 
-		_Scene->enableLightingSystem(true);
+		//_Scene->enableLightingSystem(true);
 
 		// create the camera
 		UCamera camera = _Scene->getCam();
@@ -140,21 +139,27 @@ namespace NLQT
 		setSizeViewport(w, h);
 
 		// camera will look at entities
-		updateCamera(0,0,0);
+		camera.lookAt(NLMISC::CVector(_dist,0,1), NLMISC::CVector(0,0,0.5));
 
 		NLMISC::CVector hotSpot=NLMISC::CVector(0,0,0);
 
 		_MouseListener = _Driver->create3dMouseListener();
-		_MouseListener->setMatrix(Modules::objView().getScene()->getCam().getMatrix());
-		_MouseListener->setFrustrum(Modules::objView().getScene()->getCam().getFrustum());
+		_MouseListener->setMatrix(_Scene->getCam().getMatrix());
+		_MouseListener->setFrustrum(_Scene->getCam().getFrustum());
 		_MouseListener->setHotSpot(hotSpot);
 		_MouseListener->setMouseMode(U3dMouseListener::edit3d);
+
+		NL3D::CBloomEffect::instance().setDriver(_Driver);
+		NL3D::CBloomEffect::instance().setScene(_Scene);
+		NL3D::CBloomEffect::instance().init(!_Direct3D);
+		//NL3D::CBloomEffect::instance().setDensityBloom(Modules::config().getConfigFile().getVar("BloomDensity").asInt());
+		//NL3D::CBloomEffect::instance().setSquareBloom(Modules::config().getConfigFile().getVar("BloomSquare").asBool());
 	}
 
 	void CObjectViewer::release()
 	{
 		//H_AUTO2
-		nldebug("CObjectViewer::release");
+		nldebug("");
 
 		_Driver->delete3dMouseListener(_MouseListener);
 
@@ -183,10 +188,17 @@ namespace NLQT
 		// New matrix from camera
 		_Scene->getCam().setTransformMode(NL3D::UTransformable::DirectMatrix);
 		_Scene->getCam().setMatrix (_MouseListener->getViewMatrix());
+
+		//nldebug("%s",_Scene->getCam().getMatrix().getPos().asString().c_str());
 	}
 
 	void CObjectViewer::renderDriver()
 	{
+		// Render the scene.
+		if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
+		{
+			NL3D::CBloomEffect::instance().initBloom();
+		}
 		_Driver->clearBuffers(_BackgroundColor);
 	}
 
@@ -194,6 +206,12 @@ namespace NLQT
 	{
 		// render the scene
 		_Scene->render();
+
+		if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
+		{
+			NL3D::CBloomEffect::instance().endBloom();
+			NL3D::CBloomEffect::instance().endInterfacesDisplayBloom();
+		}
 	}
 
 	void CObjectViewer::renderDebug2D()
@@ -238,10 +256,20 @@ namespace NLQT
 
 	bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 	{
+		std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
+		if ( _Entities.count(fileName) != 0) 
+			return false;
+
 		CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
 
 		// create instance of the mesh character
 		UInstance Entity = _Scene->createInstance(meshFileName);
+		
+		CAABBox bbox;
+		Entity.getShapeAABBox(bbox);
+		setCamera(bbox , Entity, true);
+
+		_MouseListener->setMatrix(_Scene->getCam().getMatrix());
 
 		USkeleton Skeleton = _Scene->createSkeleton(skelFileName);
 
@@ -249,11 +277,13 @@ namespace NLQT
 		if (Entity.empty()) return false;
 
 		// create a new entity
-		EIT eit = (_Entities.insert (make_pair (CFile::getFilenameWithoutExtension(meshFileName), CEntity()))).first;
+		EIT eit = (_Entities.insert (make_pair (fileName, CEntity()))).first;
 		CEntity	&entity = (*eit).second;
 
 		// set the entity up
-		entity._Name = CFile::getFilenameWithoutExtension(meshFileName);
+		entity._Name = fileName;
+		entity._FileNameShape = meshFileName;
+		entity._FileNameSkeleton = skelFileName;
 		entity._Instance = Entity;
 		if (!Skeleton.empty()) 
 		{
@@ -285,27 +315,7 @@ namespace NLQT
 
 	void CObjectViewer::updateCamera(float deltaPsi, float deltaPhi, float deltaDist)
 	{
-		_phi += deltaPhi;
-		_psi += deltaPsi;
-		_dist += deltaDist;
-
-		if(_phi < -NLMISC::Pi/2) _phi -= deltaPhi;
-		if(_phi > NLMISC::Pi/2) _phi -= deltaPsi;	
-		if (_dist < 1) _dist = 1;
-
-		NLMISC::CQuat q0,q1,q2;
-		NLMISC::CVector up(0,0,1);
-		NLMISC::CVector v(0,0,1);
-
-		q0.setAngleAxis(v,_psi);
-		v = NLMISC::CVector(0,1,0);
-		q1.setAngleAxis(v,_phi);
-		q2 = q0 * q1;
-		NLMISC::CMatrix m0;
-		m0.setRot(q2);
-		NLMISC::CVector camera = m0 * NLMISC::CVector(_dist,0,0);
-
-		_Scene->getCam().lookAt(camera, up);
+		
 	}
 
 	void CObjectViewer::setBackgroundColor(NLMISC::CRGBA backgroundColor)
@@ -328,13 +338,7 @@ namespace NLQT
 
 	void CObjectViewer::setSizeViewport(uint16 w, uint16 h)
 	{
-		_Scene->getCam().setPerspective((float)Pi/2.f, (float)w/h, 0.1f, 1000);
-	}
-
-	void CObjectViewer::getSizeViewport(float &left, float &right, float &bottom, float &top, float &znear, float &zfar)
-	{
-		//_Scene->getCam().setPerspective((float)Pi/2.f, (float)w/h, 0.1f, 1000);
-		_Scene->getCam().getFrustum(left, right, bottom, top, znear, zfar);
+		_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
 	}
 
 	void CObjectViewer::setCurrentObject(const std::string &name)
@@ -395,6 +399,143 @@ namespace NLQT
 			deleteEntity(entity);
 		}
 		_Entities.clear();
+	}
+
+	void CObjectViewer::setCamera(CAABBox &bbox, UTransform &entity, bool high_z)
+	{
+		CVector pos(0.f, 0.f, 0.f);
+		CQuat quat(0.f, 0.f, 0.f, 0.f);
+		NL3D::UInstance inst;
+		inst.cast(entity);
+		if (!inst.empty())
+		{
+			inst.getDefaultPos(pos);
+			inst.getDefaultRotQuat(quat);
+			/*
+			if (quat.getAxis().isNull())
+			{
+			quat.set(0, 0, 0, 0);
+			inst.setRotQuat(quat);
+			}
+			*/
+			//		quat.set(1.f, 1.f, 0.f, 0.f);
+
+			//		inst.setRotQuat(quat);
+			//		inst.getRotQuat(quat);
+
+			// check for presence of all textures from each sets
+			//bool allGood = true;
+
+			//for(uint s = 0; s < 5; ++s)
+			//{
+			//	inst.selectTextureSet(s);
+
+			//	uint numMat = inst.getNumMaterials();
+
+			//	// by default, all textures are present
+			//	allGood = true;
+
+			//	for(uint i = 0; i < numMat; ++i)
+			//	{
+			//		UInstanceMaterial mat = inst.getMaterial(i);
+
+			//		for(sint j = 0; j <= mat.getLastTextureStage(); ++j)
+			//		{
+			//			// if a texture is missing
+			//			if (mat.isTextureFile(j) && mat.getTextureFileName(j) == "CTextureMultiFile:Dummy")
+			//				allGood = false;
+			//		}
+			//	}
+
+			//	// if all textures have been found for this set, skip other sets
+			//	if (allGood)
+			//		break;
+			//}
+		}
+
+		// fix scale (some shapes have a different value)
+		entity.setScale(1.f, 1.f, 1.f);
+
+		UCamera Camera = _Scene->getCam();
+		CVector max_radius = bbox.getHalfSize();
+
+		CVector center = bbox.getCenter();
+		entity.setPivot(center);
+		center += pos;
+
+		//_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
+		float fov = float(_CameraFocal * (float)Pi/180.0);
+		//Camera.setPerspective (fov, 1.0f, 0.1f, 1000.0f);
+		float radius = max(max(max_radius.x, max_radius.y), max_radius.z);
+		if (radius == 0.f) radius = 1.f;
+		float left, right, bottom, top, znear, zfar;
+		Camera.getFrustum(left, right, bottom, top, znear, zfar);
+		float dist = radius / (tan(fov/2));
+		CVector eye(center);
+		/*	if (axis == CVector::I)
+		eye.y -= dist+radius;
+		else if (axis == CVector::J)
+		eye.x += dist+radius;
+		*/
+		//	quat.normalize();
+
+		CVector ax(quat.getAxis());
+
+		//	float angle = quat.getAngle();
+		/*
+		if (ax.isNull())
+		{
+		if (int(angle*100.f) == int(NLMISC::Pi * 200.f))
+		{
+		ax = CVector::J;
+		}
+		}
+		else 
+		*/
+		if (ax.isNull() || ax == CVector::I)
+		{
+			ax = CVector::J;
+		}
+		else if (ax == -CVector::K)
+		{
+			ax = -CVector::J;
+		}
+		/*	else if (ax.x < -0.9f && ax.y == 0.f && ax.z == 0.f)
+		{
+		ax = -CVector::J ;
+		}
+		*/
+		//	ax.normalize();
+
+		eye -= ax * (dist+radius);
+		if (high_z)
+			eye.z += max_radius.z/1.0f;
+		Camera.lookAt(eye, center);
+		setupLight(eye, center - eye);
+	}
+
+	bool CObjectViewer::setupLight(const CVector &position, const CVector &direction)
+	{
+		if (!_Light)
+		_Light = ULight::createLight();
+		if (!_Light) return false;
+
+		// set mode of the light
+		_Light->setMode(ULight::DirectionalLight);
+
+		// set position of the light
+		//	Light->setupDirectional(settings.light_ambiant, settings.light_diffuse, settings.light_specular, settings.light_direction);
+		NLMISC::CRGBA light_ambiant = CRGBA(0,0,0);
+		NLMISC::CRGBA light_diffuse = CRGBA(255,255,255);
+		NLMISC::CRGBA light_specular = CRGBA(255,255,255);
+		NLMISC::CVector light_direction = CVector(0.25, 0.25, 0.25);
+		_Light->setupPointLight(light_ambiant, light_diffuse, light_specular, position, direction + light_direction);
+
+		// set and enable the light
+		_Driver->setLight(0, *_Light);
+		_Driver->enableLight(0);
+
+		return true;
 	}
 
 } /* namespace NLQT */

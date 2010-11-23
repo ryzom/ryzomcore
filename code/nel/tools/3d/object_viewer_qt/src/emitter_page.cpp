@@ -280,17 +280,20 @@ void CEmitterPage::setDirectionMode(int index)
 void CEmitterPage::setSpeedInheritanceFactor(float value)
 {
 	_Emitter->setSpeedInheritanceFactor(value);
+	updateModifiedFlag();
 }
 
 void CEmitterPage::setConicEmitterRadius(float value)
 {
 	dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter)->setRadius(value);
+	updateModifiedFlag();
 }
 
 void CEmitterPage::setEmitDelay(float value)
 {
 	_Emitter->setEmitDelay(value); 
 	Modules::psEdit().resetAutoCount(_Node);
+	updateModifiedFlag();
 }
 
 void CEmitterPage::setMaxEmissionCount(uint32 value)
@@ -304,6 +307,7 @@ void CEmitterPage::setMaxEmissionCount(uint32 value)
 					QMessageBox::Ok);
 
 		_ui.maxEmissionCountWidget->setValue((uint32)_Emitter->getMaxEmissionCount(), false);
+		updateModifiedFlag();
 	}
 	Modules::psEdit().resetAutoCount(_Node);
 }
@@ -311,6 +315,7 @@ void CEmitterPage::setMaxEmissionCount(uint32 value)
 void CEmitterPage::setDir(const NLMISC::CVector &value)
 {
 	dynamic_cast<NL3D::CPSDirection *>(_Emitter)->setDir(value);
+	updateModifiedFlag();
 }
 
 void CEmitterPage::updatePeriodWidget()

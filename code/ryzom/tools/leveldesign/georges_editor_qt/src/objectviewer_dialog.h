@@ -50,7 +50,7 @@ class QAction;
 namespace NLQT 
 {
 
-	class CObjectViewerDialog: public QDockWidget, public NLMISC::IEventEmitter
+	class CObjectViewerDialog: public QDockWidget
 	{
 		Q_OBJECT
 
@@ -59,7 +59,7 @@ namespace NLQT
 		~CObjectViewerDialog();
 
 		virtual void setVisible(bool visible);
-		// virtual QPaintEngine* paintEngine() const { return NULL; }
+		virtual QPaintEngine* paintEngine() const { return NULL; }
 
 		void init();
 		void release();
@@ -74,20 +74,13 @@ namespace NLQT
 		void saveScreenshot();
 		void setBackgroundColor();
 
-		void submitEvents(NLMISC::CEventServer &server, bool allWindows) { };
-		void emulateMouseRawMode(bool) { };
+		void submitEvents(NLMISC::CEventServer &server, bool allWindows) { }
+		void emulateMouseRawMode(bool) { }
 
 		void topLevelChanged(bool topLevel); 
 
 	protected:
 		virtual void resizeEvent(QResizeEvent *resizeEvent);
-		virtual void mousePressEvent(QMouseEvent *event);
-		virtual void mouseReleaseEvent(QMouseEvent *event);
-		virtual void wheelEvent(QWheelEvent *event);
-		virtual void mouseMoveEvent(QMouseEvent *event);
-
-		uint32 getNelButtons(QMouseEvent *event);
-		uint32 getNelButtons(QWheelEvent *event);
 
 	private:
 		CObjectViewerDialog(const CObjectViewerDialog &);

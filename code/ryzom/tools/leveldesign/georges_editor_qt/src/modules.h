@@ -21,6 +21,7 @@
 
 #include "configuration.h"
 #include "object_viewer.h"
+#include "object_viewer_widget.h"
 #include "main_window.h"
 #include "georges.h"
 
@@ -32,11 +33,13 @@ public:
 	
 	static NLQT::CConfiguration &config()  { return *_configuration; }
 	static NLQT::CObjectViewer  &objView() { return *_objectViewer; }
+	static NLQT::CObjectViewerWidget  &objViewWid() { return *_objectViewerWidget; }
 	static NLQT::CGeorges       &georges() { return *_georges;}
 	static NLQT::CMainWindow    &mainWin() { return *_mainWindow; }
 private:
 	static NLQT::CConfiguration *_configuration;
 	static NLQT::CObjectViewer  *_objectViewer;
+	static NLQT::CObjectViewerWidget  *_objectViewerWidget;
 	static NLQT::CMainWindow    *_mainWindow;
 	static NLQT::CGeorges       *_georges;
 };

@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/misc/config_file.h>
 #include <nel/misc/rgba.h>
 #include <nel/3d/event_mouse_listener.h>
+#include <nel/misc/aabbox.h>
 
 // Project includes
 #include "entity.h"
@@ -117,7 +118,8 @@ namespace NLQT
 		/// @param w - width window.
 		/// @param h - height window.
 		void setSizeViewport(uint16 w, uint16 h);
-		void getSizeViewport(float &left, float &right, float &bottom, float &top, float &znear, float &zfar);
+		
+		void setBloomEffect(bool enabled) { _BloomEffect = enabled; }
 
 		/// Select instance from the scene
 		/// @param name - name instance,  "" if no instance edited
@@ -143,6 +145,8 @@ namespace NLQT
 		/// @return true if have used Direct3D driver, false OpenGL driver.
 		inline bool getDirect3D() { return _Direct3D; }
 
+		inline bool getBloomEffect() const { return _BloomEffect; }
+
 		/// Get a pointer to the driver.
 		/// @return pointer to the driver.
 		inline NL3D::UDriver *getDriver() { return _Driver; }
@@ -155,6 +159,9 @@ namespace NLQT
 		/// @return pointer to the UPlayListManager
 		inline NL3D::UPlayListManager *getPlayListManager() { return _PlayListManager; }
 
+		void setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z);
+		bool setupLight(const NLMISC::CVector &position, const NLMISC::CVector &direction);
+
 	private:
 		void deleteEntity (CEntity &entity);
 
@@ -165,18 +172,20 @@ namespace NLQT
 
 		NL3D::UDriver 			*_Driver;
 		NL3D::UScene 			*_Scene;
-		NL3D::UPlayListManager		*_PlayListManager;
+		NL3D::UPlayListManager  *_PlayListManager;
 		NL3D::ULight 			*_Light;
 		NL3D::UCamera 			*_Camera;
-		NL3D::U3dMouseListener		*_MouseListener;
+		NL3D::U3dMouseListener  *_MouseListener;
 
 		// The entities storage
 		CEntities		_Entities;
 
 		/// Camera parameters.
 		float _phi, _psi, _dist;
+		float _CameraFocal;
 
 		bool _Direct3D;
+		bool _BloomEffect;
 
 		std::string _CurrentInstance;
 

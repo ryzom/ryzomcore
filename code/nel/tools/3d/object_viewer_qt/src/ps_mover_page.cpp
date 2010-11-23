@@ -48,12 +48,14 @@ CPSMoverPage::CPSMoverPage(QWidget *parent)
 	_ui.scaleZWidget->setRange(0.f, 4.f);
 	_ui.scaleZWidget->setWrapper(&_ZScaleWrapper);
 
-	_ui.directionWidget->setWrapper(&_DirectionWrapper);
+	//_ui.directionWidget->setWrapper(&_DirectionWrapper);
 	
 	connect(_ui.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setXPosition(double)));
 	connect(_ui.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setYPosition(double)));
 	connect(_ui.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZPosition(double)));
-	
+		
+	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
+
 	connect(_ui.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), 
 		this, SLOT(changeSubComponent()));
 }
@@ -71,7 +73,7 @@ void CPSMoverPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *lo
 	updatePosition();
 	
 	_ui.listWidget->clear();
-	hideWrappersWidget();
+	hideAdditionalWidget();
 	
 	uint numBound = _EditedLocated->getNbBoundObjects();
 	
@@ -101,7 +103,7 @@ void CPSMoverPage::updatePosition(void)
 
 }
 
-void CPSMoverPage::hideWrappersWidget()
+void CPSMoverPage::hideAdditionalWidget()
 {
 	_ui.scaleLabel->hide();
 	_ui.scaleXLabel->hide();
@@ -162,7 +164,7 @@ void CPSMoverPage::setZPosition(double value)
 
 void CPSMoverPage::changeSubComponent()
 {
-	hideWrappersWidget();
+	hideAdditionalWidget();
 	NL3D::IPSMover *m = getMoverInterface();
 	if (!m) return;
 	
@@ -213,13 +215,15 @@ void CPSMoverPage::changeSubComponent()
 	
 	if (m->onlyStoreNormal())
 	{
-		_DirectionWrapper.OwnerNode = _Node;
-		_DirectionWrapper.M = m;
-		_DirectionWrapper.Index = _EditedLocatedIndex;
-		
-		_ui.directionWidget->updateUi();
+		_ui.directionWidget->setValue(getMoverInterface()->getNormal(getLocatedIndex()), false);
 		_ui.directionWidget->show();
 	}
+}
+
+void CPSMoverPage::setDir(const NLMISC::CVector &value)
+{
+	getMoverInterface()->setNormal(getLocatedIndex(), value);
+	updateModifiedFlag();
 }
 
 NL3D::IPSMover *CPSMoverPage::getMoverInterface(void)

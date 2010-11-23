@@ -28,7 +28,6 @@
 #include <nel/3d/ps_direction.h>
 
 // Project includes
-#include "ps_wrapper.h"
 
 namespace NLQT {
 
@@ -45,13 +44,7 @@ public:
 	CDirectionWidget(QWidget *parent = 0);
 	~CDirectionWidget();
 	
-	void enableGlobalVariable();
-	void setWrapper(IPSWrapper<NLMISC::CVector> *wrapper);
-
-	/// The CPSDirection object is used to see if a global variable can be bound to the direction.
-	/// When set to NULL it has no effect (the default)
-	void setDirectionWrapper(NL3D::CPSDirection *wrapper);
-	void updateUi();
+	void enabledGlobalVariable(bool enabled);
 
 Q_SIGNALS:
 	void valueChanged(const NLMISC::CVector &value);
@@ -73,10 +66,6 @@ private Q_SLOTS:
 	void setNewVecYZ(float x, float y);
 	
 private:
-	void checkEnabledGlobalDirection();
-  
-	IPSWrapper<NLMISC::CVector> *_Wrapper ;
-	NL3D::CPSDirection *_DirectionWrapper;
 	NLMISC::CVector _value;
 	QString _globalName;
 

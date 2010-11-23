@@ -41,18 +41,17 @@ CForcePage::CForcePage(QWidget *parent)
 	_ui.forceIntensityWidget->init();
 	
 	_ui.parametricFactorWidget->setRange(0.0, 64.0);
-	_ui.parametricFactorWidget->setWrapper(&_ParamFactorWrapper);
-	
 	_ui.radialViscosityWidget->setRange(0.0, 1.0);
-	_ui.radialViscosityWidget->setWrapper(&_RadialViscosityWrapper);
-	
 	_ui.tangentialViscosityWidget->setRange(0, 1);
-	_ui.tangentialViscosityWidget->setWrapper(&_TangentialViscosityWrapper);
-	
-	_ui.directionWidget->setWrapper(&_DirectionWrapper);
 	
 	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
 	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
+
+	connect(_ui.parametricFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setFactorBrownianForce(float)));
+	connect(_ui.radialViscosityWidget, SIGNAL(valueChanged(float)), this, SLOT(setRadialViscosity(float)));
+	connect(_ui.tangentialViscosityWidget, SIGNAL(valueChanged(float)), this, SLOT(setTangentialViscosity(float)));
+	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
+	connect(_ui.directionWidget, SIGNAL(globalNameChanged(QString)), this, SLOT(setGlobalName(QString)));
 }
 
 CForcePage::~CForcePage()
@@ -61,10 +60,11 @@ CForcePage::~CForcePage()
 
 void CForcePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindable *locatedBindable)
 {
-	hideWrappersWidget();
+	nlassert(locatedBindable);
+	
+	hideAdditionalWidget();
 	_Node = ownerNode;
 	_LBTarget = static_cast<NL3D::CPSTargetLocatedBindable *>(locatedBindable);
-	
 	updateTargets();
 
 	// force with intensity case
@@ -77,41 +77,33 @@ void CForcePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 	}
 
 	// vortex (to tune viscosity)
-	if (dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget))
+	NL3D::CPSCylindricVortex *cylindricVortex = dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget);
+	if (cylindricVortex)
 	{
-		_RadialViscosityWrapper.OwnerNode = _Node;
-		_RadialViscosityWrapper.V = dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget);
-		
-		_ui.radialViscosityWidget->updateUi();
+		_ui.radialViscosityWidget->setValue(cylindricVortex->getRadialViscosity(), false);
 		_ui.radialViscosityLabel->show();
 		_ui.radialViscosityWidget->show();
 
-		_TangentialViscosityWrapper.OwnerNode = _Node;
-		_TangentialViscosityWrapper.V = dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget);
-		
-		_ui.tangentialViscosityWidget->updateUi();
+		_ui.tangentialViscosityWidget->setValue(cylindricVortex->getTangentialViscosity(), false);
 		_ui.tangentialViscosityLabel->show();
 		_ui.tangentialViscosityWidget->show();
 	}
 
 	// deals with emitters that have a direction
-	if (dynamic_cast<NL3D::CPSDirection *>(_LBTarget))
+	NL3D::CPSDirection *direction = dynamic_cast<NL3D::CPSDirection *>(_LBTarget);
+	if (direction)
 	{
-		_DirectionWrapper.OwnerNode = _Node;
-		_DirectionWrapper.E = dynamic_cast<NL3D::CPSDirection *>(_LBTarget);
-		_ui.directionWidget->setDirectionWrapper(dynamic_cast<NL3D::CPSDirection *>(_LBTarget));
-
-		_ui.directionWidget->updateUi();
+		_ui.directionWidget->setValue(direction->getDir(), false);
+		_ui.directionWidget->enabledGlobalVariable(direction->supportGlobalVectorValue());
+		_ui.directionWidget->setGlobalName(QString(direction->getGlobalVectorValueName().c_str()), false);
 		_ui.directionWidget->show();
 	}
 
 	// Brownian (to tune parametric factor)
-	if (dynamic_cast<NL3D::CPSBrownianForce *>(_LBTarget))
+	NL3D::CPSBrownianForce *brownianForce = dynamic_cast<NL3D::CPSBrownianForce *>(_LBTarget);
+	if (brownianForce)
 	{
-		_ParamFactorWrapper.OwnerNode = _Node;
-		_ParamFactorWrapper.F = static_cast<NL3D::CPSBrownianForce *>(_LBTarget);
-		
-		_ui.parametricFactorWidget->updateUi();
+		_ui.parametricFactorWidget->setValue(brownianForce->getParametricFactor(), false);
 		_ui.parametricFactorLabel->show();
 		_ui.parametricFactorWidget->show();
 	}
@@ -168,8 +160,47 @@ void CForcePage::removeTarget()
 	_ui.avaibleTargetsListWidget->addItem(item);
 	updateModifiedFlag();
 }
+void CForcePage::setRadialViscosity(float value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget)->setRadialViscosity(value);
+	updateModifiedFlag();
+}
 
-void CForcePage::hideWrappersWidget()
+void CForcePage::setTangentialViscosity(float value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSCylindricVortex *>(_LBTarget)->setTangentialViscosity(value);
+	updateModifiedFlag();
+}
+
+void CForcePage::setDir(const NLMISC::CVector &value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSDirection *>(_LBTarget)->setDir(value);
+	updateModifiedFlag();
+}
+
+void CForcePage::setGlobalName(const QString &globalName)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSDirection *>(_LBTarget)->enableGlobalVectorValue(globalName.toStdString());
+	if (!globalName.isEmpty())
+	{
+		// take a non NULL value for the direction
+		NL3D::CParticleSystem::setGlobalVectorValue(globalName.toStdString(), NLMISC::CVector::I);
+	}
+	updateModifiedFlag();
+}
+
+void CForcePage::setFactorBrownianForce(float value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSBrownianForce *>(_LBTarget)->setParametricFactor(value);
+	updateModifiedFlag();
+}
+
+void CForcePage::hideAdditionalWidget()
 {
 	_ui.directionWidget->hide();
 	_ui.parametricFactorLabel->hide();
@@ -182,6 +213,7 @@ void CForcePage::hideWrappersWidget()
 
 void CForcePage::updateTargets()
 {
+	nlassert(_LBTarget);
 	uint k;
 	uint nbTarg = _LBTarget->getNbTargets();
 

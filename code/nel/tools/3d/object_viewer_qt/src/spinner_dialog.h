@@ -43,29 +43,20 @@ public:
 	CSpinnerDialog(NL3D::CPSBasisSpinner *sf, CWorkspaceNode *ownerNode, QWidget *parent = 0);
 	~CSpinnerDialog();
 
+private Q_SLOTS:
+	void setNumSamples(uint32 value);
+	void setAxis(const NLMISC::CVector &axis);
+
 protected:
-     
-	/// Wrapper to set the number of samples in the spinner
-	struct CNbSampleWrapper : public IPSWrapperUInt
-	{
-		NL3D::CPSBasisSpinner     *S;
-		uint32 get(void) const { return S->_F.getNumSamples(); }
-		void set(const uint32 &val) { S->_F.setNumSamples(val); }
-	} _NbSampleWrapper;
+	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
 
-
-	/// Wrapper to set the axis of the spinner
-	struct CAxisWrapper : public IPSWrapper<NLMISC::CVector>
-	{
-		NL3D::CPSBasisSpinner     *S;
-		NLMISC::CVector get(void) const { return S->_F.getAxis(); }
-		void set(const NLMISC::CVector &axis) { S->_F.setAxis(axis); }
-	} _AxisWrapper;
-	
 	QLabel *_nbSamplesLabel;
 	QVBoxLayout *_verticalLayout;
 	CEditRangeUIntWidget *_nbSamplesWidget;
 	CDirectionWidget *_dirWidget;
+
+	CWorkspaceNode *_Node;
+	NL3D::CPSBasisSpinner *_BasicSpinner;
 };
 
 } /* namespace NLQT */
