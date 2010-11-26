@@ -27,8 +27,9 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 /**
 @class CColorEditWidget
 @brief The widget provides a 4 horizontal slider or color dialog, to set the color.
@@ -36,7 +37,7 @@ namespace NLQT {
 Widget at the same time displays the color in the shaded rectangle at the side of the sliders.
 Use this widget, have two ways: Qt Q_SIGNAL/SLOT or wrapper.
 
-1. Using the Qt Q_SIGNALS/SLOT can be set current color by class methods setColor() and 
+1. Using the Qt Q_SIGNALS/SLOT can be set current color by class methods setColor() and
 changes in current color(QSliders or QColorDialog) emits the signal colorChanged().
 
 2. Using wrapper, create wpapper struct, example:
@@ -52,26 +53,26 @@ to set the current values, need call class methods updateUi();
 */
 class CColorEditWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	/// Constructor, sets the default color (255, 255, 255, 255)
 	CColorEditWidget(QWidget *parent = 0);
 	~CColorEditWidget();
-	
+
 	/// Sets the current color.
 	/// @param color - NeL NLMISC::CRGBA color
 	/// @param emit - will emit colorChanged() if the new value is different from the old one and param emit = true
 	void setColor(const NLMISC::CRGBA &color, bool emit = true);
-	
+
 	/// Sets the current color.
 	/// @param color - Qt QColor color
 	/// @param emit - will emit colorChanged() if the new value is different from the old one and param emit = true
 	void setColor(const QColor &color, bool emit = true);
-	
+
 	/// Set a wrapper to get/set the datas.
 	void setWrapper(IPSWrapperRGBA *wrapper);
-	
+
 	/// Update the content of the widget using the wrapper.
 	void updateUi();
 
@@ -84,16 +85,16 @@ private Q_SLOTS:
 	void setBlue(int b);
 	void setAlpha(int a);
 	void browseColor();
-     
+
 private:
-	
+
 	// wrapper to the datas
 	IPSWrapperRGBA *_Wrapper;
-	
+
 	bool _emit;
-	
+
 	Ui::CColorEditWidget _ui;
-	
+
 }; /* class CColorEditWidget */
 
 } /* namespace NLQT */

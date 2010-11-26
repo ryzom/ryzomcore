@@ -29,10 +29,11 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -57,11 +58,11 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 	_ui.particlePlaneBasicWidget->setWrapper(&_PlaneBasisWrapper);
 	_ui.particlePlaneBasicWidget->setSchemeWrapper(&_PlaneBasisWrapper);
 	_ui.particlePlaneBasicWidget->init();
-	
+
 	// Fake motion blur coeff
 	_ui.blurCoeffWidget->setRange(0.0, 5.0);
 	_ui.blurCoeffWidget->setWrapper(&_MotionBlurCoeffWrapper);
-	
+
 	// Fake motion blur threshold
 	_ui.blurTresholdWidget->setRange(0.0, 5.0);
 	_ui.blurTresholdWidget->setWrapper(&_MotionBlurThresholdWrapper);
@@ -106,7 +107,7 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 	// Ribbon texture U factor
 	_ui.ribbonTexUfactorWidget->setRange(0, 5);
 	_ui.ribbonTexUfactorWidget->setWrapper(&_RibbonUFactorWrapper);
-	
+
 	// Ribbon texture V factor
 	_ui.ribbonTexVfactorWidget->setRange(0, 5);
 	_ui.ribbonTexVfactorWidget->setWrapper(&_RibbonVFactorWrapper);
@@ -129,9 +130,9 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 
 	_ui.particleTextureWidget->setWrapper(&_TextureNoAnimWrapper);
 	_ui.particleTextureWidget->enableRemoveButton(true);
-	
+
 	hideAllWidget();
-	
+
 	connect(_ui.autoLodCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAutoLOD(bool)));
 	connect(_ui.globalColorLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setGlobalColorLight(bool)));
 	connect(_ui.independantSizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setIndependantSize(bool)));
@@ -159,7 +160,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 {
 	_Node = ownerNode;
 	_Bindable = locatedBindable;
-	
+
 	hideAllWidget();
 
 	// No Auto LOD
@@ -209,26 +210,26 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 		}
 		else
 			_ui.globalColorLightingCheckBox->hide();
-		
+
 		// check support for color
 		if (dynamic_cast<NL3D::CPSColoredParticle *>(_Bindable))
 		{
 			_ColorWrapper.S = dynamic_cast<NL3D::CPSColoredParticle *>(_Bindable);
 			_ui.colorWidget->setWorkspaceNode(_Node);
 			_ui.colorWidget->updateUi();
-			
+
 			// Add material page in tabWidget
 			_ui.tabWidget->addTab(_ui.materialPage, tr("Material"));
 		}
-		
-		if (dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable)) 
+
+		if (dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable))
 		{
 			updateSizeControl();
 
 			// Size/Angle2D page in tabWidget
 			_ui.tabWidget->addTab(_ui.sizeAnglePage, tr("Size/Angle 2D"));
 		}
-		
+
 		// check support for angle 2D
 		if (dynamic_cast<NL3D::CPSRotated2DParticle *>(_Bindable))
 		{
@@ -239,7 +240,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 		}
 		else
 			_ui.angle2DWidget->hide();
-		
+
 		// check support for plane basis
 		if (dynamic_cast<NL3D::CPSRotated3DPlaneParticle *>(_Bindable))
 		{
@@ -247,7 +248,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_ui.particlePlaneBasicWidget->setWorkspaceNode(_Node);
 			_ui.particlePlaneBasicWidget->updateUi();
 			_ui.particlePlaneBasicWidget->setEnabled(true);
-			
+
 			// Add material page in tabWidget
 			_ui.tabWidget->addTab(_ui.rotatePage, tr("Rotations"));
 		}
@@ -275,18 +276,18 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_MotionBlurThresholdWrapper.P = fla;
 			_MotionBlurThresholdWrapper.OwnerNode = _Node;
 			_ui.blurTresholdWidget->updateUi();
-			
+
 			_ui.zalignCheckBox->show();
 			_ui.alignCheckBox->show();
 			_ui.alignCheckBox->setChecked(fla->getAlignOnMotion());
 			_ui.zalignCheckBox->setChecked(fla->getAlignOnZAxis());
-			
+
 			// 'look at' independant sizes
 			_ui.independantSizeCheckBox->setChecked(fla->hasIndependantSizes());
-			
+
 			_ui.independantSizeCheckBox->show();
 			_ui.independantGroupBox->show();
-			
+
 			// Add Look at page in tabWidget
 			_ui.tabWidget->addTab(_ui.lookAtPage, tr("Look At param"));
 		}
@@ -300,7 +301,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 		if (dynamic_cast<NL3D::CPSShockWave *>(_Bindable))
 		{
 			NL3D::CPSShockWave *sw = static_cast<NL3D::CPSShockWave *>(_Bindable);
-			
+
 			_RadiusCutWrapper.OwnerNode = _Node;
 			_RadiusCutWrapper.S = sw;
 			_ui.radiusCutWidget->updateUi();
@@ -323,19 +324,19 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_FanLightWrapper.OwnerNode = _Node;
 			_FanLightWrapper.P = dynamic_cast<NL3D::CPSFanLight *>(_Bindable);
 			_ui.nbFanLightWidget->updateUi();
-		
+
 			_FanLightSmoothnessWrapper.OwnerNode = _Node;
 			_FanLightSmoothnessWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			_ui.phaseSmoothnesWidget->updateUi();
-			
+
 			_FanLightPhaseWrapper.OwnerNode = _Node;
 			_FanLightPhaseWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			_ui.fanLightSpeedWidget->updateUi();
-			
+
 			_FanLightIntensityWrapper.OwnerNode = _Node;
 			_FanLightIntensityWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			_ui.fanLightIntensityWidget->updateUi();
-			
+
 			// Add Fan Light page in tabWidget
 			_ui.tabWidget->addTab(_ui.fanLightPage, tr("Fan Light param"));
 		}
@@ -349,14 +350,14 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_TailParticleWrapper.OwnerNode = _Node;
 			_TailParticleWrapper.P = dynamic_cast<NL3D::CPSTailParticle *>(_Bindable);
 			_ui.tailNbSegsWidget->updateUi();
-			
+
 			_ui.tailWidget->setCurrentTailParticle(_Node, dynamic_cast<NL3D::CPSTailParticle *>(_Bindable));
 
 			_ui.ribbonTexUfactorWidget->hide();
 			_ui.ribbonTexVfactorWidget->hide();
 			_ui.tailTexUflabel->hide();
 			_ui.tailTexVflabel->hide();
-			
+
 			// Add tail page in tabWidget
 			_ui.tabWidget->addTab(_ui.ribbonTailPage, tr("Tail param"));
 		}
@@ -384,10 +385,10 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 		if (dynamic_cast<NL3D::CPSTexturedParticle *>(_Bindable))
 		{
 			_ui.texAnimWidget->setCurrentTextureAnim(dynamic_cast<NL3D::CPSTexturedParticle *>(_Bindable),
-									 dynamic_cast<NL3D::CPSMultiTexturedParticle *>(_Bindable),
-									 _Node);
+					dynamic_cast<NL3D::CPSMultiTexturedParticle *>(_Bindable),
+					_Node);
 			_ui.texAnimWidget->show();
-			
+
 			_ui.tabWidget->addTab(_ui.texturePage, tr("Texture param"));
 		}
 		else
@@ -401,7 +402,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 
 			_ui.particleTextureWidget->updateUi();
 			_ui.particleTextureWidget->show();
-			
+
 			_ui.tabWidget->addTab(_ui.texturePage, tr("Texture param"));
 		}
 		else
@@ -417,7 +418,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_RibbonVFactorWrapper.OwnerNode = _Node;
 			_RibbonVFactorWrapper.R = static_cast<NL3D::CPSRibbon *>(_Bindable);
 			_ui.ribbonTexVfactorWidget->updateUi();
-			
+
 			_ui.ribbonTexUfactorWidget->show();
 			_ui.ribbonTexVfactorWidget->show();
 			_ui.tailTexUflabel->show();
@@ -441,12 +442,12 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_LODDegradationWrapper.OwnerNode = _Node;
 			_LODDegradationWrapper.R = ribbon;
 			_ui.lodDegradationWidget->updateUi();
-	
+
 			// Coord system
 			_ui.coordSystemComboBox->setCurrentIndex(ribbon->getMatrixMode());
 			_ui.useHermitteCheckBox->setChecked(ribbon->getInterpolationMode() == NL3D::CPSRibbonBase::Hermitte);
 			_ui.constantLengthCheckBox->setChecked(ribbon->getRibbonMode() == NL3D::CPSRibbonBase::FixedSize);
-		}  
+		}
 	}
 }
 
@@ -569,7 +570,7 @@ void CLocatedBindablePage::setRotSpeedMax(double value)
 	nlassert(rotatedParticle);
 	float valueMin, valueMax;
 	uint32 nbModels = rotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
-	if (valueMax != value) 
+	if (valueMax != value)
 	{
 		rotatedParticle->hintRotateTheSame(nbModels, valueMin, value);
 		updateModifiedFlag();
@@ -582,7 +583,7 @@ void CLocatedBindablePage::setRotSpeedMin(double value)
 	nlassert(rotatedParticle);
 	float valueMin, valueMax;
 	uint32 nbModels = rotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
-	if (valueMin != value) 
+	if (valueMin != value)
 	{
 		rotatedParticle->hintRotateTheSame(nbModels, value, valueMax);
 		updateModifiedFlag();
@@ -595,9 +596,9 @@ void CLocatedBindablePage::setNumModels(int value)
 	nlassert(rotatedParticle);
 	float valueMin, valueMax;
 	sint32 nbModels;
-	
+
 	nbModels = rotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
-	if (nbModels != value) 
+	if (nbModels != value)
 	{
 		rotatedParticle->hintRotateTheSame((uint32) value, valueMin, valueMax);
 		updateModifiedFlag();
@@ -640,7 +641,7 @@ void CLocatedBindablePage::updateValidWidgetForAlignOnMotion(bool align)
 void CLocatedBindablePage::updateSizeControl()
 {
 	if (!dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable)) return;
-	
+
 	NL3D::CPSFaceLookAt *fla = dynamic_cast<NL3D::CPSFaceLookAt *>(_Bindable);
 	// LookAt case
 	if (fla && fla->hasIndependantSizes())
@@ -649,7 +650,7 @@ void CLocatedBindablePage::updateSizeControl()
 			_ui.sizeWidget->setTitle(tr("Width"));
 		else
 			_ui.sizeWidget->setTitle(tr("Height"));
-		
+
 		if (_ui.widthRadioButton->isChecked()) // wrap to the wanted size
 			_SizeWrapper.S = fla;
 		else
@@ -660,7 +661,7 @@ void CLocatedBindablePage::updateSizeControl()
 		_SizeWrapper.S = dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable);
 		_ui.sizeWidget->setTitle(tr("Size"));
 	}
- 
+
 	_ui.sizeWidget->setWorkspaceNode(_Node);
 	_ui.sizeWidget->updateUi();
 }
@@ -677,7 +678,7 @@ void CLocatedBindablePage::hideAllWidget()
 void CLocatedBindablePage::touchPSState()
 {
 	if (_Node && _Node->getPSModel())
-	{	
+	{
 		_Node->getPSModel()->touchTransparencyState();
 		_Node->getPSModel()->touchLightableState();
 	}

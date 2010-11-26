@@ -33,15 +33,16 @@
 
 namespace NL3D
 {
-	class CPSConstraintMesh;
+class CPSConstraintMesh;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CMorphMeshDialog: public QDialog
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CMorphMeshDialog(CWorkspaceNode *ownerNode, NL3D::CPSConstraintMesh *cm, QWidget *parent = 0);
 	~CMorphMeshDialog();
@@ -53,7 +54,7 @@ private Q_SLOTS:
 	void change();
 	void up();
 	void down();
-	
+
 private:
 	/// fill the mesh list with the mesh names in the object being edited
 	void updateMeshList();
@@ -69,11 +70,11 @@ private:
 		virtual scheme_type *getScheme(void) const;
 		virtual void setScheme(scheme_type *s);
 	} _MorphSchemeWrapper;
-	
+
 	void touchPSState();
-	
+
 	CWorkspaceNode *_Node;
-	
+
 	// the constraint mesh being edited
 	NL3D::CPSConstraintMesh   *_CM;
 

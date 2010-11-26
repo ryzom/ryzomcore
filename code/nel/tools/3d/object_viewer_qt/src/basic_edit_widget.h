@@ -31,16 +31,17 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CBasicEditWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CBasicEditWidget(QWidget *parent = 0);
 	~CBasicEditWidget();
-	
+
 	void setWrapper(IPSWrapper<NL3D::CPlaneBasis> *wrapper);
 	void updateUi();
 
@@ -53,7 +54,7 @@ private:
 	IPSWrapper<NL3D::CPlaneBasis> *_Wrapper ;
 
 	Ui::CBasicEditWidget _ui;
-	
+
 }; /* class CBasicEditWidget */
 
 } /* namespace NLQT */

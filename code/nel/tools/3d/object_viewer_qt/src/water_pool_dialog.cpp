@@ -20,10 +20,11 @@
 #include "stdpch.h"
 #include "water_pool_dialog.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CWaterPoolDialog::CWaterPoolDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	ui.setupUi(this);
 }

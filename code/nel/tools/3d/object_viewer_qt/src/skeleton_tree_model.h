@@ -33,7 +33,8 @@
 
 // Projects includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CSkeletonTreeItem
@@ -43,26 +44,53 @@ class CSkeletonTreeItem
 {
 public:
 	CSkeletonTreeItem(const QList<QVariant> &data, const sint32 id, CSkeletonTreeItem *parent = 0)
-				: _itemData(data), _id(id), _parentItem(parent) {}
+		: _itemData(data), _id(id), _parentItem(parent) {}
 
-	~CSkeletonTreeItem() { qDeleteAll(_childItems); }
+	~CSkeletonTreeItem()
+	{
+		qDeleteAll(_childItems);
+	}
 
-	void appendChild(CSkeletonTreeItem *child) { _childItems.append(child); }
-	
-	CSkeletonTreeItem *child(int row) { return _childItems.value(row); }
-	int childCount() const { return _childItems.count(); }
-	int columnCount() const { return _itemData.count(); }
-	QVariant data(int column) const { return _itemData.value(column); }
+	void appendChild(CSkeletonTreeItem *child)
+	{
+		_childItems.append(child);
+	}
 
-	int row() const { if (_parentItem) 
-					return _parentItem->_childItems.indexOf(const_cast<CSkeletonTreeItem*>(this)); 
-				return 0; }
-				
-	CSkeletonTreeItem *parent() { return _parentItem; }
-	sint32 getId() { return _id; }
-	
+	CSkeletonTreeItem *child(int row)
+	{
+		return _childItems.value(row);
+	}
+	int childCount() const
+	{
+		return _childItems.count();
+	}
+	int columnCount() const
+	{
+		return _itemData.count();
+	}
+	QVariant data(int column) const
+	{
+		return _itemData.value(column);
+	}
+
+	int row() const
+	{
+		if (_parentItem)
+			return _parentItem->_childItems.indexOf(const_cast<CSkeletonTreeItem*>(this));
+		return 0;
+	}
+
+	CSkeletonTreeItem *parent()
+	{
+		return _parentItem;
+	}
+	sint32 getId()
+	{
+		return _id;
+	}
+
 private:
-   
+
 	QList<CSkeletonTreeItem*> _childItems;
 	QList<QVariant> _itemData;
 	sint32 _id;
@@ -83,19 +111,19 @@ public:
 	QVariant data(const QModelIndex &index, int role) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 	QVariant headerData(int section, Qt::Orientation orientation,
-			    int role = Qt::DisplayRole) const;
+						int role = Qt::DisplayRole) const;
 	QModelIndex index(int row, int column,
-			  const QModelIndex &parent = QModelIndex()) const;
+					  const QModelIndex &parent = QModelIndex()) const;
 	QModelIndex parent(const QModelIndex &index) const;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	QModelIndex getIndexFromId(sint id, const QModelIndex &parent);
-	
+
 	/// Clear tree model skeleton
 	void resetTreeModel();
-	
+
 public Q_SLOTS:
-  
+
 	/// Update tree model skeleton
 	void rebuildModel();
 

@@ -33,35 +33,36 @@
 
 // Project includes
 
-namespace NLQT {
- 
+namespace NLQT
+{
+
 /**
 @class CAnimationDialog
 @brief Animation model control dialog.
-@details The dialogue doesn't affect on the model itself, but only calculates the current time of animations 
+@details The dialogue doesn't affect on the model itself, but only calculates the current time of animations
 that can be obtained through a class method getTime().
 The user can influence on the duration of the animation, but he doesn't know the total time for all the animations in the playlist.
-Therefore, the class provides a slot that requires a total duration of the animated object animations and set it. 
-*/  
+Therefore, the class provides a slot that requires a total duration of the animated object animations and set it.
+*/
 class CAnimationDialog: public QDockWidget
 {
-     Q_OBJECT
+	Q_OBJECT
 
 public:
 	/// Constructor, sets the default length of time from 0 to 99
 	CAnimationDialog(QWidget *parent = 0);
 	~CAnimationDialog();
-	
+
 	/// Get the current time animations
 	/// @return Returns the current time animations, which can then be use in class CObjectViewer
 	NL3D::TAnimationTime getTime ();
-	
+
 public Q_SLOTS:
 	/// Find the total time of the playlist and sets its
 	void changeAnimLength();
-	
+
 	/// Updates animation status for the selected current object
-	/// @param name - the name of the selected object 
+	/// @param name - the name of the selected object
 	void setCurrentShape(const QString &name);
 
 private Q_SLOTS:
@@ -78,11 +79,11 @@ private Q_SLOTS:
 	void finish();
 
 private:
-	
+
 	static const int _frameRate = 50;
 	QTimeLine *_timeLine;
 	Ui::CAnimationDialog _ui;
-	
+
 	friend class CMainWindow;
 }; /* CAnimationDialog */
 

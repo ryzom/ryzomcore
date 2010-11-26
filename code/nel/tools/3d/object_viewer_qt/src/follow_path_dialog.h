@@ -29,17 +29,18 @@
 
 namespace NL3D
 {
-	class CPSPlaneBasisFollowSpeed;
+class CPSPlaneBasisFollowSpeed;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CWorkspaceNode;
 
 class CFollowPathDialog : public  QDialog
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CFollowPathDialog(NL3D::CPSPlaneBasisFollowSpeed *pbfs, CWorkspaceNode *ownerNode, QWidget *parent = 0);
 	~CFollowPathDialog();
@@ -53,7 +54,7 @@ protected:
 	QComboBox *comboBox;
 	QSpacerItem *horizontalSpacer;
 	QPushButton *pushButton;
-    
+
 	NL3D::CPSPlaneBasisFollowSpeed *_FollowPath;
 	CWorkspaceNode	   *_Node;
 }; /* class CFollowPathDialog */

@@ -27,10 +27,11 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CLightPage::CLightPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -57,7 +58,7 @@ void CLightPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 {
 	_Node = ownerNode;
 	_Light = static_cast<NL3D::CPSLight *>(locatedBindable);
-	
+
 	_ColorWrapper.L = _Light;
 	_ui.lightColorWidget->setWorkspaceNode(_Node);
 	_ui.lightColorWidget->updateUi();

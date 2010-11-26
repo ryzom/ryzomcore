@@ -38,15 +38,16 @@
 #include "ps_wrapper.h"
 #include "particle_node.h"
 
-namespace NLQT {
+namespace NLQT
+{
 /**
 @class CAttribWidget
 @brief Base attrib maker edition dialog.
 */
 class CAttribWidget: public  QGroupBox
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribWidget(QWidget *parent = 0);
 	~CAttribWidget();
@@ -59,10 +60,10 @@ public:
 
 	/// Сonnects all the slots with signals
 	void init();
-	
+
 	/// Sets the pointer CWorkspaceNode* in the wrappers.
 	virtual void setWorkspaceNode(CWorkspaceNode *node) = 0;
-	
+
 	/// Private usage (not private because accessed by a static function) : return the nbCycles parameter of the scheme (e.g the input multiplier).
 	virtual float getSchemeNbCycles(void) const = 0;
 
@@ -70,21 +71,36 @@ public:
 	virtual void setSchemeNbCycles(float nbCycles) = 0;
 
 	/// Enable the srcInput
-	void enableSrcInput(bool enable = true) { _SrcInputEnabled = enable; }
-	
-	bool isSrcInputEnabled() const { return _SrcInputEnabled; }
-	
+	void enableSrcInput(bool enable = true)
+	{
+		_SrcInputEnabled = enable;
+	}
+
+	bool isSrcInputEnabled() const
+	{
+		return _SrcInputEnabled;
+	}
+
 	/// Disable the possibility to choose a scheme that has memory. (for example, a scheme for lifetime of a located has no sense
 	/// because located have already some memory to store it)
 	void enableMemoryScheme(bool enabled = true);
 
 	/// Tells wether memory schemes are enables
 	/// @see enableMemoryScheme()
-	bool isMemorySchemeEnabled() const { return !_DisableMemoryScheme; }
+	bool isMemorySchemeEnabled() const
+	{
+		return !_DisableMemoryScheme;
+	}
 
 	/// Enable Nb Cycle tuning
-	void	enableNbCycles(bool enabled) { _NbCycleEnabled = enabled; }
-	bool    isNbCycleEnabled() const { return _NbCycleEnabled; }
+	void	enableNbCycles(bool enabled)
+	{
+		_NbCycleEnabled = enabled;
+	}
+	bool    isNbCycleEnabled() const
+	{
+		return _NbCycleEnabled;
+	}
 
 private Q_SLOTS:
 	virtual void clickedEdit();
@@ -93,7 +109,7 @@ private Q_SLOTS:
 	virtual void setCurrentSrc(int index);
 	virtual void setUserIndex();
 	virtual void changeUseScheme(int index);
-	
+
 protected:
 
 	/// change the dialog for constant values
@@ -128,10 +144,10 @@ protected:
 
 	/// tells wether the scheme supports custom input
 	virtual bool hasSchemeCustomInput(void) const = 0;
-	
+
 	/// retrieve the scheme input id
 	virtual NL3D::CPSInputType getSchemeInput(void) const = 0;
-	
+
 	/// set the scheme input id
 	virtual void setSchemeInput(const NL3D::CPSInputType &input) = 0;
 
@@ -159,15 +175,21 @@ protected:
 	/// wrapper to tune the number of cycles
 	struct CNbCyclesWrapper : public IPSWrapperFloat
 	{
-			CAttribWidget *widget;
-			float get(void) const { return widget->getSchemeNbCycles(); }
-			void set(const float &v) { widget->setSchemeNbCycles(v); }
+		CAttribWidget *widget;
+		float get(void) const
+		{
+			return widget->getSchemeNbCycles();
+		}
+		void set(const float &v)
+		{
+			widget->setSchemeNbCycles(v);
+		}
 	} _NbCyclesWrapper;
-	
+
 	CWorkspaceNode *_Node;
 
 	QDialog *_SchemeWidget;
-	
+
 	Ui::CAttribWidget _ui;
 }; /* class CAttribWidget */
 
@@ -179,45 +201,78 @@ template <typename T> class CAttribWidgetT : public CAttribWidget
 {
 public:
 	CAttribWidgetT(QWidget *parent = 0): CAttribWidget(parent),
-					     _Wrapper(NULL),
-					     _SchemeWrapper(NULL)
+		_Wrapper(NULL),
+		_SchemeWrapper(NULL)
 	{
 	}
 	virtual void setWrapper(IPSWrapper<T> *wrapper) = 0;
-	void setSchemeWrapper(IPSSchemeWrapper<T> *schemeWrapper) { nlassert(schemeWrapper); _SchemeWrapper = schemeWrapper; }
-	
+	void setSchemeWrapper(IPSSchemeWrapper<T> *schemeWrapper)
+	{
+		nlassert(schemeWrapper);
+		_SchemeWrapper = schemeWrapper;
+	}
+
 	// Inherited from CAttribWidget
 	virtual QDialog *editScheme(void) = 0;
 	virtual void setCurrentScheme(uint index) = 0;
 	virtual sint getCurrentScheme(void) const  = 0;
 
-	virtual void resetCstValue(void) 
-	{ 
-		_Wrapper->setAndUpdateModifiedFlag(_Wrapper->get()); // reuse current color 
+	virtual void resetCstValue(void)
+	{
+		_Wrapper->setAndUpdateModifiedFlag(_Wrapper->get()); // reuse current color
 	}
 
-	virtual bool hasSchemeCustomInput(void) const { return _SchemeWrapper->getScheme()->hasCustomInput(); }
-	virtual NL3D::CPSInputType getSchemeInput(void) const { return  _SchemeWrapper->getScheme()->getInput(); }
-	virtual void setSchemeInput(const NL3D::CPSInputType &input) { _SchemeWrapper->getScheme()->setInput(input); }
+	virtual bool hasSchemeCustomInput(void) const
+	{
+		return _SchemeWrapper->getScheme()->hasCustomInput();
+	}
+	virtual NL3D::CPSInputType getSchemeInput(void) const
+	{
+		return  _SchemeWrapper->getScheme()->getInput();
+	}
+	virtual void setSchemeInput(const NL3D::CPSInputType &input)
+	{
+		_SchemeWrapper->getScheme()->setInput(input);
+	}
 
-	virtual void setWorkspaceNode(CWorkspaceNode *node) 
-	{ 
-		_Node = node; if (_Wrapper != NULL) _Wrapper->OwnerNode = _Node; if (_SchemeWrapper != NULL) _SchemeWrapper->OwnerNode = _Node; 
+	virtual void setWorkspaceNode(CWorkspaceNode *node)
+	{
+		_Node = node;
+		if (_Wrapper != NULL) _Wrapper->OwnerNode = _Node;
+		if (_SchemeWrapper != NULL) _SchemeWrapper->OwnerNode = _Node;
 	};
 
-	virtual float getSchemeNbCycles(void) const { return _SchemeWrapper->getScheme()->getNbCycles(); }
-	virtual void setSchemeNbCycles(float nbCycles) { _SchemeWrapper->getScheme()->setNbCycles(nbCycles); }
-	
-	virtual bool isSchemeClamped(void) const { return _SchemeWrapper->getScheme()->getClamping(); }
-	virtual void clampScheme(bool clamped = true) { _SchemeWrapper->getScheme()->setClamping(clamped); }
-	virtual bool isClampingSupported(void) const { return _SchemeWrapper->getScheme()->isClampingSupported(); };
-	virtual NL3D::CPSAttribMakerBase *getCurrentSchemePtr(void) const { return _SchemeWrapper->getScheme(); }
-	virtual void setCurrentSchemePtr(NL3D::CPSAttribMakerBase *s) 
-	{ 
+	virtual float getSchemeNbCycles(void) const
+	{
+		return _SchemeWrapper->getScheme()->getNbCycles();
+	}
+	virtual void setSchemeNbCycles(float nbCycles)
+	{
+		_SchemeWrapper->getScheme()->setNbCycles(nbCycles);
+	}
+
+	virtual bool isSchemeClamped(void) const
+	{
+		return _SchemeWrapper->getScheme()->getClamping();
+	}
+	virtual void clampScheme(bool clamped = true)
+	{
+		_SchemeWrapper->getScheme()->setClamping(clamped);
+	}
+	virtual bool isClampingSupported(void) const
+	{
+		return _SchemeWrapper->getScheme()->isClampingSupported();
+	};
+	virtual NL3D::CPSAttribMakerBase *getCurrentSchemePtr(void) const
+	{
+		return _SchemeWrapper->getScheme();
+	}
+	virtual void setCurrentSchemePtr(NL3D::CPSAttribMakerBase *s)
+	{
 		_SchemeWrapper->setSchemeAndUpdateModifiedFlag(NLMISC::safe_cast<NL3D::CPSAttribMaker<T> *>(s));
 	}
 	virtual void cstValueUpdate() = 0;
-	
+
 protected:
 	virtual bool useScheme(void) const
 	{
@@ -231,53 +286,53 @@ public:
 	IPSSchemeWrapper<T> *_SchemeWrapper;
 };
 
-/** 
+/**
 @class CAttribFloatWidget
 @brief An attribute editor specialized for float values
 */
 class CAttribFloatWidget: public CAttribWidgetT<float>
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribFloatWidget(QWidget *parent = 0);
 	~CAttribFloatWidget();
-	
+
 	void setRange(float minValue = 0, float maxValue = 10);
 	void setWrapper(IPSWrapper<float> *wrapper);
-	
+
 	// inherited from CAttribWidget
 	virtual QDialog *editScheme(void);
 	virtual void setCurrentScheme(uint index);
 	virtual sint getCurrentScheme(void) const;
 	virtual void cstValueUpdate();
-	
+
 private:
-	
+
 	float _MinRange, _MaxRange;
 }; /* class CAttribFloatWidget */
 
-/** 
+/**
 @class CAttribUIntWidget
 @brief An attribute editor specialized for unsigned int values
 */
 class CAttribUIntWidget: public CAttribWidgetT<uint32>
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribUIntWidget(QWidget *parent = 0);
 	~CAttribUIntWidget();
-	
+
 	void setRange(uint32 minValue = 0, uint32 maxValue = 10);
 	void setWrapper(IPSWrapper<uint32> *wrapper);
-	
+
 	// inherited from CAttribWidget
 	virtual QDialog *editScheme(void);
 	virtual void setCurrentScheme(uint index);
 	virtual sint getCurrentScheme(void) const;
 	virtual void cstValueUpdate();
-	
+
 private:
 
 	uint32 _MinRange, _MaxRange;
@@ -289,12 +344,12 @@ private:
 */
 class CAttribIntWidget: public CAttribWidgetT<sint32>
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribIntWidget(QWidget *parent = 0);
 	~CAttribIntWidget();
-	
+
 	void setRange(sint32 minValue = 0, sint32 maxValue = 10);
 	void setWrapper(IPSWrapper<sint32> *wrapper);
 
@@ -303,7 +358,7 @@ public:
 	virtual void setCurrentScheme(uint index);
 	virtual sint getCurrentScheme(void) const;
 	virtual void cstValueUpdate();
-	
+
 private:
 
 	sint32 _MinRange, _MaxRange;
@@ -315,20 +370,20 @@ private:
 */
 class CAttribRGBAWidget: public CAttribWidgetT<NLMISC::CRGBA>
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribRGBAWidget(QWidget *parent = 0);
 	~CAttribRGBAWidget();
 
 	void setWrapper(IPSWrapper<NLMISC::CRGBA> *wrapper);
-	
+
 	// inherited from CAttribWidget
 	virtual QDialog *editScheme(void);
 	virtual void setCurrentScheme(uint index);
 	virtual sint getCurrentScheme(void) const;
 	virtual void cstValueUpdate();
-	
+
 private:
 
 }; /* class CAttribRGBAWidget */
@@ -339,14 +394,14 @@ private:
 */
 class CAttribPlaneBasisWidget: public CAttribWidgetT<NL3D::CPlaneBasis>
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAttribPlaneBasisWidget(QWidget *parent = 0);
 	~CAttribPlaneBasisWidget();
 
 	void setWrapper(IPSWrapper<NL3D::CPlaneBasis> *wrapper);
-	
+
 	// inherited from CAttribWidget
 	virtual QDialog *editScheme(void);
 	virtual void setCurrentScheme(uint index);

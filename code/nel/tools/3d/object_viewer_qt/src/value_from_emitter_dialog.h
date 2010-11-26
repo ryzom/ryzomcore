@@ -37,15 +37,16 @@
 
 namespace NL3D
 {
-	template <typename T> class CPSAttribMakerMemory ;
+template <typename T> class CPSAttribMakerMemory ;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CValueFromEmitterDialog : public QDialog
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CValueFromEmitterDialog(QWidget *widget, QWidget *parent = 0);
 	~CValueFromEmitterDialog();
@@ -53,12 +54,12 @@ public:
 	virtual void init() = 0;
 
 protected:
-  
-    QGridLayout *_gridLayout;
-    QWidget *_widget;
+
+	QGridLayout *_gridLayout;
+	QWidget *_widget;
 };
 
-/** construct a dialog that allow to edit a scheme used for initial attribute generation in a particle  
+/** construct a dialog that allow to edit a scheme used for initial attribute generation in a particle
   */
 template <class T> class CValueFromEmitterDialogT : public CValueFromEmitterDialog
 {
@@ -68,7 +69,7 @@ public:
 	{
 		nlassert(srcDlg);
 		_SchemeWrapper.S = editedScheme ;
-	}	
+	}
 	// inherited from CValueFromEmitterDialog
 	void init()
 	{
@@ -81,7 +82,7 @@ public:
 	~CValueFromEmitterDialogT()
 	{
 		delete _AttrbDlg ;
-	}	
+	}
 
 protected:
 
@@ -92,15 +93,28 @@ protected:
 	struct CSchemeWrapper : public IPSSchemeWrapper<T>
 	{
 		NL3D::CPSAttribMakerMemory<T> *S ;
-		virtual NL3D::CPSAttribMaker<T> *getScheme(void) const { return S->getScheme() ; }
-		virtual void setScheme(NL3D::CPSAttribMaker<T> *s) { S->setScheme(s) ; } ;
+		virtual NL3D::CPSAttribMaker<T> *getScheme(void) const
+		{
+			return S->getScheme() ;
+		}
+		virtual void setScheme(NL3D::CPSAttribMaker<T> *s)
+		{
+			S->setScheme(s) ;
+		} ;
 	} _SchemeWrapper ;
 
 	/// a dummy wrapper for constant value. This shouldn't be called , however
 	struct CDummyWrapper : public IPSWrapper<T>
 	{
-		T get(void) const { nlassert(false) ; return T() ; }
-		void set(const T &) { nlassert(false) ; }
+		T get(void) const
+		{
+			nlassert(false) ;
+			return T() ;
+		}
+		void set(const T &)
+		{
+			nlassert(false) ;
+		}
 	} _DummyWrapper ;
 } ;
 

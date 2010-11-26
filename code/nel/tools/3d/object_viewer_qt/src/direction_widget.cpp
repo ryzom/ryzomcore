@@ -26,19 +26,20 @@
 // NeL includes
 #include <nel/misc/vector.h>
 
-namespace NLQT {
+namespace NLQT
+{
 
 CDirectionWidget::CDirectionWidget(QWidget *parent)
-    : QWidget(parent), _globalName("")
+	: QWidget(parent), _globalName("")
 {
 	_ui.setupUi(this);
-	
+
 	_ui.xzWidget->setMode(Mode::Direction);
 	_ui.yzWidget->setMode(Mode::Direction);
 	_ui.xzWidget->setText("XZ");
 	_ui.yzWidget->setText("YZ");
 	_ui.globalPushButton->hide();
-	
+
 	connect(_ui.globalPushButton ,SIGNAL(clicked()), this, SLOT(setGlobalDirection()));
 	connect(_ui.incVecIPushButton ,SIGNAL(clicked()), this, SLOT(incVecI()));
 	connect(_ui.incVecJPushButton ,SIGNAL(clicked()), this, SLOT(incVecJ()));
@@ -46,10 +47,10 @@ CDirectionWidget::CDirectionWidget(QWidget *parent)
 	connect(_ui.decVecIPushButton ,SIGNAL(clicked()), this, SLOT(decVecI()));
 	connect(_ui.decVecJPushButton ,SIGNAL(clicked()), this, SLOT(decVecJ()));
 	connect(_ui.decVecKPushButton ,SIGNAL(clicked()), this, SLOT(decVecK()));
-	
+
 	connect(_ui.xzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecXZ(float,float)));
 	connect(_ui.yzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecYZ(float,float)));
-	
+
 	// Set default value +K
 	setValue(NLMISC::CVector::K);
 }
@@ -72,7 +73,7 @@ void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
 	_ui.xzWidget->repaint();
 	_ui.yzWidget->repaint();
 
-	if (emit) 
+	if (emit)
 	{
 		Q_EMIT valueChanged(_value);
 	}
@@ -81,10 +82,10 @@ void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
 void CDirectionWidget::setGlobalName(const QString &globalName, bool emit)
 {
 	_globalName = globalName;
-	
+
 	_ui.xzWidget->setVisible(_globalName.isEmpty());
 	_ui.yzWidget->setVisible(_globalName.isEmpty());
-	
+
 	_ui.incVecIPushButton->setEnabled(_globalName.isEmpty());
 	_ui.incVecJPushButton->setEnabled(_globalName.isEmpty());
 	_ui.incVecKPushButton->setEnabled(_globalName.isEmpty());
@@ -100,10 +101,10 @@ void CDirectionWidget::setGlobalDirection()
 {
 	bool ok;
 	QString text = QInputDialog::getText(this, tr("Enter Name"),
-					      "", QLineEdit::Normal,
-					      QString(_globalName), &ok);
-     
-	if (ok)   
+										 "", QLineEdit::Normal,
+										 QString(_globalName), &ok);
+
+	if (ok)
 		setGlobalName(text);
 }
 
@@ -141,20 +142,20 @@ void CDirectionWidget::setNewVecXZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
 	NLMISC::CVector v = _value;
-	
+
 	v.x = x;
 	v.z = y;
-	
+
 	float d = v.x * v.x + v.z * v.z;
-	float f; 
+	float f;
 	if (fabs(d) > epsilon)
 		f = sqrt((1.f - v.y * v.y) / d);
 	else
 		f = 1;
-	
+
 	v.x *= f;
 	v.z *= f;
-	
+
 	v.normalize();
 
 	setValue(v);
@@ -164,20 +165,20 @@ void CDirectionWidget::setNewVecYZ(float x, float y)
 {
 	const float epsilon = 10E-3f;
 	NLMISC::CVector v = _value;
-	
+
 	v.y = x;
 	v.z = y;
-	
+
 	float d = v.y * v.y + v.z * v.z;
-	float f; 
+	float f;
 	if (fabs(d) > epsilon)
 		f = sqrt((1.f - v.x * v.x) / d);
 	else
 		f = 1;
-	
+
 	v.y *= f;
 	v.z *= f;
-	
+
 	v.normalize();
 
 	setValue(v);

@@ -20,8 +20,9 @@
 #include "stdpch.h"
 #include "bin_op_dialog.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CBinOpDialog::CBinOpDialog(QWidget *widget1, QWidget *widget2, QWidget *parent)
 	: QDialog(parent)
 {
@@ -36,7 +37,7 @@ CBinOpDialog::CBinOpDialog(QWidget *widget1, QWidget *widget2, QWidget *parent)
 	_gridLayout->addItem(_horizontalSpacer, 1, 1, 1, 1);
 
 	_gridLayout->addWidget(widget2, 2, 0, 1, 2);
-	
+
 	setWindowTitle(tr("Bin operator"));
 	_comboBox->clear();
 

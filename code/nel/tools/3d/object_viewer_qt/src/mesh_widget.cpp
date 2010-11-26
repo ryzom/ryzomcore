@@ -34,13 +34,14 @@
 #include "mesh_widget.h"
 #include "morph_mesh_dialog.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CMeshWidget::CMeshWidget(QWidget *parent)
-    : QGroupBox(parent)
+	: QGroupBox(parent)
 {
 	_ui.setupUi(this);
-	
+
 	connect(_ui.browsePushButton, SIGNAL(clicked(bool)), this, SLOT(browseShape()));
 	connect(_ui.editPushButton, SIGNAL(clicked(bool)), this, SLOT(editMorph()));
 	connect(_ui.morphCheckBox, SIGNAL(toggled(bool)), this, SLOT(setMorphMesh(bool)));
@@ -54,11 +55,11 @@ void CMeshWidget::setCurrentShape(CWorkspaceNode *ownerNode, NL3D::CPSShapeParti
 {
 	_Node = ownerNode;
 	_ShapeParticle = sp;
-	
+
 	if (!dynamic_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle))
 	{
 		_ui.groupBox->hide();
-		_ui.browsePushButton->setEnabled(true);  
+		_ui.browsePushButton->setEnabled(true);
 		_ui.meshLineEdit->setEnabled(true);
 		_ui.label->setEnabled(true);
 		_ui.meshLineEdit->setText(_ShapeParticle->getShape().c_str());
@@ -69,7 +70,7 @@ void CMeshWidget::setCurrentShape(CWorkspaceNode *ownerNode, NL3D::CPSShapeParti
 		NL3D::CPSConstraintMesh *cm = NLMISC::safe_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 		if (cm->getNumShapes() > 1)
 			_ui.morphCheckBox->setChecked(true);
-		else 
+		else
 			_ui.morphCheckBox->setChecked(false);
 
 		updateForMorph();
@@ -79,11 +80,11 @@ void CMeshWidget::setCurrentShape(CWorkspaceNode *ownerNode, NL3D::CPSShapeParti
 void CMeshWidget::browseShape()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("NeL shape file (*.shape)"));
+					   tr("Open NeL data file"), ".",
+					   tr("NeL shape file (*.shape)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toStdString()));
 		try
@@ -137,11 +138,11 @@ void CMeshWidget::editMorph()
 
 void CMeshWidget::updateForMorph()
 {
-  	NL3D::CPSConstraintMesh *cm = NLMISC::safe_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
+	NL3D::CPSConstraintMesh *cm = NLMISC::safe_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 	if (cm)
 	{
 		bool enable = cm->getNumShapes() > 1;
-		_ui.browsePushButton->setEnabled(!enable);  
+		_ui.browsePushButton->setEnabled(!enable);
 		_ui.meshLineEdit->setEnabled(!enable);
 		_ui.label->setEnabled(!enable);
 		if (!enable)
@@ -163,7 +164,7 @@ void CMeshWidget::updateMeshErrorString()
 	if (numVerts.empty()) return;
 	if (numVerts.size() == 1)
 		_ui.infoLabel->setText(getShapeErrorString(numVerts[0]));
-	
+
 	else
 	{
 		// display error msg for morphed meshs
@@ -185,10 +186,13 @@ QString CMeshWidget::getShapeErrorString(sint errorCode)
 {
 	switch(errorCode)
 	{
-		case NL3D::CPSConstraintMesh::ShapeFileIsNotAMesh: return tr("Not a mesh");
-		case NL3D::CPSConstraintMesh::ShapeFileNotLoaded: return tr("Shape not loaded");
-		case NL3D::CPSConstraintMesh::ShapeHasTooMuchVertices: return tr("Too much vertices");
-		default:
+	case NL3D::CPSConstraintMesh::ShapeFileIsNotAMesh:
+		return tr("Not a mesh");
+	case NL3D::CPSConstraintMesh::ShapeFileNotLoaded:
+		return tr("Shape not loaded");
+	case NL3D::CPSConstraintMesh::ShapeHasTooMuchVertices:
+		return tr("Too much vertices");
+	default:
 		break;
 	};
 	return QString();

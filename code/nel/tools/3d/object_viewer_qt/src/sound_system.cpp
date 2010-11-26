@@ -29,14 +29,15 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSoundSystem::CSoundSystem()
-		:_AudioMixer(NULL),
-		_AnimManager(NULL),
-		_Zero(NLMISC::CVector::Null)
+	:_AudioMixer(NULL),
+	 _AnimManager(NULL),
+	 _Zero(NLMISC::CVector::Null)
 {
-	
+
 }
 
 CSoundSystem::~CSoundSystem()
@@ -59,9 +60,9 @@ void CSoundSystem::setListenerMatrix(const NLMISC::CMatrix &m)
 
 void CSoundSystem::init ()
 {
-  	//H_AUTO2
+	//H_AUTO2
 	nldebug("CSoundSystem::init");
-	
+
 	// create audiomixer
 	_AudioMixer = NULL;
 	_AnimManager = NULL;
@@ -70,7 +71,7 @@ void CSoundSystem::init ()
 	nlassert(_AudioMixer);
 
 	try
-	{ 
+	{
 		// init audiomixer
 		_PackedSheetPath = Modules::config().getValue("SoundPackedSheetPath", std::string(""));
 		_SamplePath = Modules::config().getValue("SoundSamplePath", std::string(""));
@@ -151,7 +152,7 @@ void CSoundSystem::play(const std::string &soundName)
 		{
 			nlwarning("Can't play the sound (perhaps it's contextual sound)");
 		}
-	}	
+	}
 }
 
 NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
@@ -166,14 +167,15 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 			src->setPos(pos);
 			src->play();
 			return src;
-		}	
+		}
 		else
 		{
 			nlwarning("Can't play the sound (perhaps it's contextual sound)");
-		}	return NULL;
+		}
+		return NULL;
 	}
 	return NULL;
-}	
+}
 
 void CSoundSystem::playAnimation(std::string& name, float lastTime, float curTime, NLSOUND::CSoundContext &context)
 {
@@ -216,7 +218,7 @@ void CSoundSystem::releaseGraphics()
 	nldebug("CSoundSystem::releaseGraphics");
 
 	// ..
-	
+
 	// clear particle system sound
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 }

@@ -34,26 +34,28 @@
 // Projects includes
 #include "particle_node.h"
 
-namespace NL3D {
-	class CParticleSystem;
-	class CParticleSystemModel;
-	class CShapeBank;
-	class CScene;
-	class IDriver;
-	class CFontManager;
-	class CFontGenerator;
+namespace NL3D
+{
+class CParticleSystem;
+class CParticleSystemModel;
+class CShapeBank;
+class CScene;
+class IDriver;
+class CFontManager;
+class CFontGenerator;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 /**
 @class CParticleEditor
 @brief The main class of the particles editor.
 @details - Provides access to a container containing all of the particles systems (getParticleWorkspace())
-and also allows you to create an empty container (createNewWorkspace()) load / save from the file 
+and also allows you to create an empty container (createNewWorkspace()) load / save from the file
 and unload (loadWorkspace(), saveWorkspaceStructure(), saveWorkspaceContent())
-- Has basic operations management system to control a particles systems (start(), stop(), pause(), setSpeed() / setAutoRepeat()) 
+- Has basic operations management system to control a particles systems (start(), stop(), pause(), setSpeed() / setAutoRepeat())
 as in single mode, and in the multiple (start(), startMultiple()).
-- Additional functions of particle systems: display / hide the assistanse elements (setDisplayHelpers()), 
+- Additional functions of particle systems: display / hide the assistanse elements (setDisplayHelpers()),
 the calculation of bounding box (setAutoBBox(), getAutoBBox()), switching on the autoCount mode (setAutoBBox(), getAutoBBox()).
 - Selection of the current system of particles for making various operations (setActiveNode(), getActiveNode()).
 */
@@ -65,29 +67,35 @@ public:
 		enum List
 		{
 			Stopped = 1,
-			RunningSingle, 
-			RunningMultiple, 
-			PausedSingle, 
+			RunningSingle,
+			RunningMultiple,
+			PausedSingle,
 			PausedMultiple
 		};
 	};
 	CParticleEditor(void);
 	~CParticleEditor(void);
-	
+
 	void init();
-	
+
 	void release();
-	
+
 	/// Active a new node of the workspace
 	/// Current active node is ready for edition.
 	/// Its bbox is displayed.
 	void setActiveNode(CWorkspaceNode *node);
-	
+
 	/// Get the node of the workspace that is currently active
-	CWorkspaceNode *getActiveNode() const { return _ActiveNode; }
-	
+	CWorkspaceNode *getActiveNode() const
+	{
+		return _ActiveNode;
+	}
+
 	/// Get the particle system model that is currently active
-	NL3D::CParticleSystemModel *getActivePSM() const { return _ActiveNode ? _ActiveNode->getPSModel() : NULL; }
+	NL3D::CParticleSystemModel *getActivePSM() const
+	{
+		return _ActiveNode ? _ActiveNode->getPSModel() : NULL;
+	}
 
 	/// Get a model from a ps pointer. The ps must belong to the workspace
 	NL3D::CParticleSystemModel *getModelFromPS(NL3D::CParticleSystem *ps) const;
@@ -126,56 +134,92 @@ public:
 
 	void setDisplayBBox(bool enable);
 
-	void setDisplayHelpers(bool enable) { _DisplayHelpers = enable; }
+	void setDisplayHelpers(bool enable)
+	{
+		_DisplayHelpers = enable;
+	}
 
-	void setAutoRepeat(bool enable) { _AutoRepeat = enable; }
+	void setAutoRepeat(bool enable)
+	{
+		_AutoRepeat = enable;
+	}
 
 	/// Auto bbox for fx
-	void  setAutoBBox(bool enable) { _AutoUpdateBBox = enable; }
+	void  setAutoBBox(bool enable)
+	{
+		_AutoUpdateBBox = enable;
+	}
 
-	bool  getAutoBBox() const { return _AutoUpdateBBox; }
-	
+	bool  getAutoBBox() const
+	{
+		return _AutoUpdateBBox;
+	}
+
 	/// Enable / disbale auto-count
-	void enableAutoCount(bool enable);	
-	
-	/// Reset the autocount the next time the system will be started	
+	void enableAutoCount(bool enable);
+
+	/// Reset the autocount the next time the system will be started
 	void resetAutoCount(CWorkspaceNode *node, bool reset = true);
-	
+
 	/// Reset the auto compute bbox
-	void  resetAutoBBox() {	_EmptyBBox = true; }
+	void  resetAutoBBox()
+	{
+		_EmptyBBox = true;
+	}
 
 	/// Get current state
-	int getState() const { return _State; }
+	int getState() const
+	{
+		return _State;
+	}
 
 	/// Return true if one or several system are being played
-	bool isRunning() const { return _State == State::RunningSingle || _State == State::RunningMultiple; }
+	bool isRunning() const
+	{
+		return _State == State::RunningSingle || _State == State::RunningMultiple;
+	}
 
 	/// Return true if a system is paused.
 	/// Must call only if running
-	bool isPaused() const 
+	bool isPaused() const
 	{
 		return _State == State::PausedSingle || _State == State::PausedMultiple;
 	}
 
-	CParticleWorkspace *getParticleWorkspace() const { return _PW; }	
-	
-	NL3D::IDriver *getDriver() const { return _Driver; }
-	
-	NL3D::CScene *getScene() const { return _Scene; }
+	CParticleWorkspace *getParticleWorkspace() const
+	{
+		return _PW;
+	}
+
+	NL3D::IDriver *getDriver() const
+	{
+		return _Driver;
+	}
+
+	NL3D::CScene *getScene() const
+	{
+		return _Scene;
+	}
 
 	/// Get the fontManager
-	NL3D::CFontManager *getFontManager() const {return _FontManager;}
+	NL3D::CFontManager *getFontManager() const
+	{
+		return _FontManager;
+	}
 
 	/// Get the fontGenerator
-	NL3D::CFontGenerator *getFontGenerator () const { return _FontGen; }
+	NL3D::CFontGenerator *getFontGenerator () const
+	{
+		return _FontGen;
+	}
 
 private:
 	// Check if a node is inserted in the running list (it may be paused)
 	bool isRunning(CWorkspaceNode *node);
-	
+
 	// Check is a node has loops
 	bool checkHasLoop(CWorkspaceNode &node);
-	
+
 	void play(CWorkspaceNode &node);
 	void unpause(CWorkspaceNode &node);
 	void pause(CWorkspaceNode &node);
@@ -194,15 +238,15 @@ private:
 	bool	_AutoRepeat;
 	bool	_DisplayBBox;
 	bool	_DisplayHelpers;
-	
+
 	// The system bbox must be updated automatically
 	bool			_AutoUpdateBBox;
 
 	// The last computed bbox for the system
 	bool			_EmptyBBox;
 	NLMISC::CAABBox		_CurrBBox;
-	
-	
+
+
 	CParticleWorkspace	*_PW;
 	NL3D::IDriver   	*_Driver;
 	NL3D::CScene		*_Scene;

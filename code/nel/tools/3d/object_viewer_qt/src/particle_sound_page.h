@@ -35,19 +35,20 @@
 
 namespace NLSOUND
 {
-	class UAudioMixer;
+class UAudioMixer;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CSoundPage
 @brief Page for QStackWidget, to edit sounds in a particle system
-*/  
+*/
 class CSoundPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CSoundPage(QWidget *parent = 0);
 	~CSoundPage();
@@ -65,36 +66,63 @@ private Q_SLOTS:
 	void setEmissionPercent(float value);
 
 private:
-	
+
 	/// wrapper to set the gain of sounds
 	struct CGainWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSSound *S;
-		float get(void) const { return S->getGain(); }
-		void set(const float &v) { S->setGain(v); }
-		scheme_type *getScheme(void) const { return S->getGainScheme(); }
-		void setScheme(scheme_type *s) { S->setGainScheme(s); }
+		float get(void) const
+		{
+			return S->getGain();
+		}
+		void set(const float &v)
+		{
+			S->setGain(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return S->getGainScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			S->setGainScheme(s);
+		}
 	} _GainWrapper;
 
 	/// wrapper to set the pitch of sounds
 	struct CPitchWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSSound *S;
-		float get(void) const { return S->getPitch(); }
-		void set(const float &v) { S->setPitch(v); }
-		scheme_type *getScheme(void) const { return S->getPitchScheme(); }
-		void setScheme(scheme_type *s) { S->setPitchScheme(s); }
+		float get(void) const
+		{
+			return S->getPitch();
+		}
+		void set(const float &v)
+		{
+			S->setPitch(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return S->getPitchScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			S->setPitchScheme(s);
+		}
 	} _PitchWrapper;
 
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
-	
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
+
 	/// the sound being edited
 	NL3D::CPSSound            *_Sound;
-	
+
 	CWorkspaceNode *_Node;
-	
+
 	Ui::CSoundPage _ui;
-	
+
 }; /* class CSoundPage */
 
 } /* namespace NLQT */

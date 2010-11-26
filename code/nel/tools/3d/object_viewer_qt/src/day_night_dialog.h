@@ -28,7 +28,8 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CDayNightDialog
@@ -37,12 +38,12 @@ namespace NLQT {
 */
 class CDayNightDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CDayNightDialog(QWidget *parent = 0);
 	~CDayNightDialog();
-	
+
 private Q_SLOTS:
 	void setDayNight(int value);
 

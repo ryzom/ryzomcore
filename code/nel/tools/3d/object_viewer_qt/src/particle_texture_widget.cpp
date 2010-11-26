@@ -30,16 +30,17 @@
 #include "nel/3d/ps_particle_basic.h"
 #include "nel/misc/path.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CParticleTextureWidget::CParticleTextureWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL)
+	: QWidget(parent), _Wrapper(NULL)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.imageLabel->setScaledContents(true);
 	_ui.removePushButton->setVisible(false);
-	
+
 	connect(_ui.chooseTexPushButton, SIGNAL(clicked()), this, SLOT(chooseTexture()));
 	connect(_ui.removePushButton, SIGNAL(clicked()), this, SLOT(removeTexture()));
 }
@@ -51,7 +52,7 @@ CParticleTextureWidget::~CParticleTextureWidget()
 void CParticleTextureWidget::updateUi()
 {
 	nlassert(_Wrapper);
-	
+
 	_Texture = _Wrapper->get();
 
 	updateTexture();
@@ -68,11 +69,11 @@ void CParticleTextureWidget::chooseTexture()
 	}
 
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open texture file"), texName.c_str(),
-					tr("Image file (*.tga *.png)"));
+					   tr("Open texture file"), texName.c_str(),
+					   tr("Image file (*.tga *.png)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		// Add search path for the texture
 		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toStdString()));
@@ -89,7 +90,7 @@ void CParticleTextureWidget::chooseTexture()
 		{
 			QMessageBox::critical(this, tr("Texture loading error"), e.what(),  QMessageBox::Ok);
 		}
-	
+
 	}
 	setCursor(Qt::ArrowCursor);
 }
@@ -108,7 +109,7 @@ void CParticleTextureWidget::removeTexture()
 
 void CParticleTextureWidget::updateTexture()
 {
-	if (!_Texture) 
+	if (!_Texture)
 	{
 		_ui.imageLabel->setPixmap(QPixmap());
 		return;

@@ -30,7 +30,8 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 struct Mode
 {
@@ -42,28 +43,28 @@ struct Mode
 		RibbonShape
 	};
 };
-	
+
 class CGraphicsInfoWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CGraphicsInfoWidget(QWidget *parent = 0);
 	~CGraphicsInfoWidget();
-	
+
 	void setMode(int mode);
 	void setColor(const QColor &color);
 	void setVector(float x, float y);
 	void setText(const QString &text);
 	void setRibbonShape(const std::vector<NLMISC::CVector> &verts, bool braceMode);
-	
+
 Q_SIGNALS:
 	void applyNewVector(float x, float y);
-  
+
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void mouseDoubleClickEvent(QMouseEvent *event);
-	
+
 	int 	_mode;
 	QColor 	_color;
 	float _x;
@@ -71,7 +72,7 @@ protected:
 	QString _text;
 	std::vector<NLMISC::CVector> _verts;
 	bool _braceMode;
-	
+
 }; /* class CGraphicsInfoWidget */
 
 } /* namespace NLQT */

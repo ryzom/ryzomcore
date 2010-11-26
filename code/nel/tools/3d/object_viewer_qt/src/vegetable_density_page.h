@@ -30,19 +30,20 @@
 
 namespace NL3D
 {
-	class CVegetable;
+class CVegetable;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableDensityPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableDensityPage(QWidget *parent = 0);
 	~CVegetableDensityPage();
-	
+
 	/// set the vegetble to edit. NULL will disable all the controls.
 	void setVegetableToEdit(NL3D::CVegetable *vegetable);
 
@@ -65,11 +66,11 @@ private:
 
 	// The vegetable to edit.
 	NL3D::CVegetable	*_Vegetable;
-	
+
 	float _PrecMaxDensityValue;
 
 	Ui::CVegetableDensityPage _ui;
-	
+
 }; /* class CVegetableDensityPage */
 
 } /* namespace NLQT */

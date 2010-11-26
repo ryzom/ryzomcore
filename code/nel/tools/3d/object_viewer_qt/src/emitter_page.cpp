@@ -21,7 +21,7 @@
 #include "emitter_page.h"
 
 // Qt includes
- #include <QtGui/QMessageBox>
+#include <QtGui/QMessageBox>
 
 // NeL includes
 
@@ -29,11 +29,12 @@
 #include "edit_range_widget.h"
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
-  
+
 CEmitterPage::CEmitterPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -48,7 +49,7 @@ CEmitterPage::CEmitterPage(QWidget *parent)
 	_ui.genNbWidget->setWrapper(&_GenNbWrapper);
 	_ui.genNbWidget->setSchemeWrapper(&_GenNbWrapper);
 	_ui.genNbWidget->init();
-	
+
 	// deals with emitters that have a direction
 	_ui.strenghtModulateWidget->setRange(0, 10);
 	_ui.strenghtModulateWidget->setWrapper(&_ModulatedStrenghtWrapper);
@@ -58,7 +59,7 @@ CEmitterPage::CEmitterPage(QWidget *parent)
 	// SPEED_INHERITANCE_FACTOR
 	_ui.speedInherFactorWidget->setRange(-1.f, 1.f);
 	//_ui.speedInherFactorWidget->setWrapper(&_SpeedInheritanceFactorWrapper);
-	
+
 	// DELAYED_EMISSION
 	_ui.delayedEmissionWidget->setRange(0.f, 10.f);
 	_ui.delayedEmissionWidget->enableLowerBound(0.f, false);
@@ -66,10 +67,10 @@ CEmitterPage::CEmitterPage(QWidget *parent)
 	// MAX_EMISSION_COUNT
 	_ui.maxEmissionCountWidget->setRange(0, 100);
 	_ui.maxEmissionCountWidget->enableUpperBound(256, false);
-	
+
 	// radius  for conic emitter
 	_ui.radiusWidget->setRange(0.1f, 2.1f);
-	
+
 	connect(_ui.emittedTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setEmittedType(int)));
 	connect(_ui.typeEmissionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfEmission(int)));
 	connect(_ui.directionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDirectionMode(int)));
@@ -117,8 +118,8 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 	}
 	else
 		_ui.strenghtModulateWidget->hide();
-	  
-	
+
+
 	// deals with emitters that have a direction
 	if (dynamic_cast<NL3D::CPSDirection *>(_Emitter))
 	{
@@ -127,7 +128,7 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 	}
 	else
 		_ui.directionWidget->hide();
-	  
+
 
 	// radius  for conic emitter
 	if (dynamic_cast<NL3D::CPSEmitterConic *>(_Emitter))
@@ -141,7 +142,7 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 		_ui.radiusWidget->hide();
 		_ui.radiusLabel->hide();
 	}
-	
+
 	_ui.forceConsistentCheckBox->setChecked(_Emitter->isConsistentEmissionEnabled());
 
 	_ui.directionComboBox->blockSignals(true);
@@ -170,7 +171,7 @@ void CEmitterPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBind
 		nlassert(0);
 	}
 	_ui.directionComboBox->blockSignals(false);
-	
+
 	updatePeriodWidget();
 
 	_ui.typeEmissionComboBox->setCurrentIndex(int(_Emitter->getEmissionType()));
@@ -193,20 +194,20 @@ void CEmitterPage::setEmittedType(int index)
 	{
 		if (_Emitter->getOwner()->getOwner()->getBehaviourType() == NL3D::CParticleSystem::SpellFX || _Emitter->getOwner()->getOwner()->getBypassMaxNumIntegrationSteps())
 		{
-			QMessageBox::critical(this, tr("NeL Particle Editor"), 
-						tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX',"
-						"and thus, should have a finite duration. This operation create a loop in the system, and so is forbidden."),
-						QMessageBox::Ok);
+			QMessageBox::critical(this, tr("NeL Particle Editor"),
+								  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX',"
+									 "and thus, should have a finite duration. This operation create a loop in the system, and so is forbidden."),
+								  QMessageBox::Ok);
 		}
 		else
 		{
-			QMessageBox::critical(this, tr("NeL Particle Editor"), 
-						tr("Loops with emitters are forbidden."),
-						QMessageBox::Ok);
+			QMessageBox::critical(this, tr("NeL Particle Editor"),
+								  tr("Loops with emitters are forbidden."),
+								  QMessageBox::Ok);
 		}
 		updateEmittedType();
 	}
-	
+
 	Modules::psEdit().resetAutoCount(_Node);
 	updateModifiedFlag();
 }
@@ -216,11 +217,11 @@ void CEmitterPage::setTypeOfEmission(int index)
 	if (_Emitter->getEmissionType() == index) return;
 	if (!_Emitter->setEmissionType((NL3D::CPSEmitter::TEmissionType) index))
 	{
-		QMessageBox::critical(this, tr("NeL Particle Editor"), 
-				   tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-				      "and thus, should have a finite duration. Please remove that flag first."),
-				   QMessageBox::Ok);
-		
+		QMessageBox::critical(this, tr("NeL Particle Editor"),
+							  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+								 "and thus, should have a finite duration. Please remove that flag first."),
+							  QMessageBox::Ok);
+
 		_ui.typeEmissionComboBox->setCurrentIndex(int(_Emitter->getEmissionType()));
 	}
 
@@ -250,28 +251,28 @@ void CEmitterPage::setDirectionMode(int index)
 	nlassert(_Emitter);
 	switch(index)
 	{
-		case Default:
-			_Emitter->enableSpeedBasisEmission(false);
-			_Emitter->enableUserMatrixModeForEmissionDirection(false);
+	case Default:
+		_Emitter->enableSpeedBasisEmission(false);
+		_Emitter->enableUserMatrixModeForEmissionDirection(false);
 		break;
-		case AlignOnEmitterDirection:
-			_Emitter->enableSpeedBasisEmission(true);
-			_Emitter->enableUserMatrixModeForEmissionDirection(false);
+	case AlignOnEmitterDirection:
+		_Emitter->enableSpeedBasisEmission(true);
+		_Emitter->enableUserMatrixModeForEmissionDirection(false);
 		break;
-		case InWorld:
-			_Emitter->enableSpeedBasisEmission(false);
-			_Emitter->enableUserMatrixModeForEmissionDirection(true);
-			_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSIdentityMatrix);
+	case InWorld:
+		_Emitter->enableSpeedBasisEmission(false);
+		_Emitter->enableUserMatrixModeForEmissionDirection(true);
+		_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSIdentityMatrix);
 		break;
-		case LocalToSystem:
-			_Emitter->enableSpeedBasisEmission(false);
-			_Emitter->enableUserMatrixModeForEmissionDirection(true);
-			_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSFXWorldMatrix);
+	case LocalToSystem:
+		_Emitter->enableSpeedBasisEmission(false);
+		_Emitter->enableUserMatrixModeForEmissionDirection(true);
+		_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSFXWorldMatrix);
 		break;
-		case LocalToFatherSkeleton:
-			_Emitter->enableSpeedBasisEmission(false);
-			_Emitter->enableUserMatrixModeForEmissionDirection(true);
-			_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSUserMatrix);
+	case LocalToFatherSkeleton:
+		_Emitter->enableSpeedBasisEmission(false);
+		_Emitter->enableUserMatrixModeForEmissionDirection(true);
+		_Emitter->setUserMatrixModeForEmissionDirection(NL3D::PSUserMatrix);
 		break;
 	}
 	updateModifiedFlag();
@@ -291,7 +292,7 @@ void CEmitterPage::setConicEmitterRadius(float value)
 
 void CEmitterPage::setEmitDelay(float value)
 {
-	_Emitter->setEmitDelay(value); 
+	_Emitter->setEmitDelay(value);
 	Modules::psEdit().resetAutoCount(_Node);
 	updateModifiedFlag();
 }
@@ -300,11 +301,11 @@ void CEmitterPage::setMaxEmissionCount(uint32 value)
 {
 	if (!_Emitter->setMaxEmissionCount((uint8)value))
 	{
-     
-		QMessageBox::critical(this, tr("NeL Particle Editor"), 
-					tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-					"and thus, should have a finite duration. Please remove that flag first."),
-					QMessageBox::Ok);
+
+		QMessageBox::critical(this, tr("NeL Particle Editor"),
+							  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+								 "and thus, should have a finite duration. Please remove that flag first."),
+							  QMessageBox::Ok);
 
 		_ui.maxEmissionCountWidget->setValue((uint32)_Emitter->getMaxEmissionCount(), false);
 		updateModifiedFlag();
@@ -321,7 +322,7 @@ void CEmitterPage::setDir(const NLMISC::CVector &value)
 void CEmitterPage::updatePeriodWidget()
 {
 	bool bEnable = _Emitter->getEmissionType() == NL3D::CPSEmitter::regular;
-	
+
 	_ui.periodWidget->setEnabled(bEnable);
 	_ui.delayedEmissionWidget->setEnabled(bEnable);
 	_ui.delayedEmissionLabel->setEnabled(bEnable);
@@ -332,13 +333,13 @@ void CEmitterPage::updatePeriodWidget()
 void CEmitterPage::updateEmittedType()
 {
 	disconnect(_ui.emittedTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setEmittedType(int)));
-	
+
 	_ui.emittedTypeComboBox->clear();
 	_ui.emittedTypeComboBox->addItem(tr("no emission"));
 	_LocatedList.clear();
 	_LocatedList.push_back(NULL);
 	NL3D::CParticleSystem *ps = _Emitter->getOwner()->getOwner();
-	uint nbLocated = ps->getNbProcess(); 
+	uint nbLocated = ps->getNbProcess();
 	for (uint k = 0; k < nbLocated; ++k)
 	{
 		NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(ps->getProcess(k));
@@ -353,25 +354,25 @@ void CEmitterPage::updateEmittedType()
 	connect(_ui.emittedTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setEmittedType(int)));
 }
 
-void CEmitterPage::CPeriodWrapper::set(const float &v) 
-{ 
+void CEmitterPage::CPeriodWrapper::set(const float &v)
+{
 	E->setPeriod(v);
 	Modules::psEdit().resetAutoCount(Node);
 }
-void CEmitterPage::CPeriodWrapper::setScheme(scheme_type *s) 
-{ 
+void CEmitterPage::CPeriodWrapper::setScheme(scheme_type *s)
+{
 	E->setPeriodScheme(s);
 	Modules::psEdit().resetAutoCount(Node);
 }
 
-void CEmitterPage::CGenNbWrapper::set(const uint32 &v) 
-{ 
+void CEmitterPage::CGenNbWrapper::set(const uint32 &v)
+{
 	E->setGenNb(v);
 	Modules::psEdit().resetAutoCount(Node);
 }
 
-void CEmitterPage::CGenNbWrapper::setScheme(scheme_type *s) 
-{ 
+void CEmitterPage::CGenNbWrapper::setScheme(scheme_type *s)
+{
 	E->setGenNbScheme(s);
 	Modules::psEdit().resetAutoCount(Node);
 }

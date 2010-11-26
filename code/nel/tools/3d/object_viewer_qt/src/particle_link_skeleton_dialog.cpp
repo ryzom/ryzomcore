@@ -27,17 +27,18 @@
 #include "modules.h"
 #include "particle_node.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CParticleLinkDialog::CParticleLinkDialog(CSkeletonTreeModel *model, QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	qobject_cast< QMainWindow* >(parent)->addDockWidget(Qt::RightDockWidgetArea, this);
-	
+
 	_ui.treeView->setModel(model);
-	
+
 	connect(model, SIGNAL(modelReset()), this, SLOT(resetModel()));
 	connect(_ui.linkPushButton, SIGNAL(clicked()), this, SLOT(setLink()));
 	connect(_ui.unlinkPushButton, SIGNAL(clicked()), this, SLOT(setUnlink()));
@@ -51,11 +52,11 @@ CParticleLinkDialog::~CParticleLinkDialog()
 void CParticleLinkDialog::setLink()
 {
 	CWorkspaceNode *node = Modules::psEdit().getActiveNode();
-	if (node == NULL) 
+	if (node == NULL)
 		return;
 
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 		return;
 
 	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(_ui.treeView->currentIndex().internalPointer());
@@ -71,7 +72,7 @@ void CParticleLinkDialog::setLink()
 void CParticleLinkDialog::setUnlink()
 {
 	CWorkspaceNode *node = Modules::psEdit().getActiveNode();
-	if (node == NULL) 
+	if (node == NULL)
 		return;
 
 	node->unstickPSFromSkeleton();

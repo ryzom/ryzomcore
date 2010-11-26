@@ -27,10 +27,11 @@
 // Nel includes
 #include <nel/misc/rgba.h>
 
-namespace NLQT {
+namespace NLQT
+{
 
 CColorEditWidget::CColorEditWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL), _emit(true)
+	: QWidget(parent), _Wrapper(NULL), _emit(true)
 {
 	_ui.setupUi(this);
 
@@ -39,7 +40,7 @@ CColorEditWidget::CColorEditWidget(QWidget *parent)
 	connect(_ui.bSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setBlue(int)));
 	connect(_ui.aSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAlpha(int)));
 	connect(_ui.browsePushButton, SIGNAL(clicked()), this, SLOT(browseColor()));
-	
+
 	setColor(QColor(255, 255, 255, 255));
 }
 
@@ -86,14 +87,14 @@ void CColorEditWidget::setRed(int r)
 	if (_emit)
 		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
 
-	if (_Wrapper == NULL) 
+	if (_Wrapper == NULL)
 		return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
-	
+
 	if (r == color.R)
 		return;
-	
+
 	color.R = r;
 	_Wrapper->setAndUpdateModifiedFlag(color);
 
@@ -109,10 +110,10 @@ void CColorEditWidget::setGreen(int g)
 	if (_Wrapper == NULL) return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
-	
+
 	if (g == color.G)
 		return;
-	
+
 	color.G = g;
 	_Wrapper->setAndUpdateModifiedFlag(color);
 }
@@ -127,10 +128,10 @@ void CColorEditWidget::setBlue(int b)
 	if (_Wrapper == NULL) return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
-	
+
 	if (b == color.B)
 		return;
-	
+
 	color.B = b;
 	_Wrapper->setAndUpdateModifiedFlag(color);
 }
@@ -145,10 +146,10 @@ void CColorEditWidget::setAlpha(int a)
 	if (_Wrapper == NULL) return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
-	
+
 	if (a == color.A)
 		return;
-	
+
 	color.A = a;
 	_Wrapper->setAndUpdateModifiedFlag(color);
 }
@@ -156,11 +157,11 @@ void CColorEditWidget::setAlpha(int a)
 void CColorEditWidget::browseColor()
 {
 	QColor color = QColorDialog::getColor(QColor(_ui.rSpinBox->value(),
-						     _ui.gSpinBox->value(),
-						     _ui.bSpinBox->value(),
-						     _ui.aSpinBox->value()));
+										  _ui.gSpinBox->value(),
+										  _ui.bSpinBox->value(),
+										  _ui.aSpinBox->value()));
 	if (!color.isValid()) return;
-	
+
 	setColor(color);
 }
 

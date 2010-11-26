@@ -27,10 +27,11 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CSkeletonTreeModel::CSkeletonTreeModel(QObject *parent)
-     : QAbstractItemModel(parent)
+	: QAbstractItemModel(parent)
 {
 	QList<QVariant> rootData;
 	rootData << "Skeleton";
@@ -45,71 +46,71 @@ CSkeletonTreeModel::~CSkeletonTreeModel()
 int CSkeletonTreeModel::columnCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
-	    return static_cast<CSkeletonTreeItem*>(parent.internalPointer())->columnCount();
+		return static_cast<CSkeletonTreeItem*>(parent.internalPointer())->columnCount();
 	else
-	    return _rootItem->columnCount();
+		return _rootItem->columnCount();
 }
 
 QVariant CSkeletonTreeModel::data(const QModelIndex &index, int role) const
 {
-     if (!index.isValid())
-         return QVariant();
+	if (!index.isValid())
+		return QVariant();
 
-     if (role != Qt::DisplayRole)
-         return QVariant();
+	if (role != Qt::DisplayRole)
+		return QVariant();
 
-     CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(index.internalPointer());
+	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(index.internalPointer());
 
-     return item->data(index.column());
+	return item->data(index.column());
 }
 
 Qt::ItemFlags CSkeletonTreeModel::flags(const QModelIndex &index) const
 {
-  if (!index.isValid())
-         return 0;
+	if (!index.isValid())
+		return 0;
 
-     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant CSkeletonTreeModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
+										int role) const
 {
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-	    return _rootItem->data(section);
+		return _rootItem->data(section);
 
 	return QVariant();
 }
 
 QModelIndex CSkeletonTreeModel::index(int row, int column, const QModelIndex &parent)
-             const
+const
 {
-   if (!hasIndex(row, column, parent))
-         return QModelIndex();
+	if (!hasIndex(row, column, parent))
+		return QModelIndex();
 
-     CSkeletonTreeItem *parentItem;
+	CSkeletonTreeItem *parentItem;
 
-     if (!parent.isValid())
-         parentItem = _rootItem;
-     else
-         parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
+	if (!parent.isValid())
+		parentItem = _rootItem;
+	else
+		parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
 
-     CSkeletonTreeItem *childItem = parentItem->child(row);
-     if (childItem)
-         return createIndex(row, column, childItem);
-     else
-         return QModelIndex();
+	CSkeletonTreeItem *childItem = parentItem->child(row);
+	if (childItem)
+		return createIndex(row, column, childItem);
+	else
+		return QModelIndex();
 }
 
 QModelIndex CSkeletonTreeModel::parent(const QModelIndex &index) const
 {
 	if (!index.isValid())
-	    return QModelIndex();
+		return QModelIndex();
 
 	CSkeletonTreeItem *childItem = static_cast<CSkeletonTreeItem*>(index.internalPointer());
 	CSkeletonTreeItem *parentItem = childItem->parent();
 
 	if (parentItem == _rootItem)
-	    return QModelIndex();
+		return QModelIndex();
 
 	return createIndex(parentItem->row(), 0, parentItem);
 }
@@ -118,12 +119,12 @@ int CSkeletonTreeModel::rowCount(const QModelIndex &parent) const
 {
 	CSkeletonTreeItem *parentItem;
 	if (parent.column() > 0)
-	    return 0;
+		return 0;
 
 	if (!parent.isValid())
-	    parentItem = _rootItem;
+		parentItem = _rootItem;
 	else
-	    parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
 
 	return parentItem->childCount();
 }
@@ -131,9 +132,9 @@ int CSkeletonTreeModel::rowCount(const QModelIndex &parent) const
 void CSkeletonTreeModel::rebuildModel()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	
+
 	NL3D::USkeleton skel = Modules::objView().getEntity(curObj).getSkeleton();
-	
+
 	if (skel.empty())
 	{
 		resetTreeModel();
@@ -145,11 +146,11 @@ void CSkeletonTreeModel::rebuildModel()
 
 	QList<QVariant> rootData;
 	rootData << curObj.c_str();
-	
+
 	_rootItem = new CSkeletonTreeItem(rootData, -1);
-	
+
 	CSkeletonTreeItem *parentItem = _rootItem;
-	
+
 	for (uint i = 0; i < skel.getNumBones(); i++)
 	{
 		NL3D::UBone bone =  skel.getBone(i);
@@ -157,7 +158,7 @@ void CSkeletonTreeModel::rebuildModel()
 
 		while(parentId != parentItem->getId())
 			parentItem = parentItem->parent();
-	
+
 		QList<QVariant> boneData;
 		boneData << bone.getObjectPtr()->getBoneName().c_str();
 		CSkeletonTreeItem *item = new CSkeletonTreeItem(boneData, i, parentItem);

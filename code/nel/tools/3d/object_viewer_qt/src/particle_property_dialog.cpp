@@ -25,7 +25,8 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CPropertyDialog::CPropertyDialog(CParticleTreeModel *treeModel, QWidget *parent)
 	: QDockWidget(parent)
@@ -41,19 +42,19 @@ CPropertyDialog::~CPropertyDialog()
 void CPropertyDialog::setupUi()
 {
 	setObjectName(QString::fromUtf8("CPropertyDialog"));
-	
+
 	QIcon icon;
 	icon.addFile(QString::fromUtf8(":/images/pqrticles.png"), QSize(), QIcon::Normal, QIcon::Off);
-        setWindowIcon(icon);
-	
+	setWindowIcon(icon);
+
 	_dockWidgetContents = new QWidget();
 	_gridLayout = new QGridLayout(_dockWidgetContents);
 	_scrollArea = new QScrollArea(_dockWidgetContents);
 	_scrollArea->setWidgetResizable(true);
 	_scrollAreaWidgetContents = new QWidget();
-        
+
 	_pagesGridLayout = new QGridLayout(_scrollAreaWidgetContents);
-    
+
 	_stackedWidget = new QStackedWidget(_scrollAreaWidgetContents);
 
 	_wpPage = new CWorkspacePage(_treeModel);
@@ -76,15 +77,15 @@ void CPropertyDialog::setupUi()
 	_stackedWidget->addWidget(_emitterPage);
 	_psMoverPage = new CPSMoverPage(_stackedWidget);
 	_stackedWidget->addWidget(_psMoverPage);
-	
+
 	_pagesGridLayout->addWidget(_stackedWidget, 0, 0, 1, 1);
-	
+
 	_scrollArea->setWidget(_scrollAreaWidgetContents);
-	
+
 	_gridLayout->addWidget(_scrollArea, 0, 0, 1, 1);
-	
+
 	setWidget(_dockWidgetContents);
-	setWindowTitle(tr("Property editor")); 
+	setWindowTitle(tr("Property editor"));
 }
 
 void CPropertyDialog::setCurrentEditedElement(CParticleTreeItem *editedItem)
@@ -127,9 +128,9 @@ void CPropertyDialog::setCurrentEditedElement(CParticleTreeItem *editedItem)
 	case ItemType::LocatedInstance:
 		_psMoverPage->setEditedItem(_treeModel->getOwnerNode(editedItem) ,editedItem->getLoc(), editedItem->getLocatedInstanceIndex());
 		_stackedWidget->setCurrentWidget(_psMoverPage);
-		_treeModel->getOwnerNode(editedItem)->getPSPointer()->setCurrentEditedElement(editedItem->getLoc(), 
-											       editedItem->getLocatedInstanceIndex(), 
-											      _psMoverPage->getLocatedBindable());
+		_treeModel->getOwnerNode(editedItem)->getPSPointer()->setCurrentEditedElement(editedItem->getLoc(),
+				editedItem->getLocatedInstanceIndex(),
+				_psMoverPage->getLocatedBindable());
 		break;
 	default:
 		_stackedWidget->setCurrentWidget(_wpPage);

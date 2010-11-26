@@ -31,7 +31,7 @@ void Modules::init()
 {
 	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
 	config().init();
-	
+
 	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
 	if (_soundSystem == NULL) _soundSystem = new NLQT::CSoundSystem;
 	if (_particleEditor == NULL) _particleEditor = new NLQT::CParticleEditor;
@@ -41,12 +41,18 @@ void Modules::init()
 
 void Modules::release()
 {
-	delete _mainWindow; _mainWindow = NULL;
-	delete _particleEditor; _particleEditor = NULL;
-	delete _vegetableEditor; _vegetableEditor = NULL;
-	delete _soundSystem; _soundSystem = NULL;
-	delete _objectViewer; _objectViewer = NULL;
-	
+	delete _mainWindow;
+	_mainWindow = NULL;
+	delete _particleEditor;
+	_particleEditor = NULL;
+	delete _vegetableEditor;
+	_vegetableEditor = NULL;
+	delete _soundSystem;
+	_soundSystem = NULL;
+	delete _objectViewer;
+	_objectViewer = NULL;
+
 	config().release();
-	delete _configuration; _configuration = NULL;
+	delete _configuration;
+	_configuration = NULL;
 }

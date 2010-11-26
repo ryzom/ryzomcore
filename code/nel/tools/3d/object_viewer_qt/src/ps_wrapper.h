@@ -30,8 +30,9 @@
 //
 #include "particle_node.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 /// Wrapper to read/write a value of type T
 template <class T> class IPSWrapper
 {
@@ -66,7 +67,7 @@ public:
 	IPSSchemeWrapper() : OwnerNode(NULL) {}
 	typedef NL3D::CPSAttribMaker<T> scheme_type;
 	virtual scheme_type *getScheme(void) const = 0;
-	void setSchemeAndUpdateModifiedFlag(scheme_type *s)	
+	void setSchemeAndUpdateModifiedFlag(scheme_type *s)
 	{
 		if (OwnerNode)
 		{

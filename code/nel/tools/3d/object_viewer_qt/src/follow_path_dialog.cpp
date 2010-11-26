@@ -26,41 +26,42 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CFollowPathDialog::CFollowPathDialog(NL3D::CPSPlaneBasisFollowSpeed *pbfs, CWorkspaceNode *ownerNode, QWidget *parent)
-    : QDialog(parent), _FollowPath(pbfs), _Node(ownerNode)
+	: QDialog(parent), _FollowPath(pbfs), _Node(ownerNode)
 {
 	resize(270, 90);
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
-        setSizePolicy(sizePolicy);
-        setMinimumSize(QSize(0, 90));
-        setMaximumSize(QSize(16777215, 90));
-        gridLayout = new QGridLayout(this);
-        label = new QLabel(this);       
-        gridLayout->addWidget(label, 0, 0, 1, 1);
-        comboBox = new QComboBox(this);
-        gridLayout->addWidget(comboBox, 1, 0, 1, 2);
-        horizontalSpacer = new QSpacerItem(207, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-        gridLayout->addItem(horizontalSpacer, 2, 0, 1, 1);
-        pushButton = new QPushButton(this);
-        gridLayout->addWidget(pushButton, 2, 1, 1, 1);
-	
+	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+	sizePolicy.setHorizontalStretch(0);
+	sizePolicy.setVerticalStretch(0);
+	sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
+	setSizePolicy(sizePolicy);
+	setMinimumSize(QSize(0, 90));
+	setMaximumSize(QSize(16777215, 90));
+	gridLayout = new QGridLayout(this);
+	label = new QLabel(this);
+	gridLayout->addWidget(label, 0, 0, 1, 1);
+	comboBox = new QComboBox(this);
+	gridLayout->addWidget(comboBox, 1, 0, 1, 2);
+	horizontalSpacer = new QSpacerItem(207, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	gridLayout->addItem(horizontalSpacer, 2, 0, 1, 1);
+	pushButton = new QPushButton(this);
+	gridLayout->addWidget(pushButton, 2, 1, 1, 1);
+
 	setWindowTitle(tr("Follow path param"));
 	label->setText(tr("Projection plane:"));
 	comboBox->clear();
 	comboBox->insertItems(0, QStringList()
-		<< tr("No projection")
-		<< tr("XY plane")
-		<< tr("XZ plane")
-		<< tr("YZ plane"));
-        pushButton->setText(("Ok"));
-	
+						  << tr("No projection")
+						  << tr("XY plane")
+						  << tr("XZ plane")
+						  << tr("YZ plane"));
+	pushButton->setText(("Ok"));
+
 	comboBox->setCurrentIndex(_FollowPath->getProjectionPlane());
-	
+
 	setFixedHeight(sizeHint().height());
 
 	connect(pushButton, SIGNAL(clicked()), this, SLOT(accept()));

@@ -28,30 +28,31 @@
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CGlobalWindDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CGlobalWindDialog(QWidget *parent = 0);
 	~CGlobalWindDialog();
-	
+
 private Q_SLOTS:
 	void setWndPower(int value);
 	void updateWnd(bool visible);
 
 private:
 	/// wrappers to tune the direction of wind
-/*	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
-	{
-		NLMISC::CVector get(void) const;
-		void set(const NLMISC::CVector &d);
-	} _DirectionWrapper;*/
-	
+	/*	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
+		{
+			NLMISC::CVector get(void) const;
+			void set(const NLMISC::CVector &d);
+		} _DirectionWrapper;*/
+
 	Ui::CGlobalWindDialog _ui;
-	
+
 }; /* class CGlobalWindDialog */
 
 } /* namespace NLQT */

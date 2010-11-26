@@ -20,14 +20,15 @@
 #include "stdpch.h"
 #include "value_from_emitter_dialog.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CValueFromEmitterDialog::CValueFromEmitterDialog(QWidget *widget, QWidget *parent)
 	: QDialog(parent)
 {
-        _gridLayout = new QGridLayout(this);
-        _widget = widget;
-        _gridLayout->addWidget(_widget, 0, 0, 1, 1);
+	_gridLayout = new QGridLayout(this);
+	_widget = widget;
+	_gridLayout->addWidget(_widget, 0, 0, 1, 1);
 
 	setWindowTitle(tr("Value from emitter"));
 

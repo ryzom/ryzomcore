@@ -30,26 +30,27 @@
 // Projects includes
 #include "mesh_widget.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CMorphMeshDialog::CMorphMeshDialog(CWorkspaceNode *ownerNode, NL3D::CPSConstraintMesh *cm, QWidget *parent)
-    : QDialog(parent), _Node(ownerNode), _CM(cm)
+	: QDialog(parent), _Node(ownerNode), _CM(cm)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.morphValueWidget->setRange(0, 10);
 	_ui.morphValueWidget->setWrapper(&_MorphSchemeWrapper);
 	_ui.morphValueWidget->setSchemeWrapper(&_MorphSchemeWrapper);
 	_ui.morphValueWidget->init();
-	
+
 	_MorphSchemeWrapper.CM = _CM;
 	_ui.morphValueWidget->setWorkspaceNode(_Node);
 	_ui.morphValueWidget->updateUi();
 
 	updateMeshList();
-	
+
 	_ui.infoLabel->setVisible(!_CM->isValidBuild());
-	
+
 	connect(_ui.addPushButton, SIGNAL(clicked()), this, SLOT(add()));
 	connect(_ui.removePushButton, SIGNAL(clicked()), this, SLOT(remove()));
 	connect(_ui.insertPushButton, SIGNAL(clicked()), this, SLOT(insert()));
@@ -70,7 +71,7 @@ void CMorphMeshDialog::updateMeshList()
 	_ui.listWidget->clear();
 	for (uint k = 0; k < _CM->getNumShapes(); ++k)
 		_ui.listWidget->addItem(getShapeDescStr(k, numVerts[k]));
-	
+
 	_ui.listWidget->setCurrentRow(0);
 	if (_CM->getNumShapes() < 2)
 		_ui.removePushButton->setEnabled(false);
@@ -81,7 +82,7 @@ void CMorphMeshDialog::updateMeshList()
 QString CMorphMeshDialog::getShapeDescStr(uint shapeIndex, sint numVerts) const
 {
 	if (numVerts >= 0)
-	{	
+	{
 		QString verts(tr("vertices"));
 		QString msg = _CM->getShape(shapeIndex).c_str() + tr(" (%1 vertices)").arg(numVerts);
 		return msg;
@@ -97,11 +98,11 @@ QString CMorphMeshDialog::getShapeDescStr(uint shapeIndex, sint numVerts) const
 void CMorphMeshDialog::add()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("NeL shape files (*.shape)"));
+					   tr("Open NeL data file"), ".",
+					   tr("NeL shape files (*.shape)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		std::vector<std::string> shapeNames;
 		shapeNames.resize(_CM->getNumShapes() + 1);
@@ -127,10 +128,10 @@ void CMorphMeshDialog::remove()
 	_CM->getShapesNames(&shapeNames[0]);
 	shapeNames.erase(shapeNames.begin() + row);
 	_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
-	
+
 	if (_CM->getNumShapes() < 2)
 		_ui.removePushButton->setEnabled(false);
-	
+
 	touchPSState();
 	updateMeshList();
 	_ui.infoLabel->setVisible(!_CM->isValidBuild());
@@ -139,11 +140,11 @@ void CMorphMeshDialog::remove()
 void CMorphMeshDialog::insert()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("NeL shape files (*.shape)"));
+					   tr("Open NeL data file"), ".",
+					   tr("NeL shape files (*.shape)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		sint row = _ui.listWidget->currentRow();
 		std::vector<std::string> shapeNames;
@@ -162,11 +163,11 @@ void CMorphMeshDialog::insert()
 void CMorphMeshDialog::change()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("NeL shape files (*.shape)"));
+					   tr("Open NeL data file"), ".",
+					   tr("NeL shape files (*.shape)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		sint row = _ui.listWidget->currentRow();
 		_CM->setShape(row, fileName.toStdString());
@@ -193,7 +194,7 @@ void CMorphMeshDialog::up()
 
 void CMorphMeshDialog::down()
 {
-  	sint row = _ui.listWidget->currentRow();
+	sint row = _ui.listWidget->currentRow();
 	if (row == (sint) (_CM->getNumShapes() - 1)) return;
 	std::vector<std::string> shapeNames;
 	shapeNames.resize(_CM->getNumShapes());
@@ -208,7 +209,7 @@ void CMorphMeshDialog::down()
 void CMorphMeshDialog::touchPSState()
 {
 	if (_Node && _Node->getPSModel())
-	{	
+	{
 		_Node->getPSModel()->touchTransparencyState();
 		_Node->getPSModel()->touchLightableState();
 	}

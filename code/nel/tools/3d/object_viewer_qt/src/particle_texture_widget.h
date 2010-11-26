@@ -34,38 +34,45 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CParticleTextureWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CParticleTextureWidget(QWidget *parent = 0);
 	~CParticleTextureWidget();
 
 	void updateUi();
-	
+
 	// set a wrapper to get the datas, called before setCurrentTextureNoAnim
-	void setWrapper(IPSWrapperTexture *wrapper) { _Wrapper = wrapper ; }
-	
-	void enableRemoveButton(bool enabled) { _ui.removePushButton->setVisible(enabled); }
+	void setWrapper(IPSWrapperTexture *wrapper)
+	{
+		_Wrapper = wrapper ;
+	}
+
+	void enableRemoveButton(bool enabled)
+	{
+		_ui.removePushButton->setVisible(enabled);
+	}
 
 Q_SIGNALS:
 	void textureChanged(const QString &texName);
- 
+
 private Q_SLOTS:
 	void chooseTexture();
 	void removeTexture();
-	
+
 private:
 	void updateTexture();
-  
+
 	IPSWrapperTexture *_Wrapper ;
 
 	// the current texture
 	NLMISC::CSmartPtr<NL3D::ITexture> _Texture ;
-		
+
 	Ui::CParticleTextureWidget _ui;
 }; /* class CParticleTextureWidget */
 

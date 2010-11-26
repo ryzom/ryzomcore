@@ -43,27 +43,28 @@
 using namespace std;
 using namespace NL3D;
 
-namespace NLQT {
+namespace NLQT
+{
 
-CGraphicsViewport::CGraphicsViewport(QWidget *parent) 
+CGraphicsViewport::CGraphicsViewport(QWidget *parent)
 	: QNLWidget(parent)
 {
 }
 
 CGraphicsViewport::~CGraphicsViewport()
 {
-	
+
 }
 
 void CGraphicsViewport::init()
 {
 	//H_AUTO2
 	nldebug("CGraphicsViewport::init");
-	
+
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	makeCurrent();
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	
+
 	Modules::objView().init((nlWindow)winId(), width(), height());
 	Modules::psEdit().init();
 
@@ -74,7 +75,7 @@ void CGraphicsViewport::release()
 {
 	//H_AUTO2
 	nldebug("CGraphicsViewport::release");
-	
+
 	Modules::psEdit().release();
 	Modules::objView().release();
 }
@@ -89,7 +90,7 @@ QAction *CGraphicsViewport::createSaveScreenshotAction(QObject *parent)
 
 QAction *CGraphicsViewport::createSetBackgroundColor(QObject *parent)
 {
-  	QAction *action = new QAction(parent);
+	QAction *action = new QAction(parent);
 	connect(action, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
 	return action;
 }
@@ -102,9 +103,9 @@ void CGraphicsViewport::saveScreenshot()
 void CGraphicsViewport::setBackgroundColor()
 {
 	QColor color = QColorDialog::getColor(QColor(Modules::objView().getBackgroundColor().R,
-						     Modules::objView().getBackgroundColor().G,
-						     Modules::objView().getBackgroundColor().B));
-	if (color.isValid()) 
+										  Modules::objView().getBackgroundColor().G,
+										  Modules::objView().getBackgroundColor().B));
+	if (color.isValid())
 		Modules::objView().setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue()));
 }
 

@@ -44,7 +44,8 @@ typedef QGLWidget QNLWidget;
 
 class QAction;
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CGraphicsViewport
@@ -58,7 +59,10 @@ public:
 	CGraphicsViewport(QWidget *parent);
 	virtual ~CGraphicsViewport();
 
-	virtual QPaintEngine* paintEngine() const { return NULL; }
+	virtual QPaintEngine* paintEngine() const
+	{
+		return NULL;
+	}
 
 	void init();
 	void release();
@@ -69,13 +73,13 @@ public:
 private Q_SLOTS:
 	void saveScreenshot();
 	void setBackgroundColor();
-	
+
 	void submitEvents(NLMISC::CEventServer &server, bool allWindows) { }
 	void emulateMouseRawMode(bool) { }
-	
+
 protected:
 	virtual void resizeEvent(QResizeEvent *resizeEvent);
-	
+
 #if defined(NL_OS_WINDOWS)
 	virtual bool winEvent(MSG * message, long * result);
 #elif defined(NL_OS_MAC)
@@ -83,11 +87,11 @@ protected:
 #elif defined(NL_OS_UNIX)
 	virtual bool x11Event(XEvent *event);
 #endif
-	
+
 private:
 	CGraphicsViewport(const CGraphicsViewport &);
 	CGraphicsViewport &operator=(const CGraphicsViewport &);
-	
+
 }; /* class CGraphicsViewport */
 
 } /* namespace NLQT */

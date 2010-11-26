@@ -33,7 +33,8 @@
 #include "particle_node.h"
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CEmitterPage
@@ -41,19 +42,19 @@ namespace NLQT {
 */
 class CEmitterPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	/// This enum match the option in the combo box that allow to choose how the direction of emission is computed.
-	enum TDirectionMode 
+	enum TDirectionMode
 	{
-		Default = 0, 
-		AlignOnEmitterDirection, 
-		InWorld, 
-		LocalToSystem, 
-		LocalToFatherSkeleton 
+		Default = 0,
+		AlignOnEmitterDirection,
+		InWorld,
+		LocalToSystem,
+		LocalToFatherSkeleton
 	};
-	
+
 	CEmitterPage(QWidget *parent = 0);
 	~CEmitterPage();
 
@@ -72,39 +73,63 @@ private Q_SLOTS:
 	void setEmitDelay(float value);
 	void setMaxEmissionCount(uint32 value);
 	void setDir(const NLMISC::CVector &value);
-	
+
 private:
 
 	/// period of emission
-	struct CPeriodWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat 
+	struct CPeriodWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		CWorkspaceNode *Node;
 		NL3D::CPSEmitter *E;
-		float get(void) const { return E->getPeriod(); }
+		float get(void) const
+		{
+			return E->getPeriod();
+		}
 		void set(const float &v);
-		scheme_type *getScheme(void) const { return E->getPeriodScheme(); }
+		scheme_type *getScheme(void) const
+		{
+			return E->getPeriodScheme();
+		}
 		void setScheme(scheme_type *s);
 	} _PeriodWrapper;
 
 	/// number of particle to generate each time
-	struct CGenNbWrapper : public IPSWrapperUInt, IPSSchemeWrapperUInt 
+	struct CGenNbWrapper : public IPSWrapperUInt, IPSSchemeWrapperUInt
 	{
 		CWorkspaceNode *Node;
 		NL3D::CPSEmitter *E;
-		uint32 get(void) const { return E->getGenNb(); }
+		uint32 get(void) const
+		{
+			return E->getGenNb();
+		}
 		void set(const uint32 &v);
-		 scheme_type *getScheme(void) const { return E->getGenNbScheme(); }
+		scheme_type *getScheme(void) const
+		{
+			return E->getGenNbScheme();
+		}
 		void setScheme(scheme_type *s);
 	} _GenNbWrapper;
 
 	/// wrappers to emitters that have strenght modulation
-	struct CModulateStrenghtWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat 
+	struct CModulateStrenghtWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSModulatedEmitter *E;
-		float get(void) const { return E->getEmitteeSpeed(); }
-		void set(const float &v) { E->setEmitteeSpeed(v); }
-		scheme_type *getScheme(void) const { return E->getEmitteeSpeedScheme(); }
-		void setScheme(scheme_type *s) { E->setEmitteeSpeedScheme(s); }
+		float get(void) const
+		{
+			return E->getEmitteeSpeed();
+		}
+		void set(const float &v)
+		{
+			E->setEmitteeSpeed(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return E->getEmitteeSpeedScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			E->setEmitteeSpeedScheme(s);
+		}
 	} _ModulatedStrenghtWrapper;
 
 	// the emitter being edited
@@ -112,12 +137,15 @@ private:
 
 	// contains pointers to the located
 	std::vector<NL3D::CPSLocated *> _LocatedList;
-	
+
 	void updateEmittedType();
-	
+
 	void updatePeriodWidget();
-	
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
 
 	CWorkspaceNode *_Node;
 

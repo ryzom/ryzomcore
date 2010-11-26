@@ -29,12 +29,13 @@
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetNoiseValueWidget: public QGroupBox
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetNoiseValueWidget(QWidget *parent = 0);
 	~CVegetNoiseValueWidget();
@@ -44,7 +45,7 @@ public:
 	void setDefaultRangeAbs(float defRangeMin, float defRangeMax);
 	void setDefaultRangeRand(float defRangeMin, float defRangeMax);
 	void setDefaultRangeFreq(float defRangeMin, float defRangeMax);
-	
+
 Q_SIGNALS:
 	void noiseValueChanged(const NLMISC::CNoiseValue &value);
 
@@ -61,7 +62,7 @@ private:
 	bool _emit;
 
 	Ui::CVegetNoiseValueWidget _ui;
-	
+
 }; /* class CVegetNoiseValueWidget */
 
 } /* namespace NLQT */

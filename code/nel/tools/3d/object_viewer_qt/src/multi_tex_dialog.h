@@ -34,17 +34,18 @@
 
 namespace NL3D
 {
-	class CPSMultiTexturedParticle;
+class CPSMultiTexturedParticle;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CWorkspaceNode;
 
 class CMultiTexDialog: public QDialog
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CMultiTexDialog(CWorkspaceNode *ownerNode, NL3D::CPSMultiTexturedParticle *mtp, QWidget *parent = 0);
 	~CMultiTexDialog();
@@ -58,7 +59,7 @@ private Q_SLOTS:
 	void setForceBasicCaps(bool state);
 	void setUseParticleDate(bool state);
 	void setUseParticleDateAlt(bool state);
-	
+
 private:
 	struct CMainTexWrapper : IPSWrapperTexture
 	{
@@ -73,14 +74,17 @@ private:
 		virtual NL3D::ITexture *get(void);
 		virtual void set(NL3D::ITexture *);
 	} _AlternateTexWrapper;
-	
+
 	CWorkspaceNode 		*_Node;
 
 	NL3D::CPSMultiTexturedParticle *_MTP;
-	
+
 	void readValues();
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
-	
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
+
 	Ui::CMultiTexDialog _ui;
 }; /* class CMultiTexDialog */
 

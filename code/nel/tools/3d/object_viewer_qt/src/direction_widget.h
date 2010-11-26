@@ -29,7 +29,8 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CDirectionWidget
@@ -38,12 +39,12 @@ namespace NLQT {
  */
 class CDirectionWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CDirectionWidget(QWidget *parent = 0);
 	~CDirectionWidget();
-	
+
 	void enabledGlobalVariable(bool enabled);
 
 Q_SIGNALS:
@@ -64,13 +65,13 @@ private Q_SLOTS:
 	void decVecK();
 	void setNewVecXZ(float x, float y);
 	void setNewVecYZ(float x, float y);
-	
+
 private:
 	NLMISC::CVector _value;
 	QString _globalName;
 
 	Ui::CDirectionWidget _ui;
-	
+
 }; /* class CDirectionWidget */
 
 } /* namespace NLQT */

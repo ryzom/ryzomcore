@@ -23,8 +23,9 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CurveEditDialog::CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNode *ownerNode, QWidget *parent)
 	: QDialog(parent) , _Curve(curve), _scale(1.0), _pos(0.0), _Node(ownerNode)
 {
@@ -32,16 +33,16 @@ CurveEditDialog::CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNo
 
 	show();
 	_hoverPoints = new HoverPoints(_ui.curveWidget, HoverPoints::CircleShape);
-	
-	if (_Curve->hasSmoothing()) 
+
+	if (_Curve->hasSmoothing())
 		_hoverPoints->setConnectionType(HoverPoints::CurveConnection);
-	else 
+	else
 		_hoverPoints->setConnectionType(HoverPoints::LineConnection);
-	
+
 	_ui.smoothingCheckBox->setChecked(_Curve->hasSmoothing());
-	
+
 	buildPoints();
-	
+
 	_hoverPoints->setSortType(HoverPoints::XSort);
 	_hoverPoints->setShapePen(QPen(QColor(0, 0, 100, 127), 1));
 	_hoverPoints->setShapeBrush(QBrush(QColor(0, 0, 200, 127)));
@@ -69,11 +70,11 @@ CurveEditDialog::~CurveEditDialog()
 
 void CurveEditDialog::setSmoothing(bool state)
 {
-	if (state) 
+	if (state)
 		_hoverPoints->setConnectionType(HoverPoints::CurveConnection);
-	else 
+	else
 		_hoverPoints->setConnectionType(HoverPoints::LineConnection);
-	
+
 	_Curve->enableSmoothing(state);
 
 	_ui.curveWidget->update();
@@ -85,13 +86,13 @@ void CurveEditDialog::setDisplayInterpolation(bool state)
 
 void CurveEditDialog::curveChanged(const QPolygonF &points)
 {
-	if (_Curve->getNumCtrlPoints() > uint(points.size())) 
+	if (_Curve->getNumCtrlPoints() > uint(points.size()))
 		_Curve->removeCtrlPoint(0);
 	else if (_Curve->getNumCtrlPoints() < uint(points.size()))
 		_Curve->addControlPoint(NL3D::CPSFloatCurveFunctor::CCtrlPoint(1, 0.5f));
 	for (int i = 0; i < points.size(); i++)
-		_Curve->setCtrlPoint(uint(i), NL3D::CPSFloatCurveFunctor::CCtrlPoint(points.at(i).x() / _ui.curveWidget->width(), 
-				     (_ui.curveWidget->height() -  points.at(i).y() + _pos) / (_ui.curveWidget->height() * _scale)));
+		_Curve->setCtrlPoint(uint(i), NL3D::CPSFloatCurveFunctor::CCtrlPoint(points.at(i).x() / _ui.curveWidget->width(),
+							 (_ui.curveWidget->height() -  points.at(i).y() + _pos) / (_ui.curveWidget->height() * _scale)));
 }
 
 void CurveEditDialog::setScale(int value)
@@ -146,8 +147,8 @@ void CurveEditDialog::buildPoints()
 {
 	QPolygonF points;
 	for (uint i = 0; i < _Curve->getNumCtrlPoints(); i++)
-		points << QPointF((_Curve->getControlPoint(i).Date * _ui.curveWidget->width()),  
-				  _pos + _ui.curveWidget->height() - (_scale * _Curve->getControlPoint(i).Value * _ui.curveWidget->height()));
+		points << QPointF((_Curve->getControlPoint(i).Date * _ui.curveWidget->width()),
+						  _pos + _ui.curveWidget->height() - (_scale * _Curve->getControlPoint(i).Value * _ui.curveWidget->height()));
 
 	_hoverPoints->setPoints(points);
 	//_hoverPoints->setPointLock(0, HoverPoints::LockToLeft);

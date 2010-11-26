@@ -31,21 +31,22 @@
 // Projects include
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableApperancePage::CVegetableApperancePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
 	_ui.bendPhaseGroupBox->setDefaultRangeAbs(NL_VEGETABLE_BENDPHASE_RANGE_MIN, NL_VEGETABLE_BENDPHASE_RANGE_MAX);
 	_ui.bendPhaseGroupBox->setDefaultRangeRand(NL_VEGETABLE_BENDPHASE_RANGE_MIN, NL_VEGETABLE_BENDPHASE_RANGE_MAX);
 	_ui.bendPhaseGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	_ui.bendFactorGroupBox->setDefaultRangeAbs(NL_VEGETABLE_BENDFACTOR_RANGE_MIN, NL_VEGETABLE_BENDFACTOR_RANGE_MAX);
 	_ui.bendFactorGroupBox->setDefaultRangeRand(NL_VEGETABLE_BENDFACTOR_RANGE_MIN, NL_VEGETABLE_BENDFACTOR_RANGE_MAX);
 	_ui.bendFactorGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	_ui.colorNoiseGroupBox->setDefaultRangeAbs(NL_VEGETABLE_COLOR_RANGE_MIN, NL_VEGETABLE_COLOR_RANGE_MAX);
 	_ui.colorNoiseGroupBox->setDefaultRangeRand(NL_VEGETABLE_COLOR_RANGE_MIN, NL_VEGETABLE_COLOR_RANGE_MAX);
 	_ui.colorNoiseGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
@@ -58,7 +59,7 @@ CVegetableApperancePage::CVegetableApperancePage(QWidget *parent)
 	connect(_ui.insColorPushButton, SIGNAL(clicked()), this, SLOT(insNewColor()));
 	connect(_ui.removePushButton, SIGNAL(clicked()), this, SLOT(removeColor()));
 	connect(_ui.getListPushButton, SIGNAL(clicked()), this, SLOT(getFromListColors()));
-	
+
 	connect(_ui.listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(browseColor(QListWidgetItem*)));
 	setEnabled(false);
 }
@@ -116,15 +117,15 @@ void CVegetableApperancePage::setNoiseValueColor(const NLMISC::CNoiseValue &valu
 void CVegetableApperancePage::browseColor(QListWidgetItem * item)
 {
 	sint row = _ui.listWidget->currentRow();
-	
+
 	NLMISC::CRGBA oldColor = _Vegetable->Color.Gradients[row];
 	QColor color = QColorDialog::getColor(QColor(oldColor.R, oldColor.G, oldColor.B));
 	if (!color.isValid()) return;
-	
+
 	item->setIcon(getRectColorIcon(color));
-	
+
 	_Vegetable->Color.Gradients[row] = NLMISC::CRGBA(color.red(), color.green(), color.blue());
-	
+
 	Modules::veget().refreshVegetableDisplay();
 }
 
@@ -136,14 +137,14 @@ void CVegetableApperancePage::addNewColor()
 	NLMISC::CRGBA color(255, 255, 255);
 	if(row != -1)
 		color = _Vegetable->Color.Gradients[row];
-	
+
 	// update view and vegetable
 	QListWidgetItem *item = new QListWidgetItem();
-	
+
 	item->setIcon(getRectColorIcon(QColor(color.R, color.G, color.B)));
-	
+
 	_ui.listWidget->addItem(item);
-	
+
 	_Vegetable->Color.Gradients.push_back(color);
 
 	// update 3D view
@@ -164,11 +165,11 @@ void CVegetableApperancePage::insNewColor()
 
 	// update view and vegetable
 	QListWidgetItem *item = new QListWidgetItem();
-	
+
 	item->setIcon(getRectColorIcon(QColor(color.R, color.G, color.B)));
-	
+
 	_ui.listWidget->insertItem(row, item);
-	
+
 	_Vegetable->Color.Gradients.insert(_Vegetable->Color.Gradients.begin() + row ,color);
 
 	// update 3D view
@@ -179,7 +180,7 @@ void CVegetableApperancePage::removeColor()
 {
 	sint row = _ui.listWidget->currentRow();
 	if (row == -1) return;
-	
+
 	// remove curSel from the list
 	QListWidgetItem *item = _ui.listWidget->takeItem(row);
 	delete item;
@@ -197,22 +198,22 @@ void CVegetableApperancePage::getFromListColors()
 		return;
 
 	QStringList items;
-	for(size_t i = 0; i < listVegetables.size(); ++i) 
-	  items << QString(listVegetables[i].c_str());
+	for(size_t i = 0; i < listVegetables.size(); ++i)
+		items << QString(listVegetables[i].c_str());
 
 	bool ok;
 	QString item = QInputDialog::getItem(this, tr("Select on other vegetables"),
-                                          tr("Select the other vegetable to copy color."), items, 0, false, &ok);
+										 tr("Select the other vegetable to copy color."), items, 0, false, &ok);
 	if (ok)
-	{ 
+	{
 		int i = items.indexOf(item);
-			
+
 		NL3D::CVegetable *otherVegetable = Modules::veget().getVegetable(i)->Vegetable;
-		
+
 		_Vegetable->Color.Gradients = otherVegetable->Color.Gradients;
-		
+
 		updateColorList();
-		
+
 		// update 3D view
 		Modules::veget().refreshVegetableDisplay();
 	}

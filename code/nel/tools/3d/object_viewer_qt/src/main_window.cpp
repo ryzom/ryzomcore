@@ -49,17 +49,18 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
 CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent),
-	_isGraphicsInitialized(false), _isGraphicsEnabled(false),
-	_isSoundInitialized(false), _isSoundEnabled(false),
-	_isLandscapeInitialized(false), _isLandscapeEnabled(false),
-	_GraphicsViewport(NULL), _lastDir(".")
+	  _isGraphicsInitialized(false), _isGraphicsEnabled(false),
+	  _isSoundInitialized(false), _isSoundEnabled(false),
+	  _isLandscapeInitialized(false), _isLandscapeEnabled(false),
+	  _GraphicsViewport(NULL), _lastDir(".")
 {
 	nldebug("CMainWindow::CMainWindow:");
-	
+
 	// create NeL viewport
 	_GraphicsViewport = new CGraphicsViewport(this);
 	setCentralWidget(_GraphicsViewport);
@@ -78,9 +79,9 @@ CMainWindow::CMainWindow(QWidget *parent)
 	createMenus();
 	createToolBars();
 	createStatusBar();
-	
+
 	setWindowIcon(QIcon(":/images/nel.png"));
-    
+
 	QSettings settings("object_viewer_qt.ini", QSettings::IniFormat);
 	settings.beginGroup("WindowSettings");
 	restoreState(settings.value("QtWindowState").toByteArray());
@@ -90,25 +91,25 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_isGraphicsEnabled = true;
 	_isLandscapeEnabled = true;
 
-	// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed. 
+	// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed.
 	// This can be used to do heavy work while providing a snappy user interface.
 	_mainTimer = new QTimer(this);
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 	// timer->start(); // <- timeout 0
 	// it's heavy on cpu, though, when no 3d driver initialized :)
 	_mainTimer->start(25); // 25fps
-	
+
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 	_statusBarTimer->start(5000);
-	
+
 	Modules::config().setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
 }
 
 CMainWindow::~CMainWindow()
 {
-  	nldebug("CMainWindow::~CMainWindow:");
-	
+	nldebug("CMainWindow::~CMainWindow:");
+
 	// save state & geometry of window and widgets
 	QSettings settings("object_viewer_qt.ini", QSettings::IniFormat);
 	settings.beginGroup("WindowSettings");
@@ -159,23 +160,23 @@ int CMainWindow::getFrameRate()
 void CMainWindow::open()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-					tr("Open NeL data file"), _lastDir,
-					tr("All NeL files (*.shape *.ps);;"
-					"NeL shape files (*.shape);;"
-					"NeL particle system files (*.ps)"));
+							tr("Open NeL data file"), _lastDir,
+							tr("All NeL files (*.shape *.ps);;"
+							   "NeL shape files (*.shape);;"
+							   "NeL particle system files (*.ps)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileNames.isEmpty()) 
+	if (!fileNames.isEmpty())
 	{
 		QStringList list = fileNames;
 		_lastDir = QFileInfo(list.front()).absolutePath();
-		
+
 		QString skelFileName = QFileDialog::getOpenFileName(this,
-					tr("Open skeleton file"), _lastDir,
-					tr("NeL skeleton file (*.skel)"));
-					
+							   tr("Open skeleton file"), _lastDir,
+							   tr("NeL skeleton file (*.skel)"));
+
 		Q_FOREACH(QString fileName, list)
-			loadFile(fileName, skelFileName);
+		loadFile(fileName, skelFileName);
 
 		_AnimationSetDialog->updateListObject();
 		_AnimationSetDialog->updateListAnim();
@@ -203,14 +204,14 @@ void CMainWindow::settings()
 void CMainWindow::about()
 {
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
-		    tr("<h2>Object Viewer Qt  8-)</h2>"
-		    "<p> Authors: dnk-88, sfb, Kaetemi, kervala <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
+					   tr("<h2>Object Viewer Qt  8-)</h2>"
+						  "<p> Authors: dnk-88, sfb, Kaetemi, kervala <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
 void CMainWindow::updateStatusBar()
 {
-	if (_isGraphicsInitialized) 
-	  statusBar()->showMessage(QString(Modules::objView().getDriver()->getVideocardInformation()));
+	if (_isGraphicsInitialized)
+		statusBar()->showMessage(QString(Modules::objView().getDriver()->getVideocardInformation()));
 }
 
 void CMainWindow::updateInitialization(bool visible)
@@ -221,7 +222,7 @@ void CMainWindow::updateInitialization(bool visible)
 		done = true; // set false whenever change
 		bool wantSound = _isSoundEnabled && visible;
 		bool wantGraphics = _isGraphicsEnabled && visible;
-		// TODO WARNING:  made Landscape stuff 
+		// TODO WARNING:  made Landscape stuff
 		bool wantLandscape = wantGraphics && _isGraphicsInitialized && _isLandscapeEnabled;
 
 		// .. stuff that depends on other stuff goes on top to prioritize deinitialization
@@ -273,7 +274,7 @@ void CMainWindow::updateInitialization(bool visible)
 				done = false;
 			}
 		}
-		
+
 		// Sound (AudioMixer)
 		if (_isSoundInitialized)
 		{
@@ -298,17 +299,18 @@ void CMainWindow::updateInitialization(bool visible)
 			}
 		}
 
-	} while (!done);
+	}
+	while (!done);
 }
 
 void CMainWindow::createActions()
-{	
+{
 	_openAction = new QAction(tr("&Open..."), this);
 	_openAction->setIcon(QIcon(":/images/open-file.png"));
 	_openAction->setShortcut(QKeySequence::Open);
 	_openAction->setStatusTip(tr("Open an existing file"));
 	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
-    
+
 	_exitAction = new QAction(tr("E&xit"), this);
 	_exitAction->setShortcut(tr("Ctrl+Q"));
 	_exitAction->setStatusTip(tr("Exit the application"));
@@ -318,7 +320,7 @@ void CMainWindow::createActions()
 	_setBackColorAction->setText(tr("Set &background color"));
 	_setBackColorAction->setIcon(QIcon(":/images/ico_bgcolor.png"));
 	_setBackColorAction->setStatusTip(tr("Set background color"));
-	
+
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
 	connect(_resetSceneAction, SIGNAL(triggered()), this, SLOT(resetScene()));
@@ -331,7 +333,7 @@ void CMainWindow::createActions()
 	_settingsAction->setIcon(QIcon(":/images/preferences.png"));
 	_settingsAction->setStatusTip(tr("Settings"));
 	connect(_settingsAction, SIGNAL(triggered()), this, SLOT(settings()));
-	
+
 	_aboutAction = new QAction(tr("&About"), this);
 	_aboutAction->setStatusTip(tr("Show the application's About box"));
 	connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
@@ -351,43 +353,43 @@ void CMainWindow::createMenus()
 	_viewMenu = menuBar()->addMenu(tr("&View"));
 	_viewMenu->addAction(_setBackColorAction);
 	_viewMenu->addAction(_SetupFog->toggleViewAction());
-	
+
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
 	_sceneMenu->addAction(_resetSceneAction);
 	_sceneMenu->addAction(_saveScreenshotAction);
 
 	_toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	
+
 	_toolsMenu->addAction(_AnimationDialog->toggleViewAction());
 	_AnimationDialog->toggleViewAction()->setIcon(QIcon(":/images/anim.png"));
-	
+
 	_toolsMenu->addAction(_AnimationSetDialog->toggleViewAction());
 	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(":/images/animset.png"));
-	
+
 	_toolsMenu->addAction(_SlotManagerDialog->toggleViewAction());
 	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(":/images/mixer.png"));
-	
+
 	_toolsMenu->addAction(_ParticleControlDialog->toggleViewAction());
 	_ParticleControlDialog->toggleViewAction()->setIcon(QIcon(":/images/pqrticles.png"));
-	
+
 	_toolsMenu->addAction(_DayNightDialog->toggleViewAction());
 	_DayNightDialog->toggleViewAction()->setIcon(QIcon(":/images/dqynight.png"));
-	
+
 	_toolsMenu->addAction(_WaterPoolDialog->toggleViewAction());
 	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(":/images/water.png"));
 	_WaterPoolDialog->toggleViewAction()->setEnabled(false);
-	
+
 	_toolsMenu->addAction(_VegetableDialog->toggleViewAction());
 	_VegetableDialog->toggleViewAction()->setIcon(QIcon(":/images/veget.png"));
-	
+
 	_toolsMenu->addAction(_GlobalWindDialog->toggleViewAction());
 	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(":/images/wind.png"));
-	
+
 	_toolsMenu->addAction(_SkeletonScaleDialog->toggleViewAction());
 	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_skelscale.png"));
-	
+
 	_toolsMenu->addAction(_SunColorDialog->toggleViewAction());
-	
+
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog, SLOT(setVisible(bool)));
 
@@ -395,7 +397,7 @@ void CMainWindow::createMenus()
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
 	_toolsMenu->addSeparator();
-	
+
 	_toolsMenu->addAction(_settingsAction);
 
 	menuBar()->addSeparator();
@@ -409,7 +411,7 @@ void CMainWindow::createToolBars()
 {
 	_fileToolBar = addToolBar(tr("&File"));
 	_fileToolBar->addAction(_openAction);
-    
+
 	//_editToolBar = addToolBar(tr("&Edit"));
 	//_editToolBar->addSeparator();
 	_toolsBar = addToolBar(tr("&Tools"));
@@ -435,7 +437,7 @@ void CMainWindow::createDialogs()
 	_AnimationDialog = new CAnimationDialog(this);
 	addDockWidget(Qt::BottomDockWidgetArea, _AnimationDialog);
 	_AnimationDialog->setVisible(false);
-	
+
 	// create animation set manager dialog
 	_AnimationSetDialog = new CAnimationSetDialog(this);
 	addDockWidget(Qt::LeftDockWidgetArea, _AnimationSetDialog);
@@ -445,7 +447,7 @@ void CMainWindow::createDialogs()
 	_SlotManagerDialog = new CSlotManagerDialog(this);
 	addDockWidget(Qt::RightDockWidgetArea, _SlotManagerDialog);
 	_SlotManagerDialog->setVisible(false);
-	
+
 	// create particle control dialog
 	_ParticleControlDialog = new CParticleControlDialog(_SkeletonTreeModel ,this);
 	addDockWidget(Qt::BottomDockWidgetArea, _ParticleControlDialog);
@@ -475,7 +477,7 @@ void CMainWindow::createDialogs()
 	_GlobalWindDialog = new CGlobalWindDialog(this);
 	addDockWidget(Qt::TopDockWidgetArea, _GlobalWindDialog);
 	_GlobalWindDialog->setVisible(false);
-	
+
 	// create sun color dialog
 	_SunColorDialog = new CSunColorDialog(this);
 	addDockWidget(Qt::LeftDockWidgetArea, _SunColorDialog);
@@ -489,12 +491,12 @@ void CMainWindow::createDialogs()
 	_SkeletonScaleDialog = new CSkeletonScaleDialog(_SkeletonTreeModel, this);
 	addDockWidget(Qt::RightDockWidgetArea, _SkeletonScaleDialog);
 	_SkeletonScaleDialog->setVisible(false);
-	
+
 	// create setup fog dialog
 	_SetupFog = new CSetupFog(this);
 	addDockWidget(Qt::RightDockWidgetArea, _SetupFog);
 	_SetupFog->setVisible(false);
-	
+
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
 	connect(_ParticleWorkspaceDialog, SIGNAL(changeActiveNode()), _ParticleControlDialog, SLOT(updateActiveNode()));
 	connect(_AnimationSetDialog->ui.setLengthPushButton, SIGNAL(clicked()), _AnimationDialog, SLOT(changeAnimLength()));
@@ -535,23 +537,23 @@ void CMainWindow::cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var)
 void CMainWindow::updateRender()
 {
 	updateInitialization(isVisible());
-	
+
 	if (isVisible())
 	{
 
 		// call all update functions
 		// 01. Update Utilities (configuration etc)
-		
+
 		// 02. Update Time (deltas)
 		// ...
 
 		// 03. Update Receive (network, servertime, receive messages)
 		// ...
-		
+
 		// 04. Update Input (keyboard controls, etc)
 		if (_isGraphicsInitialized)
 			Modules::objView().updateInput();
-		
+
 		// 05. Update Weather (sky, snow, wind, fog, sun)
 		// ...
 
@@ -563,29 +565,29 @@ void CMainWindow::updateRender()
 
 		// 07. Update Landscape (async zone loading near entity)
 
-		
+
 		// 08. Update Collisions (entities)
 		//      - Update entities
 		//      - Update move container (swap with Update entities? todo: check code!)
 		//      - Update bullets
 		Modules::veget().update();
-		
+
 		// 09. Update Animations (playlists)
-		//      - Needs to be either before or after entities, not sure, 
+		//      - Needs to be either before or after entities, not sure,
 		//        there was a problem with wrong order a while ago!!!
 		Modules::objView().updateAnimatePS();
-		
+
 		Modules::objView().updateAnimation(_AnimationDialog->getTime());
-		
+
 		// 09.2 Update Particle system editor
 		Modules::psEdit().update();
 
 		// 10. Update Camera (depends on entities)
 		// ...
-		
+
 		// 11. Update Interface (login, ui, etc)
 		// ...
-		
+
 		// 12. Update Sound (sound driver)
 		if (_isSoundInitialized)
 		{
@@ -594,24 +596,24 @@ void CMainWindow::updateRender()
 		}
 		// 13. Update Send (network, send new position etc)
 		// ...
-		
+
 		// 14. Update Debug (stuff for dev)
 		// ...
-		
+
 		if (_isGraphicsInitialized && !Modules::objView().getDriver()->isLost())
 		{
-			// 01. Render Driver (background color)			
+			// 01. Render Driver (background color)
 			Modules::objView().renderDriver(); // clear all buffers
-				
+
 			// 02. Render Sky (sky scene)
 			// ...
-			
+
 			// 04. Render Scene (entity scene)
 			Modules::objView().renderScene();
-			
+
 			// 05. Render Effects (flare)
 			// ...
-			
+
 			// 06. Render Interface 3D (player names)
 			// ...
 
@@ -620,7 +622,7 @@ void CMainWindow::updateRender()
 
 			// 08. Render Interface 2D (chatboxes etc, optionally does have 3d)
 			// ...
-				
+
 			// 09. Render Debug 2D (stuff for dev)
 			Modules::objView().renderDebug2D();
 

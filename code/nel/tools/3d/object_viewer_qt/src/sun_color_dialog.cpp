@@ -26,10 +26,11 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSunColorDialog::CSunColorDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
 

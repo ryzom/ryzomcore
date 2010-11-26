@@ -29,16 +29,17 @@
 // Project includes
 #include "skeleton_tree_model.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CParticleLinkDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CParticleLinkDialog(CSkeletonTreeModel *model, QWidget *parent = 0);
 	~CParticleLinkDialog();
-	
+
 private Q_SLOTS:
 	void setLink();
 	void setUnlink();
@@ -46,9 +47,9 @@ private Q_SLOTS:
 	void clickedItem(const QModelIndex & index);
 
 private:
-	
+
 	Ui::CParticleLinkDialog _ui;
-	
+
 }; /* class CParticleLinkDialog */
 
 } /* namespace NLQT */

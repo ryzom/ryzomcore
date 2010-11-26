@@ -28,16 +28,17 @@
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableLandscapePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableLandscapePage(QWidget *parent = 0);
 	~CVegetableLandscapePage();
-	
+
 Q_SIGNALS:
 	void changeVisibleLandscape(bool state);
 
@@ -51,9 +52,9 @@ private Q_SLOTS:
 	void setColorDiffuse(NLMISC::CRGBA color);
 
 private:
-	
+
 	Ui::CVegetableLandscapePage _ui;
-	
+
 }; /* class CVegetableLandscapePage */
 
 } /* namespace NLQT */

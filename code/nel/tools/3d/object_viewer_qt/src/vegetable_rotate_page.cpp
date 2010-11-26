@@ -26,13 +26,14 @@
 // Projects include
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableRotatePage::CVegetableRotatePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.rotateXGroupBox->setDefaultRangeAbs(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateXGroupBox->setDefaultRangeRand(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateXGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
@@ -40,13 +41,13 @@ CVegetableRotatePage::CVegetableRotatePage(QWidget *parent)
 	_ui.rotateYGroupBox->setDefaultRangeAbs(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateYGroupBox->setDefaultRangeRand(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateYGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	_ui.rotateZGroupBox->setDefaultRangeAbs(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateZGroupBox->setDefaultRangeRand(NL_VEGETABLE_ROTATE_RANGE_MIN, NL_VEGETABLE_ROTATE_RANGE_MAX);
 	_ui.rotateZGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	setEnabled(false);
-	
+
 	connect(_ui.rotateXGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setNoiseValueRotateX(NLMISC::CNoiseValue)));
 	connect(_ui.rotateYGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setNoiseValueRotateX(NLMISC::CNoiseValue)));
 	connect(_ui.rotateZGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setNoiseValueRotateZ(NLMISC::CNoiseValue)));

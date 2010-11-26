@@ -26,17 +26,18 @@
 // Projects include
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableScalePage::CVegetableScalePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.scaleXYGroupBox->setDefaultRangeAbs(NL_VEGETABLE_SCALE_RANGE_MIN, NL_VEGETABLE_SCALE_RANGE_MAX);
 	_ui.scaleXYGroupBox->setDefaultRangeRand(NL_VEGETABLE_SCALE_RANGE_MIN, NL_VEGETABLE_SCALE_RANGE_MAX);
 	_ui.scaleXYGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	_ui.scaleZGroupBox->setDefaultRangeAbs(NL_VEGETABLE_SCALE_RANGE_MIN, NL_VEGETABLE_SCALE_RANGE_MAX);
 	_ui.scaleZGroupBox->setDefaultRangeRand(NL_VEGETABLE_SCALE_RANGE_MIN, NL_VEGETABLE_SCALE_RANGE_MAX);
 	_ui.scaleZGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
@@ -44,7 +45,7 @@ CVegetableScalePage::CVegetableScalePage(QWidget *parent)
 	_ui.freqFactorWidget->setRange(NL_VEGETABLE_BENDFREQ_RANGE_MIN, NL_VEGETABLE_BENDFREQ_RANGE_MAX);
 
 	setEnabled(false);
-	
+
 	connect(_ui.scaleXYGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setNoiseValueXYSize(NLMISC::CNoiseValue)));
 	connect(_ui.scaleZGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setNoiseValueXYSize(NLMISC::CNoiseValue)));
 	connect(_ui.freqFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setFreqFactor(float)));
@@ -64,7 +65,7 @@ void CVegetableScalePage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 
 		_ui.scaleXYGroupBox->setNoiseValue(_Vegetable->Sxy, false);
 		_ui.scaleZGroupBox->setNoiseValue(_Vegetable->Sz, false);
-		
+
 		_ui.freqFactorWidget->setValue(_Vegetable->BendFrequencyFactor, false);
 	}
 	else

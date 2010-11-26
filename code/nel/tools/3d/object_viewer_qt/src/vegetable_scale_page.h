@@ -30,34 +30,35 @@
 
 namespace NL3D
 {
-	class CVegetable;
+class CVegetable;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableScalePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableScalePage(QWidget *parent = 0);
 	~CVegetableScalePage();
-	
+
 	/// set the vegetble to edit. NULL will disable all the controls.
 	void setVegetableToEdit(NL3D::CVegetable *vegetable);
-	
+
 private Q_SLOTS:
 	void setNoiseValueXYSize(const NLMISC::CNoiseValue &value);
 	void setNoiseValueZSize(const NLMISC::CNoiseValue &value);
 	void setFreqFactor(float value);
 
 private:
-	
+
 	// The vegetable to edit.
 	NL3D::CVegetable	*_Vegetable;
 
 	Ui::CVegetableScalePage _ui;
-	
+
 }; /* class CVegetableScalePage */
 
 } /* namespace NLQT */

@@ -25,14 +25,15 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CSkeletonTreeModel;
 class CParticleLinkDialog;
 
 class CParticleControlDialog: public QDockWidget
 {
-	     Q_OBJECT
+	Q_OBJECT
 public:
 	CParticleControlDialog(CSkeletonTreeModel *model, QWidget *parent = 0);
 	~CParticleControlDialog();
@@ -48,7 +49,7 @@ public Q_SLOTS:
 private Q_SLOTS:
 	void play();
 	void stop();
-	void sliderMoved(int value); 
+	void sliderMoved(int value);
 	void displayHelpers(bool state);
 	void displayBBox(bool state);
 	void autoRepeat(bool state);

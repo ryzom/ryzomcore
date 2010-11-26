@@ -20,20 +20,21 @@
 #include "stdpch.h"
 #include "value_blender_dialog.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CValueBlenderDialog::CValueBlenderDialog(IValueBlenderDialogClient *createInterface,
-					 CWorkspaceNode *ownerNode,
-					 bool destroyInterface,
-					 QWidget *parent)
-	: QDialog(parent), 
-	 _CreateInterface(createInterface),
-	 _Node(ownerNode),
-	 _DestroyInterface(destroyInterface)
+		CWorkspaceNode *ownerNode,
+		bool destroyInterface,
+		QWidget *parent)
+	: QDialog(parent),
+	  _CreateInterface(createInterface),
+	  _Node(ownerNode),
+	  _DestroyInterface(destroyInterface)
 {
 	_gridLayout = new QGridLayout(this);
 	_startLabel = new QLabel(this);
-	
+
 	_gridLayout->addWidget(_startLabel, 0, 0, 1, 1);
 
 	_startWidget = _CreateInterface->createDialog(0, _Node, this);
@@ -46,7 +47,7 @@ CValueBlenderDialog::CValueBlenderDialog(IValueBlenderDialogClient *createInterf
 	_gridLayout->addWidget(_startWidget, 1, 0, 1, 1);
 
 	_endLabel = new QLabel(this);
-	
+
 	_gridLayout->addWidget(_endLabel, 2, 0, 1, 1);
 
 	_endWidget = _CreateInterface->createDialog(1, _Node, this);
@@ -54,7 +55,7 @@ CValueBlenderDialog::CValueBlenderDialog(IValueBlenderDialogClient *createInterf
 	_endWidget->setSizePolicy(sizePolicy);
 
 	_gridLayout->addWidget(_endWidget, 3, 0, 1, 1);
-	
+
 	setWindowTitle(tr("Value blender"));
 	_startLabel->setText(tr("Start value:"));
 	_endLabel->setText(tr("End value:"));

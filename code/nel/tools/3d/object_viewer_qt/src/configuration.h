@@ -35,7 +35,8 @@
 
 #define NLQT_CONFIG_FILE "object_viewer.cfg"
 
-namespace NLQT {
+namespace NLQT
+{
 
 typedef CCallback<void, NLMISC::CConfigFile::CVar &> CConfigCallback;
 
@@ -55,7 +56,7 @@ public:
 
 	void init();
 	void release();
-	
+
 	void updateUtilities();
 	void configSearchPaths();
 	void configRemapExtensions();
@@ -63,7 +64,7 @@ public:
 	void setAndCallback(const std::string &varName, CConfigCallback configCallback);
 	void setCallback(const std::string &varName, CConfigCallback configCallback);
 	void dropCallback(const std::string &varName);
-	
+
 	float getValue(const std::string &varName, float defaultValue);
 	double getValue(const std::string &varName, double defaultValue);
 	int getValue(const std::string &varName, int defaultValue);
@@ -72,8 +73,11 @@ public:
 	bool getValue(const std::string &varName, bool defaultValue);
 	NLMISC::CRGBA getValue(const std::string &varName, const NLMISC::CRGBA &defaultValue);
 	NLMISC::CRGBA getValue(const NLMISC::CConfigFile::CVar &var, const NLMISC::CRGBA &defaultValue);
-	
-	inline NLMISC::CConfigFile &getConfigFile() { return ConfigFile; }
+
+	inline NLMISC::CConfigFile &getConfigFile()
+	{
+		return ConfigFile;
+	}
 
 private:
 	static void cbConfigCallback(NLMISC::CConfigFile::CVar &var);
@@ -85,7 +89,7 @@ private:
 
 	NLMISC::CConfigFile ConfigFile;
 	std::map<std::string, CConfigCallback> ConfigCallbacks;
-	
+
 };/* class CConfiguration */
 
 } /* namespace NLQT */

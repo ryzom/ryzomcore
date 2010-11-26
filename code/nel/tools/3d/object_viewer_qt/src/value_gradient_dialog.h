@@ -44,22 +44,24 @@
 #include "ps_wrapper.h"
 #include "particle_node.h"
 
-namespace NL3D {
-	class CPSTexturedParticle;
+namespace NL3D
+{
+class CPSTexturedParticle;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 class  CParticleTextureWidget;
-  
+
 class IValueGradientClient: public QObject
 {
-         Q_OBJECT
+	Q_OBJECT
 public:
 	IValueGradientClient(QObject *parent = 0): QObject(parent) {}
-	
+
 	virtual QWidget *createDialog(QWidget *parent) = 0;
-  
+
 	/// Return the title of dialog in client
 	virtual QString getTitleDialog() const = 0;
 
@@ -70,7 +72,7 @@ public:
 	virtual void displayValue(uint index, QListWidgetItem *item) = 0;
 
 	virtual void setCurrentIndex(uint index) = 0;
-	
+
 	/// A function that can add, remove, or insert a new element in the gradient
 	virtual bool modifyGradient(TAction, uint index) = 0;
 
@@ -89,15 +91,15 @@ Q_SIGNALS:
 
 class CGradientDialog: public  QDialog
 {
-     Q_OBJECT
+	Q_OBJECT
 
 public:
-	CGradientDialog(CWorkspaceNode *ownerNode, 
-			IValueGradientClient *clientInterface,
-			bool destroyClientInterface,
-			bool canTuneNbStages = true,
-			uint minSize = 2,
-			QWidget *parent = 0);
+	CGradientDialog(CWorkspaceNode *ownerNode,
+					IValueGradientClient *clientInterface,
+					bool destroyClientInterface,
+					bool canTuneNbStages = true,
+					uint minSize = 2,
+					QWidget *parent = 0);
 	~CGradientDialog();
 
 private Q_SLOTS:
@@ -108,19 +110,19 @@ private Q_SLOTS:
 	void valueUp();
 	void changeCurrentRow(int currentRow);
 	void updateItem();
-	
+
 protected:
 
-  	// the minimum number of element in the gradient
+	// the minimum number of element in the gradient
 	uint		_MinSize;
-	
+
 	// false to disable the dialog that control the number of stages between each value
 	bool		_CanTuneNbStages;
-	
+
 	IValueGradientClient *_ClientInterface;
-	
+
 	bool		_DestroyClientInterface;
-	
+
 	// the current size of the gradient
 	uint		_Size;
 
@@ -131,11 +133,17 @@ protected:
 	{
 		// the interface that was passed to the dialog this struct is part of
 		IValueGradientClient *I;
-		uint32 get(void) const { return I->getNbSteps(); }
-		void set(const uint32 &nbSteps) { I->setNbSteps(nbSteps); }
+		uint32 get(void) const
+		{
+			return I->getNbSteps();
+		}
+		void set(const uint32 &nbSteps)
+		{
+			I->setNbSteps(nbSteps);
+		}
 
 	} _NbStepWrapper;
-	
+
 	QGridLayout *_gridLayout;
 	QListWidget *_listWidget;
 	QHBoxLayout *_horizontalLayout;
@@ -147,15 +155,15 @@ protected:
 	QLabel *_label;
 	NLQT::CEditRangeUIntWidget *_nbStepWidget;
 	QSpacerItem *_verticalSpacer;
-	QWidget *editWidget;    
+	QWidget *editWidget;
 }; /* class CGradientDialog */
 
-/** 
+/**
 @class CValueGradientClientT
 @brief This template generate an interface that is used with the gradient edition dialog
 This the type to be edited (color, floet, etc..)
  */
-template <typename T> 
+template <typename T>
 class CValueGradientClientT : public IValueGradientClient, public IPSWrapper<T>
 {
 public:
@@ -163,12 +171,15 @@ public:
 
 	/// the gradient being edited, must be filled by the instancier
 	NL3D::CPSValueGradientFunc<T> *Scheme;
-	
+
 	/// the gradient dialog, must be filled by the instancier
 	T DefaultValue;
-	
+
 	/// inherited from IPSWrapper
-	virtual T get(void) const { return Scheme->getValue(_CurrentEditedIndex); }
+	virtual T get(void) const
+	{
+		return Scheme->getValue(_CurrentEditedIndex);
+	}
 	virtual void set(const T &v)
 	{
 		T *tab = new T[Scheme->getNumValues()];
@@ -195,41 +206,44 @@ public:
 	/// a function that can add, remove, or insert a new element in the gradient
 	virtual bool modifyGradient(TAction action, uint index)
 	{
-		
+
 		T *tab = new T[Scheme->getNumValues() + 1]; // +1 is for the add / insert case
 		Scheme->getValues(tab);
 
 		switch(action)
 		{
-			case IValueGradientClient::Add:
-				tab[Scheme->getNumValues()] = DefaultValue;
-				Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
+		case IValueGradientClient::Add:
+			tab[Scheme->getNumValues()] = DefaultValue;
+			Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
 			break;
-			case IValueGradientClient::Insert:
-				::memmove(tab + (index + 1), tab + index, sizeof(T) * (Scheme->getNumValues() - index));
-				tab[index] = DefaultValue;
-				Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
+		case IValueGradientClient::Insert:
+			::memmove(tab + (index + 1), tab + index, sizeof(T) * (Scheme->getNumValues() - index));
+			tab[index] = DefaultValue;
+			Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
 			break;
-			case IValueGradientClient::Delete:
-				::memmove(tab + index, tab + index + 1, sizeof(T) * (Scheme->getNumValues() - index - 1));
-				Scheme->setValues(tab, Scheme->getNumValues() - 1, Scheme->getNumStages());
+		case IValueGradientClient::Delete:
+			::memmove(tab + index, tab + index + 1, sizeof(T) * (Scheme->getNumValues() - index - 1));
+			Scheme->setValues(tab, Scheme->getNumValues() - 1, Scheme->getNumStages());
 			break;
-			case IValueGradientClient::Up:
-				nlassert(index > 0);
-				std::swap(tab[index], tab[index - 1]);
-				Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
+		case IValueGradientClient::Up:
+			nlassert(index > 0);
+			std::swap(tab[index], tab[index - 1]);
+			Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
 			break;
-			case IValueGradientClient::Down:
-				nlassert(index <  Scheme->getNumValues() - 1);
-				std::swap(tab[index], tab[index + 1]);
-				Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
+		case IValueGradientClient::Down:
+			nlassert(index <  Scheme->getNumValues() - 1);
+			std::swap(tab[index], tab[index + 1]);
+			Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
 			break;
 		}
 
 		delete[] tab;
 		return true;
 	}
-	virtual uint32 getSchemeSize(void) const { return Scheme->getNumValues(); }
+	virtual uint32 getSchemeSize(void) const
+	{
+		return Scheme->getNumValues();
+	}
 
 	/// Get the number of interpolation step
 	uint32 getNbSteps(void) const
@@ -251,12 +265,12 @@ protected:
 /// FLOAT GRADIENT EDITION INTERFACE
 class CFloatGradientWrapper : public CValueGradientClientT<float>
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
 	CFloatGradientWrapper(QObject *parent = 0): CValueGradientClientT<float>(parent) {}
-	
+
 	virtual QWidget *newDialog(IPSWrapperFloat *wrapper, QWidget *parent)
-	{ 
+	{
 		editWidget = new CEditRangeFloatWidget(parent);
 		editWidget->setRange(MinRange, MaxRange);
 		editWidget->setWrapper(wrapper);
@@ -287,12 +301,12 @@ public:
 /// UINT GRADIENT EDITION INTERFACE
 class CUIntGradientWrapper : public CValueGradientClientT<uint32>
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
 	CUIntGradientWrapper(QObject *parent = 0): CValueGradientClientT<uint32>(parent) {}
 
 	virtual QWidget *newDialog(IPSWrapperUInt *wrapper, QWidget *parent)
-	{ 
+	{
 		editWidget = new CEditRangeUIntWidget(parent);
 		editWidget->setRange(MinRange, MaxRange);
 		editWidget->setWrapper(wrapper);
@@ -323,12 +337,12 @@ public:
 /// INT GRADIENT EDITION INTERFACE
 class CIntGradientWrapper : public CValueGradientClientT<sint32>
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
-	 CIntGradientWrapper(QObject *parent = 0): CValueGradientClientT<sint32>(parent) {}
+	CIntGradientWrapper(QObject *parent = 0): CValueGradientClientT<sint32>(parent) {}
 
 	virtual QWidget *newDialog(IPSWrapper<sint32> *wrapper, QWidget *parent)
-	{ 
+	{
 		editWidget = new CEditRangeIntWidget(parent);
 		editWidget->setRange(MinRange, MaxRange);
 		editWidget->setWrapper(wrapper);
@@ -359,12 +373,12 @@ public:
 /// COLOR GRADIENT EDITION INTERFACE
 class CColorGradientWrapper : public CValueGradientClientT<NLMISC::CRGBA>
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
 	CColorGradientWrapper(QObject *parent = 0): CValueGradientClientT<NLMISC::CRGBA>(parent) {}
 
 	virtual QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent)
-	{ 
+	{
 		editWidget = new CColorEditWidget(parent);
 		editWidget->setWrapper(wrapper);
 		connect(editWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SIGNAL(itemChanged()));
@@ -401,12 +415,12 @@ public:
 /// PLANE BASIS GRADIENT EDITION INTERFACE
 class CPlaneBasisGradientWrapper : public CValueGradientClientT<NL3D::CPlaneBasis>
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
 	CPlaneBasisGradientWrapper(QObject *parent = 0): CValueGradientClientT<NL3D::CPlaneBasis>(parent) {}
 
 	virtual QWidget *newDialog(IPSWrapper<NL3D::CPlaneBasis> *wrapper, QWidget *parent)
-	{ 
+	{
 		editWidget = new CBasicEditWidget(parent);
 		editWidget->setWrapper(wrapper);
 		return editWidget;
@@ -420,7 +434,7 @@ public:
 		_CurrentEditedIndex = index;
 		editWidget->updateUi();
 	}
-	
+
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
 		item->setText(QString("Plane %1").arg(index));
@@ -435,15 +449,15 @@ public:
 */
 class CTextureGradientInterface : public IValueGradientClient
 {
-       Q_OBJECT
+	Q_OBJECT
 public:
 	CTextureGradientInterface(QObject *parent = 0): IValueGradientClient(parent) {}
-	
+
 	CTextureGradientInterface(NL3D::CPSTexturedParticle *tp, CWorkspaceNode *ownerNode): Node(ownerNode), TP(tp) {}
 
 	CWorkspaceNode *Node;
 	NL3D::CPSTexturedParticle *TP;
-	
+
 	// all method inherited from IValueGradientClient
 	virtual QWidget *createDialog(QWidget *parent);
 	virtual QString getTitleDialog() const
@@ -467,7 +481,7 @@ public:
 		NL3D::ITexture *get(void);
 		void set(NL3D::ITexture *t);
 	} _TextureWrapper;
-	
+
 	CParticleTextureWidget *editWidget;
 };
 

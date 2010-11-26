@@ -33,19 +33,20 @@
 // Project includes
 #include "edit_range_widget.h"
 
-namespace NLQT {
+namespace NLQT
+{
 /**
 @class CParticleSystemPage
 @brief Page for QStackWidget, to edit workspace node in a particle system
 */
 class CParticleSystemPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CParticleSystemPage(QWidget *parent = 0);
 	~CParticleSystemPage();
-	
+
 	/// Set the workspace node to edit.
 	void setEditedParticleSystem(CWorkspaceNode *node);
 
@@ -55,7 +56,7 @@ private Q_SLOTS:
 	void setIntegration(bool state);
 	void setMotionSlowDown(bool state);
 	void setLock(bool checked);
-	
+
 	void setTimeThreshold(float value);
 	void setMaxSteps(uint32 value);
 
@@ -79,19 +80,19 @@ private Q_SLOTS:
 	void setXBbox(double value);
 	void setYBbox(double value);
 	void setZBbox(double value);
-	
+
 	// LOD Param
 	void setSharable(bool state);
 	void setAutoLOD(bool state);
 	void settings();
-	
+
 	void setMaxViewDist(float value);
 	void setLodRatio(float value);
 
 	// Global color tab
 	void setGlobalLight(bool state);
 	void setEditGlobalColor(bool state);
-	
+
 	// Life mgt param
 	void setPresetBehaviour(int index);
 	void setModelRemoved(bool state);
@@ -102,16 +103,19 @@ private Q_SLOTS:
 	void setAnimType(int index);
 	void setDie(int index);
 	void setAfterDelay(double value);
-  
+
 private:
 	void updatePrecomputedBBoxParams();
 	void updateDieOnEventParams();
 	void updateLifeMgtPresets();
-	
+
 	bool enabledModifiedFlag;
 
-	void updateModifiedFlag() { if ((_Node) && (enabledModifiedFlag)) _Node->setModified(true); }
-	
+	void updateModifiedFlag()
+	{
+		if ((_Node) && (enabledModifiedFlag)) _Node->setModified(true);
+	}
+
 	CWorkspaceNode 		  *_Node;
 
 	struct CGlobalColorWrapper : public IPSSchemeWrapperRGBA
@@ -121,9 +125,9 @@ private:
 		virtual void setScheme(scheme_type *s);
 	}
 	_GlobalColorWrapper;
-	
+
 	Ui::CParticleSystemPage _ui;
-	
+
 }; /* class CParticleSystemPage */
 
 } /* namespace NLQT */

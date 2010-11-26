@@ -31,22 +31,24 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NL3D {
-	struct CPSTailParticle;
+namespace NL3D
+{
+struct CPSTailParticle;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CTailParticleWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CTailParticleWidget(QWidget *parent = 0);
 	~CTailParticleWidget();
-	
+
 	void setCurrentTailParticle(CWorkspaceNode *ownerNode, NL3D::CPSTailParticle *tp);
-	
+
 private Q_SLOTS:
 	void setTailFading(bool state);
 	void setTailShape(int index);

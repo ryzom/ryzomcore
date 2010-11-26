@@ -27,10 +27,11 @@
 #define NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY	10.f
 #define NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART	1.f
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableLandscapePage::CVegetableLandscapePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -41,11 +42,11 @@ CVegetableLandscapePage::CVegetableLandscapePage(QWidget *parent)
 	connect(_ui.snapCameraToGroundCheckBox, SIGNAL(toggled(bool)), this, SLOT(setSnapCameraToGround(bool)));
 	connect(_ui.diffuseColorWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setColorDiffuse(NLMISC::CRGBA)));
 	connect(_ui.ambientColorwidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setColorAmbient(NLMISC::CRGBA)));
-	
+
 	float windPower = Modules::veget().getVegetableWindPower();
 	NLMISC::clamp(windPower, 0, NL_VEGETABLE_EDIT_WIND_MAX_POWER);
 	_ui.powerHorizontalSlider->setValue(int(windPower * _ui.powerHorizontalSlider->maximum() / NL_VEGETABLE_EDIT_WIND_MAX_POWER));
-	
+
 	float bendStar = Modules::veget().getVegetableWindBendStart();
 	NLMISC::clamp(bendStar, 0, NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART);
 	_ui.bendStartHorizontalSlider->setValue(int(bendStar * _ui.bendStartHorizontalSlider->maximum() / NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART));
@@ -85,7 +86,7 @@ void CVegetableLandscapePage::setFrequencySlider(int value)
 
 void CVegetableLandscapePage::setVisibleLandscape(bool state)
 {
-  	if(state)
+	if(state)
 	{
 		// Landscape not created ??
 		if(!Modules::veget().isVegetableLandscapeCreated())

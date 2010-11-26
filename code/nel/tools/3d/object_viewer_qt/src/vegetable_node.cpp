@@ -22,10 +22,11 @@
 
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 static const char *NL_DefaultVegetName= "<default>";
-  
+
 CVegetableNode::CVegetableNode(void)
 {
 	Vegetable = NULL;

@@ -34,18 +34,19 @@
 using namespace NL3D;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSetupFog::CSetupFog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	ui.setupUi(this);
-	
+
 	// load fog value from config file
 	ui.startDoubleSpinBox->setValue(Modules::config().getValue("FogStart", 0.0));
 	ui.endDoubleSpinBox->setValue(Modules::config().getValue("FogEnd", 0.0));
 	colorFog = Modules::config().getValue("FogColor",CRGBA(0.0, 0.0, 0.0));
-	
+
 	connect(ui.applyPushButton, SIGNAL(clicked()), this, SLOT(apply()));
 	connect(ui.colorPushButton, SIGNAL(clicked()), this, SLOT(setColor()));
 }
@@ -63,17 +64,17 @@ CSetupFog::~CSetupFog()
 
 void CSetupFog::apply()
 {
-	Modules::objView().getDriver()->setupFog(ui.startDoubleSpinBox->value(), 
-						 ui.endDoubleSpinBox->value(), 
-						 colorFog);
+	Modules::objView().getDriver()->setupFog(ui.startDoubleSpinBox->value(),
+			ui.endDoubleSpinBox->value(),
+			colorFog);
 	Modules::objView().getDriver()->enableFog(ui.enableFogCheckBox->isChecked());
 }
 
 void CSetupFog::setColor()
 {
 	QColor color = QColorDialog::getColor(QColor(colorFog.R,
-						     colorFog.G,
-						     colorFog.B));
+										  colorFog.G,
+										  colorFog.B));
 	colorFog.set(color.red(), color.green(), color.blue());
 }
 

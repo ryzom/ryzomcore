@@ -24,10 +24,11 @@
 #include "modules.h"
 #include <nel/3d/u_scene.h>
 
-namespace NLQT {
+namespace NLQT
+{
 
 CGlobalWindDialog::CGlobalWindDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
 

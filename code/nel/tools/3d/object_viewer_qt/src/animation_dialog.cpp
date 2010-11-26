@@ -29,10 +29,11 @@
 
 using namespace NLMISC;
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CAnimationDialog::CAnimationDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -45,13 +46,13 @@ CAnimationDialog::CAnimationDialog(QWidget *parent)
 	connect(_ui.horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(changeFrame(int)));
 	connect(_ui.startSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeStartAnim(int)));
 	connect(_ui.endSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeEndAnim(int)));
-	
+
 	// init QTimeLine
 	_timeLine = new QTimeLine(_ui.endSpinBox->value() * _frameRate, this);
 	_timeLine->setCurveShape(QTimeLine::LinearCurve);
 	_timeLine->setUpdateInterval(25);
 	_timeLine->setFrameRange(_ui.startSpinBox->value(), _ui.endSpinBox->value());
-	
+
 	connect(_timeLine, SIGNAL(frameChanged(int)), this, SLOT(updateAnim(int)));
 	connect(_timeLine, SIGNAL(finished()), this, SLOT(finish()));
 
@@ -65,7 +66,7 @@ CAnimationDialog::CAnimationDialog(QWidget *parent)
 CAnimationDialog::~CAnimationDialog()
 {
 }
-  
+
 NL3D::TAnimationTime CAnimationDialog::getTime ()
 {
 	return float(_timeLine->currentFrame()) / _frameRate;
@@ -74,7 +75,7 @@ NL3D::TAnimationTime CAnimationDialog::getTime ()
 void CAnimationDialog::changeAnimLength()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 		return;
 	CEntity &entity = Modules::objView().getEntity(curObj);
 	float animLength = entity.getPlayListLength();
@@ -85,7 +86,7 @@ void CAnimationDialog::changeAnimLength()
 
 void CAnimationDialog::setCurrentShape(const QString &name)
 {
-	if (name.isEmpty()) 
+	if (name.isEmpty())
 		return;
 	CEntity &entity = Modules::objView().getEntity(name.toStdString());
 
@@ -108,8 +109,8 @@ void CAnimationDialog::play()
 	}
 	CEntity &entity = Modules::objView().getEntity(curObj);
 	entity.playbackAnim(true);
-	
-	if (_timeLine->state() == QTimeLine::Running) 
+
+	if (_timeLine->state() == QTimeLine::Running)
 		_timeLine->setPaused(true);
 	else if (_timeLine->currentFrame() == _timeLine->endFrame()) _timeLine->start();
 	else
@@ -123,7 +124,7 @@ void CAnimationDialog::stop()
 	_ui.playPushButton->setChecked(false);
 
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 		return;
 	CEntity &entity = Modules::objView().getEntity(curObj);
 	entity.playbackAnim(false);
@@ -136,7 +137,7 @@ void CAnimationDialog::end()
 
 void CAnimationDialog::changeFrame(int frame)
 {
-	if (_timeLine->state() == QTimeLine::Running) 
+	if (_timeLine->state() == QTimeLine::Running)
 	{
 		_timeLine->setPaused(true);
 		_timeLine->setCurrentTime((float(frame) / _frameRate) * 1000);
@@ -153,7 +154,7 @@ void CAnimationDialog::changeStartAnim(int start)
 
 void CAnimationDialog::changeEndAnim(int end)
 {
-	_ui.horizontalSlider->setMaximum(end);	
+	_ui.horizontalSlider->setMaximum(end);
 	_timeLine->setDuration((float(end - _ui.startSpinBox->value()) / _frameRate) * 1000);
 	_timeLine->setFrameRange(_ui.startSpinBox->value(), end);
 }
@@ -166,7 +167,7 @@ void CAnimationDialog::updateAnim(int frame)
 void CAnimationDialog::setInPlace(bool state)
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 		return;
 	CEntity &entity = Modules::objView().getEntity(curObj);
 	entity.setInPlace(state);
@@ -175,7 +176,7 @@ void CAnimationDialog::setInPlace(bool state)
 void CAnimationDialog::setIncPos(bool state)
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 		return;
 	CEntity &entity = Modules::objView().getEntity(curObj);
 	entity.setIncPos(state);

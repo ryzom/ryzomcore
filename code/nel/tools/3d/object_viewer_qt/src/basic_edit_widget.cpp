@@ -26,15 +26,16 @@
 #include "nel/misc/matrix.h"
 #include "nel/misc/vector.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
-	
+
 // build an euler matrix
 NLMISC::CMatrix  BuildEulerMatrix(float psi, float theta, float phi)
 {
 	float ca = cosf(psi), sa = sinf(psi)
-		  , cb = cosf(theta), sb = sinf(theta)
-		  , cc = cosf(phi), sc = sinf(phi);
+							   , cb = cosf(theta), sb = sinf(theta)
+									   , cc = cosf(phi), sc = sinf(phi);
 	NLMISC::CMatrix m;
 	m.identity();
 	m.setRot(NLMISC::CVector(ca * cb * cc - sa * sc, -cc * sa - ca * cb *sc, ca * sb)
@@ -53,9 +54,11 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 	mat.getRot(v[0], v[1], v[2]);
 	for (uint l = 0; l < 3; ++l)
 	{
-		m[0][l] = v[l].x; m[1][l] = v[l].y; m[2][l] = v[l].z; 
+		m[0][l] = v[l].x;
+		m[1][l] = v[l].y;
+		m[2][l] = v[l].z;
 	}
-	
+
 	// there are eight triplet that may satisfy the equation
 	// we compute them all, and test them against the matrix
 
@@ -85,8 +88,8 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 
 	a2 = (float) NLMISC::Pi - a0;
 	a3 = (float) NLMISC::Pi - a1;
-	
-	
+
+
 	c2 = (float) NLMISC::Pi - c0;
 	c3 = (float) NLMISC::Pi - c1;
 
@@ -110,8 +113,8 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 	for (uint k = 0; k < 8; ++k)
 	{
 		float ca = cosf(sol[k].x), sa = sinf(sol[k].x)
-		  , cb = cosf(sol[k].y), sb = sinf(sol[k].y)
-		  , cc = cosf(sol[k].z), sc = sinf(sol[k].z);
+										, cb = cosf(sol[k].y), sb = sinf(sol[k].y)
+												, cc = cosf(sol[k].z), sc = sinf(sol[k].z);
 
 		float gap = fabsf(m[0][0] - ca * cb * cc + sa * sc);
 		gap += fabsf(m[1][0] + cc * sa + ca * cb *sc);
@@ -124,7 +127,7 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 		if (k == 0 || gap < bestGap)
 		{
 			bestGap = gap;
-			bestIndex  = k; 
+			bestIndex  = k;
 
 		}
 	}
@@ -132,7 +135,7 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 }
 
 CBasicEditWidget::CBasicEditWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL)
+	: QWidget(parent), _Wrapper(NULL)
 {
 	_ui.setupUi(this);
 
@@ -161,26 +164,26 @@ void CBasicEditWidget::updateUi()
 	_ui.psiSpinBox->blockSignals(true);
 	_ui.thetaSpinBox->blockSignals(true);
 	_ui.phiSpinBox->blockSignals(true);
-	
+
 	_ui.psiSpinBox->setValue(int(360.f * angles.x / (2.f * (float) NLMISC::Pi)));
 	_ui.thetaSpinBox->setValue(int(360.f * angles.y / (2.f * (float) NLMISC::Pi)));
 	_ui.phiSpinBox->setValue(int(360.f * angles.z / (2.f * (float) NLMISC::Pi)));
-	
+
 	_ui.psiSpinBox->blockSignals(false);
 	_ui.thetaSpinBox->blockSignals(false);
 	_ui.phiSpinBox->blockSignals(false);
-	
+
 	repaint();
 }
 
 void CBasicEditWidget::updateGraphics()
 {
 	if (_Wrapper == NULL) return;
-		
+
 	NLMISC::CVector angles(2.f * (float) NLMISC::Pi * _ui.psiSpinBox->value() / 360.f
-				   , 2.f * (float) NLMISC::Pi * _ui.thetaSpinBox->value() / 360.f
-				   , 2.f * (float) NLMISC::Pi * _ui.phiSpinBox->value() / 360.f
-				  );
+						   , 2.f * (float) NLMISC::Pi * _ui.thetaSpinBox->value() / 360.f
+						   , 2.f * (float) NLMISC::Pi * _ui.phiSpinBox->value() / 360.f
+						  );
 	NLMISC::CMatrix mat = BuildEulerMatrix(angles.x, angles.y, angles.z);
 	NL3D::CPlaneBasis pb;
 	pb.X = mat.getI();

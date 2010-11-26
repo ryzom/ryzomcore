@@ -31,20 +31,21 @@
 #include "value_gradient_dialog.h"
 #include "multi_tex_dialog.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CParticleTextureAnimWidget::CParticleTextureAnimWidget(QWidget *parent)
-  : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.texIndexWidget->setRange(0, 1);
 	_ui.texIndexWidget->setWrapper(&_TextureIndexWrapper );
 	_ui.texIndexWidget->setSchemeWrapper(&_TextureIndexWrapper );
 	_ui.texIndexWidget->init();
-	
+
 	_ui.texWidget->setWrapper(&_TextureWrapper);
-	
+
 	connect(_ui.texAnimCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledTexAnim(bool)));
 	connect(_ui.multitexturingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setMultitexturing(bool)));
 	connect(_ui.editPushButton, SIGNAL(clicked()), this, SLOT(editMultitexturing()));
@@ -60,13 +61,13 @@ void CParticleTextureAnimWidget::setCurrentTextureAnim(NL3D::CPSTexturedParticle
 	_Node = ownerNode;
 	_EditedParticle = tp;
 	_MTP = mtp;
-	
+
 	disconnect(_ui.texAnimCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledTexAnim(bool)));
-	
+
 	bool isAnimTex = _EditedParticle->getTextureGroup() ? true : false;
 	_ui.texAnimCheckBox->setChecked(isAnimTex);
 	updateTexAnimState(isAnimTex);
-	
+
 	if (_MTP)
 	{
 		_ui.multitexturingCheckBox->setChecked(_MTP->isMultiTextureEnabled());
@@ -74,20 +75,20 @@ void CParticleTextureAnimWidget::setCurrentTextureAnim(NL3D::CPSTexturedParticle
 	}
 	else
 		_ui.multitexturingGroupBox->hide();
-		
+
 	connect(_ui.texAnimCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledTexAnim(bool)));
 }
 
 void CParticleTextureAnimWidget::setEnabledTexAnim(bool state)
 {
-  	if (state)
+	if (state)
 	{
 		if (_MTP)
 			_ui.multitexturingCheckBox->setChecked(false);
 
 		// When you try to load a dummy texture, remove alternative paths, an assertion is thrown otherwise
 		NLMISC::CPath::removeAllAlternativeSearchPath();
-		
+
 		// put a dummy texture as a first texture
 		NLMISC::CSmartPtr<NL3D::ITexture> tex = (NL3D::ITexture *) new NL3D::CTextureFile(std::string(""));
 		NL3D::CTextureGrouped *tg = new NL3D::CTextureGrouped;

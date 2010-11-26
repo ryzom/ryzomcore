@@ -31,7 +31,8 @@
 // Project includes
 #include "particle_tree_model.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CWorkspacePage
@@ -39,12 +40,12 @@ namespace NLQT {
 */
 class CWorkspacePage: public QWidget
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CWorkspacePage(CParticleTreeModel *treeModel, QWidget *parent = 0);
 	~CWorkspacePage();
-	
+
 private Q_SLOTS:
 	void newWP();
 	void loadWP();
@@ -53,9 +54,9 @@ private Q_SLOTS:
 	void insertPS();
 	void createPS();
 	void removeAllPS();
-    
+
 private:
-	
+
 	Ui::CWorkspacePage _ui;
 
 	CParticleTreeModel *_treeModel;

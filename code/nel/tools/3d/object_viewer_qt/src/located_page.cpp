@@ -22,7 +22,7 @@
 
 // Qt includes
 #include <QtGui/QMessageBox>
-#include <QtGui/QInputDialog> 
+#include <QtGui/QInputDialog>
 
 // NeL includes
 #include <nel/3d/particle_system.h>
@@ -30,13 +30,14 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CLocatedPage::CLocatedPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.lifeWidget->setRange(0, 10);
 	_ui.lifeWidget->setWrapper(&_LifeWrapper);
 	_ui.lifeWidget->setSchemeWrapper(&_LifeWrapper);
@@ -44,7 +45,7 @@ CLocatedPage::CLocatedPage(QWidget *parent)
 	///_ui.lifeWidget->enableLowerBound(0, true);
 	_ui.lifeWidget->enableMemoryScheme(false);
 	_ui.lifeWidget->init();
-	
+
 	_ui.massWidget->setRange(0.001f, 10);
 	_ui.massWidget->setWrapper(&_MassWrapper);
 	_ui.massWidget->setSchemeWrapper(&_MassWrapper);
@@ -52,10 +53,10 @@ CLocatedPage::CLocatedPage(QWidget *parent)
 	///_ui.massWidget->enableLowerBound(0, true);
 	_ui.massWidget->enableMemoryScheme(false);
 	_ui.massWidget->init();
-	
+
 	_ui.maxNumParticleWidget->setRange(1, 501);
 	_ui.maxNumParticleWidget->enableUpperBound(1 << 16, true);
-	
+
 	connect(_ui.coordSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMatrixMode(int)));
 	connect(_ui.disgradeWithLODCheckBox, SIGNAL(toggled(bool)), this, SLOT(setDisgradeWithLod(bool)));
 	connect(_ui.parametricMotionCheckBox, SIGNAL(toggled(bool)), this, SLOT(setParametricMotion(bool)));
@@ -75,12 +76,12 @@ void CLocatedPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *lo
 {
 	_Located = located;
 	_Node = ownerNode;
-	
+
 	_LifeWrapper.Located = _Located;
 	_LifeWrapper.Node = _Node;
 	_ui.lifeWidget->setWorkspaceNode(_Node);
 	_ui.lifeWidget->updateUi();
-		
+
 	if (_Located->getLastForever())
 		_ui.lifeWidget->setEnabled(false);
 
@@ -89,17 +90,17 @@ void CLocatedPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *lo
 	_ui.massWidget->setWorkspaceNode(_Node);
 	_ui.massWidget->updateUi();
 
-     if (_Located->getOwner())
-                _ui.maxNumParticleWidget->setEnabled(!_Located->getOwner()->getAutoCountFlag());
+	if (_Located->getOwner())
+		_ui.maxNumParticleWidget->setEnabled(!_Located->getOwner()->getAutoCountFlag());
 
-	 _ui.maxNumParticleWidget->setValue(_Located->getMaxSize(), false);
-	
+	_ui.maxNumParticleWidget->setValue(_Located->getMaxSize(), false);
+
 	_ui.coordSystemComboBox->setCurrentIndex(int(_Located->getMatrixMode()));
 	_ui.limitedLifeTimeCheckBox->setChecked(!_Located->getLastForever());
 	_ui.lifeWidget->setEnabled(!_Located->getLastForever());
 	_ui.trigerOnDeathCheckBox->setChecked(_Located->isTriggerOnDeathEnabled());
 	updateTriggerOnDeath();
-	
+
 	_ui.disgradeWithLODCheckBox->setChecked(_Located->hasLODDegradation());
 	updateIntegrable();
 	updateTriggerOnDeath();
@@ -127,13 +128,13 @@ void CLocatedPage::setLimitedLifeTime(bool state)
 				forceApplied = true;
 				break;
 			}
-		}		
+		}
 		if (forceApplied)
 		{
-			int ret = QMessageBox::critical(this, tr("NeL particle system editor"), 
-					   tr("The object has force(s) applied on it. If it last forever, "
-					      "its motion can become instable after a while. Continue anyway ? (clue : you've been warned ..)"),
-					   QMessageBox::Ok | QMessageBox::Cancel);
+			int ret = QMessageBox::critical(this, tr("NeL particle system editor"),
+											tr("The object has force(s) applied on it. If it last forever, "
+											   "its motion can become instable after a while. Continue anyway ? (clue : you've been warned ..)"),
+											QMessageBox::Ok | QMessageBox::Cancel);
 
 			if (ret == QMessageBox::Cancel)
 			{
@@ -147,10 +148,10 @@ void CLocatedPage::setLimitedLifeTime(bool state)
 		}
 		else
 		{
-			QMessageBox::critical(this, tr("NeL particle system editor"), 
-					   tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-					      "and thus, should have a finite duration. Please remove that flag first."),
-					   QMessageBox::Ok); 
+			QMessageBox::critical(this, tr("NeL particle system editor"),
+								  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+									 "and thus, should have a finite duration. Please remove that flag first."),
+								  QMessageBox::Ok);
 			_ui.limitedLifeTimeCheckBox->setChecked(true);
 		}
 	}
@@ -184,10 +185,10 @@ void CLocatedPage::setParametricMotion(bool state)
 
 void CLocatedPage::editTriggerOnDeath()
 {
-  	bool ok;
+	bool ok;
 	int i = QInputDialog::getInt(this, tr("Set the extern ID"),
-				      tr("0 means no extern access."), 
-				     _Located->getTriggerEmitterID(), 0, 9999, 1, &ok);
+								 tr("0 means no extern access."),
+								 _Located->getTriggerEmitterID(), 0, 9999, 1, &ok);
 	if (ok)
 	{
 		_Located->setTriggerEmitterID(uint32(i));
@@ -233,7 +234,7 @@ void CLocatedPage::setNewMaxSize(uint32 value)
 		/// WARNING:
 		///TreeCtrl->suppressLocatedInstanceNbItem(*Node, v);
 	}
-	_Located->resize(value); 
+	_Located->resize(value);
 
 	updateModifiedFlag();
 }
@@ -246,21 +247,21 @@ void CLocatedPage::updateIntegrable(void)
 
 void CLocatedPage::updateTriggerOnDeath(void)
 {
-  	nlassert(_Located);
+	nlassert(_Located);
 	bool enable = !_Located->getLastForever();
 	_ui.trigerOnDeathCheckBox->setEnabled(enable);
 	_ui.editPushButton->setEnabled(enable && _Located->isTriggerOnDeathEnabled());
 }
 
-void CLocatedPage::CLifeWrapper::set(const float &v) 
-{ 
+void CLocatedPage::CLifeWrapper::set(const float &v)
+{
 	Located->setInitialLife(v);
 	Modules::psEdit().resetAutoCount(Node);
 }
-void CLocatedPage::CLifeWrapper::setScheme(scheme_type *s) 
-{ 
+void CLocatedPage::CLifeWrapper::setScheme(scheme_type *s)
+{
 	Located->setLifeScheme(s);
 	Modules::psEdit().resetAutoCount(Node);
 }
-	   
+
 } /* namespace NLQT */

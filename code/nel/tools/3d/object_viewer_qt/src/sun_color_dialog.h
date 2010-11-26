@@ -28,20 +28,21 @@
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 /**
 @class CSunColorDialog
 @brief Dialog to choose the sun color in a 3D scene
 */
 class CSunColorDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CSunColorDialog(QWidget *parent = 0);
 	~CSunColorDialog();
-	
+
 private Q_SLOTS:
 	void updateSunColor(bool visible);
 	void setAmbientSunColor(NLMISC::CRGBA color);
@@ -49,7 +50,7 @@ private Q_SLOTS:
 	void setSpecularSunColor(NLMISC::CRGBA color);
 
 private:
-  
+
 	Ui::CSunColorDialog _ui;
 }; /* class CSunColorDialog */
 

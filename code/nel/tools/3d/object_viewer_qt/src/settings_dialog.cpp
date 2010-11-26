@@ -34,13 +34,14 @@
 
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSettingsDialog::CSettingsDialog(QWidget *parent)
-    : QDialog(parent)
+	: QDialog(parent)
 {
 	ui.setupUi(this);
-	
+
 	loadGraphicsSettings();
 	loadSoundSettings();
 	loadPathsSettings();
@@ -49,19 +50,19 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 	connect(ui.enableBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableBloom(bool)));
 	connect(ui.squareBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableSquareBloon(bool)));
 	connect(ui.bloomDensityHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setDensityBloom(int)));
-	
+
 	connect(ui.addToolButton, SIGNAL(clicked()), this, SLOT(addPath()));
 	connect(ui.removeToolButton, SIGNAL(clicked()), this, SLOT(removePath()));
 	connect(ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
 	connect(ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
 	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(applyPressed()));
-	
+
 	connect(ui.tileBankToolButton, SIGNAL(clicked()), this, SLOT(setTileBank()));
 	connect(ui.tileFarBankToolButton, SIGNAL(clicked()), this, SLOT(setTileFarBank()));
 	connect(ui.vegetTexToolButton, SIGNAL(clicked()), this, SLOT(setTextureVegetable()));
 	connect(ui.addZoneToolButton, SIGNAL(clicked()), this, SLOT(addZone()));
 	connect(ui.removeZoneToolButton, SIGNAL(clicked()), this, SLOT(removeZone()));
-	
+
 #ifdef NL_OS_UNIX
 	ui.driverGraphComboBox->setEnabled(false);
 #endif
@@ -79,7 +80,7 @@ void CSettingsDialog::addPath()
 {
 	QListWidgetItem *newItem = new QListWidgetItem;
 	QString newPath = QFileDialog::getExistingDirectory(this);
-	if (!(newPath == "")) 
+	if (!(newPath == ""))
 	{
 		newItem->setText(newPath);
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -99,7 +100,7 @@ void CSettingsDialog::upPath()
 	if (!(currentRow == 0))
 	{
 		QListWidgetItem *item = ui.pathsListWidget->takeItem(currentRow);
-		ui.pathsListWidget->insertItem(--currentRow, item);  
+		ui.pathsListWidget->insertItem(--currentRow, item);
 		ui.pathsListWidget->setCurrentRow(currentRow);
 	}
 }
@@ -110,20 +111,20 @@ void CSettingsDialog::downPath()
 	if (!(currentRow == ui.pathsListWidget->count()-1))
 	{
 		QListWidgetItem *item = ui.pathsListWidget->takeItem(currentRow);
-		ui.pathsListWidget->insertItem(++currentRow, item);  
+		ui.pathsListWidget->insertItem(++currentRow, item);
 		ui.pathsListWidget->setCurrentRow(currentRow);
 	}
 }
 
 void CSettingsDialog::applyPressed()
 {
-  
+
 	// settings take after restart the program
-	QMessageBox::warning(this, tr("Settings"), 
-			     tr("Graphics and sound settings "
-			     "take after restart the program"),
-			     QMessageBox::Ok);
-	
+	QMessageBox::warning(this, tr("Settings"),
+						 tr("Graphics and sound settings "
+							"take after restart the program"),
+						 QMessageBox::Ok);
+
 	saveGraphicsSettings();
 	saveSoundSettings();
 	savePathsSettings();
@@ -131,7 +132,7 @@ void CSettingsDialog::applyPressed()
 
 	// save config file
 	Modules::config().getConfigFile().save();
-	
+
 	// reload search paths
 	Modules::config().configSearchPaths();
 }
@@ -139,9 +140,9 @@ void CSettingsDialog::applyPressed()
 void CSettingsDialog::setTileBank()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Set new tile bank"),
-                            ui.tileBankLineEdit->text(),
-                            tr("Tile Bank file (*.smallbank *.bank);;"));
-	if (!fileName.isEmpty()) 
+					   ui.tileBankLineEdit->text(),
+					   tr("Tile Bank file (*.smallbank *.bank);;"));
+	if (!fileName.isEmpty())
 	{
 		ui.tileBankLineEdit->setText(fileName);
 	}
@@ -149,10 +150,10 @@ void CSettingsDialog::setTileBank()
 
 void CSettingsDialog::setTileFarBank()
 {
-  	QString fileName = QFileDialog::getOpenFileName(this, tr("Set new tile far bank"),
-                            ui.tileFarBankLineEdit->text(),
-                            tr("Tile Far Bank file (*.farbank);;"));
-	if (!fileName.isEmpty()) 
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Set new tile far bank"),
+					   ui.tileFarBankLineEdit->text(),
+					   tr("Tile Far Bank file (*.farbank);;"));
+	if (!fileName.isEmpty())
 	{
 		ui.tileFarBankLineEdit->setText(fileName);
 	}
@@ -161,9 +162,9 @@ void CSettingsDialog::setTileFarBank()
 void CSettingsDialog::setTextureVegetable()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Set MicroVegetable texture"),
-                            ui.vegetTextureLineEdit->text(),
-                            tr("Texture file (*.tga *.png *.jpg *.dds);;"));
-	if (!fileName.isEmpty()) 
+					   ui.vegetTextureLineEdit->text(),
+					   tr("Texture file (*.tga *.png *.jpg *.dds);;"));
+	if (!fileName.isEmpty())
 	{
 		ui.vegetTextureLineEdit->setText(fileName);
 	}
@@ -172,21 +173,21 @@ void CSettingsDialog::setTextureVegetable()
 void CSettingsDialog::addZone()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-					tr("Add zone files"), ".",
-					tr("Zonel files (*.zonel);;"));
+							tr("Add zone files"), ".",
+							tr("Zonel files (*.zonel);;"));
 
-	if (!fileNames.isEmpty()) 
+	if (!fileNames.isEmpty())
 	{
 		QStringList list = fileNames;
 		QStringList::Iterator it = list.begin();
-		while(it != list.end()) 
+		while(it != list.end())
 		{
-			QListWidgetItem *newItem = new QListWidgetItem;	
+			QListWidgetItem *newItem = new QListWidgetItem;
 			newItem->setText(*it);
 			newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 			ui.zonesListWidget->addItem(newItem);
 			++it;
-		}  
+		}
 	}
 }
 
@@ -215,11 +216,11 @@ void CSettingsDialog::cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var)
 {
 	while (ui.driverGraphComboBox->count())
 		ui.driverGraphComboBox->removeItem(0);
-	
+
 	// load types graphics driver from the config file
 	for (uint i = 0; i < var.size(); ++i)
 		ui.driverGraphComboBox->addItem(var.asString(i).c_str());
-	
+
 	// set graphics driver from the config file
 	QString value = Modules::config().getValue("GraphicsDriver",std::string("OpenGL")).c_str();
 	QString dn = value.toLower();
@@ -237,11 +238,11 @@ void CSettingsDialog::cfcbSoundDrivers(NLMISC::CConfigFile::CVar& var)
 {
 	while (ui.driverSndComboBox->count())
 		ui.driverSndComboBox->removeItem(0);
-	
+
 	// load types sound driver from the config file
 	for (uint i = 0; i < var.size(); ++i)
 		ui.driverSndComboBox->addItem(var.asString(i).c_str());
-	
+
 	// set sound driver from the config file
 	QString value = Modules::config().getValue("SoundDriver",std::string("Auto")).c_str();
 	QString dn = value.toLower();
@@ -260,7 +261,7 @@ void CSettingsDialog::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
 	/// TODO: create custom widget add/insert/del/up/down paths (also this is use landscape zones)
 
 	ui.pathsListWidget->clear();
- 
+
 	// load search paths from the config file
 	for (uint i = 0; i < var.size(); ++i)
 	{
@@ -305,7 +306,7 @@ void CSettingsDialog::loadVegetableSettings()
 	ui.tileBankLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTileBank").asString().c_str());
 	ui.tileFarBankLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTileFarBank").asString().c_str());
 	ui.vegetTextureLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTexture").asString().c_str());
- 
+
 	ui.zonesListWidget->clear();
 
 	// load vegetable landscape zone paths from config file

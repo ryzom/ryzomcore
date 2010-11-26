@@ -38,26 +38,27 @@
 #include "ps_wrapper.h"
 #include "attrib_widget.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CBinOpDialog : public  QDialog
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CBinOpDialog(QWidget *widget1, QWidget *widget2, QWidget *parent = 0);
 	~CBinOpDialog();
 
 	virtual void init() = 0;
-	
-	/// called when a new operator has been selected 
+
+	/// called when a new operator has been selected
 	virtual void newOp(uint32 op) = 0 ;
-	
+
 private Q_SLOTS:
 	void setNewOp(int index);
 
 protected:
-  
+
 	QGridLayout *_gridLayout;
 	QWidget *_widget1;
 	QComboBox *_comboBox;
@@ -66,9 +67,9 @@ protected:
 };
 
 
-/** 
+/**
 @class CBinOpDialogT
-@brief Construct a dialog that allow to edit a binary operator that produce argument of a particle system  
+@brief Construct a dialog that allow to edit a binary operator that produce argument of a particle system
 */
 template <class T> class CBinOpDialogT : public CBinOpDialog
 {
@@ -96,8 +97,8 @@ public:
 			_AttrbDlg[k]->setSchemeWrapper(&_SchemeWrapper[k]) ;
 			_AttrbDlg[k]->init();
 		}
-		
-		static const char * const operators[] = 
+
+		static const char * const operators[] =
 		{
 			QT_TR_NOOP("Select Arg1"),
 			QT_TR_NOOP("Select Arg2"),
@@ -126,10 +127,10 @@ public:
 		{
 			delete _AttrbDlg[k] ;
 		}
-	}	
+	}
 
 protected:
-	
+
 	NL3D::CPSAttribMakerBinOp<T> *_EditedScheme ;
 
 	/// the dialogs that allow us to edit the schemes
@@ -140,17 +141,30 @@ protected:
 	{
 		NL3D::CPSAttribMakerBinOp<T> *S ;
 		uint Index ;
-		virtual NL3D::CPSAttribMaker<T> *getScheme(void) const { return S->getArg(Index) ; }
-		virtual void setScheme(NL3D::CPSAttribMaker<T> *s) { S->setArg(Index, s) ; } ;
+		virtual NL3D::CPSAttribMaker<T> *getScheme(void) const
+		{
+			return S->getArg(Index) ;
+		}
+		virtual void setScheme(NL3D::CPSAttribMaker<T> *s)
+		{
+			S->setArg(Index, s) ;
+		} ;
 	} _SchemeWrapper[2] ;
 
 	/// a dummy wrapper for constant value. This shouldn't be called , however
 	struct CDummyWrapper : public IPSWrapper<T>
 	{
-		T get(void) const { nlassert(false) ; return T() ; }
-		void set(const T &) { nlassert(false) ; }
+		T get(void) const
+		{
+			nlassert(false) ;
+			return T() ;
+		}
+		void set(const T &)
+		{
+			nlassert(false) ;
+		}
 	} _DummyWrapper ;
-		
+
 
 	void newOp(uint32 op)
 	{
@@ -158,7 +172,7 @@ protected:
 		if (_EditedScheme->getOp() != (NL3D::CPSBinOp::BinOp) op)
 			_EditedScheme->setOp((NL3D::CPSBinOp::BinOp) op);
 	}
-	
+
 } ;
 
 } /* namespace NLQT */

@@ -34,23 +34,23 @@ using namespace NL3D;
 
 
 /** This can duplicate any serializable type by using a serialization policy (polymorphic, non polymorphic ..)
-  * The serialization policy must have a method to serial a pointer on the object (see example below)  
-  * NB : of course this is slow (but convenient) way of performing a copy 
-  * TODO maybe this could be used elsewhere ?    
+  * The serialization policy must have a method to serial a pointer on the object (see example below)
+  * NB : of course this is slow (but convenient) way of performing a copy
+  * TODO maybe this could be used elsewhere ?
   */
 template <class TSerializePolicy, typename T>
 static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
 {
-	NLMISC::CMemStream ms;	
+	NLMISC::CMemStream ms;
 	nlassert(!ms.isReading());
 	T *nonConstIn = const_cast<T *>(in);
 	TSerializePolicy::serial(nonConstIn, ms);
 	std::vector<uint8> datas(ms.length());
-	std::copy(ms.buffer(), ms.buffer() + ms.length(), datas.begin());		
+	std::copy(ms.buffer(), ms.buffer() + ms.length(), datas.begin());
 	ms.resetPtrTable();
 	ms.invert();
 	ms.fill(&datas[0], (uint)datas.size());
-	nlassert(ms.isReading());	
+	nlassert(ms.isReading());
 	T *newObj = NULL;
 	TSerializePolicy::serial(newObj, ms);
 	return newObj;
@@ -62,7 +62,7 @@ struct CDupObjPolicy
 {
 	template <typename T>
 	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
-	{ 	
+	{
 		dest.serialPtr(obj);
 		/*if (dest.isReading())
 		{
@@ -72,10 +72,10 @@ struct CDupObjPolicy
 			obj = newObj.release();
 		}
 		else
-		{		
+		{
 			obj->serial(dest);
 		}*/
-	}	
+	}
 };
 
 /** A policy to duplicate a polymorphic type
@@ -84,8 +84,8 @@ struct CDupPolymorphicObjPolicy
 {
 	template <typename T>
 	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
-	{ 	
-		dest.serialPolyPtr(obj);		
+	{
+		dest.serialPolyPtr(obj);
 	}
 };
 
@@ -111,10 +111,10 @@ NL3D::CParticleSystemProcess	*DupPSLocated(const CParticleSystemProcess *in)
 			/** Duplicate the system, and detach.
 			  * We can't duplicate the object direclty (it may be referencing other objects in the system, so these objects will be copied too...)
 			  */
-			 std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(in->getOwner()));	
-			 // scene pointer is not serialised, but 'detach' may need the scene to be specified
-			 newPS->setScene(in->getOwner()->getScene());
-			return newPS->detach(index);			
+			std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(in->getOwner()));
+			// scene pointer is not serialised, but 'detach' may need the scene to be specified
+			newPS->setScene(in->getOwner()->getScene());
+			return newPS->detach(index);
 		}
 	}
 	catch (NLMISC::EStream &e)
@@ -141,13 +141,13 @@ NL3D::CPSLocatedBindable	*DupPSLocatedBindable(CPSLocatedBindable *in)
 		else
 		{
 			CParticleSystem *srcPS = in->getOwner()->getOwner();
-			std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(srcPS));	
+			std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(srcPS));
 			// scene pointer is not serialised, but 'detach' may need the scene to be specified
 			newPS->setScene(in->getOwner()->getOwner()->getScene());
 			//
 			uint index	  = srcPS->getIndexOf(*(in->getOwner()));
 			uint subIndex = in->getOwner()->getIndexOf(in);
-			//									
+			//
 			newPS->setScene(in->getOwner()->getScene()); // 'unbind' require the scene to be attached
 			CPSLocated *loc = NLMISC::safe_cast<CPSLocated *>(newPS->getProcess(index));
 			return loc->unbind(subIndex);

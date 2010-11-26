@@ -34,24 +34,26 @@
 // Project includes
 #include "entity.h"
 
-namespace NL3D {
-	class UDriver;
-	class UScene;
-	class ULight;
-	class UInstance;
-	class UCamera;
-	class USkeleton;
-	class UTextContext;
-	class UPlayListManager;
-	class U3dMouseListener;
+namespace NL3D
+{
+class UDriver;
+class UScene;
+class ULight;
+class UInstance;
+class UCamera;
+class USkeleton;
+class UTextContext;
+class UPlayListManager;
+class U3dMouseListener;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CObjectViewer
 @brief The class initializes the driver and creates a scene, provides basic control functions over the stage driver.
-@details The class initializes the driver (by choosing OpenGL or Direct3D), and creates a scene (set an aspect), respectively 
+@details The class initializes the driver (by choosing OpenGL or Direct3D), and creates a scene (set an aspect), respectively
 creates a light as well, load the font that is available further for
 all other subsystems (eg: the signature of the coordinate axes) and Mouse Listener.
 Settings are loaded from the configuration file.
@@ -60,7 +62,7 @@ Also, the class provides the following features to scene control:
 - Provides access to a animation object (getEntity(), getListObjects()).
 - Select of current object for various operation (mainly related to the animation and editing skeleton):setCurrentObject(), getCurrentObject().
 - Operations with the viewport, setting the correct perspective and creating of a screenshot.
-- Function's updating keyboard and mouse (acts on the camera updateInput()), update(updateAnimatePS(), updateAnimation()) 
+- Function's updating keyboard and mouse (acts on the camera updateInput()), update(updateAnimatePS(), updateAnimation())
 and render the scene (renderDriver(), renderScene()).
 - Provides access to a general NeL systems (getDriver(), getScene(), getPlayListManager(), getTextContext(), get3dMouseListener()).
 */
@@ -69,7 +71,7 @@ class CObjectViewer
 public:
 	/// Default constructor.
 	CObjectViewer();
-	
+
 	virtual ~CObjectViewer();
 
 	/// Init a driver and create scene.
@@ -131,8 +133,11 @@ public:
 	/// @param w - width window.
 	/// @param h - height window.
 	void setSizeViewport(uint16 w, uint16 h);
-	
-	void setBloomEffect(bool enabled) { _BloomEffect = enabled; }
+
+	void setBloomEffect(bool enabled)
+	{
+		_BloomEffect = enabled;
+	}
 
 	/// Select instance from the scene
 	/// @param name - name instance,  "" if no instance edited
@@ -140,8 +145,11 @@ public:
 
 	/// Get current instance from the scene
 	/// @return name current instance, "" if no instance edited
-	const std::string& getCurrentObject() { return _CurrentInstance; }
- 
+	const std::string& getCurrentObject()
+	{
+		return _CurrentInstance;
+	}
+
 	/// Get entity from the scene
 	/// @return ref Entity
 	CEntity& getEntity(const std::string &name);
@@ -152,49 +160,73 @@ public:
 
 	/// Get value background color.
 	/// @return  background color.
-	inline NLMISC::CRGBA getBackgroundColor() const { return _BackgroundColor; }
+	inline NLMISC::CRGBA getBackgroundColor() const
+	{
+		return _BackgroundColor;
+	}
 
 	/// Get type driver.
 	/// @return true if have used Direct3D driver, false OpenGL driver.
-	inline bool getDirect3D() const { return _Direct3D; }
+	inline bool getDirect3D() const
+	{
+		return _Direct3D;
+	}
 
-	inline bool getBloomEffect() const { return _BloomEffect; }
+	inline bool getBloomEffect() const
+	{
+		return _BloomEffect;
+	}
 
 	/// Get a game interface for window driver.
 	/// @return pointer to the driver.
-	inline NL3D::UDriver *getDriver() const { return _Driver; }
+	inline NL3D::UDriver *getDriver() const
+	{
+		return _Driver;
+	}
 
 	/// Get a game interface for scene.
 	/// @return pointer to the scene.
-	inline NL3D::UScene *getScene() const { return _Scene; }
+	inline NL3D::UScene *getScene() const
+	{
+		return _Scene;
+	}
 
 	/// Get a manager of playlist
 	/// @return pointer to the UPlayListManager
-	inline NL3D::UPlayListManager *getPlayListManager() const { return _PlayListManager; }
+	inline NL3D::UPlayListManager *getPlayListManager() const
+	{
+		return _PlayListManager;
+	}
 
-	/// Get a game interface to render string 
+	/// Get a game interface to render string
 	/// @return pointer to the UPlayListManager
-	inline NL3D::UTextContext *getTextContext() const { return _TextContext; }
+	inline NL3D::UTextContext *getTextContext() const
+	{
+		return _TextContext;
+	}
 
 	/// Get a 3d mouse listener
 	/// @return pointer to the U3dMouseListener
-	inline NL3D::U3dMouseListener *get3dMouseListener() const { return _MouseListener; }
+	inline NL3D::U3dMouseListener *get3dMouseListener() const
+	{
+		return _MouseListener;
+	}
 
 private:
 	void loadConfig();
-	
+
 	void saveConfig();
-	
+
 	// Delete all entities
 	void deleteEntities();
-	
+
 	// Load background color from config file, intended for CConfiguration.
 	void cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var);
 	void cfcbGraphicsDriver(NLMISC::CConfigFile::CVar &var);
 	void cfcbCameraFocal(NLMISC::CConfigFile::CVar &var);
 	void cfcbFontName(NLMISC::CConfigFile::CVar &var);
 	void cfcbBloomEffect(NLMISC::CConfigFile::CVar &var);
-	
+
 	NLMISC::CRGBA 			_BackgroundColor;
 
 	NL3D::UDriver 			*_Driver;
@@ -207,17 +239,17 @@ private:
 
 	// The entities storage
 	CEntities		_Entities;
-	
+
 	/// Camera parameters.
 	float _phi, _psi, _dist;
-	
+
 	float _CameraFocal;
-	
+
 	std::string _FontName;
-	
+
 	bool _Direct3D;
 	bool _BloomEffect;
-	
+
 	std::string _CurrentInstance;
 
 };/* class CObjectViewer */

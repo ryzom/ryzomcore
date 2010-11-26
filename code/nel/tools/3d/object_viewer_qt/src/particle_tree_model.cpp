@@ -28,46 +28,47 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CParticleTreeItem::CParticleTreeItem(const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
 
 }
 
 CParticleTreeItem::CParticleTreeItem(CParticleWorkspace *ws, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
-	nlassert(ws); 
+	nlassert(ws);
 	_WS = ws;
 }
 
 CParticleTreeItem::CParticleTreeItem(NL3D::CPSLocated *loc, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
-	nlassert(loc); 
+	nlassert(loc);
 	_Loc = loc;
 }
 
 CParticleTreeItem::CParticleTreeItem(NL3D::CPSLocated *loc, uint32 index, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
 	nlassert(loc);
-	_Loc = loc; 
+	_Loc = loc;
 	_LocatedInstanceIndex = index;
 }
 
 CParticleTreeItem::CParticleTreeItem(CWorkspaceNode *node, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
 	_PS = node;
 }
 
 CParticleTreeItem::CParticleTreeItem(NL3D::CPSLocatedBindable *lb, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent):
-					 _itemData(data), _itemIconType(typeItem), _parentItem(parent)
+	_itemData(data), _itemIconType(typeItem), _parentItem(parent)
 {
-	 _Bind = lb;
+	_Bind = lb;
 }
 
 CParticleTreeItem::~CParticleTreeItem()
@@ -113,7 +114,7 @@ CParticleTreeItem *CParticleTreeItem::parent()
 int CParticleTreeItem::row() const
 {
 	if (_parentItem)
-	    return _parentItem->_childItems.indexOf(const_cast<CParticleTreeItem*>(this));
+		return _parentItem->_childItems.indexOf(const_cast<CParticleTreeItem*>(this));
 	return 0;
 }
 
@@ -160,7 +161,7 @@ void CParticleTreeItem::setLocatedInstanceIndex(uint32 index)
 }
 
 CParticleTreeModel::CParticleTreeModel(QObject *parent)
-     : QAbstractItemModel(parent)
+	: QAbstractItemModel(parent)
 {
 	QList<QVariant> rootData;
 	rootData << "Name";
@@ -175,27 +176,27 @@ CParticleTreeModel::~CParticleTreeModel()
 int CParticleTreeModel::columnCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
-	    return static_cast<CParticleTreeItem*>(parent.internalPointer())->columnCount();
+		return static_cast<CParticleTreeItem*>(parent.internalPointer())->columnCount();
 	else
-	    return _rootItem->columnCount();
+		return _rootItem->columnCount();
 }
 
 QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
-	  return QVariant();
+		return QVariant();
 
 	if (role == Qt::DisplayRole)
 	{
 		CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
 		if (item->itemType() == ItemType::ParticleSystem)
 		{
-			if (item->getNode()->isModified()) 
+			if (item->getNode()->isModified())
 				return "*" + item->data(index.column()).toString();
 		}
 		if (item->itemType() == ItemType::Workspace)
 		{
-			if (item->getPW()->isModified()) 
+			if (item->getPW()->isModified())
 				return "*" + item->data(index.column()).toString();
 		}
 		return item->data(index.column());
@@ -210,8 +211,8 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 		}
 		return QFont("SansSerif", 9, QFont::Normal);
 	}
-	if (role == Qt::DecorationRole) 
-	    return qVariantFromValue(getIcon(index));
+	if (role == Qt::DecorationRole)
+		return qVariantFromValue(getIcon(index));
 
 	return QVariant();
 }
@@ -219,78 +220,78 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags CParticleTreeModel::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags itmFlags = Qt::NoItemFlags;
-	
+
 	if (!index.isValid())
-	    return itmFlags;
-	
+		return itmFlags;
+
 	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
 	switch (item->itemType())
 	{
-		case ItemType::Particle:
-		case ItemType::Emitter:
-		case ItemType::Force:
-		case ItemType::Light:
-		case ItemType::Sound:
-		case ItemType::Located:
-		case ItemType::CollisionZone:
-			itmFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-			break;
-		case ItemType::LocatedInstance:
-			if (Modules::psEdit().isRunning()) 
-				itmFlags = Qt::NoItemFlags;
-			else
-				itmFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-			break;
-		default:
+	case ItemType::Particle:
+	case ItemType::Emitter:
+	case ItemType::Force:
+	case ItemType::Light:
+	case ItemType::Sound:
+	case ItemType::Located:
+	case ItemType::CollisionZone:
+		itmFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+		break;
+	case ItemType::LocatedInstance:
+		if (Modules::psEdit().isRunning())
+			itmFlags = Qt::NoItemFlags;
+		else
 			itmFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-			break;
+		break;
+	default:
+		itmFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+		break;
 	}
-	
+
 	//CParticleWorkspaceDialog *pwsd = qobject_cast<CParticleWorkspaceDialog*>(QObject::parent());
 	//pwsd->updateTreeView();
-	
+
 	return itmFlags;
 }
 
 QVariant CParticleTreeModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
+										int role) const
 {
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-	    return _rootItem->data(section);
+		return _rootItem->data(section);
 
 	return QVariant();
 }
 
 QModelIndex CParticleTreeModel::index(int row, int column, const QModelIndex &parent)
-             const
+const
 {
 	if (!hasIndex(row, column, parent))
-	    return QModelIndex();
+		return QModelIndex();
 
 	CParticleTreeItem *parentItem;
 
 	if (!parent.isValid())
-	    parentItem = _rootItem;
+		parentItem = _rootItem;
 	else
-	    parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
 
 	CParticleTreeItem *childItem = parentItem->child(row);
 	if (childItem)
-	    return createIndex(row, column, childItem);
+		return createIndex(row, column, childItem);
 	else
-	    return QModelIndex();
+		return QModelIndex();
 }
 
 QModelIndex CParticleTreeModel::parent(const QModelIndex &index) const
 {
 	if (!index.isValid())
-	    return QModelIndex();
+		return QModelIndex();
 
 	CParticleTreeItem *childItem = static_cast<CParticleTreeItem*>(index.internalPointer());
 	CParticleTreeItem *parentItem = childItem->parent();
 
 	if (parentItem == _rootItem)
-	    return QModelIndex();
+		return QModelIndex();
 
 	return createIndex(parentItem->row(), 0, parentItem);
 }
@@ -299,28 +300,28 @@ int CParticleTreeModel::rowCount(const QModelIndex &parent) const
 {
 	CParticleTreeItem *parentItem;
 	if (parent.column() > 0)
-	    return 0;
+		return 0;
 
 	if (!parent.isValid())
-	    parentItem = _rootItem;
+		parentItem = _rootItem;
 	else
-	    parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
 
 	return parentItem->childCount();
 }
- 
+
 bool CParticleTreeModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	if (index.isValid() && role == Qt::EditRole) 
+	if (index.isValid() && role == Qt::EditRole)
 	{
 		CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
 		QList<QVariant> listData;
 		listData << value;
 		item->replace(listData);
-		std::string name = value.toString().toStdString(); 
-		if (item->itemType() == ItemType::Located) 
+		std::string name = value.toString().toStdString();
+		if (item->itemType() == ItemType::Located)
 			item->getLoc()->setName(name);
-		else 
+		else
 			item->getBind()->setName(name);
 		Q_EMIT dataChanged(index, index);
 		return true;
@@ -333,30 +334,30 @@ QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
 	switch (item->itemType())
 	{
-		case ItemType::Root:
-			break;
-		case ItemType::Workspace:
-			return QIcon(":/images/Workspace.bmp");
-		case ItemType::ParticleSystem:
-			return QIcon(":/images/ParticleSystem.bmp");
-		case ItemType::Particle:
-			return QIcon(":/images/Particle.bmp");
-		case ItemType::Emitter:
-			return QIcon(":/images/Emitter.bmp");
-		case ItemType::Force:
-			return QIcon(":/images/Force.bmp");
-		case ItemType::Light:
-			return QIcon(":/images/Light.bmp");
-		case ItemType::Sound:
-			return QIcon(":/images/Sound.bmp");
-		case ItemType::Located:
-			return QIcon(":/images/Located.bmp");
-		case ItemType::CollisionZone:
-			return QIcon(":/images/CollisionZone.bmp");
-		case ItemType::LocatedInstance:
-			return QIcon(":/images/LocatedInstance.bmp");
-		case ItemType::ParticleSystemNotLoaded:
-			return QIcon(":/images/ParticleSystemNotLoaded.bmp");
+	case ItemType::Root:
+		break;
+	case ItemType::Workspace:
+		return QIcon(":/images/Workspace.bmp");
+	case ItemType::ParticleSystem:
+		return QIcon(":/images/ParticleSystem.bmp");
+	case ItemType::Particle:
+		return QIcon(":/images/Particle.bmp");
+	case ItemType::Emitter:
+		return QIcon(":/images/Emitter.bmp");
+	case ItemType::Force:
+		return QIcon(":/images/Force.bmp");
+	case ItemType::Light:
+		return QIcon(":/images/Light.bmp");
+	case ItemType::Sound:
+		return QIcon(":/images/Sound.bmp");
+	case ItemType::Located:
+		return QIcon(":/images/Located.bmp");
+	case ItemType::CollisionZone:
+		return QIcon(":/images/CollisionZone.bmp");
+	case ItemType::LocatedInstance:
+		return QIcon(":/images/LocatedInstance.bmp");
+	case ItemType::ParticleSystemNotLoaded:
+		return QIcon(":/images/ParticleSystemNotLoaded.bmp");
 	}
 	return QIcon();
 }
@@ -364,11 +365,11 @@ QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 bool CParticleTreeModel::insertRows(CWorkspaceNode *node, int position, const QModelIndex &parent)
 {
 	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer());
-	
+
 	beginInsertRows(parent, position, position);
-	 setupModelFromPS(node, item);
+	setupModelFromPS(node, item);
 	endInsertRows();
-	
+
 	if (node->isLoaded())
 	{
 		QModelIndex indexPS = index(item->childCount() - 1, 0, parent);
@@ -384,9 +385,9 @@ bool CParticleTreeModel::insertRows(CWorkspaceNode *node, int position, const QM
 bool CParticleTreeModel::insertRows(NL3D::CPSLocated *loc, int position, const QModelIndex &parent)
 {
 	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer());
-	
+
 	beginInsertRows(parent, position, position);
-	 createItemFromLocated(loc, item);
+	createItemFromLocated(loc, item);
 	endInsertRows();
 
 	QModelIndex indexLocated = index(item->childCount() - 1, 0, parent);
@@ -402,7 +403,7 @@ bool CParticleTreeModel::insertRows(NL3D::CPSLocated *loc, int position, const Q
 bool CParticleTreeModel::insertRow(NL3D::CPSLocated *loc, uint32 index, int position, const QModelIndex &parent)
 {
 	beginInsertRows(parent, position, position);
-	 createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem*>(parent.internalPointer()));
+	createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem*>(parent.internalPointer()));
 	endInsertRows();
 	return true;
 }
@@ -414,7 +415,7 @@ bool CParticleTreeModel::insertRow(NL3D::CPSLocatedBindable *lb, int position, c
 	endInsertRows();
 	return true;
 }
- 
+
 bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 {
 	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer())->child(position);
@@ -422,31 +423,31 @@ bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 		removeRows(0, parent.child(position, 0));
 
 	beginRemoveRows(parent, position, position);
-	 static_cast<CParticleTreeItem*>(parent.internalPointer())->deleteChild(position);
+	static_cast<CParticleTreeItem*>(parent.internalPointer())->deleteChild(position);
 	endRemoveRows();
 	return false;
 }
- 
+
 CWorkspaceNode *CParticleTreeModel::getOwnerNode(CParticleTreeItem *item) const
 {
 	CWorkspaceNode *node = NULL;
 	switch (item->itemType())
 	{
-		case ItemType::ParticleSystem:
-			node = item->getNode();
-			break;
-		case ItemType::Located:
-			node = item->parent()->getNode();
-			break;
-		case ItemType::LocatedInstance:
-		case ItemType::Particle:
-		case ItemType::Emitter:
-		case ItemType::Force:
-		case ItemType::Light:
-		case ItemType::Sound:
-		case ItemType::CollisionZone:
-			node = item->parent()->parent()->getNode();
-			break;
+	case ItemType::ParticleSystem:
+		node = item->getNode();
+		break;
+	case ItemType::Located:
+		node = item->parent()->getNode();
+		break;
+	case ItemType::LocatedInstance:
+	case ItemType::Particle:
+	case ItemType::Emitter:
+	case ItemType::Force:
+	case ItemType::Light:
+	case ItemType::Sound:
+	case ItemType::CollisionZone:
+		node = item->parent()->parent()->getNode();
+		break;
 	}
 	return node;
 }
@@ -477,17 +478,17 @@ void CParticleTreeModel::setupModelFromWorkSpace()
 	QList<QVariant> workspaceData;
 	CParticleWorkspace *workspace = Modules::psEdit().getParticleWorkspace();
 
-	if (workspace == NULL) 
+	if (workspace == NULL)
 	{
 		endResetModel();
 		return;
-	} 
+	}
 
 	workspaceData << workspace->getFilename().c_str();
 	CParticleTreeItem *parent = new CParticleTreeItem(workspace ,workspaceData, ItemType::Workspace, _rootItem);
 	_rootItem->appendChild(parent);
 	endResetModel();
-	
+
 	QModelIndex rootIndex = index(0, 0);
 	uint numNode = workspace->getNumNode();
 	for (uint i = 0; i < numNode; i++)
@@ -504,7 +505,7 @@ void CParticleTreeModel::setupModelFromPS(CWorkspaceNode *node, CParticleTreeIte
 		child = new CParticleTreeItem(node, particleSystemData, ItemType::ParticleSystem, parent);
 		parent->appendChild(child);
 	}
-	else 
+	else
 	{
 		child = new CParticleTreeItem(node, particleSystemData, ItemType::ParticleSystemNotLoaded, parent);
 		parent->appendChild(child);

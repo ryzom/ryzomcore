@@ -23,7 +23,8 @@
 #include "nel/3d/ps_edit.h"
 #include "nel/3d/ps_emitter.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 void CPSInitialPos::reset()
 {
@@ -38,7 +39,7 @@ void CPSInitialPos::copySystemInitialPos(NL3D::CParticleSystem *ps)
 	reset();
 	uint32 nbLocated = ps->getNbProcess();
 
-	_PS = ps; 
+	_PS = ps;
 	for(uint32 k = 0; k < nbLocated; ++k)
 	{
 
@@ -56,7 +57,7 @@ void CPSInitialPos::copySystemInitialPos(NL3D::CParticleSystem *ps)
 				ii.Pos = loc->getPos()[l];
 				ii.Speed = loc->getSpeed()[l];
 				_InitInfoVect.push_back(ii);
-				
+
 				for (uint32 m = 0; m < loc->getNbBoundObjects(); ++m)
 				{
 
@@ -67,14 +68,14 @@ void CPSInitialPos::copySystemInitialPos(NL3D::CParticleSystem *ps)
 						rsi.LB = loc->getBoundObject(m);
 						rsi.Index = l;
 						rsi.Psm = dynamic_cast<NL3D::IPSMover *>(loc->getBoundObject(m));
-						rsi.Scale = rsi.Psm->getScale(l);											
+						rsi.Scale = rsi.Psm->getScale(l);
 						rsi.Rot = rsi.Psm->getMatrix(l);
 						_RotScaleInfoVect.push_back(rsi);
 					}
 				}
 			}
 		}
-	}	
+	}
 }
 
 
@@ -87,19 +88,28 @@ struct CRemoveLocatedPred
 // private : predicate to remove located from a CPSInitialPos::TInitialLocatedSizeVect vector
 struct CRemoveLocatedFromLocatedSizePred : public CRemoveLocatedPred
 {
-	bool operator()(const std::pair<NL3D::CPSLocated *, uint32> &value) { return Loc == value.first; }
+	bool operator()(const std::pair<NL3D::CPSLocated *, uint32> &value)
+	{
+		return Loc == value.first;
+	}
 };
 
 // private : predicate to remove located from a PSInitialPos::CInitPSInstanceInfo vector
 struct CRemoveLocatedFromInitPSInstanceInfoVectPred : public CRemoveLocatedPred
 {
-	bool operator()(const CPSInitialPos::CInitPSInstanceInfo &value) { return value.Loc == Loc; }
+	bool operator()(const CPSInitialPos::CInitPSInstanceInfo &value)
+	{
+		return value.Loc == Loc;
+	}
 };
 
 // private : predicate to remove located from a PSInitialPos::CRotScaleInfo vector
 struct CRemoveLocatedFromRotScaleInfoVectPred : public CRemoveLocatedPred
 {
-	bool operator()(const CPSInitialPos::CRotScaleInfo &value) { return value.Loc == Loc; }
+	bool operator()(const CPSInitialPos::CRotScaleInfo &value)
+	{
+		return value.Loc == Loc;
+	}
 };
 
 // private : predicate to remove located bindable pointers in a TRotScaleInfoVect vect
@@ -107,18 +117,21 @@ struct CRemoveLocatedBindableFromRotScaleInfoVectPred
 {
 	// the located bindable taht has been removed
 	NL3D::CPSLocatedBindable *LB;
-	bool operator()(const CPSInitialPos::CRotScaleInfo &value) { return value.LB == LB; }
+	bool operator()(const CPSInitialPos::CRotScaleInfo &value)
+	{
+		return value.LB == LB;
+	}
 };
 
 void CPSInitialPos::removeLocated(NL3D::CPSLocated *loc)
-{	
+{
 	// in each container, we delete every element that has a pointer over lthe located loc
-	// , by using the dedicated predicate. 
+	// , by using the dedicated predicate.
 
 	CRemoveLocatedFromLocatedSizePred p;
 	p.Loc = loc;
 	_InitialSizeVect.erase(std::remove_if(_InitialSizeVect.begin(), _InitialSizeVect.end(), p)
-							, _InitialSizeVect.end() );
+						   , _InitialSizeVect.end() );
 
 	CRemoveLocatedFromInitPSInstanceInfoVectPred p2;
 	p2.Loc = loc;
@@ -128,12 +141,12 @@ void CPSInitialPos::removeLocated(NL3D::CPSLocated *loc)
 	CRemoveLocatedFromRotScaleInfoVectPred p3;
 	p3.Loc = loc;
 	_RotScaleInfoVect.erase(std::remove_if(_RotScaleInfoVect.begin(), _RotScaleInfoVect.end(), p3)
-							 , _RotScaleInfoVect.end());
+							, _RotScaleInfoVect.end());
 
 }
 
 void CPSInitialPos::removeLocatedBindable(NL3D::CPSLocatedBindable *lb)
-{	
+{
 	CRemoveLocatedBindableFromRotScaleInfoVectPred p;
 	p.LB = lb;
 	_RotScaleInfoVect.erase(std::remove_if(_RotScaleInfoVect.begin(), _RotScaleInfoVect.end(), p), _RotScaleInfoVect.end() );
@@ -158,11 +171,11 @@ void CPSInitialPos::restoreSystem()
 
 			nlassert(loc->getSize() == 0);
 		}
-	}	
+	}
 	// recreate the initial number of instances
 	for (TInitialLocatedSizeVect ::iterator itSize = _InitialSizeVect.begin(); itSize != _InitialSizeVect.end(); ++itSize)
 	{
-	//	nlassert(itSize->first->getSize() == 0)
+		//	nlassert(itSize->first->getSize() == 0)
 		for (uint l = 0; l < itSize->second; ++l)
 		{
 			itSize->first->newElement(NLMISC::CVector::Null, NLMISC::CVector::Null, NULL, 0, itSize->first->getMatrixMode(), 0.f);
@@ -170,7 +183,7 @@ void CPSInitialPos::restoreSystem()
 
 		uint realSize = itSize->first->getSize();
 		uint size = itSize->second;
-		
+
 	}
 	NL3D::CPSEmitter::setBypassEmitOnDeath(false);
 	for (TInitInfoVect::iterator it = _InitInfoVect.begin(); it != _InitInfoVect.end(); ++it)
@@ -185,7 +198,7 @@ void CPSInitialPos::restoreSystem()
 				it->Loc->getParametricInfos()[it->Index].Pos = it->Pos;
 				it->Loc->getParametricInfos()[it->Index].Speed = it->Speed;
 				it->Loc->getParametricInfos()[it->Index].Date = 0.f;
-			}			
+			}
 		}
 	}
 	for (TRotScaleInfoVect::iterator it2 = _RotScaleInfoVect.begin(); it2 != _RotScaleInfoVect.end(); ++it2)

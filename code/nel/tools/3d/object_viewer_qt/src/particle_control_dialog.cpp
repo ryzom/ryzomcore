@@ -32,26 +32,27 @@
 #include "particle_link_skeleton_dialog.h"
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CParticleControlDialog::CParticleControlDialog(CSkeletonTreeModel *model, QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_timer = new QTimer(this);
-	
+
 	_particleLinkDialog = new CParticleLinkDialog(model, parent);
 	_particleLinkDialog->setVisible(false);
 
 	_ui.numParticlesLabel->setMinimumWidth(_ui.numParticlesLabel->sizeHint().width());
 	_ui.numWantedFacesLabel->setMinimumWidth(_ui.numWantedFacesLabel->sizeHint().width());
 	_ui.systemTimesLabel->setMinimumWidth(_ui.systemTimesLabel->sizeHint().width());
-	
+
 	stop();
 
 	connect(_timer, SIGNAL(timeout()), this, SLOT(updateCount()));
-	
+
 	connect(_ui.playToolButton, SIGNAL(clicked()), this, SLOT(play()));
 	connect(_ui.stopToolButton, SIGNAL(clicked()), this, SLOT(stop()));
 	connect(_ui.horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
@@ -60,7 +61,7 @@ CParticleControlDialog::CParticleControlDialog(CSkeletonTreeModel *model, QWidge
 	connect(_ui.loopCheckBox, SIGNAL(toggled(bool)), this, SLOT(autoRepeat(bool)));
 	connect(_ui.autoCountCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledAutoCount(bool)));
 	connect(_ui.resetAutoCountPushButton, SIGNAL(clicked()), this, SLOT(resetAutoCount()));
-	
+
 	connect(_ui.linkSkelPushButton, SIGNAL(clicked()), this, SLOT(linkSceleton()));
 	connect(_ui.unlinkSkelPushButton, SIGNAL(clicked()), this, SLOT(unlink()));
 	connect(_ui.setAnimPushButton, SIGNAL(clicked()), this, SLOT(setAnim()));
@@ -95,7 +96,7 @@ void CParticleControlDialog::play()
 		Modules::psEdit().startMultiple();
 	else
 		Modules::psEdit().start();
-	
+
 	_timer->start(200);
 	_ui.multipleCheckBox->setEnabled(false);
 	Q_EMIT changeState();
@@ -107,11 +108,11 @@ void CParticleControlDialog::stop()
 	_ui.playToolButton->setChecked(false);
 	Modules::psEdit().stop();
 	_ui.multipleCheckBox->setEnabled(true);
-	
+
 	_ui.numParticlesLabel->setText(tr("Num particles:"));
 	_ui.numWantedFacesLabel->setText(tr("Num wanted faces:"));
 	_ui.systemTimesLabel->setText(tr("System time:"));
-	
+
 	Q_EMIT changeState();
 }
 
@@ -154,18 +155,18 @@ void CParticleControlDialog::updateCount()
 {
 	if (Modules::psEdit().getActiveNode() == NULL)
 		return;
-	
+
 	NL3D::CParticleSystem *ps = Modules::psEdit().getActiveNode()->getPSPointer();
 	sint currNumParticles = (sint) ps->getCurrNumParticles();
-	
+
 	// display number of particles for the currently active node
 	_ui.numParticlesLabel->setText(tr("Num particles: %1").arg(currNumParticles));
-	
+
 	// display max number of wanted faces
 	NLMISC::CMatrix camMat = ps->getScene()->getCam()->getMatrix();
 	sint numWantedFaces = (uint) ps->getWantedNumTris((ps->getSysMat().getPos() - camMat.getPos()).norm());
 	_ui.numWantedFacesLabel->setText(tr("Num wanted faces: %1").arg(numWantedFaces));
-	
+
 	// display system date
 	_ui.systemTimesLabel->setText(tr("System time: %1").arg(ps->getSystemDate(),0,'f',2));
 
@@ -180,7 +181,7 @@ void CParticleControlDialog::linkSceleton()
 void CParticleControlDialog::unlink()
 {
 	CWorkspaceNode *node = Modules::psEdit().getActiveNode();
-	if (node == NULL) 
+	if (node == NULL)
 		return;
 
 	node->unstickPSFromSkeleton();
@@ -197,7 +198,7 @@ void CParticleControlDialog::clearAnim()
 void CParticleControlDialog::restickObjects()
 {
 	CParticleWorkspace *pw = Modules::psEdit().getParticleWorkspace();
-	if (pw == NULL) 
+	if (pw == NULL)
 		return;
 
 	pw->restickAllObjects();

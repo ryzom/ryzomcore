@@ -32,16 +32,17 @@
 
 namespace NLSOUND
 {
-	class UAudioMixer;
-	class USource;
+class UAudioMixer;
+class USource;
 }
 
 namespace NLMISC
 {
-	class CMatrix;
+class CMatrix;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CSoundSystem
@@ -52,7 +53,7 @@ class CSoundSystem
 public:
 	CSoundSystem();
 	virtual ~CSoundSystem();
-	
+
 	/// Set the name of the file containing the sample bank
 	void addSampleBank(const std::string &sampleBankFileName)
 	{
@@ -60,11 +61,17 @@ public:
 	}
 
 	/// Sets the path which contains samples
-	void setSamplePath(std::string& path) { _SamplePath = NLMISC::CPath::standardizePath(path, true); }
-	
+	void setSamplePath(std::string& path)
+	{
+		_SamplePath = NLMISC::CPath::standardizePath(path, true);
+	}
+
 	/// Sets the path which contains packed sheet
-	void setPackedSheetPath(std::string& path) { _PackedSheetPath = NLMISC::CPath::standardizePath(path, true); }
- 
+	void setPackedSheetPath(std::string& path)
+	{
+		_PackedSheetPath = NLMISC::CPath::standardizePath(path, true);
+	}
+
 	/// Init the sound system this also load the sound bank. See setSoundBank
 	void init(void);
 
@@ -76,34 +83,43 @@ public:
 
 	/// Spawn a sound at the user position
 	void play(const std::string &soundName);
-	
+
 	/// Create a sound at the user position (don't spawn it)
 	NLSOUND::USource *create(const std::string &soundName);
 
 	/// Load the sound animation with the specified name
-	void loadAnimation(std::string& name) { _AnimManager->loadAnimation(name); }
+	void loadAnimation(std::string& name)
+	{
+		_AnimManager->loadAnimation(name);
+	}
 
-	/// Start playing a sound animation. 
+	/// Start playing a sound animation.
 	void playAnimation(std::string& name, float lastTime, float curTime, NLSOUND::CSoundContext &context);
 
-	// Update the sound animations. 
+	// Update the sound animations.
 	//static void updateAnimations(float lastTime, float curTime)	{ _AnimManager->update(lastTime, curTime); };
 
 	/// Get the audio mixer, or null if init failed
-	NLSOUND::UAudioMixer *getAudioMixer(void) { return _AudioMixer; }	
+	NLSOUND::UAudioMixer *getAudioMixer(void)
+	{
+		return _AudioMixer;
+	}
 
 	/// Returns a reference to the animation manager
-	NLSOUND::CSoundAnimManager* getSoundAnimManager() { return _AnimManager; }
+	NLSOUND::CSoundAnimManager* getSoundAnimManager()
+	{
+		return _AnimManager;
+	}
 
 	/// Init the particle system sound with the given AudioMixer
 	void initGraphics();
-	
+
 	/// Release the particle system sound with the given AudioMixer
 	void releaseGraphics();
-	
+
 	/// Update sound. Must be called periodically
 	void update();
-	
+
 private:
 	NLSOUND::UAudioMixer		*_AudioMixer;
 	std::set<std::string>		_SampleBanksFileName;

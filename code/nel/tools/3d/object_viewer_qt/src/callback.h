@@ -1,17 +1,17 @@
-/* 
+/*
  * Copyright (C) 2010  by authors
- * 
+ *
  * This file is part of NEL QT.
  * NEL QT is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * NEL QT is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with NEL QT; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -34,7 +34,8 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 #define NLQT_CALLBACK_TEMPLATE \
 /** \
@@ -230,14 +231,14 @@ private: \
 	CCallbackBase *m_CallbackBase; \
 	 \
 }; /* class CCallback */ \
-
+ 
 template<typename TReturn, typename TArgsA = void, typename TArgsB = void, typename TArgsC = void, typename TArgsD = void, typename TArgsE = void, typename TArgsF = void, typename TArgsG = void, typename TDummy = void>
 class CCallback;
 
 #define NLQT_CALLBACK_ARGS_CLASS CCallback<TReturn, void, void, void, void, void, void, void, void>
-#define NLQT_CALLBACK_ARGS_TYPENAME 
-#define NLQT_CALLBACK_ARGS_DECL 
-#define NLQT_CALLBACK_ARGS_IMPL 
+#define NLQT_CALLBACK_ARGS_TYPENAME
+#define NLQT_CALLBACK_ARGS_DECL
+#define NLQT_CALLBACK_ARGS_IMPL
 NLQT_CALLBACK_TEMPLATE
 #undef NLQT_CALLBACK_ARGS_CLASS
 #undef NLQT_CALLBACK_ARGS_TYPENAME

@@ -30,15 +30,16 @@
 
 namespace NL3D
 {
-	class CVegetable;
+class CVegetable;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableApperancePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableApperancePage(QWidget *parent = 0);
 	~CVegetableApperancePage();
@@ -58,12 +59,12 @@ private Q_SLOTS:
 
 private:
 	void updateColorList();
-	
+
 	// The vegetable to edit.
 	NL3D::CVegetable	*_Vegetable;
-	
+
 	Ui::CVegetableApperancePage _ui;
-	
+
 }; /* class CVegetableApperancePage */
 
 } /* namespace NLQT */

@@ -33,41 +33,45 @@
 
 namespace NL3D
 {
-	struct CPSShapeParticle;
+struct CPSShapeParticle;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CMeshWidget: public QGroupBox
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CMeshWidget(QWidget *parent = 0);
 	~CMeshWidget();
 
 	void setCurrentShape(CWorkspaceNode *ownerNode, NL3D::CPSShapeParticle *sp);
-  
+
 	QString getShapeErrorString(sint errorCode);
-	
+
 private Q_SLOTS:
 	void browseShape();
 	void setMorphMesh(bool state);
 	void editMorph();
-	
+
 private:
 	CWorkspaceNode 		*_Node;
-	
+
 	NL3D::CPSShapeParticle  *_ShapeParticle;
-	
+
 	void updateForMorph();
-	
+
 	void updateMeshErrorString();
-	
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
-	
+
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
+
 	void touchPSState();
-	
+
 	Ui::CMeshWidget _ui;
 }; /* class CMeshWidget */
 

@@ -29,10 +29,11 @@
 #include "modules.h"
 #include "entity.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CAnimationSetDialog::CAnimationSetDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	ui.setupUi(this);
 
@@ -46,7 +47,7 @@ CAnimationSetDialog::CAnimationSetDialog(QWidget *parent)
 
 	connect(ui.listRadioButton, SIGNAL(clicked(bool)), this, SLOT(setModeAnim()));
 	connect(ui.mixerRadioButton, SIGNAL(clicked(bool)), this, SLOT(setModeAnim()));
-	
+
 	connect(ui.objectsComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setCurrentShape(QString)));
 }
 
@@ -56,22 +57,22 @@ CAnimationSetDialog::~CAnimationSetDialog()
 
 void CAnimationSetDialog::setCurrentShape(const QString &name)
 {
-	if (name.isEmpty()) 
-	  return;
+	if (name.isEmpty())
+		return;
 
 	Modules::objView().setCurrentObject(name.toStdString());
 
 	updateListAnim();
-	
+
 	Q_EMIT changeCurrentShape(name);
-	
+
 }
 
 void CAnimationSetDialog::setModeAnim()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
-	  return;
+	if (curObj.empty())
+		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
 
 	if (ui.mixerRadioButton->isChecked())
@@ -89,11 +90,11 @@ void CAnimationSetDialog::updateListObject()
 
 	for (size_t i = 0; i < listObjects.size(); i++)
 		ui.objectsComboBox->addItem(QString(listObjects[i].c_str()));
-	
+
 	if (listObjects.empty())
 	{
 		ui.addAnimPushButton->setEnabled(false);
-		ui.addSwtPushButton->setEnabled(false); 
+		ui.addSwtPushButton->setEnabled(false);
 		ui.resetPushButton->setEnabled(false);
 		ui.setLengthPushButton->setEnabled(false);
 	}
@@ -111,52 +112,52 @@ void CAnimationSetDialog::updateListAnim()
 	ui.animTreeWidget->clear();
 	ui.animPlaylistWidget->clear();
 	ui.skeletonTreeWidget->clear();
-	
+
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
-	  return;
+	if (curObj.empty())
+		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
-	
+
 	std::vector<std::string>& animationList = entity.getAnimationList();
 	std::vector<std::string>& swtList = entity.getSWTList();
 	std::vector<std::string>& playListAnimation = entity.getPlayListAnimation();
-	
+
 	// update animation list widget
 	for(size_t i = 0; i < animationList.size(); ++i)
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(ui.animTreeWidget);
 		item->setText(0,QString(animationList[i].c_str()));
 	}
-	
+
 	// update skeleton weight template list widget
 	for(size_t i = 0; i < swtList.size(); ++i)
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(ui.skeletonTreeWidget);
 		item->setText(0,QString(swtList[i].c_str()));
 	}
-	
+
 	// update PlayList animation widget
 	for(size_t i = 0; i < playListAnimation.size(); ++i)
 	{
 		QListWidgetItem *item = new QListWidgetItem(ui.animPlaylistWidget);
 		item->setText(QString(playListAnimation[i].c_str()));
 	}
-	
+
 	if (animationList.empty())
 	{
 		// lock buttons
 		ui.addToolButton->setEnabled(false);
-		ui.removeToolButton->setEnabled(false); 
+		ui.removeToolButton->setEnabled(false);
 		ui.upToolButton->setEnabled(false);
-		ui.downToolButton->setEnabled(false); 
+		ui.downToolButton->setEnabled(false);
 	}
 	else
 	{
-		// unlock buttons 
+		// unlock buttons
 		ui.addToolButton->setEnabled(true);
-		ui.removeToolButton->setEnabled(true); 
+		ui.removeToolButton->setEnabled(true);
 		ui.upToolButton->setEnabled(true);
-		ui.downToolButton->setEnabled(true); 
+		ui.downToolButton->setEnabled(true);
 	}
 }
 
@@ -165,16 +166,16 @@ void CAnimationSetDialog::loadAnim()
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
 
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-					tr("Open NeL anim file"), ".",
-					tr("NeL anim files (*.anim);;"));
-	
+							tr("Open NeL anim file"), ".",
+							tr("NeL anim files (*.anim);;"));
+
 	setCursor(Qt::WaitCursor);
 
-	if (!fileNames.isEmpty()) 
+	if (!fileNames.isEmpty())
 	{
 		QStringList list = fileNames;
-		QStringList::Iterator it = list.begin();				
-		while(it != list.end()) 
+		QStringList::Iterator it = list.begin();
+		while(it != list.end())
 		{
 			std::string animName = it->toStdString();
 			entity.loadAnimation(animName);
@@ -188,19 +189,19 @@ void CAnimationSetDialog::loadAnim()
 
 void CAnimationSetDialog::loadSwt()
 {
-  	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
+	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
 
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-					tr("Open NeL anim file"), ".",
-					tr("NeL Skeleton Weight Template files (*.swt);;"));
+							tr("Open NeL anim file"), ".",
+							tr("NeL Skeleton Weight Template files (*.swt);;"));
 
 	setCursor(Qt::WaitCursor);
 
-	if (!fileNames.isEmpty()) 
+	if (!fileNames.isEmpty())
 	{
 		QStringList list = fileNames;
-		QStringList::Iterator it = list.begin();				
-		while(it != list.end()) 
+		QStringList::Iterator it = list.begin();
+		while(it != list.end())
 		{
 			std::string swtName = it->toStdString();
 			entity.loadSWT(swtName);
@@ -216,7 +217,7 @@ void CAnimationSetDialog::resetAnim()
 {
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
 	entity.reset();
-	
+
 	updateListAnim();
 }
 
@@ -242,8 +243,8 @@ void CAnimationSetDialog::removeAnim()
 	{
 		int row = ui.animPlaylistWidget->row(item);
 		QListWidgetItem *removeItem = ui.animPlaylistWidget->takeItem(row);
-		if (!removeItem) 
-			delete removeItem; 
+		if (!removeItem)
+			delete removeItem;
 		entity.removeAnimToPlayList(row);
 	}
 }
@@ -258,7 +259,7 @@ void CAnimationSetDialog::upAnim()
 
 	int frontRow = ui.animPlaylistWidget->row(list.front());
 	int backRow = ui.animPlaylistWidget->row(list.back());
-	
+
 	if (frontRow == 0)
 		return;
 
@@ -270,7 +271,7 @@ void CAnimationSetDialog::upAnim()
 }
 
 void CAnimationSetDialog::downAnim()
-{	
+{
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
 	QList<QListWidgetItem*> list = ui.animPlaylistWidget->selectedItems();
 
@@ -279,7 +280,7 @@ void CAnimationSetDialog::downAnim()
 
 	int frontRow = ui.animPlaylistWidget->row(list.front());
 	int backRow = ui.animPlaylistWidget->row(list.back());
-	
+
 	if (backRow == (ui.animPlaylistWidget->count() - 1))
 		return;
 
@@ -289,5 +290,5 @@ void CAnimationSetDialog::downAnim()
 	for (int i = backRow; i >= frontRow; --i)
 		entity.swapAnimToPlayList(i, i + 1);
 }
-  
+
 } /* namespace NLQT */

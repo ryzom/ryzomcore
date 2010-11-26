@@ -28,18 +28,19 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CEditRangeUIntWidget
 @brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and сurrent value from this range.).
-@details Slider sets the uint32 value within a specified range (start/end QSpinBox). 
+@details Slider sets the uint32 value within a specified range (start/end QSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QSpinBox.
 Also the range of start/end values can be restricted through the class methods: enableLowerBound(), enableUpperBound()
 this widget can be used by a two ways: Qt Q_SIGNAL/SLOT or wrapper.
 
-1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and 
+1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and
 changes in current value(QSlider or QSpinBox) the signal valueChanged() will be emitted.
 
 2. Using wrapper, create wpapper struct, example:
@@ -51,13 +52,13 @@ struct CMaxNbParticlesWrapper : public IPSWrapperUInt
 	void set(const uint32 &v) { Located->setMaxSize(v); }
 } _MaxNbParticlesWrapper;
 @endcode
-to set the current values,it is need to call class methods updateUi(); 
+to set the current values,it is need to call class methods updateUi();
 */
 
 class CEditRangeUIntWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	/// Constructor, sets 0 default current value
 	CEditRangeUIntWidget(QWidget *parent = 0);
@@ -67,7 +68,7 @@ public:
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperUInt *wrapper);
 
-	/// Convenience function to set the minimum, and maximum values with a single function call 
+	/// Convenience function to set the minimum, and maximum values with a single function call
 	void setRange(uint32 minValue, uint32 maxValue);
 
 	/// Set the minimum value that can take range(slider)
@@ -85,21 +86,21 @@ public:
 	/// @param lowerBound - minimum value of the range
 	/// @param lowerBoundExcluded - if true then the test is <, otherwise its <=
 	void enableLowerBound(uint32 lowerBound, bool lowerBoundExcluded);
-	
+
 	/// Disable upper bound usage
 	void disableUpperBound(void);
-	
+
 	/// Disable lower bound usage
 	void disableLowerBound(void);
-	
+
 	/// With changes wrapper to be called for the installation of new range values
 	void updateUi();
-	
+
 Q_SIGNALS:
 	void valueChanged(uint32 value);
 
 public Q_SLOTS:
-  	/// Set current value
+	/// Set current value
 	/// @param value - current value
 	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
 	void setValue(uint32 value, bool emit = true);
@@ -120,13 +121,13 @@ private:
 /**
 @class CEditRangeIntWidget
 @brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and сurrent value from this range.).
-@details Slider sets the sint32 value within a specified range (start/end QSpinBox). 
+@details Slider sets the sint32 value within a specified range (start/end QSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QSpinBox.
 Also the range of start/end values can be restricted through the class methods: enableLowerBound(), enableUpperBound()
 this widget can be used by a two ways: Qt Q_SIGNAL/SLOT or wrapper.
 
-1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and 
+1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and
 changes in current value(QSlider or QSpinBox) the signal valueChanged() will be emitted.
 
 2. Using wrapper, create wpapper struct, example:
@@ -138,13 +139,13 @@ struct CRadialViscosityWrapper : public IPSWrapperFloat
 	void set(const sint32 &value) { V->setRadialViscosity(value); }
 } _RadialViscosityWrapper;
 @endcode
-to set the current values,it is need to call class methods updateUi(); 
+to set the current values,it is need to call class methods updateUi();
 */
 
 class CEditRangeIntWidget: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	/// Constructor, sets 0 default current value
 	CEditRangeIntWidget(QWidget *parent = 0);
@@ -153,8 +154,8 @@ public:
 	/// set an interface of a wrapper  to read / write values in the particle system
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperInt *wrapper);
-	
-	/// Convenience function to set the minimum, and maximum values with a single function call 
+
+	/// Convenience function to set the minimum, and maximum values with a single function call
 	void setRange(sint32 minValue, sint32 maxValue);
 
 	/// Set the minimum value that can take range(slider)
@@ -162,30 +163,30 @@ public:
 
 	/// Set the maximum value that can take range(slider)
 	void setRangeMax(sint32 maxValue);
-	
+
 	/// Enable upper bound use (e.g. value must be < or <= upper bound )
 	/// @param upperBound - maximum value of the range
 	/// @param upperBoundExcluded - if true then the test is <, otherwise its <=
 	void enableUpperBound(sint32 upperBound, bool upperBoundExcluded);
-	
+
 	/// Enable lower bound use (e.g. value must be < or <= lower bound )
 	/// @param lowerBound - minimum value of the range
 	/// @param lowerBoundExcluded - if true then the test is <, otherwise its <=
 	void enableLowerBound(sint32 lowerBound, bool lowerBoundExcluded);
-	
+
 	/// Disable upper bound usage
 	void disableUpperBound(void);
-	
+
 	/// Disable lower bound usage
 	void disableLowerBound(void);
 
 	/// With changes wrapper to be called for the installation of new range values
 	void updateUi();
-	
+
 Q_SIGNALS:
 	void valueChanged(sint32 value);
 
-public Q_SLOTS:  
+public Q_SLOTS:
 	/// Set current value
 	/// @param value - current value
 	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true
@@ -207,13 +208,13 @@ private:
 /**
 @class CEditRangeFloatWidget
 @brief The widget provides a horizontal slider and 3 QDoubleSpinBox(to set start/end value range and сurrent value from this range.).
-@details Slider sets the float value within a specified range (start/end QDoubleSpinBox). 
+@details Slider sets the float value within a specified range (start/end QDoubleSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QDoubleSpinBox.
 Also the range of start/end values can be restricted through the class methods: enableLowerBound(), enableUpperBound()
 this widget can be used by a two ways: Qt Q_SIGNAL/SLOT or wrapper.
 
-1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and 
+1. Using the Qt Q_SIGNAL/SLOT current value can be set by class methods setValue() and
 changes in current value(only QSlider) the signal valueChanged()will be emitted.
 
 2. Using wrapper, create wpapper struct, example:
@@ -225,22 +226,22 @@ struct CTangentialViscosityWrapper : public IPSWrapperFloat
 	void set(const float &value) { V->setTangentialViscosity(value); }
 } _TangentialViscosityWrapper;
 @endcode
-to set the current values,it is need to call class methods updateUi(); 
+to set the current values,it is need to call class methods updateUi();
 */
 
 class CEditRangeFloatWidget: public QWidget
 {
-     Q_OBJECT
+	Q_OBJECT
 public:
 	/// Constructor, sets 0 default current value
 	CEditRangeFloatWidget(QWidget *parent = 0);
 	~CEditRangeFloatWidget();
-	
+
 	/// Set an interface of a wrapper  to read / write values in the particle system
 	/// NB : The 'OwnerNode' field of the wrapper
 	void setWrapper(IPSWrapperFloat *wrapper);
 
-	/// Convenience function to set the minimum, and maximum values with a single function call 
+	/// Convenience function to set the minimum, and maximum values with a single function call
 	void setRange(float minValue, float maxValue);
 
 	/// Set the minimum value that can take range(slider)
@@ -248,12 +249,12 @@ public:
 
 	/// Set the maximum value that can take range(slider)
 	void setRangeMax(float maxValue);
-	
+
 	/// Enable upper bound use (e.g. value must be < or <= upper bound )
 	/// @param upperBound - maximum value of the range
 	/// @param upperBoundExcluded - if true then the test is <, otherwise its <=
 	void enableUpperBound(float upperBound, bool upperBoundExcluded);
-	
+
 	/// Enable lower bound use (e.g. value must be < or <= lower bound )
 	/// @param lowerBound - minimum value of the range
 	/// @param lowerBoundExcluded - if true then the test is <, otherwise its <=
@@ -271,7 +272,7 @@ public:
 Q_SIGNALS:
 	void valueChanged(float value);
 
-public Q_SLOTS: 
+public Q_SLOTS:
 	/// Set current value
 	/// @param value - current value
 	/// @param emit - will emit valueChanged() if the new value is different from the old one and param emit = true

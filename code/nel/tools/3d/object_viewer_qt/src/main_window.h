@@ -30,11 +30,13 @@
 
 // Project includes
 
-namespace NLMISC {
-	class CConfigFile;
+namespace NLMISC
+{
+class CConfigFile;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CGraphicsViewport;
 class CAnimationDialog;
@@ -60,10 +62,12 @@ public:
 	~CMainWindow();
 
 	virtual void setVisible(bool visible);
-	
+
 	int getFrameRate();
 	CSkeletonTreeModel *getSkeletonModel() const
-				{ return _SkeletonTreeModel; }
+	{
+		return _SkeletonTreeModel;
+	}
 
 private Q_SLOTS:
 	void open();
@@ -72,7 +76,7 @@ private Q_SLOTS:
 	void about();
 	void updateStatusBar();
 	void updateRender();
- 
+
 private:
 	void createActions();
 	void createMenus();
@@ -82,11 +86,11 @@ private:
 
 	void updateInitialization(bool visible);
 	bool loadFile(const QString &fileName, const QString &skelName);
-	
+
 	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
 	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
 	void cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var);
-	
+
 	bool _isGraphicsInitialized, _isGraphicsEnabled;
 	bool _isSoundInitialized, _isSoundEnabled;
 	bool _isLandscapeInitialized, _isLandscapeEnabled;
@@ -106,7 +110,7 @@ private:
 	CSunColorDialog *_SunColorDialog;
 
 	CSkeletonTreeModel *_SkeletonTreeModel;
-	
+
 	QPalette _originalPalette;
 	QString _lastDir;
 

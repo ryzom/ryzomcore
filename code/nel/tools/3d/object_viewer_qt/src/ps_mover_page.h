@@ -35,7 +35,8 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CLocatedBindableItem
@@ -44,14 +45,20 @@ namespace NLQT {
 class CLocatedBindableItem: public QListWidgetItem
 {
 public:
-	CLocatedBindableItem ( const QString & text, QListWidget * parent = 0, int type = UserType ): 
-		      QListWidgetItem(text, parent, type), _lb(NULL) {}
-	
-	void setUserData(NL3D::CPSLocatedBindable *loc) { _lb = loc;}
-	NL3D::CPSLocatedBindable *getUserData() const { return _lb;}
-	
+	CLocatedBindableItem ( const QString & text, QListWidget * parent = 0, int type = UserType ):
+		QListWidgetItem(text, parent, type), _lb(NULL) {}
+
+	void setUserData(NL3D::CPSLocatedBindable *loc)
+	{
+		_lb = loc;
+	}
+	NL3D::CPSLocatedBindable *getUserData() const
+	{
+		return _lb;
+	}
+
 private:
-  
+
 	NL3D::CPSLocatedBindable *_lb;
 }; /* class CTargetItem */
 
@@ -61,15 +68,15 @@ private:
 */
 class CPSMoverPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CPSMoverPage(QWidget *parent = 0);
 	~CPSMoverPage();
 
 	/// Set the instance to edit.
 	void setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *located, uint32 editedLocatedIndex);
-	
+
 	/// position has to be updated (for mouse edition)
 	void updatePosition(void) ;
 
@@ -77,11 +84,20 @@ public:
 	NL3D::IPSMover *getMoverInterface(void)  ;
 
 	/// get the located being edited
-	NL3D::CPSLocated *getLocated(void) { return _EditedLocated ; }
-	const NL3D::CPSLocated *getLocated(void) const { return _EditedLocated ; }
+	NL3D::CPSLocated *getLocated(void)
+	{
+		return _EditedLocated ;
+	}
+	const NL3D::CPSLocated *getLocated(void) const
+	{
+		return _EditedLocated ;
+	}
 
 	/// get the index of the current edited item
-	uint32 getLocatedIndex(void) const { return _EditedLocatedIndex ; }
+	uint32 getLocatedIndex(void) const
+	{
+		return _EditedLocatedIndex ;
+	}
 
 	/// ghet the current located bindable being edited, or null
 	NL3D::CPSLocatedBindable *getLocatedBindable(void) ;
@@ -91,18 +107,24 @@ private Q_SLOTS:
 	void setYPosition(double value);
 	void setZPosition(double value);
 	void changeSubComponent();
-	
+
 	void setDir(const NLMISC::CVector &value);
 
 private:
-  
+
 	/// wrappers to scale objects
 	struct CUniformScaleWrapper : public IPSWrapperFloat
 	{
 		uint32 Index ;
 		NL3D::IPSMover *M ;
-		float get(void) const { return M->getScale(Index).x ; }
-		void set(const float &v) { M->setScale(Index, v) ; }
+		float get(void) const
+		{
+			return M->getScale(Index).x ;
+		}
+		void set(const float &v)
+		{
+			M->setScale(Index, v) ;
+		}
 	} _UniformScaleWrapper ;
 
 	/// wrapper to scale the X coordinate
@@ -110,11 +132,14 @@ private:
 	{
 		uint32 Index ;
 		NL3D::IPSMover *M ;
-		float get(void) const { return M->getScale(Index).x ; }
-		void set(const float &s) 
-		{ 
+		float get(void) const
+		{
+			return M->getScale(Index).x ;
+		}
+		void set(const float &s)
+		{
 			NLMISC::CVector v = M->getScale(Index) ;
-			M->setScale(Index, NLMISC::CVector(s, v.y, v.z)) ; 
+			M->setScale(Index, NLMISC::CVector(s, v.y, v.z)) ;
 		}
 	} _XScaleWrapper ;
 
@@ -123,11 +148,14 @@ private:
 	{
 		uint32 Index ;
 		NL3D::IPSMover *M ;
-		float get(void) const { return M->getScale(Index).y ; }
-		void set(const float &s) 
-		{ 
+		float get(void) const
+		{
+			return M->getScale(Index).y ;
+		}
+		void set(const float &s)
+		{
 			NLMISC::CVector v = M->getScale(Index) ;
-			M->setScale(Index, NLMISC::CVector(v.x, s, v.z) ) ; 
+			M->setScale(Index, NLMISC::CVector(v.x, s, v.z) ) ;
 		}
 	} _YScaleWrapper ;
 
@@ -136,27 +164,33 @@ private:
 	{
 		uint32 Index ;
 		NL3D::IPSMover *M ;
-		float get(void) const { return M->getScale(Index).z ; }
-		void set(const float &s) 
-		{ 
+		float get(void) const
+		{
+			return M->getScale(Index).z ;
+		}
+		void set(const float &s)
+		{
 			NLMISC::CVector v = M->getScale(Index) ;
-			M->setScale(Index, NLMISC::CVector(v.x, v.y, s) ) ; 
+			M->setScale(Index, NLMISC::CVector(v.x, v.y, s) ) ;
 		}
 	} _ZScaleWrapper ;
 
 	void hideAdditionalWidget();
-	
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
 
 	/// update the mouse listener position when the user entered a value with the keyboard
 	void updateListener(void) ;
-	
+
 	CWorkspaceNode 		*_Node;
-	
+
 	NL3D::CPSLocated 	*_EditedLocated ;
-	
+
 	uint32 			_EditedLocatedIndex ;
-	
+
 	Ui::CPSMoverPage _ui;
 
 }; /* class CPSMoverPage */

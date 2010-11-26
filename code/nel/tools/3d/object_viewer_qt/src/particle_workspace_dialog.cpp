@@ -42,9 +42,11 @@
 #include "dup_ps.h"
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
-static const char * const LocatedBindable[] = {
+static const char * const LocatedBindable[] =
+{
 	QT_TR_NOOP("Point"),
 	QT_TR_NOOP("LookAt"),
 	QT_TR_NOOP("FanLight"),
@@ -121,13 +123,13 @@ struct Action
 static std::map<std::string,  uint> _PSElementIdentifiers;
 
 CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
-    : QDockWidget(parent), _currentItem(NULL)
+	: QDockWidget(parent), _currentItem(NULL)
 {
 	_ui.setupUi(this);
 
 	connect(_ui.treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(clickedItem(QModelIndex)));
 	connect(_ui.treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenu()));
-	
+
 	// Init tree model
 	_treeModel = new CParticleTreeModel(this);
 	_ui.treeView->setModel(_treeModel);
@@ -136,14 +138,14 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	_PropertyDialog = new CPropertyDialog(_treeModel, this);
 
 	_signalMapper = new QSignalMapper(this);
-	
+
 	_setActivePSAction = new QAction(tr("Set as active particle system"), this);
 	_savePSAction = new QAction(tr("Save"), this);
 	_saveAsPSAction = new QAction(tr("Save as"), this);
 	_clearContentAction = new QAction(tr("Clear content"), this);
 	_removeFromWSAction = new QAction(tr("Remove from workspace"), this);
 	_mergeAction = new QAction(tr("Merge"), this);
-	
+
 	_newLocatedAction = new QAction(tr("New located"), this);
 	_pasteLocatedAction = new QAction(tr("Paste located"), this);
 
@@ -151,13 +153,13 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 		_bindNewLocatedBindable[i] = new QAction(tr(LocatedBindable[i]), this);
 
 	_forceZBiasAction = new QAction(tr("Force ZBias"), this);
-	
+
 	_instanciateAction = new QAction(tr("Instanciate"), this);
 	_copyLocatedAction = new QAction(tr("Copy located"), this);
 	_copyBindableAction = new QAction(tr("Copy bindable"), this);
 	_pasteBindableAction = new QAction(tr("Paste bindable"), this);
 	_deleteAction = new QAction(tr("Delete"), this);
-	
+
 	_allLODAction = new QAction(tr("All LOD"), this);
 	_allLODAction->setCheckable(true);
 	_lod1Action = new QAction(tr("LOD 1"), this);
@@ -165,7 +167,7 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	_lod2Action = new QAction(tr("LOD 2"), this);
 	_lod2Action->setCheckable(true);
 	_externIDAction = new QAction(tr("extern ID"), this);
-	
+
 	connect(_setActivePSAction, SIGNAL(triggered()), this, SLOT(setActiveNode()));
 	connect(_savePSAction, SIGNAL(triggered()), this, SLOT(savePS()));
 	connect(_saveAsPSAction, SIGNAL(triggered()), this, SLOT(saveAsPS()));
@@ -183,7 +185,7 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	}
 
 	connect(_forceZBiasAction, SIGNAL(triggered()), this, SLOT(forceZBias()));
-	
+
 	connect(_copyLocatedAction, SIGNAL(triggered()), this, SLOT(copyLocated()));
 	connect(_copyBindableAction, SIGNAL(triggered()), this, SLOT(copyBindable()));
 	connect(_pasteBindableAction, SIGNAL(triggered()), this, SLOT(pasteBindable()));
@@ -215,14 +217,14 @@ void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 {
 	if (_currentItem != NULL)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);
-	
+
 	_currentItem = static_cast<CParticleTreeItem*>(index.internalPointer());
-	
+
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
-	
+
 	if ((_currentItem->itemType() == ItemType::Workspace) ||
-	    (_currentItem->itemType() == ItemType::ParticleSystemNotLoaded)) 
+			(_currentItem->itemType() == ItemType::ParticleSystemNotLoaded))
 		_currentItem = NULL;
 }
 
@@ -234,56 +236,56 @@ void CParticleWorkspaceDialog::customContextMenu()
 	QMenu *popurMenu = new QMenu(this);
 	switch (_currentItem->itemType())
 	{
-		case ItemType::ParticleSystem:
-			popurMenu->addAction(_setActivePSAction);
-			popurMenu->addAction(_savePSAction);
-			popurMenu->addAction(_saveAsPSAction);
-			popurMenu->addAction(_clearContentAction);
-			popurMenu->addAction(_removeFromWSAction);
-			popurMenu->addAction(_mergeAction);
-			popurMenu->addSeparator();
-			popurMenu->addAction(_newLocatedAction);
-			popurMenu->addAction(_pasteLocatedAction);
-			popurMenu->addSeparator();
-			buildMenu(popurMenu);
-			popurMenu->addSeparator();
-			popurMenu->addAction(_forceZBiasAction);
-			break;
-		case ItemType::Located:
-			popurMenu->addAction(_instanciateAction);
-			popurMenu->addSeparator();
-			buildMenu(popurMenu);
-			popurMenu->addSeparator();
-			popurMenu->addAction(_copyLocatedAction);
-			popurMenu->addAction(_pasteBindableAction);
-			popurMenu->addAction(_deleteAction);
-			break;
-		case ItemType::Force:
-		case ItemType::Particle:
-		case ItemType::Emitter:
-		case ItemType::Light:
-		case ItemType::CollisionZone:
-		case ItemType::Sound:
-			popurMenu->addAction(_copyBindableAction);
-			popurMenu->addAction(_deleteAction);
-			popurMenu->addSeparator();
-			popurMenu->addAction(_allLODAction);
-			popurMenu->addAction(_lod1Action);
-			popurMenu->addAction(_lod2Action);
-			popurMenu->addSeparator();
-			popurMenu->addAction(_externIDAction);
+	case ItemType::ParticleSystem:
+		popurMenu->addAction(_setActivePSAction);
+		popurMenu->addAction(_savePSAction);
+		popurMenu->addAction(_saveAsPSAction);
+		popurMenu->addAction(_clearContentAction);
+		popurMenu->addAction(_removeFromWSAction);
+		popurMenu->addAction(_mergeAction);
+		popurMenu->addSeparator();
+		popurMenu->addAction(_newLocatedAction);
+		popurMenu->addAction(_pasteLocatedAction);
+		popurMenu->addSeparator();
+		buildMenu(popurMenu);
+		popurMenu->addSeparator();
+		popurMenu->addAction(_forceZBiasAction);
+		break;
+	case ItemType::Located:
+		popurMenu->addAction(_instanciateAction);
+		popurMenu->addSeparator();
+		buildMenu(popurMenu);
+		popurMenu->addSeparator();
+		popurMenu->addAction(_copyLocatedAction);
+		popurMenu->addAction(_pasteBindableAction);
+		popurMenu->addAction(_deleteAction);
+		break;
+	case ItemType::Force:
+	case ItemType::Particle:
+	case ItemType::Emitter:
+	case ItemType::Light:
+	case ItemType::CollisionZone:
+	case ItemType::Sound:
+		popurMenu->addAction(_copyBindableAction);
+		popurMenu->addAction(_deleteAction);
+		popurMenu->addSeparator();
+		popurMenu->addAction(_allLODAction);
+		popurMenu->addAction(_lod1Action);
+		popurMenu->addAction(_lod2Action);
+		popurMenu->addSeparator();
+		popurMenu->addAction(_externIDAction);
 
-			// check the menu to tell which lod is used for this located bindable
-			if (_currentItem->getBind()->getLOD() == NL3D::PSLod1n2) _allLODAction->setChecked(true);
-			else _allLODAction->setChecked(false);
-			if (_currentItem->getBind()->getLOD() == NL3D::PSLod1) _lod1Action->setChecked(true);
-			else _lod1Action->setChecked(false);
-			if (_currentItem->getBind()->getLOD() == NL3D::PSLod2) _lod2Action->setChecked(true);
-			else _lod2Action->setChecked(false);
-			break;
-		case ItemType::LocatedInstance:
-			popurMenu->addAction(_deleteAction);
-			break;
+		// check the menu to tell which lod is used for this located bindable
+		if (_currentItem->getBind()->getLOD() == NL3D::PSLod1n2) _allLODAction->setChecked(true);
+		else _allLODAction->setChecked(false);
+		if (_currentItem->getBind()->getLOD() == NL3D::PSLod1) _lod1Action->setChecked(true);
+		else _lod1Action->setChecked(false);
+		if (_currentItem->getBind()->getLOD() == NL3D::PSLod2) _lod2Action->setChecked(true);
+		else _lod2Action->setChecked(false);
+		break;
+	case ItemType::LocatedInstance:
+		popurMenu->addAction(_deleteAction);
+		break;
 	}
 
 	bool stopped = Modules::psEdit().getState() == CParticleEditor::State::Stopped ? true : false;
@@ -319,21 +321,21 @@ void CParticleWorkspaceDialog::saveAsPS()
 	//if (nt->PS->getResetAutoCountFlag() && nt->PS->getPSPointer()->getAutoCountFlag())
 	if (node->getPSPointer()->getAutoCountFlag())
 	{
-		QMessageBox::critical(this, tr("NeL particle system editor"), 
-				   QString(node->getFilename().c_str()) + tr(" uses auto count feature, and it has been modified. "
-				   "You should run the system entirely at least once at full detail before saving so that the editor can compute the number of particles in the system. "
-				   "If user params are used to modify system aspect, you should run the system for extreme cases before saving. "),
-				   QMessageBox::Ok);
+		QMessageBox::critical(this, tr("NeL particle system editor"),
+							  QString(node->getFilename().c_str()) + tr(" uses auto count feature, and it has been modified. "
+									  "You should run the system entirely at least once at full detail before saving so that the editor can compute the number of particles in the system. "
+									  "If user params are used to modify system aspect, you should run the system for extreme cases before saving. "),
+							  QMessageBox::Ok);
 	}
 	else
 	{
 		Modules::psEdit().stop();
-		
+
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Save as ps file"),
-                            ".",
-                            tr("ps files (*.ps)"));
-		// after check 
-		if (!fileName.isEmpty()) 
+						   ".",
+						   tr("ps files (*.ps)"));
+		// after check
+		if (!fileName.isEmpty())
 			node->savePSAs(fileName.toStdString());
 	}
 }
@@ -341,8 +343,8 @@ void CParticleWorkspaceDialog::saveAsPS()
 void CParticleWorkspaceDialog::clearContent()
 {
 	int ret = QMessageBox::question(this, tr("NeL particle system editor"),
-				tr("Clear content ?"), QMessageBox::Yes | QMessageBox::No);
-				
+									tr("Clear content ?"), QMessageBox::Yes | QMessageBox::No);
+
 	if (ret == QMessageBox::Yes)
 	{
 		CWorkspaceNode *node = _treeModel->getOwnerNode(_currentItem);
@@ -383,7 +385,7 @@ void CParticleWorkspaceDialog::pasteLocated()
 	_treeModel->getOwnerNode(_currentItem)->setModified(true);
 
 	Modules::psEdit().resetAutoCount(_treeModel->getOwnerNode(_currentItem));
-	
+
 	NL3D::CPSLocated *copy = dynamic_cast<NL3D::CPSLocated *>(::DupPSLocated(_LocatedCopy.get()));
 	if (!copy) return;
 	if (_currentItem->getNode()->getPSPointer()->attach(copy))
@@ -391,10 +393,10 @@ void CParticleWorkspaceDialog::pasteLocated()
 	else
 	{
 		delete copy;
-		QMessageBox::critical(this, tr("NeL particle system editor"), 
-				   tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-				      "and thus, should have a finite duration. Please remove that flag first."),
-				   QMessageBox::Ok);
+		QMessageBox::critical(this, tr("NeL particle system editor"),
+							  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+								 "and thus, should have a finite duration. Please remove that flag first."),
+							  QMessageBox::Ok);
 	}
 }
 
@@ -403,101 +405,101 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 	NL3D::CPSLocatedBindable *toCreate = NULL;
 	switch (id)
 	{
-		case Action::ParticlePoint:
-			toCreate = new NL3D::CPSDot;
-			break;
-		case Action::ParticleLookAt:
-			toCreate = new NL3D::CPSFaceLookAt;
-			break;
-		case Action::ParticleFanLight:
-			toCreate = new NL3D::CPSFanLight;
-			break;
-		case Action::ParticleRibbon:
-			toCreate = new NL3D::CPSRibbon;
-			break;
-		case Action::ParticleTailDot:
-			toCreate = new NL3D::CPSTailDot;
-			break;
-		case Action::ParticleMesh:
-			toCreate = new NL3D::CPSMesh;
-			break;
-		case Action::ParticleConstraintMesh:
-			toCreate = new NL3D::CPSConstraintMesh;
-			break;
-		case Action::ParticleFace:
-			toCreate = new NL3D::CPSFace;
-			break;
-		case Action::ParticleShockWave:
-			toCreate = new NL3D::CPSShockWave;
-			break;
-		case Action::ParticleRibbonLookAt:
-			toCreate = new NL3D::CPSRibbonLookAt;
-			break;
-		case Action::ForceGravity:
-			toCreate = new NL3D::CPSGravity;
-			break;
-		case Action::ForceDirectional:
-			toCreate = new NL3D::CPSDirectionnalForce;
-			break;
-		case Action::ForceSpring:
-			toCreate = new NL3D::CPSSpring;
-			break;
-		case Action::ForceFlyidFriction:
-			toCreate = new NL3D::CPSFluidFriction;
-			break;
-		case Action::ForceCentralGravity:
-			toCreate = new NL3D::CPSCentralGravity;
-			break;
-		case Action::ForceCylindricVortex:
-			toCreate = new NL3D::CPSCylindricVortex;
-			break;
-		case Action::ForceBrownianMove:
-			toCreate = new NL3D::CPSBrownianForce;
-			break;
-		case Action::ForceMagnetic:
-			toCreate = new NL3D::CPSMagneticForce;
-			break;
-		case Action::ZonePlane:
-			toCreate = new NL3D::CPSZonePlane;
-			break;
-		case Action::ZoneSphere:
-			toCreate = new NL3D::CPSZoneSphere;
-			break;
-		case Action::ZoneRectangle:
-			toCreate = new NL3D::CPSZoneRectangle;
-			break;
-		case Action::ZoneDisc:
-			toCreate = new NL3D::CPSZoneDisc;
-			break;
-		case Action::ZoneCylinder:
-			toCreate = new NL3D::CPSZoneCylinder;
-			break;
-		case Action::EmitterDirectional:
-			toCreate = new NL3D::CPSEmitterDirectionnal;
-			break;
-		case Action::EmitterOmniDirectional:
-			toCreate = new NL3D::CPSEmitterOmni;
-			break;
-		case Action::EmitterRectangle:
-			toCreate = new NL3D::CPSEmitterRectangle;
-			break;
-		case Action::EmitterConic:
-			toCreate = new NL3D::CPSEmitterConic;
-			break;
-		case Action::EmitterSpherical:
-			toCreate = new NL3D::CPSSphericalEmitter;
-			break;
-		case Action::EmitterRadial:
-			toCreate = new NL3D::CPSRadialEmitter;
-			break;
-		case Action::Sound:
-			toCreate = new NL3D::CPSSound;
-			if (!Modules::psEdit().isRunning())
-				(static_cast<NL3D::CPSSound *>(toCreate))->stopSound();
-			break;
-		case Action::Light:
-			toCreate = new NL3D::CPSLight;
-			break;
+	case Action::ParticlePoint:
+		toCreate = new NL3D::CPSDot;
+		break;
+	case Action::ParticleLookAt:
+		toCreate = new NL3D::CPSFaceLookAt;
+		break;
+	case Action::ParticleFanLight:
+		toCreate = new NL3D::CPSFanLight;
+		break;
+	case Action::ParticleRibbon:
+		toCreate = new NL3D::CPSRibbon;
+		break;
+	case Action::ParticleTailDot:
+		toCreate = new NL3D::CPSTailDot;
+		break;
+	case Action::ParticleMesh:
+		toCreate = new NL3D::CPSMesh;
+		break;
+	case Action::ParticleConstraintMesh:
+		toCreate = new NL3D::CPSConstraintMesh;
+		break;
+	case Action::ParticleFace:
+		toCreate = new NL3D::CPSFace;
+		break;
+	case Action::ParticleShockWave:
+		toCreate = new NL3D::CPSShockWave;
+		break;
+	case Action::ParticleRibbonLookAt:
+		toCreate = new NL3D::CPSRibbonLookAt;
+		break;
+	case Action::ForceGravity:
+		toCreate = new NL3D::CPSGravity;
+		break;
+	case Action::ForceDirectional:
+		toCreate = new NL3D::CPSDirectionnalForce;
+		break;
+	case Action::ForceSpring:
+		toCreate = new NL3D::CPSSpring;
+		break;
+	case Action::ForceFlyidFriction:
+		toCreate = new NL3D::CPSFluidFriction;
+		break;
+	case Action::ForceCentralGravity:
+		toCreate = new NL3D::CPSCentralGravity;
+		break;
+	case Action::ForceCylindricVortex:
+		toCreate = new NL3D::CPSCylindricVortex;
+		break;
+	case Action::ForceBrownianMove:
+		toCreate = new NL3D::CPSBrownianForce;
+		break;
+	case Action::ForceMagnetic:
+		toCreate = new NL3D::CPSMagneticForce;
+		break;
+	case Action::ZonePlane:
+		toCreate = new NL3D::CPSZonePlane;
+		break;
+	case Action::ZoneSphere:
+		toCreate = new NL3D::CPSZoneSphere;
+		break;
+	case Action::ZoneRectangle:
+		toCreate = new NL3D::CPSZoneRectangle;
+		break;
+	case Action::ZoneDisc:
+		toCreate = new NL3D::CPSZoneDisc;
+		break;
+	case Action::ZoneCylinder:
+		toCreate = new NL3D::CPSZoneCylinder;
+		break;
+	case Action::EmitterDirectional:
+		toCreate = new NL3D::CPSEmitterDirectionnal;
+		break;
+	case Action::EmitterOmniDirectional:
+		toCreate = new NL3D::CPSEmitterOmni;
+		break;
+	case Action::EmitterRectangle:
+		toCreate = new NL3D::CPSEmitterRectangle;
+		break;
+	case Action::EmitterConic:
+		toCreate = new NL3D::CPSEmitterConic;
+		break;
+	case Action::EmitterSpherical:
+		toCreate = new NL3D::CPSSphericalEmitter;
+		break;
+	case Action::EmitterRadial:
+		toCreate = new NL3D::CPSRadialEmitter;
+		break;
+	case Action::Sound:
+		toCreate = new NL3D::CPSSound;
+		if (!Modules::psEdit().isRunning())
+			(static_cast<NL3D::CPSSound *>(toCreate))->stopSound();
+		break;
+	case Action::Light:
+		toCreate = new NL3D::CPSLight;
+		break;
 	}
 
 	_treeModel->getOwnerNode(_currentItem)->setModified(true);
@@ -510,7 +512,7 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 		if (_treeModel->getOwnerNode(_currentItem)->getPSPointer()->getBypassMaxNumIntegrationSteps())
 		{
 			if (toCreate->getType() == NL3D::PSParticle || toCreate->getType() == NL3D::PSEmitter)
-			loc->setInitialLife(1.f);
+				loc->setInitialLife(1.f);
 			// object must have finite duration with that flag
 		}
 	}
@@ -519,10 +521,10 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 
 	if (!loc->bind(toCreate))
 	{
-		QMessageBox::critical(this, tr("NeL particle system editor"), 
-				tr("The system is flagged with 'No max Nb steps',  or uses the preset 'Spell FX'."
-				"System must have finite duration. Can't add object. To solve this,  set a limited life time for the father."),
-				   QMessageBox::Ok);
+		QMessageBox::critical(this, tr("NeL particle system editor"),
+							  tr("The system is flagged with 'No max Nb steps',  or uses the preset 'Spell FX'."
+								 "System must have finite duration. Can't add object. To solve this,  set a limited life time for the father."),
+							  QMessageBox::Ok);
 		delete toCreate;
 		return;
 	}
@@ -535,7 +537,7 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 		toCreate->setName(name);
 	}
 	else
-	{ 
+	{
 		_PSElementIdentifiers[toCreate->getName()] = 0;
 		toCreate->setName(name + "0");
 	}
@@ -543,7 +545,7 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 	touchPSState(_currentItem);
 
 	Modules::psEdit().resetAutoCount(_treeModel->getOwnerNode(_currentItem));
-	
+
 	// update treeView
 	if (_currentItem->itemType() == ItemType::ParticleSystem)
 	{
@@ -592,10 +594,10 @@ void CParticleWorkspaceDialog::pasteBindable()
 	else
 	{
 		delete copy;
-		QMessageBox::critical(this, tr("NeL particle system editor"), 
-				tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-				   "and thus, should have a finite duration. Please remove that flag first."),
-				   QMessageBox::Ok);
+		QMessageBox::critical(this, tr("NeL particle system editor"),
+							  tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
+								 "and thus, should have a finite duration. Please remove that flag first."),
+							  QMessageBox::Ok);
 	}
 }
 
@@ -610,50 +612,50 @@ void CParticleWorkspaceDialog::deleteItem()
 	clickedItem(index.parent());
 	switch(item->itemType())
 	{
-		case ItemType::Located:
-		{			
-			NL3D::CPSLocated *loc = item->getLoc();
-			touchPSState(item);
-			ownerNode->setModified(true);
-			// if the system is running,  we must destroy initial infos about the located, 
-			// as they won't need to be restored when the stop button will be pressed
-			ownerNode->removeLocated(loc);
-			
-			Modules::psEdit().resetAutoCount(ownerNode);
-			
-			ownerNode->getPSPointer()->remove(loc);
-			_treeModel->removeRows(index.row(), index.parent());
-		}
-		break;
-		case ItemType::LocatedInstance:
-		{
-			Modules::psEdit().resetAutoCount(ownerNode);
-			NL3D::CPSEmitter::setBypassEmitOnDeath(true);
-			item->getLoc()->deleteElement(item->getLocatedInstanceIndex());
-			NL3D::CPSEmitter::setBypassEmitOnDeath(false);
-			_treeModel->removeRows(index.row(), index.parent());
-			_treeModel->rebuildLocatedInstance(_ui.treeView->currentIndex());
-		}
-		break;
-		case ItemType::Particle:
-		case ItemType::Emitter:
-		case ItemType::Force:
-		case ItemType::Light:
-		case ItemType::Sound:
-		case ItemType::CollisionZone:
-		{
-			NL3D::CPSLocatedBindable *lb = item->getBind();
-			touchPSState(item);
-			// if the system is running,  we must destroy initial infos 
-			// that what saved about the located bindable,  when the start button was pressed,  as they won't need
-			// to be restored
-			ownerNode->removeLocatedBindable(lb);
-			ownerNode->setModified(true);
-			Modules::psEdit().resetAutoCount(ownerNode);
-			lb->getOwner()->remove(lb);
-			_treeModel->removeRows(index.row(), index.parent());
-		}
-		break;
+	case ItemType::Located:
+	{
+		NL3D::CPSLocated *loc = item->getLoc();
+		touchPSState(item);
+		ownerNode->setModified(true);
+		// if the system is running,  we must destroy initial infos about the located,
+		// as they won't need to be restored when the stop button will be pressed
+		ownerNode->removeLocated(loc);
+
+		Modules::psEdit().resetAutoCount(ownerNode);
+
+		ownerNode->getPSPointer()->remove(loc);
+		_treeModel->removeRows(index.row(), index.parent());
+	}
+	break;
+	case ItemType::LocatedInstance:
+	{
+		Modules::psEdit().resetAutoCount(ownerNode);
+		NL3D::CPSEmitter::setBypassEmitOnDeath(true);
+		item->getLoc()->deleteElement(item->getLocatedInstanceIndex());
+		NL3D::CPSEmitter::setBypassEmitOnDeath(false);
+		_treeModel->removeRows(index.row(), index.parent());
+		_treeModel->rebuildLocatedInstance(_ui.treeView->currentIndex());
+	}
+	break;
+	case ItemType::Particle:
+	case ItemType::Emitter:
+	case ItemType::Force:
+	case ItemType::Light:
+	case ItemType::Sound:
+	case ItemType::CollisionZone:
+	{
+		NL3D::CPSLocatedBindable *lb = item->getBind();
+		touchPSState(item);
+		// if the system is running,  we must destroy initial infos
+		// that what saved about the located bindable,  when the start button was pressed,  as they won't need
+		// to be restored
+		ownerNode->removeLocatedBindable(lb);
+		ownerNode->setModified(true);
+		Modules::psEdit().resetAutoCount(ownerNode);
+		lb->getOwner()->remove(lb);
+		_treeModel->removeRows(index.row(), index.parent());
+	}
+	break;
 	}
 }
 
@@ -662,12 +664,12 @@ void CParticleWorkspaceDialog::setInstanciate()
 	_treeModel->getOwnerNode(_currentItem)->setModified(true);
 
 	Modules::psEdit().resetAutoCount(_treeModel->getOwnerNode(_currentItem));
-		
+
 	if (_currentItem->getLoc()->getSize() == _currentItem->getLoc()->getMaxSize())
 		_currentItem->getLoc()->resize(_currentItem->getLoc()->getMaxSize() + 1);
 
-	sint32 objIndex = _currentItem->getLoc()->newElement(NLMISC::CVector::Null, NLMISC::CVector::Null,  
-							     NULL, 0, _currentItem->getLoc()->getMatrixMode(), 0.f);
+	sint32 objIndex = _currentItem->getLoc()->newElement(NLMISC::CVector::Null, NLMISC::CVector::Null,
+					  NULL, 0, _currentItem->getLoc()->getMatrixMode(), 0.f);
 
 	_treeModel->insertRow(_currentItem->getLoc(), objIndex, _currentItem->childCount(), _ui.treeView->currentIndex());
 }
@@ -694,8 +696,8 @@ void CParticleWorkspaceDialog::setExternID()
 {
 	bool ok;
 	int i = QInputDialog::getInt(this, tr("Set the extern ID"),
-				      tr("0 means no extern access."), 
-				     _currentItem->getBind()->getExternID(), 0, 9999, 1, &ok);
+								 tr("0 means no extern access."),
+								 _currentItem->getBind()->getExternID(), 0, 9999, 1, &ok);
 	if (ok)
 	{
 		_currentItem->getBind()->setExternID(uint32(i));
@@ -727,7 +729,7 @@ void CParticleWorkspaceDialog::buildMenu(QMenu *menu)
 	menu->addAction(bindParticleMenu->menuAction());
 	for(int i = Action::ParticlePoint; i <= Action::ParticleRibbonLookAt; ++i)
 		bindParticleMenu->addAction(_bindNewLocatedBindable[i]);
-	
+
 	QMenu *bindForceMenu = new QMenu(tr("Bind force..."), menu);
 	menu->addAction(bindForceMenu->menuAction());
 	for(int i = Action::ForceGravity; i <= Action::ForceMagnetic; ++i)
@@ -750,7 +752,7 @@ void CParticleWorkspaceDialog::buildMenu(QMenu *menu)
 NL3D::CPSLocated *CParticleWorkspaceDialog::createLocated(NL3D::CParticleSystem *ps)
 {
 	// build new name
-	std::string name; 
+	std::string name;
 	if (_PSElementIdentifiers.count(std::string("located")))
 		name = (QString("located %1").arg(++_PSElementIdentifiers[std::string("located")])).toStdString();
 

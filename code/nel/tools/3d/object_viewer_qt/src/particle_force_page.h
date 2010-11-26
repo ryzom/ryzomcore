@@ -33,8 +33,9 @@
 #include "particle_node.h"
 #include "ps_wrapper.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 /**
 @class CLocatedItem
 @brief Contain pointer to CPSLocated.
@@ -42,14 +43,20 @@ namespace NLQT {
 class CLocatedItem: public QListWidgetItem
 {
 public:
-	CLocatedItem ( const QString & text, QListWidget * parent = 0, int type = UserType ): 
-		      QListWidgetItem(text, parent, type), _loc(NULL) {}
-	
-	void setUserData(NL3D::CPSLocated *loc) { _loc = loc;}
-	NL3D::CPSLocated *getUserData() const { return _loc;}
-	
+	CLocatedItem ( const QString & text, QListWidget * parent = 0, int type = UserType ):
+		QListWidgetItem(text, parent, type), _loc(NULL) {}
+
+	void setUserData(NL3D::CPSLocated *loc)
+	{
+		_loc = loc;
+	}
+	NL3D::CPSLocated *getUserData() const
+	{
+		return _loc;
+	}
+
 private:
-  
+
 	NL3D::CPSLocated *_loc;
 }; /* class CLocatedItem */
 
@@ -59,8 +66,8 @@ private:
 */
 class CForcePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CForcePage(QWidget *parent = 0);
 	virtual ~CForcePage();
@@ -71,7 +78,7 @@ public:
 private Q_SLOTS:
 	void addTarget();
 	void removeTarget();
-  	
+
 	void setRadialViscosity(float value);
 	void setTangentialViscosity(float value);
 	void setDir(const NLMISC::CVector &value);
@@ -79,30 +86,45 @@ private Q_SLOTS:
 	void setFactorBrownianForce(float value);
 
 private:
-	
+
 	/// wrapper to tune the intensity of a force
 	struct CForceIntensityWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSForceIntensity *F;
-		float get(void) const { return F->getIntensity(); }
-		void set(const float &value) {F->setIntensity(value); }
-		scheme_type *getScheme(void) const { return F->getIntensityScheme(); }
-		void setScheme(scheme_type *s) {F->setIntensityScheme(s); }
+		float get(void) const
+		{
+			return F->getIntensity();
+		}
+		void set(const float &value)
+		{
+			F->setIntensity(value);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return F->getIntensityScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			F->setIntensityScheme(s);
+		}
 	} _ForceIntensityWrapper;
 
 	void hideAdditionalWidget();
 
 	void updateTargets();
 
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
-	
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
+
 	// the target we're focusing on
 	NL3D::CPSTargetLocatedBindable *_LBTarget;
-	
+
 	CWorkspaceNode *_Node;
-	
+
 	Ui::CForcePage _ui;
-	
+
 }; /* class CForcePage */
 
 } /* namespace NLQT */

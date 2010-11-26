@@ -27,15 +27,16 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 const float epsilon = 10E-3f;
-  
+
 CPSMoverPage::CPSMoverPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.scaleWidget->setRange(0.f, 4.f);
 	_ui.scaleWidget->setWrapper(&_UniformScaleWrapper);
 
@@ -49,15 +50,15 @@ CPSMoverPage::CPSMoverPage(QWidget *parent)
 	_ui.scaleZWidget->setWrapper(&_ZScaleWrapper);
 
 	//_ui.directionWidget->setWrapper(&_DirectionWrapper);
-	
+
 	connect(_ui.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setXPosition(double)));
 	connect(_ui.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setYPosition(double)));
 	connect(_ui.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZPosition(double)));
-		
+
 	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
 
-	connect(_ui.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), 
-		this, SLOT(changeSubComponent()));
+	connect(_ui.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+			this, SLOT(changeSubComponent()));
 }
 
 CPSMoverPage::~CPSMoverPage()
@@ -71,20 +72,20 @@ void CPSMoverPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *lo
 	_EditedLocatedIndex = editedLocatedIndex;
 
 	updatePosition();
-	
+
 	_ui.listWidget->clear();
 	hideAdditionalWidget();
-	
+
 	uint numBound = _EditedLocated->getNbBoundObjects();
-	
+
 	uint nbCandidates = 0;
-	
+
 	for (uint k = 0; k < numBound; ++k)
 	{
 		if (dynamic_cast<NL3D::IPSMover *>(_EditedLocated->getBoundObject(k)))
 		{
 			CLocatedBindableItem *item = new CLocatedBindableItem(QString(_EditedLocated->getBoundObject(k)->getName().c_str()),
-									      _ui.listWidget);
+					_ui.listWidget);
 			item->setUserData(_EditedLocated->getBoundObject(k));
 			++nbCandidates;
 		}
@@ -118,15 +119,15 @@ void CPSMoverPage::hideAdditionalWidget()
 
 void CPSMoverPage::updateListener(void)
 {
-/*	if(_ParticleDlg->MainFrame->isMoveElement())
-	{
-		const NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
-		NLMISC::CMatrix m;
-		m = _MouseListener->getModelMatrix();
-		m.setPos(pos);
-		_MouseListener->setModelMatrix(m);
-		_Node->setModified(true);
-	}*/
+	/*	if(_ParticleDlg->MainFrame->isMoveElement())
+		{
+			const NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
+			NLMISC::CMatrix m;
+			m = _MouseListener->getModelMatrix();
+			m.setPos(pos);
+			_MouseListener->setModelMatrix(m);
+			_Node->setModified(true);
+		}*/
 }
 
 void CPSMoverPage::setXPosition(double value)
@@ -167,17 +168,17 @@ void CPSMoverPage::changeSubComponent()
 	hideAdditionalWidget();
 	NL3D::IPSMover *m = getMoverInterface();
 	if (!m) return;
-	
+
 	_Node->getPSPointer()->setCurrentEditedElement(NULL);
 	_Node->getPSPointer()->setCurrentEditedElement(_EditedLocated, _EditedLocatedIndex, getLocatedBindable());
-	
-	
+
+
 	if (m->supportUniformScaling() && ! m->supportNonUniformScaling() )
 	{
 		_UniformScaleWrapper.OwnerNode = _Node;
 		_UniformScaleWrapper.M = m;
 		_UniformScaleWrapper.Index = _EditedLocatedIndex;
-		
+
 		_ui.scaleWidget->updateUi();
 		_ui.scaleLabel->show();
 		_ui.scaleWidget->show();
@@ -188,31 +189,31 @@ void CPSMoverPage::changeSubComponent()
 		_XScaleWrapper.OwnerNode = _Node;
 		_XScaleWrapper.M = m;
 		_XScaleWrapper.Index = _EditedLocatedIndex;
-		
+
 		_ui.scaleXWidget->updateUi();
 		_ui.scaleXLabel->show();
 		_ui.scaleXWidget->show();
-	
+
 		// dialog for edition of y scale
 		_YScaleWrapper.OwnerNode = _Node;
 		_YScaleWrapper.M = m;
 		_YScaleWrapper.Index = _EditedLocatedIndex;
-		
+
 		_ui.scaleYWidget->updateUi();
 		_ui.scaleYLabel->show();
 		_ui.scaleYWidget->show();
-	
+
 		// dialog for edition of x scale
 		_ZScaleWrapper.OwnerNode = _Node;
 		_ZScaleWrapper.M = m;
 		_ZScaleWrapper.Index = _EditedLocatedIndex;
-		
+
 		_ui.scaleZWidget->updateUi();
 		_ui.scaleZLabel->show();
 		_ui.scaleZWidget->show();
 	}
 
-	
+
 	if (m->onlyStoreNormal())
 	{
 		_ui.directionWidget->setValue(getMoverInterface()->getNormal(getLocatedIndex()), false);
@@ -231,7 +232,7 @@ NL3D::IPSMover *CPSMoverPage::getMoverInterface(void)
 	nlassert(_EditedLocated);
 	sint currIndex = _ui.listWidget->currentRow();
 	if (currIndex == -1) return NULL;
-	
+
 	CLocatedBindableItem *item = dynamic_cast<CLocatedBindableItem *>(_ui.listWidget->currentItem());
 	return dynamic_cast<NL3D::IPSMover *>(item->getUserData());
 }

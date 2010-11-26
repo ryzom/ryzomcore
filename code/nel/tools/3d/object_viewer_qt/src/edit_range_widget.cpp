@@ -28,12 +28,13 @@
 using namespace NL3D;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
 const int max_range = 9999;
 
 CEditRangeUIntWidget::CEditRangeUIntWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL), _emit(true)
+	: QWidget(parent), _Wrapper(NULL), _emit(true)
 {
 	_ui.setupUi(this);
 
@@ -44,7 +45,7 @@ CEditRangeUIntWidget::CEditRangeUIntWidget(QWidget *parent)
 	connect(_ui.startSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimum(int)));
 	connect(_ui.endSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximum(int)));
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSlider(int)));
-	
+
 	setValue(0, false);
 }
 
@@ -142,13 +143,13 @@ void CEditRangeUIntWidget::updateUi()
 }
 
 CEditRangeIntWidget::CEditRangeIntWidget(QWidget *parent)
-    : QWidget(parent), _Wrapper(NULL)
+	: QWidget(parent), _Wrapper(NULL)
 {
 	_ui.setupUi(this);
 	connect(_ui.startSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMinimum(int)));
 	connect(_ui.endSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMaximum(int)));
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSlider(int)));
-	
+
 	setValue(0, false);
 }
 
@@ -183,7 +184,7 @@ void CEditRangeIntWidget::setValue(sint32 value, bool emit)
 		_ui.endSpinBox->setValue(value);
 	if (value < sint32(_ui.startSpinBox->value()))
 		_ui.startSpinBox->setValue(value);
-	
+
 	_emit = emit;
 	_ui.horizontalSlider->setValue(value);
 	_emit = true;
@@ -331,8 +332,8 @@ void CEditRangeFloatWidget::disableLowerBound(void)
 
 void CEditRangeFloatWidget::changeRange()
 {
-	if ((_ui.startSpinBox->value() < _ui.currentSpinBox->value()) && 
-		(_ui.endSpinBox->value() > _ui.currentSpinBox->value()))
+	if ((_ui.startSpinBox->value() < _ui.currentSpinBox->value()) &&
+			(_ui.endSpinBox->value() > _ui.currentSpinBox->value()))
 		setValue(_ui.currentSpinBox->value(), false);
 }
 
@@ -341,13 +342,13 @@ void CEditRangeFloatWidget::changeSlider(int value)
 	float delta = _ui.endSpinBox->value() - _ui.startSpinBox->value();
 	int deltaSlider = _ui.horizontalSlider->maximum() - _ui.horizontalSlider->minimum();
 	float newValue = _ui.startSpinBox->value() + ((delta / deltaSlider) * value);
-	
+
 	_ui.currentSpinBox->blockSignals(true);
 	_ui.currentSpinBox->setValue(newValue);
 	_ui.currentSpinBox->blockSignals(false);
 
 	// NeL wrapper
-	if ((_Wrapper != NULL) && (fabs(newValue - _Wrapper->get()) > 0.0001)) 
+	if ((_Wrapper != NULL) && (fabs(newValue - _Wrapper->get()) > 0.0001))
 		_Wrapper->setAndUpdateModifiedFlag(newValue);
 
 	if (_emit)

@@ -34,8 +34,9 @@
 // Projects includes
 #include "particle_node.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 struct ItemType
 {
 	enum List
@@ -64,15 +65,15 @@ class CParticleTreeItem
 {
 public:
 	CParticleTreeItem(const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent = 0);
-	
+
 	CParticleTreeItem(CParticleWorkspace *ws, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent );
-	
+
 	CParticleTreeItem(NL3D::CPSLocated *loc, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent);
-	
+
 	CParticleTreeItem(NL3D::CPSLocated *loc, uint32 index, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent);
-	
+
 	CParticleTreeItem(CWorkspaceNode *node, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent);
-	
+
 	CParticleTreeItem(NL3D::CPSLocatedBindable *lb, const QList<QVariant> &data, const int typeItem, CParticleTreeItem *parent);
 
 	~CParticleTreeItem();
@@ -94,7 +95,7 @@ public:
 	CWorkspaceNode *getNode() const;
 	uint32 getLocatedInstanceIndex() const;
 	void setLocatedInstanceIndex(uint32 index);
-	
+
 private:
 	union
 	{
@@ -103,16 +104,16 @@ private:
 		NL3D::CPSLocatedBindable  *_Bind;
 		CWorkspaceNode		  *_PS;
 	};
-	
+
 	// for the located instance type, this is the index of the instance
 	uint32 _LocatedInstanceIndex;
-   
+
 	QList<CParticleTreeItem*> _childItems;
 	QList<QVariant> _itemData;
 	int _itemIconType;
 	CParticleTreeItem *_parentItem;
 };
- 
+
 /**
 @class CParticleTreeModel
 @brief Tree model particles workspace.
@@ -128,9 +129,9 @@ public:
 	QVariant data(const QModelIndex &index, int role) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 	QVariant headerData(int section, Qt::Orientation orientation,
-			    int role = Qt::DisplayRole) const;
+						int role = Qt::DisplayRole) const;
 	QModelIndex index(int row, int column,
-			  const QModelIndex &parent = QModelIndex()) const;
+					  const QModelIndex &parent = QModelIndex()) const;
 	QModelIndex parent(const QModelIndex &index) const;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -141,41 +142,41 @@ public:
 
 	/// Insert WorkspaceNode in model and add all its sub-item.
 	bool insertRows(CWorkspaceNode *node, int position, const QModelIndex &parent = QModelIndex());
-	
+
 	/// Insert Located item in model and add all its sub-item.
 	bool insertRows(NL3D::CPSLocated *loc, int position, const QModelIndex &parent = QModelIndex());
-	
+
 	/// Insert Located item in model.
 	bool insertRow(NL3D::CPSLocated *loc, uint32 index, int position, const QModelIndex &parent = QModelIndex());
-	
+
 	/// Insert LocatedBindable item in model.
 	bool insertRow(NL3D::CPSLocatedBindable *lb, int position, const QModelIndex &parent = QModelIndex());
-	
+
 	/// Deletes a tree item and all its children.
 	bool removeRows(int position, const QModelIndex &parent = QModelIndex());
-     
+
 	/// Get the parent node in the workspace for the given element in the tree
 	CWorkspaceNode *getOwnerNode(CParticleTreeItem *item) const;
-	
+
 	/// Rebuild the located instance in the tree (after loading for example)
 	void rebuildLocatedInstance(const QModelIndex &parent);
 
 	/// Build the whole tree from a workspace
 	void setupModelFromWorkSpace();
-	
+
 private:
 	/// Build a portion of the tree using the given particle system
 	void setupModelFromPS(CWorkspaceNode *node, CParticleTreeItem *parent);
-	
+
 	/// Add item from the given located
 	void createItemFromLocated(NL3D::CPSLocated *loc, CParticleTreeItem *parent);
-	
+
 	/// Add item from the given located instance
 	void createItemFromLocatedInstance(NL3D::CPSLocated *loc, uint32 index, CParticleTreeItem *parent);
 
 	/// Add item from the given located bindable
 	void createItemFromLocatedBindable(NL3D::CPSLocatedBindable *lb, CParticleTreeItem *parent);
-  
+
 	CParticleTreeItem *_rootItem;
 };
 

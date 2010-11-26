@@ -30,15 +30,16 @@
 
 namespace NL3D
 {
-	class CVegetable;
+class CVegetable;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableRotatePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableRotatePage(QWidget *parent = 0);
 	~CVegetableRotatePage();
@@ -50,14 +51,14 @@ private Q_SLOTS:
 	void setNoiseValueRotateX(const NLMISC::CNoiseValue &value);
 	void setNoiseValueRotateY(const NLMISC::CNoiseValue &value);
 	void setNoiseValueRotateZ(const NLMISC::CNoiseValue &value);
-	
+
 private:
 
 	// The vegetable to edit.
 	NL3D::CVegetable	*_Vegetable;
-	
+
 	Ui::CVegetableRotatePage _ui;
-	
+
 }; /* class CVegetableRotatePage */
 
 } /* namespace NLQT */

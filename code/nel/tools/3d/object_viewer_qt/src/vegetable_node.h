@@ -26,17 +26,18 @@
 // NeL includes
 #include <nel/3d/vegetable.h>
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CVegetableNode
 {
 public:
 	/// Constructor
 	CVegetableNode(void);
-	
+
 	// init the vegetable
 	void initDefaultVegetable();
-	
+
 	void initVegetable(const NL3D::CVegetable &vegetable);
 
 	// update VegetableName according to Vegetable
@@ -53,7 +54,7 @@ public:
 
 	// Visibility. Editor feature only
 	bool			Visible;
-	
+
 }; /* class CVegetableNode */
 
 } /* namespace NLQT */

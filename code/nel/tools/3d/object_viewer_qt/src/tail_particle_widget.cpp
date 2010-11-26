@@ -25,13 +25,14 @@
 
 // Projects includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 CTailParticleWidget::CTailParticleWidget(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.pathWidget->setMode(Mode::RibbonShape);
 	connect(_ui.tailFadingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTailFading(bool)));
 	connect(_ui.ribbonOrientationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setRibbonOrientation(int)));
@@ -49,7 +50,7 @@ void CTailParticleWidget::setCurrentTailParticle(CWorkspaceNode *ownerNode, NL3D
 	_TailParticle = tp;
 
 	_ui.tailFadingCheckBox->setChecked(tp->getColorFading());
-	
+
 	if (!dynamic_cast<NL3D::CPSRibbon *>(_TailParticle))
 	{
 		_ui.pathWidget->hide();
@@ -63,7 +64,7 @@ void CTailParticleWidget::setCurrentTailParticle(CWorkspaceNode *ownerNode, NL3D
 		_ui.tailShapeComboBox->show();
 		NL3D::CPSRibbon *r = dynamic_cast<NL3D::CPSRibbon *>(_TailParticle);
 		_ui.ribbonOrientationComboBox->setCurrentIndex(r->getOrientation());
-		
+
 		// Update graphics widget
 		std::vector<NLMISC::CVector> verts;
 		verts.resize(r->getNbVerticesInShape());
@@ -87,32 +88,32 @@ void CTailParticleWidget::setTailShape(int index)
 	nlassert(r);
 	switch (index)
 	{
-		case 0: // triangle
-			r->setShape(NL3D::CPSRibbon::Triangle, NL3D::CPSRibbon::NbVerticesInTriangle);
+	case 0: // triangle
+		r->setShape(NL3D::CPSRibbon::Triangle, NL3D::CPSRibbon::NbVerticesInTriangle);
 		break;
-		case 1:	// quad
-			r->setShape(NL3D::CPSRibbon::Losange, NL3D::CPSRibbon::NbVerticesInLosange);
+	case 1:	// quad
+		r->setShape(NL3D::CPSRibbon::Losange, NL3D::CPSRibbon::NbVerticesInLosange);
 		break;
-		case 2: // octogon
-			r->setShape(NL3D::CPSRibbon::HeightSides, NL3D::CPSRibbon::NbVerticesInHeightSide);
+	case 2: // octogon
+		r->setShape(NL3D::CPSRibbon::HeightSides, NL3D::CPSRibbon::NbVerticesInHeightSide);
 		break;
-		case 3: // pentagram
-			r->setShape(NL3D::CPSRibbon::Pentagram, NL3D::CPSRibbon::NbVerticesInPentagram);
+	case 3: // pentagram
+		r->setShape(NL3D::CPSRibbon::Pentagram, NL3D::CPSRibbon::NbVerticesInPentagram);
 		break;
-		case 4: // simple segment x
-			r->setShape(NL3D::CPSRibbon::SimpleSegmentX, NL3D::CPSRibbon::NbVerticesInSimpleSegmentX, true);
+	case 4: // simple segment x
+		r->setShape(NL3D::CPSRibbon::SimpleSegmentX, NL3D::CPSRibbon::NbVerticesInSimpleSegmentX, true);
 		break;
-		case 5: // simple segment y
-			r->setShape(NL3D::CPSRibbon::SimpleSegmentY, NL3D::CPSRibbon::NbVerticesInSimpleSegmentY, true);
+	case 5: // simple segment y
+		r->setShape(NL3D::CPSRibbon::SimpleSegmentY, NL3D::CPSRibbon::NbVerticesInSimpleSegmentY, true);
 		break;
-		case 6: // simple segment z
-			r->setShape(NL3D::CPSRibbon::SimpleSegmentZ, NL3D::CPSRibbon::NbVerticesInSimpleSegmentZ, true);
+	case 6: // simple segment z
+		r->setShape(NL3D::CPSRibbon::SimpleSegmentZ, NL3D::CPSRibbon::NbVerticesInSimpleSegmentZ, true);
 		break;
-		case 7: // simple brace
-			r->setShape(NL3D::CPSRibbon::SimpleBrace, NL3D::CPSRibbon::NbVerticesInSimpleBrace, true);
+	case 7: // simple brace
+		r->setShape(NL3D::CPSRibbon::SimpleBrace, NL3D::CPSRibbon::NbVerticesInSimpleBrace, true);
 		break;
 	}
-	
+
 	// Update graphics widget
 	std::vector<NLMISC::CVector> verts;
 	verts.resize(r->getNbVerticesInShape() );
@@ -122,7 +123,7 @@ void CTailParticleWidget::setTailShape(int index)
 
 void CTailParticleWidget::setRibbonOrientation(int index)
 {
-  	NL3D::CPSRibbon *r = dynamic_cast<NL3D::CPSRibbon *>(_TailParticle);
+	NL3D::CPSRibbon *r = dynamic_cast<NL3D::CPSRibbon *>(_TailParticle);
 	nlassert(r);
 	if (index != r->getOrientation())
 	{

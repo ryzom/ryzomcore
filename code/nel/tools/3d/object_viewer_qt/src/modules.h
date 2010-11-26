@@ -36,13 +36,31 @@ class Modules
 public:
 	static void init();
 	static void release();
-	
-	static NLQT::CConfiguration &config() { return *_configuration; }
-	static NLQT::CObjectViewer &objView() { return *_objectViewer; }
-	static NLQT::CMainWindow &mainWin() { return *_mainWindow; }
-	static NLQT::CParticleEditor &psEdit() { return *_particleEditor; }
-	static NLQT::CSoundSystem &sound() { return *_soundSystem; }
-	static NLQT::CVegetableEditor &veget() { return *_vegetableEditor; }
+
+	static NLQT::CConfiguration &config()
+	{
+		return *_configuration;
+	}
+	static NLQT::CObjectViewer &objView()
+	{
+		return *_objectViewer;
+	}
+	static NLQT::CMainWindow &mainWin()
+	{
+		return *_mainWindow;
+	}
+	static NLQT::CParticleEditor &psEdit()
+	{
+		return *_particleEditor;
+	}
+	static NLQT::CSoundSystem &sound()
+	{
+		return *_soundSystem;
+	}
+	static NLQT::CVegetableEditor &veget()
+	{
+		return *_vegetableEditor;
+	}
 private:
 	static NLQT::CConfiguration *_configuration;
 	static NLQT::CObjectViewer *_objectViewer;

@@ -40,7 +40,8 @@
 using namespace NLMISC;
 using namespace NL3D;
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSlotInfo& CSlotInfo::operator=(const CSlotInfo & slotInfo)
 {
@@ -61,12 +62,12 @@ CSlotInfo& CSlotInfo::operator=(const CSlotInfo & slotInfo)
 	}
 	return *this;
 }
-  
+
 CEntity::CEntity(void):
-		_Name("<Unknown>"), _FileNameShape(""),
-		_FileNameSkeleton(""), _inPlace(false), _incPos(false),
-		_Instance(NULL), _Skeleton(NULL), 
-		_PlayList(NULL), _AnimationSet(NULL)
+	_Name("<Unknown>"), _FileNameShape(""),
+	_FileNameSkeleton(""), _inPlace(false), _incPos(false),
+	_Instance(NULL), _Skeleton(NULL),
+	_PlayList(NULL), _AnimationSet(NULL)
 {
 	_CharacterScalePos = 1;
 }
@@ -99,7 +100,7 @@ CEntity::~CEntity(void)
 
 void CEntity::loadAnimation(std::string &fileName)
 {
-	uint id = _AnimationSet->addAnimation(fileName.c_str(),CFile::getFilenameWithoutExtension(fileName).c_str());	
+	uint id = _AnimationSet->addAnimation(fileName.c_str(),CFile::getFilenameWithoutExtension(fileName).c_str());
 	_AnimationList.push_back(_AnimationSet->getAnimationName(id));
 	_AnimationSet->build();
 	if (!_Skeleton.empty()) _PlayList->registerTransform(_Skeleton);
@@ -115,30 +116,30 @@ void CEntity::loadSWT(std::string &fileName)
 void CEntity::addAnimToPlayList(std::string &name)
 {
 	_PlayListAnimation.push_back(name);
-	
+
 	_AnimationStatus.EndAnim = this->getPlayListLength();
-	
+
 	_Instance.start();
 }
 
 void CEntity::removeAnimToPlayList(uint row)
 {
 	if (row < _PlayListAnimation.size())
-	 _PlayListAnimation.erase(_PlayListAnimation.begin() + row);
-	
+		_PlayListAnimation.erase(_PlayListAnimation.begin() + row);
+
 	_AnimationStatus.EndAnim = this->getPlayListLength();
 }
 
 void CEntity::swapAnimToPlayList(uint row1, uint row2)
 {
 	if ((row1 < _PlayListAnimation.size()) && (row2 < _PlayListAnimation.size()))
-	 std::swap(_PlayListAnimation[row1], _PlayListAnimation[row2]);
+		std::swap(_PlayListAnimation[row1], _PlayListAnimation[row2]);
 }
 
 void CEntity::playbackAnim(bool play)
 {
 	_AnimationStatus.PlayAnim = play;
-	
+
 	if (play)
 		_Instance.start();
 	else
@@ -150,7 +151,7 @@ void CEntity::reset()
 	_PlayListAnimation.clear();
 	_AnimationList.clear();
 	_SWTList.clear();
-	
+
 	_PlayList->resetAllChannels();
 }
 
@@ -173,14 +174,14 @@ float CEntity::getAnimLength(std::string name)
 void CEntity::update(NL3D::TAnimationTime time)
 {
 	this->resetChannel();
-	switch (_AnimationStatus.Mode) 
+	switch (_AnimationStatus.Mode)
 	{
-		case Mode::PlayList:  
-			animatePlayList(time);
-			break;
-		case Mode::Mixer:
-			animateChannelMixer();
-			break;
+	case Mode::PlayList:
+		animatePlayList(time);
+		break;
+	case Mode::Mixer:
+		animateChannelMixer();
+		break;
 	}
 }
 
@@ -188,11 +189,11 @@ void CEntity::update(NL3D::TAnimationTime time)
 void CEntity::resetChannel()
 {
 	for(uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
-	 _PlayList->setAnimation(i, UPlayList::empty);
+		_PlayList->setAnimation(i, UPlayList::empty);
 }
 
-void CEntity::addTransformation (CMatrix &current, UAnimation *anim, float begin, float end, UTrack *posTrack, UTrack *rotquatTrack, 
-									   UTrack *nextPosTrack, UTrack *nextRotquatTrack, bool removeLast)
+void CEntity::addTransformation (CMatrix &current, UAnimation *anim, float begin, float end, UTrack *posTrack, UTrack *rotquatTrack,
+								 UTrack *nextPosTrack, UTrack *nextRotquatTrack, bool removeLast)
 {
 	// In place ?
 	if (_inPlace)
@@ -272,10 +273,10 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 	{
 		// Animation index
 		uint id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[0].c_str());
-		
+
 		// Try channel AnimationSet
 		NL3D::UAnimation *anim = _AnimationSet->getAnimation(id);
-		
+
 		bool there = false;
 
 		UTrack *posTrack = NULL;
@@ -294,7 +295,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 		// Accumul time
 		float startTime = 0;
 		float endTime = anim->getEndTime() - anim->getBeginTime();
-		
+
 		uint index = 0;
 		while (time >= endTime)
 		{
@@ -303,7 +304,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 			{
 				id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[index].c_str());
 				NL3D::UAnimation *newAnim = _AnimationSet->getAnimation(id);
-				
+
 				UTrack *newPosTrack = newAnim->getTrackByName ("pos");
 				UTrack *newRotquatTrack = newAnim->getTrackByName ("rotquat");
 
@@ -319,14 +320,14 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 				startTime = endTime;
 				endTime = startTime + (anim->getEndTime() - anim->getBeginTime());
 			}
-			else 
+			else
 			{
 				// Add the transformation
 				addTransformation (current, anim, 0, anim->getEndTime(), posTrack, rotQuatTrack, NULL, NULL, false);
 				break;
 			}
 		}
-		
+
 		// Time cropped ?
 		if (index >= _PlayListAnimation.size())
 		{
@@ -334,24 +335,24 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 			index--;
 			id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[index].c_str());
 			anim = _AnimationSet->getAnimation(id);
-		
+
 			// End time for last anim
 			startTime = anim->getEndTime() - time;
 		}
 		else
 		{
-			// No 
+			// No
 
 			// Add the transformation
 			addTransformation (current, anim, 0, anim->getBeginTime() + time - startTime, posTrack, rotQuatTrack, NULL, NULL, false);
 
 			id = _AnimationSet->getAnimationIdByName(_PlayListAnimation[index].c_str());
 			anim = _AnimationSet->getAnimation(id);
-			
+
 			// Final time
 			startTime -= anim->getBeginTime();
 		}
-		
+
 		// Set the slot
 		_PlayList->setAnimation(0, id);
 		_PlayList->setTimeOrigin(0, startTime);
@@ -360,7 +361,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 		_PlayList->setStartWeight(0, 1, 0);
 		_PlayList->setEndWeight(0, 1, 1);
 		_PlayList->setWrapMode(0, UPlayList::Clamp);
-		
+
 		// Setup the pos and rot for this shape
 		if (there)
 		{
@@ -391,11 +392,11 @@ void CEntity::animateChannelMixer()
 		{
 			// Set the animation
 			uint animId =  _AnimationSet->getAnimationIdByName(_SlotInfo[i].Animation);
-			if (animId == UAnimationSet::NotFound) 
+			if (animId == UAnimationSet::NotFound)
 				_PlayList->setAnimation(i, UPlayList::empty);
-			else 
+			else
 				_PlayList->setAnimation(i, animId);
-		
+
 			// Set the skeleton weight
 			uint skelId = _AnimationSet->getSkeletonWeightIdByName(_SlotInfo[i].Skeleton);
 			if (skelId == UAnimationSet::NotFound)
@@ -413,15 +414,15 @@ void CEntity::animateChannelMixer()
 			// Switch between wrap modes
 			switch (_SlotInfo[i].ClampMode)
 			{
-				case 0:
-					_PlayList->setWrapMode (i, UPlayList::Clamp);
-					break;
-				case 1:
-					_PlayList->setWrapMode (i, UPlayList::Repeat);
-					break;
-				case 2:
-					_PlayList->setWrapMode (i, UPlayList::Disable);
-					break;
+			case 0:
+				_PlayList->setWrapMode (i, UPlayList::Clamp);
+				break;
+			case 1:
+				_PlayList->setWrapMode (i, UPlayList::Repeat);
+				break;
+			case 2:
+				_PlayList->setWrapMode (i, UPlayList::Disable);
+				break;
 			}
 		}
 	}

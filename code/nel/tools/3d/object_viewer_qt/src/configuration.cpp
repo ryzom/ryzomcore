@@ -31,25 +31,26 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CConfiguration::CConfiguration()
 {
-	
+
 }
 
 CConfiguration::~CConfiguration()
 {
-	
+
 }
 
 void CConfiguration::init()
-{	
+{
 	nldebug("CConfiguration::init");
-	
+
 	// verify data
 	nlassert(!ConfigCallbacks.size());
-	
+
 	// load config
 	try
 	{
@@ -67,23 +68,23 @@ void CConfiguration::init()
 void CConfiguration::release()
 {
 	nldebug("CConfiguration::release");
-	
+
 	Modules::config().dropCallback("SearchPaths");
-	
-	 // save and release the config file
-	if (ConfigFile.exists("SaveConfig") && ConfigFile.getVarPtr("SaveConfig")->asBool()) 
+
+	// save and release the config file
+	if (ConfigFile.exists("SaveConfig") && ConfigFile.getVarPtr("SaveConfig")->asBool())
 	{
 		ConfigFile.save();
 	}
 	ConfigFile.clear();
-		
+
 	// release the search paths etc
 	CPath::releaseInstance();
-	
+
 	// verify data
 	nlassert(!ConfigCallbacks.size());
 }
- 
+
 void CConfiguration::updateUtilities()
 {
 	//H_AUTO2
@@ -101,7 +102,7 @@ void CConfiguration::configRemapExtensions()
 	var = ConfigFile.getVarPtr("RemapExtensions");
 	uint varsize = var->size();
 	for (uint i = 0; i < varsize; i += 2)
-	CPath::remapExtension(var->asString(i), var->asString(i + 1), true);
+		CPath::remapExtension(var->asString(i), var->asString(i + 1), true);
 }
 
 void CConfiguration::setAndCallback(const std::string &varName, CConfigCallback configCallback)
@@ -127,7 +128,7 @@ float CConfiguration::getValue(const string &varName, float defaultValue)
 {
 	if (ConfigFile.exists(varName)) return ConfigFile.getVar(varName).asFloat();
 	CConfigFile::CVar varToCopy;
-	varToCopy.forceAsDouble((double)defaultValue);	
+	varToCopy.forceAsDouble((double)defaultValue);
 	ConfigFile.insertVar(varName, varToCopy);
 	return defaultValue;
 }
@@ -136,7 +137,7 @@ double CConfiguration::getValue(const string &varName, double defaultValue)
 {
 	if (ConfigFile.exists(varName)) return ConfigFile.getVar(varName).asDouble();
 	CConfigFile::CVar varToCopy;
-	varToCopy.forceAsDouble(defaultValue);	
+	varToCopy.forceAsDouble(defaultValue);
 	ConfigFile.insertVar(varName, varToCopy);
 	return defaultValue;
 }
@@ -145,7 +146,7 @@ int CConfiguration::getValue(const string &varName, int defaultValue)
 {
 	if (ConfigFile.exists(varName)) return ConfigFile.getVar(varName).asInt();
 	CConfigFile::CVar varToCopy;
-	varToCopy.forceAsInt(defaultValue);	
+	varToCopy.forceAsInt(defaultValue);
 	ConfigFile.insertVar(varName, varToCopy);
 	return defaultValue;
 }
@@ -172,14 +173,14 @@ bool CConfiguration::getValue(const string &varName, bool defaultValue)
 {
 	if (ConfigFile.exists(varName)) return ConfigFile.getVar(varName).asBool();
 	CConfigFile::CVar varToCopy;
-	varToCopy.forceAsInt(defaultValue ? 1 : 0);	
+	varToCopy.forceAsInt(defaultValue ? 1 : 0);
 	ConfigFile.insertVar(varName, varToCopy);
 	return defaultValue;
 }
 
 CRGBA CConfiguration::getValue(const string &varName, const CRGBA &defaultValue)
 {
-	if (ConfigFile.exists(varName)) 
+	if (ConfigFile.exists(varName))
 	{
 		return getValue(ConfigFile.getVar(varName), defaultValue);
 	}
@@ -203,7 +204,7 @@ CRGBA CConfiguration::getValue(const CConfigFile::CVar &var, const CRGBA &defaul
 		if (var.size() > 4) nlwarning("RGBA value in config value '%s' is too long, ignoring unused values");
 		return CRGBA((uint8)var.asInt(0), (uint8)var.asInt(1), (uint8)var.asInt(2), var.size() >= 4 ? (uint8)var.asInt(3) : 255);
 	}
-	nlwarning("Invalid RGBA value in config value '%s', reverting to default { %i, %i, %i, %i }", var.Name.c_str(), (sint)defaultValue.R, (sint)defaultValue.G, (sint)defaultValue.B, (sint)defaultValue.A);	
+	nlwarning("Invalid RGBA value in config value '%s', reverting to default { %i, %i, %i, %i }", var.Name.c_str(), (sint)defaultValue.R, (sint)defaultValue.G, (sint)defaultValue.B, (sint)defaultValue.A);
 	return defaultValue;
 }
 
@@ -216,7 +217,7 @@ void CConfiguration::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
 {
 	uint varsize = var.size();
 	for (uint i = 0; i < varsize; ++i)
-	CPath::addSearchPath(var.asString(i), true, false);
+		CPath::addSearchPath(var.asString(i), true, false);
 }
 
 } /* namespace NLQT */

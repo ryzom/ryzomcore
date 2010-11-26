@@ -33,10 +33,11 @@
 
 namespace  NL3D
 {
-	class CPSLocated;
+class CPSLocated;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CLocatedPage
@@ -44,15 +45,15 @@ namespace NLQT {
 */
 class CLocatedPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CLocatedPage(QWidget *parent = 0);
 	~CLocatedPage();
 
 	/// Set the located to edit.
 	void setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *located);
-	
+
 private Q_SLOTS:
 	void setDisabledCountPS(bool state);
 	void setLimitedLifeTime(bool state);
@@ -70,21 +71,39 @@ private:
 	/// wrapper to tune the mass of particles
 	struct CMassWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
-	   NL3D::CPSLocated *Located;
-	   float get(void) const { return Located->getInitialMass(); }
-	   void set(const float &v) { Located->setInitialMass(v); }
-	   virtual scheme_type *getScheme(void) const { return Located->getMassScheme(); }
-	   virtual void setScheme(scheme_type *s) { Located->setMassScheme(s); }
+		NL3D::CPSLocated *Located;
+		float get(void) const
+		{
+			return Located->getInitialMass();
+		}
+		void set(const float &v)
+		{
+			Located->setInitialMass(v);
+		}
+		virtual scheme_type *getScheme(void) const
+		{
+			return Located->getMassScheme();
+		}
+		virtual void setScheme(scheme_type *s)
+		{
+			Located->setMassScheme(s);
+		}
 	} _MassWrapper;
 
 	struct CLifeWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
-	   NL3D::CPSLocated *Located;
-	   CWorkspaceNode *Node;
-	   float get(void) const { return Located->getInitialLife(); }
-	   void set(const float &v);
-	   virtual scheme_type *getScheme(void) const { return Located->getLifeScheme(); }
-	   virtual void setScheme(scheme_type *s);
+		NL3D::CPSLocated *Located;
+		CWorkspaceNode *Node;
+		float get(void) const
+		{
+			return Located->getInitialLife();
+		}
+		void set(const float &v);
+		virtual scheme_type *getScheme(void) const
+		{
+			return Located->getLifeScheme();
+		}
+		virtual void setScheme(scheme_type *s);
 	} _LifeWrapper;
 
 	/// the located this dialog is editing
@@ -98,7 +117,10 @@ private:
 	/// update the 'trigger on death' control
 	void updateTriggerOnDeath(void);
 
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
 
 	Ui::CLocatedPage _ui;
 }; /* class CLocatedPage */

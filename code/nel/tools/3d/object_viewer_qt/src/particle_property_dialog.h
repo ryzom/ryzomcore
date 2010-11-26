@@ -44,7 +44,8 @@
 #include "particle_tree_model.h"
 #include "particle_node.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CPropertyDialog: public QDockWidget
 {
@@ -52,21 +53,27 @@ class CPropertyDialog: public QDockWidget
 public:
 	CPropertyDialog(CParticleTreeModel *treeModel, QWidget *parent = 0);
 	~CPropertyDialog();
-	
+
 	void setCurrentEditedElement(CParticleTreeItem *editedItem);
-	
-	CLocatedPage *getLocatedPage() const { return _locatedPage; };
-	CPSMoverPage *getMoverPage() const { return _psMoverPage; };
+
+	CLocatedPage *getLocatedPage() const
+	{
+		return _locatedPage;
+	};
+	CPSMoverPage *getMoverPage() const
+	{
+		return _psMoverPage;
+	};
 
 private:
 	void setupUi();
-  
+
 	QWidget 		*_dockWidgetContents;
 	QGridLayout 		*_gridLayout;
 	QGridLayout 		*_pagesGridLayout;
 	QScrollArea 		*_scrollArea;
 	QWidget 		*_scrollAreaWidgetContents;
-	
+
 	QStackedWidget 		*_stackedWidget;
 	CWorkspacePage 		*_wpPage;
 	CParticleSystemPage 	*_psPage;
@@ -80,7 +87,7 @@ private:
 	CPSMoverPage 		*_psMoverPage;
 
 	CParticleTreeModel 	*_treeModel;
-	
+
 	friend class CParticleWorkspaceDialog;
 }; /* class CPropertyDialog */
 

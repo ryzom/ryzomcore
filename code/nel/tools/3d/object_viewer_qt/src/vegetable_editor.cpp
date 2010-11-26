@@ -38,13 +38,14 @@
 #include "modules.h"
 #include <nel/3d/u_camera.h>
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableEditor::CVegetableEditor(void)
-    : _VegetableLandscape(NULL), 
-    _VegetableCollisionManager(NULL), 
-    _VegetableCollisionEntity(NULL),
-    _Driver(NULL), _Scene(NULL)
+	: _VegetableLandscape(NULL),
+	  _VegetableCollisionManager(NULL),
+	  _VegetableCollisionEntity(NULL),
+	  _Driver(NULL), _Scene(NULL)
 {
 	loadConfig();
 }
@@ -61,7 +62,7 @@ void CVegetableEditor::init()
 
 	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver());
 	_Driver = driver->getDriver();
-	
+
 	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser*>(Modules::objView().getScene());
 	_Scene = &scene->getScene();
 }
@@ -184,7 +185,7 @@ bool CVegetableEditor::createVegetableLandscape()
 			_VegetableLandscape->Landscape.setupVegetableLighting(_VegetableAmbient, _VegetableDiffuse, _VegetableLightDir);
 			_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, _VegetableWindFreq, _VegetableWindPower, _VegetableWindBendMin);
 			_VegetableLandscape->Landscape.setUpdateLightingFrequency(1);
-			
+
 			// Load the zones.
 			// ================
 			// landscape recentering.
@@ -249,11 +250,11 @@ bool CVegetableEditor::createVegetableLandscape()
 
 			// remove the landscape
 			Modules::veget().getScene()->deleteModel(_VegetableLandscape);
-			
+
 			_VegetableLandscape= NULL;
-			
+
 			QMessageBox::critical(&Modules::mainWin(), "Failed to Load landscape", QString(e.what()), QMessageBox::Ok);
-			
+
 			return false;
 		}
 	}
@@ -359,7 +360,7 @@ void CVegetableEditor::update()
 	{
 		// get matrix from camera.
 		NLMISC::CMatrix	matrix = Modules::objView().getScene()->getCam().getMatrix();
-		
+
 		// snap To ground.
 		NLMISC::CVector pos = matrix.getPos();
 		// if succes to snap to ground
@@ -385,7 +386,7 @@ bool CVegetableEditor::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, std:
 {
 	bool ok = true;
 	NLMISC::CIFile f;
-	
+
 	if( f.open(fileName) )
 	{
 		try
@@ -451,7 +452,7 @@ void CVegetableEditor::appendVegetableSet(NL3D::CTileVegetableDesc &vegetSet)
 		const std::vector<NL3D::CVegetable> &vegetList = vegetSet.getVegetableList(distType);
 
 		// for all of them
-		for(uint i = 0; i < vegetList.size();i++)
+		for(uint i = 0; i < vegetList.size(); i++)
 		{
 			// append the vegetable to the list.
 			NL3D::CVegetable veget = vegetList[i];
@@ -484,7 +485,7 @@ void CVegetableEditor::clearVegetables()
 
 CVegetableNode *CVegetableEditor::getVegetable(sint id)
 {
-  	if(id == -1)
+	if(id == -1)
 		return NULL;
 	else
 		return &_Vegetables[id];
@@ -608,15 +609,27 @@ void CVegetableEditor::loadConfig()
 	{
 		NLMISC::CConfigFile::CVar &color = Modules::config().getConfigFile().getVar("VegetDiffuse");
 		// setup to behave correclty ie as maxLightFactor:
-		sint R = color.asInt(0) - _VegetableAmbient.R; NLMISC::clamp(R, 0, 255); _VegetableDiffuse.R = R;
-		sint G = color.asInt(1) - _VegetableAmbient.G; NLMISC::clamp(G, 0, 255); _VegetableDiffuse.G = G;
-		sint B = color.asInt(2) - _VegetableAmbient.B; NLMISC::clamp(B, 0, 255); _VegetableDiffuse.B = B;
+		sint R = color.asInt(0) - _VegetableAmbient.R;
+		NLMISC::clamp(R, 0, 255);
+		_VegetableDiffuse.R = R;
+		sint G = color.asInt(1) - _VegetableAmbient.G;
+		NLMISC::clamp(G, 0, 255);
+		_VegetableDiffuse.G = G;
+		sint B = color.asInt(2) - _VegetableAmbient.B;
+		NLMISC::clamp(B, 0, 255);
+		_VegetableDiffuse.B = B;
 	}
 	catch (NLMISC::EUnknownVar &)
 	{
-		sint R = 255 - _VegetableAmbient.R; NLMISC::clamp(R, 0, 255); _VegetableDiffuse.R = R;
-		sint G = 255 - _VegetableAmbient.G; NLMISC::clamp(G, 0, 255); _VegetableDiffuse.G = G;
-		sint B = 255 - _VegetableAmbient.B; NLMISC::clamp(B, 0, 255); _VegetableDiffuse.B = B;
+		sint R = 255 - _VegetableAmbient.R;
+		NLMISC::clamp(R, 0, 255);
+		_VegetableDiffuse.R = R;
+		sint G = 255 - _VegetableAmbient.G;
+		NLMISC::clamp(G, 0, 255);
+		_VegetableDiffuse.G = G;
+		sint B = 255 - _VegetableAmbient.B;
+		NLMISC::clamp(B, 0, 255);
+		_VegetableDiffuse.B = B;
 	}
 	// vegetable lightDir
 	try

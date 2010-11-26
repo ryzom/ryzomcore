@@ -28,22 +28,23 @@
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CWaterPoolDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CWaterPoolDialog(QWidget *parent = 0);
 	~CWaterPoolDialog();
-	
+
 private Q_SLOTS:
 
 private:
-	
+
 	Ui::CWaterPoolDialog ui;
-	
+
 }; /* class CWaterPoolDialog */
 
 } /* namespace NLQT */

@@ -23,23 +23,24 @@
 // NeL includes
 #include "nel/3d/ps_mesh.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CConstraintMeshWidget::CConstraintMeshWidget(QWidget *parent )
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	connect(_ui.stageCheckBox_0, SIGNAL(clicked(bool)), this, SLOT(setForceStage0(bool)));
 	connect(_ui.stageCheckBox_1, SIGNAL(clicked(bool)), this, SLOT(setForceStage1(bool)));
 	connect(_ui.stageCheckBox_2, SIGNAL(clicked(bool)), this, SLOT(setForceStage2(bool)));
 	connect(_ui.stageCheckBox_3, SIGNAL(clicked(bool)), this, SLOT(setForceStage3(bool)));
 	connect(_ui.vertexColorLightingCheckBox, SIGNAL(clicked(bool)), this, SLOT(setForceVertexColorLighting(bool)));
-	
+
 	connect(_ui.texAnimTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setTexAnimType(int)));
 	connect(_ui.reinitCheckBox, SIGNAL(toggled(bool)), this, SLOT(setReinitWhenNewElementIsCreated(bool)));
 	connect(_ui.stageSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStage(int)));
-	
+
 	connectGlobalTexAnim();
 }
 
@@ -55,14 +56,14 @@ void CConstraintMeshWidget::connectGlobalTexAnim()
 	connect(_ui.transVSpeedDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.transUAccelDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.transVAccelDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
-	
+
 	connect(_ui.scaleUStartDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.scaleVStartDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.scaleUSpeedDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.scaleVSpeedDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.scaleUAccelDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.scaleVAccelDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
-	
+
 	connect(_ui.rotSpeedDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 	connect(_ui.rotAccelDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGlobalTexAnimValue()));
 }
@@ -97,7 +98,7 @@ void CConstraintMeshWidget::setCurrentConstraintMesh(CWorkspaceNode *ownerNode, 
 	_ui.stageCheckBox_2->setChecked(_CM->isStageModulationForced(2));
 	_ui.stageCheckBox_3->setChecked(_CM->isStageModulationForced(3));
 	_ui.vertexColorLightingCheckBox->setChecked(_CM->isVertexColorLightingForced());
-	
+
 	_ui.texAnimTypeComboBox->setCurrentIndex(_CM->getTexAnimType());
 	if (_CM->getTexAnimType() == NL3D::CPSConstraintMesh::GlobalAnim)
 	{
@@ -135,24 +136,24 @@ void CConstraintMeshWidget::setTexAnimType(int index)
 {
 	switch(index)
 	{
-		case 0: // no anim
-			_CM->setTexAnimType(NL3D::CPSConstraintMesh::NoAnim);
-			_ui.stageSpinBox->hide();
-			_ui.stageLabel->hide();
-			_ui.tabWidget->hide();
-			_ui.reinitCheckBox->hide();
+	case 0: // no anim
+		_CM->setTexAnimType(NL3D::CPSConstraintMesh::NoAnim);
+		_ui.stageSpinBox->hide();
+		_ui.stageLabel->hide();
+		_ui.tabWidget->hide();
+		_ui.reinitCheckBox->hide();
 		break;
-		case 1: // global anim
-			_CM->setTexAnimType(NL3D::CPSConstraintMesh::GlobalAnim);
-			_ui.stageSpinBox->show();
-			_ui.stageLabel->show();
-			_ui.tabWidget->show();
-			_ui.reinitCheckBox->show();
-			_ui.stageSpinBox->setValue(0);
-			_ui.reinitCheckBox->setChecked(_CM->isGlobalAnimTimeResetOnNewElementForced());
+	case 1: // global anim
+		_CM->setTexAnimType(NL3D::CPSConstraintMesh::GlobalAnim);
+		_ui.stageSpinBox->show();
+		_ui.stageLabel->show();
+		_ui.tabWidget->show();
+		_ui.reinitCheckBox->show();
+		_ui.stageSpinBox->setValue(0);
+		_ui.reinitCheckBox->setChecked(_CM->isGlobalAnimTimeResetOnNewElementForced());
 		break;
-		default:
-			nlstop;
+	default:
+		nlstop;
 		break;
 	}
 }
@@ -170,7 +171,7 @@ void CConstraintMeshWidget::setStage(int value)
 void CConstraintMeshWidget::updateGlobalTexAnim(int value)
 {
 	disconnectGlobalTexAnim();
-	
+
 	const NL3D::CPSConstraintMesh::CGlobalTexAnim &gta = _CM->getGlobalTexAnim(value);
 
 	_ui.transUStartDoubleSpinBox->setValue(gta.TransOffset.x);
@@ -179,41 +180,41 @@ void CConstraintMeshWidget::updateGlobalTexAnim(int value)
 	_ui.transVSpeedDoubleSpinBox->setValue(gta.TransSpeed.y);
 	_ui.transUAccelDoubleSpinBox->setValue(gta.TransAccel.x);
 	_ui.transVAccelDoubleSpinBox->setValue(gta.TransAccel.y);
-	
+
 	_ui.scaleUStartDoubleSpinBox->setValue(gta.ScaleStart.x);
 	_ui.scaleVStartDoubleSpinBox->setValue(gta.ScaleStart.y);
 	_ui.scaleUSpeedDoubleSpinBox->setValue(gta.ScaleSpeed.x);
 	_ui.scaleVSpeedDoubleSpinBox->setValue(gta.ScaleSpeed.y);
 	_ui.scaleUAccelDoubleSpinBox->setValue(gta.ScaleAccel.x);
 	_ui.scaleVAccelDoubleSpinBox->setValue(gta.ScaleAccel.y);
-	
+
 	_ui.rotSpeedDoubleSpinBox->setValue(gta.WRotSpeed);
 	_ui.rotAccelDoubleSpinBox->setValue(gta.WRotAccel);
-	
+
 	connectGlobalTexAnim();
 }
 
 void CConstraintMeshWidget::setGlobalTexAnimValue()
 {
 	NL3D::CPSConstraintMesh::CGlobalTexAnim gta;
-	
+
 	gta.TransOffset.x = _ui.transUStartDoubleSpinBox->value();
 	gta.TransOffset.y = _ui.transVStartDoubleSpinBox->value();
 	gta.TransSpeed.x = _ui.transUSpeedDoubleSpinBox->value();
 	gta.TransSpeed.y = _ui.transVSpeedDoubleSpinBox->value();
 	gta.TransAccel.x = _ui.transUAccelDoubleSpinBox->value();
 	gta.TransAccel.y = _ui.transVAccelDoubleSpinBox->value();
-	
+
 	gta.ScaleStart.x = _ui.scaleUStartDoubleSpinBox->value();
 	gta.ScaleStart.y = _ui.scaleVStartDoubleSpinBox->value();
 	gta.ScaleSpeed.x = _ui.scaleUSpeedDoubleSpinBox->value();
 	gta.ScaleSpeed.y = _ui.scaleVSpeedDoubleSpinBox->value();
 	gta.ScaleAccel.x = _ui.scaleUAccelDoubleSpinBox->value();
 	gta.ScaleAccel.y = _ui.scaleVAccelDoubleSpinBox->value();
-	
+
 	gta.WRotSpeed = _ui.rotSpeedDoubleSpinBox->value();
 	gta.WRotAccel = _ui.rotAccelDoubleSpinBox->value();
-	
+
 	_CM->setGlobalTexAnim(_ui.stageSpinBox->value(), gta);
 }
 

@@ -31,28 +31,29 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CSetupFog
 @brief Dialog to edit the fog in a 3D scene.
-*/ 
+*/
 class CSetupFog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CSetupFog(QWidget *parent = 0);
 	~CSetupFog();
-	
+
 private Q_SLOTS:
 	void apply();
 	void setColor();
 private:
 	NLMISC::CRGBA colorFog;
-	
+
 	Ui::CSetupFog ui;
-	
+
 }; /* class CSetupFog */
 
 } /* namespace NLQT */

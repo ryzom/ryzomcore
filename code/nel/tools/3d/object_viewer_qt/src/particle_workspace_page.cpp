@@ -24,19 +24,20 @@
 #include <QtGui/QWidget>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMessageBox>
- 
+
 // NeL includes
 
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CWorkspacePage::CWorkspacePage(CParticleTreeModel *treeModel, QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_treeModel = treeModel;
 
 	connect(_ui.newToolButton, SIGNAL(clicked()), this, SLOT(newWP()));
@@ -57,9 +58,9 @@ void CWorkspacePage::newWP()
 	//checkModifiedWorkSpace();
 	// ask name of the new workspace to create
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Create new pws file"),
-                            ".",
-                            tr("pws files (*.pws)"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("pws files (*.pws)"));
+	if (!fileName.isEmpty())
 	{
 		Modules::psEdit().createNewWorkspace(fileName.toStdString());
 		_treeModel->setupModelFromWorkSpace();
@@ -75,11 +76,11 @@ void CWorkspacePage::loadWP()
 {
 	//checkModifiedWorkSpace();
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("Particle Workspace file (*.pws);;"));
+					   tr("Open NeL data file"), ".",
+					   tr("Particle Workspace file (*.pws);;"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		Modules::psEdit().loadWorkspace(fileName.toStdString());
 		_treeModel->setupModelFromWorkSpace();
@@ -102,9 +103,9 @@ void CWorkspacePage::saveWP()
 void CWorkspacePage::saveAsWP()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as pws file"),
-                            ".",
-                            tr("pws files (*.pws)"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("pws files (*.pws)"));
+	if (!fileName.isEmpty())
 	{
 		Modules::psEdit().getParticleWorkspace()->setFileName(fileName.toStdString());
 		Modules::psEdit().saveWorkspaceStructure();
@@ -116,10 +117,10 @@ void CWorkspacePage::saveAsWP()
 void CWorkspacePage::insertPS()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open NeL data file"), ".",
-					tr("Particle System file (*.ps);;"));
+					   tr("Open NeL data file"), ".",
+					   tr("Particle System file (*.ps);;"));
 
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		// TODO: create method particle editor insertNewPS and multiple add
 		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toStdString()));
@@ -131,11 +132,11 @@ void CWorkspacePage::insertPS()
 			}
 			catch(NLMISC::EStream &e)
 			{
-				QMessageBox::critical(this, tr("NeL particle system editor"), 
-							QString(e.what()),
-							QMessageBox::Ok);
+				QMessageBox::critical(this, tr("NeL particle system editor"),
+									  QString(e.what()),
+									  QMessageBox::Ok);
 			}
-			if (!node->isLoaded()) 
+			if (!node->isLoaded())
 				Modules::psEdit().getParticleWorkspace()->removeNode(Modules::psEdit().getParticleWorkspace()->getNumNode() - 1);
 			else
 			{
@@ -149,17 +150,17 @@ void CWorkspacePage::insertPS()
 void CWorkspacePage::createPS()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Create new particle system file"),
-                            ".",
-                            tr("ps files (*.ps)"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("ps files (*.ps)"));
+	if (!fileName.isEmpty())
 	{
-	  
+
 		// TODO: create method particle editor createNewPS
 		if (Modules::psEdit().getParticleWorkspace()->containsFile(NLMISC::CFile::getFilename(fileName.toStdString())))
 		{
-			QMessageBox::critical(this, tr("NeL particle system editor"), 
-				   tr("Failed to create new particle system"),
-				   QMessageBox::Ok);
+			QMessageBox::critical(this, tr("NeL particle system editor"),
+								  tr("Failed to create new particle system"),
+								  QMessageBox::Ok);
 			return;
 		}
 		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toStdString()));
@@ -173,10 +174,10 @@ void CWorkspacePage::createPS()
 		}
 		catch (NLMISC::Exception &e)
 		{
-			QMessageBox::critical(this, tr("NeL particle system editor"), 
-				   QString(e.what()),
-				   QMessageBox::Ok);
-				   return;
+			QMessageBox::critical(this, tr("NeL particle system editor"),
+								  QString(e.what()),
+								  QMessageBox::Ok);
+			return;
 		}
 		QModelIndex index = _treeModel->index(0, 0);
 		_treeModel->insertRows(node, static_cast<CParticleTreeItem*>(index.internalPointer())->childCount(), index);
@@ -190,7 +191,7 @@ void CWorkspacePage::removeAllPS()
 	uint numNodes = Modules::psEdit().getParticleWorkspace()->getNumNode();
 	for(uint k = 0; k < numNodes; ++k)
 		Modules::psEdit().getParticleWorkspace()->removeNode((uint) 0);
-	
+
 	_treeModel->setupModelFromWorkSpace();
 }
 

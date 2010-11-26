@@ -36,7 +36,8 @@
 #include "hoverpoints.h"
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 /**
 @class CurveEditDialog
 @brief Dialogue editing graphics curve.
@@ -45,15 +46,15 @@ The choice of the interpolation algorithm.
 */
 class CurveEditDialog : public QDialog
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNode *ownerNode, QWidget *parent = 0);
 	~CurveEditDialog();
-	
+
 	/// the scheme being edited
 	NL3D::CPSFloatCurveFunctor  *_Curve;
-	
+
 private Q_SLOTS:
 	void setSmoothing(bool state);
 	void setDisplayInterpolation(bool state);
@@ -64,17 +65,17 @@ private Q_SLOTS:
 	void setLastTiFirst();
 	void setFirstToLast();
 	void setNumSamples(uint32 value);
-	
+
 protected:
 	void buildPoints();
-  
+
 	float _scale;
 	float _pos;
-	
+
 	CWorkspaceNode *_Node;
 
 	HoverPoints *_hoverPoints;
-	
+
 	Ui::CurveEditDialog _ui;
 }; /* CurveEditDialog */
 

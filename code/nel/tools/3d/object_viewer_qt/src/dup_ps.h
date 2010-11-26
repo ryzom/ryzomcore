@@ -23,8 +23,8 @@
 
 namespace NL3D
 {
-	class CParticleSystemProcess;
-	class CPSLocatedBindable;
+class CParticleSystemProcess;
+class CPSLocatedBindable;
 }
 
 
@@ -39,7 +39,7 @@ namespace NL3D
   * return NULL if the copy failed
   */
 NL3D::CParticleSystemProcess	*DupPSLocated(const NL3D::CParticleSystemProcess *in);
-	
+
 /** temp : duplicate a located bindable of a particle system
   * return NULL if the copy failed
   */

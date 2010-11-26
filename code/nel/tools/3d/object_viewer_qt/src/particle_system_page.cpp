@@ -38,25 +38,26 @@
 using namespace NL3D;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
 static void chooseGlobalUserParam(uint userParam, NL3D::CParticleSystem *ps, QWidget *parent)
 {
 	nlassert(ps);
 	bool ok;
 	QString text = QInputDialog::getText(parent, "Choose Global User Param",
-					      "User name:", QLineEdit::Normal,
-					      QString(ps->getGlobalValueName(userParam).c_str()), &ok);
-     
-	if (ok) 
-	  ps->bindGlobalValueToUserParam(text.toStdString(), userParam);
+										 "User name:", QLineEdit::Normal,
+										 QString(ps->getGlobalValueName(userParam).c_str()), &ok);
+
+	if (ok)
+		ps->bindGlobalValueToUserParam(text.toStdString(), userParam);
 }
 
 CParticleSystemPage::CParticleSystemPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.timeThresholdWidget->setRange(0.005f, 0.3f);
 	_ui.timeThresholdWidget->enableLowerBound(0, true);
 
@@ -81,11 +82,11 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 
 	_ui.maxViewDistWidget->setRange(0, 400.f);
 	_ui.maxViewDistWidget->enableLowerBound(0, true);
-	
+
 	_ui.lodRatioWidget->setRange(0, 1.f);
 	_ui.lodRatioWidget->enableLowerBound(0, true);
 	_ui.lodRatioWidget->enableUpperBound(1, true);
-	
+
 	_ui.colorWidget->setSchemeWrapper(&_GlobalColorWrapper);
 	_ui.colorWidget->enableMemoryScheme(false);
 	_ui.colorWidget->enableNbCycles(false);
@@ -93,27 +94,27 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	_ui.colorWidget->setEnabledConstantValue(false);
 	_ui.colorWidget->init();
 	_ui.colorWidget->hide();
-	
+
 	// Integration tab
 	connect(_ui.loadBalancingCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setLoadBalancing(bool)));
 	connect(_ui.integrationCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setIntegration(bool)));
 	connect(_ui.motionSlowDownCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setMotionSlowDown(bool)));
 	connect(_ui.lockPushButton ,SIGNAL(toggled(bool)), this, SLOT(setLock(bool)));
-	
+
 	connect(_ui.timeThresholdWidget ,SIGNAL(valueChanged(float)), this, SLOT(setTimeThreshold(float)));
 	connect(_ui.maxStepsWidget ,SIGNAL(valueChanged(uint32)), this, SLOT(setMaxSteps(uint32)));
-	
+
 	// User param tab
 	connect(_ui.globalPushButton_1 ,SIGNAL(clicked()), this, SLOT(setGloabal1()));
 	connect(_ui.globalPushButton_2 ,SIGNAL(clicked()), this, SLOT(setGloabal2()));
 	connect(_ui.globalPushButton_3 ,SIGNAL(clicked()), this, SLOT(setGloabal3()));
 	connect(_ui.globalPushButton_4 ,SIGNAL(clicked()), this, SLOT(setGloabal4()));
-	
+
 	connect(_ui.userParamWidget_1 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam1(float)));
 	connect(_ui.userParamWidget_2 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam2(float)));
 	connect(_ui.userParamWidget_3 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam3(float)));
 	connect(_ui.userParamWidget_4 ,SIGNAL(valueChanged(float)), this, SLOT(setUserParam4(float)));
-	
+
 	// BBox tab
 	connect(_ui.enablePBBCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setEnableBbox(bool)));
 	connect(_ui.autoCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setAutoBbox(bool)));
@@ -123,7 +124,7 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 	connect(_ui.xDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setXBbox(double)));
 	connect(_ui.yDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setYBbox(double)));
 	connect(_ui.zDoubleSpinBox ,SIGNAL(valueChanged(double)), this, SLOT(setZBbox(double)));
-	
+
 	// LOD param tab
 	connect(_ui.sharableCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setSharable(bool)));
 	connect(_ui.autoLODCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setAutoLOD(bool)));
@@ -131,11 +132,11 @@ CParticleSystemPage::CParticleSystemPage(QWidget *parent)
 
 	connect(_ui.maxViewDistWidget ,SIGNAL(valueChanged(float)), this, SLOT(setMaxViewDist(float)));
 	connect(_ui.lodRatioWidget ,SIGNAL(valueChanged(float)), this, SLOT(setLodRatio(float)));
-	
+
 	// Global color tab
 	connect(_ui.editGlobalColorCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setEditGlobalColor(bool)));
 	connect(_ui.globalLightCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setGlobalLight(bool)));
-	
+
 	// Life mgt param tab
 	connect(_ui.presetBehaviourComboBox ,SIGNAL(currentIndexChanged(int)), this, SLOT(setPresetBehaviour(int)));
 	connect(_ui.modelRemovedCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setModelRemoved(bool)));
@@ -158,7 +159,7 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 {
 	_Node = node;
 	enabledModifiedFlag = false;
-	
+
 	NL3D::TAnimationTime t;
 	uint32 max;
 	bool csd;
@@ -167,16 +168,16 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 
 	// Update param Time threshold.
 	_ui.timeThresholdWidget->setValue(t, false);
-	
+
 	// Update param Max steps.
 	_ui.maxStepsWidget->setValue(max, false);
-	
+
 	// Update param User Param
 	_ui.userParamWidget_1->setValue(_Node->getPSPointer()->getUserParam(0) , false);
 	_ui.userParamWidget_2->setValue(_Node->getPSPointer()->getUserParam(1) , false);
 	_ui.userParamWidget_3->setValue(_Node->getPSPointer()->getUserParam(2) , false);
 	_ui.userParamWidget_4->setValue(_Node->getPSPointer()->getUserParam(3) , false);
-	
+
 	// Update param Max view dist.
 	_ui.maxViewDistWidget->setValue(_Node->getPSPointer()->getMaxViewDist(), false);
 
@@ -187,7 +188,7 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 	_ui.integrationCheckBox->setChecked(_Node->getPSPointer()->isAccurateIntegrationEnabled());
 	_ui.loadBalancingCheckBox->setChecked(_Node->getPSPointer()->isLoadBalancingEnabled());
 	_ui.motionSlowDownCheckBox->setChecked(csd);
-	
+
 	// Precomputed Bbox
 	_ui.enablePBBCheckBox->setChecked(!_Node->getPSPointer()->getAutoComputeBBox());
 
@@ -198,9 +199,9 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 	_ui.colorWidget->setWorkspaceNode(_Node);
 	int bGlobalColor = _Node->getPSPointer()->getColorAttenuationScheme() != NULL ?  1 : 0;
 	_ui.editGlobalColorCheckBox->setChecked(bGlobalColor);
-	if (bGlobalColor) 
+	if (bGlobalColor)
 		_ui.colorWidget->updateUi();
-	
+
 	// Life mgt parameters
 	_ui.presetBehaviourComboBox->setCurrentIndex(_Node->getPSPointer()->getBehaviourType());
 	_ui.sharableCheckBox->setChecked(_Node->getPSPointer()->isSharingEnabled());
@@ -211,10 +212,10 @@ void CParticleSystemPage::setEditedParticleSystem(CWorkspaceNode *node)
 	_ui.noMaxNBStepsCheckBox->setChecked(_Node->getPSPointer()->getBypassMaxNumIntegrationSteps());
 
 	_ui.lifeTimeUpdateCheckBox->setChecked(klt);
-	_ui.dieComboBox->setCurrentIndex(_Node->getPSPointer()->getDestroyCondition()); 
+	_ui.dieComboBox->setCurrentIndex(_Node->getPSPointer()->getDestroyCondition());
 	_ui.animTypeComboBox->setCurrentIndex(_Node->getPSPointer()->getAnimType());
 	_ui.autoDelayCheckBox->setChecked(_Node->getPSPointer()->getAutoComputeDelayBeforeDeathConditionTest());
-	
+
 	enabledModifiedFlag = true;
 }
 
@@ -241,7 +242,7 @@ void CParticleSystemPage::updateDieOnEventParams()
 void CParticleSystemPage::updateLifeMgtPresets()
 {
 	bool bEnable =  _Node->getPSPointer()->getBehaviourType() == NL3D::CParticleSystem::UserBehaviour ? true :  false;
-	
+
 	_ui.modelRemovedCheckBox->setEnabled(bEnable);
 	_ui.psResourceCheckBox->setEnabled(bEnable);
 	_ui.lifeTimeUpdateCheckBox->setEnabled(bEnable);
@@ -269,8 +270,8 @@ void CParticleSystemPage::setLoadBalancing(bool state)
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(this, tr("Are you sure?"),
-					      tr("Load balancing on/off"),
-					      QMessageBox::Yes | QMessageBox::No);
+									  tr("Load balancing on/off"),
+									  QMessageBox::Yes | QMessageBox::No);
 		if (reply == QMessageBox::Yes)
 			_Node->getPSPointer()->enableLoadBalancing(false);
 		else
@@ -286,7 +287,7 @@ void CParticleSystemPage::setLoadBalancing(bool state)
 void CParticleSystemPage::setIntegration(bool state)
 {
 	// enable/disable accurate integration.
-	if (state != _Node->getPSPointer()->isAccurateIntegrationEnabled()) 
+	if (state != _Node->getPSPointer()->isAccurateIntegrationEnabled())
 	{
 		_Node->getPSPointer()->enableAccurateIntegration(state);
 		updateModifiedFlag();
@@ -310,7 +311,7 @@ void CParticleSystemPage::setMotionSlowDown(bool state)
 
 void CParticleSystemPage::setLock(bool checked)
 {
-	// Need frame delay dialog. 
+	// Need frame delay dialog.
 }
 
 void CParticleSystemPage::setGloabal1()
@@ -322,19 +323,19 @@ void CParticleSystemPage::setGloabal1()
 
 void CParticleSystemPage::setGloabal2()
 {
- 	chooseGlobalUserParam(1, _Node->getPSPointer(), this);
-	updateModifiedFlag(); 
+	chooseGlobalUserParam(1, _Node->getPSPointer(), this);
+	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setGloabal3()
 {
-  	chooseGlobalUserParam(2, _Node->getPSPointer(), this);
+	chooseGlobalUserParam(2, _Node->getPSPointer(), this);
 	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setGloabal4()
 {
-  	chooseGlobalUserParam(3, _Node->getPSPointer(), this);
+	chooseGlobalUserParam(3, _Node->getPSPointer(), this);
 	updateModifiedFlag();
 }
 
@@ -345,7 +346,7 @@ void CParticleSystemPage::setEnableBbox(bool state)
 		_Node->getPSPointer()->setAutoComputeBBox(!state);
 		updateModifiedFlag();
 	}
-	  
+
 	if (state)
 		updatePrecomputedBBoxParams();
 	else
@@ -366,7 +367,7 @@ void CParticleSystemPage::resetBbox()
 
 void CParticleSystemPage::incBbox()
 {
-  	NLMISC::CAABBox b;
+	NLMISC::CAABBox b;
 	_Node->getPSPointer()->computeBBox(b);
 	b.setHalfSize(1.1f * b.getHalfSize());
 	_Node->getPSPointer()->setPrecomputedBBox(b);
@@ -421,7 +422,7 @@ void CParticleSystemPage::setZBbox(double value)
 void CParticleSystemPage::setEditGlobalColor(bool state)
 {
 	bool bGlobalColor = _Node->getPSPointer()->getColorAttenuationScheme() != NULL ?  true : false;
-	if (state != bGlobalColor) 
+	if (state != bGlobalColor)
 	{
 		// if the system hasn't a global color scheme, add one.
 		if (_Node->getPSPointer()->getColorAttenuationScheme() == NULL)
@@ -444,7 +445,7 @@ void CParticleSystemPage::setPresetBehaviour(int index)
 	updateLifeMgtPresets();
 	if (index == _Node->getPSPointer()->getBehaviourType()) return;
 	if (index == NL3D::CParticleSystem::SpellFX ||
-		index == NL3D::CParticleSystem::SpawnedEnvironmentFX)
+			index == NL3D::CParticleSystem::SpawnedEnvironmentFX)
 	{
 		NL3D::CPSLocatedBindable *lb;
 		if (!_Node->getPSPointer()->canFinish(&lb))
@@ -455,13 +456,13 @@ void CParticleSystemPage::setPresetBehaviour(int index)
 			if (!lb)
 			{
 				errorMessage->showMessage(tr("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', "
-							     "and thus, should have a finite duration. Please remove that flag first."));
+											 "and thus, should have a finite duration. Please remove that flag first."));
 				errorMessage->exec();
 			}
 			else
 			{
 				errorMessage->showMessage(tr("The system must have a finite duration for this setting! Please check that the following object "
-							     "doesn't live forever or doesn't create a loop in the system :") + QString(lb->getName().c_str()));
+											 "doesn't live forever or doesn't create a loop in the system :") + QString(lb->getName().c_str()));
 				errorMessage->exec();
 			}
 			delete errorMessage;
@@ -476,7 +477,7 @@ void CParticleSystemPage::setPresetBehaviour(int index)
 void CParticleSystemPage::setSharable(bool state)
 {
 	if (state == _Node->getPSPointer()->isSharingEnabled()) return;
-	_Node->getPSPointer()->enableSharing(state);	
+	_Node->getPSPointer()->enableSharing(state);
 	updateModifiedFlag();
 }
 
@@ -505,7 +506,7 @@ void CParticleSystemPage::setModelRemoved(bool state)
 
 void CParticleSystemPage::setPSResource(bool state)
 {
-	if (state != _Node->getPSPointer()->doesDestroyWhenOutOfFrustum()) 
+	if (state != _Node->getPSPointer()->doesDestroyWhenOutOfFrustum())
 	{
 		_Node->getPSPointer()->destroyWhenOutOfFrustum(state);
 		updateModifiedFlag();
@@ -530,7 +531,7 @@ void CParticleSystemPage::setNoMaxNBSteps(bool state)
 	_ui.maxStepsWidget->setEnabled(!state);
 	if (state == _Node->getPSPointer()->getBypassMaxNumIntegrationSteps()) return;
 	if (state && !_Node->getPSPointer()->canFinish())
-	{		
+	{
 		QErrorMessage *errorMessage = new QErrorMessage();
 		errorMessage->setModal(true);
 		errorMessage->showMessage(tr("The system must have a finite duration for this setting! Please check that."));
@@ -562,7 +563,7 @@ void CParticleSystemPage::setAnimType(int index)
 void CParticleSystemPage::setDie(int index)
 {
 	if (index != _Node->getPSPointer()->getDestroyCondition())
-	{	
+	{
 		_Node->getPSPointer()->setDestroyCondition((NL3D::CParticleSystem::TDieCondition) index);
 		updateModifiedFlag();
 	}
@@ -578,7 +579,7 @@ void CParticleSystemPage::setAfterDelay(double value)
 	}
 }
 
-	
+
 void CParticleSystemPage::setTimeThreshold(float value)
 {
 	NL3D::TAnimationTime t;
@@ -586,7 +587,7 @@ void CParticleSystemPage::setTimeThreshold(float value)
 	bool csd;
 	bool klt;
 	_Node->getPSPointer()->getAccurateIntegrationParams(t, max, csd, klt);
-	_Node->getPSPointer()->setAccurateIntegrationParams(value, max, csd, klt);	
+	_Node->getPSPointer()->setAccurateIntegrationParams(value, max, csd, klt);
 	updateModifiedFlag();
 }
 
@@ -597,25 +598,25 @@ void CParticleSystemPage::setMaxSteps(uint32 value)
 	bool csd;
 	bool klt;
 	_Node->getPSPointer()->getAccurateIntegrationParams(t, max, csd, klt);
-	_Node->getPSPointer()->setAccurateIntegrationParams(t, value, csd, klt);	
+	_Node->getPSPointer()->setAccurateIntegrationParams(t, value, csd, klt);
 	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam1(float value)
 {
-	_Node->getPSPointer()->setUserParam(0, value); 
+	_Node->getPSPointer()->setUserParam(0, value);
 	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam2(float value)
 {
-	_Node->getPSPointer()->setUserParam(1, value); 
+	_Node->getPSPointer()->setUserParam(1, value);
 	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam3(float value)
 {
-	_Node->getPSPointer()->setUserParam(2, value); 
+	_Node->getPSPointer()->setUserParam(2, value);
 	updateModifiedFlag();
 }
 

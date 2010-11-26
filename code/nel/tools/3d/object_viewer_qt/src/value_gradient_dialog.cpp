@@ -31,20 +31,21 @@
 // Projects include
 #include "particle_texture_widget.h"
 
-namespace NLQT {
-	
-CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode, 
-				IValueGradientClient *clientInterface,
-				bool destroyClientInterface,
-				bool canTuneNbStages,
-				uint minSize,
-				QWidget *parent)
+namespace NLQT
+{
+
+CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
+								 IValueGradientClient *clientInterface,
+								 bool destroyClientInterface,
+								 bool canTuneNbStages,
+								 uint minSize,
+								 QWidget *parent)
 	: QDialog(parent),
-	_MinSize(minSize),
-	_CanTuneNbStages(canTuneNbStages),
-	_ClientInterface(clientInterface),
-	_DestroyClientInterface(destroyClientInterface),
-	_Node(ownerNode)
+	  _MinSize(minSize),
+	  _CanTuneNbStages(canTuneNbStages),
+	  _ClientInterface(clientInterface),
+	  _DestroyClientInterface(destroyClientInterface),
+	  _Node(ownerNode)
 {
 	nlassert(_ClientInterface);
 
@@ -122,8 +123,8 @@ CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
 	_gridLayout->addWidget(editWidget, 4, 1, 1, 2);
 
 	setWindowTitle(_ClientInterface->getTitleDialog());
-        _label->setText(tr("Num samples:"));
-	
+	_label->setText(tr("Num samples:"));
+
 	if (canTuneNbStages)
 	{
 		_NbStepWrapper.OwnerNode = _Node;
@@ -138,14 +139,14 @@ CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
 		_nbStepWidget->hide();
 		_label->hide();
 	}
-	
+
 	connect(_addPushButton, SIGNAL(clicked()), this, SLOT(addValue()));
 	connect(_removePushButton, SIGNAL(clicked()), this, SLOT(removeValue()));
 	connect(_upPushButton, SIGNAL(clicked()), this, SLOT(valueUp()));
 	connect(_downPushButton, SIGNAL(clicked()), this, SLOT(valueDown()));
 	connect(_listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(changeCurrentRow(int)));
 	connect(clientInterface, SIGNAL(itemChanged()), this, SLOT(updateItem()));
-	
+
 	_Size = _ClientInterface->getSchemeSize();
 	for (uint k = 0; k < _Size; ++k)
 	{
@@ -170,9 +171,9 @@ void CGradientDialog::addValue()
 	QListWidgetItem *item = new QListWidgetItem();
 	_ClientInterface->displayValue(_Size - 1, item);
 	_listWidget->addItem(item);
-	
+
 	_removePushButton->setEnabled(true);
-	
+
 	_listWidget->setCurrentRow(_Size - 1);
 }
 
@@ -193,28 +194,28 @@ void CGradientDialog::removeValue()
 	nlassert(_ClientInterface);
 
 	int oldIndex = _listWidget->currentRow();
-	if (oldIndex == -1) 
-	  return;
+	if (oldIndex == -1)
+		return;
 
 	if (uint(oldIndex) == 0)
 		_listWidget->setCurrentRow(oldIndex + 1);
 	else
 		_listWidget->setCurrentRow(oldIndex - 1);
 
-	if (!_ClientInterface->modifyGradient(IValueGradientClient::Delete, oldIndex)) 
+	if (!_ClientInterface->modifyGradient(IValueGradientClient::Delete, oldIndex))
 	{
 		_listWidget->setCurrentRow(oldIndex);
 		return;
 	}
 
 	--_Size;
-	
+
 	if (_Size <= _MinSize)
 		_removePushButton->setEnabled(false);
-	
+
 	QListWidgetItem *removeItem = _listWidget->takeItem(oldIndex);
-	if (!removeItem) 
-	  delete removeItem;
+	if (!removeItem)
+		delete removeItem;
 }
 
 void CGradientDialog::valueDown()
@@ -222,10 +223,10 @@ void CGradientDialog::valueDown()
 	nlassert(_ClientInterface);
 	int currentRow = _listWidget->currentRow();
 	if (!((currentRow == _listWidget->count()-1) || (currentRow == -1)))
-	{  
+	{
 		if (!_ClientInterface->modifyGradient(IValueGradientClient::Down, currentRow)) return;
 		QListWidgetItem *item = _listWidget->takeItem(currentRow);
-		_listWidget->insertItem(++currentRow, item);  
+		_listWidget->insertItem(++currentRow, item);
 		_listWidget->setCurrentRow(currentRow);
 	}
 	_listWidget->setCurrentRow(currentRow);
@@ -236,10 +237,10 @@ void CGradientDialog::valueUp()
 	nlassert(_ClientInterface);
 	int currentRow = _listWidget->currentRow();
 	if (!((currentRow == 0) || (currentRow == -1)))
-	{  
+	{
 		if (!_ClientInterface->modifyGradient(IValueGradientClient::Up, currentRow)) return;
 		QListWidgetItem *item = _listWidget->takeItem(currentRow);
-		_listWidget->insertItem(--currentRow, item);  
+		_listWidget->insertItem(--currentRow, item);
 		_listWidget->setCurrentRow(currentRow);
 	}
 	_listWidget->setCurrentRow(currentRow);
@@ -258,7 +259,7 @@ void CGradientDialog::updateItem()
 QWidget *CTextureGradientInterface::createDialog(QWidget *parent)
 {
 	editWidget = new CParticleTextureWidget();
-	
+
 	_TextureWrapper.P = TP;
 	_TextureWrapper.Index = 0;
 	_TextureWrapper.OwnerNode = Node;
@@ -274,7 +275,7 @@ bool CTextureGradientInterface::modifyGradient(TAction action, uint index)
 
 	NLMISC::CSmartPtr<NL3D::ITexture> tex = TP->getTextureGroup()->getTexture(index);
 	std::string texName = (static_cast<NL3D::CTextureFile *>(tex.getPtr()))->getFileName().c_str();
-	if (texName.empty()) 
+	if (texName.empty())
 		return false;
 
 	std::vector< NLMISC::CSmartPtr<NL3D::ITexture> > textureList;
@@ -283,26 +284,26 @@ bool CTextureGradientInterface::modifyGradient(TAction action, uint index)
 
 	switch(action)
 	{
-		case IValueGradientClient::Add:
-		{
-			// we duplicate the last texture, so that they have the same size
-			NLMISC::CSmartPtr<NL3D::ITexture> lastTex = textureList[textureList.size() - 1];
-			textureList.push_back(lastTex);
-		}
+	case IValueGradientClient::Add:
+	{
+		// we duplicate the last texture, so that they have the same size
+		NLMISC::CSmartPtr<NL3D::ITexture> lastTex = textureList[textureList.size() - 1];
+		textureList.push_back(lastTex);
+	}
+	break;
+	case IValueGradientClient::Insert:
+	{
+		// we duplicate the current texture, so that they have the same size
+		NLMISC::CSmartPtr<NL3D::ITexture> tex = textureList[index];
+		textureList.insert(textureList.begin() + index, tex);
+	}
+	break;
+	case IValueGradientClient::Delete:
+		textureList.erase(textureList.begin() + index);
 		break;
-		case IValueGradientClient::Insert:
-		{
-			// we duplicate the current texture, so that they have the same size
-			NLMISC::CSmartPtr<NL3D::ITexture> tex = textureList[index];
-			textureList.insert(textureList.begin() + index, tex);
-		}
-		break;
-		case IValueGradientClient::Delete:
-			textureList.erase(textureList.begin() + index);
-		break;
-		case IValueGradientClient::Up:
+	case IValueGradientClient::Up:
 		return false;
-		case IValueGradientClient::Down:
+	case IValueGradientClient::Down:
 		return false;
 	}
 
@@ -314,7 +315,7 @@ void CTextureGradientInterface::displayValue(uint index, QListWidgetItem *item)
 {
 	QPixmap pixmap;
 	NLMISC::CSmartPtr<NL3D::ITexture> tex = TP->getTextureGroup()->getTexture(index);
-	
+
 	if (dynamic_cast<NL3D::CTextureFile *>(tex.getPtr()))
 	{
 		std::string texName = (static_cast<NL3D::CTextureFile *>(tex.getPtr()))->getFileName().c_str();

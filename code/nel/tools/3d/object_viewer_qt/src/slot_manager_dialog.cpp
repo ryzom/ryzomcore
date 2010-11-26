@@ -28,11 +28,12 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSlotGroupBox::CSlotGroupBox(QWidget *parent)
-	    : QGroupBox(parent),
-		_animName("empty"), _skelName("empty"), _numSlot(0)
+	: QGroupBox(parent),
+	  _animName("empty"), _skelName("empty"), _numSlot(0)
 {
 	_ui.setupUi(this);
 
@@ -52,7 +53,7 @@ CSlotGroupBox::CSlotGroupBox(QWidget *parent)
 	connect(_ui.startFrameSpinBox, SIGNAL(valueChanged(int)), this, SLOT(saveSlotInfo()));
 	connect(_ui.enableCheckBox, SIGNAL(clicked()), this, SLOT(saveSlotInfo()));
 }
-	
+
 CSlotGroupBox::~CSlotGroupBox()
 {
 }
@@ -60,7 +61,7 @@ CSlotGroupBox::~CSlotGroupBox()
 void CSlotGroupBox::updateUi()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
+	if (curObj.empty())
 	{
 		resetUi();
 		return;
@@ -75,16 +76,16 @@ void CSlotGroupBox::updateUi()
 	_ui.endFrameSpinBox->setValue(int(slotInfo.EndTime * Modules::mainWin().getFrameRate()));
 	_ui.speedDoubleSpinBox->setValue(slotInfo.SpeedFactor);
 	_ui.smoothSpinBox->setValue(int(slotInfo.Smoothness));
-	
-	if (slotInfo.SkeletonInverted) 
-	  _ui.invSkelWeightCheckBox->setCheckState(Qt::Checked); 
-	else 
-	  _ui.invSkelWeightCheckBox->setCheckState(Qt::Unchecked); 
 
-	if (slotInfo.Enable) 
-	  _ui.enableCheckBox->setCheckState(Qt::Checked); 
-	else 
-	  _ui.enableCheckBox->setCheckState(Qt::Unchecked); 
+	if (slotInfo.SkeletonInverted)
+		_ui.invSkelWeightCheckBox->setCheckState(Qt::Checked);
+	else
+		_ui.invSkelWeightCheckBox->setCheckState(Qt::Unchecked);
+
+	if (slotInfo.Enable)
+		_ui.enableCheckBox->setCheckState(Qt::Checked);
+	else
+		_ui.enableCheckBox->setCheckState(Qt::Unchecked);
 
 	switch (slotInfo.ClampMode)
 	{
@@ -98,7 +99,7 @@ void CSlotGroupBox::updateUi()
 		_ui.disableRadioButton->setChecked(true);
 		break;
 	}
-	
+
 	_animName = QString(slotInfo.Animation.c_str());
 	_skelName = QString(slotInfo.Skeleton.c_str());
 	QString title = tr("Slot %1 : ").arg(_numSlot) + _animName + " : " + _skelName;
@@ -117,27 +118,27 @@ void CSlotGroupBox::saveSlotInfo()
 	slotInfo.SpeedFactor = _ui.speedDoubleSpinBox->value();
 	slotInfo.StartBlend = _ui.startBlendSpinBox->value();
 	slotInfo.StartTime = float(_ui.startFrameSpinBox->value()) / Modules::mainWin().getFrameRate();
-	
-	if (_ui.invSkelWeightCheckBox->checkState() == Qt::Checked) 
-	  slotInfo.SkeletonInverted = true;
-	else 
-	  slotInfo.SkeletonInverted = false;
-	
-	if (_ui.enableCheckBox->checkState() == Qt::Checked) 
-	  slotInfo.Enable = true;
-	else 
-	  slotInfo.Enable = false;
-	
-	if (_ui.clampRadioButton->isChecked()) 
-	  slotInfo.ClampMode = 0;
-	else if (_ui.repeatRadioButton->isChecked()) 
-	  slotInfo.ClampMode = 1;
-	else 
-	  slotInfo.ClampMode = 2;
-	
+
+	if (_ui.invSkelWeightCheckBox->checkState() == Qt::Checked)
+		slotInfo.SkeletonInverted = true;
+	else
+		slotInfo.SkeletonInverted = false;
+
+	if (_ui.enableCheckBox->checkState() == Qt::Checked)
+		slotInfo.Enable = true;
+	else
+		slotInfo.Enable = false;
+
+	if (_ui.clampRadioButton->isChecked())
+		slotInfo.ClampMode = 0;
+	else if (_ui.repeatRadioButton->isChecked())
+		slotInfo.ClampMode = 1;
+	else
+		slotInfo.ClampMode = 2;
+
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
-	  return;
+	if (curObj.empty())
+		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
 	entity.setSlotInfo(_numSlot, slotInfo);
 }
@@ -152,30 +153,30 @@ void CSlotGroupBox::resetUi()
 	_ui.speedDoubleSpinBox->setValue(0);
 	_ui.smoothSpinBox->setValue(0);
 	_ui.disableRadioButton->setChecked(true);
-	_ui.invSkelWeightCheckBox->setCheckState(Qt::Unchecked); 
-	_ui.enableCheckBox->setCheckState(Qt::Unchecked); 
+	_ui.invSkelWeightCheckBox->setCheckState(Qt::Unchecked);
+	_ui.enableCheckBox->setCheckState(Qt::Unchecked);
 }
 
 void CSlotGroupBox::selectAnim()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
-	  return;
+	if (curObj.empty())
+		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
 	std::vector<std::string>& animationList = entity.getAnimationList();
-	
+
 	if (animationList.empty()) return;
-	
+
 	QStringList items;
 	items << tr("empty");
-	for(size_t i = 0; i < animationList.size(); ++i) 
-	  items << QString(animationList[i].c_str());
+	for(size_t i = 0; i < animationList.size(); ++i)
+		items << QString(animationList[i].c_str());
 
 	bool ok;
 	QString item = QInputDialog::getItem(this, tr("Select your anim"),
-                                          tr("Animation:"), items, 0, false, &ok);
+										 tr("Animation:"), items, 0, false, &ok);
 	if (ok)
-	{ 
+	{
 		_animName = item;
 		QString title = tr("Slot %1 : ").arg(_numSlot) + _animName + " : " + _skelName;
 		this->setTitle(title);
@@ -187,23 +188,23 @@ void CSlotGroupBox::selectAnim()
 void CSlotGroupBox::selectSkel()
 {
 	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty()) 
-	  return;
+	if (curObj.empty())
+		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
 	std::vector<std::string>& swtList = entity.getSWTList();
-	
+
 	if (swtList.empty()) return;
-	
+
 	QStringList items;
 	items << tr("empty");
-	for(size_t i = 0; i < swtList.size(); ++i) 
-	  items << QString(swtList[i].c_str());
+	for(size_t i = 0; i < swtList.size(); ++i)
+		items << QString(swtList[i].c_str());
 
-	 bool ok;
-	 QString item = QInputDialog::getItem(this, tr("Select your skel"),
-                                          tr("Skeleton weight template:"), items, 0, false, &ok);
+	bool ok;
+	QString item = QInputDialog::getItem(this, tr("Select your skel"),
+										 tr("Skeleton weight template:"), items, 0, false, &ok);
 	if (ok)
-	{ 
+	{
 		_skelName = item;
 		QString title = tr("Slot %1 : ").arg(_numSlot) + _animName + " : " + _skelName;
 		this->setTitle(title);
@@ -219,32 +220,32 @@ void CSlotGroupBox::alignAblend()
 }
 
 CSlotManagerDialog::CSlotManagerDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	setObjectName(QString::fromUtf8("CSlotManagerDialog"));
 	QIcon icon;
-        icon.addFile(QString::fromUtf8(":/images/mixer.png"), QSize(), QIcon::Normal, QIcon::Off);
-        setWindowIcon(icon);
+	icon.addFile(QString::fromUtf8(":/images/mixer.png"), QSize(), QIcon::Normal, QIcon::Off);
+	setWindowIcon(icon);
 	setMinimumSize(QSize(310, 100));
 	_dockWidgetContents = new QWidget();
 	_gridLayout = new QGridLayout(_dockWidgetContents);
 	_scrollArea = new QScrollArea(_dockWidgetContents);
 	_scrollArea->setWidgetResizable(true);
 	_scrollAreaWidgetContents = new QWidget();
-        
+
 	_slotGridLayout = new QGridLayout(_scrollAreaWidgetContents);
-        
+
 	_tabWidget = new QTabWidget(_scrollAreaWidgetContents);
 	_tabWidget->setObjectName(QString::fromUtf8("_tabWidget"));
 	_tabWidget->setTabPosition(QTabWidget::East);
-		
+
 	for (int i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
 	{
 		_tabs[i] = new QWidget();
 		_tabs[i]->setObjectName(QString::fromUtf8("_tab%1").arg(i));
 		_gridLayouts[i] = new QGridLayout(_tabs[i]);
 		_gridLayouts[i]->setObjectName(QString::fromUtf8("_gridLayouts%1").arg(i));
-		
+
 		_slotGroupBoxs[i] = new CSlotGroupBox(_tabs[i]);
 		_slotGroupBoxs[i]->setTitle(tr("Slot %1 : empty : empty").arg(i));
 		_slotGroupBoxs[i]->_numSlot = i;
@@ -256,15 +257,15 @@ CSlotManagerDialog::CSlotManagerDialog(QWidget *parent)
 		_tabWidget->addTab(_tabs[i], QString());
 		_tabWidget->setTabText(i, tr("Slot %1").arg(i));
 
-	
+
 	}
-	
+
 	_slotGridLayout->addWidget(_tabWidget);
 
 	_scrollArea->setWidget(_scrollAreaWidgetContents);
-	
+
 	_gridLayout->addWidget(_scrollArea, 0, 0, 1, 1);
-	
+
 	setWidget(_dockWidgetContents);
 	setWindowTitle(tr("Slot manager"));
 }

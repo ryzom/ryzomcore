@@ -31,15 +31,16 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
-CParticleEditor::CParticleEditor(void): 
-					_ActiveNode(NULL), _State(State::Stopped), _Speed(1.0f),
-					_AutoRepeat(false), _DisplayBBox(false),
-					_DisplayHelpers(false), _AutoUpdateBBox(false),
-					_EmptyBBox(true), _PW(NULL), 
-					_Driver(NULL), _Scene(NULL), 
-					_FontManager(NULL), _FontGen(NULL)
+CParticleEditor::CParticleEditor(void):
+	_ActiveNode(NULL), _State(State::Stopped), _Speed(1.0f),
+	_AutoRepeat(false), _DisplayBBox(false),
+	_DisplayHelpers(false), _AutoUpdateBBox(false),
+	_EmptyBBox(true), _PW(NULL),
+	_Driver(NULL), _Scene(NULL),
+	_FontManager(NULL), _FontGen(NULL)
 {
 }
 
@@ -48,10 +49,10 @@ CParticleEditor::~CParticleEditor(void)
 }
 
 void CParticleEditor::init()
-{	
+{
 	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver());
 	_Driver = driver->getDriver();
-	
+
 	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser*>(Modules::objView().getScene());
 	_Scene = &scene->getScene();
 
@@ -96,7 +97,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	// Add to the path
 	std::auto_ptr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
-	
+
 	// save empty workspace
 	try
 	{
@@ -106,8 +107,8 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	{
 		nlerror(e.what());
 		return;
-	}	
-	
+	}
+
 	// try to load each ps
 	CWorkspaceNode *firstLoadedNode = NULL;
 	TPWNodeItr itr = newPW->getNodeList().begin();
@@ -188,27 +189,27 @@ void CParticleEditor::start()
 	{
 	case State::Stopped:
 		if (_ActiveNode)
-		{	
+		{
 			if (checkHasLoop(*_ActiveNode)) return;
 			play(*_ActiveNode);
 			nlassert(_PlayingNodes.empty());
 			_PlayingNodes.push_back(_ActiveNode);
 		}
-	break;
+		break;
 	case State::RunningSingle:
 		// no-op
-	return;
-	break;
+		return;
+		break;
 	case State::RunningMultiple:
 		stop();
 		start();
-	break;
+		break;
 	case State::PausedSingle:
 		if (_ActiveNode)
 		{
 			unpause(*_ActiveNode);
 		}
-	break;
+		break;
 	case State::PausedMultiple:
 		for(uint k = 0; k < _PlayingNodes.size(); ++k)
 		{
@@ -219,10 +220,10 @@ void CParticleEditor::start()
 		}
 		stop();
 		start();
-	break;
+		break;
 	default:
 		nlassert(0);
-	break;
+		break;
 	}
 	_State = State::RunningSingle;
 }
@@ -232,54 +233,54 @@ void CParticleEditor::startMultiple()
 	switch(_State)
 	{
 	case State::Stopped:
+	{
+		if (!_PW) return;
+		nlassert(_PlayingNodes.empty());
+		TPWNodeItr itr = _PW->getNodeList().begin();
+		while(itr != _PW->getNodeList().end())
 		{
-			if (!_PW) return;
-			nlassert(_PlayingNodes.empty());
-			TPWNodeItr itr = _PW->getNodeList().begin();
-			while(itr != _PW->getNodeList().end())
-			{
-				CWorkspaceNode *node = (*itr);
-				if (node->isLoaded())
-					if (checkHasLoop(*node)) return;
-				itr++;
-			}
-			
-			itr = _PW->getNodeList().begin();
-			while(itr != _PW->getNodeList().end())
-			{
-				CWorkspaceNode *node = (*itr);
-				if (node->isLoaded())
-				{
-					// really start the node only if there's no trigger anim
-					if (node->getTriggerAnim().empty())
-						play(*node);
+			CWorkspaceNode *node = (*itr);
+			if (node->isLoaded())
+				if (checkHasLoop(*node)) return;
+			itr++;
+		}
 
-					_PlayingNodes.push_back(node);
-				}
-				itr++;
+		itr = _PW->getNodeList().begin();
+		while(itr != _PW->getNodeList().end())
+		{
+			CWorkspaceNode *node = (*itr);
+			if (node->isLoaded())
+			{
+				// really start the node only if there's no trigger anim
+				if (node->getTriggerAnim().empty())
+					play(*node);
+
+				_PlayingNodes.push_back(node);
+			}
+			itr++;
+		}
+	}
+	break;
+	case State::PausedSingle:
+	case State::RunningSingle:
+		stop();
+		startMultiple();
+		break;
+	case State::RunningMultiple:
+		// no-op
+		return;
+		break;
+	case State::PausedMultiple:
+		for(uint k = 0; k < _PlayingNodes.size(); ++k)
+		{
+			if (_PlayingNodes[k])
+			{
+				unpause(*_PlayingNodes[k]);
 			}
 		}
 		break;
-		case State::PausedSingle:
-		case State::RunningSingle:
-			stop();
-			startMultiple();
-		break;
-		case State::RunningMultiple:
-			// no-op
-			return;
-		break;
-		case State::PausedMultiple:
-			for(uint k = 0; k < _PlayingNodes.size(); ++k)
-			{
-				if (_PlayingNodes[k])
-				{
-					unpause(*_PlayingNodes[k]);
-				}
-			}
-		break;
-		default:
-			nlassert(0);
+	default:
+		nlassert(0);
 		break;
 	}
 	_State = State::RunningMultiple;
@@ -290,31 +291,31 @@ void CParticleEditor::pause()
 	switch(_State)
 	{
 	case State::Stopped:
-			// no-op
-			return;
-		case State::RunningSingle:
-			if (_ActiveNode)
-			{
-				pause(*_ActiveNode);
-			}
-			_State = State::PausedSingle;
+		// no-op
+		return;
+	case State::RunningSingle:
+		if (_ActiveNode)
+		{
+			pause(*_ActiveNode);
+		}
+		_State = State::PausedSingle;
 		break;
-		case State::RunningMultiple:
-			for(uint k = 0; k < _PlayingNodes.size(); ++k)
+	case State::RunningMultiple:
+		for(uint k = 0; k < _PlayingNodes.size(); ++k)
+		{
+			if (_PlayingNodes[k])
 			{
-				if (_PlayingNodes[k])
-				{
-					pause(*_PlayingNodes[k]);
-				}
+				pause(*_PlayingNodes[k]);
 			}
-			_State = State::PausedMultiple;
+		}
+		_State = State::PausedMultiple;
 		break;
-		case State::PausedSingle:
-		case State::PausedMultiple:
-			// no-op
-			return;
-		default:
-			nlassert(0);
+	case State::PausedSingle:
+	case State::PausedMultiple:
+		// no-op
+		return;
+	default:
+		nlassert(0);
 		break;
 	}
 }
@@ -323,28 +324,28 @@ void CParticleEditor::stop()
 {
 	switch(_State)
 	{
-		case State::Stopped:
-			// no-op
-			return;
-		case State::RunningSingle:
-		case State::RunningMultiple:
-		case State::PausedSingle:
-		case State::PausedMultiple:
-			for(uint k = 0; k < _PlayingNodes.size(); ++k)
+	case State::Stopped:
+		// no-op
+		return;
+	case State::RunningSingle:
+	case State::RunningMultiple:
+	case State::PausedSingle:
+	case State::PausedMultiple:
+		for(uint k = 0; k < _PlayingNodes.size(); ++k)
+		{
+			if (_PlayingNodes[k])
 			{
-				if (_PlayingNodes[k])
-				{
-					stop(*_PlayingNodes[k]);
-				}
+				stop(*_PlayingNodes[k]);
 			}
-			_PlayingNodes.clear();
+		}
+		_PlayingNodes.clear();
 		break;
-		default:
-			nlassert(0);
+	default:
+		nlassert(0);
 		break;
 	}
 	_State = State::Stopped;
-}	
+}
 
 void CParticleEditor::update()
 {
@@ -352,7 +353,7 @@ void CParticleEditor::update()
 	if (_PW == NULL) return;
 
 	NL3D::CParticleSystem *currPS = _ActiveNode->getPSPointer();
-	
+
 	// compute BBox
 	if (_DisplayBBox)
 	{
@@ -372,7 +373,7 @@ void CParticleEditor::update()
 			currPS->setPrecomputedBBox(_CurrBBox);
 		}
 	}
-		
+
 	// auto repeat feature
 	if (_AutoRepeat)
 	{
@@ -394,7 +395,7 @@ void CParticleEditor::update()
 							allFXFinished = false;
 							break;
 						}
-						else 
+						else
 						{
 							if (node->getPSPointer()->getCurrNumParticles() != 0)
 							{
@@ -456,7 +457,7 @@ void CParticleEditor::restartAllFX()
 		}
 	}
 	else
-	{	
+	{
 		for(uint k = 0; k < _PlayingNodes.size(); ++k)
 		{
 			if (_PlayingNodes[k])
@@ -484,14 +485,14 @@ void CParticleEditor::setSpeed(float value)
 	}
 }
 
-void CParticleEditor::setDisplayBBox(bool enable) 
-{ 
+void CParticleEditor::setDisplayBBox(bool enable)
+{
 	_DisplayBBox = enable;
 	NL3D::CParticleSystem::forceDisplayBBox(enable);
 }
 
 void CParticleEditor::enableAutoCount(bool enable)
-{	
+{
 	if (!_ActiveNode) return;
 	if (enable == _ActiveNode->getPSPointer()->getAutoCountFlag()) return;
 	_ActiveNode->getPSPointer()->setAutoCountFlag(enable);
@@ -517,7 +518,7 @@ bool CParticleEditor::checkHasLoop(CWorkspaceNode &node)
 {
 	nlassert(node.isLoaded());
 	if (!node.getPSPointer()->hasLoop()) return false;
-	return true;	
+	return true;
 }
 
 void CParticleEditor::play(CWorkspaceNode &node)
@@ -527,7 +528,7 @@ void CParticleEditor::play(CWorkspaceNode &node)
 	nlassert(node.isLoaded());
 	// if node not started, start it
 	node.memorizeState();
-	// enable the system to take the right date from the scene	
+	// enable the system to take the right date from the scene
 	node.getPSModel()->enableAutoGetEllapsedTime(true);
 	node.getPSPointer()->setSystemDate(0.f);
 	node.getPSPointer()->reactivateSound();
@@ -540,8 +541,8 @@ void CParticleEditor::play(CWorkspaceNode &node)
 			node.getPSPointer()->matchArraySize();
 		}
 		resetAutoCount(&node, false);
-	}		
-	
+	}
+
 	// Set speed playback particle system
 	node.getPSModel()->setEllapsedTimeRatio(_Speed);
 }
@@ -571,5 +572,5 @@ void CParticleEditor::stop(CWorkspaceNode &node)
 	node.getPSModel()->activateEmitters(true);
 	node.getPSPointer()->stopSound();
 }
-	
+
 } /* namespace NLQT */

@@ -33,12 +33,13 @@
 #include "edit_range_widget.h"
 #include "ps_wrapper.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CSpinnerDialog : public  QDialog
 {
-     Q_OBJECT
-     
+	Q_OBJECT
+
 public:
 	CSpinnerDialog(NL3D::CPSBasisSpinner *sf, CWorkspaceNode *ownerNode, QWidget *parent = 0);
 	~CSpinnerDialog();
@@ -48,7 +49,10 @@ private Q_SLOTS:
 	void setAxis(const NLMISC::CVector &axis);
 
 protected:
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
 
 	QLabel *_nbSamplesLabel;
 	QVBoxLayout *_verticalLayout;

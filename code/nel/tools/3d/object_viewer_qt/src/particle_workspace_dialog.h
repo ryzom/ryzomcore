@@ -34,7 +34,8 @@
 #include "particle_tree_model.h"
 #include "particle_node.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class ParticleWorkspaceDialog
@@ -46,18 +47,21 @@ class CParticleWorkspaceDialog: public QDockWidget
 public:
 	CParticleWorkspaceDialog(QWidget *parent = 0);
 	~CParticleWorkspaceDialog();
-	
+
 	void touchPSState(CParticleTreeItem *item);
-	CPropertyDialog *getPropertyDialog() const { return _PropertyDialog; }
+	CPropertyDialog *getPropertyDialog() const
+	{
+		return _PropertyDialog;
+	}
 
 Q_SIGNALS:
 	/// Emits change active particle system node.
 	void changeActiveNode();
-  
+
 private Q_SLOTS:
 	void clickedItem(const QModelIndex & index);
 	void customContextMenu();
-	
+
 	void setActiveNode();
 	void savePS();
 	void saveAsPS();
@@ -71,32 +75,32 @@ private Q_SLOTS:
 	void bindNewLocatedBindable(int id);
 
 	void forceZBias();
-	
+
 	void copyLocated();
 	void copyBindable();
 	void pasteBindable();
 	void deleteItem();
-	
+
 	void setInstanciate();
 	void setAllLOD();
 	void setLOD1();
 	void setLOD2();
-	
+
 	void setExternID();
 
 	void setNewState();
-	
+
 	void updateTreeView();
-	
+
 private:
 	void buildMenu(QMenu *menu);
 	NL3D::CPSLocated *createLocated(NL3D::CParticleSystem *ps);
-	
+
 	CPropertyDialog *_PropertyDialog;
 	CParticleTreeModel *_treeModel;
-	
+
 	QSignalMapper *_signalMapper;
-	
+
 	QAction *_setActivePSAction;
 	QAction *_savePSAction;
 	QAction *_saveAsPSAction;
@@ -107,23 +111,23 @@ private:
 	QAction *_pasteLocatedAction;
 	QAction *_bindNewLocatedBindable[32];
 	QAction *_forceZBiasAction;
-	
+
 	QAction *_instanciateAction;
 	QAction *_copyLocatedAction;
 	QAction *_copyBindableAction;
 	QAction *_pasteBindableAction;
 	QAction *_deleteAction;
-	
+
 	QAction *_allLODAction;
 	QAction *_lod1Action;
 	QAction *_lod2Action;
 	QAction *_externIDAction;
-	
+
 	std::auto_ptr<NL3D::CPSLocated>		_LocatedCopy;
 	std::auto_ptr<NL3D::CPSLocatedBindable> _LocatedBindableCopy;
 
 	CParticleTreeItem *_currentItem;
-	
+
 	Ui::CParticleWorkspaceDialog _ui;
 	friend class CMainWindow;
 }; /* class CParticleWorkspaceDialog */

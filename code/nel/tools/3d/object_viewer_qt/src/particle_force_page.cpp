@@ -21,29 +21,30 @@
 #include "particle_force_page.h"
 
 // Qt includes
- #include <QtGui/QMessageBox>
- 
+#include <QtGui/QMessageBox>
+
 // NeL includes
 #include <nel/3d/particle_system.h>
 
 // Project includes
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CForcePage::CForcePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.forceIntensityWidget->setRange(0, 10);
 	_ui.forceIntensityWidget->setWrapper(&_ForceIntensityWrapper);
 	_ui.forceIntensityWidget->setSchemeWrapper(&_ForceIntensityWrapper);
 	_ui.forceIntensityWidget->init();
-	
+
 	_ui.parametricFactorWidget->setRange(0.0, 64.0);
 	_ui.radialViscosityWidget->setRange(0.0, 1.0);
 	_ui.tangentialViscosityWidget->setRange(0, 1);
-	
+
 	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
 	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 
@@ -61,7 +62,7 @@ CForcePage::~CForcePage()
 void CForcePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindable *locatedBindable)
 {
 	nlassert(locatedBindable);
-	
+
 	hideAdditionalWidget();
 	_Node = ownerNode;
 	_LBTarget = static_cast<NL3D::CPSTargetLocatedBindable *>(locatedBindable);
@@ -116,31 +117,31 @@ void CForcePage::addTarget()
 	if ((totalCount == 0) || (_ui.avaibleTargetsListWidget->currentRow() == -1))  return;
 
 	CLocatedItem *item = dynamic_cast<CLocatedItem *>(_ui.avaibleTargetsListWidget->currentItem());
-	
+
 	NL3D::CPSLocated *loc = item->getUserData();
 	nlassert(loc);
 
 	// check that force isn't applied on a forever lasting object
 	if (dynamic_cast<NL3D::CPSForce *>(_LBTarget))
-	{	
+	{
 		if (loc->getLastForever())
 		{
-			int ret = QMessageBox::warning(this, tr("NeL particle system editor"), 
-					   tr("The target object last forever. Applying a force on such an object may result in instability in the system after a while. "
-					      "Continue ? (clue : you've been warned..)"),
-					   QMessageBox::Ok | QMessageBox::Cancel);
+			int ret = QMessageBox::warning(this, tr("NeL particle system editor"),
+										   tr("The target object last forever. Applying a force on such an object may result in instability in the system after a while. "
+											  "Continue ? (clue : you've been warned..)"),
+										   QMessageBox::Ok | QMessageBox::Cancel);
 
 			if (ret == QMessageBox::Cancel)
 				return;
 		}
-	
+
 	}
 	//
 	_LBTarget->attachTarget(loc);
-	
+
 	_ui.avaibleTargetsListWidget->takeItem(_ui.avaibleTargetsListWidget->currentRow());
 	_ui.targetsListWidget->addItem(item);
-	
+
 	updateModifiedFlag();
 }
 
@@ -151,7 +152,7 @@ void CForcePage::removeTarget()
 	if ((totalCount == 0) || (_ui.targetsListWidget->currentRow() == -1))  return;
 
 	CLocatedItem *item = dynamic_cast<CLocatedItem *>(_ui.targetsListWidget->takeItem(_ui.targetsListWidget->currentRow()));
-	
+
 	NL3D::CPSLocated *loc = item->getUserData();
 	nlassert(loc);
 
@@ -218,14 +219,14 @@ void CForcePage::updateTargets()
 	uint nbTarg = _LBTarget->getNbTargets();
 
 	_ui.targetsListWidget->clear();
-	
+
 	std::set<NL3D::CPSLocated *> targetSet;
 
 	// fill the box thta tells us what the target are
 	for(k = 0; k < nbTarg; ++k)
 	{
-		CLocatedItem *item = new CLocatedItem(QString(_LBTarget->getTarget(k)->getName().c_str()), 
-						    _ui.targetsListWidget);
+		CLocatedItem *item = new CLocatedItem(QString(_LBTarget->getTarget(k)->getName().c_str()),
+											  _ui.targetsListWidget);
 		item->setUserData(_LBTarget->getTarget(k));
 		targetSet.insert(_LBTarget->getTarget(k));
 	};
@@ -236,7 +237,7 @@ void CForcePage::updateTargets()
 	uint nbLocated = ps->getNbProcess();
 
 	_ui.avaibleTargetsListWidget->clear();
-	
+
 	for (k = 0; k < nbLocated; ++k)
 	{
 		NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(ps->getProcess(k));
@@ -244,8 +245,8 @@ void CForcePage::updateTargets()
 		{
 			if (targetSet.find(loc) == targetSet.end())
 			{
-				CLocatedItem *item = new CLocatedItem(QString(loc->getName().c_str()), 
-						    _ui.avaibleTargetsListWidget);
+				CLocatedItem *item = new CLocatedItem(QString(loc->getName().c_str()),
+													  _ui.avaibleTargetsListWidget);
 				item->setUserData(loc);
 			}
 		}

@@ -1,7 +1,7 @@
 /*
     Object Viewer Qt
     Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -34,42 +34,43 @@
 // Project includes
 #include "skeleton_tree_model.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /// A mirror to the list of bone
-struct CBoneMirror 
+struct CBoneMirror
 {
 	CBoneMirror()
 	{
 		SkinScale= BoneScale= NLMISC::CVector(1.f,1.f,1.f);
 		Selected= false;
 	}
-	
+
 	/// Current Scale * ssd_scale_precision, and rounded
 	NLMISC::CVector SkinScale;
 	NLMISC::CVector BoneScale;
-	
+
 	/// If the bone is selected in the multi List
 	bool		Selected;
 };
 
 typedef std::vector<CBoneMirror>	TBoneMirrorArray;
-  
+
 /**
 @class CSkeletonScaleDialog
 @brief Dialog to edit the skeleton.
 */
 class CSkeletonScaleDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CSkeletonScaleDialog(CSkeletonTreeModel *model, QWidget *parent = 0);
 	~CSkeletonScaleDialog();
 
 	/// call each frame to display scaled bboxes around selected bones
 	void drawSelection();
-	
+
 public Q_SLOTS:
 	/// needs called when the changes current edited skeleton
 	void setCurrentShape(const QString &name);
@@ -91,7 +92,7 @@ private Q_SLOTS:
 	void clickLoadScale();
 	void clickSaveScale();
 	void resetSkeleton();
-	
+
 private:
 	void updateBoneValues();
 	void refreshTextViewWithScale(QDoubleSpinBox *spinBox, float scale, float diff);
@@ -140,7 +141,7 @@ private:
 	TBoneMirrorArray _BkupBones;
 
 	bool _SaveDirty;
-	
+
 	// For selection drawing, the local bbox
 	std::vector<NLMISC::CAABBox> _BoneBBoxes;
 	bool _BoneBBoxNeedRecompute;

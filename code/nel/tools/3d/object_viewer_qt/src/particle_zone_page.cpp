@@ -28,15 +28,16 @@
 #include "particle_force_page.h"
 #include "modules.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CZonePage::CZonePage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	_ui.bounceFactorWidget->setRange(0.f, 1.f);
-	
+
 	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
 	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 	connect(_ui.bounceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setBounce(int)));
@@ -50,10 +51,10 @@ CZonePage::~CZonePage()
 
 void CZonePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindable *locatedBindable)
 {
-  	_Node = ownerNode;
+	_Node = ownerNode;
 	_LBTarget = static_cast<NL3D::CPSTargetLocatedBindable *>(locatedBindable);
 	_Zone = dynamic_cast<NL3D::CPSZone *>(_LBTarget);
-	
+
 	updateTargets();
 	_ui.bounceFactorWidget->setValue(_Zone->getBounceFactor() ,false);
 	_ui.bounceComboBox->setCurrentIndex( _Zone->getCollisionBehaviour());
@@ -66,15 +67,15 @@ void CZonePage::addTarget()
 	if ((totalCount == 0) || (_ui.avaibleTargetsListWidget->currentRow() == -1))  return;
 
 	CLocatedItem *item = dynamic_cast<CLocatedItem *>(_ui.avaibleTargetsListWidget->currentItem());
-	
+
 	NL3D::CPSLocated *loc = item->getUserData();
 	nlassert(loc);
 
 	_LBTarget->attachTarget(loc);
-	
+
 	_ui.avaibleTargetsListWidget->takeItem(_ui.avaibleTargetsListWidget->currentRow());
 	_ui.targetsListWidget->addItem(item);
-	
+
 	updateModifiedFlag();
 }
 
@@ -85,7 +86,7 @@ void CZonePage::removeTarget()
 	if ((totalCount == 0) || (_ui.targetsListWidget->currentRow() == -1))  return;
 
 	CLocatedItem *item = dynamic_cast<CLocatedItem *>(_ui.targetsListWidget->takeItem(_ui.targetsListWidget->currentRow()));
-	
+
 	NL3D::CPSLocated *loc = item->getUserData();
 	nlassert(loc);
 
@@ -97,9 +98,9 @@ void CZonePage::removeTarget()
 
 void CZonePage::setBounce(int index)
 {
-	if (_Zone->getCollisionBehaviour() != index) 
+	if (_Zone->getCollisionBehaviour() != index)
 		_Zone->setCollisionBehaviour( (NL3D::CPSZone::TCollisionBehaviour) index);
-	
+
 	_ui.bounceFactorWidget->setEnabled(_Zone->getCollisionBehaviour() == NL3D::CPSZone::bounce ? true : false);
 	Modules::psEdit().resetAutoCount(_Node);
 }
@@ -107,7 +108,7 @@ void CZonePage::setBounce(int index)
 void CZonePage::setBounceFactor(float value)
 {
 	_Zone->setBounceFactor(value);
-	 updateModifiedFlag();
+	updateModifiedFlag();
 }
 
 void CZonePage::updateTargets()
@@ -116,14 +117,14 @@ void CZonePage::updateTargets()
 	uint nbTarg = _LBTarget->getNbTargets();
 
 	_ui.targetsListWidget->clear();
-	
+
 	std::set<NL3D::CPSLocated *> targetSet;
 
 	// fill the box thta tells us what the target are
 	for(k = 0; k < nbTarg; ++k)
 	{
-		CLocatedItem *item = new CLocatedItem(QString(_LBTarget->getTarget(k)->getName().c_str()), 
-						    _ui.targetsListWidget);
+		CLocatedItem *item = new CLocatedItem(QString(_LBTarget->getTarget(k)->getName().c_str()),
+											  _ui.targetsListWidget);
 		item->setUserData(_LBTarget->getTarget(k));
 		targetSet.insert(_LBTarget->getTarget(k));
 	};
@@ -134,7 +135,7 @@ void CZonePage::updateTargets()
 	uint nbLocated = ps->getNbProcess();
 
 	_ui.avaibleTargetsListWidget->clear();
-	
+
 	for (k = 0; k < nbLocated; ++k)
 	{
 		NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(ps->getProcess(k));
@@ -142,8 +143,8 @@ void CZonePage::updateTargets()
 		{
 			if (targetSet.find(loc) == targetSet.end())
 			{
-				CLocatedItem *item = new CLocatedItem(QString(loc->getName().c_str()), 
-						    _ui.avaibleTargetsListWidget);
+				CLocatedItem *item = new CLocatedItem(QString(loc->getName().c_str()),
+													  _ui.avaibleTargetsListWidget);
 				item->setUserData(loc);
 			}
 		}

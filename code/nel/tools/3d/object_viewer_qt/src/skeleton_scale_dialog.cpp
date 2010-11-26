@@ -34,15 +34,16 @@
 #include "modules.h"
 #include "skeleton_tree_model.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 const int ssd_scale_precision = 1000;
 
 CSkeletonScaleDialog::CSkeletonScaleDialog(CSkeletonTreeModel *model, QWidget *parent)
-    : QDockWidget(parent), _Skeleton(NULL)
+	: QDockWidget(parent), _Skeleton(NULL)
 {
 	_ui.setupUi(this);
-	
+
 	_SaveDirty= false;
 
 	// avoid realloc
@@ -52,7 +53,7 @@ CSkeletonScaleDialog::CSkeletonScaleDialog(CSkeletonTreeModel *model, QWidget *p
 	_RedoQueue.clear();
 
 	_BoneBBoxNeedRecompute= false;
-	
+
 	_ui.treeView->setModel(model);
 
 	connect(model, SIGNAL(modelReset()), this, SLOT(resetSkeleton()));
@@ -64,7 +65,7 @@ CSkeletonScaleDialog::CSkeletonScaleDialog(CSkeletonTreeModel *model, QWidget *p
 	connect(_ui.xSkinHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setSkinSliderX(int)));
 	connect(_ui.ySkinHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setSkinSliderY(int)));
 	connect(_ui.zSkinHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setSkinSliderZ(int)));
-	
+
 	connect(_ui.xBoneHorizontalSlider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
 	connect(_ui.yBoneHorizontalSlider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
 	connect(_ui.zBoneHorizontalSlider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
@@ -103,7 +104,7 @@ void CSkeletonScaleDialog::setCurrentShape(const QString &name)
 
 		// copy from skel to mirror
 		applySkeletonToMirror();
-		
+
 		_ui.boneGroupBox->setEnabled(true);
 		_ui.skinGroupBox->setEnabled(true);
 		_ui.buttonsGroupBox->setEnabled(true);
@@ -112,10 +113,10 @@ void CSkeletonScaleDialog::setCurrentShape(const QString &name)
 	// reset bone bbox here
 	_BoneBBoxes.clear();
 	_BoneBBoxes.resize(_Bones.size());
-	
+
 	// delegate to drawSelection(), cause skins not still bound
 	_BoneBBoxNeedRecompute= true;
-	
+
 	// clean undo/redo
 	_UndoQueue.clear();
 	_RedoQueue.clear();
@@ -138,9 +139,9 @@ void CSkeletonScaleDialog::setCurrentBone(const QModelIndex & index)
 	// TODO: multiple selection
 	for(size_t i = 0; i < _Bones.size(); i++)
 		_Bones[i].Selected= false;
-	
+
 	_Bones[currentItem->getId()].Selected = true;
-	
+
 	// undo-redo
 	// selection change => no need to dirt save
 	pushUndoState(precState, false);
@@ -200,14 +201,14 @@ void CSkeletonScaleDialog::sliderReleased()
 
 void CSkeletonScaleDialog::clickMirrorSelected()
 {
-  	// bkup for undo
+	// bkup for undo
 	static TBoneMirrorArray precState;
 	precState = _Bones;
 	nlassert(!_Skeleton.empty());
 
 	// for each bone selected
 	bool	change= false;
-	for(uint i=0;i<_Bones.size();i++)
+	for(uint i=0; i<_Bones.size(); i++)
 	{
 		CBoneMirror &bone= _Bones[i];
 		if(bone.Selected)
@@ -238,7 +239,7 @@ void CSkeletonScaleDialog::clickMirrorSelected()
 	// refresh display
 	applyMirrorToSkeleton();
 	updateBoneValues();
-	
+
 	// if some change, bkup for undo/redo
 	pushUndoState(precState, true);
 }
@@ -283,12 +284,12 @@ void CSkeletonScaleDialog::clickSaveAsSkel()
 		return;
 
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save As Skeleton File"),
-                            ".",
-                            tr("Skeleton files (*.skel);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("Skeleton files (*.skel);;"));
+	if (!fileName.isEmpty())
 	{
 		NLMISC::COFile f;
-		
+
 		if( f.open(fileName.toStdString()) )
 		{
 			if(saveCurrentInStream(f))
@@ -313,14 +314,14 @@ void CSkeletonScaleDialog::clickLoadScale()
 	// if no skeleton edited, quit
 	if(_Skeleton.empty())
 		return;
-	
+
 	// choose the file
 	QString fileName = QFileDialog::getOpenFileName(this,
-					tr("Open Skeleton Scale File"), ".",
-					tr("SkelScale files (*.scale);;"));
+					   tr("Open Skeleton Scale File"), ".",
+					   tr("SkelScale files (*.scale);;"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileName.isEmpty()) 
+	if (!fileName.isEmpty())
 	{
 		NLMISC::CIFile f;
 		if( f.open(fileName.toStdString()) )
@@ -339,9 +340,9 @@ void CSkeletonScaleDialog::clickSaveScale()
 
 	// choose the file
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save As Skeleton Scale File"),
-                            ".",
-                            tr("SkelScale files (*.scale);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("SkelScale files (*.scale);;"));
+	if (!fileName.isEmpty())
 	{
 		NLMISC::COFile f;
 		if( f.open(fileName.toStdString()) )
@@ -364,12 +365,12 @@ void CSkeletonScaleDialog::updateBoneValues()
 	// 1.f for each component if multiple selection is different, else 0.f
 	NLMISC::CVector boneScaleDiff = NLMISC::CVector::Null;
 	NLMISC::CVector skinScaleDiff = NLMISC::CVector::Null;
-	
+
 	// valid if scale of each bone component is same
 	NLMISC::CVector boneScaleAll = NLMISC::CVector::Null;
 	NLMISC::CVector skinScaleAll = NLMISC::CVector::Null;
 	bool someSelected = false;
-	
+
 	// For all bones selected
 	for(uint i = 0; i < _Bones.size(); i++)
 	{
@@ -395,7 +396,7 @@ void CSkeletonScaleDialog::updateBoneValues()
 			}
 		}
 	}
-	
+
 	// if none selected, force empty text
 	if(!someSelected)
 	{
@@ -432,12 +433,24 @@ void CSkeletonScaleDialog::applyScaleSlider(int scale, int idSelect)
 		{
 			switch(idSelect)
 			{
-				case SidBoneX: _Bones[i].BoneScale.x = _BkupBones[i].BoneScale.x * factor; break;
-				case SidBoneY: _Bones[i].BoneScale.y = _BkupBones[i].BoneScale.y * factor; break;
-				case SidBoneZ: _Bones[i].BoneScale.z = _BkupBones[i].BoneScale.z * factor; break;
-				case SidSkinX: _Bones[i].SkinScale.x = _BkupBones[i].SkinScale.x * factor; break;
-				case SidSkinY: _Bones[i].SkinScale.y = _BkupBones[i].SkinScale.y * factor; break;
-				case SidSkinZ: _Bones[i].SkinScale.z = _BkupBones[i].SkinScale.z * factor; break;
+			case SidBoneX:
+				_Bones[i].BoneScale.x = _BkupBones[i].BoneScale.x * factor;
+				break;
+			case SidBoneY:
+				_Bones[i].BoneScale.y = _BkupBones[i].BoneScale.y * factor;
+				break;
+			case SidBoneZ:
+				_Bones[i].BoneScale.z = _BkupBones[i].BoneScale.z * factor;
+				break;
+			case SidSkinX:
+				_Bones[i].SkinScale.x = _BkupBones[i].SkinScale.x * factor;
+				break;
+			case SidSkinY:
+				_Bones[i].SkinScale.y = _BkupBones[i].SkinScale.y * factor;
+				break;
+			case SidSkinZ:
+				_Bones[i].SkinScale.z = _BkupBones[i].SkinScale.z * factor;
+				break;
 			};
 			roundClampScale(_Bones[i].BoneScale);
 			roundClampScale(_Bones[i].SkinScale);
@@ -529,7 +542,7 @@ sint CSkeletonScaleDialog::getBoneForMirror(uint boneId, std::string &mirrorName
 		side= -1;
 		mirrorName[pos+1]= 'R';
 	}
-	
+
 	return side;
 }
 
@@ -545,12 +558,12 @@ bool CSkeletonScaleDialog::saveCurrentInStream(NLMISC::IStream &f)
 	{
 		nlassert(!_Skeleton.empty());
 		nlassert(_Skeleton.getObjectPtr()->Shape);
-		
+
 		// Retrieve boneBase definition from the current skeleton
 		std::vector<NL3D::CBoneBase> boneBases;
 		(NLMISC::safe_cast<NL3D::CSkeletonShape*>((NL3D::IShape*)_Skeleton.getObjectPtr()->Shape))->retrieve(boneBases);
-		
-		// Copies bone scales from the model 
+
+		// Copies bone scales from the model
 		nlassert(boneBases.size() == _Skeleton.getNumBones());
 		for(uint i = 0; i < _Skeleton.getNumBones(); i++)
 		{
@@ -560,7 +573,7 @@ bool CSkeletonScaleDialog::saveCurrentInStream(NLMISC::IStream &f)
 			boneBase.SkinScale = bone.getSkinScale();
 			boneBase.DefaultScale = bone.getScale();
 		}
-		
+
 		// build a new Skeleton shape
 		NL3D::CSkeletonShape *skelShape= new NL3D::CSkeletonShape;
 		skelShape->build(boneBases);
@@ -598,21 +611,21 @@ bool CSkeletonScaleDialog::saveSkelScaleInStream(NLMISC::IStream &f)
 	try
 	{
 		nlassert(!_Skeleton.empty());
-		
-		// Copies bone scales from the model 
+
+		// Copies bone scales from the model
 		std::vector<CBoneScaleInfo> boneScales;
 		boneScales.resize(_Skeleton.getNumBones());
 		for(uint i = 0; i < boneScales.size(); i++)
 		{
 			NL3D::CBone *bone= _Skeleton.getBone(i).getObjectPtr();
 			CBoneScaleInfo &boneScale= boneScales[i];
-			
+
 			// get scale info from current edited skeleton
 			boneScale.Name = bone->getBoneName();
 			boneScale.Scale = bone->getScale();
 			boneScale.SkinScale = bone->getSkinScale();
 		}
-		
+
 		// save the file
 		sint32 ver= f.serialVersion(0);
 		f.serialCont(boneScales);
@@ -622,7 +635,7 @@ bool CSkeletonScaleDialog::saveSkelScaleInStream(NLMISC::IStream &f)
 		QMessageBox::critical(this, tr("Skeleton scale editor"), tr("Failed to save file!"), QMessageBox::Ok);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -631,7 +644,7 @@ bool CSkeletonScaleDialog::loadSkelScaleFromStream(NLMISC::IStream &f)
 	try
 	{
 		nlassert(!_Skeleton.empty());
-		
+
 		// load the file
 		sint32	ver= f.serialVersion(0);
 		std::vector<CBoneScaleInfo> boneScales;
@@ -652,13 +665,13 @@ bool CSkeletonScaleDialog::loadSkelScaleFromStream(NLMISC::IStream &f)
 		// Bkup _Bones, for undo
 		static TBoneMirrorArray precState;
 		precState = _Bones;
-		
+
 		// Then reapply to the mirror
 		applySkeletonToMirror();
 
 		// change => must save
 		pushUndoState(precState, true);
-		
+
 		// and update display
 		updateBoneValues();
 	}
@@ -667,7 +680,7 @@ bool CSkeletonScaleDialog::loadSkelScaleFromStream(NLMISC::IStream &f)
 		QMessageBox::critical(this, tr("Skeleton scale editor"), tr("Failed to load file!"), QMessageBox::Ok);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -679,8 +692,8 @@ void CSkeletonScaleDialog::pushUndoState(const TBoneMirrorArray &precState, bool
 	for(uint i = 0; i < _Bones.size(); i++)
 	{
 		if( _Bones[i].BoneScale!=precState[i].BoneScale ||
-			_Bones[i].SkinScale!=precState[i].SkinScale || 
-			_Bones[i].Selected!=precState[i].Selected)
+				_Bones[i].SkinScale!=precState[i].SkinScale ||
+				_Bones[i].Selected!=precState[i].Selected)
 		{
 			change= true;
 			break;
@@ -753,7 +766,7 @@ void CSkeletonScaleDialog::redo()
 		_Bones= _RedoQueue.front();
 		// pop
 		_RedoQueue.pop_front();
-		
+
 		// refresh display
 		applyMirrorToSkeleton();
 		updateBoneValues();

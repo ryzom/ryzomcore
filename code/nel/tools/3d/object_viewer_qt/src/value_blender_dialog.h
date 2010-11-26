@@ -44,7 +44,8 @@
 #include "edit_range_widget.h"
 #include "color_edit_widget.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 struct IValueBlenderDialogClient
 {
@@ -57,16 +58,16 @@ struct IValueBlenderDialogClient
 
 class CValueBlenderDialog : public QDialog
 {
-     Q_OBJECT
+	Q_OBJECT
 
-public:	
+public:
 	/// Create the dialog.
 	/// @param createInterface - interface that allows to create a dialog to edit one of the 2 values used for the blend.
 	/// @param destroyInterface - true if this object must take care to call 'delete' on the 'createInterface' pointer
 	CValueBlenderDialog(IValueBlenderDialogClient *createInterface,
-					 CWorkspaceNode *ownerNode,
-					 bool destroyInterface,
-					 QWidget *parent = 0); 
+						CWorkspaceNode *ownerNode,
+						bool destroyInterface,
+						QWidget *parent = 0);
 
 	~CValueBlenderDialog() ;
 
@@ -75,15 +76,15 @@ protected:
 	IValueBlenderDialogClient *_CreateInterface ;
 
 	CWorkspaceNode *_Node;
-	
+
 	bool _DestroyInterface;
-	
+
 	QGridLayout *_gridLayout;
-	
+
 	QLabel *_startLabel;
-	
+
 	QLabel *_endLabel;
-	
+
 	// the 2 dialog used to choose the blending value
 	QWidget *_startWidget, *_endWidget;
 };
@@ -91,7 +92,7 @@ protected:
 /// GENERAL INTERFACE FOR BLENDER EDITION
 
 ///  T is the type to be edited (color, float, etc..), even if it is unused
-template <typename T> 
+template <typename T>
 class CValueBlenderDialogClientT : public IValueBlenderDialogClient
 {
 public:
@@ -119,8 +120,8 @@ protected:
 		// the scheme being edited
 		NL3D::CPSValueBlendFuncBase<T> *SchemeFunc;
 
-		virtual T get(void) const 
-		{ 
+		virtual T get(void) const
+		{
 			T t1, t2;
 			SchemeFunc->getValues(t1, t2);
 			return ValueIndex == 0 ? t1 : t2;
@@ -129,7 +130,8 @@ protected:
 		{
 			T t1, t2;
 			SchemeFunc->getValues(t1, t2);
-			if (ValueIndex == 0 ) t1 = value; else t2 = value;
+			if (ValueIndex == 0 ) t1 = value;
+			else t2 = value;
 			SchemeFunc->setValues(t1, t2);
 		}
 	};
@@ -142,7 +144,7 @@ class CFloatBlenderDialogClient : public CValueBlenderDialogClientT<float>
 {
 public:
 	QWidget *newDialog(IPSWrapper<float> *wrapper, QWidget *parent)
-	{ 
+	{
 		CEditRangeFloatWidget *erf = new CEditRangeFloatWidget(parent);
 		erf->setRange(MinRange, MaxRange);
 		erf->setWrapper(wrapper);
@@ -157,7 +159,7 @@ class CUIntBlenderDialogClient : public CValueBlenderDialogClientT<uint32>
 {
 public:
 	QWidget *newDialog(IPSWrapper<uint32> *wrapper, QWidget *parent)
-	{ 
+	{
 		CEditRangeUIntWidget *erf = new CEditRangeUIntWidget(parent);
 		erf->setRange(MinRange, MaxRange);
 		erf->setWrapper(wrapper);
@@ -172,7 +174,7 @@ class CIntBlenderDialogClient : public CValueBlenderDialogClientT<sint32>
 {
 public:
 	QWidget *newDialog(IPSWrapper<sint32> *wrapper, QWidget *parent)
-	{ 
+	{
 		CEditRangeIntWidget *erf = new CEditRangeIntWidget(parent);
 		erf->setRange(MinRange, MaxRange);
 		erf->setWrapper(wrapper);
@@ -186,8 +188,8 @@ public:
 class CRGBABlenderDialogClient : public CValueBlenderDialogClientT<NLMISC::CRGBA>
 {
 public:
-	QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent) 
-	{ 
+	QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent)
+	{
 		CColorEditWidget *ce = new CColorEditWidget(parent);
 		ce->setWrapper(wrapper);
 		ce->updateUi();

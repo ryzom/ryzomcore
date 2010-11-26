@@ -32,10 +32,11 @@
 // Project includes
 #include "modules.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableDialog::CVegetableDialog(QWidget *parent)
-    : QDockWidget(parent)
+	: QDockWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -61,9 +62,9 @@ void CVegetableDialog::loadVegetset()
 {
 	// ask name of the load new vegetset file
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Load a new vegetset file"),
-                            ".",
-                            tr("vegetset files (*.vegetset);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("vegetset files (*.vegetset);;"));
+	if (!fileName.isEmpty())
 	{
 		NL3D::CTileVegetableDesc vegetSet;
 		// if succes to load the vegetSet
@@ -87,9 +88,9 @@ void CVegetableDialog::appendVegetset()
 {
 	// ask name of the load new vegetset file
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Append vegetset file"),
-                            ".",
-                            tr("vegetset files (*.vegetset);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("vegetset files (*.vegetset);;"));
+	if (!fileName.isEmpty())
 	{
 		NL3D::CTileVegetableDesc	vegetSet;
 		// if succes to load the vegetSet
@@ -101,7 +102,7 @@ void CVegetableDialog::appendVegetset()
 
 			// update 3D view
 			Modules::veget().refreshVegetableDisplay();
-			
+
 			updateVegetList();
 		}
 	}
@@ -109,20 +110,20 @@ void CVegetableDialog::appendVegetset()
 
 void CVegetableDialog::saveVegetset()
 {
-  	NL3D::CTileVegetableDesc vegetSet;
+	NL3D::CTileVegetableDesc vegetSet;
 
 	// first build the vegetSet.
 	Modules::veget().buildVegetableSet(vegetSet);
 
 	// Then try to save it.
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Vegetable Set"),
-                            ".",
-                            tr("VegetSetFiles (*.vegetset);;"));
-		// after check 
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("VegetSetFiles (*.vegetset);;"));
+	// after check
+	if (!fileName.isEmpty())
 	{
 		NLMISC::COFile f;
-		
+
 		if( f.open(fileName.toStdString()) )
 		{
 			try
@@ -138,7 +139,7 @@ void CVegetableDialog::saveVegetset()
 		else
 			QMessageBox::critical(this, "Failed to save file!", QString("Failed to open file for write!"), QMessageBox::Ok);
 	}
-	
+
 }
 
 void CVegetableDialog::addVegetList()
@@ -162,12 +163,12 @@ void CVegetableDialog::removeVegetList()
 	if(id == -1) return;
 
 	Modules::veget().delVegetDesc(id);
-	
+
 	QListWidgetItem *item = _ui.listWidget->takeItem(id);
 	delete item;
-	
+
 	id--;
-	
+
 	_ui.listWidget->setCurrentRow(id);
 
 	// update 3D view
@@ -181,7 +182,7 @@ void CVegetableDialog::insVegetList()
 	{
 		// Add a new vegetable to the list.
 		Modules::veget().insEmptyVegetDesc(id);
-		
+
 		// update view
 		QListWidgetItem *item = new QListWidgetItem();
 		item->setText(QString(Modules::veget().getVegetable(id)->VegetableName.c_str()));
@@ -219,12 +220,12 @@ void CVegetableDialog::copyVegetable()
 void CVegetableDialog::loadVegetdesc()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open Vegetable Descriptor"),
-                            ".",
-                            tr("vegetdesc files (*.vegetdesc);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("vegetdesc files (*.vegetdesc);;"));
+	if (!fileName.isEmpty())
 	{
 		NLMISC::CIFile f;
-		
+
 		if( f.open(fileName.toStdString()) )
 		{
 			NL3D::CVegetable veget;
@@ -232,10 +233,10 @@ void CVegetableDialog::loadVegetdesc()
 			{
 				// read the vegetable
 				f.serial(veget);
-				
+
 				// Add a new vegetable to the list.
 				uint id = Modules::veget().addVegetDesc(veget);
-				
+
 				// update view
 				QListWidgetItem *item = new QListWidgetItem(_ui.listWidget);
 				item->setText(QString(Modules::veget().getVegetable(id)->VegetableName.c_str()));
@@ -257,17 +258,17 @@ void CVegetableDialog::saveVegetdesc()
 {
 	sint id = _ui.listWidget->currentRow();
 	if(id == -1) return;
-	  
+
 	CVegetableNode *vegetNode = Modules::veget().getVegetable(id);
 
 	QString oldFileName = QString(vegetNode->VegetableName.c_str()) + ".vegetdesc";
-	
+
 	// Then try to save it.
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Vegetable Descriptor"),
-                            oldFileName,
-                            tr("VegetDescFiles (*.vegetdesc);;"));
-		// after check 
-	if (!fileName.isEmpty()) 
+					   oldFileName,
+					   tr("VegetDescFiles (*.vegetdesc);;"));
+	// after check
+	if (!fileName.isEmpty())
 	{
 		NLMISC::COFile	f;
 
@@ -309,7 +310,7 @@ void CVegetableDialog::updateVegetList()
 {
 	std::vector<std::string> listVegetables;
 	Modules::veget().getListVegetables(listVegetables);
-	
+
 	_ui.listWidget->clear();
 
 	for (size_t i = 0; i < listVegetables.size(); i++)

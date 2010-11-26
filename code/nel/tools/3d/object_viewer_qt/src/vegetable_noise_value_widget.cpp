@@ -25,13 +25,14 @@
 #define	NL_VEGETABLE_EDIT_SLIDER_NVS_SIZE_THRESHOLD	0.03f
 #define	NL_VEGETABLE_EDIT_SLIDER_NVS_SCALE		3.0f
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetNoiseValueWidget::CVegetNoiseValueWidget(QWidget *parent)
-    : QGroupBox(parent), _emit(true)
+	: QGroupBox(parent), _emit(true)
 {
 	_ui.setupUi(this);
-	
+
 	connect(_ui.verticalSlider, SIGNAL(valueChanged(int)), this, SLOT(setSlider(int)));
 	connect(_ui.verticalSlider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
 	connect(_ui.absWidget, SIGNAL(valueChanged(float)), this, SLOT(setAbsValue(float)));

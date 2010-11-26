@@ -32,7 +32,8 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CLightPage
@@ -40,15 +41,15 @@ namespace NLQT {
 */
 class CLightPage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CLightPage(QWidget *parent = 0);
 	~CLightPage();
 
 	/// Set the light to edit.
 	void setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindable *locatedBindable);
-	
+
 private Q_SLOTS:
 private:
 
@@ -56,36 +57,72 @@ private:
 	struct CColorWrapper : public IPSWrapperRGBA, IPSSchemeWrapperRGBA
 	{
 		NL3D::CPSLight *L;
-		NLMISC::CRGBA get(void) const { return L->getColor(); }
-		void set(const NLMISC::CRGBA &v) { L->setColor(v); }
-		scheme_type *getScheme(void) const { return L->getColorScheme(); }
-		void setScheme(scheme_type *s) { L->setColorScheme(s); }
+		NLMISC::CRGBA get(void) const
+		{
+			return L->getColor();
+		}
+		void set(const NLMISC::CRGBA &v)
+		{
+			L->setColor(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return L->getColorScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			L->setColorScheme(s);
+		}
 	} _ColorWrapper;
 
 	/// wrapper to set start atten radius
 	struct CAttenStartWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSLight *L;
-		float get(void) const { return L->getAttenStart(); }
-		void set(const float &v) { L->setAttenStart(v); }
-		scheme_type *getScheme(void) const { return L->getAttenStartScheme(); }
-		void setScheme(scheme_type *s) { L->setAttenStartScheme(s); }
+		float get(void) const
+		{
+			return L->getAttenStart();
+		}
+		void set(const float &v)
+		{
+			L->setAttenStart(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return L->getAttenStartScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			L->setAttenStartScheme(s);
+		}
 	} _AttenStartWrapper;
 
 	/// wrapper to set end atten radius
 	struct CAttenEndWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat
 	{
 		NL3D::CPSLight *L;
-		float get(void) const { return L->getAttenEnd(); }
-		void set(const float &v) { L->setAttenEnd(v); }
-		scheme_type *getScheme(void) const { return L->getAttenEndScheme(); }
-		void setScheme(scheme_type *s) { L->setAttenEndScheme(s); }
+		float get(void) const
+		{
+			return L->getAttenEnd();
+		}
+		void set(const float &v)
+		{
+			L->setAttenEnd(v);
+		}
+		scheme_type *getScheme(void) const
+		{
+			return L->getAttenEndScheme();
+		}
+		void setScheme(scheme_type *s)
+		{
+			L->setAttenEndScheme(s);
+		}
 	} _AttenEndWrapper;
 
 	NL3D::CPSLight *_Light;
-	
+
 	CWorkspaceNode *_Node;
-  
+
 	Ui::CLightPage _ui;
 }; /* class CLightPage */
 

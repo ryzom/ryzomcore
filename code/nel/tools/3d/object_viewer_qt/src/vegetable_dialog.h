@@ -31,15 +31,16 @@
 
 namespace NL3D
 {
-	class CTileVegetableDesc;
+class CTileVegetableDesc;
 }
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 class CVegetableDialog: public QDockWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CVegetableDialog(QWidget *parent = 0);
 	~CVegetableDialog();
@@ -48,25 +49,25 @@ private Q_SLOTS:
 	void loadVegetset();
 	void appendVegetset();
 	void saveVegetset();
-	
+
 	void addVegetList();
 	void removeVegetList();
 	void insVegetList();
 	void clearVegetList();
-	
+
 	void copyVegetable();
 	void loadVegetdesc();
 	void saveVegetdesc();
-	
+
 	void setVisibleVegetables(bool state);
-	
+
 	void setCurrentItem(int row);
-	
+
 private:
 	void updateVegetList();
-	
+
 	Ui::CVegetableDialog _ui;
-	
+
 }; /* class CVegetableDialog */
 
 } /* namespace NLQT */

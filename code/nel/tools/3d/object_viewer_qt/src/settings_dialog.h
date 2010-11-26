@@ -30,7 +30,8 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CSettingsDialog
@@ -38,7 +39,7 @@ namespace NLQT {
 */
 class CSettingsDialog: public QDialog
 {
-     Q_OBJECT
+	Q_OBJECT
 
 public:
 	CSettingsDialog(QWidget *parent = 0);
@@ -65,7 +66,7 @@ private:
 	void cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var);
 	void cfcbSoundDrivers(NLMISC::CConfigFile::CVar &var);
 	void cfcbSearchPaths(NLMISC::CConfigFile::CVar &var);
-	
+
 	void loadGraphicsSettings();
 	void loadSoundSettings();
 	void loadPathsSettings();
@@ -74,7 +75,7 @@ private:
 	void saveSoundSettings();
 	void savePathsSettings();
 	void saveVegetableSettings();
-	
+
 	Ui::CSettingsDialog ui;
 
 }; /* class CSettingsDialog */

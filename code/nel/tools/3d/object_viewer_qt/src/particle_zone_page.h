@@ -31,16 +31,17 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CZonePage: public QWidget
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CZonePage(QWidget *parent = 0);
 	virtual ~CZonePage();
-	
+
 	void setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindable *locatedBindable);
 
 private Q_SLOTS:
@@ -53,18 +54,21 @@ private Q_SLOTS:
 private:
 	void updateTargets();
 
-	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
-	
+	void updateModifiedFlag()
+	{
+		if (_Node) _Node->setModified(true);
+	}
+
 	/// the target we're focusing on
 	NL3D::CPSTargetLocatedBindable *_LBTarget;
-	
+
 	/// the collision zone being edited
 	NL3D::CPSZone             *_Zone ;
-	
+
 	CWorkspaceNode *_Node;
-	
+
 	Ui::CZonePage _ui;
-	
+
 }; /* class CZonePage */
 
 } /* namespace NLQT */

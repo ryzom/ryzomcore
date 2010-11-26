@@ -32,9 +32,11 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLQT
+{
 
-namespace {
+namespace
+{
 
 CFileDisplayer *s_FileDisplayer = NULL;
 
@@ -57,7 +59,7 @@ CFileDisplayer *s_FileDisplayer = NULL;
 
 sint main(int argc, char **argv)
 {
-  	// go nel!
+	// go nel!
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
 		createDebug(NULL, NLQT_USE_LOG_LOG, false);
@@ -74,10 +76,10 @@ sint main(int argc, char **argv)
 		WarningLog->addDisplayer(NLQT::s_FileDisplayer);
 		AssertLog->addDisplayer(NLQT::s_FileDisplayer);
 		ErrorLog->addDisplayer(NLQT::s_FileDisplayer);
-#endif	
+#endif
 
 		nlinfo("Welcome to NeL!");
-		
+
 		NLMISC::CPath::remapExtension("tga", "png", true);
 	}
 
@@ -85,7 +87,7 @@ sint main(int argc, char **argv)
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
 	splash->show();
-	
+
 	Modules::init();
 
 	// load and set remap extensions from config

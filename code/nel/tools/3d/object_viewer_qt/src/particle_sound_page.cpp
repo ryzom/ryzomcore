@@ -32,13 +32,14 @@
 #include "modules.h"
 #include "sound_system.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CSoundPage::CSoundPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
-	
+
 	// setup dialog the sounds gain
 	_ui.gainWidget->setRange(0.f, 1.f);
 	_ui.gainWidget->setWrapper(&_GainWrapper);
@@ -53,7 +54,7 @@ CSoundPage::CSoundPage(QWidget *parent)
 
 	// setup dialog the percent of sound emissions
 	_ui.emissionWidget->setRange(0.f, 1.f);
-	
+
 	connect(_ui.browsePushButton ,SIGNAL(clicked()), this, SLOT(browse()));
 	connect(_ui.playPushButton ,SIGNAL(clicked()), this, SLOT(play()));
 	connect(_ui.spawnCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setSpawn(bool)));
@@ -72,9 +73,9 @@ void CSoundPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 {
 	_Sound = static_cast<NL3D::CPSSound *>(locatedBindable);
 	_Node = ownerNode;
-	
+
 	nlassert(_Sound);
-	
+
 	_ui.emissionWidget->setValue(_Sound->getEmissionPercent(), false);
 
 	_GainWrapper.S = _Sound;
@@ -95,7 +96,7 @@ void CSoundPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 void CSoundPage::browse()
 {
 	std::vector<NLMISC::TStringId> names;
-	
+
 
 	NLSOUND::UAudioMixer *audioMixer = Modules::sound().getAudioMixer();
 	if (audioMixer)
@@ -106,14 +107,14 @@ void CSoundPage::browse()
 	// TODO: create CPickSound dialog
 	QStringList items;
 	items << tr("");
-	for(size_t i = 0; i < names.size(); ++i) 
-	  items << QString(names[i]->c_str());
+	for(size_t i = 0; i < names.size(); ++i)
+		items << QString(names[i]->c_str());
 
 	bool ok;
 	QString item = QInputDialog::getItem(this, tr("Select your sound"),
-                                          tr("Sound:"), items, 0, false, &ok);
+										 tr("Sound:"), items, 0, false, &ok);
 	if (ok)
-	{ 
+	{
 		_ui.soundNameLineEdit->setText(item);
 		updateModifiedFlag();
 	}

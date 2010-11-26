@@ -20,7 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "stdpch.h"
 #include "spinner_dialog.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CSpinnerDialog::CSpinnerDialog(NL3D::CPSBasisSpinner *sf, CWorkspaceNode *ownerNode, QWidget *parent)
 	: QDialog(parent), _Node(ownerNode), _BasicSpinner(sf)

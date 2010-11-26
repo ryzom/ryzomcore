@@ -31,11 +31,13 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NL3D {
-	class CPSConstraintMesh;
+namespace NL3D
+{
+class CPSConstraintMesh;
 }
 
-namespace NLQT {
+namespace NLQT
+{
 
 /**
 @class CConstraintMeshWidget
@@ -43,12 +45,12 @@ namespace NLQT {
 */
 class CConstraintMeshWidget: public QWidget
 {
-     Q_OBJECT
+	Q_OBJECT
 
 public:
 	CConstraintMeshWidget(QWidget *parent = 0);
 	~CConstraintMeshWidget();
-	
+
 	/// Set the constraint mesh to edit.
 	void setCurrentConstraintMesh(CWorkspaceNode *ownerNode, NL3D::CPSConstraintMesh *cm);
 
@@ -62,16 +64,16 @@ private Q_SLOTS:
 	void setReinitWhenNewElementIsCreated(bool state);
 	void setStage(int value);
 	void setGlobalTexAnimValue();
-	
+
 private:
 	void connectGlobalTexAnim();
 	void disconnectGlobalTexAnim();
 	void updateGlobalTexAnim(int value);
-	
+
 	CWorkspaceNode 			*_Node;
-	
+
 	NL3D::CPSConstraintMesh 	*_CM;
-	
+
 	Ui::CConstraintMeshWidget _ui;
 }; /* class CConstraintMeshWidget */
 

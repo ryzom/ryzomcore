@@ -1,7 +1,7 @@
 /*
     Object Viewer Qt
     Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -27,23 +27,24 @@
 // Project includes
 #include "particle_node.h"
 
-namespace NLQT {
-  
+namespace NLQT
+{
+
 CMultiTexDialog::CMultiTexDialog(CWorkspaceNode *ownerNode, NL3D::CPSMultiTexturedParticle *mtp, QWidget *parent)
-  : QDialog(parent), _Node(ownerNode), _MTP(mtp)
+	: QDialog(parent), _Node(ownerNode), _MTP(mtp)
 {
 	_ui.setupUi(this);
-	
+
 	nlassert(_MTP);
 
 	_ui.basicCapsCheckBox->setChecked(NL3D::CPSMultiTexturedParticle::areBasicCapsForced());
 	_ui.useParticleDataCheckBox->setChecked(_MTP->getUseLocalDateAlt());
 	_ui.useParticleDataCheckBox_2->setChecked(_MTP->getUseLocalDate());
-	
+
 	bool bEnvBumpMapUsed = _MTP->getMainTexOp() == NL3D::CPSMultiTexturedParticle::EnvBumpMap ? true : false;
 	_ui.bumpFactorLabel->setEnabled(bEnvBumpMapUsed);
 	_ui.bumpFactorDoubleSpinBox->setEnabled(bEnvBumpMapUsed);
-	
+
 	_TexWrapper.OwnerNode = _Node;
 	_AlternateTexWrapper.OwnerNode = _Node;
 	_TexWrapper.MTP = _MTP;
@@ -51,18 +52,18 @@ CMultiTexDialog::CMultiTexDialog(CWorkspaceNode *ownerNode, NL3D::CPSMultiTextur
 
 	_ui.texWidget->setWrapper(&_TexWrapper);
 	_ui.texWidget->updateUi();
-	
+
 	_ui.texWidget_2->setWrapper(&_AlternateTexWrapper);
 	_ui.texWidget_2->updateUi();
-	
+
 	readValues();
 
 	_ui.enableAlternateCheckBox->setChecked(_MTP->isAlternateTexEnabled());
 	_ui.alternateTab->setEnabled(_MTP->isAlternateTexEnabled());
-	
+
 	_ui.texOpComboBox->setCurrentIndex(int(_MTP->getMainTexOp()));
 	_ui.texOpComboBox_2->setCurrentIndex(int(_MTP->getAlternateTexOp()));
-	
+
 	connect(_ui.bumpFactorDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateValues()));
 	connect(_ui.enableAlternateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnabledAlternate(bool)));
 	connect(_ui.basicCapsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setForceBasicCaps(bool)));
@@ -100,15 +101,15 @@ void CMultiTexDialog::updateValues()
 
 	vs1.x = _ui.uSpeed1DoubleSpinBox->value();
 	vs1.y = _ui.vSpeed1DoubleSpinBox->value();
-	
+
 	vs2.x = _ui.uSpeed2DoubleSpinBox->value();
 	vs2.y = _ui.vSpeed2DoubleSpinBox->value();
-	
+
 	_MTP->setScrollSpeed(0, vs1);
 	_MTP->setScrollSpeed(1, vs2);
-	
+
 	_MTP->setBumpFactor(_ui.bumpFactorDoubleSpinBox->value());
-	
+
 	updateModifiedFlag();
 }
 
@@ -118,13 +119,13 @@ void CMultiTexDialog::updateValuesAlternate()
 
 	vs1.x = _ui.uSpeed1DoubleSpinBox_2->value();
 	vs1.y = _ui.vSpeed1DoubleSpinBox_2->value();
-	
+
 	vs2.x = _ui.uSpeed2DoubleSpinBox_2->value();
 	vs2.y = _ui.vSpeed2DoubleSpinBox_2->value();
-	
+
 	_MTP->setAlternateScrollSpeed(0, vs1);
 	_MTP->setAlternateScrollSpeed(1, vs2);
-	
+
 	updateModifiedFlag();
 }
 
@@ -146,7 +147,7 @@ void CMultiTexDialog::setMainOp(int index)
 
 void CMultiTexDialog::setForceBasicCaps(bool state)
 {
-  	NL3D::CPSMultiTexturedParticle::forceBasicCaps(state);
+	NL3D::CPSMultiTexturedParticle::forceBasicCaps(state);
 }
 
 void CMultiTexDialog::setUseParticleDate(bool state)

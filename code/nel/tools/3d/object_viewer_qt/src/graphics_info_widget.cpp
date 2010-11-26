@@ -27,12 +27,13 @@
 
 // STL includes
 
-namespace NLQT {
+namespace NLQT
+{
 
 const int directionSize = 35;
 
 CGraphicsInfoWidget::CGraphicsInfoWidget(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_color = Qt::white;
 	_mode = Mode::Color;
@@ -91,10 +92,10 @@ void CGraphicsInfoWidget::paintEvent(QPaintEvent *event)
 		painter.drawLine(width() / 2, 4, width() / 2, height() - 4);
 		painter.drawLine(4, height() / 2, width() - 4, height() / 2);
 		painter.drawText( 10, 15, _text);
-		
+
 		painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
-		painter.drawLine(width() / 2, height() / 2, 
-				 int((width() / 2) + _x * 0.9f * directionSize), int((height() / 2) - _y * 0.9f * directionSize));
+		painter.drawLine(width() / 2, height() / 2,
+						 int((width() / 2) + _x * 0.9f * directionSize), int((height() / 2) - _y * 0.9f * directionSize));
 	}
 	if (_mode == Mode::PlaneBasic)
 	{
@@ -108,25 +109,25 @@ void CGraphicsInfoWidget::paintEvent(QPaintEvent *event)
 		{
 			for(uint k = 0; k < _verts.size() / 2; ++k)
 			{
-				painter.drawLine(int((width() / 2.0) * (1 + _verts[2 * k].x)), 
-					int((height() / 2.0) * (1 - _verts[2 * k].y)),
-					int((width() / 2.0) * (1 + _verts[2 * k + 1].x)), 
-					int((height() / 2.0) * (1 - _verts[2 * k + 1].y)));
+				painter.drawLine(int((width() / 2.0) * (1 + _verts[2 * k].x)),
+								 int((height() / 2.0) * (1 - _verts[2 * k].y)),
+								 int((width() / 2.0) * (1 + _verts[2 * k + 1].x)),
+								 int((height() / 2.0) * (1 - _verts[2 * k + 1].y)));
 			}
 		}
 		else
 		{
 			for(uint k = 1; k < _verts.size(); k++)
 			{
-				painter.drawLine(int((width() / 2.0) * (1 + _verts[k - 1].x)), 
-						 int((height() / 2.0) * (1 - _verts[k - 1].y)),
-						 int((width() / 2.0) * (1 + _verts[ k].x)), 
-						 int((height() / 2.0) * (1 - _verts[k].y))); 
+				painter.drawLine(int((width() / 2.0) * (1 + _verts[k - 1].x)),
+								 int((height() / 2.0) * (1 - _verts[k - 1].y)),
+								 int((width() / 2.0) * (1 + _verts[ k].x)),
+								 int((height() / 2.0) * (1 - _verts[k].y)));
 			}
-			painter.drawLine(int((width() / 2.0) * (1 + _verts[0].x)), 
-					 int((height() / 2.0) * (1 - _verts[0].y)),
-					 int((width() / 2.0) * (1 + _verts[_verts.size() - 1].x)), 
-					 int((height() / 2.0) * (1 - _verts[_verts.size() - 1].y))); 
+			painter.drawLine(int((width() / 2.0) * (1 + _verts[0].x)),
+							 int((height() / 2.0) * (1 - _verts[0].y)),
+							 int((width() / 2.0) * (1 + _verts[_verts.size() - 1].x)),
+							 int((height() / 2.0) * (1 - _verts[_verts.size() - 1].y)));
 		}
 	}
 }
@@ -135,7 +136,7 @@ void CGraphicsInfoWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
 	float vx = (event->x() - (width() / 2)) / 0.9f;
 	float vy = ((height() / 2) - event->y()) / 0.9f;
-	
+
 	Q_EMIT applyNewVector(vx, vy);
 }
 

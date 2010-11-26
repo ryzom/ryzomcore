@@ -28,7 +28,8 @@
 
 #include "nel/3d/channel_mixer.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CSlotGroupBox: public QGroupBox
 {
@@ -38,10 +39,10 @@ public:
 	~CSlotGroupBox();
 	void resetUi();
 	void updateUi();
-	
+
 public Q_SLOTS:
 	void saveSlotInfo();
-	
+
 private Q_SLOTS:
 	void selectAnim();
 	void selectSkel();
@@ -55,10 +56,10 @@ private:
 
 	friend class CSlotManagerDialog;
 };
-  
+
 class CSlotManagerDialog: public QDockWidget
 {
-       Q_OBJECT
+	Q_OBJECT
 
 public:
 	CSlotManagerDialog(QWidget *parent = 0);
@@ -67,7 +68,7 @@ public:
 public Q_SLOTS:
 	void updateUiSlots();
 
-private: 
+private:
 	QWidget *_dockWidgetContents;
 	QGridLayout *_gridLayout;
 	QGridLayout *_slotGridLayout;
@@ -78,7 +79,7 @@ private:
 	QGridLayout *_gridLayouts[NL3D::CChannelMixer::NumAnimationSlot];
 	QWidget *_tabs[NL3D::CChannelMixer::NumAnimationSlot];
 	CSlotGroupBox *_slotGroupBoxs[NL3D::CChannelMixer::NumAnimationSlot];
-	
+
 }; /* CSlotManager */
 
 } /* namespace NLQT */

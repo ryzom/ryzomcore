@@ -33,10 +33,11 @@
 #include "modules.h"
 #include "vegetable_dialog.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 CVegetableDensityPage::CVegetableDensityPage(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	_ui.setupUi(this);
 
@@ -44,12 +45,12 @@ CVegetableDensityPage::CVegetableDensityPage(QWidget *parent)
 	_ui.densityGroupBox->setDefaultRangeAbs(NL_VEGETABLE_DENSITY_ABS_RANGE_MIN, NL_VEGETABLE_DENSITY_ABS_RANGE_MAX);
 	_ui.densityGroupBox->setDefaultRangeRand(NL_VEGETABLE_DENSITY_RAND_RANGE_MIN, NL_VEGETABLE_DENSITY_RAND_RANGE_MAX);
 	_ui.densityGroupBox->setDefaultRangeFreq(NL_VEGETABLE_FREQ_RANGE_MIN, NL_VEGETABLE_FREQ_RANGE_MAX);
-	
+
 	// Init MaxDensity widget.
 	_ui.maxDensityWidget->setRange(0, NL_VEGETABLE_EDIT_DEFAULT_MAX_DENSITY);
 	_ui.maxDensityWidget->enableLowerBound(0, false);
-	
-	
+
+
 	connect(_ui.browseShapePushButton, SIGNAL(clicked()), this, SLOT(browseShapeVeget()));
 	connect(_ui.distanceSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setDistanceOfCreat(int)));
 	connect(_ui.densityGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setDensity(NLMISC::CNoiseValue)));
@@ -75,10 +76,10 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 	if(_Vegetable)
 	{
 		setEnabled(true);
-		
-		 // ShapeName
+
+		// ShapeName
 		_ui.meshLineEdit->setText(QString(_Vegetable->ShapeName.c_str()));
-		
+
 		// Creation Distance.
 		// normalize creation distance for this editor.
 		_Vegetable->DistType = std::min(uint(_Vegetable->DistType), uint(_ui.distanceSpinBox->maximum()) );
@@ -94,7 +95,7 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 		{
 			// Disable the checkBox and the slider.
 			_ui.maxDensityCheckBox->setChecked(false);
-			
+
 			_PrecMaxDensityValue = NL_VEGETABLE_EDIT_DEFAULT_MAX_DENSITY;
 		}
 		else
@@ -140,9 +141,9 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 void CVegetableDensityPage::browseShapeVeget()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open Vegetable Shape"),
-                            ".",
-                            tr("veget files (*.veget);;"));
-	if (!fileName.isEmpty()) 
+					   ".",
+					   tr("veget files (*.veget);;"));
+	if (!fileName.isEmpty())
 	{
 		// Add search path for the .veget
 		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(fileName.toStdString()));
@@ -152,7 +153,7 @@ void CVegetableDensityPage::browseShapeVeget()
 			// update shapeName and view
 			_Vegetable->ShapeName = NLMISC::CFile::getFilename(fileName.toStdString());
 			_ui.meshLineEdit->setText(QString(NLMISC::CFile::getFilename(fileName.toStdString()).c_str()));
-			
+
 			// update the name in the list-box
 			Q_EMIT vegetNameChanged();
 
@@ -192,9 +193,9 @@ void CVegetableDensityPage::setEnabledMaxDensity(bool state)
 	{
 		// uncheck, bkup maxDenstiy
 		_PrecMaxDensityValue = _Vegetable->MaxDensity;
-		
+
 		_ui.maxDensityWidget->setEnabled(false);
-		
+
 		// and setup vegetable (disable MaxDensity).
 		_Vegetable->MaxDensity= -1;
 	}
@@ -236,7 +237,7 @@ void CVegetableDensityPage::setDensity(const NLMISC::CNoiseValue &value)
 void CVegetableDensityPage::setMaxDensity(float value)
 {
 	_Vegetable->MaxDensity = value;
-	
+
 	// update 3D view
 	Modules::veget().refreshVegetableDisplay();
 }
@@ -247,13 +248,13 @@ void CVegetableDensityPage::setAngleMinSlider(int pos)
 	NLMISC::clamp(angle, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float cosAngleMin = float(sin(angle * NLMISC::Pi / 180.f));
-	
+
 	// setup vegetable.
 	if(_Vegetable->getAngleType()== NL3D::CVegetable::AngleWall)
 		_Vegetable->setAngleWall(cosAngleMin, _Vegetable->getCosAngleMax());
 	else
 		_Vegetable->setAngleGround(cosAngleMin);
-	
+
 	// update view
 	_ui.angleMinDoubleSpinBox->setValue(angle);
 
@@ -273,7 +274,7 @@ void CVegetableDensityPage::setAngleMaxSlider(int pos)
 		_Vegetable->setAngleWall(_Vegetable->getCosAngleMin(), cosAngleMax);
 	else
 		_Vegetable->setAngleCeiling(cosAngleMax);
-	
+
 	// update view
 	_ui.angleMaxDoubleSpinBox->setValue(angle);
 

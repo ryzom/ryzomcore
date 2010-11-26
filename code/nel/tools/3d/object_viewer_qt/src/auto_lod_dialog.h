@@ -32,16 +32,17 @@
 // Project includes
 #include "ps_wrapper.h"
 
-namespace NLQT {
+namespace NLQT
+{
 
 class CAutoLODDialog: public QDialog
 {
-     Q_OBJECT
-	
+	Q_OBJECT
+
 public:
 	CAutoLODDialog(CWorkspaceNode *ownerNode, NL3D::CParticleSystem *ps, QWidget *parent = 0);
 	~CAutoLODDialog();
-  
+
 private Q_SLOTS:
 	void setDegradationExponent(int value);
 	void setSkipParticles(bool state);
@@ -54,17 +55,29 @@ private:
 	struct CDistRatioWrapper : IPSWrapperFloat
 	{
 		NL3D::CParticleSystem *PS;
-		virtual float get() const  { return PS->getAutoLODStartDistPercent(); }
-		virtual void  set(const float &v) { PS->setupAutoLOD(v, PS->getAutoLODDegradationExponent()); }
+		virtual float get() const
+		{
+			return PS->getAutoLODStartDistPercent();
+		}
+		virtual void  set(const float &v)
+		{
+			PS->setupAutoLOD(v, PS->getAutoLODDegradationExponent());
+		}
 	} _DistRatioWrapper;
 
 	struct CMaxDistLODBiasWrapper : IPSWrapperFloat
 	{
 		NL3D::CParticleSystem *PS;
-		virtual float get() const  { return PS->getMaxDistLODBias(); }
-		virtual void  set(const float &v) { PS->setMaxDistLODBias(v); }
+		virtual float get() const
+		{
+			return PS->getMaxDistLODBias();
+		}
+		virtual void  set(const float &v)
+		{
+			PS->setMaxDistLODBias(v);
+		}
 	} _MaxDistLODBiasWrapper;
-	
+
 	Ui::CAutoLODDialog _ui;
 }; /* class CAutoLODDialog */
 
