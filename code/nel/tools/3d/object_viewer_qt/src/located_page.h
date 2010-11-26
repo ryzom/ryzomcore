@@ -61,19 +61,11 @@ private Q_SLOTS:
 	void editTriggerOnDeath();
 	void setTriggerOnDeath(bool state);
 	void setMatrixMode(int index);
-	void setCount();
+	void setCurrentCount();
+
+	void setNewMaxSize(uint32 value);
 
 private:
-
-	/// wrapper to tune the max number of particles
-	struct CMaxNbParticlesWrapper : public IPSWrapperUInt
-	{
-		CWorkspaceNode *Node;
-		NL3D::CPSLocated *Located;
-		uint32 get(void) const { return Located->getMaxSize(); }
-		void set(const uint32 &v);
-	} _MaxNbParticlesWrapper;
-
 
 	/// wrapper to tune the mass of particles
 	struct CMassWrapper : public IPSWrapperFloat, IPSSchemeWrapperFloat

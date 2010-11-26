@@ -62,7 +62,8 @@ private Q_SLOTS:
 	void setMute(bool state);
 	void setKeepPitch(bool state);
 	void setSoundName(const QString &text);
-	
+	void setEmissionPercent(float value);
+
 private:
 	
 	/// wrapper to set the gain of sounds
@@ -84,14 +85,6 @@ private:
 		scheme_type *getScheme(void) const { return S->getPitchScheme(); }
 		void setScheme(scheme_type *s) { S->setPitchScheme(s); }
 	} _PitchWrapper;
-
-	/// wrapper to set the percentage of sound emissions
-	struct CEmissionPercentWrapper : public IPSWrapperFloat
-	{
-		NL3D::CPSSound *S;
-		float get(void) const { return S->getEmissionPercent(); }
-		void  set(const float &v) { S->setEmissionPercent(v); }	
-	} _EmissionPercentWrapper;
 
 	void updateModifiedFlag() { if (_Node) _Node->setModified(true); }
 	

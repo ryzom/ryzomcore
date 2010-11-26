@@ -53,14 +53,15 @@ CSoundPage::CSoundPage(QWidget *parent)
 
 	// setup dialog the percent of sound emissions
 	_ui.emissionWidget->setRange(0.f, 1.f);
-	_ui.emissionWidget->setWrapper(&_EmissionPercentWrapper);
-
+	
 	connect(_ui.browsePushButton ,SIGNAL(clicked()), this, SLOT(browse()));
 	connect(_ui.playPushButton ,SIGNAL(clicked()), this, SLOT(play()));
 	connect(_ui.spawnCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setSpawn(bool)));
 	connect(_ui.muteCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setMute(bool)));
 	connect(_ui.keepPitchCheckBox ,SIGNAL(toggled(bool)), this, SLOT(setKeepPitch(bool)));
 	connect(_ui.soundNameLineEdit ,SIGNAL(textChanged(QString)), this, SLOT(setSoundName(QString)));
+
+	connect(_ui.emissionWidget, SIGNAL(valueChanged(float)), this, SLOT(setEmissionPercent(float)));
 }
 
 CSoundPage::~CSoundPage()
@@ -73,10 +74,8 @@ void CSoundPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 	_Node = ownerNode;
 	
 	nlassert(_Sound);
-
-	_EmissionPercentWrapper.OwnerNode = _Node;
-	_EmissionPercentWrapper.S = _Sound;
-	_ui.emissionWidget->updateUi();
+	
+	_ui.emissionWidget->setValue(_Sound->getEmissionPercent(), false);
 
 	_GainWrapper.S = _Sound;
 	_ui.gainWidget->setWorkspaceNode(_Node);
@@ -163,6 +162,12 @@ void CSoundPage::setKeepPitch(bool state)
 void CSoundPage::setSoundName(const QString &text)
 {
 	_Sound->setSoundName(NLMISC::CStringMapper::map(text.toStdString()));
+}
+
+void CSoundPage::setEmissionPercent(float value)
+{
+	_Sound->setEmissionPercent(value);
+	updateModifiedFlag();
 }
 
 } /* namespace NLQT */

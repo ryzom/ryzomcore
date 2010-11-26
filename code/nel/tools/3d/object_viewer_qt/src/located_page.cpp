@@ -55,7 +55,6 @@ CLocatedPage::CLocatedPage(QWidget *parent)
 	
 	_ui.maxNumParticleWidget->setRange(1, 501);
 	_ui.maxNumParticleWidget->enableUpperBound(1 << 16, true);
-	_ui.maxNumParticleWidget->setWrapper(&_MaxNbParticlesWrapper);
 	
 	connect(_ui.coordSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMatrixMode(int)));
 	connect(_ui.disgradeWithLODCheckBox, SIGNAL(toggled(bool)), this, SLOT(setDisgradeWithLod(bool)));
@@ -63,7 +62,9 @@ CLocatedPage::CLocatedPage(QWidget *parent)
 	connect(_ui.trigerOnDeathCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTriggerOnDeath(bool)));
 	connect(_ui.editPushButton, SIGNAL(clicked()), this, SLOT(editTriggerOnDeath()));
 	connect(_ui.limitedLifeTimeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setLimitedLifeTime(bool)));
-	connect(_ui.setCurrentCountPushButton, SIGNAL(clicked()), this, SLOT(setCount()));
+	connect(_ui.setCurrentCountPushButton, SIGNAL(clicked()), this, SLOT(setCurrentCount()));
+
+	connect(_ui.maxNumParticleWidget, SIGNAL(valueChanged(uint32)), this, SLOT(setNewMaxSize(uint32)));
 }
 
 CLocatedPage::~CLocatedPage()
@@ -91,9 +92,7 @@ void CLocatedPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocated *lo
      if (_Located->getOwner())
                 _ui.maxNumParticleWidget->setEnabled(!_Located->getOwner()->getAutoCountFlag());
 
-	_MaxNbParticlesWrapper.Located = _Located;
-	_MaxNbParticlesWrapper.Node = _Node;
-	_ui.maxNumParticleWidget->updateUi();
+	 _ui.maxNumParticleWidget->setValue(_Located->getMaxSize(), false);
 	
 	_ui.coordSystemComboBox->setCurrentIndex(int(_Located->getMatrixMode()));
 	_ui.limitedLifeTimeCheckBox->setChecked(!_Located->getLastForever());
@@ -217,10 +216,25 @@ void CLocatedPage::setMatrixMode(int index)
 	}
 }
 
-void CLocatedPage::setCount()
+void CLocatedPage::setCurrentCount()
 {
-	_Located->resize(_Located->getSize()); // set new max size
-	_ui.maxNumParticleWidget->updateUi();
+	// set new max size
+	_ui.maxNumParticleWidget->setValue(_Located->getSize());
+	updateModifiedFlag();
+}
+
+void CLocatedPage::setNewMaxSize(uint32 value)
+{
+	// if the max new size is lower than the current number of instance, we must suppress item
+	// in the CParticleTreeCtrl
+	if (value < _Located->getSize())
+	{
+		nlassert(_Node);
+		/// WARNING:
+		///TreeCtrl->suppressLocatedInstanceNbItem(*Node, v);
+	}
+	_Located->resize(value); 
+
 	updateModifiedFlag();
 }
 
@@ -236,19 +250,6 @@ void CLocatedPage::updateTriggerOnDeath(void)
 	bool enable = !_Located->getLastForever();
 	_ui.trigerOnDeathCheckBox->setEnabled(enable);
 	_ui.editPushButton->setEnabled(enable && _Located->isTriggerOnDeathEnabled());
-}
-
-void CLocatedPage::CMaxNbParticlesWrapper::set(const uint32 &v) 
-{ 
-	// if the max new size is lower than the current number of instance, we must suppress item
-	// in the CParticleTreeCtrl
-	if (v < Located->getSize())
-	{
-		nlassert(Node);
-		/// WARNING:
-		///TreeCtrl->suppressLocatedInstanceNbItem(*Node, v);
-	}
-	Located->resize(v); 
 }
 
 void CLocatedPage::CLifeWrapper::set(const float &v) 
