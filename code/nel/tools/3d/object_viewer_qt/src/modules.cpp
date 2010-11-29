@@ -26,6 +26,7 @@ NLQT::CMainWindow *Modules::_mainWindow = NULL;
 NLQT::CParticleEditor *Modules::_particleEditor = NULL;
 NLQT::CSoundSystem *Modules::_soundSystem = NULL;
 NLQT::CVegetableEditor *Modules::_vegetableEditor = NULL;
+NLQT::CPluginManager *Modules::_pluginManager = NULL; 
 
 void Modules::init()
 {
@@ -37,10 +38,13 @@ void Modules::init()
 	if (_particleEditor == NULL) _particleEditor = new NLQT::CParticleEditor;
 	if (_vegetableEditor == NULL) _vegetableEditor = new NLQT::CVegetableEditor;
 	if (_mainWindow == NULL) _mainWindow = new NLQT::CMainWindow;
+	if (_pluginManager == NULL) _pluginManager = new NLQT::CPluginManager;
 }
 
 void Modules::release()
 {
+	delete _pluginManager;
+	_pluginManager = NULL;
 	delete _mainWindow;
 	_mainWindow = NULL;
 	delete _particleEditor;

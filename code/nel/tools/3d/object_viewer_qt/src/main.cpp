@@ -12,7 +12,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
-
+#include "extension_system/plugin_spec.h"
 // Project includes
 #include "modules.h"
 
@@ -96,6 +96,14 @@ sint main(int argc, char **argv)
 	Modules::config().configSearchPaths();
 
 	Modules::mainWin().showMaximized();
+
+	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
+	Modules::plugMan().loadPlugins();
+	
+	QList<NLQT::CPluginSpec *>  listPlug = Modules::plugMan().plugins();
+	Q_FOREACH (NLQT::CPluginSpec *plugSpec, listPlug)
+		nlinfo(plugSpec->errorString().toStdString().c_str());
+	
 	splash->finish(&Modules::mainWin());
 	int result = app.exec();
 	Modules::release();

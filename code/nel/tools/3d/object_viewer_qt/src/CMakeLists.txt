@@ -2,7 +2,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${LI
 INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB OBJECT_VIEWER_SRC configuration.h entity.h object_viewer.h particle_editor.h modules.h sound_system.h
-			     particle_node.h ps_initial_pos.h dup_ps.h vegetable_editor.h vegetable_node.h *.cpp)
+			    particle_node.h ps_initial_pos.h dup_ps.h vegetable_editor.h vegetable_node.h 
+			    extension_system/plugin_spec.h
+			    extension_system/*.cpp *.cpp)
+ 
 SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h 
 		      animation_set_dialog.h settings_dialog.h setup_fog_dialog.h 
 		      slot_manager_dialog.h particle_control_dialog.h particle_workspace_dialog.h
@@ -18,7 +21,9 @@ SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h
 		      skeleton_scale_dialog.h skeleton_tree_model.h particle_link_skeleton_dialog.h
 		      vegetable_dialog.h global_wind_dialog.h day_night_dialog.h sun_color_dialog.h
 		      vegetable_noise_value_widget.h vegetable_density_page.h vegetable_landscape_page.h
-		      vegetable_scale_page.h vegetable_appearance_page.h vegetable_rotate_page.h)
+		      vegetable_scale_page.h vegetable_appearance_page.h vegetable_rotate_page.h
+		      extension_system/iplugin_manager.h extension_system/plugin_manager.h)
+		      
 SET(OBJECT_VIEWER_UIS animation_form.ui animation_set_form.ui settings_form.ui 
 		      setup_fog_form.ui slot_form.ui particle_control_form.ui particle_workspace_form.ui
 		      edit_range_float_form.ui edit_range_uint_form.ui particle_system_form.ui workspace_form.ui
