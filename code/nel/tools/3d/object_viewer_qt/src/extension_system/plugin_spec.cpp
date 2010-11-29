@@ -31,8 +31,8 @@ namespace NLQT
 {
 
 CPluginSpec::CPluginSpec():
-    _state(State::Invalid),
-    _hasError(false),
+	_state(State::Invalid),
+	_hasError(false),
 	_plugin(NULL)
 {
 }
@@ -99,125 +99,125 @@ QString CPluginSpec::errorString() const
 bool CPluginSpec::setFileName(const QString &fileName)
 {
 	_name
-		= _version
-        = _vendor
-        = _description
-        = _location
-		= _filePath
-		= _fileName
-        = "";
-    _state = State::Invalid;
-    _hasError = false;
-    _errorString = "";
-    QFile file(fileName);
-    if (!file.exists())
-        return reportError(QCoreApplication::translate("CPluginSpec", "File does not exist: %1").arg(file.fileName()));
-    if (!file.open(QIODevice::ReadOnly))
-        return reportError(QCoreApplication::translate("CPluginSpec", "Could not open file for read: %1").arg(file.fileName()));
-   
+	= _version
+	  = _vendor
+		= _description
+		  = _location
+			= _filePath
+			  = _fileName
+				= "";
+	_state = State::Invalid;
+	_hasError = false;
+	_errorString = "";
+	QFile file(fileName);
+	if (!file.exists())
+		return reportError(QCoreApplication::translate("CPluginSpec", "File does not exist: %1").arg(file.fileName()));
+	if (!file.open(QIODevice::ReadOnly))
+		return reportError(QCoreApplication::translate("CPluginSpec", "Could not open file for read: %1").arg(file.fileName()));
+
 	QFileInfo fileInfo(file);
-    _location = fileInfo.absolutePath();
-    _filePath = fileInfo.absoluteFilePath();
+	_location = fileInfo.absolutePath();
+	_filePath = fileInfo.absoluteFilePath();
 	_fileName = fileInfo.fileName();
 
-    _state = State::Read;
-    return true;
+	_state = State::Read;
+	return true;
 }
 
 bool CPluginSpec::loadLibrary()
 {
 	if (_hasError)
 		return false;
-    if (_state != State::Read) 
+	if (_state != State::Read)
 	{
-        if (_state == State::Loaded)
-            return true;
+		if (_state == State::Loaded)
+			return true;
 		return reportError(QCoreApplication::translate("CPluginSpec", "Loading the library failed because state != Resolved"));
-    }
-    QString libName = QString("%1/%2").arg(_location).arg(_fileName);
+	}
+	QString libName = QString("%1/%2").arg(_location).arg(_fileName);
 
-    QPluginLoader loader(libName);
-    if (!loader.load()) 
+	QPluginLoader loader(libName);
+	if (!loader.load())
 		return reportError(libName + QString::fromLatin1(": ") + loader.errorString());
 
-    IPlugin *pluginObject = qobject_cast<IPlugin*>(loader.instance());
-    if (!pluginObject) 
+	IPlugin *pluginObject = qobject_cast<IPlugin*>(loader.instance());
+	if (!pluginObject)
 	{
 		loader.unload();
 		return reportError(QCoreApplication::translate("CPluginSpec", "Plugin is not valid (does not derive from IPlugin)"));
-    }
+	}
 
 	_name = pluginObject->name();
 	_version = pluginObject->version();
 	_vendor = pluginObject->vendor();
 	_description = pluginObject->description();
 
-    _state = State::Loaded;
-    _plugin = pluginObject;
-    return true;
+	_state = State::Loaded;
+	_plugin = pluginObject;
+	return true;
 }
 
 bool CPluginSpec::initializePlugin()
 {
 	if (_hasError)
-        return false;
-    if (_state != State::Loaded) 
+		return false;
+	if (_state != State::Loaded)
 	{
-        if (_state == State::Initialized)
-            return true;
+		if (_state == State::Initialized)
+			return true;
 		return reportError(QCoreApplication::translate("CPluginSpec", "Initializing the plugin failed because state != Loaded)"));
-    }
-    if (!_plugin) 
+	}
+	if (!_plugin)
 		return reportError(QCoreApplication::translate("CPluginSpec", "Internal error: have no plugin instance to initialize"));
 
 	QString err;
-    if (!_plugin->initialize(_pluginManager, &err)) 
+	if (!_plugin->initialize(_pluginManager, &err))
 		return reportError(QCoreApplication::translate("CPluginSpec", "Plugin initialization failed: %1").arg(err));
 
-    _state = State::Initialized;
-    return true;
+	_state = State::Initialized;
+	return true;
 }
 
 bool CPluginSpec::initializeExtensions()
 {
 	if (_hasError)
 		return false;
-    if (_state != State::Initialized) 
+	if (_state != State::Initialized)
 	{
-        if (_state == State::Running)
-            return true;
+		if (_state == State::Running)
+			return true;
 		return reportError(QCoreApplication::translate("CPluginSpec", "Cannot perform extensionsInitialized because state != Initialized"));
-    }
-    if (!_plugin) 
+	}
+	if (!_plugin)
 		return reportError(QCoreApplication::translate("CPluginSpec", "Internal error: have no plugin instance to perform extensionsInitialized"));
 
 	_plugin->extensionsInitialized();
-    _state = State::Running;
-    return true;
+	_state = State::Running;
+	return true;
 }
 
 void CPluginSpec::stop()
 {
 	if (!_plugin)
 		return;
-    _plugin->shutdown();
-    _state = State::Stopped;
+	_plugin->shutdown();
+	_state = State::Stopped;
 }
 
 void CPluginSpec::kill()
 {
 	if (!_plugin)
 		return;
-    delete _plugin;
-    _plugin = NULL;
-    _state = State::Deleted;
+	delete _plugin;
+	_plugin = NULL;
+	_state = State::Deleted;
 }
 
 bool CPluginSpec::reportError(const QString &err)
 {
-    _errorString = err;
-    _hasError = true;
-    return false;
+	_errorString = err;
+	_hasError = true;
+	return false;
 }
 
 } // namespace NLQT

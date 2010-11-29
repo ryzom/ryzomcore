@@ -42,41 +42,41 @@ CPluginManager::~CPluginManager()
 void CPluginManager::addObject(QObject *obj)
 {
 	QWriteLocker lock(&_lock);
-	if (obj == 0) 
+	if (obj == 0)
 	{
 		nlwarning("trying to add null object");
-        return;
+		return;
 	}
-    if (_allObjects.contains(obj)) 
+	if (_allObjects.contains(obj))
 	{
 		nlwarning("trying to add duplicate object");
 		return;
-    }
+	}
 	nlinfo(QString("addObject:" + obj->objectName()).toStdString().c_str());
-	
+
 	_allObjects.append(obj);
 
-    Q_EMIT objectAdded(obj);
+	Q_EMIT objectAdded(obj);
 }
 
 void CPluginManager::removeObject(QObject *obj)
 {
-	if (obj == 0) 
+	if (obj == 0)
 	{
 		nlwarning("trying to remove null object");
-        return;
-    }
+		return;
+	}
 
-    if (!_allObjects.contains(obj)) 
+	if (!_allObjects.contains(obj))
 	{
 		nlinfo(QString("object not in list:" + obj->objectName()).toStdString().c_str());
 		return;
-    }
+	}
 	nlinfo(QString("removeObject:" + obj->objectName()).toStdString().c_str());
-   
-    Q_EMIT aboutToRemoveObject(obj);
+
+	Q_EMIT aboutToRemoveObject(obj);
 	QWriteLocker lock(&_lock);
-    _allObjects.removeAll(obj);
+	_allObjects.removeAll(obj);
 }
 
 QList<QObject *> CPluginManager::allObjects() const
@@ -86,16 +86,16 @@ QList<QObject *> CPluginManager::allObjects() const
 
 void CPluginManager::loadPlugins()
 {
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs) 
-		setPluginState(spec, State::Loaded);
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
+	setPluginState(spec, State::Loaded);
 
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs) 
-        setPluginState(spec, State::Initialized);
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
+	setPluginState(spec, State::Initialized);
 
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs) 
-		setPluginState(spec, State::Running);
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
+	setPluginState(spec, State::Running);
 
-    Q_EMIT pluginsChanged();
+	Q_EMIT pluginsChanged();
 }
 
 QStringList CPluginManager::getPluginPaths() const
@@ -117,13 +117,13 @@ QList<CPluginSpec *> CPluginManager::plugins() const
 void CPluginManager::readPluginPaths()
 {
 	qDeleteAll(_pluginSpecs);
-    _pluginSpecs.clear();
+	_pluginSpecs.clear();
 
 	QStringList pluginsList;
-    QStringList searchPaths = _pluginPaths;
-    while (!searchPaths.isEmpty()) 
+	QStringList searchPaths = _pluginPaths;
+	while (!searchPaths.isEmpty())
 	{
-        const QDir dir(searchPaths.takeFirst());
+		const QDir dir(searchPaths.takeFirst());
 #ifdef Q_OS_WIN
 		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.dll"), QDir::Files);
 #elif defined(Q_OS_MAC)
@@ -132,62 +132,62 @@ void CPluginManager::readPluginPaths()
 		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.so"), QDir::Files);
 #endif
 		Q_FOREACH (const QFileInfo &file, files)
-		    pluginsList << file.absoluteFilePath();
+		pluginsList << file.absoluteFilePath();
 		const QFileInfoList dirs = dir.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot);
 		Q_FOREACH (const QFileInfo &subdir, dirs)
-		    searchPaths << subdir.absoluteFilePath();
-    }
-	
-    Q_FOREACH (const QString &pluginFile, pluginsList) 
+		searchPaths << subdir.absoluteFilePath();
+	}
+
+	Q_FOREACH (const QString &pluginFile, pluginsList)
 	{
-        CPluginSpec *spec = new CPluginSpec;
+		CPluginSpec *spec = new CPluginSpec;
 		if (spec->setFileName(pluginFile))
 			_pluginSpecs.append(spec);
 		else
 			delete spec;
-    }
+	}
 
-	 Q_EMIT pluginsChanged();
+	Q_EMIT pluginsChanged();
 }
 
 CPluginSpec *CPluginManager::pluginByName(const QString &name) const
 {
-    Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
-        if (spec->name() == name)
-            return spec;
-    return 0;
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
+	if (spec->name() == name)
+		return spec;
+	return 0;
 }
 
 void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 {
 	if (spec->hasError())
 		return;
-    if (destState == State::Running) 
+	if (destState == State::Running)
 	{
 		spec->initializeExtensions();
-        return;
-	} 
-	else if (destState == State::Deleted) 
+		return;
+	}
+	else if (destState == State::Deleted)
 	{
-        spec->kill();
-        return;
-    }
- 
-    if (destState == State::Loaded)
-        spec->loadLibrary();
-    else if (destState == State::Initialized)
-        spec->initializePlugin();
-    else if (destState == State::Stopped)
-        spec->stop();
+		spec->kill();
+		return;
+	}
+
+	if (destState == State::Loaded)
+		spec->loadLibrary();
+	else if (destState == State::Initialized)
+		spec->initializePlugin();
+	else if (destState == State::Stopped)
+		spec->stop();
 }
 
 void CPluginManager::stopAll()
 {
-    Q_FOREACH (CPluginSpec *spec,  _pluginSpecs) 
-		setPluginState(spec, State::Stopped);
+	Q_FOREACH (CPluginSpec *spec,  _pluginSpecs)
+	setPluginState(spec, State::Stopped);
 
-	Q_FOREACH (CPluginSpec *spec,  _pluginSpecs) 
-		setPluginState(spec, State::Deleted);
+	Q_FOREACH (CPluginSpec *spec,  _pluginSpecs)
+	setPluginState(spec, State::Deleted);
 }
 
 }; // namespace NLQT

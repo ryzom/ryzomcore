@@ -32,7 +32,7 @@ struct State
 {
 	enum List
 	{
-		Invalid = 1,  
+		Invalid = 1,
 		Read,
 		Loaded,
 		Initialized,
@@ -46,7 +46,7 @@ class CPluginSpec
 {
 public:
 	~CPluginSpec();
-	
+
 	QString name() const;
 	QString version() const;
 	QString vendor() const;
@@ -56,7 +56,7 @@ public:
 	QString filePath() const;
 	QString fileName() const;
 
-    IPlugin *plugin() const;
+	IPlugin *plugin() const;
 
 	// state
 	int getState() const;
@@ -68,15 +68,15 @@ private:
 
 	bool setFileName(const QString &fileName);
 	bool loadLibrary();
-    bool initializePlugin();
-    bool initializeExtensions();
-    void stop();
-    void kill();
+	bool initializePlugin();
+	bool initializeExtensions();
+	void stop();
+	void kill();
 
 	bool reportError(const QString &err);
 
 	QString _location;
-    QString _filePath;
+	QString _filePath;
 	QString _fileName;
 
 	QString _name;
@@ -85,8 +85,8 @@ private:
 	QString _description;
 
 	int _state;
-    bool _hasError;
-    QString _errorString;
+	bool _hasError;
+	QString _errorString;
 
 	IPlugin *_plugin;
 	IPluginManager *_pluginManager;

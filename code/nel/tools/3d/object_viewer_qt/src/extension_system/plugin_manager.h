@@ -33,22 +33,22 @@ class IPlugin;
 
 class CPluginManager : public IPluginManager
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    CPluginManager(QObject *parent = 0);
-    ~CPluginManager();
+	CPluginManager(QObject *parent = 0);
+	~CPluginManager();
 
-    // Object pool operations
-    virtual void addObject(QObject *obj);
-    virtual void removeObject(QObject *obj);
-    virtual QList<QObject *> allObjects() const;
+	// Object pool operations
+	virtual void addObject(QObject *obj);
+	virtual void removeObject(QObject *obj);
+	virtual QList<QObject *> allObjects() const;
 
-    // Plugin operations
-    virtual void loadPlugins();
-    virtual QStringList getPluginPaths() const;
-    virtual void setPluginPaths(const QStringList &paths);
-    virtual QList<CPluginSpec *> plugins() const;
+	// Plugin operations
+	virtual void loadPlugins();
+	virtual QStringList getPluginPaths() const;
+	virtual void setPluginPaths(const QStringList &paths);
+	virtual QList<CPluginSpec *> plugins() const;
 
 	CPluginSpec *pluginByName(const QString &name) const;
 
@@ -59,10 +59,10 @@ private:
 
 	mutable QReadWriteLock _lock;
 
-    QList<CPluginSpec *> _pluginSpecs;
-    QStringList _pluginPaths;
-    QList<QObject *> _allObjects;
- 
+	QList<CPluginSpec *> _pluginSpecs;
+	QStringList _pluginPaths;
+	QList<QObject *> _allObjects;
+
 }; // class CPluginManager
 
 } // namespace NLQT
