@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
 #include "modules.h"
+#include "georges.h"
 #include "georgesform_model.h"
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
@@ -46,6 +47,8 @@ namespace NLQT
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/, bool emptyView /*= false*/)
 		: QDockWidget(parent)
 	{
+		 _georges = new NLQT::CGeorges;
+
 		loadedForm = "";
 		_modified = false;
 
@@ -84,7 +87,7 @@ namespace NLQT
 
 	void CGeorgesTreeViewDialog::selectedForm(QString formName) 
 	{
-		_form = Modules::georges().loadForm(formName.toStdString());
+		_form = _georges->loadForm(formName.toStdString());
 
 		if (_form) 
 		{
@@ -276,9 +279,9 @@ namespace NLQT
 			{
 				if (path.contains(".shape"))
 				{
-					Modules::objView().resetScene();
+					Modules::objViewInt().resetScene();
 					//Modules::config().configRemapExtensions();
-					Modules::objView().loadMesh(path.toStdString(),"");
+					Modules::objViewInt().loadMesh(path.toStdString(),"");
 					return;
 				}
 			} 

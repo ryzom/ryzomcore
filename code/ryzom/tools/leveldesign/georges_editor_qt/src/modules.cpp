@@ -18,30 +18,59 @@
 
 #include "modules.h"
 
-NLQT::CConfiguration *Modules::_configuration = NULL;
-NLQT::CObjectViewer *Modules::_objectViewer = NULL;
+#include <QApplication>
+#include <QPluginLoader>
+#include <QDir>
+#include <QString>
+
+NLQT::CConfiguration      *Modules::_configuration = NULL;
 NLQT::CObjectViewerWidget *Modules::_objectViewerWidget = NULL;
-NLQT::CGeorges *Modules::_georges = NULL;
-NLQT::CMainWindow *Modules::_mainWindow = NULL;
+NLQT::IObjectViewer       *Modules::_objViewerInterface = NULL;
+NLQT::CMainWindow         *Modules::_mainWindow = NULL;
 	
 void Modules::init()
 {
+	loadPlugin();
+
 	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
 	config().init();
 	
-	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
 	if (_objectViewerWidget == NULL) _objectViewerWidget = new NLQT::CObjectViewerWidget;
-	if (_georges == NULL) _georges = new NLQT::CGeorges;
 	if (_mainWindow == NULL) _mainWindow = new NLQT::CMainWindow;
 }
 
 void Modules::release()
 {
 	delete _mainWindow; _mainWindow = NULL;
-	delete _objectViewer; _objectViewer = NULL;
 	//delete _objectViewerWidget; _objectViewerWidget = NULL;
-	delete _georges; _georges = NULL;
 	
 	config().release();
 	delete _configuration; _configuration = NULL;
 }
+
+bool Modules::loadPlugin()
+ {
+     QDir pluginsDir(qApp->applicationDirPath());
+ /*#if defined(Q_OS_WIN)
+     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
+         pluginsDir.cdUp();
+ #elif defined(Q_OS_MAC)
+     if (pluginsDir.dirName() == "MacOS") {
+         pluginsDir.cdUp();
+         pluginsDir.cdUp();
+         pluginsDir.cdUp();
+     }
+ #endif*/
+     //pluginsDir.cd("plugins");
+     //Q_FOREACH (QString fileName, pluginsDir.entryList(QDir::Files)) {
+         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath("object_viewer_widget_qt.dll"));
+         QObject *plugin = pluginLoader.instance();
+         if (plugin) {
+			 _objViewerInterface = qobject_cast<NLQT::IObjectViewer *>(plugin);
+             if (_objViewerInterface)
+                 return true;
+         }
+     //}
+
+     return false;
+ }

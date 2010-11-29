@@ -20,10 +20,11 @@
 #define MODULES_H
 
 #include "configuration.h"
-#include "object_viewer.h"
+//#include "object_viewer.h"
 #include "object_viewer_widget.h"
 #include "main_window.h"
-#include "georges.h"
+
+#include "interfaces.h"
 
 class Modules
 {
@@ -32,16 +33,19 @@ public:
 	static void release();
 	
 	static NLQT::CConfiguration &config()  { return *_configuration; }
-	static NLQT::CObjectViewer  &objView() { return *_objectViewer; }
+	static NLQT::IObjectViewer  &objViewInt() { return *_objViewerInterface; }
 	static NLQT::CObjectViewerWidget  &objViewWid() { return *_objectViewerWidget; }
-	static NLQT::CGeorges       &georges() { return *_georges;}
+	//static NLQT::CGeorges       &georges() { return *_georges;}
 	static NLQT::CMainWindow    &mainWin() { return *_mainWindow; }
 private:
+	static bool loadPlugin();
+	static NLQT::IObjectViewer *_objViewerInterface;
+
 	static NLQT::CConfiguration *_configuration;
-	static NLQT::CObjectViewer  *_objectViewer;
+	//static NLQT::CObjectViewer  *_objectViewer;
 	static NLQT::CObjectViewerWidget  *_objectViewerWidget;
 	static NLQT::CMainWindow    *_mainWindow;
-	static NLQT::CGeorges       *_georges;
+	//static NLQT::CGeorges       *_georges;
 };
 
 #endif // MODULES_H

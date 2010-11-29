@@ -40,6 +40,8 @@ using namespace NLGEORGES;
 namespace NLQT 
 {
 
+	class CGeorges;
+
 	class CGeorgesTreeViewDialog: public QDockWidget
 	{
 		Q_OBJECT
@@ -70,7 +72,8 @@ namespace NLQT
 
 	private:
 		Ui::CGeorgesTreeViewDialog _ui;
-		UForm *_form;
+		UForm          *_form;
+		NLQT::CGeorges *_georges;
 
 		bool _modified;
 

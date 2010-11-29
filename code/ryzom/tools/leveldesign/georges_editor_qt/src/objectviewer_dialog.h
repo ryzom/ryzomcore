@@ -61,22 +61,10 @@ namespace NLQT
 		virtual void setVisible(bool visible);
 		virtual QPaintEngine* paintEngine() const { return NULL; }
 
-		void init();
-		void release();
-		void reinit();
-
 		QAction *createSaveScreenshotAction(QObject *parent);
 		QAction *createSetBackgroundColor(QObject *parent);
 
 	private Q_SLOTS:
-		void updateRender();
-
-		void saveScreenshot();
-		void setBackgroundColor();
-
-		void submitEvents(NLMISC::CEventServer &server, bool allWindows) { }
-		void emulateMouseRawMode(bool) { }
-
 		void topLevelChanged(bool topLevel); 
 
 	protected:
@@ -86,14 +74,7 @@ namespace NLQT
 		CObjectViewerDialog(const CObjectViewerDialog &);
 		CObjectViewerDialog &operator=(const CObjectViewerDialog &);
 
-		void updateInitialization(bool visible);
-
 		Ui::CObjectViewerDialog _ui;
-
-		// render stuff
-		QTimer *_mainTimer;
-		bool _isGraphicsInitialized, _isGraphicsEnabled;
-
 		QNLWidget * _nlw;
 
 		friend class CMainWindow;
