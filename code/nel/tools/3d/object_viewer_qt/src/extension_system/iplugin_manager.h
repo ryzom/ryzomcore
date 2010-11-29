@@ -46,6 +46,8 @@ public:
 	virtual void setPluginPaths(const QStringList &paths) = 0;
 	virtual QList<NLQT::CPluginSpec *> plugins() const = 0;
 
+	virtual CPluginSpec *pluginByName(const QString &name) const = 0;
+
 Q_SIGNALS:
 	void objectAdded(QObject *obj);
 	void aboutToRemoveObject(QObject *obj);

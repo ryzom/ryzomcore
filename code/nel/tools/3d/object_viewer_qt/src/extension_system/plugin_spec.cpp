@@ -98,14 +98,13 @@ QString CPluginSpec::errorString() const
 
 bool CPluginSpec::setFileName(const QString &fileName)
 {
-	_name
-	= _version
-	  = _vendor
+	_name = _version
+	      	= _vendor
 		= _description
-		  = _location
-			= _filePath
-			  = _fileName
-				= "";
+		= _location
+		= _filePath
+		= _fileName
+		= "";
 	_state = State::Invalid;
 	_hasError = false;
 	_errorString = "";

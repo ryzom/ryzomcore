@@ -141,10 +141,9 @@ void CPluginManager::readPluginPaths()
 	Q_FOREACH (const QString &pluginFile, pluginsList)
 	{
 		CPluginSpec *spec = new CPluginSpec;
-		if (spec->setFileName(pluginFile))
-			_pluginSpecs.append(spec);
-		else
-			delete spec;
+		spec->setFileName(pluginFile);
+		spec->_pluginManager = this;
+		_pluginSpecs.append(spec);
 	}
 
 	Q_EMIT pluginsChanged();

@@ -50,7 +50,7 @@ public:
 	virtual void setPluginPaths(const QStringList &paths);
 	virtual QList<CPluginSpec *> plugins() const;
 
-	CPluginSpec *pluginByName(const QString &name) const;
+	virtual CPluginSpec *pluginByName(const QString &name) const;
 
 private:
 	void setPluginState(CPluginSpec *spec, int destState);
