@@ -33,7 +33,8 @@ namespace NLQT
 CPluginSpec::CPluginSpec():
 	_state(State::Invalid),
 	_hasError(false),
-	_plugin(NULL)
+	_plugin(NULL),
+	_pluginManager(NULL)
 {
 }
 
