@@ -1389,11 +1389,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
 	}
-	// In my tries ATI_fragment_shader doesn't like to be used With ARB_fragment_program (maybe a driver bug, display become corrupted)
-	if (ext.IsATI9500OrAbove)
-	{
-		ext.ATIFragmentShader = false;
-	}
 
 	ext.IsGeforceFXOrAbove = setupNVVertexProgram(glext) && setupARBFragmentProgram(glext);
 
