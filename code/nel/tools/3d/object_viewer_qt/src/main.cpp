@@ -96,13 +96,10 @@ sint main(int argc, char **argv)
 	Modules::config().configSearchPaths();
 
 	Modules::mainWin().showMaximized();
+	Modules::plugMan().addObject(&Modules::mainWin());
 
 	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
 	Modules::plugMan().loadPlugins();
-	
-	QList<NLQT::CPluginSpec *>  listPlug = Modules::plugMan().plugins();
-	Q_FOREACH (NLQT::CPluginSpec *plugSpec, listPlug)
-		nlinfo(plugSpec->errorString().toStdString().c_str());
 	
 	splash->finish(&Modules::mainWin());
 	int result = app.exec();

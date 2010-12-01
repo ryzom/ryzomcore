@@ -33,12 +33,12 @@ void Modules::init()
 	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
 	config().init();
 
+	if (_pluginManager == NULL) _pluginManager = new NLQT::CPluginManager;
 	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
 	if (_soundSystem == NULL) _soundSystem = new NLQT::CSoundSystem;
 	if (_particleEditor == NULL) _particleEditor = new NLQT::CParticleEditor;
 	if (_vegetableEditor == NULL) _vegetableEditor = new NLQT::CVegetableEditor;
 	if (_mainWindow == NULL) _mainWindow = new NLQT::CMainWindow;
-	if (_pluginManager == NULL) _pluginManager = new NLQT::CPluginManager;
 }
 
 void Modules::release()

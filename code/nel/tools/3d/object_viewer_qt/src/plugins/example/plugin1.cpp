@@ -2,15 +2,21 @@
 
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
+#include <QtGui/QMainWindow>
+#include <QtGui/QMenuBar>
+
+#include "../../extension_system/plugin_spec.h"
 
 using namespace Plugin;
 
 bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
+	_plugMan = pluginManager;
 	QString str;
+	
 	QList<NLQT::CPluginSpec *>  listPlug = pluginManager->plugins();
-
+	
 	Q_FOREACH (NLQT::CPluginSpec *plugSpec, listPlug)
 		str += plugSpec->name();
 
@@ -22,8 +28,20 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 
 void MyPlugin::extensionsInitialized()
 {
+	QString str;
+	QList<QObject *> listObjects = _plugMan->allObjects();
+
+	Q_FOREACH (QObject *qobj, listObjects)
+	{
+		if (qobj->objectName() == "CMainWindow")
+		{
+			QMainWindow *wnd = qobject_cast< QMainWindow* >(qobj);
+			str += qobj->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height());
+		}
+	}
+
 	QMessageBox msgBox;
-	msgBox.setText("extensionsInitialize Example Plugin.");
+	msgBox.setText(str);
 	msgBox.exec();
 }
 

@@ -60,6 +60,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	  _GraphicsViewport(NULL), _lastDir(".")
 {
 	nldebug("CMainWindow::CMainWindow:");
+	setObjectName("CMainWindow");
 
 	// create NeL viewport
 	_GraphicsViewport = new CGraphicsViewport(this);

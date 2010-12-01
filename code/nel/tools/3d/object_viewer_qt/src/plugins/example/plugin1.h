@@ -2,7 +2,6 @@
 #define PLUGIN1_H
 
 #include "../../extension_system/iplugin.h"
-#include "../../extension_system/plugin_spec.h"
 
 #include <QtCore/QObject>
 
@@ -22,6 +21,9 @@ public:
 	QString version() const;
 	QString vendor() const;
 	QString description() const;
+private:
+	NLQT::IPluginManager *_plugMan;
+
 };
 
 } // namespace Plugin1
