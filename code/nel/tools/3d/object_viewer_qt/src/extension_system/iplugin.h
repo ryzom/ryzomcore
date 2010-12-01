@@ -31,7 +31,7 @@ namespace NLQT
 class IPlugin
 {
 public:
-	virtual ~IPlugin();
+	virtual ~IPlugin() {}
 
 	virtual bool initialize(IPluginManager *pluginManager, QString *errorString) = 0;
 	virtual void extensionsInitialized() = 0;
