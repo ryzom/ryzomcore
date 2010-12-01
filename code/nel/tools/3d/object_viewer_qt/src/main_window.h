@@ -68,6 +68,10 @@ public:
 	{
 		return _SkeletonTreeModel;
 	}
+	QPalette getOriginalPalette() const
+	{
+		return _originalPalette;
+	}
 
 private Q_SLOTS:
 	void open();

@@ -24,6 +24,8 @@
 #include <QtGui/QWidget>
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
+#include <QtGui/QStyleFactory>
+#include <QtGui/QStyle>
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -278,6 +280,12 @@ void CSettingsDialog::loadGraphicsSettings()
 	ui.enableBloomCheckBox->setChecked(Modules::objView().getBloomEffect());
 	ui.squareBloomCheckBox->setChecked(NL3D::CBloomEffect::instance().getSquareBloom());
 	ui.bloomDensityHorizontalSlider->setValue(NL3D::CBloomEffect::instance().getDensityBloom());
+
+	ui.styleComboBox->addItems(QStyleFactory::keys());
+
+	ui.styleComboBox->setCurrentIndex(ui.styleComboBox->findText(Modules::config().getValue("QtStyle", std::string("")).c_str()));
+
+	ui.paletteCheckBox->setChecked(Modules::config().getValue("QtPalette", false));
 }
 
 void CSettingsDialog::loadSoundSettings()
@@ -326,6 +334,16 @@ void CSettingsDialog::saveGraphicsSettings()
 	Modules::config().getConfigFile().getVar("BloomEffect").setAsInt(ui.enableBloomCheckBox->isChecked());
 	Modules::config().getConfigFile().getVar("BloomSquare").setAsInt(ui.squareBloomCheckBox->isChecked());
 	Modules::config().getConfigFile().getVar("BloomDensity").setAsInt(ui.bloomDensityHorizontalSlider->value());
+
+	Modules::config().getConfigFile().getVar("QtStyle").setAsString(ui.styleComboBox->currentText().toStdString());
+	Modules::config().getConfigFile().getVar("QtPalette").setAsInt(ui.paletteCheckBox->isChecked());
+
+	QApplication::setStyle(QStyleFactory::create(ui.styleComboBox->currentText()));
+
+	if (ui.paletteCheckBox->isChecked())
+		QApplication::setPalette(QApplication::style()->standardPalette());
+	else
+		QApplication::setPalette(Modules::mainWin().getOriginalPalette());
 }
 
 void CSettingsDialog::saveSoundSettings()
