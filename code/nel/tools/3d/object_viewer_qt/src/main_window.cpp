@@ -46,6 +46,8 @@
 #include "day_night_dialog.h"
 #include "sun_color_dialog.h"
 
+#include "extension_system/plugin_view.h"
+
 using namespace std;
 using namespace NLMISC;
 
@@ -132,6 +134,7 @@ CMainWindow::~CMainWindow()
 	delete _ParticleControlDialog;
 	delete _ParticleWorkspaceDialog;
 	delete _GraphicsViewport;
+	delete _PluginView;
 }
 
 void CMainWindow::setVisible(bool visible)
@@ -342,6 +345,10 @@ void CMainWindow::createActions()
 	_aboutQtAction = new QAction(tr("About &Qt"), this);
 	_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
 	connect(_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+	_pluginViewAction = new QAction(tr("About &Plugins"), this);
+	_pluginViewAction->setStatusTip(tr("Show the plugin view dialog"));
+	connect(_pluginViewAction, SIGNAL(triggered()), _PluginView, SLOT(show()));
 }
 
 void CMainWindow::createMenus()
@@ -406,6 +413,7 @@ void CMainWindow::createMenus()
 	_helpMenu = menuBar()->addMenu(tr("&Help"));
 	_helpMenu->addAction(_aboutAction);
 	_helpMenu->addAction(_aboutQtAction);
+	_helpMenu->addAction(_pluginViewAction);
 }
 
 void CMainWindow::createToolBars()
@@ -497,6 +505,8 @@ void CMainWindow::createDialogs()
 	_SetupFog = new CSetupFog(this);
 	addDockWidget(Qt::RightDockWidgetArea, _SetupFog);
 	_SetupFog->setVisible(false);
+
+	_PluginView = new CPluginView(&Modules::plugMan(), this);
 
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
 	connect(_ParticleWorkspaceDialog, SIGNAL(changeActiveNode()), _ParticleControlDialog, SLOT(updateActiveNode()));

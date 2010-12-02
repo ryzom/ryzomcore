@@ -3,6 +3,7 @@
 #include <nel/misc/app_context.h>
 
 // Qt includes
+#include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QSplashScreen>
 
@@ -101,6 +102,16 @@ sint main(int argc, char **argv)
 	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
 	Modules::plugMan().loadPlugins();
 	
+	QStringList errors;
+	Q_FOREACH (NLQT::CPluginSpec *spec, Modules::plugMan().plugins())
+		if (spec->hasError())
+			errors.append(spec->fileName() + " : " + spec->errorString());
+	
+	if (!errors.isEmpty())
+		QMessageBox::warning(0,
+				QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
+				errors.join(QString::fromLatin1("\n\n")));
+
 	splash->finish(&Modules::mainWin());
 	int result = app.exec();
 	Modules::release();

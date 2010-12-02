@@ -53,6 +53,8 @@ class CGlobalWindDialog;
 class CDayNightDialog;
 class CSunColorDialog;
 
+class CPluginView;
+
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -113,6 +115,8 @@ private:
 	CDayNightDialog *_DayNightDialog;
 	CSunColorDialog *_SunColorDialog;
 
+	CPluginView *_PluginView;
+
 	CSkeletonTreeModel *_SkeletonTreeModel;
 
 	QPalette _originalPalette;
@@ -135,6 +139,7 @@ private:
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
 	QAction *_settingsAction;
+	QAction *_pluginViewAction;
 	QAction *_aboutAction;
 	QAction *_aboutQtAction;
 };/* class CMainWindow */

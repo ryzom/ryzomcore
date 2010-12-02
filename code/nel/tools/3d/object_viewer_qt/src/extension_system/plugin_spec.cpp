@@ -100,7 +100,7 @@ QString CPluginSpec::errorString() const
 bool CPluginSpec::setFileName(const QString &fileName)
 {
 	_name = _version
-	      	= _vendor
+	    	= _vendor
 		= _description
 		= _location
 		= _filePath
@@ -134,11 +134,10 @@ bool CPluginSpec::loadLibrary()
 			return true;
 		return reportError(QCoreApplication::translate("CPluginSpec", "Loading the library failed because state != Resolved"));
 	}
-	QString libName = QString("%1/%2").arg(_location).arg(_fileName);
-
-	QPluginLoader loader(libName);
+	
+	QPluginLoader loader(_filePath);
 	if (!loader.load())
-		return reportError(libName + QString::fromLatin1(": ") + loader.errorString());
+		return reportError(loader.errorString());
 
 	IPlugin *pluginObject = qobject_cast<IPlugin*>(loader.instance());
 	if (!pluginObject)

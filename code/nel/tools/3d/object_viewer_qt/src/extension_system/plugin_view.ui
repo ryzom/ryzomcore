@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Plugins</string>
+   <string>About plugins</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -19,6 +19,12 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="4">
     <widget class="QTreeWidget" name="pluginTreeWidget">
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable">
+      <bool>false</bool>
+     </property>
      <column>
       <property name="text">
        <string>State</string>
@@ -48,6 +54,9 @@
    </item>
    <item row="1" column="0">
     <widget class="QPushButton" name="detailsPushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Details</string>
      </property>
@@ -88,5 +97,22 @@
  <resources>
   <include location="../object_viewer_qt.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>closePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CPluginView</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>620</x>
+     <y>232</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
