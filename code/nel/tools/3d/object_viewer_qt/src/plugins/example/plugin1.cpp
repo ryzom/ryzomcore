@@ -7,6 +7,8 @@
 
 #include "../../extension_system/plugin_spec.h"
 
+#include "nel/misc/debug.h"
+
 using namespace Plugin;
 
 bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorString)
@@ -23,6 +25,9 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 	QMessageBox msgBox;
 	msgBox.setText(str);
 	msgBox.exec();
+
+	nlinfo("test message");
+
 	return true;
 }
 
@@ -43,6 +48,12 @@ void MyPlugin::extensionsInitialized()
 	QMessageBox msgBox;
 	msgBox.setText(str);
 	msgBox.exec();
+}
+
+void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)
+{
+	nlassert(!NLMISC::INelContext::isContextInitialised());
+	_LibContext = static_cast<NLMISC::CLibraryContext *>(nelContext);
 }
 
 QString MyPlugin::name() const

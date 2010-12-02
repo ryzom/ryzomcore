@@ -24,6 +24,8 @@
 #include <QtCore/QPluginLoader>
 #include <QtCore/QCoreApplication>
 
+#include "nel/misc/app_context.h"
+
 #include "iplugin.h"
 #include "iplugin_manager.h"
 
@@ -145,6 +147,8 @@ bool CPluginSpec::loadLibrary()
 		loader.unload();
 		return reportError(QCoreApplication::translate("CPluginSpec", "Plugin is not valid (does not derive from IPlugin)"));
 	}
+
+	pluginObject->setNelContext(&NLMISC::INelContext::getInstance());
 
 	_name = pluginObject->name();
 	_version = pluginObject->version();

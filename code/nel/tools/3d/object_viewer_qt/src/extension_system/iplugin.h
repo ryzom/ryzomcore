@@ -25,6 +25,11 @@
 
 #include "iplugin_manager.h"
 
+namespace NLMISC
+{
+	class INelContext;
+}
+
 namespace NLQT
 {
 
@@ -37,6 +42,8 @@ public:
 	virtual void extensionsInitialized() = 0;
 	virtual void shutdown() { }
 
+	virtual void setNelContext(NLMISC::INelContext *nelContext) = 0;
+
 	virtual QString name() const = 0;
 	virtual QString version() const = 0;
 	virtual QString vendor() const = 0;
@@ -45,6 +52,6 @@ public:
 
 }; //namespace NLQT
 
-Q_DECLARE_INTERFACE(NLQT::IPlugin, "com.ryzom.dev.ObjectViewerQt.IPlugin/0.7")
+Q_DECLARE_INTERFACE(NLQT::IPlugin, "com.ryzom.dev.ObjectViewerQt.IPlugin/0.8")
 
 #endif // IPLUGIN_H
