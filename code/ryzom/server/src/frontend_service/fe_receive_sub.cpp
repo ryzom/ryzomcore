@@ -75,8 +75,8 @@ extern void flushMessagesToSend();
 void cbGwTrDisconnection ( TClientId clientId );
 
 
-CVariable<string>	SaveShardRoot("variables", "SaveShardRoot", "Root directory of all files saved by any shard", "", 0, true, NULL, false);
-extern CVariable<bool> VerboseFEStatsTime;
+extern CVariable<string>	SaveShardRoot;
+extern CVariable<bool>		VerboseFEStatsTime;
 
 
 /*

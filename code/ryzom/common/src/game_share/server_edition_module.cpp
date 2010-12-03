@@ -96,7 +96,7 @@ CVariable<uint32> TimeBeforeCloseHibernatingEditionSession("DSS", "TimeBeforeClo
 CVariable<uint32> TimeBeforeAutoCloseAnimationSessionWithNoPlayer("DSS", "TimeBeforeAutoCloseAnimationSessionWithNoPlayer", "Delay in secondes before a empty animation session is closed", 15*60, 0, true);
 
 CVariable<std::string>	DefaultCharRingAccess( "DSS", "DefaultCharRingAccess", "Default Access Ring for player eg 'f1:j1:l1:d1:p1:g1:a1:'", "a1", 0, true );
-CVariable<bool>	DontUseSU( "DSS", "DontUseSU", "Simulate the SU", false, 0, true );
+CVariable<bool>	DontUseSU( "DSS", "DontUseSU", "If 1, allow running a shard with no Shard Unifier Service", false, 0, true );
 
 CVariable<bool> AcceptScenarioWithoutHeader("DSS", "AcceptScenarioWithoutHeader", "AcceptScenarioWithoutHeader", false, 0, true);
 CVariable<bool> MustVerifyRingAccessWhileLoadingAnimation("DSS", "MustVerifyRingAccessWhileLoadingAnimation", "MustVerifyRingAccessWhileLoadingAnimation", false, 0, true);
