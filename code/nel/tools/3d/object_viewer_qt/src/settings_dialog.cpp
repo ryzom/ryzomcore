@@ -367,8 +367,7 @@ void CSettingsDialog::savePathsSettings()
 		std::string str = ui.pathsListWidget->item(i)->text().toStdString();
 		list.push_back(str);
 	}
-	if (ui.pathsListWidget->count() == 0)
-		list.push_back("WARNING: Delete this string");
+	Modules::config().getConfigFile().getVar("SearchPaths").Type = NLMISC::CConfigFile::CVar::T_STRING;
 	Modules::config().getConfigFile().getVar("SearchPaths").setAsString(list);
 }
 
@@ -384,8 +383,8 @@ void CSettingsDialog::saveVegetableSettings()
 		std::string str = ui.zonesListWidget->item(i)->text().toStdString();
 		list.push_back(str);
 	}
-	if (ui.zonesListWidget->count() == 0)
-		list.push_back("WARNING: Delete this string");
+	
+	Modules::config().getConfigFile().getVar("VegetLandscapeZones").Type = NLMISC::CConfigFile::CVar::T_STRING;
 	Modules::config().getConfigFile().getVar("VegetLandscapeZones").setAsString(list);
 }
 
