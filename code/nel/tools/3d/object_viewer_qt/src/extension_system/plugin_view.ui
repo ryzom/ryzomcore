@@ -19,11 +19,23 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="4">
     <widget class="QTreeWidget" name="pluginTreeWidget">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="indentation">
+      <number>0</number>
+     </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
+     <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
      <property name="itemsExpandable">
       <bool>false</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
      </property>
      <column>
       <property name="text">

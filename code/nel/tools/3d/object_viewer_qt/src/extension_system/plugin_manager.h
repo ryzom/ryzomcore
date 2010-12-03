@@ -30,6 +30,7 @@ namespace NLQT
 {
 
 class IPlugin;
+class CPluginSpec;
 
 class CPluginManager : public IPluginManager
 {
@@ -48,9 +49,7 @@ public:
 	virtual void loadPlugins();
 	virtual QStringList getPluginPaths() const;
 	virtual void setPluginPaths(const QStringList &paths);
-	virtual QList<CPluginSpec *> plugins() const;
-
-	virtual CPluginSpec *pluginByName(const QString &name) const;
+	virtual QList<IPluginSpec *> plugins() const;
 
 private:
 	void setPluginState(CPluginSpec *spec, int destState);
@@ -60,6 +59,7 @@ private:
 	mutable QReadWriteLock _lock;
 
 	QList<CPluginSpec *> _pluginSpecs;
+	QList<IPluginSpec *> _ipluginSpecs;
 	QStringList _pluginPaths;
 	QList<QObject *> _allObjects;
 

@@ -11,6 +11,12 @@ namespace NLMISC
 {
 class CLibraryContext;
 }
+
+namespace NLQT
+{
+class IPluginSpec;
+}
+
 namespace Plugin 
 {
 
@@ -29,6 +35,12 @@ public:
 	QString version() const;
 	QString vendor() const;
 	QString description() const;
+
+	QObject *objectByName(const QString &name) const;
+	NLQT::IPluginSpec *pluginByName(const QString &name) const;
+
+private Q_SLOTS:
+	void execMessageBox();
 
 protected:
 	NLMISC::CLibraryContext *_LibContext;

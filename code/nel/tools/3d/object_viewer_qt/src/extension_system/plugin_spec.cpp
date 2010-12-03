@@ -19,6 +19,7 @@
 
 #include "plugin_spec.h"
 
+#include <QtCore/QList>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QPluginLoader>
@@ -37,10 +38,6 @@ CPluginSpec::CPluginSpec():
 	_hasError(false),
 	_plugin(NULL),
 	_pluginManager(NULL)
-{
-}
-
-CPluginSpec::~CPluginSpec()
 {
 }
 

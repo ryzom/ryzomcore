@@ -26,7 +26,7 @@
 
 namespace NLQT
 {
-class CPluginSpec;
+class IPluginSpec;
 
 class IPluginManager: public QObject
 {
@@ -44,9 +44,7 @@ public:
 	virtual void loadPlugins() = 0;
 	virtual QStringList getPluginPaths() const = 0;
 	virtual void setPluginPaths(const QStringList &paths) = 0;
-	virtual QList<NLQT::CPluginSpec *> plugins() const = 0;
-
-	virtual CPluginSpec *pluginByName(const QString &name) const = 0;
+	virtual QList<NLQT::IPluginSpec *> plugins() const = 0;
 
 Q_SIGNALS:
 	void objectAdded(QObject *obj);

@@ -6,8 +6,7 @@ INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/plugin_spec.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/plugin_spec.cpp)
+			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_EXAMPLE_HDR plugin1.h)
 

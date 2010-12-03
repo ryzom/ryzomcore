@@ -3,9 +3,11 @@
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
+#include <QtGui/QMenu>
+#include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-#include "../../extension_system/plugin_spec.h"
+#include "../../extension_system/iplugin_spec.h"
 
 #include "nel/misc/debug.h"
 
@@ -17,36 +19,30 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 	_plugMan = pluginManager;
 	QString str;
 	
-	QList<NLQT::CPluginSpec *>  listPlug = pluginManager->plugins();
+	QList<NLQT::IPluginSpec *>  listPlug = pluginManager->plugins();
 	
-	Q_FOREACH (NLQT::CPluginSpec *plugSpec, listPlug)
+	Q_FOREACH (NLQT::IPluginSpec *plugSpec, listPlug)
 		str += plugSpec->name();
 
-	QMessageBox msgBox;
-	msgBox.setText(str);
-	msgBox.exec();
-
-	nlinfo("test message");
+	nlinfo(str.toStdString().c_str());
 
 	return true;
 }
 
 void MyPlugin::extensionsInitialized()
 {
-	QString str;
-	QList<QObject *> listObjects = _plugMan->allObjects();
+	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
+	helpMenu->addSeparator();
+	QAction *newAction = helpMenu->addAction("MyPlugin");
+	
+	connect(newAction, SIGNAL(triggered()), this, SLOT(execMessageBox()));
+}
 
-	Q_FOREACH (QObject *qobj, listObjects)
-	{
-		if (qobj->objectName() == "CMainWindow")
-		{
-			QMainWindow *wnd = qobject_cast< QMainWindow* >(qobj);
-			str += qobj->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height());
-		}
-	}
-
+void MyPlugin::execMessageBox()
+{
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
 	QMessageBox msgBox;
-	msgBox.setText(str);
+	msgBox.setText(wnd->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height()));
 	msgBox.exec();
 }
 
@@ -63,17 +59,33 @@ QString MyPlugin::name() const
 
 QString MyPlugin::version() const
 {
-	return "0.1";
+	return "0.2";
 }
 
 QString MyPlugin::vendor() const
 {
-	return "dnk";
+	return "dnk-88";
 }
 
 QString MyPlugin::description() const
 {
-	return "Example plugin";
+	return "Example ovqt plugin.";
+}
+
+QObject* MyPlugin::objectByName(const QString &name) const
+{
+	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
+		if (qobj->objectName() == name)
+				return qobj;
+	return 0;
+}
+
+NLQT::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
+{
+	Q_FOREACH (NLQT::IPluginSpec *spec, _plugMan->plugins())
+		if (spec->name() == name)
+			return spec;
+	return 0;
 }
 
 Q_EXPORT_PLUGIN(MyPlugin)

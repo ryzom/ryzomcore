@@ -20,48 +20,29 @@
 #ifndef PLUGINSPEC_H
 #define PLUGINSPEC_H
 
-#include <QtCore/QString>
-#include <QtCore/QList>
+#include "iplugin_spec.h"
 
 namespace NLQT
 {
-class IPlugin;
-class IPluginManager;
 
-struct State
-{
-	enum List
-	{
-		Invalid = 1,
-		Read,
-		Loaded,
-		Initialized,
-		Running,
-		Stopped,
-		Deleted
-	};
-};
-
-class CPluginSpec
+class CPluginSpec: public IPluginSpec
 {
 public:
-	~CPluginSpec();
+	virtual QString name() const;
+	virtual QString version() const;
+	virtual QString vendor() const;
+	virtual QString description() const;
 
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
+	virtual QString location() const;
+	virtual QString filePath() const;
+	virtual QString fileName() const;
 
-	QString location() const;
-	QString filePath() const;
-	QString fileName() const;
-
-	IPlugin *plugin() const;
+	virtual IPlugin *plugin() const;
 
 	// state
-	int getState() const;
-	bool hasError() const;
-	QString errorString() const;
+	virtual int getState() const;
+	virtual bool hasError() const;
+	virtual QString errorString() const;
 
 private:
 	CPluginSpec();

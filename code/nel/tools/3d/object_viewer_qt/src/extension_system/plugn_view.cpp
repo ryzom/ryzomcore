@@ -28,7 +28,7 @@
 #include <QtGui/QTreeWidgetItem>
 
 // Project includes
-#include "plugin_spec.h"
+#include "iplugin_spec.h"
 #include "iplugin_manager.h"
 
 namespace NLQT
@@ -55,7 +55,7 @@ void CPluginView::updateList()
     static QIcon errorIcon = QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton);
 
 	QList<QTreeWidgetItem *> items;
-	Q_FOREACH (CPluginSpec *spec, _pluginManager->plugins())
+	Q_FOREACH (IPluginSpec *spec, _pluginManager->plugins())
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(QStringList()
         << ""

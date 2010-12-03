@@ -17,41 +17,53 @@
 
 */
 
-#ifndef IPLUGIN_H
-#define IPLUGIN_H
+#ifndef IPLUGINSPEC_H
+#define IPLUGINSPEC_H
 
-#include <QtCore/QtPlugin>
 #include <QtCore/QString>
-
-#include "iplugin_manager.h"
-
-namespace NLMISC
-{
-	class INelContext;
-}
 
 namespace NLQT
 {
+class IPlugin;
+class IPluginManager;
 
-class IPlugin
+struct State
+{
+	enum List
+	{
+		Invalid = 1,
+		Read,
+		Loaded,
+		Initialized,
+		Running,
+		Stopped,
+		Deleted
+	};
+};
+
+class IPluginSpec
 {
 public:
-	virtual ~IPlugin() {}
-
-	virtual bool initialize(IPluginManager *pluginManager, QString *errorString) = 0;
-	virtual void extensionsInitialized() = 0;
-	virtual void shutdown() { }
-
-	virtual void setNelContext(NLMISC::INelContext *nelContext) = 0;
+	virtual ~IPluginSpec() {}
 
 	virtual QString name() const = 0;
 	virtual QString version() const = 0;
 	virtual QString vendor() const = 0;
 	virtual QString description() const = 0;
+
+	virtual QString location() const = 0;
+	virtual QString filePath() const = 0;
+	virtual QString fileName() const = 0;
+
+	virtual IPlugin *plugin() const = 0;
+
+	// state
+	virtual int getState() const = 0;
+	virtual bool hasError() const = 0;
+	virtual QString errorString() const = 0;
 };
 
-}; //namespace NLQT
+} // namespace NLQT
 
-Q_DECLARE_INTERFACE(NLQT::IPlugin, "com.ryzom.dev.ObjectViewerQt.IPlugin/0.9")
+#endif // IPLUGINSPEC_H
 
-#endif // IPLUGIN_H

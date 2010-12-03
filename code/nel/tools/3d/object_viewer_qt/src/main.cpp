@@ -13,7 +13,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
-#include "extension_system/plugin_spec.h"
+#include "extension_system/iplugin_spec.h"
 // Project includes
 #include "modules.h"
 
@@ -103,7 +103,7 @@ sint main(int argc, char **argv)
 	Modules::plugMan().loadPlugins();
 	
 	QStringList errors;
-	Q_FOREACH (NLQT::CPluginSpec *spec, Modules::plugMan().plugins())
+	Q_FOREACH (NLQT::IPluginSpec *spec, Modules::plugMan().plugins())
 		if (spec->hasError())
 			errors.append(spec->fileName() + " : " + spec->errorString());
 	

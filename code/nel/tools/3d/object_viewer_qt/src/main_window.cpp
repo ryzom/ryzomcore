@@ -354,19 +354,23 @@ void CMainWindow::createActions()
 void CMainWindow::createMenus()
 {
 	_fileMenu = menuBar()->addMenu(tr("&File"));
+	_fileMenu->setObjectName("ovqt.Menu.File");
 	_fileMenu->addAction(_openAction);
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_exitAction);
 
 	_viewMenu = menuBar()->addMenu(tr("&View"));
+	_viewMenu->setObjectName("ovqt.Menu.View");
 	_viewMenu->addAction(_setBackColorAction);
 	_viewMenu->addAction(_SetupFog->toggleViewAction());
 
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
+	_sceneMenu->setObjectName("ovqt.Menu.Scene");
 	_sceneMenu->addAction(_resetSceneAction);
 	_sceneMenu->addAction(_saveScreenshotAction);
 
 	_toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	_toolsMenu->setObjectName("ovqt.Menu.Tools");
 
 	_toolsMenu->addAction(_AnimationDialog->toggleViewAction());
 	_AnimationDialog->toggleViewAction()->setIcon(QIcon(":/images/anim.png"));
@@ -411,9 +415,16 @@ void CMainWindow::createMenus()
 	menuBar()->addSeparator();
 
 	_helpMenu = menuBar()->addMenu(tr("&Help"));
+	_helpMenu->setObjectName("ovqt.Menu.Help");
 	_helpMenu->addAction(_aboutAction);
 	_helpMenu->addAction(_aboutQtAction);
 	_helpMenu->addAction(_pluginViewAction);
+
+	Modules::plugMan().addObject(_fileMenu);
+	Modules::plugMan().addObject(_viewMenu);
+	Modules::plugMan().addObject(_sceneMenu);
+	Modules::plugMan().addObject(_toolsMenu);
+	Modules::plugMan().addObject(_helpMenu);
 }
 
 void CMainWindow::createToolBars()

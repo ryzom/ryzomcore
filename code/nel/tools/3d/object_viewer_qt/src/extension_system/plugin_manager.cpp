@@ -109,15 +109,16 @@ void CPluginManager::setPluginPaths(const QStringList &paths)
 	readPluginPaths();
 }
 
-QList<CPluginSpec *> CPluginManager::plugins() const
+QList<IPluginSpec *> CPluginManager::plugins() const
 {
-	return _pluginSpecs;
+	return _ipluginSpecs;
 }
 
 void CPluginManager::readPluginPaths()
 {
 	qDeleteAll(_pluginSpecs);
 	_pluginSpecs.clear();
+	_ipluginSpecs.clear();
 
 	QStringList pluginsList;
 	QStringList searchPaths = _pluginPaths;
@@ -144,17 +145,10 @@ void CPluginManager::readPluginPaths()
 		spec->setFileName(pluginFile);
 		spec->_pluginManager = this;
 		_pluginSpecs.append(spec);
+		_ipluginSpecs.append(spec);
 	}
 
 	Q_EMIT pluginsChanged();
-}
-
-CPluginSpec *CPluginManager::pluginByName(const QString &name) const
-{
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
-	if (spec->name() == name)
-		return spec;
-	return 0;
 }
 
 void CPluginManager::setPluginState(CPluginSpec *spec, int destState)

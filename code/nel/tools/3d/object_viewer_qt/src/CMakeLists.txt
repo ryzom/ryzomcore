@@ -3,7 +3,7 @@ INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB OBJECT_VIEWER_SRC configuration.h entity.h object_viewer.h particle_editor.h modules.h sound_system.h
 			    particle_node.h ps_initial_pos.h dup_ps.h vegetable_editor.h vegetable_node.h 
-			    extension_system/plugin_spec.h
+			    extension_system/iplugin_spec.h extension_system/plugin_spec.h
 			    extension_system/*.cpp *.cpp)
  
 SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h 
