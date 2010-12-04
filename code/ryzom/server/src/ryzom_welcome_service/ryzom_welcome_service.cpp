@@ -38,6 +38,7 @@
 #include "ryzom_welcome_service.h"
 
 #include "game_share/welcome_service_itf.h"
+#include "game_share/mirror.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1334,6 +1335,7 @@ public:
 		return true;
 	}
 
+	CMirror				Mirror;
 };
 
 
