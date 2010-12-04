@@ -106,7 +106,7 @@ public:
 	}
 
 	/// Returns a reference to the animation manager
-	NLSOUND::CSoundAnimManager* getSoundAnimManager()
+	NLSOUND::CSoundAnimManager *getSoundAnimManager()
 	{
 		return _AnimManager;
 	}
@@ -121,13 +121,13 @@ public:
 	void update();
 
 private:
-	NLSOUND::UAudioMixer		*_AudioMixer;
-	std::set<std::string>		_SampleBanksFileName;
-	NLSOUND::CSoundAnimManager	*_AnimManager;
-	NLMISC::CVector			_Zero;
-	std::string			_SamplePath;
-	std::string			_PackedSheetPath;
-	NLMISC::CMatrix 		oldMatrix;
+	NLSOUND::UAudioMixer *_AudioMixer;
+	std::set<std::string> _SampleBanksFileName;
+	NLSOUND::CSoundAnimManager *_AnimManager;
+	NLMISC::CVector _Zero;
+	std::string	_SamplePath;
+	std::string	_PackedSheetPath;
+	NLMISC::CMatrix	oldMatrix;
 }; /* class CSoundSystem */
 
 } /* namespace NLQT */

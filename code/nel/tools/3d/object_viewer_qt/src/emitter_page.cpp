@@ -58,7 +58,6 @@ CEmitterPage::CEmitterPage(QWidget *parent)
 
 	// SPEED_INHERITANCE_FACTOR
 	_ui.speedInherFactorWidget->setRange(-1.f, 1.f);
-	//_ui.speedInherFactorWidget->setWrapper(&_SpeedInheritanceFactorWrapper);
 
 	// DELAYED_EMISSION
 	_ui.delayedEmissionWidget->setRange(0.f, 10.f);

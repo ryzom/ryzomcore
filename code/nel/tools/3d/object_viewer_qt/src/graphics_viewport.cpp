@@ -120,11 +120,11 @@ void CGraphicsViewport::resizeEvent(QResizeEvent *resizeEvent)
 
 typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-bool CGraphicsViewport::winEvent(MSG * message, long * result)
+bool CGraphicsViewport::winEvent(MSG *message, long *result)
 {
 	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver())->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
 		if (driver)
 		{
 			winProc proc = (winProc)driver->getWindowProc();
@@ -137,7 +137,7 @@ bool CGraphicsViewport::winEvent(MSG * message, long * result)
 
 #elif defined(NL_OS_MAC)
 
-typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
+typedef bool (*cocoaProc)(NL3D::IDriver *, const void *e);
 
 bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
 {
@@ -146,7 +146,7 @@ bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
 
 	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver())->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
 		if (driver)
 		{
 			cocoaProc proc = (cocoaProc)driver->getWindowProc();
@@ -165,7 +165,7 @@ bool CGraphicsViewport::x11Event(XEvent *event)
 {
 	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver())->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
 		if (driver)
 		{
 			x11Proc proc = (x11Proc)driver->getWindowProc();

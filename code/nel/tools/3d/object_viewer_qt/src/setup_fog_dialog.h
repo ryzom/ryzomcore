@@ -26,7 +26,6 @@
 // STL includes
 
 // NeL includes
-#include <nel/misc/config_file.h>
 #include <nel/misc/rgba.h>
 
 // Project includes
@@ -49,6 +48,7 @@ public:
 private Q_SLOTS:
 	void apply();
 	void setColor();
+
 private:
 	NLMISC::CRGBA colorFog;
 

@@ -141,7 +141,7 @@ void CWorkspacePage::insertPS()
 			else
 			{
 				QModelIndex index = _treeModel->index(0, 0);
-				_treeModel->insertRows(node, static_cast<CParticleTreeItem*>(index.internalPointer())->childCount(), index);
+				_treeModel->insertRows(node, static_cast<CParticleTreeItem *>(index.internalPointer())->childCount(), index);
 			}
 		}
 	}
@@ -180,7 +180,7 @@ void CWorkspacePage::createPS()
 			return;
 		}
 		QModelIndex index = _treeModel->index(0, 0);
-		_treeModel->insertRows(node, static_cast<CParticleTreeItem*>(index.internalPointer())->childCount(), index);
+		_treeModel->insertRows(node, static_cast<CParticleTreeItem *>(index.internalPointer())->childCount(), index);
 	}
 }
 

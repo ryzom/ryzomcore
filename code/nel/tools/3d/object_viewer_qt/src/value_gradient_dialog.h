@@ -114,19 +114,19 @@ private Q_SLOTS:
 protected:
 
 	// the minimum number of element in the gradient
-	uint		_MinSize;
+	uint _MinSize;
 
 	// false to disable the dialog that control the number of stages between each value
-	bool		_CanTuneNbStages;
+	bool _CanTuneNbStages;
 
 	IValueGradientClient *_ClientInterface;
 
-	bool		_DestroyClientInterface;
+	bool _DestroyClientInterface;
 
 	// the current size of the gradient
-	uint		_Size;
+	uint _Size;
 
-	CWorkspaceNode  *_Node;
+	CWorkspaceNode *_Node;
 
 	// a wrapper to tune the number of step
 	struct CNbStepWrapper :public IPSWrapperUInt

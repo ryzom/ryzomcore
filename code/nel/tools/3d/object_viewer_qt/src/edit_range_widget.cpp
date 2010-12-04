@@ -34,7 +34,9 @@ namespace NLQT
 const int max_range = 9999;
 
 CEditRangeUIntWidget::CEditRangeUIntWidget(QWidget *parent)
-	: QWidget(parent), _Wrapper(NULL), _emit(true)
+	: QWidget(parent), 
+	_Wrapper(NULL), 
+	_emit(true)
 {
 	_ui.setupUi(this);
 

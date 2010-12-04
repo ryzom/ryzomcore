@@ -68,10 +68,10 @@ private Q_SLOTS:
 private:
 	void updateTexture();
 
-	IPSWrapperTexture *_Wrapper ;
+	IPSWrapperTexture *_Wrapper;
 
 	// the current texture
-	NLMISC::CSmartPtr<NL3D::ITexture> _Texture ;
+	NLMISC::CSmartPtr<NL3D::ITexture> _Texture;
 
 	Ui::CParticleTextureWidget _ui;
 }; /* class CParticleTextureWidget */

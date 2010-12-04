@@ -34,8 +34,10 @@ namespace NLQT
 NLMISC::CMatrix  BuildEulerMatrix(float psi, float theta, float phi)
 {
 	float ca = cosf(psi), sa = sinf(psi)
-							   , cb = cosf(theta), sb = sinf(theta)
-									   , cc = cosf(phi), sc = sinf(phi);
+						, cb = cosf(theta)
+						, sb = sinf(theta)
+						, cc = cosf(phi)
+						, sc = sinf(phi);
 	NLMISC::CMatrix m;
 	m.identity();
 	m.setRot(NLMISC::CVector(ca * cb * cc - sa * sc, -cc * sa - ca * cb *sc, ca * sb)
@@ -113,8 +115,10 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 	for (uint k = 0; k < 8; ++k)
 	{
 		float ca = cosf(sol[k].x), sa = sinf(sol[k].x)
-										, cb = cosf(sol[k].y), sb = sinf(sol[k].y)
-												, cc = cosf(sol[k].z), sc = sinf(sol[k].z);
+								, cb = cosf(sol[k].y)
+								, sb = sinf(sol[k].y)
+								, cc = cosf(sol[k].z)
+								, sc = sinf(sol[k].z);
 
 		float gap = fabsf(m[0][0] - ca * cb * cc + sa * sc);
 		gap += fabsf(m[1][0] + cc * sa + ca * cb *sc);
@@ -135,7 +139,8 @@ NLMISC::CVector GetEulerAngles(const NLMISC::CMatrix &mat)
 }
 
 CBasicEditWidget::CBasicEditWidget(QWidget *parent)
-	: QWidget(parent), _Wrapper(NULL)
+	: QWidget(parent), 
+	_Wrapper(NULL)
 {
 	_ui.setupUi(this);
 
@@ -155,7 +160,8 @@ void CBasicEditWidget::setWrapper(IPSWrapper<NL3D::CPlaneBasis> *wrapper)
 
 void CBasicEditWidget::updateUi()
 {
-	if (_Wrapper == NULL) return;
+	if (_Wrapper == NULL) 
+		return;
 	NL3D::CPlaneBasis pb = _Wrapper->get();
 	NLMISC::CMatrix mat;
 	mat.setRot(pb.X, pb.Y, pb.X ^ pb.Y);
@@ -178,7 +184,8 @@ void CBasicEditWidget::updateUi()
 
 void CBasicEditWidget::updateGraphics()
 {
-	if (_Wrapper == NULL) return;
+	if (_Wrapper == NULL) 
+		return;
 
 	NLMISC::CVector angles(2.f * (float) NLMISC::Pi * _ui.psiSpinBox->value() / 360.f
 						   , 2.f * (float) NLMISC::Pi * _ui.thetaSpinBox->value() / 360.f

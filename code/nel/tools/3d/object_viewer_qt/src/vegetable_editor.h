@@ -113,7 +113,6 @@ public:
 	~CVegetableEditor(void);
 
 	void init();
-
 	void release();
 
 	/// @name Landscape control
@@ -228,47 +227,45 @@ public:
 
 private:
 	void loadConfig();
-
 	void loadLandscapeSetup();
-
 	void saveConfig();
 
-	NL3D::CLandscapeModel		*_VegetableLandscape;
+	NL3D::CLandscapeModel *_VegetableLandscape;
 
 	// File info to build it
-	std::string			_VegetableLandscapeTileBank;
-	std::string			_VegetableLandscapeTileFarBank;
-	std::vector<std::string>	_VegetableLandscapeZoneNames;
+	std::string	_VegetableLandscapeTileBank;
+	std::string	_VegetableLandscapeTileFarBank;
+	std::vector<std::string> _VegetableLandscapeZoneNames;
 
 	// Misc.
-	float				_VegetableLandscapeThreshold;
-	float				_VegetableLandscapeTileNear;
-	float				_VegetableLandscapeMultiply;
-	NLMISC::CRGBA			_VegetableLandscapeAmbient;
-	NLMISC::CRGBA			_VegetableLandscapeDiffuse;
-	std::string			_VegetableTexture;
-	NLMISC::CRGBA			_VegetableAmbient;
-	NLMISC::CRGBA			_VegetableDiffuse;
-	NLMISC::CVector			_VegetableLightDir;
+	float _VegetableLandscapeThreshold;
+	float _VegetableLandscapeTileNear;
+	float _VegetableLandscapeMultiply;
+	NLMISC::CRGBA _VegetableLandscapeAmbient;
+	NLMISC::CRGBA _VegetableLandscapeDiffuse;
+	std::string	_VegetableTexture;
+	NLMISC::CRGBA _VegetableAmbient;
+	NLMISC::CRGBA _VegetableDiffuse;
+	NLMISC::CVector	_VegetableLightDir;
 	// Vegetable wind.
-	NLMISC::CVector			_VegetableWindDir;
-	float				_VegetableWindFreq;
-	float				_VegetableWindPower;
-	float				_VegetableWindBendMin;
+	NLMISC::CVector	_VegetableWindDir;
+	float _VegetableWindFreq;
+	float _VegetableWindPower;
+	float _VegetableWindBendMin;
 
-	bool				_VegetableEnabled;
+	bool _VegetableEnabled;
 
 	// Collision
-	bool				_VegetableSnapToGround;
-	float				_VegetableSnapHeight;
-	NL3D::CVisualCollisionManager	*_VegetableCollisionManager;
-	NL3D::CVisualCollisionEntity	*_VegetableCollisionEntity;
+	bool _VegetableSnapToGround;
+	float _VegetableSnapHeight;
+	NL3D::CVisualCollisionManager *_VegetableCollisionManager;
+	NL3D::CVisualCollisionEntity *_VegetableCollisionEntity;
 
 	// The vegetable List.
 	std::vector<CVegetableNode>	_Vegetables;
 
-	NL3D::IDriver   	*_Driver;
-	NL3D::CScene		*_Scene;
+	NL3D::IDriver *_Driver;
+	NL3D::CScene *_Scene;
 
 }; /* class CVegetableEditor */
 

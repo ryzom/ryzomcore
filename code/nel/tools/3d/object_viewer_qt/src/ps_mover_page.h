@@ -20,7 +20,6 @@
 #ifndef PS_MOVER_PAGE_H
 #define PS_MOVER_PAGE_H
 
-
 #include <nel/misc/types_nl.h>
 #include "ui_ps_mover_form.h"
 
@@ -81,7 +80,7 @@ public:
 	void updatePosition(void) ;
 
 	/// get the current moving interface, or NULL, if the selected object has no IPSMover interface
-	NL3D::IPSMover *getMoverInterface(void)  ;
+	NL3D::IPSMover *getMoverInterface(void);
 
 	/// get the located being edited
 	NL3D::CPSLocated *getLocated(void)
@@ -90,17 +89,17 @@ public:
 	}
 	const NL3D::CPSLocated *getLocated(void) const
 	{
-		return _EditedLocated ;
+		return _EditedLocated;
 	}
 
 	/// get the index of the current edited item
 	uint32 getLocatedIndex(void) const
 	{
-		return _EditedLocatedIndex ;
+		return _EditedLocatedIndex;
 	}
 
 	/// ghet the current located bindable being edited, or null
-	NL3D::CPSLocatedBindable *getLocatedBindable(void) ;
+	NL3D::CPSLocatedBindable *getLocatedBindable(void);
 
 private Q_SLOTS:
 	void setXPosition(double value);
@@ -185,11 +184,11 @@ private:
 	/// update the mouse listener position when the user entered a value with the keyboard
 	void updateListener(void) ;
 
-	CWorkspaceNode 		*_Node;
+	CWorkspaceNode *_Node;
 
-	NL3D::CPSLocated 	*_EditedLocated ;
+	NL3D::CPSLocated *_EditedLocated ;
 
-	uint32 			_EditedLocatedIndex ;
+	uint32 _EditedLocatedIndex ;
 
 	Ui::CPSMoverPage _ui;
 

@@ -46,7 +46,7 @@ CSkeletonTreeModel::~CSkeletonTreeModel()
 int CSkeletonTreeModel::columnCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
-		return static_cast<CSkeletonTreeItem*>(parent.internalPointer())->columnCount();
+		return static_cast<CSkeletonTreeItem *>(parent.internalPointer())->columnCount();
 	else
 		return _rootItem->columnCount();
 }
@@ -59,7 +59,7 @@ QVariant CSkeletonTreeModel::data(const QModelIndex &index, int role) const
 	if (role != Qt::DisplayRole)
 		return QVariant();
 
-	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(index.internalPointer());
+	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem *>(index.internalPointer());
 
 	return item->data(index.column());
 }
@@ -92,7 +92,7 @@ const
 	if (!parent.isValid())
 		parentItem = _rootItem;
 	else
-		parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CSkeletonTreeItem *>(parent.internalPointer());
 
 	CSkeletonTreeItem *childItem = parentItem->child(row);
 	if (childItem)
@@ -106,7 +106,7 @@ QModelIndex CSkeletonTreeModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	CSkeletonTreeItem *childItem = static_cast<CSkeletonTreeItem*>(index.internalPointer());
+	CSkeletonTreeItem *childItem = static_cast<CSkeletonTreeItem *>(index.internalPointer());
 	CSkeletonTreeItem *parentItem = childItem->parent();
 
 	if (parentItem == _rootItem)
@@ -124,7 +124,7 @@ int CSkeletonTreeModel::rowCount(const QModelIndex &parent) const
 	if (!parent.isValid())
 		parentItem = _rootItem;
 	else
-		parentItem = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CSkeletonTreeItem *>(parent.internalPointer());
 
 	return parentItem->childCount();
 }
@@ -151,7 +151,7 @@ void CSkeletonTreeModel::rebuildModel()
 
 	CSkeletonTreeItem *parentItem = _rootItem;
 
-	for (uint i = 0; i < skel.getNumBones(); i++)
+	for (uint i = 0; i < skel.getNumBones(); ++i)
 	{
 		NL3D::UBone bone =  skel.getBone(i);
 		sint32 parentId = bone.getObjectPtr()->getFatherId();
@@ -182,12 +182,12 @@ void CSkeletonTreeModel::resetTreeModel()
 QModelIndex CSkeletonTreeModel::getIndexFromId(sint id, const QModelIndex &parent)
 {
 	QModelIndex currentIndex = parent;
-	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(parent.internalPointer());
+	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem *>(parent.internalPointer());
 	if (item->getId() != id)
-		for (int i = 0; i < item->childCount(); i++)
+		for (int i = 0; i < item->childCount(); ++i)
 		{
 			currentIndex = getIndexFromId(id, index(i, 0, parent));
-			CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(currentIndex.internalPointer());
+			CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem *>(currentIndex.internalPointer());
 			if (item->getId() == id)
 				return currentIndex;
 		}

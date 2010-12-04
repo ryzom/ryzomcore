@@ -32,8 +32,6 @@ CGlobalWindDialog::CGlobalWindDialog(QWidget *parent)
 {
 	_ui.setupUi(this);
 
-	//_ui.directionWidget->setWrapper(&_DirectionWrapper);
-
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setWndPower(int)));
 	connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(updateWnd(bool)));
 }
@@ -55,17 +53,6 @@ void CGlobalWindDialog::updateWnd(bool visible)
 		return;
 
 	_ui.horizontalSlider->setValue(int(Modules::objView().getScene()->getGlobalWindPower() * _ui.horizontalSlider->maximum()));
-//	_ui.directionWidget->updateUi();
-}
-/*
-NLMISC::CVector CGlobalWindDialog::CDirectionWrapper::get(void) const
-{
-	return Modules::objView().getScene()->getGlobalWindDirection();
 }
 
-void CGlobalWindDialog::CDirectionWrapper::set(const NLMISC::CVector &d)
-{
-	Modules::objView().getScene()->setGlobalWindDirection(d);
-}
-*/
 } /* namespace NLQT */

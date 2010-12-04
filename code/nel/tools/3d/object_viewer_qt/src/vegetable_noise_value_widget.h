@@ -40,14 +40,15 @@ public:
 	CVegetNoiseValueWidget(QWidget *parent = 0);
 	~CVegetNoiseValueWidget();
 
-	void setNoiseValue(const NLMISC::CNoiseValue &value, bool emit = true);
-
 	void setDefaultRangeAbs(float defRangeMin, float defRangeMax);
 	void setDefaultRangeRand(float defRangeMin, float defRangeMax);
 	void setDefaultRangeFreq(float defRangeMin, float defRangeMax);
-
+	
 Q_SIGNALS:
 	void noiseValueChanged(const NLMISC::CNoiseValue &value);
+
+public Q_SLOTS:
+	void setNoiseValue(const NLMISC::CNoiseValue &value, bool emit = true);
 
 private Q_SLOTS:
 	void setSlider(int value);

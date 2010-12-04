@@ -128,9 +128,9 @@ void CSkeletonScaleDialog::setCurrentShape(const QString &name)
 	_BkupBones = _Bones;
 }
 
-void CSkeletonScaleDialog::setCurrentBone(const QModelIndex & index)
+void CSkeletonScaleDialog::setCurrentBone(const QModelIndex &index)
 {
-	CSkeletonTreeItem *currentItem = static_cast<CSkeletonTreeItem*>(index.internalPointer());
+	CSkeletonTreeItem *currentItem = static_cast<CSkeletonTreeItem *>(index.internalPointer());
 
 	// bkup for undo
 	static TBoneMirrorArray precState;
@@ -208,7 +208,7 @@ void CSkeletonScaleDialog::clickMirrorSelected()
 
 	// for each bone selected
 	bool	change= false;
-	for(uint i=0; i<_Bones.size(); i++)
+	for(uint i=0; i < _Bones.size(); ++i)
 	{
 		CBoneMirror &bone= _Bones[i];
 		if(bone.Selected)
@@ -468,7 +468,7 @@ void CSkeletonScaleDialog::applyMirrorToSkeleton()
 	if(!_Skeleton.empty())
 	{
 		nlassert(_Skeleton.getNumBones() == _Bones.size());
-		for(uint i = 0; i < _Bones.size(); i++)
+		for(uint i = 0; i < _Bones.size(); ++i)
 		{
 			// unmul from precision
 			NLMISC::CVector boneScale = _Bones[i].BoneScale / ssd_scale_precision;
@@ -484,7 +484,7 @@ void CSkeletonScaleDialog::applySkeletonToMirror()
 	if(!_Skeleton.empty())
 	{
 		nlassert(_Skeleton.getNumBones() == _Bones.size());
-		for(uint i = 0; i < _Skeleton.getNumBones(); i++)
+		for(uint i = 0; i < _Skeleton.getNumBones(); ++i)
 		{
 			// mul by precision, and round
 			_Bones[i].SkinScale = _Skeleton.getBone(i).getSkinScale() * ssd_scale_precision;
@@ -517,7 +517,7 @@ void CSkeletonScaleDialog::applySelectionToView()
 {
 	_ui.treeView->blockSignals(true);
 	CSkeletonTreeModel *model = Modules::mainWin().getSkeletonModel();
-	for(uint i = 0; i < _Bones.size(); i++)
+	for(uint i = 0; i < _Bones.size(); ++i)
 	{
 		if (_Bones[i].Selected)
 			_ui.treeView->setCurrentIndex(model->getIndexFromId(i, model->index(0, 0)));
@@ -527,7 +527,7 @@ void CSkeletonScaleDialog::applySelectionToView()
 
 sint CSkeletonScaleDialog::getBoneForMirror(uint boneId, std::string &mirrorName)
 {
-	sint	side= 0;
+	sint side= 0;
 	std::string::size_type pos;
 	nlassert(!_Skeleton.empty() && (boneId < _Skeleton.getNumBones()));
 	mirrorName= _Skeleton.getBone(boneId).getObjectPtr()->getBoneName();
@@ -561,7 +561,7 @@ bool CSkeletonScaleDialog::saveCurrentInStream(NLMISC::IStream &f)
 
 		// Retrieve boneBase definition from the current skeleton
 		std::vector<NL3D::CBoneBase> boneBases;
-		(NLMISC::safe_cast<NL3D::CSkeletonShape*>((NL3D::IShape*)_Skeleton.getObjectPtr()->Shape))->retrieve(boneBases);
+		(NLMISC::safe_cast<NL3D::CSkeletonShape *>((NL3D::IShape *)_Skeleton.getObjectPtr()->Shape))->retrieve(boneBases);
 
 		// Copies bone scales from the model
 		nlassert(boneBases.size() == _Skeleton.getNumBones());
@@ -615,7 +615,7 @@ bool CSkeletonScaleDialog::saveSkelScaleInStream(NLMISC::IStream &f)
 		// Copies bone scales from the model
 		std::vector<CBoneScaleInfo> boneScales;
 		boneScales.resize(_Skeleton.getNumBones());
-		for(uint i = 0; i < boneScales.size(); i++)
+		for(uint i = 0; i < boneScales.size(); ++i)
 		{
 			NL3D::CBone *bone= _Skeleton.getBone(i).getObjectPtr();
 			CBoneScaleInfo &boneScale= boneScales[i];
@@ -651,7 +651,7 @@ bool CSkeletonScaleDialog::loadSkelScaleFromStream(NLMISC::IStream &f)
 		f.serialCont(boneScales);
 
 		// apply to the current skeleton
-		for(uint i = 0; i < boneScales.size(); i++)
+		for(uint i = 0; i < boneScales.size(); ++i)
 		{
 			sint32 boneId = _Skeleton.getBoneIdByName(boneScales[i].Name);
 			if(boneId >= 0 && boneId < (sint32)_Skeleton.getNumBones())
@@ -689,7 +689,7 @@ void CSkeletonScaleDialog::pushUndoState(const TBoneMirrorArray &precState, bool
 	// test if real change
 	nlassert(precState.size() == _Bones.size());
 	bool change = false;
-	for(uint i = 0; i < _Bones.size(); i++)
+	for(uint i = 0; i < _Bones.size(); ++i)
 	{
 		if( _Bones[i].BoneScale!=precState[i].BoneScale ||
 				_Bones[i].SkinScale!=precState[i].SkinScale ||

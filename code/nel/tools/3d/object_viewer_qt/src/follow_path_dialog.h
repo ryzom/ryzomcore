@@ -56,7 +56,7 @@ protected:
 	QPushButton *pushButton;
 
 	NL3D::CPSPlaneBasisFollowSpeed *_FollowPath;
-	CWorkspaceNode	   *_Node;
+	CWorkspaceNode *_Node;
 }; /* class CFollowPathDialog */
 
 } /* namespace NLQT */

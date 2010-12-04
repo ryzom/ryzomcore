@@ -48,13 +48,7 @@ namespace NLQT
 class CSlotInfo
 {
 public:
-	CSlotInfo ():
-		Animation("empty"), Skeleton("empty"),
-		Offset(0), StartTime(0), EndTime(0),
-		StartBlend(1),	EndBlend (1), Smoothness(1),
-		SpeedFactor(1),	ClampMode(0),
-		SkeletonInverted(false),
-		Enable(true)	{} ;
+	CSlotInfo();
 
 	std::string		Animation;
 	std::string		Skeleton;
@@ -104,8 +98,8 @@ public:
 		float	SpeedAnim;
 		int	Mode;
 
-		SAnimationStatus():
-			LoopAnim(false), PlayAnim(false),
+		SAnimationStatus()
+			: LoopAnim(false), PlayAnim(false),
 			CurrentTimeAnim(0), StartAnim(0),
 			EndAnim(0), SpeedAnim(1), Mode(Mode::PlayList) {}
 	};
@@ -262,44 +256,44 @@ private:
 							bool removeLast);
 
 	// The name of the entity
-	std::string			_Name;
-	std::string			_FileNameShape;
-	std::string			_FileNameSkeleton;
+	std::string _Name;
+	std::string	_FileNameShape;
+	std::string	_FileNameSkeleton;
 
-	SAnimationStatus		_AnimationStatus;
+	SAnimationStatus _AnimationStatus;
 
-	bool 				_inPlace;
-	bool 				_incPos;
+	bool _inPlace;
+	bool _incPos;
 
-	float 				_CharacterScalePos;
+	float _CharacterScalePos;
 
 	// The mesh instance associated to this entity
-	NL3D::UInstance			_Instance;
+	NL3D::UInstance _Instance;
 
 	// The skeleton binded to the instance
-	NL3D::USkeleton			_Skeleton;
+	NL3D::USkeleton _Skeleton;
 
-	NL3D::UPlayList			*_PlayList;
+	NL3D::UPlayList *_PlayList;
 
-	NL3D::UAnimationSet		*_AnimationSet;
+	NL3D::UAnimationSet *_AnimationSet;
 
 	// Animation input file
-	std::vector<std::string>	_AnimationList;
+	std::vector<std::string> _AnimationList;
 
 	// Skeleton weight input file
-	std::vector<std::string>	_SWTList;
+	std::vector<std::string> _SWTList;
 
 	// Play list animation
-	std::vector<std::string >	_PlayListAnimation;
+	std::vector<std::string> _PlayListAnimation;
 
 	// Slot info for this object
-	CSlotInfo			_SlotInfo[NL3D::CChannelMixer::NumAnimationSlot];
+	CSlotInfo _SlotInfo[NL3D::CChannelMixer::NumAnimationSlot];
 
 	friend class CObjectViewer;
 }; /* class CEntity */
 
-typedef std::map<std::string, CEntity>	CEntities;
-typedef CEntities::iterator		EIT;
+typedef std::map<std::string, CEntity> CEntities;
+typedef CEntities::iterator	EIT;
 
 } /* namespace NLQT */
 

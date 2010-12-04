@@ -234,25 +234,25 @@ private:
 
 	// Current state
 	int	_State;
-	float	_Speed;
-	bool	_AutoRepeat;
-	bool	_DisplayBBox;
-	bool	_DisplayHelpers;
+	float _Speed;
+	bool _AutoRepeat;
+	bool _DisplayBBox;
+	bool _DisplayHelpers;
 
 	// The system bbox must be updated automatically
-	bool			_AutoUpdateBBox;
+	bool _AutoUpdateBBox;
 
 	// The last computed bbox for the system
-	bool			_EmptyBBox;
-	NLMISC::CAABBox		_CurrBBox;
+	bool _EmptyBBox;
+	NLMISC::CAABBox _CurrBBox;
 
 
-	CParticleWorkspace	*_PW;
-	NL3D::IDriver   	*_Driver;
-	NL3D::CScene		*_Scene;
+	CParticleWorkspace *_PW;
+	NL3D::IDriver *_Driver;
+	NL3D::CScene *_Scene;
 
 	// Font manager
-	NL3D::CFontManager	*_FontManager;
+	NL3D::CFontManager *_FontManager;
 
 	// Font generator
 	NL3D::CFontGenerator *_FontGen;

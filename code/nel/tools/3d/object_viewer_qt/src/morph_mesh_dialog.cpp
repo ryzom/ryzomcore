@@ -34,7 +34,9 @@ namespace NLQT
 {
 
 CMorphMeshDialog::CMorphMeshDialog(CWorkspaceNode *ownerNode, NL3D::CPSConstraintMesh *cm, QWidget *parent)
-	: QDialog(parent), _Node(ownerNode), _CM(cm)
+	: QDialog(parent), 
+	_Node(ownerNode), 
+	_CM(cm)
 {
 	_ui.setupUi(this);
 

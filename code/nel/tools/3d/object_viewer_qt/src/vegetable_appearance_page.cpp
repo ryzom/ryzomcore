@@ -114,7 +114,7 @@ void CVegetableApperancePage::setNoiseValueColor(const NLMISC::CNoiseValue &valu
 	Modules::veget().refreshVegetableDisplay();
 }
 
-void CVegetableApperancePage::browseColor(QListWidgetItem * item)
+void CVegetableApperancePage::browseColor(QListWidgetItem *item)
 {
 	sint row = _ui.listWidget->currentRow();
 
@@ -208,7 +208,7 @@ void CVegetableApperancePage::getFromListColors()
 	{
 		int i = items.indexOf(item);
 
-		NL3D::CVegetable *otherVegetable = Modules::veget().getVegetable(i)->Vegetable;
+		NL3D::CVegetable *otherVegetable = Modules::veget().getVegetable(i)->_vegetable;
 
 		_Vegetable->Color.Gradients = otherVegetable->Color.Gradients;
 

@@ -44,7 +44,7 @@ private Q_SLOTS:
 	void setLink();
 	void setUnlink();
 	void resetModel();
-	void clickedItem(const QModelIndex & index);
+	void clickedItem(const QModelIndex &index);
 
 private:
 

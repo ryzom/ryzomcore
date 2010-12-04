@@ -99,16 +99,16 @@ public:
 private:
 	union
 	{
-		CParticleWorkspace	  *_WS;
-		NL3D::CPSLocated	  *_Loc;
-		NL3D::CPSLocatedBindable  *_Bind;
-		CWorkspaceNode		  *_PS;
+		CParticleWorkspace *_WS;
+		NL3D::CPSLocated *_Loc;
+		NL3D::CPSLocatedBindable *_Bind;
+		CWorkspaceNode *_PS;
 	};
 
 	// for the located instance type, this is the index of the instance
 	uint32 _LocatedInstanceIndex;
 
-	QList<CParticleTreeItem*> _childItems;
+	QList<CParticleTreeItem *> _childItems;
 	QList<QVariant> _itemData;
 	int _itemIconType;
 	CParticleTreeItem *_parentItem;

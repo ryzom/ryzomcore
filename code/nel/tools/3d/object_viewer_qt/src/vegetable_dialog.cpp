@@ -151,7 +151,7 @@ void CVegetableDialog::addVegetList()
 
 	// update view
 	QListWidgetItem *item = new QListWidgetItem(_ui.listWidget);
-	item->setText(QString(Modules::veget().getVegetable(id)->VegetableName.c_str()));
+	item->setText(QString(Modules::veget().getVegetable(id)->_vegetableName.c_str()));
 
 	// update 3D view
 	Modules::veget().refreshVegetableDisplay();
@@ -167,7 +167,7 @@ void CVegetableDialog::removeVegetList()
 	QListWidgetItem *item = _ui.listWidget->takeItem(id);
 	delete item;
 
-	id--;
+	--id;
 
 	_ui.listWidget->setCurrentRow(id);
 
@@ -185,7 +185,7 @@ void CVegetableDialog::insVegetList()
 
 		// update view
 		QListWidgetItem *item = new QListWidgetItem();
-		item->setText(QString(Modules::veget().getVegetable(id)->VegetableName.c_str()));
+		item->setText(QString(Modules::veget().getVegetable(id)->_vegetableName.c_str()));
 		_ui.listWidget->insertItem(id, item);
 
 		// update 3D view
@@ -239,7 +239,7 @@ void CVegetableDialog::loadVegetdesc()
 
 				// update view
 				QListWidgetItem *item = new QListWidgetItem(_ui.listWidget);
-				item->setText(QString(Modules::veget().getVegetable(id)->VegetableName.c_str()));
+				item->setText(QString(Modules::veget().getVegetable(id)->_vegetableName.c_str()));
 
 				// update 3D view
 				Modules::veget().refreshVegetableDisplay();
@@ -261,7 +261,7 @@ void CVegetableDialog::saveVegetdesc()
 
 	CVegetableNode *vegetNode = Modules::veget().getVegetable(id);
 
-	QString oldFileName = QString(vegetNode->VegetableName.c_str()) + ".vegetdesc";
+	QString oldFileName = QString(vegetNode->_vegetableName.c_str()) + ".vegetdesc";
 
 	// Then try to save it.
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Vegetable Descriptor"),
@@ -277,7 +277,7 @@ void CVegetableDialog::saveVegetdesc()
 			try
 			{
 				// save the vegetable
-				f.serial(*vegetNode->Vegetable);
+				f.serial(*vegetNode->_vegetable);
 			}
 			catch(NLMISC::EStream &e)
 			{
@@ -299,7 +299,7 @@ void CVegetableDialog::setCurrentItem(int row)
 {
 	NL3D::CVegetable *veget = NULL;
 	if (row != -1)
-		veget = Modules::veget().getVegetable(row)->Vegetable;
+		veget = Modules::veget().getVegetable(row)->_vegetable;
 	_ui.densityPage->setVegetableToEdit(veget);
 	_ui.appearancePage->setVegetableToEdit(veget);
 	_ui.scalePage->setVegetableToEdit(veget);

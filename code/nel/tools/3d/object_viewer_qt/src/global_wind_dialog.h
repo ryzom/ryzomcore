@@ -44,12 +44,6 @@ private Q_SLOTS:
 	void updateWnd(bool visible);
 
 private:
-	/// wrappers to tune the direction of wind
-	/*	struct CDirectionWrapper : public IPSWrapper<NLMISC::CVector>
-		{
-			NLMISC::CVector get(void) const;
-			void set(const NLMISC::CVector &d);
-		} _DirectionWrapper;*/
 
 	Ui::CGlobalWindDialog _ui;
 

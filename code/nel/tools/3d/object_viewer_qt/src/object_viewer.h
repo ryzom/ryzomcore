@@ -145,7 +145,7 @@ public:
 
 	/// Get current instance from the scene
 	/// @return name current instance, "" if no instance edited
-	const std::string& getCurrentObject()
+	std::string getCurrentObject() const
 	{
 		return _CurrentInstance;
 	}

@@ -50,7 +50,6 @@ CVegetableDensityPage::CVegetableDensityPage(QWidget *parent)
 	_ui.maxDensityWidget->setRange(0, NL_VEGETABLE_EDIT_DEFAULT_MAX_DENSITY);
 	_ui.maxDensityWidget->enableLowerBound(0, false);
 
-
 	connect(_ui.browseShapePushButton, SIGNAL(clicked()), this, SLOT(browseShapeVeget()));
 	connect(_ui.distanceSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setDistanceOfCreat(int)));
 	connect(_ui.densityGroupBox, SIGNAL(noiseValueChanged(NLMISC::CNoiseValue)), this, SLOT(setDensity(NLMISC::CNoiseValue)));

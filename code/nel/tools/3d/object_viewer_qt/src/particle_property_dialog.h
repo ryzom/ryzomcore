@@ -68,25 +68,25 @@ public:
 private:
 	void setupUi();
 
-	QWidget 		*_dockWidgetContents;
-	QGridLayout 		*_gridLayout;
-	QGridLayout 		*_pagesGridLayout;
-	QScrollArea 		*_scrollArea;
-	QWidget 		*_scrollAreaWidgetContents;
+	QWidget *_dockWidgetContents;
+	QGridLayout *_gridLayout;
+	QGridLayout *_pagesGridLayout;
+	QScrollArea *_scrollArea;
+	QWidget *_scrollAreaWidgetContents;
 
-	QStackedWidget 		*_stackedWidget;
-	CWorkspacePage 		*_wpPage;
-	CParticleSystemPage 	*_psPage;
-	CLocatedBindablePage	*_locatedBindablePage;
-	CLocatedPage 		*_locatedPage;
-	CForcePage 		*_forcePage;
-	CLightPage 		*_lightPage;
-	CZonePage 		*_zonePage;
-	CSoundPage 		*_soundPage;
-	CEmitterPage 		*_emitterPage;
-	CPSMoverPage 		*_psMoverPage;
+	QStackedWidget *_stackedWidget;
+	CWorkspacePage *_wpPage;
+	CParticleSystemPage	*_psPage;
+	CLocatedBindablePage *_locatedBindablePage;
+	CLocatedPage *_locatedPage;
+	CForcePage *_forcePage;
+	CLightPage *_lightPage;
+	CZonePage *_zonePage;
+	CSoundPage *_soundPage;
+	CEmitterPage *_emitterPage;
+	CPSMoverPage *_psMoverPage;
 
-	CParticleTreeModel 	*_treeModel;
+	CParticleTreeModel *_treeModel;
 
 	friend class CParticleWorkspaceDialog;
 }; /* class CPropertyDialog */

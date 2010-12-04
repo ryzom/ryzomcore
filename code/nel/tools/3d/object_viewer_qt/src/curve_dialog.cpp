@@ -27,7 +27,11 @@ namespace NLQT
 {
 
 CurveEditDialog::CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNode *ownerNode, QWidget *parent)
-	: QDialog(parent) , _Curve(curve), _scale(1.0), _pos(0.0), _Node(ownerNode)
+	: QDialog(parent), 
+	_scale(1.0), 
+	_pos(0.0), 
+	_Node(ownerNode), 
+	_Curve(curve)
 {
 	_ui.setupUi(this);
 
@@ -90,7 +94,7 @@ void CurveEditDialog::curveChanged(const QPolygonF &points)
 		_Curve->removeCtrlPoint(0);
 	else if (_Curve->getNumCtrlPoints() < uint(points.size()))
 		_Curve->addControlPoint(NL3D::CPSFloatCurveFunctor::CCtrlPoint(1, 0.5f));
-	for (int i = 0; i < points.size(); i++)
+	for (int i = 0; i < points.size(); ++i)
 		_Curve->setCtrlPoint(uint(i), NL3D::CPSFloatCurveFunctor::CCtrlPoint(points.at(i).x() / _ui.curveWidget->width(),
 							 (_ui.curveWidget->height() -  points.at(i).y() + _pos) / (_ui.curveWidget->height() * _scale)));
 }
@@ -146,7 +150,7 @@ void CurveEditDialog::setNumSamples(uint32 value)
 void CurveEditDialog::buildPoints()
 {
 	QPolygonF points;
-	for (uint i = 0; i < _Curve->getNumCtrlPoints(); i++)
+	for (uint i = 0; i < _Curve->getNumCtrlPoints(); ++i)
 		points << QPointF((_Curve->getControlPoint(i).Date * _ui.curveWidget->width()),
 						  _pos + _ui.curveWidget->height() - (_scale * _Curve->getControlPoint(i).Value * _ui.curveWidget->height()));
 

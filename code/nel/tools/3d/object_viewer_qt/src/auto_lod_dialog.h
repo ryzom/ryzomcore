@@ -46,37 +46,13 @@ public:
 private Q_SLOTS:
 	void setDegradationExponent(int value);
 	void setSkipParticles(bool state);
+	
+	void setDistRatio(float value);
+	void setMaxDistLODBias(float value);
 
 private:
 	CWorkspaceNode *_Node;
-
-	NL3D::CParticleSystem	  *_PS;
-
-	struct CDistRatioWrapper : IPSWrapperFloat
-	{
-		NL3D::CParticleSystem *PS;
-		virtual float get() const
-		{
-			return PS->getAutoLODStartDistPercent();
-		}
-		virtual void  set(const float &v)
-		{
-			PS->setupAutoLOD(v, PS->getAutoLODDegradationExponent());
-		}
-	} _DistRatioWrapper;
-
-	struct CMaxDistLODBiasWrapper : IPSWrapperFloat
-	{
-		NL3D::CParticleSystem *PS;
-		virtual float get() const
-		{
-			return PS->getMaxDistLODBias();
-		}
-		virtual void  set(const float &v)
-		{
-			PS->setMaxDistLODBias(v);
-		}
-	} _MaxDistLODBiasWrapper;
+	NL3D::CParticleSystem *_PS;
 
 	Ui::CAutoLODDialog _ui;
 }; /* class CAutoLODDialog */

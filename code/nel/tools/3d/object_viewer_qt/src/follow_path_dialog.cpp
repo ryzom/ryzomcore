@@ -30,7 +30,9 @@ namespace NLQT
 {
 
 CFollowPathDialog::CFollowPathDialog(NL3D::CPSPlaneBasisFollowSpeed *pbfs, CWorkspaceNode *ownerNode, QWidget *parent)
-	: QDialog(parent), _FollowPath(pbfs), _Node(ownerNode)
+	: QDialog(parent), 
+	_FollowPath(pbfs), 
+	_Node(ownerNode)
 {
 	resize(270, 90);
 	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);

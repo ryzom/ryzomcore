@@ -43,7 +43,23 @@ using namespace NL3D;
 namespace NLQT
 {
 
-CSlotInfo& CSlotInfo::operator=(const CSlotInfo & slotInfo)
+CSlotInfo::CSlotInfo()
+	: Animation("empty"), 
+	Skeleton("empty"),
+	Offset(0), 
+	StartTime(0), 
+	EndTime(0),
+	StartBlend(1),	
+	EndBlend (1), 
+	Smoothness(1),
+	SpeedFactor(1),	
+	ClampMode(0),
+	SkeletonInverted(false),
+	Enable(true)	
+{
+}
+
+CSlotInfo &CSlotInfo::operator=(const CSlotInfo &slotInfo)
 {
 	if ( this != &slotInfo)
 	{
@@ -63,11 +79,16 @@ CSlotInfo& CSlotInfo::operator=(const CSlotInfo & slotInfo)
 	return *this;
 }
 
-CEntity::CEntity(void):
-	_Name("<Unknown>"), _FileNameShape(""),
-	_FileNameSkeleton(""), _inPlace(false), _incPos(false),
-	_Instance(NULL), _Skeleton(NULL),
-	_PlayList(NULL), _AnimationSet(NULL)
+CEntity::CEntity(void)
+	: _Name("<Unknown>"), 
+	_FileNameShape(""),
+	_FileNameSkeleton(""), 
+	_inPlace(false), 
+	_incPos(false),
+	_Instance(NULL), 
+	_Skeleton(NULL),
+	_PlayList(NULL), 
+	_AnimationSet(NULL)
 {
 	_CharacterScalePos = 1;
 }
@@ -188,7 +209,7 @@ void CEntity::update(NL3D::TAnimationTime time)
 
 void CEntity::resetChannel()
 {
-	for(uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
+	for(uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; ++i)
 		_PlayList->setAnimation(i, UPlayList::empty);
 }
 
@@ -386,7 +407,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 
 void CEntity::animateChannelMixer()
 {
-	for (uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
+	for (uint i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; ++i)
 	{
 		if (_SlotInfo[i].Enable)
 		{

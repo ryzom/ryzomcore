@@ -81,7 +81,7 @@ protected:
 	virtual void resizeEvent(QResizeEvent *resizeEvent);
 
 #if defined(NL_OS_WINDOWS)
-	virtual bool winEvent(MSG * message, long * result);
+	virtual bool winEvent(MSG *message, long *result);
 #elif defined(NL_OS_MAC)
 	virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
 #elif defined(NL_OS_UNIX)

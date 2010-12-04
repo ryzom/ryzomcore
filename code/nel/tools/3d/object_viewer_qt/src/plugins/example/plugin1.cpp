@@ -19,7 +19,7 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 	_plugMan = pluginManager;
 	QString str;
 	
-	QList<NLQT::IPluginSpec *>  listPlug = pluginManager->plugins();
+	QList<NLQT::IPluginSpec *> listPlug = pluginManager->plugins();
 	
 	Q_FOREACH (NLQT::IPluginSpec *plugSpec, listPlug)
 		str += plugSpec->name();
@@ -32,6 +32,8 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 void MyPlugin::extensionsInitialized()
 {
 	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
+	nlassert(helpMenu);
+
 	helpMenu->addSeparator();
 	QAction *newAction = helpMenu->addAction("MyPlugin");
 	
@@ -41,6 +43,8 @@ void MyPlugin::extensionsInitialized()
 void MyPlugin::execMessageBox()
 {
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	nlassert(wnd);
+	
 	QMessageBox msgBox;
 	msgBox.setText(wnd->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height()));
 	msgBox.exec();

@@ -55,7 +55,7 @@ private Q_SLOTS:
 private:
 
 	// The vegetable to edit.
-	NL3D::CVegetable	*_Vegetable;
+	NL3D::CVegetable *_Vegetable;
 
 	Ui::CVegetableScalePage _ui;
 

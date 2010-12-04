@@ -70,9 +70,9 @@ private:
 	void disconnectGlobalTexAnim();
 	void updateGlobalTexAnim(int value);
 
-	CWorkspaceNode 			*_Node;
+	CWorkspaceNode *_Node;
 
-	NL3D::CPSConstraintMesh 	*_CM;
+	NL3D::CPSConstraintMesh *_CM;
 
 	Ui::CConstraintMeshWidget _ui;
 }; /* class CConstraintMeshWidget */

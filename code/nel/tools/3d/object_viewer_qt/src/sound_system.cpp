@@ -34,8 +34,8 @@ namespace NLQT
 
 CSoundSystem::CSoundSystem()
 	:_AudioMixer(NULL),
-	 _AnimManager(NULL),
-	 _Zero(NLMISC::CVector::Null)
+	_AnimManager(NULL),
+	_Zero(NLMISC::CVector::Null)
 {
 
 }

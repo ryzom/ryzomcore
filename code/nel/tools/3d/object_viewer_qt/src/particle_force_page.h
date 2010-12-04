@@ -43,7 +43,7 @@ namespace NLQT
 class CLocatedItem: public QListWidgetItem
 {
 public:
-	CLocatedItem ( const QString & text, QListWidget * parent = 0, int type = UserType ):
+	CLocatedItem ( const QString & text, QListWidget *parent = 0, int type = UserType ):
 		QListWidgetItem(text, parent, type), _loc(NULL) {}
 
 	void setUserData(NL3D::CPSLocated *loc)

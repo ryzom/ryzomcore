@@ -393,7 +393,7 @@ private:
 
 	void touchPSState();
 
-	CWorkspaceNode		 *_Node;
+	CWorkspaceNode *_Node;
 
 	/// The bindable being edited
 	NL3D::CPSLocatedBindable *_Bindable;

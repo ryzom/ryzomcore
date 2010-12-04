@@ -54,7 +54,6 @@ private Q_SLOTS:
 private:
 
 	Ui::CVegetableLandscapePage _ui;
-
 }; /* class CVegetableLandscapePage */
 
 } /* namespace NLQT */

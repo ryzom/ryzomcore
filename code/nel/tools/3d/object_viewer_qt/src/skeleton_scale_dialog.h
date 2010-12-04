@@ -76,7 +76,7 @@ public Q_SLOTS:
 	void setCurrentShape(const QString &name);
 
 private Q_SLOTS:
-	void setCurrentBone(const QModelIndex & index);
+	void setCurrentBone(const QModelIndex &index);
 	void setBoneSliderX(int value);
 	void setBoneSliderY(int value);
 	void setBoneSliderZ(int value);

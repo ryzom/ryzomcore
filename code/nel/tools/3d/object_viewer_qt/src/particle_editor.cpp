@@ -34,13 +34,20 @@
 namespace NLQT
 {
 
-CParticleEditor::CParticleEditor(void):
-	_ActiveNode(NULL), _State(State::Stopped), _Speed(1.0f),
-	_AutoRepeat(false), _DisplayBBox(false),
-	_DisplayHelpers(false), _AutoUpdateBBox(false),
-	_EmptyBBox(true), _PW(NULL),
-	_Driver(NULL), _Scene(NULL),
-	_FontManager(NULL), _FontGen(NULL)
+CParticleEditor::CParticleEditor(void)
+	: _ActiveNode(NULL),
+	_State(State::Stopped),
+	_Speed(1.0f),
+	_AutoRepeat(false),
+	_DisplayBBox(false),
+	_DisplayHelpers(false),
+	_AutoUpdateBBox(false),
+	_EmptyBBox(true),
+	_PW(NULL),
+	_Driver(NULL),
+	_Scene(NULL),
+	_FontManager(NULL),
+	_FontGen(NULL)
 {
 }
 
@@ -50,13 +57,13 @@ CParticleEditor::~CParticleEditor(void)
 
 void CParticleEditor::init()
 {
-	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver());
+	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
 	_Driver = driver->getDriver();
 
-	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser*>(Modules::objView().getScene());
+	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser *>(Modules::objView().getScene());
 	_Scene = &scene->getScene();
 
-	NL3D::CTextContextUser *textContext = dynamic_cast<NL3D::CTextContextUser*>(Modules::objView().getTextContext());
+	NL3D::CTextContextUser *textContext = dynamic_cast<NL3D::CTextContextUser *>(Modules::objView().getTextContext());
 	_FontManager = textContext->getTextContext().getFontManager();
 	_FontGen = textContext->getTextContext().getFontGenerator();
 	NL3D::CParticleSystem::setSerializeIdentifierFlag(true);
@@ -125,7 +132,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 		}
 		if (node->isLoaded() && !firstLoadedNode)
 			firstLoadedNode = node;
-		itr++;
+		++itr;
 	}
 	closeWorkspace();
 	_PW = newPW.release();
@@ -172,7 +179,7 @@ void CParticleEditor::saveWorkspaceContent()
 		if (node->isModified())
 			node->savePS();
 		node->setModified(false);
-		itr++;
+		++itr;
 	}
 }
 
@@ -242,7 +249,7 @@ void CParticleEditor::startMultiple()
 			CWorkspaceNode *node = (*itr);
 			if (node->isLoaded())
 				if (checkHasLoop(*node)) return;
-			itr++;
+			++itr;
 		}
 
 		itr = _PW->getNodeList().begin();
@@ -257,7 +264,7 @@ void CParticleEditor::startMultiple()
 
 				_PlayingNodes.push_back(node);
 			}
-			itr++;
+			++itr;
 		}
 	}
 	break;
@@ -405,7 +412,7 @@ void CParticleEditor::update()
 						}
 					}
 				}
-				itr++;
+				++itr;
 			}
 			if (fxStarted && allFXFinished)
 				restartAllFX();
@@ -440,7 +447,7 @@ void CParticleEditor::update()
 					node->getPSModel()->hide();
 			}
 		}
-		itr++;
+		++itr;
 	}
 }
 
@@ -481,7 +488,7 @@ void CParticleEditor::setSpeed(float value)
 		CWorkspaceNode *node = (*itr);
 		if (node->isLoaded())
 			node->getPSModel()->setEllapsedTimeRatio(value);
-		itr++;
+		++itr;
 	}
 }
 

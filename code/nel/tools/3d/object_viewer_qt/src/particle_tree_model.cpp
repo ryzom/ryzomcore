@@ -114,7 +114,7 @@ CParticleTreeItem *CParticleTreeItem::parent()
 int CParticleTreeItem::row() const
 {
 	if (_parentItem)
-		return _parentItem->_childItems.indexOf(const_cast<CParticleTreeItem*>(this));
+		return _parentItem->_childItems.indexOf(const_cast<CParticleTreeItem *>(this));
 	return 0;
 }
 
@@ -188,7 +188,7 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+		CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 		if (item->itemType() == ItemType::ParticleSystem)
 		{
 			if (item->getNode()->isModified())
@@ -203,7 +203,7 @@ QVariant CParticleTreeModel::data(const QModelIndex &index, int role) const
 	}
 	if (role == Qt::FontRole)
 	{
-		CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+		CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 		if (Modules::psEdit().getActiveNode() != NULL)
 		{
 			if (item->data(0) == QString(Modules::psEdit().getActiveNode()->getFilename().c_str()))
@@ -224,7 +224,7 @@ Qt::ItemFlags CParticleTreeModel::flags(const QModelIndex &index) const
 	if (!index.isValid())
 		return itmFlags;
 
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 	switch (item->itemType())
 	{
 	case ItemType::Particle:
@@ -247,7 +247,7 @@ Qt::ItemFlags CParticleTreeModel::flags(const QModelIndex &index) const
 		break;
 	}
 
-	//CParticleWorkspaceDialog *pwsd = qobject_cast<CParticleWorkspaceDialog*>(QObject::parent());
+	//CParticleWorkspaceDialog *pwsd = qobject_cast<CParticleWorkspaceDialog *>(QObject::parent());
 	//pwsd->updateTreeView();
 
 	return itmFlags;
@@ -273,7 +273,7 @@ const
 	if (!parent.isValid())
 		parentItem = _rootItem;
 	else
-		parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CParticleTreeItem *>(parent.internalPointer());
 
 	CParticleTreeItem *childItem = parentItem->child(row);
 	if (childItem)
@@ -287,7 +287,7 @@ QModelIndex CParticleTreeModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	CParticleTreeItem *childItem = static_cast<CParticleTreeItem*>(index.internalPointer());
+	CParticleTreeItem *childItem = static_cast<CParticleTreeItem *>(index.internalPointer());
 	CParticleTreeItem *parentItem = childItem->parent();
 
 	if (parentItem == _rootItem)
@@ -305,7 +305,7 @@ int CParticleTreeModel::rowCount(const QModelIndex &parent) const
 	if (!parent.isValid())
 		parentItem = _rootItem;
 	else
-		parentItem = static_cast<CParticleTreeItem*>(parent.internalPointer());
+		parentItem = static_cast<CParticleTreeItem *>(parent.internalPointer());
 
 	return parentItem->childCount();
 }
@@ -314,7 +314,7 @@ bool CParticleTreeModel::setData(const QModelIndex &index, const QVariant &value
 {
 	if (index.isValid() && role == Qt::EditRole)
 	{
-		CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+		CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 		QList<QVariant> listData;
 		listData << value;
 		item->replace(listData);
@@ -331,7 +331,7 @@ bool CParticleTreeModel::setData(const QModelIndex &index, const QVariant &value
 
 QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 {
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 	switch (item->itemType())
 	{
 	case ItemType::Root:
@@ -364,7 +364,7 @@ QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 
 bool CParticleTreeModel::insertRows(CWorkspaceNode *node, int position, const QModelIndex &parent)
 {
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer());
 
 	beginInsertRows(parent, position, position);
 	setupModelFromPS(node, item);
@@ -373,7 +373,7 @@ bool CParticleTreeModel::insertRows(CWorkspaceNode *node, int position, const QM
 	if (node->isLoaded())
 	{
 		QModelIndex indexPS = index(item->childCount() - 1, 0, parent);
-		for (uint k = 0; k < node->getPSPointer()->getNbProcess(); k++)
+		for (uint k = 0; k < node->getPSPointer()->getNbProcess(); ++k)
 		{
 			NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(node->getPSPointer()->getProcess(k));
 			insertRows(loc, k, indexPS);
@@ -384,7 +384,7 @@ bool CParticleTreeModel::insertRows(CWorkspaceNode *node, int position, const QM
 
 bool CParticleTreeModel::insertRows(NL3D::CPSLocated *loc, int position, const QModelIndex &parent)
 {
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer());
 
 	beginInsertRows(parent, position, position);
 	createItemFromLocated(loc, item);
@@ -403,7 +403,7 @@ bool CParticleTreeModel::insertRows(NL3D::CPSLocated *loc, int position, const Q
 bool CParticleTreeModel::insertRow(NL3D::CPSLocated *loc, uint32 index, int position, const QModelIndex &parent)
 {
 	beginInsertRows(parent, position, position);
-	createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem*>(parent.internalPointer()));
+	createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem  *>(parent.internalPointer()));
 	endInsertRows();
 	return true;
 }
@@ -411,14 +411,14 @@ bool CParticleTreeModel::insertRow(NL3D::CPSLocated *loc, uint32 index, int posi
 bool CParticleTreeModel::insertRow(NL3D::CPSLocatedBindable *lb, int position, const QModelIndex &parent)
 {
 	beginInsertRows(parent, position, position);
-	createItemFromLocatedBindable(lb, static_cast<CParticleTreeItem*>(parent.internalPointer()));
+	createItemFromLocatedBindable(lb, static_cast<CParticleTreeItem *>(parent.internalPointer()));
 	endInsertRows();
 	return true;
 }
 
 bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 {
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer())->child(position);
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer())->child(position);
 	while (item->childCount() != 0)
 		removeRows(0, parent.child(position, 0));
 
@@ -454,14 +454,14 @@ CWorkspaceNode *CParticleTreeModel::getOwnerNode(CParticleTreeItem *item) const
 
 void CParticleTreeModel::rebuildLocatedInstance(const QModelIndex &parent)
 {
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(parent.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(parent.internalPointer());
 	int k = 0;
-	for (int i = 0; i < item->childCount(); i++)
+	for (int i = 0; i < item->childCount(); ++i)
 	{
 		if (item->child(i)->itemType() == ItemType::LocatedInstance)
 		{
 			item->child(i)->setLocatedInstanceIndex(k);
-			k++;
+			++k;
 		}
 	}
 }
@@ -491,7 +491,7 @@ void CParticleTreeModel::setupModelFromWorkSpace()
 
 	QModelIndex rootIndex = index(0, 0);
 	uint numNode = workspace->getNumNode();
-	for (uint i = 0; i < numNode; i++)
+	for (uint i = 0; i < numNode; ++i)
 		insertRows(workspace->getNode(i), i, rootIndex);
 }
 

@@ -76,7 +76,7 @@ private:
 	CWorkspaceNode *_Node;
 
 	// the constraint mesh being edited
-	NL3D::CPSConstraintMesh   *_CM;
+	NL3D::CPSConstraintMesh *_CM;
 
 	Ui::CMorphMeshDialog _ui;
 }; /* class CMorphMeshDialog */

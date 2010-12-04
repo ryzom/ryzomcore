@@ -63,7 +63,7 @@ private:
 	NL3D::CPSTargetLocatedBindable *_LBTarget;
 
 	/// the collision zone being edited
-	NL3D::CPSZone             *_Zone ;
+	NL3D::CPSZone *_Zone ;
 
 	CWorkspaceNode *_Node;
 

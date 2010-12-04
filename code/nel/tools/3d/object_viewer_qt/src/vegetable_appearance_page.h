@@ -51,7 +51,7 @@ private Q_SLOTS:
 	void setNoiseValueBendPhase(const NLMISC::CNoiseValue &value);
 	void setNoiseValueBendFactor(const NLMISC::CNoiseValue &value);
 	void setNoiseValueColor(const NLMISC::CNoiseValue &value);
-	void browseColor(QListWidgetItem * item);
+	void browseColor(QListWidgetItem *item);
 	void addNewColor();
 	void insNewColor();
 	void removeColor();
@@ -61,7 +61,7 @@ private:
 	void updateColorList();
 
 	// The vegetable to edit.
-	NL3D::CVegetable	*_Vegetable;
+	NL3D::CVegetable *_Vegetable;
 
 	Ui::CVegetableApperancePage _ui;
 

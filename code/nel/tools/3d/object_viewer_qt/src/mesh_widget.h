@@ -57,9 +57,9 @@ private Q_SLOTS:
 	void editMorph();
 
 private:
-	CWorkspaceNode 		*_Node;
+	CWorkspaceNode *_Node;
 
-	NL3D::CPSShapeParticle  *_ShapeParticle;
+	NL3D::CPSShapeParticle *_ShapeParticle;
 
 	void updateForMorph();
 

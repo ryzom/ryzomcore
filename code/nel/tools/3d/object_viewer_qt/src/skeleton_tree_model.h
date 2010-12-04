@@ -76,7 +76,7 @@ public:
 	int row() const
 	{
 		if (_parentItem)
-			return _parentItem->_childItems.indexOf(const_cast<CSkeletonTreeItem*>(this));
+			return _parentItem->_childItems.indexOf(const_cast<CSkeletonTreeItem *>(this));
 		return 0;
 	}
 
@@ -91,7 +91,7 @@ public:
 
 private:
 
-	QList<CSkeletonTreeItem*> _childItems;
+	QList<CSkeletonTreeItem *> _childItems;
 	QList<QVariant> _itemData;
 	sint32 _id;
 	CSkeletonTreeItem *_parentItem;

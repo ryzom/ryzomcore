@@ -54,11 +54,13 @@ namespace NLQT
 {
 
 CObjectViewer::CObjectViewer()
-	: _Driver(NULL), _TextContext(NULL),
-	  _phi(0), _psi(0),_dist(20),
-	  _CameraFocal(75),
-	  _CurrentInstance(""),
-	  _BloomEffect(false), _Scene(0)
+	: _Driver(NULL),
+	_TextContext(NULL),
+	_phi(0), _psi(0),_dist(20),
+	_CameraFocal(75),
+	_CurrentInstance(""),
+	_BloomEffect(false),
+	_Scene(0)
 {
 
 }
@@ -243,7 +245,7 @@ void CObjectViewer::saveScreenshot(const std::string &nameFile, bool jpg, bool p
 bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 {
 	std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
-	if ( _Entities.count(fileName) != 0)
+	if (_Entities.count(fileName) != 0)
 		return false;
 
 	CPath::addSearchPath(CFile::getPath(meshFileName), false, false);

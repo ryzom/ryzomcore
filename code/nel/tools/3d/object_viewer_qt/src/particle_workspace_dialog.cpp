@@ -123,7 +123,8 @@ struct Action
 static std::map<std::string,  uint> _PSElementIdentifiers;
 
 CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
-	: QDockWidget(parent), _currentItem(NULL)
+	: QDockWidget(parent),
+	_currentItem(NULL)
 {
 	_ui.setupUi(this);
 
@@ -218,7 +219,7 @@ void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 	if (_currentItem != NULL)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);
 
-	_currentItem = static_cast<CParticleTreeItem*>(index.internalPointer());
+	_currentItem = static_cast<CParticleTreeItem *>(index.internalPointer());
 
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
@@ -303,7 +304,7 @@ void CParticleWorkspaceDialog::customContextMenu()
 void CParticleWorkspaceDialog::setActiveNode()
 {
 	QModelIndex index = _ui.treeView->currentIndex();
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 	nlassert(item->getNode());
 	Modules::psEdit().setActiveNode(item->getNode());
 	Q_EMIT changeActiveNode();
@@ -365,7 +366,7 @@ void CParticleWorkspaceDialog::removePS()
 	QModelIndex index = _ui.treeView->currentIndex();
 	_ui.treeView->setCurrentIndex(index.parent());
 	clickedItem(index.parent());
-	Modules::psEdit().getParticleWorkspace()->removeNode(static_cast<CParticleTreeItem*>(index.internalPointer())->getNode());
+	Modules::psEdit().getParticleWorkspace()->removeNode(static_cast<CParticleTreeItem *>(index.internalPointer())->getNode());
 	_treeModel->removeRows(index.row(), index.parent());
 }
 
@@ -605,7 +606,7 @@ void CParticleWorkspaceDialog::deleteItem()
 {
 	_treeModel->getOwnerNode(_currentItem)->setModified(true);
 	QModelIndex index = _ui.treeView->currentIndex();
-	CParticleTreeItem *item = static_cast<CParticleTreeItem*>(index.internalPointer());
+	CParticleTreeItem *item = static_cast<CParticleTreeItem *>(index.internalPointer());
 	CWorkspaceNode *ownerNode = _treeModel->getOwnerNode(item);
 	nlassert(ownerNode);
 	_ui.treeView->setCurrentIndex(index.parent());

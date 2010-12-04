@@ -65,7 +65,7 @@ private:
 	void updateAngleMax();
 
 	// The vegetable to edit.
-	NL3D::CVegetable	*_Vegetable;
+	NL3D::CVegetable *_Vegetable;
 
 	float _PrecMaxDensityValue;
 

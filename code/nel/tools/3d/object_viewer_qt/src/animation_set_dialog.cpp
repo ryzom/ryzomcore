@@ -88,7 +88,7 @@ void CAnimationSetDialog::updateListObject()
 	std::vector<std::string> listObjects;
 	Modules::objView().getListObjects(listObjects);
 
-	for (size_t i = 0; i < listObjects.size(); i++)
+	for (size_t i = 0; i < listObjects.size(); ++i)
 		ui.objectsComboBox->addItem(QString(listObjects[i].c_str()));
 
 	if (listObjects.empty())
@@ -118,22 +118,22 @@ void CAnimationSetDialog::updateListAnim()
 		return;
 	CEntity	&entity = Modules::objView().getEntity(curObj);
 
-	std::vector<std::string>& animationList = entity.getAnimationList();
-	std::vector<std::string>& swtList = entity.getSWTList();
-	std::vector<std::string>& playListAnimation = entity.getPlayListAnimation();
+	std::vector<std::string> &animationList = entity.getAnimationList();
+	std::vector<std::string> &swtList = entity.getSWTList();
+	std::vector<std::string> &playListAnimation = entity.getPlayListAnimation();
 
 	// update animation list widget
 	for(size_t i = 0; i < animationList.size(); ++i)
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(ui.animTreeWidget);
-		item->setText(0,QString(animationList[i].c_str()));
+		item->setText(0, QString(animationList[i].c_str()));
 	}
 
 	// update skeleton weight template list widget
 	for(size_t i = 0; i < swtList.size(); ++i)
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(ui.skeletonTreeWidget);
-		item->setText(0,QString(swtList[i].c_str()));
+		item->setText(0, QString(swtList[i].c_str()));
 	}
 
 	// update PlayList animation widget
@@ -224,9 +224,9 @@ void CAnimationSetDialog::resetAnim()
 void CAnimationSetDialog::addAnim()
 {
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
-	QList<QTreeWidgetItem*> list = ui.animTreeWidget->selectedItems();
+	QList<QTreeWidgetItem *> list = ui.animTreeWidget->selectedItems();
 
-	Q_FOREACH(QTreeWidgetItem* item, list)
+	Q_FOREACH(QTreeWidgetItem *item, list)
 	{
 		std::string animName = item->text(0).toStdString();
 		entity.addAnimToPlayList(animName);
@@ -237,9 +237,9 @@ void CAnimationSetDialog::addAnim()
 void CAnimationSetDialog::removeAnim()
 {
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
-	QList<QListWidgetItem*> list = ui.animPlaylistWidget->selectedItems();
+	QList<QListWidgetItem *> list = ui.animPlaylistWidget->selectedItems();
 
-	Q_FOREACH(QListWidgetItem* item, list)
+	Q_FOREACH(QListWidgetItem *item, list)
 	{
 		int row = ui.animPlaylistWidget->row(item);
 		QListWidgetItem *removeItem = ui.animPlaylistWidget->takeItem(row);
@@ -252,7 +252,7 @@ void CAnimationSetDialog::removeAnim()
 void CAnimationSetDialog::upAnim()
 {
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
-	QList<QListWidgetItem*> list = ui.animPlaylistWidget->selectedItems();
+	QList<QListWidgetItem *> list = ui.animPlaylistWidget->selectedItems();
 
 	if (list.empty())
 		return;
@@ -273,7 +273,7 @@ void CAnimationSetDialog::upAnim()
 void CAnimationSetDialog::downAnim()
 {
 	CEntity	&entity = Modules::objView().getEntity(Modules::objView().getCurrentObject());
-	QList<QListWidgetItem*> list = ui.animPlaylistWidget->selectedItems();
+	QList<QListWidgetItem *> list = ui.animPlaylistWidget->selectedItems();
 
 	if (list.empty())
 		return;

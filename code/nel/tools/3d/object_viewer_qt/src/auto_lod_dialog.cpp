@@ -32,30 +32,25 @@ namespace NLQT
 {
 
 CAutoLODDialog::CAutoLODDialog(CWorkspaceNode *ownerNode, NL3D::CParticleSystem *ps, QWidget *parent)
-	: QDialog(parent), _Node(ownerNode), _PS(ps)
+	: QDialog(parent), 
+	_Node(ownerNode), 
+	_PS(ps)
 {
 	_ui.setupUi(this);
 
 	setFixedHeight(sizeHint().height());
 
-	_DistRatioWrapper.PS = _PS;
-	_MaxDistLODBiasWrapper.PS = _PS;
-	_DistRatioWrapper.OwnerNode = _Node;
-	_MaxDistLODBiasWrapper.OwnerNode = _Node;
-
 	// Edit the distance at which LOD starts
 	_ui.startPercentDistWidget->setRange(0.f, 0.99f);
 	_ui.startPercentDistWidget->enableUpperBound(1.f, true);
 	_ui.startPercentDistWidget->enableLowerBound(0.f, false);
-	_ui.startPercentDistWidget->setWrapper(&_DistRatioWrapper);
-	_ui.startPercentDistWidget->updateUi();
+	_ui.startPercentDistWidget->setValue(_PS->getAutoLODStartDistPercent());
 
 	// For non-shared systems only : Set the LOD bias at the max distance, so that some particles are still displayed
 	_ui.maxDistBiasWidget->setRange(0.f, 1.0f);
 	_ui.maxDistBiasWidget->enableUpperBound(1.f, false);
 	_ui.maxDistBiasWidget->enableLowerBound(0.f, false);
-	_ui.maxDistBiasWidget->setWrapper(&_MaxDistLODBiasWrapper);
-	_ui.maxDistBiasWidget->updateUi();
+	_ui.maxDistBiasWidget->setValue(_PS->getMaxDistLODBias());
 
 	if (_PS->isSharingEnabled())
 	{
@@ -84,6 +79,18 @@ void CAutoLODDialog::setDegradationExponent(int value)
 void CAutoLODDialog::setSkipParticles(bool state)
 {
 	_PS->setAutoLODMode(state);
+}
+
+void CAutoLODDialog::setDistRatio(float value)
+{
+	_PS->setupAutoLOD(value, _PS->getAutoLODDegradationExponent());
+	_Node->setModified(true);
+}
+
+void CAutoLODDialog::setMaxDistLODBias(float value)
+{
+	_PS->setMaxDistLODBias(value);
+	_Node->setModified(true);
 }
 
 } /* namespace NLQT */

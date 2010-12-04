@@ -116,7 +116,7 @@ private:
 		if ((_Node) && (enabledModifiedFlag)) _Node->setModified(true);
 	}
 
-	CWorkspaceNode 		  *_Node;
+	CWorkspaceNode *_Node;
 
 	struct CGlobalColorWrapper : public IPSSchemeWrapperRGBA
 	{

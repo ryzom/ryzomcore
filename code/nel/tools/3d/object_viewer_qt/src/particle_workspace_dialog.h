@@ -123,7 +123,7 @@ private:
 	QAction *_lod2Action;
 	QAction *_externIDAction;
 
-	std::auto_ptr<NL3D::CPSLocated>		_LocatedCopy;
+	std::auto_ptr<NL3D::CPSLocated>	_LocatedCopy;
 	std::auto_ptr<NL3D::CPSLocatedBindable> _LocatedBindableCopy;
 
 	CParticleTreeItem *_currentItem;

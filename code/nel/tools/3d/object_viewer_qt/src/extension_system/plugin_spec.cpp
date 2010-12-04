@@ -99,7 +99,7 @@ QString CPluginSpec::errorString() const
 bool CPluginSpec::setFileName(const QString &fileName)
 {
 	_name = _version
-	    	= _vendor
+		= _vendor
 		= _description
 		= _location
 		= _filePath
@@ -138,7 +138,7 @@ bool CPluginSpec::loadLibrary()
 	if (!loader.load())
 		return reportError(loader.errorString());
 
-	IPlugin *pluginObject = qobject_cast<IPlugin*>(loader.instance());
+	IPlugin *pluginObject = qobject_cast<IPlugin *>(loader.instance());
 	if (!pluginObject)
 	{
 		loader.unload();

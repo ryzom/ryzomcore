@@ -47,13 +47,13 @@ public:
 	void deleteVegetable();
 
 	// The vegetable
-	NL3D::CVegetable	*Vegetable;
+	NL3D::CVegetable *_vegetable;
 
 	// The name of this vegetable.
-	std::string		VegetableName;
+	std::string	_vegetableName;
 
 	// Visibility. Editor feature only
-	bool			Visible;
+	bool _visible;
 
 }; /* class CVegetableNode */
 

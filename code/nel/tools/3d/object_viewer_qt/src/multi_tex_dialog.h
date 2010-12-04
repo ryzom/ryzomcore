@@ -22,7 +22,6 @@
 
 #include "ui_multi_tex_form.h"
 
-
 // STL includes
 
 // Qt includes
@@ -75,7 +74,7 @@ private:
 		virtual void set(NL3D::ITexture *);
 	} _AlternateTexWrapper;
 
-	CWorkspaceNode 		*_Node;
+	CWorkspaceNode *_Node;
 
 	NL3D::CPSMultiTexturedParticle *_MTP;
 

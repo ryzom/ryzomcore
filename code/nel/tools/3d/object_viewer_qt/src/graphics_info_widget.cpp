@@ -117,7 +117,7 @@ void CGraphicsInfoWidget::paintEvent(QPaintEvent *event)
 		}
 		else
 		{
-			for(uint k = 1; k < _verts.size(); k++)
+			for(uint k = 1; k < _verts.size(); ++k)
 			{
 				painter.drawLine(int((width() / 2.0) * (1 + _verts[k - 1].x)),
 								 int((height() / 2.0) * (1 - _verts[k - 1].y)),

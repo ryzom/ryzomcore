@@ -56,14 +56,16 @@ CWorkspaceNode::~CWorkspaceNode()
 void CWorkspaceNode::memorizeState()
 {
 	nlassert(_WS);
-	if (!_PS) return;
+	if (!_PS)
+		return;
 	_InitialPos.copySystemInitialPos(_PS);
 }
 
 void CWorkspaceNode::restoreState()
 {
 	nlassert(_WS);
-	if (!_PS) return;
+	if (!_PS) 
+		return;
 	_InitialPos.restoreSystem();
 }
 
@@ -78,7 +80,8 @@ void CWorkspaceNode::stickPSToSkeleton(NL3D::CSkeletonModel *skel,
 									   const std::string &parentBoneName)
 {
 	nlassert(_WS);
-	if (!_PSM) return;
+	if (!_PSM) 
+		return;
 	unstickPSFromSkeleton();
 	_ParentSkelName = parentSkelName;
 	_ParentBoneName = parentBoneName;
@@ -308,7 +311,7 @@ CParticleWorkspace::CParticleWorkspace()
 
 CParticleWorkspace::~CParticleWorkspace()
 {
-	for (size_t i = 0; i < _Nodes.size(); i++)
+	for (size_t i = 0; i < _Nodes.size(); ++i)
 		delete _Nodes[i];
 	_Nodes.clear();
 }

@@ -35,7 +35,7 @@ CParticleLinkDialog::CParticleLinkDialog(CSkeletonTreeModel *model, QWidget *par
 {
 	_ui.setupUi(this);
 
-	qobject_cast< QMainWindow* >(parent)->addDockWidget(Qt::RightDockWidgetArea, this);
+	qobject_cast<QMainWindow *>(parent)->addDockWidget(Qt::RightDockWidgetArea, this);
 
 	_ui.treeView->setModel(model);
 
@@ -59,7 +59,7 @@ void CParticleLinkDialog::setLink()
 	if (curObj.empty())
 		return;
 
-	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem*>(_ui.treeView->currentIndex().internalPointer());
+	CSkeletonTreeItem *item = static_cast<CSkeletonTreeItem *>(_ui.treeView->currentIndex().internalPointer());
 
 	NL3D::CSkeletonModel *skel = Modules::objView().getEntity(curObj).getSkeleton().getObjectPtr();
 	uint boneIndex = item->getId();
@@ -85,7 +85,7 @@ void CParticleLinkDialog::resetModel()
 	_ui.unlinkPushButton->setEnabled(false);
 }
 
-void CParticleLinkDialog::clickedItem(const QModelIndex & index)
+void CParticleLinkDialog::clickedItem(const QModelIndex &index)
 {
 	_ui.linkPushButton->setEnabled(true);
 	_ui.unlinkPushButton->setEnabled(true);

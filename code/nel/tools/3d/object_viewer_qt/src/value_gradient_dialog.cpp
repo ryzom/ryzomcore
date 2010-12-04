@@ -58,7 +58,7 @@ CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
 	sizePolicy.setHeightForWidth(_listWidget->sizePolicy().hasHeightForWidth());
 	_listWidget->setSizePolicy(sizePolicy);
 	//_listWidget->setIconSize(QSize(16, 16));
-	_listWidget->setMaximumSize(QSize(175, 16777215));
+	_listWidget->setMaximumSize(QSize(185, 16777215));
 	_gridLayout->addWidget(_listWidget, 0, 0, 9, 1);
 
 	_horizontalLayout = new QHBoxLayout();

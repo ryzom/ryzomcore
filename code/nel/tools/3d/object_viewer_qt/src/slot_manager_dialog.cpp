@@ -33,7 +33,9 @@ namespace NLQT
 
 CSlotGroupBox::CSlotGroupBox(QWidget *parent)
 	: QGroupBox(parent),
-	  _animName("empty"), _skelName("empty"), _numSlot(0)
+	_animName("empty"), 
+	_skelName("empty"), 
+	_numSlot(0)
 {
 	_ui.setupUi(this);
 
@@ -239,7 +241,7 @@ CSlotManagerDialog::CSlotManagerDialog(QWidget *parent)
 	_tabWidget->setObjectName(QString::fromUtf8("_tabWidget"));
 	_tabWidget->setTabPosition(QTabWidget::East);
 
-	for (int i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
+	for (int i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; ++i)
 	{
 		_tabs[i] = new QWidget();
 		_tabs[i]->setObjectName(QString::fromUtf8("_tab%1").arg(i));
@@ -276,7 +278,7 @@ CSlotManagerDialog::~CSlotManagerDialog()
 
 void CSlotManagerDialog::updateUiSlots()
 {
-	for (int i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; i++)
+	for (int i = 0; i < NL3D::CChannelMixer::NumAnimationSlot; ++i)
 	{
 		_slotGroupBoxs[i]->updateUi();
 	}

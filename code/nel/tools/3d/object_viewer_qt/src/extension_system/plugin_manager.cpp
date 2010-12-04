@@ -176,10 +176,10 @@ void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 
 void CPluginManager::stopAll()
 {
-	Q_FOREACH (CPluginSpec *spec,  _pluginSpecs)
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
 	setPluginState(spec, State::Stopped);
 
-	Q_FOREACH (CPluginSpec *spec,  _pluginSpecs)
+	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
 	setPluginState(spec, State::Deleted);
 }
 

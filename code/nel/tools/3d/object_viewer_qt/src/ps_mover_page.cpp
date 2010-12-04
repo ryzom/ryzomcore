@@ -57,7 +57,7 @@ CPSMoverPage::CPSMoverPage(QWidget *parent)
 
 	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
 
-	connect(_ui.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+	connect(_ui.listWidget, SIGNAL(currentItemChanged(QListWidgetItem *,QListWidgetItem *)),
 			this, SLOT(changeSubComponent()));
 }
 

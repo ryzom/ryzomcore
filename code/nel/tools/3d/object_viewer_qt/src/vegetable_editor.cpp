@@ -60,10 +60,10 @@ void CVegetableEditor::init()
 	//H_AUTO2
 	nldebug("CVegetableEditor::init");
 
-	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser*>(Modules::objView().getDriver());
+	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
 	_Driver = driver->getDriver();
 
-	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser*>(Modules::objView().getScene());
+	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser *>(Modules::objView().getScene());
 	_Scene = &scene->getScene();
 }
 
@@ -101,7 +101,7 @@ bool CVegetableEditor::createVegetableLandscape()
 		loadLandscapeSetup();
 
 		// create the landscape.
-		_VegetableLandscape= static_cast<NL3D::CLandscapeModel*>(Modules::veget().getScene()->createModel(NL3D::LandscapeModelId));
+		_VegetableLandscape= static_cast<NL3D::CLandscapeModel *>(Modules::veget().getScene()->createModel(NL3D::LandscapeModelId));
 
 		// create progress dialog
 		QProgressDialog progress("Loading TileBanks....", "Cancel", 0, 100);
@@ -143,7 +143,7 @@ bool CVegetableEditor::createVegetableLandscape()
 				// count nbText to load.
 				sint	ts;
 				sint	nbTextTotal = 0;
-				for (ts=0; ts < _VegetableLandscape->Landscape.TileBank.getTileSetCount (); ts++)
+				for (ts=0; ts < _VegetableLandscape->Landscape.TileBank.getTileSetCount (); ++ts)
 				{
 					NL3D::CTileSet *tileSet =_VegetableLandscape->Landscape.TileBank.getTileSet (ts);
 					nbTextTotal += tileSet->getNumTile128();
@@ -153,7 +153,7 @@ bool CVegetableEditor::createVegetableLandscape()
 
 				// load.
 				sint nbTextDone= 0;
-				for (ts=0; ts < _VegetableLandscape->Landscape.TileBank.getTileSetCount (); ts++)
+				for (ts=0; ts < _VegetableLandscape->Landscape.TileBank.getTileSetCount (); ++ts)
 				{
 					NL3D::CTileSet *tileSet=_VegetableLandscape->Landscape.TileBank.getTileSet (ts);
 					sint tl;
@@ -299,7 +299,7 @@ void CVegetableEditor::refreshVegetableLandscape(const NL3D::CTileVegetableDesc 
 		_VegetableLandscape->Landscape.enableVegetable(false);
 
 		// Then change all the tileSet of all the TileBanks.
-		for (sint ts=0; ts<_VegetableLandscape->Landscape.TileBank.getTileSetCount (); ts++)
+		for (sint ts=0; ts<_VegetableLandscape->Landscape.TileBank.getTileSetCount (); ++ts)
 		{
 			NL3D::CTileSet *tileSet=_VegetableLandscape->Landscape.TileBank.getTileSet (ts);
 			// change the vegetableTileDesc of this tileSet.
@@ -315,21 +315,30 @@ void CVegetableEditor::setVegetableWindPower(float w)
 {
 	_VegetableWindPower= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, _VegetableWindFreq, _VegetableWindPower, _VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
+														_VegetableWindFreq, 
+														_VegetableWindPower, 
+														_VegetableWindBendMin);
 }
 
 void CVegetableEditor::setVegetableWindBendStart(float w)
 {
 	_VegetableWindBendMin= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, _VegetableWindFreq, _VegetableWindPower, _VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
+														_VegetableWindFreq, 
+														_VegetableWindPower, 
+														_VegetableWindBendMin);
 }
 
 void CVegetableEditor::setVegetableWindFrequency(float w)
 {
 	_VegetableWindFreq= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, _VegetableWindFreq, _VegetableWindPower, _VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
+														_VegetableWindFreq, 
+														_VegetableWindPower, 
+														_VegetableWindBendMin);
 }
 
 void CVegetableEditor::snapToGroundVegetableLandscape(bool enable)
@@ -379,7 +388,7 @@ void CVegetableEditor::getListVegetables(std::vector<std::string> &listVeget)
 {
 	listVeget.clear();
 	for (size_t i = 0; i < _Vegetables.size(); i++)
-		listVeget.push_back(_Vegetables[i].VegetableName);
+		listVeget.push_back(_Vegetables[i]._vegetableName);
 }
 
 bool CVegetableEditor::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, std::string fileName)
@@ -416,16 +425,16 @@ void CVegetableEditor::buildVegetableSet(NL3D::CTileVegetableDesc &vegetSet, boo
 
 	// build the list.
 	std::vector<NL3D::CVegetable> vegetables;
-	for(uint i = 0; i < _Vegetables.size(); i++)
+	for(uint i = 0; i < _Vegetables.size(); ++i)
 	{
 		// if don't want to keep <default> ShapeNames, skip them.
-		if(!keepDefaultShapeName && _Vegetables[i].Vegetable->ShapeName == "")
+		if(!keepDefaultShapeName && _Vegetables[i]._vegetable->ShapeName == "")
 			continue;
 		// if don't want to keep hiden vegetables, skip them.
-		if(!keepHiden && !_Vegetables[i].Visible)
+		if(!keepHiden && !_Vegetables[i]._visible)
 			continue;
 
-		vegetables.push_back(*_Vegetables[i].Vegetable);
+		vegetables.push_back(*_Vegetables[i]._vegetable);
 		// get dst index.
 		uint	dstId= (uint)vegetables.size()-1;
 		// transform degrees in radians.
@@ -446,13 +455,13 @@ void CVegetableEditor::appendVegetableSet(NL3D::CTileVegetableDesc &vegetSet)
 	float	radToDeg = (float)(180.f / NLMISC::Pi);
 
 	// for all distances Types.
-	for(uint distType = 0; distType < NL3D_VEGETABLE_BLOCK_NUMDIST; distType++)
+	for(uint distType = 0; distType < NL3D_VEGETABLE_BLOCK_NUMDIST; ++distType)
 	{
 		// retrieve list of vegetable
 		const std::vector<NL3D::CVegetable> &vegetList = vegetSet.getVegetableList(distType);
 
 		// for all of them
-		for(uint i = 0; i < vegetList.size(); i++)
+		for(uint i = 0; i < vegetList.size(); ++i)
 		{
 			// append the vegetable to the list.
 			NL3D::CVegetable veget = vegetList[i];

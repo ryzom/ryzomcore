@@ -201,7 +201,8 @@ CRGBA CConfiguration::getValue(const CConfigFile::CVar &var, const CRGBA &defaul
 {
 	if (var.size() >= 3)
 	{
-		if (var.size() > 4) nlwarning("RGBA value in config value '%s' is too long, ignoring unused values");
+		if (var.size() > 4) 
+			nlwarning("RGBA value in config value '%s' is too long, ignoring unused values");
 		return CRGBA((uint8)var.asInt(0), (uint8)var.asInt(1), (uint8)var.asInt(2), var.size() >= 4 ? (uint8)var.asInt(3) : 255);
 	}
 	nlwarning("Invalid RGBA value in config value '%s', reverting to default { %i, %i, %i, %i }", var.Name.c_str(), (sint)defaultValue.R, (sint)defaultValue.G, (sint)defaultValue.B, (sint)defaultValue.A);

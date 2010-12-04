@@ -23,13 +23,14 @@
 // NeL includes
 
 #define	NL_VEGETABLE_EDIT_SLIDER_NVS_SIZE_THRESHOLD	0.03f
-#define	NL_VEGETABLE_EDIT_SLIDER_NVS_SCALE		3.0f
+#define	NL_VEGETABLE_EDIT_SLIDER_NVS_SCALE 3.0f
 
 namespace NLQT
 {
 
 CVegetNoiseValueWidget::CVegetNoiseValueWidget(QWidget *parent)
-	: QGroupBox(parent), _emit(true)
+	: QGroupBox(parent), 
+	_emit(true)
 {
 	_ui.setupUi(this);
 

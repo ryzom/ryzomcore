@@ -57,7 +57,7 @@ private Q_SLOTS:
 private:
 	CWorkspaceNode *_Node;
 
-	NL3D::CPSTailParticle	  *_TailParticle;
+	NL3D::CPSTailParticle *_TailParticle;
 
 	Ui::CTailParticleWidget _ui;
 }; /* class CTailParticleWidget */

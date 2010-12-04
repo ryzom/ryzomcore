@@ -52,9 +52,6 @@ public:
 	CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNode *ownerNode, QWidget *parent = 0);
 	~CurveEditDialog();
 
-	/// the scheme being edited
-	NL3D::CPSFloatCurveFunctor  *_Curve;
-
 private Q_SLOTS:
 	void setSmoothing(bool state);
 	void setDisplayInterpolation(bool state);
@@ -73,9 +70,11 @@ protected:
 	float _pos;
 
 	CWorkspaceNode *_Node;
+	
+	/// the scheme being edited
+	NL3D::CPSFloatCurveFunctor *_Curve;
 
 	HoverPoints *_hoverPoints;
-
 	Ui::CurveEditDialog _ui;
 }; /* CurveEditDialog */
 

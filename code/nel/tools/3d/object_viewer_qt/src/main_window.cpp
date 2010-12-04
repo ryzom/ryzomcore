@@ -56,10 +56,14 @@ namespace NLQT
 
 CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent),
-	  _isGraphicsInitialized(false), _isGraphicsEnabled(false),
-	  _isSoundInitialized(false), _isSoundEnabled(false),
-	  _isLandscapeInitialized(false), _isLandscapeEnabled(false),
-	  _GraphicsViewport(NULL), _lastDir(".")
+	_isGraphicsInitialized(false), 
+	_isGraphicsEnabled(false),
+	_isSoundInitialized(false),
+	_isSoundEnabled(false),
+	_isLandscapeInitialized(false),
+	_isLandscapeEnabled(false),
+	_GraphicsViewport(NULL),
+	_lastDir(".")
 {
 	nldebug("CMainWindow::CMainWindow:");
 	setObjectName("CMainWindow");

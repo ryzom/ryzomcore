@@ -163,27 +163,27 @@ public:
 	void setTriggerAnim(const std::string &anim);
 
 private:
-	std::string				_TriggerAnim;
-	NL3D::CParticleSystem			*_PS;
-	NL3D::CParticleSystemModel		*_PSM;
+	std::string	_TriggerAnim;
+	NL3D::CParticleSystem *_PS;
+	NL3D::CParticleSystemModel *_PSM;
 
 	// Keep a shape bank per node because we want the whole path to identify the ps, not just its filename
 	// (shape bank keeps the filename only)
-	NL3D::CShapeBank			*_ShapeBank;
+	NL3D::CShapeBank *_ShapeBank;
 
 	// Relative path from which the ps was inserted
 	// relative path is also a unique identifier for this ps in the workspace
-	std::string				_RelativePath;
+	std::string	_RelativePath;
 
 	// initial pos of system. Allow to restore the initial instances of the system  when doing start / stop
-	CPSInitialPos				_InitialPos;
-	bool					_Modified;
-	CParticleWorkspace			*_WS;
+	CPSInitialPos _InitialPos;
+	bool _Modified;
+	CParticleWorkspace *_WS;
 	NLMISC::CRefPtr<NL3D::CSkeletonModel> 	_ParentSkel;
-	bool					_ResetAutoCount;
+	bool _ResetAutoCount;
 	//
-	std::string				_ParentSkelName;
-	std::string				_ParentBoneName;
+	std::string	_ParentSkelName;
+	std::string	_ParentBoneName;
 private:
 	void setup(NL3D::CParticleSystemModel &psm);
 public:
@@ -339,13 +339,13 @@ public:
 
 private:
 	// use smart ptr to avoir prb wih resize
-	TNodeVect		_Nodes;
+	TNodeVect _Nodes;
 	// path + name of workspace
-	std::string		_Filename;
-	bool			_Modified;
-	IModificationCallback	*_ModificationCallback;
+	std::string _Filename;
+	bool _Modified;
+	IModificationCallback *_ModificationCallback;
 	// workspace user name
-	std::string		_Name;
+	std::string	_Name;
 
 	/// serial the object
 	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);

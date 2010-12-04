@@ -29,14 +29,14 @@ static const char *NL_DefaultVegetName= "<default>";
 
 CVegetableNode::CVegetableNode(void)
 {
-	Vegetable = NULL;
-	VegetableName = NL_DefaultVegetName;
-	Visible = true;
+	_vegetable = NULL;
+	_vegetableName = NL_DefaultVegetName;
+	_visible = true;
 }
 
 void CVegetableNode::initDefaultVegetable()
 {
-	Vegetable= new NL3D::CVegetable;
+	_vegetable = new NL3D::CVegetable;
 	// update vegetableName according to Vegetable
 	updateVegetableName();
 
@@ -44,59 +44,59 @@ void CVegetableNode::initDefaultVegetable()
 
 	// General/Density.
 	// Density.
-	Vegetable->Density.Abs = NL_VEGETABLE_DENSITY_ABS_DEFAULT;
-	Vegetable->Density.Rand = NL_VEGETABLE_DENSITY_RAND_DEFAULT;
-	Vegetable->Density.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Density.Abs = NL_VEGETABLE_DENSITY_ABS_DEFAULT;
+	_vegetable->Density.Rand = NL_VEGETABLE_DENSITY_RAND_DEFAULT;
+	_vegetable->Density.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// disable MaxDensity
-	Vegetable->MaxDensity = -1;
+	_vegetable->MaxDensity = -1;
 	// Leave ShapeName to ""
 	// Default DistType is always 0.
-	Vegetable->DistType = 0;
+	_vegetable->DistType = 0;
 
 
 	// Apperance
 	// BendPhase
-	Vegetable->BendPhase.Abs = NL_VEGETABLE_BENDPHASE_ABS_DEFAULT;
-	Vegetable->BendPhase.Rand = NL_VEGETABLE_BENDPHASE_RAND_DEFAULT;
-	Vegetable->BendPhase.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->BendPhase.Abs = NL_VEGETABLE_BENDPHASE_ABS_DEFAULT;
+	_vegetable->BendPhase.Rand = NL_VEGETABLE_BENDPHASE_RAND_DEFAULT;
+	_vegetable->BendPhase.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// BendFactor
-	Vegetable->BendFactor.Abs = NL_VEGETABLE_BENDFACTOR_ABS_DEFAULT;
-	Vegetable->BendFactor.Rand = NL_VEGETABLE_BENDFACTOR_RAND_DEFAULT;
-	Vegetable->BendFactor.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->BendFactor.Abs = NL_VEGETABLE_BENDFACTOR_ABS_DEFAULT;
+	_vegetable->BendFactor.Rand = NL_VEGETABLE_BENDFACTOR_RAND_DEFAULT;
+	_vegetable->BendFactor.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// Color
-	Vegetable->Color.NoiseValue.Abs = NL_VEGETABLE_COLOR_ABS_DEFAULT;
-	Vegetable->Color.NoiseValue.Rand = NL_VEGETABLE_COLOR_RAND_DEFAULT;
-	Vegetable->Color.NoiseValue.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Color.NoiseValue.Abs = NL_VEGETABLE_COLOR_ABS_DEFAULT;
+	_vegetable->Color.NoiseValue.Rand = NL_VEGETABLE_COLOR_RAND_DEFAULT;
+	_vegetable->Color.NoiseValue.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 
 	// Scale
 	// ScaleXY
-	Vegetable->Sxy.Abs = NL_VEGETABLE_SCALE_ABS_DEFAULT;
-	Vegetable->Sxy.Rand = NL_VEGETABLE_SCALE_RAND_DEFAULT;
-	Vegetable->Sxy.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Sxy.Abs = NL_VEGETABLE_SCALE_ABS_DEFAULT;
+	_vegetable->Sxy.Rand = NL_VEGETABLE_SCALE_RAND_DEFAULT;
+	_vegetable->Sxy.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// ScaleZ.
-	Vegetable->Sz.Abs = NL_VEGETABLE_SCALE_ABS_DEFAULT;
-	Vegetable->Sz.Rand = NL_VEGETABLE_SCALE_RAND_DEFAULT;
-	Vegetable->Sz.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Sz.Abs = NL_VEGETABLE_SCALE_ABS_DEFAULT;
+	_vegetable->Sz.Rand = NL_VEGETABLE_SCALE_RAND_DEFAULT;
+	_vegetable->Sz.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 
 	// Rotate
 	// RotateX
-	Vegetable->Rx.Abs = NL_VEGETABLE_ROTATEX_ABS_DEFAULT;
-	Vegetable->Rx.Rand = NL_VEGETABLE_ROTATEX_RAND_DEFAULT;
-	Vegetable->Rx.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Rx.Abs = NL_VEGETABLE_ROTATEX_ABS_DEFAULT;
+	_vegetable->Rx.Rand = NL_VEGETABLE_ROTATEX_RAND_DEFAULT;
+	_vegetable->Rx.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// RotateY
-	Vegetable->Ry.Abs = NL_VEGETABLE_ROTATEY_ABS_DEFAULT;
-	Vegetable->Ry.Rand = NL_VEGETABLE_ROTATEY_RAND_DEFAULT;
-	Vegetable->Ry.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
+	_vegetable->Ry.Abs = NL_VEGETABLE_ROTATEY_ABS_DEFAULT;
+	_vegetable->Ry.Rand = NL_VEGETABLE_ROTATEY_RAND_DEFAULT;
+	_vegetable->Ry.Frequency = NL_VEGETABLE_FREQ_DEFAULT;
 	// RotateZ
-	Vegetable->Rz.Abs = NL_VEGETABLE_ROTATEZ_ABS_DEFAULT;
-	Vegetable->Rz.Rand = NL_VEGETABLE_ROTATEZ_RAND_DEFAULT;
-	Vegetable->Rz.Frequency = NL_VEGETABLE_ROTATEZ_FREQ_DEFAULT;
+	_vegetable->Rz.Abs = NL_VEGETABLE_ROTATEZ_ABS_DEFAULT;
+	_vegetable->Rz.Rand = NL_VEGETABLE_ROTATEZ_RAND_DEFAULT;
+	_vegetable->Rz.Frequency = NL_VEGETABLE_ROTATEZ_FREQ_DEFAULT;
 
 }
 
 void CVegetableNode::initVegetable(const NL3D::CVegetable &vegetable)
 {
-	Vegetable = new NL3D::CVegetable(vegetable);
+	_vegetable = new NL3D::CVegetable(vegetable);
 	// update vegetableName according to Vegetable
 	updateVegetableName();
 }
@@ -105,27 +105,27 @@ void CVegetableNode::initVegetable(const NL3D::CVegetable &vegetable)
 void CVegetableNode::updateVegetableName()
 {
 	// Build the vegetable Name according to the ShapeName
-	if(Vegetable->ShapeName == "")
+	if(_vegetable->ShapeName == "")
 	{
-		VegetableName = NL_DefaultVegetName;
+		_vegetableName = NL_DefaultVegetName;
 	}
 	else
 	{
-		std::string::size_type pos = Vegetable->ShapeName.find(".veget");
-		VegetableName= Vegetable->ShapeName.substr(0, pos);
+		std::string::size_type pos = _vegetable->ShapeName.find(".veget");
+		_vegetableName = _vegetable->ShapeName.substr(0, pos);
 		// And (to be clearer) append distance of creation.
 		char	str[256];
-		sprintf(str, " - %dm", (Vegetable->DistType + 1) * 10);
-		VegetableName += str;
+		sprintf(str, " - %dm", (_vegetable->DistType + 1) * 10);
+		_vegetableName += str;
 		// NB: if you add info with other parameters, you must use updateCurSelVegetableName() if they change
 	}
 }
 
 void CVegetableNode::deleteVegetable()
 {
-	delete Vegetable;
-	Vegetable = NULL;
-	VegetableName = NL_DefaultVegetName;
+	delete _vegetable;
+	_vegetable = NULL;
+	_vegetableName = NL_DefaultVegetName;
 }
 
 } /* namespace NLQT */

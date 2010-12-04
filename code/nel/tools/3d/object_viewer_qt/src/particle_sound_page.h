@@ -117,7 +117,7 @@ private:
 	}
 
 	/// the sound being edited
-	NL3D::CPSSound            *_Sound;
+	NL3D::CPSSound *_Sound;
 
 	CWorkspaceNode *_Node;
 

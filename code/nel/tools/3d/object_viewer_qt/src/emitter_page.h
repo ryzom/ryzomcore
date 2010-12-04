@@ -133,7 +133,7 @@ private:
 	} _ModulatedStrenghtWrapper;
 
 	// the emitter being edited
-	NL3D::CPSEmitter	 *_Emitter;
+	NL3D::CPSEmitter *_Emitter;
 
 	// contains pointers to the located
 	std::vector<NL3D::CPSLocated *> _LocatedList;

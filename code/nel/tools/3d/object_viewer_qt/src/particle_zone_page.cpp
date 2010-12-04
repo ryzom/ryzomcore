@@ -130,7 +130,7 @@ void CZonePage::updateTargets()
 	};
 
 	// fill abox with the available targets
-	NL3D::CParticleSystem  *ps = _LBTarget->getOwner()->getOwner();
+	NL3D::CParticleSystem *ps = _LBTarget->getOwner()->getOwner();
 
 	uint nbLocated = ps->getNbProcess();
 

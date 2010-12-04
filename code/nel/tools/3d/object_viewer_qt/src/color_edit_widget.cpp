@@ -31,7 +31,9 @@ namespace NLQT
 {
 
 CColorEditWidget::CColorEditWidget(QWidget *parent)
-	: QWidget(parent), _Wrapper(NULL), _emit(true)
+	: QWidget(parent), 
+	_Wrapper(NULL), 
+	_emit(true)
 {
 	_ui.setupUi(this);
 
@@ -77,15 +79,23 @@ void CColorEditWidget::updateUi()
 	_ui.gSpinBox->setValue(_Wrapper->get().G);
 	_ui.bSpinBox->setValue(_Wrapper->get().B);
 	_ui.aSpinBox->setValue(_Wrapper->get().A);
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										_ui.aSpinBox->value()));
 }
 
 void CColorEditWidget::setRed(int r)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										_ui.aSpinBox->value()));
 
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(), 
+											_ui.bSpinBox->value(), 
+											_ui.aSpinBox->value()));
 
 	if (_Wrapper == NULL)
 		return;
@@ -102,10 +112,16 @@ void CColorEditWidget::setRed(int r)
 
 void CColorEditWidget::setGreen(int g)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										_ui.aSpinBox->value()));
 
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), g, _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
+										g, 
+										_ui.bSpinBox->value(), 
+										_ui.aSpinBox->value()));
 
 	if (_Wrapper == NULL) return;
 
@@ -120,10 +136,16 @@ void CColorEditWidget::setGreen(int g)
 
 void CColorEditWidget::setBlue(int b)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), _ui.aSpinBox->value()));
+	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										_ui.aSpinBox->value()));
 
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), _ui.gSpinBox->value(), b, _ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
+											_ui.gSpinBox->value(), 
+											b, 
+											_ui.aSpinBox->value()));
 
 	if (_Wrapper == NULL) return;
 
@@ -138,10 +160,16 @@ void CColorEditWidget::setBlue(int b)
 
 void CColorEditWidget::setAlpha(int a)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), a));
+	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										a));
 
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), _ui.gSpinBox->value(), _ui.bSpinBox->value(), a));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
+										_ui.gSpinBox->value(), 
+										_ui.bSpinBox->value(), 
+										a));
 
 	if (_Wrapper == NULL) return;
 
