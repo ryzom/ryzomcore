@@ -28,6 +28,14 @@ namespace NLQT
 {
 class IPluginSpec;
 
+
+/**
+@interface IPluginManager
+@brief Interface for plugin system that manages the plugins, their life cycle and their registered objects.
+@details The plugin manager is used for the following tasks:
+- Manage plugins and their state
+- Manipulate a 'common object pool'
+*/
 class IPluginManager: public QObject
 {
 	Q_OBJECT

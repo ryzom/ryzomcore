@@ -33,6 +33,14 @@ namespace NLMISC
 namespace NLQT
 {
 
+/**
+@interface IPlugin
+@brief Base class for all plugins.
+@details The IPlugin class is an abstract class that must be implemented 
+once for each plugin. The IPlugin implementation must be exported and 
+made known to Qt's plugin system via the Q_EXPORT_PLUGIN macro, 
+see the Qt documentation for details on that.
+*/
 class IPlugin
 {
 public:

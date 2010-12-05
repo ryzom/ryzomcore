@@ -27,6 +27,11 @@ namespace NLQT
 class IPlugin;
 class IPluginManager;
 
+/**
+@struct State
+@details The plugin goes through several steps while being loaded.
+The state gives a hint on what went wrong in case of an error.
+*/
 struct State
 {
 	enum List
@@ -41,6 +46,14 @@ struct State
 	};
 };
 
+/**
+@interface IPluginSpec
+@brief Interface for plugin spec contains the information of the plugins and 
+information about the plugin's current state.
+@details The plugin spec is also filled with more information as the plugin
+goes through its loading process (see State).
+If an error occurs, the plugin spec is the place to look for the error details.
+*/
 class IPluginSpec
 {
 public:
