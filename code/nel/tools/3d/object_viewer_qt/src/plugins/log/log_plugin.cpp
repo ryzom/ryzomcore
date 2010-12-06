@@ -73,15 +73,9 @@ bool CLogPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorS
 
 void CLogPlugin::extensionsInitialized()
 {
-	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
+	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.View"));
 	helpMenu->addSeparator();
-	QAction *newAction = helpMenu->addAction("LogPlugin");
 
-	connect(newAction, SIGNAL(triggered()), this, SLOT(createLogDock()));
-}
-
-void CLogPlugin::createLogDock()
-{
 	NLMISC::ErrorLog->addDisplayer(_displayer);
 	NLMISC::WarningLog->addDisplayer(_displayer);
 	NLMISC::DebugLog->addDisplayer(_displayer);
@@ -89,11 +83,9 @@ void CLogPlugin::createLogDock()
 	NLMISC::InfoLog->addDisplayer(_displayer);
 
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-
-	// create log dock widget
 	wnd->addDockWidget(Qt::RightDockWidgetArea, this);
-
-	
+	hide();
+	helpMenu->addAction(this->toggleViewAction());
 }
 
 void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
@@ -112,7 +104,7 @@ QString CLogPlugin::name() const
 
 QString CLogPlugin::version() const
 {
-	return "0.1";
+	return "1.0";
 }
 
 QString CLogPlugin::vendor() const

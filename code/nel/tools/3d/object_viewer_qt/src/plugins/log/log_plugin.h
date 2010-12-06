@@ -65,9 +65,6 @@ namespace Plugin
 		QObject *objectByName(const QString &name) const;
 		NLQT::IPluginSpec *pluginByName(const QString &name) const;
 
-		private Q_SLOTS:
-			void createLogDock();
-
 	protected:
 		NLMISC::CLibraryContext *_LibContext;
 
