@@ -99,7 +99,7 @@ void CLogPlugin::createLogDock()
 void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
 	nlassert(!NLMISC::INelContext::isContextInitialised());
-	_LibContext = static_cast<NLMISC::CLibraryContext *>(nelContext);
+	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 
 	_displayer = new NLQT::CQtDisplayer(_ui.plainTextEdit);
 	

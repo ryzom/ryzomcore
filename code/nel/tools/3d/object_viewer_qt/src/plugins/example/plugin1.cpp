@@ -53,7 +53,7 @@ void MyPlugin::execMessageBox()
 void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
 	nlassert(!NLMISC::INelContext::isContextInitialised());
-	_LibContext = static_cast<NLMISC::CLibraryContext *>(nelContext);
+	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 QString MyPlugin::name() const
