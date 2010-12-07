@@ -62,6 +62,7 @@ CFileDisplayer *s_FileDisplayer = NULL;
 sint main(int argc, char **argv)
 {
 	// go nel!
+	new NLMISC::CApplicationContext;
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
 		createDebug(NULL, NLQT_USE_LOG_LOG, false);
