@@ -90,11 +90,15 @@ void CLogPlugin::extensionsInitialized()
 
 void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
-	nlassert(!NLMISC::INelContext::isContextInitialised());
-	_LibContext = new NLMISC::CLibraryContext(*nelContext);
+#ifdef NL_OS_WINDOWS 
+        // Ensure that a context doesn't exist yet.  
+        // This only applies to platforms without PIC, e.g. Windows.  
+        nlassert(!NLMISC::INelContext::isContextInitialised()); 
+#endif // fdef NL_OS_WINDOWS^M
+        _LibContext = new NLMISC::CLibraryContext(*nelContext); 
 
 	_displayer = new NLQT::CQtDisplayer(_ui.plainTextEdit);
-	
+
 }
 
 QString CLogPlugin::name() const
