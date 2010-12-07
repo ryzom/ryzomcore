@@ -86,7 +86,7 @@ namespace NLQT
 		//nldebug("%d %d %d",_nlw->winId(), width(), height());
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		dynamic_cast<QNLWidget*>(widget())->makeCurrent();
+		//dynamic_cast<QNLWidget*>(widget())->makeCurrent();
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 		nlWindow wnd = winId();
