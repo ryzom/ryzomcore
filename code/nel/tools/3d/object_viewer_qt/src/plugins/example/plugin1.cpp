@@ -52,7 +52,11 @@ void MyPlugin::execMessageBox()
 
 void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
+#ifdef NL_OS_WINDOWS
+	// Ensure that a context doesn't exist yet.
+	// This only applies to platforms without PIC, e.g. Windows.
 	nlassert(!NLMISC::INelContext::isContextInitialised());
+#endif // NL_OS_WINDOWS
 	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
