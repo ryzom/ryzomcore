@@ -393,7 +393,8 @@ bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint 
 	// clear last error
 	GLenum glError = glGetError();
 
-	//variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
+	//variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
+	//variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
 
 	// allocate the symbols
 	nglBindVertexShaderEXT(id);
@@ -411,7 +412,8 @@ bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint 
 		// allocate needed variants
 		if (CVPParser::isInputUsed(program, CVPOperand::ISecondaryColor))
 		{
-			variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
+			variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
+
 			if (!variants[EVSSecondaryColorVariant])
 			{
 				nlwarning("EXT_vertex_shader : can't allocate variant for secondary color");
@@ -422,9 +424,11 @@ bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint 
 		{
 			variants[EVSSecondaryColorVariant] = 0;
 		}
+
 		if (CVPParser::isInputUsed(program, CVPOperand::IFogCoord))
 		{
-			variants[EVSFogCoordsVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);
+			variants[EVSFogCoordsVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);
+
 			if (!variants[EVSFogCoordsVariant])
 			{
 				nlwarning("EXT_vertex_shader : can't allocate variant for fog coords");
@@ -435,9 +439,11 @@ bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint 
 		{
 			variants[EVSFogCoordsVariant] = 0;
 		}
+
 		if (CVPParser::isInputUsed(program, CVPOperand::IWeight))
 		{
-			variants[EVSSkinWeightVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_NORMALIZED_RANGE_EXT, 1);
+			variants[EVSSkinWeightVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);
+
 			if (!variants[EVSSkinWeightVariant])
 			{
 				nlwarning("EXT_vertex_shader : can't allocate variant for skin weight");
@@ -448,9 +454,11 @@ bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint 
 		{
 			variants[EVSSkinWeightVariant] = 0;
 		}
+
 		if (CVPParser::isInputUsed(program, CVPOperand::IPaletteSkin))
 		{
-			variants[EVSPaletteSkinVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);variants[EVSSecondaryColorVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);
+			variants[EVSPaletteSkinVariant] = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_VARIANT_EXT, GL_FULL_RANGE_EXT, 1);
+
 			if (!variants[EVSPaletteSkinVariant])
 			{
 				nlwarning("EXT_vertex_shader : can't allocate variant for palette skin");
