@@ -469,7 +469,7 @@ bool CDriverGL::setupDisplay()
 		_SupportVBHard= true;
 		_MaxVerticesByVBHard= _Extensions.NVVertexArrayRangeMaxVertex;
 	}
-	else if(_Extensions.ATITextureEnvCombine3 &&  !_Extensions.IsATI9500OrAbove && _Extensions.ATIVertexArrayObject)
+	else if(_Extensions.ATITextureEnvCombine3 && _Extensions.ATIVertexArrayObject)
 	{
 		// NB
 		// on Radeon 9200 and below : ATI_vertex_array_object is better (no direct access to AGP with ARB_vertex_buffer_object -> slow unlock)
