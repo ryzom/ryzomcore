@@ -1184,12 +1184,12 @@ class CHandlerTell : public IActionHandler
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 		ucstring finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
+
 		ucstring cur_time;
 		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
 		if (pNL && pNL->getValueBool())
-		{
 			cur_time = CInterfaceManager::getTimestampHuman();
-		}
+
 		ucstring csr;
 		if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 		finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";

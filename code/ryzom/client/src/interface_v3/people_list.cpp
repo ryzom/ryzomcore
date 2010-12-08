@@ -467,9 +467,8 @@ void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint num
 	ucstring cur_time;
 	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
 	if (pNL && pNL->getValueBool())
-	{
 		cur_time = CInterfaceManager::getTimestampHuman();
-	}
+
  	ucstring csr;
 	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 	ucstring finalMsg = cur_time + csr + CI18N::get("youTell") + ": " + msg;
@@ -936,12 +935,12 @@ class CHandlerContactEntry : public IActionHandler
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 				ucstring final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
+
 				ucstring cur_time;
 				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
 				if (pNL && pNL->getValueBool())
-				{
 					cur_time = CInterfaceManager::getTimestampHuman();
-				}
+
 				ucstring csr;
 				if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
 				final += cur_time + csr + CI18N::get("youTell")+": ";

@@ -1480,7 +1480,7 @@ int CEditor::luaIsValidPosition(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
 	//
-	/*NLPACS::UGlobalPosition gpos = GR->retrievePosition(CVector((float) ls.toNumber(2), (float) ls.toNumber(3), 2000.f));
+	// NLPACS::UGlobalPosition gpos = GR->retrievePosition(CVector((float) ls.toNumber(2), (float) ls.toNumber(3), 2000.f));
 	if (gpos.InstanceId != -1)
 	{
 		CVector snappedPos = GR->getGlobalPosition(gpos);

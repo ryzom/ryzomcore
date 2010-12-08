@@ -37,7 +37,7 @@ class CWeatherFunctionSheetBase;
 
 
 /** A weather function is a set of weather setup. Depending on the weather function, it blends between 2 setups to get the current state of the weather
-  * It should be initialized after all whether setup have been loaded, because it builds references on the weather setups.
+  * It should be initialized after all weather setup have been loaded, because it builds references on the weather setups.
   * \author Nicolas Vizerie
   * \author Nevrax France
   * \date 2002

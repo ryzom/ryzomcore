@@ -77,7 +77,7 @@ public:
 
 	/// sint64 operations
 	void setSInt64 (sint64 value) {_VolatileValue->setValue64(value);}
-	sint64 getSInt64 () const{return _VolatileValue->getValue64();}
+	sint64 getSInt64 () const {return _VolatileValue->getValue64();}
 	void readSInt64(const char* value, const std::string& id);
 
 	/// CRGBA operations
@@ -101,10 +101,6 @@ private:
 	/// volatile value of the property (pointer to a leaf of the database)
 	CCDBNodeLeaf* _VolatileValue;
 };
-
-
-
-
 
 #endif // NL_INTERFACE_PROPERTY_H
 

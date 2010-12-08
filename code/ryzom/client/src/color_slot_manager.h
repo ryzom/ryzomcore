@@ -42,7 +42,7 @@ namespace NLMISC
   * The manager is initialized from a set of textures files.
   * The slot color each texture represents is encoded in the texture name
   * Example:
-  * amour_red.dds
+  * armour_red.dds
   * armour_green.dds
   * ...
   * Once the slots description have been filled, we can change model's colors for a given slot
