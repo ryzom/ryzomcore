@@ -157,8 +157,6 @@ void	CDriverGL::enableLight (uint8 num, bool enable)
 {
 	H_AUTO_OGL(CDriverGL_enableLight )
 	// User call => set the User flag
-	// Geforce FX tmp fix
-	if (_Extensions.IsGeforceFXOrAbove && num >=3) return;
 	if(num<_MaxDriverLight)
 	{
 		_UserLightEnable[num]= enable;

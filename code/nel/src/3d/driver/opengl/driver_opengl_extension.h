@@ -115,11 +115,6 @@ struct	CGlExtensions
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 
-	// hint : is it an ATI 9500 or above ?
-	bool	IsATI9500OrAbove;
-	// hint : is it a GeForce FX or above ?
-	bool	IsGeforceFXOrAbove;
-
 public:
 
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
@@ -182,18 +177,12 @@ public:
 		DisableHardwareVertexProgram= false;
 		DisableHardwareVertexArrayAGP= false;
 		DisableHardwareTextureShader= false;
-
-		// misc
-		IsATI9500OrAbove = false;
-		IsGeforceFXOrAbove = false;
 	};
 
 	std::string toString()
 	{
 		std::string result = "OpenGL version ";
 		result += Version1_2 ? "1.2 or above(*)" : "1.1 or below";
-		result += IsATI9500OrAbove ? "; ATI9500 or better" : "";
-		result += IsGeforceFXOrAbove ? "; GeForce FX or better" : "";
 		result += "; Available extensions:";
 
 		result += "\n  Texturing: ";

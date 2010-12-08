@@ -1378,19 +1378,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check ATIXTextureEnvRoute
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
 
-	if (ext.ATITextureEnvCombine3)
-	{
-		ext.IsATI9500OrAbove = setupARBFragmentProgram(glext);
-	}
-
 	// ARB extensions
 	// -------------
 	if(!ext.DisableHardwareVertexArrayAGP)
 	{
 		ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
 	}
-
-	ext.IsGeforceFXOrAbove = setupNVVertexProgram(glext) && setupARBFragmentProgram(glext);
 
 	// fix for radeon 7200 -> disable agp
 	if (ext.NbTextureStages == 3 && (ext.ATIVertexArrayObject || ext.ARBVertexBufferObject))
