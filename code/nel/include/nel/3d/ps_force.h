@@ -70,16 +70,16 @@ public:
 	virtual void		show() = 0;
 
 	/// Serial the force definition. MUST be called by deriver during their serialisation
-	virtual void		 serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
 	/// check whether this force is integrable over time. The default is false
-	virtual bool		 isIntegrable(void) const { return false; }
+	virtual bool		isIntegrable(void) const { return false; }
 
 	/// inherited from   CPSLocatedBindableTarget, we use that to tell whether this force is integrable or not
-	virtual void		 attachTarget(CPSLocated *ptr);
+	virtual void		attachTarget(CPSLocated *ptr);
 
 	/// inherited from   CPSLocatedBindableTarget
-	void				  releaseTargetRsc(CPSLocated *target);
+	void				releaseTargetRsc(CPSLocated *target);
 
 
 	/** Integrate this force on the given located. If 'accumulate' is set to true, it just add the effect of this force on position

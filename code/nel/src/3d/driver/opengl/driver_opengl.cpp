@@ -2425,7 +2425,7 @@ bool CDriverGL::getAdapter(uint adapter, CAdapter &desc) const
 		desc.Driver = (const char *) glGetString (GL_VERSION);
 		desc.Vendor= (const char *) glGetString (GL_VENDOR);
 
-		desc.Description = "Default openGL adapter";
+		desc.Description = "Default OpenGL adapter";
 		desc.DeviceId = 0;
 		desc.DriverVersion = 0;
 		desc.Revision = 0;

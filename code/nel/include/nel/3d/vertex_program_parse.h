@@ -184,7 +184,7 @@ public:
 	typedef std::vector<CVPInstruction> TProgram;
 public:
 	/** Parse a vertex program, and convert to proprietary format.
-	  * It is intended to be use by a driver implementation.
+	  * It is intended to be used by a driver implementation.
 	  * \warning: Only syntax is checked. It doesn't check that a register has been initialised before use.
 	  * \param src The input text of a vertex program, in OpenGL format.
 	  * \param result The result program.

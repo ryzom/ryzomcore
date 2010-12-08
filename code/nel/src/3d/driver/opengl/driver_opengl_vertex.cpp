@@ -883,7 +883,6 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 		case CVertexBufferInfo::HwNVIDIA:
 		case CVertexBufferInfo::HwARB:
 		{
-
 			// setup vertex ptr.
 			//-----------
 			uint numVertexCoord = CVertexBuffer::NumComponentsType[vb.Type[CVertexBuffer::Position]];

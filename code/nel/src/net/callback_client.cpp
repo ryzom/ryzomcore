@@ -19,7 +19,8 @@
 #include "nel/misc/types_nl.h"
 #include "nel/net/callback_net_base.h"
 #include "nel/net/callback_client.h"
-#include "nel/net/net_log.h"
+#include "nel/net/net_log.h"
+
 
 #ifdef USE_MESSAGE_RECORDER
 #include "nel/net/message_recorder.h"

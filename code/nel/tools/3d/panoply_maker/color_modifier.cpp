@@ -63,7 +63,7 @@ void CColorModifier::convertBitmap(NLMISC::CBitmap &destBitmap, const NLMISC::CB
 
 			result.buildFromHLS(h + deltaH, l + Lightness, s + Saturation);
 
-			/// apply contrasts						
+			/// apply contrasts
 			result.R = CalcBrightnessContrast(result.R, Luminosity, Contrast, grey);
 			result.G = CalcBrightnessContrast(result.G, Luminosity, Contrast, grey);
 			result.B = CalcBrightnessContrast(result.B, Luminosity, Contrast, grey);
