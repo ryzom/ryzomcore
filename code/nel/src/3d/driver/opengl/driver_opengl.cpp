@@ -461,8 +461,17 @@ bool CDriverGL::setupDisplay()
 	_SupportVBHard= false;
 	_SlowUnlockVBHard= false;
 	_MaxVerticesByVBHard= 0;
-	// Try with NVidia ext first.
-	if(_Extensions.NVVertexArrayRange)
+
+	// Try with ARB ext first.
+	if (_Extensions.ARBVertexBufferObject)
+	{
+		_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
+		_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
+		_SupportVBHard= true;
+		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
+	}
+	// Next with NVidia ext
+	else if(_Extensions.NVVertexArrayRange)
 	{
 		_AGPVertexArrayRange= new CVertexArrayRangeNVidia(this);
 		_VRAMVertexArrayRange= new CVertexArrayRangeNVidia(this);
@@ -490,14 +499,6 @@ bool CDriverGL::setupDisplay()
 		// _MaxVerticesByVBHard= 65535; // should always work with recent drivers.
 		// tmp fix for ati
 		_MaxVerticesByVBHard= 16777216;
-	}
-	// Else, try with ARB ext
-	else if (_Extensions.ARBVertexBufferObject)
-	{
-		_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
-		_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
-		_SupportVBHard= true;
-		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
 	}
 
 	// Reset VertexArrayRange.
@@ -812,7 +813,7 @@ bool CDriverGL::swapBuffers()
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
 		Setup a std vertex buffer to ensure NVidia synchronisation.
 	*/
-	if (_Extensions.NVVertexArrayRange)
+	if (!_Extensions.ARBVertexBufferObject && _Extensions.NVVertexArrayRange)
 	{
 		static	CVertexBuffer	dummyVB;
 		static	bool			dummyVBinit= false;
@@ -854,7 +855,7 @@ bool CDriverGL::swapBuffers()
 		AS NV_Fence GeForce Implementation says. Test each frame the NVFence, until completion.
 		NB: finish is not required here. Just test. This is like a "non block synchronisation"
 	 */
-	if (_Extensions.NVVertexArrayRange)
+	if (!_Extensions.ARBVertexBufferObject && _Extensions.NVVertexArrayRange)
 	{
 		set<IVertexBufferHardGL*>::iterator		itVBHard= _VertexBufferHardSet.Set.begin();
 		while(itVBHard != _VertexBufferHardSet.Set.end() )
