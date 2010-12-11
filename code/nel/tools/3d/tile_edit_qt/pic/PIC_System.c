@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#if !defined(__APPLE__)
 #include <malloc.h>
+#endif
 #include <string.h>
 #include <stdarg.h>
 
@@ -9,7 +11,9 @@
 static unsigned long	PIC_Sys_MEM_Allocated;
 static unsigned long	PIC_Sys_MEM_NbAllocs;
 
-#ifdef __GNUC__
+#if defined(__APPLE__)
+#define _msize malloc_size
+#elif defined(__GNUC__)
 #define _msize malloc_usable_size
 #endif /* __GNUC__ */
 
