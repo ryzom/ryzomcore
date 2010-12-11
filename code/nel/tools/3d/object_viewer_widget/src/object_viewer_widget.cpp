@@ -89,7 +89,7 @@ namespace NLQT
 		//dynamic_cast<QNLWidget*>(widget())->makeCurrent();
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
-		nlWindow wnd = winId();
+		nlWindow wnd = (nlWindow)winId();
 		uint16 w = width();
 		uint16 h = height();
 
