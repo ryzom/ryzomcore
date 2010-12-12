@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDir>
 #include <QString>
 
+#include <nel/misc/debug.h>
+
 NLQT::CConfiguration      *Modules::_configuration = NULL;
 NLQT::IObjectViewer       *Modules::_objViewerInterface = NULL;
 NLQT::CMainWindow         *Modules::_mainWindow = NULL;
@@ -49,28 +51,53 @@ void Modules::release()
 
 bool Modules::loadPlugin()
 {
-	QDir pluginsDir(qApp->applicationDirPath());
-	/*#if defined(Q_OS_WIN)
-	if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
-	pluginsDir.cdUp();
-	#elif defined(Q_OS_MAC)
-	if (pluginsDir.dirName() == "MacOS") {
-	pluginsDir.cdUp();
-	pluginsDir.cdUp();
-	pluginsDir.cdUp();
-	}
-	#endif*/
-	//pluginsDir.cd("plugins");
-	//Q_FOREACH (QString fileName, pluginsDir.entryList(QDir::Files)) {
-	QPluginLoader pluginLoader(pluginsDir.absoluteFilePath("object_viewer_widget_qt.dll"));
+#if defined(Q_OS_WIN)
+	QString pluginPath     = qApp->applicationDirPath();
+	QString pluginFilename = "object_viewer_widget_qt.dll";
+#elif defined(Q_OS_MAC)
+	QString pluginPath     = qApp->applicationDirPath() + "/../PlugIns/";
+	QString pluginFilename = "libobject_viewer_widget_qt.so";
+#else // LINUX
+	QString pluginPath     = qApp->applicationDirPath();
+	QString pluginFilename = "libobject_viewer_widget_qt.so";
+#endif
+
+	// if(!QFile::exists(pluginPath + pluginFilename))
+	// {
+	// 	nlwarning("Cannot find %s in %s, fallback to working dir", 
+	// 		pluginFilename.toStdString().c_str(), pluginPath.toStdString().c_str());
+	// 
+	// 	pluginPath = "";
+	// 
+	// 	Q_FOREACH (QString path, qApp->libraryPaths())
+	// 		nlwarning("libraryPaths %s", path.toStdString().c_str());
+	// }
+
+	QDir pluginsDir(pluginPath);
+	QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(pluginFilename));
+
 	QObject *plugin = pluginLoader.instance();
 	if (plugin) 
 	{
 		_objViewerInterface = qobject_cast<NLQT::IObjectViewer *>(plugin);
 		if (_objViewerInterface)
+		{
+			nlinfo("Loaded %s", 
+				pluginsDir.absoluteFilePath(pluginFilename).toStdString().c_str());
 			return true;
+		}
+		else
+		{
+			nlwarning("Loaded %s, but cannot cast to NLQT::IObjectViewer*", 
+				pluginFilename.toStdString().c_str());
+		}
 	}
-	//}
+	else
+	{
+		nlwarning("Cannot get plugin instance for %s (searched in %s)", 
+			pluginFilename.toStdString().c_str(), 
+			(qApp->applicationDirPath() + pluginPath).toStdString().c_str());
+	}
 
 	return false;
 }

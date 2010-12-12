@@ -63,6 +63,8 @@ namespace NLQT
 		CObjectViewerWidget(QWidget *parent = 0);
 		virtual ~CObjectViewerWidget();
 
+		virtual QPaintEngine* paintEngine() const { return NULL; }
+
 		void setNelContext(NLMISC::INelContext &nelContext);
 
 		static CObjectViewerWidget  &objViewWid() { return *_objectViewerWidget; }
