@@ -64,6 +64,7 @@ namespace NLQT
 		virtual ~CObjectViewerWidget();
 
 		virtual QPaintEngine* paintEngine() const { return NULL; }
+		virtual void showEvent ( QShowEvent * event );
 
 		void setNelContext(NLMISC::INelContext &nelContext);
 

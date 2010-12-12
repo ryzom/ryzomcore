@@ -78,6 +78,14 @@ namespace NLQT
 
 	}
 
+	void CObjectViewerWidget::showEvent ( QShowEvent * event )
+	{
+		if (!_mainTimer->isActive()) 
+		{
+			_mainTimer->start(25);
+		}
+	}
+
 	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext) 
 	{
 		_LibContext = new CLibraryContext(nelContext);
