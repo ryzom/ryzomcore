@@ -46,7 +46,7 @@ namespace NLQT
 	{
 		_ui.setupUi(this);
 
-		_nlw = Modules::objViewInt().getWidget();
+		_nlw = dynamic_cast<QNLWidget*>(Modules::objViewInt().getWidget());
 		//_nlw->setObjectName(QString::fromUtf8("nlwidget"));
 		_ui.gridLayout->addWidget(_nlw, 0, 0);
 	}
