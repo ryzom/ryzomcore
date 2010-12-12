@@ -80,10 +80,10 @@ CSettingsDialog::~CSettingsDialog()
 
 void CSettingsDialog::addPath()
 {
-	QListWidgetItem *newItem = new QListWidgetItem;
 	QString newPath = QFileDialog::getExistingDirectory(this);
-	if (!(newPath == ""))
+	if (!newPath.isEmpty())
 	{
+		QListWidgetItem *newItem = new QListWidgetItem;
 		newItem->setText(newPath);
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		ui.pathsListWidget->addItem(newItem);
