@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace NL3D;
 
-namespace NLQT 
+namespace NLQT
 {
 
 	CObjectViewerDialog::CObjectViewerDialog(QWidget *parent)
@@ -51,7 +51,7 @@ namespace NLQT
 		_ui.gridLayout->addWidget(_nlw, 0, 0);
 	}
 
-	CObjectViewerDialog::~CObjectViewerDialog() 
+	CObjectViewerDialog::~CObjectViewerDialog()
 	{
 	}
 

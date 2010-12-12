@@ -558,7 +558,7 @@ void CMicroLifeManager::tileAdded(const NL3D::CTileAddedInfo &infos)
 #if !FINAL_VERSION
 				// for debug display, tells that it was generated dynamically
 				newFX.FromIG = false;
-			#endif
+#endif
 			// spawn a primitive on the quad
 			float weight[3];
 			// compute weight values by computing some noise values around

@@ -49,22 +49,22 @@ using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
 
-namespace NLQT 
+namespace NLQT
 {
 	CObjectViewerWidget *CObjectViewerWidget::_objectViewerWidget = NULL;
 
 	CObjectViewerWidget::CObjectViewerWidget(QWidget *parent)
-		: _isGraphicsInitialized(false), _isGraphicsEnabled(false), 
+		: _isGraphicsInitialized(false), _isGraphicsEnabled(false),
 		_Driver(NULL), _Light(0), _phi(0), _psi(0),_dist(2),
-		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false), 
-		_Scene(0), QWidget(parent) 
+		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false),
+		_Scene(0), QWidget(parent)
 	{
 
 		_objectViewerWidget = this;
 
 		_isGraphicsEnabled = true;
 
-		// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed. 
+		// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed.
 		// This can be used to do heavy work while providing a snappy user interface.
 		_mainTimer = new QTimer(this);
 		connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
