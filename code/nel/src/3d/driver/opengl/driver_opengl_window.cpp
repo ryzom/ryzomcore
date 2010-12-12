@@ -1023,7 +1023,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	[_ctx flushBuffer];
 	[_glView display];
 
-	_EventEmitter.init(this, _glView);
+	_EventEmitter.init(this, _glView, _DestroyWindow);
 
 #elif defined(NL_OS_UNIX)
 

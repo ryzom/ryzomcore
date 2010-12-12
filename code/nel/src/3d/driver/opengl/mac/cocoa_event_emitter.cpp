@@ -222,10 +222,12 @@ static bool isTextKeyEvent(NSEvent* event)
 	return false;
 }
 
-void CCocoaEventEmitter::init(NL3D::IDriver* driver, CocoaOpenGLView* glView)
+void CCocoaEventEmitter::init(
+		NL3D::IDriver* driver, CocoaOpenGLView* glView, bool eventLoop)
 {
-	_driver = driver;
-	_glView = glView;
+	_driver    = driver;
+	_glView    = glView;
+	_eventLoop = eventLoop;
 }
 
 bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
@@ -442,8 +444,9 @@ typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
-	// break if there was no event to handle
-	while(true)
+	// break if there was no event to handle 
+	// if running embedded in e.g. qt, _eventLoop will be false
+	while(_eventLoop)
 	{
 		// get the next event to handle
 		NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask
