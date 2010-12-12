@@ -3,6 +3,7 @@
 
 // Qt includes
 #include <QtGui/QApplication>
+#include <QDir>
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
@@ -13,6 +14,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
+#include <nel/misc/dynloadlib.h>
 
 // Project includes
 #include "modules.h"
@@ -81,6 +83,15 @@ void messageHandler(QtMsgType p_type, const char* p_msg)
 
 sint main(int argc, char **argv)
 {
+	QApplication app(argc, argv);
+	NLMISC::CApplicationContext myApplicationContext;
+
+#if defined(NL_OS_MAC)
+	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
+	CLibrary::addLibPath(
+		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+#endif
+
 	// go nel!
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
@@ -108,8 +119,6 @@ sint main(int argc, char **argv)
 
 		NLMISC::CPath::remapExtension("tga", "png", true);
 	}
-
-	QApplication app(argc, argv);
 
 	Modules::init();
 	//Modules::mainWin().resize(800,600);
