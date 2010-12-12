@@ -246,6 +246,25 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.x /= (float)viewRect.size.width;
 	mousePos.y /= (float)viewRect.size.height;
 
+	// if the mouse event was placed outside the view, don't tell NeL :)
+	if((mousePos.x < 0.0 || mousePos.x > 1.0 || 
+		mousePos.y < 0.0 || mousePos.y > 1.0) && 
+		event.type != NSKeyDown && event.type != NSKeyUp)
+	{
+		return false;
+	}
+
+	// first event about mouse movement after setting to emulateRawMode
+	if(_setToEmulateRawMode &&
+		(event.type == NSMouseMoved || 
+		event.type == NSLeftMouseDragged || 
+		event.type == NSRightMouseDragged))
+	{
+		// do not report because it reflects wrapping pointer to 0.5/0.5 
+		_setToEmulateRawMode = false;
+		return false;
+	}
+
 	// convert the modifiers for nel to pass them with the events
 	NLMISC::TKeyButton modifiers =
 		modifierFlagsToNelKeyButton([event modifierFlags]);
@@ -399,6 +418,12 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	}
 	}
 
+	if(_emulateRawMode && _driver && (event.type == NSMouseMoved || 
+		event.type == NSLeftMouseDragged || event.type == NSRightMouseDragged)) 
+	{
+		_driver->setMousePos(0.5, 0.5);
+	}
+
 	return true;
 }
 
@@ -453,6 +478,14 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 void CCocoaEventEmitter::emulateMouseRawMode(bool enable)
 {
 	_emulateRawMode = enable;
+	
+	if(_emulateRawMode)
+	{
+		_setToEmulateRawMode = true;
+		
+		if(_driver)
+			_driver->setMousePos(0.5, 0.5);
+	}
 }
 
 }
