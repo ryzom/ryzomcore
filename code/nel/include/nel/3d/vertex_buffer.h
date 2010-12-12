@@ -1177,7 +1177,9 @@ inline void CVertexBuffer::lock (CVertexBufferReadWrite &accessor, uint first, u
 		}
 	}
 	else
+	{
 		nlassert ((first==0)&&(last==0));
+	}
 
 	_LockCounter++;
 }
@@ -1212,7 +1214,9 @@ inline void CVertexBuffer::lock (CVertexBufferRead &accessor, uint first, uint l
 		}
 	}
 	else
+	{
 		nlassert ((first==0)&&(last==0));
+	}
 
 	_LockCounter++;
 }
