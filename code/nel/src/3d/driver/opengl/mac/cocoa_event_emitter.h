@@ -34,6 +34,7 @@ class CCocoaEventEmitter : public IEventEmitter
 {
 	bool             _emulateRawMode;
 	bool             _setToEmulateRawMode;
+	bool             _eventLoop;
 	NL3D::IDriver*   _driver;
 	CocoaOpenGLView* _glView;
 
@@ -48,7 +49,7 @@ public:
 		_glView(nil),
 		_server(NULL) { }
 
-	void         init(NL3D::IDriver* driver, CocoaOpenGLView* glView);
+	void         init(NL3D::IDriver*, CocoaOpenGLView*, bool eventLoop);
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
 	virtual void submitEvents(CEventServer& server, bool allWindows);
 	virtual void emulateMouseRawMode(bool enable);

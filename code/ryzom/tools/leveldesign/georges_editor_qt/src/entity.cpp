@@ -76,23 +76,23 @@ CEntity::~CEntity(void)
 	if (_PlayList != NULL)
 	{
 		_PlayList->resetAllChannels();
-		//Modules::objViewWid().getPlayListManager()->deletePlayList (_PlayList);
+		Modules::objViewInt().getPlayListManager()->deletePlayList (_PlayList);
 		_PlayList = NULL;
 	}
 	if (_AnimationSet != NULL)
 	{
-		//Modules::objViewWid().getDriver()->deleteAnimationSet(_AnimationSet);
+		Modules::objViewInt().getDriver()->deleteAnimationSet(_AnimationSet);
 		_AnimationSet = NULL;
 	}
 	if (!_Skeleton.empty())
 	{
 		_Skeleton.detachSkeletonSon(_Instance);
-		//Modules::objViewWid().getScene()->deleteSkeleton(_Skeleton);
+		Modules::objViewInt().getScene()->deleteSkeleton(_Skeleton);
 		_Skeleton = NULL;
 	}
 	if (!_Instance.empty())
 	{
-		//Modules::objViewWid().getScene()->deleteInstance(_Instance);
+		Modules::objViewInt().getScene()->deleteInstance(_Instance);
 		_Instance = NULL;
 	}
 }

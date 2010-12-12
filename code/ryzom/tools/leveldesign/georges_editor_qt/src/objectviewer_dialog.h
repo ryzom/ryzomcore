@@ -59,7 +59,6 @@ namespace NLQT
 		~CObjectViewerDialog();
 
 		virtual void setVisible(bool visible);
-		virtual QPaintEngine* paintEngine() const { return NULL; }
 
 		QAction *createSaveScreenshotAction(QObject *parent);
 		QAction *createSetBackgroundColor(QObject *parent);

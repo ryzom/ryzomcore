@@ -300,7 +300,7 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k)
 	uint32 width, height;
 
 	//k.FontGenerator->getSizes (k.Char, k.Size, width, height);
-	// \todo mat : Temporaire !!! Essayer de faire intervenir le cache de freetype
+	// \todo mat : Temp !!! Try to use freetype cache
 	uint32 nPitch, nGlyphIndex;
 	sint32 nLeft, nTop, nAdvX;
 	k.FontGenerator->getBitmap (k.Char, k.Size, width, height, nPitch, nLeft, nTop,
