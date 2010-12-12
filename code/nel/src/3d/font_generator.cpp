@@ -104,13 +104,13 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 	}
 
 	string fontEx = fontExFileName;
-	if (fontEx == "")
+	if (fontEx.empty())
 	{
 		// try to see if the ex filename exists based on the fontExFileName
 		fontEx = CPath::lookup(CFile::getFilenameWithoutExtension (fontFileName)+".afm", false, false);
 	}
 
-	if (fontEx != "")
+	if (!fontEx.empty())
 	{
 		error = FT_Attach_File (_Face, fontEx.c_str ());
 		if (error)

@@ -19,10 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
+#include "stdpch.h"
+#include "entity.h"
+
 #include <QtPlugin>
 
-namespace NL3D {
+namespace NL3D 
+{
 	class UPlayListManager;
+	class UDriver;
+	class UScene;
 }
 
 namespace NLQT 
@@ -65,6 +71,7 @@ namespace NLQT
 		virtual bool setupLight(const NLMISC::CVector &position, const NLMISC::CVector &direction) = 0;
 		virtual void setVisible(bool visible) = 0;
 		virtual QWidget* getWidget() = 0;
+		virtual void setNelContext(NLMISC::INelContext &nelContext) = 0;
 
 	};
 

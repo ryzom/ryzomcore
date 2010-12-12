@@ -49,22 +49,22 @@ using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
 
-namespace NLQT 
+namespace NLQT
 {
 	CObjectViewerWidget *CObjectViewerWidget::_objectViewerWidget = NULL;
 
 	CObjectViewerWidget::CObjectViewerWidget(QWidget *parent)
-		: _isGraphicsInitialized(false), _isGraphicsEnabled(false), 
+		: _isGraphicsInitialized(false), _isGraphicsEnabled(false),
 		_Driver(NULL), _Light(0), _phi(0), _psi(0),_dist(2),
-		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false), 
-		_Scene(0), QWidget(parent) 
+		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false),
+		_Scene(0), QWidget(parent)
 	{
 
 		_objectViewerWidget = this;
 
 		_isGraphicsEnabled = true;
 
-		// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed. 
+		// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed.
 		// This can be used to do heavy work while providing a snappy user interface.
 		_mainTimer = new QTimer(this);
 		connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
@@ -78,12 +78,19 @@ namespace NLQT
 
 	}
 
+	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext) 
+	{
+		_LibContext = new CLibraryContext(nelContext);
+	}
+
 	void CObjectViewerWidget::init()
 	{
+
 		connect(this, SIGNAL(topLevelChanged(bool)),
 			this, SLOT(topLevelChanged(bool)));
 		//H_AUTO2
 		//nldebug("%d %d %d",_nlw->winId(), width(), height());
+
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		//dynamic_cast<QNLWidget*>(widget())->makeCurrent();
@@ -410,7 +417,6 @@ namespace NLQT
 		if ( _Entities.count(fileName) != 0) 
 			return false;
 
-		CPath::display();
 		CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
 
 		// create instance of the mesh character

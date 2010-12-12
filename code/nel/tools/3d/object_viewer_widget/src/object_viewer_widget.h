@@ -63,12 +63,11 @@ namespace NLQT
 		CObjectViewerWidget(QWidget *parent = 0);
 		virtual ~CObjectViewerWidget();
 
+		void setNelContext(NLMISC::INelContext &nelContext);
+
 		static CObjectViewerWidget  &objViewWid() { return *_objectViewerWidget; }
 
 		/// Init a driver and create scene.
-		/// @param wnd - handle window.
-		/// @param w - width window.
-		/// @param h - height window.
 		void init();
 
 		/// Release class.
@@ -175,6 +174,8 @@ namespace NLQT
 	private:
 
 		static CObjectViewerWidget  *_objectViewerWidget;
+
+		NLMISC::CLibraryContext *_LibContext;
 
 		// render stuff
 		QTimer *_mainTimer;

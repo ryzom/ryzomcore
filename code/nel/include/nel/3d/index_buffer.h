@@ -736,7 +736,9 @@ inline void CIndexBuffer::lock (CIndexBufferReadWrite &accessor, uint first, uin
 		}
 	}
 	else
+	{
 		nlassert ((first==0)&&(last==0));
+	}
 
 	_LockCounter++;
 }
@@ -771,7 +773,9 @@ inline void CIndexBuffer::lock (CIndexBufferRead &accessor, uint first, uint las
 		}
 	}
 	else
+	{
 		nlassert ((first==0)&&(last==0));
+	}
 
 	_LockCounter++;
 }

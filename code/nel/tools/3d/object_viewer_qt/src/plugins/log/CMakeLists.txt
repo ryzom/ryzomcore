@@ -26,7 +26,11 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 ADD_LIBRARY(ovqt_plugin_log SHARED ${SRC} ${OVQT_PLUG_LOG_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_LOG_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_log nelmisc ${QT_LIBRARIES})
-							
+
+IF(WITH_STLPORT)
+  TARGET_LINK_LIBRARIES(ovqt_plugin_log ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(WITH_STLPORT)
+
 NL_DEFAULT_PROPS(ovqt_plugin_log "NeL, Tools, 3D: Object Viewer Qt Plugin: Log")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_log)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_log)
