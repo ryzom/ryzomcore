@@ -127,8 +127,6 @@ void CPluginManager::readPluginPaths()
 		const QDir dir(searchPaths.takeFirst());
 #ifdef Q_OS_WIN
 		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.dll"), QDir::Files);
-#elif defined(Q_OS_MAC)
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.dylib"), QDir::Files);
 #else
 		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.so"), QDir::Files);
 #endif

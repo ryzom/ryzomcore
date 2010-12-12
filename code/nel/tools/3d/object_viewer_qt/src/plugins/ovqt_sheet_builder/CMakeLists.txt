@@ -19,7 +19,7 @@ SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC})
 SOURCE_GROUP("Sheet builder Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_sheet_builder SHARED ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+ADD_LIBRARY(ovqt_plugin_sheet_builder MODULE ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_sheet_builder nelmisc ${QT_LIBRARIES})
 							

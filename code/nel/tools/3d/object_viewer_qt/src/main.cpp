@@ -3,6 +3,7 @@
 #include <nel/misc/app_context.h>
 
 // Qt includes
+#include <QtCore/QDir>
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QSplashScreen>
@@ -11,6 +12,7 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/dynloadlib.h>
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
 
@@ -91,6 +93,12 @@ sint main(int argc, char **argv)
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
 	splash->show();
 
+#if defined(NL_OS_MAC)
+	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
+	CLibrary::addLibPath(
+		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+#endif
+
 	Modules::init();
 
 	// load and set remap extensions from config
@@ -101,7 +109,13 @@ sint main(int argc, char **argv)
 	Modules::mainWin().showMaximized();
 	Modules::plugMan().addObject(&Modules::mainWin());
 
+#if !defined(NL_OS_MAC)
 	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
+#else
+	Modules::plugMan().setPluginPaths(QStringList() << 
+		qApp->applicationDirPath() + QString("/../PlugIns/ovqt"));
+#endif
+
 	Modules::plugMan().loadPlugins();
 	
 	QStringList errors;
