@@ -3,13 +3,13 @@ INCLUDE_DIRECTORIES(
 		${CMAKE_CURRENT_SOURCE_DIR} 
 		${LIBXML2_INCLUDE_DIR} 
 		${NEL_INCLUDE_DIR}
-		../../../../../nel/tools/3d/object_viewer_widget/src 
+		../../../../../nel/tools/3d/object_viewer_widget/src
 		${QT_INCLUDES})
 INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB GEORGES_EDITOR_SRC *.cpp *.h)
 SET(GEORGES_EDITOR_HDR georges_dirtree_dialog.h georges_treeview_dialog.h main_window.h
-	objectviewer_dialog.h settings_dialog.h progress_dialog.h object_viewer_widget.h)
+	objectviewer_dialog.h settings_dialog.h progress_dialog.h)
 SET(GEORGES_EDITOR_UIS settings_form.ui objectviewer_form.ui log_form.ui georges_treeview_form.ui georges_dirtree_form.ui)
 SET(GEORGES_EDITOR_RCS georges_editor_qt.qrc)
 

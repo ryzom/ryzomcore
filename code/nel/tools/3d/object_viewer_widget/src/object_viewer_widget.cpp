@@ -78,12 +78,19 @@ namespace NLQT
 
 	}
 
+	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext) 
+	{
+		_LibContext = new CLibraryContext(nelContext);
+	}
+
 	void CObjectViewerWidget::init()
 	{
+
 		connect(this, SIGNAL(topLevelChanged(bool)),
 			this, SLOT(topLevelChanged(bool)));
 		//H_AUTO2
 		//nldebug("%d %d %d",_nlw->winId(), width(), height());
+
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		//dynamic_cast<QNLWidget*>(widget())->makeCurrent();
@@ -410,7 +417,6 @@ namespace NLQT
 		if ( _Entities.count(fileName) != 0) 
 			return false;
 
-		CPath::display();
 		CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
 
 		// create instance of the mesh character
