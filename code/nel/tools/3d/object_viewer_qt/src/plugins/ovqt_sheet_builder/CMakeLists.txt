@@ -1,0 +1,32 @@
+INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
+			${CMAKE_CURRENT_SOURCE_DIR}
+			${LIBXML2_INCLUDE_DIR}
+			${QT_INCLUDES})
+
+FILE(GLOB SRC *.cpp *.h)
+SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
+			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
+			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+
+SET(OVQT_PLUG_SHEET_BUILDER_HDR sheetbuilderconfgdialog.h sheetbuilderdialog.h ovqt_sheet_builder.h)
+
+SET(QT_USE_QTGUI TRUE)
+SET(QT_USE_QTOPENGL TRUE)
+
+QT4_WRAP_CPP(OVQT_PLUG_SHEET_BUILDER_MOC_SRC ${OVQT_PLUG_SHEET_BUILDER_HDR})
+
+SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC})
+SOURCE_GROUP("Sheet builder Plugin" FILES ${SRC})
+SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
+
+ADD_LIBRARY(ovqt_plugin_sheet_builder SHARED ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+
+TARGET_LINK_LIBRARIES(ovqt_plugin_sheet_builder nelmisc ${QT_LIBRARIES})
+							
+NL_DEFAULT_PROPS(ovqt_plugin_sheet_builder "NeL, Tools, 3D: Object Viewer Qt Plugin: Sheet builder")
+NL_ADD_RUNTIME_FLAGS(ovqt_plugin_sheet_builder)
+NL_ADD_LIB_SUFFIX(ovqt_plugin_sheet_builder)
+
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+
+INSTALL(TARGETS ovqt_plugin_sheet_builder LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)
