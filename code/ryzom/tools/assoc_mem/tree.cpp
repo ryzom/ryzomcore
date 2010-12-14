@@ -18,6 +18,7 @@
 #include <map>
 #include <stdio.h>
 #include <iostream>
+#include <algorithm>
 
 #include "tree.h"
 #include "cond_node.h"
