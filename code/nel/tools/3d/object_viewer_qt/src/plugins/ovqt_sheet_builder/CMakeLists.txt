@@ -22,7 +22,11 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 ADD_LIBRARY(ovqt_plugin_sheet_builder MODULE ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_sheet_builder nelmisc ${QT_LIBRARIES})
-							
+
+IF(WITH_STLPORT)
+  TARGET_LINK_LIBRARIES(ovqt_plugin_sheet_builder ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(WITH_STLPORT)
+		
 NL_DEFAULT_PROPS(ovqt_plugin_sheet_builder "NeL, Tools, 3D: Object Viewer Qt Plugin: Sheet builder")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_sheet_builder)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_sheet_builder)
