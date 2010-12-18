@@ -35,6 +35,18 @@ bool SheetBuilderPlugin::initialize(NLQT::IPluginManager *pluginManager, QString
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	if (!wnd)
+	{
+		*errorString = tr("Not found MainWindow Object Viewer Qt.");
+		return false;
+	}
+	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
+	if (!toolsMenu)
+	{
+		*errorString = tr("Not found QMenu Tools.");
+		return false;
+	}
 	return true;
 }
 

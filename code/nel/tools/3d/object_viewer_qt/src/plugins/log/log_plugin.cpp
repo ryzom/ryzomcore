@@ -49,8 +49,8 @@ CLogPlugin::~CLogPlugin()
 {
 	NLMISC::ErrorLog->removeDisplayer(_displayer);
 	NLMISC::WarningLog->removeDisplayer(_displayer);
-    NLMISC::DebugLog->removeDisplayer(_displayer);
-    NLMISC::AssertLog->removeDisplayer(_displayer);
+	NLMISC::DebugLog->removeDisplayer(_displayer);
+	NLMISC::AssertLog->removeDisplayer(_displayer);
 	NLMISC::InfoLog->removeDisplayer(_displayer);
 	delete _displayer;
 }
@@ -59,15 +59,6 @@ bool CLogPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorS
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	QString str;
-
-	QList<NLQT::IPluginSpec *>  listPlug = pluginManager->plugins();
-
-	Q_FOREACH (NLQT::IPluginSpec *plugSpec, listPlug)
-		str += plugSpec->name();
-
-	nlinfo(str.toStdString().c_str());
-
 	return true;
 }
 

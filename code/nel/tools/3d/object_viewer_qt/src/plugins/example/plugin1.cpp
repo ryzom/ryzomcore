@@ -25,7 +25,18 @@ bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorStr
 		str += plugSpec->name();
 
 	nlinfo(str.toStdString().c_str());
-
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	if (!wnd)
+	{
+		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
+		return false;
+	}
+	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
+	if (!helpMenu)
+	{
+		*errorString = tr("Not found QMenu Help.");
+		return false;
+	}
 	return true;
 }
 
