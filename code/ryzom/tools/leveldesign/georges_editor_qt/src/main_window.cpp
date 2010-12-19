@@ -44,7 +44,7 @@ namespace NLQT
 		: QMainWindow(parent), _GeorgesLogDialog(0), _ObjectViewerDialog(0), 
 		_GeorgesDirTreeDialog(0),_emptyView(0)
 	{
-		setWindowTitle("Qt Georges Editor");
+		setWindowTitle("Georges Editor Qt");
 
 		setDockNestingEnabled(true);
 		setCentralWidget(0);
@@ -95,7 +95,7 @@ namespace NLQT
 		restoreGeometry(settings.value("QtWindowGeometry").toByteArray());
 		settings.endGroup();
 
-		setWindowIcon(QIcon(":/images/khead.png"));
+		setWindowIcon(QIcon(":/images/georges_logo.png"));
 
 		_statusBarTimer = new QTimer(this);
 		connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
