@@ -116,6 +116,8 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
+	default:
+		break;
 	}
 #elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	switch(vbType)
@@ -128,6 +130,8 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 1.0f);
 		else
 			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
+		break;
+	default:
 		break;
 	}
 #endif	// NL_OS_WINDOWS
