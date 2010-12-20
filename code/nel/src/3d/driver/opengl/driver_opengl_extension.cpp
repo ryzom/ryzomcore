@@ -417,6 +417,17 @@ NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC				nglRenderbufferStorageEXT;
 NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC			nglFramebufferRenderbufferEXT;
 NEL_PFNGLDELETERENDERBUFFERSEXTPROC				nglDeleteRenderbuffersEXT;
 NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC				nglDeleteFramebuffersEXT;
+NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC		nglGetRenderbufferParameterivEXT;
+NEL_PFNGENERATEMIPMAPEXTPROC					nglGenerateMipmapEXT;
+
+// GL_EXT_framebuffer_blit
+NEL_PFNGLBLITFRAMEBUFFEREXTPROC					nglBlitFramebufferEXT;
+
+// GL_EXT_framebuffer_multisample
+NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC	nglRenderbufferStorageMultisampleEXT;
+
+// GL_ARB_multisample
+NEL_PFNGLSAMPLECOVERAGEARBPROC					nglSampleCoverageARB;
 
 #ifdef NL_OS_WINDOWS
 PFNWGLALLOCATEMEMORYNVPROC						nwglAllocateMemoryNV;
@@ -889,6 +900,17 @@ static bool	setupWGLARBPBuffer(const char	*glext)
 	return true;
 }
 
+// *********************************
+static bool	setupARBMultisample(const char	*glext)
+{
+	H_AUTO_OGL(setupARBMultisample);
+	CHECK_EXT("GL_ARB_multisample");
+
+	CHECK_ADDRESS(NEL_PFNGLSAMPLECOVERAGEARBPROC, glSampleCoverageARB);
+
+	return true;
+}
+
 #ifdef NL_OS_WINDOWS
 // *********************************
 static bool	setupWGLARBPixelFormat (const char	*glext)
@@ -1189,6 +1211,14 @@ static bool	setupARBTextureRectangle(const char	*glext)
 }
 
 // ***************************************************************************
+static bool	setupEXTTextureFilterAnisotropic(const char	*glext)
+{
+	H_AUTO_OGL(setupEXTTextureFilterAnisotropic);
+	CHECK_EXT("GL_EXT_texture_filter_anisotropic");
+	return true;
+}
+
+// ***************************************************************************
 static bool	setupFrameBufferObject(const char	*glext)
 {
 	H_AUTO_OGL(setupFrameBufferObject);
@@ -1206,6 +1236,30 @@ static bool	setupFrameBufferObject(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC, glFramebufferRenderbufferEXT);
 	CHECK_ADDRESS(NEL_PFNGLDELETERENDERBUFFERSEXTPROC, glDeleteRenderbuffersEXT);
 	CHECK_ADDRESS(NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC, glDeleteFramebuffersEXT);
+	CHECK_ADDRESS(NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC, glGetRenderbufferParameterivEXT);
+	CHECK_ADDRESS(NEL_PFNGENERATEMIPMAPEXTPROC, glGenerateMipmapEXT);
+
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupFrameBufferBlit(const char	*glext)
+{
+	H_AUTO_OGL(setupFrameBufferBlit);
+	CHECK_EXT("GL_EXT_framebuffer_blit");
+
+	CHECK_ADDRESS(NEL_PFNGLBLITFRAMEBUFFEREXTPROC, glBlitFramebufferEXT);
+
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupFrameBufferMultisample(const char	*glext)
+{
+	H_AUTO_OGL(setupFrameBufferMultisample);
+	CHECK_EXT("GL_EXT_framebuffer_multisample");
+
+	CHECK_ADDRESS(NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC, glRenderbufferStorageMultisampleEXT);
 
 	return true;
 }
@@ -1267,6 +1321,9 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check ARBTextureNonPowerOfTwo
 	ext.ARBTextureNonPowerOfTwo= setupARBTextureNonPowerOfTwo(glext);
+
+	// Check ARBMultisample
+	ext.ARBMultisample = setupARBMultisample(glext);
 
 	// Check NVVertexArrayRange
 	// Disable feature ???
@@ -1360,8 +1417,17 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check GL_ARB_texture_rectangle
 	ext.ARBTextureRectangle = setupARBTextureRectangle(glext);
 
+	// Check GL_EXT_texture_filter_anisotropic
+	ext.EXTTextureFilterAnisotropic = setupEXTTextureFilterAnisotropic(glext);
+
 	// Check GL_EXT_framebuffer_object
 	ext.FrameBufferObject = setupFrameBufferObject(glext);
+
+	// Check GL_EXT_framebuffer_blit
+	ext.FrameBufferBlit = setupFrameBufferBlit(glext);
+
+	// Check GL_EXT_framebuffer_multisample
+	ext.FrameBufferMultisample = setupFrameBufferMultisample(glext);
 
 	// Check GL_EXT_packed_depth_stencil
 	ext.PackedDepthStencil = setupPackedDepthStencil(glext);

@@ -80,7 +80,10 @@ struct	CGlExtensions
 	bool    EXTTextureRectangle;
 	bool    ARBTextureRectangle;
 	bool	FrameBufferObject;
+	bool	FrameBufferBlit;
+	bool	FrameBufferMultisample;
 	bool	PackedDepthStencil;
+	bool	EXTTextureFilterAnisotropic;
 	// true if NVVertexProgram and if we know that VP is emulated
 	bool	NVVertexProgramEmulated;
 	bool	EXTSecondaryColor;
@@ -114,6 +117,7 @@ struct	CGlExtensions
 	bool	ARBVertexBufferObject;
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
+	bool	ARBMultisample;
 
 public:
 
@@ -165,10 +169,14 @@ public:
 		ARBVertexProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
+		EXTTextureFilterAnisotropic = false;
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
+		ARBMultisample = false;
 		NVOcclusionQuery = false;
 		FrameBufferObject = false;
+		FrameBufferBlit = false;
+		FrameBufferMultisample = false;
 		PackedDepthStencil = false;
 		NVVertexArrayRange2 = false;
 		NVStateVARWithoutFlush = 0;
@@ -177,7 +185,7 @@ public:
 		DisableHardwareVertexProgram= false;
 		DisableHardwareVertexArrayAGP= false;
 		DisableHardwareTextureShader= false;
-	};
+	}
 
 	std::string toString()
 	{
@@ -198,6 +206,7 @@ public:
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
 		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
+		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic " : "";
 		result += ARBTextureNonPowerOfTwo ? "ARBTextureNonPowerOfTwo " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);
@@ -218,6 +227,7 @@ public:
 		result += EXTBlendColor ? "EXTBlendColor " : "";
 		result += NVOcclusionQuery ? "NVOcclusionQuery " : "";
 		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
+		result += ARBMultisample ? "ARBMultisample " : "";
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";
@@ -241,6 +251,8 @@ public:
 
 		result += "\n  FBO:       ";
 		result += FrameBufferObject ? "FramebufferObject " : "";
+		result += FrameBufferBlit ? "FrameBufferBlit " : "";
+		result += FrameBufferMultisample ? "FrameBufferMultisample " : "";
 		result += PackedDepthStencil ? "PackedDepthStencil " : "";
 
 		return result;
@@ -329,6 +341,7 @@ extern NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	nglGetCompressedTexImageARB;
 //====================
 extern NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC		nglFlushVertexArrayRangeNV;
 extern NEL_PFNGLVERTEXARRAYRANGENVPROC			nglVertexArrayRangeNV;
+
 #ifdef NL_OS_WINDOWS
 extern PFNWGLALLOCATEMEMORYNVPROC				nwglAllocateMemoryNV;
 extern PFNWGLFREEMEMORYNVPROC					nwglFreeMemoryNV;
@@ -712,6 +725,16 @@ extern NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC		nglRenderbufferStorageEXT;
 extern NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC	nglFramebufferRenderbufferEXT;
 extern NEL_PFNGLDELETERENDERBUFFERSEXTPROC		nglDeleteRenderbuffersEXT;
 extern NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC		nglDeleteFramebuffersEXT;
+extern NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC	nglGetRenderbufferParameterivEXT;
+extern NEL_PFNGENERATEMIPMAPEXTPROC				nglGenerateMipmapEXT;
+
+// GL_EXT_framebuffer_blit
+extern NEL_PFNGLBLITFRAMEBUFFEREXTPROC			nglBlitFramebufferEXT;
+
+// GL_EXT_framebuffer_multisample
+extern NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC		nglRenderbufferStorageMultisampleEXT;
+
+// GL_ARB_multisample
+extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
 
 #endif // NL_OPENGL_EXTENSION_H
-
