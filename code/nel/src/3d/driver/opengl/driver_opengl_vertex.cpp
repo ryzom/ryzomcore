@@ -1493,7 +1493,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 						case CVertexBuffer::TexCoord7:
 						{
 							_DriverGLStates.clientActiveTextureARB(value - CVertexBuffer::TexCoord0);
-							nglArrayObjectATI(GL_TEXTURE_COORD_ARRAY, NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[value]);
+							glTexCoordPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
 						}
 						break;
 						default:
