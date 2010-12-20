@@ -239,7 +239,7 @@ void CApplicationContext::setAlreadyCreateSharedAmongThreads(bool b)
 }
 
 CLibraryContext::CLibraryContext(INelContext &applicationContext)
-: _ApplicationContext(applicationContext)
+: _ApplicationContext(&applicationContext)
 {
 	contextReady();
 }
@@ -250,7 +250,7 @@ void *CLibraryContext::getSingletonPointer(const std::string &singletonName)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getSingletonPointer(singletonName);
+	return _ApplicationContext->getSingletonPointer(singletonName);
 }
 
 void CLibraryContext::setSingletonPointer(const std::string &singletonName, void *ptr)
@@ -258,7 +258,7 @@ void CLibraryContext::setSingletonPointer(const std::string &singletonName, void
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setSingletonPointer(singletonName, ptr);
+	_ApplicationContext->setSingletonPointer(singletonName, ptr);
 }
 
 void CLibraryContext::releaseSingletonPointer(const std::string &singletonName, void *ptr)
@@ -266,7 +266,7 @@ void CLibraryContext::releaseSingletonPointer(const std::string &singletonName, 
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.releaseSingletonPointer(singletonName, ptr);
+	_ApplicationContext->releaseSingletonPointer(singletonName, ptr);
 }
 
 
@@ -275,7 +275,7 @@ CLog *CLibraryContext::getErrorLog()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getErrorLog();
+	return _ApplicationContext->getErrorLog();
 }
 
 void CLibraryContext::setErrorLog(CLog *errorLog)
@@ -283,7 +283,7 @@ void CLibraryContext::setErrorLog(CLog *errorLog)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setErrorLog(errorLog);
+	_ApplicationContext->setErrorLog(errorLog);
 }
 
 CLog *CLibraryContext::getWarningLog()
@@ -291,7 +291,7 @@ CLog *CLibraryContext::getWarningLog()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getWarningLog();
+	return _ApplicationContext->getWarningLog();
 }
 
 void CLibraryContext::setWarningLog(CLog *warningLog)
@@ -299,7 +299,7 @@ void CLibraryContext::setWarningLog(CLog *warningLog)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setWarningLog(warningLog);
+	_ApplicationContext->setWarningLog(warningLog);
 }
 
 CLog *CLibraryContext::getInfoLog()
@@ -307,7 +307,7 @@ CLog *CLibraryContext::getInfoLog()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getInfoLog();
+	return _ApplicationContext->getInfoLog();
 }
 
 void CLibraryContext::setInfoLog(CLog *infoLog)
@@ -315,7 +315,7 @@ void CLibraryContext::setInfoLog(CLog *infoLog)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setInfoLog(infoLog);
+	_ApplicationContext->setInfoLog(infoLog);
 }
 
 CLog *CLibraryContext::getDebugLog()
@@ -323,7 +323,7 @@ CLog *CLibraryContext::getDebugLog()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getDebugLog();
+	return _ApplicationContext->getDebugLog();
 }
 
 void CLibraryContext::setDebugLog(CLog *debugLog)
@@ -331,7 +331,7 @@ void CLibraryContext::setDebugLog(CLog *debugLog)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setDebugLog(debugLog);
+	_ApplicationContext->setDebugLog(debugLog);
 }
 
 CLog *CLibraryContext::getAssertLog()
@@ -339,7 +339,7 @@ CLog *CLibraryContext::getAssertLog()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getAssertLog();
+	return _ApplicationContext->getAssertLog();
 }
 
 void CLibraryContext::setAssertLog(CLog *assertLog)
@@ -347,7 +347,7 @@ void CLibraryContext::setAssertLog(CLog *assertLog)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setAssertLog(assertLog);
+	_ApplicationContext->setAssertLog(assertLog);
 }
 
 CMemDisplayer *CLibraryContext::getDefaultMemDisplayer()
@@ -355,7 +355,7 @@ CMemDisplayer *CLibraryContext::getDefaultMemDisplayer()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getDefaultMemDisplayer();
+	return _ApplicationContext->getDefaultMemDisplayer();
 }
 
 void CLibraryContext::setDefaultMemDisplayer(CMemDisplayer *memDisplayer)
@@ -363,7 +363,7 @@ void CLibraryContext::setDefaultMemDisplayer(CMemDisplayer *memDisplayer)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setDefaultMemDisplayer(memDisplayer);
+	_ApplicationContext->setDefaultMemDisplayer(memDisplayer);
 }
 
 CMsgBoxDisplayer *CLibraryContext::getDefaultMsgBoxDisplayer()
@@ -371,7 +371,7 @@ CMsgBoxDisplayer *CLibraryContext::getDefaultMsgBoxDisplayer()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getDefaultMsgBoxDisplayer();
+	return _ApplicationContext->getDefaultMsgBoxDisplayer();
 }
 
 void CLibraryContext::setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer)
@@ -379,7 +379,7 @@ void CLibraryContext::setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplaye
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setDefaultMsgBoxDisplayer(msgBoxDisplayer);
+	_ApplicationContext->setDefaultMsgBoxDisplayer(msgBoxDisplayer);
 }
 
 bool CLibraryContext::getDebugNeedAssert()
@@ -387,7 +387,7 @@ bool CLibraryContext::getDebugNeedAssert()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getDebugNeedAssert();
+	return _ApplicationContext->getDebugNeedAssert();
 }
 
 void CLibraryContext::setDebugNeedAssert(bool needAssert)
@@ -395,7 +395,7 @@ void CLibraryContext::setDebugNeedAssert(bool needAssert)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setDebugNeedAssert(needAssert);
+	_ApplicationContext->setDebugNeedAssert(needAssert);
 }
 
 bool CLibraryContext::getNoAssert()
@@ -403,7 +403,7 @@ bool CLibraryContext::getNoAssert()
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	return _ApplicationContext.getNoAssert();
+	return _ApplicationContext->getNoAssert();
 }
 
 
@@ -413,17 +413,17 @@ void CLibraryContext::setNoAssert(bool noAssert)
 //	nlassert(_ApplicationContext != NULL);
 
 	// just forward the call
-	_ApplicationContext.setNoAssert(noAssert);
+	_ApplicationContext->setNoAssert(noAssert);
 }
 
 bool CLibraryContext::getAlreadyCreateSharedAmongThreads()
 {
-	return _ApplicationContext.getAlreadyCreateSharedAmongThreads();
+	return _ApplicationContext->getAlreadyCreateSharedAmongThreads();
 }
 
 void CLibraryContext::setAlreadyCreateSharedAmongThreads(bool b)
 {
-	_ApplicationContext.setAlreadyCreateSharedAmongThreads(b);
+	_ApplicationContext->setAlreadyCreateSharedAmongThreads(b);
 }
 
 void initNelLibrary(NLMISC::CLibrary &lib)

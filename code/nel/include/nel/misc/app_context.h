@@ -186,7 +186,7 @@ namespace NLMISC
 		virtual void setAlreadyCreateSharedAmongThreads(bool b);
 	private:
 		/// Pointer to the application context.
-		INelContext		&_ApplicationContext;
+		INelContext		*_ApplicationContext;
 	};
 
 
