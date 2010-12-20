@@ -530,9 +530,12 @@ void CDriverGL::bindTextureWithMode(ITexture &tex)
 	_DriverGLStates.activeTextureARB(0);
 	if(tex.isTextureCube())
 	{
-		_DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
-		// Bind this texture
-		glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
+		if (_Extensions.ARBTextureCubeMap)
+		{
+			_DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
+			// Bind this texture
+			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
+		}
 	}
 	else
 	{
@@ -562,11 +565,14 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 	gltext->MinFilter= tex.getMinFilter();
 	if(tex.isTextureCube())
 	{
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+		if (_Extensions.ARBTextureCubeMap)
+		{
+			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
+			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
+			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
+			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+		}
 	}
 	else
 	{
@@ -1161,7 +1167,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 	if (this->_CurrentTexture[stage]!=tex)
 	{
 		_DriverGLStates.activeTextureARB(stage);
-		if(tex)
+		if(tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
 			CTextureDrvInfosGL*	gltext;

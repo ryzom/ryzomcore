@@ -1251,8 +1251,11 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 	_DriverGLStates.setTextureMode(textureMode);
 	if (tex->isTextureCube())
 	{
-		glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-		glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
+		if(_Extensions.ARBTextureCubeMap)
+		{
+			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
+			glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
+		}
 	}
 	else
 	{
