@@ -403,6 +403,12 @@ typedef GLint (APIENTRY * NEL_PFNGLXGETSWAPINTERVALMESAPROC) ();
 
 #endif // NL_GLX_MESA_swap_control
 
+#ifndef NL_GLX_NV_vertex_array_range
+#define NL_GLX_NV_vertex_array_range 1
+typedef void* (APIENTRY * NEL_PFNGLXALLOCATEMEMORYNVPROC) (GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority);
+typedef void (APIENTRY * NEL_PFNGLXFREEMEMORYNVPROC) (void *pointer);
+#endif // NL_GLX_NV_vertex_array_range
+
 #endif // NL_OS_MAC
 
 #ifdef __cplusplus

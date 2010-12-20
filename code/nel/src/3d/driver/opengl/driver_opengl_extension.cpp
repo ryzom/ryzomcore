@@ -444,6 +444,9 @@ PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 
+NEL_PFNGLXLALLOCATEMEMORYNVPROC					nglXAllocateMemoryNV;
+NEL_PFNGLXFREEMEMORYNVPROC						nglXFreeMemoryNV;
+
 // Swap control extensions
 NEL_PFNGLXSWAPINTERVALEXTPROC					nglXSwapIntervalEXT;
 
@@ -562,9 +565,6 @@ static bool	setupARBTextureNonPowerOfTwo(const char	*glext)
 static bool	setupNVVertexArrayRange(const char	*glext)
 {
 	H_AUTO_OGL(setupNVVertexArrayRange);
-#ifndef NL_OS_WINDOWS
-	return false;
-#endif
 
 	// Test if VAR is present.
 	CHECK_EXT("GL_NV_vertex_array_range");
@@ -575,9 +575,13 @@ static bool	setupNVVertexArrayRange(const char	*glext)
 	// Get VAR address.
 	CHECK_ADDRESS(NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC, glFlushVertexArrayRangeNV);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXARRAYRANGENVPROC, glVertexArrayRangeNV);
+
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLALLOCATEMEMORYNVPROC, wglAllocateMemoryNV);
 	CHECK_ADDRESS(PFNWGLFREEMEMORYNVPROC, wglFreeMemoryNV);
+#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	CHECK_ADDRESS(NEL_PFNGLXLALLOCATEMEMORYNVPROC, glXAllocateMemoryNV);
+	CHECK_ADDRESS(NEL_PFNGLXFREEMEMORYNVPROC, glXFreeMemoryNV);
 #endif
 
 	// Get fence address.

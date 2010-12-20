@@ -116,7 +116,20 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
-	};
+	}
+#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	switch(vbType)
+	{
+	case CVertexBuffer::AGPPreferred:
+		_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
+		break;
+	case CVertexBuffer::StaticPreferred:
+		if (_Driver->getStaticMemoryToVRAM())
+			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 1.0f);
+		else
+			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
+		break;
+	}
 #endif	// NL_OS_WINDOWS
 
 
@@ -158,6 +171,8 @@ void			CVertexArrayRangeNVidia::free()
 #ifdef	NL_OS_WINDOWS
 		// Free special memory.
 		nwglFreeMemoryNV(_VertexArrayPtr);
+#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		nglXFreeMemoryNV(_VertexArrayPtr);
 #endif	// NL_OS_WINDOWS
 
 		_VertexArrayPtr= NULL;
