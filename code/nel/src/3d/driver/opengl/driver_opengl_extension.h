@@ -346,7 +346,7 @@ extern NEL_PFNGLVERTEXARRAYRANGENVPROC			nglVertexArrayRangeNV;
 extern PFNWGLALLOCATEMEMORYNVPROC				nwglAllocateMemoryNV;
 extern PFNWGLFREEMEMORYNVPROC					nwglFreeMemoryNV;
 #elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-extern NEL_PFNGLXLALLOCATEMEMORYNVPROC			nglXAllocateMemoryNV;
+extern NEL_PFNGLXALLOCATEMEMORYNVPROC			nglXAllocateMemoryNV;
 extern NEL_PFNGLXFREEMEMORYNVPROC				nglXFreeMemoryNV;
 #endif
 
