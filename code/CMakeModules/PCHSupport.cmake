@@ -42,9 +42,9 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 
 	IF(CMAKE_COMPILER_IS_GNUCXX)
 		GET_TARGET_PROPERTY(_targetType ${_PCH_current_target} TYPE)
-		IF((${_targetType} STREQUAL SHARED_LIBRARY) OR (${_targetType} STREQUAL MODULE_LIBRARY))
+		IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
 			LIST(APPEND ${_out_compile_flags} "-fPIC")
-		ENDIF((${_targetType} STREQUAL SHARED_LIBRARY) OR (${_targetType} STREQUAL MODULE_LIBRARY))
+		ENDIF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
 	ELSE(CMAKE_COMPILER_IS_GNUCXX)
 		## TODO ... ? or does it work out of the box
 	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
