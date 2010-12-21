@@ -6,9 +6,9 @@ ENABLE_LANGUAGE(RC)
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 
-ADD_EXECUTABLE(world_editor WIN32 ${SRC} world_editor.rc res/world_editor.rc2)
+ADD_EXECUTABLE(world_editor WIN32 ${SRC} world_editor.rc)
 
-SOURCE_GROUP(Resources FILES world_editor.rc res/world_editor.rc2)
+SOURCE_GROUP(Resources FILES world_editor.rc)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(world_editor	
