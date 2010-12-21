@@ -639,7 +639,7 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 	{
 		h = 2.f + (b - r) / diff;
 	}
-	else
+	else if (maxV == b)
 	{
 		h = 4.f + (r - g) / diff;
 	}
