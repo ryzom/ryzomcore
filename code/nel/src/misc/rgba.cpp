@@ -615,25 +615,26 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 	float maxV = NLMISC::maxof(r, g, b);
 	float minV = NLMISC::minof(r, g, b);
 
-	/// get lightness
-	l = 0.5f * (maxV + minV);
-
-	/// Get saturation
-	if (minV == maxV)  // all composants are equals -> achromatique
+	// all composants are equals -> achromatique
+	if (minV == maxV)
 	{
-		h = 0;
-		s = 0;
+		h = 0.f;
+		l = minV;
+		s = 0.f;
 		return true;
 	}
 
+	// get lightness
+	l = 0.5f * (maxV + minV);
+
 	float diff = maxV - minV;
 
-	/// compute saturation
+	// get saturation
 	s  = l > 0.5f ?   /*are we in the top of the double-hexcone ? */
 		diff / (2.f - maxV - minV)  :
 		diff / (maxV + minV);
 
-	// Get hue
+	// get hue
 	if (maxV == r)
 	{
 		h = (g - b) / diff;
@@ -691,10 +692,10 @@ static float HLSValue(float h, float v1, float v2)
 // ***************************************************************************
 void CRGBA::buildFromHLS(float h, float l, float s)
 {
-	clamp(l, 0, 1);
-	clamp(s, 0, 1);
+	clamp(l, 0.f, 1.f);
+	clamp(s, 0.f, 1.f);
 
-	float v2 = (l <= 0.5f) ? (l * (1 + s)) : (l + s - l * s);
+	float v2 = (l <= 0.5f) ? (l * (1.f + s)) : (l + s - l * s);
 	float v1 = 2.f * l - v2;
 
 	if (s == 0) // achromatic ?
