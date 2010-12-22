@@ -37,14 +37,14 @@ namespace NLMISC {
 // predifined colors
 
 /// some colors
-    const CRGBA CRGBA::Black(0, 0, 0) ;
-	const CRGBA CRGBA::Red(255, 0, 0) ;
-	const CRGBA CRGBA::Green(0, 255, 0) ;
-	const CRGBA CRGBA::Yellow(255, 255, 0) ;
-	const CRGBA CRGBA::Blue(0, 0, 255) ;
-	const CRGBA CRGBA::Magenta(255, 0, 255) ;
-	const CRGBA CRGBA::Cyan(0, 255, 255) ;
-	const CRGBA CRGBA::White(255, 255, 255) ;
+const CRGBA CRGBA::Black(0, 0, 0) ;
+const CRGBA CRGBA::Red(255, 0, 0) ;
+const CRGBA CRGBA::Green(0, 255, 0) ;
+const CRGBA CRGBA::Yellow(255, 255, 0) ;
+const CRGBA CRGBA::Blue(0, 0, 255) ;
+const CRGBA CRGBA::Magenta(255, 0, 255) ;
+const CRGBA CRGBA::Cyan(0, 255, 255) ;
+const CRGBA CRGBA::White(255, 255, 255) ;
 
 // ***************************************************************************
 void CRGBA::serial(class NLMISC::IStream &f)
@@ -407,6 +407,7 @@ void CRGBA::modulateColors(CRGBA *dest, const CRGBA *src1, const CRGBA *src2, ui
 	}
 #endif
 }
+
 // ***************************************************************************
 void CRGBA::subtractColors(CRGBA *dest, const CRGBA *src1, const CRGBA *src2, uint numColors, uint srcStride, uint destStride, uint dup)
 {
@@ -583,6 +584,7 @@ void CBGRA::serial(class NLMISC::IStream &f)
 	f.serial (R);
 	f.serial (A);
 }
+
 // ***************************************************************************
 void CBGRA::set(uint8 r, uint8 g, uint8 b, uint8 a)
 {
@@ -591,17 +593,17 @@ void CBGRA::set(uint8 r, uint8 g, uint8 b, uint8 a)
 	B = b;
 	A = a;
 }
+
 // ***************************************************************************
 void CBGRA::blendFromui(CBGRA &c0, CBGRA &c1, uint coef) // coef must be in [0,256]
 {
-	int	a1 = coef;
-	int	a2 = 256-a1;
+	sint	a1 = coef;
+	sint	a2 = 256-a1;
 	R = (c0.R*a2 + c1.R*a1) >>8;
 	G = (c0.G*a2 + c1.G*a1) >>8;
 	B = (c0.B*a2 + c1.B*a1) >>8;
 	A = (c0.A*a2 + c1.A*a1) >>8;
 }
-
 
 // ***************************************************************************
 bool CRGBA::convertToHLS(float &h, float &l, float &s) const
@@ -623,14 +625,15 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 		s = 0;
 		return true;
 	}
+
 	float diff = maxV - minV;
+
 	/// compute saturation
-	s  = l > 0.5f					?   /*are we in the top of the double-hexcone ? */
+	s  = l > 0.5f ?   /*are we in the top of the double-hexcone ? */
 		diff / (2.f - maxV - minV)  :
 		diff / (maxV + minV);
 
 	// Get hue
-
 	if (maxV == r)
 	{
 		h = (g - b) / diff;
@@ -650,7 +653,6 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 
 	return false;
 }
-
 
 // ***************************************************************************
 /// Used by buildFromHLS
@@ -736,9 +738,5 @@ void CRGBAF::set(float r, float g, float b, float a)
 	B = b;
 	A = a;
 }
-
-
-
-
 
 } // NLMISC
