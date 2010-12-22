@@ -1420,6 +1420,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check GL_EXT_texture_filter_anisotropic
 	ext.EXTTextureFilterAnisotropic = setupEXTTextureFilterAnisotropic(glext);
 
+	if (ext.EXTTextureFilterAnisotropic)
+	{
+		// get the maximum value
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
+	}
+
 	// Check GL_EXT_framebuffer_object
 	ext.FrameBufferObject = setupFrameBufferObject(glext);
 

@@ -84,6 +84,8 @@ struct	CGlExtensions
 	bool	FrameBufferMultisample;
 	bool	PackedDepthStencil;
 	bool	EXTTextureFilterAnisotropic;
+	float	EXTTextureFilterAnisotropicMaximum;
+
 	// true if NVVertexProgram and if we know that VP is emulated
 	bool	NVVertexProgramEmulated;
 	bool	EXTSecondaryColor;
@@ -170,6 +172,7 @@ public:
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
+		EXTTextureFilterAnisotropicMaximum = 1.f;
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
@@ -206,7 +209,7 @@ public:
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
 		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
-		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic " : "";
+		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
 		result += ARBTextureNonPowerOfTwo ? "ARBTextureNonPowerOfTwo " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);
@@ -236,6 +239,7 @@ public:
 		result += WGLEXTSwapControl ? "WGLEXTSwapControl " : "";
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
+		result += "\n  GLX: ";
 		result += GLXEXTSwapControl ? "GLXEXTSwapControl " : "";
 		result += GLXSGISwapControl ? "GLXSGISwapControl " : "";
 		result += GLXMESASwapControl ? "GLXMESASwapControl " : "";
