@@ -646,6 +646,11 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 	{
 		h = 4.f + (r - g) / diff;
 	}
+	else
+	{
+		// this case is to fix a compiler bug
+		h = (g - b) / diff;
+	}
 
 	h *= 60.f; // scale to [0..360]
 
