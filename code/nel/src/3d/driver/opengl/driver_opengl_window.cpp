@@ -1786,7 +1786,11 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 // --------------------------------------------------
 bool CDriverGL::setMode(const GfxMode& mode)
 {
-	H_AUTO_OGL(CDriverGL_setMode)
+	H_AUTO_OGL(CDriverGL_setMode);
+
+	// don't modify window or screen if managed by a 3rd party library
+	if (!_DestroyWindow)
+		return false;
 
 	if (!setScreenMode(mode))
 		return false;
