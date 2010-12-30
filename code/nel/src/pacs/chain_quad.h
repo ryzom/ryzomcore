@@ -23,7 +23,10 @@
 #include "collision_surface_temp.h"
 #include <vector>
 
-
+// _X is defined in some versions of linux/ctype.h
+#ifdef _X
+#	undef _X
+#endif
 
 namespace NLPACS
 {
