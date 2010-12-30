@@ -51,6 +51,11 @@
 #	define ERROR_WOULDBLOCK EWOULDBLOCK
 #	define ERROR_MSG strerror(errno)
 
+// BSD compatible constant
+#	ifndef FNDELAY
+#		define FNDELAY O_NDELAY
+#	endif
+
 typedef int SOCKET;
 
 #endif
