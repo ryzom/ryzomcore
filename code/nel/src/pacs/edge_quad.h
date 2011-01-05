@@ -23,6 +23,10 @@
 #include "collision_surface_temp.h"
 #include <vector>
 
+#ifdef _X
+#	undef _X
+#endif
+
 namespace NLMISC
 {
 	class	IStream;

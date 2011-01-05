@@ -24,6 +24,9 @@
 #include "nel/3d/fast_ptr_list.h"
 #include "nel/3d/transform.h"
 
+#ifdef _X
+#	undef _X
+#endif
 
 namespace NL3D
 {

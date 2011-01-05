@@ -22,6 +22,9 @@
 #include "nel/misc/matrix.h"
 #include "nel/3d/frustum.h"
 
+#ifdef _X
+#	undef _X
+#endif
 
 namespace NL3D
 {

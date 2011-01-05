@@ -24,6 +24,9 @@
 #include "nel/3d/frustum.h"
 #include "nel/3d/u_3d_mouse_listener.h"
 
+#ifdef _X
+#	undef _X
+#endif
 
 namespace NL3D
 {

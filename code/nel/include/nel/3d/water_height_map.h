@@ -29,6 +29,9 @@
 #include <string>
 
 
+#ifdef _X
+#	undef _X
+#endif
 
 
 namespace NL3D

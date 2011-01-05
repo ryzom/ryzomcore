@@ -20,6 +20,9 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 
+#ifdef _X
+#	undef _X
+#endif
 
 namespace NL3D {
 
