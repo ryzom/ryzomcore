@@ -1097,7 +1097,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	}
 
 	// enable or disable Scissor, but AFTER textureTarget adjust
-	if(x==0 && x==0 && width>=1 && height>=1)
+	if(x==0.f && y==0.f && width>=1.f && height>=1.f)
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
