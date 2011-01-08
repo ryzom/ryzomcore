@@ -87,7 +87,6 @@ public:
 	/**
 	  * Return a pointer on the current thread.
 	  * Implemented in the derived class.
-	  * Not implemented under Linux.
 	  */
 	static IThread *getCurrentThread ();
 
