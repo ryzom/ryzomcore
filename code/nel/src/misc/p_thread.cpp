@@ -29,41 +29,27 @@ namespace NLMISC {
 /* Key for thread specific storage holding IThread pointer. */
 static pthread_key_t threadSpecificKey;
 
-/* Hand crafted IThread representing the main thread. */
+/* Special thread type representing the main thread. */
 struct CPMainThread : public CPThread
 {
 	CPMainThread() : CPThread(NULL, 0)
 	{
-		if(pthread_setspecific(threadSpecificKey, this))
-			nlerror("cannot set main thread ptr in thread specific storage.");
+		if(pthread_key_create(&threadSpecificKey, NULL) != 0) 
+			throw EThread("cannot create thread specific storage key.");
+
+		if(pthread_setspecific(threadSpecificKey, this) != 0)
+			throw EThread("cannot set main thread ptr in thread specific storage.");
+	}
+
+	~CPMainThread() 
+	{
+		if(pthread_key_delete(threadSpecificKey) != 0) 
+			throw EThread("cannot delete thread specific storage key.");
 	}
 };
 
-/* Holds the IThread instance pointer representing the main thread. */
-static CPMainThread* mainThread = NULL;
-
-/* Init/Release routines for thread specific storage key, main thread object. */
-struct CPThreadStaticInit 
-{
-	CPThreadStaticInit() 
-	{
-		if(pthread_key_create(&threadSpecificKey, NULL)) 
-			nlerror("cannot create thread specific storage key.");
-		
-		mainThread = new CPMainThread;
-	}
-
-	~CPThreadStaticInit() 
-	{
-		if(pthread_key_delete(threadSpecificKey)) 
-			nlerror("cannot delete thread specific storage key.");
-		
-		delete mainThread;
-	}
-};
-
-/* Run init/release routines at static construction/destruction time. */
-static CPThreadStaticInit pThreadStaticInit = CPThreadStaticInit();
+/* Holds the thread instance representing the main thread. */
+static CPMainThread mainThread = CPMainThread();
 
 /*
  * The IThread static creator
@@ -89,8 +75,8 @@ static void *ProxyFunc( void *arg )
 	CPThread *parent = (CPThread*)arg;
 
 	// Set this thread's thread specific storage to IThread instance pointer
-	if(pthread_setspecific(threadSpecificKey, parent))
-		nlerror("cannot set thread ptr in thread specific storage.");
+	if(pthread_setspecific(threadSpecificKey, parent) != 0)
+		throw EThread("cannot set thread ptr in thread specific storage.");
 
 	// Allow to terminate the thread without cancellation point
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
