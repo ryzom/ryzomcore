@@ -1,0 +1,16 @@
+FILE(GLOB SRC *.cpp *.h)
+
+ADD_EXECUTABLE(mp_generator ${SRC})
+
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+
+TARGET_LINK_LIBRARIES(mp_generator
+						${LIBXML2_LIBRARIES}
+						nelmisc)
+
+NL_DEFAULT_PROPS(mp_generator "Ryzom, Tools: MP Generator")
+NL_ADD_RUNTIME_FLAGS(mp_generator)
+
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
+INSTALL(TARGETS mp_generator RUNTIME DESTINATION bin COMPONENT tools)

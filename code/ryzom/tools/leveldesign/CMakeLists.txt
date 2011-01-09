@@ -3,6 +3,8 @@ ADD_SUBDIRECTORY(prim_export)
 ADD_SUBDIRECTORY(uni_conv)
 ADD_SUBDIRECTORY(csv_transform)
 ADD_SUBDIRECTORY(icon_search)
+ADD_SUBDIRECTORY(mp_generator)
+ADD_SUBDIRECTORY(named_items_2_csv)
 
 IF(WIN32)
   ADD_SUBDIRECTORY(export)
@@ -25,8 +27,6 @@ ENDIF(WITH_QT)
 #mission_compiler_fe
 #mission_compiler_lib
 #mission_simulator
-#mp_generator
-#named_items_2_csv
 #
 #primitive_id_assignator
 #test_root
