@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="family" Value="guild option"/>
+    </STRUCT>
+    <STRUCT Name="bag">
+      <ATOM Name="weight_max" Value="1000000.0"/>
+      <ATOM Name="bulk_max" Value="500.0"/>
+    </STRUCT>
+    <STRUCT Name="guild option">
+      <ATOM Name="Type" Value="Player Room"/>
+      <ATOM Name="Money Cost" Value="1000000"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="construction.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Mar 15 17:08:49 2004 (nouveau) .basics.family = guild option
+Mon Mar 15 17:08:49 2004 (nouveau) .guild option.Money cost = 10
+Mon Mar 15 17:08:49 2004 (nouveau) .guild option.Type = Main Building
+Mon Mar 15 17:57:46 2004 (nouveau) .guild option.Money cost = 10
+Mon Mar 15 18:00:40 2004 (nouveau) .guild option.Money Cost = 10
+Thu May 06 16:48:35 2004 (nouveau) .guild option.Type = Player Room
+Thu Aug 05 14:20:11 2004 (puzin) .3d.icon = construction.tga
+Wed Aug 18 20:10:37 2004 (puzin) .guild option.Money Cost = 1000000
+Fri Aug 20 22:14:17 2004 (puzin) .bag.bulk_max = 500.0
+Fri Aug 20 22:14:17 2004 (puzin) .bag.weight_max = 100000.0
+Fri Aug 20 22:16:14 2004 (puzin) .bag.weight_max = 1000000.0</LOG>
+</FORM>

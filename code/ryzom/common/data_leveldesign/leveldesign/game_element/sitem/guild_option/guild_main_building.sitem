@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.6 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="family" Value="guild option"/>
+    </STRUCT>
+    <STRUCT Name="bag">
+      <ATOM Name="weight_max" Value="1000000.0"/>
+      <ATOM Name="bulk_max" Value="5000.0"/>
+    </STRUCT>
+    <STRUCT Name="guild option">
+      <ATOM Name="Type" Value="Main Building"/>
+      <ATOM Name="Money Cost" Value="10000000"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="icon" Value="construction.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Mar 15 17:08:49 2004 (nouveau) .basics.family = guild option
+Mon Mar 15 17:08:49 2004 (nouveau) .guild option.Money cost = 10
+Mon Mar 15 17:08:49 2004 (nouveau) .guild option.Type = Main Building
+Mon Mar 15 17:57:46 2004 (nouveau) .guild option.Money cost = 10
+Mon Mar 15 18:00:40 2004 (nouveau) .guild option.Money Cost = 10
+Thu Aug 05 14:20:15 2004 (puzin) .3d.icon = construction.tga
+Wed Aug 18 19:27:36 2004 (puzin) .guild option.Money Cost = 1000000
+Wed Aug 18 19:32:00 2004 (puzin) .guild option.Money Cost = 10000000
+Fri Aug 20 22:15:31 2004 (puzin) .bag.bulk_max = 5000.0
+Fri Aug 20 22:15:31 2004 (puzin) .bag.weight_max = 1000000.0
+Fri Aug 20 22:16:01 2004 (puzin) .bag.weight_max = 100000.0
+Fri Aug 20 22:16:09 2004 (puzin) .bag.weight_max = 1000000.0</LOG>
+</FORM>
