@@ -5,15 +5,6 @@
     <STRUCT Name="Basics">
       <ATOM Name="Race" Value="matis"/>
       <ATOM Name="Gender" Value="Female"/>
-      <STRUCT Name="Equipment">
-        <STRUCT Name="Head">
-          <ATOM Name="Item" Value="ma_cheveux01.item"/>
-        </STRUCT>
-        <STRUCT Name="Face">
-          <ATOM Name="Item" Value="ma_VISAGE.item"/>
-          <ATOM Name="Texture" Value="Lacustre/Low Quality/Young"/>
-        </STRUCT>
-      </STRUCT>
       <STRUCT Name="MovementSpeeds">
         <ATOM Name="WalkSpeed" Value="1.66"/>
       </STRUCT>

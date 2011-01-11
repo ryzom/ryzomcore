@@ -32,7 +32,7 @@
         <ATOM Name="DefaultLegs" Value="igmpu.sitem"/>
         <ATOM Name="DefaultHands" Value="igmgu.sitem"/>
         <ATOM Name="DefaultFeet" Value="igmbu.sitem"/>
-        <ATOM Name="DefaultHair" Value="ma_cheveux01.sitem"/>
+        <ATOM Name="DefaultHair" Value="ma_cheveux_short01.sitem"/>
         <ATOM Name="MorphTargetMin0" Value="-70"/>
         <ATOM Name="MorphTargetMin1" Value="-70"/>
         <ATOM Name="MorphTargetMin2" Value="-75"/>
@@ -56,7 +56,7 @@
         <ATOM Name="DefaultLegs" Value="igmpu.sitem"/>
         <ATOM Name="DefaultHands" Value="igmgu.sitem"/>
         <ATOM Name="DefaultFeet" Value="igmbu.sitem"/>
-        <ATOM Name="DefaultHair" Value="ma_cheveux01.sitem"/>
+        <ATOM Name="DefaultHair" Value="ma_cheveux_short01.sitem"/>
         <ATOM Name="MorphTargetMin0" Value="-80"/>
         <ATOM Name="MorphTargetMin1" Value="-45"/>
         <ATOM Name="MorphTargetMin2" Value="-30"/>
