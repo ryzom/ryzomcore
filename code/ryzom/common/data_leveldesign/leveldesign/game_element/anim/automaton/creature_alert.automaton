@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_alert.automaton"/>
+  <PARENT Filename="_creature.automaton"/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 19 19:13:43 2003 (puzin)
+Wed Feb 18 15:27:25 2004 (puzin) Form Parents = </LOG>
+</FORM>

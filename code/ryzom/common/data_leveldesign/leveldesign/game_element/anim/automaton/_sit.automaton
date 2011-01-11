@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_parent.automaton"/>
+  <STRUCT>
+    <ATOM Name="mode" Value="sit"/>
+    <STRUCT Name="idle">
+      <ATOM Name="slide" Value="true"/>
+      <ATOM Name="on move forward"/>
+      <ATOM Name="on move backward"/>
+      <ATOM Name="on move left"/>
+      <ATOM Name="on move right"/>
+      <ATOM Name="alert mode transition" Value="alert_mode"/>
+      <ATOM Name="combat mode transition" Value="combat_mode"/>
+      <ATOM Name="combat_float mode transition" Value="combat_float_mode"/>
+      <ATOM Name="normal mode transition" Value="default_mode"/>
+      <ATOM Name="eat mode transition" Value="eat_mode"/>
+      <ATOM Name="hungry mode transition" Value="hungry_mode"/>
+      <ATOM Name="rest mode transition" Value="rest_mode"/>
+    </STRUCT>
+    <STRUCT Name="mode states">
+      <STRUCT Name="alert_mode">
+        <ATOM Name="default next" Value="alert_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="combat_mode">
+        <ATOM Name="default next" Value="combat_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="combat_float_mode">
+        <ATOM Name="default next" Value="combat_float_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="default_mode">
+        <ATOM Name="slide" Value="true"/>
+        <ATOM Name="next automaton" Value="normal"/>
+        <ATOM Name="on move forward"/>
+        <ATOM Name="on move backward"/>
+        <ATOM Name="on move left"/>
+        <ATOM Name="on move right"/>
+      </STRUCT>
+      <STRUCT Name="eat_mode">
+        <ATOM Name="default next" Value="eat_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="hungry_mode">
+        <ATOM Name="default next" Value="hungry_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="rest_mode">
+        <ATOM Name="default next" Value="rest_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="sit_mode">
+        <ATOM Name="default next" Value="sit_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+      <STRUCT Name="mount_default_mode">
+        <ATOM Name="default next" Value="mount_default_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="other states">
+      <STRUCT Name="sit_end">
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 21 11:23:16 2003 (puzin)
+Fri Oct 01 12:04:09 2004 (coutelas) .other states.sit_end.next automaton = normal</LOG>
+</FORM>

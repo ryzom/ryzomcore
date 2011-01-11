@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_parent.automaton"/>
+  <PARENT Filename="_swim.automaton"/>
+  <STRUCT>
+    <ATOM Name="mode" Value="mount_swim"/>
+    <STRUCT Name="idle">
+      <ATOM Name="on move backward" Value="idle_to_backward"/>
+      <ATOM Name="on move left" Value="strafe_left"/>
+      <ATOM Name="on move right" Value="strafe_right"/>
+    </STRUCT>
+    <STRUCT Name="motion states">
+      <STRUCT Name="idle_to_walk">
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min" Value="-1.1"/>
+        <ATOM Name="bad heading max" Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="walk">
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min" Value="-1.1"/>
+        <ATOM Name="bad heading max" Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="walk_to_run">
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min" Value="-1.1"/>
+        <ATOM Name="bad heading max" Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="run_to_walk">
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min" Value="-1.1"/>
+        <ATOM Name="bad heading max" Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="run">
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min" Value="-1.1"/>
+        <ATOM Name="bad heading max" Value="1.1"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 21 11:23:16 2003 (puzin)
+Thu Dec 09 12:18:52 2004 (fleury) .mode = mount_swim
+Thu Dec 09 12:19:56 2004 (fleury) Form Parents = </LOG>
+</FORM>

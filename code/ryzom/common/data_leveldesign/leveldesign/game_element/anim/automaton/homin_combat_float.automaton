@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_combat_float.automaton"/>
+  <PARENT Filename="_homin.automaton"/>
+  <STRUCT>
+    <!-- ATK STATES -->
+    <STRUCT Name="atk states">
+      <STRUCT Name="attack1">
+        <ATOM Name="slide"                   Value="false"/>
+      </STRUCT>
+      <STRUCT Name="attack2">
+        <ATOM Name="slide"                   Value="false"/>
+      </STRUCT>
+    </STRUCT>
+    <!-- OTHER STATES -->
+    <STRUCT Name="other states">
+      <STRUCT Name="use_init">
+        <ATOM Name="slide"                         Value="false"             />
+      </STRUCT>
+      <STRUCT Name="use_begin">
+        <ATOM Name="slide"                         Value="false"             />
+      </STRUCT>
+      <STRUCT Name="use_loop">
+        <ATOM Name="default next"                  Value="use_loop"          />
+        <ATOM Name="slide"                         Value="false"             />
+        <ATOM Name="on move forward"               Value="use_end"           />
+        <ATOM Name="on move backward"              Value="use_end"           />
+        <ATOM Name="on move left"                  Value="use_end"           />
+        <ATOM Name="on move right"                 Value="use_end"           />
+      </STRUCT>
+      <STRUCT Name="use_end">
+        <ATOM Name="slide"                         Value="false"             />
+      </STRUCT>
+      <STRUCT Name="use_post_end">
+        <ATOM Name="slide"                         Value="false"             />
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 19 19:13:43 2003 (puzin)</LOG>
+</FORM>

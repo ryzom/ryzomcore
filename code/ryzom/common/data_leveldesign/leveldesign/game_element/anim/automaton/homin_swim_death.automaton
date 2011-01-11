@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_death.automaton"/>
+  <PARENT Filename="_homin.automaton"/>
+  <STRUCT>
+    <ATOM Name="mode" Value="swim_death"/>
+    <STRUCT Name="idle">
+      <ATOM Name="slide" Value="true"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 19 19:13:43 2003 (puzin)
+Thu Aug 12 23:40:40 2004 (puzin) .mode = swim_death</LOG>
+</FORM>

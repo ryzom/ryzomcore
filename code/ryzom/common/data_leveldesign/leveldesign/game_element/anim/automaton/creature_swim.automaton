@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_swim.automaton"/>
+  <PARENT Filename="_creature.automaton"/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 19 19:13:43 2003 (puzin)</LOG>
+</FORM>

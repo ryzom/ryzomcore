@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="motion states">
+      <!-- Turn -->
+      <STRUCT Name="turn_left">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+      <STRUCT Name="turn_right">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+      <STRUCT Name="turn_left_to_walk">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+      <STRUCT Name="turn_right_to_walk">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+      <STRUCT Name="turn_left_to_backward">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+      <STRUCT Name="turn_right_to_backward">
+		<ATOM Name="max duration"                  Value="1.0"/>
+      </STRUCT>
+	</STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 19 19:13:43 2003 (puzin)</LOG>
+</FORM>

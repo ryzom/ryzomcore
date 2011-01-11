@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_parent.automaton"/>
+  <STRUCT>
+    <ATOM Name="move dist" Value="0.05"/>
+    <ATOM Name="mode"      Value="combat"/>
+
+    <STRUCT Name="idle">
+      <ATOM Name="on move backward"          Value="idle_to_backward"/>
+      <ATOM Name="on move left"              Value="strafe_left"/>
+      <ATOM Name="on move right"             Value="strafe_right"/>
+    </STRUCT>
+
+    <STRUCT Name="motion states">
+      <STRUCT Name="idle_to_walk">
+        <ATOM Name="on atk"                  Value="walk atk"/>
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min"         Value="-1.1"/>
+        <ATOM Name="bad heading max"         Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="walk">
+        <ATOM Name="on atk"                  Value="walk atk"/>
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min"         Value="-1.1"/>
+        <ATOM Name="bad heading max"         Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="walk_to_run">
+        <ATOM Name="on atk"                  Value="run atk"/>
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min"         Value="-1.1"/>
+        <ATOM Name="bad heading max"         Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="run_to_walk">
+        <ATOM Name="on atk"                  Value="walk atk"/>
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min"         Value="-1.1"/>
+        <ATOM Name="bad heading max"         Value="1.1"/>
+      </STRUCT>
+      <STRUCT Name="run">
+        <ATOM Name="on atk"                  Value="walk atk"/>
+        <ATOM Name="on bad heading backward" Value="idle_to_backward"/>
+        <ATOM Name="bad heading min"         Value="-1.1"/>
+        <ATOM Name="bad heading max"         Value="1.1"/>
+      </STRUCT>
+    </STRUCT>
+
+    <STRUCT Name="mode states">
+      <STRUCT Name="rest_mode">
+        <ATOM Name="default next" Value="rest_mode"/>
+        <ATOM Name="next automaton" Value="normal"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 21 11:23:16 2003 (puzin)</LOG>
+</FORM>
