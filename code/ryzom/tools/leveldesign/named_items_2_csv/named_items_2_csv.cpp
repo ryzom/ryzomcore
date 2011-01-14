@@ -26,11 +26,11 @@
 
  */
 
-#include "nel\misc\common.h"
-#include "nel\misc\debug.h"
-#include "nel\misc\sstring.h"
-#include "nel\misc\path.h"
-#include "nel\misc\file.h"
+#include "nel/misc/common.h"
+#include "nel/misc/debug.h"
+#include "nel/misc/sstring.h"
+#include "nel/misc/path.h"
+#include "nel/misc/file.h"
 #include <iostream>
 
 using namespace NLMISC;

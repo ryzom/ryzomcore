@@ -1576,5 +1576,6 @@ void main( int argc, char argv[] )
 	}
 
 	printf( "-- DONE --\n" );
+	
+	return 0;
 }
-
