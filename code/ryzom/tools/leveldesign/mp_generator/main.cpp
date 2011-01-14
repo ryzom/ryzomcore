@@ -1543,7 +1543,7 @@ void LoadFamillesMP()
 
 
 // Programme principal
-void main( int argc, char argv[] )
+int main( int argc, char* argv[] )
 {
 	new CApplicationContext;
 	SortableData.init( true );
