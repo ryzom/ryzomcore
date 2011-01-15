@@ -49,6 +49,8 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 	loadPathsSettings();
 	loadVegetableSettings();
 
+	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(applyPressed()));
+
 	connect(ui.enableBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableBloom(bool)));
 	connect(ui.squareBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableSquareBloon(bool)));
 	connect(ui.bloomDensityHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setDensityBloom(int)));
@@ -57,8 +59,7 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 	connect(ui.removeToolButton, SIGNAL(clicked()), this, SLOT(removePath()));
 	connect(ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
 	connect(ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
-	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(applyPressed()));
-
+	
 	connect(ui.tileBankToolButton, SIGNAL(clicked()), this, SLOT(setTileBank()));
 	connect(ui.tileFarBankToolButton, SIGNAL(clicked()), this, SLOT(setTileFarBank()));
 	connect(ui.vegetTexToolButton, SIGNAL(clicked()), this, SLOT(setTextureVegetable()));
@@ -176,7 +177,7 @@ void CSettingsDialog::addZone()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
 							tr("Add zone files"), ".",
-							tr("Zonel files (*.zonel);;"));
+							tr("Zonel files (*.zonel *.zone);;"));
 
 	if (!fileNames.isEmpty())
 	{

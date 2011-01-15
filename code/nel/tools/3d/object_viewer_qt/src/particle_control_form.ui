@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
-    <height>111</height>
+    <width>913</width>
+    <height>88</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>941</width>
-    <height>111</height>
+    <width>913</width>
+    <height>88</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -27,6 +27,12 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout_5">
+    <property name="margin">
+     <number>6</number>
+    </property>
+    <property name="spacing">
+     <number>5</number>
+    </property>
     <item row="0" column="0" rowspan="2">
      <widget class="QToolButton" name="playToolButton">
       <property name="sizePolicy">
@@ -104,12 +110,18 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="pageGeneral">
        <layout class="QGridLayout" name="gridLayout_2">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout">
+          <property name="spacing">
+           <number>4</number>
+          </property>
           <item row="0" column="0">
            <widget class="QCheckBox" name="loopCheckBox">
             <property name="sizePolicy">
@@ -197,6 +209,9 @@
       </widget>
       <widget class="QWidget" name="pageAdditional">
        <layout class="QGridLayout" name="gridLayout_4">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
@@ -287,6 +302,9 @@
     </item>
     <item row="0" column="3" rowspan="2">
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>3</number>
+      </property>
       <item>
        <widget class="QToolButton" name="generalToolButton">
         <property name="sizePolicy">

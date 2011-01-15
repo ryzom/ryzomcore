@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>519</width>
-    <height>98</height>
+    <width>489</width>
+    <height>92</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>519</width>
-    <height>98</height>
+    <width>489</width>
+    <height>92</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -42,6 +42,12 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>9</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
     <item row="0" column="0" colspan="7">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>

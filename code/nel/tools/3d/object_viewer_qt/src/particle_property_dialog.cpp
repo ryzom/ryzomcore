@@ -49,11 +49,13 @@ void CPropertyDialog::setupUi()
 
 	_dockWidgetContents = new QWidget();
 	_gridLayout = new QGridLayout(_dockWidgetContents);
+	_gridLayout->setContentsMargins(6, 6, 6, 6);
 	_scrollArea = new QScrollArea(_dockWidgetContents);
 	_scrollArea->setWidgetResizable(true);
 	_scrollAreaWidgetContents = new QWidget();
 
 	_pagesGridLayout = new QGridLayout(_scrollAreaWidgetContents);
+	_pagesGridLayout->setContentsMargins(0, 0, 0, 0);
 
 	_stackedWidget = new QStackedWidget(_scrollAreaWidgetContents);
 

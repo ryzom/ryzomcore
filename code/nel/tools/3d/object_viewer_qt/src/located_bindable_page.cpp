@@ -616,7 +616,6 @@ void CLocatedBindablePage::setConstantLength(bool state)
 	NL3D::CPSRibbonBase *ribbon = dynamic_cast<NL3D::CPSRibbonBase *>(_Bindable);
 	ribbon->setRibbonMode(state ? NL3D::CPSRibbonBase::FixedSize : NL3D::CPSRibbonBase::VariableSize);
 	_ui.ribbonLengthWidget->setEnabled(state);
-	_ui.ribbonLengthLabel->setEnabled(state);
 }
 
 void CLocatedBindablePage::setTrailCoordSystem(int index)

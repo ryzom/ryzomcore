@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>618</width>
-    <height>679</height>
+    <width>504</width>
+    <height>473</height>
    </rect>
   </property>
   <property name="windowIcon">
@@ -19,6 +19,12 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout_3">
+    <property name="margin">
+     <number>6</number>
+    </property>
+    <property name="spacing">
+     <number>5</number>
+    </property>
     <item row="0" column="0">
      <widget class="QScrollArea" name="scrollArea">
       <property name="widgetResizable">
@@ -29,11 +35,23 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>598</width>
-         <height>640</height>
+         <width>490</width>
+         <height>437</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <property name="spacing">
+         <number>5</number>
+        </property>
         <item row="0" column="0">
          <layout class="QVBoxLayout" name="verticalLayout">
           <property name="sizeConstraint">
@@ -68,6 +86,12 @@
              <string>List edition</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
+             <property name="margin">
+              <number>6</number>
+             </property>
+             <property name="spacing">
+              <number>5</number>
+             </property>
              <item row="0" column="0">
               <widget class="QPushButton" name="addtPushButton">
                <property name="toolTip">
@@ -157,6 +181,12 @@
              <string>List Save/Load</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
+             <property name="margin">
+              <number>6</number>
+             </property>
+             <property name="spacing">
+              <number>5</number>
+             </property>
              <item row="0" column="0">
               <widget class="QPushButton" name="loadVegetsetPushButton">
                <property name="text">
@@ -198,6 +228,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QTabWidget" name="tabWidget">
+          <property name="tabPosition">
+           <enum>QTabWidget::East</enum>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>

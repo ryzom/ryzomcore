@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>562</height>
+    <height>576</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,6 +43,9 @@
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <property name="spacing">
+     <number>5</number>
+    </property>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -139,9 +142,6 @@
            <attribute name="headerVisible">
             <bool>false</bool>
            </attribute>
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
            <column>
             <property name="text">
              <string notr="true">1</string>
@@ -180,9 +180,6 @@
              <height>5646546</height>
             </size>
            </property>
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
            <attribute name="headerVisible">
             <bool>false</bool>
            </attribute>

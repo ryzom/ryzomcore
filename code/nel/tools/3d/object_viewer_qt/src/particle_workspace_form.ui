@@ -15,14 +15,14 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>5</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTreeView" name="treeView">
       <property name="animated">
        <bool>true</bool>
       </property>
-      <attribute name="headerVisible">
-       <bool>false</bool>
-      </attribute>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>

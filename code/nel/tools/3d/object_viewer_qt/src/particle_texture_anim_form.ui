@@ -6,18 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>306</width>
-    <height>186</height>
+    <width>212</width>
+    <height>101</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <item row="0" column="0">
     <widget class="QCheckBox" name="texAnimCheckBox">
      <property name="text">
-      <string>Enable texture animation</string>
+      <string>Enable texture anim</string>
      </property>
     </widget>
    </item>
@@ -33,6 +39,9 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <property name="spacing">
+       <number>5</number>
+      </property>
       <item row="0" column="0">
        <widget class="QCheckBox" name="multitexturingCheckBox">
         <property name="text">
