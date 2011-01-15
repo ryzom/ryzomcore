@@ -112,6 +112,11 @@ QString CLogPlugin::description() const
 	return "DockWidget to display all log messages from NeL.";
 }
 
+QList<QString> CLogPlugin::dependencies() const
+{
+	return QList<QString>();
+}
+
 QObject* CLogPlugin::objectByName(const QString &name) const
 {
 	Q_FOREACH (QObject *qobj, _plugMan->allObjects())

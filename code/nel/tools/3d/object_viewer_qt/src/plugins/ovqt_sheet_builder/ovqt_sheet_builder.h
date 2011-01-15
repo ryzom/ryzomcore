@@ -46,15 +46,16 @@ namespace Plugin
 
         void setNelContext(NLMISC::INelContext *nelContext);
 
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
+		QString name() const;
+		QString version() const;
+		QString vendor() const;
+		QString description() const;
 		QList<QString> dependencies() const;
-	QObject *objectByName(const QString &name) const;
-	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
-	void buildSheet(bool clean);
+		QObject *objectByName(const QString &name) const;
+		ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
+
+		void buildSheet(bool clean);
 
     private Q_SLOTS:
         void execBuilderDialog();

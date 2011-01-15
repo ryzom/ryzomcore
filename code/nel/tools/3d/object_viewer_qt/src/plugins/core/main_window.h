@@ -48,8 +48,8 @@ public:
 
 private Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
-						   const QString &page = QString(),
-						   QWidget *parent = 0);
+			       const QString &page = QString(),
+			       QWidget *parent = 0);
 	void about();
 
 private:

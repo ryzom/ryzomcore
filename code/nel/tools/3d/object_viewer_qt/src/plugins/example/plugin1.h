@@ -35,6 +35,7 @@ public:
 	QString version() const;
 	QString vendor() const;
 	QString description() const;
+	QList<QString> dependencies() const;
 
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;

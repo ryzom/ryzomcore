@@ -91,6 +91,11 @@ QString MyPlugin::description() const
 	return "Example ovqt plugin.";
 }
 
+QList<QString> MyPlugin::dependencies() const
+{
+	return QList<QString>();
+}
+
 QObject* MyPlugin::objectByName(const QString &name) const
 {
 	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
