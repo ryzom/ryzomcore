@@ -22,7 +22,7 @@
 
 #include "iplugin_spec.h"
 
-namespace NLQT
+namespace ExtensionSystem
 {
 
 class CPluginSpec: public IPluginSpec

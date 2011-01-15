@@ -26,7 +26,7 @@
 // Project include
 #include "iplugin_manager.h"
 
-namespace NLQT
+namespace ExtensionSystem
 {
 
 class IPlugin;

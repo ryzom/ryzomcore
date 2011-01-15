@@ -175,6 +175,24 @@ void CObjectViewer::updateInput()
 {
 	_Driver->EventServer.pump();
 
+	// Test some keys
+	if (_Driver->AsyncListener.isKeyPushed(KeyQ))
+	{
+		// Change render mode
+		switch (_Driver->getPolygonMode())
+		{
+			case UDriver::Filled:
+				_Driver->setPolygonMode (UDriver::Line);
+				break;
+			case UDriver::Line:
+				_Driver->setPolygonMode (UDriver::Point);
+				break;
+			case UDriver::Point:
+				_Driver->setPolygonMode (UDriver::Filled);
+				break;
+		}
+	}
+
 	// New matrix from camera
 	_Scene->getCam().setTransformMode(NL3D::UTransformable::DirectMatrix);
 	_Scene->getCam().setMatrix (_MouseListener->getViewMatrix());

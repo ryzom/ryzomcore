@@ -24,10 +24,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 
-namespace NLQT
+namespace ExtensionSystem
 {
 class IPluginSpec;
-
 
 /**
 @interface IPluginManager
@@ -52,7 +51,7 @@ public:
 	virtual void loadPlugins() = 0;
 	virtual QStringList getPluginPaths() const = 0;
 	virtual void setPluginPaths(const QStringList &paths) = 0;
-	virtual QList<NLQT::IPluginSpec *> plugins() const = 0;
+	virtual QList<ExtensionSystem::IPluginSpec *> plugins() const = 0;
 
 Q_SIGNALS:
 	void objectAdded(QObject *obj);
@@ -61,6 +60,6 @@ Q_SIGNALS:
 	void pluginsChanged();
 };
 
-}; // namespace NLQT
+}; // namespace ExtensionSystem
 
 #endif // IPLUGINMANAGER_H

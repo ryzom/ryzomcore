@@ -35,24 +35,28 @@ namespace NLMISC
 	class CLibraryContext;
 }
 
-namespace NLQT
+namespace ExtensionSystem
 {
 	class IPluginSpec;
+}
+
+namespace NLQT
+{
 	class CQtDisplayer;
 }
 
 namespace Plugin 
 {
 
-	class CLogPlugin : public QDockWidget, public NLQT::IPlugin
+	class CLogPlugin : public QDockWidget, public ExtensionSystem::IPlugin
 	{
 		Q_OBJECT
-		Q_INTERFACES(NLQT::IPlugin)
+		Q_INTERFACES(ExtensionSystem::IPlugin)
 	public:
 		CLogPlugin(QWidget *parent = 0);
 		~CLogPlugin();
 
-		bool initialize(NLQT::IPluginManager *pluginManager, QString *errorString);
+		bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 		void extensionsInitialized();
 
 		void setNelContext(NLMISC::INelContext *nelContext);
@@ -63,13 +67,13 @@ namespace Plugin
 		QString description() const;
 
 		QObject *objectByName(const QString &name) const;
-		NLQT::IPluginSpec *pluginByName(const QString &name) const;
+		ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
 	protected:
 		NLMISC::CLibraryContext *_LibContext;
 
 	private:
-		NLQT::IPluginManager *_plugMan;
+		ExtensionSystem::IPluginManager *_plugMan;
 
 		Ui::CLogPlugin _ui;
 

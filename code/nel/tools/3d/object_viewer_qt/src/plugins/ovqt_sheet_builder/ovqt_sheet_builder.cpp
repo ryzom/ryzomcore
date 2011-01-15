@@ -31,7 +31,7 @@
 
 using namespace Plugin;
 
-bool SheetBuilderPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorString)
+bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
@@ -100,6 +100,11 @@ QString SheetBuilderPlugin::description() const
     return "make_sheet_id equivalent";
 }
 
+QList<QString> SheetBuilderPlugin::dependencies() const
+{
+	return QList<QString>();
+}
+
 QObject* SheetBuilderPlugin::objectByName(const QString &name) const
 {
     Q_FOREACH (QObject *qobj, _plugMan->allObjects())
@@ -108,9 +113,9 @@ QObject* SheetBuilderPlugin::objectByName(const QString &name) const
     return 0;
 }
 
-NLQT::IPluginSpec *SheetBuilderPlugin::pluginByName(const QString &name) const
+ExtensionSystem::IPluginSpec *SheetBuilderPlugin::pluginByName(const QString &name) const
 {
-    Q_FOREACH (NLQT::IPluginSpec *spec, _plugMan->plugins())
+    Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
             if (spec->name() == name)
                 return spec;
     return 0;

@@ -30,7 +30,7 @@ namespace NLMISC
 	class INelContext;
 }
 
-namespace NLQT
+namespace ExtensionSystem
 {
 
 /**
@@ -56,10 +56,11 @@ public:
 	virtual QString version() const = 0;
 	virtual QString vendor() const = 0;
 	virtual QString description() const = 0;
+	virtual QList<QString> dependencies() const = 0;
 };
 
-}; //namespace NLQT
+}; //namespace ExtensionSystem
 
-Q_DECLARE_INTERFACE(NLQT::IPlugin, "com.ryzom.dev.ObjectViewerQt.IPlugin/0.9")
+Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.1")
 
 #endif // IPLUGIN_H

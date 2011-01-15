@@ -62,7 +62,7 @@ public:
 	{
 		return *_vegetableEditor;
 	}
-	static NLQT::CPluginManager &plugMan() 
+	static ExtensionSystem::CPluginManager &plugMan() 
 	{ 
 		return *_pluginManager; 
 	}
@@ -74,7 +74,7 @@ private:
 	static NLQT::CParticleEditor *_particleEditor;
 	static NLQT::CSoundSystem *_soundSystem;
 	static NLQT::CVegetableEditor *_vegetableEditor;
-	static NLQT::CPluginManager *_pluginManager; 
+	static ExtensionSystem::CPluginManager *_pluginManager; 
 };
 
 #endif // MODULES_H

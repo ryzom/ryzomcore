@@ -25,7 +25,7 @@
 
 #include "plugin_spec.h"
 
-namespace NLQT
+namespace ExtensionSystem
 {
 
 CPluginManager::CPluginManager(QObject *parent):

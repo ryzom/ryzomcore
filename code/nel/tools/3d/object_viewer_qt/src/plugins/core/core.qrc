@@ -1,0 +1,6 @@
+<RCC>
+<qresource prefix="/core" >
+    <file>images/nel.png</file>
+    <file>images/preferences.png</file>
+</qresource>
+</RCC>

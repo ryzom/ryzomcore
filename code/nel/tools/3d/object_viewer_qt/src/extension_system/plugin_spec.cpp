@@ -30,7 +30,7 @@
 #include "iplugin.h"
 #include "iplugin_manager.h"
 
-namespace NLQT
+namespace ExtensionSystem
 {
 
 CPluginSpec::CPluginSpec():

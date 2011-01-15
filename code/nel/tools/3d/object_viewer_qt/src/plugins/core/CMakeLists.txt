@@ -1,0 +1,54 @@
+INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
+			${CMAKE_CURRENT_SOURCE_DIR}
+			${LIBXML2_INCLUDE_DIR}
+			${QT_INCLUDES})
+
+FILE(GLOB SRC *.cpp *.h)
+SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
+			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
+			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+
+SET(OVQT_CORE_PLUGIN_HDR	
+				ioptions_page.h
+				core_plugin.h
+				core_constants.h
+				main_window.h
+				settings_dialog.h
+				qnel_widget.h
+				search_paths_settings_page.h
+				plugin_view_dialog.h)
+
+SET(OVQT_CORE_PLUGIN_UIS	settings_dialog.ui
+				plugin_view_dialog.ui
+				search_paths_settings_page.ui)
+
+SET(OVQT_CORE_PLUGIN_RCS core.qrc)
+
+SET(QT_USE_QTGUI TRUE)
+SET(QT_USE_QTOPENGL TRUE)
+
+QT4_ADD_RESOURCES(OVQT_CORE_PLUGIN_RC_SRCS ${OVQT_CORE_PLUGIN_RCS})
+QT4_WRAP_CPP(OVQT_CORE_PLUGIN_MOC_SRC ${OVQT_CORE_PLUGIN_HDR})
+QT4_WRAP_UI(OVQT_CORE_PLUGIN_UI_HDRS ${OVQT_CORE_PLUGIN_UIS})
+
+SOURCE_GROUP(QtResources FILES ${OVQT_CORE_PLUGIN_UIS} ${OVQT_CORE_PLUGIN_RCS})
+SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_CORE_PLUGIN_UI_HDRS})
+SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_CORE_PLUGIN_MOC_SRC})
+SOURCE_GROUP("Core Plugin" FILES ${SRC})
+SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
+
+ADD_LIBRARY(ovqt_plugin_core MODULE ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
+
+TARGET_LINK_LIBRARIES(ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
+
+IF(WITH_STLPORT)
+  TARGET_LINK_LIBRARIES(ovqt_plugin_core ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(WITH_STLPORT)
+
+NL_DEFAULT_PROPS(ovqt_plugin_core "NeL, Tools, 3D: Object Viewer Qt Plugin: Core")
+NL_ADD_RUNTIME_FLAGS(ovqt_plugin_core)
+NL_ADD_LIB_SUFFIX(ovqt_plugin_core)
+
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+
+INSTALL(TARGETS ovqt_plugin_core LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)

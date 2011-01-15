@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(example)
 ADD_SUBDIRECTORY(ovqt_sheet_builder)
 ADD_SUBDIRECTORY(log)

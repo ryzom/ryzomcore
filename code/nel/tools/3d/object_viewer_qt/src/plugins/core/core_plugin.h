@@ -1,5 +1,6 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef CORE_PLUGIN_H
+#define CORE_PLUGIN_H
 
 #include "../../extension_system/iplugin.h"
+#include "main_window.h"
 
 #include "nel/misc/app_context.h"
 
@@ -25,48 +27,50 @@
 
 namespace NLMISC
 {
-    class CLibraryContext;
+class CLibraryContext;
 }
 
 namespace ExtensionSystem
 {
-    class IPluginSpec;
+class IPluginSpec;
 }
 
-namespace Plugin
+namespace Core
 {
 
-    class SheetBuilderPlugin : public QObject, public ExtensionSystem::IPlugin
-    {
-        Q_OBJECT
-        Q_INTERFACES(ExtensionSystem::IPlugin)
-    public:
-        bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
-        void extensionsInitialized();
+class CorePlugin : public QObject, public ExtensionSystem::IPlugin
+{
+	Q_OBJECT
+	Q_INTERFACES(ExtensionSystem::IPlugin)
+public:
 
-        void setNelContext(NLMISC::INelContext *nelContext);
+	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
+	void extensionsInitialized();
+	void shutdown();
+
+	void setNelContext(NLMISC::INelContext *nelContext);
 
 	QString name() const;
 	QString version() const;
 	QString vendor() const;
 	QString description() const;
-		QList<QString> dependencies() const;
+	QList<QString> dependencies() const;
+
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
-	void buildSheet(bool clean);
+protected:
+	NLMISC::CLibraryContext *_LibContext;
 
-    private Q_SLOTS:
-        void execBuilderDialog();
+private Q_SLOTS:
+	void execSettings();
 
-    protected:
-        NLMISC::CLibraryContext *_LibContext;
+private:
+	ExtensionSystem::IPluginManager *_plugMan;
+	ExtensionSystem::CPluginView *_pluginView;
+	CMainWindow *_mainWindow;
+};
 
-    private:
-		ExtensionSystem::IPluginManager *_plugMan;
+} // namespace Core
 
-    };
-
-} // namespace Plugin
-
-#endif // PLUGIN_H
+#endif // CORE_PLUGIN_H

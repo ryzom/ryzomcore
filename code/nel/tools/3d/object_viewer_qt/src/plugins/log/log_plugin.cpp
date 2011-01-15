@@ -55,7 +55,7 @@ CLogPlugin::~CLogPlugin()
 	delete _displayer;
 }
 
-bool CLogPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorString)
+bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
@@ -120,9 +120,9 @@ QObject* CLogPlugin::objectByName(const QString &name) const
 	return 0;
 }
 
-NLQT::IPluginSpec *CLogPlugin::pluginByName(const QString &name) const
+ExtensionSystem::IPluginSpec *CLogPlugin::pluginByName(const QString &name) const
 {
-	Q_FOREACH (NLQT::IPluginSpec *spec, _plugMan->plugins())
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
 		if (spec->name() == name)
 			return spec;
 	return 0;

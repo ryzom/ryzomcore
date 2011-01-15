@@ -13,15 +13,15 @@
 
 using namespace Plugin;
 
-bool MyPlugin::initialize(NLQT::IPluginManager *pluginManager, QString *errorString)
+bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 	QString str;
 	
-	QList<NLQT::IPluginSpec *> listPlug = pluginManager->plugins();
+	QList<ExtensionSystem::IPluginSpec *> listPlug = pluginManager->plugins();
 	
-	Q_FOREACH (NLQT::IPluginSpec *plugSpec, listPlug)
+	Q_FOREACH (ExtensionSystem::IPluginSpec *plugSpec, listPlug)
 		str += plugSpec->name();
 
 	nlinfo(str.toStdString().c_str());
@@ -99,9 +99,9 @@ QObject* MyPlugin::objectByName(const QString &name) const
 	return 0;
 }
 
-NLQT::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
+ExtensionSystem::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
 {
-	Q_FOREACH (NLQT::IPluginSpec *spec, _plugMan->plugins())
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
 		if (spec->name() == name)
 			return spec;
 	return 0;

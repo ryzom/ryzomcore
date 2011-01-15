@@ -22,7 +22,7 @@
 
 #include <QtCore/QString>
 
-namespace NLQT
+namespace ExtensionSystem
 {
 class IPlugin;
 class IPluginManager;
@@ -76,7 +76,7 @@ public:
 	virtual QString errorString() const = 0;
 };
 
-} // namespace NLQT
+} // namespace ExtensionSystem
 
 #endif // IPLUGINSPEC_H
 
