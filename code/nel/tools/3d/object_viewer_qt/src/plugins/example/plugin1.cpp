@@ -7,8 +7,9 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-#include "../../extension_system/iplugin_spec.h"
 
+#include "../../extension_system/iplugin_spec.h"
+#include "example_settings_page.h"
 #include "nel/misc/debug.h"
 
 using namespace Plugin;
@@ -17,15 +18,9 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	QString str;
-	
-	QList<ExtensionSystem::IPluginSpec *> listPlug = pluginManager->plugins();
-	
-	Q_FOREACH (ExtensionSystem::IPluginSpec *plugSpec, listPlug)
-		str += plugSpec->name();
 
-	nlinfo(str.toStdString().c_str());
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	_plugMan->addObject(new CExampleSettingsPage(wnd));
 	if (!wnd)
 	{
 		*errorString = tr("Not found QMainWindow Object Viewer Qt.");

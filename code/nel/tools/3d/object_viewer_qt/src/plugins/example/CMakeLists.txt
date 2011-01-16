@@ -1,25 +1,33 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
-			${CMAKE_CURRENT_SOURCE_DIR}
-			${LIBXML2_INCLUDE_DIR}
-			${QT_INCLUDES})
+						${CMAKE_CURRENT_SOURCE_DIR}
+						${LIBXML2_INCLUDE_DIR}
+						${QT_INCLUDES})
 
 FILE(GLOB SRC *.cpp *.h)
-SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUG_EXAMPLE_HDR plugin1.h)
+SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+
+SET(OVQT_PLUG_EXAMPLE_HDR 	plugin1.h
+							example_settings_page.h
+							${CMAKE_CURRENT_SOURCE_DIR}/../core/ioptions_page.h)
+
+SET(OVQT_PLUG_EXAMPLE_UIS	example_settings_page.ui)
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
 QT4_WRAP_CPP(OVQT_PLUG_EXAMPLE_MOC_SRC ${OVQT_PLUG_EXAMPLE_HDR})
+QT4_WRAP_UI(OVQT_PLUG_EXAMPLE_UI_HDRS ${OVQT_PLUG_EXAMPLE_UIS})
 
+SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_EXAMPLE_UIS})
+SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_EXAMPLE_MOC_SRC})
 SOURCE_GROUP("Example Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+ADD_LIBRARY(ovqt_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_example nelmisc ${QT_LIBRARIES})
 

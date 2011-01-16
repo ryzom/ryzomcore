@@ -47,7 +47,7 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 
 	//_mainWindow = new CMainWindow(_plugMan);
 	//_mainWindow->show();
-	//_plugMan->addObject(new CSearchPathsSettingsPage(_mainWindow));
+	_plugMan->addObject(new CSearchPathsSettingsPage(wnd));
 	return true;
 }
 
