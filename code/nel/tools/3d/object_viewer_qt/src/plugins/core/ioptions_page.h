@@ -31,12 +31,9 @@ namespace Core
 @details You need to subclass this interface and put an instance of your subclass
   into the plugin manager object pool.
 */
-class IOptionsPage : public QObject
+class IOptionsPage 
 {
-	Q_OBJECT
 public:
-	IOptionsPage(QObject *parent = 0) : QObject(parent) {}
-	virtual ~IOptionsPage() {}
 
 	/// id() is a unique identifier for referencing this page
 	virtual QString id() const = 0;
@@ -62,5 +59,7 @@ public:
 };
 
 } // namespace Core
+
+Q_DECLARE_INTERFACE(Core::IOptionsPage, "dev.ryzom.com.IOptionsPage/1.0")
 
 #endif // IOPTIONSPAGE_H

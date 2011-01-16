@@ -18,6 +18,7 @@
 
 #include "settings_dialog.h"
 
+#include "nel/misc/debug.h"
 // Qt includes
 #include <QtGui/QHeaderView>
 #include <QtGui/QPushButton>
@@ -64,7 +65,7 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 	QList<QObject *> all = _plugMan->allObjects();
 	Q_FOREACH(QObject *obj, all)
 	{
-		IOptionsPage *page = dynamic_cast<IOptionsPage *>(obj);
+		IOptionsPage *page = qobject_cast<IOptionsPage *>(obj);
 		if (page)
 			pages.append(page);
 	}

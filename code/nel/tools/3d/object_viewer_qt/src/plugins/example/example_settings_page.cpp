@@ -28,7 +28,7 @@ namespace Plugin
 {
 
 CExampleSettingsPage::CExampleSettingsPage(QObject *parent)
-	: IOptionsPage(parent),
+	: QObject(parent),
 	  _currentPage(NULL)
 {
 }
