@@ -1,0 +1,557 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="fy_hom_lod__.animation_set"/>
+  <STRUCT>
+    <STRUCT Name="idle">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_engarde.anim"/>
+          <ATOM Name="head controlable" Value="true"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_engarde_provoc.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_engarde_preparation.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="walk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="fy_hom_co_ab_marche.anim"/>
+          <ATOM Name="Race Restriction" Value="Fyros"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="ma_hom_co_ab_marche.anim"/>
+          <ATOM Name="Race Restriction" Value="Matis"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="tr_hom_co_ab_marche.anim"/>
+          <ATOM Name="Race Restriction" Value="Tryker"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="zo_hom_co_ab_marche.anim"/>
+          <ATOM Name="Race Restriction" Value="Zorai"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="run">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="fy_hom_co_ab_course.anim"/>
+          <ATOM Name="Race Restriction" Value="Fyros"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="ma_hom_co_ab_course.anim"/>
+          <ATOM Name="Race Restriction" Value="Matis"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="tr_hom_co_ab_course.anim"/>
+          <ATOM Name="Race Restriction" Value="Tryker"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="zo_hom_co_ab_course.anim"/>
+          <ATOM Name="Race Restriction" Value="Zorai"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="backward">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_pasarriere.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_left">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournegauche.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_go.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_right">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournedroite.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_dr.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_left_to_walk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournegauche.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_go.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_right_to_walk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournedroite.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_dr.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_left_to_backward">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournegauche.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_go.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="turn_right_to_backward">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_tournedroite.anim"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_demitour_dr.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="strafe_left">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_strafgauche.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="strafe_right">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_strafdroit.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="impact">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_impact.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="stun_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_STUN_Init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="stun_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_STUN_Loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="stun_end">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_STUN_End.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="attack1">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_GrS_lancegrenade.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="walk atk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="fy_hom_co_ab_marche_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Fyros"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="ma_hom_co_ab_marche_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Matis"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="tr_hom_co_ab_marche_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Tryker"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="zo_hom_co_ab_marche_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Zorai"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="run atk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="fy_hom_co_ab_course_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Fyros"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="ma_hom_co_ab_course_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Matis"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="tr_hom_co_ab_course_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Tryker"/>
+        </STRUCT>
+        <STRUCT>
+          <ATOM Name="filename" Value="zo_hom_co_ab_course_coup.anim"/>
+          <ATOM Name="Race Restriction" Value="Zorai"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="backward atk">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_marche_arriere_coup.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_good_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Bienveillant_Init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_good_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Bienveillant_Loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_good_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Bienveillant_End_Echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_good_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Bienveillant_End_Fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_good_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Bienveillant_End_Ok.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_bad_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Host_Init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_bad_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Host_Loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_bad_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Host_End_Echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_bad_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Host_End_Fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_bad_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Host_End_Ok.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Neutre_Init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Neutre_loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Neutre_End_Echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Neutre_End_Fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Neutre_End_OK.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_off_init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_co_mag_off_loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_off_end_echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_off_end_fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_co_AB_mag_off_end_ok.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_link">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_co_AB_mag_off_end_ok_link.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_magie_cur_init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_magie_cur_Loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_magie_cur_end_echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_magie_cur_end_Fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_magie_cur_end_ok.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="curative_cast_link">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_magie_cur_end_ok_Link.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_begin">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_mix_init.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_loop">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_co_mag_mix_loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_fail">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_mix_end_echec.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_fumble">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_mix_end_fumble.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_success">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_mix_end_ok.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_link">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mag_mix_end_ok_link.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="death_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mort.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOM_Co_AB_mort.anim"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:35 2002 (corvazier) File converted from old format
+Tue Jul 30 23:45:44 2002 (puzin) Form Parents = 
+Thu Aug 29 14:56:19 2002 (beaume) .about_face_left_to_backward.animations[0].filename = FY_HOM_Co_AB_demitour_go.anim
+Thu Aug 29 14:56:19 2002 (beaume) .about_face_left_to_walk.animations[0].filename = FY_HOM_Co_AB_demitour_go.anim
+Thu Aug 29 14:56:19 2002 (beaume) .about_face_right_to_backward.animations[0].filename = FY_HOM_Co_AB_demitour_dr.anim
+Thu Aug 29 14:56:19 2002 (beaume) .about_face_right_to_walk.animations[0].filename = FY_HOM_Co_AB_demitour_dr.anim
+Thu Aug 29 14:56:19 2002 (beaume) .backward.animations[0].filename = FY_HOM_Co_AB_pasarriere.anim
+Thu Aug 29 14:56:19 2002 (beaume) .idle.animations[1].filename = FY_HOM_Co_AB_engarde_provoc.anim
+Thu Aug 29 14:56:19 2002 (beaume) .idle.animations[2].filename = FY_HOM_Co_AB_engarde_preparation.anim
+Thu Aug 29 14:56:19 2002 (beaume) .turn_left_to_backward.animations[0].filename = FY_HOM_Co_AB_tournegauche.anim
+Thu Aug 29 14:56:19 2002 (beaume) .turn_left_to_walk.animations[0].filename = FY_HOM_Co_AB_tournegauche.anim
+Thu Aug 29 14:56:19 2002 (beaume) .turn_right_to_backward.animations[0].filename = FY_HOM_Co_AB_tournedroite.anim
+Thu Aug 29 14:56:19 2002 (beaume) .turn_right_to_walk.animations[0].filename = FY_HOM_Co_AB_tournedroite.anim
+Thu Aug 29 14:56:19 2002 (beaume) formName Resized = 1
+Thu Aug 29 15:03:36 2002 (beaume) .run.animations[0].filename = FY_HOM_Co_AB_course.anim
+Thu Aug 29 15:03:36 2002 (beaume) .walk.animations[0].filename = FY_HOM_Co_AB_marche.anim
+Mon Sep 16 19:27:16 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:27:16 2002 (puzin) formName Resized = 2
+Mon Sep 16 19:27:26 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:27:26 2002 (puzin) formName Resized = 2
+Mon Sep 16 19:27:47 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:27:47 2002 (puzin) formName Resized = 2
+Mon Sep 16 19:28:03 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:28:03 2002 (puzin) formName Resized = 2
+Mon Sep 16 19:28:17 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:28:17 2002 (puzin) formName Resized = 2
+Mon Sep 16 19:28:31 2002 (puzin) formName Pasted = 
+Mon Sep 16 19:28:31 2002 (puzin) formName Resized = 2
+Fri Dec 20 11:20:48 2002 (miller) .idle.animations[0].head controlable = true
+Mon Jan 06 17:06:06 2003 (beaume) .backward atk.animations[0].filename = FY_HOM_Co_AB_marche_arriere_coup.anim
+Mon Jan 06 17:06:06 2003 (beaume) .run atk.animations[0].filename = FY_HOM_Co_AB_course_coup.anim
+Mon Jan 06 17:06:06 2003 (beaume) .walk atk.animations[0].filename = FY_HOM_Co_AB_marche_coup.anim
+Mon Jan 06 17:06:06 2003 (beaume) formName Resized = 1
+Mon Jan 06 17:37:31 2003 (beaume) .attack1.animations[0].filename = FY_HOM_Co_GrS_lancegrenade.anim
+Mon Jan 06 17:37:31 2003 (beaume) formName Resized = 0
+Tue Mar 18 11:38:23 2003 (arnaudb) .impact.animations[0].filename = FY_HOM_Co_AB_impact.anim
+Tue Mar 18 11:38:23 2003 (arnaudb) formName Resized = 1
+Tue Apr 15 23:52:23 2003 (puzin) .turn_left.animations[0].max_speed_factor = 4.0
+Tue Apr 15 23:52:23 2003 (puzin) .turn_left.animations[0].min_speed_factor = 0.5
+Tue Apr 15 23:52:23 2003 (puzin) .turn_left.animations[1].max_speed_factor = 4.0
+Tue Apr 15 23:52:23 2003 (puzin) .turn_left.animations[1].min_speed_factor = 0.5
+Tue Apr 15 23:52:23 2003 (puzin) .turn_right.animations[0].max_speed_factor = 4.0
+Tue Apr 15 23:52:23 2003 (puzin) .turn_right.animations[0].min_speed_factor = 0.5
+Tue Apr 15 23:52:23 2003 (puzin) .turn_right.animations[1].max_speed_factor = 4.0
+Tue Apr 15 23:52:23 2003 (puzin) .turn_right.animations[1].min_speed_factor = 0.5
+Tue Apr 15 23:52:23 2003 (puzin) formName Pasted = 
+Fri Apr 18 18:53:11 2003 (arnaudb) Form Parents = 
+Tue Jun 10 17:47:42 2003 (beaume) .death_mode.LodCharacterAnimation = FY_HOM_Co_AB_mort.anim
+Tue Jun 10 17:47:42 2003 (beaume) .death_mode.animations[0].filename = FY_HOM_Co_AB_mort.anim
+Tue Jun 10 17:47:42 2003 (beaume) formName Resized = 1
+Fri Jul 11 10:56:49 2003 (beaume) .stun_begin.animations[0].filename = FY_HOM_Co_AB_STUN_Init.anim
+Fri Jul 11 10:56:49 2003 (beaume) .stun_end.animations[0].filename = FY_HOM_Co_AB_STUN_End.anim
+Fri Jul 11 10:56:49 2003 (beaume) .stun_loop.animations[0].filename = FY_HOM_Co_AB_STUN_Loop.anim
+Fri Jul 11 10:56:49 2003 (beaume) formName Resized = 1
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_begin.animations[0].filename = FY_HOF_Co_AB_magie_cur_init.anim
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_fail.animations[0].filename = FY_HOF_Co_AB_magie_cur_end_echec.anim
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_fumble.animations[0].filename = FY_HOF_Co_AB_magie_cur_end_Fumble.anim
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_link.animations[0].filename = FY_HOF_Co_AB_magie_cur_end_ok_Link.anim
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_loop.animations[0].filename = FY_HOF_Co_magie_cur_Loop.anim
+Tue Sep 30 15:35:03 2003 (beaume) .curative_cast_success.animations[0].filename = FY_HOF_Co_AB_magie_cur_end_ok.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_begin.animations[0].filename = FY_HOF_Co_AB_mag_mix_init.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_fail.animations[0].filename = FY_HOF_Co_AB_mag_mix_end_echec.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_fumble.animations[0].filename = FY_HOF_Co_AB_mag_mix_end_fumble.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_link.animations[0].filename = FY_HOF_Co_AB_mag_mix_end_ok_link.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_loop.animations[0].filename = FY_HOF_co_mag_mix_loop.anim
+Tue Sep 30 15:35:03 2003 (beaume) .mixed_cast_success.animations[0].filename = FY_HOF_Co_AB_mag_mix_end_ok.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_begin.animations[0].filename = FY_HOF_Co_AB_mag_off_init.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_fail.animations[0].filename = FY_HOF_Co_AB_mag_off_end_echec.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_fumble.animations[0].filename = FY_HOF_Co_AB_mag_off_end_fumble.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_link.animations[0].filename = FY_HOF_co_AB_mag_off_end_ok_link.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_loop.animations[0].filename = FY_HOF_co_mag_off_loop.anim
+Tue Sep 30 15:35:03 2003 (beaume) .offensive_cast_success.animations[0].filename = FY_HOF_co_AB_mag_off_end_ok.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_begin.animations[0].filename = FY_HOM_Co_AB_magie_cur_init.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_fail.animations[0].filename = FY_HOM_Co_AB_magie_cur_end_echec.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_fumble.animations[0].filename = FY_HOM_Co_AB_magie_cur_end_Fumble.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_link.animations[0].filename = FY_HOM_Co_AB_magie_cur_end_ok_Link.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_loop.animations[0].filename = FY_HOM_Co_magie_cur_Loop.anim
+Tue Sep 30 16:45:24 2003 (beaume) .curative_cast_success.animations[0].filename = FY_HOM_Co_AB_magie_cur_end_ok.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_begin.animations[0].filename = FY_HOM_Co_AB_mag_mix_init.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_fail.animations[0].filename = FY_HOM_Co_AB_mag_mix_end_echec.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_fumble.animations[0].filename = FY_HOM_Co_AB_mag_mix_end_fumble.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_link.animations[0].filename = FY_HOM_Co_AB_mag_mix_end_ok_link.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_loop.animations[0].filename = FY_HOM_co_mag_mix_loop.anim
+Tue Sep 30 16:45:24 2003 (beaume) .mixed_cast_success.animations[0].filename = FY_HOM_Co_AB_mag_mix_end_ok.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_begin.animations[0].filename = FY_HOM_Co_AB_mag_off_init.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_fail.animations[0].filename = FY_HOM_Co_AB_mag_off_end_echec.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_fumble.animations[0].filename = FY_HOM_Co_AB_mag_off_end_fumble.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_link.animations[0].filename = FY_HOM_co_AB_mag_off_end_ok_link.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_loop.animations[0].filename = FY_HOM_co_mag_off_loop.anim
+Tue Sep 30 16:45:24 2003 (beaume) .offensive_cast_success.animations[0].filename = FY_HOM_co_AB_mag_off_end_ok.anim</LOG>
+</FORM>

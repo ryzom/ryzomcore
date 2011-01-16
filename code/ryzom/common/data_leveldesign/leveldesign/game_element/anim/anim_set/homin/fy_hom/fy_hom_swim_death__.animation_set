@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.4 $" State="modified">
+  <PARENT Filename="_homin_death__.animation_set"/>
+  <STRUCT>
+    <ATOM Name="defaultHeadControl" Value="false"/>
+    <STRUCT Name="idle">
+      <ATOM Name="Display Objects" Value="false"/>
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Swim_FloatingDead.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOM_Swim_FloatingDead.anim"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:35 2002 (puzin)
+Mon Mar 08 15:32:45 2004 (beaume) .idle.animations[0].filename = FY_HOM_Swim_FloatingDead.anim
+Wed Jun 30 11:59:45 2004 (beaume) .idle.LodCharacterAnimation = FY_HOM_Swim_FloatingDead.anim
+Thu Aug 12 23:43:59 2004 (puzin) .defaultHeadControl = false
+Thu Sep 30 16:41:18 2004 (beaume) .idle.Display Objects = false</LOG>
+</FORM>

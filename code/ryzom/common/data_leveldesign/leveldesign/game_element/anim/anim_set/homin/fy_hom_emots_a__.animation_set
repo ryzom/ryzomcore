@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.5 $" State="modified">
+  <STRUCT>
+    <ATOM Name="defaultHeadControl" Value="false"/>
+    <STRUCT Name="idle">
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOF_A_idle.anim"/>
+    </STRUCT>
+    <STRUCT Name="walk">
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOF_A_marche.anim"/>
+    </STRUCT>
+    <STRUCT Name="walk_to_run">
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOF_A_marche.anim"/>
+    </STRUCT>
+    <STRUCT Name="run">
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOF_A_course.anim"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

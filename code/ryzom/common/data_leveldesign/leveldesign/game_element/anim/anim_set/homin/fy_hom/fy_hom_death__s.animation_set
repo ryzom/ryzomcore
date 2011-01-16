@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.3 $" State="modified">
+  <PARENT Filename="_homin_death__.animation_set"/>
+  <STRUCT>
+    <ATOM Name="defaultHeadControl" Value="false"/>
+    <STRUCT Name="idle">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="FY_HOM_Co_AB_mort_idle.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="FY_HOM_mort_devant_idle.anim"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:24:35 2002 (puzin)
+Tue May 11 17:26:15 2004 (beaume) .idle.animations[0].filename = FY_HOM_Co_mn_mort_idle.anim
+Tue May 11 17:32:42 2004 (beaume) .idle.animations[0].filename = FY_HOM_Co_AB_mort_idle.anim
+Fri Aug 13 00:25:28 2004 (puzin) .defaultHeadControl = false</LOG>
+</FORM>

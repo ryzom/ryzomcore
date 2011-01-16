@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="idle">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_dormir_loop.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="TR_MO_dag_dormir_loop.anim"/>
+    </STRUCT>
+    <STRUCT Name="walk">
+      <ATOM Name="LodCharacterAnimation" Value="TR_MO_dag_marche.anim"/>
+    </STRUCT>
+    <STRUCT Name="run">
+      <ATOM Name="LodCharacterAnimation" Value="TR_MO_dag_course.anim"/>
+    </STRUCT>
+    <STRUCT Name="death">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_mort.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="TR_MO_dag_mort.anim"/>
+    </STRUCT>
+    <STRUCT Name="death_idle">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_mort_idle.anim"/>
+        </STRUCT>
+      </ARRAY>
+      <ATOM Name="LodCharacterAnimation" Value="TR_MO_dag_mort_idle.anim"/>
+    </STRUCT>
+    <STRUCT Name="alert_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_dormir_end.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="combat_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_dormir_end_to_attack.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="death_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_mort.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="default_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_dormir_end.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+    <STRUCT Name="eat_mode">
+      <ARRAY Name="animations">
+        <STRUCT>
+          <ATOM Name="filename" Value="TR_MO_dag_dormir_end.anim"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Thu Dec 12 16:14:11 2002 (puzin)
+Mon Dec 16 14:55:33 2002 (beaume) .death.LodCharacterAnimation = TR_MO_Chien_mort.anim
+Mon Dec 16 14:55:33 2002 (beaume) .death_idle.LodCharacterAnimation = TR_MO_Chien_mort_idle.anim
+Mon Dec 16 14:55:33 2002 (beaume) .idle.LodCharacterAnimation = TR_MO_Chien_idle.anim
+Mon Dec 16 14:55:33 2002 (beaume) .run.LodCharacterAnimation = TR_MO_Chien_course.anim
+Mon Dec 16 14:55:33 2002 (beaume) .walk.LodCharacterAnimation = TR_MO_Chien_marche.anim
+Fri Mar 21 10:29:44 2003 (arnaudb) .impact.animations[0].filename = TR_MO_Chien_idle_impact.anim
+Fri Mar 21 10:29:44 2003 (arnaudb) formName Resized = 1
+Fri Apr 18 11:56:12 2003 (arnaudb) .backward.animations[0].filename = TR_MO_dag_recule.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .death.LodCharacterAnimation = TR_MO_dag_mort.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .death.animations[0].filename = TR_MO_dag_mort.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .death_idle.LodCharacterAnimation = TR_MO_dag_mort_idle.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .death_idle.animations[0].filename = TR_MO_dag_mort_idle.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.LodCharacterAnimation = TR_MO_dag_idle.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.animations[0].filename = TR_MO_dag_idle.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.animations[1].filename = TR_MO_dag_idle1.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.animations[2].filename = TR_MO_dag_idle2.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.animations[3].filename = TR_MO_dag_idle_aboie.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle.animations[4].filename = TR_MO_dag_levelapatte.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .idle_to_walk.animations[0].filename = TR_MO_dag_idle_to_marche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .impact.animations[0].filename = TR_MO_dag_impact.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .run.LodCharacterAnimation = TR_MO_dag_course.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .run.animations[0].filename = TR_MO_dag_course.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left.animations[0].filename = TR_MO_dag_tournegauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left.animations[1].filename = TR_MO_dag_demitour_gauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left_to_backward.animations[0].filename = TR_MO_dag_tournegauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left_to_backward.animations[1].filename = TR_MO_dag_demitour_gauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left_to_walk.animations[0].filename = TR_MO_dag_tournegauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_left_to_walk.animations[1].filename = TR_MO_dag_demitour_gauche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right.animations[0].filename = TR_MO_dag_tournedroite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right.animations[1].filename = TR_MO_dag_demitour_droite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right_to_backward.animations[0].filename = TR_MO_dag_tournedroite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right_to_backward.animations[1].filename = TR_MO_dag_demitour_droite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right_to_walk.animations[0].filename = TR_MO_dag_tournedroite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .turn_right_to_walk.animations[1].filename = TR_MO_dag_demitour_droite.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .walk.LodCharacterAnimation = TR_MO_dag_marche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .walk.animations[0].filename = TR_MO_dag_marche.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) .walk_to_run.animations[0].filename = TR_MO_dag_marche_to_course.anim
+Fri Apr 18 11:56:12 2003 (arnaudb) formName Resized = 1
+Fri Apr 18 11:56:42 2003 (arnaudb) .rest_mode.animations[0].filename = TR_MO_dag_dormir_init.anim
+Fri Apr 18 12:06:12 2003 (arnaudb) .idle.animations[0].filename = TR_MO_dag_sentir_danger.anim
+Fri Apr 18 12:06:12 2003 (arnaudb) .idle.animations[1].filename = TR_MO_dag_crainte.anim
+Fri Apr 18 12:06:12 2003 (arnaudb) .idle.animations[2].filename = TR_MO_dag_idle.anim
+Fri Apr 18 12:06:12 2003 (arnaudb) formName Resized = 3
+Fri Apr 18 12:07:24 2003 (arnaudb) .idle.animations[0].filename = TR_MO_dag_manger.anim
+Fri Apr 18 12:07:24 2003 (arnaudb) .idle.animations[1].filename = TR_MO_dag_renifle.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .alert_mode.animations[0].filename = TR_MO_dag_dormir_end.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .combat_mode.animations[0].filename = TR_MO_dag_dormir_end_to_attack.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .default_mode.animations[0].filename = TR_MO_dag_dormir_end.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .eat_mode.animations[0].filename = TR_MO_dag_dormir_end.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .idle.LodCharacterAnimation = TR_MO_dag_dormir_loop.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) .idle.animations[0].filename = TR_MO_dag_dormir_loop.anim
+Fri Apr 18 12:11:20 2003 (arnaudb) formName Resized = 1
+Fri Jun 06 16:55:16 2003 (beaume) .death_mode.animations[0].filename = TR_MO_dag_mort.anim
+Fri Jun 06 16:55:16 2003 (beaume) formName Resized = 1</LOG>
+</FORM>

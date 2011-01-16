@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_default.animation_set"/>
+  <STRUCT>
+    <STRUCT Name="strafe_left">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="strafe_right">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="attack1">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="attack2">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="walk atk">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="run atk">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="backward atk">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="rest_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Jul 03 10:52:32 2003 (puzin)</LOG>
+</FORM>

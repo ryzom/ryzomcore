@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <PARENT Filename="_default.animation_set"/>
+  <STRUCT>
+    <STRUCT Name="idle_to_walk">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="walk_to_run">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="idle_to_backward">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="backward">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="strafe_left">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="strafe_right">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="1st_person atk">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="attack1">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="attack2">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="walk atk">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="run atk">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="backward atk">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_good_begin">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_good_loop">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_good_fail">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_good_fumble">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_good_success">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_bad_begin">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_bad_loop">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_bad_fail">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_bad_fumble">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_bad_success">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_begin">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_loop">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_fail">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_fumble">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="cast_neutral_success">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_begin">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_loop">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_fail">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_fumble">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_success">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="offensive_cast_link">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_begin">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_loop">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_fail">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_fumble">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_success">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="curative_cast_link">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_begin">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_loop">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_fail">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_fumble">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_success">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="mixed_cast_link">
+      <ATOM Name="Essential" Value="true"/>
+    </STRUCT>
+    <STRUCT Name="alert_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="combat_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="default_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="eat_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="hungry_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="mount_default_mode">
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+    <STRUCT Name="rest_mode">
+      <ATOM Name="Display Objects" Value="false"/>
+      <ATOM Name="Essential" Value="false"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_begin.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_fail.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_fumble.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_link.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_loop.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .curative_cast_success.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_begin.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_fail.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_fumble.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_link.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_loop.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .mixed_cast_success.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_begin.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_fail.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_fumble.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_link.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_loop.Essential = true
+Thu Oct 02 12:15:28 2003 (puzin) .offensive_cast_success.Essential = true
+Thu Dec 07 15:00:05 2006 (nouveau) .rest_mode.Display Objects = false</LOG>
+</FORM>

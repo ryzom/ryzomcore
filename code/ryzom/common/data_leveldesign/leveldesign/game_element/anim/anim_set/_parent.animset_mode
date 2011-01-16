@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="swim_death">
+      <ATOM Name="__" Value="false"/>
+      <ATOM Name="__s" Value="false"/>
+      <ATOM Name="__d" Value="false"/>
+      <ATOM Name="_1h_" Value="false"/>
+      <ATOM Name="_1h_d" Value="false"/>
+      <ATOM Name="_1h_s" Value="false"/>
+      <ATOM Name="_1hsw_" Value="false"/>
+      <ATOM Name="_1hsw_d" Value="false"/>
+      <ATOM Name="_1hsw_s" Value="false"/>
+      <ATOM Name="_d_" Value="false"/>
+      <ATOM Name="_d_d" Value="false"/>
+      <ATOM Name="_d_s" Value="false"/>
+      <ATOM Name="_2h_" Value="false"/>
+      <ATOM Name="_2hsw_" Value="false"/>
+      <ATOM Name="_g_" Value="false"/>
+      <ATOM Name="_sg_" Value="false"/>
+      <ATOM Name="_sgga_" Value="false"/>
+      <ATOM Name="_l2m_" Value="false"/>
+      <ATOM Name="_br_" Value="false"/>
+      <ATOM Name="_gr_" Value="false"/>
+      <ATOM Name="_dig_" Value="false"/>
+      <ATOM Name="_dis_" Value="false"/>
+      <ATOM Name="_ga_" Value="false"/>
+      <ATOM Name="_fi_" Value="false"/>
+      <ATOM Name="_sh_" Value="false"/>
+      <ATOM Name="_ho_" Value="false"/>
+      <ATOM Name="_pa_" Value="false"/>
+      <ATOM Name="_cu1_" Value="false"/>
+      <ATOM Name="_cu2_" Value="false"/>
+      <ATOM Name="_co_" Value="false"/>
+      <ATOM Name="_bu_" Value="false"/>
+      <ATOM Name="_mix_" Value="false"/>
+      <ATOM Name="_tr_" Value="false"/>
+      <ATOM Name="_trstr_" Value="false"/>
+      <ATOM Name="_mclo_" Value="false"/>
+      <ATOM Name="_mtoo_" Value="false"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1h_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1h_d = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1h_s = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1hsw_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1hsw_d = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._1hsw_s = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._2h_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._2hsw_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death.__ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death.__d = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death.__s = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._br_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._bu_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._co_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._cu1_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._cu2_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._d_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._d_d = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._d_s = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._dig_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._dis_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._fi_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._g_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._ga_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._gr_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._ho_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._l2m_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._mclo_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._mix_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._mtoo_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._pa_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._sg_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._sgga_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._sh_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._tr_ = false
+Thu Aug 12 22:52:33 2004 (puzin) .swim_death._trstr_ = false</LOG>
+</FORM>
