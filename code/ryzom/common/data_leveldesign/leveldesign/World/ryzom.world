@@ -3,6 +3,71 @@
   <STRUCT>
     <ATOM Name="name" Value="world"/>
     <ARRAY Name="continents list">
+      <STRUCT Name="fyros">
+        <ATOM Name="selection_name" Value="fyros"/>
+        <ATOM Name="continent_name" Value="fyros"/>
+        <ATOM Name="minx" Value="15840.0"/>
+        <ATOM Name="miny" Value="-27040.0"/>
+        <ATOM Name="maxx" Value="20320.0"/>
+        <ATOM Name="maxy" Value="-23840.0"/>
+      </STRUCT>
+      <STRUCT Name="tryker">
+        <ATOM Name="selection_name" Value="tryker"/>
+        <ATOM Name="continent_name" Value="tryker"/>
+        <ATOM Name="minx" Value="13760.0"/>
+        <ATOM Name="miny" Value="-34880.0"/>
+        <ATOM Name="maxx" Value="20000.0"/>
+        <ATOM Name="maxy" Value="-29440.0"/>
+      </STRUCT>
+      <STRUCT Name="matis">
+        <ATOM Name="selection_name" Value="matis"/>
+        <ATOM Name="continent_name" Value="lesfalaises"/>
+        <ATOM Name="minx" Value="320"/>
+        <ATOM Name="miny" Value="-7840"/>
+        <ATOM Name="maxx" Value="6240"/>
+        <ATOM Name="maxy" Value="-320"/>
+        <ATOM Name="prim_file" Value="verdant_heights.prim"/>
+      </STRUCT>
+      <STRUCT Name="zorai">
+        <ATOM Name="selection_name" Value="zorai"/>
+        <ATOM Name="continent_name" Value="lepaysmalade"/>
+        <ATOM Name="minx" Value="6880"/>
+        <ATOM Name="miny" Value="-5920"/>
+        <ATOM Name="maxx" Value="12480"/>
+        <ATOM Name="maxy" Value="-960"/>
+      </STRUCT>
+      <STRUCT Name="bagne">
+        <ATOM Name="selection_name" Value="bagne"/>
+        <ATOM Name="continent_name" Value="bagne"/>
+        <ATOM Name="minx" Value="480.0"/>
+        <ATOM Name="miny" Value="-11200.0"/>
+        <ATOM Name="maxx" Value="1600.0"/>
+        <ATOM Name="maxy" Value="-9760.0"/>
+      </STRUCT>
+      <STRUCT Name="route_gouffre">
+        <ATOM Name="selection_name" Value="route_gouffre"/>
+        <ATOM Name="continent_name" Value="route_gouffre"/>
+        <ATOM Name="minx" Value="5440.0"/>
+        <ATOM Name="miny" Value="-16960.0"/>
+        <ATOM Name="maxx" Value="7360.0"/>
+        <ATOM Name="maxy" Value="-9600.0"/>
+      </STRUCT>
+      <STRUCT Name="sources">
+        <ATOM Name="selection_name" Value="sources"/>
+        <ATOM Name="continent_name" Value="sources"/>
+        <ATOM Name="minx" Value="2560.0"/>
+        <ATOM Name="miny" Value="-11400.0"/>
+        <ATOM Name="maxx" Value="3840.0"/>
+        <ATOM Name="maxy" Value="-9760.0"/>
+      </STRUCT>
+      <STRUCT Name="terre">
+        <ATOM Name="selection_name" Value="terre"/>
+        <ATOM Name="continent_name" Value="terre"/>
+        <ATOM Name="minx" Value="160.0"/>
+        <ATOM Name="miny" Value="-15840.0"/>
+        <ATOM Name="maxx" Value="3040.0"/>
+        <ATOM Name="maxy" Value="-13120.0"/>
+      </STRUCT>
       <STRUCT Name="indoors">
         <ATOM Name="selection_name" Value="indoors"/>
         <ATOM Name="continent_name" Value="indoors"/>
@@ -11,6 +76,118 @@
         <ATOM Name="maxx" Value="21280"/>
         <ATOM Name="maxy" Value="-320"/>
       </STRUCT>
+      <STRUCT Name="nexus">
+        <ATOM Name="selection_name" Value="nexus"/>
+        <ATOM Name="continent_name" Value="lecarrefour"/>
+        <ATOM Name="minx" Value="7840"/>
+        <ATOM Name="miny" Value="-8320"/>
+        <ATOM Name="maxx" Value="9760"/>
+        <ATOM Name="maxy" Value="-6080"/>
+      </STRUCT>
+      <STRUCT Name="testroom">
+        <ATOM Name="selection_name" Value="testroom"/>
+        <ATOM Name="continent_name" Value="testroom"/>
+        <ATOM Name="minx" Value="33000"/>
+        <ATOM Name="miny" Value="-5630"/>
+        <ATOM Name="maxx" Value="39400"/>
+        <ATOM Name="maxy" Value="-400"/>
+      </STRUCT>
+      <STRUCT Name="fyros_newbie">
+        <ATOM Name="selection_name" Value="fyros_newbie"/>
+        <ATOM Name="continent_name" Value="fyros_newbie"/>
+        <ATOM Name="minx" Value="20960"/>
+        <ATOM Name="miny" Value="-27040"/>
+        <ATOM Name="maxx" Value="23200"/>
+        <ATOM Name="maxy" Value="-25280"/>
+      </STRUCT>
+      <STRUCT Name="fyros_island">
+        <ATOM Name="selection_name" Value="fyros_island"/>
+        <ATOM Name="continent_name" Value="fyros_island"/>
+        <ATOM Name="minx" Value="21120"/>
+        <ATOM Name="miny" Value="-24960"/>
+        <ATOM Name="maxx" Value="25920"/>
+        <ATOM Name="maxy" Value="-23840"/>
+      </STRUCT>
+      <STRUCT Name="tryker_newbie">
+        <ATOM Name="selection_name" Value="tryker_newbie"/>
+        <ATOM Name="continent_name" Value="tryker_newbie"/>
+        <ATOM Name="minx" Value="20800.0"/>
+        <ATOM Name="miny" Value="-34880.0"/>
+        <ATOM Name="maxx" Value="23200.0"/>
+        <ATOM Name="maxy" Value="-32960.0"/>
+      </STRUCT>
+      <STRUCT Name="tryker_island">
+        <ATOM Name="selection_name" Value="tryker_island"/>
+        <ATOM Name="continent_name" Value="tryker_island"/>
+        <ATOM Name="minx" Value="21120"/>
+        <ATOM Name="miny" Value="-30560"/>
+        <ATOM Name="maxx" Value="27200"/>
+        <ATOM Name="maxy" Value="-29440"/>
+      </STRUCT>
+      <STRUCT Name="matis_island">
+        <ATOM Name="selection_name" Value="matis_island"/>
+        <ATOM Name="continent_name" Value="matis_island"/>
+        <ATOM Name="minx" Value="14080"/>
+        <ATOM Name="miny" Value="-1600"/>
+        <ATOM Name="maxx" Value="18400"/>
+        <ATOM Name="maxy" Value="-320"/>
+      </STRUCT>
+      <STRUCT Name="zorai_island">
+        <ATOM Name="selection_name" Value="zorai_island"/>
+        <ATOM Name="continent_name" Value="zorai_island"/>
+        <ATOM Name="minx" Value="13920"/>
+        <ATOM Name="miny" Value="-4800"/>
+        <ATOM Name="maxx" Value="18720"/>
+        <ATOM Name="maxy" Value="-3520"/>
+      </STRUCT>
+      <STRUCT Name="matis_newbie">
+        <ATOM Name="selection_name" Value="matis_newbie"/>
+        <ATOM Name="continent_name" Value="matis_newbie"/>
+      </STRUCT>
+      <STRUCT Name="zorai_newbie">
+        <ATOM Name="selection_name" Value="zorai_newbie"/>
+        <ATOM Name="continent_name" Value="zorai_newbie"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="selection_name" Value="r2_roots"/>
+        <ATOM Name="continent_name" Value="r2_roots"/>
+        <ATOM Name="minx" Value="30960"/>
+        <ATOM Name="miny" Value="-20800"/>
+        <ATOM Name="maxx" Value="40960"/>
+        <ATOM Name="maxy" Value="-30800"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="selection_name" Value="r2_desert"/>
+        <ATOM Name="continent_name" Value="r2_desert"/>
+        <ATOM Name="minx" Value="20960"/>
+        <ATOM Name="miny" Value="-800"/>
+        <ATOM Name="maxx" Value="30959"/>
+        <ATOM Name="maxy" Value="-10800"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="selection_name" Value="r2_lakes"/>
+        <ATOM Name="continent_name" Value="r2_lakes"/>
+        <ATOM Name="minx" Value="20960"/>
+        <ATOM Name="miny" Value="-10800"/>
+        <ATOM Name="maxx" Value="30959"/>
+        <ATOM Name="maxy" Value="-20800"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="selection_name" Value="r2_forest"/>
+        <ATOM Name="continent_name" Value="r2_forest"/>
+        <ATOM Name="minx" Value="30960"/>
+        <ATOM Name="miny" Value="-800"/>
+        <ATOM Name="maxx" Value="40959"/>
+        <ATOM Name="maxy" Value="-10800"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="selection_name" Value="r2_jungle"/>
+        <ATOM Name="continent_name" Value="r2_jungle"/>
+        <ATOM Name="minx" Value="30960"/>
+        <ATOM Name="miny" Value="-10800"/>
+        <ATOM Name="maxx" Value="40959"/>
+        <ATOM Name="maxy" Value="-20800"/>
+      </STRUCT>
       <STRUCT Name="newbieland">
         <ATOM Name="selection_name" Value="newbieland"/>
         <ATOM Name="continent_name" Value="newbieland"/>
@@ -18,6 +195,22 @@
         <ATOM Name="miny" Value="-12320"/>
         <ATOM Name="maxx" Value="11360"/>
         <ATOM Name="maxy" Value="-10240"/>
+      </STRUCT>
+      <STRUCT Name="corrupted_moor">
+        <ATOM Name="selection_name" Value="corrupted_moor"/>
+        <ATOM Name="continent_name" Value="corrupted_moor"/>
+        <ATOM Name="minx" Value="12480"/>
+        <ATOM Name="miny" Value="-12200"/>
+        <ATOM Name="maxx" Value="15840"/>
+        <ATOM Name="maxy" Value="-9940"/>
+      </STRUCT>
+      <STRUCT Name="kitiniere">
+        <ATOM Name="selection_name" Value="kitiniere"/>
+        <ATOM Name="continent_name" Value="kitiniere"/>
+        <ATOM Name="minx" Value="160.0"/>
+        <ATOM Name="miny" Value="-17600.0"/>
+        <ATOM Name="maxx" Value="3040.0"/>
+        <ATOM Name="maxy" Value="-13120.0"/>
       </STRUCT>
     </ARRAY>
     <ARRAY Name="maps list">
@@ -28,6 +221,391 @@
         <ATOM Name="ymin" Value="160"/>
         <ATOM Name="xmax" Value="640"/>
         <ATOM Name="ymax" Value="640"/>
+        <ARRAY Name="children">
+          <STRUCT>
+            <ATOM Name="name" Value="continent_fyros"/>
+            <ATOM Name="click zone name" Value="continent_fyros"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_matis"/>
+            <ATOM Name="click zone name" Value="continent_matis"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_tryker"/>
+            <ATOM Name="click zone name" Value="continent_tryker"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_zorai"/>
+            <ATOM Name="click zone name" Value="continent_zorai"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_bagne"/>
+            <ATOM Name="click zone name" Value="continent_bagne"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_route_gouffre"/>
+            <ATOM Name="click zone name" Value="continent_route_gouffre"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_sources"/>
+            <ATOM Name="click zone name" Value="continent_sources"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_terre"/>
+            <ATOM Name="click zone name" Value="continent_terre"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="continent_nexus"/>
+            <ATOM Name="click zone name" Value="continent_nexus"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="nland_fyros">
+        <ATOM Name="name" Value="continent_fyros_newbie"/>
+        <ATOM Name="contname" Value="fyros_newbie"/>
+        <ATOM Name="bitmap" Value="fyros_newbie_map.tga"/>
+        <ATOM Name="xmin" Value="20960"/>
+        <ATOM Name="ymin" Value="-27040"/>
+        <ATOM Name="xmax" Value="23200"/>
+        <ATOM Name="ymax" Value="-25280"/>
+      </STRUCT>
+      <STRUCT Name="nland_matis">
+        <ATOM Name="name" Value="continent_matis_newbie"/>
+        <ATOM Name="contname" Value="matis_newbie"/>
+        <ATOM Name="bitmap" Value="matis_newbie_map.tga"/>
+        <ATOM Name="xmin" Value="320"/>
+        <ATOM Name="ymin" Value="-7680"/>
+        <ATOM Name="xmax" Value="2720"/>
+        <ATOM Name="ymax" Value="-5760"/>
+      </STRUCT>
+      <STRUCT Name="nland_tryker">
+        <ATOM Name="name" Value="continent_tryker_newbie"/>
+        <ATOM Name="contname" Value="tryker_newbie"/>
+        <ATOM Name="bitmap" Value="tryker_newbie_map.tga"/>
+        <ATOM Name="xmin" Value="20800"/>
+        <ATOM Name="ymin" Value="-34880"/>
+        <ATOM Name="xmax" Value="23200"/>
+        <ATOM Name="ymax" Value="-32960"/>
+      </STRUCT>
+      <STRUCT Name="nland_zorai">
+        <ATOM Name="name" Value="continent_zorai_newbie"/>
+        <ATOM Name="contname" Value="zorai_newbie"/>
+        <ATOM Name="bitmap" Value="zorai_newbie_map.tga"/>
+        <ATOM Name="xmin" Value="7040"/>
+        <ATOM Name="ymin" Value="-5600"/>
+        <ATOM Name="xmax" Value="8960"/>
+        <ATOM Name="ymax" Value="-4160"/>
+      </STRUCT>
+      <STRUCT Name="cont_fyros">
+        <ATOM Name="name" Value="continent_fyros"/>
+        <ATOM Name="contname" Value="fyros"/>
+        <ATOM Name="bitmap" Value="Fyros_Map.tga"/>
+        <ATOM Name="xmin" Value="15840"/>
+        <ATOM Name="ymin" Value="-27040"/>
+        <ATOM Name="xmax" Value="20320"/>
+        <ATOM Name="ymax" Value="-23840"/>
+        <ARRAY Name="children">
+          <STRUCT>
+            <ATOM Name="name" Value="place_pyr"/>
+            <ATOM Name="click zone name" Value="place_pyr"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_dyron"/>
+            <ATOM Name="click zone name" Value="place_dyron"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_thesos"/>
+            <ATOM Name="click zone name" Value="place_thesos"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="cont_matis">
+        <ATOM Name="name" Value="continent_matis"/>
+        <ATOM Name="contname" Value="matis"/>
+        <ATOM Name="bitmap" Value="matis_map.tga"/>
+        <ATOM Name="xmin" Value="320"/>
+        <ATOM Name="ymin" Value="-7840"/>
+        <ATOM Name="xmax" Value="6240"/>
+        <ATOM Name="ymax" Value="-320"/>
+        <ARRAY Name="children">
+          <STRUCT>
+            <ATOM Name="name" Value="place_yrkanis"/>
+            <ATOM Name="click zone name" Value="place_yrkanis"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_natae"/>
+            <ATOM Name="click zone name" Value="place_natae"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_davae"/>
+            <ATOM Name="click zone name" Value="place_davae"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_avalae"/>
+            <ATOM Name="click zone name" Value="place_avalae"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="cont_tryker">
+        <ATOM Name="name" Value="continent_tryker"/>
+        <ATOM Name="contname" Value="tryker"/>
+        <ATOM Name="bitmap" Value="tryker_map.tga"/>
+        <ATOM Name="xmin" Value="13760"/>
+        <ATOM Name="ymin" Value="-34880"/>
+        <ATOM Name="xmax" Value="20000"/>
+        <ATOM Name="ymax" Value="-29440"/>
+        <ARRAY Name="children">
+          <STRUCT>
+            <ATOM Name="name" Value="place_avendale"/>
+            <ATOM Name="click zone name" Value="place_avendale"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_crystabell"/>
+            <ATOM Name="click zone name" Value="place_crystabell"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_fairhaven"/>
+            <ATOM Name="click zone name" Value="place_fairhaven"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_windermeer"/>
+            <ATOM Name="click zone name" Value="place_windermeer"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="cont_zorai">
+        <ATOM Name="name" Value="continent_zorai"/>
+        <ATOM Name="contname" Value="zorai"/>
+        <ATOM Name="bitmap" Value="zorai_map.tga"/>
+        <ATOM Name="xmin" Value="6880"/>
+        <ATOM Name="ymin" Value="-5920"/>
+        <ATOM Name="xmax" Value="12480"/>
+        <ATOM Name="ymax" Value="-960"/>
+        <ARRAY Name="children">
+          <STRUCT>
+            <ATOM Name="name" Value="place_zora"/>
+            <ATOM Name="click zone name" Value="place_zora"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_hoi_cho"/>
+            <ATOM Name="click zone name" Value="place_hoi_cho"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_jen_lai"/>
+            <ATOM Name="click zone name" Value="place_jen_lai"/>
+          </STRUCT>
+          <STRUCT>
+            <ATOM Name="name" Value="place_min_cho"/>
+            <ATOM Name="click zone name" Value="place_min_cho"/>
+          </STRUCT>
+        </ARRAY>
+      </STRUCT>
+      <STRUCT Name="fyros_pyr">
+        <ATOM Name="name" Value="place_pyr"/>
+        <ATOM Name="contname" Value="fyros"/>
+        <ATOM Name="bitmap" Value="fy_cit_pyr.tga"/>
+        <ATOM Name="xmin" Value="18400"/>
+        <ATOM Name="ymin" Value="-24720"/>
+        <ATOM Name="xmax" Value="19040"/>
+        <ATOM Name="ymax" Value="-24240"/>
+      </STRUCT>
+      <STRUCT Name="cont_bagne">
+        <ATOM Name="name" Value="continent_bagne"/>
+        <ATOM Name="contname" Value="bagne"/>
+        <ATOM Name="bitmap" Value="Pr_Bagne_Map.tga"/>
+        <ATOM Name="xmin" Value="480"/>
+        <ATOM Name="ymin" Value="-11360"/>
+        <ATOM Name="xmax" Value="1600"/>
+        <ATOM Name="ymax" Value="-9760"/>
+      </STRUCT>
+      <STRUCT Name="cont_route_gouffre">
+        <ATOM Name="name" Value="continent_route_gouffre"/>
+        <ATOM Name="contname" Value="route_gouffre"/>
+        <ATOM Name="bitmap" Value="Pr_Route_Gouffre_Map.tga"/>
+        <ATOM Name="xmin" Value="5440"/>
+        <ATOM Name="ymin" Value="-16960"/>
+        <ATOM Name="xmax" Value="7360"/>
+        <ATOM Name="ymax" Value="-9600"/>
+      </STRUCT>
+      <STRUCT Name="cont_sources">
+        <ATOM Name="name" Value="continent_sources"/>
+        <ATOM Name="contname" Value="sources"/>
+        <ATOM Name="bitmap" Value="Pr_Source_Map.tga"/>
+        <ATOM Name="xmin" Value="2560"/>
+        <ATOM Name="ymin" Value="-11360"/>
+        <ATOM Name="xmax" Value="3840"/>
+        <ATOM Name="ymax" Value="-9760"/>
+      </STRUCT>
+      <STRUCT Name="cont_terre">
+        <ATOM Name="name" Value="continent_terre"/>
+        <ATOM Name="contname" Value="terre"/>
+        <ATOM Name="bitmap" Value="Pr_Terre_Map.tga"/>
+        <ATOM Name="xmin" Value="160"/>
+        <ATOM Name="ymin" Value="-15840"/>
+        <ATOM Name="xmax" Value="3040"/>
+        <ATOM Name="ymax" Value="-13120"/>
+      </STRUCT>
+      <STRUCT Name="cont_nexus">
+        <ATOM Name="name" Value="continent_nexus"/>
+        <ATOM Name="contname" Value="nexus"/>
+        <ATOM Name="bitmap" Value="Nexus_Map.tga"/>
+        <ATOM Name="xmin" Value="7840"/>
+        <ATOM Name="ymin" Value="-8320"/>
+        <ATOM Name="xmax" Value="9760"/>
+        <ATOM Name="ymax" Value="-6080"/>
+      </STRUCT>
+      <STRUCT Name="matis_yrkanis">
+        <ATOM Name="name" Value="place_yrkanis"/>
+        <ATOM Name="contname" Value="matis"/>
+        <ATOM Name="bitmap" Value="MA_CIT_yrkanis.tga"/>
+        <ATOM Name="xmin" Value="4640"/>
+        <ATOM Name="ymin" Value="-3680"/>
+        <ATOM Name="xmax" Value="4800"/>
+        <ATOM Name="ymax" Value="-3200"/>
+      </STRUCT>
+      <STRUCT Name="matis_natae">
+        <ATOM Name="name" Value="place_natae"/>
+        <ATOM Name="contname" Value="matis"/>
+        <ATOM Name="bitmap" Value="MA_CIT_natae.tga"/>
+        <ATOM Name="xmin" Value="3600"/>
+        <ATOM Name="ymin" Value="-3840"/>
+        <ATOM Name="xmax" Value="3840"/>
+        <ATOM Name="ymax" Value="-3680"/>
+      </STRUCT>
+      <STRUCT Name="matis_davae">
+        <ATOM Name="name" Value="place_davae"/>
+        <ATOM Name="contname" Value="matis"/>
+        <ATOM Name="bitmap" Value="MA_CIT_davae.tga"/>
+        <ATOM Name="xmin" Value="4160"/>
+        <ATOM Name="ymin" Value="-4240"/>
+        <ATOM Name="xmax" Value="4320"/>
+        <ATOM Name="ymax" Value="-4000"/>
+      </STRUCT>
+      <STRUCT Name="matis_avalae">
+        <ATOM Name="name" Value="place_avalae"/>
+        <ATOM Name="contname" Value="matis"/>
+        <ATOM Name="bitmap" Value="MA_CIT_avalae.tga"/>
+        <ATOM Name="xmin" Value="4800"/>
+        <ATOM Name="ymin" Value="-4480"/>
+        <ATOM Name="xmax" Value="4960"/>
+        <ATOM Name="ymax" Value="-4320"/>
+      </STRUCT>
+      <STRUCT Name="fyros_dyron">
+        <ATOM Name="name" Value="place_dyron"/>
+        <ATOM Name="contname" Value="fyros"/>
+        <ATOM Name="bitmap" Value="FY_CIT_dyron.tga"/>
+        <ATOM Name="xmin" Value="16480"/>
+        <ATOM Name="ymin" Value="-24800"/>
+        <ATOM Name="xmax" Value="16720"/>
+        <ATOM Name="ymax" Value="-24480"/>
+      </STRUCT>
+      <STRUCT Name="fyros_thesos">
+        <ATOM Name="name" Value="place_thesos"/>
+        <ATOM Name="contname" Value="fyros"/>
+        <ATOM Name="bitmap" Value="FY_CIT_thesos.tga"/>
+        <ATOM Name="xmin" Value="19520"/>
+        <ATOM Name="ymin" Value="-26400"/>
+        <ATOM Name="xmax" Value="19760"/>
+        <ATOM Name="ymax" Value="-26080"/>
+      </STRUCT>
+      <STRUCT Name="tryker_avendale">
+        <ATOM Name="name" Value="place_avendale"/>
+        <ATOM Name="contname" Value="tryker"/>
+        <ATOM Name="bitmap" Value="TR_CIT_avendale.tga"/>
+        <ATOM Name="xmin" Value="18000"/>
+        <ATOM Name="ymin" Value="-31200"/>
+        <ATOM Name="xmax" Value="18240"/>
+        <ATOM Name="ymax" Value="-30960"/>
+      </STRUCT>
+      <STRUCT Name="tryker_crystabell">
+        <ATOM Name="name" Value="place_crystabell"/>
+        <ATOM Name="contname" Value="tryker"/>
+        <ATOM Name="bitmap" Value="TR_CIT_crystabell.tga"/>
+        <ATOM Name="xmin" Value="17760"/>
+        <ATOM Name="ymin" Value="-32000"/>
+        <ATOM Name="xmax" Value="18000"/>
+        <ATOM Name="ymax" Value="-31760"/>
+      </STRUCT>
+      <STRUCT Name="tryker_fairhaven">
+        <ATOM Name="name" Value="place_fairhaven"/>
+        <ATOM Name="contname" Value="tryker"/>
+        <ATOM Name="bitmap" Value="TR_CIT_fairhaven.tga"/>
+        <ATOM Name="xmin" Value="16960"/>
+        <ATOM Name="ymin" Value="-33280"/>
+        <ATOM Name="xmax" Value="17440"/>
+        <ATOM Name="ymax" Value="-32720"/>
+      </STRUCT>
+      <STRUCT Name="tryker_windermeer">
+        <ATOM Name="name" Value="place_windermeer"/>
+        <ATOM Name="contname" Value="tryker"/>
+        <ATOM Name="bitmap" Value="TR_CIT_windermeer.tga"/>
+        <ATOM Name="xmin" Value="15440"/>
+        <ATOM Name="ymin" Value="-33120"/>
+        <ATOM Name="xmax" Value="15760"/>
+        <ATOM Name="ymax" Value="-32880"/>
+      </STRUCT>
+      <STRUCT Name="zorai_zora">
+        <ATOM Name="name" Value="place_zora"/>
+        <ATOM Name="contname" Value="zorai"/>
+        <ATOM Name="bitmap" Value="ZO_CIT_zora.tga"/>
+        <ATOM Name="xmin" Value="8480"/>
+        <ATOM Name="ymin" Value="-3040"/>
+        <ATOM Name="xmax" Value="8800"/>
+        <ATOM Name="ymax" Value="-2720"/>
+      </STRUCT>
+      <STRUCT Name="zorai_hoi_cho">
+        <ATOM Name="name" Value="place_hoi_cho"/>
+        <ATOM Name="contname" Value="zorai"/>
+        <ATOM Name="bitmap" Value="ZO_CIT_hoi_cho.tga"/>
+        <ATOM Name="xmin" Value="9440"/>
+        <ATOM Name="ymin" Value="-3680"/>
+        <ATOM Name="xmax" Value="9680"/>
+        <ATOM Name="ymax" Value="-3360"/>
+      </STRUCT>
+      <STRUCT Name="zorai_jen_lai">
+        <ATOM Name="name" Value="place_jen_lai"/>
+        <ATOM Name="contname" Value="zorai"/>
+        <ATOM Name="bitmap" Value="ZO_CIT_jen_lai.tga"/>
+        <ATOM Name="xmin" Value="8640"/>
+        <ATOM Name="ymin" Value="-3840"/>
+        <ATOM Name="xmax" Value="8960"/>
+        <ATOM Name="ymax" Value="-3520"/>
+      </STRUCT>
+      <STRUCT Name="zorai_min_cho">
+        <ATOM Name="name" Value="place_min_cho"/>
+        <ATOM Name="contname" Value="zorai"/>
+        <ATOM Name="bitmap" Value="ZO_CIT_min_cho.tga"/>
+        <ATOM Name="xmin" Value="9760"/>
+        <ATOM Name="ymin" Value="-4320"/>
+        <ATOM Name="xmax" Value="10080"/>
+        <ATOM Name="ymax" Value="-4000"/>
+      </STRUCT>
+      <STRUCT Name="matis_island">
+        <ATOM Name="name" Value="Almati"/>
+        <ATOM Name="contname" Value="matis_island"/>
+        <ATOM Name="bitmap" Value="matis_island_map.tga"/>
+        <ATOM Name="xmin" Value="14080"/>
+        <ATOM Name="ymin" Value="-1600"/>
+        <ATOM Name="xmax" Value="15360"/>
+        <ATOM Name="ymax" Value="-320"/>
+      </STRUCT>
+      <STRUCT Name="tryker_island">
+        <ATOM Name="name" Value="Olkern"/>
+        <ATOM Name="contname" Value="tryker_island"/>
+        <ATOM Name="bitmap" Value="tryker_island_map.tga"/>
+        <ATOM Name="xmin" Value="24800"/>
+        <ATOM Name="ymin" Value="-30560"/>
+        <ATOM Name="xmax" Value="25760"/>
+        <ATOM Name="ymax" Value="-29600"/>
+      </STRUCT>
+      <STRUCT Name="fyros_island">
+        <ATOM Name="name" Value="Aelius"/>
+        <ATOM Name="contname" Value="fyros_island"/>
+        <ATOM Name="bitmap" Value="fyros_island_map.tga"/>
+        <ATOM Name="xmin" Value="24800"/>
+        <ATOM Name="ymin" Value="-24480"/>
+        <ATOM Name="xmax" Value="25920"/>
+        <ATOM Name="ymax" Value="-23840"/>
       </STRUCT>
       <STRUCT Name="cont_newbieland">
         <ATOM Name="name" Value="cont_newbieland"/>
@@ -37,6 +615,24 @@
         <ATOM Name="ymin" Value="-12320"/>
         <ATOM Name="xmax" Value="11360"/>
         <ATOM Name="ymax" Value="-10240"/>
+      </STRUCT>
+      <STRUCT Name="corrupted_moor">
+        <ATOM Name="name" Value="cont_corrupted_moor"/>
+        <ATOM Name="contname" Value="corrupted_moor"/>
+        <ATOM Name="bitmap" Value="corrupted_moor_Map.tga"/>
+        <ATOM Name="xmin" Value="12480"/>
+        <ATOM Name="ymin" Value="-12200"/>
+        <ATOM Name="xmax" Value="15840"/>
+        <ATOM Name="ymax" Value="-9940"/>
+      </STRUCT>
+      <STRUCT Name="kitiniere">
+        <ATOM Name="name" Value="cont_kitiniere"/>
+        <ATOM Name="contname" Value="kitiniere"/>
+        <ATOM Name="bitmap" Value="kitiniere_map.tga"/>
+        <ATOM Name="xmin" Value="1760"/>
+        <ATOM Name="ymin" Value="-17440"/>
+        <ATOM Name="xmax" Value="3040"/>
+        <ATOM Name="ymax" Value="-16160"/>
       </STRUCT>
     </ARRAY>
   </STRUCT>
