@@ -257,12 +257,33 @@ public:
 		setHeader(UpdateValue);
 
 		uint	sz = 0;
+				
+		// update 20101119 by packpro
+		if (sizeof(value) == 1)
+		{ 
+			sz = 0; 
+			memcpy(&(_Value0[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 2)
+		{ 
+			sz = 1; 
+			memcpy(&(_Value1[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 4)
+		{ 
+			sz = 2;
+			memcpy(&(_Value2[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 8)
+		{ 
+			sz = 3; 
+			memcpy(&(_Value3[0]), &value, sizeof(value));
+		}
 
-		if (sizeof(value) == 1)			{ sz = 0; _Value0[0] = *(uint8*)(&value); }
-		else if (sizeof(value) == 2)	{ sz = 1; _Value1[0] = *(uint16*)(&value); }
-		else if (sizeof(value) == 4)	{ sz = 2; _Value2[0] = *(uint32*)(&value); }
-		else if (sizeof(value) == 8)	{ sz = 3; _Value3[0] = *(uint64*)(&value); }
-
+		//if (sizeof(value) == 1)			{ sz = 0; _Value0[0] = *(uint8*)(&value); }
+		//else if (sizeof(value) == 2)	{ sz = 1; _Value1[0] = *(uint16*)(&value); }
+		//else if (sizeof(value) == 4)	{ sz = 2; _Value2[0] = *(uint32*)(&value); }
+		//else if (sizeof(value) == 8)	{ sz = 3; _Value3[0] = *(uint64*)(&value); }
 		_ColumnAndSize = (uint16)(column | (sz << 14));
 	}
 
@@ -274,10 +295,31 @@ public:
 
 		uint	sz;
 
-		if (sizeof(value) == 1)			{ sz = 0; _Value0[0] = *(uint8*)(&value); }
-		else if (sizeof(value) == 2)	{ sz = 1; _Value1[0] = *(uint16*)(&value); }
-		else if (sizeof(value) == 4)	{ sz = 2; _Value2[0] = *(uint32*)(&value); }
-		else if (sizeof(value) == 8)	{ sz = 3; _Value3[0] = *(uint64*)(&value); }
+		// update 20101119 by packpro
+		if (sizeof(value) == 1)
+		{ 
+			sz = 0; 
+			memcpy(&(_Value0[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 2)
+		{ 
+			sz = 1; 
+			memcpy(&(_Value1[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 4)
+		{ 
+			sz = 2;
+			memcpy(&(_Value2[0]), &value, sizeof(value));
+		}
+		else if (sizeof(value) == 8)
+		{ 
+			sz = 3; 
+			memcpy(&(_Value3[0]), &value, sizeof(value));
+		}
+		//if (sizeof(value) == 1)			{ sz = 0; _Value0[0] = *(uint8*)(&value); }
+		//else if (sizeof(value) == 2)	{ sz = 1; _Value1[0] = *(uint16*)(&value); }
+		//else if (sizeof(value) == 4)	{ sz = 2; _Value2[0] = *(uint32*)(&value); }
+		//else if (sizeof(value) == 8)	{ sz = 3; _Value3[0] = *(uint64*)(&value); }
 
 		_ColumnAndSize = (uint16)(column | (sz << 14));
 
