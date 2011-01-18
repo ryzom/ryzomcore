@@ -22,22 +22,25 @@
 
 // Qt includes
 #include <QtGui/QInputDialog>
+#include <QtGui/QPainter>
+#include <QtGui/QMouseEvent>
 
 // NeL includes
 #include <nel/misc/vector.h>
 
 namespace NLQT
 {
+const int directionSize = 35;
 
 CDirectionWidget::CDirectionWidget(QWidget *parent)
 	: QWidget(parent), _globalName("")
 {
 	_ui.setupUi(this);
 
-	_ui.xzWidget->setMode(Mode::Direction);
-	_ui.yzWidget->setMode(Mode::Direction);
-	_ui.xzWidget->setText("XZ");
-	_ui.yzWidget->setText("YZ");
+	_ui.xzWidget->installEventFilter(this);
+	_ui.yzWidget->installEventFilter(this);
+	_ui.xzWidget->setObjectName("XZ");
+	_ui.yzWidget->setObjectName("YZ");
 	_ui.globalPushButton->hide();
 
 	connect(_ui.globalPushButton ,SIGNAL(clicked()), this, SLOT(setGlobalDirection()));
@@ -47,9 +50,6 @@ CDirectionWidget::CDirectionWidget(QWidget *parent)
 	connect(_ui.decVecIPushButton ,SIGNAL(clicked()), this, SLOT(decVecI()));
 	connect(_ui.decVecJPushButton ,SIGNAL(clicked()), this, SLOT(decVecJ()));
 	connect(_ui.decVecKPushButton ,SIGNAL(clicked()), this, SLOT(decVecK()));
-
-	connect(_ui.xzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecXZ(float,float)));
-	connect(_ui.yzWidget, SIGNAL(applyNewVector(float,float)), this, SLOT(setNewVecYZ(float,float)));
 
 	// Set default value +K
 	setValue(NLMISC::CVector::K);
@@ -68,8 +68,6 @@ void CDirectionWidget::enabledGlobalVariable(bool enabled)
 void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
 {
 	_value = value;
-	_ui.xzWidget->setVector(_value.x, _value.z);
-	_ui.yzWidget->setVector(_value.y, _value.z);
 	_ui.xzWidget->repaint();
 	_ui.yzWidget->repaint();
 
@@ -182,6 +180,49 @@ void CDirectionWidget::setNewVecYZ(float x, float y)
 	v.normalize();
 
 	setValue(v);
+}
+
+bool CDirectionWidget::eventFilter(QObject *object, QEvent *event)
+{
+	QWidget *widget = qobject_cast<QWidget *>(object);
+	switch (event->type())
+	{
+	case QEvent::Paint:
+	{
+		float x; 
+		if (widget->objectName() == "XZ")
+			x = _value.x;
+		else
+			x = _value.y;
+		QPainter painter(widget);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setBrush(QBrush(Qt::white));
+		painter.setPen(QPen(Qt::black, 2, Qt::SolidLine));
+		painter.drawRoundedRect(QRect(3, 3, widget->width() - 6, widget->height() - 6), 3.0, 3.0);
+		painter.setPen(QPen(Qt::gray, 1, Qt::SolidLine));
+		painter.drawLine(widget->width() / 2, 4, widget->width() / 2, widget->height() - 4);
+		painter.drawLine(4, widget->height() / 2, widget->width() - 4, widget->height() / 2);
+		painter.drawText( 10, 15, widget->objectName());
+		painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
+		painter.drawLine(widget->width() / 2, widget->height() / 2,
+			int((widget->width() / 2) + x * 0.9f * directionSize), int((widget->height() / 2) - _value.z * 0.9f * directionSize));
+		break;
+	}
+	case QEvent::MouseButtonDblClick:
+	{
+		QMouseEvent *mouseEvent = (QMouseEvent *) event;
+		float vx = (mouseEvent->x() - (widget->width() / 2)) / 0.9f;
+		float vy = ((widget->height() / 2) - mouseEvent->y()) / 0.9f;
+
+		if (widget->objectName() == "XZ")
+			setNewVecXZ(vx, vy);
+		else
+			setNewVecYZ(vx, vy);
+
+		break;
+	}
+	}
+	return QWidget::eventFilter(object, event);
 }
 
 } /* namespace NLQT */

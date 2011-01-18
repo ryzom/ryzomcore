@@ -67,6 +67,8 @@ private Q_SLOTS:
 	void setNewVecYZ(float x, float y);
 
 private:
+	bool eventFilter(QObject *object, QEvent *event);
+
 	NLMISC::CVector _value;
 	QString _globalName;
 

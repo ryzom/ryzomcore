@@ -55,6 +55,8 @@ private Q_SLOTS:
 	void setRibbonOrientation(int index);
 
 private:
+	bool eventFilter(QObject *object, QEvent *event);
+
 	CWorkspaceNode *_Node;
 
 	NL3D::CPSTailParticle *_TailParticle;

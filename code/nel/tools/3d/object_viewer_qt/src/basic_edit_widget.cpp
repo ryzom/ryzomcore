@@ -21,6 +21,7 @@
 #include "basic_edit_widget.h"
 
 // Qt includes
+#include <QtGui/QPainter>
 
 // NeL includes
 #include "nel/misc/matrix.h"
@@ -143,6 +144,7 @@ CBasicEditWidget::CBasicEditWidget(QWidget *parent)
 	_Wrapper(NULL)
 {
 	_ui.setupUi(this);
+	_ui.graphicsWidget->installEventFilter(this);
 
 	connect(_ui.psiSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateGraphics()));
 	connect(_ui.thetaSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateGraphics()));
@@ -199,4 +201,16 @@ void CBasicEditWidget::updateGraphics()
 	repaint();
 }
 
+bool CBasicEditWidget::eventFilter(QObject *object, QEvent *event)
+{
+	if( event->type() == QEvent::Paint )
+	{
+		QPainter painter(_ui.graphicsWidget);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setBrush(QBrush(Qt::white));
+		painter.setPen(QPen(Qt::black, 2, Qt::SolidLine));
+		painter.drawRoundedRect(QRect(3, 3, _ui.graphicsWidget->width() - 6, _ui.graphicsWidget->height() - 6), 3.0, 3.0);
+	}
+	return QWidget::eventFilter(object, event);
+}
 } /* namespace NLQT */

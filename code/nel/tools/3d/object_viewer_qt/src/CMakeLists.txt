@@ -13,7 +13,7 @@ SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h
 		      emitter_page.h attrib_widget.h located_bindable_page.h located_page.h
 		      particle_force_page.h particle_light_page.h particle_zone_page.h particle_sound_page.h
 		      basic_edit_widget.h direction_widget.h color_edit_widget.h particle_property_dialog.h
-		      ps_mover_page.h graphics_info_widget.h value_blender_dialog.h value_gradient_dialog.h
+		      ps_mover_page.h value_blender_dialog.h value_gradient_dialog.h
 		      value_from_emitter_dialog.h curve_dialog.h bin_op_dialog.h hoverpoints.h
 		      mesh_widget.h morph_mesh_dialog.h constraint_mesh_widget.h tail_particle_widget.h
 		      auto_lod_dialog.h particle_texture_widget.h particle_texture_anim_widget.h

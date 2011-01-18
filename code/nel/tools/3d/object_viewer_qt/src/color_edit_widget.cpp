@@ -23,6 +23,7 @@
 // Qt includes
 #include <QtGui/QColorDialog>
 #include <QtGui/QColor>
+#include <QtGui/QPainter>
 
 // Nel includes
 #include <nel/misc/rgba.h>
@@ -36,6 +37,8 @@ CColorEditWidget::CColorEditWidget(QWidget *parent)
 	_emit(true)
 {
 	_ui.setupUi(this);
+
+	_ui.graphicsWidget->installEventFilter(this);
 
 	connect(_ui.rSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setRed(int)));
 	connect(_ui.gSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setGreen(int)));
@@ -65,6 +68,8 @@ void CColorEditWidget::setColor(const NLMISC::CRGBA &color, bool emit)
 	_emit = true;
 	if (emit)
 		Q_EMIT colorChanged(color);
+
+	_ui.graphicsWidget->repaint();
 }
 
 void CColorEditWidget::setColor(const QColor &color, bool emit)
@@ -75,28 +80,17 @@ void CColorEditWidget::setColor(const QColor &color, bool emit)
 void CColorEditWidget::updateUi()
 {
 	if (_Wrapper == NULL) return;
-	_ui.rSpinBox->setValue(_Wrapper->get().R);
-	_ui.gSpinBox->setValue(_Wrapper->get().G);
-	_ui.bSpinBox->setValue(_Wrapper->get().B);
-	_ui.aSpinBox->setValue(_Wrapper->get().A);
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										_ui.aSpinBox->value()));
+	setColor(_Wrapper->get());
 }
 
 void CColorEditWidget::setRed(int r)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										_ui.aSpinBox->value()));
-
 	if (_emit)
 		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(), 
 											_ui.bSpinBox->value(), 
 											_ui.aSpinBox->value()));
 
+	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL)
 		return;
 
@@ -112,17 +106,12 @@ void CColorEditWidget::setRed(int r)
 
 void CColorEditWidget::setGreen(int g)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										_ui.aSpinBox->value()));
-
 	if (_emit)
 		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
 										g, 
 										_ui.bSpinBox->value(), 
 										_ui.aSpinBox->value()));
-
+	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL) return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
@@ -136,17 +125,12 @@ void CColorEditWidget::setGreen(int g)
 
 void CColorEditWidget::setBlue(int b)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										_ui.aSpinBox->value()));
-
 	if (_emit)
 		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
 											_ui.gSpinBox->value(), 
 											b, 
 											_ui.aSpinBox->value()));
-
+	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL) return;
 
 	NLMISC::CRGBA color = _Wrapper->get();
@@ -160,16 +144,12 @@ void CColorEditWidget::setBlue(int b)
 
 void CColorEditWidget::setAlpha(int a)
 {
-	_ui.graphicsWidget->setColor(QColor(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										a));
-
 	if (_emit)
 		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
 										_ui.gSpinBox->value(), 
 										_ui.bSpinBox->value(), 
 										a));
+	_ui.graphicsWidget->repaint();
 
 	if (_Wrapper == NULL) return;
 
@@ -191,6 +171,24 @@ void CColorEditWidget::browseColor()
 	if (!color.isValid()) return;
 
 	setColor(color);
+}
+
+bool CColorEditWidget::eventFilter(QObject *object, QEvent *event)
+{
+	if( event->type() == QEvent::Paint )
+	{
+		_color = QColor(_ui.rSpinBox->value(), 
+						_ui.gSpinBox->value(), 
+						_ui.bSpinBox->value(), 
+						_ui.aSpinBox->value());
+
+		QPainter painter(_ui.graphicsWidget);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setBrush(QBrush(_color));
+		painter.setPen(QPen(Qt::black, 2, Qt::SolidLine));
+		painter.drawRoundedRect(QRect(3, 3, _ui.graphicsWidget->width() - 6, _ui.graphicsWidget->height() - 6), 3.0, 3.0);
+	}
+	return QWidget::eventFilter(object, event);
 }
 
 } /* namespace NLQT */

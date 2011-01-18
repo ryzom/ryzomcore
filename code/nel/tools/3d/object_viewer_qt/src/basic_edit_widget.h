@@ -48,7 +48,8 @@ public:
 private Q_SLOTS:
 	void updateGraphics();
 
-private:
+private:	
+	bool eventFilter(QObject *object, QEvent *event);
 
 	// wrapper to the datas
 	IPSWrapper<NL3D::CPlaneBasis> *_Wrapper ;

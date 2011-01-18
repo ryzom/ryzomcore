@@ -45,7 +45,7 @@
     </widget>
    </item>
    <item row="0" column="3" rowspan="3">
-    <widget class="NLQT::CGraphicsInfoWidget" name="graphicsWidget" native="true">
+    <widget class="QWidget" name="graphicsWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -110,14 +110,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>NLQT::CGraphicsInfoWidget</class>
-   <extends>QWidget</extends>
-   <header>graphics_info_widget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

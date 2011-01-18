@@ -88,9 +88,11 @@ private Q_SLOTS:
 
 private:
 
+	bool eventFilter(QObject *object, QEvent *event);
 	// wrapper to the datas
 	IPSWrapperRGBA *_Wrapper;
 
+	QColor _color;
 	bool _emit;
 
 	Ui::CColorEditWidget _ui;
