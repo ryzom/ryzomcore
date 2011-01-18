@@ -18,7 +18,6 @@
 
 #include "settings_dialog.h"
 
-#include "nel/misc/debug.h"
 // Qt includes
 #include <QtGui/QHeaderView>
 #include <QtGui/QPushButton>

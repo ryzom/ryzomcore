@@ -34,6 +34,7 @@ namespace Core
 class IOptionsPage 
 {
 public:
+	virtual ~IOptionsPage() {}
 
 	/// id() is a unique identifier for referencing this page
 	virtual QString id() const = 0;

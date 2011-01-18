@@ -32,22 +32,22 @@ namespace Core
 /**
 @class CSearchPathsSettingsPage
 */
-class CSearchPathsSettingsPage : public QObject, public IOptionsPage
+	class CSearchPathsSettingsPage : public QObject, public Core::IOptionsPage
 {
 	Q_OBJECT
-	Q_INTERFACES(IOptionsPage)
+	Q_INTERFACES(Core::IOptionsPage)
 public:
 	CSearchPathsSettingsPage(QObject *parent = 0);
-	virtual ~CSearchPathsSettingsPage() {}
+	~CSearchPathsSettingsPage() {}
 
-	virtual QString id() const;
-	virtual QString trName() const;
-	virtual QString category() const;
-	virtual QString trCategory() const;
-	virtual QWidget *createPage(QWidget *parent);
+	QString id() const;
+	QString trName() const;
+	QString category() const;
+	QString trCategory() const;
+	QWidget *createPage(QWidget *parent);
 
-	virtual void apply();
-	virtual void finish() {}
+	void apply();
+	void finish() {}
 
 private:
 	QWidget *_currentPage;
