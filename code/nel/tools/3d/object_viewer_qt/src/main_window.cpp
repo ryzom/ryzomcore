@@ -649,6 +649,26 @@ void CMainWindow::updateRender()
 	}
 }
 
+void CMainWindow::keyPressEvent(QKeyEvent *keyEvent)
+{
+	if (keyEvent->key() == Qt::Key_F1)
+	{
+		// Change render mode
+		switch (Modules::objView().getDriver()->getPolygonMode())
+		{
+		case NL3D::UDriver::Filled:
+			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Line);
+			break;
+		case NL3D::UDriver::Line:
+			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Point);
+			break;
+		case NL3D::UDriver::Point:
+			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Filled);
+			break;
+		}
+	}
+	QMainWindow::keyPressEvent(keyEvent);
+}
 
 } /* namespace NLQT */
 

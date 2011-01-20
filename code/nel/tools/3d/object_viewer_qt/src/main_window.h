@@ -81,6 +81,9 @@ private Q_SLOTS:
 	void updateStatusBar();
 	void updateRender();
 
+protected:
+	virtual void keyPressEvent(QKeyEvent *keyEvent);
+
 private:
 	void createActions();
 	void createMenus();
