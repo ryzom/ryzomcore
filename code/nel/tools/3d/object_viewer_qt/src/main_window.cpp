@@ -106,8 +106,10 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
-	_statusBarTimer->start(5000);
+	_statusBarTimer->start(1000);
 
+	_statusInfo = new QLabel(this);
+	this->statusBar()->addPermanentWidget(_statusInfo);
 	Modules::config().setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
 }
 
@@ -216,7 +218,13 @@ void CMainWindow::about()
 void CMainWindow::updateStatusBar()
 {
 	if (_isGraphicsInitialized)
-		statusBar()->showMessage(QString(Modules::objView().getDriver()->getVideocardInformation()));
+	{
+		_statusInfo->setText(QString("%1, Nb tri: %2, Texture used (Mb): %3, fps: %4  ").arg(
+					Modules::objView().getDriver()->getVideocardInformation()).arg(
+					_numTri).arg(
+					_texMem, 0,'f',4).arg(
+					_fps, 0,'f',2));
+	}
 }
 
 void CMainWindow::updateInitialization(bool visible)
@@ -615,6 +623,12 @@ void CMainWindow::updateRender()
 
 		// 14. Update Debug (stuff for dev)
 		// ...
+			
+		// 15. Calc FPS
+		static sint64 lastTime = NLMISC::CTime::getPerformanceTime ();
+		sint64 newTime = NLMISC::CTime::getPerformanceTime ();
+		_fps = float(1.0 / NLMISC::CTime::ticksToSecond (newTime-lastTime));
+		lastTime = newTime;
 
 		if (_isGraphicsInitialized && !Modules::objView().getDriver()->isLost())
 		{
@@ -642,6 +656,13 @@ void CMainWindow::updateRender()
 
 			// 09. Render Debug 2D (stuff for dev)
 			Modules::objView().renderDebug2D();
+
+			// 10. Get profile information
+			NL3D::CPrimitiveProfile in, out;
+			Modules::objView().getDriver()->profileRenderedPrimitives (in, out);
+
+			_numTri = in.NLines+in.NPoints+in.NQuads*2+in.NTriangles+in.NTriangleStrips;
+			_texMem = float(Modules::objView().getDriver()->getUsedTextureMemory() / float(1024*1024));
 
 			// swap 3d buffers
 			Modules::objView().getDriver()->swapBuffers();

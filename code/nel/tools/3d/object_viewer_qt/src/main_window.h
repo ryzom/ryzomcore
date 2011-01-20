@@ -24,6 +24,7 @@
 
 // Qt includes
 #include <QtGui/QMainWindow>
+#include <QtGui/QLabel>
 
 // NeL includes
 #include <nel/misc/config_file.h>
@@ -140,6 +141,12 @@ private:
 	QAction *_settingsAction;
 	QAction *_aboutAction;
 	QAction *_aboutQtAction;
+
+	QLabel *_statusInfo;
+
+	float _fps;
+	uint _numTri;
+	float _texMem;
 };/* class CMainWindow */
 
 } /* namespace NLQT */

@@ -21,7 +21,6 @@
 #include "particle_property_dialog.h"
 
 // Qt includes
-
 // Project includes
 #include "modules.h"
 
@@ -42,7 +41,6 @@ CPropertyDialog::~CPropertyDialog()
 void CPropertyDialog::setupUi()
 {
 	setObjectName(QString::fromUtf8("CPropertyDialog"));
-
 	QIcon icon;
 	icon.addFile(QString::fromUtf8(":/images/pqrticles.png"), QSize(), QIcon::Normal, QIcon::Off);
 	setWindowIcon(icon);

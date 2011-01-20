@@ -117,6 +117,7 @@ void CParticleTextureWidget::updateTexture()
 	if (dynamic_cast<NL3D::CTextureFile *>(_Wrapper->get()))
 	{
 		std::string texName = (static_cast<NL3D::CTextureFile *>(_Wrapper->get()))->getFileName().c_str();
+		_ui.nameLabel->setText(tr("Name: %1").arg(texName.c_str()));
 		if (!NLMISC::CFile::getFilename(texName).empty())
 			_ui.imageLabel->setPixmap(QPixmap(NLMISC::CPath::lookup(texName).c_str()));
 		else

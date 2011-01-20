@@ -84,6 +84,7 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 
 	// initialize the window with config file values
 	_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
+	_Driver->enableUsedTextureMemorySum();
 
 	_Light = ULight::createLight();
 
@@ -174,24 +175,6 @@ void CObjectViewer::release()
 void CObjectViewer::updateInput()
 {
 	_Driver->EventServer.pump();
-
-	// Test some keys
-	if (_Driver->AsyncListener.isKeyPushed(KeyQ))
-	{
-		// Change render mode
-		switch (_Driver->getPolygonMode())
-		{
-			case UDriver::Filled:
-				_Driver->setPolygonMode (UDriver::Line);
-				break;
-			case UDriver::Line:
-				_Driver->setPolygonMode (UDriver::Point);
-				break;
-			case UDriver::Point:
-				_Driver->setPolygonMode (UDriver::Filled);
-				break;
-		}
-	}
 
 	// New matrix from camera
 	_Scene->getCam().setTransformMode(NL3D::UTransformable::DirectMatrix);

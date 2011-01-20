@@ -49,6 +49,7 @@ namespace NLQT
 CGraphicsViewport::CGraphicsViewport(QWidget *parent)
 	: QNLWidget(parent)
 {
+	this->setStatusTip("Status ready");
 }
 
 CGraphicsViewport::~CGraphicsViewport()
