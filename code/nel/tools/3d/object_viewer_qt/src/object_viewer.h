@@ -239,7 +239,7 @@ private:
 	NL3D::UCamera 			*_Camera;
 	NL3D::UTextContext 		*_TextContext;
 	NL3D::U3dMouseListener		*_MouseListener;
-	std::vector<NL3D::UInstanceGroup*>	_ListIG;
+	std::vector<NL3D::UInstanceGroup *>	_ListIG;
 
 	// The entities storage
 	CEntities		_Entities;

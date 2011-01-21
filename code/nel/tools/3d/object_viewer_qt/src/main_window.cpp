@@ -206,6 +206,19 @@ void CMainWindow::resetScene()
 
 void CMainWindow::changeRenderMode()
 {
+	// Change render mode
+	switch (Modules::objView().getDriver()->getPolygonMode())
+	{
+	case NL3D::UDriver::Filled:
+		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Line);
+		break;
+	case NL3D::UDriver::Line:
+		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Point);
+		break;
+	case NL3D::UDriver::Point:
+		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Filled);
+		break;
+	}
 }
 
 void CMainWindow::resetCamera()
@@ -355,10 +368,15 @@ void CMainWindow::createActions()
 	_setBackColorAction->setIcon(QIcon(":/images/ico_bgcolor.png"));
 	_setBackColorAction->setStatusTip(tr("Set background color"));
 
-	_resetCameraAction = new QAction(tr("R&eset camera"), this);
+	_resetCameraAction = new QAction(tr("Reset camera"), this);
 	_resetCameraAction->setShortcut(tr("Ctrl+R"));
 	_resetCameraAction->setStatusTip(tr("Reset current camera"));
 	connect(_resetCameraAction, SIGNAL(triggered()), this, SLOT(resetCamera()));
+
+	_renderModeAction = new QAction("Change render mode", this);
+	_renderModeAction->setShortcut(tr("Ctrl+M"));
+	_renderModeAction->setStatusTip(tr("Change render mode (Line, Point, Filled)"));
+	connect(_renderModeAction, SIGNAL(triggered()), this, SLOT(changeRenderMode()));
 
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
@@ -393,8 +411,9 @@ void CMainWindow::createMenus()
 	_viewMenu = menuBar()->addMenu(tr("&View"));
 	_viewMenu->setObjectName("ovqt.Menu.View");
 	_viewMenu->addAction(_setBackColorAction);
-	_viewMenu->addAction(_SetupFog->toggleViewAction());
+	_viewMenu->addAction(_renderModeAction);
 	_viewMenu->addAction(_resetCameraAction);
+	_viewMenu->addAction(_SetupFog->toggleViewAction());
 
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
 	_sceneMenu->setObjectName("ovqt.Menu.Scene");
@@ -702,27 +721,6 @@ void CMainWindow::updateRender()
 			Modules::objView().getDriver()->swapBuffers();
 		}
 	}
-}
-
-void CMainWindow::keyPressEvent(QKeyEvent *keyEvent)
-{
-	if (keyEvent->key() == Qt::Key_F1)
-	{
-		// Change render mode
-		switch (Modules::objView().getDriver()->getPolygonMode())
-		{
-		case NL3D::UDriver::Filled:
-			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Line);
-			break;
-		case NL3D::UDriver::Line:
-			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Point);
-			break;
-		case NL3D::UDriver::Point:
-			Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Filled);
-			break;
-		}
-	}
-	QMainWindow::keyPressEvent(keyEvent);
 }
 
 } /* namespace NLQT */
