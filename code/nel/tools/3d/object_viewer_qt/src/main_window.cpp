@@ -63,7 +63,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_isLandscapeInitialized(false),
 	_isLandscapeEnabled(false),
 	_GraphicsViewport(NULL),
-	_lastDir(".")
+	_lastDir("."),
+	_mouseMode(NL3D::U3dMouseListener::edit3d)
 {
 	nldebug("CMainWindow::CMainWindow:");
 	setObjectName("CMainWindow");
@@ -228,6 +229,17 @@ void CMainWindow::resetCamera()
 
 void CMainWindow::changeCameraMode()
 {
+	switch (_mouseMode)
+	{
+	case NL3D::U3dMouseListener::edit3d:
+		Modules::objView().get3dMouseListener()->setMouseMode(NL3D::U3dMouseListener::firstPerson);
+		_mouseMode = NL3D::U3dMouseListener::firstPerson;
+		break;
+	case NL3D::U3dMouseListener::firstPerson:
+		_mouseMode = NL3D::U3dMouseListener::edit3d;
+		Modules::objView().get3dMouseListener()->setMouseMode(NL3D::U3dMouseListener::edit3d);
+		break;
+	}
 }
 
 void CMainWindow::reloadTextures()
@@ -378,9 +390,18 @@ void CMainWindow::createActions()
 	_renderModeAction->setStatusTip(tr("Change render mode (Line, Point, Filled)"));
 	connect(_renderModeAction, SIGNAL(triggered()), this, SLOT(changeRenderMode()));
 
+	_cameraModeAction = new QAction("Change camera mode", this);
+	_cameraModeAction->setShortcut(tr("Ctrl+W"));
+	_cameraModeAction->setStatusTip(tr("Change camera mode (edit3d, firstPerson)"));
+	connect(_cameraModeAction, SIGNAL(triggered()), this, SLOT(changeCameraMode()));
+
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
 	connect(_resetSceneAction, SIGNAL(triggered()), this, SLOT(resetScene()));
+
+	_reloadTexturesAction = new QAction(tr("Reload textures"), this);
+	_reloadTexturesAction->setStatusTip(tr("Reload textures"));
+	connect(_reloadTexturesAction, SIGNAL(triggered()), this, SLOT(reloadTextures()));
 
 	_saveScreenshotAction = _GraphicsViewport->createSaveScreenshotAction(this);
 	_saveScreenshotAction->setText(tr("Save &Screenshot"));
@@ -411,13 +432,15 @@ void CMainWindow::createMenus()
 	_viewMenu = menuBar()->addMenu(tr("&View"));
 	_viewMenu->setObjectName("ovqt.Menu.View");
 	_viewMenu->addAction(_setBackColorAction);
-	_viewMenu->addAction(_renderModeAction);
 	_viewMenu->addAction(_resetCameraAction);
+	_viewMenu->addAction(_renderModeAction);
+	_viewMenu->addAction(_cameraModeAction);
 	_viewMenu->addAction(_SetupFog->toggleViewAction());
 
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
 	_sceneMenu->setObjectName("ovqt.Menu.Scene");
 	_sceneMenu->addAction(_resetSceneAction);
+	_sceneMenu->addAction(_reloadTexturesAction);
 	_sceneMenu->addAction(_saveScreenshotAction);
 
 	_toolsMenu = menuBar()->addMenu(tr("&Tools"));

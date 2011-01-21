@@ -155,6 +155,7 @@ private:
 	float _fps;
 	uint _numTri;
 	float _texMem;
+	sint _mouseMode;
 };/* class CMainWindow */
 
 } /* namespace NLQT */
