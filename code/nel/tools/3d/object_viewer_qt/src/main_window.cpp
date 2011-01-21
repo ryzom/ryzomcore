@@ -27,6 +27,8 @@
 
 // NeL includes
 #include <nel/3d/u_driver.h>
+#include <nel/3d/u_scene.h>
+#include <nel/3d/u_camera.h>
 
 // Project includes
 #include "modules.h"
@@ -102,7 +104,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 	// timer->start(); // <- timeout 0
 	// it's heavy on cpu, though, when no 3d driver initialized :)
-	_mainTimer->start(25); // 25fps
+	_mainTimer->start(20); // 25fps
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
@@ -168,9 +170,10 @@ void CMainWindow::open()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
 							tr("Open NeL data file"), _lastDir,
-							tr("All NeL files (*.shape *.ps);;"
+							tr("All NeL files (*.shape *.ps *.ig);;"
 							   "NeL shape files (*.shape);;"
-							   "NeL particle system files (*.ps)"));
+							   "NeL particle system files (*.ps)"
+							   "NeL Instance Group files (*.ig)"));
 
 	setCursor(Qt::WaitCursor);
 	if (!fileNames.isEmpty())
@@ -183,7 +186,7 @@ void CMainWindow::open()
 							   tr("NeL skeleton file (*.skel)"));
 
 		Q_FOREACH(QString fileName, list)
-		loadFile(fileName, skelFileName);
+				loadFile(fileName, skelFileName);
 
 		_AnimationSetDialog->updateListObject();
 		_AnimationSetDialog->updateListAnim();
@@ -199,6 +202,24 @@ void CMainWindow::resetScene()
 	_AnimationSetDialog->updateListAnim();
 	_SlotManagerDialog->updateUiSlots();
 	_SkeletonTreeModel->resetTreeModel();
+}
+
+void CMainWindow::changeRenderMode()
+{
+}
+
+void CMainWindow::resetCamera()
+{
+	Modules::objView().resetCamera();
+}
+
+void CMainWindow::changeCameraMode()
+{
+}
+
+void CMainWindow::reloadTextures()
+{
+	Modules::objView().reloadTextures();
 }
 
 void CMainWindow::settings()
@@ -219,7 +240,7 @@ void CMainWindow::updateStatusBar()
 {
 	if (_isGraphicsInitialized)
 	{
-		_statusInfo->setText(QString("%1, Nb tri: %2, Texture used (Mb): %3, fps: %4  ").arg(
+		_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
 					Modules::objView().getDriver()->getVideocardInformation()).arg(
 					_numTri).arg(
 					_texMem, 0,'f',4).arg(
@@ -334,6 +355,11 @@ void CMainWindow::createActions()
 	_setBackColorAction->setIcon(QIcon(":/images/ico_bgcolor.png"));
 	_setBackColorAction->setStatusTip(tr("Set background color"));
 
+	_resetCameraAction = new QAction(tr("R&eset camera"), this);
+	_resetCameraAction->setShortcut(tr("Ctrl+R"));
+	_resetCameraAction->setStatusTip(tr("Reset current camera"));
+	connect(_resetCameraAction, SIGNAL(triggered()), this, SLOT(resetCamera()));
+
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
 	connect(_resetSceneAction, SIGNAL(triggered()), this, SLOT(resetScene()));
@@ -368,6 +394,7 @@ void CMainWindow::createMenus()
 	_viewMenu->setObjectName("ovqt.Menu.View");
 	_viewMenu->addAction(_setBackColorAction);
 	_viewMenu->addAction(_SetupFog->toggleViewAction());
+	_viewMenu->addAction(_resetCameraAction);
 
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
 	_sceneMenu->setObjectName("ovqt.Menu.Scene");
@@ -533,7 +560,14 @@ void CMainWindow::createDialogs()
 
 bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 {
-	if (!Modules::objView().loadMesh(fileName.toStdString(), skelName.toStdString()))
+	QFileInfo fileInfo(fileName);
+	bool loaded;
+	if (fileInfo.suffix() == "ig")
+		loaded = Modules::objView().loadInstanceGroup(fileName.toStdString());
+	else 
+		loaded = Modules::objView().loadMesh(fileName.toStdString(), skelName.toStdString());
+
+	if (!loaded)
 	{
 		statusBar()->showMessage(tr("Loading canceled"),2000);
 		return false;

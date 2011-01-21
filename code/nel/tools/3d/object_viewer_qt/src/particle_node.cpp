@@ -290,7 +290,10 @@ bool CWorkspaceNode::loadPS() throw(NLMISC::EStream)
 		Modules::psEdit().getScene()->deleteInstance(trs);
 		return false;
 	}
-	Modules::psEdit().getScene()->setShapeBank(oldSB);
+	if (oldSB)
+	{
+		Modules::psEdit().getScene()->setShapeBank(oldSB);
+	} 
 	setup(*psm);
 	unload();
 	// commit new values

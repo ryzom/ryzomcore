@@ -45,6 +45,7 @@ class USkeleton;
 class UTextContext;
 class UPlayListManager;
 class U3dMouseListener;
+class UInstanceGroup;
 }
 
 namespace NLQT
@@ -95,6 +96,10 @@ public:
 	/// Render Debug 2D (stuff for dev).
 	void renderDebug2D();
 
+	void reloadTextures();
+
+	void resetCamera();
+
 	/// Make a screenshot of the current scene and save.
 	void saveScreenshot(const std::string &nameFile, bool jpg, bool png, bool tga);
 
@@ -104,14 +109,12 @@ public:
 	/// @return true if file have been loaded, false if file have not been loaded.
 	bool loadMesh (const std::string &meshFileName, const std::string &skelFileName);
 
+	bool loadInstanceGroup(const std::string &igName);
+
+	void setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z);
+
 	/// Reset current scene.
 	void resetScene();
-
-	/// Update the navigation camera.(Note: deprecated)
-	/// @param deltaPsi - delta angle horizontal (radians).
-	/// @param deltaPhi - delta angle vertical (radians).
-	/// @param deltaDist - delta distance.
-	void updateCamera(float deltaPsi, float deltaPhi, float deltaDist);
 
 	/// Update the animation time for Particle System animation.
 	/// @param deltaTime - set the manual animation time.
@@ -236,12 +239,10 @@ private:
 	NL3D::UCamera 			*_Camera;
 	NL3D::UTextContext 		*_TextContext;
 	NL3D::U3dMouseListener		*_MouseListener;
+	std::vector<NL3D::UInstanceGroup*>	_ListIG;
 
 	// The entities storage
 	CEntities		_Entities;
-
-	/// Camera parameters.
-	float _phi, _psi, _dist;
 
 	float _CameraFocal;
 

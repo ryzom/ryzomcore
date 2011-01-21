@@ -77,6 +77,10 @@ public:
 private Q_SLOTS:
 	void open();
 	void resetScene();
+	void changeRenderMode();
+	void resetCamera();
+	void changeCameraMode();
+	void reloadTextures();
 	void settings();
 	void about();
 	void updateStatusBar();
@@ -136,6 +140,13 @@ private:
 	QAction *_openAction;
 	QAction *_exitAction;
 	QAction *_setBackColorAction;
+	QAction *_renderModeAction;
+	QAction *_frameDelayAction;
+	QAction *_lightGroupAction;
+	QAction *_tuneMRMAction;
+	QAction *_reloadTexturesAction;
+	QAction *_cameraModeAction;
+	QAction *_resetCameraAction;
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
 	QAction *_settingsAction;

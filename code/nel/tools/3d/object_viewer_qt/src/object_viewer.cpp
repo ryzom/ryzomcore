@@ -40,6 +40,7 @@
 #include <nel/3d/u_animation.h>
 #include <nel/3d/u_play_list_manager.h>
 #include <nel/3d/u_3d_mouse_listener.h>
+#include <nel/3d/u_instance_group.h>
 #include <nel/3d/bloom_effect.h>
 
 // Project includes
@@ -56,7 +57,6 @@ namespace NLQT
 CObjectViewer::CObjectViewer()
 	: _Driver(NULL),
 	_TextContext(NULL),
-	_phi(0), _psi(0),_dist(20),
 	_CameraFocal(75),
 	_CurrentInstance(""),
 	_BloomEffect(false),
@@ -114,16 +114,12 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 
 	setSizeViewport(w, h);
 
-	// camera will look at entities
-	updateCamera(0,0,0);
-
 	NLMISC::CVector hotSpot=NLMISC::CVector(0,0,0);
 
 	_MouseListener = _Driver->create3dMouseListener();
-	_MouseListener->setMatrix(Modules::objView().getScene()->getCam().getMatrix());
-	_MouseListener->setFrustrum(Modules::objView().getScene()->getCam().getFrustum());
-	_MouseListener->setHotSpot(hotSpot);
 	_MouseListener->setMouseMode(U3dMouseListener::edit3d);
+
+	resetCamera();
 
 	// set the cache size for the font manager(in bytes)
 	_Driver->setFontManagerMaxMemory(2097152);
@@ -207,6 +203,25 @@ void CObjectViewer::renderDebug2D()
 {
 }
 
+void CObjectViewer::reloadTextures()
+{
+}
+
+void CObjectViewer::resetCamera()
+{
+	CVector hotSpot = CVector (0,0,0);
+	float radius=10.f;
+
+	// Setup camera
+	_Scene->getCam().lookAt(hotSpot + CVector(0.57735f, 0.57735f, 0.57735f) * radius, hotSpot);
+
+	// Setup mouse listener
+	_MouseListener->setMatrix (_Scene->getCam().getMatrix());
+	_MouseListener->setFrustrum (_Scene->getCam().getFrustum());
+	_MouseListener->setViewport (CViewport());
+	_MouseListener->setHotSpot (hotSpot);
+}
+
 void CObjectViewer::saveScreenshot(const std::string &nameFile, bool jpg, bool png, bool tga)
 {
 	//H_AUTO2
@@ -249,10 +264,16 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 	if (_Entities.count(fileName) != 0)
 		return false;
 
-	CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
+	CPath::addSearchPath(CFile::getPath(meshFileName));
 
 	// create instance of the mesh character
 	UInstance Entity = _Scene->createInstance(meshFileName);
+	
+	CAABBox bbox;
+	Entity.getShapeAABBox(bbox);
+	setCamera(bbox , Entity, true);
+
+	_MouseListener->setMatrix(_Scene->getCam().getMatrix());
 
 	USkeleton Skeleton = _Scene->createSkeleton(skelFileName);
 
@@ -278,6 +299,63 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 	return true;
 }
 
+bool CObjectViewer::loadInstanceGroup(const std::string &igName)
+{
+	CPath::addSearchPath (CFile::getPath(igName));
+	UInstanceGroup *ig = UInstanceGroup::createInstanceGroup(igName);
+	if (ig == NULL) 
+		return false;
+	ig->addToScene(*_Scene, _Driver);
+	ig->unfreezeHRC();
+	_ListIG.push_back(ig);
+	return true;
+}
+
+void CObjectViewer::setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z)
+{
+	CVector pos(0.f, 0.f, 0.f);
+	CQuat quat(0.f, 0.f, 0.f, 0.f);
+	NL3D::UInstance inst;
+	inst.cast(entity);
+	if (!inst.empty())
+	{
+		inst.getDefaultPos(pos);
+		inst.getDefaultRotQuat(quat);
+	}
+
+	// fix scale (some shapes have a different value)
+	entity.setScale(1.f, 1.f, 1.f);
+	UCamera Camera = _Scene->getCam();
+	CVector max_radius = bbox.getHalfSize();
+	CVector center = bbox.getCenter();
+	entity.setPivot(center);
+	center += pos;
+	float fov = float(_CameraFocal * (float)Pi/180.0);
+	float radius = max(max(max_radius.x, max_radius.y), max_radius.z);
+	if (radius == 0.f) radius = 1.f;
+	float left, right, bottom, top, znear, zfar;
+	Camera.getFrustum(left, right, bottom, top, znear, zfar);
+	float dist = radius / (tan(fov/2));
+	CVector eye(center);
+
+	CVector ax(quat.getAxis());
+	
+	if (ax.isNull() || ax == CVector::I)
+	{
+		ax = CVector::J;
+	}
+	else if (ax == -CVector::K)
+	{
+		ax = -CVector::J;
+	}
+
+	eye -= ax * (dist+radius);
+	if (high_z)
+		eye.z += max_radius.z/1.0f;
+	get3dMouseListener()->setHotSpot(center);
+	Camera.lookAt(eye, center);
+}
+
 void CObjectViewer::resetScene()
 {
 	deleteEntities();
@@ -286,39 +364,14 @@ void CObjectViewer::resetScene()
 	//..
 
 	// to load files with the same name but located in different directories
-	CPath::clearMap();
+	//CPath::clearMap();
 
 	// load and set search paths from config
-	Modules::config().configSearchPaths();
+	//Modules::config().configSearchPaths();
 
 	_CurrentInstance = "";
 
 	nlinfo("Scene cleared");
-}
-
-void CObjectViewer::updateCamera(float deltaPsi, float deltaPhi, float deltaDist)
-{
-	_phi += deltaPhi;
-	_psi += deltaPsi;
-	_dist += deltaDist;
-
-	if(_phi < -NLMISC::Pi/2) _phi -= deltaPhi;
-	if(_phi > NLMISC::Pi/2) _phi -= deltaPsi;
-	if (_dist < 1) _dist = 1;
-
-	NLMISC::CQuat q0,q1,q2;
-	NLMISC::CVector up(0,0,1);
-	NLMISC::CVector v(0,0,1);
-
-	q0.setAngleAxis(v,_psi);
-	v = NLMISC::CVector(0,1,0);
-	q1.setAngleAxis(v,_phi);
-	q2 = q0 * q1;
-	NLMISC::CMatrix m0;
-	m0.setRot(q2);
-	NLMISC::CVector camera = m0 * NLMISC::CVector(_dist,0,0);
-
-	_Scene->getCam().lookAt(camera, up);
 }
 
 void CObjectViewer::updateAnimatePS(uint64 deltaTime)
@@ -417,6 +470,13 @@ void CObjectViewer::saveConfig()
 void CObjectViewer::deleteEntities()
 {
 	_Entities.clear();
+
+	for(size_t i = 0; i < _ListIG.size(); ++i)
+	{
+		_ListIG[i]->removeFromScene(*_Scene);
+		delete _ListIG[i];
+	}
+	_ListIG.clear();
 }
 
 void CObjectViewer::cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var)

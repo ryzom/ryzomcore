@@ -51,7 +51,7 @@ namespace NLQT
 @class CGraphicsViewport
 @brief Responsible for interaction between Qt and NeL. Initializes CObjectViewer, CParticleEditor and CVegetableEditor subsystem.
 */
-class CGraphicsViewport : public QNLWidget
+class CGraphicsViewport : public QNLWidget, public NLMISC::IEventEmitter
 {
 	Q_OBJECT
 

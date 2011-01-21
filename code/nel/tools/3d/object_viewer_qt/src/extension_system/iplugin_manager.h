@@ -41,6 +41,7 @@ class IPluginManager: public QObject
 
 public:
 	IPluginManager(QObject *parent = 0): QObject(parent) {}
+	virtual ~IPluginManager() {}
 
 	// Object pool operations
 	virtual void addObject(QObject *obj) = 0;
