@@ -1790,7 +1790,7 @@ bool CDriverGL::setMode(const GfxMode& mode)
 
 	// don't modify window or screen if managed by a 3rd party library
 	if (!_DestroyWindow)
-		return false;
+		return true;
 
 	if (!setScreenMode(mode))
 		return false;
