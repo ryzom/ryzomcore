@@ -70,6 +70,7 @@ void CGraphicsViewport::init()
 	Modules::psEdit().init();
 
 	setMouseTracking(true);
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 void CGraphicsViewport::release()
