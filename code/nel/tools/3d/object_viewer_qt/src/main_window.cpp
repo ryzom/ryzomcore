@@ -105,7 +105,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 	// timer->start(); // <- timeout 0
 	// it's heavy on cpu, though, when no 3d driver initialized :)
-	_mainTimer->start(20); // 25fps
+	_mainTimer->start(23); // 25fps
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
@@ -709,7 +709,7 @@ void CMainWindow::updateRender()
 		if (_isGraphicsInitialized && !Modules::objView().getDriver()->isLost())
 		{
 			// 01. Render Driver (background color)
-			Modules::objView().getDriver()->activate();			
+			//Modules::objView().getDriver()->activate();			
 			Modules::objView().renderDriver(); // clear all buffers
 
 			// 02. Render Sky (sky scene)

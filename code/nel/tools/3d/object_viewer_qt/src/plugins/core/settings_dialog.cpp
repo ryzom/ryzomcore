@@ -22,9 +22,6 @@
 #include <QtGui/QHeaderView>
 #include <QtGui/QPushButton>
 
-namespace Core
-{
-
 struct PageData
 {
 	int index;
@@ -34,6 +31,8 @@ struct PageData
 
 Q_DECLARE_METATYPE(PageData);
 
+namespace Core
+{
 CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 								 const QString &categoryId,
 								 const QString &pageId,

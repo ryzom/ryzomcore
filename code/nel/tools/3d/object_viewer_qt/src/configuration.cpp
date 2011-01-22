@@ -218,7 +218,7 @@ void CConfiguration::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
 {
 	uint varsize = var.size();
 	for (uint i = 0; i < varsize; ++i)
-		CPath::addSearchPath(var.asString(i), true, false);
+		CPath::addSearchPath(var.asString(i), false, false);
 }
 
 } /* namespace NLQT */

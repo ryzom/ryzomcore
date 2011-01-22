@@ -264,10 +264,13 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 	if (_Entities.count(fileName) != 0)
 		return false;
 
-	CPath::addSearchPath(CFile::getPath(meshFileName));
+	CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
 
 	// create instance of the mesh character
 	UInstance Entity = _Scene->createInstance(meshFileName);
+
+	// if we can't create entity, skip it
+	if (Entity.empty()) return false;
 	
 	CAABBox bbox;
 	Entity.getShapeAABBox(bbox);
@@ -276,9 +279,6 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 	_MouseListener->setMatrix(_Scene->getCam().getMatrix());
 
 	USkeleton Skeleton = _Scene->createSkeleton(skelFileName);
-
-	// if we can't create entity, skip it
-	if (Entity.empty()) return false;
 
 	// TODO: remade at typedef std::map<std::string, *CEntity>	CEntities;
 	EIT eit = (_Entities.insert (make_pair (fileName, CEntity()))).first;
