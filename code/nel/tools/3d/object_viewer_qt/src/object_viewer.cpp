@@ -41,6 +41,9 @@
 #include <nel/3d/u_play_list_manager.h>
 #include <nel/3d/u_3d_mouse_listener.h>
 #include <nel/3d/u_instance_group.h>
+#include <nel/3d/material.h>
+#include <nel/3d/driver.h>
+#include <nel/3d/scene_user.h>
 #include <nel/3d/bloom_effect.h>
 
 // Project includes
@@ -55,12 +58,14 @@ namespace NLQT
 {
 
 CObjectViewer::CObjectViewer()
-	: _Driver(NULL),
-	_TextContext(NULL),
+	: _IDriver(0),
+	_CScene(0),
+	_Driver(0),
+	_Scene(0),
+	_TextContext(0),
 	_CameraFocal(75),
 	_CurrentInstance(""),
-	_BloomEffect(false),
-	_Scene(0)
+	_BloomEffect(false)
 {
 
 }
@@ -102,7 +107,7 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	_Driver->enableLight(0);
 
 	// Create a scene
-	_Scene = _Driver->createScene(true);
+	_Scene = _Driver->createScene(false);
 
 	_PlayListManager = _Scene->createPlayListManager();
 
@@ -134,6 +139,12 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	NL3D::CBloomEffect::instance().init(!_Direct3D);
 	NL3D::CBloomEffect::instance().setDensityBloom(Modules::config().getConfigFile().getVar("BloomDensity").asInt());
 	NL3D::CBloomEffect::instance().setSquareBloom(Modules::config().getConfigFile().getVar("BloomSquare").asBool());
+
+	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
+	_IDriver = driver->getDriver();
+
+	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser *>(Modules::objView().getScene());
+	_CScene = &scene->getScene();
 }
 
 void CObjectViewer::release()
@@ -146,7 +157,7 @@ void CObjectViewer::release()
 	// release text context
 	nlassert(_TextContext);
 	_Driver->deleteTextContext(_TextContext);
-	_TextContext = NULL;
+	_TextContext = 0;
 
 	_Driver->delete3dMouseListener(_MouseListener);
 
@@ -165,7 +176,7 @@ void CObjectViewer::release()
 	nlassert(_Driver);
 	_Driver->release();
 	delete _Driver;
-	_Driver = NULL;
+	_Driver = 0;
 }
 
 void CObjectViewer::updateInput()
@@ -180,7 +191,7 @@ void CObjectViewer::updateInput()
 void CObjectViewer::renderDriver()
 {
 	// Render the scene.
-	if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
+	if((NL3D::CBloomEffect::instance().getDriver() != 0) && (_BloomEffect))
 	{
 		NL3D::CBloomEffect::instance().initBloom();
 	}
@@ -192,7 +203,7 @@ void CObjectViewer::renderScene()
 	// render the scene
 	_Scene->render();
 
-	if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
+	if((NL3D::CBloomEffect::instance().getDriver() != 0) && (_BloomEffect))
 	{
 		NL3D::CBloomEffect::instance().endBloom();
 		NL3D::CBloomEffect::instance().endInterfacesDisplayBloom();
@@ -205,6 +216,38 @@ void CObjectViewer::renderDebug2D()
 
 void CObjectViewer::reloadTextures()
 {
+	// For each instances
+	std::vector<std::string> listObjects;
+	getListObjects(listObjects);
+
+	for (size_t i = 0; i < listObjects.size(); ++i)
+	{
+		// Get the shape
+		NL3D::UInstance instance = getEntity(listObjects[i]).getInstance();
+
+		// For each material
+		if (!instance.empty())
+		{
+			uint numMaterial = instance.getNumMaterials();
+			uint mat;
+			for (mat = 0; mat < numMaterial; mat++)
+			{
+				// Get the material
+				NL3D::CMaterial *material = instance.getMaterial(mat).getObjectPtr();
+
+				// For each texture
+				int tex;
+				for (tex = 0; tex < NL3D::IDRV_MAT_MAXTEXTURES; tex++)
+				{
+					ITexture *texture = material->getTexture(tex);
+
+					// Touch it!
+					if (texture)
+						getIDriver()->invalidateShareTexture(*texture);
+				}
+			}
+		}
+	}
 }
 
 void CObjectViewer::resetCamera()
@@ -303,7 +346,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igName)
 {
 	CPath::addSearchPath (CFile::getPath(igName));
 	UInstanceGroup *ig = UInstanceGroup::createInstanceGroup(igName);
-	if (ig == NULL) 
+	if (ig == 0) 
 		return false;
 	ig->addToScene(*_Scene, _Driver);
 	ig->unfreezeHRC();

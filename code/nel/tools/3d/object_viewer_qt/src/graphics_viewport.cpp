@@ -118,7 +118,7 @@ void CGraphicsViewport::resizeEvent(QResizeEvent *resizeEvent)
 		Modules::objView().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
 }
 
-#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC)
+#if defined(NL_OS_MAC)
 // Qt does not provide wheel events through winEvent() and macEvent() (but it 
 // does through x11Event(), which is inconsistent...)  
 // Workaround is to handle wheel events like implemented below.
@@ -148,7 +148,7 @@ void CGraphicsViewport::wheelEvent(QWheelEvent *event)
 		Modules::objView().getDriver()->EventServer.postEvent(
 			new NLMISC::CEventMouseWheel(-fX, fY, (NLMISC::TMouseButton)buttons, false, NULL));
 }
-#endif // defined(NL_OS_WINDOWS) || defined(NL_OS_MAC)
+#endif // defined(NL_OS_MAC)
 
 
 #if defined(NL_OS_WINDOWS)

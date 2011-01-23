@@ -22,7 +22,6 @@
 
 // NeL includes
 #include <nel/3d/driver.h>
-#include <nel/3d/scene_user.h>
 #include <nel/3d/text_context_user.h>
 #include <nel/3d/scene.h>
 #include <nel/3d/particle_system_model.h>
@@ -57,11 +56,8 @@ CParticleEditor::~CParticleEditor(void)
 
 void CParticleEditor::init()
 {
-	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
-	_Driver = driver->getDriver();
-
-	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser *>(Modules::objView().getScene());
-	_Scene = &scene->getScene();
+	_Driver = Modules::objView().getIDriver();
+	_Scene = Modules::objView().getCScene();
 
 	NL3D::CTextContextUser *textContext = dynamic_cast<NL3D::CTextContextUser *>(Modules::objView().getTextContext());
 	_FontManager = textContext->getTextContext().getFontManager();

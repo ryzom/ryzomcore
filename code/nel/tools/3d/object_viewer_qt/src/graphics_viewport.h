@@ -80,7 +80,7 @@ private Q_SLOTS:
 protected:
 	virtual void resizeEvent(QResizeEvent *resizeEvent);
 
-#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC)
+#if defined(NL_OS_MAC)
 	virtual void wheelEvent(QWheelEvent *event);
 #endif
 

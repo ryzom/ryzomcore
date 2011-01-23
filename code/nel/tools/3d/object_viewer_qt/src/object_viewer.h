@@ -46,6 +46,8 @@ class UTextContext;
 class UPlayListManager;
 class U3dMouseListener;
 class UInstanceGroup;
+class CScene;
+class IDriver;
 }
 
 namespace NLQT
@@ -186,12 +188,22 @@ public:
 	{
 		return _Driver;
 	}
-
+	
+	NL3D::IDriver *getIDriver() const
+	{
+		return _IDriver;
+	}
+	
 	/// Get a game interface for scene.
 	/// @return pointer to the scene.
 	inline NL3D::UScene *getScene() const
 	{
 		return _Scene;
+	}
+	
+	NL3D::CScene *getCScene() const
+	{
+		return _CScene;
 	}
 
 	/// Get a manager of playlist
@@ -231,6 +243,8 @@ private:
 	void cfcbBloomEffect(NLMISC::CConfigFile::CVar &var);
 
 	NLMISC::CRGBA 			_BackgroundColor;
+	NL3D::IDriver			*_IDriver;
+	NL3D::CScene			*_CScene;
 
 	NL3D::UDriver 			*_Driver;
 	NL3D::UScene 			*_Scene;

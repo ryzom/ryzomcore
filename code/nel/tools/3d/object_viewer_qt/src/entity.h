@@ -227,6 +227,12 @@ public:
 	{
 		return _SWTList;
 	}
+	
+	/// Get game interface for manipulating Skeleton.
+	NL3D::UInstance getInstance() const
+	{
+		return _Instance;
+	}
 
 	/// Get game interface for manipulating Skeleton.
 	NL3D::USkeleton getSkeleton() const
