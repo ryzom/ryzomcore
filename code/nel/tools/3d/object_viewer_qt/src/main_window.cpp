@@ -386,6 +386,7 @@ void CMainWindow::createActions()
 	connect(_resetCameraAction, SIGNAL(triggered()), this, SLOT(resetCamera()));
 
 	_renderModeAction = new QAction("Change render mode", this);
+	_renderModeAction->setIcon(QIcon(":/images/polymode.png"));
 	_renderModeAction->setShortcut(tr("Ctrl+M"));
 	_renderModeAction->setStatusTip(tr("Change render mode (Line, Point, Filled)"));
 	connect(_renderModeAction, SIGNAL(triggered()), this, SLOT(changeRenderMode()));

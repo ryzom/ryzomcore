@@ -148,14 +148,19 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	_mergeAction = new QAction(tr("Merge"), this);
 
 	_newLocatedAction = new QAction(tr("New located"), this);
+	_newLocatedAction->setIcon(QIcon(":/images/located_item.png"));
 	_pasteLocatedAction = new QAction(tr("Paste located"), this);
 
 	for(int i = 0; LocatedBindable[i]; ++i)
 		_bindNewLocatedBindable[i] = new QAction(tr(LocatedBindable[i]), this);
 
+	_bindNewLocatedBindable[Action::Sound]->setIcon(QIcon(":/images/sound_item.png"));
+	_bindNewLocatedBindable[Action::Light]->setIcon(QIcon(":/images/light_item.png"));
+
 	_forceZBiasAction = new QAction(tr("Force ZBias"), this);
 
 	_instanciateAction = new QAction(tr("Instanciate"), this);
+	_instanciateAction->setIcon(QIcon(":/images/instance_item.png"));
 	_copyLocatedAction = new QAction(tr("Copy located"), this);
 	_copyBindableAction = new QAction(tr("Copy bindable"), this);
 	_pasteBindableAction = new QAction(tr("Paste bindable"), this);
@@ -727,6 +732,7 @@ void CParticleWorkspaceDialog::updateTreeView()
 void CParticleWorkspaceDialog::buildMenu(QMenu *menu)
 {
 	QMenu *bindParticleMenu = new QMenu(tr("Bind particle..."), menu);
+	bindParticleMenu->setIcon(QIcon(":/images/particle_system_item.png"));
 	menu->addAction(bindParticleMenu->menuAction());
 	for(int i = Action::ParticlePoint; i <= Action::ParticleRibbonLookAt; ++i)
 		bindParticleMenu->addAction(_bindNewLocatedBindable[i]);
@@ -737,6 +743,7 @@ void CParticleWorkspaceDialog::buildMenu(QMenu *menu)
 		bindForceMenu->addAction(_bindNewLocatedBindable[i]);
 
 	QMenu *bindZoneMenu = new QMenu(tr("Bind zone..."), menu);
+	bindZoneMenu->setIcon(QIcon(":/images/collision_zone_item.png"));
 	menu->addAction(bindZoneMenu->menuAction());
 	for(int i = Action::ZonePlane; i <= Action::ZoneCylinder; ++i)
 		bindZoneMenu->addAction(_bindNewLocatedBindable[i]);

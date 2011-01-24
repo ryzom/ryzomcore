@@ -337,27 +337,27 @@ QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 	case ItemType::Root:
 		break;
 	case ItemType::Workspace:
-		return QIcon(":/images/Workspace.bmp");
+		return QIcon(":/images/workspace_item.png");
 	case ItemType::ParticleSystem:
-		return QIcon(":/images/ParticleSystem.bmp");
+		return QIcon(":/images/particle_system_item.png");
 	case ItemType::Particle:
-		return QIcon(":/images/Particle.bmp");
+		return QIcon(":/images/particle_item.png");
 	case ItemType::Emitter:
 		return QIcon(":/images/Emitter.bmp");
 	case ItemType::Force:
 		return QIcon(":/images/Force.bmp");
 	case ItemType::Light:
-		return QIcon(":/images/Light.bmp");
+		return QIcon(":/images/light_item.png");
 	case ItemType::Sound:
-		return QIcon(":/images/Sound.bmp");
+		return QIcon(":/images/sound_item.png");
 	case ItemType::Located:
-		return QIcon(":/images/Located.bmp");
+		return QIcon(":/images/located_item.png");
 	case ItemType::CollisionZone:
-		return QIcon(":/images/CollisionZone.bmp");
+		return QIcon(":/images/collision_zone_item.png");
 	case ItemType::LocatedInstance:
-		return QIcon(":/images/LocatedInstance.bmp");
+		return QIcon(":/images/instance_item.png");
 	case ItemType::ParticleSystemNotLoaded:
-		return QIcon(":/images/ParticleSystemNotLoaded.bmp");
+		return QIcon(":/images/bad_particle_system_item.png");
 	}
 	return QIcon();
 }

@@ -34,19 +34,21 @@
     <file>images/save-as.png</file>
     <file>images/save.png</file>
     <file>images/insert-horizontal.png</file>
-    
-    <file>images/Workspace.bmp</file>
-    <file>images/ParticleSystem.bmp</file>
+    <file>images/polymode.png</file>
+  
     <file>images/Emitter.bmp</file>
-    <file>images/Sound.bmp</file>
-    <file>images/Light.bmp</file>
     <file>images/Force.bmp</file>
-    <file>images/Particle.bmp</file>
-    <file>images/Located.bmp</file>
-    <file>images/LocatedInstance.bmp</file>
-    <file>images/CollisionZone.bmp</file>
-    <file>images/ParticleSystemNotLoaded.bmp</file>
-
+   
     <file>images/nel_ide_load.png</file>
+
+    <file>images/bad_particle_system_item.png</file>
+    <file>images/particle_system_item.png</file>
+    <file>images/instance_item.png</file>
+    <file>images/light_item.png</file>
+    <file>images/located_item.png</file>
+    <file>images/particle_item.png</file>
+    <file>images/sound_item.png</file>
+    <file>images/workspace_item.png</file>
+    <file>images/collision_zone_item.png</file>
 </qresource>
 </RCC>
