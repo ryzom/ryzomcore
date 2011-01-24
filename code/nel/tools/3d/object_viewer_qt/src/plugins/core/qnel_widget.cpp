@@ -55,7 +55,8 @@ void QNLWidget::init()
 	nlassert(_driver);
 
 	// initialize the nel 3d viewport
-	_driver->setDisplay(winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	_driver->setDisplay((nlWindow)winId(), 
+		NL3D::UDriver::CMode(width(), height(), 32));
 
 	// set the cache size for the font manager(in bytes)
 	_driver->setFontManagerMaxMemory(2097152);
