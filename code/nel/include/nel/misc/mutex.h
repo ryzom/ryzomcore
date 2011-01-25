@@ -198,10 +198,10 @@ test_again:
  * \author Nevrax France
  * \date 2002, 2003
  */
-#ifdef __ppc__
-// on ppc, use fait mutex because we don't have ppc implementation of fast mutex
-#   define CFastMutex CFairMutex
-#else
+#if defined(__ppc__) && !defined(NL_OS_MAC) && (GCC_VERSION <= 40100)
+#	error "no CFastMutex implementation available, try to use GCC >4.0.1"
+#endif
+
 
 #ifdef NL_OS_WINDOWS
 #pragma managed(push, off)
@@ -310,8 +310,6 @@ private:
 	volatile uint32	_Lock;
 };
 
-
-#endif
 
 /**
  * Fast mutex for multiprocessor implementation (not fairly).
