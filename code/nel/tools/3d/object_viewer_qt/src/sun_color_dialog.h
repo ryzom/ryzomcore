@@ -44,7 +44,6 @@ public:
 	~CSunColorDialog();
 
 private Q_SLOTS:
-	void updateSunColor(bool visible);
 	void setAmbientSunColor(NLMISC::CRGBA color);
 	void setDiffuseSunColor(NLMISC::CRGBA color);
 	void setSpecularSunColor(NLMISC::CRGBA color);

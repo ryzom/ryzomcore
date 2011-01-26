@@ -32,8 +32,9 @@ CGlobalWindDialog::CGlobalWindDialog(QWidget *parent)
 {
 	_ui.setupUi(this);
 
+	_ui.horizontalSlider->setValue(int(Modules::objView().getScene()->getGlobalWindPower() * _ui.horizontalSlider->maximum()));
+
 	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setWndPower(int)));
-	connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(updateWnd(bool)));
 }
 
 CGlobalWindDialog::~CGlobalWindDialog()
@@ -45,14 +46,6 @@ void CGlobalWindDialog::setWndPower(int value)
 	float fValue = float(value) / _ui.horizontalSlider->maximum();
 	_ui.doubleSpinBox->setValue(fValue);
 	Modules::objView().getScene()->setGlobalWindPower(fValue);
-}
-
-void CGlobalWindDialog::updateWnd(bool visible)
-{
-	if (!visible || !Modules::objView().getScene())
-		return;
-
-	_ui.horizontalSlider->setValue(int(Modules::objView().getScene()->getGlobalWindPower() * _ui.horizontalSlider->maximum()));
 }
 
 } /* namespace NLQT */

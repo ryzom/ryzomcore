@@ -53,6 +53,7 @@ class CVegetableDialog;
 class CGlobalWindDialog;
 class CDayNightDialog;
 class CSunColorDialog;
+class CTuneMRMDialog;
 
 class CMainWindow : public QMainWindow
 {
@@ -93,7 +94,6 @@ private:
 	void createStatusBar();
 	void createDialogs();
 
-	void updateInitialization(bool visible);
 	bool loadFile(const QString &fileName, const QString &skelName);
 
 	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
@@ -102,7 +102,6 @@ private:
 
 	bool _isGraphicsInitialized, _isGraphicsEnabled;
 	bool _isSoundInitialized, _isSoundEnabled;
-	bool _isLandscapeInitialized, _isLandscapeEnabled;
 
 	CGraphicsViewport *_GraphicsViewport;
 	CAnimationDialog *_AnimationDialog;
@@ -117,7 +116,7 @@ private:
 	CSkeletonScaleDialog *_SkeletonScaleDialog;
 	CDayNightDialog *_DayNightDialog;
 	CSunColorDialog *_SunColorDialog;
-
+	CTuneMRMDialog *_TuneMRMDialog;
 	CSkeletonTreeModel *_SkeletonTreeModel;
 
 	QPalette _originalPalette;
@@ -140,7 +139,6 @@ private:
 	QAction *_renderModeAction;
 	QAction *_frameDelayAction;
 	QAction *_lightGroupAction;
-	QAction *_tuneMRMAction;
 	QAction *_reloadTexturesAction;
 	QAction *_cameraModeAction;
 	QAction *_resetCameraAction;

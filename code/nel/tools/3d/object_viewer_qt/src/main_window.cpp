@@ -47,6 +47,7 @@
 #include "global_wind_dialog.h"
 #include "day_night_dialog.h"
 #include "sun_color_dialog.h"
+#include "tune_mrm_dialog.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -60,8 +61,6 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_isGraphicsEnabled(false),
 	_isSoundInitialized(false),
 	_isSoundEnabled(false),
-	_isLandscapeInitialized(false),
-	_isLandscapeEnabled(false),
 	_GraphicsViewport(NULL),
 	_lastDir("."),
 	_mouseMode(NL3D::U3dMouseListener::edit3d)
@@ -79,6 +78,16 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_originalPalette = QApplication::palette();
 	Modules::config().setAndCallback("QtStyle", CConfigCallback(this, &CMainWindow::cfcbQtStyle));
 	Modules::config().setAndCallback("QtPalette", CConfigCallback(this, &CMainWindow::cfcbQtPalette));
+	Modules::config().setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
+
+	_GraphicsViewport->init();
+	_isGraphicsInitialized = true;
+	
+	if (_isSoundEnabled)
+	{
+		Modules::sound().init();
+		_isSoundInitialized = true;
+	}
 
 	_SkeletonTreeModel = new CSkeletonTreeModel(this);
 
@@ -96,24 +105,16 @@ CMainWindow::CMainWindow(QWidget *parent)
 	restoreGeometry(settings.value("QtWindowGeometry").toByteArray());
 	settings.endGroup();
 
-	_isGraphicsEnabled = true;
-	_isLandscapeEnabled = true;
-
 	// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed.
 	// This can be used to do heavy work while providing a snappy user interface.
 	_mainTimer = new QTimer(this);
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
-	// timer->start(); // <- timeout 0
-	// it's heavy on cpu, though, when no 3d driver initialized :)
-	_mainTimer->start(23); // 25fps
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
-	_statusBarTimer->start(1000);
 
 	_statusInfo = new QLabel(this);
 	this->statusBar()->addPermanentWidget(_statusInfo);
-	Modules::config().setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
 }
 
 CMainWindow::~CMainWindow()
@@ -131,15 +132,18 @@ CMainWindow::~CMainWindow()
 	Modules::config().dropCallback("QtPalette");
 	Modules::config().dropCallback("QtStyle");
 
-	_mainTimer->stop();
-	_statusBarTimer->stop();
-
 	delete _AnimationDialog;
 	delete _AnimationSetDialog;
 	delete _SlotManagerDialog;
 	delete _SetupFog;
+	delete _TuneMRMDialog;
 	delete _ParticleControlDialog;
 	delete _ParticleWorkspaceDialog;
+	
+	if (_isSoundInitialized)
+		Modules::sound().releaseGraphics();
+
+	_GraphicsViewport->release();
 	delete _GraphicsViewport;
 }
 
@@ -152,11 +156,17 @@ void CMainWindow::setVisible(bool visible)
 		if (visible)
 		{
 			QMainWindow::setVisible(true);
-			updateInitialization(true);
+			if (_isSoundInitialized)
+					Modules::sound().initGraphics();
+			_mainTimer->start(23);
+			_statusBarTimer->start(1000);
 		}
 		else
 		{
-			updateInitialization(false);
+			_mainTimer->stop();
+			_statusBarTimer->stop();
+			if (_isSoundInitialized)
+				Modules::sound().releaseGraphics();
 			QMainWindow::setVisible(false);
 		}
 	}
@@ -271,95 +281,6 @@ void CMainWindow::updateStatusBar()
 					_texMem, 0,'f',4).arg(
 					_fps, 0,'f',2));
 	}
-}
-
-void CMainWindow::updateInitialization(bool visible)
-{
-	bool done;
-	do
-	{
-		done = true; // set false whenever change
-		bool wantSound = _isSoundEnabled && visible;
-		bool wantGraphics = _isGraphicsEnabled && visible;
-		// TODO WARNING:  made Landscape stuff
-		bool wantLandscape = wantGraphics && _isGraphicsInitialized && _isLandscapeEnabled;
-
-		// .. stuff that depends on other stuff goes on top to prioritize deinitialization
-
-		// Landscape
-		if (_isLandscapeInitialized)
-		{
-			if (!wantLandscape)
-			{
-				_isLandscapeInitialized = false;
-//				if (_isGraphicsInitialized)
-//					Modules::veget().releaseGraphics();
-				Modules::veget().release();
-				done = false;
-			}
-		}
-		else
-		{
-			if (wantLandscape)
-			{
-				Modules::veget().init();
-//				if (_isGraphicsInitialized)
-//					Modules::veget().initGraphics();
-				_isLandscapeInitialized = true;
-				done = false;
-			}
-		}
-
-		// Graphics (Driver)
-		if (_isGraphicsInitialized)
-		{
-			if (!wantGraphics)
-			{
-				_isGraphicsInitialized = false;
-				if (_isSoundInitialized)
-					Modules::sound().releaseGraphics();
-				_GraphicsViewport->release();
-				done = false;
-			}
-		}
-		else
-		{
-			if (wantGraphics)
-			{
-				_GraphicsViewport->init();
-				if (_isSoundInitialized)
-					Modules::sound().initGraphics();
-				_isGraphicsInitialized = true;
-				done = false;
-			}
-		}
-
-		// Sound (AudioMixer)
-		if (_isSoundInitialized)
-		{
-			if (!wantSound)
-			{
-				_isSoundInitialized = false;
-				if (_isGraphicsInitialized)
-					Modules::sound().releaseGraphics();
-				Modules::sound().release();
-				done = false;
-			}
-		}
-		else
-		{
-			if (wantSound)
-			{
-				Modules::sound().init();
-				if (_isGraphicsInitialized)
-					Modules::sound().initGraphics();
-				_isSoundInitialized = true;
-				done = false;
-			}
-		}
-
-	}
-	while (!done);
 }
 
 void CMainWindow::createActions()
@@ -477,6 +398,9 @@ void CMainWindow::createMenus()
 
 	_toolsMenu->addAction(_SunColorDialog->toggleViewAction());
 
+	//_toolsMenu->addAction(_TuneMRMDialog->toggleViewAction());
+	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_mrm_mesh.png"));
+
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog, SLOT(setVisible(bool)));
 
@@ -518,6 +442,7 @@ void CMainWindow::createToolBars()
 	_toolsBar->addAction(_VegetableDialog->toggleViewAction());
 	_toolsBar->addAction(_GlobalWindDialog->toggleViewAction());
 	_toolsBar->addAction(_SkeletonScaleDialog->toggleViewAction());
+//	_toolsBar->addAction(_TuneMRMDialog->toggleViewAction());
 }
 
 void CMainWindow::createStatusBar()
@@ -591,6 +516,11 @@ void CMainWindow::createDialogs()
 	addDockWidget(Qt::RightDockWidgetArea, _SetupFog);
 	_SetupFog->setVisible(false);
 
+	// create tune mrm dialog
+	_TuneMRMDialog = new CTuneMRMDialog(this);
+	addDockWidget(Qt::BottomDockWidgetArea, _TuneMRMDialog);
+	_TuneMRMDialog->setVisible(false);
+
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
 	connect(_ParticleWorkspaceDialog, SIGNAL(changeActiveNode()), _ParticleControlDialog, SLOT(updateActiveNode()));
 	connect(_AnimationSetDialog->ui.setLengthPushButton, SIGNAL(clicked()), _AnimationDialog, SLOT(changeAnimLength()));
@@ -637,8 +567,6 @@ void CMainWindow::cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var)
 
 void CMainWindow::updateRender()
 {
-	updateInitialization(isVisible());
-
 	if (isVisible())
 	{
 
