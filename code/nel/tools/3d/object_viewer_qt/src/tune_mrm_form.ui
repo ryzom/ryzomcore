@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>576</width>
-    <height>87</height>
+    <height>92</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>476</width>
-    <height>87</height>
+    <height>92</height>
    </size>
   </property>
   <property name="features">
@@ -47,7 +47,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="maxValueSpinBox">
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -87,7 +87,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox_2">
+       <widget class="QSpinBox" name="currentValueSpinBox">
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -105,29 +105,32 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <widget class="QSlider" name="horizontalSlider">
+     <widget class="QSlider" name="maxValueSlider">
       <property name="maximum">
-       <number>100000</number>
+       <number>20</number>
       </property>
       <property name="singleStep">
-       <number>5000</number>
+       <number>1</number>
       </property>
       <property name="pageStep">
-       <number>10000</number>
+       <number>5</number>
       </property>
       <property name="sliderPosition">
-       <number>100000</number>
+       <number>20</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="tickPosition">
+       <enum>QSlider::TicksAbove</enum>
+      </property>
       <property name="tickInterval">
-       <number>5000</number>
+       <number>1</number>
       </property>
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QSlider" name="horizontalSlider_2">
+     <widget class="QSlider" name="currentValueSlider">
       <property name="maximum">
        <number>100000</number>
       </property>
@@ -143,22 +146,5 @@
   </widget>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>horizontalSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>spinBox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>214</x>
-     <y>67</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>232</x>
-     <y>47</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

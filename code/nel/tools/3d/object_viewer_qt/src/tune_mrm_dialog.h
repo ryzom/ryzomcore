@@ -40,10 +40,12 @@ public:
 	~CTuneMRMDialog();
 
 private Q_SLOTS:
+	void setMaxValue(int value);
+	void setCurrentValue(int value);
 
 private:
 
-	Ui::CTuneMRMDialog ui;
+	Ui::CTuneMRMDialog _ui;
 
 }; /* class CTuneMRMDialog */
 

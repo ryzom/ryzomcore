@@ -20,17 +20,46 @@
 #include "stdpch.h"
 #include "tune_mrm_dialog.h"
 
+// NeL includes
+#include <nel/3d/u_scene.h>
+
+// Project includes
+#include "modules.h"
+
+const int sliderStepSize = 5000;
+
 namespace NLQT
 {
 
 CTuneMRMDialog::CTuneMRMDialog(QWidget *parent)
 	: QDockWidget(parent)
 {
-	ui.setupUi(this);
+	_ui.setupUi(this);
+
+	connect(_ui.maxValueSlider, SIGNAL(valueChanged(int)), this, SLOT(setMaxValue(int)));
+	connect(_ui.currentValueSlider, SIGNAL(valueChanged(int)), this, SLOT(setCurrentValue(int)));
+
+	_ui.maxValueSlider->setValue(_ui.maxValueSlider->maximum());
 }
 
 CTuneMRMDialog::~CTuneMRMDialog()
 {
+}
+
+void CTuneMRMDialog::setMaxValue(int value)
+{
+	int actualMaxValue = value * sliderStepSize;
+	int	actualValue = float(actualMaxValue) * _ui.currentValueSlider->value() / _ui.currentValueSlider->maximum();
+
+	_ui.currentValueSlider->setMaximum(actualMaxValue);
+	_ui.currentValueSlider->setValue(actualValue);
+	_ui.maxValueSpinBox->setValue(actualMaxValue);
+}
+
+void CTuneMRMDialog::setCurrentValue(int value)
+{
+	Modules::objView().getScene()->setGroupLoadMaxPolygon("Skin", value);
+	_ui.currentValueSpinBox->setValue(value);
 }
 
 } /* namespace NLQT */

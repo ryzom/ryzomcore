@@ -398,7 +398,7 @@ void CMainWindow::createMenus()
 
 	_toolsMenu->addAction(_SunColorDialog->toggleViewAction());
 
-	//_toolsMenu->addAction(_TuneMRMDialog->toggleViewAction());
+	_toolsMenu->addAction(_TuneMRMDialog->toggleViewAction());
 	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_mrm_mesh.png"));
 
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
@@ -442,7 +442,7 @@ void CMainWindow::createToolBars()
 	_toolsBar->addAction(_VegetableDialog->toggleViewAction());
 	_toolsBar->addAction(_GlobalWindDialog->toggleViewAction());
 	_toolsBar->addAction(_SkeletonScaleDialog->toggleViewAction());
-//	_toolsBar->addAction(_TuneMRMDialog->toggleViewAction());
+	_toolsBar->addAction(_TuneMRMDialog->toggleViewAction());
 }
 
 void CMainWindow::createStatusBar()
