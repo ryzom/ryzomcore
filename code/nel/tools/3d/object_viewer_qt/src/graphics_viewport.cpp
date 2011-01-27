@@ -68,6 +68,7 @@ void CGraphicsViewport::init()
 
 	Modules::objView().init((nlWindow)winId(), width(), height());
 	Modules::psEdit().init();
+	Modules::veget().init();
 
 	setMouseTracking(true);
 	setFocusPolicy(Qt::StrongFocus);
@@ -77,7 +78,8 @@ void CGraphicsViewport::release()
 {
 	//H_AUTO2
 	nldebug("CGraphicsViewport::release");
-
+	
+	Modules::veget().release();
 	Modules::psEdit().release();
 	Modules::objView().release();
 }

@@ -22,6 +22,7 @@ SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h
 		      vegetable_dialog.h global_wind_dialog.h day_night_dialog.h sun_color_dialog.h
 		      vegetable_noise_value_widget.h vegetable_density_page.h vegetable_landscape_page.h
 		      vegetable_scale_page.h vegetable_appearance_page.h vegetable_rotate_page.h
+		      tune_mrm_dialog.h
 		      extension_system/iplugin_manager.h extension_system/plugin_manager.h)
 		      
 SET(OBJECT_VIEWER_UIS animation_form.ui animation_set_form.ui settings_form.ui 
@@ -35,7 +36,7 @@ SET(OBJECT_VIEWER_UIS animation_form.ui animation_set_form.ui settings_form.ui
 		      particle_link_skeleton_form.ui water_pool_form.ui vegetable_dialog_form.ui
 		      vegetable_noise_value_form.ui global_wind_form.ui sun_color_form.ui day_night_form.ui
 		      vegetable_density_form.ui vegetable_apperance_form.ui vegetable_landscape_form.ui
-		      vegetable_rotate_form.ui vegetable_scale_form.ui)
+		      vegetable_rotate_form.ui vegetable_scale_form.ui tune_mrm_form.ui)
 
 SET(OBJECT_VIEWER_RCS object_viewer_qt.qrc)
 

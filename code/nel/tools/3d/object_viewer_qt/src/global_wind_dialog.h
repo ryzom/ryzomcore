@@ -41,7 +41,6 @@ public:
 
 private Q_SLOTS:
 	void setWndPower(int value);
-	void updateWnd(bool visible);
 
 private:
 

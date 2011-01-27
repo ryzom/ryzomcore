@@ -89,6 +89,11 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 
 	// initialize the window with config file values
 	_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
+
+	// Create a scene
+	_Scene = _Driver->createScene(false);
+	_Scene->setPolygonBalancingMode(NL3D::UScene::PolygonBalancingClamp);
+
 	_Driver->enableUsedTextureMemorySum();
 
 	_Light = ULight::createLight();
@@ -105,9 +110,6 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	// set and enable the light
 	_Driver->setLight(0, *_Light);
 	_Driver->enableLight(0);
-
-	// Create a scene
-	_Scene = _Driver->createScene(false);
 
 	_PlayListManager = _Scene->createPlayListManager();
 

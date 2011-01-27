@@ -17,10 +17,10 @@
 
 */
 
-#ifndef SUN_COLOR_DIALOG_H
-#define SUN_COLOR_DIALOG_H
+#ifndef TUNE_MRM_DIALOG_H
+#define TUNE_MRM_DIALOG_H
 
-#include "ui_sun_color_form.h"
+#include "ui_tune_mrm_form.h"
 
 // STL includes
 
@@ -31,28 +31,24 @@
 namespace NLQT
 {
 
-/**
-@class CSunColorDialog
-@brief Dialog to choose the sun color in a 3D scene
-*/
-class CSunColorDialog: public QDockWidget
+class CTuneMRMDialog: public QDockWidget
 {
 	Q_OBJECT
 
 public:
-	CSunColorDialog(QWidget *parent = 0);
-	~CSunColorDialog();
+	CTuneMRMDialog(QWidget *parent = 0);
+	~CTuneMRMDialog();
 
 private Q_SLOTS:
-	void setAmbientSunColor(NLMISC::CRGBA color);
-	void setDiffuseSunColor(NLMISC::CRGBA color);
-	void setSpecularSunColor(NLMISC::CRGBA color);
+	void setMaxValue(int value);
+	void setCurrentValue(int value);
 
 private:
 
-	Ui::CSunColorDialog _ui;
-}; /* class CSunColorDialog */
+	Ui::CTuneMRMDialog _ui;
+
+}; /* class CTuneMRMDialog */
 
 } /* namespace NLQT */
 
-#endif // SUN_COLOR_DIALOG_H
+#endif // TUNE_MRM_DIALOG_H

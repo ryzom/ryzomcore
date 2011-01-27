@@ -34,7 +34,11 @@ CSunColorDialog::CSunColorDialog(QWidget *parent)
 {
 	_ui.setupUi(this);
 
-	connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(updateSunColor(bool)));
+	_ui.ambientWidget->setColor(Modules::objView().getScene()->getSunAmbient());
+	_ui.diffuseWidget->setColor(Modules::objView().getScene()->getSunDiffuse());
+	_ui.specularWidget->setColor(Modules::objView().getScene()->getSunSpecular());
+
+	//connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(updateSunColor(bool)));
 	connect(_ui.ambientWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setAmbientSunColor(NLMISC::CRGBA)));
 	connect(_ui.diffuseWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setDiffuseSunColor(NLMISC::CRGBA)));
 	connect(_ui.specularWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setSpecularSunColor(NLMISC::CRGBA)));
@@ -42,16 +46,6 @@ CSunColorDialog::CSunColorDialog(QWidget *parent)
 
 CSunColorDialog::~CSunColorDialog()
 {
-}
-
-void CSunColorDialog::updateSunColor(bool visible)
-{
-	if (!visible || !Modules::objView().getScene())
-		return;
-
-	_ui.ambientWidget->setColor(Modules::objView().getScene()->getSunAmbient());
-	_ui.diffuseWidget->setColor(Modules::objView().getScene()->getSunDiffuse());
-	_ui.specularWidget->setColor(Modules::objView().getScene()->getSunSpecular());
 }
 
 void CSunColorDialog::setAmbientSunColor(NLMISC::CRGBA color)
