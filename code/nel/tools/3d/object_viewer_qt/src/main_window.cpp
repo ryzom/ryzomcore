@@ -48,6 +48,7 @@
 #include "day_night_dialog.h"
 #include "sun_color_dialog.h"
 #include "tune_mrm_dialog.h"
+#include "tune_timer_dialog.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -109,6 +110,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 	// This can be used to do heavy work while providing a snappy user interface.
 	_mainTimer = new QTimer(this);
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
+	connect(_TuneTimerDialog, SIGNAL(changeInterval(int)), this, SLOT(setInterval(int)));
+	_TuneTimerDialog->setInterval(settings.value("TimerInterval", 25).toInt());
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
@@ -127,6 +130,7 @@ CMainWindow::~CMainWindow()
 	settings.setValue("QtWindowState", saveState());
 	settings.setValue("QtWindowGeometry", saveGeometry());
 	settings.endGroup();
+	settings.setValue("TimerInterval", _mainTimer->interval());
 
 	Modules::config().dropCallback("SoundEnabled");
 	Modules::config().dropCallback("QtPalette");
@@ -137,6 +141,7 @@ CMainWindow::~CMainWindow()
 	delete _SlotManagerDialog;
 	delete _SetupFog;
 	delete _TuneMRMDialog;
+	delete _TuneTimerDialog;
 	delete _ParticleControlDialog;
 	delete _ParticleWorkspaceDialog;
 	
@@ -158,7 +163,7 @@ void CMainWindow::setVisible(bool visible)
 			QMainWindow::setVisible(true);
 			if (_isSoundInitialized)
 					Modules::sound().initGraphics();
-			_mainTimer->start(23);
+			_mainTimer->start();
 			_statusBarTimer->start(1000);
 		}
 		else
@@ -255,6 +260,11 @@ void CMainWindow::changeCameraMode()
 void CMainWindow::reloadTextures()
 {
 	Modules::objView().reloadTextures();
+}
+
+void CMainWindow::setInterval(int value)
+{
+	_mainTimer->setInterval(value);
 }
 
 void CMainWindow::settings()
@@ -396,6 +406,9 @@ void CMainWindow::createMenus()
 	_toolsMenu->addAction(_SkeletonScaleDialog->toggleViewAction());
 	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_skelscale.png"));
 
+	_toolsMenu->addAction(_TuneTimerDialog->toggleViewAction());
+	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_framedelay.png"));
+
 	_toolsMenu->addAction(_SunColorDialog->toggleViewAction());
 
 	_toolsMenu->addAction(_TuneMRMDialog->toggleViewAction());
@@ -441,6 +454,7 @@ void CMainWindow::createToolBars()
 	_toolsBar->addAction(_WaterPoolDialog->toggleViewAction());
 	_toolsBar->addAction(_VegetableDialog->toggleViewAction());
 	_toolsBar->addAction(_GlobalWindDialog->toggleViewAction());
+	_toolsBar->addAction(_TuneTimerDialog->toggleViewAction());
 	_toolsBar->addAction(_SkeletonScaleDialog->toggleViewAction());
 	_toolsBar->addAction(_TuneMRMDialog->toggleViewAction());
 }
@@ -520,6 +534,10 @@ void CMainWindow::createDialogs()
 	_TuneMRMDialog = new CTuneMRMDialog(this);
 	addDockWidget(Qt::BottomDockWidgetArea, _TuneMRMDialog);
 	_TuneMRMDialog->setVisible(false);
+
+	_TuneTimerDialog = new CTuneTimerDialog(this);
+	addDockWidget(Qt::TopDockWidgetArea, _TuneTimerDialog);
+	_TuneTimerDialog->setVisible(false);
 
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
 	connect(_ParticleWorkspaceDialog, SIGNAL(changeActiveNode()), _ParticleControlDialog, SLOT(updateActiveNode()));

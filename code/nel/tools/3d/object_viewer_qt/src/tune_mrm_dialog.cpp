@@ -49,7 +49,7 @@ CTuneMRMDialog::~CTuneMRMDialog()
 void CTuneMRMDialog::setMaxValue(int value)
 {
 	int actualMaxValue = value * sliderStepSize;
-	int	actualValue = float(actualMaxValue) * _ui.currentValueSlider->value() / _ui.currentValueSlider->maximum();
+	int actualValue = float(actualMaxValue) * _ui.currentValueSlider->value() / _ui.currentValueSlider->maximum();
 
 	_ui.currentValueSlider->setMaximum(actualMaxValue);
 	_ui.currentValueSlider->setValue(actualValue);

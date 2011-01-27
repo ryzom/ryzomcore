@@ -54,6 +54,7 @@ class CGlobalWindDialog;
 class CDayNightDialog;
 class CSunColorDialog;
 class CTuneMRMDialog;
+class CTuneTimerDialog;
 
 class CMainWindow : public QMainWindow
 {
@@ -86,6 +87,7 @@ private Q_SLOTS:
 	void about();
 	void updateStatusBar();
 	void updateRender();
+	void setInterval(int value);
 
 private:
 	void createActions();
@@ -118,6 +120,7 @@ private:
 	CSunColorDialog *_SunColorDialog;
 	CTuneMRMDialog *_TuneMRMDialog;
 	CSkeletonTreeModel *_SkeletonTreeModel;
+	CTuneTimerDialog *_TuneTimerDialog;
 
 	QPalette _originalPalette;
 	QString _lastDir;
