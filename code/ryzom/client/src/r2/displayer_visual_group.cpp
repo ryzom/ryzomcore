@@ -50,6 +50,95 @@ extern ULandscape	*Landscape;
 namespace R2
 {
 
+// create a special selectable polygon
+class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
+{
+public:
+	CCtrlPolygonSelectable(CInstance &instance) : Instance(instance) {}
+	// from IDisplayerUIHandle
+	virtual CInstance &getDisplayedInstance() { return Instance; }
+	// from IDisplayerUIHandle
+	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
+	{
+		if (!_Parent) return false;
+
+		// relies on parent class CViewPolygon::contains
+		return CCtrlPolygon::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
+	}
+	// tooltip
+	virtual void		getContextHelp(::ucstring &help) const
+	{
+		help = Instance.getDisplayName();
+		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName") ))
+			help.clear();
+	}
+	bool				emptyContextHelp() const { return true; }
+	bool				wantInstantContextHelp() const { return true; }
+	// from CCtrlBase
+	virtual bool		preciseHitTest(sint32 x, sint32 y) const
+	{
+		if (!_Parent) return false;
+		sint32 winX, winY;
+		_Parent->getCorner(winX, winY, _ParentPosRef);
+		return contains(x - winX, y - winY);
+	}
+public:
+	CInstance &Instance;
+protected:
+	// TMP TMP until matrix precision is solved
+	// from CCtrlPolygon
+	void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
+	{
+		CGroupMap *gm = CTool::getWorldMap();
+		if (!gm) dest = CVector::Null;
+		gm->worldToWindow(dest, src);
+	}
+};
+
+// create a special selectable polygon
+class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
+{
+public:
+	CCtrlQuadSelectable(CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex) {}
+	// from IDisplayerUIHandle
+	virtual CInstance &getDisplayedInstance() { return Instance; }
+	// from IDisplayerUIHandle
+	virtual bool isEdge() const { return true; }
+	// from IDisplayerUIHandle
+	virtual uint getEdgeIndex() const { return EdgeIndex; }
+	// from IDisplayerUIHandle
+	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
+	{
+		if (!_Parent) return false;
+
+		// relies on parent class CViewPolygon::contains
+		return CCtrlQuad::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
+	}
+	// tooltip
+	virtual void		getContextHelp(ucstring &help) const
+	{
+		help = Instance.getDisplayName();
+		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName")))
+			help.clear();
+	}
+	bool				emptyContextHelp() const { return true; }
+	bool				wantInstantContextHelp() const { return true; }
+	// from CCtrlBase
+	virtual bool		preciseHitTest(sint32 x, sint32 y) const
+	{
+		if (!_Parent) return false;
+		sint32 winX, winY;
+		_Parent->getCorner(winX, winY, _ParentPosRef);
+		return contains(x - winX, y - winY);
+	}
+	virtual bool		handleEvent (const CEventDescriptor &/* event */)
+	{
+		return false;
+	}
+public:
+	CInstance &Instance;
+	uint	  EdgeIndex;
+};
 
 
 
@@ -90,50 +179,6 @@ CCtrlPolygon *CDisplayerVisualGroup::CSelectablePrimRender::newCtrlPolygon() con
 {
 	//H_AUTO(R2_CDisplayerVisualGroup_CSelectablePrimRender)
 	nlassert(DisplayedInstance);
-	// create a special selectable polygon
-	class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
-	{
-	public:
-		CCtrlPolygonSelectable(CInstance &instance) : Instance(instance) {}
-		// from IDisplayerUIHandle
-		virtual CInstance &getDisplayedInstance() { return Instance; }
-		// from IDisplayerUIHandle
-		virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
-		{
-			if (!_Parent) return false;
-
-			// relies on parent class CViewPolygon::contains
-			return CCtrlPolygon::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
-		}
-		// tooltip
-		virtual void		getContextHelp(::ucstring &help) const
-		{
-			help = Instance.getDisplayName();
-			if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName") ))
-				help.clear();
-		}
-		bool				emptyContextHelp() const { return true; }
-		bool				wantInstantContextHelp() const { return true; }
-		// from CCtrlBase
-		virtual bool		preciseHitTest(sint32 x, sint32 y) const
-		{
-			if (!_Parent) return false;
-			sint32 winX, winY;
-			_Parent->getCorner(winX, winY, _ParentPosRef);
-			return contains(x - winX, y - winY);
-		}
-	public:
-		CInstance &Instance;
-	protected:
-		// TMP TMP until matrix precision is solved
-		// from CCtrlPolygon
-		void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
-		{
-			CGroupMap *gm = CTool::getWorldMap();
-			if (!gm) dest = CVector::Null;
-			gm->worldToWindow(dest, src);
-		}
-	};
 	CCtrlPolygonSelectable *result = new CCtrlPolygonSelectable(*DisplayedInstance);
 	result->setId(DisplayedInstance->getId());
 	result->setToolTipParent(CCtrlBase::TTMouse);
@@ -147,50 +192,6 @@ CCtrlQuad *CDisplayerVisualGroup::CSelectablePrimRender::newCtrlQuad(uint edgeIn
 {
 	//H_AUTO(R2_CDisplayerVisualGroup_CSelectablePrimRender)
 	nlassert(DisplayedInstance);
-	// create a special selectable polygon
-	class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
-	{
-	public:
-		CCtrlQuadSelectable(CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex) {}
-		// from IDisplayerUIHandle
-		virtual CInstance &getDisplayedInstance() { return Instance; }
-		// from IDisplayerUIHandle
-		virtual bool isEdge() const { return true; }
-		// from IDisplayerUIHandle
-		virtual uint getEdgeIndex() const { return EdgeIndex; }
-		// from IDisplayerUIHandle
-		virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
-		{
-			if (!_Parent) return false;
-
-			// relies on parent class CViewPolygon::contains
-			return CCtrlQuad::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
-		}
-		// tooltip
-		virtual void		getContextHelp(ucstring &help) const
-		{
-			help = Instance.getDisplayName();
-			if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName")))
-				help.clear();
-		}
-		bool				emptyContextHelp() const { return true; }
-		bool				wantInstantContextHelp() const { return true; }
-		// from CCtrlBase
-		virtual bool		preciseHitTest(sint32 x, sint32 y) const
-		{
-			if (!_Parent) return false;
-			sint32 winX, winY;
-			_Parent->getCorner(winX, winY, _ParentPosRef);
-			return contains(x - winX, y - winY);
-		}
-		virtual bool		handleEvent (const CEventDescriptor &/* event */)
-		{
-			return false;
-		}
-	public:
-		CInstance &Instance;
-		uint	  EdgeIndex;
-	};
 	CCtrlQuadSelectable *result = new CCtrlQuadSelectable(*DisplayedInstance, edgeIndex);
 	result->setToolTipParent(CCtrlBase::TTMouse);
 	result->setToolTipParentPosRef(Hotspot_BR);
