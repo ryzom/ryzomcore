@@ -155,6 +155,10 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 		return false;
 	}
 
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nOffsetFromBeginning);
+#endif
+
 	if (nlfseek64 (handle.File, nOffsetFromBeginning, SEEK_SET) != 0)
 	{
 		fclose (handle.File);
@@ -170,6 +174,11 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 		handle.File = NULL;
 		return false;
 	}
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nNbFile);
+#endif
+
 	map<string,BNPFile> tempMap;
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
@@ -198,6 +207,10 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 			return false;
 		}
 
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFileSize2);
+#endif
+
 		uint32 nFilePos;
 		if (fread (&nFilePos, sizeof(uint32), 1, handle.File) != 1)
 		{
@@ -205,6 +218,10 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 			handle.File = NULL;
 			return false;
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFilePos);
+#endif
 
 		BNPFile bnpfTmp;
 		bnpfTmp.Pos = nFilePos;
