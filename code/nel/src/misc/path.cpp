@@ -1224,6 +1224,11 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 			fclose(Handle);
 			return;
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nOffsetFromBegining);
+#endif
+
 		nlfseek64 (Handle, nOffsetFromBegining, SEEK_SET);
 		uint32 nNbFile;
 		if (fread (&nNbFile, sizeof(uint32), 1, Handle) != 1)
@@ -1231,6 +1236,11 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 			fclose(Handle);
 			return;
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nNbFile);
+#endif
+
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			// Progress bar
@@ -1259,12 +1269,22 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 				fclose(Handle);
 				return;
 			}
+
+#ifdef NL_BIG_ENDIAN
+			NLMISC_BSWAP32(nFileSize2);
+#endif
+
 			uint32 nFilePos;
 			if (fread (&nFilePos, sizeof(uint32), 1, Handle) != 1)
 			{
 				fclose(Handle);
 				return;
 			}
+
+#ifdef NL_BIG_ENDIAN
+			NLMISC_BSWAP32(nFilePos);
+#endif
+
 			string sTmp = toLower(string(FileName));
 			if (sTmp.empty())
 			{

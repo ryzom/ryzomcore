@@ -1708,6 +1708,10 @@ bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Fi
 		return false;
 	}
 
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nOffsetFromBegining);
+#endif
+
 	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
 	{
 		fclose(f);
@@ -1720,6 +1724,10 @@ bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Fi
 		fclose(f);
 		return false;
 	}
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nNbFile);
+#endif
 
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
@@ -1746,11 +1754,19 @@ bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Fi
 			return false;
 		}
 
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(tmpBNPFile.Size);
+#endif
+
 		if (fread (&tmpBNPFile.Pos, sizeof(uint32), 1, f) != 1)
 		{
 			fclose(f);
 			return false;
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(tmpBNPFile.Pos);
+#endif
 
 		Files.push_back (tmpBNPFile);
 	}
