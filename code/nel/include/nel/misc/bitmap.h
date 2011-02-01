@@ -35,13 +35,19 @@ class IStream;
 //------------------ DDS STUFFS --------------------
 
 #ifndef NL_MAKEFOURCC
-    #define NL_MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
-                ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) |   \
-                ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
+	#ifdef NL_LITTLE_ENDIAN
+		#define NL_MAKEFOURCC(ch0, ch1, ch2, ch3) \
+			((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | \
+			((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
+	#else
+		#define NL_MAKEFOURCC(ch0, ch1, ch2, ch3) \
+			((uint32)(uint8)(ch3) | ((uint32)(uint8)(ch2) << 8) | \
+			((uint32)(uint8)(ch1) << 16) | ((uint32)(uint8)(ch0) << 24 ))
+	#endif
 #endif
 
 const uint32	DDS_HEADER = NL_MAKEFOURCC('D', 'D', 'S', ' ');
-const uint32	DXT_HEADER = NL_MAKEFOURCC('D','X', 'T', '\0');
+const uint32	DXT_HEADER = NL_MAKEFOURCC('D', 'X', 'T', '\0');
 const uint32	PNG_HEADER = NL_MAKEFOURCC(0x89, 'P', 'N', 'G');
 const uint32	JPG_HEADER = NL_MAKEFOURCC(0xff, 0xd8, 0xff, 0xe0);
 

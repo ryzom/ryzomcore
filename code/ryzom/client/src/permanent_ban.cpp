@@ -157,6 +157,10 @@ static void markBNPFile(std::string &path)
 		return;
 	}
 
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nOffsetFromBegining);
+#endif
+
 	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
 	{
 		fclose (f);
@@ -170,6 +174,11 @@ static void markBNPFile(std::string &path)
 		fclose (f);
 		return;
 	}
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nNbFile);
+#endif
+
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
 		char FileName[MAX_PATH];
@@ -223,12 +232,20 @@ static void markBNPFile(std::string &path)
 			return;
 		}
 
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFileSize2);
+#endif
+
 		uint32 nFilePos;
 		if (fread (&nFilePos, sizeof(uint32), 1, f) != 1)
 		{
 			fclose (f);
 			return;
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFilePos);
+#endif
 	}
 
 	fclose (f);
