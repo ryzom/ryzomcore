@@ -124,11 +124,18 @@ uint32 CMusicBufferVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 ma
 	if (_IsMusicEnded) return 0;
 	nlassert(minimum <= maximum); // can't have this..
 	uint32 bytes_read = 0;
+
+#ifdef NL_BIG_ENDIAN
+	sint endianness = 1;
+#else
+	sint endianness = 0;
+#endif
+	
 	do
 	{
 		// signed 16-bit or unsigned 8-bit little-endian samples
 		sint br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
-			0, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
+			endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for big endian. Typical value is 0.
 			getBitsPerSample() == 8 ? 1 : 2, 
 			getBitsPerSample() == 8 ? 0 : 1, // Signed or unsigned data. 0 for unsigned, 1 for signed. Typically 1.
 			&current_section);
