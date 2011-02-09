@@ -94,8 +94,6 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	glDisable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
 
-
-
 	// Func.
 	_CurBlendSrc= GL_SRC_ALPHA;
 	_CurBlendDst= GL_ONE_MINUS_SRC_ALPHA;
@@ -108,6 +106,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurStencilOpZPass = GL_KEEP;
 	_CurStencilWriteMask = std::numeric_limits<GLuint>::max();
 	_CurAlphaTestThreshold= 0.5f;
+
 	// setup GLStates.
 	glBlendFunc(_CurBlendSrc, _CurBlendDst);
 	glDepthFunc(_CurDepthFunc);
@@ -139,9 +138,6 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, one);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, zero);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, _CurShininess);
-
-
-
 
 	// TexModes
 	uint stage;
@@ -328,15 +324,15 @@ void			CDriverGLStates::enableZWrite(uint enable)
 // ***************************************************************************
 void			CDriverGLStates::enableStencilTest(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableStencilTest)
+	H_AUTO_OGL(CDriverGLStates_enableStencilTest);
+
 	// If different from current setup, update.
-	bool	enabled= (enable!=0);
 #ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if( enabled != _CurStencilTest )
+	if( enable != _CurStencilTest )
 #endif
 	{
 		// new state.
-		_CurStencilTest= enabled;
+		_CurStencilTest= enable;
 		// Setup GLState.
 		if(_CurStencilTest)
 			glEnable(GL_STENCIL_TEST);
@@ -599,7 +595,8 @@ void CDriverGLStates::setDepthRange(float znear, float zfar)
 // ***************************************************************************
 void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 {
-	H_AUTO_OGL(CDriverGLStates_setTexGenMode )
+	H_AUTO_OGL(CDriverGLStates_setTexGenMode);
+
 #ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (mode != _TexGenMode[stage])
 #endif
@@ -643,12 +640,13 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 
 
 
-
 // ***************************************************************************
 void			CDriverGLStates::resetTextureMode()
 {
-	H_AUTO_OGL(CDriverGLStates_resetTextureMode)
+	H_AUTO_OGL(CDriverGLStates_resetTextureMode);
+
 	glDisable(GL_TEXTURE_2D);
+
 	if (_TextureCubeMapSupported)
 	{
 		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
@@ -657,6 +655,7 @@ void			CDriverGLStates::resetTextureMode()
 	{
 		glDisable(GL_TEXTURE_RECTANGLE_NV);
 	}
+
 	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
 }
 
@@ -669,39 +668,59 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 	if(oldTexMode != texMode)
 	{
 		// Disable first old mode.
-		if(oldTexMode == Texture2D)
+		if (oldTexMode == Texture2D)
+		{
 			glDisable(GL_TEXTURE_2D);
+		}
 		else if(oldTexMode == TextureRect)
 		{
 			if(_TextureRectangleSupported)
+			{
 				glDisable(GL_TEXTURE_RECTANGLE_NV);
+			}
 			else
+			{
 				glDisable(GL_TEXTURE_2D);
+			}
 		}
 		else if(oldTexMode == TextureCubeMap)
 		{
 			if(_TextureCubeMapSupported)
+			{
 				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+			}
 			else
+			{
 				glDisable(GL_TEXTURE_2D);
+			}
 		}
 
 		// Enable new mode.
 		if(texMode == Texture2D)
+		{
 			glEnable(GL_TEXTURE_2D);
+		}
 		else if(texMode == TextureRect)
 		{
 			if(_TextureRectangleSupported)
+			{
 				glEnable(GL_TEXTURE_RECTANGLE_NV);
+			}
 			else
+			{
 				glDisable(GL_TEXTURE_2D);
+			}
 		}
 		else if(texMode == TextureCubeMap)
 		{
 			if(_TextureCubeMapSupported)
+			{
 				glEnable(GL_TEXTURE_CUBE_MAP_ARB);
+			}
 			else
+			{
 				glDisable(GL_TEXTURE_2D);
+			}
 		}
 
 		// new mode.
@@ -713,7 +732,8 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 // ***************************************************************************
 void			CDriverGLStates::activeTextureARB(uint stage)
 {
-	H_AUTO_OGL(CDriverGLStates_activeTextureARB)
+	H_AUTO_OGL(CDriverGLStates_activeTextureARB);
+
 	if( _CurrentActiveTextureARB != stage )
 	{
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
@@ -726,7 +746,8 @@ void			CDriverGLStates::activeTextureARB(uint stage)
 // ***************************************************************************
 void			CDriverGLStates::forceActiveTextureARB(uint stage)
 {
-	H_AUTO_OGL(CDriverGLStates_forceActiveTextureARB)
+	H_AUTO_OGL(CDriverGLStates_forceActiveTextureARB);
+
 	nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
 
 	_CurrentActiveTextureARB= stage;
@@ -960,8 +981,6 @@ void			CDriverGLStates::enableFog(uint enable)
 			glEnable(GL_FOG);
 		else
 			glDisable(GL_FOG);
-
-
 	}
 }
 

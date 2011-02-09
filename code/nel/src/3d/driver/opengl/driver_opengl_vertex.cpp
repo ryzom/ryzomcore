@@ -288,7 +288,6 @@ bool CDriverGL::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	// end multipass.
 	endMultiPass();
 
-
 	// Profiling.
 	_PrimitiveProfileIn.NLines+= nlines;
 	_PrimitiveProfileOut.NLines+= nlines;
@@ -296,6 +295,7 @@ bool CDriverGL::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	// We have render some prims. inform the VBHard.
 	if(_CurrentVertexBufferHard)
 		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
+
 	return true;
 }
 
@@ -303,9 +303,11 @@ bool CDriverGL::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 
 bool CDriverGL::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 {
-	H_AUTO_OGL(CDriverGL_renderTriangles)
+	H_AUTO_OGL(CDriverGL_renderTriangles);
+
 	// update matrix and Light in OpenGL if needed
 	refreshRenderSetup();
+
 	// setup material
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
@@ -357,12 +359,12 @@ bool CDriverGL::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 
 bool CDriverGL::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 {
-	H_AUTO_OGL(CDriverGL_renderSimpleTriangles)
+	H_AUTO_OGL(CDriverGL_renderSimpleTriangles);
+
 	nlassert(ntris>0);
 
 	// update matrix and Light in OpenGL if needed
 	refreshRenderSetup();
-
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// Don't setup any material here.
@@ -370,7 +372,7 @@ bool CDriverGL::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	// render primitives.
 	//==============================
 	// NO MULTIPASS HERE!!
-	// draw the primitives. (nb: ntrsi>0).
+	// draw the primitives. (nb: ntris>0).
 
 	if (_LastIB._Format == CIndexBuffer::Indices16)
 	{
@@ -389,6 +391,7 @@ bool CDriverGL::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	// We have render some prims. inform the VBHard.
 	if(_CurrentVertexBufferHard)
 		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
+
 	return true;
 }
 
@@ -757,7 +760,7 @@ IVertexBufferHardGL	*CDriverGL::createVertexBufferHard(uint size, uint numVertic
 		break;
         default:
             break;
-	};
+	}
 
 	// If this one at least created (an extension support it).
 	if( !vertexArrayRange )
@@ -769,7 +772,7 @@ IVertexBufferHardGL	*CDriverGL::createVertexBufferHard(uint size, uint numVertic
 			return NULL;
 
 		// Create a CVertexBufferHardGL
-		IVertexBufferHardGL		*vbHard;
+		IVertexBufferHardGL		*vbHard = NULL;
 		// let the VAR create the vbhard.
 		vbHard= vertexArrayRange->createVBHardGL(size, vb);
 		// if fails
@@ -889,6 +892,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 			nlassert (numVertexCoord >= 2);
 			_DriverGLStates.enableVertexArray(true);
 			glVertexPointer(numVertexCoord, GL_FLOAT, vb.VertexSize, vb.ValuePtr[CVertexBuffer::Position]);
+
 			// setup normal ptr.
 			//-----------
 			// Check for normal param in vertex buffer
@@ -904,6 +908,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 			{
 				_DriverGLStates.enableNormalArray(false);
 			}
+
 			// Setup Color
 			//-----------
 			// Check for color param in vertex buffer
@@ -916,7 +921,9 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 				glColorPointer(4,GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[CVertexBuffer::PrimaryColor]);
 			}
 			else
+			{
 				_DriverGLStates.enableColorArray(false);
+			}
 		}
 		break;
 		case CVertexBufferInfo::HwATI:
@@ -972,8 +979,6 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 		// normal behavior: each texture has its own UV.
 		setupUVPtr(i, vb, vb.UVRouting[i]);
 	}
-
-
 }
 
 
@@ -1435,70 +1440,70 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 			{
 				switch(value)
 				{
-						case CVertexBuffer::Position: // position
-						{
-							nlassert(NumCoordinatesType[type] >= 2);
-							glVertexPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::Weight: // skin weight
-						{
-							nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-							nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSSkinWeightVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::Normal: // normal
-						{
-							nlassert(NumCoordinatesType[type] == 3); // must have 3 components for normals
-							glNormalPointer(GLType[type], vb.VertexSize, vb.ValuePtr[CVertexBuffer::Normal]);
-						}
-						break;
-						case CVertexBuffer::PrimaryColor: // color
-						{
-							nlassert(NumCoordinatesType[type] >= 3); // must have 3 or 4 components for primary color
-							glColorPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::SecondaryColor: // secondary color
-						{
-							// implemented using a variant, as not available with EXTVertexShader
-							nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-							nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSSecondaryColorVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::Fog: // fog coordinate
-						{
-							// implemented using a variant
-							nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-							nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSFogCoordsVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::PaletteSkin: // palette skin
-						{
-							// implemented using a variant
-							nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-							nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSPaletteSkinVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						case CVertexBuffer::Empty: // empty
-							nlstop;
-						break;
-						case CVertexBuffer::TexCoord0:
-						case CVertexBuffer::TexCoord1:
-						case CVertexBuffer::TexCoord2:
-						case CVertexBuffer::TexCoord3:
-						case CVertexBuffer::TexCoord4:
-						case CVertexBuffer::TexCoord5:
-						case CVertexBuffer::TexCoord6:
-						case CVertexBuffer::TexCoord7:
-						{
-							_DriverGLStates.clientActiveTextureARB(value - CVertexBuffer::TexCoord0);
-							glTexCoordPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-						}
-						break;
-						default:
-							nlstop; // invalid value
-						break;
+					case CVertexBuffer::Position: // position
+					{
+						nlassert(NumCoordinatesType[type] >= 2);
+						glVertexPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::Weight: // skin weight
+					{
+						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
+						nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSSkinWeightVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::Normal: // normal
+					{
+						nlassert(NumCoordinatesType[type] == 3); // must have 3 components for normals
+						glNormalPointer(GLType[type], vb.VertexSize, vb.ValuePtr[CVertexBuffer::Normal]);
+					}
+					break;
+					case CVertexBuffer::PrimaryColor: // color
+					{
+						nlassert(NumCoordinatesType[type] >= 3); // must have 3 or 4 components for primary color
+						glColorPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::SecondaryColor: // secondary color
+					{
+						// implemented using a variant, as not available with EXTVertexShader
+						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
+						nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSSecondaryColorVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::Fog: // fog coordinate
+					{
+						// implemented using a variant
+						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
+						nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSFogCoordsVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::PaletteSkin: // palette skin
+					{
+						// implemented using a variant
+						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
+						nglVariantPointerEXT(drvInfo->Variants[CDriverGL::EVSPaletteSkinVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					case CVertexBuffer::Empty: // empty
+						nlstop;
+					break;
+					case CVertexBuffer::TexCoord0:
+					case CVertexBuffer::TexCoord1:
+					case CVertexBuffer::TexCoord2:
+					case CVertexBuffer::TexCoord3:
+					case CVertexBuffer::TexCoord4:
+					case CVertexBuffer::TexCoord5:
+					case CVertexBuffer::TexCoord6:
+					case CVertexBuffer::TexCoord7:
+					{
+						_DriverGLStates.clientActiveTextureARB(value - CVertexBuffer::TexCoord0);
+						glTexCoordPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+					}
+					break;
+					default:
+						nlstop; // invalid value
+					break;
 				}
 			}
 		}
@@ -1732,7 +1737,8 @@ uint32				CDriverGL::getAvailableVertexVRAMMemory ()
 // ***************************************************************************
 void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 {
-	H_AUTO_OGL(CDriverGL_fenceOnCurVBHardIfNeeded)
+	H_AUTO_OGL(CDriverGL_fenceOnCurVBHardIfNeeded);
+
 	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
 	if( _CurrentVertexBufferHard==NULL || !_CurrentVertexBufferHard->VBType == IVertexBufferHardGL::NVidiaVB)
 		return;

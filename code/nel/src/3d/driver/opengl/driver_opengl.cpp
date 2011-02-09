@@ -2552,14 +2552,16 @@ bool CDriverGL::supportTextureRectangle() const
 // ***************************************************************************
 bool CDriverGL::supportPackedDepthStencil() const
 {
-	H_AUTO_OGL(CDriverGL_supportPackedDepthStencil)
+	H_AUTO_OGL(CDriverGL_supportPackedDepthStencil);
+
 	return _Extensions.PackedDepthStencil;
 }
 
 // ***************************************************************************
 bool CDriverGL::supportFrameBufferObject() const
 {
-	H_AUTO_OGL(CDriverGL_supportFrameBufferObject)
+	H_AUTO_OGL(CDriverGL_supportFrameBufferObject);
+
 	return _Extensions.FrameBufferObject;
 }
 

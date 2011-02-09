@@ -604,7 +604,6 @@ static bool	setupNVVertexArrayRange(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLFINISHFENCENVPROC, glFinishFenceNV);
 	CHECK_ADDRESS(NEL_PFNGLSETFENCENVPROC, glSetFenceNV);
 
-
 	return true;
 }
 
@@ -951,7 +950,6 @@ static bool	setupEXTBlendColor(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLBLENDCOLOREXTPROC, glBlendColorEXT);
 	return true;
 }
-
 
 // *********************************
 static bool	setupNVVertexArrayRange2(const char	*glext)

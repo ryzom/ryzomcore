@@ -1888,7 +1888,7 @@ void CDriverGL::enableVertexProgramDoubleSidedColor(bool doubleSided)
 bool CDriverGL::supportVertexProgramDoubleSidedColor() const
 {
 	H_AUTO_OGL(CDriverGL_supportVertexProgramDoubleSidedColor)
-	// currenlty only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
+	// currently only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
 	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
 }
 
