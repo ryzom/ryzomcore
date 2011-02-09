@@ -28,6 +28,7 @@ class CDisplayerLua : public CDisplayerBase
 {
 public:
 	NLMISC_DECLARE_CLASS(R2::CDisplayerLua);
+	CDisplayerLua();
 	// expected parameter is a ctor function
 	virtual bool init(const CLuaObject &parameters);
 	virtual void pushLuaAccess(CLuaState &ls);
@@ -55,11 +56,13 @@ private:
 	class CToLua : public CLuaEventForwarder
 	{
 	public:
+		CToLua();
 		CLuaObject _LuaTable; // reference to lua version of the displayer
+		CDisplayerLua *_Displayer;
 		virtual CLuaState *getLua();
 		virtual void executeHandler(const CLuaString &eventName, int numArgs);
 		void pushLuaAccess(CLuaState &ls);
-		CDisplayerLua &getEnclosing();
+		CDisplayerLua* getEnclosing();
 	};
 	friend class CToLua;
 	CToLua _ToLua;

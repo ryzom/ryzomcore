@@ -23,6 +23,12 @@ namespace R2
 {
 
 // *********************************************************************************************************
+CDisplayerLua::CDisplayerLua()
+{
+	_ToLua._Displayer = this;
+}
+
+// *********************************************************************************************************
 bool CDisplayerLua::init(const CLuaObject &parameters)
 {
 	//H_AUTO(R2_CDisplayerLua_init)
@@ -53,9 +59,14 @@ bool CDisplayerLua::init(const CLuaObject &parameters)
 }
 
 // *********************************************************************************************************
-CDisplayerLua &CDisplayerLua::CToLua::getEnclosing()
+CDisplayerLua::CToLua::CToLua():_Displayer(NULL)
 {
-	return *(CDisplayerLua *) ((uint8 *) this - offsetof(CDisplayerLua, _ToLua)); // ugly, yes ...
+}
+
+// *********************************************************************************************************
+CDisplayerLua* CDisplayerLua::CToLua::getEnclosing()
+{
+	return _Displayer;
 }
 
 // *********************************************************************************************************
@@ -79,7 +90,8 @@ void CDisplayerLua::CToLua::executeHandler(const CLuaString &eventName, int numA
 	ls.insert(- numArgs - 1);
 	if (dumpStackWanted) ls.dumpStack();
 	// First arg always is the instance being displayed
-	getEnclosing().getDisplayedInstance()->getLuaProjection().push();
+	if (getEnclosing())
+		getEnclosing()->getDisplayedInstance()->getLuaProjection().push();
 	ls.insert(- numArgs - 1);
 	if (dumpStackWanted) ls.dumpStack();
 	CLuaIHM::executeFunctionOnStack(*_LuaTable.getLuaState(),  numArgs + 2,  0);

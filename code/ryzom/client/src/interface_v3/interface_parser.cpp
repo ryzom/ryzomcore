@@ -2197,8 +2197,8 @@ bool CInterfaceParser::parseTree (xmlNodePtr cur, SMasterGroup *parentGroup)
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
 			CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-			string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-			string stmp2 = strlwr(string((const char*)ptr));
+			string stmp = NLMISC::toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+			string stmp2 = NLMISC::toLower(string((const char*)ptr));
 			if (stmp == stmp2)
 			{
 				pEltFound = pIG;

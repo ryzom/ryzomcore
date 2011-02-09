@@ -1856,7 +1856,7 @@ CInstanceObserverLua::~CInstanceObserverLua()
 	#ifdef NL_DEBUG
 		nlassert(!getEditor().isInstanceObserver(this));
 	#endif
-	nlassert(_Count >= 0);
+	nlassert(_Count < 1000000000);
 	-- _Count;
 }
 
