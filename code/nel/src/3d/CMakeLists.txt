@@ -60,7 +60,7 @@ SOURCE_GROUP(Landscape FILES
         ../../include/nel/3d/landscape_def.h
         landscape_face_vector_manager.cpp
         ../../include/nel/3d/landscape_face_vector_manager.h
-        ./3d/landscape_profile.cpp
+        landscape_profile.cpp
         ../../include/nel/3d/landscape_profile.h
         landscape_vegetable_block.cpp
         ../../include/nel/3d/landscape_vegetable_block.h
@@ -258,6 +258,8 @@ SOURCE_GROUP(Textures FILES
         texture_blank.cpp
         ../../include/nel/3d/texture_blank.h
         texture_blend.cpp
+        ../../include/nel/3d/texture_bloom.h
+        texture_bloom.cpp
         ../../include/nel/3d/texture_blend.h
         texture_bump.cpp
         ../../include/nel/3d/texture_bump.h
@@ -534,7 +536,7 @@ SOURCE_GROUP(Fx\\Particles\\lights FILES
         ps_light.cpp
         ../../include/nel/3d/ps_light.h)
 SOURCE_GROUP(Fx\\2d FILES
-        ./3d/bloom_effect.cpp
+        bloom_effect.cpp
         ../../include/nel/3d/bloom_effect.h
         deform_2d.cpp
         ../../include/nel/3d/deform_2d.h
@@ -549,13 +551,13 @@ SOURCE_GROUP(Collisions FILES
         ../../include/nel/3d/camera_col.h
         landscape_collision_grid.cpp
         ../../include/nel/3d/landscape_collision_grid.h
-        ./3d/packed_world.cpp
+        packed_world.cpp
         ../../include/nel/3d/packed_world.h
-        ./3d/packed_zone.cpp
+        packed_zone.cpp
         ../../include/nel/3d/packed_zone.h
-        ./3d/ray_mesh.cpp
+        ray_mesh.cpp
         ../../include/nel/3d/ray_mesh.h
-        ./3d/shape_info.cpp
+        shape_info.cpp
         ../../include/nel/3d/shape_info.h
         visual_collision_entity.cpp
         ../../include/nel/3d/visual_collision_entity.h
