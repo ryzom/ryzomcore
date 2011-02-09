@@ -517,28 +517,42 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 					sale.setSheetId(CSheetId(parts[i]+".sitem"));
 					if (sale.getSheetId() == CSheetId::Unknown)
 						return false;
+					break;
 				case RYMSG::TExplicitSaleType::est_named_item:
 					sale.setNamed(parts[i]);
 					if (sale.getNamed().empty())
 						return false;
+					break;
 				case RYMSG::TExplicitSaleType::est_brick:
 					sale.setSheetId(CSheetId(parts[i]+".sbrick"));
 					if (sale.getSheetId() == CSheetId::Unknown)
 						return false;
+					break;
 				case RYMSG::TExplicitSaleType::est_phrase:
 					sale.setSheetId(CSheetId(parts[i]+".sphrase"));
 					if (sale.getSheetId() == CSheetId::Unknown)
 						return false;
+					break;
 				case RYMSG::TExplicitSaleType::est_dappers:
+				{
 					// read the amount of dapper
-					sale.setQuantity(atoi(parts[i].c_str()));
+					uint32 quantity;
+					NLMISC::fromString(parts[i], quantity),
+					sale.setQuantity(quantity);
+					break;
+				}
 				default:
 					STOP("Unsupported sale type "<<sale.getSaleType().toString());
 				}
 				break;
 			case 3:
+			{
 				// read the quality
-				sale.setQuality(atoi(parts[i].c_str()));
+				uint32 quality;
+				NLMISC::fromString(parts[i], quality);
+				sale.setQuality(quality);
+				break;
+			}
 			case 4:
 				// read the money (may be more than one)
 				if (!parts[i].empty())
