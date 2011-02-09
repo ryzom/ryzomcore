@@ -125,24 +125,42 @@ SOURCE_GROUP(Landscape\\Tools FILES
         ../../include/nel/3d/zone_tgt_smoother.h)
 
 SOURCE_GROUP(Driver FILES
+        async_file_manager_3d.cpp
+        ../../include/nel/3d/async_file_manager_3d.h
+        debug_vb.cpp
+        ../../include/nel/3d/debug_vb.h
         driver.cpp
         ../../include/nel/3d/driver.h
         ../../include/nel/3d/driver_material_inline.h
         dru.cpp
         ../../include/nel/3d/dru.h
+        event_mouse_listener.cpp
+        ../../include/nel/3d/event_mouse_listener.h
         index_buffer.cpp
         ../../include/nel/3d/index_buffer.h
+        init_3d.cpp
+        ../../include/nel/3d/init_3d.h
         light.cpp
         ../../include/nel/3d/light.h
         material.cpp
         ../../include/nel/3d/material.h
+        nelu.cpp
+        ../../include/nel/3d/nelu.h
         ../../include/nel/3d/occlusion_query.h
+        register_3d.cpp
+        ../../include/nel/3d/register_3d.h
+        scene.cpp
+        ../../include/nel/3d/scene.h
+        scene_group.cpp
+        ../../include/nel/3d/scene_group.h
         shader.cpp
         ../../include/nel/3d/shader.h
         texture.cpp
         ../../include/nel/3d/texture.h
         vertex_buffer.cpp
         ../../include/nel/3d/vertex_buffer.h
+        vertex_buffer_heap.cpp
+        ../../include/nel/3d/vertex_buffer_heap.h
         vertex_program.cpp
         ../../include/nel/3d/vertex_program.h
         vertex_program_parse.cpp
@@ -170,6 +188,7 @@ SOURCE_GROUP(Container FILES
         ../../include/nel/3d/ptr_set.h
         quad_grid.cpp
         ../../include/nel/3d/quad_grid.h
+        ../../include/nel/3d/quad_tree.h
         static_quad_grid.cpp
         ../../include/nel/3d/static_quad_grid.h)
 
@@ -494,6 +513,7 @@ SOURCE_GROUP("Fx\\Particles\\particles render" FILES
 SOURCE_GROUP(Fx\\Particles\\attribs FILES
         ../../include/nel/3d/ps_attrib.h
         ../../include/nel/3d/ps_attrib_maker.h
+        ../../include/nel/3d/ps_attrib_maker_template.h
         ps_attrib_maker_bin_op.cpp
         ../../include/nel/3d/ps_attrib_maker_bin_op.h
         ../../include/nel/3d/ps_attrib_maker_bin_op_inline.h
@@ -551,6 +571,8 @@ SOURCE_GROUP(Collisions FILES
         ../../include/nel/3d/camera_col.h
         landscape_collision_grid.cpp
         ../../include/nel/3d/landscape_collision_grid.h
+        mini_col.cpp
+        ../../include/nel/3d/mini_col.h
         packed_world.cpp
         ../../include/nel/3d/packed_world.h
         packed_zone.cpp
@@ -651,7 +673,7 @@ SOURCE_GROUP(LodSystems FILES
         lod_character_texture.cpp
         ../../include/nel/3d/lod_character_texture.h)
 SOURCE_GROUP(CloudScape FILES
-        cloud.cppo
+        cloud.cpp
         ../../include/nel/3d/cloud.h
         cloud_scape.cpp
         ../../include/nel/3d/cloud_scape.h
