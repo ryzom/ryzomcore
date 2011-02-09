@@ -283,11 +283,23 @@ typedef	uint64_t	uint64;
 typedef				int			sint;			// at least 32bits (depend of processor)
 typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
+// used for macro PRI*64
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
+#ifdef NL_OS_MAC
+#define NL_I64 __PRI_64_LENGTH_MODIFIER__
+#else
+#define NL_I64 __PRI64_PREFIX
+#endif
+
+/*
 #ifdef _LP64
 #	define	NL_I64 "l"
 #else
 #	define	NL_I64 "ll"
 #endif // _LP64
+*/
 
 #endif // NL_OS_UNIX
 
