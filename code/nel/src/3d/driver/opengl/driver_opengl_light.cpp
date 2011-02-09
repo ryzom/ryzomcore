@@ -138,7 +138,7 @@ void	CDriverGL::setLightInternal(uint8 num, const CLight& light)
 		}
 		else
 		{
-			// Disactive spot properties
+			// Deactivate spot properties
 			glLighti (lightNum, GL_SPOT_CUTOFF, 180);
 			glLighti (lightNum, GL_SPOT_EXPONENT, 0);
 		}
