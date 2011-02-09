@@ -61,7 +61,7 @@ CTaskManager::~CTaskManager()
 void CTaskManager::run(void)
 {
 	IRunnable *runnableTask;
-	float priorityTask;
+	float priorityTask = 0.f;
 	while(_ThreadRunning)
 	{
 		{

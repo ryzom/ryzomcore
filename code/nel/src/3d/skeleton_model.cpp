@@ -1741,7 +1741,7 @@ bool		CSkeletonModel::computeRenderedBBoxWithBoneSphere(NLMISC::CAABBox &bbox, b
 	updateSkinRenderLists();
 
 	// **** Compute The BBox with Bones of the skeleton
-	CVector		minBB, maxBB;
+	CVector		minBB(0.f, 0.f, 0.f), maxBB(0.f, 0.f, 0.f);
 	for(uint i=0;i<_BoneToCompute.size();i++)
 	{
 		CBone			*bone= _BoneToCompute[i].Bone;
@@ -2225,7 +2225,7 @@ bool		CSkeletonModel::computeWorldBBoxForShadow(NLMISC::CAABBox &worldBB)
 		return false;
 
 	// **** Compute The BBox with Bones of the skeleton
-	CVector		minBB, maxBB;
+	CVector		minBB(0.f, 0.f, 0.f), maxBB(0.f, 0.f, 0.f);
 	for(i=0;i<_BoneToCompute.size();i++)
 	{
 		CBone			*bone= _BoneToCompute[i].Bone;

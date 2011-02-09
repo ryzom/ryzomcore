@@ -1290,7 +1290,7 @@ template <class T> bool raytrace(T &packedZone, const NLMISC::CVector &start, co
 			CTriangle tri;
 			CPlane triPlane;
 			float bestInterDist = FLT_MAX;
-			NLMISC::CVector bestNormal;
+			CVector bestNormal(0.f, 0.f, 0.f);
 			CVector currInter;
 			do
 			{

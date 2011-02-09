@@ -33,12 +33,16 @@ namespace NLMISC
 
 static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-	((IStream*) png_ptr->io_ptr)->serialBuffer((uint8*)data, (uint)length);
+	IStream *stream = static_cast<IStream*>(png_get_io_ptr(png_ptr));
+	if (stream)
+		stream->serialBuffer((uint8*)data, (uint)length);
 }
 
 static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-	((IStream*) png_ptr->io_ptr)->serialBuffer((uint8*)data, (uint)length);
+	IStream *stream = static_cast<IStream*>(png_get_io_ptr(png_ptr));
+	if (stream)
+		stream->serialBuffer((uint8*)data, (uint)length);
 }
 
 static void setPNGWarning(png_struct * /* png_ptr */, const char* message)
@@ -50,7 +54,7 @@ static void setPNGError(png_struct *png_ptr, const char* message)
 {
 	setPNGWarning(png_ptr, message);
 
-	longjmp(png_ptr->jmpbuf, 1);
+	longjmp(png_jmpbuf(png_ptr), 1);
 }
 
 /*-------------------------------------------------------------------*\
@@ -79,7 +83,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 		return 0;
 	}
 
-	if (setjmp(png_ptr->jmpbuf))
+	if (setjmp(png_jmpbuf(png_ptr)))
 	{
 		// free all of the memory associated with the png_ptr and info_ptr
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
@@ -237,7 +241,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 		return false;
 	}
 
-	if (setjmp(png_ptr->jmpbuf))
+	if (setjmp(png_jmpbuf(png_ptr)))
 	{
 		png_destroy_write_struct( &png_ptr, (png_info**)NULL );
 		nlwarning("couldn't set setjmp");

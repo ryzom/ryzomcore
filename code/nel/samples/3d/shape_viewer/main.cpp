@@ -75,6 +75,7 @@ sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LP
 sint main(int argc, char **argv)
 {
 #endif
+	NLMISC::CApplicationContext myApplicationContext;
 
 	try
 	{

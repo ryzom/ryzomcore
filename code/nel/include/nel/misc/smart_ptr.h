@@ -52,7 +52,7 @@ public:
 	*/
 	struct	CPtrInfoBase
 	{
-		CRefCount const* Ptr;	// to know if the instance is valid.
+		const CRefCount* Ptr;	// to know if the instance is valid.
 		sint	RefCount;		// RefCount of ptrinfo (!= instance)
 		bool	IsNullPtrInfo;	// For dll problems, must use a flag to mark NullPtrInfo.
 	};

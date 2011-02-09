@@ -178,11 +178,11 @@ TTicks CTime::getPerformanceTime ()
 	return mach_absolute_time();
 #else
 #if defined(HAVE_X86_64)
-	unsigned long long int hi, lo;
+	uint64 hi, lo;
 	__asm__ volatile (".byte 0x0f, 0x31" : "=a" (lo), "=d" (hi));
 	return (hi << 32) | (lo & 0xffffffff);
 #elif defined(HAVE_X86) and !defined(NL_OS_MAC)
-	unsigned long long int x;
+	uint64 x;
 	// RDTSC - Read time-stamp counter into EDX:EAX. 
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
 	return x;
