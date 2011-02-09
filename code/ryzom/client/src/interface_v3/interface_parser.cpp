@@ -551,14 +551,13 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			firstFileName = *it;
 			string filename = CPath::lookup(firstFileName);
 			bool isInData = false;
-			if (filename.find ("@") != string::npos)
+			string::size_type pos = filename.find ("@");
+			if (pos != string::npos)
 			{
-				vector<string> bigFilePaths;
-				CBigFile::getInstance().getBigFilePaths(bigFilePaths);
-				if (CBigFile::getInstance().getBigFileName(filename.substr(0, filename.find ("@"))) != "data/"+filename.substr(0, filename.find ("@")))
-					isInData = false;
-				else
-					isInData = true;
+				std::string bigFilename = CBigFile::getInstance().getBigFileName(filename.substr(0, pos));
+				std::string path = "data/"+filename.substr(0, pos);
+
+				isInData = bigFilename.find(path) != std::string::npos;
 			}
 
 			if ((needCheck && !isInData) || !file.open (CPath::lookup(firstFileName)))
@@ -654,10 +653,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			if (saveParseResult)
 			{
 				nlassert(isFilename);
-				std::string outputFilename = std::string("data/") + CFile::getFilename(nextFileName) + std::string("_compressed");
-				#ifdef NL_OS_WINDOWS
-					outputFilename = CPath::standardizeDosPath(outputFilename);
-				#endif
+				std::string outputFilename = CPath::standardizePath("data") + CFile::getFilename(nextFileName) + std::string("_compressed");
 				COFile f;
 				f.open(outputFilename);
 				f.serialCheck(UI_CACHE_SERIAL_CHECK);

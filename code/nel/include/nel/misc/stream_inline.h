@@ -161,7 +161,7 @@ inline	void		IStream::serial(sint32 &b)
 inline	void		IStream::serial(uint64 &b)
 {
 #ifdef NL_LITTLE_ENDIAN
-		serialBuffer((uint8 *)&b, 8);
+	serialBuffer((uint8 *)&b, 8);
 #else // NL_LITTLE_ENDIAN
 	uint64	v;
 	if(isReading())
