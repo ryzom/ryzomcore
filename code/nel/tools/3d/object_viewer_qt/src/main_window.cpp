@@ -49,6 +49,7 @@
 #include "sun_color_dialog.h"
 #include "tune_mrm_dialog.h"
 #include "tune_timer_dialog.h"
+#include "camera_control.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -58,13 +59,13 @@ namespace NLQT
 
 CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent),
-	_isGraphicsInitialized(false), 
-	_isGraphicsEnabled(false),
-	_isSoundInitialized(false),
-	_isSoundEnabled(false),
-	_GraphicsViewport(NULL),
-	_lastDir("."),
-	_mouseMode(NL3D::U3dMouseListener::edit3d)
+	  _isGraphicsInitialized(false),
+	  _isGraphicsEnabled(false),
+	  _isSoundInitialized(false),
+	  _isSoundEnabled(false),
+	  _GraphicsViewport(NULL),
+	  _lastDir("."),
+	  _mouseMode(NL3D::U3dMouseListener::edit3d)
 {
 	nldebug("CMainWindow::CMainWindow:");
 	setObjectName("CMainWindow");
@@ -83,7 +84,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	_GraphicsViewport->init();
 	_isGraphicsInitialized = true;
-	
+
 	if (_isSoundEnabled)
 	{
 		Modules::sound().init();
@@ -144,7 +145,7 @@ CMainWindow::~CMainWindow()
 	delete _TuneTimerDialog;
 	delete _ParticleControlDialog;
 	delete _ParticleWorkspaceDialog;
-	
+
 	if (_isSoundInitialized)
 		Modules::sound().releaseGraphics();
 
@@ -162,7 +163,7 @@ void CMainWindow::setVisible(bool visible)
 		{
 			QMainWindow::setVisible(true);
 			if (_isSoundInitialized)
-					Modules::sound().initGraphics();
+				Modules::sound().initGraphics();
 			_mainTimer->start();
 			_statusBarTimer->start(1000);
 		}
@@ -202,7 +203,7 @@ void CMainWindow::open()
 							   tr("NeL skeleton file (*.skel)"));
 
 		Q_FOREACH(QString fileName, list)
-				loadFile(fileName, skelFileName);
+		loadFile(fileName, skelFileName);
 
 		_AnimationSetDialog->updateListObject();
 		_AnimationSetDialog->updateListAnim();
@@ -218,43 +219,6 @@ void CMainWindow::resetScene()
 	_AnimationSetDialog->updateListAnim();
 	_SlotManagerDialog->updateUiSlots();
 	_SkeletonTreeModel->resetTreeModel();
-}
-
-void CMainWindow::changeRenderMode()
-{
-	// Change render mode
-	switch (Modules::objView().getDriver()->getPolygonMode())
-	{
-	case NL3D::UDriver::Filled:
-		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Line);
-		break;
-	case NL3D::UDriver::Line:
-		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Point);
-		break;
-	case NL3D::UDriver::Point:
-		Modules::objView().getDriver()->setPolygonMode (NL3D::UDriver::Filled);
-		break;
-	}
-}
-
-void CMainWindow::resetCamera()
-{
-	Modules::objView().resetCamera();
-}
-
-void CMainWindow::changeCameraMode()
-{
-	switch (_mouseMode)
-	{
-	case NL3D::U3dMouseListener::edit3d:
-		Modules::objView().get3dMouseListener()->setMouseMode(NL3D::U3dMouseListener::firstPerson);
-		_mouseMode = NL3D::U3dMouseListener::firstPerson;
-		break;
-	case NL3D::U3dMouseListener::firstPerson:
-		_mouseMode = NL3D::U3dMouseListener::edit3d;
-		Modules::objView().get3dMouseListener()->setMouseMode(NL3D::U3dMouseListener::edit3d);
-		break;
-	}
 }
 
 void CMainWindow::reloadTextures()
@@ -286,10 +250,10 @@ void CMainWindow::updateStatusBar()
 	if (_isGraphicsInitialized)
 	{
 		_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
-					Modules::objView().getDriver()->getVideocardInformation()).arg(
-					_numTri).arg(
-					_texMem, 0,'f',4).arg(
-					_fps, 0,'f',2));
+								 Modules::objView().getDriver()->getVideocardInformation()).arg(
+								 _numTri).arg(
+								 _texMem, 0,'f',4).arg(
+								 _fps, 0,'f',2));
 	}
 }
 
@@ -314,18 +278,11 @@ void CMainWindow::createActions()
 	_resetCameraAction = new QAction(tr("Reset camera"), this);
 	_resetCameraAction->setShortcut(tr("Ctrl+R"));
 	_resetCameraAction->setStatusTip(tr("Reset current camera"));
-	connect(_resetCameraAction, SIGNAL(triggered()), this, SLOT(resetCamera()));
 
 	_renderModeAction = new QAction("Change render mode", this);
 	_renderModeAction->setIcon(QIcon(":/images/polymode.png"));
 	_renderModeAction->setShortcut(tr("Ctrl+M"));
 	_renderModeAction->setStatusTip(tr("Change render mode (Line, Point, Filled)"));
-	connect(_renderModeAction, SIGNAL(triggered()), this, SLOT(changeRenderMode()));
-
-	_cameraModeAction = new QAction("Change camera mode", this);
-	_cameraModeAction->setShortcut(tr("Ctrl+W"));
-	_cameraModeAction->setStatusTip(tr("Change camera mode (edit3d, firstPerson)"));
-	connect(_cameraModeAction, SIGNAL(triggered()), this, SLOT(changeCameraMode()));
 
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
@@ -366,7 +323,6 @@ void CMainWindow::createMenus()
 	_viewMenu->addAction(_setBackColorAction);
 	_viewMenu->addAction(_resetCameraAction);
 	_viewMenu->addAction(_renderModeAction);
-	_viewMenu->addAction(_cameraModeAction);
 	_viewMenu->addAction(_SetupFog->toggleViewAction());
 
 	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
@@ -457,6 +413,12 @@ void CMainWindow::createToolBars()
 	_toolsBar->addAction(_TuneTimerDialog->toggleViewAction());
 	_toolsBar->addAction(_SkeletonScaleDialog->toggleViewAction());
 	_toolsBar->addAction(_TuneMRMDialog->toggleViewAction());
+
+	_cameraControl = new CCameraControl(this);
+	this->addToolBar(_cameraControl->getToolBar());
+
+	connect(_resetCameraAction, SIGNAL(triggered()), _cameraControl, SLOT(resetCamera()));
+	connect(_renderModeAction, SIGNAL(triggered()), _cameraControl, SLOT(setRenderMode()));
 }
 
 void CMainWindow::createStatusBar()
@@ -555,7 +517,7 @@ bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 	bool loaded;
 	if (fileInfo.suffix() == "ig")
 		loaded = Modules::objView().loadInstanceGroup(fileName.toStdString());
-	else 
+	else
 		loaded = Modules::objView().loadMesh(fileName.toStdString(), skelName.toStdString());
 
 	if (!loaded)
@@ -646,7 +608,7 @@ void CMainWindow::updateRender()
 
 		// 14. Update Debug (stuff for dev)
 		// ...
-			
+
 		// 15. Calc FPS
 		static sint64 lastTime = NLMISC::CTime::getPerformanceTime ();
 		sint64 newTime = NLMISC::CTime::getPerformanceTime ();
@@ -656,7 +618,7 @@ void CMainWindow::updateRender()
 		if (_isGraphicsInitialized && !Modules::objView().getDriver()->isLost())
 		{
 			// 01. Render Driver (background color)
-			//Modules::objView().getDriver()->activate();			
+			//Modules::objView().getDriver()->activate();
 			Modules::objView().renderDriver(); // clear all buffers
 
 			// 02. Render Sky (sky scene)

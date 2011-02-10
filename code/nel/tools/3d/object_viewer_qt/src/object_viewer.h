@@ -100,8 +100,6 @@ public:
 
 	void reloadTextures();
 
-	void resetCamera();
-
 	/// Make a screenshot of the current scene and save.
 	void saveScreenshot(const std::string &nameFile, bool jpg, bool png, bool tga);
 
@@ -188,19 +186,19 @@ public:
 	{
 		return _Driver;
 	}
-	
+
 	NL3D::IDriver *getIDriver() const
 	{
 		return _IDriver;
 	}
-	
+
 	/// Get a game interface for scene.
 	/// @return pointer to the scene.
 	inline NL3D::UScene *getScene() const
 	{
 		return _Scene;
 	}
-	
+
 	NL3D::CScene *getCScene() const
 	{
 		return _CScene;

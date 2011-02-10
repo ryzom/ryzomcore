@@ -22,7 +22,7 @@ SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h
 		      vegetable_dialog.h global_wind_dialog.h day_night_dialog.h sun_color_dialog.h
 		      vegetable_noise_value_widget.h vegetable_density_page.h vegetable_landscape_page.h
 		      vegetable_scale_page.h vegetable_appearance_page.h vegetable_rotate_page.h
-		      tune_mrm_dialog.h tune_timer_dialog.h
+		      tune_mrm_dialog.h tune_timer_dialog.h camera_control.h
 		      extension_system/iplugin_manager.h extension_system/plugin_manager.h)
 		      
 SET(OBJECT_VIEWER_UIS animation_form.ui animation_set_form.ui settings_form.ui 

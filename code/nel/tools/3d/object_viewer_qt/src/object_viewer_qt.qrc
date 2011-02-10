@@ -37,7 +37,12 @@
     <file>images/save.png</file>
     <file>images/insert-horizontal.png</file>
     <file>images/polymode.png</file>
-  
+    <file>images/rmfill.png</file>
+    <file>images/rmline.png</file>
+    <file>images/rmpoints.png</file>
+    <file>images/cam_del.png</file>
+    <file>images/cam_add.png</file>
+
     <file>images/Emitter.bmp</file>
     <file>images/Force.bmp</file>
    
