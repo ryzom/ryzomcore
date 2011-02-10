@@ -126,7 +126,7 @@ bool CParticleTreeItem::replace(const QList<QVariant> &data)
 
 bool CParticleTreeItem::deleteChild(int row)
 {
-	_childItems.removeAt(row);
+	delete _childItems.takeAt(row);
 	return true;
 }
 

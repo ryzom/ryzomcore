@@ -33,9 +33,9 @@ namespace NLQT
 
 CSlotGroupBox::CSlotGroupBox(QWidget *parent)
 	: QGroupBox(parent),
-	_animName("empty"), 
-	_skelName("empty"), 
-	_numSlot(0)
+	  _animName("empty"),
+	  _skelName("empty"),
+	  _numSlot(0)
 {
 	_ui.setupUi(this);
 

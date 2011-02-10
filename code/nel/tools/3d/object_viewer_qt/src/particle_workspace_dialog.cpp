@@ -124,7 +124,7 @@ static std::map<std::string,  uint> _PSElementIdentifiers;
 
 CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	: QDockWidget(parent),
-	_currentItem(NULL)
+	  _currentItem(NULL)
 {
 	_ui.setupUi(this);
 

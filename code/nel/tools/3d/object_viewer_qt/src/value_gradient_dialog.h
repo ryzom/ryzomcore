@@ -59,6 +59,7 @@ class IValueGradientClient: public QObject
 	Q_OBJECT
 public:
 	IValueGradientClient(QObject *parent = 0): QObject(parent) {}
+	virtual ~IValueGradientClient() {}
 
 	virtual QWidget *createDialog(QWidget *parent) = 0;
 
@@ -168,6 +169,7 @@ class CValueGradientClientT : public IValueGradientClient, public IPSWrapper<T>
 {
 public:
 	CValueGradientClientT(QObject *parent = 0): IValueGradientClient(parent) {}
+	virtual ~CValueGradientClientT() {}
 
 	/// the gradient being edited, must be filled by the instancier
 	NL3D::CPSValueGradientFunc<T> *Scheme;
@@ -268,6 +270,7 @@ class CFloatGradientWrapper : public CValueGradientClientT<float>
 	Q_OBJECT
 public:
 	CFloatGradientWrapper(QObject *parent = 0): CValueGradientClientT<float>(parent) {}
+	~CFloatGradientWrapper() {}
 
 	virtual QWidget *newDialog(IPSWrapperFloat *wrapper, QWidget *parent)
 	{
@@ -304,6 +307,7 @@ class CUIntGradientWrapper : public CValueGradientClientT<uint32>
 	Q_OBJECT
 public:
 	CUIntGradientWrapper(QObject *parent = 0): CValueGradientClientT<uint32>(parent) {}
+	~CUIntGradientWrapper() {}
 
 	virtual QWidget *newDialog(IPSWrapperUInt *wrapper, QWidget *parent)
 	{
@@ -340,6 +344,7 @@ class CIntGradientWrapper : public CValueGradientClientT<sint32>
 	Q_OBJECT
 public:
 	CIntGradientWrapper(QObject *parent = 0): CValueGradientClientT<sint32>(parent) {}
+	~CIntGradientWrapper() {}
 
 	virtual QWidget *newDialog(IPSWrapper<sint32> *wrapper, QWidget *parent)
 	{
@@ -376,6 +381,7 @@ class CColorGradientWrapper : public CValueGradientClientT<NLMISC::CRGBA>
 	Q_OBJECT
 public:
 	CColorGradientWrapper(QObject *parent = 0): CValueGradientClientT<NLMISC::CRGBA>(parent) {}
+	~CColorGradientWrapper() {}
 
 	virtual QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent)
 	{
@@ -418,6 +424,7 @@ class CPlaneBasisGradientWrapper : public CValueGradientClientT<NL3D::CPlaneBasi
 	Q_OBJECT
 public:
 	CPlaneBasisGradientWrapper(QObject *parent = 0): CValueGradientClientT<NL3D::CPlaneBasis>(parent) {}
+	~CPlaneBasisGradientWrapper() {}
 
 	virtual QWidget *newDialog(IPSWrapper<NL3D::CPlaneBasis> *wrapper, QWidget *parent)
 	{
@@ -454,6 +461,8 @@ public:
 	CTextureGradientInterface(QObject *parent = 0): IValueGradientClient(parent) {}
 
 	CTextureGradientInterface(NL3D::CPSTexturedParticle *tp, CWorkspaceNode *ownerNode): Node(ownerNode), TP(tp) {}
+
+	~CTextureGradientInterface() {}
 
 	CWorkspaceNode *Node;
 	NL3D::CPSTexturedParticle *TP;

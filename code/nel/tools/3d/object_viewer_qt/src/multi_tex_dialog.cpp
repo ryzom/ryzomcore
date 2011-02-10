@@ -31,9 +31,9 @@ namespace NLQT
 {
 
 CMultiTexDialog::CMultiTexDialog(CWorkspaceNode *ownerNode, NL3D::CPSMultiTexturedParticle *mtp, QWidget *parent)
-	: QDialog(parent), 
-	_Node(ownerNode), 
-	_MTP(mtp)
+	: QDialog(parent),
+	  _Node(ownerNode),
+	  _MTP(mtp)
 {
 	_ui.setupUi(this);
 

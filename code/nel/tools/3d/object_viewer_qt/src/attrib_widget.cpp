@@ -45,12 +45,12 @@ namespace NLQT
 
 CAttribWidget::CAttribWidget(QWidget *parent)
 	: QGroupBox(parent),
-	_SrcInputEnabled(true),
-	_EnableConstantValue(true),
-	_DisableMemoryScheme(false),
-	_NbCycleEnabled(true),
-	_Node(NULL), 
-	_SchemeWidget(NULL)
+	  _SrcInputEnabled(true),
+	  _EnableConstantValue(true),
+	  _DisableMemoryScheme(false),
+	  _NbCycleEnabled(true),
+	  _Node(NULL),
+	  _SchemeWidget(NULL)
 {
 	_ui.setupUi(this);
 	_ui.constRangeUIntWidget->hide();

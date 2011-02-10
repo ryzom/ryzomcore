@@ -27,11 +27,11 @@ namespace NLQT
 {
 
 CurveEditDialog::CurveEditDialog(NL3D::CPSFloatCurveFunctor *curve, CWorkspaceNode *ownerNode, QWidget *parent)
-	: QDialog(parent), 
-	_scale(1.0), 
-	_pos(0.0), 
-	_Node(ownerNode), 
-	_Curve(curve)
+	: QDialog(parent),
+	  _scale(1.0),
+	  _pos(0.0),
+	  _Node(ownerNode),
+	  _Curve(curve)
 {
 	_ui.setupUi(this);
 

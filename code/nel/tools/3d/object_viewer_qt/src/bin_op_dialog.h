@@ -47,7 +47,7 @@ class CBinOpDialog : public  QDialog
 
 public:
 	CBinOpDialog(QWidget *widget1, QWidget *widget2, QWidget *parent = 0);
-	~CBinOpDialog();
+	virtual ~CBinOpDialog();
 
 	virtual void init() = 0;
 
@@ -86,7 +86,6 @@ public:
 			_SchemeWrapper[k].Index =  k ;
 		}
 	}
-
 	void init()
 	{
 		uint k ;

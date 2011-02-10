@@ -64,7 +64,7 @@ void CWorkspaceNode::memorizeState()
 void CWorkspaceNode::restoreState()
 {
 	nlassert(_WS);
-	if (!_PS) 
+	if (!_PS)
 		return;
 	_InitialPos.restoreSystem();
 }
@@ -80,7 +80,7 @@ void CWorkspaceNode::stickPSToSkeleton(NL3D::CSkeletonModel *skel,
 									   const std::string &parentBoneName)
 {
 	nlassert(_WS);
-	if (!_PSM) 
+	if (!_PSM)
 		return;
 	unstickPSFromSkeleton();
 	_ParentSkelName = parentSkelName;
@@ -293,7 +293,7 @@ bool CWorkspaceNode::loadPS() throw(NLMISC::EStream)
 	if (oldSB)
 	{
 		Modules::psEdit().getScene()->setShapeBank(oldSB);
-	} 
+	}
 	setup(*psm);
 	unload();
 	// commit new values

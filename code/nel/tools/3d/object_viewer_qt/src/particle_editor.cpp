@@ -35,18 +35,18 @@ namespace NLQT
 
 CParticleEditor::CParticleEditor(void)
 	: _ActiveNode(NULL),
-	_State(State::Stopped),
-	_Speed(1.0f),
-	_AutoRepeat(false),
-	_DisplayBBox(false),
-	_DisplayHelpers(false),
-	_AutoUpdateBBox(false),
-	_EmptyBBox(true),
-	_PW(NULL),
-	_Driver(NULL),
-	_Scene(NULL),
-	_FontManager(NULL),
-	_FontGen(NULL)
+	  _State(State::Stopped),
+	  _Speed(1.0f),
+	  _AutoRepeat(false),
+	  _DisplayBBox(false),
+	  _DisplayHelpers(false),
+	  _AutoUpdateBBox(false),
+	  _EmptyBBox(true),
+	  _PW(NULL),
+	  _Driver(NULL),
+	  _Scene(NULL),
+	  _FontManager(NULL),
+	  _FontGen(NULL)
 {
 }
 
