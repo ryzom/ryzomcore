@@ -5,10 +5,6 @@ NL_TARGET_LIB(ryzom_export ${PRIV_H} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
-IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ryzom_export ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(WITH_STLPORT)
-
 TARGET_LINK_LIBRARIES(ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES})
 NL_DEFAULT_PROPS(ryzom_export "Ryzom, Library, World: Export Tools")
 NL_ADD_RUNTIME_FLAGS(ryzom_export)

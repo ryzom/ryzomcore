@@ -31,10 +31,6 @@ ADD_LIBRARY(ovqt_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQ
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_example nelmisc ${QT_LIBRARIES})
 
-IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ovqt_plugin_example ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(WITH_STLPORT)
-
 NL_DEFAULT_PROPS(ovqt_plugin_example "NeL, Tools, 3D: Object Viewer Qt Plugin: Example")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_example)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_example)
