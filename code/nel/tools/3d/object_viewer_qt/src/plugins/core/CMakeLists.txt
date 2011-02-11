@@ -39,10 +39,6 @@ ADD_LIBRARY(ovqt_plugin_core MODULE ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EX
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
 
-IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ovqt_plugin_core ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(WITH_STLPORT)
-
 NL_DEFAULT_PROPS(ovqt_plugin_core "NeL, Tools, 3D: Object Viewer Qt Plugin: Core")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_core)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_core)
