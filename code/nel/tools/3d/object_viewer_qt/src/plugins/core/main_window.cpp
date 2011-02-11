@@ -17,9 +17,12 @@
 
 // Project includes
 #include "main_window.h"
+#include "iapp_page.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
 
+// NeL includes
+#include <nel/misc/debug.h>
 // Qt includes
 #include <QtGui/QtGui>
 
@@ -37,23 +40,24 @@ CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget
 	_tabWidget = new QTabWidget(this);
 	setCentralWidget(_tabWidget);
 
-	QWidget *qwidg1 = new QWidget(_tabWidget);
-	QWidget *qwidg2 = new QWidget(_tabWidget);
+	QList<QObject *> listObjects = _pluginManager->allObjects();
+	QList<IAppPage *> listAppPages;
+	Q_FOREACH(QObject *obj, listObjects)
+	{
+		IAppPage *appPage = dynamic_cast<IAppPage *>(obj);
+		if (appPage)
+			listAppPages.append(appPage);
+	}
 
-	_tabWidget->addTab(qwidg1, "tab1");
-	_tabWidget->addTab(qwidg2, "tab2");
-
-
-	QGridLayout *gridLayout = new QGridLayout(qwidg1);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-	NLQT::QNLWidget *_nelWidget = new NLQT::QNLWidget(qwidg1);
-	_nelWidget->setObjectName(QString::fromUtf8("NELWIdget1"));
-	gridLayout->addWidget(_nelWidget, 0, 0, 1, 1);
-
-	QGridLayout *gridLayout2 = new QGridLayout(qwidg2);
-	NLQT::QNLWidget *_nelWidget2 = new NLQT::QNLWidget(qwidg2);
-	_nelWidget2->setObjectName(QString::fromUtf8("NELWIdget2"));
-	gridLayout2->addWidget(_nelWidget2, 0, 0, 1, 1);
+	Q_FOREACH(IAppPage *appPage, listAppPages)
+	{
+		QWidget *tabWidget = new QWidget(_tabWidget);
+		_tabWidget->addTab(tabWidget, appPage->icon(), appPage->trName());
+		QGridLayout *gridLayout = new QGridLayout(tabWidget);
+		gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
+		gridLayout->setContentsMargins(0, 0, 0, 0);
+		gridLayout->addWidget(appPage->widget(tabWidget), 0, 0, 1, 1);
+	}
 
 	setDockNestingEnabled(true);
 

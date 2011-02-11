@@ -1,7 +1,6 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
-// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -16,8 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef IOPTIONS_PAGE_H
-#define IOPTIONS_PAGE_H
+#ifndef IAPP_PAGE_H
+#define IAPP_PAGE_H
 
 #include <QtCore/QObject>
 
@@ -26,15 +25,15 @@ class QWidget;
 namespace Core
 {
 /**
-@interface IOptionsPage
-@brief The IOptionsPage is an interface for providing options pages.
+@interface IAppPage
+@brief The IAppPage is an interface for providing app pages in main window.
 @details You need to subclass this interface and put an instance of your subclass
   into the plugin manager object pool.
 */
-class IOptionsPage
+class IAppPage
 {
 public:
-	virtual ~IOptionsPage() {}
+	virtual ~IAppPage() {}
 
 	/// id() is a unique identifier for referencing this page
 	virtual QString id() const = 0;
@@ -42,25 +41,15 @@ public:
 	/// trName() is the (translated) name for display.
 	virtual QString trName() const = 0;
 
-	/// category() is the unique id for the category that the page should be displayed in
-	virtual QString category() const = 0;
+	/// icon() is the icon for display
+	virtual QIcon icon() const = 0;
 
-	/// trCategory() is the translated category
-	virtual QString trCategory() const = 0;
-
-	/// createPage() is called to retrieve the widget to show in the preferences dialog
-	/// The widget will be destroyed by the widget hierarchy when the dialog closes
-	virtual QWidget *createPage(QWidget *parent) = 0;
-
-	/// apply() is called to store the settings. It should detect if any changes have been made and store those.
-	virtual void apply() = 0;
-
-	/// finish() is called directly before the preferences dialog closes
-	virtual void finish() = 0;
+	/// The widget will be destroyed by the widget hierarchy when the main window closes
+	virtual QWidget *widget(QWidget *parent) = 0;
 };
 
 } // namespace Core
 
-Q_DECLARE_INTERFACE(Core::IOptionsPage, "dev.ryzom.com.IOptionsPage/1.0")
+Q_DECLARE_INTERFACE(Core::IAppPage, "dev.ryzom.com.IAppPage/0.1")
 
-#endif // IOPTIONS_PAGE_H
+#endif // IAPP_PAGE_H
