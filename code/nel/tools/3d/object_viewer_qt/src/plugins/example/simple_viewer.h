@@ -21,6 +21,7 @@
 
 // Project includes
 #include "qnel_widget.h"
+#include "../core/icore_listener.h"
 
 // Qt includes
 #include <QtCore/QObject>
@@ -36,6 +37,17 @@ class CSimpleViewer : public QWidget
 public:
 	CSimpleViewer(QWidget *parent = 0);
 	virtual ~CSimpleViewer() {}
+};
+
+class CCoreListener : public QObject, public Core::ICoreListener
+{
+	Q_OBJECT
+	Q_INTERFACES(Core::ICoreListener)
+public:
+	CCoreListener(QObject *parent = 0): QObject(parent) {}
+	virtual ~CCoreListener() {}
+
+	virtual bool closeMainWindow() const;
 };
 
 } // namespace Plugin

@@ -14,6 +14,7 @@ SET(OVQT_PLUG_EXAMPLE_HDR 	plugin1.h
 							simple_viewer.h
 							example_settings_page.h
 							${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h
+							${CMAKE_CURRENT_SOURCE_DIR}/../core/icore_listener.h
 							${CMAKE_CURRENT_SOURCE_DIR}/../core/ioptions_page.h)
 
 SET(OVQT_PLUG_EXAMPLE_UIS	example_settings_page.ui)

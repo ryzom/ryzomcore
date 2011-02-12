@@ -31,13 +31,14 @@
 namespace Core
 {
 class CSettingsDialog;
+class CorePlugin;
 
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent = 0);
+	CMainWindow(CorePlugin *corePlugin, QWidget *parent = 0);
 	~CMainWindow();
 
 	inline QSettings *settings() const
@@ -61,6 +62,7 @@ private:
 
 	ExtensionSystem::IPluginManager *_pluginManager;
 	ExtensionSystem::CPluginView *_pluginView;
+	CorePlugin *_corePlugin;
 
 	QPalette _originalPalette;
 	QString _lastDir;

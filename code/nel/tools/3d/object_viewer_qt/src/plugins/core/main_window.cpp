@@ -17,7 +17,9 @@
 
 // Project includes
 #include "main_window.h"
+#include "core_plugin.h"
 #include "iapp_page.h"
+#include "icore_listener.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
 
@@ -29,11 +31,12 @@
 namespace Core
 {
 
-CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent)
+CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 	: QMainWindow(parent),
 	  _lastDir(".")
 {
-	_pluginManager = pluginManager;
+	_corePlugin = corePlugin;
+	_pluginManager = _corePlugin->pluginManager();
 
 	setObjectName(Constants::MAIN_WINDOW);
 
@@ -41,14 +44,7 @@ CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget
 	_tabWidget->setTabPosition(QTabWidget::South);
 	setCentralWidget(_tabWidget);
 
-	QList<QObject *> listObjects = _pluginManager->allObjects();
-	QList<IAppPage *> listAppPages;
-	Q_FOREACH(QObject *obj, listObjects)
-	{
-		IAppPage *appPage = dynamic_cast<IAppPage *>(obj);
-		if (appPage)
-			listAppPages.append(appPage);
-	}
+	QList<IAppPage *> listAppPages = _corePlugin->getObjects<IAppPage>();
 
 	Q_FOREACH(IAppPage *appPage, listAppPages)
 	{
@@ -98,6 +94,15 @@ void CMainWindow::about()
 
 void CMainWindow::closeEvent(QCloseEvent *event)
 {
+	QList<ICoreListener *> listeners = _corePlugin->getObjects<ICoreListener>();
+	Q_FOREACH(ICoreListener *listener, listeners)
+	{
+		if (!listener->closeMainWindow())
+		{
+			event->ignore();
+			return;
+		}
+	}
 	QMainWindow::closeEvent(event);
 }
 
@@ -160,12 +165,6 @@ void CMainWindow::createMenus()
 	_helpMenu->addAction(_aboutAction);
 	_helpMenu->addAction(_aboutQtAction);
 	_helpMenu->addAction(_pluginViewAction);
-
-	_pluginManager->addObject(_fileMenu);
-	_pluginManager->addObject(_editMenu);
-	_pluginManager->addObject(_viewMenu);
-	_pluginManager->addObject(_toolsMenu);
-	_pluginManager->addObject(_helpMenu);
 }
 
 void CMainWindow::createStatusBar()

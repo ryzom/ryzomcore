@@ -70,7 +70,7 @@ void CorePlugin::extensionsInitialized()
 	}
 	else
 	{
-		_mainWindow = new CMainWindow(_plugMan);
+		_mainWindow = new CMainWindow(this);
 #ifdef Q_WS_X11
 		_mainWindow->setAttribute(Qt::WA_TranslucentBackground);
 		_mainWindow->setAttribute(Qt::WA_NoSystemBackground, false);

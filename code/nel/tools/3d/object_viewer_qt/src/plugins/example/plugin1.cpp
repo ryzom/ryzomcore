@@ -26,6 +26,7 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 
 	_plugMan->addObject(new CExampleSettingsPage(this));
 	_plugMan->addObject(new CExampleAppPage(this));
+	_plugMan->addObject(new CCoreListener(this));
 	return true;
 }
 

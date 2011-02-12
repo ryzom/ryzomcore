@@ -20,6 +20,7 @@
 // Qt includes
 #include <QtGui/QWidget>
 #include <QtGui/QGridLayout>
+#include <QtGui/QMessageBox>
 
 // NeL includes
 
@@ -38,5 +39,16 @@ CSimpleViewer::CSimpleViewer(QWidget *parent)
 	gridLayout->addWidget(_nelWidget, 0, 0, 1, 1);
 }
 
+bool CCoreListener::closeMainWindow() const
+{
+	int ret = QMessageBox::question(0, tr("Example close event hook"),
+									tr("Do you want to close window?"),
+									QMessageBox::Yes | QMessageBox::No);
+
+	if (ret == QMessageBox::Yes)
+		return true;
+	else
+		return false;
+}
 
 } /* namespace Plugin */
