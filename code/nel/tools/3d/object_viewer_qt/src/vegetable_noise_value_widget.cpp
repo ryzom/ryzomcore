@@ -29,8 +29,8 @@ namespace NLQT
 {
 
 CVegetNoiseValueWidget::CVegetNoiseValueWidget(QWidget *parent)
-	: QGroupBox(parent), 
-	_emit(true)
+	: QGroupBox(parent),
+	  _emit(true)
 {
 	_ui.setupUi(this);
 

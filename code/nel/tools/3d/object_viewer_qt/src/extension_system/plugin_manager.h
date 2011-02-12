@@ -52,10 +52,10 @@ public:
 	virtual QList<IPluginSpec *> plugins() const;
 
 	// Settings
-    virtual void setSettings(QSettings *settings);
-    virtual QSettings *settings() const;
-    void readSettings();
-    void writeSettings();
+	virtual void setSettings(QSettings *settings);
+	virtual QSettings *settings() const;
+	void readSettings();
+	void writeSettings();
 
 private:
 	void setPluginState(CPluginSpec *spec, int destState);

@@ -117,9 +117,9 @@ sint main(int argc, char **argv)
 #endif
 
 	Modules::init();
-	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, 
+	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
 										QLatin1String("Ryzom Core"), QLatin1String("ObjectViewerQt"));
-	
+
 	Modules::plugMan().setSettings(settings);
 
 	// load and set remap extensions from config

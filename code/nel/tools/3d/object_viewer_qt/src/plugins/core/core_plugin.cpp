@@ -49,7 +49,7 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 void CorePlugin::extensionsInitialized()
 {
 	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-	
+
 	// for old ovqt
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
 	if (wnd)
@@ -63,7 +63,7 @@ void CorePlugin::extensionsInitialized()
 		QAction *newAction = toolsMenu->addAction(tr("New settings"));
 		QAction *newAction2 = helpMenu->addAction(tr("About plugins"));
 		newAction->setIcon(QIcon(Constants::ICON_SETTINGS));
-		
+
 		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
 		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
 		oldOVQT = true;
@@ -94,7 +94,7 @@ void CorePlugin::extensionsInitialized()
 void CorePlugin::shutdown()
 {
 	if (!oldOVQT)
-	{	
+	{
 		delete _mainWindow;
 		delete _pluginView;
 	}

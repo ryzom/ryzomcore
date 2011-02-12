@@ -36,7 +36,7 @@ namespace NLQT
 
 /**
 @class CWorkspacePage
-@brief Page for QStackWidget, to particles workspace operation (new/load/save workspace, 
+@brief Page for QStackWidget, to particles workspace operation (new/load/save workspace,
 create/insert/remove all particles system to workspace)
 */
 class CWorkspacePage: public QWidget

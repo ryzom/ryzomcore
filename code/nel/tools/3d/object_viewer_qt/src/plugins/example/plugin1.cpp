@@ -71,16 +71,16 @@ QList<QString> MyPlugin::dependencies() const
 QObject* MyPlugin::objectByName(const QString &name) const
 {
 	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-		if (qobj->objectName() == name)
-			return qobj;
+	if (qobj->objectName() == name)
+		return qobj;
 	return 0;
 }
 
 ExtensionSystem::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
 {
 	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-		if (spec->name() == name)
-			return spec;
+	if (spec->name() == name)
+		return spec;
 	return 0;
 }
 

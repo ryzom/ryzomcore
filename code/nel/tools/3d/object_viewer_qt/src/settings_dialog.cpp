@@ -59,7 +59,7 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 	connect(ui.removeToolButton, SIGNAL(clicked()), this, SLOT(removePath()));
 	connect(ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
 	connect(ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
-	
+
 	connect(ui.tileBankToolButton, SIGNAL(clicked()), this, SLOT(setTileBank()));
 	connect(ui.tileFarBankToolButton, SIGNAL(clicked()), this, SLOT(setTileFarBank()));
 	connect(ui.vegetTexToolButton, SIGNAL(clicked()), this, SLOT(setTextureVegetable()));
@@ -384,7 +384,7 @@ void CSettingsDialog::saveVegetableSettings()
 		std::string str = ui.zonesListWidget->item(i)->text().toStdString();
 		list.push_back(str);
 	}
-	
+
 	Modules::config().getConfigFile().getVar("VegetLandscapeZones").Type = NLMISC::CConfigFile::CVar::T_STRING;
 	Modules::config().getConfigFile().getVar("VegetLandscapeZones").setAsString(list);
 }

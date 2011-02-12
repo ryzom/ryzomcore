@@ -56,8 +56,8 @@ public:
 	virtual QList<ExtensionSystem::IPluginSpec *> plugins() const = 0;
 
 	// Settings
-    virtual void setSettings(QSettings *settings) = 0;
-    virtual QSettings *settings() const = 0;
+	virtual void setSettings(QSettings *settings) = 0;
+	virtual QSettings *settings() const = 0;
 
 Q_SIGNALS:
 	void objectAdded(QObject *obj);

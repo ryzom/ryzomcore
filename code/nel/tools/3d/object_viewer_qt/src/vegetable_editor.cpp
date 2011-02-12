@@ -315,30 +315,30 @@ void CVegetableEditor::setVegetableWindPower(float w)
 {
 	_VegetableWindPower= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
-														_VegetableWindFreq, 
-														_VegetableWindPower, 
-														_VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir,
+				_VegetableWindFreq,
+				_VegetableWindPower,
+				_VegetableWindBendMin);
 }
 
 void CVegetableEditor::setVegetableWindBendStart(float w)
 {
 	_VegetableWindBendMin= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
-														_VegetableWindFreq, 
-														_VegetableWindPower, 
-														_VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir,
+				_VegetableWindFreq,
+				_VegetableWindPower,
+				_VegetableWindBendMin);
 }
 
 void CVegetableEditor::setVegetableWindFrequency(float w)
 {
 	_VegetableWindFreq= w;
 	if(_VegetableLandscape)
-		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, 
-														_VegetableWindFreq, 
-														_VegetableWindPower, 
-														_VegetableWindBendMin);
+		_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir,
+				_VegetableWindFreq,
+				_VegetableWindPower,
+				_VegetableWindBendMin);
 }
 
 void CVegetableEditor::snapToGroundVegetableLandscape(bool enable)

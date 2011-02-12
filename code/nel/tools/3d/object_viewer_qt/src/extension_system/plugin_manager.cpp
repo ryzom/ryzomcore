@@ -95,8 +95,8 @@ void CPluginManager::loadPlugins()
 	setPluginState(spec, State::Initialized);
 
 	QListIterator<CPluginSpec *> it(_pluginSpecs);
-    it.toBack();
-    while (it.hasPrevious())
+	it.toBack();
+	while (it.hasPrevious())
 		setPluginState(it.previous(), State::Running);
 
 	Q_EMIT pluginsChanged();
@@ -202,12 +202,12 @@ void CPluginManager::stopAll()
 
 void CPluginManager::deleteAll()
 {
-    QListIterator<CPluginSpec *> it(_pluginSpecs);
-    it.toBack();
-    while (it.hasPrevious())
+	QListIterator<CPluginSpec *> it(_pluginSpecs);
+	it.toBack();
+	while (it.hasPrevious())
 	{
-        setPluginState(it.previous(), State::Deleted);
-    }
+		setPluginState(it.previous(), State::Deleted);
+	}
 }
 
 }; // namespace NLQT

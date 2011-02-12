@@ -58,7 +58,10 @@ public:
 
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
-	ExtensionSystem::IPluginManager *pluginManager() const { return _plugMan; }
+	ExtensionSystem::IPluginManager *pluginManager() const
+	{
+		return _plugMan;
+	}
 
 	template <typename Type>
 	QList<Type *> getObjects() const
