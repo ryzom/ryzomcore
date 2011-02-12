@@ -183,7 +183,7 @@ CCameraControl::CCameraControl(QWidget *parent)
 
 CCameraControl::~CCameraControl()
 {
-	for(int i = 0; i < _cameraList.size(); ++i)
+	for(size_t i = 0; i < _cameraList.size(); ++i)
 		delete _cameraList[i];
 	_cameraList.clear();
 }

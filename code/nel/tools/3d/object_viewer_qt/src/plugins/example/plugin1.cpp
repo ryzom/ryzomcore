@@ -24,42 +24,13 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	_plugMan->addObject(new CExampleSettingsPage(wnd));
-	if (!wnd)
-	{
-		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
-		return false;
-	}
-	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-	if (!helpMenu)
-	{
-		*errorString = tr("Not found QMenu Help.");
-		return false;
-	}
-	_plugMan->addObject(new CExampleAppPage());
+	_plugMan->addObject(new CExampleSettingsPage(this));
+	_plugMan->addObject(new CExampleAppPage(this));
 	return true;
 }
 
 void MyPlugin::extensionsInitialized()
 {
-	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
-	nlassert(helpMenu);
-
-	helpMenu->addSeparator();
-	QAction *newAction = helpMenu->addAction("MyPlugin");
-
-	connect(newAction, SIGNAL(triggered()), this, SLOT(execMessageBox()));
-}
-
-void MyPlugin::execMessageBox()
-{
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	nlassert(wnd);
-
-	QMessageBox msgBox;
-	msgBox.setText(wnd->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height()));
-	msgBox.exec();
 }
 
 void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)

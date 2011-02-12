@@ -50,6 +50,8 @@ private Q_SLOTS:
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
 	void about();
+protected:
+	virtual void closeEvent(QCloseEvent *event);
 
 private:
 	void createActions();

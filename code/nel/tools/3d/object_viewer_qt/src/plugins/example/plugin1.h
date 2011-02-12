@@ -46,9 +46,6 @@ public:
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
-private Q_SLOTS:
-	void execMessageBox();
-
 protected:
 	NLMISC::CLibraryContext *_LibContext;
 

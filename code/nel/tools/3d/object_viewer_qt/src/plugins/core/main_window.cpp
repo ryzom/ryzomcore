@@ -96,6 +96,11 @@ void CMainWindow::about()
 						  "<p> Author: dnk-88 <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
+void CMainWindow::closeEvent(QCloseEvent *event)
+{
+	QMainWindow::closeEvent(event);
+}
+
 void CMainWindow::createActions()
 {
 	_openAction = new QAction(tr("&Open..."), this);

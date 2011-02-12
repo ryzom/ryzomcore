@@ -40,59 +40,64 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	// for old ovqt
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	if (!wnd)
-	{
-		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
-		return false;
-	}
+	oldOVQT = false;
 
-	_plugMan->addObject(new CSearchPathsSettingsPage(wnd));
+	_plugMan->addObject(new CSearchPathsSettingsPage(this));
 	return true;
 }
 
 void CorePlugin::extensionsInitialized()
 {
-	// for old ovqt
 	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-
-	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
-	nlassert(toolsMenu);
-	nlassert(helpMenu);
-
-	QAction *newAction = toolsMenu->addAction(tr("New settings"));
-	QAction *newAction2 = helpMenu->addAction(tr("About plugins"));
-	newAction->setIcon(QIcon(Constants::ICON_SETTINGS));
-
-	connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
-	connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
-
-	_mainWindow = new CMainWindow(_plugMan);
-#ifdef Q_WS_X11
-	_mainWindow->setAttribute(Qt::WA_TranslucentBackground);
-	_mainWindow->setAttribute(Qt::WA_NoSystemBackground, false);
-	QPalette pal = _mainWindow->palette();
-	QColor bg = pal.window().color();
-	bg.setAlpha(180);
-	pal.setColor(QPalette::Window, bg);
-	_mainWindow->setPalette(pal);
-	_mainWindow->ensurePolished(); // workaround Oxygen filling the background
-	_mainWindow->setAttribute(Qt::WA_StyledBackground, false);
-#endif
-	if (QtWin::isCompositionEnabled())
+	
+	// for old ovqt
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	if (wnd)
 	{
-		QtWin::extendFrameIntoClientArea(_mainWindow);
-		_mainWindow->setContentsMargins(0, 0, 0, 0);
+		_pluginView = new ExtensionSystem::CPluginView(_plugMan);
+		QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
+		QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
+		nlassert(toolsMenu);
+		nlassert(helpMenu);
+
+		QAction *newAction = toolsMenu->addAction(tr("New settings"));
+		QAction *newAction2 = helpMenu->addAction(tr("About plugins"));
+		newAction->setIcon(QIcon(Constants::ICON_SETTINGS));
+		
+		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
+		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
+		oldOVQT = true;
 	}
-	_mainWindow->show();
+	else
+	{
+		_mainWindow = new CMainWindow(_plugMan);
+#ifdef Q_WS_X11
+		_mainWindow->setAttribute(Qt::WA_TranslucentBackground);
+		_mainWindow->setAttribute(Qt::WA_NoSystemBackground, false);
+		QPalette pal = _mainWindow->palette();
+		QColor bg = pal.window().color();
+		bg.setAlpha(180);
+		pal.setColor(QPalette::Window, bg);
+		_mainWindow->setPalette(pal);
+		_mainWindow->ensurePolished(); // workaround Oxygen filling the background
+		_mainWindow->setAttribute(Qt::WA_StyledBackground, false);
+#endif
+		if (QtWin::isCompositionEnabled())
+		{
+			QtWin::extendFrameIntoClientArea(_mainWindow);
+			_mainWindow->setContentsMargins(0, 0, 0, 0);
+		}
+		_mainWindow->show();
+	}
 }
 
 void CorePlugin::shutdown()
 {
-	delete _mainWindow;
-	delete _pluginView;
+	if (!oldOVQT)
+	{	
+		delete _mainWindow;
+		delete _pluginView;
+	}
 }
 
 void CorePlugin::execSettings()

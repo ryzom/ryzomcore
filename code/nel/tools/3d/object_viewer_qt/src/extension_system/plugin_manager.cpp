@@ -28,14 +28,16 @@
 namespace ExtensionSystem
 {
 
-CPluginManager::CPluginManager(QObject *parent):
-	IPluginManager(parent)
+CPluginManager::CPluginManager(QObject *parent)
+	:IPluginManager(parent),
+	 _settings(0)
 {
 }
 
 CPluginManager::~CPluginManager()
 {
 	stopAll();
+	deleteAll();
 	qDeleteAll(_pluginSpecs);
 }
 
@@ -92,8 +94,10 @@ void CPluginManager::loadPlugins()
 	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
 	setPluginState(spec, State::Initialized);
 
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
-	setPluginState(spec, State::Running);
+	QListIterator<CPluginSpec *> it(_pluginSpecs);
+    it.toBack();
+    while (it.hasPrevious())
+		setPluginState(it.previous(), State::Running);
 
 	Q_EMIT pluginsChanged();
 }
@@ -112,6 +116,24 @@ void CPluginManager::setPluginPaths(const QStringList &paths)
 QList<IPluginSpec *> CPluginManager::plugins() const
 {
 	return _ipluginSpecs;
+}
+
+void CPluginManager::setSettings(QSettings *settings)
+{
+	_settings = settings;
+}
+
+QSettings *CPluginManager::settings() const
+{
+	return _settings;
+}
+
+void CPluginManager::readSettings()
+{
+}
+
+void CPluginManager::writeSettings()
+{
 }
 
 void CPluginManager::readPluginPaths()
@@ -176,9 +198,16 @@ void CPluginManager::stopAll()
 {
 	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
 	setPluginState(spec, State::Stopped);
+}
 
-	Q_FOREACH (CPluginSpec *spec, _pluginSpecs)
-	setPluginState(spec, State::Deleted);
+void CPluginManager::deleteAll()
+{
+    QListIterator<CPluginSpec *> it(_pluginSpecs);
+    it.toBack();
+    while (it.hasPrevious())
+	{
+        setPluginState(it.previous(), State::Deleted);
+    }
 }
 
 }; // namespace NLQT

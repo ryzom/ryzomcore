@@ -23,6 +23,7 @@
 #include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
+#include <QtCore/QSettings>
 
 namespace ExtensionSystem
 {
@@ -53,6 +54,10 @@ public:
 	virtual QStringList getPluginPaths() const = 0;
 	virtual void setPluginPaths(const QStringList &paths) = 0;
 	virtual QList<ExtensionSystem::IPluginSpec *> plugins() const = 0;
+
+	// Settings
+    virtual void setSettings(QSettings *settings) = 0;
+    virtual QSettings *settings() const = 0;
 
 Q_SIGNALS:
 	void objectAdded(QObject *obj);
