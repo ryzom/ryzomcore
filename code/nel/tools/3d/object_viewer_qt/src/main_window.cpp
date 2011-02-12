@@ -145,6 +145,7 @@ CMainWindow::~CMainWindow()
 	delete _TuneTimerDialog;
 	delete _ParticleControlDialog;
 	delete _ParticleWorkspaceDialog;
+	delete _cameraControl;
 
 	if (_isSoundInitialized)
 		Modules::sound().releaseGraphics();

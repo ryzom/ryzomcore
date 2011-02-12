@@ -1,5 +1,14 @@
+// Project includes
 #include "plugin1.h"
+#include "example_settings_page.h"
+#include "simple_viewer.h"
+#include "../core/iapp_page.h"
+#include "../../extension_system/iplugin_spec.h"
 
+// NeL includes
+#include "nel/misc/debug.h"
+
+// Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
@@ -7,12 +16,8 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-
-#include "../../extension_system/iplugin_spec.h"
-#include "example_settings_page.h"
-#include "nel/misc/debug.h"
-
-using namespace Plugin;
+namespace Plugin
+{
 
 bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
@@ -32,6 +37,7 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 		*errorString = tr("Not found QMenu Help.");
 		return false;
 	}
+	_plugMan->addObject(new CExampleAppPage());
 	return true;
 }
 
@@ -42,7 +48,7 @@ void MyPlugin::extensionsInitialized()
 
 	helpMenu->addSeparator();
 	QAction *newAction = helpMenu->addAction("MyPlugin");
-	
+
 	connect(newAction, SIGNAL(triggered()), this, SLOT(execMessageBox()));
 }
 
@@ -50,7 +56,7 @@ void MyPlugin::execMessageBox()
 {
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
 	nlassert(wnd);
-	
+
 	QMessageBox msgBox;
 	msgBox.setText(wnd->objectName() + QString(": width=%1,height=%2").arg(wnd->width()).arg(wnd->height()));
 	msgBox.exec();
@@ -95,7 +101,7 @@ QObject* MyPlugin::objectByName(const QString &name) const
 {
 	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
 		if (qobj->objectName() == name)
-				return qobj;
+			return qobj;
 	return 0;
 }
 
@@ -107,4 +113,6 @@ ExtensionSystem::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
 	return 0;
 }
 
-Q_EXPORT_PLUGIN(MyPlugin)
+}
+
+Q_EXPORT_PLUGIN(Plugin::MyPlugin)

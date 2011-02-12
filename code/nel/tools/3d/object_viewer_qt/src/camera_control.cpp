@@ -52,6 +52,7 @@ CCameraItem::CCameraItem(const QString &name):
 
 CCameraItem::~CCameraItem()
 {
+	Modules::objView().getScene()->deleteCamera(_camera);
 }
 
 void CCameraItem::setActive(bool active)
@@ -182,6 +183,9 @@ CCameraControl::CCameraControl(QWidget *parent)
 
 CCameraControl::~CCameraControl()
 {
+	for(int i = 0; i < _cameraList.size(); ++i)
+		delete _cameraList[i];
+	_cameraList.clear();
 }
 
 void CCameraControl::setEditMode()

@@ -12,7 +12,6 @@ SET(OVQT_CORE_PLUGIN_HDR
 				core_plugin.h
 				main_window.h
 				settings_dialog.h
-				qnel_widget.h
 				search_paths_settings_page.h
 				plugin_view_dialog.h)
 
@@ -37,7 +36,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_core MODULE ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_core nelmisc ${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(ovqt_plugin_core "NeL, Tools, 3D: Object Viewer Qt Plugin: Core")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_core)

@@ -18,16 +18,15 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+// Project includes
+#include "../../extension_system/iplugin.h"
+#include "plugin_view_dialog.h"
+
 // STL includes
 
 // Qt includes
 #include <QtGui/QMainWindow>
 #include <QtCore/QSettings>
-
-// Project includes
-#include "qnel_widget.h"
-#include "../../extension_system/iplugin.h"
-#include "plugin_view_dialog.h"
 
 namespace Core
 {

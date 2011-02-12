@@ -38,6 +38,7 @@ CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget
 	setObjectName(Constants::MAIN_WINDOW);
 
 	_tabWidget = new QTabWidget(this);
+	_tabWidget->setTabPosition(QTabWidget::South);
 	setCentralWidget(_tabWidget);
 
 	QList<QObject *> listObjects = _pluginManager->allObjects();
@@ -56,7 +57,7 @@ CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget
 		QGridLayout *gridLayout = new QGridLayout(tabWidget);
 		gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
 		gridLayout->setContentsMargins(0, 0, 0, 0);
-		gridLayout->addWidget(appPage->widget(tabWidget), 0, 0, 1, 1);
+		gridLayout->addWidget(appPage->widget(), 0, 0, 1, 1);
 	}
 
 	setDockNestingEnabled(true);
