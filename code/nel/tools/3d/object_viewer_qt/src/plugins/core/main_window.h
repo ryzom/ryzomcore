@@ -32,6 +32,7 @@ namespace Core
 {
 class CSettingsDialog;
 class CorePlugin;
+class IAppPage;
 
 class CMainWindow : public QMainWindow
 {
@@ -41,12 +42,8 @@ public:
 	CMainWindow(CorePlugin *corePlugin, QWidget *parent = 0);
 	~CMainWindow();
 
-	inline QSettings *settings() const
-	{
-		return _settings;
-	}
-
 private Q_SLOTS:
+	void checkObject(QObject *obj);
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
@@ -55,10 +52,15 @@ protected:
 	virtual void closeEvent(QCloseEvent *event);
 
 private:
+	void addAppPage(IAppPage *appPage);
+
 	void createActions();
 	void createMenus();
 	void createStatusBar();
 	void createDialogs();
+
+	void readSettings();
+	void writeSettings();
 
 	ExtensionSystem::IPluginManager *_pluginManager;
 	ExtensionSystem::CPluginView *_pluginView;

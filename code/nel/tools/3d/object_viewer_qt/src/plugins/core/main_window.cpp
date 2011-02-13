@@ -37,6 +37,7 @@ CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 {
 	_corePlugin = corePlugin;
 	_pluginManager = _corePlugin->pluginManager();
+	_settings = _pluginManager->settings();
 
 	setObjectName(Constants::MAIN_WINDOW);
 
@@ -48,12 +49,7 @@ CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 
 	Q_FOREACH(IAppPage *appPage, listAppPages)
 	{
-		QWidget *tabWidget = new QWidget(_tabWidget);
-		_tabWidget->addTab(tabWidget, appPage->icon(), appPage->trName());
-		QGridLayout *gridLayout = new QGridLayout(tabWidget);
-		gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
-		gridLayout->setContentsMargins(0, 0, 0, 0);
-		gridLayout->addWidget(appPage->widget(), 0, 0, 1, 1);
+		addAppPage(appPage);
 	}
 
 	setDockNestingEnabled(true);
@@ -65,13 +61,24 @@ CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 	createMenus();
 	createStatusBar();
 
+	readSettings();
+
 	setWindowIcon(QIcon(Constants::ICON_NEL));
 	setWindowTitle(tr("Object Viewer Qt"));
+
+	connect(_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 }
 
 CMainWindow::~CMainWindow()
 {
 	delete _pluginView;
+}
+
+void CMainWindow::checkObject(QObject *obj)
+{
+	IAppPage *appPage = qobject_cast<IAppPage *>(obj);
+	if (appPage)
+		addAppPage(appPage);
 }
 
 bool CMainWindow::showOptionsDialog(const QString &group,
@@ -103,7 +110,20 @@ void CMainWindow::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
+
+	writeSettings();
+
 	QMainWindow::closeEvent(event);
+}
+
+void CMainWindow::addAppPage(IAppPage *appPage)
+{
+	QWidget *tabWidget = new QWidget(_tabWidget);
+	_tabWidget->addTab(tabWidget, appPage->icon(), appPage->trName());
+	QGridLayout *gridLayout = new QGridLayout(tabWidget);
+	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
+	gridLayout->setContentsMargins(0, 0, 0, 0);
+	gridLayout->addWidget(appPage->widget(), 0, 0, 1, 1);
 }
 
 void CMainWindow::createActions()
@@ -175,6 +195,22 @@ void CMainWindow::createStatusBar()
 void CMainWindow::createDialogs()
 {
 	_pluginView = new ExtensionSystem::CPluginView(_pluginManager, this);
+}
+
+void CMainWindow::readSettings()
+{
+	_settings->beginGroup("MainWindowSettings");
+	restoreState(_settings->value("QtWindowState").toByteArray());
+	restoreGeometry(_settings->value("QtWindowGeometry").toByteArray());
+	_settings->endGroup();
+}
+
+void CMainWindow::writeSettings()
+{
+	_settings->beginGroup("MainWindowSettings");
+	_settings->setValue("QtWindowState", saveState());
+	_settings->setValue("QtWindowGeometry", saveGeometry());
+	_settings->endGroup();
 }
 
 } /* namespace Core */
