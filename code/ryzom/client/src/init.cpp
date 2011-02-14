@@ -577,12 +577,19 @@ void checkDriverDepth ()
 
 static std::string replaceApplicationDirToken(const std::string &dir)
 {
+
+#ifdef NL_OS_MAC
+  // if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
+  if (!CFile::isExists("client_default.cfg") && dir.size()>0 && dir[0]!='/')
+    {
+	return  getAppBundlePath() + "/Contents/Resources/" + dir;
+    }
+#else
 	static const std::string token = "<ApplicationDir>";
-
 	std::string::size_type pos = dir.find(token);
-
 	if (pos != std::string::npos)
 		return dir.substr(0, pos) + getAppBundlePath() + dir.substr(pos + token.length());
+#endif
 
 //	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
 
