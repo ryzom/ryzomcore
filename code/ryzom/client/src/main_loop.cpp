@@ -700,6 +700,9 @@ void updateFromClientCfg()
 	//---------------------------------------------------
 	if (Landscape)
 	{
+#ifdef NL_OS_MAC
+		Landscape->enableVegetable(false);
+#else
 		if (ClientCfg.MicroVeget != LastClientCfg.MicroVeget)
 		{
 			if(ClientCfg.MicroVeget)
@@ -719,6 +722,7 @@ void updateFromClientCfg()
 				Landscape->enableVegetable(false);
 			}
 		}
+#endif
 	}
 
 	//---------------------------------------------------
