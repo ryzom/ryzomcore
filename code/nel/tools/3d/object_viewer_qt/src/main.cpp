@@ -21,6 +21,7 @@
 
 // Qt includes
 #include <QtCore/QDir>
+#include <QtCore/QSettings>
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QSplashScreen>
@@ -112,11 +113,14 @@ sint main(int argc, char **argv)
 
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
-	CLibrary::addLibPath(
-		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+	CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
 	Modules::init();
+	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+										QLatin1String("Ryzom Core"), QLatin1String("ObjectViewerQt"));
+
+	Modules::plugMan().setSettings(settings);
 
 	// load and set remap extensions from config
 	Modules::config().configRemapExtensions();
@@ -129,21 +133,20 @@ sint main(int argc, char **argv)
 #if !defined(NL_OS_MAC)
 	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
 #else
-	Modules::plugMan().setPluginPaths(QStringList() << 
-		qApp->applicationDirPath() + QString("/../PlugIns/ovqt"));
+	Modules::plugMan().setPluginPaths(QStringList() <<
+									  qApp->applicationDirPath() + QString("/../PlugIns/ovqt"));
 #endif
 
 	Modules::plugMan().loadPlugins();
-	
+
 	QStringList errors;
 	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, Modules::plugMan().plugins())
-		if (spec->hasError())
-			errors.append(spec->fileName() + " : " + spec->errorString());
-	
+	if (spec->hasError())
+		errors.append(spec->fileName() + " : " + spec->errorString());
+
 	if (!errors.isEmpty())
-		QMessageBox::warning(0,
-				QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
-				errors.join(QString::fromLatin1("\n\n")));
+		QMessageBox::warning(0, QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
+							 errors.join(QString::fromLatin1("\n\n")));
 
 	splash->finish(&Modules::mainWin());
 	int result = app.exec();

@@ -17,43 +17,40 @@
 
 // Project includes
 #include "main_window.h"
+#include "core_plugin.h"
+#include "iapp_page.h"
+#include "icore_listener.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
 
+// NeL includes
+#include <nel/misc/debug.h>
 // Qt includes
 #include <QtGui/QtGui>
 
 namespace Core
 {
 
-CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent)
+CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 	: QMainWindow(parent),
 	  _lastDir(".")
 {
-	_pluginManager = pluginManager;
+	_corePlugin = corePlugin;
+	_pluginManager = _corePlugin->pluginManager();
+	_settings = _pluginManager->settings();
 
 	setObjectName(Constants::MAIN_WINDOW);
 
 	_tabWidget = new QTabWidget(this);
+	_tabWidget->setTabPosition(QTabWidget::South);
 	setCentralWidget(_tabWidget);
 
-	QWidget *qwidg1 = new QWidget(_tabWidget);
-	QWidget *qwidg2 = new QWidget(_tabWidget);
+	QList<IAppPage *> listAppPages = _corePlugin->getObjects<IAppPage>();
 
-	_tabWidget->addTab(qwidg1, "tab1");
-	_tabWidget->addTab(qwidg2, "tab2");
-
-
-	QGridLayout *gridLayout = new QGridLayout(qwidg1);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-	NLQT::QNLWidget *_nelWidget = new NLQT::QNLWidget(qwidg1);
-	_nelWidget->setObjectName(QString::fromUtf8("NELWIdget1"));
-	gridLayout->addWidget(_nelWidget, 0, 0, 1, 1);
-
-	QGridLayout *gridLayout2 = new QGridLayout(qwidg2);
-	NLQT::QNLWidget *_nelWidget2 = new NLQT::QNLWidget(qwidg2);
-	_nelWidget2->setObjectName(QString::fromUtf8("NELWIdget2"));
-	gridLayout2->addWidget(_nelWidget2, 0, 0, 1, 1);
+	Q_FOREACH(IAppPage *appPage, listAppPages)
+	{
+		addAppPage(appPage);
+	}
 
 	setDockNestingEnabled(true);
 
@@ -64,13 +61,24 @@ CMainWindow::CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget
 	createMenus();
 	createStatusBar();
 
+	readSettings();
+
 	setWindowIcon(QIcon(Constants::ICON_NEL));
 	setWindowTitle(tr("Object Viewer Qt"));
+
+	connect(_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 }
 
 CMainWindow::~CMainWindow()
 {
 	delete _pluginView;
+}
+
+void CMainWindow::checkObject(QObject *obj)
+{
+	IAppPage *appPage = qobject_cast<IAppPage *>(obj);
+	if (appPage)
+		addAppPage(appPage);
 }
 
 bool CMainWindow::showOptionsDialog(const QString &group,
@@ -89,6 +97,33 @@ void CMainWindow::about()
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
 					   tr("<h2>Object Viewer Qt NG</h2>"
 						  "<p> Author: dnk-88 <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
+}
+
+void CMainWindow::closeEvent(QCloseEvent *event)
+{
+	QList<ICoreListener *> listeners = _corePlugin->getObjects<ICoreListener>();
+	Q_FOREACH(ICoreListener *listener, listeners)
+	{
+		if (!listener->closeMainWindow())
+		{
+			event->ignore();
+			return;
+		}
+	}
+
+	writeSettings();
+
+	QMainWindow::closeEvent(event);
+}
+
+void CMainWindow::addAppPage(IAppPage *appPage)
+{
+	QWidget *tabWidget = new QWidget(_tabWidget);
+	_tabWidget->addTab(tabWidget, appPage->icon(), appPage->trName());
+	QGridLayout *gridLayout = new QGridLayout(tabWidget);
+	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
+	gridLayout->setContentsMargins(0, 0, 0, 0);
+	gridLayout->addWidget(appPage->widget(), 0, 0, 1, 1);
 }
 
 void CMainWindow::createActions()
@@ -150,12 +185,6 @@ void CMainWindow::createMenus()
 	_helpMenu->addAction(_aboutAction);
 	_helpMenu->addAction(_aboutQtAction);
 	_helpMenu->addAction(_pluginViewAction);
-
-	_pluginManager->addObject(_fileMenu);
-	_pluginManager->addObject(_editMenu);
-	_pluginManager->addObject(_viewMenu);
-	_pluginManager->addObject(_toolsMenu);
-	_pluginManager->addObject(_helpMenu);
 }
 
 void CMainWindow::createStatusBar()
@@ -166,6 +195,22 @@ void CMainWindow::createStatusBar()
 void CMainWindow::createDialogs()
 {
 	_pluginView = new ExtensionSystem::CPluginView(_pluginManager, this);
+}
+
+void CMainWindow::readSettings()
+{
+	_settings->beginGroup("MainWindowSettings");
+	restoreState(_settings->value("QtWindowState").toByteArray());
+	restoreGeometry(_settings->value("QtWindowGeometry").toByteArray());
+	_settings->endGroup();
+}
+
+void CMainWindow::writeSettings()
+{
+	_settings->beginGroup("MainWindowSettings");
+	_settings->setValue("QtWindowState", saveState());
+	_settings->setValue("QtWindowGeometry", saveGeometry());
+	_settings->endGroup();
 }
 
 } /* namespace Core */

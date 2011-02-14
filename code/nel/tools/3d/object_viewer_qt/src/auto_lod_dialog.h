@@ -46,7 +46,6 @@ public:
 private Q_SLOTS:
 	void setDegradationExponent(int value);
 	void setSkipParticles(bool state);
-	
 	void setDistRatio(float value);
 	void setMaxDistLODBias(float value);
 

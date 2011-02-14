@@ -23,7 +23,6 @@
 // STL includes
 
 // NeL includes
-#include <nel/misc/common.h>
 #include <nel/misc/debug.h>
 #include <nel/misc/file.h>
 #include <nel/misc/bitmap.h>
@@ -59,13 +58,13 @@ namespace NLQT
 
 CObjectViewer::CObjectViewer()
 	: _IDriver(0),
-	_CScene(0),
-	_Driver(0),
-	_Scene(0),
-	_TextContext(0),
-	_CameraFocal(75),
-	_CurrentInstance(""),
-	_BloomEffect(false)
+	  _CScene(0),
+	  _Driver(0),
+	  _Scene(0),
+	  _TextContext(0),
+	  _CameraFocal(75),
+	  _CurrentInstance(""),
+	  _BloomEffect(false)
 {
 
 }
@@ -115,18 +114,10 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 
 	_Scene->enableLightingSystem(true);
 
-	// create the camera
-	UCamera camera = _Scene->getCam();
-	camera.setTransformMode (UTransformable::DirectMatrix);
-
-	setSizeViewport(w, h);
-
 	NLMISC::CVector hotSpot=NLMISC::CVector(0,0,0);
 
 	_MouseListener = _Driver->create3dMouseListener();
 	_MouseListener->setMouseMode(U3dMouseListener::edit3d);
-
-	resetCamera();
 
 	// set the cache size for the font manager(in bytes)
 	_Driver->setFontManagerMaxMemory(2097152);
@@ -252,21 +243,6 @@ void CObjectViewer::reloadTextures()
 	}
 }
 
-void CObjectViewer::resetCamera()
-{
-	CVector hotSpot = CVector (0,0,0);
-	float radius=10.f;
-
-	// Setup camera
-	_Scene->getCam().lookAt(hotSpot + CVector(0.57735f, 0.57735f, 0.57735f) * radius, hotSpot);
-
-	// Setup mouse listener
-	_MouseListener->setMatrix (_Scene->getCam().getMatrix());
-	_MouseListener->setFrustrum (_Scene->getCam().getFrustum());
-	_MouseListener->setViewport (CViewport());
-	_MouseListener->setHotSpot (hotSpot);
-}
-
 void CObjectViewer::saveScreenshot(const std::string &nameFile, bool jpg, bool png, bool tga)
 {
 	//H_AUTO2
@@ -316,7 +292,7 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 
 	// if we can't create entity, skip it
 	if (Entity.empty()) return false;
-	
+
 	CAABBox bbox;
 	Entity.getShapeAABBox(bbox);
 	setCamera(bbox , Entity, true);
@@ -348,7 +324,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igName)
 {
 	CPath::addSearchPath (CFile::getPath(igName));
 	UInstanceGroup *ig = UInstanceGroup::createInstanceGroup(igName);
-	if (ig == 0) 
+	if (ig == 0)
 		return false;
 	ig->addToScene(*_Scene, _Driver);
 	ig->unfreezeHRC();
@@ -384,7 +360,7 @@ void CObjectViewer::setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, b
 	CVector eye(center);
 
 	CVector ax(quat.getAxis());
-	
+
 	if (ax.isNull() || ax == CVector::I)
 	{
 		ax = CVector::J;

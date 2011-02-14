@@ -32,9 +32,9 @@ namespace NLQT
 {
 
 CAutoLODDialog::CAutoLODDialog(CWorkspaceNode *ownerNode, NL3D::CParticleSystem *ps, QWidget *parent)
-	: QDialog(parent), 
-	_Node(ownerNode), 
-	_PS(ps)
+	: QDialog(parent),
+	  _Node(ownerNode),
+	  _PS(ps)
 {
 	_ui.setupUi(this);
 

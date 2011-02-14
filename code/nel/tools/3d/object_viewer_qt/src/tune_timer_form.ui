@@ -27,7 +27,7 @@
     <item row="0" column="0">
      <widget class="QSlider" name="horizontalSlider">
       <property name="maximum">
-       <number>1000</number>
+       <number>500</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -36,7 +36,7 @@
        <enum>QSlider::TicksAbove</enum>
       </property>
       <property name="tickInterval">
-       <number>100</number>
+       <number>50</number>
       </property>
      </widget>
     </item>

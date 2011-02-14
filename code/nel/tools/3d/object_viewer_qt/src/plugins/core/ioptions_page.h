@@ -31,7 +31,7 @@ namespace Core
 @details You need to subclass this interface and put an instance of your subclass
   into the plugin manager object pool.
 */
-class IOptionsPage 
+class IOptionsPage
 {
 public:
 	virtual ~IOptionsPage() {}
@@ -63,4 +63,4 @@ public:
 
 Q_DECLARE_INTERFACE(Core::IOptionsPage, "dev.ryzom.com.IOptionsPage/1.0")
 
-#endif // IOPTIONSPAGE_H
+#endif // IOPTIONS_PAGE_H

@@ -43,7 +43,7 @@ public:
 	void setDefaultRangeAbs(float defRangeMin, float defRangeMax);
 	void setDefaultRangeRand(float defRangeMin, float defRangeMax);
 	void setDefaultRangeFreq(float defRangeMin, float defRangeMax);
-	
+
 Q_SIGNALS:
 	void noiseValueChanged(const NLMISC::CNoiseValue &value);
 

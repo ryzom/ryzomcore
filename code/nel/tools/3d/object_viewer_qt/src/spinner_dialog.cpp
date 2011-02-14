@@ -25,8 +25,8 @@ namespace NLQT
 
 CSpinnerDialog::CSpinnerDialog(NL3D::CPSBasisSpinner *sf, CWorkspaceNode *ownerNode, QWidget *parent)
 	: QDialog(parent),
-	_Node(ownerNode),
-	_BasicSpinner(sf)
+	  _Node(ownerNode),
+	  _BasicSpinner(sf)
 {
 	nlassert(_BasicSpinner);
 

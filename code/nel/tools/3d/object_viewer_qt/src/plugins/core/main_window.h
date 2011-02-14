@@ -18,48 +18,53 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+// Project includes
+#include "../../extension_system/iplugin.h"
+#include "plugin_view_dialog.h"
+
 // STL includes
 
 // Qt includes
 #include <QtGui/QMainWindow>
 #include <QtCore/QSettings>
 
-// Project includes
-#include "qnel_widget.h"
-#include "../../extension_system/iplugin.h"
-#include "plugin_view_dialog.h"
-
 namespace Core
 {
 class CSettingsDialog;
+class CorePlugin;
+class IAppPage;
 
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	CMainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent = 0);
+	CMainWindow(CorePlugin *corePlugin, QWidget *parent = 0);
 	~CMainWindow();
 
-	inline QSettings *settings() const
-	{
-		return _settings;
-	}
-
 private Q_SLOTS:
+	void checkObject(QObject *obj);
 	bool showOptionsDialog(const QString &group = QString(),
-			       const QString &page = QString(),
-			       QWidget *parent = 0);
+						   const QString &page = QString(),
+						   QWidget *parent = 0);
 	void about();
+protected:
+	virtual void closeEvent(QCloseEvent *event);
 
 private:
+	void addAppPage(IAppPage *appPage);
+
 	void createActions();
 	void createMenus();
 	void createStatusBar();
 	void createDialogs();
 
+	void readSettings();
+	void writeSettings();
+
 	ExtensionSystem::IPluginManager *_pluginManager;
 	ExtensionSystem::CPluginView *_pluginView;
+	CorePlugin *_corePlugin;
 
 	QPalette _originalPalette;
 	QString _lastDir;

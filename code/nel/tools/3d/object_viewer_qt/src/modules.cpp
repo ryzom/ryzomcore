@@ -26,7 +26,7 @@ NLQT::CMainWindow *Modules::_mainWindow = NULL;
 NLQT::CParticleEditor *Modules::_particleEditor = NULL;
 NLQT::CSoundSystem *Modules::_soundSystem = NULL;
 NLQT::CVegetableEditor *Modules::_vegetableEditor = NULL;
-ExtensionSystem::CPluginManager *Modules::_pluginManager = NULL; 
+ExtensionSystem::CPluginManager *Modules::_pluginManager = NULL;
 
 void Modules::init()
 {

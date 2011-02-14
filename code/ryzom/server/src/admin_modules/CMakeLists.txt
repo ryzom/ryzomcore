@@ -4,10 +4,6 @@ NL_TARGET_LIB(ryzom_adminmodules ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ryzom_adminmodules ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(WITH_STLPORT)
-
 TARGET_LINK_LIBRARIES(ryzom_adminmodules nelmisc nelnet)
 NL_DEFAULT_PROPS(ryzom_adminmodules "Ryzom, Library: Service Admin Modules")
 NL_ADD_RUNTIME_FLAGS(ryzom_adminmodules)

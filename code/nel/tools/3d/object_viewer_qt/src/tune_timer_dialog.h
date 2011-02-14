@@ -38,7 +38,7 @@ class CTuneTimerDialog: public QDockWidget
 public:
 	CTuneTimerDialog(QWidget *parent = 0);
 	~CTuneTimerDialog();
-	
+
 	void setInterval(int value);
 
 Q_SIGNALS:

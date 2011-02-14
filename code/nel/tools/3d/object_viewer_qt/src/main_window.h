@@ -56,6 +56,8 @@ class CSunColorDialog;
 class CTuneMRMDialog;
 class CTuneTimerDialog;
 
+class CCameraControl;
+
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -79,9 +81,6 @@ public:
 private Q_SLOTS:
 	void open();
 	void resetScene();
-	void changeRenderMode();
-	void resetCamera();
-	void changeCameraMode();
 	void reloadTextures();
 	void settings();
 	void about();
@@ -122,6 +121,8 @@ private:
 	CSkeletonTreeModel *_SkeletonTreeModel;
 	CTuneTimerDialog *_TuneTimerDialog;
 
+	CCameraControl *_cameraControl;
+
 	QPalette _originalPalette;
 	QString _lastDir;
 
@@ -143,7 +144,6 @@ private:
 	QAction *_frameDelayAction;
 	QAction *_lightGroupAction;
 	QAction *_reloadTexturesAction;
-	QAction *_cameraModeAction;
 	QAction *_resetCameraAction;
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;

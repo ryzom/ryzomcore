@@ -51,13 +51,21 @@ public:
 	virtual void setPluginPaths(const QStringList &paths);
 	virtual QList<IPluginSpec *> plugins() const;
 
+	// Settings
+	virtual void setSettings(QSettings *settings);
+	virtual QSettings *settings() const;
+	void readSettings();
+	void writeSettings();
+
 private:
 	void setPluginState(CPluginSpec *spec, int destState);
 	void readPluginPaths();
 	void stopAll();
+	void deleteAll();
 
 	mutable QReadWriteLock _lock;
 
+	QSettings *_settings;
 	QList<CPluginSpec *> _pluginSpecs;
 	QList<IPluginSpec *> _ipluginSpecs;
 	QStringList _pluginPaths;

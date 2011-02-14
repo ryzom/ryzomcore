@@ -100,8 +100,8 @@ public:
 
 		SAnimationStatus()
 			: LoopAnim(false), PlayAnim(false),
-			CurrentTimeAnim(0), StartAnim(0),
-			EndAnim(0), SpeedAnim(1), Mode(Mode::PlayList) {}
+			  CurrentTimeAnim(0), StartAnim(0),
+			  EndAnim(0), SpeedAnim(1), Mode(Mode::PlayList) {}
 	};
 
 	/// Destructor
@@ -227,7 +227,7 @@ public:
 	{
 		return _SWTList;
 	}
-	
+
 	/// Get game interface for manipulating Skeleton.
 	NL3D::UInstance getInstance() const
 	{

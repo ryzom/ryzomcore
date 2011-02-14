@@ -70,7 +70,7 @@ protected:
 	float _pos;
 
 	CWorkspaceNode *_Node;
-	
+
 	/// the scheme being edited
 	NL3D::CPSFloatCurveFunctor *_Curve;
 

@@ -27,10 +27,6 @@ ADD_LIBRARY(ovqt_plugin_log MODULE ${SRC} ${OVQT_PLUG_LOG_MOC_SRC} ${OVQT_EXT_SY
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_log nelmisc ${QT_LIBRARIES})
 
-IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ovqt_plugin_log ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(WITH_STLPORT)
-
 NL_DEFAULT_PROPS(ovqt_plugin_log "NeL, Tools, 3D: Object Viewer Qt Plugin: Log")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_log)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_log)

@@ -58,6 +58,24 @@ public:
 
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
+	ExtensionSystem::IPluginManager *pluginManager() const
+	{
+		return _plugMan;
+	}
+
+	template <typename Type>
+	QList<Type *> getObjects() const
+	{
+		QList<QObject *> all = _plugMan->allObjects();
+		QList<Type *> objects;
+		Q_FOREACH(QObject *obj, all)
+		{
+			Type *typeObj = qobject_cast<Type *>(obj);
+			if (typeObj)
+				objects.append(typeObj);
+		}
+		return objects;
+	}
 
 protected:
 	NLMISC::CLibraryContext *_LibContext;
@@ -69,6 +87,8 @@ private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	ExtensionSystem::CPluginView *_pluginView;
 	CMainWindow *_mainWindow;
+
+	bool oldOVQT;
 };
 
 } // namespace Core

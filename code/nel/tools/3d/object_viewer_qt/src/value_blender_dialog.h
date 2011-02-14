@@ -96,6 +96,8 @@ template <typename T>
 class CValueBlenderDialogClientT : public IValueBlenderDialogClient
 {
 public:
+	virtual ~CValueBlenderDialogClientT() {}
+
 	// the scheme being used. Must be set by the user
 	NL3D::CPSValueBlendFuncBase<T> *SchemeFunc;
 
@@ -143,6 +145,8 @@ protected:
 class CFloatBlenderDialogClient : public CValueBlenderDialogClientT<float>
 {
 public:
+	~CFloatBlenderDialogClient() {}
+
 	QWidget *newDialog(IPSWrapper<float> *wrapper, QWidget *parent)
 	{
 		CEditRangeFloatWidget *erf = new CEditRangeFloatWidget(parent);
@@ -158,6 +162,8 @@ public:
 class CUIntBlenderDialogClient : public CValueBlenderDialogClientT<uint32>
 {
 public:
+	~CUIntBlenderDialogClient() {}
+
 	QWidget *newDialog(IPSWrapper<uint32> *wrapper, QWidget *parent)
 	{
 		CEditRangeUIntWidget *erf = new CEditRangeUIntWidget(parent);
@@ -173,6 +179,8 @@ public:
 class CIntBlenderDialogClient : public CValueBlenderDialogClientT<sint32>
 {
 public:
+	~CIntBlenderDialogClient() {}
+
 	QWidget *newDialog(IPSWrapper<sint32> *wrapper, QWidget *parent)
 	{
 		CEditRangeIntWidget *erf = new CEditRangeIntWidget(parent);
@@ -188,6 +196,8 @@ public:
 class CRGBABlenderDialogClient : public CValueBlenderDialogClientT<NLMISC::CRGBA>
 {
 public:
+	~CRGBABlenderDialogClient() {}
+
 	QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent)
 	{
 		CColorEditWidget *ce = new CColorEditWidget(parent);

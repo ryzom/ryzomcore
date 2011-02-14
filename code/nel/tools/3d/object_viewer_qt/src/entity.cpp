@@ -44,18 +44,18 @@ namespace NLQT
 {
 
 CSlotInfo::CSlotInfo()
-	: Animation("empty"), 
-	Skeleton("empty"),
-	Offset(0), 
-	StartTime(0), 
-	EndTime(0),
-	StartBlend(1),	
-	EndBlend (1), 
-	Smoothness(1),
-	SpeedFactor(1),	
-	ClampMode(0),
-	SkeletonInverted(false),
-	Enable(true)	
+	: Animation("empty"),
+	  Skeleton("empty"),
+	  Offset(0),
+	  StartTime(0),
+	  EndTime(0),
+	  StartBlend(1),
+	  EndBlend (1),
+	  Smoothness(1),
+	  SpeedFactor(1),
+	  ClampMode(0),
+	  SkeletonInverted(false),
+	  Enable(true)
 {
 }
 
@@ -80,15 +80,15 @@ CSlotInfo &CSlotInfo::operator=(const CSlotInfo &slotInfo)
 }
 
 CEntity::CEntity(void)
-	: _Name("<Unknown>"), 
-	_FileNameShape(""),
-	_FileNameSkeleton(""), 
-	_inPlace(false), 
-	_incPos(false),
-	_Instance(NULL), 
-	_Skeleton(NULL),
-	_PlayList(NULL), 
-	_AnimationSet(NULL)
+	: _Name("<Unknown>"),
+	  _FileNameShape(""),
+	  _FileNameSkeleton(""),
+	  _inPlace(false),
+	  _incPos(false),
+	  _Instance(NULL),
+	  _Skeleton(NULL),
+	  _PlayList(NULL),
+	  _AnimationSet(NULL)
 {
 	_CharacterScalePos = 1;
 }
