@@ -33,11 +33,19 @@
 namespace ExtensionSystem
 {
 
-CPluginSpec::CPluginSpec():
-	_state(State::Invalid),
-	_hasError(false),
-	_plugin(NULL),
-	_pluginManager(NULL)
+CPluginSpec::CPluginSpec()
+	: _location(""),
+	  _filePath(""),
+	  _fileName(""),
+	  _name(""),
+	  _version(""),
+	  _vendor(""),
+	  _description(""),
+	  _state(State::Invalid),
+	  _hasError(false),
+	  _errorString(""),
+	  _plugin(0),
+	  _pluginManager(0)
 {
 }
 
@@ -98,16 +106,6 @@ QString CPluginSpec::errorString() const
 
 bool CPluginSpec::setFileName(const QString &fileName)
 {
-	_name = _version
-		= _vendor
-		= _description
-		= _location
-		= _filePath
-		= _fileName
-		= "";
-	_state = State::Invalid;
-	_hasError = false;
-	_errorString = "";
 	QFile file(fileName);
 	if (!file.exists())
 		return reportError(QCoreApplication::translate("CPluginSpec", "File does not exist: %1").arg(file.fileName()));
@@ -133,7 +131,7 @@ bool CPluginSpec::loadLibrary()
 			return true;
 		return reportError(QCoreApplication::translate("CPluginSpec", "Loading the library failed because state != Resolved"));
 	}
-	
+
 	QPluginLoader loader(_filePath);
 	if (!loader.load())
 		return reportError(loader.errorString());
@@ -209,7 +207,7 @@ void CPluginSpec::kill()
 	if (!_plugin)
 		return;
 	delete _plugin;
-	_plugin = NULL;
+	_plugin = 0;
 	_state = State::Deleted;
 }
 

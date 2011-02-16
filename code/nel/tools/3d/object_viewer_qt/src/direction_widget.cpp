@@ -189,7 +189,7 @@ bool CDirectionWidget::eventFilter(QObject *object, QEvent *event)
 	{
 	case QEvent::Paint:
 	{
-		float x; 
+		float x;
 		if (widget->objectName() == "XZ")
 			x = _value.x;
 		else
@@ -205,7 +205,7 @@ bool CDirectionWidget::eventFilter(QObject *object, QEvent *event)
 		painter.drawText( 10, 15, widget->objectName());
 		painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
 		painter.drawLine(widget->width() / 2, widget->height() / 2,
-			int((widget->width() / 2) + x * 0.9f * directionSize), int((widget->height() / 2) - _value.z * 0.9f * directionSize));
+						 int((widget->width() / 2) + x * 0.9f * directionSize), int((widget->height() / 2) - _value.z * 0.9f * directionSize));
 		break;
 	}
 	case QEvent::MouseButtonDblClick:

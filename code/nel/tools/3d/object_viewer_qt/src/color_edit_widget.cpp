@@ -32,9 +32,9 @@ namespace NLQT
 {
 
 CColorEditWidget::CColorEditWidget(QWidget *parent)
-	: QWidget(parent), 
-	_Wrapper(NULL), 
-	_emit(true)
+	: QWidget(parent),
+	  _Wrapper(NULL),
+	  _emit(true)
 {
 	_ui.setupUi(this);
 
@@ -86,9 +86,9 @@ void CColorEditWidget::updateUi()
 void CColorEditWidget::setRed(int r)
 {
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(), 
-											_ui.bSpinBox->value(), 
-											_ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(r, _ui.gSpinBox->value(),
+										  _ui.bSpinBox->value(),
+										  _ui.aSpinBox->value()));
 
 	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL)
@@ -107,10 +107,10 @@ void CColorEditWidget::setRed(int r)
 void CColorEditWidget::setGreen(int g)
 {
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
-										g, 
-										_ui.bSpinBox->value(), 
-										_ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(),
+										  g,
+										  _ui.bSpinBox->value(),
+										  _ui.aSpinBox->value()));
 	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL) return;
 
@@ -126,10 +126,10 @@ void CColorEditWidget::setGreen(int g)
 void CColorEditWidget::setBlue(int b)
 {
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
-											_ui.gSpinBox->value(), 
-											b, 
-											_ui.aSpinBox->value()));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(),
+										  _ui.gSpinBox->value(),
+										  b,
+										  _ui.aSpinBox->value()));
 	_ui.graphicsWidget->repaint();
 	if (_Wrapper == NULL) return;
 
@@ -145,10 +145,10 @@ void CColorEditWidget::setBlue(int b)
 void CColorEditWidget::setAlpha(int a)
 {
 	if (_emit)
-		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(), 
-										_ui.gSpinBox->value(), 
-										_ui.bSpinBox->value(), 
-										a));
+		Q_EMIT colorChanged(NLMISC::CRGBA(_ui.rSpinBox->value(),
+										  _ui.gSpinBox->value(),
+										  _ui.bSpinBox->value(),
+										  a));
 	_ui.graphicsWidget->repaint();
 
 	if (_Wrapper == NULL) return;
@@ -177,9 +177,9 @@ bool CColorEditWidget::eventFilter(QObject *object, QEvent *event)
 {
 	if( event->type() == QEvent::Paint )
 	{
-		_color = QColor(_ui.rSpinBox->value(), 
-						_ui.gSpinBox->value(), 
-						_ui.bSpinBox->value(), 
+		_color = QColor(_ui.rSpinBox->value(),
+						_ui.gSpinBox->value(),
+						_ui.bSpinBox->value(),
 						_ui.aSpinBox->value());
 
 		QPainter painter(_ui.graphicsWidget);

@@ -96,6 +96,7 @@ public:
 				break;
 			}
 		}
+		return result;
 	}
 
 protected:
