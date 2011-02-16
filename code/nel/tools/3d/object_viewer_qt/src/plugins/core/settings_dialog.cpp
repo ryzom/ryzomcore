@@ -16,7 +16,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project includes
 #include "settings_dialog.h"
+#include "core_plugin.h"
+#include "ioptions_page.h"
 
 // Qt includes
 #include <QtGui/QHeaderView>
@@ -33,7 +36,7 @@ Q_DECLARE_METATYPE(PageData);
 
 namespace Core
 {
-CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
+CSettingsDialog::CSettingsDialog(CorePlugin *corePlugin,
 								 const QString &categoryId,
 								 const QString &pageId,
 								 QWidget *parent)
@@ -42,7 +45,7 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 {
 	_ui.setupUi(this);
 
-	_plugMan = pluginManager;
+	_plugMan = corePlugin->pluginManager();
 
 	QString initialCategory = categoryId;
 	QString initialPage = pageId;
@@ -59,14 +62,7 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 
 	QMap<QString, QTreeWidgetItem *> categories;
 
-	QList<IOptionsPage *> pages;
-	QList<QObject *> all = _plugMan->allObjects();
-	Q_FOREACH(QObject *obj, all)
-	{
-		IOptionsPage *page = qobject_cast<IOptionsPage *>(obj);
-		if (page)
-			pages.append(page);
-	}
+	QList<IOptionsPage *> pages = corePlugin->getObjects<IOptionsPage>();
 
 	int index = 0;
 	Q_FOREACH(IOptionsPage *page, pages)

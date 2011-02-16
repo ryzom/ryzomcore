@@ -32,6 +32,8 @@ class MyPlugin : public QObject, public ExtensionSystem::IPlugin
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 
+	virtual ~MyPlugin();
+
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 
@@ -43,6 +45,8 @@ public:
 	QString description() const;
 	QList<QString> dependencies() const;
 
+	void addAutoReleasedObject(QObject *obj);
+
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
@@ -51,7 +55,7 @@ protected:
 
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
-
+	QList<QObject *> _autoReleaseObjects;
 };
 
 class CExampleAppPage: public QObject, public Core::IAppPage

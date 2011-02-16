@@ -25,11 +25,12 @@
 #include <QtCore/QList>
 
 // Project includes
-#include "ioptions_page.h"
 #include "../../extension_system/iplugin.h"
 
 namespace Core
 {
+class CorePlugin;
+class IOptionsPage;
 
 /**
 @class CSettingsDialog
@@ -40,7 +41,7 @@ class CSettingsDialog: public QDialog
 	Q_OBJECT
 
 public:
-	CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
+	CSettingsDialog(CorePlugin *corePlugin,
 					const QString &initialCategory = QString(),
 					const QString &initialPage = QString(),
 					QWidget *parent = 0);
@@ -60,7 +61,7 @@ private Q_SLOTS:
 	void apply();
 
 private:
-	QList<Core::IOptionsPage*> _pages;
+	QList<IOptionsPage *> _pages;
 	bool _applied;
 	QString _currentCategory;
 	QString _currentPage;

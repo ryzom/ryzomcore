@@ -44,6 +44,9 @@ class CorePlugin : public QObject, public ExtensionSystem::IPlugin
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 
+	CorePlugin();
+	virtual ~CorePlugin();
+
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void shutdown();
@@ -56,6 +59,8 @@ public:
 	QString description() const;
 	QList<QString> dependencies() const;
 
+	void addAutoReleasedObject(QObject *obj);
+
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 	ExtensionSystem::IPluginManager *pluginManager() const
@@ -63,18 +68,34 @@ public:
 		return _plugMan;
 	}
 
-	template <typename Type>
-	QList<Type *> getObjects() const
+	template <typename T>
+	QList<T *> getObjects() const
 	{
 		QList<QObject *> all = _plugMan->allObjects();
-		QList<Type *> objects;
+		QList<T *> objects;
 		Q_FOREACH(QObject *obj, all)
 		{
-			Type *typeObj = qobject_cast<Type *>(obj);
-			if (typeObj)
-				objects.append(typeObj);
+			T *tObj = qobject_cast<T *>(obj);
+			if (tObj)
+				objects.append(tObj);
 		}
 		return objects;
+	}
+
+	template <typename T>
+	T *getObject() const
+	{
+		QList<QObject *> all = _plugMan->allObjects();
+		T *result = 0;
+		Q_FOREACH(QObject *obj, all)
+		{
+			T *tObj = qobject_cast<T *>(obj);
+			if (tObj)
+			{
+				result = tObj;
+				break;
+			}
+		}
 	}
 
 protected:
@@ -87,8 +108,8 @@ private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	ExtensionSystem::CPluginView *_pluginView;
 	CMainWindow *_mainWindow;
-
-	bool oldOVQT;
+	QList<QObject *> _autoReleaseObjects;
+	bool _oldOVQT;
 };
 
 } // namespace Core

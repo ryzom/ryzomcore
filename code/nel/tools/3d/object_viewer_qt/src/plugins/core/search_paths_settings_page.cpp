@@ -29,7 +29,7 @@ namespace Core
 
 CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
 	: QObject(parent),
-	  _currentPage(NULL)
+	  _currentPage(0)
 {
 }
 

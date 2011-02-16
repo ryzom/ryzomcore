@@ -52,52 +52,52 @@ bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManag
 
 void SheetBuilderPlugin::extensionsInitialized()
 {
-    QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-    nlassert(toolsMenu);
+	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
+	nlassert(toolsMenu);
 
-    toolsMenu->addSeparator();
+	toolsMenu->addSeparator();
 
-    QAction *actBuilder = toolsMenu->addAction("Sheet builder");
-    connect(actBuilder, SIGNAL(triggered()), this, SLOT(execBuilderDialog()));
+	QAction *actBuilder = toolsMenu->addAction("Sheet builder");
+	connect(actBuilder, SIGNAL(triggered()), this, SLOT(execBuilderDialog()));
 }
 
 void SheetBuilderPlugin::execBuilderDialog()
 {
-    QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-    nlassert(wnd);
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	nlassert(wnd);
 
-    SheetBuilderDialog dlg(wnd);
-    dlg.exec();
+	SheetBuilderDialog dlg(wnd);
+	dlg.exec();
 }
 
 void SheetBuilderPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
 #ifdef NL_OS_WINDOWS
-    // Ensure that a context doesn't exist yet.
-    // This only applies to platforms without PIC, e.g. Windows.
-    nlassert(!NLMISC::INelContext::isContextInitialised());
+	// Ensure that a context doesn't exist yet.
+	// This only applies to platforms without PIC, e.g. Windows.
+	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
-    _LibContext = new NLMISC::CLibraryContext(*nelContext);
+	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 QString SheetBuilderPlugin::name() const
 {
-    return "Sheet builder";
+	return "Sheet builder";
 }
 
 QString SheetBuilderPlugin::version() const
 {
-    return "1.0";
+	return "1.0";
 }
 
 QString SheetBuilderPlugin::vendor() const
 {
-    return "kharvd";
+	return "kharvd";
 }
 
 QString SheetBuilderPlugin::description() const
 {
-    return "make_sheet_id equivalent";
+	return "make_sheet_id equivalent";
 }
 
 QList<QString> SheetBuilderPlugin::dependencies() const
@@ -107,18 +107,18 @@ QList<QString> SheetBuilderPlugin::dependencies() const
 
 QObject* SheetBuilderPlugin::objectByName(const QString &name) const
 {
-    Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-            if (qobj->objectName() == name)
-                return qobj;
-    return 0;
+	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
+	if (qobj->objectName() == name)
+		return qobj;
+	return 0;
 }
 
 ExtensionSystem::IPluginSpec *SheetBuilderPlugin::pluginByName(const QString &name) const
 {
-    Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-            if (spec->name() == name)
-                return spec;
-    return 0;
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
+	if (spec->name() == name)
+		return spec;
+	return 0;
 }
 
 Q_EXPORT_PLUGIN(SheetBuilderPlugin)

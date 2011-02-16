@@ -25,6 +25,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+
 // Qt includes
 #include <QtGui/QtGui>
 
@@ -87,7 +88,7 @@ bool CMainWindow::showOptionsDialog(const QString &group,
 {
 	if (!parent)
 		parent = this;
-	CSettingsDialog _settingsDialog(_pluginManager, group, page, parent);
+	CSettingsDialog _settingsDialog(_corePlugin, group, page, parent);
 	_settingsDialog.show();
 	return _settingsDialog.execDialog();
 }

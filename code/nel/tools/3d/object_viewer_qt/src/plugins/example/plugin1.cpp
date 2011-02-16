@@ -18,15 +18,24 @@
 
 namespace Plugin
 {
+MyPlugin::~MyPlugin()
+{
+	Q_FOREACH(QObject *obj, _autoReleaseObjects)
+	{
+		_plugMan->removeObject(obj);
+	}
+	qDeleteAll(_autoReleaseObjects);
+	_autoReleaseObjects.clear();
+}
 
 bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 
-	_plugMan->addObject(new CExampleSettingsPage(this));
-	_plugMan->addObject(new CExampleAppPage(this));
-	_plugMan->addObject(new CCoreListener(this));
+	addAutoReleasedObject(new CExampleSettingsPage(this));
+	addAutoReleasedObject(new CExampleAppPage(this));
+	addAutoReleasedObject(new CCoreListener(this));
 	return true;
 }
 
@@ -67,6 +76,12 @@ QString MyPlugin::description() const
 QList<QString> MyPlugin::dependencies() const
 {
 	return QList<QString>();
+}
+
+void MyPlugin::addAutoReleasedObject(QObject *obj)
+{
+	_plugMan->addObject(obj);
+	_autoReleaseObjects.prepend(obj);
 }
 
 QObject* MyPlugin::objectByName(const QString &name) const

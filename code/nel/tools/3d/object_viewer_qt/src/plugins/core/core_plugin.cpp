@@ -36,13 +36,27 @@
 
 using namespace Core;
 
+CorePlugin::CorePlugin()
+{
+}
+
+CorePlugin::~CorePlugin()
+{
+	Q_FOREACH(QObject *obj, _autoReleaseObjects)
+	{
+		_plugMan->removeObject(obj);
+	}
+	qDeleteAll(_autoReleaseObjects);
+	_autoReleaseObjects.clear();
+}
+
 bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	oldOVQT = false;
+	_oldOVQT = false;
 
-	_plugMan->addObject(new CSearchPathsSettingsPage(this));
+	addAutoReleasedObject(new CSearchPathsSettingsPage(this));
 	return true;
 }
 
@@ -66,7 +80,7 @@ void CorePlugin::extensionsInitialized()
 
 		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
 		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
-		oldOVQT = true;
+		_oldOVQT = true;
 	}
 	else
 	{
@@ -93,7 +107,7 @@ void CorePlugin::extensionsInitialized()
 
 void CorePlugin::shutdown()
 {
-	if (!oldOVQT)
+	if (!_oldOVQT)
 	{
 		delete _mainWindow;
 		delete _pluginView;
@@ -102,7 +116,7 @@ void CorePlugin::shutdown()
 
 void CorePlugin::execSettings()
 {
-	CSettingsDialog settingsDialog(_plugMan);
+	CSettingsDialog settingsDialog(this);
 	settingsDialog.show();
 	settingsDialog.execDialog();
 }
@@ -140,6 +154,12 @@ QString CorePlugin::description() const
 QList<QString> CorePlugin::dependencies() const
 {
 	return QList<QString>();
+}
+
+void CorePlugin::addAutoReleasedObject(QObject *obj)
+{
+	_plugMan->addObject(obj);
+	_autoReleaseObjects.prepend(obj);
 }
 
 QObject* CorePlugin::objectByName(const QString &name) const
