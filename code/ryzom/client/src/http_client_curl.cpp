@@ -57,7 +57,7 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 	return true;
 }
 
-const char *CAFilename = "./data/ssl_ca_cert.pem"; // this the certificate "Thawte Server CA"
+const char *CAFilename = "ssl_ca_cert.pem"; // this the certificate "Thawte Server CA"
 
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
@@ -66,7 +66,9 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
 	//curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function); // would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	curl_easy_setopt(_Curl, CURLOPT_CAINFO, CAFilename);
+	string path = CPath::lookup(CAFilename);
+	nldebug("cert path '%s'", path.c_str());
+	curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
 	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
 	return true;
 }
