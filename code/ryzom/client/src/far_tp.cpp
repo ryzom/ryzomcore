@@ -346,6 +346,7 @@ void CLoginStateMachine::run()
 			if (initCreateAccount())
 			{
 				SM_BEGIN_EVENT_TABLE
+					SM_EVENT(ev_login_ok, st_check_patch);
 					SM_EVENT(ev_close_create_account, st_login);
 					SM_EVENT(ev_quit, st_end);
 				SM_END_EVENT_TABLE

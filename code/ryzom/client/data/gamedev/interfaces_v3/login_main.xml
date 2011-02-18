@@ -63,18 +63,17 @@
     <ctrl style="log_std_but" id="but_create_account" posparent="but_log" posref="BM TM" y="-28" 
     onclick_l="on_create_account" hardtext="uiCreateAccount" />
 
+	<!-- Edit Account -->
+    <ctrl style="log_std_but" id="but_edit_account" posparent="but_create_account" posref="BM TM" y="-8"
+    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
+
 	<!-- Upgrade Account -->
-    <ctrl style="log_std_but" id="but_upgrade_account" posparent="but_create_account" posref="BM TM" y="-8"
-    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" />
+<!--    <ctrl style="log_std_but" id="but_upgrade_account" posparent="but_create_account" posref="BM TM" y="-8"
+    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiUpgradeAccount" /> -->
 
 	<!-- Forget Password -->
-    <ctrl style="log_std_but" id="but_forget_pwd" posparent="but_upgrade_account" posref="BM TM" y="-8"
-    onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />
-    
-    <!-- Edit Account -->
-    <ctrl style="log_std_but" id="but_edit_account" posparent="but_forget_pwd" posref="BM TM" y="-8"
-    onclick_l="open_url" params_l="cfg_EditAccountURL" hardtext="uiEditAccount" />
-    
+    <ctrl style="log_std_but" id="but_forget_pwd" posparent="but_edit_account" posref="BM TM" y="-8"
+    onclick_l="open_url" params_l="cfg_ForgetPwdURL" hardtext="uiForgetPwd" />    
     
     <!-- Free Trial 
     <ctrl style="log_spe_but" id="but_free_trial" posparent="but_forget_pwd" posref="BL TL" y="-8"
@@ -82,7 +81,7 @@
 	-->
     
     <!-- Login Support -->
-    <ctrl style="log_std_but" id="but_login_support" posparent="but_edit_account" posref="BM TM" y="-8"
+    <ctrl style="log_std_but" id="but_login_support" posparent="but_forget_pwd" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
     
     <!-- Scan Data -->
@@ -109,8 +108,11 @@
     <!-- RESOLUTION ET LEVEL OF DETAILS -->
     <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10"/>
     <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
-	<!-- Game Configuration -->    <ctrl style="log_std_but" id="but_game_configuration" posparent="lod_win" posref="TR TL" x="26"    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" />	<!-- EXIT BUTTON -->    <ctrl style="log_button" id="but_exit" posparent="windows" posref="BR BR" y="6" onclick_l="login_quit" hardtext="uiExitLogin" />
-	    <!-- Textes -->
+	<!-- Game Configuration -->
+<!--    <ctrl style="log_std_but" id="but_game_configuration" posparent="lod_win" posref="TR TL" x="26"    onclick_l="on_game_configuration" hardtext="uiGameConfiguration" /> -->
+	<!-- EXIT BUTTON -->
+    <ctrl style="log_button" id="but_exit" posparent="windows" posref="BR BR" y="6" onclick_l="login_quit" hardtext="uiExitLogin" />
+	<!-- Textes -->
     <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
     <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
 
