@@ -66,7 +66,7 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 
-#ifndef NL_STATIC
+#if !defined(NL_STATIC) || defined(NL_OS_MAC)
 	// EFX
 	if ((AlExtEfx = (alcIsExtensionPresent(device, "ALC_EXT_EFX") == ALC_TRUE)) == true)
 	{
@@ -136,7 +136,7 @@ EAXGetBufferMode eaxGetBufferMode = NULL;
 // ALC_EXT_EFX
 bool AlExtEfx = false;
 // effect objects
-#ifndef NL_STATIC
+#if !defined(NL_STATIC) || defined(NL_OS_MAC)
 LPALGENEFXOBJECTS alGenEffects = NULL;
 LPALDELETEEFXOBJECTS alDeleteEffects = NULL;
 LPALISEFXOBJECT alIsEffect = NULL;
