@@ -25,7 +25,7 @@
 #include "action.h"
 #include "left_view.h"
 
-#include "georges/type.h"
+#include "nel/georges/type.h"
 
 using namespace NLGEORGES;
 using namespace NLMISC;

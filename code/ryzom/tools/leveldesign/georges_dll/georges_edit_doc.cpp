@@ -28,7 +28,7 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/path.h"
 
-#include "georges/form.h"
+#include "nel/georges/form.h"
 
 using namespace NLMISC;
 using namespace NLGEORGES;

@@ -26,8 +26,8 @@
 #include "left_view.h"
 
 #include "nel/misc/path.h"
-#include "georges/type.h"
-#include "georges/form_elm.h"
+#include "nel/georges/type.h"
+#include "nel/georges/form_elm.h"
 
 using namespace std;
 using namespace NLMISC;

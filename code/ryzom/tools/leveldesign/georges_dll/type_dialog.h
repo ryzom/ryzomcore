@@ -20,7 +20,7 @@
 #include "base_dialog.h"
 #include "edit_list_ctrl.h"
 
-#include "georges/type.h"
+#include "nel/georges/type.h"
 
 #if _MSC_VER > 1000
 #pragma once

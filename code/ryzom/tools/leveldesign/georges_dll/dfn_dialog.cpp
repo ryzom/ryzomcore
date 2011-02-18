@@ -26,7 +26,7 @@
 #include "action.h"
 
 #include "nel/misc/path.h"
-#include "georges/type.h"
+#include "nel/georges/type.h"
 
 using namespace std;
 using namespace NLMISC;

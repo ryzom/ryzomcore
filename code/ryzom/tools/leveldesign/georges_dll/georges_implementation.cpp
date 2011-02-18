@@ -30,10 +30,10 @@
 #include "child_frm.h"
 #include "action.h"
 
-#include "georges/form_elm.h"
-#include "georges/type.h"
-#include "georges/form.h"
-#include "georges/form_elm.h"
+#include "nel/georges/form_elm.h"
+#include "nel/georges/type.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_elm.h"
 
 #include "nel/misc/file.h"
 #include "nel/misc/o_xml.h"

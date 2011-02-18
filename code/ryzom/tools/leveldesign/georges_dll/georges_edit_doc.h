@@ -24,10 +24,10 @@
 
 #include "nel/misc/types_nl.h"
 
-#include "georges/type.h"
-#include "georges/form.h"
-#include "georges/form_dfn.h"
-#include "georges/form_loader.h"
+#include "nel/georges/type.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_dfn.h"
+#include "nel/georges/form_loader.h"
 
 #include "plugin_interface.h"
 

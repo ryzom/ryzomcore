@@ -20,9 +20,9 @@
 #include "georges_edit_view.h"
 #include "left_view.h"
 
-#include "georges/type.h"
-#include "georges/form_dfn.h"
-#include "georges/form_elm.h"
+#include "nel/georges/type.h"
+#include "nel/georges/form_dfn.h"
+#include "nel/georges/form_elm.h"
 
 #include "action.h"
 
