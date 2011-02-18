@@ -32,10 +32,10 @@ namespace Core
 /**
 @class CSearchPathsSettingsPage
 */
-class CSearchPathsSettingsPage : public QObject, public Core::IOptionsPage
+class CSearchPathsSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
-	Q_INTERFACES(Core::IOptionsPage)
+
 public:
 	CSearchPathsSettingsPage(QObject *parent = 0);
 	~CSearchPathsSettingsPage() {}

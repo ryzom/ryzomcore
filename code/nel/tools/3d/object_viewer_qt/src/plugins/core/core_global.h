@@ -1,6 +1,7 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,44 +16,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef CORE_GLOBAL_H
+#define CORE_GLOBAL_H
 
-#ifndef EXAMPLE_SETTINGS_PAGE_H
-#define EXAMPLE_SETTINGS_PAGE_H
+#include <QtCore/qglobal.h>
 
-#include <QtCore/QObject>
+#if defined(CORE_LIBRARY)
+#  define CORE_EXPORT Q_DECL_EXPORT
+#else
+#  define CORE_EXPORT Q_DECL_IMPORT
+#endif
 
-#include "../core/ioptions_page.h"
-
-#include "ui_example_settings_page.h"
-
-class QWidget;
-
-namespace Plugin
-{
-/**
-@class CExampleSettingsPage
-*/
-class CExampleSettingsPage : public Core::IOptionsPage
-{
-	Q_OBJECT
-public:
-	CExampleSettingsPage(QObject *parent = 0);
-	virtual ~CExampleSettingsPage() {}
-
-	virtual QString id() const;
-	virtual QString trName() const;
-	virtual QString category() const;
-	virtual QString trCategory() const;
-	virtual QWidget *createPage(QWidget *parent);
-
-	virtual void apply();
-	virtual void finish() {}
-
-private:
-	QWidget *_currentPage;
-	Ui::CExampleSettingsPage _ui;
-};
-
-} // namespace Plugin
-
-#endif // EXAMPLE_SETTINGS_H
+#endif // CORE_GLOBAL_H

@@ -62,7 +62,7 @@ CSettingsDialog::CSettingsDialog(CorePlugin *corePlugin,
 
 	QMap<QString, QTreeWidgetItem *> categories;
 
-	QList<IOptionsPage *> pages = corePlugin->getObjects<IOptionsPage>();
+	QList<IOptionsPage *> pages = _plugMan->getObjects<IOptionsPage>();
 
 	int index = 0;
 	Q_FOREACH(IOptionsPage *page, pages)

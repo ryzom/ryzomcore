@@ -19,9 +19,15 @@
 #ifndef IOPTIONS_PAGE_H
 #define IOPTIONS_PAGE_H
 
+// Project includes
+#include "core_global.h"
+
+// Qt includes
 #include <QtCore/QObject>
 
+QT_BEGIN_NAMESPACE
 class QWidget;
+QT_END_NAMESPACE
 
 namespace Core
 {
@@ -31,9 +37,11 @@ namespace Core
 @details You need to subclass this interface and put an instance of your subclass
   into the plugin manager object pool.
 */
-class IOptionsPage
+class CORE_EXPORT IOptionsPage: public QObject
 {
+	Q_OBJECT
 public:
+	IOptionsPage(QObject *parent = 0): QObject(parent) {}
 	virtual ~IOptionsPage() {}
 
 	/// id() is a unique identifier for referencing this page
@@ -60,7 +68,5 @@ public:
 };
 
 } // namespace Core
-
-Q_DECLARE_INTERFACE(Core::IOptionsPage, "dev.ryzom.com.IOptionsPage/1.0")
 
 #endif // IOPTIONS_PAGE_H

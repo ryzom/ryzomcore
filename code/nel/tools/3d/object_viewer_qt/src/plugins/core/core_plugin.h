@@ -61,42 +61,9 @@ public:
 
 	void addAutoReleasedObject(QObject *obj);
 
-	QObject *objectByName(const QString &name) const;
-	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 	ExtensionSystem::IPluginManager *pluginManager() const
 	{
 		return _plugMan;
-	}
-
-	template <typename T>
-	QList<T *> getObjects() const
-	{
-		QList<QObject *> all = _plugMan->allObjects();
-		QList<T *> objects;
-		Q_FOREACH(QObject *obj, all)
-		{
-			T *tObj = qobject_cast<T *>(obj);
-			if (tObj)
-				objects.append(tObj);
-		}
-		return objects;
-	}
-
-	template <typename T>
-	T *getObject() const
-	{
-		QList<QObject *> all = _plugMan->allObjects();
-		T *result = 0;
-		Q_FOREACH(QObject *obj, all)
-		{
-			T *tObj = qobject_cast<T *>(obj);
-			if (tObj)
-			{
-				result = tObj;
-				break;
-			}
-		}
-		return result;
 	}
 
 protected:

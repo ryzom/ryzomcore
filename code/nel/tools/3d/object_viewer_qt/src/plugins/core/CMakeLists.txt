@@ -9,8 +9,12 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_CORE_PLUGIN_HDR
+				imenu_manager.h
+				icore_listener.h
+				ioptions_page.h
 				core_plugin.h
 				main_window.h
+				menu_manager.h
 				settings_dialog.h
 				search_paths_settings_page.h
 				plugin_view_dialog.h)
@@ -34,7 +38,7 @@ SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_CORE_PLUGIN_MOC_SRC})
 SOURCE_GROUP("Core Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_core MODULE ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
+ADD_LIBRARY(ovqt_plugin_core SHARED ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_core nelmisc ${QT_LIBRARIES})
 
@@ -42,6 +46,6 @@ NL_DEFAULT_PROPS(ovqt_plugin_core "NeL, Tools, 3D: Object Viewer Qt Plugin: Core
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_core)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_core)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+ADD_DEFINITIONS(-DCORE_LIBRARY ${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 INSTALL(TARGETS ovqt_plugin_core LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)

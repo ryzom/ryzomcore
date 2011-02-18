@@ -19,9 +19,15 @@
 #ifndef ICORE_LISTENER_H
 #define ICORE_LISTENER_H
 
+// Project includes
+#include "core_global.h"
+
+// Qt includes
 #include <QtCore/QObject>
 
+QT_BEGIN_NAMESPACE
 class QWidget;
+QT_END_NAMESPACE
 
 namespace Core
 {
@@ -40,9 +46,11 @@ PluginManager->addObject(yourImplementingObject);
 Don't forget to remove the object again at deconstruction (e.g. in the destructor of
 your plugin)
 */
-class ICoreListener
+class CORE_EXPORT ICoreListener: public QObject
 {
+	Q_OBJECT
 public:
+	ICoreListener(QObject *parent = 0): QObject(parent) {}
 	virtual ~ICoreListener() {}
 
 	/// Return false from the implemented method if you want to prevent the event.
@@ -51,6 +59,5 @@ public:
 
 } // namespace Core
 
-Q_DECLARE_INTERFACE(Core::ICoreListener, "dev.ryzom.com.ICoreListener/0.1")
 
 #endif // ICORE_LISTENER_H

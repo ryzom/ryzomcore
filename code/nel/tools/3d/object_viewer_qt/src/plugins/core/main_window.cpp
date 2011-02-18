@@ -17,6 +17,7 @@
 
 // Project includes
 #include "main_window.h"
+#include "menu_manager.h"
 #include "core_plugin.h"
 #include "iapp_page.h"
 #include "icore_listener.h"
@@ -34,7 +35,11 @@ namespace Core
 
 CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 	: QMainWindow(parent),
-	  _lastDir(".")
+	  _pluginManager(0),
+	  _corePlugin(0),
+	  _menuManager(0),
+	  _lastDir("."),
+	  _settings(0)
 {
 	_corePlugin = corePlugin;
 	_pluginManager = _corePlugin->pluginManager();
@@ -42,11 +47,15 @@ CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 
 	setObjectName(Constants::MAIN_WINDOW);
 
+	_menuManager = new MenuManager(this);
+	_menuManager->setMenuBar(menuBar());
+	_pluginManager->addObject(_menuManager);
+
 	_tabWidget = new QTabWidget(this);
 	_tabWidget->setTabPosition(QTabWidget::South);
 	setCentralWidget(_tabWidget);
 
-	QList<IAppPage *> listAppPages = _corePlugin->getObjects<IAppPage>();
+	QList<IAppPage *> listAppPages = _pluginManager->getObjects<IAppPage>();
 
 	Q_FOREACH(IAppPage *appPage, listAppPages)
 	{
@@ -72,7 +81,11 @@ CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
 
 CMainWindow::~CMainWindow()
 {
-	delete _pluginView;
+}
+
+IMenuManager *CMainWindow::menuManager() const
+{
+	return _menuManager;
 }
 
 void CMainWindow::checkObject(QObject *obj)
@@ -102,7 +115,7 @@ void CMainWindow::about()
 
 void CMainWindow::closeEvent(QCloseEvent *event)
 {
-	QList<ICoreListener *> listeners = _corePlugin->getObjects<ICoreListener>();
+	QList<ICoreListener *> listeners = _pluginManager->getObjects<ICoreListener>();
 	Q_FOREACH(ICoreListener *listener, listeners)
 	{
 		if (!listener->closeMainWindow())
@@ -113,8 +126,7 @@ void CMainWindow::closeEvent(QCloseEvent *event)
 	}
 
 	writeSettings();
-
-	QMainWindow::closeEvent(event);
+	event->accept();
 }
 
 void CMainWindow::addAppPage(IAppPage *appPage)
@@ -133,46 +145,52 @@ void CMainWindow::createActions()
 	_openAction->setIcon(QIcon(":/images/open-file.png"));
 	_openAction->setShortcut(QKeySequence::Open);
 	_openAction->setStatusTip(tr("Open an existing file"));
+	menuManager()->registerAction(_openAction, Constants::OPEN);
 //	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
 	_exitAction = new QAction(tr("E&xit"), this);
 	_exitAction->setShortcut(tr("Ctrl+Q"));
 	_exitAction->setStatusTip(tr("Exit the application"));
+	menuManager()->registerAction(_exitAction, Constants::EXIT);
 	connect(_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
 	_settingsAction = new QAction(tr("&Settings"), this);
 	_settingsAction->setIcon(QIcon(":/images/preferences.png"));
 	_settingsAction->setStatusTip(tr("Open the settings dialog"));
+	menuManager()->registerAction(_settingsAction, Constants::SETTINGS);
 	connect(_settingsAction, SIGNAL(triggered()), this, SLOT(showOptionsDialog()));
 
 	_aboutAction = new QAction(tr("&About"), this);
 	_aboutAction->setStatusTip(tr("Show the application's About box"));
+	menuManager()->registerAction(_aboutAction, Constants::ABOUT);
 	connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
 	_aboutQtAction = new QAction(tr("About &Qt"), this);
 	_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
+	menuManager()->registerAction(_aboutQtAction, Constants::ABOUT_QT);
 	connect(_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
 	_pluginViewAction = new QAction(tr("About &Plugins"), this);
 	_pluginViewAction->setStatusTip(tr("Show the plugin view dialog"));
+	menuManager()->registerAction(_pluginViewAction, Constants::ABOUT_PLUGINS);
 	connect(_pluginViewAction, SIGNAL(triggered()), _pluginView, SLOT(show()));
 }
 
 void CMainWindow::createMenus()
 {
 	_fileMenu = menuBar()->addMenu(tr("&File"));
-	_fileMenu->setObjectName(Constants::M_FILE);
+	menuManager()->registerMenu(_fileMenu, Constants::M_FILE);
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_exitAction);
 
 	_editMenu = menuBar()->addMenu(tr("&Edit"));
-	_editMenu->setObjectName(Constants::M_EDIT);
+	menuManager()->registerMenu(_editMenu, Constants::M_EDIT);
 
 	_viewMenu = menuBar()->addMenu(tr("&View"));
-	_viewMenu->setObjectName(Constants::M_VIEW);
+	menuManager()->registerMenu(_viewMenu, Constants::M_VIEW);
 
 	_toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	_toolsMenu->setObjectName(Constants::M_TOOLS);
+	menuManager()->registerMenu(_toolsMenu, Constants::M_TOOLS);
 
 
 	_toolsMenu->addSeparator();
@@ -182,7 +200,7 @@ void CMainWindow::createMenus()
 	menuBar()->addSeparator();
 
 	_helpMenu = menuBar()->addMenu(tr("&Help"));
-	_helpMenu->setObjectName(Constants::M_HELP);
+	menuManager()->registerMenu(_helpMenu, Constants::M_HELP);
 	_helpMenu->addAction(_aboutAction);
 	_helpMenu->addAction(_aboutQtAction);
 	_helpMenu->addAction(_pluginViewAction);

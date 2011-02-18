@@ -23,8 +23,6 @@
 
 #include <nel/misc/debug.h>
 
-#include "plugin_spec.h"
-
 namespace ExtensionSystem
 {
 

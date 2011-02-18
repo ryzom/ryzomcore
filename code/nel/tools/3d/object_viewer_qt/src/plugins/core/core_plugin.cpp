@@ -56,21 +56,13 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	_plugMan = pluginManager;
 	_oldOVQT = false;
 
-	addAutoReleasedObject(new CSearchPathsSettingsPage(this));
-	return true;
-}
-
-void CorePlugin::extensionsInitialized()
-{
-	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-
 	// for old ovqt
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(_plugMan->objectByName("CMainWindow"));
 	if (wnd)
 	{
 		_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-		QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-		QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Help"));
+		QMenu *toolsMenu = qobject_cast<QMenu *>(_plugMan->objectByName("ovqt.Menu.Tools"));
+		QMenu *helpMenu = qobject_cast<QMenu *>(_plugMan->objectByName("ovqt.Menu.Help"));
 		nlassert(toolsMenu);
 		nlassert(helpMenu);
 
@@ -103,6 +95,14 @@ void CorePlugin::extensionsInitialized()
 		}
 		_mainWindow->show();
 	}
+
+	addAutoReleasedObject(new CSearchPathsSettingsPage(this));
+	return true;
+}
+
+void CorePlugin::extensionsInitialized()
+{
+	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
 }
 
 void CorePlugin::shutdown()
@@ -160,22 +160,6 @@ void CorePlugin::addAutoReleasedObject(QObject *obj)
 {
 	_plugMan->addObject(obj);
 	_autoReleaseObjects.prepend(obj);
-}
-
-QObject* CorePlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-	if (qobj->objectName() == name)
-		return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *CorePlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-	if (spec->name() == name)
-		return spec;
-	return 0;
 }
 
 Q_EXPORT_PLUGIN(CorePlugin)

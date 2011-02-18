@@ -20,6 +20,8 @@
 #ifndef IPLUGINMANAGER_H
 #define IPLUGINMANAGER_H
 
+#include "plugin_spec.h"
+
 #include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -58,6 +60,68 @@ public:
 	// Settings
 	virtual void setSettings(QSettings *settings) = 0;
 	virtual QSettings *settings() const = 0;
+
+	// Auxiliary operations
+	template <typename T>
+	QList<T *> getObjects() const
+	{
+		QList<QObject *> all = allObjects();
+		QList<T *> objects;
+		Q_FOREACH(QObject *obj, all)
+		{
+			T *tObj = qobject_cast<T *>(obj);
+			if (tObj)
+				objects.append(tObj);
+		}
+		return objects;
+	}
+
+	template <typename T>
+	T *getObject() const
+	{
+		QList<QObject *> all = allObjects();
+		T *result = 0;
+		Q_FOREACH(QObject *obj, all)
+		{
+			T *tObj = qobject_cast<T *>(obj);
+			if (tObj)
+			{
+				result = tObj;
+				break;
+			}
+		}
+		return result;
+	}
+
+	QObject *objectByName(const QString &name) const
+	{
+		QList<QObject *> all = allObjects();
+		QObject *result = 0;
+		Q_FOREACH (QObject *qobj, all)
+		{
+			if (qobj->objectName() == name)
+			{
+				result = qobj;
+				break;
+			}
+		}
+		return result;
+	}
+
+	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const
+	{
+		QList<ExtensionSystem::IPluginSpec *> all = plugins();
+		ExtensionSystem::IPluginSpec *result = 0;
+		Q_FOREACH (ExtensionSystem::IPluginSpec *spec, all)
+		{
+			if (spec->name() == name)
+			{
+				result = spec;
+				break;
+			}
+		}
+		return result;
+	}
 
 Q_SIGNALS:
 	void objectAdded(QObject *obj);

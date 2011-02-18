@@ -28,7 +28,7 @@ namespace Core
 {
 
 CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
-	: QObject(parent),
+	: IOptionsPage(parent),
 	  _currentPage(0)
 {
 }
