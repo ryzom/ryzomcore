@@ -15,44 +15,45 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef MENU_MANAGER_H
+#define MENU_MANAGER_H
 
-#ifndef EXAMPLE_SETTINGS_PAGE_H
-#define EXAMPLE_SETTINGS_PAGE_H
+// Project includes
+#include "imenu_manager.h"
 
-#include <QtCore/QObject>
+// Qt includes
+#include <QtCore/QHash>
 
-#include "../core/ioptions_page.h"
-
-#include "ui_example_settings_page.h"
-
-class QWidget;
-
-namespace Plugin
+namespace Core
 {
-/**
-@class CExampleSettingsPage
-*/
-class CExampleSettingsPage : public Core::IOptionsPage
+
+class MenuManager : public IMenuManager
 {
 	Q_OBJECT
+
 public:
-	CExampleSettingsPage(QObject *parent = 0);
-	virtual ~CExampleSettingsPage() {}
+	MenuManager(QObject *parent = 0);
+	virtual ~MenuManager();
 
-	virtual QString id() const;
-	virtual QString trName() const;
-	virtual QString category() const;
-	virtual QString trCategory() const;
-	virtual QWidget *createPage(QWidget *parent);
+	virtual void registerMenu(QMenu *menu, const QString &id);
+	virtual void registerAction(QAction *action, const QString &id);
 
-	virtual void apply();
-	virtual void finish() {}
+	virtual QMenu *menu(const QString &id) const;
+	virtual QAction *action(const QString &id) const;
 
+	virtual void unregisterMenu(const QString &id);
+	virtual void unregisterAction(const QString &id);
+
+	virtual QMenuBar *menuBar() const;
+	void setMenuBar(QMenuBar *menuBar);
 private:
-	QWidget *_currentPage;
-	Ui::CExampleSettingsPage _ui;
+	QMenuBar *_menuBar;
+	typedef QHash<QString, QMenu *> IdMenuMap;
+	IdMenuMap _menuMap;
+	typedef QHash<QString, QAction *> IdActionMap;
+	IdActionMap _actionMap;
 };
 
-} // namespace Plugin
+} // namespace Core
 
-#endif // EXAMPLE_SETTINGS_H
+#endif // MENU_MANAGER_H

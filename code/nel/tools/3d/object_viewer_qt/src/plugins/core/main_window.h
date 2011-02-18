@@ -33,6 +33,8 @@ namespace Core
 class CSettingsDialog;
 class CorePlugin;
 class IAppPage;
+class IMenuManager;
+class MenuManager;
 
 class CMainWindow : public QMainWindow
 {
@@ -41,6 +43,8 @@ class CMainWindow : public QMainWindow
 public:
 	CMainWindow(CorePlugin *corePlugin, QWidget *parent = 0);
 	~CMainWindow();
+
+	IMenuManager *menuManager() const;
 
 private Q_SLOTS:
 	void checkObject(QObject *obj);
@@ -65,6 +69,7 @@ private:
 	ExtensionSystem::IPluginManager *_pluginManager;
 	ExtensionSystem::CPluginView *_pluginView;
 	CorePlugin *_corePlugin;
+	MenuManager *_menuManager;
 
 	QPalette _originalPalette;
 	QString _lastDir;

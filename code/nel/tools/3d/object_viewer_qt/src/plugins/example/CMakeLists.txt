@@ -13,9 +13,7 @@ SET(OVQT_PLUG_EXAMPLE_HDR 	plugin1.h
 							qnel_widget.h
 							simple_viewer.h
 							example_settings_page.h
-							${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h
-							${CMAKE_CURRENT_SOURCE_DIR}/../core/icore_listener.h
-							${CMAKE_CURRENT_SOURCE_DIR}/../core/ioptions_page.h)
+							${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h)
 
 SET(OVQT_PLUG_EXAMPLE_UIS	example_settings_page.ui)
 
@@ -33,7 +31,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_example nelmisc nel3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_example ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(ovqt_plugin_example "NeL, Tools, 3D: Object Viewer Qt Plugin: Example")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_example)

@@ -39,12 +39,11 @@ public:
 	virtual ~CSimpleViewer() {}
 };
 
-class CCoreListener : public QObject, public Core::ICoreListener
+class CCoreListener : public Core::ICoreListener
 {
 	Q_OBJECT
-	Q_INTERFACES(Core::ICoreListener)
 public:
-	CCoreListener(QObject *parent = 0): QObject(parent) {}
+	CCoreListener(QObject *parent = 0): ICoreListener(parent) {}
 	virtual ~CCoreListener() {}
 
 	virtual bool closeMainWindow() const;
