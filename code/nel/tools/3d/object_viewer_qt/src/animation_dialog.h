@@ -77,6 +77,8 @@ private Q_SLOTS:
 	void setInPlace(bool state);
 	void setIncPos(bool state);
 	void finish();
+	void setModePlayList();
+	void setModeMixer();
 
 private:
 

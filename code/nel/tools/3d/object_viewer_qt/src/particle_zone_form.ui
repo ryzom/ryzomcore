@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>210</width>
-    <height>302</height>
+    <width>198</width>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,10 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="margin">
-    <number>9</number>
+    <number>6</number>
    </property>
    <property name="spacing">
-    <number>6</number>
+    <number>3</number>
    </property>
    <item row="0" column="0">
     <widget class="QLabel" name="label_2">
@@ -128,19 +128,6 @@
    </item>
    <item row="7" column="0" colspan="3">
     <widget class="NLQT::CEditRangeFloatWidget" name="bounceFactorWidget" native="true"/>
-   </item>
-   <item row="8" column="1">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>1</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

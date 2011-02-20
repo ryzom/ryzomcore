@@ -46,6 +46,8 @@ CAnimationDialog::CAnimationDialog(QWidget *parent)
 	connect(_ui.horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(changeFrame(int)));
 	connect(_ui.startSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeStartAnim(int)));
 	connect(_ui.endSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeEndAnim(int)));
+	connect(_ui.playlistToolButton, SIGNAL(toggled(bool)), this, SLOT(setModePlayList()));
+	connect(_ui.mixerToolButton, SIGNAL(toggled(bool)), this, SLOT(setModeMixer()));
 
 	// init QTimeLine
 	_timeLine = new QTimeLine(_ui.endSpinBox->value() * _frameRate, this);
@@ -92,6 +94,11 @@ void CAnimationDialog::setCurrentShape(const QString &name)
 
 	_ui.inPlaceCheckBox->setChecked(entity.getInPlace());
 	_ui.incPosCheckBox->setChecked(entity.getIncPos());
+
+	if (_ui.playlistToolButton->isChecked())
+		entity.setMode(CEntity::Mode::PlayList);
+	else
+		entity.setMode(CEntity::Mode::Mixer);
 }
 
 void CAnimationDialog::start()
@@ -112,7 +119,8 @@ void CAnimationDialog::play()
 
 	if (_timeLine->state() == QTimeLine::Running)
 		_timeLine->setPaused(true);
-	else if (_timeLine->currentFrame() == _timeLine->endFrame()) _timeLine->start();
+	else if (_timeLine->currentFrame() == _timeLine->endFrame())
+		_timeLine->start();
 	else
 		_timeLine->resume();
 }
@@ -184,8 +192,30 @@ void CAnimationDialog::setIncPos(bool state)
 
 void CAnimationDialog::finish()
 {
-	if (_ui.loopCheckBox->checkState() == Qt::Checked) play();
-	else _ui.playPushButton->setChecked(false);
+	if (_ui.loopCheckBox->isChecked())
+		play();
+	else
+		_ui.playPushButton->setChecked(false);
+}
+
+void CAnimationDialog::setModePlayList()
+{
+	std::string curObj = Modules::objView().getCurrentObject();
+	if (curObj.empty())
+		return;
+	CEntity	&entity = Modules::objView().getEntity(curObj);
+
+	entity.setMode(CEntity::Mode::PlayList);
+}
+
+void CAnimationDialog::setModeMixer()
+{
+	std::string curObj = Modules::objView().getCurrentObject();
+	if (curObj.empty())
+		return;
+	CEntity	&entity = Modules::objView().getEntity(curObj);
+
+	entity.setMode(CEntity::Mode::Mixer);
 }
 
 } /* namespace NLQT */

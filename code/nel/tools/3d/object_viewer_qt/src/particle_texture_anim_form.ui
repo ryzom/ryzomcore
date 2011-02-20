@@ -6,28 +6,53 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>212</width>
-    <height>101</height>
+    <width>252</width>
+    <height>103</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_3">
    <property name="margin">
     <number>0</number>
    </property>
    <property name="spacing">
-    <number>5</number>
+    <number>3</number>
    </property>
    <item row="0" column="0">
-    <widget class="QCheckBox" name="texAnimCheckBox">
-     <property name="text">
-      <string>Enable texture anim</string>
+    <widget class="QGroupBox" name="texAnimGroupBox">
+     <property name="title">
+      <string/>
      </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="texAnimCheckBox">
+        <property name="text">
+         <string>Enable texture anim</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="textureGroupedPushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Texture grouped</string>
+        </property>
+        <property name="autoDefault">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0">
     <widget class="QGroupBox" name="multitexturingGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -39,6 +64,9 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <property name="margin">
+       <number>6</number>
+      </property>
       <property name="spacing">
        <number>5</number>
       </property>
@@ -62,24 +90,11 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="2" column="0">
     <widget class="NLQT::CAttribIntWidget" name="texIndexWidget" native="true"/>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="3" column="0">
     <widget class="NLQT::CParticleTextureWidget" name="texWidget" native="true"/>
-   </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="textureGroupedPushButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Texture grouped</string>
-     </property>
-     <property name="autoDefault">
-      <bool>true</bool>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

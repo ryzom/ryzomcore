@@ -175,14 +175,14 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
-        <widget class="QCheckBox" name="independantSizeCheckBox">
+        <widget class="QCheckBox" name="independentSizeCheckBox">
          <property name="text">
-          <string>Independant size</string>
+          <string>Independent size</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QGroupBox" name="independantGroupBox">
+        <widget class="QGroupBox" name="independentGroupBox">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -424,7 +424,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Number of segs:</string>
+          <string>Number of segments:</string>
          </property>
         </widget>
        </item>
@@ -536,7 +536,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Nb segs:</string>
+          <string>Number of segments:</string>
          </property>
         </widget>
        </item>
@@ -546,7 +546,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_14">
          <property name="text">
-          <string>Seg duration:</string>
+          <string>Duration segment:</string>
          </property>
         </widget>
        </item>
@@ -696,6 +696,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="NLQT::CParticleTextureWidget" name="particleTextureWidget" native="true"/>
        </item>
@@ -708,7 +714,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>

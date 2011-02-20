@@ -504,7 +504,7 @@ void CMainWindow::createDialogs()
 
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
 	connect(_ParticleWorkspaceDialog, SIGNAL(changeActiveNode()), _ParticleControlDialog, SLOT(updateActiveNode()));
-	connect(_AnimationSetDialog->ui.setLengthPushButton, SIGNAL(clicked()), _AnimationDialog, SLOT(changeAnimLength()));
+	connect(_AnimationSetDialog->ui.setLengthToolButton, SIGNAL(clicked()), _AnimationDialog, SLOT(changeAnimLength()));
 	connect(_AnimationSetDialog, SIGNAL(changeCurrentShape(QString)), _SkeletonTreeModel, SLOT(rebuildModel()));
 	connect(_AnimationSetDialog, SIGNAL(changeCurrentShape(QString)), _SkeletonScaleDialog, SLOT(setCurrentShape(QString)));
 	connect(_AnimationSetDialog, SIGNAL(changeCurrentShape(QString)), _AnimationDialog, SLOT(setCurrentShape(QString)));

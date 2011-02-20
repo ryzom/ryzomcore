@@ -43,10 +43,7 @@ CAnimationSetDialog::CAnimationSetDialog(QWidget *parent)
 	connect(ui.downToolButton, SIGNAL(clicked()), this, SLOT(downAnim()));
 	connect(ui.addAnimPushButton, SIGNAL(clicked()), this, SLOT(loadAnim()));
 	connect(ui.addSwtPushButton, SIGNAL(clicked()), this, SLOT(loadSwt()));
-	connect(ui.resetPushButton, SIGNAL(clicked()), this, SLOT(resetAnim()));
-
-	connect(ui.listRadioButton, SIGNAL(clicked(bool)), this, SLOT(setModeAnim()));
-	connect(ui.mixerRadioButton, SIGNAL(clicked(bool)), this, SLOT(setModeAnim()));
+	connect(ui.resetToolButton, SIGNAL(clicked()), this, SLOT(resetAnim()));
 
 	connect(ui.objectsComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setCurrentShape(QString)));
 }
@@ -68,19 +65,6 @@ void CAnimationSetDialog::setCurrentShape(const QString &name)
 
 }
 
-void CAnimationSetDialog::setModeAnim()
-{
-	std::string curObj = Modules::objView().getCurrentObject();
-	if (curObj.empty())
-		return;
-	CEntity	&entity = Modules::objView().getEntity(curObj);
-
-	if (ui.mixerRadioButton->isChecked())
-		entity.setMode(CEntity::Mode::Mixer);
-	else
-		entity.setMode(CEntity::Mode::PlayList);
-}
-
 void CAnimationSetDialog::updateListObject()
 {
 	ui.objectsComboBox->clear();
@@ -95,15 +79,15 @@ void CAnimationSetDialog::updateListObject()
 	{
 		ui.addAnimPushButton->setEnabled(false);
 		ui.addSwtPushButton->setEnabled(false);
-		ui.resetPushButton->setEnabled(false);
-		ui.setLengthPushButton->setEnabled(false);
+		ui.resetToolButton->setEnabled(false);
+		ui.setLengthToolButton->setEnabled(false);
 	}
 	else
 	{
 		ui.addAnimPushButton->setEnabled(true);
 		ui.addSwtPushButton->setEnabled(true);
-		ui.resetPushButton->setEnabled(true);
-		ui.setLengthPushButton->setEnabled(true);
+		ui.resetToolButton->setEnabled(true);
+		ui.setLengthToolButton->setEnabled(true);
 	}
 }
 
