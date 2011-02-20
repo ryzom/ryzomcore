@@ -135,7 +135,7 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 
 	connect(_ui.autoLodCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAutoLOD(bool)));
 	connect(_ui.globalColorLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setGlobalColorLight(bool)));
-	connect(_ui.independantSizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setIndependantSize(bool)));
+	connect(_ui.independentSizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setIndependantSize(bool)));
 	connect(_ui.alignCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAlignOnMotion(bool)));
 	connect(_ui.ztestCheckBox, SIGNAL(toggled(bool)), this, SLOT(setZTest(bool)));
 	connect(_ui.zalignCheckBox, SIGNAL(toggled(bool)), this, SLOT(setZAlign(bool)));
@@ -283,18 +283,18 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 			_ui.zalignCheckBox->setChecked(fla->getAlignOnZAxis());
 
 			// 'look at' independant sizes
-			_ui.independantSizeCheckBox->setChecked(fla->hasIndependantSizes());
+			_ui.independentSizeCheckBox->setChecked(fla->hasIndependantSizes());
 
-			_ui.independantSizeCheckBox->show();
-			_ui.independantGroupBox->show();
+			_ui.independentSizeCheckBox->show();
+			_ui.independentGroupBox->show();
 
 			// Add Look at page in tabWidget
 			_ui.tabWidget->addTab(_ui.lookAtPage, tr("Look At param"));
 		}
 		else
 		{
-			_ui.independantSizeCheckBox->hide();
-			_ui.independantGroupBox->hide();
+			_ui.independentSizeCheckBox->hide();
+			_ui.independentGroupBox->hide();
 		}
 
 		// Shock wave page setup
@@ -495,7 +495,7 @@ void CLocatedBindablePage::setIndependantSize(bool state)
 		la->setIndependantSizes(state);
 		updateModifiedFlag();
 	}
-	_ui.independantGroupBox->setEnabled(state);
+	_ui.independentGroupBox->setEnabled(state);
 	updateSizeControl();
 }
 

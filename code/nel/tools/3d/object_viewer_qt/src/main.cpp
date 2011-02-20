@@ -21,6 +21,9 @@
 
 // Qt includes
 #include <QtCore/QDir>
+#include <QtCore/QTranslator>
+#include <QtCore/QLibraryInfo>
+#include <QtCore/QLocale>
 #include <QtCore/QSettings>
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
@@ -102,14 +105,23 @@ sint main(int argc, char **argv)
 #endif
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
-
-		NLMISC::CPath::remapExtension("tga", "png", true);
 	}
-
 	QApplication app(argc, argv);
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
 	splash->show();
+
+	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
+										QLatin1String("Ryzom Core"), QLatin1String("ObjectViewerQt"));
+
+	QTranslator translator;
+	QTranslator qtTranslator;
+	QString locale = settings->value("Language", QLocale::system().name()).toString();
+	QString qtTrPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+	translator.load("object_viewer_qt_" + locale, ":/translations");
+	qtTranslator.load("qt_" + locale, qtTrPath);
+	app.installTranslator(&translator);
+	app.installTranslator(&qtTranslator);
 
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
@@ -117,8 +129,6 @@ sint main(int argc, char **argv)
 #endif
 
 	Modules::init();
-	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-										QLatin1String("Ryzom Core"), QLatin1String("ObjectViewerQt"));
 
 	Modules::plugMan().setSettings(settings);
 

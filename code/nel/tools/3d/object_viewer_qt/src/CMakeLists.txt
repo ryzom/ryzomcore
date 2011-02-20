@@ -5,7 +5,7 @@ FILE(GLOB OBJECT_VIEWER_SRC configuration.h entity.h object_viewer.h particle_ed
 			    particle_node.h ps_initial_pos.h dup_ps.h vegetable_editor.h vegetable_node.h 
 			    extension_system/iplugin_spec.h extension_system/plugin_spec.h
 			    extension_system/*.cpp *.cpp)
- 
+
 SET(OBJECT_VIEWER_HDR main_window.h graphics_viewport.h animation_dialog.h 
 		      animation_set_dialog.h settings_dialog.h setup_fog_dialog.h 
 		      slot_manager_dialog.h particle_control_dialog.h particle_workspace_dialog.h
@@ -40,6 +40,8 @@ SET(OBJECT_VIEWER_UIS animation_form.ui animation_set_form.ui settings_form.ui
 
 SET(OBJECT_VIEWER_RCS object_viewer_qt.qrc)
 
+SET(LANGUAGES	en fr de ru)
+
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
@@ -47,11 +49,27 @@ QT4_ADD_RESOURCES( OBJECT_VIEWER_RC_SRCS ${OBJECT_VIEWER_RCS} )
 QT4_WRAP_CPP( OBJECT_VIEWER_MOC_SRCS ${OBJECT_VIEWER_HDR} )
 QT4_WRAP_UI( OBJECT_VIEWER_UI_HDRS ${OBJECT_VIEWER_UIS} )
 
+FOREACH(LANGUAGE ${LANGUAGES})
+        SET (TS ${CMAKE_CURRENT_SOURCE_DIR}/translations/object_viewer_qt_${LANGUAGE}.ts)
+        SET (QM ${CMAKE_CURRENT_SOURCE_DIR}/translations/object_viewer_qt_${LANGUAGE}.qm)
+        SET (TRANSLATIONS ${TRANSLATIONS} ${TS})
+        SET (TRANSLATIONS_BINARY ${TRANSLATIONS_BINARY} ${QM})
+        ADD_CUSTOM_COMMAND (OUTPUT ${QM} COMMAND ${QT_LRELEASE_EXECUTABLE} ${TS} MAIN_DEPENDENCY ${TS})
+ENDFOREACH()
+
+ADD_CUSTOM_TARGET (translations COMMAND ${QT_LUPDATE_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} -recursive -ts ${TRANSLATIONS})
+ADD_CUSTOM_COMMAND (TARGET translations	COMMAND ${QT_LRELEASE_EXECUTABLE} ${TRANSLATIONS})
+
 SOURCE_GROUP(QtResources FILES ${OBJECT_VIEWER_UIS} ${OBJECT_VIEWER_RCS})
 SOURCE_GROUP(QtGeneratedUiHdr FILES ${OBJECT_VIEWER_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${OBJECT_VIEWER_MOC_SRCS})
 
-ADD_EXECUTABLE(object_viewer_qt WIN32 MACOSX_BUNDLE ${OBJECT_VIEWER_SRC} ${OBJECT_VIEWER_MOC_SRCS} ${OBJECT_VIEWER_RC_SRCS} ${OBJECT_VIEWER_UI_HDRS})
+ADD_EXECUTABLE(object_viewer_qt WIN32 MACOSX_BUNDLE
+               ${OBJECT_VIEWER_SRC}
+               ${OBJECT_VIEWER_MOC_SRCS}
+               ${OBJECT_VIEWER_RC_SRCS}
+               ${OBJECT_VIEWER_UI_HDRS}
+               ${TRANSLATIONS})
 
 TARGET_LINK_LIBRARIES(object_viewer_qt
 		nelmisc 

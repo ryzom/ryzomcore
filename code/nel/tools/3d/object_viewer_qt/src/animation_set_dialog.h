@@ -66,7 +66,6 @@ public Q_SLOTS:
 	void setCurrentShape(const QString &name);
 
 private Q_SLOTS:
-	void setModeAnim();
 	void loadAnim();
 	void loadSwt();
 	void resetAnim();
