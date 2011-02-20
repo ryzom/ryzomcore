@@ -20,10 +20,10 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 
-#include "form.h"
-#include "form_elm.h"
-#include "form_loader.h"
-#include "type.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_elm.h"
+#include "nel/georges/form_loader.h"
+#include "nel/georges/type.h"
 
 using namespace NLMISC;
 using namespace std;

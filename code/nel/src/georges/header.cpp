@@ -16,10 +16,11 @@
 
 #include "stdgeorges.h"
 
-#include "header.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/common.h"
+
+#include "nel/georges/header.h"
 
 using namespace NLMISC;
 

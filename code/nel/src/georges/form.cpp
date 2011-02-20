@@ -21,8 +21,8 @@
 #include "nel/misc/common.h"
 #include "nel/misc/path.h"
 
-#include "form.h"
-#include "form_loader.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_loader.h"
 
 using namespace NLMISC;
 

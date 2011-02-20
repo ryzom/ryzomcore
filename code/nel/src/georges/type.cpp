@@ -22,11 +22,11 @@
 #include "nel/misc/path.h"
 #include "nel/georges/u_type.h"
 
-#include "form.h"
-#include "form_elm.h"
-#include "form_loader.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_elm.h"
+#include "nel/georges/form_loader.h"
 
-#include "type.h"
+#include "nel/georges/type.h"
 
 using namespace NLMISC;
 using namespace std;

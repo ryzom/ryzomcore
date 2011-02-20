@@ -20,9 +20,9 @@
 #include "nel/misc/i_xml.h"
 #include "nel/misc/path.h"
 
-#include "form_dfn.h"
-#include "form_loader.h"
-#include "form_elm.h"
+#include "nel/georges/form_dfn.h"
+#include "nel/georges/form_loader.h"
+#include "nel/georges/form_elm.h"
 
 using namespace NLMISC;
 using namespace std;

@@ -22,10 +22,10 @@
 
 #include "nel/georges/u_form.h"
 
-#include "form_loader.h"
-#include "type.h"
-#include "form.h"
-#include "form_dfn.h"
+#include "nel/georges/form_loader.h"
+#include "nel/georges/type.h"
+#include "nel/georges/form.h"
+#include "nel/georges/form_dfn.h"
 
 using namespace NLMISC;
 using namespace std;
