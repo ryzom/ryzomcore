@@ -1038,6 +1038,44 @@
     </message>
 </context>
 <context>
+    <name>CLogSettingsPage</name>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="20"/>
+        <source>NeL Displayers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="26"/>
+        <source>Error Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="36"/>
+        <source>Warning Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="46"/>
+        <source>Debug Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="56"/>
+        <source>Assert Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="66"/>
+        <source>Info Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CMeshWidget</name>
     <message>
         <location filename="../mesh_form.ui" line="14"/>
@@ -3215,108 +3253,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>Dialog</name>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="14"/>
-        <source>Dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="38"/>
-        <source>Browse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="45"/>
-        <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="52"/>
-        <source>End</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Form</name>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="20"/>
-        <source>Graphics settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="28"/>
-        <location filename="../plugins/core/general_settings_page.ui" line="123"/>
-        <source>Driver</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="63"/>
-        <source>Qt Style</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="71"/>
-        <source>Style</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="96"/>
-        <source>Use style&apos;s standard palette</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="103"/>
-        <source>Use WinAero</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="113"/>
-        <source>Sound settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="155"/>
-        <source>SoundAutoLoadSample</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="162"/>
-        <source>SoundEnableOccludeObstruct</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="169"/>
-        <source>SoundEnableReverb</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="176"/>
-        <source>SoundManualRolloff</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="183"/>
-        <source>SoundForceSoftware</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="190"/>
-        <source>SoundUseADPCM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="199"/>
-        <source>SoundMaxTrack</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CAnimationSetDialog</name>
     <message>
         <location filename="../animation_set_dialog.cpp" line="153"/>
@@ -4792,15 +4728,23 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>Plugin::MyPlugin</name>
+    <name>Plugin::CLogPlugin</name>
     <message>
-        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="23"/>
+        <location filename="../plugins/log/log_plugin.cpp" line="71"/>
         <source>Not found QMainWindow Object Viewer Qt.</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>Plugin::CLogSettingsPage</name>
     <message>
-        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="29"/>
-        <source>Not found QMenu Help.</source>
+        <location filename="../plugins/log/log_settings_page.cpp" line="47"/>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.cpp" line="57"/>
+        <source>General</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4867,7 +4811,7 @@ Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="157"/>
+        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="156"/>
         <source>Choose output file</source>
         <translation type="unfinished"></translation>
     </message>

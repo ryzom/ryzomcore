@@ -5,11 +5,15 @@ INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
-			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUG_LOG_HDR log_plugin.h)
-SET(OVQT_PLUG_LOG_UIS log_form.ui)
+SET(OVQT_PLUG_LOG_HDR	log_plugin.h 
+						log_settings_page.h 
+						${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h)
+						
+SET(OVQT_PLUG_LOG_UIS	log_form.ui 
+						log_settings_page.ui)
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
@@ -25,7 +29,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_log MODULE ${SRC} ${OVQT_PLUG_LOG_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_LOG_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_log nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_log ovqt_plugin_core nelmisc ${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(ovqt_plugin_log "NeL, Tools, 3D: Object Viewer Qt Plugin: Log")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_log)

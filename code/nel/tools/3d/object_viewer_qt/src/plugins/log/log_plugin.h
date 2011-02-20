@@ -60,6 +60,7 @@ namespace Plugin
 		void extensionsInitialized();
 
 		void setNelContext(NLMISC::INelContext *nelContext);
+		NLQT::CQtDisplayer* displayer() { return _displayer; }
 
 		QString name() const;
 		QString version() const;

@@ -1034,6 +1034,44 @@
     <message>
         <location filename="../plugins/log/log_form.ui" line="32"/>
         <source>Log</source>
+        <translation>Log</translation>
+    </message>
+</context>
+<context>
+    <name>CLogSettingsPage</name>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="20"/>
+        <source>NeL Displayers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="26"/>
+        <source>Error Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="36"/>
+        <source>Warning Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="46"/>
+        <source>Debug Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="56"/>
+        <source>Assert Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.ui" line="66"/>
+        <source>Info Log</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3016,112 +3054,112 @@
     <message>
         <location filename="../plugins/core/main_window.cpp" line="77"/>
         <source>Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
+        <translation>Object Viewer Qt</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="111"/>
         <source>About Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
+        <translation>Über Object Viewer Qt</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="112"/>
         <source>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Author: dnk-88 &lt;p&gt;Compiled on %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Autor: dnk-88 &lt;p&gt;Kompliert am %1 %2</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="144"/>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Öffnen...</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="147"/>
         <source>Open an existing file</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei öffnen</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="151"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
+        <translation>B&amp;eenden</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="152"/>
         <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Q</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="153"/>
         <source>Exit the application</source>
-        <translation type="unfinished"></translation>
+        <translation>Object Viewer verlassen</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="157"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein&amp;stellungen</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="159"/>
         <source>Open the settings dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffnet das Konfigurationsmenü</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="163"/>
         <source>&amp;About</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Über</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="164"/>
         <source>Show the application&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeigt Informationen über den Object Viewer</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="168"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished"></translation>
+        <translation>Über &amp;Qt</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="169"/>
         <source>Show the Qt library&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeigt Informationen über Qt</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="173"/>
         <source>About &amp;Plugins</source>
-        <translation type="unfinished"></translation>
+        <translation>Über &amp;Plugins</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="174"/>
         <source>Show the plugin view dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeigt Informationen über Plugins</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="181"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Datei</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="186"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Editieren</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="189"/>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ansicht</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="192"/>
         <source>&amp;Tools</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Werkzeuge</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="202"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Hilfe</translation>
     </message>
     <message>
         <location filename="../plugins/core/main_window.cpp" line="211"/>
         <source>StatusReady</source>
-        <translation type="unfinished"></translation>
+        <translation>Status Fertig</translation>
     </message>
 </context>
 <context>
@@ -3211,108 +3249,6 @@ Right click to remove points.</source>
     <message>
         <location filename="../curve_form.ui" line="216"/>
         <source>Ok</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Dialog</name>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="14"/>
-        <source>Dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="38"/>
-        <source>Browse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="45"/>
-        <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/disp_sheet_id/dialog.ui" line="52"/>
-        <source>End</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Form</name>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="20"/>
-        <source>Graphics settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="28"/>
-        <location filename="../plugins/core/general_settings_page.ui" line="123"/>
-        <source>Driver</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="63"/>
-        <source>Qt Style</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="71"/>
-        <source>Style</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="96"/>
-        <source>Use style&apos;s standard palette</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="103"/>
-        <source>Use WinAero</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="113"/>
-        <source>Sound settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="155"/>
-        <source>SoundAutoLoadSample</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="162"/>
-        <source>SoundEnableOccludeObstruct</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="169"/>
-        <source>SoundEnableReverb</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="176"/>
-        <source>SoundManualRolloff</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="183"/>
-        <source>SoundForceSoftware</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="190"/>
-        <source>SoundUseADPCM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/general_settings_page.ui" line="199"/>
-        <source>SoundMaxTrack</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3863,7 +3799,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../main_window.cpp" line="244"/>
         <source>About Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Über Object Viewer Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="245"/>
@@ -3873,27 +3809,27 @@ Right click to remove points.</source>
     <message>
         <location filename="../main_window.cpp" line="263"/>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Öffnen...</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="266"/>
         <source>Open an existing file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Datei öffnen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="269"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">B&amp;eenden</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="270"/>
         <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ctrl+Q</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="271"/>
         <source>Exit the application</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Object Viewer verlassen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="275"/>
@@ -3959,7 +3895,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../main_window.cpp" line="300"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ein&amp;stellungen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="302"/>
@@ -3969,33 +3905,33 @@ Right click to remove points.</source>
     <message>
         <location filename="../main_window.cpp" line="305"/>
         <source>&amp;About</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Über</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="306"/>
         <source>Show the application&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zeigt Informationen über den Object Viewer</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="309"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Über &amp;Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="310"/>
         <source>Show the Qt library&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zeigt Informationen über Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="316"/>
         <location filename="../main_window.cpp" line="400"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Datei</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="322"/>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Ansicht</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="329"/>
@@ -4006,17 +3942,17 @@ Right click to remove points.</source>
         <location filename="../main_window.cpp" line="335"/>
         <location filename="../main_window.cpp" line="405"/>
         <source>&amp;Tools</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Werkzeuge</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="386"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Hilfe</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="427"/>
         <source>StatusReady</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Status Fertig</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="526"/>
@@ -4792,15 +4728,23 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>Plugin::MyPlugin</name>
+    <name>Plugin::CLogPlugin</name>
     <message>
-        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="23"/>
+        <location filename="../plugins/log/log_plugin.cpp" line="71"/>
         <source>Not found QMainWindow Object Viewer Qt.</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>Plugin::CLogSettingsPage</name>
     <message>
-        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="29"/>
-        <source>Not found QMenu Help.</source>
+        <location filename="../plugins/log/log_settings_page.cpp" line="47"/>
+        <source>Log</source>
+        <translation type="unfinished">Log</translation>
+    </message>
+    <message>
+        <location filename="../plugins/log/log_settings_page.cpp" line="57"/>
+        <source>General</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4867,7 +4811,7 @@ Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="157"/>
+        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="156"/>
         <source>Choose output file</source>
         <translation type="unfinished"></translation>
     </message>

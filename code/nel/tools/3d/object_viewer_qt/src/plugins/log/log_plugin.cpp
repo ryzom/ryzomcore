@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "log_plugin.h"
+#include "log_settings_page.h"
 
 // Qt includes
 #include <QtCore/QObject>
@@ -40,6 +41,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Plugin;
 
+namespace ExtensionSystem
+{
+	class IPluginSpec;
+}
+
 CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
 {
 	_ui.setupUi(this);
@@ -59,6 +65,13 @@ bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
+	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	if (!wnd)
+	{
+		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
+		return false;
+	}
+	_plugMan->addObject(new CLogSettingsPage(this));
 	return true;
 }
 
