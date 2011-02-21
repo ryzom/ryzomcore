@@ -43,9 +43,13 @@
 #include "nel/georges/u_form_dfn.h"
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/load_form.h"
+
+// Include from libxml2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
 // Georges, bypassing interface
-#include "../../../src/georges/stdgeorges.h"
-#include "../../../src/georges/form.h"
+#include "nel/georges/form.h"
 
 // Basic C++
 #include <iostream>
