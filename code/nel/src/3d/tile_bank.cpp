@@ -377,7 +377,6 @@ void CTileBank::makeAllPathRelative ()
 
 
 // ***************************************************************************
-// Moi aussi je le parie (Yoyo).
 void CTileBank::makeAllExtensionDDS ()
 {
 	// For all tiles

@@ -22,7 +22,7 @@ typedef struct PIC_PICTURE
 
 /*
  * JPG
-*/
+ */
 
 	
 extern unsigned long	Pic_JPG_Read(	unsigned char *FileName, 
@@ -35,7 +35,7 @@ extern unsigned long	Pic_JPG_Write(	unsigned char *FileName,
 										unsigned long w, unsigned long h);
 /*
  * TGA
-*/
+ */
 extern unsigned long	Pic_TGA_Read(	unsigned char *FileName,
 										unsigned char **ppPal, unsigned char **ppDatas,
 										unsigned long *pWidth, unsigned long *pHeight, 
@@ -45,7 +45,7 @@ extern unsigned long	Pic_TGA_Write(	unsigned char *FileName,
 										unsigned long w, unsigned long h, unsigned long d);
 /*
  * BMP
-*/
+ */
 extern unsigned long	Pic_BMP_Read(	unsigned char *FileName,
 										unsigned char **ppPal, unsigned char **ppDatas,
 										unsigned long *pWidth, unsigned long *pHeight, 
@@ -56,7 +56,7 @@ extern unsigned long	Pic_BMP_Write(	unsigned char *FileName,
 										unsigned long w, unsigned long h, unsigned long d);
 /*
  * System
-*/
+ */
 extern void*			Pic_malloc(unsigned long size);
 extern void*			Pic_calloc(unsigned long count, unsigned long size);
 extern void				Pic_free(void *memblock);

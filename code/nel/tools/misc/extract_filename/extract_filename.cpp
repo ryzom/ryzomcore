@@ -190,7 +190,7 @@ void extractStringsFromBinary (const vector<char> &fileArray, set<string> &filen
 		// if we're pointing at a string the first 4 bytes ar the string length
 		uint len=*(uint *)(arrayPointer+i);
 
-		// if the stringlength could be valid
+		// if the string length could be valid
 		if (len>0 && len+i<=size)
 		{
 			uint k;

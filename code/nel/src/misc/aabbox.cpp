@@ -21,8 +21,6 @@
 #include "nel/misc/bsphere.h"
 #include "nel/misc/matrix.h"
 
-
-
 namespace NLMISC {
 
 
