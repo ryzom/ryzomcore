@@ -54,10 +54,19 @@ public:
 	/// Set the update interval renderer
 	void setInterval(int msec);
 
+	float getFPS() const
+	{
+		return m_fps;
+	}
+
 	virtual QPaintEngine* paintEngine() const
 	{
 		return NULL;
 	}
+Q_SIGNALS:
+	void updateData();
+	void updatePreRender();
+	void updatePostRender();
 
 private Q_SLOTS:
 	void updateRender();
@@ -80,10 +89,11 @@ private:
 	QNLWidget(const QNLWidget &);
 	QNLWidget &operator=(const QNLWidget &);
 
-	NL3D::UDriver *_driver;
-	QTimer *_mainTimer;
-	bool _initialized;
-	int _interval;
+	NL3D::UDriver *m_driver;
+	QTimer *m_mainTimer;
+	bool m_initialized;
+	int m_interval;
+	float m_fps;
 
 }; /* class QNLWidget */
 

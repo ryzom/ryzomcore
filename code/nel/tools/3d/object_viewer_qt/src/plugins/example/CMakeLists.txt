@@ -12,8 +12,7 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 SET(OVQT_PLUG_EXAMPLE_HDR 	plugin1.h
 							qnel_widget.h
 							simple_viewer.h
-							example_settings_page.h
-							${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h)
+							example_settings_page.h)
 
 SET(OVQT_PLUG_EXAMPLE_UIS	example_settings_page.ui)
 

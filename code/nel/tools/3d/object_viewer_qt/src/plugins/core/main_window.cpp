@@ -17,10 +17,10 @@
 
 // Project includes
 #include "main_window.h"
-#include "menu_manager.h"
-#include "core_plugin.h"
-#include "iapp_page.h"
+#include "icontext.h"
 #include "icore_listener.h"
+#include "menu_manager.h"
+#include "core.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
 
@@ -28,94 +28,117 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
+#include <QtCore/QCoreApplication>
 #include <QtGui/QtGui>
 
 namespace Core
 {
 
-CMainWindow::CMainWindow(CorePlugin *corePlugin, QWidget *parent)
+MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent)
 	: QMainWindow(parent),
-	  _pluginManager(0),
-	  _corePlugin(0),
-	  _menuManager(0),
-	  _lastDir("."),
-	  _settings(0)
+	  m_pluginManager(0),
+	  m_menuManager(0),
+	  m_coreImpl(0),
+	  m_lastDir("."),
+	  m_settings(0)
 {
-	_corePlugin = corePlugin;
-	_pluginManager = _corePlugin->pluginManager();
-	_settings = _pluginManager->settings();
+	QCoreApplication::setApplicationName(QLatin1String("ObjectViewerQt"));
+	QCoreApplication::setApplicationVersion(QLatin1String(Core::Constants::OVQT_VERSION_LONG));
+	QCoreApplication::setOrganizationName(QLatin1String("RyzomCore"));
 
 	setObjectName(Constants::MAIN_WINDOW);
+	setWindowIcon(QIcon(Constants::ICON_NEL));
+	setWindowTitle(tr("Object Viewer Qt"));
 
-	_menuManager = new MenuManager(this);
-	_menuManager->setMenuBar(menuBar());
-	_pluginManager->addObject(_menuManager);
+	m_pluginManager = pluginManager;
+	m_settings = m_pluginManager->settings();
+	m_coreImpl = new CoreImpl(this);
 
-	_tabWidget = new QTabWidget(this);
-	_tabWidget->setTabPosition(QTabWidget::South);
-	setCentralWidget(_tabWidget);
+	m_menuManager = new MenuManager(this);
+	m_menuManager->setMenuBar(menuBar());
 
-	QList<IAppPage *> listAppPages = _pluginManager->getObjects<IAppPage>();
-
-	Q_FOREACH(IAppPage *appPage, listAppPages)
-	{
-		addAppPage(appPage);
-	}
+	m_tabWidget = new QTabWidget(this);
+	m_tabWidget->setTabPosition(QTabWidget::South);
+	setCentralWidget(m_tabWidget);
 
 	setDockNestingEnabled(true);
-
-	_originalPalette = QApplication::palette();
+	m_originalPalette = QApplication::palette();
 
 	createDialogs();
 	createActions();
 	createMenus();
 	createStatusBar();
+}
 
+MainWindow::~MainWindow()
+{
+	m_pluginManager->removeObject(m_coreImpl);
+	m_pluginManager->removeObject(m_menuManager);
+
+	delete m_coreImpl;
+	m_coreImpl = 0;
+}
+
+bool MainWindow::initialize(QString *errorString)
+{
+	Q_UNUSED(errorString);
+	m_pluginManager->addObject(m_coreImpl);
+	m_pluginManager->addObject(m_menuManager);
+	return true;
+}
+
+void MainWindow::extensionsInitialized()
+{
+	QList<IContext *> listContexts = m_pluginManager->getObjects<IContext>();
+
+	Q_FOREACH(IContext *context, listContexts)
+	{
+		addContextObject(context);
+	}
+
+	connect(m_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 	readSettings();
-
-	setWindowIcon(QIcon(Constants::ICON_NEL));
-	setWindowTitle(tr("Object Viewer Qt"));
-
-	connect(_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
+	show();
 }
 
-CMainWindow::~CMainWindow()
+IMenuManager *MainWindow::menuManager() const
 {
+	return m_menuManager;
 }
 
-IMenuManager *CMainWindow::menuManager() const
+QSettings *MainWindow::settings() const
 {
-	return _menuManager;
+	return m_settings;
 }
 
-void CMainWindow::checkObject(QObject *obj)
+void MainWindow::checkObject(QObject *obj)
 {
-	IAppPage *appPage = qobject_cast<IAppPage *>(obj);
-	if (appPage)
-		addAppPage(appPage);
+	IContext *context = qobject_cast<IContext *>(obj);
+	if (context)
+		addContextObject(context);
 }
 
-bool CMainWindow::showOptionsDialog(const QString &group,
-									const QString &page,
-									QWidget *parent)
+bool MainWindow::showOptionsDialog(const QString &group,
+								   const QString &page,
+								   QWidget *parent)
 {
 	if (!parent)
 		parent = this;
-	CSettingsDialog _settingsDialog(_corePlugin, group, page, parent);
-	_settingsDialog.show();
-	return _settingsDialog.execDialog();
+	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
+	settingsDialog.show();
+	return settingsDialog.execDialog();
 }
 
-void CMainWindow::about()
+void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
 					   tr("<h2>Object Viewer Qt NG</h2>"
 						  "<p> Author: dnk-88 <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
-void CMainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-	QList<ICoreListener *> listeners = _pluginManager->getObjects<ICoreListener>();
+	QList<ICoreListener *> listeners = m_pluginManager->getObjects<ICoreListener>();
 	Q_FOREACH(ICoreListener *listener, listeners)
 	{
 		if (!listener->closeMainWindow())
@@ -124,112 +147,122 @@ void CMainWindow::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
+	Q_EMIT m_coreImpl->closeMainWindow();
 
 	writeSettings();
 	event->accept();
 }
 
-void CMainWindow::addAppPage(IAppPage *appPage)
+void MainWindow::addContextObject(IContext *context)
 {
-	QWidget *tabWidget = new QWidget(_tabWidget);
-	_tabWidget->addTab(tabWidget, appPage->icon(), appPage->trName());
+	QWidget *tabWidget = new QWidget(m_tabWidget);
+	m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
 	QGridLayout *gridLayout = new QGridLayout(tabWidget);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + appPage->id());
+	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + context->id());
 	gridLayout->setContentsMargins(0, 0, 0, 0);
-	gridLayout->addWidget(appPage->widget(), 0, 0, 1, 1);
+	gridLayout->addWidget(context->widget(), 0, 0, 1, 1);
 }
 
-void CMainWindow::createActions()
+void MainWindow::createActions()
 {
-	_openAction = new QAction(tr("&Open..."), this);
-	_openAction->setIcon(QIcon(":/images/open-file.png"));
-	_openAction->setShortcut(QKeySequence::Open);
-	_openAction->setStatusTip(tr("Open an existing file"));
-	menuManager()->registerAction(_openAction, Constants::OPEN);
-//	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
+	m_openAction = new QAction(tr("&Open..."), this);
+	m_openAction->setIcon(QIcon(":/images/open-file.png"));
+	m_openAction->setShortcut(QKeySequence::Open);
+	m_openAction->setStatusTip(tr("Open an existing file"));
+	menuManager()->registerAction(m_openAction, Constants::OPEN);
+//	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
-	_exitAction = new QAction(tr("E&xit"), this);
-	_exitAction->setShortcut(tr("Ctrl+Q"));
-	_exitAction->setStatusTip(tr("Exit the application"));
-	menuManager()->registerAction(_exitAction, Constants::EXIT);
-	connect(_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+	m_exitAction = new QAction(tr("E&xit"), this);
+	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
+	m_exitAction->setStatusTip(tr("Exit the application"));
+	menuManager()->registerAction(m_exitAction, Constants::EXIT);
+	connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
-	_settingsAction = new QAction(tr("&Settings"), this);
-	_settingsAction->setIcon(QIcon(":/images/preferences.png"));
-	_settingsAction->setStatusTip(tr("Open the settings dialog"));
-	menuManager()->registerAction(_settingsAction, Constants::SETTINGS);
-	connect(_settingsAction, SIGNAL(triggered()), this, SLOT(showOptionsDialog()));
+	m_settingsAction = new QAction(tr("&Settings"), this);
+	m_settingsAction->setIcon(QIcon(":/images/preferences.png"));
+	m_settingsAction->setShortcut(QKeySequence::Preferences);
+	m_settingsAction->setStatusTip(tr("Open the settings dialog"));
+	menuManager()->registerAction(m_settingsAction, Constants::SETTINGS);
+	connect(m_settingsAction, SIGNAL(triggered()), this, SLOT(showOptionsDialog()));
 
-	_aboutAction = new QAction(tr("&About"), this);
-	_aboutAction->setStatusTip(tr("Show the application's About box"));
-	menuManager()->registerAction(_aboutAction, Constants::ABOUT);
-	connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+	m_aboutAction = new QAction(tr("&About"), this);
+	m_aboutAction->setStatusTip(tr("Show the application's About box"));
+	menuManager()->registerAction(m_aboutAction, Constants::ABOUT);
+	connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
-	_aboutQtAction = new QAction(tr("About &Qt"), this);
-	_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
-	menuManager()->registerAction(_aboutQtAction, Constants::ABOUT_QT);
-	connect(_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+	m_aboutQtAction = new QAction(tr("About &Qt"), this);
+	m_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
+	menuManager()->registerAction(m_aboutQtAction, Constants::ABOUT_QT);
+	connect(m_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-	_pluginViewAction = new QAction(tr("About &Plugins"), this);
-	_pluginViewAction->setStatusTip(tr("Show the plugin view dialog"));
-	menuManager()->registerAction(_pluginViewAction, Constants::ABOUT_PLUGINS);
-	connect(_pluginViewAction, SIGNAL(triggered()), _pluginView, SLOT(show()));
+	m_pluginViewAction = new QAction(tr("About &Plugins"), this);
+	m_pluginViewAction->setStatusTip(tr("Show the plugin view dialog"));
+	menuManager()->registerAction(m_pluginViewAction, Constants::ABOUT_PLUGINS);
+	connect(m_pluginViewAction, SIGNAL(triggered()), m_pluginView, SLOT(show()));
+
+#ifdef Q_WS_MAC
+	m_exitAction->setMenuRole(QAction::QuitRole);
+	m_settingsAction->setMenuRole(QAction::PreferencesRole);
+	m_aboutAction->setMenuRole(QAction::AboutRole);
+	m_aboutQtAction->setMenuRole(QAction::AboutQtRole);
+	m_pluginViewAction->setMenuRole(QAction::ApplicationSpecificRole);
+#endif
 }
 
-void CMainWindow::createMenus()
+void MainWindow::createMenus()
 {
-	_fileMenu = menuBar()->addMenu(tr("&File"));
-	menuManager()->registerMenu(_fileMenu, Constants::M_FILE);
-	_fileMenu->addSeparator();
-	_fileMenu->addAction(_exitAction);
+	m_fileMenu = menuBar()->addMenu(tr("&File"));
+	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
+	m_fileMenu->addSeparator();
+	m_fileMenu->addAction(m_exitAction);
 
-	_editMenu = menuBar()->addMenu(tr("&Edit"));
-	menuManager()->registerMenu(_editMenu, Constants::M_EDIT);
+	m_editMenu = menuBar()->addMenu(tr("&Edit"));
+	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
-	_viewMenu = menuBar()->addMenu(tr("&View"));
-	menuManager()->registerMenu(_viewMenu, Constants::M_VIEW);
+	m_viewMenu = menuBar()->addMenu(tr("&View"));
+	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
-	_toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	menuManager()->registerMenu(_toolsMenu, Constants::M_TOOLS);
+	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	menuManager()->registerMenu(m_toolsMenu, Constants::M_TOOLS);
 
 
-	_toolsMenu->addSeparator();
+	m_toolsMenu->addSeparator();
 
-	_toolsMenu->addAction(_settingsAction);
+	m_toolsMenu->addAction(m_settingsAction);
 
 	menuBar()->addSeparator();
 
-	_helpMenu = menuBar()->addMenu(tr("&Help"));
-	menuManager()->registerMenu(_helpMenu, Constants::M_HELP);
-	_helpMenu->addAction(_aboutAction);
-	_helpMenu->addAction(_aboutQtAction);
-	_helpMenu->addAction(_pluginViewAction);
+	m_helpMenu = menuBar()->addMenu(tr("&Help"));
+	menuManager()->registerMenu(m_helpMenu, Constants::M_HELP);
+	m_helpMenu->addAction(m_aboutAction);
+	m_helpMenu->addAction(m_aboutQtAction);
+	m_helpMenu->addAction(m_pluginViewAction);
 }
 
-void CMainWindow::createStatusBar()
+void MainWindow::createStatusBar()
 {
 	statusBar()->showMessage(tr("StatusReady"));
 }
 
-void CMainWindow::createDialogs()
+void MainWindow::createDialogs()
 {
-	_pluginView = new ExtensionSystem::CPluginView(_pluginManager, this);
+	m_pluginView = new ExtensionSystem::CPluginView(m_pluginManager, this);
 }
 
-void CMainWindow::readSettings()
+void MainWindow::readSettings()
 {
-	_settings->beginGroup("MainWindowSettings");
-	restoreState(_settings->value("QtWindowState").toByteArray());
-	restoreGeometry(_settings->value("QtWindowGeometry").toByteArray());
-	_settings->endGroup();
+	m_settings->beginGroup("MainWindow");
+	restoreState(m_settings->value("WindowState").toByteArray());
+	restoreGeometry(m_settings->value("WindowGeometry").toByteArray());
+	m_settings->endGroup();
 }
 
-void CMainWindow::writeSettings()
+void MainWindow::writeSettings()
 {
-	_settings->beginGroup("MainWindowSettings");
-	_settings->setValue("QtWindowState", saveState());
-	_settings->setValue("QtWindowGeometry", saveGeometry());
-	_settings->endGroup();
+	m_settings->beginGroup("MainWindow");
+	m_settings->setValue("WindowState", saveState());
+	m_settings->setValue("WindowGeometry", saveGeometry());
+	m_settings->endGroup();
 }
 
 } /* namespace Core */

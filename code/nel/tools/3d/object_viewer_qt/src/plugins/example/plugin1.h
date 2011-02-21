@@ -3,8 +3,8 @@
 
 // Project includes
 #include "../../extension_system/iplugin.h"
+#include "../core/icontext.h"
 #include "simple_viewer.h"
-#include "../core/iapp_page.h"
 
 // NeL includes
 #include "nel/misc/app_context.h"
@@ -58,17 +58,16 @@ private:
 	QList<QObject *> _autoReleaseObjects;
 };
 
-class CExampleAppPage: public QObject, public Core::IAppPage
+class CExampleContext: public Core::IContext
 {
 	Q_OBJECT
-	Q_INTERFACES(Core::IAppPage)
 public:
-	CExampleAppPage(QObject *parent = 0): QObject(parent) {}
-	virtual ~CExampleAppPage() {}
+	CExampleContext(QObject *parent = 0): IContext(parent) {}
+	virtual ~CExampleContext() {}
 
 	virtual QString id() const
 	{
-		return QLatin1String("ExampleAppPage");
+		return QLatin1String("ExampleContext");
 	}
 	virtual QString trName() const
 	{

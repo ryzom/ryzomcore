@@ -75,7 +75,7 @@ private Q_SLOTS:
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	ExtensionSystem::CPluginView *_pluginView;
-	CMainWindow *_mainWindow;
+	MainWindow *_mainWindow;
 	QList<QObject *> _autoReleaseObjects;
 	bool _oldOVQT;
 };

@@ -32,31 +32,39 @@ namespace Core
 {
 class CSettingsDialog;
 class CorePlugin;
-class IAppPage;
+class IContext;
 class IMenuManager;
 class MenuManager;
+class CoreImpl;
 
-class CMainWindow : public QMainWindow
+class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	CMainWindow(CorePlugin *corePlugin, QWidget *parent = 0);
-	~CMainWindow();
+	MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent = 0);
+	~MainWindow();
+
+	bool initialize(QString *errorString);
+	void extensionsInitialized();
 
 	IMenuManager *menuManager() const;
+	QSettings *settings() const;
 
-private Q_SLOTS:
-	void checkObject(QObject *obj);
+public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
+
+private Q_SLOTS:
+	void checkObject(QObject *obj);
 	void about();
+
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 
 private:
-	void addAppPage(IAppPage *appPage);
+	void addContextObject(IContext *appPage);
 
 	void createActions();
 	void createMenus();
@@ -66,35 +74,35 @@ private:
 	void readSettings();
 	void writeSettings();
 
-	ExtensionSystem::IPluginManager *_pluginManager;
-	ExtensionSystem::CPluginView *_pluginView;
-	CorePlugin *_corePlugin;
-	MenuManager *_menuManager;
+	ExtensionSystem::IPluginManager *m_pluginManager;
+	ExtensionSystem::CPluginView *m_pluginView;
+	MenuManager *m_menuManager;
+	CoreImpl *m_coreImpl;
 
-	QPalette _originalPalette;
-	QString _lastDir;
+	QPalette m_originalPalette;
+	QString m_lastDir;
 
-	QSettings *_settings;
+	QSettings *m_settings;
 
-	QTimer *_mainTimer;
-	QTimer *_statusBarTimer;
+	QTimer *m_mainTimer;
+	QTimer *m_statusBarTimer;
 
-	QTabWidget *_tabWidget;
+	QTabWidget *m_tabWidget;
 
-	QMenu *_fileMenu;
-	QMenu *_editMenu;
-	QMenu *_viewMenu;
-	QMenu *_toolsMenu;
-	QMenu *_helpMenu;
+	QMenu *m_fileMenu;
+	QMenu *m_editMenu;
+	QMenu *m_viewMenu;
+	QMenu *m_toolsMenu;
+	QMenu *m_helpMenu;
 
-	QAction *_openAction;
-	QAction *_exitAction;
-	QAction *_settingsAction;
-	QAction *_pluginViewAction;
-	QAction *_aboutAction;
-	QAction *_aboutQtAction;
+	QAction *m_openAction;
+	QAction *m_exitAction;
+	QAction *m_settingsAction;
+	QAction *m_pluginViewAction;
+	QAction *m_aboutAction;
+	QAction *m_aboutQtAction;
 
-};/* class CMainWindow */
+};/* class MainWindow */
 
 } /* namespace Core */
 

@@ -48,13 +48,15 @@ CorePlugin::~CorePlugin()
 	}
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
+
+	if (_oldOVQT)
+		delete _mainWindow;
 }
 
 bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	_oldOVQT = false;
 
 	// for old ovqt
 	QMainWindow *wnd = qobject_cast<QMainWindow *>(_plugMan->objectByName("CMainWindow"));
@@ -72,11 +74,11 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 
 		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
 		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
-		_oldOVQT = true;
+		_oldOVQT = false;
 	}
 	else
 	{
-		_mainWindow = new CMainWindow(this);
+		_mainWindow = new MainWindow(pluginManager);
 #ifdef Q_WS_X11
 		_mainWindow->setAttribute(Qt::WA_TranslucentBackground);
 		_mainWindow->setAttribute(Qt::WA_NoSystemBackground, false);
@@ -93,7 +95,9 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 			QtWin::extendFrameIntoClientArea(_mainWindow);
 			_mainWindow->setContentsMargins(0, 0, 0, 0);
 		}
-		_mainWindow->show();
+		_oldOVQT = true;
+		bool success = _mainWindow->initialize(errorString);
+		return success;
 	}
 
 	addAutoReleasedObject(new CSearchPathsSettingsPage(this));
@@ -103,20 +107,18 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 void CorePlugin::extensionsInitialized()
 {
 	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
+	if (_oldOVQT)
+		_mainWindow->extensionsInitialized();
 }
 
 void CorePlugin::shutdown()
 {
-	if (!_oldOVQT)
-	{
-		delete _mainWindow;
-		delete _pluginView;
-	}
+	delete _pluginView;
 }
 
 void CorePlugin::execSettings()
 {
-	CSettingsDialog settingsDialog(this);
+	CSettingsDialog settingsDialog(_plugMan);
 	settingsDialog.show();
 	settingsDialog.execDialog();
 }

@@ -18,7 +18,6 @@
 
 // Project includes
 #include "settings_dialog.h"
-#include "core_plugin.h"
 #include "ioptions_page.h"
 
 // Qt includes
@@ -36,7 +35,7 @@ Q_DECLARE_METATYPE(PageData);
 
 namespace Core
 {
-CSettingsDialog::CSettingsDialog(CorePlugin *corePlugin,
+CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 								 const QString &categoryId,
 								 const QString &pageId,
 								 QWidget *parent)
@@ -45,7 +44,7 @@ CSettingsDialog::CSettingsDialog(CorePlugin *corePlugin,
 {
 	_ui.setupUi(this);
 
-	_plugMan = corePlugin->pluginManager();
+	_plugMan = pluginManager;
 
 	QString initialCategory = categoryId;
 	QString initialPage = pageId;

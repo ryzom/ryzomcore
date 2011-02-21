@@ -40,6 +40,9 @@
 // Project includes
 #include "modules.h"
 #include "extension_system/iplugin_spec.h"
+#include "extension_system/plugin_manager.h"
+
+static const char *appNameC = "ObjectViewerQt";
 
 // nel_qt log file name
 #define NLQT_LOG_FILE "nel_qt.log"
@@ -82,6 +85,29 @@ CFileDisplayer *s_FileDisplayer = NULL;
 #	endif
 #endif
 
+#ifdef Q_OS_WIN
+
+static void displayError(const QString &t) // No console on Windows.
+{
+	QMessageBox::critical(0, QLatin1String(appNameC), t);
+}
+
+#else
+
+static void displayError(const QString &t)
+{
+	qCritical("%s", qPrintable(t));
+}
+
+#endif
+
+static inline QString msgCoreLoadFailure(const QString &why)
+{
+	return QCoreApplication::translate("Application", "Failed to load Core plugin: %1").arg(why);
+}
+
+#define OVQT_OLD true
+
 sint main(int argc, char **argv)
 {
 	// go nel!
@@ -111,8 +137,9 @@ sint main(int argc, char **argv)
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
 	splash->show();
 
+	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-										QLatin1String("Ryzom Core"), QLatin1String("ObjectViewerQt"));
+										QLatin1String("RyzomCore"), QLatin1String(appNameC));
 
 	QTranslator translator;
 	QTranslator qtTranslator;
@@ -128,6 +155,7 @@ sint main(int argc, char **argv)
 	CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
+#if defined(OVQT_OLD)
 	Modules::init();
 
 	Modules::plugMan().setSettings(settings);
@@ -161,5 +189,57 @@ sint main(int argc, char **argv)
 	splash->finish(&Modules::mainWin());
 	int result = app.exec();
 	Modules::release();
+#else
+	ExtensionSystem::CPluginManager pluginManager;
+	pluginManager.setSettings(settings);
+	QStringList pluginPaths;
+#if !defined(NL_OS_MAC)
+	pluginPaths << QString("./plugins");
+#else
+	pluginPaths << qApp->applicationDirPath() + QString("/../PlugIns/ovqt");
+#endif
+
+	pluginManager.setPluginPaths(pluginPaths);
+	pluginManager.loadPlugins();
+
+	splash->hide();
+
+	const QList<ExtensionSystem::IPluginSpec *> plugins = pluginManager.plugins();
+	ExtensionSystem::IPluginSpec *corePlugin = 0;
+	Q_FOREACH(ExtensionSystem::IPluginSpec *spec, plugins)
+	{
+		if (spec->name() == QLatin1String("Core"))
+		{
+			corePlugin = spec;
+			break;
+		}
+	}
+
+	if (!corePlugin)
+	{
+		QDir absolutePluginPaths(pluginPaths.join(QLatin1String(",")));
+		QString absolutePaths = absolutePluginPaths.absolutePath();
+		const QString reason = QCoreApplication::translate("Application", "Could not find ovqt_plugin_core in %1").arg(absolutePaths);
+		displayError(msgCoreLoadFailure(reason));
+		return 1;
+	}
+	if (corePlugin->hasError())
+	{
+		displayError(msgCoreLoadFailure(corePlugin->errorString()));
+		return 1;
+	}
+
+	QStringList errors;
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, pluginManager.plugins())
+	if (spec->hasError())
+		errors.append(spec->fileName() + " : " + spec->errorString());
+
+	if (!errors.isEmpty())
+		QMessageBox::warning(0, QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
+							 errors.join(QString::fromLatin1("\n\n")));
+
+	int result = app.exec();
+#endif
+
 	return result;
 }

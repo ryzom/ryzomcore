@@ -2,7 +2,7 @@
 #include "plugin1.h"
 #include "example_settings_page.h"
 #include "simple_viewer.h"
-#include "../core/iapp_page.h"
+#include "../core/icore.h"
 #include "../core/core_constants.h"
 #include "../core/imenu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
@@ -36,19 +36,20 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 	_plugMan = pluginManager;
 
 	addAutoReleasedObject(new CExampleSettingsPage(this));
-	addAutoReleasedObject(new CExampleAppPage(this));
+	addAutoReleasedObject(new CExampleContext(this));
 	addAutoReleasedObject(new CCoreListener(this));
 	return true;
 }
 
 void MyPlugin::extensionsInitialized()
 {
-	Core::IMenuManager *menuManager = 0;
-	menuManager = _plugMan->getObject<Core::IMenuManager>();
-	if (menuManager == 0)
-		nlinfo("error menu manager");
+	Core::ICore *core = Core::ICore::instance();
+	if (core == 0)
+		nlinfo("This not ovqt ng");
 	else
 	{
+		Core::IMenuManager *menuManager = core->menuManager();
+		//menuManager = _plugMan->getObject<Core::IMenuManager>();
 		QAction *exampleAction1 = new QAction("Example1", this);
 		QAction *exampleAction2 = new QAction("Example2", this);
 		QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);

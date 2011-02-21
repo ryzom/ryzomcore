@@ -9,8 +9,7 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_LOG_HDR	log_plugin.h 
-						log_settings_page.h 
-						${CMAKE_CURRENT_SOURCE_DIR}/../core/iapp_page.h)
+						log_settings_page.h)
 						
 SET(OVQT_PLUG_LOG_UIS	log_form.ui 
 						log_settings_page.ui)

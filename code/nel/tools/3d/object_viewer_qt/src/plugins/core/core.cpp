@@ -1,6 +1,7 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,41 +16,51 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef IAPP_PAGE_H
-#define IAPP_PAGE_H
+#include "core.h"
+#include "imenu_manager.h"
+#include "main_window.h"
 
-#include <QtCore/QObject>
-
-class QWidget;
+static Core::CoreImpl *m_coreInstance = 0;
 
 namespace Core
 {
-/**
-@interface IAppPage
-@brief The IAppPage is an interface for providing app pages in main window.
-@details You need to subclass this interface and put an instance of your subclass
-  into the plugin manager object pool.
-*/
-class IAppPage
+
+ICore *ICore::instance()
 {
-public:
-	virtual ~IAppPage() {}
+	return m_coreInstance;
+}
 
-	/// id() is a unique identifier for referencing this page
-	virtual QString id() const = 0;
+CoreImpl::CoreImpl(MainWindow *mainWindow)
+{
+	m_mainWindow = mainWindow;
+	m_coreInstance = this;
+}
 
-	/// trName() is the (translated) name for display.
-	virtual QString trName() const = 0;
+CoreImpl::~CoreImpl()
+{
+	m_coreInstance = 0;
+}
 
-	/// icon() is the icon for display
-	virtual QIcon icon() const = 0;
+bool CoreImpl::showOptionsDialog(const QString &group,
+								 const QString &page,
+								 QWidget *parent)
+{
+	return m_mainWindow->showOptionsDialog(group, page, parent);
+}
 
-	/// The widget will be destroyed by the widget hierarchy when the main window closes
-	virtual QWidget *widget() = 0;
-};
+IMenuManager *CoreImpl::menuManager() const
+{
+	return m_mainWindow->menuManager();
+}
+
+QSettings *CoreImpl::settings() const
+{
+	return m_mainWindow->settings();
+}
+
+QMainWindow *CoreImpl::mainWindow() const
+{
+	return m_mainWindow;
+}
 
 } // namespace Core
-
-Q_DECLARE_INTERFACE(Core::IAppPage, "dev.ryzom.com.IAppPage/0.1")
-
-#endif // IAPP_PAGE_H

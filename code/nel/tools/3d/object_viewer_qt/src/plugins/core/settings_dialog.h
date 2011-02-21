@@ -25,11 +25,10 @@
 #include <QtCore/QList>
 
 // Project includes
-#include "../../extension_system/iplugin.h"
+#include "../../extension_system/iplugin_manager.h"
 
 namespace Core
 {
-class CorePlugin;
 class IOptionsPage;
 
 /**
@@ -41,7 +40,7 @@ class CSettingsDialog: public QDialog
 	Q_OBJECT
 
 public:
-	CSettingsDialog(CorePlugin *corePlugin,
+	CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 					const QString &initialCategory = QString(),
 					const QString &initialPage = QString(),
 					QWidget *parent = 0);

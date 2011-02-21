@@ -9,10 +9,13 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_CORE_PLUGIN_HDR
+				icore.h
+				icontext.h
 				imenu_manager.h
 				icore_listener.h
 				ioptions_page.h
 				core_plugin.h
+				core.h
 				main_window.h
 				menu_manager.h
 				settings_dialog.h

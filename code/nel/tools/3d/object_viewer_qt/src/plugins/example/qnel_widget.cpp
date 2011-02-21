@@ -34,16 +34,16 @@ namespace NLQT
 
 QNLWidget::QNLWidget(QWidget *parent)
 	: QWidget(parent),
-	  _driver(NULL),
-	  _initialized(false),
-	  _interval(25)
+	  m_driver(NULL),
+	  m_initialized(false),
+	  m_interval(25)
 {
 	setMouseTracking(true);
 	setFocusPolicy(Qt::StrongFocus);
 
 	init();
-	_mainTimer = new QTimer(this);
-	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
+	m_mainTimer = new QTimer(this);
+	connect(m_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 }
 
 QNLWidget::~QNLWidget()
@@ -54,49 +54,59 @@ QNLWidget::~QNLWidget()
 void QNLWidget::init()
 {
 	// create the driver
-	_driver = NL3D::UDriver::createDriver(NULL, false, NULL);
-	nlassert(_driver);
+	m_driver = NL3D::UDriver::createDriver(NULL, false, NULL);
+	nlassert(m_driver);
 
 	// initialize the nel 3d viewport
-	_driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	m_driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32));
 
 	// set the cache size for the font manager(in bytes)
-	_driver->setFontManagerMaxMemory(2097152);
+	m_driver->setFontManagerMaxMemory(2097152);
 
-	_initialized = true;
+	m_initialized = true;
 }
 
 void QNLWidget::release()
 {
-	_mainTimer->stop();
-	delete _mainTimer;
-	if (_initialized)
+	m_mainTimer->stop();
+	delete m_mainTimer;
+	if (m_initialized)
 	{
-		_driver->release();
-		delete _driver;
-		_driver = NULL;
+		m_driver->release();
+		delete m_driver;
+		m_driver = NULL;
 	}
 }
 
 void QNLWidget::setInterval(int msec)
 {
-	_interval = msec;
-	_mainTimer->setInterval(msec);
+	m_interval = msec;
+	m_mainTimer->setInterval(msec);
 }
 
 void QNLWidget::updateRender()
 {
 	if (isVisible())
 	{
-		if (_initialized)
-			_driver->EventServer.pump();
-		if (_initialized && !_driver->isLost())
-		{
-			_driver->activate();
-			_driver->clearBuffers(NLMISC::CRGBA(125,12,58));
+		if (m_initialized)
+			m_driver->EventServer.pump();
+		Q_EMIT updateData();
 
+		// Calc FPS
+		static sint64 lastTime = NLMISC::CTime::getPerformanceTime ();
+		sint64 newTime = NLMISC::CTime::getPerformanceTime ();
+		m_fps = float(1.0 / NLMISC::CTime::ticksToSecond (newTime-lastTime));
+		lastTime = newTime;
+
+		if (m_initialized && !m_driver->isLost())
+		{
+			//_driver->activate();
+			m_driver->clearBuffers(NLMISC::CRGBA(125,12,58));
+			Q_EMIT updatePreRender();
+
+			Q_EMIT updatePostRender();
 			// swap 3d buffers
-			_driver->swapBuffers();
+			m_driver->swapBuffers();
 		}
 	}
 }
@@ -106,11 +116,11 @@ void QNLWidget::showEvent(QShowEvent *showEvent)
 	QWidget::showEvent(showEvent);
 	if (isVisible())
 	{
-		_driver->activate();
-		_mainTimer->start(_interval);
+		m_driver->activate();
+		m_mainTimer->start(m_interval);
 	}
 	else
-		_mainTimer->stop();
+		m_mainTimer->stop();
 }
 
 #if defined(NL_OS_WINDOWS)
@@ -119,9 +129,9 @@ typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM w
 
 bool QNLWidget::winEvent(MSG *message, long *result)
 {
-	if (_driver && _driver->isActive())
+	if (m_driver && m_driver->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(_driver)->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
 		if (driver)
 		{
 			winProc proc = (winProc)driver->getWindowProc();
@@ -141,9 +151,9 @@ bool QNLWidget::macEvent(EventHandlerCallRef caller, EventRef event)
 	if(caller)
 		nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
 
-	if (_driver && _driver->isActive())
+	if (m_driver && m_driver->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(_driver)->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
 		if (driver)
 		{
 			cocoaProc proc = (cocoaProc)driver->getWindowProc();
@@ -160,9 +170,9 @@ typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
 bool QNLWidget::x11Event(XEvent *event)
 {
-	if (_driver && _driver->isActive())
+	if (m_driver && m_driver->isActive())
 	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(_driver)->getDriver();
+		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
 		if (driver)
 		{
 			x11Proc proc = (x11Proc)driver->getWindowProc();
