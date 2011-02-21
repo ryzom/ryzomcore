@@ -406,17 +406,17 @@
     <message>
         <location filename="../day_night_form.ui" line="14"/>
         <source>Day/Night</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag/Nacht</translation>
     </message>
     <message>
         <location filename="../day_night_form.ui" line="21"/>
         <source>Day</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag</translation>
     </message>
     <message>
         <location filename="../day_night_form.ui" line="38"/>
         <source>Night</source>
-        <translation type="unfinished"></translation>
+        <translation>Nacht</translation>
     </message>
 </context>
 <context>
@@ -429,7 +429,7 @@
     <message>
         <location filename="../direction_form.ui" line="26"/>
         <source>Direction:</source>
-        <translation type="unfinished"></translation>
+        <translation>Richtung:</translation>
     </message>
     <message>
         <location filename="../direction_form.ui" line="44"/>
@@ -652,12 +652,12 @@
     <message>
         <location filename="../particle_force_form.ui" line="32"/>
         <source>Targets:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ziele:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="39"/>
         <source>Avaible targets:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verfügbare Ziele:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="85"/>
@@ -1839,52 +1839,52 @@
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="14"/>
         <source>About plugins</source>
-        <translation type="unfinished"></translation>
+        <translation>Über Plugins</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="45"/>
         <source>State</source>
-        <translation type="unfinished"></translation>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="50"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="55"/>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Version</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="60"/>
         <source>Vendor</source>
-        <translation type="unfinished"></translation>
+        <translation>Autor</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="65"/>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translation>Ort</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="76"/>
         <source>Details</source>
-        <translation type="unfinished"></translation>
+        <translation>Details</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="86"/>
         <source>Error details</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler Details</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="106"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Beenden</translation>
     </message>
     <message>
         <location filename="../plugins/core/plugin_view_dialog.ui" line="116"/>
         <source>All objects list</source>
-        <translation type="unfinished"></translation>
+        <translation>Objekt Liste</translation>
     </message>
 </context>
 <context>
@@ -1924,22 +1924,22 @@
     <message>
         <location filename="../settings_form.ui" line="43"/>
         <source>Graphics</source>
-        <translation type="unfinished"></translation>
+        <translation>Video</translation>
     </message>
     <message>
         <location filename="../settings_form.ui" line="48"/>
         <source>Sound</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio</translation>
     </message>
     <message>
         <location filename="../settings_form.ui" line="53"/>
         <source>Paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnisse</translation>
     </message>
     <message>
         <location filename="../settings_form.ui" line="58"/>
         <source>Vegetable</source>
-        <translation type="unfinished"></translation>
+        <translation>Vegetation</translation>
     </message>
     <message>
         <location filename="../settings_form.ui" line="85"/>
@@ -2028,45 +2028,45 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="372"/>
+        <location filename="../settings_form.ui" line="381"/>
         <source>Search paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="389"/>
-        <location filename="../settings_form.ui" line="406"/>
-        <location filename="../settings_form.ui" line="417"/>
-        <location filename="../settings_form.ui" line="428"/>
-        <location filename="../settings_form.ui" line="484"/>
-        <location filename="../settings_form.ui" line="508"/>
-        <location filename="../settings_form.ui" line="532"/>
-        <location filename="../settings_form.ui" line="573"/>
-        <location filename="../settings_form.ui" line="590"/>
+        <location filename="../settings_form.ui" line="398"/>
+        <location filename="../settings_form.ui" line="415"/>
+        <location filename="../settings_form.ui" line="426"/>
+        <location filename="../settings_form.ui" line="437"/>
+        <location filename="../settings_form.ui" line="493"/>
+        <location filename="../settings_form.ui" line="517"/>
+        <location filename="../settings_form.ui" line="541"/>
+        <location filename="../settings_form.ui" line="582"/>
+        <location filename="../settings_form.ui" line="599"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="461"/>
+        <location filename="../settings_form.ui" line="470"/>
         <source>Setup Landscape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="467"/>
+        <location filename="../settings_form.ui" line="476"/>
         <source>Tile bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="491"/>
+        <location filename="../settings_form.ui" line="500"/>
         <source>Tile far bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="515"/>
+        <location filename="../settings_form.ui" line="524"/>
         <source>Vegetable texture:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="539"/>
+        <location filename="../settings_form.ui" line="548"/>
         <source>Landscape zones:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2347,7 +2347,7 @@
     <message>
         <location filename="../sun_color_form.ui" line="14"/>
         <source>Sun color</source>
-        <translation type="unfinished"></translation>
+        <translation>Sonnenfarbe</translation>
     </message>
     <message>
         <location filename="../sun_color_form.ui" line="21"/>
@@ -2555,22 +2555,22 @@
     <message>
         <location filename="../vegetable_density_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Dichte Seite</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="20"/>
         <source>Vegetable mesh selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Mesh Auswahl</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="33"/>
         <source>Browse</source>
-        <translation type="unfinished"></translation>
+        <translation>Durchsuchen</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="45"/>
         <source>Distance of creation</source>
-        <translation type="unfinished"></translation>
+        <translation>Erstellungsdistanz</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="55"/>
@@ -2580,52 +2580,52 @@
     <message>
         <location filename="../vegetable_density_form.ui" line="70"/>
         <source>Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Dichte</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="77"/>
         <source>MaxDensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Dichte</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="83"/>
         <source>MaxDensity enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>maximale Dichte aktiviert</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="100"/>
         <source>Angle setup</source>
-        <translation type="unfinished"></translation>
+        <translation>Winkel Konfiguration</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="106"/>
         <source>Angle Mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Winkel Modus:</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="113"/>
         <source>Floor</source>
-        <translation type="unfinished"></translation>
+        <translation>Boden</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="120"/>
         <source>Wall</source>
-        <translation type="unfinished"></translation>
+        <translation>Wand</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="127"/>
         <source>Ceiling</source>
-        <translation type="unfinished"></translation>
+        <translation>Decke</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="134"/>
         <source>AngleMin</source>
-        <translation type="unfinished"></translation>
+        <translation>Min Winkel</translation>
     </message>
     <message>
         <location filename="../vegetable_density_form.ui" line="170"/>
         <source>AngleMax</source>
-        <translation type="unfinished"></translation>
+        <translation>Max Winkel</translation>
     </message>
 </context>
 <context>
@@ -2633,102 +2633,102 @@
     <message>
         <location filename="../vegetable_dialog_form.ui" line="18"/>
         <source>Vegetable editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Editor</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="63"/>
         <source>Vegetables:</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen:</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="86"/>
         <source>List edition</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste bearbeiten</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="98"/>
         <source>Add vegetable</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanze hinzufügen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="112"/>
         <source>Insert vegetable</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanze einfügen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="126"/>
         <source>Remove vegetable</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanze entfernen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="140"/>
         <source>Clear all vegetables</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle entfernen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="157"/>
         <source>Copy Vegetable</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanze kopieren</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="164"/>
         <source>Load .vegetdesc</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade .vegetdesc</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="171"/>
         <source>Save .vegetdesc</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichere .vegetdesc</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="181"/>
         <source>List Save/Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste speichern/laden</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="193"/>
         <source>Load .vegetset</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade .vegetset</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="200"/>
         <source>Append .vegetset</source>
-        <translation type="unfinished"></translation>
+        <translation>Anfügen eines.vegetset</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="207"/>
         <source>Save .vegetset</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichere.vegetset</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="220"/>
         <source>Display Vegetables</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen anzeigen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="239"/>
         <source>Landscape</source>
-        <translation type="unfinished"></translation>
+        <translation>Landschaft</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="244"/>
         <source>General/Density</source>
-        <translation type="unfinished"></translation>
+        <translation>Allgemein/Dichte</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="249"/>
         <source>Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Aussehen</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="254"/>
         <source>Scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Größe</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="259"/>
         <source>Rotation</source>
-        <translation type="unfinished"></translation>
+        <translation>Drehung</translation>
     </message>
 </context>
 <context>
@@ -2736,47 +2736,47 @@
     <message>
         <location filename="../vegetable_landscape_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Landschaft Seite</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="23"/>
         <source>Setup Wind</source>
-        <translation type="unfinished"></translation>
+        <translation>Wind konfigurieren</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="34"/>
         <source>Power:</source>
-        <translation type="unfinished"></translation>
+        <translation>Kraft:</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="84"/>
         <source>Bend Start:</source>
-        <translation type="unfinished"></translation>
+        <translation>Start der Beugung:</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="137"/>
         <source>Frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>Frequenz</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="204"/>
         <source>Ambient color</source>
-        <translation type="unfinished"></translation>
+        <translation>Ambient Farbe</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="214"/>
         <source>Diffuse color</source>
-        <translation type="unfinished"></translation>
+        <translation>Diffuse Farbe</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="227"/>
         <source>Show Vegetable Lands</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeige Pflanzen</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="237"/>
         <source>Snap Camera To Ground</source>
-        <translation type="unfinished"></translation>
+        <translation>Kamera bleibt am Boden</translation>
     </message>
 </context>
 <context>
@@ -2784,22 +2784,22 @@
     <message>
         <location filename="../vegetable_rotate_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Drehungs Seite</translation>
     </message>
     <message>
         <location filename="../vegetable_rotate_form.ui" line="20"/>
         <source>Rotate X</source>
-        <translation type="unfinished"></translation>
+        <translation>Drehung X</translation>
     </message>
     <message>
         <location filename="../vegetable_rotate_form.ui" line="27"/>
         <source>Rotate Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Drehung Y</translation>
     </message>
     <message>
         <location filename="../vegetable_rotate_form.ui" line="34"/>
         <source>Rotate Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Drehung Z</translation>
     </message>
 </context>
 <context>
@@ -2807,22 +2807,22 @@
     <message>
         <location filename="../vegetable_scale_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Pflanzen Größen seite</translation>
     </message>
     <message>
         <location filename="../vegetable_scale_form.ui" line="20"/>
         <source>Scale X/Y</source>
-        <translation type="unfinished"></translation>
+        <translation>Größe X/Y</translation>
     </message>
     <message>
         <location filename="../vegetable_scale_form.ui" line="27"/>
         <source>Scale Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Größe Z</translation>
     </message>
     <message>
         <location filename="../vegetable_scale_form.ui" line="34"/>
         <source>Bend Frequency Factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Faktor Beugungsfrequenz</translation>
     </message>
 </context>
 <context>
@@ -2940,70 +2940,66 @@
     <message>
         <location filename="../water_pool_form.ui" line="225"/>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Laden</translation>
     </message>
     <message>
         <location filename="../water_pool_form.ui" line="232"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Speichern</translation>
     </message>
 </context>
 <context>
     <name>CWorkspacePage</name>
     <message>
         <location filename="../workspace_form.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../workspace_form.ui" line="53"/>
+        <location filename="../workspace_form.ui" line="45"/>
         <source>Particle system editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Partikelsystem Editor</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="103"/>
-        <source>Workspace:</source>
-        <translation type="unfinished"></translation>
+        <location filename="../workspace_form.ui" line="55"/>
+        <source>Workspace</source>
+        <translation>Arbeitsbereich</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="139"/>
+        <location filename="../workspace_form.ui" line="73"/>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="174"/>
+        <location filename="../workspace_form.ui" line="108"/>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="212"/>
+        <location filename="../workspace_form.ui" line="146"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="253"/>
+        <location filename="../workspace_form.ui" line="187"/>
         <source>Save As</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern als ...</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="306"/>
-        <source>Particle system:</source>
-        <translation type="unfinished"></translation>
+        <location filename="../workspace_form.ui" line="213"/>
+        <source>Particle system</source>
+        <translation>Partikelsystem</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="345"/>
+        <location filename="../workspace_form.ui" line="234"/>
         <source>Insert New</source>
-        <translation type="unfinished"></translation>
+        <translation>Neu einfügen</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="383"/>
+        <location filename="../workspace_form.ui" line="272"/>
         <source>Create New</source>
-        <translation type="unfinished"></translation>
+        <translation>Neu erstellen</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="421"/>
+        <location filename="../workspace_form.ui" line="310"/>
         <source>Reset all</source>
-        <translation type="unfinished"></translation>
+        <translation>Alles zurücksetzen</translation>
     </message>
 </context>
 <context>
@@ -3011,40 +3007,30 @@
     <message>
         <location filename="../particle_zone_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Partikel Zonen Editor</translation>
     </message>
     <message>
         <location filename="../particle_zone_form.ui" line="26"/>
         <source>Targets:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ziele:</translation>
     </message>
     <message>
         <location filename="../particle_zone_form.ui" line="33"/>
         <source>Avaible targets:</source>
-        <translation type="unfinished"></translation>
+        <translation>Verfügbare Ziele:</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="65"/>
-        <source>&lt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_zone_form.ui" line="78"/>
-        <source>&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_zone_form.ui" line="99"/>
+        <location filename="../particle_zone_form.ui" line="73"/>
         <source>Bounce</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="104"/>
+        <location filename="../particle_zone_form.ui" line="78"/>
         <source>Destroy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="125"/>
+        <location filename="../particle_zone_form.ui" line="99"/>
         <source>Bounce factor:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3167,12 +3153,12 @@
     <message>
         <location filename="../plugins/core/search_paths_settings_page.cpp" line="43"/>
         <source>Search Paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnisse</translation>
     </message>
     <message>
         <location filename="../plugins/core/search_paths_settings_page.cpp" line="53"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation>Allgemein</translation>
     </message>
 </context>
 <context>
@@ -3180,12 +3166,12 @@
     <message>
         <location filename="../plugins/core/core_plugin.cpp" line="69"/>
         <source>New settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Neue Einstellungen</translation>
     </message>
     <message>
         <location filename="../plugins/core/core_plugin.cpp" line="70"/>
         <source>About plugins</source>
-        <translation type="unfinished"></translation>
+        <translation>Über Plugins</translation>
     </message>
 </context>
 <context>
@@ -3779,190 +3765,190 @@ Right click to remove points.</source>
     <message>
         <location filename="../main_window.cpp" line="190"/>
         <source>Open NeL data file</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffne NeL Daten Dateien</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="191"/>
         <source>All NeL files (*.shape *.ps *.ig);;NeL shape files (*.shape);;NeL particle system files (*.ps)NeL Instance Group files (*.ig)</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle NeL Dateien (*.shape *.ps *.ig);;NeL shape (*.shape);;NeL Partikelsystem(*.ps)NeL Instanz Gruppen (*.ig)</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="203"/>
         <source>Open skeleton file</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffne Skelett Datei</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="204"/>
         <source>NeL skeleton file (*.skel)</source>
-        <translation type="unfinished"></translation>
+        <translation>NeL Skelet (*.skel)</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="244"/>
         <source>About Object Viewer Qt</source>
-        <translation type="unfinished">Über Object Viewer Qt</translation>
+        <translation>Über Object Viewer Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="245"/>
         <source>&lt;h2&gt;Object Viewer Qt  8-)&lt;/h2&gt;&lt;p&gt; Authors: dnk-88, sfb, Kaetemi, kervala &lt;p&gt;Compiled on %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;h2&gt;Object Viewer Qt  8-)&lt;/h2&gt;&lt;p&gt; Autoren: dnk-88, sfb, Kaetemi, kervala &lt;p&gt;Kompiliert am %1 %2</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="263"/>
         <source>&amp;Open...</source>
-        <translation type="unfinished">&amp;Öffnen...</translation>
+        <translation>&amp;Öffnen...</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="266"/>
         <source>Open an existing file</source>
-        <translation type="unfinished">Datei öffnen</translation>
+        <translation>Datei öffnen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="269"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished">B&amp;eenden</translation>
+        <translation>B&amp;eenden</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="270"/>
         <source>Ctrl+Q</source>
-        <translation type="unfinished">Ctrl+Q</translation>
+        <translation>Ctrl+Q</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="271"/>
         <source>Exit the application</source>
-        <translation type="unfinished">Object Viewer verlassen</translation>
+        <translation>Object Viewer verlassen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="275"/>
         <source>Set &amp;background color</source>
-        <translation type="unfinished"></translation>
+        <translation>Hintergrundfar&amp;be setzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="277"/>
         <source>Set background color</source>
-        <translation type="unfinished"></translation>
+        <translation>Hintergrundfarbe setzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="279"/>
         <source>Reset camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Kamera zurücksetzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="280"/>
         <source>Ctrl+R</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+R</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="281"/>
         <source>Reset current camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuelle Kamera zurücksetzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="285"/>
         <source>Ctrl+M</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+M</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="286"/>
         <source>Change render mode (Line, Point, Filled)</source>
-        <translation type="unfinished"></translation>
+        <translation>Render Modus ändern (Linie, Punkt, Gefüllt)</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="288"/>
         <source>&amp;Reset scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Szene zu&amp;rücksetzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="289"/>
         <source>Reset current scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuelle Szene zurücksetzen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="292"/>
         <location filename="../main_window.cpp" line="293"/>
         <source>Reload textures</source>
-        <translation type="unfinished"></translation>
+        <translation>Texturen neu laden</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="297"/>
         <source>Save &amp;Screenshot</source>
-        <translation type="unfinished"></translation>
+        <translation>Screenshot &amp;Speichern</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="298"/>
         <source>Make a screenshot of the current viewport and save</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichert ein Screenshot der aktuellen Szene</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="300"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished">Ein&amp;stellungen</translation>
+        <translation>Ein&amp;stellungen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="302"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="305"/>
         <source>&amp;About</source>
-        <translation type="unfinished">&amp;Über</translation>
+        <translation>&amp;Über</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="306"/>
         <source>Show the application&apos;s About box</source>
-        <translation type="unfinished">Zeigt Informationen über den Object Viewer</translation>
+        <translation>Zeigt Informationen über den Object Viewer</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="309"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished">Über &amp;Qt</translation>
+        <translation>Über &amp;Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="310"/>
         <source>Show the Qt library&apos;s About box</source>
-        <translation type="unfinished">Zeigt Informationen über Qt</translation>
+        <translation>Zeigt Informationen über Qt</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="316"/>
         <location filename="../main_window.cpp" line="400"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;Datei</translation>
+        <translation>&amp;Datei</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="322"/>
         <source>&amp;View</source>
-        <translation type="unfinished">&amp;Ansicht</translation>
+        <translation>&amp;Ansicht</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="329"/>
         <source>&amp;Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Szene</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="335"/>
         <location filename="../main_window.cpp" line="405"/>
         <source>&amp;Tools</source>
-        <translation type="unfinished">&amp;Werkzeuge</translation>
+        <translation>&amp;Werkzeuge</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="386"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;Hilfe</translation>
+        <translation>&amp;Hilfe</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="427"/>
         <source>StatusReady</source>
-        <translation type="unfinished">Status Fertig</translation>
+        <translation>Status Fertig</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="526"/>
         <source>Loading canceled</source>
-        <translation type="unfinished"></translation>
+        <translation>Laden abgebrochen</translation>
     </message>
     <message>
         <location filename="../main_window.cpp" line="529"/>
         <source>File loaded</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei geladen</translation>
     </message>
 </context>
 <context>
@@ -4149,7 +4135,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../particle_workspace_dialog.cpp" line="144"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Speichern</translation>
     </message>
     <message>
         <location filename="../particle_workspace_dialog.cpp" line="145"/>
@@ -4320,7 +4306,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../particle_property_dialog.cpp" line="88"/>
         <source>Property editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Eigenschaften</translation>
     </message>
 </context>
 <context>
@@ -4328,7 +4314,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../settings_dialog.cpp" line="126"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../settings_dialog.cpp" line="127"/>

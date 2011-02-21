@@ -1303,92 +1303,92 @@
 <context>
     <name>CParticleControlDialog</name>
     <message>
-        <location filename="../particle_control_form.ui" line="26"/>
+        <location filename="../particle_control_form.ui" line="32"/>
         <source>Particles system control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="134"/>
+        <location filename="../particle_control_form.ui" line="124"/>
         <source>Loop</source>
         <translation>Повтор</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="147"/>
+        <location filename="../particle_control_form.ui" line="137"/>
         <source>Display helpers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="160"/>
+        <location filename="../particle_control_form.ui" line="150"/>
         <source>Enable auto count</source>
         <translation type="unfinished">Включить авто подсчет</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="173"/>
+        <location filename="../particle_control_form.ui" line="163"/>
         <source>Display box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="186"/>
+        <location filename="../particle_control_form.ui" line="176"/>
         <source>All particle system</source>
         <translation type="unfinished">Все системы частиц</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="202"/>
+        <location filename="../particle_control_form.ui" line="192"/>
         <source>Reset auto count</source>
         <translation type="unfinished">Сбросить авто подсчет</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="223"/>
+        <location filename="../particle_control_form.ui" line="209"/>
         <source>Link play to scene play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="233"/>
+        <location filename="../particle_control_form.ui" line="219"/>
         <source>Link to skeleton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="246"/>
+        <location filename="../particle_control_form.ui" line="232"/>
         <source>Unlink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="266"/>
+        <location filename="../particle_control_form.ui" line="252"/>
         <source>Restick all objects</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="276"/>
+        <location filename="../particle_control_form.ui" line="262"/>
         <source>Set anim</source>
         <translation type="unfinished">Выбрать anim</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="286"/>
+        <location filename="../particle_control_form.ui" line="272"/>
         <source>Clear anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="317"/>
+        <location filename="../particle_control_form.ui" line="296"/>
         <source>General</source>
         <translation type="unfinished">Главное</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="330"/>
+        <location filename="../particle_control_form.ui" line="309"/>
         <source>Additional</source>
         <translation type="unfinished">Дополнительное</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="345"/>
+        <location filename="../particle_control_form.ui" line="348"/>
         <source>Num particles:9999999</source>
         <translation>Кол-во частиц:9999999</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="358"/>
+        <location filename="../particle_control_form.ui" line="361"/>
         <source>Num wanted faces:9999999</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="371"/>
+        <location filename="../particle_control_form.ui" line="332"/>
         <source>System time:99999999999</source>
         <translation type="unfinished">Время:99999999999</translation>
     </message>
@@ -2028,45 +2028,45 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="372"/>
+        <location filename="../settings_form.ui" line="381"/>
         <source>Search paths</source>
         <translation>Пути поиска</translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="389"/>
-        <location filename="../settings_form.ui" line="406"/>
-        <location filename="../settings_form.ui" line="417"/>
-        <location filename="../settings_form.ui" line="428"/>
-        <location filename="../settings_form.ui" line="484"/>
-        <location filename="../settings_form.ui" line="508"/>
-        <location filename="../settings_form.ui" line="532"/>
-        <location filename="../settings_form.ui" line="573"/>
-        <location filename="../settings_form.ui" line="590"/>
+        <location filename="../settings_form.ui" line="398"/>
+        <location filename="../settings_form.ui" line="415"/>
+        <location filename="../settings_form.ui" line="426"/>
+        <location filename="../settings_form.ui" line="437"/>
+        <location filename="../settings_form.ui" line="493"/>
+        <location filename="../settings_form.ui" line="517"/>
+        <location filename="../settings_form.ui" line="541"/>
+        <location filename="../settings_form.ui" line="582"/>
+        <location filename="../settings_form.ui" line="599"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="461"/>
+        <location filename="../settings_form.ui" line="470"/>
         <source>Setup Landscape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="467"/>
+        <location filename="../settings_form.ui" line="476"/>
         <source>Tile bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="491"/>
+        <location filename="../settings_form.ui" line="500"/>
         <source>Tile far bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="515"/>
+        <location filename="../settings_form.ui" line="524"/>
         <source>Vegetable texture:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="539"/>
+        <location filename="../settings_form.ui" line="548"/>
         <source>Landscape zones:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2951,57 +2951,53 @@
 <context>
     <name>CWorkspacePage</name>
     <message>
-        <location filename="../workspace_form.ui" line="14"/>
-        <source>Form</source>
-        <translation>Форма</translation>
-    </message>
-    <message>
-        <location filename="../workspace_form.ui" line="53"/>
+        <location filename="../workspace_form.ui" line="20"/>
+        <location filename="../workspace_form.ui" line="38"/>
         <source>Particle system editor</source>
         <translation>Редактор системы частиц</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="103"/>
-        <source>Workspace:</source>
-        <translation>Рабочее пространство:</translation>
+        <location filename="../workspace_form.ui" line="48"/>
+        <source>Workspace</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="139"/>
+        <location filename="../workspace_form.ui" line="72"/>
         <source>New</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="174"/>
+        <location filename="../workspace_form.ui" line="113"/>
         <source>Load</source>
         <translation>Загрузить</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="212"/>
+        <location filename="../workspace_form.ui" line="157"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="253"/>
+        <location filename="../workspace_form.ui" line="204"/>
         <source>Save As</source>
         <translation>Сохранить как</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="306"/>
-        <source>Particle system:</source>
-        <translation>Система частиц:</translation>
+        <location filename="../workspace_form.ui" line="243"/>
+        <source>Particle system</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="345"/>
+        <location filename="../workspace_form.ui" line="270"/>
         <source>Insert New</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="383"/>
+        <location filename="../workspace_form.ui" line="314"/>
         <source>Create New</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="421"/>
+        <location filename="../workspace_form.ui" line="358"/>
         <source>Reset all</source>
         <translation>Сбросить</translation>
     </message>
@@ -3024,27 +3020,17 @@
         <translation type="unfinished">Доступные цели:</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="65"/>
-        <source>&lt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_zone_form.ui" line="78"/>
-        <source>&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_zone_form.ui" line="99"/>
+        <location filename="../particle_zone_form.ui" line="73"/>
         <source>Bounce</source>
         <translation type="unfinished">Отскок</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="104"/>
+        <location filename="../particle_zone_form.ui" line="78"/>
         <source>Destroy</source>
         <translation type="unfinished">Уничтожение</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="125"/>
+        <location filename="../particle_zone_form.ui" line="99"/>
         <source>Bounce factor:</source>
         <translation type="unfinished">Сила отскока:</translation>
     </message>

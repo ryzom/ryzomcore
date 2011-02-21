@@ -75,7 +75,7 @@
       <enum>QFrame::Plain</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="graphicsPage">
       <layout class="QGridLayout" name="gridLayout_10">
@@ -339,6 +339,15 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="specialValueText">
+                 <string notr="true"/>
+                </property>
+                <property name="suffix">
+                 <string notr="true"/>
+                </property>
+                <property name="prefix">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>198</width>
-    <height>310</height>
+    <width>426</width>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,32 +52,6 @@
    </item>
    <item row="1" column="2" rowspan="4">
     <widget class="QListWidget" name="avaibleTargetsListWidget"/>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="toTargetsPushButton">
-     <property name="maximumSize">
-      <size>
-       <width>30</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>&lt;</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QPushButton" name="toAvaibleTargetsPushButton">
-     <property name="maximumSize">
-      <size>
-       <width>30</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>&gt;</string>
-     </property>
-    </widget>
    </item>
    <item row="4" column="1">
     <spacer name="verticalSpacer_2">
@@ -128,6 +102,32 @@
    </item>
    <item row="7" column="0" colspan="3">
     <widget class="NLQT::CEditRangeFloatWidget" name="bounceFactorWidget" native="true"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QToolButton" name="toTargetsToolButton">
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::LeftArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QToolButton" name="toAvaibleTargetsToolButton">
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::RightArrow</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

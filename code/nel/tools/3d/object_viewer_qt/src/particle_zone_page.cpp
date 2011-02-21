@@ -38,8 +38,8 @@ CZonePage::CZonePage(QWidget *parent)
 
 	_ui.bounceFactorWidget->setRange(0.f, 1.f);
 
-	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
-	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
+	connect(_ui.toTargetsToolButton, SIGNAL(clicked()), this, SLOT(addTarget()));
+	connect(_ui.toAvaibleTargetsToolButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 	connect(_ui.bounceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setBounce(int)));
 
 	connect(_ui.bounceFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setBounceFactor(float)));
