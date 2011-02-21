@@ -117,13 +117,13 @@ class   COcclusionQueryGL;
 
 bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 typedef HCURSOR nlCursor;
-#define EmptyCursor NULL
+#define EmptyCursor (nlCursor)NULL
 
 #elif defined (NL_OS_MAC)
 
 bool GlWndProc(CDriverGL *driver, const void* e);
 typedef void* nlCursor;
-#define EmptyCursor NULL
+#define EmptyCursor (nlCursor)NULL
 
 #elif defined (NL_OS_UNIX)
 

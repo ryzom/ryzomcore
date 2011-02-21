@@ -251,8 +251,8 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL_setupMaterial)
 	CShaderGL*	pShader;
-	GLenum		glenum;
-	uint32		touched=mat.getTouched();
+	GLenum		glenum = GL_ZERO;
+	uint32		touched = mat.getTouched();
 	uint		stage;
 
 	// profile.

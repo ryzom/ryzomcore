@@ -407,7 +407,7 @@ nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot
 	}
 
 	// create a cursor from bitmap
-	nlCursor result = NULL;
+	nlCursor result = EmptyCursor;
 	convertBitmapToCursor(rotSrc, result, mouseW, mouseH, _ColorDepth == ColorDepth16 ? 16:32, col, hotSpotX, hotSpotY);
 	return result;
 }
