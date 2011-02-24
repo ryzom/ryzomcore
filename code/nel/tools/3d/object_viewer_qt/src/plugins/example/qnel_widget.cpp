@@ -84,6 +84,11 @@ void QNLWidget::setInterval(int msec)
 	m_mainTimer->setInterval(msec);
 }
 
+void QNLWidget::setBackgroundColor(NLMISC::CRGBA backgroundColor)
+{
+	m_backgroundColor = backgroundColor;
+}
+
 void QNLWidget::updateRender()
 {
 	if (isVisible())
@@ -101,7 +106,7 @@ void QNLWidget::updateRender()
 		if (m_initialized && !m_driver->isLost())
 		{
 			//_driver->activate();
-			m_driver->clearBuffers(NLMISC::CRGBA(125,12,58));
+			m_driver->clearBuffers(m_backgroundColor);
 			Q_EMIT updatePreRender();
 
 			Q_EMIT updatePostRender();

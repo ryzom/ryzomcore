@@ -25,9 +25,7 @@
 // NeL includes
 #include <nel/misc/path.h>
 #include <nel/3d/u_driver.h>
-#include <nel/3d/u_instance.h>
 #include <nel/3d/u_scene.h>
-#include <nel/3d/u_skeleton.h>
 #include <nel/3d/u_animation_set.h>
 #include <nel/3d/u_animation.h>
 #include <nel/3d/u_play_list_manager.h>
@@ -124,8 +122,10 @@ void CEntity::loadAnimation(std::string &fileName)
 	uint id = _AnimationSet->addAnimation(fileName.c_str(),CFile::getFilenameWithoutExtension(fileName).c_str());
 	_AnimationList.push_back(_AnimationSet->getAnimationName(id));
 	_AnimationSet->build();
-	if (!_Skeleton.empty()) _PlayList->registerTransform(_Skeleton);
-	else _PlayList->registerTransform(_Instance);
+	if (!_Skeleton.empty())
+		_PlayList->registerTransform(_Skeleton);
+	else
+		_PlayList->registerTransform(_Instance);
 }
 
 void CEntity::loadSWT(std::string &fileName)

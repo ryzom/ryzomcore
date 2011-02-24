@@ -39,9 +39,7 @@ namespace NL3D
 class UDriver;
 class UScene;
 class ULight;
-class UInstance;
 class UCamera;
-class USkeleton;
 class UTextContext;
 class UPlayListManager;
 class U3dMouseListener;
