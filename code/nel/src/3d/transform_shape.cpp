@@ -296,7 +296,18 @@ void	CTransformShape::traverseLoadBalancingPass0()
 // ***************************************************************************
 void	CTransformShape::traverseLoadBalancingPass1()
 {
-	// Set the result into the isntance.
+	// Show more polygons for upscaled shapes to preserve visual quality
+	float factor = 1.0f;
+	if (getTransformMode() == RotEuler || getTransformMode() == RotQuat)
+	{
+		factor = std::max(1.0f, std::max(getScale().x, std::max(getScale().y, getScale().z)));
+		if (factor > 1)
+		{
+			_FaceCount = factor * std::max(_FaceCount, factor * 200.0f);
+		}
+	}
+
+	// Set the result into the instance.
 	_NumTrianglesAfterLoadBalancing= _LoadBalancingGroup->computeModelNbFace(_FaceCount);
 
 }

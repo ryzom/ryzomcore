@@ -506,18 +506,12 @@ void CClipTrav::loadBalanceSkeletonCLod()
 		// If valid priority (CLOd enabled, and skeleton visible)
 		if(pr>0)
 		{
-			// if the priority is >1, then display as CLod
-			if(pr>1)
-				sm->setDisplayLodCharacterFlag(true);
-			// else load balance.
-			else
-			{
-				CSkeletonKey	key;
-				// don't bother OptFastFloor precision. NB: 0<pr<=1 here.
-				key.Priority= OptFastFloor(pr*0xFFFFFF00);
-				key.SkeletonModel= sm;
-				_TmpSortSkeletons.push_back(key);
-			}
+			sm->setDisplayLodCharacterFlag(false);
+			CSkeletonKey key;
+			// don't bother OptFastFloor precision.
+			key.Priority= OptFastFloor(pr*0xFFFFFF00);
+			key.SkeletonModel= sm;
+			_TmpSortSkeletons.push_back(key);
 		}
 	}
 
@@ -529,16 +523,9 @@ void CClipTrav::loadBalanceSkeletonCLod()
 		sort(_TmpSortSkeletons.begin(), _TmpSortSkeletons.end());
 	}
 
-	// **** set CLod flag
-	uint	n= min(nMaxSkelsInNotCLodForm, (uint)_TmpSortSkeletons.size());
-	uint	i;
-	// The lowest priority are displayed in std form
-	for(i=0;i<n;i++)
-	{
-		_TmpSortSkeletons[i].SkeletonModel->setDisplayLodCharacterFlag(false);
-	}
-	// the other are displayed in CLod form
-	for(i=n;i<_TmpSortSkeletons.size();i++)
+	// **** set CLod flag for skeletons > setting
+	uint	n = min(nMaxSkelsInNotCLodForm, (uint)_TmpSortSkeletons.size());
+	for (uint i = n; i < _TmpSortSkeletons.size(); i++)
 	{
 		_TmpSortSkeletons[i].SkeletonModel->setDisplayLodCharacterFlag(true);
 	}
