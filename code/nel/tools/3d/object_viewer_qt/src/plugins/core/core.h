@@ -42,6 +42,7 @@ public:
 	virtual QSettings *settings() const;
 	virtual QMainWindow *mainWindow() const;
 
+	virtual ExtensionSystem::IPluginManager *pluginManager() const;
 private:
 	MainWindow *m_mainWindow;
 	friend class MainWindow;

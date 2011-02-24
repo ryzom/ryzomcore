@@ -38,7 +38,7 @@ class CSearchPathsSettingsPage : public Core::IOptionsPage
 
 public:
 	CSearchPathsSettingsPage(QObject *parent = 0);
-	~CSearchPathsSettingsPage() {}
+	~CSearchPathsSettingsPage();
 
 	QString id() const;
 	QString trName() const;
@@ -47,11 +47,23 @@ public:
 	QWidget *createPage(QWidget *parent);
 
 	void apply();
-	void finish() {}
+	void finish();
+
+	void applySearchPaths();
+
+private Q_SLOTS:
+	void addPath();
+	void delPath();
+	void upPath();
+	void downPath();
 
 private:
-	QWidget *_currentPage;
-	Ui::CSearchPathsSettingsPage _ui;
+	void readSettings();
+	void writeSettings();
+	void checkEnabledButton();
+
+	QWidget *m_page;
+	Ui::CSearchPathsSettingsPage m_ui;
 };
 
 } // namespace Core

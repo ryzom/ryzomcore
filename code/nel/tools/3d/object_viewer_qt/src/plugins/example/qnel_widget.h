@@ -20,6 +20,7 @@
 
 // NeL includes
 #include <nel/misc/types_nl.h>
+#include <nel/misc/rgba.h>
 #include <nel/misc/event_emitter.h>
 
 // Qt includes
@@ -54,9 +55,22 @@ public:
 	/// Set the update interval renderer
 	void setInterval(int msec);
 
-	float getFPS() const
+	/// Set the background color.
+	void setBackgroundColor(NLMISC::CRGBA backgroundColor);
+
+	float fps() const
 	{
 		return m_fps;
+	}
+
+	inline NLMISC::CRGBA backgroundColor() const
+	{
+		return m_backgroundColor;
+	}
+
+	NL3D::UDriver *driver() const
+	{
+		return m_driver;
 	}
 
 	virtual QPaintEngine* paintEngine() const
@@ -90,7 +104,10 @@ private:
 	QNLWidget &operator=(const QNLWidget &);
 
 	NL3D::UDriver *m_driver;
+	NLMISC::CRGBA m_backgroundColor;
+
 	QTimer *m_mainTimer;
+
 	bool m_initialized;
 	int m_interval;
 	float m_fps;

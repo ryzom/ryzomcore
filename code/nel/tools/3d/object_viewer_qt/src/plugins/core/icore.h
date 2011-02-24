@@ -28,6 +28,11 @@ class QMainWindow;
 class QSettings;
 QT_END_NAMESPACE
 
+namespace ExtensionSystem
+{
+class IPluginManager;
+}
+
 namespace Core
 {
 class IMenuManager;
@@ -50,6 +55,8 @@ public:
 
 	virtual QSettings *settings() const = 0;
 	virtual QMainWindow *mainWindow() const = 0;
+
+	virtual ExtensionSystem::IPluginManager *pluginManager() const = 0;
 
 Q_SIGNALS:
 	void closeMainWindow();

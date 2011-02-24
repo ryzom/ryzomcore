@@ -1,6 +1,10 @@
 <RCC>
-<qresource prefix="/core" >
+  <qresource prefix="/core">
+    <file>images/list-add.png</file>
+    <file>images/list-remove.png</file>
+    <file>images/go-up.png</file>
+    <file>images/go-down.png</file>
     <file>images/nel.png</file>
     <file>images/preferences.png</file>
-</qresource>
+  </qresource>
 </RCC>

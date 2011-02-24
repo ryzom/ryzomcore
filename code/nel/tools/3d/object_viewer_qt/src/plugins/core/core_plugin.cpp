@@ -75,6 +75,7 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
 		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
 		_oldOVQT = false;
+		return true;
 	}
 	else
 	{
@@ -97,11 +98,12 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 		}
 		_oldOVQT = true;
 		bool success = _mainWindow->initialize(errorString);
+		CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
+		serchPathPage->applySearchPaths();
+		addAutoReleasedObject(serchPathPage);
+
 		return success;
 	}
-
-	addAutoReleasedObject(new CSearchPathsSettingsPage(this));
-	return true;
 }
 
 void CorePlugin::extensionsInitialized()

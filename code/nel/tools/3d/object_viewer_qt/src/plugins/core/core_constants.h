@@ -57,6 +57,14 @@ const char * const ABOUT		= "ObjectViewerQt.About";
 const char * const ABOUT_PLUGINS	= "ObjectViewerQt.AboutPlugins";
 const char * const ABOUT_QT		= "ObjectViewerQt.AboutQt";
 
+//settings
+const char * const DATA_PATH_SECTION = "DataPath";
+const char * const SEARCH_PATHS = "SearchPaths";
+const char * const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
+const char * const LEVELDESIGN_PATH = "LevelDesignPath";
+const char * const ASSETS_PATH  = "LevelDesignPath";
+
+//resources
 const char * const ICON_NEL		= ":/core/images/nel.png";
 const char * const ICON_SETTINGS	= ":/core/images/preferences.png";
 } // namespace Constants

@@ -19,7 +19,7 @@
 #define MAIN_WINDOW_H
 
 // Project includes
-#include "../../extension_system/iplugin.h"
+#include "../../extension_system/iplugin_manager.h"
 #include "plugin_view_dialog.h"
 
 // STL includes
@@ -50,6 +50,8 @@ public:
 
 	IMenuManager *menuManager() const;
 	QSettings *settings() const;
+
+	ExtensionSystem::IPluginManager *pluginManager() const;
 
 public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),

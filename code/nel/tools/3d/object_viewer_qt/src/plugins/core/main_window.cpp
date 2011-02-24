@@ -111,6 +111,11 @@ QSettings *MainWindow::settings() const
 	return m_settings;
 }
 
+ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
+{
+	return m_pluginManager;
+}
+
 void MainWindow::checkObject(QObject *obj)
 {
 	IContext *context = qobject_cast<IContext *>(obj);

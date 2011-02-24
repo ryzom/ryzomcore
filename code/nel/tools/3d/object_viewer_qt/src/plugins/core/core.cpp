@@ -19,6 +19,7 @@
 #include "core.h"
 #include "imenu_manager.h"
 #include "main_window.h"
+#include "../../extension_system/iplugin_manager.h"
 
 static Core::CoreImpl *m_coreInstance = 0;
 
@@ -61,6 +62,11 @@ QSettings *CoreImpl::settings() const
 QMainWindow *CoreImpl::mainWindow() const
 {
 	return m_mainWindow;
+}
+
+ExtensionSystem::IPluginManager *CoreImpl::pluginManager() const
+{
+	return m_mainWindow->pluginManager();
 }
 
 } // namespace Core
