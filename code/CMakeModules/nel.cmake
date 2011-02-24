@@ -84,23 +84,7 @@ MACRO(NL_ADD_STATIC_VID_DRIVERS name)
       IF(WITH_DRIVER_DIRECT3D)
         TARGET_LINK_LIBRARIES(${name} nel_drv_direct3d_win)
       ENDIF(WITH_DRIVER_DIRECT3D)
-
-      IF(WITH_DRIVER_DSOUND)
-        TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
-      ENDIF(WITH_DRIVER_DSOUND)
-
-      IF(WITH_DRIVER_XAUDIO2)
-        TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
-      ENDIF(WITH_DRIVER_XAUDIO2)
     ENDIF(WIN32)
-
-    IF(WITH_DRIVER_OPENAL)
-      TARGET_LINK_LIBRARIES(${name} nel_drv_openal)
-    ENDIF(WITH_DRIVER_OPENAL)
-
-    IF(WITH_DRIVER_FMOD)
-      TARGET_LINK_LIBRARIES(${name} nel_drv_fmod)
-    ENDIF(WITH_DRIVER_FMOD)
 
     IF(WITH_DRIVER_OPENGL)
       IF(WIN32)
@@ -116,21 +100,29 @@ MACRO(NL_ADD_STATIC_SND_DRIVERS name)
   IF(WITH_STATIC_DRIVERS)
     IF(WIN32)
       IF(WITH_DRIVER_DSOUND)
-        TARGET_LINK_LIBRARIES(${name} nel_drv_dsound)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_dsound_win)
       ENDIF(WITH_DRIVER_DSOUND)
 
       IF(WITH_DRIVER_XAUDIO2)
-        TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_xaudio2_win)
       ENDIF(WITH_DRIVER_XAUDIO2)
+
+      IF(WITH_DRIVER_OPENAL)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_openal_win)
+      ENDIF(WITH_DRIVER_OPENAL)
+
+      IF(WITH_DRIVER_FMOD)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_fmod_win)
+      ENDIF(WITH_DRIVER_FMOD)
+    ELSE(WIN32)
+      IF(WITH_DRIVER_OPENAL)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_openal)
+      ENDIF(WITH_DRIVER_OPENAL)
+
+      IF(WITH_DRIVER_FMOD)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_fmod)
+      ENDIF(WITH_DRIVER_FMOD)
     ENDIF(WIN32)
-
-    IF(WITH_DRIVER_OPENAL)
-      TARGET_LINK_LIBRARIES(${name} nel_drv_openal)
-    ENDIF(WITH_DRIVER_OPENAL)
-
-    IF(WITH_DRIVER_FMOD)
-      TARGET_LINK_LIBRARIES(${name} nel_drv_fmod)
-    ENDIF(WITH_DRIVER_FMOD)
 
   ENDIF(WITH_STATIC_DRIVERS)
 ENDMACRO(NL_ADD_STATIC_SND_DRIVERS)
