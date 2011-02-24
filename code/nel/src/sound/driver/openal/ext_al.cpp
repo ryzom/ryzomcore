@@ -66,7 +66,8 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 
-#if !defined(NL_STATIC) || defined(NL_OS_MAC)
+// Windows and Mac OS always link to shared OpenAL library
+#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
 	// EFX
 	if ((AlExtEfx = (alcIsExtensionPresent(device, "ALC_EXT_EFX") == ALC_TRUE)) == true)
 	{
@@ -136,7 +137,7 @@ EAXGetBufferMode eaxGetBufferMode = NULL;
 // ALC_EXT_EFX
 bool AlExtEfx = false;
 // effect objects
-#if !defined(NL_STATIC) || defined(NL_OS_MAC)
+#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
 LPALGENEFXOBJECTS alGenEffects = NULL;
 LPALDELETEEFXOBJECTS alDeleteEffects = NULL;
 LPALISEFXOBJECT alIsEffect = NULL;

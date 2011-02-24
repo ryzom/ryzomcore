@@ -20,6 +20,17 @@
 
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
+#elif defined(NL_STATIC)
+// Driver availability for NL_STATIC compilation.
+#	undef NL_FMOD_AVAILABLE
+#	undef NL_OPENAL_AVAILABLE
+#	undef NL_DSOUND_AVAILABLE
+#	undef NL_XAUDIO2_AVAILABLE
+#	if defined( NL_OS_WINDOWS )
+#		define NL_FMOD_AVAILABLE
+#	else
+#		define NL_OPENAL_AVAILABLE
+#	endif
 #endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_WINDOWS
@@ -33,28 +44,6 @@
 #endif
 
 using namespace NLMISC;
-
-// Driver availability for NL_STATIC compilation.
-#if defined( NL_OS_WINDOWS )
-#	define NL_FMOD_AVAILABLE 1
-#	define NL_OPENAL_AVAILABLE 0
-#	define NL_DSOUND_AVAILABLE 0
-#	define NL_XAUDIO2_AVAILABLE 0
-#elif defined( NL_OS_UNIX )
-#ifdef NL_STATIC
-#	define NL_FMOD_AVAILABLE 0
-#else
-#	define NL_FMOD_AVAILABLE 1
-#endif
-#	define NL_OPENAL_AVAILABLE 1
-#	define NL_DSOUND_AVAILABLE 0
-#	define NL_XAUDIO2_AVAILABLE 0
-#else
-#	define NL_FMOD_AVAILABLE 0
-#	define NL_OPENAL_AVAILABLE 0
-#	define NL_DSOUND_AVAILABLE 0
-#	define NL_XAUDIO2_AVAILABLE 0
-#endif
 
 namespace NLSOUND
 {
@@ -72,16 +61,16 @@ const uint32 ISoundDriver::InterfaceVersion = 0x16; // Kaetemi
 	extern void outputProfile##__soundDriver(std::string &out); \
 	extern ISoundDriver::TDriver getDriverType##__soundDriver();
 
-#if NL_FMOD_AVAILABLE
+#ifdef NL_FMOD_AVAILABLE
 	NLSOUND_DECLARE_DRIVER(FMod)
 #endif
-#if NL_OPENAL_AVAILABLE
+#ifdef NL_OPENAL_AVAILABLE
 	NLSOUND_DECLARE_DRIVER(OpenAl)
 #endif
-#if NL_DSOUND_AVAILABLE
+#ifdef NL_DSOUND_AVAILABLE
 	NLSOUND_DECLARE_DRIVER(DSound)
 #endif
-#if NL_XAUDIO2_AVAILABLE
+#ifdef NL_XAUDIO2_AVAILABLE
 	NLSOUND_DECLARE_DRIVER(XAudio2)
 #endif
 
@@ -122,26 +111,26 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	switch (driverType)
 	{
 		// switch between available drivers
-#	if NL_FMOD_AVAILABLE
+#	ifdef NL_FMOD_AVAILABLE
 		case DriverFMod: result = createISoundDriverInstanceFMod(stringMapper); break;
 #	endif
-#	if NL_OPENAL_AVAILABLE
+#	ifdef NL_OPENAL_AVAILABLE
 		case DriverOpenAl: result = createISoundDriverInstanceOpenAl(stringMapper); break;
 #	endif
-#	if NL_DSOUND_AVAILABLE
+#	ifdef NL_DSOUND_AVAILABLE
 		case DriverDSound: result = createISoundDriverInstanceDSound(stringMapper); break;
 #	endif
-#	if NL_XAUDIO2_AVAILABLE
+#	ifdef NL_XAUDIO2_AVAILABLE
 		case DriverXAudio2: result = createISoundDriverInstanceXAudio2(stringMapper); break;
 #	endif
 		// auto driver = first available in this order: FMod, OpenAl, XAudio2, DSound
-#	if NL_FMOD_AVAILABLE
+#	if defined(NL_FMOD_AVAILABLE)
 		case DriverAuto: result = createISoundDriverInstanceFMod(stringMapper); break;
-#	elif NL_OPENAL_AVAILABLE
+#	elif defined(NL_OPENAL_AVAILABLE)
 		case DriverAuto: result = createISoundDriverInstanceOpenAl(stringMapper); break;
-#	elif NL_XAUDIO2_AVAILABLE
+#	elif defined(NL_XAUDIO2_AVAILABLE)
 		case DriverAuto: result = createISoundDriverInstanceXAudio2(stringMapper); break;
-#	elif NL_DSOUND_AVAILABLE
+#	elif defined(NL_DSOUND_AVAILABLE)
 		case DriverAuto: result = createISoundDriverInstanceDSound(stringMapper); break;
 #	endif
 		// unavailable driver = FAIL

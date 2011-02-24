@@ -86,9 +86,7 @@ NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS()
 NL_SETUP_PREFIX_PATHS()
 RYZOM_SETUP_PREFIX_PATHS()
 
-IF(NOT WIN32)
-  NL_CONFIGURE_CHECKS()
-ENDIF(NOT WIN32)
+NL_CONFIGURE_CHECKS()
 
 #-----------------------------------------------------------------------------
 #Platform specifics
