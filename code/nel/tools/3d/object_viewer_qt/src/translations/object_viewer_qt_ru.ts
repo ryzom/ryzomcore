@@ -4,9 +4,20 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../main.cpp" line="158"/>
+        <location filename="../main.cpp" line="106"/>
+        <source>Failed to load Core plugin: %1</source>
+        <translation>Не удалось загрузить плагин: %1</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="186"/>
+        <location filename="../main.cpp" line="238"/>
         <source>Object Viewer Qt - Plugin loader messages</source>
         <translation>Object Viewer Qt - Сообщения загрузчика плагинов</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="222"/>
+        <source>Could not find ovqt_plugin_core in %1</source>
+        <translation>Не найден ovqt_plugin_core в %1</translation>
     </message>
 </context>
 <context>
@@ -29,7 +40,7 @@
     <message>
         <location filename="../animation_form.ui" line="155"/>
         <source>Increment pos</source>
-        <translation type="unfinished">Приращение позиций</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../animation_form.ui" line="189"/>
@@ -62,7 +73,7 @@
     <message>
         <location filename="../animation_set_form.ui" line="67"/>
         <source>Edited object:</source>
-        <translation type="unfinished">Текущий объект:</translation>
+        <translation>Текущий объект:</translation>
     </message>
     <message>
         <location filename="../animation_set_form.ui" line="99"/>
@@ -175,7 +186,7 @@
     <message>
         <location filename="../attrib_form.ui" line="187"/>
         <source>User param</source>
-        <translation type="unfinished">Пользовательский</translation>
+        <translation>Пользовательский параметр</translation>
     </message>
     <message>
         <location filename="../attrib_form.ui" line="192"/>
@@ -292,22 +303,22 @@
     <message>
         <location filename="../constraint_mesh_form.ui" line="32"/>
         <source>Stage 0</source>
-        <translation>Стадия 0</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="39"/>
         <source>Stage 1</source>
-        <translation>Стадия 1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="46"/>
         <source>Stage 2</source>
-        <translation>Стадия 2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="53"/>
         <source>Stage 3</source>
-        <translation>Стадия 3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="63"/>
@@ -322,22 +333,22 @@
     <message>
         <location filename="../constraint_mesh_form.ui" line="88"/>
         <source>None</source>
-        <translation type="unfinished">Никакой</translation>
+        <translation type="unfinished">Не использовать</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="93"/>
         <source>Global</source>
-        <translation type="unfinished">Мировой</translation>
+        <translation type="unfinished">Глобальный</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="101"/>
         <source>Reinit when new element is created</source>
-        <translation type="unfinished"></translation>
+        <translation>Заново инициализировать, при созданий нового элемента</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="108"/>
         <source>Stage:</source>
-        <translation>Стадия:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="132"/>
@@ -354,25 +365,25 @@
         <location filename="../constraint_mesh_form.ui" line="182"/>
         <location filename="../constraint_mesh_form.ui" line="326"/>
         <source>U Speed:</source>
-        <translation type="unfinished"></translation>
+        <translation>U скорость:</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="202"/>
         <location filename="../constraint_mesh_form.ui" line="346"/>
         <source>V Speed:</source>
-        <translation type="unfinished"></translation>
+        <translation>V скорость:</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="222"/>
         <location filename="../constraint_mesh_form.ui" line="366"/>
         <source>U Accel:</source>
-        <translation type="unfinished"></translation>
+        <translation>U Ускорение:</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="242"/>
         <location filename="../constraint_mesh_form.ui" line="386"/>
         <source>V Accel:</source>
-        <translation type="unfinished"></translation>
+        <translation>V Ускорение:</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="262"/>
@@ -388,7 +399,7 @@
     <message>
         <location filename="../constraint_mesh_form.ui" line="409"/>
         <source>Rotation</source>
-        <translation>Вращение</translation>
+        <translation type="unfinished">Поворот</translation>
     </message>
     <message>
         <location filename="../constraint_mesh_form.ui" line="421"/>
@@ -464,7 +475,7 @@
     <message>
         <location filename="../direction_form.ui" line="116"/>
         <source>Global</source>
-        <translation type="unfinished">Мировой</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -493,7 +504,7 @@
     <message>
         <location filename="../emitter_form.ui" line="36"/>
         <source>General</source>
-        <translation>Главное</translation>
+        <translation type="unfinished">Основные</translation>
     </message>
     <message>
         <location filename="../emitter_form.ui" line="47"/>
@@ -558,7 +569,7 @@
     <message>
         <location filename="../emitter_form.ui" line="123"/>
         <source>User</source>
-        <translation type="unfinished">Пользовательский</translation>
+        <translation>Пользовательский</translation>
     </message>
     <message>
         <location filename="../emitter_form.ui" line="131"/>
@@ -578,7 +589,7 @@
     <message>
         <location filename="../emitter_form.ui" line="155"/>
         <source>Delayed emission:</source>
-        <translation type="unfinished">Задержка излучения:</translation>
+        <translation>Задержка излучения:</translation>
     </message>
     <message>
         <location filename="../emitter_form.ui" line="165"/>
@@ -617,7 +628,7 @@
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished">Форма</translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="23"/>
@@ -652,12 +663,12 @@
     <message>
         <location filename="../particle_force_form.ui" line="32"/>
         <source>Targets:</source>
-        <translation type="unfinished">Цели:</translation>
+        <translation>Цели:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="39"/>
         <source>Avaible targets:</source>
-        <translation type="unfinished">Доступные цели:</translation>
+        <translation>Доступные цели:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="85"/>
@@ -677,12 +688,12 @@
     <message>
         <location filename="../particle_force_form.ui" line="135"/>
         <source>Radial viscosity:</source>
-        <translation type="unfinished">Радиальное ускорение:</translation>
+        <translation>Радиальное ускорение:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="145"/>
         <source>Tangential viscosity:</source>
-        <translation type="unfinished">Тангенциальное ускорение:</translation>
+        <translation>Тангенциальное ускорение:</translation>
     </message>
     <message>
         <location filename="../particle_force_form.ui" line="118"/>
@@ -718,17 +729,17 @@
     <message>
         <location filename="../particle_light_form.ui" line="59"/>
         <source>Attenuation start/end</source>
-        <translation type="unfinished"></translation>
+        <translation>Начало/конец затухания</translation>
     </message>
     <message>
         <location filename="../particle_light_form.ui" line="71"/>
         <source>Attenuation start</source>
-        <translation type="unfinished"></translation>
+        <translation>Начало затухания освещенности</translation>
     </message>
     <message>
         <location filename="../particle_light_form.ui" line="78"/>
         <source>Attenuation end</source>
-        <translation type="unfinished"></translation>
+        <translation>Конец затухания освещенности</translation>
     </message>
 </context>
 <context>
@@ -821,40 +832,40 @@
     <message>
         <location filename="../located_bindable_form.ui" line="269"/>
         <source>hint / precomputed rotations</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Предварительно вычисленные повороты</translation>
     </message>
     <message>
         <location filename="../located_bindable_form.ui" line="291"/>
         <source>Rot speed min:</source>
-        <translation type="unfinished"></translation>
+        <translation>Мин. скорость поворота:</translation>
     </message>
     <message>
         <location filename="../located_bindable_form.ui" line="301"/>
         <source>Rot speed max:</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. скорость поворота:</translation>
     </message>
     <message>
         <location filename="../located_bindable_form.ui" line="311"/>
         <source>Nb models:</source>
-        <translation type="unfinished"></translation>
+        <translation>Количество моделей:</translation>
     </message>
     <message>
         <location filename="../located_bindable_form.ui" line="357"/>
         <source>Align on motion</source>
-        <translation type="unfinished"></translation>
+        <translation>Выровнять по движению</translation>
+    </message>
+    <message>
+        <location filename="../located_bindable_form.ui" line="397"/>
+        <source>Z-Align</source>
+        <translation>Z-Выравнивание</translation>
     </message>
     <message>
         <location filename="../located_bindable_form.ui" line="364"/>
-        <source>Z-Align</source>
-        <translation type="unfinished">Z-Выравнивание</translation>
-    </message>
-    <message>
-        <location filename="../located_bindable_form.ui" line="371"/>
         <source>Fake motion blur coeff.:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="381"/>
+        <location filename="../located_bindable_form.ui" line="374"/>
         <source>Fake motion blur treshold:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -867,6 +878,11 @@
         <location filename="../located_bindable_form.ui" line="427"/>
         <location filename="../located_bindable_form.ui" line="539"/>
         <source>Number of segments:</source>
+        <translation>Количество сегментов:</translation>
+    </message>
+    <message>
+        <location filename="../located_bindable_form.ui" line="483"/>
+        <source>Phase smoothness:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -883,11 +899,6 @@
     <message>
         <location filename="../located_bindable_form.ui" line="473"/>
         <source>Number fan light:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../located_bindable_form.ui" line="483"/>
-        <source>Phase smoothnes:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -961,7 +972,7 @@
     <message>
         <location filename="../located_form.ui" line="30"/>
         <source>General</source>
-        <translation>Главное</translation>
+        <translation type="unfinished">Основные</translation>
     </message>
     <message>
         <location filename="../located_form.ui" line="36"/>
@@ -981,7 +992,7 @@
     <message>
         <location filename="../located_form.ui" line="54"/>
         <source>User</source>
-        <translation type="unfinished">Пользовательский</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../located_form.ui" line="62"/>
@@ -1016,7 +1027,7 @@
     <message>
         <location filename="../located_form.ui" line="164"/>
         <source>Triger on death</source>
-        <translation type="unfinished">Тригер для уничтожения</translation>
+        <translation>Тригер для уничтожения</translation>
     </message>
     <message>
         <location filename="../located_form.ui" line="171"/>
@@ -1042,7 +1053,7 @@
     <message>
         <location filename="../plugins/log/log_settings_page.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished">Форма</translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="../plugins/log/log_settings_page.ui" line="20"/>
@@ -1167,30 +1178,30 @@
         <location filename="../multi_tex_form.ui" line="36"/>
         <location filename="../multi_tex_form.ui" line="144"/>
         <source>U speed 1:</source>
-        <translation type="unfinished"></translation>
+        <translation>U скорость 1:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="49"/>
         <location filename="../multi_tex_form.ui" line="157"/>
         <source>V speed 1:</source>
-        <translation type="unfinished"></translation>
+        <translation>V скорость 1:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="59"/>
         <location filename="../multi_tex_form.ui" line="167"/>
         <source>U speed 2:</source>
-        <translation type="unfinished"></translation>
+        <translation>U скорость 2:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="69"/>
         <location filename="../multi_tex_form.ui" line="177"/>
         <source>V speed 2:</source>
-        <translation type="unfinished"></translation>
+        <translation>V скорость 2:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="82"/>
         <source>Bump factor:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Bump фактор:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="96"/>
@@ -1201,7 +1212,7 @@
         <location filename="../multi_tex_form.ui" line="103"/>
         <location filename="../multi_tex_form.ui" line="187"/>
         <source>Tex op:</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим смешивания:</translation>
     </message>
     <message>
         <location filename="../multi_tex_form.ui" line="111"/>
@@ -1277,22 +1288,22 @@
     <message>
         <location filename="../ps_mover_form.ui" line="110"/>
         <source>Sub component:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Субкомпоненты:</translation>
     </message>
     <message>
         <location filename="../ps_mover_form.ui" line="122"/>
         <source>Scale X:</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб по X:</translation>
     </message>
     <message>
         <location filename="../ps_mover_form.ui" line="132"/>
         <source>Scale Y:</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб по Y:</translation>
     </message>
     <message>
         <location filename="../ps_mover_form.ui" line="142"/>
         <source>Scale Z:</source>
-        <translation type="unfinished"></translation>
+        <translation>Масштаб по Z:</translation>
     </message>
     <message>
         <location filename="../ps_mover_form.ui" line="152"/>
@@ -1308,87 +1319,87 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="124"/>
+        <location filename="../particle_control_form.ui" line="145"/>
         <source>Loop</source>
         <translation>Повтор</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="137"/>
+        <location filename="../particle_control_form.ui" line="158"/>
         <source>Display helpers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="150"/>
+        <location filename="../particle_control_form.ui" line="171"/>
         <source>Enable auto count</source>
         <translation type="unfinished">Включить авто подсчет</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="163"/>
+        <location filename="../particle_control_form.ui" line="184"/>
         <source>Display box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="176"/>
+        <location filename="../particle_control_form.ui" line="197"/>
         <source>All particle system</source>
-        <translation type="unfinished">Все системы частиц</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="192"/>
+        <location filename="../particle_control_form.ui" line="213"/>
         <source>Reset auto count</source>
         <translation type="unfinished">Сбросить авто подсчет</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="209"/>
+        <location filename="../particle_control_form.ui" line="233"/>
         <source>Link play to scene play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="219"/>
+        <location filename="../particle_control_form.ui" line="243"/>
         <source>Link to skeleton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="232"/>
+        <location filename="../particle_control_form.ui" line="256"/>
         <source>Unlink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="252"/>
+        <location filename="../particle_control_form.ui" line="276"/>
         <source>Restick all objects</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="262"/>
+        <location filename="../particle_control_form.ui" line="286"/>
         <source>Set anim</source>
         <translation type="unfinished">Выбрать anim</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="272"/>
+        <location filename="../particle_control_form.ui" line="296"/>
         <source>Clear anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="296"/>
+        <location filename="../particle_control_form.ui" line="320"/>
         <source>General</source>
-        <translation type="unfinished">Главное</translation>
+        <translation>Основные</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="309"/>
+        <location filename="../particle_control_form.ui" line="333"/>
         <source>Additional</source>
-        <translation type="unfinished">Дополнительное</translation>
+        <translation>Дополнительные</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="348"/>
+        <location filename="../particle_control_form.ui" line="372"/>
         <source>Num particles:9999999</source>
         <translation>Кол-во частиц:9999999</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="361"/>
+        <location filename="../particle_control_form.ui" line="385"/>
         <source>Num wanted faces:9999999</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="332"/>
+        <location filename="../particle_control_form.ui" line="356"/>
         <source>System time:99999999999</source>
         <translation type="unfinished">Время:99999999999</translation>
     </message>
@@ -1413,7 +1424,7 @@
     <message>
         <location filename="../particle_link_skeleton_form.ui" line="41"/>
         <source>Unlink</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отсоединить</translation>
     </message>
 </context>
 <context>
@@ -1461,7 +1472,7 @@
     <message>
         <location filename="../particle_system_form.ui" line="122"/>
         <source>User param</source>
-        <translation type="unfinished">Пользовательский</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="130"/>
@@ -1474,7 +1485,7 @@
         <location filename="../particle_system_form.ui" line="230"/>
         <location filename="../particle_system_form.ui" line="264"/>
         <source>Global</source>
-        <translation type="unfinished">Мировой</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="170"/>
@@ -1514,27 +1525,27 @@
     <message>
         <location filename="../particle_system_form.ui" line="347"/>
         <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="373"/>
         <source>Y:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="405"/>
         <source>Z:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="448"/>
         <source>+10 %</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="473"/>
         <source>-10 %</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="505"/>
@@ -1549,7 +1560,7 @@
     <message>
         <location filename="../particle_system_form.ui" line="534"/>
         <source>Settings</source>
-        <translation type="unfinished">Настройки</translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="543"/>
@@ -1564,12 +1575,12 @@
     <message>
         <location filename="../particle_system_form.ui" line="577"/>
         <source>Global color</source>
-        <translation type="unfinished">Глобальный цвет</translation>
+        <translation>Глобальный цвет</translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="589"/>
         <source>Force global lighting</source>
-        <translation type="unfinished">Принудительное глобальное освещение</translation>
+        <translation>Принудительное глобальное освещение</translation>
     </message>
     <message>
         <location filename="../particle_system_form.ui" line="605"/>
@@ -1727,22 +1738,22 @@
     <message>
         <location filename="../particle_texture_anim_form.ui" line="35"/>
         <source>Enable texture anim</source>
-        <translation type="unfinished">Включить анимацию текстуры</translation>
+        <translation>Включить анимацию текстуры</translation>
     </message>
     <message>
         <location filename="../particle_texture_anim_form.ui" line="45"/>
         <source>Texture grouped</source>
-        <translation type="unfinished">Группа текстур</translation>
+        <translation>Группа текстур</translation>
     </message>
     <message>
         <location filename="../particle_texture_anim_form.ui" line="76"/>
         <source>Multitexturing</source>
-        <translation type="unfinished">Мультитекстурирование</translation>
+        <translation>Мультитекстурирование</translation>
     </message>
     <message>
         <location filename="../particle_texture_anim_form.ui" line="86"/>
         <source>Edit</source>
-        <translation type="unfinished">Правка</translation>
+        <translation>Правка</translation>
     </message>
 </context>
 <context>
@@ -1801,7 +1812,7 @@
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="132"/>
         <source>Loading the library failed because state != Resolved</source>
-        <translation type="unfinished">Загрузка библиотеки не удалась, потому что не разрешены зависимости</translation>
+        <translation>Загрузка библиотеки не удалась, потому что не разрешены зависимости</translation>
     </message>
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="143"/>
@@ -1816,12 +1827,12 @@
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="169"/>
         <source>Internal error: have no plugin instance to initialize</source>
-        <translation type="unfinished">Внутренняя ошибка: нет экземпляра плагина для инициализации</translation>
+        <translation>Внутренняя ошибка: нет экземпляра плагина для инициализации</translation>
     </message>
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="173"/>
         <source>Plugin initialization failed: %1</source>
-        <translation type="unfinished">Плагин не удалось инициализировать: %1</translation>
+        <translation>Плагин не удалось инициализировать: %1</translation>
     </message>
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="187"/>
@@ -1831,7 +1842,7 @@
     <message>
         <location filename="../extension_system/plugin_spec.cpp" line="190"/>
         <source>Internal error: have no plugin instance to perform extensionsInitialized</source>
-        <translation type="unfinished">Внутренняя ошибка: нет экземпляра плагина для extensionsInitialized</translation>
+        <translation>Внутренняя ошибка: нет экземпляра плагина для extensionsInitialized</translation>
     </message>
 </context>
 <context>
@@ -1895,17 +1906,9 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="23"/>
+        <location filename="../plugins/core/search_paths_settings_page.ui" line="26"/>
         <source>Search paths</source>
         <translation>Пути поиска</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="40"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="57"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="68"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="79"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2120,7 +2123,7 @@
         <location filename="../skeleton_scale_form.ui" line="49"/>
         <location filename="../skeleton_scale_form.ui" line="274"/>
         <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="62"/>
@@ -2136,19 +2139,19 @@
         <location filename="../skeleton_scale_form.ui" line="427"/>
         <location filename="../skeleton_scale_form.ui" line="465"/>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="119"/>
         <location filename="../skeleton_scale_form.ui" line="372"/>
         <source>Y:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="186"/>
         <location filename="../skeleton_scale_form.ui" line="411"/>
         <source>Z:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="262"/>
@@ -2173,22 +2176,22 @@
     <message>
         <location filename="../skeleton_scale_form.ui" line="522"/>
         <source>Save .skel</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить .skel</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="529"/>
         <source>Save as</source>
-        <translation type="unfinished">Сохранить как</translation>
+        <translation>Сохранить как</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="536"/>
         <source>Load .scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузить .scale</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_form.ui" line="543"/>
         <source>Save .scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить .scale</translation>
     </message>
 </context>
 <context>
@@ -2201,7 +2204,7 @@
     <message>
         <location filename="../slot_form.ui" line="23"/>
         <source>Slot _:empty</source>
-        <translation type="unfinished">Слот _:пустой</translation>
+        <translation>Слот _:пустой</translation>
     </message>
     <message>
         <location filename="../slot_form.ui" line="43"/>
@@ -2241,7 +2244,7 @@
     <message>
         <location filename="../slot_form.ui" line="154"/>
         <source>Wrap mode:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Режим:</translation>
     </message>
     <message>
         <location filename="../slot_form.ui" line="161"/>
@@ -2294,7 +2297,7 @@
     <message>
         <location filename="../particle_sound_form.ui" line="30"/>
         <source>General</source>
-        <translation>Главное</translation>
+        <translation>Основные</translation>
     </message>
     <message>
         <location filename="../particle_sound_form.ui" line="36"/>
@@ -2339,7 +2342,7 @@
     <message>
         <location filename="../particle_sound_form.ui" line="151"/>
         <source>Sound pitch</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Высота звука</translation>
     </message>
 </context>
 <context>
@@ -2370,7 +2373,7 @@
     <message>
         <location filename="../tail_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished">Форма</translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="../tail_form.ui" line="26"/>
@@ -2517,7 +2520,7 @@
     <message>
         <location filename="../vegetable_apperance_form.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished">Форма</translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="../vegetable_apperance_form.ui" line="42"/>
@@ -2532,17 +2535,17 @@
     <message>
         <location filename="../vegetable_apperance_form.ui" line="97"/>
         <source>Color Noise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Цветовой шум</translation>
     </message>
     <message>
         <location filename="../vegetable_apperance_form.ui" line="104"/>
         <source>Color setup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Настройки цвета</translation>
     </message>
     <message>
         <location filename="../vegetable_apperance_form.ui" line="116"/>
         <source>Double cliclk to change color</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Двойным щелчком мыши выберите цвет</translation>
     </message>
     <message>
         <location filename="../vegetable_apperance_form.ui" line="140"/>
@@ -2633,7 +2636,7 @@
     <message>
         <location filename="../vegetable_dialog_form.ui" line="18"/>
         <source>Vegetable editor</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Редактор растительности</translation>
     </message>
     <message>
         <location filename="../vegetable_dialog_form.ui" line="63"/>
@@ -2771,7 +2774,7 @@
     <message>
         <location filename="../vegetable_landscape_form.ui" line="227"/>
         <source>Show Vegetable Lands</source>
-        <translation type="unfinished">Показать ландшафт</translation>
+        <translation>Показать ландшафт</translation>
     </message>
     <message>
         <location filename="../vegetable_landscape_form.ui" line="237"/>
@@ -3012,12 +3015,12 @@
     <message>
         <location filename="../particle_zone_form.ui" line="26"/>
         <source>Targets:</source>
-        <translation type="unfinished">Цели:</translation>
+        <translation>Цели:</translation>
     </message>
     <message>
         <location filename="../particle_zone_form.ui" line="33"/>
         <source>Avaible targets:</source>
-        <translation type="unfinished">Доступные цели:</translation>
+        <translation>Доступные цели:</translation>
     </message>
     <message>
         <location filename="../particle_zone_form.ui" line="73"/>
@@ -3036,142 +3039,142 @@
     </message>
 </context>
 <context>
-    <name>Core::CMainWindow</name>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="77"/>
-        <source>Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="111"/>
-        <source>About Object Viewer Qt</source>
-        <translation>О Object Viewer Qt</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="112"/>
-        <source>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Author: dnk-88 &lt;p&gt;Compiled on %1 %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="144"/>
-        <source>&amp;Open...</source>
-        <translation>&amp;Открыть...</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="147"/>
-        <source>Open an existing file</source>
-        <translation>Открыть файл</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="151"/>
-        <source>E&amp;xit</source>
-        <translation>В&amp;ыход</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="152"/>
-        <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="153"/>
-        <source>Exit the application</source>
-        <translation>Выйти из приложения</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="157"/>
-        <source>&amp;Settings</source>
-        <translation>&amp;Настройки</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="159"/>
-        <source>Open the settings dialog</source>
-        <translation>Открыть диалог настроек</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="163"/>
-        <source>&amp;About</source>
-        <translation>О программе</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="164"/>
-        <source>Show the application&apos;s About box</source>
-        <translation>Открыть диалог О программе</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="168"/>
-        <source>About &amp;Qt</source>
-        <translation>О &amp;Qt</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="169"/>
-        <source>Show the Qt library&apos;s About box</source>
-        <translation>Открыть диалог О Qt</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="173"/>
-        <source>About &amp;Plugins</source>
-        <translation>О &amp;модулях</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="174"/>
-        <source>Show the plugin view dialog</source>
-        <translation>Показать диалог списка плагинов</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="181"/>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="186"/>
-        <source>&amp;Edit</source>
-        <translation>&amp;Правка</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="189"/>
-        <source>&amp;View</source>
-        <translation>&amp;Вид</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="192"/>
-        <source>&amp;Tools</source>
-        <translation>&amp;Иструменты</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="202"/>
-        <source>&amp;Help</source>
-        <translation>&amp;Справка</translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="211"/>
-        <source>StatusReady</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>Core::CSearchPathsSettingsPage</name>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="43"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="51"/>
         <source>Search Paths</source>
         <translation>Пути поиска</translation>
     </message>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="53"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="61"/>
         <source>General</source>
-        <translation type="unfinished">Главное</translation>
+        <translation>Основные</translation>
     </message>
 </context>
 <context>
     <name>Core::CorePlugin</name>
     <message>
-        <location filename="../plugins/core/core_plugin.cpp" line="69"/>
+        <location filename="../plugins/core/core_plugin.cpp" line="71"/>
         <source>New settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/core_plugin.cpp" line="70"/>
+        <location filename="../plugins/core/core_plugin.cpp" line="72"/>
         <source>About plugins</source>
         <translation>О модулях</translation>
+    </message>
+</context>
+<context>
+    <name>Core::MainWindow</name>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="51"/>
+        <source>Object Viewer Qt</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="139"/>
+        <source>About Object Viewer Qt</source>
+        <translation>О Object Viewer Qt</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="140"/>
+        <source>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Author: dnk-88 &lt;p&gt;Compiled on %1 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="173"/>
+        <source>&amp;Open...</source>
+        <translation>&amp;Открыть...</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="176"/>
+        <source>Open an existing file</source>
+        <translation type="unfinished">Открыть файл</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="180"/>
+        <source>E&amp;xit</source>
+        <translation>В&amp;ыход</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="181"/>
+        <source>Ctrl+Q</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="182"/>
+        <source>Exit the application</source>
+        <translation>Выйти из приложения</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="186"/>
+        <source>&amp;Settings</source>
+        <translation>&amp;Настройки</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="189"/>
+        <source>Open the settings dialog</source>
+        <translation>Открыть диалог настроек</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="193"/>
+        <source>&amp;About</source>
+        <translation>О программе</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="194"/>
+        <source>Show the application&apos;s About box</source>
+        <translation>Открыть диалог О программе</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="198"/>
+        <source>About &amp;Qt</source>
+        <translation>О &amp;Qt</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="199"/>
+        <source>Show the Qt library&apos;s About box</source>
+        <translation>Открыть диалог О Qt</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="203"/>
+        <source>About &amp;Plugins</source>
+        <translation>О &amp;модулях</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="204"/>
+        <source>Show the plugin view dialog</source>
+        <translation>Показать диалог списка плагинов</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="219"/>
+        <source>&amp;File</source>
+        <translation>&amp;Файл</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="224"/>
+        <source>&amp;Edit</source>
+        <translation>&amp;Правка</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="227"/>
+        <source>&amp;View</source>
+        <translation>&amp;Вид</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="230"/>
+        <source>&amp;Tools</source>
+        <translation>&amp;Иструменты</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="240"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Справка</translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="249"/>
+        <source>StatusReady</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3236,6 +3239,57 @@ Right click to remove points.</source>
         <location filename="../curve_form.ui" line="216"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Dialog</name>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="38"/>
+        <source>Browse</source>
+        <translation>Обзор</translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="45"/>
+        <source>Display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="52"/>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>Form</name>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="235"/>
+        <source>AddInstance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="236"/>
+        <source>AddCharacter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="237"/>
+        <source>Reset</source>
+        <translation type="unfinished">Сбросить</translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="238"/>
+        <source>Play</source>
+        <translation type="unfinished">Играть</translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="239"/>
+        <source>Stop</source>
+        <translation type="unfinished">Стоп</translation>
     </message>
 </context>
 <context>
@@ -3414,34 +3468,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CBinOpDialogT</name>
-    <message>
-        <location filename="../bin_op_dialog.h" line="102"/>
-        <source>Select Arg1</source>
-        <translation type="unfinished">Выбрать Arg1</translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="103"/>
-        <source>Select Arg2</source>
-        <translation type="unfinished">Выбрать Arg2</translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="104"/>
-        <source>Modulate</source>
-        <translation type="unfinished">Перемножить</translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="105"/>
-        <source>Add</source>
-        <translation type="unfinished">Сложить</translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="106"/>
-        <source>Subtract</source>
-        <translation type="unfinished">Вычитать</translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CCameraControl</name>
     <message>
         <location filename="../camera_control.cpp" line="107"/>
@@ -3461,7 +3487,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../camera_control.cpp" line="113"/>
         <source>Edit</source>
-        <translation type="unfinished">Правка</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../camera_control.cpp" line="114"/>
@@ -3550,14 +3576,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CColorGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="396"/>
-        <source>Color gradient dialog</source>
-        <translation type="unfinished">Цветовой градиент</translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CDirectionWidget</name>
     <message>
         <location filename="../direction_widget.cpp" line="101"/>
@@ -3597,14 +3615,6 @@ Right click to remove points.</source>
         <location filename="../emitter_page.cpp" line="337"/>
         <source>no emission</source>
         <translation type="unfinished">Не излучать</translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CFloatGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="286"/>
-        <source>Float values gradient dialog</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3658,14 +3668,6 @@ Right click to remove points.</source>
     <message>
         <location filename="../value_gradient_dialog.cpp" line="126"/>
         <source>Num samples:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CIntGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="360"/>
-        <source>Int values gradient dialog</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3997,12 +3999,12 @@ Right click to remove points.</source>
     <message>
         <location filename="../morph_mesh_dialog.cpp" line="88"/>
         <source>vertices</source>
-        <translation type="unfinished"></translation>
+        <translation>вершины</translation>
     </message>
     <message>
         <location filename="../morph_mesh_dialog.cpp" line="89"/>
         <source> (%1 vertices)</source>
-        <translation type="unfinished"></translation>
+        <translation> (%1 вершин)</translation>
     </message>
     <message>
         <location filename="../morph_mesh_dialog.cpp" line="103"/>
@@ -4299,14 +4301,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CPlaneBasisGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="437"/>
-        <source>Plane basis gradient dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CPropertyDialog</name>
     <message>
         <location filename="../particle_property_dialog.cpp" line="88"/>
@@ -4385,7 +4379,7 @@ Right click to remove points.</source>
         <location filename="../skeleton_scale_dialog.cpp" line="307"/>
         <location filename="../skeleton_scale_dialog.cpp" line="351"/>
         <source>Failed to open file for write!</source>
-        <translation type="unfinished">Не удалось открыть файл для записи!</translation>
+        <translation>Не удалось открыть файл для записи!</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_dialog.cpp" line="286"/>
@@ -4411,7 +4405,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../skeleton_scale_dialog.cpp" line="330"/>
         <source>Failed to open file for read!</source>
-        <translation type="unfinished">Не удалось открыть файл для чтения!</translation>
+        <translation>Не удалось открыть файл для чтения!</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_dialog.cpp" line="342"/>
@@ -4422,12 +4416,12 @@ Right click to remove points.</source>
         <location filename="../skeleton_scale_dialog.cpp" line="589"/>
         <location filename="../skeleton_scale_dialog.cpp" line="635"/>
         <source>Failed to save file!</source>
-        <translation type="unfinished">Не удалось сохранить файл!</translation>
+        <translation>Не удалось сохранить файл!</translation>
     </message>
     <message>
         <location filename="../skeleton_scale_dialog.cpp" line="680"/>
         <source>Failed to load file!</source>
-        <translation type="unfinished">Не удалось открыть файл!</translation>
+        <translation>Не удалось открыть файл!</translation>
     </message>
 </context>
 <context>
@@ -4437,13 +4431,13 @@ Right click to remove points.</source>
         <location filename="../slot_manager_dialog.cpp" line="183"/>
         <location filename="../slot_manager_dialog.cpp" line="211"/>
         <source>Slot %1 : </source>
-        <translation type="unfinished"></translation>
+        <translation>Слот %1 : </translation>
     </message>
     <message>
         <location filename="../slot_manager_dialog.cpp" line="173"/>
         <location filename="../slot_manager_dialog.cpp" line="201"/>
         <source>empty</source>
-        <translation type="unfinished"></translation>
+        <translation>пусто</translation>
     </message>
     <message>
         <location filename="../slot_manager_dialog.cpp" line="178"/>
@@ -4476,7 +4470,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../slot_manager_dialog.cpp" line="260"/>
         <source>Slot %1</source>
-        <translation>Пусто %1</translation>
+        <translation>Слот %1</translation>
     </message>
     <message>
         <location filename="../slot_manager_dialog.cpp" line="272"/>
@@ -4489,7 +4483,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../particle_sound_page.cpp" line="114"/>
         <source>Select your sound</source>
-        <translation type="unfinished"></translation>
+        <translation>Выберите звук</translation>
     </message>
     <message>
         <location filename="../particle_sound_page.cpp" line="115"/>
@@ -4507,22 +4501,6 @@ Right click to remove points.</source>
     <message>
         <location filename="../spinner_dialog.cpp" line="52"/>
         <source>Nb samples:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CTextureGradientInterface</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="474"/>
-        <source>Texture grouped dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CUIntGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="323"/>
-        <source>UInt values gradient dialog</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4632,7 +4610,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../particle_workspace_page.cpp" line="60"/>
         <source>Create new pws file</source>
-        <translation type="unfinished"></translation>
+        <translation>Сооздать новый pws файл</translation>
     </message>
     <message>
         <location filename="../particle_workspace_page.cpp" line="62"/>
@@ -4671,7 +4649,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../particle_workspace_page.cpp" line="152"/>
         <source>Create new particle system file</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать файл системы частиц</translation>
     </message>
     <message>
         <location filename="../particle_workspace_page.cpp" line="154"/>
@@ -4687,21 +4665,13 @@ Right click to remove points.</source>
 <context>
     <name>Plugin::CCoreListener</name>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="44"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="244"/>
         <source>Example close event hook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="45"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="245"/>
         <source>Do you want to close window?</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Plugin::CExampleAppPage</name>
-    <message>
-        <location filename="../plugins/example/plugin1.h" line="75"/>
-        <source>SimpleViewer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4736,7 +4706,44 @@ Right click to remove points.</source>
     <message>
         <location filename="../plugins/log/log_settings_page.cpp" line="57"/>
         <source>General</source>
-        <translation type="unfinished">Главное</translation>
+        <translation>Основные</translation>
+    </message>
+</context>
+<context>
+    <name>Plugin::CSimpleViewer</name>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="57"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="76"/>
+        <source>Open NeL data file</source>
+        <translation type="unfinished">Открыть NeL файлы</translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="58"/>
+        <source>All NeL files (*.shape *.ps);;NeL shape files (*.shape);;NeL particle system files (*.ps)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="77"/>
+        <source>All NeL files (*.shape *.ps);;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="86"/>
+        <source>Open skeleton file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="87"/>
+        <source>NeL skeleton file (*.skel)</source>
+        <translation type="unfinished">файл NeL скелета (*.skel)</translation>
+    </message>
+</context>
+<context>
+    <name>Plugin::MyPlugin</name>
+    <message>
+        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="23"/>
+        <source>Not found QMainWindow Object Viewer Qt.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4757,29 +4764,29 @@ Right click to remove points.</source>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="34"/>
         <source>Paths:</source>
-        <translation type="unfinished"></translation>
+        <translation>Пути:</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="38"/>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="70"/>
         <source>Add</source>
-        <translation type="unfinished">Сложение</translation>
+        <translation>Добавить</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="40"/>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="72"/>
         <source>Delete</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="55"/>
         <source>Output file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Выходной файл:</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="57"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>Обзор...</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="67"/>
@@ -4802,7 +4809,7 @@ Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="156"/>
+        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="157"/>
         <source>Choose output file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4817,7 +4824,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderdialog.cpp" line="36"/>
         <source>Close</source>
-        <translation type="unfinished">Закрыть</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderdialog.cpp" line="39"/>
@@ -4832,7 +4839,7 @@ Right click to remove points.</source>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderdialog.cpp" line="50"/>
         <source>Settings</source>
-        <translation type="unfinished">Настройки</translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/sheetbuilderdialog.cpp" line="73"/>

@@ -4,8 +4,19 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../main.cpp" line="158"/>
+        <location filename="../main.cpp" line="106"/>
+        <source>Failed to load Core plugin: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="186"/>
+        <location filename="../main.cpp" line="238"/>
         <source>Object Viewer Qt - Plugin loader messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="222"/>
+        <source>Could not find ovqt_plugin_core in %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -844,17 +855,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="364"/>
+        <location filename="../located_bindable_form.ui" line="397"/>
         <source>Z-Align</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="371"/>
+        <location filename="../located_bindable_form.ui" line="364"/>
         <source>Fake motion blur coeff.:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="381"/>
+        <location filename="../located_bindable_form.ui" line="374"/>
         <source>Fake motion blur treshold:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -867,6 +878,11 @@
         <location filename="../located_bindable_form.ui" line="427"/>
         <location filename="../located_bindable_form.ui" line="539"/>
         <source>Number of segments:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../located_bindable_form.ui" line="483"/>
+        <source>Phase smoothness:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -883,11 +899,6 @@
     <message>
         <location filename="../located_bindable_form.ui" line="473"/>
         <source>Number fan light:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../located_bindable_form.ui" line="483"/>
-        <source>Phase smoothnes:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1308,87 +1319,87 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="124"/>
+        <location filename="../particle_control_form.ui" line="145"/>
         <source>Loop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="137"/>
+        <location filename="../particle_control_form.ui" line="158"/>
         <source>Display helpers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="150"/>
+        <location filename="../particle_control_form.ui" line="171"/>
         <source>Enable auto count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="163"/>
+        <location filename="../particle_control_form.ui" line="184"/>
         <source>Display box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="176"/>
+        <location filename="../particle_control_form.ui" line="197"/>
         <source>All particle system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="192"/>
+        <location filename="../particle_control_form.ui" line="213"/>
         <source>Reset auto count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="209"/>
+        <location filename="../particle_control_form.ui" line="233"/>
         <source>Link play to scene play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="219"/>
+        <location filename="../particle_control_form.ui" line="243"/>
         <source>Link to skeleton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="232"/>
+        <location filename="../particle_control_form.ui" line="256"/>
         <source>Unlink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="252"/>
+        <location filename="../particle_control_form.ui" line="276"/>
         <source>Restick all objects</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="262"/>
+        <location filename="../particle_control_form.ui" line="286"/>
         <source>Set anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="272"/>
+        <location filename="../particle_control_form.ui" line="296"/>
         <source>Clear anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="296"/>
+        <location filename="../particle_control_form.ui" line="320"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="309"/>
+        <location filename="../particle_control_form.ui" line="333"/>
         <source>Additional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="348"/>
+        <location filename="../particle_control_form.ui" line="372"/>
         <source>Num particles:9999999</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="361"/>
+        <location filename="../particle_control_form.ui" line="385"/>
         <source>Num wanted faces:9999999</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="332"/>
+        <location filename="../particle_control_form.ui" line="356"/>
         <source>System time:99999999999</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1895,16 +1906,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="23"/>
+        <location filename="../plugins/core/search_paths_settings_page.ui" line="26"/>
         <source>Search paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="40"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="57"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="68"/>
-        <location filename="../plugins/core/search_paths_settings_page.ui" line="79"/>
-        <source>...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3036,127 +3039,14 @@
     </message>
 </context>
 <context>
-    <name>Core::CMainWindow</name>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="77"/>
-        <source>Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="111"/>
-        <source>About Object Viewer Qt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="112"/>
-        <source>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Author: dnk-88 &lt;p&gt;Compiled on %1 %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="144"/>
-        <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="147"/>
-        <source>Open an existing file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="151"/>
-        <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="152"/>
-        <source>Ctrl+Q</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="153"/>
-        <source>Exit the application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="157"/>
-        <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="159"/>
-        <source>Open the settings dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="163"/>
-        <source>&amp;About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="164"/>
-        <source>Show the application&apos;s About box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="168"/>
-        <source>About &amp;Qt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="169"/>
-        <source>Show the Qt library&apos;s About box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="173"/>
-        <source>About &amp;Plugins</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="174"/>
-        <source>Show the plugin view dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="181"/>
-        <source>&amp;File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="186"/>
-        <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="189"/>
-        <source>&amp;View</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="192"/>
-        <source>&amp;Tools</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="202"/>
-        <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/core/main_window.cpp" line="211"/>
-        <source>StatusReady</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>Core::CSearchPathsSettingsPage</name>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="43"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="51"/>
         <source>Search Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="53"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="61"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3164,13 +3054,126 @@
 <context>
     <name>Core::CorePlugin</name>
     <message>
-        <location filename="../plugins/core/core_plugin.cpp" line="69"/>
+        <location filename="../plugins/core/core_plugin.cpp" line="71"/>
         <source>New settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/core_plugin.cpp" line="70"/>
+        <location filename="../plugins/core/core_plugin.cpp" line="72"/>
         <source>About plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Core::MainWindow</name>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="51"/>
+        <source>Object Viewer Qt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="139"/>
+        <source>About Object Viewer Qt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="140"/>
+        <source>&lt;h2&gt;Object Viewer Qt NG&lt;/h2&gt;&lt;p&gt; Author: dnk-88 &lt;p&gt;Compiled on %1 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="173"/>
+        <source>&amp;Open...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="176"/>
+        <source>Open an existing file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="180"/>
+        <source>E&amp;xit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="181"/>
+        <source>Ctrl+Q</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="182"/>
+        <source>Exit the application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="186"/>
+        <source>&amp;Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="189"/>
+        <source>Open the settings dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="193"/>
+        <source>&amp;About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="194"/>
+        <source>Show the application&apos;s About box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="198"/>
+        <source>About &amp;Qt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="199"/>
+        <source>Show the Qt library&apos;s About box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="203"/>
+        <source>About &amp;Plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="204"/>
+        <source>Show the plugin view dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="219"/>
+        <source>&amp;File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="224"/>
+        <source>&amp;Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="227"/>
+        <source>&amp;View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="230"/>
+        <source>&amp;Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="240"/>
+        <source>&amp;Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/core/main_window.cpp" line="249"/>
+        <source>StatusReady</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3235,6 +3238,57 @@ Right click to remove points.</source>
     <message>
         <location filename="../curve_form.ui" line="216"/>
         <source>Ok</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Dialog</name>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="38"/>
+        <source>Browse</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="45"/>
+        <source>Display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/disp_sheet_id/dialog.ui" line="52"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Form</name>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="235"/>
+        <source>AddInstance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="236"/>
+        <source>AddCharacter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="237"/>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="238"/>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="239"/>
+        <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3414,34 +3468,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CBinOpDialogT</name>
-    <message>
-        <location filename="../bin_op_dialog.h" line="102"/>
-        <source>Select Arg1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="103"/>
-        <source>Select Arg2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="104"/>
-        <source>Modulate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="105"/>
-        <source>Add</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../bin_op_dialog.h" line="106"/>
-        <source>Subtract</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CCameraControl</name>
     <message>
         <location filename="../camera_control.cpp" line="107"/>
@@ -3550,14 +3576,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CColorGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="396"/>
-        <source>Color gradient dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CDirectionWidget</name>
     <message>
         <location filename="../direction_widget.cpp" line="101"/>
@@ -3594,14 +3612,6 @@ Right click to remove points.</source>
     <message>
         <location filename="../emitter_page.cpp" line="337"/>
         <source>no emission</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CFloatGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="286"/>
-        <source>Float values gradient dialog</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3656,14 +3666,6 @@ Right click to remove points.</source>
     <message>
         <location filename="../value_gradient_dialog.cpp" line="126"/>
         <source>Num samples:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CIntGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="360"/>
-        <source>Int values gradient dialog</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4294,14 +4296,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CPlaneBasisGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="437"/>
-        <source>Plane basis gradient dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CPropertyDialog</name>
     <message>
         <location filename="../particle_property_dialog.cpp" line="88"/>
@@ -4506,22 +4500,6 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>NLQT::CTextureGradientInterface</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="474"/>
-        <source>Texture grouped dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NLQT::CUIntGradientWrapper</name>
-    <message>
-        <location filename="../value_gradient_dialog.h" line="323"/>
-        <source>UInt values gradient dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CValueBlenderDialog</name>
     <message>
         <location filename="../value_blender_dialog.cpp" line="59"/>
@@ -4682,21 +4660,13 @@ Right click to remove points.</source>
 <context>
     <name>Plugin::CCoreListener</name>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="44"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="244"/>
         <source>Example close event hook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="45"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="245"/>
         <source>Do you want to close window?</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Plugin::CExampleAppPage</name>
-    <message>
-        <location filename="../plugins/example/plugin1.h" line="75"/>
-        <source>SimpleViewer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4731,6 +4701,43 @@ Right click to remove points.</source>
     <message>
         <location filename="../plugins/log/log_settings_page.cpp" line="57"/>
         <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Plugin::CSimpleViewer</name>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="57"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="76"/>
+        <source>Open NeL data file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="58"/>
+        <source>All NeL files (*.shape *.ps);;NeL shape files (*.shape);;NeL particle system files (*.ps)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="77"/>
+        <source>All NeL files (*.shape *.ps);;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="86"/>
+        <source>Open skeleton file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/example/simple_viewer.cpp" line="87"/>
+        <source>NeL skeleton file (*.skel)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Plugin::MyPlugin</name>
+    <message>
+        <location filename="../plugins/disp_sheet_id/disp_sheet_id_plugin.cpp" line="23"/>
+        <source>Not found QMainWindow Object Viewer Qt.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4797,7 +4804,7 @@ Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="156"/>
+        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="157"/>
         <source>Choose output file</source>
         <translation type="unfinished"></translation>
     </message>
