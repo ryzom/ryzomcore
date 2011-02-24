@@ -27,6 +27,11 @@
 
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
+#else
+#	define NL_OPENGL_AVAILABLE
+#	ifdef NL_OS_WINDOWS
+#		define NL_DIRECT3D_AVAILABLE
+#	endif
 #endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_WINDOWS

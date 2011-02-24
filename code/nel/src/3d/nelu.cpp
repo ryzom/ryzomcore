@@ -27,10 +27,6 @@
 #include "nel/3d/vertex_stream_manager.h"
 #include "nel/misc/debug.h"
 
-#ifdef HAVE_CONFIG_H
-#	include "config.h"
-#endif // HAVE_CONFIG_H
-
 using namespace std;
 using namespace NLMISC;
 
@@ -62,19 +58,17 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 	CNELU::Driver = NULL;
 
 	// Init driver.
-#if defined(NL_OS_WINDOWS) && defined(NL_DIRECT3D_AVAILABLE)
+#if defined(NL_OS_WINDOWS)
 	if (direct3d)
 	{
 		CNELU::Driver= CDRU::createD3DDriver();
 	}
 #endif
 
-#ifdef NL_OPENGL_AVAILABLE
 	if (!CNELU::Driver)
 	{
 		CNELU::Driver= CDRU::createGlDriver();
 	}
-#endif
 
 	if (!CNELU::Driver)
 	{

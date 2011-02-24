@@ -36,10 +36,6 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/event_emitter.h"
 
-#ifdef HAVE_CONFIG_H
-#	include "config.h"
-#endif // HAVE_CONFIG_H
-
 using namespace NLMISC;
 
 namespace NL3D
@@ -137,15 +133,13 @@ CDriverUser::CDriverUser (uint windowIcon, bool direct3d, emptyProc exitFunc)
 	_Driver = NULL;
 
 	// Create/Init Driver.
-#if defined(NL_OS_WINDOWS) && defined(NL_DIRECT3D_AVAILABLE)
+#if defined(NL_OS_WINDOWS)
 	if (direct3d)
 		_Driver= CDRU::createD3DDriver();
 #endif
 
-#ifdef NL_OPENGL_AVAILABLE
 	if (!_Driver)
 		_Driver= CDRU::createGlDriver();
-#endif
 
 	nlassert(_Driver);
 	_Driver->init (windowIcon, exitFunc);
