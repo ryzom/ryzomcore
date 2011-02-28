@@ -25,6 +25,7 @@ using namespace NLNET;
 
 CVariable<bool>		MSWStrictMode("msw", "MSWStrictMode", "Set the strict mode on SQL request", true, 0, true);
 CVariable<uint32>	MSWRequestDuration("msw", "MSWRequestDuration", "Measure the duration of SQL request", 0, 1000);
+CVariable<bool>		MSWAutoReconnect("msw", "MSWAutoReconnect", "MYSQL_OPT_RECONNECT", true, 0, true);
 
 
 namespace MSW
@@ -111,6 +112,11 @@ namespace MSW
 		_ConnDefaultDatabase = defaultDatabase;
 
 		nlassert(!_Connected);
+
+		if (MSWAutoReconnect)
+		{
+			addOption(MYSQL_OPT_RECONNECT, "1");
+		}		
 
 		return _connect();
 	}
